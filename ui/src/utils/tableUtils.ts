@@ -1,89 +1,44 @@
-import { format } from "date-fns";
-import { Employee } from "../models/Employee";
-import { Schedule } from "../models/Schedule";
-import { HoursWorked } from "../models/HoursWorked";
-import { Dashboard } from "../models/Dashboard";
-import { translateDayToAbrevSpanish } from "./stringUtils";
-import { getBiweeklyDates, getMonthlyDates, isValidDate } from "./dateUtils";
-import { EnglishDayOfWeek } from "./englishDayOfWeek";
+interface Summary {
+  employeeId: number;
+  totalHours: number;
+  weekNumber?: number;
+  biweekNumber?: number;
+  month?: number;
+  year: number;
+}
 
-export const collectTableData = (
-  paginatedEmployees: Employee[],
-  currentWeek: { day: string; date: string }[],
-  hoursWorked: HoursWorked[],
-  schedules: Schedule[],
-  selectedColumn: "weekly" | "biweekly" | "monthly"
-): Dashboard[] => {
-  return paginatedEmployees.map((employee) => {
-    const dailyHours = currentWeek.map(({ day, date }) => {
-      const record = hoursWorked.find(
-        (record) =>
-          record.employeeId === employee.id &&
-          new Date(record.date).toISOString().split("T")[0] ===
-            new Date(date).toISOString().split("T")[0]
-      );
-      const hours = record ? String(record.scheduleId) : "Libre";
-      return {
-        day: translateDayToAbrevSpanish(day as EnglishDayOfWeek),
-        hours,
-      };
-    });
-
-    const totalHours = calculateTotalHours(
-      currentWeek,
-      hoursWorked,
-      schedules,
-      employee.id,
-      selectedColumn
-    );
-
-    return {
-      employeeName: `${employee.firstName} ${employee.lastName}`,
-      dailyHours,
-      totalHours,
-    };
-  });
-};
-
-export const calculateTotalHours = (
-  currentWeek: { day: string; date: string }[],
-  hoursWorked: HoursWorked[],
-  schedules: Schedule[],
+export const calculateTotalHoursForPeriod = (
   employeeId: number,
-  period: "weekly" | "biweekly" | "monthly"
+  selectedPeriod: "weekly" | "biweekly" | "monthly",
+  weekNumber: number,
+  biweekNumber: number,
+  month: number,
+  year: number,
+  weeklySummaries: Summary[],
+  biweeklySummaries: Summary[],
+  monthlySummaries: Summary[]
 ): number => {
-  let days = [];
-  const startDate = new Date();
+  const summary =
+    selectedPeriod === "weekly"
+      ? weeklySummaries.find(
+          (s) =>
+            s.employeeId === employeeId &&
+            s.weekNumber === weekNumber &&
+            s.year === year
+        )
+      : selectedPeriod === "biweekly"
+      ? biweeklySummaries.find(
+          (s) =>
+            s.employeeId === employeeId &&
+            s.biweekNumber === biweekNumber &&
+            s.year === year
+        )
+      : monthlySummaries.find(
+          (s) =>
+            s.employeeId === employeeId && s.month === month && s.year === year
+        );
 
-  switch (period) {
-    case "weekly":
-      days = currentWeek;
-      break;
-    case "biweekly":
-      days = getBiweeklyDates(startDate);
-      break;
-    case "monthly":
-      days = getMonthlyDates(startDate);
-      break;
-    default:
-      days = currentWeek;
-  }
-
-  return days.reduce((total, { day }) => {
-    const record = hoursWorked.find(
-      (record: HoursWorked) =>
-        record.employeeId === employeeId &&
-        isValidDate(record.date) &&
-        format(record.date, "EEEE") === day
-    );
-
-    const scheduleHours = record
-      ? schedules.find((schedule) => schedule.id === record.scheduleId)
-          ?.hours || 0
-      : 0;
-
-    return total + scheduleHours;
-  }, 0);
+  return summary ? summary.totalHours : 0;
 };
 
 export const getBackgroundColor = (rowIndex: number) => {

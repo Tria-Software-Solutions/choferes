@@ -24,6 +24,7 @@ MonthlySummary.init(
         model: Employee,
         key: 'id',
       },
+      onDelete: 'CASCADE',
     },
     month: {
       type: DataTypes.INTEGER,
@@ -45,4 +46,4 @@ MonthlySummary.init(
   }
 );
 
-MonthlySummary.belongsTo(Employee, { foreignKey: "employeeId" });
+MonthlySummary.belongsTo(Employee, { foreignKey: "employeeId", onDelete: 'CASCADE' });

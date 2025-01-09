@@ -16,7 +16,14 @@ import {
   Divider,
   Typography,
   Box,
+  useTheme,
+  useMediaQuery,
+  Badge,
+  Tooltip,
+  Tab,
 } from "@mui/material";
+import { TabContext, TabList, TabPanel } from "@mui/lab";
+import ModalComponent from "../../Modal/ModalComponent";
 import { Employee } from "../../../models/Employee";
 import { Schedule } from "../../../models/Schedule";
 import { HoursWorked } from "../../../models/HoursWorked";
@@ -25,18 +32,25 @@ import { BiweeklySummary } from "../../../models/BiweeklySummary";
 import { MonthlySummary } from "../../../models/MonthlySummary";
 import {
   formatDate,
+  formatDateWithoutYear,
   formatHeaderDate,
+  getBiweeklyDates,
   getCurrentWeekDates,
+  getInvolvedPeriods,
+  hasMultipleBiweeks,
   isValidDateForSelect,
 } from "../../../utils/dateUtils";
 import { getBackgroundColor } from "../../../utils/tableUtils";
 import {
+  getMonthName,
   getOptionsForDay,
   translateDayToAbrevSpanish,
 } from "../../../utils/stringUtils";
 import { EnglishDayOfWeek } from "../../../utils/englishDayOfWeek";
 import { STATE, TABLE } from "../../../constants/constants";
 import { format } from "date-fns";
+import InfoRoundedIcon from "@mui/icons-material/InfoRounded";
+import AccessTimeRoundedIcon from "@mui/icons-material/AccessTimeRounded";
 
 interface DropdownTableProps {
   filteredEmployees: Employee[];
@@ -56,9 +70,9 @@ interface DropdownTableProps {
     date: Date,
     selectedLabel: string
   ) => void;
-  weeklySummaries: WeeklySummary[]; 
-  biweeklySummaries: BiweeklySummary[]; 
-  monthlySummaries: MonthlySummary[]; 
+  weeklySummaries: WeeklySummary[];
+  biweeklySummaries: BiweeklySummary[];
+  monthlySummaries: MonthlySummary[];
 }
 
 const DropdownTable: React.FC<DropdownTableProps> = ({
@@ -82,6 +96,7 @@ const DropdownTable: React.FC<DropdownTableProps> = ({
     "weekly" | "biweekly" | "monthly"
   >("weekly");
   const [orderDirection, setOrderDirection] = useState<"asc" | "desc">("asc");
+  const [tabValue, setTabValue] = React.useState("1");
 
   const currentWeek = useMemo(
     () => getCurrentWeekDates(weekOffset),
@@ -126,9 +141,11 @@ const DropdownTable: React.FC<DropdownTableProps> = ({
                 s.year === year
             );
 
+      const totalHours = summary ? summary.totalHours : 0;
+
       return {
         employeeId: employee.id,
-        totalHours: summary ? summary.totalHours : 0,
+        totalHours,
       };
     });
   }, [
@@ -143,9 +160,90 @@ const DropdownTable: React.FC<DropdownTableProps> = ({
     monthlySummaries,
   ]);
 
+  const getTotalWeekly = useMemo(() => {
+    return filteredEmployees.map((employee) => {
+      const summary = weeklySummaries.find(
+        (s) =>
+          s.employeeId === employee.id &&
+          s.weekNumber === weekNumber &&
+          s.year === year
+      );
+
+      const totalHours = summary ? summary.totalHours : 0;
+
+      return {
+        employeeId: employee.id,
+        totalHours,
+      };
+    });
+  }, [filteredEmployees, weekNumber, year, weeklySummaries]);
+
+  const getTotalBiweekly = useMemo(() => {
+    return filteredEmployees.map((employee) => {
+      const summary = biweeklySummaries.find(
+        (s) =>
+          s.employeeId === employee.id &&
+          s.biweekNumber === biweekNumber &&
+          s.year === year
+      );
+
+      const totalHours = summary ? summary.totalHours : 0;
+
+      return {
+        employeeId: employee.id,
+        totalHours,
+      };
+    });
+  }, [filteredEmployees, biweekNumber, year, biweeklySummaries]);
+
+  const getTotalMonthly = useMemo(() => {
+    return filteredEmployees.map((employee) => {
+      const summary = monthlySummaries.find(
+        (s) =>
+          s.employeeId === employee.id && s.month === month && s.year === year
+      );
+
+      const totalHours = summary ? summary.totalHours : 0;
+
+      return {
+        employeeId: employee.id,
+        totalHours,
+      };
+    });
+  }, [filteredEmployees, month, year, monthlySummaries]);
+
+  const getTotalOvertime = useMemo(() => {
+    return filteredEmployees.map((employee) => {
+      const summary = biweeklySummaries.find(
+        (s) =>
+          s.employeeId === employee.id &&
+          s.biweekNumber === biweekNumber &&
+          s.year === year
+      );
+
+      const totalHours = summary ? summary.totalHours : 0;
+      const overtime = totalHours > 96 ? totalHours - 96 : 0;
+
+      return {
+        employeeId: employee.id,
+        totalHours,
+        overtime,
+      };
+    });
+  }, [filteredEmployees, biweekNumber, year, biweeklySummaries]);
+
+  const handleTabChange = (event: React.SyntheticEvent, newValue: string) => {
+    setTabValue(newValue);
+  };
+
   const startIndex = page * rowsPerPage;
   const endIndex = startIndex + rowsPerPage;
   const paginatedEmployees = sortedEmployees.slice(startIndex, endIndex);
+
+  const theme = useTheme();
+  const isSmallScreen = useMediaQuery(theme.breakpoints.down("sm"));
+
+  const multiplePeriods = getInvolvedPeriods(currentWeek);
 
   if (!filteredEmployees || filteredEmployees.length === 0) {
     return (
@@ -161,8 +259,32 @@ const DropdownTable: React.FC<DropdownTableProps> = ({
         <Table stickyHeader aria-label="sticky table">
           <TableHead>
             <TableRow>
-              <TableCell align="center" colSpan={currentWeek.length + 2}>
-                <Typography variant="body2">Semana {weekNumber}</Typography>
+              <TableCell align="center" colSpan={9}>
+                {selectedPeriod === "weekly" ? (
+                  <Typography variant="body2">{`Semana ${weekNumber}`}</Typography>
+                ) : selectedPeriod === "biweekly" ? (
+                  <div>
+                    {hasMultipleBiweeks(currentWeek) ? (
+                      <Typography variant="body2">{`Quincenas ${multiplePeriods.biweekNumbers[0]} / ${multiplePeriods.biweekNumbers[1]}`}</Typography>
+                    ) : (
+                      <Typography variant="body2">{`Quincena ${biweekNumber}`}</Typography>
+                    )}
+                  </div>
+                ) : (
+                  <div>
+                    {hasMultipleBiweeks(currentWeek) ? (
+                      <Typography variant="body2">{`${getMonthName(
+                        multiplePeriods.months[0]
+                      )} / ${getMonthName(
+                        multiplePeriods.months[1]
+                      )}`}</Typography>
+                    ) : (
+                      <Typography variant="body2">{`${getMonthName(
+                        month
+                      )}`}</Typography>
+                    )}
+                  </div>
+                )}
               </TableCell>
             </TableRow>
             <TableRow>
@@ -191,6 +313,7 @@ const DropdownTable: React.FC<DropdownTableProps> = ({
               <TableCell
                 align="center"
                 sx={{ position: "sticky", right: 0, zIndex: 2 }}
+                colSpan={2}
               >
                 <FormControl>
                   <InputLabel>Total</InputLabel>
@@ -226,7 +349,116 @@ const DropdownTable: React.FC<DropdownTableProps> = ({
                     backgroundColor: getBackgroundColor(rowIndex),
                   }}
                 >
-                  {employee.firstName} {employee.lastName}
+                  <Box
+                    display="flex"
+                    alignItems="center"
+                    justifyContent="space-between"
+                  >
+                    <Typography variant="body2">
+                      {employee.firstName} {employee.lastName}
+                    </Typography>
+                    <ModalComponent
+                      buttonType="icon"
+                      buttonIcon={<InfoRoundedIcon />}
+                      modalTitle={`${employee.firstName} ${employee.lastName}`}
+                      modalDescription="Resumen del total de horas trabajadas"
+                      children={
+                        <TabContext value={tabValue}>
+                          <Box sx={{ bgcolor: "background.paper" }}>
+                            <TabList
+                              onChange={handleTabChange}
+                              sx={{ padding: 0, margin: 0 }}
+                            >
+                              <Tab label="Semanal" value="1" />
+                              <Tab label="Quincenal" value="2" />
+                              <Tab label="Mensual" value="3" />
+                              <Tab label="Horas Extra" value="4" />
+                            </TabList>
+                          </Box>
+                          <TabPanel
+                            value="1"
+                            sx={{ paddingLeft: 0, paddingRight: 0 }}
+                          >
+                            <Typography variant="body2">
+                              {`${employee.firstName} ha trabajado un total de `}
+                              <strong>
+                                {getTotalWeekly.find(
+                                  (emp) => emp.employeeId === employee.id
+                                )?.totalHours || 0}
+                              </strong>
+                              {` horas en la semana número `}
+                              <strong>{weekNumber}</strong>
+                              {`, que comprende del ${formatDate(
+                                new Date(currentWeek[0]?.date),
+                                false
+                              )} al ${formatDate(
+                                new Date(currentWeek[6]?.date),
+                                false
+                              )} `}
+                            </Typography>
+                          </TabPanel>
+                          <TabPanel
+                            value="2"
+                            sx={{ paddingLeft: 0, paddingRight: 0 }}
+                          >
+                            <Typography variant="body2">
+                              {`${employee.firstName} ha trabajado un total de `}
+                              <strong>
+                                {getTotalBiweekly.find(
+                                  (emp) => emp.employeeId === employee.id
+                                )?.totalHours || 0}
+                              </strong>
+                              {` horas en la quincena número `}{" "}
+                              <strong>{biweekNumber}</strong>
+                              {`, que comprende del ${formatDate(
+                                getBiweeklyDates(year, biweekNumber).startDate,
+                                false
+                              )} al ${formatDate(
+                                getBiweeklyDates(year, biweekNumber).startDate,
+                                false
+                              )}`}
+                            </Typography>
+                          </TabPanel>
+                          <TabPanel
+                            value="3"
+                            sx={{ paddingLeft: 0, paddingRight: 0 }}
+                          >
+                            <Typography variant="body2">
+                              {`${employee.firstName} ha trabajado un total de `}
+                              <strong>
+                                {getTotalMonthly.find(
+                                  (emp) => emp.employeeId === employee.id
+                                )?.totalHours || 0}
+                              </strong>
+                              {` horas en el mes de ${getMonthName(
+                                month
+                              )} del ${year}`}
+                            </Typography>
+                          </TabPanel>
+                          <TabPanel
+                            value="4"
+                            sx={{ paddingLeft: 0, paddingRight: 0 }}
+                          >
+                            <Typography variant="body2">
+                              {`${employee.firstName} ha trabajado un total de `}
+                              <strong>
+                                {getTotalOvertime.find(
+                                  (emp) => emp.employeeId === employee.id
+                                )?.overtime || 0}
+                              </strong>
+                              {` horas extra en la quincena del ${formatDate(
+                                getBiweeklyDates(year, biweekNumber).startDate,
+                                false
+                              )} al ${formatDate(
+                                getBiweeklyDates(year, biweekNumber).startDate,
+                                false
+                              )}`}
+                            </Typography>
+                          </TabPanel>
+                        </TabContext>
+                      }
+                    />
+                  </Box>
                 </TableCell>
                 {currentWeek.map(({ day, date }) => {
                   const existingRecord = hoursWorked.find(
@@ -311,21 +543,56 @@ const DropdownTable: React.FC<DropdownTableProps> = ({
                     </TableCell>
                   );
                 })}
-
                 <TableCell
-                  align="center"
+                  align="left"
                   sx={{
                     position: "sticky",
                     right: 0,
                     zIndex: 2,
                     backgroundColor: getBackgroundColor(rowIndex),
+                    display: "flex",
+                    justifyContent: "space-between",
+                    alignItems: "center",
+                    height: "64px",
+                    paddingX: 2,
                   }}
                 >
-                  {
-                    getTotalForPeriod.find(
-                      (emp) => emp.employeeId === employee.id
-                    )?.totalHours
-                  }
+                  <Box
+                    sx={{
+                      display: "flex",
+                      alignItems: "center",
+                      flexGrow: 1,
+                      justifyContent: "center",
+                    }}
+                  >
+                    <strong>
+                      {getTotalForPeriod.find(
+                        (emp) => emp.employeeId === employee.id
+                      )?.totalHours || 0}
+                    </strong>
+                    &nbsp;horas
+                  </Box>
+                  <Box sx={{ display: "flex", alignItems: "center", ml: 1 }}>
+                    <Tooltip title="Horas Extra" arrow>
+                      <Badge
+                        badgeContent={
+                          getTotalOvertime.find(
+                            (emp) => emp.employeeId === employee.id
+                          )?.overtime || 0
+                        }
+                        color={
+                          (getTotalOvertime.find(
+                            (emp) => emp.employeeId === employee.id
+                          )?.overtime || 0) > 0
+                            ? "warning"
+                            : "success"
+                        }
+                        showZero
+                      >
+                        <AccessTimeRoundedIcon />
+                      </Badge>
+                    </Tooltip>
+                  </Box>
                 </TableCell>
               </TableRow>
             ))}
@@ -334,10 +601,109 @@ const DropdownTable: React.FC<DropdownTableProps> = ({
       </TableContainer>
       <Divider />
       <Box display="flex" justifyContent="space-between" alignItems="center">
-        <Typography variant="body2" sx={{ ml: 2 }}>
-          Semana del {formatDate(new Date(currentWeek[0]?.date), false)} al{" "}
-          {formatDate(new Date(currentWeek[6]?.date), false)}
-        </Typography>
+        {selectedPeriod === "weekly" ? (
+          <div>
+            {isSmallScreen ? (
+              <Typography variant="body2" sx={{ ml: 2 }}>
+                Semana del{" "}
+                {format(new Date(currentWeek[0]?.date), "dd/MM/yyyy")} al{" "}
+                {format(new Date(currentWeek[6]?.date), "dd/MM/yyyy")}
+              </Typography>
+            ) : (
+              <Typography variant="body2" sx={{ ml: 2 }}>
+                Semana del {formatDate(new Date(currentWeek[0]?.date), false)}{" "}
+                al {formatDate(new Date(currentWeek[6]?.date), false)}
+              </Typography>
+            )}
+          </div>
+        ) : selectedPeriod === "biweekly" ? (
+          <div>
+            {isSmallScreen ? (
+              <div>
+                {hasMultipleBiweeks(currentWeek) ? (
+                  <Typography
+                    variant="body2"
+                    sx={{ ml: 2 }}
+                  >{`Quincenas del ${format(
+                    getBiweeklyDates(year, multiplePeriods.biweekNumbers[0])
+                      .startDate,
+                    "dd/MM/yyyy"
+                  )} al ${format(
+                    getBiweeklyDates(year, multiplePeriods.biweekNumbers[0])
+                      .endDate,
+                    "dd/MM/yyyy"
+                  )} / ${format(
+                    getBiweeklyDates(year, multiplePeriods.biweekNumbers[1])
+                      .startDate,
+                    "dd/MM/yyyy"
+                  )} al ${format(
+                    getBiweeklyDates(year, multiplePeriods.biweekNumbers[1])
+                      .endDate,
+                    "dd/MM/yyyy"
+                  )}`}</Typography>
+                ) : (
+                  <Typography
+                    variant="body2"
+                    sx={{ ml: 2 }}
+                  >{`Quincena del ${format(
+                    getBiweeklyDates(year, biweekNumber).startDate,
+                    "dd/MM/yyyy"
+                  )} al ${format(
+                    getBiweeklyDates(year, biweekNumber).endDate,
+                    "dd/MM/yyyy"
+                  )}`}</Typography>
+                )}
+              </div>
+            ) : (
+              <div>
+                {hasMultipleBiweeks(currentWeek) ? (
+                  <Typography
+                    variant="body2"
+                    sx={{ ml: 2 }}
+                  >{`Quincenas del ${formatDateWithoutYear(
+                    getBiweeklyDates(year, multiplePeriods.biweekNumbers[0])
+                      .startDate
+                  )} al ${formatDateWithoutYear(
+                    getBiweeklyDates(year, multiplePeriods.biweekNumbers[0])
+                      .endDate
+                  )} / ${formatDateWithoutYear(
+                    getBiweeklyDates(year, multiplePeriods.biweekNumbers[1])
+                      .startDate
+                  )} al ${formatDateWithoutYear(
+                    getBiweeklyDates(year, multiplePeriods.biweekNumbers[1])
+                      .endDate
+                  )} del ${year}`}</Typography>
+                ) : (
+                  <Typography
+                    variant="body2"
+                    sx={{ ml: 2 }}
+                  >{`Quincena del ${formatDate(
+                    getBiweeklyDates(year, biweekNumber).startDate,
+                    false
+                  )} al ${formatDate(
+                    getBiweeklyDates(year, biweekNumber).endDate,
+                    false
+                  )}`}</Typography>
+                )}
+              </div>
+            )}
+          </div>
+        ) : (
+          <div>
+            {hasMultipleBiweeks(currentWeek) ? (
+              <Typography variant="body2" sx={{ ml: 2 }}>{`${getMonthName(
+                multiplePeriods.months[0]
+              )} / ${getMonthName(
+                multiplePeriods.months[1]
+              )} del ${year}`}</Typography>
+            ) : (
+              <Typography variant="body2" sx={{ ml: 2 }}>{`${getMonthName(
+                month
+              )}`}</Typography>
+            )}
+          </div>
+        )}
+
         <TablePagination
           className="pagination"
           rowsPerPageOptions={[5, 10, 25]}

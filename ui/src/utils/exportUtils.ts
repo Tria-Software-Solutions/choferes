@@ -11,9 +11,12 @@ import {
   translatePeriodToSpanish,
   translationsDayOptionsToSpanish,
 } from "./stringUtils";
-import { calculateTotalHours } from "./tableUtils";
+import { calculateTotalHoursForPeriod } from "./tableUtils";
 import { formatHeaderDateWithYear, formatDate } from "./dateUtils";
 import { EnglishDayOfWeek } from "./englishDayOfWeek";
+import { WeeklySummary } from "../models/WeeklySummary";
+import { BiweeklySummary } from "../models/BiweeklySummary";
+import { MonthlySummary } from "../models/MonthlySummary";
 
 export const exportToExcel = (
   data: any[],
@@ -108,6 +111,13 @@ export const handleExportTableData = (
   filteredEmployees: Employee[],
   hoursWorked: HoursWorked[],
   schedules: Schedule[],
+  weeklySummaries: WeeklySummary[],
+  biweeklySummaries: BiweeklySummary[],
+  monthlySummaries: MonthlySummary[],
+  weekNumber: number,
+  biweekNumber: number,
+  month: number,
+  year: number,
   currentWeek: { day: string; date: string }[],
   period: "weekly" | "biweekly" | "monthly"
 ) => {
@@ -147,12 +157,16 @@ export const handleExportTableData = (
     });
 
     employeeData[`Total ${translatePeriodToSpanish(period)}`] =
-      calculateTotalHours(
-        currentWeek,
-        hoursWorked,
-        schedules,
+      calculateTotalHoursForPeriod(
         employee.id,
-        period
+        period,
+        weekNumber,
+        biweekNumber,
+        month,
+        year,
+        weeklySummaries,
+        biweeklySummaries,
+        monthlySummaries
       );
 
     return employeeData;
@@ -172,7 +186,7 @@ export const createExportOptions = (
   exportToPDF: (dataForExport: any, fileName: string, headers?: any) => any,
   dataForExport: any,
   fileName: string,
-  headers?: any,
+  headers?: any
 ) => {
   return [
     {

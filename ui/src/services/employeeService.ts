@@ -1,5 +1,5 @@
-import { Employee } from '../models/Employee';
-import api from './api';
+import { Employee } from "../models/Employee";
+import api from "./api";
 
 export const fetchEmployees = async () => {
   const response = await api.get("/employees");
@@ -10,7 +10,10 @@ export const addEmployee = async (newEmployee: Employee) => {
   await api.post("/employees", newEmployee);
 };
 
-export const updateEmployee = async (id: number, updatedEmployee: Partial<Employee>) => {
+export const updateEmployee = async (
+  id: number,
+  updatedEmployee: Partial<Employee>
+) => {
   await api.put(`/employees/${id}`, updatedEmployee);
 };
 

@@ -32,7 +32,6 @@ import { faFileExcel, faFilePdf } from "@fortawesome/free-solid-svg-icons";
 const ManageEmployees: React.FC = () => {
   const {
     employees,
-    fetchEmployees,
     handleAddEmployee,
     handleUpdateEmployee,
     handleDeleteEmployee,
@@ -48,14 +47,6 @@ const ManageEmployees: React.FC = () => {
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(5);
   const [isValid, setIsValid] = useState(false);
-
-  useEffect(() => {
-    const fetchData = async () => {
-      await fetchEmployees();
-    };
-
-    fetchData();
-  }, [fetchEmployees]);
 
   useEffect(() => {
     const filtered = employees.filter((employee) =>

@@ -20,6 +20,11 @@ HoursWorked.init(
     employeeId: {
       type: DataTypes.INTEGER,
       allowNull: false,
+      references: {
+        model: Employee,
+        key: 'id',
+      },
+      onDelete: 'CASCADE',
     },
     date: {
       type: DataTypes.DATE,
@@ -41,5 +46,5 @@ HoursWorked.init(
   }
 );
 
-HoursWorked.belongsTo(Employee, { foreignKey: 'employeeId' });
+HoursWorked.belongsTo(Employee, { foreignKey: 'employeeId', onDelete: 'CASCADE' });
 HoursWorked.belongsTo(Schedule, { foreignKey: 'scheduleId' });

@@ -49,6 +49,29 @@ export const translateMonthToAbrevSpanish = (
   return translationMap[monthInEnglish];
 };
 
+export const getMonthName = (month: number) => {
+  const months = [
+    "Enero",
+    "Febrero",
+    "Marzo",
+    "Abril",
+    "Mayo",
+    "Junio",
+    "Julio",
+    "Agosto",
+    "Septiembre",
+    "Octubre",
+    "Noviembre",
+    "Diciembre",
+  ];
+
+  if (month < 1 || month > 12) {
+    throw new Error("Número de mes inválido. Debe estar entre 1 y 12.");
+  }
+
+  return months[month - 1]; 
+};
+
 export const translateColumnHeaderToSpanish = (
   column: string | number | symbol
 ): string => {

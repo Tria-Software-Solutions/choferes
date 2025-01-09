@@ -78,7 +78,7 @@ const SplitButton: React.FC<SplitButtonProps> = ({
         </Button>
       </ButtonGroup>
       <Popper
-        sx={{ zIndex: 1 }}
+        sx={{ zIndex: 2 }}
         open={open}
         anchorEl={anchorRef.current}
         role={undefined}

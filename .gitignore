@@ -1,30 +1,30 @@
-# See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
+# Node.js
+/node_modules
 
-# dependencies
-ui/node_modules/
-api/node_modules/
+# Build output
+/build
+/dist
 
-# FE temporary files
-ui/.eslintcache
-ui/tsconfig.tsbuildinfo
-ui/*.pack
+# Logs
+*.log
+npm-debug.log*
 
-/.pnp
-.pnp.js
+# Environment files
+.env
+.env.local
+.env.*.local
 
-# testing
+# Editor directories and files
+.vscode/
+.idea/
+*.sublime-workspace
+
+# OS generated files
+.DS_Store
+Thumbs.db
+
+# Test coverage
 /coverage
 
-# production
-/build
-
-# misc
-.DS_Store
-.env.local
-.env.development.local
-.env.test.local
-.env.production.local
-
-npm-debug.log*
-yarn-debug.log*
-yarn-error.log*
+# TypeScript
+*.tsbuildinfo

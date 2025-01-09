@@ -2,6 +2,7 @@ import React from "react";
 import { AppBar, Toolbar, Typography, IconButton } from "@mui/material";
 import MenuComponent from "../Menu/MenuComponent";
 import MenuRoundedIcon from "@mui/icons-material/MenuRounded";
+import logo from '../../assets/images/logo.png'; 
 
 interface Link {
   label: string;
@@ -39,7 +40,6 @@ const AppBarComponent: React.FC<AppBarComponentProps> = ({
       icon: subLink.icon as React.ReactElement | undefined,
     })),
   }));
-  
 
   return (
     <AppBar position="static">
@@ -49,6 +49,15 @@ const AppBarComponent: React.FC<AppBarComponentProps> = ({
             {icon}
           </IconButton>
         )}
+        <img
+          src={logo}
+          alt="Logo"
+          style={{
+            width: '28px',
+            height: 'auto', 
+            marginRight: '10px', 
+          }}
+        />
         <Typography
           variant="h5"
           sx={{ flexGrow: 1, fontFamily: "'Protest Guerrilla', sans-serif" }}
