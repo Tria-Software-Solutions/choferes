@@ -32,6 +32,7 @@ import { setDayOptionsEnglish } from "../utils/stringUtils";
 import {
   getBiweekNumber,
   getCurrentWeekDates,
+  getFirstDayOfWeek,
   getMonthNumber,
   getWeekNumber,
   isValidDateForSelect,
@@ -47,8 +48,8 @@ import { es } from "date-fns/locale";
 import { differenceInCalendarWeeks } from "date-fns";
 
 const Dashboard: React.FC = () => {
-  const { employees, fetchEmployees } = useEmployees();
-  const { schedules, fetchSchedules } = useSchedules();
+  const { employees } = useEmployees();
+  const { schedules } = useSchedules();
   const { hoursWorked, fetchHours, handleAddHours, handleUpdateHours } =
     useHours();
   const { handleSummaryChange, handleSummaryUpdate } = useSummaries();
@@ -68,29 +69,6 @@ const Dashboard: React.FC = () => {
   const [showResults, setShowResults] = useState(true);
 
   useEffect(() => {
-    const fetchData = async () => {
-      await fetchEmployees();
-      await fetchSchedules();
-      await fetchHours();
-      await fetchWeeklySummaries();
-      await fetchBiweeklySummaries();
-      await fetchMonthlySummaries();
-    };
-    fetchData();
-  }, [
-    hoursWorked,
-    weeklySummaries,
-    biweeklySummaries,
-    monthlySummaries,
-    fetchEmployees,
-    fetchSchedules,
-    fetchHours,
-    fetchWeeklySummaries,
-    fetchBiweeklySummaries,
-    fetchMonthlySummaries,
-  ]);
-
-  useEffect(() => {
     const currentWeek = getCurrentWeekDates(weekOffset);
     if (currentWeek.length > 0) {
       const firstDayOfWeek = new Date(currentWeek[0].date);
@@ -101,9 +79,20 @@ const Dashboard: React.FC = () => {
     }
   }, [weekOffset]);
 
-  const handleNextWeek = () => setWeekOffset(weekOffset + 1);
-  const handlePreviousWeek = () => setWeekOffset(weekOffset - 1);
-  const handleCurrentWeek = () => setWeekOffset(0);
+  const handleNextWeek = () => {
+    setWeekOffset(weekOffset + 1);
+    setSelectedDate(getFirstDayOfWeek(weekOffset + 1));
+  };
+
+  const handlePreviousWeek = () => {
+    setWeekOffset(weekOffset - 1);
+    setSelectedDate(getFirstDayOfWeek(weekOffset - 1));
+  };
+
+  const handleCurrentWeek = () => {
+    setWeekOffset(0);
+    setSelectedDate(new Date());
+  };
 
   const filteredEmployees = employees.filter((employee) =>
     `${employee.firstName} ${employee.lastName}`
@@ -119,7 +108,10 @@ const Dashboard: React.FC = () => {
     setSelectedDate(newDate);
     if (newDate) {
       const today = new Date();
-      setWeekOffset(differenceInCalendarWeeks(newDate, today) + 1);
+      const weekOptions: { weekStartsOn: 0 | 1 | 2 | 3 | 4 | 5 | 6 } = {
+        weekStartsOn: 1,
+      };
+      setWeekOffset(differenceInCalendarWeeks(newDate, today, weekOptions));
     }
   };
 
@@ -148,6 +140,7 @@ const Dashboard: React.FC = () => {
       biweeklySummaries,
       monthlySummaries,
       date,
+      weekOffset,
       weekNumber,
       biweekNumber,
       month,
@@ -169,6 +162,13 @@ const Dashboard: React.FC = () => {
     filteredEmployees,
     hoursWorked,
     schedules,
+    weeklySummaries,
+    biweeklySummaries,
+    monthlySummaries,
+    weekNumber,
+    biweekNumber,
+    month,
+    year,
     getCurrentWeekDates(weekOffset),
     period
   );
@@ -203,23 +203,28 @@ const Dashboard: React.FC = () => {
           />
         )}
       </Box>
-
       <Grid
         container
         spacing={2}
         justifyContent="space-between"
         alignItems="center"
       >
-        <Grid item>
+        <Grid item xs={12} sm={6} md={4}>
           <SearchBar
             placeholder="Buscar Empleado"
             value={filter}
             onChange={(e) => setFilter(e.target.value)}
+            fullWidth
           />
         </Grid>
         {showResults && (
-          <Grid item>
-            <Box display="flex" alignItems="center">
+          <Grid item xs={12} sm={6} md={8}>
+            <Box
+              display="flex"
+              alignItems="center"
+              flexWrap="wrap"
+              justifyContent="flex-end"
+            >
               <Tooltip title="Semana Anterior" arrow>
                 <Button
                   variant="contained"
@@ -260,10 +265,19 @@ const Dashboard: React.FC = () => {
               <LocalizationProvider
                 dateAdapter={AdapterDateFns}
                 adapterLocale={es}
+                localeText={{
+                  okButtonLabel: "Aceptar",
+                  cancelButtonLabel: "Cancelar",
+                  todayButtonLabel: "Hoy",
+                  year: "Año #{year}",
+                  previousMonth: "Mes anterior",
+                  nextMonth: "Mes siguiente",
+                }}
               >
                 <DatePicker
-                  label="Seleccione una fecha"
+                  label="Seleccionar fecha"
                   value={selectedDate}
+                  sx={{ width: { xs: "100%", sm: "180px" } }}
                   onChange={handleDateChange}
                 />
               </LocalizationProvider>

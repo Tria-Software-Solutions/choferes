@@ -25,6 +25,7 @@ WeeklySummary.init(
         model: Employee,
         key: 'id',
       },
+      onDelete: 'CASCADE',
     },
     weekNumber: {
       type: DataTypes.INTEGER,
@@ -50,4 +51,4 @@ WeeklySummary.init(
   }
 );
 
-WeeklySummary.belongsTo(Employee, { foreignKey: "employeeId" });
+WeeklySummary.belongsTo(Employee, { foreignKey: "employeeId", onDelete: 'CASCADE' });

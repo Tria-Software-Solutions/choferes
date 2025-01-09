@@ -4,7 +4,7 @@ import { HoursWorked } from "../models/HoursWorked";
 import { MonthlySummary } from "../models/MonthlySummary";
 import { Schedule } from "../models/Schedule";
 import { WeeklySummary } from "../models/WeeklySummary";
-import { format } from "date-fns";
+import { format, parseISO } from "date-fns";
 import { getBiweekNumber, getWeekNumber } from "./dateUtils";
 
 export const updateHoursAndSummaries = async (
@@ -15,6 +15,7 @@ export const updateHoursAndSummaries = async (
   biweeklySummaries: BiweeklySummary[],
   monthlySummaries: MonthlySummary[],
   date: Date,
+  weekOffset: number,
   weekNumber: number,
   biweekNumber: number,
   month: number,
@@ -45,7 +46,8 @@ export const updateHoursAndSummaries = async (
   const existingHoursWorkedRecord = hoursWorked.find((record) => {
     return (
       record.employeeId === employee.id &&
-      format(record.date, "yyyy-MM-dd") === format(date, "yyyy-MM-dd")
+      format(parseISO(record.date.toString()), "yyyy-MM-dd") ===
+        format(date, "yyyy-MM-dd")
     );
   });
 
@@ -77,12 +79,17 @@ export const updateHoursAndSummaries = async (
 
   const totalBiweeklyHours = updatedHoursWorked
     .filter((record) => {
-      const recordBiweekNumber = getBiweekNumber(new Date(record.date));
-      return (
+      const recordDate = new Date(record.date);
+      const recordMonth = recordDate.getMonth() + 1;
+      const recordYear = recordDate.getFullYear();
+      const recordBiweekNumber = getBiweekNumber(recordDate);
+
+      const matches =
         record.employeeId === employee.id &&
         recordBiweekNumber === biweekNumber &&
-        new Date(record.date).getFullYear() === year
-      );
+        recordMonth === month &&
+        recordYear === year;
+      return matches;
     })
     .reduce((sum, record) => {
       const schedule = schedules.find(

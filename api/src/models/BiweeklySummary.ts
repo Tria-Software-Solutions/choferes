@@ -25,6 +25,7 @@ BiweeklySummary.init(
         model: Employee,
         key: 'id',
       },
+      onDelete: 'CASCADE',
     },
     biweekNumber: {
       type: DataTypes.INTEGER,
@@ -50,4 +51,4 @@ BiweeklySummary.init(
   }
 );
 
-BiweeklySummary.belongsTo(Employee, { foreignKey: "employeeId" });
+BiweeklySummary.belongsTo(Employee, { foreignKey: "employeeId", onDelete: 'CASCADE' });
