@@ -7,6 +7,7 @@ import weeklySummaryRoutes from './routes/weeklySummaryRoutes';
 import biweeklySummaryRoutes from './routes/biweeklySummaryRoutes';
 import monthlySummaryRoutes from './routes/monthlySummaryRoutes';
 import scheduleRoutes from './routes/scheduleRoutes';
+import vehicleRoutes from './routes/vehicleRoutes';
 import sequelize from './config/database'; 
 
 const app = express();
@@ -21,6 +22,7 @@ app.use('/api/weekly-summary', weeklySummaryRoutes);
 app.use('/api/biweekly-summary', biweeklySummaryRoutes);
 app.use('/api/monthly-summary', monthlySummaryRoutes);
 app.use('/api/schedules', scheduleRoutes);
+app.use('/api/vehicles', vehicleRoutes);
 
 app.use((err: Error, req: express.Request, res: express.Response, next: express.NextFunction) => {
   console.error(err.stack);

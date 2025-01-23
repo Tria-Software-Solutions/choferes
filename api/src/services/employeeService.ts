@@ -1,6 +1,9 @@
-import { Employee } from '../models/Employee';
+import { Employee } from "../models/Employee";
 
-export const createEmployee = async (data: { firstName: string; lastName: string }) => {
+export const createEmployee = async (data: {
+  firstName: string;
+  lastName: string;
+}) => {
   return Employee.create(data);
 };
 

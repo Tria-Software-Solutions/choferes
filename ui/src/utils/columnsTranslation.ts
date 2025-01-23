@@ -7,4 +7,9 @@ export type ColumnsTranslation = {
     hours: string;
     createdAt: string;
     updatedAt: string;
+    licensePlate: string;
+    brand: string;
+    color: string;
+    parkingLot: string;
+    notes: string;
   };

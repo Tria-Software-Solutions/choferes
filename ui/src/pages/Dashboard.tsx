@@ -75,7 +75,7 @@ const Dashboard: React.FC = () => {
       setWeekNumber(getWeekNumber(firstDayOfWeek));
       setBiweekNumber(getBiweekNumber(firstDayOfWeek));
       setMonth(getMonthNumber(firstDayOfWeek));
-      setYear(firstDayOfWeek.getFullYear());
+      setYear(new Date().getFullYear());
     }
   }, [weekOffset]);
 
@@ -305,7 +305,7 @@ const Dashboard: React.FC = () => {
         />
       ) : (
         <Typography variant="h6" color="textSecondary">
-          No se encontraron empleados que coincidan con la búsqueda.
+          No se encontraron empleados para mostrar.
         </Typography>
       )}
     </Box>

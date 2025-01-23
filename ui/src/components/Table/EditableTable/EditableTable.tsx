@@ -20,34 +20,39 @@ import {
 } from "@mui/material";
 import {
   translateColumnHeaderToSpanish,
-  getDayOptionsSpanish,
-  translateDayOptionsToSpanish,
+  mapDayValues,
 } from "../../../utils/stringUtils";
 import DeleteIcon from "@mui/icons-material/Delete";
 import EditIcon from "@mui/icons-material/Edit";
 import SaveIcon from "@mui/icons-material/Save";
 import { TABLE } from "../../../constants/constants";
 
-type EditableTableProps<T> = {
+type EditableTableProps<T extends { licensePlate?: string; id?: number }> = {
   data: T[];
   columns: (keyof T)[];
-  editRowId: number | null;
-  editFields: Record<string, string>;
+  groupByField?: keyof T;
+  editRowId: number | string | null;
+  editFields: Record<string, string | number | Date>;
   setEditField: (field: string, value: string) => void;
   handleEditClick: (row: T) => void;
-  handleSaveClick: (id: number) => void;
-  handleOpenDialog: (id: number) => void;
-  getRowId: (row: T) => number;
+  handleSaveClick: (args: { id?: number; licensePlate?: string }) => void;
+  handleOpenDialog: (args: { id?: number; licensePlate?: string }) => void;
+  getRowId: (row: T) => number | string;
   totalCount: number;
   page: number;
   rowsPerPage: number;
   setPage: (page: number) => void;
   setRowsPerPage: (rowsPerPage: number) => void;
+  renderColumnValue?: (column: keyof T, value: any) => React.ReactNode;
+  getOptionsForColumn?: (column: keyof T) => { value: string; label: string }[];
+  validateField?: (field: string, value: string | number | Date) => boolean;
+  customPagination?: (data: T[], page: number, rowsPerPage: number) => T[];
 };
 
-const EditableTable = <T,>({
+const EditableTable = <T extends { licensePlate?: string; id?: number }>({
   data,
   columns,
+  groupByField,
   editRowId,
   editFields,
   setEditField,
@@ -60,31 +65,21 @@ const EditableTable = <T,>({
   rowsPerPage,
   setPage,
   setRowsPerPage,
+  renderColumnValue = (_, value) => value,
+  getOptionsForColumn = () => [],
+  validateField = () => true,
+  customPagination,
 }: EditableTableProps<T>) => {
   const [isFormValid, setIsFormValid] = useState(false);
   const [order, setOrder] = useState<"asc" | "desc">("asc");
   const [orderBy, setOrderBy] = useState<keyof T>(columns[0]);
-
-  const validateField = (field: string, value: string): boolean => {
-    if (
-      field === "firstName" ||
-      field === "lastName" ||
-      field === "label" ||
-      field === "day"
-    ) {
-      return /^[a-zA-ZáéíóúÁÉÍÓÚñÑ\s]*$/.test(value);
-    } else if (field === "hours") {
-      return /^[0-9]+$/.test(value);
-    }
-    return true;
-  };
 
   const checkFormValidity = useCallback(() => {
     const isValid = Object.keys(editFields).every((field) =>
       validateField(field, editFields[field])
     );
     setIsFormValid(isValid);
-  }, [editFields]);
+  }, [editFields, validateField]);
 
   useEffect(() => {
     checkFormValidity();
@@ -103,21 +98,53 @@ const EditableTable = <T,>({
     setOrderBy(column);
   };
 
-  const sortedData = [...data].sort((a, b) => {
-    if (a[orderBy] < b[orderBy]) {
-      return order === "asc" ? -1 : 1;
-    }
-    if (a[orderBy] > b[orderBy]) {
-      return order === "asc" ? 1 : -1;
-    }
-    return 0;
-  });
+  const groupedData = groupByField
+    ? data.reduce((acc, item) => {
+        const key = item[groupByField] as string;
+        if (!acc[key]) acc[key] = [];
+        acc[key].push(item);
+        return acc;
+      }, {} as Record<string, T[]>)
+    : { default: data };
+
+  const groupKeys = groupByField
+    ? Object.keys(groupedData).sort((a, b) =>
+        order === "asc" ? a.localeCompare(b) : b.localeCompare(a)
+      )
+    : ["default"];
+
+  const sortedData = groupByField
+    ? groupKeys.flatMap((key) => groupedData[key])
+    : [...data].sort((a, b) => {
+        if (a[orderBy] < b[orderBy]) {
+          return order === "asc" ? -1 : 1;
+        }
+        if (a[orderBy] > b[orderBy]) {
+          return order === "asc" ? 1 : -1;
+        }
+        return 0;
+      });
+
+  const paginatedData = customPagination
+    ? customPagination(data, page, rowsPerPage)
+    : sortedData.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage);
 
   return (
     <Paper sx={{ width: "100%" }}>
       <TableContainer className="table-container">
         <Table stickyHeader aria-label="sticky table">
           <TableHead>
+            {customPagination && (
+              <TableRow>
+                <TableCell
+                  colSpan={columns.length + 1}
+                  align="center"
+                  style={{ backgroundColor: "#f4f4f4", fontWeight: "bold" }}
+                >
+                  Created At
+                </TableCell>
+              </TableRow>
+            )}
             <TableRow>
               {columns.map((column) => (
                 <TableCell key={String(column)} className="tableCell">
@@ -133,94 +160,107 @@ const EditableTable = <T,>({
             </TableRow>
           </TableHead>
           <TableBody>
-            {sortedData
-              .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
-              .map((row) => (
-                <TableRow key={getRowId(row)}>
-                  {columns.map((column) => (
-                    <TableCell key={String(column)} className="tableCell">
-                      {editRowId === getRowId(row) ? (
-                        column === "day" ? (
-                          <FormControl variant="outlined" fullWidth>
-                            <InputLabel>Día</InputLabel>
-                            <Select
-                              label="Día"
-                              value={editFields[String(column)] || ""}
-                              onChange={(e) =>
-                                setEditField(String(column), e.target.value)
-                              }
-                            >
-                              {getDayOptionsSpanish().map((option) => (
-                                <MenuItem
-                                  key={option.value}
-                                  value={option.value}
-                                >
-                                  {option.label}
-                                </MenuItem>
-                              ))}
-                            </Select>
-                          </FormControl>
-                        ) : (
-                          <TextField
-                            fullWidth
+            {paginatedData.map((row) => (
+              <TableRow key={getRowId(row)}>
+                {columns.map((column) => (
+                  <TableCell key={String(column)}>
+                    {editRowId === getRowId(row) ? (
+                      getOptionsForColumn(column).length > 0 ? (
+                        <FormControl variant="outlined" fullWidth>
+                          <InputLabel>{String(column)}</InputLabel>
+                          <Select
+                            label={String(column)}
                             value={editFields[String(column)] || ""}
                             onChange={(e) =>
-                              setEditField(String(column), e.target.value)
-                            }
-                            error={
-                              !validateField(
+                              setEditField(
                                 String(column),
-                                editFields[String(column)]
+                                String(e.target.value)
                               )
                             }
-                          />
-                        )
-                      ) : column === "day" ? (
-                        translateDayOptionsToSpanish(
-                          row[column as keyof T] as string
-                        ) || null
+                          >
+                            {getOptionsForColumn(column).map((option) => (
+                              <MenuItem key={option.value} value={option.value}>
+                                {option.label}
+                              </MenuItem>
+                            ))}
+                          </Select>
+                        </FormControl>
                       ) : (
-                        (row[column] as React.ReactNode)
-                      )}
-                    </TableCell>
-                  ))}
-                  <TableCell className="actionCell">
-                    {editRowId === getRowId(row) ? (
-                      <Tooltip title="Guardar" arrow>
-                        <IconButton
-                          color="primary"
-                          sx={{ mr: 2 }}
-                          onClick={() => handleSaveClick(getRowId(row))}
-                          className="saveIconButton"
-                          disabled={!isFormValid}
-                        >
-                          <SaveIcon />
-                        </IconButton>
-                      </Tooltip>
+                        <TextField
+                          fullWidth
+                          value={editFields[String(column)] || ""}
+                          onChange={(e) =>
+                            setEditField(String(column), e.target.value)
+                          }
+                          error={
+                            !validateField(
+                              String(column),
+                              editFields[String(column)]
+                            )
+                          }
+                        />
+                      )
+                    ) : column === "day" ? (
+                      mapDayValues(row[column] as string)
                     ) : (
-                      <Tooltip title="Editar" arrow>
-                        <IconButton
-                          color="primary"
-                          sx={{ mr: 2 }}
-                          onClick={() => handleEditClick(row)}
-                          className="saveIconButton"
-                        >
-                          <EditIcon />
-                        </IconButton>
-                      </Tooltip>
+                      renderColumnValue(column, row[column])
                     )}
-                    <Tooltip title="Eliminar" arrow>
+                  </TableCell>
+                ))}
+                <TableCell>
+                  {editRowId === getRowId(row) ? (
+                    <Tooltip title="Guardar" arrow>
                       <IconButton
-                        color="secondary"
-                        onClick={() => handleOpenDialog(getRowId(row))}
-                        className="saveIconButton"
+                        color="primary"
+                        onClick={() => {
+                          if (row.licensePlate) {
+                            handleSaveClick({
+                              licensePlate: row.licensePlate,
+                            });
+                          } else {
+                            const id = getRowId(row);
+                            if (typeof id === "number") {
+                              handleSaveClick({ id });
+                            }
+                          }
+                        }}
+                        disabled={!isFormValid}
                       >
-                        <DeleteIcon />
+                        <SaveIcon />
                       </IconButton>
                     </Tooltip>
-                  </TableCell>
-                </TableRow>
-              ))}
+                  ) : (
+                    <Tooltip title="Editar" arrow>
+                      <IconButton
+                        color="primary"
+                        onClick={() => handleEditClick(row)}
+                      >
+                        <EditIcon />
+                      </IconButton>
+                    </Tooltip>
+                  )}
+                  <Tooltip title="Eliminar" arrow>
+                    <IconButton
+                      color="secondary"
+                      onClick={() => {
+                        if (row.licensePlate) {
+                          handleOpenDialog({
+                            licensePlate: row.licensePlate,
+                          });
+                        } else {
+                          const id = getRowId(row);
+                          if (typeof id === "number") {
+                            handleOpenDialog({ id });
+                          }
+                        }
+                      }}
+                    >
+                      <DeleteIcon />
+                    </IconButton>
+                  </Tooltip>
+                </TableCell>
+              </TableRow>
+            ))}
           </TableBody>
         </Table>
       </TableContainer>

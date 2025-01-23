@@ -90,18 +90,22 @@ const ManageEmployees: React.FC = () => {
     });
   };
 
-  const handleSaveClick = (id: number) => {
-    const updatedEmployee = {
-      ...editFields,
-    };
-    handleUpdateEmployee(id, updatedEmployee);
-    setEditRowId(null);
-    setEditFields({ firstName: "", lastName: "" });
+  const handleSaveClick = (args: { id?: number; licensePlate?: string }) => {
+    if (args.id) {
+      const updatedEmployee = {
+        ...editFields,
+      };
+      handleUpdateEmployee(args.id, updatedEmployee);
+      setEditRowId(null);
+      setEditFields({ firstName: "", lastName: "" });
+    }
   };
 
-  const handleOpenDialog = (id: number) => {
-    setDialogOpen(true);
-    setEmployeeToDelete(id);
+  const handleOpenDialog = (args: { id?: number; licensePlate?: string }) => {
+    if (args.id) {
+      setDialogOpen(true);
+      setEmployeeToDelete(args.id);
+    }
   };
 
   const handleCloseDialog = () => {
@@ -216,7 +220,7 @@ const ManageEmployees: React.FC = () => {
         />
       ) : (
         <Typography variant="h6" color="textSecondary">
-          No se encontraron empleados que coincidan con la búsqueda.
+          No se encontraron empleados para mostrar.
         </Typography>
       )}
       <Dialog open={dialogOpen} onClose={handleCloseDialog}>

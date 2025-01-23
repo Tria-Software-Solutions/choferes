@@ -84,6 +84,11 @@ export const translateColumnHeaderToSpanish = (
     hours: "Horas",
     createdAt: "Agregado",
     updatedAt: "Actualizado",
+    licensePlate: "Placa",
+    brand: "Marca",
+    color: "Color",
+    parkingLot: "Espacio",
+    notes: "Observaciones"
   };
 
   if (typeof column === "string" && column in translations) {
@@ -124,6 +129,16 @@ export const getDayOptionsSpanish = () => [
   { value: "saturday", label: "Sábado" },
   { value: "sunday", label: "Domingo" },
 ];
+
+export const mapDayValues = (value: string): string => {
+  const dayMap: Record<string, string> = {
+    weekday: "Lunes a Jueves",
+    friday: "Viernes",
+    saturday: "Sábado",
+    sunday: "Domingo",
+  };
+  return dayMap[value] || value;
+};
 
 export const setDayOptionsEnglish = (day: string): string => {
   const lowerCaseDay = day.toLowerCase();

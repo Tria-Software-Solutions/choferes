@@ -8,8 +8,10 @@ import { APPBAR_MENU, ROUTES } from "./constants/constants";
 import ManageSchedules from "./pages/ManageSchedules";
 import CalendarMonthRoundedIcon from "@mui/icons-material/CalendarMonthRounded";
 import ManageAccountsRoundedIcon from "@mui/icons-material/ManageAccountsRounded";
+import DirectionsCarIcon from "@mui/icons-material/DirectionsCar";
 import GroupRoundedIcon from "@mui/icons-material/GroupRounded";
 import EditCalendarRoundedIcon from "@mui/icons-material/EditCalendarRounded";
+import ManageVehicles from "./pages/ManageVehicles";
 
 const App: React.FC = () => {
   return (
@@ -21,6 +23,11 @@ const App: React.FC = () => {
             label: APPBAR_MENU.ROLES,
             icon: <CalendarMonthRoundedIcon />,
             path: ROUTES.HOME,
+          },
+          {
+            label: APPBAR_MENU.VEHICLES,
+            icon: <DirectionsCarIcon />,
+            path: ROUTES.MANAGE_VEHICLES,
           },
           {
             label: APPBAR_MENU.MANAGE,
@@ -62,6 +69,7 @@ const App: React.FC = () => {
       >
         <Routes>
           <Route path="/" element={<Dashboard />} />
+          <Route path="/vehicles" element={<ManageVehicles />} />
           <Route path="/employees" element={<ManageEmployees />} />
           <Route path="/schedules" element={<ManageSchedules />} />
         </Routes>

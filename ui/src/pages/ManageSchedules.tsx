@@ -114,19 +114,23 @@ const ManageSchedules: React.FC = () => {
     });
   };
 
-  const handleSaveClick = (id: number) => {
-    const updatedSchedule = {
-      ...editFields,
-      hours: parseInt(editFields.hours, 10),
-    };
-    handleUpdateSchedule(id, updatedSchedule);
-    setEditRowId(null);
-    setEditFields({ label: "", day: "", hours: "" });
+  const handleSaveClick = (args: { id?: number; licensePlate?: string }) => {
+    if (args.id) {
+      const updatedSchedule = {
+        ...editFields,
+        hours: parseInt(editFields.hours, 10),
+      };
+      handleUpdateSchedule(args.id, updatedSchedule);
+      setEditRowId(null);
+      setEditFields({ label: "", day: "", hours: "" });
+    }
   };
 
-  const handleOpenDialog = (id: number) => {
-    setDialogOpen(true);
-    setScheduleToDelete(id);
+  const handleOpenDialog = (args: { id?: number; licensePlate?: string }) => {
+    if (args.id) {
+      setDialogOpen(true);
+      setScheduleToDelete(args.id);
+    }
   };
 
   const handleCloseDialog = () => {
@@ -152,22 +156,22 @@ const ManageSchedules: React.FC = () => {
         alignItems="center"
         sx={{ mb: 2 }}
       >
-        <Typography variant={isSmallScreen ? 'h4' : 'h2'} sx={{ flexGrow: 1 }}>
+        <Typography variant={isSmallScreen ? "h4" : "h2"} sx={{ flexGrow: 1 }}>
           Gestionar Horarios
         </Typography>
         {filteredSchedules.length > 0 && (
           <SplitButton
-          options={createExportOptions(
-            <FontAwesomeIcon icon={faFileExcel} size="lg" />,
-            <FontAwesomeIcon icon={faFilePdf} size="lg" />,
-            exportToExcel,
-            exportToPDF,
-            filteredSchedules,
-            `empleados-${exportFileFormattedDate(new Date())}`
-          )}
-          defaultIndex={0}
-          buttonIcon={<DownloadRoundedIcon />}
-        />
+            options={createExportOptions(
+              <FontAwesomeIcon icon={faFileExcel} size="lg" />,
+              <FontAwesomeIcon icon={faFilePdf} size="lg" />,
+              exportToExcel,
+              exportToPDF,
+              filteredSchedules,
+              `empleados-${exportFileFormattedDate(new Date())}`
+            )}
+            defaultIndex={0}
+            buttonIcon={<DownloadRoundedIcon />}
+          />
         )}
       </Box>
       <Grid
@@ -258,7 +262,7 @@ const ManageSchedules: React.FC = () => {
         />
       ) : (
         <Typography variant="h6" color="textSecondary">
-          No se encontraron horarios que coincidan con la búsqueda.
+          No se encontraron horarios para mostrar.
         </Typography>
       )}
       <Dialog open={dialogOpen} onClose={handleCloseDialog}>
