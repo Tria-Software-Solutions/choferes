@@ -39,6 +39,7 @@ import {
   getInvolvedPeriods,
   hasMultipleBiweeks,
   hasMultipleMonths,
+  hasMultipleYears,
   isValidDateForSelect,
 } from "../../../utils/dateUtils";
 import { getBackgroundColor } from "../../../utils/tableUtils";
@@ -131,6 +132,7 @@ const DropdownTable: React.FC<DropdownTableProps> = ({
 
       return {
         employeeId: employee.id,
+        weekNumber,
         totalHours,
       };
     });
@@ -138,21 +140,15 @@ const DropdownTable: React.FC<DropdownTableProps> = ({
 
   const getTotalBiweekly = useMemo(() => {
     return filteredEmployees.map((employee) => {
-      const summary = biweeklySummaries.find(
-        (s) =>
-          s.employeeId === employee.id &&
-          s.biweekNumber === biweekNumber &&
-          s.year === year
+      const summaries = biweeklySummaries.filter(
+        (s) => s.employeeId === employee.id && s.year === year
       );
-
-      const totalHours = summary ? summary.totalHours : 0;
-
       return {
         employeeId: employee.id,
-        totalHours,
+        totalHours: summaries,
       };
     });
-  }, [filteredEmployees, biweekNumber, year, biweeklySummaries]);
+  }, [filteredEmployees, year, biweeklySummaries]);
 
   const getTotalMonthly = useMemo(() => {
     return filteredEmployees.map((employee) => {
@@ -165,10 +161,56 @@ const DropdownTable: React.FC<DropdownTableProps> = ({
 
       return {
         employeeId: employee.id,
+        month,
         totalHours,
       };
     });
   }, [filteredEmployees, month, year, monthlySummaries]);
+
+  const multipleWeeksOutput = (employee: Employee): string => {
+    const weeks = getInvolvedPeriods(currentWeek).weekNumbers;
+    return weeks
+      .map(
+        (week) =>
+          `${
+            getTotalWeekly.find(
+              (emp) =>
+                emp.employeeId === employee.id &&
+                emp.weekNumber === week.weekNumber
+            )?.totalHours || 0
+          }`
+      )
+      .join(" / ");
+  };
+
+  const multipleBiweeksOutput = (employee: Employee): string => {
+    const biweeks = getInvolvedPeriods(currentWeek).biweekNumbers;
+    const employeeData = getTotalBiweekly.find(
+      (emp) => emp.employeeId === employee.id
+    );
+    return biweeks
+      .map((biweek) => {
+        const summary = employeeData?.totalHours.find(
+          (s) => s.biweekNumber === biweek
+        );
+        return `${summary ? summary.totalHours : 0}`;
+      })
+      .join(" / ");
+  };
+
+  const multipleMonthsOutput = (employee: Employee): string => {
+    const months = getInvolvedPeriods(currentWeek).months;
+    return months
+      .map(
+        (month) =>
+          `${
+            getTotalMonthly.find(
+              (emp) => emp.employeeId === employee.id && emp.month === month
+            )?.totalHours || 0
+          }`
+      )
+      .join(" / ");
+  };
 
   const getTotalOvertime = useMemo(() => {
     return filteredEmployees.map((employee) => {
@@ -219,7 +261,13 @@ const DropdownTable: React.FC<DropdownTableProps> = ({
             <TableRow>
               <TableCell align="center" colSpan={9}>
                 {selectedPeriod === "weekly" ? (
-                  <Typography variant="body2">{`Semana ${weekNumber}`}</Typography>
+                  <div>
+                    {hasMultipleYears(currentWeek) ? (
+                      <Typography variant="body2">{`Semanas ${multiplePeriods.weekNumbers[1].weekNumber} / ${multiplePeriods.weekNumbers[0].weekNumber}`}</Typography>
+                    ) : (
+                      <Typography variant="body2">{`Semana ${weekNumber}`}</Typography>
+                    )}
+                  </div>
                 ) : selectedPeriod === "biweekly" ? (
                   <div>
                     {hasMultipleBiweeks(currentWeek) ? (
@@ -362,9 +410,11 @@ const DropdownTable: React.FC<DropdownTableProps> = ({
                             <Typography variant="body2">
                               {`${employee.firstName} ha trabajado un total de `}
                               <strong>
-                                {getTotalBiweekly.find(
-                                  (emp) => emp.employeeId === employee.id
-                                )?.totalHours || 0}
+                                {getTotalBiweekly
+                                  .find((emp) => emp.employeeId === employee.id)
+                                  ?.totalHours.find(
+                                    (s) => s.biweekNumber === biweekNumber
+                                  )?.totalHours || 0}
                               </strong>
                               {` horas en la quincena número `}{" "}
                               <strong>{biweekNumber}</strong>
@@ -525,13 +575,21 @@ const DropdownTable: React.FC<DropdownTableProps> = ({
                   >
                     <strong>
                       {selectedPeriod === "weekly"
-                        ? getTotalWeekly.find(
-                            (emp) => emp.employeeId === employee.id
-                          )?.totalHours || 0
+                        ? hasMultipleYears(currentWeek)
+                          ? multipleWeeksOutput(employee)
+                          : getTotalWeekly.find(
+                              (emp) => emp.employeeId === employee.id
+                            )?.totalHours || 0
                         : selectedPeriod === "biweekly"
-                        ? getTotalBiweekly.find(
-                            (emp) => emp.employeeId === employee.id
-                          )?.totalHours || 0
+                        ? hasMultipleBiweeks(currentWeek)
+                          ? multipleBiweeksOutput(employee)
+                          : getTotalBiweekly
+                              .find((emp) => emp.employeeId === employee.id)
+                              ?.totalHours.find(
+                                (s) => s.biweekNumber === biweekNumber
+                              )?.totalHours || 0
+                        : hasMultipleMonths(currentWeek)
+                        ? multipleMonthsOutput(employee)
                         : getTotalMonthly.find(
                             (emp) => emp.employeeId === employee.id
                           )?.totalHours || 0}
@@ -540,23 +598,25 @@ const DropdownTable: React.FC<DropdownTableProps> = ({
                   </Box>
                   <Box sx={{ display: "flex", alignItems: "center", ml: 1 }}>
                     <Tooltip title="Horas Extra" arrow>
-                      <Badge
-                        badgeContent={
-                          getTotalOvertime.find(
-                            (emp) => emp.employeeId === employee.id
-                          )?.overtime || 0
-                        }
-                        color={
-                          (getTotalOvertime.find(
-                            (emp) => emp.employeeId === employee.id
-                          )?.overtime || 0) > 0
-                            ? "warning"
-                            : "success"
-                        }
-                        showZero
-                      >
-                        <AccessTimeRoundedIcon />
-                      </Badge>
+                      <Box>
+                        <Badge
+                          badgeContent={
+                            getTotalOvertime.find(
+                              (emp) => emp.employeeId === employee.id
+                            )?.overtime || 0
+                          }
+                          color={
+                            (getTotalOvertime.find(
+                              (emp) => emp.employeeId === employee.id
+                            )?.overtime || 0) > 0
+                              ? "warning"
+                              : "success"
+                          }
+                          showZero
+                        >
+                          <AccessTimeRoundedIcon />
+                        </Badge>
+                      </Box>
                     </Tooltip>
                   </Box>
                 </TableCell>
@@ -571,8 +631,9 @@ const DropdownTable: React.FC<DropdownTableProps> = ({
           <div>
             {selectedPeriod === "weekly" ? (
               <Typography variant="body2" sx={{ ml: 2 }}>
-                Semana del {formatDateWithoutYear(new Date(currentWeek[0]?.date))}{" "}
-                al {formatDate(new Date(currentWeek[6]?.date), false)}
+                Semana del{" "}
+                {formatDateWithoutYear(new Date(currentWeek[0]?.date))} al{" "}
+                {formatDate(new Date(currentWeek[6]?.date), false)}
               </Typography>
             ) : selectedPeriod === "biweekly" ? (
               <div>

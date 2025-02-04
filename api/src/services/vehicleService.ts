@@ -1,4 +1,4 @@
-import { Sequelize } from "sequelize";
+import { Op, Sequelize } from "sequelize";
 import { Vehicle } from "../models/Vehicle";
 
 export const createVehicle = async (data: {
@@ -19,20 +19,20 @@ export const getVehicleById = async (id: number) => {
   return Vehicle.findByPk(id);
 };
 
-export const getVehiclesGroupedByDate = async () => {
-  const vehicles = await Vehicle.findAll({
-    attributes: [
-      [Sequelize.fn("DATE", Sequelize.col("createdAt")), "createdDate"], 
-      [Sequelize.fn("COUNT", Sequelize.col("id")), "vehicleCount"], 
-    ],
-    group: ["createdDate"], 
-    order: [[Sequelize.fn("DATE", Sequelize.col("createdAt")), "ASC"]],
-  });
+export const getVehiclesByDate = async (createdAt: Date) => {
+  const startOfDay = new Date(createdAt);
+  startOfDay.setHours(0, 0, 0, 0);
 
-  return vehicles.map((row: any) => ({
-    createdDate: row.get("createdDate"),
-    vehicleCount: row.get("vehicleCount"),
-  }));
+  const endOfDay = new Date(createdAt);
+  endOfDay.setHours(23, 59, 59, 999);
+
+  return Vehicle.findAll({
+    where: {
+      createdAt: {
+        [Op.between]: [startOfDay, endOfDay],
+      },
+    },
+  });
 };
 
 export const updateVehicle = async (

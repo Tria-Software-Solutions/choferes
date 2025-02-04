@@ -20,21 +20,16 @@ export const getVehicleById = async (id: number): Promise<Vehicle> => {
   return response.data;
 };
 
-export const getVehiclesGroupedByDate = async (
-  date: string,       
-  page: number = 1,
-  perPage: number = 10
+export const getVehiclesByDate = async (
+  date: string,
 ): Promise<Vehicle[]> => {
-  const response = await api.get("/vehicles/grouped/by-date", {
-    params: { date, page, perPage },
+  const response = await api.get("/vehicles/by-date", {
+    params: { date },
   });
   return response.data;
 };
 
-export const updateVehicle = async (
-  id: number,        
-  vehicle: Partial<Vehicle>
-) => {
+export const updateVehicle = async (id: number, vehicle: Partial<Vehicle>) => {
   await api.put(`/vehicles/${id}`, vehicle);
 };
 

@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useRef, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import {
   Box,
   Typography,
@@ -33,16 +33,26 @@ import { faFileExcel, faFilePdf } from "@fortawesome/free-solid-svg-icons";
 import SearchBar from "../components/SearchBar/SearchBar";
 import DirectionsCarIcon from "@mui/icons-material/DirectionsCar";
 import EditableTable from "../components/Table/EditableTable/EditableTable";
-import InputMask from "react-input-mask";
-import { BRANDS, COLORS } from "../constants/constants";
+import { BRANDS, COLORS, PAGE_TITLE } from "../constants/constants";
+import ArrowBackIosNewRoundedIcon from "@mui/icons-material/ArrowBackIosNewRounded";
+import ArrowForwardIosRoundedIcon from "@mui/icons-material/ArrowForwardIosRounded";
+import CalendarTodayRoundedIcon from "@mui/icons-material/CalendarTodayRounded";
+import { LocalizationProvider } from "@mui/x-date-pickers";
+import { DatePicker } from "@mui/x-date-pickers/DatePicker";
+import { AdapterDateFns } from "@mui/x-date-pickers/AdapterDateFns";
+import { es } from "date-fns/locale";
+import { isTodayOrFuture } from "../utils/dateUtils";
+import { maskLicensePlate, maskParkingLot } from "../utils/maskUtils";
 
 const ManageVehicles: React.FC = () => {
+  const [selectedDate, setSelectedDate] = useState<Date | null>(new Date());
   const {
     vehicles,
+    allVehicles,
     handleAddVehicle,
     handleUpdateVehicle,
     handleDeleteVehicle,
-  } = useVehicles();
+  } = useVehicles(selectedDate?.toISOString());
   const [filteredVehicles, setFilteredVehicles] = useState<Vehicle[]>([]);
   const [totalCount, setTotalCount] = useState(0);
   const [editRowId, setEditRowId] = useState<number | null>(null);
@@ -60,32 +70,43 @@ const ManageVehicles: React.FC = () => {
     parkingLot: "",
     notes: "",
   });
-  const [dialogOpen, setDialogOpen] = useState(false);
+  const [openDialog, setOpenDialog] = useState(false);
+  const [openTooltip, setOpenTooltip] = useState(false);
   const [vehicleToDelete, setVehicleToDelete] = useState<number | null>(null);
   const [filter, setFilter] = useState("");
-  const [page, setPage] = useState(0);
-  const [rowsPerPage, setRowsPerPage] = useState(5);
-  const [isValid, setIsValid] = useState(false);
   const [selectedBrand, setSelectedBrand] = useState("");
   const [customBrand, setCustomBrand] = useState("");
   const [selectedColor, setSelectedColor] = useState("");
   const [customColor, setCustomColor] = useState("");
-  const inputRef = useRef<HTMLInputElement | null>(null);
+  const [page, setPage] = useState(0);
+  const [rowsPerPage, setRowsPerPage] = useState(5);
+  const [isAddFormValid, setIsAddFormValid] = useState(false);
+  const [isEditFormValid, setIsEditFormValid] = useState(false);
 
   useEffect(() => {
     const allVehicles = Object.values(vehicles).flat();
-    const filtered = allVehicles.filter((vehicle) =>
-      `${vehicle.licensePlate} ${vehicle.brand} ${vehicle.color} ${vehicle.parkingLot} ${vehicle.notes}`
-        .toLowerCase()
-        .includes(filter.toLowerCase())
-    );
+    const cleanedFilter = filter.replace(/[\s-]/g, "").toLowerCase();
+    const filtered = allVehicles.filter((vehicle) => {
+      const cleanedLicensePlate = vehicle.licensePlate
+        .replace(/[\s-]/g, "")
+        .toLowerCase();
+      const cleanedParkingLot = vehicle.parkingLot
+        .replace(/[\s-]/g, "")
+        .toLowerCase();
+      const isLicensePlateMatch = cleanedLicensePlate.includes(cleanedFilter);
+      const isOtherFieldsMatch =
+        `${vehicle.brand} ${vehicle.color} ${cleanedParkingLot} ${vehicle.notes}`
+          .toLowerCase()
+          .includes(cleanedFilter);
 
+      return isLicensePlateMatch || isOtherFieldsMatch;
+    });
     setFilteredVehicles(filtered);
     setTotalCount(filtered.length);
   }, [vehicles, filter]);
 
-  const validateFields = useCallback(() => {
-    const plateRegex = /^[A-ZÑ0-9]{3}-[A-ZÑ0-9]{3,4}$/;
+  const validateAddFields = useCallback(() => {
+    const plateRegex = /^(?:[A-ZÑ]{3}-\d{3}|\d{6})$/;
     const textRegex = /^[a-zA-ZáéíóúÁÉÍÓÚñÑ\s]+$/;
     const parkingLotRegex = /^ATP[1-9]-\d{3,4}$/;
     const isLicensePlateValid =
@@ -98,14 +119,39 @@ const ManageVehicles: React.FC = () => {
     const isParkingLotValid =
       parkingLotRegex.test(addFields.parkingLot.trim()) &&
       addFields.parkingLot !== "";
-    setIsValid(
+    setIsAddFormValid(
       isLicensePlateValid && isModelValid && isColorValid && isParkingLotValid
     );
   }, [addFields]);
 
+  const validateEditFields = useCallback(() => {
+    const plateRegex = /^(?:[A-ZÑ]{3}-\d{3}|\d{6})$/;
+    const textRegex = /^[a-zA-ZáéíóúÁÉÍÓÚñÑ\s]+$/;
+    const parkingLotRegex = /^ATP[1-9]-\d{3,4}$/;
+    const isLicensePlateValid =
+      plateRegex.test(editFields.licensePlate.trim()) &&
+      editFields.licensePlate !== "";
+    const isModelValid =
+      textRegex.test(editFields.brand) && editFields.brand !== "";
+    const isColorValid =
+      textRegex.test(editFields.color) && editFields.color !== "";
+    const isParkingLotValid =
+      parkingLotRegex.test(editFields.parkingLot.trim()) &&
+      editFields.parkingLot !== "";
+    setIsEditFormValid(
+      isLicensePlateValid && isModelValid && isColorValid && isParkingLotValid
+    );
+  }, [editFields]);
+
   useEffect(() => {
-    validateFields();
-  }, [validateFields]);
+    validateAddFields();
+  }, [validateAddFields]);
+
+  useEffect(() => {
+    if (editRowId !== null) {
+      validateEditFields();
+    }
+  }, [editFields, editRowId, validateEditFields]);
 
   const handleAdd = () => {
     const newVehicle: Vehicle = {
@@ -115,6 +161,7 @@ const ManageVehicles: React.FC = () => {
       color: addFields.color,
       parkingLot: addFields.parkingLot,
       notes: addFields.notes,
+      createdAt: selectedDate,
     };
     handleAddVehicle(newVehicle);
     setAddFields({
@@ -124,6 +171,8 @@ const ManageVehicles: React.FC = () => {
       parkingLot: "",
       notes: "",
     });
+    setSelectedBrand("");
+    setSelectedColor("");
   };
 
   const handleEditClick = (vehicle: Vehicle) => {
@@ -137,32 +186,32 @@ const ManageVehicles: React.FC = () => {
     });
   };
 
-  const handleSaveClick = (args: { id?: number; licensePlate?: string }) => {
-    if (args.id) {
-      const updatedVehicle = {
-        ...editFields,
-      };
-      handleUpdateVehicle(args.id, updatedVehicle);
-      setEditRowId(null);
-      setEditFields({
-        licensePlate: "",
-        brand: "",
-        color: "",
-        parkingLot: "",
-        notes: "",
-      });
-    }
+  const handleCancelClick = () => {
+    setEditRowId(null);
   };
 
-  const handleOpenDialog = (args: { id?: number; licensePlate?: string }) => {
-    if (args.id) {
-      setDialogOpen(true);
-      setVehicleToDelete(args.id);
-    }
+  const handleSaveClick = (id: number) => {
+    const updatedVehicle = {
+      ...editFields,
+    };
+    handleUpdateVehicle(id, updatedVehicle);
+    setEditRowId(null);
+    setEditFields({
+      licensePlate: "",
+      brand: "",
+      color: "",
+      parkingLot: "",
+      notes: "",
+    });
+  };
+
+  const handleOpenDialog = (id: number) => {
+    setOpenDialog(true);
+    setVehicleToDelete(id);
   };
 
   const handleCloseDialog = () => {
-    setDialogOpen(false);
+    setOpenDialog(false);
     setVehicleToDelete(null);
   };
 
@@ -171,6 +220,10 @@ const ManageVehicles: React.FC = () => {
       handleDeleteVehicle(vehicleToDelete);
       handleCloseDialog();
     }
+  };
+
+  const handleDateChange = (newDate: Date | null) => {
+    setSelectedDate(newDate);
   };
 
   const handleBrandChange = (event: SelectChangeEvent<string>) => {
@@ -205,6 +258,73 @@ const ManageVehicles: React.FC = () => {
     setAddFields({ ...addFields, color: event.target.value });
   };
 
+  const checkLicensePlateExistence = (licensePlate: string): boolean => {
+    return vehicles.some((vehicle) => vehicle.licensePlate === licensePlate);
+  };
+
+  const checkLicensePlateExistenceInAllVehicles = (
+    licensePlate: string
+  ): Vehicle | undefined => {
+    return allVehicles.find((vehicle) => vehicle.licensePlate === licensePlate);
+  };
+
+  const handleLicensePlateChange = (
+    event: React.ChangeEvent<HTMLInputElement>
+  ) => {
+    const rawValue = event.target.value;
+    const maskedValue = maskLicensePlate(rawValue);
+
+    if (checkLicensePlateExistence(maskedValue)) {
+      setOpenTooltip(true);
+      setTimeout(() => setOpenTooltip(false), 2000);
+      return;
+    }
+
+    const existingVehicle =
+      checkLicensePlateExistenceInAllVehicles(maskedValue);
+
+    setAddFields((prevState) => {
+      const updatedFields = {
+        ...prevState,
+        licensePlate: maskedValue,
+        brand: existingVehicle?.brand || "",
+        color: existingVehicle?.color || "",
+      };
+      return updatedFields;
+    });
+
+    if (existingVehicle) {
+      setSelectedBrand(existingVehicle.brand || ""); 
+      setSelectedColor(existingVehicle.color || "");
+    }
+  };
+
+  const handleParkingLotChange = (
+    event: React.ChangeEvent<HTMLInputElement>
+  ) => {
+    const rawValue = event.target.value;
+    const maskedValue = maskParkingLot(rawValue);
+    setAddFields((prevState) => ({ ...prevState, parkingLot: maskedValue }));
+  };
+
+  const handleNextDate = () => {
+    const nextDay = selectedDate
+      ? new Date(selectedDate.getTime() + 24 * 60 * 60 * 1000)
+      : null;
+    setSelectedDate(nextDay);
+  };
+
+  const handlePreviousDate = () => {
+    const previousDay = selectedDate
+      ? new Date(selectedDate.getTime() - 24 * 60 * 60 * 1000)
+      : null;
+    setSelectedDate(previousDay);
+  };
+
+  const handleCurrentDate = () => {
+    setSelectedDate(new Date());
+  };
+
   const theme = useTheme();
   const isSmallScreen = useMediaQuery(theme.breakpoints.down("sm"));
 
@@ -217,7 +337,7 @@ const ManageVehicles: React.FC = () => {
         sx={{ mb: 2 }}
       >
         <Typography variant={isSmallScreen ? "h4" : "h2"} sx={{ flexGrow: 1 }}>
-          Gestionar Vehículos
+          {PAGE_TITLE.MANAGE_VEHICLES}
         </Typography>
         {filteredVehicles.length > 0 && (
           <SplitButton
@@ -227,7 +347,7 @@ const ManageVehicles: React.FC = () => {
               exportToExcel,
               exportToPDF,
               filteredVehicles,
-              `reporte-de-vehiculos-${exportFileFormattedDate(new Date())}`
+              `reporte-de-vehiculos-${exportFileFormattedDate(selectedDate || new Date())}`
             )}
             defaultIndex={0}
             buttonIcon={<DownloadRoundedIcon />}
@@ -240,136 +360,226 @@ const ManageVehicles: React.FC = () => {
         justifyContent="space-between"
         alignItems="center"
       >
-        <Grid item>
+        <Grid item xs={12} md={6}>
           <SearchBar
             placeholder="Buscar Vehículo"
             value={filter}
             onChange={(e) => setFilter(e.target.value)}
+            sx={{
+              maxWidth: "100%",
+            }}
+            fullWidth
           />
         </Grid>
-        <Grid item>
-          <Box display="flex" alignItems="center">
-            <InputMask
-              mask="***-****"
-              value={addFields.licensePlate}
-              onChange={(e) => {
-                const formattedValue = e.target.value.toUpperCase();
-                setAddFields({ ...addFields, licensePlate: formattedValue });
-              }}
-              maskChar=" "
-              alwaysShowMask={false}
+        <Grid item xs={12} md={6}>
+          <Box
+            display="flex"
+            flexDirection={{ xs: "column", sm: "column", md: "row" }}
+            alignItems="flex-start"
+            justifyContent="flex-end"
+            gap={2}
+          >
+            <Box
+              display="flex"
+              flexDirection={{ xs: "row", sm: "row", md: "row" }}
+              alignItems="center"
+              justifyContent="flex-end"
+              gap={2}
+              width="100%"
             >
-              {(inputProps) => (
-                <TextField
-                  {...inputProps}
-                  label="Placa"
-                  variant="outlined"
-                  sx={{ mr: 2 }}
-                  InputProps={{
-                    style: { textTransform: "uppercase" },
-                    inputRef: inputRef,
-                  }}
-                />
-              )}
-            </InputMask>
-            {selectedColor === "Otro" ? (
-              <TextField
-                label="Modelo"
-                variant="outlined"
-                sx={{ mr: 2 }}
-                value={customBrand}
-                onChange={handleCustomBrandChange}
-              />
-            ) : (
-              <FormControl variant="outlined" sx={{ mr: 2, width: 200 }}>
-                <InputLabel>Modelo</InputLabel>
-                <Select
-                  label="Modelo"
-                  sx={{ height: 56 }}
-                  value={selectedBrand}
-                  onChange={handleBrandChange}
-                >
-                  {BRANDS.map((option) => (
-                    <MenuItem key={option.value} value={option.value}>
-                      {option.label}
-                    </MenuItem>
-                  ))}
-                </Select>
-              </FormControl>
-            )}
-            {selectedColor === "Otro" ? (
-              <TextField
-                label="Color"
-                variant="outlined"
-                sx={{ mr: 2 }}
-                value={customColor}
-                onChange={handleCustomColorChange}
-              />
-            ) : (
-              <FormControl variant="outlined" sx={{ mr: 2, width: 200 }}>
-                <InputLabel>Color</InputLabel>
-                <Select
-                  label="Color"
-                  sx={{ height: 56 }}
-                  value={selectedColor}
-                  onChange={handleColorChange}
-                >
-                  {COLORS.map((option) => (
-                    <MenuItem key={option.value} value={option.value}>
-                      {option.label}
-                    </MenuItem>
-                  ))}
-                </Select>
-              </FormControl>
-            )}
-            <InputMask
-              mask="9-99999"
-              value={addFields.parkingLot.replace(/^ATP/, "")}
-              onChange={(e) => {
-                const formattedValue = `ATP${e.target.value}`;
-                setAddFields({ ...addFields, parkingLot: formattedValue });
+              <Tooltip title="Día Anterior" arrow>
+                <Box>
+                  <Button
+                    variant="contained"
+                    sx={{
+                      height: "56px",
+                      width: { xs: "auto", sm: "auto", md: "auto" },
+                    }}
+                    onClick={handlePreviousDate}
+                  >
+                    <ArrowBackIosNewRoundedIcon />
+                  </Button>
+                </Box>
+              </Tooltip>
+              <Tooltip title="Día Siguiente" arrow>
+                <Box>
+                  <Button
+                    variant="contained"
+                    sx={{
+                      height: "56px",
+                      width: { xs: "auto", sm: "auto", md: "auto" },
+                    }}
+                    disabled={isTodayOrFuture(selectedDate)}
+                    onClick={handleNextDate}
+                  >
+                    <ArrowForwardIosRoundedIcon />
+                  </Button>
+                </Box>
+              </Tooltip>
+              <Tooltip title="Día Actual" arrow>
+                <Box>
+                  <Button
+                    variant="contained"
+                    sx={{
+                      height: "56px",
+                      width: { xs: "auto", sm: "auto", md: "auto" },
+                    }}
+                    disabled={isTodayOrFuture(selectedDate)}
+                    onClick={handleCurrentDate}
+                  >
+                    <CalendarTodayRoundedIcon />
+                  </Button>
+                </Box>
+              </Tooltip>
+            </Box>
+            <LocalizationProvider
+              dateAdapter={AdapterDateFns}
+              adapterLocale={es}
+              localeText={{
+                okButtonLabel: "Aceptar",
+                cancelButtonLabel: "Cancelar",
+                todayButtonLabel: "Hoy",
+                year: "Año #{year}",
+                previousMonth: "Mes anterior",
+                nextMonth: "Mes siguiente",
               }}
-              maskChar={null}
-              alwaysShowMask={false}
             >
-              {(inputProps) => (
+              <DatePicker
+                label="Seleccionar fecha"
+                value={selectedDate}
+                sx={{
+                  width: { xs: "100%", sm: "100%", md: "auto" },
+                  mt: { xs: 2, sm: 2, md: 0 },
+                }}
+                maxDate={new Date()}
+                onChange={handleDateChange}
+              />
+            </LocalizationProvider>
+          </Box>
+        </Grid>
+        <Grid item xs={12} md={12}>
+          <Box
+            display="flex"
+            flexDirection={{ xs: "column", sm: "column", md: "row" }}
+            alignItems="center"
+            justifyContent="flex-end"
+            gap={2}
+          >
+            <Grid container spacing={2} alignItems="center">
+              <Grid item xs={12} sm={6} md={2}>
+                <Tooltip
+                  title="Esta placa ya está registrada"
+                  open={openTooltip}
+                  disableHoverListener
+                  placement="bottom"
+                  arrow
+                >
+                  <TextField
+                    label="Placa"
+                    variant="outlined"
+                    fullWidth
+                    value={addFields.licensePlate}
+                    onChange={handleLicensePlateChange}
+                  />
+                </Tooltip>
+              </Grid>
+              <Grid item xs={12} sm={6} md={2}>
+                {selectedBrand === "Otro" ? (
+                  <TextField
+                    label="Marca"
+                    variant="outlined"
+                    fullWidth
+                    value={customBrand}
+                    onChange={handleCustomBrandChange}
+                  />
+                ) : (
+                  <FormControl variant="outlined" fullWidth>
+                    <InputLabel>Marca</InputLabel>
+                    <Select
+                      label="Marca"
+                      value={selectedBrand}
+                      onChange={handleBrandChange}
+                    >
+                      {BRANDS.map((option) => (
+                        <MenuItem key={option.value} value={option.value}>
+                          {option.label}
+                        </MenuItem>
+                      ))}
+                    </Select>
+                  </FormControl>
+                )}
+              </Grid>
+              <Grid item xs={12} sm={6} md={2}>
+                {selectedColor === "Otro" ? (
+                  <TextField
+                    label="Color"
+                    variant="outlined"
+                    fullWidth
+                    value={customColor}
+                    onChange={handleCustomColorChange}
+                  />
+                ) : (
+                  <FormControl variant="outlined" fullWidth>
+                    <InputLabel>Color</InputLabel>
+                    <Select
+                      label="Color"
+                      value={selectedColor}
+                      onChange={handleColorChange}
+                    >
+                      {COLORS.map((option) => (
+                        <MenuItem key={option.value} value={option.value}>
+                          {option.label}
+                        </MenuItem>
+                      ))}
+                    </Select>
+                  </FormControl>
+                )}
+              </Grid>
+              <Grid item xs={12} sm={6} md={1}>
                 <TextField
-                  {...inputProps}
                   label="Espacio"
                   variant="outlined"
-                  sx={{ mr: 2 }}
-                  InputProps={{
-                    startAdornment: addFields.parkingLot ? (
-                      <span style={{ marginRight: "8px" }}>ATP</span>
-                    ) : null,
-                    style: { textTransform: "uppercase" },
-                    inputRef: inputRef,
-                  }}
+                  fullWidth
+                  value={addFields.parkingLot}
+                  onChange={handleParkingLotChange}
                 />
-              )}
-            </InputMask>
-            <TextField
-              label="Observaciones"
-              variant="outlined"
-              sx={{ mr: 2 }}
-              fullWidth
-              value={addFields.notes}
-              onChange={(e) =>
-                setAddFields({ ...addFields, notes: e.target.value })
-              }
-            />
+              </Grid>
+              <Grid item xs={12} sm={12} md={5}>
+                <TextField
+                  label="Observaciones"
+                  variant="outlined"
+                  fullWidth
+                  value={addFields.notes}
+                  onChange={(e) =>
+                    setAddFields({ ...addFields, notes: e.target.value })
+                  }
+                />
+              </Grid>
+            </Grid>
             <Tooltip title="Agregar Vehículo" arrow>
-              <span>
+              <Box
+                sx={{
+                  width: { xs: "100%", md: "auto" },
+                  display: "flex",
+                  justifyContent: { xs: "stretch", md: "flex-end" },
+                }}
+              >
                 <Button
                   variant="contained"
                   color="primary"
-                  sx={{ height: "56px" }}
+                  sx={{
+                    minHeight: 56,
+                    display: "flex",
+                    justifyContent: "center",
+                    lineHeight: "normal",
+                    width: { xs: "100%", md: "auto" },
+                  }}
                   onClick={handleAdd}
-                  disabled={!isValid}
+                  disabled={!isAddFormValid}
                 >
                   <DirectionsCarIcon />
                 </Button>
-              </span>
+              </Box>
             </Tooltip>
           </Box>
         </Grid>
@@ -379,28 +589,40 @@ const ManageVehicles: React.FC = () => {
         <EditableTable<Vehicle>
           data={filteredVehicles}
           columns={["licensePlate", "brand", "color", "parkingLot", "notes"]}
-          //groupByField="createdAt"
+          groupByDate={selectedDate}
           editRowId={editRowId}
           editFields={editFields}
           setEditField={(field, value) =>
             setEditFields({ ...editFields, [field]: value })
           }
           handleEditClick={handleEditClick}
+          handleCancelClick={handleCancelClick}
           handleSaveClick={handleSaveClick}
           handleOpenDialog={handleOpenDialog}
-          getRowId={(row) => row.licensePlate}
+          getRowId={(row) => row.id}
           totalCount={totalCount}
           page={page}
           rowsPerPage={rowsPerPage}
           setPage={setPage}
           setRowsPerPage={setRowsPerPage}
+          isSaveDisabled={!isEditFormValid}
         />
       ) : (
-        <Typography variant="h6" color="textSecondary">
-          No se encontraron vehículos para mostrar.
-        </Typography>
+        <Box
+          sx={{
+            display: "flex",
+            justifyContent: "center",
+            alignItems: "center",
+            textAlign: "center",
+            paddingTop: "10%",
+          }}
+        >
+          <Typography variant="h6" color="textSecondary">
+            No se encontraron vehículos para mostrar.
+          </Typography>
+        </Box>
       )}
-      <Dialog open={dialogOpen} onClose={handleCloseDialog}>
+      <Dialog open={openDialog} onClose={handleCloseDialog}>
         <DialogTitle>Confirmar Eliminación</DialogTitle>
         <DialogContent>
           <Typography>

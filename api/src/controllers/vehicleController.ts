@@ -1,21 +1,22 @@
 import { Request, Response } from "express";
 import * as vehicleService from "../services/vehicleService";
+import { parseISO, isValid } from "date-fns";
 
 export const createVehicle = async (req: Request, res: Response) => {
   try {
     const newVehicle = await vehicleService.createVehicle(req.body);
-    res.status(201).json(newVehicle);
+    return res.status(201).json(newVehicle);
   } catch (error) {
-    res.status(500).json({ message: "Error creating Vehicle", error });
+    return res.status(500).json({ message: "Error creating Vehicle", error });
   }
 };
 
 export const getAllVehicles = async (req: Request, res: Response) => {
   try {
     const vehicles = await vehicleService.getAllVehicles();
-    res.status(200).json(vehicles);
+    return res.status(200).json(vehicles);
   } catch (error) {
-    res.status(500).json({ message: "Error fetching Vehicles", error });
+    return res.status(500).json({ message: "Error fetching Vehicles", error });
   }
 };
 
@@ -24,21 +25,29 @@ export const getVehicleById = async (req: Request, res: Response) => {
     const id = parseInt(req.params.id);
     const vehicle = await vehicleService.getVehicleById(id);
     if (vehicle) {
-      res.status(200).json(vehicle);
+      return res.status(200).json(vehicle);
     } else {
-      res.status(404).json({ message: "Vehicle not found" });
+      return res.status(404).json({ message: "Vehicle not found" });
     }
   } catch (error) {
-    res.status(500).json({ message: "Error fetching Vehicle", error });
+    return res.status(500).json({ message: "Error fetching Vehicle", error });
   }
 };
 
-export const getVehiclesGroupedByDate = async (req: Request, res: Response) => {
+export const getVehiclesByDate = async (req: Request, res: Response) => {
   try {
-    const groupedVehicles = await vehicleService.getVehiclesGroupedByDate();
-    res.status(200).json(groupedVehicles);
+    const { date } = req.query;
+    if (!date) {
+      return res.status(400).json({ message: "Date is required" });
+    }
+    const createdAt = parseISO(date as string);
+    if (!isValid(createdAt)) {
+      return res.status(400).json({ message: "Invalid date format" });
+    }
+    const vehicles = await vehicleService.getVehiclesByDate(createdAt);
+    return res.status(200).json(vehicles);
   } catch (error) {
-    res.status(500).json({ message: "Error fetching grouped Vehicles", error });
+    return res.status(500).json({ message: "Error fetching Vehicles", error });
   }
 };
 
@@ -47,12 +56,12 @@ export const updateVehicle = async (req: Request, res: Response) => {
     const id = parseInt(req.params.id);
     const updatedVehicle = await vehicleService.updateVehicle(id, req.body);
     if (updatedVehicle) {
-      res.status(200).json(updatedVehicle);
+      return res.status(200).json(updatedVehicle);
     } else {
-      res.status(404).json({ message: "Vehicle not found" });
+      return res.status(404).json({ message: "Vehicle not found" });
     }
   } catch (error) {
-    res.status(500).json({ message: "Error updating Vehicle", error });
+    return res.status(500).json({ message: "Error updating Vehicle", error });
   }
 };
 
@@ -61,11 +70,11 @@ export const deleteVehicle = async (req: Request, res: Response) => {
     const id = parseInt(req.params.id);
     const deleted = await vehicleService.deleteVehicle(id);
     if (deleted) {
-      res.status(204).end();
+      return res.status(204).end();
     } else {
-      res.status(404).json({ message: "Vehicle not found" });
+      return res.status(404).json({ message: "Vehicle not found" });
     }
   } catch (error) {
-    res.status(500).json({ message: "Error deleting Vehicle", error });
+    return res.status(500).json({ message: "Error deleting Vehicle", error });
   }
 };

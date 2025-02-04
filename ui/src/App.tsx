@@ -1,7 +1,7 @@
 import React from "react";
 import { BrowserRouter as Router, Route, Routes } from "react-router-dom";
 import { Container } from "@mui/material";
-import Dashboard from "./pages/Dashboard";
+import ManageRoles from "./pages/ManageRoles";
 import ManageEmployees from "./pages/ManageEmployees";
 import AppBarComponent from "./components/AppBar/AppBarComponent";
 import { APPBAR_MENU, ROUTES } from "./constants/constants";
@@ -68,7 +68,7 @@ const App: React.FC = () => {
         }}
       >
         <Routes>
-          <Route path="/" element={<Dashboard />} />
+          <Route path="/" element={<ManageRoles />} />
           <Route path="/vehicles" element={<ManageVehicles />} />
           <Route path="/employees" element={<ManageEmployees />} />
           <Route path="/schedules" element={<ManageSchedules />} />

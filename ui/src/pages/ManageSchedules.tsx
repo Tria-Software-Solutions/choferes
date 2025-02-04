@@ -33,6 +33,7 @@ import PostAddRoundedIcon from "@mui/icons-material/PostAddRounded";
 import DownloadRoundedIcon from "@mui/icons-material/DownloadRounded";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faFileExcel, faFilePdf } from "@fortawesome/free-solid-svg-icons";
+import { PAGE_TITLE } from "../constants/constants";
 
 const ManageSchedules: React.FC = () => {
   const {
@@ -60,7 +61,8 @@ const ManageSchedules: React.FC = () => {
   const [filter, setFilter] = useState("");
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(5);
-  const [isValid, setIsValid] = useState(false);
+  const [isAddFormValid, setIsAddFormValid] = useState(false);
+  const [isEditFormValid, setIsEditFormValid] = useState(false);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -81,18 +83,33 @@ const ManageSchedules: React.FC = () => {
     setTotalCount(filtered.length);
   }, [schedules, filter]);
 
-  const validateFields = useCallback(() => {
+  const validateAddFields = useCallback(() => {
     const nameRegex = /^[a-zA-ZáéíóúÁÉÍÓÚñÑ\s]+$/;
     const isLabelValid =
       nameRegex.test(addFields.label) && addFields.label !== "";
     const isDayValid = addFields.day !== "";
     const isHoursValid = /^[0-9]+$/.test(addFields.hours);
-    setIsValid(isLabelValid && isDayValid && isHoursValid);
+    setIsAddFormValid(isLabelValid && isDayValid && isHoursValid);
   }, [addFields]);
 
+  const validateEditFields = useCallback(() => {
+    const nameRegex = /^[a-zA-ZáéíóúÁÉÍÓÚñÑ\s]+$/;
+    const isLabelValid =
+      nameRegex.test(editFields.label) && editFields.label !== "";
+    const isDayValid = editFields.day !== "";
+    const isHoursValid = /^[0-9]+$/.test(editFields.hours);
+    setIsEditFormValid(isLabelValid && isDayValid && isHoursValid);
+  }, [editFields]);
+
   useEffect(() => {
-    validateFields();
-  }, [validateFields]);
+    validateAddFields();
+  }, [validateAddFields]);
+
+  useEffect(() => {
+    if (editRowId !== null) {
+      validateEditFields();
+    }
+  }, [editFields, editRowId, validateEditFields]);
 
   const handleAdd = () => {
     const newSchedule: Schedule = {
@@ -114,23 +131,23 @@ const ManageSchedules: React.FC = () => {
     });
   };
 
-  const handleSaveClick = (args: { id?: number; licensePlate?: string }) => {
-    if (args.id) {
-      const updatedSchedule = {
-        ...editFields,
-        hours: parseInt(editFields.hours, 10),
-      };
-      handleUpdateSchedule(args.id, updatedSchedule);
-      setEditRowId(null);
-      setEditFields({ label: "", day: "", hours: "" });
-    }
+  const handleCancelClick = () => {
+    setEditRowId(null);
   };
 
-  const handleOpenDialog = (args: { id?: number; licensePlate?: string }) => {
-    if (args.id) {
-      setDialogOpen(true);
-      setScheduleToDelete(args.id);
-    }
+  const handleSaveClick = (id: number) => {
+    const updatedSchedule = {
+      ...editFields,
+      hours: parseInt(editFields.hours, 10),
+    };
+    handleUpdateSchedule(id, updatedSchedule);
+    setEditRowId(null);
+    setEditFields({ label: "", day: "", hours: "" });
+  };
+
+  const handleOpenDialog = (id: number) => {
+    setDialogOpen(true);
+    setScheduleToDelete(id);
   };
 
   const handleCloseDialog = () => {
@@ -157,7 +174,7 @@ const ManageSchedules: React.FC = () => {
         sx={{ mb: 2 }}
       >
         <Typography variant={isSmallScreen ? "h4" : "h2"} sx={{ flexGrow: 1 }}>
-          Gestionar Horarios
+          {PAGE_TITLE.MANAGE_SCHEDULES}
         </Typography>
         {filteredSchedules.length > 0 && (
           <SplitButton
@@ -167,7 +184,7 @@ const ManageSchedules: React.FC = () => {
               exportToExcel,
               exportToPDF,
               filteredSchedules,
-              `empleados-${exportFileFormattedDate(new Date())}`
+              `horarios-${exportFileFormattedDate(new Date())}`
             )}
             defaultIndex={0}
             buttonIcon={<DownloadRoundedIcon />}
@@ -180,62 +197,103 @@ const ManageSchedules: React.FC = () => {
         justifyContent="space-between"
         alignItems="center"
       >
-        <Grid item>
+        <Grid item xs={12} md={6}>
           <SearchBar
             placeholder="Buscar Horario"
             value={filter}
             onChange={(e) => setFilter(e.target.value)}
+            sx={{ maxWidth: "100%" }}
+            fullWidth
           />
         </Grid>
-        <Grid item>
-          <Box display="flex" alignItems="center">
-            <TextField
-              label="Lugar"
-              variant="outlined"
-              sx={{ mr: 2 }}
-              value={addFields.label}
-              onChange={(e) =>
-                setAddFields({ ...addFields, label: e.target.value })
-              }
-            />
-            <FormControl variant="outlined" sx={{ mr: 2, width: 200 }}>
-              <InputLabel>Día</InputLabel>
-              <Select
-                label="Día"
-                value={addFields.day}
-                onChange={(e) =>
-                  setAddFields({ ...addFields, day: e.target.value })
-                }
-              >
-                {getDayOptionsSpanish().map((option) => (
-                  <MenuItem key={option.value} value={option.value}>
-                    {option.label}
-                  </MenuItem>
-                ))}
-              </Select>
-            </FormControl>
-            <TextField
-              label="Horas"
-              variant="outlined"
-              type="number"
-              sx={{ mr: 2 }}
-              value={addFields.hours}
-              onChange={(e) =>
-                setAddFields({ ...addFields, hours: e.target.value })
-              }
-            />
+        <Grid item xs={12} md={6}>
+          <Box
+            display="flex"
+            flexDirection={{ xs: "column", sm: "column", md: "row" }}
+            alignItems="center"
+            justifyContent="flex-end"
+            gap={2}
+          >
+            <Grid container spacing={2} alignItems="center">
+              <Grid item xs={12} md={4}>
+                <TextField
+                  label="Lugar"
+                  variant="outlined"
+                  fullWidth
+                  sx={{
+                    height: 56,
+                  }}
+                  value={addFields.label}
+                  onChange={(e) =>
+                    setAddFields({ ...addFields, label: e.target.value })
+                  }
+                />
+              </Grid>
+              <Grid item xs={6} md={4}>
+                <FormControl
+                  variant="outlined"
+                  fullWidth
+                  sx={{
+                    height: 56,
+                  }}
+                >
+                  <InputLabel>Día</InputLabel>
+                  <Select
+                    label="Día"
+                    sx={{ height: 56 }}
+                    value={addFields.day}
+                    onChange={(e) =>
+                      setAddFields({ ...addFields, day: e.target.value })
+                    }
+                  >
+                    {getDayOptionsSpanish().map((option) => (
+                      <MenuItem key={option.value} value={option.value}>
+                        {option.label}
+                      </MenuItem>
+                    ))}
+                  </Select>
+                </FormControl>
+              </Grid>
+              <Grid item xs={6} md={4}>
+                <TextField
+                  label="Horas"
+                  variant="outlined"
+                  type="number"
+                  fullWidth
+                  sx={{
+                    height: 56,
+                  }}
+                  value={addFields.hours}
+                  onChange={(e) =>
+                    setAddFields({ ...addFields, hours: e.target.value })
+                  }
+                />
+              </Grid>
+            </Grid>
             <Tooltip title="Agregar Horario" arrow>
-              <span>
+              <Box
+                sx={{
+                  width: { xs: "100%", md: "auto" },
+                  display: "flex",
+                  justifyContent: { xs: "stretch", md: "flex-end" },
+                }}
+              >
                 <Button
                   variant="contained"
                   color="primary"
-                  sx={{ height: "56px" }}
+                  sx={{
+                    minHeight: 56,
+                    display: "flex",
+                    justifyContent: "center",
+                    lineHeight: "normal",
+                    width: { xs: "100%", md: "auto" },
+                  }}
                   onClick={handleAdd}
-                  disabled={!isValid}
+                  disabled={!isAddFormValid}
                 >
                   <PostAddRoundedIcon />
                 </Button>
-              </span>
+              </Box>
             </Tooltip>
           </Box>
         </Grid>
@@ -251,6 +309,7 @@ const ManageSchedules: React.FC = () => {
             setEditFields({ ...editFields, [field]: value })
           }
           handleEditClick={handleEditClick}
+          handleCancelClick={handleCancelClick}
           handleSaveClick={handleSaveClick}
           handleOpenDialog={handleOpenDialog}
           getRowId={(row) => row.id}
@@ -259,11 +318,22 @@ const ManageSchedules: React.FC = () => {
           rowsPerPage={rowsPerPage}
           setPage={setPage}
           setRowsPerPage={setRowsPerPage}
+          isSaveDisabled={!isEditFormValid}
         />
       ) : (
-        <Typography variant="h6" color="textSecondary">
-          No se encontraron horarios para mostrar.
-        </Typography>
+        <Box
+          sx={{
+            display: "flex",
+            justifyContent: "center",
+            alignItems: "center",
+            textAlign: "center",
+            paddingTop: "10%",
+          }}
+        >
+          <Typography variant="h6" color="textSecondary">
+            No se encontraron horarios para mostrar.
+          </Typography>
+        </Box>
       )}
       <Dialog open={dialogOpen} onClose={handleCloseDialog}>
         <DialogTitle>Confirmar Eliminación</DialogTitle>

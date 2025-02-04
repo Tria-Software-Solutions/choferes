@@ -45,53 +45,59 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faFileExcel, faFilePdf } from "@fortawesome/free-solid-svg-icons";
 import { updateHoursAndSummaries } from "../utils/calculationsUtils";
 import { es } from "date-fns/locale";
-import { differenceInCalendarWeeks } from "date-fns";
+import {
+  addWeeks,
+  differenceInCalendarWeeks,
+  endOfWeek,
+  startOfWeek,
+} from "date-fns";
+import { PAGE_TITLE } from "../constants/constants";
 
-const Dashboard: React.FC = () => {
+const ManageRoles: React.FC = () => {
   const { employees } = useEmployees();
   const { schedules } = useSchedules();
   const { hoursWorked, fetchHours, handleAddHours, handleUpdateHours } =
     useHours();
   const { handleSummaryChange, handleSummaryUpdate } = useSummaries();
+  const [filteredRoles, setFilteredRoles] = useState(true);
   const { weeklySummaries, fetchWeeklySummaries } = useWeeklySummaries();
   const { biweeklySummaries, fetchBiweeklySummaries } = useBiweeklySummaries();
   const { monthlySummaries, fetchMonthlySummaries } = useMonthlySummaries();
   const [weekOffset, setWeekOffset] = useState(0);
-  const [weekNumber, setWeekNumber] = useState<number>(0);
-  const [biweekNumber, setBiweekNumber] = useState<number>(0);
-  const [month, setMonth] = useState<number>(0);
-  const [year, setYear] = useState<number>(0);
+  const [currentWeekNumber, setCurrentWeekNumber] = useState<number>(0);
+  const [currentBiweekNumber, setCurrentBiweekNumber] = useState<number>(0);
+  const [currentMonth, setCurrentMonth] = useState<number>(0);
+  const [currentYear, setCurrentYear] = useState<number>(0);
   const [period, setPeriod] = useState<"weekly" | "biweekly" | "monthly">(
     "weekly"
   );
-  const [selectedDate, setSelectedDate] = useState<Date | null>(new Date());
+  const [firstDayOfWeek, setFirstDayOfWeek] = useState<Date | null>(new Date());
   const [filter, setFilter] = useState("");
-  const [showResults, setShowResults] = useState(true);
 
   useEffect(() => {
     const currentWeek = getCurrentWeekDates(weekOffset);
     if (currentWeek.length > 0) {
       const firstDayOfWeek = new Date(currentWeek[0].date);
-      setWeekNumber(getWeekNumber(firstDayOfWeek));
-      setBiweekNumber(getBiweekNumber(firstDayOfWeek));
-      setMonth(getMonthNumber(firstDayOfWeek));
-      setYear(new Date().getFullYear());
+      setCurrentWeekNumber(getWeekNumber(firstDayOfWeek));
+      setCurrentBiweekNumber(getBiweekNumber(firstDayOfWeek));
+      setCurrentMonth(getMonthNumber(firstDayOfWeek));
+      setCurrentYear(new Date().getFullYear());
     }
   }, [weekOffset]);
 
   const handleNextWeek = () => {
     setWeekOffset(weekOffset + 1);
-    setSelectedDate(getFirstDayOfWeek(weekOffset + 1));
+    setFirstDayOfWeek(getFirstDayOfWeek(weekOffset + 1));
   };
 
   const handlePreviousWeek = () => {
     setWeekOffset(weekOffset - 1);
-    setSelectedDate(getFirstDayOfWeek(weekOffset - 1));
+    setFirstDayOfWeek(getFirstDayOfWeek(weekOffset - 1));
   };
 
   const handleCurrentWeek = () => {
     setWeekOffset(0);
-    setSelectedDate(new Date());
+    setFirstDayOfWeek(new Date());
   };
 
   const filteredEmployees = employees.filter((employee) =>
@@ -101,11 +107,11 @@ const Dashboard: React.FC = () => {
   );
 
   useEffect(() => {
-    setShowResults(filteredEmployees.length > 0);
+    setFilteredRoles(filteredEmployees.length > 0);
   }, [filter, employees, filteredEmployees.length]);
 
   const handleDateChange = (newDate: Date | null) => {
-    setSelectedDate(newDate);
+    setFirstDayOfWeek(newDate);
     if (newDate) {
       const today = new Date();
       const weekOptions: { weekStartsOn: 0 | 1 | 2 | 3 | 4 | 5 | 6 } = {
@@ -141,10 +147,10 @@ const Dashboard: React.FC = () => {
       monthlySummaries,
       date,
       weekOffset,
-      weekNumber,
-      biweekNumber,
-      month,
-      year,
+      getWeekNumber(date),
+      getBiweekNumber(date),
+      getMonthNumber(date),
+      date.getFullYear(),
       selectedSchedule,
       handleAddHours,
       handleUpdateHours,
@@ -165,13 +171,18 @@ const Dashboard: React.FC = () => {
     weeklySummaries,
     biweeklySummaries,
     monthlySummaries,
-    weekNumber,
-    biweekNumber,
-    month,
-    year,
+    currentWeekNumber,
+    currentBiweekNumber,
+    currentMonth,
+    currentYear,
     getCurrentWeekDates(weekOffset),
     period
   );
+
+  const nextWeekStart = startOfWeek(addWeeks(new Date(), 1), {
+    weekStartsOn: 1,
+  });
+  const nextWeekEnd = endOfWeek(nextWeekStart, { weekStartsOn: 1 });
 
   const theme = useTheme();
   const isSmallScreen = useMediaQuery(theme.breakpoints.down("sm"));
@@ -185,9 +196,9 @@ const Dashboard: React.FC = () => {
         sx={{ mb: 2 }}
       >
         <Typography variant={isSmallScreen ? "h4" : "h2"} sx={{ flexGrow: 1 }}>
-          Administrar Roles
+          {PAGE_TITLE.MANAGE_ROLES}
         </Typography>
-        {showResults && (
+        {filteredRoles && (
           <SplitButton
             options={createExportOptions(
               <FontAwesomeIcon icon={faFileExcel} size="lg" />,
@@ -209,59 +220,85 @@ const Dashboard: React.FC = () => {
         justifyContent="space-between"
         alignItems="center"
       >
-        <Grid item xs={12} sm={6} md={4}>
+        <Grid item xs={12} md={6}>
           <SearchBar
             placeholder="Buscar Empleado"
             value={filter}
             onChange={(e) => setFilter(e.target.value)}
+            sx={{
+              maxWidth: "100%",
+            }}
             fullWidth
           />
         </Grid>
-        {showResults && (
-          <Grid item xs={12} sm={6} md={8}>
+        {filteredRoles && (
+          <Grid item xs={12} md={6}>
             <Box
               display="flex"
-              alignItems="center"
-              flexWrap="wrap"
+              flexDirection={{ xs: "column", sm: "column", md: "row" }}
+              alignItems="flex-start"
               justifyContent="flex-end"
+              gap={2}
             >
-              <Tooltip title="Semana Anterior" arrow>
-                <Button
-                  variant="contained"
-                  sx={{ mr: 2, height: "56px" }}
-                  onClick={handlePreviousWeek}
-                >
-                  <ArrowBackIosNewRoundedIcon />
-                </Button>
-              </Tooltip>
-              <Tooltip title="Semana Siguiente" arrow>
-                <span>
-                  <Button
-                    variant="contained"
-                    sx={{ mr: 2, height: "56px" }}
-                    disabled={
-                      !isValidDateForSelect(
-                        new Date(getCurrentWeekDates(weekOffset + 1)[0].isoDate)
-                      )
-                    }
-                    onClick={handleNextWeek}
-                  >
-                    <ArrowForwardIosRoundedIcon />
-                  </Button>
-                </span>
-              </Tooltip>
-              <Tooltip title="Semana Actual" arrow>
-                <span>
-                  <Button
-                    variant="contained"
-                    sx={{ mr: 2, height: "56px" }}
-                    disabled={weekOffset === 0}
-                    onClick={handleCurrentWeek}
-                  >
-                    <CalendarTodayRoundedIcon />
-                  </Button>
-                </span>
-              </Tooltip>
+              <Box
+                display="flex"
+                flexDirection={{ xs: "row", sm: "row", md: "row" }}
+                alignItems="center"
+                justifyContent="flex-end"
+                gap={2}
+                width="100%"
+              >
+                <Tooltip title="Semana Anterior" arrow>
+                  <Box>
+                    <Button
+                      variant="contained"
+                      sx={{
+                        height: "56px",
+                        width: { xs: "auto", sm: "auto", md: "auto" },
+                      }}
+                      onClick={handlePreviousWeek}
+                    >
+                      <ArrowBackIosNewRoundedIcon />
+                    </Button>
+                  </Box>
+                </Tooltip>
+                <Tooltip title="Semana Siguiente" arrow>
+                  <Box>
+                    <Button
+                      variant="contained"
+                      sx={{
+                        height: "56px",
+                        width: { xs: "auto", sm: "auto", md: "auto" },
+                      }}
+                      disabled={
+                        !isValidDateForSelect(
+                          new Date(
+                            getCurrentWeekDates(weekOffset + 1)[0].isoDate
+                          )
+                        )
+                      }
+                      onClick={handleNextWeek}
+                    >
+                      <ArrowForwardIosRoundedIcon />
+                    </Button>
+                  </Box>
+                </Tooltip>
+                <Tooltip title="Semana Actual" arrow>
+                  <Box>
+                    <Button
+                      variant="contained"
+                      sx={{
+                        height: "56px",
+                        width: { xs: "auto", sm: "auto", md: "auto" },
+                      }}
+                      disabled={weekOffset === 0}
+                      onClick={handleCurrentWeek}
+                    >
+                      <CalendarTodayRoundedIcon />
+                    </Button>
+                  </Box>
+                </Tooltip>
+              </Box>
               <LocalizationProvider
                 dateAdapter={AdapterDateFns}
                 adapterLocale={es}
@@ -269,15 +306,19 @@ const Dashboard: React.FC = () => {
                   okButtonLabel: "Aceptar",
                   cancelButtonLabel: "Cancelar",
                   todayButtonLabel: "Hoy",
-                  year: "Año #{year}",
+                  year: "Año #{currentYear}",
                   previousMonth: "Mes anterior",
                   nextMonth: "Mes siguiente",
                 }}
               >
                 <DatePicker
                   label="Seleccionar fecha"
-                  value={selectedDate}
-                  sx={{ width: { xs: "100%", sm: "180px" } }}
+                  value={firstDayOfWeek}
+                  sx={{
+                    width: { xs: "100%", sm: "100%", md: "auto" },
+                    mt: { xs: 2, sm: 2, md: 0 },
+                  }}
+                  maxDate={nextWeekEnd}
                   onChange={handleDateChange}
                 />
               </LocalizationProvider>
@@ -286,17 +327,16 @@ const Dashboard: React.FC = () => {
         )}
       </Grid>
       <br />
-
-      {showResults ? (
+      {filteredRoles ? (
         <DropdownTable
           filteredEmployees={filteredEmployees}
           schedules={schedules}
           hoursWorked={hoursWorked}
           weekOffset={weekOffset}
-          weekNumber={weekNumber}
-          biweekNumber={biweekNumber}
-          month={month}
-          year={year}
+          weekNumber={currentWeekNumber}
+          biweekNumber={currentBiweekNumber}
+          month={currentMonth}
+          year={currentYear}
           setPeriod={setPeriod}
           handleChange={handleChange}
           weeklySummaries={weeklySummaries}
@@ -304,12 +344,22 @@ const Dashboard: React.FC = () => {
           monthlySummaries={monthlySummaries}
         />
       ) : (
-        <Typography variant="h6" color="textSecondary">
-          No se encontraron empleados para mostrar.
-        </Typography>
+        <Box
+          sx={{
+            display: "flex",
+            justifyContent: "center",
+            alignItems: "center",
+            textAlign: "center",
+            paddingTop: "10%",
+          }}
+        >
+          <Typography variant="h6" color="textSecondary">
+            No se encontraron empleados para mostrar.
+          </Typography>
+        </Box>
       )}
     </Box>
   );
 };
 
-export default Dashboard;
+export default ManageRoles;

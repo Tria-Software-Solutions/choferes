@@ -38,12 +38,12 @@ export const updateEmployee = async (req: Request, res: Response) => {
     const id = parseInt(req.params.id);
     const updatedEmployee = await employeeService.updateEmployee(id, req.body);
     if (updatedEmployee) {
-      res.status(200).json(updatedEmployee);
+      return res.status(200).json(updatedEmployee);
     } else {
-      res.status(404).json({ message: 'Employee not found' });
+      return res.status(404).json({ message: 'Employee not found' });
     }
   } catch (error) {
-    res.status(500).json({ message: 'Error updating Employee', error });
+    return res.status(500).json({ message: 'Error updating Employee', error });
   }
 };
 
@@ -52,11 +52,11 @@ export const deleteEmployee = async (req: Request, res: Response) => {
     const id = parseInt(req.params.id);
     const deleted = await employeeService.deleteEmployee(id);
     if (deleted) {
-      res.status(204).end();
+      return res.status(204).end();
     } else {
-      res.status(404).json({ message: 'Employee not found' });
+      return res.status(404).json({ message: 'Employee not found' });
     }
   } catch (error) {
-    res.status(500).json({ message: 'Error deleting Employee', error });
+    return res.status(500).json({ message: 'Error deleting Employee', error });
   }
 };

@@ -1,5 +1,5 @@
 import React from "react";
-import { IconButton, InputBase } from "@mui/material";
+import { Box, IconButton, InputBase } from "@mui/material";
 import SearchIcon from "@mui/icons-material/Search";
 import ClearRoundedIcon from "@mui/icons-material/ClearRounded";
 
@@ -8,6 +8,7 @@ interface SearchBarProps {
   onChange: (event: React.ChangeEvent<HTMLInputElement>) => void;
   placeholder?: string;
   fullWidth?: boolean;
+  sx?: { [key: string]: any };
   onSearch?: () => void;
 }
 
@@ -15,6 +16,7 @@ const SearchBar: React.FC<SearchBarProps> = ({
   placeholder = "Buscar...",
   value,
   fullWidth,
+  sx,
   onChange,
 }) => {
   const handleClear = () => {
@@ -22,7 +24,7 @@ const SearchBar: React.FC<SearchBarProps> = ({
   };
 
   return (
-    <div className="search-bar-container">
+    <Box className="search-bar-container" sx={{...sx}}>
       {value ? (
         <IconButton
           type="button"
@@ -49,7 +51,7 @@ const SearchBar: React.FC<SearchBarProps> = ({
         fullWidth={fullWidth}
         onChange={onChange}
       />
-    </div>
+    </Box>
   );
 };
 
