@@ -29,46 +29,53 @@ export const exportToExcel = (
 ) => {
   let isVehicleData = data.length > 0 && "licensePlate" in data[0];
 
-  if (isVehicleData) {
-    data = data.map(({ id, updatedAt, createdAt, ...filteredRow }) => {
-      if (createdAt) {
-        filteredRow.Fecha = formatDateWithDay(new Date(createdAt), false);
-      }
+  if (!isVehicleData) {
+    data = data.map(({ id, ...filteredRow }) => {
       return filteredRow;
+    });
+  } else {
+    data = data.map(({ id, updatedAt, createdAt, ...filteredRow }) => {
+      const newRow = { ...filteredRow };
+      if (createdAt) {
+        newRow.Fecha = formatDateWithDay(new Date(createdAt), false);
+      }
+      return newRow;
     });
   }
 
-  const headers =
-    customHeaders ||
-    Object.keys(data[0]).map((header) =>
-      isVehicleData && header === "createdAt"
-        ? "Fecha"
-        : translateColumnHeaderToSpanish(header)
-    );
-
   const translatedData = data.map((row) => {
     const translatedRow: any = {};
-    Object.keys(row).forEach((key, index) => {
-      let value = row[key];
+    if (isVehicleData) {
+      translatedRow["Fecha"] = row["Fecha"];
+    }
 
-      if (key === "licensePlate" && typeof value === "string") {
-        value = `${value}`;
-      } else if (typeof value === "string") {
-        const dateValue = new Date(value);
-        value = !isNaN(dateValue.getTime())
-          ? formatDate(dateValue, false)
-          : value;
+    Object.keys(row).forEach((key) => {
+      if (key !== "Fecha") {
+        let value = row[key];
+
+        if (
+          (key === "ticket" || key === "licensePlate") &&
+          typeof value === "string"
+        ) {
+          value = `${value}`;
+        } else if (typeof value === "string") {
+          const dateValue = new Date(value);
+          value = !isNaN(dateValue.getTime())
+            ? formatDate(dateValue, false)
+            : value;
+        }
+
+        if (
+          typeof value === "string" &&
+          Object.keys(translationsDayOptionsToSpanish).includes(value)
+        ) {
+          value = translateDayOptionsToSpanish(value);
+        }
+
+        translatedRow[translateColumnHeaderToSpanish(key)] = value;
       }
-
-      if (
-        typeof value === "string" &&
-        Object.keys(translationsDayOptionsToSpanish).includes(value)
-      ) {
-        value = translateDayOptionsToSpanish(value);
-      }
-
-      translatedRow[headers[index]] = value;
     });
+
     return translatedRow;
   });
 
@@ -88,12 +95,15 @@ export const exportToPDF = (
 
   let isVehicleData = data.length > 0 && "licensePlate" in data[0];
 
-  if (isVehicleData) {
+  if (!isVehicleData) {
+    data = data.map(({ id, ...filteredRow }) => filteredRow);
+  } else {
     data = data.map(({ id, updatedAt, createdAt, ...filteredRow }) => {
-      if (createdAt) {
-        filteredRow.Fecha = formatDateWithDay(new Date(createdAt), false);
-      }
-      return filteredRow;
+      const formattedDate = createdAt
+        ? formatDateWithDay(new Date(createdAt), false)
+        : "";
+
+      return Object.assign({ Fecha: formattedDate }, filteredRow);
     });
   }
 
@@ -101,15 +111,16 @@ export const exportToPDF = (
     ? [customHeaders]
     : [
         Object.keys(data[0]).map((header) =>
-          isVehicleData && header === "createdAt"
-            ? "Fecha"
-            : translateColumnHeaderToSpanish(header)
+          header === "Fecha" ? "Fecha" : translateColumnHeaderToSpanish(header)
         ),
       ];
 
   const tableData = data.map((row) => {
     return Object.entries(row).map(([key, value]) => {
-      if (key === "licensePlate" && typeof value === "string") {
+      if (
+        (key === "ticket" || key === "licensePlate") &&
+        typeof value === "string"
+      ) {
         return value;
       }
 

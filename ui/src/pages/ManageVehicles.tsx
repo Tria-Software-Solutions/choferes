@@ -57,6 +57,7 @@ const ManageVehicles: React.FC = () => {
   const [totalCount, setTotalCount] = useState(0);
   const [editRowId, setEditRowId] = useState<number | null>(null);
   const [addFields, setAddFields] = useState({
+    ticket: "",
     licensePlate: "",
     brand: "",
     color: "",
@@ -64,6 +65,7 @@ const ManageVehicles: React.FC = () => {
     notes: "",
   });
   const [editFields, setEditFields] = useState({
+    ticket: "",
     licensePlate: "",
     brand: "",
     color: "",
@@ -71,7 +73,8 @@ const ManageVehicles: React.FC = () => {
     notes: "",
   });
   const [openDialog, setOpenDialog] = useState(false);
-  const [openTooltip, setOpenTooltip] = useState(false);
+  const [openTicketTooltip, setOpenTicketTooltip] = useState(false);
+  const [openLicensePlateTooltip, setOpenLicensePlateTooltip] = useState(false);
   const [vehicleToDelete, setVehicleToDelete] = useState<number | null>(null);
   const [filter, setFilter] = useState("");
   const [selectedBrand, setSelectedBrand] = useState("");
@@ -95,7 +98,7 @@ const ManageVehicles: React.FC = () => {
         .toLowerCase();
       const isLicensePlateMatch = cleanedLicensePlate.includes(cleanedFilter);
       const isOtherFieldsMatch =
-        `${vehicle.brand} ${vehicle.color} ${cleanedParkingLot} ${vehicle.notes}`
+        `${vehicle.ticket} ${vehicle.brand} ${vehicle.color} ${cleanedParkingLot} ${vehicle.notes}`
           .toLowerCase()
           .includes(cleanedFilter);
 
@@ -106,9 +109,12 @@ const ManageVehicles: React.FC = () => {
   }, [vehicles, filter]);
 
   const validateAddFields = useCallback(() => {
+    const numberRegex = /^\d+$/;
     const plateRegex = /^(?:[A-ZÑ]{3}-\d{3}|\d{6})$/;
     const textRegex = /^[a-zA-ZáéíóúÁÉÍÓÚñÑ\s]+$/;
     const parkingLotRegex = /^ATP[1-9]-\d{3,4}$/;
+    const isTicketValid =
+      numberRegex.test(addFields.ticket.toString()) && addFields.ticket !== "";
     const isLicensePlateValid =
       plateRegex.test(addFields.licensePlate.trim()) &&
       addFields.licensePlate !== "";
@@ -120,14 +126,22 @@ const ManageVehicles: React.FC = () => {
       parkingLotRegex.test(addFields.parkingLot.trim()) &&
       addFields.parkingLot !== "";
     setIsAddFormValid(
-      isLicensePlateValid && isModelValid && isColorValid && isParkingLotValid
+      isTicketValid &&
+        isLicensePlateValid &&
+        isModelValid &&
+        isColorValid &&
+        isParkingLotValid
     );
   }, [addFields]);
 
   const validateEditFields = useCallback(() => {
+    const numberRegex = /^\d+$/;
     const plateRegex = /^(?:[A-ZÑ]{3}-\d{3}|\d{6})$/;
     const textRegex = /^[a-zA-ZáéíóúÁÉÍÓÚñÑ\s]+$/;
     const parkingLotRegex = /^ATP[1-9]-\d{3,4}$/;
+    const isTicketValid =
+      numberRegex.test(editFields.ticket.toString()) &&
+      editFields.ticket !== "";
     const isLicensePlateValid =
       plateRegex.test(editFields.licensePlate.trim()) &&
       editFields.licensePlate !== "";
@@ -139,7 +153,11 @@ const ManageVehicles: React.FC = () => {
       parkingLotRegex.test(editFields.parkingLot.trim()) &&
       editFields.parkingLot !== "";
     setIsEditFormValid(
-      isLicensePlateValid && isModelValid && isColorValid && isParkingLotValid
+      isTicketValid &&
+        isLicensePlateValid &&
+        isModelValid &&
+        isColorValid &&
+        isParkingLotValid
     );
   }, [editFields]);
 
@@ -156,6 +174,7 @@ const ManageVehicles: React.FC = () => {
   const handleAdd = () => {
     const newVehicle: Vehicle = {
       id: Math.max(...vehicles.map((vehicle) => vehicle.id)) + 1,
+      ticket: addFields.ticket,
       licensePlate: addFields.licensePlate,
       brand: addFields.brand,
       color: addFields.color,
@@ -165,6 +184,7 @@ const ManageVehicles: React.FC = () => {
     };
     handleAddVehicle(newVehicle);
     setAddFields({
+      ticket: "",
       licensePlate: "",
       brand: "",
       color: "",
@@ -178,6 +198,7 @@ const ManageVehicles: React.FC = () => {
   const handleEditClick = (vehicle: Vehicle) => {
     setEditRowId(vehicle.id);
     setEditFields({
+      ticket: vehicle.ticket,
       licensePlate: vehicle.licensePlate,
       brand: vehicle.brand,
       color: vehicle.color,
@@ -197,6 +218,7 @@ const ManageVehicles: React.FC = () => {
     handleUpdateVehicle(id, updatedVehicle);
     setEditRowId(null);
     setEditFields({
+      ticket: "",
       licensePlate: "",
       brand: "",
       color: "",
@@ -258,6 +280,52 @@ const ManageVehicles: React.FC = () => {
     setAddFields({ ...addFields, color: event.target.value });
   };
 
+  const checkTicketExistenceInAllVehicles = (
+    ticket: string
+  ): Vehicle | undefined => {
+    return allVehicles.find((vehicle) => String(vehicle.ticket) === ticket);
+  };
+
+  const getNextTicketNumber = (): string => {
+    if (vehicles.length === 0) return "";
+    const lastTicket = vehicles
+      .map((vehicle) => vehicle.ticket)
+      .filter((ticket) => ticket && /^\d+$/.test(ticket))
+      .map((ticket) => BigInt(ticket!));
+    if (lastTicket.length === 0) return "";
+    const maxTicket = lastTicket.reduce(
+      (max, current) => (current > max ? current : max),
+      BigInt(0)
+    );
+    return (maxTicket + BigInt(1)).toString();
+  };
+
+  const handleTicketOnFocus = () => {
+    if (addFields.ticket && /^\d+$/.test(addFields.ticket)) {
+      return;
+    }
+    let nextTicket = getNextTicketNumber();
+    while (checkTicketExistenceInAllVehicles(nextTicket)) {
+      nextTicket = (BigInt(nextTicket) + BigInt(1)).toString();
+    }
+    setAddFields((prevFields) => ({ ...prevFields, ticket: nextTicket }));
+  };
+
+  const handleTicketChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    let value = event.target.value.trim();
+    if (!/^\d*$/.test(value)) {
+      return;
+    }
+
+    if (checkTicketExistenceInAllVehicles(value)) {
+      setOpenTicketTooltip(true);
+      setTimeout(() => setOpenTicketTooltip(false), 2000);
+      return;
+    }
+
+    setAddFields((prevFields) => ({ ...prevFields, ticket: value }));
+  };
+
   const checkLicensePlateExistence = (licensePlate: string): boolean => {
     return vehicles.some((vehicle) => vehicle.licensePlate === licensePlate);
   };
@@ -275,8 +343,8 @@ const ManageVehicles: React.FC = () => {
     const maskedValue = maskLicensePlate(rawValue);
 
     if (checkLicensePlateExistence(maskedValue)) {
-      setOpenTooltip(true);
-      setTimeout(() => setOpenTooltip(false), 2000);
+      setOpenLicensePlateTooltip(true);
+      setTimeout(() => setOpenLicensePlateTooltip(false), 2000);
       return;
     }
 
@@ -294,7 +362,7 @@ const ManageVehicles: React.FC = () => {
     });
 
     if (existingVehicle) {
-      setSelectedBrand(existingVehicle.brand || ""); 
+      setSelectedBrand(existingVehicle.brand || "");
       setSelectedColor(existingVehicle.color || "");
     }
   };
@@ -347,7 +415,9 @@ const ManageVehicles: React.FC = () => {
               exportToExcel,
               exportToPDF,
               filteredVehicles,
-              `reporte-de-vehiculos-${exportFileFormattedDate(selectedDate || new Date())}`
+              `reporte-de-vehiculos-${exportFileFormattedDate(
+                selectedDate || new Date()
+              )}`
             )}
             defaultIndex={0}
             buttonIcon={<DownloadRoundedIcon />}
@@ -362,7 +432,7 @@ const ManageVehicles: React.FC = () => {
       >
         <Grid item xs={12} md={6}>
           <SearchBar
-            placeholder="Buscar Vehículo"
+            placeholder="Buscar vehículo"
             value={filter}
             onChange={(e) => setFilter(e.target.value)}
             sx={{
@@ -466,10 +536,28 @@ const ManageVehicles: React.FC = () => {
             gap={2}
           >
             <Grid container spacing={2} alignItems="center">
-              <Grid item xs={12} sm={6} md={2}>
+              <Grid item xs={12} sm={6} md={1}>
+                <Tooltip
+                  title="Este número de boleta ya está registrado"
+                  open={openTicketTooltip}
+                  disableHoverListener
+                  placement="bottom"
+                  arrow
+                >
+                  <TextField
+                    label="Boleta"
+                    variant="outlined"
+                    fullWidth
+                    value={addFields.ticket}
+                    onFocus={handleTicketOnFocus}
+                    onChange={handleTicketChange}
+                  />
+                </Tooltip>
+              </Grid>
+              <Grid item xs={12} sm={6} md={1}>
                 <Tooltip
                   title="Esta placa ya está registrada"
-                  open={openTooltip}
+                  open={openLicensePlateTooltip}
                   disableHoverListener
                   placement="bottom"
                   arrow
@@ -544,7 +632,7 @@ const ManageVehicles: React.FC = () => {
                   onChange={handleParkingLotChange}
                 />
               </Grid>
-              <Grid item xs={12} sm={12} md={5}>
+              <Grid item xs={12} sm={6} md={5}>
                 <TextField
                   label="Observaciones"
                   variant="outlined"
@@ -588,7 +676,14 @@ const ManageVehicles: React.FC = () => {
       {filteredVehicles.length > 0 ? (
         <EditableTable<Vehicle>
           data={filteredVehicles}
-          columns={["licensePlate", "brand", "color", "parkingLot", "notes"]}
+          columns={[
+            "ticket",
+            "licensePlate",
+            "brand",
+            "color",
+            "parkingLot",
+            "notes",
+          ]}
           groupByDate={selectedDate}
           editRowId={editRowId}
           editFields={editFields}

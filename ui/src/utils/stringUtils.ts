@@ -84,6 +84,7 @@ export const translateColumnHeaderToSpanish = (
     hours: "Horas",
     createdAt: "Agregado",
     updatedAt: "Actualizado",
+    ticket: "Boleta",
     licensePlate: "Placa",
     brand: "Marca",
     color: "Color",

@@ -1,5 +1,6 @@
 export interface Vehicle {
-  id: number;            
+  id: number;
+  ticket: string;            
   licensePlate: string; 
   brand: string;       
   color: string;    

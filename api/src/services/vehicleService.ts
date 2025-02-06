@@ -2,6 +2,7 @@ import { Op, Sequelize } from "sequelize";
 import { Vehicle } from "../models/Vehicle";
 
 export const createVehicle = async (data: {
+  ticket: string;
   licensePlate: string;
   brand: string;
   color: string;
@@ -38,6 +39,7 @@ export const getVehiclesByDate = async (createdAt: Date) => {
 export const updateVehicle = async (
   id: number,
   data: Partial<{
+    ticket: string;
     licensePlate: string;
     brand: string;
     color: string;

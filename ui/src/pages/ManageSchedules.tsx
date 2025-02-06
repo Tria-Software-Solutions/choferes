@@ -199,7 +199,7 @@ const ManageSchedules: React.FC = () => {
       >
         <Grid item xs={12} md={6}>
           <SearchBar
-            placeholder="Buscar Horario"
+            placeholder="Buscar horario"
             value={filter}
             onChange={(e) => setFilter(e.target.value)}
             sx={{ maxWidth: "100%" }}

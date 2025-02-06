@@ -7,6 +7,7 @@ export type ColumnsTranslation = {
     hours: string;
     createdAt: string;
     updatedAt: string;
+    ticket: string;
     licensePlate: string;
     brand: string;
     color: string;

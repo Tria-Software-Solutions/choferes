@@ -222,7 +222,7 @@ const ManageRoles: React.FC = () => {
       >
         <Grid item xs={12} md={6}>
           <SearchBar
-            placeholder="Buscar Empleado"
+            placeholder="Buscar empleado"
             value={filter}
             onChange={(e) => setFilter(e.target.value)}
             sx={{

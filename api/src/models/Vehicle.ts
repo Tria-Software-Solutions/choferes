@@ -3,6 +3,7 @@ import sequelize from "../config/database";
 
 export class Vehicle extends Model {
   public id!: number;
+  public ticket!: string;
   public licensePlate!: string;
   public brand!: string;
   public color!: string;
@@ -16,6 +17,11 @@ Vehicle.init(
       type: DataTypes.INTEGER,
       autoIncrement: true,
       primaryKey: true,
+    },
+    ticket: {
+      type: DataTypes.STRING,
+      allowNull: false,
+      unique: true
     },
     licensePlate: {
       type: DataTypes.STRING,
