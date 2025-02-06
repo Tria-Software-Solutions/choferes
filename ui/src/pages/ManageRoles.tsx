@@ -189,36 +189,33 @@ const ManageRoles: React.FC = () => {
 
   return (
     <Box>
+      <Box
+        display="flex"
+        justifyContent="space-between"
+        alignItems="center"
+        sx={{ mb: 2 }}
+      >
+        <Typography variant={isSmallScreen ? "h4" : "h2"} sx={{ flexGrow: 1 }}>
+          {PAGE_TITLE.MANAGE_ROLES}
+        </Typography>
+        {filteredRoles && (
+          <SplitButton
+            options={createExportOptions(
+              <FontAwesomeIcon icon={faFileExcel} size="lg" />,
+              <FontAwesomeIcon icon={faFilePdf} size="lg" />,
+              exportToExcel,
+              exportToPDF,
+              dataForExport,
+              fileName,
+              headers
+            )}
+            defaultIndex={0}
+            buttonIcon={<DownloadRoundedIcon />}
+          />
+        )}
+      </Box>
       {filteredRoles ? (
         <>
-          <Box
-            display="flex"
-            justifyContent="space-between"
-            alignItems="center"
-            sx={{ mb: 2 }}
-          >
-            <Typography
-              variant={isSmallScreen ? "h4" : "h2"}
-              sx={{ flexGrow: 1 }}
-            >
-              {PAGE_TITLE.MANAGE_ROLES}
-            </Typography>
-            {filteredRoles && (
-              <SplitButton
-                options={createExportOptions(
-                  <FontAwesomeIcon icon={faFileExcel} size="lg" />,
-                  <FontAwesomeIcon icon={faFilePdf} size="lg" />,
-                  exportToExcel,
-                  exportToPDF,
-                  dataForExport,
-                  fileName,
-                  headers
-                )}
-                defaultIndex={0}
-                buttonIcon={<DownloadRoundedIcon />}
-              />
-            )}
-          </Box>
           <Grid
             container
             spacing={2}

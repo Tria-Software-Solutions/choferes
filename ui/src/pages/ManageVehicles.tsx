@@ -398,315 +398,312 @@ const ManageVehicles: React.FC = () => {
 
   return (
     <Box>
-      {filteredVehicles.length > 0 ? (
-        <>
+      <Box
+        display="flex"
+        justifyContent="space-between"
+        alignItems="center"
+        sx={{ mb: 2 }}
+      >
+        <Typography variant={isSmallScreen ? "h4" : "h2"} sx={{ flexGrow: 1 }}>
+          {PAGE_TITLE.MANAGE_VEHICLES}
+        </Typography>
+        {filteredVehicles.length > 0 && (
+          <SplitButton
+            options={createExportOptions(
+              <FontAwesomeIcon icon={faFileExcel} size="lg" />,
+              <FontAwesomeIcon icon={faFilePdf} size="lg" />,
+              exportToExcel,
+              exportToPDF,
+              filteredVehicles,
+              `reporte-de-vehiculos-${exportFileFormattedDate(
+                selectedDate || new Date()
+              )}`
+            )}
+            defaultIndex={0}
+            buttonIcon={<DownloadRoundedIcon />}
+          />
+        )}
+      </Box>
+      <Grid
+        container
+        spacing={2}
+        justifyContent="space-between"
+        alignItems="center"
+      >
+        <Grid item xs={12} md={6}>
+          {filteredVehicles.length > 0 && (
+            <SearchBar
+              placeholder="Buscar vehículo"
+              value={filter}
+              onChange={(e) => setFilter(e.target.value)}
+              sx={{
+                maxWidth: "100%",
+              }}
+              fullWidth
+            />
+          )}
+        </Grid>
+        <Grid item xs={12} md={6}>
           <Box
             display="flex"
-            justifyContent="space-between"
-            alignItems="center"
-            sx={{ mb: 2 }}
+            flexDirection={{ xs: "column", sm: "column", md: "row" }}
+            alignItems="flex-start"
+            justifyContent="flex-end"
+            gap={2}
           >
-            <Typography
-              variant={isSmallScreen ? "h4" : "h2"}
-              sx={{ flexGrow: 1 }}
+            <Box
+              display="flex"
+              flexDirection={{ xs: "row", sm: "row", md: "row" }}
+              alignItems="center"
+              justifyContent="flex-end"
+              gap={2}
+              width="100%"
             >
-              {PAGE_TITLE.MANAGE_VEHICLES}
-            </Typography>
-            {filteredVehicles.length > 0 && (
-              <SplitButton
-                options={createExportOptions(
-                  <FontAwesomeIcon icon={faFileExcel} size="lg" />,
-                  <FontAwesomeIcon icon={faFilePdf} size="lg" />,
-                  exportToExcel,
-                  exportToPDF,
-                  filteredVehicles,
-                  `reporte-de-vehiculos-${exportFileFormattedDate(
-                    selectedDate || new Date()
-                  )}`
-                )}
-                defaultIndex={0}
-                buttonIcon={<DownloadRoundedIcon />}
-              />
-            )}
-          </Box>
-          <Grid
-            container
-            spacing={2}
-            justifyContent="space-between"
-            alignItems="center"
-          >
-            <Grid item xs={12} md={6}>
-              <SearchBar
-                placeholder="Buscar vehículo"
-                value={filter}
-                onChange={(e) => setFilter(e.target.value)}
-                sx={{
-                  maxWidth: "100%",
-                }}
-                fullWidth
-              />
-            </Grid>
-            <Grid item xs={12} md={6}>
-              <Box
-                display="flex"
-                flexDirection={{ xs: "column", sm: "column", md: "row" }}
-                alignItems="flex-start"
-                justifyContent="flex-end"
-                gap={2}
-              >
-                <Box
-                  display="flex"
-                  flexDirection={{ xs: "row", sm: "row", md: "row" }}
-                  alignItems="center"
-                  justifyContent="flex-end"
-                  gap={2}
-                  width="100%"
-                >
-                  <Tooltip title="Día Anterior" arrow>
-                    <Box>
-                      <Button
-                        variant="contained"
-                        sx={{
-                          height: "56px",
-                          width: { xs: "auto", sm: "auto", md: "auto" },
-                        }}
-                        onClick={handlePreviousDate}
-                      >
-                        <ArrowBackIosNewRoundedIcon />
-                      </Button>
-                    </Box>
-                  </Tooltip>
-                  <Tooltip title="Día Siguiente" arrow>
-                    <Box>
-                      <Button
-                        variant="contained"
-                        sx={{
-                          height: "56px",
-                          width: { xs: "auto", sm: "auto", md: "auto" },
-                        }}
-                        disabled={isTodayOrFuture(selectedDate)}
-                        onClick={handleNextDate}
-                      >
-                        <ArrowForwardIosRoundedIcon />
-                      </Button>
-                    </Box>
-                  </Tooltip>
-                  <Tooltip title="Día Actual" arrow>
-                    <Box>
-                      <Button
-                        variant="contained"
-                        sx={{
-                          height: "56px",
-                          width: { xs: "auto", sm: "auto", md: "auto" },
-                        }}
-                        disabled={isTodayOrFuture(selectedDate)}
-                        onClick={handleCurrentDate}
-                      >
-                        <CalendarTodayRoundedIcon />
-                      </Button>
-                    </Box>
-                  </Tooltip>
-                </Box>
-                <LocalizationProvider
-                  dateAdapter={AdapterDateFns}
-                  adapterLocale={es}
-                  localeText={{
-                    okButtonLabel: "Aceptar",
-                    cancelButtonLabel: "Cancelar",
-                    todayButtonLabel: "Hoy",
-                    year: "Año #{year}",
-                    previousMonth: "Mes anterior",
-                    nextMonth: "Mes siguiente",
-                  }}
-                >
-                  <DatePicker
-                    label="Seleccionar fecha"
-                    value={selectedDate}
+              <Tooltip title="Día Anterior" arrow>
+                <Box>
+                  <Button
+                    variant="contained"
                     sx={{
-                      width: { xs: "100%", sm: "100%", md: "auto" },
-                      mt: { xs: 2, sm: 2, md: 0 },
+                      height: "56px",
+                      width: { xs: "auto", sm: "auto", md: "auto" },
                     }}
-                    maxDate={new Date()}
-                    onChange={handleDateChange}
-                  />
-                </LocalizationProvider>
-              </Box>
-            </Grid>
-            <Grid item xs={12} md={12}>
-              <Box
-                display="flex"
-                flexDirection={{ xs: "column", sm: "column", md: "row" }}
-                alignItems="center"
-                justifyContent="flex-end"
-                gap={2}
-              >
-                <Grid container spacing={2} alignItems="center">
-                  <Grid item xs={12} sm={6} md={1}>
-                    <Tooltip
-                      title="Este número de boleta ya está registrado"
-                      open={openTicketTooltip}
-                      disableHoverListener
-                      placement="bottom"
-                      arrow
-                    >
-                      <TextField
-                        label="Boleta"
-                        variant="outlined"
-                        fullWidth
-                        value={addFields.ticket}
-                        onFocus={handleTicketOnFocus}
-                        onChange={handleTicketChange}
-                      />
-                    </Tooltip>
-                  </Grid>
-                  <Grid item xs={12} sm={6} md={1}>
-                    <Tooltip
-                      title="Esta placa ya está registrada"
-                      open={openLicensePlateTooltip}
-                      disableHoverListener
-                      placement="bottom"
-                      arrow
-                    >
-                      <TextField
-                        label="Placa"
-                        variant="outlined"
-                        fullWidth
-                        value={addFields.licensePlate}
-                        onChange={handleLicensePlateChange}
-                      />
-                    </Tooltip>
-                  </Grid>
-                  <Grid item xs={12} sm={6} md={2}>
-                    {selectedBrand === "Otro" ? (
-                      <TextField
-                        label="Marca"
-                        variant="outlined"
-                        fullWidth
-                        value={customBrand}
-                        onChange={handleCustomBrandChange}
-                      />
-                    ) : (
-                      <FormControl variant="outlined" fullWidth>
-                        <InputLabel>Marca</InputLabel>
-                        <Select
-                          label="Marca"
-                          value={selectedBrand}
-                          onChange={handleBrandChange}
-                        >
-                          {BRANDS.map((option) => (
-                            <MenuItem key={option.value} value={option.value}>
-                              {option.label}
-                            </MenuItem>
-                          ))}
-                        </Select>
-                      </FormControl>
-                    )}
-                  </Grid>
-                  <Grid item xs={12} sm={6} md={2}>
-                    {selectedColor === "Otro" ? (
-                      <TextField
-                        label="Color"
-                        variant="outlined"
-                        fullWidth
-                        value={customColor}
-                        onChange={handleCustomColorChange}
-                      />
-                    ) : (
-                      <FormControl variant="outlined" fullWidth>
-                        <InputLabel>Color</InputLabel>
-                        <Select
-                          label="Color"
-                          value={selectedColor}
-                          onChange={handleColorChange}
-                        >
-                          {COLORS.map((option) => (
-                            <MenuItem key={option.value} value={option.value}>
-                              {option.label}
-                            </MenuItem>
-                          ))}
-                        </Select>
-                      </FormControl>
-                    )}
-                  </Grid>
-                  <Grid item xs={12} sm={6} md={1}>
-                    <TextField
-                      label="Espacio"
-                      variant="outlined"
-                      fullWidth
-                      value={addFields.parkingLot}
-                      onChange={handleParkingLotChange}
-                    />
-                  </Grid>
-                  <Grid item xs={12} sm={6} md={5}>
-                    <TextField
-                      label="Observaciones"
-                      variant="outlined"
-                      fullWidth
-                      value={addFields.notes}
-                      onChange={(e) =>
-                        setAddFields({ ...addFields, notes: e.target.value })
-                      }
-                    />
-                  </Grid>
-                </Grid>
-                <Tooltip title="Agregar Vehículo" arrow>
-                  <Box
-                    sx={{
-                      width: { xs: "100%", md: "auto" },
-                      display: "flex",
-                      justifyContent: { xs: "stretch", md: "flex-end" },
-                    }}
+                    onClick={handlePreviousDate}
                   >
-                    <Button
-                      variant="contained"
-                      color="primary"
-                      sx={{
-                        minHeight: 56,
-                        display: "flex",
-                        justifyContent: "center",
-                        lineHeight: "normal",
-                        width: { xs: "100%", md: "auto" },
-                      }}
-                      onClick={handleAdd}
-                      disabled={!isAddFormValid}
-                    >
-                      <DirectionsCarIcon />
-                    </Button>
-                  </Box>
+                    <ArrowBackIosNewRoundedIcon />
+                  </Button>
+                </Box>
+              </Tooltip>
+              <Tooltip title="Día Siguiente" arrow>
+                <Box>
+                  <Button
+                    variant="contained"
+                    sx={{
+                      height: "56px",
+                      width: { xs: "auto", sm: "auto", md: "auto" },
+                    }}
+                    disabled={isTodayOrFuture(selectedDate)}
+                    onClick={handleNextDate}
+                  >
+                    <ArrowForwardIosRoundedIcon />
+                  </Button>
+                </Box>
+              </Tooltip>
+              <Tooltip title="Día Actual" arrow>
+                <Box>
+                  <Button
+                    variant="contained"
+                    sx={{
+                      height: "56px",
+                      width: { xs: "auto", sm: "auto", md: "auto" },
+                    }}
+                    disabled={isTodayOrFuture(selectedDate)}
+                    onClick={handleCurrentDate}
+                  >
+                    <CalendarTodayRoundedIcon />
+                  </Button>
+                </Box>
+              </Tooltip>
+            </Box>
+            <LocalizationProvider
+              dateAdapter={AdapterDateFns}
+              adapterLocale={es}
+              localeText={{
+                okButtonLabel: "Aceptar",
+                cancelButtonLabel: "Cancelar",
+                todayButtonLabel: "Hoy",
+                year: "Año #{year}",
+                previousMonth: "Mes anterior",
+                nextMonth: "Mes siguiente",
+              }}
+            >
+              <DatePicker
+                label="Seleccionar fecha"
+                value={selectedDate}
+                sx={{
+                  width: { xs: "100%", sm: "100%", md: "auto" },
+                  mt: { xs: 2, sm: 2, md: 0 },
+                }}
+                maxDate={new Date()}
+                onChange={handleDateChange}
+              />
+            </LocalizationProvider>
+          </Box>
+        </Grid>
+        <Grid item xs={12} md={12}>
+          <Box
+            display="flex"
+            flexDirection={{ xs: "column", sm: "column", md: "row" }}
+            alignItems="center"
+            justifyContent="flex-end"
+            gap={2}
+          >
+            <Grid container spacing={2} alignItems="center">
+              <Grid item xs={12} sm={6} md={1}>
+                <Tooltip
+                  title="Este número de boleta ya está registrado"
+                  open={openTicketTooltip}
+                  disableHoverListener
+                  placement="bottom"
+                  arrow
+                >
+                  <TextField
+                    label="Boleta"
+                    variant="outlined"
+                    fullWidth
+                    value={addFields.ticket}
+                    onFocus={handleTicketOnFocus}
+                    onChange={handleTicketChange}
+                  />
                 </Tooltip>
-              </Box>
+              </Grid>
+              <Grid item xs={12} sm={6} md={1}>
+                <Tooltip
+                  title="Esta placa ya está registrada"
+                  open={openLicensePlateTooltip}
+                  disableHoverListener
+                  placement="bottom"
+                  arrow
+                >
+                  <TextField
+                    label="Placa"
+                    variant="outlined"
+                    fullWidth
+                    value={addFields.licensePlate}
+                    onChange={handleLicensePlateChange}
+                  />
+                </Tooltip>
+              </Grid>
+              <Grid item xs={12} sm={6} md={2}>
+                {selectedBrand === "Otro" ? (
+                  <TextField
+                    label="Marca"
+                    variant="outlined"
+                    fullWidth
+                    value={customBrand}
+                    onChange={handleCustomBrandChange}
+                  />
+                ) : (
+                  <FormControl variant="outlined" fullWidth>
+                    <InputLabel>Marca</InputLabel>
+                    <Select
+                      label="Marca"
+                      value={selectedBrand}
+                      onChange={handleBrandChange}
+                    >
+                      {BRANDS.map((option) => (
+                        <MenuItem key={option.value} value={option.value}>
+                          {option.label}
+                        </MenuItem>
+                      ))}
+                    </Select>
+                  </FormControl>
+                )}
+              </Grid>
+              <Grid item xs={12} sm={6} md={2}>
+                {selectedColor === "Otro" ? (
+                  <TextField
+                    label="Color"
+                    variant="outlined"
+                    fullWidth
+                    value={customColor}
+                    onChange={handleCustomColorChange}
+                  />
+                ) : (
+                  <FormControl variant="outlined" fullWidth>
+                    <InputLabel>Color</InputLabel>
+                    <Select
+                      label="Color"
+                      value={selectedColor}
+                      onChange={handleColorChange}
+                    >
+                      {COLORS.map((option) => (
+                        <MenuItem key={option.value} value={option.value}>
+                          {option.label}
+                        </MenuItem>
+                      ))}
+                    </Select>
+                  </FormControl>
+                )}
+              </Grid>
+              <Grid item xs={12} sm={6} md={1}>
+                <TextField
+                  label="Espacio"
+                  variant="outlined"
+                  fullWidth
+                  value={addFields.parkingLot}
+                  onChange={handleParkingLotChange}
+                />
+              </Grid>
+              <Grid item xs={12} sm={6} md={5}>
+                <TextField
+                  label="Observaciones"
+                  variant="outlined"
+                  fullWidth
+                  value={addFields.notes}
+                  onChange={(e) =>
+                    setAddFields({ ...addFields, notes: e.target.value })
+                  }
+                />
+              </Grid>
             </Grid>
-          </Grid>
-          <br />
-          <EditableTable<Vehicle>
-            data={filteredVehicles}
-            columns={[
-              "ticket",
-              "licensePlate",
-              "brand",
-              "color",
-              "parkingLot",
-              "notes",
-            ]}
-            groupByDate={selectedDate}
-            editRowId={editRowId}
-            editFields={editFields}
-            setEditField={(field, value) =>
-              setEditFields({ ...editFields, [field]: value })
-            }
-            handleEditClick={handleEditClick}
-            handleCancelClick={handleCancelClick}
-            handleSaveClick={handleSaveClick}
-            handleOpenDialog={handleOpenDialog}
-            getRowId={(row) => row.id}
-            totalCount={totalCount}
-            page={page}
-            rowsPerPage={rowsPerPage}
-            setPage={setPage}
-            setRowsPerPage={setRowsPerPage}
-            isSaveDisabled={!isEditFormValid}
-          />
-        </>
+            <Tooltip title="Agregar Vehículo" arrow>
+              <Box
+                sx={{
+                  width: { xs: "100%", md: "auto" },
+                  display: "flex",
+                  justifyContent: { xs: "stretch", md: "flex-end" },
+                }}
+              >
+                <Button
+                  variant="contained"
+                  color="primary"
+                  sx={{
+                    minHeight: 56,
+                    display: "flex",
+                    justifyContent: "center",
+                    lineHeight: "normal",
+                    width: { xs: "100%", md: "auto" },
+                  }}
+                  onClick={handleAdd}
+                  disabled={!isAddFormValid}
+                >
+                  <DirectionsCarIcon />
+                </Button>
+              </Box>
+            </Tooltip>
+          </Box>
+        </Grid>
+      </Grid>
+      <br />
+      {filteredVehicles.length > 0 ? (
+        <EditableTable<Vehicle>
+          data={filteredVehicles}
+          columns={[
+            "ticket",
+            "licensePlate",
+            "brand",
+            "color",
+            "parkingLot",
+            "notes",
+          ]}
+          groupByDate={selectedDate}
+          editRowId={editRowId}
+          editFields={editFields}
+          setEditField={(field, value) =>
+            setEditFields({ ...editFields, [field]: value })
+          }
+          handleEditClick={handleEditClick}
+          handleCancelClick={handleCancelClick}
+          handleSaveClick={handleSaveClick}
+          handleOpenDialog={handleOpenDialog}
+          getRowId={(row) => row.id}
+          totalCount={totalCount}
+          page={page}
+          rowsPerPage={rowsPerPage}
+          setPage={setPage}
+          setRowsPerPage={setRowsPerPage}
+          isSaveDisabled={!isEditFormValid}
+        />
       ) : (
         <Box
           sx={{

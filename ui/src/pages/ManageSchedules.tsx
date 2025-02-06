@@ -167,164 +167,161 @@ const ManageSchedules: React.FC = () => {
 
   return (
     <Box>
-      {filteredSchedules.length > 0 ? (
-        <>
+      <Box
+        display="flex"
+        justifyContent="space-between"
+        alignItems="center"
+        sx={{ mb: 2 }}
+      >
+        <Typography variant={isSmallScreen ? "h4" : "h2"} sx={{ flexGrow: 1 }}>
+          {PAGE_TITLE.MANAGE_SCHEDULES}
+        </Typography>
+        {filteredSchedules.length > 0 && (
+          <SplitButton
+            options={createExportOptions(
+              <FontAwesomeIcon icon={faFileExcel} size="lg" />,
+              <FontAwesomeIcon icon={faFilePdf} size="lg" />,
+              exportToExcel,
+              exportToPDF,
+              filteredSchedules,
+              `horarios-${exportFileFormattedDate(new Date())}`
+            )}
+            defaultIndex={0}
+            buttonIcon={<DownloadRoundedIcon />}
+          />
+        )}
+      </Box>
+      <Grid
+        container
+        spacing={2}
+        justifyContent="space-between"
+        alignItems="center"
+      >
+        <Grid item xs={12} md={6}>
+          {filteredSchedules.length > 0 && (
+            <SearchBar
+              placeholder="Buscar horario"
+              value={filter}
+              onChange={(e) => setFilter(e.target.value)}
+              sx={{ maxWidth: "100%" }}
+              fullWidth
+            />
+          )}
+        </Grid>
+        <Grid item xs={12} md={6}>
           <Box
             display="flex"
-            justifyContent="space-between"
+            flexDirection={{ xs: "column", sm: "column", md: "row" }}
             alignItems="center"
-            sx={{ mb: 2 }}
+            justifyContent="flex-end"
+            gap={2}
           >
-            <Typography
-              variant={isSmallScreen ? "h4" : "h2"}
-              sx={{ flexGrow: 1 }}
-            >
-              {PAGE_TITLE.MANAGE_SCHEDULES}
-            </Typography>
-            {filteredSchedules.length > 0 && (
-              <SplitButton
-                options={createExportOptions(
-                  <FontAwesomeIcon icon={faFileExcel} size="lg" />,
-                  <FontAwesomeIcon icon={faFilePdf} size="lg" />,
-                  exportToExcel,
-                  exportToPDF,
-                  filteredSchedules,
-                  `horarios-${exportFileFormattedDate(new Date())}`
-                )}
-                defaultIndex={0}
-                buttonIcon={<DownloadRoundedIcon />}
-              />
-            )}
-          </Box>
-          <Grid
-            container
-            spacing={2}
-            justifyContent="space-between"
-            alignItems="center"
-          >
-            <Grid item xs={12} md={6}>
-              <SearchBar
-                placeholder="Buscar horario"
-                value={filter}
-                onChange={(e) => setFilter(e.target.value)}
-                sx={{ maxWidth: "100%" }}
-                fullWidth
-              />
-            </Grid>
-            <Grid item xs={12} md={6}>
-              <Box
-                display="flex"
-                flexDirection={{ xs: "column", sm: "column", md: "row" }}
-                alignItems="center"
-                justifyContent="flex-end"
-                gap={2}
-              >
-                <Grid container spacing={2} alignItems="center">
-                  <Grid item xs={12} md={4}>
-                    <TextField
-                      label="Lugar"
-                      variant="outlined"
-                      fullWidth
-                      sx={{
-                        height: 56,
-                      }}
-                      value={addFields.label}
-                      onChange={(e) =>
-                        setAddFields({ ...addFields, label: e.target.value })
-                      }
-                    />
-                  </Grid>
-                  <Grid item xs={6} md={4}>
-                    <FormControl
-                      variant="outlined"
-                      fullWidth
-                      sx={{
-                        height: 56,
-                      }}
-                    >
-                      <InputLabel>Día</InputLabel>
-                      <Select
-                        label="Día"
-                        sx={{ height: 56 }}
-                        value={addFields.day}
-                        onChange={(e) =>
-                          setAddFields({ ...addFields, day: e.target.value })
-                        }
-                      >
-                        {getDayOptionsSpanish().map((option) => (
-                          <MenuItem key={option.value} value={option.value}>
-                            {option.label}
-                          </MenuItem>
-                        ))}
-                      </Select>
-                    </FormControl>
-                  </Grid>
-                  <Grid item xs={6} md={4}>
-                    <TextField
-                      label="Horas"
-                      variant="outlined"
-                      type="number"
-                      fullWidth
-                      sx={{
-                        height: 56,
-                      }}
-                      value={addFields.hours}
-                      onChange={(e) =>
-                        setAddFields({ ...addFields, hours: e.target.value })
-                      }
-                    />
-                  </Grid>
-                </Grid>
-                <Tooltip title="Agregar Horario" arrow>
-                  <Box
-                    sx={{
-                      width: { xs: "100%", md: "auto" },
-                      display: "flex",
-                      justifyContent: { xs: "stretch", md: "flex-end" },
-                    }}
+            <Grid container spacing={2} alignItems="center">
+              <Grid item xs={12} md={4}>
+                <TextField
+                  label="Lugar"
+                  variant="outlined"
+                  fullWidth
+                  sx={{
+                    height: 56,
+                  }}
+                  value={addFields.label}
+                  onChange={(e) =>
+                    setAddFields({ ...addFields, label: e.target.value })
+                  }
+                />
+              </Grid>
+              <Grid item xs={6} md={4}>
+                <FormControl
+                  variant="outlined"
+                  fullWidth
+                  sx={{
+                    height: 56,
+                  }}
+                >
+                  <InputLabel>Día</InputLabel>
+                  <Select
+                    label="Día"
+                    sx={{ height: 56 }}
+                    value={addFields.day}
+                    onChange={(e) =>
+                      setAddFields({ ...addFields, day: e.target.value })
+                    }
                   >
-                    <Button
-                      variant="contained"
-                      color="primary"
-                      sx={{
-                        minHeight: 56,
-                        display: "flex",
-                        justifyContent: "center",
-                        lineHeight: "normal",
-                        width: { xs: "100%", md: "auto" },
-                      }}
-                      onClick={handleAdd}
-                      disabled={!isAddFormValid}
-                    >
-                      <PostAddRoundedIcon />
-                    </Button>
-                  </Box>
-                </Tooltip>
-              </Box>
+                    {getDayOptionsSpanish().map((option) => (
+                      <MenuItem key={option.value} value={option.value}>
+                        {option.label}
+                      </MenuItem>
+                    ))}
+                  </Select>
+                </FormControl>
+              </Grid>
+              <Grid item xs={6} md={4}>
+                <TextField
+                  label="Horas"
+                  variant="outlined"
+                  type="number"
+                  fullWidth
+                  sx={{
+                    height: 56,
+                  }}
+                  value={addFields.hours}
+                  onChange={(e) =>
+                    setAddFields({ ...addFields, hours: e.target.value })
+                  }
+                />
+              </Grid>
             </Grid>
-          </Grid>
-          <br />
-          <EditableTable<Schedule>
-            data={filteredSchedules}
-            columns={["label", "day", "hours"]}
-            editRowId={editRowId}
-            editFields={editFields}
-            setEditField={(field, value) =>
-              setEditFields({ ...editFields, [field]: value })
-            }
-            handleEditClick={handleEditClick}
-            handleCancelClick={handleCancelClick}
-            handleSaveClick={handleSaveClick}
-            handleOpenDialog={handleOpenDialog}
-            getRowId={(row) => row.id}
-            totalCount={totalCount}
-            page={page}
-            rowsPerPage={rowsPerPage}
-            setPage={setPage}
-            setRowsPerPage={setRowsPerPage}
-            isSaveDisabled={!isEditFormValid}
-          />
-        </>
+            <Tooltip title="Agregar Horario" arrow>
+              <Box
+                sx={{
+                  width: { xs: "100%", md: "auto" },
+                  display: "flex",
+                  justifyContent: { xs: "stretch", md: "flex-end" },
+                }}
+              >
+                <Button
+                  variant="contained"
+                  color="primary"
+                  sx={{
+                    minHeight: 56,
+                    display: "flex",
+                    justifyContent: "center",
+                    lineHeight: "normal",
+                    width: { xs: "100%", md: "auto" },
+                  }}
+                  onClick={handleAdd}
+                  disabled={!isAddFormValid}
+                >
+                  <PostAddRoundedIcon />
+                </Button>
+              </Box>
+            </Tooltip>
+          </Box>
+        </Grid>
+      </Grid>
+      <br />
+      {filteredSchedules.length > 0 ? (
+        <EditableTable<Schedule>
+          data={filteredSchedules}
+          columns={["label", "day", "hours"]}
+          editRowId={editRowId}
+          editFields={editFields}
+          setEditField={(field, value) =>
+            setEditFields({ ...editFields, [field]: value })
+          }
+          handleEditClick={handleEditClick}
+          handleCancelClick={handleCancelClick}
+          handleSaveClick={handleSaveClick}
+          handleOpenDialog={handleOpenDialog}
+          getRowId={(row) => row.id}
+          totalCount={totalCount}
+          page={page}
+          rowsPerPage={rowsPerPage}
+          setPage={setPage}
+          setRowsPerPage={setRowsPerPage}
+          isSaveDisabled={!isEditFormValid}
+        />
       ) : (
         <Box
           sx={{
