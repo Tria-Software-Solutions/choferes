@@ -189,160 +189,165 @@ const ManageRoles: React.FC = () => {
 
   return (
     <Box>
-      <Box
-        display="flex"
-        justifyContent="space-between"
-        alignItems="center"
-        sx={{ mb: 2 }}
-      >
-        <Typography variant={isSmallScreen ? "h4" : "h2"} sx={{ flexGrow: 1 }}>
-          {PAGE_TITLE.MANAGE_ROLES}
-        </Typography>
-        {filteredRoles && (
-          <SplitButton
-            options={createExportOptions(
-              <FontAwesomeIcon icon={faFileExcel} size="lg" />,
-              <FontAwesomeIcon icon={faFilePdf} size="lg" />,
-              exportToExcel,
-              exportToPDF,
-              dataForExport,
-              fileName,
-              headers
-            )}
-            defaultIndex={0}
-            buttonIcon={<DownloadRoundedIcon />}
-          />
-        )}
-      </Box>
-      <Grid
-        container
-        spacing={2}
-        justifyContent="space-between"
-        alignItems="center"
-      >
-        <Grid item xs={12} md={6}>
-          <SearchBar
-            placeholder="Buscar empleado"
-            value={filter}
-            onChange={(e) => setFilter(e.target.value)}
-            sx={{
-              maxWidth: "100%",
-            }}
-            fullWidth
-          />
-        </Grid>
-        {filteredRoles && (
-          <Grid item xs={12} md={6}>
-            <Box
-              display="flex"
-              flexDirection={{ xs: "column", sm: "column", md: "row" }}
-              alignItems="flex-start"
-              justifyContent="flex-end"
-              gap={2}
-            >
-              <Box
-                display="flex"
-                flexDirection={{ xs: "row", sm: "row", md: "row" }}
-                alignItems="center"
-                justifyContent="flex-end"
-                gap={2}
-                width="100%"
-              >
-                <Tooltip title="Semana Anterior" arrow>
-                  <Box>
-                    <Button
-                      variant="contained"
-                      sx={{
-                        height: "56px",
-                        width: { xs: "auto", sm: "auto", md: "auto" },
-                      }}
-                      onClick={handlePreviousWeek}
-                    >
-                      <ArrowBackIosNewRoundedIcon />
-                    </Button>
-                  </Box>
-                </Tooltip>
-                <Tooltip title="Semana Siguiente" arrow>
-                  <Box>
-                    <Button
-                      variant="contained"
-                      sx={{
-                        height: "56px",
-                        width: { xs: "auto", sm: "auto", md: "auto" },
-                      }}
-                      disabled={
-                        !isValidDateForSelect(
-                          new Date(
-                            getCurrentWeekDates(weekOffset + 1)[0].isoDate
-                          )
-                        )
-                      }
-                      onClick={handleNextWeek}
-                    >
-                      <ArrowForwardIosRoundedIcon />
-                    </Button>
-                  </Box>
-                </Tooltip>
-                <Tooltip title="Semana Actual" arrow>
-                  <Box>
-                    <Button
-                      variant="contained"
-                      sx={{
-                        height: "56px",
-                        width: { xs: "auto", sm: "auto", md: "auto" },
-                      }}
-                      disabled={weekOffset === 0}
-                      onClick={handleCurrentWeek}
-                    >
-                      <CalendarTodayRoundedIcon />
-                    </Button>
-                  </Box>
-                </Tooltip>
-              </Box>
-              <LocalizationProvider
-                dateAdapter={AdapterDateFns}
-                adapterLocale={es}
-                localeText={{
-                  okButtonLabel: "Aceptar",
-                  cancelButtonLabel: "Cancelar",
-                  todayButtonLabel: "Hoy",
-                  year: "Año #{currentYear}",
-                  previousMonth: "Mes anterior",
-                  nextMonth: "Mes siguiente",
-                }}
-              >
-                <DatePicker
-                  label="Seleccionar fecha"
-                  value={firstDayOfWeek}
-                  sx={{
-                    width: { xs: "100%", sm: "100%", md: "auto" },
-                    mt: { xs: 2, sm: 2, md: 0 },
-                  }}
-                  maxDate={nextWeekEnd}
-                  onChange={handleDateChange}
-                />
-              </LocalizationProvider>
-            </Box>
-          </Grid>
-        )}
-      </Grid>
-      <br />
       {filteredRoles ? (
-        <DropdownTable
-          filteredEmployees={filteredEmployees}
-          schedules={schedules}
-          hoursWorked={hoursWorked}
-          weekOffset={weekOffset}
-          weekNumber={currentWeekNumber}
-          biweekNumber={currentBiweekNumber}
-          month={currentMonth}
-          year={currentYear}
-          setPeriod={setPeriod}
-          handleChange={handleChange}
-          weeklySummaries={weeklySummaries}
-          biweeklySummaries={biweeklySummaries}
-          monthlySummaries={monthlySummaries}
-        />
+        <>
+          <Box
+            display="flex"
+            justifyContent="space-between"
+            alignItems="center"
+            sx={{ mb: 2 }}
+          >
+            <Typography
+              variant={isSmallScreen ? "h4" : "h2"}
+              sx={{ flexGrow: 1 }}
+            >
+              {PAGE_TITLE.MANAGE_ROLES}
+            </Typography>
+            {filteredRoles && (
+              <SplitButton
+                options={createExportOptions(
+                  <FontAwesomeIcon icon={faFileExcel} size="lg" />,
+                  <FontAwesomeIcon icon={faFilePdf} size="lg" />,
+                  exportToExcel,
+                  exportToPDF,
+                  dataForExport,
+                  fileName,
+                  headers
+                )}
+                defaultIndex={0}
+                buttonIcon={<DownloadRoundedIcon />}
+              />
+            )}
+          </Box>
+          <Grid
+            container
+            spacing={2}
+            justifyContent="space-between"
+            alignItems="center"
+          >
+            <Grid item xs={12} md={6}>
+              <SearchBar
+                placeholder="Buscar empleado"
+                value={filter}
+                onChange={(e) => setFilter(e.target.value)}
+                sx={{
+                  maxWidth: "100%",
+                }}
+                fullWidth
+              />
+            </Grid>
+            {filteredRoles && (
+              <Grid item xs={12} md={6}>
+                <Box
+                  display="flex"
+                  flexDirection={{ xs: "column", sm: "column", md: "row" }}
+                  alignItems="flex-start"
+                  justifyContent="flex-end"
+                  gap={2}
+                >
+                  <Box
+                    display="flex"
+                    flexDirection={{ xs: "row", sm: "row", md: "row" }}
+                    alignItems="center"
+                    justifyContent="flex-end"
+                    gap={2}
+                    width="100%"
+                  >
+                    <Tooltip title="Semana Anterior" arrow>
+                      <Box>
+                        <Button
+                          variant="contained"
+                          sx={{
+                            height: "56px",
+                            width: { xs: "auto", sm: "auto", md: "auto" },
+                          }}
+                          onClick={handlePreviousWeek}
+                        >
+                          <ArrowBackIosNewRoundedIcon />
+                        </Button>
+                      </Box>
+                    </Tooltip>
+                    <Tooltip title="Semana Siguiente" arrow>
+                      <Box>
+                        <Button
+                          variant="contained"
+                          sx={{
+                            height: "56px",
+                            width: { xs: "auto", sm: "auto", md: "auto" },
+                          }}
+                          disabled={
+                            !isValidDateForSelect(
+                              new Date(
+                                getCurrentWeekDates(weekOffset + 1)[0].isoDate
+                              )
+                            )
+                          }
+                          onClick={handleNextWeek}
+                        >
+                          <ArrowForwardIosRoundedIcon />
+                        </Button>
+                      </Box>
+                    </Tooltip>
+                    <Tooltip title="Semana Actual" arrow>
+                      <Box>
+                        <Button
+                          variant="contained"
+                          sx={{
+                            height: "56px",
+                            width: { xs: "auto", sm: "auto", md: "auto" },
+                          }}
+                          disabled={weekOffset === 0}
+                          onClick={handleCurrentWeek}
+                        >
+                          <CalendarTodayRoundedIcon />
+                        </Button>
+                      </Box>
+                    </Tooltip>
+                  </Box>
+                  <LocalizationProvider
+                    dateAdapter={AdapterDateFns}
+                    adapterLocale={es}
+                    localeText={{
+                      okButtonLabel: "Aceptar",
+                      cancelButtonLabel: "Cancelar",
+                      todayButtonLabel: "Hoy",
+                      year: "Año #{currentYear}",
+                      previousMonth: "Mes anterior",
+                      nextMonth: "Mes siguiente",
+                    }}
+                  >
+                    <DatePicker
+                      label="Seleccionar fecha"
+                      value={firstDayOfWeek}
+                      sx={{
+                        width: { xs: "100%", sm: "100%", md: "auto" },
+                        mt: { xs: 2, sm: 2, md: 0 },
+                      }}
+                      maxDate={nextWeekEnd}
+                      onChange={handleDateChange}
+                    />
+                  </LocalizationProvider>
+                </Box>
+              </Grid>
+            )}
+          </Grid>
+          <br />
+          <DropdownTable
+            filteredEmployees={filteredEmployees}
+            schedules={schedules}
+            hoursWorked={hoursWorked}
+            weekOffset={weekOffset}
+            weekNumber={currentWeekNumber}
+            biweekNumber={currentBiweekNumber}
+            month={currentMonth}
+            year={currentYear}
+            setPeriod={setPeriod}
+            handleChange={handleChange}
+            weeklySummaries={weeklySummaries}
+            biweeklySummaries={biweeklySummaries}
+            monthlySummaries={monthlySummaries}
+          />
+        </>
       ) : (
         <Box
           sx={{
