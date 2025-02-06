@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "main": "index.js",
   "scripts": {
-    "build": "tsc",
+    "build": "tsc && cp src/config/config.json dist/config/config.json",
     "start": "node dist/server.js",
     "dev": "ts-node src/server.ts"
   },
