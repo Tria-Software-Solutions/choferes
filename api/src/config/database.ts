@@ -1,4 +1,5 @@
 import { Sequelize } from 'sequelize';
+require('dotenv').config(); 
 const config = require('./config.json'); 
 
 const env = process.env.NODE_ENV || 'development'; 
