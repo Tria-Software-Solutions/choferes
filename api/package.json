@@ -23,7 +23,7 @@
     "sequelize": "^6.37.5",
     "sequelize-typescript": "^2.1.6",
     "ts-node": "^10.9.2",
-    "typescript": "^5.6.2"
+    "typescript": "^5.7.3"
   },
   "devDependencies": {
     "@types/cors": "^2.8.17",

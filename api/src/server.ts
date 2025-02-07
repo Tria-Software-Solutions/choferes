@@ -33,7 +33,7 @@ sequelize.sync()
   .then(() => {
     console.log('Database synchronized');
   })
-  .catch((error) => {
+  .catch((error: any) => {
     console.error('Error syncing database:', error);
   });
 
