@@ -1,12 +1,9 @@
 "use strict";
-Object.defineProperty(exports, "__esModule", { value: true });
-const sequelize_1 = require("sequelize");
-const config = require('./config.json');
+const { Sequelize } = require('sequelize');
 const env = process.env.NODE_ENV || 'development';
-const dbConfig = config[env];
-const sequelize = new sequelize_1.Sequelize(dbConfig.database, dbConfig.username, dbConfig.password, {
+const dbConfig = require('./config')[env];
+const sequelize = new Sequelize(dbConfig.database, dbConfig.username, dbConfig.password, {
     host: dbConfig.host,
-    dialect: 'postgres',
-    logging: false,
+    dialect: dbConfig.dialect,
 });
-exports.default = sequelize;
+module.exports = sequelize;
