@@ -24,8 +24,8 @@ Employee.init(
     },
   },
   {
-    sequelize,
-    modelName: "Employee",
-    tableName: "employees",
+    sequelize, 
+    modelName: 'Employee',
+    tableName: 'employees',
   }
 );

@@ -48,6 +48,5 @@ Vehicle.init(
     sequelize,
     modelName: "Vehicle",
     tableName: "vehicles",
-    timestamps: true,
   }
 );
