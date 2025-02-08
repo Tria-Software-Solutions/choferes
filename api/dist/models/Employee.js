@@ -25,6 +25,6 @@ Employee.init({
     },
 }, {
     sequelize: database_1.default,
-    modelName: "Employee",
-    tableName: "employees",
+    modelName: 'Employee',
+    tableName: 'employees',
 });
