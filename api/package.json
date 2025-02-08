@@ -5,7 +5,9 @@
   "scripts": {
     "build": "npm install && tsc && mkdir -p dist/config && cp src/config/config.js dist/config/config.js",
     "start": "node dist/server.js",
-    "dev": "ts-node src/server.ts"
+    "dev": "ts-node src/server.ts",
+    "migrate:dev": "npx sequelize-cli db:migrate --config src/config/config.js",
+    "migrate:prod": "NODE_ENV=production npx sequelize-cli db:migrate --config src/config/config.js"
   },
   "keywords": [],
   "author": "",
