@@ -5,11 +5,19 @@ import { WeeklySummary } from "../models/WeeklySummary";
 export const useWeeklySummaries = () => {
   const [weeklySummaries, setWeeklySummaries] = useState<WeeklySummary[]>([]);
   const [totalCount, setTotalCount] = useState(0);
+  const [isLoading, setIsLoading] = useState(false);
 
   const fetchWeeklySummaries = useCallback(async () => {
-    const data = await WeeklySummaryService.fetchWeeklySummaries();
-    setWeeklySummaries(data);
-    setTotalCount(data.length);
+    setIsLoading(true);
+    try {
+      const data = await WeeklySummaryService.fetchWeeklySummaries();
+      setWeeklySummaries(data);
+      setTotalCount(data.length);
+    } catch (error) {
+      console.error("Error fetching weekly summaries:", error);
+    } finally {
+      setIsLoading(false);
+    }
   }, []);
 
   const handleAddWeeklySummary = async (newWeeklySummary: WeeklySummary) => {
@@ -40,7 +48,8 @@ export const useWeeklySummaries = () => {
     setTotalCount((prev) => prev - 1);
   };
 
-  const totalWeeklyHours = WeeklySummaryService.calculateTotalWeeklyHours(weeklySummaries);
+  const totalWeeklyHours =
+    WeeklySummaryService.calculateTotalWeeklyHours(weeklySummaries);
 
   useEffect(() => {
     fetchWeeklySummaries();
@@ -49,10 +58,11 @@ export const useWeeklySummaries = () => {
   return {
     weeklySummaries,
     totalCount,
+    isLoading,
     fetchWeeklySummaries,
     handleAddWeeklySummary,
     handleUpdateWeeklySummary,
     handleDeleteWeeklySummary,
-    totalWeeklyHours
+    totalWeeklyHours,
   };
 };

@@ -5,11 +5,19 @@ import { Schedule } from "../models/Schedule";
 export const useSchedules = () => {
   const [schedules, setSchedules] = useState<Schedule[]>([]);
   const [totalCount, setTotalCount] = useState(0);
+  const [isLoading, setIsLoading] = useState(false);
 
   const fetchSchedules = useCallback(async () => {
-    const data = await ScheduleService.fetchSchedules();
-    setSchedules(data);
-    setTotalCount(data.length);
+    setIsLoading(true);
+    try {
+      const data = await ScheduleService.fetchSchedules();
+      setSchedules(data);
+      setTotalCount(data.length);
+    } catch (error) {
+      console.error("Error fetching schedules:", error);
+    } finally {
+      setIsLoading(false);
+    }
   }, []);
 
   const handleAddSchedule = async (newSchedule: Schedule) => {
@@ -43,6 +51,7 @@ export const useSchedules = () => {
   return {
     schedules,
     totalCount,
+    isLoading,
     fetchSchedules,
     handleAddSchedule,
     handleUpdateSchedule,

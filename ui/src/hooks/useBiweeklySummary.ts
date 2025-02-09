@@ -7,11 +7,19 @@ export const useBiweeklySummaries = () => {
     []
   );
   const [totalCount, setTotalCount] = useState(0);
+  const [isLoading, setIsLoading] = useState(false);
 
   const fetchBiweeklySummaries = useCallback(async () => {
-    const data = await BiweeklySummaryService.fetchBiweeklySummaries();
-    setBiweeklySummaries(data);
-    setTotalCount(data.length);
+    setIsLoading(true);
+    try {
+      const data = await BiweeklySummaryService.fetchBiweeklySummaries();
+      setBiweeklySummaries(data);
+      setTotalCount(data.length);
+    } catch (error) {
+      console.error("Error fetching biweekly summaries:", error);
+    } finally {
+      setIsLoading(false);
+    }
   }, []);
 
   const handleAddBiweeklySummary = async (
@@ -47,7 +55,8 @@ export const useBiweeklySummaries = () => {
     setTotalCount((prev) => prev - 1);
   };
 
-  const totalBiweeklyHours = BiweeklySummaryService.calculateTotalBiweeklyHours(biweeklySummaries);
+  const totalBiweeklyHours =
+    BiweeklySummaryService.calculateTotalBiweeklyHours(biweeklySummaries);
 
   useEffect(() => {
     fetchBiweeklySummaries();
@@ -56,6 +65,7 @@ export const useBiweeklySummaries = () => {
   return {
     biweeklySummaries,
     totalCount,
+    isLoading,
     fetchBiweeklySummaries,
     handleAddBiweeklySummary,
     handleUpdateBiweeklySummary,
