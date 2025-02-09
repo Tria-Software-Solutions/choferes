@@ -319,68 +319,32 @@ const ManageRoles: React.FC = () => {
                       </Box>
                     </Tooltip>
                   </Box>
-                </Tooltip>
-                <Tooltip title="Semana Siguiente" arrow>
-                  <Box>
-                    <Button
-                      variant="contained"
+                  <LocalizationProvider
+                    dateAdapter={AdapterDateFns}
+                    adapterLocale={es}
+                    localeText={{
+                      okButtonLabel: "Aceptar",
+                      cancelButtonLabel: "Cancelar",
+                      todayButtonLabel: "Hoy",
+                      year: "Año #{currentYear}",
+                      previousMonth: "Mes anterior",
+                      nextMonth: "Mes siguiente",
+                    }}
+                  >
+                    <DatePicker
+                      label="Seleccionar fecha"
+                      value={firstDayOfWeek}
                       sx={{
-                        height: "56px",
-                        width: { xs: "auto", sm: "auto", md: "auto" },
+                        width: { xs: "100%", sm: "100%", md: "auto" },
+                        mt: { xs: 2, sm: 2, md: 0 },
                       }}
-                      disabled={
-                        !isValidDateForSelect(
-                          new Date(
-                            getCurrentWeekDates(weekOffset + 1)[0].isoDate
-                          )
-                        )
-                      }
-                      onClick={handleNextWeek}
-                    >
-                      <ArrowForwardIosRoundedIcon />
-                    </Button>
-                  </Box>
-                </Tooltip>
-                <Tooltip title="Semana Actual" arrow>
-                  <Box>
-                    <Button
-                      variant="contained"
-                      sx={{
-                        height: "56px",
-                        width: { xs: "auto", sm: "auto", md: "auto" },
-                      }}
-                      disabled={weekOffset === 0}
-                      onClick={handleCurrentWeek}
-                    >
-                      <CalendarTodayRoundedIcon />
-                    </Button>
-                  </Box>
-                </Tooltip>
-              </Box>
-              <LocalizationProvider
-                dateAdapter={AdapterDateFns}
-                adapterLocale={es}
-                localeText={{
-                  okButtonLabel: "Aceptar",
-                  cancelButtonLabel: "Cancelar",
-                  todayButtonLabel: "Hoy",
-                  year: "Año #{currentYear}",
-                  previousMonth: "Mes anterior",
-                  nextMonth: "Mes siguiente",
-                }}
-              >
-                <DatePicker
-                  label="Seleccionar fecha"
-                  value={firstDayOfWeek}
-                  sx={{
-                    width: { xs: "100%", sm: "100%", md: "auto" },
-                    mt: { xs: 2, sm: 2, md: 0 },
-                  }}
-                  maxDate={nextWeekEnd}
-                  onChange={handleDateChange}
-                />
-              </LocalizationProvider>
-            </Box>
+                      maxDate={nextWeekEnd}
+                      onChange={handleDateChange}
+                    />
+                  </LocalizationProvider>
+                </Box>
+              </Grid>
+            )}
           </Grid>
           <br />
           {filteredRoles ? (
@@ -415,7 +379,6 @@ const ManageRoles: React.FC = () => {
             </Box>
           )}
         </>
-
       )}
     </Box>
   );
