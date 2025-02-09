@@ -7,11 +7,19 @@ export const useMonthlySummaries = () => {
     []
   );
   const [totalCount, setTotalCount] = useState(0);
+  const [isLoading, setIsLoading] = useState(false);
 
   const fetchMonthlySummaries = useCallback(async () => {
-    const data = await MonthlySummaryService.fetchMonthlySummaries();
-    setMonthlySummaries(data);
-    setTotalCount(data.length);
+    setIsLoading(true);
+    try {
+      const data = await MonthlySummaryService.fetchMonthlySummaries();
+      setMonthlySummaries(data);
+      setTotalCount(data.length);
+    } catch (error) {
+      console.error("Error fetching monthly summaries:", error);
+    } finally {
+      setIsLoading(false);
+    }
   }, []);
 
   const handleAddMonthlySummary = async (newMonthlySummary: MonthlySummary) => {
@@ -42,7 +50,8 @@ export const useMonthlySummaries = () => {
     setTotalCount((prev) => prev - 1);
   };
 
-  const totalMonthlyHours = MonthlySummaryService.calculateTotalMonthlyHours(monthlySummaries);
+  const totalMonthlyHours =
+    MonthlySummaryService.calculateTotalMonthlyHours(monthlySummaries);
 
   useEffect(() => {
     fetchMonthlySummaries();
@@ -51,10 +60,11 @@ export const useMonthlySummaries = () => {
   return {
     monthlySummaries,
     totalCount,
+    isLoading,
     fetchMonthlySummaries,
     handleAddMonthlySummary,
     handleUpdateMonthlySummary,
     handleDeleteMonthlySummary,
-    totalMonthlyHours
+    totalMonthlyHours,
   };
 };

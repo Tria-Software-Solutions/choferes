@@ -12,6 +12,7 @@ import {
   Tooltip,
   useTheme,
   useMediaQuery,
+  CircularProgress,
 } from "@mui/material";
 import EditableTable from "../components/Table/EditableTable/EditableTable";
 import SearchBar from "../components/SearchBar/SearchBar";
@@ -33,6 +34,7 @@ import { PAGE_TITLE } from "../constants/constants";
 const ManageEmployees: React.FC = () => {
   const {
     employees,
+    isLoading,
     handleAddEmployee,
     handleUpdateEmployee,
     handleDeleteEmployee,
@@ -166,115 +168,7 @@ const ManageEmployees: React.FC = () => {
           />
         )}
       </Box>
-      <Grid
-        container
-        spacing={2}
-        justifyContent="space-between"
-        alignItems="center"
-      >
-        <Grid item xs={12} md={6}>
-          {filteredEmployees && (
-            <SearchBar
-              placeholder="Buscar empleado"
-              value={filter}
-              onChange={(e) => setFilter(e.target.value)}
-              sx={{ maxWidth: "100%" }}
-              fullWidth
-            />
-          )}
-        </Grid>
-        <Grid item xs={12} md={6}>
-          <Box
-            display="flex"
-            flexDirection={{ xs: "column", sm: "column", md: "row" }}
-            alignItems="center"
-            justifyContent="flex-end"
-            gap={2}
-          >
-            <Grid container spacing={2} alignItems="center">
-              <Grid item xs={6} md={6}>
-                <TextField
-                  label="Nombre"
-                  variant="outlined"
-                  fullWidth
-                  sx={{
-                    height: 56,
-                  }}
-                  value={addFields.firstName}
-                  onChange={(e) =>
-                    setAddFields({
-                      ...addFields,
-                      firstName: e.target.value,
-                    })
-                  }
-                />
-              </Grid>
-              <Grid item xs={6} md={6}>
-                <TextField
-                  label="Apellido"
-                  variant="outlined"
-                  fullWidth
-                  sx={{
-                    height: 56,
-                  }}
-                  value={addFields.lastName}
-                  onChange={(e) =>
-                    setAddFields({ ...addFields, lastName: e.target.value })
-                  }
-                />
-              </Grid>
-            </Grid>
-            <Tooltip title="Agregar Empleado" arrow>
-              <Box
-                sx={{
-                  width: { xs: "100%", md: "auto" },
-                  display: "flex",
-                  justifyContent: { xs: "stretch", md: "flex-end" },
-                }}
-              >
-                <Button
-                  variant="contained"
-                  color="primary"
-                  sx={{
-                    minHeight: 56,
-                    display: "flex",
-                    justifyContent: "center",
-                    lineHeight: "normal",
-                    width: { xs: "100%", md: "auto" },
-                  }}
-                  onClick={handleAdd}
-                  disabled={!isAddFormValid}
-                >
-                  <PersonAddAlt1RoundedIcon />
-                </Button>
-              </Box>
-            </Tooltip>
-          </Box>
-        </Grid>
-      </Grid>
-      <br />
-      {filteredEmployees.length > 0 ? (
-        <EditableTable<Employee>
-          data={filteredEmployees}
-          columns={["firstName", "lastName"]}
-          editRowId={editRowId}
-          editFields={editFields}
-          setEditField={(field, value) =>
-            setEditFields({ ...editFields, [field]: value })
-          }
-          handleEditClick={handleEditClick}
-          handleCancelClick={handleCancelClick}
-          handleSaveClick={handleSaveClick}
-          handleOpenDialog={handleOpenDialog}
-          getRowId={(row) => row.id}
-          totalCount={totalCount}
-          page={page}
-          rowsPerPage={rowsPerPage}
-          setPage={setPage}
-          setRowsPerPage={setRowsPerPage}
-          isSaveDisabled={!isEditFormValid}
-        />
-      ) : (
+      {isLoading ? (
         <Box
           sx={{
             display: "flex",
@@ -284,10 +178,134 @@ const ManageEmployees: React.FC = () => {
             paddingTop: "10%",
           }}
         >
-          <Typography variant="h6" color="textSecondary">
-            No se encontraron empleados para mostrar.
-          </Typography>
+          <CircularProgress />
         </Box>
+      ) : (
+        <>
+          <Grid
+            container
+            spacing={2}
+            justifyContent="space-between"
+            alignItems="center"
+          >
+            <Grid item xs={12} md={6}>
+              {filteredEmployees && (
+                <SearchBar
+                  placeholder="Buscar empleado"
+                  value={filter}
+                  onChange={(e) => setFilter(e.target.value)}
+                  sx={{ maxWidth: "100%" }}
+                  fullWidth
+                />
+              )}
+            </Grid>
+            <Grid item xs={12} md={6}>
+              <Box
+                display="flex"
+                flexDirection={{ xs: "column", sm: "column", md: "row" }}
+                alignItems="center"
+                justifyContent="flex-end"
+                gap={2}
+              >
+                <Grid container spacing={2} alignItems="center">
+                  <Grid item xs={6} md={6}>
+                    <TextField
+                      label="Nombre"
+                      variant="outlined"
+                      fullWidth
+                      sx={{
+                        height: 56,
+                      }}
+                      value={addFields.firstName}
+                      onChange={(e) =>
+                        setAddFields({
+                          ...addFields,
+                          firstName: e.target.value,
+                        })
+                      }
+                    />
+                  </Grid>
+                  <Grid item xs={6} md={6}>
+                    <TextField
+                      label="Apellido"
+                      variant="outlined"
+                      fullWidth
+                      sx={{
+                        height: 56,
+                      }}
+                      value={addFields.lastName}
+                      onChange={(e) =>
+                        setAddFields({ ...addFields, lastName: e.target.value })
+                      }
+                    />
+                  </Grid>
+                </Grid>
+                <Tooltip title="Agregar Empleado" arrow>
+                  <Box
+                    sx={{
+                      width: { xs: "100%", md: "auto" },
+                      display: "flex",
+                      justifyContent: { xs: "stretch", md: "flex-end" },
+                    }}
+                  >
+                    <Button
+                      variant="contained"
+                      color="primary"
+                      sx={{
+                        minHeight: 56,
+                        display: "flex",
+                        justifyContent: "center",
+                        lineHeight: "normal",
+                        width: { xs: "100%", md: "auto" },
+                      }}
+                      onClick={handleAdd}
+                      disabled={!isAddFormValid}
+                    >
+                      <PersonAddAlt1RoundedIcon />
+                    </Button>
+                  </Box>
+                </Tooltip>
+              </Box>
+            </Grid>
+          </Grid>
+          <br />
+          {filteredEmployees.length > 0 ? (
+            <EditableTable<Employee>
+              data={filteredEmployees}
+              columns={["firstName", "lastName"]}
+              editRowId={editRowId}
+              editFields={editFields}
+              setEditField={(field, value) =>
+                setEditFields({ ...editFields, [field]: value })
+              }
+              handleEditClick={handleEditClick}
+              handleCancelClick={handleCancelClick}
+              handleSaveClick={handleSaveClick}
+              handleOpenDialog={handleOpenDialog}
+              getRowId={(row) => row.id}
+              totalCount={totalCount}
+              page={page}
+              rowsPerPage={rowsPerPage}
+              setPage={setPage}
+              setRowsPerPage={setRowsPerPage}
+              isSaveDisabled={!isEditFormValid}
+            />
+          ) : (
+            <Box
+              sx={{
+                display: "flex",
+                justifyContent: "center",
+                alignItems: "center",
+                textAlign: "center",
+                paddingTop: "10%",
+              }}
+            >
+              <Typography variant="h6" color="textSecondary">
+                No se encontraron empleados para mostrar.
+              </Typography>
+            </Box>
+          )}
+        </>
       )}
       <Dialog open={dialogOpen} onClose={handleCloseDialog}>
         <DialogTitle>Confirmar Eliminación</DialogTitle>

@@ -5,12 +5,21 @@ import { HoursWorked } from "../models/HoursWorked";
 export const useHours = () => {
   const [hoursWorked, setHoursWorked] = useState<HoursWorked[]>([]);
   const [totalCount, setTotalCount] = useState(0);
+  const [isLoading, setIsLoading] = useState(false);
 
   const fetchHours = useCallback(async (): Promise<HoursWorked[]> => {
-    const data = await HoursService.fetchHours();
-    setHoursWorked(data);
-    setTotalCount(data.length);
-    return data;
+    setIsLoading(true);
+    try {
+      const data = await HoursService.fetchHours();
+      setHoursWorked(data);
+      setTotalCount(data.length);
+      return data;
+    } catch (error) {
+      console.error("Error fetching hours:", error);
+      return [];
+    } finally {
+      setIsLoading(false);
+    }
   }, []);
 
   const handleAddHours = async (newHours: HoursWorked) => {
@@ -19,7 +28,10 @@ export const useHours = () => {
     setTotalCount((prev) => prev + 1);
   };
 
-  const handleUpdateHours = async (id: number, updatedHours: Partial<HoursWorked>) => {
+  const handleUpdateHours = async (
+    id: number,
+    updatedHours: Partial<HoursWorked>
+  ) => {
     await HoursService.updateHours(id, updatedHours);
     setHoursWorked((prev) =>
       prev.map((hours) =>
@@ -41,6 +53,7 @@ export const useHours = () => {
   return {
     hoursWorked,
     totalCount,
+    isLoading,
     fetchHours,
     handleAddHours,
     handleUpdateHours,

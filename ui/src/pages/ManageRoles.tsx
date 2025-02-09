@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import {
   Box,
   Button,
+  CircularProgress,
   Grid,
   Tooltip,
   Typography,
@@ -56,8 +57,13 @@ import { PAGE_TITLE } from "../constants/constants";
 const ManageRoles: React.FC = () => {
   const { employees } = useEmployees();
   const { schedules } = useSchedules();
-  const { hoursWorked, fetchHours, handleAddHours, handleUpdateHours } =
-    useHours();
+  const {
+    hoursWorked,
+    isLoading,
+    fetchHours,
+    handleAddHours,
+    handleUpdateHours,
+  } = useHours();
   const { handleSummaryChange, handleSummaryUpdate } = useSummaries();
   const [filteredRoles, setFilteredRoles] = useState(true);
   const { weeklySummaries, fetchWeeklySummaries } = useWeeklySummaries();
@@ -214,52 +220,104 @@ const ManageRoles: React.FC = () => {
           />
         )}
       </Box>
-      <Grid
-        container
-        spacing={2}
-        justifyContent="space-between"
-        alignItems="center"
-      >
-        <Grid item xs={12} md={6}>
-          <SearchBar
-            placeholder="Buscar empleado"
-            value={filter}
-            onChange={(e) => setFilter(e.target.value)}
-            sx={{
-              maxWidth: "100%",
-            }}
-            fullWidth
-          />
-        </Grid>
-        {filteredRoles && (
-          <Grid item xs={12} md={6}>
-            <Box
-              display="flex"
-              flexDirection={{ xs: "column", sm: "column", md: "row" }}
-              alignItems="flex-start"
-              justifyContent="flex-end"
-              gap={2}
-            >
-              <Box
-                display="flex"
-                flexDirection={{ xs: "row", sm: "row", md: "row" }}
-                alignItems="center"
-                justifyContent="flex-end"
-                gap={2}
-                width="100%"
-              >
-                <Tooltip title="Semana Anterior" arrow>
-                  <Box>
-                    <Button
-                      variant="contained"
-                      sx={{
-                        height: "56px",
-                        width: { xs: "auto", sm: "auto", md: "auto" },
-                      }}
-                      onClick={handlePreviousWeek}
-                    >
-                      <ArrowBackIosNewRoundedIcon />
-                    </Button>
+      {isLoading ? (
+        <Box
+          sx={{
+            display: "flex",
+            justifyContent: "center",
+            alignItems: "center",
+            textAlign: "center",
+            paddingTop: "10%",
+          }}
+        >
+          <CircularProgress />
+        </Box>
+      ) : (
+        <>
+          <Grid
+            container
+            spacing={2}
+            justifyContent="space-between"
+            alignItems="center"
+          >
+            <Grid item xs={12} md={6}>
+              <SearchBar
+                placeholder="Buscar empleado"
+                value={filter}
+                onChange={(e) => setFilter(e.target.value)}
+                sx={{
+                  maxWidth: "100%",
+                }}
+                fullWidth
+              />
+            </Grid>
+            {filteredRoles && (
+              <Grid item xs={12} md={6}>
+                <Box
+                  display="flex"
+                  flexDirection={{ xs: "column", sm: "column", md: "row" }}
+                  alignItems="flex-start"
+                  justifyContent="flex-end"
+                  gap={2}
+                >
+                  <Box
+                    display="flex"
+                    flexDirection={{ xs: "row", sm: "row", md: "row" }}
+                    alignItems="center"
+                    justifyContent="flex-end"
+                    gap={2}
+                    width="100%"
+                  >
+                    <Tooltip title="Semana Anterior" arrow>
+                      <Box>
+                        <Button
+                          variant="contained"
+                          sx={{
+                            height: "56px",
+                            width: { xs: "auto", sm: "auto", md: "auto" },
+                          }}
+                          onClick={handlePreviousWeek}
+                        >
+                          <ArrowBackIosNewRoundedIcon />
+                        </Button>
+                      </Box>
+                    </Tooltip>
+                    <Tooltip title="Semana Siguiente" arrow>
+                      <Box>
+                        <Button
+                          variant="contained"
+                          sx={{
+                            height: "56px",
+                            width: { xs: "auto", sm: "auto", md: "auto" },
+                          }}
+                          disabled={
+                            !isValidDateForSelect(
+                              new Date(
+                                getCurrentWeekDates(weekOffset + 1)[0].isoDate
+                              )
+                            )
+                          }
+                          onClick={handleNextWeek}
+                        >
+                          <ArrowForwardIosRoundedIcon />
+                        </Button>
+                      </Box>
+                    </Tooltip>
+                    <Tooltip title="Semana Actual" arrow>
+                      <Box>
+                        <Button
+                          variant="contained"
+                          sx={{
+                            height: "56px",
+                            width: { xs: "auto", sm: "auto", md: "auto" },
+                          }}
+                          disabled={weekOffset === 0}
+                          onClick={handleCurrentWeek}
+                        >
+                          <CalendarTodayRoundedIcon />
+                        </Button>
+                      </Box>
+                    </Tooltip>
                   </Box>
                 </Tooltip>
                 <Tooltip title="Semana Siguiente" arrow>
@@ -324,39 +382,40 @@ const ManageRoles: React.FC = () => {
               </LocalizationProvider>
             </Box>
           </Grid>
-        )}
-      </Grid>
-      <br />
-      {filteredRoles ? (
-        <DropdownTable
-          filteredEmployees={filteredEmployees}
-          schedules={schedules}
-          hoursWorked={hoursWorked}
-          weekOffset={weekOffset}
-          weekNumber={currentWeekNumber}
-          biweekNumber={currentBiweekNumber}
-          month={currentMonth}
-          year={currentYear}
-          setPeriod={setPeriod}
-          handleChange={handleChange}
-          weeklySummaries={weeklySummaries}
-          biweeklySummaries={biweeklySummaries}
-          monthlySummaries={monthlySummaries}
-        />
-      ) : (
-        <Box
-          sx={{
-            display: "flex",
-            justifyContent: "center",
-            alignItems: "center",
-            textAlign: "center",
-            paddingTop: "10%",
-          }}
-        >
-          <Typography variant="h6" color="textSecondary">
-            No se encontraron empleados para mostrar.
-          </Typography>
-        </Box>
+          <br />
+          {filteredRoles ? (
+            <DropdownTable
+              filteredEmployees={filteredEmployees}
+              schedules={schedules}
+              hoursWorked={hoursWorked}
+              weekOffset={weekOffset}
+              weekNumber={currentWeekNumber}
+              biweekNumber={currentBiweekNumber}
+              month={currentMonth}
+              year={currentYear}
+              setPeriod={setPeriod}
+              handleChange={handleChange}
+              weeklySummaries={weeklySummaries}
+              biweeklySummaries={biweeklySummaries}
+              monthlySummaries={monthlySummaries}
+            />
+          ) : (
+            <Box
+              sx={{
+                display: "flex",
+                justifyContent: "center",
+                alignItems: "center",
+                textAlign: "center",
+                paddingTop: "10%",
+              }}
+            >
+              <Typography variant="h6" color="textSecondary">
+                No se encontraron empleados para mostrar.
+              </Typography>
+            </Box>
+          )}
+        </>
+
       )}
     </Box>
   );
