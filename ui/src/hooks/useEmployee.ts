@@ -5,11 +5,19 @@ import { Employee } from "../models/Employee";
 export const useEmployees = () => {
   const [employees, setEmployees] = useState<Employee[]>([]);
   const [totalCount, setTotalCount] = useState(0);
+  const [isLoading, setIsLoading] = useState(false);
 
   const fetchEmployees = useCallback(async () => {
-    const data = await EmployeeService.fetchEmployees();
-    setEmployees(data);
-    setTotalCount(data.length);
+    setIsLoading(true);
+    try {
+      const data = await EmployeeService.fetchEmployees();
+      setEmployees(data);
+      setTotalCount(data.length);
+    } catch (error) {
+      console.error("Error fetching employees:", error);
+    } finally {
+      setIsLoading(false);
+    }
   }, []);
 
   const handleAddEmployee = async (newEmployee: Employee) => {
@@ -43,6 +51,7 @@ export const useEmployees = () => {
   return {
     employees,
     totalCount,
+    isLoading,
     fetchEmployees,
     handleAddEmployee,
     handleUpdateEmployee,
