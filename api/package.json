@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "main": "index.js",
   "scripts": {
-    "build": "npm install && npm install -g typescript && tsc && mkdir -p dist/config && cp src/config/config.js dist/config/config.js",
+    "build": "npm install && ./node_modules/.bin/tsc && mkdir -p dist/config && cp src/config/config.js dist/config/config.js",
     "start": "node dist/server.js",
     "dev": "ts-node src/server.ts",
     "migrate:dev": "npx sequelize-cli db:migrate --config src/config/config.js",
@@ -24,13 +24,13 @@
     "pg-hstore": "^2.3.4",
     "sequelize": "^6.37.5",
     "sequelize-typescript": "^2.1.6",
-    "ts-node": "^10.9.2",
-    "typescript": "^5.7.3"
+    "ts-node": "^10.9.2"
   },
   "devDependencies": {
     "@types/cors": "^2.8.17",
     "@types/date-fns": "^2.6.3",
-    "sequelize-cli": "^6.6.2"
+    "sequelize-cli": "^6.6.2",
+    "typescript": "^5.7.3"
   },
   "engines": {
     "node": "20.x"
