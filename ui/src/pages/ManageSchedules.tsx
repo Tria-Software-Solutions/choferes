@@ -28,7 +28,10 @@ import {
   exportToExcel,
   exportToPDF,
 } from "../utils/exportUtils";
-import { getDayOptionsSpanish } from "../utils/stringUtils";
+import {
+  getDayOptionsSpanish,
+  translateDayOptionsToSpanish,
+} from "../utils/stringUtils";
 import PostAddRoundedIcon from "@mui/icons-material/PostAddRounded";
 import DownloadRoundedIcon from "@mui/icons-material/DownloadRounded";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
@@ -74,7 +77,9 @@ const ManageSchedules: React.FC = () => {
 
   useEffect(() => {
     const filtered = schedules.filter((schedule) =>
-      `${schedule.label} ${schedule.day} ${schedule.hours}`
+      `${schedule.label} ${translateDayOptionsToSpanish(schedule.day)} ${
+        schedule.hours
+      }`
         .toLowerCase()
         .includes(filter.toLowerCase())
     );
