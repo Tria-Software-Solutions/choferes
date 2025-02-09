@@ -11,12 +11,7 @@ const sequelize = new Sequelize(
     host: dbConfig.host,
     dialect: dbConfig.dialect,
     logging: false,
-    dialectOptions: {
-        ssl: {
-          require: true,
-          rejectUnauthorized: false, 
-        },
-      },
+    dialectOptions: dbConfig.dialectOptions || {},
   }
 );
 
