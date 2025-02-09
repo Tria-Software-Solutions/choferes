@@ -6,11 +6,6 @@ const sequelize = new Sequelize(dbConfig.database, dbConfig.username, dbConfig.p
     host: dbConfig.host,
     dialect: dbConfig.dialect,
     logging: false,
-    dialectOptions: {
-        ssl: {
-            require: true,
-            rejectUnauthorized: false,
-        },
-    },
+    dialectOptions: dbConfig.dialectOptions || {},
 });
 module.exports = sequelize;
