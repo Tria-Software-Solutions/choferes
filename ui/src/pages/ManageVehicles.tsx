@@ -431,7 +431,7 @@ const ManageVehicles: React.FC = () => {
         alignItems="center"
       >
         <Grid item xs={12} md={6}>
-          {filteredVehicles.length > 0 && (
+          {filteredVehicles && (
             <SearchBar
               placeholder="Buscar vehículo"
               value={filter}
