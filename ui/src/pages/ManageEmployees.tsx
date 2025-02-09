@@ -173,7 +173,7 @@ const ManageEmployees: React.FC = () => {
         alignItems="center"
       >
         <Grid item xs={12} md={6}>
-          {filteredEmployees.length > 0 && (
+          {filteredEmployees && (
             <SearchBar
               placeholder="Buscar empleado"
               value={filter}

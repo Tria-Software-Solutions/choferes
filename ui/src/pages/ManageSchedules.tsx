@@ -198,7 +198,7 @@ const ManageSchedules: React.FC = () => {
         alignItems="center"
       >
         <Grid item xs={12} md={6}>
-          {filteredSchedules.length > 0 && (
+          {filteredSchedules && (
             <SearchBar
               placeholder="Buscar horario"
               value={filter}
