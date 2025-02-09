@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "main": "index.js",
   "scripts": {
-    "build": "npm install && tsc && mkdir -p dist/config && cp src/config/config.js dist/config/config.js",
+    "build": "tsc",
     "start": "node dist/server.js",
     "dev": "ts-node src/server.ts",
     "migrate:dev": "npx sequelize-cli db:migrate --config src/config/config.js",
