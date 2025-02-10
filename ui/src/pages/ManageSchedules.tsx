@@ -42,7 +42,7 @@ import { PAGE_TITLE } from "../constants/constants";
 const ManageSchedules: React.FC = () => {
   const {
     schedules,
-    isLoading,
+    isLoadingSchedules,
     fetchSchedules,
     handleAddSchedule,
     handleUpdateSchedule,
@@ -198,7 +198,7 @@ const ManageSchedules: React.FC = () => {
           />
         )}
       </Box>
-      {isLoading ? (
+      {isLoadingSchedules ? (
         <Box
           sx={{
             display: "flex",

@@ -7,10 +7,10 @@ export const useBiweeklySummaries = () => {
     []
   );
   const [totalCount, setTotalCount] = useState(0);
-  const [isLoading, setIsLoading] = useState(false);
+  const [isLoadingBiweeklySummaries, setIsLoadingBiweeklySummaries] = useState(false);
 
   const fetchBiweeklySummaries = useCallback(async () => {
-    setIsLoading(true);
+    setIsLoadingBiweeklySummaries(true);
     try {
       const data = await BiweeklySummaryService.fetchBiweeklySummaries();
       setBiweeklySummaries(data);
@@ -18,7 +18,7 @@ export const useBiweeklySummaries = () => {
     } catch (error) {
       console.error("Error fetching biweekly summaries:", error);
     } finally {
-      setIsLoading(false);
+      setIsLoadingBiweeklySummaries(false);
     }
   }, []);
 
@@ -65,7 +65,7 @@ export const useBiweeklySummaries = () => {
   return {
     biweeklySummaries,
     totalCount,
-    isLoading,
+    isLoadingBiweeklySummaries,
     fetchBiweeklySummaries,
     handleAddBiweeklySummary,
     handleUpdateBiweeklySummary,
