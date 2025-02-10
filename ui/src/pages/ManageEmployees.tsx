@@ -34,7 +34,7 @@ import { PAGE_TITLE } from "../constants/constants";
 const ManageEmployees: React.FC = () => {
   const {
     employees,
-    isLoading,
+    isLoadingEmployees,
     handleAddEmployee,
     handleUpdateEmployee,
     handleDeleteEmployee,
@@ -168,7 +168,7 @@ const ManageEmployees: React.FC = () => {
           />
         )}
       </Box>
-      {isLoading ? (
+      {isLoadingEmployees ? (
         <Box
           sx={{
             display: "flex",

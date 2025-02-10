@@ -55,11 +55,11 @@ import {
 import { PAGE_TITLE } from "../constants/constants";
 
 const ManageRoles: React.FC = () => {
-  const { employees } = useEmployees();
-  const { schedules } = useSchedules();
+  const { employees, isLoadingEmployees } = useEmployees();
+  const { schedules, isLoadingSchedules } = useSchedules();
   const {
     hoursWorked,
-    isLoading,
+    isLoadingHours,
     fetchHours,
     handleAddHours,
     handleUpdateHours,
@@ -220,7 +220,7 @@ const ManageRoles: React.FC = () => {
           />
         )}
       </Box>
-      {isLoading ? (
+      {isLoadingEmployees || isLoadingSchedules || isLoadingHours ? (
         <Box
           sx={{
             display: "flex",
