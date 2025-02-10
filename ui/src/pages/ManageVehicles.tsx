@@ -50,7 +50,7 @@ const ManageVehicles: React.FC = () => {
   const {
     vehicles,
     allVehicles,
-    isLoading,
+    isLoadingVehicles,
     handleAddVehicle,
     handleUpdateVehicle,
     handleDeleteVehicle,
@@ -426,7 +426,7 @@ const ManageVehicles: React.FC = () => {
           />
         )}
       </Box>
-      {isLoading ? (
+      {isLoadingVehicles ? (
         <Box
           sx={{
             display: "flex",

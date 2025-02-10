@@ -7,10 +7,10 @@ export const useMonthlySummaries = () => {
     []
   );
   const [totalCount, setTotalCount] = useState(0);
-  const [isLoading, setIsLoading] = useState(false);
+  const [isLoadingMonthlySummaries, setIsLoadingMonthlySummaries] = useState(false);
 
   const fetchMonthlySummaries = useCallback(async () => {
-    setIsLoading(true);
+    setIsLoadingMonthlySummaries(true);
     try {
       const data = await MonthlySummaryService.fetchMonthlySummaries();
       setMonthlySummaries(data);
@@ -18,7 +18,7 @@ export const useMonthlySummaries = () => {
     } catch (error) {
       console.error("Error fetching monthly summaries:", error);
     } finally {
-      setIsLoading(false);
+      setIsLoadingMonthlySummaries(false);
     }
   }, []);
 
@@ -60,7 +60,7 @@ export const useMonthlySummaries = () => {
   return {
     monthlySummaries,
     totalCount,
-    isLoading,
+    isLoadingMonthlySummaries,
     fetchMonthlySummaries,
     handleAddMonthlySummary,
     handleUpdateMonthlySummary,

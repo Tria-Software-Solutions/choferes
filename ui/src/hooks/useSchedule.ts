@@ -5,10 +5,10 @@ import { Schedule } from "../models/Schedule";
 export const useSchedules = () => {
   const [schedules, setSchedules] = useState<Schedule[]>([]);
   const [totalCount, setTotalCount] = useState(0);
-  const [isLoading, setIsLoading] = useState(false);
+  const [isLoadingSchedules, setIsLoadingSchedules] = useState(false);
 
   const fetchSchedules = useCallback(async () => {
-    setIsLoading(true);
+    setIsLoadingSchedules(true);
     try {
       const data = await ScheduleService.fetchSchedules();
       setSchedules(data);
@@ -16,7 +16,7 @@ export const useSchedules = () => {
     } catch (error) {
       console.error("Error fetching schedules:", error);
     } finally {
-      setIsLoading(false);
+      setIsLoadingSchedules(false);
     }
   }, []);
 
@@ -51,7 +51,7 @@ export const useSchedules = () => {
   return {
     schedules,
     totalCount,
-    isLoading,
+    isLoadingSchedules,
     fetchSchedules,
     handleAddSchedule,
     handleUpdateSchedule,
