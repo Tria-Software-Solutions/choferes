@@ -9,11 +9,11 @@ export const useVehicles = (
   const [allVehicles, setAllVehicles] = useState<Vehicle[]>([]);
   const [count, setCount] = useState(0);
   const [totalCount, setTotalCount] = useState(0);
-  const [isLoading, setIsLoading] = useState(false);
+  const [isLoadingVehicles, setIsLoadingVehicles] = useState(false);
 
   const fetchVehicles = useCallback(
     async (page: number = 1, perPage: number = 10) => {
-      setIsLoading(true);
+      setIsLoadingVehicles(true);
       try {
         const data = await VehicleService.fetchVehicles(page, perPage);
         setAllVehicles(data);
@@ -21,7 +21,7 @@ export const useVehicles = (
       } catch (error) {
         console.error("Error fetching vehicles", error);
       } finally {
-        setIsLoading(false);
+        setIsLoadingVehicles(false);
       }
     },
     []
@@ -29,7 +29,7 @@ export const useVehicles = (
 
   const fetchVehiclesByDate = useCallback(
     async (date: string) => {
-      setIsLoading(true);
+      setIsLoadingVehicles(true);
       try {
         const data = await VehicleService.getVehiclesByDate(date);
         setVehicles(data);
@@ -37,7 +37,7 @@ export const useVehicles = (
       } catch (error) {
         console.error("Error fetching vehicles by date", error);
       } finally {
-        setIsLoading(false);
+        setIsLoadingVehicles(false);
       }
     },
     []
@@ -82,7 +82,7 @@ export const useVehicles = (
     allVehicles,
     count,
     totalCount,
-    isLoading,
+    isLoadingVehicles,
     fetchVehicles,
     fetchVehiclesByDate,
     handleAddVehicle,
