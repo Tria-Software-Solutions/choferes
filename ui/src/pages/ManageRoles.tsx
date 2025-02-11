@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import {
   Box,
   Button,
@@ -127,48 +127,66 @@ const ManageRoles: React.FC = () => {
     }
   };
 
-  const handleChange = async (
-    employee: Employee,
-    day: string,
-    date: Date,
-    selectedLabel: string
-  ) => {
-    const selectedSchedule = schedules.find(
-      (schedule) =>
-        schedule.label === selectedLabel &&
-        schedule.day === setDayOptionsEnglish(day)
-    );
+  const handleChange = useCallback(
+    async (
+      employee: Employee,
+      day: string,
+      date: Date,
+      selectedLabel: string
+    ) => {
+      const selectedSchedule = schedules.find(
+        (schedule) =>
+          schedule.label === selectedLabel &&
+          schedule.day === setDayOptionsEnglish(day)
+      );
 
-    if (!selectedSchedule) {
-      console.error("No se encontró un horario para el label seleccionado");
-      return;
-    }
+      if (!selectedSchedule) {
+        console.error("No se encontró un horario para el label seleccionado");
+        return;
+      }
 
-    await updateHoursAndSummaries(
-      employee,
+      await updateHoursAndSummaries(
+        employee,
+        schedules,
+        hoursWorked,
+        weeklySummaries,
+        biweeklySummaries,
+        monthlySummaries,
+        date,
+        weekOffset,
+        getWeekNumber(date),
+        getBiweekNumber(date),
+        getMonthNumber(date),
+        date.getFullYear(),
+        selectedSchedule,
+        handleAddHours,
+        handleUpdateHours,
+        handleSummaryChange,
+        handleSummaryUpdate,
+        fetchHours
+      );
+
+      await fetchWeeklySummaries();
+      await fetchBiweeklySummaries();
+      await fetchMonthlySummaries();
+    },
+    [
       schedules,
       hoursWorked,
       weeklySummaries,
       biweeklySummaries,
       monthlySummaries,
-      date,
       weekOffset,
-      getWeekNumber(date),
-      getBiweekNumber(date),
-      getMonthNumber(date),
-      date.getFullYear(),
-      selectedSchedule,
       handleAddHours,
       handleUpdateHours,
       handleSummaryChange,
       handleSummaryUpdate,
-      fetchHours
-    );
-
-    await fetchWeeklySummaries();
-    await fetchBiweeklySummaries();
-    await fetchMonthlySummaries();
-  };
+      fetchHours,
+      fetchWeeklySummaries,
+      fetchBiweeklySummaries,
+      fetchMonthlySummaries,
+    ]
+  );
 
   const { dataForExport, headers, fileName } = handleExportTableData(
     filteredEmployees,

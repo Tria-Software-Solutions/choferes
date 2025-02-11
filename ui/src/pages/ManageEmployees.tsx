@@ -64,7 +64,7 @@ const ManageEmployees: React.FC = () => {
   }, [employees, filter]);
 
   const validateAddFields = useCallback(() => {
-    const nameRegex = /^[a-zA-ZáéíóúÁÉÍÓÚñÑ\s]+$/;
+    const nameRegex = /^[a-zA-ZáéíóúÁÉÍÓÚüÜñÑ.\s]+$/;
     const isFirstNameValid =
       nameRegex.test(addFields.firstName) && addFields.firstName !== "";
     const isLastNameValid =
@@ -73,7 +73,7 @@ const ManageEmployees: React.FC = () => {
   }, [addFields]);
 
   const validateEditFields = useCallback(() => {
-    const nameRegex = /^[a-zA-ZáéíóúÁÉÍÓÚñÑ\s]+$/;
+    const nameRegex = /^[a-zA-ZáéíóúÁÉÍÓÚüÜñÑ.\s]+$/;
     const isFirstNameValid =
       nameRegex.test(editFields.firstName) && editFields.firstName !== "";
     const isLastNameValid =
