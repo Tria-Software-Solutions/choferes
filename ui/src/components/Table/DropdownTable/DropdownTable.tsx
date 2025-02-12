@@ -106,16 +106,6 @@ const DropdownTable: React.FC<DropdownTableProps> = React.memo(
       [weekOffset]
     );
 
-    const sortedEmployees = useMemo(() => {
-      return [...filteredEmployees].sort((a, b) => {
-        const nameA = `${a.firstName} ${a.lastName}`;
-        const nameB = `${b.firstName} ${b.lastName}`;
-        return orderDirection === "asc"
-          ? nameA.localeCompare(nameB)
-          : nameB.localeCompare(nameA);
-      });
-    }, [filteredEmployees, orderDirection]);
-
     useEffect(() => {
       setPeriod(selectedPeriod);
     }, [selectedPeriod, setPeriod]);
@@ -237,6 +227,16 @@ const DropdownTable: React.FC<DropdownTableProps> = React.memo(
       setTabValue(newValue);
     };
 
+    const sortedEmployees = useMemo(() => {
+      return [...filteredEmployees].sort((a, b) => {
+        const nameA = `${a.firstName} ${a.lastName}`;
+        const nameB = `${b.firstName} ${b.lastName}`;
+        return orderDirection === "asc"
+          ? nameA.localeCompare(nameB)
+          : nameB.localeCompare(nameA);
+      });
+    }, [filteredEmployees, orderDirection]);
+
     const startIndex = page * rowsPerPage;
     const endIndex = startIndex + rowsPerPage;
     const paginatedEmployees = sortedEmployees.slice(startIndex, endIndex);
@@ -319,7 +319,11 @@ const DropdownTable: React.FC<DropdownTableProps> = React.memo(
                 ))}
                 <TableCell
                   align="center"
-                  sx={{ position: "sticky", right: 0, zIndex: 2 }}
+                  sx={{
+                    position: isSmallScreen ? "static" : "sticky",
+                    right: 0,
+                    zIndex: 2,
+                  }}
                   colSpan={2}
                 >
                   <FormControl>
@@ -518,7 +522,6 @@ const DropdownTable: React.FC<DropdownTableProps> = React.memo(
 
                       return a.label.localeCompare(b.label);
                     });
-
                     return (
                       <TableCell
                         key={day}
@@ -564,7 +567,7 @@ const DropdownTable: React.FC<DropdownTableProps> = React.memo(
                   <TableCell
                     align="left"
                     sx={{
-                      position: "sticky",
+                      position: isSmallScreen ? "static" : "sticky",
                       right: 0,
                       zIndex: 2,
                       backgroundColor: getBackgroundColor(rowIndex),
