@@ -226,7 +226,7 @@ const DropdownTable: React.FC<DropdownTableProps> = React.memo(
     const handleTabChange = (event: React.SyntheticEvent, newValue: string) => {
       setTabValue(newValue);
     };
-
+    
     const sortedEmployees = useMemo(() => {
       return [...filteredEmployees].sort((a, b) => {
         const nameA = `${a.firstName} ${a.lastName}`;
@@ -514,6 +514,7 @@ const DropdownTable: React.FC<DropdownTableProps> = React.memo(
 
                       return a.label.localeCompare(b.label);
                     });
+                    
                     return (
                       <TableCell
                         key={day}
