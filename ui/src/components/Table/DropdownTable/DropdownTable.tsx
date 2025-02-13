@@ -246,14 +246,6 @@ const DropdownTable: React.FC<DropdownTableProps> = React.memo(
 
     const multiplePeriods = getInvolvedPeriods(currentWeek);
 
-    if (!filteredEmployees || filteredEmployees.length === 0) {
-      return (
-        <Typography variant="h6" color="textSecondary">
-          No se encontraron empleados disponibles.
-        </Typography>
-      );
-    }
-
     return (
       <Paper sx={{ width: "100%" }}>
         <TableContainer className="table-container">

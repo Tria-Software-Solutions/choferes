@@ -84,41 +84,6 @@ const EditableTable = <T,>({
     setPage(newPage);
   };
 
-  const handleSortRequest = (column: keyof T) => {
-    const isAsc = orderBy === column && order === "asc";
-    setOrder(isAsc ? "desc" : "asc");
-    setOrderBy(column);
-  };
-
-  const sortedData = [...data].sort((a, b) => {
-    if (a[orderBy] < b[orderBy]) {
-      return order === "asc" ? -1 : 1;
-    }
-    if (a[orderBy] > b[orderBy]) {
-      return order === "asc" ? 1 : -1;
-    }
-    return 0;
-  });
-
-  const paginatedData = sortedData.slice(
-    page * rowsPerPage,
-    page * rowsPerPage + rowsPerPage
-  );
-
-  const columnConfig: Record<
-    string,
-    {
-      type: "text" | "select" | "masked";
-      options?: { value: string; label: string }[];
-    }
-  > = {
-    licensePlate: { type: "masked" },
-    parkingLot: { type: "masked" },
-    brand: { type: "select", options: BRANDS },
-    color: { type: "select", options: COLORS },
-    day: { type: "select", options: getDayOptionsSpanish() },
-  };
-
   const renderEditField = (column: keyof T, value: string) => {
     const config = columnConfig[String(column)];
 
@@ -197,6 +162,41 @@ const EditableTable = <T,>({
         error={!validateField(String(column), value)}
       />
     );
+  };
+
+  const handleSortRequest = (column: keyof T) => {
+    const isAsc = orderBy === column && order === "asc";
+    setOrder(isAsc ? "desc" : "asc");
+    setOrderBy(column);
+  };
+
+  const sortedData = [...data].sort((a, b) => {
+    if (a[orderBy] < b[orderBy]) {
+      return order === "asc" ? -1 : 1;
+    }
+    if (a[orderBy] > b[orderBy]) {
+      return order === "asc" ? 1 : -1;
+    }
+    return 0;
+  });
+
+  const paginatedData = sortedData.slice(
+    page * rowsPerPage,
+    page * rowsPerPage + rowsPerPage
+  );
+
+  const columnConfig: Record<
+    string,
+    {
+      type: "text" | "select" | "masked";
+      options?: { value: string; label: string }[];
+    }
+  > = {
+    licensePlate: { type: "masked" },
+    parkingLot: { type: "masked" },
+    brand: { type: "select", options: BRANDS },
+    color: { type: "select", options: COLORS },
+    day: { type: "select", options: getDayOptionsSpanish() },
   };
 
   return (
