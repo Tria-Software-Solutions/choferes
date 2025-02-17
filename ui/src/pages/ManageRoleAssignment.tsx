@@ -41,7 +41,12 @@ import { useEmployees } from "../hooks/useEmployee";
 import { useSchedules } from "../hooks/useSchedule";
 import { useHours } from "../hooks/useHours";
 import { Employee } from "../models/Employee";
-import { addWeeks, endOfWeek, startOfWeek } from "date-fns";
+import {
+  addWeeks,
+  differenceInCalendarWeeks,
+  endOfWeek,
+  startOfWeek,
+} from "date-fns";
 import SelectorTable from "../components/Table/SelectorTable/SelectorTable";
 import { HoursWorked } from "../models/HoursWorked";
 import { useWeeklySummaries } from "../hooks/useWeeklySummary";
@@ -73,7 +78,6 @@ const ManageRoleAssignment: React.FC = () => {
   } = useMonthlySummaries();
   const [filteredEmployees, setFilteredEmployees] = useState<Employee[]>([]);
   const [totalCount, setTotalCount] = useState(0);
-
   const [weekOffset, setWeekOffset] = useState(0);
   const [firstDayOfWeek, setFirstDayOfWeek] = useState<Date | null>(new Date());
   const [currentWeekNumber, setCurrentWeekNumber] = useState<number>(0);
@@ -82,8 +86,14 @@ const ManageRoleAssignment: React.FC = () => {
   const [currentYear, setCurrentYear] = useState<number>(0);
   const [editRowId, setEditRowId] = useState<number | null>(null);
   const [filter, setFilter] = useState("");
-  //   const [page, setPage] = useState(0);
-  //   const [rowsPerPage, setRowsPerPage] = useState(5);
+
+  const isLoading =
+    isLoadingEmployees ||
+    isLoadingSchedules ||
+    isLoadingHours ||
+    isLoadingWeeklySummaries ||
+    isLoadingBiweeklySummaries ||
+    isLoadingMonthlySummaries;
 
   const handleAddOrUpdateHoursWorked = (
     employeeId: number,
@@ -212,6 +222,14 @@ const ManageRoleAssignment: React.FC = () => {
 
   const handleDateChange = (newDate: Date | null) => {
     setSelectedDate(newDate);
+    setFirstDayOfWeek(newDate);
+    if (newDate) {
+      const today = new Date();
+      const weekOptions: { weekStartsOn: 0 | 1 | 2 | 3 | 4 | 5 | 6 } = {
+        weekStartsOn: 1,
+      };
+      setWeekOffset(differenceInCalendarWeeks(newDate, today, weekOptions));
+    }
   };
 
   const handleNextWeek = () => {
@@ -236,14 +254,6 @@ const ManageRoleAssignment: React.FC = () => {
 
   const theme = useTheme();
   const isSmallScreen = useMediaQuery(theme.breakpoints.down("sm"));
-
-  const isLoading =
-    isLoadingEmployees ||
-    isLoadingSchedules ||
-    isLoadingHours ||
-    isLoadingWeeklySummaries ||
-    isLoadingBiweeklySummaries ||
-    isLoadingMonthlySummaries;
 
   return (
     <Box>
@@ -387,7 +397,7 @@ const ManageRoleAssignment: React.FC = () => {
                 >
                   <DatePicker
                     label="Seleccionar fecha"
-                    value={selectedDate}
+                    value={firstDayOfWeek}
                     sx={{
                       width: { xs: "100%", sm: "100%", md: "auto" },
                       mt: { xs: 2, sm: 2, md: 0 },
@@ -406,6 +416,10 @@ const ManageRoleAssignment: React.FC = () => {
               schedules={schedules}
               hoursWorked={hoursWorked}
               weekOffset={weekOffset}
+              weekNumber={currentWeekNumber}
+              biweekNumber={currentBiweekNumber}
+              month={currentMonth}
+              year={currentYear}
             />
           ) : (
             <Box
