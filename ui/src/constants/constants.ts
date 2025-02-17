@@ -35,6 +35,15 @@ export const TABLE = {
   ROWS_PER_PAGE: "Filas por página",
 };
 
+export const DEFAULT_SCHEDULE_VALUES = [
+  "Ausencia",
+  "Cubre Almuerzo",
+  "Cubre Almuerzo BAC",
+  "Cubre Almuerzo Promerica",
+  "Libre",
+  "Salida Programada",
+]
+
 export const COLORS = [
   { value: 'Blanco', label: 'Blanco' },
   { value: 'Negro', label: 'Negro' },
