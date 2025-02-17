@@ -7,7 +7,8 @@ export const useBiweeklySummaries = () => {
     []
   );
   const [totalCount, setTotalCount] = useState(0);
-  const [isLoadingBiweeklySummaries, setIsLoadingBiweeklySummaries] = useState(false);
+  const [isLoadingBiweeklySummaries, setIsLoadingBiweeklySummaries] =
+    useState(false);
 
   const fetchBiweeklySummaries = useCallback(async () => {
     setIsLoadingBiweeklySummaries(true);
@@ -47,6 +48,32 @@ export const useBiweeklySummaries = () => {
     );
   };
 
+  const handleAddOrUpdateBiweeklySummary = async (
+    newBiweeklySummary: BiweeklySummary
+  ) => {
+    const existingSummary = biweeklySummaries.find(
+      (summary) => summary.id === newBiweeklySummary.id
+    );
+
+    if (existingSummary) {
+      await BiweeklySummaryService.updateBiweeklySummary(
+        newBiweeklySummary.id!,
+        newBiweeklySummary
+      );
+      setBiweeklySummaries((prev) =>
+        prev.map((summary) =>
+          summary.id === newBiweeklySummary.id
+            ? { ...summary, ...newBiweeklySummary }
+            : summary
+        )
+      );
+    } else {
+      await BiweeklySummaryService.addBiweeklySummary(newBiweeklySummary);
+      setBiweeklySummaries((prev) => [...prev, newBiweeklySummary]);
+      setTotalCount((prev) => prev + 1);
+    }
+  };
+
   const handleDeleteBiweeklySummary = async (id: number) => {
     await BiweeklySummaryService.deleteBiweeklySummary(id);
     setBiweeklySummaries((prev) =>
@@ -69,6 +96,7 @@ export const useBiweeklySummaries = () => {
     fetchBiweeklySummaries,
     handleAddBiweeklySummary,
     handleUpdateBiweeklySummary,
+    handleAddOrUpdateBiweeklySummary,
     handleDeleteBiweeklySummary,
     totalBiweeklyHours,
   };

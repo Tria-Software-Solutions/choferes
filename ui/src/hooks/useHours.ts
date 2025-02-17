@@ -40,6 +40,22 @@ export const useHours = () => {
     );
   };
 
+  const handleAddOrUpdateHours = async (newHours: HoursWorked) => {
+    const existingHours = hoursWorked.find((hours) => hours.id === newHours.id);
+
+    if (existingHours) {
+      await HoursService.updateHours(newHours.id!, newHours);
+      setHoursWorked((prev) =>
+        prev.map((hours) =>
+          hours.id === newHours.id ? { ...hours, ...newHours } : hours
+        )
+      );
+    } else {
+      await HoursService.addHours(newHours);
+      setHoursWorked((prev) => [...prev, newHours]);
+    }
+  };
+
   const handleDeleteHours = async (id: number) => {
     await HoursService.deleteHours(id);
     setHoursWorked((prev) => prev.filter((hours) => hours.id !== id));
@@ -57,6 +73,7 @@ export const useHours = () => {
     fetchHours,
     handleAddHours,
     handleUpdateHours,
+    handleAddOrUpdateHours,
     handleDeleteHours,
   };
 };

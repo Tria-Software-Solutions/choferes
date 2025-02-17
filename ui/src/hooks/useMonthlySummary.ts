@@ -7,7 +7,8 @@ export const useMonthlySummaries = () => {
     []
   );
   const [totalCount, setTotalCount] = useState(0);
-  const [isLoadingMonthlySummaries, setIsLoadingMonthlySummaries] = useState(false);
+  const [isLoadingMonthlySummaries, setIsLoadingMonthlySummaries] =
+    useState(false);
 
   const fetchMonthlySummaries = useCallback(async () => {
     setIsLoadingMonthlySummaries(true);
@@ -50,6 +51,32 @@ export const useMonthlySummaries = () => {
     setTotalCount((prev) => prev - 1);
   };
 
+  const handleAddOrUpdateMonthlySummary = async (
+    newMonthlySummary: MonthlySummary
+  ) => {
+    const existingSummary = monthlySummaries.find(
+      (summary) => summary.id === newMonthlySummary.id
+    );
+
+    if (existingSummary) {
+      await MonthlySummaryService.updateMonthlySummary(
+        newMonthlySummary.id!,
+        newMonthlySummary
+      );
+      setMonthlySummaries((prev) =>
+        prev.map((summary) =>
+          summary.id === newMonthlySummary.id
+            ? { ...summary, ...newMonthlySummary }
+            : summary
+        )
+      );
+    } else {
+      await MonthlySummaryService.addMonthlySummary(newMonthlySummary);
+      setMonthlySummaries((prev) => [...prev, newMonthlySummary]);
+      setTotalCount((prev) => prev + 1);
+    }
+  };
+
   const totalMonthlyHours =
     MonthlySummaryService.calculateTotalMonthlyHours(monthlySummaries);
 
@@ -64,6 +91,7 @@ export const useMonthlySummaries = () => {
     fetchMonthlySummaries,
     handleAddMonthlySummary,
     handleUpdateMonthlySummary,
+    handleAddOrUpdateMonthlySummary,
     handleDeleteMonthlySummary,
     totalMonthlyHours,
   };
