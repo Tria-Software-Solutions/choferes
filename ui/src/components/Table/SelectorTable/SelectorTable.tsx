@@ -18,6 +18,8 @@ import {
   useTheme,
   useMediaQuery,
   Typography,
+  Tab,
+  SelectChangeEvent,
 } from "@mui/material";
 import { Employee } from "../../../models/Employee";
 import { Schedule } from "../../../models/Schedule";
@@ -32,13 +34,25 @@ import {
   hasMultipleBiweeks,
   hasMultipleMonths,
   hasMultipleYears,
+  isValidDateForSelect,
 } from "../../../utils/dateUtils";
 import {
   getMonthName,
+  getOptionsForDay,
+  setDayOptionsEnglish,
   translateDayToAbrevSpanish,
 } from "../../../utils/stringUtils";
 import { EnglishDayOfWeek } from "../../../utils/englishDayOfWeek";
-import { TABLE } from "../../../constants/constants";
+import {
+  STATE,
+  TABLE,
+  DEFAULT_SCHEDULE_VALUES,
+} from "../../../constants/constants";
+import ModalComponent from "../../Modal/ModalComponent";
+import InfoRoundedIcon from "@mui/icons-material/InfoRounded";
+import { TabContext, TabList, TabPanel } from "@mui/lab";
+import { getBackgroundColor } from "../../../utils/tableUtils";
+import { format } from "date-fns";
 
 interface SelectorTableProps {
   filteredEmployees: Employee[];
@@ -65,6 +79,7 @@ const SelectorTable: React.FC<SelectorTableProps> = React.memo(
     const [selectedPeriod, setSelectedPeriod] = useState<
       "weekly" | "biweekly" | "monthly"
     >("weekly");
+    const [tabValue, setTabValue] = React.useState(0);
     const [orderDirection, setOrderDirection] = useState<"asc" | "desc">("asc");
     const [page, setPage] = useState(0);
     const [rowsPerPage, setRowsPerPage] = useState(5);
@@ -75,6 +90,37 @@ const SelectorTable: React.FC<SelectorTableProps> = React.memo(
     );
 
     const multiplePeriods = getInvolvedPeriods(currentWeek);
+
+    const handleTabChange = (event: React.SyntheticEvent, newValue: number) => {
+      setTabValue(newValue);
+    };
+
+    const handleChange = (
+      event: SelectChangeEvent<string>,
+      employeeId: number,
+      day: string,
+      date: number,
+      month: number,
+      year: number
+    ) => {
+      const selectedSchedule = schedules.find(
+        (schedule) =>
+          schedule.label === event.target.value &&
+          schedule.day === setDayOptionsEnglish(day)
+      );
+
+      if (!selectedSchedule) {
+        console.error("No se encontró un horario para el label seleccionado");
+        return;
+      }
+      console.log("Horario:", selectedSchedule.label);
+      console.log("Horas:", selectedSchedule.hours);
+      console.log("Empleado:", employeeId);
+      console.log("Día:", day);
+      console.log("Fecha:", date);
+      console.log("Mes:", month);
+      console.log("Year:", year);
+    };
 
     const sortedEmployees = useMemo(() => {
       return [...filteredEmployees].sort((a, b) => {
@@ -92,6 +138,82 @@ const SelectorTable: React.FC<SelectorTableProps> = React.memo(
 
     const theme = useTheme();
     const isSmallScreen = useMediaQuery(theme.breakpoints.down("sm"));
+
+    const modalContent = (employee: Employee) => {
+      return (
+        <TabContext value={tabValue}>
+          <Box sx={{ bgcolor: "background.paper" }}>
+            <TabList onChange={handleTabChange} sx={{ padding: 0, margin: 0 }}>
+              <Tab label="Semanal" value={0} />
+              <Tab label="Quincenal" value={1} />
+              <Tab label="Mensual" value={2} />
+              <Tab label="Horas Extra" value={3} />
+            </TabList>
+          </Box>
+          <TabPanel value="1" sx={{ paddingLeft: 0, paddingRight: 0 }}>
+            <Typography variant="body2">
+              {`${employee.firstName} ha trabajado un total de `}
+              {/* <strong>
+                  {getTotalWeekly.find((emp) => emp.employeeId === employee.id)
+                    ?.totalHours || 0}
+                </strong> */}
+              {` horas en la semana número `}
+              <strong>{weekNumber}</strong>
+              {`, que comprende del ${formatDate(
+                new Date(currentWeek[0]?.date),
+                false
+              )} al ${formatDate(new Date(currentWeek[6]?.date), false)} `}
+            </Typography>
+          </TabPanel>
+          <TabPanel value="2" sx={{ paddingLeft: 0, paddingRight: 0 }}>
+            <Typography variant="body2">
+              {`${employee.firstName} ha trabajado un total de `}
+              {/* <strong>
+                  {getTotalBiweekly
+                    .find((emp) => emp.employeeId === employee.id)
+                    ?.totalHours.find((s) => s.biweekNumber === biweekNumber)
+                    ?.totalHours || 0}
+                </strong> */}
+              {` horas en la quincena número `} <strong>{biweekNumber}</strong>
+              {`, que comprende del ${formatDate(
+                getBiweeklyDates(year, biweekNumber).startDate,
+                false
+              )} al ${formatDate(
+                getBiweeklyDates(year, biweekNumber).startDate,
+                false
+              )}`}
+            </Typography>
+          </TabPanel>
+          <TabPanel value="3" sx={{ paddingLeft: 0, paddingRight: 0 }}>
+            <Typography variant="body2">
+              {`${employee.firstName} ha trabajado un total de `}
+              {/* <strong>
+                  {getTotalMonthly.find((emp) => emp.employeeId === employee.id)
+                    ?.totalHours || 0}
+                </strong> */}
+              {` horas en el mes de ${getMonthName(month)} del ${year}`}
+            </Typography>
+          </TabPanel>
+          <TabPanel value="4" sx={{ paddingLeft: 0, paddingRight: 0 }}>
+            <Typography variant="body2">
+              {`${employee.firstName} ha trabajado un total de `}
+              {/* <strong>
+                  {getTotalOvertime.find(
+                    (emp) => emp.employeeId === employee.id
+                  )?.overtime || 0}
+                </strong> */}
+              {` horas extra en la quincena del ${formatDate(
+                getBiweeklyDates(year, biweekNumber).startDate,
+                false
+              )} al ${formatDate(
+                getBiweeklyDates(year, biweekNumber).startDate,
+                false
+              )}`}
+            </Typography>
+          </TabPanel>
+        </TabContext>
+      );
+    };
 
     return (
       <Paper sx={{ width: "100%" }}>
@@ -185,7 +307,119 @@ const SelectorTable: React.FC<SelectorTableProps> = React.memo(
                 </TableCell>
               </TableRow>
             </TableHead>
-            <TableBody></TableBody>
+            <TableBody>
+              {paginatedEmployees.map((employee, rowIndex) => (
+                <TableRow
+                  key={employee.id}
+                  sx={{ backgroundColor: getBackgroundColor(rowIndex) }}
+                >
+                  <TableCell
+                    sx={{
+                      position: "sticky",
+                      left: 0,
+                      zIndex: 2,
+                      backgroundColor: getBackgroundColor(rowIndex),
+                    }}
+                  >
+                    <Box
+                      display="flex"
+                      alignItems="center"
+                      justifyContent="space-between"
+                    >
+                      <Typography variant="body2">
+                        {employee.firstName} {employee.lastName}
+                      </Typography>
+                      <ModalComponent
+                        buttonType="icon"
+                        buttonIcon={<InfoRoundedIcon />}
+                        modalTitle={`${employee.firstName} ${employee.lastName}`}
+                        modalDescription="Resumen del total de horas trabajadas"
+                        children={modalContent(employee)}
+                      />
+                    </Box>
+                  </TableCell>
+                  {currentWeek.map(({ day, date }) => {
+                    const formattedDate = format(new Date(date), "yyyy-MM-dd");
+                    const existingRecord = hoursWorked.find(
+                      (record) =>
+                        record.employeeId === employee.id &&
+                        format(new Date(record.date), "yyyy-MM-dd") ===
+                          formattedDate
+                    );
+
+                    const options = getOptionsForDay(day, schedules);
+                    const validLabels = options.map((option) => option.label);
+
+                    const selectedLabel =
+                      schedules.find(
+                        (schedule) => schedule.id === existingRecord?.scheduleId
+                      )?.label ?? STATE.FREE;
+
+                    const finalSelectedLabel = validLabels.includes(
+                      selectedLabel
+                    )
+                      ? selectedLabel
+                      : validLabels[0] ?? "";
+
+                    const sortedOptions = [...options].sort((a, b) => {
+                      const indexA = DEFAULT_SCHEDULE_VALUES.indexOf(a.label);
+                      const indexB = DEFAULT_SCHEDULE_VALUES.indexOf(b.label);
+
+                      if (indexA !== -1 && indexB !== -1)
+                        return indexA - indexB;
+                      if (indexA !== -1) return 1;
+                      if (indexB !== -1) return -1;
+
+                      return a.label.localeCompare(b.label);
+                    });
+
+                    return (
+                      <TableCell
+                        key={day}
+                        sx={{
+                          backgroundColor:
+                            format(new Date(), "yyyy-MM-dd") ===
+                            format(new Date(date), "yyyy-MM-dd")
+                              ? "#e4f5ed"
+                              : "inherit",
+                        }}
+                      >
+                        <FormControl fullWidth>
+                          <Select
+                            value={finalSelectedLabel}
+                            onChange={(event) =>
+                              handleChange(
+                                event,
+                                employee.id,
+                                day,
+                                new Date(date).getDate(),
+                                new Date(date).getMonth(),
+                                new Date(date).getFullYear()
+                              )
+                            }
+                            disabled={!isValidDateForSelect(new Date(date))}
+                          >
+                            {sortedOptions.map((option, index) => {
+                              const items = [
+                                <MenuItem key={option.id} value={option.label}>
+                                  {option.label}
+                                </MenuItem>,
+                              ];
+
+                              if (option.label === "Ausencia" && index > 0) {
+                                items.unshift(<Divider key="divider" />);
+                              }
+
+                              return items;
+                            })}
+                          </Select>
+                        </FormControl>
+                      </TableCell>
+                    );
+                  })}
+                </TableRow>
+              ))}
+            </TableBody>
           </Table>
         </TableContainer>
         <Divider />
