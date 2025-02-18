@@ -130,120 +130,6 @@ const ManageRoles: React.FC = () => {
     }
   }, [weekOffset]);
 
-  const handleAddOrUpdateHoursWorked = useCallback(
-    (employeeId: number, date: Date, scheduleId: number, id?: number) => {
-      const newId =
-        id ??
-        (hoursWorked.length > 0
-          ? Math.max(...hoursWorked.map((hours) => hours.id || 0), 0) + 1
-          : 1);
-
-      const newHoursWorked: HoursWorked = {
-        id: newId,
-        employeeId,
-        date,
-        scheduleId,
-      };
-      handleAddOrUpdateHours(newHoursWorked);
-    },
-    [hoursWorked, handleAddOrUpdateHours]
-  );
-
-  const handleAddOrUpdateWeeklySummaries = useCallback(
-    (
-      employeeId: number,
-      weekNumber: number,
-      month: number,
-      year: number,
-      totalHours: number,
-      id?: number
-    ) => {
-      const newId =
-        id ??
-        (weeklySummaries.length > 0
-          ? Math.max(
-              ...weeklySummaries.map((weeklySummary) => weeklySummary.id || 0),
-              0
-            ) + 1
-          : 1);
-
-      const newWeeklySummaries: WeeklySummary = {
-        id: newId,
-        employeeId,
-        weekNumber,
-        month,
-        year,
-        totalHours,
-      };
-      handleAddOrUpdateWeeklySummary(newWeeklySummaries);
-    },
-    [weeklySummaries, handleAddOrUpdateWeeklySummary]
-  );
-
-  const handleAddOrUpdateBiweeklySummaries = useCallback(
-    (
-      employeeId: number,
-      biweekNumber: number,
-      month: number,
-      year: number,
-      totalHours: number,
-      id?: number
-    ) => {
-      const newId =
-        id ??
-        (biweeklySummaries.length > 0
-          ? Math.max(
-              ...biweeklySummaries.map(
-                (biweeklySummaries) => biweeklySummaries.id || 0
-              ),
-              0
-            ) + 1
-          : 1);
-
-      const newBiweeklySummaries: BiweeklySummary = {
-        id: newId,
-        employeeId,
-        biweekNumber,
-        month,
-        year,
-        totalHours,
-      };
-      handleAddOrUpdateBiweeklySummary(newBiweeklySummaries);
-    },
-    [biweeklySummaries, handleAddOrUpdateBiweeklySummary]
-  );
-
-  const handleAddOrUpdateMonthlySummaries = useCallback(
-    (
-      employeeId: number,
-      month: number,
-      year: number,
-      totalHours: number,
-      id?: number
-    ) => {
-      const newId =
-        id ??
-        (monthlySummaries.length > 0
-          ? Math.max(
-              ...monthlySummaries.map(
-                (monthlySummaries) => monthlySummaries.id || 0
-              ),
-              0
-            ) + 1
-          : 1);
-
-      const newMonthlySummaries: MonthlySummary = {
-        id: newId,
-        employeeId,
-        month,
-        year,
-        totalHours,
-      };
-      handleAddOrUpdateMonthlySummary(newMonthlySummaries);
-    },
-    [monthlySummaries, handleAddOrUpdateMonthlySummary]
-  );
-
   const handleFilterChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setFilter(e.target.value);
   };
@@ -265,6 +151,175 @@ const ManageRoles: React.FC = () => {
     setFirstDayOfWeek(newDate);
   };
 
+  const handleAddOrUpdateHoursAndSummaries = useCallback(
+    (
+      employeeId: number,
+      date: Date,
+      scheduleId: number,
+      weekNumber: number,
+      biweekNumber: number,
+      month: number,
+      year: number,
+      totalHours: number
+    ) => {
+      const existingHoursRecord = hoursWorked.find(
+        (hours) =>
+          hours.employeeId === employeeId &&
+          hours.date.getTime() === date.getTime()
+      );
+
+      let newHoursId: number | undefined;
+      let updatedHoursWorked: HoursWorked;
+      let previousHours: number | undefined;
+
+      if (existingHoursRecord) {
+        updatedHoursWorked = {
+          ...existingHoursRecord,
+          scheduleId,
+        };
+        newHoursId = existingHoursRecord.id;
+        previousHours = schedules.find(
+          (schedule) => schedule.id === existingHoursRecord.scheduleId
+        )?.hours;
+      } else {
+        newHoursId =
+          Math.max(...hoursWorked.map((hours) => hours.id || 0), 0) + 1;
+        updatedHoursWorked = {
+          id: newHoursId,
+          employeeId,
+          date,
+          scheduleId,
+        };
+      }
+      handleAddOrUpdateHours(updatedHoursWorked);
+
+      const existingWeeklySummaryRecord = weeklySummaries.find(
+        (weeklySummary) =>
+          weeklySummary.employeeId === employeeId &&
+          weeklySummary.weekNumber === weekNumber &&
+          weeklySummary.month === month &&
+          weeklySummary.year === year
+      );
+
+      let newWeeklySummaryId: number | undefined;
+      let updatedWeeklySummary: WeeklySummary;
+
+      if (existingWeeklySummaryRecord) {
+        updatedWeeklySummary = {
+          ...existingWeeklySummaryRecord,
+          totalHours: previousHours
+            ? existingWeeklySummaryRecord.totalHours +
+              totalHours -
+              previousHours
+            : existingWeeklySummaryRecord.totalHours + totalHours,
+        };
+        newWeeklySummaryId = existingWeeklySummaryRecord.id;
+      } else {
+        newWeeklySummaryId =
+          Math.max(
+            ...weeklySummaries.map((weeklySummary) => weeklySummary.id || 0),
+            0
+          ) + 1;
+        updatedWeeklySummary = {
+          id: newWeeklySummaryId,
+          employeeId,
+          weekNumber,
+          month,
+          year,
+          totalHours,
+        };
+      }
+      handleAddOrUpdateWeeklySummary(updatedWeeklySummary);
+
+      const existingBiweeklySummaryRecord = biweeklySummaries.find(
+        (biweeklySummary) =>
+          biweeklySummary.employeeId === employeeId &&
+          biweeklySummary.biweekNumber === biweekNumber &&
+          biweeklySummary.month === month &&
+          biweeklySummary.year === year
+      );
+
+      let newBiweeklySummaryId: number | undefined;
+      let updatedBiweeklySummary: BiweeklySummary;
+
+      if (existingBiweeklySummaryRecord) {
+        updatedBiweeklySummary = {
+          ...existingBiweeklySummaryRecord,
+          totalHours: previousHours
+            ? existingBiweeklySummaryRecord.totalHours +
+              totalHours -
+              previousHours
+            : existingBiweeklySummaryRecord.totalHours + totalHours,
+        };
+        newBiweeklySummaryId = existingBiweeklySummaryRecord.id;
+      } else {
+        newBiweeklySummaryId =
+          Math.max(
+            ...biweeklySummaries.map(
+              (biweeklySummary) => biweeklySummary.id || 0
+            ),
+            0
+          ) + 1;
+        updatedBiweeklySummary = {
+          id: newBiweeklySummaryId,
+          employeeId,
+          biweekNumber,
+          month,
+          year,
+          totalHours,
+        };
+      }
+      handleAddOrUpdateBiweeklySummary(updatedBiweeklySummary);
+
+      const existingMonthlySummaryRecord = monthlySummaries.find(
+        (monthlySummary) =>
+          monthlySummary.employeeId === employeeId &&
+          monthlySummary.month === month &&
+          monthlySummary.year === year
+      );
+
+      let newMonthlySummaryId: number | undefined;
+      let updatedMonthlySummary: MonthlySummary;
+
+      if (existingMonthlySummaryRecord) {
+        updatedMonthlySummary = {
+          ...existingMonthlySummaryRecord,
+          totalHours: previousHours
+            ? existingMonthlySummaryRecord.totalHours +
+              totalHours -
+              previousHours
+            : existingMonthlySummaryRecord.totalHours + totalHours,
+        };
+        newMonthlySummaryId = existingMonthlySummaryRecord.id;
+      } else {
+        newMonthlySummaryId =
+          Math.max(
+            ...monthlySummaries.map((monthlySummary) => monthlySummary.id || 0),
+            0
+          ) + 1;
+        updatedMonthlySummary = {
+          id: newMonthlySummaryId,
+          employeeId,
+          month,
+          year,
+          totalHours,
+        };
+      }
+      handleAddOrUpdateMonthlySummary(updatedMonthlySummary);
+    },
+    [
+      hoursWorked,
+      schedules,
+      weeklySummaries,
+      biweeklySummaries,
+      monthlySummaries,
+      handleAddOrUpdateHours,
+      handleAddOrUpdateWeeklySummary,
+      handleAddOrUpdateBiweeklySummary,
+      handleAddOrUpdateMonthlySummary,
+    ]
+  );
+
   const handleChange = (
     event: SelectChangeEvent<string>,
     employeeId: number,
@@ -281,32 +336,16 @@ const ManageRoles: React.FC = () => {
       return;
     }
 
-    handleAddOrUpdateHoursWorked(employeeId, date, selectedSchedule.id);
-    handleAddOrUpdateWeeklySummaries(
+    handleAddOrUpdateHoursAndSummaries(
       employeeId,
+      date,
+      selectedSchedule.id,
       currentWeekNumber,
-      date.getMonth(),
-      date.getFullYear(),
-      selectedSchedule.hours
-    );
-    handleAddOrUpdateBiweeklySummaries(
-      employeeId,
       currentBiweekNumber,
       date.getMonth(),
       date.getFullYear(),
       selectedSchedule.hours
     );
-    handleAddOrUpdateMonthlySummaries(
-      employeeId,
-      date.getMonth(),
-      date.getFullYear(),
-      selectedSchedule.hours
-    );
-
-    console.log("Horario:", selectedSchedule.label);
-    console.log("Horas:", selectedSchedule.hours);
-    console.log("Empleado:", employeeId);
-    console.log("Fecha:", date);
   };
 
   const handleNextWeek = () => {
