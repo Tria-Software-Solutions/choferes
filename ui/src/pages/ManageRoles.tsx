@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import {
   Box,
   Typography,
@@ -33,7 +33,6 @@ import {
   getFirstDayOfWeek,
   getMonthNumber,
   getWeekNumber,
-  isTodayOrFuture,
   isValidDateForSelect,
 } from "../utils/dateUtils";
 import { PAGE_TITLE } from "../constants/constants";
@@ -77,7 +76,6 @@ const ManageRoles: React.FC = () => {
     isLoadingMonthlySummaries,
     handleAddOrUpdateMonthlySummary,
   } = useMonthlySummaries();
-  const [totalCount, setTotalCount] = useState(0);
   const [weekOffset, setWeekOffset] = useState(0);
   const [firstDayOfWeek, setFirstDayOfWeek] = useState<Date | null>(new Date());
   const [currentWeekNumber, setCurrentWeekNumber] = useState<number>(0);
@@ -94,141 +92,174 @@ const ManageRoles: React.FC = () => {
     isLoadingBiweeklySummaries ||
     isLoadingMonthlySummaries;
 
-  const handleAddOrUpdateHoursWorked = (
-    employeeId: number,
-    date: Date,
-    scheduleId: number,
-    id?: number
-  ) => {
-    const newId =
-      id ??
-      (hoursWorked.length > 0
-        ? Math.max(...hoursWorked.map((hours) => hours.id || 0)) + 1
-        : 1);
+  const handleAddOrUpdateHoursWorked = useCallback(
+    (employeeId: number, date: Date, scheduleId: number, id?: number) => {
+      const newId =
+        id ??
+        (hoursWorked.length > 0
+          ? Math.max(...hoursWorked.map((hours) => hours.id || 0), 0) + 1
+          : 1);
 
-    const newHoursWorked: HoursWorked = {
-      id: newId,
-      employeeId,
-      date,
-      scheduleId,
-    };
-    handleAddOrUpdateHours(newHoursWorked);
-  };
+      const newHoursWorked: HoursWorked = {
+        id: newId,
+        employeeId,
+        date,
+        scheduleId,
+      };
+      handleAddOrUpdateHours(newHoursWorked);
+    },
+    [hoursWorked, handleAddOrUpdateHours]
+  );
 
-  const handleAddOrUpdateWeeklySummaries = (
-    employeeId: number,
-    weekNumber: number,
-    month: number,
-    year: number,
-    totalHours: number,
-    id?: number
-  ) => {
-    const newId =
-      id ??
-      (weeklySummaries.length > 0
-        ? Math.max(
-            ...weeklySummaries.map((weeklySummaries) => weeklySummaries.id || 0)
-          ) + 1
-        : 1);
+  const handleAddOrUpdateWeeklySummaries = useCallback(
+    (
+      employeeId: number,
+      weekNumber: number,
+      month: number,
+      year: number,
+      totalHours: number,
+      id?: number
+    ) => {
+      const newId =
+        id ??
+        (weeklySummaries.length > 0
+          ? Math.max(
+              ...weeklySummaries.map((weeklySummary) => weeklySummary.id || 0),
+              0
+            ) + 1
+          : 1);
 
-    const newWeeklySummaries: WeeklySummary = {
-      id: newId,
-      employeeId,
-      weekNumber,
-      month,
-      year,
-      totalHours,
-    };
-    handleAddOrUpdateWeeklySummary(newWeeklySummaries);
-  };
+      const newWeeklySummaries: WeeklySummary = {
+        id: newId,
+        employeeId,
+        weekNumber,
+        month,
+        year,
+        totalHours,
+      };
+      handleAddOrUpdateWeeklySummary(newWeeklySummaries);
+    },
+    [weeklySummaries, handleAddOrUpdateWeeklySummary]
+  );
 
-  const handleAddOrUpdateBiweeklySummaries = (
-    employeeId: number,
-    biweekNumber: number,
-    month: number,
-    year: number,
-    totalHours: number,
-    id?: number
-  ) => {
-    const newId =
-      id ??
-      (biweeklySummaries.length > 0
-        ? Math.max(
-            ...biweeklySummaries.map(
-              (biweeklySummaries) => biweeklySummaries.id || 0
-            )
-          ) + 1
-        : 1);
+  const handleAddOrUpdateBiweeklySummaries = useCallback(
+    (
+      employeeId: number,
+      biweekNumber: number,
+      month: number,
+      year: number,
+      totalHours: number,
+      id?: number
+    ) => {
+      const newId =
+        id ??
+        (biweeklySummaries.length > 0
+          ? Math.max(
+              ...biweeklySummaries.map(
+                (biweeklySummaries) => biweeklySummaries.id || 0
+              ),
+              0
+            ) + 1
+          : 1);
 
-    const newBiweeklySummaries: BiweeklySummary = {
-      id: newId,
-      employeeId,
-      biweekNumber,
-      month,
-      year,
-      totalHours,
-    };
-    handleAddOrUpdateBiweeklySummary(newBiweeklySummaries);
-  };
+      const newBiweeklySummaries: BiweeklySummary = {
+        id: newId,
+        employeeId,
+        biweekNumber,
+        month,
+        year,
+        totalHours,
+      };
+      handleAddOrUpdateBiweeklySummary(newBiweeklySummaries);
+    },
+    [biweeklySummaries, handleAddOrUpdateBiweeklySummary]
+  );
 
-  const handleAddOrUpdateMonthlySummaries = (
-    employeeId: number,
-    month: number,
-    year: number,
-    totalHours: number,
-    id?: number
-  ) => {
-    const newId =
-      id ??
-      (monthlySummaries.length > 0
-        ? Math.max(
-            ...monthlySummaries.map(
-              (monthlySummaries) => monthlySummaries.id || 0
-            )
-          ) + 1
-        : 1);
+  const handleAddOrUpdateMonthlySummaries = useCallback(
+    (
+      employeeId: number,
+      month: number,
+      year: number,
+      totalHours: number,
+      id?: number
+    ) => {
+      const newId =
+        id ??
+        (monthlySummaries.length > 0
+          ? Math.max(
+              ...monthlySummaries.map(
+                (monthlySummaries) => monthlySummaries.id || 0
+              ),
+              0
+            ) + 1
+          : 1);
 
-    const newMonthlySummaries: MonthlySummary = {
-      id: newId,
-      employeeId,
-      month,
-      year,
-      totalHours,
-    };
-    handleAddOrUpdateMonthlySummary(newMonthlySummaries);
-  };
-
-  const filtered = employees.filter((employee) =>
-    `${employee.firstName} ${employee.lastName}`
-      .toLowerCase()
-      .includes(filter.toLowerCase())
+      const newMonthlySummaries: MonthlySummary = {
+        id: newId,
+        employeeId,
+        month,
+        year,
+        totalHours,
+      };
+      handleAddOrUpdateMonthlySummary(newMonthlySummaries);
+    },
+    [monthlySummaries, handleAddOrUpdateMonthlySummary]
   );
 
   useEffect(() => {
-    setFilteredEmployees(filtered);
-  }, [filter, employees, filtered.length]);
+    setFilteredEmployees(
+      employees.filter((employee) =>
+        `${employee.firstName} ${employee.lastName}`
+          .toLowerCase()
+          .includes(filter.toLowerCase())
+      )
+    );
+  }, [filter, employees]);
 
   useEffect(() => {
     const currentWeek = getCurrentWeekDates(weekOffset);
+
     if (currentWeek.length > 0) {
       const firstDayOfWeek = new Date(currentWeek[0].date);
-      setCurrentWeekNumber(getWeekNumber(firstDayOfWeek));
-      setCurrentBiweekNumber(getBiweekNumber(firstDayOfWeek));
-      setCurrentMonth(getMonthNumber(firstDayOfWeek));
-      setCurrentYear(new Date().getFullYear());
+
+      setCurrentWeekNumber((prev) => {
+        const newWeekNumber = getWeekNumber(firstDayOfWeek);
+        return newWeekNumber !== prev ? newWeekNumber : prev;
+      });
+      setCurrentBiweekNumber((prev) => {
+        const newBiweekNumber = getBiweekNumber(firstDayOfWeek);
+        return newBiweekNumber !== prev ? newBiweekNumber : prev;
+      });
+      setCurrentMonth((prev) => {
+        const newMonth = getMonthNumber(firstDayOfWeek);
+        return newMonth !== prev ? newMonth : prev;
+      });
+      setCurrentYear((prev) => {
+        const newYear = new Date().getFullYear();
+        return newYear !== prev ? newYear : prev;
+      });
     }
   }, [weekOffset]);
 
+  const handleFilterChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setFilter(e.target.value);
+  };
+
   const handleDateChange = (newDate: Date | null) => {
-    setSelectedDate(newDate);
-    setFirstDayOfWeek(newDate);
     if (newDate) {
       const today = new Date();
       const weekOptions: { weekStartsOn: 0 | 1 | 2 | 3 | 4 | 5 | 6 } = {
         weekStartsOn: 1,
       };
-      setWeekOffset(differenceInCalendarWeeks(newDate, today, weekOptions));
+      const newWeekOffset = differenceInCalendarWeeks(
+        newDate,
+        today,
+        weekOptions
+      );
+      setWeekOffset(newWeekOffset);
     }
+    setSelectedDate(newDate);
+    setFirstDayOfWeek(newDate);
   };
 
   const handleNextWeek = () => {
@@ -307,7 +338,7 @@ const ManageRoles: React.FC = () => {
                 <SearchBar
                   placeholder="Buscar empleado"
                   value={filter}
-                  onChange={(e) => setFilter(e.target.value)}
+                  onChange={handleFilterChange}
                   sx={{
                     maxWidth: "100%",
                   }}
@@ -396,7 +427,7 @@ const ManageRoles: React.FC = () => {
                 >
                   <DatePicker
                     label="Seleccionar fecha"
-                    value={firstDayOfWeek}
+                    value={firstDayOfWeek || null}
                     sx={{
                       width: { xs: "100%", sm: "100%", md: "auto" },
                       mt: { xs: 2, sm: 2, md: 0 },
