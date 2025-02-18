@@ -8,6 +8,7 @@ import {
   Tooltip,
   Button,
   CircularProgress,
+  SelectChangeEvent,
 } from "@mui/material";
 import SplitButton from "../components/SplitButton/SplitButton";
 import {
@@ -30,6 +31,7 @@ import { es } from "date-fns/locale";
 import {
   getBiweekNumber,
   getCurrentWeekDates,
+  getDayName,
   getFirstDayOfWeek,
   getMonthNumber,
   getWeekNumber,
@@ -54,6 +56,7 @@ import { useMonthlySummaries } from "../hooks/useMonthlySummary";
 import { WeeklySummary } from "../models/WeeklySummary";
 import { BiweeklySummary } from "../models/BiweeklySummary";
 import { MonthlySummary } from "../models/MonthlySummary";
+import { setDayOptionsEnglish } from "../utils/stringUtils";
 
 const ManageRoles: React.FC = () => {
   const [selectedDate, setSelectedDate] = useState<Date | null>(new Date());
@@ -91,6 +94,41 @@ const ManageRoles: React.FC = () => {
     isLoadingWeeklySummaries ||
     isLoadingBiweeklySummaries ||
     isLoadingMonthlySummaries;
+
+  useEffect(() => {
+    setFilteredEmployees(
+      employees.filter((employee) =>
+        `${employee.firstName} ${employee.lastName}`
+          .toLowerCase()
+          .includes(filter.toLowerCase())
+      )
+    );
+  }, [filter, employees]);
+
+  useEffect(() => {
+    const currentWeek = getCurrentWeekDates(weekOffset);
+
+    if (currentWeek.length > 0) {
+      const firstDayOfWeek = new Date(currentWeek[0].date);
+
+      setCurrentWeekNumber((prev) => {
+        const newWeekNumber = getWeekNumber(firstDayOfWeek);
+        return newWeekNumber !== prev ? newWeekNumber : prev;
+      });
+      setCurrentBiweekNumber((prev) => {
+        const newBiweekNumber = getBiweekNumber(firstDayOfWeek);
+        return newBiweekNumber !== prev ? newBiweekNumber : prev;
+      });
+      setCurrentMonth((prev) => {
+        const newMonth = getMonthNumber(firstDayOfWeek);
+        return newMonth !== prev ? newMonth : prev;
+      });
+      setCurrentYear((prev) => {
+        const newYear = new Date().getFullYear();
+        return newYear !== prev ? newYear : prev;
+      });
+    }
+  }, [weekOffset]);
 
   const handleAddOrUpdateHoursWorked = useCallback(
     (employeeId: number, date: Date, scheduleId: number, id?: number) => {
@@ -206,41 +244,6 @@ const ManageRoles: React.FC = () => {
     [monthlySummaries, handleAddOrUpdateMonthlySummary]
   );
 
-  useEffect(() => {
-    setFilteredEmployees(
-      employees.filter((employee) =>
-        `${employee.firstName} ${employee.lastName}`
-          .toLowerCase()
-          .includes(filter.toLowerCase())
-      )
-    );
-  }, [filter, employees]);
-
-  useEffect(() => {
-    const currentWeek = getCurrentWeekDates(weekOffset);
-
-    if (currentWeek.length > 0) {
-      const firstDayOfWeek = new Date(currentWeek[0].date);
-
-      setCurrentWeekNumber((prev) => {
-        const newWeekNumber = getWeekNumber(firstDayOfWeek);
-        return newWeekNumber !== prev ? newWeekNumber : prev;
-      });
-      setCurrentBiweekNumber((prev) => {
-        const newBiweekNumber = getBiweekNumber(firstDayOfWeek);
-        return newBiweekNumber !== prev ? newBiweekNumber : prev;
-      });
-      setCurrentMonth((prev) => {
-        const newMonth = getMonthNumber(firstDayOfWeek);
-        return newMonth !== prev ? newMonth : prev;
-      });
-      setCurrentYear((prev) => {
-        const newYear = new Date().getFullYear();
-        return newYear !== prev ? newYear : prev;
-      });
-    }
-  }, [weekOffset]);
-
   const handleFilterChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setFilter(e.target.value);
   };
@@ -260,6 +263,50 @@ const ManageRoles: React.FC = () => {
     }
     setSelectedDate(newDate);
     setFirstDayOfWeek(newDate);
+  };
+
+  const handleChange = (
+    event: SelectChangeEvent<string>,
+    employeeId: number,
+    date: Date
+  ) => {
+    const selectedSchedule = schedules.find(
+      (schedule) =>
+        schedule.label === event.target.value &&
+        schedule.day === setDayOptionsEnglish(getDayName(date))
+    );
+
+    if (!selectedSchedule) {
+      console.error("No se encontró un horario para el label seleccionado");
+      return;
+    }
+
+    handleAddOrUpdateHoursWorked(employeeId, date, selectedSchedule.id);
+    handleAddOrUpdateWeeklySummaries(
+      employeeId,
+      currentWeekNumber,
+      date.getMonth(),
+      date.getFullYear(),
+      selectedSchedule.hours
+    );
+    handleAddOrUpdateBiweeklySummaries(
+      employeeId,
+      currentBiweekNumber,
+      date.getMonth(),
+      date.getFullYear(),
+      selectedSchedule.hours
+    );
+    handleAddOrUpdateMonthlySummaries(
+      employeeId,
+      date.getMonth(),
+      date.getFullYear(),
+      selectedSchedule.hours
+    );
+
+    console.log("Horario:", selectedSchedule.label);
+    console.log("Horas:", selectedSchedule.hours);
+    console.log("Empleado:", employeeId);
+    console.log("Fecha:", date);
   };
 
   const handleNextWeek = () => {
@@ -450,6 +497,7 @@ const ManageRoles: React.FC = () => {
               biweekNumber={currentBiweekNumber}
               month={currentMonth}
               year={currentYear}
+              handleChange={handleChange}
             />
           ) : (
             <Box

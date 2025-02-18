@@ -232,6 +232,11 @@ export const getBiweeklyDates = (year: number, biweekNumber: number) => {
   };
 };
 
+export const getDayName = (date: Date): string => {
+  const options: { weekday: "long" } = { weekday: "long" };
+  return date.toLocaleDateString("en-US", options);
+};
+
 export const getMonthNumber = (date: Date): number => {
   return date.getMonth() + 1;
 };
