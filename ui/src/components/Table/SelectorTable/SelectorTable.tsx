@@ -88,7 +88,6 @@ const SelectorTable: React.FC<SelectorTableProps> = React.memo(
       () => getCurrentWeekDates(weekOffset),
       [weekOffset]
     );
-
     const multiplePeriods = getInvolvedPeriods(currentWeek);
 
     const handleTabChange = (event: React.SyntheticEvent, newValue: number) => {
@@ -113,22 +112,21 @@ const SelectorTable: React.FC<SelectorTableProps> = React.memo(
         console.error("No se encontró un horario para el label seleccionado");
         return;
       }
+
       console.log("Horario:", selectedSchedule.label);
       console.log("Horas:", selectedSchedule.hours);
       console.log("Empleado:", employeeId);
       console.log("Día:", day);
       console.log("Fecha:", date);
       console.log("Mes:", month);
-      console.log("Year:", year);
+      console.log("Año:", year);
     };
 
     const sortedEmployees = useMemo(() => {
       return [...filteredEmployees].sort((a, b) => {
         const nameA = `${a.firstName} ${a.lastName}`;
         const nameB = `${b.firstName} ${b.lastName}`;
-        return orderDirection === "asc"
-          ? nameA.localeCompare(nameB)
-          : nameB.localeCompare(nameA);
+        return nameA.localeCompare(nameB, "es", { sensitivity: "base" });
       });
     }, [filteredEmployees, orderDirection]);
 
@@ -387,7 +385,7 @@ const SelectorTable: React.FC<SelectorTableProps> = React.memo(
                         <FormControl fullWidth>
                           <Select
                             value={finalSelectedLabel}
-                            onChange={(event) =>
+                            onChange={(event: SelectChangeEvent<string>) =>
                               handleChange(
                                 event,
                                 employee.id,

@@ -118,6 +118,10 @@ const ManageSchedules: React.FC = () => {
     }
   }, [editFields, editRowId, validateEditFields]);
 
+  const handleFilterChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setFilter(e.target.value);
+  };
+
   const handleAdd = () => {
     const newSchedule: Schedule = {
       id: Math.max(...schedules.map((schedule) => schedule.id)) + 1,
@@ -223,7 +227,7 @@ const ManageSchedules: React.FC = () => {
                 <SearchBar
                   placeholder="Buscar horario"
                   value={filter}
-                  onChange={(e) => setFilter(e.target.value)}
+                  onChange={handleFilterChange}
                   sx={{ maxWidth: "100%" }}
                   fullWidth
                 />
