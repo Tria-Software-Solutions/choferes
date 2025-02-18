@@ -128,10 +128,9 @@ const SelectorTable: React.FC<SelectorTableProps> = React.memo(
           <TabPanel value="1" sx={{ paddingLeft: 0, paddingRight: 0 }}>
             <Typography variant="body2">
               {`${employee.firstName} ha trabajado un total de `}
-              {/* <strong>
-                  {getTotalWeekly.find((emp) => emp.employeeId === employee.id)
-                    ?.totalHours || 0}
-                </strong> */}
+              <strong>
+                {/* {calculateTotalHoursForPeriod(employee.id, "weekly", weekNumber, biweekNumber, month, year) || 0} */}
+              </strong>
               {` horas en la semana número `}
               <strong>{weekNumber}</strong>
               {`, que comprende del ${formatDate(
