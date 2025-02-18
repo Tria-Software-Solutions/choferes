@@ -39,7 +39,6 @@ import {
 import {
   getMonthName,
   getOptionsForDay,
-  setDayOptionsEnglish,
   translateDayToAbrevSpanish,
 } from "../../../utils/stringUtils";
 import { EnglishDayOfWeek } from "../../../utils/englishDayOfWeek";
@@ -63,6 +62,11 @@ interface SelectorTableProps {
   biweekNumber: number;
   month: number;
   year: number;
+  handleChange: (
+    event: SelectChangeEvent<string>,
+    employeeId: number,
+    date: Date
+  ) => void;
 }
 
 const SelectorTable: React.FC<SelectorTableProps> = React.memo(
@@ -75,6 +79,7 @@ const SelectorTable: React.FC<SelectorTableProps> = React.memo(
     biweekNumber,
     month,
     year,
+    handleChange,
   }) => {
     const [selectedPeriod, setSelectedPeriod] = useState<
       "weekly" | "biweekly" | "monthly"
@@ -94,41 +99,13 @@ const SelectorTable: React.FC<SelectorTableProps> = React.memo(
       setTabValue(newValue);
     };
 
-    const handleChange = (
-      event: SelectChangeEvent<string>,
-      employeeId: number,
-      day: string,
-      date: number,
-      month: number,
-      year: number
-    ) => {
-      const selectedSchedule = schedules.find(
-        (schedule) =>
-          schedule.label === event.target.value &&
-          schedule.day === setDayOptionsEnglish(day)
-      );
-
-      if (!selectedSchedule) {
-        console.error("No se encontró un horario para el label seleccionado");
-        return;
-      }
-
-      console.log("Horario:", selectedSchedule.label);
-      console.log("Horas:", selectedSchedule.hours);
-      console.log("Empleado:", employeeId);
-      console.log("Día:", day);
-      console.log("Fecha:", date);
-      console.log("Mes:", month);
-      console.log("Año:", year);
-    };
-
     const sortedEmployees = useMemo(() => {
       return [...filteredEmployees].sort((a, b) => {
         const nameA = `${a.firstName} ${a.lastName}`;
         const nameB = `${b.firstName} ${b.lastName}`;
         return nameA.localeCompare(nameB, "es", { sensitivity: "base" });
       });
-    }, [filteredEmployees, orderDirection]);
+    }, [filteredEmployees]);
 
     const startIndex = page * rowsPerPage;
     const endIndex = startIndex + rowsPerPage;
@@ -386,14 +363,7 @@ const SelectorTable: React.FC<SelectorTableProps> = React.memo(
                           <Select
                             value={finalSelectedLabel}
                             onChange={(event: SelectChangeEvent<string>) =>
-                              handleChange(
-                                event,
-                                employee.id,
-                                day,
-                                new Date(date).getDate(),
-                                new Date(date).getMonth(),
-                                new Date(date).getFullYear()
-                              )
+                              handleChange(event, employee.id, new Date(date))
                             }
                             disabled={!isValidDateForSelect(new Date(date))}
                           >
