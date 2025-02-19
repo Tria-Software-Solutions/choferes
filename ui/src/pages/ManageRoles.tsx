@@ -543,15 +543,15 @@ const ManageRoles: React.FC = () => {
               filteredEmployees={filteredEmployees}
               schedules={schedules}
               hoursWorked={hoursWorked}
+              weeklySummaries={weeklySummaries}
+              biweeklySummaries={biweeklySummaries}
+              monthlySummaries={monthlySummaries}
               weekOffset={weekOffset}
               weekNumber={currentWeekNumber}
               biweekNumber={currentBiweekNumber}
               month={currentMonth}
               year={currentYear}
               handleChange={handleChange}
-              weeklySummaries={weeklySummaries}
-              biweeklySummaries={biweeklySummaries}
-              monthlySummaries={monthlySummaries}
             />
           ) : (
             <Box

@@ -11,7 +11,7 @@ import {
   translatePeriodToSpanish,
   translationsDayOptionsToSpanish,
 } from "./stringUtils";
-import { calculateTotalHoursForPeriod } from "./tableUtils";
+import { calculateTotalHoursAndOvertimeForPeriod } from "./calculationUtils";
 import {
   formatHeaderDateWithYear,
   formatDate,
@@ -211,7 +211,7 @@ export const handleExportTableData = (
     });
 
     employeeData[`Total ${translatePeriodToSpanish(period)}`] =
-      calculateTotalHoursForPeriod(
+      calculateTotalHoursAndOvertimeForPeriod(
         employee.id,
         period,
         weekNumber,
@@ -221,7 +221,20 @@ export const handleExportTableData = (
         weeklySummaries,
         biweeklySummaries,
         monthlySummaries
-      );
+      ).totalHours;
+
+      employeeData[`Total horas extra ${translatePeriodToSpanish(period)}`] =
+      calculateTotalHoursAndOvertimeForPeriod(
+        employee.id,
+        period,
+        weekNumber,
+        biweekNumber,
+        month,
+        year,
+        weeklySummaries,
+        biweeklySummaries,
+        monthlySummaries
+      ).overtime;
 
     return employeeData;
   });

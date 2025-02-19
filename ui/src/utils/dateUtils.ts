@@ -70,10 +70,6 @@ export const formatDateWithoutYear = (date: Date) => {
   return date.toLocaleString("es-ES", options);
 };
 
-export const isValidDate = (date: any): boolean => {
-  return date instanceof Date && !isNaN(date.getTime());
-};
-
 export const formatHeaderDate = (dateStr: string) => {
   const [day, month] = dateStr.split(" ");
   const transformedMonth = translateMonthToAbrevSpanish(
