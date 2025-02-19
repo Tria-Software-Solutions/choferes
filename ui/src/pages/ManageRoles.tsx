@@ -359,15 +359,6 @@ const ManageRoles: React.FC = () => {
       date.getFullYear(),
       selectedSchedule.hours
     );
-
-    console.log("employeeId: ", employeeId);
-    console.log("date: ", date);
-    console.log("selectedSchedule.id: ", selectedSchedule.id);
-    console.log("weekNumber: ", getWeekNumber(date));
-    console.log("biweekNumber: ", getBiweekNumber(date));
-    console.log("month: ", date.getMonth() + 1);
-    console.log("year: ", date.getFullYear());
-    console.log("hours: ", selectedSchedule.hours);
   };
 
   const handleNextWeek = () => {
