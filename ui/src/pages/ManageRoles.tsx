@@ -13,9 +13,9 @@ import {
 import SplitButton from "../components/SplitButton/SplitButton";
 import {
   createExportOptions,
-  exportFileFormattedDate,
   exportToExcel,
   exportToPDF,
+  handleExportTableData,
 } from "../utils/exportUtils";
 import DownloadRoundedIcon from "@mui/icons-material/DownloadRounded";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
@@ -59,7 +59,6 @@ import { MonthlySummary } from "../models/MonthlySummary";
 import { setDayOptionsEnglish } from "../utils/stringUtils";
 
 const ManageRoles: React.FC = () => {
-  const [selectedDate, setSelectedDate] = useState<Date | null>(new Date());
   const { employees, isLoadingEmployees } = useEmployees();
   const [filteredEmployees, setFilteredEmployees] = useState<Employee[]>([]);
   const { schedules, isLoadingSchedules } = useSchedules();
@@ -134,6 +133,21 @@ const ManageRoles: React.FC = () => {
     setFilter(e.target.value);
   };
 
+  const { dataForExport, headers, fileName } = handleExportTableData(
+    filteredEmployees,
+    hoursWorked,
+    schedules,
+    weeklySummaries,
+    biweeklySummaries,
+    monthlySummaries,
+    currentWeekNumber,
+    currentBiweekNumber,
+    currentMonth,
+    currentYear,
+    getCurrentWeekDates(weekOffset),
+    "biweekly"
+  );
+
   const handleDateChange = (newDate: Date | null) => {
     if (newDate) {
       const today = new Date();
@@ -147,7 +161,6 @@ const ManageRoles: React.FC = () => {
       );
       setWeekOffset(newWeekOffset);
     }
-    setSelectedDate(newDate);
     setFirstDayOfWeek(newDate);
   };
 
@@ -165,7 +178,7 @@ const ManageRoles: React.FC = () => {
       const existingHoursRecord = hoursWorked.find(
         (hours) =>
           hours.employeeId === employeeId &&
-          hours.date.getTime() === date.getTime()
+          new Date(hours.date).getTime() === new Date(date).getTime()
       );
 
       let newHoursId: number | undefined;
@@ -340,12 +353,21 @@ const ManageRoles: React.FC = () => {
       employeeId,
       date,
       selectedSchedule.id,
-      currentWeekNumber,
-      currentBiweekNumber,
-      date.getMonth(),
+      getWeekNumber(date),
+      getBiweekNumber(date),
+      date.getMonth() + 1,
       date.getFullYear(),
       selectedSchedule.hours
     );
+
+    console.log("employeeId: ", employeeId);
+    console.log("date: ", date);
+    console.log("selectedSchedule.id: ", selectedSchedule.id);
+    console.log("weekNumber: ", getWeekNumber(date));
+    console.log("biweekNumber: ", getBiweekNumber(date));
+    console.log("month: ", date.getMonth() + 1);
+    console.log("year: ", date.getFullYear());
+    console.log("hours: ", selectedSchedule.hours);
   };
 
   const handleNextWeek = () => {
@@ -389,10 +411,9 @@ const ManageRoles: React.FC = () => {
               <FontAwesomeIcon icon={faFilePdf} size="lg" />,
               exportToExcel,
               exportToPDF,
-              filteredEmployees,
-              `reporte-de-roles-${exportFileFormattedDate(
-                selectedDate || new Date()
-              )}`
+              dataForExport,
+              fileName,
+              headers
             )}
             defaultIndex={0}
             buttonIcon={<DownloadRoundedIcon />}
@@ -537,6 +558,9 @@ const ManageRoles: React.FC = () => {
               month={currentMonth}
               year={currentYear}
               handleChange={handleChange}
+              weeklySummaries={weeklySummaries}
+              biweeklySummaries={biweeklySummaries}
+              monthlySummaries={monthlySummaries}
             />
           ) : (
             <Box

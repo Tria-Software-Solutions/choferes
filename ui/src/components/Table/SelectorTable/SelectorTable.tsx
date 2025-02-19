@@ -20,6 +20,8 @@ import {
   Typography,
   Tab,
   SelectChangeEvent,
+  Badge,
+  Tooltip,
 } from "@mui/material";
 import { Employee } from "../../../models/Employee";
 import { Schedule } from "../../../models/Schedule";
@@ -50,8 +52,16 @@ import {
 import ModalComponent from "../../Modal/ModalComponent";
 import InfoRoundedIcon from "@mui/icons-material/InfoRounded";
 import { TabContext, TabList, TabPanel } from "@mui/lab";
-import { getBackgroundColor } from "../../../utils/tableUtils";
+import {
+  calculateTotalHoursForPeriod,
+  calculateTotalHoursForPeriods,
+  getBackgroundColor,
+} from "../../../utils/tableUtils";
 import { format } from "date-fns";
+import { WeeklySummary } from "../../../models/WeeklySummary";
+import { BiweeklySummary } from "../../../models/BiweeklySummary";
+import { MonthlySummary } from "../../../models/MonthlySummary";
+import AccessTimeRoundedIcon from "@mui/icons-material/AccessTimeRounded";
 
 interface SelectorTableProps {
   filteredEmployees: Employee[];
@@ -67,6 +77,9 @@ interface SelectorTableProps {
     employeeId: number,
     date: Date
   ) => void;
+  weeklySummaries: WeeklySummary[];
+  biweeklySummaries: BiweeklySummary[];
+  monthlySummaries: MonthlySummary[];
 }
 
 const SelectorTable: React.FC<SelectorTableProps> = React.memo(
@@ -80,6 +93,9 @@ const SelectorTable: React.FC<SelectorTableProps> = React.memo(
     month,
     year,
     handleChange,
+    weeklySummaries,
+    biweeklySummaries,
+    monthlySummaries,
   }) => {
     const [selectedPeriod, setSelectedPeriod] = useState<
       "weekly" | "biweekly" | "monthly"
@@ -114,6 +130,58 @@ const SelectorTable: React.FC<SelectorTableProps> = React.memo(
     const theme = useTheme();
     const isSmallScreen = useMediaQuery(theme.breakpoints.down("sm"));
 
+    const resultHoursForPeriod = (employee: Employee) => {
+      return calculateTotalHoursForPeriod(
+        employee.id,
+        selectedPeriod,
+        weekNumber,
+        biweekNumber,
+        month,
+        year,
+        weeklySummaries,
+        biweeklySummaries,
+        monthlySummaries
+      ).totalHours;
+    };
+
+    const resultOvertimeForPeriod = (employee: Employee) => {
+      return calculateTotalHoursForPeriod(
+        employee.id,
+        selectedPeriod,
+        weekNumber,
+        biweekNumber,
+        month,
+        year,
+        weeklySummaries,
+        biweeklySummaries,
+        monthlySummaries
+      ).overtime;
+    };
+
+    const resultHoursForPeriods = (employee: Employee) => {
+      return calculateTotalHoursForPeriods(
+        employee.id,
+        multiplePeriods,
+        selectedPeriod,
+        year,
+        weeklySummaries,
+        biweeklySummaries,
+        monthlySummaries
+      ).totalHours;
+    };
+
+    const resultOvertimeForPeriods = (employee: Employee) => {
+      return calculateTotalHoursForPeriods(
+        employee.id,
+        multiplePeriods,
+        selectedPeriod,
+        year,
+        weeklySummaries,
+        biweeklySummaries,
+        monthlySummaries
+      ).overtime;
+    };
+
     const modalContent = (employee: Employee) => {
       return (
         <TabContext value={tabValue}>
@@ -125,11 +193,21 @@ const SelectorTable: React.FC<SelectorTableProps> = React.memo(
               <Tab label="Horas Extra" value={3} />
             </TabList>
           </Box>
-          <TabPanel value="1" sx={{ paddingLeft: 0, paddingRight: 0 }}>
+          <TabPanel value={0} sx={{ paddingLeft: 0, paddingRight: 0 }}>
             <Typography variant="body2">
               {`${employee.firstName} ha trabajado un total de `}
               <strong>
-                {/* {calculateTotalHoursForPeriod(employee.id, "weekly", weekNumber, biweekNumber, month, year) || 0} */}
+                {calculateTotalHoursForPeriod(
+                  employee.id,
+                  "weekly",
+                  weekNumber,
+                  biweekNumber,
+                  month,
+                  year,
+                  weeklySummaries,
+                  biweeklySummaries,
+                  monthlySummaries
+                ).totalHours || 0}
               </strong>
               {` horas en la semana número `}
               <strong>{weekNumber}</strong>
@@ -139,15 +217,22 @@ const SelectorTable: React.FC<SelectorTableProps> = React.memo(
               )} al ${formatDate(new Date(currentWeek[6]?.date), false)} `}
             </Typography>
           </TabPanel>
-          <TabPanel value="2" sx={{ paddingLeft: 0, paddingRight: 0 }}>
+          <TabPanel value={1} sx={{ paddingLeft: 0, paddingRight: 0 }}>
             <Typography variant="body2">
               {`${employee.firstName} ha trabajado un total de `}
-              {/* <strong>
-                  {getTotalBiweekly
-                    .find((emp) => emp.employeeId === employee.id)
-                    ?.totalHours.find((s) => s.biweekNumber === biweekNumber)
-                    ?.totalHours || 0}
-                </strong> */}
+              <strong>
+                {calculateTotalHoursForPeriod(
+                  employee.id,
+                  "biweekly",
+                  weekNumber,
+                  biweekNumber,
+                  month,
+                  year,
+                  weeklySummaries,
+                  biweeklySummaries,
+                  monthlySummaries
+                ).totalHours || 0}
+              </strong>
               {` horas en la quincena número `} <strong>{biweekNumber}</strong>
               {`, que comprende del ${formatDate(
                 getBiweeklyDates(year, biweekNumber).startDate,
@@ -158,31 +243,88 @@ const SelectorTable: React.FC<SelectorTableProps> = React.memo(
               )}`}
             </Typography>
           </TabPanel>
-          <TabPanel value="3" sx={{ paddingLeft: 0, paddingRight: 0 }}>
+          <TabPanel value={2} sx={{ paddingLeft: 0, paddingRight: 0 }}>
             <Typography variant="body2">
               {`${employee.firstName} ha trabajado un total de `}
-              {/* <strong>
-                  {getTotalMonthly.find((emp) => emp.employeeId === employee.id)
-                    ?.totalHours || 0}
-                </strong> */}
+              <strong>
+                {calculateTotalHoursForPeriod(
+                  employee.id,
+                  "monthly",
+                  weekNumber,
+                  biweekNumber,
+                  month,
+                  year,
+                  weeklySummaries,
+                  biweeklySummaries,
+                  monthlySummaries
+                ).totalHours || 0}
+              </strong>
               {` horas en el mes de ${getMonthName(month)} del ${year}`}
             </Typography>
           </TabPanel>
-          <TabPanel value="4" sx={{ paddingLeft: 0, paddingRight: 0 }}>
+          <TabPanel value={3} sx={{ paddingLeft: 0, paddingRight: 0 }}>
             <Typography variant="body2">
-              {`${employee.firstName} ha trabajado un total de `}
-              {/* <strong>
-                  {getTotalOvertime.find(
-                    (emp) => emp.employeeId === employee.id
-                  )?.overtime || 0}
-                </strong> */}
-              {` horas extra en la quincena del ${formatDate(
+              {`${employee.firstName} ha trabajado un total de: `}
+            </Typography>
+            <Typography variant="body2">
+              <strong>
+                {calculateTotalHoursForPeriod(
+                  employee.id,
+                  "weekly",
+                  weekNumber,
+                  biweekNumber,
+                  month,
+                  year,
+                  weeklySummaries,
+                  biweeklySummaries,
+                  monthlySummaries
+                ).overtime || 0}
+              </strong>
+              {` horas extra en la semana número `}
+              <strong>{weekNumber}</strong>
+              {`, que comprende del ${formatDate(
+                new Date(currentWeek[0]?.date),
+                false
+              )} al ${formatDate(new Date(currentWeek[6]?.date), false)} `}
+            </Typography>
+            <Typography variant="body2">
+              <strong>
+                {calculateTotalHoursForPeriod(
+                  employee.id,
+                  "biweekly",
+                  weekNumber,
+                  biweekNumber,
+                  month,
+                  year,
+                  weeklySummaries,
+                  biweeklySummaries,
+                  monthlySummaries
+                ).overtime || 0}
+              </strong>
+              {` horas en la quincena número `} <strong>{biweekNumber}</strong>
+              {`, que comprende del ${formatDate(
                 getBiweeklyDates(year, biweekNumber).startDate,
                 false
               )} al ${formatDate(
                 getBiweeklyDates(year, biweekNumber).startDate,
                 false
               )}`}
+            </Typography>
+            <Typography variant="body2">
+              <strong>
+                {calculateTotalHoursForPeriod(
+                  employee.id,
+                  "monthly",
+                  weekNumber,
+                  biweekNumber,
+                  month,
+                  year,
+                  weeklySummaries,
+                  biweeklySummaries,
+                  monthlySummaries
+                ).overtime || 0}
+              </strong>
+              {` horas extra en el mes de ${getMonthName(month)} del ${year}`}
             </Typography>
           </TabPanel>
         </TabContext>
@@ -384,6 +526,66 @@ const SelectorTable: React.FC<SelectorTableProps> = React.memo(
                       </TableCell>
                     );
                   })}
+                  <TableCell
+                    align="left"
+                    sx={{
+                      position: isSmallScreen ? "static" : "sticky",
+                      right: 0,
+                      zIndex: 2,
+                      backgroundColor: getBackgroundColor(rowIndex),
+                    }}
+                  >
+                    <Box
+                      sx={{
+                        display: "flex",
+                        justifyContent: "space-between",
+                        alignItems: "center",
+                        height: "64px",
+                        paddingX: 2,
+                      }}
+                    >
+                      <Box
+                        sx={{
+                          display: "flex",
+                          alignItems: "center",
+                          flexGrow: 1,
+                          justifyContent: "center",
+                        }}
+                      >
+                        <strong>
+                          {hasMultipleYears(currentWeek)
+                            ? resultHoursForPeriod(employee) || 0
+                            : resultHoursForPeriods(employee) || 0}
+                        </strong>
+                        &nbsp;horas
+                      </Box>
+                      <Box
+                        sx={{ display: "flex", alignItems: "center", ml: 1 }}
+                      >
+                        <Tooltip title="Horas Extra" arrow>
+                          <Box>
+                            <Badge
+                              badgeContent={
+                                hasMultipleYears(currentWeek)
+                                  ? resultOvertimeForPeriod(employee) || 0
+                                  : resultOvertimeForPeriods(employee) || 0
+                              }
+                              color={
+                                (hasMultipleYears(currentWeek)
+                                  ? resultOvertimeForPeriod(employee) || 0
+                                  : resultOvertimeForPeriods(employee) || 0) > 0
+                                  ? "warning"
+                                  : "success"
+                              }
+                              showZero
+                            >
+                              <AccessTimeRoundedIcon />
+                            </Badge>
+                          </Box>
+                        </Tooltip>
+                      </Box>
+                    </Box>
+                  </TableCell>
                 </TableRow>
               ))}
             </TableBody>

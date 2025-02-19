@@ -1,4 +1,9 @@
-import { addDays, startOfWeek } from "date-fns";
+import {
+  addDays,
+  differenceInCalendarDays,
+  startOfWeek,
+  startOfYear,
+} from "date-fns";
 import { EnglishAbrevMonthOfYear } from "./englishAbrevMonthOfYear";
 import { translateMonthToAbrevSpanish } from "./stringUtils";
 
@@ -171,49 +176,66 @@ export const getWeekNumberAndYear = (
   return { year, weekNumber };
 };
 
+export const getDayName = (date: Date): string => {
+  const options: { weekday: "long" } = { weekday: "long" };
+  return date.toLocaleDateString("en-US", options);
+};
+
 export const getWeekNumber = (date: Date): number => {
-  const tempDate = new Date(
-    Date.UTC(date.getFullYear(), date.getMonth(), date.getDate())
+  const currentDate = new Date(date);
+  currentDate.setHours(0, 0, 0, 0);
+
+  const firstDayOfYear = new Date(currentDate.getFullYear(), 0, 1);
+  const firstThursday = new Date(firstDayOfYear);
+  firstThursday.setDate(
+    firstDayOfYear.getDate() + ((4 - firstDayOfYear.getDay() + 7) % 7)
   );
-  const dayOfWeek = tempDate.getUTCDay() || 7;
-  tempDate.setUTCDate(tempDate.getUTCDate() + (4 - dayOfWeek));
 
-  const startOfYear = new Date(Date.UTC(tempDate.getUTCFullYear(), 0, 1));
-  const firstThursday =
-    startOfYear.getUTCDay() === 4
-      ? startOfYear
-      : new Date(
-          Date.UTC(
-            tempDate.getUTCFullYear(),
-            0,
-            1 + ((4 - startOfYear.getUTCDay() + 7) % 7)
-          )
-        );
+  const firstMonday = new Date(firstThursday);
+  firstMonday.setDate(firstThursday.getDate() - 3);
 
-  const diff = tempDate.getTime() - firstThursday.getTime();
-  return Math.floor(diff / (7 * 24 * 60 * 60 * 1000)) + 1;
+  const diffInMillis = currentDate.getTime() - firstMonday.getTime();
+  const diffInDays = Math.floor(diffInMillis / (1000 * 60 * 60 * 24));
+  const weekNumber = Math.floor(diffInDays / 7) + 1;
+
+  const lastDayOfYear = new Date(currentDate.getFullYear(), 11, 31);
+  const lastThursday = new Date(lastDayOfYear);
+  lastThursday.setDate(
+    lastDayOfYear.getDate() - ((lastDayOfYear.getDay() + 3) % 7)
+  );
+
+  const lastMonday = new Date(lastThursday);
+  lastMonday.setDate(lastThursday.getDate() - 3);
+
+  const isWeek53 =
+    lastDayOfYear.getDay() === 4 ||
+    (lastDayOfYear.getDay() === 3 && weekNumber === 1);
+
+  if (currentDate >= lastMonday && currentDate <= lastDayOfYear) {
+    if (currentDate.getDate() === 30 || currentDate.getDate() === 31) {
+      return 53;
+    }
+    return isWeek53 ? 53 : 52;
+  }
+
+  if (
+    currentDate.getFullYear() === lastDayOfYear.getFullYear() &&
+    currentDate.getDate() <= 5 &&
+    currentDate.getMonth() === 0
+  ) {
+    return 1;
+  }
+
+  return weekNumber;
 };
 
 export const getBiweekNumber = (date: Date): number => {
-  const month = date.getMonth();
-  const dayOfMonth = date.getDate();
-  const biweekNumber = month * 2 + (dayOfMonth <= 15 ? 1 : 2);
-  return biweekNumber;
-};
-
-export const getStartOfBiweek = (date: Date): Date => {
-  const startOfCurrentWeek = startOfWeek(date, { weekStartsOn: 1 });
-  const dayOfMonth = date.getDate();
-  const biweekNumber = Math.ceil(dayOfMonth / 15);
-  if (biweekNumber === 1) {
-    return startOfCurrentWeek;
-  }
-  return addDays(startOfCurrentWeek, 7);
-};
-
-export const getEndOfBiweek = (date: Date): Date => {
-  const startOfBiweek = getStartOfBiweek(date);
-  return addDays(startOfBiweek, 13);
+  const startOfYearDate = startOfYear(date);
+  const dayOfYear = differenceInCalendarDays(date, startOfYearDate) + 1;
+  const maxDayOfYear = 365;
+  const correctedDayOfYear = Math.min(dayOfYear, maxDayOfYear);
+  const biweek = Math.ceil(correctedDayOfYear / 15);
+  return biweek <= 24 ? biweek : 24;
 };
 
 export const getBiweeklyDates = (year: number, biweekNumber: number) => {
@@ -230,11 +252,6 @@ export const getBiweeklyDates = (year: number, biweekNumber: number) => {
     startDate,
     endDate,
   };
-};
-
-export const getDayName = (date: Date): string => {
-  const options: { weekday: "long" } = { weekday: "long" };
-  return date.toLocaleDateString("en-US", options);
 };
 
 export const getMonthNumber = (date: Date): number => {
