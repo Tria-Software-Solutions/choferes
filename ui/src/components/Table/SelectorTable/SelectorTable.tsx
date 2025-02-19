@@ -53,10 +53,9 @@ import ModalComponent from "../../Modal/ModalComponent";
 import InfoRoundedIcon from "@mui/icons-material/InfoRounded";
 import { TabContext, TabList, TabPanel } from "@mui/lab";
 import {
-  calculateTotalHoursForPeriod,
-  calculateTotalHoursForPeriods,
-  getBackgroundColor,
-} from "../../../utils/tableUtils";
+  calculateTotalHoursAndOvertimeForPeriod,
+  calculateTotalHoursAndOvertimeForPeriods,
+} from "../../../utils/calculationUtils";
 import { format } from "date-fns";
 import { WeeklySummary } from "../../../models/WeeklySummary";
 import { BiweeklySummary } from "../../../models/BiweeklySummary";
@@ -67,6 +66,9 @@ interface SelectorTableProps {
   filteredEmployees: Employee[];
   schedules: Schedule[];
   hoursWorked: HoursWorked[];
+  weeklySummaries: WeeklySummary[];
+  biweeklySummaries: BiweeklySummary[];
+  monthlySummaries: MonthlySummary[];
   weekOffset: number;
   weekNumber: number;
   biweekNumber: number;
@@ -77,9 +79,6 @@ interface SelectorTableProps {
     employeeId: number,
     date: Date
   ) => void;
-  weeklySummaries: WeeklySummary[];
-  biweeklySummaries: BiweeklySummary[];
-  monthlySummaries: MonthlySummary[];
 }
 
 const SelectorTable: React.FC<SelectorTableProps> = React.memo(
@@ -87,15 +86,15 @@ const SelectorTable: React.FC<SelectorTableProps> = React.memo(
     filteredEmployees,
     schedules,
     hoursWorked,
+    weeklySummaries,
+    biweeklySummaries,
+    monthlySummaries,
     weekOffset,
     weekNumber,
     biweekNumber,
     month,
     year,
     handleChange,
-    weeklySummaries,
-    biweeklySummaries,
-    monthlySummaries,
   }) => {
     const [selectedPeriod, setSelectedPeriod] = useState<
       "weekly" | "biweekly" | "monthly"
@@ -130,56 +129,68 @@ const SelectorTable: React.FC<SelectorTableProps> = React.memo(
     const theme = useTheme();
     const isSmallScreen = useMediaQuery(theme.breakpoints.down("sm"));
 
-    const resultHoursForPeriod = (employee: Employee) => {
-      return calculateTotalHoursForPeriod(
-        employee.id,
-        selectedPeriod,
-        weekNumber,
-        biweekNumber,
-        month,
-        year,
-        weeklySummaries,
-        biweeklySummaries,
-        monthlySummaries
-      ).totalHours;
+    const resultHoursForPeriod = (
+      employee: Employee,
+      period: "weekly" | "biweekly" | "monthly",
+      type: "totalHours" | "overtime"
+    ) => {
+      if (type === "totalHours") {
+        return calculateTotalHoursAndOvertimeForPeriod(
+          employee.id,
+          period,
+          weekNumber,
+          biweekNumber,
+          month,
+          year,
+          weeklySummaries,
+          biweeklySummaries,
+          monthlySummaries
+        ).totalHours;
+      } else {
+        return calculateTotalHoursAndOvertimeForPeriod(
+          employee.id,
+          period,
+          weekNumber,
+          biweekNumber,
+          month,
+          year,
+          weeklySummaries,
+          biweeklySummaries,
+          monthlySummaries
+        ).overtime;
+      }
     };
 
-    const resultOvertimeForPeriod = (employee: Employee) => {
-      return calculateTotalHoursForPeriod(
-        employee.id,
-        selectedPeriod,
-        weekNumber,
-        biweekNumber,
-        month,
-        year,
-        weeklySummaries,
-        biweeklySummaries,
-        monthlySummaries
-      ).overtime;
-    };
-
-    const resultHoursForPeriods = (employee: Employee) => {
-      return calculateTotalHoursForPeriods(
-        employee.id,
-        multiplePeriods,
-        selectedPeriod,
-        year,
-        weeklySummaries,
-        biweeklySummaries,
-        monthlySummaries
-      ).totalHours;
-    };
-
-    const resultOvertimeForPeriods = (employee: Employee) => {
-      return calculateTotalHoursForPeriods(
-        employee.id,
-        multiplePeriods,
-        selectedPeriod,
-        year,
-        weeklySummaries,
-        biweeklySummaries,
-        monthlySummaries
-      ).overtime;
+    const resultHoursForPeriods = (
+      employee: Employee,
+      period: "weekly" | "biweekly" | "monthly",
+      type: "totalHours" | "overtime"
+    ) => {
+      if (type === "totalHours") {
+        return calculateTotalHoursAndOvertimeForPeriods(
+          employee.id,
+          period,
+          multiplePeriods.weekNumbers,
+          multiplePeriods.biweekNumbers,
+          multiplePeriods.months,
+          year,
+          weeklySummaries,
+          biweeklySummaries,
+          monthlySummaries
+        ).totalHours;
+      } else {
+        return calculateTotalHoursAndOvertimeForPeriods(
+          employee.id,
+          period,
+          multiplePeriods.weekNumbers,
+          multiplePeriods.biweekNumbers,
+          multiplePeriods.months,
+          year,
+          weeklySummaries,
+          biweeklySummaries,
+          monthlySummaries
+        ).overtime;
+      }
     };
 
     const modalContent = (employee: Employee) => {
@@ -197,17 +208,7 @@ const SelectorTable: React.FC<SelectorTableProps> = React.memo(
             <Typography variant="body2">
               {`${employee.firstName} ha trabajado un total de `}
               <strong>
-                {calculateTotalHoursForPeriod(
-                  employee.id,
-                  "weekly",
-                  weekNumber,
-                  biweekNumber,
-                  month,
-                  year,
-                  weeklySummaries,
-                  biweeklySummaries,
-                  monthlySummaries
-                ).totalHours || 0}
+                {resultHoursForPeriod(employee, "weekly", "totalHours")}
               </strong>
               {` horas en la semana número `}
               <strong>{weekNumber}</strong>
@@ -221,17 +222,7 @@ const SelectorTable: React.FC<SelectorTableProps> = React.memo(
             <Typography variant="body2">
               {`${employee.firstName} ha trabajado un total de `}
               <strong>
-                {calculateTotalHoursForPeriod(
-                  employee.id,
-                  "biweekly",
-                  weekNumber,
-                  biweekNumber,
-                  month,
-                  year,
-                  weeklySummaries,
-                  biweeklySummaries,
-                  monthlySummaries
-                ).totalHours || 0}
+                {resultHoursForPeriod(employee, "biweekly", "totalHours")}
               </strong>
               {` horas en la quincena número `} <strong>{biweekNumber}</strong>
               {`, que comprende del ${formatDate(
@@ -247,17 +238,7 @@ const SelectorTable: React.FC<SelectorTableProps> = React.memo(
             <Typography variant="body2">
               {`${employee.firstName} ha trabajado un total de `}
               <strong>
-                {calculateTotalHoursForPeriod(
-                  employee.id,
-                  "monthly",
-                  weekNumber,
-                  biweekNumber,
-                  month,
-                  year,
-                  weeklySummaries,
-                  biweeklySummaries,
-                  monthlySummaries
-                ).totalHours || 0}
+                {resultHoursForPeriod(employee, "monthly", "totalHours")}
               </strong>
               {` horas en el mes de ${getMonthName(month)} del ${year}`}
             </Typography>
@@ -268,17 +249,7 @@ const SelectorTable: React.FC<SelectorTableProps> = React.memo(
             </Typography>
             <Typography variant="body2">
               <strong>
-                {calculateTotalHoursForPeriod(
-                  employee.id,
-                  "weekly",
-                  weekNumber,
-                  biweekNumber,
-                  month,
-                  year,
-                  weeklySummaries,
-                  biweeklySummaries,
-                  monthlySummaries
-                ).overtime || 0}
+                {resultHoursForPeriod(employee, "weekly", "overtime")}
               </strong>
               {` horas extra en la semana número `}
               <strong>{weekNumber}</strong>
@@ -289,19 +260,10 @@ const SelectorTable: React.FC<SelectorTableProps> = React.memo(
             </Typography>
             <Typography variant="body2">
               <strong>
-                {calculateTotalHoursForPeriod(
-                  employee.id,
-                  "biweekly",
-                  weekNumber,
-                  biweekNumber,
-                  month,
-                  year,
-                  weeklySummaries,
-                  biweeklySummaries,
-                  monthlySummaries
-                ).overtime || 0}
+                {resultHoursForPeriod(employee, "biweekly", "overtime")}
               </strong>
-              {` horas en la quincena número `} <strong>{biweekNumber}</strong>
+              {` horas extra en la quincena número `}{" "}
+              <strong>{biweekNumber}</strong>
               {`, que comprende del ${formatDate(
                 getBiweeklyDates(year, biweekNumber).startDate,
                 false
@@ -312,17 +274,7 @@ const SelectorTable: React.FC<SelectorTableProps> = React.memo(
             </Typography>
             <Typography variant="body2">
               <strong>
-                {calculateTotalHoursForPeriod(
-                  employee.id,
-                  "monthly",
-                  weekNumber,
-                  biweekNumber,
-                  month,
-                  year,
-                  weeklySummaries,
-                  biweeklySummaries,
-                  monthlySummaries
-                ).overtime || 0}
+                {resultHoursForPeriod(employee, "monthly", "overtime")}
               </strong>
               {` horas extra en el mes de ${getMonthName(month)} del ${year}`}
             </Typography>
@@ -427,14 +379,16 @@ const SelectorTable: React.FC<SelectorTableProps> = React.memo(
               {paginatedEmployees.map((employee, rowIndex) => (
                 <TableRow
                   key={employee.id}
-                  sx={{ backgroundColor: getBackgroundColor(rowIndex) }}
+                  sx={{
+                    backgroundColor: rowIndex % 2 === 0 ? "white" : "#f5f5f5",
+                  }}
                 >
                   <TableCell
                     sx={{
                       position: "sticky",
                       left: 0,
                       zIndex: 2,
-                      backgroundColor: getBackgroundColor(rowIndex),
+                      backgroundColor: rowIndex % 2 === 0 ? "white" : "#f5f5f5",
                     }}
                   >
                     <Box
@@ -532,7 +486,7 @@ const SelectorTable: React.FC<SelectorTableProps> = React.memo(
                       position: isSmallScreen ? "static" : "sticky",
                       right: 0,
                       zIndex: 2,
-                      backgroundColor: getBackgroundColor(rowIndex),
+                      backgroundColor: rowIndex % 2 === 0 ? "white" : "#f5f5f5",
                     }}
                   >
                     <Box
@@ -550,12 +504,45 @@ const SelectorTable: React.FC<SelectorTableProps> = React.memo(
                           alignItems: "center",
                           flexGrow: 1,
                           justifyContent: "center",
+                          whiteSpace: "nowrap",
                         }}
                       >
                         <strong>
-                          {hasMultipleYears(currentWeek)
-                            ? resultHoursForPeriod(employee) || 0
-                            : resultHoursForPeriods(employee) || 0}
+                          {selectedPeriod === "weekly"
+                            ? hasMultipleYears(currentWeek)
+                              ? resultHoursForPeriods(
+                                  employee,
+                                  selectedPeriod,
+                                  "totalHours"
+                                )
+                              : resultHoursForPeriod(
+                                  employee,
+                                  selectedPeriod,
+                                  "totalHours"
+                                )
+                            : selectedPeriod === "biweekly"
+                            ? hasMultipleBiweeks(currentWeek)
+                              ? resultHoursForPeriods(
+                                  employee,
+                                  selectedPeriod,
+                                  "totalHours"
+                                )
+                              : resultHoursForPeriod(
+                                  employee,
+                                  selectedPeriod,
+                                  "totalHours"
+                                )
+                            : hasMultipleMonths(currentWeek)
+                            ? resultHoursForPeriods(
+                                employee,
+                                selectedPeriod,
+                                "totalHours"
+                              )
+                            : resultHoursForPeriod(
+                                employee,
+                                selectedPeriod,
+                                "totalHours"
+                              )}
                         </strong>
                         &nbsp;horas
                       </Box>
@@ -566,17 +553,44 @@ const SelectorTable: React.FC<SelectorTableProps> = React.memo(
                           <Box>
                             <Badge
                               badgeContent={
-                                hasMultipleYears(currentWeek)
-                                  ? resultOvertimeForPeriod(employee) || 0
-                                  : resultOvertimeForPeriods(employee) || 0
+                                selectedPeriod === "weekly"
+                                  ? hasMultipleYears(currentWeek)
+                                    ? resultHoursForPeriods(
+                                        employee,
+                                        selectedPeriod,
+                                        "overtime"
+                                      )
+                                    : resultHoursForPeriod(
+                                        employee,
+                                        selectedPeriod,
+                                        "overtime"
+                                      )
+                                  : selectedPeriod === "biweekly"
+                                  ? hasMultipleBiweeks(currentWeek)
+                                    ? resultHoursForPeriods(
+                                        employee,
+                                        selectedPeriod,
+                                        "overtime"
+                                      )
+                                    : resultHoursForPeriod(
+                                        employee,
+                                        selectedPeriod,
+                                        "overtime"
+                                      )
+                                  : hasMultipleMonths(currentWeek)
+                                  ? resultHoursForPeriods(
+                                      employee,
+                                      selectedPeriod,
+                                      "overtime"
+                                    )
+                                  : resultHoursForPeriod(
+                                      employee,
+                                      selectedPeriod,
+                                      "overtime"
+                                    )
                               }
-                              color={
-                                (hasMultipleYears(currentWeek)
-                                  ? resultOvertimeForPeriod(employee) || 0
-                                  : resultOvertimeForPeriods(employee) || 0) > 0
-                                  ? "warning"
-                                  : "success"
-                              }
+                              max={9999999}
+                              color={0 ? "warning" : "success"}
                               showZero
                             >
                               <AccessTimeRoundedIcon />
