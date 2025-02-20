@@ -193,6 +193,34 @@ const SelectorTable: React.FC<SelectorTableProps> = React.memo(
       }
     };
 
+    const resultTotalHours = (employee: Employee) => {
+      return selectedPeriod === "weekly"
+        ? hasMultipleYears(currentWeek)
+          ? resultHoursForPeriods(employee, selectedPeriod, "totalHours")
+          : resultHoursForPeriod(employee, selectedPeriod, "totalHours")
+        : selectedPeriod === "biweekly"
+        ? hasMultipleBiweeks(currentWeek)
+          ? resultHoursForPeriods(employee, selectedPeriod, "totalHours")
+          : resultHoursForPeriod(employee, selectedPeriod, "totalHours")
+        : hasMultipleMonths(currentWeek)
+        ? resultHoursForPeriods(employee, selectedPeriod, "totalHours")
+        : resultHoursForPeriod(employee, selectedPeriod, "totalHours");
+    };
+
+    const resultOvertime = (employee: Employee) => {
+      return selectedPeriod === "weekly"
+        ? hasMultipleYears(currentWeek)
+          ? resultHoursForPeriods(employee, selectedPeriod, "overtime")
+          : resultHoursForPeriod(employee, selectedPeriod, "overtime")
+        : selectedPeriod === "biweekly"
+        ? hasMultipleBiweeks(currentWeek)
+          ? resultHoursForPeriods(employee, selectedPeriod, "overtime")
+          : resultHoursForPeriod(employee, selectedPeriod, "overtime")
+        : hasMultipleMonths(currentWeek)
+        ? resultHoursForPeriods(employee, selectedPeriod, "overtime")
+        : resultHoursForPeriod(employee, selectedPeriod, "overtime");
+    };
+
     const modalContent = (employee: Employee) => {
       return (
         <TabContext value={tabValue}>
@@ -507,43 +535,7 @@ const SelectorTable: React.FC<SelectorTableProps> = React.memo(
                           whiteSpace: "nowrap",
                         }}
                       >
-                        <strong>
-                          {selectedPeriod === "weekly"
-                            ? hasMultipleYears(currentWeek)
-                              ? resultHoursForPeriods(
-                                  employee,
-                                  selectedPeriod,
-                                  "totalHours"
-                                )
-                              : resultHoursForPeriod(
-                                  employee,
-                                  selectedPeriod,
-                                  "totalHours"
-                                )
-                            : selectedPeriod === "biweekly"
-                            ? hasMultipleBiweeks(currentWeek)
-                              ? resultHoursForPeriods(
-                                  employee,
-                                  selectedPeriod,
-                                  "totalHours"
-                                )
-                              : resultHoursForPeriod(
-                                  employee,
-                                  selectedPeriod,
-                                  "totalHours"
-                                )
-                            : hasMultipleMonths(currentWeek)
-                            ? resultHoursForPeriods(
-                                employee,
-                                selectedPeriod,
-                                "totalHours"
-                              )
-                            : resultHoursForPeriod(
-                                employee,
-                                selectedPeriod,
-                                "totalHours"
-                              )}
-                        </strong>
+                        <strong>{resultTotalHours(employee)}</strong>
                         &nbsp;horas
                       </Box>
                       <Box
@@ -552,45 +544,14 @@ const SelectorTable: React.FC<SelectorTableProps> = React.memo(
                         <Tooltip title="Horas Extra" arrow>
                           <Box>
                             <Badge
-                              badgeContent={
-                                selectedPeriod === "weekly"
-                                  ? hasMultipleYears(currentWeek)
-                                    ? resultHoursForPeriods(
-                                        employee,
-                                        selectedPeriod,
-                                        "overtime"
-                                      )
-                                    : resultHoursForPeriod(
-                                        employee,
-                                        selectedPeriod,
-                                        "overtime"
-                                      )
-                                  : selectedPeriod === "biweekly"
-                                  ? hasMultipleBiweeks(currentWeek)
-                                    ? resultHoursForPeriods(
-                                        employee,
-                                        selectedPeriod,
-                                        "overtime"
-                                      )
-                                    : resultHoursForPeriod(
-                                        employee,
-                                        selectedPeriod,
-                                        "overtime"
-                                      )
-                                  : hasMultipleMonths(currentWeek)
-                                  ? resultHoursForPeriods(
-                                      employee,
-                                      selectedPeriod,
-                                      "overtime"
-                                    )
-                                  : resultHoursForPeriod(
-                                      employee,
-                                      selectedPeriod,
-                                      "overtime"
-                                    )
-                              }
+                              badgeContent={resultOvertime(employee)}
                               max={9999999}
-                              color={0 ? "warning" : "success"}
+                              color={
+                                resultOvertime(employee) !== "0" &&
+                                resultOvertime(employee) !== "0/0"
+                                  ? "success"
+                                  : "warning"
+                              }
                               showZero
                             >
                               <AccessTimeRoundedIcon />
@@ -622,17 +583,25 @@ const SelectorTable: React.FC<SelectorTableProps> = React.memo(
                       variant="body2"
                       sx={{ ml: 2 }}
                     >{`Quincenas del ${formatDateWithoutYear(
-                      getBiweeklyDates(year, multiplePeriods.biweekNumbers[0].biweekNumber)
-                        .startDate
+                      getBiweeklyDates(
+                        year,
+                        multiplePeriods.biweekNumbers[0].biweekNumber
+                      ).startDate
                     )} al ${formatDateWithoutYear(
-                      getBiweeklyDates(year, multiplePeriods.biweekNumbers[0].biweekNumber)
-                        .endDate
+                      getBiweeklyDates(
+                        year,
+                        multiplePeriods.biweekNumbers[0].biweekNumber
+                      ).endDate
                     )} / ${formatDateWithoutYear(
-                      getBiweeklyDates(year, multiplePeriods.biweekNumbers[1].biweekNumber)
-                        .startDate
+                      getBiweeklyDates(
+                        year,
+                        multiplePeriods.biweekNumbers[1].biweekNumber
+                      ).startDate
                     )} al ${formatDateWithoutYear(
-                      getBiweeklyDates(year, multiplePeriods.biweekNumbers[1].biweekNumber)
-                        .endDate
+                      getBiweeklyDates(
+                        year,
+                        multiplePeriods.biweekNumbers[1].biweekNumber
+                      ).endDate
                     )} del ${year}`}</Typography>
                   ) : (
                     <Typography
