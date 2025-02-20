@@ -173,7 +173,6 @@ const SelectorTable: React.FC<SelectorTableProps> = React.memo(
           multiplePeriods.weekNumbers,
           multiplePeriods.biweekNumbers,
           multiplePeriods.months,
-          year,
           weeklySummaries,
           biweeklySummaries,
           monthlySummaries
@@ -185,7 +184,6 @@ const SelectorTable: React.FC<SelectorTableProps> = React.memo(
           multiplePeriods.weekNumbers,
           multiplePeriods.biweekNumbers,
           multiplePeriods.months,
-          year,
           weeklySummaries,
           biweeklySummaries,
           monthlySummaries
@@ -199,10 +197,10 @@ const SelectorTable: React.FC<SelectorTableProps> = React.memo(
           ? resultHoursForPeriods(employee, selectedPeriod, "totalHours")
           : resultHoursForPeriod(employee, selectedPeriod, "totalHours")
         : selectedPeriod === "biweekly"
-        ? hasMultipleBiweeks(currentWeek)
+        ? hasMultipleYears(currentWeek) || hasMultipleBiweeks(currentWeek)
           ? resultHoursForPeriods(employee, selectedPeriod, "totalHours")
           : resultHoursForPeriod(employee, selectedPeriod, "totalHours")
-        : hasMultipleMonths(currentWeek)
+        : hasMultipleYears(currentWeek) || hasMultipleMonths(currentWeek)
         ? resultHoursForPeriods(employee, selectedPeriod, "totalHours")
         : resultHoursForPeriod(employee, selectedPeriod, "totalHours");
     };
@@ -213,10 +211,10 @@ const SelectorTable: React.FC<SelectorTableProps> = React.memo(
           ? resultHoursForPeriods(employee, selectedPeriod, "overtime")
           : resultHoursForPeriod(employee, selectedPeriod, "overtime")
         : selectedPeriod === "biweekly"
-        ? hasMultipleBiweeks(currentWeek)
+        ? hasMultipleYears(currentWeek) || hasMultipleBiweeks(currentWeek)
           ? resultHoursForPeriods(employee, selectedPeriod, "overtime")
           : resultHoursForPeriod(employee, selectedPeriod, "overtime")
-        : hasMultipleMonths(currentWeek)
+        : hasMultipleYears(currentWeek) || hasMultipleMonths(currentWeek)
         ? resultHoursForPeriods(employee, selectedPeriod, "overtime")
         : resultHoursForPeriod(employee, selectedPeriod, "overtime");
     };
@@ -547,8 +545,8 @@ const SelectorTable: React.FC<SelectorTableProps> = React.memo(
                               badgeContent={resultOvertime(employee)}
                               max={9999999}
                               color={
-                                resultOvertime(employee) !== "0" &&
-                                resultOvertime(employee) !== "0/0"
+                                resultOvertime(employee) !== 0 ||
+                                resultOvertime(employee) !== 0 / 0
                                   ? "success"
                                   : "warning"
                               }

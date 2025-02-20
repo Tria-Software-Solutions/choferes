@@ -20,6 +20,13 @@ export const calculateTotalHoursAndOvertimeForPeriod = (
   biweeklySummaries: Summary[],
   monthlySummaries: Summary[]
 ) => {
+
+  console.log('selectedPeriod: ', selectedPeriod);
+  console.log('weekNumber: ', weekNumber);
+  console.log('biweekNumber: ', biweekNumber);
+  console.log('month: ', month);
+  console.log('year: ', year);
+
   const findWeeklySummary = () =>
     weeklySummaries.find(
       (s) =>
@@ -77,11 +84,16 @@ export const calculateTotalHoursAndOvertimeForPeriods = (
     year: number;
     month: number;
   }[],
-  year: number,
   weeklySummaries: Summary[],
   biweeklySummaries: Summary[],
   monthlySummaries: Summary[]
 ) => {
+
+  console.log('selectedPeriod: ', selectedPeriod);
+  console.log('weekNumber: ', weekNumbers);
+  console.log('biweekNumber: ', biweekNumbers);
+  console.log('month: ', months);
+
   const findFirstWeeklySummary = () =>
     weeklySummaries.find(
       (s) =>
@@ -103,7 +115,7 @@ export const calculateTotalHoursAndOvertimeForPeriods = (
       (s) =>
         s.employeeId === employeeId &&
         s.biweekNumber === biweekNumbers[0].biweekNumber &&
-        s.year === biweekNumbers[0].year
+        s.year === biweekNumbers[1].year
     );
 
   const findSecondBiweeklySummary = () =>
@@ -111,7 +123,7 @@ export const calculateTotalHoursAndOvertimeForPeriods = (
       (s) =>
         s.employeeId === employeeId &&
         s.biweekNumber === biweekNumbers[1].biweekNumber &&
-        s.year === biweekNumbers[1].year
+        s.year === biweekNumbers[0].year
     );
 
   const findFirstMonthlySummary = () =>
@@ -119,7 +131,7 @@ export const calculateTotalHoursAndOvertimeForPeriods = (
       (s) =>
         s.employeeId === employeeId &&
         s.month === months[0].month &&
-        s.year === months[0].year
+        s.year === months[1].year
     );
 
   const findSecondMonthlySummary = () =>
@@ -127,7 +139,7 @@ export const calculateTotalHoursAndOvertimeForPeriods = (
       (s) =>
         s.employeeId === employeeId &&
         s.month === months[1].month &&
-        s.year === months[1].year
+        s.year === months[0].year
     );
 
   const firstSummary =
