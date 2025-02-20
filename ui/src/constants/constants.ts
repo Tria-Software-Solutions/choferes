@@ -36,7 +36,7 @@ export const TABLE = {
 };
 
 export const OVERTIME = {
-  WEEKLY: 45,
+  WEEKLY: 48,
   BIWEEKLY: 96,
   MONTHLY: 192,
 };

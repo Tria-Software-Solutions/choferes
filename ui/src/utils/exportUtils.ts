@@ -227,7 +227,6 @@ export const handleExportTableData = (
           multiplePeriods.weekNumbers,
           multiplePeriods.biweekNumbers,
           multiplePeriods.months,
-          year,
           weeklySummaries,
           biweeklySummaries,
           monthlySummaries
@@ -240,7 +239,6 @@ export const handleExportTableData = (
           multiplePeriods.weekNumbers,
           multiplePeriods.biweekNumbers,
           multiplePeriods.months,
-          year,
           weeklySummaries,
           biweeklySummaries,
           monthlySummaries
@@ -281,7 +279,6 @@ export const handleExportTableData = (
           multiplePeriods.weekNumbers,
           multiplePeriods.biweekNumbers,
           multiplePeriods.months,
-          year,
           weeklySummaries,
           biweeklySummaries,
           monthlySummaries
@@ -295,7 +292,6 @@ export const handleExportTableData = (
         multiplePeriods.weekNumbers,
         multiplePeriods.biweekNumbers,
         multiplePeriods.months,
-        year,
         weeklySummaries,
         biweeklySummaries,
         monthlySummaries
@@ -337,7 +333,6 @@ export const handleExportTableData = (
           multiplePeriods.weekNumbers,
           multiplePeriods.biweekNumbers,
           multiplePeriods.months,
-          year,
           weeklySummaries,
           biweeklySummaries,
           monthlySummaries
@@ -350,7 +345,6 @@ export const handleExportTableData = (
           multiplePeriods.weekNumbers,
           multiplePeriods.biweekNumbers,
           multiplePeriods.months,
-          year,
           weeklySummaries,
           biweeklySummaries,
           monthlySummaries
