@@ -301,7 +301,7 @@ const SelectorTable: React.FC<SelectorTableProps> = React.memo(
                   ) : selectedPeriod === "biweekly" ? (
                     <div>
                       {hasMultipleBiweeks(currentWeek) ? (
-                        <Typography variant="body2">{`Quincenas ${multiplePeriods.biweekNumbers[0]} / ${multiplePeriods.biweekNumbers[1]}`}</Typography>
+                        <Typography variant="body2">{`Quincenas ${multiplePeriods.biweekNumbers[0].biweekNumber} / ${multiplePeriods.biweekNumbers[1].biweekNumber}`}</Typography>
                       ) : (
                         <Typography variant="body2">{`Quincena ${biweekNumber}`}</Typography>
                       )}
@@ -310,9 +310,9 @@ const SelectorTable: React.FC<SelectorTableProps> = React.memo(
                     <div>
                       {hasMultipleMonths(currentWeek) ? (
                         <Typography variant="body2">{`${getMonthName(
-                          multiplePeriods.months[0]
+                          multiplePeriods.months[0].month
                         )} / ${getMonthName(
-                          multiplePeriods.months[1]
+                          multiplePeriods.months[1].month
                         )}`}</Typography>
                       ) : (
                         <Typography variant="body2">{`${getMonthName(
@@ -622,16 +622,16 @@ const SelectorTable: React.FC<SelectorTableProps> = React.memo(
                       variant="body2"
                       sx={{ ml: 2 }}
                     >{`Quincenas del ${formatDateWithoutYear(
-                      getBiweeklyDates(year, multiplePeriods.biweekNumbers[0])
+                      getBiweeklyDates(year, multiplePeriods.biweekNumbers[0].biweekNumber)
                         .startDate
                     )} al ${formatDateWithoutYear(
-                      getBiweeklyDates(year, multiplePeriods.biweekNumbers[0])
+                      getBiweeklyDates(year, multiplePeriods.biweekNumbers[0].biweekNumber)
                         .endDate
                     )} / ${formatDateWithoutYear(
-                      getBiweeklyDates(year, multiplePeriods.biweekNumbers[1])
+                      getBiweeklyDates(year, multiplePeriods.biweekNumbers[1].biweekNumber)
                         .startDate
                     )} al ${formatDateWithoutYear(
-                      getBiweeklyDates(year, multiplePeriods.biweekNumbers[1])
+                      getBiweeklyDates(year, multiplePeriods.biweekNumbers[1].biweekNumber)
                         .endDate
                     )} del ${year}`}</Typography>
                   ) : (
@@ -649,9 +649,9 @@ const SelectorTable: React.FC<SelectorTableProps> = React.memo(
                 <div>
                   {hasMultipleMonths(currentWeek) ? (
                     <Typography variant="body2" sx={{ ml: 2 }}>{`${getMonthName(
-                      multiplePeriods.months[0]
+                      multiplePeriods.months[0].month
                     )} / ${getMonthName(
-                      multiplePeriods.months[1]
+                      multiplePeriods.months[1].month
                     )} del ${year}`}</Typography>
                   ) : (
                     <Typography variant="body2" sx={{ ml: 2 }}>{`${getMonthName(
