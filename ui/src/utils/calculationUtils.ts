@@ -69,8 +69,14 @@ export const calculateTotalHoursAndOvertimeForPeriods = (
     year: number;
     weekNumber: number;
   }[],
-  biweekNumbers: number[],
-  months: number[],
+  biweekNumbers: {
+    year: number;
+    biweekNumber: number;
+  }[],
+  months: {
+    year: number;
+    month: number;
+  }[],
   year: number,
   weeklySummaries: Summary[],
   biweeklySummaries: Summary[],
@@ -96,28 +102,32 @@ export const calculateTotalHoursAndOvertimeForPeriods = (
     biweeklySummaries.find(
       (s) =>
         s.employeeId === employeeId &&
-        s.biweekNumber === biweekNumbers[0] &&
-        s.year === year
+        s.biweekNumber === biweekNumbers[0].biweekNumber &&
+        s.year === biweekNumbers[0].year
     );
 
   const findSecondBiweeklySummary = () =>
     biweeklySummaries.find(
       (s) =>
         s.employeeId === employeeId &&
-        s.biweekNumber === biweekNumbers[1] &&
-        s.year === year
+        s.biweekNumber === biweekNumbers[1].biweekNumber &&
+        s.year === biweekNumbers[1].year
     );
 
   const findFirstMonthlySummary = () =>
     monthlySummaries.find(
       (s) =>
-        s.employeeId === employeeId && s.month === months[0] && s.year === year
+        s.employeeId === employeeId &&
+        s.month === months[0].month &&
+        s.year === months[0].year
     );
 
   const findSecondMonthlySummary = () =>
     monthlySummaries.find(
       (s) =>
-        s.employeeId === employeeId && s.month === months[1] && s.year === year
+        s.employeeId === employeeId &&
+        s.month === months[1].month &&
+        s.year === months[1].year
     );
 
   const firstSummary =

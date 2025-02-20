@@ -291,20 +291,22 @@ export const getInvolvedPeriods = (
   currentWeek: DayEntry[]
 ): {
   weekNumbers: { year: number; weekNumber: number }[];
-  biweekNumbers: number[];
-  months: number[];
+  biweekNumbers: { year: number; biweekNumber: number }[];
+  months: { year: number; month: number }[];
 } => {
   const weekNumbers = new Set<string>();
-  const biweekNumbers = new Set<number>();
-  const months = new Set<number>();
+  const biweekNumbers = new Set<string>();
+  const months = new Set<string>();
 
   currentWeek.forEach((day) => {
     const date = new Date(day.isoDate);
-    let { year, weekNumber } = getWeekNumberAndYear(date);
+    const { year, weekNumber } = getWeekNumberAndYear(date);
+    const biweekNumber = getBiweekNumber(date);
+    const month = getMonthNumber(date);
 
     weekNumbers.add(`${year}-${weekNumber}`);
-    biweekNumbers.add(getBiweekNumber(date));
-    months.add(getMonthNumber(date));
+    biweekNumbers.add(`${year}-${biweekNumber}`);
+    months.add(`${year}-${month}`);
   });
 
   return {
@@ -312,7 +314,14 @@ export const getInvolvedPeriods = (
       const [year, weekNumber] = entry.split("-").map(Number);
       return { year, weekNumber };
     }),
-    biweekNumbers: Array.from(biweekNumbers),
-    months: Array.from(months),
+    biweekNumbers: Array.from(biweekNumbers).map((entry) => {
+      const [year, biweekNumber] = entry.split("-").map(Number);
+      return { year, biweekNumber };
+    }),
+    months: Array.from(months).map((entry) => {
+      const [year, month] = entry.split("-").map(Number);
+      return { year, month };
+    }),
   };
 };
+
