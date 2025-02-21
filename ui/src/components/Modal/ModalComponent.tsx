@@ -1,11 +1,7 @@
 import * as React from "react";
-import Box from "@mui/material/Box";
-import Button from "@mui/material/Button";
-import Typography from "@mui/material/Typography";
-import Modal from "@mui/material/Modal";
-import IconButton from "@mui/material/IconButton";
+import { Button, IconButton, Modal, Typography } from "@mui/material";
+import { Box, SxProps } from "@mui/system";
 import CloseIcon from "@mui/icons-material/Close";
-import { SxProps } from "@mui/system";
 
 interface ModalComponentProps {
   buttonType: "text" | "icon";

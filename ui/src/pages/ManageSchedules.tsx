@@ -1,4 +1,9 @@
 import React, { useState, useEffect, useCallback } from "react";
+import { Schedule } from "../models/Schedule";
+import { useSchedules } from "../hooks/useSchedule";
+import SplitButton from "../components/SplitButton/SplitButton";
+import SearchBar from "../components/SearchBar/SearchBar";
+import EditableTable from "../components/Table/EditableTable/EditableTable";
 import {
   Button,
   TextField,
@@ -18,11 +23,6 @@ import {
   useMediaQuery,
   CircularProgress,
 } from "@mui/material";
-import EditableTable from "../components/Table/EditableTable/EditableTable";
-import SearchBar from "../components/SearchBar/SearchBar";
-import SplitButton from "../components/SplitButton/SplitButton";
-import { Schedule } from "../models/Schedule";
-import { useSchedules } from "../hooks/useSchedule";
 import {
   createExportOptions,
   exportFileFormattedDate,
@@ -33,11 +33,11 @@ import {
   getDayOptionsSpanish,
   translateDayOptionsToSpanish,
 } from "../utils/stringUtils";
+import { PAGE_TITLE } from "../constants/constants";
 import PostAddRoundedIcon from "@mui/icons-material/PostAddRounded";
 import DownloadRoundedIcon from "@mui/icons-material/DownloadRounded";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faFileExcel, faFilePdf } from "@fortawesome/free-solid-svg-icons";
-import { PAGE_TITLE } from "../constants/constants";
 
 const ManageSchedules: React.FC = () => {
   const {
