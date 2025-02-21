@@ -516,14 +516,6 @@ const ManageRoles: React.FC = () => {
                 <LocalizationProvider
                   dateAdapter={AdapterDateFns}
                   adapterLocale={es}
-                  localeText={{
-                    okButtonLabel: "Aceptar",
-                    cancelButtonLabel: "Cancelar",
-                    todayButtonLabel: "Hoy",
-                    year: "Año #{currentYear}",
-                    previousMonth: "Mes anterior",
-                    nextMonth: "Mes siguiente",
-                  }}
                 >
                   <DatePicker
                     label="Seleccionar fecha"
@@ -533,6 +525,7 @@ const ManageRoles: React.FC = () => {
                       mt: { xs: 2, sm: 2, md: 0 },
                     }}
                     maxDate={nextWeekEnd}
+                    views={["year", "month", "day"]}
                     onChange={handleDateChange}
                   />
                 </LocalizationProvider>

@@ -527,14 +527,6 @@ const ManageVehicles: React.FC = () => {
                 <LocalizationProvider
                   dateAdapter={AdapterDateFns}
                   adapterLocale={es}
-                  localeText={{
-                    okButtonLabel: "Aceptar",
-                    cancelButtonLabel: "Cancelar",
-                    todayButtonLabel: "Hoy",
-                    year: "Año #{year}",
-                    previousMonth: "Mes anterior",
-                    nextMonth: "Mes siguiente",
-                  }}
                 >
                   <DatePicker
                     label="Seleccionar fecha"
@@ -544,6 +536,7 @@ const ManageVehicles: React.FC = () => {
                       mt: { xs: 2, sm: 2, md: 0 },
                     }}
                     maxDate={new Date()}
+                    views={["year", "month", "day"]}
                     onChange={handleDateChange}
                   />
                 </LocalizationProvider>

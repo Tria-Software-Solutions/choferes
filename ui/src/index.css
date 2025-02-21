@@ -26,6 +26,11 @@ code {
   padding: 10px;
 }
 
+.table-container {
+  width: 100%; 
+  table-layout: fixed; 
+}
+
 .action-cell {
   display: flex;
   justify-content: flex-end;
