@@ -316,15 +316,23 @@ const SelectorTable: React.FC<SelectorTableProps> = React.memo(
           sx={{ maxHeight: "65vh", overflowX: "auto" }}
         >
           <Table stickyHeader aria-label="sticky table">
-            <TableHead>
-              <TableRow
-                sx={{
-                  position: "sticky",
-                  top: 0,
-                  zIndex: 3,
-                }}
-              >
-                <TableCell align="center" colSpan={9}>
+            <TableHead
+              sx={{
+                position: "sticky",
+                top: 0,
+                zIndex: 4,
+              }}
+            >
+              <TableRow>
+                <TableCell
+                  align="center"
+                  colSpan={9}
+                  sx={{
+                    position: "sticky",
+                    top: 0,
+                    zIndex: 4,
+                  }}
+                >
                   <Box
                     sx={{
                       display: "flex",
@@ -335,7 +343,10 @@ const SelectorTable: React.FC<SelectorTableProps> = React.memo(
                     {selectedPeriod === "weekly" ? (
                       <div>
                         {hasMultipleYears(currentWeek) ? (
-                          <Typography variant="body2">{`Semanas ${multiplePeriods.weekNumbers[1].weekNumber} / ${multiplePeriods.weekNumbers[0].weekNumber}`}</Typography>
+                          <Typography variant="body2">
+                            {`Semanas ${multiplePeriods.weekNumbers[1].weekNumber} / `}
+                            {multiplePeriods.weekNumbers[0].weekNumber}
+                          </Typography>
                         ) : (
                           <Typography variant="body2">{`Semana ${weekNumber}`}</Typography>
                         )}
@@ -343,7 +354,10 @@ const SelectorTable: React.FC<SelectorTableProps> = React.memo(
                     ) : selectedPeriod === "biweekly" ? (
                       <div>
                         {hasMultipleBiweeks(currentWeek) ? (
-                          <Typography variant="body2">{`Quincenas ${multiplePeriods.biweekNumbers[0].biweekNumber} / ${multiplePeriods.biweekNumbers[1].biweekNumber}`}</Typography>
+                          <Typography variant="body2">
+                            {`Quincenas ${multiplePeriods.biweekNumbers[0].biweekNumber} / `}
+                            {multiplePeriods.biweekNumbers[1].biweekNumber}
+                          </Typography>
                         ) : (
                           <Typography variant="body2">{`Quincena ${biweekNumber}`}</Typography>
                         )}
@@ -369,7 +383,11 @@ const SelectorTable: React.FC<SelectorTableProps> = React.memo(
               <TableRow>
                 <TableCell
                   className="employee-column"
-                  sx={{ position: "sticky", left: 0, zIndex: 3 }}
+                  sx={{
+                    position: "sticky",
+                    left: 0,
+                    zIndex: 4,
+                  }}
                 >
                   <TableSortLabel
                     direction={orderDirection}
@@ -494,7 +512,7 @@ const SelectorTable: React.FC<SelectorTableProps> = React.memo(
 
                       return a.label.localeCompare(b.label);
                     });
-                    
+
                     return (
                       <TableCell
                         key={day}
