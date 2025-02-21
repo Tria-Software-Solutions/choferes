@@ -40,6 +40,32 @@ export const useWeeklySummaries = () => {
     );
   };
 
+  const handleAddOrUpdateWeeklySummary = async (
+    newWeeklySummary: WeeklySummary
+  ) => {
+    const existingSummary = weeklySummaries.find(
+      (summary) => summary.id === newWeeklySummary.id
+    );
+  
+    if (existingSummary) {
+      await WeeklySummaryService.updateWeeklySummary(
+        newWeeklySummary.id!,
+        newWeeklySummary
+      );
+      setWeeklySummaries((prev) =>
+        prev.map((summary) =>
+          summary.id === newWeeklySummary.id
+            ? { ...summary, ...newWeeklySummary }
+            : summary
+        )
+      );
+    } else {
+      await WeeklySummaryService.addWeeklySummary(newWeeklySummary);
+      setWeeklySummaries((prev) => [...prev, newWeeklySummary]);
+      setTotalCount((prev) => prev + 1);
+    }
+  };
+
   const handleDeleteWeeklySummary = async (id: number) => {
     await WeeklySummaryService.deleteWeeklySummary(id);
     setWeeklySummaries((prev) =>
@@ -62,6 +88,7 @@ export const useWeeklySummaries = () => {
     fetchWeeklySummaries,
     handleAddWeeklySummary,
     handleUpdateWeeklySummary,
+    handleAddOrUpdateWeeklySummary,
     handleDeleteWeeklySummary,
     totalWeeklyHours,
   };

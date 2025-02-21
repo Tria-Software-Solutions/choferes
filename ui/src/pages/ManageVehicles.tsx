@@ -173,6 +173,10 @@ const ManageVehicles: React.FC = () => {
     }
   }, [editFields, editRowId, validateEditFields]);
 
+  const handleFilterChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setFilter(e.target.value);
+  };
+
   const handleAdd = () => {
     const newVehicle: Vehicle = {
       id: Math.max(...vehicles.map((vehicle) => vehicle.id)) + 1,
@@ -451,7 +455,7 @@ const ManageVehicles: React.FC = () => {
                 <SearchBar
                   placeholder="Buscar vehículo"
                   value={filter}
-                  onChange={(e) => setFilter(e.target.value)}
+                  onChange={handleFilterChange}
                   sx={{
                     maxWidth: "100%",
                   }}
@@ -534,7 +538,7 @@ const ManageVehicles: React.FC = () => {
                 >
                   <DatePicker
                     label="Seleccionar fecha"
-                    value={selectedDate}
+                    value={selectedDate || null}
                     sx={{
                       width: { xs: "100%", sm: "100%", md: "auto" },
                       mt: { xs: 2, sm: 2, md: 0 },
