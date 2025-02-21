@@ -53,15 +53,18 @@ const ManageEmployees: React.FC = () => {
   const [isEditFormValid, setIsEditFormValid] = useState(false);
 
   useEffect(() => {
-    const filtered = employees.filter((employee) =>
-      `${employee.firstName} ${employee.lastName}`
-        .toLowerCase()
-        .includes(filter.toLowerCase())
-    );
-
-    setFilteredEmployees(filtered);
-    setTotalCount(filtered.length);
-  }, [employees, filter]);
+      const normalizeString = (str: string) =>
+        str.normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+  
+      setFilteredEmployees(
+        employees.filter((employee) =>
+          normalizeString(`${employee.firstName} ${employee.lastName}`)
+            .toLowerCase()
+            .includes(normalizeString(filter).toLowerCase())
+        )
+      );
+      setTotalCount(filteredEmployees.length);
+    }, [filter, employees, filteredEmployees.length]);
 
   const validateAddFields = useCallback(() => {
     const nameRegex = /^[a-zA-ZáéíóúÁÉÍÓÚüÜñÑ.\s]+$/;

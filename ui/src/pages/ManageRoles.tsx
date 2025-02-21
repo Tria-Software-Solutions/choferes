@@ -95,11 +95,14 @@ const ManageRoles: React.FC = () => {
     isLoadingMonthlySummaries;
 
   useEffect(() => {
+    const normalizeString = (str: string) =>
+      str.normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+
     setFilteredEmployees(
       employees.filter((employee) =>
-        `${employee.firstName} ${employee.lastName}`
+        normalizeString(`${employee.firstName} ${employee.lastName}`)
           .toLowerCase()
-          .includes(filter.toLowerCase())
+          .includes(normalizeString(filter).toLowerCase())
       )
     );
   }, [filter, employees]);
@@ -144,8 +147,7 @@ const ManageRoles: React.FC = () => {
     currentBiweekNumber,
     currentMonth,
     currentYear,
-    getCurrentWeekDates(weekOffset),
-    "biweekly"
+    getCurrentWeekDates(weekOffset)
   );
 
   const handleDateChange = (newDate: Date | null) => {

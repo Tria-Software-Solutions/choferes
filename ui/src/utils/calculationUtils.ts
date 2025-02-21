@@ -20,13 +20,6 @@ export const calculateTotalHoursAndOvertimeForPeriod = (
   biweeklySummaries: Summary[],
   monthlySummaries: Summary[]
 ) => {
-
-  console.log('selectedPeriod: ', selectedPeriod);
-  console.log('weekNumber: ', weekNumber);
-  console.log('biweekNumber: ', biweekNumber);
-  console.log('month: ', month);
-  console.log('year: ', year);
-
   const findWeeklySummary = () =>
     weeklySummaries.find(
       (s) =>
@@ -88,12 +81,6 @@ export const calculateTotalHoursAndOvertimeForPeriods = (
   biweeklySummaries: Summary[],
   monthlySummaries: Summary[]
 ) => {
-
-  console.log('selectedPeriod: ', selectedPeriod);
-  console.log('weekNumber: ', weekNumbers);
-  console.log('biweekNumber: ', biweekNumbers);
-  console.log('month: ', months);
-
   const findFirstWeeklySummary = () =>
     weeklySummaries.find(
       (s) =>
