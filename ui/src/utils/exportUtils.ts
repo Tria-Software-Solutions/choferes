@@ -179,13 +179,17 @@ export const handleExportTableData = (
   biweekNumber: number,
   month: number,
   year: number,
-  currentWeek: { day: string; date: string; isoDate: string }[],
-  period: "weekly" | "biweekly" | "monthly"
+  currentWeek: { day: string; date: string; isoDate: string }[]
 ) => {
   const headers = [
     "Nombre",
     ...currentWeek.map(({ date }) => formatHeaderDateWithYear(date)),
-    `Total ${translatePeriodToSpanish(period)}`,
+    `Total ${translatePeriodToSpanish('weekly')}`,
+    `Total Horas Extra ${translatePeriodToSpanish('weekly')}`,
+    `Total ${translatePeriodToSpanish('biweekly')}`,
+    `Total Horas Extra ${translatePeriodToSpanish('biweekly')}`,
+    `Total ${translatePeriodToSpanish('monthly')}`,
+    `Total Horas Extra ${translatePeriodToSpanish('monthly')}`,
   ];
 
   const sortedEmployees = filteredEmployees.sort((a, b) => {
