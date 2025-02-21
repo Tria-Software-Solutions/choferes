@@ -1,4 +1,9 @@
 import React, { useCallback, useEffect, useState } from "react";
+import { Vehicle } from "../models/Vehicle";
+import { useVehicles } from "../hooks/useVehicle";
+import SplitButton from "../components/SplitButton/SplitButton";
+import SearchBar from "../components/SearchBar/SearchBar";
+import EditableTable from "../components/Table/EditableTable/EditableTable";
 import {
   Box,
   Typography,
@@ -19,31 +24,26 @@ import {
   SelectChangeEvent,
   CircularProgress,
 } from "@mui/material";
-import { useVehicles } from "../hooks/useVehicle";
-import { Vehicle } from "../models/Vehicle";
-import SplitButton from "../components/SplitButton/SplitButton";
-import {
-  createExportOptions,
-  exportFileFormattedDate,
-  exportToExcel,
-  exportToPDF,
-} from "../utils/exportUtils";
-import DownloadRoundedIcon from "@mui/icons-material/DownloadRounded";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faFileExcel, faFilePdf } from "@fortawesome/free-solid-svg-icons";
-import SearchBar from "../components/SearchBar/SearchBar";
-import DirectionsCarIcon from "@mui/icons-material/DirectionsCar";
-import EditableTable from "../components/Table/EditableTable/EditableTable";
-import { BRANDS, COLORS, PAGE_TITLE } from "../constants/constants";
-import ArrowBackIosNewRoundedIcon from "@mui/icons-material/ArrowBackIosNewRounded";
-import ArrowForwardIosRoundedIcon from "@mui/icons-material/ArrowForwardIosRounded";
-import CalendarTodayRoundedIcon from "@mui/icons-material/CalendarTodayRounded";
 import { LocalizationProvider } from "@mui/x-date-pickers";
 import { DatePicker } from "@mui/x-date-pickers/DatePicker";
 import { AdapterDateFns } from "@mui/x-date-pickers/AdapterDateFns";
 import { es } from "date-fns/locale";
 import { isTodayOrFuture } from "../utils/dateUtils";
 import { maskLicensePlate, maskParkingLot } from "../utils/maskUtils";
+import {
+  createExportOptions,
+  exportFileFormattedDate,
+  exportToExcel,
+  exportToPDF,
+} from "../utils/exportUtils";
+import { BRANDS, COLORS, PAGE_TITLE } from "../constants/constants";
+import DownloadRoundedIcon from "@mui/icons-material/DownloadRounded";
+import DirectionsCarIcon from "@mui/icons-material/DirectionsCar";
+import ArrowBackIosNewRoundedIcon from "@mui/icons-material/ArrowBackIosNewRounded";
+import ArrowForwardIosRoundedIcon from "@mui/icons-material/ArrowForwardIosRounded";
+import CalendarTodayRoundedIcon from "@mui/icons-material/CalendarTodayRounded";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faFileExcel, faFilePdf } from "@fortawesome/free-solid-svg-icons";
 
 const ManageVehicles: React.FC = () => {
   const [selectedDate, setSelectedDate] = useState<Date | null>(new Date());

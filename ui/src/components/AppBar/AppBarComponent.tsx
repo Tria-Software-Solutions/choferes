@@ -1,8 +1,9 @@
 import React from "react";
-import { AppBar, Toolbar, Typography, IconButton } from "@mui/material";
 import MenuComponent from "../Menu/MenuComponent";
+import { AppBar, Toolbar, Typography, IconButton, Box } from "@mui/material";
 import MenuRoundedIcon from "@mui/icons-material/MenuRounded";
-import logo from '../../assets/images/logo.png'; 
+import logo from "../../assets/images/logo.png";
+import { useNavigate } from "react-router-dom";
 
 interface Link {
   label: string;
@@ -22,6 +23,7 @@ const AppBarComponent: React.FC<AppBarComponentProps> = ({
   title,
   links,
 }) => {
+  const navigate = useNavigate();
   const menuItems = links.map((link) => ({
     text: link.label,
     onClick: () => {
@@ -45,24 +47,36 @@ const AppBarComponent: React.FC<AppBarComponentProps> = ({
     <AppBar position="static">
       <Toolbar variant="regular">
         {icon && (
-          <IconButton edge="start" color="inherit" aria-label="menu">
+          <IconButton
+            edge="start"
+            color="inherit"
+            aria-label="menu"
+            onClick={() => navigate("/")}
+          >
             {icon}
           </IconButton>
         )}
-        <img
-          src={logo}
-          alt="Logo"
-          style={{
-            width: '28px',
-            height: 'auto', 
-            marginRight: '10px', 
-          }}
-        />
+        <Box sx={{ cursor: "pointer" }} onClick={() => navigate("/")}>
+          <img
+            src={logo}
+            alt="Logo"
+            style={{
+              width: "28px",
+              height: "auto",
+              marginRight: "10px",
+            }}
+          />
+        </Box>
         <Typography
           variant="h5"
           sx={{ flexGrow: 1, fontFamily: "'Protest Guerrilla', sans-serif" }}
         >
-          {title}
+          <Box
+            sx={{ cursor: "pointer", display: "inline-block" }}
+            onClick={() => navigate("/")}
+          >
+            {title}
+          </Box>
         </Typography>
         <MenuComponent icon={<MenuRoundedIcon />} menuItems={menuItems} />
       </Toolbar>

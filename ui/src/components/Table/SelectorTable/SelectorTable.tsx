@@ -1,4 +1,13 @@
 import React, { useMemo, useState } from "react";
+import { Employee } from "../../../models/Employee";
+import { Schedule } from "../../../models/Schedule";
+import { HoursWorked } from "../../../models/HoursWorked";
+import { WeeklySummary } from "../../../models/WeeklySummary";
+import { BiweeklySummary } from "../../../models/BiweeklySummary";
+import { MonthlySummary } from "../../../models/MonthlySummary";
+import { useNavigate } from "react-router-dom";
+import { format } from "date-fns";
+import ModalComponent from "../../Modal/ModalComponent";
 import {
   Table,
   TableBody,
@@ -23,9 +32,7 @@ import {
   Badge,
   Tooltip,
 } from "@mui/material";
-import { Employee } from "../../../models/Employee";
-import { Schedule } from "../../../models/Schedule";
-import { HoursWorked } from "../../../models/HoursWorked";
+import { TabContext, TabList, TabPanel } from "@mui/lab";
 import {
   formatDate,
   formatDateWithoutYear,
@@ -43,24 +50,19 @@ import {
   getOptionsForDay,
   translateDayToAbrevSpanish,
 } from "../../../utils/stringUtils";
+import {
+  calculateTotalHoursAndOvertimeForPeriod,
+  calculateTotalHoursAndOvertimeForPeriods,
+} from "../../../utils/calculationUtils";
 import { EnglishDayOfWeek } from "../../../utils/englishDayOfWeek";
 import {
   STATE,
   TABLE,
   DEFAULT_SCHEDULE_VALUES,
 } from "../../../constants/constants";
-import ModalComponent from "../../Modal/ModalComponent";
 import InfoRoundedIcon from "@mui/icons-material/InfoRounded";
-import { TabContext, TabList, TabPanel } from "@mui/lab";
-import {
-  calculateTotalHoursAndOvertimeForPeriod,
-  calculateTotalHoursAndOvertimeForPeriods,
-} from "../../../utils/calculationUtils";
-import { format } from "date-fns";
-import { WeeklySummary } from "../../../models/WeeklySummary";
-import { BiweeklySummary } from "../../../models/BiweeklySummary";
-import { MonthlySummary } from "../../../models/MonthlySummary";
 import AccessTimeRoundedIcon from "@mui/icons-material/AccessTimeRounded";
+import AddIcon from "@mui/icons-material/Add";
 
 interface SelectorTableProps {
   filteredEmployees: Employee[];
@@ -96,6 +98,7 @@ const SelectorTable: React.FC<SelectorTableProps> = React.memo(
     year,
     handleChange,
   }) => {
+    const navigate = useNavigate();
     const [selectedPeriod, setSelectedPeriod] = useState<
       "weekly" | "biweekly" | "monthly"
     >("weekly");
@@ -545,6 +548,21 @@ const SelectorTable: React.FC<SelectorTableProps> = React.memo(
 
                               return items;
                             })}
+                            <Divider key="divider" />
+                            <MenuItem
+                              value={"Other"}
+                              onClick={() => navigate("/schedules")}
+                            >
+                              <Box
+                                display="flex"
+                                justifyContent="space-between"
+                                width="100%"
+                                alignItems="center"
+                              >
+                                Otro
+                                <AddIcon fontSize="small" />
+                              </Box>
+                            </MenuItem>
                           </Select>
                         </FormControl>
                       </TableCell>

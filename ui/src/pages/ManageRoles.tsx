@@ -1,4 +1,29 @@
 import React, { useCallback, useEffect, useState } from "react";
+import { Employee } from "../models/Employee";
+import { HoursWorked } from "../models/HoursWorked";
+import { WeeklySummary } from "../models/WeeklySummary";
+import { BiweeklySummary } from "../models/BiweeklySummary";
+import { MonthlySummary } from "../models/MonthlySummary";
+import { useEmployees } from "../hooks/useEmployee";
+import { useSchedules } from "../hooks/useSchedule";
+import { useHours } from "../hooks/useHours";
+import { useWeeklySummaries } from "../hooks/useWeeklySummary";
+import { useBiweeklySummaries } from "../hooks/useBiweeklySummary";
+import { useMonthlySummaries } from "../hooks/useMonthlySummary";
+import SplitButton from "../components/SplitButton/SplitButton";
+import SearchBar from "../components/SearchBar/SearchBar";
+import SelectorTable from "../components/Table/SelectorTable/SelectorTable";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { es } from "date-fns/locale";
+import { LocalizationProvider } from "@mui/x-date-pickers";
+import { DatePicker } from "@mui/x-date-pickers/DatePicker";
+import { AdapterDateFns } from "@mui/x-date-pickers/AdapterDateFns";
+import {
+  addWeeks,
+  differenceInCalendarWeeks,
+  endOfWeek,
+  startOfWeek,
+} from "date-fns";
 import {
   Box,
   Typography,
@@ -10,24 +35,12 @@ import {
   CircularProgress,
   SelectChangeEvent,
 } from "@mui/material";
-import SplitButton from "../components/SplitButton/SplitButton";
 import {
   createExportOptions,
   exportToExcel,
   exportToPDF,
   handleExportTableData,
 } from "../utils/exportUtils";
-import DownloadRoundedIcon from "@mui/icons-material/DownloadRounded";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faFileExcel, faFilePdf } from "@fortawesome/free-solid-svg-icons";
-import SearchBar from "../components/SearchBar/SearchBar";
-import ArrowBackIosNewRoundedIcon from "@mui/icons-material/ArrowBackIosNewRounded";
-import ArrowForwardIosRoundedIcon from "@mui/icons-material/ArrowForwardIosRounded";
-import CalendarTodayRoundedIcon from "@mui/icons-material/CalendarTodayRounded";
-import { LocalizationProvider } from "@mui/x-date-pickers";
-import { DatePicker } from "@mui/x-date-pickers/DatePicker";
-import { AdapterDateFns } from "@mui/x-date-pickers/AdapterDateFns";
-import { es } from "date-fns/locale";
 import {
   getBiweekNumber,
   getCurrentWeekDates,
@@ -37,26 +50,13 @@ import {
   getWeekNumber,
   isValidDateForSelect,
 } from "../utils/dateUtils";
-import { PAGE_TITLE } from "../constants/constants";
-import { useEmployees } from "../hooks/useEmployee";
-import { useSchedules } from "../hooks/useSchedule";
-import { useHours } from "../hooks/useHours";
-import { Employee } from "../models/Employee";
-import {
-  addWeeks,
-  differenceInCalendarWeeks,
-  endOfWeek,
-  startOfWeek,
-} from "date-fns";
-import SelectorTable from "../components/Table/SelectorTable/SelectorTable";
-import { HoursWorked } from "../models/HoursWorked";
-import { useWeeklySummaries } from "../hooks/useWeeklySummary";
-import { useBiweeklySummaries } from "../hooks/useBiweeklySummary";
-import { useMonthlySummaries } from "../hooks/useMonthlySummary";
-import { WeeklySummary } from "../models/WeeklySummary";
-import { BiweeklySummary } from "../models/BiweeklySummary";
-import { MonthlySummary } from "../models/MonthlySummary";
 import { setDayOptionsEnglish } from "../utils/stringUtils";
+import { PAGE_TITLE } from "../constants/constants";
+import DownloadRoundedIcon from "@mui/icons-material/DownloadRounded";
+import ArrowBackIosNewRoundedIcon from "@mui/icons-material/ArrowBackIosNewRounded";
+import ArrowForwardIosRoundedIcon from "@mui/icons-material/ArrowForwardIosRounded";
+import CalendarTodayRoundedIcon from "@mui/icons-material/CalendarTodayRounded";
+import { faFileExcel, faFilePdf } from "@fortawesome/free-solid-svg-icons";
 
 const ManageRoles: React.FC = () => {
   const { employees, isLoadingEmployees } = useEmployees();
@@ -340,6 +340,10 @@ const ManageRoles: React.FC = () => {
     employeeId: number,
     date: Date
   ) => {
+    if (event.target.value === "Other") {
+      return;
+    }
+
     const selectedSchedule = schedules.find(
       (schedule) =>
         schedule.label === event.target.value &&

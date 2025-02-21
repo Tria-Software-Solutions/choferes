@@ -23,13 +23,14 @@ import {
   mapDayValues,
   getDayOptionsSpanish,
 } from "../../../utils/stringUtils";
+import { formatDateWithDay } from "../../../utils/dateUtils";
+import { maskLicensePlate, maskParkingLot } from "../../../utils/maskUtils";
+import { BRANDS, COLORS, TABLE } from "../../../constants/constants";
 import DeleteIcon from "@mui/icons-material/Delete";
 import EditIcon from "@mui/icons-material/Edit";
 import SaveIcon from "@mui/icons-material/Save";
 import CloseIcon from "@mui/icons-material/Close";
-import { BRANDS, COLORS, TABLE } from "../../../constants/constants";
-import { formatDateWithDay } from "../../../utils/dateUtils";
-import { maskLicensePlate, maskParkingLot } from "../../../utils/maskUtils";
+
 
 type EditableTableProps<T> = {
   data: T[];
