@@ -91,6 +91,10 @@ const ManageEmployees: React.FC = () => {
     }
   }, [editFields, editRowId, validateEditFields]);
 
+  const handleFilterChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setFilter(e.target.value);
+  };
+
   const handleAdd = () => {
     const newEmployee: Employee = {
       id: Math.max(...employees.map((employee) => employee.id)) + 1,
@@ -193,7 +197,7 @@ const ManageEmployees: React.FC = () => {
                 <SearchBar
                   placeholder="Buscar empleado"
                   value={filter}
-                  onChange={(e) => setFilter(e.target.value)}
+                  onChange={handleFilterChange}
                   sx={{ maxWidth: "100%" }}
                   fullWidth
                 />

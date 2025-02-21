@@ -11,11 +11,18 @@ import {
   translatePeriodToSpanish,
   translationsDayOptionsToSpanish,
 } from "./stringUtils";
-import { calculateTotalHoursForPeriod } from "./tableUtils";
+import {
+  calculateTotalHoursAndOvertimeForPeriod,
+  calculateTotalHoursAndOvertimeForPeriods,
+} from "./calculationUtils";
 import {
   formatHeaderDateWithYear,
   formatDate,
   formatDateWithDay,
+  hasMultipleYears,
+  hasMultipleBiweeks,
+  hasMultipleMonths,
+  getInvolvedPeriods,
 } from "./dateUtils";
 import { EnglishDayOfWeek } from "./englishDayOfWeek";
 import { WeeklySummary } from "../models/WeeklySummary";
@@ -172,7 +179,7 @@ export const handleExportTableData = (
   biweekNumber: number,
   month: number,
   year: number,
-  currentWeek: { day: string; date: string }[],
+  currentWeek: { day: string; date: string; isoDate: string }[],
   period: "weekly" | "biweekly" | "monthly"
 ) => {
   const headers = [
@@ -210,10 +217,104 @@ export const handleExportTableData = (
         scheduleLabel || "Libre";
     });
 
-    employeeData[`Total ${translatePeriodToSpanish(period)}`] =
-      calculateTotalHoursForPeriod(
+    const multiplePeriods = getInvolvedPeriods(currentWeek);
+
+    if (hasMultipleYears(currentWeek)) {
+      employeeData[`Total ${translatePeriodToSpanish("weekly")}`] =
+        calculateTotalHoursAndOvertimeForPeriods(
+          employee.id,
+          "weekly",
+          multiplePeriods.weekNumbers,
+          multiplePeriods.biweekNumbers,
+          multiplePeriods.months,
+          weeklySummaries,
+          biweeklySummaries,
+          monthlySummaries
+        ).totalHours;
+
+      employeeData[`Total Horas Extra ${translatePeriodToSpanish("weekly")}`] =
+        calculateTotalHoursAndOvertimeForPeriods(
+          employee.id,
+          "weekly",
+          multiplePeriods.weekNumbers,
+          multiplePeriods.biweekNumbers,
+          multiplePeriods.months,
+          weeklySummaries,
+          biweeklySummaries,
+          monthlySummaries
+        ).overtime;
+    } else {
+      employeeData[`Total ${translatePeriodToSpanish("weekly")}`] =
+        calculateTotalHoursAndOvertimeForPeriod(
+          employee.id,
+          "weekly",
+          weekNumber,
+          biweekNumber,
+          month,
+          year,
+          weeklySummaries,
+          biweeklySummaries,
+          monthlySummaries
+        ).totalHours;
+
+      employeeData[`Total Horas Extra ${translatePeriodToSpanish("weekly")}`] =
+        calculateTotalHoursAndOvertimeForPeriod(
+          employee.id,
+          "weekly",
+          weekNumber,
+          biweekNumber,
+          month,
+          year,
+          weeklySummaries,
+          biweeklySummaries,
+          monthlySummaries
+        ).overtime;
+    }
+
+    if (hasMultipleBiweeks(currentWeek)) {
+      employeeData[`Total ${translatePeriodToSpanish("biweekly")}`] =
+        calculateTotalHoursAndOvertimeForPeriods(
+          employee.id,
+          "biweekly",
+          multiplePeriods.weekNumbers,
+          multiplePeriods.biweekNumbers,
+          multiplePeriods.months,
+          weeklySummaries,
+          biweeklySummaries,
+          monthlySummaries
+        ).totalHours;
+
+      employeeData[
+        `Total Horas Extra ${translatePeriodToSpanish("biweekly")}`
+      ] = calculateTotalHoursAndOvertimeForPeriods(
         employee.id,
-        period,
+        "biweekly",
+        multiplePeriods.weekNumbers,
+        multiplePeriods.biweekNumbers,
+        multiplePeriods.months,
+        weeklySummaries,
+        biweeklySummaries,
+        monthlySummaries
+      ).overtime;
+    } else {
+      employeeData[`Total ${translatePeriodToSpanish("biweekly")}`] =
+        calculateTotalHoursAndOvertimeForPeriod(
+          employee.id,
+          "biweekly",
+          weekNumber,
+          biweekNumber,
+          month,
+          year,
+          weeklySummaries,
+          biweeklySummaries,
+          monthlySummaries
+        ).totalHours;
+
+      employeeData[
+        `Total Horas Extra ${translatePeriodToSpanish("biweekly")}`
+      ] = calculateTotalHoursAndOvertimeForPeriod(
+        employee.id,
+        "biweekly",
         weekNumber,
         biweekNumber,
         month,
@@ -221,7 +322,60 @@ export const handleExportTableData = (
         weeklySummaries,
         biweeklySummaries,
         monthlySummaries
-      );
+      ).overtime;
+    }
+
+    if (hasMultipleMonths(currentWeek)) {
+      employeeData[`Total ${translatePeriodToSpanish("monthly")}`] =
+        calculateTotalHoursAndOvertimeForPeriods(
+          employee.id,
+          "monthly",
+          multiplePeriods.weekNumbers,
+          multiplePeriods.biweekNumbers,
+          multiplePeriods.months,
+          weeklySummaries,
+          biweeklySummaries,
+          monthlySummaries
+        ).totalHours;
+
+      employeeData[`Total Horas Extra ${translatePeriodToSpanish("monthly")}`] =
+        calculateTotalHoursAndOvertimeForPeriods(
+          employee.id,
+          "monthly",
+          multiplePeriods.weekNumbers,
+          multiplePeriods.biweekNumbers,
+          multiplePeriods.months,
+          weeklySummaries,
+          biweeklySummaries,
+          monthlySummaries
+        ).overtime;
+    } else {
+      employeeData[`Total ${translatePeriodToSpanish("monthly")}`] =
+        calculateTotalHoursAndOvertimeForPeriod(
+          employee.id,
+          "monthly",
+          weekNumber,
+          biweekNumber,
+          month,
+          year,
+          weeklySummaries,
+          biweeklySummaries,
+          monthlySummaries
+        ).totalHours;
+
+      employeeData[`Total Horas Extra ${translatePeriodToSpanish("monthly")}`] =
+        calculateTotalHoursAndOvertimeForPeriod(
+          employee.id,
+          "monthly",
+          weekNumber,
+          biweekNumber,
+          month,
+          year,
+          weeklySummaries,
+          biweeklySummaries,
+          monthlySummaries
+        ).overtime;
+    }
 
     return employeeData;
   });
