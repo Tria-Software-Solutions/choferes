@@ -78,17 +78,22 @@ const ManageSchedules: React.FC = () => {
   }, [fetchSchedules]);
 
   useEffect(() => {
-    const filtered = schedules.filter((schedule) =>
-      `${schedule.label} ${translateDayOptionsToSpanish(schedule.day)} ${
-        schedule.hours
-      }`
-        .toLowerCase()
-        .includes(filter.toLowerCase())
-    );
+    const normalizeString = (str: string) =>
+      str.normalize("NFD").replace(/[\u0300-\u036f]/g, "");
 
-    setFilteredSchedules(filtered);
-    setTotalCount(filtered.length);
-  }, [schedules, filter]);
+    setFilteredSchedules(
+      schedules.filter((schedule) =>
+        normalizeString(
+          `${schedule.label} ${translateDayOptionsToSpanish(schedule.day)} ${
+            schedule.hours
+          }`
+        )
+          .toLowerCase()
+          .includes(normalizeString(filter).toLowerCase())
+      )
+    );
+    setTotalCount(filteredSchedules.length);
+  }, [filter, schedules, filteredSchedules.length]);
 
   const validateAddFields = useCallback(() => {
     const nameRegex = /^[a-zA-ZáéíóúÁÉÍÓÚñÑ\s]+$/;
