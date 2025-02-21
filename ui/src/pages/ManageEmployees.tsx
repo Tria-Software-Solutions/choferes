@@ -1,4 +1,9 @@
 import React, { useState, useEffect, useCallback } from "react";
+import { Employee } from "../models/Employee";
+import { useEmployees } from "../hooks/useEmployee";
+import SplitButton from "../components/SplitButton/SplitButton";
+import SearchBar from "../components/SearchBar/SearchBar";
+import EditableTable from "../components/Table/EditableTable/EditableTable";
 import {
   Button,
   TextField,
@@ -14,22 +19,17 @@ import {
   useMediaQuery,
   CircularProgress,
 } from "@mui/material";
-import EditableTable from "../components/Table/EditableTable/EditableTable";
-import SearchBar from "../components/SearchBar/SearchBar";
-import SplitButton from "../components/SplitButton/SplitButton";
-import { Employee } from "../models/Employee";
-import { useEmployees } from "../hooks/useEmployee";
 import {
   createExportOptions,
   exportFileFormattedDate,
   exportToExcel,
   exportToPDF,
 } from "../utils/exportUtils";
+import { PAGE_TITLE } from "../constants/constants";
 import PersonAddAlt1RoundedIcon from "@mui/icons-material/PersonAddAlt1Rounded";
 import DownloadRoundedIcon from "@mui/icons-material/DownloadRounded";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faFileExcel, faFilePdf } from "@fortawesome/free-solid-svg-icons";
-import { PAGE_TITLE } from "../constants/constants";
 
 const ManageEmployees: React.FC = () => {
   const {
@@ -53,18 +53,18 @@ const ManageEmployees: React.FC = () => {
   const [isEditFormValid, setIsEditFormValid] = useState(false);
 
   useEffect(() => {
-      const normalizeString = (str: string) =>
-        str.normalize("NFD").replace(/[\u0300-\u036f]/g, "");
-  
-      setFilteredEmployees(
-        employees.filter((employee) =>
-          normalizeString(`${employee.firstName} ${employee.lastName}`)
-            .toLowerCase()
-            .includes(normalizeString(filter).toLowerCase())
-        )
-      );
-      setTotalCount(filteredEmployees.length);
-    }, [filter, employees, filteredEmployees.length]);
+    const normalizeString = (str: string) =>
+      str.normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+
+    setFilteredEmployees(
+      employees.filter((employee) =>
+        normalizeString(`${employee.firstName} ${employee.lastName}`)
+          .toLowerCase()
+          .includes(normalizeString(filter).toLowerCase())
+      )
+    );
+    setTotalCount(filteredEmployees.length);
+  }, [filter, employees, filteredEmployees.length]);
 
   const validateAddFields = useCallback(() => {
     const nameRegex = /^[a-zA-ZáéíóúÁÉÍÓÚüÜñÑ.\s]+$/;
