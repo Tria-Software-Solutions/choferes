@@ -421,7 +421,9 @@ const SelectorTable: React.FC<SelectorTableProps> = React.memo(
                       display="flex"
                       alignItems="center"
                       justifyContent="space-between"
-                      whiteSpace="nowrap"
+                      sx={{
+                        whiteSpace: isSmallScreen ? "break-spaces" : "nowrap",
+                      }}
                     >
                       <Typography variant="body2">
                         {employee.firstName} {employee.lastName}
