@@ -311,42 +311,59 @@ const SelectorTable: React.FC<SelectorTableProps> = React.memo(
 
     return (
       <Paper sx={{ width: "100%" }}>
-        <TableContainer className="table-container">
+        <TableContainer
+          className="table-container"
+          sx={{ maxHeight: "65vh", overflowX: "auto" }}
+        >
           <Table stickyHeader aria-label="sticky table">
             <TableHead>
-              <TableRow>
+              <TableRow
+                sx={{
+                  position: "sticky",
+                  top: 0,
+                  zIndex: 3,
+                }}
+              >
                 <TableCell align="center" colSpan={9}>
-                  {selectedPeriod === "weekly" ? (
-                    <div>
-                      {hasMultipleYears(currentWeek) ? (
-                        <Typography variant="body2">{`Semanas ${multiplePeriods.weekNumbers[1].weekNumber} / ${multiplePeriods.weekNumbers[0].weekNumber}`}</Typography>
-                      ) : (
-                        <Typography variant="body2">{`Semana ${weekNumber}`}</Typography>
-                      )}
-                    </div>
-                  ) : selectedPeriod === "biweekly" ? (
-                    <div>
-                      {hasMultipleBiweeks(currentWeek) ? (
-                        <Typography variant="body2">{`Quincenas ${multiplePeriods.biweekNumbers[0].biweekNumber} / ${multiplePeriods.biweekNumbers[1].biweekNumber}`}</Typography>
-                      ) : (
-                        <Typography variant="body2">{`Quincena ${biweekNumber}`}</Typography>
-                      )}
-                    </div>
-                  ) : (
-                    <div>
-                      {hasMultipleMonths(currentWeek) ? (
-                        <Typography variant="body2">{`${getMonthName(
-                          multiplePeriods.months[0].month
-                        )} / ${getMonthName(
-                          multiplePeriods.months[1].month
-                        )}`}</Typography>
-                      ) : (
-                        <Typography variant="body2">{`${getMonthName(
-                          month
-                        )}`}</Typography>
-                      )}
-                    </div>
-                  )}
+                  <Box
+                    sx={{
+                      display: "flex",
+                      justifyContent: "center",
+                      alignItems: "center",
+                    }}
+                  >
+                    {selectedPeriod === "weekly" ? (
+                      <div>
+                        {hasMultipleYears(currentWeek) ? (
+                          <Typography variant="body2">{`Semanas ${multiplePeriods.weekNumbers[1].weekNumber} / ${multiplePeriods.weekNumbers[0].weekNumber}`}</Typography>
+                        ) : (
+                          <Typography variant="body2">{`Semana ${weekNumber}`}</Typography>
+                        )}
+                      </div>
+                    ) : selectedPeriod === "biweekly" ? (
+                      <div>
+                        {hasMultipleBiweeks(currentWeek) ? (
+                          <Typography variant="body2">{`Quincenas ${multiplePeriods.biweekNumbers[0].biweekNumber} / ${multiplePeriods.biweekNumbers[1].biweekNumber}`}</Typography>
+                        ) : (
+                          <Typography variant="body2">{`Quincena ${biweekNumber}`}</Typography>
+                        )}
+                      </div>
+                    ) : (
+                      <div>
+                        {hasMultipleMonths(currentWeek) ? (
+                          <Typography variant="body2">{`${getMonthName(
+                            multiplePeriods.months[0].month
+                          )} / ${getMonthName(
+                            multiplePeriods.months[1].month
+                          )}`}</Typography>
+                        ) : (
+                          <Typography variant="body2">{`${getMonthName(
+                            month
+                          )}`}</Typography>
+                        )}
+                      </div>
+                    )}
+                  </Box>
                 </TableCell>
               </TableRow>
               <TableRow>
@@ -366,7 +383,13 @@ const SelectorTable: React.FC<SelectorTableProps> = React.memo(
                   </TableSortLabel>
                 </TableCell>
                 {currentWeek.map(({ day, date }) => (
-                  <TableCell key={day} align="center">
+                  <TableCell
+                    key={day}
+                    align="center"
+                    sx={{
+                      zIndex: 3,
+                    }}
+                  >
                     {`${translateDayToAbrevSpanish(
                       day as EnglishDayOfWeek
                     )} ${formatHeaderDate(date)}`}
@@ -377,7 +400,7 @@ const SelectorTable: React.FC<SelectorTableProps> = React.memo(
                   sx={{
                     position: isSmallScreen ? "static" : "sticky",
                     right: 0,
-                    zIndex: 2,
+                    zIndex: 3,
                   }}
                   colSpan={2}
                 >

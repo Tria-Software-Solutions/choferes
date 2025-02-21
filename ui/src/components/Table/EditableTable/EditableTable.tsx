@@ -26,7 +26,7 @@ import {
 import DeleteIcon from "@mui/icons-material/Delete";
 import EditIcon from "@mui/icons-material/Edit";
 import SaveIcon from "@mui/icons-material/Save";
-import CloseIcon from '@mui/icons-material/Close';
+import CloseIcon from "@mui/icons-material/Close";
 import { BRANDS, COLORS, TABLE } from "../../../constants/constants";
 import { formatDateWithDay } from "../../../utils/dateUtils";
 import { maskLicensePlate, maskParkingLot } from "../../../utils/maskUtils";
@@ -201,7 +201,10 @@ const EditableTable = <T,>({
 
   return (
     <Paper sx={{ width: "100%" }}>
-      <TableContainer className="table-container">
+      <TableContainer
+        className="table-container"
+        sx={{ maxHeight: "65vh", overflowX: "auto" }}
+      >
         <Table stickyHeader aria-label="sticky table">
           <TableHead>
             {groupByDate && (
