@@ -421,6 +421,7 @@ const SelectorTable: React.FC<SelectorTableProps> = React.memo(
                       display="flex"
                       alignItems="center"
                       justifyContent="space-between"
+                      whiteSpace="nowrap"
                     >
                       <Typography variant="body2">
                         {employee.firstName} {employee.lastName}
@@ -545,8 +546,8 @@ const SelectorTable: React.FC<SelectorTableProps> = React.memo(
                               badgeContent={resultOvertime(employee)}
                               max={9999999}
                               color={
-                                resultOvertime(employee) !== 0 ||
-                                resultOvertime(employee) !== 0 / 0
+                                resultOvertime(employee) === 0 ||
+                                resultOvertime(employee) === "0/0"
                                   ? "success"
                                   : "warning"
                               }
