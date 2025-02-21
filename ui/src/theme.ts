@@ -7,7 +7,7 @@ const theme = createTheme({
       sm: 435,
       md: 960,
       lg: 1280,
-      xl: 3300, 
+      xl: 3300,
     },
   },
   palette: {
@@ -42,7 +42,7 @@ const theme = createTheme({
     },
   },
   typography: {
-    fontFamily: 'Montserrat, Arial, sans-serif',
+    fontFamily: "Montserrat, Arial, sans-serif",
     h1: {
       fontSize: "2.5rem",
       fontWeight: 700,
@@ -78,7 +78,7 @@ const theme = createTheme({
     MuiPaper: {
       styleOverrides: {
         root: {
-          marginBottom: '25px', 
+          marginBottom: "25px",
         },
       },
     },
@@ -130,9 +130,7 @@ const theme = createTheme({
     },
     MuiTable: {
       styleOverrides: {
-        root: {
-          borderCollapse: "collapse",
-        },
+        root: {},
       },
     },
     MuiTableCell: {
@@ -140,11 +138,11 @@ const theme = createTheme({
         root: {
           padding: "16px",
           color: "#333333",
-          border: 'none',
+          border: "none",
         },
         head: {
-          borderBottom: '1px solid rgba(224, 224, 224, 1)', 
-          borderTop: '1px solid rgba(224, 224, 224, 1)',
+          borderBottom: "0.25px solid rgba(224, 224, 224, 1)",
+          borderTop: "0.25px solid rgba(224, 224, 224, 1)",
         },
       },
     },
@@ -159,10 +157,10 @@ const theme = createTheme({
     MuiTableRow: {
       styleOverrides: {
         root: {
-          '&:nth-of-type(even)': {
-            backgroundColor: "#f5f5f5", 
+          "&:nth-of-type(even)": {
+            backgroundColor: "#f5f5f5",
           },
-          '&:nth-of-type(odd)': {
+          "&:nth-of-type(odd)": {
             backgroundColor: "white",
           },
         },
@@ -171,18 +169,18 @@ const theme = createTheme({
     MuiTablePagination: {
       styleOverrides: {
         selectLabel: {
-          color: 'black',
+          color: "black",
         },
         select: {
-          color: 'black',
+          color: "black",
         },
         actions: {
-          '& .MuiIconButton-root': {
-            color: 'black',
+          "& .MuiIconButton-root": {
+            color: "black",
           },
         },
       },
-    }
+    },
   },
 });
 
