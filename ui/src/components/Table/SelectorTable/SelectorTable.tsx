@@ -494,7 +494,7 @@ const SelectorTable: React.FC<SelectorTableProps> = React.memo(
 
                       return a.label.localeCompare(b.label);
                     });
-
+                    
                     return (
                       <TableCell
                         key={day}
