@@ -113,7 +113,7 @@ const ManageVehicles: React.FC = () => {
   const validateAddFields = useCallback(() => {
     const numberRegex = /^\d+$/;
     const plateRegex = /^(?:[A-ZÑ]{3}-\d{3}|\d{6})$/;
-    const textRegex = /^[a-zA-ZáéíóúÁÉÍÓÚñÑ\s]+$/;
+    const textRegex = /^[a-zA-ZáéíóúÁÉÍÓÚñÑüÜëË\s-]+$/;
     const parkingLotRegex = /^ATP[1-9]-\d{3,4}$/;
     const isTicketValid =
       numberRegex.test(addFields.ticket.toString()) && addFields.ticket !== "";
