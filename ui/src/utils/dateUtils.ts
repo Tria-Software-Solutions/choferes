@@ -177,6 +177,12 @@ export const getDayName = (date: Date): string => {
   return date.toLocaleDateString("en-US", options);
 };
 
+export const getMidnightDate = (date: Date) => {
+  const midnight = new Date(date);
+  midnight.setHours(0, 0, 0, 0);
+  return midnight;
+};
+
 export const getWeekNumber = (date: Date): number => {
   const currentDate = new Date(date);
   currentDate.setHours(0, 0, 0, 0);

@@ -28,7 +28,7 @@ import { LocalizationProvider } from "@mui/x-date-pickers";
 import { DatePicker } from "@mui/x-date-pickers/DatePicker";
 import { AdapterDateFns } from "@mui/x-date-pickers/AdapterDateFns";
 import { es } from "date-fns/locale";
-import { isTodayOrFuture } from "../utils/dateUtils";
+import { getMidnightDate, isTodayOrFuture } from "../utils/dateUtils";
 import { maskLicensePlate, maskParkingLot } from "../utils/maskUtils";
 import {
   createExportOptions,
@@ -54,7 +54,7 @@ const ManageVehicles: React.FC = () => {
     handleAddVehicle,
     handleUpdateVehicle,
     handleDeleteVehicle,
-  } = useVehicles(selectedDate?.toISOString());
+  } = useVehicles(selectedDate?.toISOString().split('T')[0]);
   const [filteredVehicles, setFilteredVehicles] = useState<Vehicle[]>([]);
   const [totalCount, setTotalCount] = useState(0);
   const [editRowId, setEditRowId] = useState<number | null>(null);
@@ -382,21 +382,21 @@ const ManageVehicles: React.FC = () => {
   };
 
   const handleNextDate = () => {
-    const nextDay = selectedDate
-      ? new Date(selectedDate.getTime() + 24 * 60 * 60 * 1000)
-      : null;
+    if (!selectedDate) return;
+    const nextDay = new Date(getMidnightDate(selectedDate));
+    nextDay.setDate(nextDay.getDate() + 1);
     setSelectedDate(nextDay);
   };
-
+  
   const handlePreviousDate = () => {
-    const previousDay = selectedDate
-      ? new Date(selectedDate.getTime() - 24 * 60 * 60 * 1000)
-      : null;
+    if (!selectedDate) return;
+    const previousDay = new Date(getMidnightDate(selectedDate));
+    previousDay.setDate(previousDay.getDate() - 1);
     setSelectedDate(previousDay);
   };
-
+  
   const handleCurrentDate = () => {
-    setSelectedDate(new Date());
+    setSelectedDate(getMidnightDate(new Date()));
   };
 
   const theme = useTheme();
