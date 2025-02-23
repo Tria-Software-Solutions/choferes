@@ -38,10 +38,11 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 const express_1 = __importDefault(require("express"));
 const biweeklySummaryController = __importStar(require("../controllers/biweeklySummaryController"));
+const authMiddleware_1 = require("../middleware/authMiddleware");
 const router = express_1.default.Router();
-router.post('/', biweeklySummaryController.createBiweeklySummary);
-router.get('/', biweeklySummaryController.getAllBiweeklySummaries);
-router.get('/:id', biweeklySummaryController.getBiweeklySummaryById);
-router.put('/:id', biweeklySummaryController.updateBiweeklySummary);
-router.delete('/:id', biweeklySummaryController.deleteBiweeklySummary);
+router.post('/', authMiddleware_1.authenticateToken, biweeklySummaryController.createBiweeklySummary);
+router.get('/', authMiddleware_1.authenticateToken, biweeklySummaryController.getAllBiweeklySummaries);
+router.get('/:id', authMiddleware_1.authenticateToken, biweeklySummaryController.getBiweeklySummaryById);
+router.put('/:id', authMiddleware_1.authenticateToken, biweeklySummaryController.updateBiweeklySummary);
+router.delete('/:id', authMiddleware_1.authenticateToken, biweeklySummaryController.deleteBiweeklySummary);
 exports.default = router;

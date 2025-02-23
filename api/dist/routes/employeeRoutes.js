@@ -38,10 +38,12 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 const express_1 = __importDefault(require("express"));
 const employeeController = __importStar(require("../controllers/employeeController"));
+const authMiddleware_1 = require("../middleware/authMiddleware");
+const roleMiddleware_1 = require("../middleware/roleMiddleware");
 const router = express_1.default.Router();
-router.post('/', employeeController.createEmployee);
-router.get('/', employeeController.getAllEmployees);
-router.get('/:id', employeeController.getEmployeeById);
-router.put('/:id', employeeController.updateEmployee);
-router.delete('/:id', employeeController.deleteEmployee);
+router.post('/', authMiddleware_1.authenticateToken, (0, roleMiddleware_1.authorizeRole)('admin'), employeeController.createEmployee);
+router.get('/', authMiddleware_1.authenticateToken, employeeController.getAllEmployees);
+router.get('/:id', authMiddleware_1.authenticateToken, employeeController.getEmployeeById);
+router.put('/:id', authMiddleware_1.authenticateToken, employeeController.updateEmployee);
+router.delete('/:id', authMiddleware_1.authenticateToken, employeeController.deleteEmployee);
 exports.default = router;

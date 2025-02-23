@@ -38,10 +38,11 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 const express_1 = __importDefault(require("express"));
 const monthlySummaryController = __importStar(require("../controllers/monthlySummaryController"));
+const authMiddleware_1 = require("../middleware/authMiddleware");
 const router = express_1.default.Router();
-router.post('/', monthlySummaryController.createMonthlySummary);
-router.get('/', monthlySummaryController.getAllMonthlySummaries);
-router.get('/:id', monthlySummaryController.getMonthlySummaryById);
-router.put('/:id', monthlySummaryController.updateMonthlySummary);
-router.delete('/:id', monthlySummaryController.deleteMonthlySummary);
+router.post('/', authMiddleware_1.authenticateToken, monthlySummaryController.createMonthlySummary);
+router.get('/', authMiddleware_1.authenticateToken, monthlySummaryController.getAllMonthlySummaries);
+router.get('/:id', authMiddleware_1.authenticateToken, monthlySummaryController.getMonthlySummaryById);
+router.put('/:id', authMiddleware_1.authenticateToken, monthlySummaryController.updateMonthlySummary);
+router.delete('/:id', authMiddleware_1.authenticateToken, monthlySummaryController.deleteMonthlySummary);
 exports.default = router;

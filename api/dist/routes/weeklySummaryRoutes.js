@@ -38,10 +38,11 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 const express_1 = __importDefault(require("express"));
 const weeklySummaryController = __importStar(require("../controllers/weeklySummaryController"));
+const authMiddleware_1 = require("../middleware/authMiddleware");
 const router = express_1.default.Router();
-router.post('/', weeklySummaryController.createWeeklySummary);
-router.get('/', weeklySummaryController.getAllWeeklySummaries);
-router.get('/:id', weeklySummaryController.getWeeklySummaryById);
-router.put('/:id', weeklySummaryController.updateWeeklySummary);
-router.delete('/:id', weeklySummaryController.deleteWeeklySummary);
+router.post('/', authMiddleware_1.authenticateToken, weeklySummaryController.createWeeklySummary);
+router.get('/', authMiddleware_1.authenticateToken, weeklySummaryController.getAllWeeklySummaries);
+router.get('/:id', authMiddleware_1.authenticateToken, weeklySummaryController.getWeeklySummaryById);
+router.put('/:id', authMiddleware_1.authenticateToken, weeklySummaryController.updateWeeklySummary);
+router.delete('/:id', authMiddleware_1.authenticateToken, weeklySummaryController.deleteWeeklySummary);
 exports.default = router;

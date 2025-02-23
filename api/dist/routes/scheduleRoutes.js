@@ -38,10 +38,11 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 const express_1 = __importDefault(require("express"));
 const scheduleController = __importStar(require("../controllers/scheduleController"));
+const authMiddleware_1 = require("../middleware/authMiddleware");
 const router = express_1.default.Router();
-router.post('/', scheduleController.createSchedule);
-router.get('/', scheduleController.getAllSchedules);
-router.get('/:id', scheduleController.getScheduleById);
-router.put('/:id', scheduleController.updateSchedule);
-router.delete('/:id', scheduleController.deleteSchedule);
+router.post('/', authMiddleware_1.authenticateToken, scheduleController.createSchedule);
+router.get('/', authMiddleware_1.authenticateToken, scheduleController.getAllSchedules);
+router.get('/:id', authMiddleware_1.authenticateToken, scheduleController.getScheduleById);
+router.put('/:id', authMiddleware_1.authenticateToken, scheduleController.updateSchedule);
+router.delete('/:id', authMiddleware_1.authenticateToken, scheduleController.deleteSchedule);
 exports.default = router;

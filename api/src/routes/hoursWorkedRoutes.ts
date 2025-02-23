@@ -1,12 +1,13 @@
 import express from 'express';
 import * as hoursWorkedController from '../controllers/hoursWorkedController';
+import { authenticateToken } from '../middleware/authMiddleware';
 
 const router = express.Router();
 
-router.post('/', hoursWorkedController.createHoursWorked);
-router.get('/', hoursWorkedController.getAllHoursWorked);
-router.get('/:id', hoursWorkedController.getHoursWorkedById);
-router.put('/:id', hoursWorkedController.updateHoursWorked);
-router.delete('/:id', hoursWorkedController.deleteHoursWorked);
+router.post('/', authenticateToken, hoursWorkedController.createHoursWorked);
+router.get('/', authenticateToken, hoursWorkedController.getAllHoursWorked);
+router.get('/:id', authenticateToken, hoursWorkedController.getHoursWorkedById);
+router.put('/:id', authenticateToken, hoursWorkedController.updateHoursWorked);
+router.delete('/:id', authenticateToken, hoursWorkedController.deleteHoursWorked);
 
 export default router;
