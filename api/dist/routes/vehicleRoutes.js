@@ -38,11 +38,12 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 const express_1 = __importDefault(require("express"));
 const vehicleController = __importStar(require("../controllers/vehicleController"));
+const authMiddleware_1 = require("../middleware/authMiddleware");
 const router = express_1.default.Router();
-router.post("/", vehicleController.createVehicle);
-router.get("/", vehicleController.getAllVehicles);
-router.get("/by-date", vehicleController.getVehiclesByDate);
-router.get("/:id", vehicleController.getVehicleById);
-router.put("/:id", vehicleController.updateVehicle);
-router.delete("/:id", vehicleController.deleteVehicle);
+router.post("/", authMiddleware_1.authenticateToken, vehicleController.createVehicle);
+router.get("/", authMiddleware_1.authenticateToken, vehicleController.getAllVehicles);
+router.get("/by-date", authMiddleware_1.authenticateToken, vehicleController.getVehiclesByDate);
+router.get("/:id", authMiddleware_1.authenticateToken, vehicleController.getVehicleById);
+router.put("/:id", authMiddleware_1.authenticateToken, vehicleController.updateVehicle);
+router.delete("/:id", authMiddleware_1.authenticateToken, vehicleController.deleteVehicle);
 exports.default = router;

@@ -43,5 +43,3 @@ HoursWorked.init({
     modelName: "HoursWorked",
     tableName: 'hours_worked',
 });
-HoursWorked.belongsTo(Employee_1.Employee, { foreignKey: 'employeeId', onDelete: 'CASCADE' });
-HoursWorked.belongsTo(Schedule_1.Schedule, { foreignKey: 'scheduleId' });

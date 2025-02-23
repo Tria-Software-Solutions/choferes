@@ -45,6 +45,3 @@ HoursWorked.init(
     tableName: 'hours_worked',
   }
 );
-
-HoursWorked.belongsTo(Employee, { foreignKey: 'employeeId', onDelete: 'CASCADE' });
-HoursWorked.belongsTo(Schedule, { foreignKey: 'scheduleId' });

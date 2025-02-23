@@ -38,10 +38,11 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 const express_1 = __importDefault(require("express"));
 const hoursWorkedController = __importStar(require("../controllers/hoursWorkedController"));
+const authMiddleware_1 = require("../middleware/authMiddleware");
 const router = express_1.default.Router();
-router.post('/', hoursWorkedController.createHoursWorked);
-router.get('/', hoursWorkedController.getAllHoursWorked);
-router.get('/:id', hoursWorkedController.getHoursWorkedById);
-router.put('/:id', hoursWorkedController.updateHoursWorked);
-router.delete('/:id', hoursWorkedController.deleteHoursWorked);
+router.post('/', authMiddleware_1.authenticateToken, hoursWorkedController.createHoursWorked);
+router.get('/', authMiddleware_1.authenticateToken, hoursWorkedController.getAllHoursWorked);
+router.get('/:id', authMiddleware_1.authenticateToken, hoursWorkedController.getHoursWorkedById);
+router.put('/:id', authMiddleware_1.authenticateToken, hoursWorkedController.updateHoursWorked);
+router.delete('/:id', authMiddleware_1.authenticateToken, hoursWorkedController.deleteHoursWorked);
 exports.default = router;
