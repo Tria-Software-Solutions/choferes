@@ -59,7 +59,7 @@ const loginUser = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const { username, password } = req.body;
         const token = yield userService.authenticateUser(username, password);
-        res.json(token);
+        res.json({ token });
     }
     catch (error) {
         res.status(401).json({ message: "Error login User", error });

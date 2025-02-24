@@ -15,7 +15,7 @@ export const loginUser = async (req: Request, res: Response) => {
   try {
     const { username, password } = req.body;
     const token = await userService.authenticateUser(username, password);
-    res.json(token);
+    res.json({ token });
   } catch (error) {
     res.status(401).json({ message: "Error login User", error });
   }
