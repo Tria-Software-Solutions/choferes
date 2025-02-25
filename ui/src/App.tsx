@@ -102,7 +102,7 @@ const AppContent: React.FC = () => {
             xl: "0",
           },
           backgroundImage: isAuthPage ? `url(${wallpaper})` : "none",
-          backgroundSize: "100%",
+          backgroundSize: "cover",
           backgroundPosition: "center",
           backgroundRepeat: "no-repeat",
           backgroundAttachment: "fixed",
