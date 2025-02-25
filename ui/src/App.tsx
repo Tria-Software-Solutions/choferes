@@ -6,6 +6,8 @@ import {
   useLocation,
 } from "react-router-dom";
 import { useUsers } from "./hooks/useUser";
+import Login from "./pages/Login";
+import Register from "./pages/Register";
 import ManageRoles from "./pages/ManageRoles";
 import ManageEmployees from "./pages/ManageEmployees";
 import ManageSchedules from "./pages/ManageSchedules";
@@ -13,8 +15,6 @@ import ManageVehicles from "./pages/ManageVehicles";
 import UserManagement from "./pages/Dashboard/UserManagement";
 import RoleManagement from "./pages/Dashboard/RoleManagement";
 import PermissionManagement from "./pages/Dashboard/PermissionManagement";
-import Login from "./pages/Login";
-import Register from "./pages/Register";
 import AppBarComponent from "./components/AppBar/AppBarComponent";
 import { Container } from "@mui/material";
 import { APPBAR_MENU, ROUTES } from "./constants/constants";
@@ -24,12 +24,13 @@ import DirectionsCarIcon from "@mui/icons-material/DirectionsCar";
 import GroupRoundedIcon from "@mui/icons-material/GroupRounded";
 import EditCalendarRoundedIcon from "@mui/icons-material/EditCalendarRounded";
 import LogoutIcon from "@mui/icons-material/Logout";
+import wallpaper from "./assets/images/choferes1.webp";
+import { AuthProvider } from "./context/AuthContext";
 
 const AppBarWrapper: React.FC = () => {
-  const { currentUser, authError,  handleLogoutUser } = useUsers();
+  const { currentUser, handleLogoutUser } = useUsers();
 
   console.log("currentUser: ", currentUser);
-  console.log("authError: ", authError);
 
   return (
     <AppBarComponent
@@ -102,9 +103,7 @@ const AppContent: React.FC = () => {
             lg: "48px",
             xl: "0",
           },
-          background: isAuthPage
-            ? "linear-gradient(135deg, #1f1f1f 0%, #333333 100%)"
-            : "none",
+          backgroundImage: isAuthPage ? `url(${wallpaper})` : "none",
         }}
       >
         <Routes>
@@ -128,9 +127,11 @@ const AppContent: React.FC = () => {
 
 const App: React.FC = () => {
   return (
-    <Router>
-      <AppContent />
-    </Router>
+    <AuthProvider>
+      <Router>
+        <AppContent />
+      </Router>
+    </AuthProvider>
   );
 };
 

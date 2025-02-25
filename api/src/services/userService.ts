@@ -18,13 +18,21 @@ export const createUser = async (
     lastName,
     email,
     username,
-    password: hashedPassword
+    password: hashedPassword,
   });
   return user;
 };
 
 export const authenticateUser = async (username: string, password: string) => {
-  const user = await User.findOne({ where: { username }, include: Role });
+  const user = await User.findOne({
+    where: { username },
+    include: [
+      {
+        model: Role,
+        through: { attributes: [] },
+      },
+    ],
+  });
   if (!user) throw new Error("User not found");
 
   const isMatch = await bcrypt.compare(password, user.password);
@@ -33,7 +41,7 @@ export const authenticateUser = async (username: string, password: string) => {
   const token = jwt.sign({ userId: user.id }, secretKey, {
     expiresIn: "1h",
   });
-  return token;
+  return { user, token };
 };
 
 export const getUsers = async () => {

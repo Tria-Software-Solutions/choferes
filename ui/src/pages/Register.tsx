@@ -84,7 +84,6 @@ const Register = () => {
       justifyContent="center"
       alignItems="center"
       minHeight="100vh"
-      sx={{ background: "linear-gradient(135deg, #1f1f1f 0%, #333333 100%)" }}
     >
       <Card sx={{ width: 400, p: 3, boxShadow: 3 }}>
         <CardContent>
