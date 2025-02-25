@@ -1,5 +1,5 @@
-import { useState } from "react";
-import { useNavigate, Link } from "react-router-dom";
+import { useCallback, useState } from "react";
+import { Link } from "react-router-dom";
 import {
   TextField,
   Button,
@@ -24,22 +24,44 @@ const Register = () => {
     password: "",
   });
   const [error, setError] = useState<string | null>(null);
-  const navigate = useNavigate();
+
+  const validateFields = useCallback(() => {
+    const nameRegex = /^[a-zA-ZáéíóúÁÉÍÓÚüÜñÑ.\s]+$/;
+    const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+    const usernameRegex = /^[a-zA-Z][a-zA-Z0-9_.]{2,19}$/;
+    const passwordRegex =
+      /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
+
+    if (!nameRegex.test(addFields.firstName) || addFields.firstName === "") {
+      setError("El primer nombre es inválido.");
+      return false;
+    }
+    if (!nameRegex.test(addFields.lastName) || addFields.lastName === "") {
+      setError("El apellido es inválido.");
+      return false;
+    }
+    if (!emailRegex.test(addFields.email) || addFields.email === "") {
+      setError("El email es inválido.");
+      return false;
+    }
+    if (!usernameRegex.test(addFields.username) || addFields.username === "") {
+      setError("El nombre de usuario es inválido.");
+      return false;
+    }
+    if (!passwordRegex.test(addFields.password) || addFields.password === "") {
+      setError("La contraseña es inválida.");
+      return false;
+    }
+
+    setError(null);
+    return true;
+  }, [addFields]);
 
   const handleRegister = async (e: React.FormEvent) => {
     e.preventDefault();
-    setError(null);
 
-    if (
-      !addFields.firstName ||
-      !addFields.lastName ||
-      !addFields.email ||
-      !addFields.username ||
-      !addFields.password
-    ) {
-      setError("Todos los campos son obligatorios");
-      return;
-    }
+    const isValid = validateFields();
+    if (!isValid) return;
 
     try {
       const newUser: User = {
@@ -51,7 +73,6 @@ const Register = () => {
         password: addFields.password,
       };
       handleRegisterUser(newUser);
-      navigate("/");
     } catch (err) {
       setError("Error al registrar usuario");
     }
@@ -88,7 +109,6 @@ const Register = () => {
               onChange={(e) =>
                 setAddFields({ ...addFields, firstName: e.target.value })
               }
-              required
             />
             <TextField
               fullWidth
@@ -99,7 +119,6 @@ const Register = () => {
               onChange={(e) =>
                 setAddFields({ ...addFields, lastName: e.target.value })
               }
-              required
             />
             <TextField
               fullWidth
@@ -111,7 +130,6 @@ const Register = () => {
               onChange={(e) =>
                 setAddFields({ ...addFields, email: e.target.value })
               }
-              required
             />
             <TextField
               fullWidth
@@ -122,7 +140,6 @@ const Register = () => {
               onChange={(e) =>
                 setAddFields({ ...addFields, username: e.target.value })
               }
-              required
             />
             <TextField
               fullWidth
@@ -134,7 +151,6 @@ const Register = () => {
               onChange={(e) =>
                 setAddFields({ ...addFields, password: e.target.value })
               }
-              required
             />
             <Button
               type="submit"
