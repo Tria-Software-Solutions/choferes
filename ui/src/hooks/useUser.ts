@@ -5,7 +5,7 @@ import { useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 
 export const useUsers = () => {
-  const { currentUser } = useAuth();
+  const { login, logout } = useAuth();
   const [users, setUsers] = useState<User[]>([]);
   const [totalCount, setTotalCount] = useState(0);
   const [isLoadingUsers, setIsLoadingUsers] = useState(false);
@@ -36,8 +36,7 @@ export const useUsers = () => {
     setAuthError(null);
     try {
       const loginData = await UserService.loginUser(username, password);
-      localStorage.setItem("token", loginData.token);
-      localStorage.setItem("currentUser", loginData.user);
+      login(loginData.user, loginData.token);
       navigate("/roles");
     } catch (error) {
       setAuthError("Login failed. Please check your credentials.");
@@ -52,8 +51,7 @@ export const useUsers = () => {
   };
 
   const handleLogoutUser = () => {
-    localStorage.removeItem("token");
-    localStorage.removeItem("currentUser");
+    logout()
     navigate("/");
   };
 
@@ -66,7 +64,6 @@ export const useUsers = () => {
     totalCount,
     isLoadingUsers,
     authError,
-    currentUser,
     fetchUsers,
     handleRegisterUser,
     handleLoginUser,
