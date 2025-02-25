@@ -3,11 +3,25 @@ import { Role } from "../models/Role";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 
-const secretKey = process.env.JWT_SECRET || "default_secret";
+const secretKey = process.env.JWT_SECRET || "secret";
 
-export const createUser = async (username: string, password: string, roleId: number) => {
+export const createUser = async (
+  firstName: string,
+  lastName: string,
+  email: string,
+  username: string,
+  password: string,
+  roleId: number
+) => {
   const hashedPassword = await bcrypt.hash(password, 10);
-  const user = await User.create({ username, password: hashedPassword, roleId });
+  const user = await User.create({
+    firstName,
+    lastName,
+    email,
+    username,
+    password: hashedPassword,
+    roleId,
+  });
   return user;
 };
 
@@ -18,14 +32,16 @@ export const authenticateUser = async (username: string, password: string) => {
   const isMatch = await bcrypt.compare(password, user.password);
   if (!isMatch) throw new Error("Incorrect password");
 
-  const token = jwt.sign({ userId: user.id, role: user.roleId }, secretKey, { expiresIn: "1h" });
+  const token = jwt.sign({ userId: user.id, role: user.roleId }, secretKey, {
+    expiresIn: "1h",
+  });
   return token;
 };
 
 export const getUsers = async () => {
-    const users = await User.findAll({ include: Role });
-    return users;
-  };
+  const users = await User.findAll({ include: Role });
+  return users;
+};
 
 export const getUserById = async (id: number) => {
   const user = await User.findByPk(id, { include: Role });
