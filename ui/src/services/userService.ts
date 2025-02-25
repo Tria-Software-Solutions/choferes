@@ -1,21 +1,8 @@
+import { User } from "../models/User";
 import api from "./api";
 
-export const registerUser = async (
-  firstName: string,
-  lastName: string,
-  email: string,
-  username: string,
-  password: string,
-  roleId: number
-) => {
-  const response = await api.post("/users/register", {
-    firstName,
-    lastName,
-    email,
-    username,
-    password,
-    roleId,
-  });
+export const registerUser = async (user: User) => {
+  const response = await api.post("/users/register", user);
   return response.data;
 };
 

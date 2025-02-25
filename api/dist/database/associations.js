@@ -12,7 +12,7 @@ User_1.User.belongsTo(Role_1.Role, { foreignKey: "roleId" });
 Role_1.Role.hasMany(User_1.User, { foreignKey: "roleId" });
 // Relación Role - Permission
 Role_1.Role.belongsToMany(Permission_1.Permission, { through: "role_permission" });
-Permission_1.Permission.belongsToMany(Role_1.Role, { through: "role_permissions" });
+Permission_1.Permission.belongsToMany(Role_1.Role, { through: "role_permission" });
 // Relación User - Role
 User_1.User.belongsToMany(Role_1.Role, { through: "user_role" });
 Role_1.Role.belongsToMany(User_1.User, { through: "user_role" });

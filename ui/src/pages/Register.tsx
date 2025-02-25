@@ -1,6 +1,5 @@
 import { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
-import { registerUser } from "../services/userService";
 import {
   TextField,
   Button,
@@ -9,17 +8,21 @@ import {
   Typography,
   Box,
   Alert,
-  useTheme,
-  useMediaQuery,
 } from "@mui/material";
 import logo from "../assets/images/logo.png";
+import { PAGE_TITLE } from "../constants/constants";
+import { useUsers } from "../hooks/useUser";
+import { User } from "../models/User";
 
 const Register = () => {
-  const [firstName, setFirstName] = useState("");
-  const [lastName, setLastName] = useState("");
-  const [email, setEmail] = useState("");
-  const [username, setUsername] = useState("");
-  const [password, setPassword] = useState("");
+  const { users, handleRegisterUser } = useUsers();
+  const [addFields, setAddFields] = useState({
+    firstName: "",
+    lastName: "",
+    email: "",
+    username: "",
+    password: "",
+  });
   const [error, setError] = useState<string | null>(null);
   const navigate = useNavigate();
 
@@ -27,22 +30,32 @@ const Register = () => {
     e.preventDefault();
     setError(null);
 
-    if (!firstName || !lastName || !email || !username || !password) {
+    if (
+      !addFields.firstName ||
+      !addFields.lastName ||
+      !addFields.email ||
+      !addFields.username ||
+      !addFields.password
+    ) {
       setError("Todos los campos son obligatorios");
       return;
     }
 
     try {
-      await registerUser(firstName, lastName, email, username, password, 0);
+      const newUser: User = {
+        id: Math.max(...users.map((user) => user.id)) + 1,
+        firstName: addFields.firstName,
+        lastName: addFields.lastName,
+        email: addFields.email,
+        username: addFields.username,
+        password: addFields.password,
+      };
+      handleRegisterUser(newUser);
       navigate("/");
     } catch (err) {
       setError("Error al registrar usuario");
-      console.error("Error en registro", err);
     }
   };
-
-  const theme = useTheme();
-  const isSmallScreen = useMediaQuery(theme.breakpoints.down("sm"));
 
   return (
     <Box
@@ -55,19 +68,15 @@ const Register = () => {
       <Card sx={{ width: 400, p: 3, boxShadow: 3 }}>
         <CardContent>
           <Box display="flex" justifyContent="center" mb={2}>
-            <img
-              src={logo}
-              alt="Logo"
-              style={{ width: 95, height: "auto" }}
-            />
+            <img src={logo} alt="Logo" style={{ width: 95, height: "auto" }} />
           </Box>
           <Typography
-            variant={isSmallScreen ? "h4" : "h2"}
+            variant={"h4"}
             align="center"
             sx={{ flexGrow: 1 }}
             gutterBottom
           >
-            Registro
+            {PAGE_TITLE.REGISTER}
           </Typography>
           <form onSubmit={handleRegister}>
             <TextField
@@ -75,8 +84,10 @@ const Register = () => {
               label="Nombre"
               variant="outlined"
               margin="normal"
-              value={firstName}
-              onChange={(e) => setFirstName(e.target.value)}
+              value={addFields.firstName}
+              onChange={(e) =>
+                setAddFields({ ...addFields, firstName: e.target.value })
+              }
               required
             />
             <TextField
@@ -84,8 +95,10 @@ const Register = () => {
               label="Apellido"
               variant="outlined"
               margin="normal"
-              value={lastName}
-              onChange={(e) => setLastName(e.target.value)}
+              value={addFields.lastName}
+              onChange={(e) =>
+                setAddFields({ ...addFields, lastName: e.target.value })
+              }
               required
             />
             <TextField
@@ -94,8 +107,10 @@ const Register = () => {
               type="email"
               variant="outlined"
               margin="normal"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
+              value={addFields.email}
+              onChange={(e) =>
+                setAddFields({ ...addFields, email: e.target.value })
+              }
               required
             />
             <TextField
@@ -103,8 +118,10 @@ const Register = () => {
               label="Usuario"
               variant="outlined"
               margin="normal"
-              value={username}
-              onChange={(e) => setUsername(e.target.value)}
+              value={addFields.username}
+              onChange={(e) =>
+                setAddFields({ ...addFields, username: e.target.value })
+              }
               required
             />
             <TextField
@@ -113,11 +130,25 @@ const Register = () => {
               type="password"
               variant="outlined"
               margin="normal"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
+              value={addFields.password}
+              onChange={(e) =>
+                setAddFields({ ...addFields, password: e.target.value })
+              }
               required
             />
-            <Button type="submit" fullWidth variant="contained" sx={{ mt: 2 }}>
+            <Button
+              type="submit"
+              fullWidth
+              variant="contained"
+              color="primary"
+              sx={{
+                mt: 2,
+                minHeight: 56,
+                display: "flex",
+                justifyContent: "center",
+                lineHeight: "normal",
+              }}
+            >
               Registrarse
             </Button>
           </form>
@@ -126,7 +157,7 @@ const Register = () => {
               {error}
             </Alert>
           )}
-          <Typography align="center" sx={{ mt: 2 }}>
+          <Typography align="center" sx={{ mt: 6 }}>
             ¿Ya tienes una cuenta?{" "}
             <Link
               to="/"

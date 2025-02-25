@@ -10,8 +10,7 @@ export const createUser = async (
   lastName: string,
   email: string,
   username: string,
-  password: string,
-  roleId: number
+  password: string
 ) => {
   const hashedPassword = await bcrypt.hash(password, 10);
   const user = await User.create({
@@ -19,8 +18,7 @@ export const createUser = async (
     lastName,
     email,
     username,
-    password: hashedPassword,
-    roleId,
+    password: hashedPassword
   });
   return user;
 };
@@ -32,7 +30,7 @@ export const authenticateUser = async (username: string, password: string) => {
   const isMatch = await bcrypt.compare(password, user.password);
   if (!isMatch) throw new Error("Incorrect password");
 
-  const token = jwt.sign({ userId: user.id, role: user.roleId }, secretKey, {
+  const token = jwt.sign({ userId: user.id }, secretKey, {
     expiresIn: "1h",
   });
   return token;

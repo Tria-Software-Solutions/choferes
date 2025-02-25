@@ -1,6 +1,5 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { loginUser } from "../services/userService";
 import {
   TextField,
   Button,
@@ -9,12 +8,13 @@ import {
   Typography,
   Box,
   Alert,
-  useTheme,
-  useMediaQuery,
 } from "@mui/material";
 import logo from "../assets/images/logo.png";
+import { PAGE_TITLE } from "../constants/constants";
+import { useUsers } from "../hooks/useUser";
 
 const Login = () => {
+  const { handleLoginUser } = useUsers();
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
@@ -30,17 +30,13 @@ const Login = () => {
     }
 
     try {
-      const data = await loginUser(username, password);
-      localStorage.setItem("token", data.token);
-      navigate("/manageRoles");
+      handleLoginUser(username, password);
+      navigate("/roles");
     } catch (err) {
       setError("Usuario o contraseña incorrectos");
       console.error("Error en login", err);
     }
   };
-
-  const theme = useTheme();
-  const isSmallScreen = useMediaQuery(theme.breakpoints.down("sm"));
 
   return (
     <Box
@@ -56,12 +52,12 @@ const Login = () => {
             <img src={logo} alt="Logo" style={{ width: 95, height: "auto" }} />
           </Box>
           <Typography
-            variant={isSmallScreen ? "h4" : "h2"}
+            variant={"h4"}
             align="center"
             sx={{ flexGrow: 1 }}
             gutterBottom
           >
-            Iniciar Sesión
+            {PAGE_TITLE.LOGIN}
           </Typography>
           <form onSubmit={handleLogin}>
             <TextField
@@ -83,7 +79,19 @@ const Login = () => {
               onChange={(e) => setPassword(e.target.value)}
               required
             />
-            <Button type="submit" fullWidth variant="contained" sx={{ mt: 2 }}>
+            <Button
+              type="submit"
+              fullWidth
+              variant="contained"
+              color="primary"
+              sx={{
+                mt: 2,
+                minHeight: 56,
+                display: "flex",
+                justifyContent: "center",
+                lineHeight: "normal",
+              }}
+            >
               Ingresar
             </Button>
           </form>
@@ -92,7 +100,7 @@ const Login = () => {
               {error}
             </Alert>
           )}
-          <Typography align="center" sx={{ mt: 2 }}>
+          <Typography align="center" sx={{ mt: 6 }}>
             ¿Aún no tienes una cuenta?{" "}
             <Link
               to="/register"
