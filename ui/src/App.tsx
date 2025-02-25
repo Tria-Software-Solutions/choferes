@@ -71,32 +71,31 @@ const AppContent: React.FC = () => {
         maxWidth="xl"
         disableGutters
         sx={{
-          paddingLeft: isAuthPage
-            ? 0
-            : {
-                xs: "16px",
-                sm: "24px",
-                md: "32px",
-                lg: "48px",
-                xl: "0",
-              },
-          paddingRight: isAuthPage
-            ? 0
-            : {
-                xs: "16px",
-                sm: "24px",
-                md: "32px",
-                lg: "48px",
-                xl: "0",
-              },
+          paddingLeft: {
+            xs: "16px",
+            sm: "24px",
+            md: "32px",
+            lg: "48px",
+            xl: "0",
+          },
+          paddingRight: {
+            xs: "16px",
+            sm: "24px",
+            md: "32px",
+            lg: "48px",
+            xl: "0",
+          },
+          background: isAuthPage
+            ? "linear-gradient(135deg, #1f1f1f 0%, #333333 100%)"
+            : "none",
         }}
       >
         <Routes>
           <Route path="/" element={<Login />} />
           <Route path="/register" element={<Register />} />
-          <Route path="/users" element={<UserManagement />} />
-          <Route path="/roles" element={<RoleManagement />} />
-          <Route path="/permissions" element={<PermissionManagement />} />
+          <Route path="/userManagement" element={<UserManagement />} />
+          <Route path="/roleManagement" element={<RoleManagement />} />
+          <Route path="/permissionManagement" element={<PermissionManagement />} />
           <Route path="/roles" element={<ManageRoles />} />
           <Route path="/vehicles" element={<ManageVehicles />} />
           <Route path="/employees" element={<ManageEmployees />} />

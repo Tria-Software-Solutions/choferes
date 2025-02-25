@@ -6,7 +6,6 @@ export class User extends Model {
   public username!: string;
   public email!: string;
   public password!: string;
-  public roleId!: number;
 }
 
 User.init(
@@ -24,10 +23,10 @@ User.init(
       type: DataTypes.STRING,
       allowNull: false,
     },
-    email: { 
-      type: DataTypes.STRING, 
-      allowNull: false, 
-      unique: true 
+    email: {
+      type: DataTypes.STRING,
+      allowNull: false,
+      unique: true,
     },
     username: {
       type: DataTypes.STRING,
@@ -38,14 +37,10 @@ User.init(
       type: DataTypes.STRING,
       allowNull: false,
     },
-    roleId: {
-      type: DataTypes.INTEGER,
-      allowNull: false,
-    },
   },
   {
     sequelize,
     modelName: "User",
-    tableName: "user",
+    tableName: "users",
   }
 );

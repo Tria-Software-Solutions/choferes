@@ -21,6 +21,8 @@ export const ROUTES = {
 };
 
 export const PAGE_TITLE = {
+  LOGIN: "Iniciar Sesión",
+  REGISTER: "Registrar Usuario",
   MANAGE_ROLES: "Gestionar Roles",
   MANAGE_VEHICLES: "Gestionar Vehículos",
   MANAGE_EMPLOYEES: "Gestionar Empleados",

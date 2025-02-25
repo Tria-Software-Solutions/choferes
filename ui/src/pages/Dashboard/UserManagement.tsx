@@ -40,7 +40,6 @@ const UserManagement = () => {
               <ListItem key={user.id}>
                 <ListItemText
                   primary={user.username}
-                  secondary={`Role ID: ${user.roleId}`}
                 />
                 {/* Aquí agregarías botones para editar o eliminar usuarios */}
               </ListItem>

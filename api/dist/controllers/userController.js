@@ -46,8 +46,8 @@ exports.getUserById = exports.getAllUsers = exports.loginUser = exports.register
 const userService = __importStar(require("../services/userService"));
 const registerUser = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        const { username, password, roleId } = req.body;
-        const user = yield userService.createUser(username, password, roleId);
+        const { firstName, lastName, email, username, password, roleId } = req.body;
+        const user = yield userService.createUser(firstName, lastName, email, username, password, roleId);
         res.status(201).json(user);
     }
     catch (error) {
