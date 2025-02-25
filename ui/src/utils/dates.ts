@@ -4,8 +4,8 @@ import {
   startOfWeek,
   startOfYear,
 } from "date-fns";
-import { EnglishAbrevMonthOfYear } from "./englishAbrevMonthOfYear";
-import { translateMonthToAbrevSpanish } from "./stringUtils";
+import { EnglishAbrevMonthOfYear } from "./monthAbreviations";
+import { translateMonthToAbrevSpanish } from "./string";
 
 type DayEntry = {
   day: string;

@@ -40,7 +40,7 @@ import {
   exportToExcel,
   exportToPDF,
   handleExportTableData,
-} from "../utils/exportUtils";
+} from "../utils/export";
 import {
   getBiweekNumber,
   getCurrentWeekDates,
@@ -49,8 +49,8 @@ import {
   getMonthNumber,
   getWeekNumber,
   isValidDateForSelect,
-} from "../utils/dateUtils";
-import { setDayOptionsEnglish } from "../utils/stringUtils";
+} from "../utils/dates";
+import { setDayOptionsEnglish } from "../utils/string";
 import { PAGE_TITLE } from "../constants/constants";
 import DownloadRoundedIcon from "@mui/icons-material/DownloadRounded";
 import ArrowBackIosNewRoundedIcon from "@mui/icons-material/ArrowBackIosNewRounded";
