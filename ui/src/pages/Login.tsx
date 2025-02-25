@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link } from "react-router-dom";
 import {
   TextField,
   Button,
@@ -15,26 +15,19 @@ import { useUsers } from "../hooks/useUser";
 
 const Login = () => {
   const { handleLoginUser } = useUsers();
-  const [username, setUsername] = useState("");
-  const [password, setPassword] = useState("");
+  const [fields, setFields] = useState({
+    username: "",
+    password: "",
+  });
   const [error, setError] = useState<string | null>(null);
-  const navigate = useNavigate();
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
-    setError(null);
-
-    if (!username || !password) {
-      setError("Todos los campos son obligatorios");
-      return;
-    }
-
+    
     try {
-      handleLoginUser(username, password);
-      navigate("/roles");
+      handleLoginUser(fields.username, fields.password);
     } catch (err) {
       setError("Usuario o contraseña incorrectos");
-      console.error("Error en login", err);
     }
   };
 
@@ -65,9 +58,10 @@ const Login = () => {
               label="Usuario"
               variant="outlined"
               margin="normal"
-              value={username}
-              onChange={(e) => setUsername(e.target.value)}
-              required
+              value={fields.username}
+              onChange={(e) =>
+                setFields({ ...fields, username: e.target.value })
+              }
             />
             <TextField
               fullWidth
@@ -75,9 +69,10 @@ const Login = () => {
               type="password"
               variant="outlined"
               margin="normal"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              required
+              value={fields.password}
+              onChange={(e) =>
+                setFields({ ...fields, password: e.target.value })
+              }
             />
             <Button
               type="submit"

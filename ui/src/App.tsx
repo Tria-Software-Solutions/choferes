@@ -5,6 +5,7 @@ import {
   Routes,
   useLocation,
 } from "react-router-dom";
+import { useUsers } from "./hooks/useUser";
 import ManageRoles from "./pages/ManageRoles";
 import ManageEmployees from "./pages/ManageEmployees";
 import ManageSchedules from "./pages/ManageSchedules";
@@ -22,8 +23,14 @@ import ManageAccountsRoundedIcon from "@mui/icons-material/ManageAccountsRounded
 import DirectionsCarIcon from "@mui/icons-material/DirectionsCar";
 import GroupRoundedIcon from "@mui/icons-material/GroupRounded";
 import EditCalendarRoundedIcon from "@mui/icons-material/EditCalendarRounded";
+import LogoutIcon from "@mui/icons-material/Logout";
 
 const AppBarWrapper: React.FC = () => {
+  const { currentUser, authError,  handleLogoutUser } = useUsers();
+
+  console.log("currentUser: ", currentUser);
+  console.log("authError: ", authError);
+
   return (
     <AppBarComponent
       title={APPBAR_MENU.TITLE}
@@ -31,7 +38,7 @@ const AppBarWrapper: React.FC = () => {
         {
           label: APPBAR_MENU.ROLES,
           icon: <CalendarMonthRoundedIcon />,
-          path: ROUTES.HOME,
+          path: ROUTES.MANAGE_ROLES,
         },
         {
           label: APPBAR_MENU.VEHICLES,
@@ -54,6 +61,16 @@ const AppBarWrapper: React.FC = () => {
             },
           ],
         },
+        ...(currentUser
+          ? [
+              {
+                label: APPBAR_MENU.LOGOUT,
+                icon: <LogoutIcon />,
+                path: ROUTES.LOGIN,
+                onClick: handleLogoutUser,
+              },
+            ]
+          : []),
       ]}
     />
   );
@@ -93,9 +110,12 @@ const AppContent: React.FC = () => {
         <Routes>
           <Route path="/" element={<Login />} />
           <Route path="/register" element={<Register />} />
-          <Route path="/userManagement" element={<UserManagement />} />
-          <Route path="/roleManagement" element={<RoleManagement />} />
-          <Route path="/permissionManagement" element={<PermissionManagement />} />
+          <Route path="/user_management" element={<UserManagement />} />
+          <Route path="/role_management" element={<RoleManagement />} />
+          <Route
+            path="/permission_management"
+            element={<PermissionManagement />}
+          />
           <Route path="/roles" element={<ManageRoles />} />
           <Route path="/vehicles" element={<ManageVehicles />} />
           <Route path="/employees" element={<ManageEmployees />} />

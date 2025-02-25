@@ -10,7 +10,9 @@ interface Link {
   path?: string;
   icon?: React.ReactNode;
   subLinks?: Link[];
+  onClick?: () => void; 
 }
+
 
 interface AppBarComponentProps {
   icon?: React.ReactNode;
@@ -26,22 +28,27 @@ const AppBarComponent: React.FC<AppBarComponentProps> = ({
   const navigate = useNavigate();
   const menuItems = links.map((link) => ({
     text: link.label,
-    onClick: () => {
-      if (link.path) {
-        window.location.href = link.path;
-      }
-    },
+    onClick: link.onClick 
+      ? link.onClick
+      : () => {
+          if (link.path) {
+            window.location.href = link.path;
+          }
+        },
     icon: link.icon as React.ReactElement | undefined,
     subMenuItems: link.subLinks?.map((subLink) => ({
       text: subLink.label,
-      onClick: () => {
-        if (subLink.path) {
-          window.location.href = subLink.path;
-        }
-      },
+      onClick: subLink.onClick 
+        ? subLink.onClick
+        : () => {
+            if (subLink.path) {
+              window.location.href = subLink.path;
+            }
+          },
       icon: subLink.icon as React.ReactElement | undefined,
     })),
   }));
+  
 
   return (
     <AppBar position="static">

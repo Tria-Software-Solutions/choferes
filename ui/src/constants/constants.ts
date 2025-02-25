@@ -11,10 +11,13 @@ export const APPBAR_MENU = {
   MANAGE: "Gestión",
   EMPLOYEES: "Empleados",
   SCHEDULES: "Horarios",
+  LOGOUT: "Salir",
 };
 
 export const ROUTES = {
-  HOME: "/",
+  LOGIN: "/",
+  REGISTER: "register",
+  MANAGE_ROLES: "/roles",
   MANAGE_VEHICLES: "/vehicles",
   MANAGE_EMPLOYEES: "/employees",
   MANAGE_SCHEDULES: "/schedules",
