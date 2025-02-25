@@ -25,11 +25,12 @@ import GroupRoundedIcon from "@mui/icons-material/GroupRounded";
 import EditCalendarRoundedIcon from "@mui/icons-material/EditCalendarRounded";
 import LogoutIcon from "@mui/icons-material/Logout";
 import wallpaper from "./assets/images/choferes1.webp";
-import { AuthProvider } from "./context/AuthContext";
+import { AuthProvider, useAuth } from "./context/AuthContext";
 
 const AppBarWrapper: React.FC = () => {
-  const { currentUser, handleLogoutUser } = useUsers();
-
+  const { currentUser } = useAuth();
+  const { handleLogoutUser } = useUsers();
+  
   console.log("currentUser: ", currentUser);
 
   return (
