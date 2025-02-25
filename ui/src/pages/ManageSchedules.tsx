@@ -28,11 +28,11 @@ import {
   exportFileFormattedDate,
   exportToExcel,
   exportToPDF,
-} from "../utils/exportUtils";
+} from "../utils/export";
 import {
   getDayOptionsSpanish,
   translateDayOptionsToSpanish,
-} from "../utils/stringUtils";
+} from "../utils/string";
 import { PAGE_TITLE } from "../constants/constants";
 import PostAddRoundedIcon from "@mui/icons-material/PostAddRounded";
 import DownloadRoundedIcon from "@mui/icons-material/DownloadRounded";

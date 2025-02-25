@@ -44,17 +44,17 @@ import {
   hasMultipleMonths,
   hasMultipleYears,
   isValidDateForSelect,
-} from "../../../utils/dateUtils";
+} from "../../../utils/dates";
 import {
   getMonthName,
   getOptionsForDay,
   translateDayToAbrevSpanish,
-} from "../../../utils/stringUtils";
+} from "../../../utils/string";
 import {
   calculateTotalHoursAndOvertimeForPeriod,
   calculateTotalHoursAndOvertimeForPeriods,
-} from "../../../utils/calculationUtils";
-import { EnglishDayOfWeek } from "../../../utils/englishDayOfWeek";
+} from "../../../utils/calculation";
+import { EnglishDayOfWeek } from "../../../utils/dayAbreviations";
 import {
   STATE,
   TABLE,

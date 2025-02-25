@@ -1,4 +1,4 @@
-import { createContext, useContext, useState } from "react";
+import { createContext, useContext, useEffect, useState } from "react";
 import { User } from "../models/User";
 
 interface AuthContextType {
@@ -14,14 +14,24 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const [currentUser, setCurrentUser] = useState<User | null>(null);
   const [token, setToken] = useState<string | null>(null);
 
+  useEffect(() => {
+    const storedToken = localStorage.getItem("token");
+
+    if (storedToken) {
+      setToken(storedToken);
+    }
+  }, []);
+
   const login = (user: User, authToken: string) => {
     setCurrentUser(user);
     setToken(authToken);
+    localStorage.setItem("token", authToken);
   };
 
   const logout = () => {
     setCurrentUser(null);
     setToken(null);
+    localStorage.removeItem("token");
   };
 
   return (

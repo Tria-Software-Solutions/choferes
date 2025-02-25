@@ -10,11 +10,11 @@ import {
   translateDayToAbrevSpanish,
   translatePeriodToSpanish,
   translationsDayOptionsToSpanish,
-} from "./stringUtils";
+} from "./string";
 import {
   calculateTotalHoursAndOvertimeForPeriod,
   calculateTotalHoursAndOvertimeForPeriods,
-} from "./calculationUtils";
+} from "./calculation";
 import {
   formatHeaderDateWithYear,
   formatDate,
@@ -23,8 +23,8 @@ import {
   hasMultipleBiweeks,
   hasMultipleMonths,
   getInvolvedPeriods,
-} from "./dateUtils";
-import { EnglishDayOfWeek } from "./englishDayOfWeek";
+} from "./dates";
+import { EnglishDayOfWeek } from "./dayAbreviations";
 import { WeeklySummary } from "../models/WeeklySummary";
 import { BiweeklySummary } from "../models/BiweeklySummary";
 import { MonthlySummary } from "../models/MonthlySummary";

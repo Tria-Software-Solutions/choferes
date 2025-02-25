@@ -30,9 +30,6 @@ import { AuthProvider, useAuth } from "./context/AuthContext";
 const AppBarWrapper: React.FC = () => {
   const { currentUser } = useAuth();
   const { handleLogoutUser } = useUsers();
-  
-  console.log("currentUser: ", currentUser);
-
   return (
     <AppBarComponent
       title={APPBAR_MENU.TITLE}

@@ -28,14 +28,14 @@ import { LocalizationProvider } from "@mui/x-date-pickers";
 import { DatePicker } from "@mui/x-date-pickers/DatePicker";
 import { AdapterDateFns } from "@mui/x-date-pickers/AdapterDateFns";
 import { es } from "date-fns/locale";
-import { getMidnightDate, isTodayOrFuture } from "../utils/dateUtils";
-import { maskLicensePlate, maskParkingLot } from "../utils/maskUtils";
+import { getMidnightDate, isTodayOrFuture } from "../utils/dates";
+import { maskLicensePlate, maskParkingLot } from "../utils/mask";
 import {
   createExportOptions,
   exportFileFormattedDate,
   exportToExcel,
   exportToPDF,
-} from "../utils/exportUtils";
+} from "../utils/export";
 import { BRANDS, COLORS, PAGE_TITLE } from "../constants/constants";
 import DownloadRoundedIcon from "@mui/icons-material/DownloadRounded";
 import DirectionsCarIcon from "@mui/icons-material/DirectionsCar";
