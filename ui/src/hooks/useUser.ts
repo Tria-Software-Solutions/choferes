@@ -2,12 +2,13 @@ import { useState, useEffect, useCallback } from "react";
 import * as UserService from "../services/userService";
 import { User } from "../models/User";
 import { useNavigate } from "react-router-dom";
+import { useAuth } from "../context/AuthContext";
 
 export const useUsers = () => {
+  const { currentUser } = useAuth();
   const [users, setUsers] = useState<User[]>([]);
   const [totalCount, setTotalCount] = useState(0);
   const [isLoadingUsers, setIsLoadingUsers] = useState(false);
-  const [currentUser, setCurrentUser] = useState<User | null>(null);
   const [authError, setAuthError] = useState<string | null>(null);
   const navigate = useNavigate();
 
@@ -32,14 +33,11 @@ export const useUsers = () => {
   };
 
   const handleLoginUser = async (username: string, password: string) => {
-    console.log("username: ", username);
-    console.log("password: ", password);
     setAuthError(null);
     try {
       const loginData = await UserService.loginUser(username, password);
-      console.log("loginData: ", loginData);
-      setCurrentUser(loginData.user);
       localStorage.setItem("token", loginData.token);
+      localStorage.setItem("currentUser", loginData.user);
       navigate("/roles");
     } catch (error) {
       setAuthError("Login failed. Please check your credentials.");
@@ -54,8 +52,8 @@ export const useUsers = () => {
   };
 
   const handleLogoutUser = () => {
-    setCurrentUser(null);
     localStorage.removeItem("token");
+    localStorage.removeItem("currentUser");
     navigate("/");
   };
 
@@ -67,8 +65,8 @@ export const useUsers = () => {
     users,
     totalCount,
     isLoadingUsers,
-    currentUser,
     authError,
+    currentUser,
     fetchUsers,
     handleRegisterUser,
     handleLoginUser,

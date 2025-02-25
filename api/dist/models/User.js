@@ -26,7 +26,7 @@ User.init({
     email: {
         type: sequelize_1.DataTypes.STRING,
         allowNull: false,
-        unique: true
+        unique: true,
     },
     username: {
         type: sequelize_1.DataTypes.STRING,
@@ -37,12 +37,8 @@ User.init({
         type: sequelize_1.DataTypes.STRING,
         allowNull: false,
     },
-    roleId: {
-        type: sequelize_1.DataTypes.INTEGER,
-        allowNull: false,
-    },
 }, {
     sequelize: database_1.default,
     modelName: "User",
-    tableName: "user",
+    tableName: "users",
 });

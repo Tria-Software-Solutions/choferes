@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
+import { useUsers } from "../hooks/useUser";
 import {
   TextField,
   Button,
@@ -9,9 +10,8 @@ import {
   Box,
   Alert,
 } from "@mui/material";
-import logo from "../assets/images/logo.png";
 import { PAGE_TITLE } from "../constants/constants";
-import { useUsers } from "../hooks/useUser";
+import logo from "../assets/images/logo.png";
 
 const Login = () => {
   const { handleLoginUser } = useUsers();
@@ -37,7 +37,6 @@ const Login = () => {
       justifyContent="center"
       alignItems="center"
       minHeight="100vh"
-      sx={{ background: "linear-gradient(135deg, #1f1f1f 0%, #333333 100%)" }}
     >
       <Card sx={{ width: 400, p: 3, boxShadow: 3 }}>
         <CardContent>

@@ -20,8 +20,11 @@ export const registerUser = async (req: Request, res: Response) => {
 export const loginUser = async (req: Request, res: Response) => {
   try {
     const { username, password } = req.body;
-    const token = await userService.authenticateUser(username, password);
-    res.json({ token });
+    const { user, token } = await userService.authenticateUser(
+      username,
+      password
+    );
+    res.json({ user, token });
   } catch (error) {
     res.status(401).json({ message: "Error login User", error });
   }

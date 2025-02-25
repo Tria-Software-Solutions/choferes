@@ -8,14 +8,17 @@ const Employee_1 = require("../models/Employee");
 const Schedule_1 = require("../models/Schedule");
 const HoursWorked_1 = require("../models/HoursWorked");
 // Relación User - Role
-User_1.User.belongsTo(Role_1.Role, { foreignKey: "roleId" });
-Role_1.Role.hasMany(User_1.User, { foreignKey: "roleId" });
+User_1.User.belongsToMany(Role_1.Role, { through: "user_role", foreignKey: "userId" });
+Role_1.Role.belongsToMany(User_1.User, { through: "user_role", foreignKey: "roleId" });
 // Relación Role - Permission
-Role_1.Role.belongsToMany(Permission_1.Permission, { through: "role_permission" });
-Permission_1.Permission.belongsToMany(Role_1.Role, { through: "role_permission" });
-// Relación User - Role
-User_1.User.belongsToMany(Role_1.Role, { through: "user_role" });
-Role_1.Role.belongsToMany(User_1.User, { through: "user_role" });
+Role_1.Role.belongsToMany(Permission_1.Permission, {
+    through: "role_permission",
+    foreignKey: "roleId",
+});
+Permission_1.Permission.belongsToMany(Role_1.Role, {
+    through: "role_permission",
+    foreignKey: "permissionId",
+});
 // Relación Employee - HoursWorked
 HoursWorked_1.HoursWorked.belongsTo(Employee_1.Employee, {
     foreignKey: "employeeId",
