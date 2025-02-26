@@ -5,17 +5,36 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.authenticateToken = void 0;
 const jsonwebtoken_1 = __importDefault(require("jsonwebtoken"));
-const SECRET_KEY = process.env.JWT_SECRET_KEY || "";
+const SECRET_KEY = process.env.JWT_SECRET_KEY;
+if (!SECRET_KEY) {
+    throw new Error("Missing JWT_SECRET_KEY in environment variables");
+}
 const authenticateToken = (req, res, next) => {
-    var _a;
-    const token = (_a = req.headers["authorization"]) === null || _a === void 0 ? void 0 : _a.split(" ")[1];
-    if (!token)
-        return res.status(403).json({ error: "Required token" });
-    jsonwebtoken_1.default.verify(token, SECRET_KEY, (err, decoded) => {
-        if (err)
-            return res.status(403).json({ error: "Invalid or expired token" });
-        req.user = decoded;
-        next();
-    });
+    try {
+        const authHeader = req.headers["authorization"];
+        const token = authHeader === null || authHeader === void 0 ? void 0 : authHeader.split(" ")[1];
+        if (!token) {
+            return res.status(401).json({ error: "Unauthorized: Token required" });
+        }
+        jsonwebtoken_1.default.verify(token, SECRET_KEY, (err, decoded) => {
+            if (err) {
+                if (err.name === "TokenExpiredError") {
+                    return res.status(401).json({ error: "Unauthorized: Token expired" });
+                }
+                return res.status(401).json({ error: "Unauthorized: Invalid token" });
+            }
+            const payload = decoded;
+            if (!payload.userId) {
+                return res
+                    .status(403)
+                    .json({ error: "Forbidden: Invalid token payload" });
+            }
+            req.user = { id: payload.userId, role: payload.role };
+            next();
+        });
+    }
+    catch (error) {
+        return res.status(500).json({ error: "Internal server error" });
+    }
 };
 exports.authenticateToken = authenticateToken;

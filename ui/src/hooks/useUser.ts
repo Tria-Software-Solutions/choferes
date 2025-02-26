@@ -5,7 +5,7 @@ import { useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 
 export const useUsers = () => {
-  const { login, logout } = useAuth();
+  const { currentUser, login, logout } = useAuth();
   const [users, setUsers] = useState<User[]>([]);
   const [totalCount, setTotalCount] = useState(0);
   const [isLoadingUsers, setIsLoadingUsers] = useState(false);
@@ -51,13 +51,15 @@ export const useUsers = () => {
   };
 
   const handleLogoutUser = () => {
-    logout()
+    logout();
     navigate("/");
   };
 
   useEffect(() => {
-    fetchUsers();
-  }, [fetchUsers]);
+    if (currentUser) {
+      fetchUsers();
+    }
+  }, [currentUser, fetchUsers]);
 
   return {
     users,
