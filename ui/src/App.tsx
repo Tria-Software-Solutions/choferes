@@ -23,7 +23,6 @@ import ProtectedRoute from "./routes/ProtectedRoute";
 import { Container } from "@mui/material";
 import { APPBAR_MENU, ROUTES } from "./constants/constants";
 import CalendarMonthRoundedIcon from "@mui/icons-material/CalendarMonthRounded";
-import ManageAccountsRoundedIcon from "@mui/icons-material/ManageAccountsRounded";
 import DirectionsCarIcon from "@mui/icons-material/DirectionsCar";
 import GroupRoundedIcon from "@mui/icons-material/GroupRounded";
 import EditCalendarRoundedIcon from "@mui/icons-material/EditCalendarRounded";
@@ -43,25 +42,19 @@ const AppBarWrapper: React.FC = () => {
           path: ROUTES.MANAGE_ROLES,
         },
         {
+          label: APPBAR_MENU.EMPLOYEES,
+          icon: <GroupRoundedIcon />,
+          path: ROUTES.MANAGE_EMPLOYEES,
+        },
+        {
+          label: APPBAR_MENU.SCHEDULES,
+          icon: <EditCalendarRoundedIcon />,
+          path: ROUTES.MANAGE_SCHEDULES,
+        },
+        {
           label: APPBAR_MENU.VEHICLES,
           icon: <DirectionsCarIcon />,
           path: ROUTES.MANAGE_VEHICLES,
-        },
-        {
-          label: APPBAR_MENU.MANAGE,
-          icon: <ManageAccountsRoundedIcon />,
-          subLinks: [
-            {
-              label: APPBAR_MENU.EMPLOYEES,
-              icon: <GroupRoundedIcon />,
-              path: ROUTES.MANAGE_EMPLOYEES,
-            },
-            {
-              label: APPBAR_MENU.SCHEDULES,
-              icon: <EditCalendarRoundedIcon />,
-              path: ROUTES.MANAGE_SCHEDULES,
-            },
-          ],
         },
         ...(currentUser
           ? [
