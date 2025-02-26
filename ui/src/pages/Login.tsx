@@ -32,9 +32,9 @@ const Login = () => {
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
-
+  
     try {
-      handleLoginUser(fields.username, fields.password);
+      await handleLoginUser(fields.username, fields.password); 
     } catch (err) {
       setError("Usuario o contraseña incorrectos");
     }
