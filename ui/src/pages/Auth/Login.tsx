@@ -11,26 +11,30 @@ import {
   Alert,
   useTheme,
   useMediaQuery,
+  CircularProgress,
 } from "@mui/material";
 import { PAGE_TITLE } from "../../constants/constants";
 import logo from "../../assets/images/logo.png";
 
 const Login = () => {
-  const { handleLoginUser } = useUsers();
+  const { isLoadingUsers, handleLoginUser } = useUsers();
   const [fields, setFields] = useState({
     username: "",
     password: "",
   });
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
+    setIsSubmitting(true);
 
     try {
       await handleLoginUser(fields.username, fields.password);
     } catch (err) {
       setError("Usuario o contraseña incorrectos");
     }
+    setIsSubmitting(false);
   };
 
   const theme = useTheme();
@@ -91,7 +95,15 @@ const Login = () => {
                 lineHeight: "normal",
               }}
             >
-              Ingresar
+              {isSubmitting && isLoadingUsers ? (
+                <CircularProgress
+                  color="inherit"
+                  size={24}
+                  sx={{ marginRight: 2 }}
+                />
+              ) : (
+                "Ingresar"
+              )}
             </Button>
           </form>
           {error && (
