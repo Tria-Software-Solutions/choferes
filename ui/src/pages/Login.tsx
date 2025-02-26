@@ -9,6 +9,8 @@ import {
   Typography,
   Box,
   Alert,
+  useTheme,
+  useMediaQuery,
 } from "@mui/material";
 import { PAGE_TITLE } from "../constants/constants";
 import logo from "../assets/images/logo.png";
@@ -32,13 +34,16 @@ const Login = () => {
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
-  
+
     try {
-      await handleLoginUser(fields.username, fields.password); 
+      await handleLoginUser(fields.username, fields.password);
     } catch (err) {
       setError("Usuario o contraseña incorrectos");
     }
   };
+
+  const theme = useTheme();
+  const isSmallScreen = useMediaQuery(theme.breakpoints.down("sm"));
 
   return (
     <Box
@@ -104,7 +109,8 @@ const Login = () => {
             </Alert>
           )}
           <Typography align="center" sx={{ mt: 6 }}>
-            ¿Aún no tienes una cuenta?{" "}
+            ¿Aún no tienes una cuenta?
+            {isSmallScreen ? <br /> : " "}
             <Link
               to="/register"
               style={{

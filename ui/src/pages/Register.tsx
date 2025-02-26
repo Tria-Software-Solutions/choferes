@@ -8,6 +8,8 @@ import {
   Typography,
   Box,
   Alert,
+  useTheme,
+  useMediaQuery,
 } from "@mui/material";
 import logo from "../assets/images/logo.png";
 import { PAGE_TITLE } from "../constants/constants";
@@ -77,6 +79,9 @@ const Register = () => {
       setError("Error al registrar usuario");
     }
   };
+
+  const theme = useTheme();
+  const isSmallScreen = useMediaQuery(theme.breakpoints.down("sm"));
 
   return (
     <Box
@@ -173,7 +178,7 @@ const Register = () => {
             </Alert>
           )}
           <Typography align="center" sx={{ mt: 6 }}>
-            ¿Ya tienes una cuenta?{" "}
+            ¿Ya tienes una cuenta? {isSmallScreen ? <br /> : " "}
             <Link
               to="/"
               style={{
