@@ -1,6 +1,6 @@
-import { useEffect, useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
-import { useUsers } from "../hooks/useUser";
+import { useState } from "react";
+import { Link } from "react-router-dom";
+import { useUsers } from "../../hooks/useUser";
 import {
   TextField,
   Button,
@@ -12,25 +12,16 @@ import {
   useTheme,
   useMediaQuery,
 } from "@mui/material";
-import { PAGE_TITLE } from "../constants/constants";
-import logo from "../assets/images/logo.png";
+import { PAGE_TITLE } from "../../constants/constants";
+import logo from "../../assets/images/logo.png";
 
 const Login = () => {
-  const navigate = useNavigate();
-  const { users, handleLoginUser } = useUsers();
+  const { handleLoginUser } = useUsers();
   const [fields, setFields] = useState({
     username: "",
     password: "",
   });
   const [error, setError] = useState<string | null>(null);
-
-  useEffect(() => {
-    const lastRoute = localStorage.getItem("lastRoute");
-
-    if (users && lastRoute) {
-      navigate(lastRoute);
-    }
-  }, [users, navigate]);
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
