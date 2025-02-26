@@ -51,6 +51,7 @@ export const useUsers = () => {
   };
 
   const handleLogoutUser = () => {
+    localStorage.removeItem("lastRoute");
     logout();
     navigate("/");
   };

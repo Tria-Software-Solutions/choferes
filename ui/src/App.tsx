@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 import {
   BrowserRouter as Router,
   Route,
@@ -25,11 +25,10 @@ import GroupRoundedIcon from "@mui/icons-material/GroupRounded";
 import EditCalendarRoundedIcon from "@mui/icons-material/EditCalendarRounded";
 import LogoutIcon from "@mui/icons-material/Logout";
 import wallpaper from "./assets/images/choferes1.webp";
-import { AuthProvider, useAuth } from "./context/AuthContext";
+import { AuthProvider } from "./context/AuthContext";
 
 const AppBarWrapper: React.FC = () => {
-  const { currentUser } = useAuth();
-  const { handleLogoutUser } = useUsers();
+  const { users, handleLogoutUser } = useUsers();
   return (
     <AppBarComponent
       title={APPBAR_MENU.TITLE}
@@ -60,7 +59,7 @@ const AppBarWrapper: React.FC = () => {
             },
           ],
         },
-        ...(currentUser
+        ...(users
           ? [
               {
                 label: APPBAR_MENU.LOGOUT,
@@ -79,6 +78,12 @@ const AppContent: React.FC = () => {
   const location = useLocation();
   const isAuthPage =
     location.pathname === "/" || location.pathname === "/register";
+
+  useEffect(() => {
+    if (location.pathname !== "/") {
+      localStorage.setItem("lastRoute", location.pathname);
+    }
+  }, [location]);
 
   return (
     <>
