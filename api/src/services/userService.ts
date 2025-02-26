@@ -3,7 +3,7 @@ import { Role } from "../models/Role";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 
-const secretKey = process.env.JWT_SECRET || "secret";
+const SECRET_KEY = process.env.JWT_SECRET_KEY || "default_secret";
 
 export const createUser = async (
   firstName: string,
@@ -24,6 +24,8 @@ export const createUser = async (
 };
 
 export const authenticateUser = async (username: string, password: string) => {
+  if (!SECRET_KEY) throw new Error("JWT_SECRET_KEY is not set");
+
   const user = await User.findOne({
     where: { username },
     include: [
@@ -33,12 +35,13 @@ export const authenticateUser = async (username: string, password: string) => {
       },
     ],
   });
+  
   if (!user) throw new Error("User not found");
 
   const isMatch = await bcrypt.compare(password, user.password);
   if (!isMatch) throw new Error("Incorrect password");
 
-  const token = jwt.sign({ userId: user.id }, secretKey, {
+  const token = jwt.sign({ userId: user.id }, SECRET_KEY, {
     expiresIn: "1h",
   });
   return { user, token };

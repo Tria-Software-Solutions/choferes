@@ -351,7 +351,7 @@ const ManageRoles: React.FC = () => {
     );
 
     if (!selectedSchedule) {
-      console.error("No se encontró un horario para el label seleccionado");
+      console.error("No schedule found for the selected label");
       return;
     }
 
