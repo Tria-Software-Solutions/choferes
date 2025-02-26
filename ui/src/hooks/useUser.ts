@@ -40,6 +40,7 @@ export const useUsers = () => {
       navigate("/roles");
     } catch (error) {
       setAuthError("Login failed. Please check your credentials.");
+      throw error;
     }
   };
 
