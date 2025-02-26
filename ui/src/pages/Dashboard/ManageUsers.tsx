@@ -11,7 +11,7 @@ import {
   Typography,
 } from "@mui/material";
 
-const UserManagement = () => {
+const ManageUsers = () => {
   const [users, setUsers] = useState<User[]>([]);
 
   useEffect(() => {
@@ -51,4 +51,4 @@ const UserManagement = () => {
   );
 };
 
-export default UserManagement;
+export default ManageUsers;

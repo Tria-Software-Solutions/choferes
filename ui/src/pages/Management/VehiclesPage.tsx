@@ -45,7 +45,7 @@ import CalendarTodayRoundedIcon from "@mui/icons-material/CalendarTodayRounded";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faFileExcel, faFilePdf } from "@fortawesome/free-solid-svg-icons";
 
-const ManageVehicles: React.FC = () => {
+const VehiclesPage: React.FC = () => {
   const [selectedDate, setSelectedDate] = useState<Date | null>(new Date());
   const {
     vehicles,
@@ -754,4 +754,4 @@ const ManageVehicles: React.FC = () => {
   );
 };
 
-export default ManageVehicles;
+export default VehiclesPage;

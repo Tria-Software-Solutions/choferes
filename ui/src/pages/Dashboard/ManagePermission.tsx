@@ -11,7 +11,7 @@ import {
   Typography,
 } from "@mui/material";
 
-const PermissionManagement = () => {
+const ManagePermission = () => {
   const [permissions, setPermissions] = useState<Permission[]>([]);
 
   useEffect(() => {
@@ -49,4 +49,4 @@ const PermissionManagement = () => {
   );
 };
 
-export default PermissionManagement;
+export default ManagePermission;

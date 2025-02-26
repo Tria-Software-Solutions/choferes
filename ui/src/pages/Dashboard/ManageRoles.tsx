@@ -11,7 +11,7 @@ import {
   Typography,
 } from "@mui/material";
 
-const RoleManagement = () => {
+const ManageRoles = () => {
   const [roles, setRoles] = useState<Role[]>([]);
 
   useEffect(() => {
@@ -49,4 +49,4 @@ const RoleManagement = () => {
   );
 };
 
-export default RoleManagement;
+export default ManageRoles;

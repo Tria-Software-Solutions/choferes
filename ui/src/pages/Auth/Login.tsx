@@ -53,7 +53,7 @@ const Login = () => {
             <img src={logo} alt="Logo" style={{ width: 95, height: "auto" }} />
           </Box>
           <Typography
-            variant={"h4"}
+            variant={isSmallScreen ? "h6" : "h2"}
             align="center"
             sx={{ flexGrow: 1 }}
             gutterBottom
