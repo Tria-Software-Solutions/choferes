@@ -7,7 +7,11 @@
     "start": "node dist/server.js",
     "dev": "ts-node src/server.ts",
     "migrate:dev": "npx sequelize-cli db:migrate --config src/config/config.js",
-    "migrate:prod": "NODE_ENV=production npx sequelize-cli db:migrate --config src/config/config.js"
+    "migrate:prod": "NODE_ENV=production npx sequelize-cli db:migrate --config src/config/config.js",
+    "seed:dev": "npx sequelize-cli db:seed:all --config src/config/config.js",
+    "undo:seed:dev": "npx sequelize-cli db:seed:undo:all --config src/config/config.js",
+    "seed:prod": "NODE_ENV=production npx sequelize-cli db:seed:all --config src/config/config.js",
+    "undo:seed:prod": "NODE_ENV=production npx sequelize-cli db:seed:undo:all --config src/config/config.js"
   },
   "keywords": [],
   "author": "",
