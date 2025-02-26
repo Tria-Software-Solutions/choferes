@@ -9,13 +9,11 @@ import {
 import { useUsers } from "./hooks/useUser";
 import Login from "./pages/Auth/Login";
 import Register from "./pages/Auth/Register";
-import ManageRoles from "./pages/Management/ManageRoles";
-import ManageEmployees from "./pages/Management/ManageEmployees";
-import ManageSchedules from "./pages/Management/ManageSchedules";
-import ManageVehicles from "./pages/Management/ManageVehicles";
-import UserManagement from "./pages/Dashboard/UserManagement";
-import RoleManagement from "./pages/Dashboard/RoleManagement";
-import PermissionManagement from "./pages/Dashboard/PermissionManagement";
+import RolesPage from "./pages/Management/RolesPage";
+import EmployeesPage from "./pages/Management/EmployeesPage";
+import SchedulesPage from "./pages/Management/SchedulesPage";
+import VehiclesPage from "./pages/Management/VehiclesPage";
+import Dashboard from "./pages/Dashboard/Dashboard";
 import NotFound from "./pages/NotFound";
 import AppBarComponent from "./components/AppBar/AppBarComponent";
 import { AuthProvider, useAuth } from "./context/AuthContext";
@@ -112,16 +110,11 @@ const AppContent: React.FC = () => {
           />
           <Route path="/register" element={<Register />} />
           <Route element={<ProtectedRoute />}>
-            <Route path="/dashboard_users" element={<UserManagement />} />
-            <Route path="/dashboard_roles" element={<RoleManagement />} />
-            <Route
-              path="/dashboard_permissions"
-              element={<PermissionManagement />}
-            />
-            <Route path="/roles" element={<ManageRoles />} />
-            <Route path="/vehicles" element={<ManageVehicles />} />
-            <Route path="/employees" element={<ManageEmployees />} />
-            <Route path="/schedules" element={<ManageSchedules />} />
+            <Route path="/dashboard" element={<Dashboard />} />
+            <Route path="/roles" element={<RolesPage />} />
+            <Route path="/vehicles" element={<VehiclesPage />} />
+            <Route path="/employees" element={<EmployeesPage />} />
+            <Route path="/schedules" element={<SchedulesPage />} />
           </Route>
           <Route path="*" element={<NotFound />} />
         </Routes>

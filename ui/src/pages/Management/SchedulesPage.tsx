@@ -39,7 +39,7 @@ import DownloadRoundedIcon from "@mui/icons-material/DownloadRounded";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faFileExcel, faFilePdf } from "@fortawesome/free-solid-svg-icons";
 
-const ManageSchedules: React.FC = () => {
+const SchedulesPage: React.FC = () => {
   const {
     schedules,
     isLoadingSchedules,
@@ -389,4 +389,4 @@ const ManageSchedules: React.FC = () => {
   );
 };
 
-export default ManageSchedules;
+export default SchedulesPage;

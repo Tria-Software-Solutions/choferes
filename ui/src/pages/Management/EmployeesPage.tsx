@@ -31,7 +31,7 @@ import DownloadRoundedIcon from "@mui/icons-material/DownloadRounded";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faFileExcel, faFilePdf } from "@fortawesome/free-solid-svg-icons";
 
-const ManageEmployees: React.FC = () => {
+const EmployeesPage: React.FC = () => {
   const {
     employees,
     isLoadingEmployees,
@@ -334,4 +334,4 @@ const ManageEmployees: React.FC = () => {
   );
 };
 
-export default ManageEmployees;
+export default EmployeesPage;

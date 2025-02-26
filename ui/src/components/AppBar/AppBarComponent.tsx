@@ -1,10 +1,11 @@
 import React from "react";
 import MenuComponent from "../Menu/MenuComponent";
 import { AppBar, Toolbar, Typography, IconButton, Box } from "@mui/material";
-import MenuRoundedIcon from "@mui/icons-material/MenuRounded";
-import logo from "../../assets/images/logo.png";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext";
+import MenuRoundedIcon from "@mui/icons-material/MenuRounded";
+import logo from "../../assets/images/logo.png";
+
 
 interface Link {
   label: string;
@@ -85,10 +86,10 @@ const AppBarComponent: React.FC<AppBarComponentProps> = ({
             {title}
           </Box>
         </Typography>
-        <Typography sx={{ color: "white" }}>
+        <Typography sx={{ color: "white", marginRight: "25px" }}>
           {`${currentUser?.firstName} ${currentUser?.lastName}`}
         </Typography>
-        <MenuComponent icon={<MenuRoundedIcon />} menuItems={menuItems} />
+        <MenuComponent icon={<MenuRoundedIcon />} menuItems={menuItems}/>
       </Toolbar>
     </AppBar>
   );

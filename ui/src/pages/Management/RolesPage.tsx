@@ -58,7 +58,7 @@ import ArrowForwardIosRoundedIcon from "@mui/icons-material/ArrowForwardIosRound
 import CalendarTodayRoundedIcon from "@mui/icons-material/CalendarTodayRounded";
 import { faFileExcel, faFilePdf } from "@fortawesome/free-solid-svg-icons";
 
-const ManageRoles: React.FC = () => {
+const RolesPage: React.FC = () => {
   const { employees, isLoadingEmployees } = useEmployees();
   const [filteredEmployees, setFilteredEmployees] = useState<Employee[]>([]);
   const { schedules, isLoadingSchedules } = useSchedules();
@@ -573,4 +573,4 @@ const ManageRoles: React.FC = () => {
   );
 };
 
-export default ManageRoles;
+export default RolesPage;
