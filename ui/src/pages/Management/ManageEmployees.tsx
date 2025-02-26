@@ -1,9 +1,9 @@
 import React, { useState, useEffect, useCallback } from "react";
-import { Employee } from "../models/Employee";
-import { useEmployees } from "../hooks/useEmployee";
-import SplitButton from "../components/SplitButton/SplitButton";
-import SearchBar from "../components/SearchBar/SearchBar";
-import EditableTable from "../components/Table/EditableTable/EditableTable";
+import { Employee } from "../../models/Employee";
+import { useEmployees } from "../../hooks/useEmployee";
+import SplitButton from "../../components/SplitButton/SplitButton";
+import SearchBar from "../../components/SearchBar/SearchBar";
+import EditableTable from "../../components/Table/EditableTable/EditableTable";
 import {
   Button,
   TextField,
@@ -24,8 +24,8 @@ import {
   exportFileFormattedDate,
   exportToExcel,
   exportToPDF,
-} from "../utils/export";
-import { PAGE_TITLE } from "../constants/constants";
+} from "../../utils/export";
+import { PAGE_TITLE } from "../../constants/constants";
 import PersonAddAlt1RoundedIcon from "@mui/icons-material/PersonAddAlt1Rounded";
 import DownloadRoundedIcon from "@mui/icons-material/DownloadRounded";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";

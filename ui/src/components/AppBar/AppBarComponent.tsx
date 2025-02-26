@@ -10,9 +10,8 @@ interface Link {
   path?: string;
   icon?: React.ReactNode;
   subLinks?: Link[];
-  onClick?: () => void; 
+  onClick?: () => void;
 }
-
 
 interface AppBarComponentProps {
   icon?: React.ReactNode;
@@ -28,7 +27,7 @@ const AppBarComponent: React.FC<AppBarComponentProps> = ({
   const navigate = useNavigate();
   const menuItems = links.map((link) => ({
     text: link.label,
-    onClick: link.onClick 
+    onClick: link.onClick
       ? link.onClick
       : () => {
           if (link.path) {
@@ -38,7 +37,7 @@ const AppBarComponent: React.FC<AppBarComponentProps> = ({
     icon: link.icon as React.ReactElement | undefined,
     subMenuItems: link.subLinks?.map((subLink) => ({
       text: subLink.label,
-      onClick: subLink.onClick 
+      onClick: subLink.onClick
         ? subLink.onClick
         : () => {
             if (subLink.path) {
@@ -48,7 +47,6 @@ const AppBarComponent: React.FC<AppBarComponentProps> = ({
       icon: subLink.icon as React.ReactElement | undefined,
     })),
   }));
-  
 
   return (
     <AppBar position="static">
@@ -58,12 +56,12 @@ const AppBarComponent: React.FC<AppBarComponentProps> = ({
             edge="start"
             color="inherit"
             aria-label="menu"
-            onClick={() => navigate("/")}
+            onClick={() => navigate("/roles")}
           >
             {icon}
           </IconButton>
         )}
-        <Box sx={{ cursor: "pointer" }} onClick={() => navigate("/")}>
+        <Box sx={{ cursor: "pointer" }} onClick={() => navigate("/roles")}>
           <img
             src={logo}
             alt="Logo"
@@ -80,7 +78,7 @@ const AppBarComponent: React.FC<AppBarComponentProps> = ({
         >
           <Box
             sx={{ cursor: "pointer", display: "inline-block" }}
-            onClick={() => navigate("/")}
+            onClick={() => navigate("/roles")}
           >
             {title}
           </Box>

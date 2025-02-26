@@ -1,9 +1,9 @@
 import React, { useState, useEffect, useCallback } from "react";
-import { Schedule } from "../models/Schedule";
-import { useSchedules } from "../hooks/useSchedule";
-import SplitButton from "../components/SplitButton/SplitButton";
-import SearchBar from "../components/SearchBar/SearchBar";
-import EditableTable from "../components/Table/EditableTable/EditableTable";
+import { Schedule } from "../../models/Schedule";
+import { useSchedules } from "../../hooks/useSchedule";
+import SplitButton from "../../components/SplitButton/SplitButton";
+import SearchBar from "../../components/SearchBar/SearchBar";
+import EditableTable from "../../components/Table/EditableTable/EditableTable";
 import {
   Button,
   TextField,
@@ -28,12 +28,12 @@ import {
   exportFileFormattedDate,
   exportToExcel,
   exportToPDF,
-} from "../utils/export";
+} from "../../utils/export";
 import {
   getDayOptionsSpanish,
   translateDayOptionsToSpanish,
-} from "../utils/string";
-import { PAGE_TITLE } from "../constants/constants";
+} from "../../utils/string";
+import { PAGE_TITLE } from "../../constants/constants";
 import PostAddRoundedIcon from "@mui/icons-material/PostAddRounded";
 import DownloadRoundedIcon from "@mui/icons-material/DownloadRounded";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
