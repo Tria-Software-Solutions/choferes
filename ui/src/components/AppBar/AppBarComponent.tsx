@@ -4,6 +4,7 @@ import { AppBar, Toolbar, Typography, IconButton, Box } from "@mui/material";
 import MenuRoundedIcon from "@mui/icons-material/MenuRounded";
 import logo from "../../assets/images/logo.png";
 import { useNavigate } from "react-router-dom";
+import { useAuth } from "../../context/AuthContext";
 
 interface Link {
   label: string;
@@ -24,6 +25,7 @@ const AppBarComponent: React.FC<AppBarComponentProps> = ({
   title,
   links,
 }) => {
+  const { currentUser } = useAuth();
   const navigate = useNavigate();
   const menuItems = links.map((link) => ({
     text: link.label,
@@ -82,6 +84,9 @@ const AppBarComponent: React.FC<AppBarComponentProps> = ({
           >
             {title}
           </Box>
+        </Typography>
+        <Typography sx={{ color: "white" }}>
+          {`${currentUser?.firstName} ${currentUser?.lastName}`}
         </Typography>
         <MenuComponent icon={<MenuRoundedIcon />} menuItems={menuItems} />
       </Toolbar>
