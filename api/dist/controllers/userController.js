@@ -80,7 +80,7 @@ const getUserById = (req, res) => __awaiter(void 0, void 0, void 0, function* ()
     try {
         const user = yield userService.getUserById(Number(req.params.id));
         if (!user) {
-            return res.status(404).json({ message: "User not fouund" });
+            return res.status(404).json({ message: "User not found" });
         }
         res.json(user);
     }
