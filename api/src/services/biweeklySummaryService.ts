@@ -1,6 +1,6 @@
 import { BiweeklySummary } from '../models/BiweeklySummary';
 
-export const createBiweeklySummary = async (data: { firstHalfHours: number; secondHalfHours: number }) => {
+export const createBiweeklySummary = async (data: Omit<BiweeklySummary, "id">) => {
   return BiweeklySummary.create(data);
 };
 

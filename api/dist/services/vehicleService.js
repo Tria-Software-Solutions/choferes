@@ -13,7 +13,9 @@ exports.deleteVehicle = exports.updateVehicle = exports.getVehiclesByDate = expo
 const sequelize_1 = require("sequelize");
 const Vehicle_1 = require("../models/Vehicle");
 const createVehicle = (data) => __awaiter(void 0, void 0, void 0, function* () {
-    return Vehicle_1.Vehicle.create(data);
+    const newVehicle = yield Vehicle_1.Vehicle.create(data);
+    yield newVehicle.reload();
+    return newVehicle;
 });
 exports.createVehicle = createVehicle;
 const getAllVehicles = () => __awaiter(void 0, void 0, void 0, function* () {
