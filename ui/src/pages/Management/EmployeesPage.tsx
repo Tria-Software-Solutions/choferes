@@ -158,7 +158,7 @@ const EmployeesPage: React.FC = () => {
         sx={{ mb: 2 }}
       >
         <Typography variant={isSmallScreen ? "h4" : "h2"} sx={{ flexGrow: 1 }}>
-          {PAGE_TITLE.MANAGE_EMPLOYEES}
+          {PAGE_TITLE.EMPLOYEES}
         </Typography>
         {filteredEmployees.length > 0 && (
           <SplitButton

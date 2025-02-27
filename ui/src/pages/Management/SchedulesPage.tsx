@@ -190,7 +190,7 @@ const SchedulesPage: React.FC = () => {
         sx={{ mb: 2 }}
       >
         <Typography variant={isSmallScreen ? "h4" : "h2"} sx={{ flexGrow: 1 }}>
-          {PAGE_TITLE.MANAGE_SCHEDULES}
+          {PAGE_TITLE.SCHEDULES}
         </Typography>
         {filteredSchedules.length > 0 && (
           <SplitButton
