@@ -54,7 +54,7 @@ const ManageVehicles: React.FC = () => {
     handleAddVehicle,
     handleUpdateVehicle,
     handleDeleteVehicle,
-  } = useVehicles(selectedDate?.toISOString().split('T')[0]);
+  } = useVehicles(selectedDate?.toLocaleDateString("fr-CA"));
   const [filteredVehicles, setFilteredVehicles] = useState<Vehicle[]>([]);
   const [totalCount, setTotalCount] = useState(0);
   const [editRowId, setEditRowId] = useState<number | null>(null);
@@ -188,6 +188,7 @@ const ManageVehicles: React.FC = () => {
       notes: addFields.notes,
       createdAt: selectedDate,
     };
+    console.log("newVehicle: ", newVehicle);
     handleAddVehicle(newVehicle);
     setAddFields({
       ticket: "",
@@ -387,14 +388,14 @@ const ManageVehicles: React.FC = () => {
     nextDay.setDate(nextDay.getDate() + 1);
     setSelectedDate(nextDay);
   };
-  
+
   const handlePreviousDate = () => {
     if (!selectedDate) return;
     const previousDay = new Date(getMidnightDate(selectedDate));
     previousDay.setDate(previousDay.getDate() - 1);
     setSelectedDate(previousDay);
   };
-  
+
   const handleCurrentDate = () => {
     setSelectedDate(getMidnightDate(new Date()));
   };

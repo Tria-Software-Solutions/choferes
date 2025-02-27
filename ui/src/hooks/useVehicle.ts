@@ -29,7 +29,6 @@ export const useVehicles = (
 
   const fetchVehiclesByDate = useCallback(
     async (date: string) => {
-      console.log("DATE IN FETCH: ", date);
       setIsLoadingVehicles(true);
       try {
         const data = await VehicleService.getVehiclesByDate(date);
