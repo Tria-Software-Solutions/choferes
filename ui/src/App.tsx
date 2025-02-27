@@ -24,6 +24,7 @@ import CalendarMonthRoundedIcon from "@mui/icons-material/CalendarMonthRounded";
 import DirectionsCarIcon from "@mui/icons-material/DirectionsCar";
 import GroupRoundedIcon from "@mui/icons-material/GroupRounded";
 import EditCalendarRoundedIcon from "@mui/icons-material/EditCalendarRounded";
+import ManageAccountsIcon from '@mui/icons-material/ManageAccounts';
 import LogoutIcon from "@mui/icons-material/Logout";
 import wallpaper from "./assets/images/choferesblurred1.webp";
 
@@ -37,22 +38,27 @@ const AppBarWrapper: React.FC = () => {
         {
           label: APPBAR_MENU.ROLES,
           icon: <CalendarMonthRoundedIcon />,
-          path: ROUTES.MANAGE_ROLES,
+          path: ROUTES.ROLES,
         },
         {
           label: APPBAR_MENU.EMPLOYEES,
           icon: <GroupRoundedIcon />,
-          path: ROUTES.MANAGE_EMPLOYEES,
+          path: ROUTES.EMPLOYEES,
         },
         {
           label: APPBAR_MENU.SCHEDULES,
           icon: <EditCalendarRoundedIcon />,
-          path: ROUTES.MANAGE_SCHEDULES,
+          path: ROUTES.SCHEDULES,
         },
         {
           label: APPBAR_MENU.VEHICLES,
           icon: <DirectionsCarIcon />,
-          path: ROUTES.MANAGE_VEHICLES,
+          path: ROUTES.VEHICLES,
+        },
+        {
+          label: APPBAR_MENU.DASHBOARD,
+          icon: <ManageAccountsIcon />,
+          path: ROUTES.DASHBOARD,
         },
         ...(currentUser
           ? [

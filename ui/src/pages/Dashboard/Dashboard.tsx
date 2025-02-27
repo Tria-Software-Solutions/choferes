@@ -1,49 +1,75 @@
-import { Button, Container, Grid, Typography } from "@mui/material";
 import React from "react";
-import { Link } from "react-router-dom";
+import ManageUsers from "./ManageUsers";
+import ManageRoles from "./ManageRoles";
+import ManagePermissions from "./ManagePermissions";
+import {
+  Accordion,
+  AccordionDetails,
+  AccordionSummary,
+  Box,
+  Typography,
+  useMediaQuery,
+  useTheme,
+} from "@mui/material";
+import { PAGE_TITLE } from "../../constants/constants";
 
 const Dashboard = () => {
+  const [expanded, setExpanded] = React.useState<string | false>("panel1");
+
+  const handleChange =
+    (panel: string) => (event: React.SyntheticEvent, newExpanded: boolean) => {
+      setExpanded(newExpanded ? panel : false);
+    };
+
+  const theme = useTheme();
+  const isSmallScreen = useMediaQuery(theme.breakpoints.down("sm"));
+
   return (
-    <Container>
-      <Typography variant="h4" gutterBottom>
-        Panel de Administrador
-      </Typography>
-      <Grid container spacing={3}>
-        <Grid item xs={12} sm={4}>
-          <Button
-            component={Link}
-            to="/users"
-            variant="contained"
-            color="primary"
-            fullWidth
-          >
-            Control de Usuarios
-          </Button>
-        </Grid>
-        <Grid item xs={12} sm={4}>
-          <Button
-            component={Link}
-            to="/roles"
-            variant="contained"
-            color="primary"
-            fullWidth
-          >
-            Control de Roles
-          </Button>
-        </Grid>
-        <Grid item xs={12} sm={4}>
-          <Button
-            component={Link}
-            to="/permissions"
-            variant="contained"
-            color="primary"
-            fullWidth
-          >
-            Control Permisos
-          </Button>
-        </Grid>
-      </Grid>
-    </Container>
+    <Box>
+      <Box
+        display="flex"
+        justifyContent="space-between"
+        alignItems="center"
+        sx={{ mb: 2 }}
+      >
+        <Typography variant={isSmallScreen ? "h4" : "h2"} sx={{ flexGrow: 1 }}>
+          {PAGE_TITLE.DASHBOARD}
+        </Typography>
+      </Box>
+      <Accordion
+        expanded={expanded === "panel1"}
+        onChange={handleChange("panel1")}
+      >
+        <AccordionSummary aria-controls="panel1d-content" id="panel1d-header">
+          <Typography component="span">Usuarios</Typography>
+        </AccordionSummary>
+        <AccordionDetails>
+          <ManageUsers />
+        </AccordionDetails>
+      </Accordion>
+      <Accordion
+        expanded={expanded === "panel2"}
+        onChange={handleChange("panel2")}
+      >
+        <AccordionSummary aria-controls="panel2d-content" id="panel2d-header">
+          <Typography component="span">Roles</Typography>
+        </AccordionSummary>
+        <AccordionDetails>
+          <ManageRoles />
+        </AccordionDetails>
+      </Accordion>
+      <Accordion
+        expanded={expanded === "panel3"}
+        onChange={handleChange("panel3")}
+      >
+        <AccordionSummary aria-controls="panel3d-content" id="panel3d-header">
+          <Typography component="span">Permisos</Typography>
+        </AccordionSummary>
+        <AccordionDetails>
+          <ManagePermissions />
+        </AccordionDetails>
+      </Accordion>
+    </Box>
   );
 };
 

@@ -11,25 +11,28 @@ export const APPBAR_MENU = {
   MANAGE: "Gestión",
   EMPLOYEES: "Empleados",
   SCHEDULES: "Horarios",
+  DASHBOARD: "Admin",
   LOGOUT: "Salir",
 };
 
 export const ROUTES = {
   LOGIN: "/",
   REGISTER: "register",
-  MANAGE_ROLES: "/roles",
-  MANAGE_VEHICLES: "/vehicles",
-  MANAGE_EMPLOYEES: "/employees",
-  MANAGE_SCHEDULES: "/schedules",
+  ROLES: "/roles",
+  VEHICLES: "/vehicles",
+  EMPLOYEES: "/employees",
+  SCHEDULES: "/schedules",
+  DASHBOARD: "/dashboard"
 };
 
 export const PAGE_TITLE = {
   LOGIN: "Iniciar Sesión",
   REGISTER: "Registrar Usuario",
-  MANAGE_ROLES: "Gestionar Roles",
-  MANAGE_VEHICLES: "Gestionar Vehículos",
-  MANAGE_EMPLOYEES: "Gestionar Empleados",
-  MANAGE_SCHEDULES: "Gestionar Horarios",
+  ROLES: "Gestionar Roles",
+  VEHICLES: "Gestionar Vehículos",
+  EMPLOYEES: "Gestionar Empleados",
+  SCHEDULES: "Gestionar Horarios",
+  DASHBOARD: "Administración de Usuarios"
 };
 
 export const STATE = {
