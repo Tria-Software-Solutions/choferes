@@ -1,10 +1,6 @@
 import { Schedule } from "../models/Schedule";
 
-export const createSchedule = async (data: {
-  day: string;
-  label: string;
-  hours: number;
-}) => {
+export const createSchedule = async (data: Omit<Schedule, "id">) => {
   return Schedule.create(data);
 };
 
