@@ -46,7 +46,7 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faFileExcel, faFilePdf } from "@fortawesome/free-solid-svg-icons";
 
 const VehiclesPage: React.FC = () => {
-  const [selectedDate, setSelectedDate] = useState<Date | null>(new Date());
+  const [selectedDate, setSelectedDate] = useState<Date>(new Date());
   const {
     vehicles,
     allVehicles,
@@ -54,7 +54,7 @@ const VehiclesPage: React.FC = () => {
     handleAddVehicle,
     handleUpdateVehicle,
     handleDeleteVehicle,
-  } = useVehicles(selectedDate?.toISOString().split('T')[0]);
+  } = useVehicles(selectedDate?.toLocaleDateString("fr-CA"));
   const [filteredVehicles, setFilteredVehicles] = useState<Vehicle[]>([]);
   const [totalCount, setTotalCount] = useState(0);
   const [editRowId, setEditRowId] = useState<number | null>(null);
@@ -251,7 +251,25 @@ const VehiclesPage: React.FC = () => {
   };
 
   const handleDateChange = (newDate: Date | null) => {
-    setSelectedDate(newDate);
+    if (newDate) setSelectedDate(newDate);
+  };
+
+  const handleNextDate = () => {
+    if (!selectedDate) return;
+    const nextDay = new Date(getMidnightDate(selectedDate));
+    nextDay.setDate(nextDay.getDate() + 1);
+    setSelectedDate(nextDay);
+  };
+
+  const handlePreviousDate = () => {
+    if (!selectedDate) return;
+    const previousDay = new Date(getMidnightDate(selectedDate));
+    previousDay.setDate(previousDay.getDate() - 1);
+    setSelectedDate(previousDay);
+  };
+
+  const handleCurrentDate = () => {
+    setSelectedDate(getMidnightDate(new Date()));
   };
 
   const handleBrandChange = (event: SelectChangeEvent<string>) => {
@@ -379,24 +397,6 @@ const VehiclesPage: React.FC = () => {
     const rawValue = event.target.value;
     const maskedValue = maskParkingLot(rawValue);
     setAddFields((prevState) => ({ ...prevState, parkingLot: maskedValue }));
-  };
-
-  const handleNextDate = () => {
-    if (!selectedDate) return;
-    const nextDay = new Date(getMidnightDate(selectedDate));
-    nextDay.setDate(nextDay.getDate() + 1);
-    setSelectedDate(nextDay);
-  };
-  
-  const handlePreviousDate = () => {
-    if (!selectedDate) return;
-    const previousDay = new Date(getMidnightDate(selectedDate));
-    previousDay.setDate(previousDay.getDate() - 1);
-    setSelectedDate(previousDay);
-  };
-  
-  const handleCurrentDate = () => {
-    setSelectedDate(getMidnightDate(new Date()));
   };
 
   const theme = useTheme();
@@ -537,7 +537,7 @@ const VehiclesPage: React.FC = () => {
                     }}
                     maxDate={new Date()}
                     views={["year", "month", "day"]}
-                    onChange={handleDateChange}
+                    onChange={(date) => handleDateChange(date)}
                   />
                 </LocalizationProvider>
               </Box>

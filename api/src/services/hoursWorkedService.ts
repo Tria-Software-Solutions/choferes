@@ -2,11 +2,7 @@ import { HoursWorked } from "../models/HoursWorked";
 import { Employee } from "../models/Employee";
 import { Schedule } from "../models/Schedule";
 
-export const createHoursWorked = async (data: {
-  employeeId: number;
-  date: Date;
-  scheduleId: number;
-}) => {
+export const createHoursWorked = async (data: Omit<HoursWorked, "id">) => {
   return await HoursWorked.create(data);
 };
 
@@ -30,7 +26,7 @@ export const getHoursWorkedById = async (id: number) => {
 
 export const updateHoursWorked = async (
   id: number,
-  data: { scheduleId?: number }
+  data: Omit<HoursWorked, "id">
 ) => {
   await HoursWorked.update(data, { where: { id } });
   return HoursWorked.findByPk(id);

@@ -1,15 +1,8 @@
-import { Op, Sequelize } from "sequelize";
+import { Op } from "sequelize";
 import { Vehicle } from "../models/Vehicle";
 
-export const createVehicle = async (data: {
-  ticket: string;
-  licensePlate: string;
-  brand: string;
-  color: string;
-  parkingLot: string;
-  notes?: string;
-}) => {
-  return Vehicle.create(data);
+export const createVehicle = async (data: Omit<Vehicle, "id">) => {
+  return await Vehicle.create(data);
 };
 
 export const getAllVehicles = async () => {
@@ -36,17 +29,7 @@ export const getVehiclesByDate = async (createdAt: Date) => {
   });
 };
 
-export const updateVehicle = async (
-  id: number,
-  data: Partial<{
-    ticket: string;
-    licensePlate: string;
-    brand: string;
-    color: string;
-    parkingLot: string;
-    notes: string;
-  }>
-) => {
+export const updateVehicle = async (id: number, data: Omit<Vehicle, "id">) => {
   await Vehicle.update(data, { where: { id } });
   return Vehicle.findByPk(id);
 };

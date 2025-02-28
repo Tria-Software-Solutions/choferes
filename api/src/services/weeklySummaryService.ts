@@ -1,6 +1,6 @@
 import { WeeklySummary } from '../models/WeeklySummary';
 
-export const createWeeklySummary = async (data: { weekNumber: number; totalHours: number }) => {
+export const createWeeklySummary = async (data: Omit<WeeklySummary, "id">) => {
   return WeeklySummary.create(data);
 };
 
@@ -14,7 +14,7 @@ export const getWeeklySummaryById = async (id: number) => {
 
 export const updateWeeklySummary = async (
   id: number,
-  data: { weekNumber?: number; totalHours?: number }
+  data: Omit<WeeklySummary, "id">
 ) => {
   await WeeklySummary.update(data, { where: { id } });
   return WeeklySummary.findByPk(id);
