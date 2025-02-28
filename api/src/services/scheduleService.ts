@@ -1,7 +1,7 @@
 import { Schedule } from "../models/Schedule";
 
 export const createSchedule = async (data: Omit<Schedule, "id">) => {
-  return Schedule.create(data);
+  return await Schedule.create(data);
 };
 
 export const getAllSchedules = async () => {

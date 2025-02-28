@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from "react";
+import React, { useState, useEffect, useCallback, useMemo } from "react";
 import { Schedule } from "../../models/Schedule";
 import { useSchedules } from "../../hooks/useSchedule";
 import SplitButton from "../../components/SplitButton/SplitButton";
@@ -95,41 +95,38 @@ const SchedulesPage: React.FC = () => {
     setTotalCount(filteredSchedules.length);
   }, [filter, schedules, filteredSchedules.length]);
 
-  const validateAddFields = useCallback(() => {
-    const nameRegex = /^[a-zA-ZáéíóúÁÉÍÓÚñÑ\s]+$/;
-    const isLabelValid =
-      nameRegex.test(addFields.label) && addFields.label !== "";
-    const isDayValid = addFields.day !== "";
-    const isHoursValid = /^[0-9]+$/.test(addFields.hours);
-    setIsAddFormValid(isLabelValid && isDayValid && isHoursValid);
-  }, [addFields]);
+  const validateFields = useCallback((fields: typeof addFields) => {
+    const regex = {
+      text: /^[a-zA-ZáéíóúÁÉÍÓÚñÑüÜëË\s-]+$/,
+      time: /^[0-9]+$/,
+    };
 
-  const validateEditFields = useCallback(() => {
-    const nameRegex = /^[a-zA-ZáéíóúÁÉÍÓÚñÑ\s]+$/;
-    const isLabelValid =
-      nameRegex.test(editFields.label) && editFields.label !== "";
-    const isDayValid = editFields.day !== "";
-    const isHoursValid = /^[0-9]+$/.test(editFields.hours);
-    setIsEditFormValid(isLabelValid && isDayValid && isHoursValid);
-  }, [editFields]);
+    return (
+      regex.text.test(fields.label) &&
+      regex.text.test(fields.day) &&
+      regex.time.test(fields.hours)
+    );
+  }, []);
 
+  useEffect(
+    () => setIsAddFormValid(validateFields(addFields)),
+    [addFields, validateFields]
+  );
   useEffect(() => {
-    validateAddFields();
-  }, [validateAddFields]);
-
-  useEffect(() => {
-    if (editRowId !== null) {
-      validateEditFields();
-    }
-  }, [editFields, editRowId, validateEditFields]);
+    if (editRowId !== null) setIsEditFormValid(validateFields(editFields));
+  }, [editFields, editRowId, validateFields]);
 
   const handleFilterChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setFilter(e.target.value);
   };
 
   const handleAdd = () => {
+    const newId =
+      schedules.length > 0
+        ? Math.max(...schedules.map((schedule) => schedule.id)) + 1
+        : 1;
     const newSchedule: Schedule = {
-      id: Math.max(...schedules.map((schedule) => schedule.id)) + 1,
+      id: newId,
       label: addFields.label,
       day: addFields.day,
       hours: parseInt(addFields.hours, 10),
@@ -178,6 +175,17 @@ const SchedulesPage: React.FC = () => {
     }
   };
 
+  const exportOptions = useMemo(() => {
+    return createExportOptions(
+      <FontAwesomeIcon icon={faFileExcel} size="lg" />,
+      <FontAwesomeIcon icon={faFilePdf} size="lg" />,
+      exportToExcel,
+      exportToPDF,
+      filteredSchedules,
+      `horarios-${exportFileFormattedDate(new Date())}`
+    );
+  }, [filteredSchedules]);
+
   const theme = useTheme();
   const isSmallScreen = useMediaQuery(theme.breakpoints.down("sm"));
 
@@ -194,14 +202,7 @@ const SchedulesPage: React.FC = () => {
         </Typography>
         {filteredSchedules.length > 0 && (
           <SplitButton
-            options={createExportOptions(
-              <FontAwesomeIcon icon={faFileExcel} size="lg" />,
-              <FontAwesomeIcon icon={faFilePdf} size="lg" />,
-              exportToExcel,
-              exportToPDF,
-              filteredSchedules,
-              `horarios-${exportFileFormattedDate(new Date())}`
-            )}
+            options={exportOptions}
             defaultIndex={0}
             buttonIcon={<DownloadRoundedIcon />}
           />

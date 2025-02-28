@@ -1,7 +1,7 @@
-import { WeeklySummary } from '../models/WeeklySummary';
+import { WeeklySummary } from "../models/WeeklySummary";
 
 export const createWeeklySummary = async (data: Omit<WeeklySummary, "id">) => {
-  return WeeklySummary.create(data);
+  return await WeeklySummary.create(data);
 };
 
 export const getAllWeeklySummaries = async () => {
