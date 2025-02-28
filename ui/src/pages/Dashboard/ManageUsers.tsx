@@ -5,9 +5,6 @@ import { fetchUsers } from "../../services/userService";
 import {
   Box,
   CircularProgress,
-  List,
-  ListItem,
-  ListItemText,
   Typography,
 } from "@mui/material";
 import EditableTable from "../../components/Table/EditableTable/EditableTable";
@@ -56,28 +53,24 @@ const ManageUsers = () => {
     setTotalCount(filteredUsers.length);
   }, [filter, users, filteredUsers.length]);
 
-  const validateEditFields = useCallback(() => {
-    const nameRegex = /^[a-zA-ZáéíóúÁÉÍÓÚüÜñÑ.\s]+$/;
-    const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
-    const usernameRegex = /^[a-zA-Z][a-zA-Z0-9_.]{2,19}$/;
-    const isFirstNameValid =
-      nameRegex.test(editFields.firstName) && editFields.firstName !== "";
-    const isLastNameValid =
-      nameRegex.test(editFields.lastName) && editFields.lastName !== "";
-    const isEmailValid =
-      emailRegex.test(editFields.email) && editFields.email !== "";
-    const isUsernameValid =
-      usernameRegex.test(editFields.username) && editFields.username !== "";
-    setIsEditFormValid(
-      isFirstNameValid && isLastNameValid && isEmailValid && isUsernameValid
+  const validateFields = useCallback((fields: typeof editFields) => {
+    const regex = {
+      text: /^[a-zA-ZáéíóúÁÉÍÓÚñÑüÜëË\s-]+$/,
+      email: /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/,
+      username: /^[a-zA-Z][a-zA-Z0-9_.]{2,19}$/,
+    };
+
+    return (
+      regex.text.test(fields.firstName) &&
+      regex.text.test(fields.lastName) &&
+      regex.email.test(fields.email) &&
+      regex.username.test(fields.username)
     );
-  }, [editFields]);
+  }, []);
 
   useEffect(() => {
-    if (editRowId !== null) {
-      validateEditFields();
-    }
-  }, [editFields, editRowId, validateEditFields]);
+    if (editRowId !== null) setIsEditFormValid(validateFields(editFields));
+  }, [editFields, editRowId, validateFields]);
 
   // const handleFilterChange = (e: React.ChangeEvent<HTMLInputElement>) => {
   //   setFilter(e.target.value);
@@ -142,7 +135,7 @@ const ManageUsers = () => {
           {filteredUsers.length > 0 ? (
             <EditableTable<User>
               data={filteredUsers}
-              columns={["username", "firstName", "lastName", "email"]}
+              columns={["firstName", "lastName", "username", "email"]}
               editRowId={editRowId}
               editFields={editFields}
               setEditField={(field, value) =>

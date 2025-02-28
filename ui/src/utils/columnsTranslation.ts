@@ -1,5 +1,6 @@
 export type ColumnsTranslation = {
     id: string;
+    name: string;
     firstName: string;
     lastName: string;
     email: string;
