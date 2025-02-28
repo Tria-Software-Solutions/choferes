@@ -150,8 +150,8 @@ const ManageVehicles: React.FC = () => {
 
   const handleAdd = () => {
     const newId =
-      vehicles.length > 0
-        ? Math.max(...vehicles.map((vehicle) => vehicle.id)) + 1
+      allVehicles.length > 0
+        ? Math.max(...allVehicles.map((vehicle) => vehicle.id)) + 1
         : 1;
     const newVehicle: Vehicle = {
       id: newId,
