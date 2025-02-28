@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from "react";
+import React, { useState, useEffect, useCallback, useMemo } from "react";
 import { Employee } from "../models/Employee";
 import { useEmployees } from "../hooks/useEmployee";
 import SplitButton from "../components/SplitButton/SplitButton";
@@ -66,41 +66,35 @@ const ManageEmployees: React.FC = () => {
     setTotalCount(filteredEmployees.length);
   }, [filter, employees, filteredEmployees.length]);
 
-  const validateAddFields = useCallback(() => {
-    const nameRegex = /^[a-zA-ZáéíóúÁÉÍÓÚüÜñÑ.\s]+$/;
-    const isFirstNameValid =
-      nameRegex.test(addFields.firstName) && addFields.firstName !== "";
-    const isLastNameValid =
-      nameRegex.test(addFields.lastName) && addFields.lastName !== "";
-    setIsAddFormValid(isFirstNameValid && isLastNameValid);
-  }, [addFields]);
+  const validateFields = useCallback((fields: typeof addFields) => {
+    const regex = {
+      text: /^[a-zA-ZáéíóúÁÉÍÓÚñÑüÜëË\s-]+$/,
+    };
 
-  const validateEditFields = useCallback(() => {
-    const nameRegex = /^[a-zA-ZáéíóúÁÉÍÓÚüÜñÑ.\s]+$/;
-    const isFirstNameValid =
-      nameRegex.test(editFields.firstName) && editFields.firstName !== "";
-    const isLastNameValid =
-      nameRegex.test(editFields.lastName) && editFields.lastName !== "";
-    setIsEditFormValid(isFirstNameValid && isLastNameValid);
-  }, [editFields]);
+    return (
+      regex.text.test(fields.firstName) && regex.text.test(fields.lastName)
+    );
+  }, []);
 
+  useEffect(
+    () => setIsAddFormValid(validateFields(addFields)),
+    [addFields, validateFields]
+  );
   useEffect(() => {
-    validateAddFields();
-  }, [validateAddFields]);
-
-  useEffect(() => {
-    if (editRowId !== null) {
-      validateEditFields();
-    }
-  }, [editFields, editRowId, validateEditFields]);
+    if (editRowId !== null) setIsEditFormValid(validateFields(editFields));
+  }, [editFields, editRowId, validateFields]);
 
   const handleFilterChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setFilter(e.target.value);
   };
 
   const handleAdd = () => {
+    const newId =
+      employees.length > 0
+        ? Math.max(...employees.map((employee) => employee.id)) + 1
+        : 1;
     const newEmployee: Employee = {
-      id: Math.max(...employees.map((employee) => employee.id)) + 1,
+      id: newId,
       firstName: addFields.firstName,
       lastName: addFields.lastName,
     };
@@ -146,6 +140,17 @@ const ManageEmployees: React.FC = () => {
     }
   };
 
+  const exportOptions = useMemo(() => {
+    return createExportOptions(
+      <FontAwesomeIcon icon={faFileExcel} size="lg" />,
+      <FontAwesomeIcon icon={faFilePdf} size="lg" />,
+      exportToExcel,
+      exportToPDF,
+      filteredEmployees,
+      `empleados-${exportFileFormattedDate(new Date())}`
+    );
+  }, [filteredEmployees]);
+
   const theme = useTheme();
   const isSmallScreen = useMediaQuery(theme.breakpoints.down("sm"));
 
@@ -162,14 +167,7 @@ const ManageEmployees: React.FC = () => {
         </Typography>
         {filteredEmployees.length > 0 && (
           <SplitButton
-            options={createExportOptions(
-              <FontAwesomeIcon icon={faFileExcel} size="lg" />,
-              <FontAwesomeIcon icon={faFilePdf} size="lg" />,
-              exportToExcel,
-              exportToPDF,
-              filteredEmployees,
-              `empleados-${exportFileFormattedDate(new Date())}`
-            )}
+            options={exportOptions}
             defaultIndex={0}
             buttonIcon={<DownloadRoundedIcon />}
           />

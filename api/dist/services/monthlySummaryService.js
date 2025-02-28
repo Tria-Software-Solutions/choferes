@@ -12,9 +12,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.deleteMonthlySummary = exports.updateMonthlySummary = exports.getMonthlySummaryById = exports.getAllMonthlySummaries = exports.createMonthlySummary = void 0;
 const MonthlySummary_1 = require("../models/MonthlySummary");
 const createMonthlySummary = (data) => __awaiter(void 0, void 0, void 0, function* () {
-    const newMonthlySummary = yield MonthlySummary_1.MonthlySummary.create(data);
-    yield newMonthlySummary.reload();
-    return newMonthlySummary;
+    return yield MonthlySummary_1.MonthlySummary.create(data);
 });
 exports.createMonthlySummary = createMonthlySummary;
 const getAllMonthlySummaries = () => __awaiter(void 0, void 0, void 0, function* () {

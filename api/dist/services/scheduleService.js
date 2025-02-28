@@ -12,9 +12,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.deleteSchedule = exports.updateSchedule = exports.getScheduleById = exports.getAllSchedules = exports.createSchedule = void 0;
 const Schedule_1 = require("../models/Schedule");
 const createSchedule = (data) => __awaiter(void 0, void 0, void 0, function* () {
-    const newSchedule = yield Schedule_1.Schedule.create(data);
-    yield newSchedule.reload();
-    return newSchedule;
+    return yield Schedule_1.Schedule.create(data);
 });
 exports.createSchedule = createSchedule;
 const getAllSchedules = () => __awaiter(void 0, void 0, void 0, function* () {

@@ -12,9 +12,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.deleteEmployee = exports.updateEmployee = exports.getEmployeeById = exports.getAllEmployees = exports.createEmployee = void 0;
 const Employee_1 = require("../models/Employee");
 const createEmployee = (data) => __awaiter(void 0, void 0, void 0, function* () {
-    const newEmployee = yield Employee_1.Employee.create(data);
-    yield newEmployee.reload();
-    return newEmployee;
+    return yield Employee_1.Employee.create(data);
 });
 exports.createEmployee = createEmployee;
 const getAllEmployees = () => __awaiter(void 0, void 0, void 0, function* () {

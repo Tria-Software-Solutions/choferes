@@ -3,9 +3,7 @@ import { BiweeklySummary } from "../models/BiweeklySummary";
 export const createBiweeklySummary = async (
   data: Omit<BiweeklySummary, "id">
 ) => {
-  const newBiweeklySummary = await BiweeklySummary.create(data);
-  await newBiweeklySummary.reload();
-  return newBiweeklySummary;
+  return await BiweeklySummary.create(data);
 };
 
 export const getAllBiweeklySummaries = async () => {

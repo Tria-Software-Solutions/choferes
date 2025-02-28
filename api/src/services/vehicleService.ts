@@ -2,9 +2,7 @@ import { Op } from "sequelize";
 import { Vehicle } from "../models/Vehicle";
 
 export const createVehicle = async (data: Omit<Vehicle, "id">) => {
-  const newVehicle = await Vehicle.create(data);
-  await newVehicle.reload();
-  return newVehicle;
+  return await Vehicle.create(data);
 };
 
 export const getAllVehicles = async () => {
