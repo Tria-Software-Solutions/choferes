@@ -1,5 +1,7 @@
 import { useCallback, useState } from "react";
 import { Link } from "react-router-dom";
+import { useUsers } from "../../hooks/useUser";
+import { User } from "../../models/User";
 import {
   TextField,
   Button,
@@ -13,8 +15,6 @@ import {
 } from "@mui/material";
 import logo from "../../assets/images/logo.png";
 import { PAGE_TITLE } from "../../constants/constants";
-import { useUsers } from "../../hooks/useUser";
-import { User } from "../../models/User";
 
 const Register = () => {
   const { users, handleRegisterUser } = useUsers();

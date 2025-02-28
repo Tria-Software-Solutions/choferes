@@ -77,10 +77,11 @@ export const translateColumnHeaderToSpanish = (
 ): string => {
   const translations: ColumnsTranslation = {
     id: "Id",
+    name: "Nombre",
     firstName: "Nombre",
     lastName: "Apellido",
     email: "Correo Electrónico",
-    username: "Nombre de Usuario",
+    username: "Usuario",
     label: "Lugar",
     day: "Día",
     hours: "Horas",
