@@ -11,8 +11,8 @@ export const fetchVehicles = async (
   return response.data;
 };
 
-export const addVehicle = async (vehicle: Vehicle) => {
-  await api.post("/vehicles", vehicle);
+export const addVehicle = async (newVehicle: Vehicle) => {
+  await api.post("/vehicles", newVehicle);
 };
 
 export const getVehicleById = async (id: number): Promise<Vehicle> => {
@@ -20,9 +20,7 @@ export const getVehicleById = async (id: number): Promise<Vehicle> => {
   return response.data;
 };
 
-export const getVehiclesByDate = async (
-  date: string,
-): Promise<Vehicle[]> => {
+export const getVehiclesByDate = async (date: string): Promise<Vehicle[]> => {
   const response = await api.get("/vehicles/by-date", {
     params: { date },
   });

@@ -31,7 +31,6 @@ import EditIcon from "@mui/icons-material/Edit";
 import SaveIcon from "@mui/icons-material/Save";
 import CloseIcon from "@mui/icons-material/Close";
 
-
 type EditableTableProps<T> = {
   data: T[];
   columns: (keyof T)[];
@@ -204,16 +203,27 @@ const EditableTable = <T,>({
     <Paper sx={{ width: "100%" }}>
       <TableContainer
         className="table-container"
-        sx={{ maxHeight: "65vh", overflowX: "auto" }}
+        sx={{ maxHeight: "58vh", overflowX: "auto" }}
       >
         <Table stickyHeader aria-label="sticky table">
-          <TableHead>
+          <TableHead
+            sx={{
+              position: "sticky",
+              top: 0,
+              zIndex: 4,
+            }}
+          >
             {groupByDate && (
               <TableRow>
                 <TableCell
                   colSpan={columns.length + 1}
                   align="center"
-                  style={{ fontWeight: "bold" }}
+                  sx={{
+                    position: "sticky",
+                    top: 0,
+                    zIndex: 4,
+                    fontWeight: "bold"
+                  }}
                 >
                   {formatDateWithDay(groupByDate, false)}
                 </TableCell>

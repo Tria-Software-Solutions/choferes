@@ -1,10 +1,6 @@
 import { Schedule } from "../models/Schedule";
 
-export const createSchedule = async (data: {
-  day: string;
-  label: string;
-  hours: number;
-}) => {
+export const createSchedule = async (data: Omit<Schedule, "id">) => {
   return Schedule.create(data);
 };
 
@@ -18,7 +14,7 @@ export const getScheduleById = async (id: number) => {
 
 export const updateSchedule = async (
   id: number,
-  data: { day?: string; label?: string; hours?: number }
+  data: Omit<Schedule, "id">
 ) => {
   await Schedule.update(data, { where: { id } });
   return Schedule.findByPk(id);

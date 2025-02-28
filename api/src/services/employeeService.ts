@@ -1,9 +1,6 @@
 import { Employee } from "../models/Employee";
 
-export const createEmployee = async (data: {
-  firstName: string;
-  lastName: string;
-}) => {
+export const createEmployee = async (data: Omit<Employee, "id">) => {
   return Employee.create(data);
 };
 
@@ -17,7 +14,7 @@ export const getEmployeeById = async (id: number) => {
 
 export const updateEmployee = async (
   id: number,
-  data: { firstName?: string; lastName?: string }
+  data: Omit<Employee, "id">
 ) => {
   await Employee.update(data, { where: { id } });
   return Employee.findByPk(id);

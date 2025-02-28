@@ -1,6 +1,6 @@
 import { BiweeklySummary } from '../models/BiweeklySummary';
 
-export const createBiweeklySummary = async (data: { firstHalfHours: number; secondHalfHours: number }) => {
+export const createBiweeklySummary = async (data: Omit<BiweeklySummary, "id">) => {
   return BiweeklySummary.create(data);
 };
 
@@ -14,7 +14,7 @@ export const getBiweeklySummaryById = async (id: number) => {
 
 export const updateBiweeklySummary = async (
   id: number,
-  data: { firstHalfHours?: number; secondHalfHours?: number }
+  data: Omit<BiweeklySummary, "id">
 ) => {
   await BiweeklySummary.update(data, { where: { id } });
   return BiweeklySummary.findByPk(id);

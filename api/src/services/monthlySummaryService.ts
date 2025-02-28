@@ -1,6 +1,6 @@
 import { MonthlySummary } from '../models/MonthlySummary';
 
-export const createMonthlySummary = async (data: { month: number; year: number; totalHours: number }) => {
+export const createMonthlySummary = async (data: Omit<MonthlySummary, "id">) => {
   return MonthlySummary.create(data);
 };
 
@@ -14,7 +14,7 @@ export const getMonthlySummaryById = async (id: number) => {
 
 export const updateMonthlySummary = async (
   id: number,
-  data: { month?: number; year?: number; totalHours?: number }
+  data: Omit<MonthlySummary, "id">
 ) => {
   await MonthlySummary.update(data, { where: { id } });
   return MonthlySummary.findByPk(id);
