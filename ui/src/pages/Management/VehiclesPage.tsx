@@ -163,6 +163,7 @@ const VehiclesPage: React.FC = () => {
       notes: addFields.notes,
       createdAt: selectedDate,
     };
+    console.log("newVehicle: ", newVehicle);
     handleAddVehicle(newVehicle);
     setAddFields({
       ticket: "",
