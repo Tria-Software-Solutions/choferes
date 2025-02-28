@@ -1,9 +1,7 @@
 import { WeeklySummary } from "../models/WeeklySummary";
 
 export const createWeeklySummary = async (data: Omit<WeeklySummary, "id">) => {
-  const newWeeklySummary = await WeeklySummary.create(data);
-  await newWeeklySummary.reload();
-  return newWeeklySummary;
+  return await WeeklySummary.create(data);
 };
 
 export const getAllWeeklySummaries = async () => {

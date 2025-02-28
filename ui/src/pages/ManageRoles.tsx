@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useState } from "react";
+import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { Employee } from "../models/Employee";
 import { HoursWorked } from "../models/HoursWorked";
 import { WeeklySummary } from "../models/WeeklySummary";
@@ -136,21 +136,7 @@ const ManageRoles: React.FC = () => {
     setFilter(e.target.value);
   };
 
-  const { dataForExport, headers, fileName } = handleExportTableData(
-    filteredEmployees,
-    hoursWorked,
-    schedules,
-    weeklySummaries,
-    biweeklySummaries,
-    monthlySummaries,
-    currentWeekNumber,
-    currentBiweekNumber,
-    currentMonth,
-    currentYear,
-    getCurrentWeekDates(weekOffset)
-  );
-
-  const handleDateChange = (newDate: Date | null) => {
+  const handleDateChange = useCallback((newDate: Date | null) => {
     if (newDate) {
       const today = new Date();
       const weekOptions: { weekStartsOn: 0 | 1 | 2 | 3 | 4 | 5 | 6 } = {
@@ -164,7 +150,7 @@ const ManageRoles: React.FC = () => {
       setWeekOffset(newWeekOffset);
     }
     setFirstDayOfWeek(newDate);
-  };
+  }, []);
 
   const handleAddOrUpdateHoursAndSummaries = useCallback(
     (
@@ -387,6 +373,32 @@ const ManageRoles: React.FC = () => {
   });
   const nextWeekEnd = endOfWeek(nextWeekStart, { weekStartsOn: 1 });
 
+  const { dataForExport, headers, fileName } = handleExportTableData(
+    filteredEmployees,
+    hoursWorked,
+    schedules,
+    weeklySummaries,
+    biweeklySummaries,
+    monthlySummaries,
+    currentWeekNumber,
+    currentBiweekNumber,
+    currentMonth,
+    currentYear,
+    getCurrentWeekDates(weekOffset)
+  );
+
+  const exportOptions = useMemo(() => {
+    return createExportOptions(
+      <FontAwesomeIcon icon={faFileExcel} size="lg" />,
+      <FontAwesomeIcon icon={faFilePdf} size="lg" />,
+      exportToExcel,
+      exportToPDF,
+      dataForExport,
+      fileName,
+      headers
+    );
+  }, [dataForExport, fileName, headers]);
+
   const theme = useTheme();
   const isSmallScreen = useMediaQuery(theme.breakpoints.down("sm"));
 
@@ -403,15 +415,7 @@ const ManageRoles: React.FC = () => {
         </Typography>
         {filteredEmployees.length > 0 && (
           <SplitButton
-            options={createExportOptions(
-              <FontAwesomeIcon icon={faFileExcel} size="lg" />,
-              <FontAwesomeIcon icon={faFilePdf} size="lg" />,
-              exportToExcel,
-              exportToPDF,
-              dataForExport,
-              fileName,
-              headers
-            )}
+            options={exportOptions}
             defaultIndex={0}
             buttonIcon={<DownloadRoundedIcon />}
           />

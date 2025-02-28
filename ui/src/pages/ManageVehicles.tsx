@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useState } from "react";
+import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { Vehicle } from "../models/Vehicle";
 import { useVehicles } from "../hooks/useVehicle";
 import SplitButton from "../components/SplitButton/SplitButton";
@@ -44,6 +44,7 @@ import ArrowForwardIosRoundedIcon from "@mui/icons-material/ArrowForwardIosRound
 import CalendarTodayRoundedIcon from "@mui/icons-material/CalendarTodayRounded";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faFileExcel, faFilePdf } from "@fortawesome/free-solid-svg-icons";
+import { format } from "date-fns";
 
 const ManageVehicles: React.FC = () => {
   const [selectedDate, setSelectedDate] = useState<Date>(new Date());
@@ -54,7 +55,7 @@ const ManageVehicles: React.FC = () => {
     handleAddVehicle,
     handleUpdateVehicle,
     handleDeleteVehicle,
-  } = useVehicles(selectedDate?.toLocaleDateString("fr-CA"));
+  } = useVehicles(format(selectedDate, "yyyy-MM-dd"));
   const [filteredVehicles, setFilteredVehicles] = useState<Vehicle[]>([]);
   const [totalCount, setTotalCount] = useState(0);
   const [editRowId, setEditRowId] = useState<number | null>(null);
@@ -88,9 +89,13 @@ const ManageVehicles: React.FC = () => {
   const [isAddFormValid, setIsAddFormValid] = useState(false);
   const [isEditFormValid, setIsEditFormValid] = useState(false);
 
+  const cleanedFilter = useMemo(
+    () => filter.replace(/[\s-]/g, "").toLowerCase(),
+    [filter]
+  );
+
   useEffect(() => {
     const allVehicles = Object.values(vehicles).flat();
-    const cleanedFilter = filter.replace(/[\s-]/g, "").toLowerCase();
     const filtered = allVehicles.filter((vehicle) => {
       const cleanedLicensePlate = vehicle.licensePlate
         .replace(/[\s-]/g, "")
@@ -98,88 +103,58 @@ const ManageVehicles: React.FC = () => {
       const cleanedParkingLot = vehicle.parkingLot
         .replace(/[\s-]/g, "")
         .toLowerCase();
-      const isLicensePlateMatch = cleanedLicensePlate.includes(cleanedFilter);
-      const isOtherFieldsMatch =
+
+      return (
+        cleanedLicensePlate.includes(cleanedFilter) ||
         `${vehicle.ticket} ${vehicle.brand} ${vehicle.color} ${cleanedParkingLot} ${vehicle.notes}`
           .toLowerCase()
-          .includes(cleanedFilter);
-
-      return isLicensePlateMatch || isOtherFieldsMatch;
+          .includes(cleanedFilter)
+      );
     });
+
     setFilteredVehicles(filtered);
     setTotalCount(filtered.length);
-  }, [vehicles, filter]);
+  }, [vehicles, cleanedFilter]);
 
-  const validateAddFields = useCallback(() => {
-    const numberRegex = /^\d+$/;
-    const plateRegex = /^(?:[A-ZÑ]{3}-\d{3}|\d{6})$/;
-    const textRegex = /^[a-zA-ZáéíóúÁÉÍÓÚñÑüÜëË\s-]+$/;
-    const parkingLotRegex = /^ATP[1-9]-\d{3,4}$/;
-    const isTicketValid =
-      numberRegex.test(addFields.ticket.toString()) && addFields.ticket !== "";
-    const isLicensePlateValid =
-      plateRegex.test(addFields.licensePlate.trim()) &&
-      addFields.licensePlate !== "";
-    const isModelValid =
-      textRegex.test(addFields.brand) && addFields.brand !== "";
-    const isColorValid =
-      textRegex.test(addFields.color) && addFields.color !== "";
-    const isParkingLotValid =
-      parkingLotRegex.test(addFields.parkingLot.trim()) &&
-      addFields.parkingLot !== "";
-    setIsAddFormValid(
-      isTicketValid &&
-        isLicensePlateValid &&
-        isModelValid &&
-        isColorValid &&
-        isParkingLotValid
+  const validateFields = useCallback((fields: typeof addFields) => {
+    const regex = {
+      number: /^\d+$/,
+      plate: /^(?:[A-ZÑ]{3}-\d{3}|\d{6})$/,
+      text: /^[a-zA-ZáéíóúÁÉÍÓÚñÑüÜëË\s-]+$/,
+      parkingLot: /^ATP[1-9]-\d{3,4}$/,
+    };
+
+    return (
+      regex.number.test(fields.ticket) &&
+      regex.plate.test(fields.licensePlate.trim()) &&
+      regex.text.test(fields.brand) &&
+      regex.text.test(fields.color) &&
+      regex.parkingLot.test(fields.parkingLot.trim())
     );
-  }, [addFields]);
+  }, []);
 
-  const validateEditFields = useCallback(() => {
-    const numberRegex = /^\d+$/;
-    const plateRegex = /^(?:[A-ZÑ]{3}-\d{3}|\d{6})$/;
-    const textRegex = /^[a-zA-ZáéíóúÁÉÍÓÚñÑ\s]+$/;
-    const parkingLotRegex = /^ATP[1-9]-\d{3,4}$/;
-    const isTicketValid =
-      numberRegex.test(editFields.ticket.toString()) &&
-      editFields.ticket !== "";
-    const isLicensePlateValid =
-      plateRegex.test(editFields.licensePlate.trim()) &&
-      editFields.licensePlate !== "";
-    const isModelValid =
-      textRegex.test(editFields.brand) && editFields.brand !== "";
-    const isColorValid =
-      textRegex.test(editFields.color) && editFields.color !== "";
-    const isParkingLotValid =
-      parkingLotRegex.test(editFields.parkingLot.trim()) &&
-      editFields.parkingLot !== "";
-    setIsEditFormValid(
-      isTicketValid &&
-        isLicensePlateValid &&
-        isModelValid &&
-        isColorValid &&
-        isParkingLotValid
-    );
-  }, [editFields]);
-
+  useEffect(
+    () => setIsAddFormValid(validateFields(addFields)),
+    [addFields, validateFields]
+  );
   useEffect(() => {
-    validateAddFields();
-  }, [validateAddFields]);
+    if (editRowId !== null) setIsEditFormValid(validateFields(editFields));
+  }, [editFields, editRowId, validateFields]);
 
-  useEffect(() => {
-    if (editRowId !== null) {
-      validateEditFields();
-    }
-  }, [editFields, editRowId, validateEditFields]);
-
-  const handleFilterChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setFilter(e.target.value);
-  };
+  const handleFilterChange = useCallback(
+    (e: React.ChangeEvent<HTMLInputElement>) => {
+      setFilter(e.target.value);
+    },
+    []
+  );
 
   const handleAdd = () => {
+    const newId =
+      allVehicles.length > 0
+        ? Math.max(...allVehicles.map((vehicle) => vehicle.id)) + 1
+        : 1;
     const newVehicle: Vehicle = {
-      id: Math.max(...vehicles.map((vehicle) => vehicle.id)) + 1,
+      id: newId,
       ticket: addFields.ticket,
       licensePlate: addFields.licensePlate,
       brand: addFields.brand,
@@ -218,21 +193,24 @@ const ManageVehicles: React.FC = () => {
     setEditRowId(null);
   };
 
-  const handleSaveClick = (id: number) => {
-    const updatedVehicle = {
-      ...editFields,
-    };
-    handleUpdateVehicle(id, updatedVehicle);
-    setEditRowId(null);
-    setEditFields({
-      ticket: "",
-      licensePlate: "",
-      brand: "",
-      color: "",
-      parkingLot: "",
-      notes: "",
-    });
-  };
+  const handleSaveClick = useCallback(
+    (id: number) => {
+      const updatedVehicle = {
+        ...editFields,
+      };
+      handleUpdateVehicle(id, updatedVehicle);
+      setEditRowId(null);
+      setEditFields({
+        ticket: "",
+        licensePlate: "",
+        brand: "",
+        color: "",
+        parkingLot: "",
+        notes: "",
+      });
+    },
+    [editFields, handleUpdateVehicle]
+  );
 
   const handleOpenDialog = (id: number) => {
     setOpenDialog(true);
@@ -251,9 +229,9 @@ const ManageVehicles: React.FC = () => {
     }
   };
 
-  const handleDateChange = (newDate: Date | null) => {
+  const handleDateChange = useCallback((newDate: Date | null) => {
     if (newDate) setSelectedDate(newDate);
-  };
+  }, []);
 
   const handleNextDate = () => {
     if (!selectedDate) return;
@@ -273,14 +251,34 @@ const ManageVehicles: React.FC = () => {
     setSelectedDate(getMidnightDate(new Date()));
   };
 
-  const handleBrandChange = (event: SelectChangeEvent<string>) => {
-    const value = event.target.value;
-    setSelectedBrand(value);
-    if (value !== "Otro") {
-      setCustomBrand("");
-    }
-    setAddFields({ ...addFields, brand: event.target.value });
+  const showTemporaryTooltip = (
+    setTooltip: React.Dispatch<React.SetStateAction<boolean>>
+  ) => {
+    setTooltip(true);
+    setTimeout(() => setTooltip(false), 2000);
   };
+
+  const handleSelectChange = (
+    event: SelectChangeEvent<string>,
+    setState: React.Dispatch<React.SetStateAction<string>>,
+    setField: (value: string) => void,
+    setCustomValue: React.Dispatch<React.SetStateAction<string>>
+  ) => {
+    const value = event.target.value;
+    setState(value);
+    if (value !== "Otro") {
+      setCustomValue("");
+    }
+    setField(value);
+  };
+
+  const handleBrandChange = (event: SelectChangeEvent<string>) =>
+    handleSelectChange(
+      event,
+      setSelectedBrand,
+      (value) => setAddFields((prev) => ({ ...prev, brand: value })),
+      setCustomBrand
+    );
 
   const handleCustomBrandChange = (
     event: React.ChangeEvent<HTMLInputElement>
@@ -289,14 +287,13 @@ const ManageVehicles: React.FC = () => {
     setAddFields({ ...addFields, brand: event.target.value });
   };
 
-  const handleColorChange = (event: SelectChangeEvent<string>) => {
-    const value = event.target.value;
-    setSelectedColor(value);
-    if (value !== "Otro") {
-      setCustomColor("");
-    }
-    setAddFields({ ...addFields, color: event.target.value });
-  };
+  const handleColorChange = (event: SelectChangeEvent<string>) =>
+    handleSelectChange(
+      event,
+      setSelectedColor,
+      (value) => setAddFields((prev) => ({ ...prev, color: value })),
+      setCustomColor
+    );
 
   const handleCustomColorChange = (
     event: React.ChangeEvent<HTMLInputElement>
@@ -337,17 +334,12 @@ const ManageVehicles: React.FC = () => {
   };
 
   const handleTicketChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    let value = event.target.value.trim();
-    if (!/^\d*$/.test(value)) {
-      return;
-    }
-
+    const value = event.target.value.trim();
+    if (!/^\d*$/.test(value)) return;
     if (checkTicketExistenceInAllVehicles(value)) {
-      setOpenTicketTooltip(true);
-      setTimeout(() => setOpenTicketTooltip(false), 2000);
+      showTemporaryTooltip(setOpenTicketTooltip);
       return;
     }
-
     setAddFields((prevFields) => ({ ...prevFields, ticket: value }));
   };
 
@@ -364,32 +356,22 @@ const ManageVehicles: React.FC = () => {
   const handleLicensePlateChange = (
     event: React.ChangeEvent<HTMLInputElement>
   ) => {
-    const rawValue = event.target.value;
-    const maskedValue = maskLicensePlate(rawValue);
+    const maskedValue = maskLicensePlate(event.target.value);
 
     if (checkLicensePlateExistence(maskedValue)) {
-      setOpenLicensePlateTooltip(true);
-      setTimeout(() => setOpenLicensePlateTooltip(false), 2000);
+      showTemporaryTooltip(setOpenLicensePlateTooltip);
       return;
     }
 
     const existingVehicle =
       checkLicensePlateExistenceInAllVehicles(maskedValue);
 
-    setAddFields((prevState) => {
-      const updatedFields = {
-        ...prevState,
-        licensePlate: maskedValue,
-        brand: existingVehicle?.brand || "",
-        color: existingVehicle?.color || "",
-      };
-      return updatedFields;
-    });
-
-    if (existingVehicle) {
-      setSelectedBrand(existingVehicle.brand || "");
-      setSelectedColor(existingVehicle.color || "");
-    }
+    setAddFields((prevState) => ({
+      ...prevState,
+      licensePlate: maskedValue,
+      brand: existingVehicle?.brand || "",
+      color: existingVehicle?.color || "",
+    }));
   };
 
   const handleParkingLotChange = (
@@ -399,6 +381,63 @@ const ManageVehicles: React.FC = () => {
     const maskedValue = maskParkingLot(rawValue);
     setAddFields((prevState) => ({ ...prevState, parkingLot: maskedValue }));
   };
+
+  const exportOptions = useMemo(() => {
+    return createExportOptions(
+      <FontAwesomeIcon icon={faFileExcel} size="lg" />,
+      <FontAwesomeIcon icon={faFilePdf} size="lg" />,
+      exportToExcel,
+      exportToPDF,
+      filteredVehicles,
+      `reporte-de-vehiculos-${exportFileFormattedDate(
+        selectedDate || new Date()
+      )}`
+    );
+  }, [filteredVehicles, selectedDate]);
+
+  const MemoizedTable = useMemo(
+    () => (
+      <EditableTable<Vehicle>
+        data={filteredVehicles}
+        columns={[
+          "ticket",
+          "licensePlate",
+          "brand",
+          "color",
+          "parkingLot",
+          "notes",
+        ]}
+        groupByDate={selectedDate}
+        editRowId={editRowId}
+        editFields={editFields}
+        setEditField={(field, value) =>
+          setEditFields({ ...editFields, [field]: value })
+        }
+        handleEditClick={handleEditClick}
+        handleCancelClick={handleCancelClick}
+        handleSaveClick={handleSaveClick}
+        handleOpenDialog={handleOpenDialog}
+        getRowId={(row) => row.id}
+        totalCount={totalCount}
+        page={page}
+        rowsPerPage={rowsPerPage}
+        setPage={setPage}
+        setRowsPerPage={setRowsPerPage}
+        isSaveDisabled={!isEditFormValid}
+      />
+    ),
+    [
+      filteredVehicles,
+      selectedDate,
+      editRowId,
+      editFields,
+      isEditFormValid,
+      handleSaveClick,
+      totalCount,
+      page,
+      rowsPerPage,
+    ]
+  );
 
   const theme = useTheme();
   const isSmallScreen = useMediaQuery(theme.breakpoints.down("sm"));
@@ -416,16 +455,7 @@ const ManageVehicles: React.FC = () => {
         </Typography>
         {filteredVehicles.length > 0 && (
           <SplitButton
-            options={createExportOptions(
-              <FontAwesomeIcon icon={faFileExcel} size="lg" />,
-              <FontAwesomeIcon icon={faFilePdf} size="lg" />,
-              exportToExcel,
-              exportToPDF,
-              filteredVehicles,
-              `reporte-de-vehiculos-${exportFileFormattedDate(
-                selectedDate || new Date()
-              )}`
-            )}
+            options={exportOptions}
             defaultIndex={0}
             buttonIcon={<DownloadRoundedIcon />}
           />
@@ -601,7 +631,7 @@ const ManageVehicles: React.FC = () => {
                         <InputLabel>Marca</InputLabel>
                         <Select
                           label="Marca"
-                          value={selectedBrand}
+                          value={addFields.brand}
                           onChange={handleBrandChange}
                         >
                           {BRANDS.map((option) => (
@@ -627,7 +657,7 @@ const ManageVehicles: React.FC = () => {
                         <InputLabel>Color</InputLabel>
                         <Select
                           label="Color"
-                          value={selectedColor}
+                          value={addFields.color}
                           onChange={handleColorChange}
                         >
                           {COLORS.map((option) => (
@@ -690,34 +720,7 @@ const ManageVehicles: React.FC = () => {
           </Grid>
           <br />
           {filteredVehicles.length > 0 ? (
-            <EditableTable<Vehicle>
-              data={filteredVehicles}
-              columns={[
-                "ticket",
-                "licensePlate",
-                "brand",
-                "color",
-                "parkingLot",
-                "notes",
-              ]}
-              groupByDate={selectedDate}
-              editRowId={editRowId}
-              editFields={editFields}
-              setEditField={(field, value) =>
-                setEditFields({ ...editFields, [field]: value })
-              }
-              handleEditClick={handleEditClick}
-              handleCancelClick={handleCancelClick}
-              handleSaveClick={handleSaveClick}
-              handleOpenDialog={handleOpenDialog}
-              getRowId={(row) => row.id}
-              totalCount={totalCount}
-              page={page}
-              rowsPerPage={rowsPerPage}
-              setPage={setPage}
-              setRowsPerPage={setRowsPerPage}
-              isSaveDisabled={!isEditFormValid}
-            />
+            MemoizedTable
           ) : (
             <Box
               sx={{
