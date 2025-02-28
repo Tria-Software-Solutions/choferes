@@ -2,12 +2,9 @@ import React, { useState, useEffect, useCallback } from "react";
 import { User } from "../../models/User";
 import { useUsers } from "../../hooks/useUser";
 import { fetchUsers } from "../../services/userService";
-import {
-  Box,
-  CircularProgress,
-  Typography,
-} from "@mui/material";
+import { Box, CircularProgress, Stack, Typography } from "@mui/material";
 import EditableTable from "../../components/Table/EditableTable/EditableTable";
+import SearchBar from "../../components/SearchBar/SearchBar";
 
 const ManageUsers = () => {
   const { isLoadingUsers, handleUpdateUser } = useUsers();
@@ -72,9 +69,9 @@ const ManageUsers = () => {
     if (editRowId !== null) setIsEditFormValid(validateFields(editFields));
   }, [editFields, editRowId, validateFields]);
 
-  // const handleFilterChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-  //   setFilter(e.target.value);
-  // };
+  const handleFilterChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setFilter(e.target.value);
+  };
 
   const handleEditClick = (user: User) => {
     setEditRowId(user.id);
@@ -133,26 +130,37 @@ const ManageUsers = () => {
       ) : (
         <>
           {filteredUsers.length > 0 ? (
-            <EditableTable<User>
-              data={filteredUsers}
-              columns={["firstName", "lastName", "username", "email"]}
-              editRowId={editRowId}
-              editFields={editFields}
-              setEditField={(field, value) =>
-                setEditFields({ ...editFields, [field]: value })
-              }
-              handleEditClick={handleEditClick}
-              handleCancelClick={handleCancelClick}
-              handleSaveClick={handleSaveClick}
-              handleOpenDialog={handleOpenDialog}
-              getRowId={(row) => row.id}
-              totalCount={totalCount}
-              page={page}
-              rowsPerPage={rowsPerPage}
-              setPage={setPage}
-              setRowsPerPage={setRowsPerPage}
-              isSaveDisabled={!isEditFormValid}
-            />
+            <Stack spacing={2}>
+              <Box>
+                <SearchBar
+                  placeholder="Buscar usuario"
+                  value={filter}
+                  onChange={handleFilterChange}
+                  sx={{ maxWidth: "100%" }}
+                  fullWidth
+                />
+              </Box>
+              <EditableTable<User>
+                data={filteredUsers}
+                columns={["firstName", "lastName", "username", "email"]}
+                editRowId={editRowId}
+                editFields={editFields}
+                setEditField={(field, value) =>
+                  setEditFields({ ...editFields, [field]: value })
+                }
+                handleEditClick={handleEditClick}
+                handleCancelClick={handleCancelClick}
+                handleSaveClick={handleSaveClick}
+                handleOpenDialog={handleOpenDialog}
+                getRowId={(row) => row.id}
+                totalCount={totalCount}
+                page={page}
+                rowsPerPage={rowsPerPage}
+                setPage={setPage}
+                setRowsPerPage={setRowsPerPage}
+                isSaveDisabled={!isEditFormValid}
+              />
+            </Stack>
           ) : (
             <Box
               sx={{

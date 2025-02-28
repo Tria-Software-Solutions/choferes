@@ -18,7 +18,7 @@ const Dashboard = () => {
 
   const handleChange =
     (panel: string) => (event: React.SyntheticEvent, newExpanded: boolean) => {
-      setExpanded(newExpanded ? panel : false);
+      setExpanded(newExpanded ? panel : expanded);
     };
 
   const theme = useTheme();
@@ -41,7 +41,9 @@ const Dashboard = () => {
         onChange={handleChange("panel1")}
       >
         <AccordionSummary aria-controls="panel1d-content" id="panel1d-header">
-          <Typography component="span">Usuarios</Typography>
+          <Typography component="span" fontWeight="bold">
+            Usuarios
+          </Typography>
         </AccordionSummary>
         <AccordionDetails>
           <ManageUsers />
@@ -52,7 +54,9 @@ const Dashboard = () => {
         onChange={handleChange("panel2")}
       >
         <AccordionSummary aria-controls="panel2d-content" id="panel2d-header">
-          <Typography component="span">Roles</Typography>
+          <Typography component="span" fontWeight="bold">
+            Roles
+          </Typography>
         </AccordionSummary>
         <AccordionDetails>
           <ManageRoles />
@@ -63,7 +67,9 @@ const Dashboard = () => {
         onChange={handleChange("panel3")}
       >
         <AccordionSummary aria-controls="panel3d-content" id="panel3d-header">
-          <Typography component="span">Permisos</Typography>
+          <Typography component="span" fontWeight="bold">
+            Permisos
+          </Typography>
         </AccordionSummary>
         <AccordionDetails>
           <ManagePermissions />

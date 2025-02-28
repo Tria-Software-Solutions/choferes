@@ -2,12 +2,9 @@ import React, { useState, useEffect, useCallback } from "react";
 import { Role } from "../../models/Role";
 import { useUsers } from "../../hooks/useUser";
 import { fetchRoles } from "../../services/roleService";
-import {
-  Box,
-  CircularProgress,
-  Typography,
-} from "@mui/material";
+import { Box, CircularProgress, Stack, Typography } from "@mui/material";
 import EditableTable from "../../components/Table/EditableTable/EditableTable";
+import SearchBar from "../../components/SearchBar/SearchBar";
 
 const ManageRoles = () => {
   const { isLoadingRoles, handleUpdateRole } = useUsers();
@@ -60,9 +57,9 @@ const ManageRoles = () => {
     if (editRowId !== null) setIsEditFormValid(validateFields(editFields));
   }, [editFields, editRowId, validateFields]);
 
-  // const handleFilterChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-  //   setFilter(e.target.value);
-  // };
+  const handleFilterChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setFilter(e.target.value);
+  };
 
   const handleEditClick = (role: Role) => {
     setEditRowId(role.id);
@@ -118,26 +115,37 @@ const ManageRoles = () => {
       ) : (
         <>
           {filteredRoles.length > 0 ? (
-            <EditableTable<Role>
-              data={filteredRoles}
-              columns={["name"]}
-              editRowId={editRowId}
-              editFields={editFields}
-              setEditField={(field, value) =>
-                setEditFields({ ...editFields, [field]: value })
-              }
-              handleEditClick={handleEditClick}
-              handleCancelClick={handleCancelClick}
-              handleSaveClick={handleSaveClick}
-              handleOpenDialog={handleOpenDialog}
-              getRowId={(row) => row.id}
-              totalCount={totalCount}
-              page={page}
-              rowsPerPage={rowsPerPage}
-              setPage={setPage}
-              setRowsPerPage={setRowsPerPage}
-              isSaveDisabled={!isEditFormValid}
-            />
+            <Stack spacing={2}>
+              <Box>
+                <SearchBar
+                  placeholder="Buscar rol"
+                  value={filter}
+                  onChange={handleFilterChange}
+                  sx={{ maxWidth: "100%" }}
+                  fullWidth
+                />
+              </Box>
+              <EditableTable<Role>
+                data={filteredRoles}
+                columns={["name"]}
+                editRowId={editRowId}
+                editFields={editFields}
+                setEditField={(field, value) =>
+                  setEditFields({ ...editFields, [field]: value })
+                }
+                handleEditClick={handleEditClick}
+                handleCancelClick={handleCancelClick}
+                handleSaveClick={handleSaveClick}
+                handleOpenDialog={handleOpenDialog}
+                getRowId={(row) => row.id}
+                totalCount={totalCount}
+                page={page}
+                rowsPerPage={rowsPerPage}
+                setPage={setPage}
+                setRowsPerPage={setRowsPerPage}
+                isSaveDisabled={!isEditFormValid}
+              />
+            </Stack>
           ) : (
             <Box
               sx={{

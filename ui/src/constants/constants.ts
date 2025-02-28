@@ -32,7 +32,7 @@ export const PAGE_TITLE = {
   VEHICLES: "Gestionar Vehículos",
   EMPLOYEES: "Gestionar Empleados",
   SCHEDULES: "Gestionar Horarios",
-  DASHBOARD: "Administración de Usuarios"
+  DASHBOARD: "Panel de Administración"
 };
 
 export const STATE = {

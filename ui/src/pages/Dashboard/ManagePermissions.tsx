@@ -2,12 +2,9 @@ import React, { useState, useEffect, useCallback } from "react";
 import { Permission } from "../../models/Permission";
 import { useUsers } from "../../hooks/useUser";
 import { fetchPermissions } from "../../services/permissionService";
-import {
-  Box,
-  CircularProgress,
-  Typography,
-} from "@mui/material";
+import { Box, CircularProgress, Stack, Typography } from "@mui/material";
 import EditableTable from "../../components/Table/EditableTable/EditableTable";
+import SearchBar from "../../components/SearchBar/SearchBar";
 
 const ManagePermissions = () => {
   const { isLoadingPermissions, handleUpdatePermission } = useUsers();
@@ -64,9 +61,9 @@ const ManagePermissions = () => {
     if (editRowId !== null) setIsEditFormValid(validateFields(editFields));
   }, [editFields, editRowId, validateFields]);
 
-  // const handleFilterChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-  //   setFilter(e.target.value);
-  // };
+  const handleFilterChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setFilter(e.target.value);
+  };
 
   const handleEditClick = (permission: Permission) => {
     setEditRowId(permission.id);
@@ -122,26 +119,37 @@ const ManagePermissions = () => {
       ) : (
         <>
           {filteredPermissions.length > 0 ? (
-            <EditableTable<Permission>
-              data={filteredPermissions}
-              columns={["name"]}
-              editRowId={editRowId}
-              editFields={editFields}
-              setEditField={(field, value) =>
-                setEditFields({ ...editFields, [field]: value })
-              }
-              handleEditClick={handleEditClick}
-              handleCancelClick={handleCancelClick}
-              handleSaveClick={handleSaveClick}
-              handleOpenDialog={handleOpenDialog}
-              getRowId={(row) => row.id}
-              totalCount={totalCount}
-              page={page}
-              rowsPerPage={rowsPerPage}
-              setPage={setPage}
-              setRowsPerPage={setRowsPerPage}
-              isSaveDisabled={!isEditFormValid}
-            />
+            <Stack spacing={2}>
+              <Box>
+                <SearchBar
+                  placeholder="Buscar permiso"
+                  value={filter}
+                  onChange={handleFilterChange}
+                  sx={{ maxWidth: "100%" }}
+                  fullWidth
+                />
+              </Box>
+              <EditableTable<Permission>
+                data={filteredPermissions}
+                columns={["name"]}
+                editRowId={editRowId}
+                editFields={editFields}
+                setEditField={(field, value) =>
+                  setEditFields({ ...editFields, [field]: value })
+                }
+                handleEditClick={handleEditClick}
+                handleCancelClick={handleCancelClick}
+                handleSaveClick={handleSaveClick}
+                handleOpenDialog={handleOpenDialog}
+                getRowId={(row) => row.id}
+                totalCount={totalCount}
+                page={page}
+                rowsPerPage={rowsPerPage}
+                setPage={setPage}
+                setRowsPerPage={setRowsPerPage}
+                isSaveDisabled={!isEditFormValid}
+              />
+            </Stack>
           ) : (
             <Box
               sx={{
