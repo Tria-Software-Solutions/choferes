@@ -26,7 +26,7 @@ export const getHoursWorkedById = async (id: number) => {
 
 export const updateHoursWorked = async (
   id: number,
-  data: { scheduleId?: number }
+  data: Omit<HoursWorked, "id">
 ) => {
   await HoursWorked.update(data, { where: { id } });
   return HoursWorked.findByPk(id);

@@ -14,7 +14,7 @@ export const getWeeklySummaryById = async (id: number) => {
 
 export const updateWeeklySummary = async (
   id: number,
-  data: { weekNumber?: number; totalHours?: number }
+  data: Omit<WeeklySummary, "id">
 ) => {
   await WeeklySummary.update(data, { where: { id } });
   return WeeklySummary.findByPk(id);
