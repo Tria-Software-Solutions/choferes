@@ -12,7 +12,9 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.deleteBiweeklySummary = exports.updateBiweeklySummary = exports.getBiweeklySummaryById = exports.getAllBiweeklySummaries = exports.createBiweeklySummary = void 0;
 const BiweeklySummary_1 = require("../models/BiweeklySummary");
 const createBiweeklySummary = (data) => __awaiter(void 0, void 0, void 0, function* () {
-    return BiweeklySummary_1.BiweeklySummary.create(data);
+    const newBiweeklySummary = yield BiweeklySummary_1.BiweeklySummary.create(data);
+    yield newBiweeklySummary.reload();
+    return newBiweeklySummary;
 });
 exports.createBiweeklySummary = createBiweeklySummary;
 const getAllBiweeklySummaries = () => __awaiter(void 0, void 0, void 0, function* () {
