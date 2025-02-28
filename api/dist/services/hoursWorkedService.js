@@ -14,9 +14,7 @@ const HoursWorked_1 = require("../models/HoursWorked");
 const Employee_1 = require("../models/Employee");
 const Schedule_1 = require("../models/Schedule");
 const createHoursWorked = (data) => __awaiter(void 0, void 0, void 0, function* () {
-    const newHoursWorked = yield HoursWorked_1.HoursWorked.create(data);
-    yield newHoursWorked.reload();
-    return newHoursWorked;
+    return yield HoursWorked_1.HoursWorked.create(data);
 });
 exports.createHoursWorked = createHoursWorked;
 const getAllHoursWorked = () => __awaiter(void 0, void 0, void 0, function* () {

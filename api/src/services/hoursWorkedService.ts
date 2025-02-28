@@ -3,9 +3,7 @@ import { Employee } from "../models/Employee";
 import { Schedule } from "../models/Schedule";
 
 export const createHoursWorked = async (data: Omit<HoursWorked, "id">) => {
-  const newHoursWorked = await HoursWorked.create(data);
-  await newHoursWorked.reload();
-  return newHoursWorked;
+  return await HoursWorked.create(data);
 };
 
 export const getAllHoursWorked = async () => {
