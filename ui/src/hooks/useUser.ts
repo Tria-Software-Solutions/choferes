@@ -23,6 +23,26 @@ export const useUsers = () => {
   const [authError, setAuthError] = useState<string | null>(null);
   const navigate = useNavigate();
 
+  const handleRegisterUser = async (newUser: User) => {
+    await UserService.registerUser(newUser);
+    setUsers((prev) => [...prev, newUser]);
+    setTotalCountUsers((prev) => prev + 1);
+    await UserRoleService.assignUserRole(newUser.id, 0);
+    navigate("/");
+  };
+
+  const handleLoginUser = async (username: string, password: string) => {
+    setAuthError(null);
+    try {
+      const loginData = await UserService.loginUser(username, password);
+      login(loginData.user, loginData.token);
+      navigate("/roles");
+    } catch (error) {
+      setAuthError("Login failed. Please check your credentials.");
+      throw error;
+    }
+  };
+
   const fetchUsers = useCallback(async () => {
     setIsLoadingUsers(true);
     try {
@@ -61,26 +81,6 @@ export const useUsers = () => {
       setIsLoadingPermissions(false);
     }
   }, []);
-
-  const handleRegisterUser = async (newUser: User) => {
-    await UserService.registerUser(newUser);
-    setUsers((prev) => [...prev, newUser]);
-    setTotalCountUsers((prev) => prev + 1);
-    await UserRoleService.assignUserRole(newUser.id, 0);
-    navigate("/");
-  };
-
-  const handleLoginUser = async (username: string, password: string) => {
-    setAuthError(null);
-    try {
-      const loginData = await UserService.loginUser(username, password);
-      login(loginData.user, loginData.token);
-      navigate("/roles");
-    } catch (error) {
-      setAuthError("Login failed. Please check your credentials.");
-      throw error;
-    }
-  };
 
   const handleUpdateUser = async (id: number, updatedUser: Partial<User>) => {
     await UserService.getUserById(id);
@@ -142,6 +142,6 @@ export const useUsers = () => {
     handleLogoutUser,
     handleUpdateUser,
     handleUpdateRole,
-    handleUpdatePermission
+    handleUpdatePermission,
   };
 };

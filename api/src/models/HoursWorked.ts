@@ -22,26 +22,26 @@ HoursWorked.init(
       allowNull: false,
       references: {
         model: Employee,
-        key: 'id',
+        key: "id",
       },
-      onDelete: 'CASCADE',
+      onDelete: "CASCADE",
     },
     date: {
       type: DataTypes.DATE,
       allowNull: false,
     },
-    scheduleId: { 
+    scheduleId: {
       type: DataTypes.INTEGER,
       allowNull: false,
       references: {
-        model: Schedule, 
-        key: 'id',
+        model: Schedule,
+        key: "id",
       },
     },
   },
   {
     sequelize,
     modelName: "HoursWorked",
-    tableName: 'hours_worked',
+    tableName: "hours_worked",
   }
 );

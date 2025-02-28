@@ -6,8 +6,16 @@ import { Schedule } from "../models/Schedule";
 import { HoursWorked } from "../models/HoursWorked";
 
 // Relación User - Role
-User.belongsToMany(Role, { through: "user_role", foreignKey: "userId" });
-Role.belongsToMany(User, { through: "user_role", foreignKey: "roleId" });
+User.belongsToMany(Role, {
+  through: "user_role",
+  foreignKey: "userId",
+  onDelete: "CASCADE",
+});
+Role.belongsToMany(User, {
+  through: "user_role",
+  foreignKey: "roleId",
+  onDelete: "CASCADE",
+});
 
 // Relación Role - Permission
 Role.belongsToMany(Permission, {

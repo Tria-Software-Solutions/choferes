@@ -62,6 +62,7 @@ const loginUser = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
         res.json({ user, token });
     }
     catch (error) {
+        console.log("Error during login process:", error);
         res.status(401).json({ message: "Error login User", error });
     }
 });
