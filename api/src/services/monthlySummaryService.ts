@@ -1,7 +1,11 @@
-import { MonthlySummary } from '../models/MonthlySummary';
+import { MonthlySummary } from "../models/MonthlySummary";
 
-export const createMonthlySummary = async (data: Omit<MonthlySummary, "id">) => {
-  return MonthlySummary.create(data);
+export const createMonthlySummary = async (
+  data: Omit<MonthlySummary, "id">
+) => {
+  const newMonthlySummary = await MonthlySummary.create(data);
+  await newMonthlySummary.reload();
+  return newMonthlySummary;
 };
 
 export const getAllMonthlySummaries = async () => {

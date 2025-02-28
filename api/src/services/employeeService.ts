@@ -1,7 +1,9 @@
 import { Employee } from "../models/Employee";
 
 export const createEmployee = async (data: Omit<Employee, "id">) => {
-  return Employee.create(data);
+  const newEmployee = await Employee.create(data);
+  await newEmployee.reload();
+  return newEmployee;
 };
 
 export const getAllEmployees = async () => {

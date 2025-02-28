@@ -12,7 +12,9 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.deleteWeeklySummary = exports.updateWeeklySummary = exports.getWeeklySummaryById = exports.getAllWeeklySummaries = exports.createWeeklySummary = void 0;
 const WeeklySummary_1 = require("../models/WeeklySummary");
 const createWeeklySummary = (data) => __awaiter(void 0, void 0, void 0, function* () {
-    return WeeklySummary_1.WeeklySummary.create(data);
+    const newWeeklySummary = yield WeeklySummary_1.WeeklySummary.create(data);
+    yield newWeeklySummary.reload();
+    return newWeeklySummary;
 });
 exports.createWeeklySummary = createWeeklySummary;
 const getAllWeeklySummaries = () => __awaiter(void 0, void 0, void 0, function* () {
