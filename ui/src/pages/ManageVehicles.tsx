@@ -44,6 +44,7 @@ import ArrowForwardIosRoundedIcon from "@mui/icons-material/ArrowForwardIosRound
 import CalendarTodayRoundedIcon from "@mui/icons-material/CalendarTodayRounded";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faFileExcel, faFilePdf } from "@fortawesome/free-solid-svg-icons";
+import { format } from "date-fns";
 
 const ManageVehicles: React.FC = () => {
   const [selectedDate, setSelectedDate] = useState<Date>(new Date());
@@ -54,7 +55,7 @@ const ManageVehicles: React.FC = () => {
     handleAddVehicle,
     handleUpdateVehicle,
     handleDeleteVehicle,
-  } = useVehicles(selectedDate?.toLocaleDateString("fr-CA"));
+  } = useVehicles(format(selectedDate, "yyyy-MM-dd"));
   const [filteredVehicles, setFilteredVehicles] = useState<Vehicle[]>([]);
   const [totalCount, setTotalCount] = useState(0);
   const [editRowId, setEditRowId] = useState<number | null>(null);
@@ -355,15 +356,20 @@ const ManageVehicles: React.FC = () => {
     event: React.ChangeEvent<HTMLInputElement>
   ) => {
     const maskedValue = maskLicensePlate(event.target.value);
+
     if (checkLicensePlateExistence(maskedValue)) {
       showTemporaryTooltip(setOpenLicensePlateTooltip);
       return;
     }
+
+    const existingVehicle =
+      checkLicensePlateExistenceInAllVehicles(maskedValue);
+
     setAddFields((prevState) => ({
       ...prevState,
       licensePlate: maskedValue,
-      brand: checkLicensePlateExistenceInAllVehicles(maskedValue)?.brand || "",
-      color: checkLicensePlateExistenceInAllVehicles(maskedValue)?.color || "",
+      brand: existingVehicle?.brand || "",
+      color: existingVehicle?.color || "",
     }));
   };
 
@@ -624,7 +630,7 @@ const ManageVehicles: React.FC = () => {
                         <InputLabel>Marca</InputLabel>
                         <Select
                           label="Marca"
-                          value={selectedBrand}
+                          value={addFields.brand}
                           onChange={handleBrandChange}
                         >
                           {BRANDS.map((option) => (
@@ -650,7 +656,7 @@ const ManageVehicles: React.FC = () => {
                         <InputLabel>Color</InputLabel>
                         <Select
                           label="Color"
-                          value={selectedColor}
+                          value={addFields.color}
                           onChange={handleColorChange}
                         >
                           {COLORS.map((option) => (
