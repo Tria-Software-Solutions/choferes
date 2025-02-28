@@ -14,7 +14,7 @@ export const getBiweeklySummaryById = async (id: number) => {
 
 export const updateBiweeklySummary = async (
   id: number,
-  data: { firstHalfHours?: number; secondHalfHours?: number }
+  data: Omit<BiweeklySummary, "id">
 ) => {
   await BiweeklySummary.update(data, { where: { id } });
   return BiweeklySummary.findByPk(id);

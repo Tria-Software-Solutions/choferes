@@ -14,7 +14,7 @@ export const getMonthlySummaryById = async (id: number) => {
 
 export const updateMonthlySummary = async (
   id: number,
-  data: { month?: number; year?: number; totalHours?: number }
+  data: Omit<MonthlySummary, "id">
 ) => {
   await MonthlySummary.update(data, { where: { id } });
   return MonthlySummary.findByPk(id);

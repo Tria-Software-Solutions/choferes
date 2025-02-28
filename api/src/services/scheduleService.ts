@@ -14,7 +14,7 @@ export const getScheduleById = async (id: number) => {
 
 export const updateSchedule = async (
   id: number,
-  data: { day?: string; label?: string; hours?: number }
+  data: Omit<Schedule, "id">
 ) => {
   await Schedule.update(data, { where: { id } });
   return Schedule.findByPk(id);
