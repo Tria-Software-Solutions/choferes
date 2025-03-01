@@ -681,34 +681,34 @@ const ManageVehicles: React.FC = () => {
           </Grid>
           <br />
           {filteredVehicles.length > 0 ? (
-            <EditableTable<Vehicle>
-              data={filteredVehicles}
-              columns={[
-                "ticket",
-                "licensePlate",
-                "brand",
-                "color",
-                "parkingLot",
-                "notes",
-              ]}
-              groupByDate={selectedDate}
-              editRowId={editRowId}
-              editFields={editFields}
-              setEditField={(field, value) =>
-                setEditFields({ ...editFields, [field]: value })
-              }
-              handleEditClick={handleEditClick}
-              handleCancelClick={handleCancelClick}
-              handleSaveClick={handleSaveClick}
-              handleOpenDialog={handleOpenDialog}
-              getRowId={(row) => row.id}
-              totalCount={totalCount}
-              page={page}
-              rowsPerPage={rowsPerPage}
-              setPage={setPage}
-              setRowsPerPage={setRowsPerPage}
-              isSaveDisabled={!isEditFormValid}
-            />
+             <EditableTable<Vehicle>
+        data={filteredVehicles}
+        columns={[
+          "ticket",
+          "licensePlate",
+          "brand",
+          "color",
+          "parkingLot",
+          "notes",
+        ]}
+        groupByDate={selectedDate}
+        editRowId={editRowId}
+        editFields={editFields}
+        setEditField={(field, value) =>
+          setEditFields({ ...editFields, [field]: value })
+        }
+        handleEditClick={handleEditClick}
+        handleCancelClick={handleCancelClick}
+        handleSaveClick={handleSaveClick}
+        handleOpenDialog={handleOpenDialog}
+        getRowId={(row) => row.id}
+        totalCount={totalCount}
+        page={page}
+        rowsPerPage={rowsPerPage}
+        setPage={setPage}
+        setRowsPerPage={setRowsPerPage}
+        isSaveDisabled={!isEditFormValid}
+      />
           ) : (
             <Box
               sx={{
