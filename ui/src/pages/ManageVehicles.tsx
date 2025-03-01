@@ -55,6 +55,7 @@ const ManageVehicles: React.FC = () => {
     handleAddVehicle,
     handleUpdateVehicle,
     handleDeleteVehicle,
+    setAllVehicles,
   } = useVehicles(format(selectedDate, "yyyy-MM-dd"));
   const [filteredVehicles, setFilteredVehicles] = useState<Vehicle[]>([]);
   const [totalCount, setTotalCount] = useState(0);
@@ -149,22 +150,26 @@ const ManageVehicles: React.FC = () => {
   );
 
   const handleAdd = () => {
-    const newId =
-      allVehicles.length > 0
-        ? Math.max(...allVehicles.map((vehicle) => vehicle.id)) + 1
-        : 1;
-    const newVehicle: Vehicle = {
-      id: newId,
-      ticket: addFields.ticket,
-      licensePlate: addFields.licensePlate,
-      brand: addFields.brand,
-      color: addFields.color,
-      parkingLot: addFields.parkingLot,
-      notes: addFields.notes,
-      createdAt: selectedDate,
-    };
-    console.log("newVehicle: ", newVehicle);
-    handleAddVehicle(newVehicle);
+    setAllVehicles((prevVehicles) => {
+      const newId =
+        prevVehicles.length > 0
+          ? Math.max(...prevVehicles.map((vehicle) => vehicle.id)) + 1
+          : 1;
+
+      const newVehicle: Vehicle = {
+        id: newId,
+        ticket: addFields.ticket,
+        licensePlate: addFields.licensePlate,
+        brand: addFields.brand,
+        color: addFields.color,
+        parkingLot: addFields.parkingLot,
+        notes: addFields.notes,
+        createdAt: selectedDate,
+      };
+      console.log("newVehicle: ", newVehicle);
+      handleAddVehicle(newVehicle);
+      return [...prevVehicles, newVehicle];
+    });
     setAddFields({
       ticket: "",
       licensePlate: "",
@@ -394,50 +399,6 @@ const ManageVehicles: React.FC = () => {
       )}`
     );
   }, [filteredVehicles, selectedDate]);
-
-  const MemoizedTable = useMemo(
-    () => (
-      <EditableTable<Vehicle>
-        data={filteredVehicles}
-        columns={[
-          "ticket",
-          "licensePlate",
-          "brand",
-          "color",
-          "parkingLot",
-          "notes",
-        ]}
-        groupByDate={selectedDate}
-        editRowId={editRowId}
-        editFields={editFields}
-        setEditField={(field, value) =>
-          setEditFields({ ...editFields, [field]: value })
-        }
-        handleEditClick={handleEditClick}
-        handleCancelClick={handleCancelClick}
-        handleSaveClick={handleSaveClick}
-        handleOpenDialog={handleOpenDialog}
-        getRowId={(row) => row.id}
-        totalCount={totalCount}
-        page={page}
-        rowsPerPage={rowsPerPage}
-        setPage={setPage}
-        setRowsPerPage={setRowsPerPage}
-        isSaveDisabled={!isEditFormValid}
-      />
-    ),
-    [
-      filteredVehicles,
-      selectedDate,
-      editRowId,
-      editFields,
-      isEditFormValid,
-      handleSaveClick,
-      totalCount,
-      page,
-      rowsPerPage,
-    ]
-  );
 
   const theme = useTheme();
   const isSmallScreen = useMediaQuery(theme.breakpoints.down("sm"));
@@ -720,7 +681,34 @@ const ManageVehicles: React.FC = () => {
           </Grid>
           <br />
           {filteredVehicles.length > 0 ? (
-            MemoizedTable
+             <EditableTable<Vehicle>
+        data={filteredVehicles}
+        columns={[
+          "ticket",
+          "licensePlate",
+          "brand",
+          "color",
+          "parkingLot",
+          "notes",
+        ]}
+        groupByDate={selectedDate}
+        editRowId={editRowId}
+        editFields={editFields}
+        setEditField={(field, value) =>
+          setEditFields({ ...editFields, [field]: value })
+        }
+        handleEditClick={handleEditClick}
+        handleCancelClick={handleCancelClick}
+        handleSaveClick={handleSaveClick}
+        handleOpenDialog={handleOpenDialog}
+        getRowId={(row) => row.id}
+        totalCount={totalCount}
+        page={page}
+        rowsPerPage={rowsPerPage}
+        setPage={setPage}
+        setRowsPerPage={setRowsPerPage}
+        isSaveDisabled={!isEditFormValid}
+      />
           ) : (
             <Box
               sx={{
