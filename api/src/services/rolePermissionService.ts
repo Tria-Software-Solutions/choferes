@@ -1,10 +1,9 @@
 import { RolePermission } from "../models/RolePermission";
 
 export const assignPermissionToRole = async (
-  roleId: number,
-  permissionId: number
+  data: Omit<RolePermission, "id">
 ) => {
-  return RolePermission.create({ roleId, permissionId });
+  return RolePermission.create(data);
 };
 
 export const getPermissionsByRole = async (roleId: number) => {

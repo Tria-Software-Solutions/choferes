@@ -46,9 +46,8 @@ exports.getUserById = exports.getAllUsers = exports.loginUser = exports.register
 const userService = __importStar(require("../services/userService"));
 const registerUser = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        const { firstName, lastName, email, username, password } = req.body;
-        const user = yield userService.createUser(firstName, lastName, email, username, password);
-        res.status(201).json(user);
+        const newUser = yield userService.createUser(req.body);
+        res.status(201).json(newUser);
     }
     catch (error) {
         res.status(500).json({ message: "Error registering User", error });
@@ -62,7 +61,6 @@ const loginUser = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
         res.json({ user, token });
     }
     catch (error) {
-        console.log("Error during login process:", error);
         res.status(401).json({ message: "Error login User", error });
     }
 });

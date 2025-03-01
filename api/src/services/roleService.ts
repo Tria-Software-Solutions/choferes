@@ -1,16 +1,13 @@
 import { Role } from "../models/Role";
 
-export const createRole = async (name: string) => {
-  const role = await Role.create({ name });
-  return role;
+export const createRole = async (data: Omit<Role, "id">) => {
+  return await Role.create(data);
 };
 
 export const getRoles = async () => {
-    const roles = await Role.findAll();
-    return roles;
-  };
+  return await Role.findAll();
+};
 
 export const getRoleById = async (id: number) => {
-  const role = await Role.findByPk(id);
-  return role;
+  return await Role.findByPk(id);
 };

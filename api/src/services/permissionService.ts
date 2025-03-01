@@ -1,16 +1,13 @@
 import { Permission } from "../models/Permission";
 
-export const createPermission = async (name: string) => {
-  const permission = await Permission.create({ name });
-  return permission;
+export const createPermission = async (data: Omit<Permission, "id">) => {
+  return await Permission.create(data);
 };
 
 export const getPermissions = async () => {
-  const permissions = await Permission.findAll();
-  return permissions;
+  return await Permission.findAll();
 };
 
 export const getPermissionById = async (id: number) => {
-  const permission = await Permission.findByPk(id);
-  return permission;
+  return await Permission.findByPk(id);
 };

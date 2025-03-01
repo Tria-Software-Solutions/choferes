@@ -11,8 +11,8 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.removeRoleFromUser = exports.getRolesByUser = exports.assignRoleToUser = void 0;
 const UserRole_1 = require("../models/UserRole");
-const assignRoleToUser = (userId, roleId) => __awaiter(void 0, void 0, void 0, function* () {
-    return UserRole_1.UserRole.create({ userId, roleId });
+const assignRoleToUser = (data) => __awaiter(void 0, void 0, void 0, function* () {
+    return UserRole_1.UserRole.create(data);
 });
 exports.assignRoleToUser = assignRoleToUser;
 const getRolesByUser = (userId) => __awaiter(void 0, void 0, void 0, function* () {

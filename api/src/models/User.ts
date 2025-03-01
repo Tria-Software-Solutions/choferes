@@ -3,6 +3,8 @@ import sequelize from "../config/database";
 
 export class User extends Model {
   public id!: number;
+  public firstName!: string;
+  public lastName!: string;
   public username!: string;
   public email!: string;
   public password!: string;

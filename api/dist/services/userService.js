@@ -18,15 +18,9 @@ const Role_1 = require("../models/Role");
 const bcrypt_1 = __importDefault(require("bcrypt"));
 const jsonwebtoken_1 = __importDefault(require("jsonwebtoken"));
 const SECRET_KEY = process.env.JWT_SECRET_KEY || "default_secret";
-const createUser = (firstName, lastName, email, username, password) => __awaiter(void 0, void 0, void 0, function* () {
-    const hashedPassword = yield bcrypt_1.default.hash(password, 10);
-    const user = yield User_1.User.create({
-        firstName,
-        lastName,
-        email,
-        username,
-        password: hashedPassword,
-    });
+const createUser = (data) => __awaiter(void 0, void 0, void 0, function* () {
+    const hashedPassword = yield bcrypt_1.default.hash(data.password, 10);
+    const user = yield User_1.User.create(Object.assign(Object.assign({}, data), { password: hashedPassword }));
     return user;
 });
 exports.createUser = createUser;
@@ -54,12 +48,10 @@ const authenticateUser = (username, password) => __awaiter(void 0, void 0, void 
 });
 exports.authenticateUser = authenticateUser;
 const getUsers = () => __awaiter(void 0, void 0, void 0, function* () {
-    const users = yield User_1.User.findAll({ include: Role_1.Role });
-    return users;
+    return yield User_1.User.findAll({ include: Role_1.Role });
 });
 exports.getUsers = getUsers;
 const getUserById = (id) => __awaiter(void 0, void 0, void 0, function* () {
-    const user = yield User_1.User.findByPk(id, { include: Role_1.Role });
-    return user;
+    return yield User_1.User.findByPk(id, { include: Role_1.Role });
 });
 exports.getUserById = getUserById;

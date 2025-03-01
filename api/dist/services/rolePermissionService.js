@@ -11,8 +11,8 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.removePermissionFromRole = exports.getPermissionsByRole = exports.assignPermissionToRole = void 0;
 const RolePermission_1 = require("../models/RolePermission");
-const assignPermissionToRole = (roleId, permissionId) => __awaiter(void 0, void 0, void 0, function* () {
-    return RolePermission_1.RolePermission.create({ roleId, permissionId });
+const assignPermissionToRole = (data) => __awaiter(void 0, void 0, void 0, function* () {
+    return RolePermission_1.RolePermission.create(data);
 });
 exports.assignPermissionToRole = assignPermissionToRole;
 const getPermissionsByRole = (roleId) => __awaiter(void 0, void 0, void 0, function* () {
