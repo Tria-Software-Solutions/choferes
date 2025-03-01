@@ -8,8 +8,16 @@ const Employee_1 = require("../models/Employee");
 const Schedule_1 = require("../models/Schedule");
 const HoursWorked_1 = require("../models/HoursWorked");
 // Relación User - Role
-User_1.User.belongsToMany(Role_1.Role, { through: "user_role", foreignKey: "userId" });
-Role_1.Role.belongsToMany(User_1.User, { through: "user_role", foreignKey: "roleId" });
+User_1.User.belongsToMany(Role_1.Role, {
+    through: "user_role",
+    foreignKey: "userId",
+    onDelete: "CASCADE",
+});
+Role_1.Role.belongsToMany(User_1.User, {
+    through: "user_role",
+    foreignKey: "roleId",
+    onDelete: "CASCADE",
+});
 // Relación Role - Permission
 Role_1.Role.belongsToMany(Permission_1.Permission, {
     through: "role_permission",
