@@ -2,9 +2,7 @@ import { useState, useEffect, useCallback } from "react";
 import * as VehicleService from "../services/vehicleService";
 import { Vehicle } from "../models/Vehicle";
 
-export const useVehicles = (
-  selectedDate?: string,
-) => {
+export const useVehicles = (selectedDate?: string) => {
   const [vehicles, setVehicles] = useState<Vehicle[]>([]);
   const [allVehicles, setAllVehicles] = useState<Vehicle[]>([]);
   const [count, setCount] = useState(0);
@@ -27,25 +25,23 @@ export const useVehicles = (
     []
   );
 
-  const fetchVehiclesByDate = useCallback(
-    async (date: string) => {
-      setIsLoadingVehicles(true);
-      try {
-        const data = await VehicleService.getVehiclesByDate(date);
-        setVehicles(data);
-        setCount(data.length);
-      } catch (error) {
-        console.error("Error fetching vehicles by date", error);
-      } finally {
-        setIsLoadingVehicles(false);
-      }
-    },
-    []
-  );
+  const fetchVehiclesByDate = useCallback(async (date: string) => {
+    setIsLoadingVehicles(true);
+    try {
+      const data = await VehicleService.getVehiclesByDate(date);
+      setVehicles(data);
+      setCount(data.length);
+    } catch (error) {
+      console.error("Error fetching vehicles by date", error);
+    } finally {
+      setIsLoadingVehicles(false);
+    }
+  }, []);
 
   const handleAddVehicle = async (newVehicle: Vehicle) => {
     await VehicleService.addVehicle(newVehicle);
     setVehicles((prev) => [...prev, newVehicle]);
+    setAllVehicles((prev) => [...prev, newVehicle]);
     setTotalCount((prev) => prev + 1);
   };
 
@@ -59,11 +55,17 @@ export const useVehicles = (
         vehicle.id === id ? { ...vehicle, ...updatedVehicle } : vehicle
       )
     );
+    setAllVehicles((prev) =>
+      prev.map((vehicle) =>
+        vehicle.id === id ? { ...vehicle, ...updatedVehicle } : vehicle
+      )
+    );
   };
 
   const handleDeleteVehicle = async (id: number) => {
     await VehicleService.deleteVehicle(id);
     setVehicles((prev) => prev.filter((vehicle) => vehicle.id !== id));
+    setAllVehicles((prev) => prev.filter((vehicle) => vehicle.id !== id));
     setTotalCount((prev) => prev - 1);
   };
 
@@ -73,7 +75,7 @@ export const useVehicles = (
 
   useEffect(() => {
     if (selectedDate) {
-      fetchVehiclesByDate(selectedDate); 
+      fetchVehiclesByDate(selectedDate);
     }
   }, [selectedDate, fetchVehiclesByDate]);
 
@@ -88,5 +90,6 @@ export const useVehicles = (
     handleAddVehicle,
     handleUpdateVehicle,
     handleDeleteVehicle,
+    setAllVehicles,
   };
 };
