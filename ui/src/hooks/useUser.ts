@@ -8,6 +8,7 @@ import { useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import { Role } from "../models/Role";
 import { Permission } from "../models/Permission";
+import { Roles } from "../enums/roles";
 
 export const useUsers = () => {
   const { currentUser, login, logout } = useAuth();
@@ -27,7 +28,7 @@ export const useUsers = () => {
     await UserService.registerUser(newUser);
     setUsers((prev) => [...prev, newUser]);
     setTotalCountUsers((prev) => prev + 1);
-    await UserRoleService.assignUserRole(newUser.id, 0);
+    await UserRoleService.assignUserRole(newUser.id, Roles.USER);
     navigate("/");
   };
 

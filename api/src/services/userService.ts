@@ -5,19 +5,10 @@ import jwt from "jsonwebtoken";
 
 const SECRET_KEY = process.env.JWT_SECRET_KEY || "default_secret";
 
-export const createUser = async (
-  firstName: string,
-  lastName: string,
-  email: string,
-  username: string,
-  password: string
-) => {
-  const hashedPassword = await bcrypt.hash(password, 10);
+export const createUser = async (data: Omit<User, "id">) => {
+  const hashedPassword = await bcrypt.hash(data.password, 10);
   const user = await User.create({
-    firstName,
-    lastName,
-    email,
-    username,
+    ...data,
     password: hashedPassword,
   });
   return user;
@@ -35,7 +26,7 @@ export const authenticateUser = async (username: string, password: string) => {
       },
     ],
   });
-  
+
   if (!user) throw new Error("User not found");
 
   const isMatch = await bcrypt.compare(password, user.password);
@@ -48,11 +39,9 @@ export const authenticateUser = async (username: string, password: string) => {
 };
 
 export const getUsers = async () => {
-  const users = await User.findAll({ include: Role });
-  return users;
+  return await User.findAll({ include: Role });
 };
 
 export const getUserById = async (id: number) => {
-  const user = await User.findByPk(id, { include: Role });
-  return user;
+  return await User.findByPk(id, { include: Role });
 };

@@ -1,7 +1,7 @@
 import { UserRole } from "../models/UserRole";
 
-export const assignRoleToUser = async (userId: number, roleId: number) => {
-  return UserRole.create({ userId, roleId });
+export const assignRoleToUser = async (data: Omit<UserRole, "id">) => {
+  return UserRole.create(data);
 };
 
 export const getRolesByUser = async (userId: number) => {

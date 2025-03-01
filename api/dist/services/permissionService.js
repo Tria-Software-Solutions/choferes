@@ -11,18 +11,15 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.getPermissionById = exports.getPermissions = exports.createPermission = void 0;
 const Permission_1 = require("../models/Permission");
-const createPermission = (name) => __awaiter(void 0, void 0, void 0, function* () {
-    const permission = yield Permission_1.Permission.create({ name });
-    return permission;
+const createPermission = (data) => __awaiter(void 0, void 0, void 0, function* () {
+    return yield Permission_1.Permission.create(data);
 });
 exports.createPermission = createPermission;
 const getPermissions = () => __awaiter(void 0, void 0, void 0, function* () {
-    const permissions = yield Permission_1.Permission.findAll();
-    return permissions;
+    return yield Permission_1.Permission.findAll();
 });
 exports.getPermissions = getPermissions;
 const getPermissionById = (id) => __awaiter(void 0, void 0, void 0, function* () {
-    const permission = yield Permission_1.Permission.findByPk(id);
-    return permission;
+    return yield Permission_1.Permission.findByPk(id);
 });
 exports.getPermissionById = getPermissionById;
