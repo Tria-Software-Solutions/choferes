@@ -19,7 +19,7 @@ const createRolePermission = (data) => __awaiter(void 0, void 0, void 0, functio
     return RolePermission_1.RolePermission.create(data);
 });
 exports.createRolePermission = createRolePermission;
-const deleteRolePermission = (roleId, permissionId) => __awaiter(void 0, void 0, void 0, function* () {
-    return RolePermission_1.RolePermission.destroy({ where: { roleId, permissionId } });
+const deleteRolePermission = (id) => __awaiter(void 0, void 0, void 0, function* () {
+    return RolePermission_1.RolePermission.destroy({ where: { id } });
 });
 exports.deleteRolePermission = deleteRolePermission;

@@ -15,3 +15,7 @@ export const createRole = async (newRole: Omit<Role, "id">) => {
   const response = await api.post("/roles", newRole);
   return response.data;
 };
+
+export const deleteRole = async (id: number) => {
+  await api.delete(`/roles/${id}`);
+};

@@ -23,3 +23,7 @@ export const createUser = async (user: Omit<User, "id">) => {
   const response = await api.post("/users/register", user);
   return response.data;
 };
+
+export const deleteUser = async (id: number) => {
+  await api.delete(`/users/${id}`);
+};

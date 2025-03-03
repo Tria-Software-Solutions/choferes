@@ -66,13 +66,18 @@ const createRolePermission = (req, res) => __awaiter(void 0, void 0, void 0, fun
 });
 exports.createRolePermission = createRolePermission;
 const deleteRolePermission = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    const { roleId, permissionId } = req.body;
     try {
-        yield rolePermissionService.deleteRolePermission(roleId, permissionId);
-        res.status(200).json({ message: "RolePermission deleted" });
+        const id = parseInt(req.params.id);
+        const deleted = yield rolePermissionService.deleteRolePermission(id);
+        if (deleted) {
+            return res.status(204).end();
+        }
+        else {
+            return res.status(404).json({ message: "RolePermission not found" });
+        }
     }
     catch (error) {
-        res.status(400).json({ message: "Error deleting RolePermission", error });
+        return res.status(500).json({ message: "Error deleting RolePermission", error });
     }
 });
 exports.deleteRolePermission = deleteRolePermission;

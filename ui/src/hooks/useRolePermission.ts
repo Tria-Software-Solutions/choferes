@@ -44,7 +44,7 @@ export const useRolePermissions = () => {
 
   useEffect(() => {
     if (currentUser) {
-      //getRolePermission();
+      getRolePermissions();
     }
   }, [currentUser, getRolePermissions]);
 

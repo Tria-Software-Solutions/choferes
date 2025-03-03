@@ -29,3 +29,17 @@ export const createRole = async (req: Request, res: Response) => {
     res.status(500).json({ message: 'Error creating Role', error });
   }
 };
+
+export const deleteRole = async (req: Request, res: Response) => {
+  try {
+    const id = parseInt(req.params.id);
+    const deleted = await roleService.deleteRole(id);
+    if (deleted) {
+      return res.status(204).end();
+    } else {
+      return res.status(404).json({ message: "Role not found" });
+    }
+  } catch (error) {
+    return res.status(500).json({ message: "Error deleting Role", error });
+  }
+};

@@ -10,9 +10,6 @@ export const createRolePermission = async (
   return RolePermission.create(data);
 };
 
-export const deleteRolePermission = async (
-  roleId: number,
-  permissionId: number
-) => {
-  return RolePermission.destroy({ where: { roleId, permissionId } });
+export const deleteRolePermission = async (id: number) => {
+  return RolePermission.destroy({ where: { id } });
 };

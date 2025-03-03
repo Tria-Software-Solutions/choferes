@@ -1,14 +1,15 @@
 import { useState, useEffect, useCallback } from "react";
 import * as UserService from "../services/userService";
-import * as UserRoleService from "../services/userRoleService";
+import { useUserRoles } from "./useUserRole";
 import { User } from "../models/User";
+import { UserRole } from "../models/UserRole";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import { Roles } from "../enums/roles";
-import { UserRole } from "../models/UserRole";
 
 export const useUsers = () => {
   const { currentUser, login, logout } = useAuth();
+  const { createUserRole } = useUserRoles();
   const [users, setUsers] = useState<User[]>([]);
   const [totalCountUsers, setTotalCountUsers] = useState(0);
   const [isLoadingUsers, setIsLoadingUsers] = useState(false);
@@ -53,7 +54,8 @@ export const useUsers = () => {
       userId: createdUser.userId,
       roleId: Roles.USER,
     };
-    await UserRoleService.createUserRole(createdUserRole);
+    console.log("createdUserRole: ", createdUserRole);
+    createUserRole(createdUserRole);
     navigate("/");
   };
 
@@ -65,10 +67,10 @@ export const useUsers = () => {
   };
 
   const deleteUser = async (id: number) => {
-    //await UserService.deleteUser(id);
-    //setUsers((prev) => prev.filter((user) => user.id !== id));
-    //setTotalCountUsers((prev) => prev - 1);
-    //await UserRoleService.deleteAssignation(userId, roleId);
+    await UserService.deleteUser(id);
+    setUsers((prev) => prev.filter((user) => user.id !== id));
+    setTotalCountUsers((prev) => prev - 1);
+    //await UserRoleService.deleteUserRole(userId, roleId);
   };
 
   useEffect(() => {

@@ -42,7 +42,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.createUser = exports.getUserById = exports.getUsers = exports.authenticateUser = void 0;
+exports.deleteUser = exports.createUser = exports.getUserById = exports.getUsers = exports.authenticateUser = void 0;
 const userService = __importStar(require("../services/userService"));
 const authenticateUser = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
@@ -88,3 +88,19 @@ const createUser = (req, res) => __awaiter(void 0, void 0, void 0, function* () 
     }
 });
 exports.createUser = createUser;
+const deleteUser = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        const id = parseInt(req.params.id);
+        const deleted = yield userService.deleteUser(id);
+        if (deleted) {
+            return res.status(204).end();
+        }
+        else {
+            return res.status(404).json({ message: "User not found" });
+        }
+    }
+    catch (error) {
+        return res.status(500).json({ message: "Error deleting User", error });
+    }
+});
+exports.deleteUser = deleteUser;

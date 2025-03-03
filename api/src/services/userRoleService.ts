@@ -8,6 +8,6 @@ export const createUserRole = async (data: Omit<UserRole, "id">) => {
   return UserRole.create(data);
 };
 
-export const deleteUserRole = async (userId: number, roleId: number) => {
-  return UserRole.destroy({ where: { userId, roleId } });
+export const deleteUserRole = async (id: number) => {
+  return UserRole.destroy({ where: { id } });
 };

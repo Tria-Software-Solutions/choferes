@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback } from "react";
 import * as UserRoleService from "../services/userRoleService";
-import { useAuth } from "../context/AuthContext";
 import { UserRole } from "../models/UserRole";
+import { useAuth } from "../context/AuthContext";
 
 export const useUserRoles = () => {
   const { currentUser } = useAuth();
@@ -38,7 +38,7 @@ export const useUserRoles = () => {
 
   useEffect(() => {
     if (currentUser) {
-      //getUserRoles();
+      getUserRoles();
     }
   }, [currentUser, getUserRoles]);
 

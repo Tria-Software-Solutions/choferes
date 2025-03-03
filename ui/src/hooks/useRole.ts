@@ -31,10 +31,11 @@ export const useRoles = () => {
   };
 
   const deleteRole = async (id: number) => {
-    //await UserService.deleteRole(id);
-    //setRoles((prev) => prev.filter((role) => role.id !== id));
-    //setTotalCountRoles((prev) => prev - 1);
-    //await UserRoleService.deleteAssignation(userId, roleId);
+    await RoleService.deleteRole(id);
+    setRoles((prev) => prev.filter((role) => role.id !== id));
+    setTotalCountRoles((prev) => prev - 1);
+    //await UserRoleService.delete(id);
+    //await RolePermissionService.delete(id);
   };
 
   useEffect(() => {

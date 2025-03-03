@@ -43,4 +43,5 @@ const router = express_1.default.Router();
 router.get("/", authMiddleware_1.authenticateToken, permissionController.getPermissions);
 router.get("/:id", authMiddleware_1.authenticateToken, permissionController.getPermissionById);
 router.post("/", authMiddleware_1.authenticateToken, permissionController.createPermission);
+router.delete('/:id', authMiddleware_1.authenticateToken, permissionController.deletePermission);
 exports.default = router;

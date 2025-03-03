@@ -12,7 +12,11 @@ import {
   Alert,
   useTheme,
   useMediaQuery,
+  IconButton,
+  InputAdornment,
 } from "@mui/material";
+import Visibility from "@mui/icons-material/Visibility";
+import VisibilityOff from "@mui/icons-material/VisibilityOff";
 import logo from "../../assets/images/logo.png";
 import { PAGE_TITLE } from "../../constants/constants";
 
@@ -25,6 +29,7 @@ const Register = () => {
     username: "",
     password: "",
   });
+  const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   const validateFields = useCallback(() => {
@@ -77,6 +82,10 @@ const Register = () => {
     } catch (err) {
       setError("Error al registrar usuario");
     }
+  };
+
+  const handleTogglePassword = () => {
+    setShowPassword((prev) => !prev);
   };
 
   const theme = useTheme();
@@ -147,13 +156,22 @@ const Register = () => {
             <TextField
               fullWidth
               label="Contraseña"
-              type="password"
+              type={showPassword ? "text" : "password"}
               variant="outlined"
               margin="normal"
               value={addFields.password}
               onChange={(e) =>
                 setAddFields({ ...addFields, password: e.target.value })
               }
+              InputProps={{
+                endAdornment: (
+                  <InputAdornment position="end">
+                    <IconButton onClick={handleTogglePassword} edge="end">
+                      {showPassword ? <VisibilityOff /> : <Visibility />}
+                    </IconButton>
+                  </InputAdornment>
+                ),
+              }}
             />
             <Button
               type="submit"

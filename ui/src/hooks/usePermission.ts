@@ -1,9 +1,9 @@
 import { useState, useEffect, useCallback } from "react";
 import * as PermissionService from "../services/permissionService";
-import { User } from "../models/User";
-import { useAuth } from "../context/AuthContext";
-import { Permission } from "../models/Permission";
 import { useRoles } from "./useRole";
+import { User } from "../models/User";
+import { Permission } from "../models/Permission";
+import { useAuth } from "../context/AuthContext";
 
 export const usePermissions = () => {
   const { currentUser } = useAuth();
@@ -40,10 +40,10 @@ export const usePermissions = () => {
   };
 
   const deletePermission = async (id: number) => {
-    //await UserService.deletePermission(id);
-    //setPermissions((prev) => prev.filter((permission) => permission.id !== id));
-    //setTotalCountPermissions((prev) => prev - 1);
-    //await RolePermissionService.deleteAssignation(userId, roleId);
+    await PermissionService.deletePermission(id);
+    setPermissions((prev) => prev.filter((permission) => permission.id !== id));
+    setTotalCountPermissions((prev) => prev - 1);
+    // await RolePermissionService.delete(id);
   };
 
   useEffect(() => {

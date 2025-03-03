@@ -11,3 +11,7 @@ export const getRoleById = async (id: number) => {
 export const createRole = async (data: Omit<Role, "id">) => {
   return await Role.create(data);
 };
+
+export const deleteRole = async (id: number) => {
+  return await Role.destroy({ where: { id } });
+};

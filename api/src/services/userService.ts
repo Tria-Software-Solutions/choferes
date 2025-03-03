@@ -44,3 +44,7 @@ export const createUser = async (data: Omit<User, "id">) => {
     password: hashedPassword,
   });
 };
+
+export const deleteUser = async (id: number) => {
+  return await User.destroy({ where: { id } });
+};
