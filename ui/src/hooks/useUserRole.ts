@@ -9,10 +9,10 @@ export const useUserRoles = () => {
   const [totalCountUserRoles, setTotalCountUserRoles] = useState(0);
   const [isLoadingUserRoles, setIsLoadingUserRoles] = useState(false);
 
-  const getUserRoles = useCallback(async (roleId: number) => {
+  const getUserRoles = useCallback(async () => {
     setIsLoadingUserRoles(true);
     try {
-      const data = await UserRoleService.getUserRoles(roleId);
+      const data = await UserRoleService.getUserRoles();
       setUserRole(data);
       setTotalCountUserRoles(data.length);
       return data;
@@ -30,13 +30,9 @@ export const useUserRoles = () => {
     setTotalCountUserRoles((prev) => prev + 1);
   };
 
-  const deleteUserRole = async (userId: number, roleId: number) => {
-    await UserRoleService.deleteUserRole(userId, roleId);
-    setUserRole((prev) =>
-      prev.filter(
-        (userRole) => userRole.userId !== userId && userRole.roleId !== roleId
-      )
-    );
+  const deleteUserRole = async (id: number) => {
+    await UserRoleService.deleteUserRole(id);
+    setUserRole((prev) => prev.filter((userRole) => userRole.id !== id));
     setTotalCountUserRoles((prev) => prev - 1);
   };
 

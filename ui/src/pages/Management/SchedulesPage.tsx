@@ -43,7 +43,6 @@ const SchedulesPage: React.FC = () => {
   const {
     schedules,
     isLoadingSchedules,
-    getSchedules,
     createSchedule,
     updateSchedule,
     deleteSchedule,
@@ -68,14 +67,6 @@ const SchedulesPage: React.FC = () => {
   const [rowsPerPage, setRowsPerPage] = useState(5);
   const [isAddFormValid, setIsAddFormValid] = useState(false);
   const [isEditFormValid, setIsEditFormValid] = useState(false);
-
-  useEffect(() => {
-    const fetchData = async () => {
-      await getSchedules();
-    };
-
-    fetchData();
-  }, [getSchedules]);
 
   useEffect(() => {
     const normalizeString = (str: string) =>

@@ -5,16 +5,16 @@ import { RolePermission } from "../models/RolePermission";
 
 export const useRolePermissions = () => {
   const { currentUser } = useAuth();
-  const [rolePermission, setRolePermission] = useState<RolePermission[]>([]);
+  const [rolePermissions, setRolePermissions] = useState<RolePermission[]>([]);
   const [totalCountRolePermissions, setTotalCountRolePermissions] = useState(0);
   const [isLoadingRolePermissions, setIsLoadingRolePermissions] =
     useState(false);
 
-  const getRolePermission = useCallback(async (roleId: number) => {
+  const getRolePermissions = useCallback(async () => {
     setIsLoadingRolePermissions(true);
     try {
-      const data = await RolePermissionService.getRolePermissions(roleId);
-      setRolePermission(data);
+      const data = await RolePermissionService.getRolePermissions();
+      setRolePermissions(data);
       setTotalCountRolePermissions(data.length);
       return data;
     } catch (error) {
@@ -28,24 +28,16 @@ export const useRolePermissions = () => {
   const createRolePermission = async (
     newRolePermission: Omit<RolePermission, "id">
   ) => {
-    const createdRolePermission = await RolePermissionService.createRolePermission(
-      newRolePermission
-    );
-    setRolePermission((prev) => [...prev, createdRolePermission]);
+    const createdRolePermission =
+      await RolePermissionService.createRolePermission(newRolePermission);
+    setRolePermissions((prev) => [...prev, createdRolePermission]);
     setTotalCountRolePermissions((prev) => prev + 1);
   };
 
-  const deleteRolePermission = async (
-    roleId: number,
-    permissionId: number
-  ) => {
-    await RolePermissionService.deleteRolePermission(roleId, permissionId);
-    setRolePermission((prev) =>
-      prev.filter(
-        (rolePermission) =>
-          rolePermission.roleId !== roleId &&
-          rolePermission.permissionId !== permissionId
-      )
+  const deleteRolePermission = async (id: number) => {
+    await RolePermissionService.deleteRolePermission(id);
+    setRolePermissions((prev) =>
+      prev.filter((rolePermission) => rolePermission.id !== id)
     );
     setTotalCountRolePermissions((prev) => prev - 1);
   };
@@ -54,13 +46,13 @@ export const useRolePermissions = () => {
     if (currentUser) {
       //getRolePermission();
     }
-  }, [currentUser, getRolePermission]);
+  }, [currentUser, getRolePermissions]);
 
   return {
-    rolePermission,
+    rolePermission: rolePermissions,
     totalCountRolePermissions,
     isLoadingRolePermissions,
-    getRolePermission,
+    getRolePermissions,
     createRolePermission,
     deleteRolePermission,
   };
