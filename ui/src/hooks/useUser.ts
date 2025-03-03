@@ -51,10 +51,9 @@ export const useUsers = () => {
     setUsers((prev) => [...prev, createdUser]);
     setTotalCountUsers((prev) => prev + 1);
     const createdUserRole: Omit<UserRole, "id"> = {
-      userId: createdUser.userId,
+      userId: createdUser.id,
       roleId: Roles.USER,
     };
-    console.log("createdUserRole: ", createdUserRole);
     createUserRole(createdUserRole);
     navigate("/");
   };

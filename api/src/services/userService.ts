@@ -39,10 +39,13 @@ export const getUserById = async (id: number) => {
 
 export const createUser = async (data: Omit<User, "id">) => {
   const hashedPassword = await bcrypt.hash(data.password, 10);
-  return await User.create({
-    ...data,
-    password: hashedPassword,
-  });
+  return await User.create(
+    {
+      ...data,
+      password: hashedPassword,
+    },
+    { returning: true }
+  );
 };
 
 export const deleteUser = async (id: number) => {

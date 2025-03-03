@@ -51,7 +51,8 @@ const getUserById = (id) => __awaiter(void 0, void 0, void 0, function* () {
 exports.getUserById = getUserById;
 const createUser = (data) => __awaiter(void 0, void 0, void 0, function* () {
     const hashedPassword = yield bcrypt_1.default.hash(data.password, 10);
-    return yield User_1.User.create(Object.assign(Object.assign({}, data), { password: hashedPassword }));
+    const newUser = yield User_1.User.create(Object.assign(Object.assign({}, data), { password: hashedPassword }), { returning: true });
+    return newUser;
 });
 exports.createUser = createUser;
 const deleteUser = (id) => __awaiter(void 0, void 0, void 0, function* () {
