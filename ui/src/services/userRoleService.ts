@@ -1,18 +1,16 @@
 import { UserRole } from "../models/UserRole";
 import api from "./api";
 
-export const getUserRoles = async (userId: number) => {
-  const response = await api.get(`/user-role/${userId}`);
+export const getUserRoles = async () => {
+  const response = await api.get("/user-role");
   return response.data;
 };
 
 export const createUserRole = async (userRole: Omit<UserRole, "id">) => {
-  const response = await api.post("/user-role/assign", userRole);
+  const response = await api.post("/user-role", userRole);
   return response.data;
 };
 
-export const deleteUserRole = async (userId: number, roleId: number) => {
-  await api.delete("/user-role/remove", {
-    data: { userId, roleId },
-  });
+export const deleteUserRole = async (id: number) => {
+  await api.delete(`/user-role/${id}`);
 };

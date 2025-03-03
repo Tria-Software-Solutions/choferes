@@ -41,6 +41,6 @@ const userRoleController = __importStar(require("../controllers/userRoleControll
 const authMiddleware_1 = require("../middleware/authMiddleware");
 const router = express_1.default.Router();
 router.get('/', authMiddleware_1.authenticateToken, userRoleController.getUserRoles);
-router.post('/', authMiddleware_1.authenticateToken, userRoleController.createUserRole);
+router.post('/', userRoleController.createUserRole);
 router.delete('/:id', authMiddleware_1.authenticateToken, userRoleController.deleteUserRole);
 exports.default = router;

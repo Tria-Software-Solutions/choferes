@@ -5,7 +5,7 @@ import { authenticateToken } from '../middleware/authMiddleware';
 const router = express.Router();
 
 router.get('/', authenticateToken, userRoleController.getUserRoles);
-router.post('/', authenticateToken, userRoleController.createUserRole);
+router.post('/', userRoleController.createUserRole);
 router.delete('/:id', authenticateToken, userRoleController.deleteUserRole);
 
 export default router;
