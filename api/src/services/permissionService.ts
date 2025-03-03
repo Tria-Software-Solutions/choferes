@@ -11,3 +11,7 @@ export const getPermissionById = async (id: number) => {
 export const createPermission = async (data: Omit<Permission, "id">) => {
   return await Permission.create(data);
 };
+
+export const deletePermission = async (id: number) => {
+  return await Permission.destroy({ where: { id } });
+};

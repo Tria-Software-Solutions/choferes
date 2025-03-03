@@ -15,3 +15,7 @@ export const createPermission = async (newPermission: Omit<Permission, "id">) =>
   const response = await api.post("/permissions", newPermission);
   return response.data;
 };
+
+export const deletePermission = async (id: number) => {
+  await api.delete(`/permissions/${id}`);
+};

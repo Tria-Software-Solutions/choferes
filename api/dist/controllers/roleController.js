@@ -42,7 +42,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.createRole = exports.getRoleById = exports.getRoles = void 0;
+exports.deleteRole = exports.createRole = exports.getRoleById = exports.getRoles = void 0;
 const roleService = __importStar(require("../services/roleService"));
 const getRoles = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
@@ -77,3 +77,19 @@ const createRole = (req, res) => __awaiter(void 0, void 0, void 0, function* () 
     }
 });
 exports.createRole = createRole;
+const deleteRole = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        const id = parseInt(req.params.id);
+        const deleted = yield roleService.deleteRole(id);
+        if (deleted) {
+            return res.status(204).end();
+        }
+        else {
+            return res.status(404).json({ message: "Role not found" });
+        }
+    }
+    catch (error) {
+        return res.status(500).json({ message: "Error deleting Role", error });
+    }
+});
+exports.deleteRole = deleteRole;

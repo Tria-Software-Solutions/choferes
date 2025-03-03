@@ -12,8 +12,12 @@ import {
   useTheme,
   useMediaQuery,
   CircularProgress,
+  IconButton,
+  InputAdornment,
 } from "@mui/material";
 import { PAGE_TITLE } from "../../constants/constants";
+import Visibility from "@mui/icons-material/Visibility";
+import VisibilityOff from "@mui/icons-material/VisibilityOff";
 import logo from "../../assets/images/logo.png";
 
 const Login = () => {
@@ -23,6 +27,7 @@ const Login = () => {
     password: "",
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   const handleLogin = async (e: React.FormEvent) => {
@@ -35,6 +40,10 @@ const Login = () => {
       setError("Usuario o contraseña incorrectos");
     }
     setIsSubmitting(false);
+  };
+
+  const handleTogglePassword = () => {
+    setShowPassword((prev) => !prev);
   };
 
   const theme = useTheme();
@@ -74,13 +83,22 @@ const Login = () => {
             <TextField
               fullWidth
               label="Contraseña"
-              type="password"
+              type={showPassword ? "text" : "password"}
               variant="outlined"
               margin="normal"
               value={fields.password}
               onChange={(e) =>
                 setFields({ ...fields, password: e.target.value })
               }
+              InputProps={{
+                endAdornment: (
+                  <InputAdornment position="end">
+                    <IconButton onClick={handleTogglePassword} edge="end">
+                      {showPassword ? <VisibilityOff /> : <Visibility />}
+                    </IconButton>
+                  </InputAdornment>
+                ),
+              }}
             />
             <Button
               type="submit"

@@ -26,12 +26,15 @@ export const createRolePermission = async (req: Request, res: Response) => {
 };
 
 export const deleteRolePermission = async (req: Request, res: Response) => {
-  const { roleId, permissionId } = req.body;
-
   try {
-    await rolePermissionService.deleteRolePermission(roleId, permissionId);
-    res.status(200).json({ message: "RolePermission deleted" });
+    const id = parseInt(req.params.id);
+    const deleted = await rolePermissionService.deleteRolePermission(id);
+    if (deleted) {
+      return res.status(204).end();
+    } else {
+      return res.status(404).json({ message: "RolePermission not found" });
+    }
   } catch (error) {
-    res.status(400).json({ message: "Error deleting RolePermission", error });
+    return res.status(500).json({ message: "Error deleting RolePermission", error });
   }
 };

@@ -19,7 +19,7 @@ const createUserRole = (data) => __awaiter(void 0, void 0, void 0, function* () 
     return UserRole_1.UserRole.create(data);
 });
 exports.createUserRole = createUserRole;
-const deleteUserRole = (userId, roleId) => __awaiter(void 0, void 0, void 0, function* () {
-    return UserRole_1.UserRole.destroy({ where: { userId, roleId } });
+const deleteUserRole = (id) => __awaiter(void 0, void 0, void 0, function* () {
+    return UserRole_1.UserRole.destroy({ where: { id } });
 });
 exports.deleteUserRole = deleteUserRole;

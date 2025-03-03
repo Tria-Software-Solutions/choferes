@@ -43,3 +43,17 @@ export const createUser = async (req: Request, res: Response) => {
     res.status(500).json({ message: "Error registering User", error });
   }
 };
+
+export const deleteUser = async (req: Request, res: Response) => {
+  try {
+    const id = parseInt(req.params.id);
+    const deleted = await userService.deleteUser(id);
+    if (deleted) {
+      return res.status(204).end();
+    } else {
+      return res.status(404).json({ message: "User not found" });
+    }
+  } catch (error) {
+    return res.status(500).json({ message: "Error deleting User", error });
+  }
+};

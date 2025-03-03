@@ -66,13 +66,18 @@ const createUserRole = (req, res) => __awaiter(void 0, void 0, void 0, function*
 });
 exports.createUserRole = createUserRole;
 const deleteUserRole = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    const { userId, roleId } = req.body;
     try {
-        yield userRoleService.deleteUserRole(userId, roleId);
-        res.status(200).json({ message: "UserRole deleted" });
+        const id = parseInt(req.params.id);
+        const deleted = yield userRoleService.deleteUserRole(id);
+        if (deleted) {
+            return res.status(204).end();
+        }
+        else {
+            return res.status(404).json({ message: "UserRole not found" });
+        }
     }
     catch (error) {
-        res.status(400).json({ message: "Error deleting UserRole", error });
+        return res.status(500).json({ message: "Error deleting UserRole", error });
     }
 });
 exports.deleteUserRole = deleteUserRole;

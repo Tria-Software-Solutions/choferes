@@ -9,7 +9,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.createPermission = exports.getPermissionById = exports.getPermissions = void 0;
+exports.deletePermission = exports.createPermission = exports.getPermissionById = exports.getPermissions = void 0;
 const Permission_1 = require("../models/Permission");
 const getPermissions = () => __awaiter(void 0, void 0, void 0, function* () {
     return yield Permission_1.Permission.findAll();
@@ -23,3 +23,7 @@ const createPermission = (data) => __awaiter(void 0, void 0, void 0, function* (
     return yield Permission_1.Permission.create(data);
 });
 exports.createPermission = createPermission;
+const deletePermission = (id) => __awaiter(void 0, void 0, void 0, function* () {
+    return yield Permission_1.Permission.destroy({ where: { id } });
+});
+exports.deletePermission = deletePermission;

@@ -42,7 +42,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.createPermission = exports.getPermissionById = exports.getPermissions = void 0;
+exports.deletePermission = exports.createPermission = exports.getPermissionById = exports.getPermissions = void 0;
 const permissionService = __importStar(require("../services/permissionService"));
 const getPermissions = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
@@ -77,3 +77,19 @@ const createPermission = (req, res) => __awaiter(void 0, void 0, void 0, functio
     }
 });
 exports.createPermission = createPermission;
+const deletePermission = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        const id = parseInt(req.params.id);
+        const deleted = yield permissionService.deletePermission(id);
+        if (deleted) {
+            return res.status(204).end();
+        }
+        else {
+            return res.status(404).json({ message: "Permission not found" });
+        }
+    }
+    catch (error) {
+        return res.status(500).json({ message: "Error deleting Permission", error });
+    }
+});
+exports.deletePermission = deletePermission;

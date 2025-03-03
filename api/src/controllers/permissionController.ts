@@ -29,3 +29,17 @@ export const createPermission = async (req: Request, res: Response) => {
     res.status(500).json({ message: 'Error creating Permission', error });
   }
 };
+
+export const deletePermission = async (req: Request, res: Response) => {
+  try {
+    const id = parseInt(req.params.id);
+    const deleted = await permissionService.deletePermission(id);
+    if (deleted) {
+      return res.status(204).end();
+    } else {
+      return res.status(404).json({ message: "Permission not found" });
+    }
+  } catch (error) {
+    return res.status(500).json({ message: "Error deleting Permission", error });
+  }
+};

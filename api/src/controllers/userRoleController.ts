@@ -22,12 +22,15 @@ export const createUserRole = async (req: Request, res: Response) => {
 };
 
 export const deleteUserRole = async (req: Request, res: Response) => {
-  const { userId, roleId } = req.body;
-
   try {
-    await userRoleService.deleteUserRole(userId, roleId);
-    res.status(200).json({ message: "UserRole deleted" });
+    const id = parseInt(req.params.id);
+    const deleted = await userRoleService.deleteUserRole(id);
+    if (deleted) {
+      return res.status(204).end();
+    } else {
+      return res.status(404).json({ message: "UserRole not found" });
+    }
   } catch (error) {
-    res.status(400).json({ message: "Error deleting UserRole", error });
+    return res.status(500).json({ message: "Error deleting UserRole", error });
   }
 };
