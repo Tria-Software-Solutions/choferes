@@ -1,13 +1,24 @@
 import React, { useState, useEffect, useCallback } from "react";
 import { Permission } from "../../models/Permission";
-import { useUsers } from "../../hooks/useUser";
+import { usePermissions } from "../../hooks/usePermission";
 import { fetchPermissions } from "../../services/permissionService";
-import { Box, CircularProgress, Stack, Typography } from "@mui/material";
+import {
+  Box,
+  Button,
+  CircularProgress,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogTitle,
+  Stack,
+  Typography,
+} from "@mui/material";
 import EditableTable from "../../components/Table/EditableTable/EditableTable";
 import SearchBar from "../../components/SearchBar/SearchBar";
 
+
 const ManagePermissions = () => {
-  const { isLoadingPermissions, handleUpdatePermission } = useUsers();
+  const { isLoadingPermissions, handleUpdatePermission, handleDeletePermission } = usePermissions();
   const [permissions, setPermissions] = useState<Permission[]>([]);
   const [filteredPermissions, setFilteredPermissions] = useState<Permission[]>(
     []
@@ -90,17 +101,17 @@ const ManagePermissions = () => {
     setPermissionToDelete(id);
   };
 
-  // const handleCloseDialog = () => {
-  //   setDialogOpen(false);
-  //   setPermissionToDelete(null);
-  // };
+  const handleCloseDialog = () => {
+    setDialogOpen(false);
+    setPermissionToDelete(null);
+  };
 
-  // const handleDelete = () => {
-  //   if (permissionToDelete !== null) {
-  //     handleDeletePermission(permissionToDelete);
-  //     handleCloseDialog();
-  //   }
-  // };
+  const handleDelete = () => {
+    if (permissionToDelete !== null) {
+      handleDeletePermission(permissionToDelete);
+      handleCloseDialog();
+    }
+  };
 
   return (
     <Box>
@@ -166,6 +177,22 @@ const ManagePermissions = () => {
           )}
         </>
       )}
+      <Dialog open={dialogOpen} onClose={handleCloseDialog}>
+        <DialogTitle>Confirmar Eliminación</DialogTitle>
+        <DialogContent>
+          <Typography>
+            ¿Estás seguro de que deseas eliminar este permiso?
+          </Typography>
+        </DialogContent>
+        <DialogActions>
+          <Button color="primary" onClick={handleCloseDialog}>
+            Cancelar
+          </Button>
+          <Button color="secondary" onClick={handleDelete}>
+            Eliminar
+          </Button>
+        </DialogActions>
+      </Dialog>
     </Box>
   );
 };

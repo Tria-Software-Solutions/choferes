@@ -169,30 +169,25 @@ const RolesPage: React.FC = () => {
           new Date(hours.date).getTime() === new Date(date).getTime()
       );
 
-      let newHoursId: number | undefined;
-      let updatedHoursWorked: HoursWorked;
       let previousHours: number | undefined;
+      let addOrUpdatedHoursWorked: Omit<HoursWorked, "id"> | HoursWorked;
 
       if (existingHoursRecord) {
-        updatedHoursWorked = {
+        addOrUpdatedHoursWorked = {
           ...existingHoursRecord,
           scheduleId,
         };
-        newHoursId = existingHoursRecord.id;
         previousHours = schedules.find(
           (schedule) => schedule.id === existingHoursRecord.scheduleId
         )?.hours;
       } else {
-        newHoursId =
-          Math.max(...hoursWorked.map((hours) => hours.id || 0), 0) + 1;
-        updatedHoursWorked = {
-          id: newHoursId,
+        addOrUpdatedHoursWorked = {
           employeeId,
           date,
           scheduleId,
         };
       }
-      handleAddOrUpdateHours(updatedHoursWorked);
+      handleAddOrUpdateHours(addOrUpdatedHoursWorked);
 
       const existingWeeklySummaryRecord = weeklySummaries.find(
         (weeklySummary) =>
@@ -202,11 +197,10 @@ const RolesPage: React.FC = () => {
           weeklySummary.year === year
       );
 
-      let newWeeklySummaryId: number | undefined;
-      let updatedWeeklySummary: WeeklySummary;
+      let addOrUpdatedWeeklySummary: Omit<WeeklySummary, "id"> | WeeklySummary;
 
       if (existingWeeklySummaryRecord) {
-        updatedWeeklySummary = {
+        addOrUpdatedWeeklySummary = {
           ...existingWeeklySummaryRecord,
           totalHours: previousHours
             ? existingWeeklySummaryRecord.totalHours +
@@ -214,15 +208,8 @@ const RolesPage: React.FC = () => {
               previousHours
             : existingWeeklySummaryRecord.totalHours + totalHours,
         };
-        newWeeklySummaryId = existingWeeklySummaryRecord.id;
       } else {
-        newWeeklySummaryId =
-          Math.max(
-            ...weeklySummaries.map((weeklySummary) => weeklySummary.id || 0),
-            0
-          ) + 1;
-        updatedWeeklySummary = {
-          id: newWeeklySummaryId,
+        addOrUpdatedWeeklySummary = {
           employeeId,
           weekNumber,
           month,
@@ -230,7 +217,7 @@ const RolesPage: React.FC = () => {
           totalHours,
         };
       }
-      handleAddOrUpdateWeeklySummary(updatedWeeklySummary);
+      handleAddOrUpdateWeeklySummary(addOrUpdatedWeeklySummary);
 
       const existingBiweeklySummaryRecord = biweeklySummaries.find(
         (biweeklySummary) =>
@@ -240,11 +227,10 @@ const RolesPage: React.FC = () => {
           biweeklySummary.year === year
       );
 
-      let newBiweeklySummaryId: number | undefined;
-      let updatedBiweeklySummary: BiweeklySummary;
+      let addOrUpdatedBiweeklySummary: Omit<BiweeklySummary, "id"> | BiweeklySummary;
 
       if (existingBiweeklySummaryRecord) {
-        updatedBiweeklySummary = {
+        addOrUpdatedBiweeklySummary = {
           ...existingBiweeklySummaryRecord,
           totalHours: previousHours
             ? existingBiweeklySummaryRecord.totalHours +
@@ -252,17 +238,8 @@ const RolesPage: React.FC = () => {
               previousHours
             : existingBiweeklySummaryRecord.totalHours + totalHours,
         };
-        newBiweeklySummaryId = existingBiweeklySummaryRecord.id;
       } else {
-        newBiweeklySummaryId =
-          Math.max(
-            ...biweeklySummaries.map(
-              (biweeklySummary) => biweeklySummary.id || 0
-            ),
-            0
-          ) + 1;
-        updatedBiweeklySummary = {
-          id: newBiweeklySummaryId,
+        addOrUpdatedBiweeklySummary = {
           employeeId,
           biweekNumber,
           month,
@@ -270,7 +247,7 @@ const RolesPage: React.FC = () => {
           totalHours,
         };
       }
-      handleAddOrUpdateBiweeklySummary(updatedBiweeklySummary);
+      handleAddOrUpdateBiweeklySummary(addOrUpdatedBiweeklySummary);
 
       const existingMonthlySummaryRecord = monthlySummaries.find(
         (monthlySummary) =>
@@ -279,11 +256,10 @@ const RolesPage: React.FC = () => {
           monthlySummary.year === year
       );
 
-      let newMonthlySummaryId: number | undefined;
-      let updatedMonthlySummary: MonthlySummary;
+      let addOrUpdatedMonthlySummary: Omit<MonthlySummary, "id"> | MonthlySummary;
 
       if (existingMonthlySummaryRecord) {
-        updatedMonthlySummary = {
+        addOrUpdatedMonthlySummary = {
           ...existingMonthlySummaryRecord,
           totalHours: previousHours
             ? existingMonthlySummaryRecord.totalHours +
@@ -291,22 +267,15 @@ const RolesPage: React.FC = () => {
               previousHours
             : existingMonthlySummaryRecord.totalHours + totalHours,
         };
-        newMonthlySummaryId = existingMonthlySummaryRecord.id;
       } else {
-        newMonthlySummaryId =
-          Math.max(
-            ...monthlySummaries.map((monthlySummary) => monthlySummary.id || 0),
-            0
-          ) + 1;
-        updatedMonthlySummary = {
-          id: newMonthlySummaryId,
+        addOrUpdatedMonthlySummary = {
           employeeId,
           month,
           year,
           totalHours,
         };
       }
-      handleAddOrUpdateMonthlySummary(updatedMonthlySummary);
+      handleAddOrUpdateMonthlySummary(addOrUpdatedMonthlySummary);
     },
     [
       hoursWorked,

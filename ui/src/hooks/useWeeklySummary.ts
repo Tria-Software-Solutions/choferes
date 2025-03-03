@@ -5,7 +5,8 @@ import { WeeklySummary } from "../models/WeeklySummary";
 export const useWeeklySummaries = () => {
   const [weeklySummaries, setWeeklySummaries] = useState<WeeklySummary[]>([]);
   const [totalCount, setTotalCount] = useState(0);
-  const [isLoadingWeeklySummaries, setIsLoadingWeeklySummaries] = useState(false);
+  const [isLoadingWeeklySummaries, setIsLoadingWeeklySummaries] =
+    useState(false);
 
   const fetchWeeklySummaries = useCallback(async () => {
     setIsLoadingWeeklySummaries(true);
@@ -20,9 +21,13 @@ export const useWeeklySummaries = () => {
     }
   }, []);
 
-  const handleAddWeeklySummary = async (newWeeklySummary: WeeklySummary) => {
-    await WeeklySummaryService.addWeeklySummary(newWeeklySummary);
-    setWeeklySummaries((prev) => [...prev, newWeeklySummary]);
+  const handleAddWeeklySummary = async (
+    newWeeklySummary: Omit<WeeklySummary, "id">
+  ) => {
+    const createdWeeklySummary = await WeeklySummaryService.addWeeklySummary(
+      newWeeklySummary
+    );
+    setWeeklySummaries((prev) => [...prev, createdWeeklySummary]);
     setTotalCount((prev) => prev + 1);
   };
 
@@ -41,28 +46,12 @@ export const useWeeklySummaries = () => {
   };
 
   const handleAddOrUpdateWeeklySummary = async (
-    newWeeklySummary: WeeklySummary
+    newWeeklySummary: Omit<WeeklySummary, "id"> | WeeklySummary
   ) => {
-    const existingSummary = weeklySummaries.find(
-      (summary) => summary.id === newWeeklySummary.id
-    );
-  
-    if (existingSummary) {
-      await WeeklySummaryService.updateWeeklySummary(
-        newWeeklySummary.id!,
-        newWeeklySummary
-      );
-      setWeeklySummaries((prev) =>
-        prev.map((summary) =>
-          summary.id === newWeeklySummary.id
-            ? { ...summary, ...newWeeklySummary }
-            : summary
-        )
-      );
+    if ("id" in newWeeklySummary) {
+      await handleUpdateWeeklySummary(newWeeklySummary.id, newWeeklySummary);
     } else {
-      await WeeklySummaryService.addWeeklySummary(newWeeklySummary);
-      setWeeklySummaries((prev) => [...prev, newWeeklySummary]);
-      setTotalCount((prev) => prev + 1);
+      await handleAddWeeklySummary(newWeeklySummary);
     }
   };
 

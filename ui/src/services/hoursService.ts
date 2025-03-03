@@ -6,8 +6,9 @@ export const fetchHours = async () => {
   return response.data;
 };
 
-export const addHours = async (newHours: HoursWorked) => {
-  await api.post("/hours", newHours);
+export const addHours = async (newHours: Omit<HoursWorked, "id">) => {
+  const response = await api.post("/hours", newHours);
+  return response.data;
 };
 
 export const updateHours = async (id: number, updatedHours: Partial<HoursWorked>) => {

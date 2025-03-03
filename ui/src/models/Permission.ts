@@ -1,4 +1,4 @@
 export interface Permission {
-  id: number;
+  id: number; 
   name: string;
 }

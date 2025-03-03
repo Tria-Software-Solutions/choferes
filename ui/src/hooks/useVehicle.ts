@@ -38,10 +38,10 @@ export const useVehicles = (selectedDate?: string) => {
     }
   }, []);
 
-  const handleAddVehicle = async (newVehicle: Vehicle) => {
-    await VehicleService.addVehicle(newVehicle);
-    setVehicles((prev) => [...prev, newVehicle]);
-    setAllVehicles((prev) => [...prev, newVehicle]);
+  const handleAddVehicle = async (newVehicle: Omit<Vehicle, "id">) => {
+    const createdVehicle = await VehicleService.addVehicle(newVehicle);
+    setVehicles((prev) => [...prev, createdVehicle]);
+    setAllVehicles((prev) => [...prev, createdVehicle]);
     setTotalCount((prev) => prev + 1);
   };
 
@@ -90,6 +90,5 @@ export const useVehicles = (selectedDate?: string) => {
     handleAddVehicle,
     handleUpdateVehicle,
     handleDeleteVehicle,
-    setAllVehicles,
   };
 };

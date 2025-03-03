@@ -11,8 +11,9 @@ export const fetchVehicles = async (
   return response.data;
 };
 
-export const addVehicle = async (newVehicle: Vehicle) => {
-  await api.post("/vehicles", newVehicle);
+export const addVehicle = async (newVehicle: Omit<Vehicle, "id">) => {
+  const response = await api.post("/vehicles", newVehicle);
+  return response.data;
 };
 
 export const getVehicleById = async (id: number): Promise<Vehicle> => {

@@ -1,13 +1,13 @@
 import React, { useState, useEffect, useCallback } from "react";
 import { Role } from "../../models/Role";
-import { useUsers } from "../../hooks/useUser";
+import { useRoles } from "../../hooks/useRole";
 import { fetchRoles } from "../../services/roleService";
-import { Box, CircularProgress, Stack, Typography } from "@mui/material";
+import { Box, Button, CircularProgress, Dialog, DialogActions, DialogContent, DialogTitle, Stack, Typography } from "@mui/material";
 import EditableTable from "../../components/Table/EditableTable/EditableTable";
 import SearchBar from "../../components/SearchBar/SearchBar";
 
 const ManageRoles = () => {
-  const { isLoadingRoles, handleUpdateRole } = useUsers();
+  const { isLoadingRoles, handleUpdateRole, handleDeleteRole } = useRoles();
   const [roles, setRoles] = useState<Role[]>([]);
   const [filteredRoles, setFilteredRoles] = useState<Role[]>([]);
   const [totalCount, setTotalCount] = useState(0);
@@ -86,17 +86,17 @@ const ManageRoles = () => {
     setRoleToDelete(id);
   };
 
-  // const handleCloseDialog = () => {
-  //   setDialogOpen(false);
-  //   setRoleToDelete(null);
-  // };
+  const handleCloseDialog = () => {
+    setDialogOpen(false);
+    setRoleToDelete(null);
+  };
 
-  // const handleDelete = () => {
-  //   if (roleToDelete !== null) {
-  //     handleDeleteRole(rolerToDelete);
-  //     handleCloseDialog();
-  //   }
-  // };
+  const handleDelete = () => {
+    if (roleToDelete !== null) {
+      handleDeleteRole(roleToDelete);
+      handleCloseDialog();
+    }
+  };
 
   return (
     <Box>
@@ -162,6 +162,22 @@ const ManageRoles = () => {
           )}
         </>
       )}
+      <Dialog open={dialogOpen} onClose={handleCloseDialog}>
+        <DialogTitle>Confirmar Eliminación</DialogTitle>
+        <DialogContent>
+          <Typography>
+            ¿Estás seguro de que deseas eliminar este rol?
+          </Typography>
+        </DialogContent>
+        <DialogActions>
+          <Button color="primary" onClick={handleCloseDialog}>
+            Cancelar
+          </Button>
+          <Button color="secondary" onClick={handleDelete}>
+            Eliminar
+          </Button>
+        </DialogActions>
+      </Dialog>
     </Box>
   );
 };

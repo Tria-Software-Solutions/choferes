@@ -12,18 +12,12 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.getUserById = exports.getUsers = exports.authenticateUser = exports.createUser = void 0;
+exports.getUserById = exports.getUsers = exports.createUser = exports.authenticateUser = void 0;
 const User_1 = require("../models/User");
 const Role_1 = require("../models/Role");
 const bcrypt_1 = __importDefault(require("bcrypt"));
 const jsonwebtoken_1 = __importDefault(require("jsonwebtoken"));
 const SECRET_KEY = process.env.JWT_SECRET_KEY || "default_secret";
-const createUser = (data) => __awaiter(void 0, void 0, void 0, function* () {
-    const hashedPassword = yield bcrypt_1.default.hash(data.password, 10);
-    const user = yield User_1.User.create(Object.assign(Object.assign({}, data), { password: hashedPassword }));
-    return user;
-});
-exports.createUser = createUser;
 const authenticateUser = (username, password) => __awaiter(void 0, void 0, void 0, function* () {
     if (!SECRET_KEY)
         throw new Error("JWT_SECRET_KEY is not set");
@@ -47,6 +41,11 @@ const authenticateUser = (username, password) => __awaiter(void 0, void 0, void 
     return { user, token };
 });
 exports.authenticateUser = authenticateUser;
+const createUser = (data) => __awaiter(void 0, void 0, void 0, function* () {
+    const hashedPassword = yield bcrypt_1.default.hash(data.password, 10);
+    return yield User_1.User.create(Object.assign(Object.assign({}, data), { password: hashedPassword }));
+});
+exports.createUser = createUser;
 const getUsers = () => __awaiter(void 0, void 0, void 0, function* () {
     return yield User_1.User.findAll({ include: Role_1.Role });
 });

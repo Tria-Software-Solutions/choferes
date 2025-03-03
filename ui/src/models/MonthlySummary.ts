@@ -1,5 +1,5 @@
 export interface MonthlySummary {
-  id?: number;
+  id: number; 
   employeeId: number;
   month: number;
   year: number;

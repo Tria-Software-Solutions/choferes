@@ -6,8 +6,9 @@ export const fetchWeeklySummaries = async () => {
   return response.data;
 };
 
-export const addWeeklySummary = async (newWeeklySummary: WeeklySummary) => {
-  await api.post("/weekly-summary", newWeeklySummary);
+export const addWeeklySummary = async (newWeeklySummary: Omit<WeeklySummary, "id">) => {
+  const response = await api.post("/weekly-summary", newWeeklySummary);
+  return response.data;
 };
 
 export const updateWeeklySummary = async (

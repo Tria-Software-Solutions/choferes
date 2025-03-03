@@ -6,8 +6,9 @@ export const fetchEmployees = async () => {
   return response.data;
 };
 
-export const addEmployee = async (newEmployee: Employee) => {
-  await api.post("/employees", newEmployee);
+export const addEmployee = async (newEmployee: Omit<Employee, "id">) => {
+  const response = await api.post("/employees", newEmployee);
+  return response.data;
 };
 
 export const updateEmployee = async (

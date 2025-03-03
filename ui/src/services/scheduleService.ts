@@ -6,8 +6,9 @@ export const fetchSchedules = async () => {
   return response.data;
 };
 
-export const addSchedule = async (newSchedule: Schedule) => {
-  await api.post("/schedules", newSchedule);
+export const addSchedule = async (newSchedule: Omit<Schedule, "id">) => {
+  const response = await api.post("/schedules", newSchedule);
+  return response.data;
 };
 
 export const updateSchedule = async (id: number, updatedSchedule: Partial<Schedule>) => {

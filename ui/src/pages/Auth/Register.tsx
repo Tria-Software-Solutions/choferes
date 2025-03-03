@@ -17,7 +17,7 @@ import logo from "../../assets/images/logo.png";
 import { PAGE_TITLE } from "../../constants/constants";
 
 const Register = () => {
-  const { users, handleRegisterUser } = useUsers();
+  const { handleRegisterUser } = useUsers();
   const [addFields, setAddFields] = useState({
     firstName: "",
     lastName: "",
@@ -66,8 +66,7 @@ const Register = () => {
     if (!isValid) return;
 
     try {
-      const newUser: User = {
-        id: Math.max(...users.map((user) => user.id)) + 1,
+      const newUser: Omit<User, "id"> = {
         firstName: addFields.firstName,
         lastName: addFields.lastName,
         email: addFields.email,

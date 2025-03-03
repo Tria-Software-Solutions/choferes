@@ -22,9 +22,9 @@ export const useHours = () => {
     }
   }, []);
 
-  const handleAddHours = async (newHours: HoursWorked) => {
-    await HoursService.addHours(newHours);
-    setHoursWorked((prev) => [...prev, newHours]);
+  const handleAddHours = async (newHours: Omit<HoursWorked, "id">) => {
+    const createdHoursWorked = await HoursService.addHours(newHours);
+    setHoursWorked((prev) => [...prev, createdHoursWorked]);
     setTotalCount((prev) => prev + 1);
   };
 
@@ -40,19 +40,13 @@ export const useHours = () => {
     );
   };
 
-  const handleAddOrUpdateHours = async (newHours: HoursWorked) => {
-    const existingHours = hoursWorked.find((hours) => hours.id === newHours.id);
-
-    if (existingHours) {
-      await HoursService.updateHours(newHours.id!, newHours);
-      setHoursWorked((prev) =>
-        prev.map((hours) =>
-          hours.id === newHours.id ? { ...hours, ...newHours } : hours
-        )
-      );
+  const handleAddOrUpdateHours = async (
+    newHours: Omit<HoursWorked, "id"> | HoursWorked
+  ) => {
+    if ("id" in newHours) {
+      await handleUpdateHours(newHours.id, newHours);
     } else {
-      await HoursService.addHours(newHours);
-      setHoursWorked((prev) => [...prev, newHours]);
+      await handleAddHours(newHours);
     }
   };
 

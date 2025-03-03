@@ -1,14 +1,12 @@
 import React, { useState, useEffect, useCallback } from "react";
 import { User } from "../../models/User";
 import { useUsers } from "../../hooks/useUser";
-import { fetchUsers } from "../../services/userService";
-import { Box, CircularProgress, Stack, Typography } from "@mui/material";
+import { Box, Button, CircularProgress, Dialog, DialogActions, DialogContent, DialogTitle, Stack, Typography } from "@mui/material";
 import EditableTable from "../../components/Table/EditableTable/EditableTable";
 import SearchBar from "../../components/SearchBar/SearchBar";
 
 const ManageUsers = () => {
-  const { isLoadingUsers, handleUpdateUser } = useUsers();
-  const [users, setUsers] = useState<User[]>([]);
+  const { users, isLoadingUsers, handleUpdateUser, handleDeleteUser } = useUsers();
   const [filteredUsers, setFilteredUsers] = useState<User[]>([]);
   const [totalCount, setTotalCount] = useState(0);
   const [editRowId, setEditRowId] = useState<number | null>(null);
@@ -24,16 +22,7 @@ const ManageUsers = () => {
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(5);
   const [isEditFormValid, setIsEditFormValid] = useState(false);
-
-  useEffect(() => {
-    const users = async () => {
-      const fetchedUsers = await fetchUsers();
-      setUsers(fetchedUsers);
-    };
-
-    users();
-  }, []);
-
+  
   useEffect(() => {
     const normalizeString = (str: string) =>
       str.normalize("NFD").replace(/[\u0300-\u036f]/g, "");
@@ -101,17 +90,17 @@ const ManageUsers = () => {
     setUserToDelete(id);
   };
 
-  // const handleCloseDialog = () => {
-  //   setDialogOpen(false);
-  //   setUserToDelete(null);
-  // };
+  const handleCloseDialog = () => {
+    setDialogOpen(false);
+    setUserToDelete(null);
+  };
 
-  // const handleDelete = () => {
-  //   if (userToDelete !== null) {
-  //     handleDeleteUser(userToDelete);
-  //     handleCloseDialog();
-  //   }
-  // };
+  const handleDelete = () => {
+    if (userToDelete !== null) {
+      handleDeleteUser(userToDelete);
+      handleCloseDialog();
+    }
+  };
 
   return (
     <Box>
@@ -177,6 +166,22 @@ const ManageUsers = () => {
           )}
         </>
       )}
+      <Dialog open={dialogOpen} onClose={handleCloseDialog}>
+        <DialogTitle>Confirmar Eliminación</DialogTitle>
+        <DialogContent>
+          <Typography>
+            ¿Estás seguro de que deseas eliminar este usuario?
+          </Typography>
+        </DialogContent>
+        <DialogActions>
+          <Button color="primary" onClick={handleCloseDialog}>
+            Cancelar
+          </Button>
+          <Button color="secondary" onClick={handleDelete}>
+            Eliminar
+          </Button>
+        </DialogActions>
+      </Dialog>
     </Box>
   );
 };

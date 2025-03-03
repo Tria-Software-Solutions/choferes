@@ -20,9 +20,9 @@ export const useEmployees = () => {
     }
   }, []);
 
-  const handleAddEmployee = async (newEmployee: Employee) => {
-    await EmployeeService.addEmployee(newEmployee);
-    setEmployees((prev) => [...prev, newEmployee]);
+  const handleAddEmployee = async (newEmployee: Omit<Employee, "id">) => {
+    const createdEmployee = await EmployeeService.addEmployee(newEmployee);
+    setEmployees((prev) => [...prev, createdEmployee]);
     setTotalCount((prev) => prev + 1);
   };
 
