@@ -20,9 +20,9 @@ export const useSchedules = () => {
     }
   }, []);
 
-  const handleAddSchedule = async (newSchedule: Schedule) => {
-    await ScheduleService.addSchedule(newSchedule);
-    setSchedules((prev) => [...prev, newSchedule]);
+  const handleAddSchedule = async (newSchedule: Omit<Schedule, "id">) => {
+    const createdSchedule = await ScheduleService.addSchedule(newSchedule);
+    setSchedules((prev) => [...prev, createdSchedule]);
     setTotalCount((prev) => prev + 1);
   };
 

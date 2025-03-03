@@ -6,7 +6,7 @@ export const fetchRoles = async () => {
   return response.data;
 };
 
-export const addRole = async (newRole: Role) => {
+export const addRole = async (newRole: Omit<Role, "id">) => {
   const response = await api.post("/roles", newRole);
   return response.data;
 };

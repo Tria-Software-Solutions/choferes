@@ -14,8 +14,7 @@ export const fetchUserRoles = async (userId: number) => {
 };
 
 export const deleteUserRole = async (userId: number, roleId: number) => {
-  const response = await api.delete("/user-role/remove", {
+  await api.delete("/user-role/remove", {
     data: { userId, roleId },
   });
-  return response.data;
 };

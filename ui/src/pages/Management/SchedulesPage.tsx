@@ -121,12 +121,7 @@ const SchedulesPage: React.FC = () => {
   };
 
   const handleAdd = () => {
-    const newId =
-      schedules.length > 0
-        ? Math.max(...schedules.map((schedule) => schedule.id)) + 1
-        : 1;
-    const newSchedule: Schedule = {
-      id: newId,
+    const newSchedule: Omit<Schedule, "id"> = {
       label: addFields.label,
       day: addFields.day,
       hours: parseInt(addFields.hours, 10),

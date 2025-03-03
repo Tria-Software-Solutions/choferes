@@ -89,12 +89,7 @@ const EmployeesPage: React.FC = () => {
   };
 
   const handleAdd = () => {
-    const newId =
-      employees.length > 0
-        ? Math.max(...employees.map((employee) => employee.id)) + 1
-        : 1;
-    const newEmployee: Employee = {
-      id: newId,
+    const newEmployee: Omit<Employee, "id"> = {  
       firstName: addFields.firstName,
       lastName: addFields.lastName,
     };

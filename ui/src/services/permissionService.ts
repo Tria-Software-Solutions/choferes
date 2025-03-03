@@ -6,7 +6,7 @@ export const fetchPermissions = async () => {
   return response.data;
 };
 
-export const addPermission = async (newPermission: Permission) => {
+export const addPermission = async (newPermission: Omit<Permission, "id">) => {
   const response = await api.post("/permissions", newPermission);
   return response.data;
 };

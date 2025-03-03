@@ -5,15 +5,6 @@ import jwt from "jsonwebtoken";
 
 const SECRET_KEY = process.env.JWT_SECRET_KEY || "default_secret";
 
-export const createUser = async (data: Omit<User, "id">) => {
-  const hashedPassword = await bcrypt.hash(data.password, 10);
-  const user = await User.create({
-    ...data,
-    password: hashedPassword,
-  });
-  return user;
-};
-
 export const authenticateUser = async (username: string, password: string) => {
   if (!SECRET_KEY) throw new Error("JWT_SECRET_KEY is not set");
 
@@ -36,6 +27,14 @@ export const authenticateUser = async (username: string, password: string) => {
     expiresIn: "1h",
   });
   return { user, token };
+};
+
+export const createUser = async (data: Omit<User, "id">) => {
+  const hashedPassword = await bcrypt.hash(data.password, 10);
+  return await User.create({
+    ...data,
+    password: hashedPassword,
+  });
 };
 
 export const getUsers = async () => {

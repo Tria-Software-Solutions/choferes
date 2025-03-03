@@ -24,10 +24,11 @@ export const useBiweeklySummaries = () => {
   }, []);
 
   const handleAddBiweeklySummary = async (
-    newBiweeklySummary: BiweeklySummary
+    newBiweeklySummary: Omit<BiweeklySummary, "id">
   ) => {
-    await BiweeklySummaryService.addBiweeklySummary(newBiweeklySummary);
-    setBiweeklySummaries((prev) => [...prev, newBiweeklySummary]);
+    const createdBiweeklySummary =
+      await BiweeklySummaryService.addBiweeklySummary(newBiweeklySummary);
+    setBiweeklySummaries((prev) => [...prev, createdBiweeklySummary]);
     setTotalCount((prev) => prev + 1);
   };
 
@@ -49,28 +50,15 @@ export const useBiweeklySummaries = () => {
   };
 
   const handleAddOrUpdateBiweeklySummary = async (
-    newBiweeklySummary: BiweeklySummary
+    newBiweeklySummary: Omit<BiweeklySummary, "id"> | BiweeklySummary
   ) => {
-    const existingSummary = biweeklySummaries.find(
-      (summary) => summary.id === newBiweeklySummary.id
-    );
-
-    if (existingSummary) {
-      await BiweeklySummaryService.updateBiweeklySummary(
-        newBiweeklySummary.id!,
+    if ("id" in newBiweeklySummary) {
+      await handleUpdateBiweeklySummary(
+        newBiweeklySummary.id,
         newBiweeklySummary
       );
-      setBiweeklySummaries((prev) =>
-        prev.map((summary) =>
-          summary.id === newBiweeklySummary.id
-            ? { ...summary, ...newBiweeklySummary }
-            : summary
-        )
-      );
     } else {
-      await BiweeklySummaryService.addBiweeklySummary(newBiweeklySummary);
-      setBiweeklySummaries((prev) => [...prev, newBiweeklySummary]);
-      setTotalCount((prev) => prev + 1);
+      await handleAddBiweeklySummary(newBiweeklySummary);
     }
   };
 

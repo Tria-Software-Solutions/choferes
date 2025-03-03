@@ -23,9 +23,13 @@ export const useMonthlySummaries = () => {
     }
   }, []);
 
-  const handleAddMonthlySummary = async (newMonthlySummary: MonthlySummary) => {
-    await MonthlySummaryService.addMonthlySummary(newMonthlySummary);
-    setMonthlySummaries((prev) => [...prev, newMonthlySummary]);
+  const handleAddMonthlySummary = async (
+    newMonthlySummary: Omit<MonthlySummary, "id">
+  ) => {
+    const createdMonthlySummary = await MonthlySummaryService.addMonthlySummary(
+      newMonthlySummary
+    );
+    setMonthlySummaries((prev) => [...prev, createdMonthlySummary]);
     setTotalCount((prev) => prev + 1);
   };
 
@@ -43,38 +47,22 @@ export const useMonthlySummaries = () => {
     );
   };
 
+  const handleAddOrUpdateMonthlySummary = async (
+    newMonthlySummary: Omit<MonthlySummary, "id"> | MonthlySummary
+  ) => {
+    if ("id" in newMonthlySummary) {
+      await handleUpdateMonthlySummary(newMonthlySummary.id, newMonthlySummary);
+    } else {
+      await handleAddMonthlySummary(newMonthlySummary);
+    }
+  };
+
   const handleDeleteMonthlySummary = async (id: number) => {
     await MonthlySummaryService.deleteMonthlySummary(id);
     setMonthlySummaries((prev) =>
       prev.filter((monthlySummary) => monthlySummary.id !== id)
     );
     setTotalCount((prev) => prev - 1);
-  };
-
-  const handleAddOrUpdateMonthlySummary = async (
-    newMonthlySummary: MonthlySummary
-  ) => {
-    const existingSummary = monthlySummaries.find(
-      (summary) => summary.id === newMonthlySummary.id
-    );
-
-    if (existingSummary) {
-      await MonthlySummaryService.updateMonthlySummary(
-        newMonthlySummary.id!,
-        newMonthlySummary
-      );
-      setMonthlySummaries((prev) =>
-        prev.map((summary) =>
-          summary.id === newMonthlySummary.id
-            ? { ...summary, ...newMonthlySummary }
-            : summary
-        )
-      );
-    } else {
-      await MonthlySummaryService.addMonthlySummary(newMonthlySummary);
-      setMonthlySummaries((prev) => [...prev, newMonthlySummary]);
-      setTotalCount((prev) => prev + 1);
-    }
   };
 
   const totalMonthlyHours =

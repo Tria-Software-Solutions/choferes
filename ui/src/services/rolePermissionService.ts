@@ -17,8 +17,7 @@ export const removeRolePermission = async (
   roleId: number,
   permissionId: number
 ) => {
-  const response = await api.delete("/role-permission/remove", {
+  await api.delete("/role-permission/remove", {
     data: { roleId, permissionId },
   });
-  return response.data;
 };
