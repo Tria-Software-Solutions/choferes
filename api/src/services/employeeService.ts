@@ -1,15 +1,15 @@
 import { Employee } from "../models/Employee";
 
-export const createEmployee = async (data: Omit<Employee, "id">) => {
-  return await Employee.create(data);
-};
-
-export const getAllEmployees = async () => {
+export const getEmployees = async () => {
   return Employee.findAll();
 };
 
 export const getEmployeeById = async (id: number) => {
   return Employee.findByPk(id);
+};
+
+export const createEmployee = async (data: Omit<Employee, "id">) => {
+  return await Employee.create(data);
 };
 
 export const updateEmployee = async (

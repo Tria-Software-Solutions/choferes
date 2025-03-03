@@ -9,20 +9,20 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.deleteSchedule = exports.updateSchedule = exports.getScheduleById = exports.getAllSchedules = exports.createSchedule = void 0;
+exports.deleteSchedule = exports.updateSchedule = exports.createSchedule = exports.getScheduleById = exports.getSchedules = void 0;
 const Schedule_1 = require("../models/Schedule");
-const createSchedule = (data) => __awaiter(void 0, void 0, void 0, function* () {
-    return yield Schedule_1.Schedule.create(data);
-});
-exports.createSchedule = createSchedule;
-const getAllSchedules = () => __awaiter(void 0, void 0, void 0, function* () {
+const getSchedules = () => __awaiter(void 0, void 0, void 0, function* () {
     return Schedule_1.Schedule.findAll();
 });
-exports.getAllSchedules = getAllSchedules;
+exports.getSchedules = getSchedules;
 const getScheduleById = (id) => __awaiter(void 0, void 0, void 0, function* () {
     return Schedule_1.Schedule.findByPk(id);
 });
 exports.getScheduleById = getScheduleById;
+const createSchedule = (data) => __awaiter(void 0, void 0, void 0, function* () {
+    return yield Schedule_1.Schedule.create(data);
+});
+exports.createSchedule = createSchedule;
 const updateSchedule = (id, data) => __awaiter(void 0, void 0, void 0, function* () {
     yield Schedule_1.Schedule.update(data, { where: { id } });
     return Schedule_1.Schedule.findByPk(id);

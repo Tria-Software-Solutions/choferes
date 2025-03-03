@@ -1,18 +1,18 @@
 import { useState, useEffect, useCallback } from "react";
-import * as HoursService from "../services/hoursService";
+import * as HoursWorkedService from "../services/hoursWorkedService";
 import { HoursWorked } from "../models/HoursWorked";
 
-export const useHours = () => {
+export const useHoursWorked = () => {
   const [hoursWorked, setHoursWorked] = useState<HoursWorked[]>([]);
-  const [totalCount, setTotalCount] = useState(0);
+  const [totalCountHoursWorked, setTotalCountHoursWorked] = useState(0);
   const [isLoadingHours, setIsLoadingHours] = useState(false);
 
-  const fetchHours = useCallback(async (): Promise<HoursWorked[]> => {
+  const fetchHoursWorked = useCallback(async (): Promise<HoursWorked[]> => {
     setIsLoadingHours(true);
     try {
-      const data = await HoursService.fetchHours();
+      const data = await HoursWorkedService.getHoursWorked();
       setHoursWorked(data);
-      setTotalCount(data.length);
+      setTotalCountHoursWorked(data.length);
       return data;
     } catch (error) {
       console.error("Error fetching hours:", error);
@@ -23,16 +23,16 @@ export const useHours = () => {
   }, []);
 
   const handleAddHours = async (newHours: Omit<HoursWorked, "id">) => {
-    const createdHoursWorked = await HoursService.addHours(newHours);
+    const createdHoursWorked = await HoursWorkedService.createHoursWorked(newHours);
     setHoursWorked((prev) => [...prev, createdHoursWorked]);
-    setTotalCount((prev) => prev + 1);
+    setTotalCountHoursWorked((prev) => prev + 1);
   };
 
   const handleUpdateHours = async (
     id: number,
     updatedHours: Partial<HoursWorked>
   ) => {
-    await HoursService.updateHours(id, updatedHours);
+    await HoursWorkedService.updateHoursWorked(id, updatedHours);
     setHoursWorked((prev) =>
       prev.map((hours) =>
         hours.id === id ? { ...hours, ...updatedHours } : hours
@@ -51,20 +51,20 @@ export const useHours = () => {
   };
 
   const handleDeleteHours = async (id: number) => {
-    await HoursService.deleteHours(id);
+    await HoursWorkedService.deleteHoursWorked(id);
     setHoursWorked((prev) => prev.filter((hours) => hours.id !== id));
-    setTotalCount((prev) => prev - 1);
+    setTotalCountHoursWorked((prev) => prev - 1);
   };
 
   useEffect(() => {
-    fetchHours();
-  }, [fetchHours]);
+    fetchHoursWorked();
+  }, [fetchHoursWorked]);
 
   return {
     hoursWorked,
-    totalCount,
+    totalCountHoursWorked,
     isLoadingHours,
-    fetchHours,
+    fetchHoursWorked,
     handleAddHours,
     handleUpdateHours,
     handleAddOrUpdateHours,

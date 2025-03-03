@@ -10,10 +10,10 @@ export const useRoles = () => {
   const [totalCountRoles, setTotalCountRoles] = useState(0);
   const [isLoadingRoles, setIsLoadingRoles] = useState(false);
 
-  const fetchRoles = useCallback(async () => {
+  const getRoles = useCallback(async () => {
     setIsLoadingRoles(true);
     try {
-      const data = await RoleService.fetchRoles();
+      const data = await RoleService.getRoles();
       setRoles(data);
       setTotalCountRoles(data.length);
     } catch (error) {
@@ -23,14 +23,14 @@ export const useRoles = () => {
     }
   }, []);
 
-  const handleUpdateRole = async (id: number, updatedRole: Partial<Role>) => {
+  const updateRole = async (id: number, updatedRole: Partial<Role>) => {
     await RoleService.getRoleById(id);
     setRoles((prev) =>
       prev.map((role) => (role.id === id ? { ...role, ...updatedRole } : role))
     );
   };
 
-  const handleDeleteRole = async (id: number) => {
+  const deleteRole = async (id: number) => {
     //await UserService.deleteRole(id);
     //setRoles((prev) => prev.filter((role) => role.id !== id));
     //setTotalCountRoles((prev) => prev - 1);
@@ -39,17 +39,17 @@ export const useRoles = () => {
 
   useEffect(() => {
     if (currentUser) {
-      fetchRoles();
+      getRoles();
     }
-  }, [currentUser, fetchRoles]);
+  }, [currentUser, getRoles]);
 
   return {
     roles,
     setRoles,
     totalCountRoles,
     isLoadingRoles,
-    fetchRoles,
-    handleUpdateRole,
-    handleDeleteRole,
+    getRoles,
+    updateRole,
+    deleteRole,
   };
 };

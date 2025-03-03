@@ -4,8 +4,8 @@ import { authenticateToken } from "../middleware/authMiddleware";
 
 const router = express.Router();
 
-router.post("/", authenticateToken, permissionController.createPermission);
 router.get("/", authenticateToken, permissionController.getPermissions);
 router.get("/:id", authenticateToken, permissionController.getPermissionById);
+router.post("/", authenticateToken, permissionController.createPermission);
 
 export default router;

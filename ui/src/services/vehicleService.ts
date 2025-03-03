@@ -1,18 +1,13 @@
 import { Vehicle } from "../models/Vehicle";
 import api from "./api";
 
-export const fetchVehicles = async (
+export const getVehicles = async (
   page: number = 1,
   perPage: number = 10
 ): Promise<Vehicle[]> => {
   const response = await api.get("/vehicles", {
     params: { page, perPage },
   });
-  return response.data;
-};
-
-export const addVehicle = async (newVehicle: Omit<Vehicle, "id">) => {
-  const response = await api.post("/vehicles", newVehicle);
   return response.data;
 };
 
@@ -25,6 +20,11 @@ export const getVehiclesByDate = async (date: string): Promise<Vehicle[]> => {
   const response = await api.get("/vehicles/by-date", {
     params: { date },
   });
+  return response.data;
+};
+
+export const createVehicle = async (newVehicle: Omit<Vehicle, "id">) => {
+  const response = await api.post("/vehicles", newVehicle);
   return response.data;
 };
 

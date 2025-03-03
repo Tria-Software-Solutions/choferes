@@ -42,28 +42,18 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.deleteSchedule = exports.updateSchedule = exports.getScheduleById = exports.getAllSchedules = exports.createSchedule = void 0;
+exports.deleteSchedule = exports.updateSchedule = exports.createSchedule = exports.getScheduleById = exports.getSchedules = void 0;
 const scheduleService = __importStar(require("../services/scheduleService"));
-const createSchedule = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+const getSchedules = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        const newSchedule = yield scheduleService.createSchedule(req.body);
-        return res.status(201).json(newSchedule);
-    }
-    catch (error) {
-        return res.status(500).json({ message: 'Error creating Schedule', error });
-    }
-});
-exports.createSchedule = createSchedule;
-const getAllSchedules = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    try {
-        const schedules = yield scheduleService.getAllSchedules();
+        const schedules = yield scheduleService.getSchedules();
         return res.status(200).json(schedules);
     }
     catch (error) {
         return res.status(500).json({ message: 'Error fetching Schedules', error });
     }
 });
-exports.getAllSchedules = getAllSchedules;
+exports.getSchedules = getSchedules;
 const getScheduleById = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const id = parseInt(req.params.id);
@@ -80,6 +70,16 @@ const getScheduleById = (req, res) => __awaiter(void 0, void 0, void 0, function
     }
 });
 exports.getScheduleById = getScheduleById;
+const createSchedule = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        const newSchedule = yield scheduleService.createSchedule(req.body);
+        return res.status(201).json(newSchedule);
+    }
+    catch (error) {
+        return res.status(500).json({ message: 'Error creating Schedule', error });
+    }
+});
+exports.createSchedule = createSchedule;
 const updateSchedule = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const id = parseInt(req.params.id);

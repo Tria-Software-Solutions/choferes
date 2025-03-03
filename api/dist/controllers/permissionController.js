@@ -42,19 +42,8 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.getPermissionById = exports.getPermissions = exports.createPermission = void 0;
+exports.createPermission = exports.getPermissionById = exports.getPermissions = void 0;
 const permissionService = __importStar(require("../services/permissionService"));
-const createPermission = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    try {
-        const { name } = req.body;
-        const permission = yield permissionService.createPermission(name);
-        res.status(201).json(permission);
-    }
-    catch (error) {
-        res.status(500).json({ message: 'Error creating Permission', error });
-    }
-});
-exports.createPermission = createPermission;
 const getPermissions = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const permissions = yield permissionService.getPermissions();
@@ -77,3 +66,14 @@ const getPermissionById = (req, res) => __awaiter(void 0, void 0, void 0, functi
     }
 });
 exports.getPermissionById = getPermissionById;
+const createPermission = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        const { name } = req.body;
+        const permission = yield permissionService.createPermission(name);
+        res.status(201).json(permission);
+    }
+    catch (error) {
+        res.status(500).json({ message: 'Error creating Permission', error });
+    }
+});
+exports.createPermission = createPermission;

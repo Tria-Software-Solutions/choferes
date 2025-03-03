@@ -52,9 +52,9 @@ const VehiclesPage: React.FC = () => {
     vehicles,
     allVehicles,
     isLoadingVehicles,
-    handleAddVehicle,
-    handleUpdateVehicle,
-    handleDeleteVehicle,
+    createVehicle,
+    updateVehicle,
+    deleteVehicle,
   } = useVehicles(format(selectedDate, "yyyy-MM-dd"));
   const [filteredVehicles, setFilteredVehicles] = useState<Vehicle[]>([]);
   const [totalCount, setTotalCount] = useState(0);
@@ -158,7 +158,7 @@ const VehiclesPage: React.FC = () => {
       notes: addFields.notes,
       createdAt: selectedDate,
     };
-    handleAddVehicle(newVehicle);
+    createVehicle(newVehicle);
     setAddFields({
       ticket: "",
       licensePlate: "",
@@ -192,7 +192,7 @@ const VehiclesPage: React.FC = () => {
       const updatedVehicle = {
         ...editFields,
       };
-      handleUpdateVehicle(id, updatedVehicle);
+      updateVehicle(id, updatedVehicle);
       setEditRowId(null);
       setEditFields({
         ticket: "",
@@ -203,7 +203,7 @@ const VehiclesPage: React.FC = () => {
         notes: "",
       });
     },
-    [editFields, handleUpdateVehicle]
+    [editFields, updateVehicle]
   );
 
   const handleOpenDialog = (id: number) => {
@@ -218,7 +218,7 @@ const VehiclesPage: React.FC = () => {
 
   const handleDelete = () => {
     if (vehicleToDelete !== null) {
-      handleDeleteVehicle(vehicleToDelete);
+      deleteVehicle(vehicleToDelete);
       handleCloseDialog();
     }
   };

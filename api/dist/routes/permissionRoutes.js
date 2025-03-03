@@ -40,7 +40,7 @@ const express_1 = __importDefault(require("express"));
 const permissionController = __importStar(require("../controllers/permissionController"));
 const authMiddleware_1 = require("../middleware/authMiddleware");
 const router = express_1.default.Router();
-router.post("/", authMiddleware_1.authenticateToken, permissionController.createPermission);
 router.get("/", authMiddleware_1.authenticateToken, permissionController.getPermissions);
 router.get("/:id", authMiddleware_1.authenticateToken, permissionController.getPermissionById);
+router.post("/", authMiddleware_1.authenticateToken, permissionController.createPermission);
 exports.default = router;

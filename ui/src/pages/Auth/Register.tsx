@@ -17,7 +17,7 @@ import logo from "../../assets/images/logo.png";
 import { PAGE_TITLE } from "../../constants/constants";
 
 const Register = () => {
-  const { handleRegisterUser } = useUsers();
+  const { createUser } = useUsers();
   const [addFields, setAddFields] = useState({
     firstName: "",
     lastName: "",
@@ -73,7 +73,7 @@ const Register = () => {
         username: addFields.username,
         password: addFields.password,
       };
-      handleRegisterUser(newUser);
+      createUser(newUser);
     } catch (err) {
       setError("Error al registrar usuario");
     }

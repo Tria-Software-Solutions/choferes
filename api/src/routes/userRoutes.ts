@@ -4,9 +4,9 @@ import { authenticateToken } from "../middleware/authMiddleware";
 
 const router = express.Router();
 
-router.post("/login", userController.loginUser);
+router.post("/login", userController.authenticateUser);
+router.get("/", authenticateToken, userController.getUsers);
 router.post("/register", userController.createUser);
-router.get("/", authenticateToken, userController.getAllUsers);
 router.get("/:id", authenticateToken, userController.getUserById);
 
 export default router;

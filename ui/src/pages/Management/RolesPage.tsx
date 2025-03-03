@@ -6,7 +6,7 @@ import { BiweeklySummary } from "../../models/BiweeklySummary";
 import { MonthlySummary } from "../../models/MonthlySummary";
 import { useEmployees } from "../../hooks/useEmployee";
 import { useSchedules } from "../../hooks/useSchedule";
-import { useHours } from "../../hooks/useHours";
+import { useHoursWorked } from "../../hooks/useHoursWorked";
 import { useWeeklySummaries } from "../../hooks/useWeeklySummary";
 import { useBiweeklySummaries } from "../../hooks/useBiweeklySummary";
 import { useMonthlySummaries } from "../../hooks/useMonthlySummary";
@@ -62,21 +62,21 @@ const RolesPage: React.FC = () => {
   const { employees, isLoadingEmployees } = useEmployees();
   const [filteredEmployees, setFilteredEmployees] = useState<Employee[]>([]);
   const { schedules, isLoadingSchedules } = useSchedules();
-  const { hoursWorked, isLoadingHours, handleAddOrUpdateHours } = useHours();
+  const { hoursWorked, isLoadingHours, handleAddOrUpdateHours } = useHoursWorked();
   const {
     weeklySummaries,
     isLoadingWeeklySummaries,
-    handleAddOrUpdateWeeklySummary,
+    createOrUpdateWeeklySummary,
   } = useWeeklySummaries();
   const {
     biweeklySummaries,
     isLoadingBiweeklySummaries,
-    handleAddOrUpdateBiweeklySummary,
+    createOrUpdateBiweeklySummary,
   } = useBiweeklySummaries();
   const {
     monthlySummaries,
     isLoadingMonthlySummaries,
-    handleAddOrUpdateMonthlySummary,
+    createOrUpdateMonthlySummary,
   } = useMonthlySummaries();
   const [weekOffset, setWeekOffset] = useState(0);
   const [firstDayOfWeek, setFirstDayOfWeek] = useState<Date | null>(new Date());
@@ -152,7 +152,7 @@ const RolesPage: React.FC = () => {
     setFirstDayOfWeek(newDate);
   }, []);
 
-  const handleAddOrUpdateHoursAndSummaries = useCallback(
+  const handleCreateOrUpdateHoursAndSummaries = useCallback(
     (
       employeeId: number,
       date: Date,
@@ -170,10 +170,10 @@ const RolesPage: React.FC = () => {
       );
 
       let previousHours: number | undefined;
-      let addOrUpdatedHoursWorked: Omit<HoursWorked, "id"> | HoursWorked;
+      let createOrUpdatedHoursWorked: Omit<HoursWorked, "id"> | HoursWorked;
 
       if (existingHoursRecord) {
-        addOrUpdatedHoursWorked = {
+        createOrUpdatedHoursWorked = {
           ...existingHoursRecord,
           scheduleId,
         };
@@ -181,13 +181,13 @@ const RolesPage: React.FC = () => {
           (schedule) => schedule.id === existingHoursRecord.scheduleId
         )?.hours;
       } else {
-        addOrUpdatedHoursWorked = {
+        createOrUpdatedHoursWorked = {
           employeeId,
           date,
           scheduleId,
         };
       }
-      handleAddOrUpdateHours(addOrUpdatedHoursWorked);
+      handleAddOrUpdateHours(createOrUpdatedHoursWorked);
 
       const existingWeeklySummaryRecord = weeklySummaries.find(
         (weeklySummary) =>
@@ -197,10 +197,10 @@ const RolesPage: React.FC = () => {
           weeklySummary.year === year
       );
 
-      let addOrUpdatedWeeklySummary: Omit<WeeklySummary, "id"> | WeeklySummary;
+      let createOrUpdatedWeeklySummary: Omit<WeeklySummary, "id"> | WeeklySummary;
 
       if (existingWeeklySummaryRecord) {
-        addOrUpdatedWeeklySummary = {
+        createOrUpdatedWeeklySummary = {
           ...existingWeeklySummaryRecord,
           totalHours: previousHours
             ? existingWeeklySummaryRecord.totalHours +
@@ -209,7 +209,7 @@ const RolesPage: React.FC = () => {
             : existingWeeklySummaryRecord.totalHours + totalHours,
         };
       } else {
-        addOrUpdatedWeeklySummary = {
+        createOrUpdatedWeeklySummary = {
           employeeId,
           weekNumber,
           month,
@@ -217,7 +217,7 @@ const RolesPage: React.FC = () => {
           totalHours,
         };
       }
-      handleAddOrUpdateWeeklySummary(addOrUpdatedWeeklySummary);
+      createOrUpdateWeeklySummary(createOrUpdatedWeeklySummary);
 
       const existingBiweeklySummaryRecord = biweeklySummaries.find(
         (biweeklySummary) =>
@@ -227,10 +227,10 @@ const RolesPage: React.FC = () => {
           biweeklySummary.year === year
       );
 
-      let addOrUpdatedBiweeklySummary: Omit<BiweeklySummary, "id"> | BiweeklySummary;
+      let createOrUpdatedBiweeklySummary: Omit<BiweeklySummary, "id"> | BiweeklySummary;
 
       if (existingBiweeklySummaryRecord) {
-        addOrUpdatedBiweeklySummary = {
+        createOrUpdatedBiweeklySummary = {
           ...existingBiweeklySummaryRecord,
           totalHours: previousHours
             ? existingBiweeklySummaryRecord.totalHours +
@@ -239,7 +239,7 @@ const RolesPage: React.FC = () => {
             : existingBiweeklySummaryRecord.totalHours + totalHours,
         };
       } else {
-        addOrUpdatedBiweeklySummary = {
+        createOrUpdatedBiweeklySummary = {
           employeeId,
           biweekNumber,
           month,
@@ -247,7 +247,7 @@ const RolesPage: React.FC = () => {
           totalHours,
         };
       }
-      handleAddOrUpdateBiweeklySummary(addOrUpdatedBiweeklySummary);
+      createOrUpdateBiweeklySummary(createOrUpdatedBiweeklySummary);
 
       const existingMonthlySummaryRecord = monthlySummaries.find(
         (monthlySummary) =>
@@ -256,10 +256,10 @@ const RolesPage: React.FC = () => {
           monthlySummary.year === year
       );
 
-      let addOrUpdatedMonthlySummary: Omit<MonthlySummary, "id"> | MonthlySummary;
+      let createOrUpdatedMonthlySummary: Omit<MonthlySummary, "id"> | MonthlySummary;
 
       if (existingMonthlySummaryRecord) {
-        addOrUpdatedMonthlySummary = {
+        createOrUpdatedMonthlySummary = {
           ...existingMonthlySummaryRecord,
           totalHours: previousHours
             ? existingMonthlySummaryRecord.totalHours +
@@ -268,14 +268,14 @@ const RolesPage: React.FC = () => {
             : existingMonthlySummaryRecord.totalHours + totalHours,
         };
       } else {
-        addOrUpdatedMonthlySummary = {
+        createOrUpdatedMonthlySummary = {
           employeeId,
           month,
           year,
           totalHours,
         };
       }
-      handleAddOrUpdateMonthlySummary(addOrUpdatedMonthlySummary);
+      createOrUpdateMonthlySummary(createOrUpdatedMonthlySummary);
     },
     [
       hoursWorked,
@@ -284,9 +284,9 @@ const RolesPage: React.FC = () => {
       biweeklySummaries,
       monthlySummaries,
       handleAddOrUpdateHours,
-      handleAddOrUpdateWeeklySummary,
-      handleAddOrUpdateBiweeklySummary,
-      handleAddOrUpdateMonthlySummary,
+      createOrUpdateWeeklySummary,
+      createOrUpdateBiweeklySummary,
+      createOrUpdateMonthlySummary,
     ]
   );
 
@@ -310,7 +310,7 @@ const RolesPage: React.FC = () => {
       return;
     }
 
-    handleAddOrUpdateHoursAndSummaries(
+    handleCreateOrUpdateHoursAndSummaries(
       employeeId,
       date,
       selectedSchedule.id,

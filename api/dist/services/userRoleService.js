@@ -9,17 +9,17 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.removeRoleFromUser = exports.getRolesByUser = exports.assignRoleToUser = void 0;
+exports.deleteUserRole = exports.createUserRole = exports.getUserRoles = void 0;
 const UserRole_1 = require("../models/UserRole");
-const assignRoleToUser = (data) => __awaiter(void 0, void 0, void 0, function* () {
-    return UserRole_1.UserRole.create(data);
-});
-exports.assignRoleToUser = assignRoleToUser;
-const getRolesByUser = (userId) => __awaiter(void 0, void 0, void 0, function* () {
+const getUserRoles = (userId) => __awaiter(void 0, void 0, void 0, function* () {
     return UserRole_1.UserRole.findAll({ where: { userId } });
 });
-exports.getRolesByUser = getRolesByUser;
-const removeRoleFromUser = (userId, roleId) => __awaiter(void 0, void 0, void 0, function* () {
+exports.getUserRoles = getUserRoles;
+const createUserRole = (data) => __awaiter(void 0, void 0, void 0, function* () {
+    return UserRole_1.UserRole.create(data);
+});
+exports.createUserRole = createUserRole;
+const deleteUserRole = (userId, roleId) => __awaiter(void 0, void 0, void 0, function* () {
     return UserRole_1.UserRole.destroy({ where: { userId, roleId } });
 });
-exports.removeRoleFromUser = removeRoleFromUser;
+exports.deleteUserRole = deleteUserRole;

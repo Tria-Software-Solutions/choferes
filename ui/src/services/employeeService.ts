@@ -1,12 +1,12 @@
 import { Employee } from "../models/Employee";
 import api from "./api";
 
-export const fetchEmployees = async () => {
+export const getEmployees = async () => {
   const response = await api.get("/employees");
   return response.data;
 };
 
-export const addEmployee = async (newEmployee: Omit<Employee, "id">) => {
+export const createEmployee = async (newEmployee: Omit<Employee, "id">) => {
   const response = await api.post("/employees", newEmployee);
   return response.data;
 };

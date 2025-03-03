@@ -12,10 +12,10 @@ export const usePermissions = () => {
   const [totalCountPermissions, setTotalCountPermissions] = useState(0);
   const [isLoadingPermissions, setIsLoadingPermissions] = useState(false);
 
-  const fetchPermissions = useCallback(async () => {
+  const getPermissions = useCallback(async () => {
     setIsLoadingPermissions(true);
     try {
-      const data = await PermissionService.fetchPermissions();
+      const data = await PermissionService.getPermissions();
       setPermissions(data);
       setTotalCountPermissions(data.length);
     } catch (error) {
@@ -25,7 +25,7 @@ export const usePermissions = () => {
     }
   }, []);
 
-  const handleUpdatePermission = async (
+  const updatePermission = async (
     id: number,
     updatedPermission: Partial<Permission>
   ) => {
@@ -39,7 +39,7 @@ export const usePermissions = () => {
     );
   };
 
-  const handleDeletePermission = async (id: number) => {
+  const deletePermission = async (id: number) => {
     //await UserService.deletePermission(id);
     //setPermissions((prev) => prev.filter((permission) => permission.id !== id));
     //setTotalCountPermissions((prev) => prev - 1);
@@ -48,16 +48,16 @@ export const usePermissions = () => {
 
   useEffect(() => {
     if (currentUser) {
-      fetchPermissions();
+      getPermissions();
     }
-  }, [currentUser, fetchPermissions]);
+  }, [currentUser, getPermissions]);
 
   return {
     permissions,
     totalCountPermissions,
     isLoadingPermissions,
-    fetchPermissions,
-    handleUpdatePermission,
-    handleDeletePermission,
+    getPermissions,
+    updatePermission,
+    deletePermission,
   };
 };

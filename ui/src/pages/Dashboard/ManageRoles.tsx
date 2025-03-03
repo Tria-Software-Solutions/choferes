@@ -1,13 +1,13 @@
 import React, { useState, useEffect, useCallback } from "react";
 import { Role } from "../../models/Role";
 import { useRoles } from "../../hooks/useRole";
-import { fetchRoles } from "../../services/roleService";
+import { getRoles } from "../../services/roleService";
 import { Box, Button, CircularProgress, Dialog, DialogActions, DialogContent, DialogTitle, Stack, Typography } from "@mui/material";
 import EditableTable from "../../components/Table/EditableTable/EditableTable";
 import SearchBar from "../../components/SearchBar/SearchBar";
 
 const ManageRoles = () => {
-  const { isLoadingRoles, handleUpdateRole, handleDeleteRole } = useRoles();
+  const { isLoadingRoles, updateRole, deleteRole } = useRoles();
   const [roles, setRoles] = useState<Role[]>([]);
   const [filteredRoles, setFilteredRoles] = useState<Role[]>([]);
   const [totalCount, setTotalCount] = useState(0);
@@ -24,7 +24,7 @@ const ManageRoles = () => {
 
   useEffect(() => {
     const getAllRoles = async () => {
-      const fetchedRoles = await fetchRoles();
+      const fetchedRoles = await getRoles();
       setRoles(fetchedRoles);
     };
 
@@ -76,7 +76,7 @@ const ManageRoles = () => {
     const updatedUser = {
       ...editFields,
     };
-    handleUpdateRole(id, updatedUser);
+    updateRole(id, updatedUser);
     setEditRowId(null);
     setEditFields({ name: "" });
   };
@@ -93,7 +93,7 @@ const ManageRoles = () => {
 
   const handleDelete = () => {
     if (roleToDelete !== null) {
-      handleDeleteRole(roleToDelete);
+      deleteRole(roleToDelete);
       handleCloseDialog();
     }
   };

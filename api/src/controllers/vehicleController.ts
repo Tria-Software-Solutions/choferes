@@ -2,18 +2,9 @@ import { Request, Response } from "express";
 import * as vehicleService from "../services/vehicleService";
 import { parseISO, isValid } from "date-fns";
 
-export const createVehicle = async (req: Request, res: Response) => {
+export const getVehicles = async (req: Request, res: Response) => {
   try {
-    const newVehicle = await vehicleService.createVehicle(req.body);
-    return res.status(201).json(newVehicle);
-  } catch (error) {
-    return res.status(500).json({ message: "Error creating Vehicle", error });
-  }
-};
-
-export const getAllVehicles = async (req: Request, res: Response) => {
-  try {
-    const vehicles = await vehicleService.getAllVehicles();
+    const vehicles = await vehicleService.getVehicles();
     return res.status(200).json(vehicles);
   } catch (error) {
     return res.status(500).json({ message: "Error fetching Vehicles", error });
@@ -48,6 +39,15 @@ export const getVehiclesByDate = async (req: Request, res: Response) => {
     return res.status(200).json(vehicles);
   } catch (error) {
     return res.status(500).json({ message: "Error fetching Vehicles", error });
+  }
+};
+
+export const createVehicle = async (req: Request, res: Response) => {
+  try {
+    const newVehicle = await vehicleService.createVehicle(req.body);
+    return res.status(201).json(newVehicle);
+  } catch (error) {
+    return res.status(500).json({ message: "Error creating Vehicle", error });
   }
 };
 

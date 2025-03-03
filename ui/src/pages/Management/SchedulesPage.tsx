@@ -43,13 +43,13 @@ const SchedulesPage: React.FC = () => {
   const {
     schedules,
     isLoadingSchedules,
-    fetchSchedules,
-    handleAddSchedule,
-    handleUpdateSchedule,
-    handleDeleteSchedule,
+    getSchedules,
+    createSchedule,
+    updateSchedule,
+    deleteSchedule,
   } = useSchedules();
   const [filteredSchedules, setFilteredSchedules] = useState<Schedule[]>([]);
-  const [totalCount, setTotalCount] = useState(0);
+  const [totalCountSchedules, setTotalCountSchedules] = useState(0);
   const [editRowId, setEditRowId] = useState<number | null>(null);
   const [addFields, setAddFields] = useState({
     label: "",
@@ -71,11 +71,11 @@ const SchedulesPage: React.FC = () => {
 
   useEffect(() => {
     const fetchData = async () => {
-      await fetchSchedules();
+      await getSchedules();
     };
 
     fetchData();
-  }, [fetchSchedules]);
+  }, [getSchedules]);
 
   useEffect(() => {
     const normalizeString = (str: string) =>
@@ -92,7 +92,7 @@ const SchedulesPage: React.FC = () => {
           .includes(normalizeString(filter).toLowerCase())
       )
     );
-    setTotalCount(filteredSchedules.length);
+    setTotalCountSchedules(filteredSchedules.length);
   }, [filter, schedules, filteredSchedules.length]);
 
   const validateFields = useCallback((fields: typeof addFields) => {
@@ -126,7 +126,7 @@ const SchedulesPage: React.FC = () => {
       day: addFields.day,
       hours: parseInt(addFields.hours, 10),
     };
-    handleAddSchedule(newSchedule);
+    createSchedule(newSchedule);
     setAddFields({ label: "", day: "", hours: "" });
   };
 
@@ -148,7 +148,7 @@ const SchedulesPage: React.FC = () => {
       ...editFields,
       hours: parseInt(editFields.hours, 10),
     };
-    handleUpdateSchedule(id, updatedSchedule);
+    updateSchedule(id, updatedSchedule);
     setEditRowId(null);
     setEditFields({ label: "", day: "", hours: "" });
   };
@@ -165,7 +165,7 @@ const SchedulesPage: React.FC = () => {
 
   const handleDelete = () => {
     if (scheduleToDelete !== null) {
-      handleDeleteSchedule(scheduleToDelete);
+      deleteSchedule(scheduleToDelete);
       handleCloseDialog();
     }
   };
@@ -341,7 +341,7 @@ const SchedulesPage: React.FC = () => {
               handleSaveClick={handleSaveClick}
               handleOpenDialog={handleOpenDialog}
               getRowId={(row) => row.id}
-              totalCount={totalCount}
+              totalCount={totalCountSchedules}
               page={page}
               rowsPerPage={rowsPerPage}
               setPage={setPage}

@@ -1,15 +1,13 @@
+import { UserRole } from "../models/UserRole";
 import api from "./api";
 
-export const assignUserRole = async (userId: number, roleId: number) => {
-  const response = await api.post("/user-role/assign", {
-    userId,
-    roleId,
-  });
+export const getUserRoles = async (userId: number) => {
+  const response = await api.get(`/user-role/${userId}`);
   return response.data;
 };
 
-export const fetchUserRoles = async (userId: number) => {
-  const response = await api.get(`/user-role/${userId}`);
+export const createUserRole = async (userRole: Omit<UserRole, "id">) => {
+  const response = await api.post("/user-role/assign", userRole);
   return response.data;
 };
 

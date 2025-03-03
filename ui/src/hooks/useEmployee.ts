@@ -4,15 +4,15 @@ import { Employee } from "../models/Employee";
 
 export const useEmployees = () => {
   const [employees, setEmployees] = useState<Employee[]>([]);
-  const [totalCount, setTotalCount] = useState(0);
+  const [totalCountEmployees, setTotalCountEmployees] = useState(0);
   const [isLoadingEmployees, setIsLoadingEmployees] = useState(false);
 
-  const fetchEmployees = useCallback(async () => {
+  const getEmployees = useCallback(async () => {
     setIsLoadingEmployees(true);
     try {
-      const data = await EmployeeService.fetchEmployees();
+      const data = await EmployeeService.getEmployees();
       setEmployees(data);
-      setTotalCount(data.length);
+      setTotalCountEmployees(data.length);
     } catch (error) {
       console.error("Error fetching employees:", error);
     } finally {
@@ -20,13 +20,13 @@ export const useEmployees = () => {
     }
   }, []);
 
-  const handleAddEmployee = async (newEmployee: Omit<Employee, "id">) => {
-    const createdEmployee = await EmployeeService.addEmployee(newEmployee);
+  const createEmployee = async (newEmployee: Omit<Employee, "id">) => {
+    const createdEmployee = await EmployeeService.createEmployee(newEmployee);
     setEmployees((prev) => [...prev, createdEmployee]);
-    setTotalCount((prev) => prev + 1);
+    setTotalCountEmployees((prev) => prev + 1);
   };
 
-  const handleUpdateEmployee = async (
+  const updateEmployee = async (
     id: number,
     updatedEmployee: Partial<Employee>
   ) => {
@@ -38,23 +38,23 @@ export const useEmployees = () => {
     );
   };
 
-  const handleDeleteEmployee = async (id: number) => {
+  const deleteEmployee = async (id: number) => {
     await EmployeeService.deleteEmployee(id);
     setEmployees((prev) => prev.filter((employee) => employee.id !== id));
-    setTotalCount((prev) => prev - 1);
+    setTotalCountEmployees((prev) => prev - 1);
   };
 
   useEffect(() => {
-    fetchEmployees();
-  }, [fetchEmployees]);
+    getEmployees();
+  }, [getEmployees]);
 
   return {
     employees,
-    totalCount,
+    totalCountEmployees,
     isLoadingEmployees,
-    fetchEmployees,
-    handleAddEmployee,
-    handleUpdateEmployee,
-    handleDeleteEmployee,
+    getEmployees,
+    createEmployee,
+    updateEmployee,
+    deleteEmployee,
   };
 };

@@ -35,9 +35,9 @@ const EmployeesPage: React.FC = () => {
   const {
     employees,
     isLoadingEmployees,
-    handleAddEmployee,
-    handleUpdateEmployee,
-    handleDeleteEmployee,
+    createEmployee,
+    updateEmployee,
+    deleteEmployee,
   } = useEmployees();
   const [filteredEmployees, setFilteredEmployees] = useState<Employee[]>([]);
   const [totalCount, setTotalCount] = useState(0);
@@ -93,7 +93,7 @@ const EmployeesPage: React.FC = () => {
       firstName: addFields.firstName,
       lastName: addFields.lastName,
     };
-    handleAddEmployee(newEmployee);
+    createEmployee(newEmployee);
     setAddFields({ firstName: "", lastName: "" });
   };
 
@@ -113,7 +113,7 @@ const EmployeesPage: React.FC = () => {
     const updatedEmployee = {
       ...editFields,
     };
-    handleUpdateEmployee(id, updatedEmployee);
+    updateEmployee(id, updatedEmployee);
     setEditRowId(null);
     setEditFields({ firstName: "", lastName: "" });
   };
@@ -130,7 +130,7 @@ const EmployeesPage: React.FC = () => {
 
   const handleDelete = () => {
     if (employeeToDelete !== null) {
-      handleDeleteEmployee(employeeToDelete);
+      deleteEmployee(employeeToDelete);
       handleCloseDialog();
     }
   };

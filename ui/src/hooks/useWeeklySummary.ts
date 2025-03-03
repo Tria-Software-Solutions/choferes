@@ -4,16 +4,16 @@ import { WeeklySummary } from "../models/WeeklySummary";
 
 export const useWeeklySummaries = () => {
   const [weeklySummaries, setWeeklySummaries] = useState<WeeklySummary[]>([]);
-  const [totalCount, setTotalCount] = useState(0);
+  const [totalCountWeeklySummaries, setTotalCountWeeklySummaries] = useState(0);
   const [isLoadingWeeklySummaries, setIsLoadingWeeklySummaries] =
     useState(false);
 
-  const fetchWeeklySummaries = useCallback(async () => {
+  const getWeeklySummaries = useCallback(async () => {
     setIsLoadingWeeklySummaries(true);
     try {
-      const data = await WeeklySummaryService.fetchWeeklySummaries();
+      const data = await WeeklySummaryService.getWeeklySummaries();
       setWeeklySummaries(data);
-      setTotalCount(data.length);
+      setTotalCountWeeklySummaries(data.length);
     } catch (error) {
       console.error("Error fetching weekly summaries:", error);
     } finally {
@@ -21,17 +21,17 @@ export const useWeeklySummaries = () => {
     }
   }, []);
 
-  const handleAddWeeklySummary = async (
+  const createWeeklySummary = async (
     newWeeklySummary: Omit<WeeklySummary, "id">
   ) => {
-    const createdWeeklySummary = await WeeklySummaryService.addWeeklySummary(
+    const createdWeeklySummary = await WeeklySummaryService.createWeeklySummary(
       newWeeklySummary
     );
     setWeeklySummaries((prev) => [...prev, createdWeeklySummary]);
-    setTotalCount((prev) => prev + 1);
+    setTotalCountWeeklySummaries((prev) => prev + 1);
   };
 
-  const handleUpdateWeeklySummary = async (
+  const updateWeeklySummary = async (
     id: number,
     updatedWeeklySummary: Partial<WeeklySummary>
   ) => {
@@ -45,40 +45,40 @@ export const useWeeklySummaries = () => {
     );
   };
 
-  const handleAddOrUpdateWeeklySummary = async (
+  const createOrUpdateWeeklySummary = async (
     newWeeklySummary: Omit<WeeklySummary, "id"> | WeeklySummary
   ) => {
     if ("id" in newWeeklySummary) {
-      await handleUpdateWeeklySummary(newWeeklySummary.id, newWeeklySummary);
+      await updateWeeklySummary(newWeeklySummary.id, newWeeklySummary);
     } else {
-      await handleAddWeeklySummary(newWeeklySummary);
+      await createWeeklySummary(newWeeklySummary);
     }
   };
 
-  const handleDeleteWeeklySummary = async (id: number) => {
+  const deleteWeeklySummary = async (id: number) => {
     await WeeklySummaryService.deleteWeeklySummary(id);
     setWeeklySummaries((prev) =>
       prev.filter((weeklySummary) => weeklySummary.id !== id)
     );
-    setTotalCount((prev) => prev - 1);
+    setTotalCountWeeklySummaries((prev) => prev - 1);
   };
 
   const totalWeeklyHours =
     WeeklySummaryService.calculateTotalWeeklyHours(weeklySummaries);
 
   useEffect(() => {
-    fetchWeeklySummaries();
-  }, [fetchWeeklySummaries]);
+    getWeeklySummaries();
+  }, [getWeeklySummaries]);
 
   return {
     weeklySummaries,
-    totalCount,
+    totalCountWeeklySummaries,
     isLoadingWeeklySummaries,
-    fetchWeeklySummaries,
-    handleAddWeeklySummary,
-    handleUpdateWeeklySummary,
-    handleAddOrUpdateWeeklySummary,
-    handleDeleteWeeklySummary,
+    getWeeklySummaries,
+    createWeeklySummary,
+    updateWeeklySummary,
+    createOrUpdateWeeklySummary,
+    deleteWeeklySummary,
     totalWeeklyHours,
   };
 };

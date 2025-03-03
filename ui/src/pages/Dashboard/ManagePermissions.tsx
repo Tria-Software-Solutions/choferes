@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useCallback } from "react";
 import { Permission } from "../../models/Permission";
 import { usePermissions } from "../../hooks/usePermission";
-import { fetchPermissions } from "../../services/permissionService";
+import { getPermissions } from "../../services/permissionService";
 import {
   Box,
   Button,
@@ -18,7 +18,7 @@ import SearchBar from "../../components/SearchBar/SearchBar";
 
 
 const ManagePermissions = () => {
-  const { isLoadingPermissions, handleUpdatePermission, handleDeletePermission } = usePermissions();
+  const { isLoadingPermissions, updatePermission, deletePermission } = usePermissions();
   const [permissions, setPermissions] = useState<Permission[]>([]);
   const [filteredPermissions, setFilteredPermissions] = useState<Permission[]>(
     []
@@ -39,7 +39,7 @@ const ManagePermissions = () => {
 
   useEffect(() => {
     const getAllPermissions = async () => {
-      const fetchedPermissions = await fetchPermissions();
+      const fetchedPermissions = await getPermissions();
       setPermissions(fetchedPermissions);
     };
 
@@ -91,7 +91,7 @@ const ManagePermissions = () => {
     const updatedPermission = {
       ...editFields,
     };
-    handleUpdatePermission(id, updatedPermission);
+    updatePermission(id, updatedPermission);
     setEditRowId(null);
     setEditFields({ name: "" });
   };
@@ -108,7 +108,7 @@ const ManagePermissions = () => {
 
   const handleDelete = () => {
     if (permissionToDelete !== null) {
-      handleDeletePermission(permissionToDelete);
+      deletePermission(permissionToDelete);
       handleCloseDialog();
     }
   };

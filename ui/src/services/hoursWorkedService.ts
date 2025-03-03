@@ -1,20 +1,20 @@
 import { HoursWorked } from '../models/HoursWorked';
 import api from './api'; 
 
-export const fetchHours = async () => {
+export const getHoursWorked = async () => {
   const response = await api.get("/hours");
   return response.data;
 };
 
-export const addHours = async (newHours: Omit<HoursWorked, "id">) => {
+export const createHoursWorked = async (newHours: Omit<HoursWorked, "id">) => {
   const response = await api.post("/hours", newHours);
   return response.data;
 };
 
-export const updateHours = async (id: number, updatedHours: Partial<HoursWorked>) => {
+export const updateHoursWorked = async (id: number, updatedHours: Partial<HoursWorked>) => {
   await api.put(`/hours/${id}`, updatedHours);
 };
 
-export const deleteHours = async (id: number) => {
+export const deleteHoursWorked = async (id: number) => {
   await api.delete(`/hours/${id}`);
 };

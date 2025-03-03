@@ -4,8 +4,8 @@ import { authenticateToken } from '../middleware/authMiddleware';
 
 const router = express.Router();
 
-router.post('/assign', authenticateToken, userRoleController.assignRole);
-router.get('/:userId', authenticateToken, userRoleController.getRoles);
-router.delete('/remove', authenticateToken, userRoleController.removeRole);
+router.get('/', authenticateToken, userRoleController.getUserRoles);
+router.post('/', authenticateToken, userRoleController.createUserRole);
+router.delete('/:id', authenticateToken, userRoleController.deleteUserRole);
 
 export default router;

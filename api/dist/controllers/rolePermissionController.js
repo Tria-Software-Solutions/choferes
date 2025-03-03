@@ -42,37 +42,37 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.removePermission = exports.getPermissions = exports.assignPermission = void 0;
+exports.deleteRolePermission = exports.createRolePermission = exports.getRolePermissions = void 0;
 const rolePermissionService = __importStar(require("../services/rolePermissionService"));
-const assignPermission = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    try {
-        const rolePermission = yield rolePermissionService.assignPermissionToRole(req.body);
-        res.status(201).json(rolePermission);
-    }
-    catch (error) {
-        res.status(400).json({ message: "Error assigning RolePermission", error });
-    }
-});
-exports.assignPermission = assignPermission;
-const getPermissions = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+const getRolePermissions = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const { roleId } = req.params;
     try {
-        const permissions = yield rolePermissionService.getPermissionsByRole(Number(roleId));
+        const permissions = yield rolePermissionService.getRolePermissions(Number(roleId));
         res.status(200).json(permissions);
     }
     catch (error) {
         res.status(400).json({ message: "Error fetching RolePermission", error });
     }
 });
-exports.getPermissions = getPermissions;
-const removePermission = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+exports.getRolePermissions = getRolePermissions;
+const createRolePermission = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        const rolePermission = yield rolePermissionService.createRolePermission(req.body);
+        res.status(201).json(rolePermission);
+    }
+    catch (error) {
+        res.status(400).json({ message: "Error assigning RolePermission", error });
+    }
+});
+exports.createRolePermission = createRolePermission;
+const deleteRolePermission = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const { roleId, permissionId } = req.body;
     try {
-        yield rolePermissionService.removePermissionFromRole(roleId, permissionId);
+        yield rolePermissionService.deleteRolePermission(roleId, permissionId);
         res.status(200).json({ message: "RolePermission deleted" });
     }
     catch (error) {
         res.status(400).json({ message: "Error deleting RolePermission", error });
     }
 });
-exports.removePermission = removePermission;
+exports.deleteRolePermission = deleteRolePermission;

@@ -40,7 +40,7 @@ const express_1 = __importDefault(require("express"));
 const roleController = __importStar(require("../controllers/roleController"));
 const authMiddleware_1 = require("../middleware/authMiddleware");
 const router = express_1.default.Router();
-router.post("/", authMiddleware_1.authenticateToken, roleController.createRole);
 router.get("/", authMiddleware_1.authenticateToken, roleController.getRoles);
 router.get("/:id", authMiddleware_1.authenticateToken, roleController.getRoleById);
+router.post("/", authMiddleware_1.authenticateToken, roleController.createRole);
 exports.default = router;

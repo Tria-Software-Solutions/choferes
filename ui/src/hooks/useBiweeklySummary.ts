@@ -6,16 +6,16 @@ export const useBiweeklySummaries = () => {
   const [biweeklySummaries, setBiweeklySummaries] = useState<BiweeklySummary[]>(
     []
   );
-  const [totalCount, setTotalCount] = useState(0);
+  const [totalCountBiweeklySummaries, setTotalCountBiweeklySummaries] = useState(0);
   const [isLoadingBiweeklySummaries, setIsLoadingBiweeklySummaries] =
     useState(false);
 
-  const fetchBiweeklySummaries = useCallback(async () => {
+  const getBiweeklySummaries = useCallback(async () => {
     setIsLoadingBiweeklySummaries(true);
     try {
-      const data = await BiweeklySummaryService.fetchBiweeklySummaries();
+      const data = await BiweeklySummaryService.getBiweeklySummaries();
       setBiweeklySummaries(data);
-      setTotalCount(data.length);
+      setTotalCountBiweeklySummaries(data.length);
     } catch (error) {
       console.error("Error fetching biweekly summaries:", error);
     } finally {
@@ -23,16 +23,16 @@ export const useBiweeklySummaries = () => {
     }
   }, []);
 
-  const handleAddBiweeklySummary = async (
+  const createBiweeklySummary = async (
     newBiweeklySummary: Omit<BiweeklySummary, "id">
   ) => {
     const createdBiweeklySummary =
-      await BiweeklySummaryService.addBiweeklySummary(newBiweeklySummary);
+      await BiweeklySummaryService.createBiweeklySummary(newBiweeklySummary);
     setBiweeklySummaries((prev) => [...prev, createdBiweeklySummary]);
-    setTotalCount((prev) => prev + 1);
+    setTotalCountBiweeklySummaries((prev) => prev + 1);
   };
 
-  const handleUpdateBiweeklySummary = async (
+  const updateBiweeklySummary = async (
     id: number,
     updatedBiweeklySummary: Partial<BiweeklySummary>
   ) => {
@@ -49,43 +49,43 @@ export const useBiweeklySummaries = () => {
     );
   };
 
-  const handleAddOrUpdateBiweeklySummary = async (
+  const createOrUpdateBiweeklySummary = async (
     newBiweeklySummary: Omit<BiweeklySummary, "id"> | BiweeklySummary
   ) => {
     if ("id" in newBiweeklySummary) {
-      await handleUpdateBiweeklySummary(
+      await updateBiweeklySummary(
         newBiweeklySummary.id,
         newBiweeklySummary
       );
     } else {
-      await handleAddBiweeklySummary(newBiweeklySummary);
+      await createBiweeklySummary(newBiweeklySummary);
     }
   };
 
-  const handleDeleteBiweeklySummary = async (id: number) => {
+  const deleteBiweeklySummary = async (id: number) => {
     await BiweeklySummaryService.deleteBiweeklySummary(id);
     setBiweeklySummaries((prev) =>
       prev.filter((biweeklySummary) => biweeklySummary.id !== id)
     );
-    setTotalCount((prev) => prev - 1);
+    setTotalCountBiweeklySummaries((prev) => prev - 1);
   };
 
   const totalBiweeklyHours =
     BiweeklySummaryService.calculateTotalBiweeklyHours(biweeklySummaries);
 
   useEffect(() => {
-    fetchBiweeklySummaries();
-  }, [fetchBiweeklySummaries]);
+    getBiweeklySummaries();
+  }, [getBiweeklySummaries]);
 
   return {
     biweeklySummaries,
-    totalCount,
+    totalCountBiweeklySummaries,
     isLoadingBiweeklySummaries,
-    fetchBiweeklySummaries,
-    handleAddBiweeklySummary,
-    handleUpdateBiweeklySummary,
-    handleAddOrUpdateBiweeklySummary,
-    handleDeleteBiweeklySummary,
+    getBiweeklySummaries,
+    createBiweeklySummary,
+    updateBiweeklySummary,
+    createOrUpdateBiweeklySummary,
+    deleteBiweeklySummary,
     totalBiweeklyHours,
   };
 };
