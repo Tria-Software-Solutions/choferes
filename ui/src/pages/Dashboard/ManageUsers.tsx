@@ -6,7 +6,7 @@ import EditableTable from "../../components/Table/EditableTable/EditableTable";
 import SearchBar from "../../components/SearchBar/SearchBar";
 
 const ManageUsers = () => {
-  const { users, isLoadingUsers, handleUpdateUser, handleDeleteUser } = useUsers();
+  const { users, isLoadingUsers, updateUser, deleteUser } = useUsers();
   const [filteredUsers, setFilteredUsers] = useState<User[]>([]);
   const [totalCount, setTotalCount] = useState(0);
   const [editRowId, setEditRowId] = useState<number | null>(null);
@@ -80,7 +80,7 @@ const ManageUsers = () => {
     const updatedUser = {
       ...editFields,
     };
-    handleUpdateUser(id, updatedUser);
+    updateUser(id, updatedUser);
     setEditRowId(null);
     setEditFields({ firstName: "", lastName: "", email: "", username: "" });
   };
@@ -97,7 +97,7 @@ const ManageUsers = () => {
 
   const handleDelete = () => {
     if (userToDelete !== null) {
-      handleDeleteUser(userToDelete);
+      deleteUser(userToDelete);
       handleCloseDialog();
     }
   };

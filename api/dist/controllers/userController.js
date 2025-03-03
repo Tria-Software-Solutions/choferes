@@ -42,9 +42,9 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.getUserById = exports.getAllUsers = exports.createUser = exports.loginUser = void 0;
+exports.createUser = exports.getUserById = exports.getUsers = exports.authenticateUser = void 0;
 const userService = __importStar(require("../services/userService"));
-const loginUser = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+const authenticateUser = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const { username, password } = req.body;
         const { user, token } = yield userService.authenticateUser(username, password);
@@ -54,18 +54,8 @@ const loginUser = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
         res.status(401).json({ message: "Error login User", error });
     }
 });
-exports.loginUser = loginUser;
-const createUser = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    try {
-        const newUser = yield userService.createUser(req.body);
-        res.status(201).json(newUser);
-    }
-    catch (error) {
-        res.status(500).json({ message: "Error registering User", error });
-    }
-});
-exports.createUser = createUser;
-const getAllUsers = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+exports.authenticateUser = authenticateUser;
+const getUsers = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const users = yield userService.getUsers();
         res.json(users);
@@ -74,7 +64,7 @@ const getAllUsers = (req, res) => __awaiter(void 0, void 0, void 0, function* ()
         res.status(500).json({ message: "Error fetching Users", error });
     }
 });
-exports.getAllUsers = getAllUsers;
+exports.getUsers = getUsers;
 const getUserById = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const user = yield userService.getUserById(Number(req.params.id));
@@ -88,3 +78,13 @@ const getUserById = (req, res) => __awaiter(void 0, void 0, void 0, function* ()
     }
 });
 exports.getUserById = getUserById;
+const createUser = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        const newUser = yield userService.createUser(req.body);
+        res.status(201).json(newUser);
+    }
+    catch (error) {
+        res.status(500).json({ message: "Error registering User", error });
+    }
+});
+exports.createUser = createUser;

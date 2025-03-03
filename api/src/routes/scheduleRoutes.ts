@@ -4,9 +4,9 @@ import { authenticateToken } from '../middleware/authMiddleware';
 
 const router = express.Router();
 
-router.post('/', authenticateToken, scheduleController.createSchedule);
-router.get('/', authenticateToken, scheduleController.getAllSchedules);
+router.get('/', authenticateToken, scheduleController.getSchedules);
 router.get('/:id', authenticateToken, scheduleController.getScheduleById);
+router.post('/', authenticateToken, scheduleController.createSchedule);
 router.put('/:id', authenticateToken, scheduleController.updateSchedule);
 router.delete('/:id', authenticateToken, scheduleController.deleteSchedule);
 

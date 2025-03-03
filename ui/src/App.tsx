@@ -30,7 +30,7 @@ import wallpaper from "./assets/images/choferesblurred1.webp";
 
 const AppBarWrapper: React.FC = () => {
   const { currentUser } = useAuth();
-  const { handleLogoutUser } = useUsers();
+  const { logoutUser } = useUsers();
   return (
     <AppBarComponent
       title={APPBAR_MENU.TITLE}
@@ -66,7 +66,7 @@ const AppBarWrapper: React.FC = () => {
                 label: APPBAR_MENU.LOGOUT,
                 icon: <LogoutIcon />,
                 path: ROUTES.LOGIN,
-                onClick: handleLogoutUser,
+                onClick: logoutUser,
               },
             ]
           : []),

@@ -1,17 +1,17 @@
 import { MonthlySummary } from "../models/MonthlySummary";
 
-export const createMonthlySummary = async (
-  data: Omit<MonthlySummary, "id">
-) => {
-  return await MonthlySummary.create(data);
-};
-
-export const getAllMonthlySummaries = async () => {
+export const getMonthlySummaries = async () => {
   return MonthlySummary.findAll();
 };
 
 export const getMonthlySummaryById = async (id: number) => {
   return MonthlySummary.findByPk(id);
+};
+
+export const createMonthlySummary = async (
+  data: Omit<MonthlySummary, "id">
+) => {
+  return await MonthlySummary.create(data);
 };
 
 export const updateMonthlySummary = async (

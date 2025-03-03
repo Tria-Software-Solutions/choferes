@@ -29,18 +29,18 @@ export const authenticateUser = async (username: string, password: string) => {
   return { user, token };
 };
 
-export const createUser = async (data: Omit<User, "id">) => {
-  const hashedPassword = await bcrypt.hash(data.password, 10);
-  return await User.create({
-    ...data,
-    password: hashedPassword,
-  });
-};
-
 export const getUsers = async () => {
   return await User.findAll({ include: Role });
 };
 
 export const getUserById = async (id: number) => {
   return await User.findByPk(id, { include: Role });
+};
+
+export const createUser = async (data: Omit<User, "id">) => {
+  const hashedPassword = await bcrypt.hash(data.password, 10);
+  return await User.create({
+    ...data,
+    password: hashedPassword,
+  });
 };

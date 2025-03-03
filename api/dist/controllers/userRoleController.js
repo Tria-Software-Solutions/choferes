@@ -42,37 +42,37 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.removeRole = exports.getRoles = exports.assignRole = void 0;
+exports.deleteUserRole = exports.createUserRole = exports.getUserRoles = void 0;
 const userRoleService = __importStar(require("../services/userRoleService"));
-const assignRole = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    try {
-        const userRole = yield userRoleService.assignRoleToUser(req.body);
-        res.status(201).json(userRole);
-    }
-    catch (error) {
-        res.status(400).json({ message: "Error assigning UserRole", error });
-    }
-});
-exports.assignRole = assignRole;
-const getRoles = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+const getUserRoles = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const { userId } = req.params;
     try {
-        const roles = yield userRoleService.getRolesByUser(Number(userId));
+        const roles = yield userRoleService.getUserRoles(Number(userId));
         res.status(200).json(roles);
     }
     catch (error) {
         res.status(400).json({ message: "Error fetching UserRole", error });
     }
 });
-exports.getRoles = getRoles;
-const removeRole = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+exports.getUserRoles = getUserRoles;
+const createUserRole = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        const userRole = yield userRoleService.createUserRole(req.body);
+        res.status(201).json(userRole);
+    }
+    catch (error) {
+        res.status(400).json({ message: "Error assigning UserRole", error });
+    }
+});
+exports.createUserRole = createUserRole;
+const deleteUserRole = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const { userId, roleId } = req.body;
     try {
-        yield userRoleService.removeRoleFromUser(userId, roleId);
+        yield userRoleService.deleteUserRole(userId, roleId);
         res.status(200).json({ message: "UserRole deleted" });
     }
     catch (error) {
         res.status(400).json({ message: "Error deleting UserRole", error });
     }
 });
-exports.removeRole = removeRole;
+exports.deleteUserRole = deleteUserRole;

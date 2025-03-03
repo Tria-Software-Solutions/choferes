@@ -1,16 +1,6 @@
 import { Request, Response } from "express";
 import * as permissionService from "../services/permissionService";
 
-export const createPermission = async (req: Request, res: Response) => {
-  try {
-    const { name } = req.body;
-    const permission = await permissionService.createPermission(name);
-    res.status(201).json(permission);
-  } catch (error) {
-    res.status(500).json({ message: 'Error creating Permission', error });
-  }
-};
-
 export const getPermissions = async (req: Request, res: Response) => {
   try {
     const permissions = await permissionService.getPermissions();
@@ -27,5 +17,15 @@ export const getPermissionById = async (req: Request, res: Response) => {
     res.json(permission);
   } catch (error) {
     res.status(500).json({ message: "Error fetching Permission", error });
+  }
+};
+
+export const createPermission = async (req: Request, res: Response) => {
+  try {
+    const { name } = req.body;
+    const permission = await permissionService.createPermission(name);
+    res.status(201).json(permission);
+  } catch (error) {
+    res.status(500).json({ message: 'Error creating Permission', error });
   }
 };

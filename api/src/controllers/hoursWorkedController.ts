@@ -1,18 +1,9 @@
 import { Request, Response } from "express";
 import * as hoursWorkedService from "../services/hoursWorkedService";
 
-export const createHoursWorked = async (req: Request, res: Response) => {
+export const getHoursWorked = async (req: Request, res: Response) => {
   try {
-    const hoursWorked = await hoursWorkedService.createHoursWorked(req.body);
-    return res.status(201).json(hoursWorked);
-  } catch (error) {
-    return res.status(500).json({ message: "Error creating HoursWorked", error });
-  }
-};
-
-export const getAllHoursWorked = async (req: Request, res: Response) => {
-  try {
-    const hoursWorked = await hoursWorkedService.getAllHoursWorked();
+    const hoursWorked = await hoursWorkedService.getHoursWorked();
     return res.status(200).json(hoursWorked);
   } catch (error) {
     return res.status(500).json({ message: "Error fetching HoursWorked", error });
@@ -32,6 +23,15 @@ export const getHoursWorkedById = async (req: Request, res: Response) => {
     return res
       .status(500)
       .json({ message: "Error fetching HoursWorked by ID", error });
+  }
+};
+
+export const createHoursWorked = async (req: Request, res: Response) => {
+  try {
+    const hoursWorked = await hoursWorkedService.createHoursWorked(req.body);
+    return res.status(201).json(hoursWorked);
+  } catch (error) {
+    return res.status(500).json({ message: "Error creating HoursWorked", error });
   }
 };
 

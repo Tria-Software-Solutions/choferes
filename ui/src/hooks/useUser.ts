@@ -5,6 +5,7 @@ import { User } from "../models/User";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import { Roles } from "../enums/roles";
+import { UserRole } from "../models/UserRole";
 
 export const useUsers = () => {
   const { currentUser, login, logout } = useAuth();
@@ -14,18 +15,10 @@ export const useUsers = () => {
   const [authError, setAuthError] = useState<string | null>(null);
   const navigate = useNavigate();
 
-  const handleRegisterUser = async (newUser: Omit<User, "id">) => {
-    const createdUser = await UserService.addUser(newUser);
-    setUsers((prev) => [...prev, createdUser]);
-    setTotalCountUsers((prev) => prev + 1);
-    await UserRoleService.assignUserRole(createdUser.id, Roles.USER);
-    navigate("/");
-  };
-
-  const handleLoginUser = async (username: string, password: string) => {
+  const authenticateUser = async (username: string, password: string) => {
     setAuthError(null);
     try {
-      const loginData = await UserService.loginUser(username, password);
+      const loginData = await UserService.authenticateUser(username, password);
       login(loginData.user, loginData.token);
       navigate("/roles");
     } catch (error) {
@@ -34,10 +27,15 @@ export const useUsers = () => {
     }
   };
 
-  const fetchUsers = useCallback(async () => {
+  const logoutUser = () => {
+    logout();
+    navigate("/");
+  };
+
+  const getUsers = useCallback(async () => {
     setIsLoadingUsers(true);
     try {
-      const data = await UserService.fetchUsers();
+      const data = await UserService.getUsers();
       setUsers(data);
       setTotalCountUsers(data.length);
     } catch (error) {
@@ -47,19 +45,26 @@ export const useUsers = () => {
     }
   }, []);
 
-  const handleUpdateUser = async (id: number, updatedUser: Partial<User>) => {
+  const createUser = async (newUser: Omit<User, "id">) => {
+    const createdUser = await UserService.createUser(newUser);
+    setUsers((prev) => [...prev, createdUser]);
+    setTotalCountUsers((prev) => prev + 1);
+    const createdUserRole: Omit<UserRole, "id"> = {
+      userId: createdUser.userId,
+      roleId: Roles.USER,
+    };
+    await UserRoleService.createUserRole(createdUserRole);
+    navigate("/");
+  };
+
+  const updateUser = async (id: number, updatedUser: Partial<User>) => {
     await UserService.getUserById(id);
     setUsers((prev) =>
       prev.map((user) => (user.id === id ? { ...user, ...updatedUser } : user))
     );
   };
 
-  const handleLogoutUser = () => {
-    logout();
-    navigate("/");
-  };
-
-  const handleDeleteUser = async (id: number) => {
+  const deleteUser = async (id: number) => {
     //await UserService.deleteUser(id);
     //setUsers((prev) => prev.filter((user) => user.id !== id));
     //setTotalCountUsers((prev) => prev - 1);
@@ -68,20 +73,20 @@ export const useUsers = () => {
 
   useEffect(() => {
     if (currentUser) {
-      fetchUsers();
+      getUsers();
     }
-  }, [currentUser, fetchUsers]);
+  }, [currentUser, getUsers]);
 
   return {
     users,
     totalCountUsers,
     isLoadingUsers,
     authError,
-    fetchUsers,
-    handleRegisterUser,
-    handleLoginUser,
-    handleLogoutUser,
-    handleUpdateUser,
-    handleDeleteUser,
+    authenticateUser,
+    logoutUser,
+    getUsers,
+    createUser,
+    updateUser,
+    deleteUser,
   };
 };

@@ -1,12 +1,12 @@
 import { MonthlySummary } from "../models/MonthlySummary";
 import api from "./api";
 
-export const fetchMonthlySummaries = async () => {
+export const getMonthlySummaries = async () => {
   const response = await api.get("/monthly-summary");
   return response.data;
 };
 
-export const addMonthlySummary = async (
+export const createMonthlySummary = async (
   newMonthlySummary: Omit<MonthlySummary, "id">
 ) => {
   const response = await api.post("/monthly-summary", newMonthlySummary);

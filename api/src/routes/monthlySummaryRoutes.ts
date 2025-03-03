@@ -4,9 +4,9 @@ import { authenticateToken } from '../middleware/authMiddleware';
 
 const router = express.Router();
 
-router.post('/', authenticateToken, monthlySummaryController.createMonthlySummary);
-router.get('/', authenticateToken, monthlySummaryController.getAllMonthlySummaries);
+router.get('/', authenticateToken, monthlySummaryController.getMonthlySummaries);
 router.get('/:id', authenticateToken, monthlySummaryController.getMonthlySummaryById);
+router.post('/', authenticateToken, monthlySummaryController.createMonthlySummary);
 router.put('/:id', authenticateToken, monthlySummaryController.updateMonthlySummary);
 router.delete('/:id', authenticateToken, monthlySummaryController.deleteMonthlySummary);
 

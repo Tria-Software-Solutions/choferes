@@ -1,12 +1,12 @@
 import { BiweeklySummary } from "../models/BiweeklySummary";
 import api from "./api";
 
-export const fetchBiweeklySummaries = async () => {
+export const getBiweeklySummaries = async () => {
   const response = await api.get("/biweekly-summary");
   return response.data;
 };
 
-export const addBiweeklySummary = async (
+export const createBiweeklySummary = async (
   newBiweeklySummary: Omit<BiweeklySummary, "id">
 ) => {
   const response = await api.post("/biweekly-summary", newBiweeklySummary);

@@ -1,7 +1,7 @@
 import { Request, Response } from "express";
 import * as userService from "../services/userService";
 
-export const loginUser = async (req: Request, res: Response) => {
+export const authenticateUser = async (req: Request, res: Response) => {
   try {
     const { username, password } = req.body;
     const { user, token } = await userService.authenticateUser(
@@ -14,16 +14,7 @@ export const loginUser = async (req: Request, res: Response) => {
   }
 };
 
-export const createUser = async (req: Request, res: Response) => {
-  try {
-    const newUser = await userService.createUser(req.body);
-    res.status(201).json(newUser);
-  } catch (error) {
-    res.status(500).json({ message: "Error registering User", error });
-  }
-};
-
-export const getAllUsers = async (req: Request, res: Response) => {
+export const getUsers = async (req: Request, res: Response) => {
   try {
     const users = await userService.getUsers();
     res.json(users);
@@ -41,5 +32,14 @@ export const getUserById = async (req: Request, res: Response) => {
     res.json(user);
   } catch (error) {
     res.status(500).json({ message: "Error fetching User", error });
+  }
+};
+
+export const createUser = async (req: Request, res: Response) => {
+  try {
+    const newUser = await userService.createUser(req.body);
+    res.status(201).json(newUser);
+  } catch (error) {
+    res.status(500).json({ message: "Error registering User", error });
   }
 };

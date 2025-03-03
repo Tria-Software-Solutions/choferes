@@ -1,22 +1,11 @@
 import { Request, Response } from "express";
 import * as rolePermissionService from "../services/rolePermissionService";
 
-export const assignPermission = async (req: Request, res: Response) => {
-  try {
-    const rolePermission = await rolePermissionService.assignPermissionToRole(
-      req.body
-    );
-    res.status(201).json(rolePermission);
-  } catch (error) {
-    res.status(400).json({ message: "Error assigning RolePermission", error });
-  }
-};
-
-export const getPermissions = async (req: Request, res: Response) => {
+export const getRolePermissions = async (req: Request, res: Response) => {
   const { roleId } = req.params;
 
   try {
-    const permissions = await rolePermissionService.getPermissionsByRole(
+    const permissions = await rolePermissionService.getRolePermissions(
       Number(roleId)
     );
     res.status(200).json(permissions);
@@ -25,11 +14,22 @@ export const getPermissions = async (req: Request, res: Response) => {
   }
 };
 
-export const removePermission = async (req: Request, res: Response) => {
+export const createRolePermission = async (req: Request, res: Response) => {
+  try {
+    const rolePermission = await rolePermissionService.createRolePermission(
+      req.body
+    );
+    res.status(201).json(rolePermission);
+  } catch (error) {
+    res.status(400).json({ message: "Error assigning RolePermission", error });
+  }
+};
+
+export const deleteRolePermission = async (req: Request, res: Response) => {
   const { roleId, permissionId } = req.body;
 
   try {
-    await rolePermissionService.removePermissionFromRole(roleId, permissionId);
+    await rolePermissionService.deleteRolePermission(roleId, permissionId);
     res.status(200).json({ message: "RolePermission deleted" });
   } catch (error) {
     res.status(400).json({ message: "Error deleting RolePermission", error });

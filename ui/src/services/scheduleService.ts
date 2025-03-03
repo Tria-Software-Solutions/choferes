@@ -1,12 +1,12 @@
 import { Schedule } from '../models/Schedule';
 import api from './api';
 
-export const fetchSchedules = async () => {
+export const getSchedules = async () => {
   const response = await api.get("/schedules");
   return response.data;
 };
 
-export const addSchedule = async (newSchedule: Omit<Schedule, "id">) => {
+export const createSchedule = async (newSchedule: Omit<Schedule, "id">) => {
   const response = await api.post("/schedules", newSchedule);
   return response.data;
 };

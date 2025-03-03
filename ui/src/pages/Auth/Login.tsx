@@ -17,7 +17,7 @@ import { PAGE_TITLE } from "../../constants/constants";
 import logo from "../../assets/images/logo.png";
 
 const Login = () => {
-  const { isLoadingUsers, handleLoginUser } = useUsers();
+  const { isLoadingUsers, authenticateUser } = useUsers();
   const [fields, setFields] = useState({
     username: "",
     password: "",
@@ -30,7 +30,7 @@ const Login = () => {
     setIsSubmitting(true);
 
     try {
-      await handleLoginUser(fields.username, fields.password);
+      await authenticateUser(fields.username, fields.password);
     } catch (err) {
       setError("Usuario o contraseña incorrectos");
     }

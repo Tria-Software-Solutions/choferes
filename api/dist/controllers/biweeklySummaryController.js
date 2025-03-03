@@ -42,23 +42,11 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.deleteBiweeklySummary = exports.updateBiweeklySummary = exports.getBiweeklySummaryById = exports.getAllBiweeklySummaries = exports.createBiweeklySummary = void 0;
+exports.deleteBiweeklySummary = exports.updateBiweeklySummary = exports.createBiweeklySummary = exports.getBiweeklySummaryById = exports.getBiweeklySummaries = void 0;
 const biweeklySummaryService = __importStar(require("../services/biweeklySummaryService"));
-const createBiweeklySummary = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+const getBiweeklySummaries = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        const newBiweeklySummary = yield biweeklySummaryService.createBiweeklySummary(req.body);
-        return res.status(201).json(newBiweeklySummary);
-    }
-    catch (error) {
-        return res
-            .status(500)
-            .json({ message: "Error creating BiweeklySummary", error });
-    }
-});
-exports.createBiweeklySummary = createBiweeklySummary;
-const getAllBiweeklySummaries = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    try {
-        const summaries = yield biweeklySummaryService.getAllBiweeklySummaries();
+        const summaries = yield biweeklySummaryService.getBiweeklySummaries();
         return res.status(200).json(summaries);
     }
     catch (error) {
@@ -67,7 +55,7 @@ const getAllBiweeklySummaries = (req, res) => __awaiter(void 0, void 0, void 0, 
             .json({ message: "Error fetching BiweeklySummaries", error });
     }
 });
-exports.getAllBiweeklySummaries = getAllBiweeklySummaries;
+exports.getBiweeklySummaries = getBiweeklySummaries;
 const getBiweeklySummaryById = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const id = parseInt(req.params.id);
@@ -86,6 +74,18 @@ const getBiweeklySummaryById = (req, res) => __awaiter(void 0, void 0, void 0, f
     }
 });
 exports.getBiweeklySummaryById = getBiweeklySummaryById;
+const createBiweeklySummary = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        const newBiweeklySummary = yield biweeklySummaryService.createBiweeklySummary(req.body);
+        return res.status(201).json(newBiweeklySummary);
+    }
+    catch (error) {
+        return res
+            .status(500)
+            .json({ message: "Error creating BiweeklySummary", error });
+    }
+});
+exports.createBiweeklySummary = createBiweeklySummary;
 const updateBiweeklySummary = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const id = parseInt(req.params.id);

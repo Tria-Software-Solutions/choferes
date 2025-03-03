@@ -1,7 +1,7 @@
 import { User } from "../models/User";
 import api from "./api";
 
-export const loginUser = async (username: string, password: string) => {
+export const authenticateUser = async (username: string, password: string) => {
   const response = await api.post("/users/login", {
     username,
     password,
@@ -9,17 +9,17 @@ export const loginUser = async (username: string, password: string) => {
   return response.data;
 };
 
-export const fetchUsers = async () => {
+export const getUsers = async () => {
   const response = await api.get("/users");
-  return response.data;
-};
-
-export const addUser = async (user: Omit<User, "id">) => {
-  const response = await api.post("/users/register", user);
   return response.data;
 };
 
 export const getUserById = async (id: number) => {
   const response = await api.get(`/users/${id}`);
+  return response.data;
+};
+
+export const createUser = async (user: Omit<User, "id">) => {
+  const response = await api.post("/users/register", user);
   return response.data;
 };
