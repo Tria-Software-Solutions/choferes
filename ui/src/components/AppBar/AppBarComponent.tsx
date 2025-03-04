@@ -2,7 +2,7 @@ import React from "react";
 import MenuComponent from "../Menu/MenuComponent";
 import { AppBar, Toolbar, Typography, IconButton, Box } from "@mui/material";
 import { useNavigate } from "react-router-dom";
-import { useAuth } from "../../context/AuthContext";
+// import { useAuth } from "../../context/AuthContext";
 import MenuRoundedIcon from "@mui/icons-material/MenuRounded";
 import logo from "../../assets/images/logo.png";
 
@@ -26,7 +26,7 @@ const AppBarComponent: React.FC<AppBarComponentProps> = ({
   title,
   links,
 }) => {
-  const { currentUser } = useAuth();
+  // const { currentUser } = useAuth();
   const navigate = useNavigate();
   const menuItems = links.map((link) => ({
     text: link.label,
@@ -59,12 +59,14 @@ const AppBarComponent: React.FC<AppBarComponentProps> = ({
             edge="start"
             color="inherit"
             aria-label="menu"
-            onClick={() => navigate("/roles")}
+            // onClick={() => navigate("/roles")}
+            onClick={() => navigate("/")}
           >
             {icon}
           </IconButton>
         )}
-        <Box sx={{ cursor: "pointer" }} onClick={() => navigate("/roles")}>
+        {/* <Box sx={{ cursor: "pointer" }} onClick={() => navigate("/roles")}> */}
+        <Box sx={{ cursor: "pointer" }} onClick={() => navigate("/")}>
           <img
             src={logo}
             alt="Logo"
@@ -81,14 +83,15 @@ const AppBarComponent: React.FC<AppBarComponentProps> = ({
         >
           <Box
             sx={{ cursor: "pointer", display: "inline-block" }}
-            onClick={() => navigate("/roles")}
+            // onClick={() => navigate("/roles")}
+            onClick={() => navigate("/")}
           >
             {title}
           </Box>
         </Typography>
-        <Typography sx={{ color: "white", marginRight: "25px" }}>
+        {/* <Typography sx={{ color: "white", marginRight: "25px" }}>
           {`${currentUser?.firstName} ${currentUser?.lastName}`}
-        </Typography>
+        </Typography> */}
         <MenuComponent icon={<MenuRoundedIcon />} menuItems={menuItems}/>
       </Toolbar>
     </AppBar>

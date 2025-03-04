@@ -8,7 +8,8 @@ const NotFound = () => {
     if (window.history.length > 2) {
       navigate(-1);
     } else {
-      navigate("/roles");
+      // navigate("/roles");
+      navigate("/");
     }
   };
 
