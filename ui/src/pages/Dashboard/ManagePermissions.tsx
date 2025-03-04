@@ -3,6 +3,7 @@ import { Permission } from "../../models/Permission";
 import { usePermissions } from "../../hooks/usePermission";
 import { getPermissions } from "../../services/permissionService";
 import {
+  Backdrop,
   Box,
   Button,
   CircularProgress,
@@ -16,9 +17,9 @@ import {
 import EditableTable from "../../components/Table/EditableTable/EditableTable";
 import SearchBar from "../../components/SearchBar/SearchBar";
 
-
 const ManagePermissions = () => {
-  const { isLoadingPermissions, updatePermission, deletePermission } = usePermissions();
+  const { isLoadingPermissions, updatePermission, deletePermission } =
+    usePermissions();
   const [permissions, setPermissions] = useState<Permission[]>([]);
   const [filteredPermissions, setFilteredPermissions] = useState<Permission[]>(
     []
@@ -125,7 +126,12 @@ const ManagePermissions = () => {
             paddingTop: "10%",
           }}
         >
-          <CircularProgress />
+          <Backdrop
+            sx={(theme) => ({ color: "#fff", zIndex: theme.zIndex.drawer + 1 })}
+            open={isLoadingPermissions}
+          >
+            <CircularProgress />
+          </Backdrop>
         </Box>
       ) : (
         <>

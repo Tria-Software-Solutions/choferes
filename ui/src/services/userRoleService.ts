@@ -6,6 +6,11 @@ export const getUserRoles = async () => {
   return response.data;
 };
 
+export const getUserRoleByUserId = async (userId: number) => {
+  const response = await api.get(`/user-role/${userId}`);
+  return response.data;
+};
+
 export const createUserRole = async (userRole: Omit<UserRole, "id">) => {
   const response = await api.post("/user-role", userRole);
   return response.data;

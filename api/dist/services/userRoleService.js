@@ -9,12 +9,16 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.deleteUserRole = exports.createUserRole = exports.getUserRoles = void 0;
+exports.deleteUserRole = exports.createUserRole = exports.getUserRoleByUserId = exports.getUserRoles = void 0;
 const UserRole_1 = require("../models/UserRole");
 const getUserRoles = (userId) => __awaiter(void 0, void 0, void 0, function* () {
     return UserRole_1.UserRole.findAll({ where: { userId } });
 });
 exports.getUserRoles = getUserRoles;
+const getUserRoleByUserId = (userId) => __awaiter(void 0, void 0, void 0, function* () {
+    return yield UserRole_1.UserRole.findByPk(userId);
+});
+exports.getUserRoleByUserId = getUserRoleByUserId;
 const createUserRole = (data) => __awaiter(void 0, void 0, void 0, function* () {
     return UserRole_1.UserRole.create(data);
 });

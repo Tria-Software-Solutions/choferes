@@ -34,6 +34,7 @@ import {
   Button,
   CircularProgress,
   SelectChangeEvent,
+  Backdrop,
 } from "@mui/material";
 import {
   createExportOptions,
@@ -62,7 +63,8 @@ const RolesPage: React.FC = () => {
   const { employees, isLoadingEmployees } = useEmployees();
   const [filteredEmployees, setFilteredEmployees] = useState<Employee[]>([]);
   const { schedules, isLoadingSchedules } = useSchedules();
-  const { hoursWorked, isLoadingHours, handleAddOrUpdateHours } = useHoursWorked();
+  const { hoursWorked, isLoadingHours, createOrUpdateHoursWorked } =
+    useHoursWorked();
   const {
     weeklySummaries,
     isLoadingWeeklySummaries,
@@ -187,7 +189,7 @@ const RolesPage: React.FC = () => {
           scheduleId,
         };
       }
-      handleAddOrUpdateHours(createOrUpdatedHoursWorked);
+      createOrUpdateHoursWorked(createOrUpdatedHoursWorked);
 
       const existingWeeklySummaryRecord = weeklySummaries.find(
         (weeklySummary) =>
@@ -197,7 +199,9 @@ const RolesPage: React.FC = () => {
           weeklySummary.year === year
       );
 
-      let createOrUpdatedWeeklySummary: Omit<WeeklySummary, "id"> | WeeklySummary;
+      let createOrUpdatedWeeklySummary:
+        | Omit<WeeklySummary, "id">
+        | WeeklySummary;
 
       if (existingWeeklySummaryRecord) {
         createOrUpdatedWeeklySummary = {
@@ -227,7 +231,9 @@ const RolesPage: React.FC = () => {
           biweeklySummary.year === year
       );
 
-      let createOrUpdatedBiweeklySummary: Omit<BiweeklySummary, "id"> | BiweeklySummary;
+      let createOrUpdatedBiweeklySummary:
+        | Omit<BiweeklySummary, "id">
+        | BiweeklySummary;
 
       if (existingBiweeklySummaryRecord) {
         createOrUpdatedBiweeklySummary = {
@@ -256,7 +262,9 @@ const RolesPage: React.FC = () => {
           monthlySummary.year === year
       );
 
-      let createOrUpdatedMonthlySummary: Omit<MonthlySummary, "id"> | MonthlySummary;
+      let createOrUpdatedMonthlySummary:
+        | Omit<MonthlySummary, "id">
+        | MonthlySummary;
 
       if (existingMonthlySummaryRecord) {
         createOrUpdatedMonthlySummary = {
@@ -283,7 +291,7 @@ const RolesPage: React.FC = () => {
       weeklySummaries,
       biweeklySummaries,
       monthlySummaries,
-      handleAddOrUpdateHours,
+      createOrUpdateHoursWorked,
       createOrUpdateWeeklySummary,
       createOrUpdateBiweeklySummary,
       createOrUpdateMonthlySummary,
@@ -377,18 +385,20 @@ const RolesPage: React.FC = () => {
         display="flex"
         justifyContent="space-between"
         alignItems="center"
-        sx={{ mb: 2 }}
+        sx={{ mb: 3 }}
       >
         <Typography variant={isSmallScreen ? "h4" : "h2"} sx={{ flexGrow: 1 }}>
           {PAGE_TITLE.ROLES}
         </Typography>
-        {filteredEmployees.length > 0 && (
-          <SplitButton
-            options={exportOptions}
-            defaultIndex={0}
-            buttonIcon={<DownloadRoundedIcon />}
-          />
-        )}
+        <Box sx={{ minHeight: 65 }}>
+          {filteredEmployees.length > 0 && (
+            <SplitButton
+              options={exportOptions}
+              defaultIndex={0}
+              buttonIcon={<DownloadRoundedIcon />}
+            />
+          )}
+        </Box>
       </Box>
       {isLoading ? (
         <Box
@@ -400,7 +410,12 @@ const RolesPage: React.FC = () => {
             paddingTop: "10%",
           }}
         >
-          <CircularProgress />
+          <Backdrop
+            sx={(theme) => ({ color: "#fff", zIndex: theme.zIndex.drawer + 1 })}
+            open={isLoading}
+          >
+            <CircularProgress />
+          </Backdrop>
         </Box>
       ) : (
         <>

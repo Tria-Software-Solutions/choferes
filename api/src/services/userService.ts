@@ -37,6 +37,13 @@ export const getUserById = async (id: number) => {
   return await User.findByPk(id, { include: Role });
 };
 
+export const getUserByUsername = async (username: string) => {
+  return await User.findOne({
+    where: { username },
+    include: Role,
+  });
+};
+
 export const createUser = async (data: Omit<User, "id">) => {
   const hashedPassword = await bcrypt.hash(data.password, 10);
   return await User.create(

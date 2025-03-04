@@ -19,6 +19,11 @@ export const getUserById = async (id: number) => {
   return response.data;
 };
 
+export const getUserByUsername = async (username: string) => {
+  const response = await api.get(`/users/username/${username}`);
+  return response.data;
+};
+
 export const createUser = async (user: Omit<User, "id">) => {
   const response = await api.post("/users/register", user);
   return response.data;

@@ -18,6 +18,7 @@ import {
   useTheme,
   useMediaQuery,
   CircularProgress,
+  Backdrop,
 } from "@mui/material";
 import {
   createExportOptions,
@@ -89,7 +90,7 @@ const EmployeesPage: React.FC = () => {
   };
 
   const handleAdd = () => {
-    const newEmployee: Omit<Employee, "id"> = {  
+    const newEmployee: Omit<Employee, "id"> = {
       firstName: addFields.firstName,
       lastName: addFields.lastName,
     };
@@ -155,18 +156,20 @@ const EmployeesPage: React.FC = () => {
         display="flex"
         justifyContent="space-between"
         alignItems="center"
-        sx={{ mb: 2 }}
+        sx={{ mb: 3 }}
       >
         <Typography variant={isSmallScreen ? "h4" : "h2"} sx={{ flexGrow: 1 }}>
           {PAGE_TITLE.EMPLOYEES}
         </Typography>
-        {filteredEmployees.length > 0 && (
-          <SplitButton
-            options={exportOptions}
-            defaultIndex={0}
-            buttonIcon={<DownloadRoundedIcon />}
-          />
-        )}
+        <Box sx={{ minHeight: 65 }}>
+          {filteredEmployees.length > 0 && (
+            <SplitButton
+              options={exportOptions}
+              defaultIndex={0}
+              buttonIcon={<DownloadRoundedIcon />}
+            />
+          )}
+        </Box>
       </Box>
       {isLoadingEmployees ? (
         <Box
@@ -178,7 +181,12 @@ const EmployeesPage: React.FC = () => {
             paddingTop: "10%",
           }}
         >
-          <CircularProgress />
+          <Backdrop
+            sx={(theme) => ({ color: "#fff", zIndex: theme.zIndex.drawer + 1 })}
+            open={isLoadingEmployees}
+          >
+            <CircularProgress />
+          </Backdrop>
         </Box>
       ) : (
         <>

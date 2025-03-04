@@ -17,8 +17,19 @@ export const useUserRoles = () => {
       setTotalCountUserRoles(data.length);
       return data;
     } catch (error) {
-      console.error("Error fetching userRoles:", error);
+      console.error("Error fetching UserRoles:", error);
       return [];
+    } finally {
+      setIsLoadingUserRoles(false);
+    }
+  }, []);
+
+  const getUserRoleByUserId = useCallback(async (userId: number) => {
+    setIsLoadingUserRoles(true);
+    try {
+      return await UserRoleService.getUserRoleByUserId(userId);
+    } catch (error) {
+      console.error("Error fetching UserRole by userId", error);
     } finally {
       setIsLoadingUserRoles(false);
     }
@@ -47,6 +58,7 @@ export const useUserRoles = () => {
     totalCountUserRoles,
     isLoadingUserRoles,
     getUserRoles,
+    getUserRoleByUserId,
     createUserRole,
     deleteUserRole,
   };

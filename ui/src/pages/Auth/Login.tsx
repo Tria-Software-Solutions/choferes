@@ -21,7 +21,7 @@ import VisibilityOff from "@mui/icons-material/VisibilityOff";
 import logo from "../../assets/images/logo.png";
 
 const Login = () => {
-  const { isLoadingUsers, authenticateUser } = useUsers();
+  const { authenticateUser } = useUsers();
   const [fields, setFields] = useState({
     username: "",
     password: "",
@@ -33,11 +33,16 @@ const Login = () => {
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsSubmitting(true);
+    setError(null); 
 
     try {
       await authenticateUser(fields.username, fields.password);
     } catch (err) {
-      setError("Usuario o contraseña incorrectos");
+      if (err instanceof Error) {
+        setError("No se pudo conectar al servidor. Intenta más tarde.");
+      } else {
+        setError("Usuario o contraseña incorrectos.");
+      }
     }
     setIsSubmitting(false);
   };
@@ -113,7 +118,7 @@ const Login = () => {
                 lineHeight: "normal",
               }}
             >
-              {isSubmitting && isLoadingUsers ? (
+              {isSubmitting ? (
                 <CircularProgress
                   color="inherit"
                   size={24}
