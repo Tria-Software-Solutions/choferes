@@ -12,6 +12,18 @@ export const getUserRoles = async (req: Request, res: Response) => {
   }
 };
 
+export const getUserRoleByUserId = async (req: Request, res: Response) => {
+  try {
+    const user = await userRoleService.getUserRoleByUserId(Number(req.params.userId));
+    if (!user) {
+      return res.status(404).json({ message: "UserRole not found" });
+    }
+    res.json(user);
+  } catch (error) {
+    res.status(500).json({ message: "Error fetching UserRole", error });
+  }
+};
+
 export const createUserRole = async (req: Request, res: Response) => {
   try {
     const userRole = await userRoleService.createUserRole(req.body);

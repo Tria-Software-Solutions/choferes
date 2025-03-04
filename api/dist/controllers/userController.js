@@ -42,7 +42,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.deleteUser = exports.createUser = exports.getUserById = exports.getUsers = exports.authenticateUser = void 0;
+exports.deleteUser = exports.createUser = exports.getUserByUsername = exports.getUserById = exports.getUsers = exports.authenticateUser = void 0;
 const userService = __importStar(require("../services/userService"));
 const authenticateUser = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
@@ -78,6 +78,19 @@ const getUserById = (req, res) => __awaiter(void 0, void 0, void 0, function* ()
     }
 });
 exports.getUserById = getUserById;
+const getUserByUsername = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        const user = yield userService.getUserByUsername(req.params.username);
+        if (!user) {
+            return res.status(404).json({ message: "User not found" });
+        }
+        res.json(user);
+    }
+    catch (error) {
+        res.status(500).json({ message: "Error fetching User", error });
+    }
+});
+exports.getUserByUsername = getUserByUsername;
 const createUser = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const newUser = yield userService.createUser(req.body);

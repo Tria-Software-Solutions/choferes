@@ -2,7 +2,7 @@ import React, { useState, useEffect, useCallback } from "react";
 import { Role } from "../../models/Role";
 import { useRoles } from "../../hooks/useRole";
 import { getRoles } from "../../services/roleService";
-import { Box, Button, CircularProgress, Dialog, DialogActions, DialogContent, DialogTitle, Stack, Typography } from "@mui/material";
+import { Backdrop, Box, Button, CircularProgress, Dialog, DialogActions, DialogContent, DialogTitle, Stack, Typography } from "@mui/material";
 import EditableTable from "../../components/Table/EditableTable/EditableTable";
 import SearchBar from "../../components/SearchBar/SearchBar";
 
@@ -110,7 +110,12 @@ const ManageRoles = () => {
             paddingTop: "10%",
           }}
         >
-          <CircularProgress />
+          <Backdrop
+            sx={(theme) => ({ color: "#fff", zIndex: theme.zIndex.drawer + 1 })}
+            open={isLoadingRoles}
+          >
+            <CircularProgress />
+          </Backdrop>
         </Box>
       ) : (
         <>

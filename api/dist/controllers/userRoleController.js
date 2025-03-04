@@ -42,7 +42,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.deleteUserRole = exports.createUserRole = exports.getUserRoles = void 0;
+exports.deleteUserRole = exports.createUserRole = exports.getUserRoleByUserId = exports.getUserRoles = void 0;
 const userRoleService = __importStar(require("../services/userRoleService"));
 const getUserRoles = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const { userId } = req.params;
@@ -55,6 +55,19 @@ const getUserRoles = (req, res) => __awaiter(void 0, void 0, void 0, function* (
     }
 });
 exports.getUserRoles = getUserRoles;
+const getUserRoleByUserId = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        const user = yield userRoleService.getUserRoleByUserId(Number(req.params.userId));
+        if (!user) {
+            return res.status(404).json({ message: "UserRole not found" });
+        }
+        res.json(user);
+    }
+    catch (error) {
+        res.status(500).json({ message: "Error fetching UserRole", error });
+    }
+});
+exports.getUserRoleByUserId = getUserRoleByUserId;
 const createUserRole = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const userRole = yield userRoleService.createUserRole(req.body);

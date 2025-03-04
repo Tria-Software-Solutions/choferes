@@ -12,7 +12,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.deleteUser = exports.createUser = exports.getUserById = exports.getUsers = exports.authenticateUser = void 0;
+exports.deleteUser = exports.createUser = exports.getUserByUsername = exports.getUserById = exports.getUsers = exports.authenticateUser = void 0;
 const User_1 = require("../models/User");
 const Role_1 = require("../models/Role");
 const bcrypt_1 = __importDefault(require("bcrypt"));
@@ -49,10 +49,16 @@ const getUserById = (id) => __awaiter(void 0, void 0, void 0, function* () {
     return yield User_1.User.findByPk(id, { include: Role_1.Role });
 });
 exports.getUserById = getUserById;
+const getUserByUsername = (username) => __awaiter(void 0, void 0, void 0, function* () {
+    return yield User_1.User.findOne({
+        where: { username },
+        include: Role_1.Role,
+    });
+});
+exports.getUserByUsername = getUserByUsername;
 const createUser = (data) => __awaiter(void 0, void 0, void 0, function* () {
     const hashedPassword = yield bcrypt_1.default.hash(data.password, 10);
-    const newUser = yield User_1.User.create(Object.assign(Object.assign({}, data), { password: hashedPassword }), { returning: true });
-    return newUser;
+    return yield User_1.User.create(Object.assign(Object.assign({}, data), { password: hashedPassword }), { returning: true });
 });
 exports.createUser = createUser;
 const deleteUser = (id) => __awaiter(void 0, void 0, void 0, function* () {

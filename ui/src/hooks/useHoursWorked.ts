@@ -7,7 +7,7 @@ export const useHoursWorked = () => {
   const [totalCountHoursWorked, setTotalCountHoursWorked] = useState(0);
   const [isLoadingHours, setIsLoadingHours] = useState(false);
 
-  const fetchHoursWorked = useCallback(async (): Promise<HoursWorked[]> => {
+  const getHoursWorked = useCallback(async (): Promise<HoursWorked[]> => {
     setIsLoadingHours(true);
     try {
       const data = await HoursWorkedService.getHoursWorked();
@@ -22,13 +22,13 @@ export const useHoursWorked = () => {
     }
   }, []);
 
-  const handleAddHours = async (newHours: Omit<HoursWorked, "id">) => {
+  const createHoursWorked = async (newHours: Omit<HoursWorked, "id">) => {
     const createdHoursWorked = await HoursWorkedService.createHoursWorked(newHours);
     setHoursWorked((prev) => [...prev, createdHoursWorked]);
     setTotalCountHoursWorked((prev) => prev + 1);
   };
 
-  const handleUpdateHours = async (
+  const updateHoursWorked = async (
     id: number,
     updatedHours: Partial<HoursWorked>
   ) => {
@@ -40,34 +40,34 @@ export const useHoursWorked = () => {
     );
   };
 
-  const handleAddOrUpdateHours = async (
+  const createOrUpdateHoursWorked = async (
     newHours: Omit<HoursWorked, "id"> | HoursWorked
   ) => {
     if ("id" in newHours) {
-      await handleUpdateHours(newHours.id, newHours);
+      await updateHoursWorked(newHours.id, newHours);
     } else {
-      await handleAddHours(newHours);
+      await createHoursWorked(newHours);
     }
   };
 
-  const handleDeleteHours = async (id: number) => {
+  const deleteHoursWorked = async (id: number) => {
     await HoursWorkedService.deleteHoursWorked(id);
     setHoursWorked((prev) => prev.filter((hours) => hours.id !== id));
     setTotalCountHoursWorked((prev) => prev - 1);
   };
 
   useEffect(() => {
-    fetchHoursWorked();
-  }, [fetchHoursWorked]);
+    getHoursWorked();
+  }, [getHoursWorked]);
 
   return {
     hoursWorked,
     totalCountHoursWorked,
     isLoadingHours,
-    fetchHoursWorked,
-    handleAddHours,
-    handleUpdateHours,
-    handleAddOrUpdateHours,
-    handleDeleteHours,
+    getHoursWorked,
+    createHoursWorked,
+    updateHoursWorked,
+    createOrUpdateHoursWorked,
+    deleteHoursWorked,
   };
 };

@@ -1,12 +1,25 @@
 import React, { useState, useEffect, useCallback } from "react";
 import { User } from "../../models/User";
 import { useUsers } from "../../hooks/useUser";
-import { Box, Button, CircularProgress, Dialog, DialogActions, DialogContent, DialogTitle, Stack, Typography } from "@mui/material";
+import {
+  Backdrop,
+  Box,
+  Button,
+  CircularProgress,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogTitle,
+  Stack,
+  Typography,
+} from "@mui/material";
 import EditableTable from "../../components/Table/EditableTable/EditableTable";
 import SearchBar from "../../components/SearchBar/SearchBar";
+import { useUserRoles } from "../../hooks/useUserRole";
 
 const ManageUsers = () => {
   const { users, isLoadingUsers, updateUser, deleteUser } = useUsers();
+  const { getUserRoleByUserId } = useUserRoles();
   const [filteredUsers, setFilteredUsers] = useState<User[]>([]);
   const [totalCount, setTotalCount] = useState(0);
   const [editRowId, setEditRowId] = useState<number | null>(null);
@@ -22,7 +35,7 @@ const ManageUsers = () => {
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(5);
   const [isEditFormValid, setIsEditFormValid] = useState(false);
-  
+
   useEffect(() => {
     const normalizeString = (str: string) =>
       str.normalize("NFD").replace(/[\u0300-\u036f]/g, "");
@@ -95,9 +108,10 @@ const ManageUsers = () => {
     setUserToDelete(null);
   };
 
-  const handleDelete = () => {
+  const handleDelete = async () => {
     if (userToDelete !== null) {
-      deleteUser(userToDelete);
+      const userRoleToDelete = await getUserRoleByUserId(userToDelete);
+      await deleteUser(userToDelete, userRoleToDelete.id);
       handleCloseDialog();
     }
   };
@@ -114,7 +128,12 @@ const ManageUsers = () => {
             paddingTop: "10%",
           }}
         >
-          <CircularProgress />
+          <Backdrop
+            sx={(theme) => ({ color: "#fff", zIndex: theme.zIndex.drawer + 1 })}
+            open={isLoadingUsers}
+          >
+            <CircularProgress />
+          </Backdrop>
         </Box>
       ) : (
         <>

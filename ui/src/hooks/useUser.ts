@@ -9,7 +9,7 @@ import { Roles } from "../enums/roles";
 
 export const useUsers = () => {
   const { currentUser, login, logout } = useAuth();
-  const { createUserRole } = useUserRoles();
+  const { createUserRole, deleteUserRole } = useUserRoles();
   const [users, setUsers] = useState<User[]>([]);
   const [totalCountUsers, setTotalCountUsers] = useState(0);
   const [isLoadingUsers, setIsLoadingUsers] = useState(false);
@@ -40,7 +40,29 @@ export const useUsers = () => {
       setUsers(data);
       setTotalCountUsers(data.length);
     } catch (error) {
-      console.error("Error fetching users:", error);
+      console.error("Error fetching Users:", error);
+    } finally {
+      setIsLoadingUsers(false);
+    }
+  }, []);
+
+  const getUserById = useCallback(async (id: number) => {
+    setIsLoadingUsers(true);
+    try {
+      return await UserService.getUserById(id);
+    } catch (error) {
+      console.error("Error fetching User by Id", error);
+    } finally {
+      setIsLoadingUsers(false);
+    }
+  }, []);
+
+  const getUserByUsername = useCallback(async (username: string) => {
+    setIsLoadingUsers(true);
+    try {
+      return await UserService.getUserByUsername(username);
+    } catch (error) {
+      console.error("Error fetching User by Username", error);
     } finally {
       setIsLoadingUsers(false);
     }
@@ -65,11 +87,11 @@ export const useUsers = () => {
     );
   };
 
-  const deleteUser = async (id: number) => {
-    await UserService.deleteUser(id);
-    setUsers((prev) => prev.filter((user) => user.id !== id));
+  const deleteUser = async (userId: number, userRoleId: number) => {
+    deleteUserRole(userRoleId);
+    await UserService.deleteUser(userId);
+    setUsers((prev) => prev.filter((user) => user.id !== userId));
     setTotalCountUsers((prev) => prev - 1);
-    //await UserRoleService.deleteUserRole(userId, roleId);
   };
 
   useEffect(() => {
@@ -86,6 +108,8 @@ export const useUsers = () => {
     authenticateUser,
     logoutUser,
     getUsers,
+    getUserById,
+    getUserByUsername,
     createUser,
     updateUser,
     deleteUser,
