@@ -4,15 +4,15 @@ import { Schedule } from "../models/Schedule";
 
 export const useSchedules = () => {
   const [schedules, setSchedules] = useState<Schedule[]>([]);
-  const [totalCount, setTotalCount] = useState(0);
+  const [totalCountSchedules, setTotalCountSchedules] = useState(0);
   const [isLoadingSchedules, setIsLoadingSchedules] = useState(false);
 
-  const fetchSchedules = useCallback(async () => {
+  const getSchedules = useCallback(async () => {
     setIsLoadingSchedules(true);
     try {
-      const data = await ScheduleService.fetchSchedules();
+      const data = await ScheduleService.getSchedules();
       setSchedules(data);
-      setTotalCount(data.length);
+      setTotalCountSchedules(data.length);
     } catch (error) {
       console.error("Error fetching schedules:", error);
     } finally {
@@ -20,13 +20,13 @@ export const useSchedules = () => {
     }
   }, []);
 
-  const handleAddSchedule = async (newSchedule: Schedule) => {
-    await ScheduleService.addSchedule(newSchedule);
-    setSchedules((prev) => [...prev, newSchedule]);
-    setTotalCount((prev) => prev + 1);
+  const createSchedule = async (newSchedule: Omit<Schedule, "id">) => {
+    const createdSchedule = await ScheduleService.createSchedule(newSchedule);
+    setSchedules((prev) => [...prev, createdSchedule]);
+    setTotalCountSchedules((prev) => prev + 1);
   };
 
-  const handleUpdateSchedule = async (
+  const updateSchedule = async (
     id: number,
     updatedSchedule: Partial<Schedule>
   ) => {
@@ -38,23 +38,23 @@ export const useSchedules = () => {
     );
   };
 
-  const handleDeleteSchedule = async (id: number) => {
+  const deleteSchedule = async (id: number) => {
     await ScheduleService.deleteSchedule(id);
     setSchedules((prev) => prev.filter((schedule) => schedule.id !== id));
-    setTotalCount((prev) => prev - 1);
+    setTotalCountSchedules((prev) => prev - 1);
   };
 
   useEffect(() => {
-    fetchSchedules();
-  }, [fetchSchedules]);
+    getSchedules();
+  }, [getSchedules]);
 
   return {
     schedules,
-    totalCount,
+    totalCountSchedules,
     isLoadingSchedules,
-    fetchSchedules,
-    handleAddSchedule,
-    handleUpdateSchedule,
-    handleDeleteSchedule,
+    getSchedules,
+    createSchedule,
+    updateSchedule,
+    deleteSchedule,
   };
 };

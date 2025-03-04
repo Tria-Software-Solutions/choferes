@@ -1,18 +1,9 @@
 import { Request, Response } from 'express';
 import * as monthlySummaryService from '../services/monthlySummaryService'
 
-export const createMonthlySummary = async (req: Request, res: Response) => {
+export const getMonthlySummaries = async (req: Request, res: Response) => {
   try {
-    const newMonthlySummary = await monthlySummaryService.createMonthlySummary(req.body);
-    return res.status(201).json(newMonthlySummary);
-  } catch (error) {
-    return res.status(500).json({ message: 'Error creating MonthlySummary', error });
-  }
-};
-
-export const getAllMonthlySummaries = async (req: Request, res: Response) => {
-  try {
-    const summaries = await monthlySummaryService.getAllMonthlySummaries();
+    const summaries = await monthlySummaryService.getMonthlySummaries();
     return res.status(200).json(summaries);
   } catch (error) {
     return res.status(500).json({ message: 'Error fetching MonthlySummaries', error });
@@ -30,6 +21,15 @@ export const getMonthlySummaryById = async (req: Request, res: Response) => {
     }
   } catch (error) {
     return res.status(500).json({ message: 'Error fetching MonthlySummary', error });
+  }
+};
+
+export const createMonthlySummary = async (req: Request, res: Response) => {
+  try {
+    const newMonthlySummary = await monthlySummaryService.createMonthlySummary(req.body);
+    return res.status(201).json(newMonthlySummary);
+  } catch (error) {
+    return res.status(500).json({ message: 'Error creating MonthlySummary', error });
   }
 };
 

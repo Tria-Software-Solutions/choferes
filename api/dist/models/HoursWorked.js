@@ -22,9 +22,9 @@ HoursWorked.init({
         allowNull: false,
         references: {
             model: Employee_1.Employee,
-            key: 'id',
+            key: "id",
         },
-        onDelete: 'CASCADE',
+        onDelete: "CASCADE",
     },
     date: {
         type: sequelize_1.DataTypes.DATE,
@@ -35,13 +35,11 @@ HoursWorked.init({
         allowNull: false,
         references: {
             model: Schedule_1.Schedule,
-            key: 'id',
+            key: "id",
         },
     },
 }, {
     sequelize: database_1.default,
     modelName: "HoursWorked",
-    tableName: 'hours_worked',
+    tableName: "hours_worked",
 });
-HoursWorked.belongsTo(Employee_1.Employee, { foreignKey: 'employeeId', onDelete: 'CASCADE' });
-HoursWorked.belongsTo(Schedule_1.Schedule, { foreignKey: 'scheduleId' });

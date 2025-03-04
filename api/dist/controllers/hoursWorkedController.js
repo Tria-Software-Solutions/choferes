@@ -42,28 +42,18 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.deleteHoursWorked = exports.updateHoursWorked = exports.getHoursWorkedById = exports.getAllHoursWorked = exports.createHoursWorked = void 0;
+exports.deleteHoursWorked = exports.updateHoursWorked = exports.createHoursWorked = exports.getHoursWorkedById = exports.getHoursWorked = void 0;
 const hoursWorkedService = __importStar(require("../services/hoursWorkedService"));
-const createHoursWorked = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+const getHoursWorked = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        const hoursWorked = yield hoursWorkedService.createHoursWorked(req.body);
-        return res.status(201).json(hoursWorked);
-    }
-    catch (error) {
-        return res.status(500).json({ message: "Error creating HoursWorked", error });
-    }
-});
-exports.createHoursWorked = createHoursWorked;
-const getAllHoursWorked = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    try {
-        const hoursWorked = yield hoursWorkedService.getAllHoursWorked();
+        const hoursWorked = yield hoursWorkedService.getHoursWorked();
         return res.status(200).json(hoursWorked);
     }
     catch (error) {
         return res.status(500).json({ message: "Error fetching HoursWorked", error });
     }
 });
-exports.getAllHoursWorked = getAllHoursWorked;
+exports.getHoursWorked = getHoursWorked;
 const getHoursWorkedById = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const id = parseInt(req.params.id);
@@ -82,6 +72,16 @@ const getHoursWorkedById = (req, res) => __awaiter(void 0, void 0, void 0, funct
     }
 });
 exports.getHoursWorkedById = getHoursWorkedById;
+const createHoursWorked = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        const hoursWorked = yield hoursWorkedService.createHoursWorked(req.body);
+        return res.status(201).json(hoursWorked);
+    }
+    catch (error) {
+        return res.status(500).json({ message: "Error creating HoursWorked", error });
+    }
+});
+exports.createHoursWorked = createHoursWorked;
 const updateHoursWorked = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const id = parseInt(req.params.id);

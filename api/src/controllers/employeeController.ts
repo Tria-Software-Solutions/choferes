@@ -1,18 +1,9 @@
 import { Request, Response } from 'express';
 import * as employeeService from '../services/employeeService';
 
-export const createEmployee = async (req: Request, res: Response) => {
+export const getEmployees = async (req: Request, res: Response) => {
   try {
-    const newEmployee = await employeeService.createEmployee(req.body);
-    res.status(201).json(newEmployee);
-  } catch (error) {
-    res.status(500).json({ message: 'Error creating Employee', error });
-  }
-};
-
-export const getAllEmployees = async (req: Request, res: Response) => {
-  try {
-    const employees = await employeeService.getAllEmployees();
+    const employees = await employeeService.getEmployees();
     res.status(200).json(employees);
   } catch (error) {
     res.status(500).json({ message: 'Error fetching Employees', error });
@@ -30,6 +21,15 @@ export const getEmployeeById = async (req: Request, res: Response) => {
     }
   } catch (error) {
     res.status(500).json({ message: 'Error fetching Employee', error });
+  }
+};
+
+export const createEmployee = async (req: Request, res: Response) => {
+  try {
+    const newEmployee = await employeeService.createEmployee(req.body);
+    res.status(201).json(newEmployee);
+  } catch (error) {
+    res.status(500).json({ message: 'Error creating Employee', error });
   }
 };
 

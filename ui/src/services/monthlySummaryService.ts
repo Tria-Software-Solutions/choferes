@@ -1,13 +1,16 @@
 import { MonthlySummary } from "../models/MonthlySummary";
 import api from "./api";
 
-export const fetchMonthlySummaries = async () => {
+export const getMonthlySummaries = async () => {
   const response = await api.get("/monthly-summary");
   return response.data;
 };
 
-export const addMonthlySummary = async (newMonthlySummary: MonthlySummary) => {
-  await api.post("/monthly-summary", newMonthlySummary);
+export const createMonthlySummary = async (
+  newMonthlySummary: Omit<MonthlySummary, "id">
+) => {
+  const response = await api.post("/monthly-summary", newMonthlySummary);
+  return response.data;
 };
 
 export const updateMonthlySummary = async (
@@ -21,6 +24,11 @@ export const deleteMonthlySummary = async (id: number) => {
   await api.delete(`/monthly-summary/${id}`);
 };
 
-export const calculateTotalMonthlyHours = (monthlySummaries: MonthlySummary[]) => {
-  return monthlySummaries.reduce((total, summary) => total + summary.totalHours, 0);
+export const calculateTotalMonthlyHours = (
+  monthlySummaries: MonthlySummary[]
+) => {
+  return monthlySummaries.reduce(
+    (total, summary) => total + summary.totalHours,
+    0
+  );
 };

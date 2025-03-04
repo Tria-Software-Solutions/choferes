@@ -53,7 +53,11 @@ const MenuComponent: React.FC<MenuComponentProps> = ({
       {icon && (
         <IconButton
           color="inherit"
-          sx={{ height: "56px" }}
+          sx={{
+            height: "40px",
+            border: "0.5px solid #f0f2f5",
+            borderRadius: "6px",
+          }}
           aria-controls={open ? "generic-menu" : undefined}
           aria-haspopup="true"
           aria-expanded={open ? "true" : undefined}
@@ -65,7 +69,11 @@ const MenuComponent: React.FC<MenuComponentProps> = ({
 
       {buttonText && !icon && (
         <Button
-          sx={{ height: "56px" }}
+          sx={{
+            height: "40px",
+            border: "0.5px solid #f0f2f5",
+            borderRadius: "6px",
+          }}
           aria-controls={open ? "generic-menu" : undefined}
           aria-haspopup="true"
           aria-expanded={open ? "true" : undefined}
