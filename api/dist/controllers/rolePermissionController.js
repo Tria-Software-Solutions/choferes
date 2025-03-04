@@ -45,9 +45,8 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.deleteRolePermission = exports.createRolePermission = exports.getRolePermissions = void 0;
 const rolePermissionService = __importStar(require("../services/rolePermissionService"));
 const getRolePermissions = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    const { roleId } = req.params;
     try {
-        const permissions = yield rolePermissionService.getRolePermissions(Number(roleId));
+        const permissions = yield rolePermissionService.getRolePermissions();
         res.status(200).json(permissions);
     }
     catch (error) {

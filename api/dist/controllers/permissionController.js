@@ -47,7 +47,7 @@ const permissionService = __importStar(require("../services/permissionService"))
 const getPermissions = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const permissions = yield permissionService.getPermissions();
-        res.json(permissions);
+        res.status(200).json(permissions);
     }
     catch (error) {
         res.status(500).json({ message: "Error fetching Permissions", error });
@@ -59,7 +59,7 @@ const getPermissionById = (req, res) => __awaiter(void 0, void 0, void 0, functi
         const permission = yield permissionService.getPermissionById(Number(req.params.id));
         if (!permission)
             return res.status(404).json({ error: "Permiso no encontrado" });
-        res.json(permission);
+        res.status(200).json(permission);
     }
     catch (error) {
         res.status(500).json({ message: "Error fetching Permission", error });
@@ -73,7 +73,7 @@ const createPermission = (req, res) => __awaiter(void 0, void 0, void 0, functio
         res.status(201).json(permission);
     }
     catch (error) {
-        res.status(500).json({ message: 'Error creating Permission', error });
+        res.status(500).json({ message: "Error creating Permission", error });
     }
 });
 exports.createPermission = createPermission;
@@ -89,7 +89,9 @@ const deletePermission = (req, res) => __awaiter(void 0, void 0, void 0, functio
         }
     }
     catch (error) {
-        return res.status(500).json({ message: "Error deleting Permission", error });
+        return res
+            .status(500)
+            .json({ message: "Error deleting Permission", error });
     }
 });
 exports.deletePermission = deletePermission;
