@@ -1,4 +1,4 @@
-import * as XLSX from "xlsx-style";
+import * as XLSX from 'xlsx-style';
 import jsPDF from "jspdf";
 import "jspdf-autotable";
 import { Employee } from "../models/Employee";
