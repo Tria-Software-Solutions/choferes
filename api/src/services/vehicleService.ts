@@ -1,13 +1,7 @@
 import { Op } from "sequelize";
 import { Vehicle } from "../models/Vehicle";
 
-export const createVehicle = async (data: Omit<Vehicle, "id">) => {
-  const newVehicle = await Vehicle.create(data);
-  await newVehicle.reload();
-  return newVehicle;
-};
-
-export const getAllVehicles = async () => {
+export const getVehicles = async () => {
   return Vehicle.findAll();
 };
 
@@ -30,6 +24,13 @@ export const getVehiclesByDate = async (createdAt: Date) => {
     },
   });
 };
+
+export const createVehicle = async (data: Omit<Vehicle, "id">) => {
+  const newVehicle = await Vehicle.create(data);
+  await newVehicle.reload();
+  return newVehicle;
+};
+
 
 export const updateVehicle = async (id: number, data: Omit<Vehicle, "id">) => {
   await Vehicle.update(data, { where: { id } });

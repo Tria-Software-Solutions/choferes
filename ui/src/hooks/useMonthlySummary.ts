@@ -6,16 +6,16 @@ export const useMonthlySummaries = () => {
   const [monthlySummaries, setMonthlySummaries] = useState<MonthlySummary[]>(
     []
   );
-  const [totalCount, setTotalCount] = useState(0);
+  const [totalCountMonthlySummaries, setTotalCountMonthlySummaries] = useState(0);
   const [isLoadingMonthlySummaries, setIsLoadingMonthlySummaries] =
     useState(false);
 
-  const fetchMonthlySummaries = useCallback(async () => {
+  const getMonthlySummaries = useCallback(async () => {
     setIsLoadingMonthlySummaries(true);
     try {
-      const data = await MonthlySummaryService.fetchMonthlySummaries();
+      const data = await MonthlySummaryService.getMonthlySummaries();
       setMonthlySummaries(data);
-      setTotalCount(data.length);
+      setTotalCountMonthlySummaries(data.length);
     } catch (error) {
       console.error("Error fetching monthly summaries:", error);
     } finally {
@@ -23,13 +23,17 @@ export const useMonthlySummaries = () => {
     }
   }, []);
 
-  const handleAddMonthlySummary = async (newMonthlySummary: MonthlySummary) => {
-    await MonthlySummaryService.addMonthlySummary(newMonthlySummary);
-    setMonthlySummaries((prev) => [...prev, newMonthlySummary]);
-    setTotalCount((prev) => prev + 1);
+  const createMonthlySummary = async (
+    newMonthlySummary: Omit<MonthlySummary, "id">
+  ) => {
+    const createdMonthlySummary = await MonthlySummaryService.createMonthlySummary(
+      newMonthlySummary
+    );
+    setMonthlySummaries((prev) => [...prev, createdMonthlySummary]);
+    setTotalCountMonthlySummaries((prev) => prev + 1);
   };
 
-  const handleUpdateMonthlySummary = async (
+  const updateMonthlySummary = async (
     id: number,
     updatedMonthlySummary: Partial<MonthlySummary>
   ) => {
@@ -43,56 +47,40 @@ export const useMonthlySummaries = () => {
     );
   };
 
-  const handleDeleteMonthlySummary = async (id: number) => {
+  const createOrUpdateMonthlySummary = async (
+    newMonthlySummary: Omit<MonthlySummary, "id"> | MonthlySummary
+  ) => {
+    if ("id" in newMonthlySummary) {
+      await updateMonthlySummary(newMonthlySummary.id, newMonthlySummary);
+    } else {
+      await createMonthlySummary(newMonthlySummary);
+    }
+  };
+
+  const deleteMonthlySummary = async (id: number) => {
     await MonthlySummaryService.deleteMonthlySummary(id);
     setMonthlySummaries((prev) =>
       prev.filter((monthlySummary) => monthlySummary.id !== id)
     );
-    setTotalCount((prev) => prev - 1);
-  };
-
-  const handleAddOrUpdateMonthlySummary = async (
-    newMonthlySummary: MonthlySummary
-  ) => {
-    const existingSummary = monthlySummaries.find(
-      (summary) => summary.id === newMonthlySummary.id
-    );
-
-    if (existingSummary) {
-      await MonthlySummaryService.updateMonthlySummary(
-        newMonthlySummary.id!,
-        newMonthlySummary
-      );
-      setMonthlySummaries((prev) =>
-        prev.map((summary) =>
-          summary.id === newMonthlySummary.id
-            ? { ...summary, ...newMonthlySummary }
-            : summary
-        )
-      );
-    } else {
-      await MonthlySummaryService.addMonthlySummary(newMonthlySummary);
-      setMonthlySummaries((prev) => [...prev, newMonthlySummary]);
-      setTotalCount((prev) => prev + 1);
-    }
+    setTotalCountMonthlySummaries((prev) => prev - 1);
   };
 
   const totalMonthlyHours =
     MonthlySummaryService.calculateTotalMonthlyHours(monthlySummaries);
 
   useEffect(() => {
-    fetchMonthlySummaries();
-  }, [fetchMonthlySummaries]);
+    getMonthlySummaries();
+  }, [getMonthlySummaries]);
 
   return {
     monthlySummaries,
-    totalCount,
+    totalCountMonthlySummaries,
     isLoadingMonthlySummaries,
-    fetchMonthlySummaries,
-    handleAddMonthlySummary,
-    handleUpdateMonthlySummary,
-    handleAddOrUpdateMonthlySummary,
-    handleDeleteMonthlySummary,
+    getMonthlySummaries,
+    createMonthlySummary,
+    updateMonthlySummary,
+    createOrUpdateMonthlySummary,
+    deleteMonthlySummary,
     totalMonthlyHours,
   };
 };

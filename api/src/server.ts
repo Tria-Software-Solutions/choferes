@@ -1,6 +1,7 @@
 import express from 'express';
 import cors from 'cors';
 import { json, urlencoded } from 'body-parser';
+import userRoutes from './routes/userRoutes';
 import employeeRoutes from './routes/employeeRoutes';
 import hoursWorkedRoutes from './routes/hoursWorkedRoutes';
 import weeklySummaryRoutes from './routes/weeklySummaryRoutes';
@@ -8,7 +9,12 @@ import biweeklySummaryRoutes from './routes/biweeklySummaryRoutes';
 import monthlySummaryRoutes from './routes/monthlySummaryRoutes';
 import scheduleRoutes from './routes/scheduleRoutes';
 import vehicleRoutes from './routes/vehicleRoutes';
-import sequelize from './config/database'; 
+import roleRoutes from './routes/roleRoutes';
+import permissionRoutes from './routes/permissionRoutes';
+import userRoleRoutes from './routes/userRoleRoutes';
+import rolePermissionRoutes from './routes/rolePermissionRoutes';
+import sequelize from './config/database';
+import "./database/models"; 
 
 const app = express();
 
@@ -16,6 +22,11 @@ app.use(cors());
 app.use(json());
 app.use(urlencoded({ extended: true }));
 
+app.use("/api/users", userRoutes);
+app.use("/api/roles", roleRoutes);
+app.use("/api/permissions", permissionRoutes);
+app.use("/api/user-role", userRoleRoutes);
+app.use("/api/role-permission", rolePermissionRoutes);
 app.use('/api/employees', employeeRoutes);
 app.use('/api/hours', hoursWorkedRoutes);
 app.use('/api/weekly-summary', weeklySummaryRoutes);

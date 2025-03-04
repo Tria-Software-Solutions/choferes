@@ -9,20 +9,20 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.deleteEmployee = exports.updateEmployee = exports.getEmployeeById = exports.getAllEmployees = exports.createEmployee = void 0;
+exports.deleteEmployee = exports.updateEmployee = exports.createEmployee = exports.getEmployeeById = exports.getEmployees = void 0;
 const Employee_1 = require("../models/Employee");
-const createEmployee = (data) => __awaiter(void 0, void 0, void 0, function* () {
-    return yield Employee_1.Employee.create(data);
-});
-exports.createEmployee = createEmployee;
-const getAllEmployees = () => __awaiter(void 0, void 0, void 0, function* () {
+const getEmployees = () => __awaiter(void 0, void 0, void 0, function* () {
     return Employee_1.Employee.findAll();
 });
-exports.getAllEmployees = getAllEmployees;
+exports.getEmployees = getEmployees;
 const getEmployeeById = (id) => __awaiter(void 0, void 0, void 0, function* () {
     return Employee_1.Employee.findByPk(id);
 });
 exports.getEmployeeById = getEmployeeById;
+const createEmployee = (data) => __awaiter(void 0, void 0, void 0, function* () {
+    return yield Employee_1.Employee.create(data);
+});
+exports.createEmployee = createEmployee;
 const updateEmployee = (id, data) => __awaiter(void 0, void 0, void 0, function* () {
     yield Employee_1.Employee.update(data, { where: { id } });
     return Employee_1.Employee.findByPk(id);

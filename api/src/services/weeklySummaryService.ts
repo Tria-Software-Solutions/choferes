@@ -1,15 +1,15 @@
 import { WeeklySummary } from "../models/WeeklySummary";
 
-export const createWeeklySummary = async (data: Omit<WeeklySummary, "id">) => {
-  return await WeeklySummary.create(data);
-};
-
-export const getAllWeeklySummaries = async () => {
+export const getWeeklySummaries = async () => {
   return WeeklySummary.findAll();
 };
 
 export const getWeeklySummaryById = async (id: number) => {
   return WeeklySummary.findByPk(id);
+};
+
+export const createWeeklySummary = async (data: Omit<WeeklySummary, "id">) => {
+  return await WeeklySummary.create(data);
 };
 
 export const updateWeeklySummary = async (
