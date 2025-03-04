@@ -1,21 +1,9 @@
 import { Request, Response } from "express";
 import * as biweeklySummaryService from "../services/biweeklySummaryService";
 
-export const createBiweeklySummary = async (req: Request, res: Response) => {
+export const getBiweeklySummaries = async (req: Request, res: Response) => {
   try {
-    const newBiweeklySummary =
-      await biweeklySummaryService.createBiweeklySummary(req.body);
-    return res.status(201).json(newBiweeklySummary);
-  } catch (error) {
-    return res
-      .status(500)
-      .json({ message: "Error creating BiweeklySummary", error });
-  }
-};
-
-export const getAllBiweeklySummaries = async (req: Request, res: Response) => {
-  try {
-    const summaries = await biweeklySummaryService.getAllBiweeklySummaries();
+    const summaries = await biweeklySummaryService.getBiweeklySummaries();
     return res.status(200).json(summaries);
   } catch (error) {
     return res
@@ -37,6 +25,18 @@ export const getBiweeklySummaryById = async (req: Request, res: Response) => {
     return res
       .status(500)
       .json({ message: "Error fetching BiweeklySummary", error });
+  }
+};
+
+export const createBiweeklySummary = async (req: Request, res: Response) => {
+  try {
+    const newBiweeklySummary =
+      await biweeklySummaryService.createBiweeklySummary(req.body);
+    return res.status(201).json(newBiweeklySummary);
+  } catch (error) {
+    return res
+      .status(500)
+      .json({ message: "Error creating BiweeklySummary", error });
   }
 };
 

@@ -9,17 +9,11 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.deleteHoursWorked = exports.updateHoursWorked = exports.getHoursWorkedById = exports.getAllHoursWorked = exports.createHoursWorked = void 0;
+exports.deleteHoursWorked = exports.updateHoursWorked = exports.createHoursWorked = exports.getHoursWorkedById = exports.getHoursWorked = void 0;
 const HoursWorked_1 = require("../models/HoursWorked");
 const Employee_1 = require("../models/Employee");
 const Schedule_1 = require("../models/Schedule");
-const createHoursWorked = (data) => __awaiter(void 0, void 0, void 0, function* () {
-    const newHoursWorked = yield HoursWorked_1.HoursWorked.create(data);
-    yield newHoursWorked.reload();
-    return newHoursWorked;
-});
-exports.createHoursWorked = createHoursWorked;
-const getAllHoursWorked = () => __awaiter(void 0, void 0, void 0, function* () {
+const getHoursWorked = () => __awaiter(void 0, void 0, void 0, function* () {
     return yield HoursWorked_1.HoursWorked.findAll({
         include: [
             { model: Employee_1.Employee, attributes: ["firstName", "lastName"] },
@@ -27,7 +21,7 @@ const getAllHoursWorked = () => __awaiter(void 0, void 0, void 0, function* () {
         ],
     });
 });
-exports.getAllHoursWorked = getAllHoursWorked;
+exports.getHoursWorked = getHoursWorked;
 const getHoursWorkedById = (id) => __awaiter(void 0, void 0, void 0, function* () {
     return yield HoursWorked_1.HoursWorked.findByPk(id, {
         include: [
@@ -37,6 +31,12 @@ const getHoursWorkedById = (id) => __awaiter(void 0, void 0, void 0, function* (
     });
 });
 exports.getHoursWorkedById = getHoursWorkedById;
+const createHoursWorked = (data) => __awaiter(void 0, void 0, void 0, function* () {
+    const newHoursWorked = yield HoursWorked_1.HoursWorked.create(data);
+    yield newHoursWorked.reload();
+    return newHoursWorked;
+});
+exports.createHoursWorked = createHoursWorked;
 const updateHoursWorked = (id, data) => __awaiter(void 0, void 0, void 0, function* () {
     yield HoursWorked_1.HoursWorked.update(data, { where: { id } });
     return HoursWorked_1.HoursWorked.findByPk(id);

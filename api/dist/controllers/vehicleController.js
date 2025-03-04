@@ -42,29 +42,19 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.deleteVehicle = exports.updateVehicle = exports.getVehiclesByDate = exports.getVehicleById = exports.getAllVehicles = exports.createVehicle = void 0;
+exports.deleteVehicle = exports.updateVehicle = exports.createVehicle = exports.getVehiclesByDate = exports.getVehicleById = exports.getVehicles = void 0;
 const vehicleService = __importStar(require("../services/vehicleService"));
 const date_fns_1 = require("date-fns");
-const createVehicle = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+const getVehicles = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        const newVehicle = yield vehicleService.createVehicle(req.body);
-        return res.status(201).json(newVehicle);
-    }
-    catch (error) {
-        return res.status(500).json({ message: "Error creating Vehicle", error });
-    }
-});
-exports.createVehicle = createVehicle;
-const getAllVehicles = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    try {
-        const vehicles = yield vehicleService.getAllVehicles();
+        const vehicles = yield vehicleService.getVehicles();
         return res.status(200).json(vehicles);
     }
     catch (error) {
         return res.status(500).json({ message: "Error fetching Vehicles", error });
     }
 });
-exports.getAllVehicles = getAllVehicles;
+exports.getVehicles = getVehicles;
 const getVehicleById = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const id = parseInt(req.params.id);
@@ -99,6 +89,16 @@ const getVehiclesByDate = (req, res) => __awaiter(void 0, void 0, void 0, functi
     }
 });
 exports.getVehiclesByDate = getVehiclesByDate;
+const createVehicle = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        const newVehicle = yield vehicleService.createVehicle(req.body);
+        return res.status(201).json(newVehicle);
+    }
+    catch (error) {
+        return res.status(500).json({ message: "Error creating Vehicle", error });
+    }
+});
+exports.createVehicle = createVehicle;
 const updateVehicle = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const id = parseInt(req.params.id);

@@ -1,7 +1,10 @@
 export type ColumnsTranslation = {
     id: string;
+    name: string;
     firstName: string;
     lastName: string;
+    email: string;
+    username: string;
     label: string;
     day: string;
     hours: string;

@@ -42,8 +42,20 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.deleteWeeklySummary = exports.updateWeeklySummary = exports.getWeeklySummaryById = exports.getAllWeeklySummaries = exports.createWeeklySummary = void 0;
+exports.deleteWeeklySummary = exports.updateWeeklySummary = exports.getWeeklySummaryById = exports.createWeeklySummary = exports.getWeeklySummaries = void 0;
 const weeklySummaryService = __importStar(require("../services/weeklySummaryService"));
+const getWeeklySummaries = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        const summaries = yield weeklySummaryService.getWeeklySummaries();
+        return res.status(200).json(summaries);
+    }
+    catch (error) {
+        return res
+            .status(500)
+            .json({ message: "Error fetching WeeklySummaries", error });
+    }
+});
+exports.getWeeklySummaries = getWeeklySummaries;
 const createWeeklySummary = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const newWeeklySummary = yield weeklySummaryService.createWeeklySummary(req.body);
@@ -56,18 +68,6 @@ const createWeeklySummary = (req, res) => __awaiter(void 0, void 0, void 0, func
     }
 });
 exports.createWeeklySummary = createWeeklySummary;
-const getAllWeeklySummaries = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    try {
-        const summaries = yield weeklySummaryService.getAllWeeklySummaries();
-        return res.status(200).json(summaries);
-    }
-    catch (error) {
-        return res
-            .status(500)
-            .json({ message: "Error fetching WeeklySummaries", error });
-    }
-});
-exports.getAllWeeklySummaries = getAllWeeklySummaries;
 const getWeeklySummaryById = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const id = parseInt(req.params.id);

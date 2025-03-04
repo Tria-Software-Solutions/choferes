@@ -1,55 +1,94 @@
 import React from "react";
-import { BrowserRouter as Router, Route, Routes } from "react-router-dom";
-import { Container } from "@mui/material";
-import ManageRoles from "./pages/ManageRoles";
-import ManageEmployees from "./pages/ManageEmployees";
+import {
+  BrowserRouter as Router,
+  Route,
+  Routes,
+  // useLocation,
+  // Navigate,
+} from "react-router-dom";
+// import { useUsers } from "./hooks/useUser";
+// import Login from "./pages/Auth/Login";
+// import Register from "./pages/Auth/Register";
+import RolesPage from "./pages/Management/RolesPage";
+import EmployeesPage from "./pages/Management/EmployeesPage";
+import SchedulesPage from "./pages/Management/SchedulesPage";
+import VehiclesPage from "./pages/Management/VehiclesPage";
+// import Dashboard from "./pages/Dashboard/Dashboard";
+import NotFound from "./pages/NotFound";
 import AppBarComponent from "./components/AppBar/AppBarComponent";
+// import { AuthProvider, useAuth } from "./context/AuthContext";
+import { AuthProvider } from "./context/AuthContext";
+// import ProtectedRoute from "./routes/ProtectedRoute";
+import { Container } from "@mui/material";
 import { APPBAR_MENU, ROUTES } from "./constants/constants";
-import ManageSchedules from "./pages/ManageSchedules";
 import CalendarMonthRoundedIcon from "@mui/icons-material/CalendarMonthRounded";
-import ManageAccountsRoundedIcon from "@mui/icons-material/ManageAccountsRounded";
 import DirectionsCarIcon from "@mui/icons-material/DirectionsCar";
 import GroupRoundedIcon from "@mui/icons-material/GroupRounded";
 import EditCalendarRoundedIcon from "@mui/icons-material/EditCalendarRounded";
-import ManageVehicles from "./pages/ManageVehicles";
+// import ManageAccountsIcon from '@mui/icons-material/ManageAccounts';
+// import LogoutIcon from "@mui/icons-material/Logout";
+// import wallpaper from "./assets/images/choferesblurred1.webp";
 
-const App: React.FC = () => {
+const AppBarWrapper: React.FC = () => {
+  // const { currentUser } = useAuth();
+  // const { logoutUser } = useUsers();
   return (
-    <Router>
-      <AppBarComponent
-        title={APPBAR_MENU.TITLE}
-        links={[
-          {
-            label: APPBAR_MENU.ROLES,
-            icon: <CalendarMonthRoundedIcon />,
-            path: ROUTES.HOME,
-          },
-          {
-            label: APPBAR_MENU.VEHICLES,
-            icon: <DirectionsCarIcon />,
-            path: ROUTES.MANAGE_VEHICLES,
-          },
-          {
-            label: APPBAR_MENU.MANAGE,
-            icon: <ManageAccountsRoundedIcon />,
-            subLinks: [
-              {
-                label: APPBAR_MENU.EMPLOYEES,
-                icon: <GroupRoundedIcon />,
-                path: ROUTES.MANAGE_EMPLOYEES,
-              },
-              {
-                label: APPBAR_MENU.SCHEDULES,
-                icon: <EditCalendarRoundedIcon />,
-                path: ROUTES.MANAGE_SCHEDULES,
-              },
-            ],
-          },
-        ]}
-      />
+    <AppBarComponent
+      title={APPBAR_MENU.TITLE}
+      links={[
+        {
+          label: APPBAR_MENU.ROLES,
+          icon: <CalendarMonthRoundedIcon />,
+          path: ROUTES.ROLES,
+        },
+        {
+          label: APPBAR_MENU.EMPLOYEES,
+          icon: <GroupRoundedIcon />,
+          path: ROUTES.EMPLOYEES,
+        },
+        {
+          label: APPBAR_MENU.SCHEDULES,
+          icon: <EditCalendarRoundedIcon />,
+          path: ROUTES.SCHEDULES,
+        },
+        {
+          label: APPBAR_MENU.VEHICLES,
+          icon: <DirectionsCarIcon />,
+          path: ROUTES.VEHICLES,
+        },
+        // {
+        //   label: APPBAR_MENU.DASHBOARD,
+        //   icon: <ManageAccountsIcon />,
+        //   path: ROUTES.DASHBOARD,
+        // },
+        // ...(currentUser
+        //   ? [
+        //       {
+        //         label: APPBAR_MENU.LOGOUT,
+        //         icon: <LogoutIcon />,
+        //         path: ROUTES.LOGIN,
+        //         onClick: logoutUser,
+        //       },
+        //     ]
+        //   : []),
+      ]}
+    />
+  );
+};
+
+const AppContent: React.FC = () => {
+  // const { currentUser } = useAuth();
+  // const location = useLocation();
+  // const isAuthPage =
+  //   location.pathname === "/" || location.pathname === "/register";
+
+  return (
+    <>
+      {/* {!isAuthPage && <AppBarWrapper />} */}
+      <AppBarWrapper />
       <Container
         maxWidth="xl"
-        disableGutters={false}
+        disableGutters
         sx={{
           paddingLeft: {
             xs: "16px",
@@ -65,16 +104,44 @@ const App: React.FC = () => {
             lg: "48px",
             xl: "0",
           },
+          // backgroundImage: isAuthPage ? `url(${wallpaper})` : "none",
+          // backgroundSize: "cover",
+          // backgroundPosition: "center",
+          // backgroundRepeat: "no-repeat",
+          // backgroundAttachment: "fixed",
         }}
       >
         <Routes>
-          <Route path="/" element={<ManageRoles />} />
-          <Route path="/vehicles" element={<ManageVehicles />} />
-          <Route path="/employees" element={<ManageEmployees />} />
-          <Route path="/schedules" element={<ManageSchedules />} />
+          {/* <Route
+            path="/"
+            element={currentUser ? <Navigate to="/roles" /> : <Login />}
+          />
+          <Route path="/register" element={<Register />} /> */}
+          {/* <Route element={<ProtectedRoute />}>
+            <Route path="/dashboard" element={<Dashboard />} />
+            <Route path="/roles" element={<RolesPage />} />
+            <Route path="/vehicles" element={<VehiclesPage />} />
+            <Route path="/employees" element={<EmployeesPage />} />
+            <Route path="/schedules" element={<SchedulesPage />} />
+          </Route> */}
+          <Route path="/" element={<RolesPage />} />
+          <Route path="/vehicles" element={<VehiclesPage />} />
+          <Route path="/employees" element={<EmployeesPage />} />
+          <Route path="/schedules" element={<SchedulesPage />} />
+          <Route path="*" element={<NotFound />} />
         </Routes>
       </Container>
-    </Router>
+    </>
+  );
+};
+
+const App: React.FC = () => {
+  return (
+    <AuthProvider>
+      <Router>
+        <AppContent />
+      </Router>
+    </AuthProvider>
   );
 };
 
