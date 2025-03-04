@@ -21,8 +21,7 @@ export const useUsers = () => {
     try {
       const loginData = await UserService.authenticateUser(username, password);
       login(loginData.user, loginData.token);
-      // navigate("/roles");
-      navigate("/");
+      navigate("/roles");
     } catch (error) {
       setAuthError("Login failed. Please check your credentials.");
       throw error;
