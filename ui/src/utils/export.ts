@@ -92,6 +92,30 @@ export const exportToExcel = (
   const workbook = XLSX.utils.book_new();
   XLSX.utils.book_append_sheet(workbook, worksheet, "Sheet1");
 
+  const headerKeys = Object.keys(translatedData[0] || {});
+
+  headerKeys.forEach((key, index) => {
+    const cellAddress = XLSX.utils.encode_cell({ r: 0, c: index });
+    if (!worksheet[cellAddress]) return;
+
+    worksheet[cellAddress].s = {
+      fill: { fgColor: { rgb: "000000" } },
+      font: { color: { rgb: "FFFFFF" }, bold: true },
+    };
+  });
+
+  const columnWidths = headerKeys.map((key) => {
+    const maxLength = Math.max(
+      key.length,
+      ...translatedData.map((row) =>
+        row[key] ? row[key].toString().length : 0
+      )
+    );
+    return { width: maxLength + 2 };
+  });
+
+  worksheet["!cols"] = columnWidths;
+
   XLSX.writeFile(workbook, `${fileName}.xlsx`);
 };
 
@@ -156,6 +180,15 @@ export const exportToPDF = (
   doc.autoTable({
     head: headers,
     body: tableData,
+    headStyles: {
+      fillColor: [0, 0, 0],
+      textColor: [255, 255, 255],
+      fontStyle: "bold",
+    },
+    columnStyles: {
+      0: { cellWidth: "auto" },
+    },
+    styles: { cellPadding: 2, fontSize: 10 },
   });
 
   doc.save(`${fileName}.pdf`);
@@ -415,12 +448,12 @@ export const createExportOptions = (
 ) => {
   return [
     {
-      label: "Descargar Excel",
+      label: "Exportar a Excel",
       icon: excelIcon,
       action: () => exportToExcel(dataForExport, fileName, headers),
     },
     {
-      label: "Descargar PDF",
+      label: "Exportar a PDF",
       icon: pdfIcon,
       action: () => exportToPDF(dataForExport, fileName, headers),
     },
