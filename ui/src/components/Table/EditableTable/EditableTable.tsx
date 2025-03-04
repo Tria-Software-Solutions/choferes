@@ -22,9 +22,9 @@ import {
   translateColumnHeaderToSpanish,
   mapDayValues,
   getDayOptionsSpanish,
-} from "../../../utils/stringUtils";
-import { formatDateWithDay } from "../../../utils/dateUtils";
-import { maskLicensePlate, maskParkingLot } from "../../../utils/maskUtils";
+} from "../../../utils/string";
+import { formatDateWithDay } from "../../../utils/dates";
+import { maskLicensePlate, maskParkingLot } from "../../../utils/mask";
 import { BRANDS, COLORS, TABLE } from "../../../constants/constants";
 import DeleteIcon from "@mui/icons-material/Delete";
 import EditIcon from "@mui/icons-material/Edit";

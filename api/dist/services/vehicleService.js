@@ -9,19 +9,13 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.deleteVehicle = exports.updateVehicle = exports.getVehiclesByDate = exports.getVehicleById = exports.getAllVehicles = exports.createVehicle = void 0;
+exports.deleteVehicle = exports.updateVehicle = exports.createVehicle = exports.getVehiclesByDate = exports.getVehicleById = exports.getVehicles = void 0;
 const sequelize_1 = require("sequelize");
 const Vehicle_1 = require("../models/Vehicle");
-const createVehicle = (data) => __awaiter(void 0, void 0, void 0, function* () {
-    const newVehicle = yield Vehicle_1.Vehicle.create(data);
-    yield newVehicle.reload();
-    return newVehicle;
-});
-exports.createVehicle = createVehicle;
-const getAllVehicles = () => __awaiter(void 0, void 0, void 0, function* () {
+const getVehicles = () => __awaiter(void 0, void 0, void 0, function* () {
     return Vehicle_1.Vehicle.findAll();
 });
-exports.getAllVehicles = getAllVehicles;
+exports.getVehicles = getVehicles;
 const getVehicleById = (id) => __awaiter(void 0, void 0, void 0, function* () {
     return Vehicle_1.Vehicle.findByPk(id);
 });
@@ -40,6 +34,12 @@ const getVehiclesByDate = (createdAt) => __awaiter(void 0, void 0, void 0, funct
     });
 });
 exports.getVehiclesByDate = getVehiclesByDate;
+const createVehicle = (data) => __awaiter(void 0, void 0, void 0, function* () {
+    const newVehicle = yield Vehicle_1.Vehicle.create(data);
+    yield newVehicle.reload();
+    return newVehicle;
+});
+exports.createVehicle = createVehicle;
 const updateVehicle = (id, data) => __awaiter(void 0, void 0, void 0, function* () {
     yield Vehicle_1.Vehicle.update(data, { where: { id } });
     return Vehicle_1.Vehicle.findByPk(id);

@@ -42,28 +42,18 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.deleteEmployee = exports.updateEmployee = exports.getEmployeeById = exports.getAllEmployees = exports.createEmployee = void 0;
+exports.deleteEmployee = exports.updateEmployee = exports.createEmployee = exports.getEmployeeById = exports.getEmployees = void 0;
 const employeeService = __importStar(require("../services/employeeService"));
-const createEmployee = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+const getEmployees = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        const newEmployee = yield employeeService.createEmployee(req.body);
-        res.status(201).json(newEmployee);
-    }
-    catch (error) {
-        res.status(500).json({ message: 'Error creating Employee', error });
-    }
-});
-exports.createEmployee = createEmployee;
-const getAllEmployees = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    try {
-        const employees = yield employeeService.getAllEmployees();
+        const employees = yield employeeService.getEmployees();
         res.status(200).json(employees);
     }
     catch (error) {
         res.status(500).json({ message: 'Error fetching Employees', error });
     }
 });
-exports.getAllEmployees = getAllEmployees;
+exports.getEmployees = getEmployees;
 const getEmployeeById = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const id = parseInt(req.params.id);
@@ -80,6 +70,16 @@ const getEmployeeById = (req, res) => __awaiter(void 0, void 0, void 0, function
     }
 });
 exports.getEmployeeById = getEmployeeById;
+const createEmployee = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        const newEmployee = yield employeeService.createEmployee(req.body);
+        res.status(201).json(newEmployee);
+    }
+    catch (error) {
+        res.status(500).json({ message: 'Error creating Employee', error });
+    }
+});
+exports.createEmployee = createEmployee;
 const updateEmployee = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const id = parseInt(req.params.id);

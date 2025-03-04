@@ -1,6 +1,17 @@
 import { Request, Response } from "express";
 import * as weeklySummaryService from "../services/weeklySummaryService";
 
+export const getWeeklySummaries = async (req: Request, res: Response) => {
+  try {
+    const summaries = await weeklySummaryService.getWeeklySummaries();
+    return res.status(200).json(summaries);
+  } catch (error) {
+    return res
+      .status(500)
+      .json({ message: "Error fetching WeeklySummaries", error });
+  }
+};
+
 export const createWeeklySummary = async (req: Request, res: Response) => {
   try {
     const newWeeklySummary = await weeklySummaryService.createWeeklySummary(
@@ -11,17 +22,6 @@ export const createWeeklySummary = async (req: Request, res: Response) => {
     return res
       .status(500)
       .json({ message: "Error creating WeeklySummary", error });
-  }
-};
-
-export const getAllWeeklySummaries = async (req: Request, res: Response) => {
-  try {
-    const summaries = await weeklySummaryService.getAllWeeklySummaries();
-    return res.status(200).json(summaries);
-  } catch (error) {
-    return res
-      .status(500)
-      .json({ message: "Error fetching WeeklySummaries", error });
   }
 };
 

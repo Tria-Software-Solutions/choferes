@@ -1,0 +1,82 @@
+import React from "react";
+import ManageUsers from "./ManageUsers";
+import ManageRoles from "./ManageRoles";
+import ManagePermissions from "./ManagePermissions";
+import {
+  Accordion,
+  AccordionDetails,
+  AccordionSummary,
+  Box,
+  Typography,
+  useMediaQuery,
+  useTheme,
+} from "@mui/material";
+import { PAGE_TITLE } from "../../constants/constants";
+
+const Dashboard = () => {
+  const [expanded, setExpanded] = React.useState<string | false>("panel1");
+
+  const handleChange =
+    (panel: string) => (event: React.SyntheticEvent, newExpanded: boolean) => {
+      setExpanded(newExpanded ? panel : expanded);
+    };
+
+  const theme = useTheme();
+  const isSmallScreen = useMediaQuery(theme.breakpoints.down("sm"));
+
+  return (
+    <Box>
+      <Box
+        display="flex"
+        justifyContent="space-between"
+        alignItems="center"
+        sx={{ mb: 2 }}
+      >
+        <Typography variant={isSmallScreen ? "h4" : "h2"} sx={{ flexGrow: 1 }}>
+          {PAGE_TITLE.DASHBOARD}
+        </Typography>
+      </Box>
+      <Accordion
+        expanded={expanded === "panel1"}
+        onChange={handleChange("panel1")}
+      >
+        <AccordionSummary aria-controls="panel1d-content" id="panel1d-header">
+          <Typography component="span" fontWeight="bold">
+            Usuarios
+          </Typography>
+        </AccordionSummary>
+        <AccordionDetails>
+          <ManageUsers />
+        </AccordionDetails>
+      </Accordion>
+      <Accordion
+        expanded={expanded === "panel2"}
+        onChange={handleChange("panel2")}
+      >
+        <AccordionSummary aria-controls="panel2d-content" id="panel2d-header">
+          <Typography component="span" fontWeight="bold">
+            Roles
+          </Typography>
+        </AccordionSummary>
+        <AccordionDetails>
+          <ManageRoles />
+        </AccordionDetails>
+      </Accordion>
+      <Accordion
+        expanded={expanded === "panel3"}
+        onChange={handleChange("panel3")}
+      >
+        <AccordionSummary aria-controls="panel3d-content" id="panel3d-header">
+          <Typography component="span" fontWeight="bold">
+            Permisos
+          </Typography>
+        </AccordionSummary>
+        <AccordionDetails>
+          <ManagePermissions />
+        </AccordionDetails>
+      </Accordion>
+    </Box>
+  );
+};
+
+export default Dashboard;

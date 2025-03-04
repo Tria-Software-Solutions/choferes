@@ -1,15 +1,18 @@
 import React from "react";
 import MenuComponent from "../Menu/MenuComponent";
 import { AppBar, Toolbar, Typography, IconButton, Box } from "@mui/material";
+import { useNavigate } from "react-router-dom";
+// import { useAuth } from "../../context/AuthContext";
 import MenuRoundedIcon from "@mui/icons-material/MenuRounded";
 import logo from "../../assets/images/logo.png";
-import { useNavigate } from "react-router-dom";
+
 
 interface Link {
   label: string;
   path?: string;
   icon?: React.ReactNode;
   subLinks?: Link[];
+  onClick?: () => void;
 }
 
 interface AppBarComponentProps {
@@ -23,22 +26,27 @@ const AppBarComponent: React.FC<AppBarComponentProps> = ({
   title,
   links,
 }) => {
+  // const { currentUser } = useAuth();
   const navigate = useNavigate();
   const menuItems = links.map((link) => ({
     text: link.label,
-    onClick: () => {
-      if (link.path) {
-        window.location.href = link.path;
-      }
-    },
+    onClick: link.onClick
+      ? link.onClick
+      : () => {
+          if (link.path) {
+            window.location.href = link.path;
+          }
+        },
     icon: link.icon as React.ReactElement | undefined,
     subMenuItems: link.subLinks?.map((subLink) => ({
       text: subLink.label,
-      onClick: () => {
-        if (subLink.path) {
-          window.location.href = subLink.path;
-        }
-      },
+      onClick: subLink.onClick
+        ? subLink.onClick
+        : () => {
+            if (subLink.path) {
+              window.location.href = subLink.path;
+            }
+          },
       icon: subLink.icon as React.ReactElement | undefined,
     })),
   }));
@@ -51,11 +59,13 @@ const AppBarComponent: React.FC<AppBarComponentProps> = ({
             edge="start"
             color="inherit"
             aria-label="menu"
+            // onClick={() => navigate("/roles")}
             onClick={() => navigate("/")}
           >
             {icon}
           </IconButton>
         )}
+        {/* <Box sx={{ cursor: "pointer" }} onClick={() => navigate("/roles")}> */}
         <Box sx={{ cursor: "pointer" }} onClick={() => navigate("/")}>
           <img
             src={logo}
@@ -73,12 +83,16 @@ const AppBarComponent: React.FC<AppBarComponentProps> = ({
         >
           <Box
             sx={{ cursor: "pointer", display: "inline-block" }}
+            // onClick={() => navigate("/roles")}
             onClick={() => navigate("/")}
           >
             {title}
           </Box>
         </Typography>
-        <MenuComponent icon={<MenuRoundedIcon />} menuItems={menuItems} />
+        {/* <Typography sx={{ color: "white", marginRight: "25px" }}>
+          {`${currentUser?.firstName} ${currentUser?.lastName}`}
+        </Typography> */}
+        <MenuComponent icon={<MenuRoundedIcon />} menuItems={menuItems}/>
       </Toolbar>
     </AppBar>
   );

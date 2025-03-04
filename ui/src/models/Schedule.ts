@@ -1,5 +1,5 @@
 export interface Schedule {
-  id: number;
+  id: number; 
   day: string;
   label: string;
   hours: number;
