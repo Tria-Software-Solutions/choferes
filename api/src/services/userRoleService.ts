@@ -1,11 +1,15 @@
 import { UserRole } from "../models/UserRole";
 
-export const getUserRoles = async (userId: number) => {
-  return UserRole.findAll({ where: { userId } });
+export const getUserRoles = async () => {
+  return UserRole.findAll();
 };
 
 export const getUserRoleByUserId = async (userId: number) => {
-  return await UserRole.findByPk(userId);
+  return await UserRole.findOne({
+    where: {
+      userId: userId,
+    },
+  });
 };
 
 export const createUserRole = async (data: Omit<UserRole, "id">) => {

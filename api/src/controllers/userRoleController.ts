@@ -2,10 +2,8 @@ import { Request, Response } from "express";
 import * as userRoleService from "../services/userRoleService";
 
 export const getUserRoles = async (req: Request, res: Response) => {
-  const { userId } = req.params;
-
   try {
-    const roles = await userRoleService.getUserRoles(Number(userId));
+    const roles = await userRoleService.getUserRoles();
     res.status(200).json(roles);
   } catch (error) {
     res.status(400).json({ message: "Error fetching UserRole", error });
@@ -14,11 +12,13 @@ export const getUserRoles = async (req: Request, res: Response) => {
 
 export const getUserRoleByUserId = async (req: Request, res: Response) => {
   try {
-    const user = await userRoleService.getUserRoleByUserId(Number(req.params.userId));
+    const user = await userRoleService.getUserRoleByUserId(
+      Number(req.params.userId)
+    );
     if (!user) {
       return res.status(404).json({ message: "UserRole not found" });
     }
-    res.json(user);
+    res.status(200).json(user);
   } catch (error) {
     res.status(500).json({ message: "Error fetching UserRole", error });
   }

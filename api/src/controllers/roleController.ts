@@ -4,7 +4,7 @@ import * as roleService from "../services/roleService";
 export const getRoles = async (req: Request, res: Response) => {
   try {
     const roles = await roleService.getRoles();
-    res.json(roles);
+    res.status(200).json(roles);
   } catch (error) {
     res.status(500).json({ message: "Error fetching Roles", error });
   }
@@ -14,7 +14,7 @@ export const getRoleById = async (req: Request, res: Response) => {
   try {
     const role = await roleService.getRoleById(Number(req.params.id));
     if (!role) return res.status(404).json({ error: "Role not found" });
-    res.json(role);
+    res.status(200).json(role);
   } catch (error) {
     res.status(500).json({ message: "Error fetching Role", error });
   }

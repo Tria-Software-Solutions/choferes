@@ -45,9 +45,8 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.deleteUserRole = exports.createUserRole = exports.getUserRoleByUserId = exports.getUserRoles = void 0;
 const userRoleService = __importStar(require("../services/userRoleService"));
 const getUserRoles = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    const { userId } = req.params;
     try {
-        const roles = yield userRoleService.getUserRoles(Number(userId));
+        const roles = yield userRoleService.getUserRoles();
         res.status(200).json(roles);
     }
     catch (error) {
@@ -61,7 +60,7 @@ const getUserRoleByUserId = (req, res) => __awaiter(void 0, void 0, void 0, func
         if (!user) {
             return res.status(404).json({ message: "UserRole not found" });
         }
-        res.json(user);
+        res.status(200).json(user);
     }
     catch (error) {
         res.status(500).json({ message: "Error fetching UserRole", error });

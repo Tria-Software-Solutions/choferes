@@ -47,7 +47,7 @@ const roleService = __importStar(require("../services/roleService"));
 const getRoles = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const roles = yield roleService.getRoles();
-        res.json(roles);
+        res.status(200).json(roles);
     }
     catch (error) {
         res.status(500).json({ message: "Error fetching Roles", error });
@@ -59,7 +59,7 @@ const getRoleById = (req, res) => __awaiter(void 0, void 0, void 0, function* ()
         const role = yield roleService.getRoleById(Number(req.params.id));
         if (!role)
             return res.status(404).json({ error: "Role not found" });
-        res.json(role);
+        res.status(200).json(role);
     }
     catch (error) {
         res.status(500).json({ message: "Error fetching Role", error });

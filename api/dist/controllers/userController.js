@@ -48,7 +48,7 @@ const authenticateUser = (req, res) => __awaiter(void 0, void 0, void 0, functio
     try {
         const { username, password } = req.body;
         const { user, token } = yield userService.authenticateUser(username, password);
-        res.json({ user, token });
+        res.status(200).json({ user, token });
     }
     catch (error) {
         res.status(401).json({ message: "Error login User", error });
@@ -58,7 +58,7 @@ exports.authenticateUser = authenticateUser;
 const getUsers = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const users = yield userService.getUsers();
-        res.json(users);
+        res.status(200).json(users);
     }
     catch (error) {
         res.status(500).json({ message: "Error fetching Users", error });
@@ -71,7 +71,7 @@ const getUserById = (req, res) => __awaiter(void 0, void 0, void 0, function* ()
         if (!user) {
             return res.status(404).json({ message: "User not found" });
         }
-        res.json(user);
+        res.status(200).json(user);
     }
     catch (error) {
         res.status(500).json({ message: "Error fetching User", error });
@@ -84,7 +84,7 @@ const getUserByUsername = (req, res) => __awaiter(void 0, void 0, void 0, functi
         if (!user) {
             return res.status(404).json({ message: "User not found" });
         }
-        res.json(user);
+        res.status(200).json(user);
     }
     catch (error) {
         res.status(500).json({ message: "Error fetching User", error });

@@ -8,7 +8,7 @@ export const authenticateUser = async (req: Request, res: Response) => {
       username,
       password
     );
-    res.json({ user, token });
+    res.status(200).json({ user, token });
   } catch (error) {
     res.status(401).json({ message: "Error login User", error });
   }
@@ -17,7 +17,7 @@ export const authenticateUser = async (req: Request, res: Response) => {
 export const getUsers = async (req: Request, res: Response) => {
   try {
     const users = await userService.getUsers();
-    res.json(users);
+    res.status(200).json(users);
   } catch (error) {
     res.status(500).json({ message: "Error fetching Users", error });
   }
@@ -29,7 +29,7 @@ export const getUserById = async (req: Request, res: Response) => {
     if (!user) {
       return res.status(404).json({ message: "User not found" });
     }
-    res.json(user);
+    res.status(200).json(user);
   } catch (error) {
     res.status(500).json({ message: "Error fetching User", error });
   }
@@ -41,7 +41,7 @@ export const getUserByUsername = async (req: Request, res: Response) => {
     if (!user) {
       return res.status(404).json({ message: "User not found" });
     }
-    res.json(user);
+    res.status(200).json(user);
   } catch (error) {
     res.status(500).json({ message: "Error fetching User", error });
   }

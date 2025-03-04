@@ -1,7 +1,7 @@
 import { RolePermission } from "../models/RolePermission";
 
-export const getRolePermissions = async (roleId: number) => {
-  return RolePermission.findAll({ where: { roleId } });
+export const getRolePermissions = async () => {
+  return RolePermission.findAll();
 };
 
 export const createRolePermission = async (
