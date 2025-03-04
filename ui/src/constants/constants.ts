@@ -18,8 +18,7 @@ export const APPBAR_MENU = {
 export const ROUTES = {
   LOGIN: "/",
   REGISTER: "register",
-  // ROLES: "/roles",
-  ROLES: "/",
+  ROLES: "/roles",
   VEHICLES: "/vehicles",
   EMPLOYEES: "/employees",
   SCHEDULES: "/schedules",
