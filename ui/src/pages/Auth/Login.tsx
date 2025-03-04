@@ -19,6 +19,7 @@ import { PAGE_TITLE } from "../../constants/constants";
 import Visibility from "@mui/icons-material/Visibility";
 import VisibilityOff from "@mui/icons-material/VisibilityOff";
 import logo from "../../assets/images/logo.png";
+import { AxiosError } from "axios";
 
 const Login = () => {
   const { authenticateUser } = useUsers();
@@ -33,15 +34,21 @@ const Login = () => {
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsSubmitting(true);
-    setError(null); 
+    setError(null);
 
     try {
       await authenticateUser(fields.username, fields.password);
-    } catch (err) {
-      if (err instanceof Error) {
+    } catch (err: unknown) {
+      if (err instanceof AxiosError) {
+        if (err.response?.status === 401) {
+          setError("Usuario o contraseña incorrectos.");
+        } else {
+          setError("Ocurrió un error con la autenticación. Intenta más tarde.");
+        }
+      } else if (err instanceof Error) {
         setError("No se pudo conectar al servidor. Intenta más tarde.");
       } else {
-        setError("Usuario o contraseña incorrectos.");
+        setError("Ocurrió un error desconocido. Intenta más tarde.");
       }
     }
     setIsSubmitting(false);
