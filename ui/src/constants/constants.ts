@@ -1,5 +1,6 @@
 export const PERMISSIONS = {
   VIEW_ROLES: "Ver Roles",
+  VIEW_EMPLOYEE_ROLES_HOURS: "Ver Horas de Empleados",
   EDIT_EMPLOYEE_ROLES: "Editar Roles de Empleados",
   EXPORT_EXCEL_ROLES: "Exportar Excel de Roles de Empleados",
   EXPORT_PDF_ROLES: "Exportar PDF de Roles de Empleados",
