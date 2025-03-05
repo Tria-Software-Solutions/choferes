@@ -20,7 +20,8 @@ export const useUsers = () => {
     setAuthError(null);
     try {
       const loginData = await UserService.authenticateUser(username, password);
-      login(loginData.user, loginData.token);
+      const userPermissions = await UserService.getUserPermissions(loginData.user.id);
+      login(loginData.user, loginData.token, userPermissions);
       navigate("/roles");
     } catch (error) {
       setAuthError("Login failed. Please check your credentials.");
@@ -68,6 +69,17 @@ export const useUsers = () => {
     }
   }, []);
 
+  const getUserPermissions = useCallback(async (id: number) => {
+    setIsLoadingUsers(true);
+    try {
+      return await UserService.getUserPermissions(id);
+    } catch (error) {
+      console.error("Error fetching User with Permissions", error);
+    } finally {
+      setIsLoadingUsers(false);
+    }
+  }, []);
+
   const createUser = async (newUser: Omit<User, "id" | "Roles" | "roleName">) => {
     const createdUser = await UserService.createUser(newUser);
     setUsers((prev) => [...prev, createdUser]);
@@ -109,6 +121,7 @@ export const useUsers = () => {
     logoutUser,
     getUsers,
     getUserById,
+    getUserPermissions,
     getUserByUsername,
     createUser,
     updateUser,
