@@ -1,4 +1,5 @@
 import React, { useCallback, useEffect, useMemo, useState } from "react";
+import { useAuth } from "../../context/AuthContext";
 import { Employee } from "../../models/Employee";
 import { HoursWorked } from "../../models/HoursWorked";
 import { WeeklySummary } from "../../models/WeeklySummary";
@@ -52,7 +53,7 @@ import {
   isValidDateForSelect,
 } from "../../utils/dates";
 import { setDayOptionsEnglish } from "../../utils/string";
-import { PAGE_TITLE } from "../../constants/constants";
+import { PAGE_TITLE, PERMISSIONS } from "../../constants/constants";
 import DownloadRoundedIcon from "@mui/icons-material/DownloadRounded";
 import ArrowBackIosNewRoundedIcon from "@mui/icons-material/ArrowBackIosNewRounded";
 import ArrowForwardIosRoundedIcon from "@mui/icons-material/ArrowForwardIosRounded";
@@ -60,6 +61,7 @@ import CalendarTodayRoundedIcon from "@mui/icons-material/CalendarTodayRounded";
 import { faFileExcel, faFilePdf } from "@fortawesome/free-solid-svg-icons";
 
 const RolesPage: React.FC = () => {
+  const { userPermissions } = useAuth();
   const { employees, isLoadingEmployees } = useEmployees();
   const [filteredEmployees, setFilteredEmployees] = useState<Employee[]>([]);
   const { schedules, isLoadingSchedules } = useSchedules();
@@ -365,16 +367,22 @@ const RolesPage: React.FC = () => {
   );
 
   const exportOptions = useMemo(() => {
+    const excelOption = userPermissions.includes(PERMISSIONS.EXPORT_EXCEL_ROLES)
+      ? exportToExcel
+      : undefined;
+    const pdfOption = userPermissions.includes(PERMISSIONS.EXPORT_PDF_ROLES)
+      ? exportToPDF
+      : undefined;
     return createExportOptions(
       <FontAwesomeIcon icon={faFileExcel} size="lg" />,
       <FontAwesomeIcon icon={faFilePdf} size="lg" />,
-      exportToExcel,
-      exportToPDF,
       dataForExport,
       fileName,
+      excelOption,
+      pdfOption,
       headers
     );
-  }, [dataForExport, fileName, headers]);
+  }, [userPermissions, dataForExport, fileName, headers]);
 
   const theme = useTheme();
   const isSmallScreen = useMediaQuery(theme.breakpoints.down("sm"));
@@ -390,15 +398,18 @@ const RolesPage: React.FC = () => {
         <Typography variant={isSmallScreen ? "h4" : "h2"} sx={{ flexGrow: 1 }}>
           {PAGE_TITLE.ROLES}
         </Typography>
-        <Box sx={{ minHeight: 65 }}>
-          {filteredEmployees.length > 0 && (
-            <SplitButton
-              options={exportOptions}
-              defaultIndex={0}
-              buttonIcon={<DownloadRoundedIcon />}
-            />
+        {userPermissions.includes(PERMISSIONS.EXPORT_EXCEL_ROLES) &&
+          userPermissions.includes(PERMISSIONS.EXPORT_PDF_ROLES) && (
+            <Box sx={{ minHeight: 65 }}>
+              {filteredEmployees.length > 0 && (
+                <SplitButton
+                  options={exportOptions}
+                  defaultIndex={0}
+                  buttonIcon={<DownloadRoundedIcon />}
+                />
+              )}
+            </Box>
           )}
-        </Box>
       </Box>
       {isLoading ? (
         <Box
@@ -539,6 +550,7 @@ const RolesPage: React.FC = () => {
               month={currentMonth}
               year={currentYear}
               handleChange={handleChange}
+              permissions={userPermissions}
             />
           ) : (
             <Box

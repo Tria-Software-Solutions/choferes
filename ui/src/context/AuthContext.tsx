@@ -4,7 +4,8 @@ import { User } from "../models/User";
 interface AuthContextType {
   currentUser: User | null;
   token: string | null;
-  login: (user: User, token: string) => void;
+  userPermissions: string[];
+  login: (user: User, token: string, userPermissions: string[]) => void;
   logout: () => void;
 }
 
@@ -21,11 +22,23 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     return storedToken ? storedToken : null;
   });
 
-  const login = (currentUser: User, token: string) => {
+  const [userPermissions, setUserPermissions] = useState(() => {
+    const storedUserPermissions = sessionStorage.getItem("userPermissions");
+    return storedUserPermissions ? JSON.parse(storedUserPermissions) : [];
+  });
+
+
+  const login = (
+    currentUser: User,
+    token: string,
+    userPermissions: string[]
+  ) => {
     setCurrentUser(currentUser);
     setToken(token);
+    setUserPermissions(userPermissions);
     sessionStorage.setItem("currentUser", JSON.stringify(currentUser));
     sessionStorage.setItem("token", token);
+    sessionStorage.setItem("userPermissions", JSON.stringify(userPermissions));
   };
 
   const logout = () => {
@@ -33,10 +46,13 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     setToken(null);
     sessionStorage.removeItem("currentUser");
     sessionStorage.removeItem("token");
+    sessionStorage.removeItem("userPermissions");
   };
 
   return (
-    <AuthContext.Provider value={{ currentUser, token, login, logout }}>
+    <AuthContext.Provider
+      value={{ currentUser, token, userPermissions, login, logout }}
+    >
       {children}
     </AuthContext.Provider>
   );

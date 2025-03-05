@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useCallback } from "react";
+import { useAuth } from "../../context/AuthContext";
 import { User } from "../../models/User";
 import { useUsers } from "../../hooks/useUser";
 import {
@@ -18,6 +19,7 @@ import SearchBar from "../../components/SearchBar/SearchBar";
 import { useUserRoles } from "../../hooks/useUserRole";
 
 const ManageUsers = () => {
+  const { userPermissions } = useAuth();
   const { users, isLoadingUsers, updateUser, deleteUser } = useUsers();
   const { getUserRoleByUserId } = useUserRoles();
   const [filteredUsers, setFilteredUsers] = useState<User[]>([]);
@@ -173,6 +175,7 @@ const ManageUsers = () => {
                 setPage={setPage}
                 setRowsPerPage={setRowsPerPage}
                 isSaveDisabled={!isEditFormValid}
+                permissions={userPermissions}
               />
             </Stack>
           ) : (

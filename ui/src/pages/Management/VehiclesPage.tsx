@@ -1,4 +1,5 @@
 import React, { useCallback, useEffect, useMemo, useState } from "react";
+import { useAuth } from "../../context/AuthContext";
 import { Vehicle } from "../../models/Vehicle";
 import { useVehicles } from "../../hooks/useVehicle";
 import SplitButton from "../../components/SplitButton/SplitButton";
@@ -37,7 +38,12 @@ import {
   exportToExcel,
   exportToPDF,
 } from "../../utils/export";
-import { BRANDS, COLORS, PAGE_TITLE } from "../../constants/constants";
+import {
+  BRANDS,
+  COLORS,
+  PAGE_TITLE,
+  PERMISSIONS,
+} from "../../constants/constants";
 import DownloadRoundedIcon from "@mui/icons-material/DownloadRounded";
 import DirectionsCarIcon from "@mui/icons-material/DirectionsCar";
 import ArrowBackIosNewRoundedIcon from "@mui/icons-material/ArrowBackIosNewRounded";
@@ -48,6 +54,7 @@ import { faFileExcel, faFilePdf } from "@fortawesome/free-solid-svg-icons";
 import { format } from "date-fns";
 
 const VehiclesPage: React.FC = () => {
+  const { userPermissions } = useAuth();
   const [selectedDate, setSelectedDate] = useState<Date>(new Date());
   const {
     vehicles,
@@ -388,17 +395,25 @@ const VehiclesPage: React.FC = () => {
   };
 
   const exportOptions = useMemo(() => {
+    const excelOption = userPermissions.includes(
+      PERMISSIONS.EXPORT_EXCEL_VEHICLES
+    )
+      ? exportToExcel
+      : undefined;
+    const pdfOption = userPermissions.includes(PERMISSIONS.EXPORT_PDF_VEHICLES)
+      ? exportToPDF
+      : undefined;
     return createExportOptions(
       <FontAwesomeIcon icon={faFileExcel} size="lg" />,
       <FontAwesomeIcon icon={faFilePdf} size="lg" />,
-      exportToExcel,
-      exportToPDF,
       filteredVehicles,
       `reporte-de-vehiculos-${exportFileFormattedDate(
         selectedDate || new Date()
-      )}`
+      )}`,
+      excelOption,
+      pdfOption
     );
-  }, [filteredVehicles, selectedDate]);
+  }, [userPermissions, filteredVehicles, selectedDate]);
 
   const theme = useTheme();
   const isSmallScreen = useMediaQuery(theme.breakpoints.down("sm"));
@@ -414,15 +429,18 @@ const VehiclesPage: React.FC = () => {
         <Typography variant={isSmallScreen ? "h4" : "h2"} sx={{ flexGrow: 1 }}>
           {PAGE_TITLE.VEHICLES}
         </Typography>
-        <Box sx={{ minHeight: 65 }}>
-          {filteredVehicles.length > 0 && (
-            <SplitButton
-              options={exportOptions}
-              defaultIndex={0}
-              buttonIcon={<DownloadRoundedIcon />}
-            />
+        {userPermissions.includes(PERMISSIONS.EXPORT_EXCEL_VEHICLES) &&
+          userPermissions.includes(PERMISSIONS.EXPORT_PDF_VEHICLES) && (
+            <Box sx={{ minHeight: 65 }}>
+              {filteredVehicles.length > 0 && (
+                <SplitButton
+                  options={exportOptions}
+                  defaultIndex={0}
+                  buttonIcon={<DownloadRoundedIcon />}
+                />
+              )}
+            </Box>
           )}
-        </Box>
       </Box>
       {isLoadingVehicles ? (
         <Box
@@ -541,150 +559,152 @@ const VehiclesPage: React.FC = () => {
                 </LocalizationProvider>
               </Box>
             </Grid>
-            <Grid item xs={12} md={12}>
-              <Box
-                display="flex"
-                flexDirection={{ xs: "column", sm: "column", md: "row" }}
-                alignItems="center"
-                justifyContent="flex-end"
-                gap={2}
-              >
-                <Grid container spacing={2} alignItems="center">
-                  <Grid item xs={12} sm={6} md={1}>
-                    <Tooltip
-                      title="Este número de boleta ya está registrado"
-                      open={openTicketTooltip}
-                      disableHoverListener
-                      placement="bottom"
-                      arrow
-                    >
-                      <TextField
-                        label="Boleta"
-                        variant="outlined"
-                        fullWidth
-                        value={addFields.ticket}
-                        onFocus={handleTicketOnFocus}
-                        onChange={handleTicketChange}
-                      />
-                    </Tooltip>
-                  </Grid>
-                  <Grid item xs={12} sm={6} md={1}>
-                    <Tooltip
-                      title="Esta placa ya está registrada"
-                      open={openLicensePlateTooltip}
-                      disableHoverListener
-                      placement="bottom"
-                      arrow
-                    >
-                      <TextField
-                        label="Placa"
-                        variant="outlined"
-                        fullWidth
-                        value={addFields.licensePlate}
-                        onChange={handleLicensePlateChange}
-                      />
-                    </Tooltip>
-                  </Grid>
-                  <Grid item xs={12} sm={6} md={2}>
-                    {selectedBrand === "Otro" ? (
-                      <TextField
-                        label="Marca"
-                        variant="outlined"
-                        fullWidth
-                        value={customBrand}
-                        onChange={handleCustomBrandChange}
-                      />
-                    ) : (
-                      <FormControl variant="outlined" fullWidth>
-                        <InputLabel>Marca</InputLabel>
-                        <Select
+            {userPermissions.includes(PERMISSIONS.CREATE_VEHICLES) && (
+              <Grid item xs={12} md={12}>
+                <Box
+                  display="flex"
+                  flexDirection={{ xs: "column", sm: "column", md: "row" }}
+                  alignItems="center"
+                  justifyContent="flex-end"
+                  gap={2}
+                >
+                  <Grid container spacing={2} alignItems="center">
+                    <Grid item xs={12} sm={6} md={1}>
+                      <Tooltip
+                        title="Este número de boleta ya está registrado"
+                        open={openTicketTooltip}
+                        disableHoverListener
+                        placement="bottom"
+                        arrow
+                      >
+                        <TextField
+                          label="Boleta"
+                          variant="outlined"
+                          fullWidth
+                          value={addFields.ticket}
+                          onFocus={handleTicketOnFocus}
+                          onChange={handleTicketChange}
+                        />
+                      </Tooltip>
+                    </Grid>
+                    <Grid item xs={12} sm={6} md={1}>
+                      <Tooltip
+                        title="Esta placa ya está registrada"
+                        open={openLicensePlateTooltip}
+                        disableHoverListener
+                        placement="bottom"
+                        arrow
+                      >
+                        <TextField
+                          label="Placa"
+                          variant="outlined"
+                          fullWidth
+                          value={addFields.licensePlate}
+                          onChange={handleLicensePlateChange}
+                        />
+                      </Tooltip>
+                    </Grid>
+                    <Grid item xs={12} sm={6} md={2}>
+                      {selectedBrand === "Otro" ? (
+                        <TextField
                           label="Marca"
-                          value={addFields.brand}
-                          onChange={handleBrandChange}
-                        >
-                          {BRANDS.map((option) => (
-                            <MenuItem key={option.value} value={option.value}>
-                              {option.label}
-                            </MenuItem>
-                          ))}
-                        </Select>
-                      </FormControl>
-                    )}
-                  </Grid>
-                  <Grid item xs={12} sm={6} md={2}>
-                    {selectedColor === "Otro" ? (
+                          variant="outlined"
+                          fullWidth
+                          value={customBrand}
+                          onChange={handleCustomBrandChange}
+                        />
+                      ) : (
+                        <FormControl variant="outlined" fullWidth>
+                          <InputLabel>Marca</InputLabel>
+                          <Select
+                            label="Marca"
+                            value={addFields.brand}
+                            onChange={handleBrandChange}
+                          >
+                            {BRANDS.map((option) => (
+                              <MenuItem key={option.value} value={option.value}>
+                                {option.label}
+                              </MenuItem>
+                            ))}
+                          </Select>
+                        </FormControl>
+                      )}
+                    </Grid>
+                    <Grid item xs={12} sm={6} md={2}>
+                      {selectedColor === "Otro" ? (
+                        <TextField
+                          label="Color"
+                          variant="outlined"
+                          fullWidth
+                          value={customColor}
+                          onChange={handleCustomColorChange}
+                        />
+                      ) : (
+                        <FormControl variant="outlined" fullWidth>
+                          <InputLabel>Color</InputLabel>
+                          <Select
+                            label="Color"
+                            value={addFields.color}
+                            onChange={handleColorChange}
+                          >
+                            {COLORS.map((option) => (
+                              <MenuItem key={option.value} value={option.value}>
+                                {option.label}
+                              </MenuItem>
+                            ))}
+                          </Select>
+                        </FormControl>
+                      )}
+                    </Grid>
+                    <Grid item xs={12} sm={6} md={1}>
                       <TextField
-                        label="Color"
+                        label="Espacio"
                         variant="outlined"
                         fullWidth
-                        value={customColor}
-                        onChange={handleCustomColorChange}
+                        value={addFields.parkingLot}
+                        onChange={handleParkingLotChange}
                       />
-                    ) : (
-                      <FormControl variant="outlined" fullWidth>
-                        <InputLabel>Color</InputLabel>
-                        <Select
-                          label="Color"
-                          value={addFields.color}
-                          onChange={handleColorChange}
-                        >
-                          {COLORS.map((option) => (
-                            <MenuItem key={option.value} value={option.value}>
-                              {option.label}
-                            </MenuItem>
-                          ))}
-                        </Select>
-                      </FormControl>
-                    )}
+                    </Grid>
+                    <Grid item xs={12} sm={6} md={5}>
+                      <TextField
+                        label="Observaciones"
+                        variant="outlined"
+                        fullWidth
+                        value={addFields.notes}
+                        onChange={(e) =>
+                          setAddFields({ ...addFields, notes: e.target.value })
+                        }
+                      />
+                    </Grid>
                   </Grid>
-                  <Grid item xs={12} sm={6} md={1}>
-                    <TextField
-                      label="Espacio"
-                      variant="outlined"
-                      fullWidth
-                      value={addFields.parkingLot}
-                      onChange={handleParkingLotChange}
-                    />
-                  </Grid>
-                  <Grid item xs={12} sm={6} md={5}>
-                    <TextField
-                      label="Observaciones"
-                      variant="outlined"
-                      fullWidth
-                      value={addFields.notes}
-                      onChange={(e) =>
-                        setAddFields({ ...addFields, notes: e.target.value })
-                      }
-                    />
-                  </Grid>
-                </Grid>
-                <Tooltip title="Agregar Vehículo" arrow>
-                  <Box
-                    sx={{
-                      width: { xs: "100%", md: "auto" },
-                      display: "flex",
-                      justifyContent: { xs: "stretch", md: "flex-end" },
-                    }}
-                  >
-                    <Button
-                      variant="contained"
-                      color="primary"
+                  <Tooltip title="Agregar Vehículo" arrow>
+                    <Box
                       sx={{
-                        minHeight: 56,
-                        display: "flex",
-                        justifyContent: "center",
-                        lineHeight: "normal",
                         width: { xs: "100%", md: "auto" },
+                        display: "flex",
+                        justifyContent: { xs: "stretch", md: "flex-end" },
                       }}
-                      onClick={handleAdd}
-                      disabled={!isAddFormValid}
                     >
-                      <DirectionsCarIcon />
-                    </Button>
-                  </Box>
-                </Tooltip>
-              </Box>
-            </Grid>
+                      <Button
+                        variant="contained"
+                        color="primary"
+                        sx={{
+                          minHeight: 56,
+                          display: "flex",
+                          justifyContent: "center",
+                          lineHeight: "normal",
+                          width: { xs: "100%", md: "auto" },
+                        }}
+                        onClick={handleAdd}
+                        disabled={!isAddFormValid}
+                      >
+                        <DirectionsCarIcon />
+                      </Button>
+                    </Box>
+                  </Tooltip>
+                </Box>
+              </Grid>
+            )}
           </Grid>
           <br />
           {filteredVehicles.length > 0 ? (
@@ -715,6 +735,7 @@ const VehiclesPage: React.FC = () => {
               setPage={setPage}
               setRowsPerPage={setRowsPerPage}
               isSaveDisabled={!isEditFormValid}
+              permissions={userPermissions}
             />
           ) : (
             <Box

@@ -440,22 +440,27 @@ export const handleExportTableData = (
 export const createExportOptions = (
   excelIcon: JSX.Element,
   pdfIcon: JSX.Element,
-  exportToExcel: (dataForExport: any, fileName: string, headers?: any) => any,
-  exportToPDF: (dataForExport: any, fileName: string, headers?: any) => any,
   dataForExport: any,
   fileName: string,
+  exportToExcel?: (dataForExport: any, fileName: string, headers?: any) => any,
+  exportToPDF?: (dataForExport: any, fileName: string, headers?: any) => any,
   headers?: any
 ) => {
-  return [
-    {
+  const options = [];
+  if (exportToExcel) {
+    options.push({
       label: "Exportar a Excel",
       icon: excelIcon,
       action: () => exportToExcel(dataForExport, fileName, headers),
-    },
-    {
+    });
+  }
+  if (exportToPDF) {
+    options.push({
       label: "Exportar a PDF",
       icon: pdfIcon,
       action: () => exportToPDF(dataForExport, fileName, headers),
-    },
-  ];
+    });
+  }
+
+  return options;
 };

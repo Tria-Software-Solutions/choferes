@@ -2,6 +2,7 @@ import { User } from "../models/User";
 import { Role } from "../models/Role";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
+import { Permission } from "../models/Permission";
 
 const SECRET_KEY = process.env.JWT_SECRET_KEY || "default_secret";
 
@@ -34,7 +35,7 @@ export const getUsers = async () => {
     include: [
       {
         model: Role,
-        through: { attributes: [] }, 
+        through: { attributes: [] },
       },
     ],
   });
@@ -49,6 +50,31 @@ export const getUserByUsername = async (username: string) => {
     where: { username },
     include: Role,
   });
+};
+
+export const getUserPermissions = async (userId: number) => {
+  const user = await User.findByPk(userId, {
+    include: [
+      {
+        model: Role,
+        include: [
+          {
+            model: Permission,
+            through: { attributes: [] },
+          },
+        ],
+      },
+    ],
+  });
+
+  if (!user) return null;
+
+  const permissions =
+    user.Roles?.flatMap(
+      (role) => role.Permissions?.map((permission) => permission.name) || []
+    ) || [];
+
+  return Array.from(new Set(permissions));
 };
 
 export const createUser = async (data: Omit<User, "id">) => {

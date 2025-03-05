@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useCallback } from "react";
+import { useAuth } from "../../context/AuthContext";
 import { Role } from "../../models/Role";
 import { useRoles } from "../../hooks/useRole";
 import { getRoles } from "../../services/roleService";
@@ -7,6 +8,7 @@ import EditableTable from "../../components/Table/EditableTable/EditableTable";
 import SearchBar from "../../components/SearchBar/SearchBar";
 
 const ManageRoles = () => {
+  const { userPermissions } = useAuth();
   const { isLoadingRoles, updateRole, deleteRole } = useRoles();
   const [roles, setRoles] = useState<Role[]>([]);
   const [filteredRoles, setFilteredRoles] = useState<Role[]>([]);
@@ -149,6 +151,7 @@ const ManageRoles = () => {
                 setPage={setPage}
                 setRowsPerPage={setRowsPerPage}
                 isSaveDisabled={!isEditFormValid}
+                permissions={userPermissions}
               />
             </Stack>
           ) : (
