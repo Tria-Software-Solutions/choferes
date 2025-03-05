@@ -6,7 +6,7 @@ export const getUserRoles = async (req: Request, res: Response) => {
     const roles = await userRoleService.getUserRoles();
     res.status(200).json(roles);
   } catch (error) {
-    res.status(400).json({ message: "Error fetching UserRole", error });
+    res.status(400).json({ message: "Error fetching UserRoles", error });
   }
 };
 
