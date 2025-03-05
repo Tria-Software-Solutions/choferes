@@ -52,6 +52,7 @@ const VehiclesPage: React.FC = () => {
   const {
     vehicles,
     allVehicles,
+    setAllVehicles,
     isLoadingVehicles,
     createVehicle,
     updateVehicle,
@@ -150,16 +151,25 @@ const VehiclesPage: React.FC = () => {
   );
 
   const handleAdd = () => {
-    const newVehicle: Omit<Vehicle, "id"> = {
-      ticket: addFields.ticket,
-      licensePlate: addFields.licensePlate,
-      brand: addFields.brand,
-      color: addFields.color,
-      parkingLot: addFields.parkingLot,
-      notes: addFields.notes,
-      createdAt: selectedDate,
-    };
-    createVehicle(newVehicle);
+    setAllVehicles((prevVehicles) => {
+      const newId =
+        prevVehicles.length > 0
+          ? Math.max(...prevVehicles.map((vehicle) => vehicle.id)) + 1
+          : 1;
+
+      const newVehicle: Vehicle = {
+        id: newId,
+        ticket: addFields.ticket,
+        licensePlate: addFields.licensePlate,
+        brand: addFields.brand,
+        color: addFields.color,
+        parkingLot: addFields.parkingLot,
+        notes: addFields.notes,
+        createdAt: selectedDate,
+      };
+      createVehicle(newVehicle);
+      return [...prevVehicles, newVehicle];
+    });
     setAddFields({
       ticket: "",
       licensePlate: "",
@@ -678,34 +688,34 @@ const VehiclesPage: React.FC = () => {
           </Grid>
           <br />
           {filteredVehicles.length > 0 ? (
-             <EditableTable<Vehicle>
-        data={filteredVehicles}
-        columns={[
-          "ticket",
-          "licensePlate",
-          "brand",
-          "color",
-          "parkingLot",
-          "notes",
-        ]}
-        groupByDate={selectedDate}
-        editRowId={editRowId}
-        editFields={editFields}
-        setEditField={(field, value) =>
-          setEditFields({ ...editFields, [field]: value })
-        }
-        handleEditClick={handleEditClick}
-        handleCancelClick={handleCancelClick}
-        handleSaveClick={handleSaveClick}
-        handleOpenDialog={handleOpenDialog}
-        getRowId={(row) => row.id}
-        totalCount={totalCount}
-        page={page}
-        rowsPerPage={rowsPerPage}
-        setPage={setPage}
-        setRowsPerPage={setRowsPerPage}
-        isSaveDisabled={!isEditFormValid}
-      />
+            <EditableTable<Vehicle>
+              data={filteredVehicles}
+              columns={[
+                "ticket",
+                "licensePlate",
+                "brand",
+                "color",
+                "parkingLot",
+                "notes",
+              ]}
+              groupByDate={selectedDate}
+              editRowId={editRowId}
+              editFields={editFields}
+              setEditField={(field, value) =>
+                setEditFields({ ...editFields, [field]: value })
+              }
+              handleEditClick={handleEditClick}
+              handleCancelClick={handleCancelClick}
+              handleSaveClick={handleSaveClick}
+              handleOpenDialog={handleOpenDialog}
+              getRowId={(row) => row.id}
+              totalCount={totalCount}
+              page={page}
+              rowsPerPage={rowsPerPage}
+              setPage={setPage}
+              setRowsPerPage={setRowsPerPage}
+              isSaveDisabled={!isEditFormValid}
+            />
           ) : (
             <Box
               sx={{
