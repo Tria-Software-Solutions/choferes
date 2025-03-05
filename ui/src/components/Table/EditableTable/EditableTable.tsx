@@ -37,11 +37,11 @@ type EditableTableProps<T> = {
   groupByDate?: Date | null;
   editRowId: number | null;
   editFields: Record<string, string>;
-  setEditField: (field: string, value: string) => void;
-  handleEditClick: (row: T) => void;
-  handleCancelClick: () => void;
-  handleSaveClick: (id: number) => void;
-  handleOpenDialog: (id: number) => void;
+  setEditField?: (field: string, value: string) => void;
+  handleEditClick?: (row: T) => void;
+  handleCancelClick?: () => void;
+  handleSaveClick?: (id: number) => void;
+  handleOpenDialog?: (id: number) => void;
   getRowId: (row: T) => number;
   totalCount: number;
   page: number;
@@ -51,6 +51,7 @@ type EditableTableProps<T> = {
   renderColumnValue?: (column: keyof T, value: any) => React.ReactNode;
   validateField?: (field: string, value: string) => boolean;
   isSaveDisabled?: boolean;
+  noActions?: boolean;
 };
 
 const EditableTable = <T,>({
@@ -73,6 +74,7 @@ const EditableTable = <T,>({
   renderColumnValue = (_, value) => value,
   validateField = () => true,
   isSaveDisabled,
+  noActions,
 }: EditableTableProps<T>) => {
   const [order, setOrder] = useState<"asc" | "desc">("asc");
   const [orderBy, setOrderBy] = useState<keyof T>(columns[0]);
@@ -92,7 +94,7 @@ const EditableTable = <T,>({
         <TextField
           fullWidth
           value={editFields[String(column)] || ""}
-          onChange={(e) => setEditField(String(column), e.target.value)}
+          onChange={(e) => setEditField && setEditField(String(column), e.target.value)}
           error={!validateField(String(column), value)}
         />
       );
@@ -112,13 +114,13 @@ const EditableTable = <T,>({
               variant="outlined"
               fullWidth
               value={editFields[String(column)] || ""}
-              onChange={(e) => setEditField(String(column), e.target.value)}
+              onChange={(e) => setEditField && setEditField(String(column), e.target.value)}
             />
           ) : (
             <Select
               value={selectedValue}
               onChange={(e) =>
-                setEditField(String(column), String(e.target.value))
+                setEditField && setEditField(String(column), String(e.target.value))
               }
             >
               {config.options.map((option) => (
@@ -140,7 +142,7 @@ const EditableTable = <T,>({
           column === "licensePlate"
             ? maskLicensePlate(rawValue)
             : maskParkingLot(rawValue);
-        setEditField(String(column), maskedValue);
+            setEditField && setEditField(String(column), maskedValue);
       };
 
       return (
@@ -158,7 +160,7 @@ const EditableTable = <T,>({
       <TextField
         fullWidth
         value={editFields[String(column)] || ""}
-        onChange={(e) => setEditField(String(column), e.target.value)}
+        onChange={(e) => setEditField && setEditField(String(column), e.target.value)}
         error={!validateField(String(column), value)}
       />
     );
@@ -222,7 +224,7 @@ const EditableTable = <T,>({
                     position: "sticky",
                     top: 0,
                     zIndex: 4,
-                    fontWeight: "bold"
+                    fontWeight: "bold",
                   }}
                 >
                   {formatDateWithDay(groupByDate, false)}
@@ -240,7 +242,7 @@ const EditableTable = <T,>({
                   </TableSortLabel>
                 </TableCell>
               ))}
-              <TableCell style={{ width: "100px" }} />
+              {!noActions && <TableCell style={{ width: "100px" }} />}
             </TableRow>
           </TableHead>
           <TableBody>
@@ -258,58 +260,60 @@ const EditableTable = <T,>({
                       : renderColumnValue(column, row[column])}
                   </TableCell>
                 ))}
-                <TableCell>
-                  <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-                    {editRowId === getRowId(row) ? (
-                      <>
-                        <Tooltip title="Guardar" arrow>
-                          <Box>
-                            <IconButton
-                              color="primary"
-                              onClick={() => handleSaveClick(getRowId(row))}
-                              disabled={isSaveDisabled}
-                            >
-                              <SaveIcon />
-                            </IconButton>
-                          </Box>
-                        </Tooltip>
-                        <Tooltip title="Cancelar" arrow>
-                          <Box>
-                            <IconButton
-                              color="primary"
-                              onClick={() => handleCancelClick()}
-                            >
-                              <CloseIcon />
-                            </IconButton>
-                          </Box>
-                        </Tooltip>
-                      </>
-                    ) : (
-                      <>
-                        <Tooltip title="Editar" arrow>
-                          <Box>
-                            <IconButton
-                              color="primary"
-                              onClick={() => handleEditClick(row)}
-                            >
-                              <EditIcon />
-                            </IconButton>
-                          </Box>
-                        </Tooltip>
-                        <Tooltip title="Eliminar" arrow>
-                          <Box>
-                            <IconButton
-                              color="secondary"
-                              onClick={() => handleOpenDialog(getRowId(row))}
-                            >
-                              <DeleteIcon />
-                            </IconButton>
-                          </Box>
-                        </Tooltip>
-                      </>
-                    )}
-                  </Box>
-                </TableCell>
+                {!noActions && (
+                  <TableCell>
+                    <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+                      {editRowId === getRowId(row) ? (
+                        <>
+                          <Tooltip title="Guardar" arrow>
+                            <Box>
+                              <IconButton
+                                color="primary"
+                                onClick={() => handleSaveClick && handleSaveClick(getRowId(row))}
+                                disabled={isSaveDisabled}
+                              >
+                                <SaveIcon />
+                              </IconButton>
+                            </Box>
+                          </Tooltip>
+                          <Tooltip title="Cancelar" arrow>
+                            <Box>
+                              <IconButton
+                                color="primary"
+                                onClick={() => handleCancelClick && handleCancelClick()}
+                              >
+                                <CloseIcon />
+                              </IconButton>
+                            </Box>
+                          </Tooltip>
+                        </>
+                      ) : (
+                        <>
+                          <Tooltip title="Editar" arrow>
+                            <Box>
+                              <IconButton
+                                color="primary"
+                                onClick={() => handleEditClick && handleEditClick(row)}
+                              >
+                                <EditIcon />
+                              </IconButton>
+                            </Box>
+                          </Tooltip>
+                          <Tooltip title="Eliminar" arrow>
+                            <Box>
+                              <IconButton
+                                color="secondary"
+                                onClick={() => handleOpenDialog && handleOpenDialog(getRowId(row))}
+                              >
+                                <DeleteIcon />
+                              </IconButton>
+                            </Box>
+                          </Tooltip>
+                        </>
+                      )}
+                    </Box>
+                  </TableCell>
+                )}
               </TableRow>
             ))}
           </TableBody>
