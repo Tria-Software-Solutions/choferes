@@ -42,7 +42,14 @@ const authenticateUser = (username, password) => __awaiter(void 0, void 0, void 
 });
 exports.authenticateUser = authenticateUser;
 const getUsers = () => __awaiter(void 0, void 0, void 0, function* () {
-    return yield User_1.User.findAll({ include: Role_1.Role });
+    return yield User_1.User.findAll({
+        include: [
+            {
+                model: Role_1.Role,
+                through: { attributes: [] },
+            },
+        ],
+    });
 });
 exports.getUsers = getUsers;
 const getUserById = (id) => __awaiter(void 0, void 0, void 0, function* () {

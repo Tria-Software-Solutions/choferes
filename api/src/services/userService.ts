@@ -30,7 +30,14 @@ export const authenticateUser = async (username: string, password: string) => {
 };
 
 export const getUsers = async () => {
-  return await User.findAll({ include: Role });
+  return await User.findAll({
+    include: [
+      {
+        model: Role,
+        through: { attributes: [] }, 
+      },
+    ],
+  });
 };
 
 export const getUserById = async (id: number) => {

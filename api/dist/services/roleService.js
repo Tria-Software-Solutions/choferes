@@ -10,13 +10,14 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.deleteRole = exports.createRole = exports.getRoleById = exports.getRoles = void 0;
+const Permission_1 = require("../models/Permission");
 const Role_1 = require("../models/Role");
 const getRoles = () => __awaiter(void 0, void 0, void 0, function* () {
-    return yield Role_1.Role.findAll();
+    return yield Role_1.Role.findAll({ include: Permission_1.Permission });
 });
 exports.getRoles = getRoles;
 const getRoleById = (id) => __awaiter(void 0, void 0, void 0, function* () {
-    return yield Role_1.Role.findByPk(id);
+    return yield Role_1.Role.findByPk(id, { include: Permission_1.Permission });
 });
 exports.getRoleById = getRoleById;
 const createRole = (data) => __awaiter(void 0, void 0, void 0, function* () {
