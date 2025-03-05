@@ -68,7 +68,7 @@ export const useUsers = () => {
     }
   }, []);
 
-  const createUser = async (newUser: Omit<User, "id">) => {
+  const createUser = async (newUser: Omit<User, "id" | "Roles" | "roleName">) => {
     const createdUser = await UserService.createUser(newUser);
     setUsers((prev) => [...prev, createdUser]);
     setTotalCountUsers((prev) => prev + 1);

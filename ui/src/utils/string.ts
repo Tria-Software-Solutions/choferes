@@ -69,7 +69,7 @@ export const getMonthName = (month: number) => {
     throw new Error("Número de mes inválido. Debe estar entre 1 y 12.");
   }
 
-  return months[month - 1]; 
+  return months[month - 1];
 };
 
 export const translateColumnHeaderToSpanish = (
@@ -82,17 +82,20 @@ export const translateColumnHeaderToSpanish = (
     lastName: "Apellido",
     email: "Correo Electrónico",
     username: "Usuario",
+    permissions: "Permisos",
     label: "Lugar",
     day: "Día",
     hours: "Horas",
-    createdAt: "Agregado",
-    updatedAt: "Actualizado",
     ticket: "Boleta",
     licensePlate: "Placa",
     brand: "Marca",
     color: "Color",
     parkingLot: "Espacio",
-    notes: "Observaciones"
+    notes: "Observaciones",
+    createdAt: "Agregado",
+    updatedAt: "Actualizado",
+    // RELATION COLUMNS
+    roleName: "Rol",
   };
 
   if (typeof column === "string" && column in translations) {
@@ -102,7 +105,9 @@ export const translateColumnHeaderToSpanish = (
   return String(column);
 };
 
-export const translateDayToAbrevSpanish = (dayInEnglish: EnglishDayOfWeek): string => {
+export const translateDayToAbrevSpanish = (
+  dayInEnglish: EnglishDayOfWeek
+): string => {
   const translationMap: Record<EnglishDayOfWeek, string> = {
     Sunday: "Dom",
     Monday: "Lun",
@@ -154,7 +159,9 @@ export const setDayOptionsEnglish = (day: string): string => {
   return lowerCaseDay;
 };
 
-export const translatePeriodToSpanish = (period: "weekly" | "biweekly" | "monthly"): string => {
+export const translatePeriodToSpanish = (
+  period: "weekly" | "biweekly" | "monthly"
+): string => {
   switch (period) {
     case "weekly":
       return "Semanal";

@@ -24,7 +24,7 @@ export const getUserByUsername = async (username: string) => {
   return response.data;
 };
 
-export const createUser = async (user: Omit<User, "id">) => {
+export const createUser = async (user: Omit<User, "id" | "Roles" | "roleName">) => {
   const response = await api.post("/users/register", user);
   return response.data;
 };
