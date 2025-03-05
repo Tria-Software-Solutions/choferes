@@ -39,18 +39,24 @@ const ManageUsers = () => {
   useEffect(() => {
     const normalizeString = (str: string) =>
       str.normalize("NFD").replace(/[\u0300-\u036f]/g, "");
-
-    setFilteredUsers(
-      users.filter((user) =>
+  
+    const updatedUsers = users
+      .filter((user) =>
         normalizeString(
           `${user.firstName} ${user.lastName} ${user.email} ${user.username}`
         )
           .toLowerCase()
           .includes(normalizeString(filter).toLowerCase())
       )
-    );
-    setTotalCount(filteredUsers.length);
-  }, [filter, users, filteredUsers.length]);
+      .map((user) => ({
+        ...user,
+        roleName: user.Roles?.[0]?.name || "Sin rol", 
+      }));
+  
+    setFilteredUsers(updatedUsers);
+    setTotalCount(updatedUsers.length);
+  }, [filter, users]);
+  
 
   const validateFields = useCallback((fields: typeof editFields) => {
     const regex = {
@@ -150,7 +156,7 @@ const ManageUsers = () => {
               </Box>
               <EditableTable<User>
                 data={filteredUsers}
-                columns={["firstName", "lastName", "username", "email"]}
+                columns={["firstName", "lastName", "username", "email", "roleName"]}
                 editRowId={editRowId}
                 editFields={editFields}
                 setEditField={(field, value) =>
