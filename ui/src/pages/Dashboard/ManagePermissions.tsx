@@ -1,16 +1,11 @@
-import React, { useState, useEffect, useCallback } from "react";
+import React, { useState, useEffect } from "react";
 import { Permission } from "../../models/Permission";
 import { usePermissions } from "../../hooks/usePermission";
 import { getPermissions } from "../../services/permissionService";
 import {
   Backdrop,
   Box,
-  Button,
   CircularProgress,
-  Dialog,
-  DialogActions,
-  DialogContent,
-  DialogTitle,
   Stack,
   Typography,
 } from "@mui/material";
@@ -18,25 +13,19 @@ import EditableTable from "../../components/Table/EditableTable/EditableTable";
 import SearchBar from "../../components/SearchBar/SearchBar";
 
 const ManagePermissions = () => {
-  const { isLoadingPermissions, updatePermission, deletePermission } =
+  const { isLoadingPermissions } =
     usePermissions();
   const [permissions, setPermissions] = useState<Permission[]>([]);
   const [filteredPermissions, setFilteredPermissions] = useState<Permission[]>(
     []
   );
   const [totalCount, setTotalCount] = useState(0);
-  const [editRowId, setEditRowId] = useState<number | null>(null);
   const [editFields, setEditFields] = useState({
     name: "",
   });
-  const [dialogOpen, setDialogOpen] = useState(false);
-  const [permissionToDelete, setPermissionToDelete] = useState<number | null>(
-    null
-  );
   const [filter, setFilter] = useState("");
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(5);
-  const [isEditFormValid, setIsEditFormValid] = useState(false);
 
   useEffect(() => {
     const getAllPermissions = async () => {
@@ -61,57 +50,8 @@ const ManagePermissions = () => {
     setTotalCount(filteredPermissions.length);
   }, [filter, permissions, filteredPermissions.length]);
 
-  const validateFields = useCallback((fields: typeof editFields) => {
-    const regex = {
-      text: /^[a-zA-ZáéíóúÁÉÍÓÚñÑüÜëË\s-]+$/,
-    };
-
-    return regex.text.test(fields.name);
-  }, []);
-
-  useEffect(() => {
-    if (editRowId !== null) setIsEditFormValid(validateFields(editFields));
-  }, [editFields, editRowId, validateFields]);
-
   const handleFilterChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setFilter(e.target.value);
-  };
-
-  const handleEditClick = (permission: Permission) => {
-    setEditRowId(permission.id);
-    setEditFields({
-      name: permission.name,
-    });
-  };
-
-  const handleCancelClick = () => {
-    setEditRowId(null);
-  };
-
-  const handleSaveClick = (id: number) => {
-    const updatedPermission = {
-      ...editFields,
-    };
-    updatePermission(id, updatedPermission);
-    setEditRowId(null);
-    setEditFields({ name: "" });
-  };
-
-  const handleOpenDialog = (id: number) => {
-    setDialogOpen(true);
-    setPermissionToDelete(id);
-  };
-
-  const handleCloseDialog = () => {
-    setDialogOpen(false);
-    setPermissionToDelete(null);
-  };
-
-  const handleDelete = () => {
-    if (permissionToDelete !== null) {
-      deletePermission(permissionToDelete);
-      handleCloseDialog();
-    }
   };
 
   return (
@@ -149,22 +89,18 @@ const ManagePermissions = () => {
               <EditableTable<Permission>
                 data={filteredPermissions}
                 columns={["name"]}
-                editRowId={editRowId}
+                editRowId={null}
                 editFields={editFields}
                 setEditField={(field, value) =>
                   setEditFields({ ...editFields, [field]: value })
                 }
-                handleEditClick={handleEditClick}
-                handleCancelClick={handleCancelClick}
-                handleSaveClick={handleSaveClick}
-                handleOpenDialog={handleOpenDialog}
                 getRowId={(row) => row.id}
                 totalCount={totalCount}
                 page={page}
                 rowsPerPage={rowsPerPage}
                 setPage={setPage}
                 setRowsPerPage={setRowsPerPage}
-                isSaveDisabled={!isEditFormValid}
+                noActions
               />
             </Stack>
           ) : (
@@ -183,22 +119,6 @@ const ManagePermissions = () => {
           )}
         </>
       )}
-      <Dialog open={dialogOpen} onClose={handleCloseDialog}>
-        <DialogTitle>Confirmar Eliminación</DialogTitle>
-        <DialogContent>
-          <Typography>
-            ¿Estás seguro de que deseas eliminar este permiso?
-          </Typography>
-        </DialogContent>
-        <DialogActions>
-          <Button color="primary" onClick={handleCloseDialog}>
-            Cancelar
-          </Button>
-          <Button color="secondary" onClick={handleDelete}>
-            Eliminar
-          </Button>
-        </DialogActions>
-      </Dialog>
     </Box>
   );
 };
