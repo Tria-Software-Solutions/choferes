@@ -50,7 +50,7 @@ const getRolePermissions = (req, res) => __awaiter(void 0, void 0, void 0, funct
         res.status(200).json(permissions);
     }
     catch (error) {
-        res.status(400).json({ message: "Error fetching RolePermission", error });
+        res.status(400).json({ message: "Error fetching RolePermissions", error });
     }
 });
 exports.getRolePermissions = getRolePermissions;

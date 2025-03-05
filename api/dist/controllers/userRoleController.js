@@ -50,7 +50,7 @@ const getUserRoles = (req, res) => __awaiter(void 0, void 0, void 0, function* (
         res.status(200).json(roles);
     }
     catch (error) {
-        res.status(400).json({ message: "Error fetching UserRole", error });
+        res.status(400).json({ message: "Error fetching UserRoles", error });
     }
 });
 exports.getUserRoles = getUserRoles;
