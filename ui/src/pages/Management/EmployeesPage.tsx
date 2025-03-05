@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useCallback, useMemo } from "react";
+import { useAuth } from "../../context/AuthContext";
 import { Employee } from "../../models/Employee";
 import { useEmployees } from "../../hooks/useEmployee";
 import SplitButton from "../../components/SplitButton/SplitButton";
@@ -26,13 +27,14 @@ import {
   exportToExcel,
   exportToPDF,
 } from "../../utils/export";
-import { PAGE_TITLE } from "../../constants/constants";
+import { PAGE_TITLE, PERMISSIONS } from "../../constants/constants";
 import PersonAddAlt1RoundedIcon from "@mui/icons-material/PersonAddAlt1Rounded";
 import DownloadRoundedIcon from "@mui/icons-material/DownloadRounded";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faFileExcel, faFilePdf } from "@fortawesome/free-solid-svg-icons";
 
 const EmployeesPage: React.FC = () => {
+  const { userPermissions } = useAuth();
   const {
     employees,
     isLoadingEmployees,
@@ -137,15 +139,23 @@ const EmployeesPage: React.FC = () => {
   };
 
   const exportOptions = useMemo(() => {
+    const excelOption = userPermissions.includes(
+      PERMISSIONS.EXPORT_EXCEL_EMPLOYEES
+    )
+      ? exportToExcel
+      : undefined;
+    const pdfOption = userPermissions.includes(PERMISSIONS.EXPORT_PDF_EMPLOYEES)
+      ? exportToPDF
+      : undefined;
     return createExportOptions(
       <FontAwesomeIcon icon={faFileExcel} size="lg" />,
       <FontAwesomeIcon icon={faFilePdf} size="lg" />,
-      exportToExcel,
-      exportToPDF,
       filteredEmployees,
-      `empleados-${exportFileFormattedDate(new Date())}`
+      `empleados-${exportFileFormattedDate(new Date())}`,
+      excelOption,
+      pdfOption
     );
-  }, [filteredEmployees]);
+  }, [userPermissions, filteredEmployees]);
 
   const theme = useTheme();
   const isSmallScreen = useMediaQuery(theme.breakpoints.down("sm"));
@@ -161,15 +171,18 @@ const EmployeesPage: React.FC = () => {
         <Typography variant={isSmallScreen ? "h4" : "h2"} sx={{ flexGrow: 1 }}>
           {PAGE_TITLE.EMPLOYEES}
         </Typography>
-        <Box sx={{ minHeight: 65 }}>
-          {filteredEmployees.length > 0 && (
-            <SplitButton
-              options={exportOptions}
-              defaultIndex={0}
-              buttonIcon={<DownloadRoundedIcon />}
-            />
+        {userPermissions.includes(PERMISSIONS.EXPORT_EXCEL_EMPLOYEES) &&
+          userPermissions.includes(PERMISSIONS.EXPORT_PDF_EMPLOYEES) && (
+            <Box sx={{ minHeight: 65 }}>
+              {filteredEmployees.length > 0 && (
+                <SplitButton
+                  options={exportOptions}
+                  defaultIndex={0}
+                  buttonIcon={<DownloadRoundedIcon />}
+                />
+              )}
+            </Box>
           )}
-        </Box>
       </Box>
       {isLoadingEmployees ? (
         <Box
@@ -207,74 +220,79 @@ const EmployeesPage: React.FC = () => {
                 />
               )}
             </Grid>
-            <Grid item xs={12} md={6}>
-              <Box
-                display="flex"
-                flexDirection={{ xs: "column", sm: "column", md: "row" }}
-                alignItems="center"
-                justifyContent="flex-end"
-                gap={2}
-              >
-                <Grid container spacing={2} alignItems="center">
-                  <Grid item xs={6} md={6}>
-                    <TextField
-                      label="Nombre"
-                      variant="outlined"
-                      fullWidth
-                      sx={{
-                        height: 56,
-                      }}
-                      value={addFields.firstName}
-                      onChange={(e) =>
-                        setAddFields({
-                          ...addFields,
-                          firstName: e.target.value,
-                        })
-                      }
-                    />
+            {userPermissions.includes(PERMISSIONS.CREATE_EMPLOYEES) && (
+              <Grid item xs={12} md={6}>
+                <Box
+                  display="flex"
+                  flexDirection={{ xs: "column", sm: "column", md: "row" }}
+                  alignItems="center"
+                  justifyContent="flex-end"
+                  gap={2}
+                >
+                  <Grid container spacing={2} alignItems="center">
+                    <Grid item xs={6} md={6}>
+                      <TextField
+                        label="Nombre"
+                        variant="outlined"
+                        fullWidth
+                        sx={{
+                          height: 56,
+                        }}
+                        value={addFields.firstName}
+                        onChange={(e) =>
+                          setAddFields({
+                            ...addFields,
+                            firstName: e.target.value,
+                          })
+                        }
+                      />
+                    </Grid>
+                    <Grid item xs={6} md={6}>
+                      <TextField
+                        label="Apellido"
+                        variant="outlined"
+                        fullWidth
+                        sx={{
+                          height: 56,
+                        }}
+                        value={addFields.lastName}
+                        onChange={(e) =>
+                          setAddFields({
+                            ...addFields,
+                            lastName: e.target.value,
+                          })
+                        }
+                      />
+                    </Grid>
                   </Grid>
-                  <Grid item xs={6} md={6}>
-                    <TextField
-                      label="Apellido"
-                      variant="outlined"
-                      fullWidth
+                  <Tooltip title="Agregar Empleado" arrow>
+                    <Box
                       sx={{
-                        height: 56,
-                      }}
-                      value={addFields.lastName}
-                      onChange={(e) =>
-                        setAddFields({ ...addFields, lastName: e.target.value })
-                      }
-                    />
-                  </Grid>
-                </Grid>
-                <Tooltip title="Agregar Empleado" arrow>
-                  <Box
-                    sx={{
-                      width: { xs: "100%", md: "auto" },
-                      display: "flex",
-                      justifyContent: { xs: "stretch", md: "flex-end" },
-                    }}
-                  >
-                    <Button
-                      variant="contained"
-                      color="primary"
-                      sx={{
-                        minHeight: 56,
-                        display: "flex",
-                        justifyContent: "center",
-                        lineHeight: "normal",
                         width: { xs: "100%", md: "auto" },
+                        display: "flex",
+                        justifyContent: { xs: "stretch", md: "flex-end" },
                       }}
-                      onClick={handleAdd}
-                      disabled={!isAddFormValid}
                     >
-                      <PersonAddAlt1RoundedIcon />
-                    </Button>
-                  </Box>
-                </Tooltip>
-              </Box>
-            </Grid>
+                      <Button
+                        variant="contained"
+                        color="primary"
+                        sx={{
+                          minHeight: 56,
+                          display: "flex",
+                          justifyContent: "center",
+                          lineHeight: "normal",
+                          width: { xs: "100%", md: "auto" },
+                        }}
+                        onClick={handleAdd}
+                        disabled={!isAddFormValid}
+                      >
+                        <PersonAddAlt1RoundedIcon />
+                      </Button>
+                    </Box>
+                  </Tooltip>
+                </Box>
+              </Grid>
+            )}
           </Grid>
           <br />
           {filteredEmployees.length > 0 ? (
@@ -297,6 +315,7 @@ const EmployeesPage: React.FC = () => {
               setPage={setPage}
               setRowsPerPage={setRowsPerPage}
               isSaveDisabled={!isEditFormValid}
+              permissions={userPermissions}
             />
           ) : (
             <Box

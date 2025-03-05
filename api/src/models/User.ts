@@ -1,5 +1,6 @@
-import { Model, DataTypes } from "sequelize";
+import { Model, DataTypes, Association } from "sequelize";
 import sequelize from "../config/database";
+import { Role } from "./Role";
 
 export class User extends Model {
   public id!: number;
@@ -8,6 +9,12 @@ export class User extends Model {
   public username!: string;
   public email!: string;
   public password!: string;
+
+  public Roles?: Role[];
+
+  public static associations: {
+    Roles: Association<User, Role>;
+  };
 }
 
 User.init(
