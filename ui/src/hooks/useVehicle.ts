@@ -82,6 +82,7 @@ export const useVehicles = (selectedDate?: string) => {
   return {
     vehicles,
     allVehicles,
+    setAllVehicles,
     totalCountVehicles,
     totalCountAlVehicles,
     isLoadingVehicles,
