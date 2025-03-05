@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useCallback, useMemo } from "react";
+import { useAuth } from "../../context/AuthContext";
 import { Schedule } from "../../models/Schedule";
 import { useSchedules } from "../../hooks/useSchedule";
 import SplitButton from "../../components/SplitButton/SplitButton";
@@ -34,13 +35,14 @@ import {
   getDayOptionsSpanish,
   translateDayOptionsToSpanish,
 } from "../../utils/string";
-import { PAGE_TITLE } from "../../constants/constants";
+import { PAGE_TITLE, PERMISSIONS } from "../../constants/constants";
 import PostAddRoundedIcon from "@mui/icons-material/PostAddRounded";
 import DownloadRoundedIcon from "@mui/icons-material/DownloadRounded";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faFileExcel, faFilePdf } from "@fortawesome/free-solid-svg-icons";
 
 const SchedulesPage: React.FC = () => {
+  const { userPermissions } = useAuth();
   const {
     schedules,
     isLoadingSchedules,
@@ -163,15 +165,23 @@ const SchedulesPage: React.FC = () => {
   };
 
   const exportOptions = useMemo(() => {
+    const excelOption = userPermissions.includes(
+      PERMISSIONS.EXPORT_EXCEL_SCHEDULES
+    )
+      ? exportToExcel
+      : undefined;
+    const pdfOption = userPermissions.includes(PERMISSIONS.EXPORT_PDF_SCHEDULES)
+      ? exportToPDF
+      : undefined;
     return createExportOptions(
       <FontAwesomeIcon icon={faFileExcel} size="lg" />,
       <FontAwesomeIcon icon={faFilePdf} size="lg" />,
-      exportToExcel,
-      exportToPDF,
       filteredSchedules,
-      `horarios-${exportFileFormattedDate(new Date())}`
+      `horarios-${exportFileFormattedDate(new Date())}`,
+      excelOption,
+      pdfOption
     );
-  }, [filteredSchedules]);
+  }, [userPermissions, filteredSchedules]);
 
   const theme = useTheme();
   const isSmallScreen = useMediaQuery(theme.breakpoints.down("sm"));
@@ -187,15 +197,18 @@ const SchedulesPage: React.FC = () => {
         <Typography variant={isSmallScreen ? "h4" : "h2"} sx={{ flexGrow: 1 }}>
           {PAGE_TITLE.SCHEDULES}
         </Typography>
-        <Box sx={{ minHeight: 65 }}>
-          {filteredSchedules.length > 0 && (
-            <SplitButton
-              options={exportOptions}
-              defaultIndex={0}
-              buttonIcon={<DownloadRoundedIcon />}
-            />
+        {userPermissions.includes(PERMISSIONS.EXPORT_EXCEL_SCHEDULES) &&
+          userPermissions.includes(PERMISSIONS.EXPORT_PDF_SCHEDULES) && (
+            <Box sx={{ minHeight: 65 }}>
+              {filteredSchedules.length > 0 && (
+                <SplitButton
+                  options={exportOptions}
+                  defaultIndex={0}
+                  buttonIcon={<DownloadRoundedIcon />}
+                />
+              )}
+            </Box>
           )}
-        </Box>
       </Box>
       {isLoadingSchedules ? (
         <Box
@@ -233,97 +246,99 @@ const SchedulesPage: React.FC = () => {
                 />
               )}
             </Grid>
-            <Grid item xs={12} md={6}>
-              <Box
-                display="flex"
-                flexDirection={{ xs: "column", sm: "column", md: "row" }}
-                alignItems="center"
-                justifyContent="flex-end"
-                gap={2}
-              >
-                <Grid container spacing={2} alignItems="center">
-                  <Grid item xs={12} md={4}>
-                    <TextField
-                      label="Lugar"
-                      variant="outlined"
-                      fullWidth
-                      sx={{
-                        height: 56,
-                      }}
-                      value={addFields.label}
-                      onChange={(e) =>
-                        setAddFields({ ...addFields, label: e.target.value })
-                      }
-                    />
-                  </Grid>
-                  <Grid item xs={6} md={4}>
-                    <FormControl
-                      variant="outlined"
-                      fullWidth
-                      sx={{
-                        height: 56,
-                      }}
-                    >
-                      <InputLabel>Día</InputLabel>
-                      <Select
-                        label="Día"
-                        sx={{ height: 56 }}
-                        value={addFields.day}
+            {userPermissions.includes(PERMISSIONS.CREATE_SCHEDULES) && (
+              <Grid item xs={12} md={6}>
+                <Box
+                  display="flex"
+                  flexDirection={{ xs: "column", sm: "column", md: "row" }}
+                  alignItems="center"
+                  justifyContent="flex-end"
+                  gap={2}
+                >
+                  <Grid container spacing={2} alignItems="center">
+                    <Grid item xs={12} md={4}>
+                      <TextField
+                        label="Lugar"
+                        variant="outlined"
+                        fullWidth
+                        sx={{
+                          height: 56,
+                        }}
+                        value={addFields.label}
                         onChange={(e) =>
-                          setAddFields({ ...addFields, day: e.target.value })
+                          setAddFields({ ...addFields, label: e.target.value })
                         }
+                      />
+                    </Grid>
+                    <Grid item xs={6} md={4}>
+                      <FormControl
+                        variant="outlined"
+                        fullWidth
+                        sx={{
+                          height: 56,
+                        }}
                       >
-                        {getDayOptionsSpanish().map((option) => (
-                          <MenuItem key={option.value} value={option.value}>
-                            {option.label}
-                          </MenuItem>
-                        ))}
-                      </Select>
-                    </FormControl>
+                        <InputLabel>Día</InputLabel>
+                        <Select
+                          label="Día"
+                          sx={{ height: 56 }}
+                          value={addFields.day}
+                          onChange={(e) =>
+                            setAddFields({ ...addFields, day: e.target.value })
+                          }
+                        >
+                          {getDayOptionsSpanish().map((option) => (
+                            <MenuItem key={option.value} value={option.value}>
+                              {option.label}
+                            </MenuItem>
+                          ))}
+                        </Select>
+                      </FormControl>
+                    </Grid>
+                    <Grid item xs={6} md={4}>
+                      <TextField
+                        label="Horas"
+                        variant="outlined"
+                        type="number"
+                        fullWidth
+                        sx={{
+                          height: 56,
+                        }}
+                        value={addFields.hours}
+                        onChange={(e) =>
+                          setAddFields({ ...addFields, hours: e.target.value })
+                        }
+                      />
+                    </Grid>
                   </Grid>
-                  <Grid item xs={6} md={4}>
-                    <TextField
-                      label="Horas"
-                      variant="outlined"
-                      type="number"
-                      fullWidth
+                  <Tooltip title="Agregar Horario" arrow>
+                    <Box
                       sx={{
-                        height: 56,
-                      }}
-                      value={addFields.hours}
-                      onChange={(e) =>
-                        setAddFields({ ...addFields, hours: e.target.value })
-                      }
-                    />
-                  </Grid>
-                </Grid>
-                <Tooltip title="Agregar Horario" arrow>
-                  <Box
-                    sx={{
-                      width: { xs: "100%", md: "auto" },
-                      display: "flex",
-                      justifyContent: { xs: "stretch", md: "flex-end" },
-                    }}
-                  >
-                    <Button
-                      variant="contained"
-                      color="primary"
-                      sx={{
-                        minHeight: 56,
-                        display: "flex",
-                        justifyContent: "center",
-                        lineHeight: "normal",
                         width: { xs: "100%", md: "auto" },
+                        display: "flex",
+                        justifyContent: { xs: "stretch", md: "flex-end" },
                       }}
-                      onClick={handleAdd}
-                      disabled={!isAddFormValid}
                     >
-                      <PostAddRoundedIcon />
-                    </Button>
-                  </Box>
-                </Tooltip>
-              </Box>
-            </Grid>
+                      <Button
+                        variant="contained"
+                        color="primary"
+                        sx={{
+                          minHeight: 56,
+                          display: "flex",
+                          justifyContent: "center",
+                          lineHeight: "normal",
+                          width: { xs: "100%", md: "auto" },
+                        }}
+                        onClick={handleAdd}
+                        disabled={!isAddFormValid}
+                      >
+                        <PostAddRoundedIcon />
+                      </Button>
+                    </Box>
+                  </Tooltip>
+                </Box>
+              </Grid>
+            )}
           </Grid>
           <br />
           {filteredSchedules.length > 0 ? (
@@ -346,6 +361,7 @@ const SchedulesPage: React.FC = () => {
               setPage={setPage}
               setRowsPerPage={setRowsPerPage}
               isSaveDisabled={!isEditFormValid}
+              permissions={userPermissions}
             />
           ) : (
             <Box

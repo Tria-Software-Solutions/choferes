@@ -43,7 +43,6 @@ import {
   hasMultipleBiweeks,
   hasMultipleMonths,
   hasMultipleYears,
-  isValidDateForSelect,
 } from "../../../utils/dates";
 import {
   getMonthName,
@@ -59,6 +58,7 @@ import {
   STATE,
   TABLE,
   DEFAULT_SCHEDULE_VALUES,
+  PERMISSIONS,
 } from "../../../constants/constants";
 import InfoRoundedIcon from "@mui/icons-material/InfoRounded";
 import AccessTimeRoundedIcon from "@mui/icons-material/AccessTimeRounded";
@@ -81,6 +81,7 @@ interface SelectorTableProps {
     employeeId: number,
     date: Date
   ) => void;
+  permissions?: string[];
 }
 
 const SelectorTable: React.FC<SelectorTableProps> = React.memo(
@@ -97,6 +98,7 @@ const SelectorTable: React.FC<SelectorTableProps> = React.memo(
     month,
     year,
     handleChange,
+    permissions,
   }) => {
     const navigate = useNavigate();
     const [selectedPeriod, setSelectedPeriod] = useState<
@@ -533,7 +535,11 @@ const SelectorTable: React.FC<SelectorTableProps> = React.memo(
                             onChange={(event: SelectChangeEvent<string>) =>
                               handleChange(event, employee.id, new Date(date))
                             }
-                            disabled={!isValidDateForSelect(new Date(date))}
+                            disabled={
+                              !permissions?.includes(
+                                PERMISSIONS.EDIT_EMPLOYEE_ROLES
+                              )
+                            }
                           >
                             {sortedOptions.map((option, index) => {
                               const items = [

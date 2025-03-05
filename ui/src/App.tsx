@@ -19,60 +19,79 @@ import AppBarComponent from "./components/AppBar/AppBarComponent";
 import { AuthProvider, useAuth } from "./context/AuthContext";
 import ProtectedRoute from "./routes/ProtectedRoute";
 import { Container } from "@mui/material";
-import { APPBAR_MENU, ROUTES } from "./constants/constants";
+import { APPBAR_MENU, PERMISSIONS, ROUTES } from "./constants/constants";
 import CalendarMonthRoundedIcon from "@mui/icons-material/CalendarMonthRounded";
 import DirectionsCarIcon from "@mui/icons-material/DirectionsCar";
 import GroupRoundedIcon from "@mui/icons-material/GroupRounded";
 import EditCalendarRoundedIcon from "@mui/icons-material/EditCalendarRounded";
-import ManageAccountsIcon from '@mui/icons-material/ManageAccounts';
+import ManageAccountsIcon from "@mui/icons-material/ManageAccounts";
 import LogoutIcon from "@mui/icons-material/Logout";
 import wallpaper from "./assets/images/choferesblurred1.webp";
 
 const AppBarWrapper: React.FC = () => {
-  const { currentUser } = useAuth();
+  const { currentUser, userPermissions } = useAuth();
   const { logoutUser } = useUsers();
-  return (
-    <AppBarComponent
-      title={APPBAR_MENU.TITLE}
-      links={[
-        {
-          label: APPBAR_MENU.ROLES,
-          icon: <CalendarMonthRoundedIcon />,
-          path: ROUTES.ROLES,
-        },
-        {
-          label: APPBAR_MENU.EMPLOYEES,
-          icon: <GroupRoundedIcon />,
-          path: ROUTES.EMPLOYEES,
-        },
-        {
-          label: APPBAR_MENU.SCHEDULES,
-          icon: <EditCalendarRoundedIcon />,
-          path: ROUTES.SCHEDULES,
-        },
-        {
-          label: APPBAR_MENU.VEHICLES,
-          icon: <DirectionsCarIcon />,
-          path: ROUTES.VEHICLES,
-        },
-        {
-          label: APPBAR_MENU.DASHBOARD,
-          icon: <ManageAccountsIcon />,
-          path: ROUTES.DASHBOARD,
-        },
-        ...(currentUser
-          ? [
-              {
-                label: APPBAR_MENU.LOGOUT,
-                icon: <LogoutIcon />,
-                path: ROUTES.LOGIN,
-                onClick: logoutUser,
-              },
-            ]
-          : []),
-      ]}
-    />
-  );
+
+  const links = [
+    {
+      label: APPBAR_MENU.ROLES,
+      icon: <CalendarMonthRoundedIcon />,
+      path: ROUTES.ROLES,
+      permission: PERMISSIONS.VIEW_ROLES,
+    },
+    {
+      label: APPBAR_MENU.EMPLOYEES,
+      icon: <GroupRoundedIcon />,
+      path: ROUTES.EMPLOYEES,
+      permission: PERMISSIONS.VIEW_EMPLOYEES,
+    },
+    {
+      label: APPBAR_MENU.SCHEDULES,
+      icon: <EditCalendarRoundedIcon />,
+      path: ROUTES.SCHEDULES,
+      permission: PERMISSIONS.VIEW_SCHEDULES,
+    },
+    {
+      label: APPBAR_MENU.VEHICLES,
+      icon: <DirectionsCarIcon />,
+      path: ROUTES.VEHICLES,
+      permission: PERMISSIONS.VIEW_VEHICLES,
+    },
+    {
+      label: APPBAR_MENU.DASHBOARD,
+      icon: <ManageAccountsIcon />,
+      path: ROUTES.DASHBOARD,
+      permission: PERMISSIONS.VIEW_ADMIN,
+    },
+  ];
+
+  const permissionsMap = {
+    [APPBAR_MENU.ROLES]: PERMISSIONS.VIEW_ROLES,
+    [APPBAR_MENU.EMPLOYEES]: PERMISSIONS.VIEW_EMPLOYEES,
+    [APPBAR_MENU.SCHEDULES]: PERMISSIONS.VIEW_SCHEDULES,
+    [APPBAR_MENU.VEHICLES]: PERMISSIONS.VIEW_VEHICLES,
+    [APPBAR_MENU.DASHBOARD]: PERMISSIONS.VIEW_ADMIN,
+  };
+
+  const filteredLinks = links.filter((link) => {
+    return userPermissions.includes(permissionsMap[link.label]);
+  });
+
+  const finalLinks = [
+    ...filteredLinks,
+    ...(currentUser
+      ? [
+          {
+            label: APPBAR_MENU.LOGOUT,
+            icon: <LogoutIcon />,
+            path: ROUTES.LOGIN,
+            onClick: logoutUser,
+          },
+        ]
+      : []),
+  ];
+
+  return <AppBarComponent title={APPBAR_MENU.TITLE} links={finalLinks} />;
 };
 
 const AppContent: React.FC = () => {
