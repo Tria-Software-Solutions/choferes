@@ -35,7 +35,7 @@ import DeleteIcon from "@mui/icons-material/Delete";
 import EditIcon from "@mui/icons-material/Edit";
 import SaveIcon from "@mui/icons-material/Save";
 import CloseIcon from "@mui/icons-material/Close";
-import PaginationActions from "../PaginationActions";
+import PaginationActions from "../Pagination/PaginationActions";
 
 type EditableTableProps<T> = {
   data: T[];
