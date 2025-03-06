@@ -1,6 +1,6 @@
 export enum Roles {
-  SUPERADMINISTRATOR = 1,
-  ADMINISTRATOR = 2,
-  COORDINATOR = 3,
+  MANAGER = 1,
+  ADMINISTRATIVE = 2,
+  SUPERVISOR = 3,
   USER = 4,
 }

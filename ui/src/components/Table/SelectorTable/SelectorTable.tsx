@@ -63,6 +63,7 @@ import {
 import InfoRoundedIcon from "@mui/icons-material/InfoRounded";
 import AccessTimeRoundedIcon from "@mui/icons-material/AccessTimeRounded";
 import AddIcon from "@mui/icons-material/Add";
+import PaginationActions from "../PaginationActions";
 
 interface SelectorTableProps {
   filteredEmployees: Employee[];
@@ -708,7 +709,7 @@ const SelectorTable: React.FC<SelectorTableProps> = React.memo(
           )}
           <TablePagination
             className="pagination"
-            rowsPerPageOptions={[5, 10, 25]}
+            rowsPerPageOptions={[5, 10, 25, 50, 100]}
             component="div"
             count={sortedEmployees.length}
             rowsPerPage={rowsPerPage}
@@ -719,6 +720,8 @@ const SelectorTable: React.FC<SelectorTableProps> = React.memo(
               setPage(0);
             }}
             labelRowsPerPage={TABLE.ROWS_PER_PAGE}
+            labelDisplayedRows={() => ""} 
+            ActionsComponent={PaginationActions}
           />
         </Box>
       </Paper>

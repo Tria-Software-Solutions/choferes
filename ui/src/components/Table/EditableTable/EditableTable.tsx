@@ -35,6 +35,7 @@ import DeleteIcon from "@mui/icons-material/Delete";
 import EditIcon from "@mui/icons-material/Edit";
 import SaveIcon from "@mui/icons-material/Save";
 import CloseIcon from "@mui/icons-material/Close";
+import PaginationActions from "../PaginationActions";
 
 type EditableTableProps<T> = {
   data: T[];
@@ -366,7 +367,7 @@ const EditableTable = <T,>({
       <Divider />
       <TablePagination
         className="pagination"
-        rowsPerPageOptions={[5, 10, 25]}
+        rowsPerPageOptions={[5, 10, 25, 50, 100]}
         component="div"
         count={totalCount}
         rowsPerPage={rowsPerPage}
@@ -377,6 +378,8 @@ const EditableTable = <T,>({
           setPage(0);
         }}
         labelRowsPerPage={TABLE.ROWS_PER_PAGE}
+        labelDisplayedRows={() => ""} 
+        ActionsComponent={PaginationActions}
       />
     </Paper>
   );

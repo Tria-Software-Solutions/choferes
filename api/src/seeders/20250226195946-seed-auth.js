@@ -181,14 +181,14 @@ module.exports = {
       },
     ]);
     await queryInterface.bulkInsert("roles", [
-      { id: 1, name: "Super Administrador", createdAt: new Date(), updatedAt: new Date() },
-      { id: 2, name: "Administrador", createdAt: new Date(), updatedAt: new Date() },
+      { id: 1, name: "Gerencia", createdAt: new Date(), updatedAt: new Date() },
       {
-        id: 3,
-        name: "Coordinador",
+        id: 2,
+        name: "Administrativo",
         createdAt: new Date(),
         updatedAt: new Date(),
       },
+      { id: 3, name: "Supervisor", createdAt: new Date(), updatedAt: new Date() },
       { id: 4, name: "Usuario", createdAt: new Date(), updatedAt: new Date() },
     ]);
     await queryInterface.bulkInsert("role_permission", [
@@ -404,24 +404,6 @@ module.exports = {
       },
       {
         roleId: 2,
-        permissionId: 7,
-        createdAt: new Date(),
-        updatedAt: new Date(),
-      },
-      {
-        roleId: 2,
-        permissionId: 8,
-        createdAt: new Date(),
-        updatedAt: new Date(),
-      },
-      {
-        roleId: 2,
-        permissionId: 9,
-        createdAt: new Date(),
-        updatedAt: new Date(),
-      },
-      {
-        roleId: 2,
         permissionId: 10,
         createdAt: new Date(),
         updatedAt: new Date(),
@@ -435,24 +417,6 @@ module.exports = {
       {
         roleId: 2,
         permissionId: 12,
-        createdAt: new Date(),
-        updatedAt: new Date(),
-      },
-      {
-        roleId: 2,
-        permissionId: 13,
-        createdAt: new Date(),
-        updatedAt: new Date(),
-      },
-      {
-        roleId: 2,
-        permissionId: 14,
-        createdAt: new Date(),
-        updatedAt: new Date(),
-      },
-      {
-        roleId: 2,
-        permissionId: 15,
         createdAt: new Date(),
         updatedAt: new Date(),
       },
@@ -476,24 +440,6 @@ module.exports = {
       },
       {
         roleId: 2,
-        permissionId: 19,
-        createdAt: new Date(),
-        updatedAt: new Date(),
-      },
-      {
-        roleId: 2,
-        permissionId: 20,
-        createdAt: new Date(),
-        updatedAt: new Date(),
-      },
-      {
-        roleId: 2,
-        permissionId: 21,
-        createdAt: new Date(),
-        updatedAt: new Date(),
-      },
-      {
-        roleId: 2,
         permissionId: 22,
         createdAt: new Date(),
         updatedAt: new Date(),
@@ -501,12 +447,6 @@ module.exports = {
       {
         roleId: 2,
         permissionId: 23,
-        createdAt: new Date(),
-        updatedAt: new Date(),
-      },
-      {
-        roleId: 2,
-        permissionId: 24,
         createdAt: new Date(),
         updatedAt: new Date(),
       },
@@ -598,9 +538,29 @@ module.exports = {
         id: 2,
         firstName: "Daniela",
         lastName: "Miranda",
-        email: "danielamirandamurillo@gmail.com",
+        email: "info@choferesdealquiler.com",
         username: "danilumix",
+        password: await bcrypt.hash("Gerencia123$", 10),
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      },
+      {
+        id: 3,
+        firstName: "Damaris",
+        lastName: "Arias",
+        email: "administrativo@choferesdealquiler.com",
+        username: "damarisa",
         password: await bcrypt.hash("Admin123$", 10),
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      },
+      {
+        id: 4,
+        firstName: "Carlos",
+        lastName: "Caamaño",
+        email: "servicioalcliente@choferesdealquiler.com",
+        username: "carlosc",
+        password: await bcrypt.hash("678900CS$", 10), 
         createdAt: new Date(),
         updatedAt: new Date(),
       },
@@ -608,6 +568,8 @@ module.exports = {
     await queryInterface.bulkInsert("user_role", [
       { userId: 1, roleId: 1, createdAt: new Date(), updatedAt: new Date() },
       { userId: 2, roleId: 1, createdAt: new Date(), updatedAt: new Date() },
+      { userId: 3, roleId: 2, createdAt: new Date(), updatedAt: new Date() },
+      { userId: 4, roleId: 3, createdAt: new Date(), updatedAt: new Date() },
     ]);
   },
 
