@@ -63,7 +63,7 @@ import {
 import InfoRoundedIcon from "@mui/icons-material/InfoRounded";
 import AccessTimeRoundedIcon from "@mui/icons-material/AccessTimeRounded";
 import AddIcon from "@mui/icons-material/Add";
-import PaginationActions from "../PaginationActions";
+import PaginationActions from "../Pagination/PaginationActions";
 
 interface SelectorTableProps {
   filteredEmployees: Employee[];
