@@ -87,10 +87,6 @@ const EditableTable = <T,>({
 }: EditableTableProps<T>) => {
   const [order, setOrder] = useState<"asc" | "desc">("asc");
   const [orderBy, setOrderBy] = useState<keyof T>(columns[0]);
-  const [searchTerms, setSearchTerms] = useState<{ [key: string]: string }>({});
-  const [filteredOptions, setFilteredOptions] = useState<{
-    [key: string]: any[];
-  }>({});
 
   const hasEditPermissions =
     permissions?.includes(PERMISSIONS.EDIT_EMPLOYEES) ||
@@ -112,29 +108,6 @@ const EditableTable = <T,>({
   ) => {
     setPage(newPage);
   };
-
-  const handleSearchChange = (
-    column: string,
-    event: React.SyntheticEvent<Element, Event> | null
-  ) => {
-    if (event) {
-      const inputEvent = event as React.ChangeEvent<HTMLInputElement>;
-      const value = inputEvent.target.value;
-      setSearchTerms((prev) => ({
-        ...prev,
-        [column]: value,
-      }));
-      const filtered = columnConfig[String(column)]?.options?.filter((option) => {
-        const label = option.label || ''; 
-        return label.toLowerCase().includes(value.toLowerCase());
-      });
-      setFilteredOptions((prev) => ({
-        ...prev,
-        [column]: filtered || [],
-      }));
-    }
-  };
-  
 
   const renderEditField = (column: keyof T, value: string) => {
     const config = columnConfig[String(column)];
@@ -192,46 +165,32 @@ const EditableTable = <T,>({
 
     if (config.type === "autocomplete" && config.options) {
       const selectedValue = editFields[String(column)] || "";
-      const filtered = filteredOptions[String(column)] || [];
-
-      console.log("selectedValue: ", selectedValue);
-      console.log("editFields: ", editFields);
-      console.log("filtered: ", filtered);
+      const selectedOption =
+        config.options?.find((opt) => opt.value === selectedValue) || null;
 
       return (
-        <FormControl variant="outlined" fullWidth>
-          <Autocomplete
-            value={
-              selectedValue
-                ? { value: selectedValue, label: selectedValue }
-                : null
-            }
-            onChange={(event, newValue) => {
-              if (newValue) {
-                setEditField && setEditField(String(column), newValue.value);
-              } else {
-                setEditField && setEditField(String(column), "");
-              }
-            }}
-            inputValue={searchTerms[String(column)] || ""}
-            onInputChange={(event, newInputValue) => {
-              if (event) {
-                handleSearchChange(String(column), event);
-              }
-            }}
-            options={filtered}
-            getOptionLabel={(option) => option.label}
-            renderInput={(params) => (
-              <TextField
-                {...params}
-                label={translateColumnHeaderToSpanish(column)}
-                variant="outlined"
-                fullWidth
-                placeholder={`Buscar ${translateColumnHeaderToSpanish(column)}`}
-              />
-            )}
-          />
-        </FormControl>
+        <Autocomplete
+          value={selectedOption}
+          onChange={(event, newValue) => {
+            setEditField &&
+              setEditField(String(column), newValue ? newValue.value : "");
+          }}
+          inputValue={undefined}
+          onInputChange={(event, newInputValue) => {
+            if (!event) return;
+          }}
+          options={config.options || []}
+          getOptionLabel={(option) => option.label}
+          renderInput={(params) => (
+            <TextField
+              {...params}
+              label={translateColumnHeaderToSpanish(column)}
+              variant="outlined"
+              fullWidth
+              placeholder={`Buscar ${translateColumnHeaderToSpanish(column)}`}
+            />
+          )}
+        />
       );
     }
 
