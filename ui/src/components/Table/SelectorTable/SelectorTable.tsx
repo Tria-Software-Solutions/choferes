@@ -419,7 +419,9 @@ const SelectorTable: React.FC<SelectorTableProps> = React.memo(
                     )} ${formatHeaderDate(date)}`}
                   </TableCell>
                 ))}
-                {permissions?.includes(PERMISSIONS.VIEW_EMPLOYEE_ROLES_HOURS) && (
+                {permissions?.includes(
+                  PERMISSIONS.VIEW_EMPLOYEE_ROLES_HOURS
+                ) && (
                   <TableCell
                     align="center"
                     sx={{
@@ -581,7 +583,9 @@ const SelectorTable: React.FC<SelectorTableProps> = React.memo(
                       </TableCell>
                     );
                   })}
-                  {permissions?.includes(PERMISSIONS.VIEW_EMPLOYEE_ROLES_HOURS) && (
+                  {permissions?.includes(
+                    PERMISSIONS.VIEW_EMPLOYEE_ROLES_HOURS
+                  ) && (
                     <TableCell
                       align="left"
                       sx={{
@@ -719,8 +723,8 @@ const SelectorTable: React.FC<SelectorTableProps> = React.memo(
               setRowsPerPage(parseInt(event.target.value, 10));
               setPage(0);
             }}
-            labelRowsPerPage={TABLE.ROWS_PER_PAGE}
-            labelDisplayedRows={() => ""} 
+            labelRowsPerPage={<Typography variant="body2" component="span">{TABLE.ROWS_PER_PAGE}</Typography>}
+            labelDisplayedRows={() => ""}
             ActionsComponent={PaginationActions}
           />
         </Box>

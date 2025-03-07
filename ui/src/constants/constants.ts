@@ -28,7 +28,7 @@ export const PERMISSIONS = {
   CREATE_ROLE: "Crear Rol",
   EDIT_ROLE: "Editar Rol",
   DELETE_ROLE: "Eliminar Rol",
-}
+};
 
 export const DAYS = {
   WEEKDAY: "weekday",
@@ -54,7 +54,7 @@ export const ROUTES = {
   VEHICLES: "/vehicles",
   EMPLOYEES: "/employees",
   SCHEDULES: "/schedules",
-  DASHBOARD: "/dashboard"
+  DASHBOARD: "/dashboard",
 };
 
 export const PAGE_TITLE = {
@@ -64,7 +64,7 @@ export const PAGE_TITLE = {
   VEHICLES: "Gestionar Vehículos",
   EMPLOYEES: "Gestionar Empleados",
   SCHEDULES: "Gestionar Horarios",
-  DASHBOARD: "Panel de Administración"
+  DASHBOARD: "Panel de Administración",
 };
 
 export const STATE = {
@@ -90,7 +90,7 @@ export const DEFAULT_SCHEDULE_VALUES = [
   "Salida Programada",
 ];
 
-export const COLORS = [
+export const COLORS_LIST = [
   { value: "Blanco", label: "Blanco" },
   { value: "Negro", label: "Negro" },
   { value: "Gris", label: "Gris" },
@@ -112,7 +112,7 @@ export const COLORS = [
   { value: "Champán", label: "Champán" },
 ];
 
-export const BRANDS = [
+export const BRANDS_LIST = [
   { value: "Acura", label: "Acura" },
   { value: "Alfa Romeo", label: "Alfa Romeo" },
   { value: "Aston Martin", label: "Aston Martin" },
@@ -176,4 +176,55 @@ export const BRANDS = [
   { value: "Volvo", label: "Volvo" },
   { value: "Wuling", label: "Wuling" },
   { value: "Xpeng", label: "Xpeng" },
+];
+
+export const ROLES_LIST = [
+  { value: "Gerencia", label: "Gerencia" },
+  { value: "Administrativo", label: "Administrativo" },
+  { value: "Supervisor", label: "Supervisor" },
+  { value: "Usuario", label: "Usuario" },
+];
+
+export const PERMISSIONS_LIST = [
+  { value: "Ver Roles", label: "Ver Roles" },
+  { value: "Ver Horas de Empleados", label: "Ver Horas de Empleados" },
+  { value: "Editar Roles de Empleados", label: "Editar Roles de Empleados" },
+  {
+    value: "Exportar Excel de Roles de Empleados",
+    label: "Exportar Excel de Roles de Empleados",
+  },
+  {
+    value: "Exportar PDF de Roles de Empleados",
+    label: "Exportar PDF de Roles de Empleados",
+  },
+  { value: "Ver Empleados", label: "Ver Empleados" },
+  { value: "Crear Empleado", label: "Crear Empleado" },
+  { value: "Editar Empleado", label: "Editar Empleado" },
+  { value: "Eliminar Empleado", label: "Eliminar Empleado" },
+  {
+    value: "Exportar Excel de Empleados",
+    label: "Exportar Excel de Empleados",
+  },
+  { value: "Exportar PDF de Empleados", label: "Exportar PDF de Empleados" },
+  { value: "Ver Horarios", label: "Ver Horarios" },
+  { value: "Crear Horario", label: "Crear Horario" },
+  { value: "Editar Horario", label: "Editar Horario" },
+  { value: "Eliminar Horario", label: "Eliminar Horario" },
+  { value: "Exportar Excel de Horarios", label: "Exportar Excel de Horarios" },
+  { value: "Exportar PDF de Horarios", label: "Exportar PDF de Horarios" },
+  { value: "Ver Vehículos", label: "Ver Vehículos" },
+  { value: "Crear Vehículo", label: "Crear Vehículo" },
+  { value: "Editar Vehículo", label: "Editar Vehículo" },
+  { value: "Eliminar Vehículo", label: "Eliminar Vehículo" },
+  {
+    value: "Exportar Excel de Vehículos",
+    label: "Exportar Excel de Vehículos",
+  },
+  { value: "Exportar PDF de Vehículos", label: "Exportar PDF de Vehículos" },
+  { value: "Ver Admin", label: "Ver Admin" },
+  { value: "Editar Usuario", label: "Editar Usuario" },
+  { value: "Eliminar Usuario", label: "Eliminar Usuario" },
+  { value: "Crear Rol", label: "Crear Rol" },
+  { value: "Editar Rol", label: "Editar Rol" },
+  { value: "Eliminar Rol", label: "Eliminar Rol" },
 ];

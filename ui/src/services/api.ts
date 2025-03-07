@@ -11,7 +11,7 @@ const api = axios.create({
 
 api.interceptors.request.use(
   (config) => {
-    const token = sessionStorage.getItem("token"); 
+    const token = sessionStorage.getItem("token");
     if (token) {
       config.headers["Authorization"] = `Bearer ${token}`;
     }
@@ -19,5 +19,22 @@ api.interceptors.request.use(
   },
   (error) => Promise.reject(error)
 );
+
+api.interceptors.response.use(
+  (response) => response,
+  (error) => {
+    if (error.response && error.response.status === 401) {
+      logoutUser();
+    }
+    return Promise.reject(error);
+  }
+);
+
+const logoutUser = () => {
+  sessionStorage.removeItem("currentUser");
+  sessionStorage.removeItem("token");
+  sessionStorage.removeItem("userPermissions");
+  window.location.href = "/";
+};
 
 export default api;

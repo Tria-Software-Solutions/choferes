@@ -2,7 +2,6 @@ import React, { useState, useEffect, useCallback } from "react";
 import { useAuth } from "../../context/AuthContext";
 import { Role } from "../../models/Role";
 import { useRoles } from "../../hooks/useRole";
-import { getRoles } from "../../services/roleService";
 import {
   Backdrop,
   Box,
@@ -20,14 +19,18 @@ import SearchBar from "../../components/SearchBar/SearchBar";
 
 const ManageRoles = () => {
   const { userPermissions } = useAuth();
-  const { isLoadingRoles, updateRole, deleteRole } = useRoles();
-  const [roles, setRoles] = useState<Role[]>([]);
+  const { roles, isLoadingRoles, updateRole, deleteRole } = useRoles();
   const [filteredRoles, setFilteredRoles] = useState<Role[]>([]);
   const [totalCount, setTotalCount] = useState(0);
   const [editRowId, setEditRowId] = useState<number | null>(null);
-  const [editFields, setEditFields] = useState({
+  const [editFields, setEditFields] = useState<{
+    name: string;
+    permissionName: string[];
+  }>({
     name: "",
+    permissionName: [],
   });
+
   const [dialogOpen, setDialogOpen] = useState(false);
   const [roleToDelete, setRoleToDelete] = useState<number | null>(null);
   const [filter, setFilter] = useState("");
@@ -36,27 +39,24 @@ const ManageRoles = () => {
   const [isEditFormValid, setIsEditFormValid] = useState(false);
 
   useEffect(() => {
-    const getAllRoles = async () => {
-      const fetchedRoles = await getRoles();
-      setRoles(fetchedRoles);
-    };
-
-    getAllRoles();
-  }, []);
-
-  useEffect(() => {
     const normalizeString = (str: string) =>
       str.normalize("NFD").replace(/[\u0300-\u036f]/g, "");
 
-    setFilteredRoles(
-      roles.filter((role) =>
+    const filtered = roles
+      .filter((role) =>
         normalizeString(`${role.name}`)
           .toLowerCase()
           .includes(normalizeString(filter).toLowerCase())
       )
-    );
-    setTotalCount(filteredRoles.length);
-  }, [filter, roles, filteredRoles.length]);
+      .map((role) => ({
+        ...role,
+        rolePermissions:
+          role.Permissions?.map((permission) => permission.name).join(", ") ||
+          "Sin permisos",
+      }));
+    setFilteredRoles(filtered);
+    setTotalCount(filtered.length);
+  }, [filter, roles]);
 
   const validateFields = useCallback((fields: typeof editFields) => {
     const regex = {
@@ -78,6 +78,7 @@ const ManageRoles = () => {
     setEditRowId(role.id);
     setEditFields({
       name: role.name,
+      permissionName: role.Permissions.map((permission) => permission.name),
     });
   };
 
@@ -86,12 +87,23 @@ const ManageRoles = () => {
   };
 
   const handleSaveClick = (id: number) => {
-    const updatedUser = {
-      ...editFields,
+    const updatedRole = {
+      id,
+      name: editFields.name,
+      Permissions: editFields.permissionName.map((permissionName) => {
+        const existingPermission = roles
+          .find((role) => role.id === id)
+          ?.Permissions.find(
+            (permission) => permission.name === permissionName.trim()
+          );
+        return existingPermission
+          ? { id: existingPermission.id, name: permissionName.trim() }
+          : { id: 0, name: permissionName.trim() };
+      }),
     };
-    updateRole(id, updatedUser);
+    updateRole(id, updatedRole);
     setEditRowId(null);
-    setEditFields({ name: "" });
+    setEditFields({ name: "", permissionName: [] });
   };
 
   const handleOpenDialog = (id: number) => {
@@ -110,8 +122,6 @@ const ManageRoles = () => {
       handleCloseDialog();
     }
   };
-
-  console.log("filteredRoles: ", filteredRoles);
 
   return (
     <Box>
@@ -147,9 +157,12 @@ const ManageRoles = () => {
               </Box>
               <EditableTable<Role>
                 data={filteredRoles}
-                columns={["name"]}
+                columns={["name", "permissionName"]}
                 editRowId={editRowId}
-                editFields={editFields}
+                editFields={{
+                  ...editFields,
+                  permissionName: editFields.permissionName.join(", "),
+                }}
                 setEditField={(field, value) =>
                   setEditFields({ ...editFields, [field]: value })
                 }

@@ -19,4 +19,5 @@ export type ColumnsTranslation = {
   updatedAt: string;
   // RELATION COLUMNS
   roleName: string;
+  permissionName: string;
 };
