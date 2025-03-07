@@ -11,19 +11,19 @@ router.get("/:id", authenticateToken, hoursWorkedController.getHoursWorkedById);
 router.post(
   "/",
   authenticateToken,
-  authorizeRole([Roles.MANAGER, Roles.ADMINISTRATIVE]),
+  authorizeRole([Roles.MANAGER, Roles.ADMINISTRATIVE, Roles.SUPERVISOR]),
   hoursWorkedController.createHoursWorked
 );
 router.put(
   "/:id",
   authenticateToken,
-  authorizeRole([Roles.MANAGER, Roles.ADMINISTRATIVE]),
+  authorizeRole([Roles.MANAGER, Roles.ADMINISTRATIVE, Roles.SUPERVISOR]),
   hoursWorkedController.updateHoursWorked
 );
 router.delete(
   "/:id",
   authenticateToken,
-  authorizeRole([Roles.MANAGER, Roles.ADMINISTRATIVE]),
+  authorizeRole([Roles.MANAGER, Roles.ADMINISTRATIVE, Roles.SUPERVISOR]),
   hoursWorkedController.deleteHoursWorked
 );
 
