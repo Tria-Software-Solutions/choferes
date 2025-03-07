@@ -2,6 +2,7 @@ import express from "express";
 import * as userController from "../controllers/userController";
 import { authenticateToken } from "../middleware/authMiddleware";
 import { authorizeRole } from "../middleware/roleMiddleware";
+import { Roles } from "../enums/roles";
 
 const router = express.Router();
 
@@ -14,7 +15,7 @@ router.post("/register", userController.createUser);
 router.delete(
   "/:id",
   authenticateToken,
-  authorizeRole(["Super Administrador"]),
+  authorizeRole([Roles.MANAGER]),
   userController.deleteUser
 );
 

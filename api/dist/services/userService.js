@@ -20,6 +20,7 @@ const jsonwebtoken_1 = __importDefault(require("jsonwebtoken"));
 const Permission_1 = require("../models/Permission");
 const SECRET_KEY = process.env.JWT_SECRET_KEY || "default_secret";
 const authenticateUser = (username, password) => __awaiter(void 0, void 0, void 0, function* () {
+    var _a, _b;
     if (!SECRET_KEY)
         throw new Error("JWT_SECRET_KEY is not set");
     const user = yield User_1.User.findOne({
@@ -36,7 +37,7 @@ const authenticateUser = (username, password) => __awaiter(void 0, void 0, void 
     const isMatch = yield bcrypt_1.default.compare(password, user.password);
     if (!isMatch)
         throw new Error("Incorrect password");
-    const token = jsonwebtoken_1.default.sign({ userId: user.id }, SECRET_KEY, {
+    const token = jsonwebtoken_1.default.sign({ userId: user.id, role: (_b = (_a = user.Roles) === null || _a === void 0 ? void 0 : _a[0]) === null || _b === void 0 ? void 0 : _b.name }, SECRET_KEY, {
         expiresIn: "1h",
     });
     return { user, token };
