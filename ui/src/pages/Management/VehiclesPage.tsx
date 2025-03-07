@@ -148,6 +148,10 @@ const VehiclesPage: React.FC = () => {
     if (editRowId !== null) setIsEditFormValid(validateFields(editFields));
   }, [editFields, editRowId, validateFields]);
 
+  useEffect(() => {
+    setPage(0);
+  }, [selectedDate]);
+
   const handleFilterChange = useCallback(
     (e: React.ChangeEvent<HTMLInputElement>) => {
       setFilter(e.target.value);
@@ -602,25 +606,27 @@ const VehiclesPage: React.FC = () => {
                             } else {
                               setAddFields((prev) => ({ ...prev, brand: "" }));
                             }
+                            setSearchBrandTerm("");
+                            setFilteredBrands(BRANDS_LIST);
                           }}
                           inputValue={searchBrandTerm}
                           onInputChange={handleSearchChangeBrand}
                           options={filteredBrands}
                           getOptionLabel={(option) => option.label}
+                          noOptionsText="Sin coincidencias"
                           renderInput={(params) => (
                             <TextField
                               {...params}
                               label="Marca"
                               variant="outlined"
                               fullWidth
-                              placeholder="Buscar Marca"
                             />
                           )}
                         />
                       </FormControl>
                     </Grid>
                     <Grid item xs={12} sm={6} md={2}>
-                    <FormControl variant="outlined" fullWidth>
+                      <FormControl variant="outlined" fullWidth>
                         <Autocomplete
                           value={
                             addFields.color
@@ -639,18 +645,20 @@ const VehiclesPage: React.FC = () => {
                             } else {
                               setAddFields((prev) => ({ ...prev, color: "" }));
                             }
+                            setSearchColorTerm("");
+                            setFilteredColors(COLORS_LIST);
                           }}
                           inputValue={searchColorTerm}
                           onInputChange={handleSearchChangeColor}
                           options={filteredColors}
                           getOptionLabel={(option) => option.label}
+                          noOptionsText="Sin coincidencias"
                           renderInput={(params) => (
                             <TextField
                               {...params}
                               label="Color"
                               variant="outlined"
                               fullWidth
-                              placeholder="Buscar Color"
                             />
                           )}
                         />
