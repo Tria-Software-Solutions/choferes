@@ -17,6 +17,7 @@ import {
   IconButton,
   Divider,
   Box,
+  Autocomplete,
 } from "@mui/material";
 import {
   translateColumnHeaderToSpanish,
@@ -86,6 +87,10 @@ const EditableTable = <T,>({
 }: EditableTableProps<T>) => {
   const [order, setOrder] = useState<"asc" | "desc">("asc");
   const [orderBy, setOrderBy] = useState<keyof T>(columns[0]);
+  const [searchTerms, setSearchTerms] = useState<{ [key: string]: string }>({});
+  const [filteredOptions, setFilteredOptions] = useState<{
+    [key: string]: any[];
+  }>({});
 
   const hasEditPermissions =
     permissions?.includes(PERMISSIONS.EDIT_EMPLOYEES) ||
@@ -107,6 +112,29 @@ const EditableTable = <T,>({
   ) => {
     setPage(newPage);
   };
+
+  const handleSearchChange = (
+    column: string,
+    event: React.SyntheticEvent<Element, Event> | null
+  ) => {
+    if (event) {
+      const inputEvent = event as React.ChangeEvent<HTMLInputElement>;
+      const value = inputEvent.target.value;
+      setSearchTerms((prev) => ({
+        ...prev,
+        [column]: value,
+      }));
+      const filtered = columnConfig[String(column)]?.options?.filter((option) => {
+        const label = option.label || ''; 
+        return label.toLowerCase().includes(value.toLowerCase());
+      });
+      setFilteredOptions((prev) => ({
+        ...prev,
+        [column]: filtered || [],
+      }));
+    }
+  };
+  
 
   const renderEditField = (column: keyof T, value: string) => {
     const config = columnConfig[String(column)];
@@ -158,6 +186,51 @@ const EditableTable = <T,>({
               {!hasOtroOption && <MenuItem value="Otro">Otro</MenuItem>}
             </Select>
           )}
+        </FormControl>
+      );
+    }
+
+    if (config.type === "autocomplete" && config.options) {
+      const selectedValue = editFields[String(column)] || "";
+      const filtered = filteredOptions[String(column)] || [];
+
+      console.log("selectedValue: ", selectedValue);
+      console.log("editFields: ", editFields);
+      console.log("filtered: ", filtered);
+
+      return (
+        <FormControl variant="outlined" fullWidth>
+          <Autocomplete
+            value={
+              selectedValue
+                ? { value: selectedValue, label: selectedValue }
+                : null
+            }
+            onChange={(event, newValue) => {
+              if (newValue) {
+                setEditField && setEditField(String(column), newValue.value);
+              } else {
+                setEditField && setEditField(String(column), "");
+              }
+            }}
+            inputValue={searchTerms[String(column)] || ""}
+            onInputChange={(event, newInputValue) => {
+              if (event) {
+                handleSearchChange(String(column), event);
+              }
+            }}
+            options={filtered}
+            getOptionLabel={(option) => option.label}
+            renderInput={(params) => (
+              <TextField
+                {...params}
+                label={translateColumnHeaderToSpanish(column)}
+                variant="outlined"
+                fullWidth
+                placeholder={`Buscar ${translateColumnHeaderToSpanish(column)}`}
+              />
+            )}
+          />
         </FormControl>
       );
     }
@@ -219,14 +292,14 @@ const EditableTable = <T,>({
   const columnConfig: Record<
     string,
     {
-      type: "text" | "select" | "masked";
+      type: "text" | "select" | "autocomplete" | "masked";
       options?: { value: string; label: string }[];
     }
   > = {
     licensePlate: { type: "masked" },
     parkingLot: { type: "masked" },
-    brand: { type: "select", options: BRANDS },
-    color: { type: "select", options: COLORS },
+    brand: { type: "autocomplete", options: BRANDS },
+    color: { type: "autocomplete", options: COLORS },
     day: { type: "select", options: getDayOptionsSpanish() },
   };
 
@@ -378,7 +451,7 @@ const EditableTable = <T,>({
           setPage(0);
         }}
         labelRowsPerPage={TABLE.ROWS_PER_PAGE}
-        labelDisplayedRows={() => ""} 
+        labelDisplayedRows={() => ""}
         ActionsComponent={PaginationActions}
       />
     </Paper>
