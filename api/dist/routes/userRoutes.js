@@ -40,6 +40,7 @@ const express_1 = __importDefault(require("express"));
 const userController = __importStar(require("../controllers/userController"));
 const authMiddleware_1 = require("../middleware/authMiddleware");
 const roleMiddleware_1 = require("../middleware/roleMiddleware");
+const roles_1 = require("../enums/roles");
 const router = express_1.default.Router();
 router.post("/login", userController.authenticateUser);
 router.get("/", authMiddleware_1.authenticateToken, userController.getUsers);
@@ -47,5 +48,5 @@ router.get("/:id", authMiddleware_1.authenticateToken, userController.getUserByI
 router.get("/username/:username", userController.getUserByUsername);
 router.get("/:id/permissions", userController.getUserPermissions);
 router.post("/register", userController.createUser);
-router.delete("/:id", authMiddleware_1.authenticateToken, (0, roleMiddleware_1.authorizeRole)(["Super Administrador"]), userController.deleteUser);
+router.delete("/:id", authMiddleware_1.authenticateToken, (0, roleMiddleware_1.authorizeRole)([roles_1.Roles.MANAGER]), userController.deleteUser);
 exports.default = router;

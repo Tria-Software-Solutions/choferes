@@ -2,6 +2,7 @@ import express from "express";
 import * as vehicleController from "../controllers/vehicleController";
 import { authenticateToken } from "../middleware/authMiddleware";
 import { authorizeRole } from "../middleware/roleMiddleware";
+import { Roles } from "../enums/roles";
 
 const router = express.Router();
 
@@ -11,19 +12,19 @@ router.get("/:id", authenticateToken, vehicleController.getVehicleById);
 router.post(
   "/",
   authenticateToken,
-  authorizeRole(["Super Administrador, Administrador"]),
+  authorizeRole([Roles.MANAGER, Roles.ADMINISTRATIVE]),
   vehicleController.createVehicle
 );
 router.put(
   "/:id",
   authenticateToken,
-  authorizeRole(["Super Administrador, Administrador"]),
+  authorizeRole([Roles.MANAGER, Roles.ADMINISTRATIVE]),
   vehicleController.updateVehicle
 );
 router.delete(
   "/:id",
   authenticateToken,
-  authorizeRole(["Super Administrador, Administrador"]),
+  authorizeRole([Roles.MANAGER, Roles.ADMINISTRATIVE]),
   vehicleController.deleteVehicle
 );
 
