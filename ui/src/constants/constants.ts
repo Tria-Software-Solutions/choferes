@@ -110,7 +110,6 @@ export const COLORS = [
   { value: "Celeste", label: "Celeste" },
   { value: "Bronce", label: "Bronce" },
   { value: "Champán", label: "Champán" },
-  { value: "Otro", label: "Otro" },
 ];
 
 export const BRANDS = [
@@ -177,5 +176,4 @@ export const BRANDS = [
   { value: "Volvo", label: "Volvo" },
   { value: "Wuling", label: "Wuling" },
   { value: "Xpeng", label: "Xpeng" },
-  { value: "Otro", label: "Otro" },
 ];

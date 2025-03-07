@@ -17,6 +17,7 @@ import {
   IconButton,
   Divider,
   Box,
+  Autocomplete,
 } from "@mui/material";
 import {
   translateColumnHeaderToSpanish,
@@ -35,6 +36,7 @@ import DeleteIcon from "@mui/icons-material/Delete";
 import EditIcon from "@mui/icons-material/Edit";
 import SaveIcon from "@mui/icons-material/Save";
 import CloseIcon from "@mui/icons-material/Close";
+import PaginationActions from "../Pagination/PaginationActions";
 
 type EditableTableProps<T> = {
   data: T[];
@@ -161,6 +163,37 @@ const EditableTable = <T,>({
       );
     }
 
+    if (config.type === "autocomplete" && config.options) {
+      const selectedValue = editFields[String(column)] || "";
+      const selectedOption =
+        config.options?.find((opt) => opt.value === selectedValue) || null;
+
+      return (
+        <Autocomplete
+          value={selectedOption}
+          onChange={(event, newValue) => {
+            setEditField &&
+              setEditField(String(column), newValue ? newValue.value : "");
+          }}
+          inputValue={undefined}
+          onInputChange={(event, newInputValue) => {
+            if (!event) return;
+          }}
+          options={config.options || []}
+          getOptionLabel={(option) => option.label}
+          renderInput={(params) => (
+            <TextField
+              {...params}
+              label={translateColumnHeaderToSpanish(column)}
+              variant="outlined"
+              fullWidth
+              placeholder={`Buscar ${translateColumnHeaderToSpanish(column)}`}
+            />
+          )}
+        />
+      );
+    }
+
     if (config.type === "masked") {
       const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
         const rawValue = event.target.value;
@@ -218,14 +251,14 @@ const EditableTable = <T,>({
   const columnConfig: Record<
     string,
     {
-      type: "text" | "select" | "masked";
+      type: "text" | "select" | "autocomplete" | "masked";
       options?: { value: string; label: string }[];
     }
   > = {
     licensePlate: { type: "masked" },
     parkingLot: { type: "masked" },
-    brand: { type: "select", options: BRANDS },
-    color: { type: "select", options: COLORS },
+    brand: { type: "autocomplete", options: BRANDS },
+    color: { type: "autocomplete", options: COLORS },
     day: { type: "select", options: getDayOptionsSpanish() },
   };
 
@@ -366,7 +399,7 @@ const EditableTable = <T,>({
       <Divider />
       <TablePagination
         className="pagination"
-        rowsPerPageOptions={[5, 10, 25]}
+        rowsPerPageOptions={[5, 10, 25, 50, 100]}
         component="div"
         count={totalCount}
         rowsPerPage={rowsPerPage}
@@ -377,6 +410,8 @@ const EditableTable = <T,>({
           setPage(0);
         }}
         labelRowsPerPage={TABLE.ROWS_PER_PAGE}
+        labelDisplayedRows={() => ""}
+        ActionsComponent={PaginationActions}
       />
     </Paper>
   );

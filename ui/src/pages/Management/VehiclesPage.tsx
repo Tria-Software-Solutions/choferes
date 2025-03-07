@@ -19,12 +19,9 @@ import {
   DialogContent,
   DialogActions,
   FormControl,
-  InputLabel,
-  Select,
-  MenuItem,
-  SelectChangeEvent,
   CircularProgress,
   Backdrop,
+  Autocomplete,
 } from "@mui/material";
 import { LocalizationProvider } from "@mui/x-date-pickers";
 import { DatePicker } from "@mui/x-date-pickers/DatePicker";
@@ -89,10 +86,10 @@ const VehiclesPage: React.FC = () => {
   const [openLicensePlateTooltip, setOpenLicensePlateTooltip] = useState(false);
   const [vehicleToDelete, setVehicleToDelete] = useState<number | null>(null);
   const [filter, setFilter] = useState("");
-  const [selectedBrand, setSelectedBrand] = useState("");
-  const [customBrand, setCustomBrand] = useState("");
-  const [selectedColor, setSelectedColor] = useState("");
-  const [customColor, setCustomColor] = useState("");
+  const [searchBrandTerm, setSearchBrandTerm] = useState("");
+  const [filteredBrands, setFilteredBrands] = useState(BRANDS);
+  const [searchColorTerm, setSearchColorTerm] = useState("");
+  const [filteredColors, setFilteredColors] = useState(COLORS);
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(5);
   const [isAddFormValid, setIsAddFormValid] = useState(false);
@@ -146,6 +143,7 @@ const VehiclesPage: React.FC = () => {
     () => setIsAddFormValid(validateFields(addFields)),
     [addFields, validateFields]
   );
+
   useEffect(() => {
     if (editRowId !== null) setIsEditFormValid(validateFields(editFields));
   }, [editFields, editRowId, validateFields]);
@@ -185,8 +183,8 @@ const VehiclesPage: React.FC = () => {
       parkingLot: "",
       notes: "",
     });
-    setSelectedBrand("");
-    setSelectedColor("");
+    setSearchBrandTerm("");
+    setSearchColorTerm("");
   };
 
   const handleEditClick = (vehicle: Vehicle) => {
@@ -270,48 +268,28 @@ const VehiclesPage: React.FC = () => {
     setTimeout(() => setTooltip(false), 2000);
   };
 
-  const handleSelectChange = (
-    event: SelectChangeEvent<string>,
-    setState: React.Dispatch<React.SetStateAction<string>>,
-    setField: (value: string) => void,
-    setCustomValue: React.Dispatch<React.SetStateAction<string>>
+  const handleSearchChangeBrand = (
+    event: React.SyntheticEvent,
+    value: string,
+    reason: string
   ) => {
-    const value = event.target.value;
-    setState(value);
-    if (value !== "Otro") {
-      setCustomValue("");
-    }
-    setField(value);
+    setSearchBrandTerm(value);
+    const filtered = BRANDS.filter((option) =>
+      option.label.toLowerCase().includes(value.toLowerCase())
+    );
+    setFilteredBrands(filtered);
   };
 
-  const handleBrandChange = (event: SelectChangeEvent<string>) =>
-    handleSelectChange(
-      event,
-      setSelectedBrand,
-      (value) => setAddFields((prev) => ({ ...prev, brand: value })),
-      setCustomBrand
-    );
-
-  const handleCustomBrandChange = (
-    event: React.ChangeEvent<HTMLInputElement>
+  const handleSearchChangeColor = (
+    event: React.SyntheticEvent,
+    value: string,
+    reason: string
   ) => {
-    setCustomBrand(event.target.value);
-    setAddFields({ ...addFields, brand: event.target.value });
-  };
-
-  const handleColorChange = (event: SelectChangeEvent<string>) =>
-    handleSelectChange(
-      event,
-      setSelectedColor,
-      (value) => setAddFields((prev) => ({ ...prev, color: value })),
-      setCustomColor
+    setSearchColorTerm(value);
+    const filtered = COLORS.filter((option) =>
+      option.label.toLowerCase().includes(value.toLowerCase())
     );
-
-  const handleCustomColorChange = (
-    event: React.ChangeEvent<HTMLInputElement>
-  ) => {
-    setCustomColor(event.target.value);
-    setAddFields({ ...addFields, color: event.target.value });
+    setFilteredColors(filtered);
   };
 
   const checkTicketExistenceInAllVehicles = (
@@ -605,56 +583,78 @@ const VehiclesPage: React.FC = () => {
                       </Tooltip>
                     </Grid>
                     <Grid item xs={12} sm={6} md={2}>
-                      {selectedBrand === "Otro" ? (
-                        <TextField
-                          label="Marca"
-                          variant="outlined"
-                          fullWidth
-                          value={customBrand}
-                          onChange={handleCustomBrandChange}
+                      <FormControl variant="outlined" fullWidth>
+                        <Autocomplete
+                          value={
+                            addFields.brand
+                              ? {
+                                  value: addFields.brand,
+                                  label: addFields.brand,
+                                }
+                              : null
+                          }
+                          onChange={(event, newValue) => {
+                            if (newValue) {
+                              setAddFields((prev) => ({
+                                ...prev,
+                                brand: newValue.value,
+                              }));
+                            } else {
+                              setAddFields((prev) => ({ ...prev, brand: "" }));
+                            }
+                          }}
+                          inputValue={searchBrandTerm}
+                          onInputChange={handleSearchChangeBrand}
+                          options={filteredBrands}
+                          getOptionLabel={(option) => option.label}
+                          renderInput={(params) => (
+                            <TextField
+                              {...params}
+                              label="Marca"
+                              variant="outlined"
+                              fullWidth
+                              placeholder="Buscar Marca"
+                            />
+                          )}
                         />
-                      ) : (
-                        <FormControl variant="outlined" fullWidth>
-                          <InputLabel>Marca</InputLabel>
-                          <Select
-                            label="Marca"
-                            value={addFields.brand}
-                            onChange={handleBrandChange}
-                          >
-                            {BRANDS.map((option) => (
-                              <MenuItem key={option.value} value={option.value}>
-                                {option.label}
-                              </MenuItem>
-                            ))}
-                          </Select>
-                        </FormControl>
-                      )}
+                      </FormControl>
                     </Grid>
                     <Grid item xs={12} sm={6} md={2}>
-                      {selectedColor === "Otro" ? (
-                        <TextField
-                          label="Color"
-                          variant="outlined"
-                          fullWidth
-                          value={customColor}
-                          onChange={handleCustomColorChange}
+                    <FormControl variant="outlined" fullWidth>
+                        <Autocomplete
+                          value={
+                            addFields.color
+                              ? {
+                                  value: addFields.color,
+                                  label: addFields.color,
+                                }
+                              : null
+                          }
+                          onChange={(event, newValue) => {
+                            if (newValue) {
+                              setAddFields((prev) => ({
+                                ...prev,
+                                color: newValue.value,
+                              }));
+                            } else {
+                              setAddFields((prev) => ({ ...prev, color: "" }));
+                            }
+                          }}
+                          inputValue={searchColorTerm}
+                          onInputChange={handleSearchChangeColor}
+                          options={filteredColors}
+                          getOptionLabel={(option) => option.label}
+                          renderInput={(params) => (
+                            <TextField
+                              {...params}
+                              label="Color"
+                              variant="outlined"
+                              fullWidth
+                              placeholder="Buscar Color"
+                            />
+                          )}
                         />
-                      ) : (
-                        <FormControl variant="outlined" fullWidth>
-                          <InputLabel>Color</InputLabel>
-                          <Select
-                            label="Color"
-                            value={addFields.color}
-                            onChange={handleColorChange}
-                          >
-                            {COLORS.map((option) => (
-                              <MenuItem key={option.value} value={option.value}>
-                                {option.label}
-                              </MenuItem>
-                            ))}
-                          </Select>
-                        </FormControl>
-                      )}
+                      </FormControl>
                     </Grid>
                     <Grid item xs={12} sm={6} md={1}>
                       <TextField
