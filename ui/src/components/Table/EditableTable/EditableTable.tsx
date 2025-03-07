@@ -31,6 +31,7 @@ import {
   BRANDS_LIST,
   COLORS_LIST,
   PERMISSIONS,
+  PERMISSIONS_LIST,
   ROLES_LIST,
   TABLE,
 } from "../../../constants/constants";
@@ -262,6 +263,7 @@ const EditableTable = <T,>({
     brand: { type: "autocomplete", options: BRANDS_LIST },
     color: { type: "autocomplete", options: COLORS_LIST },
     roleName: { type: "select", options: ROLES_LIST },
+    permissionName: { type: "select", options: PERMISSIONS_LIST },
     day: { type: "select", options: getDayOptionsSpanish() },
   };
 
@@ -314,35 +316,33 @@ const EditableTable = <T,>({
           <TableBody>
             {paginatedData.map((row) => (
               <TableRow key={getRowId(row)}>
-                {/* {columns.map((column) => (
-                  <TableCell key={String(column)}>
-                    {editRowId === getRowId(row)
-                      ? renderEditField(
+                {columns.map((column) => {
+                  console.log("Row Object:", row);
+                  console.log("Column:", column);
+                  console.log("Row[column]:", row[column]);
+                  console.log("Type of Row[column]:", typeof row[column]);
+
+                  return (
+                    <TableCell key={String(column)}>
+                      {editRowId === getRowId(row) ? (
+                        renderEditField(
                           column,
                           editFields[String(column)] || ""
                         )
-                      : column === "day"
-                      ? mapDayValues(row[column] as string)
-                      : renderColumnValue(column, row[column])}
-                  </TableCell>
-                ))} */}
-                {columns.map((column) => (
-                  <TableCell key={String(column)}>
-                    {editRowId === getRowId(row) ? (
-                      renderEditField(column, editFields[String(column)] || "")
-                    ) : Array.isArray(row[column]) ? (
-                      <ul>
-                        {(row[column] as string[]).map((item, index) => (
-                          <li key={index}>{item}</li>
-                        ))}
-                      </ul>
-                    ) : column === "day" ? (
-                      mapDayValues(row[column] as string)
-                    ) : (
-                      renderColumnValue(column, row[column])
-                    )}
-                  </TableCell>
-                ))}
+                      ) : Array.isArray(row[column]) ? (
+                        <ul>
+                          {(row[column] as string[]).map((item, index) => (
+                            <li key={index}>{item}</li>
+                          ))}
+                        </ul>
+                      ) : column === "day" ? (
+                        mapDayValues(row[column] as string)
+                      ) : (
+                        renderColumnValue(column, row[column])
+                      )}
+                    </TableCell>
+                  );
+                })}
                 {!noActions && (
                   <TableCell>
                     <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
@@ -430,7 +430,9 @@ const EditableTable = <T,>({
           setPage(0);
         }}
         labelRowsPerPage={
-          <Typography variant="body2" component="span">{TABLE.ROWS_PER_PAGE}</Typography>
+          <Typography variant="body2" component="span">
+            {TABLE.ROWS_PER_PAGE}
+          </Typography>
         }
         labelDisplayedRows={() => ""}
         ActionsComponent={PaginationActions}
