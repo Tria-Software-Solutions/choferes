@@ -3,7 +3,18 @@ import { useAuth } from "../../context/AuthContext";
 import { Role } from "../../models/Role";
 import { useRoles } from "../../hooks/useRole";
 import { getRoles } from "../../services/roleService";
-import { Backdrop, Box, Button, CircularProgress, Dialog, DialogActions, DialogContent, DialogTitle, Stack, Typography } from "@mui/material";
+import {
+  Backdrop,
+  Box,
+  Button,
+  CircularProgress,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogTitle,
+  Stack,
+  Typography,
+} from "@mui/material";
 import EditableTable from "../../components/Table/EditableTable/EditableTable";
 import SearchBar from "../../components/SearchBar/SearchBar";
 
@@ -99,6 +110,8 @@ const ManageRoles = () => {
       handleCloseDialog();
     }
   };
+
+  console.log("filteredRoles: ", filteredRoles);
 
   return (
     <Box>
