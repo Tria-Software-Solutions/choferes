@@ -1,4 +1,4 @@
-import { IconButton } from "@mui/material";
+import { IconButton, Typography } from "@mui/material";
 import { ArrowBack, ArrowForward } from "@mui/icons-material";
 import React from "react";
 
@@ -31,9 +31,9 @@ const PaginationActions: React.FC<PaginationActionsProps> = ({
         padding: "10px"
       }}
     >
-      <span style={{ minWidth: "80px", textAlign: "center" }}>
+      <Typography variant="body2" style={{ minWidth: "80px", textAlign: "center" }}>
         Página {page + 1}
-      </span>
+      </Typography>
       <IconButton
         onClick={(e) => onPageChange(e, page - 1)}
         disabled={page === 0}
@@ -41,9 +41,9 @@ const PaginationActions: React.FC<PaginationActionsProps> = ({
       >
         <ArrowBack />
       </IconButton>
-      <span style={{ minWidth: "80px", textAlign: "center" }}>
+      <Typography variant="body2" style={{ minWidth: "80px", textAlign: "center" }}>
         {startIndex}-{endIndex} de {count}
-      </span>
+      </Typography>
       <IconButton
         onClick={(e) => onPageChange(e, page + 1)}
         disabled={page >= Math.ceil(count / rowsPerPage) - 1}

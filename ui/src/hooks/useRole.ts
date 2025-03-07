@@ -1,12 +1,11 @@
 import { useState, useEffect, useCallback } from "react";
 import * as RoleService from "../services/roleService";
-import { User } from "../models/User";
 import { useAuth } from "../context/AuthContext";
 import { Role } from "../models/Role";
 
 export const useRoles = () => {
   const { currentUser } = useAuth();
-  const [roles, setRoles] = useState<User[]>([]);
+  const [roles, setRoles] = useState<Role[]>([]);
   const [totalCountRoles, setTotalCountRoles] = useState(0);
   const [isLoadingRoles, setIsLoadingRoles] = useState(false);
 

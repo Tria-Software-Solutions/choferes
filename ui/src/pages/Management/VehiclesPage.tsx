@@ -36,8 +36,8 @@ import {
   exportToPDF,
 } from "../../utils/export";
 import {
-  BRANDS,
-  COLORS,
+  BRANDS_LIST,
+  COLORS_LIST,
   PAGE_TITLE,
   PERMISSIONS,
 } from "../../constants/constants";
@@ -87,9 +87,9 @@ const VehiclesPage: React.FC = () => {
   const [vehicleToDelete, setVehicleToDelete] = useState<number | null>(null);
   const [filter, setFilter] = useState("");
   const [searchBrandTerm, setSearchBrandTerm] = useState("");
-  const [filteredBrands, setFilteredBrands] = useState(BRANDS);
+  const [filteredBrands, setFilteredBrands] = useState(BRANDS_LIST);
   const [searchColorTerm, setSearchColorTerm] = useState("");
-  const [filteredColors, setFilteredColors] = useState(COLORS);
+  const [filteredColors, setFilteredColors] = useState(COLORS_LIST);
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(5);
   const [isAddFormValid, setIsAddFormValid] = useState(false);
@@ -274,7 +274,7 @@ const VehiclesPage: React.FC = () => {
     reason: string
   ) => {
     setSearchBrandTerm(value);
-    const filtered = BRANDS.filter((option) =>
+    const filtered = BRANDS_LIST.filter((option) =>
       option.label.toLowerCase().includes(value.toLowerCase())
     );
     setFilteredBrands(filtered);
@@ -286,7 +286,7 @@ const VehiclesPage: React.FC = () => {
     reason: string
   ) => {
     setSearchColorTerm(value);
-    const filtered = COLORS.filter((option) =>
+    const filtered = COLORS_LIST.filter((option) =>
       option.label.toLowerCase().includes(value.toLowerCase())
     );
     setFilteredColors(filtered);

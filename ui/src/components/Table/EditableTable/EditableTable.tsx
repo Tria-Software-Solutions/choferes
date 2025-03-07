@@ -18,6 +18,7 @@ import {
   Divider,
   Box,
   Autocomplete,
+  Typography,
 } from "@mui/material";
 import {
   translateColumnHeaderToSpanish,
@@ -27,9 +28,10 @@ import {
 import { formatDateWithDay } from "../../../utils/dates";
 import { maskLicensePlate, maskParkingLot } from "../../../utils/mask";
 import {
-  BRANDS,
-  COLORS,
+  BRANDS_LIST,
+  COLORS_LIST,
   PERMISSIONS,
+  ROLES_LIST,
   TABLE,
 } from "../../../constants/constants";
 import DeleteIcon from "@mui/icons-material/Delete";
@@ -156,7 +158,7 @@ const EditableTable = <T,>({
                   {option.label}
                 </MenuItem>
               ))}
-              {!hasOtroOption && <MenuItem value="Otro">Otro</MenuItem>}
+              {hasOtroOption && <MenuItem value="Otro">Otro</MenuItem>}
             </Select>
           )}
         </FormControl>
@@ -257,8 +259,9 @@ const EditableTable = <T,>({
   > = {
     licensePlate: { type: "masked" },
     parkingLot: { type: "masked" },
-    brand: { type: "autocomplete", options: BRANDS },
-    color: { type: "autocomplete", options: COLORS },
+    brand: { type: "autocomplete", options: BRANDS_LIST },
+    color: { type: "autocomplete", options: COLORS_LIST },
+    roleName: { type: "select", options: ROLES_LIST },
     day: { type: "select", options: getDayOptionsSpanish() },
   };
 
@@ -311,7 +314,7 @@ const EditableTable = <T,>({
           <TableBody>
             {paginatedData.map((row) => (
               <TableRow key={getRowId(row)}>
-                {columns.map((column) => (
+                {/* {columns.map((column) => (
                   <TableCell key={String(column)}>
                     {editRowId === getRowId(row)
                       ? renderEditField(
@@ -321,6 +324,23 @@ const EditableTable = <T,>({
                       : column === "day"
                       ? mapDayValues(row[column] as string)
                       : renderColumnValue(column, row[column])}
+                  </TableCell>
+                ))} */}
+                {columns.map((column) => (
+                  <TableCell key={String(column)}>
+                    {editRowId === getRowId(row) ? (
+                      renderEditField(column, editFields[String(column)] || "")
+                    ) : Array.isArray(row[column]) ? (
+                      <ul>
+                        {(row[column] as string[]).map((item, index) => (
+                          <li key={index}>{item}</li>
+                        ))}
+                      </ul>
+                    ) : column === "day" ? (
+                      mapDayValues(row[column] as string)
+                    ) : (
+                      renderColumnValue(column, row[column])
+                    )}
                   </TableCell>
                 ))}
                 {!noActions && (
@@ -409,7 +429,9 @@ const EditableTable = <T,>({
           setRowsPerPage(+event.target.value);
           setPage(0);
         }}
-        labelRowsPerPage={TABLE.ROWS_PER_PAGE}
+        labelRowsPerPage={
+          <Typography variant="body2" component="span">{TABLE.ROWS_PER_PAGE}</Typography>
+        }
         labelDisplayedRows={() => ""}
         ActionsComponent={PaginationActions}
       />
