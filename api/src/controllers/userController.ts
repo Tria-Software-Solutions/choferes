@@ -47,18 +47,6 @@ export const getUserByUsername = async (req: Request, res: Response) => {
   }
 };
 
-export const getUserPermissions = async (req: Request, res: Response) => {
-  try {
-    const user = await userService.getUserPermissions(Number(req.params.id));
-    if (!user) {
-      return res.status(404).json({ message: "User Permissions not found" });
-    }
-    res.status(200).json(user);
-  } catch (error) {
-    res.status(500).json({ message: "Error fetching User Permissions", error });
-  }
-};
-
 export const createUser = async (req: Request, res: Response) => {
   try {
     const newUser = await userService.createUser(req.body);

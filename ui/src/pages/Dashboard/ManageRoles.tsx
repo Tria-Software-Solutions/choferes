@@ -23,14 +23,9 @@ const ManageRoles = () => {
   const [filteredRoles, setFilteredRoles] = useState<Role[]>([]);
   const [totalCount, setTotalCount] = useState(0);
   const [editRowId, setEditRowId] = useState<number | null>(null);
-  const [editFields, setEditFields] = useState<{
-    name: string;
-    permissionName: string[];
-  }>({
+  const [editFields, setEditFields] = useState({
     name: "",
-    permissionName: [],
   });
-
   const [dialogOpen, setDialogOpen] = useState(false);
   const [roleToDelete, setRoleToDelete] = useState<number | null>(null);
   const [filter, setFilter] = useState("");
@@ -42,18 +37,16 @@ const ManageRoles = () => {
     const normalizeString = (str: string) =>
       str.normalize("NFD").replace(/[\u0300-\u036f]/g, "");
 
-    const filtered = roles
-      .filter((role) =>
-        normalizeString(`${role.name}`)
-          .toLowerCase()
-          .includes(normalizeString(filter).toLowerCase())
-      )
-      .map((role) => ({
-        ...role,
-        rolePermissions:
-          role.Permissions?.map((permission) => permission.name).join(", ") ||
-          "Sin permisos",
-      }));
+    const filtered = roles.filter((role) =>
+      normalizeString(`${role.name}`)
+        .toLowerCase()
+        .includes(normalizeString(filter).toLowerCase())
+    );
+
+    filtered.forEach((role) => {
+      console.log("Role: ", role);
+    });
+
     setFilteredRoles(filtered);
     setTotalCount(filtered.length);
   }, [filter, roles]);
@@ -78,7 +71,6 @@ const ManageRoles = () => {
     setEditRowId(role.id);
     setEditFields({
       name: role.name,
-      permissionName: role.Permissions.map((permission) => permission.name),
     });
   };
 
@@ -88,22 +80,11 @@ const ManageRoles = () => {
 
   const handleSaveClick = (id: number) => {
     const updatedRole = {
-      id,
-      name: editFields.name,
-      Permissions: editFields.permissionName.map((permissionName) => {
-        const existingPermission = roles
-          .find((role) => role.id === id)
-          ?.Permissions.find(
-            (permission) => permission.name === permissionName.trim()
-          );
-        return existingPermission
-          ? { id: existingPermission.id, name: permissionName.trim() }
-          : { id: 0, name: permissionName.trim() };
-      }),
+      ...editFields,
     };
     updateRole(id, updatedRole);
     setEditRowId(null);
-    setEditFields({ name: "", permissionName: [] });
+    setEditFields({ name: "" });
   };
 
   const handleOpenDialog = (id: number) => {
@@ -157,12 +138,9 @@ const ManageRoles = () => {
               </Box>
               <EditableTable<Role>
                 data={filteredRoles}
-                columns={["name", "permissionName"]}
+                columns={["name"]}
                 editRowId={editRowId}
-                editFields={{
-                  ...editFields,
-                  permissionName: editFields.permissionName.join(", "),
-                }}
+                editFields={editFields}
                 setEditField={(field, value) =>
                   setEditFields({ ...editFields, [field]: value })
                 }

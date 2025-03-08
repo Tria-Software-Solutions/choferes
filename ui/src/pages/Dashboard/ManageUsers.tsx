@@ -3,7 +3,7 @@ import { useAuth } from "../../context/AuthContext";
 import { User } from "../../models/User";
 import { useUsers } from "../../hooks/useUser";
 import { useUserRoles } from "../../hooks/useUserRole";
-import { useRoles } from "../../hooks/useRole";
+// import { useRoles } from "../../hooks/useRole";
 import {
   Backdrop,
   Box,
@@ -18,11 +18,12 @@ import {
 } from "@mui/material";
 import EditableTable from "../../components/Table/EditableTable/EditableTable";
 import SearchBar from "../../components/SearchBar/SearchBar";
+import { Role } from "../../models/Role";
 
 const ManageUsers = () => {
   const { userPermissions } = useAuth();
   const { users, isLoadingUsers, updateUser, deleteUser } = useUsers();
-  const { roles  } = useRoles();
+  //const { updateUserRole } = useUserRoles();
   const { getUserRoleByUserId } = useUserRoles();
   const [filteredUsers, setFilteredUsers] = useState<User[]>([]);
   const [totalCount, setTotalCount] = useState(0);
@@ -32,7 +33,6 @@ const ManageUsers = () => {
     lastName: "",
     email: "",
     username: "",
-    roleName: "",
   });
   const [dialogOpen, setDialogOpen] = useState(false);
   const [userToDelete, setUserToDelete] = useState<number | null>(null);
@@ -45,18 +45,13 @@ const ManageUsers = () => {
     const normalizeString = (str: string) =>
       str.normalize("NFD").replace(/[\u0300-\u036f]/g, "");
 
-    const filtered = users
-      .filter((user) =>
-        normalizeString(
-          `${user.firstName} ${user.lastName} ${user.email} ${user.username} ${user.Roles[0].name}`
-        )
-          .toLowerCase()
-          .includes(normalizeString(filter).toLowerCase())
+    const filtered = users.filter((user) =>
+      normalizeString(
+        `${user.firstName} ${user.lastName} ${user.email} ${user.username} ${user.role.name}`
       )
-      .map((user) => ({
-        ...user,
-        roleName: user.Roles?.[0]?.name || "Sin rol",
-      }));
+        .toLowerCase()
+        .includes(normalizeString(filter).toLowerCase())
+    )    
 
     setFilteredUsers(filtered);
     setTotalCount(filtered.length);
@@ -92,7 +87,6 @@ const ManageUsers = () => {
       lastName: user.lastName,
       email: user.email,
       username: user.username,
-      roleName: user.Roles[0].name,
     });
   };
 
@@ -103,7 +97,6 @@ const ManageUsers = () => {
   const handleSaveClick = (id: number) => {
     const updatedUser = {
       ...editFields,
-      Roles: roles.filter((role) => role.name === editFields.roleName), 
     };
     updateUser(id, updatedUser);
     setEditRowId(null);
@@ -112,7 +105,6 @@ const ManageUsers = () => {
       lastName: "",
       email: "",
       username: "",
-      roleName: "",
     });
   };
 
@@ -168,13 +160,7 @@ const ManageUsers = () => {
               </Box>
               <EditableTable<User>
                 data={filteredUsers}
-                columns={[
-                  "firstName",
-                  "lastName",
-                  "username",
-                  "email",
-                  "roleName",
-                ]}
+                columns={["firstName", "lastName", "username", "email", "role"]}
                 editRowId={editRowId}
                 editFields={editFields}
                 setEditField={(field, value) =>

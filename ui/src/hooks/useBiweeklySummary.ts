@@ -6,7 +6,8 @@ export const useBiweeklySummaries = () => {
   const [biweeklySummaries, setBiweeklySummaries] = useState<BiweeklySummary[]>(
     []
   );
-  const [totalCountBiweeklySummaries, setTotalCountBiweeklySummaries] = useState(0);
+  const [totalCountBiweeklySummaries, setTotalCountBiweeklySummaries] =
+    useState(0);
   const [isLoadingBiweeklySummaries, setIsLoadingBiweeklySummaries] =
     useState(false);
 
@@ -53,10 +54,7 @@ export const useBiweeklySummaries = () => {
     newBiweeklySummary: Omit<BiweeklySummary, "id"> | BiweeklySummary
   ) => {
     if ("id" in newBiweeklySummary) {
-      await updateBiweeklySummary(
-        newBiweeklySummary.id,
-        newBiweeklySummary
-      );
+      await updateBiweeklySummary(newBiweeklySummary.id, newBiweeklySummary);
     } else {
       await createBiweeklySummary(newBiweeklySummary);
     }
@@ -69,9 +67,6 @@ export const useBiweeklySummaries = () => {
     );
     setTotalCountBiweeklySummaries((prev) => prev - 1);
   };
-
-  const totalBiweeklyHours =
-    BiweeklySummaryService.calculateTotalBiweeklyHours(biweeklySummaries);
 
   useEffect(() => {
     getBiweeklySummaries();
@@ -86,6 +81,5 @@ export const useBiweeklySummaries = () => {
     updateBiweeklySummary,
     createOrUpdateBiweeklySummary,
     deleteBiweeklySummary,
-    totalBiweeklyHours,
   };
 };

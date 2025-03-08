@@ -317,11 +317,6 @@ const EditableTable = <T,>({
             {paginatedData.map((row) => (
               <TableRow key={getRowId(row)}>
                 {columns.map((column) => {
-                  console.log("Row Object:", row);
-                  console.log("Column:", column);
-                  console.log("Row[column]:", row[column]);
-                  console.log("Type of Row[column]:", typeof row[column]);
-
                   return (
                     <TableCell key={String(column)}>
                       {editRowId === getRowId(row) ? (

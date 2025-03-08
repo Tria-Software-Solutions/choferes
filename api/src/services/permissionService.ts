@@ -12,6 +12,14 @@ export const createPermission = async (data: Omit<Permission, "id">) => {
   return await Permission.create(data);
 };
 
+export const updatePermission = async (
+  id: number,
+  data: Omit<Permission, "id">
+) => {
+  await Permission.update(data, { where: { id } });
+  return Permission.findByPk(id);
+};
+
 export const deletePermission = async (id: number) => {
   return await Permission.destroy({ where: { id } });
 };

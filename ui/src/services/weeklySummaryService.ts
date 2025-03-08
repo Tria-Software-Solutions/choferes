@@ -23,10 +23,3 @@ export const updateWeeklySummary = async (
 export const deleteWeeklySummary = async (id: number) => {
   await api.delete(`/weekly-summary/${id}`);
 };
-
-export const calculateTotalWeeklyHours = (weeklySummaries: WeeklySummary[]) => {
-  return weeklySummaries.reduce(
-    (total, summary) => total + summary.totalHours,
-    0
-  );
-};

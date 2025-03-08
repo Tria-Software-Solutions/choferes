@@ -23,12 +23,3 @@ export const updateBiweeklySummary = async (
 export const deleteBiweeklySummary = async (id: number) => {
   await api.delete(`/biweekly-summary/${id}`);
 };
-
-export const calculateTotalBiweeklyHours = (
-  biweeklySummaries: BiweeklySummary[]
-) => {
-  return biweeklySummaries.reduce(
-    (total, summary) => total + summary.totalHours,
-    0
-  );
-};

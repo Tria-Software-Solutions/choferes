@@ -25,7 +25,7 @@ export const authenticateUser = async (username: string, password: string) => {
   if (!isMatch) throw new Error("Incorrect password");
 
   const token = jwt.sign(
-    { userId: user.id, role: user.Roles?.[0]?.name },
+    { userId: user.id },
     SECRET_KEY,
     {
       expiresIn: "1h",
@@ -56,31 +56,6 @@ export const getUserByUsername = async (username: string) => {
   });
 };
 
-export const getUserPermissions = async (userId: number) => {
-  const user = await User.findByPk(userId, {
-    include: [
-      {
-        model: Role,
-        include: [
-          {
-            model: Permission,
-            through: { attributes: [] },
-          },
-        ],
-      },
-    ],
-  });
-
-  if (!user) return null;
-
-  const permissions =
-    user.Roles?.flatMap(
-      (role) => role.Permissions?.map((permission) => permission.name) || []
-    ) || [];
-
-  return Array.from(new Set(permissions));
-};
-
 export const createUser = async (data: Omit<User, "id">) => {
   const hashedPassword = await bcrypt.hash(data.password, 10);
   return await User.create(
@@ -90,6 +65,14 @@ export const createUser = async (data: Omit<User, "id">) => {
     },
     { returning: true }
   );
+};
+
+export const updateUser = async (
+  id: number,
+  data: Omit<User, "id">
+) => {
+  await User.update(data, { where: { id } });
+  return User.findByPk(id);
 };
 
 export const deleteUser = async (id: number) => {

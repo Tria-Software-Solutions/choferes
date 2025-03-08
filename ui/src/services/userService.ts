@@ -29,7 +29,7 @@ export const getUserPermissions = async (id: number) => {
   return response.data;
 };
 
-export const createUser = async (user: Omit<User, "id" | "Roles" | "roleName">) => {
+export const createUser = async (user: Omit<User, "id" | "role">) => {
   const response = await api.post("/users/register", user);
   return response.data;
 };
