@@ -95,7 +95,7 @@ const Register = () => {
     if (!isValid) return;
 
     try {
-      const newUser: Omit<User, "id" | "Roles" | "roleName"> = {
+      const newUser: Omit<User, "id" | "role"> = {
         firstName: addFields.firstName,
         lastName: addFields.lastName,
         email: addFields.email,

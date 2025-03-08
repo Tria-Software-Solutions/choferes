@@ -12,15 +12,13 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.deleteUser = exports.createUser = exports.getUserPermissions = exports.getUserByUsername = exports.getUserById = exports.getUsers = exports.authenticateUser = void 0;
+exports.deleteUser = exports.updateUser = exports.createUser = exports.getUserByUsername = exports.getUserById = exports.getUsers = exports.authenticateUser = void 0;
 const User_1 = require("../models/User");
 const Role_1 = require("../models/Role");
 const bcrypt_1 = __importDefault(require("bcrypt"));
 const jsonwebtoken_1 = __importDefault(require("jsonwebtoken"));
-const Permission_1 = require("../models/Permission");
 const SECRET_KEY = process.env.JWT_SECRET_KEY || "default_secret";
 const authenticateUser = (username, password) => __awaiter(void 0, void 0, void 0, function* () {
-    var _a, _b;
     if (!SECRET_KEY)
         throw new Error("JWT_SECRET_KEY is not set");
     const user = yield User_1.User.findOne({
@@ -37,7 +35,7 @@ const authenticateUser = (username, password) => __awaiter(void 0, void 0, void 
     const isMatch = yield bcrypt_1.default.compare(password, user.password);
     if (!isMatch)
         throw new Error("Incorrect password");
-    const token = jsonwebtoken_1.default.sign({ userId: user.id, role: (_b = (_a = user.Roles) === null || _a === void 0 ? void 0 : _a[0]) === null || _b === void 0 ? void 0 : _b.name }, SECRET_KEY, {
+    const token = jsonwebtoken_1.default.sign({ userId: user.id }, SECRET_KEY, {
         expiresIn: "1h",
     });
     return { user, token };
@@ -65,32 +63,16 @@ const getUserByUsername = (username) => __awaiter(void 0, void 0, void 0, functi
     });
 });
 exports.getUserByUsername = getUserByUsername;
-const getUserPermissions = (userId) => __awaiter(void 0, void 0, void 0, function* () {
-    var _a;
-    const user = yield User_1.User.findByPk(userId, {
-        include: [
-            {
-                model: Role_1.Role,
-                include: [
-                    {
-                        model: Permission_1.Permission,
-                        through: { attributes: [] },
-                    },
-                ],
-            },
-        ],
-    });
-    if (!user)
-        return null;
-    const permissions = ((_a = user.Roles) === null || _a === void 0 ? void 0 : _a.flatMap((role) => { var _a; return ((_a = role.Permissions) === null || _a === void 0 ? void 0 : _a.map((permission) => permission.name)) || []; })) || [];
-    return Array.from(new Set(permissions));
-});
-exports.getUserPermissions = getUserPermissions;
 const createUser = (data) => __awaiter(void 0, void 0, void 0, function* () {
     const hashedPassword = yield bcrypt_1.default.hash(data.password, 10);
     return yield User_1.User.create(Object.assign(Object.assign({}, data), { password: hashedPassword }), { returning: true });
 });
 exports.createUser = createUser;
+const updateUser = (id, data) => __awaiter(void 0, void 0, void 0, function* () {
+    yield User_1.User.update(data, { where: { id } });
+    return User_1.User.findByPk(id);
+});
+exports.updateUser = updateUser;
 const deleteUser = (id) => __awaiter(void 0, void 0, void 0, function* () {
     return yield User_1.User.destroy({ where: { id } });
 });

@@ -9,7 +9,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.deleteUserRole = exports.createUserRole = exports.getUserRoleByUserId = exports.getUserRoles = void 0;
+exports.deleteUserRole = exports.updateUserRole = exports.createUserRole = exports.getUserRoleByUserId = exports.getUserRoles = void 0;
 const UserRole_1 = require("../models/UserRole");
 const getUserRoles = () => __awaiter(void 0, void 0, void 0, function* () {
     return UserRole_1.UserRole.findAll();
@@ -27,6 +27,11 @@ const createUserRole = (data) => __awaiter(void 0, void 0, void 0, function* () 
     return UserRole_1.UserRole.create(data);
 });
 exports.createUserRole = createUserRole;
+const updateUserRole = (id, data) => __awaiter(void 0, void 0, void 0, function* () {
+    yield UserRole_1.UserRole.update(data, { where: { id } });
+    return UserRole_1.UserRole.findByPk(id);
+});
+exports.updateUserRole = updateUserRole;
 const deleteUserRole = (id) => __awaiter(void 0, void 0, void 0, function* () {
     return UserRole_1.UserRole.destroy({ where: { id } });
 });

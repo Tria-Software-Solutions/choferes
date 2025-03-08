@@ -9,12 +9,6 @@ export class User extends Model {
   public username!: string;
   public email!: string;
   public password!: string;
-
-  public Roles?: Role[];
-
-  public static associations: {
-    Roles: Association<User, Role>;
-  };
 }
 
 User.init(

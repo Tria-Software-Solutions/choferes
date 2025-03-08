@@ -13,6 +13,14 @@ export const createRole = async (data: Omit<Role, "id">) => {
   return await Role.create(data);
 };
 
+export const updateRole = async (
+  id: number,
+  data: Omit<Role, "id">
+) => {
+  await Role.update(data, { where: { id } });
+  return Role.findByPk(id);
+};
+
 export const deleteRole = async (id: number) => {
   return await Role.destroy({ where: { id } });
 };

@@ -9,7 +9,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.deleteRolePermission = exports.createRolePermission = exports.getRolePermissions = void 0;
+exports.deleteRolePermission = exports.updateRolePermission = exports.createRolePermission = exports.getRolePermissions = void 0;
 const RolePermission_1 = require("../models/RolePermission");
 const getRolePermissions = () => __awaiter(void 0, void 0, void 0, function* () {
     return RolePermission_1.RolePermission.findAll();
@@ -19,6 +19,11 @@ const createRolePermission = (data) => __awaiter(void 0, void 0, void 0, functio
     return RolePermission_1.RolePermission.create(data);
 });
 exports.createRolePermission = createRolePermission;
+const updateRolePermission = (id, data) => __awaiter(void 0, void 0, void 0, function* () {
+    yield RolePermission_1.RolePermission.update(data, { where: { id } });
+    return RolePermission_1.RolePermission.findByPk(id);
+});
+exports.updateRolePermission = updateRolePermission;
 const deleteRolePermission = (id) => __awaiter(void 0, void 0, void 0, function* () {
     return RolePermission_1.RolePermission.destroy({ where: { id } });
 });

@@ -23,12 +23,3 @@ export const updateMonthlySummary = async (
 export const deleteMonthlySummary = async (id: number) => {
   await api.delete(`/monthly-summary/${id}`);
 };
-
-export const calculateTotalMonthlyHours = (
-  monthlySummaries: MonthlySummary[]
-) => {
-  return monthlySummaries.reduce(
-    (total, summary) => total + summary.totalHours,
-    0
-  );
-};

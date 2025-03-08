@@ -82,7 +82,6 @@ export const translateColumnHeaderToSpanish = (
     lastName: "Apellido",
     email: "Correo Electrónico",
     username: "Usuario",
-    permissions: "Permisos",
     label: "Lugar",
     day: "Día",
     hours: "Horas",
@@ -94,9 +93,8 @@ export const translateColumnHeaderToSpanish = (
     notes: "Observaciones",
     createdAt: "Agregado",
     updatedAt: "Actualizado",
-    // RELATION COLUMNS
-    roleName: "Rol",
-    permissionName: "Permisos"
+    role: "Rol",
+    permissions: "Permisos"
   };
 
   if (typeof column === "string" && column in translations) {

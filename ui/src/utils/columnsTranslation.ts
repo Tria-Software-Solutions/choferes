@@ -5,7 +5,6 @@ export type ColumnsTranslation = {
   lastName: string;
   email: string;
   username: string;
-  permissions: string;
   label: string;
   day: string;
   hours: string;
@@ -17,7 +16,6 @@ export type ColumnsTranslation = {
   notes: string;
   createdAt: string;
   updatedAt: string;
-  // RELATION COLUMNS
-  roleName: string;
-  permissionName: string;
+  role: string;
+  permissions: string;
 };

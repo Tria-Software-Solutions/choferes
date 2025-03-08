@@ -42,7 +42,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.deleteUser = exports.createUser = exports.getUserPermissions = exports.getUserByUsername = exports.getUserById = exports.getUsers = exports.authenticateUser = void 0;
+exports.deleteUser = exports.createUser = exports.getUserByUsername = exports.getUserById = exports.getUsers = exports.authenticateUser = void 0;
 const userService = __importStar(require("../services/userService"));
 const authenticateUser = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
@@ -91,19 +91,6 @@ const getUserByUsername = (req, res) => __awaiter(void 0, void 0, void 0, functi
     }
 });
 exports.getUserByUsername = getUserByUsername;
-const getUserPermissions = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    try {
-        const user = yield userService.getUserPermissions(Number(req.params.id));
-        if (!user) {
-            return res.status(404).json({ message: "User Permissions not found" });
-        }
-        res.status(200).json(user);
-    }
-    catch (error) {
-        res.status(500).json({ message: "Error fetching User Permissions", error });
-    }
-});
-exports.getUserPermissions = getUserPermissions;
 const createUser = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const newUser = yield userService.createUser(req.body);
