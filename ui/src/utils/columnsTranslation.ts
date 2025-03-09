@@ -16,6 +16,6 @@ export type ColumnsTranslation = {
   notes: string;
   createdAt: string;
   updatedAt: string;
-  role: string;
+  roleName: string;
   permissions: string;
 };
