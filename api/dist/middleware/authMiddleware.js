@@ -29,7 +29,7 @@ const authenticateToken = (req, res, next) => {
                     .status(403)
                     .json({ error: "Forbidden: Invalid token payload" });
             }
-            req.user = { id: payload.userId, role: payload.role };
+            req.user = { id: payload.userId };
             next();
         });
     }

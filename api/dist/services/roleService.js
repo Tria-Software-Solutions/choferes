@@ -13,15 +13,31 @@ exports.deleteRole = exports.updateRole = exports.createRole = exports.getRoleBy
 const Permission_1 = require("../models/Permission");
 const Role_1 = require("../models/Role");
 const getRoles = () => __awaiter(void 0, void 0, void 0, function* () {
-    return yield Role_1.Role.findAll({ include: Permission_1.Permission });
+    return yield Role_1.Role.findAll({
+        include: [
+            {
+                model: Permission_1.Permission,
+                as: "permissions",
+                through: { attributes: [] },
+            },
+        ],
+    });
 });
 exports.getRoles = getRoles;
 const getRoleById = (id) => __awaiter(void 0, void 0, void 0, function* () {
-    return yield Role_1.Role.findByPk(id, { include: Permission_1.Permission });
+    return yield Role_1.Role.findByPk(id, {
+        include: [
+            {
+                model: Permission_1.Permission,
+                as: "permissions",
+                through: { attributes: [] },
+            },
+        ],
+    });
 });
 exports.getRoleById = getRoleById;
 const createRole = (data) => __awaiter(void 0, void 0, void 0, function* () {
-    return yield Role_1.Role.create(data);
+    return yield Role_1.Role.create(data, { returning: true });
 });
 exports.createRole = createRole;
 const updateRole = (id, data) => __awaiter(void 0, void 0, void 0, function* () {

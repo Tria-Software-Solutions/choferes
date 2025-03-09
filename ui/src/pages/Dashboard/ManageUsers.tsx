@@ -18,12 +18,10 @@ import {
 } from "@mui/material";
 import EditableTable from "../../components/Table/EditableTable/EditableTable";
 import SearchBar from "../../components/SearchBar/SearchBar";
-import { Role } from "../../models/Role";
 
 const ManageUsers = () => {
   const { userPermissions } = useAuth();
   const { users, isLoadingUsers, updateUser, deleteUser } = useUsers();
-  //const { updateUserRole } = useUserRoles();
   const { getUserRoleByUserId } = useUserRoles();
   const [filteredUsers, setFilteredUsers] = useState<User[]>([]);
   const [totalCount, setTotalCount] = useState(0);
@@ -47,7 +45,7 @@ const ManageUsers = () => {
 
     const filtered = users.filter((user) =>
       normalizeString(
-        `${user.firstName} ${user.lastName} ${user.email} ${user.username} ${user.role.name}`
+        `${user.firstName} ${user.lastName} ${user.email} ${user.username}`
       )
         .toLowerCase()
         .includes(normalizeString(filter).toLowerCase())

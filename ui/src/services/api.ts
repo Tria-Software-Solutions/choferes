@@ -24,7 +24,12 @@ api.interceptors.response.use(
   (response) => response,
   (error) => {
     if (error.response && error.response.status === 401) {
-      logoutUser();
+      if (
+        error.response.data &&
+        error.response.data.message === "Token expired due to inactivity"
+      ) {
+        logoutUser();
+      }
     }
     return Promise.reject(error);
   }

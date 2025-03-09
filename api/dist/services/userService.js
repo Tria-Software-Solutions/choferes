@@ -12,11 +12,12 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.deleteUser = exports.updateUser = exports.createUser = exports.getUserByUsername = exports.getUserById = exports.getUsers = exports.authenticateUser = void 0;
+exports.deleteUser = exports.updateUser = exports.createUser = exports.getUserPermissions = exports.getUserByUsername = exports.getUserById = exports.getUsers = exports.authenticateUser = void 0;
 const User_1 = require("../models/User");
 const Role_1 = require("../models/Role");
 const bcrypt_1 = __importDefault(require("bcrypt"));
 const jsonwebtoken_1 = __importDefault(require("jsonwebtoken"));
+const Permission_1 = require("../models/Permission");
 const SECRET_KEY = process.env.JWT_SECRET_KEY || "default_secret";
 const authenticateUser = (username, password) => __awaiter(void 0, void 0, void 0, function* () {
     if (!SECRET_KEY)
@@ -26,7 +27,10 @@ const authenticateUser = (username, password) => __awaiter(void 0, void 0, void 
         include: [
             {
                 model: Role_1.Role,
-                through: { attributes: [] },
+                as: "roles",
+                include: [
+                    { model: Permission_1.Permission, as: "permissions", through: { attributes: [] } },
+                ],
             },
         ],
     });
@@ -46,6 +50,7 @@ const getUsers = () => __awaiter(void 0, void 0, void 0, function* () {
         include: [
             {
                 model: Role_1.Role,
+                as: "roles",
                 through: { attributes: [] },
             },
         ],
@@ -53,16 +58,53 @@ const getUsers = () => __awaiter(void 0, void 0, void 0, function* () {
 });
 exports.getUsers = getUsers;
 const getUserById = (id) => __awaiter(void 0, void 0, void 0, function* () {
-    return yield User_1.User.findByPk(id, { include: Role_1.Role });
+    return yield User_1.User.findByPk(id, {
+        include: [
+            {
+                model: Role_1.Role,
+                as: "roles",
+                through: { attributes: [] },
+            },
+        ],
+    });
 });
 exports.getUserById = getUserById;
 const getUserByUsername = (username) => __awaiter(void 0, void 0, void 0, function* () {
     return yield User_1.User.findOne({
         where: { username },
-        include: Role_1.Role,
+        include: [
+            {
+                model: Role_1.Role,
+                as: "roles",
+                through: { attributes: [] },
+            },
+        ],
     });
 });
 exports.getUserByUsername = getUserByUsername;
+const getUserPermissions = (userId) => __awaiter(void 0, void 0, void 0, function* () {
+    var _a;
+    const user = yield User_1.User.findByPk(userId, {
+        include: [
+            {
+                model: Role_1.Role,
+                as: "roles",
+                include: [
+                    {
+                        model: Permission_1.Permission,
+                        as: "permissions",
+                        through: { attributes: [] },
+                    },
+                ],
+            },
+        ],
+    });
+    if (!user)
+        return null;
+    const permissions = ((_a = user.roles) === null || _a === void 0 ? void 0 : _a.flatMap((role) => { var _a; return (_a = role.permissions) === null || _a === void 0 ? void 0 : _a.map((permission) => permission.name); })) || [];
+    return Array.from(new Set(permissions));
+});
+exports.getUserPermissions = getUserPermissions;
 const createUser = (data) => __awaiter(void 0, void 0, void 0, function* () {
     const hashedPassword = yield bcrypt_1.default.hash(data.password, 10);
     return yield User_1.User.create(Object.assign(Object.assign({}, data), { password: hashedPassword }), { returning: true });

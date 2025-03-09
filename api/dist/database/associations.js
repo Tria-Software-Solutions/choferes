@@ -7,25 +7,28 @@ const Permission_1 = require("../models/Permission");
 const Employee_1 = require("../models/Employee");
 const Schedule_1 = require("../models/Schedule");
 const HoursWorked_1 = require("../models/HoursWorked");
-// Relación User - Role
+const models_1 = require("./models");
+// Relación User - Role (Mediante UserRole)
 User_1.User.belongsToMany(Role_1.Role, {
-    through: "user_role",
+    through: models_1.UserRole,
     foreignKey: "userId",
-    onDelete: "CASCADE",
+    as: "roles",
 });
 Role_1.Role.belongsToMany(User_1.User, {
-    through: "user_role",
+    through: models_1.UserRole,
     foreignKey: "roleId",
-    onDelete: "CASCADE",
+    as: "users",
 });
-// Relación Role - Permission
+// Relación Role - Permission (Mediante RolePermission)
 Role_1.Role.belongsToMany(Permission_1.Permission, {
-    through: "role_permission",
+    through: models_1.RolePermission,
     foreignKey: "roleId",
+    as: "permissions",
 });
 Permission_1.Permission.belongsToMany(Role_1.Role, {
-    through: "role_permission",
+    through: models_1.RolePermission,
     foreignKey: "permissionId",
+    as: "roles",
 });
 // Relación Employee - HoursWorked
 HoursWorked_1.HoursWorked.belongsTo(Employee_1.Employee, {
