@@ -93,7 +93,7 @@ export const translateColumnHeaderToSpanish = (
     notes: "Observaciones",
     createdAt: "Agregado",
     updatedAt: "Actualizado",
-    role: "Rol",
+    roleName: "Rol",
     permissions: "Permisos"
   };
 

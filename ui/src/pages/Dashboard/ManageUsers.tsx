@@ -18,6 +18,7 @@ import {
 } from "@mui/material";
 import EditableTable from "../../components/Table/EditableTable/EditableTable";
 import SearchBar from "../../components/SearchBar/SearchBar";
+import { Role } from "../../models/Role";
 
 const ManageUsers = () => {
   const { userPermissions } = useAuth();
@@ -43,13 +44,18 @@ const ManageUsers = () => {
     const normalizeString = (str: string) =>
       str.normalize("NFD").replace(/[\u0300-\u036f]/g, "");
 
-    const filtered = users.filter((user) =>
-      normalizeString(
-        `${user.firstName} ${user.lastName} ${user.email} ${user.username}`
-      )
-        .toLowerCase()
-        .includes(normalizeString(filter).toLowerCase())
-    )    
+    const filtered = users
+      .map((user) => ({
+        ...user,
+        roleName: user.roles?.map((role: Role) => role.name).join(", "),
+      }))
+      .filter((user) =>
+        normalizeString(
+          `${user.firstName} ${user.lastName} ${user.email} ${user.username} ${user.roleName}`
+        )
+          .toLowerCase()
+          .includes(normalizeString(filter).toLowerCase())
+      );
 
     setFilteredUsers(filtered);
     setTotalCount(filtered.length);
@@ -158,7 +164,13 @@ const ManageUsers = () => {
               </Box>
               <EditableTable<User>
                 data={filteredUsers}
-                columns={["firstName", "lastName", "username", "email", "role"]}
+                columns={[
+                  "firstName",
+                  "lastName",
+                  "username",
+                  "email",
+                  "roleName",
+                ]}
                 editRowId={editRowId}
                 editFields={editFields}
                 setEditField={(field, value) =>

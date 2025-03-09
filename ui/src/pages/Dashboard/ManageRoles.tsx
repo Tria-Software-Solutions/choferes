@@ -43,10 +43,6 @@ const ManageRoles = () => {
         .includes(normalizeString(filter).toLowerCase())
     );
 
-    filtered.forEach((role) => {
-      console.log("Role: ", role);
-    });
-
     setFilteredRoles(filtered);
     setTotalCount(filtered.length);
   }, [filter, roles]);
