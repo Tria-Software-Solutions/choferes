@@ -14,7 +14,10 @@ export const authenticateUser = async (username: string, password: string) => {
     include: [
       {
         model: Role,
-        through: { attributes: [] },
+        as: "roles",
+        include: [
+          { model: Permission, as: "permissions", through: { attributes: [] } },
+        ],
       },
     ],
   });
@@ -24,13 +27,9 @@ export const authenticateUser = async (username: string, password: string) => {
   const isMatch = await bcrypt.compare(password, user.password);
   if (!isMatch) throw new Error("Incorrect password");
 
-  const token = jwt.sign(
-    { userId: user.id },
-    SECRET_KEY,
-    {
-      expiresIn: "1h",
-    }
-  );
+  const token = jwt.sign({ userId: user.id }, SECRET_KEY, {
+    expiresIn: "1h",
+  });
   return { user, token };
 };
 
@@ -39,22 +38,64 @@ export const getUsers = async () => {
     include: [
       {
         model: Role,
-        through: { attributes: [] },
+        as: "roles",  
+        through: { attributes: [] },  
       },
     ],
   });
 };
 
 export const getUserById = async (id: number) => {
-  return await User.findByPk(id, { include: Role });
+  return await User.findByPk(id, {
+    include: [
+      {
+        model: Role,
+        as: "roles",
+        through: { attributes: [] }, 
+      },
+    ],
+  });
 };
 
 export const getUserByUsername = async (username: string) => {
   return await User.findOne({
     where: { username },
-    include: Role,
+    include: [
+      {
+        model: Role,
+        as: "roles", 
+        through: { attributes: [] }, 
+      },
+    ],
   });
 };
+
+export const getUserPermissions = async (userId: number) => {
+  const user = await User.findByPk(userId, {
+    include: [
+      {
+        model: Role,
+        as: "roles", 
+        include: [
+          {
+            model: Permission,
+            as: "permissions", 
+            through: { attributes: [] }, 
+          },
+        ],
+      },
+    ],
+  });
+
+  if (!user) return null;
+
+  const permissions = user.roles?.flatMap((role) =>
+    role.permissions?.map((permission) => permission.name)
+  ) || [];
+
+  return Array.from(new Set(permissions));
+};
+
 
 export const createUser = async (data: Omit<User, "id">) => {
   const hashedPassword = await bcrypt.hash(data.password, 10);
@@ -67,10 +108,7 @@ export const createUser = async (data: Omit<User, "id">) => {
   );
 };
 
-export const updateUser = async (
-  id: number,
-  data: Omit<User, "id">
-) => {
+export const updateUser = async (id: number, data: Omit<User, "id">) => {
   await User.update(data, { where: { id } });
   return User.findByPk(id);
 };

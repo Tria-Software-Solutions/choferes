@@ -44,6 +44,7 @@ router.post("/login", userController.authenticateUser);
 router.get("/", authMiddleware_1.authenticateToken, userController.getUsers);
 router.get("/:id", authMiddleware_1.authenticateToken, userController.getUserById);
 router.get("/username/:username", userController.getUserByUsername);
+router.get("/:id/permissions", userController.getUserPermissions);
 router.post("/register", userController.createUser);
 router.delete("/:id", authMiddleware_1.authenticateToken, userController.deleteUser);
 exports.default = router;

@@ -6,10 +6,10 @@ export class Role extends Model {
   public id!: number;
   public name!: string;
 
-  public Permissions?: Permission[];
+  public permissions?: Permission[];
 
   public static associations: {
-    Roles: Association<Role, Permission>;
+    permissions: Association<Role, Permission>;
   };
 }
 

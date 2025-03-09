@@ -22,6 +22,6 @@ Permission.init({
     },
 }, {
     sequelize: database_1.default,
-    modelName: "Permissions",
+    modelName: "Permission",
     tableName: "permissions",
 });

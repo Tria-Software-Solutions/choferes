@@ -2,7 +2,7 @@ import jwt, { JwtPayload } from "jsonwebtoken";
 import { Request, Response, NextFunction } from "express";
 
 interface AuthenticatedRequest extends Request {
-  user?: { id: number; role: string };
+  user?: { id: number };
 }
 
 const SECRET_KEY = process.env.JWT_SECRET_KEY;
@@ -39,7 +39,7 @@ export const authenticateToken = (
           .json({ error: "Forbidden: Invalid token payload" });
       }
 
-      req.user = { id: payload.userId, role: payload.role };
+      req.user = { id: payload.userId };
       next();
     });
   } catch (error) {

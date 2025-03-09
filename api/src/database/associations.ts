@@ -4,27 +4,32 @@ import { Permission } from "../models/Permission";
 import { Employee } from "../models/Employee";
 import { Schedule } from "../models/Schedule";
 import { HoursWorked } from "../models/HoursWorked";
+import { RolePermission, UserRole } from "./models";
 
-// Relación User - Role
+// Relación User - Role (Mediante UserRole)
 User.belongsToMany(Role, {
-  through: "user_role",
+  through: UserRole,
   foreignKey: "userId",
-  onDelete: "CASCADE",
-});
-Role.belongsToMany(User, {
-  through: "user_role",
-  foreignKey: "roleId",
-  onDelete: "CASCADE",
+  as: "roles",
 });
 
-// Relación Role - Permission
-Role.belongsToMany(Permission, {
-  through: "role_permission",
+Role.belongsToMany(User, {
+  through: UserRole,
   foreignKey: "roleId",
+  as: "users",
 });
+
+// Relación Role - Permission (Mediante RolePermission)
+Role.belongsToMany(Permission, {
+  through: RolePermission,
+  foreignKey: "roleId",
+  as: "permissions",
+});
+
 Permission.belongsToMany(Role, {
-  through: "role_permission",
+  through: RolePermission,
   foreignKey: "permissionId",
+  as: "roles",
 });
 
 // Relación Employee - HoursWorked
