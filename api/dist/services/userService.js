@@ -15,13 +15,10 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.deleteUser = exports.updateUser = exports.createUser = exports.getUserPermissions = exports.getUserByUsername = exports.getUserById = exports.getUsers = exports.authenticateUser = void 0;
 const User_1 = require("../models/User");
 const Role_1 = require("../models/Role");
-const bcrypt_1 = __importDefault(require("bcrypt"));
-const jsonwebtoken_1 = __importDefault(require("jsonwebtoken"));
 const Permission_1 = require("../models/Permission");
-const SECRET_KEY = process.env.JWT_SECRET_KEY || "default_secret";
-const authenticateUser = (username, password) => __awaiter(void 0, void 0, void 0, function* () {
-    if (!SECRET_KEY)
-        throw new Error("JWT_SECRET_KEY is not set");
+const bcrypt_1 = __importDefault(require("bcrypt"));
+const generateSecret_1 = require("../utils/generateSecret");
+const authenticateUser = (username, password, res) => __awaiter(void 0, void 0, void 0, function* () {
     const user = yield User_1.User.findOne({
         where: { username },
         include: [
@@ -39,10 +36,8 @@ const authenticateUser = (username, password) => __awaiter(void 0, void 0, void 
     const isMatch = yield bcrypt_1.default.compare(password, user.password);
     if (!isMatch)
         throw new Error("Incorrect password");
-    const token = jsonwebtoken_1.default.sign({ userId: user.id }, SECRET_KEY, {
-        expiresIn: "1h",
-    });
-    return { user, token };
+    (0, generateSecret_1.sendTokensInCookies)(user.id, res);
+    return { user };
 });
 exports.authenticateUser = authenticateUser;
 const getUsers = () => __awaiter(void 0, void 0, void 0, function* () {

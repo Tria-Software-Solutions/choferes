@@ -94,7 +94,7 @@ export const translateColumnHeaderToSpanish = (
     createdAt: "Agregado",
     updatedAt: "Actualizado",
     roleName: "Rol",
-    permissions: "Permisos"
+    permissionNames: "Permisos"
   };
 
   if (typeof column === "string" && column in translations) {
