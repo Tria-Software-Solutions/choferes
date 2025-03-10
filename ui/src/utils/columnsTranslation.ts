@@ -17,5 +17,5 @@ export type ColumnsTranslation = {
   createdAt: string;
   updatedAt: string;
   roleName: string;
-  permissions: string;
+  permissionNames: string;
 };

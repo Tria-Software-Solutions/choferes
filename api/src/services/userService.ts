@@ -1,14 +1,13 @@
 import { User } from "../models/User";
 import { Role } from "../models/Role";
-import bcrypt from "bcrypt";
-import jwt from "jsonwebtoken";
 import { Permission } from "../models/Permission";
+import bcrypt from "bcrypt";
+import { Response } from "express";
+import {
+  sendTokensInCookies,
+} from "../utils/generateSecret";
 
-const SECRET_KEY = process.env.JWT_SECRET_KEY || "default_secret";
-
-export const authenticateUser = async (username: string, password: string) => {
-  if (!SECRET_KEY) throw new Error("JWT_SECRET_KEY is not set");
-
+export const authenticateUser = async (username: string, password: string, res: Response) => {
   const user = await User.findOne({
     where: { username },
     include: [
@@ -27,10 +26,9 @@ export const authenticateUser = async (username: string, password: string) => {
   const isMatch = await bcrypt.compare(password, user.password);
   if (!isMatch) throw new Error("Incorrect password");
 
-  const token = jwt.sign({ userId: user.id }, SECRET_KEY, {
-    expiresIn: "1h",
-  });
-  return { user, token };
+  sendTokensInCookies(user.id, res);
+
+  return { user };
 };
 
 export const getUsers = async () => {
@@ -38,8 +36,8 @@ export const getUsers = async () => {
     include: [
       {
         model: Role,
-        as: "roles",  
-        through: { attributes: [] },  
+        as: "roles",
+        through: { attributes: [] },
       },
     ],
   });
@@ -51,7 +49,7 @@ export const getUserById = async (id: number) => {
       {
         model: Role,
         as: "roles",
-        through: { attributes: [] }, 
+        through: { attributes: [] },
       },
     ],
   });
@@ -63,8 +61,8 @@ export const getUserByUsername = async (username: string) => {
     include: [
       {
         model: Role,
-        as: "roles", 
-        through: { attributes: [] }, 
+        as: "roles",
+        through: { attributes: [] },
       },
     ],
   });
@@ -75,12 +73,12 @@ export const getUserPermissions = async (userId: number) => {
     include: [
       {
         model: Role,
-        as: "roles", 
+        as: "roles",
         include: [
           {
             model: Permission,
-            as: "permissions", 
-            through: { attributes: [] }, 
+            as: "permissions",
+            through: { attributes: [] },
           },
         ],
       },
@@ -89,13 +87,13 @@ export const getUserPermissions = async (userId: number) => {
 
   if (!user) return null;
 
-  const permissions = user.roles?.flatMap((role) =>
-    role.permissions?.map((permission) => permission.name)
-  ) || [];
+  const permissions =
+    user.roles?.flatMap((role) =>
+      role.permissions?.map((permission) => permission.name)
+    ) || [];
 
   return Array.from(new Set(permissions));
 };
-
 
 export const createUser = async (data: Omit<User, "id">) => {
   const hashedPassword = await bcrypt.hash(data.password, 10);

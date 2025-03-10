@@ -74,7 +74,7 @@ const AppBarWrapper: React.FC = () => {
   };
 
   const filteredLinks = links.filter((link) => {
-    return userPermissions.includes(permissionsMap[link.label]);
+    return (userPermissions || []).includes(permissionsMap[link.label]);
   });
 
   const finalLinks = [

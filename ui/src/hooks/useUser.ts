@@ -20,8 +20,10 @@ export const useUsers = () => {
     setAuthError(null);
     try {
       const loginData = await UserService.authenticateUser(username, password);
-      const userPermissions = await UserService.getUserPermissions(loginData.user.id);
-      login(loginData.user, loginData.token, userPermissions);
+      const userPermissions = await UserService.getUserPermissions(
+        loginData.user.id
+      );
+      login(loginData.user, userPermissions);
       navigate("/roles");
     } catch (error) {
       setAuthError("Login failed. Please check your credentials.");

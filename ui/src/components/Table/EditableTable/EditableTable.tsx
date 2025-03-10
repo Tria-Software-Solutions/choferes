@@ -19,6 +19,10 @@ import {
   Box,
   Autocomplete,
   Typography,
+  Stack,
+  Chip,
+  useTheme,
+  Link,
 } from "@mui/material";
 import {
   translateColumnHeaderToSpanish,
@@ -90,6 +94,7 @@ const EditableTable = <T,>({
 }: EditableTableProps<T>) => {
   const [order, setOrder] = useState<"asc" | "desc">("asc");
   const [orderBy, setOrderBy] = useState<keyof T>(columns[0]);
+  const theme = useTheme();
 
   const hasEditPermissions =
     permissions?.includes(PERMISSIONS.EDIT_EMPLOYEES) ||
@@ -320,24 +325,45 @@ const EditableTable = <T,>({
                   return (
                     <TableCell key={String(column)}>
                       {editRowId === getRowId(row) ? (
-                        renderEditField(
-                          column,
-                          editFields[String(column)] || ""
-                        )
+                        <>
+                          {renderEditField(
+                            column,
+                            editFields[String(column)] || ""
+                          )}
+                        </>
                       ) : Array.isArray(row[column]) ? (
-                        <ul>
+                        <Stack
+                          direction="row"
+                          spacing={1}
+                          flexWrap="wrap"
+                          sx={{ rowGap: 2 }}
+                        >
                           {(row[column] as string[]).map((item, index) => (
-                            <li key={index}>{item}</li>
+                            <Chip key={index} label={item} variant="outlined" />
                           ))}
-                        </ul>
+                        </Stack>
+                      ) : column === "email" ? (
+                        <Link
+                          href={`mailto:${row[column]}`}
+                          sx={{
+                            textDecoration: "none",
+                            color: theme.palette.primary.main,
+                            "&:hover": {
+                              textDecoration: "underline",
+                            },
+                          }}
+                        >
+                          {String(row[column])}
+                        </Link>
                       ) : column === "day" ? (
-                        mapDayValues(row[column] as string)
+                        <>{mapDayValues(row[column] as string)}</>
                       ) : (
-                        renderColumnValue(column, row[column])
+                        <>{renderColumnValue(column, row[column])}</>
                       )}
                     </TableCell>
                   );
                 })}
+
                 {!noActions && (
                   <TableCell>
                     <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>

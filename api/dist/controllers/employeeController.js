@@ -50,7 +50,7 @@ const getEmployees = (req, res) => __awaiter(void 0, void 0, void 0, function* (
         res.status(200).json(employees);
     }
     catch (error) {
-        res.status(500).json({ message: 'Error fetching Employees', error });
+        res.status(500).json({ message: "Error fetching Employees", error });
     }
 });
 exports.getEmployees = getEmployees;
@@ -62,11 +62,11 @@ const getEmployeeById = (req, res) => __awaiter(void 0, void 0, void 0, function
             res.status(200).json(employee);
         }
         else {
-            res.status(404).json({ message: 'Employee not found' });
+            res.status(404).json({ message: "Employee not found" });
         }
     }
     catch (error) {
-        res.status(500).json({ message: 'Error fetching Employee', error });
+        res.status(500).json({ message: "Error fetching Employee", error });
     }
 });
 exports.getEmployeeById = getEmployeeById;
@@ -76,7 +76,7 @@ const createEmployee = (req, res) => __awaiter(void 0, void 0, void 0, function*
         res.status(201).json(newEmployee);
     }
     catch (error) {
-        res.status(500).json({ message: 'Error creating Employee', error });
+        res.status(500).json({ message: "Error creating Employee", error });
     }
 });
 exports.createEmployee = createEmployee;
@@ -88,11 +88,11 @@ const updateEmployee = (req, res) => __awaiter(void 0, void 0, void 0, function*
             return res.status(200).json(updatedEmployee);
         }
         else {
-            return res.status(404).json({ message: 'Employee not found' });
+            return res.status(404).json({ message: "Employee not found" });
         }
     }
     catch (error) {
-        return res.status(500).json({ message: 'Error updating Employee', error });
+        return res.status(500).json({ message: "Error updating Employee", error });
     }
 });
 exports.updateEmployee = updateEmployee;
@@ -104,11 +104,11 @@ const deleteEmployee = (req, res) => __awaiter(void 0, void 0, void 0, function*
             return res.status(204).end();
         }
         else {
-            return res.status(404).json({ message: 'Employee not found' });
+            return res.status(404).json({ message: "Employee not found" });
         }
     }
     catch (error) {
-        return res.status(500).json({ message: 'Error deleting Employee', error });
+        return res.status(500).json({ message: "Error deleting Employee", error });
     }
 });
 exports.deleteEmployee = deleteEmployee;

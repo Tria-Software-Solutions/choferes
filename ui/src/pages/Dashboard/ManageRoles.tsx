@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useCallback } from "react";
 import { useAuth } from "../../context/AuthContext";
 import { Role } from "../../models/Role";
+import { Permission } from "../../models/Permission";
 import { useRoles } from "../../hooks/useRole";
 import {
   Backdrop,
@@ -37,11 +38,18 @@ const ManageRoles = () => {
     const normalizeString = (str: string) =>
       str.normalize("NFD").replace(/[\u0300-\u036f]/g, "");
 
-    const filtered = roles.filter((role) =>
-      normalizeString(`${role.name}`)
-        .toLowerCase()
-        .includes(normalizeString(filter).toLowerCase())
-    );
+    const filtered = roles
+      .map((role) => ({
+        ...role,
+        permissionNames: (role.permissions ?? []).map(
+          (permission: Permission) => permission.name
+        ),
+      }))
+      .filter((role) =>
+        normalizeString(`${role.name} ${role.permissionNames}`)
+          .toLowerCase()
+          .includes(normalizeString(filter).toLowerCase())
+      );
 
     setFilteredRoles(filtered);
     setTotalCount(filtered.length);
@@ -134,7 +142,7 @@ const ManageRoles = () => {
               </Box>
               <EditableTable<Role>
                 data={filteredRoles}
-                columns={["name"]}
+                columns={["name", "permissionNames"]}
                 editRowId={editRowId}
                 editFields={editFields}
                 setEditField={(field, value) =>
