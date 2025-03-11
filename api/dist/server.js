@@ -23,19 +23,14 @@ const database_1 = __importDefault(require("./config/database"));
 require("./database/models");
 const app = (0, express_1.default)();
 app.use((0, cors_1.default)({
-    origin: (origin, callback) => {
-        if (origin === process.env.REACT_APP_FRONTEND_URL ||
-            origin === "http://localhost:3000" ||
-            !origin) {
-            callback(null, true);
-        }
-        else {
-            callback(new Error("CORS no permitido"));
-        }
-    },
+    origin: [
+        "https://choferesdealquilercr.vercel.app",
+        "http://localhost:3000",
+    ],
     credentials: true,
     methods: ["GET", "POST", "PUT", "DELETE"],
     allowedHeaders: ["Content-Type", "Authorization"],
+    exposedHeaders: ["Set-Cookie"],
 }));
 app.use((0, body_parser_1.json)());
 app.use((0, body_parser_1.urlencoded)({ extended: true }));

@@ -21,20 +21,14 @@ const app = express();
 
 app.use(
   cors({
-    origin: (origin, callback) => {
-      if (
-        origin === process.env.REACT_APP_FRONTEND_URL ||
-        origin === "http://localhost:3000" ||
-        !origin
-      ) {
-        callback(null, true);
-      } else {
-        callback(new Error("CORS no permitido"));
-      }
-    },
+    origin: [
+      "https://choferesdealquilercr.vercel.app",
+      "http://localhost:3000",
+    ],
     credentials: true,
     methods: ["GET", "POST", "PUT", "DELETE"],
     allowedHeaders: ["Content-Type", "Authorization"],
+    exposedHeaders: ["Set-Cookie"],
   })
 );
 app.use(json());
