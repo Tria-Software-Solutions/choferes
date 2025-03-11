@@ -34,6 +34,13 @@ export const createUser = async (user: Omit<User, "id" | "role">) => {
   return response.data;
 };
 
+export const updateUser = async (
+  id: number,
+  updatedUser: Partial<User>
+) => {
+  await api.put(`/users/${id}`, updatedUser);
+};
+
 export const deleteUser = async (id: number) => {
   await api.delete(`/users/${id}`);
 };

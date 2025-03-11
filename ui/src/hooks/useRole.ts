@@ -22,6 +22,17 @@ export const useRoles = () => {
     }
   }, []);
 
+  const getRoleByName = useCallback(async (name: string) => {
+    setIsLoadingRoles(true);
+    try {
+      return await RoleService.getRoleByName(name);
+    } catch (error) {
+      console.error("Error fetching Role by Name", error);
+    } finally {
+      setIsLoadingRoles(false);
+    }
+  }, []);
+
   const updateRole = async (id: number, updatedRole: Partial<Role>) => {
     await RoleService.getRoleById(id);
     setRoles((prev) =>
@@ -33,8 +44,6 @@ export const useRoles = () => {
     await RoleService.deleteRole(id);
     setRoles((prev) => prev.filter((role) => role.id !== id));
     setTotalCountRoles((prev) => prev - 1);
-    //await UserRoleService.delete(id);
-    //await RolePermissionService.delete(id);
   };
 
   useEffect(() => {
@@ -49,6 +58,7 @@ export const useRoles = () => {
     totalCountRoles,
     isLoadingRoles,
     getRoles,
+    getRoleByName,
     updateRole,
     deleteRole,
   };

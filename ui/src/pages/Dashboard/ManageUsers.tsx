@@ -1,9 +1,10 @@
 import React, { useState, useEffect, useCallback } from "react";
 import { useAuth } from "../../context/AuthContext";
 import { User } from "../../models/User";
+import { Role } from "../../models/Role";
 import { useUsers } from "../../hooks/useUser";
+import { useRoles } from "../../hooks/useRole";
 import { useUserRoles } from "../../hooks/useUserRole";
-// import { useRoles } from "../../hooks/useRole";
 import {
   Backdrop,
   Box,
@@ -18,12 +19,12 @@ import {
 } from "@mui/material";
 import EditableTable from "../../components/Table/EditableTable/EditableTable";
 import SearchBar from "../../components/SearchBar/SearchBar";
-import { Role } from "../../models/Role";
 
 const ManageUsers = () => {
   const { userPermissions } = useAuth();
   const { users, isLoadingUsers, updateUser, deleteUser } = useUsers();
-  const { getUserRoleByUserId } = useUserRoles();
+  const { getRoleByName } = useRoles();
+  const { getUserRoleByUserId, updateUserRole } = useUserRoles();
   const [filteredUsers, setFilteredUsers] = useState<User[]>([]);
   const [totalCount, setTotalCount] = useState(0);
   const [editRowId, setEditRowId] = useState<number | null>(null);
@@ -32,6 +33,7 @@ const ManageUsers = () => {
     lastName: "",
     email: "",
     username: "",
+    roleName: ""
   });
   const [dialogOpen, setDialogOpen] = useState(false);
   const [userToDelete, setUserToDelete] = useState<number | null>(null);
@@ -91,6 +93,7 @@ const ManageUsers = () => {
       lastName: user.lastName,
       email: user.email,
       username: user.username,
+      roleName: user?.roleName || "",
     });
   };
 
@@ -98,7 +101,23 @@ const ManageUsers = () => {
     setEditRowId(null);
   };
 
-  const handleSaveClick = (id: number) => {
+  const handleSaveClick = async (id: number) => {
+    const newRole = await getRoleByName(editFields.roleName);
+    if (!newRole) {
+      console.error("Rol no encontrado");
+      return;
+    }
+
+    const userRole = await getUserRoleByUserId(id);
+    if (!userRole) {
+      console.error("No se encontró la relación userRole");
+      return;
+    }
+
+    if (userRole.roleId !== newRole.id) {
+      updateUserRole(id, newRole.id);
+    }
+
     const updatedUser = {
       ...editFields,
     };
@@ -109,6 +128,7 @@ const ManageUsers = () => {
       lastName: "",
       email: "",
       username: "",
+      roleName: "",
     });
   };
 

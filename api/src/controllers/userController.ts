@@ -4,7 +4,11 @@ import * as userService from "../services/userService";
 export const authenticateUser = async (req: Request, res: Response) => {
   try {
     const { username, password } = req.body;
-    const { user } = await userService.authenticateUser(username, password, res);
+    const { user } = await userService.authenticateUser(
+      username,
+      password,
+      res
+    );
     res.status(200).json({ user });
   } catch (error) {
     res.status(401).json({ message: "Error login User", error });
@@ -62,6 +66,20 @@ export const createUser = async (req: Request, res: Response) => {
     res.status(201).json(newUser);
   } catch (error) {
     res.status(500).json({ message: "Error registering User", error });
+  }
+};
+
+export const updateUser = async (req: Request, res: Response) => {
+  try {
+    const id = parseInt(req.params.id);
+    const updatedUser = await userService.updateUser(id, req.body);
+    if (updatedUser) {
+      return res.status(200).json(updatedUser);
+    } else {
+      return res.status(404).json({ message: "User not found" });
+    }
+  } catch (error) {
+    return res.status(500).json({ message: "Error updating User", error });
   }
 };
 

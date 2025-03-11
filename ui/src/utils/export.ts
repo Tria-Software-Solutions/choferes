@@ -451,14 +451,14 @@ export const createExportOptions = (
     options.push({
       label: "Exportar a Excel",
       icon: excelIcon,
-      action: () => exportToExcel(dataForExport, fileName, headers),
+      onClick: () => exportToExcel(dataForExport, fileName, headers),
     });
   }
   if (exportToPDF) {
     options.push({
       label: "Exportar a PDF",
       icon: pdfIcon,
-      action: () => exportToPDF(dataForExport, fileName, headers),
+      onClick: () => exportToPDF(dataForExport, fileName, headers),
     });
   }
 

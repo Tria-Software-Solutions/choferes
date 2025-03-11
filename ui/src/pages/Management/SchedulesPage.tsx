@@ -2,9 +2,9 @@ import React, { useState, useEffect, useCallback, useMemo } from "react";
 import { useAuth } from "../../context/AuthContext";
 import { Schedule } from "../../models/Schedule";
 import { useSchedules } from "../../hooks/useSchedule";
-import SplitButton from "../../components/SplitButton/SplitButton";
 import SearchBar from "../../components/SearchBar/SearchBar";
 import EditableTable from "../../components/Table/EditableTable/EditableTable";
+import CustomSpeedDial from "../../components/SpeedDial/CustomSpeedDial";
 import {
   Button,
   TextField,
@@ -38,6 +38,7 @@ import {
 import { PAGE_TITLE, PERMISSIONS } from "../../constants/constants";
 import PostAddRoundedIcon from "@mui/icons-material/PostAddRounded";
 import DownloadRoundedIcon from "@mui/icons-material/DownloadRounded";
+import CloseRoundedIcon from '@mui/icons-material/CloseRounded';
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faFileExcel, faFilePdf } from "@fortawesome/free-solid-svg-icons";
 
@@ -201,11 +202,12 @@ const SchedulesPage: React.FC = () => {
           userPermissions.includes(PERMISSIONS.EXPORT_PDF_SCHEDULES) && (
             <Box sx={{ minHeight: 65 }}>
               {filteredSchedules.length > 0 && (
-                <SplitButton
-                  options={exportOptions}
-                  defaultIndex={0}
-                  buttonIcon={<DownloadRoundedIcon />}
-                />
+                <CustomSpeedDial
+                actions={exportOptions}
+                mainIcon={<DownloadRoundedIcon />}
+                openIcon={<CloseRoundedIcon />}
+                direction="left"
+              />
               )}
             </Box>
           )}

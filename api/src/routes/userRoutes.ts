@@ -11,6 +11,7 @@ router.get("/:id", authenticateToken, userController.getUserById);
 router.get("/username/:username", userController.getUserByUsername);
 router.get("/:id/permissions", userController.getUserPermissions);
 router.post("/register", userController.createUser);
+router.put("/:id", authenticateToken, userController.updateUser);
 router.delete(
   "/:id",
   authenticateToken,

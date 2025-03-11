@@ -11,6 +11,7 @@ router.get(
   userRoleController.getUserRoleByUserId
 );
 router.post("/", userRoleController.createUserRole);
+router.put("/:id", authenticateToken, userRoleController.updateUserRole);
 router.delete("/:id", authenticateToken, userRoleController.deleteUserRole);
 
 export default router;

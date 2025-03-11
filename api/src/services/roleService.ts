@@ -25,6 +25,19 @@ export const getRoleById = async (id: number) => {
   });
 };
 
+export const getRoleByName = async (name: string) => {
+  return await Role.findOne({
+    where: { name },
+    include: [
+      {
+        model: Permission,
+        as: "permissions",
+        through: { attributes: [] },
+      },
+    ],
+  });
+};
+
 export const createRole = async (data: Omit<Role, "id">) => {
   return await Role.create(data, { returning: true });
 };
