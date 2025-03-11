@@ -184,7 +184,7 @@ const theme = createTheme({
     MuiFab: {
       styleOverrides: {
         root: {
-          borderRadius: "15%",
+          borderRadius: "5px",
           backgroundColor: "black",
           "&:hover": {
             color: "#a6a6a6",
@@ -194,6 +194,20 @@ const theme = createTheme({
             color: "#a6a6a6",
             backgroundColor: "#e0e0e0", 
           },
+        },
+      },
+    },
+    MuiSpeedDial: {
+      styleOverrides: {
+        fab: {
+          width: "62px", 
+        },
+      },
+    },
+    MuiSpeedDialAction: {
+      styleOverrides: {
+        fab: {
+          width: "45px",
         },
       },
     },

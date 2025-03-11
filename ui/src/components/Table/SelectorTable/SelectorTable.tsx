@@ -563,21 +563,27 @@ const SelectorTable: React.FC<SelectorTableProps> = React.memo(
 
                               return items;
                             })}
-                            <Divider key="divider" />
-                            <MenuItem
-                              value={"Other"}
-                              onClick={() => navigate("/schedules")}
-                            >
-                              <Box
-                                display="flex"
-                                justifyContent="space-between"
-                                width="100%"
-                                alignItems="center"
-                              >
-                                Otro
-                                <AddIcon fontSize="small" />
-                              </Box>
-                            </MenuItem>
+                            {permissions?.includes(
+                              PERMISSIONS.CREATE_SCHEDULES
+                            ) && (
+                              <>
+                                <Divider key="divider" />
+                                <MenuItem
+                                  value={"Other"}
+                                  onClick={() => navigate("/schedules")}
+                                >
+                                  <Box
+                                    display="flex"
+                                    justifyContent="space-between"
+                                    width="100%"
+                                    alignItems="center"
+                                  >
+                                    Otro
+                                    <AddIcon fontSize="small" />
+                                  </Box>
+                                </MenuItem>
+                              </>
+                            )}
                           </Select>
                         </FormControl>
                       </TableCell>
@@ -723,7 +729,11 @@ const SelectorTable: React.FC<SelectorTableProps> = React.memo(
               setRowsPerPage(parseInt(event.target.value, 10));
               setPage(0);
             }}
-            labelRowsPerPage={<Typography variant="body2" component="span">{TABLE.ROWS_PER_PAGE}</Typography>}
+            labelRowsPerPage={
+              <Typography variant="body2" component="span">
+                {TABLE.ROWS_PER_PAGE}
+              </Typography>
+            }
             labelDisplayedRows={() => ""}
             ActionsComponent={PaginationActions}
           />
