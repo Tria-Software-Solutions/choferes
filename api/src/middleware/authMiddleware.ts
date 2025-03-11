@@ -27,9 +27,9 @@ export const authenticateToken = (
       return res.status(401).json({ error: "Unauthorized: Token required" });
     }
 
-    jwt.verify(accessToken, JWT_SECRET_KEY, (err, decoded) => {
-      if (err) {
-        if (err.name === "TokenExpiredError") {
+    jwt.verify(accessToken, JWT_SECRET_KEY, (error, decoded) => {
+      if (error) {
+        if (error.name === "TokenExpiredError") {
           const refreshToken = req.cookies.refreshToken;
           if (!refreshToken) {
             return res

@@ -47,8 +47,8 @@ app.use("/api/biweekly-summary", biweeklySummaryRoutes_1.default);
 app.use("/api/monthly-summary", monthlySummaryRoutes_1.default);
 app.use("/api/schedules", scheduleRoutes_1.default);
 app.use("/api/vehicles", vehicleRoutes_1.default);
-app.use((err, req, res, next) => {
-    console.error(err.stack);
+app.use((error, req, res, next) => {
+    console.error(error.stack);
     res.status(500).send("Something broke!");
 });
 database_1.default

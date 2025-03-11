@@ -5,6 +5,7 @@ import { useVehicles } from "../../hooks/useVehicle";
 import SearchBar from "../../components/SearchBar/SearchBar";
 import EditableTable from "../../components/Table/EditableTable/EditableTable";
 import CustomSpeedDial from "../../components/SpeedDial/CustomSpeedDial";
+import { useAppNotifications } from "../../components/Snackbar/SnackbarWrapper";
 import {
   Box,
   Typography,
@@ -63,6 +64,7 @@ const VehiclesPage: React.FC = () => {
     updateVehicle,
     deleteVehicle,
   } = useVehicles(format(selectedDate, "yyyy-MM-dd"));
+  const { showNotification } = useAppNotifications();
   const [filteredVehicles, setFilteredVehicles] = useState<Vehicle[]>([]);
   const [filteredWeekVehicles, setFilteredWeekVehicles] = useState<Vehicle[]>(
     []
@@ -184,35 +186,51 @@ const VehiclesPage: React.FC = () => {
   );
 
   const handleAdd = () => {
-    setAllVehicles((prevVehicles) => {
-      const newId =
-        prevVehicles.length > 0
-          ? Math.max(...prevVehicles.map((vehicle) => vehicle.id)) + 1
-          : 1;
+    try {
+      setAllVehicles((prevVehicles) => {
+        const newId =
+          prevVehicles.length > 0
+            ? Math.max(...prevVehicles.map((vehicle) => vehicle.id)) + 1
+            : 1;
 
-      const newVehicle: Vehicle = {
-        id: newId,
-        ticket: addFields.ticket,
-        licensePlate: addFields.licensePlate,
-        brand: addFields.brand,
-        color: addFields.color,
-        parkingLot: addFields.parkingLot,
-        notes: addFields.notes,
-        createdAt: selectedDate,
-      };
-      createVehicle(newVehicle);
-      return [...prevVehicles, newVehicle];
-    });
-    setAddFields({
-      ticket: "",
-      licensePlate: "",
-      brand: "",
-      color: "",
-      parkingLot: "",
-      notes: "",
-    });
-    setSearchBrandTerm("");
-    setSearchColorTerm("");
+        const newVehicle: Vehicle = {
+          id: newId,
+          ticket: addFields.ticket,
+          licensePlate: addFields.licensePlate,
+          brand: addFields.brand,
+          color: addFields.color,
+          parkingLot: addFields.parkingLot,
+          notes: addFields.notes,
+          createdAt: selectedDate,
+        };
+        createVehicle(newVehicle);
+        return [...prevVehicles, newVehicle];
+      });
+      setAddFields({
+        ticket: "",
+        licensePlate: "",
+        brand: "",
+        color: "",
+        parkingLot: "",
+        notes: "",
+      });
+      setSearchBrandTerm("");
+      setSearchColorTerm("");
+      showNotification(
+        "El registro del vehículo fue exitoso",
+        "success",
+        3000,
+        false
+      );
+    } catch (error) {
+      console.error(error);
+      showNotification(
+        "Ha ocurrido un error al registrar el vehículo",
+        "error",
+        5000,
+        false
+      );
+    }
   };
 
   const handleEditClick = (vehicle: Vehicle) => {
@@ -233,21 +251,37 @@ const VehiclesPage: React.FC = () => {
 
   const handleSaveClick = useCallback(
     (id: number) => {
-      const updatedVehicle = {
-        ...editFields,
-      };
-      updateVehicle(id, updatedVehicle);
-      setEditRowId(null);
-      setEditFields({
-        ticket: "",
-        licensePlate: "",
-        brand: "",
-        color: "",
-        parkingLot: "",
-        notes: "",
-      });
+      try {
+        const updatedVehicle = {
+          ...editFields,
+        };
+        updateVehicle(id, updatedVehicle);
+        setEditRowId(null);
+        setEditFields({
+          ticket: "",
+          licensePlate: "",
+          brand: "",
+          color: "",
+          parkingLot: "",
+          notes: "",
+        });
+        showNotification(
+          "La actualización del vehículo fue exitosa",
+          "success",
+          3000,
+          false
+        );
+      } catch (error) {
+        console.error(error);
+        showNotification(
+          "Ha ocurrido un error al actualizar el vehículo",
+          "error",
+          5000,
+          false
+        );
+      }
     },
-    [editFields, updateVehicle]
+    [editFields, updateVehicle, showNotification]
   );
 
   const handleOpenDialog = (id: number) => {
@@ -261,9 +295,25 @@ const VehiclesPage: React.FC = () => {
   };
 
   const handleDelete = () => {
-    if (vehicleToDelete !== null) {
-      deleteVehicle(vehicleToDelete);
-      handleCloseDialog();
+    try {
+      if (vehicleToDelete !== null) {
+        deleteVehicle(vehicleToDelete);
+        handleCloseDialog();
+      }
+      showNotification(
+        "La eliminación del vehículo fue exitosa",
+        "success",
+        3000,
+        false
+      );
+    } catch (error) {
+      console.error(error);
+      showNotification(
+        "Ha ocurrido un error al eliminar el vehículo",
+        "error",
+        5000,
+        false
+      );
     }
   };
 

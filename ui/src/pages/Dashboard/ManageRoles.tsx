@@ -3,6 +3,7 @@ import { useAuth } from "../../context/AuthContext";
 import { Role } from "../../models/Role";
 import { Permission } from "../../models/Permission";
 import { useRoles } from "../../hooks/useRole";
+import { useAppNotifications } from "../../components/Snackbar/SnackbarWrapper";
 import {
   Backdrop,
   Box,
@@ -21,6 +22,7 @@ import SearchBar from "../../components/SearchBar/SearchBar";
 const ManageRoles = () => {
   const { userPermissions } = useAuth();
   const { roles, isLoadingRoles, updateRole, deleteRole } = useRoles();
+  const { showNotification } = useAppNotifications();
   const [filteredRoles, setFilteredRoles] = useState<Role[]>([]);
   const [totalCount, setTotalCount] = useState(0);
   const [editRowId, setEditRowId] = useState<number | null>(null);
@@ -83,12 +85,28 @@ const ManageRoles = () => {
   };
 
   const handleSaveClick = (id: number) => {
-    const updatedRole = {
-      ...editFields,
-    };
-    updateRole(id, updatedRole);
-    setEditRowId(null);
-    setEditFields({ name: "" });
+    try {
+      const updatedRole = {
+        ...editFields,
+      };
+      updateRole(id, updatedRole);
+      setEditRowId(null);
+      setEditFields({ name: "" });
+      showNotification(
+        "La actualización del rol fue exitosa",
+        "success",
+        3000,
+        false
+      );
+    } catch (error) {
+      console.error(error);
+      showNotification(
+        "Ha ocurrido un error al actualizar el rol",
+        "error",
+        5000,
+        false
+      );
+    }
   };
 
   const handleOpenDialog = (id: number) => {
@@ -102,9 +120,25 @@ const ManageRoles = () => {
   };
 
   const handleDelete = () => {
-    if (roleToDelete !== null) {
-      deleteRole(roleToDelete);
-      handleCloseDialog();
+    try {
+      if (roleToDelete !== null) {
+        deleteRole(roleToDelete);
+        handleCloseDialog();
+      }
+      showNotification(
+        "La eliminación del rol fue exitosa",
+        "success",
+        3000,
+        false
+      );
+    } catch (error) {
+      console.error(error);
+      showNotification(
+        "Ha ocurrido un error al eliminar el empleado",
+        "error",
+        5000,
+        false
+      );
     }
   };
 

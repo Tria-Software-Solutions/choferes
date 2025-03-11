@@ -50,12 +50,12 @@ app.use("/api/vehicles", vehicleRoutes);
 
 app.use(
   (
-    err: Error,
+    error: Error,
     req: express.Request,
     res: express.Response,
     next: express.NextFunction
   ) => {
-    console.error(err.stack);
+    console.error(error.stack);
     res.status(500).send("Something broke!");
   }
 );
