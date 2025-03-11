@@ -23,7 +23,9 @@ export const getRoleById = async (req: Request, res: Response) => {
 export const getRoleByName = async (req: Request, res: Response) => {
   try {
     const role = await roleService.getRoleByName(req.params.name);
-    if (!role) return res.status(404).json({ error: "Role not found" });
+    if (!role) {
+      return res.status(404).json({ error: "Role not found" });
+    }
     res.status(200).json(role);
   } catch (error) {
     res.status(500).json({ message: "Error fetching Role", error });

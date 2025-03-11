@@ -33,7 +33,7 @@ const ManageUsers = () => {
     lastName: "",
     email: "",
     username: "",
-    roleName: ""
+    roleName: "",
   });
   const [dialogOpen, setDialogOpen] = useState(false);
   const [userToDelete, setUserToDelete] = useState<number | null>(null);
@@ -113,7 +113,6 @@ const ManageUsers = () => {
       console.error("No se encontró la relación userRole");
       return;
     }
-
     if (userRole.roleId !== newRole.id) {
       updateUserRole(id, newRole.id);
     }
@@ -122,6 +121,7 @@ const ManageUsers = () => {
       ...editFields,
     };
     updateUser(id, updatedUser);
+    //UPDATE USERROLE !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
     setEditRowId(null);
     setEditFields({
       firstName: "",

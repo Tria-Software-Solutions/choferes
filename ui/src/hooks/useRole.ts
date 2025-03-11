@@ -22,6 +22,17 @@ export const useRoles = () => {
     }
   }, []);
 
+  const getRoleById = useCallback(async (id: number) => {
+    setIsLoadingRoles(true);
+    try {
+      return await RoleService.getRoleById(id);
+    } catch (error) {
+      console.error("Error fetching Role by Id", error);
+    } finally {
+      setIsLoadingRoles(false);
+    }
+  }, []);
+
   const getRoleByName = useCallback(async (name: string) => {
     setIsLoadingRoles(true);
     try {
@@ -58,6 +69,7 @@ export const useRoles = () => {
     totalCountRoles,
     isLoadingRoles,
     getRoles,
+    getRoleById,
     getRoleByName,
     updateRole,
     deleteRole,

@@ -43,5 +43,6 @@ const router = express_1.default.Router();
 router.get("/", authMiddleware_1.authenticateToken, userRoleController.getUserRoles);
 router.get("/:userId", authMiddleware_1.authenticateToken, userRoleController.getUserRoleByUserId);
 router.post("/", userRoleController.createUserRole);
+router.put("/:id", authMiddleware_1.authenticateToken, userRoleController.updateUserRole);
 router.delete("/:id", authMiddleware_1.authenticateToken, userRoleController.deleteUserRole);
 exports.default = router;
