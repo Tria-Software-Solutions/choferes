@@ -2,6 +2,7 @@ import { useCallback, useState } from "react";
 import { Link } from "react-router-dom";
 import { useUsers } from "../../hooks/useUser";
 import { User } from "../../models/User";
+import { useAppNotifications } from "../../components/Snackbar/SnackbarWrapper";
 import {
   TextField,
   Button,
@@ -22,6 +23,7 @@ import { PAGE_TITLE } from "../../constants/constants";
 
 const Register = () => {
   const { createUser, getUserByUsername } = useUsers();
+  const { showNotification } = useAppNotifications();
   const [addFields, setAddFields] = useState({
     firstName: "",
     lastName: "",
@@ -103,8 +105,10 @@ const Register = () => {
         password: addFields.password,
       };
       createUser(newUser);
+      showNotification("El registro fue exitoso", "success");
     } catch (err) {
       setError("Error al registrar usuario");
+      showNotification("Ha ocurrido un error al realizar el registro.", "error");
     }
   };
 

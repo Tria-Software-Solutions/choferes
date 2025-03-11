@@ -186,6 +186,14 @@ const theme = createTheme({
         root: {
           borderRadius: "15%",
           backgroundColor: "black",
+          "&:hover": {
+            color: "#a6a6a6",
+            backgroundColor: "#e0e0e0",
+          },
+          "&:active": {
+            color: "#a6a6a6",
+            backgroundColor: "#e0e0e0", 
+          },
         },
       },
     },
