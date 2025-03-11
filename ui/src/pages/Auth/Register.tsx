@@ -105,10 +105,13 @@ const Register = () => {
         password: addFields.password,
       };
       createUser(newUser);
-      showNotification("El registro fue exitoso", "success");
-    } catch (err) {
+      showNotification("El registro del usuario fue exitoso", "success", 3000, false);
+    } catch (error) {
       setError("Error al registrar usuario");
-      showNotification("Ha ocurrido un error al realizar el registro.", "error");
+      showNotification(
+        "Ha ocurrido un error al registrar el usuario",
+        "error", 5000, false
+      );
     }
   };
 

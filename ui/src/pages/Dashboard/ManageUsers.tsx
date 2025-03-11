@@ -5,6 +5,7 @@ import { Role } from "../../models/Role";
 import { useUsers } from "../../hooks/useUser";
 import { useRoles } from "../../hooks/useRole";
 import { useUserRoles } from "../../hooks/useUserRole";
+import { useAppNotifications } from "../../components/Snackbar/SnackbarWrapper";
 import {
   Backdrop,
   Box,
@@ -25,6 +26,7 @@ const ManageUsers = () => {
   const { users, isLoadingUsers, updateUser, deleteUser } = useUsers();
   const { getRoleByName } = useRoles();
   const { getUserRoleByUserId, updateUserRole } = useUserRoles();
+  const { showNotification } = useAppNotifications();
   const [filteredUsers, setFilteredUsers] = useState<User[]>([]);
   const [totalCount, setTotalCount] = useState(0);
   const [editRowId, setEditRowId] = useState<number | null>(null);
@@ -102,34 +104,50 @@ const ManageUsers = () => {
   };
 
   const handleSaveClick = async (id: number) => {
-    const newRole = await getRoleByName(editFields.roleName);
-    if (!newRole) {
-      console.error("Rol no encontrado");
-      return;
-    }
+    try {
+      const newRole = await getRoleByName(editFields.roleName);
+      if (!newRole) {
+        console.error("Rol no encontrado");
+        return;
+      }
 
-    const userRole = await getUserRoleByUserId(id);
-    if (!userRole) {
-      console.error("No se encontró la relación userRole");
-      return;
-    }
-    if (userRole.roleId !== newRole.id) {
-      updateUserRole(id, newRole.id);
-    }
+      const userRole = await getUserRoleByUserId(id);
+      if (!userRole) {
+        console.error("No se encontró la relación userRole");
+        return;
+      }
+      if (userRole.roleId !== newRole.id) {
+        updateUserRole(id, newRole.id);
+      }
 
-    const updatedUser = {
-      ...editFields,
-    };
-    updateUser(id, updatedUser);
-    //UPDATE USERROLE !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-    setEditRowId(null);
-    setEditFields({
-      firstName: "",
-      lastName: "",
-      email: "",
-      username: "",
-      roleName: "",
-    });
+      const updatedUser = {
+        ...editFields,
+      };
+      updateUser(id, updatedUser);
+      //UPDATE USERROLE !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+      setEditRowId(null);
+      setEditFields({
+        firstName: "",
+        lastName: "",
+        email: "",
+        username: "",
+        roleName: "",
+      });
+      showNotification(
+        "La actualización del usuario fue exitosa",
+        "success",
+        3000,
+        false
+      );
+    } catch (error) {
+      console.error(error);
+      showNotification(
+        "Ha ocurrido un error al actualizar el usuario",
+        "error",
+        5000,
+        false
+      );
+    }
   };
 
   const handleOpenDialog = (id: number) => {
@@ -143,10 +161,26 @@ const ManageUsers = () => {
   };
 
   const handleDelete = async () => {
-    if (userToDelete !== null) {
-      const userRoleToDelete = await getUserRoleByUserId(userToDelete);
-      await deleteUser(userToDelete, userRoleToDelete.id);
-      handleCloseDialog();
+    try {
+      if (userToDelete !== null) {
+        const userRoleToDelete = await getUserRoleByUserId(userToDelete);
+        await deleteUser(userToDelete, userRoleToDelete.id);
+        handleCloseDialog();
+      }
+      showNotification(
+        "La eliminación del usuario fue exitosa",
+        "success",
+        3000,
+        false
+      );
+    } catch (error) {
+      console.error(error);
+      showNotification(
+        "Ha ocurrido un error al eliminar el usuario",
+        "error",
+        5000,
+        false
+      );
     }
   };
 

@@ -5,6 +5,7 @@ import { useEmployees } from "../../hooks/useEmployee";
 import SearchBar from "../../components/SearchBar/SearchBar";
 import CustomSpeedDial from "../../components/SpeedDial/CustomSpeedDial";
 import EditableTable from "../../components/Table/EditableTable/EditableTable";
+import { useAppNotifications } from "../../components/Snackbar/SnackbarWrapper";
 import {
   Button,
   TextField,
@@ -30,7 +31,7 @@ import {
 import { PAGE_TITLE, PERMISSIONS } from "../../constants/constants";
 import PersonAddAlt1RoundedIcon from "@mui/icons-material/PersonAddAlt1Rounded";
 import DownloadRoundedIcon from "@mui/icons-material/DownloadRounded";
-import CloseRoundedIcon from '@mui/icons-material/CloseRounded';
+import CloseRoundedIcon from "@mui/icons-material/CloseRounded";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faFileExcel, faFilePdf } from "@fortawesome/free-solid-svg-icons";
 
@@ -43,6 +44,7 @@ const EmployeesPage: React.FC = () => {
     updateEmployee,
     deleteEmployee,
   } = useEmployees();
+  const { showNotification } = useAppNotifications();
   const [filteredEmployees, setFilteredEmployees] = useState<Employee[]>([]);
   const [totalCount, setTotalCount] = useState(0);
   const [editRowId, setEditRowId] = useState<number | null>(null);
@@ -93,12 +95,28 @@ const EmployeesPage: React.FC = () => {
   };
 
   const handleAdd = () => {
-    const newEmployee: Omit<Employee, "id"> = {
-      firstName: addFields.firstName,
-      lastName: addFields.lastName,
-    };
-    createEmployee(newEmployee);
-    setAddFields({ firstName: "", lastName: "" });
+    try {
+      const newEmployee: Omit<Employee, "id"> = {
+        firstName: addFields.firstName,
+        lastName: addFields.lastName,
+      };
+      createEmployee(newEmployee);
+      setAddFields({ firstName: "", lastName: "" });
+      showNotification(
+        "El registro del empleado fue exitoso",
+        "success",
+        3000,
+        false
+      );
+    } catch (error) {
+      console.error(error);
+      showNotification(
+        "Ha ocurrido un error al registrar el usuario",
+        "error",
+        5000,
+        false
+      );
+    }
   };
 
   const handleEditClick = (employee: Employee) => {
@@ -114,12 +132,28 @@ const EmployeesPage: React.FC = () => {
   };
 
   const handleSaveClick = (id: number) => {
-    const updatedEmployee = {
-      ...editFields,
-    };
-    updateEmployee(id, updatedEmployee);
-    setEditRowId(null);
-    setEditFields({ firstName: "", lastName: "" });
+    try {
+      const updatedEmployee = {
+        ...editFields,
+      };
+      updateEmployee(id, updatedEmployee);
+      setEditRowId(null);
+      setEditFields({ firstName: "", lastName: "" });
+      showNotification(
+        "La actualización del empleado fue exitosa",
+        "success",
+        3000,
+        false
+      );
+    } catch (error) {
+      console.error(error);
+      showNotification(
+        "Ha ocurrido un error al actualizar el empleado",
+        "error",
+        5000,
+        false
+      );
+    }
   };
 
   const handleOpenDialog = (id: number) => {
@@ -133,9 +167,25 @@ const EmployeesPage: React.FC = () => {
   };
 
   const handleDelete = () => {
-    if (employeeToDelete !== null) {
-      deleteEmployee(employeeToDelete);
-      handleCloseDialog();
+    try {
+      if (employeeToDelete !== null) {
+        deleteEmployee(employeeToDelete);
+        handleCloseDialog();
+      }
+      showNotification(
+        "La eliminación del empleado fue exitosa",
+        "success",
+        3000,
+        false
+      );
+    } catch (error) {
+      console.error(error);
+      showNotification(
+        "Ha ocurrido un error al eliminar el empleado",
+        "error",
+        5000,
+        false
+      );
     }
   };
 
@@ -177,11 +227,11 @@ const EmployeesPage: React.FC = () => {
             <Box sx={{ minHeight: 65 }}>
               {filteredEmployees.length > 0 && (
                 <CustomSpeedDial
-                actions={exportOptions}
-                mainIcon={<DownloadRoundedIcon />}
-                openIcon={<CloseRoundedIcon />}
-                direction="left"
-              />
+                  actions={exportOptions}
+                  mainIcon={<DownloadRoundedIcon />}
+                  openIcon={<CloseRoundedIcon />}
+                  direction="left"
+                />
               )}
             </Box>
           )}

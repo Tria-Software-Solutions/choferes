@@ -5,6 +5,7 @@ import { useSchedules } from "../../hooks/useSchedule";
 import SearchBar from "../../components/SearchBar/SearchBar";
 import EditableTable from "../../components/Table/EditableTable/EditableTable";
 import CustomSpeedDial from "../../components/SpeedDial/CustomSpeedDial";
+import { useAppNotifications } from "../../components/Snackbar/SnackbarWrapper";
 import {
   Button,
   TextField,
@@ -38,7 +39,7 @@ import {
 import { PAGE_TITLE, PERMISSIONS } from "../../constants/constants";
 import PostAddRoundedIcon from "@mui/icons-material/PostAddRounded";
 import DownloadRoundedIcon from "@mui/icons-material/DownloadRounded";
-import CloseRoundedIcon from '@mui/icons-material/CloseRounded';
+import CloseRoundedIcon from "@mui/icons-material/CloseRounded";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faFileExcel, faFilePdf } from "@fortawesome/free-solid-svg-icons";
 
@@ -51,6 +52,7 @@ const SchedulesPage: React.FC = () => {
     updateSchedule,
     deleteSchedule,
   } = useSchedules();
+  const { showNotification } = useAppNotifications();
   const [filteredSchedules, setFilteredSchedules] = useState<Schedule[]>([]);
   const [totalCountSchedules, setTotalCountSchedules] = useState(0);
   const [editRowId, setEditRowId] = useState<number | null>(null);
@@ -116,13 +118,29 @@ const SchedulesPage: React.FC = () => {
   };
 
   const handleAdd = () => {
-    const newSchedule: Omit<Schedule, "id"> = {
-      label: addFields.label,
-      day: addFields.day,
-      hours: parseInt(addFields.hours, 10),
-    };
-    createSchedule(newSchedule);
-    setAddFields({ label: "", day: "", hours: "" });
+    try {
+      const newSchedule: Omit<Schedule, "id"> = {
+        label: addFields.label,
+        day: addFields.day,
+        hours: parseInt(addFields.hours, 10),
+      };
+      createSchedule(newSchedule);
+      setAddFields({ label: "", day: "", hours: "" });
+      showNotification(
+        "El registro del horario fue exitoso",
+        "success",
+        3000,
+        false
+      );
+    } catch (error) {
+      console.error(error);
+      showNotification(
+        "Ha ocurrido un error al registrar el horario",
+        "error",
+        5000,
+        false
+      );
+    }
   };
 
   const handleEditClick = (schedule: Schedule) => {
@@ -139,13 +157,29 @@ const SchedulesPage: React.FC = () => {
   };
 
   const handleSaveClick = (id: number) => {
-    const updatedSchedule = {
-      ...editFields,
-      hours: parseInt(editFields.hours, 10),
-    };
-    updateSchedule(id, updatedSchedule);
-    setEditRowId(null);
-    setEditFields({ label: "", day: "", hours: "" });
+    try {
+      const updatedSchedule = {
+        ...editFields,
+        hours: parseInt(editFields.hours, 10),
+      };
+      updateSchedule(id, updatedSchedule);
+      setEditRowId(null);
+      setEditFields({ label: "", day: "", hours: "" });
+      showNotification(
+        "La actualización del horario fue exitosa",
+        "success",
+        3000,
+        false
+      );
+    } catch (error) {
+      console.error(error);
+      showNotification(
+        "Ha ocurrido un error al actualizar el horario",
+        "error",
+        5000,
+        false
+      );
+    }
   };
 
   const handleOpenDialog = (id: number) => {
@@ -159,9 +193,25 @@ const SchedulesPage: React.FC = () => {
   };
 
   const handleDelete = () => {
-    if (scheduleToDelete !== null) {
-      deleteSchedule(scheduleToDelete);
-      handleCloseDialog();
+    try {
+      if (scheduleToDelete !== null) {
+        deleteSchedule(scheduleToDelete);
+        handleCloseDialog();
+      }
+      showNotification(
+        "La eliminación del horario fue exitosa",
+        "success",
+        3000,
+        false
+      );
+    } catch (error) {
+      console.error(error);
+      showNotification(
+        "Ha ocurrido un error al eliminar el horario",
+        "error",
+        5000,
+        false
+      );
     }
   };
 
@@ -203,11 +253,11 @@ const SchedulesPage: React.FC = () => {
             <Box sx={{ minHeight: 65 }}>
               {filteredSchedules.length > 0 && (
                 <CustomSpeedDial
-                actions={exportOptions}
-                mainIcon={<DownloadRoundedIcon />}
-                openIcon={<CloseRoundedIcon />}
-                direction="left"
-              />
+                  actions={exportOptions}
+                  mainIcon={<DownloadRoundedIcon />}
+                  openIcon={<CloseRoundedIcon />}
+                  direction="left"
+                />
               )}
             </Box>
           )}

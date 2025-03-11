@@ -38,14 +38,14 @@ const Login = () => {
 
     try {
       await authenticateUser(fields.username, fields.password);
-    } catch (err: unknown) {
-      if (err instanceof AxiosError) {
-        if (err.response?.status === 401) {
+    } catch (error: unknown) {
+      if (error instanceof AxiosError) {
+        if (error.response?.status === 401) {
           setError("Usuario o contraseña incorrectos.");
         } else {
           setError("Ocurrió un error con la autenticación. Intenta más tarde.");
         }
-      } else if (err instanceof Error) {
+      } else if (error instanceof Error) {
         setError("No se pudo conectar al servidor. Intenta más tarde.");
       } else {
         setError("Ocurrió un error desconocido. Intenta más tarde.");
