@@ -42,7 +42,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.deleteUserRole = exports.createUserRole = exports.getUserRoleByUserId = exports.getUserRoles = void 0;
+exports.deleteUserRole = exports.updateUserRole = exports.createUserRole = exports.getUserRoleByUserId = exports.getUserRoles = void 0;
 const userRoleService = __importStar(require("../services/userRoleService"));
 const getUserRoles = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
@@ -77,6 +77,22 @@ const createUserRole = (req, res) => __awaiter(void 0, void 0, void 0, function*
     }
 });
 exports.createUserRole = createUserRole;
+const updateUserRole = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        const id = parseInt(req.params.id);
+        const updatedUserRole = yield userRoleService.updateUserRole(id, req.body);
+        if (updatedUserRole) {
+            return res.status(200).json(updatedUserRole);
+        }
+        else {
+            return res.status(404).json({ message: "UserRole not found" });
+        }
+    }
+    catch (error) {
+        return res.status(500).json({ message: "Error updating UserRole", error });
+    }
+});
+exports.updateUserRole = updateUserRole;
 const deleteUserRole = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const id = parseInt(req.params.id);

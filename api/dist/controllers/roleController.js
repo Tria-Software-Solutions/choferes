@@ -42,7 +42,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.deleteRole = exports.createRole = exports.getRoleById = exports.getRoles = void 0;
+exports.deleteRole = exports.updateRole = exports.createRole = exports.getRoleByName = exports.getRoleById = exports.getRoles = void 0;
 const roleService = __importStar(require("../services/roleService"));
 const getRoles = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
@@ -66,6 +66,19 @@ const getRoleById = (req, res) => __awaiter(void 0, void 0, void 0, function* ()
     }
 });
 exports.getRoleById = getRoleById;
+const getRoleByName = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        const role = yield roleService.getRoleByName(req.params.name);
+        if (!role) {
+            return res.status(404).json({ error: "Role not found" });
+        }
+        res.status(200).json(role);
+    }
+    catch (error) {
+        res.status(500).json({ message: "Error fetching Role", error });
+    }
+});
+exports.getRoleByName = getRoleByName;
 const createRole = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const { name } = req.body;
@@ -73,10 +86,26 @@ const createRole = (req, res) => __awaiter(void 0, void 0, void 0, function* () 
         res.status(201).json(role);
     }
     catch (error) {
-        res.status(500).json({ message: 'Error creating Role', error });
+        res.status(500).json({ message: "Error creating Role", error });
     }
 });
 exports.createRole = createRole;
+const updateRole = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        const id = parseInt(req.params.id);
+        const updatedRole = yield roleService.updateRole(id, req.body);
+        if (updatedRole) {
+            return res.status(200).json(updatedRole);
+        }
+        else {
+            return res.status(404).json({ message: "Role not found" });
+        }
+    }
+    catch (error) {
+        return res.status(500).json({ message: "Error updating Role", error });
+    }
+});
+exports.updateRole = updateRole;
 const deleteRole = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const id = parseInt(req.params.id);

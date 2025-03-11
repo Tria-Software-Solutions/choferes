@@ -9,7 +9,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.deleteRole = exports.updateRole = exports.createRole = exports.getRoleById = exports.getRoles = void 0;
+exports.deleteRole = exports.updateRole = exports.createRole = exports.getRoleByName = exports.getRoleById = exports.getRoles = void 0;
 const Permission_1 = require("../models/Permission");
 const Role_1 = require("../models/Role");
 const getRoles = () => __awaiter(void 0, void 0, void 0, function* () {
@@ -36,6 +36,19 @@ const getRoleById = (id) => __awaiter(void 0, void 0, void 0, function* () {
     });
 });
 exports.getRoleById = getRoleById;
+const getRoleByName = (name) => __awaiter(void 0, void 0, void 0, function* () {
+    return yield Role_1.Role.findOne({
+        where: { name },
+        include: [
+            {
+                model: Permission_1.Permission,
+                as: "permissions",
+                through: { attributes: [] },
+            },
+        ],
+    });
+});
+exports.getRoleByName = getRoleByName;
 const createRole = (data) => __awaiter(void 0, void 0, void 0, function* () {
     return yield Role_1.Role.create(data, { returning: true });
 });
