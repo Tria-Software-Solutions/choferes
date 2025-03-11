@@ -27,6 +27,7 @@ import EditCalendarRoundedIcon from "@mui/icons-material/EditCalendarRounded";
 import ManageAccountsIcon from "@mui/icons-material/ManageAccounts";
 import LogoutIcon from "@mui/icons-material/Logout";
 import wallpaper from "./assets/images/choferesblurred1.webp";
+import SnackbarWrapper from "./components/Snackbar/SnackbarWrapper";
 
 const AppBarWrapper: React.FC = () => {
   const { currentUser, userPermissions } = useAuth();
@@ -152,7 +153,9 @@ const App: React.FC = () => {
   return (
     <AuthProvider>
       <Router>
-        <AppContent />
+        <SnackbarWrapper>
+          <AppContent />
+        </SnackbarWrapper>
       </Router>
     </AuthProvider>
   );
