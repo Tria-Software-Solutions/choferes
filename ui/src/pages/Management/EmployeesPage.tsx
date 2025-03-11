@@ -2,8 +2,8 @@ import React, { useState, useEffect, useCallback, useMemo } from "react";
 import { useAuth } from "../../context/AuthContext";
 import { Employee } from "../../models/Employee";
 import { useEmployees } from "../../hooks/useEmployee";
-import SplitButton from "../../components/SplitButton/SplitButton";
 import SearchBar from "../../components/SearchBar/SearchBar";
+import CustomSpeedDial from "../../components/SpeedDial/CustomSpeedDial";
 import EditableTable from "../../components/Table/EditableTable/EditableTable";
 import {
   Button,
@@ -30,6 +30,7 @@ import {
 import { PAGE_TITLE, PERMISSIONS } from "../../constants/constants";
 import PersonAddAlt1RoundedIcon from "@mui/icons-material/PersonAddAlt1Rounded";
 import DownloadRoundedIcon from "@mui/icons-material/DownloadRounded";
+import CloseRoundedIcon from '@mui/icons-material/CloseRounded';
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faFileExcel, faFilePdf } from "@fortawesome/free-solid-svg-icons";
 
@@ -175,11 +176,12 @@ const EmployeesPage: React.FC = () => {
           userPermissions.includes(PERMISSIONS.EXPORT_PDF_EMPLOYEES) && (
             <Box sx={{ minHeight: 65 }}>
               {filteredEmployees.length > 0 && (
-                <SplitButton
-                  options={exportOptions}
-                  defaultIndex={0}
-                  buttonIcon={<DownloadRoundedIcon />}
-                />
+                <CustomSpeedDial
+                actions={exportOptions}
+                mainIcon={<DownloadRoundedIcon />}
+                openIcon={<CloseRoundedIcon />}
+                direction="left"
+              />
               )}
             </Box>
           )}

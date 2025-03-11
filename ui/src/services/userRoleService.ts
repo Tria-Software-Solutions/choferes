@@ -16,6 +16,13 @@ export const createUserRole = async (userRole: Omit<UserRole, "id">) => {
   return response.data;
 };
 
+export const updateUserRole = async (
+  id: number,
+  updatedUserRole: Partial<UserRole>
+) => {
+  await api.put(`/user-role/${id}`, updatedUserRole);
+};
+
 export const deleteUserRole = async (id: number) => {
   await api.delete(`/user-role/${id}`);
 };

@@ -181,6 +181,14 @@ const theme = createTheme({
         },
       },
     },
+    MuiFab: {
+      styleOverrides: {
+        root: {
+          borderRadius: "15%",
+          backgroundColor: "black",
+        },
+      },
+    },
   },
 });
 

@@ -11,9 +11,9 @@ import { useHoursWorked } from "../../hooks/useHoursWorked";
 import { useWeeklySummaries } from "../../hooks/useWeeklySummary";
 import { useBiweeklySummaries } from "../../hooks/useBiweeklySummary";
 import { useMonthlySummaries } from "../../hooks/useMonthlySummary";
-import SplitButton from "../../components/SplitButton/SplitButton";
 import SearchBar from "../../components/SearchBar/SearchBar";
 import SelectorTable from "../../components/Table/SelectorTable/SelectorTable";
+import CustomSpeedDial from "../../components/SpeedDial/CustomSpeedDial";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { es } from "date-fns/locale";
 import { LocalizationProvider } from "@mui/x-date-pickers";
@@ -58,6 +58,7 @@ import DownloadRoundedIcon from "@mui/icons-material/DownloadRounded";
 import ArrowBackIosNewRoundedIcon from "@mui/icons-material/ArrowBackIosNewRounded";
 import ArrowForwardIosRoundedIcon from "@mui/icons-material/ArrowForwardIosRounded";
 import CalendarTodayRoundedIcon from "@mui/icons-material/CalendarTodayRounded";
+import CloseRoundedIcon from '@mui/icons-material/CloseRounded';
 import { faFileExcel, faFilePdf } from "@fortawesome/free-solid-svg-icons";
 
 const RolesPage: React.FC = () => {
@@ -402,10 +403,11 @@ const RolesPage: React.FC = () => {
           userPermissions.includes(PERMISSIONS.EXPORT_PDF_ROLES) && (
             <Box sx={{ minHeight: 65 }}>
               {filteredEmployees.length > 0 && (
-                <SplitButton
-                  options={exportOptions}
-                  defaultIndex={0}
-                  buttonIcon={<DownloadRoundedIcon />}
+                <CustomSpeedDial
+                  actions={exportOptions}
+                  mainIcon={<DownloadRoundedIcon />}
+                  openIcon={<CloseRoundedIcon />}
+                  direction="left"
                 />
               )}
             </Box>

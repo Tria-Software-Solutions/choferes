@@ -2,9 +2,9 @@ import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { useAuth } from "../../context/AuthContext";
 import { Vehicle } from "../../models/Vehicle";
 import { useVehicles } from "../../hooks/useVehicle";
-import SplitButton from "../../components/SplitButton/SplitButton";
 import SearchBar from "../../components/SearchBar/SearchBar";
 import EditableTable from "../../components/Table/EditableTable/EditableTable";
+import CustomSpeedDial from "../../components/SpeedDial/CustomSpeedDial";
 import {
   Box,
   Typography,
@@ -47,6 +47,7 @@ import ArrowBackIosNewRoundedIcon from "@mui/icons-material/ArrowBackIosNewRound
 import ArrowForwardIosRoundedIcon from "@mui/icons-material/ArrowForwardIosRounded";
 import CalendarTodayRoundedIcon from "@mui/icons-material/CalendarTodayRounded";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import CloseRoundedIcon from "@mui/icons-material/CloseRounded";
 import { faFileExcel, faFilePdf } from "@fortawesome/free-solid-svg-icons";
 import { format } from "date-fns";
 
@@ -63,6 +64,9 @@ const VehiclesPage: React.FC = () => {
     deleteVehicle,
   } = useVehicles(format(selectedDate, "yyyy-MM-dd"));
   const [filteredVehicles, setFilteredVehicles] = useState<Vehicle[]>([]);
+  const [filteredWeekVehicles, setFilteredWeekVehicles] = useState<Vehicle[]>(
+    []
+  );
   const [totalCount, setTotalCount] = useState(0);
   const [editRowId, setEditRowId] = useState<number | null>(null);
   const [addFields, setAddFields] = useState({
@@ -121,6 +125,26 @@ const VehiclesPage: React.FC = () => {
     setFilteredVehicles(filtered);
     setTotalCount(filtered.length);
   }, [vehicles, cleanedFilter]);
+
+  useEffect(() => {
+    const date = selectedDate;
+    const dayOfWeek = date.getDay();
+
+    const startOfWeek = new Date(date);
+    startOfWeek.setDate(date.getDate() - (dayOfWeek === 0 ? 6 : dayOfWeek - 1));
+    startOfWeek.setHours(0, 0, 0, 0);
+
+    const endOfWeek = new Date(startOfWeek);
+    endOfWeek.setDate(startOfWeek.getDate() + 6);
+    endOfWeek.setHours(23, 59, 59, 999);
+
+    const vehiclesThisWeek = allVehicles.filter((vehicle) => {
+      const parkedDate = new Date(vehicle.createdAt);
+      return parkedDate >= startOfWeek && parkedDate <= endOfWeek;
+    });
+
+    setFilteredWeekVehicles(vehiclesThisWeek);
+  }, [allVehicles, selectedDate]);
 
   const validateFields = useCallback((fields: typeof addFields) => {
     const regex = {
@@ -388,14 +412,14 @@ const VehiclesPage: React.FC = () => {
     return createExportOptions(
       <FontAwesomeIcon icon={faFileExcel} size="lg" />,
       <FontAwesomeIcon icon={faFilePdf} size="lg" />,
-      filteredVehicles,
+      filteredWeekVehicles,
       `reporte-de-vehiculos-${exportFileFormattedDate(
         selectedDate || new Date()
       )}`,
       excelOption,
       pdfOption
     );
-  }, [userPermissions, filteredVehicles, selectedDate]);
+  }, [userPermissions, filteredWeekVehicles, selectedDate]);
 
   const theme = useTheme();
   const isSmallScreen = useMediaQuery(theme.breakpoints.down("sm"));
@@ -414,11 +438,12 @@ const VehiclesPage: React.FC = () => {
         {userPermissions.includes(PERMISSIONS.EXPORT_EXCEL_VEHICLES) &&
           userPermissions.includes(PERMISSIONS.EXPORT_PDF_VEHICLES) && (
             <Box sx={{ minHeight: 65 }}>
-              {filteredVehicles.length > 0 && (
-                <SplitButton
-                  options={exportOptions}
-                  defaultIndex={0}
-                  buttonIcon={<DownloadRoundedIcon />}
+              {filteredWeekVehicles.length > 0 && (
+                <CustomSpeedDial
+                  actions={exportOptions}
+                  mainIcon={<DownloadRoundedIcon />}
+                  openIcon={<CloseRoundedIcon />}
+                  direction="left"
                 />
               )}
             </Box>

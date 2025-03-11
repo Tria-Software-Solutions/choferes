@@ -41,6 +41,18 @@ export const useUserRoles = () => {
     setTotalCountUserRoles((prev) => prev + 1);
   };
 
+  const updateUserRole = async (
+    id: number,
+    updatedUserRole: Partial<UserRole>
+  ) => {
+    await UserRoleService.getUserRoleByUserId(id);
+    setUserRole((prev) =>
+      prev.map((userRole) =>
+        userRole.id === id ? { ...userRole, ...updatedUserRole } : userRole
+      )
+    );
+  };
+
   const deleteUserRole = async (id: number) => {
     await UserRoleService.deleteUserRole(id);
     setUserRole((prev) => prev.filter((userRole) => userRole.id !== id));
@@ -60,6 +72,7 @@ export const useUserRoles = () => {
     getUserRoles,
     getUserRoleByUserId,
     createUserRole,
+    updateUserRole,
     deleteUserRole,
   };
 };

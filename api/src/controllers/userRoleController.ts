@@ -33,6 +33,20 @@ export const createUserRole = async (req: Request, res: Response) => {
   }
 };
 
+export const updateUserRole = async (req: Request, res: Response) => {
+  try {
+    const id = parseInt(req.params.id);
+    const updatedUserRole = await userRoleService.updateUserRole(id, req.body);
+    if (updatedUserRole) {
+      return res.status(200).json(updatedUserRole);
+    } else {
+      return res.status(404).json({ message: "UserRole not found" });
+    }
+  } catch (error) {
+    return res.status(500).json({ message: "Error updating UserRole", error });
+  }
+};
+
 export const deleteUserRole = async (req: Request, res: Response) => {
   try {
     const id = parseInt(req.params.id);
