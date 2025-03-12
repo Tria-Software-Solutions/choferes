@@ -40,7 +40,7 @@ const express_1 = __importDefault(require("express"));
 const userController = __importStar(require("../controllers/userController"));
 const authMiddleware_1 = require("../middleware/authMiddleware");
 const router = express_1.default.Router();
-router.post("/login", userController.authenticateUser);
+router.post("/auth/login", userController.authenticateUser);
 router.get("/", authMiddleware_1.authenticateToken, userController.getUsers);
 router.get("/:id", authMiddleware_1.authenticateToken, userController.getUserById);
 router.get("/username/:username", userController.getUserByUsername);
