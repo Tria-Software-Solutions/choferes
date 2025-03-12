@@ -19,18 +19,18 @@ import "./database/models";
 
 const app = express();
 
-app.use(
-  cors({
-    origin: [
-      "https://choferesdealquilercr.vercel.app",
-      "http://localhost:3000",
-    ],
-    credentials: true,
-    methods: ["GET", "POST", "PUT", "DELETE"],
-    allowedHeaders: ["Content-Type", "Authorization"],
-    exposedHeaders: ["Set-Cookie"],
-  })
-);
+const corsOptions = {
+  origin:
+    process.env.NODE_ENV === "production"
+      ? process.env.REACT_APP_UI_URL
+      : "http://localhost:3000",
+  credentials: true,
+  methods: ["GET", "POST", "PUT", "DELETE"],
+  allowedHeaders: ["Content-Type", "Authorization"],
+  exposedHeaders: ["Set-Cookie"],
+};
+
+app.use(cors(corsOptions));
 app.use(json());
 app.use(urlencoded({ extended: true }));
 app.use(cookieParser());

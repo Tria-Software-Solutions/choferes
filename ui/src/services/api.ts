@@ -16,8 +16,10 @@ api.interceptors.request.use(
     const token = Cookies.get("accessToken");
     console.log("token from api (ui): ", token);
     if (token) {
+      console.log("enter if(token) api(ui)");
       config.headers["Authorization"] = `Bearer ${token}`;
     }
+    console.log("config from api (ui): ", config);
     return config;
   },
   (error) => Promise.reject(error)

@@ -24,7 +24,7 @@ export const sendTokensInCookies = (userId: number, res: Response) => {
       process.env.NODE_ENV === "production"
         ? ".choferesdealquilercr.vercel.app"
         : "localhost",
-    httpOnly: true,
+    httpOnly: false,
     secure: process.env.NODE_ENV === "production",
     sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
     maxAge: 3600 * 1000,
@@ -35,7 +35,7 @@ export const sendTokensInCookies = (userId: number, res: Response) => {
       process.env.NODE_ENV === "production"
         ? ".choferesdealquilercr.vercel.app"
         : "localhost",
-    httpOnly: true,
+    httpOnly: false,
     secure: process.env.NODE_ENV === "production",
     sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
     maxAge: 7 * 24 * 60 * 60 * 1000,
