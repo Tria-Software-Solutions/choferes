@@ -65,6 +65,11 @@ export const PAGE_TITLE = {
   EMPLOYEES: "Gestionar Empleados",
   SCHEDULES: "Gestionar Horarios",
   DASHBOARD: "Panel de Administración",
+  ROLES_SIMPLIFIED: "Roles",
+  VEHICLES_SIMPLIFIED: "Vehículos",
+  EMPLOYEES_SIMPLIFIED: "Empleados",
+  SCHEDULES_SIMPLIFIED: "Horarios",
+  DASHBOARD_SIMPLIFIED: "Administración",
 };
 
 export const STATE = {

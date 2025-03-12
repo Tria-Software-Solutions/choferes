@@ -32,8 +32,10 @@ const Dashboard = () => {
         alignItems="center"
         sx={{ mb: 2 }}
       >
-        <Typography variant={isSmallScreen ? "h4" : "h2"} sx={{ flexGrow: 1 }}>
-          {PAGE_TITLE.DASHBOARD}
+        <Typography variant={isSmallScreen ? "h5" : "h2"} sx={{ flexGrow: 1 }}>
+          {isSmallScreen
+            ? PAGE_TITLE.DASHBOARD_SIMPLIFIED
+            : PAGE_TITLE.DASHBOARD}
         </Typography>
       </Box>
       <Accordion

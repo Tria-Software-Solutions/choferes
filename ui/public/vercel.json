@@ -13,8 +13,8 @@
   ],
   "rewrites": [
     {
-      "source": "/api/(.*)",
-      "destination": "https://choferesdealquiler.onrender.com/api/$1"
+      "source": "/api/:path*",
+      "destination": "https://choferesdealquiler.onrender.com/api/:path*"
     }
   ]
 }

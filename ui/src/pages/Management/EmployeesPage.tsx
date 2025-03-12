@@ -58,6 +58,17 @@ const EmployeesPage: React.FC = () => {
   const [isAddFormValid, setIsAddFormValid] = useState(false);
   const [isEditFormValid, setIsEditFormValid] = useState(false);
 
+  const theme = useTheme();
+  const isSmallScreen = useMediaQuery(theme.breakpoints.down("sm"));
+
+  useEffect(() => {
+    if (isSmallScreen) {
+      setRowsPerPage(5);
+    } else {
+      setRowsPerPage(25);
+    }
+  }, [isSmallScreen]);
+
   useEffect(() => {
     const normalizeString = (str: string) =>
       str.normalize("NFD").replace(/[\u0300-\u036f]/g, "");
@@ -208,9 +219,6 @@ const EmployeesPage: React.FC = () => {
     );
   }, [userPermissions, filteredEmployees]);
 
-  const theme = useTheme();
-  const isSmallScreen = useMediaQuery(theme.breakpoints.down("sm"));
-
   return (
     <Box>
       <Box
@@ -219,8 +227,10 @@ const EmployeesPage: React.FC = () => {
         alignItems="center"
         sx={{ mb: 3 }}
       >
-        <Typography variant={isSmallScreen ? "h4" : "h2"} sx={{ flexGrow: 1 }}>
-          {PAGE_TITLE.EMPLOYEES}
+        <Typography variant={isSmallScreen ? "h5" : "h2"} sx={{ flexGrow: 1 }}>
+          {isSmallScreen
+            ? PAGE_TITLE.EMPLOYEES_SIMPLIFIED
+            : PAGE_TITLE.EMPLOYEES}
         </Typography>
         {userPermissions.includes(PERMISSIONS.EXPORT_EXCEL_EMPLOYEES) &&
           userPermissions.includes(PERMISSIONS.EXPORT_PDF_EMPLOYEES) && (

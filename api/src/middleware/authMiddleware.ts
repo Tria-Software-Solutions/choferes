@@ -8,12 +8,10 @@ interface AuthenticatedRequest extends Request {
 
 const { JWT_SECRET_KEY, JWT_SECRET_KEY_REFRESH } = process.env;
 
-if (!JWT_SECRET_KEY) {
-  throw new Error("Missing JWT_SECRET_KEY in environment variables");
-}
-
-if (!JWT_SECRET_KEY_REFRESH) {
-  throw new Error("Missing JWT_SECRET_KEY_REFRESH in environment variables");
+if (!JWT_SECRET_KEY || !JWT_SECRET_KEY_REFRESH) {
+  throw new Error(
+    "Missing JWT_SECRET_KEY or JWT_SECRET_KEY_REFRESH in environment variables"
+  );
 }
 
 export const authenticateToken = (
@@ -23,7 +21,6 @@ export const authenticateToken = (
 ) => {
   try {
     const accessToken = req.cookies.accessToken;
-    console.log("token from middleware (api): ", accessToken);
     if (!accessToken) {
       return res.status(401).json({ error: "Unauthorized: Token required" });
     }
@@ -32,7 +29,6 @@ export const authenticateToken = (
       if (error) {
         if (error.name === "TokenExpiredError") {
           const refreshToken = req.cookies.refreshToken;
-          console.log("refresh token from middleware (api): ", refreshToken);
           if (!refreshToken) {
             return res
               .status(401)
@@ -58,7 +54,6 @@ export const authenticateToken = (
         }
       }
       const payload = decoded as JwtPayload;
-      console.log("payload from middleware (api): ", payload);
       req.user = { id: payload.userId };
       next();
     });
