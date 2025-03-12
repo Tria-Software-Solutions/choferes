@@ -32,35 +32,13 @@ var __importStar = (this && this.__importStar) || (function () {
         return result;
     };
 })();
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.generateSecret = exports.sendTokensInCookies = void 0;
-const crypto = __importStar(require("crypto"));
-const jwt = __importStar(require("jsonwebtoken"));
-const { JWT_SECRET_KEY, JWT_SECRET_KEY_REFRESH, NODE_ENV } = process.env;
-const sendTokensInCookies = (userId, res) => {
-    const accessToken = jwt.sign({ userId }, JWT_SECRET_KEY, {
-        expiresIn: "1h",
-    });
-    const refreshToken = jwt.sign({ userId }, JWT_SECRET_KEY_REFRESH, {
-        expiresIn: "7d",
-    });
-    res.cookie("accessToken", accessToken, {
-        httpOnly: true,
-        secure: NODE_ENV === "production",
-        sameSite: NODE_ENV === "production" ? "none" : "lax",
-        maxAge: 3600 * 1000,
-    });
-    res.cookie("refreshToken", refreshToken, {
-        httpOnly: true,
-        secure: NODE_ENV === "production",
-        sameSite: NODE_ENV === "production" ? "none" : "lax",
-        maxAge: 7 * 24 * 60 * 60 * 1000,
-    });
-};
-exports.sendTokensInCookies = sendTokensInCookies;
-const generateSecret = (length = 32) => {
-    return crypto.randomBytes(length).toString("hex");
-};
-exports.generateSecret = generateSecret;
-// const secret = generateSecret();
-// console.log("Generated JWT Secret:", secret);
+const express_1 = __importDefault(require("express"));
+const authController = __importStar(require("../controllers/authController"));
+const authMiddleware_1 = require("../middleware/authMiddleware");
+const router = express_1.default.Router();
+router.post("/refresh-token", authMiddleware_1.authenticateToken, authController.refreshToken);
+exports.default = router;

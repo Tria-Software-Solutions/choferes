@@ -23,7 +23,12 @@ export const useUsers = () => {
       const userPermissions = await UserService.getUserPermissions(
         loginData.user.id
       );
-      login(loginData.user, userPermissions);
+      login(
+        loginData.user,
+        userPermissions,
+        loginData.accessToken,
+        loginData.refreshToken
+      );
       navigate("/roles");
     } catch (error) {
       setAuthError("Login failed. Please check your credentials.");

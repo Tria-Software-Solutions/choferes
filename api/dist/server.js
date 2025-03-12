@@ -7,7 +7,6 @@ const express_1 = __importDefault(require("express"));
 const cors_1 = __importDefault(require("cors"));
 const body_parser_1 = require("body-parser");
 const cookie_parser_1 = __importDefault(require("cookie-parser"));
-const dotenv_1 = __importDefault(require("dotenv"));
 const userRoutes_1 = __importDefault(require("./routes/userRoutes"));
 const employeeRoutes_1 = __importDefault(require("./routes/employeeRoutes"));
 const hoursWorkedRoutes_1 = __importDefault(require("./routes/hoursWorkedRoutes"));
@@ -22,18 +21,16 @@ const userRoleRoutes_1 = __importDefault(require("./routes/userRoleRoutes"));
 const rolePermissionRoutes_1 = __importDefault(require("./routes/rolePermissionRoutes"));
 const database_1 = __importDefault(require("./config/database"));
 require("./database/models");
-dotenv_1.default.config();
 const app = (0, express_1.default)();
-app.use(express_1.default.json());
-app.use((0, cookie_parser_1.default)());
-app.use((0, cors_1.default)({
+const corsOptions = {
     origin: process.env.NODE_ENV === "production"
         ? "https://choferesdealquilercr.vercel.app"
         : "http://localhost:3000",
     credentials: true,
-    methods: ["GET", "POST", "PUT", "DELETE"],
-    allowedHeaders: ["Content-Type", "Authorization"],
-}));
+};
+app.use((0, cors_1.default)(corsOptions));
+app.use(express_1.default.json());
+app.use((0, cookie_parser_1.default)());
 app.use((0, body_parser_1.urlencoded)({ extended: true }));
 app.use("/api/users", userRoutes_1.default);
 app.use("/api/roles", roleRoutes_1.default);

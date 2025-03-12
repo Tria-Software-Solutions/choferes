@@ -2,39 +2,28 @@ import * as crypto from "crypto";
 import * as jwt from "jsonwebtoken";
 import { Response } from "express";
 
-const { JWT_SECRET_KEY, JWT_SECRET_KEY_REFRESH } = process.env;
-
-const generateAccessToken = (userId: number) => {
-  return jwt.sign({ userId }, JWT_SECRET_KEY, { expiresIn: "1h" });
-};
-
-const generateRefreshToken = (userId: number) => {
-  return jwt.sign({ userId }, JWT_SECRET_KEY_REFRESH, { expiresIn: "7d" });
-};
+const { JWT_SECRET_KEY, JWT_SECRET_KEY_REFRESH, NODE_ENV } = process.env;
 
 export const sendTokensInCookies = (userId: number, res: Response) => {
-  const accessToken = generateAccessToken(userId);
-  const refreshToken = generateRefreshToken(userId);
+  const accessToken = jwt.sign({ userId }, JWT_SECRET_KEY, {
+    expiresIn: "1h",
+  });
+
+  const refreshToken = jwt.sign({ userId }, JWT_SECRET_KEY_REFRESH, {
+    expiresIn: "7d",
+  });
 
   res.cookie("accessToken", accessToken, {
     httpOnly: true,
-    secure: process.env.NODE_ENV === "production",
-    sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
-    domain:
-      process.env.NODE_ENV === "production"
-        ? ".choferesdealquilercr.vercel.app"
-        : "localhost",
+    secure: NODE_ENV === "production",
+    sameSite: NODE_ENV === "production" ? "none" : "lax",
     maxAge: 3600 * 1000,
   });
 
   res.cookie("refreshToken", refreshToken, {
     httpOnly: true,
-    secure: process.env.NODE_ENV === "production",
-    sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
-    domain:
-      process.env.NODE_ENV === "production"
-        ? ".choferesdealquilercr.vercel.app"
-        : "localhost",
+    secure: NODE_ENV === "production",
+    sameSite: NODE_ENV === "production" ? "none" : "lax",
     maxAge: 7 * 24 * 60 * 60 * 1000,
   });
 };
