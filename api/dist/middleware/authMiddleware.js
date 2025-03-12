@@ -16,6 +16,7 @@ if (!JWT_SECRET_KEY_REFRESH) {
 const authenticateToken = (req, res, next) => {
     try {
         const accessToken = req.cookies.accessToken;
+        console.log("token from middleware (api): ", accessToken);
         if (!accessToken) {
             return res.status(401).json({ error: "Unauthorized: Token required" });
         }
@@ -23,6 +24,7 @@ const authenticateToken = (req, res, next) => {
             if (error) {
                 if (error.name === "TokenExpiredError") {
                     const refreshToken = req.cookies.refreshToken;
+                    console.log("refresh token from middleware (api): ", refreshToken);
                     if (!refreshToken) {
                         return res
                             .status(401)
@@ -45,6 +47,7 @@ const authenticateToken = (req, res, next) => {
                 }
             }
             const payload = decoded;
+            console.log("payload from middleware (api): ", payload);
             req.user = { id: payload.userId };
             next();
         });

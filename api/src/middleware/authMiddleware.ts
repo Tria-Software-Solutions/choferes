@@ -23,6 +23,7 @@ export const authenticateToken = (
 ) => {
   try {
     const accessToken = req.cookies.accessToken;
+    console.log("token from middleware (api): ", accessToken);
     if (!accessToken) {
       return res.status(401).json({ error: "Unauthorized: Token required" });
     }
@@ -31,6 +32,7 @@ export const authenticateToken = (
       if (error) {
         if (error.name === "TokenExpiredError") {
           const refreshToken = req.cookies.refreshToken;
+          console.log("refresh token from middleware (api): ", refreshToken);
           if (!refreshToken) {
             return res
               .status(401)
@@ -56,6 +58,7 @@ export const authenticateToken = (
         }
       }
       const payload = decoded as JwtPayload;
+      console.log("payload from middleware (api): ", payload);
       req.user = { id: payload.userId };
       next();
     });

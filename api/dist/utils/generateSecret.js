@@ -46,13 +46,15 @@ const generateRefreshToken = (userId) => {
 const sendTokensInCookies = (userId, res) => {
     const accessToken = generateAccessToken(userId);
     const refreshToken = generateRefreshToken(userId);
+    console.log("Generated access token:", accessToken);
+    console.log("Generated refresh token:", refreshToken);
     res.cookie("accessToken", accessToken, {
         domain: process.env.NODE_ENV === "production"
             ? ".choferesdealquilercr.vercel.app"
             : "localhost",
         httpOnly: true,
         secure: process.env.NODE_ENV === "production",
-        sameSite: "none",
+        sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
         maxAge: 3600 * 1000,
     });
     res.cookie("refreshToken", refreshToken, {
@@ -61,7 +63,7 @@ const sendTokensInCookies = (userId, res) => {
             : "localhost",
         httpOnly: true,
         secure: process.env.NODE_ENV === "production",
-        sameSite: "none",
+        sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
         maxAge: 7 * 24 * 60 * 60 * 1000,
     });
 };
