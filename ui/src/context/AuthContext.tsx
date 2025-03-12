@@ -1,10 +1,11 @@
 import { createContext, useContext, useState } from "react";
+import Cookies from "js-cookie";
 import { User } from "../models/User";
 
 interface AuthContextType {
   currentUser: User | null;
   userPermissions: string[];
-  login: (user: User, userPermissions: string[]) => void;
+  login: (user: User, userPermissions: string[], accessToken: string, refreshToken: string) => void;
   logout: () => void;
 }
 
@@ -24,12 +25,16 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
   const login = (
     currentUser: User,
-    userPermissions: string[]
+    userPermissions: string[],
+    accessToken: string,
+    refreshToken: string
   ) => {
     setCurrentUser(currentUser);
     setUserPermissions(userPermissions);
     sessionStorage.setItem("currentUser", JSON.stringify(currentUser));
     sessionStorage.setItem("userPermissions", JSON.stringify(userPermissions));
+    Cookies.set("accessToken", accessToken, { expires: 1 });
+    Cookies.set("refreshToken", refreshToken, { expires: 7 });
   };
 
   const logout = () => {
@@ -37,6 +42,8 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     setUserPermissions(null);
     sessionStorage.removeItem("currentUser");
     sessionStorage.removeItem("userPermissions");
+    Cookies.remove("accessToken");
+    Cookies.remove("refreshToken");
   };
 
   return (

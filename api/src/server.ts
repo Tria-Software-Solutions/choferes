@@ -18,22 +18,17 @@ import rolePermissionRoutes from "./routes/rolePermissionRoutes";
 import sequelize from "./config/database";
 import "./database/models";
 
-dotenv.config();
-
 const app = express();
+const corsOptions = {
+  origin:
+  process.env.NODE_ENV === "production"
+      ? "https://choferesdealquilercr.vercel.app"
+      : "http://localhost:3000",
+  credentials: true,
+};
+app.use(cors(corsOptions));
 app.use(express.json());
 app.use(cookieParser());
-app.use(
-  cors({
-    origin:
-      process.env.NODE_ENV === "production"
-        ? "https://choferesdealquilercr.vercel.app"
-        : "http://localhost:3000",
-    credentials: true,
-    methods: ["GET", "POST", "PUT", "DELETE"],
-    allowedHeaders: ["Content-Type", "Authorization"],
-  })
-);
 app.use(urlencoded({ extended: true }));
 app.use("/api/users", userRoutes);
 app.use("/api/roles", roleRoutes);
