@@ -22,7 +22,7 @@ const app = express();
 const corsOptions = {
   origin:
     process.env.NODE_ENV === "production"
-      ? process.env.REACT_APP_UI_URL
+      ? "https://choferesdealquilercr.vercel.app"
       : "http://localhost:3000",
   credentials: true,
   methods: ["GET", "POST", "PUT", "DELETE"],
