@@ -58,7 +58,7 @@ import DownloadRoundedIcon from "@mui/icons-material/DownloadRounded";
 import ArrowBackIosNewRoundedIcon from "@mui/icons-material/ArrowBackIosNewRounded";
 import ArrowForwardIosRoundedIcon from "@mui/icons-material/ArrowForwardIosRounded";
 import CalendarTodayRoundedIcon from "@mui/icons-material/CalendarTodayRounded";
-import CloseRoundedIcon from '@mui/icons-material/CloseRounded';
+import CloseRoundedIcon from "@mui/icons-material/CloseRounded";
 import { faFileExcel, faFilePdf } from "@fortawesome/free-solid-svg-icons";
 
 const RolesPage: React.FC = () => {
@@ -90,6 +90,9 @@ const RolesPage: React.FC = () => {
   const [currentMonth, setCurrentMonth] = useState<number>(0);
   const [currentYear, setCurrentYear] = useState<number>(0);
   const [filter, setFilter] = useState("");
+
+  const theme = useTheme();
+  const isSmallScreen = useMediaQuery(theme.breakpoints.down("sm"));
 
   const isLoading =
     isLoadingEmployees ||
@@ -385,9 +388,6 @@ const RolesPage: React.FC = () => {
     );
   }, [userPermissions, dataForExport, fileName, headers]);
 
-  const theme = useTheme();
-  const isSmallScreen = useMediaQuery(theme.breakpoints.down("sm"));
-
   return (
     <Box>
       <Box
@@ -396,8 +396,8 @@ const RolesPage: React.FC = () => {
         alignItems="center"
         sx={{ mb: 3 }}
       >
-        <Typography variant={isSmallScreen ? "h4" : "h2"} sx={{ flexGrow: 1 }}>
-          {PAGE_TITLE.ROLES}
+        <Typography variant={isSmallScreen ? "h5" : "h2"} sx={{ flexGrow: 1 }}>
+          {isSmallScreen ? PAGE_TITLE.ROLES_SIMPLIFIED : PAGE_TITLE.ROLES}
         </Typography>
         {userPermissions.includes(PERMISSIONS.EXPORT_EXCEL_ROLES) &&
           userPermissions.includes(PERMISSIONS.EXPORT_PDF_ROLES) && (

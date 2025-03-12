@@ -25,11 +25,17 @@ const CustomSpeedDial: React.FC<CustomSpeedDialProps> = ({
       ariaLabel="SpeedDial"
       icon={<SpeedDialIcon icon={mainIcon} openIcon={openIcon} />}
       direction={direction}
+      sx={{
+        zIndex: 1500,
+      }}
     >
       {actions.map((action) => (
         <SpeedDialAction
           key={action.label}
           icon={action.icon}
+          sx={{
+            zIndex: 2000,
+          }}
           tooltipTitle={action.label}
           onClick={action.onClick}
         />

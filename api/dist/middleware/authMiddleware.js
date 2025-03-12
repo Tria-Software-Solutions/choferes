@@ -7,16 +7,12 @@ exports.authenticateToken = void 0;
 const jsonwebtoken_1 = __importDefault(require("jsonwebtoken"));
 const generateSecret_1 = require("../utils/generateSecret");
 const { JWT_SECRET_KEY, JWT_SECRET_KEY_REFRESH } = process.env;
-if (!JWT_SECRET_KEY) {
-    throw new Error("Missing JWT_SECRET_KEY in environment variables");
-}
-if (!JWT_SECRET_KEY_REFRESH) {
-    throw new Error("Missing JWT_SECRET_KEY_REFRESH in environment variables");
+if (!JWT_SECRET_KEY || !JWT_SECRET_KEY_REFRESH) {
+    throw new Error("Missing JWT_SECRET_KEY or JWT_SECRET_KEY_REFRESH in environment variables");
 }
 const authenticateToken = (req, res, next) => {
     try {
         const accessToken = req.cookies.accessToken;
-        console.log("token from middleware (api): ", accessToken);
         if (!accessToken) {
             return res.status(401).json({ error: "Unauthorized: Token required" });
         }
@@ -24,7 +20,6 @@ const authenticateToken = (req, res, next) => {
             if (error) {
                 if (error.name === "TokenExpiredError") {
                     const refreshToken = req.cookies.refreshToken;
-                    console.log("refresh token from middleware (api): ", refreshToken);
                     if (!refreshToken) {
                         return res
                             .status(401)
@@ -47,7 +42,6 @@ const authenticateToken = (req, res, next) => {
                 }
             }
             const payload = decoded;
-            console.log("payload from middleware (api): ", payload);
             req.user = { id: payload.userId };
             next();
         });

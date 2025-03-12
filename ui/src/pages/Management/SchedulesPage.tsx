@@ -74,6 +74,17 @@ const SchedulesPage: React.FC = () => {
   const [isAddFormValid, setIsAddFormValid] = useState(false);
   const [isEditFormValid, setIsEditFormValid] = useState(false);
 
+  const theme = useTheme();
+  const isSmallScreen = useMediaQuery(theme.breakpoints.down("sm"));
+
+  useEffect(() => {
+    if (isSmallScreen) {
+      setRowsPerPage(5);
+    } else {
+      setRowsPerPage(25);
+    }
+  }, [isSmallScreen]);
+
   useEffect(() => {
     const normalizeString = (str: string) =>
       str.normalize("NFD").replace(/[\u0300-\u036f]/g, "");
@@ -234,9 +245,6 @@ const SchedulesPage: React.FC = () => {
     );
   }, [userPermissions, filteredSchedules]);
 
-  const theme = useTheme();
-  const isSmallScreen = useMediaQuery(theme.breakpoints.down("sm"));
-
   return (
     <Box>
       <Box
@@ -245,8 +253,10 @@ const SchedulesPage: React.FC = () => {
         alignItems="center"
         sx={{ mb: 3 }}
       >
-        <Typography variant={isSmallScreen ? "h4" : "h2"} sx={{ flexGrow: 1 }}>
-          {PAGE_TITLE.SCHEDULES}
+        <Typography variant={isSmallScreen ? "h5" : "h2"} sx={{ flexGrow: 1 }}>
+          {isSmallScreen
+            ? PAGE_TITLE.SCHEDULES_SIMPLIFIED
+            : PAGE_TITLE.SCHEDULES}
         </Typography>
         {userPermissions.includes(PERMISSIONS.EXPORT_EXCEL_SCHEDULES) &&
           userPermissions.includes(PERMISSIONS.EXPORT_PDF_SCHEDULES) && (
