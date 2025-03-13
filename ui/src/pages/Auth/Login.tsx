@@ -88,6 +88,7 @@ const Login = () => {
               variant="outlined"
               margin="normal"
               value={fields.username}
+              autoComplete="username"
               onChange={(e) =>
                 setFields({ ...fields, username: e.target.value })
               }
@@ -99,6 +100,7 @@ const Login = () => {
               variant="outlined"
               margin="normal"
               value={fields.password}
+              autoComplete="password"
               onChange={(e) =>
                 setFields({ ...fields, password: e.target.value })
               }
