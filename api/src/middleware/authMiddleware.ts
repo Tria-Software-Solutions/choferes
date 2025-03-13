@@ -6,7 +6,8 @@ interface AuthenticatedRequest extends Request {
   user?: { id: number };
 }
 
-const { JWT_SECRET_KEY, JWT_SECRET_KEY_REFRESH } = process.env;
+const JWT_SECRET_KEY = process.env.JWT_SECRET_KEY;
+const JWT_SECRET_KEY_REFRESH = process.env.JWT_SECRET_KEY_REFRESH;
 
 if (!JWT_SECRET_KEY || !JWT_SECRET_KEY_REFRESH) {
   throw new Error("Missing token in environment variables");
@@ -71,7 +72,7 @@ export const authenticateRefreshToken = (
         }
         const userId = (refreshDecoded as JwtPayload).userId;
         const { accessToken: newAccessToken, refreshToken: newRefreshToken } =
-          generateTokens(userId);
+          generateTokens(userId);  
 
         res.setHeader("x-access-token", newAccessToken);
         res.setHeader("x-refresh-token", newRefreshToken);
