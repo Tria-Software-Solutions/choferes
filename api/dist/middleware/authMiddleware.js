@@ -6,7 +6,8 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.authenticateRefreshToken = exports.authenticateToken = void 0;
 const jsonwebtoken_1 = __importDefault(require("jsonwebtoken"));
 const generateSecret_1 = require("../utils/generateSecret");
-const { JWT_SECRET_KEY, JWT_SECRET_KEY_REFRESH } = process.env;
+const JWT_SECRET_KEY = process.env.JWT_SECRET_KEY;
+const JWT_SECRET_KEY_REFRESH = process.env.JWT_SECRET_KEY_REFRESH;
 if (!JWT_SECRET_KEY || !JWT_SECRET_KEY_REFRESH) {
     throw new Error("Missing token in environment variables");
 }

@@ -32,17 +32,18 @@ var __importStar = (this && this.__importStar) || (function () {
         return result;
     };
 })();
-var __importDefault = (this && this.__importDefault) || function (mod) {
-    return (mod && mod.__esModule) ? mod : { "default": mod };
-};
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.generateSecret = exports.generateTokens = void 0;
 const crypto = __importStar(require("crypto"));
 const jwt = __importStar(require("jsonwebtoken"));
-const config_1 = __importDefault(require("../config/config"));
-const { JWT_SECRET_KEY, JWT_SECRET_KEY_REFRESH } = config_1.default;
+const dotenv = __importStar(require("dotenv"));
+dotenv.config();
+const JWT_SECRET_KEY = process.env.JWT_SECRET_KEY;
+const JWT_SECRET_KEY_REFRESH = process.env.JWT_SECRET_KEY_REFRESH;
 const generateTokens = (user) => {
-    const accessToken = jwt.sign({ userId: user.id, username: user.username, role: user.role }, JWT_SECRET_KEY, { expiresIn: "1h" });
+    const accessToken = jwt.sign({ userId: user.id, username: user.username, role: user.role }, JWT_SECRET_KEY, {
+        expiresIn: "1h",
+    });
     const refreshToken = jwt.sign({ userId: user.id }, JWT_SECRET_KEY_REFRESH, {
         expiresIn: "7d",
     });
