@@ -199,6 +199,7 @@ const Register = () => {
               variant="outlined"
               margin="normal"
               value={addFields.username}
+              autoComplete="username"
               onChange={(e) =>
                 setAddFields({ ...addFields, username: e.target.value })
               }
@@ -211,6 +212,7 @@ const Register = () => {
               variant="outlined"
               margin="normal"
               value={addFields.password}
+              autoComplete="password"
               onChange={(e) =>
                 setAddFields({ ...addFields, password: e.target.value })
               }
