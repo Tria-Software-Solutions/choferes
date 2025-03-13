@@ -2,11 +2,36 @@ import { User } from "../models/User";
 import api from "./api";
 
 export const authenticateUser = async (username: string, password: string) => {
-  const response = await api.post("/users/auth/login", {
+  const response = await api.post("/users/login", {
     username,
     password,
   });
   return response.data;
+};
+
+export const refreshAccessToken = async () => {
+  const refreshToken = sessionStorage.getItem("refreshToken");
+  if (!refreshToken) throw new Error("No refresh token available");
+
+  try {
+    const response = await api.post(
+      "/auth/refresh-token",
+      {},
+      {
+        headers: {
+          "x-refresh-token": refreshToken,
+        },
+      }
+    );
+
+    sessionStorage.setItem("accessToken", response.data.accessToken);
+    sessionStorage.setItem("refreshToken", response.data.refreshToken);
+
+    return response.data.accessToken;
+  } catch (error) {
+    console.error("Error refreshing token:", error);
+    throw error;
+  }
 };
 
 export const getUsers = async () => {
@@ -34,10 +59,7 @@ export const createUser = async (user: Omit<User, "id" | "role">) => {
   return response.data;
 };
 
-export const updateUser = async (
-  id: number,
-  updatedUser: Partial<User>
-) => {
+export const updateUser = async (id: number, updatedUser: Partial<User>) => {
   await api.put(`/users/${id}`, updatedUser);
 };
 

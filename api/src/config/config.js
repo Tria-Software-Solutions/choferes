@@ -24,9 +24,4 @@ module.exports = {
       },
     },
   },
-  authConfig: {
-    JWT_SECRET_KEY: process.env.JWT_SECRET_KEY,  
-    JWT_SECRET_KEY_REFRESH: process.env.JWT_SECRET_KEY_REFRESH, 
-    NODE_ENV: process.env.NODE_ENV || "development", 
-  },
 };

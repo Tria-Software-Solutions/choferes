@@ -107,13 +107,13 @@ const ManageUsers = () => {
     try {
       const newRole = await getRoleByName(editFields.roleName);
       if (!newRole) {
-        console.error("Rol no encontrado");
+        console.error("Role not found");
         return;
       }
 
       const userRole = await getUserRoleByUserId(id);
       if (!userRole) {
-        console.error("No se encontró la relación userRole");
+        console.error("Relation with userRole not found");
         return;
       }
       if (userRole.roleId !== newRole.id) {

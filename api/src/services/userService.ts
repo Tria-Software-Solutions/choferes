@@ -1,13 +1,10 @@
+import bcrypt from "bcrypt";
 import { User } from "../models/User";
 import { Role } from "../models/Role";
 import { Permission } from "../models/Permission";
-import bcrypt from "bcrypt";
-import { Response } from "express";
-import {
-  sendTokensInCookies,
-} from "../utils/generateSecret";
+import { generateTokens } from "../utils/generateSecret";
 
-export const authenticateUser = async (username: string, password: string, res: Response) => {
+export const authenticateUser = async (username: string, password: string) => {
   const user = await User.findOne({
     where: { username },
     include: [
@@ -21,14 +18,15 @@ export const authenticateUser = async (username: string, password: string, res: 
     ],
   });
 
-  if (!user) throw new Error("User not found");
-
+  if (!user) {
+    throw new Error("User not found");
+  }
   const isMatch = await bcrypt.compare(password, user.password);
   if (!isMatch) throw new Error("Incorrect password");
 
-  sendTokensInCookies(user.id, res);
+  const { accessToken, refreshToken } = generateTokens(user.id.toString());
 
-  return { user };
+  return { user, accessToken, refreshToken };
 };
 
 export const getUsers = async () => {

@@ -1,17 +1,33 @@
 import { createContext, useContext, useState } from "react";
-import Cookies from "js-cookie";
 import { User } from "../models/User";
 
 interface AuthContextType {
+  accessToken: string | null;
+  refreshToken: string | null;
   currentUser: User | null;
   userPermissions: string[];
-  login: (user: User, userPermissions: string[], accessToken: string, refreshToken: string) => void;
+  login: (
+    accessToken: string,
+    refreshToken: string,
+    user: User,
+    userPermissions: string[]
+  ) => void;
   logout: () => void;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
+  const [accessToken, setAccessToken] = useState(() => {
+    const storedAccessToken = sessionStorage.getItem("accessToken");
+    return storedAccessToken ? storedAccessToken : null;
+  });
+
+  const [refreshToken, setRefreshToken] = useState(() => {
+    const storedRefreshToken = sessionStorage.getItem("refreshToken");
+    return storedRefreshToken ? storedRefreshToken : null;
+  });
+
   const [currentUser, setCurrentUser] = useState(() => {
     const storedUser = sessionStorage.getItem("currentUser");
     return storedUser ? JSON.parse(storedUser) : null;
@@ -22,33 +38,40 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     return storedUserPermissions ? JSON.parse(storedUserPermissions) : [];
   });
 
-
   const login = (
-    currentUser: User,
-    userPermissions: string[],
     accessToken: string,
-    refreshToken: string
+    refreshToken: string,
+    currentUser: User,
+    userPermissions: string[]
   ) => {
+    setAccessToken(accessToken);
+    setRefreshToken(refreshToken);
     setCurrentUser(currentUser);
     setUserPermissions(userPermissions);
+    sessionStorage.setItem("accessToken", accessToken);
+    sessionStorage.setItem("refreshToken", refreshToken);
     sessionStorage.setItem("currentUser", JSON.stringify(currentUser));
     sessionStorage.setItem("userPermissions", JSON.stringify(userPermissions));
-    Cookies.set("accessToken", accessToken, { expires: 1 });
-    Cookies.set("refreshToken", refreshToken, { expires: 7 });
   };
 
   const logout = () => {
+    setAccessToken(null);
+    setRefreshToken(null);
     setCurrentUser(null);
     setUserPermissions(null);
-    sessionStorage.removeItem("currentUser");
-    sessionStorage.removeItem("userPermissions");
-    Cookies.remove("accessToken");
-    Cookies.remove("refreshToken");
+    sessionStorage.clear();
   };
 
   return (
     <AuthContext.Provider
-      value={{ currentUser, userPermissions, login, logout }}
+      value={{
+        accessToken,
+        refreshToken,
+        currentUser,
+        userPermissions,
+        login,
+        logout,
+      }}
     >
       {children}
     </AuthContext.Provider>
