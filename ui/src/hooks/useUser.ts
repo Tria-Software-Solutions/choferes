@@ -19,15 +19,17 @@ export const useUsers = () => {
   const authenticateUser = async (username: string, password: string) => {
     setAuthError(null);
     try {
-      const loginData = await UserService.authenticateUser(username, password);
+      const response = await UserService.authenticateUser(username, password);
+      sessionStorage.setItem("refreshToken", response.refreshToken);
       const userPermissions = await UserService.getUserPermissions(
-        loginData.user.id
+        response.user.id
       );
+      console.log("userPermissions", userPermissions);
       login(
-        loginData.user,
-        userPermissions,
-        loginData.accessToken,
-        loginData.refreshToken
+        response.accessToken,
+        response.refreshToken,
+        response.user,
+        userPermissions
       );
       navigate("/roles");
     } catch (error) {

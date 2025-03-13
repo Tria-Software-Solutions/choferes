@@ -47,8 +47,8 @@ const userService = __importStar(require("../services/userService"));
 const authenticateUser = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const { username, password } = req.body;
-        const { user } = yield userService.authenticateUser(username, password, res);
-        res.status(200).json({ user });
+        const { user, accessToken, refreshToken } = yield userService.authenticateUser(username, password);
+        res.status(200).json({ user, accessToken, refreshToken });
     }
     catch (error) {
         res.status(401).json({ message: "Error login User", error });

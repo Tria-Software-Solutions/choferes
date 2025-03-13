@@ -1,8 +1,7 @@
-import dotenv from "dotenv";
 import express from "express";
 import cors from "cors";
-import cookieParser from "cookie-parser";
-import { urlencoded } from "body-parser";
+import { json, urlencoded } from "body-parser";
+import authRoutes from "./routes/authRoutes";
 import userRoutes from "./routes/userRoutes";
 import employeeRoutes from "./routes/employeeRoutes";
 import hoursWorkedRoutes from "./routes/hoursWorkedRoutes";
@@ -18,29 +17,14 @@ import rolePermissionRoutes from "./routes/rolePermissionRoutes";
 import sequelize from "./config/database";
 import "./database/models";
 
-dotenv.config();
 
 const app = express();
-const allowedOrigins = [
-  "https://choferesdealquilercr.vercel.app",
-  "http://localhost:3000",
-];
-app.use(
-  cors({
-    origin: function (origin, callback) {
-      if (!origin || allowedOrigins.includes(origin)) {
-        callback(null, true);
-      } else {
-        callback(new Error("Not allowed by CORS"));
-      }
-    },
-    credentials: true, 
-  })
-);
-app.use(cookieParser());
-app.use(express.json());
+
+app.use(cors());  
+app.use(json());
 app.use(urlencoded({ extended: true }));
-app.options("*", cors());
+
+app.use("/api/auth", authRoutes);
 app.use("/api/users", userRoutes);
 app.use("/api/roles", roleRoutes);
 app.use("/api/permissions", permissionRoutes);

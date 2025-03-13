@@ -4,12 +4,9 @@ import * as userService from "../services/userService";
 export const authenticateUser = async (req: Request, res: Response) => {
   try {
     const { username, password } = req.body;
-    const { user } = await userService.authenticateUser(
-      username,
-      password,
-      res
-    );
-    res.status(200).json({ user });
+    const { user, accessToken, refreshToken } =
+      await userService.authenticateUser(username, password);
+    res.status(200).json({ user, accessToken, refreshToken });
   } catch (error) {
     res.status(401).json({ message: "Error login User", error });
   }

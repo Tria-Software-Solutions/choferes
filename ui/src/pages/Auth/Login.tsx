@@ -51,6 +51,7 @@ const Login = () => {
         setError("Ocurrió un error desconocido. Intenta más tarde.");
       }
     }
+
     setIsSubmitting(false);
   };
 

@@ -13,12 +13,12 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.deleteUser = exports.updateUser = exports.createUser = exports.getUserPermissions = exports.getUserByUsername = exports.getUserById = exports.getUsers = exports.authenticateUser = void 0;
+const bcrypt_1 = __importDefault(require("bcrypt"));
 const User_1 = require("../models/User");
 const Role_1 = require("../models/Role");
 const Permission_1 = require("../models/Permission");
-const bcrypt_1 = __importDefault(require("bcrypt"));
 const generateSecret_1 = require("../utils/generateSecret");
-const authenticateUser = (username, password, res) => __awaiter(void 0, void 0, void 0, function* () {
+const authenticateUser = (username, password) => __awaiter(void 0, void 0, void 0, function* () {
     const user = yield User_1.User.findOne({
         where: { username },
         include: [
@@ -31,13 +31,14 @@ const authenticateUser = (username, password, res) => __awaiter(void 0, void 0, 
             },
         ],
     });
-    if (!user)
+    if (!user) {
         throw new Error("User not found");
+    }
     const isMatch = yield bcrypt_1.default.compare(password, user.password);
     if (!isMatch)
         throw new Error("Incorrect password");
-    (0, generateSecret_1.sendTokensInCookies)(user.id, res);
-    return { user };
+    const { accessToken, refreshToken } = (0, generateSecret_1.generateTokens)(user.id.toString());
+    return { user, accessToken, refreshToken };
 });
 exports.authenticateUser = authenticateUser;
 const getUsers = () => __awaiter(void 0, void 0, void 0, function* () {

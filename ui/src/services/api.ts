@@ -1,21 +1,18 @@
 import axios from "axios";
-import Cookies from "js-cookie";
+import { refreshAccessToken } from "./userService";
 
 const API_URL = process.env.REACT_APP_API_URL || "http://localhost:5000";
 
 const api = axios.create({
   baseURL: `${API_URL}/api`,
-  headers: {
-    "Content-Type": "application/json",
-  },
-  withCredentials: true,
+  headers: { "Content-Type": "application/json" },
 });
 
 api.interceptors.request.use(
   (config) => {
-    const token = Cookies.get("accessToken");
-    if (token) {
-      config.headers["Authorization"] = `Bearer ${token}`;
+    const accessToken = sessionStorage.getItem("accessToken");
+    if (accessToken) {
+      config.headers["Authorization"] = `Bearer ${accessToken}`;
     }
     return config;
   },
@@ -25,43 +22,26 @@ api.interceptors.request.use(
 api.interceptors.response.use(
   (response) => response,
   async (error) => {
-    if (error.response && error.response.status === 401) {
+    if (
+      error.response?.status === 401 &&
+      error.response.data?.error === "Token expired"
+    ) {
       try {
-        const refreshToken = Cookies.get("refreshToken");
-
-        if (!refreshToken) {
-          throw new Error("No refresh token available");
-        }
-
-        const refreshResponse = await axios.post(
-          `${API_URL}/api/refresh-token`,
-          {},
-          { withCredentials: true }
-        );
-
-        const newAccessToken = refreshResponse.data.accessToken;
-
-        Cookies.set("accessToken", newAccessToken, { expires: 1 });
-
+        const newAccessToken = await refreshAccessToken();
         error.config.headers["Authorization"] = `Bearer ${newAccessToken}`;
-
-        return axios(error.config);
+        return api.request(error.config);
       } catch (refreshError) {
-        logoutUser();
+        disconnectUser();
         return Promise.reject(refreshError);
       }
     }
-
     return Promise.reject(error);
   }
 );
 
-const logoutUser = () => {
-  Cookies.remove("accessToken");
-  Cookies.remove("refreshToken");
-  sessionStorage.removeItem("currentUser");
-  sessionStorage.removeItem("userPermissions");
-  window.location.href = "/";
+const disconnectUser = () => {
+  sessionStorage.clear();
+  console.warn("Session expired. User disconnected.");
 };
 
 export default api;

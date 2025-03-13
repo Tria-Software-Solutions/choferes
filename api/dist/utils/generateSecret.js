@@ -32,32 +32,23 @@ var __importStar = (this && this.__importStar) || (function () {
         return result;
     };
 })();
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.generateSecret = exports.sendTokensInCookies = void 0;
+exports.generateSecret = exports.generateTokens = void 0;
 const crypto = __importStar(require("crypto"));
 const jwt = __importStar(require("jsonwebtoken"));
-const { JWT_SECRET_KEY, JWT_SECRET_KEY_REFRESH, NODE_ENV } = process.env;
-const sendTokensInCookies = (userId, res) => {
-    const accessToken = jwt.sign({ userId }, JWT_SECRET_KEY, {
-        expiresIn: "1h",
-    });
-    const refreshToken = jwt.sign({ userId }, JWT_SECRET_KEY_REFRESH, {
+const config_1 = __importDefault(require("../config/config"));
+const { JWT_SECRET_KEY, JWT_SECRET_KEY_REFRESH } = config_1.default;
+const generateTokens = (user) => {
+    const accessToken = jwt.sign({ userId: user.id, username: user.username, role: user.role }, JWT_SECRET_KEY, { expiresIn: "1h" });
+    const refreshToken = jwt.sign({ userId: user.id }, JWT_SECRET_KEY_REFRESH, {
         expiresIn: "7d",
     });
-    res.cookie("accessToken", accessToken, {
-        httpOnly: true,
-        secure: NODE_ENV === "production",
-        sameSite: NODE_ENV === "production" ? "none" : "lax",
-        maxAge: 3600 * 1000,
-    });
-    res.cookie("refreshToken", refreshToken, {
-        httpOnly: true,
-        secure: NODE_ENV === "production",
-        sameSite: NODE_ENV === "production" ? "none" : "lax",
-        maxAge: 7 * 24 * 60 * 60 * 1000,
-    });
+    return { accessToken, refreshToken };
 };
-exports.sendTokensInCookies = sendTokensInCookies;
+exports.generateTokens = generateTokens;
 const generateSecret = (length = 32) => {
     return crypto.randomBytes(length).toString("hex");
 };
