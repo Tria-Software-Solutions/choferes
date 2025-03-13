@@ -40,11 +40,11 @@ const dotenv = __importStar(require("dotenv"));
 dotenv.config();
 const JWT_SECRET_KEY = process.env.JWT_SECRET_KEY;
 const JWT_SECRET_KEY_REFRESH = process.env.JWT_SECRET_KEY_REFRESH;
-const generateTokens = (user) => {
-    const accessToken = jwt.sign({ userId: user.id, username: user.username, role: user.role }, JWT_SECRET_KEY, {
+const generateTokens = (userId) => {
+    const accessToken = jwt.sign({ userId }, JWT_SECRET_KEY, {
         expiresIn: "1h",
     });
-    const refreshToken = jwt.sign({ userId: user.id }, JWT_SECRET_KEY_REFRESH, {
+    const refreshToken = jwt.sign({ userId }, JWT_SECRET_KEY_REFRESH, {
         expiresIn: "7d",
     });
     return { accessToken, refreshToken };
