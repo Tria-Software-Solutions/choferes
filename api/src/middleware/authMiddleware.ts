@@ -32,6 +32,7 @@ export const authenticateToken = (
           return res.status(401).json({ error: "Unauthorized: Invalid token" });
         }
       }
+      
       const payload = decoded as JwtPayload;
 
       if (!payload.userId) {
