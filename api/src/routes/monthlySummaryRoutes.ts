@@ -10,9 +10,9 @@ router.get(
   monthlySummaryController.getMonthlySummaries
 );
 router.get(
-  "/:id",
+  "/employee/:id",
   authenticateToken,
-  monthlySummaryController.getMonthlySummaryById
+  monthlySummaryController.getCurrentMonthlySummary
 );
 router.post(
   "/",

@@ -42,7 +42,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.deleteBiweeklySummary = exports.updateBiweeklySummary = exports.createBiweeklySummary = exports.getBiweeklySummaryById = exports.getBiweeklySummaries = void 0;
+exports.deleteBiweeklySummary = exports.updateBiweeklySummary = exports.createBiweeklySummary = exports.getCurrentBiweeklySummary = exports.getBiweeklySummaries = void 0;
 const biweeklySummaryService = __importStar(require("../services/biweeklySummaryService"));
 const getBiweeklySummaries = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
@@ -56,10 +56,9 @@ const getBiweeklySummaries = (req, res) => __awaiter(void 0, void 0, void 0, fun
     }
 });
 exports.getBiweeklySummaries = getBiweeklySummaries;
-const getBiweeklySummaryById = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+const getCurrentBiweeklySummary = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        const id = parseInt(req.params.id);
-        const summary = yield biweeklySummaryService.getBiweeklySummaryById(id);
+        const summary = yield biweeklySummaryService.getCurrentBiweeklySummary(Number(req.params.id), Number(req.query.biweekNumber), Number(req.query.month), Number(req.query.year));
         if (summary) {
             return res.status(200).json(summary);
         }
@@ -73,7 +72,7 @@ const getBiweeklySummaryById = (req, res) => __awaiter(void 0, void 0, void 0, f
             .json({ message: "Error fetching BiweeklySummary", error });
     }
 });
-exports.getBiweeklySummaryById = getBiweeklySummaryById;
+exports.getCurrentBiweeklySummary = getCurrentBiweeklySummary;
 const createBiweeklySummary = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const newBiweeklySummary = yield biweeklySummaryService.createBiweeklySummary(req.body);

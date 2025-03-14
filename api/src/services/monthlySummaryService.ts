@@ -4,8 +4,14 @@ export const getMonthlySummaries = async () => {
   return MonthlySummary.findAll();
 };
 
-export const getMonthlySummaryById = async (id: number) => {
-  return MonthlySummary.findByPk(id);
+export const getCurrentMonthlySummary = async (
+  employeeId: number,
+  month: number,
+  year: number
+) => {
+  return MonthlySummary.findOne({
+    where: { employeeId, month, year },
+  });
 };
 
 export const createMonthlySummary = async (

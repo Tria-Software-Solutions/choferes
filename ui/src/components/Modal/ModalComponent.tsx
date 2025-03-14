@@ -10,17 +10,19 @@ interface ModalComponentProps {
   variant?: "contained" | "outlined" | "text";
   buttonStyle?: SxProps;
   modalStyle?: SxProps;
+  disabled?: boolean;
   modalTitle: string;
   modalDescription?: string;
   children?: React.ReactNode;
+  onCloseModal?: () => void;
 }
 
 const defaultModalStyle = {
   position: "absolute" as "absolute",
+  zIndex: 9999,
   top: "50%",
   left: "50%",
   transform: "translate(-50%, -50%)",
-  width: "60%",
   bgcolor: "background.paper",
   borderRadius: "8px",
   boxShadow: 24,
@@ -34,26 +36,38 @@ const ModalComponent: React.FC<ModalComponentProps> = ({
   variant,
   buttonStyle,
   modalStyle,
+  disabled,
   modalTitle,
   modalDescription,
   children,
+  onCloseModal,
 }) => {
   const [open, setOpen] = React.useState(false);
   const handleOpen = () => setOpen(true);
-  const handleClose = () => setOpen(false);
+  const handleClose = () => {
+    setOpen(false);
+    if (onCloseModal) {
+      onCloseModal();
+    }
+  };
 
   return (
     <div>
       {buttonType === "text" ? (
-        <Button onClick={handleOpen} sx={buttonStyle}>
+        <Button onClick={handleOpen} sx={buttonStyle} disabled={disabled}>
           {buttonLabel}
         </Button>
       ) : buttonType === "icon" ? (
-        <IconButton onClick={handleOpen} sx={buttonStyle}>
+        <IconButton onClick={handleOpen} sx={buttonStyle} disabled={disabled}>
           {buttonIcon}
         </IconButton>
       ) : (
-        <Button variant={variant} sx={buttonStyle} onClick={handleOpen}>
+        <Button
+          variant={variant}
+          sx={buttonStyle}
+          disabled={disabled}
+          onClick={handleOpen}
+        >
           {buttonIcon}
         </Button>
       )}
@@ -62,7 +76,6 @@ const ModalComponent: React.FC<ModalComponentProps> = ({
         onClose={handleClose}
         aria-labelledby="modal-title"
         aria-describedby="modal-description"
-        sx={{ zIndex: 9999 }}
       >
         <Box sx={{ ...defaultModalStyle, ...modalStyle }}>
           <Box

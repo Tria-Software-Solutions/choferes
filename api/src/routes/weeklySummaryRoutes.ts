@@ -6,9 +6,13 @@ const router = express.Router();
 
 router.get("/", authenticateToken, weeklySummaryController.getWeeklySummaries);
 router.get(
-  "/:id",
+  "/employee/:id",
   authenticateToken,
-  weeklySummaryController.getWeeklySummaryById
+  weeklySummaryController.getCurrentWeeklySummary
+);
+router.get(
+  "/employee/:id/has-worked",
+  weeklySummaryController.hasWorkedCurrenWeeklySummary
 );
 router.post(
   "/",

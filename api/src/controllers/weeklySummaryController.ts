@@ -25,10 +25,14 @@ export const createWeeklySummary = async (req: Request, res: Response) => {
   }
 };
 
-export const getWeeklySummaryById = async (req: Request, res: Response) => {
+export const getCurrentWeeklySummary = async (req: Request, res: Response) => {
   try {
-    const id = parseInt(req.params.id);
-    const summary = await weeklySummaryService.getWeeklySummaryById(id);
+    const summary = await weeklySummaryService.getCurrentWeeklySummary(
+      Number(req.params.id),
+      Number(req.query.weekNumber),
+      Number(req.query.month),
+      Number(req.query.year)
+    );
     if (summary) {
       return res.status(200).json(summary);
     } else {
@@ -38,6 +42,25 @@ export const getWeeklySummaryById = async (req: Request, res: Response) => {
     return res
       .status(500)
       .json({ message: "Error fetching WeeklySummary", error });
+  }
+};
+
+export const hasWorkedCurrenWeeklySummary = async (
+  req: Request,
+  res: Response
+) => {
+  try {
+    const hasWorked = await weeklySummaryService.hasWorkedCurrenWeeklySummary(
+      Number(req.params.id),
+      Number(req.query.weekNumber),
+      Number(req.query.month),
+      Number(req.query.year)
+    );
+    return res.status(200).json({ hasWorked });
+  } catch (error) {
+    return res
+      .status(500)
+      .json({ message: "Error checking work status", error });
   }
 };
 

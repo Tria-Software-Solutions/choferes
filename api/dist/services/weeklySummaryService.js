@@ -9,16 +9,25 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.deleteWeeklySummary = exports.updateWeeklySummary = exports.createWeeklySummary = exports.getWeeklySummaryById = exports.getWeeklySummaries = void 0;
+exports.deleteWeeklySummary = exports.updateWeeklySummary = exports.createWeeklySummary = exports.hasWorkedCurrenWeeklySummary = exports.getCurrentWeeklySummary = exports.getWeeklySummaries = void 0;
 const WeeklySummary_1 = require("../models/WeeklySummary");
 const getWeeklySummaries = () => __awaiter(void 0, void 0, void 0, function* () {
     return WeeklySummary_1.WeeklySummary.findAll();
 });
 exports.getWeeklySummaries = getWeeklySummaries;
-const getWeeklySummaryById = (id) => __awaiter(void 0, void 0, void 0, function* () {
-    return WeeklySummary_1.WeeklySummary.findByPk(id);
+const getCurrentWeeklySummary = (employeeId, weekNumber, month, year) => __awaiter(void 0, void 0, void 0, function* () {
+    return WeeklySummary_1.WeeklySummary.findOne({
+        where: { employeeId, weekNumber, month, year },
+    });
 });
-exports.getWeeklySummaryById = getWeeklySummaryById;
+exports.getCurrentWeeklySummary = getCurrentWeeklySummary;
+const hasWorkedCurrenWeeklySummary = (employeeId, weekNumber, month, year) => __awaiter(void 0, void 0, void 0, function* () {
+    const summary = yield WeeklySummary_1.WeeklySummary.findOne({
+        where: { employeeId, weekNumber, month, year },
+    });
+    return !!summary;
+});
+exports.hasWorkedCurrenWeeklySummary = hasWorkedCurrenWeeklySummary;
 const createWeeklySummary = (data) => __awaiter(void 0, void 0, void 0, function* () {
     return yield WeeklySummary_1.WeeklySummary.create(data);
 });

@@ -10,9 +10,9 @@ router.get(
   biweeklySummaryController.getBiweeklySummaries
 );
 router.get(
-  "/:id",
+  "/employee/:id",
   authenticateToken,
-  biweeklySummaryController.getBiweeklySummaryById
+  biweeklySummaryController.getCurrentBiweeklySummary
 );
 router.post(
   "/",

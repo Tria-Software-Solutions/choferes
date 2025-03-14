@@ -42,7 +42,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.deleteWeeklySummary = exports.updateWeeklySummary = exports.getWeeklySummaryById = exports.createWeeklySummary = exports.getWeeklySummaries = void 0;
+exports.deleteWeeklySummary = exports.updateWeeklySummary = exports.hasWorkedCurrenWeeklySummary = exports.getCurrentWeeklySummary = exports.createWeeklySummary = exports.getWeeklySummaries = void 0;
 const weeklySummaryService = __importStar(require("../services/weeklySummaryService"));
 const getWeeklySummaries = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
@@ -68,10 +68,9 @@ const createWeeklySummary = (req, res) => __awaiter(void 0, void 0, void 0, func
     }
 });
 exports.createWeeklySummary = createWeeklySummary;
-const getWeeklySummaryById = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+const getCurrentWeeklySummary = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        const id = parseInt(req.params.id);
-        const summary = yield weeklySummaryService.getWeeklySummaryById(id);
+        const summary = yield weeklySummaryService.getCurrentWeeklySummary(Number(req.params.id), Number(req.query.weekNumber), Number(req.query.month), Number(req.query.year));
         if (summary) {
             return res.status(200).json(summary);
         }
@@ -85,7 +84,19 @@ const getWeeklySummaryById = (req, res) => __awaiter(void 0, void 0, void 0, fun
             .json({ message: "Error fetching WeeklySummary", error });
     }
 });
-exports.getWeeklySummaryById = getWeeklySummaryById;
+exports.getCurrentWeeklySummary = getCurrentWeeklySummary;
+const hasWorkedCurrenWeeklySummary = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        const hasWorked = yield weeklySummaryService.hasWorkedCurrenWeeklySummary(Number(req.params.id), Number(req.query.weekNumber), Number(req.query.month), Number(req.query.year));
+        return res.status(200).json({ hasWorked });
+    }
+    catch (error) {
+        return res
+            .status(500)
+            .json({ message: "Error checking work status", error });
+    }
+});
+exports.hasWorkedCurrenWeeklySummary = hasWorkedCurrenWeeklySummary;
 const updateWeeklySummary = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const id = parseInt(req.params.id);

@@ -24,16 +24,32 @@ export const useBiweeklySummaries = () => {
     }
   }, []);
 
-  const getBiweeklySummaryById = useCallback(async (id: number) => {
-    setIsLoadingBiweeklySummaries(true);
-    try {
-      return await BiweeklySummaryService.getBiweeklySummaryById(id);
-    } catch (error) {
-      console.error("Error fetching Biweekly Summaries by Id", error);
-    } finally {
-      setIsLoadingBiweeklySummaries(false);
-    }
-  }, []);
+  const getCurrentBiweeklySummary = useCallback(
+    async (
+      employeeId: number,
+      biweekNumber: number,
+      month: number,
+      year: number
+    ) => {
+      setIsLoadingBiweeklySummaries(true);
+      try {
+        return await BiweeklySummaryService.getCurrentBiweeklySummary(
+          employeeId,
+          biweekNumber,
+          month,
+          year
+        );
+      } catch (error) {
+        console.error(
+          "Error fetching current Biweekly Summary",
+          error
+        );
+      } finally {
+        setIsLoadingBiweeklySummaries(false);
+      }
+    },
+    []
+  );
 
   const createBiweeklySummary = async (
     newBiweeklySummary: Omit<BiweeklySummary, "id">
@@ -88,7 +104,7 @@ export const useBiweeklySummaries = () => {
     totalCountBiweeklySummaries,
     isLoadingBiweeklySummaries,
     getBiweeklySummaries,
-    getBiweeklySummaryById,
+    getCurrentBiweeklySummary,
     createBiweeklySummary,
     updateBiweeklySummary,
     createOrUpdateBiweeklySummary,

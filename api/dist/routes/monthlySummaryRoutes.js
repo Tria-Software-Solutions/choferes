@@ -41,7 +41,7 @@ const monthlySummaryController = __importStar(require("../controllers/monthlySum
 const authMiddleware_1 = require("../middleware/authMiddleware");
 const router = express_1.default.Router();
 router.get("/", authMiddleware_1.authenticateToken, monthlySummaryController.getMonthlySummaries);
-router.get("/:id", authMiddleware_1.authenticateToken, monthlySummaryController.getMonthlySummaryById);
+router.get("/employee/:id", authMiddleware_1.authenticateToken, monthlySummaryController.getCurrentMonthlySummary);
 router.post("/", authMiddleware_1.authenticateToken, monthlySummaryController.createMonthlySummary);
 router.put("/:id", authMiddleware_1.authenticateToken, monthlySummaryController.updateMonthlySummary);
 router.delete("/:id", authMiddleware_1.authenticateToken, monthlySummaryController.deleteMonthlySummary);

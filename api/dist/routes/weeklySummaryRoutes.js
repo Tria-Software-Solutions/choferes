@@ -41,7 +41,8 @@ const weeklySummaryController = __importStar(require("../controllers/weeklySumma
 const authMiddleware_1 = require("../middleware/authMiddleware");
 const router = express_1.default.Router();
 router.get("/", authMiddleware_1.authenticateToken, weeklySummaryController.getWeeklySummaries);
-router.get("/:id", authMiddleware_1.authenticateToken, weeklySummaryController.getWeeklySummaryById);
+router.get("/employee/:id", authMiddleware_1.authenticateToken, weeklySummaryController.getCurrentWeeklySummary);
+router.get("/employee/:id/has-worked", weeklySummaryController.hasWorkedCurrenWeeklySummary);
 router.post("/", authMiddleware_1.authenticateToken, weeklySummaryController.createWeeklySummary);
 router.put("/:id", authMiddleware_1.authenticateToken, weeklySummaryController.updateWeeklySummary);
 router.delete("/:id", authMiddleware_1.authenticateToken, weeklySummaryController.deleteWeeklySummary);

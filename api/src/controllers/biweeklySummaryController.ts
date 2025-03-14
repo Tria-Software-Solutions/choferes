@@ -12,10 +12,17 @@ export const getBiweeklySummaries = async (req: Request, res: Response) => {
   }
 };
 
-export const getBiweeklySummaryById = async (req: Request, res: Response) => {
+export const getCurrentBiweeklySummary = async (
+  req: Request,
+  res: Response
+) => {
   try {
-    const id = parseInt(req.params.id);
-    const summary = await biweeklySummaryService.getBiweeklySummaryById(id);
+    const summary = await biweeklySummaryService.getCurrentBiweeklySummary(
+      Number(req.params.id),
+      Number(req.query.biweekNumber),
+      Number(req.query.month),
+      Number(req.query.year)
+    );
     if (summary) {
       return res.status(200).json(summary);
     } else {

@@ -21,16 +21,53 @@ export const useWeeklySummaries = () => {
     }
   }, []);
 
-  const getWeeklySummaryById = useCallback(async (id: number) => {
-    setIsLoadingWeeklySummaries(true);
-    try {
-      return await WeeklySummaryService.getWeeklySummaryById(id);
-    } catch (error) {
-      console.error("Error fetching Weekly Summaries by Id", error);
-    } finally {
-      setIsLoadingWeeklySummaries(false);
-    }
-  }, []);
+  const getCurrentWeeklySummary = useCallback(
+    async (
+      employeeId: number,
+      weekNumber: number,
+      month: number,
+      year: number
+    ) => {
+      setIsLoadingWeeklySummaries(true);
+      try {
+        return await WeeklySummaryService.getCurrentWeeklySummary(
+          employeeId,
+          weekNumber,
+          month,
+          year
+        );
+      } catch (error) {
+        console.error("Error fetching current Weekly Summary", error);
+      } finally {
+        setIsLoadingWeeklySummaries(false);
+      }
+    },
+    []
+  );
+
+  const hasWorkedCurrenWeeklySummary = useCallback(
+    async (
+      employeeId: number,
+      weekNumber: number,
+      month: number,
+      year: number
+    ) => {
+      setIsLoadingWeeklySummaries(true);
+      try {
+        return await WeeklySummaryService.hasWorkedCurrenWeeklySummary(
+          employeeId,
+          weekNumber,
+          month,
+          year
+        );
+      } catch (error) {
+        console.error("Error fetching current Weekly Summary", error);
+      } finally {
+        setIsLoadingWeeklySummaries(false);
+      }
+    },
+    []
+  );
 
   const createWeeklySummary = async (
     newWeeklySummary: Omit<WeeklySummary, "id">
@@ -83,7 +120,8 @@ export const useWeeklySummaries = () => {
     totalCountWeeklySummaries,
     isLoadingWeeklySummaries,
     getWeeklySummaries,
-    getWeeklySummaryById,
+    getCurrentWeeklySummary,
+    hasWorkedCurrenWeeklySummary,
     createWeeklySummary,
     updateWeeklySummary,
     createOrUpdateWeeklySummary,
