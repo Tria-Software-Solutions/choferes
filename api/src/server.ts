@@ -1,5 +1,7 @@
+import dotenv from "dotenv";
 import express from "express";
 import cors from "cors";
+import cookieParser from "cookie-parser";
 import { json, urlencoded } from "body-parser";
 import authRoutes from "./routes/authRoutes";
 import userRoutes from "./routes/userRoutes";
@@ -17,10 +19,24 @@ import rolePermissionRoutes from "./routes/rolePermissionRoutes";
 import sequelize from "./config/database";
 import "./database/models";
 
+dotenv.config();
 
 const app = express();
 
-app.use(cors());  
+const allowedOrigins = [process.env.REACT_APP_UI_URL, "http://localhost:3000"];
+app.use(
+  cors({
+    origin: function (origin, callback) {
+      if (!origin || allowedOrigins.includes(origin)) {
+        callback(null, true);
+      } else {
+        callback(new Error("Not allowed by CORS"));
+      }
+    },
+    credentials: true,
+  })
+);
+app.use(cookieParser());
 app.use(json());
 app.use(urlencoded({ extended: true }));
 

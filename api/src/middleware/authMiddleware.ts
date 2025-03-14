@@ -19,8 +19,7 @@ export const authenticateToken = (
   next: NextFunction
 ) => {
   try {
-    const authHeader = req.headers["authorization"];
-    const accessToken = authHeader?.split(" ")[1];
+    const accessToken = req.cookies.accessToken;
     if (!accessToken)
       return res.status(401).json({ error: "Unauthorized: Token required" });
 
@@ -55,7 +54,7 @@ export const authenticateRefreshToken = (
   next: NextFunction
 ) => {
   try {
-    const refreshToken = req.headers["x-refresh-token"] as string;
+    const refreshToken = req.cookies.refreshToken;
     if (!refreshToken) {
       return res
         .status(401)
@@ -73,7 +72,7 @@ export const authenticateRefreshToken = (
         }
         const userId = (refreshDecoded as JwtPayload).userId;
         const { accessToken: newAccessToken, refreshToken: newRefreshToken } =
-          generateTokens(userId);  
+          generateTokens(userId, res);  
 
         res.setHeader("x-access-token", newAccessToken);
         res.setHeader("x-refresh-token", newRefreshToken);

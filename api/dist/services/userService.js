@@ -18,7 +18,7 @@ const User_1 = require("../models/User");
 const Role_1 = require("../models/Role");
 const Permission_1 = require("../models/Permission");
 const generateSecret_1 = require("../utils/generateSecret");
-const authenticateUser = (username, password) => __awaiter(void 0, void 0, void 0, function* () {
+const authenticateUser = (username, password, res) => __awaiter(void 0, void 0, void 0, function* () {
     const user = yield User_1.User.findOne({
         where: { username },
         include: [
@@ -37,7 +37,7 @@ const authenticateUser = (username, password) => __awaiter(void 0, void 0, void 
     const isMatch = yield bcrypt_1.default.compare(password, user.password);
     if (!isMatch)
         throw new Error("Incorrect password");
-    const { accessToken, refreshToken } = (0, generateSecret_1.generateTokens)(user.id.toString());
+    const { accessToken, refreshToken } = (0, generateSecret_1.generateTokens)(user.id.toString(), res);
     return { user, accessToken, refreshToken };
 });
 exports.authenticateUser = authenticateUser;

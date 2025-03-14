@@ -13,8 +13,7 @@ if (!JWT_SECRET_KEY || !JWT_SECRET_KEY_REFRESH) {
 }
 const authenticateToken = (req, res, next) => {
     try {
-        const authHeader = req.headers["authorization"];
-        const accessToken = authHeader === null || authHeader === void 0 ? void 0 : authHeader.split(" ")[1];
+        const accessToken = req.cookies.accessToken;
         if (!accessToken)
             return res.status(401).json({ error: "Unauthorized: Token required" });
         jsonwebtoken_1.default.verify(accessToken, JWT_SECRET_KEY, (error, decoded) => {
@@ -43,7 +42,7 @@ const authenticateToken = (req, res, next) => {
 exports.authenticateToken = authenticateToken;
 const authenticateRefreshToken = (req, res, next) => {
     try {
-        const refreshToken = req.headers["x-refresh-token"];
+        const refreshToken = req.cookies.refreshToken;
         if (!refreshToken) {
             return res
                 .status(401)
@@ -56,7 +55,7 @@ const authenticateRefreshToken = (req, res, next) => {
                     .json({ error: "Forbidden: Invalid refresh token" });
             }
             const userId = refreshDecoded.userId;
-            const { accessToken: newAccessToken, refreshToken: newRefreshToken } = (0, generateSecret_1.generateTokens)(userId);
+            const { accessToken: newAccessToken, refreshToken: newRefreshToken } = (0, generateSecret_1.generateTokens)(userId, res);
             res.setHeader("x-access-token", newAccessToken);
             res.setHeader("x-refresh-token", newRefreshToken);
             return res
