@@ -41,7 +41,7 @@ const biweeklySummaryController = __importStar(require("../controllers/biweeklyS
 const authMiddleware_1 = require("../middleware/authMiddleware");
 const router = express_1.default.Router();
 router.get("/", authMiddleware_1.authenticateToken, biweeklySummaryController.getBiweeklySummaries);
-router.get("/:id", authMiddleware_1.authenticateToken, biweeklySummaryController.getBiweeklySummaryById);
+router.get("/employee/:id", authMiddleware_1.authenticateToken, biweeklySummaryController.getCurrentBiweeklySummary);
 router.post("/", authMiddleware_1.authenticateToken, biweeklySummaryController.createBiweeklySummary);
 router.put("/:id", authMiddleware_1.authenticateToken, biweeklySummaryController.updateBiweeklySummary);
 router.delete("/:id", authMiddleware_1.authenticateToken, biweeklySummaryController.deleteBiweeklySummary);

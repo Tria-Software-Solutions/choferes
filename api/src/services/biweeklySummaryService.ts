@@ -4,8 +4,15 @@ export const getBiweeklySummaries = async () => {
   return BiweeklySummary.findAll();
 };
 
-export const getBiweeklySummaryById = async (id: number) => {
-  return BiweeklySummary.findByPk(id);
+export const getCurrentBiweeklySummary = async (
+  employeeId: number,
+  biweekNumber: number,
+  month: number,
+  year: number
+) => {
+  return BiweeklySummary.findOne({
+    where: { employeeId, biweekNumber, month, year },
+  });
 };
 
 export const createBiweeklySummary = async (

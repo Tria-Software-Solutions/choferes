@@ -6,8 +6,14 @@ export const getMonthlySummaries = async () => {
   return response.data;
 };
 
-export const getMonthlySummaryById = async (id: number) => {
-  const response = await api.get(`/monthly-summary/${id}`);
+export const getCurrentMonthlySummary = async (
+  employeeId: number,
+  month: number,
+  year: number
+) => {
+  const response = await api.get(`/monthly-summary/employee/${employeeId}`, {
+    params: { month, year },
+  });
   return response.data;
 };
 

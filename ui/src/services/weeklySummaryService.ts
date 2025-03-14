@@ -6,9 +6,28 @@ export const getWeeklySummaries = async () => {
   return response.data;
 };
 
-export const getWeeklySummaryById = async (id: number) => {
-  const response = await api.get(`/weekly-summary/${id}`);
+export const getCurrentWeeklySummary = async (
+  employeeId: number,
+  weekNumber: number,
+  month: number,
+  year: number
+) => {
+  const response = await api.get(`/weekly-summary/employee/${employeeId}`, {
+    params: { weekNumber, month, year },
+  });
   return response.data;
+};
+
+export const hasWorkedCurrenWeeklySummary = async (
+  employeeId: number,
+  weekNumber: number,
+  month: number,
+  year: number
+) => {
+  const response = await api.get(`/weekly-summary/employee/${employeeId}/has-worked`, {
+    params: { weekNumber, month, year },
+  });
+  return response.data.hasWorked;
 };
 
 export const createWeeklySummary = async (

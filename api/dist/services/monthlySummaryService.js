@@ -9,16 +9,18 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.deleteMonthlySummary = exports.updateMonthlySummary = exports.createMonthlySummary = exports.getMonthlySummaryById = exports.getMonthlySummaries = void 0;
+exports.deleteMonthlySummary = exports.updateMonthlySummary = exports.createMonthlySummary = exports.getCurrentMonthlySummary = exports.getMonthlySummaries = void 0;
 const MonthlySummary_1 = require("../models/MonthlySummary");
 const getMonthlySummaries = () => __awaiter(void 0, void 0, void 0, function* () {
     return MonthlySummary_1.MonthlySummary.findAll();
 });
 exports.getMonthlySummaries = getMonthlySummaries;
-const getMonthlySummaryById = (id) => __awaiter(void 0, void 0, void 0, function* () {
-    return MonthlySummary_1.MonthlySummary.findByPk(id);
+const getCurrentMonthlySummary = (employeeId, month, year) => __awaiter(void 0, void 0, void 0, function* () {
+    return MonthlySummary_1.MonthlySummary.findOne({
+        where: { employeeId, month, year },
+    });
 });
-exports.getMonthlySummaryById = getMonthlySummaryById;
+exports.getCurrentMonthlySummary = getCurrentMonthlySummary;
 const createMonthlySummary = (data) => __awaiter(void 0, void 0, void 0, function* () {
     return yield MonthlySummary_1.MonthlySummary.create(data);
 });

@@ -1,49 +1,65 @@
-import { Request, Response } from 'express';
-import * as monthlySummaryService from '../services/monthlySummaryService'
+import { Request, Response } from "express";
+import * as monthlySummaryService from "../services/monthlySummaryService";
 
 export const getMonthlySummaries = async (req: Request, res: Response) => {
   try {
     const summaries = await monthlySummaryService.getMonthlySummaries();
     return res.status(200).json(summaries);
   } catch (error) {
-    return res.status(500).json({ message: 'Error fetching MonthlySummaries', error });
+    return res
+      .status(500)
+      .json({ message: "Error fetching MonthlySummaries", error });
   }
 };
 
-export const getMonthlySummaryById = async (req: Request, res: Response) => {
+export const getCurrentMonthlySummary = async (req: Request, res: Response) => {
   try {
-    const id = parseInt(req.params.id);
-    const summary = await monthlySummaryService.getMonthlySummaryById(id);
+    const summary = await monthlySummaryService.getCurrentMonthlySummary(
+      Number(req.params.id),
+      Number(req.query.month),
+      Number(req.query.year)
+    );
     if (summary) {
       return res.status(200).json(summary);
     } else {
-      return res.status(404).json({ message: 'MonthlySummary not found' });
+      return res.status(404).json({ message: "MonthlySummary not found" });
     }
   } catch (error) {
-    return res.status(500).json({ message: 'Error fetching MonthlySummary', error });
+    return res
+      .status(500)
+      .json({ message: "Error fetching MonthlySummary", error });
   }
 };
 
 export const createMonthlySummary = async (req: Request, res: Response) => {
   try {
-    const newMonthlySummary = await monthlySummaryService.createMonthlySummary(req.body);
+    const newMonthlySummary = await monthlySummaryService.createMonthlySummary(
+      req.body
+    );
     return res.status(201).json(newMonthlySummary);
   } catch (error) {
-    return res.status(500).json({ message: 'Error creating MonthlySummary', error });
+    return res
+      .status(500)
+      .json({ message: "Error creating MonthlySummary", error });
   }
 };
 
 export const updateMonthlySummary = async (req: Request, res: Response) => {
   try {
     const id = parseInt(req.params.id);
-    const updatedSummary = await monthlySummaryService.updateMonthlySummary(id, req.body);
+    const updatedSummary = await monthlySummaryService.updateMonthlySummary(
+      id,
+      req.body
+    );
     if (updatedSummary) {
       return res.status(200).json(updatedSummary);
     } else {
-      return res.status(404).json({ message: 'MonthlySummary not found' });
+      return res.status(404).json({ message: "MonthlySummary not found" });
     }
   } catch (error) {
-    return res.status(500).json({ message: 'Error updating MonthlySummary', error });
+    return res
+      .status(500)
+      .json({ message: "Error updating MonthlySummary", error });
   }
 };
 
@@ -54,9 +70,11 @@ export const deleteMonthlySummary = async (req: Request, res: Response) => {
     if (deleted) {
       return res.status(204).end();
     } else {
-      return res.status(404).json({ message: 'MonthlySummary not found' });
+      return res.status(404).json({ message: "MonthlySummary not found" });
     }
   } catch (error) {
-    return res.status(500).json({ message: 'Error deleting MonthlySummary', error });
+    return res
+      .status(500)
+      .json({ message: "Error deleting MonthlySummary", error });
   }
 };

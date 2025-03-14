@@ -24,16 +24,31 @@ export const useMonthlySummaries = () => {
     }
   }, []);
 
-  const getMonthlySummaryById = useCallback(async (id: number) => {
-    setIsLoadingMonthlySummaries(true);
-    try {
-      return await MonthlySummaryService.getMonthlySummaryById(id);
-    } catch (error) {
-      console.error("Error fetching Monthly Summaries by Id", error);
-    } finally {
-      setIsLoadingMonthlySummaries(false);
-    }
-  }, []);
+  const getCurrentMonthlySummary = useCallback(
+      async (
+        employeeId: number,
+        month: number,
+        year: number
+      ) => {
+        setIsLoadingMonthlySummaries(true);
+        try {
+          return await MonthlySummaryService.getCurrentMonthlySummary(
+            employeeId,
+            month,
+            year
+          );
+        } catch (error) {
+          console.error(
+            "Error fetching current Biweekly Summary",
+            error
+          );
+        } finally {
+          setIsLoadingMonthlySummaries(false);
+        }
+      },
+      []
+    );
+  
 
   const createMonthlySummary = async (
     newMonthlySummary: Omit<MonthlySummary, "id">
@@ -85,7 +100,7 @@ export const useMonthlySummaries = () => {
     totalCountMonthlySummaries,
     isLoadingMonthlySummaries,
     getMonthlySummaries,
-    getMonthlySummaryById,
+    getCurrentMonthlySummary,
     createMonthlySummary,
     updateMonthlySummary,
     createOrUpdateMonthlySummary,

@@ -42,7 +42,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.deleteMonthlySummary = exports.updateMonthlySummary = exports.createMonthlySummary = exports.getMonthlySummaryById = exports.getMonthlySummaries = void 0;
+exports.deleteMonthlySummary = exports.updateMonthlySummary = exports.createMonthlySummary = exports.getCurrentMonthlySummary = exports.getMonthlySummaries = void 0;
 const monthlySummaryService = __importStar(require("../services/monthlySummaryService"));
 const getMonthlySummaries = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
@@ -50,33 +50,38 @@ const getMonthlySummaries = (req, res) => __awaiter(void 0, void 0, void 0, func
         return res.status(200).json(summaries);
     }
     catch (error) {
-        return res.status(500).json({ message: 'Error fetching MonthlySummaries', error });
+        return res
+            .status(500)
+            .json({ message: "Error fetching MonthlySummaries", error });
     }
 });
 exports.getMonthlySummaries = getMonthlySummaries;
-const getMonthlySummaryById = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+const getCurrentMonthlySummary = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        const id = parseInt(req.params.id);
-        const summary = yield monthlySummaryService.getMonthlySummaryById(id);
+        const summary = yield monthlySummaryService.getCurrentMonthlySummary(Number(req.params.id), Number(req.query.month), Number(req.query.year));
         if (summary) {
             return res.status(200).json(summary);
         }
         else {
-            return res.status(404).json({ message: 'MonthlySummary not found' });
+            return res.status(404).json({ message: "MonthlySummary not found" });
         }
     }
     catch (error) {
-        return res.status(500).json({ message: 'Error fetching MonthlySummary', error });
+        return res
+            .status(500)
+            .json({ message: "Error fetching MonthlySummary", error });
     }
 });
-exports.getMonthlySummaryById = getMonthlySummaryById;
+exports.getCurrentMonthlySummary = getCurrentMonthlySummary;
 const createMonthlySummary = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const newMonthlySummary = yield monthlySummaryService.createMonthlySummary(req.body);
         return res.status(201).json(newMonthlySummary);
     }
     catch (error) {
-        return res.status(500).json({ message: 'Error creating MonthlySummary', error });
+        return res
+            .status(500)
+            .json({ message: "Error creating MonthlySummary", error });
     }
 });
 exports.createMonthlySummary = createMonthlySummary;
@@ -88,11 +93,13 @@ const updateMonthlySummary = (req, res) => __awaiter(void 0, void 0, void 0, fun
             return res.status(200).json(updatedSummary);
         }
         else {
-            return res.status(404).json({ message: 'MonthlySummary not found' });
+            return res.status(404).json({ message: "MonthlySummary not found" });
         }
     }
     catch (error) {
-        return res.status(500).json({ message: 'Error updating MonthlySummary', error });
+        return res
+            .status(500)
+            .json({ message: "Error updating MonthlySummary", error });
     }
 });
 exports.updateMonthlySummary = updateMonthlySummary;
@@ -104,11 +111,13 @@ const deleteMonthlySummary = (req, res) => __awaiter(void 0, void 0, void 0, fun
             return res.status(204).end();
         }
         else {
-            return res.status(404).json({ message: 'MonthlySummary not found' });
+            return res.status(404).json({ message: "MonthlySummary not found" });
         }
     }
     catch (error) {
-        return res.status(500).json({ message: 'Error deleting MonthlySummary', error });
+        return res
+            .status(500)
+            .json({ message: "Error deleting MonthlySummary", error });
     }
 });
 exports.deleteMonthlySummary = deleteMonthlySummary;

@@ -6,8 +6,15 @@ export const getBiweeklySummaries = async () => {
   return response.data;
 };
 
-export const getBiweeklySummaryById = async (id: number) => {
-  const response = await api.get(`/biweekly-summary/${id}`);
+export const getCurrentBiweeklySummary = async (
+  employeeId: number,
+  biweekNumber: number,
+  month: number,
+  year: number
+) => {
+  const response = await api.get(`/biweekly-summary/employee/${employeeId}`, {
+    params: { biweekNumber, month, year },
+  });
   return response.data;
 };
 

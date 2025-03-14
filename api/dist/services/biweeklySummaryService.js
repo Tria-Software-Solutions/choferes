@@ -9,16 +9,18 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.deleteBiweeklySummary = exports.updateBiweeklySummary = exports.createBiweeklySummary = exports.getBiweeklySummaryById = exports.getBiweeklySummaries = void 0;
+exports.deleteBiweeklySummary = exports.updateBiweeklySummary = exports.createBiweeklySummary = exports.getCurrentBiweeklySummary = exports.getBiweeklySummaries = void 0;
 const BiweeklySummary_1 = require("../models/BiweeklySummary");
 const getBiweeklySummaries = () => __awaiter(void 0, void 0, void 0, function* () {
     return BiweeklySummary_1.BiweeklySummary.findAll();
 });
 exports.getBiweeklySummaries = getBiweeklySummaries;
-const getBiweeklySummaryById = (id) => __awaiter(void 0, void 0, void 0, function* () {
-    return BiweeklySummary_1.BiweeklySummary.findByPk(id);
+const getCurrentBiweeklySummary = (employeeId, biweekNumber, month, year) => __awaiter(void 0, void 0, void 0, function* () {
+    return BiweeklySummary_1.BiweeklySummary.findOne({
+        where: { employeeId, biweekNumber, month, year },
+    });
 });
-exports.getBiweeklySummaryById = getBiweeklySummaryById;
+exports.getCurrentBiweeklySummary = getCurrentBiweeklySummary;
 const createBiweeklySummary = (data) => __awaiter(void 0, void 0, void 0, function* () {
     return yield BiweeklySummary_1.BiweeklySummary.create(data);
 });
