@@ -51,6 +51,7 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import CloseRoundedIcon from "@mui/icons-material/CloseRounded";
 import { faFileExcel, faFilePdf } from "@fortawesome/free-solid-svg-icons";
 import { format } from "date-fns";
+import { capitalizeFirstLetter } from "../../utils/string";
 
 const VehiclesPage: React.FC = () => {
   const { userPermissions } = useAuth();
@@ -634,7 +635,7 @@ const VehiclesPage: React.FC = () => {
                   gap={2}
                 >
                   <Grid container spacing={2} alignItems="center">
-                    <Grid item xs={12} sm={6} md={1}>
+                    <Grid item xs={6} sm={4} md={2} lg={1}>
                       <Tooltip
                         title="Este número de boleta ya está registrado"
                         open={openTicketTooltip}
@@ -652,7 +653,7 @@ const VehiclesPage: React.FC = () => {
                         />
                       </Tooltip>
                     </Grid>
-                    <Grid item xs={12} sm={6} md={1}>
+                    <Grid item xs={6} sm={4} md={2} lg={1}>
                       <Tooltip
                         title="Esta placa ya está registrada"
                         open={openLicensePlateTooltip}
@@ -669,7 +670,7 @@ const VehiclesPage: React.FC = () => {
                         />
                       </Tooltip>
                     </Grid>
-                    <Grid item xs={12} sm={6} md={2}>
+                    <Grid item xs={6} sm={4} md={2} lg={2}>
                       <FormControl variant="outlined" fullWidth>
                         <Autocomplete
                           value={
@@ -708,7 +709,7 @@ const VehiclesPage: React.FC = () => {
                         />
                       </FormControl>
                     </Grid>
-                    <Grid item xs={12} sm={6} md={2}>
+                    <Grid item xs={6} sm={4} md={2} lg={2}>
                       <FormControl variant="outlined" fullWidth>
                         <Autocomplete
                           value={
@@ -747,7 +748,7 @@ const VehiclesPage: React.FC = () => {
                         />
                       </FormControl>
                     </Grid>
-                    <Grid item xs={12} sm={6} md={1}>
+                    <Grid item xs={6} sm={4} md={2} lg={1}>
                       <TextField
                         label="Espacio"
                         variant="outlined"
@@ -756,7 +757,7 @@ const VehiclesPage: React.FC = () => {
                         onChange={handleParkingLotChange}
                       />
                     </Grid>
-                    <Grid item xs={12} sm={6} md={5}>
+                    <Grid item xs={6} sm={4} md={2} lg={5}>
                       <TextField
                         label="Observaciones"
                         variant="outlined"
@@ -832,12 +833,20 @@ const VehiclesPage: React.FC = () => {
             <Box
               sx={{
                 display: "flex",
+                flexDirection: "column",
                 justifyContent: "center",
                 alignItems: "center",
                 textAlign: "center",
                 paddingTop: "10%",
               }}
             >
+              <Typography variant="body1"  color="textSecondary">
+                {capitalizeFirstLetter(
+                  format(selectedDate, "EEEE dd 'de' MMMM 'de' yyyy", {
+                    locale: es,
+                  })
+                )}
+              </Typography>
               <Typography variant="h6" color="textSecondary">
                 No se encontraron vehículos para mostrar.
               </Typography>
