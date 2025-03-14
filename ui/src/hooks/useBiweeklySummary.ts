@@ -18,7 +18,18 @@ export const useBiweeklySummaries = () => {
       setBiweeklySummaries(data);
       setTotalCountBiweeklySummaries(data.length);
     } catch (error) {
-      console.error("Error fetching biweekly summaries:", error);
+      console.error("Error fetching Biweekly Summaries:", error);
+    } finally {
+      setIsLoadingBiweeklySummaries(false);
+    }
+  }, []);
+
+  const getBiweeklySummaryById = useCallback(async (id: number) => {
+    setIsLoadingBiweeklySummaries(true);
+    try {
+      return await BiweeklySummaryService.getBiweeklySummaryById(id);
+    } catch (error) {
+      console.error("Error fetching Biweekly Summaries by Id", error);
     } finally {
       setIsLoadingBiweeklySummaries(false);
     }
@@ -77,6 +88,7 @@ export const useBiweeklySummaries = () => {
     totalCountBiweeklySummaries,
     isLoadingBiweeklySummaries,
     getBiweeklySummaries,
+    getBiweeklySummaryById,
     createBiweeklySummary,
     updateBiweeklySummary,
     createOrUpdateBiweeklySummary,

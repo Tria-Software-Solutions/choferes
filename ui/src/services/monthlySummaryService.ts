@@ -6,6 +6,11 @@ export const getMonthlySummaries = async () => {
   return response.data;
 };
 
+export const getMonthlySummaryById = async (id: number) => {
+  const response = await api.get(`/monthly-summary/${id}`);
+  return response.data;
+};
+
 export const createMonthlySummary = async (
   newMonthlySummary: Omit<MonthlySummary, "id">
 ) => {
