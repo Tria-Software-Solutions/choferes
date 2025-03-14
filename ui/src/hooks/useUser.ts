@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback } from "react";
+import Cookies from "js-cookie";
 import * as UserService from "../services/userService";
 import { useUserRoles } from "./useUserRole";
 import { User } from "../models/User";
@@ -6,6 +7,7 @@ import { UserRole } from "../models/UserRole";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import { Roles } from "../enums/roles";
+
 
 export const useUsers = () => {
   const { currentUser, login, logout } = useAuth();
@@ -20,7 +22,7 @@ export const useUsers = () => {
     setAuthError(null);
     try {
       const response = await UserService.authenticateUser(username, password);
-      sessionStorage.setItem("refreshToken", response.refreshToken);
+      Cookies.set("refreshToken", response.refreshToken, { expires: 7 });
       const userPermissions = await UserService.getUserPermissions(
         response.user.id
       );

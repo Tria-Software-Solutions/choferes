@@ -1,4 +1,5 @@
 import axios from "axios";
+import Cookies from "js-cookie";
 import { refreshAccessToken } from "./userService";
 
 const API_URL = process.env.REACT_APP_API_URL || "http://localhost:5000";
@@ -6,11 +7,12 @@ const API_URL = process.env.REACT_APP_API_URL || "http://localhost:5000";
 const api = axios.create({
   baseURL: `${API_URL}/api`,
   headers: { "Content-Type": "application/json" },
+  withCredentials: true,
 });
 
 api.interceptors.request.use(
   (config) => {
-    const accessToken = sessionStorage.getItem("accessToken");
+    const accessToken = Cookies.get("accessToken");
     if (accessToken) {
       config.headers["Authorization"] = `Bearer ${accessToken}`;
     }

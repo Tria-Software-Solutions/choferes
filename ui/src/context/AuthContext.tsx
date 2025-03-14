@@ -1,4 +1,5 @@
 import { createContext, useContext, useState } from "react";
+import Cookies from "js-cookie";
 import { User } from "../models/User";
 
 interface AuthContextType {
@@ -19,12 +20,12 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const [accessToken, setAccessToken] = useState(() => {
-    const storedAccessToken = sessionStorage.getItem("accessToken");
+    const storedAccessToken = Cookies.get("accessToken");
     return storedAccessToken ? storedAccessToken : null;
   });
 
   const [refreshToken, setRefreshToken] = useState(() => {
-    const storedRefreshToken = sessionStorage.getItem("refreshToken");
+    const storedRefreshToken = Cookies.get("refreshToken");
     return storedRefreshToken ? storedRefreshToken : null;
   });
 
@@ -48,8 +49,8 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     setRefreshToken(refreshToken);
     setCurrentUser(currentUser);
     setUserPermissions(userPermissions);
-    sessionStorage.setItem("accessToken", accessToken);
-    sessionStorage.setItem("refreshToken", refreshToken);
+    Cookies.set("accessToken", accessToken, { expires: 1 });
+    Cookies.set("refreshToken", refreshToken, { expires: 7 });
     sessionStorage.setItem("currentUser", JSON.stringify(currentUser));
     sessionStorage.setItem("userPermissions", JSON.stringify(userPermissions));
   };
@@ -59,6 +60,8 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     setRefreshToken(null);
     setCurrentUser(null);
     setUserPermissions(null);
+    Cookies.remove("accessToken");
+    Cookies.remove("refreshToken");
     sessionStorage.clear();
   };
 
