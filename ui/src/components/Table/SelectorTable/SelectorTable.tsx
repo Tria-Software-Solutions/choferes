@@ -31,8 +31,11 @@ import {
   SelectChangeEvent,
   Badge,
   Tooltip,
+  TextField,
+  Button,
 } from "@mui/material";
 import { TabContext, TabList, TabPanel } from "@mui/lab";
+import PaginationActions from "../Pagination/PaginationActions";
 import {
   formatDate,
   formatDateWithoutYear,
@@ -60,10 +63,10 @@ import {
   DEFAULT_SCHEDULE_VALUES,
   PERMISSIONS,
 } from "../../../constants/constants";
-import InfoRoundedIcon from "@mui/icons-material/InfoRounded";
+import InfoOutlinedIcon from "@mui/icons-material/InfoOutlined";
 import AccessTimeRoundedIcon from "@mui/icons-material/AccessTimeRounded";
 import AddIcon from "@mui/icons-material/Add";
-import PaginationActions from "../Pagination/PaginationActions";
+import MoreTimeIcon from "@mui/icons-material/MoreTime";
 
 interface SelectorTableProps {
   filteredEmployees: Employee[];
@@ -106,6 +109,7 @@ const SelectorTable: React.FC<SelectorTableProps> = React.memo(
       "weekly" | "biweekly" | "monthly"
     >("weekly");
     const [tabValue, setTabValue] = React.useState(0);
+    const [timeAdjustment, setTimeAdjustment] = useState(0);
     const [orderDirection, setOrderDirection] = useState<"asc" | "desc">("asc");
     const [page, setPage] = useState(0);
     const [rowsPerPage, setRowsPerPage] = useState(5);
@@ -225,93 +229,255 @@ const SelectorTable: React.FC<SelectorTableProps> = React.memo(
         : resultHoursForPeriod(employee, selectedPeriod, "overtime");
     };
 
-    const modalContent = (employee: Employee) => {
+    const handleEditSumTime = (employee: Employee) => {
+      console.log("Sumar: ", timeAdjustment);
+    };
+
+    const handleEditSubtractTime = (employee: Employee) => {
+      console.log("Restar: ", timeAdjustment);
+    };
+
+    const modalContentSummary = (employee: Employee) => {
       return (
         <TabContext value={tabValue}>
-          <Box sx={{ bgcolor: "background.paper" }}>
-            <TabList onChange={handleTabChange} sx={{ padding: 0, margin: 0 }}>
+          <Box
+            sx={{
+              bgcolor: "background.paper",
+            }}
+          >
+            <TabList onChange={handleTabChange}>
               <Tab label="Semanal" value={0} />
               <Tab label="Quincenal" value={1} />
               <Tab label="Mensual" value={2} />
               <Tab label="Horas Extra" value={3} />
             </TabList>
           </Box>
-          <TabPanel value={0} sx={{ paddingLeft: 0, paddingRight: 0 }}>
-            <Typography variant="body2">
-              {`${employee.firstName} ha trabajado un total de `}
-              <strong>
-                {resultHoursForPeriod(employee, "weekly", "totalHours")}
-              </strong>
-              {` horas en la semana número `}
-              <strong>{weekNumber}</strong>
-              {`, que comprende del ${formatDate(
-                new Date(currentWeek[0]?.date),
-                false
-              )} al ${formatDate(new Date(currentWeek[6]?.date), false)} `}
-            </Typography>
+          <TabPanel
+            value={0}
+            sx={{
+              paddingLeft: 0,
+              paddingRight: 0,
+            }}
+          >
+            <TableContainer component={Paper}>
+              <Table>
+                <TableHead>
+                  <TableRow>
+                    <TableCell>Empleado</TableCell>
+                    <TableCell>Horas Trabajadas</TableCell>
+                    <TableCell>Semana</TableCell>
+                    <TableCell>Rango de Fechas</TableCell>
+                  </TableRow>
+                </TableHead>
+                <TableBody>
+                  <TableRow>
+                    <TableCell>
+                      {employee.firstName} {employee.lastName}
+                    </TableCell>
+                    <TableCell>
+                      <strong>
+                        {resultHoursForPeriod(employee, "weekly", "totalHours")}
+                      </strong>
+                    </TableCell>
+                    <TableCell>{weekNumber}</TableCell>
+                    <TableCell sx={{ whiteSpace: "nowrap" }}>
+                      {`${formatDate(
+                        new Date(currentWeek[0]?.date),
+                        false
+                      )} - ${formatDate(
+                        new Date(currentWeek[6]?.date),
+                        false
+                      )}`}
+                    </TableCell>
+                  </TableRow>
+                </TableBody>
+              </Table>
+            </TableContainer>
           </TabPanel>
           <TabPanel value={1} sx={{ paddingLeft: 0, paddingRight: 0 }}>
-            <Typography variant="body2">
-              {`${employee.firstName} ha trabajado un total de `}
-              <strong>
-                {resultHoursForPeriod(employee, "biweekly", "totalHours")}
-              </strong>
-              {` horas en la quincena número `} <strong>{biweekNumber}</strong>
-              {`, que comprende del ${formatDate(
-                getBiweeklyDates(year, biweekNumber).startDate,
-                false
-              )} al ${formatDate(
-                getBiweeklyDates(year, biweekNumber).startDate,
-                false
-              )}`}
-            </Typography>
+            <TableContainer component={Paper}>
+              <Table>
+                <TableHead>
+                  <TableRow>
+                    <TableCell>Empleado</TableCell>
+                    <TableCell>Horas Trabajadas</TableCell>
+                    <TableCell>Quincena</TableCell>
+                    <TableCell>Rango de Fechas</TableCell>
+                  </TableRow>
+                </TableHead>
+                <TableBody>
+                  <TableRow>
+                    <TableCell>
+                      {employee.firstName} {employee.lastName}
+                    </TableCell>
+                    <TableCell>
+                      <strong>
+                        {resultHoursForPeriod(
+                          employee,
+                          "biweekly",
+                          "totalHours"
+                        )}
+                      </strong>
+                    </TableCell>
+                    <TableCell>{biweekNumber}</TableCell>
+                    <TableCell sx={{ whiteSpace: "nowrap" }}>
+                      {`${formatDate(
+                        getBiweeklyDates(year, biweekNumber).startDate,
+                        false
+                      )} -  ${formatDate(
+                        getBiweeklyDates(year, biweekNumber).endDate,
+                        false
+                      )}`}
+                    </TableCell>
+                  </TableRow>
+                </TableBody>
+              </Table>
+            </TableContainer>
           </TabPanel>
           <TabPanel value={2} sx={{ paddingLeft: 0, paddingRight: 0 }}>
-            <Typography variant="body2">
-              {`${employee.firstName} ha trabajado un total de `}
-              <strong>
-                {resultHoursForPeriod(employee, "monthly", "totalHours")}
-              </strong>
-              {` horas en el mes de ${getMonthName(month)} del ${year}`}
-            </Typography>
+            <TableContainer component={Paper}>
+              <Table>
+                <TableHead>
+                  <TableRow>
+                    <TableCell>Empleado</TableCell>
+                    <TableCell>Horas Trabajadas</TableCell>
+                    <TableCell>Mes</TableCell>
+                    <TableCell>Año</TableCell>
+                  </TableRow>
+                </TableHead>
+                <TableBody>
+                  <TableRow>
+                    <TableCell>
+                      {employee.firstName} {employee.lastName}
+                    </TableCell>
+                    <TableCell>
+                      <strong>
+                        {resultHoursForPeriod(
+                          employee,
+                          "monthly",
+                          "totalHours"
+                        )}
+                      </strong>
+                    </TableCell>
+                    <TableCell>{getMonthName(month)}</TableCell>
+                    <TableCell>{year}</TableCell>
+                  </TableRow>
+                </TableBody>
+              </Table>
+            </TableContainer>
           </TabPanel>
           <TabPanel value={3} sx={{ paddingLeft: 0, paddingRight: 0 }}>
-            <Typography variant="body2">
-              {`${employee.firstName} ha trabajado un total de: `}
-            </Typography>
-            <Typography variant="body2">
-              <strong>
-                {resultHoursForPeriod(employee, "weekly", "overtime")}
-              </strong>
-              {` horas extra en la semana número `}
-              <strong>{weekNumber}</strong>
-              {`, que comprende del ${formatDate(
-                new Date(currentWeek[0]?.date),
-                false
-              )} al ${formatDate(new Date(currentWeek[6]?.date), false)} `}
-            </Typography>
-            <Typography variant="body2">
-              <strong>
-                {resultHoursForPeriod(employee, "biweekly", "overtime")}
-              </strong>
-              {` horas extra en la quincena número `}{" "}
-              <strong>{biweekNumber}</strong>
-              {`, que comprende del ${formatDate(
-                getBiweeklyDates(year, biweekNumber).startDate,
-                false
-              )} al ${formatDate(
-                getBiweeklyDates(year, biweekNumber).startDate,
-                false
-              )}`}
-            </Typography>
-            <Typography variant="body2">
-              <strong>
-                {resultHoursForPeriod(employee, "monthly", "overtime")}
-              </strong>
-              {` horas extra en el mes de ${getMonthName(month)} del ${year}`}
-            </Typography>
+            <TableContainer component={Paper}>
+              <Table>
+                <TableHead>
+                  <TableRow>
+                    <TableCell>Empleado</TableCell>
+                    <TableCell align="center">Periodo</TableCell>
+                    <TableCell align="center">Horas Extra</TableCell>
+                    <TableCell align="center">Número</TableCell>
+                    <TableCell align="center">Rango de Fechas</TableCell>
+                  </TableRow>
+                </TableHead>
+                <TableBody>
+                  <TableRow>
+                    <TableCell rowSpan={3}>
+                      {employee.firstName} {employee.lastName}
+                    </TableCell>
+                    <TableCell align="center">Semanal</TableCell>
+                    <TableCell align="center">
+                      <strong>
+                        {resultHoursForPeriod(employee, "weekly", "overtime")}
+                      </strong>
+                    </TableCell>
+                    <TableCell align="center">{weekNumber}</TableCell>
+                    <TableCell align="center" sx={{ whiteSpace: "nowrap" }}>
+                      {`${formatDate(
+                        new Date(currentWeek[0]?.date),
+                        false
+                      )} - ${formatDate(
+                        new Date(currentWeek[6]?.date),
+                        false
+                      )}`}
+                    </TableCell>
+                  </TableRow>
+                  <TableRow>
+                    <TableCell align="center">Quincenal</TableCell>
+                    <TableCell align="center">
+                      <strong>
+                        {resultHoursForPeriod(employee, "biweekly", "overtime")}
+                      </strong>
+                    </TableCell>
+                    <TableCell align="center">{biweekNumber}</TableCell>
+                    <TableCell align="center" sx={{ whiteSpace: "nowrap" }}>
+                      {`${formatDate(
+                        getBiweeklyDates(year, biweekNumber).startDate,
+                        false
+                      )} - ${formatDate(
+                        getBiweeklyDates(year, biweekNumber).endDate,
+                        false
+                      )}`}
+                    </TableCell>
+                  </TableRow>
+                  <TableRow>
+                    <TableCell align="center">Mensual</TableCell>
+                    <TableCell align="center">
+                      <strong>
+                        {resultHoursForPeriod(employee, "monthly", "overtime")}
+                      </strong>
+                    </TableCell>
+                    <TableCell align="center">{getMonthName(month)}</TableCell>
+                    <TableCell align="center">{year}</TableCell>
+                  </TableRow>
+                </TableBody>
+              </Table>
+            </TableContainer>
           </TabPanel>
         </TabContext>
+      );
+    };
+
+    const modalContentEditTime = (employee: Employee) => {
+      return (
+        <Box
+          sx={{
+            display: "flex",
+            flexDirection: "column",
+            gap: 2,
+            margin: "auto",
+          }}
+        >
+          {selectedPeriod === "weekly" ? (
+            <Typography variant="body1">Total de horas semanales: </Typography>
+          ) : selectedPeriod === "biweekly" ? (
+            <Typography variant="body1">
+              Total de horas quincenales:{" "}
+            </Typography>
+          ) : (
+            <Typography variant="body1">Total de horas mensuales: </Typography>
+          )}
+          <TextField
+            label="Horas a ajustar"
+            variant="outlined"
+            type="number"
+            onChange={(e) => setTimeAdjustment(Number(e.target.value))}
+          />
+          <Box sx={{ display: "flex", justifyContent: "flex-end", gap: 2 }}>
+            <Button
+              variant="contained"
+              color="success"
+              onClick={() => handleEditSumTime(employee)}
+            >
+              Sumar
+            </Button>
+            <Button
+              variant="contained"
+              color="error"
+              onClick={() => handleEditSubtractTime(employee)}
+            >
+              Restar
+            </Button>
+          </Box>
+        </Box>
       );
     };
 
@@ -332,7 +498,7 @@ const SelectorTable: React.FC<SelectorTableProps> = React.memo(
               <TableRow>
                 <TableCell
                   align="center"
-                  colSpan={9}
+                  colSpan={10}
                   sx={{
                     position: "sticky",
                     top: 0,
@@ -422,33 +588,39 @@ const SelectorTable: React.FC<SelectorTableProps> = React.memo(
                 {permissions?.includes(
                   PERMISSIONS.VIEW_EMPLOYEE_ROLES_HOURS
                 ) && (
-                  <TableCell
-                    align="center"
-                    sx={{
-                      position: isSmallScreen ? "static" : "sticky",
-                      right: 0,
-                      zIndex: 3,
-                    }}
-                    colSpan={2}
-                  >
-                    <FormControl>
-                      <InputLabel>Total</InputLabel>
-                      <Select
-                        value={selectedPeriod}
-                        onChange={(e) =>
-                          setSelectedPeriod(
-                            e.target.value as "weekly" | "biweekly" | "monthly"
-                          )
-                        }
-                        autoWidth
-                        label="Total"
-                      >
-                        <MenuItem value="weekly">Semanal</MenuItem>
-                        <MenuItem value="biweekly">Quincenal</MenuItem>
-                        <MenuItem value="monthly">Mensual</MenuItem>
-                      </Select>
-                    </FormControl>
-                  </TableCell>
+                  <>
+                    <TableCell />
+                    <TableCell
+                      align="center"
+                      sx={{
+                        position: isSmallScreen ? "static" : "sticky",
+                        right: 0,
+                        zIndex: 3,
+                      }}
+                      colSpan={2}
+                    >
+                      <FormControl>
+                        <InputLabel>Total</InputLabel>
+                        <Select
+                          value={selectedPeriod}
+                          onChange={(e) =>
+                            setSelectedPeriod(
+                              e.target.value as
+                                | "weekly"
+                                | "biweekly"
+                                | "monthly"
+                            )
+                          }
+                          autoWidth
+                          label="Total"
+                        >
+                          <MenuItem value="weekly">Semanal</MenuItem>
+                          <MenuItem value="biweekly">Quincenal</MenuItem>
+                          <MenuItem value="monthly">Mensual</MenuItem>
+                        </Select>
+                      </FormControl>
+                    </TableCell>
+                  </>
                 )}
               </TableRow>
             </TableHead>
@@ -484,10 +656,11 @@ const SelectorTable: React.FC<SelectorTableProps> = React.memo(
                       ) && (
                         <ModalComponent
                           buttonType="icon"
-                          buttonIcon={<InfoRoundedIcon />}
-                          modalTitle={`${employee.firstName} ${employee.lastName}`}
-                          modalDescription="Resumen del total de horas trabajadas"
-                          children={modalContent(employee)}
+                          buttonIcon={<InfoOutlinedIcon />}
+                          variant="text"
+                          modalTitle={"Resumen de Horas Trabajadas"}
+                          modalDescription="Detalle de horas trabajadas en diferentes períodos"
+                          children={modalContentSummary(employee)}
                         />
                       )}
                     </Box>
@@ -592,60 +765,81 @@ const SelectorTable: React.FC<SelectorTableProps> = React.memo(
                   {permissions?.includes(
                     PERMISSIONS.VIEW_EMPLOYEE_ROLES_HOURS
                   ) && (
-                    <TableCell
-                      align="left"
-                      sx={{
-                        position: isSmallScreen ? "static" : "sticky",
-                        right: 0,
-                        zIndex: 2,
-                        backgroundColor:
-                          rowIndex % 2 === 0 ? "white" : "#f5f5f5",
-                      }}
-                    >
-                      <Box
+                    <>
+                      <TableCell align="center">
+                        <Tooltip title="Editar Horas" arrow>
+                          <Box>
+                            <ModalComponent
+                              buttonType="button"
+                              buttonIcon={<MoreTimeIcon />}
+                              variant="contained"
+                              buttonStyle={{ height: "56px" }}
+                              modalTitle={"Ajuste de Horas"}
+                              modalDescription={`Ingresa la cantidad de horas que deseas sumar o restar al total de horas trabajadas por ${employee.firstName} ${employee.lastName}.`}
+                              children={modalContentEditTime(employee)}
+                            />
+                          </Box>
+                        </Tooltip>
+                      </TableCell>
+                      <TableCell
+                        align="left"
                         sx={{
-                          display: "flex",
-                          justifyContent: "space-between",
-                          alignItems: "center",
-                          height: "64px",
-                          paddingX: 2,
+                          position: isSmallScreen ? "static" : "sticky",
+                          right: 0,
+                          zIndex: 2,
+                          backgroundColor:
+                            rowIndex % 2 === 0 ? "white" : "#f5f5f5",
                         }}
                       >
                         <Box
                           sx={{
                             display: "flex",
+                            justifyContent: "space-between",
                             alignItems: "center",
-                            flexGrow: 1,
-                            justifyContent: "center",
-                            whiteSpace: "nowrap",
+                            height: "64px",
+                            paddingX: 2,
                           }}
                         >
-                          <strong>{resultTotalHours(employee)}</strong>
-                          &nbsp;horas
+                          <Box
+                            sx={{
+                              display: "flex",
+                              alignItems: "center",
+                              flexGrow: 1,
+                              justifyContent: "center",
+                              whiteSpace: "nowrap",
+                            }}
+                          >
+                            <strong>{resultTotalHours(employee)}</strong>
+                            &nbsp;horas
+                          </Box>
+                          <Box
+                            sx={{
+                              display: "flex",
+                              alignItems: "center",
+                              ml: 1,
+                            }}
+                          >
+                            <Tooltip title="Horas Extra" arrow>
+                              <Box>
+                                <Badge
+                                  badgeContent={resultOvertime(employee)}
+                                  max={9999999}
+                                  color={
+                                    resultOvertime(employee) === 0 ||
+                                    resultOvertime(employee) === "0/0"
+                                      ? "success"
+                                      : "warning"
+                                  }
+                                  showZero
+                                >
+                                  <AccessTimeRoundedIcon />
+                                </Badge>
+                              </Box>
+                            </Tooltip>
+                          </Box>
                         </Box>
-                        <Box
-                          sx={{ display: "flex", alignItems: "center", ml: 1 }}
-                        >
-                          <Tooltip title="Horas Extra" arrow>
-                            <Box>
-                              <Badge
-                                badgeContent={resultOvertime(employee)}
-                                max={9999999}
-                                color={
-                                  resultOvertime(employee) === 0 ||
-                                  resultOvertime(employee) === "0/0"
-                                    ? "success"
-                                    : "warning"
-                                }
-                                showZero
-                              >
-                                <AccessTimeRoundedIcon />
-                              </Badge>
-                            </Box>
-                          </Tooltip>
-                        </Box>
-                      </Box>
-                    </TableCell>
+                      </TableCell>
+                    </>
                   )}
                 </TableRow>
               ))}

@@ -22,7 +22,7 @@ const NotFound = () => {
       textAlign="center"
       px={3}
     >
-      <Typography variant="h1" color="primary" fontWeight="bold">
+      <Typography variant="h1" color="textDisabled" fontWeight="bold">
         404
       </Typography>
       <Typography variant="h5" sx={{ mt: 2, mb: 3 }}>

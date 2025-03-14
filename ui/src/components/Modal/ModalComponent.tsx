@@ -4,13 +4,14 @@ import { Box, SxProps } from "@mui/system";
 import CloseIcon from "@mui/icons-material/Close";
 
 interface ModalComponentProps {
-  buttonType: "text" | "icon";
+  buttonType: "text" | "button" | "icon";
   buttonLabel?: string;
   buttonIcon?: React.ReactNode;
-  modalTitle: string;
-  modalDescription?: string;
+  variant?: "contained" | "outlined" | "text";
   buttonStyle?: SxProps;
   modalStyle?: SxProps;
+  modalTitle: string;
+  modalDescription?: string;
   children?: React.ReactNode;
 }
 
@@ -30,10 +31,11 @@ const ModalComponent: React.FC<ModalComponentProps> = ({
   buttonType,
   buttonLabel = "Open Modal",
   buttonIcon,
-  modalTitle,
-  modalDescription,
+  variant,
   buttonStyle,
   modalStyle,
+  modalTitle,
+  modalDescription,
   children,
 }) => {
   const [open, setOpen] = React.useState(false);
@@ -46,16 +48,21 @@ const ModalComponent: React.FC<ModalComponentProps> = ({
         <Button onClick={handleOpen} sx={buttonStyle}>
           {buttonLabel}
         </Button>
-      ) : (
+      ) : buttonType === "icon" ? (
         <IconButton onClick={handleOpen} sx={buttonStyle}>
           {buttonIcon}
         </IconButton>
+      ) : (
+        <Button variant={variant} sx={buttonStyle} onClick={handleOpen}>
+          {buttonIcon}
+        </Button>
       )}
       <Modal
         open={open}
         onClose={handleClose}
-        aria-labelledby="generic-modal-title"
-        aria-describedby="generic-modal-description"
+        aria-labelledby="modal-title"
+        aria-describedby="modal-description"
+        sx={{ zIndex: 9999 }}
       >
         <Box sx={{ ...defaultModalStyle, ...modalStyle }}>
           <Box
@@ -65,7 +72,7 @@ const ModalComponent: React.FC<ModalComponentProps> = ({
               alignItems: "center",
             }}
           >
-            <Typography id="generic-modal-title" variant="h6" component="h2">
+            <Typography id="modal-title" variant="h6" component="h2">
               {modalTitle}
             </Typography>
             <IconButton onClick={handleClose} aria-label="close">
@@ -73,7 +80,7 @@ const ModalComponent: React.FC<ModalComponentProps> = ({
             </IconButton>
           </Box>
           {modalDescription && (
-            <Typography id="generic-modal-description" sx={{ mt: 2 }}>
+            <Typography id="modal-description" sx={{ mt: 2 }}>
               {modalDescription}
             </Typography>
           )}
