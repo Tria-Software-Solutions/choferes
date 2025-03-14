@@ -27,6 +27,7 @@ import {
 import { LocalizationProvider } from "@mui/x-date-pickers";
 import { DatePicker } from "@mui/x-date-pickers/DatePicker";
 import { AdapterDateFns } from "@mui/x-date-pickers/AdapterDateFns";
+import { format } from "date-fns";
 import { es } from "date-fns/locale";
 import { getMidnightDate, isTodayOrFuture } from "../../utils/dates";
 import { maskLicensePlate, maskParkingLot } from "../../utils/mask";
@@ -36,6 +37,7 @@ import {
   exportToExcel,
   exportToPDF,
 } from "../../utils/export";
+import { capitalizeFirstLetter } from "../../utils/string";
 import {
   BRANDS_LIST,
   COLORS_LIST,
@@ -47,11 +49,10 @@ import DirectionsCarIcon from "@mui/icons-material/DirectionsCar";
 import ArrowBackIosNewRoundedIcon from "@mui/icons-material/ArrowBackIosNewRounded";
 import ArrowForwardIosRoundedIcon from "@mui/icons-material/ArrowForwardIosRounded";
 import CalendarTodayRoundedIcon from "@mui/icons-material/CalendarTodayRounded";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import CloseRoundedIcon from "@mui/icons-material/CloseRounded";
+import ManageSearchIcon from "@mui/icons-material/ManageSearch";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faFileExcel, faFilePdf } from "@fortawesome/free-solid-svg-icons";
-import { format } from "date-fns";
-import { capitalizeFirstLetter } from "../../utils/string";
 
 const VehiclesPage: React.FC = () => {
   const { userPermissions } = useAuth();
@@ -838,9 +839,11 @@ const VehiclesPage: React.FC = () => {
                 alignItems: "center",
                 textAlign: "center",
                 paddingTop: "10%",
+                paddingBottom: "12%",
               }}
             >
-              <Typography variant="body1"  color="textSecondary">
+              <ManageSearchIcon color="disabled" sx={{ fontSize: "65px" }} />
+              <Typography variant="body1" color="textSecondary">
                 {capitalizeFirstLetter(
                   format(selectedDate, "EEEE dd 'de' MMMM 'de' yyyy", {
                     locale: es,

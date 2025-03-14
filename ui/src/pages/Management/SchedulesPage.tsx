@@ -40,6 +40,7 @@ import { PAGE_TITLE, PERMISSIONS } from "../../constants/constants";
 import PostAddRoundedIcon from "@mui/icons-material/PostAddRounded";
 import DownloadRoundedIcon from "@mui/icons-material/DownloadRounded";
 import CloseRoundedIcon from "@mui/icons-material/CloseRounded";
+import ManageSearchIcon from "@mui/icons-material/ManageSearch";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faFileExcel, faFilePdf } from "@fortawesome/free-solid-svg-icons";
 
@@ -429,12 +430,15 @@ const SchedulesPage: React.FC = () => {
             <Box
               sx={{
                 display: "flex",
+                flexDirection: "column",
                 justifyContent: "center",
                 alignItems: "center",
                 textAlign: "center",
                 paddingTop: "10%",
+                paddingBottom: "12%",
               }}
             >
+              <ManageSearchIcon color="disabled" sx={{ fontSize: "65px" }} />
               <Typography variant="h6" color="textSecondary">
                 No se encontraron horarios para mostrar.
               </Typography>
