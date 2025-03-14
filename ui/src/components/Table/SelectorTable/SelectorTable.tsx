@@ -5,6 +5,9 @@ import { HoursWorked } from "../../../models/HoursWorked";
 import { WeeklySummary } from "../../../models/WeeklySummary";
 import { BiweeklySummary } from "../../../models/BiweeklySummary";
 import { MonthlySummary } from "../../../models/MonthlySummary";
+import { useWeeklySummaries } from "../../../hooks/useWeeklySummary";
+import { useBiweeklySummaries } from "../../../hooks/useBiweeklySummary";
+import { useMonthlySummaries } from "../../../hooks/useMonthlySummary";
 import { useNavigate } from "react-router-dom";
 import { format } from "date-fns";
 import ModalComponent from "../../Modal/ModalComponent";
@@ -105,6 +108,12 @@ const SelectorTable: React.FC<SelectorTableProps> = React.memo(
     permissions,
   }) => {
     const navigate = useNavigate();
+    const { getWeeklySummaryById, createOrUpdateWeeklySummary } =
+      useWeeklySummaries();
+    const { getBiweeklySummaryById, createOrUpdateBiweeklySummary } =
+      useBiweeklySummaries();
+    const { getMonthlySummaryById, createOrUpdateMonthlySummary } =
+      useMonthlySummaries();
     const [selectedPeriod, setSelectedPeriod] = useState<
       "weekly" | "biweekly" | "monthly"
     >("weekly");
@@ -229,12 +238,128 @@ const SelectorTable: React.FC<SelectorTableProps> = React.memo(
         : resultHoursForPeriod(employee, selectedPeriod, "overtime");
     };
 
-    const handleEditSumTime = (employee: Employee) => {
-      console.log("Sumar: ", timeAdjustment);
+    const handleEditSumTime = async (employee: Employee) => {
+      if (!timeAdjustment) return;
+
+      const [
+        existingWeeklySummary,
+        existingBiweeklySummary,
+        existingMonthlySummary,
+      ] = await Promise.all([
+        getWeeklySummaryById(employee.id),
+        getBiweeklySummaryById(employee.id),
+        getMonthlySummaryById(employee.id),
+      ]);
+
+      const updatedWeeklySummary: Omit<WeeklySummary, "id"> | WeeklySummary =
+        existingWeeklySummary
+          ? {
+              ...existingWeeklySummary,
+              totalHours: existingWeeklySummary.totalHours + timeAdjustment,
+            }
+          : {
+              employeeId: employee.id,
+              weekNumber,
+              month,
+              year,
+              totalHours: timeAdjustment,
+            };
+
+      const updatedBiweeklySummary:
+        | Omit<BiweeklySummary, "id">
+        | BiweeklySummary = existingBiweeklySummary
+        ? {
+            ...existingBiweeklySummary,
+            totalHours: existingBiweeklySummary.totalHours + timeAdjustment,
+          }
+        : {
+            employeeId: employee.id,
+            biweekNumber,
+            month,
+            year,
+            totalHours: timeAdjustment,
+          };
+
+      const updatedMonthlySummary: Omit<MonthlySummary, "id"> | MonthlySummary =
+        existingMonthlySummary
+          ? {
+              ...existingMonthlySummary,
+              totalHours: existingMonthlySummary.totalHours + timeAdjustment,
+            }
+          : {
+              employeeId: employee.id,
+              month,
+              year,
+              totalHours: timeAdjustment,
+            };
+
+      await Promise.all([
+        createOrUpdateWeeklySummary(updatedWeeklySummary),
+        createOrUpdateBiweeklySummary(updatedBiweeklySummary),
+        createOrUpdateMonthlySummary(updatedMonthlySummary),
+      ]);
     };
 
-    const handleEditSubtractTime = (employee: Employee) => {
-      console.log("Restar: ", timeAdjustment);
+    const handleEditSubtractTime = async (employee: Employee) => {
+      if (!timeAdjustment) return;
+
+      const [
+        existingWeeklySummary,
+        existingBiweeklySummary,
+        existingMonthlySummary,
+      ] = await Promise.all([
+        getWeeklySummaryById(employee.id),
+        getBiweeklySummaryById(employee.id),
+        getMonthlySummaryById(employee.id),
+      ]);
+
+      const updatedWeeklySummary: Omit<WeeklySummary, "id"> | WeeklySummary =
+        existingWeeklySummary
+          ? {
+              ...existingWeeklySummary,
+              totalHours: existingWeeklySummary.totalHours - timeAdjustment,
+            }
+          : {
+              employeeId: employee.id,
+              weekNumber,
+              month,
+              year,
+              totalHours: timeAdjustment,
+            };
+
+      const updatedBiweeklySummary:
+        | Omit<BiweeklySummary, "id">
+        | BiweeklySummary = existingBiweeklySummary
+        ? {
+            ...existingBiweeklySummary,
+            totalHours: existingBiweeklySummary.totalHours - timeAdjustment,
+          }
+        : {
+            employeeId: employee.id,
+            biweekNumber,
+            month,
+            year,
+            totalHours: timeAdjustment,
+          };
+
+      const updatedMonthlySummary: Omit<MonthlySummary, "id"> | MonthlySummary =
+        existingMonthlySummary
+          ? {
+              ...existingMonthlySummary,
+              totalHours: existingMonthlySummary.totalHours - timeAdjustment,
+            }
+          : {
+              employeeId: employee.id,
+              month,
+              year,
+              totalHours: timeAdjustment,
+            };
+
+      await Promise.all([
+        createOrUpdateWeeklySummary(updatedWeeklySummary),
+        createOrUpdateBiweeklySummary(updatedBiweeklySummary),
+        createOrUpdateMonthlySummary(updatedMonthlySummary),
+      ]);
     };
 
     const modalContentSummary = (employee: Employee) => {
@@ -264,9 +389,9 @@ const SelectorTable: React.FC<SelectorTableProps> = React.memo(
                 <TableHead>
                   <TableRow>
                     <TableCell>Empleado</TableCell>
-                    <TableCell>Horas Trabajadas</TableCell>
-                    <TableCell>Semana</TableCell>
-                    <TableCell>Rango de Fechas</TableCell>
+                    <TableCell align="center">Horas Trabajadas</TableCell>
+                    <TableCell align="center">Semana</TableCell>
+                    <TableCell align="center">Rango de Fechas</TableCell>
                   </TableRow>
                 </TableHead>
                 <TableBody>
@@ -274,13 +399,13 @@ const SelectorTable: React.FC<SelectorTableProps> = React.memo(
                     <TableCell>
                       {employee.firstName} {employee.lastName}
                     </TableCell>
-                    <TableCell>
+                    <TableCell align="center">
                       <strong>
                         {resultHoursForPeriod(employee, "weekly", "totalHours")}
                       </strong>
                     </TableCell>
-                    <TableCell>{weekNumber}</TableCell>
-                    <TableCell sx={{ whiteSpace: "nowrap" }}>
+                    <TableCell align="center">{weekNumber}</TableCell>
+                    <TableCell align="center" sx={{ whiteSpace: "nowrap" }}>
                       {`${formatDate(
                         new Date(currentWeek[0]?.date),
                         false
@@ -300,9 +425,9 @@ const SelectorTable: React.FC<SelectorTableProps> = React.memo(
                 <TableHead>
                   <TableRow>
                     <TableCell>Empleado</TableCell>
-                    <TableCell>Horas Trabajadas</TableCell>
-                    <TableCell>Quincena</TableCell>
-                    <TableCell>Rango de Fechas</TableCell>
+                    <TableCell align="center">Horas Trabajadas</TableCell>
+                    <TableCell align="center">Quincena</TableCell>
+                    <TableCell align="center">Rango de Fechas</TableCell>
                   </TableRow>
                 </TableHead>
                 <TableBody>
@@ -310,7 +435,7 @@ const SelectorTable: React.FC<SelectorTableProps> = React.memo(
                     <TableCell>
                       {employee.firstName} {employee.lastName}
                     </TableCell>
-                    <TableCell>
+                    <TableCell align="center">
                       <strong>
                         {resultHoursForPeriod(
                           employee,
@@ -319,8 +444,8 @@ const SelectorTable: React.FC<SelectorTableProps> = React.memo(
                         )}
                       </strong>
                     </TableCell>
-                    <TableCell>{biweekNumber}</TableCell>
-                    <TableCell sx={{ whiteSpace: "nowrap" }}>
+                    <TableCell align="center">{biweekNumber}</TableCell>
+                    <TableCell align="center" sx={{ whiteSpace: "nowrap" }}>
                       {`${formatDate(
                         getBiweeklyDates(year, biweekNumber).startDate,
                         false
@@ -340,9 +465,9 @@ const SelectorTable: React.FC<SelectorTableProps> = React.memo(
                 <TableHead>
                   <TableRow>
                     <TableCell>Empleado</TableCell>
-                    <TableCell>Horas Trabajadas</TableCell>
-                    <TableCell>Mes</TableCell>
-                    <TableCell>Año</TableCell>
+                    <TableCell align="center">Horas Trabajadas</TableCell>
+                    <TableCell align="center">Mes</TableCell>
+                    <TableCell align="center">Año</TableCell>
                   </TableRow>
                 </TableHead>
                 <TableBody>
@@ -350,7 +475,7 @@ const SelectorTable: React.FC<SelectorTableProps> = React.memo(
                     <TableCell>
                       {employee.firstName} {employee.lastName}
                     </TableCell>
-                    <TableCell>
+                    <TableCell align="center">
                       <strong>
                         {resultHoursForPeriod(
                           employee,
@@ -359,8 +484,8 @@ const SelectorTable: React.FC<SelectorTableProps> = React.memo(
                         )}
                       </strong>
                     </TableCell>
-                    <TableCell>{getMonthName(month)}</TableCell>
-                    <TableCell>{year}</TableCell>
+                    <TableCell align="center">{getMonthName(month)}</TableCell>
+                    <TableCell align="center">{year}</TableCell>
                   </TableRow>
                 </TableBody>
               </Table>
@@ -447,18 +572,26 @@ const SelectorTable: React.FC<SelectorTableProps> = React.memo(
           }}
         >
           {selectedPeriod === "weekly" ? (
-            <Typography variant="body1">Total de horas semanales: </Typography>
+            <Typography variant="body1">
+              Total de horas trabajada en la semana:{" "}
+              {resultHoursForPeriod(employee, "weekly", "totalHours")} horas
+            </Typography>
           ) : selectedPeriod === "biweekly" ? (
             <Typography variant="body1">
-              Total de horas quincenales:{" "}
+              Total de horas trabajadas en la quincena:{" "}
+              {resultHoursForPeriod(employee, "biweekly", "totalHours")} horas
             </Typography>
           ) : (
-            <Typography variant="body1">Total de horas mensuales: </Typography>
+            <Typography variant="body1">
+              Total de horas trabajadas en el mes:{" "}
+              {resultHoursForPeriod(employee, "monthly", "totalHours")} horas
+            </Typography>
           )}
           <TextField
             label="Horas a ajustar"
             variant="outlined"
             type="number"
+            placeholder="0"
             onChange={(e) => setTimeAdjustment(Number(e.target.value))}
           />
           <Box sx={{ display: "flex", justifyContent: "flex-end", gap: 2 }}>

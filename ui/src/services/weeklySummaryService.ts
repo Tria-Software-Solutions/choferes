@@ -6,6 +6,11 @@ export const getWeeklySummaries = async () => {
   return response.data;
 };
 
+export const getWeeklySummaryById = async (id: number) => {
+  const response = await api.get(`/weekly-summary/${id}`);
+  return response.data;
+};
+
 export const createWeeklySummary = async (
   newWeeklySummary: Omit<WeeklySummary, "id">
 ) => {

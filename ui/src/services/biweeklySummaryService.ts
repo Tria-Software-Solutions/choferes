@@ -6,6 +6,11 @@ export const getBiweeklySummaries = async () => {
   return response.data;
 };
 
+export const getBiweeklySummaryById = async (id: number) => {
+  const response = await api.get(`/biweekly-summary/${id}`);
+  return response.data;
+};
+
 export const createBiweeklySummary = async (
   newBiweeklySummary: Omit<BiweeklySummary, "id">
 ) => {

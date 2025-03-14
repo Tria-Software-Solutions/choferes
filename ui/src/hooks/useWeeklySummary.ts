@@ -15,7 +15,18 @@ export const useWeeklySummaries = () => {
       setWeeklySummaries(data);
       setTotalCountWeeklySummaries(data.length);
     } catch (error) {
-      console.error("Error fetching weekly summaries:", error);
+      console.error("Error fetching Weekly Summaries:", error);
+    } finally {
+      setIsLoadingWeeklySummaries(false);
+    }
+  }, []);
+
+  const getWeeklySummaryById = useCallback(async (id: number) => {
+    setIsLoadingWeeklySummaries(true);
+    try {
+      return await WeeklySummaryService.getWeeklySummaryById(id);
+    } catch (error) {
+      console.error("Error fetching Weekly Summaries by Id", error);
     } finally {
       setIsLoadingWeeklySummaries(false);
     }
@@ -72,6 +83,7 @@ export const useWeeklySummaries = () => {
     totalCountWeeklySummaries,
     isLoadingWeeklySummaries,
     getWeeklySummaries,
+    getWeeklySummaryById,
     createWeeklySummary,
     updateWeeklySummary,
     createOrUpdateWeeklySummary,
