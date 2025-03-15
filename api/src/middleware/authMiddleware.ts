@@ -31,7 +31,7 @@ export const authenticateToken = (
           return res.status(401).json({ error: "Unauthorized: Invalid token" });
         }
       }
-      
+
       const payload = decoded as JwtPayload;
 
       if (!payload.userId) {
@@ -72,7 +72,7 @@ export const authenticateRefreshToken = (
         }
         const userId = (refreshDecoded as JwtPayload).userId;
         const { accessToken: newAccessToken, refreshToken: newRefreshToken } =
-          generateTokens(userId, res);  
+          generateTokens(userId, res);
 
         res.setHeader("x-access-token", newAccessToken);
         res.setHeader("x-refresh-token", newRefreshToken);
