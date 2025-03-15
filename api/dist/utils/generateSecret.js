@@ -33,8 +33,7 @@ var __importStar = (this && this.__importStar) || (function () {
     };
 })();
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.generateSecret = exports.generateTokens = void 0;
-const crypto = __importStar(require("crypto"));
+exports.generateTokens = void 0;
 const jwt = __importStar(require("jsonwebtoken"));
 const dotenv = __importStar(require("dotenv"));
 dotenv.config();
@@ -62,9 +61,5 @@ const generateTokens = (userId, res) => {
     return { accessToken, refreshToken };
 };
 exports.generateTokens = generateTokens;
-const generateSecret = (length = 32) => {
-    return crypto.randomBytes(length).toString("hex");
-};
-exports.generateSecret = generateSecret;
-// const secret = generateSecret();
-// console.log("Generated JWT Secret:", secret);
+//generateSecret
+//node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"
