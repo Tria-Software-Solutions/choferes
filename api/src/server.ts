@@ -23,14 +23,17 @@ dotenv.config();
 
 const app = express();
 
-const allowedOrigins = [process.env.REACT_APP_UI_URL, "http://localhost:3000"];
 app.use(
   cors({
-    origin: function (origin, callback) {
+    origin: (origin, callback) => {
+      const allowedOrigins = [
+        "https://choferesdealquilercr.vercel.app",
+        "http://localhost:3000",
+      ];
       if (!origin || allowedOrigins.includes(origin)) {
         callback(null, true);
       } else {
-        callback(new Error("Not allowed by CORS"));
+        callback(new Error("CORS not allowed"));
       }
     },
     credentials: true,
