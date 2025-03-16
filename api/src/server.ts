@@ -21,21 +21,16 @@ import "./database/models";
 
 dotenv.config();
 
+const UI_URL =
+  process.env.NODE_ENV === "production"
+    ? process.env.REACT_APP_UI_URL
+    : "http://localhost:3000";
+
 const app = express();
 
 app.use(
   cors({
-    origin: (origin, callback) => {
-      const allowedOrigins = [
-        "https://choferesdealquilercr.vercel.app",
-        "http://localhost:3000",
-      ];
-      if (!origin || allowedOrigins.includes(origin)) {
-        callback(null, true);
-      } else {
-        callback(new Error("CORS not allowed"));
-      }
-    },
+    origin: UI_URL,
     credentials: true,
   })
 );
