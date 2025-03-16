@@ -22,6 +22,7 @@ export const generateTokens = (userId: string, res: Response) => {
     httpOnly: true,
     secure: isProduction,
     sameSite: isProduction ? "none" : "lax",
+    domain: "choferesdealquiler.onrender.com", 
     path: "/",
     maxAge: 3600 * 1000,
   });
@@ -30,6 +31,7 @@ export const generateTokens = (userId: string, res: Response) => {
     httpOnly: true,
     secure: isProduction,
     sameSite: isProduction ? "none" : "lax",
+    domain: "choferesdealquiler.onrender.com", 
     path: "/",
     maxAge: 7 * 24 * 60 * 60 * 1000,
   });
