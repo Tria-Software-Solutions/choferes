@@ -25,14 +25,17 @@ const database_1 = __importDefault(require("./config/database"));
 require("./database/models");
 dotenv_1.default.config();
 const app = (0, express_1.default)();
-const allowedOrigins = [process.env.REACT_APP_UI_URL, "http://localhost:3000"];
 app.use((0, cors_1.default)({
-    origin: function (origin, callback) {
+    origin: (origin, callback) => {
+        const allowedOrigins = [
+            "https://choferesdealquilercr.vercel.app",
+            "http://localhost:3000",
+        ];
         if (!origin || allowedOrigins.includes(origin)) {
             callback(null, true);
         }
         else {
-            callback(new Error("Not allowed by CORS"));
+            callback(new Error("CORS not allowed"));
         }
     },
     credentials: true,
