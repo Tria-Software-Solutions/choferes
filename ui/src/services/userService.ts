@@ -10,24 +10,16 @@ export const authenticateUser = async (username: string, password: string) => {
 };
 
 export const refreshAccessToken = async () => {
-  const refreshToken = sessionStorage.getItem("refreshToken");
-  if (!refreshToken) throw new Error("No refresh token available");
-
   try {
     const response = await api.post(
       "/auth/refresh-token",
       {},
       {
-        headers: {
-          "x-refresh-token": refreshToken,
-        },
+        withCredentials: true,
       }
     );
 
-    sessionStorage.setItem("accessToken", response.data.accessToken);
-    sessionStorage.setItem("refreshToken", response.data.refreshToken);
-
-    return response.data.accessToken;
+    return response.data;
   } catch (error) {
     console.error("Error refreshing token:", error);
     throw error;
