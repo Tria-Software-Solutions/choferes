@@ -24,12 +24,20 @@ const rolePermissionRoutes_1 = __importDefault(require("./routes/rolePermissionR
 const database_1 = __importDefault(require("./config/database"));
 require("./database/models");
 dotenv_1.default.config();
-const UI_URL = process.env.NODE_ENV === "production"
-    ? process.env.REACT_APP_UI_URL
-    : "http://localhost:3000";
+const allowedOrigins = [
+    "http://localhost:3000",
+    "https://choferesdealquilercr.vercel.app",
+];
 const app = (0, express_1.default)();
 app.use((0, cors_1.default)({
-    origin: UI_URL,
+    origin: (origin, callback) => {
+        if (!origin || allowedOrigins.includes(origin)) {
+            callback(null, true);
+        }
+        else {
+            callback(new Error("Not allowed by CORS"));
+        }
+    },
     credentials: true,
 }));
 app.use((0, cookie_parser_1.default)());
