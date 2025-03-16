@@ -8,8 +8,6 @@ const JWT_SECRET_KEY = process.env.JWT_SECRET_KEY;
 const JWT_SECRET_KEY_REFRESH = process.env.JWT_SECRET_KEY_REFRESH;
 
 export const generateTokens = (userId: string, res: Response) => {
-  const isProduction = process.env.NODE_ENV === "production";
-
   const accessToken = jwt.sign({ userId }, JWT_SECRET_KEY, {
     expiresIn: "1h",
   });
@@ -20,18 +18,16 @@ export const generateTokens = (userId: string, res: Response) => {
 
   res.cookie("accessToken", accessToken, {
     httpOnly: true,
-    secure: isProduction,
-    sameSite: isProduction ? "none" : "lax",
-    domain: "choferesdealquiler.onrender.com", 
+    secure: true,
+    sameSite: "none",
     path: "/",
     maxAge: 3600 * 1000,
   });
 
   res.cookie("refreshToken", refreshToken, {
     httpOnly: true,
-    secure: isProduction,
-    sameSite: isProduction ? "none" : "lax",
-    domain: "choferesdealquiler.onrender.com", 
+    secure: true,
+    sameSite: "none",
     path: "/",
     maxAge: 7 * 24 * 60 * 60 * 1000,
   });
