@@ -29,7 +29,9 @@ const hasWorkedCurrenWeeklySummary = (employeeId, weekNumber, month, year) => __
 });
 exports.hasWorkedCurrenWeeklySummary = hasWorkedCurrenWeeklySummary;
 const createWeeklySummary = (data) => __awaiter(void 0, void 0, void 0, function* () {
-    return yield WeeklySummary_1.WeeklySummary.create(data);
+    const newWeeklySummary = yield WeeklySummary_1.WeeklySummary.create(data);
+    yield newWeeklySummary.reload();
+    return newWeeklySummary;
 });
 exports.createWeeklySummary = createWeeklySummary;
 const updateWeeklySummary = (id, data) => __awaiter(void 0, void 0, void 0, function* () {

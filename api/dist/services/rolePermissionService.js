@@ -16,7 +16,9 @@ const getRolePermissions = () => __awaiter(void 0, void 0, void 0, function* () 
 });
 exports.getRolePermissions = getRolePermissions;
 const createRolePermission = (data) => __awaiter(void 0, void 0, void 0, function* () {
-    return RolePermission_1.RolePermission.create(data);
+    const newRolePermission = yield RolePermission_1.RolePermission.create(data);
+    yield newRolePermission.reload();
+    return newRolePermission;
 });
 exports.createRolePermission = createRolePermission;
 const updateRolePermission = (id, data) => __awaiter(void 0, void 0, void 0, function* () {

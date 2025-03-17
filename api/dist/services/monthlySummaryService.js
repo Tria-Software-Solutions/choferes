@@ -22,7 +22,9 @@ const getCurrentMonthlySummary = (employeeId, month, year) => __awaiter(void 0, 
 });
 exports.getCurrentMonthlySummary = getCurrentMonthlySummary;
 const createMonthlySummary = (data) => __awaiter(void 0, void 0, void 0, function* () {
-    return yield MonthlySummary_1.MonthlySummary.create(data);
+    const newMonthlySummary = yield MonthlySummary_1.MonthlySummary.create(data);
+    yield newMonthlySummary.reload();
+    return newMonthlySummary;
 });
 exports.createMonthlySummary = createMonthlySummary;
 const updateMonthlySummary = (id, data) => __awaiter(void 0, void 0, void 0, function* () {

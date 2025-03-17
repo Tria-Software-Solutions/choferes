@@ -24,7 +24,9 @@ const getUserRoleByUserId = (userId) => __awaiter(void 0, void 0, void 0, functi
 });
 exports.getUserRoleByUserId = getUserRoleByUserId;
 const createUserRole = (data) => __awaiter(void 0, void 0, void 0, function* () {
-    return UserRole_1.UserRole.create(data);
+    const newUserRole = yield UserRole_1.UserRole.create(data);
+    yield newUserRole.reload();
+    return newUserRole;
 });
 exports.createUserRole = createUserRole;
 const updateUserRole = (id, data) => __awaiter(void 0, void 0, void 0, function* () {

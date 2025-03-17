@@ -9,7 +9,9 @@ export const getScheduleById = async (id: number) => {
 };
 
 export const createSchedule = async (data: Omit<Schedule, "id">) => {
-  return await Schedule.create(data);
+  const newSchedule = await Schedule.create(data);
+  await newSchedule.reload();
+  return newSchedule;
 };
 
 export const updateSchedule = async (

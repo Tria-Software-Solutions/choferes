@@ -39,7 +39,9 @@ export const getRoleByName = async (name: string) => {
 };
 
 export const createRole = async (data: Omit<Role, "id">) => {
-  return await Role.create(data, { returning: true });
+  const newRole = await Role.create(data);
+  await newRole.reload();
+  return newRole;
 };
 
 export const updateRole = async (id: number, data: Omit<Role, "id">) => {
