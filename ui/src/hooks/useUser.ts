@@ -23,7 +23,6 @@ export const useUsers = () => {
       const userPermissions = await UserService.getUserPermissions(
         response.user.id
       );
-      console.log("response from useUser: ", response);
       login(
         response.accessToken,
         response.refreshToken,

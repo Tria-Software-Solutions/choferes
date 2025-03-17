@@ -13,7 +13,9 @@ export const getUserRoleByUserId = async (userId: number) => {
 };
 
 export const createUserRole = async (data: Omit<UserRole, "id">) => {
-  return UserRole.create(data);
+  const newUserRole = await UserRole.create(data);
+  await newUserRole.reload();
+  return newUserRole;
 };
 
 export const updateUserRole = async (

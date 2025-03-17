@@ -50,7 +50,9 @@ const getRoleByName = (name) => __awaiter(void 0, void 0, void 0, function* () {
 });
 exports.getRoleByName = getRoleByName;
 const createRole = (data) => __awaiter(void 0, void 0, void 0, function* () {
-    return yield Role_1.Role.create(data, { returning: true });
+    const newRole = yield Role_1.Role.create(data);
+    yield newRole.reload();
+    return newRole;
 });
 exports.createRole = createRole;
 const updateRole = (id, data) => __awaiter(void 0, void 0, void 0, function* () {

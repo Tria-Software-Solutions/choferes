@@ -22,7 +22,9 @@ const getCurrentBiweeklySummary = (employeeId, biweekNumber, month, year) => __a
 });
 exports.getCurrentBiweeklySummary = getCurrentBiweeklySummary;
 const createBiweeklySummary = (data) => __awaiter(void 0, void 0, void 0, function* () {
-    return yield BiweeklySummary_1.BiweeklySummary.create(data);
+    const newBiweeklySummary = yield BiweeklySummary_1.BiweeklySummary.create(data);
+    yield newBiweeklySummary.reload();
+    return newBiweeklySummary;
 });
 exports.createBiweeklySummary = createBiweeklySummary;
 const updateBiweeklySummary = (id, data) => __awaiter(void 0, void 0, void 0, function* () {
