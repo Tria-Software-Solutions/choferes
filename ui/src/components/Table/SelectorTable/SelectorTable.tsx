@@ -5,9 +5,6 @@ import { HoursWorked } from "../../../models/HoursWorked";
 import { WeeklySummary } from "../../../models/WeeklySummary";
 import { BiweeklySummary } from "../../../models/BiweeklySummary";
 import { MonthlySummary } from "../../../models/MonthlySummary";
-import { useWeeklySummaries } from "../../../hooks/useWeeklySummary";
-import { useBiweeklySummaries } from "../../../hooks/useBiweeklySummary";
-import { useMonthlySummaries } from "../../../hooks/useMonthlySummary";
 import { useNavigate } from "react-router-dom";
 import { format } from "date-fns";
 import ModalComponent from "../../Modal/ModalComponent";
@@ -89,6 +86,11 @@ interface SelectorTableProps {
     employeeId: number,
     date: Date
   ) => void;
+  handleAdjustTime: (
+    employeeId: number,
+    condition: string,
+    timeAdjustment: number
+  ) => void;
   permissions?: string[];
 }
 
@@ -106,12 +108,10 @@ const SelectorTable: React.FC<SelectorTableProps> = React.memo(
     month,
     year,
     handleChange,
+    handleAdjustTime,
     permissions,
   }) => {
     const navigate = useNavigate();
-    const { updateWeeklySummary } = useWeeklySummaries();
-    const { updateBiweeklySummary } = useBiweeklySummaries();
-    const { updateMonthlySummary } = useMonthlySummaries();
     const [selectedPeriod, setSelectedPeriod] = useState<
       "weekly" | "biweekly" | "monthly"
     >("weekly");
@@ -253,68 +253,6 @@ const SelectorTable: React.FC<SelectorTableProps> = React.memo(
           summary.year === year
       );
       return found;
-    };
-
-    const handleAdjustTime = async (employee: Employee, condition: string) => {
-      if (!timeAdjustment) return;
-
-      const adjustment = condition === "sum" ? timeAdjustment : -timeAdjustment;
-
-      const existingWeeklySummary = weeklySummaries.find(
-        (weeklySummary) =>
-          weeklySummary.employeeId === employee.id &&
-          weeklySummary.weekNumber === weekNumber &&
-          weeklySummary.month === month &&
-          weeklySummary.year === year
-      );
-      const existingBiweeklySummary = biweeklySummaries.find(
-        (biweeklySummary) =>
-          biweeklySummary.employeeId === employee.id &&
-          biweeklySummary.biweekNumber === biweekNumber &&
-          biweeklySummary.month === month &&
-          biweeklySummary.year === year
-      );
-      const existingMonthlySummary = monthlySummaries.find(
-        (monthlySummary) =>
-          monthlySummary.employeeId === employee.id &&
-          monthlySummary.month === month &&
-          monthlySummary.year === year
-      );
-
-      const updatedWeeklySummary: WeeklySummary = {
-        id: existingWeeklySummary?.id ?? 0,
-        employeeId: existingWeeklySummary?.employeeId ?? employee.id,
-        weekNumber: existingWeeklySummary?.weekNumber ?? weekNumber,
-        month: existingWeeklySummary?.month ?? month,
-        year: existingWeeklySummary?.year ?? year,
-        totalHours: (existingWeeklySummary?.totalHours ?? 0) + adjustment,
-      };
-
-      const updatedBiweeklySummary: BiweeklySummary = {
-        id: existingBiweeklySummary?.id ?? 0,
-        employeeId: existingBiweeklySummary?.employeeId ?? employee.id,
-        biweekNumber: existingBiweeklySummary?.biweekNumber ?? biweekNumber,
-        month: existingBiweeklySummary?.month ?? month,
-        year: existingBiweeklySummary?.year ?? year,
-        totalHours: (existingBiweeklySummary?.totalHours ?? 0) + adjustment,
-      };
-
-      const updatedMonthlySummary: MonthlySummary = {
-        id: existingMonthlySummary?.id ?? 0,
-        employeeId: existingMonthlySummary?.employeeId ?? employee.id,
-        month: existingMonthlySummary?.month ?? month,
-        year: existingMonthlySummary?.year ?? year,
-        totalHours: (existingMonthlySummary?.totalHours ?? 0) + adjustment,
-      };
-
-      await Promise.all([
-        updateWeeklySummary(updatedWeeklySummary.id, updatedWeeklySummary),
-        updateBiweeklySummary(
-          updatedBiweeklySummary.id,
-          updatedBiweeklySummary
-        ),
-        updateMonthlySummary(updatedMonthlySummary.id, updatedMonthlySummary),
-      ]);
     };
 
     const modalContentSummary = (employee: Employee) => {
@@ -574,7 +512,7 @@ const SelectorTable: React.FC<SelectorTableProps> = React.memo(
                   color="success"
                   sx={{ height: "56px" }}
                   onClick={() => {
-                    handleAdjustTime(employee, "sum");
+                    handleAdjustTime(employee.id, "sum", timeAdjustment);
                     handleClose();
                   }}
                 >
@@ -590,7 +528,7 @@ const SelectorTable: React.FC<SelectorTableProps> = React.memo(
                   color="error"
                   sx={{ height: "56px" }}
                   onClick={() => {
-                    handleAdjustTime(employee, "substract");
+                    handleAdjustTime(employee.id, "substract", timeAdjustment);
                     handleClose();
                   }}
                 >

@@ -106,13 +106,13 @@ const EmployeesPage: React.FC = () => {
     setFilter(e.target.value);
   };
 
-  const handleAdd = () => {
+  const handleAdd = async () => {
     try {
       const newEmployee: Omit<Employee, "id"> = {
         firstName: addFields.firstName,
         lastName: addFields.lastName,
       };
-      createEmployee(newEmployee);
+      await createEmployee(newEmployee);
       setAddFields({ firstName: "", lastName: "" });
       showNotification(
         "El registro del empleado fue exitoso",
@@ -143,12 +143,12 @@ const EmployeesPage: React.FC = () => {
     setEditRowId(null);
   };
 
-  const handleSaveClick = (id: number) => {
+  const handleSaveClick = async (id: number) => {
     try {
       const updatedEmployee = {
         ...editFields,
       };
-      updateEmployee(id, updatedEmployee);
+      await updateEmployee(id, updatedEmployee);
       setEditRowId(null);
       setEditFields({ firstName: "", lastName: "" });
       showNotification(
@@ -178,10 +178,10 @@ const EmployeesPage: React.FC = () => {
     setEmployeeToDelete(null);
   };
 
-  const handleDelete = () => {
+  const handleDelete = async () => {
     try {
       if (employeeToDelete !== null) {
-        deleteEmployee(employeeToDelete);
+        await deleteEmployee(employeeToDelete);
         handleCloseDialog();
       }
       showNotification(
