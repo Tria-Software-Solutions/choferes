@@ -20,7 +20,9 @@ const getScheduleById = (id) => __awaiter(void 0, void 0, void 0, function* () {
 });
 exports.getScheduleById = getScheduleById;
 const createSchedule = (data) => __awaiter(void 0, void 0, void 0, function* () {
-    return yield Schedule_1.Schedule.create(data);
+    const newSchedule = yield Schedule_1.Schedule.create(data);
+    yield newSchedule.reload();
+    return newSchedule;
 });
 exports.createSchedule = createSchedule;
 const updateSchedule = (id, data) => __awaiter(void 0, void 0, void 0, function* () {

@@ -1,5 +1,5 @@
-import { Schedule } from '../models/Schedule';
-import api from './api';
+import { Schedule } from "../models/Schedule";
+import api from "./api";
 
 export const getSchedules = async () => {
   const response = await api.get("/schedules");
@@ -11,7 +11,10 @@ export const createSchedule = async (newSchedule: Omit<Schedule, "id">) => {
   return response.data;
 };
 
-export const updateSchedule = async (id: number, updatedSchedule: Partial<Schedule>) => {
+export const updateSchedule = async (
+  id: number,
+  updatedSchedule: Partial<Schedule>
+) => {
   await api.put(`/schedules/${id}`, updatedSchedule);
 };
 

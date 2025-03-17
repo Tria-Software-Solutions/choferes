@@ -7,7 +7,9 @@ export const getRolePermissions = async () => {
 export const createRolePermission = async (
   data: Omit<RolePermission, "id">
 ) => {
-  return RolePermission.create(data);
+  const newRolePermission = await RolePermission.create(data);
+  await newRolePermission.reload();
+  return newRolePermission;
 };
 
 export const updateRolePermission = async (

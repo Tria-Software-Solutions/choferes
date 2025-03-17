@@ -9,7 +9,9 @@ export const getPermissionById = async (id: number) => {
 };
 
 export const createPermission = async (data: Omit<Permission, "id">) => {
-  return await Permission.create(data);
+  const newPermission = await Permission.create(data);
+  await newPermission.reload();
+  return newPermission;
 };
 
 export const updatePermission = async (

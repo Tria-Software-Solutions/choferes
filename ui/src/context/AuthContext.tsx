@@ -49,10 +49,6 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     setRefreshToken(refreshToken);
     setCurrentUser(currentUser);
     setUserPermissions(userPermissions);
-
-    console.log("accessToken from auth context: ", accessToken);
-    console.log("refreshToken from auth context: ", refreshToken);
-
     Cookies.set("accessToken", accessToken, { expires: 1 });
     Cookies.set("refreshToken", refreshToken, { expires: 7 });
     sessionStorage.setItem("currentUser", JSON.stringify(currentUser));

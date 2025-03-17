@@ -9,7 +9,9 @@ export const getEmployeeById = async (id: number) => {
 };
 
 export const createEmployee = async (data: Omit<Employee, "id">) => {
-  return await Employee.create(data);
+  const newEmployee = await Employee.create(data);
+  await newEmployee.reload();
+  return newEmployee;
 };
 
 export const updateEmployee = async (

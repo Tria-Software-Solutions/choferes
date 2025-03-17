@@ -28,7 +28,9 @@ export const hasWorkedCurrenWeeklySummary = async (
 };
 
 export const createWeeklySummary = async (data: Omit<WeeklySummary, "id">) => {
-  return await WeeklySummary.create(data);
+  const newWeeklySummary = await WeeklySummary.create(data);
+  await newWeeklySummary.reload();
+  return newWeeklySummary;
 };
 
 export const updateWeeklySummary = async (
