@@ -18,7 +18,9 @@ export const getCurrentBiweeklySummary = async (
 export const createBiweeklySummary = async (
   data: Omit<BiweeklySummary, "id">
 ) => {
-  return await BiweeklySummary.create(data);
+  const newBiweeklySummary = await BiweeklySummary.create(data);
+  await newBiweeklySummary.reload();
+  return newBiweeklySummary;
 };
 
 export const updateBiweeklySummary = async (

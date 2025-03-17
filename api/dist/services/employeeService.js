@@ -20,7 +20,9 @@ const getEmployeeById = (id) => __awaiter(void 0, void 0, void 0, function* () {
 });
 exports.getEmployeeById = getEmployeeById;
 const createEmployee = (data) => __awaiter(void 0, void 0, void 0, function* () {
-    return yield Employee_1.Employee.create(data);
+    const newEmployee = yield Employee_1.Employee.create(data);
+    yield newEmployee.reload();
+    return newEmployee;
 });
 exports.createEmployee = createEmployee;
 const updateEmployee = (id, data) => __awaiter(void 0, void 0, void 0, function* () {

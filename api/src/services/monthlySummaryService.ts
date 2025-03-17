@@ -17,7 +17,9 @@ export const getCurrentMonthlySummary = async (
 export const createMonthlySummary = async (
   data: Omit<MonthlySummary, "id">
 ) => {
-  return await MonthlySummary.create(data);
+  const newMonthlySummary = await MonthlySummary.create(data);
+  await newMonthlySummary.reload();
+  return newMonthlySummary;
 };
 
 export const updateMonthlySummary = async (

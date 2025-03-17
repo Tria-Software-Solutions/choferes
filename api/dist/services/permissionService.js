@@ -20,7 +20,9 @@ const getPermissionById = (id) => __awaiter(void 0, void 0, void 0, function* ()
 });
 exports.getPermissionById = getPermissionById;
 const createPermission = (data) => __awaiter(void 0, void 0, void 0, function* () {
-    return yield Permission_1.Permission.create(data);
+    const newPermission = yield Permission_1.Permission.create(data);
+    yield newPermission.reload();
+    return newPermission;
 });
 exports.createPermission = createPermission;
 const updatePermission = (id, data) => __awaiter(void 0, void 0, void 0, function* () {
