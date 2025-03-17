@@ -109,12 +109,9 @@ const SelectorTable: React.FC<SelectorTableProps> = React.memo(
     permissions,
   }) => {
     const navigate = useNavigate();
-    const { getCurrentWeeklySummary, updateWeeklySummary } =
-      useWeeklySummaries();
-    const { getCurrentBiweeklySummary, updateBiweeklySummary } =
-      useBiweeklySummaries();
-    const { getCurrentMonthlySummary, updateMonthlySummary } =
-      useMonthlySummaries();
+    const { updateWeeklySummary } = useWeeklySummaries();
+    const { updateBiweeklySummary } = useBiweeklySummaries();
+    const { updateMonthlySummary } = useMonthlySummaries();
     const [selectedPeriod, setSelectedPeriod] = useState<
       "weekly" | "biweekly" | "monthly"
     >("weekly");
@@ -250,70 +247,56 @@ const SelectorTable: React.FC<SelectorTableProps> = React.memo(
       return found;
     };
 
-    const handleEditSumTime = async (employee: Employee) => {
+    const handleAdjustTime = async (employee: Employee, condition: string) => {
       if (!timeAdjustment) return;
 
-      const [
-        existingWeeklySummary,
-        existingBiweeklySummary,
-        existingMonthlySummary,
-      ] = await Promise.all([
-        getCurrentWeeklySummary(employee.id, weekNumber, month, year),
-        getCurrentBiweeklySummary(employee.id, biweekNumber, month, year),
-        getCurrentMonthlySummary(employee.id, month, year),
-      ]);
+      const adjustment = condition === "sum" ? timeAdjustment : -timeAdjustment;
+
+      const existingWeeklySummary = weeklySummaries.find(
+        (weeklySummary) =>
+          weeklySummary.employeeId === employee.id &&
+          weeklySummary.weekNumber === weekNumber &&
+          weeklySummary.month === month &&
+          weeklySummary.year === year
+      );
+      const existingBiweeklySummary = biweeklySummaries.find(
+        (biweeklySummary) =>
+          biweeklySummary.employeeId === employee.id &&
+          biweeklySummary.biweekNumber === biweekNumber &&
+          biweeklySummary.month === month &&
+          biweeklySummary.year === year
+      );
+      const existingMonthlySummary = monthlySummaries.find(
+        (monthlySummary) =>
+          monthlySummary.employeeId === employee.id &&
+          monthlySummary.month === month &&
+          monthlySummary.year === year
+      );
 
       const updatedWeeklySummary: WeeklySummary = {
-        ...existingWeeklySummary,
-        totalHours: existingWeeklySummary.totalHours + timeAdjustment,
+        id: existingWeeklySummary?.id ?? 0,
+        employeeId: existingWeeklySummary?.employeeId ?? employee.id,
+        weekNumber: existingWeeklySummary?.weekNumber ?? weekNumber,
+        month: existingWeeklySummary?.month ?? month,
+        year: existingWeeklySummary?.year ?? year,
+        totalHours: (existingWeeklySummary?.totalHours ?? 0) + adjustment,
       };
 
       const updatedBiweeklySummary: BiweeklySummary = {
-        ...existingBiweeklySummary,
-        totalHours: existingBiweeklySummary.totalHours + timeAdjustment,
+        id: existingBiweeklySummary?.id ?? 0,
+        employeeId: existingBiweeklySummary?.employeeId ?? employee.id,
+        biweekNumber: existingBiweeklySummary?.biweekNumber ?? biweekNumber,
+        month: existingBiweeklySummary?.month ?? month,
+        year: existingBiweeklySummary?.year ?? year,
+        totalHours: (existingBiweeklySummary?.totalHours ?? 0) + adjustment,
       };
 
       const updatedMonthlySummary: MonthlySummary = {
-        ...existingMonthlySummary,
-        totalHours: existingMonthlySummary.totalHours + timeAdjustment,
-      };
-
-      await Promise.all([
-        updateWeeklySummary(updatedWeeklySummary.id, updatedWeeklySummary),
-        updateBiweeklySummary(
-          updatedBiweeklySummary.id,
-          updatedBiweeklySummary
-        ),
-        updateMonthlySummary(updatedMonthlySummary.id, updatedMonthlySummary),
-      ]);
-    };
-
-    const handleEditSubtractTime = async (employee: Employee) => {
-      if (!timeAdjustment) return;
-
-      const [
-        existingWeeklySummary,
-        existingBiweeklySummary,
-        existingMonthlySummary,
-      ] = await Promise.all([
-        getCurrentWeeklySummary(employee.id, weekNumber, month, year),
-        getCurrentBiweeklySummary(employee.id, biweekNumber, month, year),
-        getCurrentMonthlySummary(employee.id, month, year),
-      ]);
-
-      const updatedWeeklySummary: WeeklySummary = {
-        ...existingWeeklySummary,
-        totalHours: existingWeeklySummary.totalHours - timeAdjustment,
-      };
-
-      const updatedBiweeklySummary: BiweeklySummary = {
-        ...existingBiweeklySummary,
-        totalHours: existingBiweeklySummary.totalHours - timeAdjustment,
-      };
-
-      const updatedMonthlySummary: MonthlySummary = {
-        ...existingMonthlySummary,
-        totalHours: existingMonthlySummary.totalHours - timeAdjustment,
+        id: existingMonthlySummary?.id ?? 0,
+        employeeId: existingMonthlySummary?.employeeId ?? employee.id,
+        month: existingMonthlySummary?.month ?? month,
+        year: existingMonthlySummary?.year ?? year,
+        totalHours: (existingMonthlySummary?.totalHours ?? 0) + adjustment,
       };
 
       await Promise.all([
@@ -539,7 +522,10 @@ const SelectorTable: React.FC<SelectorTableProps> = React.memo(
       );
     };
 
-    const modalContentEditTime = (employee: Employee) => {
+    const modalContentEditTime = (
+      employee: Employee,
+      handleClose: () => void
+    ) => {
       return (
         <Box
           sx={{
@@ -579,7 +565,10 @@ const SelectorTable: React.FC<SelectorTableProps> = React.memo(
                   variant="contained"
                   color="success"
                   sx={{ height: "56px" }}
-                  onClick={() => handleEditSumTime(employee)}
+                  onClick={() => {
+                    handleAdjustTime(employee, "sum");
+                    handleClose();
+                  }}
                 >
                   <AddIcon />
                 </Button>
@@ -592,7 +581,10 @@ const SelectorTable: React.FC<SelectorTableProps> = React.memo(
                   variant="contained"
                   color="error"
                   sx={{ height: "56px" }}
-                  onClick={() => handleEditSubtractTime(employee)}
+                  onClick={() => {
+                    handleAdjustTime(employee, "substract");
+                    handleClose();
+                  }}
                 >
                   <RemoveIcon />
                 </Button>
@@ -783,7 +775,9 @@ const SelectorTable: React.FC<SelectorTableProps> = React.memo(
                           modalStyle={{ width: "80%" }}
                           modalTitle={"Resumen de Horas Trabajadas"}
                           modalDescription="Detalle de horas trabajadas en los diferentes períodos"
-                          children={modalContentSummary(employee)}
+                          children={({ handleClose }) =>
+                            modalContentSummary(employee)
+                          }
                         />
                       )}
                     </Box>
@@ -899,8 +893,11 @@ const SelectorTable: React.FC<SelectorTableProps> = React.memo(
                           disabled={!hasWorkedCurrentWeek(employee)}
                           modalTitle={"Ajuste de Horas"}
                           modalDescription={`Ingresa la cantidad de horas que deseas sumar o restar al total de horas trabajadas por ${employee.firstName} ${employee.lastName}.`}
-                          children={modalContentEditTime(employee)}
-                        />
+                        >
+                          {({ handleClose }) =>
+                            modalContentEditTime(employee, handleClose)
+                          }
+                        </ModalComponent>
                       </TableCell>
                       <TableCell
                         align="left"
