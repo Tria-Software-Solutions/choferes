@@ -321,7 +321,7 @@ const SchedulesPage: React.FC = () => {
                   <Grid container spacing={2} alignItems="center">
                     <Grid item xs={12} md={4}>
                       <TextField
-                        label="Lugar"
+                        label="Asignación"
                         variant="outlined"
                         fullWidth
                         sx={{

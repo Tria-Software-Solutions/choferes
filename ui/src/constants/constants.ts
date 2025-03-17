@@ -91,6 +91,8 @@ export const DEFAULT_SCHEDULE_VALUES = [
   "Cubre Almuerzo",
   "Cubre Almuerzo BAC",
   "Cubre Almuerzo Promerica",
+  "Horario Especial",
+  "Incapacidad",
   "Libre",
   "Salida Programada",
 ];
