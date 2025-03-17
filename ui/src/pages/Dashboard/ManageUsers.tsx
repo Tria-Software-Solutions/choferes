@@ -123,7 +123,7 @@ const ManageUsers = () => {
       const updatedUser = {
         ...editFields,
       };
-      updateUser(id, updatedUser);
+      await updateUser(id, updatedUser);
       //UPDATE USERROLE !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
       setEditRowId(null);
       setEditFields({

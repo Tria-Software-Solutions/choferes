@@ -84,12 +84,12 @@ const ManageRoles = () => {
     setEditRowId(null);
   };
 
-  const handleSaveClick = (id: number) => {
+  const handleSaveClick = async (id: number) => {
     try {
       const updatedRole = {
         ...editFields,
       };
-      updateRole(id, updatedRole);
+      await updateRole(id, updatedRole);
       setEditRowId(null);
       setEditFields({ name: "" });
       showNotification(
@@ -119,10 +119,10 @@ const ManageRoles = () => {
     setRoleToDelete(null);
   };
 
-  const handleDelete = () => {
+  const handleDelete = async () => {
     try {
       if (roleToDelete !== null) {
-        deleteRole(roleToDelete);
+        await deleteRole(roleToDelete);
         handleCloseDialog();
       }
       showNotification(
