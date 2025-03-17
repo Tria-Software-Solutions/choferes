@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { Employee } from "../../../models/Employee";
 import { Schedule } from "../../../models/Schedule";
 import { HoursWorked } from "../../../models/HoursWorked";
@@ -121,6 +121,17 @@ const SelectorTable: React.FC<SelectorTableProps> = React.memo(
     const [page, setPage] = useState(0);
     const [rowsPerPage, setRowsPerPage] = useState(5);
 
+    const theme = useTheme();
+    const isSmallScreen = useMediaQuery(theme.breakpoints.down("sm"));
+
+    useEffect(() => {
+      if (isSmallScreen) {
+        setRowsPerPage(5);
+      } else {
+        setRowsPerPage(25);
+      }
+    }, [isSmallScreen]);
+
     const currentWeek = useMemo(
       () => getCurrentWeekDates(weekOffset),
       [weekOffset]
@@ -138,9 +149,6 @@ const SelectorTable: React.FC<SelectorTableProps> = React.memo(
     const startIndex = page * rowsPerPage;
     const endIndex = startIndex + rowsPerPage;
     const paginatedEmployees = sortedEmployees.slice(startIndex, endIndex);
-
-    const theme = useTheme();
-    const isSmallScreen = useMediaQuery(theme.breakpoints.down("sm"));
 
     const resultHoursForPeriod = (
       employee: Employee,
