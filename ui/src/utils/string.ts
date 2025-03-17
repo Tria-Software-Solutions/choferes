@@ -82,7 +82,7 @@ export const translateColumnHeaderToSpanish = (
     lastName: "Apellido",
     email: "Correo Electrónico",
     username: "Usuario",
-    label: "Lugar",
+    label: "Asignación",
     day: "Día",
     hours: "Horas",
     ticket: "Boleta",
