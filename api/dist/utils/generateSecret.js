@@ -39,33 +39,23 @@ const dotenv = __importStar(require("dotenv"));
 dotenv.config();
 const JWT_SECRET_KEY = process.env.JWT_SECRET_KEY;
 const JWT_SECRET_KEY_REFRESH = process.env.JWT_SECRET_KEY_REFRESH;
-console.log("JWT_SECRET_KEY:", JWT_SECRET_KEY ? "Cargada ✅" : "No definida ❌");
-console.log("JWT_SECRET_KEY_REFRESH:", JWT_SECRET_KEY_REFRESH ? "Cargada ✅" : "No definida ❌");
+const IS_PRODUCTION = process.env.NODE_ENV === "production";
 const generateTokens = (userId, res) => {
-    const accessToken = jwt.sign({ userId }, JWT_SECRET_KEY, {
-        expiresIn: "1h",
-    });
-    const refreshToken = jwt.sign({ userId }, JWT_SECRET_KEY_REFRESH, {
-        expiresIn: "7d",
-    });
-    console.log("Access Token:", accessToken);
-    console.log("Refresh Token:", refreshToken);
-    res.cookie("accessToken", accessToken, {
+    const tokens = {
+        accessToken: jwt.sign({ userId }, JWT_SECRET_KEY, { expiresIn: "1h" }),
+        refreshToken: jwt.sign({ userId }, JWT_SECRET_KEY_REFRESH, {
+            expiresIn: "7d",
+        }),
+    };
+    const cookieOptions = {
         httpOnly: true,
-        secure: process.env.NODE_ENV === "production",
-        sameSite: "none",
+        secure: IS_PRODUCTION,
+        sameSite: IS_PRODUCTION ? "none" : "lax",
         path: "/",
-        maxAge: 3600 * 1000,
-    });
-    res.cookie("refreshToken", refreshToken, {
-        httpOnly: true,
-        secure: process.env.NODE_ENV === "production",
-        sameSite: "none",
-        path: "/",
-        maxAge: 7 * 24 * 60 * 60 * 1000,
-    });
-    console.log("Headers enviados:", res.getHeaders());
-    return { accessToken, refreshToken };
+    };
+    res.cookie("accessToken", tokens.accessToken, Object.assign(Object.assign({}, cookieOptions), { maxAge: 3600 * 1000 }));
+    res.cookie("refreshToken", tokens.refreshToken, Object.assign(Object.assign({}, cookieOptions), { maxAge: 7 * 24 * 60 * 60 * 1000 }));
+    return tokens;
 };
 exports.generateTokens = generateTokens;
 //generateSecret

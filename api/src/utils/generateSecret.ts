@@ -6,47 +6,34 @@ dotenv.config();
 
 const JWT_SECRET_KEY = process.env.JWT_SECRET_KEY;
 const JWT_SECRET_KEY_REFRESH = process.env.JWT_SECRET_KEY_REFRESH;
-
-console.log(
-  "JWT_SECRET_KEY:",
-  JWT_SECRET_KEY ? "Cargada ✅" : "No definida ❌"
-);
-console.log(
-  "JWT_SECRET_KEY_REFRESH:",
-  JWT_SECRET_KEY_REFRESH ? "Cargada ✅" : "No definida ❌"
-);
+const IS_PRODUCTION = process.env.NODE_ENV === "production";
 
 export const generateTokens = (userId: string, res: Response) => {
-  const accessToken = jwt.sign({ userId }, JWT_SECRET_KEY, {
-    expiresIn: "1h",
-  });
+  const tokens = {
+    accessToken: jwt.sign({ userId }, JWT_SECRET_KEY, { expiresIn: "1h" }),
+    refreshToken: jwt.sign({ userId }, JWT_SECRET_KEY_REFRESH, {
+      expiresIn: "7d",
+    }),
+  };
 
-  const refreshToken = jwt.sign({ userId }, JWT_SECRET_KEY_REFRESH, {
-    expiresIn: "7d",
-  });
-
-  console.log("Access Token:", accessToken);
-  console.log("Refresh Token:", refreshToken);
-
-  res.cookie("accessToken", accessToken, {
+  const cookieOptions = {
     httpOnly: true,
-    secure: process.env.NODE_ENV === "production",
-    sameSite: "none",
+    secure: IS_PRODUCTION,
+    sameSite: IS_PRODUCTION ? "none" as "none" : "lax" as "lax",
     path: "/",
+  };
+
+  res.cookie("accessToken", tokens.accessToken, {
+    ...cookieOptions,
     maxAge: 3600 * 1000,
   });
-
-  res.cookie("refreshToken", refreshToken, {
-    httpOnly: true,
-    secure: process.env.NODE_ENV === "production",
-    sameSite: "none",
-    path: "/",
+  
+  res.cookie("refreshToken", tokens.refreshToken, {
+    ...cookieOptions,
     maxAge: 7 * 24 * 60 * 60 * 1000,
   });
 
-  console.log("Headers enviados:", res.getHeaders());
-
-  return { accessToken, refreshToken };
+  return tokens;
 };
 
 //generateSecret

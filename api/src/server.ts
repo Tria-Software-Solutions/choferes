@@ -21,12 +21,9 @@ import "./database/models";
 
 dotenv.config();
 
-const allowedOrigins = [
-  "http://localhost:3000",
-  "https://choferesdealquilercr.vercel.app",
-];
-
 const app = express();
+
+const allowedOrigins = ["http://localhost:3000", process.env.REACT_APP_UI_URL];
 
 app.use(
   cors({
@@ -37,9 +34,10 @@ app.use(
         callback(new Error("Not allowed by CORS"));
       }
     },
-    credentials: true, 
+    credentials: true,
   })
 );
+
 app.use(cookieParser());
 app.use(json());
 app.use(urlencoded({ extended: true }));
