@@ -599,6 +599,15 @@ const RolesPage: React.FC = () => {
                     }}
                     maxDate={nextWeekEnd}
                     views={["year", "month", "day"]}
+                    slots={{
+                      toolbar: () => null,
+                    }}
+                    slotProps={{
+                      actionBar: {
+                        actions: [],
+                      },
+                    }}
+                    closeOnSelect
                     onChange={handleDateChange}
                   />
                 </LocalizationProvider>
