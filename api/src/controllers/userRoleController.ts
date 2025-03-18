@@ -36,7 +36,8 @@ export const createUserRole = async (req: Request, res: Response) => {
 export const updateUserRole = async (req: Request, res: Response) => {
   try {
     const id = parseInt(req.params.id);
-    const updatedUserRole = await userRoleService.updateUserRole(id, req.body);
+    const { newRoleId } = req.body;
+    const updatedUserRole = await userRoleService.updateUserRole(Number(id), newRoleId);
     if (updatedUserRole) {
       return res.status(200).json(updatedUserRole);
     } else {
