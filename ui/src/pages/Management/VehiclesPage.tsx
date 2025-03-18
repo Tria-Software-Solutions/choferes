@@ -619,6 +619,15 @@ const VehiclesPage: React.FC = () => {
                     }}
                     maxDate={new Date()}
                     views={["year", "month", "day"]}
+                    slots={{
+                      toolbar: () => null,
+                    }}
+                    slotProps={{
+                      actionBar: {
+                        actions: [],
+                      },
+                    }}
+                    closeOnSelect
                     onChange={(date) => handleDateChange(date)}
                   />
                 </LocalizationProvider>
