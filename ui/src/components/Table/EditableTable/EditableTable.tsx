@@ -50,8 +50,8 @@ type EditableTableProps<T> = {
   columns: (keyof T)[];
   groupByDate?: Date | null;
   editRowId: number | null;
-  editFields: Record<string, string>;
-  setEditField?: (field: string, value: string) => void;
+  editFields: Record<string, string | string[]>;
+  setEditField?: (field: string, value: string | string[]) => void;
   handleEditClick?: (row: T) => void;
   handleCancelClick?: () => void;
   handleSaveClick?: (id: number) => void;
@@ -63,7 +63,7 @@ type EditableTableProps<T> = {
   setPage: (page: number) => void;
   setRowsPerPage: (rowsPerPage: number) => void;
   renderColumnValue?: (column: keyof T, value: any) => React.ReactNode;
-  validateField?: (field: string, value: string) => boolean;
+  validateField?: (field: string, value: string | string[]) => boolean;
   isSaveDisabled?: boolean;
   noActions?: boolean;
   permissions?: string[];
@@ -202,6 +202,58 @@ const EditableTable = <T,>({
       );
     }
 
+    if (config.type === "autocomplete multiple" && config.options) {
+      const selectedValues: string[] = Array.isArray(editFields[String(column)])
+        ? (editFields[String(column)] as string[])
+        : [];
+
+      const selectedOptions = config.options.filter((opt) =>
+        selectedValues.includes(opt.value)
+      );
+
+      const fixedOptions: { value: string; label: string }[] = [];
+
+      return (
+        <Autocomplete
+          multiple
+          value={selectedOptions}
+          onChange={(event, newValue) => {
+            setEditField &&
+              setEditField(
+                String(column),
+                newValue.map((option) => option.value)
+              );
+          }}
+          options={config.options}
+          getOptionLabel={(option) => option.label}
+          renderTags={(tagValue, getTagProps) =>
+            tagValue.map((option, index) => {
+              const { key, ...tagProps } = getTagProps({ index });
+              return (
+                <Chip
+                  key={key}
+                  label={option.label}
+                  {...tagProps}
+                  disabled={fixedOptions.some(
+                    (fixed) => fixed.value === option.value
+                  )}
+                />
+              );
+            })
+          }
+          renderInput={(params) => (
+            <TextField
+              {...params}
+              label={translateColumnHeaderToSpanish(column)}
+              variant="outlined"
+              fullWidth
+              placeholder={`Buscar ${translateColumnHeaderToSpanish(column)}`}
+            />
+          )}
+        />
+      );
+    }
+
     if (config.type === "masked") {
       const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
         const rawValue = event.target.value;
@@ -259,7 +311,12 @@ const EditableTable = <T,>({
   const columnConfig: Record<
     string,
     {
-      type: "text" | "select" | "autocomplete" | "masked";
+      type:
+        | "text"
+        | "masked"
+        | "select"
+        | "autocomplete"
+        | "autocomplete multiple";
       options?: { value: string; label: string }[];
     }
   > = {
@@ -268,7 +325,10 @@ const EditableTable = <T,>({
     brand: { type: "autocomplete", options: BRANDS_LIST },
     color: { type: "autocomplete", options: COLORS_LIST },
     roleName: { type: "select", options: ROLES_LIST },
-    permissionName: { type: "select", options: PERMISSIONS_LIST },
+    permissionName: {
+      type: "autocomplete multiple",
+      options: PERMISSIONS_LIST,
+    },
     day: { type: "select", options: getDayOptionsSpanish() },
   };
 
@@ -328,7 +388,7 @@ const EditableTable = <T,>({
                         <>
                           {renderEditField(
                             column,
-                            editFields[String(column)] || ""
+                            (editFields[String(column)] || "").toString()
                           )}
                         </>
                       ) : Array.isArray(row[column]) ? (

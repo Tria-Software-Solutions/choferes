@@ -3,7 +3,7 @@ import { useAuth } from "../../context/AuthContext";
 import { User } from "../../models/User";
 import { Role } from "../../models/Role";
 import { useUsers } from "../../hooks/useUser";
-import { useRoles } from "../../hooks/useRole";
+// import { useRoles } from "../../hooks/useRole";
 import { useUserRoles } from "../../hooks/useUserRole";
 import { useAppNotifications } from "../../components/Snackbar/SnackbarWrapper";
 import {
@@ -24,8 +24,8 @@ import SearchBar from "../../components/SearchBar/SearchBar";
 const ManageUsers = () => {
   const { userPermissions } = useAuth();
   const { users, isLoadingUsers, updateUser, deleteUser } = useUsers();
-  const { getRoleByName } = useRoles();
-  const { getUserRoleByUserId, updateUserRole } = useUserRoles();
+  // const { getRoleByName } = useRoles();
+  const { getUserRoleByUserId } = useUserRoles();
   const { showNotification } = useAppNotifications();
   const [filteredUsers, setFilteredUsers] = useState<User[]>([]);
   const [totalCount, setTotalCount] = useState(0);
@@ -105,26 +105,10 @@ const ManageUsers = () => {
 
   const handleSaveClick = async (id: number) => {
     try {
-      const newRole = await getRoleByName(editFields.roleName);
-      if (!newRole) {
-        console.error("Role not found");
-        return;
-      }
-
-      const userRole = await getUserRoleByUserId(id);
-      if (!userRole) {
-        console.error("Relation with userRole not found");
-        return;
-      }
-      if (userRole.roleId !== newRole.id) {
-        updateUserRole(id, newRole.id);
-      }
-
-      const updatedUser = {
-        ...editFields,
-      };
+      // const newRole = await getRoleByName(editFields.roleName);
+      // await updateUserRole(id, newRole.id);
+      const updatedUser = { ...editFields };
       await updateUser(id, updatedUser);
-      //UPDATE USERROLE !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
       setEditRowId(null);
       setEditFields({
         firstName: "",
