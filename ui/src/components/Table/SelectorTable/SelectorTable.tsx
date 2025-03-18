@@ -33,6 +33,7 @@ import {
   Tooltip,
   TextField,
   Button,
+  ListSubheader,
 } from "@mui/material";
 import { TabContext, TabList, TabPanel } from "@mui/lab";
 import PaginationActions from "../Pagination/PaginationActions";
@@ -775,7 +776,7 @@ const SelectorTable: React.FC<SelectorTableProps> = React.memo(
                         }}
                       >
                         <FormControl fullWidth>
-                          <Select
+                          {/* <Select
                             value={finalSelectedLabel}
                             onChange={(event: SelectChangeEvent<string>) =>
                               handleChange(event, employee.id, new Date(date))
@@ -793,7 +794,7 @@ const SelectorTable: React.FC<SelectorTableProps> = React.memo(
                                 </MenuItem>,
                               ];
 
-                              if (option.label === "Ausencia" && index > 0) {
+                              if (option.specialSchedule && index > 0) {
                                 items.unshift(<Divider key="divider" />);
                               }
 
@@ -804,6 +805,61 @@ const SelectorTable: React.FC<SelectorTableProps> = React.memo(
                             ) && (
                               <>
                                 <Divider key="divider" />
+                                <MenuItem
+                                  value={"Other"}
+                                  onClick={() => navigate("/schedules")}
+                                >
+                                  <Box
+                                    display="flex"
+                                    justifyContent="space-between"
+                                    width="100%"
+                                    alignItems="center"
+                                  >
+                                    Otro
+                                    <AddIcon fontSize="small" />
+                                  </Box>
+                                </MenuItem>
+                              </>
+                            )}
+                          </Select> */}
+
+                          <Select
+                            value={finalSelectedLabel}
+                            onChange={(event: SelectChangeEvent<string>) =>
+                              handleChange(event, employee.id, new Date(date))
+                            }
+                            disabled={
+                              !permissions?.includes(
+                                PERMISSIONS.EDIT_EMPLOYEE_ROLES
+                              )
+                            }
+                          >
+                            <ListSubheader>
+                              <strong>Ubicaciones</strong>
+                            </ListSubheader>
+                            {sortedOptions
+                              .filter((option) => !option.specialSchedule)
+                              .map((option) => (
+                                <MenuItem key={option.id} value={option.label}>
+                                  {option.label}
+                                </MenuItem>
+                              ))}
+                            <Divider key="divider" />
+                            <ListSubheader>
+                              <strong>Horarios Especiales</strong>
+                            </ListSubheader>
+                            {sortedOptions
+                              .filter((option) => option.specialSchedule)
+                              .map((option) => (
+                                <MenuItem key={option.id} value={option.label}>
+                                  {option.label}
+                                </MenuItem>
+                              ))}
+                            <Divider key="divider" />
+                            {permissions?.includes(
+                              PERMISSIONS.CREATE_SCHEDULES
+                            ) && (
+                              <>
                                 <MenuItem
                                   value={"Other"}
                                   onClick={() => navigate("/schedules")}
