@@ -6,6 +6,7 @@ export class Schedule extends Model {
   public day!: string;
   public label!: string;
   public hours!: number;
+  public specialSchedule!: boolean;
 }
 
 Schedule.init(
@@ -26,6 +27,11 @@ Schedule.init(
     hours: {
       type: DataTypes.INTEGER,
       allowNull: false,
+    },
+    specialSchedule: {
+      type: DataTypes.BOOLEAN,
+      allowNull: false,
+      defaultValue: false,
     },
   },
   {
