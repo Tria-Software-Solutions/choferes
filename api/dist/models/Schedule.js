@@ -27,6 +27,11 @@ Schedule.init({
         type: sequelize_1.DataTypes.INTEGER,
         allowNull: false,
     },
+    specialSchedule: {
+        type: sequelize_1.DataTypes.BOOLEAN,
+        allowNull: false,
+        defaultValue: false,
+    },
 }, {
     sequelize: database_1.default,
     modelName: "Schedule",
