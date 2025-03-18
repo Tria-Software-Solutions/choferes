@@ -129,14 +129,14 @@ const SchedulesPage: React.FC = () => {
     setFilter(e.target.value);
   };
 
-  const handleAdd = () => {
+  const handleAdd = async () => {
     try {
       const newSchedule: Omit<Schedule, "id"> = {
         label: addFields.label,
         day: addFields.day,
         hours: parseInt(addFields.hours, 10),
       };
-      createSchedule(newSchedule);
+      await createSchedule(newSchedule);
       setAddFields({ label: "", day: "", hours: "" });
       showNotification(
         "El registro del horario fue exitoso",
@@ -168,13 +168,13 @@ const SchedulesPage: React.FC = () => {
     setEditRowId(null);
   };
 
-  const handleSaveClick = (id: number) => {
+  const handleSaveClick = async (id: number) => {
     try {
       const updatedSchedule = {
         ...editFields,
         hours: parseInt(editFields.hours, 10),
       };
-      updateSchedule(id, updatedSchedule);
+      await updateSchedule(id, updatedSchedule);
       setEditRowId(null);
       setEditFields({ label: "", day: "", hours: "" });
       showNotification(
@@ -204,10 +204,10 @@ const SchedulesPage: React.FC = () => {
     setScheduleToDelete(null);
   };
 
-  const handleDelete = () => {
+  const handleDelete = async () => {
     try {
       if (scheduleToDelete !== null) {
-        deleteSchedule(scheduleToDelete);
+        await deleteSchedule(scheduleToDelete);
         handleCloseDialog();
       }
       showNotification(

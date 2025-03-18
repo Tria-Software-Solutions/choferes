@@ -72,16 +72,19 @@ const RolesPage: React.FC = () => {
   const {
     weeklySummaries,
     isLoadingWeeklySummaries,
+    updateWeeklySummary,
     createOrUpdateWeeklySummary,
   } = useWeeklySummaries();
   const {
     biweeklySummaries,
     isLoadingBiweeklySummaries,
+    updateBiweeklySummary,
     createOrUpdateBiweeklySummary,
   } = useBiweeklySummaries();
   const {
     monthlySummaries,
     isLoadingMonthlySummaries,
+    updateMonthlySummary,
     createOrUpdateMonthlySummary,
   } = useMonthlySummaries();
   const [weekOffset, setWeekOffset] = useState(0);
@@ -162,7 +165,7 @@ const RolesPage: React.FC = () => {
   }, []);
 
   const handleCreateOrUpdateHoursAndSummaries = useCallback(
-    (
+    async (
       employeeId: number,
       date: Date,
       scheduleId: number,
@@ -196,7 +199,7 @@ const RolesPage: React.FC = () => {
           scheduleId,
         };
       }
-      createOrUpdateHoursWorked(createOrUpdatedHoursWorked);
+      await createOrUpdateHoursWorked(createOrUpdatedHoursWorked);
 
       const existingWeeklySummaryRecord = weeklySummaries.find(
         (weeklySummary) =>
@@ -228,7 +231,7 @@ const RolesPage: React.FC = () => {
           totalHours,
         };
       }
-      createOrUpdateWeeklySummary(createOrUpdatedWeeklySummary);
+      await createOrUpdateWeeklySummary(createOrUpdatedWeeklySummary);
 
       const existingBiweeklySummaryRecord = biweeklySummaries.find(
         (biweeklySummary) =>
@@ -260,7 +263,7 @@ const RolesPage: React.FC = () => {
           totalHours,
         };
       }
-      createOrUpdateBiweeklySummary(createOrUpdatedBiweeklySummary);
+      await createOrUpdateBiweeklySummary(createOrUpdatedBiweeklySummary);
 
       const existingMonthlySummaryRecord = monthlySummaries.find(
         (monthlySummary) =>
@@ -290,7 +293,7 @@ const RolesPage: React.FC = () => {
           totalHours,
         };
       }
-      createOrUpdateMonthlySummary(createOrUpdatedMonthlySummary);
+      await createOrUpdateMonthlySummary(createOrUpdatedMonthlySummary);
     },
     [
       hoursWorked,
@@ -335,6 +338,70 @@ const RolesPage: React.FC = () => {
       date.getFullYear(),
       selectedSchedule.hours
     );
+  };
+
+  const handleAdjustTime = async (
+    employeeId: number,
+    condition: string,
+    timeAdjustment: number
+  ) => {
+    if (!timeAdjustment) return;
+
+    const adjustment = condition === "sum" ? timeAdjustment : -timeAdjustment;
+
+    const existingWeeklySummary = weeklySummaries.find(
+      (weeklySummary) =>
+        weeklySummary.employeeId === employeeId &&
+        weeklySummary.weekNumber === currentWeekNumber &&
+        weeklySummary.month === currentMonth &&
+        weeklySummary.year === currentYear
+    );
+    const existingBiweeklySummary = biweeklySummaries.find(
+      (biweeklySummary) =>
+        biweeklySummary.employeeId === employeeId &&
+        biweeklySummary.biweekNumber === currentBiweekNumber &&
+        biweeklySummary.month === currentMonth &&
+        biweeklySummary.year === currentYear
+    );
+    const existingMonthlySummary = monthlySummaries.find(
+      (monthlySummary) =>
+        monthlySummary.employeeId === employeeId &&
+        monthlySummary.month === currentMonth &&
+        monthlySummary.year === currentYear
+    );
+
+    const updatedWeeklySummary: WeeklySummary = {
+      id: existingWeeklySummary?.id ?? 0,
+      employeeId: existingWeeklySummary?.employeeId ?? employeeId,
+      weekNumber: existingWeeklySummary?.weekNumber ?? currentWeekNumber,
+      month: existingWeeklySummary?.month ?? currentMonth,
+      year: existingWeeklySummary?.year ?? currentYear,
+      totalHours: (existingWeeklySummary?.totalHours ?? 0) + adjustment,
+    };
+
+    const updatedBiweeklySummary: BiweeklySummary = {
+      id: existingBiweeklySummary?.id ?? 0,
+      employeeId: existingBiweeklySummary?.employeeId ?? employeeId,
+      biweekNumber:
+        existingBiweeklySummary?.biweekNumber ?? currentBiweekNumber,
+      month: existingBiweeklySummary?.month ?? currentMonth,
+      year: existingBiweeklySummary?.year ?? currentYear,
+      totalHours: (existingBiweeklySummary?.totalHours ?? 0) + adjustment,
+    };
+
+    const updatedMonthlySummary: MonthlySummary = {
+      id: existingMonthlySummary?.id ?? 0,
+      employeeId: existingMonthlySummary?.employeeId ?? employeeId,
+      month: existingMonthlySummary?.month ?? currentMonth,
+      year: existingMonthlySummary?.year ?? currentYear,
+      totalHours: (existingMonthlySummary?.totalHours ?? 0) + adjustment,
+    };
+
+    await Promise.all([
+      updateWeeklySummary(updatedWeeklySummary.id, updatedWeeklySummary),
+      updateBiweeklySummary(updatedBiweeklySummary.id, updatedBiweeklySummary),
+      updateMonthlySummary(updatedMonthlySummary.id, updatedMonthlySummary),
+    ]);
   };
 
   const handleNextWeek = () => {
@@ -553,6 +620,7 @@ const RolesPage: React.FC = () => {
               month={currentMonth}
               year={currentYear}
               handleChange={handleChange}
+              handleAdjustTime={handleAdjustTime}
               permissions={userPermissions}
             />
           ) : (
