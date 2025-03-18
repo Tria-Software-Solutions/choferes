@@ -198,27 +198,25 @@ const VehiclesPage: React.FC = () => {
     []
   );
 
-  const handleAdd = () => {
+  const handleAdd = async () => {
     try {
-      setAllVehicles((prevVehicles) => {
-        const newId =
-          prevVehicles.length > 0
-            ? Math.max(...prevVehicles.map((vehicle) => vehicle.id)) + 1
-            : 1;
-
-        const newVehicle: Vehicle = {
-          id: newId,
-          ticket: addFields.ticket,
-          licensePlate: addFields.licensePlate,
-          brand: addFields.brand,
-          color: addFields.color,
-          parkingLot: addFields.parkingLot,
-          notes: addFields.notes,
-          createdAt: selectedDate,
-        };
-        createVehicle(newVehicle);
-        return [...prevVehicles, newVehicle];
-      });
+      const newVehicle: Vehicle = {
+        id: allVehicles.length > 0
+          ? Math.max(...allVehicles.map((vehicle) => vehicle.id)) + 1
+          : 1,
+        ticket: addFields.ticket,
+        licensePlate: addFields.licensePlate,
+        brand: addFields.brand,
+        color: addFields.color,
+        parkingLot: addFields.parkingLot,
+        notes: addFields.notes,
+        createdAt: selectedDate,
+      };
+  
+      await createVehicle(newVehicle); 
+  
+      setAllVehicles((prevVehicles) => [...prevVehicles, newVehicle]);
+  
       setAddFields({
         ticket: "",
         licensePlate: "",
@@ -227,8 +225,7 @@ const VehiclesPage: React.FC = () => {
         parkingLot: "",
         notes: "",
       });
-      setSearchBrandTerm("");
-      setSearchColorTerm("");
+  
       showNotification(
         "El registro del vehículo fue exitoso",
         "success",
@@ -245,6 +242,7 @@ const VehiclesPage: React.FC = () => {
       );
     }
   };
+  
 
   const handleEditClick = (vehicle: Vehicle) => {
     setEditRowId(vehicle.id);
@@ -263,12 +261,12 @@ const VehiclesPage: React.FC = () => {
   };
 
   const handleSaveClick = useCallback(
-    (id: number) => {
+    async (id: number) => {
       try {
         const updatedVehicle = {
           ...editFields,
         };
-        updateVehicle(id, updatedVehicle);
+        await updateVehicle(id, updatedVehicle);
         setEditRowId(null);
         setEditFields({
           ticket: "",
@@ -307,10 +305,10 @@ const VehiclesPage: React.FC = () => {
     setVehicleToDelete(null);
   };
 
-  const handleDelete = () => {
+  const handleDelete = async () => {
     try {
       if (vehicleToDelete !== null) {
-        deleteVehicle(vehicleToDelete);
+        await deleteVehicle(vehicleToDelete);
         handleCloseDialog();
       }
       showNotification(

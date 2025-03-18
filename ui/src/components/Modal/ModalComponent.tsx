@@ -13,7 +13,7 @@ interface ModalComponentProps {
   disabled?: boolean;
   modalTitle: string;
   modalDescription?: string;
-  children?: React.ReactNode;
+  children?: (props: { handleClose: () => void }) => React.ReactNode;
   onCloseModal?: () => void;
 }
 
@@ -97,7 +97,11 @@ const ModalComponent: React.FC<ModalComponentProps> = ({
               {modalDescription}
             </Typography>
           )}
-          <Box sx={{ mt: 2 }}>{children}</Box>
+          <Box sx={{ mt: 2 }}>
+            {children && typeof children === "function"
+              ? children({ handleClose })
+              : children}
+          </Box>
         </Box>
       </Modal>
     </div>
