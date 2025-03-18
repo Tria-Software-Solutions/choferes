@@ -58,12 +58,7 @@ import {
   calculateTotalHoursAndOvertimeForPeriods,
 } from "../../../utils/calculation";
 import { EnglishDayOfWeek } from "../../../utils/dayAbreviations";
-import {
-  STATE,
-  TABLE,
-  DEFAULT_SCHEDULE_VALUES,
-  PERMISSIONS,
-} from "../../../constants/constants";
+import { STATE, TABLE, PERMISSIONS } from "../../../constants/constants";
 import InfoOutlinedIcon from "@mui/icons-material/InfoOutlined";
 import AccessTimeRoundedIcon from "@mui/icons-material/AccessTimeRounded";
 import MoreTimeIcon from "@mui/icons-material/MoreTime";
@@ -752,18 +747,6 @@ const SelectorTable: React.FC<SelectorTableProps> = React.memo(
                       ? selectedLabel
                       : validLabels[0] ?? "";
 
-                    const sortedOptions = [...options].sort((a, b) => {
-                      const indexA = DEFAULT_SCHEDULE_VALUES.indexOf(a.label);
-                      const indexB = DEFAULT_SCHEDULE_VALUES.indexOf(b.label);
-
-                      if (indexA !== -1 && indexB !== -1)
-                        return indexA - indexB;
-                      if (indexA !== -1) return 1;
-                      if (indexB !== -1) return -1;
-
-                      return a.label.localeCompare(b.label);
-                    });
-
                     return (
                       <TableCell
                         key={day}
@@ -776,53 +759,6 @@ const SelectorTable: React.FC<SelectorTableProps> = React.memo(
                         }}
                       >
                         <FormControl fullWidth>
-                          {/* <Select
-                            value={finalSelectedLabel}
-                            onChange={(event: SelectChangeEvent<string>) =>
-                              handleChange(event, employee.id, new Date(date))
-                            }
-                            disabled={
-                              !permissions?.includes(
-                                PERMISSIONS.EDIT_EMPLOYEE_ROLES
-                              )
-                            }
-                          >
-                            {sortedOptions.map((option, index) => {
-                              const items = [
-                                <MenuItem key={option.id} value={option.label}>
-                                  {option.label}
-                                </MenuItem>,
-                              ];
-
-                              if (option.specialSchedule && index > 0) {
-                                items.unshift(<Divider key="divider" />);
-                              }
-
-                              return items;
-                            })}
-                            {permissions?.includes(
-                              PERMISSIONS.CREATE_SCHEDULES
-                            ) && (
-                              <>
-                                <Divider key="divider" />
-                                <MenuItem
-                                  value={"Other"}
-                                  onClick={() => navigate("/schedules")}
-                                >
-                                  <Box
-                                    display="flex"
-                                    justifyContent="space-between"
-                                    width="100%"
-                                    alignItems="center"
-                                  >
-                                    Otro
-                                    <AddIcon fontSize="small" />
-                                  </Box>
-                                </MenuItem>
-                              </>
-                            )}
-                          </Select> */}
-
                           <Select
                             value={finalSelectedLabel}
                             onChange={(event: SelectChangeEvent<string>) =>
@@ -837,7 +773,7 @@ const SelectorTable: React.FC<SelectorTableProps> = React.memo(
                             <ListSubheader>
                               <strong>Ubicaciones</strong>
                             </ListSubheader>
-                            {sortedOptions
+                            {options
                               .filter((option) => !option.specialSchedule)
                               .map((option) => (
                                 <MenuItem key={option.id} value={option.label}>
@@ -848,7 +784,7 @@ const SelectorTable: React.FC<SelectorTableProps> = React.memo(
                             <ListSubheader>
                               <strong>Horarios Especiales</strong>
                             </ListSubheader>
-                            {sortedOptions
+                            {options
                               .filter((option) => option.specialSchedule)
                               .map((option) => (
                                 <MenuItem key={option.id} value={option.label}>
