@@ -6,7 +6,7 @@ export const getHoursWorked = async () => {
   return await HoursWorked.findAll({
     include: [
       { model: Employee, attributes: ["firstName", "lastName"] },
-      { model: Schedule, attributes: ["day", "label", "hours"] },
+      { model: Schedule, attributes: ["days", "label", "hours"] },
     ],
   });
 };
@@ -15,7 +15,7 @@ export const getHoursWorkedById = async (id: number) => {
   return await HoursWorked.findByPk(id, {
     include: [
       { model: Employee, attributes: ["firstName", "lastName"] },
-      { model: Schedule, attributes: ["day", "label", "hours"] },
+      { model: Schedule, attributes: ["days", "label", "hours"] },
     ],
   });
 };

@@ -1,3 +1,39 @@
+export const ROUTES = {
+  LOGIN: "/",
+  REGISTER: "register",
+  ROLES: "/roles",
+  VEHICLES: "/vehicles",
+  EMPLOYEES: "/employees",
+  SCHEDULES: "/schedules",
+  DASHBOARD: "/dashboard",
+};
+
+export const APPBAR_MENU = {
+  TITLE: "Choferes",
+  ROLES: "Roles",
+  VEHICLES: "Vehículos",
+  MANAGE: "Gestión",
+  EMPLOYEES: "Empleados",
+  SCHEDULES: "Horarios",
+  DASHBOARD: "Admin",
+  LOGOUT: "Salir",
+};
+
+export const PAGE_TITLE = {
+  LOGIN: "Iniciar Sesión",
+  REGISTER: "Registrar Usuario",
+  ROLES: "Gestionar Roles",
+  VEHICLES: "Gestionar Vehículos",
+  EMPLOYEES: "Gestionar Empleados",
+  SCHEDULES: "Gestionar Horarios",
+  DASHBOARD: "Panel de Administración",
+  ROLES_SIMPLIFIED: "Roles",
+  VEHICLES_SIMPLIFIED: "Vehículos",
+  EMPLOYEES_SIMPLIFIED: "Empleados",
+  SCHEDULES_SIMPLIFIED: "Horarios",
+  DASHBOARD_SIMPLIFIED: "Administración",
+};
+
 export const PERMISSIONS = {
   VIEW_ROLES: "Ver Roles",
   VIEW_EMPLOYEE_ROLES_HOURS: "Ver Horas de Empleados",
@@ -30,54 +66,76 @@ export const PERMISSIONS = {
   DELETE_ROLE: "Eliminar Rol",
 };
 
+export const DAYS_LIST = [
+  { value: "monday", label: "Lunes" },
+  { value: "tuesday", label: "Martes" },
+  { value: "wednesday", label: "Miércoles" },
+  { value: "thursday", label: "Jueves" },
+  { value: "friday", label: "Viernes" },
+  { value: "saturday", label: "Sábado" },
+  { value: "sunday", label: "Domingo" },
+];
+
+export const ROLES_LIST = [
+  { value: "Gerencia", label: "Gerencia" },
+  { value: "Administrativo", label: "Administrativo" },
+  { value: "Supervisor", label: "Supervisor" },
+  { value: "Usuario", label: "Usuario" },
+];
+
+export const PERMISSIONS_LIST = [
+  { value: "Ver Roles", label: "Ver Roles" },
+  { value: "Ver Horas de Empleados", label: "Ver Horas de Empleados" },
+  { value: "Editar Roles de Empleados", label: "Editar Roles de Empleados" },
+  {
+    value: "Exportar Excel de Roles de Empleados",
+    label: "Exportar Excel de Roles de Empleados",
+  },
+  {
+    value: "Exportar PDF de Roles de Empleados",
+    label: "Exportar PDF de Roles de Empleados",
+  },
+  { value: "Ver Empleados", label: "Ver Empleados" },
+  { value: "Crear Empleado", label: "Crear Empleado" },
+  { value: "Editar Empleado", label: "Editar Empleado" },
+  { value: "Eliminar Empleado", label: "Eliminar Empleado" },
+  {
+    value: "Exportar Excel de Empleados",
+    label: "Exportar Excel de Empleados",
+  },
+  { value: "Exportar PDF de Empleados", label: "Exportar PDF de Empleados" },
+  { value: "Ver Horarios", label: "Ver Horarios" },
+  { value: "Crear Horario", label: "Crear Horario" },
+  { value: "Editar Horario", label: "Editar Horario" },
+  { value: "Eliminar Horario", label: "Eliminar Horario" },
+  { value: "Exportar Excel de Horarios", label: "Exportar Excel de Horarios" },
+  { value: "Exportar PDF de Horarios", label: "Exportar PDF de Horarios" },
+  { value: "Ver Vehículos", label: "Ver Vehículos" },
+  { value: "Crear Vehículo", label: "Crear Vehículo" },
+  { value: "Editar Vehículo", label: "Editar Vehículo" },
+  { value: "Eliminar Vehículo", label: "Eliminar Vehículo" },
+  {
+    value: "Exportar Excel de Vehículos",
+    label: "Exportar Excel de Vehículos",
+  },
+  { value: "Exportar PDF de Vehículos", label: "Exportar PDF de Vehículos" },
+  { value: "Ver Admin", label: "Ver Admin" },
+  { value: "Editar Usuario", label: "Editar Usuario" },
+  { value: "Eliminar Usuario", label: "Eliminar Usuario" },
+  { value: "Crear Rol", label: "Crear Rol" },
+  { value: "Editar Rol", label: "Editar Rol" },
+  { value: "Eliminar Rol", label: "Eliminar Rol" },
+];
+
 export const DAYS = {
   WEEKDAY: "weekday",
+  MONDAY: "monday",
+  TUESDAY: "tuesday",
+  WEDNESDAY: "wednesday",
+  THURSDAY: "thursday",
   FRIDAY: "friday",
   SATURDAY: "saturday",
   SUNDAY: "sunday",
-};
-export const APPBAR_MENU = {
-  TITLE: "Choferes",
-  ROLES: "Roles",
-  VEHICLES: "Vehículos",
-  MANAGE: "Gestión",
-  EMPLOYEES: "Empleados",
-  SCHEDULES: "Horarios",
-  DASHBOARD: "Admin",
-  LOGOUT: "Salir",
-};
-
-export const ROUTES = {
-  LOGIN: "/",
-  REGISTER: "register",
-  ROLES: "/roles",
-  VEHICLES: "/vehicles",
-  EMPLOYEES: "/employees",
-  SCHEDULES: "/schedules",
-  DASHBOARD: "/dashboard",
-};
-
-export const PAGE_TITLE = {
-  LOGIN: "Iniciar Sesión",
-  REGISTER: "Registrar Usuario",
-  ROLES: "Gestionar Roles",
-  VEHICLES: "Gestionar Vehículos",
-  EMPLOYEES: "Gestionar Empleados",
-  SCHEDULES: "Gestionar Horarios",
-  DASHBOARD: "Panel de Administración",
-  ROLES_SIMPLIFIED: "Roles",
-  VEHICLES_SIMPLIFIED: "Vehículos",
-  EMPLOYEES_SIMPLIFIED: "Empleados",
-  SCHEDULES_SIMPLIFIED: "Horarios",
-  DASHBOARD_SIMPLIFIED: "Administración",
-};
-
-export const STATE = {
-  FREE: "Libre",
-};
-
-export const TABLE = {
-  ROWS_PER_PAGE: "Filas por página",
 };
 
 export const OVERTIME = {
@@ -174,53 +232,10 @@ export const BRANDS_LIST = [
   { value: "Xpeng", label: "Xpeng" },
 ];
 
-export const ROLES_LIST = [
-  { value: "Gerencia", label: "Gerencia" },
-  { value: "Administrativo", label: "Administrativo" },
-  { value: "Supervisor", label: "Supervisor" },
-  { value: "Usuario", label: "Usuario" },
-];
+export const STATE = {
+  FREE: "Libre",
+};
 
-export const PERMISSIONS_LIST = [
-  { value: "Ver Roles", label: "Ver Roles" },
-  { value: "Ver Horas de Empleados", label: "Ver Horas de Empleados" },
-  { value: "Editar Roles de Empleados", label: "Editar Roles de Empleados" },
-  {
-    value: "Exportar Excel de Roles de Empleados",
-    label: "Exportar Excel de Roles de Empleados",
-  },
-  {
-    value: "Exportar PDF de Roles de Empleados",
-    label: "Exportar PDF de Roles de Empleados",
-  },
-  { value: "Ver Empleados", label: "Ver Empleados" },
-  { value: "Crear Empleado", label: "Crear Empleado" },
-  { value: "Editar Empleado", label: "Editar Empleado" },
-  { value: "Eliminar Empleado", label: "Eliminar Empleado" },
-  {
-    value: "Exportar Excel de Empleados",
-    label: "Exportar Excel de Empleados",
-  },
-  { value: "Exportar PDF de Empleados", label: "Exportar PDF de Empleados" },
-  { value: "Ver Horarios", label: "Ver Horarios" },
-  { value: "Crear Horario", label: "Crear Horario" },
-  { value: "Editar Horario", label: "Editar Horario" },
-  { value: "Eliminar Horario", label: "Eliminar Horario" },
-  { value: "Exportar Excel de Horarios", label: "Exportar Excel de Horarios" },
-  { value: "Exportar PDF de Horarios", label: "Exportar PDF de Horarios" },
-  { value: "Ver Vehículos", label: "Ver Vehículos" },
-  { value: "Crear Vehículo", label: "Crear Vehículo" },
-  { value: "Editar Vehículo", label: "Editar Vehículo" },
-  { value: "Eliminar Vehículo", label: "Eliminar Vehículo" },
-  {
-    value: "Exportar Excel de Vehículos",
-    label: "Exportar Excel de Vehículos",
-  },
-  { value: "Exportar PDF de Vehículos", label: "Exportar PDF de Vehículos" },
-  { value: "Ver Admin", label: "Ver Admin" },
-  { value: "Editar Usuario", label: "Editar Usuario" },
-  { value: "Eliminar Usuario", label: "Eliminar Usuario" },
-  { value: "Crear Rol", label: "Crear Rol" },
-  { value: "Editar Rol", label: "Editar Rol" },
-  { value: "Eliminar Rol", label: "Eliminar Rol" },
-];
+export const TABLE = {
+  ROWS_PER_PAGE: "Filas por página",
+};

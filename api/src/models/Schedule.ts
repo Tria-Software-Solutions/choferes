@@ -3,7 +3,7 @@ import sequelize from "../config/database";
 
 export class Schedule extends Model {
   public id!: number;
-  public day!: string;
+  public days!: string[];
   public label!: string;
   public hours!: number;
   public specialSchedule!: boolean;
@@ -16,8 +16,8 @@ Schedule.init(
       autoIncrement: true,
       primaryKey: true,
     },
-    day: {
-      type: DataTypes.STRING,
+    days: {
+      type: DataTypes.ARRAY(DataTypes.STRING),
       allowNull: false,
     },
     label: {

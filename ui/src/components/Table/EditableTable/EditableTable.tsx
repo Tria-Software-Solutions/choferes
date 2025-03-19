@@ -23,17 +23,19 @@ import {
   Chip,
   useTheme,
   Link,
+  Checkbox,
+  ListItemText,
 } from "@mui/material";
 import {
   translateColumnHeaderToSpanish,
-  mapDayValues,
-  getDayOptionsSpanish,
+  translateDayOptionsToSpanish,
 } from "../../../utils/string";
 import { formatDateWithDay } from "../../../utils/dates";
 import { maskLicensePlate, maskParkingLot } from "../../../utils/mask";
 import {
   BRANDS_LIST,
   COLORS_LIST,
+  DAYS_LIST,
   PERMISSIONS,
   PERMISSIONS_LIST,
   ROLES_LIST,
@@ -63,7 +65,10 @@ type EditableTableProps<T> = {
   setPage: (page: number) => void;
   setRowsPerPage: (rowsPerPage: number) => void;
   renderColumnValue?: (column: keyof T, value: any) => React.ReactNode;
-  validateField?: (field: string, value: string | string[] | boolean) => boolean;
+  validateField?: (
+    field: string,
+    value: string | string[] | boolean
+  ) => boolean;
   isSaveDisabled?: boolean;
   noActions?: boolean;
   permissions?: string[];
@@ -133,6 +138,27 @@ const EditableTable = <T,>({
       );
     }
 
+    if (config.type === "masked") {
+      const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+        const rawValue = event.target.value;
+        const maskedValue =
+          column === "licensePlate"
+            ? maskLicensePlate(rawValue)
+            : maskParkingLot(rawValue);
+        setEditField && setEditField(String(column), maskedValue);
+      };
+
+      return (
+        <TextField
+          label={translateColumnHeaderToSpanish(column)}
+          variant="outlined"
+          fullWidth
+          value={editFields[String(column)] || ""}
+          onChange={handleChange}
+        />
+      );
+    }
+
     if (config.type === "select" && config.options) {
       const selectedValue = editFields[String(column)] || "";
       const hasOtroOption = config.options.some(
@@ -167,6 +193,43 @@ const EditableTable = <T,>({
               {hasOtroOption && <MenuItem value="Otro">Otro</MenuItem>}
             </Select>
           )}
+        </FormControl>
+      );
+    }
+
+    if (config.type === "select multiple" && config.options) {
+      const selectedValues = Array.isArray(editFields[String(column)])
+        ? editFields[String(column)]
+        : [];
+        
+      return (
+        <FormControl variant="outlined" fullWidth>
+          <Select
+            multiple
+            value={selectedValues}
+            onChange={(e) =>
+              setEditField && setEditField(String(column), e.target.value)
+            }
+            renderValue={(selected) =>
+              Array.isArray(selected)
+                ? selected
+                    .map((item) => translateDayOptionsToSpanish(item))
+                    .join(", ")
+                : ""
+            }
+          >
+            {config.options.map((option) => (
+              <MenuItem key={option.value} value={option.value}>
+                <Checkbox
+                  checked={
+                    Array.isArray(selectedValues) &&
+                    selectedValues.includes(option.value)
+                  }
+                />
+                <ListItemText primary={option.label} />
+              </MenuItem>
+            ))}
+          </Select>
         </FormControl>
       );
     }
@@ -254,27 +317,6 @@ const EditableTable = <T,>({
       );
     }
 
-    if (config.type === "masked") {
-      const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-        const rawValue = event.target.value;
-        const maskedValue =
-          column === "licensePlate"
-            ? maskLicensePlate(rawValue)
-            : maskParkingLot(rawValue);
-        setEditField && setEditField(String(column), maskedValue);
-      };
-
-      return (
-        <TextField
-          label={translateColumnHeaderToSpanish(column)}
-          variant="outlined"
-          fullWidth
-          value={editFields[String(column)] || ""}
-          onChange={handleChange}
-        />
-      );
-    }
-
     return (
       <TextField
         fullWidth
@@ -315,6 +357,7 @@ const EditableTable = <T,>({
         | "text"
         | "masked"
         | "select"
+        | "select multiple"
         | "autocomplete"
         | "autocomplete multiple";
       options?: { value: string; label: string }[];
@@ -329,7 +372,7 @@ const EditableTable = <T,>({
       type: "autocomplete multiple",
       options: PERMISSIONS_LIST,
     },
-    day: { type: "select", options: getDayOptionsSpanish() },
+    days: { type: "select multiple", options: DAYS_LIST },
   };
 
   return (
@@ -398,9 +441,14 @@ const EditableTable = <T,>({
                           flexWrap="wrap"
                           sx={{ rowGap: 2 }}
                         >
-                          {(row[column] as string[]).map((item, index) => (
-                            <Chip key={index} label={item} variant="outlined" />
-                          ))}
+                          {(row[column] as string[]).map(
+                            (item, index, array) => (
+                              <Typography key={index} component="span">
+                                {translateDayOptionsToSpanish(item)}
+                                {index < array.length - 1 ? ", " : ""}
+                              </Typography>
+                            )
+                          )}
                         </Stack>
                       ) : column === "email" ? (
                         <Link
@@ -416,7 +464,9 @@ const EditableTable = <T,>({
                           {String(row[column])}
                         </Link>
                       ) : column === "day" ? (
-                        <>{mapDayValues(row[column] as string)}</>
+                        <>
+                          {translateDayOptionsToSpanish(row[column] as string)}
+                        </>
                       ) : (
                         <>{renderColumnValue(column, row[column])}</>
                       )}
