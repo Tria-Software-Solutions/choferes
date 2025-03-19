@@ -6,18 +6,18 @@ export const authenticateUser = async (req: Request, res: Response) => {
     const { username, password } = req.body;
     const { user, accessToken, refreshToken } =
       await userService.authenticateUser(username, password, res);
-    res.status(200).json({ user, accessToken, refreshToken });
+      return res.status(200).json({ user, accessToken, refreshToken });
   } catch (error) {
-    res.status(401).json({ message: "Error login User", error });
+    return res.status(401).json({ message: "Error login User", error });
   }
 };
 
 export const getUsers = async (req: Request, res: Response) => {
   try {
     const users = await userService.getUsers();
-    res.status(200).json(users);
+    return res.status(200).json(users);
   } catch (error) {
-    res.status(500).json({ message: "Error fetching Users", error });
+    return res.status(500).json({ message: "Error fetching Users", error });
   }
 };
 
@@ -27,9 +27,9 @@ export const getUserById = async (req: Request, res: Response) => {
     if (!user) {
       return res.status(404).json({ message: "User not found" });
     }
-    res.status(200).json(user);
+    return res.status(200).json(user);
   } catch (error) {
-    res.status(500).json({ message: "Error fetching User", error });
+    return res.status(500).json({ message: "Error fetching User", error });
   }
 };
 
@@ -39,9 +39,9 @@ export const getUserByUsername = async (req: Request, res: Response) => {
     if (!user) {
       return res.status(404).json({ message: "User not found" });
     }
-    res.status(200).json(user);
+    return res.status(200).json(user);
   } catch (error) {
-    res.status(500).json({ message: "Error fetching User", error });
+    return res.status(500).json({ message: "Error fetching User", error });
   }
 };
 
@@ -51,18 +51,18 @@ export const getUserPermissions = async (req: Request, res: Response) => {
     if (!user) {
       return res.status(404).json({ message: "User Permissions not found" });
     }
-    res.status(200).json(user);
+    return res.status(200).json(user);
   } catch (error) {
-    res.status(500).json({ message: "Error fetching User Permissions", error });
+    return res.status(500).json({ message: "Error fetching User Permissions", error });
   }
 };
 
 export const createUser = async (req: Request, res: Response) => {
   try {
     const newUser = await userService.createUser(req.body);
-    res.status(201).json(newUser);
+    return res.status(201).json(newUser);
   } catch (error) {
-    res.status(500).json({ message: "Error registering User", error });
+    return res.status(500).json({ message: "Error registering User", error });
   }
 };
 

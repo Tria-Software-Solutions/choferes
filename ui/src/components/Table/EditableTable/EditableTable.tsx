@@ -50,8 +50,8 @@ type EditableTableProps<T> = {
   columns: (keyof T)[];
   groupByDate?: Date | null;
   editRowId: number | null;
-  editFields: Record<string, string | string[]>;
-  setEditField?: (field: string, value: string | string[]) => void;
+  editFields: Record<string, string | string[] | boolean>;
+  setEditField?: (field: string, value: string | string[] | boolean) => void;
   handleEditClick?: (row: T) => void;
   handleCancelClick?: () => void;
   handleSaveClick?: (id: number) => void;
@@ -63,7 +63,7 @@ type EditableTableProps<T> = {
   setPage: (page: number) => void;
   setRowsPerPage: (rowsPerPage: number) => void;
   renderColumnValue?: (column: keyof T, value: any) => React.ReactNode;
-  validateField?: (field: string, value: string | string[]) => boolean;
+  validateField?: (field: string, value: string | string[] | boolean) => boolean;
   isSaveDisabled?: boolean;
   noActions?: boolean;
   permissions?: string[];

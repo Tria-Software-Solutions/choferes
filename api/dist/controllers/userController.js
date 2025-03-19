@@ -48,20 +48,20 @@ const authenticateUser = (req, res) => __awaiter(void 0, void 0, void 0, functio
     try {
         const { username, password } = req.body;
         const { user, accessToken, refreshToken } = yield userService.authenticateUser(username, password, res);
-        res.status(200).json({ user, accessToken, refreshToken });
+        return res.status(200).json({ user, accessToken, refreshToken });
     }
     catch (error) {
-        res.status(401).json({ message: "Error login User", error });
+        return res.status(401).json({ message: "Error login User", error });
     }
 });
 exports.authenticateUser = authenticateUser;
 const getUsers = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const users = yield userService.getUsers();
-        res.status(200).json(users);
+        return res.status(200).json(users);
     }
     catch (error) {
-        res.status(500).json({ message: "Error fetching Users", error });
+        return res.status(500).json({ message: "Error fetching Users", error });
     }
 });
 exports.getUsers = getUsers;
@@ -71,10 +71,10 @@ const getUserById = (req, res) => __awaiter(void 0, void 0, void 0, function* ()
         if (!user) {
             return res.status(404).json({ message: "User not found" });
         }
-        res.status(200).json(user);
+        return res.status(200).json(user);
     }
     catch (error) {
-        res.status(500).json({ message: "Error fetching User", error });
+        return res.status(500).json({ message: "Error fetching User", error });
     }
 });
 exports.getUserById = getUserById;
@@ -84,10 +84,10 @@ const getUserByUsername = (req, res) => __awaiter(void 0, void 0, void 0, functi
         if (!user) {
             return res.status(404).json({ message: "User not found" });
         }
-        res.status(200).json(user);
+        return res.status(200).json(user);
     }
     catch (error) {
-        res.status(500).json({ message: "Error fetching User", error });
+        return res.status(500).json({ message: "Error fetching User", error });
     }
 });
 exports.getUserByUsername = getUserByUsername;
@@ -97,20 +97,20 @@ const getUserPermissions = (req, res) => __awaiter(void 0, void 0, void 0, funct
         if (!user) {
             return res.status(404).json({ message: "User Permissions not found" });
         }
-        res.status(200).json(user);
+        return res.status(200).json(user);
     }
     catch (error) {
-        res.status(500).json({ message: "Error fetching User Permissions", error });
+        return res.status(500).json({ message: "Error fetching User Permissions", error });
     }
 });
 exports.getUserPermissions = getUserPermissions;
 const createUser = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const newUser = yield userService.createUser(req.body);
-        res.status(201).json(newUser);
+        return res.status(201).json(newUser);
     }
     catch (error) {
-        res.status(500).json({ message: "Error registering User", error });
+        return res.status(500).json({ message: "Error registering User", error });
     }
 });
 exports.createUser = createUser;

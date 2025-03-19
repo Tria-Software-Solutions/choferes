@@ -4,9 +4,9 @@ import * as employeeService from "../services/employeeService";
 export const getEmployees = async (req: Request, res: Response) => {
   try {
     const employees = await employeeService.getEmployees();
-    res.status(200).json(employees);
+    return res.status(200).json(employees);
   } catch (error) {
-    res.status(500).json({ message: "Error fetching Employees", error });
+    return res.status(500).json({ message: "Error fetching Employees", error });
   }
 };
 
@@ -15,21 +15,21 @@ export const getEmployeeById = async (req: Request, res: Response) => {
     const id = parseInt(req.params.id);
     const employee = await employeeService.getEmployeeById(id);
     if (employee) {
-      res.status(200).json(employee);
+      return res.status(200).json(employee);
     } else {
-      res.status(404).json({ message: "Employee not found" });
+      return res.status(404).json({ message: "Employee not found" });
     }
   } catch (error) {
-    res.status(500).json({ message: "Error fetching Employee", error });
+    return res.status(500).json({ message: "Error fetching Employee", error });
   }
 };
 
 export const createEmployee = async (req: Request, res: Response) => {
   try {
     const newEmployee = await employeeService.createEmployee(req.body);
-    res.status(201).json(newEmployee);
+    return res.status(201).json(newEmployee);
   } catch (error) {
-    res.status(500).json({ message: "Error creating Employee", error });
+    return res.status(500).json({ message: "Error creating Employee", error });
   }
 };
 
