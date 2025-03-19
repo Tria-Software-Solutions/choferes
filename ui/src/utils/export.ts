@@ -5,11 +5,10 @@ import { Employee } from "../models/Employee";
 import { HoursWorked } from "../models/HoursWorked";
 import { Schedule } from "../models/Schedule";
 import {
-  translateColumnHeaderToSpanish,
   translateDayOptionsToSpanish,
+  translateColumnHeaderToSpanish,
   translateDayToAbrevSpanish,
   translatePeriodToSpanish,
-  translationsDayOptionsToSpanish,
 } from "./string";
 import {
   calculateTotalHoursAndOvertimeForPeriod,
@@ -76,7 +75,7 @@ export const exportToExcel = (
 
         if (
           typeof value === "string" &&
-          Object.keys(translationsDayOptionsToSpanish).includes(value)
+          Object.keys(translateDayOptionsToSpanish).includes(value)
         ) {
           value = translateDayOptionsToSpanish(value);
         }
@@ -168,7 +167,7 @@ export const exportToPDF = (
 
       if (
         typeof value === "string" &&
-        Object.keys(translationsDayOptionsToSpanish).includes(value)
+        Object.keys(translateDayOptionsToSpanish).includes(value)
       ) {
         value = translateDayOptionsToSpanish(value);
       }

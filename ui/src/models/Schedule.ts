@@ -1,6 +1,6 @@
 export interface Schedule {
   id: number; 
-  day: string;
+  days: string[];
   label: string;
   hours: number;
   specialSchedule: boolean;

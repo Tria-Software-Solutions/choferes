@@ -174,7 +174,7 @@ export const getWeekNumberAndYear = (
 
 export const getDayName = (date: Date): string => {
   const options: { weekday: "long" } = { weekday: "long" };
-  return date.toLocaleDateString("en-US", options);
+  return date.toLocaleDateString("en-US", options).toLowerCase();
 };
 
 export const getMidnightDate = (date: Date) => {
