@@ -775,23 +775,25 @@ const SelectorTable: React.FC<SelectorTableProps> = React.memo(
                             </ListSubheader>
                             {options
                               .filter((option) => !option.specialSchedule)
+                              .sort((a, b) => a.label.localeCompare(b.label))
                               .map((option) => (
                                 <MenuItem key={option.id} value={option.label}>
                                   {option.label}
                                 </MenuItem>
                               ))}
-                            <Divider key="divider" />
+                            <Divider/>
                             <ListSubheader>
                               <strong>Horarios Especiales</strong>
                             </ListSubheader>
                             {options
                               .filter((option) => option.specialSchedule)
+                              .sort((a, b) => a.label.localeCompare(b.label))
                               .map((option) => (
                                 <MenuItem key={option.id} value={option.label}>
                                   {option.label}
                                 </MenuItem>
                               ))}
-                            <Divider key="divider" />
+                            <Divider/>
                             {permissions?.includes(
                               PERMISSIONS.CREATE_SCHEDULES
                             ) && (

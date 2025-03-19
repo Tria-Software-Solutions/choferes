@@ -50,7 +50,7 @@ const getSchedules = (req, res) => __awaiter(void 0, void 0, void 0, function* (
         return res.status(200).json(schedules);
     }
     catch (error) {
-        return res.status(500).json({ message: 'Error fetching Schedules', error });
+        return res.status(500).json({ message: "Error fetching Schedules", error });
     }
 });
 exports.getSchedules = getSchedules;
@@ -62,11 +62,11 @@ const getScheduleById = (req, res) => __awaiter(void 0, void 0, void 0, function
             return res.status(200).json(schedule);
         }
         else {
-            return res.status(404).json({ message: 'Schedule not found' });
+            return res.status(404).json({ message: "Schedule not found" });
         }
     }
     catch (error) {
-        return res.status(500).json({ message: 'Error fetching Schedule', error });
+        return res.status(500).json({ message: "Error fetching Schedule", error });
     }
 });
 exports.getScheduleById = getScheduleById;
@@ -76,7 +76,7 @@ const createSchedule = (req, res) => __awaiter(void 0, void 0, void 0, function*
         return res.status(201).json(newSchedule);
     }
     catch (error) {
-        return res.status(500).json({ message: 'Error creating Schedule', error });
+        return res.status(500).json({ message: "Error creating Schedule", error });
     }
 });
 exports.createSchedule = createSchedule;
@@ -88,11 +88,11 @@ const updateSchedule = (req, res) => __awaiter(void 0, void 0, void 0, function*
             return res.status(200).json(updatedSchedule);
         }
         else {
-            return res.status(404).json({ message: 'Schedule not found' });
+            return res.status(404).json({ message: "Schedule not found" });
         }
     }
     catch (error) {
-        return res.status(500).json({ message: 'Error updating Schedule', error });
+        return res.status(500).json({ message: "Error updating Schedule", error });
     }
 });
 exports.updateSchedule = updateSchedule;
@@ -104,11 +104,11 @@ const deleteSchedule = (req, res) => __awaiter(void 0, void 0, void 0, function*
             return res.status(204).end();
         }
         else {
-            return res.status(404).json({ message: 'Schedule not found' });
+            return res.status(404).json({ message: "Schedule not found" });
         }
     }
     catch (error) {
-        return res.status(500).json({ message: 'Error deleting Schedule', error });
+        return res.status(500).json({ message: "Error deleting Schedule", error });
     }
 });
 exports.deleteSchedule = deleteSchedule;
