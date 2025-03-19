@@ -732,7 +732,6 @@ const SelectorTable: React.FC<SelectorTableProps> = React.memo(
                         format(new Date(record.date), "yyyy-MM-dd") ===
                           formattedDate
                     );
-
                     const options = getOptionsForDay(day, schedules);
                     const validLabels = options.map((option) => option.label);
 
@@ -781,7 +780,7 @@ const SelectorTable: React.FC<SelectorTableProps> = React.memo(
                                   {option.label}
                                 </MenuItem>
                               ))}
-                            <Divider/>
+                            <Divider />
                             <ListSubheader>
                               <strong>Horarios Especiales</strong>
                             </ListSubheader>
@@ -793,7 +792,7 @@ const SelectorTable: React.FC<SelectorTableProps> = React.memo(
                                   {option.label}
                                 </MenuItem>
                               ))}
-                            <Divider/>
+                            <Divider />
                             {permissions?.includes(
                               PERMISSIONS.CREATE_SCHEDULES
                             ) && (

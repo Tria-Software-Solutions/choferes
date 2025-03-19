@@ -6,7 +6,7 @@ export type ColumnsTranslation = {
   email: string;
   username: string;
   label: string;
-  day: string;
+  days: string;
   hours: string;
   ticket: string;
   licensePlate: string;
