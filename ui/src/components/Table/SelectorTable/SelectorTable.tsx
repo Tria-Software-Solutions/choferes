@@ -33,6 +33,7 @@ import {
   Tooltip,
   TextField,
   Button,
+  ListSubheader,
 } from "@mui/material";
 import { TabContext, TabList, TabPanel } from "@mui/lab";
 import PaginationActions from "../Pagination/PaginationActions";
@@ -57,12 +58,7 @@ import {
   calculateTotalHoursAndOvertimeForPeriods,
 } from "../../../utils/calculation";
 import { EnglishDayOfWeek } from "../../../utils/dayAbreviations";
-import {
-  STATE,
-  TABLE,
-  DEFAULT_SCHEDULE_VALUES,
-  PERMISSIONS,
-} from "../../../constants/constants";
+import { STATE, TABLE, PERMISSIONS } from "../../../constants/constants";
 import InfoOutlinedIcon from "@mui/icons-material/InfoOutlined";
 import AccessTimeRoundedIcon from "@mui/icons-material/AccessTimeRounded";
 import MoreTimeIcon from "@mui/icons-material/MoreTime";
@@ -751,18 +747,6 @@ const SelectorTable: React.FC<SelectorTableProps> = React.memo(
                       ? selectedLabel
                       : validLabels[0] ?? "";
 
-                    const sortedOptions = [...options].sort((a, b) => {
-                      const indexA = DEFAULT_SCHEDULE_VALUES.indexOf(a.label);
-                      const indexB = DEFAULT_SCHEDULE_VALUES.indexOf(b.label);
-
-                      if (indexA !== -1 && indexB !== -1)
-                        return indexA - indexB;
-                      if (indexA !== -1) return 1;
-                      if (indexB !== -1) return -1;
-
-                      return a.label.localeCompare(b.label);
-                    });
-
                     return (
                       <TableCell
                         key={day}
@@ -786,24 +770,34 @@ const SelectorTable: React.FC<SelectorTableProps> = React.memo(
                               )
                             }
                           >
-                            {sortedOptions.map((option, index) => {
-                              const items = [
+                            <ListSubheader>
+                              <strong>Ubicaciones</strong>
+                            </ListSubheader>
+                            {options
+                              .filter((option) => !option.specialSchedule)
+                              .sort((a, b) => a.label.localeCompare(b.label))
+                              .map((option) => (
                                 <MenuItem key={option.id} value={option.label}>
                                   {option.label}
-                                </MenuItem>,
-                              ];
-
-                              if (option.label === "Ausencia" && index > 0) {
-                                items.unshift(<Divider key="divider" />);
-                              }
-
-                              return items;
-                            })}
+                                </MenuItem>
+                              ))}
+                            <Divider/>
+                            <ListSubheader>
+                              <strong>Horarios Especiales</strong>
+                            </ListSubheader>
+                            {options
+                              .filter((option) => option.specialSchedule)
+                              .sort((a, b) => a.label.localeCompare(b.label))
+                              .map((option) => (
+                                <MenuItem key={option.id} value={option.label}>
+                                  {option.label}
+                                </MenuItem>
+                              ))}
+                            <Divider/>
                             {permissions?.includes(
                               PERMISSIONS.CREATE_SCHEDULES
                             ) && (
                               <>
-                                <Divider key="divider" />
                                 <MenuItem
                                   value={"Other"}
                                   onClick={() => navigate("/schedules")}

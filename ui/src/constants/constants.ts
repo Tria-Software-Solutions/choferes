@@ -86,17 +86,6 @@ export const OVERTIME = {
   MONTHLY: 192,
 };
 
-export const DEFAULT_SCHEDULE_VALUES = [
-  "Ausencia",
-  "Cubre Almuerzo",
-  "Cubre Almuerzo BAC",
-  "Cubre Almuerzo Promerica",
-  "Horario Especial",
-  "Incapacidad",
-  "Libre",
-  "Salida Programada",
-];
-
 export const COLORS_LIST = [
   { value: "Blanco", label: "Blanco" },
   { value: "Negro", label: "Negro" },

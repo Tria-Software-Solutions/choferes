@@ -25,6 +25,9 @@ import {
   useMediaQuery,
   CircularProgress,
   Backdrop,
+  FormGroup,
+  FormControlLabel,
+  Switch,
 } from "@mui/material";
 import {
   createExportOptions,
@@ -61,11 +64,13 @@ const SchedulesPage: React.FC = () => {
     label: "",
     day: "",
     hours: "",
+    specialSchedule: false,
   });
   const [editFields, setEditFields] = useState({
     label: "",
     day: "",
     hours: "",
+    specialSchedule: false,
   });
   const [dialogOpen, setDialogOpen] = useState(false);
   const [scheduleToDelete, setScheduleToDelete] = useState<number | null>(null);
@@ -91,15 +96,21 @@ const SchedulesPage: React.FC = () => {
       str.normalize("NFD").replace(/[\u0300-\u036f]/g, "");
 
     setFilteredSchedules(
-      schedules.filter((schedule) =>
-        normalizeString(
-          `${schedule.label} ${translateDayOptionsToSpanish(schedule.day)} ${
-            schedule.hours
-          }`
+      schedules
+        .filter((schedule) =>
+          normalizeString(
+            `${schedule.label} ${translateDayOptionsToSpanish(schedule.day)} ${
+              schedule.hours
+            }`
+          )
+            .toLowerCase()
+            .includes(normalizeString(filter).toLowerCase())
         )
-          .toLowerCase()
-          .includes(normalizeString(filter).toLowerCase())
-      )
+        .sort((a, b) => {
+          const dayComparison = a.day.localeCompare(b.day);
+          if (dayComparison !== 0) return dayComparison;
+          return a.label.localeCompare(b.label);
+        })
     );
     setTotalCountSchedules(filteredSchedules.length);
   }, [filter, schedules, filteredSchedules.length]);
@@ -135,9 +146,10 @@ const SchedulesPage: React.FC = () => {
         label: addFields.label,
         day: addFields.day,
         hours: parseInt(addFields.hours, 10),
+        specialSchedule: addFields.specialSchedule,
       };
       await createSchedule(newSchedule);
-      setAddFields({ label: "", day: "", hours: "" });
+      setAddFields({ label: "", day: "", hours: "", specialSchedule: false });
       showNotification(
         "El registro del horario fue exitoso",
         "success",
@@ -161,6 +173,7 @@ const SchedulesPage: React.FC = () => {
       label: schedule.label,
       day: schedule.day,
       hours: schedule.hours.toString(),
+      specialSchedule: schedule.specialSchedule,
     });
   };
 
@@ -176,7 +189,7 @@ const SchedulesPage: React.FC = () => {
       };
       await updateSchedule(id, updatedSchedule);
       setEditRowId(null);
-      setEditFields({ label: "", day: "", hours: "" });
+      setEditFields({ label: "", day: "", hours: "", specialSchedule: false });
       showNotification(
         "La actualización del horario fue exitosa",
         "success",
@@ -298,7 +311,7 @@ const SchedulesPage: React.FC = () => {
             justifyContent="space-between"
             alignItems="center"
           >
-            <Grid item xs={12} md={6}>
+            <Grid item xs={12} md={4} lg={6}>
               {filteredSchedules && (
                 <SearchBar
                   placeholder="Buscar horario"
@@ -310,7 +323,7 @@ const SchedulesPage: React.FC = () => {
               )}
             </Grid>
             {userPermissions.includes(PERMISSIONS.CREATE_SCHEDULES) && (
-              <Grid item xs={12} md={6}>
+              <Grid item xs={12} md={8} lg={6}>
                 <Box
                   display="flex"
                   flexDirection={{ xs: "column", sm: "column", md: "row" }}
@@ -319,7 +332,7 @@ const SchedulesPage: React.FC = () => {
                   gap={2}
                 >
                   <Grid container spacing={2} alignItems="center">
-                    <Grid item xs={12} md={4}>
+                    <Grid item xs={6} md={3} lg={3}>
                       <TextField
                         label="Asignación"
                         variant="outlined"
@@ -333,7 +346,7 @@ const SchedulesPage: React.FC = () => {
                         }
                       />
                     </Grid>
-                    <Grid item xs={6} md={4}>
+                    <Grid item xs={6} md={3} lg={3}>
                       <FormControl
                         variant="outlined"
                         fullWidth
@@ -358,7 +371,7 @@ const SchedulesPage: React.FC = () => {
                         </Select>
                       </FormControl>
                     </Grid>
-                    <Grid item xs={6} md={4}>
+                    <Grid item xs={6} md={3} lg={2}>
                       <TextField
                         label="Horas"
                         variant="outlined"
@@ -372,6 +385,34 @@ const SchedulesPage: React.FC = () => {
                           setAddFields({ ...addFields, hours: e.target.value })
                         }
                       />
+                    </Grid>
+                    <Grid item xs={6} md={3} lg={4}>
+                      <Box
+                        sx={{
+                          display: "flex",
+                          justifyContent: "center",
+                          alignItems: "center",
+                        }}
+                      >
+                        <FormGroup>
+                          <FormControlLabel
+                            control={
+                              <Switch
+                                size={isSmallScreen ? "small" : "medium"}
+                                color="primary"
+                                checked={addFields.specialSchedule}
+                                onChange={(e) =>
+                                  setAddFields({
+                                    ...addFields,
+                                    specialSchedule: e.target.checked,
+                                  })
+                                }
+                              />
+                            }
+                            label="Horario Especial"
+                          />
+                        </FormGroup>
+                      </Box>
                     </Grid>
                   </Grid>
                   <Tooltip title="Agregar Horario" arrow>

@@ -47,20 +47,20 @@ const rolePermissionService = __importStar(require("../services/rolePermissionSe
 const getRolePermissions = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const permissions = yield rolePermissionService.getRolePermissions();
-        res.status(200).json(permissions);
+        return res.status(200).json(permissions);
     }
     catch (error) {
-        res.status(400).json({ message: "Error fetching RolePermissions", error });
+        return res.status(400).json({ message: "Error fetching RolePermissions", error });
     }
 });
 exports.getRolePermissions = getRolePermissions;
 const createRolePermission = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const rolePermission = yield rolePermissionService.createRolePermission(req.body);
-        res.status(201).json(rolePermission);
+        return res.status(201).json(rolePermission);
     }
     catch (error) {
-        res.status(400).json({ message: "Error assigning RolePermission", error });
+        return res.status(400).json({ message: "Error assigning RolePermission", error });
     }
 });
 exports.createRolePermission = createRolePermission;

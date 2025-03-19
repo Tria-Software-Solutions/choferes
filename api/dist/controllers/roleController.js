@@ -47,10 +47,10 @@ const roleService = __importStar(require("../services/roleService"));
 const getRoles = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const roles = yield roleService.getRoles();
-        res.status(200).json(roles);
+        return res.status(200).json(roles);
     }
     catch (error) {
-        res.status(500).json({ message: "Error fetching Roles", error });
+        return res.status(500).json({ message: "Error fetching Roles", error });
     }
 });
 exports.getRoles = getRoles;
@@ -59,10 +59,10 @@ const getRoleById = (req, res) => __awaiter(void 0, void 0, void 0, function* ()
         const role = yield roleService.getRoleById(Number(req.params.id));
         if (!role)
             return res.status(404).json({ error: "Role not found" });
-        res.status(200).json(role);
+        return res.status(200).json(role);
     }
     catch (error) {
-        res.status(500).json({ message: "Error fetching Role", error });
+        return res.status(500).json({ message: "Error fetching Role", error });
     }
 });
 exports.getRoleById = getRoleById;
@@ -72,10 +72,10 @@ const getRoleByName = (req, res) => __awaiter(void 0, void 0, void 0, function* 
         if (!role) {
             return res.status(404).json({ error: "Role not found" });
         }
-        res.status(200).json(role);
+        return res.status(200).json(role);
     }
     catch (error) {
-        res.status(500).json({ message: "Error fetching Role", error });
+        return res.status(500).json({ message: "Error fetching Role", error });
     }
 });
 exports.getRoleByName = getRoleByName;
@@ -83,10 +83,10 @@ const createRole = (req, res) => __awaiter(void 0, void 0, void 0, function* () 
     try {
         const { name } = req.body;
         const role = yield roleService.createRole(name);
-        res.status(201).json(role);
+        return res.status(201).json(role);
     }
     catch (error) {
-        res.status(500).json({ message: "Error creating Role", error });
+        return res.status(500).json({ message: "Error creating Role", error });
     }
 });
 exports.createRole = createRole;
