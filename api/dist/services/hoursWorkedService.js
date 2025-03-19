@@ -17,7 +17,7 @@ const getHoursWorked = () => __awaiter(void 0, void 0, void 0, function* () {
     return yield HoursWorked_1.HoursWorked.findAll({
         include: [
             { model: Employee_1.Employee, attributes: ["firstName", "lastName"] },
-            { model: Schedule_1.Schedule, attributes: ["day", "label", "hours"] },
+            { model: Schedule_1.Schedule, attributes: ["days", "label", "hours"] },
         ],
     });
 });
@@ -26,7 +26,7 @@ const getHoursWorkedById = (id) => __awaiter(void 0, void 0, void 0, function* (
     return yield HoursWorked_1.HoursWorked.findByPk(id, {
         include: [
             { model: Employee_1.Employee, attributes: ["firstName", "lastName"] },
-            { model: Schedule_1.Schedule, attributes: ["day", "label", "hours"] },
+            { model: Schedule_1.Schedule, attributes: ["days", "label", "hours"] },
         ],
     });
 });

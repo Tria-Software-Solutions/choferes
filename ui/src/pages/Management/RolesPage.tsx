@@ -52,7 +52,6 @@ import {
   getWeekNumber,
   isValidDateForSelect,
 } from "../../utils/dates";
-import { setDayOptionsEnglish } from "../../utils/string";
 import { PAGE_TITLE, PERMISSIONS } from "../../constants/constants";
 import DownloadRoundedIcon from "@mui/icons-material/DownloadRounded";
 import ArrowBackIosNewRoundedIcon from "@mui/icons-material/ArrowBackIosNewRounded";
@@ -320,7 +319,7 @@ const RolesPage: React.FC = () => {
     const selectedSchedule = schedules.find(
       (schedule) =>
         schedule.label === event.target.value &&
-        schedule.day === setDayOptionsEnglish(getDayName(date))
+        schedule.days.includes(getDayName(date))
     );
 
     if (!selectedSchedule) {

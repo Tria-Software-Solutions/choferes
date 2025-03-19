@@ -122,6 +122,13 @@ const AppContent: React.FC = () => {
             lg: "48px",
             xl: "0",
           },
+          paddingBottom:{
+            xs: "16px",
+            sm: "24px",
+            md: "32px",
+            lg: "48px",
+            xl: "0",
+          },
           backgroundImage: isAuthPage ? `url(${wallpaper})` : "none",
           backgroundSize: "cover",
           backgroundPosition: "center",

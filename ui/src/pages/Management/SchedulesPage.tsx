@@ -28,6 +28,9 @@ import {
   FormGroup,
   FormControlLabel,
   Switch,
+  OutlinedInput,
+  Checkbox,
+  ListItemText,
 } from "@mui/material";
 import {
   createExportOptions,
@@ -35,11 +38,8 @@ import {
   exportToExcel,
   exportToPDF,
 } from "../../utils/export";
-import {
-  getDayOptionsSpanish,
-  translateDayOptionsToSpanish,
-} from "../../utils/string";
-import { PAGE_TITLE, PERMISSIONS } from "../../constants/constants";
+import { translateDayOptionsToSpanish } from "../../utils/string";
+import { DAYS_LIST, PAGE_TITLE, PERMISSIONS } from "../../constants/constants";
 import PostAddRoundedIcon from "@mui/icons-material/PostAddRounded";
 import DownloadRoundedIcon from "@mui/icons-material/DownloadRounded";
 import CloseRoundedIcon from "@mui/icons-material/CloseRounded";
@@ -60,15 +60,25 @@ const SchedulesPage: React.FC = () => {
   const [filteredSchedules, setFilteredSchedules] = useState<Schedule[]>([]);
   const [totalCountSchedules, setTotalCountSchedules] = useState(0);
   const [editRowId, setEditRowId] = useState<number | null>(null);
-  const [addFields, setAddFields] = useState({
+  const [addFields, setAddFields] = useState<{
+    label: string;
+    days: string[];
+    hours: string;
+    specialSchedule: boolean;
+  }>({
     label: "",
-    day: "",
+    days: [],
     hours: "",
     specialSchedule: false,
   });
-  const [editFields, setEditFields] = useState({
+  const [editFields, setEditFields] = useState<{
+    label: string;
+    days: string[];
+    hours: string;
+    specialSchedule: boolean;
+  }>({
     label: "",
-    day: "",
+    days: [],
     hours: "",
     specialSchedule: false,
   });
@@ -95,25 +105,21 @@ const SchedulesPage: React.FC = () => {
     const normalizeString = (str: string) =>
       str.normalize("NFD").replace(/[\u0300-\u036f]/g, "");
 
-    setFilteredSchedules(
-      schedules
-        .filter((schedule) =>
-          normalizeString(
-            `${schedule.label} ${translateDayOptionsToSpanish(schedule.day)} ${
-              schedule.hours
-            }`
-          )
-            .toLowerCase()
-            .includes(normalizeString(filter).toLowerCase())
-        )
-        .sort((a, b) => {
-          const dayComparison = a.day.localeCompare(b.day);
-          if (dayComparison !== 0) return dayComparison;
-          return a.label.localeCompare(b.label);
-        })
-    );
-    setTotalCountSchedules(filteredSchedules.length);
-  }, [filter, schedules, filteredSchedules.length]);
+    const newFilteredSchedules = schedules.filter((schedule) => {
+      const daysString = Array.isArray(schedule.days)
+        ? schedule.days.map(translateDayOptionsToSpanish).join(" ")
+        : translateDayOptionsToSpanish(schedule.days);
+
+      return normalizeString(
+        `${schedule.label} ${daysString} ${schedule.hours}`
+      )
+        .toLowerCase()
+        .includes(normalizeString(filter).toLowerCase());
+    });
+
+    setFilteredSchedules(newFilteredSchedules);
+    setTotalCountSchedules(newFilteredSchedules.length);
+  }, [filter, schedules]);
 
   const validateFields = useCallback((fields: typeof addFields) => {
     const regex = {
@@ -121,11 +127,7 @@ const SchedulesPage: React.FC = () => {
       time: /^[0-9]+$/,
     };
 
-    return (
-      regex.text.test(fields.label) &&
-      regex.text.test(fields.day) &&
-      regex.time.test(fields.hours)
-    );
+    return regex.text.test(fields.label) && regex.time.test(fields.hours);
   }, []);
 
   useEffect(
@@ -144,12 +146,12 @@ const SchedulesPage: React.FC = () => {
     try {
       const newSchedule: Omit<Schedule, "id"> = {
         label: addFields.label,
-        day: addFields.day,
+        days: addFields.days,
         hours: parseInt(addFields.hours, 10),
         specialSchedule: addFields.specialSchedule,
       };
       await createSchedule(newSchedule);
-      setAddFields({ label: "", day: "", hours: "", specialSchedule: false });
+      setAddFields({ label: "", days: [], hours: "", specialSchedule: false });
       showNotification(
         "El registro del horario fue exitoso",
         "success",
@@ -171,7 +173,7 @@ const SchedulesPage: React.FC = () => {
     setEditRowId(schedule.id);
     setEditFields({
       label: schedule.label,
-      day: schedule.day,
+      days: schedule.days,
       hours: schedule.hours.toString(),
       specialSchedule: schedule.specialSchedule,
     });
@@ -189,7 +191,7 @@ const SchedulesPage: React.FC = () => {
       };
       await updateSchedule(id, updatedSchedule);
       setEditRowId(null);
-      setEditFields({ label: "", day: "", hours: "", specialSchedule: false });
+      setEditFields({ label: "", days: [], hours: "", specialSchedule: false });
       showNotification(
         "La actualización del horario fue exitosa",
         "success",
@@ -354,18 +356,33 @@ const SchedulesPage: React.FC = () => {
                           height: 56,
                         }}
                       >
-                        <InputLabel>Día</InputLabel>
+                        <InputLabel>Días</InputLabel>
                         <Select
-                          label="Día"
+                          multiple
+                          label="Días"
                           sx={{ height: 56 }}
-                          value={addFields.day}
+                          value={addFields.days}
+                          input={<OutlinedInput label="Días" />}
+                          renderValue={(selected) =>
+                            selected
+                              .map((item) => translateDayOptionsToSpanish(item))
+                              .join(", ")
+                          }
                           onChange={(e) =>
-                            setAddFields({ ...addFields, day: e.target.value })
+                            setAddFields({
+                              ...addFields,
+                              days: Array.isArray(e.target.value)
+                                ? e.target.value
+                                : [e.target.value],
+                            })
                           }
                         >
-                          {getDayOptionsSpanish().map((option) => (
+                          {DAYS_LIST.map((option) => (
                             <MenuItem key={option.value} value={option.value}>
-                              {option.label}
+                              <Checkbox
+                                checked={addFields.days.includes(option.value)}
+                              />
+                              <ListItemText primary={option.label} />
                             </MenuItem>
                           ))}
                         </Select>
@@ -448,7 +465,7 @@ const SchedulesPage: React.FC = () => {
           {filteredSchedules.length > 0 ? (
             <EditableTable<Schedule>
               data={filteredSchedules}
-              columns={["label", "day", "hours"]}
+              columns={["label", "days", "hours"]}
               editRowId={editRowId}
               editFields={editFields}
               setEditField={(field, value) =>

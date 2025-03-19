@@ -15,8 +15,8 @@ Schedule.init({
         autoIncrement: true,
         primaryKey: true,
     },
-    day: {
-        type: sequelize_1.DataTypes.STRING,
+    days: {
+        type: sequelize_1.DataTypes.ARRAY(sequelize_1.DataTypes.STRING),
         allowNull: false,
     },
     label: {

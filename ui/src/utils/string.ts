@@ -4,6 +4,38 @@ import { EnglishDayOfWeek } from "./dayAbreviations";
 import { EnglishAbrevMonthOfYear } from "./monthAbreviations";
 import { DAYS } from "../constants/constants";
 
+export const translateColumnHeaderToSpanish = (
+  column: string | number | symbol
+): string => {
+  const translations: ColumnsTranslation = {
+    id: "Id",
+    name: "Nombre",
+    firstName: "Nombre",
+    lastName: "Apellido",
+    email: "Correo Electrónico",
+    username: "Usuario",
+    label: "Asignación",
+    days: "Días",
+    hours: "Horas",
+    ticket: "Boleta",
+    licensePlate: "Placa",
+    brand: "Marca",
+    color: "Color",
+    parkingLot: "Espacio",
+    notes: "Observaciones",
+    createdAt: "Agregado",
+    updatedAt: "Actualizado",
+    roleName: "Rol",
+    permissionNames: "Permisos",
+  };
+
+  if (typeof column === "string" && column in translations) {
+    return translations[column as keyof ColumnsTranslation];
+  }
+
+  return String(column);
+};
+
 export const getOptionsForDay = (
   day: string,
   schedules: Schedule[]
@@ -11,6 +43,18 @@ export const getOptionsForDay = (
   let dayFilter = "";
 
   switch (day.toLowerCase()) {
+    case "monday":
+      dayFilter = DAYS.MONDAY;
+      break;
+    case "tuesday":
+      dayFilter = DAYS.TUESDAY;
+      break;
+    case "wednesday":
+      dayFilter = DAYS.WEDNESDAY;
+      break;
+    case "thursday":
+      dayFilter = DAYS.THURSDAY;
+      break;
     case "friday":
       dayFilter = DAYS.FRIDAY;
       break;
@@ -20,12 +64,38 @@ export const getOptionsForDay = (
     case "sunday":
       dayFilter = DAYS.SUNDAY;
       break;
-    default:
-      dayFilter = DAYS.WEEKDAY;
-      break;
   }
 
-  return schedules.filter((schedule) => schedule.day === dayFilter);
+  return schedules.filter((schedule) => schedule.days.includes(dayFilter));
+};
+
+export const translateDayToAbrevSpanish = (
+  dayInEnglish: EnglishDayOfWeek
+): string => {
+  const translationMap: Record<EnglishDayOfWeek, string> = {
+    Sunday: "Dom",
+    Monday: "Lun",
+    Tuesday: "Mar",
+    Wednesday: "Mié",
+    Thursday: "Jue",
+    Friday: "Vie",
+    Saturday: "Sáb",
+  };
+
+  return translationMap[dayInEnglish];
+};
+
+export const translateDayOptionsToSpanish = (value: string): string => {
+  const dayMap: Record<string, string> = {
+    monday: "Lunes",
+    tuesday: "Martes",
+    wednesday: "Miércoles",
+    thursday: "Jueves",
+    friday: "Viernes",
+    saturday: "Sábado",
+    sunday: "Domingo",
+  };
+  return dayMap[value] || value;
 };
 
 export const translateMonthToAbrevSpanish = (
@@ -72,92 +142,6 @@ export const getMonthName = (month: number) => {
   return months[month - 1];
 };
 
-export const translateColumnHeaderToSpanish = (
-  column: string | number | symbol
-): string => {
-  const translations: ColumnsTranslation = {
-    id: "Id",
-    name: "Nombre",
-    firstName: "Nombre",
-    lastName: "Apellido",
-    email: "Correo Electrónico",
-    username: "Usuario",
-    label: "Asignación",
-    day: "Día",
-    hours: "Horas",
-    ticket: "Boleta",
-    licensePlate: "Placa",
-    brand: "Marca",
-    color: "Color",
-    parkingLot: "Espacio",
-    notes: "Observaciones",
-    createdAt: "Agregado",
-    updatedAt: "Actualizado",
-    roleName: "Rol",
-    permissionNames: "Permisos"
-  };
-
-  if (typeof column === "string" && column in translations) {
-    return translations[column as keyof ColumnsTranslation];
-  }
-
-  return String(column);
-};
-
-export const translateDayToAbrevSpanish = (
-  dayInEnglish: EnglishDayOfWeek
-): string => {
-  const translationMap: Record<EnglishDayOfWeek, string> = {
-    Sunday: "Dom",
-    Monday: "Lun",
-    Tuesday: "Mar",
-    Wednesday: "Mié",
-    Thursday: "Jue",
-    Friday: "Vie",
-    Saturday: "Sáb",
-  };
-
-  return translationMap[dayInEnglish];
-};
-
-export const translationsDayOptionsToSpanish: { [key: string]: string } = {
-  weekday: "Lunes a Jueves",
-  friday: "Viernes",
-  saturday: "Sábado",
-  sunday: "Domingo",
-};
-
-export const translateDayOptionsToSpanish = (day: string): string => {
-  return translationsDayOptionsToSpanish[day] || day;
-};
-
-export const getDayOptionsSpanish = () => [
-  { value: "weekday", label: "Lunes a Jueves" },
-  { value: "friday", label: "Viernes" },
-  { value: "saturday", label: "Sábado" },
-  { value: "sunday", label: "Domingo" },
-];
-
-export const mapDayValues = (value: string): string => {
-  const dayMap: Record<string, string> = {
-    weekday: "Lunes a Jueves",
-    friday: "Viernes",
-    saturday: "Sábado",
-    sunday: "Domingo",
-  };
-  return dayMap[value] || value;
-};
-
-export const setDayOptionsEnglish = (day: string): string => {
-  const lowerCaseDay = day.toLowerCase();
-
-  if (["monday", "tuesday", "wednesday", "thursday"].includes(lowerCaseDay)) {
-    return "weekday";
-  }
-
-  return lowerCaseDay;
-};
-
 export const translatePeriodToSpanish = (
   period: "weekly" | "biweekly" | "monthly"
 ): string => {
@@ -173,5 +157,5 @@ export const translatePeriodToSpanish = (
   }
 };
 
-export const capitalizeFirstLetter = (str: string) => 
+export const capitalizeFirstLetter = (str: string) =>
   str.charAt(0).toUpperCase() + str.slice(1);
