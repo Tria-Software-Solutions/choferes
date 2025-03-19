@@ -47,10 +47,10 @@ const employeeService = __importStar(require("../services/employeeService"));
 const getEmployees = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const employees = yield employeeService.getEmployees();
-        res.status(200).json(employees);
+        return res.status(200).json(employees);
     }
     catch (error) {
-        res.status(500).json({ message: "Error fetching Employees", error });
+        return res.status(500).json({ message: "Error fetching Employees", error });
     }
 });
 exports.getEmployees = getEmployees;
@@ -59,24 +59,24 @@ const getEmployeeById = (req, res) => __awaiter(void 0, void 0, void 0, function
         const id = parseInt(req.params.id);
         const employee = yield employeeService.getEmployeeById(id);
         if (employee) {
-            res.status(200).json(employee);
+            return res.status(200).json(employee);
         }
         else {
-            res.status(404).json({ message: "Employee not found" });
+            return res.status(404).json({ message: "Employee not found" });
         }
     }
     catch (error) {
-        res.status(500).json({ message: "Error fetching Employee", error });
+        return res.status(500).json({ message: "Error fetching Employee", error });
     }
 });
 exports.getEmployeeById = getEmployeeById;
 const createEmployee = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const newEmployee = yield employeeService.createEmployee(req.body);
-        res.status(201).json(newEmployee);
+        return res.status(201).json(newEmployee);
     }
     catch (error) {
-        res.status(500).json({ message: "Error creating Employee", error });
+        return res.status(500).json({ message: "Error creating Employee", error });
     }
 });
 exports.createEmployee = createEmployee;

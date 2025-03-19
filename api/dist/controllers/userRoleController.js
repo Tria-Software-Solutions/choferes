@@ -47,10 +47,10 @@ const userRoleService = __importStar(require("../services/userRoleService"));
 const getUserRoles = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const roles = yield userRoleService.getUserRoles();
-        res.status(200).json(roles);
+        return res.status(200).json(roles);
     }
     catch (error) {
-        res.status(400).json({ message: "Error fetching UserRoles", error });
+        return res.status(400).json({ message: "Error fetching UserRoles", error });
     }
 });
 exports.getUserRoles = getUserRoles;
@@ -60,20 +60,20 @@ const getUserRoleByUserId = (req, res) => __awaiter(void 0, void 0, void 0, func
         if (!user) {
             return res.status(404).json({ message: "UserRole not found" });
         }
-        res.status(200).json(user);
+        return res.status(200).json(user);
     }
     catch (error) {
-        res.status(500).json({ message: "Error fetching UserRole", error });
+        return res.status(500).json({ message: "Error fetching UserRole", error });
     }
 });
 exports.getUserRoleByUserId = getUserRoleByUserId;
 const createUserRole = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const userRole = yield userRoleService.createUserRole(req.body);
-        res.status(201).json(userRole);
+        return res.status(201).json(userRole);
     }
     catch (error) {
-        res.status(400).json({ message: "Error assigning UserRole", error });
+        return res.status(400).json({ message: "Error assigning UserRole", error });
     }
 });
 exports.createUserRole = createUserRole;
