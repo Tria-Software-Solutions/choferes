@@ -2,7 +2,6 @@ import { Schedule } from "../models/Schedule";
 import { ColumnsTranslation } from "./columnsTranslation";
 import { EnglishDayOfWeek } from "./dayAbreviations";
 import { EnglishAbrevMonthOfYear } from "./monthAbreviations";
-import { DAYS } from "../constants/constants";
 
 export const translateColumnHeaderToSpanish = (
   column: string | number | symbol
@@ -40,33 +39,9 @@ export const getOptionsForDay = (
   day: string,
   schedules: Schedule[]
 ): Schedule[] => {
-  let dayFilter = "";
-
-  switch (day.toLowerCase()) {
-    case "monday":
-      dayFilter = DAYS.MONDAY;
-      break;
-    case "tuesday":
-      dayFilter = DAYS.TUESDAY;
-      break;
-    case "wednesday":
-      dayFilter = DAYS.WEDNESDAY;
-      break;
-    case "thursday":
-      dayFilter = DAYS.THURSDAY;
-      break;
-    case "friday":
-      dayFilter = DAYS.FRIDAY;
-      break;
-    case "saturday":
-      dayFilter = DAYS.SATURDAY;
-      break;
-    case "sunday":
-      dayFilter = DAYS.SUNDAY;
-      break;
-  }
-
-  return schedules.filter((schedule) => schedule.days.includes(dayFilter));
+  return schedules.filter((schedule) =>
+    schedule.days.includes(day.toLowerCase())
+  );
 };
 
 export const translateDayToAbrevSpanish = (

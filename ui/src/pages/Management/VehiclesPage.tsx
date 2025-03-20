@@ -623,6 +623,10 @@ const VehiclesPage: React.FC = () => {
                       toolbar: () => null,
                     }}
                     slotProps={{
+                      textField: {
+                        inputProps: { readOnly: true },
+                        onMouseDown: (e) => e.preventDefault(),
+                      },
                       actionBar: {
                         actions: [],
                       },
@@ -835,7 +839,7 @@ const VehiclesPage: React.FC = () => {
               setPage={setPage}
               setRowsPerPage={setRowsPerPage}
               isSaveDisabled={!isEditFormValid}
-              permissions={userPermissions}
+              userPermissions={userPermissions}
             />
           ) : (
             <Box
