@@ -136,7 +136,6 @@ const theme = createTheme({
     MuiTableCell: {
       styleOverrides: {
         root: {
-          padding: "16px",
           color: "#333333",
           border: "none",
         },

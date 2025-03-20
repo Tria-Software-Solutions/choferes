@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { useRoles } from "../../../hooks/useRole";
 import {
   Table,
   TableBody,
@@ -37,8 +38,6 @@ import {
   COLORS_LIST,
   DAYS_LIST,
   PERMISSIONS,
-  PERMISSIONS_LIST,
-  ROLES_LIST,
   TABLE,
 } from "../../../constants/constants";
 import DeleteIcon from "@mui/icons-material/Delete";
@@ -46,6 +45,7 @@ import EditIcon from "@mui/icons-material/Edit";
 import SaveIcon from "@mui/icons-material/Save";
 import CloseIcon from "@mui/icons-material/Close";
 import PaginationActions from "../Pagination/PaginationActions";
+import { usePermissions } from "../../../hooks/usePermission";
 
 type EditableTableProps<T> = {
   data: T[];
@@ -71,7 +71,7 @@ type EditableTableProps<T> = {
   ) => boolean;
   isSaveDisabled?: boolean;
   noActions?: boolean;
-  permissions?: string[];
+  userPermissions?: string[];
 };
 
 const EditableTable = <T,>({
@@ -95,25 +95,27 @@ const EditableTable = <T,>({
   validateField = () => true,
   isSaveDisabled,
   noActions,
-  permissions,
+  userPermissions,
 }: EditableTableProps<T>) => {
+  const { roles } = useRoles();
+  const { permissions } = usePermissions();
   const [order, setOrder] = useState<"asc" | "desc">("asc");
   const [orderBy, setOrderBy] = useState<keyof T>(columns[0]);
   const theme = useTheme();
 
   const hasEditPermissions =
-    permissions?.includes(PERMISSIONS.EDIT_EMPLOYEES) ||
-    permissions?.includes(PERMISSIONS.EDIT_SCHEDULES) ||
-    permissions?.includes(PERMISSIONS.EDIT_VEHICLES) ||
-    permissions?.includes(PERMISSIONS.EDIT_USER) ||
-    permissions?.includes(PERMISSIONS.EDIT_ROLE);
+    userPermissions?.includes(PERMISSIONS.EDIT_EMPLOYEES) ||
+    userPermissions?.includes(PERMISSIONS.EDIT_SCHEDULES) ||
+    userPermissions?.includes(PERMISSIONS.EDIT_VEHICLES) ||
+    userPermissions?.includes(PERMISSIONS.EDIT_USER) ||
+    userPermissions?.includes(PERMISSIONS.EDIT_ROLE);
 
   const hasDeletePermissions =
-    permissions?.includes(PERMISSIONS.DELETE_EMPLOYEES) ||
-    permissions?.includes(PERMISSIONS.DELETE_SCHEDULES) ||
-    permissions?.includes(PERMISSIONS.DELETE_VEHICLES) ||
-    permissions?.includes(PERMISSIONS.DELETE_USER) ||
-    permissions?.includes(PERMISSIONS.DELETE_ROLE);
+    userPermissions?.includes(PERMISSIONS.DELETE_EMPLOYEES) ||
+    userPermissions?.includes(PERMISSIONS.DELETE_SCHEDULES) ||
+    userPermissions?.includes(PERMISSIONS.DELETE_VEHICLES) ||
+    userPermissions?.includes(PERMISSIONS.DELETE_USER) ||
+    userPermissions?.includes(PERMISSIONS.DELETE_ROLE);
 
   const handlePageChange = (
     event: React.MouseEvent<HTMLButtonElement> | null,
@@ -201,7 +203,7 @@ const EditableTable = <T,>({
       const selectedValues = Array.isArray(editFields[String(column)])
         ? editFields[String(column)]
         : [];
-        
+
       return (
         <FormControl variant="outlined" fullWidth>
           <Select
@@ -269,12 +271,9 @@ const EditableTable = <T,>({
       const selectedValues: string[] = Array.isArray(editFields[String(column)])
         ? (editFields[String(column)] as string[])
         : [];
-
       const selectedOptions = config.options.filter((opt) =>
-        selectedValues.includes(opt.value)
+        selectedValues.some((val) => val === opt.value)
       );
-
-      const fixedOptions: { value: string; label: string }[] = [];
 
       return (
         <Autocomplete
@@ -289,19 +288,11 @@ const EditableTable = <T,>({
           }}
           options={config.options}
           getOptionLabel={(option) => option.label}
+          isOptionEqualToValue={(option, value) => option.value === value.value}
           renderTags={(tagValue, getTagProps) =>
             tagValue.map((option, index) => {
               const { key, ...tagProps } = getTagProps({ index });
-              return (
-                <Chip
-                  key={key}
-                  label={option.label}
-                  {...tagProps}
-                  disabled={fixedOptions.some(
-                    (fixed) => fixed.value === option.value
-                  )}
-                />
-              );
+              return <Chip key={key} label={option.label} {...tagProps} />;
             })
           }
           renderInput={(params) => (
@@ -365,14 +356,20 @@ const EditableTable = <T,>({
   > = {
     licensePlate: { type: "masked" },
     parkingLot: { type: "masked" },
-    brand: { type: "autocomplete", options: BRANDS_LIST },
-    color: { type: "autocomplete", options: COLORS_LIST },
-    roleName: { type: "select", options: ROLES_LIST },
-    permissionName: {
-      type: "autocomplete multiple",
-      options: PERMISSIONS_LIST,
+    roleName: {
+      type: "select",
+      options: roles.map((role) => ({ value: role.name, label: role.name })),
     },
     days: { type: "select multiple", options: DAYS_LIST },
+    permissionNames: {
+      type: "autocomplete multiple",
+      options: permissions.map((permission) => ({
+        value: permission.name,
+        label: permission.name,
+      })),
+    },
+    brand: { type: "autocomplete", options: BRANDS_LIST },
+    color: { type: "autocomplete", options: COLORS_LIST },
   };
 
   return (
