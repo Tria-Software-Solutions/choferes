@@ -1,14 +1,13 @@
 import { useState, useEffect, useCallback } from "react";
 import * as PermissionService from "../services/permissionService";
 import { useRoles } from "./useRole";
-import { User } from "../models/User";
 import { Permission } from "../models/Permission";
 import { useAuth } from "../context/AuthContext";
 
 export const usePermissions = () => {
   const { currentUser } = useAuth();
   const { setRoles } = useRoles();
-  const [permissions, setPermissions] = useState<User[]>([]);
+  const [permissions, setPermissions] = useState<Permission[]>([]);
   const [totalCountPermissions, setTotalCountPermissions] = useState(0);
   const [isLoadingPermissions, setIsLoadingPermissions] = useState(false);
 

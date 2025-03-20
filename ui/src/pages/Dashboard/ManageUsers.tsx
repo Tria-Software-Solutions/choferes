@@ -225,7 +225,7 @@ const ManageUsers = () => {
                 setPage={setPage}
                 setRowsPerPage={setRowsPerPage}
                 isSaveDisabled={!isEditFormValid}
-                permissions={userPermissions}
+                userPermissions={userPermissions}
               />
             </Stack>
           ) : (
