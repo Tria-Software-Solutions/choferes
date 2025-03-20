@@ -556,6 +556,7 @@ const SelectorTable: React.FC<SelectorTableProps> = React.memo(
                   align="center"
                   colSpan={10}
                   sx={{
+                    padding: isSmallScreen ? "8px" : "16px",
                     position: "sticky",
                     top: 0,
                     zIndex: 4,
@@ -612,6 +613,7 @@ const SelectorTable: React.FC<SelectorTableProps> = React.memo(
                 <TableCell
                   className="employee-column"
                   sx={{
+                    padding: isSmallScreen ? "8px" : "16px",
                     position: "sticky",
                     left: 0,
                     zIndex: 4,
@@ -633,6 +635,7 @@ const SelectorTable: React.FC<SelectorTableProps> = React.memo(
                     key={day}
                     align="center"
                     sx={{
+                      padding: isSmallScreen ? "8px" : "16px",
                       zIndex: 3,
                     }}
                   >
@@ -649,6 +652,7 @@ const SelectorTable: React.FC<SelectorTableProps> = React.memo(
                     <TableCell
                       align="center"
                       sx={{
+                        padding: isSmallScreen ? "8px" : "16px",
                         position: isSmallScreen ? "static" : "sticky",
                         right: 0,
                         zIndex: 3,
@@ -690,6 +694,7 @@ const SelectorTable: React.FC<SelectorTableProps> = React.memo(
                 >
                   <TableCell
                     sx={{
+                      padding: isSmallScreen ? "8px" : "16px",
                       position: "sticky",
                       left: 0,
                       zIndex: 2,
@@ -750,6 +755,7 @@ const SelectorTable: React.FC<SelectorTableProps> = React.memo(
                       <TableCell
                         key={day}
                         sx={{
+                          padding: isSmallScreen ? "8px" : "16px",
                           backgroundColor:
                             format(new Date(), "yyyy-MM-dd") ===
                             format(new Date(date), "yyyy-MM-dd")
@@ -822,7 +828,12 @@ const SelectorTable: React.FC<SelectorTableProps> = React.memo(
                     PERMISSIONS.VIEW_EMPLOYEE_ROLES_HOURS
                   ) && (
                     <>
-                      <TableCell align="center">
+                      <TableCell
+                        align="center"
+                        sx={{
+                          padding: isSmallScreen ? "8px" : "16px",
+                        }}
+                      >
                         <ModalComponent
                           buttonType="button"
                           buttonIcon={<MoreTimeIcon />}
@@ -841,6 +852,7 @@ const SelectorTable: React.FC<SelectorTableProps> = React.memo(
                       <TableCell
                         align="left"
                         sx={{
+                          padding: isSmallScreen ? "8px" : "16px",
                           position: isSmallScreen ? "static" : "sticky",
                           right: 0,
                           zIndex: 2,

@@ -482,7 +482,7 @@ const SchedulesPage: React.FC = () => {
               setPage={setPage}
               setRowsPerPage={setRowsPerPage}
               isSaveDisabled={!isEditFormValid}
-              permissions={userPermissions}
+              userPermissions={userPermissions}
             />
           ) : (
             <Box

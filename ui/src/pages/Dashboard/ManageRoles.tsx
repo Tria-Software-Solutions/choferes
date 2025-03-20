@@ -26,8 +26,8 @@ const ManageRoles = () => {
   const [filteredRoles, setFilteredRoles] = useState<Role[]>([]);
   const [totalCount, setTotalCount] = useState(0);
   const [editRowId, setEditRowId] = useState<number | null>(null);
-  const [editFields, setEditFields] = useState({
-    name: "",
+  const [editFields, setEditFields] = useState<{ name: string; permissionNames: string[] }>({
+    name: "", permissionNames: []
   });
   const [dialogOpen, setDialogOpen] = useState(false);
   const [roleToDelete, setRoleToDelete] = useState<number | null>(null);
@@ -77,6 +77,7 @@ const ManageRoles = () => {
     setEditRowId(role.id);
     setEditFields({
       name: role.name,
+      permissionNames: role?.permissionNames || []
     });
   };
 
@@ -91,7 +92,7 @@ const ManageRoles = () => {
       };
       await updateRole(id, updatedRole);
       setEditRowId(null);
-      setEditFields({ name: "" });
+      setEditFields({ name: "", permissionNames: [] });
       showNotification(
         "La actualización del rol fue exitosa",
         "success",
@@ -193,7 +194,7 @@ const ManageRoles = () => {
                 setPage={setPage}
                 setRowsPerPage={setRowsPerPage}
                 isSaveDisabled={!isEditFormValid}
-                permissions={userPermissions}
+                userPermissions={userPermissions}
               />
             </Stack>
           ) : (

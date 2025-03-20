@@ -602,6 +602,10 @@ const RolesPage: React.FC = () => {
                       toolbar: () => null,
                     }}
                     slotProps={{
+                      textField: {
+                        inputProps: { readOnly: true },
+                        onMouseDown: (e) => e.preventDefault(),
+                      },
                       actionBar: {
                         actions: [],
                       },
