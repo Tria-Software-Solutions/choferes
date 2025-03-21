@@ -24,6 +24,17 @@ export const usePermissions = () => {
     }
   }, []);
 
+  const getPermissionsByNames = useCallback(async (names: string[]) => {
+    setIsLoadingPermissions(true);
+    try {
+      return await PermissionService.getPermissionsByNames(names);
+    } catch (error) {
+      console.error("Error fetching Permissions by Name", error);
+    } finally {
+      setIsLoadingPermissions(false);
+    }
+  }, []);
+
   const updatePermission = async (
     id: number,
     updatedPermission: Partial<Permission>
@@ -56,6 +67,7 @@ export const usePermissions = () => {
     totalCountPermissions,
     isLoadingPermissions,
     getPermissions,
+    getPermissionsByNames,
     updatePermission,
     deletePermission,
   };

@@ -13,11 +13,16 @@ export const createRolePermission = async (
 };
 
 export const updateRolePermission = async (
-  id: number,
-  data: Omit<RolePermission, "id">
+  roleId: number,
+  permissionIds: number[]
 ) => {
-  await RolePermission.update(data, { where: { id } });
-  return RolePermission.findByPk(id);
+  await RolePermission.destroy({ where: { roleId } });
+  const newPermissions = permissionIds.map((permissionId) => ({
+    roleId,
+    permissionId,
+  }));
+  await RolePermission.bulkCreate(newPermissions);
+  return await RolePermission.findAll({ where: { roleId } });
 };
 
 export const deleteRolePermission = async (id: number) => {

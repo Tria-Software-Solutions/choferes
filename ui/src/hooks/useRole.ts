@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback } from "react";
 import * as RoleService from "../services/roleService";
+import * as RolePermissionService from "../services/rolePermissionService";
 import { useAuth } from "../context/AuthContext";
 import { Role } from "../models/Role";
 
@@ -44,10 +45,29 @@ export const useRoles = () => {
     }
   }, []);
 
-  const updateRole = async (id: number, updatedRole: Partial<Role>) => {
-    await RoleService.getRoleById(id);
+  const updateRole = async (
+    id: number,
+    updatedRole: Partial<Role>,
+    newPermissionIds?: number[]
+  ) => {
+    await RoleService.updateRole(id, updatedRole);
+    if (newPermissionIds) {
+      await RolePermissionService.updateRolePermission(id, newPermissionIds);
+    }
     setRoles((prev) =>
       prev.map((role) => (role.id === id ? { ...role, ...updatedRole } : role))
+    );
+
+    setRoles((prev) =>
+      prev.map((role) =>
+        role.id === id
+          ? {
+              ...role,
+              ...updatedRole,
+              permissionIds: newPermissionIds ?? role.permissionIds,
+            }
+          : role
+      )
     );
   };
 
