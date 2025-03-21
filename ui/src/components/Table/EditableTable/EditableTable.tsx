@@ -47,13 +47,14 @@ import CloseIcon from "@mui/icons-material/Close";
 import PaginationActions from "../Pagination/PaginationActions";
 import { usePermissions } from "../../../hooks/usePermission";
 
+
 type EditableTableProps<T> = {
   data: T[];
   columns: (keyof T)[];
   groupByDate?: Date | null;
   editRowId: number | null;
-  editFields: Record<string, string | string[] | boolean>;
-  setEditField?: (field: string, value: string | string[] | boolean) => void;
+  editFields: Record<string, string | boolean | number | string[]>;
+  setEditField?: (field: string, value: string | boolean | number | string[]) => void;
   handleEditClick?: (row: T) => void;
   handleCancelClick?: () => void;
   handleSaveClick?: (id: number) => void;
@@ -162,39 +163,27 @@ const EditableTable = <T,>({
     }
 
     if (config.type === "select" && config.options) {
-      const selectedValue = editFields[String(column)] || "";
-      const hasOtroOption = config.options.some(
-        (option) => option.value === "Otro"
-      );
+      const selectedValue = config.options.some(
+        (opt) => opt.value === editFields[String(column)]
+      )
+        ? editFields[String(column)]
+        : "";
 
       return (
         <FormControl variant="outlined" fullWidth>
-          {selectedValue === "Otro" ? (
-            <TextField
-              label={translateColumnHeaderToSpanish(column)}
-              variant="outlined"
-              fullWidth
-              value={editFields[String(column)] || ""}
-              onChange={(e) =>
-                setEditField && setEditField(String(column), e.target.value)
-              }
-            />
-          ) : (
-            <Select
-              value={selectedValue}
-              onChange={(e) =>
-                setEditField &&
-                setEditField(String(column), String(e.target.value))
-              }
-            >
-              {config.options.map((option) => (
-                <MenuItem key={option.value} value={option.value}>
-                  {option.label}
-                </MenuItem>
-              ))}
-              {hasOtroOption && <MenuItem value="Otro">Otro</MenuItem>}
-            </Select>
-          )}
+          <Select
+            value={selectedValue}
+            onChange={(e) =>
+              setEditField &&
+              setEditField(String(column), String(e.target.value))
+            }
+          >
+            {config.options.map((option) => (
+              <MenuItem key={option.value} value={option.value}>
+                {option.label}
+              </MenuItem>
+            ))}
+          </Select>
         </FormControl>
       );
     }

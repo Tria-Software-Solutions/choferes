@@ -8,5 +8,6 @@ export interface User {
   username: string;
   password: string;
   roles?: Role[];
+  roleId?: number;
   roleName?: string;
 }

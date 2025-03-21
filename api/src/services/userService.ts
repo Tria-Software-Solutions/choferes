@@ -4,6 +4,7 @@ import { Response } from "express";
 import { Role } from "../models/Role";
 import { Permission } from "../models/Permission";
 import { generateTokens } from "../utils/generateSecret";
+import { UserRole } from "../models/UserRole";
 
 export const authenticateUser = async (
   username: string,
@@ -109,9 +110,14 @@ export const createUser = async (data: Omit<User, "id">) => {
   );
 };
 
-export const updateUser = async (id: number, data: Omit<User, "id">) => {
+export const updateUser = async (
+  id: number,
+  data: Partial<Omit<User, "id">>
+) => {
   await User.update(data, { where: { id } });
-  return User.findByPk(id);
+  return User.findByPk(id, {
+    include: [{ model: Role, through: { attributes: [] } }],
+  });
 };
 
 export const deleteUser = async (id: number) => {

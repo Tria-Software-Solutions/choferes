@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback } from "react";
 import * as UserService from "../services/userService";
+import * as RoleService from "../services/roleService";
 import { useUserRoles } from "./useUserRole";
 import { User } from "../models/User";
 import { UserRole } from "../models/UserRole";
@@ -100,7 +101,7 @@ export const useUsers = () => {
   };
 
   const updateUser = async (id: number, updatedUser: Partial<User>) => {
-    await UserService.getUserById(id);
+    await UserService.updateUser(id, updatedUser);
     setUsers((prev) =>
       prev.map((user) => (user.id === id ? { ...user, ...updatedUser } : user))
     );
