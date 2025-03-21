@@ -11,6 +11,11 @@ export const getPermissionById = async (id: number) => {
   return response.data;
 };
 
+export const getPermissionsByNames = async (names: string[]) => {
+  const response = await api.get(`/permissions/names/${names}`);
+  return response.data;
+};
+
 export const createPermission = async (newPermission: Omit<Permission, "id">) => {
   const response = await api.post("/permissions", newPermission);
   return response.data;

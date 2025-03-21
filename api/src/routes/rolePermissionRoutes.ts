@@ -10,6 +10,7 @@ router.post(
   authenticateToken,
   rolePermissionController.createRolePermission
 );
+router.put("/:id", authenticateToken, rolePermissionController.updateRolePermissions);
 router.delete(
   "/:id",
   authenticateToken,

@@ -3,6 +3,7 @@ import { useAuth } from "../../context/AuthContext";
 import { Role } from "../../models/Role";
 import { Permission } from "../../models/Permission";
 import { useRoles } from "../../hooks/useRole";
+import { usePermissions } from "../../hooks/usePermission";
 import { useAppNotifications } from "../../components/Snackbar/SnackbarWrapper";
 import {
   Backdrop,
@@ -21,13 +22,19 @@ import SearchBar from "../../components/SearchBar/SearchBar";
 
 const ManageRoles = () => {
   const { userPermissions } = useAuth();
-  const { roles, isLoadingRoles, updateRole, deleteRole } = useRoles();
+  const { roles, isLoadingRoles, getRoles, updateRole, deleteRole } =
+    useRoles();
+  const { getPermissionsByNames } = usePermissions();
   const { showNotification } = useAppNotifications();
   const [filteredRoles, setFilteredRoles] = useState<Role[]>([]);
   const [totalCount, setTotalCount] = useState(0);
   const [editRowId, setEditRowId] = useState<number | null>(null);
-  const [editFields, setEditFields] = useState<{ name: string; permissionNames: string[] }>({
-    name: "", permissionNames: []
+  const [editFields, setEditFields] = useState<{
+    name: string;
+    permissionNames: string[];
+  }>({
+    name: "",
+    permissionNames: [],
   });
   const [dialogOpen, setDialogOpen] = useState(false);
   const [roleToDelete, setRoleToDelete] = useState<number | null>(null);
@@ -77,7 +84,7 @@ const ManageRoles = () => {
     setEditRowId(role.id);
     setEditFields({
       name: role.name,
-      permissionNames: role?.permissionNames || []
+      permissionNames: role?.permissionNames || [],
     });
   };
 
@@ -87,10 +94,18 @@ const ManageRoles = () => {
 
   const handleSaveClick = async (id: number) => {
     try {
-      const updatedRole = {
+      const permissions = await getPermissionsByNames(
+        editFields.permissionNames
+      );
+      const updatedRole: Partial<Role> = {
         ...editFields,
       };
-      await updateRole(id, updatedRole);
+      await updateRole(
+        id,
+        updatedRole,
+        permissions.map((permission: Permission) => permission.id)
+      );
+      await getRoles();
       setEditRowId(null);
       setEditFields({ name: "", permissionNames: [] });
       showNotification(

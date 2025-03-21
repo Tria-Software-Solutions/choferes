@@ -34,6 +34,20 @@ export const useRolePermissions = () => {
     setTotalCountRolePermissions((prev) => prev + 1);
   };
 
+  const updateRolePermission = async (
+    roleId: number,
+    permissionIds: number[]
+  ) => {
+    await RolePermissionService.updateRolePermission(roleId, permissionIds);
+    setRolePermissions((prev) =>
+      prev.map((rolePermission) =>
+        rolePermission.roleId === roleId
+          ? { ...rolePermission, roleId }
+          : rolePermission
+      )
+    );
+  };
+
   const deleteRolePermission = async (id: number) => {
     await RolePermissionService.deleteRolePermission(id);
     setRolePermissions((prev) =>
@@ -54,6 +68,7 @@ export const useRolePermissions = () => {
     isLoadingRolePermissions,
     getRolePermissions,
     createRolePermission,
+    updateRolePermission,
     deleteRolePermission,
   };
 };

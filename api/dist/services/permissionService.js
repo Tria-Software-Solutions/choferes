@@ -9,7 +9,8 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.deletePermission = exports.updatePermission = exports.createPermission = exports.getPermissionById = exports.getPermissions = void 0;
+exports.deletePermission = exports.updatePermission = exports.createPermission = exports.getPermissionsByNames = exports.getPermissionById = exports.getPermissions = void 0;
+const sequelize_1 = require("sequelize");
 const Permission_1 = require("../models/Permission");
 const getPermissions = () => __awaiter(void 0, void 0, void 0, function* () {
     return yield Permission_1.Permission.findAll();
@@ -19,6 +20,16 @@ const getPermissionById = (id) => __awaiter(void 0, void 0, void 0, function* ()
     return yield Permission_1.Permission.findByPk(id);
 });
 exports.getPermissionById = getPermissionById;
+const getPermissionsByNames = (names) => __awaiter(void 0, void 0, void 0, function* () {
+    return yield Permission_1.Permission.findAll({
+        where: {
+            name: {
+                [sequelize_1.Op.in]: names,
+            },
+        },
+    });
+});
+exports.getPermissionsByNames = getPermissionsByNames;
 const createPermission = (data) => __awaiter(void 0, void 0, void 0, function* () {
     const newPermission = yield Permission_1.Permission.create(data);
     yield newPermission.reload();
