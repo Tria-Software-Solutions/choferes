@@ -23,7 +23,8 @@ import SearchBar from "../../components/SearchBar/SearchBar";
 
 const ManageUsers = () => {
   const { userPermissions } = useAuth();
-  const { users, isLoadingUsers, updateUser, deleteUser } = useUsers();
+  const { users, isLoadingUsers, getUsers, updateUser, deleteUser } =
+    useUsers();
   const { getRoleByName } = useRoles();
   const { getUserRoleByUserId } = useUserRoles();
   const { showNotification } = useAppNotifications();
@@ -109,7 +110,8 @@ const ManageUsers = () => {
       const updatedUser: Partial<User> = {
         ...editFields,
       };
-      await updateUser(id, updatedUser);
+      await updateUser(id, updatedUser, role.id);
+      await getUsers();
       setEditRowId(null);
       setEditFields({
         firstName: "",

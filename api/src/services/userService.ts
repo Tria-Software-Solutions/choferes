@@ -112,12 +112,10 @@ export const createUser = async (data: Omit<User, "id">) => {
 
 export const updateUser = async (
   id: number,
-  data: Partial<Omit<User, "id">>
+  data: Omit<User, "id">
 ) => {
   await User.update(data, { where: { id } });
-  return User.findByPk(id, {
-    include: [{ model: Role, through: { attributes: [] } }],
-  });
+  return User.findByPk(id);
 };
 
 export const deleteUser = async (id: number) => {

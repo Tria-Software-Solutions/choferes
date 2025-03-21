@@ -78,7 +78,6 @@ export const updateUser = async (req: Request, res: Response) => {
       return res.status(404).json({ message: "User not found" });
     }
   } catch (error) {
-    console.log("ERROR: ", error);
     return res.status(500).json({ message: "Error updating User", error });
   }
 };
