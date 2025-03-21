@@ -100,6 +100,7 @@ const ManageRoles = () => {
         false
       );
     } catch (error) {
+      handleCancelClick();
       console.error(error);
       showNotification(
         "Ha ocurrido un error al actualizar el rol",
@@ -133,6 +134,7 @@ const ManageRoles = () => {
         false
       );
     } catch (error) {
+      handleCancelClick();
       console.error(error);
       showNotification(
         "Ha ocurrido un error al eliminar el empleado",

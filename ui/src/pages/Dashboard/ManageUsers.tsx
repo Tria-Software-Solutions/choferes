@@ -3,7 +3,7 @@ import { useAuth } from "../../context/AuthContext";
 import { User } from "../../models/User";
 import { Role } from "../../models/Role";
 import { useUsers } from "../../hooks/useUser";
-// import { useRoles } from "../../hooks/useRole";
+import { useRoles } from "../../hooks/useRole";
 import { useUserRoles } from "../../hooks/useUserRole";
 import { useAppNotifications } from "../../components/Snackbar/SnackbarWrapper";
 import {
@@ -24,7 +24,7 @@ import SearchBar from "../../components/SearchBar/SearchBar";
 const ManageUsers = () => {
   const { userPermissions } = useAuth();
   const { users, isLoadingUsers, updateUser, deleteUser } = useUsers();
-  // const { getRoleByName } = useRoles();
+  const { getRoleByName } = useRoles();
   const { getUserRoleByUserId } = useUserRoles();
   const { showNotification } = useAppNotifications();
   const [filteredUsers, setFilteredUsers] = useState<User[]>([]);
@@ -105,9 +105,10 @@ const ManageUsers = () => {
 
   const handleSaveClick = async (id: number) => {
     try {
-      // const newRole = await getRoleByName(editFields.roleName);
-      // await updateUserRole(id, newRole.id);
-      const updatedUser = { ...editFields };
+      const role = await getRoleByName(editFields.roleName);
+      const updatedUser: Partial<User> = {
+        ...editFields,
+      };
       await updateUser(id, updatedUser);
       setEditRowId(null);
       setEditFields({
@@ -124,6 +125,7 @@ const ManageUsers = () => {
         false
       );
     } catch (error) {
+      handleCancelClick();
       console.error(error);
       showNotification(
         "Ha ocurrido un error al actualizar el usuario",
@@ -158,6 +160,7 @@ const ManageUsers = () => {
         false
       );
     } catch (error) {
+      handleCancelClick();
       console.error(error);
       showNotification(
         "Ha ocurrido un error al eliminar el usuario",

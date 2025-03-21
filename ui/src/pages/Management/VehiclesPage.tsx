@@ -283,6 +283,7 @@ const VehiclesPage: React.FC = () => {
           false
         );
       } catch (error) {
+        handleCancelClick();
         console.error(error);
         showNotification(
           "Ha ocurrido un error al actualizar el vehículo",
@@ -318,6 +319,7 @@ const VehiclesPage: React.FC = () => {
         false
       );
     } catch (error) {
+      handleCancelClick();
       console.error(error);
       showNotification(
         "Ha ocurrido un error al eliminar el vehículo",

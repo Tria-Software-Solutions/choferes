@@ -1,5 +1,5 @@
-import { Role } from "../models/Role";
 import { UserRole } from "../models/UserRole";
+import * as RoleService from "../services/roleService";
 
 export const getUserRoles = async () => {
   return UserRole.findAll();
@@ -19,33 +19,12 @@ export const createUserRole = async (data: Omit<UserRole, "id">) => {
   return newUserRole;
 };
 
-// export const updateUserRole = async (userId: number, newRoleId: number) => {
-//   await UserRole.update(
-//     { roleId: newRoleId },
-//     {
-//       where: { userId },
-//     }
-//   );
-
-//   return UserRole.findOne({ where: { userId } });
-// };
-
-export const updateUserRole = async (userId: number, newRoleId: number) => {
-  const role = await Role.findByPk(newRoleId);
-  if (!role) {
-    throw new Error("Role not found");
-  }
-
-  const updated = await UserRole.update(
-    { roleId: newRoleId },
-    { where: { userId } } 
-  );
-
-  if (updated[0] > 0) {
-    return UserRole.findOne({ where: { userId } });
-  } else {
-    throw new Error("Failed to update UserRole");
-  }
+export const updateUserRole = async (userId: number, roleId: number) => {
+  const role = await RoleService.getRoleById(roleId);
+  if (!role) throw new Error("Role not found");;
+  const [updated] = await UserRole.update({ roleId }, { where: { userId } });
+  if (updated === 0) return null;
+  return await UserRole.findOne({ where: { userId } });
 };
 
 export const deleteUserRole = async (id: number) => {

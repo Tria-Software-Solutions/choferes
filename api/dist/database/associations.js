@@ -7,26 +7,27 @@ const Permission_1 = require("../models/Permission");
 const Employee_1 = require("../models/Employee");
 const Schedule_1 = require("../models/Schedule");
 const HoursWorked_1 = require("../models/HoursWorked");
-const models_1 = require("./models");
+const UserRole_1 = require("../models/UserRole");
+const RolePermission_1 = require("../models/RolePermission");
 // Relación User - Role (Mediante UserRole)
 User_1.User.belongsToMany(Role_1.Role, {
-    through: models_1.UserRole,
+    through: UserRole_1.UserRole,
     foreignKey: "userId",
     as: "roles",
 });
 Role_1.Role.belongsToMany(User_1.User, {
-    through: models_1.UserRole,
+    through: UserRole_1.UserRole,
     foreignKey: "roleId",
     as: "users",
 });
 // Relación Role - Permission (Mediante RolePermission)
 Role_1.Role.belongsToMany(Permission_1.Permission, {
-    through: models_1.RolePermission,
+    through: RolePermission_1.RolePermission,
     foreignKey: "roleId",
     as: "permissions",
 });
 Permission_1.Permission.belongsToMany(Role_1.Role, {
-    through: models_1.RolePermission,
+    through: RolePermission_1.RolePermission,
     foreignKey: "permissionId",
     as: "roles",
 });

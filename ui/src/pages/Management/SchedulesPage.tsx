@@ -199,6 +199,7 @@ const SchedulesPage: React.FC = () => {
         false
       );
     } catch (error) {
+      handleCancelClick();
       console.error(error);
       showNotification(
         "Ha ocurrido un error al actualizar el horario",
@@ -232,6 +233,7 @@ const SchedulesPage: React.FC = () => {
         false
       );
     } catch (error) {
+      handleCancelClick();
       console.error(error);
       showNotification(
         "Ha ocurrido un error al eliminar el horario",

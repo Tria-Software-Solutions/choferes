@@ -158,6 +158,7 @@ const EmployeesPage: React.FC = () => {
         false
       );
     } catch (error) {
+      handleCancelClick();
       console.error(error);
       showNotification(
         "Ha ocurrido un error al actualizar el empleado",
@@ -191,6 +192,7 @@ const EmployeesPage: React.FC = () => {
         false
       );
     } catch (error) {
+      handleCancelClick();
       console.error(error);
       showNotification(
         "Ha ocurrido un error al eliminar el empleado",

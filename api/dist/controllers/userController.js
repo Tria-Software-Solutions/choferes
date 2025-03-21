@@ -100,7 +100,9 @@ const getUserPermissions = (req, res) => __awaiter(void 0, void 0, void 0, funct
         return res.status(200).json(user);
     }
     catch (error) {
-        return res.status(500).json({ message: "Error fetching User Permissions", error });
+        return res
+            .status(500)
+            .json({ message: "Error fetching User Permissions", error });
     }
 });
 exports.getUserPermissions = getUserPermissions;
@@ -126,6 +128,7 @@ const updateUser = (req, res) => __awaiter(void 0, void 0, void 0, function* () 
         }
     }
     catch (error) {
+        console.log("ERROR: ", error);
         return res.status(500).json({ message: "Error updating User", error });
     }
 });
