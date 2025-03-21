@@ -20,10 +20,7 @@ export const createUserRole = async (data: Omit<UserRole, "id">) => {
 };
 
 export const updateUserRole = async (userId: number, roleId: number) => {
-  const role = await RoleService.getRoleById(roleId);
-  if (!role) throw new Error("Role not found");;
-  const [updated] = await UserRole.update({ roleId }, { where: { userId } });
-  if (updated === 0) return null;
+  await UserRole.update({ roleId }, { where: { userId } });
   return await UserRole.findOne({ where: { userId } });
 };
 
