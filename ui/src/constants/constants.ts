@@ -21,7 +21,7 @@ export const APPBAR_MENU = {
 
 export const PAGE_TITLE = {
   LOGIN: "Iniciar Sesión",
-  REGISTER: "Registrar Usuario",
+  REGISTER: "Registrar Cuenta",
   ROLES: "Gestionar Roles",
   VEHICLES: "Gestionar Vehículos",
   EMPLOYEES: "Gestionar Empleados",

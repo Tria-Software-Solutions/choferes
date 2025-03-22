@@ -1,5 +1,7 @@
 import React, { useState } from "react";
 import { useRoles } from "../../../hooks/useRole";
+import { usePermissions } from "../../../hooks/usePermission";
+import { useAuth } from "../../../context/AuthContext";
 import {
   Table,
   TableBody,
@@ -45,8 +47,6 @@ import EditIcon from "@mui/icons-material/Edit";
 import SaveIcon from "@mui/icons-material/Save";
 import CloseIcon from "@mui/icons-material/Close";
 import PaginationActions from "../Pagination/PaginationActions";
-import { usePermissions } from "../../../hooks/usePermission";
-
 
 type EditableTableProps<T> = {
   data: T[];
@@ -54,7 +54,10 @@ type EditableTableProps<T> = {
   groupByDate?: Date | null;
   editRowId: number | null;
   editFields: Record<string, string | boolean | number | string[]>;
-  setEditField?: (field: string, value: string | boolean | number | string[]) => void;
+  setEditField?: (
+    field: string,
+    value: string | boolean | number | string[]
+  ) => void;
   handleEditClick?: (row: T) => void;
   handleCancelClick?: () => void;
   handleSaveClick?: (id: number) => void;
@@ -98,6 +101,7 @@ const EditableTable = <T,>({
   noActions,
   userPermissions,
 }: EditableTableProps<T>) => {
+  const { currentUser } = useAuth();
   const { roles } = useRoles();
   const { permissions } = usePermissions();
   const [order, setOrder] = useState<"asc" | "desc">("asc");
@@ -267,6 +271,7 @@ const EditableTable = <T,>({
       return (
         <Autocomplete
           multiple
+          limitTags={5}
           value={selectedOptions}
           onChange={(event, newValue) => {
             setEditField &&
@@ -408,128 +413,142 @@ const EditableTable = <T,>({
             </TableRow>
           </TableHead>
           <TableBody>
-            {paginatedData.map((row) => (
-              <TableRow key={getRowId(row)}>
-                {columns.map((column) => {
-                  return (
-                    <TableCell key={String(column)}>
-                      {editRowId === getRowId(row) ? (
-                        <>
-                          {renderEditField(
-                            column,
-                            (editFields[String(column)] || "").toString()
-                          )}
-                        </>
-                      ) : Array.isArray(row[column]) ? (
-                        <Stack
-                          direction="row"
-                          spacing={1}
-                          flexWrap="wrap"
-                          sx={{ rowGap: 2 }}
-                        >
-                          {(row[column] as string[]).map(
-                            (item, index, array) => (
-                              <Typography key={index} component="span">
-                                {translateDayOptionsToSpanish(item)}
-                                {index < array.length - 1 ? ", " : ""}
-                              </Typography>
-                            )
-                          )}
-                        </Stack>
-                      ) : column === "email" ? (
-                        <Link
-                          href={`mailto:${row[column]}`}
-                          sx={{
-                            textDecoration: "none",
-                            color: theme.palette.primary.main,
-                            "&:hover": {
-                              textDecoration: "underline",
-                            },
-                          }}
-                        >
-                          {String(row[column])}
-                        </Link>
-                      ) : column === "day" ? (
-                        <>
-                          {translateDayOptionsToSpanish(row[column] as string)}
-                        </>
-                      ) : (
-                        <>{renderColumnValue(column, row[column])}</>
-                      )}
-                    </TableCell>
-                  );
-                })}
-
-                {!noActions && (
-                  <TableCell>
-                    <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-                      {editRowId === getRowId(row) ? (
-                        <>
-                          <Tooltip title="Guardar" arrow>
-                            <Box>
-                              <IconButton
-                                color="primary"
-                                onClick={() =>
-                                  handleSaveClick &&
-                                  handleSaveClick(getRowId(row))
-                                }
-                                disabled={isSaveDisabled}
-                              >
-                                <SaveIcon />
-                              </IconButton>
-                            </Box>
-                          </Tooltip>
-                          <Tooltip title="Cancelar" arrow>
-                            <Box>
-                              <IconButton
-                                color="primary"
-                                onClick={() =>
-                                  handleCancelClick && handleCancelClick()
-                                }
-                              >
-                                <CloseIcon />
-                              </IconButton>
-                            </Box>
-                          </Tooltip>
-                        </>
-                      ) : (
-                        <>
-                          {hasEditPermissions && (
-                            <Tooltip title="Editar" arrow>
+            {paginatedData.map((row) => {
+              const rowId = getRowId(row);
+              const isCurrentUser = rowId === currentUser?.id;
+              return (
+                <TableRow key={getRowId(row)}>
+                  {columns.map((column) => {
+                    return (
+                      <TableCell key={String(column)}>
+                        {editRowId === getRowId(row) ? (
+                          <>
+                            {renderEditField(
+                              column,
+                              (editFields[String(column)] || "").toString()
+                            )}
+                          </>
+                        ) : Array.isArray(row[column]) ? (
+                          <Stack
+                            direction="row"
+                            spacing={1}
+                            flexWrap="wrap"
+                            sx={{ rowGap: 2 }}
+                          >
+                            {(row[column] as string[]).map(
+                              (item, index, array) =>
+                                column === "permissionNames" ? (
+                                  <Chip
+                                    key={index}
+                                    label={translateDayOptionsToSpanish(item)}
+                                    variant="outlined"
+                                  />
+                                ) : (
+                                  <Typography key={index} component="span">
+                                    {translateDayOptionsToSpanish(item)}
+                                    {index < array.length - 1 ? ", " : ""}
+                                  </Typography>
+                                )
+                            )}
+                          </Stack>
+                        ) : column === "email" ? (
+                          <Link
+                            href={`mailto:${row[column]}`}
+                            sx={{
+                              textDecoration: "none",
+                              color: theme.palette.primary.main,
+                              "&:hover": {
+                                textDecoration: "underline",
+                              },
+                            }}
+                          >
+                            {String(row[column])}
+                          </Link>
+                        ) : column === "day" ? (
+                          <>
+                            {translateDayOptionsToSpanish(
+                              row[column] as string
+                            )}
+                          </>
+                        ) : (
+                          <>{renderColumnValue(column, row[column])}</>
+                        )}
+                      </TableCell>
+                    );
+                  })}
+                  {!noActions && (
+                    <TableCell>
+                      <Box
+                        sx={{ display: "flex", alignItems: "center", gap: 1 }}
+                      >
+                        {editRowId === getRowId(row) ? (
+                          <>
+                            <Tooltip title="Guardar" arrow>
                               <Box>
                                 <IconButton
                                   color="primary"
                                   onClick={() =>
-                                    handleEditClick && handleEditClick(row)
+                                    handleSaveClick &&
+                                    handleSaveClick(getRowId(row))
                                   }
+                                  disabled={isSaveDisabled}
                                 >
-                                  <EditIcon />
+                                  <SaveIcon />
                                 </IconButton>
                               </Box>
                             </Tooltip>
-                          )}
-                          {hasDeletePermissions && (
-                            <Tooltip title="Eliminar" arrow>
+                            <Tooltip title="Cancelar" arrow>
                               <Box>
                                 <IconButton
-                                  color="secondary"
+                                  color="primary"
                                   onClick={() =>
-                                    handleOpenDialog &&
-                                    handleOpenDialog(getRowId(row))
+                                    handleCancelClick && handleCancelClick()
                                   }
                                 >
-                                  <DeleteIcon />
+                                  <CloseIcon />
                                 </IconButton>
                               </Box>
                             </Tooltip>
-                          )}
-                        </>
-                      )}
-                    </Box>
-                  </TableCell>
-                )}
-              </TableRow>
-            ))}
+                          </>
+                        ) : (
+                          <>
+                            {hasEditPermissions && (
+                              <Tooltip title="Editar" arrow>
+                                <Box>
+                                  <IconButton
+                                    color="primary"
+                                    onClick={() =>
+                                      handleEditClick && handleEditClick(row)
+                                    }
+                                  >
+                                    <EditIcon />
+                                  </IconButton>
+                                </Box>
+                              </Tooltip>
+                            )}
+                            {hasDeletePermissions && !isCurrentUser && (
+                              <Tooltip title="Eliminar" arrow>
+                                <Box>
+                                  <IconButton
+                                    color="secondary"
+                                    onClick={() =>
+                                      handleOpenDialog &&
+                                      handleOpenDialog(getRowId(row))
+                                    }
+                                  >
+                                    <DeleteIcon />
+                                  </IconButton>
+                                </Box>
+                              </Tooltip>
+                            )}
+                          </>
+                        )}
+                      </Box>
+                    </TableCell>
+                  )}
+                </TableRow>
+              );
+            })}
           </TableBody>
         </Table>
       </TableContainer>

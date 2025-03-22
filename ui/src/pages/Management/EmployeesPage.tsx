@@ -123,7 +123,7 @@ const EmployeesPage: React.FC = () => {
     } catch (error) {
       console.error(error);
       showNotification(
-        "Ha ocurrido un error al registrar el usuario",
+        "Ha ocurrido un error al registrar el empleado",
         "error",
         5000,
         false

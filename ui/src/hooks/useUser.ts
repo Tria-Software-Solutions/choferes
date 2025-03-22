@@ -17,10 +17,10 @@ export const useUsers = () => {
   const [authError, setAuthError] = useState<string | null>(null);
   const navigate = useNavigate();
 
-  const authenticateUser = async (username: string, password: string) => {
+  const authenticateUser = async (identifier: string, password: string) => {
     setAuthError(null);
     try {
-      const response = await UserService.authenticateUser(username, password);
+      const response = await UserService.authenticateUser(identifier, password);
       const userPermissions = await UserService.getUserPermissions(
         response.user.id
       );
@@ -97,7 +97,10 @@ export const useUsers = () => {
       roleId: Roles.USER,
     };
     createUserRole(createdUserRole);
-    navigate("/");
+    getUsers();
+    if (!currentUser) {
+      navigate("/");
+    }
   };
 
   const updateUser = async (

@@ -46,8 +46,8 @@ exports.deleteUser = exports.updateUser = exports.createUser = exports.getUserPe
 const userService = __importStar(require("../services/userService"));
 const authenticateUser = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        const { username, password } = req.body;
-        const { user, accessToken, refreshToken } = yield userService.authenticateUser(username, password, res);
+        const { identifier, password } = req.body;
+        const { user, accessToken, refreshToken } = yield userService.authenticateUser(identifier, password, res);
         return res.status(200).json({ user, accessToken, refreshToken });
     }
     catch (error) {

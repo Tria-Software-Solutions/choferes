@@ -18,9 +18,10 @@ const User_1 = require("../models/User");
 const Role_1 = require("../models/Role");
 const Permission_1 = require("../models/Permission");
 const generateSecret_1 = require("../utils/generateSecret");
-const authenticateUser = (username, password, res) => __awaiter(void 0, void 0, void 0, function* () {
+const sequelize_1 = require("sequelize");
+const authenticateUser = (identifier, password, res) => __awaiter(void 0, void 0, void 0, function* () {
     const user = yield User_1.User.findOne({
-        where: { username },
+        where: { [sequelize_1.Op.or]: [{ username: identifier }, { email: identifier }] },
         include: [
             {
                 model: Role_1.Role,
