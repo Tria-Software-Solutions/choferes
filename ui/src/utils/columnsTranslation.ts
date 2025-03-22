@@ -5,6 +5,7 @@ export type ColumnsTranslation = {
   lastName: string;
   email: string;
   username: string;
+  password: string;
   label: string;
   days: string;
   hours: string;

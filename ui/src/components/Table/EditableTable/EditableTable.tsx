@@ -47,6 +47,7 @@ import EditIcon from "@mui/icons-material/Edit";
 import SaveIcon from "@mui/icons-material/Save";
 import CloseIcon from "@mui/icons-material/Close";
 import PaginationActions from "../Pagination/PaginationActions";
+import PasswordIcon from "@mui/icons-material/Password";
 
 type EditableTableProps<T> = {
   data: T[];
@@ -78,7 +79,7 @@ type EditableTableProps<T> = {
   userPermissions?: string[];
 };
 
-const EditableTable = <T,>({
+const EditableTable = <T extends object>({
   data,
   columns,
   groupByDate,
@@ -416,6 +417,7 @@ const EditableTable = <T,>({
             {paginatedData.map((row) => {
               const rowId = getRowId(row);
               const isCurrentUser = rowId === currentUser?.id;
+              const isUser = "username" in row;
               return (
                 <TableRow key={getRowId(row)}>
                   {columns.map((column) => {
@@ -513,18 +515,32 @@ const EditableTable = <T,>({
                         ) : (
                           <>
                             {hasEditPermissions && (
-                              <Tooltip title="Editar" arrow>
-                                <Box>
-                                  <IconButton
-                                    color="primary"
-                                    onClick={() =>
-                                      handleEditClick && handleEditClick(row)
-                                    }
-                                  >
-                                    <EditIcon />
-                                  </IconButton>
-                                </Box>
-                              </Tooltip>
+                              <>
+                                {isUser && (
+                                  <Tooltip title="Cambiar Contraseña" arrow>
+                                    <IconButton
+                                      color="primary"
+                                      onClick={() =>
+                                        console.log("Cambiar contraseña: ", getRowId(row))
+                                      }
+                                    >
+                                      <PasswordIcon />
+                                    </IconButton>
+                                  </Tooltip>
+                                )}
+                                <Tooltip title="Editar" arrow>
+                                  <Box>
+                                    <IconButton
+                                      color="primary"
+                                      onClick={() =>
+                                        handleEditClick && handleEditClick(row)
+                                      }
+                                    >
+                                      <EditIcon />
+                                    </IconButton>
+                                  </Box>
+                                </Tooltip>
+                              </>
                             )}
                             {hasDeletePermissions && !isCurrentUser && (
                               <Tooltip title="Eliminar" arrow>
