@@ -15,34 +15,58 @@ import {
   DialogActions,
   DialogContent,
   DialogTitle,
-  Stack,
+  Grid,
+  IconButton,
+  InputAdornment,
+  TextField,
+  Tooltip,
   Typography,
 } from "@mui/material";
 import EditableTable from "../../components/Table/EditableTable/EditableTable";
 import SearchBar from "../../components/SearchBar/SearchBar";
+import PersonAddAlt1RoundedIcon from "@mui/icons-material/PersonAddAlt1Rounded";
+import Visibility from "@mui/icons-material/Visibility";
+import VisibilityOff from "@mui/icons-material/VisibilityOff";
 
 const ManageUsers = () => {
   const { userPermissions } = useAuth();
-  const { users, isLoadingUsers, getUsers, updateUser, deleteUser } =
-    useUsers();
+  const {
+    users,
+    isLoadingUsers,
+    createUser,
+    getUsers,
+    updateUser,
+    deleteUser,
+  } = useUsers();
   const { getRoleByName } = useRoles();
   const { getUserRoleByUserId } = useUserRoles();
   const { showNotification } = useAppNotifications();
   const [filteredUsers, setFilteredUsers] = useState<User[]>([]);
   const [totalCount, setTotalCount] = useState(0);
   const [editRowId, setEditRowId] = useState<number | null>(null);
+  const [addFields, setAddFields] = useState({
+    firstName: "",
+    lastName: "",
+    email: "",
+    username: "",
+    password: "",
+    roleName: "",
+  });
   const [editFields, setEditFields] = useState({
     firstName: "",
     lastName: "",
     email: "",
     username: "",
+    password: "",
     roleName: "",
   });
   const [dialogOpen, setDialogOpen] = useState(false);
   const [userToDelete, setUserToDelete] = useState<number | null>(null);
   const [filter, setFilter] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(5);
+  const [isAddFormValid, setIsAddFormValid] = useState(false);
   const [isEditFormValid, setIsEditFormValid] = useState(false);
 
   useEffect(() => {
@@ -71,15 +95,23 @@ const ManageUsers = () => {
       text: /^[a-zA-ZáéíóúÁÉÍÓÚñÑüÜëË\s-]+$/,
       email: /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/,
       username: /^[a-zA-Z][a-zA-Z0-9_.]{2,19}$/,
+      password:
+        /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/,
     };
 
     return (
       regex.text.test(fields.firstName) &&
       regex.text.test(fields.lastName) &&
       regex.email.test(fields.email) &&
-      regex.username.test(fields.username)
+      regex.username.test(fields.username) &&
+      regex.password.test(fields.password)
     );
   }, []);
+
+  useEffect(
+    () => setIsAddFormValid(validateFields(addFields)),
+    [addFields, validateFields]
+  );
 
   useEffect(() => {
     if (editRowId !== null) setIsEditFormValid(validateFields(editFields));
@@ -89,6 +121,41 @@ const ManageUsers = () => {
     setFilter(e.target.value);
   };
 
+  const handleAdd = async () => {
+    try {
+      const newUser: Omit<User, "id" | "role"> = {
+        firstName: addFields.firstName,
+        lastName: addFields.lastName,
+        email: addFields.email,
+        username: addFields.username,
+        password: addFields.password,
+      };
+      await createUser(newUser);
+      setAddFields({
+        firstName: "",
+        lastName: "",
+        email: "",
+        username: "",
+        password: "",
+        roleName: "",
+      });
+      showNotification(
+        "El registro del usuario fue exitoso",
+        "success",
+        3000,
+        false
+      );
+    } catch (error) {
+      console.error(error);
+      showNotification(
+        "Ha ocurrido un error al registrar el usuario",
+        "error",
+        5000,
+        false
+      );
+    }
+  };
+
   const handleEditClick = (user: User) => {
     setEditRowId(user.id);
     setEditFields({
@@ -96,6 +163,7 @@ const ManageUsers = () => {
       lastName: user.lastName,
       email: user.email,
       username: user.username,
+      password: user.password,
       roleName: user?.roleName || "",
     });
   };
@@ -118,6 +186,7 @@ const ManageUsers = () => {
         lastName: "",
         email: "",
         username: "",
+        password: "",
         roleName: "",
       });
       showNotification(
@@ -173,6 +242,10 @@ const ManageUsers = () => {
     }
   };
 
+  const handleTogglePassword = () => {
+    setShowPassword((prev) => !prev);
+  };
+
   return (
     <Box>
       {isLoadingUsers ? (
@@ -194,45 +267,182 @@ const ManageUsers = () => {
         </Box>
       ) : (
         <>
-          {filteredUsers.length > 0 ? (
-            <Stack spacing={2}>
-              <Box>
+          <Grid
+            container
+            spacing={2}
+            justifyContent="space-between"
+            alignItems="center"
+          >
+            <Grid item xs={12} md={2} lg={4}>
+              {filteredUsers && (
                 <SearchBar
                   placeholder="Buscar usuario"
                   value={filter}
                   onChange={handleFilterChange}
-                  sx={{ maxWidth: "100%" }}
+                  sx={{
+                    maxWidth: "100%",
+                  }}
                   fullWidth
                 />
+              )}
+            </Grid>
+            <Grid item xs={12} md={10} lg={8}>
+              <Box
+                display="flex"
+                flexDirection={{ xs: "column", sm: "column", md: "row" }}
+                alignItems="center"
+                justifyContent="flex-end"
+                gap={2}
+              >
+                <Grid container spacing={2} alignItems="center">
+                  <Grid item xs={6} md={2} lg={2}>
+                    <TextField
+                      label="Nombre"
+                      variant="outlined"
+                      fullWidth
+                      sx={{
+                        height: 56,
+                      }}
+                      value={addFields.firstName}
+                      onChange={(e) =>
+                        setAddFields({
+                          ...addFields,
+                          firstName: e.target.value,
+                        })
+                      }
+                    />
+                  </Grid>
+                  <Grid item xs={6} md={2} lg={2}>
+                    <TextField
+                      label="Apellido"
+                      variant="outlined"
+                      fullWidth
+                      sx={{
+                        height: 56,
+                      }}
+                      value={addFields.lastName}
+                      onChange={(e) =>
+                        setAddFields({ ...addFields, lastName: e.target.value })
+                      }
+                    />
+                  </Grid>
+                  <Grid item xs={12} md={3} lg={3}>
+                    <TextField
+                      label="Correo Eléctronico"
+                      variant="outlined"
+                      fullWidth
+                      sx={{
+                        height: 56,
+                      }}
+                      value={addFields.email}
+                      onChange={(e) =>
+                        setAddFields({ ...addFields, email: e.target.value })
+                      }
+                    />
+                  </Grid>
+                  <Grid item xs={6} md={2} lg={2}>
+                    <TextField
+                      label="Usuario"
+                      variant="outlined"
+                      fullWidth
+                      sx={{
+                        height: 56,
+                      }}
+                      value={addFields.username}
+                      onChange={(e) =>
+                        setAddFields({ ...addFields, username: e.target.value })
+                      }
+                    />
+                  </Grid>
+                  <Grid item xs={6} md={3} lg={3}>
+                    <TextField
+                      label="Contraseña"
+                      variant="outlined"
+                      type={showPassword ? "text" : "password"}
+                      fullWidth
+                      sx={{
+                        height: 56,
+                      }}
+                      value={addFields.password}
+                      onChange={(e) =>
+                        setAddFields({ ...addFields, password: e.target.value })
+                      }
+                      InputProps={{
+                        endAdornment: (
+                          <InputAdornment position="end">
+                            <IconButton
+                              onClick={handleTogglePassword}
+                              edge="end"
+                            >
+                              {showPassword ? (
+                                <VisibilityOff />
+                              ) : (
+                                <Visibility />
+                              )}
+                            </IconButton>
+                          </InputAdornment>
+                        ),
+                      }}
+                    />
+                  </Grid>
+                </Grid>
+                <Tooltip title="Agregar Usuario" arrow>
+                  <Box
+                    sx={{
+                      width: { xs: "100%", md: "auto" },
+                      display: "flex",
+                      justifyContent: { xs: "stretch", md: "flex-end" },
+                    }}
+                  >
+                    <Button
+                      variant="contained"
+                      color="primary"
+                      sx={{
+                        minHeight: 56,
+                        display: "flex",
+                        justifyContent: "center",
+                        lineHeight: "normal",
+                        width: { xs: "100%", md: "auto" },
+                      }}
+                      onClick={handleAdd}
+                      disabled={!isAddFormValid}
+                    >
+                      <PersonAddAlt1RoundedIcon />
+                    </Button>
+                  </Box>
+                </Tooltip>
               </Box>
-              <EditableTable<User>
-                data={filteredUsers}
-                columns={[
-                  "firstName",
-                  "lastName",
-                  "username",
-                  "email",
-                  "roleName",
-                ]}
-                editRowId={editRowId}
-                editFields={editFields}
-                setEditField={(field, value) =>
-                  setEditFields({ ...editFields, [field]: value })
-                }
-                handleEditClick={handleEditClick}
-                handleCancelClick={handleCancelClick}
-                handleSaveClick={handleSaveClick}
-                handleOpenDialog={handleOpenDialog}
-                getRowId={(row) => row.id}
-                totalCount={totalCount}
-                page={page}
-                rowsPerPage={rowsPerPage}
-                setPage={setPage}
-                setRowsPerPage={setRowsPerPage}
-                isSaveDisabled={!isEditFormValid}
-                userPermissions={userPermissions}
-              />
-            </Stack>
+            </Grid>
+          </Grid>
+          <br />
+          {filteredUsers.length > 0 ? (
+            <EditableTable<User>
+              data={filteredUsers}
+              columns={[
+                "firstName",
+                "lastName",
+                "username",
+                "email",
+                "roleName",
+              ]}
+              editRowId={editRowId}
+              editFields={editFields}
+              setEditField={(field, value) =>
+                setEditFields({ ...editFields, [field]: value })
+              }
+              handleEditClick={handleEditClick}
+              handleCancelClick={handleCancelClick}
+              handleSaveClick={handleSaveClick}
+              handleOpenDialog={handleOpenDialog}
+              getRowId={(row) => row.id}
+              totalCount={totalCount}
+              page={page}
+              rowsPerPage={rowsPerPage}
+              setPage={setPage}
+              setRowsPerPage={setRowsPerPage}
+              isSaveDisabled={!isEditFormValid}
+              userPermissions={userPermissions}
+            />
           ) : (
             <Box
               sx={{

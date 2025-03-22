@@ -5,14 +5,15 @@ import { Role } from "../models/Role";
 import { Permission } from "../models/Permission";
 import { generateTokens } from "../utils/generateSecret";
 import { UserRole } from "../models/UserRole";
+import { Op } from "sequelize";
 
 export const authenticateUser = async (
-  username: string,
+  identifier: string,
   password: string,
   res: Response<any, Record<string, any>>
 ) => {
   const user = await User.findOne({
-    where: { username },
+    where: { [Op.or]: [{ username: identifier }, { email: identifier }] },
     include: [
       {
         model: Role,
@@ -110,10 +111,7 @@ export const createUser = async (data: Omit<User, "id">) => {
   );
 };
 
-export const updateUser = async (
-  id: number,
-  data: Omit<User, "id">
-) => {
+export const updateUser = async (id: number, data: Omit<User, "id">) => {
   await User.update(data, { where: { id } });
   return User.findByPk(id);
 };

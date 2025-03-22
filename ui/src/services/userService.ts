@@ -1,9 +1,9 @@
 import { User } from "../models/User";
 import api from "./api";
 
-export const authenticateUser = async (username: string, password: string) => {
+export const authenticateUser = async (identifier: string, password: string) => {
   const response = await api.post("/users/login", {
-    username,
+    identifier,
     password,
   });
   return response.data;

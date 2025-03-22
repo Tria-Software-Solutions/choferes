@@ -20,6 +20,7 @@ import Visibility from "@mui/icons-material/Visibility";
 import VisibilityOff from "@mui/icons-material/VisibilityOff";
 import logo from "../../assets/images/logo.png";
 import { PAGE_TITLE } from "../../constants/constants";
+import AccountCircleIcon from '@mui/icons-material/AccountCircle';
 
 const Register = () => {
   const { createUser, getUserByUsername } = useUsers();
@@ -33,6 +34,9 @@ const Register = () => {
   });
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  const theme = useTheme();
+  const isSmallScreen = useMediaQuery(theme.breakpoints.down("sm"));
 
   const validateFields = useCallback(async () => {
     const nameRegex = /^[a-zA-ZáéíóúÁÉÍÓÚüÜñÑ.\s]+$/;
@@ -104,7 +108,7 @@ const Register = () => {
         username: addFields.username,
         password: addFields.password,
       };
-      createUser(newUser);
+      await createUser(newUser);
       showNotification("El registro del usuario fue exitoso", "success", 3000, false);
     } catch (error) {
       setError("Error al registrar usuario");
@@ -139,9 +143,6 @@ const Register = () => {
     setShowPassword((prev) => !prev);
   };
 
-  const theme = useTheme();
-  const isSmallScreen = useMediaQuery(theme.breakpoints.down("sm"));
-
   return (
     <Box
       display="flex"
@@ -152,7 +153,7 @@ const Register = () => {
       <Card sx={{ width: 400, p: 3, boxShadow: 3 }}>
         <CardContent>
           <Box display="flex" justifyContent="center" mb={2}>
-            <img src={logo} alt="Logo" style={{ width: 95, height: "auto" }} />
+            <AccountCircleIcon style={{ width: 95, height: "auto" }}/>
           </Box>
           <Typography
             variant={isSmallScreen ? "h6" : "h2"}

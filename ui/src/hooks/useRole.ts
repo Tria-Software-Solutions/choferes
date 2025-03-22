@@ -45,6 +45,12 @@ export const useRoles = () => {
     }
   }, []);
 
+  const createRole = async (newRole: Omit<Role, "id">) => {
+    const createdRole = await RoleService.createRole(newRole);
+    setRoles((prev) => [...prev, createdRole]);
+    setTotalCountRoles((prev) => prev + 1);
+  };
+
   const updateRole = async (
     id: number,
     updatedRole: Partial<Role>,
@@ -91,6 +97,7 @@ export const useRoles = () => {
     getRoles,
     getRoleById,
     getRoleByName,
+    createRole,
     updateRole,
     deleteRole,
   };
