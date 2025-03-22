@@ -88,8 +88,12 @@ const MenuComponent: React.FC<MenuComponentProps> = ({
         anchorEl={anchorEl}
         open={open}
         onClose={handleClose}
-        MenuListProps={{
-          "aria-labelledby": "generic-button",
+        PaperProps={{
+          sx: {
+            mt: 1.5,
+            borderTopLeftRadius: 0,
+            borderTopRightRadius: 0,
+          }
         }}
       >
         {menuItems.map((item, index) => (

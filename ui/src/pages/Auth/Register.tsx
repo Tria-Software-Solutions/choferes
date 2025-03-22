@@ -18,7 +18,6 @@ import {
 } from "@mui/material";
 import Visibility from "@mui/icons-material/Visibility";
 import VisibilityOff from "@mui/icons-material/VisibilityOff";
-import logo from "../../assets/images/logo.png";
 import { PAGE_TITLE } from "../../constants/constants";
 import AccountCircleIcon from '@mui/icons-material/AccountCircle';
 
