@@ -201,9 +201,10 @@ const VehiclesPage: React.FC = () => {
   const handleAdd = async () => {
     try {
       const newVehicle: Vehicle = {
-        id: allVehicles.length > 0
-          ? Math.max(...allVehicles.map((vehicle) => vehicle.id)) + 1
-          : 1,
+        id:
+          allVehicles.length > 0
+            ? Math.max(...allVehicles.map((vehicle) => vehicle.id)) + 1
+            : 1,
         ticket: addFields.ticket,
         licensePlate: addFields.licensePlate,
         brand: addFields.brand,
@@ -212,11 +213,11 @@ const VehiclesPage: React.FC = () => {
         notes: addFields.notes,
         createdAt: selectedDate,
       };
-  
-      await createVehicle(newVehicle); 
-  
+
+      await createVehicle(newVehicle);
+
       setAllVehicles((prevVehicles) => [...prevVehicles, newVehicle]);
-  
+
       setAddFields({
         ticket: "",
         licensePlate: "",
@@ -225,7 +226,7 @@ const VehiclesPage: React.FC = () => {
         parkingLot: "",
         notes: "",
       });
-  
+
       showNotification(
         "El registro del vehículo fue exitoso",
         "success",
@@ -242,7 +243,6 @@ const VehiclesPage: React.FC = () => {
       );
     }
   };
-  
 
   const handleEditClick = (vehicle: Vehicle) => {
     setEditRowId(vehicle.id);
@@ -878,11 +878,15 @@ const VehiclesPage: React.FC = () => {
           </Typography>
         </DialogContent>
         <DialogActions>
-          <Button color="primary" onClick={handleCloseDeleteDialog}>
-            Cancelar
+          <Button color="primary" sx={{ flex: 1 }} onClick={handleDelete}>
+            Aceptar
           </Button>
-          <Button color="secondary" onClick={handleDelete}>
-            Eliminar
+          <Button
+            color="secondary"
+            sx={{ flex: 1 }}
+            onClick={handleCloseDeleteDialog}
+          >
+            Cancelar
           </Button>
         </DialogActions>
       </Dialog>

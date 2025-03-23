@@ -429,6 +429,7 @@ const SchedulesPage: React.FC = () => {
                               />
                             }
                             label="Horario Especial"
+                            labelPlacement="start"
                           />
                         </FormGroup>
                       </Box>
@@ -514,11 +515,15 @@ const SchedulesPage: React.FC = () => {
           </Typography>
         </DialogContent>
         <DialogActions>
-          <Button onClick={handleCloseDeleteDialog} color="primary">
-            Cancelar
+          <Button color="primary" sx={{ flex: 1 }} onClick={handleDelete}>
+            Aceptar
           </Button>
-          <Button onClick={handleDelete} color="secondary">
-            Eliminar
+          <Button
+            color="secondary"
+            sx={{ flex: 1 }}
+            onClick={handleCloseDeleteDialog}
+          >
+            Cancelar
           </Button>
         </DialogActions>
       </Dialog>

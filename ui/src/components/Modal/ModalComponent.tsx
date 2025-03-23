@@ -12,7 +12,7 @@ interface ModalComponentProps {
   modalStyle?: SxProps;
   disabled?: boolean;
   modalTitle: string;
-  modalDescription?: string;
+  modalDescription?: JSX.Element | string;
   children?: (props: { handleClose: () => void }) => React.ReactNode;
   onCloseModal?: () => void;
 }

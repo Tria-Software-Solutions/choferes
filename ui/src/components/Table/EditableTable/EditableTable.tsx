@@ -28,6 +28,7 @@ import {
   Link,
   Checkbox,
   ListItemText,
+  useMediaQuery,
 } from "@mui/material";
 import {
   translateColumnHeaderToSpanish,
@@ -50,6 +51,7 @@ import PaginationActions from "../Pagination/PaginationActions";
 import PasswordIcon from "@mui/icons-material/Password";
 import CheckCircleOutlineIcon from "@mui/icons-material/CheckCircleOutline";
 import BlockIcon from "@mui/icons-material/Block";
+import ModalComponent from "../../Modal/ModalComponent";
 
 type EditableTableProps<T> = {
   data: T[];
@@ -66,7 +68,7 @@ type EditableTableProps<T> = {
   handleSaveClick?: (id: number) => void;
   handleOpenDeleteDialog?: (id: number) => void;
   handleOpenStatusDialog?: (id: number) => void;
-  handleOpenPasswordDialog?: (id: number) => void;
+  handlePasswordModal?: (handleClose: () => void) => void;
   getRowId: (row: T) => number;
   totalCount: number;
   page: number;
@@ -95,7 +97,7 @@ const EditableTable = <T extends object>({
   handleSaveClick,
   handleOpenDeleteDialog,
   handleOpenStatusDialog,
-  handleOpenPasswordDialog,
+  handlePasswordModal,
   getRowId,
   totalCount,
   page,
@@ -113,7 +115,9 @@ const EditableTable = <T extends object>({
   const { permissions } = usePermissions();
   const [order, setOrder] = useState<"asc" | "desc">("asc");
   const [orderBy, setOrderBy] = useState<keyof T>(columns[0]);
+
   const theme = useTheme();
+  const isSmallScreen = useMediaQuery(theme.breakpoints.down("sm"));
 
   const hasEditPermissions =
     userPermissions?.includes(PERMISSIONS.EDIT_EMPLOYEES) ||
@@ -524,15 +528,24 @@ const EditableTable = <T extends object>({
                               <>
                                 {isUser && (
                                   <Tooltip title="Cambiar Contraseña" arrow>
-                                    <IconButton
-                                      color="primary"
-                                      onClick={() =>
-                                        handleOpenPasswordDialog &&
-                                        handleOpenPasswordDialog(getRowId(row))
+                                    <ModalComponent
+                                      buttonType="icon"
+                                      buttonIcon={<PasswordIcon />}
+                                      variant="text"
+                                      modalStyle={{
+                                        width: isSmallScreen ? "80%" : "40%",
+                                      }}
+                                      modalTitle={"Cambiar Contraseña"}
+                                      modalDescription={
+                                        "Puedes cambiar la contraseña manualmente"
                                       }
                                     >
-                                      <PasswordIcon />
-                                    </IconButton>
+                                      {({ handleClose }) => (
+                                        <>
+                                          {handlePasswordModal && handlePasswordModal(handleClose)}
+                                        </>
+                                      )}
+                                    </ModalComponent>
                                   </Tooltip>
                                 )}
                                 <Tooltip title="Editar" arrow>
@@ -549,15 +562,14 @@ const EditableTable = <T extends object>({
                                 </Tooltip>
                               </>
                             )}
-                            {hasDeletePermissions && !isCurrentUser && (
+                            {hasDeletePermissions && (
                               <>
                                 {isUser ? (
-                                  "isActive" in row ? (
+                                  !isCurrentUser &&
+                                  ("isActive" in row ? (
                                     <Tooltip
                                       title={
-                                        row.isActive
-                                          ? "Desactivar"
-                                          : "Activar"
+                                        row.isActive ? "Desactivar" : "Activar"
                                       }
                                       arrow
                                     >
@@ -572,14 +584,14 @@ const EditableTable = <T extends object>({
                                           }
                                         >
                                           {row.isActive ? (
-                                            <BlockIcon />
+                                            <BlockIcon color="error" />
                                           ) : (
-                                            <CheckCircleOutlineIcon />
+                                            <CheckCircleOutlineIcon color="success" />
                                           )}
                                         </IconButton>
                                       </Box>
                                     </Tooltip>
-                                  ) : null
+                                  ) : null)
                                 ) : (
                                   <Tooltip title="Eliminar" arrow>
                                     <Box>

@@ -18,7 +18,6 @@ import {
   Grid,
   IconButton,
   InputAdornment,
-  Link,
   TextField,
   Tooltip,
   Typography,
@@ -29,7 +28,11 @@ import PersonAddAlt1RoundedIcon from "@mui/icons-material/PersonAddAlt1Rounded";
 import Visibility from "@mui/icons-material/Visibility";
 import VisibilityOff from "@mui/icons-material/VisibilityOff";
 
-const ManageUsers = () => {
+interface ManageUsersProps {
+  showInactive: boolean;
+}
+
+const ManageUsers: React.FC<ManageUsersProps> = ({ showInactive }) => {
   const { userPermissions } = useAuth();
   const {
     users,
@@ -39,7 +42,7 @@ const ManageUsers = () => {
     updateUser,
     updateUserStatus,
     updateUserPassword,
-    updateUserTemporalPassword
+    updateUserTemporalPassword,
   } = useUsers();
   const { getRoleByName } = useRoles();
   const { showNotification } = useAppNotifications();
@@ -63,15 +66,14 @@ const ManageUsers = () => {
     password: "",
     roleName: "",
   });
+  const [openStatusDialog, setOpenStatusDialog] = useState(false);
   const [newPassword, setNewPassword] = useState("");
   const [confirmNewPassword, setConfirmNewPassword] = useState("");
-  const [openStatusDialog, setOpenStatusDialog] = useState(false);
-  const [openPasswordDialog, setOpenPasswordDialog] = useState(false);
-  const [filter, setFilter] = useState("");
-  const [showPassword, setShowPassword] = useState(false);
   const [showNewPassword, setShowNewPassword] = useState(false);
   const [showConfirmNewPassword, setShowConfirmNewPassword] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [filter, setFilter] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(5);
   const [isAddFormValid, setIsAddFormValid] = useState(false);
@@ -81,7 +83,7 @@ const ManageUsers = () => {
     const normalizeString = (str: string) =>
       str.normalize("NFD").replace(/[\u0300-\u036f]/g, "");
 
-    const filtered = users
+    let filtered = users
       .map((user) => ({
         ...user,
         roleName: user.roles?.map((role: Role) => role.name).join(", "),
@@ -94,9 +96,13 @@ const ManageUsers = () => {
           .includes(normalizeString(filter).toLowerCase())
       );
 
+    if (!showInactive) {
+      filtered = filtered.filter((user) => user.isActive);
+    }
+
     setFilteredUsers(filtered);
     setTotalCount(filtered.length);
-  }, [filter, users]);
+  }, [filter, users, showInactive]);
 
   const validateFields = useCallback((fields: typeof editFields) => {
     const regex = {
@@ -131,10 +137,7 @@ const ManageUsers = () => {
 
   const handleAdd = async () => {
     try {
-      const newUser: Omit<
-        User,
-        "id" | "temporalPassword" | "role"
-      > = {
+      const newUser: Omit<User, "id" | "temporalPassword" | "role"> = {
         firstName: addFields.firstName,
         lastName: addFields.lastName,
         email: addFields.email,
@@ -228,14 +231,6 @@ const ManageUsers = () => {
     setOpenStatusDialog(false);
   };
 
-  const handleOpenPasswordDialog = (id: number) => {
-    setOpenPasswordDialog(true);
-  };
-
-  const handleClosePasswordDialog = () => {
-    setOpenPasswordDialog(false);
-  };
-
   const handleStatusChange = async () => {
     try {
       // if (userToDelete !== null) {
@@ -243,9 +238,9 @@ const ManageUsers = () => {
       //   await deleteUser(userToDelete, userRoleToDelete.id);
       //   handleCloseStatusDialog();
       // }
-      
+
       showNotification(
-        "La actualización del estatus del usuario fue exitosa",
+        "La actualización del estado del usuario fue exitosa",
         "success",
         3000,
         false
@@ -254,12 +249,16 @@ const ManageUsers = () => {
       handleCancelClick();
       console.error(error);
       showNotification(
-        "Ha ocurrido un error al actualizar el estatus del usuario",
+        "Ha ocurrido un error al actualizar el estado del usuario",
         "error",
         5000,
         false
       );
     }
+  };
+
+  const handleTogglePassword = () => {
+    setShowPassword((prev) => !prev);
   };
 
   const handleNewPassword = (
@@ -272,10 +271,6 @@ const ManageUsers = () => {
     event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
   ) => {
     setConfirmNewPassword(event.target.value);
-  };
-
-  const handleTogglePassword = () => {
-    setShowPassword((prev) => !prev);
   };
 
   const handleToggleNewPassword = () => {
@@ -301,6 +296,88 @@ const ManageUsers = () => {
     if (newPassword !== confirmNewPassword) {
       setError("Las contraseñas no coinciden.");
     }
+  };
+
+  const modalContentChangeUserPassword = (handleClose: () => void) => {
+    return (
+      <Box
+        sx={{
+          display: "flex",
+          flexDirection: "column",
+          gap: 2,
+          margin: "auto",
+        }}
+      >
+        <TextField
+          label="Nueva Contraseña"
+          variant="outlined"
+          type={showNewPassword ? "text" : "password"}
+          fullWidth
+          sx={{
+            height: 56,
+          }}
+          value={newPassword}
+          onChange={(e) => handleNewPassword(e)}
+          InputProps={{
+            endAdornment: (
+              <InputAdornment position="end">
+                <IconButton onClick={handleToggleNewPassword} edge="end">
+                  {showNewPassword ? <VisibilityOff /> : <Visibility />}
+                </IconButton>
+              </InputAdornment>
+            ),
+          }}
+        />
+        <TextField
+          label="Confirmar Contraseña"
+          variant="outlined"
+          type={showConfirmNewPassword ? "text" : "password"}
+          fullWidth
+          sx={{
+            height: 56,
+          }}
+          value={confirmNewPassword}
+          onChange={(e) => handleConfirmNewPassword(e)}
+          InputProps={{
+            endAdornment: (
+              <InputAdornment position="end">
+                <IconButton onClick={handleToggleConfirmNewPassword} edge="end">
+                  {showConfirmNewPassword ? <VisibilityOff /> : <Visibility />}
+                </IconButton>
+              </InputAdornment>
+            ),
+          }}
+        />
+        <br />
+        {error && (
+          <Alert severity="error" sx={{ mt: 2 }}>
+            {error}
+          </Alert>
+        )}
+        <Box sx={{ display: "flex", justifyContent: "flex-end", gap: 2 }}>
+          <Box>
+            <Button
+              variant="contained"
+              color="error"
+              sx={{ flex: 2, height: "56px" }}
+              onClick={handleChangePassword}
+            >
+              Aceptar
+            </Button>
+          </Box>
+          <Box>
+            <Button
+              variant="contained"
+              color="success"
+              sx={{ flex: 1, height: "56px" }}
+              onClick={handleClose}
+            >
+              Cancelar
+            </Button>
+          </Box>
+        </Box>
+      </Box>
+    );
   };
 
   return (
@@ -491,7 +568,7 @@ const ManageUsers = () => {
               handleCancelClick={handleCancelClick}
               handleSaveClick={handleSaveClick}
               handleOpenStatusDialog={handleOpenStatusDialog}
-              handleOpenPasswordDialog={handleOpenPasswordDialog}
+              handlePasswordModal={modalContentChangeUserPassword}
               getRowId={(row) => row.id}
               totalCount={totalCount}
               page={page}
@@ -518,93 +595,22 @@ const ManageUsers = () => {
         </>
       )}
       <Dialog open={openStatusDialog} onClose={handleCloseStatusDialog}>
-        <DialogTitle>Confirmar Eliminación</DialogTitle>
+        <DialogTitle>Confirmar Cambio de Estado</DialogTitle>
         <DialogContent>
           <Typography>
-            ¿Estás seguro de que deseas eliminar este usuario?
+            ¿Estás seguro de que deseas cambiar el estado de este usuario?
           </Typography>
         </DialogContent>
         <DialogActions>
-          <Button color="primary" onClick={handleCloseStatusDialog}>
-            Cancelar
-          </Button>
-          <Button color="secondary" onClick={handleStatusChange}>
-            Eliminar
-          </Button>
-        </DialogActions>
-      </Dialog>
-      <Dialog open={openPasswordDialog} onClose={handleClosePasswordDialog}>
-        <DialogTitle>Cambiar Contraseña</DialogTitle>
-        <DialogContent>
-          <Typography variant="body1">
-            Puedes cambiar la contraseña manualmente o generar una{" "}
-            <Link component="button" onClick={generatePassword}>
-              contraseña temporal
-            </Link>
-          </Typography>
-          <br />
-          <Typography variant="body1" />
-          <br />
-          <TextField
-            label="Nueva Contraseña"
-            variant="outlined"
-            type={showNewPassword ? "text" : "password"}
-            fullWidth
-            sx={{
-              height: 56,
-            }}
-            value={newPassword}
-            onChange={(e) => handleNewPassword(e)}
-            InputProps={{
-              endAdornment: (
-                <InputAdornment position="end">
-                  <IconButton onClick={handleToggleNewPassword} edge="end">
-                    {showNewPassword ? <VisibilityOff /> : <Visibility />}
-                  </IconButton>
-                </InputAdornment>
-              ),
-            }}
-          />
-          <TextField
-            label="Confirmar Contraseña"
-            variant="outlined"
-            type={showConfirmNewPassword ? "text" : "password"}
-            fullWidth
-            sx={{
-              height: 56,
-            }}
-            value={confirmNewPassword}
-            onChange={(e) => handleConfirmNewPassword(e)}
-            InputProps={{
-              endAdornment: (
-                <InputAdornment position="end">
-                  <IconButton
-                    onClick={handleToggleConfirmNewPassword}
-                    edge="end"
-                  >
-                    {showConfirmNewPassword ? (
-                      <VisibilityOff />
-                    ) : (
-                      <Visibility />
-                    )}
-                  </IconButton>
-                </InputAdornment>
-              ),
-            }}
-          />
-          <br />
-          {error && (
-            <Alert severity="error" sx={{ mt: 2 }}>
-              {error}
-            </Alert>
-          )}
-        </DialogContent>
-        <DialogActions>
-          <Button color="primary" onClick={handleClosePasswordDialog}>
-            Cancelar
-          </Button>
-          <Button color="secondary" onClick={handleChangePassword}>
+          <Button color="primary" sx={{ flex: 1 }} onClick={handleStatusChange}>
             Aceptar
+          </Button>
+          <Button
+            color="secondary"
+            sx={{ flex: 1 }}
+            onClick={handleCloseStatusDialog}
+          >
+            Cancelar
           </Button>
         </DialogActions>
       </Dialog>
