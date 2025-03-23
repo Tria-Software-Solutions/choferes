@@ -88,7 +88,9 @@ export const useUsers = () => {
     }
   }, []);
 
-  const createUser = async (newUser: Omit<User, "id" | "role">) => {
+  const createUser = async (
+    newUser: Omit<User, "id" | "temporalPassword" | "role">
+  ) => {
     const createdUser = await UserService.createUser(newUser);
     setUsers((prev) => [...prev, createdUser]);
     setTotalCountUsers((prev) => prev + 1);
@@ -121,6 +123,34 @@ export const useUsers = () => {
     );
   };
 
+  const updateUserStatus = async (id: number, status: boolean) => {
+    await UserService.updateUserStatus(id, status);
+    setUsers((prev) =>
+      prev.map((user) =>
+        user.id === id ? { ...user, isActive: status } : user
+      )
+    );
+  };
+
+  const updateUserPassword = async (id: number, password: string) => {
+    await UserService.updateUserPassword(id, password);
+    setUsers((prev) =>
+      prev.map((user) => (user.id === id ? { ...user, password } : user))
+    );
+  };
+
+  const updateUserTemporalPassword = async (
+    id: number,
+    temporalPassword: string
+  ) => {
+    await UserService.updateUserTemporalPassword(id, temporalPassword);
+    setUsers((prev) =>
+      prev.map((user) =>
+        user.id === id ? { ...user, temporalPassword } : user
+      )
+    );
+  };
+
   const deleteUser = async (userId: number, userRoleId: number) => {
     deleteUserRole(userRoleId);
     await UserService.deleteUser(userId);
@@ -147,6 +177,9 @@ export const useUsers = () => {
     getUserByUsername,
     createUser,
     updateUser,
+    updateUserStatus,
+    updateUserPassword,
+    updateUserTemporalPassword,
     deleteUser,
   };
 };

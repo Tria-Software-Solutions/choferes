@@ -54,7 +54,7 @@ const ManageRoles = () => {
     name: "",
     permissionNames: [],
   });
-  const [dialogOpen, setDialogOpen] = useState(false);
+  const [openDeleteDialog, setOpenDeleteDialog] = useState(false);
   const [roleToDelete, setRoleToDelete] = useState<number | null>(null);
   const [filter, setFilter] = useState("");
   const [page, setPage] = useState(0);
@@ -177,13 +177,13 @@ const ManageRoles = () => {
     }
   };
 
-  const handleOpenDialog = (id: number) => {
-    setDialogOpen(true);
+  const handleOpenDeleteDialog = (id: number) => {
+    setOpenDeleteDialog(true);
     setRoleToDelete(id);
   };
 
-  const handleCloseDialog = () => {
-    setDialogOpen(false);
+  const handleCloseDeleteDialog = () => {
+    setOpenDeleteDialog(false);
     setRoleToDelete(null);
   };
 
@@ -191,7 +191,7 @@ const ManageRoles = () => {
     try {
       if (roleToDelete !== null) {
         await deleteRole(roleToDelete);
-        handleCloseDialog();
+        handleCloseDeleteDialog();
       }
       showNotification(
         "La eliminación del rol fue exitosa",
@@ -353,7 +353,7 @@ const ManageRoles = () => {
               handleEditClick={handleEditClick}
               handleCancelClick={handleCancelClick}
               handleSaveClick={handleSaveClick}
-              handleOpenDialog={handleOpenDialog}
+              handleOpenDeleteDialog={handleOpenDeleteDialog}
               getRowId={(row) => row.id}
               totalCount={totalCount}
               page={page}
@@ -379,7 +379,7 @@ const ManageRoles = () => {
           )}
         </>
       )}
-      <Dialog open={dialogOpen} onClose={handleCloseDialog}>
+      <Dialog open={openDeleteDialog} onClose={handleCloseDeleteDialog}>
         <DialogTitle>Confirmar Eliminación</DialogTitle>
         <DialogContent>
           <Typography>
@@ -387,7 +387,7 @@ const ManageRoles = () => {
           </Typography>
         </DialogContent>
         <DialogActions>
-          <Button color="primary" onClick={handleCloseDialog}>
+          <Button color="primary" onClick={handleCloseDeleteDialog}>
             Cancelar
           </Button>
           <Button color="secondary" onClick={handleDelete}>

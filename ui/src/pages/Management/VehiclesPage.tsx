@@ -89,7 +89,7 @@ const VehiclesPage: React.FC = () => {
     parkingLot: "",
     notes: "",
   });
-  const [openDialog, setOpenDialog] = useState(false);
+  const [openDeleteDialog, setOpenDeleteDialog] = useState(false);
   const [openTicketTooltip, setOpenTicketTooltip] = useState(false);
   const [openLicensePlateTooltip, setOpenLicensePlateTooltip] = useState(false);
   const [vehicleToDelete, setVehicleToDelete] = useState<number | null>(null);
@@ -296,13 +296,13 @@ const VehiclesPage: React.FC = () => {
     [editFields, updateVehicle, showNotification]
   );
 
-  const handleOpenDialog = (id: number) => {
-    setOpenDialog(true);
+  const handleOpenDeleteDialog = (id: number) => {
+    setOpenDeleteDialog(true);
     setVehicleToDelete(id);
   };
 
-  const handleCloseDialog = () => {
-    setOpenDialog(false);
+  const handleCloseDeleteDialog = () => {
+    setOpenDeleteDialog(false);
     setVehicleToDelete(null);
   };
 
@@ -310,7 +310,7 @@ const VehiclesPage: React.FC = () => {
     try {
       if (vehicleToDelete !== null) {
         await deleteVehicle(vehicleToDelete);
-        handleCloseDialog();
+        handleCloseDeleteDialog();
       }
       showNotification(
         "La eliminación del vehículo fue exitosa",
@@ -833,7 +833,7 @@ const VehiclesPage: React.FC = () => {
               handleEditClick={handleEditClick}
               handleCancelClick={handleCancelClick}
               handleSaveClick={handleSaveClick}
-              handleOpenDialog={handleOpenDialog}
+              handleOpenDeleteDialog={handleOpenDeleteDialog}
               getRowId={(row) => row.id}
               totalCount={totalCount}
               page={page}
@@ -870,7 +870,7 @@ const VehiclesPage: React.FC = () => {
           )}
         </>
       )}
-      <Dialog open={openDialog} onClose={handleCloseDialog}>
+      <Dialog open={openDeleteDialog} onClose={handleCloseDeleteDialog}>
         <DialogTitle>Confirmar Eliminación</DialogTitle>
         <DialogContent>
           <Typography>
@@ -878,7 +878,7 @@ const VehiclesPage: React.FC = () => {
           </Typography>
         </DialogContent>
         <DialogActions>
-          <Button color="primary" onClick={handleCloseDialog}>
+          <Button color="primary" onClick={handleCloseDeleteDialog}>
             Cancelar
           </Button>
           <Button color="secondary" onClick={handleDelete}>

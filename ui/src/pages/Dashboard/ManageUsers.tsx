@@ -4,9 +4,9 @@ import { User } from "../../models/User";
 import { Role } from "../../models/Role";
 import { useUsers } from "../../hooks/useUser";
 import { useRoles } from "../../hooks/useRole";
-import { useUserRoles } from "../../hooks/useUserRole";
 import { useAppNotifications } from "../../components/Snackbar/SnackbarWrapper";
 import {
+  Alert,
   Backdrop,
   Box,
   Button,
@@ -18,6 +18,7 @@ import {
   Grid,
   IconButton,
   InputAdornment,
+  Link,
   TextField,
   Tooltip,
   Typography,
@@ -36,10 +37,11 @@ const ManageUsers = () => {
     createUser,
     getUsers,
     updateUser,
-    deleteUser,
+    updateUserStatus,
+    updateUserPassword,
+    updateUserTemporalPassword
   } = useUsers();
   const { getRoleByName } = useRoles();
-  const { getUserRoleByUserId } = useUserRoles();
   const { showNotification } = useAppNotifications();
   const [filteredUsers, setFilteredUsers] = useState<User[]>([]);
   const [totalCount, setTotalCount] = useState(0);
@@ -51,6 +53,7 @@ const ManageUsers = () => {
     username: "",
     password: "",
     roleName: "",
+    isActive: true,
   });
   const [editFields, setEditFields] = useState({
     firstName: "",
@@ -60,10 +63,15 @@ const ManageUsers = () => {
     password: "",
     roleName: "",
   });
-  const [dialogOpen, setDialogOpen] = useState(false);
-  const [userToDelete, setUserToDelete] = useState<number | null>(null);
+  const [newPassword, setNewPassword] = useState("");
+  const [confirmNewPassword, setConfirmNewPassword] = useState("");
+  const [openStatusDialog, setOpenStatusDialog] = useState(false);
+  const [openPasswordDialog, setOpenPasswordDialog] = useState(false);
   const [filter, setFilter] = useState("");
   const [showPassword, setShowPassword] = useState(false);
+  const [showNewPassword, setShowNewPassword] = useState(false);
+  const [showConfirmNewPassword, setShowConfirmNewPassword] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(5);
   const [isAddFormValid, setIsAddFormValid] = useState(false);
@@ -123,12 +131,16 @@ const ManageUsers = () => {
 
   const handleAdd = async () => {
     try {
-      const newUser: Omit<User, "id" | "role"> = {
+      const newUser: Omit<
+        User,
+        "id" | "temporalPassword" | "role"
+      > = {
         firstName: addFields.firstName,
         lastName: addFields.lastName,
         email: addFields.email,
         username: addFields.username,
         password: addFields.password,
+        isActive: addFields.isActive,
       };
       await createUser(newUser);
       setAddFields({
@@ -138,6 +150,7 @@ const ManageUsers = () => {
         username: "",
         password: "",
         roleName: "",
+        isActive: true,
       });
       showNotification(
         "El registro del usuario fue exitoso",
@@ -207,25 +220,32 @@ const ManageUsers = () => {
     }
   };
 
-  const handleOpenDialog = (id: number) => {
-    setDialogOpen(true);
-    setUserToDelete(id);
+  const handleOpenStatusDialog = (id: number) => {
+    setOpenStatusDialog(true);
   };
 
-  const handleCloseDialog = () => {
-    setDialogOpen(false);
-    setUserToDelete(null);
+  const handleCloseStatusDialog = () => {
+    setOpenStatusDialog(false);
   };
 
-  const handleDelete = async () => {
+  const handleOpenPasswordDialog = (id: number) => {
+    setOpenPasswordDialog(true);
+  };
+
+  const handleClosePasswordDialog = () => {
+    setOpenPasswordDialog(false);
+  };
+
+  const handleStatusChange = async () => {
     try {
-      if (userToDelete !== null) {
-        const userRoleToDelete = await getUserRoleByUserId(userToDelete);
-        await deleteUser(userToDelete, userRoleToDelete.id);
-        handleCloseDialog();
-      }
+      // if (userToDelete !== null) {
+      //   const userRoleToDelete = await getUserRoleByUserId(userToDelete);
+      //   await deleteUser(userToDelete, userRoleToDelete.id);
+      //   handleCloseStatusDialog();
+      // }
+      
       showNotification(
-        "La eliminación del usuario fue exitosa",
+        "La actualización del estatus del usuario fue exitosa",
         "success",
         3000,
         false
@@ -234,7 +254,7 @@ const ManageUsers = () => {
       handleCancelClick();
       console.error(error);
       showNotification(
-        "Ha ocurrido un error al eliminar el usuario",
+        "Ha ocurrido un error al actualizar el estatus del usuario",
         "error",
         5000,
         false
@@ -242,8 +262,45 @@ const ManageUsers = () => {
     }
   };
 
+  const handleNewPassword = (
+    event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+  ) => {
+    setNewPassword(event.target.value);
+  };
+
+  const handleConfirmNewPassword = (
+    event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+  ) => {
+    setConfirmNewPassword(event.target.value);
+  };
+
   const handleTogglePassword = () => {
     setShowPassword((prev) => !prev);
+  };
+
+  const handleToggleNewPassword = () => {
+    setShowNewPassword((prev) => !prev);
+  };
+
+  const handleToggleConfirmNewPassword = () => {
+    setShowConfirmNewPassword((prev) => !prev);
+  };
+
+  const generatePassword = () => {
+    const regex =
+      /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
+    let password = "";
+    do {
+      password = Math.random().toString(36).slice(-8) + "@A1";
+    } while (!regex.test(password));
+    setNewPassword(password);
+    setConfirmNewPassword(password);
+  };
+
+  const handleChangePassword = () => {
+    if (newPassword !== confirmNewPassword) {
+      setError("Las contraseñas no coinciden.");
+    }
   };
 
   return (
@@ -433,7 +490,8 @@ const ManageUsers = () => {
               handleEditClick={handleEditClick}
               handleCancelClick={handleCancelClick}
               handleSaveClick={handleSaveClick}
-              handleOpenDialog={handleOpenDialog}
+              handleOpenStatusDialog={handleOpenStatusDialog}
+              handleOpenPasswordDialog={handleOpenPasswordDialog}
               getRowId={(row) => row.id}
               totalCount={totalCount}
               page={page}
@@ -459,7 +517,7 @@ const ManageUsers = () => {
           )}
         </>
       )}
-      <Dialog open={dialogOpen} onClose={handleCloseDialog}>
+      <Dialog open={openStatusDialog} onClose={handleCloseStatusDialog}>
         <DialogTitle>Confirmar Eliminación</DialogTitle>
         <DialogContent>
           <Typography>
@@ -467,11 +525,86 @@ const ManageUsers = () => {
           </Typography>
         </DialogContent>
         <DialogActions>
-          <Button color="primary" onClick={handleCloseDialog}>
+          <Button color="primary" onClick={handleCloseStatusDialog}>
             Cancelar
           </Button>
-          <Button color="secondary" onClick={handleDelete}>
+          <Button color="secondary" onClick={handleStatusChange}>
             Eliminar
+          </Button>
+        </DialogActions>
+      </Dialog>
+      <Dialog open={openPasswordDialog} onClose={handleClosePasswordDialog}>
+        <DialogTitle>Cambiar Contraseña</DialogTitle>
+        <DialogContent>
+          <Typography variant="body1">
+            Puedes cambiar la contraseña manualmente o generar una{" "}
+            <Link component="button" onClick={generatePassword}>
+              contraseña temporal
+            </Link>
+          </Typography>
+          <br />
+          <Typography variant="body1" />
+          <br />
+          <TextField
+            label="Nueva Contraseña"
+            variant="outlined"
+            type={showNewPassword ? "text" : "password"}
+            fullWidth
+            sx={{
+              height: 56,
+            }}
+            value={newPassword}
+            onChange={(e) => handleNewPassword(e)}
+            InputProps={{
+              endAdornment: (
+                <InputAdornment position="end">
+                  <IconButton onClick={handleToggleNewPassword} edge="end">
+                    {showNewPassword ? <VisibilityOff /> : <Visibility />}
+                  </IconButton>
+                </InputAdornment>
+              ),
+            }}
+          />
+          <TextField
+            label="Confirmar Contraseña"
+            variant="outlined"
+            type={showConfirmNewPassword ? "text" : "password"}
+            fullWidth
+            sx={{
+              height: 56,
+            }}
+            value={confirmNewPassword}
+            onChange={(e) => handleConfirmNewPassword(e)}
+            InputProps={{
+              endAdornment: (
+                <InputAdornment position="end">
+                  <IconButton
+                    onClick={handleToggleConfirmNewPassword}
+                    edge="end"
+                  >
+                    {showConfirmNewPassword ? (
+                      <VisibilityOff />
+                    ) : (
+                      <Visibility />
+                    )}
+                  </IconButton>
+                </InputAdornment>
+              ),
+            }}
+          />
+          <br />
+          {error && (
+            <Alert severity="error" sx={{ mt: 2 }}>
+              {error}
+            </Alert>
+          )}
+        </DialogContent>
+        <DialogActions>
+          <Button color="primary" onClick={handleClosePasswordDialog}>
+            Cancelar
+          </Button>
+          <Button color="secondary" onClick={handleChangePassword}>
+            Aceptar
           </Button>
         </DialogActions>
       </Dialog>

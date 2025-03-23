@@ -4,7 +4,6 @@ import { Response } from "express";
 import { Role } from "../models/Role";
 import { Permission } from "../models/Permission";
 import { generateTokens } from "../utils/generateSecret";
-import { UserRole } from "../models/UserRole";
 import { Op } from "sequelize";
 
 export const authenticateUser = async (
@@ -29,7 +28,19 @@ export const authenticateUser = async (
     throw new Error("User not found");
   }
   const isMatch = await bcrypt.compare(password, user.password);
-  if (!isMatch) throw new Error("Incorrect password");
+  if (!isMatch) {
+    if (user.temporalPassword) {
+      const isMatchWithTemporalPassword = await bcrypt.compare(
+        password,
+        user.temporalPassword
+      );
+      if (!isMatchWithTemporalPassword) {
+        throw new Error("Incorrect password and temporary password");
+      }
+    } else {
+      throw new Error("Incorrect password");
+    }
+  }
 
   const { accessToken, refreshToken } = generateTokens(user.id.toString(), res);
 
@@ -113,6 +124,29 @@ export const createUser = async (data: Omit<User, "id">) => {
 
 export const updateUser = async (id: number, data: Omit<User, "id">) => {
   await User.update(data, { where: { id } });
+  return User.findByPk(id);
+};
+
+export const updateUserStatus = async (id: number, status: boolean) => {
+  await User.update({ isActive: status }, { where: { id } });
+  return User.findByPk(id);
+};
+
+export const updateUserPassword = async (id: number, password: string) => {
+  const hashedPassword = await bcrypt.hash(password, 10);
+  await User.update({ password: hashedPassword }, { where: { id } });
+  return User.findByPk(id);
+};
+
+export const updateUserTemporalPassword = async (
+  id: number,
+  temporalPassword: string
+) => {
+  const hashedTemporalPassword = await bcrypt.hash(temporalPassword, 10);
+  await User.update(
+    { temporalPassword: hashedTemporalPassword },
+    { where: { id } }
+  );
   return User.findByPk(id);
 };
 

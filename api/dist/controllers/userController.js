@@ -42,7 +42,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.deleteUser = exports.updateUser = exports.createUser = exports.getUserPermissions = exports.getUserByUsername = exports.getUserById = exports.getUsers = exports.authenticateUser = void 0;
+exports.deleteUser = exports.updateUserTemporalPassword = exports.updateUserPassword = exports.updateUserStatus = exports.updateUser = exports.createUser = exports.getUserPermissions = exports.getUserByUsername = exports.getUserById = exports.getUsers = exports.authenticateUser = void 0;
 const userService = __importStar(require("../services/userService"));
 const authenticateUser = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
@@ -132,6 +132,54 @@ const updateUser = (req, res) => __awaiter(void 0, void 0, void 0, function* () 
     }
 });
 exports.updateUser = updateUser;
+const updateUserStatus = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        const id = parseInt(req.params.id);
+        const updatedUser = yield userService.updateUserStatus(id, req.body.isActive);
+        if (updatedUser) {
+            return res.status(200).json(updatedUser);
+        }
+        else {
+            return res.status(404).json({ message: "User not found" });
+        }
+    }
+    catch (error) {
+        return res.status(500).json({ message: "Error updating User", error });
+    }
+});
+exports.updateUserStatus = updateUserStatus;
+const updateUserPassword = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        const id = parseInt(req.params.id);
+        const updatedUser = yield userService.updateUserPassword(id, req.body.password);
+        if (updatedUser) {
+            return res.status(200).json(updatedUser);
+        }
+        else {
+            return res.status(404).json({ message: "User not found" });
+        }
+    }
+    catch (error) {
+        return res.status(500).json({ message: "Error updating User", error });
+    }
+});
+exports.updateUserPassword = updateUserPassword;
+const updateUserTemporalPassword = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        const id = parseInt(req.params.id);
+        const updatedUser = yield userService.updateUserTemporalPassword(id, req.body.temporalPassword);
+        if (updatedUser) {
+            return res.status(200).json(updatedUser);
+        }
+        else {
+            return res.status(404).json({ message: "User not found" });
+        }
+    }
+    catch (error) {
+        return res.status(500).json({ message: "Error updating User", error });
+    }
+});
+exports.updateUserTemporalPassword = updateUserTemporalPassword;
 const deleteUser = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const id = parseInt(req.params.id);

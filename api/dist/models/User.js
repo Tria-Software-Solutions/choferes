@@ -37,6 +37,15 @@ User.init({
         type: sequelize_1.DataTypes.STRING,
         allowNull: false,
     },
+    temporalPassword: {
+        type: sequelize_1.DataTypes.STRING,
+        allowNull: true,
+    },
+    isActive: {
+        type: sequelize_1.DataTypes.BOOLEAN,
+        allowNull: false,
+        defaultValue: true,
+    }
 }, {
     sequelize: database_1.default,
     modelName: "User",

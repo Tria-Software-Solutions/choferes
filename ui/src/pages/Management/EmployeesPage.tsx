@@ -51,7 +51,7 @@ const EmployeesPage: React.FC = () => {
   const [editRowId, setEditRowId] = useState<number | null>(null);
   const [addFields, setAddFields] = useState({ firstName: "", lastName: "" });
   const [editFields, setEditFields] = useState({ firstName: "", lastName: "" });
-  const [dialogOpen, setDialogOpen] = useState(false);
+  const [openDeleteDialog, setOpenDeleteDialog] = useState(false);
   const [employeeToDelete, setEmployeeToDelete] = useState<number | null>(null);
   const [filter, setFilter] = useState("");
   const [page, setPage] = useState(0);
@@ -169,13 +169,13 @@ const EmployeesPage: React.FC = () => {
     }
   };
 
-  const handleOpenDialog = (id: number) => {
-    setDialogOpen(true);
+  const handleOpenDeleteDialog = (id: number) => {
+    setOpenDeleteDialog(true);
     setEmployeeToDelete(id);
   };
 
-  const handleCloseDialog = () => {
-    setDialogOpen(false);
+  const handleCloseDeleteDialog = () => {
+    setOpenDeleteDialog(false);
     setEmployeeToDelete(null);
   };
 
@@ -183,7 +183,7 @@ const EmployeesPage: React.FC = () => {
     try {
       if (employeeToDelete !== null) {
         await deleteEmployee(employeeToDelete);
-        handleCloseDialog();
+        handleCloseDeleteDialog();
       }
       showNotification(
         "La eliminación del empleado fue exitosa",
@@ -372,7 +372,7 @@ const EmployeesPage: React.FC = () => {
               handleEditClick={handleEditClick}
               handleCancelClick={handleCancelClick}
               handleSaveClick={handleSaveClick}
-              handleOpenDialog={handleOpenDialog}
+              handleOpenDeleteDialog={handleOpenDeleteDialog}
               getRowId={(row) => row.id}
               totalCount={totalCount}
               page={page}
@@ -402,7 +402,7 @@ const EmployeesPage: React.FC = () => {
           )}
         </>
       )}
-      <Dialog open={dialogOpen} onClose={handleCloseDialog}>
+      <Dialog open={openDeleteDialog} onClose={handleCloseDeleteDialog}>
         <DialogTitle>Confirmar Eliminación</DialogTitle>
         <DialogContent>
           <Typography>
@@ -410,7 +410,7 @@ const EmployeesPage: React.FC = () => {
           </Typography>
         </DialogContent>
         <DialogActions>
-          <Button color="primary" onClick={handleCloseDialog}>
+          <Button color="primary" onClick={handleCloseDeleteDialog}>
             Cancelar
           </Button>
           <Button color="secondary" onClick={handleDelete}>
