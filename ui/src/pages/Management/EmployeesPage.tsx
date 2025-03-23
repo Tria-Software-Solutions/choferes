@@ -410,11 +410,15 @@ const EmployeesPage: React.FC = () => {
           </Typography>
         </DialogContent>
         <DialogActions>
-          <Button color="primary" onClick={handleCloseDeleteDialog}>
-            Cancelar
+          <Button color="primary" sx={{ flex: 1 }} onClick={handleDelete}>
+            Aceptar
           </Button>
-          <Button color="secondary" onClick={handleDelete}>
-            Eliminar
+          <Button
+            color="secondary"
+            sx={{ flex: 1 }}
+            onClick={handleCloseDeleteDialog}
+          >
+            Cancelar
           </Button>
         </DialogActions>
       </Dialog>
