@@ -82,6 +82,60 @@ export const updateUser = async (req: Request, res: Response) => {
   }
 };
 
+export const updateUserStatus = async (req: Request, res: Response) => {
+  try {
+    const id = parseInt(req.params.id);
+    const updatedUser = await userService.updateUserStatus(
+      id,
+      req.body.isActive
+    );
+    if (updatedUser) {
+      return res.status(200).json(updatedUser);
+    } else {
+      return res.status(404).json({ message: "User not found" });
+    }
+  } catch (error) {
+    return res.status(500).json({ message: "Error updating User", error });
+  }
+};
+
+export const updateUserPassword = async (req: Request, res: Response) => {
+  try {
+    const id = parseInt(req.params.id);
+    const updatedUser = await userService.updateUserPassword(
+      id,
+      req.body.password
+    );
+    if (updatedUser) {
+      return res.status(200).json(updatedUser);
+    } else {
+      return res.status(404).json({ message: "User not found" });
+    }
+  } catch (error) {
+    return res.status(500).json({ message: "Error updating User", error });
+  }
+};
+
+export const updateUserTemporalPassword = async (
+  req: Request,
+  res: Response
+) => {
+  try {
+    const id = parseInt(req.params.id);
+    const updatedUser = await userService.updateUserTemporalPassword(
+      id,
+      req.body.temporalPassword
+    );
+    if (updatedUser) {
+      return res.status(200).json(updatedUser);
+    } else {
+      return res.status(404).json({ message: "User not found" });
+    }
+  } catch (error) {
+    return res.status(500).json({ message: "Error updating User", error });
+  }
+};
+
 export const deleteUser = async (req: Request, res: Response) => {
   try {
     const id = parseInt(req.params.id);

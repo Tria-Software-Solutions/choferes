@@ -48,6 +48,8 @@ import SaveIcon from "@mui/icons-material/Save";
 import CloseIcon from "@mui/icons-material/Close";
 import PaginationActions from "../Pagination/PaginationActions";
 import PasswordIcon from "@mui/icons-material/Password";
+import CheckCircleOutlineIcon from "@mui/icons-material/CheckCircleOutline";
+import BlockIcon from "@mui/icons-material/Block";
 
 type EditableTableProps<T> = {
   data: T[];
@@ -62,7 +64,9 @@ type EditableTableProps<T> = {
   handleEditClick?: (row: T) => void;
   handleCancelClick?: () => void;
   handleSaveClick?: (id: number) => void;
-  handleOpenDialog?: (id: number) => void;
+  handleOpenDeleteDialog?: (id: number) => void;
+  handleOpenStatusDialog?: (id: number) => void;
+  handleOpenPasswordDialog?: (id: number) => void;
   getRowId: (row: T) => number;
   totalCount: number;
   page: number;
@@ -89,7 +93,9 @@ const EditableTable = <T extends object>({
   handleEditClick,
   handleCancelClick,
   handleSaveClick,
-  handleOpenDialog,
+  handleOpenDeleteDialog,
+  handleOpenStatusDialog,
+  handleOpenPasswordDialog,
   getRowId,
   totalCount,
   page,
@@ -521,7 +527,8 @@ const EditableTable = <T extends object>({
                                     <IconButton
                                       color="primary"
                                       onClick={() =>
-                                        console.log("Cambiar contraseña: ", getRowId(row))
+                                        handleOpenPasswordDialog &&
+                                        handleOpenPasswordDialog(getRowId(row))
                                       }
                                     >
                                       <PasswordIcon />
@@ -543,19 +550,52 @@ const EditableTable = <T extends object>({
                               </>
                             )}
                             {hasDeletePermissions && !isCurrentUser && (
-                              <Tooltip title="Eliminar" arrow>
-                                <Box>
-                                  <IconButton
-                                    color="secondary"
-                                    onClick={() =>
-                                      handleOpenDialog &&
-                                      handleOpenDialog(getRowId(row))
-                                    }
-                                  >
-                                    <DeleteIcon />
-                                  </IconButton>
-                                </Box>
-                              </Tooltip>
+                              <>
+                                {isUser ? (
+                                  "isActive" in row ? (
+                                    <Tooltip
+                                      title={
+                                        row.isActive
+                                          ? "Desactivar"
+                                          : "Activar"
+                                      }
+                                      arrow
+                                    >
+                                      <Box>
+                                        <IconButton
+                                          color="secondary"
+                                          onClick={() =>
+                                            handleOpenStatusDialog &&
+                                            handleOpenStatusDialog(
+                                              getRowId(row)
+                                            )
+                                          }
+                                        >
+                                          {row.isActive ? (
+                                            <BlockIcon />
+                                          ) : (
+                                            <CheckCircleOutlineIcon />
+                                          )}
+                                        </IconButton>
+                                      </Box>
+                                    </Tooltip>
+                                  ) : null
+                                ) : (
+                                  <Tooltip title="Eliminar" arrow>
+                                    <Box>
+                                      <IconButton
+                                        color="secondary"
+                                        onClick={() =>
+                                          handleOpenDeleteDialog &&
+                                          handleOpenDeleteDialog(getRowId(row))
+                                        }
+                                      >
+                                        <DeleteIcon />
+                                      </IconButton>
+                                    </Box>
+                                  </Tooltip>
+                                )}
+                              </>
                             )}
                           </>
                         )}

@@ -42,8 +42,11 @@ api.interceptors.response.use(
 );
 
 const disconnectUser = () => {
+  Cookies.remove("accessToken");
+  Cookies.remove("refreshToken");
   sessionStorage.clear();
   console.warn("Session expired. User disconnected.");
+  window.location.href = "/";
 };
 
 export default api;

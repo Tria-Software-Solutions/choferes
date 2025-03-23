@@ -82,7 +82,7 @@ const SchedulesPage: React.FC = () => {
     hours: "",
     specialSchedule: false,
   });
-  const [dialogOpen, setDialogOpen] = useState(false);
+  const [openDeleteDialog, setOpenDeleteDialog] = useState(false);
   const [scheduleToDelete, setScheduleToDelete] = useState<number | null>(null);
   const [filter, setFilter] = useState("");
   const [page, setPage] = useState(0);
@@ -210,13 +210,13 @@ const SchedulesPage: React.FC = () => {
     }
   };
 
-  const handleOpenDialog = (id: number) => {
-    setDialogOpen(true);
+  const handleOpenDeleteDialog = (id: number) => {
+    setOpenDeleteDialog(true);
     setScheduleToDelete(id);
   };
 
-  const handleCloseDialog = () => {
-    setDialogOpen(false);
+  const handleCloseDeleteDialog = () => {
+    setOpenDeleteDialog(false);
     setScheduleToDelete(null);
   };
 
@@ -224,7 +224,7 @@ const SchedulesPage: React.FC = () => {
     try {
       if (scheduleToDelete !== null) {
         await deleteSchedule(scheduleToDelete);
-        handleCloseDialog();
+        handleCloseDeleteDialog();
       }
       showNotification(
         "La eliminación del horario fue exitosa",
@@ -476,7 +476,7 @@ const SchedulesPage: React.FC = () => {
               handleEditClick={handleEditClick}
               handleCancelClick={handleCancelClick}
               handleSaveClick={handleSaveClick}
-              handleOpenDialog={handleOpenDialog}
+              handleOpenDeleteDialog={handleOpenDeleteDialog}
               getRowId={(row) => row.id}
               totalCount={totalCountSchedules}
               page={page}
@@ -506,7 +506,7 @@ const SchedulesPage: React.FC = () => {
           )}
         </>
       )}
-      <Dialog open={dialogOpen} onClose={handleCloseDialog}>
+      <Dialog open={openDeleteDialog} onClose={handleCloseDeleteDialog}>
         <DialogTitle>Confirmar Eliminación</DialogTitle>
         <DialogContent>
           <Typography>
@@ -514,7 +514,7 @@ const SchedulesPage: React.FC = () => {
           </Typography>
         </DialogContent>
         <DialogActions>
-          <Button onClick={handleCloseDialog} color="primary">
+          <Button onClick={handleCloseDeleteDialog} color="primary">
             Cancelar
           </Button>
           <Button onClick={handleDelete} color="secondary">
