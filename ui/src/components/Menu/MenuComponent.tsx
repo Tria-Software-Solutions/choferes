@@ -18,14 +18,16 @@ interface MenuItemProps {
 }
 
 interface MenuComponentProps {
+  buttonType: "icon" | "text" | "button";
   icon?: React.ReactElement<SvgIconProps> | React.ReactElement;
-  buttonText?: string;
+  text?: string;
   menuItems: MenuItemProps[];
 }
 
 const MenuComponent: React.FC<MenuComponentProps> = ({
+  buttonType,
   icon,
-  buttonText,
+  text,
   menuItems,
 }) => {
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
@@ -50,7 +52,7 @@ const MenuComponent: React.FC<MenuComponentProps> = ({
 
   return (
     <div>
-      {icon && (
+      {buttonType === "icon" ? (
         <IconButton
           color="inherit"
           sx={{
@@ -65,9 +67,19 @@ const MenuComponent: React.FC<MenuComponentProps> = ({
         >
           {icon}
         </IconButton>
-      )}
-
-      {buttonText && !icon && (
+      ) : buttonType === "text" ? (
+        <Button
+          sx={{
+            height: "40px",
+          }}
+          aria-controls={open ? "generic-menu" : undefined}
+          aria-haspopup="true"
+          aria-expanded={open ? "true" : undefined}
+          onClick={handleClick}
+        >
+          {text}
+        </Button>
+      ) : (
         <Button
           sx={{
             height: "40px",
@@ -79,17 +91,20 @@ const MenuComponent: React.FC<MenuComponentProps> = ({
           aria-expanded={open ? "true" : undefined}
           onClick={handleClick}
         >
-          {buttonText}
+          {text}
         </Button>
       )}
-
       <Menu
         id="generic-menu"
         anchorEl={anchorEl}
         open={open}
         onClose={handleClose}
-        MenuListProps={{
-          "aria-labelledby": "generic-button",
+        PaperProps={{
+          sx: {
+            mt: 1.5,
+            borderTopLeftRadius: 0,
+            borderTopRightRadius: 0,
+          },
         }}
       >
         {menuItems.map((item, index) => (

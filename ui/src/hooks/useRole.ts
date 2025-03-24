@@ -1,10 +1,13 @@
 import { useState, useEffect, useCallback } from "react";
 import * as RoleService from "../services/roleService";
+import * as RolePermissionService from "../services/rolePermissionService";
 import { useAuth } from "../context/AuthContext";
 import { Role } from "../models/Role";
+import { useRolePermissions } from "./useRolePermission";
 
 export const useRoles = () => {
   const { currentUser } = useAuth();
+  const { createRolePermission } = useRolePermissions();
   const [roles, setRoles] = useState<Role[]>([]);
   const [totalCountRoles, setTotalCountRoles] = useState(0);
   const [isLoadingRoles, setIsLoadingRoles] = useState(false);
@@ -44,10 +47,48 @@ export const useRoles = () => {
     }
   }, []);
 
-  const updateRole = async (id: number, updatedRole: Partial<Role>) => {
-    await RoleService.getRoleById(id);
+  const createRole = async (
+    newRole: Omit<Role, "id">,
+    newPermissionIds?: number[]
+  ) => {
+    const createdRole = await RoleService.createRole(newRole);
+    setRoles((prev) => [...prev, createdRole]);
+    setTotalCountRoles((prev) => prev + 1);
+    if (Array.isArray(newPermissionIds) && newPermissionIds.length > 0) {
+      await Promise.all(
+        newPermissionIds.map((permissionId) =>
+          createRolePermission({
+            roleId: createdRole.id,
+            permissionId,
+          })
+        )
+      );
+    }
+  };
+
+  const updateRole = async (
+    id: number,
+    updatedRole: Partial<Role>,
+    newPermissionIds?: number[]
+  ) => {
+    await RoleService.updateRole(id, updatedRole);
+    if (newPermissionIds) {
+      await RolePermissionService.updateRolePermission(id, newPermissionIds);
+    }
     setRoles((prev) =>
       prev.map((role) => (role.id === id ? { ...role, ...updatedRole } : role))
+    );
+
+    setRoles((prev) =>
+      prev.map((role) =>
+        role.id === id
+          ? {
+              ...role,
+              ...updatedRole,
+              permissionIds: newPermissionIds ?? role.permissionIds,
+            }
+          : role
+      )
     );
   };
 
@@ -71,6 +112,7 @@ export const useRoles = () => {
     getRoles,
     getRoleById,
     getRoleByName,
+    createRole,
     updateRole,
     deleteRole,
   };

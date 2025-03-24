@@ -21,6 +21,27 @@ export const createRolePermission = async (req: Request, res: Response) => {
   }
 };
 
+export const updateRolePermissions = async (req: Request, res: Response) => {
+  try {
+    const roleId = parseInt(req.params.id);
+    const { permissionIds } = req.body;
+
+    if (!Array.isArray(permissionIds)) {
+      return res.status(400).json({ message: "Permission Ids must be an array" });
+    }
+
+    const updatedRolePermissions = await rolePermissionService.updateRolePermission(roleId, permissionIds);
+
+    if (updatedRolePermissions) {
+      return res.status(200).json(updatedRolePermissions);
+    } else {
+      return res.status(404).json({ message: "Role not found or no permissions updated" });
+    }
+  } catch (error) {
+    return res.status(500).json({ message: "Error updating role permissions", error });
+  }
+};
+
 export const deleteRolePermission = async (req: Request, res: Response) => {
   try {
     const id = parseInt(req.params.id);

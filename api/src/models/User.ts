@@ -1,6 +1,7 @@
 import { Model, DataTypes, Association } from "sequelize";
 import sequelize from "../config/database";
 import { Role } from "./Role";
+import { AllowNull } from "sequelize-typescript";
 
 export class User extends Model {
   public id!: number;
@@ -9,7 +10,8 @@ export class User extends Model {
   public username!: string;
   public email!: string;
   public password!: string;
-
+  public temporalPassword!: string;
+  public isActive!: boolean;
   public roles?: Role[]; 
 
   public static associations: {
@@ -46,6 +48,15 @@ User.init(
       type: DataTypes.STRING,
       allowNull: false,
     },
+    temporalPassword: {
+      type: DataTypes.STRING,
+      allowNull: true,
+    },
+    isActive: {
+      type: DataTypes.BOOLEAN,
+      allowNull: false,
+      defaultValue: true,
+    }
   },
   {
     sequelize,

@@ -40,6 +40,7 @@ import {
 } from "../../utils/export";
 import { translateDayOptionsToSpanish } from "../../utils/string";
 import { DAYS_LIST, PAGE_TITLE, PERMISSIONS } from "../../constants/constants";
+import EditCalendarRoundedIcon from "@mui/icons-material/EditCalendarRounded";
 import PostAddRoundedIcon from "@mui/icons-material/PostAddRounded";
 import DownloadRoundedIcon from "@mui/icons-material/DownloadRounded";
 import CloseRoundedIcon from "@mui/icons-material/CloseRounded";
@@ -82,7 +83,7 @@ const SchedulesPage: React.FC = () => {
     hours: "",
     specialSchedule: false,
   });
-  const [dialogOpen, setDialogOpen] = useState(false);
+  const [openDeleteDialog, setOpenDeleteDialog] = useState(false);
   const [scheduleToDelete, setScheduleToDelete] = useState<number | null>(null);
   const [filter, setFilter] = useState("");
   const [page, setPage] = useState(0);
@@ -199,6 +200,7 @@ const SchedulesPage: React.FC = () => {
         false
       );
     } catch (error) {
+      handleCancelClick();
       console.error(error);
       showNotification(
         "Ha ocurrido un error al actualizar el horario",
@@ -209,13 +211,13 @@ const SchedulesPage: React.FC = () => {
     }
   };
 
-  const handleOpenDialog = (id: number) => {
-    setDialogOpen(true);
+  const handleOpenDeleteDialog = (id: number) => {
+    setOpenDeleteDialog(true);
     setScheduleToDelete(id);
   };
 
-  const handleCloseDialog = () => {
-    setDialogOpen(false);
+  const handleCloseDeleteDialog = () => {
+    setOpenDeleteDialog(false);
     setScheduleToDelete(null);
   };
 
@@ -223,15 +225,16 @@ const SchedulesPage: React.FC = () => {
     try {
       if (scheduleToDelete !== null) {
         await deleteSchedule(scheduleToDelete);
-        handleCloseDialog();
+        showNotification(
+          "La eliminación del horario fue exitosa",
+          "success",
+          3000,
+          false
+        );
       }
-      showNotification(
-        "La eliminación del horario fue exitosa",
-        "success",
-        3000,
-        false
-      );
+      handleCloseDeleteDialog();
     } catch (error) {
+      handleCancelClick();
       console.error(error);
       showNotification(
         "Ha ocurrido un error al eliminar el horario",
@@ -269,11 +272,18 @@ const SchedulesPage: React.FC = () => {
         alignItems="center"
         sx={{ mb: 3 }}
       >
-        <Typography variant={isSmallScreen ? "h5" : "h2"} sx={{ flexGrow: 1 }}>
+        <Box display="flex" alignItems="center">
+          <EditCalendarRoundedIcon
+            fontSize={isSmallScreen ? "small" : "large"}
+          />
+          <Box sx={{ ml: 1 }}>
+          <Typography variant={isSmallScreen ? "h5" : "h2"} sx={{ flexGrow: 1 }}>
           {isSmallScreen
             ? PAGE_TITLE.SCHEDULES_SIMPLIFIED
             : PAGE_TITLE.SCHEDULES}
         </Typography>
+          </Box>
+        </Box>
         {userPermissions.includes(PERMISSIONS.EXPORT_EXCEL_SCHEDULES) &&
           userPermissions.includes(PERMISSIONS.EXPORT_PDF_SCHEDULES) && (
             <Box sx={{ minHeight: 65 }}>
@@ -427,6 +437,7 @@ const SchedulesPage: React.FC = () => {
                               />
                             }
                             label="Horario Especial"
+                            labelPlacement="start"
                           />
                         </FormGroup>
                       </Box>
@@ -474,7 +485,7 @@ const SchedulesPage: React.FC = () => {
               handleEditClick={handleEditClick}
               handleCancelClick={handleCancelClick}
               handleSaveClick={handleSaveClick}
-              handleOpenDialog={handleOpenDialog}
+              handleOpenDeleteDialog={handleOpenDeleteDialog}
               getRowId={(row) => row.id}
               totalCount={totalCountSchedules}
               page={page}
@@ -504,19 +515,23 @@ const SchedulesPage: React.FC = () => {
           )}
         </>
       )}
-      <Dialog open={dialogOpen} onClose={handleCloseDialog}>
-        <DialogTitle>Confirmar Eliminación</DialogTitle>
+      <Dialog open={openDeleteDialog} onClose={handleCloseDeleteDialog}>
+        <DialogTitle>Confirmar</DialogTitle>
         <DialogContent>
           <Typography>
             ¿Estás seguro de que deseas eliminar este horario?
           </Typography>
         </DialogContent>
         <DialogActions>
-          <Button onClick={handleCloseDialog} color="primary">
-            Cancelar
+          <Button color="primary" sx={{ flex: 1 }} onClick={handleDelete}>
+            Aceptar
           </Button>
-          <Button onClick={handleDelete} color="secondary">
-            Eliminar
+          <Button
+            color="secondary"
+            sx={{ flex: 1 }}
+            onClick={handleCloseDeleteDialog}
+          >
+            Cancelar
           </Button>
         </DialogActions>
       </Dialog>

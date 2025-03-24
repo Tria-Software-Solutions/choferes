@@ -41,11 +41,11 @@ export const useUserRoles = () => {
     setTotalCountUserRoles((prev) => prev + 1);
   };
 
-  const updateUserRole = async (id: number, roleId: number) => {
-    await UserRoleService.updateUserRole(id, roleId);
+  const updateUserRole = async (userId: number, roleId: number) => {
+    await UserRoleService.updateUserRole(userId, roleId);
     setUserRole((prev) =>
       prev.map((userRole) =>
-        userRole.id === id ? { ...userRole, roleId } : userRole
+        userRole.userId === userId ? { ...userRole, roleId } : userRole
       )
     );
   };

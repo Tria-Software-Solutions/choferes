@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback } from "react";
 import * as UserService from "../services/userService";
+import * as UserRoleService from "../services/userRoleService";
 import { useUserRoles } from "./useUserRole";
 import { User } from "../models/User";
 import { UserRole } from "../models/UserRole";
@@ -16,10 +17,10 @@ export const useUsers = () => {
   const [authError, setAuthError] = useState<string | null>(null);
   const navigate = useNavigate();
 
-  const authenticateUser = async (username: string, password: string) => {
+  const authenticateUser = async (identifier: string, password: string) => {
     setAuthError(null);
     try {
-      const response = await UserService.authenticateUser(username, password);
+      const response = await UserService.authenticateUser(identifier, password);
       const userPermissions = await UserService.getUserPermissions(
         response.user.id
       );
@@ -87,22 +88,68 @@ export const useUsers = () => {
     }
   }, []);
 
-  const createUser = async (newUser: Omit<User, "id" | "role">) => {
+  const createUser = async (
+    newUser: Omit<User, "id" | "temporalPassword">,
+    newRoleId?: number
+  ) => {
     const createdUser = await UserService.createUser(newUser);
     setUsers((prev) => [...prev, createdUser]);
     setTotalCountUsers((prev) => prev + 1);
     const createdUserRole: Omit<UserRole, "id"> = {
       userId: createdUser.id,
-      roleId: Roles.USER,
+      roleId: newRoleId ? newRoleId : Roles.USER,
     };
     createUserRole(createdUserRole);
-    navigate("/");
+    if (currentUser) {
+      getUsers();
+    } else {
+      navigate("/");
+    }
   };
 
-  const updateUser = async (id: number, updatedUser: Partial<User>) => {
-    await UserService.getUserById(id);
+  const updateUser = async (
+    id: number,
+    updatedUser: Partial<User>,
+    newRoleId?: number
+  ) => {
+    await UserService.updateUser(id, updatedUser);
+    if (newRoleId) {
+      await UserRoleService.updateUserRole(id, newRoleId);
+    }
     setUsers((prev) =>
-      prev.map((user) => (user.id === id ? { ...user, ...updatedUser } : user))
+      prev.map((user) =>
+        user.id === id
+          ? { ...user, ...updatedUser, roleId: newRoleId ?? user.roleId }
+          : user
+      )
+    );
+  };
+
+  const updateUserStatus = async (id: number, status: boolean) => {
+    await UserService.updateUserStatus(id, status);
+    setUsers((prev) =>
+      prev.map((user) =>
+        user.id === id ? { ...user, isActive: status } : user
+      )
+    );
+  };
+
+  const updateUserPassword = async (id: number, password: string) => {
+    await UserService.updateUserPassword(id, password);
+    setUsers((prev) =>
+      prev.map((user) => (user.id === id ? { ...user, password } : user))
+    );
+  };
+
+  const updateUserTemporalPassword = async (
+    id: number,
+    temporalPassword: string
+  ) => {
+    await UserService.updateUserTemporalPassword(id, temporalPassword);
+    setUsers((prev) =>
+      prev.map((user) =>
+        user.id === id ? { ...user, temporalPassword } : user
+      )
     );
   };
 
@@ -132,6 +179,9 @@ export const useUsers = () => {
     getUserByUsername,
     createUser,
     updateUser,
+    updateUserStatus,
+    updateUserPassword,
+    updateUserTemporalPassword,
     deleteUser,
   };
 };

@@ -42,6 +42,7 @@ const authMiddleware_1 = require("../middleware/authMiddleware");
 const router = express_1.default.Router();
 router.get("/", authMiddleware_1.authenticateToken, permissionController.getPermissions);
 router.get("/:id", authMiddleware_1.authenticateToken, permissionController.getPermissionById);
+router.get("/names/:names", authMiddleware_1.authenticateToken, permissionController.getPermissionsByNames);
 router.post("/", authMiddleware_1.authenticateToken, permissionController.createPermission);
 router.delete("/:id", authMiddleware_1.authenticateToken, permissionController.deletePermission);
 exports.default = router;

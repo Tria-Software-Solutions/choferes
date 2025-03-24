@@ -89,6 +89,7 @@ const theme = createTheme({
           color: "#ffffff",
           borderRadius: "4px",
           textTransform: "none",
+          transition: "font-size 0.2s ease-in-out",
         },
         contained: {
           boxShadow: "none",
@@ -191,7 +192,7 @@ const theme = createTheme({
           },
           "&:active": {
             color: "#a6a6a6",
-            backgroundColor: "#e0e0e0", 
+            backgroundColor: "#e0e0e0",
           },
         },
       },
@@ -199,7 +200,7 @@ const theme = createTheme({
     MuiSpeedDial: {
       styleOverrides: {
         fab: {
-          width: "62px", 
+          width: "62px",
         },
       },
     },

@@ -42,7 +42,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.deletePermission = exports.createPermission = exports.getPermissionById = exports.getPermissions = void 0;
+exports.deletePermission = exports.createPermission = exports.getPermissionsByNames = exports.getPermissionById = exports.getPermissions = void 0;
 const permissionService = __importStar(require("../services/permissionService"));
 const getPermissions = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
@@ -50,7 +50,9 @@ const getPermissions = (req, res) => __awaiter(void 0, void 0, void 0, function*
         return res.status(200).json(permissions);
     }
     catch (error) {
-        return res.status(500).json({ message: "Error fetching Permissions", error });
+        return res
+            .status(500)
+            .json({ message: "Error fetching Permissions", error });
     }
 });
 exports.getPermissions = getPermissions;
@@ -58,14 +60,38 @@ const getPermissionById = (req, res) => __awaiter(void 0, void 0, void 0, functi
     try {
         const permission = yield permissionService.getPermissionById(Number(req.params.id));
         if (!permission)
-            return res.status(404).json({ error: "Permiso no encontrado" });
+            return res.status(404).json({ error: "Permission not found" });
         return res.status(200).json(permission);
     }
     catch (error) {
-        return res.status(500).json({ message: "Error fetching Permission", error });
+        return res
+            .status(500)
+            .json({ message: "Error fetching Permission", error });
     }
 });
 exports.getPermissionById = getPermissionById;
+const getPermissionsByNames = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        const decodedPermissionsNames = decodeURIComponent(req.params.names);
+        const permissionsNamesArray = decodedPermissionsNames
+            .split(",")
+            .map((name) => name.trim());
+        if (permissionsNamesArray.length === 0) {
+            return res.status(400).json({ error: "Invalid permissions array" });
+        }
+        const permissions = yield permissionService.getPermissionsByNames(permissionsNamesArray);
+        if (!permissions || permissions.length === 0) {
+            return res.status(404).json({ error: "Permissions not found" });
+        }
+        return res.status(200).json(permissions);
+    }
+    catch (error) {
+        return res
+            .status(500)
+            .json({ message: "Error fetching Permissions", error });
+    }
+});
+exports.getPermissionsByNames = getPermissionsByNames;
 const createPermission = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const { name } = req.body;

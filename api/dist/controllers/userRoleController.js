@@ -80,8 +80,7 @@ exports.createUserRole = createUserRole;
 const updateUserRole = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const id = parseInt(req.params.id);
-        const { newRoleId } = req.body;
-        const updatedUserRole = yield userRoleService.updateUserRole(Number(id), newRoleId);
+        const updatedUserRole = yield userRoleService.updateUserRole(Number(id), req.body.roleId);
         if (updatedUserRole) {
             return res.status(200).json(updatedUserRole);
         }

@@ -1,7 +1,6 @@
 import React from "react";
 import ManageUsers from "./ManageUsers";
 import ManageRoles from "./ManageRoles";
-import ManagePermissions from "./ManagePermissions";
 import {
   Accordion,
   AccordionDetails,
@@ -12,17 +11,18 @@ import {
   useTheme,
 } from "@mui/material";
 import { PAGE_TITLE } from "../../constants/constants";
+import ManageAccountsIcon from "@mui/icons-material/ManageAccounts";
 
 const Dashboard = () => {
   const [expanded, setExpanded] = React.useState<string | false>("panel1");
+
+  const theme = useTheme();
+  const isSmallScreen = useMediaQuery(theme.breakpoints.down("sm"));
 
   const handleChange =
     (panel: string) => (event: React.SyntheticEvent, newExpanded: boolean) => {
       setExpanded(newExpanded ? panel : expanded);
     };
-
-  const theme = useTheme();
-  const isSmallScreen = useMediaQuery(theme.breakpoints.down("sm"));
 
   return (
     <Box>
@@ -32,11 +32,19 @@ const Dashboard = () => {
         alignItems="center"
         sx={{ mb: 2 }}
       >
-        <Typography variant={isSmallScreen ? "h5" : "h2"} sx={{ flexGrow: 1 }}>
-          {isSmallScreen
-            ? PAGE_TITLE.DASHBOARD_SIMPLIFIED
-            : PAGE_TITLE.DASHBOARD}
-        </Typography>
+        <Box display="flex" alignItems="center">
+          <ManageAccountsIcon fontSize={isSmallScreen ? "small" : "large"} />
+          <Box sx={{ ml: 1 }}>
+            <Typography
+              variant={isSmallScreen ? "h5" : "h2"}
+              sx={{ flexGrow: 1 }}
+            >
+              {isSmallScreen
+                ? PAGE_TITLE.DASHBOARD_SIMPLIFIED
+                : PAGE_TITLE.DASHBOARD}
+            </Typography>
+          </Box>
+        </Box>
       </Box>
       <Accordion
         expanded={expanded === "panel1"}
@@ -62,19 +70,6 @@ const Dashboard = () => {
         </AccordionSummary>
         <AccordionDetails>
           <ManageRoles />
-        </AccordionDetails>
-      </Accordion>
-      <Accordion
-        expanded={expanded === "panel3"}
-        onChange={handleChange("panel3")}
-      >
-        <AccordionSummary aria-controls="panel3d-content" id="panel3d-header">
-          <Typography component="span" fontWeight="bold">
-            Permisos
-          </Typography>
-        </AccordionSummary>
-        <AccordionDetails>
-          <ManagePermissions />
         </AccordionDetails>
       </Accordion>
     </Box>

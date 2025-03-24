@@ -1,5 +1,7 @@
 import React, { useState } from "react";
 import { useRoles } from "../../../hooks/useRole";
+import { usePermissions } from "../../../hooks/usePermission";
+import { useAuth } from "../../../context/AuthContext";
 import {
   Table,
   TableBody,
@@ -26,6 +28,7 @@ import {
   Link,
   Checkbox,
   ListItemText,
+  useMediaQuery,
 } from "@mui/material";
 import {
   translateColumnHeaderToSpanish,
@@ -45,19 +48,27 @@ import EditIcon from "@mui/icons-material/Edit";
 import SaveIcon from "@mui/icons-material/Save";
 import CloseIcon from "@mui/icons-material/Close";
 import PaginationActions from "../Pagination/PaginationActions";
-import { usePermissions } from "../../../hooks/usePermission";
+import PasswordIcon from "@mui/icons-material/Password";
+import CheckCircleOutlineIcon from "@mui/icons-material/CheckCircleOutline";
+import BlockIcon from "@mui/icons-material/Block";
+import ModalComponent from "../../Modal/ModalComponent";
 
 type EditableTableProps<T> = {
   data: T[];
   columns: (keyof T)[];
   groupByDate?: Date | null;
   editRowId: number | null;
-  editFields: Record<string, string | string[] | boolean>;
-  setEditField?: (field: string, value: string | string[] | boolean) => void;
+  editFields: Record<string, string | boolean | number | string[]>;
+  setEditField?: (
+    field: string,
+    value: string | boolean | number | string[]
+  ) => void;
   handleEditClick?: (row: T) => void;
   handleCancelClick?: () => void;
   handleSaveClick?: (id: number) => void;
-  handleOpenDialog?: (id: number) => void;
+  handleOpenDeleteDialog?: (id: number) => void;
+  handleOpenStatusDialog?: (row: any) => void;
+  handlePasswordModal?: (id: number, handleClose: () => void) => void;
   getRowId: (row: T) => number;
   totalCount: number;
   page: number;
@@ -74,7 +85,7 @@ type EditableTableProps<T> = {
   userPermissions?: string[];
 };
 
-const EditableTable = <T,>({
+const EditableTable = <T extends object>({
   data,
   columns,
   groupByDate,
@@ -84,7 +95,9 @@ const EditableTable = <T,>({
   handleEditClick,
   handleCancelClick,
   handleSaveClick,
-  handleOpenDialog,
+  handleOpenDeleteDialog,
+  handleOpenStatusDialog,
+  handlePasswordModal,
   getRowId,
   totalCount,
   page,
@@ -97,11 +110,14 @@ const EditableTable = <T,>({
   noActions,
   userPermissions,
 }: EditableTableProps<T>) => {
+  const { currentUser } = useAuth();
   const { roles } = useRoles();
   const { permissions } = usePermissions();
   const [order, setOrder] = useState<"asc" | "desc">("asc");
   const [orderBy, setOrderBy] = useState<keyof T>(columns[0]);
+
   const theme = useTheme();
+  const isSmallScreen = useMediaQuery(theme.breakpoints.down("sm"));
 
   const hasEditPermissions =
     userPermissions?.includes(PERMISSIONS.EDIT_EMPLOYEES) ||
@@ -114,7 +130,7 @@ const EditableTable = <T,>({
     userPermissions?.includes(PERMISSIONS.DELETE_EMPLOYEES) ||
     userPermissions?.includes(PERMISSIONS.DELETE_SCHEDULES) ||
     userPermissions?.includes(PERMISSIONS.DELETE_VEHICLES) ||
-    userPermissions?.includes(PERMISSIONS.DELETE_USER) ||
+    userPermissions?.includes(PERMISSIONS.ENABLE_DISABLE_USER) ||
     userPermissions?.includes(PERMISSIONS.DELETE_ROLE);
 
   const handlePageChange = (
@@ -162,39 +178,27 @@ const EditableTable = <T,>({
     }
 
     if (config.type === "select" && config.options) {
-      const selectedValue = editFields[String(column)] || "";
-      const hasOtroOption = config.options.some(
-        (option) => option.value === "Otro"
-      );
+      const selectedValue = config.options.some(
+        (opt) => opt.value === editFields[String(column)]
+      )
+        ? editFields[String(column)]
+        : "";
 
       return (
         <FormControl variant="outlined" fullWidth>
-          {selectedValue === "Otro" ? (
-            <TextField
-              label={translateColumnHeaderToSpanish(column)}
-              variant="outlined"
-              fullWidth
-              value={editFields[String(column)] || ""}
-              onChange={(e) =>
-                setEditField && setEditField(String(column), e.target.value)
-              }
-            />
-          ) : (
-            <Select
-              value={selectedValue}
-              onChange={(e) =>
-                setEditField &&
-                setEditField(String(column), String(e.target.value))
-              }
-            >
-              {config.options.map((option) => (
-                <MenuItem key={option.value} value={option.value}>
-                  {option.label}
-                </MenuItem>
-              ))}
-              {hasOtroOption && <MenuItem value="Otro">Otro</MenuItem>}
-            </Select>
-          )}
+          <Select
+            value={selectedValue}
+            onChange={(e) =>
+              setEditField &&
+              setEditField(String(column), String(e.target.value))
+            }
+          >
+            {config.options.map((option) => (
+              <MenuItem key={option.value} value={option.value}>
+                {option.label}
+              </MenuItem>
+            ))}
+          </Select>
         </FormControl>
       );
     }
@@ -243,17 +247,23 @@ const EditableTable = <T,>({
 
       return (
         <Autocomplete
+          freeSolo
           value={selectedOption}
           onChange={(event, newValue) => {
             setEditField &&
-              setEditField(String(column), newValue ? newValue.value : "");
+              setEditField(
+                String(column),
+                newValue && typeof newValue !== "string" ? newValue.value : ""
+              );
           }}
           inputValue={undefined}
           onInputChange={(event, newInputValue) => {
             if (!event) return;
           }}
           options={config.options || []}
-          getOptionLabel={(option) => option.label}
+          getOptionLabel={(option) =>
+            typeof option === "string" ? option : option.label
+          }
           renderInput={(params) => (
             <TextField
               {...params}
@@ -278,6 +288,7 @@ const EditableTable = <T,>({
       return (
         <Autocomplete
           multiple
+          limitTags={5}
           value={selectedOptions}
           onChange={(event, newValue) => {
             setEditField &&
@@ -419,128 +430,197 @@ const EditableTable = <T,>({
             </TableRow>
           </TableHead>
           <TableBody>
-            {paginatedData.map((row) => (
-              <TableRow key={getRowId(row)}>
-                {columns.map((column) => {
-                  return (
-                    <TableCell key={String(column)}>
-                      {editRowId === getRowId(row) ? (
-                        <>
-                          {renderEditField(
-                            column,
-                            (editFields[String(column)] || "").toString()
-                          )}
-                        </>
-                      ) : Array.isArray(row[column]) ? (
-                        <Stack
-                          direction="row"
-                          spacing={1}
-                          flexWrap="wrap"
-                          sx={{ rowGap: 2 }}
-                        >
-                          {(row[column] as string[]).map(
-                            (item, index, array) => (
-                              <Typography key={index} component="span">
-                                {translateDayOptionsToSpanish(item)}
-                                {index < array.length - 1 ? ", " : ""}
-                              </Typography>
-                            )
-                          )}
-                        </Stack>
-                      ) : column === "email" ? (
-                        <Link
-                          href={`mailto:${row[column]}`}
-                          sx={{
-                            textDecoration: "none",
-                            color: theme.palette.primary.main,
-                            "&:hover": {
-                              textDecoration: "underline",
-                            },
-                          }}
-                        >
-                          {String(row[column])}
-                        </Link>
-                      ) : column === "day" ? (
-                        <>
-                          {translateDayOptionsToSpanish(row[column] as string)}
-                        </>
-                      ) : (
-                        <>{renderColumnValue(column, row[column])}</>
-                      )}
-                    </TableCell>
-                  );
-                })}
-
-                {!noActions && (
-                  <TableCell>
-                    <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-                      {editRowId === getRowId(row) ? (
-                        <>
-                          <Tooltip title="Guardar" arrow>
-                            <Box>
-                              <IconButton
-                                color="primary"
-                                onClick={() =>
-                                  handleSaveClick &&
-                                  handleSaveClick(getRowId(row))
-                                }
-                                disabled={isSaveDisabled}
-                              >
-                                <SaveIcon />
-                              </IconButton>
-                            </Box>
-                          </Tooltip>
-                          <Tooltip title="Cancelar" arrow>
-                            <Box>
-                              <IconButton
-                                color="primary"
-                                onClick={() =>
-                                  handleCancelClick && handleCancelClick()
-                                }
-                              >
-                                <CloseIcon />
-                              </IconButton>
-                            </Box>
-                          </Tooltip>
-                        </>
-                      ) : (
-                        <>
-                          {hasEditPermissions && (
-                            <Tooltip title="Editar" arrow>
+            {paginatedData.map((row) => {
+              const rowId = getRowId(row);
+              const isCurrentUser = rowId === currentUser?.id;
+              const isUser = "username" in row;
+              return (
+                <TableRow key={getRowId(row)}>
+                  {columns.map((column) => {
+                    return (
+                      <TableCell key={String(column)}>
+                        {editRowId === getRowId(row) ? (
+                          <>
+                            {renderEditField(
+                              column,
+                              (editFields[String(column)] || "").toString()
+                            )}
+                          </>
+                        ) : Array.isArray(row[column]) ? (
+                          <Stack
+                            direction="row"
+                            spacing={1}
+                            flexWrap="wrap"
+                            sx={{ rowGap: 2 }}
+                          >
+                            {(row[column] as string[]).map(
+                              (item, index, array) =>
+                                column === "permissionNames" ? (
+                                  <Chip
+                                    key={index}
+                                    label={translateDayOptionsToSpanish(item)}
+                                    variant="outlined"
+                                  />
+                                ) : (
+                                  <Typography key={index} component="span">
+                                    {translateDayOptionsToSpanish(item)}
+                                    {index < array.length - 1 ? ", " : ""}
+                                  </Typography>
+                                )
+                            )}
+                          </Stack>
+                        ) : column === "email" ? (
+                          <Link
+                            href={`mailto:${row[column]}`}
+                            sx={{
+                              textDecoration: "none",
+                              color: theme.palette.primary.main,
+                              "&:hover": {
+                                textDecoration: "underline",
+                              },
+                            }}
+                          >
+                            {String(row[column])}
+                          </Link>
+                        ) : column === "day" ? (
+                          <>
+                            {translateDayOptionsToSpanish(
+                              row[column] as string
+                            )}
+                          </>
+                        ) : (
+                          <>{renderColumnValue(column, row[column])}</>
+                        )}
+                      </TableCell>
+                    );
+                  })}
+                  {!noActions && (
+                    <TableCell>
+                      <Box
+                        sx={{ display: "flex", alignItems: "center", gap: 1 }}
+                      >
+                        {editRowId === getRowId(row) ? (
+                          <>
+                            <Tooltip title="Guardar" arrow>
                               <Box>
                                 <IconButton
                                   color="primary"
                                   onClick={() =>
-                                    handleEditClick && handleEditClick(row)
+                                    handleSaveClick &&
+                                    handleSaveClick(getRowId(row))
                                   }
+                                  disabled={isSaveDisabled}
                                 >
-                                  <EditIcon />
+                                  <SaveIcon />
                                 </IconButton>
                               </Box>
                             </Tooltip>
-                          )}
-                          {hasDeletePermissions && (
-                            <Tooltip title="Eliminar" arrow>
+                            <Tooltip title="Cancelar" arrow>
                               <Box>
                                 <IconButton
-                                  color="secondary"
+                                  color="primary"
                                   onClick={() =>
-                                    handleOpenDialog &&
-                                    handleOpenDialog(getRowId(row))
+                                    handleCancelClick && handleCancelClick()
                                   }
                                 >
-                                  <DeleteIcon />
+                                  <CloseIcon />
                                 </IconButton>
                               </Box>
                             </Tooltip>
-                          )}
-                        </>
-                      )}
-                    </Box>
-                  </TableCell>
-                )}
-              </TableRow>
-            ))}
+                          </>
+                        ) : (
+                          <>
+                            {hasEditPermissions && (
+                              <>
+                                {isUser && (
+                                  <ModalComponent
+                                    buttonType="icon"
+                                    buttonIcon={<PasswordIcon />}
+                                    variant="text"
+                                    modalStyle={{
+                                      width: isSmallScreen ? "80%" : "40%",
+                                    }}
+                                    modalTooltip="Cambiar Contraseña"
+                                    modalTitle="Cambiar Contraseña"
+                                  >
+                                    {({ handleClose }) => (
+                                      <>
+                                        {handlePasswordModal &&
+                                          handlePasswordModal(
+                                            getRowId(row),
+                                            handleClose
+                                          )}
+                                      </>
+                                    )}
+                                  </ModalComponent>
+                                )}
+                                <Tooltip title="Editar" arrow>
+                                  <Box>
+                                    <IconButton
+                                      color="primary"
+                                      onClick={() =>
+                                        handleEditClick && handleEditClick(row)
+                                      }
+                                    >
+                                      <EditIcon />
+                                    </IconButton>
+                                  </Box>
+                                </Tooltip>
+                              </>
+                            )}
+                            {hasDeletePermissions && (
+                              <>
+                                {isUser ? (
+                                  !isCurrentUser &&
+                                  ("isActive" in row ? (
+                                    <Tooltip
+                                      title={
+                                        row.isActive ? "Desactivar" : "Activar"
+                                      }
+                                      arrow
+                                    >
+                                      <Box>
+                                        <IconButton
+                                          color="secondary"
+                                          onClick={() =>
+                                            handleOpenStatusDialog &&
+                                            handleOpenStatusDialog(row)
+                                          }
+                                        >
+                                          {row.isActive ? (
+                                            <BlockIcon color="error" />
+                                          ) : (
+                                            <CheckCircleOutlineIcon color="success" />
+                                          )}
+                                        </IconButton>
+                                      </Box>
+                                    </Tooltip>
+                                  ) : null)
+                                ) : (
+                                  <Tooltip title="Eliminar" arrow>
+                                    <Box>
+                                      <IconButton
+                                        color="secondary"
+                                        onClick={() =>
+                                          handleOpenDeleteDialog &&
+                                          handleOpenDeleteDialog(getRowId(row))
+                                        }
+                                      >
+                                        <DeleteIcon />
+                                      </IconButton>
+                                    </Box>
+                                  </Tooltip>
+                                )}
+                              </>
+                            )}
+                          </>
+                        )}
+                      </Box>
+                    </TableCell>
+                  )}
+                </TableRow>
+              );
+            })}
           </TableBody>
         </Table>
       </TableContainer>

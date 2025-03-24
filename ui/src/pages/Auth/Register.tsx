@@ -18,8 +18,8 @@ import {
 } from "@mui/material";
 import Visibility from "@mui/icons-material/Visibility";
 import VisibilityOff from "@mui/icons-material/VisibilityOff";
-import logo from "../../assets/images/logo.png";
 import { PAGE_TITLE } from "../../constants/constants";
+import AccountCircleIcon from "@mui/icons-material/AccountCircle";
 
 const Register = () => {
   const { createUser, getUserByUsername } = useUsers();
@@ -33,6 +33,9 @@ const Register = () => {
   });
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  const theme = useTheme();
+  const isSmallScreen = useMediaQuery(theme.breakpoints.down("sm"));
 
   const validateFields = useCallback(async () => {
     const nameRegex = /^[a-zA-ZáéíóúÁÉÍÓÚüÜñÑ.\s]+$/;
@@ -97,20 +100,31 @@ const Register = () => {
     if (!isValid) return;
 
     try {
-      const newUser: Omit<User, "id" | "role"> = {
+      const newUser: Omit<
+        User,
+        "id" | "temporalPassword" | "role"
+      > = {
         firstName: addFields.firstName,
         lastName: addFields.lastName,
         email: addFields.email,
         username: addFields.username,
         password: addFields.password,
+        isActive: true,
       };
-      createUser(newUser);
-      showNotification("El registro del usuario fue exitoso", "success", 3000, false);
+      await createUser(newUser);
+      showNotification(
+        "El registro del usuario fue exitoso",
+        "success",
+        3000,
+        false
+      );
     } catch (error) {
       setError("Error al registrar usuario");
       showNotification(
         "Ha ocurrido un error al registrar el usuario",
-        "error", 5000, false
+        "error",
+        5000,
+        false
       );
     }
   };
@@ -139,9 +153,6 @@ const Register = () => {
     setShowPassword((prev) => !prev);
   };
 
-  const theme = useTheme();
-  const isSmallScreen = useMediaQuery(theme.breakpoints.down("sm"));
-
   return (
     <Box
       display="flex"
@@ -152,7 +163,7 @@ const Register = () => {
       <Card sx={{ width: 400, p: 3, boxShadow: 3 }}>
         <CardContent>
           <Box display="flex" justifyContent="center" mb={2}>
-            <img src={logo} alt="Logo" style={{ width: 95, height: "auto" }} />
+            <AccountCircleIcon style={{ width: 95, height: "auto" }} />
           </Box>
           <Typography
             variant={isSmallScreen ? "h6" : "h2"}

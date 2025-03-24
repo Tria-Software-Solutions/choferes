@@ -4,14 +4,15 @@ import { Response } from "express";
 import { Role } from "../models/Role";
 import { Permission } from "../models/Permission";
 import { generateTokens } from "../utils/generateSecret";
+import { Op } from "sequelize";
 
 export const authenticateUser = async (
-  username: string,
+  identifier: string,
   password: string,
   res: Response<any, Record<string, any>>
 ) => {
   const user = await User.findOne({
-    where: { username },
+    where: { [Op.or]: [{ username: identifier }, { email: identifier }] },
     include: [
       {
         model: Role,
@@ -23,11 +24,22 @@ export const authenticateUser = async (
     ],
   });
 
-  if (!user) {
-    throw new Error("User not found");
-  }
+  if (!user) throw new Error("User not found");
+  if (!user.isActive) throw new Error("User is inactive");
   const isMatch = await bcrypt.compare(password, user.password);
-  if (!isMatch) throw new Error("Incorrect password");
+  if (!isMatch) {
+    if (user.temporalPassword) {
+      const isMatchWithTemporalPassword = await bcrypt.compare(
+        password,
+        user.temporalPassword
+      );
+      if (!isMatchWithTemporalPassword) {
+        throw new Error("Incorrect password and temporary password");
+      }
+    } else {
+      throw new Error("Incorrect password");
+    }
+  }
 
   const { accessToken, refreshToken } = generateTokens(user.id.toString(), res);
 
@@ -111,6 +123,29 @@ export const createUser = async (data: Omit<User, "id">) => {
 
 export const updateUser = async (id: number, data: Omit<User, "id">) => {
   await User.update(data, { where: { id } });
+  return User.findByPk(id);
+};
+
+export const updateUserStatus = async (id: number, status: boolean) => {
+  await User.update({ isActive: status }, { where: { id } });
+  return User.findByPk(id);
+};
+
+export const updateUserPassword = async (id: number, password: string) => {
+  const hashedPassword = await bcrypt.hash(password, 10);
+  await User.update({ password: hashedPassword }, { where: { id } });
+  return User.findByPk(id);
+};
+
+export const updateUserTemporalPassword = async (
+  id: number,
+  temporalPassword: string
+) => {
+  const hashedTemporalPassword = await bcrypt.hash(temporalPassword, 10);
+  await User.update(
+    { temporalPassword: hashedTemporalPassword },
+    { where: { id } }
+  );
   return User.findByPk(id);
 };
 

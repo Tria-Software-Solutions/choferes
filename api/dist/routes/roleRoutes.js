@@ -42,7 +42,7 @@ const authMiddleware_1 = require("../middleware/authMiddleware");
 const router = express_1.default.Router();
 router.get("/", authMiddleware_1.authenticateToken, roleController.getRoles);
 router.get("/:id", authMiddleware_1.authenticateToken, roleController.getRoleById);
-router.get("/rolename/:name", authMiddleware_1.authenticateToken, roleController.getRoleByName);
+router.get("/name/:name", authMiddleware_1.authenticateToken, roleController.getRoleByName);
 router.post("/", authMiddleware_1.authenticateToken, roleController.createRole);
 router.put("/:id", authMiddleware_1.authenticateToken, roleController.updateRole);
 router.delete("/:id", authMiddleware_1.authenticateToken, roleController.deleteRole);

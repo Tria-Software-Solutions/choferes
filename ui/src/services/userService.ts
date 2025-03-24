@@ -1,9 +1,12 @@
 import { User } from "../models/User";
 import api from "./api";
 
-export const authenticateUser = async (username: string, password: string) => {
+export const authenticateUser = async (
+  identifier: string,
+  password: string
+) => {
   const response = await api.post("/users/login", {
-    username,
+    identifier,
     password,
   });
   return response.data;
@@ -46,13 +49,32 @@ export const getUserPermissions = async (id: number) => {
   return response.data;
 };
 
-export const createUser = async (user: Omit<User, "id" | "role">) => {
+export const createUser = async (
+  user: Omit<User, "id" | "temporalPassword">
+) => {
   const response = await api.post("/users/register", user);
   return response.data;
 };
 
 export const updateUser = async (id: number, updatedUser: Partial<User>) => {
   await api.put(`/users/${id}`, updatedUser);
+};
+
+export const updateUserStatus = async (id: number, status: boolean) => {
+  await api.put(`/users/${id}/status`, { isActive: status });
+};
+
+export const updateUserPassword = async (id: number, password: string) => {
+  await api.put(`/users/${id}/password`, { password });
+};
+
+export const updateUserTemporalPassword = async (
+  id: number,
+  temporalPassword: string
+) => {
+  await api.put(`/users/${id}/temporal-password`, {
+    temporalPassword,
+  });
 };
 
 export const deleteUser = async (id: number) => {

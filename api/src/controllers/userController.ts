@@ -3,10 +3,10 @@ import * as userService from "../services/userService";
 
 export const authenticateUser = async (req: Request, res: Response) => {
   try {
-    const { username, password } = req.body;
+    const { identifier, password } = req.body;
     const { user, accessToken, refreshToken } =
-      await userService.authenticateUser(username, password, res);
-      return res.status(200).json({ user, accessToken, refreshToken });
+      await userService.authenticateUser(identifier, password, res);
+    return res.status(200).json({ user, accessToken, refreshToken });
   } catch (error) {
     return res.status(401).json({ message: "Error login User", error });
   }
@@ -53,7 +53,9 @@ export const getUserPermissions = async (req: Request, res: Response) => {
     }
     return res.status(200).json(user);
   } catch (error) {
-    return res.status(500).json({ message: "Error fetching User Permissions", error });
+    return res
+      .status(500)
+      .json({ message: "Error fetching User Permissions", error });
   }
 };
 
@@ -70,6 +72,61 @@ export const updateUser = async (req: Request, res: Response) => {
   try {
     const id = parseInt(req.params.id);
     const updatedUser = await userService.updateUser(id, req.body);
+    if (updatedUser) {
+      return res.status(200).json(updatedUser);
+    } else {
+      return res.status(404).json({ message: "User not found" });
+    }
+  } catch (error) {
+    return res.status(500).json({ message: "Error updating User", error });
+  }
+};
+
+export const updateUserStatus = async (req: Request, res: Response) => {
+  try {
+    const id = parseInt(req.params.id);
+    const updatedUser = await userService.updateUserStatus(
+      id,
+      req.body.isActive
+    );
+    if (updatedUser) {
+      return res.status(200).json(updatedUser);
+    } else {
+      return res.status(404).json({ message: "User not found" });
+    }
+  } catch (error) {
+    console.log("ERROR: ", error);
+    return res.status(500).json({ message: "Error updating User", error });
+  }
+};
+
+export const updateUserPassword = async (req: Request, res: Response) => {
+  try {
+    const id = parseInt(req.params.id);
+    const updatedUser = await userService.updateUserPassword(
+      id,
+      req.body.password
+    );
+    if (updatedUser) {
+      return res.status(200).json(updatedUser);
+    } else {
+      return res.status(404).json({ message: "User not found" });
+    }
+  } catch (error) {
+    return res.status(500).json({ message: "Error updating User", error });
+  }
+};
+
+export const updateUserTemporalPassword = async (
+  req: Request,
+  res: Response
+) => {
+  try {
+    const id = parseInt(req.params.id);
+    const updatedUser = await userService.updateUserTemporalPassword(
+      id,
+      req.body.temporalPassword
+    );
     if (updatedUser) {
       return res.status(200).json(updatedUser);
     } else {

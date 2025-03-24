@@ -1,3 +1,4 @@
+import { Op } from "sequelize";
 import { Permission } from "../models/Permission";
 
 export const getPermissions = async () => {
@@ -6,6 +7,16 @@ export const getPermissions = async () => {
 
 export const getPermissionById = async (id: number) => {
   return await Permission.findByPk(id);
+};
+
+export const getPermissionsByNames = async (names: string[]) => {
+  return await Permission.findAll({
+    where: {
+      name: {
+        [Op.in]: names, 
+      },
+    },
+  });
 };
 
 export const createPermission = async (data: Omit<Permission, "id">) => {
