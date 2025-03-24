@@ -1,5 +1,5 @@
 import * as React from "react";
-import { Button, IconButton, Modal, Typography } from "@mui/material";
+import { Button, IconButton, Modal, Tooltip, Typography } from "@mui/material";
 import { Box, SxProps } from "@mui/system";
 import CloseIcon from "@mui/icons-material/Close";
 
@@ -11,6 +11,7 @@ interface ModalComponentProps {
   buttonStyle?: SxProps;
   modalStyle?: SxProps;
   disabled?: boolean;
+  modalTooltip?: string;
   modalTitle: string;
   modalDescription?: JSX.Element | string;
   children?: (props: { handleClose: () => void }) => React.ReactNode;
@@ -37,6 +38,7 @@ const ModalComponent: React.FC<ModalComponentProps> = ({
   buttonStyle,
   modalStyle,
   disabled,
+  modalTooltip,
   modalTitle,
   modalDescription,
   children,
@@ -53,24 +55,64 @@ const ModalComponent: React.FC<ModalComponentProps> = ({
 
   return (
     <div>
-      {buttonType === "text" ? (
-        <Button onClick={handleOpen} sx={buttonStyle} disabled={disabled}>
-          {buttonLabel}
-        </Button>
-      ) : buttonType === "icon" ? (
-        <IconButton onClick={handleOpen} sx={buttonStyle} disabled={disabled}>
-          {buttonIcon}
-        </IconButton>
+      {modalTooltip ? (
+        <>
+          {buttonType === "text" ? (
+            <Tooltip title={modalTooltip} arrow>
+              <Button onClick={handleOpen} sx={buttonStyle} disabled={disabled}>
+                {buttonLabel}
+              </Button>
+            </Tooltip>
+          ) : buttonType === "icon" ? (
+            <Tooltip title={modalTooltip} arrow>
+              <IconButton
+                onClick={handleOpen}
+                sx={buttonStyle}
+                disabled={disabled}
+              >
+                {buttonIcon}
+              </IconButton>
+            </Tooltip>
+          ) : (
+            <Tooltip title={modalTooltip} arrow>
+              <Button
+                variant={variant}
+                sx={buttonStyle}
+                disabled={disabled}
+                onClick={handleOpen}
+              >
+                {buttonIcon}
+              </Button>
+            </Tooltip>
+          )}
+        </>
       ) : (
-        <Button
-          variant={variant}
-          sx={buttonStyle}
-          disabled={disabled}
-          onClick={handleOpen}
-        >
-          {buttonIcon}
-        </Button>
+        <>
+          {buttonType === "text" ? (
+            <Button onClick={handleOpen} sx={buttonStyle} disabled={disabled}>
+              {buttonLabel}
+            </Button>
+          ) : buttonType === "icon" ? (
+            <IconButton
+              onClick={handleOpen}
+              sx={buttonStyle}
+              disabled={disabled}
+            >
+              {buttonIcon}
+            </IconButton>
+          ) : (
+            <Button
+              variant={variant}
+              sx={buttonStyle}
+              disabled={disabled}
+              onClick={handleOpen}
+            >
+              {buttonIcon}
+            </Button>
+          )}
+        </>
       )}
+
       <Modal
         open={open}
         onClose={handleClose}

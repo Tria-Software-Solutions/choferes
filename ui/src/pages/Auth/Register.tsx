@@ -30,7 +30,6 @@ const Register = () => {
     email: "",
     username: "",
     password: "",
-    isActive: true,
   });
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -110,7 +109,7 @@ const Register = () => {
         email: addFields.email,
         username: addFields.username,
         password: addFields.password,
-        isActive: addFields.isActive,
+        isActive: true,
       };
       await createUser(newUser);
       showNotification(

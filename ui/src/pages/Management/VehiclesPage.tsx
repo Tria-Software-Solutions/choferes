@@ -310,14 +310,14 @@ const VehiclesPage: React.FC = () => {
     try {
       if (vehicleToDelete !== null) {
         await deleteVehicle(vehicleToDelete);
-        handleCloseDeleteDialog();
+        showNotification(
+          "La eliminación del vehículo fue exitosa",
+          "success",
+          3000,
+          false
+        );
       }
-      showNotification(
-        "La eliminación del vehículo fue exitosa",
-        "success",
-        3000,
-        false
-      );
+      handleCloseDeleteDialog();
     } catch (error) {
       handleCancelClick();
       console.error(error);
@@ -871,7 +871,7 @@ const VehiclesPage: React.FC = () => {
         </>
       )}
       <Dialog open={openDeleteDialog} onClose={handleCloseDeleteDialog}>
-        <DialogTitle>Confirmar Eliminación</DialogTitle>
+        <DialogTitle>Confirmar</DialogTitle>
         <DialogContent>
           <Typography>
             ¿Estás seguro de que deseas eliminar este vehículo?

@@ -191,14 +191,14 @@ const ManageRoles = () => {
     try {
       if (roleToDelete !== null) {
         await deleteRole(roleToDelete);
-        handleCloseDeleteDialog();
+        showNotification(
+          "La eliminación del rol fue exitosa",
+          "success",
+          3000,
+          false
+        );
       }
-      showNotification(
-        "La eliminación del rol fue exitosa",
-        "success",
-        3000,
-        false
-      );
+      handleCloseDeleteDialog();
     } catch (error) {
       handleCancelClick();
       console.error(error);
@@ -380,7 +380,7 @@ const ManageRoles = () => {
         </>
       )}
       <Dialog open={openDeleteDialog} onClose={handleCloseDeleteDialog}>
-        <DialogTitle>Confirmar Eliminación</DialogTitle>
+        <DialogTitle>Confirmar</DialogTitle>
         <DialogContent>
           <Typography>
             ¿Estás seguro de que deseas eliminar este rol?

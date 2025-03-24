@@ -56,7 +56,6 @@ const ManageUsers: React.FC<ManageUsersProps> = ({ showInactive }) => {
     username: "",
     password: "",
     roleName: "",
-    isActive: true,
   });
   const [editFields, setEditFields] = useState({
     firstName: "",
@@ -67,6 +66,7 @@ const ManageUsers: React.FC<ManageUsersProps> = ({ showInactive }) => {
     roleName: "",
   });
   const [openStatusDialog, setOpenStatusDialog] = useState(false);
+  const [userToChange, setUserToChange] = useState<User | null>(null);
   const [newPassword, setNewPassword] = useState("");
   const [confirmNewPassword, setConfirmNewPassword] = useState("");
   const [showNewPassword, setShowNewPassword] = useState(false);
@@ -104,31 +104,34 @@ const ManageUsers: React.FC<ManageUsersProps> = ({ showInactive }) => {
     setTotalCount(filtered.length);
   }, [filter, users, showInactive]);
 
-  const validateFields = useCallback((fields: typeof editFields) => {
-    const regex = {
-      text: /^[a-zA-ZáéíóúÁÉÍÓÚñÑüÜëË\s-]+$/,
-      email: /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/,
-      username: /^[a-zA-Z][a-zA-Z0-9_.]{2,19}$/,
-      password:
-        /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/,
-    };
-
-    return (
-      regex.text.test(fields.firstName) &&
-      regex.text.test(fields.lastName) &&
-      regex.email.test(fields.email) &&
-      regex.username.test(fields.username) &&
-      regex.password.test(fields.password)
-    );
-  }, []);
+  const validateFields = useCallback(
+    (fields: typeof editFields, isAddForm: boolean) => {
+      const regex = {
+        text: /^[a-zA-ZáéíóúÁÉÍÓÚñÑüÜëË\s-]+$/,
+        email: /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/,
+        username: /^[a-zA-Z][a-zA-Z0-9_.]{2,19}$/,
+        password: /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/,
+      };
+  
+      const isValid =
+        regex.text.test(fields.firstName) &&
+        regex.text.test(fields.lastName) &&
+        regex.email.test(fields.email) &&
+        regex.username.test(fields.username);
+  
+      return isAddForm ? isValid && regex.password.test(fields.password) : isValid;
+    },
+    []
+  );
 
   useEffect(
-    () => setIsAddFormValid(validateFields(addFields)),
+    () => setIsAddFormValid(validateFields(addFields, true)),
     [addFields, validateFields]
   );
 
   useEffect(() => {
-    if (editRowId !== null) setIsEditFormValid(validateFields(editFields));
+    if (editRowId !== null)
+      setIsEditFormValid(validateFields(editFields, false));
   }, [editFields, editRowId, validateFields]);
 
   const handleFilterChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -143,7 +146,7 @@ const ManageUsers: React.FC<ManageUsersProps> = ({ showInactive }) => {
         email: addFields.email,
         username: addFields.username,
         password: addFields.password,
-        isActive: addFields.isActive,
+        isActive: true,
       };
       await createUser(newUser);
       setAddFields({
@@ -153,7 +156,6 @@ const ManageUsers: React.FC<ManageUsersProps> = ({ showInactive }) => {
         username: "",
         password: "",
         roleName: "",
-        isActive: true,
       });
       showNotification(
         "El registro del usuario fue exitoso",
@@ -223,28 +225,28 @@ const ManageUsers: React.FC<ManageUsersProps> = ({ showInactive }) => {
     }
   };
 
-  const handleOpenStatusDialog = (id: number) => {
+  const handleOpenStatusDialog = async (row: any) => {
     setOpenStatusDialog(true);
+    setUserToChange(row);
   };
 
   const handleCloseStatusDialog = () => {
     setOpenStatusDialog(false);
+    setUserToChange(null);
   };
 
   const handleStatusChange = async () => {
     try {
-      // if (userToDelete !== null) {
-      //   const userRoleToDelete = await getUserRoleByUserId(userToDelete);
-      //   await deleteUser(userToDelete, userRoleToDelete.id);
-      //   handleCloseStatusDialog();
-      // }
-
-      showNotification(
-        "La actualización del estado del usuario fue exitosa",
-        "success",
-        3000,
-        false
-      );
+      if (userToChange !== null) {
+        await updateUserStatus(userToChange.id, !userToChange.isActive);
+        showNotification(
+          "La actualización del estado del usuario fue exitosa",
+          "success",
+          3000,
+          false
+        );
+      }
+      handleCloseStatusDialog();
     } catch (error) {
       handleCancelClick();
       console.error(error);
@@ -595,7 +597,7 @@ const ManageUsers: React.FC<ManageUsersProps> = ({ showInactive }) => {
         </>
       )}
       <Dialog open={openStatusDialog} onClose={handleCloseStatusDialog}>
-        <DialogTitle>Confirmar Cambio de Estado</DialogTitle>
+        <DialogTitle>Confirmar</DialogTitle>
         <DialogContent>
           <Typography>
             ¿Estás seguro de que deseas cambiar el estado de este usuario?
