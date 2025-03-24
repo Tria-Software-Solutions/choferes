@@ -29,6 +29,7 @@ export const PAGE_TITLE = {
   EMPLOYEES: "Gestionar Empleados",
   SCHEDULES: "Gestionar Horarios",
   DASHBOARD: "Panel de Administración",
+  SETTINGS: "Configuración",
   ROLES_SIMPLIFIED: "Roles",
   VEHICLES_SIMPLIFIED: "Vehículos",
   EMPLOYEES_SIMPLIFIED: "Empleados",

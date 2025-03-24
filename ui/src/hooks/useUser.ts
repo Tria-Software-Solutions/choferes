@@ -95,7 +95,6 @@ export const useUsers = () => {
     const createdUser = await UserService.createUser(newUser);
     setUsers((prev) => [...prev, createdUser]);
     setTotalCountUsers((prev) => prev + 1);
-    console.log("newRoleId: ", newRoleId);
     const createdUserRole: Omit<UserRole, "id"> = {
       userId: createdUser.id,
       roleId: newRoleId ? newRoleId : Roles.USER,

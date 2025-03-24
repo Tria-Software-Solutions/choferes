@@ -53,6 +53,7 @@ import {
   isValidDateForSelect,
 } from "../../utils/dates";
 import { PAGE_TITLE, PERMISSIONS } from "../../constants/constants";
+import CalendarMonthRoundedIcon from "@mui/icons-material/CalendarMonthRounded";
 import DownloadRoundedIcon from "@mui/icons-material/DownloadRounded";
 import ArrowBackIosNewRoundedIcon from "@mui/icons-material/ArrowBackIosNewRounded";
 import ArrowForwardIosRoundedIcon from "@mui/icons-material/ArrowForwardIosRounded";
@@ -463,9 +464,17 @@ const RolesPage: React.FC = () => {
         alignItems="center"
         sx={{ mb: 3 }}
       >
-        <Typography variant={isSmallScreen ? "h5" : "h2"} sx={{ flexGrow: 1 }}>
-          {isSmallScreen ? PAGE_TITLE.ROLES_SIMPLIFIED : PAGE_TITLE.ROLES}
-        </Typography>
+        <Box display="flex" alignItems="center">
+          <CalendarMonthRoundedIcon fontSize={isSmallScreen ? "small" : "large"} />
+          <Box sx={{ ml: 1 }}>
+            <Typography
+              variant={isSmallScreen ? "h5" : "h2"}
+              sx={{ flexGrow: 1 }}
+            >
+              {isSmallScreen ? PAGE_TITLE.ROLES_SIMPLIFIED : PAGE_TITLE.ROLES}
+            </Typography>
+          </Box>
+        </Box>
         {userPermissions.includes(PERMISSIONS.EXPORT_EXCEL_ROLES) &&
           userPermissions.includes(PERMISSIONS.EXPORT_PDF_ROLES) && (
             <Box sx={{ minHeight: 65 }}>

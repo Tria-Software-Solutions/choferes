@@ -44,8 +44,8 @@ import {
   PAGE_TITLE,
   PERMISSIONS,
 } from "../../constants/constants";
-import DownloadRoundedIcon from "@mui/icons-material/DownloadRounded";
 import DirectionsCarIcon from "@mui/icons-material/DirectionsCar";
+import DownloadRoundedIcon from "@mui/icons-material/DownloadRounded";
 import ArrowBackIosNewRoundedIcon from "@mui/icons-material/ArrowBackIosNewRounded";
 import ArrowForwardIosRoundedIcon from "@mui/icons-material/ArrowForwardIosRounded";
 import CalendarTodayRoundedIcon from "@mui/icons-material/CalendarTodayRounded";
@@ -492,9 +492,21 @@ const VehiclesPage: React.FC = () => {
         alignItems="center"
         sx={{ mb: 3 }}
       >
-        <Typography variant={isSmallScreen ? "h5" : "h2"} sx={{ flexGrow: 1 }}>
-          {isSmallScreen ? PAGE_TITLE.VEHICLES_SIMPLIFIED : PAGE_TITLE.VEHICLES}
-        </Typography>
+        <Box display="flex" alignItems="center">
+          <DirectionsCarIcon
+            fontSize={isSmallScreen ? "small" : "large"}
+          />
+          <Box sx={{ ml: 1 }}>
+            <Typography
+              variant={isSmallScreen ? "h5" : "h2"}
+              sx={{ flexGrow: 1 }}
+            >
+              {isSmallScreen
+                ? PAGE_TITLE.VEHICLES_SIMPLIFIED
+                : PAGE_TITLE.VEHICLES}
+            </Typography>
+          </Box>
+        </Box>
         {userPermissions.includes(PERMISSIONS.EXPORT_EXCEL_VEHICLES) &&
           userPermissions.includes(PERMISSIONS.EXPORT_PDF_VEHICLES) && (
             <Box sx={{ minHeight: 65 }}>
