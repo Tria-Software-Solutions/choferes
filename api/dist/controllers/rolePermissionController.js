@@ -42,7 +42,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.deleteRolePermission = exports.createRolePermission = exports.getRolePermissions = void 0;
+exports.deleteRolePermission = exports.updateRolePermissions = exports.createRolePermission = exports.getRolePermissions = void 0;
 const rolePermissionService = __importStar(require("../services/rolePermissionService"));
 const getRolePermissions = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
@@ -64,6 +64,26 @@ const createRolePermission = (req, res) => __awaiter(void 0, void 0, void 0, fun
     }
 });
 exports.createRolePermission = createRolePermission;
+const updateRolePermissions = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        const roleId = parseInt(req.params.id);
+        const { permissionIds } = req.body;
+        if (!Array.isArray(permissionIds)) {
+            return res.status(400).json({ message: "Permission Ids must be an array" });
+        }
+        const updatedRolePermissions = yield rolePermissionService.updateRolePermission(roleId, permissionIds);
+        if (updatedRolePermissions) {
+            return res.status(200).json(updatedRolePermissions);
+        }
+        else {
+            return res.status(404).json({ message: "Role not found or no permissions updated" });
+        }
+    }
+    catch (error) {
+        return res.status(500).json({ message: "Error updating role permissions", error });
+    }
+});
+exports.updateRolePermissions = updateRolePermissions;
 const deleteRolePermission = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const id = parseInt(req.params.id);

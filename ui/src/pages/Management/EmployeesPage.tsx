@@ -29,6 +29,7 @@ import {
   exportToPDF,
 } from "../../utils/export";
 import { PAGE_TITLE, PERMISSIONS } from "../../constants/constants";
+import GroupRoundedIcon from "@mui/icons-material/GroupRounded";
 import PersonAddAlt1RoundedIcon from "@mui/icons-material/PersonAddAlt1Rounded";
 import DownloadRoundedIcon from "@mui/icons-material/DownloadRounded";
 import CloseRoundedIcon from "@mui/icons-material/CloseRounded";
@@ -51,7 +52,7 @@ const EmployeesPage: React.FC = () => {
   const [editRowId, setEditRowId] = useState<number | null>(null);
   const [addFields, setAddFields] = useState({ firstName: "", lastName: "" });
   const [editFields, setEditFields] = useState({ firstName: "", lastName: "" });
-  const [dialogOpen, setDialogOpen] = useState(false);
+  const [openDeleteDialog, setOpenDeleteDialog] = useState(false);
   const [employeeToDelete, setEmployeeToDelete] = useState<number | null>(null);
   const [filter, setFilter] = useState("");
   const [page, setPage] = useState(0);
@@ -123,7 +124,7 @@ const EmployeesPage: React.FC = () => {
     } catch (error) {
       console.error(error);
       showNotification(
-        "Ha ocurrido un error al registrar el usuario",
+        "Ha ocurrido un error al registrar el empleado",
         "error",
         5000,
         false
@@ -158,6 +159,7 @@ const EmployeesPage: React.FC = () => {
         false
       );
     } catch (error) {
+      handleCancelClick();
       console.error(error);
       showNotification(
         "Ha ocurrido un error al actualizar el empleado",
@@ -168,13 +170,13 @@ const EmployeesPage: React.FC = () => {
     }
   };
 
-  const handleOpenDialog = (id: number) => {
-    setDialogOpen(true);
+  const handleOpenDeleteDialog = (id: number) => {
+    setOpenDeleteDialog(true);
     setEmployeeToDelete(id);
   };
 
-  const handleCloseDialog = () => {
-    setDialogOpen(false);
+  const handleCloseDeleteDialog = () => {
+    setOpenDeleteDialog(false);
     setEmployeeToDelete(null);
   };
 
@@ -182,15 +184,16 @@ const EmployeesPage: React.FC = () => {
     try {
       if (employeeToDelete !== null) {
         await deleteEmployee(employeeToDelete);
-        handleCloseDialog();
+        showNotification(
+          "La eliminación del empleado fue exitosa",
+          "success",
+          3000,
+          false
+        );
       }
-      showNotification(
-        "La eliminación del empleado fue exitosa",
-        "success",
-        3000,
-        false
-      );
+      handleCloseDeleteDialog();
     } catch (error) {
+      handleCancelClick();
       console.error(error);
       showNotification(
         "Ha ocurrido un error al eliminar el empleado",
@@ -228,11 +231,21 @@ const EmployeesPage: React.FC = () => {
         alignItems="center"
         sx={{ mb: 3 }}
       >
-        <Typography variant={isSmallScreen ? "h5" : "h2"} sx={{ flexGrow: 1 }}>
-          {isSmallScreen
-            ? PAGE_TITLE.EMPLOYEES_SIMPLIFIED
-            : PAGE_TITLE.EMPLOYEES}
-        </Typography>
+        <Box display="flex" alignItems="center">
+          <GroupRoundedIcon
+            fontSize={isSmallScreen ? "small" : "large"}
+          />
+          <Box sx={{ ml: 1 }}>
+            <Typography
+              variant={isSmallScreen ? "h5" : "h2"}
+              sx={{ flexGrow: 1 }}
+            >
+              {isSmallScreen
+                ? PAGE_TITLE.EMPLOYEES_SIMPLIFIED
+                : PAGE_TITLE.EMPLOYEES}
+            </Typography>
+          </Box>
+        </Box>
         {userPermissions.includes(PERMISSIONS.EXPORT_EXCEL_EMPLOYEES) &&
           userPermissions.includes(PERMISSIONS.EXPORT_PDF_EMPLOYEES) && (
             <Box sx={{ minHeight: 65 }}>
@@ -370,7 +383,7 @@ const EmployeesPage: React.FC = () => {
               handleEditClick={handleEditClick}
               handleCancelClick={handleCancelClick}
               handleSaveClick={handleSaveClick}
-              handleOpenDialog={handleOpenDialog}
+              handleOpenDeleteDialog={handleOpenDeleteDialog}
               getRowId={(row) => row.id}
               totalCount={totalCount}
               page={page}
@@ -400,19 +413,23 @@ const EmployeesPage: React.FC = () => {
           )}
         </>
       )}
-      <Dialog open={dialogOpen} onClose={handleCloseDialog}>
-        <DialogTitle>Confirmar Eliminación</DialogTitle>
+      <Dialog open={openDeleteDialog} onClose={handleCloseDeleteDialog}>
+        <DialogTitle>Confirmar</DialogTitle>
         <DialogContent>
           <Typography>
             ¿Estás seguro de que deseas eliminar este empleado?
           </Typography>
         </DialogContent>
         <DialogActions>
-          <Button color="primary" onClick={handleCloseDialog}>
-            Cancelar
+          <Button color="primary" sx={{ flex: 1 }} onClick={handleDelete}>
+            Aceptar
           </Button>
-          <Button color="secondary" onClick={handleDelete}>
-            Eliminar
+          <Button
+            color="secondary"
+            sx={{ flex: 1 }}
+            onClick={handleCloseDeleteDialog}
+          >
+            Cancelar
           </Button>
         </DialogActions>
       </Dialog>

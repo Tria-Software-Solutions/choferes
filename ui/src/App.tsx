@@ -14,8 +14,10 @@ import EmployeesPage from "./pages/Management/EmployeesPage";
 import SchedulesPage from "./pages/Management/SchedulesPage";
 import VehiclesPage from "./pages/Management/VehiclesPage";
 import Dashboard from "./pages/Dashboard/Dashboard";
+import Settings from "./pages/Auth/Settings";
 import NotFound from "./pages/NotFound";
 import AppBarComponent from "./components/AppBar/AppBarComponent";
+import SnackbarWrapper from "./components/Snackbar/SnackbarWrapper";
 import { AuthProvider, useAuth } from "./context/AuthContext";
 import ProtectedRoute from "./routes/ProtectedRoute";
 import { Container } from "@mui/material";
@@ -25,9 +27,9 @@ import DirectionsCarIcon from "@mui/icons-material/DirectionsCar";
 import GroupRoundedIcon from "@mui/icons-material/GroupRounded";
 import EditCalendarRoundedIcon from "@mui/icons-material/EditCalendarRounded";
 import ManageAccountsIcon from "@mui/icons-material/ManageAccounts";
+import SettingsIcon from '@mui/icons-material/Settings';
 import LogoutIcon from "@mui/icons-material/Logout";
 import wallpaper from "./assets/images/choferesblurred1.webp";
-import SnackbarWrapper from "./components/Snackbar/SnackbarWrapper";
 
 const AppBarWrapper: React.FC = () => {
   const { currentUser, userPermissions } = useAuth();
@@ -92,7 +94,15 @@ const AppBarWrapper: React.FC = () => {
       : []),
   ];
 
-  return <AppBarComponent title={APPBAR_MENU.TITLE} links={finalLinks} />;
+  const userLinks = [
+    {
+      label: APPBAR_MENU.SETTINGS,
+      icon: <SettingsIcon />,
+      path: ROUTES.SETTINGS,
+    },
+  ]
+
+  return <AppBarComponent title={APPBAR_MENU.TITLE} userLinks={userLinks} links={finalLinks} />;
 };
 
 const AppContent: React.FC = () => {
@@ -148,6 +158,7 @@ const AppContent: React.FC = () => {
             <Route path="/vehicles" element={<VehiclesPage />} />
             <Route path="/employees" element={<EmployeesPage />} />
             <Route path="/schedules" element={<SchedulesPage />} />
+            <Route path="/settings" element={<Settings />} />
           </Route>
           <Route path="*" element={<NotFound />} />
         </Routes>

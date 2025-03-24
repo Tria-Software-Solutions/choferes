@@ -5,6 +5,7 @@ export const ROUTES = {
   VEHICLES: "/vehicles",
   EMPLOYEES: "/employees",
   SCHEDULES: "/schedules",
+  SETTINGS: "/settings",
   DASHBOARD: "/dashboard",
 };
 
@@ -16,17 +17,19 @@ export const APPBAR_MENU = {
   EMPLOYEES: "Empleados",
   SCHEDULES: "Horarios",
   DASHBOARD: "Admin",
+  SETTINGS: "Configuración",
   LOGOUT: "Salir",
 };
 
 export const PAGE_TITLE = {
   LOGIN: "Iniciar Sesión",
-  REGISTER: "Registrar Usuario",
+  REGISTER: "Registrar Cuenta",
   ROLES: "Gestionar Roles",
   VEHICLES: "Gestionar Vehículos",
   EMPLOYEES: "Gestionar Empleados",
   SCHEDULES: "Gestionar Horarios",
   DASHBOARD: "Panel de Administración",
+  SETTINGS: "Configuración",
   ROLES_SIMPLIFIED: "Roles",
   VEHICLES_SIMPLIFIED: "Vehículos",
   EMPLOYEES_SIMPLIFIED: "Empleados",
@@ -60,7 +63,7 @@ export const PERMISSIONS = {
   EXPORT_PDF_VEHICLES: "Exportar PDF de Vehículos",
   VIEW_ADMIN: "Ver Admin",
   EDIT_USER: "Editar Usuario",
-  DELETE_USER: "Eliminar Usuario",
+  ENABLE_DISABLE_USER: "Habilitar/Deshabilitar Usuario",
   CREATE_ROLE: "Crear Rol",
   EDIT_ROLE: "Editar Rol",
   DELETE_ROLE: "Eliminar Rol",

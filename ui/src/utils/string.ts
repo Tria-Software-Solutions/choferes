@@ -13,6 +13,7 @@ export const translateColumnHeaderToSpanish = (
     lastName: "Apellido",
     email: "Correo Electrónico",
     username: "Usuario",
+    password: "Contraseña",
     label: "Asignación",
     days: "Días",
     hours: "Horas",

@@ -44,8 +44,8 @@ import {
   PAGE_TITLE,
   PERMISSIONS,
 } from "../../constants/constants";
-import DownloadRoundedIcon from "@mui/icons-material/DownloadRounded";
 import DirectionsCarIcon from "@mui/icons-material/DirectionsCar";
+import DownloadRoundedIcon from "@mui/icons-material/DownloadRounded";
 import ArrowBackIosNewRoundedIcon from "@mui/icons-material/ArrowBackIosNewRounded";
 import ArrowForwardIosRoundedIcon from "@mui/icons-material/ArrowForwardIosRounded";
 import CalendarTodayRoundedIcon from "@mui/icons-material/CalendarTodayRounded";
@@ -89,7 +89,7 @@ const VehiclesPage: React.FC = () => {
     parkingLot: "",
     notes: "",
   });
-  const [openDialog, setOpenDialog] = useState(false);
+  const [openDeleteDialog, setOpenDeleteDialog] = useState(false);
   const [openTicketTooltip, setOpenTicketTooltip] = useState(false);
   const [openLicensePlateTooltip, setOpenLicensePlateTooltip] = useState(false);
   const [vehicleToDelete, setVehicleToDelete] = useState<number | null>(null);
@@ -201,9 +201,10 @@ const VehiclesPage: React.FC = () => {
   const handleAdd = async () => {
     try {
       const newVehicle: Vehicle = {
-        id: allVehicles.length > 0
-          ? Math.max(...allVehicles.map((vehicle) => vehicle.id)) + 1
-          : 1,
+        id:
+          allVehicles.length > 0
+            ? Math.max(...allVehicles.map((vehicle) => vehicle.id)) + 1
+            : 1,
         ticket: addFields.ticket,
         licensePlate: addFields.licensePlate,
         brand: addFields.brand,
@@ -212,11 +213,11 @@ const VehiclesPage: React.FC = () => {
         notes: addFields.notes,
         createdAt: selectedDate,
       };
-  
-      await createVehicle(newVehicle); 
-  
+
+      await createVehicle(newVehicle);
+
       setAllVehicles((prevVehicles) => [...prevVehicles, newVehicle]);
-  
+
       setAddFields({
         ticket: "",
         licensePlate: "",
@@ -225,7 +226,7 @@ const VehiclesPage: React.FC = () => {
         parkingLot: "",
         notes: "",
       });
-  
+
       showNotification(
         "El registro del vehículo fue exitoso",
         "success",
@@ -242,7 +243,6 @@ const VehiclesPage: React.FC = () => {
       );
     }
   };
-  
 
   const handleEditClick = (vehicle: Vehicle) => {
     setEditRowId(vehicle.id);
@@ -283,6 +283,7 @@ const VehiclesPage: React.FC = () => {
           false
         );
       } catch (error) {
+        handleCancelClick();
         console.error(error);
         showNotification(
           "Ha ocurrido un error al actualizar el vehículo",
@@ -295,13 +296,13 @@ const VehiclesPage: React.FC = () => {
     [editFields, updateVehicle, showNotification]
   );
 
-  const handleOpenDialog = (id: number) => {
-    setOpenDialog(true);
+  const handleOpenDeleteDialog = (id: number) => {
+    setOpenDeleteDialog(true);
     setVehicleToDelete(id);
   };
 
-  const handleCloseDialog = () => {
-    setOpenDialog(false);
+  const handleCloseDeleteDialog = () => {
+    setOpenDeleteDialog(false);
     setVehicleToDelete(null);
   };
 
@@ -309,15 +310,16 @@ const VehiclesPage: React.FC = () => {
     try {
       if (vehicleToDelete !== null) {
         await deleteVehicle(vehicleToDelete);
-        handleCloseDialog();
+        showNotification(
+          "La eliminación del vehículo fue exitosa",
+          "success",
+          3000,
+          false
+        );
       }
-      showNotification(
-        "La eliminación del vehículo fue exitosa",
-        "success",
-        3000,
-        false
-      );
+      handleCloseDeleteDialog();
     } catch (error) {
+      handleCancelClick();
       console.error(error);
       showNotification(
         "Ha ocurrido un error al eliminar el vehículo",
@@ -490,9 +492,21 @@ const VehiclesPage: React.FC = () => {
         alignItems="center"
         sx={{ mb: 3 }}
       >
-        <Typography variant={isSmallScreen ? "h5" : "h2"} sx={{ flexGrow: 1 }}>
-          {isSmallScreen ? PAGE_TITLE.VEHICLES_SIMPLIFIED : PAGE_TITLE.VEHICLES}
-        </Typography>
+        <Box display="flex" alignItems="center">
+          <DirectionsCarIcon
+            fontSize={isSmallScreen ? "small" : "large"}
+          />
+          <Box sx={{ ml: 1 }}>
+            <Typography
+              variant={isSmallScreen ? "h5" : "h2"}
+              sx={{ flexGrow: 1 }}
+            >
+              {isSmallScreen
+                ? PAGE_TITLE.VEHICLES_SIMPLIFIED
+                : PAGE_TITLE.VEHICLES}
+            </Typography>
+          </Box>
+        </Box>
         {userPermissions.includes(PERMISSIONS.EXPORT_EXCEL_VEHICLES) &&
           userPermissions.includes(PERMISSIONS.EXPORT_PDF_VEHICLES) && (
             <Box sx={{ minHeight: 65 }}>
@@ -685,6 +699,7 @@ const VehiclesPage: React.FC = () => {
                     <Grid item xs={6} sm={4} md={2} lg={2}>
                       <FormControl variant="outlined" fullWidth>
                         <Autocomplete
+                          freeSolo
                           value={
                             addFields.brand
                               ? {
@@ -697,7 +712,10 @@ const VehiclesPage: React.FC = () => {
                             if (newValue) {
                               setAddFields((prev) => ({
                                 ...prev,
-                                brand: newValue.value,
+                                brand:
+                                  typeof newValue === "object"
+                                    ? newValue.value
+                                    : newValue,
                               }));
                             } else {
                               setAddFields((prev) => ({ ...prev, brand: "" }));
@@ -708,7 +726,9 @@ const VehiclesPage: React.FC = () => {
                           inputValue={searchBrandTerm}
                           onInputChange={handleSearchChangeBrand}
                           options={filteredBrands}
-                          getOptionLabel={(option) => option.label}
+                          getOptionLabel={(option) =>
+                            typeof option === "string" ? option : option.label
+                          }
                           noOptionsText="Sin coincidencias"
                           renderInput={(params) => (
                             <TextField
@@ -724,6 +744,7 @@ const VehiclesPage: React.FC = () => {
                     <Grid item xs={6} sm={4} md={2} lg={2}>
                       <FormControl variant="outlined" fullWidth>
                         <Autocomplete
+                          freeSolo
                           value={
                             addFields.color
                               ? {
@@ -736,7 +757,10 @@ const VehiclesPage: React.FC = () => {
                             if (newValue) {
                               setAddFields((prev) => ({
                                 ...prev,
-                                color: newValue.value,
+                                color:
+                                  typeof newValue === "object"
+                                    ? newValue.value
+                                    : newValue,
                               }));
                             } else {
                               setAddFields((prev) => ({ ...prev, color: "" }));
@@ -747,7 +771,9 @@ const VehiclesPage: React.FC = () => {
                           inputValue={searchColorTerm}
                           onInputChange={handleSearchChangeColor}
                           options={filteredColors}
-                          getOptionLabel={(option) => option.label}
+                          getOptionLabel={(option) =>
+                            typeof option === "string" ? option : option.label
+                          }
                           noOptionsText="Sin coincidencias"
                           renderInput={(params) => (
                             <TextField
@@ -831,7 +857,7 @@ const VehiclesPage: React.FC = () => {
               handleEditClick={handleEditClick}
               handleCancelClick={handleCancelClick}
               handleSaveClick={handleSaveClick}
-              handleOpenDialog={handleOpenDialog}
+              handleOpenDeleteDialog={handleOpenDeleteDialog}
               getRowId={(row) => row.id}
               totalCount={totalCount}
               page={page}
@@ -868,19 +894,23 @@ const VehiclesPage: React.FC = () => {
           )}
         </>
       )}
-      <Dialog open={openDialog} onClose={handleCloseDialog}>
-        <DialogTitle>Confirmar Eliminación</DialogTitle>
+      <Dialog open={openDeleteDialog} onClose={handleCloseDeleteDialog}>
+        <DialogTitle>Confirmar</DialogTitle>
         <DialogContent>
           <Typography>
             ¿Estás seguro de que deseas eliminar este vehículo?
           </Typography>
         </DialogContent>
         <DialogActions>
-          <Button color="primary" onClick={handleCloseDialog}>
-            Cancelar
+          <Button color="primary" sx={{ flex: 1 }} onClick={handleDelete}>
+            Aceptar
           </Button>
-          <Button color="secondary" onClick={handleDelete}>
-            Eliminar
+          <Button
+            color="secondary"
+            sx={{ flex: 1 }}
+            onClick={handleCloseDeleteDialog}
+          >
+            Cancelar
           </Button>
         </DialogActions>
       </Dialog>

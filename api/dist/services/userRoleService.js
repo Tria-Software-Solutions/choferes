@@ -10,7 +10,6 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.deleteUserRole = exports.updateUserRole = exports.createUserRole = exports.getUserRoleByUserId = exports.getUserRoles = void 0;
-const Role_1 = require("../models/Role");
 const UserRole_1 = require("../models/UserRole");
 const getUserRoles = () => __awaiter(void 0, void 0, void 0, function* () {
     return UserRole_1.UserRole.findAll();
@@ -30,27 +29,9 @@ const createUserRole = (data) => __awaiter(void 0, void 0, void 0, function* () 
     return newUserRole;
 });
 exports.createUserRole = createUserRole;
-// export const updateUserRole = async (userId: number, newRoleId: number) => {
-//   await UserRole.update(
-//     { roleId: newRoleId },
-//     {
-//       where: { userId },
-//     }
-//   );
-//   return UserRole.findOne({ where: { userId } });
-// };
-const updateUserRole = (userId, newRoleId) => __awaiter(void 0, void 0, void 0, function* () {
-    const role = yield Role_1.Role.findByPk(newRoleId);
-    if (!role) {
-        throw new Error("Role not found");
-    }
-    const updated = yield UserRole_1.UserRole.update({ roleId: newRoleId }, { where: { userId } });
-    if (updated[0] > 0) {
-        return UserRole_1.UserRole.findOne({ where: { userId } });
-    }
-    else {
-        throw new Error("Failed to update UserRole");
-    }
+const updateUserRole = (userId, roleId) => __awaiter(void 0, void 0, void 0, function* () {
+    yield UserRole_1.UserRole.update({ userId, roleId }, { where: { userId } });
+    return yield UserRole_1.UserRole.findOne({ where: { userId } });
 });
 exports.updateUserRole = updateUserRole;
 const deleteUserRole = (id) => __awaiter(void 0, void 0, void 0, function* () {

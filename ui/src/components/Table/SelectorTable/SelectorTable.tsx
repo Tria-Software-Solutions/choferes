@@ -720,7 +720,8 @@ const SelectorTable: React.FC<SelectorTableProps> = React.memo(
                           buttonIcon={<InfoOutlinedIcon />}
                           variant="text"
                           modalStyle={{ width: "80%" }}
-                          modalTitle={"Resumen de Horas Trabajadas"}
+                          modalTooltip="Resumen de Horas Trabajadas"
+                          modalTitle="Resumen de Horas Trabajadas"
                           modalDescription="Detalle de horas trabajadas en los diferentes períodos"
                           children={({ handleClose }) =>
                             modalContentSummary(employee)
@@ -841,7 +842,8 @@ const SelectorTable: React.FC<SelectorTableProps> = React.memo(
                           buttonStyle={{ height: "56px" }}
                           modalStyle={{ width: isSmallScreen ? "80%" : "40%" }}
                           disabled={!hasWorkedCurrentWeek(employee)}
-                          modalTitle={"Ajuste de Horas"}
+                          modalTooltip="Ajuste de Horas"
+                          modalTitle="Ajuste de Horas"
                           modalDescription={`Ingresa la cantidad de horas que deseas sumar o restar al total de horas trabajadas por ${employee.firstName} ${employee.lastName}.`}
                         >
                           {({ handleClose }) =>

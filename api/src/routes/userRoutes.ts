@@ -11,10 +11,17 @@ router.get("/:id", authenticateToken, userController.getUserById);
 router.get("/username/:username", userController.getUserByUsername);
 router.get("/:id/permissions", userController.getUserPermissions);
 router.put("/:id", authenticateToken, userController.updateUser);
-router.delete(
-  "/:id",
+router.put("/:id/status", authenticateToken, userController.updateUserStatus);
+router.put(
+  "/:id/password",
   authenticateToken,
-  userController.deleteUser
+  userController.updateUserPassword
 );
+router.put(
+  "/:id/temporal-password",
+  authenticateToken,
+  userController.updateUserTemporalPassword
+);
+router.delete("/:id", authenticateToken, userController.deleteUser);
 
 export default router;

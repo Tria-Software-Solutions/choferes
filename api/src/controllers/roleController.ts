@@ -34,10 +34,10 @@ export const getRoleByName = async (req: Request, res: Response) => {
 
 export const createRole = async (req: Request, res: Response) => {
   try {
-    const { name } = req.body;
-    const role = await roleService.createRole(name);
-    return res.status(201).json(role);
+    const newRole = await roleService.createRole(req.body);
+    return res.status(201).json(newRole);
   } catch (error) {
+    console.log("ERROR: ", error);
     return res.status(500).json({ message: "Error creating Role", error });
   }
 };

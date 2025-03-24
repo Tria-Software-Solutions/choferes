@@ -42,5 +42,6 @@ const authMiddleware_1 = require("../middleware/authMiddleware");
 const router = express_1.default.Router();
 router.get("/", authMiddleware_1.authenticateToken, rolePermissionController.getRolePermissions);
 router.post("/", authMiddleware_1.authenticateToken, rolePermissionController.createRolePermission);
+router.put("/:id", authMiddleware_1.authenticateToken, rolePermissionController.updateRolePermissions);
 router.delete("/:id", authMiddleware_1.authenticateToken, rolePermissionController.deleteRolePermission);
 exports.default = router;

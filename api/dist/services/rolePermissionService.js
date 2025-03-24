@@ -21,9 +21,14 @@ const createRolePermission = (data) => __awaiter(void 0, void 0, void 0, functio
     return newRolePermission;
 });
 exports.createRolePermission = createRolePermission;
-const updateRolePermission = (id, data) => __awaiter(void 0, void 0, void 0, function* () {
-    yield RolePermission_1.RolePermission.update(data, { where: { id } });
-    return RolePermission_1.RolePermission.findByPk(id);
+const updateRolePermission = (roleId, permissionIds) => __awaiter(void 0, void 0, void 0, function* () {
+    yield RolePermission_1.RolePermission.destroy({ where: { roleId } });
+    const newPermissions = permissionIds.map((permissionId) => ({
+        roleId,
+        permissionId,
+    }));
+    yield RolePermission_1.RolePermission.bulkCreate(newPermissions);
+    return yield RolePermission_1.RolePermission.findAll({ where: { roleId } });
 });
 exports.updateRolePermission = updateRolePermission;
 const deleteRolePermission = (id) => __awaiter(void 0, void 0, void 0, function* () {

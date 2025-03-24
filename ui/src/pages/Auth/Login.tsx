@@ -24,12 +24,15 @@ import { AxiosError } from "axios";
 const Login = () => {
   const { authenticateUser } = useUsers();
   const [fields, setFields] = useState({
-    username: "",
+    identifier: "",
     password: "",
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  const theme = useTheme();
+  const isSmallScreen = useMediaQuery(theme.breakpoints.down("sm"));
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -37,7 +40,7 @@ const Login = () => {
     setError(null);
 
     try {
-      await authenticateUser(fields.username, fields.password);
+      await authenticateUser(fields.identifier, fields.password);
     } catch (error: unknown) {
       if (error instanceof AxiosError) {
         if (error.response?.status === 401) {
@@ -58,9 +61,6 @@ const Login = () => {
   const handleTogglePassword = () => {
     setShowPassword((prev) => !prev);
   };
-
-  const theme = useTheme();
-  const isSmallScreen = useMediaQuery(theme.breakpoints.down("sm"));
 
   return (
     <Box
@@ -85,13 +85,13 @@ const Login = () => {
           <form onSubmit={handleLogin}>
             <TextField
               fullWidth
-              label="Usuario"
+              label="Correo Eléctronico o Usuario"
               variant="outlined"
               margin="normal"
-              value={fields.username}
+              value={fields.identifier}
               autoComplete="username"
               onChange={(e) =>
-                setFields({ ...fields, username: e.target.value })
+                setFields({ ...fields, identifier: e.target.value })
               }
             />
             <TextField

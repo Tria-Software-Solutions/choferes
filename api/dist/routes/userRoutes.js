@@ -47,5 +47,8 @@ router.get("/:id", authMiddleware_1.authenticateToken, userController.getUserByI
 router.get("/username/:username", userController.getUserByUsername);
 router.get("/:id/permissions", userController.getUserPermissions);
 router.put("/:id", authMiddleware_1.authenticateToken, userController.updateUser);
+router.put("/:id/status", authMiddleware_1.authenticateToken, userController.updateUserStatus);
+router.put("/:id/password", authMiddleware_1.authenticateToken, userController.updateUserPassword);
+router.put("/:id/temporal-password", authMiddleware_1.authenticateToken, userController.updateUserTemporalPassword);
 router.delete("/:id", authMiddleware_1.authenticateToken, userController.deleteUser);
 exports.default = router;

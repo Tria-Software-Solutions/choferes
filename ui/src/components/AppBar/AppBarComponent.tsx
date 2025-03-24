@@ -6,11 +6,10 @@ import { useAuth } from "../../context/AuthContext";
 import MenuRoundedIcon from "@mui/icons-material/MenuRounded";
 import logo from "../../assets/images/logo.png";
 
-
 interface Link {
   label: string;
   path?: string;
-  icon?: React.ReactNode;
+  icon?: React.ReactElement;
   subLinks?: Link[];
   onClick?: () => void;
 }
@@ -18,38 +17,36 @@ interface Link {
 interface AppBarComponentProps {
   icon?: React.ReactNode;
   title: string;
+  userLinks?: Link[];
   links: Link[];
 }
 
 const AppBarComponent: React.FC<AppBarComponentProps> = ({
   icon,
   title,
+  userLinks = [],
   links,
 }) => {
   const { currentUser } = useAuth();
   const navigate = useNavigate();
-  const menuItems = links.map((link) => ({
-    text: link.label,
-    onClick: link.onClick
-      ? link.onClick
-      : () => {
-          if (link.path) {
-            window.location.href = link.path;
-          }
-        },
-    icon: link.icon as React.ReactElement | undefined,
-    subMenuItems: link.subLinks?.map((subLink) => ({
-      text: subLink.label,
-      onClick: subLink.onClick
-        ? subLink.onClick
-        : () => {
-            if (subLink.path) {
-              window.location.href = subLink.path;
-            }
-          },
-      icon: subLink.icon as React.ReactElement | undefined,
-    })),
-  }));
+
+  const mapLinksToMenuItems = (
+    linkList: Link[]
+  ): {
+    text: string;
+    onClick?: () => void;
+    icon?: React.ReactElement;
+    subMenuItems?: any;
+  }[] =>
+    linkList.map(({ label, path, icon, subLinks, onClick }) => ({
+      text: label,
+      onClick: onClick || (path ? () => navigate(path) : undefined),
+      icon,
+      subMenuItems: subLinks ? mapLinksToMenuItems(subLinks) : undefined,
+    }));
+
+  const menuItems = mapLinksToMenuItems(links);
+  const menuUserItems = mapLinksToMenuItems(userLinks);
 
   return (
     <AppBar position="static">
@@ -86,10 +83,18 @@ const AppBarComponent: React.FC<AppBarComponentProps> = ({
             {title}
           </Box>
         </Typography>
-        <Typography sx={{ color: "white", marginRight: "25px" }}>
-          {`${currentUser?.firstName} ${currentUser?.lastName}`}
-        </Typography>
-        <MenuComponent icon={<MenuRoundedIcon />} menuItems={menuItems}/>
+        <Box sx={{ display: "flex", gap: 2 }}>
+          <MenuComponent
+            buttonType="text"
+            text={`${currentUser?.firstName} ${currentUser?.lastName}`}
+            menuItems={menuUserItems}
+          />
+          <MenuComponent
+            buttonType="icon"
+            icon={<MenuRoundedIcon />}
+            menuItems={menuItems}
+          />
+        </Box>
       </Toolbar>
     </AppBar>
   );

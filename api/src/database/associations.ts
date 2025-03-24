@@ -4,7 +4,8 @@ import { Permission } from "../models/Permission";
 import { Employee } from "../models/Employee";
 import { Schedule } from "../models/Schedule";
 import { HoursWorked } from "../models/HoursWorked";
-import { RolePermission, UserRole } from "./models";
+import { UserRole } from "../models/UserRole";
+import { RolePermission } from "../models/RolePermission";
 
 // Relación User - Role (Mediante UserRole)
 User.belongsToMany(Role, {

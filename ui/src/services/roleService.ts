@@ -12,7 +12,7 @@ export const getRoleById = async (id: number) => {
 };
 
 export const getRoleByName = async (name: string) => {
-  const response = await api.get(`/roles/rolename/${name}`);
+  const response = await api.get(`/roles/name/${name}`);
   return response.data;
 };
 
