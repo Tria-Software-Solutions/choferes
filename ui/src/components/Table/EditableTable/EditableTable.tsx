@@ -68,7 +68,7 @@ type EditableTableProps<T> = {
   handleSaveClick?: (id: number) => void;
   handleOpenDeleteDialog?: (id: number) => void;
   handleOpenStatusDialog?: (row: any) => void;
-  handlePasswordModal?: (handleClose: () => void) => void;
+  handlePasswordModal?: (id: number, handleClose: () => void) => void;
   getRowId: (row: T) => number;
   totalCount: number;
   page: number;
@@ -130,7 +130,7 @@ const EditableTable = <T extends object>({
     userPermissions?.includes(PERMISSIONS.DELETE_EMPLOYEES) ||
     userPermissions?.includes(PERMISSIONS.DELETE_SCHEDULES) ||
     userPermissions?.includes(PERMISSIONS.DELETE_VEHICLES) ||
-    userPermissions?.includes(PERMISSIONS.DELETE_USER) ||
+    userPermissions?.includes(PERMISSIONS.ENABLE_DISABLE_USER) ||
     userPermissions?.includes(PERMISSIONS.DELETE_ROLE);
 
   const handlePageChange = (
@@ -428,6 +428,7 @@ const EditableTable = <T extends object>({
               const rowId = getRowId(row);
               const isCurrentUser = rowId === currentUser?.id;
               const isUser = "username" in row;
+              const isRole = "permissions" in row;
               return (
                 <TableRow key={getRowId(row)}>
                   {columns.map((column) => {
@@ -536,14 +537,11 @@ const EditableTable = <T extends object>({
                                     }}
                                     modalTooltip="Cambiar Contraseña"
                                     modalTitle="Cambiar Contraseña"
-                                    modalDescription={
-                                      "Puedes cambiar la contraseña manualmente"
-                                    }
                                   >
                                     {({ handleClose }) => (
                                       <>
                                         {handlePasswordModal &&
-                                          handlePasswordModal(handleClose)}
+                                          handlePasswordModal(getRowId(row), handleClose)}
                                       </>
                                     )}
                                   </ModalComponent>
@@ -562,7 +560,7 @@ const EditableTable = <T extends object>({
                                 </Tooltip>
                               </>
                             )}
-                            {hasDeletePermissions && (
+                            {hasDeletePermissions && !isRole && (
                               <>
                                 {isUser ? (
                                   !isCurrentUser &&

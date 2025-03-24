@@ -18,6 +18,8 @@ import {
   Grid,
   IconButton,
   InputAdornment,
+  Link,
+  Stack,
   TextField,
   Tooltip,
   Typography,
@@ -27,6 +29,12 @@ import SearchBar from "../../components/SearchBar/SearchBar";
 import PersonAddAlt1RoundedIcon from "@mui/icons-material/PersonAddAlt1Rounded";
 import Visibility from "@mui/icons-material/Visibility";
 import VisibilityOff from "@mui/icons-material/VisibilityOff";
+import ContentCopyIcon from "@mui/icons-material/ContentCopy";
+
+interface TemporalPassword {
+  id: number;
+  temporalPassword: string;
+}
 
 interface ManageUsersProps {
   showInactive: boolean;
@@ -67,13 +75,17 @@ const ManageUsers: React.FC<ManageUsersProps> = ({ showInactive }) => {
   });
   const [openStatusDialog, setOpenStatusDialog] = useState(false);
   const [userToChange, setUserToChange] = useState<User | null>(null);
+  const [showPassword, setShowPassword] = useState(false);
   const [newPassword, setNewPassword] = useState("");
   const [confirmNewPassword, setConfirmNewPassword] = useState("");
   const [showNewPassword, setShowNewPassword] = useState(false);
   const [showConfirmNewPassword, setShowConfirmNewPassword] = useState(false);
+  const [temporalPasswordHidden, setTemporalPasswordHidden] = useState(true);
+  const [generatedTemporalPassword, setGeneratedTemporalPassword] =
+    useState<TemporalPassword>({ id: 0, temporalPassword: "" });
+  const [copyTooltipOpen, setCopyTooltipOpen] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [filter, setFilter] = useState("");
-  const [showPassword, setShowPassword] = useState(false);
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(5);
   const [isAddFormValid, setIsAddFormValid] = useState(false);
@@ -110,19 +122,47 @@ const ManageUsers: React.FC<ManageUsersProps> = ({ showInactive }) => {
         text: /^[a-zA-ZáéíóúÁÉÍÓÚñÑüÜëË\s-]+$/,
         email: /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/,
         username: /^[a-zA-Z][a-zA-Z0-9_.]{2,19}$/,
-        password: /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/,
+        password:
+          /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/,
       };
-  
+
       const isValid =
         regex.text.test(fields.firstName) &&
         regex.text.test(fields.lastName) &&
         regex.email.test(fields.email) &&
         regex.username.test(fields.username);
-  
-      return isAddForm ? isValid && regex.password.test(fields.password) : isValid;
+
+      return isAddForm
+        ? isValid && regex.password.test(fields.password)
+        : isValid;
     },
     []
   );
+
+  const validateNewPasswordFields = useCallback(async () => {
+    const passwordRegex =
+      /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
+    if (newPassword === "" || confirmNewPassword === "") {
+      setError("Los espacios son requeridos.");
+      return false;
+    }
+    if (newPassword !== confirmNewPassword) {
+      setError("Las contraseñas no coinciden.");
+      return false;
+    }
+    if (
+      !passwordRegex.test(newPassword) ||
+      !passwordRegex.test(confirmNewPassword)
+    ) {
+      setError(
+        "El valor es inválido.\n\n- Mínimo 8 caracteres.\n- Al menos una letra mayúscula.\n- Al menos una letra minúscula.\n- Al menos un número.\n- Al menos un carácter especial"
+      );
+      return false;
+    }
+
+    setError(null);
+    return true;
+  }, [newPassword, confirmNewPassword]);
 
   useEffect(
     () => setIsAddFormValid(validateFields(addFields, true)),
@@ -283,24 +323,84 @@ const ManageUsers: React.FC<ManageUsersProps> = ({ showInactive }) => {
     setShowConfirmNewPassword((prev) => !prev);
   };
 
-  const generatePassword = () => {
-    const regex =
-      /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
-    let password = "";
-    do {
-      password = Math.random().toString(36).slice(-8) + "@A1";
-    } while (!regex.test(password));
-    setNewPassword(password);
-    setConfirmNewPassword(password);
-  };
-
-  const handleChangePassword = () => {
-    if (newPassword !== confirmNewPassword) {
-      setError("Las contraseñas no coinciden.");
+  const handleGeneratePassword = async (id: number) => {
+    try {
+      const passwordRegex =
+        /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
+      let temporalPassword = "";
+      do {
+        temporalPassword = Math.random().toString(36).slice(-8) + "@A1";
+      } while (!passwordRegex.test(temporalPassword));
+      setGeneratedTemporalPassword({ id, temporalPassword });
+      setTemporalPasswordHidden(false);
+      await updateUserTemporalPassword(id, temporalPassword);
+      showNotification(
+        "Se ha creado una contraseña temporal",
+        "success",
+        3000,
+        false
+      );
+    } catch (error) {
+      console.error(error);
+      showNotification(
+        "Ha ocurrido un error al crear la contraseña temporal",
+        "error",
+        5000,
+        false
+      );
     }
   };
 
-  const modalContentChangeUserPassword = (handleClose: () => void) => {
+  const handleCopy = async () => {
+    try {
+      await navigator.clipboard.writeText(
+        generatedTemporalPassword.temporalPassword
+      );
+      setCopyTooltipOpen(true);
+      await new Promise((resolve) => setTimeout(resolve, 5000));
+      setCopyTooltipOpen(false);
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
+  const handleChangePassword = async (
+    e: React.FormEvent,
+    id: number,
+    handleClose: () => void
+  ) => {
+    e.preventDefault();
+
+    const isValid = await validateNewPasswordFields();
+    if (!isValid) return;
+
+    try {
+      await updateUserPassword(id, newPassword);
+      setNewPassword("");
+      setConfirmNewPassword("");
+      setTemporalPasswordHidden(true);
+      handleClose();
+      showNotification(
+        "La actualización de la contraseña del usuario fue exitosa",
+        "success",
+        3000,
+        false
+      );
+    } catch (error) {
+      console.error(error);
+      showNotification(
+        "Ha ocurrido un error al actualizar la contraseña del usuario",
+        "error",
+        5000,
+        false
+      );
+    }
+  };
+
+  const modalContentChangeUserPassword = (
+    id: number,
+    handleClose: () => void
+  ) => {
     return (
       <Box
         sx={{
@@ -310,6 +410,32 @@ const ManageUsers: React.FC<ManageUsersProps> = ({ showInactive }) => {
           margin: "auto",
         }}
       >
+        <Typography>
+          Puedes cambiar la contraseña manualmente o{" "}
+          <Link component="button" onClick={() => handleGeneratePassword(id)}>
+            generar una contraseña temporal
+          </Link>
+        </Typography>
+        <Stack direction="row" alignItems="center" spacing={1}>
+          {!temporalPasswordHidden && id === generatedTemporalPassword.id && (
+            <>
+              <Typography variant="h6">
+                {generatedTemporalPassword.temporalPassword}
+              </Typography>
+              <Tooltip
+                title="Copiado!"
+                open={copyTooltipOpen}
+                placement="right"
+                disableHoverListener
+                arrow
+              >
+                <IconButton size="small" onClick={handleCopy}>
+                  <ContentCopyIcon fontSize="small" />
+                </IconButton>
+              </Tooltip>
+            </>
+          )}
+        </Stack>
         <TextField
           label="Nueva Contraseña"
           variant="outlined"
@@ -350,7 +476,6 @@ const ManageUsers: React.FC<ManageUsersProps> = ({ showInactive }) => {
             ),
           }}
         />
-        <br />
         {error && (
           <Alert severity="error" sx={{ mt: 2 }}>
             {error}
@@ -362,19 +487,11 @@ const ManageUsers: React.FC<ManageUsersProps> = ({ showInactive }) => {
               variant="contained"
               color="error"
               sx={{ flex: 2, height: "56px" }}
-              onClick={handleChangePassword}
+              onClick={async (e) => {
+                await handleChangePassword(e, id, handleClose);
+              }}
             >
               Aceptar
-            </Button>
-          </Box>
-          <Box>
-            <Button
-              variant="contained"
-              color="success"
-              sx={{ flex: 1, height: "56px" }}
-              onClick={handleClose}
-            >
-              Cancelar
             </Button>
           </Box>
         </Box>
