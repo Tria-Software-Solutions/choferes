@@ -687,6 +687,7 @@ const VehiclesPage: React.FC = () => {
                     <Grid item xs={6} sm={4} md={2} lg={2}>
                       <FormControl variant="outlined" fullWidth>
                         <Autocomplete
+                          freeSolo
                           value={
                             addFields.brand
                               ? {
@@ -699,7 +700,10 @@ const VehiclesPage: React.FC = () => {
                             if (newValue) {
                               setAddFields((prev) => ({
                                 ...prev,
-                                brand: newValue.value,
+                                brand:
+                                  typeof newValue === "object"
+                                    ? newValue.value
+                                    : newValue,
                               }));
                             } else {
                               setAddFields((prev) => ({ ...prev, brand: "" }));
@@ -710,7 +714,9 @@ const VehiclesPage: React.FC = () => {
                           inputValue={searchBrandTerm}
                           onInputChange={handleSearchChangeBrand}
                           options={filteredBrands}
-                          getOptionLabel={(option) => option.label}
+                          getOptionLabel={(option) =>
+                            typeof option === "string" ? option : option.label
+                          }
                           noOptionsText="Sin coincidencias"
                           renderInput={(params) => (
                             <TextField
@@ -726,6 +732,7 @@ const VehiclesPage: React.FC = () => {
                     <Grid item xs={6} sm={4} md={2} lg={2}>
                       <FormControl variant="outlined" fullWidth>
                         <Autocomplete
+                          freeSolo
                           value={
                             addFields.color
                               ? {
@@ -738,7 +745,10 @@ const VehiclesPage: React.FC = () => {
                             if (newValue) {
                               setAddFields((prev) => ({
                                 ...prev,
-                                color: newValue.value,
+                                color:
+                                  typeof newValue === "object"
+                                    ? newValue.value
+                                    : newValue,
                               }));
                             } else {
                               setAddFields((prev) => ({ ...prev, color: "" }));
@@ -749,7 +759,9 @@ const VehiclesPage: React.FC = () => {
                           inputValue={searchColorTerm}
                           onInputChange={handleSearchChangeColor}
                           options={filteredColors}
-                          getOptionLabel={(option) => option.label}
+                          getOptionLabel={(option) =>
+                            typeof option === "string" ? option : option.label
+                          }
                           noOptionsText="Sin coincidencias"
                           renderInput={(params) => (
                             <TextField

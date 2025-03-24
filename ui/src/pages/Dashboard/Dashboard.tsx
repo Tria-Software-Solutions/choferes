@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React from "react";
 import ManageUsers from "./ManageUsers";
 import ManageRoles from "./ManageRoles";
 import {
@@ -6,8 +6,6 @@ import {
   AccordionDetails,
   AccordionSummary,
   Box,
-  FormControlLabel,
-  Switch,
   Typography,
   useMediaQuery,
   useTheme,
@@ -16,7 +14,6 @@ import { PAGE_TITLE } from "../../constants/constants";
 
 const Dashboard = () => {
   const [expanded, setExpanded] = React.useState<string | false>("panel1");
-  const [showInactive, setShowInactive] = useState(false);
 
   const handleChange =
     (panel: string) => (event: React.SyntheticEvent, newExpanded: boolean) => {
@@ -25,12 +22,6 @@ const Dashboard = () => {
 
   const theme = useTheme();
   const isSmallScreen = useMediaQuery(theme.breakpoints.down("sm"));
-
-  const handleChangeShowInactive = (
-    event: React.ChangeEvent<HTMLInputElement>
-  ) => {
-    setShowInactive(event.target.checked);
-  };
 
   return (
     <Box>
@@ -56,19 +47,7 @@ const Dashboard = () => {
           </Typography>
         </AccordionSummary>
         <AccordionDetails>
-          <FormControlLabel
-            control={
-              <Switch
-                size={isSmallScreen ? "small" : "medium"}
-                color="primary"
-                checked={showInactive}
-                onChange={handleChangeShowInactive}
-              />
-            }
-            label="Mostrar Inactivos"
-            labelPlacement="start"
-          />
-          <ManageUsers showInactive={showInactive} />
+          <ManageUsers />
         </AccordionDetails>
       </Accordion>
       <Accordion

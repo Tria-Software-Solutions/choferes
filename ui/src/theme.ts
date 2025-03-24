@@ -90,9 +90,6 @@ const theme = createTheme({
           borderRadius: "4px",
           textTransform: "none",
           transition: "font-size 0.2s ease-in-out",
-          "&:hover": {
-            fontSize: "0.95rem",
-          },
         },
         contained: {
           boxShadow: "none",

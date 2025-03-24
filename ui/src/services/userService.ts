@@ -50,10 +50,14 @@ export const getUserPermissions = async (id: number) => {
 };
 
 export const createUser = async (
-  user: Omit<User, "id" | "temporalPassword" | "role">
+  user: Omit<User, "id" | "temporalPassword">
 ) => {
   const response = await api.post("/users/register", user);
   return response.data;
+};
+
+export const updateUser = async (id: number, updatedUser: Partial<User>) => {
+  await api.put(`/users/${id}`, updatedUser);
 };
 
 export const updateUserStatus = async (id: number, status: boolean) => {
@@ -71,10 +75,6 @@ export const updateUserTemporalPassword = async (
   await api.put(`/users/${id}/temporal-password`, {
     temporalPassword,
   });
-};
-
-export const updateUser = async (id: number, updatedUser: Partial<User>) => {
-  await api.put(`/users/${id}`, updatedUser);
 };
 
 export const deleteUser = async (id: number) => {

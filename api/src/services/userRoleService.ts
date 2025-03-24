@@ -20,7 +20,7 @@ export const createUserRole = async (data: Omit<UserRole, "id">) => {
 };
 
 export const updateUserRole = async (userId: number, roleId: number) => {
-  await UserRole.update({ roleId }, { where: { userId } });
+  await UserRole.update({ userId, roleId }, { where: { userId } });
   return await UserRole.findOne({ where: { userId } });
 };
 
