@@ -108,8 +108,16 @@ const ManageRoles = () => {
     try {
       const newRole: Omit<Role, "id" | "permissions"> = {
         name: addFields.name,
+        permissionNames: addFields.permissionNames,
       };
-      await createRole(newRole);
+      const permissions = await getPermissionsByNames(
+        addFields.permissionNames
+      );
+      await createRole(
+        newRole,
+        permissions.map((permission: Permission) => permission.id)
+      );
+      await getRoles();
       setAddFields({
         name: "",
         permissionNames: [],

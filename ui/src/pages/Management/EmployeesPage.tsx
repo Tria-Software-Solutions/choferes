@@ -29,6 +29,7 @@ import {
   exportToPDF,
 } from "../../utils/export";
 import { PAGE_TITLE, PERMISSIONS } from "../../constants/constants";
+import GroupRoundedIcon from "@mui/icons-material/GroupRounded";
 import PersonAddAlt1RoundedIcon from "@mui/icons-material/PersonAddAlt1Rounded";
 import DownloadRoundedIcon from "@mui/icons-material/DownloadRounded";
 import CloseRoundedIcon from "@mui/icons-material/CloseRounded";
@@ -230,11 +231,21 @@ const EmployeesPage: React.FC = () => {
         alignItems="center"
         sx={{ mb: 3 }}
       >
-        <Typography variant={isSmallScreen ? "h5" : "h2"} sx={{ flexGrow: 1 }}>
-          {isSmallScreen
-            ? PAGE_TITLE.EMPLOYEES_SIMPLIFIED
-            : PAGE_TITLE.EMPLOYEES}
-        </Typography>
+        <Box display="flex" alignItems="center">
+          <GroupRoundedIcon
+            fontSize={isSmallScreen ? "small" : "large"}
+          />
+          <Box sx={{ ml: 1 }}>
+            <Typography
+              variant={isSmallScreen ? "h5" : "h2"}
+              sx={{ flexGrow: 1 }}
+            >
+              {isSmallScreen
+                ? PAGE_TITLE.EMPLOYEES_SIMPLIFIED
+                : PAGE_TITLE.EMPLOYEES}
+            </Typography>
+          </Box>
+        </Box>
         {userPermissions.includes(PERMISSIONS.EXPORT_EXCEL_EMPLOYEES) &&
           userPermissions.includes(PERMISSIONS.EXPORT_PDF_EMPLOYEES) && (
             <Box sx={{ minHeight: 65 }}>

@@ -40,6 +40,7 @@ import {
 } from "../../utils/export";
 import { translateDayOptionsToSpanish } from "../../utils/string";
 import { DAYS_LIST, PAGE_TITLE, PERMISSIONS } from "../../constants/constants";
+import EditCalendarRoundedIcon from "@mui/icons-material/EditCalendarRounded";
 import PostAddRoundedIcon from "@mui/icons-material/PostAddRounded";
 import DownloadRoundedIcon from "@mui/icons-material/DownloadRounded";
 import CloseRoundedIcon from "@mui/icons-material/CloseRounded";
@@ -271,11 +272,18 @@ const SchedulesPage: React.FC = () => {
         alignItems="center"
         sx={{ mb: 3 }}
       >
-        <Typography variant={isSmallScreen ? "h5" : "h2"} sx={{ flexGrow: 1 }}>
+        <Box display="flex" alignItems="center">
+          <EditCalendarRoundedIcon
+            fontSize={isSmallScreen ? "small" : "large"}
+          />
+          <Box sx={{ ml: 1 }}>
+          <Typography variant={isSmallScreen ? "h5" : "h2"} sx={{ flexGrow: 1 }}>
           {isSmallScreen
             ? PAGE_TITLE.SCHEDULES_SIMPLIFIED
             : PAGE_TITLE.SCHEDULES}
         </Typography>
+          </Box>
+        </Box>
         {userPermissions.includes(PERMISSIONS.EXPORT_EXCEL_SCHEDULES) &&
           userPermissions.includes(PERMISSIONS.EXPORT_PDF_SCHEDULES) && (
             <Box sx={{ minHeight: 65 }}>
