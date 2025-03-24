@@ -32,9 +32,10 @@ const authenticateUser = (identifier, password, res) => __awaiter(void 0, void 0
             },
         ],
     });
-    if (!user) {
+    if (!user)
         throw new Error("User not found");
-    }
+    if (!user.isActive)
+        throw new Error("User is inactive");
     const isMatch = yield bcrypt_1.default.compare(password, user.password);
     if (!isMatch) {
         if (user.temporalPassword) {

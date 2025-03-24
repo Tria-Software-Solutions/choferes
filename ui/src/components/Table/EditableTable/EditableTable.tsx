@@ -67,7 +67,7 @@ type EditableTableProps<T> = {
   handleCancelClick?: () => void;
   handleSaveClick?: (id: number) => void;
   handleOpenDeleteDialog?: (id: number) => void;
-  handleOpenStatusDialog?: (id: number) => void;
+  handleOpenStatusDialog?: (row: any) => void;
   handlePasswordModal?: (handleClose: () => void) => void;
   getRowId: (row: T) => number;
   totalCount: number;
@@ -527,26 +527,26 @@ const EditableTable = <T extends object>({
                             {hasEditPermissions && (
                               <>
                                 {isUser && (
-                                  <Tooltip title="Cambiar Contraseña" arrow>
-                                    <ModalComponent
-                                      buttonType="icon"
-                                      buttonIcon={<PasswordIcon />}
-                                      variant="text"
-                                      modalStyle={{
-                                        width: isSmallScreen ? "80%" : "40%",
-                                      }}
-                                      modalTitle={"Cambiar Contraseña"}
-                                      modalDescription={
-                                        "Puedes cambiar la contraseña manualmente"
-                                      }
-                                    >
-                                      {({ handleClose }) => (
-                                        <>
-                                          {handlePasswordModal && handlePasswordModal(handleClose)}
-                                        </>
-                                      )}
-                                    </ModalComponent>
-                                  </Tooltip>
+                                  <ModalComponent
+                                    buttonType="icon"
+                                    buttonIcon={<PasswordIcon />}
+                                    variant="text"
+                                    modalStyle={{
+                                      width: isSmallScreen ? "80%" : "40%",
+                                    }}
+                                    modalTooltip="Cambiar Contraseña"
+                                    modalTitle="Cambiar Contraseña"
+                                    modalDescription={
+                                      "Puedes cambiar la contraseña manualmente"
+                                    }
+                                  >
+                                    {({ handleClose }) => (
+                                      <>
+                                        {handlePasswordModal &&
+                                          handlePasswordModal(handleClose)}
+                                      </>
+                                    )}
+                                  </ModalComponent>
                                 )}
                                 <Tooltip title="Editar" arrow>
                                   <Box>
@@ -578,9 +578,7 @@ const EditableTable = <T extends object>({
                                           color="secondary"
                                           onClick={() =>
                                             handleOpenStatusDialog &&
-                                            handleOpenStatusDialog(
-                                              getRowId(row)
-                                            )
+                                            handleOpenStatusDialog(row)
                                           }
                                         >
                                           {row.isActive ? (

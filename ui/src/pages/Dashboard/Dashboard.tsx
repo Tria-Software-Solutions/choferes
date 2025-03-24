@@ -6,7 +6,6 @@ import {
   AccordionDetails,
   AccordionSummary,
   Box,
-  Checkbox,
   FormControlLabel,
   Switch,
   Typography,

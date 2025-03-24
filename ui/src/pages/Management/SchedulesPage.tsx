@@ -224,14 +224,14 @@ const SchedulesPage: React.FC = () => {
     try {
       if (scheduleToDelete !== null) {
         await deleteSchedule(scheduleToDelete);
-        handleCloseDeleteDialog();
+        showNotification(
+          "La eliminación del horario fue exitosa",
+          "success",
+          3000,
+          false
+        );
       }
-      showNotification(
-        "La eliminación del horario fue exitosa",
-        "success",
-        3000,
-        false
-      );
+      handleCloseDeleteDialog();
     } catch (error) {
       handleCancelClick();
       console.error(error);
@@ -508,7 +508,7 @@ const SchedulesPage: React.FC = () => {
         </>
       )}
       <Dialog open={openDeleteDialog} onClose={handleCloseDeleteDialog}>
-        <DialogTitle>Confirmar Eliminación</DialogTitle>
+        <DialogTitle>Confirmar</DialogTitle>
         <DialogContent>
           <Typography>
             ¿Estás seguro de que deseas eliminar este horario?

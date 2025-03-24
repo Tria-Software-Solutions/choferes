@@ -57,7 +57,7 @@ export const createUser = async (
 };
 
 export const updateUserStatus = async (id: number, status: boolean) => {
-  await api.put(`/users/${id}/status/`, status);
+  await api.put(`/users/${id}/status`, { isActive: status });
 };
 
 export const updateUserPassword = async (id: number, password: string) => {
