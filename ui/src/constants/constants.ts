@@ -5,6 +5,7 @@ export const ROUTES = {
   VEHICLES: "/vehicles",
   EMPLOYEES: "/employees",
   SCHEDULES: "/schedules",
+  SETTINGS: "/settings",
   DASHBOARD: "/dashboard",
 };
 
@@ -16,6 +17,7 @@ export const APPBAR_MENU = {
   EMPLOYEES: "Empleados",
   SCHEDULES: "Horarios",
   DASHBOARD: "Admin",
+  SETTINGS: "Configuración",
   LOGOUT: "Salir",
 };
 

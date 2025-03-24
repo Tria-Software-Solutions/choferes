@@ -15,14 +15,22 @@ import {
   DialogActions,
   DialogContent,
   DialogTitle,
+  FormControl,
+  FormControlLabel,
   Grid,
   IconButton,
   InputAdornment,
+  InputLabel,
   Link,
+  MenuItem,
+  Select,
   Stack,
+  Switch,
   TextField,
   Tooltip,
   Typography,
+  useMediaQuery,
+  useTheme,
 } from "@mui/material";
 import EditableTable from "../../components/Table/EditableTable/EditableTable";
 import SearchBar from "../../components/SearchBar/SearchBar";
@@ -36,11 +44,7 @@ interface TemporalPassword {
   temporalPassword: string;
 }
 
-interface ManageUsersProps {
-  showInactive: boolean;
-}
-
-const ManageUsers: React.FC<ManageUsersProps> = ({ showInactive }) => {
+const ManageUsers: React.FC = () => {
   const { userPermissions } = useAuth();
   const {
     users,
@@ -52,9 +56,10 @@ const ManageUsers: React.FC<ManageUsersProps> = ({ showInactive }) => {
     updateUserPassword,
     updateUserTemporalPassword,
   } = useUsers();
-  const { getRoleByName } = useRoles();
+  const { roles, getRoleByName } = useRoles();
   const { showNotification } = useAppNotifications();
   const [filteredUsers, setFilteredUsers] = useState<User[]>([]);
+  const [showInactive, setShowInactive] = useState(false);
   const [totalCount, setTotalCount] = useState(0);
   const [editRowId, setEditRowId] = useState<number | null>(null);
   const [addFields, setAddFields] = useState({
@@ -91,6 +96,9 @@ const ManageUsers: React.FC<ManageUsersProps> = ({ showInactive }) => {
   const [isAddFormValid, setIsAddFormValid] = useState(false);
   const [isEditFormValid, setIsEditFormValid] = useState(false);
 
+  const theme = useTheme();
+  const isSmallScreen = useMediaQuery(theme.breakpoints.down("sm"));
+
   useEffect(() => {
     const normalizeString = (str: string) =>
       str.normalize("NFD").replace(/[\u0300-\u036f]/g, "");
@@ -116,6 +124,12 @@ const ManageUsers: React.FC<ManageUsersProps> = ({ showInactive }) => {
     setTotalCount(filtered.length);
   }, [filter, users, showInactive]);
 
+  const handleChangeShowInactive = (
+    event: React.ChangeEvent<HTMLInputElement>
+  ) => {
+    setShowInactive(event.target.checked);
+  };
+
   const validateFields = useCallback(
     (fields: typeof editFields, isAddForm: boolean) => {
       const regex = {
@@ -133,7 +147,9 @@ const ManageUsers: React.FC<ManageUsersProps> = ({ showInactive }) => {
         regex.username.test(fields.username);
 
       return isAddForm
-        ? isValid && regex.password.test(fields.password)
+        ? isValid &&
+            regex.password.test(fields.password) &&
+            regex.text.test(fields.roleName)
         : isValid;
     },
     []
@@ -186,9 +202,12 @@ const ManageUsers: React.FC<ManageUsersProps> = ({ showInactive }) => {
         email: addFields.email,
         username: addFields.username,
         password: addFields.password,
+        roleName: addFields.roleName,
         isActive: true,
       };
-      await createUser(newUser);
+      const role = await getRoleByName(addFields.roleName);
+      await createUser(newUser, role.id);
+      await getUsers();
       setAddFields({
         firstName: "",
         lastName: "",
@@ -412,7 +431,10 @@ const ManageUsers: React.FC<ManageUsersProps> = ({ showInactive }) => {
       >
         <Typography>
           Puedes cambiar la contraseña manualmente o{" "}
-          <Link component="button" onClick={() => handleGeneratePassword(id)}>
+          <Link
+            sx={{ cursor: "pointer" }}
+            onClick={() => handleGeneratePassword(id)}
+          >
             generar una contraseña temporal
           </Link>
         </Typography>
@@ -526,7 +548,7 @@ const ManageUsers: React.FC<ManageUsersProps> = ({ showInactive }) => {
             justifyContent="space-between"
             alignItems="center"
           >
-            <Grid item xs={12} md={2} lg={4}>
+            <Grid item xs={12} md={6}>
               {filteredUsers && (
                 <SearchBar
                   placeholder="Buscar usuario"
@@ -539,7 +561,29 @@ const ManageUsers: React.FC<ManageUsersProps> = ({ showInactive }) => {
                 />
               )}
             </Grid>
-            <Grid item xs={12} md={10} lg={8}>
+            <Grid item xs={12} md={6}>
+              <Box
+                display="flex"
+                flexDirection={{ xs: "column", sm: "column", md: "row" }}
+                alignItems="flex-start"
+                justifyContent="flex-end"
+                gap={2}
+              >
+                <FormControlLabel
+                  control={
+                    <Switch
+                      size={isSmallScreen ? "small" : "medium"}
+                      color="primary"
+                      checked={showInactive}
+                      onChange={handleChangeShowInactive}
+                    />
+                  }
+                  label="Mostrar Inactivos"
+                  labelPlacement="start"
+                />
+              </Box>
+            </Grid>
+            <Grid item xs={12} md={12}>
               <Box
                 display="flex"
                 flexDirection={{ xs: "column", sm: "column", md: "row" }}
@@ -548,7 +592,7 @@ const ManageUsers: React.FC<ManageUsersProps> = ({ showInactive }) => {
                 gap={2}
               >
                 <Grid container spacing={2} alignItems="center">
-                  <Grid item xs={6} md={2} lg={2}>
+                  <Grid item xs={6} md={2}>
                     <TextField
                       label="Nombre"
                       variant="outlined"
@@ -565,7 +609,7 @@ const ManageUsers: React.FC<ManageUsersProps> = ({ showInactive }) => {
                       }
                     />
                   </Grid>
-                  <Grid item xs={6} md={2} lg={2}>
+                  <Grid item xs={6} md={2}>
                     <TextField
                       label="Apellido"
                       variant="outlined"
@@ -579,7 +623,7 @@ const ManageUsers: React.FC<ManageUsersProps> = ({ showInactive }) => {
                       }
                     />
                   </Grid>
-                  <Grid item xs={12} md={3} lg={3}>
+                  <Grid item xs={12} md={2}>
                     <TextField
                       label="Correo Eléctronico"
                       variant="outlined"
@@ -593,7 +637,7 @@ const ManageUsers: React.FC<ManageUsersProps> = ({ showInactive }) => {
                       }
                     />
                   </Grid>
-                  <Grid item xs={6} md={2} lg={2}>
+                  <Grid item xs={6} md={2}>
                     <TextField
                       label="Usuario"
                       variant="outlined"
@@ -607,7 +651,7 @@ const ManageUsers: React.FC<ManageUsersProps> = ({ showInactive }) => {
                       }
                     />
                   </Grid>
-                  <Grid item xs={6} md={3} lg={3}>
+                  <Grid item xs={6} md={2}>
                     <TextField
                       label="Contraseña"
                       variant="outlined"
@@ -637,6 +681,27 @@ const ManageUsers: React.FC<ManageUsersProps> = ({ showInactive }) => {
                         ),
                       }}
                     />
+                  </Grid>
+                  <Grid item xs={12} md={2}>
+                    <FormControl variant="outlined" fullWidth>
+                      <InputLabel>Seleccione un rol</InputLabel>
+                      <Select
+                        label="Seleccione un rol"
+                        value={addFields.roleName || ""}
+                        onChange={(e) =>
+                          setAddFields({
+                            ...addFields,
+                            roleName: e.target.value,
+                          })
+                        }
+                      >
+                        {roles.map((role) => (
+                          <MenuItem key={role.id} value={role.name}>
+                            {role.name}
+                          </MenuItem>
+                        ))}
+                      </Select>
+                    </FormControl>
                   </Grid>
                 </Grid>
                 <Tooltip title="Agregar Usuario" arrow>

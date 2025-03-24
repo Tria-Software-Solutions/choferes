@@ -16,8 +16,8 @@ export const createUserRole = async (userRole: Omit<UserRole, "id">) => {
   return response.data;
 };
 
-export const updateUserRole = async (id: number, roleId: number) => {
-  await api.put(`/user-role/${id}`, { roleId });
+export const updateUserRole = async (userId: number, roleId: number) => {
+  await api.put(`/user-role/${userId}`, { roleId });
 };
 
 export const deleteUserRole = async (id: number) => {

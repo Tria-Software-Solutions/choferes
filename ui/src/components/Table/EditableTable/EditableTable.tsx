@@ -247,17 +247,23 @@ const EditableTable = <T extends object>({
 
       return (
         <Autocomplete
+          freeSolo
           value={selectedOption}
           onChange={(event, newValue) => {
             setEditField &&
-              setEditField(String(column), newValue ? newValue.value : "");
+              setEditField(
+                String(column),
+                newValue && typeof newValue !== "string" ? newValue.value : ""
+              );
           }}
           inputValue={undefined}
           onInputChange={(event, newInputValue) => {
             if (!event) return;
           }}
           options={config.options || []}
-          getOptionLabel={(option) => option.label}
+          getOptionLabel={(option) =>
+            typeof option === "string" ? option : option.label
+          }
           renderInput={(params) => (
             <TextField
               {...params}
@@ -428,7 +434,6 @@ const EditableTable = <T extends object>({
               const rowId = getRowId(row);
               const isCurrentUser = rowId === currentUser?.id;
               const isUser = "username" in row;
-              const isRole = "permissions" in row;
               return (
                 <TableRow key={getRowId(row)}>
                   {columns.map((column) => {
@@ -541,7 +546,10 @@ const EditableTable = <T extends object>({
                                     {({ handleClose }) => (
                                       <>
                                         {handlePasswordModal &&
-                                          handlePasswordModal(getRowId(row), handleClose)}
+                                          handlePasswordModal(
+                                            getRowId(row),
+                                            handleClose
+                                          )}
                                       </>
                                     )}
                                   </ModalComponent>
@@ -560,7 +568,7 @@ const EditableTable = <T extends object>({
                                 </Tooltip>
                               </>
                             )}
-                            {hasDeletePermissions && !isRole && (
+                            {hasDeletePermissions && (
                               <>
                                 {isUser ? (
                                   !isCurrentUser &&

@@ -30,7 +30,7 @@ const createUserRole = (data) => __awaiter(void 0, void 0, void 0, function* () 
 });
 exports.createUserRole = createUserRole;
 const updateUserRole = (userId, roleId) => __awaiter(void 0, void 0, void 0, function* () {
-    yield UserRole_1.UserRole.update({ roleId }, { where: { userId } });
+    yield UserRole_1.UserRole.update({ userId, roleId }, { where: { userId } });
     return yield UserRole_1.UserRole.findOne({ where: { userId } });
 });
 exports.updateUserRole = updateUserRole;

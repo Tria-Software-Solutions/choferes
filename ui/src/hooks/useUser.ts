@@ -89,18 +89,21 @@ export const useUsers = () => {
   }, []);
 
   const createUser = async (
-    newUser: Omit<User, "id" | "temporalPassword" | "role">
+    newUser: Omit<User, "id" | "temporalPassword">,
+    newRoleId?: number
   ) => {
     const createdUser = await UserService.createUser(newUser);
     setUsers((prev) => [...prev, createdUser]);
     setTotalCountUsers((prev) => prev + 1);
+    console.log("newRoleId: ", newRoleId);
     const createdUserRole: Omit<UserRole, "id"> = {
       userId: createdUser.id,
-      roleId: Roles.USER,
+      roleId: newRoleId ? newRoleId : Roles.USER,
     };
     createUserRole(createdUserRole);
-    getUsers();
-    if (!currentUser) {
+    if (currentUser) {
+      getUsers();
+    } else {
       navigate("/");
     }
   };
