@@ -537,7 +537,7 @@ module.exports = {
       },
       {
         id: 26,
-        name: "Eliminar Usuario",
+        name: "Habilitar/Deshabilitar Usuario",
         createdAt: new Date(),
         updatedAt: new Date(),
       },

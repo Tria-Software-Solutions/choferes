@@ -61,14 +61,16 @@ export const updateUserStatus = async (id: number, status: boolean) => {
 };
 
 export const updateUserPassword = async (id: number, password: string) => {
-  await api.put(`/users/${id}/password`, password);
+  await api.put(`/users/${id}/password`, { password });
 };
 
 export const updateUserTemporalPassword = async (
   id: number,
   temporalPassword: string
 ) => {
-  await api.put(`/users/${id}/temporal-password`, temporalPassword);
+  await api.put(`/users/${id}/temporal-password`, {
+    temporalPassword,
+  });
 };
 
 export const updateUser = async (id: number, updatedUser: Partial<User>) => {

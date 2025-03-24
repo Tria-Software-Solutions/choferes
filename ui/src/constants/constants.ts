@@ -60,7 +60,7 @@ export const PERMISSIONS = {
   EXPORT_PDF_VEHICLES: "Exportar PDF de Vehículos",
   VIEW_ADMIN: "Ver Admin",
   EDIT_USER: "Editar Usuario",
-  DELETE_USER: "Eliminar Usuario",
+  ENABLE_DISABLE_USER: "Habilitar/Deshabilitar Usuario",
   CREATE_ROLE: "Crear Rol",
   EDIT_ROLE: "Editar Rol",
   DELETE_ROLE: "Eliminar Rol",
