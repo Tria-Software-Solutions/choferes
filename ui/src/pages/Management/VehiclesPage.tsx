@@ -164,9 +164,9 @@ const VehiclesPage: React.FC = () => {
   const validateFields = useCallback((fields: typeof addFields) => {
     const regex = {
       number: /^\d+$/,
-      plate: /^(?:[A-ZÑ]{3}-\d{3}|\d{6})$/,
-      text: /^[a-zA-ZáéíóúÁÉÍÓÚñÑüÜëË\s-]+$/,
-      parkingLot: /^ATP[1-9]-\d{3,4}$/,
+      plate: /^(?:[A-ZÑ]{3}-\d{3}|\d{6}|nulo|n\/a)$/i,
+      text: /^(?:[a-zA-ZáéíóúÁÉÍÓÚñÑüÜëË\s-]+|nulo|n\/a)$/i,
+      parkingLot: /^(?:ATP[1-9]-\d{3,4}|nulo|n\/a)$/i,
     };
 
     return (
@@ -215,9 +215,7 @@ const VehiclesPage: React.FC = () => {
       };
 
       await createVehicle(newVehicle);
-
       setAllVehicles((prevVehicles) => [...prevVehicles, newVehicle]);
-
       setAddFields({
         ticket: "",
         licensePlate: "",
@@ -226,7 +224,6 @@ const VehiclesPage: React.FC = () => {
         parkingLot: "",
         notes: "",
       });
-
       showNotification(
         "El registro del vehículo fue exitoso",
         "success",
@@ -484,6 +481,17 @@ const VehiclesPage: React.FC = () => {
     );
   }, [userPermissions, filteredWeekVehicles, selectedDate]);
 
+  const handleErroInTicket = () => {
+    setAddFields({
+      ticket: getNextTicketNumber(),
+      licensePlate: "N/A",
+      brand: "N/A",
+      color: "N/A",
+      parkingLot: "N/A",
+      notes: "N/A",
+    });
+  };
+
   return (
     <Box>
       <Box
@@ -495,6 +503,8 @@ const VehiclesPage: React.FC = () => {
         <Box display="flex" alignItems="center">
           <DirectionsCarIcon
             fontSize={isSmallScreen ? "small" : "large"}
+            style={{ cursor: "pointer" }}
+            onClick={handleErroInTicket}
           />
           <Box sx={{ ml: 1 }}>
             <Typography

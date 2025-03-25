@@ -99,10 +99,14 @@ const Settings = () => {
       };
       if (currentUser) {
         await updateUser(currentUser.id, updatedUser);
+        sessionStorage.setItem(
+          "currentUser",
+          JSON.stringify({ ...currentUser, ...updatedUser })
+        );
+        await getUsers();
       } else {
         throw new Error("Current User is null");
       }
-      await getUsers();
       showNotification(
         "La actualización de lo datos fue exitosa",
         "success",
