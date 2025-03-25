@@ -215,18 +215,24 @@ export const handleExportTableData = (
   biweekNumber: number,
   month: number,
   year: number,
-  currentWeek: { day: string; date: string; isoDate: string }[]
+  currentWeek: { day: string; date: string; isoDate: string }[],
+  withHours?: boolean
 ) => {
-  const headers = [
-    "Nombre",
-    ...currentWeek.map(({ date }) => formatHeaderDateWithYear(date)),
-    `Total ${translatePeriodToSpanish("weekly")}`,
-    `Total Horas Extra ${translatePeriodToSpanish("weekly")}`,
-    `Total ${translatePeriodToSpanish("biweekly")}`,
-    `Total Horas Extra ${translatePeriodToSpanish("biweekly")}`,
-    `Total ${translatePeriodToSpanish("monthly")}`,
-    `Total Horas Extra ${translatePeriodToSpanish("monthly")}`,
-  ];
+  const headers = !withHours
+    ? [
+        "Nombre",
+        ...currentWeek.map(({ date }) => formatHeaderDateWithYear(date)),
+      ]
+    : [
+        "Nombre",
+        ...currentWeek.map(({ date }) => formatHeaderDateWithYear(date)),
+        `Total ${translatePeriodToSpanish("weekly")}`,
+        `Total Horas Extra ${translatePeriodToSpanish("weekly")}`,
+        `Total ${translatePeriodToSpanish("biweekly")}`,
+        `Total Horas Extra ${translatePeriodToSpanish("biweekly")}`,
+        `Total ${translatePeriodToSpanish("monthly")}`,
+        `Total Horas Extra ${translatePeriodToSpanish("monthly")}`,
+      ];
 
   const sortedEmployees = filteredEmployees.sort((a, b) => {
     const fullNameA = `${a.firstName} ${a.lastName}`.toLowerCase();
@@ -257,24 +263,26 @@ export const handleExportTableData = (
         scheduleLabel || "Libre";
     });
 
-    const multiplePeriods = getInvolvedPeriods(currentWeek);
+    if (withHours) {
+      const multiplePeriods = getInvolvedPeriods(currentWeek);
 
-    if (hasMultipleYears(currentWeek)) {
-      employeeData[`Total ${translatePeriodToSpanish("weekly")}`] = String(
-        calculateTotalHoursAndOvertimeForPeriods(
-          employee.id,
-          "weekly",
-          multiplePeriods.weekNumbers,
-          multiplePeriods.biweekNumbers,
-          multiplePeriods.months,
-          weeklySummaries,
-          biweeklySummaries,
-          monthlySummaries
-        ).totalHours
-      );
+      if (hasMultipleYears(currentWeek)) {
+        employeeData[`Total ${translatePeriodToSpanish("weekly")}`] = String(
+          calculateTotalHoursAndOvertimeForPeriods(
+            employee.id,
+            "weekly",
+            multiplePeriods.weekNumbers,
+            multiplePeriods.biweekNumbers,
+            multiplePeriods.months,
+            weeklySummaries,
+            biweeklySummaries,
+            monthlySummaries
+          ).totalHours
+        );
 
-      employeeData[`Total Horas Extra ${translatePeriodToSpanish("weekly")}`] =
-        String(
+        employeeData[
+          `Total Horas Extra ${translatePeriodToSpanish("weekly")}`
+        ] = String(
           calculateTotalHoursAndOvertimeForPeriods(
             employee.id,
             "weekly",
@@ -286,22 +294,23 @@ export const handleExportTableData = (
             monthlySummaries
           ).overtime
         );
-    } else {
-      employeeData[`Total ${translatePeriodToSpanish("weekly")}`] =
-        calculateTotalHoursAndOvertimeForPeriod(
-          employee.id,
-          "weekly",
-          weekNumber,
-          biweekNumber,
-          month,
-          year,
-          weeklySummaries,
-          biweeklySummaries,
-          monthlySummaries
-        ).totalHours;
+      } else {
+        employeeData[`Total ${translatePeriodToSpanish("weekly")}`] =
+          calculateTotalHoursAndOvertimeForPeriod(
+            employee.id,
+            "weekly",
+            weekNumber,
+            biweekNumber,
+            month,
+            year,
+            weeklySummaries,
+            biweeklySummaries,
+            monthlySummaries
+          ).totalHours;
 
-      employeeData[`Total Horas Extra ${translatePeriodToSpanish("weekly")}`] =
-        calculateTotalHoursAndOvertimeForPeriod(
+        employeeData[
+          `Total Horas Extra ${translatePeriodToSpanish("weekly")}`
+        ] = calculateTotalHoursAndOvertimeForPeriod(
           employee.id,
           "weekly",
           weekNumber,
@@ -312,39 +321,53 @@ export const handleExportTableData = (
           biweeklySummaries,
           monthlySummaries
         ).overtime;
-    }
+      }
 
-    if (hasMultipleBiweeks(currentWeek)) {
-      employeeData[`Total ${translatePeriodToSpanish("biweekly")}`] = String(
-        calculateTotalHoursAndOvertimeForPeriods(
-          employee.id,
-          "biweekly",
-          multiplePeriods.weekNumbers,
-          multiplePeriods.biweekNumbers,
-          multiplePeriods.months,
-          weeklySummaries,
-          biweeklySummaries,
-          monthlySummaries
-        ).totalHours
-      );
+      if (hasMultipleBiweeks(currentWeek)) {
+        employeeData[`Total ${translatePeriodToSpanish("biweekly")}`] = String(
+          calculateTotalHoursAndOvertimeForPeriods(
+            employee.id,
+            "biweekly",
+            multiplePeriods.weekNumbers,
+            multiplePeriods.biweekNumbers,
+            multiplePeriods.months,
+            weeklySummaries,
+            biweeklySummaries,
+            monthlySummaries
+          ).totalHours
+        );
 
-      employeeData[
-        `Total Horas Extra ${translatePeriodToSpanish("biweekly")}`
-      ] = String(
-        calculateTotalHoursAndOvertimeForPeriods(
-          employee.id,
-          "biweekly",
-          multiplePeriods.weekNumbers,
-          multiplePeriods.biweekNumbers,
-          multiplePeriods.months,
-          weeklySummaries,
-          biweeklySummaries,
-          monthlySummaries
-        ).overtime
-      );
-    } else {
-      employeeData[`Total ${translatePeriodToSpanish("biweekly")}`] =
-        calculateTotalHoursAndOvertimeForPeriod(
+        employeeData[
+          `Total Horas Extra ${translatePeriodToSpanish("biweekly")}`
+        ] = String(
+          calculateTotalHoursAndOvertimeForPeriods(
+            employee.id,
+            "biweekly",
+            multiplePeriods.weekNumbers,
+            multiplePeriods.biweekNumbers,
+            multiplePeriods.months,
+            weeklySummaries,
+            biweeklySummaries,
+            monthlySummaries
+          ).overtime
+        );
+      } else {
+        employeeData[`Total ${translatePeriodToSpanish("biweekly")}`] =
+          calculateTotalHoursAndOvertimeForPeriod(
+            employee.id,
+            "biweekly",
+            weekNumber,
+            biweekNumber,
+            month,
+            year,
+            weeklySummaries,
+            biweeklySummaries,
+            monthlySummaries
+          ).totalHours;
+
+        employeeData[
+          `Total Horas Extra ${translatePeriodToSpanish("biweekly")}`
+        ] = calculateTotalHoursAndOvertimeForPeriod(
           employee.id,
           "biweekly",
           weekNumber,
@@ -354,39 +377,26 @@ export const handleExportTableData = (
           weeklySummaries,
           biweeklySummaries,
           monthlySummaries
-        ).totalHours;
+        ).overtime;
+      }
 
-      employeeData[
-        `Total Horas Extra ${translatePeriodToSpanish("biweekly")}`
-      ] = calculateTotalHoursAndOvertimeForPeriod(
-        employee.id,
-        "biweekly",
-        weekNumber,
-        biweekNumber,
-        month,
-        year,
-        weeklySummaries,
-        biweeklySummaries,
-        monthlySummaries
-      ).overtime;
-    }
+      if (hasMultipleMonths(currentWeek)) {
+        employeeData[`Total ${translatePeriodToSpanish("monthly")}`] = String(
+          calculateTotalHoursAndOvertimeForPeriods(
+            employee.id,
+            "monthly",
+            multiplePeriods.weekNumbers,
+            multiplePeriods.biweekNumbers,
+            multiplePeriods.months,
+            weeklySummaries,
+            biweeklySummaries,
+            monthlySummaries
+          ).totalHours
+        );
 
-    if (hasMultipleMonths(currentWeek)) {
-      employeeData[`Total ${translatePeriodToSpanish("monthly")}`] = String(
-        calculateTotalHoursAndOvertimeForPeriods(
-          employee.id,
-          "monthly",
-          multiplePeriods.weekNumbers,
-          multiplePeriods.biweekNumbers,
-          multiplePeriods.months,
-          weeklySummaries,
-          biweeklySummaries,
-          monthlySummaries
-        ).totalHours
-      );
-
-      employeeData[`Total Horas Extra ${translatePeriodToSpanish("monthly")}`] =
-        String(
+        employeeData[
+          `Total Horas Extra ${translatePeriodToSpanish("monthly")}`
+        ] = String(
           calculateTotalHoursAndOvertimeForPeriods(
             employee.id,
             "monthly",
@@ -398,22 +408,23 @@ export const handleExportTableData = (
             monthlySummaries
           ).overtime
         );
-    } else {
-      employeeData[`Total ${translatePeriodToSpanish("monthly")}`] =
-        calculateTotalHoursAndOvertimeForPeriod(
-          employee.id,
-          "monthly",
-          weekNumber,
-          biweekNumber,
-          month,
-          year,
-          weeklySummaries,
-          biweeklySummaries,
-          monthlySummaries
-        ).totalHours;
+      } else {
+        employeeData[`Total ${translatePeriodToSpanish("monthly")}`] =
+          calculateTotalHoursAndOvertimeForPeriod(
+            employee.id,
+            "monthly",
+            weekNumber,
+            biweekNumber,
+            month,
+            year,
+            weeklySummaries,
+            biweeklySummaries,
+            monthlySummaries
+          ).totalHours;
 
-      employeeData[`Total Horas Extra ${translatePeriodToSpanish("monthly")}`] =
-        calculateTotalHoursAndOvertimeForPeriod(
+        employeeData[
+          `Total Horas Extra ${translatePeriodToSpanish("monthly")}`
+        ] = calculateTotalHoursAndOvertimeForPeriod(
           employee.id,
           "monthly",
           weekNumber,
@@ -424,6 +435,7 @@ export const handleExportTableData = (
           biweeklySummaries,
           monthlySummaries
         ).overtime;
+      }
     }
 
     return employeeData;
