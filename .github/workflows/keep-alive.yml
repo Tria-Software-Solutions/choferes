@@ -9,4 +9,4 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Ping Backend
-        run: curl -s https://tu-backend-en-render.com/health
+        run: curl -s https://choferesdealquiler.onrender.com/health
