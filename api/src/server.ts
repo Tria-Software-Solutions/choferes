@@ -4,6 +4,7 @@ import cors from "cors";
 import cookieParser from "cookie-parser";
 import { json, urlencoded } from "body-parser";
 import authRoutes from "./routes/authRoutes";
+import healthRoutes from "./routes/healthRoutes";
 import userRoutes from "./routes/userRoutes";
 import employeeRoutes from "./routes/employeeRoutes";
 import hoursWorkedRoutes from "./routes/hoursWorkedRoutes";
@@ -43,6 +44,7 @@ app.use(json());
 app.use(urlencoded({ extended: true }));
 
 app.use("/api/auth", authRoutes);
+app.use("api/health", healthRoutes);
 app.use("/api/users", userRoutes);
 app.use("/api/roles", roleRoutes);
 app.use("/api/permissions", permissionRoutes);
