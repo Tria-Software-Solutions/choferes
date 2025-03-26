@@ -132,7 +132,7 @@ const EmployeesPage: React.FC = () => {
     }
   };
 
-  const handleEditClick = (employee: Employee) => {
+  const handleEdit = (employee: Employee) => {
     setEditRowId(employee.id);
     setEditFields({
       firstName: employee.firstName,
@@ -140,11 +140,11 @@ const EmployeesPage: React.FC = () => {
     });
   };
 
-  const handleCancelClick = () => {
+  const handleCancel = () => {
     setEditRowId(null);
   };
 
-  const handleSaveClick = async (id: number) => {
+  const handleUpdate = async (id: number) => {
     try {
       const updatedEmployee = {
         ...editFields,
@@ -159,7 +159,7 @@ const EmployeesPage: React.FC = () => {
         false
       );
     } catch (error) {
-      handleCancelClick();
+      handleCancel();
       console.error(error);
       showNotification(
         "Ha ocurrido un error al actualizar el empleado",
@@ -193,7 +193,7 @@ const EmployeesPage: React.FC = () => {
       }
       handleCloseDeleteDialog();
     } catch (error) {
-      handleCancelClick();
+      handleCancel();
       console.error(error);
       showNotification(
         "Ha ocurrido un error al eliminar el empleado",
@@ -380,9 +380,9 @@ const EmployeesPage: React.FC = () => {
               setEditField={(field, value) =>
                 setEditFields({ ...editFields, [field]: value })
               }
-              handleEditClick={handleEditClick}
-              handleCancelClick={handleCancelClick}
-              handleSaveClick={handleSaveClick}
+              handleEdit={handleEdit}
+              handleCancel={handleCancel}
+              handleUpdate={handleUpdate}
               handleOpenDeleteDialog={handleOpenDeleteDialog}
               getRowId={(row) => row.id}
               totalCount={totalCount}

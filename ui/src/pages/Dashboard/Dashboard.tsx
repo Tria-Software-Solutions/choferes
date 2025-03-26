@@ -13,7 +13,7 @@ import {
 import { PAGE_TITLE } from "../../constants/constants";
 import ManageAccountsIcon from "@mui/icons-material/ManageAccounts";
 
-const Dashboard = () => {
+const Dashboard: React.FC = () => {
   const [expanded, setExpanded] = React.useState<string | false>("panel1");
 
   const theme = useTheme();

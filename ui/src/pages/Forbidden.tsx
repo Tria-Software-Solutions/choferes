@@ -1,7 +1,8 @@
 import { useNavigate } from "react-router-dom";
 import { Box, Typography, Button } from "@mui/material";
+import LockIcon from '@mui/icons-material/Lock';
 
-const NotFound: React.FC = () => {
+const Forbidden: React.FC = () => {
   const navigate = useNavigate();
 
   const handleGoBack = () => {
@@ -22,11 +23,12 @@ const NotFound: React.FC = () => {
       textAlign="center"
       px={3}
     >
+      <LockIcon color="disabled" sx={{ mb: 3, fontSize: "50px" }}/>
       <Typography variant="h1" color="textDisabled" fontWeight="bold">
-        404
+        Acceso Denegado
       </Typography>
       <Typography variant="h5" sx={{ mt: 2, mb: 3 }}>
-        Oops! La página que está buscando no existe.
+        No tienes permisos para acceder a esta página.
       </Typography>
       <Button
         variant="contained"
@@ -40,4 +42,4 @@ const NotFound: React.FC = () => {
   );
 };
 
-export default NotFound;
+export default Forbidden;

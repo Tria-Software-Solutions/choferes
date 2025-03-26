@@ -8,7 +8,15 @@ export const getUserRoles = async () => {
 export const getUserRoleByUserId = async (userId: number) => {
   return await UserRole.findOne({
     where: {
-      userId: userId,
+      userId,
+    },
+  });
+};
+
+export const getUserRoleByRoleId = async (roleId: number) => {
+  return await UserRole.findOne({
+    where: {
+      roleId,
     },
   });
 };

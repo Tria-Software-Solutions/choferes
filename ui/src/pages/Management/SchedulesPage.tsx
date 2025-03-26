@@ -143,7 +143,7 @@ const SchedulesPage: React.FC = () => {
     setFilter(e.target.value);
   };
 
-  const handleAdd = async () => {
+  const handleCreate = async () => {
     try {
       const newSchedule: Omit<Schedule, "id"> = {
         label: addFields.label,
@@ -170,7 +170,7 @@ const SchedulesPage: React.FC = () => {
     }
   };
 
-  const handleEditClick = (schedule: Schedule) => {
+  const handleEdit = (schedule: Schedule) => {
     setEditRowId(schedule.id);
     setEditFields({
       label: schedule.label,
@@ -180,11 +180,11 @@ const SchedulesPage: React.FC = () => {
     });
   };
 
-  const handleCancelClick = () => {
+  const handleCancel = () => {
     setEditRowId(null);
   };
 
-  const handleSaveClick = async (id: number) => {
+  const handleUpdate = async (id: number) => {
     try {
       const updatedSchedule = {
         ...editFields,
@@ -200,7 +200,7 @@ const SchedulesPage: React.FC = () => {
         false
       );
     } catch (error) {
-      handleCancelClick();
+      handleCancel();
       console.error(error);
       showNotification(
         "Ha ocurrido un error al actualizar el horario",
@@ -234,7 +234,7 @@ const SchedulesPage: React.FC = () => {
       }
       handleCloseDeleteDialog();
     } catch (error) {
-      handleCancelClick();
+      handleCancel();
       console.error(error);
       showNotification(
         "Ha ocurrido un error al eliminar el horario",
@@ -461,7 +461,7 @@ const SchedulesPage: React.FC = () => {
                           lineHeight: "normal",
                           width: { xs: "100%", md: "auto" },
                         }}
-                        onClick={handleAdd}
+                        onClick={handleCreate}
                         disabled={!isAddFormValid}
                       >
                         <PostAddRoundedIcon />
@@ -482,9 +482,9 @@ const SchedulesPage: React.FC = () => {
               setEditField={(field, value) =>
                 setEditFields({ ...editFields, [field]: value })
               }
-              handleEditClick={handleEditClick}
-              handleCancelClick={handleCancelClick}
-              handleSaveClick={handleSaveClick}
+              handleEdit={handleEdit}
+              handleCancel={handleCancel}
+              handleUpdate={handleUpdate}
               handleOpenDeleteDialog={handleOpenDeleteDialog}
               getRowId={(row) => row.id}
               totalCount={totalCountSchedules}

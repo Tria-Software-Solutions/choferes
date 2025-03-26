@@ -198,7 +198,7 @@ const VehiclesPage: React.FC = () => {
     []
   );
 
-  const handleAdd = async () => {
+  const handleCreate = async () => {
     try {
       const newVehicle: Vehicle = {
         id:
@@ -241,7 +241,7 @@ const VehiclesPage: React.FC = () => {
     }
   };
 
-  const handleEditClick = (vehicle: Vehicle) => {
+  const handleEdit = (vehicle: Vehicle) => {
     setEditRowId(vehicle.id);
     setEditFields({
       ticket: vehicle.ticket,
@@ -253,11 +253,11 @@ const VehiclesPage: React.FC = () => {
     });
   };
 
-  const handleCancelClick = () => {
+  const handleCancel = () => {
     setEditRowId(null);
   };
 
-  const handleSaveClick = useCallback(
+  const handleUpdate = useCallback(
     async (id: number) => {
       try {
         const updatedVehicle = {
@@ -280,7 +280,7 @@ const VehiclesPage: React.FC = () => {
           false
         );
       } catch (error) {
-        handleCancelClick();
+        handleCancel();
         console.error(error);
         showNotification(
           "Ha ocurrido un error al actualizar el vehículo",
@@ -316,7 +316,7 @@ const VehiclesPage: React.FC = () => {
       }
       handleCloseDeleteDialog();
     } catch (error) {
-      handleCancelClick();
+      handleCancel();
       console.error(error);
       showNotification(
         "Ha ocurrido un error al eliminar el vehículo",
@@ -835,7 +835,7 @@ const VehiclesPage: React.FC = () => {
                           lineHeight: "normal",
                           width: { xs: "100%", md: "auto" },
                         }}
-                        onClick={handleAdd}
+                        onClick={handleCreate}
                         disabled={!isAddFormValid}
                       >
                         <DirectionsCarIcon />
@@ -864,9 +864,9 @@ const VehiclesPage: React.FC = () => {
               setEditField={(field, value) =>
                 setEditFields({ ...editFields, [field]: value })
               }
-              handleEditClick={handleEditClick}
-              handleCancelClick={handleCancelClick}
-              handleSaveClick={handleSaveClick}
+              handleEdit={handleEdit}
+              handleCancel={handleCancel}
+              handleUpdate={handleUpdate}
               handleOpenDeleteDialog={handleOpenDeleteDialog}
               getRowId={(row) => row.id}
               totalCount={totalCount}

@@ -1,17 +1,9 @@
-import { useNavigate } from "react-router-dom";
+import { useUsers } from "../hooks/useUser";
 import { Box, Typography, Button } from "@mui/material";
+import WarningIcon from '@mui/icons-material/Warning';
 
-const NotFound: React.FC = () => {
-  const navigate = useNavigate();
-
-  const handleGoBack = () => {
-    if (window.history.length > 2) {
-      navigate(-1);
-    } else {
-      navigate("/roles");
-    }
-  };
-
+const SessionExpired: React.FC = () => {
+  const { logoutUser } = useUsers();
   return (
     <Box
       display="flex"
@@ -22,22 +14,23 @@ const NotFound: React.FC = () => {
       textAlign="center"
       px={3}
     >
+      <WarningIcon color="disabled" sx={{ mb: 3, fontSize: "50px" }}/>
       <Typography variant="h1" color="textDisabled" fontWeight="bold">
-        404
+        Sesión Expirada
       </Typography>
       <Typography variant="h5" sx={{ mt: 2, mb: 3 }}>
-        Oops! La página que está buscando no existe.
+        Tu sesión ha expirado. Por favor, inicia sesión nuevamente.
       </Typography>
       <Button
         variant="contained"
         color="primary"
         sx={{ height: "56px" }}
-        onClick={handleGoBack}
+        onClick={logoutUser}
       >
-        Regresar
+        Iniciar Sesión
       </Button>
     </Box>
   );
 };
 
-export default NotFound;
+export default SessionExpired;

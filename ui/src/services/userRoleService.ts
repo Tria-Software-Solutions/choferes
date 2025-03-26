@@ -7,7 +7,12 @@ export const getUserRoles = async () => {
 };
 
 export const getUserRoleByUserId = async (userId: number) => {
-  const response = await api.get(`/user-role/${userId}`);
+  const response = await api.get(`/user-role/userId/${userId}`);
+  return response.data;
+};
+
+export const getUserRoleByRoleId = async (roleId: number) => {
+  const response = await api.get(`/user-role/roleId/${roleId}`);
   return response.data;
 };
 

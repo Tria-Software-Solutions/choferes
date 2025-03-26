@@ -12,7 +12,7 @@ import {
 import EditableTable from "../../components/Table/EditableTable/EditableTable";
 import SearchBar from "../../components/SearchBar/SearchBar";
 
-const ManagePermissions = () => {
+const ManagePermissions: React.FC = () => {
   const { isLoadingPermissions } =
     usePermissions();
   const [permissions, setPermissions] = useState<Permission[]>([]);
