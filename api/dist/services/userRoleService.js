@@ -9,7 +9,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.deleteUserRole = exports.updateUserRole = exports.createUserRole = exports.getUserRoleByUserId = exports.getUserRoles = void 0;
+exports.deleteUserRole = exports.updateUserRole = exports.createUserRole = exports.getUserRoleByRoleId = exports.getUserRoleByUserId = exports.getUserRoles = void 0;
 const UserRole_1 = require("../models/UserRole");
 const getUserRoles = () => __awaiter(void 0, void 0, void 0, function* () {
     return UserRole_1.UserRole.findAll();
@@ -18,11 +18,19 @@ exports.getUserRoles = getUserRoles;
 const getUserRoleByUserId = (userId) => __awaiter(void 0, void 0, void 0, function* () {
     return yield UserRole_1.UserRole.findOne({
         where: {
-            userId: userId,
+            userId,
         },
     });
 });
 exports.getUserRoleByUserId = getUserRoleByUserId;
+const getUserRoleByRoleId = (roleId) => __awaiter(void 0, void 0, void 0, function* () {
+    return yield UserRole_1.UserRole.findOne({
+        where: {
+            roleId,
+        },
+    });
+});
+exports.getUserRoleByRoleId = getUserRoleByRoleId;
 const createUserRole = (data) => __awaiter(void 0, void 0, void 0, function* () {
     const newUserRole = yield UserRole_1.UserRole.create(data);
     yield newUserRole.reload();

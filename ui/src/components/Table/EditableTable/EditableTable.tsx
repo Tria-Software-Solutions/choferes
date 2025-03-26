@@ -63,9 +63,9 @@ type EditableTableProps<T> = {
     field: string,
     value: string | boolean | number | string[]
   ) => void;
-  handleEditClick?: (row: T) => void;
-  handleCancelClick?: () => void;
-  handleSaveClick?: (id: number) => void;
+  handleEdit?: (row: T) => void;
+  handleCancel?: () => void;
+  handleUpdate?: (id: number) => void;
   handleOpenDeleteDialog?: (id: number) => void;
   handleOpenStatusDialog?: (row: any) => void;
   handlePasswordModal?: (id: number, handleClose: () => void) => void;
@@ -92,9 +92,9 @@ const EditableTable = <T extends object>({
   editRowId,
   editFields,
   setEditField,
-  handleEditClick,
-  handleCancelClick,
-  handleSaveClick,
+  handleEdit: handleEditClick,
+  handleCancel: handleCancelClick,
+  handleUpdate: handleSaveClick,
   handleOpenDeleteDialog,
   handleOpenStatusDialog,
   handlePasswordModal,

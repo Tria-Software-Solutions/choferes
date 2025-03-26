@@ -16,6 +16,9 @@ import VehiclesPage from "./pages/Management/VehiclesPage";
 import Dashboard from "./pages/Dashboard/Dashboard";
 import Settings from "./pages/Auth/Settings";
 import NotFound from "./pages/NotFound";
+import Forbidden from "./pages/Forbidden";
+import ErrorPage from "./pages/Error";
+import SessionExpired from "./pages/SessionExpired";
 import AppBarComponent from "./components/AppBar/AppBarComponent";
 import SnackbarWrapper from "./components/Snackbar/SnackbarWrapper";
 import { AuthProvider, useAuth } from "./context/AuthContext";
@@ -27,7 +30,7 @@ import DirectionsCarIcon from "@mui/icons-material/DirectionsCar";
 import GroupRoundedIcon from "@mui/icons-material/GroupRounded";
 import EditCalendarRoundedIcon from "@mui/icons-material/EditCalendarRounded";
 import ManageAccountsIcon from "@mui/icons-material/ManageAccounts";
-import SettingsIcon from '@mui/icons-material/Settings';
+import SettingsIcon from "@mui/icons-material/Settings";
 import LogoutIcon from "@mui/icons-material/Logout";
 import wallpaper from "./assets/images/choferesblurred1.webp";
 
@@ -100,16 +103,24 @@ const AppBarWrapper: React.FC = () => {
       icon: <SettingsIcon />,
       path: ROUTES.SETTINGS,
     },
-  ]
+  ];
 
-  return <AppBarComponent title={APPBAR_MENU.TITLE} userLinks={userLinks} links={finalLinks} />;
+  return (
+    <AppBarComponent
+      title={APPBAR_MENU.TITLE}
+      userLinks={userLinks}
+      links={finalLinks}
+    />
+  );
 };
 
 const AppContent: React.FC = () => {
-  const { currentUser } = useAuth();
+  const { currentUser, userPermissions } = useAuth();
   const location = useLocation();
   const isAuthPage =
     location.pathname === "/" || location.pathname === "/register";
+
+  const safeUserPermissions = userPermissions || [];
 
   return (
     <>
@@ -132,7 +143,7 @@ const AppContent: React.FC = () => {
             lg: "48px",
             xl: "0",
           },
-          paddingBottom:{
+          paddingBottom: {
             xs: "16px",
             sm: "24px",
             md: "32px",
@@ -153,14 +164,61 @@ const AppContent: React.FC = () => {
           />
           <Route path="/register" element={<Register />} />
           <Route element={<ProtectedRoute />}>
-            <Route path="/dashboard" element={<Dashboard />} />
-            <Route path="/roles" element={<RolesPage />} />
-            <Route path="/vehicles" element={<VehiclesPage />} />
-            <Route path="/employees" element={<EmployeesPage />} />
-            <Route path="/schedules" element={<SchedulesPage />} />
+            <Route
+              path="/roles"
+              element={
+                safeUserPermissions.includes(PERMISSIONS.VIEW_ROLES) ? (
+                  <RolesPage />
+                ) : (
+                  <Forbidden />
+                )
+              }
+            />
+            <Route
+              path="/employees"
+              element={
+                safeUserPermissions.includes(PERMISSIONS.VIEW_EMPLOYEES) ? (
+                  <EmployeesPage />
+                ) : (
+                  <Forbidden />
+                )
+              }
+            />
+            <Route
+              path="/schedules"
+              element={
+                safeUserPermissions.includes(PERMISSIONS.VIEW_SCHEDULES) ? (
+                  <SchedulesPage />
+                ) : (
+                  <Forbidden />
+                )
+              }
+            />
+            <Route
+              path="/vehicles"
+              element={
+                safeUserPermissions.includes(PERMISSIONS.VIEW_VEHICLES) ? (
+                  <VehiclesPage />
+                ) : (
+                  <Forbidden />
+                )
+              }
+            />
+            <Route
+              path="/dashboard"
+              element={
+                safeUserPermissions.includes(PERMISSIONS.VIEW_ADMIN) ? (
+                  <Dashboard />
+                ) : (
+                  <Forbidden />
+                )
+              }
+            />
             <Route path="/settings" element={<Settings />} />
           </Route>
           <Route path="*" element={<NotFound />} />
+          <Route path="/error" element={<ErrorPage />} />
+          <Route path="/session-expired" element={<SessionExpired />} />
         </Routes>
       </Container>
     </>
