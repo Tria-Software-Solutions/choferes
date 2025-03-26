@@ -21,7 +21,7 @@ import VisibilityOff from "@mui/icons-material/VisibilityOff";
 import logo from "../../assets/images/logo.png";
 import { AxiosError } from "axios";
 
-const Login = () => {
+const Login: React.FC = () => {
   const { authenticateUser } = useUsers();
   const [fields, setFields] = useState({
     identifier: "",
