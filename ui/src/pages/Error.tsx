@@ -1,7 +1,7 @@
 import { useNavigate } from "react-router-dom";
 import { Box, Typography, Button } from "@mui/material";
 
-const NotFound: React.FC = () => {
+const ErrorPage: React.FC = () => {
   const navigate = useNavigate();
 
   const handleGoBack = () => {
@@ -23,10 +23,11 @@ const NotFound: React.FC = () => {
       px={3}
     >
       <Typography variant="h1" color="textDisabled" fontWeight="bold">
-        404
+        Oops, algo salió mal
       </Typography>
       <Typography variant="h5" sx={{ mt: 2, mb: 3 }}>
-        Oops! La página que está buscando no existe.
+        Hubo un problema al cargar la página. Por favor, intenta nuevamente más
+        tarde.
       </Typography>
       <Button
         variant="contained"
@@ -40,4 +41,4 @@ const NotFound: React.FC = () => {
   );
 };
 
-export default NotFound;
+export default ErrorPage;
