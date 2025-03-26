@@ -194,7 +194,7 @@ const ManageUsers: React.FC = () => {
     setFilter(e.target.value);
   };
 
-  const handleAdd = async () => {
+  const handleCreate = async () => {
     try {
       const newUser: Omit<User, "id" | "temporalPassword" | "role"> = {
         firstName: addFields.firstName,
@@ -233,7 +233,7 @@ const ManageUsers: React.FC = () => {
     }
   };
 
-  const handleEditClick = (user: User) => {
+  const handleEdit = (user: User) => {
     setEditRowId(user.id);
     setEditFields({
       firstName: user.firstName,
@@ -245,11 +245,11 @@ const ManageUsers: React.FC = () => {
     });
   };
 
-  const handleCancelClick = () => {
+  const handleCancel = () => {
     setEditRowId(null);
   };
 
-  const handleSaveClick = async (id: number) => {
+  const handleUpdate = async (id: number) => {
     try {
       const role = await getRoleByName(editFields.roleName);
       const updatedUser: Partial<User> = {
@@ -273,7 +273,7 @@ const ManageUsers: React.FC = () => {
         false
       );
     } catch (error) {
-      handleCancelClick();
+      handleCancel();
       console.error(error);
       showNotification(
         "Ha ocurrido un error al actualizar el usuario",
@@ -307,7 +307,7 @@ const ManageUsers: React.FC = () => {
       }
       handleCloseStatusDialog();
     } catch (error) {
-      handleCancelClick();
+      handleCancel();
       console.error(error);
       showNotification(
         "Ha ocurrido un error al actualizar el estado del usuario",
@@ -722,7 +722,7 @@ const ManageUsers: React.FC = () => {
                         lineHeight: "normal",
                         width: { xs: "100%", md: "auto" },
                       }}
-                      onClick={handleAdd}
+                      onClick={handleCreate}
                       disabled={!isAddFormValid}
                     >
                       <PersonAddAlt1RoundedIcon />
@@ -748,9 +748,9 @@ const ManageUsers: React.FC = () => {
               setEditField={(field, value) =>
                 setEditFields({ ...editFields, [field]: value })
               }
-              handleEditClick={handleEditClick}
-              handleCancelClick={handleCancelClick}
-              handleSaveClick={handleSaveClick}
+              handleEdit={handleEdit}
+              handleCancel={handleCancel}
+              handleUpdate={handleUpdate}
               handleOpenStatusDialog={handleOpenStatusDialog}
               handlePasswordModal={modalContentChangeUserPassword}
               getRowId={(row) => row.id}

@@ -106,7 +106,7 @@ const ManageRoles: React.FC = () => {
     setFilter(e.target.value);
   };
 
-  const handleAdd = async () => {
+  const handleCreate = async () => {
     try {
       const newRole: Omit<Role, "id" | "permissions"> = {
         name: addFields.name,
@@ -141,7 +141,7 @@ const ManageRoles: React.FC = () => {
     }
   };
 
-  const handleEditClick = (role: Role) => {
+  const handleEdit = (role: Role) => {
     setEditRowId(role.id);
     setEditFields({
       name: role.name,
@@ -149,11 +149,11 @@ const ManageRoles: React.FC = () => {
     });
   };
 
-  const handleCancelClick = () => {
+  const handleCancel = () => {
     setEditRowId(null);
   };
 
-  const handleSaveClick = async (id: number) => {
+  const handleUpdate = async (id: number) => {
     try {
       const permissions = await getPermissionsByNames(
         editFields.permissionNames
@@ -176,7 +176,7 @@ const ManageRoles: React.FC = () => {
         false
       );
     } catch (error) {
-      handleCancelClick();
+      handleCancel();
       console.error(error);
       showNotification(
         "Ha ocurrido un error al actualizar el rol",
@@ -221,7 +221,7 @@ const ManageRoles: React.FC = () => {
       }
       handleCloseDeleteDialog();
     } catch (error) {
-      handleCancelClick();
+      handleCancel();
       console.error(error);
       showNotification(
         "Ha ocurrido un error al eliminar el rol",
@@ -351,7 +351,7 @@ const ManageRoles: React.FC = () => {
                         lineHeight: "normal",
                         width: { xs: "100%", md: "auto" },
                       }}
-                      onClick={handleAdd}
+                      onClick={handleCreate}
                       disabled={!isAddFormValid}
                     >
                       <AddModeratorIcon />
@@ -371,9 +371,9 @@ const ManageRoles: React.FC = () => {
               setEditField={(field, value) =>
                 setEditFields({ ...editFields, [field]: value })
               }
-              handleEditClick={handleEditClick}
-              handleCancelClick={handleCancelClick}
-              handleSaveClick={handleSaveClick}
+              handleEdit={handleEdit}
+              handleCancel={handleCancel}
+              handleUpdate={handleUpdate}
               handleOpenDeleteDialog={handleOpenDeleteDialog}
               getRowId={(row) => row.id}
               totalCount={totalCount}

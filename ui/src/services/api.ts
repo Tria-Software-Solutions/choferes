@@ -46,7 +46,7 @@ const disconnectUser = () => {
   Cookies.remove("refreshToken");
   sessionStorage.clear();
   console.warn("Session expired. User disconnected.");
-  window.location.href = "/";
+  window.location.href = "/session-expired";
 };
 
 export default api;

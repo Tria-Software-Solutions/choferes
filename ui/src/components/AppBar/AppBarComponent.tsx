@@ -84,16 +84,20 @@ const AppBarComponent: React.FC<AppBarComponentProps> = ({
           </Box>
         </Typography>
         <Box sx={{ display: "flex", gap: 2 }}>
-          <MenuComponent
-            buttonType="text"
-            text={`${currentUser?.firstName} ${currentUser?.lastName}`}
-            menuItems={menuUserItems}
-          />
-          <MenuComponent
-            buttonType="icon"
-            icon={<MenuRoundedIcon />}
-            menuItems={menuItems}
-          />
+          {currentUser && (
+            <>
+              <MenuComponent
+                buttonType="text"
+                text={`${currentUser?.firstName} ${currentUser?.lastName}`}
+                menuItems={menuUserItems}
+              />
+              <MenuComponent
+                buttonType="icon"
+                icon={<MenuRoundedIcon />}
+                menuItems={menuItems}
+              />
+            </>
+          )}
         </Box>
       </Toolbar>
     </AppBar>
