@@ -4,6 +4,7 @@ import { Role } from "../../models/Role";
 import { Permission } from "../../models/Permission";
 import { useRoles } from "../../hooks/useRole";
 import { usePermissions } from "../../hooks/usePermission";
+import { useUserRoles } from "../../hooks/useUserRole";
 import { useAppNotifications } from "../../components/Snackbar/SnackbarWrapper";
 import {
   Autocomplete,
@@ -25,7 +26,7 @@ import EditableTable from "../../components/Table/EditableTable/EditableTable";
 import SearchBar from "../../components/SearchBar/SearchBar";
 import AddModeratorIcon from "@mui/icons-material/AddModerator";
 
-const ManageRoles = () => {
+const ManageRoles: React.FC = () => {
   const { userPermissions } = useAuth();
   const {
     roles,
@@ -36,6 +37,7 @@ const ManageRoles = () => {
     deleteRole,
   } = useRoles();
   const { permissions, getPermissionsByNames } = usePermissions();
+  const { getUserRoleByRoleId } = useUserRoles();
   const { showNotification } = useAppNotifications();
   const [filteredRoles, setFilteredRoles] = useState<Role[]>([]);
   const [totalCount, setTotalCount] = useState(0);
@@ -198,20 +200,31 @@ const ManageRoles = () => {
   const handleDelete = async () => {
     try {
       if (roleToDelete !== null) {
-        await deleteRole(roleToDelete);
-        showNotification(
-          "La eliminación del rol fue exitosa",
-          "success",
-          3000,
-          false
-        );
+        const userAsociation = await getUserRoleByRoleId(roleToDelete);
+        if (userAsociation) {
+          showNotification(
+            "No se puede eliminar este rol porque está vinculado a usuarios activos",
+            "warning",
+            8000,
+            false
+          );
+        } else {
+          await deleteRole(roleToDelete);
+          await getRoles();
+          showNotification(
+            "La eliminación del rol fue exitosa",
+            "success",
+            3000,
+            false
+          );
+        }
       }
       handleCloseDeleteDialog();
     } catch (error) {
       handleCancelClick();
       console.error(error);
       showNotification(
-        "Ha ocurrido un error al eliminar el empleado",
+        "Ha ocurrido un error al eliminar el rol",
         "error",
         5000,
         false

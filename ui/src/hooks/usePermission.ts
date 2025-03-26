@@ -53,7 +53,6 @@ export const usePermissions = () => {
     await PermissionService.deletePermission(id);
     setPermissions((prev) => prev.filter((permission) => permission.id !== id));
     setTotalCountPermissions((prev) => prev - 1);
-    // await RolePermissionService.delete(id);
   };
 
   useEffect(() => {

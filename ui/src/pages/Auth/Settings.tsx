@@ -21,7 +21,7 @@ import Visibility from "@mui/icons-material/Visibility";
 import VisibilityOff from "@mui/icons-material/VisibilityOff";
 import { User } from "../../models/User";
 
-const Settings = () => {
+const Settings: React.FC = () => {
   const { currentUser } = useAuth();
   const { getUsers, updateUser, updateUserPassword } = useUsers();
   const { showNotification } = useAppNotifications();

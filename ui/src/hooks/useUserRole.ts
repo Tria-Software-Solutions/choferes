@@ -35,6 +35,17 @@ export const useUserRoles = () => {
     }
   }, []);
 
+  const getUserRoleByRoleId = useCallback(async (roleId: number) => {
+    setIsLoadingUserRoles(true);
+    try {
+      return await UserRoleService.getUserRoleByRoleId(roleId);
+    } catch (error) {
+      console.error("Error fetching UserRole by roleId", error);
+    } finally {
+      setIsLoadingUserRoles(false);
+    }
+  }, []);
+
   const createUserRole = async (newUserRole: Omit<UserRole, "id">) => {
     const createdUserRole = await UserRoleService.createUserRole(newUserRole);
     setUserRole((prev) => [...prev, createdUserRole]);
@@ -68,6 +79,7 @@ export const useUserRoles = () => {
     isLoadingUserRoles,
     getUserRoles,
     getUserRoleByUserId,
+    getUserRoleByRoleId,
     createUserRole,
     updateUserRole,
     deleteUserRole,

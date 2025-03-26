@@ -1,7 +1,7 @@
 import { useNavigate } from "react-router-dom";
 import { Box, Typography, Button } from "@mui/material";
 
-const NotFound = () => {
+const NotFound: React.FC = () => {
   const navigate = useNavigate();
 
   const handleGoBack = () => {

@@ -37,13 +37,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 const express_1 = __importDefault(require("express"));
-const userRoleController = __importStar(require("../controllers/userRoleController"));
-const authMiddleware_1 = require("../middleware/authMiddleware");
+const healthController = __importStar(require("../controllers/healtController"));
 const router = express_1.default.Router();
-router.get("/", authMiddleware_1.authenticateToken, userRoleController.getUserRoles);
-router.get("/userId/:userId", authMiddleware_1.authenticateToken, userRoleController.getUserRoleByUserId);
-router.get("/roleId/:roleId", authMiddleware_1.authenticateToken, userRoleController.getUserRoleByRoleId);
-router.post("/", userRoleController.createUserRole);
-router.put("/:id", authMiddleware_1.authenticateToken, userRoleController.updateUserRole);
-router.delete("/:id", authMiddleware_1.authenticateToken, userRoleController.deleteUserRole);
+router.get("/", healthController.healthCheck);
 exports.default = router;

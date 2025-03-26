@@ -57,8 +57,9 @@ exports.getRoles = getRoles;
 const getRoleById = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const role = yield roleService.getRoleById(Number(req.params.id));
-        if (!role)
+        if (!role) {
             return res.status(404).json({ error: "Role not found" });
+        }
         return res.status(200).json(role);
     }
     catch (error) {
