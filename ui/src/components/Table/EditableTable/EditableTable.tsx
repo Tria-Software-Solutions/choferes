@@ -247,7 +247,7 @@ const EditableTable = <T extends object>({
 
       return (
         <Autocomplete
-          freeSolo
+          // freeSolo
           value={selectedOption}
           onChange={(event, newValue) => {
             setEditField &&
