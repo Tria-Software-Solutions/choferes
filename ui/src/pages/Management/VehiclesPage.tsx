@@ -709,7 +709,7 @@ const VehiclesPage: React.FC = () => {
                     <Grid item xs={6} sm={4} md={2} lg={2}>
                       <FormControl variant="outlined" fullWidth>
                         <Autocomplete
-                          freeSolo
+                          // freeSolo
                           value={
                             addFields.brand
                               ? {
