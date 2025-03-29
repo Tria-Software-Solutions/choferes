@@ -22,26 +22,30 @@ import VisibilityOff from "@mui/icons-material/VisibilityOff";
 import { User } from "../../models/User";
 
 const Settings: React.FC = () => {
-  const { currentUser } = useAuth();
-  const { getUsers, updateUser, updateUserPassword } = useUsers();
+  const { currentUser, setUser } = useAuth();
+  const { users, getUsers, updateUser, updateUserPassword } = useUsers();
   const { showNotification } = useAppNotifications();
   const [editFields, setEditFields] = useState({
-    firstName: currentUser?.firstName,
-    lastName: currentUser?.lastName,
-    email: currentUser?.email,
-    username: currentUser?.username,
+    firstName: currentUser?.firstName || "",
+    lastName: currentUser?.lastName || "",
+    email: currentUser?.email || "",
+    username: currentUser?.username || "",
   });
-  const [newPassword, setNewPassword] = useState("");
-  const [confirmNewPassword, setConfirmNewPassword] = useState("");
+  const [passwordFields, setPasswordFields] = useState({
+    newPassword: "",
+    confirmNewPassword: "",
+  });
   const [showNewPassword, setShowNewPassword] = useState(false);
   const [showConfirmNewPassword, setShowConfirmNewPassword] = useState(false);
+  const [infoError, setInfoError] = useState<string | null>(null);
   const [passwordError, setPasswordError] = useState<string | null>(null);
   const [isEditFormValid, setIsEditFormValid] = useState(false);
+  const [isPasswordFormValid, setIsPasswordFormValid] = useState(false);
 
   const theme = useTheme();
   const isSmallScreen = useMediaQuery(theme.breakpoints.down("sm"));
 
-  const validateFields = useCallback((fields: typeof editFields) => {
+  const validateFields = useCallback(async (fields: typeof editFields) => {
     const regex = {
       text: /^[a-zA-ZáéíóúÁÉÍÓÚñÑüÜëË\s-]+$/,
       email: /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/,
@@ -63,34 +67,73 @@ const Settings: React.FC = () => {
     return isValid;
   }, []);
 
-  const validateNewPasswordFields = useCallback(async () => {
-    const passwordRegex =
-      /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
-    if (newPassword === "" || confirmNewPassword === "") {
-      setPasswordError("Los espacios son requeridos.");
-      return false;
-    }
-    if (newPassword !== confirmNewPassword) {
-      setPasswordError("Las contraseñas no coinciden.");
-      return false;
-    }
-    if (
-      !passwordRegex.test(newPassword) ||
-      !passwordRegex.test(confirmNewPassword)
-    ) {
-      setPasswordError(
-        "El valor es inválido.\n\n- Mínimo 8 caracteres.\n- Al menos una letra mayúscula.\n- Al menos una letra minúscula.\n- Al menos un número.\n- Al menos un carácter especial"
-      );
-      return false;
-    }
+  const validatePasswordFields = useCallback(
+    async (fields: typeof passwordFields) => {
+      const passwordRegex =
+        /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
+      if (fields.newPassword === "" || fields.confirmNewPassword === "") {
+        setPasswordError("Los espacios son requeridos.");
+        return false;
+      }
+      if (fields.newPassword !== fields.confirmNewPassword) {
+        setPasswordError("Las contraseñas no coinciden.");
+        return false;
+      }
+      if (
+        !passwordRegex.test(fields.newPassword) ||
+        !passwordRegex.test(fields.confirmNewPassword)
+      ) {
+        setPasswordError(
+          "El valor es inválido.\n\n- Mínimo 8 caracteres.\n- Al menos una letra mayúscula.\n- Al menos una letra minúscula.\n- Al menos un número.\n- Al menos un carácter especial"
+        );
+        return false;
+      }
 
-    setPasswordError(null);
-    return true;
-  }, [newPassword, confirmNewPassword]);
+      setPasswordError(null);
+      return true;
+    },
+    []
+  );
 
   useEffect(() => {
-    setIsEditFormValid(validateFields(editFields));
-  }, [editFields, validateFields]);
+    const hasChanges =
+      editFields.firstName !== currentUser?.firstName ||
+      editFields.lastName !== currentUser?.lastName ||
+      editFields.email !== currentUser?.email ||
+      editFields.username !== currentUser?.username;
+
+    (async () => {
+      const isValid = await validateFields(editFields);
+      setIsEditFormValid(isValid && hasChanges);
+    })();
+  }, [editFields, currentUser, validateFields]);
+
+  useEffect(() => {
+    const hasPasswordChange =
+      passwordFields.newPassword.trim() !== "" ||
+      passwordFields.confirmNewPassword.trim() !== "";
+    setIsPasswordFormValid(hasPasswordChange);
+  }, [passwordFields]);
+
+  const checkUsernameExistence = async (
+    username: string
+  ): Promise<User | undefined> => {
+    return users.find((user) => user.username === username);
+  };
+
+  const handleUsernameChange = async (
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+  ) => {
+    const value = e.target.value.trim();
+    if (!value) return;
+
+    const usernameExists = await checkUsernameExistence(value);
+    if (usernameExists && usernameExists.email !== editFields.email) {
+      setInfoError("El nombre de usuario ya existe.");
+    } else {
+      setInfoError(null);
+    }
+  };
 
   const handleSaveChanges = async () => {
     try {
@@ -99,10 +142,15 @@ const Settings: React.FC = () => {
       };
       if (currentUser) {
         await updateUser(currentUser.id, updatedUser);
-        sessionStorage.setItem(
-          "currentUser",
-          JSON.stringify({ ...currentUser, ...updatedUser })
-        );
+        setUser({
+          id: currentUser.id,
+          firstName: updatedUser.firstName || "",
+          lastName: updatedUser.lastName || "",
+          email: updatedUser.email || "",
+          username: updatedUser.username || "",
+          password: updatedUser.password || "",
+          isActive: updatedUser.isActive || false,
+        });
         await getUsers();
       } else {
         throw new Error("Current User is null");
@@ -125,15 +173,21 @@ const Settings: React.FC = () => {
   };
 
   const handleNewPassword = (
-    event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
   ) => {
-    setNewPassword(event.target.value);
+    setPasswordFields({
+      ...passwordFields,
+      newPassword: e.target.value,
+    });
   };
 
   const handleConfirmNewPassword = (
-    event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
   ) => {
-    setConfirmNewPassword(event.target.value);
+    setPasswordFields({
+      ...passwordFields,
+      confirmNewPassword: e.target.value,
+    });
   };
 
   const handleToggleNewPassword = () => {
@@ -147,17 +201,19 @@ const Settings: React.FC = () => {
   const handleChangePassword = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    const isValid = await validateNewPasswordFields();
+    const isValid = await validatePasswordFields(passwordFields);
     if (!isValid) return;
 
     try {
       if (currentUser) {
-        await updateUserPassword(currentUser.id, newPassword);
+        await updateUserPassword(currentUser.id, passwordFields.newPassword);
       } else {
         throw new Error("Current User is null");
       }
-      setNewPassword("");
-      setConfirmNewPassword("");
+      setPasswordFields({
+        newPassword: "",
+        confirmNewPassword: "",
+      });
       showNotification(
         "La actualización de la contraseña fue exitosa",
         "success",
@@ -250,16 +306,22 @@ const Settings: React.FC = () => {
             <TextField
               label="Usuario"
               value={editFields.username}
-              onChange={(e) =>
+              onChange={(e) => {
                 setEditFields({
                   ...editFields,
                   username: e.target.value,
-                })
-              }
+                });
+                handleUsernameChange(e);
+              }}
               fullWidth
               margin="dense"
             />
           </Grid>
+          {infoError && (
+            <Alert severity="error" sx={{ mt: 2 }}>
+              {infoError}
+            </Alert>
+          )}
           <Box sx={{ display: "flex", justifyContent: "flex-end", gap: 2 }}>
             <Box>
               <Button
@@ -267,7 +329,7 @@ const Settings: React.FC = () => {
                 color="error"
                 sx={{ flex: 2, height: "56px" }}
                 onClick={handleSaveChanges}
-                disabled={!isEditFormValid}
+                disabled={!isEditFormValid || !!infoError}
               >
                 Guardar Cambios
               </Button>
@@ -295,7 +357,7 @@ const Settings: React.FC = () => {
             <TextField
               label="Nueva Contraseña"
               type={showNewPassword ? "text" : "password"}
-              value={newPassword}
+              value={passwordFields.newPassword}
               onChange={(e) => handleNewPassword(e)}
               InputProps={{
                 endAdornment: (
@@ -314,7 +376,7 @@ const Settings: React.FC = () => {
             <TextField
               label="Confirmar Contraseña"
               type={showConfirmNewPassword ? "text" : "password"}
-              value={confirmNewPassword}
+              value={passwordFields.confirmNewPassword}
               onChange={(e) => handleConfirmNewPassword(e)}
               InputProps={{
                 endAdornment: (
@@ -348,6 +410,7 @@ const Settings: React.FC = () => {
                 color="error"
                 sx={{ flex: 2, height: "56px" }}
                 onClick={(e) => handleChangePassword(e)}
+                disabled={!isPasswordFormValid}
               >
                 Cambiar Contraseña
               </Button>

@@ -564,7 +564,7 @@ const ManageUsers: React.FC = () => {
             <Grid item xs={12} md={6}>
               <Box
                 display="flex"
-                flexDirection={{ xs: "column", sm: "column", md: "row" }}
+                flexDirection="row"
                 alignItems="flex-start"
                 justifyContent="flex-end"
                 gap={2}
