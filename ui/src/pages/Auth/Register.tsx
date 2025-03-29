@@ -22,7 +22,7 @@ import { PAGE_TITLE } from "../../constants/constants";
 import AccountCircleIcon from "@mui/icons-material/AccountCircle";
 
 const Register = () => {
-  const { createUser, getUserByUsername } = useUsers();
+  const { createUser, getUserByEmail, getUserByUsername } = useUsers();
   const { showNotification } = useAppNotifications();
   const [addFields, setAddFields] = useState({
     firstName: "",
@@ -129,6 +129,26 @@ const Register = () => {
     }
   };
 
+  const checkEmailExistence = async (
+    email: string
+  ): Promise<User | undefined> => {
+    return await getUserByEmail(email);
+  };
+
+  const handleEmailChange = async (
+    event: React.FocusEvent<HTMLInputElement>
+  ) => {
+    const value = event.target.value.trim();
+    if (!value) return;
+
+    const usernameExists = await checkEmailExistence(value);
+    if (usernameExists) {
+      setError("El correo electrónico ya existe.");
+    } else {
+      setError(null);
+    }
+  };
+
   const checkUsernameExistence = async (
     username: string
   ): Promise<User | undefined> => {
@@ -203,6 +223,7 @@ const Register = () => {
               onChange={(e) =>
                 setAddFields({ ...addFields, email: e.target.value })
               }
+              onBlur={handleEmailChange}
             />
             <TextField
               fullWidth

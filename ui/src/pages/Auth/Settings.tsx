@@ -115,7 +115,25 @@ const Settings: React.FC = () => {
     setIsPasswordFormValid(hasPasswordChange);
   }, [passwordFields]);
 
-  const checkUsernameExistence = async (
+  const getUserByEmail = async (email: string): Promise<User | undefined> => {
+    return users.find((user) => user.email === email);
+  };
+
+  const handleEmailChange = async (
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+  ) => {
+    const value = e.target.value.trim();
+    if (!value) return;
+
+    const user = await getUserByEmail(value);
+    if (user && user.username !== editFields.username) {
+      setInfoError("El correo electrónico ya existe.");
+    } else {
+      setInfoError(null);
+    }
+  };
+
+  const getUserByUsername = async (
     username: string
   ): Promise<User | undefined> => {
     return users.find((user) => user.username === username);
@@ -127,8 +145,8 @@ const Settings: React.FC = () => {
     const value = e.target.value.trim();
     if (!value) return;
 
-    const usernameExists = await checkUsernameExistence(value);
-    if (usernameExists && usernameExists.email !== editFields.email) {
+    const user = await getUserByUsername(value);
+    if (user && user.email !== editFields.email) {
       setInfoError("El nombre de usuario ya existe.");
     } else {
       setInfoError(null);
@@ -292,12 +310,13 @@ const Settings: React.FC = () => {
               label="Correo Electrónico"
               type="email"
               value={editFields.email}
-              onChange={(e) =>
+              onChange={(e) => {
                 setEditFields({
                   ...editFields,
                   email: e.target.value,
-                })
-              }
+                });
+                handleEmailChange(e);
+              }}
               fullWidth
               margin="dense"
             />
