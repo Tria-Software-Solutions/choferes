@@ -6,6 +6,7 @@ interface AuthContextType {
   accessToken: string | null;
   refreshToken: string | null;
   currentUser: User | null;
+  setUser: (updatedUser: User) => void;
   userPermissions: string[];
   login: (
     accessToken: string,
@@ -49,8 +50,8 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     setRefreshToken(refreshToken);
     setCurrentUser(currentUser);
     setUserPermissions(userPermissions);
-    Cookies.set("accessToken", accessToken, { expires: 1 });
-    Cookies.set("refreshToken", refreshToken, { expires: 7 });
+    Cookies.set("accessToken", accessToken, { expires: 1, secure: true });
+    Cookies.set("refreshToken", refreshToken, { expires: 7, secure: true });
     sessionStorage.setItem("currentUser", JSON.stringify(currentUser));
     sessionStorage.setItem("userPermissions", JSON.stringify(userPermissions));
   };
@@ -59,10 +60,15 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     setAccessToken(null);
     setRefreshToken(null);
     setCurrentUser(null);
-    setUserPermissions(null);
+    setUserPermissions([]);
     Cookies.remove("accessToken");
     Cookies.remove("refreshToken");
     sessionStorage.clear();
+  };
+
+  const setUser = (updatedUser: User) => {
+    setCurrentUser(updatedUser);
+    sessionStorage.setItem("currentUser", JSON.stringify(updatedUser));
   };
 
   return (
@@ -74,6 +80,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         userPermissions,
         login,
         logout,
+        setUser
       }}
     >
       {children}
