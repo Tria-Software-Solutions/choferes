@@ -66,6 +66,17 @@ export const useUsers = () => {
     }
   }, []);
 
+  const getUserByEmail = useCallback(async (email: string) => {
+    setIsLoadingUsers(true);
+    try {
+      return await UserService.getUserByEmail(email);
+    } catch (error) {
+      console.error("Error fetching User by Email", error);
+    } finally {
+      setIsLoadingUsers(false);
+    }
+  }, []);
+
   const getUserByUsername = useCallback(async (username: string) => {
     setIsLoadingUsers(true);
     try {
@@ -176,6 +187,7 @@ export const useUsers = () => {
     getUsers,
     getUserById,
     getUserPermissions,
+    getUserByEmail,
     getUserByUsername,
     createUser,
     updateUser,

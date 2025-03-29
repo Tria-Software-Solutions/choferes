@@ -78,11 +78,17 @@ const ManageUsers: React.FC = () => {
     password: "",
     roleName: "",
   });
+  const [openEmailTooltip, setOpenEmailTooltip] = useState(false);
+  const [openUsernameTooltip, setOpenUsernameTooltip] = useState(false);
   const [openStatusDialog, setOpenStatusDialog] = useState(false);
   const [userToChange, setUserToChange] = useState<User | null>(null);
   const [showPassword, setShowPassword] = useState(false);
-  const [newPassword, setNewPassword] = useState("");
-  const [confirmNewPassword, setConfirmNewPassword] = useState("");
+  const [passwordFields, setPasswordFields] = useState({
+    newPassword: "",
+    confirmNewPassword: "",
+  });
+  // const [newPassword, setNewPassword] = useState("");
+  // const [confirmNewPassword, setConfirmNewPassword] = useState("");
   const [showNewPassword, setShowNewPassword] = useState(false);
   const [showConfirmNewPassword, setShowConfirmNewPassword] = useState(false);
   const [temporalPasswordHidden, setTemporalPasswordHidden] = useState(true);
@@ -155,20 +161,20 @@ const ManageUsers: React.FC = () => {
     []
   );
 
-  const validateNewPasswordFields = useCallback(async () => {
+  const validateNewPasswordFields = useCallback(async (fields: typeof passwordFields) => {
     const passwordRegex =
       /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
-    if (newPassword === "" || confirmNewPassword === "") {
+    if (fields.newPassword === "" || fields.confirmNewPassword === "") {
       setError("Los espacios son requeridos.");
       return false;
     }
-    if (newPassword !== confirmNewPassword) {
+    if (fields.newPassword !== fields.confirmNewPassword) {
       setError("Las contraseñas no coinciden.");
       return false;
     }
     if (
-      !passwordRegex.test(newPassword) ||
-      !passwordRegex.test(confirmNewPassword)
+      !passwordRegex.test(fields.newPassword) ||
+      !passwordRegex.test(fields.confirmNewPassword)
     ) {
       setError(
         "El valor es inválido.\n\n- Mínimo 8 caracteres.\n- Al menos una letra mayúscula.\n- Al menos una letra minúscula.\n- Al menos un número.\n- Al menos un carácter especial"
@@ -178,7 +184,7 @@ const ManageUsers: React.FC = () => {
 
     setError(null);
     return true;
-  }, [newPassword, confirmNewPassword]);
+  }, []);
 
   useEffect(
     () => setIsAddFormValid(validateFields(addFields, true)),
@@ -192,6 +198,13 @@ const ManageUsers: React.FC = () => {
 
   const handleFilterChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setFilter(e.target.value);
+  };
+
+  const showTemporaryTooltip = (
+    setTooltip: React.Dispatch<React.SetStateAction<boolean>>
+  ) => {
+    setTooltip(true);
+    setTimeout(() => setTooltip(false), 2000);
   };
 
   const handleCreate = async () => {
@@ -284,6 +297,34 @@ const ManageUsers: React.FC = () => {
     }
   };
 
+  const checkEmailExistence = (email: string): User | undefined => {
+    return users.find((user) => user.email === email);
+  };
+
+  const handleEmailChange = (
+    event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+  ) => {
+    const value = event.target.value.trim();
+    if (checkEmailExistence(value)) {
+      showTemporaryTooltip(setOpenEmailTooltip);
+      return;
+    }
+    setAddFields((prevFields) => ({ ...prevFields, email: value }));
+  };
+
+  const checkUsernameExistence = (username: string): User | undefined => {
+    return users.find((user) => user.username === username);
+  };
+
+  const handleUsernameChange = (event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+      const value = event.target.value.trim();
+      if (checkUsernameExistence(value)) {
+        showTemporaryTooltip(setOpenUsernameTooltip);
+        return;
+      }
+      setAddFields((prevFields) => ({ ...prevFields, username: value }));
+    };
+
   const handleOpenStatusDialog = async (row: any) => {
     setOpenStatusDialog(true);
     setUserToChange(row);
@@ -325,13 +366,19 @@ const ManageUsers: React.FC = () => {
   const handleNewPassword = (
     event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
   ) => {
-    setNewPassword(event.target.value);
+    setPasswordFields({
+      ...passwordFields,
+      newPassword: event.target.value,
+    });
   };
 
   const handleConfirmNewPassword = (
     event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
   ) => {
-    setConfirmNewPassword(event.target.value);
+    setPasswordFields({
+      ...passwordFields,
+      confirmNewPassword: event.target.value,
+    });
   };
 
   const handleToggleNewPassword = () => {
@@ -390,13 +437,15 @@ const ManageUsers: React.FC = () => {
   ) => {
     e.preventDefault();
 
-    const isValid = await validateNewPasswordFields();
+    const isValid = await validateNewPasswordFields(passwordFields);
     if (!isValid) return;
 
     try {
-      await updateUserPassword(id, newPassword);
-      setNewPassword("");
-      setConfirmNewPassword("");
+      await updateUserPassword(id, passwordFields.newPassword);
+      setPasswordFields({
+        newPassword: "",
+        confirmNewPassword: "",
+      });
       setTemporalPasswordHidden(true);
       handleClose();
       showNotification(
@@ -466,7 +515,7 @@ const ManageUsers: React.FC = () => {
           sx={{
             height: 56,
           }}
-          value={newPassword}
+          value={passwordFields.newPassword}
           onChange={(e) => handleNewPassword(e)}
           InputProps={{
             endAdornment: (
@@ -486,7 +535,7 @@ const ManageUsers: React.FC = () => {
           sx={{
             height: 56,
           }}
-          value={confirmNewPassword}
+          value={passwordFields.confirmNewPassword}
           onChange={(e) => handleConfirmNewPassword(e)}
           InputProps={{
             endAdornment: (
@@ -564,7 +613,7 @@ const ManageUsers: React.FC = () => {
             <Grid item xs={12} md={6}>
               <Box
                 display="flex"
-                flexDirection={{ xs: "column", sm: "column", md: "row" }}
+                flexDirection="row"
                 alignItems="flex-start"
                 justifyContent="flex-end"
                 gap={2}
@@ -624,32 +673,44 @@ const ManageUsers: React.FC = () => {
                     />
                   </Grid>
                   <Grid item xs={12} md={2}>
-                    <TextField
-                      label="Correo Eléctronico"
-                      variant="outlined"
-                      fullWidth
-                      sx={{
-                        height: 56,
-                      }}
-                      value={addFields.email}
-                      onChange={(e) =>
-                        setAddFields({ ...addFields, email: e.target.value })
-                      }
-                    />
+                    <Tooltip
+                      title="Este correo electrónico ya está registrado"
+                      open={openEmailTooltip}
+                      disableHoverListener
+                      placement="bottom"
+                      arrow
+                    >
+                      <TextField
+                        label="Correo Eléctronico"
+                        variant="outlined"
+                        fullWidth
+                        sx={{
+                          height: 56,
+                        }}
+                        value={addFields.email}
+                        onChange={(e) => handleEmailChange(e)}
+                      />
+                    </Tooltip>
                   </Grid>
                   <Grid item xs={6} md={2}>
-                    <TextField
-                      label="Usuario"
-                      variant="outlined"
-                      fullWidth
-                      sx={{
-                        height: 56,
-                      }}
-                      value={addFields.username}
-                      onChange={(e) =>
-                        setAddFields({ ...addFields, username: e.target.value })
-                      }
-                    />
+                    <Tooltip
+                      title="Este nombre de usuario ya está registrado"
+                      open={openUsernameTooltip}
+                      disableHoverListener
+                      placement="bottom"
+                      arrow
+                    >
+                      <TextField
+                        label="Usuario"
+                        variant="outlined"
+                        fullWidth
+                        sx={{
+                          height: 56,
+                        }}
+                        value={addFields.username}
+                        onChange={(e) => handleUsernameChange(e)}
+                      />
+                    </Tooltip>
                   </Grid>
                   <Grid item xs={6} md={2}>
                     <TextField
