@@ -70,6 +70,19 @@ export const getUserById = async (id: number) => {
   });
 };
 
+export const getUserByEmail = async (email: string) => {
+  return await User.findOne({
+    where: { email },
+    include: [
+      {
+        model: Role,
+        as: "roles",
+        through: { attributes: [] },
+      },
+    ],
+  });
+};
+
 export const getUserByUsername = async (username: string) => {
   return await User.findOne({
     where: { username },
