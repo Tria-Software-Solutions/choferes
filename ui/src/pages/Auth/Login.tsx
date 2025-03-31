@@ -67,7 +67,8 @@ const Login: React.FC = () => {
       display="flex"
       justifyContent="center"
       alignItems="center"
-      minHeight="100vh"
+      height="100dvh"
+      padding={2}
     >
       <Card sx={{ width: 400, p: 3, boxShadow: 3 }}>
         <CardContent>
