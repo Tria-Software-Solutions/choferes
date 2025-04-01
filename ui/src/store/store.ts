@@ -1,5 +1,6 @@
 import { configureStore } from "@reduxjs/toolkit";
 import employeeReducer from "./slices/employeeSlice";
+import hoursWorkedReducer from "./slices/hoursWorkedSlice";
 import permissionsReducer from "./slices/permissionsSlice";
 import rolePermissionsReducer from "./slices/rolePermissionsSlice";
 import rolesReducer from "./slices/rolesSlice";
@@ -9,6 +10,7 @@ import userReducer from "./slices/userSlice";
 export const store = configureStore({
   reducer: {
     employees: employeeReducer,
+    hoursWorked: hoursWorkedReducer,
     permissions: permissionsReducer,
     rolePermissions: rolePermissionsReducer,
     roles: rolesReducer,
