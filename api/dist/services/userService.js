@@ -12,7 +12,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.deleteUser = exports.updateUserTemporalPassword = exports.updateUserPassword = exports.updateUserStatus = exports.updateUser = exports.createUser = exports.getUserPermissions = exports.getUserByUsername = exports.getUserById = exports.getUsers = exports.authenticateUser = void 0;
+exports.deleteUser = exports.updateUserTemporalPassword = exports.updateUserPassword = exports.updateUserStatus = exports.updateUser = exports.createUser = exports.getUserPermissions = exports.getUserByUsername = exports.getUserByEmail = exports.getUserById = exports.getUsers = exports.authenticateUser = void 0;
 const bcrypt_1 = __importDefault(require("bcrypt"));
 const User_1 = require("../models/User");
 const Role_1 = require("../models/Role");
@@ -76,6 +76,19 @@ const getUserById = (id) => __awaiter(void 0, void 0, void 0, function* () {
     });
 });
 exports.getUserById = getUserById;
+const getUserByEmail = (email) => __awaiter(void 0, void 0, void 0, function* () {
+    return yield User_1.User.findOne({
+        where: { email },
+        include: [
+            {
+                model: Role_1.Role,
+                as: "roles",
+                through: { attributes: [] },
+            },
+        ],
+    });
+});
+exports.getUserByEmail = getUserByEmail;
 const getUserByUsername = (username) => __awaiter(void 0, void 0, void 0, function* () {
     return yield User_1.User.findOne({
         where: { username },

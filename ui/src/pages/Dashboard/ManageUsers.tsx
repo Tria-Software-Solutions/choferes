@@ -87,8 +87,6 @@ const ManageUsers: React.FC = () => {
     newPassword: "",
     confirmNewPassword: "",
   });
-  // const [newPassword, setNewPassword] = useState("");
-  // const [confirmNewPassword, setConfirmNewPassword] = useState("");
   const [showNewPassword, setShowNewPassword] = useState(false);
   const [showConfirmNewPassword, setShowConfirmNewPassword] = useState(false);
   const [temporalPasswordHidden, setTemporalPasswordHidden] = useState(true);
@@ -161,40 +159,38 @@ const ManageUsers: React.FC = () => {
     []
   );
 
-  const validateNewPasswordFields = useCallback(async (fields: typeof passwordFields) => {
-    const passwordRegex =
-      /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
-    if (fields.newPassword === "" || fields.confirmNewPassword === "") {
-      setError("Los espacios son requeridos.");
-      return false;
-    }
-    if (fields.newPassword !== fields.confirmNewPassword) {
-      setError("Las contraseñas no coinciden.");
-      return false;
-    }
-    if (
-      !passwordRegex.test(fields.newPassword) ||
-      !passwordRegex.test(fields.confirmNewPassword)
-    ) {
-      setError(
-        "El valor es inválido.\n\n- Mínimo 8 caracteres.\n- Al menos una letra mayúscula.\n- Al menos una letra minúscula.\n- Al menos un número.\n- Al menos un carácter especial"
-      );
-      return false;
-    }
+  const validateNewPasswordFields = useCallback(
+    async (fields: typeof passwordFields) => {
+      const passwordRegex =
+        /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
+      if (fields.newPassword === "" || fields.confirmNewPassword === "") {
+        setError("Los espacios son requeridos.");
+        return false;
+      }
+      if (fields.newPassword !== fields.confirmNewPassword) {
+        setError("Las contraseñas no coinciden.");
+        return false;
+      }
+      if (
+        !passwordRegex.test(fields.newPassword) ||
+        !passwordRegex.test(fields.confirmNewPassword)
+      ) {
+        setError(
+          "El valor es inválido.\n\n- Mínimo 8 caracteres.\n- Al menos una letra mayúscula.\n- Al menos una letra minúscula.\n- Al menos un número.\n- Al menos un carácter especial"
+        );
+        return false;
+      }
 
-    setError(null);
-    return true;
-  }, []);
+      setError(null);
+      return true;
+    },
+    []
+  );
 
   useEffect(
     () => setIsAddFormValid(validateFields(addFields, true)),
     [addFields, validateFields]
   );
-
-  useEffect(() => {
-    if (editRowId !== null)
-      setIsEditFormValid(validateFields(editFields, false));
-  }, [editFields, editRowId, validateFields]);
 
   const handleFilterChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setFilter(e.target.value);
@@ -297,9 +293,12 @@ const ManageUsers: React.FC = () => {
     }
   };
 
-  const checkEmailExistence = (email: string): User | undefined => {
-    return users.find((user) => user.email === email);
-  };
+  const checkEmailExistence = useCallback(
+    (email: string): User | undefined => {
+      return users.find((user) => user.email === email);
+    },
+    [users]
+  );
 
   const handleEmailChange = (
     event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
@@ -312,18 +311,58 @@ const ManageUsers: React.FC = () => {
     setAddFields((prevFields) => ({ ...prevFields, email: value }));
   };
 
-  const checkUsernameExistence = (username: string): User | undefined => {
-    return users.find((user) => user.username === username);
+  const checkUsernameExistence = useCallback(
+    (username: string): User | undefined => {
+      return users.find((user) => user.username === username);
+    },
+    [users]
+  );
+
+  const handleUsernameChange = (
+    event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+  ) => {
+    const value = event.target.value.trim();
+    if (checkUsernameExistence(value)) {
+      showTemporaryTooltip(setOpenUsernameTooltip);
+      return;
+    }
+    setAddFields((prevFields) => ({ ...prevFields, username: value }));
   };
 
-  const handleUsernameChange = (event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-      const value = event.target.value.trim();
-      if (checkUsernameExistence(value)) {
-        showTemporaryTooltip(setOpenUsernameTooltip);
-        return;
-      }
-      setAddFields((prevFields) => ({ ...prevFields, username: value }));
-    };
+  useEffect(() => {
+    if (editRowId === null) return;
+
+    const selectedUser = users.find((user) => user.id === editRowId);
+    if (!selectedUser) return;
+
+    const isEmailModified = editFields.email !== selectedUser.email;
+    const isUsernameModified = editFields.username !== selectedUser.username;
+
+    const isValid = validateFields(editFields, false);
+
+    if (isEmailModified && isUsernameModified) {
+      setIsEditFormValid(
+        isValid &&
+          !checkEmailExistence(editFields.email) &&
+          !checkUsernameExistence(editFields.username)
+      );
+    } else if (isEmailModified) {
+      setIsEditFormValid(isValid && !checkEmailExistence(editFields.email));
+    } else if (isUsernameModified) {
+      setIsEditFormValid(
+        isValid && !checkUsernameExistence(editFields.username)
+      );
+    } else {
+      setIsEditFormValid(isValid);
+    }
+  }, [
+    users,
+    editFields,
+    editRowId,
+    validateFields,
+    checkEmailExistence,
+    checkUsernameExistence,
+  ]);
 
   const handleOpenStatusDialog = async (row: any) => {
     setOpenStatusDialog(true);

@@ -100,10 +100,7 @@ const Register = () => {
     if (!isValid) return;
 
     try {
-      const newUser: Omit<
-        User,
-        "id" | "temporalPassword" | "role"
-      > = {
+      const newUser: Omit<User, "id" | "temporalPassword" | "role"> = {
         firstName: addFields.firstName,
         lastName: addFields.lastName,
         email: addFields.email,
@@ -178,7 +175,8 @@ const Register = () => {
       display="flex"
       justifyContent="center"
       alignItems="center"
-      minHeight="100vh"
+      height="100dvh"
+      padding={2}
     >
       <Card sx={{ width: 400, p: 3, boxShadow: 3 }}>
         <CardContent>
