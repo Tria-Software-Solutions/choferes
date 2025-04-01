@@ -6,7 +6,7 @@ import {
   useLocation,
   Navigate,
 } from "react-router-dom";
-import { useUsers } from "./hooks/useUser";
+import { useAuth } from "./hooks/useAuth";
 import Login from "./pages/Auth/Login";
 import Register from "./pages/Auth/Register";
 import RolesPage from "./pages/Management/RolesPage";
@@ -21,7 +21,9 @@ import ErrorPage from "./pages/Error";
 import SessionExpired from "./pages/SessionExpired";
 import AppBarComponent from "./components/AppBar/AppBarComponent";
 import SnackbarWrapper from "./components/Snackbar/SnackbarWrapper";
-import { AuthProvider, useAuth } from "./context/AuthContext";
+import { Provider } from "react-redux";
+import { store } from "./store/store";
+import { AuthProvider, useAuthContext } from "./context/AuthContext";
 import ProtectedRoute from "./routes/ProtectedRoute";
 import { Container } from "@mui/material";
 import { APPBAR_MENU, PERMISSIONS, ROUTES } from "./constants/constants";
@@ -35,8 +37,8 @@ import LogoutIcon from "@mui/icons-material/Logout";
 import wallpaper from "./assets/images/choferesblurred1.webp";
 
 const AppBarWrapper: React.FC = () => {
-  const { currentUser, userPermissions } = useAuth();
-  const { logoutUser } = useUsers();
+  const { currentUser, userPermissions } = useAuthContext();
+  const { logoutUser } = useAuth();
 
   const links = [
     {
@@ -115,7 +117,7 @@ const AppBarWrapper: React.FC = () => {
 };
 
 const AppContent: React.FC = () => {
-  const { currentUser, userPermissions } = useAuth();
+  const { currentUser, userPermissions } = useAuthContext();
   const location = useLocation();
   const isAuthPage =
     location.pathname === "/" || location.pathname === "/register";
@@ -227,13 +229,15 @@ const AppContent: React.FC = () => {
 
 const App: React.FC = () => {
   return (
-    <AuthProvider>
-      <Router>
-        <SnackbarWrapper>
-          <AppContent />
-        </SnackbarWrapper>
-      </Router>
-    </AuthProvider>
+    <Provider store={store}>
+      <AuthProvider>
+        <Router>
+          <SnackbarWrapper>
+            <AppContent />
+          </SnackbarWrapper>
+        </Router>
+      </AuthProvider>
+    </Provider>
   );
 };
 

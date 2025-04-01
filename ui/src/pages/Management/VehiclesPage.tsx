@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useMemo, useState } from "react";
-import { useAuth } from "../../context/AuthContext";
+import { useAuthContext } from "../../context/AuthContext";
 import { Vehicle } from "../../models/Vehicle";
 import { useVehicles } from "../../hooks/useVehicle";
 import SearchBar from "../../components/SearchBar/SearchBar";
@@ -55,7 +55,7 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faFileExcel, faFilePdf } from "@fortawesome/free-solid-svg-icons";
 
 const VehiclesPage: React.FC = () => {
-  const { userPermissions } = useAuth();
+  const { userPermissions } = useAuthContext();
   const [selectedDate, setSelectedDate] = useState<Date>(new Date());
   const {
     vehicles,

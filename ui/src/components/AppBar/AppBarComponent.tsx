@@ -2,7 +2,7 @@ import React from "react";
 import MenuComponent from "../Menu/MenuComponent";
 import { AppBar, Toolbar, Typography, IconButton, Box } from "@mui/material";
 import { useNavigate } from "react-router-dom";
-import { useAuth } from "../../context/AuthContext";
+import { useAuthContext } from "../../context/AuthContext";
 import MenuRoundedIcon from "@mui/icons-material/MenuRounded";
 import logo from "../../assets/images/logo.png";
 
@@ -27,7 +27,7 @@ const AppBarComponent: React.FC<AppBarComponentProps> = ({
   userLinks = [],
   links,
 }) => {
-  const { currentUser } = useAuth();
+  const { currentUser } = useAuthContext();
   const navigate = useNavigate();
 
   const mapLinksToMenuItems = (

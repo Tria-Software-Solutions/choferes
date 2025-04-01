@@ -1,12 +1,14 @@
 import React, { useCallback, useEffect, useMemo, useState } from "react";
-import { useAuth } from "../../context/AuthContext";
+import { useAuthContext } from "../../context/AuthContext";
 import { Employee } from "../../models/Employee";
 import { HoursWorked } from "../../models/HoursWorked";
 import { WeeklySummary } from "../../models/WeeklySummary";
 import { BiweeklySummary } from "../../models/BiweeklySummary";
 import { MonthlySummary } from "../../models/MonthlySummary";
-import { useEmployees } from "../../hooks/useEmployee";
-import { useSchedules } from "../../hooks/useSchedule";
+import { useSelector, useDispatch } from "react-redux";
+import { RootState, AppDispatch } from "../../store/store";
+import { fetchEmployees } from "../../store/slices/employeeSlice";
+import { fetchSchedules } from "../../store/slices/schedulesSlice";
 import { useHoursWorked } from "../../hooks/useHoursWorked";
 import { useWeeklySummaries } from "../../hooks/useWeeklySummary";
 import { useBiweeklySummaries } from "../../hooks/useBiweeklySummary";
@@ -63,10 +65,15 @@ import ManageSearchIcon from "@mui/icons-material/ManageSearch";
 import { faFileExcel, faFilePdf } from "@fortawesome/free-solid-svg-icons";
 
 const RolesPage: React.FC = () => {
-  const { userPermissions } = useAuth();
-  const { employees, isLoadingEmployees } = useEmployees();
+  const dispatch = useDispatch<AppDispatch>();
+  const { userPermissions } = useAuthContext();
+  const { employees, isLoadingEmployees } = useSelector(
+    (state: RootState) => state.employees
+  );
+  const { schedules, isLoadingSchedules } = useSelector(
+    (state: RootState) => state.schedules
+  );
   const [filteredEmployees, setFilteredEmployees] = useState<Employee[]>([]);
-  const { schedules, isLoadingSchedules } = useSchedules();
   const { hoursWorked, isLoadingHours, createOrUpdateHoursWorked } =
     useHoursWorked();
   const {
@@ -97,6 +104,11 @@ const RolesPage: React.FC = () => {
 
   const theme = useTheme();
   const isSmallScreen = useMediaQuery(theme.breakpoints.down("sm"));
+
+  useEffect(() => {
+    dispatch(fetchEmployees());
+    dispatch(fetchSchedules());
+  }, [dispatch]);
 
   const isLoading =
     isLoadingEmployees ||
@@ -436,7 +448,7 @@ const RolesPage: React.FC = () => {
     currentMonth,
     currentYear,
     getCurrentWeekDates(weekOffset),
-    true, //show or hide hours
+    true //show or hide hours
   );
 
   const exportOptions = useMemo(() => {
@@ -466,7 +478,9 @@ const RolesPage: React.FC = () => {
         sx={{ mb: 3 }}
       >
         <Box display="flex" alignItems="center">
-          <CalendarMonthRoundedIcon fontSize={isSmallScreen ? "small" : "large"} />
+          <CalendarMonthRoundedIcon
+            fontSize={isSmallScreen ? "small" : "large"}
+          />
           <Box sx={{ ml: 1 }}>
             <Typography
               variant={isSmallScreen ? "h5" : "h2"}

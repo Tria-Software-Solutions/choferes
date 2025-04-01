@@ -12,9 +12,11 @@ export const createHoursWorked = async (newHours: Omit<HoursWorked, "id">) => {
 };
 
 export const updateHoursWorked = async (id: number, updatedHours: Partial<HoursWorked>) => {
-  await api.put(`/hours/${id}`, updatedHours);
+  const response = await api.put(`/hours/${id}`, updatedHours);
+  return response.data;
 };
 
 export const deleteHoursWorked = async (id: number) => {
-  await api.delete(`/hours/${id}`);
+  const response = await api.delete(`/hours/${id}`);
+  return { id, message: response.data };
 };

@@ -77,11 +77,13 @@ export const updateUserTemporalPassword = async (
   id: number,
   temporalPassword: string
 ) => {
-  await api.put(`/users/${id}/temporal-password`, {
+  const response = await api.put(`/users/${id}/temporal-password`, {
     temporalPassword,
   });
+  return response.data;
 };
 
 export const deleteUser = async (id: number) => {
-  await api.delete(`/users/${id}`);
+  const response = await api.delete(`/users/${id}`);
+  return { id, message: response.data };
 };

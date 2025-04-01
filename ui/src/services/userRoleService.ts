@@ -22,9 +22,11 @@ export const createUserRole = async (userRole: Omit<UserRole, "id">) => {
 };
 
 export const updateUserRole = async (userId: number, roleId: number) => {
-  await api.put(`/user-role/${userId}`, { roleId });
+  const response = await api.put(`/user-role/${userId}`, { roleId });
+  return response.data;
 };
 
 export const deleteUserRole = async (id: number) => {
-  await api.delete(`/user-role/${id}`);
+  const response = await api.delete(`/user-role/${id}`);
+  return { id, message: response.data };
 };
