@@ -56,12 +56,12 @@ const AppBarComponent: React.FC<AppBarComponentProps> = ({
             edge="start"
             color="inherit"
             aria-label="menu"
-            onClick={() => navigate("/roles")}
+            onClick={() => navigate("/")}
           >
             {icon}
           </IconButton>
         )}
-        <Box sx={{ cursor: "pointer" }} onClick={() => navigate("/roles")}>
+        <Box sx={{ cursor: "pointer" }} onClick={() => navigate("/")}>
           <img
             src={logo}
             alt="Logo"
@@ -78,7 +78,7 @@ const AppBarComponent: React.FC<AppBarComponentProps> = ({
         >
           <Box
             sx={{ cursor: "pointer", display: "inline-block" }}
-            onClick={() => navigate("/roles")}
+            onClick={() => navigate("/")}
           >
             {title}
           </Box>

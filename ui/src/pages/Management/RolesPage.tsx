@@ -448,7 +448,7 @@ const RolesPage: React.FC = () => {
     currentMonth,
     currentYear,
     getCurrentWeekDates(weekOffset),
-    true //show or hide hours
+    false //show or hide hours
   );
 
   const exportOptions = useMemo(() => {

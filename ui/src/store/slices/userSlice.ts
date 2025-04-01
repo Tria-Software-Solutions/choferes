@@ -256,19 +256,27 @@ const userSlice = createSlice({
         state.users.push(action.payload);
         state.totalCountUsers += 1;
       })
-      .addCase(updateUser.fulfilled, (state, action) => {
-        state.users = state.users.map((user) =>
-          user.id === action.payload.id
-            ? { ...user, ...action.payload.updatedUser }
-            : user
-        );
-        if (action.payload.newRoleId !== undefined) {
-          const user = state.users.find((u) => u.id === action.payload.id);
-          if (user) {
-            user.roleId = action.payload.newRoleId;
-          }
+      .addCase(
+        updateUser.fulfilled,
+        (
+          state,
+          action: PayloadAction<{
+            id: number;
+            updatedUser: Partial<Omit<User, "id" | "temporalPassword">>;
+            newRoleId?: number;
+          }>
+        ) => {
+          state.users = state.users.map((user) =>
+            user.id === action.payload.id
+              ? {
+                  ...user,
+                  ...action.payload.updatedUser,
+                  roleId: action.payload.newRoleId ?? user.roleId,
+                }
+              : user
+          );
         }
-      })
+      )
       .addCase(
         updateUserStatus.fulfilled,
         (state, action: PayloadAction<{ id: number; status: boolean }>) => {

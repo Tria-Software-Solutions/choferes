@@ -103,6 +103,7 @@ const ManageUsers: React.FC = () => {
   const [rowsPerPage, setRowsPerPage] = useState(5);
   const [isAddFormValid, setIsAddFormValid] = useState(false);
   const [isEditFormValid, setIsEditFormValid] = useState(false);
+  const [isPasswordFormValid, setIsPasswordFormValid] = useState(false);
 
   const theme = useTheme();
   const isSmallScreen = useMediaQuery(theme.breakpoints.down("sm"));
@@ -280,7 +281,8 @@ const ManageUsers: React.FC = () => {
         updateUser({
           id,
           updatedUser,
-          newRoleId: roles.find((role) => editFields.roleName === role.name)?.id,
+          newRoleId: roles.find((role) => editFields.roleName === role.name)
+            ?.id,
         })
       );
       if (id === currentUser?.id) {
@@ -539,6 +541,13 @@ const ManageUsers: React.FC = () => {
     }
   };
 
+  useEffect(() => {
+    const hasPasswordChange =
+      passwordFields.newPassword.trim() !== "" ||
+      passwordFields.confirmNewPassword.trim() !== "";
+    setIsPasswordFormValid(hasPasswordChange);
+  }, [passwordFields]);
+
   const modalContentChangeUserPassword = (
     id: number,
     handleClose: () => void
@@ -635,6 +644,7 @@ const ManageUsers: React.FC = () => {
               onClick={async (e) => {
                 await handleChangePassword(e, id, handleClose);
               }}
+              disabled={!isPasswordFormValid}
             >
               Aceptar
             </Button>

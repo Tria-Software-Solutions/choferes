@@ -172,7 +172,7 @@ const ManageRoles: React.FC = () => {
           id,
           updatedRole,
           newPermissionIds: permissions
-            .filter((permission) => addFields.permissionNames.includes(permission.name))
+            .filter((permission) => editFields.permissionNames.includes(permission.name))
             .map((permission) => permission.id),
         })
       );
