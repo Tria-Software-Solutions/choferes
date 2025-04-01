@@ -12,6 +12,7 @@ import {
 } from "@mui/material";
 import { PAGE_TITLE } from "../../constants/constants";
 import ManageAccountsIcon from "@mui/icons-material/ManageAccounts";
+import ManagePermissions from "./ManagePermissions";
 
 const Dashboard: React.FC = () => {
   const [expanded, setExpanded] = React.useState<string | false>("panel1");
@@ -70,6 +71,19 @@ const Dashboard: React.FC = () => {
         </AccordionSummary>
         <AccordionDetails>
           <ManageRoles />
+        </AccordionDetails>
+      </Accordion>
+      <Accordion
+        expanded={expanded === "panel3"}
+        onChange={handleChange("panel3")}
+      >
+        <AccordionSummary aria-controls="panel3d-content" id="panel3d-header">
+          <Typography component="span" fontWeight="bold">
+            Permisos
+          </Typography>
+        </AccordionSummary>
+        <AccordionDetails>
+          <ManagePermissions />
         </AccordionDetails>
       </Accordion>
     </Box>

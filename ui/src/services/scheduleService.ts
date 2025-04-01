@@ -15,9 +15,11 @@ export const updateSchedule = async (
   id: number,
   updatedSchedule: Partial<Schedule>
 ) => {
-  await api.put(`/schedules/${id}`, updatedSchedule);
+  const response = await api.put(`/schedules/${id}`, updatedSchedule);
+  return response.data;
 };
 
 export const deleteSchedule = async (id: number) => {
-  await api.delete(`/schedules/${id}`);
+  const response = await api.delete(`/schedules/${id}`);
+  return { id, message: response.data };
 };

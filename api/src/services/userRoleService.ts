@@ -1,3 +1,4 @@
+import sequelize from "../config/database";
 import { UserRole } from "../models/UserRole";
 import * as RoleService from "../services/roleService";
 

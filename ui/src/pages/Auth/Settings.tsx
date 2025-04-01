@@ -1,6 +1,12 @@
 import { useCallback, useEffect, useState } from "react";
-import { useAuth } from "../../context/AuthContext";
-import { useUsers } from "../../hooks/useUser";
+import { useAuthContext } from "../../context/AuthContext";
+import { useSelector, useDispatch } from "react-redux";
+import { RootState, AppDispatch } from "../../store/store";
+import {
+  fetchUsers,
+  updateUser,
+  updateUserPassword,
+} from "../../store/slices/userSlice";
 import {
   Alert,
   Box,
@@ -22,8 +28,9 @@ import VisibilityOff from "@mui/icons-material/VisibilityOff";
 import { User } from "../../models/User";
 
 const Settings: React.FC = () => {
-  const { currentUser, setUser } = useAuth();
-  const { users, getUsers, updateUser, updateUserPassword } = useUsers();
+  const dispatch = useDispatch<AppDispatch>();
+  const { currentUser, setUser } = useAuthContext();
+  const { users } = useSelector((state: RootState) => state.users);
   const { showNotification } = useAppNotifications();
   const [editFields, setEditFields] = useState({
     firstName: currentUser?.firstName || "",
@@ -44,6 +51,10 @@ const Settings: React.FC = () => {
 
   const theme = useTheme();
   const isSmallScreen = useMediaQuery(theme.breakpoints.down("sm"));
+
+  useEffect(() => {
+    dispatch(fetchUsers());
+  }, [dispatch]);
 
   const validateFields = useCallback(async (fields: typeof editFields) => {
     const regex = {
@@ -159,7 +170,7 @@ const Settings: React.FC = () => {
         ...editFields,
       };
       if (currentUser) {
-        await updateUser(currentUser.id, updatedUser);
+        dispatch(updateUser({ id: currentUser.id, updatedUser }));
         setUser({
           id: currentUser.id,
           firstName: updatedUser.firstName || "",
@@ -169,7 +180,6 @@ const Settings: React.FC = () => {
           password: updatedUser.password || "",
           isActive: updatedUser.isActive || false,
         });
-        await getUsers();
       } else {
         throw new Error("Current User is null");
       }
@@ -224,7 +234,12 @@ const Settings: React.FC = () => {
 
     try {
       if (currentUser) {
-        await updateUserPassword(currentUser.id, passwordFields.newPassword);
+        dispatch(
+          updateUserPassword({
+            id: currentUser.id,
+            password: passwordFields.newPassword,
+          })
+        );
       } else {
         throw new Error("Current User is null");
       }

@@ -25,9 +25,11 @@ export const updateRole = async (
   id: number,
   updatedRole: Partial<Role>
 ) => {
-  await api.put(`/roles/${id}`, updatedRole);
+  const response = await api.put(`/roles/${id}`, updatedRole);
+  return response.data;
 };
 
 export const deleteRole = async (id: number) => {
-  await api.delete(`/roles/${id}`);
+  const response = await api.delete(`/roles/${id}`);
+  return { id, message: response.data };
 };

@@ -1,7 +1,14 @@
 import React, { useState, useEffect, useCallback, useMemo } from "react";
-import { useAuth } from "../../context/AuthContext";
+import { useAuthContext } from "../../context/AuthContext";
 import { Employee } from "../../models/Employee";
-import { useEmployees } from "../../hooks/useEmployee";
+import { useSelector, useDispatch } from "react-redux";
+import { RootState, AppDispatch } from "../../store/store";
+import {
+  fetchEmployees,
+  createEmployee,
+  updateEmployee,
+  deleteEmployee,
+} from "../../store/slices/employeeSlice";
 import SearchBar from "../../components/SearchBar/SearchBar";
 import CustomSpeedDial from "../../components/SpeedDial/CustomSpeedDial";
 import EditableTable from "../../components/Table/EditableTable/EditableTable";
@@ -38,14 +45,11 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faFileExcel, faFilePdf } from "@fortawesome/free-solid-svg-icons";
 
 const EmployeesPage: React.FC = () => {
-  const { userPermissions } = useAuth();
-  const {
-    employees,
-    isLoadingEmployees,
-    createEmployee,
-    updateEmployee,
-    deleteEmployee,
-  } = useEmployees();
+  const dispatch = useDispatch<AppDispatch>();
+  const { userPermissions } = useAuthContext();
+  const { employees, isLoadingEmployees } = useSelector(
+    (state: RootState) => state.employees
+  );
   const { showNotification } = useAppNotifications();
   const [filteredEmployees, setFilteredEmployees] = useState<Employee[]>([]);
   const [totalCount, setTotalCount] = useState(0);
@@ -62,6 +66,10 @@ const EmployeesPage: React.FC = () => {
 
   const theme = useTheme();
   const isSmallScreen = useMediaQuery(theme.breakpoints.down("sm"));
+
+  useEffect(() => {
+    dispatch(fetchEmployees());
+  }, [dispatch]);
 
   useEffect(() => {
     if (isSmallScreen) {
@@ -107,13 +115,13 @@ const EmployeesPage: React.FC = () => {
     setFilter(e.target.value);
   };
 
-  const handleAdd = async () => {
+  const handleCreate = async () => {
     try {
       const newEmployee: Omit<Employee, "id"> = {
         firstName: addFields.firstName,
         lastName: addFields.lastName,
       };
-      await createEmployee(newEmployee);
+      dispatch(createEmployee(newEmployee));
       setAddFields({ firstName: "", lastName: "" });
       showNotification(
         "El registro del empleado fue exitoso",
@@ -149,7 +157,7 @@ const EmployeesPage: React.FC = () => {
       const updatedEmployee = {
         ...editFields,
       };
-      await updateEmployee(id, updatedEmployee);
+      dispatch(updateEmployee({ id, updatedEmployee }));
       setEditRowId(null);
       setEditFields({ firstName: "", lastName: "" });
       showNotification(
@@ -183,7 +191,7 @@ const EmployeesPage: React.FC = () => {
   const handleDelete = async () => {
     try {
       if (employeeToDelete !== null) {
-        await deleteEmployee(employeeToDelete);
+        dispatch(deleteEmployee(employeeToDelete));
         showNotification(
           "La eliminación del empleado fue exitosa",
           "success",
@@ -232,9 +240,7 @@ const EmployeesPage: React.FC = () => {
         sx={{ mb: 3 }}
       >
         <Box display="flex" alignItems="center">
-          <GroupRoundedIcon
-            fontSize={isSmallScreen ? "small" : "large"}
-          />
+          <GroupRoundedIcon fontSize={isSmallScreen ? "small" : "large"} />
           <Box sx={{ ml: 1 }}>
             <Typography
               variant={isSmallScreen ? "h5" : "h2"}
@@ -359,7 +365,7 @@ const EmployeesPage: React.FC = () => {
                           lineHeight: "normal",
                           width: { xs: "100%", md: "auto" },
                         }}
-                        onClick={handleAdd}
+                        onClick={handleCreate}
                         disabled={!isAddFormValid}
                       >
                         <PersonAddAlt1RoundedIcon />

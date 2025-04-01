@@ -1,9 +1,19 @@
 import React, { useState, useEffect, useCallback } from "react";
-import { useAuth } from "../../context/AuthContext";
+import { useAuthContext } from "../../context/AuthContext";
 import { User } from "../../models/User";
 import { Role } from "../../models/Role";
-import { useUsers } from "../../hooks/useUser";
-import { useRoles } from "../../hooks/useRole";
+import { useSelector, useDispatch } from "react-redux";
+import { RootState, AppDispatch } from "../../store/store";
+import {
+  fetchUsers,
+  createUser,
+  updateUser,
+  updateUserStatus,
+  updateUserPassword,
+  updateUserTemporalPassword,
+} from "../../store/slices/userSlice";
+import { fetchRoles } from "../../store/slices/rolesSlice";
+import { fetchUserRoles } from "../../store/slices/userRolesSlice";
 import { useAppNotifications } from "../../components/Snackbar/SnackbarWrapper";
 import {
   Alert,
@@ -45,18 +55,12 @@ interface TemporalPassword {
 }
 
 const ManageUsers: React.FC = () => {
-  const { userPermissions } = useAuth();
-  const {
-    users,
-    isLoadingUsers,
-    createUser,
-    getUsers,
-    updateUser,
-    updateUserStatus,
-    updateUserPassword,
-    updateUserTemporalPassword,
-  } = useUsers();
-  const { roles, getRoleByName } = useRoles();
+  const dispatch = useDispatch<AppDispatch>();
+  const { currentUser, setUser, userPermissions } = useAuthContext();
+  const { users, isLoadingUsers } = useSelector(
+    (state: RootState) => state.users
+  );
+  const { roles } = useSelector((state: RootState) => state.roles);
   const { showNotification } = useAppNotifications();
   const [filteredUsers, setFilteredUsers] = useState<User[]>([]);
   const [showInactive, setShowInactive] = useState(false);
@@ -102,6 +106,12 @@ const ManageUsers: React.FC = () => {
 
   const theme = useTheme();
   const isSmallScreen = useMediaQuery(theme.breakpoints.down("sm"));
+
+  useEffect(() => {
+    dispatch(fetchUsers());
+    dispatch(fetchRoles());
+    dispatch(fetchUserRoles());
+  }, [dispatch]);
 
   useEffect(() => {
     const normalizeString = (str: string) =>
@@ -214,9 +224,12 @@ const ManageUsers: React.FC = () => {
         roleName: addFields.roleName,
         isActive: true,
       };
-      const role = await getRoleByName(addFields.roleName);
-      await createUser(newUser, role.id);
-      await getUsers();
+      dispatch(
+        createUser({
+          newUser,
+          newRoleId: roles.find((role) => addFields.roleName === role.name)?.id,
+        })
+      );
       setAddFields({
         firstName: "",
         lastName: "",
@@ -260,12 +273,27 @@ const ManageUsers: React.FC = () => {
 
   const handleUpdate = async (id: number) => {
     try {
-      const role = await getRoleByName(editFields.roleName);
       const updatedUser: Partial<User> = {
         ...editFields,
       };
-      await updateUser(id, updatedUser, role.id);
-      await getUsers();
+      dispatch(
+        updateUser({
+          id,
+          updatedUser,
+          newRoleId: roles.find((role) => editFields.roleName === role.name)?.id,
+        })
+      );
+      if (id === currentUser?.id) {
+        setUser({
+          id: currentUser.id,
+          firstName: updatedUser.firstName || "",
+          lastName: updatedUser.lastName || "",
+          email: updatedUser.email || "",
+          username: updatedUser.username || "",
+          password: updatedUser.password || "",
+          isActive: updatedUser.isActive || false,
+        });
+      }
       setEditRowId(null);
       setEditFields({
         firstName: "",
@@ -377,7 +405,12 @@ const ManageUsers: React.FC = () => {
   const handleStatusChange = async () => {
     try {
       if (userToChange !== null) {
-        await updateUserStatus(userToChange.id, !userToChange.isActive);
+        dispatch(
+          updateUserStatus({
+            id: userToChange.id,
+            status: !userToChange.isActive,
+          })
+        );
         showNotification(
           "La actualización del estado del usuario fue exitosa",
           "success",
@@ -438,7 +471,7 @@ const ManageUsers: React.FC = () => {
       } while (!passwordRegex.test(temporalPassword));
       setGeneratedTemporalPassword({ id, temporalPassword });
       setTemporalPasswordHidden(false);
-      await updateUserTemporalPassword(id, temporalPassword);
+      dispatch(updateUserTemporalPassword({ id, temporalPassword }));
       showNotification(
         "Se ha creado una contraseña temporal",
         "success",
@@ -480,7 +513,9 @@ const ManageUsers: React.FC = () => {
     if (!isValid) return;
 
     try {
-      await updateUserPassword(id, passwordFields.newPassword);
+      dispatch(
+        updateUserPassword({ id, password: passwordFields.newPassword })
+      );
       setPasswordFields({
         newPassword: "",
         confirmNewPassword: "",
