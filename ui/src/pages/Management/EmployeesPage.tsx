@@ -224,10 +224,10 @@ const EmployeesPage: React.FC = () => {
     return createExportOptions(
       <FontAwesomeIcon icon={faFileExcel} size="lg" />,
       <FontAwesomeIcon icon={faFilePdf} size="lg" />,
+      excelOption,
+      pdfOption,
       filteredEmployees,
       `empleados-${exportFileFormattedDate(new Date())}`,
-      excelOption,
-      pdfOption
     );
   }, [userPermissions, filteredEmployees]);
 

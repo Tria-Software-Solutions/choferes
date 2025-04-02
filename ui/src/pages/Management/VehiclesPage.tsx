@@ -478,12 +478,12 @@ const VehiclesPage: React.FC = () => {
     return createExportOptions(
       <FontAwesomeIcon icon={faFileExcel} size="lg" />,
       <FontAwesomeIcon icon={faFilePdf} size="lg" />,
+      excelOption,
+      pdfOption,
       filteredWeekVehicles,
       `reporte-de-vehiculos-${exportFileFormattedDate(
         selectedDate || new Date()
       )}`,
-      excelOption,
-      pdfOption
     );
   }, [userPermissions, filteredWeekVehicles, selectedDate]);
 
