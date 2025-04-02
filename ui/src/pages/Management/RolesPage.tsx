@@ -9,7 +9,10 @@ import { useSelector, useDispatch } from "react-redux";
 import { RootState, AppDispatch } from "../../store/store";
 import { fetchEmployees } from "../../store/slices/employeeSlice";
 import { fetchSchedules } from "../../store/slices/schedulesSlice";
-import { useHoursWorked } from "../../hooks/useHoursWorked";
+import {
+  fetchHoursWorked,
+  createOrUpdateHoursWorked,
+} from "../../store/slices/hoursWorkedSlice";
 import { useWeeklySummaries } from "../../hooks/useWeeklySummary";
 import { useBiweeklySummaries } from "../../hooks/useBiweeklySummary";
 import { useMonthlySummaries } from "../../hooks/useMonthlySummary";
@@ -73,9 +76,10 @@ const RolesPage: React.FC = () => {
   const { schedules, isLoadingSchedules } = useSelector(
     (state: RootState) => state.schedules
   );
+  const { hoursWorked, isLoadingHoursWorked } = useSelector(
+    (state: RootState) => state.hoursWorked
+  );
   const [filteredEmployees, setFilteredEmployees] = useState<Employee[]>([]);
-  const { hoursWorked, isLoadingHours, createOrUpdateHoursWorked } =
-    useHoursWorked();
   const {
     weeklySummaries,
     isLoadingWeeklySummaries,
@@ -108,12 +112,13 @@ const RolesPage: React.FC = () => {
   useEffect(() => {
     dispatch(fetchEmployees());
     dispatch(fetchSchedules());
+    dispatch(fetchHoursWorked());
   }, [dispatch]);
 
   const isLoading =
     isLoadingEmployees ||
     isLoadingSchedules ||
-    isLoadingHours ||
+    isLoadingHoursWorked ||
     isLoadingWeeklySummaries ||
     isLoadingBiweeklySummaries ||
     isLoadingMonthlySummaries;
@@ -211,13 +216,11 @@ const RolesPage: React.FC = () => {
           scheduleId,
         };
       }
-      await createOrUpdateHoursWorked(createOrUpdatedHoursWorked);
 
       const existingWeeklySummaryRecord = weeklySummaries.find(
         (weeklySummary) =>
           weeklySummary.employeeId === employeeId &&
           weeklySummary.weekNumber === weekNumber &&
-          weeklySummary.month === month &&
           weeklySummary.year === year
       );
 
@@ -243,13 +246,11 @@ const RolesPage: React.FC = () => {
           totalHours,
         };
       }
-      await createOrUpdateWeeklySummary(createOrUpdatedWeeklySummary);
 
       const existingBiweeklySummaryRecord = biweeklySummaries.find(
         (biweeklySummary) =>
           biweeklySummary.employeeId === employeeId &&
           biweeklySummary.biweekNumber === biweekNumber &&
-          biweeklySummary.month === month &&
           biweeklySummary.year === year
       );
 
@@ -275,7 +276,6 @@ const RolesPage: React.FC = () => {
           totalHours,
         };
       }
-      await createOrUpdateBiweeklySummary(createOrUpdatedBiweeklySummary);
 
       const existingMonthlySummaryRecord = monthlySummaries.find(
         (monthlySummary) =>
@@ -305,15 +305,20 @@ const RolesPage: React.FC = () => {
           totalHours,
         };
       }
-      await createOrUpdateMonthlySummary(createOrUpdatedMonthlySummary);
+      await Promise.all([
+        dispatch(createOrUpdateHoursWorked(createOrUpdatedHoursWorked)),
+        createOrUpdateWeeklySummary(createOrUpdatedWeeklySummary),
+        createOrUpdateBiweeklySummary(createOrUpdatedBiweeklySummary),
+        createOrUpdateMonthlySummary(createOrUpdatedMonthlySummary),
+      ]);
     },
     [
+      dispatch,
       hoursWorked,
       schedules,
       weeklySummaries,
       biweeklySummaries,
       monthlySummaries,
-      createOrUpdateHoursWorked,
       createOrUpdateWeeklySummary,
       createOrUpdateBiweeklySummary,
       createOrUpdateMonthlySummary,

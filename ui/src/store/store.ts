@@ -1,22 +1,25 @@
 import { configureStore } from "@reduxjs/toolkit";
-import employeeReducer from "./slices/employeeSlice";
+import employeesReducer from "./slices/employeeSlice";
 import hoursWorkedReducer from "./slices/hoursWorkedSlice";
 import permissionsReducer from "./slices/permissionsSlice";
 import rolePermissionsReducer from "./slices/rolePermissionsSlice";
 import rolesReducer from "./slices/rolesSlice";
-import scheduleReducer from "./slices/schedulesSlice";
+import schedulesReducer from "./slices/schedulesSlice";
 import userRolesReducer from "./slices/userRolesSlice";
-import userReducer from "./slices/userSlice";
+import usersReducer from "./slices/userSlice";
+import vehiclesReducer from "./slices/vehiclesSlice";
 export const store = configureStore({
   reducer: {
-    employees: employeeReducer,
+    employees: employeesReducer,
     hoursWorked: hoursWorkedReducer,
     permissions: permissionsReducer,
     rolePermissions: rolePermissionsReducer,
     roles: rolesReducer,
-    schedules: scheduleReducer,
+    schedules: schedulesReducer,
     userRoles: userRolesReducer,
-    users: userReducer,
+    users: usersReducer,
+    vehicles: vehiclesReducer,
+    
   },
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware({

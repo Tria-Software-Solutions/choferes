@@ -66,15 +66,20 @@ export const createOrUpdateHoursWorked = createAsyncThunk(
   "hoursWorked/createOrUpdateHoursWorked",
   async (
     newHours: Omit<HoursWorked, "id"> | HoursWorked,
-    { dispatch, rejectWithValue }
+    { rejectWithValue }
   ) => {
     try {
       if ("id" in newHours) {
-        await dispatch(updateHoursWorked({ id: newHours.id, updatedHours: newHours }));
-        return { id: newHours.id, updatedHours: newHours };
+        const updatedHoursWorked = await HoursWorkedService.updateHoursWorked(
+          newHours.id,
+          newHours
+        );
+        return updatedHoursWorked;
       } else {
-        const createdHours = await HoursWorkedService.createHoursWorked(newHours);
-        return createdHours;
+        const createdHoursWorked = await HoursWorkedService.createHoursWorked(
+          newHours
+        );
+        return createdHoursWorked;
       }
     } catch (error: any) {
       return rejectWithValue(
@@ -132,7 +137,10 @@ const hoursWorkedSlice = createSlice({
         updateHoursWorked.fulfilled,
         (
           state,
-          action: PayloadAction<{ id: number; updatedHours: Partial<HoursWorked> }>
+          action: PayloadAction<{
+            id: number;
+            updatedHours: Partial<HoursWorked>;
+          }>
         ) => {
           const { id, updatedHours } = action.payload;
           state.hoursWorked = state.hoursWorked.map((hours) =>
@@ -140,24 +148,18 @@ const hoursWorkedSlice = createSlice({
           );
         }
       )
-      .addCase(
-        createOrUpdateHoursWorked.fulfilled,
-        (
-          state,
-          action: PayloadAction<HoursWorked | { id: number; updatedHours: Partial<HoursWorked> }>
-        ) => {
-          if ('id' in action.payload) {
-            state.hoursWorked = state.hoursWorked.map((hours) =>
-              'updatedHours' in action.payload && action.payload.id === hours.id
-                ? { ...hours, ...action.payload.updatedHours }
-                : hours
-            );
-          } else {
-            state.hoursWorked.push(action.payload as HoursWorked);
-            state.totalCountHoursWorked += 1;
-          }
+      .addCase(createOrUpdateHoursWorked.fulfilled, (state, action) => {
+        const updatedHoursWorked = action.payload;
+        const index = state.hoursWorked.findIndex(
+          (hours) => hours.id === updatedHoursWorked.id
+        );
+
+        if (index !== -1) {
+          state.hoursWorked[index] = updatedHoursWorked;
+        } else {
+          state.hoursWorked.push(updatedHoursWorked);
         }
-      )
+      })
       .addCase(
         deleteHoursWorked.fulfilled,
         (state, action: PayloadAction<number>) => {
@@ -170,9 +172,13 @@ const hoursWorkedSlice = createSlice({
   },
 });
 
-export const selectHoursWorked = (state: RootState) => state.hoursWorked.hoursWorked;
-export const selectTotalCountHoursWorked = (state: RootState) => state.hoursWorked.totalCountHoursWorked;
-export const selectIsLoadingHoursWorked = (state: RootState) => state.hoursWorked.isLoadingHoursWorked;
-export const selectHoursWorkedError = (state: RootState) => state.hoursWorked.error;
+export const selectHoursWorked = (state: RootState) =>
+  state.hoursWorked.hoursWorked;
+export const selectTotalCountHoursWorked = (state: RootState) =>
+  state.hoursWorked.totalCountHoursWorked;
+export const selectIsLoadingHoursWorked = (state: RootState) =>
+  state.hoursWorked.isLoadingHoursWorked;
+export const selectHoursWorkedError = (state: RootState) =>
+  state.hoursWorked.error;
 
 export default hoursWorkedSlice.reducer;

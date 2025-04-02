@@ -1,7 +1,15 @@
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { useAuthContext } from "../../context/AuthContext";
 import { Vehicle } from "../../models/Vehicle";
-import { useVehicles } from "../../hooks/useVehicle";
+import { useSelector, useDispatch } from "react-redux";
+import { RootState, AppDispatch } from "../../store/store";
+import {
+  fetchVehicles,
+  fetchVehiclesByDate,
+  createVehicle,
+  updateVehicle,
+  deleteVehicle,
+} from "../../store/slices/vehiclesSlice";
 import SearchBar from "../../components/SearchBar/SearchBar";
 import EditableTable from "../../components/Table/EditableTable/EditableTable";
 import CustomSpeedDial from "../../components/SpeedDial/CustomSpeedDial";
@@ -55,17 +63,12 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faFileExcel, faFilePdf } from "@fortawesome/free-solid-svg-icons";
 
 const VehiclesPage: React.FC = () => {
+  const dispatch = useDispatch<AppDispatch>();
   const { userPermissions } = useAuthContext();
   const [selectedDate, setSelectedDate] = useState<Date>(new Date());
-  const {
-    vehicles,
-    allVehicles,
-    setAllVehicles,
-    isLoadingVehicles,
-    createVehicle,
-    updateVehicle,
-    deleteVehicle,
-  } = useVehicles(format(selectedDate, "yyyy-MM-dd"));
+  const { vehicles, allVehicles, isLoadingVehicles } = useSelector(
+    (state: RootState) => state.vehicles
+  );
   const { showNotification } = useAppNotifications();
   const [filteredVehicles, setFilteredVehicles] = useState<Vehicle[]>([]);
   const [filteredWeekVehicles, setFilteredWeekVehicles] = useState<Vehicle[]>(
@@ -105,6 +108,11 @@ const VehiclesPage: React.FC = () => {
 
   const theme = useTheme();
   const isSmallScreen = useMediaQuery(theme.breakpoints.down("sm"));
+
+  useEffect(() => {
+    dispatch(fetchVehicles({}));
+    dispatch(fetchVehiclesByDate(format(selectedDate, "yyyy-MM-dd")));
+  }, [dispatch, selectedDate]);
 
   useEffect(() => {
     if (isSmallScreen) {
@@ -213,9 +221,7 @@ const VehiclesPage: React.FC = () => {
         notes: addFields.notes,
         createdAt: selectedDate,
       };
-
-      await createVehicle(newVehicle);
-      setAllVehicles((prevVehicles) => [...prevVehicles, newVehicle]);
+      dispatch(createVehicle(newVehicle));
       setAddFields({
         ticket: "",
         licensePlate: "",
@@ -263,7 +269,7 @@ const VehiclesPage: React.FC = () => {
         const updatedVehicle = {
           ...editFields,
         };
-        await updateVehicle(id, updatedVehicle);
+        dispatch(updateVehicle({ id, updatedVehicle }));
         setEditRowId(null);
         setEditFields({
           ticket: "",
@@ -290,7 +296,7 @@ const VehiclesPage: React.FC = () => {
         );
       }
     },
-    [editFields, updateVehicle, showNotification]
+    [dispatch, editFields, showNotification]
   );
 
   const handleOpenDeleteDialog = (id: number) => {
@@ -306,7 +312,7 @@ const VehiclesPage: React.FC = () => {
   const handleDelete = async () => {
     try {
       if (vehicleToDelete !== null) {
-        await deleteVehicle(vehicleToDelete);
+        dispatch(deleteVehicle(vehicleToDelete));
         showNotification(
           "La eliminación del vehículo fue exitosa",
           "success",
