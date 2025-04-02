@@ -1,6 +1,8 @@
-import { useCallback, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import { useUsers } from "../../hooks/useUser";
+import { useSelector, useDispatch } from "react-redux";
+import { RootState, AppDispatch } from "../../store/store";
+import { fetchUsers, createUser } from "../../store/slices/userSlice";
 import { User } from "../../models/User";
 import { useAppNotifications } from "../../components/Snackbar/SnackbarWrapper";
 import {
@@ -22,7 +24,8 @@ import { PAGE_TITLE } from "../../constants/constants";
 import AccountCircleIcon from "@mui/icons-material/AccountCircle";
 
 const Register = () => {
-  const { createUser, getUserByEmail, getUserByUsername } = useUsers();
+  const dispatch = useDispatch<AppDispatch>();
+  const { users } = useSelector((state: RootState) => state.users);
   const { showNotification } = useAppNotifications();
   const [addFields, setAddFields] = useState({
     firstName: "",
@@ -36,6 +39,10 @@ const Register = () => {
 
   const theme = useTheme();
   const isSmallScreen = useMediaQuery(theme.breakpoints.down("sm"));
+
+  useEffect(() => {
+    dispatch(fetchUsers());
+  }, [dispatch]);
 
   const validateFields = useCallback(async () => {
     const nameRegex = /^[a-zA-ZáéíóúÁÉÍÓÚüÜñÑ.\s]+$/;
@@ -108,7 +115,7 @@ const Register = () => {
         password: addFields.password,
         isActive: true,
       };
-      await createUser(newUser);
+      dispatch(createUser({ newUser }));
       showNotification(
         "El registro del usuario fue exitoso",
         "success",
@@ -126,19 +133,18 @@ const Register = () => {
     }
   };
 
-  const checkEmailExistence = async (
-    email: string
-  ): Promise<User | undefined> => {
-    return await getUserByEmail(email);
-  };
+  const checkEmailExistence = useCallback(
+    (email: string): User | undefined => {
+      return users.find((user) => user.email === email);
+    },
+    [users]
+  );
 
-  const handleEmailChange = async (
-    event: React.FocusEvent<HTMLInputElement>
-  ) => {
+  const handleEmailChange = (event: React.FocusEvent<HTMLInputElement>) => {
     const value = event.target.value.trim();
     if (!value) return;
 
-    const usernameExists = await checkEmailExistence(value);
+    const usernameExists = checkEmailExistence(value);
     if (usernameExists) {
       setError("El correo electrónico ya existe.");
     } else {
@@ -146,19 +152,18 @@ const Register = () => {
     }
   };
 
-  const checkUsernameExistence = async (
-    username: string
-  ): Promise<User | undefined> => {
-    return await getUserByUsername(username);
-  };
+  const checkUsernameExistence = useCallback(
+    (username: string): User | undefined => {
+      return users.find((user) => user.username === username);
+    },
+    [users]
+  );
 
-  const handleUsernameChange = async (
-    event: React.FocusEvent<HTMLInputElement>
-  ) => {
+  const handleUsernameChange = (event: React.FocusEvent<HTMLInputElement>) => {
     const value = event.target.value.trim();
     if (!value) return;
 
-    const usernameExists = await checkUsernameExistence(value);
+    const usernameExists = checkUsernameExistence(value);
     if (usernameExists) {
       setError("El nombre de usuario ya existe.");
     } else {

@@ -28,9 +28,11 @@ export const updateMonthlySummary = async (
   id: number,
   updatedMonthlySummary: Partial<MonthlySummary>
 ) => {
-  await api.put(`/monthly-summary/${id}`, updatedMonthlySummary);
+  const response = await api.put(`/monthly-summary/${id}`, updatedMonthlySummary);
+  return response.data;
 };
 
 export const deleteMonthlySummary = async (id: number) => {
-  await api.delete(`/monthly-summary/${id}`);
+  const response = await api.delete(`/monthly-summary/${id}`);
+  return { id, message: response.data };
 };

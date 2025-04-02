@@ -1,7 +1,14 @@
 import React, { useState, useEffect, useCallback, useMemo } from "react";
-import { useAuth } from "../../context/AuthContext";
+import { useAuthContext } from "../../context/AuthContext";
 import { Schedule } from "../../models/Schedule";
-import { useSchedules } from "../../hooks/useSchedule";
+import { useSelector, useDispatch } from "react-redux";
+import { RootState, AppDispatch } from "../../store/store";
+import {
+  fetchSchedules,
+  createSchedule,
+  updateSchedule,
+  deleteSchedule,
+} from "../../store/slices/schedulesSlice";
 import SearchBar from "../../components/SearchBar/SearchBar";
 import EditableTable from "../../components/Table/EditableTable/EditableTable";
 import CustomSpeedDial from "../../components/SpeedDial/CustomSpeedDial";
@@ -49,14 +56,11 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faFileExcel, faFilePdf } from "@fortawesome/free-solid-svg-icons";
 
 const SchedulesPage: React.FC = () => {
-  const { userPermissions } = useAuth();
-  const {
-    schedules,
-    isLoadingSchedules,
-    createSchedule,
-    updateSchedule,
-    deleteSchedule,
-  } = useSchedules();
+  const dispatch = useDispatch<AppDispatch>();
+  const { userPermissions } = useAuthContext();
+  const { schedules, isLoadingSchedules } = useSelector(
+    (state: RootState) => state.schedules
+  );
   const { showNotification } = useAppNotifications();
   const [filteredSchedules, setFilteredSchedules] = useState<Schedule[]>([]);
   const [totalCountSchedules, setTotalCountSchedules] = useState(0);
@@ -93,6 +97,10 @@ const SchedulesPage: React.FC = () => {
 
   const theme = useTheme();
   const isSmallScreen = useMediaQuery(theme.breakpoints.down("sm"));
+
+  useEffect(() => {
+    dispatch(fetchSchedules());
+  }, [dispatch]);
 
   useEffect(() => {
     if (isSmallScreen) {
@@ -151,7 +159,7 @@ const SchedulesPage: React.FC = () => {
         hours: parseInt(addFields.hours, 10),
         specialSchedule: addFields.specialSchedule,
       };
-      await createSchedule(newSchedule);
+      dispatch(createSchedule(newSchedule));
       setAddFields({ label: "", days: [], hours: "", specialSchedule: false });
       showNotification(
         "El registro del horario fue exitoso",
@@ -190,7 +198,7 @@ const SchedulesPage: React.FC = () => {
         ...editFields,
         hours: parseInt(editFields.hours, 10),
       };
-      await updateSchedule(id, updatedSchedule);
+      dispatch(updateSchedule({ id, updatedSchedule }));
       setEditRowId(null);
       setEditFields({ label: "", days: [], hours: "", specialSchedule: false });
       showNotification(
@@ -224,7 +232,7 @@ const SchedulesPage: React.FC = () => {
   const handleDelete = async () => {
     try {
       if (scheduleToDelete !== null) {
-        await deleteSchedule(scheduleToDelete);
+        dispatch(deleteSchedule(scheduleToDelete));
         showNotification(
           "La eliminación del horario fue exitosa",
           "success",
@@ -277,11 +285,14 @@ const SchedulesPage: React.FC = () => {
             fontSize={isSmallScreen ? "small" : "large"}
           />
           <Box sx={{ ml: 1 }}>
-          <Typography variant={isSmallScreen ? "h5" : "h2"} sx={{ flexGrow: 1 }}>
-          {isSmallScreen
-            ? PAGE_TITLE.SCHEDULES_SIMPLIFIED
-            : PAGE_TITLE.SCHEDULES}
-        </Typography>
+            <Typography
+              variant={isSmallScreen ? "h5" : "h2"}
+              sx={{ flexGrow: 1 }}
+            >
+              {isSmallScreen
+                ? PAGE_TITLE.SCHEDULES_SIMPLIFIED
+                : PAGE_TITLE.SCHEDULES}
+            </Typography>
           </Box>
         </Box>
         {userPermissions.includes(PERMISSIONS.EXPORT_EXCEL_SCHEDULES) &&

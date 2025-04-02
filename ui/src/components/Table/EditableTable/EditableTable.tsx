@@ -1,7 +1,7 @@
 import React, { useState } from "react";
-import { useRoles } from "../../../hooks/useRole";
-import { usePermissions } from "../../../hooks/usePermission";
-import { useAuth } from "../../../context/AuthContext";
+import { useSelector } from "react-redux";
+import { RootState } from "../../../store/store";
+import { useAuthContext } from "../../../context/AuthContext";
 import {
   Table,
   TableBody,
@@ -110,9 +110,9 @@ const EditableTable = <T extends object>({
   noActions,
   userPermissions,
 }: EditableTableProps<T>) => {
-  const { currentUser } = useAuth();
-  const { roles } = useRoles();
-  const { permissions } = usePermissions();
+  const { currentUser } = useAuthContext();
+  const { roles } = useSelector((state: RootState) => state.roles);
+  const { permissions } = useSelector((state: RootState) => state.permissions);
   const [order, setOrder] = useState<"asc" | "desc">("asc");
   const [orderBy, setOrderBy] = useState<keyof T>(columns[0]);
 

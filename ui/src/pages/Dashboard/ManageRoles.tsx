@@ -1,10 +1,17 @@
 import React, { useState, useEffect, useCallback } from "react";
-import { useAuth } from "../../context/AuthContext";
+import { useAuthContext } from "../../context/AuthContext";
 import { Role } from "../../models/Role";
 import { Permission } from "../../models/Permission";
-import { useRoles } from "../../hooks/useRole";
-import { usePermissions } from "../../hooks/usePermission";
-import { useUserRoles } from "../../hooks/useUserRole";
+import { useSelector, useDispatch } from "react-redux";
+import { RootState, AppDispatch } from "../../store/store";
+import {
+  fetchRoles,
+  createRole,
+  updateRole,
+  deleteRole,
+} from "../../store/slices/rolesSlice";
+import { fetchPermissions } from "../../store/slices/permissionsSlice";
+import { fetchRolePermissions } from "../../store/slices/rolePermissionsSlice";
 import { useAppNotifications } from "../../components/Snackbar/SnackbarWrapper";
 import {
   Autocomplete,
@@ -27,17 +34,13 @@ import SearchBar from "../../components/SearchBar/SearchBar";
 import AddModeratorIcon from "@mui/icons-material/AddModerator";
 
 const ManageRoles: React.FC = () => {
-  const { userPermissions } = useAuth();
-  const {
-    roles,
-    isLoadingRoles,
-    createRole,
-    getRoles,
-    updateRole,
-    deleteRole,
-  } = useRoles();
-  const { permissions, getPermissionsByNames } = usePermissions();
-  const { getUserRoleByRoleId } = useUserRoles();
+  const dispatch = useDispatch<AppDispatch>();
+  const { userPermissions } = useAuthContext();
+  const { roles, isLoadingRoles } = useSelector(
+    (state: RootState) => state.roles
+  );
+  const { permissions } = useSelector((state: RootState) => state.permissions);
+  const { userRoles } = useSelector((state: RootState) => state.userRoles);
   const { showNotification } = useAppNotifications();
   const [filteredRoles, setFilteredRoles] = useState<Role[]>([]);
   const [totalCount, setTotalCount] = useState(0);
@@ -63,6 +66,12 @@ const ManageRoles: React.FC = () => {
   const [rowsPerPage, setRowsPerPage] = useState(5);
   const [isAddFormValid, setIsAddFormValid] = useState(false);
   const [isEditFormValid, setIsEditFormValid] = useState(false);
+
+  useEffect(() => {
+    dispatch(fetchRoles());
+    dispatch(fetchPermissions());
+    dispatch(fetchRolePermissions());
+  }, [dispatch]);
 
   useEffect(() => {
     const normalizeString = (str: string) =>
@@ -112,14 +121,14 @@ const ManageRoles: React.FC = () => {
         name: addFields.name,
         permissionNames: addFields.permissionNames,
       };
-      const permissions = await getPermissionsByNames(
-        addFields.permissionNames
+      dispatch(
+        createRole({
+          newRole,
+          newPermissionIds: permissions
+            .filter((permission) => addFields.permissionNames.includes(permission.name))
+            .map((permission) => permission.id),
+        })
       );
-      await createRole(
-        newRole,
-        permissions.map((permission: Permission) => permission.id)
-      );
-      await getRoles();
       setAddFields({
         name: "",
         permissionNames: [],
@@ -155,18 +164,18 @@ const ManageRoles: React.FC = () => {
 
   const handleUpdate = async (id: number) => {
     try {
-      const permissions = await getPermissionsByNames(
-        editFields.permissionNames
-      );
       const updatedRole: Partial<Role> = {
         ...editFields,
       };
-      await updateRole(
-        id,
-        updatedRole,
-        permissions.map((permission: Permission) => permission.id)
+      dispatch(
+        updateRole({
+          id,
+          updatedRole,
+          newPermissionIds: permissions
+            .filter((permission) => editFields.permissionNames.includes(permission.name))
+            .map((permission) => permission.id),
+        })
       );
-      await getRoles();
       setEditRowId(null);
       setEditFields({ name: "", permissionNames: [] });
       showNotification(
@@ -200,7 +209,9 @@ const ManageRoles: React.FC = () => {
   const handleDelete = async () => {
     try {
       if (roleToDelete !== null) {
-        const userAsociation = await getUserRoleByRoleId(roleToDelete);
+        const userAsociation = userRoles.find(
+          (userRole) => userRole.roleId === roleToDelete
+        );
         if (userAsociation) {
           showNotification(
             "No se puede eliminar este rol porque está vinculado a usuarios activos",
@@ -209,8 +220,7 @@ const ManageRoles: React.FC = () => {
             false
           );
         } else {
-          await deleteRole(roleToDelete);
-          await getRoles();
+          dispatch(deleteRole(roleToDelete));
           showNotification(
             "La eliminación del rol fue exitosa",
             "success",

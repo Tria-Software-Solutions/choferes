@@ -1,13 +1,18 @@
 import React, { useCallback, useEffect, useMemo, useState } from "react";
-import { useAuth } from "../../context/AuthContext";
+import { useAuthContext } from "../../context/AuthContext";
 import { Employee } from "../../models/Employee";
 import { HoursWorked } from "../../models/HoursWorked";
 import { WeeklySummary } from "../../models/WeeklySummary";
 import { BiweeklySummary } from "../../models/BiweeklySummary";
 import { MonthlySummary } from "../../models/MonthlySummary";
-import { useEmployees } from "../../hooks/useEmployee";
-import { useSchedules } from "../../hooks/useSchedule";
-import { useHoursWorked } from "../../hooks/useHoursWorked";
+import { useSelector, useDispatch } from "react-redux";
+import { RootState, AppDispatch } from "../../store/store";
+import { fetchEmployees } from "../../store/slices/employeeSlice";
+import { fetchSchedules } from "../../store/slices/schedulesSlice";
+import {
+  fetchHoursWorked,
+  createOrUpdateHoursWorked,
+} from "../../store/slices/hoursWorkedSlice";
 import { useWeeklySummaries } from "../../hooks/useWeeklySummary";
 import { useBiweeklySummaries } from "../../hooks/useBiweeklySummary";
 import { useMonthlySummaries } from "../../hooks/useMonthlySummary";
@@ -63,12 +68,18 @@ import ManageSearchIcon from "@mui/icons-material/ManageSearch";
 import { faFileExcel, faFilePdf } from "@fortawesome/free-solid-svg-icons";
 
 const RolesPage: React.FC = () => {
-  const { userPermissions } = useAuth();
-  const { employees, isLoadingEmployees } = useEmployees();
+  const dispatch = useDispatch<AppDispatch>();
+  const { userPermissions } = useAuthContext();
+  const { employees, isLoadingEmployees } = useSelector(
+    (state: RootState) => state.employees
+  );
+  const { schedules, isLoadingSchedules } = useSelector(
+    (state: RootState) => state.schedules
+  );
+  const { hoursWorked, isLoadingHoursWorked } = useSelector(
+    (state: RootState) => state.hoursWorked
+  );
   const [filteredEmployees, setFilteredEmployees] = useState<Employee[]>([]);
-  const { schedules, isLoadingSchedules } = useSchedules();
-  const { hoursWorked, isLoadingHours, createOrUpdateHoursWorked } =
-    useHoursWorked();
   const {
     weeklySummaries,
     isLoadingWeeklySummaries,
@@ -98,10 +109,16 @@ const RolesPage: React.FC = () => {
   const theme = useTheme();
   const isSmallScreen = useMediaQuery(theme.breakpoints.down("sm"));
 
+  useEffect(() => {
+    dispatch(fetchEmployees());
+    dispatch(fetchSchedules());
+    dispatch(fetchHoursWorked());
+  }, [dispatch]);
+
   const isLoading =
     isLoadingEmployees ||
     isLoadingSchedules ||
-    isLoadingHours ||
+    isLoadingHoursWorked ||
     isLoadingWeeklySummaries ||
     isLoadingBiweeklySummaries ||
     isLoadingMonthlySummaries;
@@ -199,13 +216,11 @@ const RolesPage: React.FC = () => {
           scheduleId,
         };
       }
-      await createOrUpdateHoursWorked(createOrUpdatedHoursWorked);
 
       const existingWeeklySummaryRecord = weeklySummaries.find(
         (weeklySummary) =>
           weeklySummary.employeeId === employeeId &&
           weeklySummary.weekNumber === weekNumber &&
-          weeklySummary.month === month &&
           weeklySummary.year === year
       );
 
@@ -231,13 +246,11 @@ const RolesPage: React.FC = () => {
           totalHours,
         };
       }
-      await createOrUpdateWeeklySummary(createOrUpdatedWeeklySummary);
 
       const existingBiweeklySummaryRecord = biweeklySummaries.find(
         (biweeklySummary) =>
           biweeklySummary.employeeId === employeeId &&
           biweeklySummary.biweekNumber === biweekNumber &&
-          biweeklySummary.month === month &&
           biweeklySummary.year === year
       );
 
@@ -263,7 +276,6 @@ const RolesPage: React.FC = () => {
           totalHours,
         };
       }
-      await createOrUpdateBiweeklySummary(createOrUpdatedBiweeklySummary);
 
       const existingMonthlySummaryRecord = monthlySummaries.find(
         (monthlySummary) =>
@@ -293,15 +305,20 @@ const RolesPage: React.FC = () => {
           totalHours,
         };
       }
-      await createOrUpdateMonthlySummary(createOrUpdatedMonthlySummary);
+      await Promise.all([
+        dispatch(createOrUpdateHoursWorked(createOrUpdatedHoursWorked)),
+        createOrUpdateWeeklySummary(createOrUpdatedWeeklySummary),
+        createOrUpdateBiweeklySummary(createOrUpdatedBiweeklySummary),
+        createOrUpdateMonthlySummary(createOrUpdatedMonthlySummary),
+      ]);
     },
     [
+      dispatch,
       hoursWorked,
       schedules,
       weeklySummaries,
       biweeklySummaries,
       monthlySummaries,
-      createOrUpdateHoursWorked,
       createOrUpdateWeeklySummary,
       createOrUpdateBiweeklySummary,
       createOrUpdateMonthlySummary,
@@ -436,7 +453,7 @@ const RolesPage: React.FC = () => {
     currentMonth,
     currentYear,
     getCurrentWeekDates(weekOffset),
-    true, //show or hide hours
+    false //show or hide hours
   );
 
   const exportOptions = useMemo(() => {
@@ -466,7 +483,9 @@ const RolesPage: React.FC = () => {
         sx={{ mb: 3 }}
       >
         <Box display="flex" alignItems="center">
-          <CalendarMonthRoundedIcon fontSize={isSmallScreen ? "small" : "large"} />
+          <CalendarMonthRoundedIcon
+            fontSize={isSmallScreen ? "small" : "large"}
+          />
           <Box sx={{ ml: 1 }}>
             <Typography
               variant={isSmallScreen ? "h5" : "h2"}

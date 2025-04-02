@@ -29,9 +29,11 @@ export const updateBiweeklySummary = async (
   id: number,
   updatedBiweeklySummary: Partial<BiweeklySummary>
 ) => {
-  await api.put(`/biweekly-summary/${id}`, updatedBiweeklySummary);
+  const response = await api.put(`/biweekly-summary/${id}`, updatedBiweeklySummary);
+  return response.data;
 };
 
 export const deleteBiweeklySummary = async (id: number) => {
-  await api.delete(`/biweekly-summary/${id}`);
+  const response = await api.delete(`/biweekly-summary/${id}`);
+  return { id, message: response.data };
 };

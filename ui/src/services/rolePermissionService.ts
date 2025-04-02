@@ -17,9 +17,11 @@ export const updateRolePermission = async (
   roleId: number,
   permissionIds: number[]
 ) => {
-  await api.put(`/role-permission/${roleId}`, { permissionIds });
+  const response = await api.put(`/role-permission/${roleId}`, { permissionIds });
+  return response.data;
 };
 
 export const deleteRolePermission = async (id: number) => {
-  await api.delete(`/role-permission/${id}`);
+  const response = await api.delete(`/role-permission/${id}`);
+  return { id, message: response.data };
 };

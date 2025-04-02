@@ -1,9 +1,9 @@
-import { useUsers } from "../hooks/useUser";
+import { useAuth } from "../hooks/useAuth";
 import { Box, Typography, Button } from "@mui/material";
 import WarningIcon from '@mui/icons-material/Warning';
 
 const SessionExpired: React.FC = () => {
-  const { logoutUser } = useUsers();
+  const { logoutUser } = useAuth();
   return (
     <Box
       display="flex"
