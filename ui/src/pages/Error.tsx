@@ -1,5 +1,6 @@
 import { useNavigate } from "react-router-dom";
-import { Box, Typography, Button } from "@mui/material";
+import { Box, Typography, Button, Tooltip } from "@mui/material";
+import KeyboardReturnIcon from "@mui/icons-material/KeyboardReturn";
 
 const ErrorPage: React.FC = () => {
   const navigate = useNavigate();
@@ -22,21 +23,23 @@ const ErrorPage: React.FC = () => {
       textAlign="center"
       px={3}
     >
-      <Typography variant="h1" color="textDisabled" fontWeight="bold">
+      <Typography variant="h2" color="textDisabled" fontWeight="bold">
         Oops, algo salió mal
       </Typography>
       <Typography variant="h5" sx={{ mt: 2, mb: 3 }}>
         Hubo un problema al cargar la página. Por favor, intenta nuevamente más
         tarde.
       </Typography>
-      <Button
-        variant="contained"
-        color="primary"
-        sx={{ height: "56px" }}
-        onClick={handleGoBack}
-      >
-        Regresar
-      </Button>
+      <Tooltip title={"Volver"} arrow>
+        <Button
+          variant="contained"
+          color="primary"
+          sx={{ height: "56px" }}
+          onClick={handleGoBack}
+        >
+          <KeyboardReturnIcon />
+        </Button>
+      </Tooltip>
     </Box>
   );
 };

@@ -15,7 +15,7 @@ const SessionExpired: React.FC = () => {
       px={3}
     >
       <WarningIcon color="disabled" sx={{ mb: 3, fontSize: "50px" }}/>
-      <Typography variant="h1" color="textDisabled" fontWeight="bold">
+      <Typography variant="h2" color="textDisabled" fontWeight="bold">
         Sesión Expirada
       </Typography>
       <Typography variant="h5" sx={{ mt: 2, mb: 3 }}>
