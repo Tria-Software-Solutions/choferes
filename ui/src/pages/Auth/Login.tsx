@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
-import { useUsers } from "../../hooks/useUser";
+import { useAuth } from "../../hooks/useAuth";
 import {
   TextField,
   Button,
@@ -22,7 +22,7 @@ import logo from "../../assets/images/logo.png";
 import { AxiosError } from "axios";
 
 const Login: React.FC = () => {
-  const { authenticateUser } = useUsers();
+  const { authenticateUser } = useAuth();
   const [fields, setFields] = useState({
     identifier: "",
     password: "",

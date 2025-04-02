@@ -1,21 +1,23 @@
 import React, { useState, useEffect } from "react";
 import { Permission } from "../../models/Permission";
-import { usePermissions } from "../../hooks/usePermission";
-import { getPermissions } from "../../services/permissionService";
+import { useSelector, useDispatch } from "react-redux";
+import { RootState, AppDispatch } from "../../store/store";
+import { fetchPermissions } from "../../store/slices/permissionsSlice";
 import {
   Backdrop,
   Box,
   CircularProgress,
-  Stack,
+  Grid,
   Typography,
 } from "@mui/material";
 import EditableTable from "../../components/Table/EditableTable/EditableTable";
 import SearchBar from "../../components/SearchBar/SearchBar";
 
 const ManagePermissions: React.FC = () => {
-  const { isLoadingPermissions } =
-    usePermissions();
-  const [permissions, setPermissions] = useState<Permission[]>([]);
+  const dispatch = useDispatch<AppDispatch>();
+  const { permissions, isLoadingPermissions } = useSelector(
+    (state: RootState) => state.permissions
+  );
   const [filteredPermissions, setFilteredPermissions] = useState<Permission[]>(
     []
   );
@@ -28,13 +30,8 @@ const ManagePermissions: React.FC = () => {
   const [rowsPerPage, setRowsPerPage] = useState(5);
 
   useEffect(() => {
-    const getAllPermissions = async () => {
-      const fetchedPermissions = await getPermissions();
-      setPermissions(fetchedPermissions);
-    };
-
-    getAllPermissions();
-  }, []);
+    dispatch(fetchPermissions());
+  }, [dispatch]);
 
   useEffect(() => {
     const normalizeString = (str: string) =>
@@ -75,9 +72,14 @@ const ManagePermissions: React.FC = () => {
         </Box>
       ) : (
         <>
-          {filteredPermissions.length > 0 ? (
-            <Stack spacing={2}>
-              <Box>
+          <Grid
+            container
+            spacing={2}
+            justifyContent="space-between"
+            alignItems="center"
+          >
+            <Grid item xs={12}>
+              {filteredPermissions && (
                 <SearchBar
                   placeholder="Buscar permiso"
                   value={filter}
@@ -85,24 +87,27 @@ const ManagePermissions: React.FC = () => {
                   sx={{ maxWidth: "100%" }}
                   fullWidth
                 />
-              </Box>
-              <EditableTable<Permission>
-                data={filteredPermissions}
-                columns={["name"]}
-                editRowId={null}
-                editFields={editFields}
-                setEditField={(field, value) =>
-                  setEditFields({ ...editFields, [field]: value })
-                }
-                getRowId={(row) => row.id}
-                totalCount={totalCount}
-                page={page}
-                rowsPerPage={rowsPerPage}
-                setPage={setPage}
-                setRowsPerPage={setRowsPerPage}
-                noActions
-              />
-            </Stack>
+              )}
+            </Grid>
+          </Grid>
+          <br/>
+          {filteredPermissions.length > 0 ? (
+            <EditableTable<Permission>
+              data={filteredPermissions}
+              columns={["name"]}
+              editRowId={null}
+              editFields={editFields}
+              setEditField={(field, value) =>
+                setEditFields({ ...editFields, [field]: value })
+              }
+              getRowId={(row) => row.id}
+              totalCount={totalCount}
+              page={page}
+              rowsPerPage={rowsPerPage}
+              setPage={setPage}
+              setRowsPerPage={setRowsPerPage}
+              noActions
+            />
           ) : (
             <Box
               sx={{

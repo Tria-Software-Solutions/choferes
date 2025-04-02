@@ -41,9 +41,11 @@ export const updateWeeklySummary = async (
   id: number,
   updatedWeeklySummary: Partial<WeeklySummary>
 ) => {
-  await api.put(`/weekly-summary/${id}`, updatedWeeklySummary);
+  const response = await api.put(`/weekly-summary/${id}`, updatedWeeklySummary);
+  return response.data;
 };
 
 export const deleteWeeklySummary = async (id: number) => {
-  await api.delete(`/weekly-summary/${id}`);
+  const response = await api.delete(`/weekly-summary/${id}`);
+  return { id, message: response.data };
 };

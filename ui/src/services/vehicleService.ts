@@ -29,9 +29,11 @@ export const createVehicle = async (newVehicle: Omit<Vehicle, "id">) => {
 };
 
 export const updateVehicle = async (id: number, vehicle: Partial<Vehicle>) => {
-  await api.put(`/vehicles/${id}`, vehicle);
+  const response = await api.put(`/vehicles/${id}`, vehicle);
+  return response.data;
 };
 
 export const deleteVehicle = async (id: number) => {
-  await api.delete(`/vehicles/${id}`);
+  const response = await api.delete(`/vehicles/${id}`);
+  return { id, message: response.data };
 };
