@@ -8,9 +8,11 @@ import {
   Box,
   CircularProgress,
   Grid,
+  List,
+  ListItem,
+  ListItemText,
   Typography,
 } from "@mui/material";
-import EditableTable from "../../components/Table/EditableTable/EditableTable";
 import SearchBar from "../../components/SearchBar/SearchBar";
 
 const ManagePermissions: React.FC = () => {
@@ -21,13 +23,10 @@ const ManagePermissions: React.FC = () => {
   const [filteredPermissions, setFilteredPermissions] = useState<Permission[]>(
     []
   );
-  const [totalCount, setTotalCount] = useState(0);
-  const [editFields, setEditFields] = useState({
-    name: "",
-  });
   const [filter, setFilter] = useState("");
-  const [page, setPage] = useState(0);
-  const [rowsPerPage, setRowsPerPage] = useState(5);
+  const half = Math.ceil(filteredPermissions.length / 2);
+  const leftColumn = filteredPermissions.slice(0, half);
+  const rightColumn = filteredPermissions.slice(half);
 
   useEffect(() => {
     dispatch(fetchPermissions());
@@ -44,7 +43,6 @@ const ManagePermissions: React.FC = () => {
           .includes(normalizeString(filter).toLowerCase())
       )
     );
-    setTotalCount(filteredPermissions.length);
   }, [filter, permissions, filteredPermissions.length]);
 
   const handleFilterChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -90,24 +88,21 @@ const ManagePermissions: React.FC = () => {
               )}
             </Grid>
           </Grid>
-          <br/>
+          <br />
           {filteredPermissions.length > 0 ? (
-            <EditableTable<Permission>
-              data={filteredPermissions}
-              columns={["name"]}
-              editRowId={null}
-              editFields={editFields}
-              setEditField={(field, value) =>
-                setEditFields({ ...editFields, [field]: value })
-              }
-              getRowId={(row) => row.id}
-              totalCount={totalCount}
-              page={page}
-              rowsPerPage={rowsPerPage}
-              setPage={setPage}
-              setRowsPerPage={setRowsPerPage}
-              noActions
-            />
+            <Grid container spacing={2}>
+              {[leftColumn, rightColumn].map((column, index) => (
+                <Grid item xs={6} key={index}>
+                  <List>
+                    {column.map((permission) => (
+                      <ListItem key={permission.id}>
+                        <ListItemText secondary={permission.name} />
+                      </ListItem>
+                    ))}
+                  </List>
+                </Grid>
+              ))}
+            </Grid>
           ) : (
             <Box
               sx={{

@@ -265,10 +265,10 @@ const SchedulesPage: React.FC = () => {
     return createExportOptions(
       <FontAwesomeIcon icon={faFileExcel} size="lg" />,
       <FontAwesomeIcon icon={faFilePdf} size="lg" />,
+      excelOption,
+      pdfOption,
       filteredSchedules,
       `horarios-${exportFileFormattedDate(new Date())}`,
-      excelOption,
-      pdfOption
     );
   }, [userPermissions, filteredSchedules]);
 
