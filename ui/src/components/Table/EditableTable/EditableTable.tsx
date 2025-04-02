@@ -30,6 +30,10 @@ import {
   ListItemText,
   useMediaQuery,
 } from "@mui/material";
+import { LocalizationProvider } from "@mui/x-date-pickers";
+import { DatePicker } from "@mui/x-date-pickers/DatePicker";
+import { AdapterDateFns } from "@mui/x-date-pickers/AdapterDateFns";
+import { es } from "date-fns/locale";
 import {
   translateColumnHeaderToSpanish,
   translateDayOptionsToSpanish,
@@ -58,10 +62,10 @@ type EditableTableProps<T> = {
   columns: (keyof T)[];
   groupByDate?: Date | null;
   editRowId: number | null;
-  editFields: Record<string, string | boolean | number | string[]>;
+  editFields: Record<string, string | boolean | number | string[] | Date>;
   setEditField?: (
     field: string,
-    value: string | boolean | number | string[]
+    value: string | boolean | number | string[] | Date
   ) => void;
   handleEdit?: (row: T) => void;
   handleCancel?: () => void;
@@ -171,9 +175,56 @@ const EditableTable = <T extends object>({
           label={translateColumnHeaderToSpanish(column)}
           variant="outlined"
           fullWidth
-          value={editFields[String(column)] || ""}
+          value={
+            editFields[String(column)] instanceof Date
+              ? (editFields[String(column)] as Date)
+              : null
+          }
           onChange={handleChange}
         />
+      );
+    }
+
+    if (config.type === "date") {
+      const handleDateChange = (date: Date | null) => {
+        if (date) {
+          setEditField && setEditField(String(column), date);
+        }
+      };
+
+      return (
+        <LocalizationProvider dateAdapter={AdapterDateFns} adapterLocale={es}>
+          <DatePicker
+            label="Seleccionar fecha"
+            value={
+              editFields[String(column)] instanceof Date
+                ? (editFields[String(column)] as Date)
+                : editFields[String(column)]
+                  ? new Date(editFields[String(column)] as string)
+                  : null
+            }
+            sx={{
+              width: { xs: "100%", sm: "100%", md: "auto" },
+              mt: { xs: 2, sm: 2, md: 0 },
+            }}
+            maxDate={new Date()}
+            views={["year", "month", "day"]}
+            slots={{
+              toolbar: () => null,
+            }}
+            slotProps={{
+              textField: {
+                inputProps: { readOnly: true },
+                onMouseDown: (e) => e.preventDefault(),
+              },
+              actionBar: {
+                actions: [],
+              },
+            }}
+            closeOnSelect
+            onChange={(date) => handleDateChange(date)}
+          />
+        </LocalizationProvider>
       );
     }
 
@@ -358,15 +409,18 @@ const EditableTable = <T extends object>({
       type:
         | "text"
         | "masked"
+        | "date"
         | "select"
         | "select multiple"
         | "autocomplete"
         | "autocomplete multiple";
       options?: { value: string; label: string }[];
+      hidden?: boolean;
     }
   > = {
     licensePlate: { type: "masked" },
     parkingLot: { type: "masked" },
+    createdAt: { type: "date", hidden: false },
     roleName: {
       type: "select",
       options: roles.map((role) => ({ value: role.name, label: role.name })),
@@ -414,16 +468,18 @@ const EditableTable = <T extends object>({
               </TableRow>
             )}
             <TableRow>
-              {columns.map((column) => (
-                <TableCell key={String(column)} className="tableCell">
-                  <TableSortLabel
-                    direction={orderBy === column ? order : "asc"}
-                    onClick={() => handleSortRequest(column)}
-                  >
-                    {translateColumnHeaderToSpanish(column)}
-                  </TableSortLabel>
-                </TableCell>
-              ))}
+              {columns
+                .filter((column) => !columnConfig[String(column)]?.hidden)
+                .map((column) => (
+                  <TableCell key={String(column)} className="tableCell">
+                    <TableSortLabel
+                      direction={orderBy === column ? order : "asc"}
+                      onClick={() => handleSortRequest(column)}
+                    >
+                      {translateColumnHeaderToSpanish(column)}
+                    </TableSortLabel>
+                  </TableCell>
+                ))}
               {!noActions || hasEditPermissions || hasDeletePermissions ? (
                 <TableCell style={{ width: "100px" }} />
               ) : null}
@@ -436,64 +492,76 @@ const EditableTable = <T extends object>({
               const isUser = "username" in row;
               return (
                 <TableRow key={getRowId(row)}>
-                  {columns.map((column) => {
-                    return (
-                      <TableCell key={String(column)}>
-                        {editRowId === getRowId(row) ? (
-                          <>
-                            {renderEditField(
-                              column,
-                              (editFields[String(column)] || "").toString()
-                            )}
-                          </>
-                        ) : Array.isArray(row[column]) ? (
-                          <Stack
-                            direction="row"
-                            spacing={1}
-                            flexWrap="wrap"
-                            sx={{ rowGap: 2 }}
-                          >
-                            {(row[column] as string[]).map(
-                              (item, index, array) =>
-                                column === "permissionNames" ? (
-                                  <Chip
-                                    key={index}
-                                    label={translateDayOptionsToSpanish(item)}
-                                    variant="outlined"
-                                  />
-                                ) : (
-                                  <Typography key={index} component="span">
-                                    {translateDayOptionsToSpanish(item)}
-                                    {index < array.length - 1 ? ", " : ""}
-                                  </Typography>
-                                )
-                            )}
-                          </Stack>
-                        ) : column === "email" ? (
-                          <Link
-                            href={`mailto:${row[column]}`}
-                            sx={{
-                              textDecoration: "none",
-                              color: theme.palette.primary.main,
-                              "&:hover": {
-                                textDecoration: "underline",
-                              },
-                            }}
-                          >
-                            {String(row[column])}
-                          </Link>
-                        ) : column === "day" ? (
-                          <>
-                            {translateDayOptionsToSpanish(
-                              row[column] as string
-                            )}
-                          </>
-                        ) : (
-                          <>{renderColumnValue(column, row[column])}</>
-                        )}
-                      </TableCell>
-                    );
-                  })}
+                  {columns
+                    .filter((column) => !columnConfig[String(column)]?.hidden)
+                    .map((column) => {
+                      return (
+                        <TableCell key={String(column)}>
+                          {editRowId === getRowId(row) ? (
+                            <>
+                              {renderEditField(
+                                column,
+                                (editFields[String(column)] || "").toString()
+                              )}
+                            </>
+                          ) : Array.isArray(row[column]) ? (
+                            <Stack
+                              direction="row"
+                              spacing={1}
+                              flexWrap="wrap"
+                              sx={{ rowGap: 2 }}
+                            >
+                              {(row[column] as string[]).map(
+                                (item, index, array) =>
+                                  column === "permissionNames" ? (
+                                    <Chip
+                                      key={index}
+                                      label={translateDayOptionsToSpanish(item)}
+                                      variant="outlined"
+                                    />
+                                  ) : (
+                                    <Typography key={index} component="span">
+                                      {translateDayOptionsToSpanish(item)}
+                                      {index < array.length - 1 ? ", " : ""}
+                                    </Typography>
+                                  )
+                              )}
+                            </Stack>
+                          ) : column === "email" ? (
+                            <Link
+                              href={`mailto:${row[column]}`}
+                              sx={{
+                                textDecoration: "none",
+                                color: theme.palette.primary.main,
+                                "&:hover": {
+                                  textDecoration: "underline",
+                                },
+                              }}
+                            >
+                              {String(row[column])}
+                            </Link>
+                          ) : column === "day" ? (
+                            <>
+                              {translateDayOptionsToSpanish(
+                                row[column] as string
+                              )}
+                            </>
+                          ) : column === "createdAt" && row[column] ? (
+                            <>
+                              {/* {format(
+                                new Date(row[column] as unknown as Date),
+                                "dd/MM/yyyy",
+                                {
+                                  locale: es,
+                                }
+                              )} */}
+                            </>
+                          ) : (
+                            <>{renderColumnValue(column, row[column])}</>
+                          )}
+                        </TableCell>
+                      );
+                    })}
                   {!noActions && (
                     <TableCell>
                       <Box

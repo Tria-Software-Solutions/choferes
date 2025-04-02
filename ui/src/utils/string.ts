@@ -24,10 +24,10 @@ export const translateColumnHeaderToSpanish = (
     color: "Color",
     parkingLot: "Espacio",
     notes: "Observaciones",
-    createdAt: "Agregado",
     updatedAt: "Actualizado",
     roleName: "Rol",
     permissionNames: "Permisos",
+    createdAt: "",
   };
 
   if (typeof column === "string" && column in translations) {
