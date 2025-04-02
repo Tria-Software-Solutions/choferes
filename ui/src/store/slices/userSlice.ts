@@ -134,7 +134,13 @@ export const updateUser = createAsyncThunk(
         await UserRoleService.updateUserRole(id, newRoleId);
       }
 
-      return { id, updatedUser, newRoleId };
+      const refreshedUser = await UserService.getUserById(id);
+
+      return {
+        id,
+        refreshedUser,
+        newRoleId,
+      };
     } catch (error: any) {
       return rejectWithValue(error.response?.data || "Failed to update user");
     }
@@ -262,18 +268,12 @@ const userSlice = createSlice({
           state,
           action: PayloadAction<{
             id: number;
-            updatedUser: Partial<Omit<User, "id" | "temporalPassword">>;
+            refreshedUser: User;
             newRoleId?: number;
           }>
         ) => {
           state.users = state.users.map((user) =>
-            user.id === action.payload.id
-              ? {
-                  ...user,
-                  ...action.payload.updatedUser,
-                  roleId: action.payload.newRoleId ?? user.roleId,
-                }
-              : user
+            user.id === action.payload.id ? action.payload.refreshedUser : user
           );
         }
       )
