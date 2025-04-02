@@ -104,9 +104,11 @@ export const updateRole = createAsyncThunk(
         await RolePermissionService.updateRolePermission(id, newPermissionIds);
       }
 
+      const refreshedRole = await RoleService.getRoleById(id);
+
       return {
         id,
-        updatedRole,
+        refreshedRole,
         newPermissionIds,
       };
     } catch (error: any) {
@@ -166,11 +168,21 @@ const rolesSlice = createSlice({
         state.roles.push(action.payload);
         state.totalCountRoles += 1;
       })
-      .addCase(updateRole.fulfilled, (state, action: PayloadAction<{ id: number; updatedRole: Partial<Role>; newPermissionIds?: number[] }>) => {
-        state.roles = state.roles.map((role) =>
-          role.id === action.payload.id ? { ...role, ...action.payload.updatedRole } : role
-        );
-      })
+      .addCase(
+        updateRole.fulfilled,
+        (
+          state,
+          action: PayloadAction<{
+            id: number;
+            refreshedRole: Role;
+            newPermissionIds?: number[];
+          }>
+        ) => {
+          state.roles = state.roles.map((role) =>
+            role.id === action.payload.id ? action.payload.refreshedRole : role
+          );
+        }
+      )
       .addCase(deleteRole.fulfilled, (state, action: PayloadAction<number>) => {
         state.roles = state.roles.filter((role) => role.id !== action.payload);
         state.totalCountRoles -= 1;
