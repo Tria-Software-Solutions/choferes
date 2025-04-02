@@ -1,5 +1,6 @@
 import { useNavigate } from "react-router-dom";
-import { Box, Typography, Button } from "@mui/material";
+import { Box, Typography, Button, Tooltip } from "@mui/material";
+import KeyboardReturnIcon from "@mui/icons-material/KeyboardReturn";
 
 const NotFound: React.FC = () => {
   const navigate = useNavigate();
@@ -28,14 +29,16 @@ const NotFound: React.FC = () => {
       <Typography variant="h5" sx={{ mt: 2, mb: 3 }}>
         Oops! La página que está buscando no existe.
       </Typography>
-      <Button
-        variant="contained"
-        color="primary"
-        sx={{ height: "56px" }}
-        onClick={handleGoBack}
-      >
-        Regresar
-      </Button>
+      <Tooltip title={"Volver"} arrow>
+        <Button
+          variant="contained"
+          color="primary"
+          sx={{ height: "56px" }}
+          onClick={handleGoBack}
+        >
+          <KeyboardReturnIcon />
+        </Button>
+      </Tooltip>
     </Box>
   );
 };

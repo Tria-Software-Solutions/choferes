@@ -41,6 +41,10 @@ import {
   CircularProgress,
   SelectChangeEvent,
   Backdrop,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
 } from "@mui/material";
 import {
   createExportOptions,
@@ -105,6 +109,8 @@ const RolesPage: React.FC = () => {
   const [currentMonth, setCurrentMonth] = useState<number>(0);
   const [currentYear, setCurrentYear] = useState<number>(0);
   const [filter, setFilter] = useState("");
+  const [openExportDialog, setOpenExportDialog] = useState(false);
+  const [exportType, setExportType] = useState<"excel" | "pdf" | null>(null);
 
   const theme = useTheme();
   const isSmallScreen = useMediaQuery(theme.breakpoints.down("sm"));
@@ -441,38 +447,56 @@ const RolesPage: React.FC = () => {
   });
   const nextWeekEnd = endOfWeek(nextWeekStart, { weekStartsOn: 1 });
 
-  const { dataForExport, headers, fileName } = handleExportTableData(
-    filteredEmployees,
-    hoursWorked,
-    schedules,
-    weeklySummaries,
-    biweeklySummaries,
-    monthlySummaries,
-    currentWeekNumber,
-    currentBiweekNumber,
-    currentMonth,
-    currentYear,
-    getCurrentWeekDates(weekOffset),
-    false //show or hide hours
-  );
+  const handleOpenExportDialog = (type: "excel" | "pdf") => {
+    setExportType(type);
+    setOpenExportDialog(true);
+  };
+
+  const handleCloseExportDialog = () => {
+    setOpenExportDialog(false);
+  };
+
+  const handleExportHours = (shouldExportHours: boolean) => {
+    const { dataForExport, fileName } = handleExportTableData(
+      filteredEmployees,
+      hoursWorked,
+      schedules,
+      weeklySummaries,
+      biweeklySummaries,
+      monthlySummaries,
+      currentWeekNumber,
+      currentBiweekNumber,
+      currentMonth,
+      currentYear,
+      getCurrentWeekDates(weekOffset),
+      shouldExportHours
+    );
+    setTimeout(() => {
+      if (exportType === "excel") {
+        exportToExcel(dataForExport, fileName);
+      } else if (exportType === "pdf") {
+        exportToPDF(dataForExport, fileName);
+      }
+      handleCloseExportDialog();
+    }, 0);
+  };
 
   const exportOptions = useMemo(() => {
     const excelOption = userPermissions.includes(PERMISSIONS.EXPORT_EXCEL_ROLES)
-      ? exportToExcel
+      ? () => handleOpenExportDialog("excel")
       : undefined;
+
     const pdfOption = userPermissions.includes(PERMISSIONS.EXPORT_PDF_ROLES)
-      ? exportToPDF
+      ? () => handleOpenExportDialog("pdf")
       : undefined;
+
     return createExportOptions(
       <FontAwesomeIcon icon={faFileExcel} size="lg" />,
       <FontAwesomeIcon icon={faFilePdf} size="lg" />,
-      dataForExport,
-      fileName,
       excelOption,
       pdfOption,
-      headers
     );
-  }, [userPermissions, dataForExport, fileName, headers]);
+  }, [userPermissions]);
 
   return (
     <Box>
@@ -684,6 +708,31 @@ const RolesPage: React.FC = () => {
           )}
         </>
       )}
+      <Dialog open={openExportDialog} onClose={handleCloseExportDialog}>
+        <DialogTitle>Exportar Horas</DialogTitle>
+        <DialogContent>
+          <Typography>
+            ¿Quieres que se incluyan las horas trabajadas al exportar el{" "}
+            {exportType}?
+          </Typography>
+        </DialogContent>
+        <DialogActions>
+          <Button
+            color="primary"
+            sx={{ flex: 1 }}
+            onClick={() => handleExportHours(true)}
+          >
+            Sí
+          </Button>
+          <Button
+            color="secondary"
+            sx={{ flex: 1 }}
+            onClick={() => handleExportHours(false)}
+          >
+            No
+          </Button>
+        </DialogActions>
+      </Dialog>
     </Box>
   );
 };

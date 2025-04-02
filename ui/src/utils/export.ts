@@ -28,11 +28,7 @@ import { WeeklySummary } from "../models/WeeklySummary";
 import { BiweeklySummary } from "../models/BiweeklySummary";
 import { MonthlySummary } from "../models/MonthlySummary";
 
-export const exportToExcel = (
-  data: any[],
-  fileName: string,
-  customHeaders?: string[]
-) => {
+export const exportToExcel = (data: any[], fileName: string) => {
   let isVehicleData = data.length > 0 && "licensePlate" in data[0];
 
   if (!isVehicleData) {
@@ -58,6 +54,16 @@ export const exportToExcel = (
     Object.keys(row).forEach((key) => {
       if (key !== "Fecha") {
         let value = row[key];
+
+        if (Array.isArray(value)) {
+          value = value
+            .map((item) => translateDayOptionsToSpanish(item))
+            .join(", ");
+        }
+
+        if (typeof value === "boolean") {
+          value = value ? "Sí" : "No";
+        }
 
         if (
           (key === "ticket" || key === "licensePlate") &&
@@ -149,6 +155,16 @@ export const exportToPDF = (
 
   const tableData = data.map((row) => {
     return Object.entries(row).map(([key, value]) => {
+      if (Array.isArray(value)) {
+        value = value
+          .map((item) => translateDayOptionsToSpanish(item))
+          .join(", ");
+      }
+
+      if (typeof value === "boolean") {
+        value = value ? "Sí" : "No";
+      }
+
       if (
         (key === "ticket" || key === "licensePlate") &&
         typeof value === "string"
@@ -451,10 +467,10 @@ export const handleExportTableData = (
 export const createExportOptions = (
   excelIcon: JSX.Element,
   pdfIcon: JSX.Element,
-  dataForExport: any,
-  fileName: string,
   exportToExcel?: (dataForExport: any, fileName: string, headers?: any) => any,
   exportToPDF?: (dataForExport: any, fileName: string, headers?: any) => any,
+  dataForExport?: any,
+  fileName?: string,
   headers?: any
 ) => {
   const options = [];
@@ -462,14 +478,20 @@ export const createExportOptions = (
     options.push({
       label: "Exportar a Excel",
       icon: excelIcon,
-      onClick: () => exportToExcel(dataForExport, fileName, headers),
+      onClick: () =>
+        exportToExcel(
+          dataForExport,
+          fileName || "excel-exported-file",
+          headers
+        ),
     });
   }
   if (exportToPDF) {
     options.push({
       label: "Exportar a PDF",
       icon: pdfIcon,
-      onClick: () => exportToPDF(dataForExport, fileName, headers),
+      onClick: () =>
+        exportToPDF(dataForExport, fileName || "pdf-exported-file", headers),
     });
   }
 
