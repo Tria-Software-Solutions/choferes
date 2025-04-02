@@ -200,12 +200,11 @@ const EditableTable = <T extends object>({
               editFields[String(column)] instanceof Date
                 ? (editFields[String(column)] as Date)
                 : editFields[String(column)]
-                  ? new Date(editFields[String(column)] as string)
-                  : null
+                ? new Date(editFields[String(column)] as string)
+                : null
             }
             sx={{
-              width: { xs: "100%", sm: "100%", md: "auto" },
-              mt: { xs: 2, sm: 2, md: 0 },
+              width: { xs: "150px", sm: "150px", md: "150px" },
             }}
             maxDate={new Date()}
             views={["year", "month", "day"]}
