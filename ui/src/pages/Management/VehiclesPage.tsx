@@ -91,6 +91,7 @@ const VehiclesPage: React.FC = () => {
     color: "",
     parkingLot: "",
     notes: "",
+    createdAt: new Date(),
   });
   const [openDeleteDialog, setOpenDeleteDialog] = useState(false);
   const [openTicketTooltip, setOpenTicketTooltip] = useState(false);
@@ -256,6 +257,7 @@ const VehiclesPage: React.FC = () => {
       color: vehicle.color,
       parkingLot: vehicle.parkingLot,
       notes: vehicle.notes,
+      createdAt: vehicle.createdAt
     });
   };
 
@@ -269,7 +271,8 @@ const VehiclesPage: React.FC = () => {
         const updatedVehicle = {
           ...editFields,
         };
-        dispatch(updateVehicle({ id, updatedVehicle }));
+        await dispatch(updateVehicle({ id, updatedVehicle }));
+        dispatch(fetchVehiclesByDate(format(selectedDate, "yyyy-MM-dd")));
         setEditRowId(null);
         setEditFields({
           ticket: "",
@@ -278,6 +281,7 @@ const VehiclesPage: React.FC = () => {
           color: "",
           parkingLot: "",
           notes: "",
+          createdAt: new Date(),
         });
         showNotification(
           "La actualización del vehículo fue exitosa",
@@ -296,7 +300,7 @@ const VehiclesPage: React.FC = () => {
         );
       }
     },
-    [dispatch, editFields, showNotification]
+    [dispatch, editFields, selectedDate, showNotification]
   );
 
   const handleOpenDeleteDialog = (id: number) => {
@@ -483,7 +487,7 @@ const VehiclesPage: React.FC = () => {
       filteredWeekVehicles,
       `reporte-de-vehiculos-${exportFileFormattedDate(
         selectedDate || new Date()
-      )}`,
+      )}`
     );
   }, [userPermissions, filteredWeekVehicles, selectedDate]);
 
@@ -863,6 +867,7 @@ const VehiclesPage: React.FC = () => {
                 "color",
                 "parkingLot",
                 "notes",
+                "createdAt",
               ]}
               groupByDate={selectedDate}
               editRowId={editRowId}

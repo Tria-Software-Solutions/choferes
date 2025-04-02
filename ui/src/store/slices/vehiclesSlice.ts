@@ -136,23 +136,14 @@ const vehicleSlice = createSlice({
       )
       .addCase(
         updateVehicle.fulfilled,
-        (
-          state,
-          action: PayloadAction<{
-            id: number;
-            updatedVehicle: Partial<Vehicle>;
-          }>
-        ) => {
+        (state, action: PayloadAction<{ id: number; updatedVehicle: Partial<Vehicle> }>) => {
           const { id, updatedVehicle } = action.payload;
-          const vehicleToUpdate = state.vehicles.find(
-            (vehicle) => vehicle.id === id
+          state.vehicles = state.vehicles.map((vehicle) =>
+            vehicle.id === id ? { ...vehicle, ...updatedVehicle } : vehicle
           );
-          if (vehicleToUpdate) Object.assign(vehicleToUpdate, updatedVehicle);
-          const allVehicleToUpdate = state.allVehicles.find(
-            (vehicle) => vehicle.id === id
+          state.allVehicles = state.allVehicles.map((vehicle) =>
+            vehicle.id === id ? { ...vehicle, ...updatedVehicle } : vehicle
           );
-          if (allVehicleToUpdate)
-            Object.assign(allVehicleToUpdate, updatedVehicle);
         }
       )
       .addCase(
