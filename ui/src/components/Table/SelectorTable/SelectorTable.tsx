@@ -245,7 +245,6 @@ const SelectorTable: React.FC<SelectorTableProps> = React.memo(
         (summary) =>
           summary.employeeId === employee.id &&
           summary.weekNumber === weekNumber &&
-          summary.month === month &&
           summary.year === year
       );
       return found;
@@ -511,12 +510,12 @@ const SelectorTable: React.FC<SelectorTableProps> = React.memo(
                     handleAdjustTime(employee.id, "sum", timeAdjustment);
                     handleClose();
                   }}
+                  disabled={timeAdjustment <= 0}
                 >
                   <AddIcon />
                 </Button>
               </Box>
             </Tooltip>
-
             <Tooltip title="Restar Horas" arrow>
               <Box>
                 <Button
@@ -527,6 +526,7 @@ const SelectorTable: React.FC<SelectorTableProps> = React.memo(
                     handleAdjustTime(employee.id, "substract", timeAdjustment);
                     handleClose();
                   }}
+                  disabled={timeAdjustment <= 0}
                 >
                   <RemoveIcon />
                 </Button>
