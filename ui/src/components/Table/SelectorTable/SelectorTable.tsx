@@ -559,35 +559,35 @@ const SelectorTable: React.FC<SelectorTableProps> = React.memo(
             {selectedPeriod === "weekly" ? (
               <div>
                 {hasMultipleYears(currentWeek) ? (
-                  <Typography variant="body2">
+                  <Typography variant="body2" fontWeight="bold">
                     {`Semanas ${multiplePeriods.weekNumbers[1].weekNumber} / `}
                     {multiplePeriods.weekNumbers[0].weekNumber}
                   </Typography>
                 ) : (
-                  <Typography variant="body2">{`Semana ${weekNumber}`}</Typography>
+                  <Typography variant="body2" fontWeight="bold">{`Semana ${weekNumber}`}</Typography>
                 )}
               </div>
             ) : selectedPeriod === "biweekly" ? (
               <div>
                 {hasMultipleBiweeks(currentWeek) ? (
-                  <Typography variant="body2">
+                  <Typography variant="body2" fontWeight="bold">
                     {`Quincenas ${multiplePeriods.biweekNumbers[0].biweekNumber} / `}
                     {multiplePeriods.biweekNumbers[1].biweekNumber}
                   </Typography>
                 ) : (
-                  <Typography variant="body2">{`Quincena ${biweekNumber}`}</Typography>
+                  <Typography variant="body2" fontWeight="bold">{`Quincena ${biweekNumber}`}</Typography>
                 )}
               </div>
             ) : (
               <div>
                 {hasMultipleMonths(currentWeek) ? (
-                  <Typography variant="body2">{`${getMonthName(
+                  <Typography variant="body2" fontWeight="bold">{`${getMonthName(
                     multiplePeriods.months[0].month
                   )} / ${getMonthName(
                     multiplePeriods.months[1].month
                   )}`}</Typography>
                 ) : (
-                  <Typography variant="body2">{`${getMonthName(
+                  <Typography variant="body2" fontWeight="bold">{`${getMonthName(
                     month
                   )}`}</Typography>
                 )}
