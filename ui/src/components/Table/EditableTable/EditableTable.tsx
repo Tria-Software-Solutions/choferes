@@ -515,8 +515,10 @@ const EditableTable = <T extends object>({
                             <Stack
                               direction="row"
                               spacing={1}
-                              flexWrap="wrap"
-                              sx={{ rowGap: 2 }}
+                              sx={{
+                                rowGap: 2,
+                                flexWrap: column === "permissionNames" ? "wrap" : "nowrap",
+                              }}
                             >
                               {(row[column] as string[]).map(
                                 (item, index, array) =>
