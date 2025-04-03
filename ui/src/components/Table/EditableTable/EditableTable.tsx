@@ -297,7 +297,7 @@ const EditableTable = <T extends object>({
 
       return (
         <Autocomplete
-          // freeSolo
+          freeSolo
           value={selectedOption}
           onChange={(event, newValue) => {
             setEditField &&
@@ -438,6 +438,30 @@ const EditableTable = <T extends object>({
 
   return (
     <Paper sx={{ width: "100%" }}>
+      {groupByDate && (
+        <Box
+          sx={{
+            position: "sticky",
+            top: 0,
+            zIndex: 5,
+            backgroundColor: "#f0f2f5",
+            padding: isSmallScreen ? "8px" : "16px",
+            borderBottom: "1px solid #ddd",
+          }}
+        >
+          <Box
+            sx={{
+              display: "flex",
+              justifyContent: "center",
+              alignItems: "center",
+            }}
+          >
+            <Typography variant="body2" fontWeight="bold">
+              {formatDateWithDay(groupByDate, false)}
+            </Typography>
+          </Box>
+        </Box>
+      )}
       <TableContainer
         className="table-container"
         sx={{ maxHeight: "58vh", overflowX: "auto" }}
@@ -450,22 +474,6 @@ const EditableTable = <T extends object>({
               zIndex: 4,
             }}
           >
-            {groupByDate && (
-              <TableRow>
-                <TableCell
-                  colSpan={columns.length + 1}
-                  align="center"
-                  sx={{
-                    position: "sticky",
-                    top: 0,
-                    zIndex: 4,
-                    fontWeight: "bold",
-                  }}
-                >
-                  {formatDateWithDay(groupByDate, false)}
-                </TableCell>
-              </TableRow>
-            )}
             <TableRow>
               {columns
                 .filter((column) => !columnConfig[String(column)]?.hidden)
