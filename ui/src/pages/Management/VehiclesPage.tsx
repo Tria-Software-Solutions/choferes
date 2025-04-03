@@ -231,6 +231,10 @@ const VehiclesPage: React.FC = () => {
         parkingLot: "",
         notes: "",
       });
+      setSearchBrandTerm("");
+      setSearchColorTerm("");
+      setFilteredBrands(BRANDS_LIST);
+      setFilteredColors(COLORS_LIST);
       showNotification(
         "El registro del vehículo fue exitoso",
         "success",
@@ -257,7 +261,7 @@ const VehiclesPage: React.FC = () => {
       color: vehicle.color,
       parkingLot: vehicle.parkingLot,
       notes: vehicle.notes,
-      createdAt: vehicle.createdAt
+      createdAt: vehicle.createdAt,
     });
   };
 
@@ -719,7 +723,7 @@ const VehiclesPage: React.FC = () => {
                     <Grid item xs={6} sm={4} md={2} lg={2}>
                       <FormControl variant="outlined" fullWidth>
                         <Autocomplete
-                          // freeSolo
+                          freeSolo
                           value={
                             addFields.brand
                               ? {
@@ -764,7 +768,7 @@ const VehiclesPage: React.FC = () => {
                     <Grid item xs={6} sm={4} md={2} lg={2}>
                       <FormControl variant="outlined" fullWidth>
                         <Autocomplete
-                          // freeSolo
+                          freeSolo
                           value={
                             addFields.color
                               ? {
