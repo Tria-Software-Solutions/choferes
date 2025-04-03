@@ -539,6 +539,62 @@ const SelectorTable: React.FC<SelectorTableProps> = React.memo(
 
     return (
       <Paper sx={{ width: "100%" }}>
+        <Box
+          sx={{
+            position: "sticky",
+            top: 0,
+            zIndex: 5,
+            backgroundColor: "#f0f2f5",
+            padding: isSmallScreen ? "8px" : "16px",
+            borderBottom: "1px solid #ddd",
+          }}
+        >
+          <Box
+            sx={{
+              display: "flex",
+              justifyContent: "center",
+              alignItems: "center",
+            }}
+          >
+            {selectedPeriod === "weekly" ? (
+              <div>
+                {hasMultipleYears(currentWeek) ? (
+                  <Typography variant="body2">
+                    {`Semanas ${multiplePeriods.weekNumbers[1].weekNumber} / `}
+                    {multiplePeriods.weekNumbers[0].weekNumber}
+                  </Typography>
+                ) : (
+                  <Typography variant="body2">{`Semana ${weekNumber}`}</Typography>
+                )}
+              </div>
+            ) : selectedPeriod === "biweekly" ? (
+              <div>
+                {hasMultipleBiweeks(currentWeek) ? (
+                  <Typography variant="body2">
+                    {`Quincenas ${multiplePeriods.biweekNumbers[0].biweekNumber} / `}
+                    {multiplePeriods.biweekNumbers[1].biweekNumber}
+                  </Typography>
+                ) : (
+                  <Typography variant="body2">{`Quincena ${biweekNumber}`}</Typography>
+                )}
+              </div>
+            ) : (
+              <div>
+                {hasMultipleMonths(currentWeek) ? (
+                  <Typography variant="body2">{`${getMonthName(
+                    multiplePeriods.months[0].month
+                  )} / ${getMonthName(
+                    multiplePeriods.months[1].month
+                  )}`}</Typography>
+                ) : (
+                  <Typography variant="body2">{`${getMonthName(
+                    month
+                  )}`}</Typography>
+                )}
+              </div>
+            )}
+          </Box>
+        </Box>
         <TableContainer
           className="table-container"
           sx={{ maxHeight: "65vh", overflowX: "auto" }}
@@ -551,64 +607,6 @@ const SelectorTable: React.FC<SelectorTableProps> = React.memo(
                 zIndex: 4,
               }}
             >
-              <TableRow>
-                <TableCell
-                  align="center"
-                  colSpan={10}
-                  sx={{
-                    padding: isSmallScreen ? "8px" : "16px",
-                    position: "sticky",
-                    top: 0,
-                    zIndex: 4,
-                  }}
-                >
-                  <Box
-                    sx={{
-                      display: "flex",
-                      justifyContent: "center",
-                      alignItems: "center",
-                    }}
-                  >
-                    {selectedPeriod === "weekly" ? (
-                      <div>
-                        {hasMultipleYears(currentWeek) ? (
-                          <Typography variant="body2">
-                            {`Semanas ${multiplePeriods.weekNumbers[1].weekNumber} / `}
-                            {multiplePeriods.weekNumbers[0].weekNumber}
-                          </Typography>
-                        ) : (
-                          <Typography variant="body2">{`Semana ${weekNumber}`}</Typography>
-                        )}
-                      </div>
-                    ) : selectedPeriod === "biweekly" ? (
-                      <div>
-                        {hasMultipleBiweeks(currentWeek) ? (
-                          <Typography variant="body2">
-                            {`Quincenas ${multiplePeriods.biweekNumbers[0].biweekNumber} / `}
-                            {multiplePeriods.biweekNumbers[1].biweekNumber}
-                          </Typography>
-                        ) : (
-                          <Typography variant="body2">{`Quincena ${biweekNumber}`}</Typography>
-                        )}
-                      </div>
-                    ) : (
-                      <div>
-                        {hasMultipleMonths(currentWeek) ? (
-                          <Typography variant="body2">{`${getMonthName(
-                            multiplePeriods.months[0].month
-                          )} / ${getMonthName(
-                            multiplePeriods.months[1].month
-                          )}`}</Typography>
-                        ) : (
-                          <Typography variant="body2">{`${getMonthName(
-                            month
-                          )}`}</Typography>
-                        )}
-                      </div>
-                    )}
-                  </Box>
-                </TableCell>
-              </TableRow>
               <TableRow>
                 <TableCell
                   className="employee-column"
