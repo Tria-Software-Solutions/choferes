@@ -197,10 +197,25 @@ const EditableTable = <T extends object>({
           <DatePicker
             label="Seleccionar fecha"
             value={
-              editFields[String(column)] instanceof Date
-                ? (editFields[String(column)] as Date)
-                : editFields[String(column)]
-                ? new Date(editFields[String(column)] as string)
+              editFields[String(column)]
+                ? (() => {
+                    const rawValue = editFields[String(column)];
+                    const dateStr =
+                      typeof rawValue === "string"
+                        ? rawValue
+                        : rawValue instanceof Date
+                        ? rawValue.toISOString()
+                        : "";
+
+                    if (!dateStr) return null;
+
+                    const [year, month, day] = dateStr.split("T")[0].split("-");
+                    return new Date(
+                      Number(year),
+                      Number(month) - 1,
+                      Number(day)
+                    );
+                  })()
                 : null
             }
             sx={{
@@ -517,7 +532,10 @@ const EditableTable = <T extends object>({
                               spacing={1}
                               sx={{
                                 rowGap: 2,
-                                flexWrap: column === "permissionNames" ? "wrap" : "nowrap",
+                                flexWrap:
+                                  column === "permissionNames"
+                                    ? "wrap"
+                                    : "nowrap",
                               }}
                             >
                               {(row[column] as string[]).map(
