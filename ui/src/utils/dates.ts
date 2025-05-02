@@ -330,3 +330,8 @@ export const getInvolvedPeriods = (
     }),
   };
 };
+
+export const parseIsoDateWithoutTimeZone = (isoString: string): Date => {
+  const [year, month, day] = isoString.split("T")[0].split("-").map(Number);
+  return new Date(year, month - 1, day);
+};

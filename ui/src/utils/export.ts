@@ -22,6 +22,7 @@ import {
   hasMultipleBiweeks,
   hasMultipleMonths,
   getInvolvedPeriods,
+  parseIsoDateWithoutTimeZone,
 } from "./dates";
 import { EnglishDayOfWeek } from "./dayAbreviations";
 import { WeeklySummary } from "../models/WeeklySummary";
@@ -29,97 +30,84 @@ import { BiweeklySummary } from "../models/BiweeklySummary";
 import { MonthlySummary } from "../models/MonthlySummary";
 
 export const exportToExcel = (data: any[], fileName: string) => {
-  let isVehicleData = data.length > 0 && "licensePlate" in data[0];
+  if (!data || data.length === 0) return;
 
-  if (!isVehicleData) {
-    data = data.map(({ id, ...filteredRow }) => {
-      return filteredRow;
-    });
-  } else {
-    data = data.map(({ id, updatedAt, createdAt, ...filteredRow }) => {
-      const newRow = { ...filteredRow };
-      if (createdAt) {
-        newRow.Fecha = formatDateWithDay(new Date(createdAt), false);
-      }
-      return newRow;
+  const isVehicleData = "licensePlate" in data[0];
+
+  if (isVehicleData) {
+    data.sort((a, b) => {
+      const ticketA = a.ticket ? BigInt(a.ticket) : BigInt(0);
+      const ticketB = b.ticket ? BigInt(b.ticket) : BigInt(0);
+      return ticketA < ticketB ? -1 : ticketA > ticketB ? 1 : 0;
     });
   }
 
-  const translatedData = data.map((row) => {
+  const cleanedData = isVehicleData
+    ? data.map(({ id, updatedAt, createdAt, ...row }) => {
+        const newRow = { ...row };
+        if (createdAt) {
+          const localDate = parseIsoDateWithoutTimeZone(createdAt);
+          newRow.Fecha = formatDateWithDay(localDate, false);
+        }
+        return newRow;
+      })
+    : data.map(({ id, ...row }) => row);
+
+  const translatedData = cleanedData.map((row) => {
     const translatedRow: any = {};
-    if (isVehicleData) {
-      translatedRow["Fecha"] = row["Fecha"];
+    if (isVehicleData && row.Fecha) {
+      translatedRow["Fecha"] = row.Fecha;
     }
 
-    Object.keys(row).forEach((key) => {
-      if (key !== "Fecha") {
-        let value = row[key];
+    Object.entries(row).forEach(([key, value]) => {
+      if (key === "Fecha") return;
 
-        if (Array.isArray(value)) {
-          value = value
-            .map((item) => translateDayOptionsToSpanish(item))
-            .join(", ");
-        }
-
-        if (typeof value === "boolean") {
-          value = value ? "Sí" : "No";
-        }
-
-        if (
-          (key === "ticket" || key === "licensePlate") &&
-          typeof value === "string"
-        ) {
-          value = `${value}`;
-        } else if (typeof value === "string") {
-          if (!value.includes("/")) {
-            const dateValue = new Date(value);
-            value = !isNaN(dateValue.getTime())
-              ? formatDate(dateValue, false)
-              : value;
-          }
-        }
-
-        if (
-          typeof value === "string" &&
-          Object.keys(translateDayOptionsToSpanish).includes(value)
-        ) {
+      if (Array.isArray(value)) {
+        value = value
+          .map((item) => translateDayOptionsToSpanish(item))
+          .join(", ");
+      } else if (typeof value === "boolean") {
+        value = value ? "Sí" : "No";
+      } else if (typeof value === "string") {
+        const isoDateRegex = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}/;
+        if (isoDateRegex.test(value)) {
+          const localDate = parseIsoDateWithoutTimeZone(value);
+          value = formatDate(localDate, false);
+        } else if (Object.keys(translateDayOptionsToSpanish).includes(value)) {
           value = translateDayOptionsToSpanish(value);
         }
-
-        translatedRow[translateColumnHeaderToSpanish(key)] = value;
       }
+
+      const translatedKey = translateColumnHeaderToSpanish(key);
+      translatedRow[translatedKey] = value;
     });
 
     return translatedRow;
   });
 
-  const worksheet = XLSX.utils.json_to_sheet(translatedData);
+  const columnOrder = Object.keys(translatedData[0] || {});
+  const worksheet = XLSX.utils.json_to_sheet(translatedData, {
+    header: columnOrder,
+  });
   const workbook = XLSX.utils.book_new();
   XLSX.utils.book_append_sheet(workbook, worksheet, "Sheet1");
 
-  const headerKeys = Object.keys(translatedData[0] || {});
-
-  headerKeys.forEach((key, index) => {
+  columnOrder.forEach((key, index) => {
     const cellAddress = XLSX.utils.encode_cell({ r: 0, c: index });
     if (!worksheet[cellAddress]) return;
-
     worksheet[cellAddress].s = {
       fill: { fgColor: { rgb: "000000" } },
       font: { color: { rgb: "FFFFFF" }, bold: true },
     };
   });
 
-  const columnWidths = headerKeys.map((key) => {
+  worksheet["!cols"] = columnOrder.map((key) => {
     const maxLength = Math.max(
       key.length,
-      ...translatedData.map((row) =>
-        row[key] ? row[key].toString().length : 0
-      )
+      ...translatedData.map((row) => row[key]?.toString().length || 0)
     );
     return { width: maxLength + 2 };
   });
-
-  worksheet["!cols"] = columnWidths;
 
   XLSX.writeFile(workbook, `${fileName}.xlsx`);
 };
@@ -131,61 +119,57 @@ export const exportToPDF = (
 ) => {
   const doc = new jsPDF();
 
-  let isVehicleData = data.length > 0 && "licensePlate" in data[0];
+  const isVehicleData = data.length > 0 && "licensePlate" in data[0];
 
-  if (!isVehicleData) {
-    data = data.map(({ id, ...filteredRow }) => filteredRow);
-  } else {
-    data = data.map(({ id, updatedAt, createdAt, ...filteredRow }) => {
-      const formattedDate = createdAt
-        ? formatDateWithDay(new Date(createdAt), false)
-        : "";
-
-      return Object.assign({ Fecha: formattedDate }, filteredRow);
+  if (isVehicleData) {
+    data.sort((a, b) => {
+      const ticketA = a.ticket ? BigInt(a.ticket) : BigInt(0);
+      const ticketB = b.ticket ? BigInt(b.ticket) : BigInt(0);
+      return ticketA < ticketB ? -1 : ticketA > ticketB ? 1 : 0;
     });
   }
+
+  const cleanedData = isVehicleData
+    ? data.map(({ id, updatedAt, createdAt, ...row }) => {
+        const formattedDate = createdAt
+          ? formatDateWithDay(parseIsoDateWithoutTimeZone(createdAt), false)
+          : "";
+        return { Fecha: formattedDate, ...row };
+      })
+    : data.map(({ id, ...row }) => row);
 
   const headers = customHeaders
     ? [customHeaders]
     : [
-        Object.keys(data[0]).map((header) =>
+        Object.keys(cleanedData[0]).map((header) =>
           header === "Fecha" ? "Fecha" : translateColumnHeaderToSpanish(header)
         ),
       ];
 
-  const tableData = data.map((row) => {
+  const tableData = cleanedData.map((row) => {
     return Object.entries(row).map(([key, value]) => {
       if (Array.isArray(value)) {
-        value = value
-          .map((item) => translateDayOptionsToSpanish(item))
-          .join(", ");
+        return value.map(translateDayOptionsToSpanish).join(", ");
       }
 
       if (typeof value === "boolean") {
-        value = value ? "Sí" : "No";
+        return value ? "Sí" : "No";
       }
 
       if (
-        (key === "ticket" || key === "licensePlate") &&
-        typeof value === "string"
+        typeof value === "string" &&
+        /^\d{4}-\d{2}-\d{2}T/.test(value) &&
+        !value.includes("/")
       ) {
-        return value;
-      }
-
-      if (typeof value === "string") {
-        if (!value.includes("/")) {
-          const dateValue = new Date(value);
-          value = !isNaN(dateValue.getTime())
-            ? formatDate(dateValue, false)
-            : value;
-        }
+        const parsedDate = parseIsoDateWithoutTimeZone(value);
+        return formatDate(parsedDate, false);
       }
 
       if (
         typeof value === "string" &&
         Object.keys(translateDayOptionsToSpanish).includes(value)
       ) {
-        value = translateDayOptionsToSpanish(value);
+        return translateDayOptionsToSpanish(value);
       }
 
       return value;
