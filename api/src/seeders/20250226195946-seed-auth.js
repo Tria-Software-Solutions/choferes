@@ -559,6 +559,12 @@ module.exports = {
         createdAt: new Date(),
         updatedAt: new Date(),
       },
+      {
+        id: 30,
+        name: "Ver Mensajería",
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      },
     ]);
     await queryInterface.bulkInsert("roles", [
       { id: 1, name: "Gerencia", createdAt: new Date(), updatedAt: new Date() },
@@ -752,6 +758,12 @@ module.exports = {
         updatedAt: new Date(),
       },
       {
+        roleId: 1,
+        permissionId: 30,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      },
+      {
         roleId: 2,
         permissionId: 1,
         createdAt: new Date(),
@@ -832,6 +844,12 @@ module.exports = {
       {
         roleId: 2,
         permissionId: 23,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      },
+      {
+        roleId: 2,
+        permissionId: 30,
         createdAt: new Date(),
         updatedAt: new Date(),
       },

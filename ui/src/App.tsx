@@ -13,6 +13,7 @@ import RolesPage from "./pages/Management/RolesPage";
 import EmployeesPage from "./pages/Management/EmployeesPage";
 import SchedulesPage from "./pages/Management/SchedulesPage";
 import VehiclesPage from "./pages/Management/VehiclesPage";
+import CourierServicePage from "./pages/Services/CourierServicePage";
 import Dashboard from "./pages/Dashboard/Dashboard";
 import Settings from "./pages/Auth/Settings";
 import NotFound from "./pages/NotFound";
@@ -27,6 +28,7 @@ import { AuthProvider, useAuthContext } from "./context/AuthContext";
 import ProtectedRoute from "./routes/ProtectedRoute";
 import { Container } from "@mui/material";
 import { APPBAR_MENU, PERMISSIONS, ROUTES } from "./constants/constants";
+import LocalShippingIcon from '@mui/icons-material/LocalShipping';
 import CalendarMonthRoundedIcon from "@mui/icons-material/CalendarMonthRounded";
 import DirectionsCarIcon from "@mui/icons-material/DirectionsCar";
 import GroupRoundedIcon from "@mui/icons-material/GroupRounded";
@@ -41,6 +43,12 @@ const AppBarWrapper: React.FC = () => {
   const { logoutUser } = useAuth();
 
   const links = [
+    {
+      label: APPBAR_MENU.COURIER_SERVICE,
+      icon: <LocalShippingIcon />,
+      path: ROUTES.COURIER_SERVICE,
+      permission: PERMISSIONS.VIEW_COURIER_SERVICE,
+    },
     {
       label: APPBAR_MENU.ROLES,
       icon: <CalendarMonthRoundedIcon />,
@@ -74,6 +82,7 @@ const AppBarWrapper: React.FC = () => {
   ];
 
   const permissionsMap = {
+    [APPBAR_MENU.COURIER_SERVICE]: PERMISSIONS.VIEW_COURIER_SERVICE,
     [APPBAR_MENU.ROLES]: PERMISSIONS.VIEW_ROLES,
     [APPBAR_MENU.EMPLOYEES]: PERMISSIONS.VIEW_EMPLOYEES,
     [APPBAR_MENU.SCHEDULES]: PERMISSIONS.VIEW_SCHEDULES,
@@ -166,6 +175,16 @@ const AppContent: React.FC = () => {
           />
           <Route path="/register" element={<Register />} />
           <Route element={<ProtectedRoute />}>
+            <Route
+              path="/courier-service"
+              element={
+                safeUserPermissions.includes(PERMISSIONS.VIEW_COURIER_SERVICE) ? (
+                  <CourierServicePage />
+                ) : (
+                  <Forbidden />
+                )
+              }
+            />
             <Route
               path="/roles"
               element={
