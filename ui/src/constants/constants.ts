@@ -5,17 +5,19 @@ export const ROUTES = {
   VEHICLES: "/vehicles",
   EMPLOYEES: "/employees",
   SCHEDULES: "/schedules",
+  COURIER_SERVICE: "/courier-service",
   SETTINGS: "/settings",
   DASHBOARD: "/dashboard",
 };
 
 export const APPBAR_MENU = {
-  TITLE: "Choferes",
+  TITLE: "Choferes de Alquiler",
   ROLES: "Roles",
   VEHICLES: "Vehículos",
   MANAGE: "Gestión",
   EMPLOYEES: "Empleados",
   SCHEDULES: "Horarios",
+  COURIER_SERVICE: "Mensajería",
   DASHBOARD: "Admin",
   SETTINGS: "Configuración",
   LOGOUT: "Salir",
@@ -24,6 +26,7 @@ export const APPBAR_MENU = {
 export const PAGE_TITLE = {
   LOGIN: "Iniciar Sesión",
   REGISTER: "Registrar Cuenta",
+  COURIER_SERVICE: "Servicio de Mensajería",
   ROLES: "Gestionar Roles",
   VEHICLES: "Gestionar Vehículos",
   EMPLOYEES: "Gestionar Empleados",
@@ -34,10 +37,12 @@ export const PAGE_TITLE = {
   VEHICLES_SIMPLIFIED: "Vehículos",
   EMPLOYEES_SIMPLIFIED: "Empleados",
   SCHEDULES_SIMPLIFIED: "Horarios",
+  COURIER_SERVICE_SIMPLIFIED: "Mensajería",
   DASHBOARD_SIMPLIFIED: "Administración",
 };
 
 export const PERMISSIONS = {
+  VIEW_COURIER_SERVICE: "Ver Mensajería",
   VIEW_ROLES: "Ver Roles",
   VIEW_EMPLOYEE_ROLES_HOURS: "Ver Horas de Empleados",
   EDIT_EMPLOYEE_ROLES: "Editar Roles de Empleados",
