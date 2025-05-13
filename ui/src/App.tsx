@@ -26,9 +26,9 @@ import { Provider } from "react-redux";
 import { store } from "./store/store";
 import { AuthProvider, useAuthContext } from "./context/AuthContext";
 import ProtectedRoute from "./routes/ProtectedRoute";
-import { Container } from "@mui/material";
+import { Container, useMediaQuery, useTheme } from "@mui/material";
 import { APPBAR_MENU, PERMISSIONS, ROUTES } from "./constants/constants";
-import LocalShippingIcon from '@mui/icons-material/LocalShipping';
+import LocalShippingIcon from "@mui/icons-material/LocalShipping";
 import CalendarMonthRoundedIcon from "@mui/icons-material/CalendarMonthRounded";
 import DirectionsCarIcon from "@mui/icons-material/DirectionsCar";
 import GroupRoundedIcon from "@mui/icons-material/GroupRounded";
@@ -41,6 +41,9 @@ import wallpaper from "./assets/images/choferesblurred1.webp";
 const AppBarWrapper: React.FC = () => {
   const { currentUser, userPermissions } = useAuthContext();
   const { logoutUser } = useAuth();
+
+  const theme = useTheme();
+  const isSmallScreen = useMediaQuery(theme.breakpoints.down("sm"));
 
   const links = [
     {
@@ -118,7 +121,7 @@ const AppBarWrapper: React.FC = () => {
 
   return (
     <AppBarComponent
-      title={APPBAR_MENU.TITLE}
+      title={isSmallScreen ? APPBAR_MENU.TITLE_SIMPLIFIED : APPBAR_MENU.TITLE}
       userLinks={userLinks}
       links={finalLinks}
     />
@@ -178,7 +181,9 @@ const AppContent: React.FC = () => {
             <Route
               path="/courier-service"
               element={
-                safeUserPermissions.includes(PERMISSIONS.VIEW_COURIER_SERVICE) ? (
+                safeUserPermissions.includes(
+                  PERMISSIONS.VIEW_COURIER_SERVICE
+                ) ? (
                   <CourierServicePage />
                 ) : (
                   <Forbidden />
