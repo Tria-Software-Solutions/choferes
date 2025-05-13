@@ -3,7 +3,7 @@ import { useAuthContext } from "../../context/AuthContext";
 import { useSelector, useDispatch } from "react-redux";
 import { RootState, AppDispatch } from "../../store/store";
 import SearchBar from "../../components/SearchBar/SearchBar";
-import EditableTable from "../../components/Table/EditableTable/EditableTable";
+// import EditableTable from "../../components/Table/EditableTable/EditableTable";
 import CustomSpeedDial from "../../components/SpeedDial/CustomSpeedDial";
 import { useAppNotifications } from "../../components/Snackbar/SnackbarWrapper";
 import {
@@ -525,7 +525,7 @@ const CourierServicePage: React.FC = () => {
                   gap={2}
                 >
                   <Grid container spacing={2} alignItems="center">
-                    <Grid item xs={6} md={3}>
+                    <Grid item xs={12} md={3}>
                       <TextField
                         label="Chofer"
                         variant="outlined"

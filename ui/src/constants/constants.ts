@@ -12,6 +12,7 @@ export const ROUTES = {
 
 export const APPBAR_MENU = {
   TITLE: "Choferes de Alquiler",
+  TITLE_SIMPLIFIED: "Choferes",
   ROLES: "Roles",
   VEHICLES: "Vehículos",
   MANAGE: "Gestión",
