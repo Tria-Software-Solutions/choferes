@@ -1,7 +1,7 @@
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { useAuthContext } from "../../context/AuthContext";
-import { useSelector, useDispatch } from "react-redux";
-import { RootState, AppDispatch } from "../../store/store";
+import { useSelector, /*useDispatch*/ } from "react-redux";
+import { RootState, /*AppDispatch*/ } from "../../store/store";
 import SearchBar from "../../components/SearchBar/SearchBar";
 // import EditableTable from "../../components/Table/EditableTable/EditableTable";
 import CustomSpeedDial from "../../components/SpeedDial/CustomSpeedDial";
@@ -55,27 +55,27 @@ import { faFileExcel, faFilePdf } from "@fortawesome/free-solid-svg-icons";
 import { Courier } from "../../models/Courier";
 
 const CourierServicePage: React.FC = () => {
-  const dispatch = useDispatch<AppDispatch>();
+  // const dispatch = useDispatch<AppDispatch>();
   const { userPermissions } = useAuthContext();
   const [selectedDate, setSelectedDate] = useState<Date>(new Date());
   const { /*couriers, allCouriers, isLoadingCourier,*/ isLoadingVehicles } = useSelector(
     (state: RootState) => state.vehicles
   );
   const { showNotification } = useAppNotifications();
-  const [filteredCouriers, setFilteredCouriers] = useState<Courier[]>([]);
-  const [filteredWeekCouriers, setFilteredWeekCouriers] = useState<Courier[]>(
+  const [filteredCouriers, /*setFilteredCouriers*/] = useState<Courier[]>([]);
+  const [filteredWeekCouriers, /*setFilteredWeekCouriers*/] = useState<Courier[]>(
     []
   );
-  const [totalCount, setTotalCount] = useState(0);
+  //const [totalCount, setTotalCount] = useState(0);
   const [editRowId, setEditRowId] = useState<number | null>(null);
-  const [addFields, setAddFields] = useState({
+  const [addFields, /*setAddFields*/] = useState({
     driver: "",
     route: "",
     distance: 0,
     trackingNumber: "",
     status: "",
   });
-  const [editFields, setEditFields] = useState({
+  const [editFields, /*setEditFields*/] = useState({
     driver: "",
     route: "",
     distance: 0,
@@ -84,14 +84,12 @@ const CourierServicePage: React.FC = () => {
     createdAt: new Date(),
   });
   const [openDeleteDialog, setOpenDeleteDialog] = useState(false);
-  const [openTicketTooltip, setOpenTicketTooltip] = useState(false);
-  const [openLicensePlateTooltip, setOpenLicensePlateTooltip] = useState(false);
   const [courierToDelete, setCourierToDelete] = useState<number | null>(null);
   const [filter, setFilter] = useState("");
-  const [page, setPage] = useState(0);
-  const [rowsPerPage, setRowsPerPage] = useState(5);
+  const [/*page*/, setPage] = useState(0);
+  const [/*rowsPerPage*/, setRowsPerPage] = useState(5);
   const [isAddFormValid, setIsAddFormValid] = useState(false);
-  const [isEditFormValid, setIsEditFormValid] = useState(false);
+  const [/*isEditFormValid*/, setIsEditFormValid] = useState(false);
 
   const theme = useTheme();
   const isSmallScreen = useMediaQuery(theme.breakpoints.down("sm"));
@@ -220,63 +218,63 @@ const CourierServicePage: React.FC = () => {
   //   }
   // };
 
-  const handleEdit = (courier: Courier) => {
-    setEditRowId(courier.id);
-    setEditFields({
-      driver: courier.driver,
-      route: courier.route,
-      distance: courier.distance,
-      trackingNumber: courier.trackingNumber,
-      status: courier.status,
-      createdAt: courier.createdAt,
-    });
-  };
+  // const handleEdit = (courier: Courier) => {
+  //   setEditRowId(courier.id);
+  //   setEditFields({
+  //     driver: courier.driver,
+  //     route: courier.route,
+  //     distance: courier.distance,
+  //     trackingNumber: courier.trackingNumber,
+  //     status: courier.status,
+  //     createdAt: courier.createdAt,
+  //   });
+  // };
 
   const handleCancel = () => {
     setEditRowId(null);
   };
 
-  const handleUpdate = useCallback(
-    async (id: number) => {
-      try {
-        // const updatedCourier = {
-        //   ...editFields,
-        // };
-        // await dispatch(updateCourier({ id, updatedCourier }));
-        // dispatch(fetchCouriersByDate(format(selectedDate, "yyyy-MM-dd")));
-        setEditRowId(null);
-        setEditFields({
-          driver: "",
-          route: "",
-          distance: 0,
-          trackingNumber: "",
-          status: "",
-          createdAt: new Date(),
-        });
-        showNotification(
-          "La actualización del servicio fue exitosa",
-          "success",
-          3000,
-          false
-        );
-      } catch (error) {
-        handleCancel();
-        console.error(error);
-        showNotification(
-          "Ha ocurrido un error al actualizar el servicio",
-          "error",
-          5000,
-          false
-        );
-      }
-    },
-    [dispatch, editFields, selectedDate, showNotification]
-  );
+  // const handleUpdate = useCallback(
+  //   async (id: number) => {
+  //     try {
+  //       const updatedCourier = {
+  //         ...editFields,
+  //       };
+  //       await dispatch(updateCourier({ id, updatedCourier }));
+  //       dispatch(fetchCouriersByDate(format(selectedDate, "yyyy-MM-dd")));
+  //       setEditRowId(null);
+  //       setEditFields({
+  //         driver: "",
+  //         route: "",
+  //         distance: 0,
+  //         trackingNumber: "",
+  //         status: "",
+  //         createdAt: new Date(),
+  //       });
+  //       showNotification(
+  //         "La actualización del servicio fue exitosa",
+  //         "success",
+  //         3000,
+  //         false
+  //       );
+  //     } catch (error) {
+  //       handleCancel();
+  //       console.error(error);
+  //       showNotification(
+  //         "Ha ocurrido un error al actualizar el servicio",
+  //         "error",
+  //         5000,
+  //         false
+  //       );
+  //     }
+  //   },
+  //   [dispatch, editFields, selectedDate, showNotification]
+  // );
 
-  const handleOpenDeleteDialog = (id: number) => {
-    setOpenDeleteDialog(true);
-    setCourierToDelete(id);
-  };
+  // const handleOpenDeleteDialog = (id: number) => {
+  //   setOpenDeleteDialog(true);
+  //   setCourierToDelete(id);
+  // };
 
   const handleCloseDeleteDialog = () => {
     setOpenDeleteDialog(false);
