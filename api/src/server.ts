@@ -24,27 +24,49 @@ dotenv.config();
 
 const app = express();
 
-const allowedOrigins = ["http://localhost:3000", process.env.REACT_APP_UI_URL];
+// Configuración más restrictiva de CORS
+const allowedOrigins = [
+  "http://localhost:3000",
+  process.env.REACT_APP_UI_URL
+].filter(Boolean); // Elimina valores undefined/null
 
 app.use(
   cors({
     origin: (origin, callback) => {
-      if (!origin || allowedOrigins.includes(origin)) {
+      // Permitir requests sin origin (como mobile apps o Postman)
+      if (!origin) {
+        return callback(null, true);
+      }
+      
+      if (allowedOrigins.includes(origin)) {
         callback(null, true);
       } else {
+        console.warn(`CORS blocked request from origin: ${origin}`);
         callback(new Error("Not allowed by CORS"));
       }
     },
     credentials: true,
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With'],
+    maxAge: 86400 // 24 horas
   })
 );
 
 app.use(cookieParser());
-app.use(json());
-app.use(urlencoded({ extended: true }));
+app.use(json({ limit: '10mb' }));
+app.use(urlencoded({ extended: true, limit: '10mb' }));
+
+// Headers de seguridad
+app.use((req, res, next) => {
+  res.setHeader('X-Content-Type-Options', 'nosniff');
+  res.setHeader('X-Frame-Options', 'DENY');
+  res.setHeader('X-XSS-Protection', '1; mode=block');
+  res.setHeader('Strict-Transport-Security', 'max-age=31536000; includeSubDomains');
+  next();
+});
 
 app.use("/api/auth", authRoutes);
-app.use("api/health", healthRoutes);
+app.use("/api/health", healthRoutes);
 app.use("/api/users", userRoutes);
 app.use("/api/roles", roleRoutes);
 app.use("/api/permissions", permissionRoutes);
@@ -58,6 +80,7 @@ app.use("/api/monthly-summary", monthlySummaryRoutes);
 app.use("/api/schedules", scheduleRoutes);
 app.use("/api/vehicles", vehicleRoutes);
 
+// Middleware de manejo de errores mejorado
 app.use(
   (
     error: Error,
@@ -65,8 +88,14 @@ app.use(
     res: express.Response,
     next: express.NextFunction
   ) => {
-    console.error(error.stack);
-    res.status(500).send("Something broke!");
+    // No exponer detalles del error en producción
+    if (process.env.NODE_ENV === 'production') {
+      console.error('Error:', error.message);
+      res.status(500).json({ error: "Internal server error" });
+    } else {
+      console.error(error.stack);
+      res.status(500).json({ error: error.message });
+    }
   }
 );
 

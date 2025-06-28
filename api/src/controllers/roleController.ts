@@ -39,7 +39,6 @@ export const createRole = async (req: Request, res: Response) => {
     const newRole = await roleService.createRole(req.body);
     return res.status(201).json(newRole);
   } catch (error) {
-    console.log("ERROR: ", error);
     return res.status(500).json({ message: "Error creating Role", error });
   }
 };
