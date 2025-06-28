@@ -10,7 +10,7 @@ const JWT_SECRET_KEY = process.env.JWT_SECRET_KEY;
 const JWT_SECRET_KEY_REFRESH = process.env.JWT_SECRET_KEY_REFRESH;
 
 if (!JWT_SECRET_KEY || !JWT_SECRET_KEY_REFRESH) {
-  throw new Error("Missing token in environment variables");
+  throw new Error("Missing JWT secret keys in environment variables");
 }
 
 export const authenticateToken = (
@@ -20,31 +20,54 @@ export const authenticateToken = (
 ) => {
   try {
     const accessToken = req.cookies.accessToken;
-    if (!accessToken)
-      return res.status(401).json({ error: "Unauthorized: Token required" });
+    
+    if (!accessToken) {
+      return res.status(401).json({ 
+        error: "Unauthorized: Access token required",
+        code: "MISSING_TOKEN"
+      });
+    }
 
     jwt.verify(accessToken, JWT_SECRET_KEY, (error, decoded) => {
       if (error) {
         if (error.name === "TokenExpiredError") {
-          return res.status(401).json({ error: "Unauthorized: Token expired" });
+          return res.status(401).json({ 
+            error: "Unauthorized: Token expired",
+            code: "TOKEN_EXPIRED"
+          });
+        } else if (error.name === "JsonWebTokenError") {
+          return res.status(401).json({ 
+            error: "Unauthorized: Invalid token",
+            code: "INVALID_TOKEN"
+          });
         } else {
-          return res.status(401).json({ error: "Unauthorized: Invalid token" });
+          return res.status(401).json({ 
+            error: "Unauthorized: Token verification failed",
+            code: "TOKEN_VERIFICATION_FAILED"
+          });
         }
       }
 
       const payload = decoded as JwtPayload;
 
-      if (!payload.userId) {
+      if (!payload.userId || typeof payload.userId !== 'string') {
         return res
           .status(403)
-          .json({ error: "Forbidden: Invalid token payload" });
+          .json({ 
+            error: "Forbidden: Invalid token payload",
+            code: "INVALID_PAYLOAD"
+          });
       }
 
-      req.user = { id: payload.userId };
+      req.user = { id: parseInt(payload.userId) };
       next();
     });
   } catch (error) {
-    return res.status(500).json({ error: "Internal server error" });
+    console.error('Authentication error:', error instanceof Error ? error.message : 'Unknown error');
+    return res.status(500).json({ 
+      error: "Internal server error",
+      code: "AUTH_ERROR"
+    });
   }
 };
 
@@ -55,10 +78,14 @@ export const authenticateRefreshToken = (
 ) => {
   try {
     const refreshToken = req.cookies.refreshToken;
+    
     if (!refreshToken) {
       return res
         .status(401)
-        .json({ error: "Unauthorized: Refresh token required" });
+        .json({ 
+          error: "Unauthorized: Refresh token required",
+          code: "MISSING_REFRESH_TOKEN"
+        });
     }
 
     jwt.verify(
@@ -66,11 +93,30 @@ export const authenticateRefreshToken = (
       JWT_SECRET_KEY_REFRESH,
       (refreshErr, refreshDecoded) => {
         if (refreshErr) {
+          if (refreshErr.name === "TokenExpiredError") {
+            return res.status(401).json({ 
+              error: "Unauthorized: Refresh token expired",
+              code: "REFRESH_TOKEN_EXPIRED"
+            });
+          }
           return res
             .status(403)
-            .json({ error: "Forbidden: Invalid refresh token" });
+            .json({ 
+              error: "Forbidden: Invalid refresh token",
+              code: "INVALID_REFRESH_TOKEN"
+            });
         }
-        const userId = (refreshDecoded as JwtPayload).userId;
+        
+        const payload = refreshDecoded as JwtPayload;
+        const userId = payload.userId;
+        
+        if (!userId || typeof userId !== 'string') {
+          return res.status(403).json({ 
+            error: "Forbidden: Invalid refresh token payload",
+            code: "INVALID_REFRESH_PAYLOAD"
+          });
+        }
+
         const { accessToken: newAccessToken, refreshToken: newRefreshToken } =
           generateTokens(userId, res);
 
@@ -79,10 +125,18 @@ export const authenticateRefreshToken = (
 
         return res
           .status(200)
-          .json({ accessToken: newAccessToken, refreshToken: newRefreshToken });
+          .json({ 
+            accessToken: newAccessToken, 
+            refreshToken: newRefreshToken,
+            message: "Tokens refreshed successfully"
+          });
       }
     );
   } catch (error) {
-    return res.status(500).json({ error: "Internal server error" });
+    console.error('Refresh token error:', error instanceof Error ? error.message : 'Unknown error');
+    return res.status(500).json({ 
+      error: "Internal server error",
+      code: "REFRESH_ERROR"
+    });
   }
 };

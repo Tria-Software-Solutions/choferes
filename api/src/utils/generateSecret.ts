@@ -1,6 +1,7 @@
 import * as jwt from "jsonwebtoken";
 import * as dotenv from "dotenv";
 import { Response } from "express";
+import * as crypto from "crypto";
 
 dotenv.config();
 
@@ -8,12 +9,41 @@ const JWT_SECRET_KEY = process.env.JWT_SECRET_KEY;
 const JWT_SECRET_KEY_REFRESH = process.env.JWT_SECRET_KEY_REFRESH;
 const IS_PRODUCTION = process.env.NODE_ENV === "production";
 
+// Validar que las claves secretas tengan la longitud mínima recomendada
+if (!JWT_SECRET_KEY || JWT_SECRET_KEY.length < 32) {
+  throw new Error("JWT_SECRET_KEY must be at least 32 characters long");
+}
+
+if (!JWT_SECRET_KEY_REFRESH || JWT_SECRET_KEY_REFRESH.length < 32) {
+  throw new Error("JWT_SECRET_KEY_REFRESH must be at least 32 characters long");
+}
+
 export const generateTokens = (userId: string, res: Response) => {
   const tokens = {
-    accessToken: jwt.sign({ userId }, JWT_SECRET_KEY, { expiresIn: "1h" }),
-    refreshToken: jwt.sign({ userId }, JWT_SECRET_KEY_REFRESH, {
-      expiresIn: "7d",
-    }),
+    accessToken: jwt.sign(
+      { 
+        userId,
+        iat: Math.floor(Date.now() / 1000),
+        type: 'access'
+      }, 
+      JWT_SECRET_KEY, 
+      { 
+        expiresIn: "1h",
+        algorithm: 'HS256'
+      }
+    ),
+    refreshToken: jwt.sign(
+      { 
+        userId,
+        iat: Math.floor(Date.now() / 1000),
+        type: 'refresh'
+      }, 
+      JWT_SECRET_KEY_REFRESH, 
+      {
+        expiresIn: "7d",
+        algorithm: 'HS256'
+      }
+    ),
   };
 
   const cookieOptions = {
@@ -21,20 +51,35 @@ export const generateTokens = (userId: string, res: Response) => {
     secure: IS_PRODUCTION,
     sameSite: IS_PRODUCTION ? "none" as "none" : "lax" as "lax",
     path: "/",
+    maxAge: 3600 * 1000, // 1 hour for access token
   };
 
-  res.cookie("accessToken", tokens.accessToken, {
-    ...cookieOptions,
-    maxAge: 3600 * 1000,
-  });
+  res.cookie("accessToken", tokens.accessToken, cookieOptions);
   
   res.cookie("refreshToken", tokens.refreshToken, {
     ...cookieOptions,
-    maxAge: 7 * 24 * 60 * 60 * 1000,
+    maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days for refresh token
   });
 
   return tokens;
 };
 
-//generateSecret
-//node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"
+// Función para generar claves secretas seguras
+export const generateSecureSecret = (): string => {
+  return crypto.randomBytes(32).toString('hex');
+};
+
+// Función para validar formato de token
+export const validateTokenFormat = (token: string): boolean => {
+  if (!token || typeof token !== 'string') {
+    return false;
+  }
+  
+  // Verificar que el token tenga el formato básico de JWT (3 partes separadas por puntos)
+  const parts = token.split('.');
+  return parts.length === 3;
+};
+
+// Comando para generar claves secretas:
+// node -e "console.log('JWT_SECRET_KEY=' + require('crypto').randomBytes(32).toString('hex'))"
+// node -e "console.log('JWT_SECRET_KEY_REFRESH=' + require('crypto').randomBytes(32).toString('hex'))"
