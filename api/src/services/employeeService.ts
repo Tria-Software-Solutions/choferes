@@ -1,5 +1,6 @@
 import { Op } from "sequelize";
 import { Employee } from "../models/Employee";
+import { HoursWorked } from "../models/HoursWorked";
 
 export const getEmployees = async (page: number = 1, limit: number = 25, search?: string) => {
   const offset = (page - 1) * limit;
@@ -67,11 +68,11 @@ export const deleteEmployee = async (id: number) => {
 };
 
 export const getEmployeesWithRelations = async (includeHoursWorked: boolean = false) => {
-  const include = [];
+  const include: any[] = [];
   
   if (includeHoursWorked) {
     include.push({
-      model: require('../models/HoursWorked').HoursWorked,
+      model: HoursWorked,
       as: 'hoursWorked',
       attributes: ['id', 'date', 'scheduleId'],
       separate: true,

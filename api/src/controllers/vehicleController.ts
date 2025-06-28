@@ -28,23 +28,31 @@ export const getVehicleById = async (req: Request, res: Response) => {
 export const getVehiclesByDate = async (req: Request, res: Response) => {
   try {
     const { date } = req.query;
-    if (!date) {
-      return res.status(400).json({ message: "Date is required" });
+    
+    if (!date || typeof date !== 'string') {
+      return res.status(400).json({ message: "Date parameter is required" });
     }
-    const createdAt = parseISO(date as string);
-    if (!isValid(createdAt)) {
+
+    const parsedDate = parseISO(date);
+    if (!isValid(parsedDate)) {
       return res.status(400).json({ message: "Invalid date format" });
     }
-    const vehicles = await vehicleService.getVehiclesByDate(createdAt);
+
+    const vehicles = await vehicleService.getVehiclesByDate(parsedDate);
     return res.status(200).json(vehicles);
   } catch (error) {
-    return res.status(500).json({ message: "Error fetching Vehicles", error });
+    return res.status(500).json({ message: "Error fetching Vehicles by date", error });
   }
 };
 
 export const createVehicle = async (req: Request, res: Response) => {
   try {
-    const newVehicle = await vehicleService.createVehicle(req.body);
+    const vehicleData = {
+      ...req.body,
+      parkingDate: req.body.parkingDate ? parseISO(req.body.parkingDate) : new Date()
+    };
+    
+    const newVehicle = await vehicleService.createVehicle(vehicleData);
     return res.status(201).json(newVehicle);
   } catch (error) {
     return res.status(500).json({ message: "Error creating Vehicle", error });
@@ -54,7 +62,13 @@ export const createVehicle = async (req: Request, res: Response) => {
 export const updateVehicle = async (req: Request, res: Response) => {
   try {
     const id = parseInt(req.params.id);
-    const updatedVehicle = await vehicleService.updateVehicle(id, req.body);
+    const updateData = { ...req.body };
+    
+    if (req.body.parkingDate) {
+      updateData.parkingDate = parseISO(req.body.parkingDate);
+    }
+    
+    const updatedVehicle = await vehicleService.updateVehicle(id, updateData);
     if (updatedVehicle) {
       return res.status(200).json(updatedVehicle);
     } else {

@@ -24,7 +24,12 @@ export const getVehiclesByDate = async (date: string): Promise<Vehicle[]> => {
 };
 
 export const createVehicle = async (newVehicle: Omit<Vehicle, "id">) => {
-  const response = await api.post("/vehicles", newVehicle);
+  const vehicleData = {
+    ...newVehicle,
+    parkingDate: newVehicle.parkingDate || new Date()
+  };
+  
+  const response = await api.post("/vehicles", vehicleData);
   return response.data;
 };
 

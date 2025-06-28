@@ -91,7 +91,7 @@ const VehiclesPage: React.FC = () => {
     color: "",
     parkingLot: "",
     notes: "",
-    createdAt: new Date(),
+    parkingDate: new Date(),
   });
   const [openDeleteDialog, setOpenDeleteDialog] = useState(false);
   const [openTicketTooltip, setOpenTicketTooltip] = useState(false);
@@ -163,7 +163,7 @@ const VehiclesPage: React.FC = () => {
     endOfWeek.setHours(23, 59, 59, 999);
 
     const vehiclesThisWeek = allVehicles.filter((vehicle) => {
-      const parkedDate = new Date(vehicle.createdAt);
+      const parkedDate = new Date(vehicle.parkingDate);
       return parkedDate >= startOfWeek && parkedDate <= endOfWeek;
     });
 
@@ -220,7 +220,8 @@ const VehiclesPage: React.FC = () => {
         color: addFields.color,
         parkingLot: addFields.parkingLot,
         notes: addFields.notes,
-        createdAt: selectedDate,
+        parkingDate: selectedDate,
+        createdAt: new Date(),
       };
       dispatch(createVehicle(newVehicle));
       setAddFields({
@@ -261,7 +262,7 @@ const VehiclesPage: React.FC = () => {
       color: vehicle.color,
       parkingLot: vehicle.parkingLot,
       notes: vehicle.notes,
-      createdAt: vehicle.createdAt,
+      parkingDate: vehicle.parkingDate,
     });
   };
 
@@ -285,7 +286,7 @@ const VehiclesPage: React.FC = () => {
           color: "",
           parkingLot: "",
           notes: "",
-          createdAt: new Date(),
+          parkingDate: new Date(),
         });
         showNotification(
           "La actualización del vehículo fue exitosa",
@@ -489,9 +490,7 @@ const VehiclesPage: React.FC = () => {
       excelOption,
       pdfOption,
       filteredWeekVehicles,
-      `reporte-de-vehiculos-${exportFileFormattedDate(
-        selectedDate || new Date()
-      )}`
+      `reporte-de-vehiculos-${exportFileFormattedDate(selectedDate || new Date())}`
     );
   }, [userPermissions, filteredWeekVehicles, selectedDate]);
 
@@ -871,7 +870,7 @@ const VehiclesPage: React.FC = () => {
                 "color",
                 "parkingLot",
                 "notes",
-                "createdAt",
+                "parkingDate",
               ]}
               groupByDate={selectedDate}
               editRowId={editRowId}
