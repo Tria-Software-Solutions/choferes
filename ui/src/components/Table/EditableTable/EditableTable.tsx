@@ -29,6 +29,7 @@ import {
   Checkbox,
   ListItemText,
   useMediaQuery,
+  Grid,
 } from "@mui/material";
 import { LocalizationProvider } from "@mui/x-date-pickers";
 import { DatePicker } from "@mui/x-date-pickers/DatePicker";
@@ -144,11 +145,24 @@ const EditableTable = <T extends object>({
     setPage(newPage);
   };
 
+  const wrapWithGrid = (component: React.ReactNode, column: keyof T) => {
+    const config = columnConfig[String(column)];
+    if (!config?.size) {
+      return component;
+    }
+
+    return (
+      <Grid item xs={config.size.xs} sm={config.size.sm} md={config.size.md} lg={config.size.lg}>
+        {component}
+      </Grid>
+    );
+  };
+
   const renderEditField = (column: keyof T, value: string) => {
     const config = columnConfig[String(column)];
 
     if (!config) {
-      return (
+      return wrapWithGrid(
         <TextField
           fullWidth
           value={editFields[String(column)] || ""}
@@ -156,7 +170,8 @@ const EditableTable = <T extends object>({
             setEditField && setEditField(String(column), e.target.value)
           }
           error={!validateField(String(column), value)}
-        />
+        />,
+        column
       );
     }
 
@@ -170,7 +185,7 @@ const EditableTable = <T extends object>({
         setEditField && setEditField(String(column), maskedValue);
       };
 
-      return (
+      return wrapWithGrid(
         <TextField
           label={translateColumnHeaderToSpanish(column)}
           variant="outlined"
@@ -181,7 +196,8 @@ const EditableTable = <T extends object>({
               : null
           }
           onChange={handleChange}
-        />
+        />,
+        column
       );
     }
 
@@ -192,10 +208,10 @@ const EditableTable = <T extends object>({
         }
       };
 
-      return (
+      return wrapWithGrid(
         <LocalizationProvider dateAdapter={AdapterDateFns} adapterLocale={es}>
           <DatePicker
-            label="Seleccionar fecha"
+            label={translateColumnHeaderToSpanish(column)}
             value={
               editFields[String(column)]
                 ? (() => {
@@ -219,7 +235,7 @@ const EditableTable = <T extends object>({
                 : null
             }
             sx={{
-              width: { xs: "150px", sm: "150px", md: "150px" },
+              width: "100%",
             }}
             maxDate={new Date()}
             views={["year", "month", "day"]}
@@ -228,6 +244,8 @@ const EditableTable = <T extends object>({
             }}
             slotProps={{
               textField: {
+                variant: "outlined",
+                fullWidth: true,
                 inputProps: { readOnly: true },
                 onMouseDown: (e) => e.preventDefault(),
               },
@@ -238,7 +256,8 @@ const EditableTable = <T extends object>({
             closeOnSelect
             onChange={(date) => handleDateChange(date)}
           />
-        </LocalizationProvider>
+        </LocalizationProvider>,
+        column
       );
     }
 
@@ -249,14 +268,15 @@ const EditableTable = <T extends object>({
         ? editFields[String(column)]
         : "";
 
-      return (
-        <FormControl variant="outlined" fullWidth>
+      return wrapWithGrid(
+        <FormControl variant="outlined" fullWidth sx={{ height: 56 }}>
           <Select
             value={selectedValue}
             onChange={(e) =>
               setEditField &&
               setEditField(String(column), String(e.target.value))
             }
+            sx={{ height: 56 }}
           >
             {config.options.map((option) => (
               <MenuItem key={option.value} value={option.value}>
@@ -264,7 +284,8 @@ const EditableTable = <T extends object>({
               </MenuItem>
             ))}
           </Select>
-        </FormControl>
+        </FormControl>,
+        column
       );
     }
 
@@ -273,8 +294,8 @@ const EditableTable = <T extends object>({
         ? editFields[String(column)]
         : [];
 
-      return (
-        <FormControl variant="outlined" fullWidth>
+      return wrapWithGrid(
+        <FormControl variant="outlined" fullWidth sx={{ height: 56 }}>
           <Select
             multiple
             value={selectedValues}
@@ -288,6 +309,7 @@ const EditableTable = <T extends object>({
                     .join(", ")
                 : ""
             }
+            sx={{ height: 56 }}
           >
             {config.options.map((option) => (
               <MenuItem key={option.value} value={option.value}>
@@ -301,7 +323,8 @@ const EditableTable = <T extends object>({
               </MenuItem>
             ))}
           </Select>
-        </FormControl>
+        </FormControl>,
+        column
       );
     }
 
@@ -310,7 +333,7 @@ const EditableTable = <T extends object>({
       const selectedOption =
         config.options?.find((opt) => opt.value === selectedValue) || null;
 
-      return (
+      return wrapWithGrid(
         <Autocomplete
           freeSolo
           value={selectedOption}
@@ -335,10 +358,12 @@ const EditableTable = <T extends object>({
               label={translateColumnHeaderToSpanish(column)}
               variant="outlined"
               fullWidth
+              sx={{ height: 56 }}
               placeholder={`Buscar ${translateColumnHeaderToSpanish(column)}`}
             />
           )}
-        />
+        />,
+        column
       );
     }
 
@@ -350,7 +375,7 @@ const EditableTable = <T extends object>({
         selectedValues.some((val) => val === opt.value)
       );
 
-      return (
+      return wrapWithGrid(
         <Autocomplete
           multiple
           limitTags={5}
@@ -377,14 +402,16 @@ const EditableTable = <T extends object>({
               label={translateColumnHeaderToSpanish(column)}
               variant="outlined"
               fullWidth
+              sx={{ height: 56 }}
               placeholder={`Buscar ${translateColumnHeaderToSpanish(column)}`}
             />
           )}
-        />
+        />,
+        column
       );
     }
 
-    return (
+    return wrapWithGrid(
       <TextField
         fullWidth
         value={editFields[String(column)] || ""}
@@ -392,7 +419,8 @@ const EditableTable = <T extends object>({
           setEditField && setEditField(String(column), e.target.value)
         }
         error={!validateField(String(column), value)}
-      />
+      />,
+      column
     );
   };
 
@@ -430,25 +458,106 @@ const EditableTable = <T extends object>({
         | "autocomplete multiple";
       options?: { value: string; label: string }[];
       hidden?: boolean;
+      size?: {
+        xs: number;
+        sm: number;
+        md: number;
+        lg: number;
+      };
     }
   > = {
-    licensePlate: { type: "masked" },
-    parkingLot: { type: "masked" },
-    createdAt: { type: "date", hidden: false },
+    licensePlate: { 
+      type: "masked",
+      size: { xs: 6, sm: 4, md: 2, lg: 0.5 }
+    },
+    parkingLot: { 
+      type: "masked",
+      size: { xs: 6, sm: 4, md: 2, lg: 1 }
+    },
+    ticket: {
+      type: "text",
+      size: { xs: 6, sm: 4, md: 2, lg: 0.5 }
+    },
+    brand: { 
+      type: "autocomplete", 
+      options: BRANDS_LIST,
+      size: { xs: 6, sm: 4, md: 2, lg: 4 }
+    },
+    color: { 
+      type: "autocomplete", 
+      options: COLORS_LIST,
+      size: { xs: 6, sm: 4, md: 2, lg: 4 }
+    },
+    notes: {
+      type: "text",
+      size: { xs: 6, sm: 4, md: 2, lg: 2 }
+    },
+    parkingDate: { 
+      type: "date", 
+      hidden: true,
+      size: { xs: 6, sm: 4, md: 2, lg: 2 }
+    },
+    
+    firstName: {
+      type: "text",
+      size: { xs: 6, sm: 6, md: 6, lg: 6 }
+    },
+    lastName: {
+      type: "text",
+      size: { xs: 6, sm: 6, md: 6, lg: 6 }
+    },
+    
+    label: {
+      type: "text",
+      size: { xs: 6, sm: 6, md: 3, lg: 3 }
+    },
+    days: { 
+      type: "select multiple", 
+      options: DAYS_LIST,
+      size: { xs: 6, sm: 6, md: 3, lg: 3 }
+    },
+    hours: {
+      type: "text",
+      size: { xs: 6, sm: 6, md: 3, lg: 2 }
+    },
+    specialSchedule: {
+      type: "text",
+      size: { xs: 6, sm: 6, md: 3, lg: 4 }
+    },
+    
+    email: {
+      type: "text",
+      size: { xs: 12, sm: 12, md: 2, lg: 2 }
+    },
+    username: {
+      type: "text",
+      size: { xs: 6, sm: 6, md: 2, lg: 2 }
+    },
+    password: {
+      type: "text",
+      size: { xs: 6, sm: 6, md: 2, lg: 2 }
+    },
     roleName: {
       type: "select",
       options: roles.map((role) => ({ value: role.name, label: role.name })),
+      size: { xs: 6, sm: 6, md: 2, lg: 2 }
     },
-    days: { type: "select multiple", options: DAYS_LIST },
+    
+    name: {
+      type: "text",
+      size: { xs: 12, sm: 12, md: 4, lg: 3 }
+    },
     permissionNames: {
       type: "autocomplete multiple",
       options: permissions.map((permission) => ({
         value: permission.name,
         label: permission.name,
       })),
+      size: { xs: 12, sm: 12, md: 8, lg: 9 }
     },
-    brand: { type: "autocomplete", options: BRANDS_LIST },
-    color: { type: "autocomplete", options: COLORS_LIST },
+    
+    createdAt: { type: "date", hidden: true },
+    updatedAt: { type: "date", hidden: true },
   };
 
   return (
@@ -502,8 +611,16 @@ const EditableTable = <T extends object>({
                     </TableSortLabel>
                   </TableCell>
                 ))}
+              {editRowId !== null &&
+                columns
+                  .filter((column) => columnConfig[String(column)]?.hidden)
+                  .map((column) => (
+                    <TableCell key={`header-${String(column)}`} className="tableCell">
+                      {translateColumnHeaderToSpanish(column)}
+                    </TableCell>
+                  ))}
               {!noActions || hasEditPermissions || hasDeletePermissions ? (
-                <TableCell style={{ width: "100px" }} />
+                <TableCell className="tableCell" style={{ width: "100px" }} />
               ) : null}
             </TableRow>
           </TableHead>
@@ -512,6 +629,7 @@ const EditableTable = <T extends object>({
               const rowId = getRowId(row);
               const isCurrentUser = rowId === currentUser?.id;
               const isUser = "username" in row;
+              
               return (
                 <TableRow key={getRowId(row)}>
                   {columns
@@ -520,12 +638,10 @@ const EditableTable = <T extends object>({
                       return (
                         <TableCell key={String(column)}>
                           {editRowId === getRowId(row) ? (
-                            <>
-                              {renderEditField(
-                                column,
-                                (editFields[String(column)] || "").toString()
-                              )}
-                            </>
+                            renderEditField(
+                              column,
+                              (editFields[String(column)] || "").toString()
+                            )
                           ) : Array.isArray(row[column]) ? (
                             <Stack
                               direction="row"
@@ -589,6 +705,17 @@ const EditableTable = <T extends object>({
                         </TableCell>
                       );
                     })}
+                  {editRowId === getRowId(row) &&
+                    columns
+                      .filter((column) => columnConfig[String(column)]?.hidden)
+                      .map((column) => (
+                        <TableCell key={`edit-${String(column)}`} className="tableCell">
+                          {renderEditField(
+                            column,
+                            (editFields[String(column)] || "").toString()
+                          )}
+                        </TableCell>
+                      ))}
                   {!noActions && (
                     <TableCell>
                       <Box
@@ -683,19 +810,33 @@ const EditableTable = <T extends object>({
                                           }
                                         >
                                           {row.isActive ? (
-                                            <BlockIcon color="error" />
+                                            <CheckCircleOutlineIcon />
                                           ) : (
-                                            <CheckCircleOutlineIcon color="success" />
+                                            <BlockIcon />
                                           )}
                                         </IconButton>
                                       </Box>
                                     </Tooltip>
-                                  ) : null)
+                                  ) : (
+                                    <Tooltip title="Eliminar" arrow>
+                                      <Box>
+                                        <IconButton
+                                          color="error"
+                                          onClick={() =>
+                                            handleOpenDeleteDialog &&
+                                            handleOpenDeleteDialog(getRowId(row))
+                                          }
+                                        >
+                                          <DeleteIcon />
+                                        </IconButton>
+                                      </Box>
+                                    </Tooltip>
+                                  ))
                                 ) : (
                                   <Tooltip title="Eliminar" arrow>
                                     <Box>
                                       <IconButton
-                                        color="secondary"
+                                        color="error"
                                         onClick={() =>
                                           handleOpenDeleteDialog &&
                                           handleOpenDeleteDialog(getRowId(row))

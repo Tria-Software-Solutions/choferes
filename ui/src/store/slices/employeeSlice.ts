@@ -21,8 +21,14 @@ export const fetchEmployees = createAsyncThunk(
   "employees/fetchEmployees",
   async (_, { rejectWithValue }) => {
     try {
-      const employees = await EmployeeService.getEmployees();
-      return employees;
+      const response = await EmployeeService.getEmployees();
+      if (Array.isArray(response)) {
+        return response;
+      } else if (response && Array.isArray(response.employees)) {
+        return response.employees;
+      } else {
+        return [];
+      }
     } catch (error: any) {
       return rejectWithValue(
         error.response?.data || "Failed to fetch employees"

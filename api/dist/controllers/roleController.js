@@ -86,7 +86,6 @@ const createRole = (req, res) => __awaiter(void 0, void 0, void 0, function* () 
         return res.status(201).json(newRole);
     }
     catch (error) {
-        console.log("ERROR: ", error);
         return res.status(500).json({ message: "Error creating Role", error });
     }
 });

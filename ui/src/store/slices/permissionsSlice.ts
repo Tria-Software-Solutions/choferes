@@ -21,8 +21,14 @@ export const fetchPermissions = createAsyncThunk(
   "permissions/fetchPermissions",
   async (_, { rejectWithValue }) => {
     try {
-      const permissions = await PermissionService.getPermissions();
-      return permissions;
+      const response = await PermissionService.getPermissions();
+      if (Array.isArray(response)) {
+        return response;
+      } else if (response && Array.isArray(response.permissions)) {
+        return response.permissions;
+      } else {
+        return [];
+      }
     } catch (error: any) {
       return rejectWithValue(error.response?.data || "Failed to fetch permissions");
     }

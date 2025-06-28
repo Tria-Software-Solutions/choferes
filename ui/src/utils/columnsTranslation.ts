@@ -15,6 +15,7 @@ export type ColumnsTranslation = {
   brand: string;
   color: string;
   parkingLot: string;
+  parkingDate: string;
   notes: string;
   createdAt: string;
   updatedAt: string;

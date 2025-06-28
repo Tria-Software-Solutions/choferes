@@ -28,8 +28,14 @@ export const fetchVehicles = createAsyncThunk(
     { rejectWithValue }
   ) => {
     try {
-      const vehicles = await VehicleService.getVehicles(page, perPage);
-      return vehicles;
+      const response = await VehicleService.getVehicles(page, perPage);
+      if (Array.isArray(response)) {
+        return response;
+      } else if (response && Array.isArray((response as any).vehicles)) {
+        return (response as any).vehicles;
+      } else {
+        return [];
+      }
     } catch (error: any) {
       return rejectWithValue(
         error.response?.data || "Failed to fetch vehicles"
