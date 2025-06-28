@@ -6,5 +6,6 @@ export interface Vehicle {
   color: string;    
   parkingLot: string; 
   notes: string;  
+  parkingDate: Date;
   createdAt: Date;
 }
