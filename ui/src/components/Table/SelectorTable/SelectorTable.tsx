@@ -665,7 +665,15 @@ const SelectorTable: React.FC<SelectorTableProps> = React.memo(
                       colSpan={2}
                     >
                       <FormControl>
-                        <InputLabel>Total</InputLabel>
+                        <InputLabel sx={{ 
+                          color: '#ffffff !important',
+                          '&.Mui-focused': {
+                            color: '#ffffff !important',
+                          },
+                          '&.Mui-focused.MuiInputLabel-shrink': {
+                            color: '#ffffff !important',
+                          }
+                        }}>Total</InputLabel>
                         <Select
                           value={selectedPeriod}
                           onChange={(e) =>
@@ -678,6 +686,31 @@ const SelectorTable: React.FC<SelectorTableProps> = React.memo(
                           }
                           autoWidth
                           label="Total"
+                          sx={{
+                            color: '#ffffff',
+                            '& .MuiOutlinedInput-notchedOutline': {
+                              borderColor: '#ffffff !important',
+                              borderWidth: '2px !important',
+                            },
+                            '&:hover .MuiOutlinedInput-notchedOutline': {
+                              borderColor: '#ffffff !important',
+                              borderWidth: '2px !important',
+                            },
+                            '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
+                              borderColor: '#ffffff !important',
+                              borderWidth: '2px !important',
+                            },
+                            '&.Mui-focused:hover .MuiOutlinedInput-notchedOutline': {
+                              borderColor: '#ffffff !important',
+                              borderWidth: '2px !important',
+                            },
+                            '& .MuiSelect-select': {
+                              color: '#ffffff',
+                            },
+                            '& .MuiSelect-icon': {
+                              color: '#ffffff',
+                            },
+                          }}
                         >
                           <MenuItem value="weekly">Semanal</MenuItem>
                           <MenuItem value="biweekly">Quincenal</MenuItem>

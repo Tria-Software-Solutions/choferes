@@ -12,20 +12,6 @@ code {
     monospace;
 }
 
-.search-bar-container {
-  display: flex;
-  align-items: center;
-}
-
-.search-bar-input {
-  margin-left: 8px;
-  flex: 1;
-}
-
-.search-bar-icon {
-  padding: 10px;
-}
-
 .table-container {
   width: 100%; 
   table-layout: fixed; 

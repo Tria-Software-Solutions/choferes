@@ -12,6 +12,8 @@ import {
 import SearchBar from "../../components/SearchBar/SearchBar";
 import CustomSpeedDial from "../../components/SpeedDial/CustomSpeedDial";
 import EditableTable from "../../components/Table/EditableTable/EditableTable";
+import ModalComponent from "../../components/Modal/ModalComponent";
+import AddEmployeeForm from "../../components/Forms/AddEmployeeForm";
 import { useAppNotifications } from "../../components/Snackbar/SnackbarWrapper";
 import {
   Button,
@@ -54,14 +56,14 @@ const EmployeesPage: React.FC = () => {
   const [filteredEmployees, setFilteredEmployees] = useState<Employee[]>([]);
   const [totalCount, setTotalCount] = useState(0);
   const [editRowId, setEditRowId] = useState<number | null>(null);
-  const [addFields, setAddFields] = useState({ firstName: "", lastName: "" });
+  const [openAddModal, setOpenAddModal] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const [editFields, setEditFields] = useState({ firstName: "", lastName: "" });
   const [openDeleteDialog, setOpenDeleteDialog] = useState(false);
   const [employeeToDelete, setEmployeeToDelete] = useState<number | null>(null);
   const [filter, setFilter] = useState("");
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(5);
-  const [isAddFormValid, setIsAddFormValid] = useState(false);
   const [isEditFormValid, setIsEditFormValid] = useState(false);
 
   const theme = useTheme();
@@ -93,7 +95,7 @@ const EmployeesPage: React.FC = () => {
     setTotalCount(filteredEmployees.length);
   }, [filter, employees, filteredEmployees.length]);
 
-  const validateFields = useCallback((fields: typeof addFields) => {
+  const validateFields = useCallback((fields: typeof editFields) => {
     const regex = {
       text: /^[a-zA-ZáéíóúÁÉÍÓÚñÑüÜëË\s-]+$/,
     };
@@ -103,10 +105,6 @@ const EmployeesPage: React.FC = () => {
     );
   }, []);
 
-  useEffect(
-    () => setIsAddFormValid(validateFields(addFields)),
-    [addFields, validateFields]
-  );
   useEffect(() => {
     if (editRowId !== null) setIsEditFormValid(validateFields(editFields));
   }, [editFields, editRowId, validateFields]);
@@ -115,14 +113,11 @@ const EmployeesPage: React.FC = () => {
     setFilter(e.target.value);
   };
 
-  const handleCreate = async () => {
+  const handleCreate = async (newEmployee: { firstName: string; lastName: string }) => {
     try {
-      const newEmployee: Omit<Employee, "id"> = {
-        firstName: addFields.firstName,
-        lastName: addFields.lastName,
-      };
+      setIsSubmitting(true);
       dispatch(createEmployee(newEmployee));
-      setAddFields({ firstName: "", lastName: "" });
+      setOpenAddModal(false);
       showNotification(
         "El registro del empleado fue exitoso",
         "success",
@@ -137,7 +132,17 @@ const EmployeesPage: React.FC = () => {
         5000,
         false
       );
+    } finally {
+      setIsSubmitting(false);
     }
+  };
+
+  const handleOpenAddModal = () => {
+    setOpenAddModal(true);
+  };
+
+  const handleCloseAddModal = () => {
+    setOpenAddModal(false);
   };
 
   const handleEdit = (employee: Employee) => {
@@ -305,73 +310,26 @@ const EmployeesPage: React.FC = () => {
             {userPermissions.includes(PERMISSIONS.CREATE_EMPLOYEES) && (
               <Grid item xs={12} md={6}>
                 <Box
-                  display="flex"
-                  flexDirection={{ xs: "column", sm: "column", md: "row" }}
-                  alignItems="center"
-                  justifyContent="flex-end"
-                  gap={2}
+                  sx={{
+                    display: 'flex',
+                    justifyContent: 'flex-end',
+                  }}
                 >
-                  <Grid container spacing={2} alignItems="center">
-                    <Grid item xs={6} md={6}>
-                      <TextField
-                        label="Nombre"
-                        variant="outlined"
-                        fullWidth
-                        sx={{
-                          height: 56,
-                        }}
-                        value={addFields.firstName}
-                        onChange={(e) =>
-                          setAddFields({
-                            ...addFields,
-                            firstName: e.target.value,
-                          })
-                        }
-                      />
-                    </Grid>
-                    <Grid item xs={6} md={6}>
-                      <TextField
-                        label="Apellido"
-                        variant="outlined"
-                        fullWidth
-                        sx={{
-                          height: 56,
-                        }}
-                        value={addFields.lastName}
-                        onChange={(e) =>
-                          setAddFields({
-                            ...addFields,
-                            lastName: e.target.value,
-                          })
-                        }
-                      />
-                    </Grid>
-                  </Grid>
-                  <Tooltip title="Agregar Empleado" arrow>
-                    <Box
-                      sx={{
-                        width: { xs: "100%", md: "auto" },
-                        display: "flex",
-                        justifyContent: { xs: "stretch", md: "flex-end" },
-                      }}
-                    >
-                      <Button
-                        variant="contained"
-                        color="primary"
-                        sx={{
-                          minHeight: 56,
-                          display: "flex",
-                          justifyContent: "center",
-                          lineHeight: "normal",
-                          width: { xs: "100%", md: "auto" },
-                        }}
-                        onClick={handleCreate}
-                        disabled={!isAddFormValid}
-                      >
-                        <PersonAddAlt1RoundedIcon />
-                      </Button>
-                    </Box>
-                  </Tooltip>
+                  <Button
+                    variant="contained"
+                    color="primary"
+                    onClick={handleOpenAddModal}
+                    startIcon={<PersonAddAlt1RoundedIcon />}
+                    sx={{
+                      px: 4,
+                      py: 1.5,
+                      fontWeight: 600,
+                      textTransform: 'none',
+                      fontSize: '1rem',
+                    }}
+                  >
+                    Agregar Empleado
+                  </Button>
                 </Box>
               </Grid>
             )}
@@ -439,6 +397,22 @@ const EmployeesPage: React.FC = () => {
           </Button>
         </DialogActions>
       </Dialog>
+      
+      {/* Modal para Agregar Empleado */}
+      <ModalComponent
+        buttonType="none"
+        open={openAddModal}
+        onCloseModal={handleCloseAddModal}
+        modalTitle="Agregar Nuevo Empleado"
+        showActions={false}
+        maxWidth="md"
+      >
+        <AddEmployeeForm
+          onSubmit={handleCreate}
+          onCancel={handleCloseAddModal}
+          isLoading={isSubmitting}
+        />
+      </ModalComponent>
     </Box>
   );
 };

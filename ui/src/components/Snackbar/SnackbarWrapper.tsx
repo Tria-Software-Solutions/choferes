@@ -3,7 +3,7 @@ import CheckCircleOutlinedIcon from "@mui/icons-material/CheckCircleOutlined";
 import ReportOutlinedIcon from "@mui/icons-material/ReportOutlined";
 import WarningAmberOutlinedIcon from "@mui/icons-material/WarningAmberOutlined";
 import InfoOutlinedIcon from "@mui/icons-material/InfoOutlined";
-import { Snackbar, IconButton } from "@mui/material";
+import { Snackbar, IconButton, useTheme } from "@mui/material";
 import CloseIcon from "@mui/icons-material/Close";
 
 interface NotificationContextType {
@@ -34,19 +34,37 @@ export const useAppNotifications = () => {
 const NotificationIcon: React.FC<{
   severity: "success" | "error" | "warning" | "info";
 }> = ({ severity }) => {
+  const theme = useTheme();
+  
+  const getIconColor = () => {
+    switch (severity) {
+      case "success":
+        return theme.palette.success.main;
+      case "error":
+        return theme.palette.error.main;
+      case "warning":
+        return theme.palette.warning.main;
+      case "info":
+        return theme.palette.info.main;
+      default:
+        return theme.palette.text.primary;
+    }
+  };
+
+  const iconStyle = { 
+    color: getIconColor(), 
+    marginRight: 8 
+  };
+
   switch (severity) {
     case "success":
-      return (
-        <CheckCircleOutlinedIcon style={{ color: "green", marginRight: 8 }} />
-      );
+      return <CheckCircleOutlinedIcon style={iconStyle} />;
     case "error":
-      return <ReportOutlinedIcon style={{ color: "red", marginRight: 8 }} />;
+      return <ReportOutlinedIcon style={iconStyle} />;
     case "warning":
-      return (
-        <WarningAmberOutlinedIcon style={{ color: "orange", marginRight: 8 }} />
-      );
+      return <WarningAmberOutlinedIcon style={iconStyle} />;
     case "info":
-      return <InfoOutlinedIcon style={{ color: "blue", marginRight: 8 }} />;
+      return <InfoOutlinedIcon style={iconStyle} />;
     default:
       return null;
   }
@@ -55,6 +73,7 @@ const NotificationIcon: React.FC<{
 export const AppNotificationProvider: React.FC<{
   children: React.ReactNode;
 }> = ({ children }) => {
+  const theme = useTheme();
   const [open, setOpen] = useState(false);
   const [message, setMessage] = useState("");
   const [severity, setSeverity] = useState<
@@ -111,6 +130,12 @@ export const AppNotificationProvider: React.FC<{
                 aria-label="close"
                 color="inherit"
                 onClick={() => setOpen(false)}
+                sx={{
+                  color: theme.palette.primary.contrastText,
+                  '&:hover': {
+                    backgroundColor: 'rgba(255,255,255,0.1)',
+                  },
+                }}
               >
                 <CloseIcon />
               </IconButton>
@@ -120,6 +145,23 @@ export const AppNotificationProvider: React.FC<{
                     onButtonClick();
                     setOpen(false);
                   }}
+                  style={{
+                    backgroundColor: 'transparent',
+                    border: 'none',
+                    color: theme.palette.primary.contrastText,
+                    cursor: 'pointer',
+                    padding: '4px 8px',
+                    borderRadius: '4px',
+                    fontSize: '0.875rem',
+                    fontWeight: 500,
+                    transition: 'all 0.2s ease',
+                  }}
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.backgroundColor = 'rgba(255,255,255,0.1)';
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.backgroundColor = 'transparent';
+                  }}
                 >
                   {buttonText}
                 </button>
@@ -127,6 +169,14 @@ export const AppNotificationProvider: React.FC<{
             </>
           )
         }
+        sx={{
+          '& .MuiSnackbarContent-root': {
+            backgroundColor: theme.palette.primary.main,
+            color: theme.palette.primary.contrastText,
+            borderRadius: theme.shape.borderRadius,
+            boxShadow: theme.shadows[8],
+          },
+        }}
       />
     </NotificationContext.Provider>
   );

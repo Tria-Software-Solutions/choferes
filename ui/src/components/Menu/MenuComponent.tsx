@@ -8,6 +8,7 @@ import {
   SvgIconProps,
   ListItemIcon,
   ListItemText,
+  useTheme,
 } from "@mui/material";
 
 interface MenuItemProps {
@@ -30,6 +31,7 @@ const MenuComponent: React.FC<MenuComponentProps> = ({
   text,
   menuItems,
 }) => {
+  const theme = useTheme();
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const [subMenuAnchorEl, setSubMenuAnchorEl] = useState<null | HTMLElement>(
     null
@@ -57,8 +59,13 @@ const MenuComponent: React.FC<MenuComponentProps> = ({
           color="inherit"
           sx={{
             height: "40px",
-            border: "0.5px solid #f0f2f5",
-            borderRadius: "6px",
+            border: `1px solid ${theme.palette.divider}`,
+            borderRadius: theme.shape.borderRadius,
+            transition: 'all 0.3s ease',
+            '&:hover': {
+              backgroundColor: theme.palette.action.hover,
+              transform: 'translateY(-1px)',
+            },
           }}
           aria-controls={open ? "generic-menu" : undefined}
           aria-haspopup="true"
@@ -71,6 +78,12 @@ const MenuComponent: React.FC<MenuComponentProps> = ({
         <Button
           sx={{
             height: "40px",
+            color: theme.palette.primary.contrastText,
+            transition: 'all 0.3s ease',
+            '&:hover': {
+              backgroundColor: 'rgba(255,255,255,0.1)',
+              transform: 'translateY(-1px)',
+            },
           }}
           aria-controls={open ? "generic-menu" : undefined}
           aria-haspopup="true"
@@ -83,8 +96,13 @@ const MenuComponent: React.FC<MenuComponentProps> = ({
         <Button
           sx={{
             height: "40px",
-            border: "0.5px solid #f0f2f5",
-            borderRadius: "6px",
+            border: `1px solid ${theme.palette.divider}`,
+            borderRadius: theme.shape.borderRadius,
+            transition: 'all 0.3s ease',
+            '&:hover': {
+              backgroundColor: theme.palette.action.hover,
+              transform: 'translateY(-1px)',
+            },
           }}
           aria-controls={open ? "generic-menu" : undefined}
           aria-haspopup="true"
@@ -104,6 +122,8 @@ const MenuComponent: React.FC<MenuComponentProps> = ({
             mt: 1.5,
             borderTopLeftRadius: 0,
             borderTopRightRadius: 0,
+            boxShadow: theme.shadows[8],
+            border: `1px solid ${theme.palette.divider}`,
           },
         }}
       >
@@ -115,9 +135,20 @@ const MenuComponent: React.FC<MenuComponentProps> = ({
                 if (!item.subMenuItems) handleClose();
               }}
               onMouseEnter={item.subMenuItems ? handleSubMenuClick : undefined}
+              sx={{
+                transition: 'all 0.2s ease',
+                '&:hover': {
+                  backgroundColor: theme.palette.action.hover,
+                },
+              }}
             >
               {item.icon && <ListItemIcon>{item.icon}</ListItemIcon>}
-              <ListItemText primary={item.text} />
+              <ListItemText 
+                primary={item.text}
+                primaryTypographyProps={{
+                  sx: { fontWeight: 500 }
+                }}
+              />
               {item.subMenuItems && (
                 <IconButton onClick={handleSubMenuClick}></IconButton>
               )}
@@ -128,13 +159,33 @@ const MenuComponent: React.FC<MenuComponentProps> = ({
                 anchorEl={subMenuAnchorEl}
                 open={openSubMenu}
                 onClose={handleClose}
+                PaperProps={{
+                  sx: {
+                    boxShadow: theme.shadows[8],
+                    border: `1px solid ${theme.palette.divider}`,
+                  },
+                }}
               >
                 {item.subMenuItems.map((subItem, subIndex) => (
-                  <MenuItem key={subIndex} onClick={subItem.onClick}>
+                  <MenuItem 
+                    key={subIndex} 
+                    onClick={subItem.onClick}
+                    sx={{
+                      transition: 'all 0.2s ease',
+                      '&:hover': {
+                        backgroundColor: theme.palette.action.hover,
+                      },
+                    }}
+                  >
                     {subItem.icon && (
                       <ListItemIcon>{subItem.icon}</ListItemIcon>
                     )}
-                    <ListItemText primary={subItem.text} />
+                    <ListItemText 
+                      primary={subItem.text}
+                      primaryTypographyProps={{
+                        sx: { fontWeight: 500 }
+                      }}
+                    />
                   </MenuItem>
                 ))}
               </Menu>
