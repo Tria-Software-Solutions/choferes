@@ -277,7 +277,6 @@ const VehiclesPage: React.FC = () => {
           ...editFields,
         };
         await dispatch(updateVehicle({ id, updatedVehicle }));
-        dispatch(fetchVehiclesByDate(format(selectedDate, "yyyy-MM-dd")));
         setEditRowId(null);
         setEditFields({
           ticket: "",
@@ -305,7 +304,7 @@ const VehiclesPage: React.FC = () => {
         );
       }
     },
-    [dispatch, editFields, selectedDate, showNotification]
+    [dispatch, editFields, showNotification]
   );
 
   const handleOpenDeleteDialog = (id: number) => {
