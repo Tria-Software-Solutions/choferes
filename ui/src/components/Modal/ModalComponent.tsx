@@ -1,10 +1,22 @@
 import * as React from "react";
-import { Button, IconButton, Modal, Tooltip, Typography } from "@mui/material";
-import { Box, SxProps } from "@mui/system";
+import { 
+  Button, 
+  IconButton,
+  Tooltip, 
+  Typography,
+  Box,
+  useTheme,
+  useMediaQuery,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+} from "@mui/material";
+import { SxProps } from "@mui/system";
 import CloseIcon from "@mui/icons-material/Close";
 
 interface ModalComponentProps {
-  buttonType: "text" | "button" | "icon";
+  buttonType?: "text" | "button" | "icon" | "none";
   buttonLabel?: string;
   buttonIcon?: React.ReactNode;
   variant?: "contained" | "outlined" | "text";
@@ -14,27 +26,27 @@ interface ModalComponentProps {
   modalTooltip?: string;
   modalTitle: string;
   modalDescription?: JSX.Element | string;
-  children?: (props: { handleClose: () => void }) => React.ReactNode;
+  children?: ((props: { handleClose: () => void }) => React.ReactNode) | React.ReactNode;
   onCloseModal?: () => void;
+  open?: boolean;
+  onOpen?: () => void;
+  maxWidth?: 'xs' | 'sm' | 'md' | 'lg' | 'xl';
+  fullWidth?: boolean;
+  showActions?: boolean;
+  saveButtonText?: string;
+  cancelButtonText?: string;
+  onSave?: () => void;
+  onCancel?: () => void;
+  showSaveButton?: boolean;
+  showCancelButton?: boolean;
+  disableEscapeKeyDown?: boolean;
 }
 
-const defaultModalStyle = {
-  position: "absolute" as "absolute",
-  zIndex: 9999,
-  top: "50%",
-  left: "50%",
-  transform: "translate(-50%, -50%)",
-  bgcolor: "background.paper",
-  borderRadius: "8px",
-  boxShadow: 24,
-  p: 4,
-};
-
 const ModalComponent: React.FC<ModalComponentProps> = ({
-  buttonType,
-  buttonLabel = "Open Modal",
+  buttonType = "button",
+  buttonLabel,
   buttonIcon,
-  variant,
+  variant = "contained",
   buttonStyle,
   modalStyle,
   disabled,
@@ -43,109 +55,207 @@ const ModalComponent: React.FC<ModalComponentProps> = ({
   modalDescription,
   children,
   onCloseModal,
+  open: externalOpen,
+  onOpen,
+  maxWidth = 'md',
+  fullWidth = true,
+  showActions = false,
+  saveButtonText = 'Guardar',
+  cancelButtonText = 'Cancelar',
+  onSave,
+  onCancel,
+  showSaveButton = true,
+  showCancelButton = true,
+  disableEscapeKeyDown = false,
 }) => {
-  const [open, setOpen] = React.useState(false);
-  const handleOpen = () => setOpen(true);
+  const theme = useTheme();
+  const isSmallScreen = useMediaQuery(theme.breakpoints.down('sm'));
+  
+  const [internalOpen, setInternalOpen] = React.useState(false);
+  const isControlled = externalOpen !== undefined;
+  const open = isControlled ? externalOpen : internalOpen;
+
+  const handleOpen = () => {
+    if (!isControlled) {
+      setInternalOpen(true);
+    }
+    if (onOpen) {
+      onOpen();
+    }
+  };
+
   const handleClose = () => {
-    setOpen(false);
+    if (!isControlled) {
+      setInternalOpen(false);
+    }
     if (onCloseModal) {
       onCloseModal();
+    }
+    if (onCancel) {
+      onCancel();
+    }
+  };
+
+  const handleSave = () => {
+    if (onSave) {
+      onSave();
+    }
+  };
+
+  const renderButton = () => {
+    if (buttonType === "none") return null;
+
+    const buttonProps = {
+      onClick: handleOpen,
+      sx: buttonStyle,
+      disabled,
+    };
+
+    const tooltipWrapper = (button: React.ReactElement) => 
+      modalTooltip ? (
+        <Tooltip title={modalTooltip} arrow>
+          {button}
+        </Tooltip>
+      ) : button;
+
+    if (buttonType === "text") {
+      return tooltipWrapper(
+        <Button {...buttonProps}>
+          {buttonLabel}
+        </Button>
+      );
+    } else if (buttonType === "icon") {
+      return tooltipWrapper(
+        <IconButton {...buttonProps}>
+          {buttonIcon}
+        </IconButton>
+      );
+    } else {
+      return tooltipWrapper(
+        <Button variant={variant} {...buttonProps}>
+          {buttonIcon}
+          {buttonLabel}
+        </Button>
+      );
     }
   };
 
   return (
     <div>
-      {modalTooltip ? (
-        <>
-          {buttonType === "text" ? (
-            <Tooltip title={modalTooltip} arrow>
-              <Button onClick={handleOpen} sx={buttonStyle} disabled={disabled}>
-                {buttonLabel}
-              </Button>
-            </Tooltip>
-          ) : buttonType === "icon" ? (
-            <Tooltip title={modalTooltip} arrow>
-              <IconButton
-                onClick={handleOpen}
-                sx={buttonStyle}
-                disabled={disabled}
-              >
-                {buttonIcon}
-              </IconButton>
-            </Tooltip>
-          ) : (
-            <Tooltip title={modalTooltip} arrow>
-              <Button
-                variant={variant}
-                sx={buttonStyle}
-                disabled={disabled}
-                onClick={handleOpen}
-              >
-                {buttonIcon}
-              </Button>
-            </Tooltip>
-          )}
-        </>
-      ) : (
-        <>
-          {buttonType === "text" ? (
-            <Button onClick={handleOpen} sx={buttonStyle} disabled={disabled}>
-              {buttonLabel}
-            </Button>
-          ) : buttonType === "icon" ? (
-            <IconButton
-              onClick={handleOpen}
-              sx={buttonStyle}
-              disabled={disabled}
-            >
-              {buttonIcon}
-            </IconButton>
-          ) : (
-            <Button
-              variant={variant}
-              sx={buttonStyle}
-              disabled={disabled}
-              onClick={handleOpen}
-            >
-              {buttonIcon}
-            </Button>
-          )}
-        </>
-      )}
+      {renderButton()}
 
-      <Modal
+      <Dialog
         open={open}
         onClose={handleClose}
-        aria-labelledby="modal-title"
-        aria-describedby="modal-description"
+        maxWidth={maxWidth}
+        fullWidth={fullWidth}
+        fullScreen={isSmallScreen}
+        disableEscapeKeyDown={disableEscapeKeyDown}
+        PaperProps={{
+          sx: {
+            borderRadius: isSmallScreen ? 0 : 2,
+            boxShadow: '0 8px 32px rgba(0,0,0,0.12)',
+            border: '1px solid',
+            borderColor: 'divider',
+            ...modalStyle,
+          },
+        }}
       >
-        <Box sx={{ ...defaultModalStyle, ...modalStyle }}>
-          <Box
+        <DialogTitle
+          sx={{
+            backgroundColor: theme.palette.primary.main,
+            color: theme.palette.primary.contrastText,
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            px: 3,
+            py: 2,
+            marginBottom: '25px'
+          }}
+        >
+          <Typography variant="h6" sx={{ fontWeight: 600 }}>
+            {modalTitle}
+          </Typography>
+          <IconButton
+            onClick={handleClose}
             sx={{
-              display: "flex",
-              justifyContent: "space-between",
-              alignItems: "center",
+              color: theme.palette.primary.contrastText,
+              '&:hover': {
+                backgroundColor: 'rgba(255,255,255,0.1)',
+              },
             }}
           >
-            <Typography id="modal-title" variant="h6" component="h2">
-              {modalTitle}
-            </Typography>
-            <IconButton onClick={handleClose} aria-label="close">
-              <CloseIcon />
-            </IconButton>
-          </Box>
+            <CloseIcon />
+          </IconButton>
+        </DialogTitle>
+
+        <DialogContent
+          sx={{
+            p: 4,
+            pt: '25px',
+            pb: 3,
+            backgroundColor: theme.palette.background.paper,
+          }}
+        >
           {modalDescription && (
-            <Typography id="modal-description" sx={{ mt: 2 }}>
+            <Typography sx={{ mb: 2, color: theme.palette.text.secondary }}>
               {modalDescription}
             </Typography>
           )}
-          <Box sx={{ mt: 2 }}>
+          <Box>
             {children && typeof children === "function"
               ? children({ handleClose })
               : children}
           </Box>
-        </Box>
-      </Modal>
+        </DialogContent>
+
+        {showActions && (showSaveButton || showCancelButton) && (
+          <DialogActions
+            sx={{
+              p: 4,
+              pt: 2,
+              backgroundColor: theme.palette.background.paper,
+              borderTop: '1px solid',
+              borderColor: theme.palette.divider,
+            }}
+          >
+            <Box
+              sx={{
+                display: 'flex',
+                gap: 2,
+                width: '100%',
+                justifyContent: 'flex-end',
+                flexDirection: { xs: 'column', sm: 'row' },
+              }}
+            >
+              {showCancelButton && (
+                <Button
+                  variant="outlined"
+                  onClick={handleClose}
+                  fullWidth={isSmallScreen}
+                  sx={{
+                    minWidth: { xs: '100%', sm: 120 },
+                  }}
+                >
+                  {cancelButtonText}
+                </Button>
+              )}
+              {showSaveButton && (
+                <Button
+                  variant="contained"
+                  onClick={handleSave}
+                  fullWidth={isSmallScreen}
+                  sx={{
+                    minWidth: { xs: '100%', sm: 120 },
+                  }}
+                >
+                  {saveButtonText}
+                </Button>
+              )}
+            </Box>
+          </DialogActions>
+        )}
+      </Dialog>
     </div>
   );
 };

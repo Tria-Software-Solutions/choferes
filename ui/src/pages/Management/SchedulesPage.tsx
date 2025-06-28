@@ -12,10 +12,11 @@ import {
 import SearchBar from "../../components/SearchBar/SearchBar";
 import EditableTable from "../../components/Table/EditableTable/EditableTable";
 import CustomSpeedDial from "../../components/SpeedDial/CustomSpeedDial";
+import ModalComponent from "../../components/Modal/ModalComponent";
+import AddScheduleForm from "../../components/Forms/AddScheduleForm";
 import { useAppNotifications } from "../../components/Snackbar/SnackbarWrapper";
 import {
   Button,
-  TextField,
   Grid,
   Box,
   Typography,
@@ -23,21 +24,10 @@ import {
   DialogActions,
   DialogContent,
   DialogTitle,
-  FormControl,
-  InputLabel,
-  Select,
-  MenuItem,
-  Tooltip,
   useTheme,
   useMediaQuery,
   CircularProgress,
   Backdrop,
-  FormGroup,
-  FormControlLabel,
-  Switch,
-  OutlinedInput,
-  Checkbox,
-  ListItemText,
 } from "@mui/material";
 import {
   createExportOptions,
@@ -46,7 +36,7 @@ import {
   exportToPDF,
 } from "../../utils/export";
 import { translateDayOptionsToSpanish } from "../../utils/string";
-import { DAYS_LIST, PAGE_TITLE, PERMISSIONS } from "../../constants/constants";
+import { PAGE_TITLE, PERMISSIONS } from "../../constants/constants";
 import EditCalendarRoundedIcon from "@mui/icons-material/EditCalendarRounded";
 import PostAddRoundedIcon from "@mui/icons-material/PostAddRounded";
 import DownloadRoundedIcon from "@mui/icons-material/DownloadRounded";
@@ -65,17 +55,8 @@ const SchedulesPage: React.FC = () => {
   const [filteredSchedules, setFilteredSchedules] = useState<Schedule[]>([]);
   const [totalCountSchedules, setTotalCountSchedules] = useState(0);
   const [editRowId, setEditRowId] = useState<number | null>(null);
-  const [addFields, setAddFields] = useState<{
-    label: string;
-    days: string[];
-    hours: string;
-    specialSchedule: boolean;
-  }>({
-    label: "",
-    days: [],
-    hours: "",
-    specialSchedule: false,
-  });
+  const [openAddModal, setOpenAddModal] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const [editFields, setEditFields] = useState<{
     label: string;
     days: string[];
@@ -92,7 +73,6 @@ const SchedulesPage: React.FC = () => {
   const [filter, setFilter] = useState("");
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(5);
-  const [isAddFormValid, setIsAddFormValid] = useState(false);
   const [isEditFormValid, setIsEditFormValid] = useState(false);
 
   const theme = useTheme();
@@ -130,19 +110,20 @@ const SchedulesPage: React.FC = () => {
     setTotalCountSchedules(newFilteredSchedules.length);
   }, [filter, schedules]);
 
-  const validateFields = useCallback((fields: typeof addFields) => {
+  const validateFields = useCallback((fields: typeof editFields) => {
     const regex = {
       text: /^[a-zA-ZáéíóúÁÉÍÓÚñÑüÜëË\s-]+$/,
       time: /^[0-9]+$/,
     };
 
-    return regex.text.test(fields.label) && regex.time.test(fields.hours);
+    const isLabelValid = fields.label.trim().length > 0 && regex.text.test(fields.label);
+    const isHoursValid = fields.hours.length > 0 && regex.time.test(fields.hours) && 
+                        parseInt(fields.hours) > 0 && parseInt(fields.hours) <= 24;
+    const isDaysValid = fields.days.length > 0;
+
+    return isLabelValid && isHoursValid && isDaysValid;
   }, []);
 
-  useEffect(
-    () => setIsAddFormValid(validateFields(addFields)),
-    [addFields, validateFields]
-  );
   useEffect(() => {
     if (editRowId !== null) setIsEditFormValid(validateFields(editFields));
   }, [editFields, editRowId, validateFields]);
@@ -151,16 +132,11 @@ const SchedulesPage: React.FC = () => {
     setFilter(e.target.value);
   };
 
-  const handleCreate = async () => {
+  const handleCreate = async (newSchedule: Omit<Schedule, "id">) => {
     try {
-      const newSchedule: Omit<Schedule, "id"> = {
-        label: addFields.label,
-        days: addFields.days,
-        hours: parseInt(addFields.hours, 10),
-        specialSchedule: addFields.specialSchedule,
-      };
+      setIsSubmitting(true);
       dispatch(createSchedule(newSchedule));
-      setAddFields({ label: "", days: [], hours: "", specialSchedule: false });
+      setOpenAddModal(false);
       showNotification(
         "El registro del horario fue exitoso",
         "success",
@@ -175,6 +151,8 @@ const SchedulesPage: React.FC = () => {
         5000,
         false
       );
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -227,6 +205,14 @@ const SchedulesPage: React.FC = () => {
   const handleCloseDeleteDialog = () => {
     setOpenDeleteDialog(false);
     setScheduleToDelete(null);
+  };
+
+  const handleOpenAddModal = () => {
+    setOpenAddModal(true);
+  };
+
+  const handleCloseAddModal = () => {
+    setOpenAddModal(false);
   };
 
   const handleDelete = async () => {
@@ -348,137 +334,26 @@ const SchedulesPage: React.FC = () => {
             {userPermissions.includes(PERMISSIONS.CREATE_SCHEDULES) && (
               <Grid item xs={12} md={8} lg={6}>
                 <Box
-                  display="flex"
-                  flexDirection={{ xs: "column", sm: "column", md: "row" }}
-                  alignItems="center"
-                  justifyContent="flex-end"
-                  gap={2}
+                  sx={{
+                    display: 'flex',
+                    justifyContent: 'flex-end',
+                  }}
                 >
-                  <Grid container spacing={2} alignItems="center">
-                    <Grid item xs={6} md={3} lg={3}>
-                      <TextField
-                        label="Asignación"
-                        variant="outlined"
-                        fullWidth
-                        sx={{
-                          height: 56,
-                        }}
-                        value={addFields.label}
-                        onChange={(e) =>
-                          setAddFields({ ...addFields, label: e.target.value })
-                        }
-                      />
-                    </Grid>
-                    <Grid item xs={6} md={3} lg={3}>
-                      <FormControl
-                        variant="outlined"
-                        fullWidth
-                        sx={{
-                          height: 56,
-                        }}
-                      >
-                        <InputLabel>Días</InputLabel>
-                        <Select
-                          multiple
-                          label="Días"
-                          sx={{ height: 56 }}
-                          value={addFields.days}
-                          input={<OutlinedInput label="Días" />}
-                          renderValue={(selected) =>
-                            selected
-                              .map((item) => translateDayOptionsToSpanish(item))
-                              .join(", ")
-                          }
-                          onChange={(e) =>
-                            setAddFields({
-                              ...addFields,
-                              days: Array.isArray(e.target.value)
-                                ? e.target.value
-                                : [e.target.value],
-                            })
-                          }
-                        >
-                          {DAYS_LIST.map((option) => (
-                            <MenuItem key={option.value} value={option.value}>
-                              <Checkbox
-                                checked={addFields.days.includes(option.value)}
-                              />
-                              <ListItemText primary={option.label} />
-                            </MenuItem>
-                          ))}
-                        </Select>
-                      </FormControl>
-                    </Grid>
-                    <Grid item xs={6} md={3} lg={2}>
-                      <TextField
-                        label="Horas"
-                        variant="outlined"
-                        type="number"
-                        fullWidth
-                        sx={{
-                          height: 56,
-                        }}
-                        value={addFields.hours}
-                        onChange={(e) =>
-                          setAddFields({ ...addFields, hours: e.target.value })
-                        }
-                      />
-                    </Grid>
-                    <Grid item xs={6} md={3} lg={4}>
-                      <Box
-                        sx={{
-                          display: "flex",
-                          justifyContent: "center",
-                          alignItems: "center",
-                        }}
-                      >
-                        <FormGroup>
-                          <FormControlLabel
-                            control={
-                              <Switch
-                                size={isSmallScreen ? "small" : "medium"}
-                                color="primary"
-                                checked={addFields.specialSchedule}
-                                onChange={(e) =>
-                                  setAddFields({
-                                    ...addFields,
-                                    specialSchedule: e.target.checked,
-                                  })
-                                }
-                              />
-                            }
-                            label="Horario Especial"
-                            labelPlacement="start"
-                          />
-                        </FormGroup>
-                      </Box>
-                    </Grid>
-                  </Grid>
-                  <Tooltip title="Agregar Horario" arrow>
-                    <Box
-                      sx={{
-                        width: { xs: "100%", md: "auto" },
-                        display: "flex",
-                        justifyContent: { xs: "stretch", md: "flex-end" },
-                      }}
-                    >
-                      <Button
-                        variant="contained"
-                        color="primary"
-                        sx={{
-                          minHeight: 56,
-                          display: "flex",
-                          justifyContent: "center",
-                          lineHeight: "normal",
-                          width: { xs: "100%", md: "auto" },
-                        }}
-                        onClick={handleCreate}
-                        disabled={!isAddFormValid}
-                      >
-                        <PostAddRoundedIcon />
-                      </Button>
-                    </Box>
-                  </Tooltip>
+                  <Button
+                    variant="contained"
+                    color="primary"
+                    onClick={handleOpenAddModal}
+                    startIcon={<PostAddRoundedIcon />}
+                    sx={{
+                      px: 4,
+                      py: 1.5,
+                      fontWeight: 600,
+                      textTransform: 'none',
+                      fontSize: '1rem',
+                    }}
+                  >
+                    Agregar Horario
+                  </Button>
                 </Box>
               </Grid>
             )}
@@ -546,6 +421,22 @@ const SchedulesPage: React.FC = () => {
           </Button>
         </DialogActions>
       </Dialog>
+      
+      {/* Modal para Agregar Horario */}
+      <ModalComponent
+        buttonType="none"
+        open={openAddModal}
+        onCloseModal={handleCloseAddModal}
+        modalTitle="Agregar Nuevo Horario"
+        showActions={false}
+        maxWidth="md"
+      >
+        <AddScheduleForm
+          onSubmit={handleCreate}
+          onCancel={handleCloseAddModal}
+          isLoading={isSubmitting}
+        />
+      </ModalComponent>
     </Box>
   );
 };

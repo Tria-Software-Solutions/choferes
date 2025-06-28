@@ -5,7 +5,6 @@ import { useSelector, useDispatch } from "react-redux";
 import { RootState, AppDispatch } from "../../store/store";
 import {
   fetchVehicles,
-  fetchVehiclesByDate,
   createVehicle,
   updateVehicle,
   deleteVehicle,
@@ -105,7 +104,7 @@ const VehiclesPage: React.FC = () => {
   const [rowsPerPage, setRowsPerPage] = useState(5);
   const [isAddFormValid, setIsAddFormValid] = useState(false);
   const [isEditFormValid, setIsEditFormValid] = useState(false);
-  const [shouldRefetch, setShouldRefetch] = useState(true);
+  const [shouldRefetch, ] = useState(true);
 
   const theme = useTheme();
   const isSmallScreen = useMediaQuery(theme.breakpoints.down("sm"));
