@@ -24,16 +24,14 @@ dotenv.config();
 
 const app = express();
 
-// Configuración más restrictiva de CORS
 const allowedOrigins = [
   "http://localhost:3000",
   process.env.REACT_APP_UI_URL
-].filter(Boolean); // Elimina valores undefined/null
+].filter(Boolean);
 
 app.use(
   cors({
     origin: (origin, callback) => {
-      // Permitir requests sin origin (como mobile apps o Postman)
       if (!origin) {
         return callback(null, true);
       }
@@ -48,7 +46,7 @@ app.use(
     credentials: true,
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
     allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With'],
-    maxAge: 86400 // 24 horas
+    maxAge: 86400
   })
 );
 
@@ -56,7 +54,6 @@ app.use(cookieParser());
 app.use(json({ limit: '10mb' }));
 app.use(urlencoded({ extended: true, limit: '10mb' }));
 
-// Headers de seguridad
 app.use((req, res, next) => {
   res.setHeader('X-Content-Type-Options', 'nosniff');
   res.setHeader('X-Frame-Options', 'DENY');
@@ -80,7 +77,6 @@ app.use("/api/monthly-summary", monthlySummaryRoutes);
 app.use("/api/schedules", scheduleRoutes);
 app.use("/api/vehicles", vehicleRoutes);
 
-// Middleware de manejo de errores mejorado
 app.use(
   (
     error: Error,
@@ -88,7 +84,6 @@ app.use(
     res: express.Response,
     next: express.NextFunction
   ) => {
-    // No exponer detalles del error en producción
     if (process.env.NODE_ENV === 'production') {
       console.error('Error:', error.message);
       res.status(500).json({ error: "Internal server error" });
