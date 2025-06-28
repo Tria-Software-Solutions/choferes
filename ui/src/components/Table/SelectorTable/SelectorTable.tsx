@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useEffect, useMemo, useState, useCallback } from "react";
 import { Employee } from "../../../models/Employee";
 import { Schedule } from "../../../models/Schedule";
 import { HoursWorked } from "../../../models/HoursWorked";
@@ -111,7 +111,7 @@ const SelectorTable: React.FC<SelectorTableProps> = React.memo(
     const [selectedPeriod, setSelectedPeriod] = useState<
       "weekly" | "biweekly" | "monthly"
     >("weekly");
-    const [tabValue, setTabValue] = React.useState(0);
+    const [tabValue, setTabValue] = useState(0);
     const [timeAdjustment, setTimeAdjustment] = useState(0);
     const [orderDirection, setOrderDirection] = useState<"asc" | "desc">("asc");
     const [page, setPage] = useState(0);
@@ -132,7 +132,11 @@ const SelectorTable: React.FC<SelectorTableProps> = React.memo(
       () => getCurrentWeekDates(weekOffset),
       [weekOffset]
     );
-    const multiplePeriods = getInvolvedPeriods(currentWeek);
+    
+    const multiplePeriods = useMemo(
+      () => getInvolvedPeriods(currentWeek),
+      [currentWeek]
+    );
 
     const sortedEmployees = useMemo(() => {
       return [...filteredEmployees].sort((a, b) => {
@@ -144,9 +148,12 @@ const SelectorTable: React.FC<SelectorTableProps> = React.memo(
 
     const startIndex = page * rowsPerPage;
     const endIndex = startIndex + rowsPerPage;
-    const paginatedEmployees = sortedEmployees.slice(startIndex, endIndex);
+    const paginatedEmployees = useMemo(
+      () => sortedEmployees.slice(startIndex, endIndex),
+      [sortedEmployees, startIndex, endIndex]
+    );
 
-    const resultHoursForPeriod = (
+    const resultHoursForPeriod = useCallback((
       employee: Employee,
       period: "weekly" | "biweekly" | "monthly",
       type: "totalHours" | "overtime"
@@ -176,9 +183,9 @@ const SelectorTable: React.FC<SelectorTableProps> = React.memo(
           monthlySummaries
         ).overtime;
       }
-    };
+    }, [weekNumber, biweekNumber, month, year, weeklySummaries, biweeklySummaries, monthlySummaries]);
 
-    const resultHoursForPeriods = (
+    const resultHoursForPeriods = useCallback((
       employee: Employee,
       period: "weekly" | "biweekly" | "monthly",
       type: "totalHours" | "overtime"
@@ -206,9 +213,9 @@ const SelectorTable: React.FC<SelectorTableProps> = React.memo(
           monthlySummaries
         ).overtime;
       }
-    };
+    }, [multiplePeriods, weeklySummaries, biweeklySummaries, monthlySummaries]);
 
-    const resultTotalHours = (employee: Employee) => {
+    const resultTotalHours = useCallback((employee: Employee) => {
       return selectedPeriod === "weekly"
         ? hasMultipleYears(currentWeek)
           ? resultHoursForPeriods(employee, selectedPeriod, "totalHours")
@@ -220,9 +227,9 @@ const SelectorTable: React.FC<SelectorTableProps> = React.memo(
         : hasMultipleYears(currentWeek) || hasMultipleMonths(currentWeek)
         ? resultHoursForPeriods(employee, selectedPeriod, "totalHours")
         : resultHoursForPeriod(employee, selectedPeriod, "totalHours");
-    };
+    }, [selectedPeriod, currentWeek, resultHoursForPeriod, resultHoursForPeriods]);
 
-    const resultOvertime = (employee: Employee) => {
+    const resultOvertime = useCallback((employee: Employee) => {
       return selectedPeriod === "weekly"
         ? hasMultipleYears(currentWeek)
           ? resultHoursForPeriods(employee, selectedPeriod, "overtime")
@@ -234,13 +241,13 @@ const SelectorTable: React.FC<SelectorTableProps> = React.memo(
         : hasMultipleYears(currentWeek) || hasMultipleMonths(currentWeek)
         ? resultHoursForPeriods(employee, selectedPeriod, "overtime")
         : resultHoursForPeriod(employee, selectedPeriod, "overtime");
-    };
+    }, [selectedPeriod, currentWeek, resultHoursForPeriod, resultHoursForPeriods]);
 
-    const handleTabChange = (event: React.SyntheticEvent, newValue: number) => {
+    const handleTabChange = useCallback((event: React.SyntheticEvent, newValue: number) => {
       setTabValue(newValue);
-    };
+    }, []);
 
-    const hasWorkedCurrentWeek = (employee: Employee): boolean => {
+    const hasWorkedCurrentWeek = useCallback((employee: Employee): boolean => {
       const found = weeklySummaries.some(
         (summary) =>
           summary.employeeId === employee.id &&
@@ -248,7 +255,7 @@ const SelectorTable: React.FC<SelectorTableProps> = React.memo(
           summary.year === year
       );
       return found;
-    };
+    }, [weeklySummaries, weekNumber, year]);
 
     const modalContentSummary = (employee: Employee) => {
       return (
