@@ -70,7 +70,6 @@ const VehiclesPage: React.FC = () => {
     (state: RootState) => state.vehicles
   );
   const { showNotification } = useAppNotifications();
-  const [filteredVehicles, setFilteredVehicles] = useState<Vehicle[]>([]);
   const [filteredWeekVehicles, setFilteredWeekVehicles] = useState<Vehicle[]>(
     []
   );
@@ -106,31 +105,32 @@ const VehiclesPage: React.FC = () => {
   const [rowsPerPage, setRowsPerPage] = useState(5);
   const [isAddFormValid, setIsAddFormValid] = useState(false);
   const [isEditFormValid, setIsEditFormValid] = useState(false);
+  const [shouldRefetch, setShouldRefetch] = useState(true);
 
   const theme = useTheme();
   const isSmallScreen = useMediaQuery(theme.breakpoints.down("sm"));
-
-  useEffect(() => {
-    dispatch(fetchVehicles({}));
-    dispatch(fetchVehiclesByDate(format(selectedDate, "yyyy-MM-dd")));
-  }, [dispatch, selectedDate]);
-
-  useEffect(() => {
-    if (isSmallScreen) {
-      setRowsPerPage(5);
-    } else {
-      setRowsPerPage(25);
-    }
-  }, [isSmallScreen]);
 
   const cleanedFilter = useMemo(
     () => filter.replace(/[\s-]/g, "").toLowerCase(),
     [filter]
   );
 
-  useEffect(() => {
-    const allVehicles = Object.values(vehicles).flat();
-    const filtered = allVehicles.filter((vehicle) => {
+  const filteredVehicles = useMemo(() => {
+    const vehiclesForSelectedDate = allVehicles.filter((vehicle) => {
+      const vehicleDate = new Date(vehicle.parkingDate);
+      const selectedDateMidnight = new Date(selectedDate);
+      selectedDateMidnight.setHours(0, 0, 0, 0);
+      
+      const vehicleDateMidnight = new Date(vehicleDate);
+      vehicleDateMidnight.setHours(0, 0, 0, 0);
+      
+      const vehicleDateStr = vehicleDateMidnight.toISOString().split('T')[0];
+      const selectedDateStr = selectedDateMidnight.toISOString().split('T')[0];
+      
+      return vehicleDateStr === selectedDateStr;
+    });
+    
+    const filtered = vehiclesForSelectedDate.filter((vehicle) => {
       const cleanedLicensePlate = vehicle.licensePlate
         .replace(/[\s-]/g, "")
         .toLowerCase();
@@ -146,9 +146,26 @@ const VehiclesPage: React.FC = () => {
       );
     });
 
-    setFilteredVehicles(filtered);
-    setTotalCount(filtered.length);
-  }, [vehicles, cleanedFilter]);
+    return filtered;
+  }, [allVehicles, selectedDate, cleanedFilter]);
+
+  useEffect(() => {
+    setTotalCount(filteredVehicles.length);
+  }, [filteredVehicles]);
+
+  useEffect(() => {
+    if (shouldRefetch) {
+      dispatch(fetchVehicles({}));
+    }
+  }, [dispatch, shouldRefetch]);
+
+  useEffect(() => {
+    if (isSmallScreen) {
+      setRowsPerPage(5);
+    } else {
+      setRowsPerPage(25);
+    }
+  }, [isSmallScreen]);
 
   useEffect(() => {
     const date = selectedDate;
@@ -209,11 +226,17 @@ const VehiclesPage: React.FC = () => {
 
   const handleCreate = async () => {
     try {
-      const newVehicle: Vehicle = {
-        id:
-          allVehicles.length > 0
-            ? Math.max(...allVehicles.map((vehicle) => vehicle.id)) + 1
-            : 1,
+      if (!addFields.ticket || !addFields.licensePlate || !addFields.brand || !addFields.color || !addFields.parkingLot) {
+        showNotification(
+          "Todos los campos son obligatorios",
+          "error",
+          5000,
+          false
+        );
+        return;
+      }
+      
+      const newVehicle = {
         ticket: addFields.ticket,
         licensePlate: addFields.licensePlate,
         brand: addFields.brand,
@@ -221,9 +244,10 @@ const VehiclesPage: React.FC = () => {
         parkingLot: addFields.parkingLot,
         notes: addFields.notes,
         parkingDate: selectedDate,
-        createdAt: new Date(),
       };
-      dispatch(createVehicle(newVehicle));
+      
+      await dispatch(createVehicle(newVehicle)).unwrap();
+      
       setAddFields({
         ticket: "",
         licensePlate: "",
@@ -243,7 +267,7 @@ const VehiclesPage: React.FC = () => {
         false
       );
     } catch (error) {
-      console.error(error);
+      console.error('Error in handleCreate:', error);
       showNotification(
         "Ha ocurrido un error al registrar el vehículo",
         "error",
@@ -276,7 +300,9 @@ const VehiclesPage: React.FC = () => {
         const updatedVehicle = {
           ...editFields,
         };
-        await dispatch(updateVehicle({ id, updatedVehicle }));
+        
+        await dispatch(updateVehicle({ id, updatedVehicle })).unwrap();
+        
         setEditRowId(null);
         setEditFields({
           ticket: "",
@@ -295,7 +321,7 @@ const VehiclesPage: React.FC = () => {
         );
       } catch (error) {
         handleCancel();
-        console.error(error);
+        console.error('Error in handleUpdate:', error);
         showNotification(
           "Ha ocurrido un error al actualizar el vehículo",
           "error",
@@ -342,7 +368,9 @@ const VehiclesPage: React.FC = () => {
   };
 
   const handleDateChange = useCallback((newDate: Date | null) => {
-    if (newDate) setSelectedDate(newDate);
+    if (newDate) {
+      setSelectedDate(newDate);
+    }
   }, []);
 
   const handleNextDate = () => {
@@ -360,7 +388,8 @@ const VehiclesPage: React.FC = () => {
   };
 
   const handleCurrentDate = () => {
-    setSelectedDate(getMidnightDate(new Date()));
+    const currentDate = getMidnightDate(new Date());
+    setSelectedDate(currentDate);
   };
 
   const showTemporaryTooltip = (

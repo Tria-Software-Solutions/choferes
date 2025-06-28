@@ -10,6 +10,8 @@ export class Vehicle extends Model {
   public parkingLot!: string;
   public notes!: string;
   public parkingDate!: Date;
+  public createdAt!: Date;
+  public updatedAt!: Date;
 }
 
 Vehicle.init(

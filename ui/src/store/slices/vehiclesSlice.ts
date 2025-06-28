@@ -79,8 +79,8 @@ export const updateVehicle = createAsyncThunk(
     { rejectWithValue }
   ) => {
     try {
-      await VehicleService.updateVehicle(id, updatedVehicle);
-      return { id, updatedVehicle };
+      const updatedVehicleFromBackend = await VehicleService.updateVehicle(id, updatedVehicle);
+      return updatedVehicleFromBackend;
     } catch (error: any) {
       return rejectWithValue(
         error.response?.data || "Failed to update vehicle"
@@ -140,16 +140,24 @@ const vehicleSlice = createSlice({
           state.totalCountAllVehicles += 1;
         }
       )
+      .addCase(createVehicle.rejected, (state, action) => {
+        state.error = action.payload as string;
+      })
       .addCase(
         updateVehicle.fulfilled,
-        (state, action: PayloadAction<{ id: number; updatedVehicle: Partial<Vehicle> }>) => {
-          const { id, updatedVehicle } = action.payload;
-          state.vehicles = state.vehicles.map((vehicle) =>
-            vehicle.id === id ? { ...vehicle, ...updatedVehicle } : vehicle
+        (state, action: PayloadAction<Vehicle>) => {
+          const updatedVehicle = action.payload;
+          const id = updatedVehicle.id;
+          
+          const updatedAllVehicles = state.allVehicles.map((vehicle) =>
+            vehicle.id === id ? updatedVehicle : vehicle
           );
-          state.allVehicles = state.allVehicles.map((vehicle) =>
-            vehicle.id === id ? { ...vehicle, ...updatedVehicle } : vehicle
+          state.allVehicles = updatedAllVehicles;
+          
+          const updatedVehicles = state.vehicles.map((vehicle) =>
+            vehicle.id === id ? updatedVehicle : vehicle
           );
+          state.vehicles = updatedVehicles;
         }
       )
       .addCase(

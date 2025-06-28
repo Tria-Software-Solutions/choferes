@@ -7,5 +7,5 @@ export interface Vehicle {
   parkingLot: string; 
   notes: string;  
   parkingDate: Date;
-  createdAt: Date;
+  createdAt?: Date;
 }
