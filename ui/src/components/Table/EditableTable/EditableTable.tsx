@@ -190,11 +190,7 @@ const EditableTable = <T extends object>({
           label={translateColumnHeaderToSpanish(column)}
           variant="outlined"
           fullWidth
-          value={
-            editFields[String(column)] instanceof Date
-              ? (editFields[String(column)] as Date)
-              : null
-          }
+          value={editFields[String(column)] || ""}
           onChange={handleChange}
         />,
         column
