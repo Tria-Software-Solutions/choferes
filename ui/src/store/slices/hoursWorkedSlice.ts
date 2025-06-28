@@ -21,8 +21,14 @@ export const fetchHoursWorked = createAsyncThunk(
   "hoursWorked/fetchHoursWorked",
   async (_, { rejectWithValue }) => {
     try {
-      const hours = await HoursWorkedService.getHoursWorked();
-      return hours;
+      const response = await HoursWorkedService.getHoursWorked();
+      if (Array.isArray(response)) {
+        return response;
+      } else if (response && Array.isArray(response.hoursWorked)) {
+        return response.hoursWorked;
+      } else {
+        return [];
+      }
     } catch (error: any) {
       return rejectWithValue(
         error.response?.data || "Failed to fetch hours worked"

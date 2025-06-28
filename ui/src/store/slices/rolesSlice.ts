@@ -22,8 +22,14 @@ export const fetchRoles = createAsyncThunk(
   "roles/fetchRoles",
   async (_, { rejectWithValue }) => {
     try {
-      const roles = await RoleService.getRoles();
-      return roles;
+      const response = await RoleService.getRoles();
+      if (Array.isArray(response)) {
+        return response;
+      } else if (response && Array.isArray(response.roles)) {
+        return response.roles;
+      } else {
+        return [];
+      }
     } catch (error: any) {
       return rejectWithValue(error.response?.data || "Failed to fetch roles");
     }

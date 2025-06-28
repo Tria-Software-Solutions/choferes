@@ -23,6 +23,7 @@ export const translateColumnHeaderToSpanish = (
     brand: "Marca",
     color: "Color",
     parkingLot: "Espacio",
+    parkingDate: "Fecha de Parqueo",
     notes: "Observaciones",
     updatedAt: "Actualizado",
     roleName: "Rol",

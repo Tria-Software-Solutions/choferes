@@ -21,8 +21,14 @@ export const fetchSchedules = createAsyncThunk(
   "schedules/fetchSchedules",
   async (_, { rejectWithValue }) => {
     try {
-      const schedules = await ScheduleService.getSchedules();
-      return schedules;
+      const response = await ScheduleService.getSchedules();
+      if (Array.isArray(response)) {
+        return response;
+      } else if (response && typeof response === 'object' && 'schedules' in response && Array.isArray((response as any).schedules)) {
+        return (response as any).schedules;
+      } else {
+        return [];
+      }
     } catch (error: any) {
       return rejectWithValue(
         error.response?.data || "Failed to fetch schedules"

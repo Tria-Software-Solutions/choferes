@@ -30,7 +30,14 @@ export const fetchUsers = createAsyncThunk(
   "users/fetchUsers",
   async (_, { rejectWithValue }) => {
     try {
-      return await UserService.getUsers();
+      const response = await UserService.getUsers();
+      if (Array.isArray(response)) {
+        return response;
+      } else if (response && Array.isArray((response as any).users)) {
+        return (response as any).users;
+      } else {
+        return [];
+      }
     } catch (error: any) {
       return rejectWithValue(error.response?.data || "Failed to fetch users");
     }
@@ -130,7 +137,7 @@ export const updateUser = createAsyncThunk(
     try {
       await UserService.updateUser(id, updatedUser);
 
-      if (newRoleId !== undefined) {
+      if (newRoleId !== undefined && typeof newRoleId === 'number') {
         await UserRoleService.updateUserRole(id, newRoleId);
       }
 

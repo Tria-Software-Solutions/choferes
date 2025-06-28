@@ -74,24 +74,25 @@ exports.getVehicleById = getVehicleById;
 const getVehiclesByDate = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const { date } = req.query;
-        if (!date) {
-            return res.status(400).json({ message: "Date is required" });
+        if (!date || typeof date !== 'string') {
+            return res.status(400).json({ message: "Date parameter is required" });
         }
-        const createdAt = (0, date_fns_1.parseISO)(date);
-        if (!(0, date_fns_1.isValid)(createdAt)) {
+        const parsedDate = (0, date_fns_1.parseISO)(date);
+        if (!(0, date_fns_1.isValid)(parsedDate)) {
             return res.status(400).json({ message: "Invalid date format" });
         }
-        const vehicles = yield vehicleService.getVehiclesByDate(createdAt);
+        const vehicles = yield vehicleService.getVehiclesByDate(parsedDate);
         return res.status(200).json(vehicles);
     }
     catch (error) {
-        return res.status(500).json({ message: "Error fetching Vehicles", error });
+        return res.status(500).json({ message: "Error fetching Vehicles by date", error });
     }
 });
 exports.getVehiclesByDate = getVehiclesByDate;
 const createVehicle = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        const newVehicle = yield vehicleService.createVehicle(req.body);
+        const vehicleData = Object.assign(Object.assign({}, req.body), { parkingDate: req.body.parkingDate ? (0, date_fns_1.parseISO)(req.body.parkingDate) : new Date() });
+        const newVehicle = yield vehicleService.createVehicle(vehicleData);
         return res.status(201).json(newVehicle);
     }
     catch (error) {
@@ -102,7 +103,11 @@ exports.createVehicle = createVehicle;
 const updateVehicle = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const id = parseInt(req.params.id);
-        const updatedVehicle = yield vehicleService.updateVehicle(id, req.body);
+        const updateData = Object.assign({}, req.body);
+        if (req.body.parkingDate) {
+            updateData.parkingDate = (0, date_fns_1.parseISO)(req.body.parkingDate);
+        }
+        const updatedVehicle = yield vehicleService.updateVehicle(id, updateData);
         if (updatedVehicle) {
             return res.status(200).json(updatedVehicle);
         }

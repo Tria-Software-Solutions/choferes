@@ -40,6 +40,11 @@ Vehicle.init({
         type: sequelize_1.DataTypes.STRING,
         allowNull: true,
     },
+    parkingDate: {
+        type: sequelize_1.DataTypes.DATE,
+        allowNull: false,
+        defaultValue: sequelize_1.DataTypes.NOW,
+    },
 }, {
     sequelize: database_1.default,
     modelName: "Vehicle",
