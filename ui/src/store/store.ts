@@ -8,6 +8,7 @@ import schedulesReducer from "./slices/schedulesSlice";
 import userRolesReducer from "./slices/userRolesSlice";
 import usersReducer from "./slices/userSlice";
 import vehiclesReducer from "./slices/vehiclesSlice";
+
 export const store = configureStore({
   reducer: {
     employees: employeesReducer,
@@ -19,12 +20,31 @@ export const store = configureStore({
     userRoles: userRolesReducer,
     users: usersReducer,
     vehicles: vehiclesReducer,
-    
   },
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware({
-      serializableCheck: false,
+      serializableCheck: {
+        ignoredActions: [
+          'persist/PERSIST',
+          'persist/REHYDRATE',
+          'persist/PAUSE',
+          'persist/PURGE',
+          'persist/REGISTER',
+          'persist/FLUSH',
+        ],
+        ignoredPaths: [
+          'hoursWorked.entities',
+          'employees.entities',
+          'users.entities',
+        ],
+        ignoredActionPaths: ['payload.date', 'payload.createdAt', 'payload.updatedAt'],
+      },
+      immutableCheck: {
+        ignoredPaths: ['hoursWorked.entities', 'employees.entities', 'users.entities'],
+      },
     }),
+  devTools: process.env.NODE_ENV !== 'production',
+  preloadedState: undefined,
 });
 
 export type RootState = ReturnType<typeof store.getState>;
