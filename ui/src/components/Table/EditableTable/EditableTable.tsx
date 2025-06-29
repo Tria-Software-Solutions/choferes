@@ -25,7 +25,6 @@ import {
   Stack,
   Chip,
   useTheme,
-  Link,
   Checkbox,
   ListItemText,
   useMediaQuery,
@@ -640,65 +639,56 @@ const EditableTable = <T extends object>({
                               column,
                               (editFields[String(column)] || "").toString()
                             )
-                          ) : Array.isArray(row[column]) ? (
-                            <Stack
-                              direction="row"
-                              spacing={1}
-                              sx={{
-                                rowGap: 2,
-                                flexWrap:
-                                  column === "permissionNames"
-                                    ? "wrap"
-                                    : "nowrap",
-                              }}
-                            >
-                              {(row[column] as string[]).map(
-                                (item, index, array) =>
+                          ) : editRowId === getRowId(row) && column === "permissionNames" ? (
+                            Array.isArray(row[column]) ? (
+                              <Stack direction="row" spacing={1} flexWrap="nowrap">
+                                {(row[column] as string[]).map((item: string, index: number) => (
+                                  <Chip
+                                    key={index}
+                                    label={item}
+                                    sx={{
+                                      backgroundColor: theme.palette.primary.main,
+                                      color: '#fff',
+                                      '& .MuiChip-label': { color: '#fff' },
+                                    }}
+                                  />
+                                ))}
+                              </Stack>
+                            ) : (
+                              <Typography component="span">{String(row[column] ?? "")}</Typography>
+                            )
+                          ) : (
+                            Array.isArray(row[column]) ? (
+                              <Stack
+                                direction="row"
+                                spacing={1}
+                                sx={{
+                                  rowGap: 2,
+                                  flexWrap: column === "permissionNames" ? "wrap" : "nowrap",
+                                }}
+                              >
+                                {(row[column] as string[]).map((item: string, index: number, array: string[]) =>
                                   column === "permissionNames" ? (
                                     <Chip
                                       key={index}
-                                      label={translateDayOptionsToSpanish(item)}
-                                      variant="outlined"
+                                      label={item}
+                                      sx={{
+                                        backgroundColor: theme.palette.primary.main,
+                                        color: '#fff',
+                                        '& .MuiChip-label': { color: '#fff' },
+                                      }}
                                     />
                                   ) : (
                                     <Typography key={index} component="span">
-                                      {translateDayOptionsToSpanish(item)}
+                                      {item}
                                       {index < array.length - 1 ? ", " : ""}
                                     </Typography>
                                   )
-                              )}
-                            </Stack>
-                          ) : column === "email" ? (
-                            <Link
-                              href={`mailto:${row[column]}`}
-                              sx={{
-                                textDecoration: "none",
-                                color: theme.palette.primary.main,
-                                "&:hover": {
-                                  textDecoration: "underline",
-                                },
-                              }}
-                            >
-                              {String(row[column])}
-                            </Link>
-                          ) : column === "day" ? (
-                            <>
-                              {translateDayOptionsToSpanish(
-                                row[column] as string
-                              )}
-                            </>
-                          ) : column === "createdAt" && row[column] ? (
-                            <>
-                              {/* {format(
-                                new Date(row[column] as unknown as Date),
-                                "dd/MM/yyyy",
-                                {
-                                  locale: es,
-                                }
-                              )} */}
-                            </>
-                          ) : (
-                            <>{renderColumnValue(column, row[column])}</>
+                                )}
+                              </Stack>
+                            ) : (
+                              <Typography component="span">{String(row[column] ?? "")}</Typography>
+                            )
                           )}
                         </TableCell>
                       );
