@@ -653,7 +653,7 @@ const ManageUsers: React.FC<{ isExpanded?: boolean }> = ({ isExpanded = true }) 
             justifyContent="space-between"
             alignItems="center"
           >
-            <Grid item xs={12} md={6}>
+            <Grid item xs={12} md={4}>
               {filteredUsers && (
                 <SearchBar
                   placeholder="Buscar usuario"
@@ -666,7 +666,7 @@ const ManageUsers: React.FC<{ isExpanded?: boolean }> = ({ isExpanded = true }) 
                 />
               )}
             </Grid>
-            <Grid item xs={12} md={6}>
+            <Grid item xs={12} md={8}>
               <Box
                 display="flex"
                 flexDirection="row"
