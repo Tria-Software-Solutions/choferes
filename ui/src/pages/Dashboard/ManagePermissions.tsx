@@ -8,9 +8,6 @@ import {
   Box,
   CircularProgress,
   Grid,
-  List,
-  ListItem,
-  ListItemText,
   Typography,
 } from "@mui/material";
 import SearchBar from "../../components/SearchBar/SearchBar";
@@ -24,9 +21,6 @@ const ManagePermissions: React.FC = () => {
     []
   );
   const [filter, setFilter] = useState("");
-  const half = Math.ceil(filteredPermissions.length / 2);
-  const leftColumn = filteredPermissions.slice(0, half);
-  const rightColumn = filteredPermissions.slice(half);
 
   useEffect(() => {
     dispatch(fetchPermissions());
