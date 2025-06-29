@@ -91,12 +91,10 @@ const AppBarComponent: React.FC<AppBarComponentProps> = ({
   };
 
   const handleDashboardMenuOpen = (event: React.MouseEvent<HTMLElement>) => {
-    console.log('Opening dashboard menu, links:', links);
     setDashboardMenuAnchor(event.currentTarget);
   };
 
   const handleDashboardMenuClose = () => {
-    console.log('Closing dashboard menu');
     setDashboardMenuAnchor(null);
   };
 
@@ -108,8 +106,6 @@ const AppBarComponent: React.FC<AppBarComponentProps> = ({
   const isActivePage = (path: string) => {
     return location.pathname === path;
   };
-
-  console.log('AppBarComponent - links:', links, 'links.length:', links.length);
 
   return (
     <AppBar 
