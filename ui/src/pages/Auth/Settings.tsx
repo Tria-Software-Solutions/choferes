@@ -26,6 +26,13 @@ import SettingsIcon from "@mui/icons-material/Settings";
 import Visibility from "@mui/icons-material/Visibility";
 import VisibilityOff from "@mui/icons-material/VisibilityOff";
 import { User } from "../../models/User";
+import {
+  validateName,
+  validateEmail,
+  validateUsername,
+  validatePassword,
+  validatePasswordMatch
+} from '../../utils/userValidation';
 
 const Settings: React.FC = () => {
   const dispatch = useDispatch<AppDispatch>();
@@ -56,50 +63,32 @@ const Settings: React.FC = () => {
     dispatch(fetchUsers());
   }, [dispatch]);
 
-  const validateFields = useCallback(async (fields: typeof editFields) => {
-    const regex = {
-      text: /^[a-zA-ZáéíóúÁÉÍÓÚñÑüÜëË\s-]+$/,
-      email: /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/,
-      username: /^[a-zA-Z][a-zA-Z0-9_.]{2,19}$/,
-      password:
-        /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/,
-    };
-
-    const isValid =
-      fields.firstName !== undefined &&
-      regex.text.test(fields.firstName) &&
-      fields.lastName !== undefined &&
-      regex.text.test(fields.lastName) &&
-      fields.email !== undefined &&
-      regex.email.test(fields.email) &&
-      fields.username !== undefined &&
-      regex.username.test(fields.username);
-
-    return isValid;
+  const validateField = useCallback((name: string, value: string) => {
+    switch (name) {
+      case "firstName":
+      case "lastName":
+        return validateName(value);
+      case "email":
+        return validateEmail(value);
+      case "username":
+        return validateUsername(value);
+      default:
+        return "";
+    }
   }, []);
 
   const validatePasswordFields = useCallback(
-    async (fields: typeof passwordFields) => {
-      const passwordRegex =
-        /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
-      if (fields.newPassword === "" || fields.confirmNewPassword === "") {
-        setPasswordError("Los espacios son requeridos.");
+    (fields: typeof passwordFields) => {
+      const passError = validatePassword(fields.newPassword);
+      const matchError = validatePasswordMatch(fields.newPassword, fields.confirmNewPassword);
+      if (passError) {
+        setPasswordError(passError);
         return false;
       }
-      if (fields.newPassword !== fields.confirmNewPassword) {
-        setPasswordError("Las contraseñas no coinciden.");
+      if (matchError) {
+        setPasswordError(matchError);
         return false;
       }
-      if (
-        !passwordRegex.test(fields.newPassword) ||
-        !passwordRegex.test(fields.confirmNewPassword)
-      ) {
-        setPasswordError(
-          "El valor es inválido.\n\n- Mínimo 8 caracteres.\n- Al menos una letra mayúscula.\n- Al menos una letra minúscula.\n- Al menos un número.\n- Al menos un carácter especial"
-        );
-        return false;
-      }
-
       setPasswordError(null);
       return true;
     },
@@ -114,10 +103,10 @@ const Settings: React.FC = () => {
       editFields.username !== currentUser?.username;
 
     (async () => {
-      const isValid = await validateFields(editFields);
+      const isValid = Object.entries(editFields).every(([key, value]) => validateField(key, value) === "");
       setIsEditFormValid(isValid && hasChanges);
     })();
-  }, [editFields, currentUser, validateFields]);
+  }, [editFields, currentUser, validateField]);
 
   useEffect(() => {
     const hasPasswordChange =
@@ -265,7 +254,7 @@ const Settings: React.FC = () => {
   };
 
   return (
-    <Box>
+    <Box sx={{ maxWidth: 1200, mx: 'auto', p: 3 }}>
       <Box
         display="flex"
         justifyContent="space-between"
@@ -284,7 +273,7 @@ const Settings: React.FC = () => {
           </Box>
         </Box>
       </Box>
-      <Grid container spacing={2} justifyContent="space-between">
+      <Grid container spacing={4} justifyContent="space-between">
         <Grid item xs={12} md={5}>
           <Typography variant="h5" fontWeight="bold" mb={1}>
             Información Personal
@@ -296,28 +285,50 @@ const Settings: React.FC = () => {
             <TextField
               label="Nombre"
               value={editFields.firstName}
-              onChange={(e) =>
-                setEditFields({
-                  ...editFields,
-                  firstName: e.target.value,
-                })
-              }
+              onChange={(e) => {
+                const value = e.target.value;
+                setEditFields({ ...editFields, firstName: value });
+                const error = validateField("firstName", value);
+                if (error) setInfoError(error);
+                else setInfoError(null);
+              }}
               fullWidth
               margin="dense"
+              placeholder="Ej: Juan Carlos"
+              helperText={infoError || "Tu nombre completo"}
+              error={infoError !== null && infoError !== ""}
+              InputProps={{
+                startAdornment: (
+                  <Box sx={{ mr: 1, color: theme.palette.text.secondary }}>
+                    👤
+                  </Box>
+                ),
+              }}
             />
           </Grid>
           <Grid item xs={12} md={12} lg={12} sx={{ mb: 3 }}>
             <TextField
               label="Apellido"
               value={editFields.lastName}
-              onChange={(e) =>
-                setEditFields({
-                  ...editFields,
-                  lastName: e.target.value,
-                })
-              }
+              onChange={(e) => {
+                const value = e.target.value;
+                setEditFields({ ...editFields, lastName: value });
+                const error = validateField("lastName", value);
+                if (error) setInfoError(error);
+                else setInfoError(null);
+              }}
               fullWidth
               margin="dense"
+              placeholder="Ej: Pérez González"
+              helperText={infoError || "Tu apellido completo"}
+              error={infoError !== null && infoError !== ""}
+              InputProps={{
+                startAdornment: (
+                  <Box sx={{ mr: 1, color: theme.palette.text.secondary }}>
+                    👤
+                  </Box>
+                ),
+              }}
             />
           </Grid>
           <Grid item xs={12} md={12} lg={12} sx={{ mb: 3 }}>
@@ -326,14 +337,24 @@ const Settings: React.FC = () => {
               type="email"
               value={editFields.email}
               onChange={(e) => {
-                setEditFields({
-                  ...editFields,
-                  email: e.target.value,
-                });
-                handleEmailChange(e);
+                const value = e.target.value;
+                setEditFields({ ...editFields, email: value });
+                const error = validateField("email", value);
+                if (error) setInfoError(error);
+                else handleEmailChange(e);
               }}
               fullWidth
               margin="dense"
+              placeholder="ejemplo@correo.com"
+              helperText={infoError || "Tu dirección de correo electrónico"}
+              error={infoError !== null && infoError !== ""}
+              InputProps={{
+                startAdornment: (
+                  <Box sx={{ mr: 1, color: theme.palette.text.secondary }}>
+                    📧
+                  </Box>
+                ),
+              }}
             />
           </Grid>
           <Grid item xs={12} md={12} lg={12} sx={{ mb: 3 }}>
@@ -341,14 +362,24 @@ const Settings: React.FC = () => {
               label="Usuario"
               value={editFields.username}
               onChange={(e) => {
-                setEditFields({
-                  ...editFields,
-                  username: e.target.value,
-                });
-                handleUsernameChange(e);
+                const value = e.target.value;
+                setEditFields({ ...editFields, username: value });
+                const error = validateField("username", value);
+                if (error) setInfoError(error);
+                else handleUsernameChange(e);
               }}
               fullWidth
               margin="dense"
+              placeholder="juan.perez"
+              helperText={infoError || "Tu nombre de usuario único"}
+              error={infoError !== null && infoError !== ""}
+              InputProps={{
+                startAdornment: (
+                  <Box sx={{ mr: 1, color: theme.palette.text.secondary }}>
+                    🆔
+                  </Box>
+                ),
+              }}
             />
           </Grid>
           {infoError && (
@@ -360,8 +391,16 @@ const Settings: React.FC = () => {
             <Box>
               <Button
                 variant="contained"
-                color="error"
-                sx={{ flex: 2, height: "56px" }}
+                color="primary"
+                sx={{ 
+                  flex: 2, 
+                  height: "56px",
+                  px: 4,
+                  py: 1.5,
+                  fontSize: '1rem',
+                  fontWeight: 600,
+                  minWidth: 140,
+                }}
                 onClick={handleSaveChanges}
                 disabled={!isEditFormValid || !!infoError}
               >
@@ -393,7 +432,15 @@ const Settings: React.FC = () => {
               type={showNewPassword ? "text" : "password"}
               value={passwordFields.newPassword}
               onChange={(e) => handleNewPassword(e)}
+              placeholder="Mínimo 8 caracteres"
+              helperText={passwordError || "Ingresa tu nueva contraseña"}
+              error={passwordError !== null && passwordError !== ""}
               InputProps={{
+                startAdornment: (
+                  <Box sx={{ mr: 1, color: theme.palette.text.secondary }}>
+                    🔒
+                  </Box>
+                ),
                 endAdornment: (
                   <InputAdornment position="end">
                     <IconButton onClick={handleToggleNewPassword} edge="end">
@@ -412,7 +459,15 @@ const Settings: React.FC = () => {
               type={showConfirmNewPassword ? "text" : "password"}
               value={passwordFields.confirmNewPassword}
               onChange={(e) => handleConfirmNewPassword(e)}
+              placeholder="Repite la nueva contraseña"
+              helperText={passwordError || "Confirma tu nueva contraseña"}
+              error={passwordError !== null && passwordError !== ""}
               InputProps={{
+                startAdornment: (
+                  <Box sx={{ mr: 1, color: theme.palette.text.secondary }}>
+                    🔒
+                  </Box>
+                ),
                 endAdornment: (
                   <InputAdornment position="end">
                     <IconButton
@@ -433,7 +488,7 @@ const Settings: React.FC = () => {
             />
           </Grid>
           {passwordError && (
-            <Alert severity="error" sx={{ mt: 2 }}>
+            <Alert severity="error" sx={{ mt: 2, whiteSpace: "pre-line" }}>
               {passwordError}
             </Alert>
           )}
@@ -441,8 +496,16 @@ const Settings: React.FC = () => {
             <Box>
               <Button
                 variant="contained"
-                color="error"
-                sx={{ flex: 2, height: "56px" }}
+                color="primary"
+                sx={{ 
+                  flex: 2, 
+                  height: "56px",
+                  px: 4,
+                  py: 1.5,
+                  fontSize: '1rem',
+                  fontWeight: 600,
+                  minWidth: 140,
+                }}
                 onClick={(e) => handleChangePassword(e)}
                 disabled={!isPasswordFormValid}
               >

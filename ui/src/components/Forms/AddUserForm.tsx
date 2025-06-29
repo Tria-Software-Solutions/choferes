@@ -17,6 +17,12 @@ import CloseRoundedIcon from "@mui/icons-material/CloseRounded";
 import Visibility from "@mui/icons-material/Visibility";
 import VisibilityOff from "@mui/icons-material/VisibilityOff";
 import { Role } from "../../models/Role";
+import {
+  validateName,
+  validateEmail,
+  validateUsername,
+  validatePassword
+} from '../../utils/userValidation';
 
 interface AddUserFormProps {
   onSubmit: (user: { 
@@ -58,55 +64,21 @@ const AddUserForm: React.FC<AddUserFormProps> = ({
   const [showPassword, setShowPassword] = useState(false);
 
   const validateField = (name: string, value: string) => {
-    const nameRegex = /^[a-zA-ZáéíóúÁÉÍÓÚñÑüÜëË\s-]+$/;
-    const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
-    const usernameRegex = /^[a-zA-Z][a-zA-Z0-9_.]{2,19}$/;
-    const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
-    
-    if (!value.trim()) {
-      return "Este campo es requerido";
-    }
-    
     switch (name) {
       case "firstName":
       case "lastName":
-        if (!nameRegex.test(value)) {
-          return "Solo se permiten letras, espacios y guiones";
-        }
-        if (value.trim().length < 2) {
-          return "Mínimo 2 caracteres";
-        }
-        if (value.trim().length > 50) {
-          return "Máximo 50 caracteres";
-        }
-        break;
-      
+        return validateName(value);
       case "email":
-        if (!emailRegex.test(value)) {
-          return "Formato de email inválido";
-        }
-        break;
-      
+        return validateEmail(value);
       case "username":
-        if (!usernameRegex.test(value)) {
-          return "Debe empezar con letra y contener solo letras, números, puntos y guiones bajos";
-        }
-        break;
-      
+        return validateUsername(value);
       case "password":
-        if (!passwordRegex.test(value)) {
-          return "Mínimo 8 caracteres, una mayúscula, una minúscula, un número y un carácter especial";
-        }
-        break;
-      
+        return validatePassword(value);
       case "roleName":
-        if (!nameRegex.test(value)) {
-          return "Solo se permiten letras, espacios y guiones";
-        }
-        break;
+        return validateName(value);
+      default:
+        return "";
     }
-    
-    return "";
   };
 
   const handleFieldChange = (field: string, value: string) => {
