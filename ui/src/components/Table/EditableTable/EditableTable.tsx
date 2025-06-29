@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useMemo } from "react";
 import { useSelector } from "react-redux";
 import { RootState } from "../../../store/store";
 import { useAuthContext } from "../../../context/AuthContext";
@@ -29,6 +29,10 @@ import {
   ListItemText,
   useMediaQuery,
   Grid,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  IconButton as MuiIconButton,
 } from "@mui/material";
 import { LocalizationProvider } from "@mui/x-date-pickers";
 import { DatePicker } from "@mui/x-date-pickers/DatePicker";
@@ -56,7 +60,6 @@ import PaginationActions from "../Pagination/PaginationActions";
 import PasswordIcon from "@mui/icons-material/Password";
 import CheckCircleOutlineIcon from "@mui/icons-material/CheckCircleOutline";
 import BlockIcon from "@mui/icons-material/Block";
-import ModalComponent from "../../Modal/ModalComponent";
 
 type EditableTableProps<T> = {
   data: T[];
@@ -122,6 +125,8 @@ const EditableTable = <T extends object>({
   const { permissions } = useSelector((state: RootState) => state.permissions);
   const [order, setOrder] = useState<"asc" | "desc">("asc");
   const [orderBy, setOrderBy] = useState<keyof T>(columns[0]);
+  const [passwordModalOpen, setPasswordModalOpen] = useState(false);
+  const [passwordUserId, setPasswordUserId] = useState<number | null>(null);
 
   const theme = useTheme();
   const isSmallScreen = useMediaQuery(theme.breakpoints.down("sm"));
@@ -812,20 +817,19 @@ const EditableTable = <T extends object>({
                             {hasEditPermissions && (
                               <>
                                 {isUser && isExpanded && handlePasswordModal && (
-                                  <ModalComponent
-                                    buttonType="icon"
-                                    buttonIcon={<PasswordIcon />}
-                                    variant="text"
-                                    modalStyle={{
-                                      width: isSmallScreen ? "80%" : "40%",
-                                    }}
-                                    modalTooltip="Cambiar Contraseña"
-                                    modalTitle="Cambiar Contraseña"
-                                  >
-                                    {({ handleClose }) => 
-                                      handlePasswordModal(getRowId(row), handleClose)
-                                    }
-                                  </ModalComponent>
+                                  <Tooltip title="Cambiar Contraseña" arrow>
+                                    <Box>
+                                      <IconButton
+                                        color="primary"
+                                        onClick={() => {
+                                          setPasswordUserId(getRowId(row));
+                                          setPasswordModalOpen(true);
+                                        }}
+                                      >
+                                        <PasswordIcon />
+                                      </IconButton>
+                                    </Box>
+                                  </Tooltip>
                                 )}
                                 <Tooltip title="Editar" arrow>
                                   <Box>
@@ -932,6 +936,51 @@ const EditableTable = <T extends object>({
         labelDisplayedRows={() => ""}
         ActionsComponent={PaginationActions}
       />
+      
+      {/* Modal de cambio de contraseña */}
+      {passwordUserId !== null && handlePasswordModal && (
+        <Dialog
+          open={passwordModalOpen}
+          onClose={() => {
+            setPasswordModalOpen(false);
+            setPasswordUserId(null);
+          }}
+          maxWidth="sm"
+          fullWidth
+        >
+          <DialogTitle sx={{ 
+            backgroundColor: theme.palette.primary.main, 
+            color: theme.palette.primary.contrastText,
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between'
+          }}>
+            <Typography variant="h6" sx={{ fontWeight: 600 }}>
+              Cambiar Contraseña
+            </Typography>
+            <IconButton
+              onClick={() => {
+                setPasswordModalOpen(false);
+                setPasswordUserId(null);
+              }}
+              sx={{
+                color: theme.palette.primary.contrastText,
+                '&:hover': {
+                  backgroundColor: 'rgba(255,255,255,0.1)',
+                },
+              }}
+            >
+              <CloseIcon />
+            </IconButton>
+          </DialogTitle>
+          <DialogContent sx={{ p: 3 }}>
+            {handlePasswordModal(passwordUserId, () => {
+              setPasswordModalOpen(false);
+              setPasswordUserId(null);
+            })}
+          </DialogContent>
+        </Dialog>
+      )}
     </Paper>
   );
 };

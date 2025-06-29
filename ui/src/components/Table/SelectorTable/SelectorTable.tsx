@@ -7,7 +7,6 @@ import { BiweeklySummary } from "../../../models/BiweeklySummary";
 import { MonthlySummary } from "../../../models/MonthlySummary";
 import { useNavigate } from "react-router-dom";
 import { format } from "date-fns";
-import ModalComponent from "../../Modal/ModalComponent";
 import {
   Table,
   TableBody,
@@ -38,6 +37,10 @@ import {
   CardContent,
   Alert,
   InputAdornment,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  IconButton,
 } from "@mui/material";
 import { TabContext, TabList, TabPanel } from "@mui/lab";
 import PaginationActions from "../Pagination/PaginationActions";
@@ -75,6 +78,7 @@ import AssessmentIcon from "@mui/icons-material/Assessment";
 import ScheduleIcon from "@mui/icons-material/Schedule";
 import CalendarMonthIcon from "@mui/icons-material/CalendarMonth";
 import WarningIcon from "@mui/icons-material/Warning";
+import CloseIcon from "@mui/icons-material/Close";
 
 interface SelectorTableProps {
   filteredEmployees: Employee[];
@@ -127,6 +131,9 @@ const SelectorTable: React.FC<SelectorTableProps> = React.memo(
     const [orderDirection, setOrderDirection] = useState<"asc" | "desc">("asc");
     const [page, setPage] = useState(0);
     const [rowsPerPage, setRowsPerPage] = useState(5);
+    const [summaryModalOpen, setSummaryModalOpen] = useState(false);
+    const [timeModalOpen, setTimeModalOpen] = useState(false);
+    const [selectedEmployee, setSelectedEmployee] = useState<Employee | null>(null);
 
     const theme = useTheme();
     const isSmallScreen = useMediaQuery(theme.breakpoints.down("sm"));
@@ -755,501 +762,587 @@ const SelectorTable: React.FC<SelectorTableProps> = React.memo(
     };
 
     return (
-      <Paper sx={{ width: "100%" }}>
-        <Box
-          sx={{
-            position: "sticky",
-            top: 0,
-            zIndex: 5,
-            backgroundColor: "#f0f2f5",
-            padding: isSmallScreen ? "8px" : "16px",
-            borderBottom: "1px solid #ddd",
-          }}
-        >
+      <>
+        <Paper sx={{ width: "100%" }}>
           <Box
             sx={{
-              display: "flex",
-              justifyContent: "center",
-              alignItems: "center",
+              position: "sticky",
+              top: 0,
+              zIndex: 5,
+              backgroundColor: "#f0f2f5",
+              padding: isSmallScreen ? "8px" : "16px",
+              borderBottom: "1px solid #ddd",
             }}
           >
-            {selectedPeriod === "weekly" ? (
-              <div>
-                {hasMultipleYears(currentWeek) ? (
-                  <Typography variant="body2" fontWeight="bold">
-                    {`Semanas ${multiplePeriods.weekNumbers[1].weekNumber} / `}
-                    {multiplePeriods.weekNumbers[0].weekNumber}
-                  </Typography>
-                ) : (
-                  <Typography variant="body2" fontWeight="bold">{`Semana ${weekNumber}`}</Typography>
-                )}
-              </div>
-            ) : selectedPeriod === "biweekly" ? (
-              <div>
-                {hasMultipleBiweeks(currentWeek) ? (
-                  <Typography variant="body2" fontWeight="bold">
-                    {`Quincenas ${multiplePeriods.biweekNumbers[0].biweekNumber} / `}
-                    {multiplePeriods.biweekNumbers[1].biweekNumber}
-                  </Typography>
-                ) : (
-                  <Typography variant="body2" fontWeight="bold">{`Quincena ${biweekNumber}`}</Typography>
-                )}
-              </div>
-            ) : (
-              <div>
-                {hasMultipleMonths(currentWeek) ? (
-                  <Typography variant="body2" fontWeight="bold">{`${getMonthName(
-                    multiplePeriods.months[0].month
-                  )} / ${getMonthName(
-                    multiplePeriods.months[1].month
-                  )}`}</Typography>
-                ) : (
-                  <Typography variant="body2" fontWeight="bold">{`${getMonthName(
-                    month
-                  )}`}</Typography>
-                )}
-              </div>
-            )}
-          </Box>
-        </Box>
-        <TableContainer
-          className="table-container"
-          sx={{ maxHeight: "65vh", overflowX: "auto" }}
-        >
-          <Table stickyHeader aria-label="sticky table">
-            <TableHead
+            <Box
               sx={{
-                position: "sticky",
-                top: 0,
-                zIndex: 4,
+                display: "flex",
+                justifyContent: "center",
+                alignItems: "center",
               }}
             >
-              <TableRow>
-                <TableCell
-                  className="employee-column"
-                  sx={{
-                    padding: isSmallScreen ? "8px" : "16px",
-                    position: "sticky",
-                    left: 0,
-                    zIndex: 4,
-                  }}
-                >
-                  <TableSortLabel
-                    direction={orderDirection}
-                    onClick={() =>
-                      setOrderDirection((prev) =>
-                        prev === "asc" ? "desc" : "asc"
-                      )
-                    }
-                  >
-                    Empleados
-                  </TableSortLabel>
-                </TableCell>
-                {currentWeek.map(({ day, date }) => (
-                  <TableCell
-                    key={day}
-                    align="center"
-                    sx={{
-                      padding: isSmallScreen ? "8px" : "16px",
-                      zIndex: 3,
-                    }}
-                  >
-                    {`${translateDayToAbrevSpanish(
-                      day as EnglishDayOfWeek
-                    )} ${formatHeaderDate(date)}`}
-                  </TableCell>
-                ))}
-                {permissions?.includes(
-                  PERMISSIONS.VIEW_EMPLOYEE_ROLES_HOURS
-                ) && (
-                  <>
-                    <TableCell />
-                    <TableCell
-                      align="center"
-                      sx={{
-                        padding: isSmallScreen ? "8px" : "16px",
-                        position: isSmallScreen ? "static" : "sticky",
-                        right: 0,
-                        zIndex: 3,
-                      }}
-                      colSpan={2}
-                    >
-                      <FormControl>
-                        <InputLabel sx={{ 
-                          color: '#ffffff !important',
-                          '&.Mui-focused': {
-                            color: '#ffffff !important',
-                          },
-                          '&.Mui-focused.MuiInputLabel-shrink': {
-                            color: '#ffffff !important',
-                          }
-                        }}>Total</InputLabel>
-                        <Select
-                          value={selectedPeriod}
-                          onChange={(e) =>
-                            setSelectedPeriod(
-                              e.target.value as
-                                | "weekly"
-                                | "biweekly"
-                                | "monthly"
-                            )
-                          }
-                          autoWidth
-                          label="Total"
-                          sx={{
-                            color: '#ffffff',
-                            '& .MuiOutlinedInput-notchedOutline': {
-                              borderColor: '#ffffff !important',
-                              borderWidth: '2px !important',
-                            },
-                            '&:hover .MuiOutlinedInput-notchedOutline': {
-                              borderColor: '#ffffff !important',
-                              borderWidth: '2px !important',
-                            },
-                            '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
-                              borderColor: '#ffffff !important',
-                              borderWidth: '2px !important',
-                            },
-                            '&.Mui-focused:hover .MuiOutlinedInput-notchedOutline': {
-                              borderColor: '#ffffff !important',
-                              borderWidth: '2px !important',
-                            },
-                            '& .MuiSelect-select': {
-                              color: '#ffffff',
-                            },
-                            '& .MuiSelect-icon': {
-                              color: '#ffffff',
-                            },
-                          }}
-                        >
-                          <MenuItem value="weekly">Semanal</MenuItem>
-                          <MenuItem value="biweekly">Quincenal</MenuItem>
-                          <MenuItem value="monthly">Mensual</MenuItem>
-                        </Select>
-                      </FormControl>
-                    </TableCell>
-                  </>
-                )}
-              </TableRow>
-            </TableHead>
-            <TableBody>
-              {paginatedEmployees.map((employee, rowIndex) => (
-                <TableRow
-                  key={employee.id}
-                  sx={{
-                    backgroundColor: rowIndex % 2 === 0 ? "white" : "#f5f5f5",
-                  }}
-                >
-                  <TableCell
-                    sx={{
-                      padding: isSmallScreen ? "8px" : "16px",
-                      position: "sticky",
-                      left: 0,
-                      zIndex: 2,
-                      backgroundColor: rowIndex % 2 === 0 ? "white" : "#f5f5f5",
-                    }}
-                  >
-                    <Box
-                      display="flex"
-                      alignItems="center"
-                      justifyContent="space-between"
-                      sx={{
-                        whiteSpace: isSmallScreen ? "break-spaces" : "nowrap",
-                      }}
-                    >
-                      <Typography variant="body2">
-                        {employee.firstName} {employee.lastName}
-                      </Typography>
-                      {permissions?.includes(
-                        PERMISSIONS.VIEW_EMPLOYEE_ROLES_HOURS
-                      ) && (
-                        <ModalComponent
-                          buttonType="icon"
-                          buttonIcon={<InfoOutlinedIcon />}
-                          variant="text"
-                          modalStyle={{ width: "90%", maxWidth: 1000 }}
-                          modalTooltip="Resumen de Horas Trabajadas"
-                          modalTitle="Resumen de Horas Trabajadas"
-                          children={({ handleClose }) =>
-                            modalContentSummary(employee)
-                          }
-                        />
-                      )}
-                    </Box>
-                  </TableCell>
-                  {currentWeek.map(({ day, date }) => {
-                    const formattedDate = format(new Date(date), "yyyy-MM-dd");
-                    const existingRecord = hoursWorked.find(
-                      (record) =>
-                        record.employeeId === employee.id &&
-                        format(new Date(record.date), "yyyy-MM-dd") ===
-                          formattedDate
-                    );
-                    const options = getOptionsForDay(day, schedules);
-                    const validLabels = options.map((option) => option.label);
-
-                    const selectedLabel =
-                      schedules.find(
-                        (schedule) => schedule.id === existingRecord?.scheduleId
-                      )?.label ?? STATE.FREE;
-
-                    const finalSelectedLabel = validLabels.includes(
-                      selectedLabel
-                    )
-                      ? selectedLabel
-                      : validLabels[0] ?? "";
-
-                    return (
-                      <TableCell
-                        key={day}
-                        sx={{
-                          padding: isSmallScreen ? "8px" : "16px",
-                          backgroundColor:
-                            format(new Date(), "yyyy-MM-dd") ===
-                            format(new Date(date), "yyyy-MM-dd")
-                              ? "#e4f5ed"
-                              : "inherit",
-                        }}
-                      >
-                        <FormControl fullWidth>
-                          <Select
-                            value={finalSelectedLabel}
-                            onChange={(event: SelectChangeEvent<string>) =>
-                              handleChange(event, employee.id, new Date(date))
-                            }
-                            disabled={
-                              !permissions?.includes(
-                                PERMISSIONS.EDIT_EMPLOYEE_ROLES
-                              )
-                            }
-                          >
-                            <ListSubheader>
-                              <strong>Ubicaciones</strong>
-                            </ListSubheader>
-                            {options
-                              .filter((option) => !option.specialSchedule)
-                              .sort((a, b) => a.label.localeCompare(b.label))
-                              .map((option) => (
-                                <MenuItem key={option.id} value={option.label}>
-                                  {option.label}
-                                </MenuItem>
-                              ))}
-                            <Divider />
-                            <ListSubheader>
-                              <strong>Horarios Especiales</strong>
-                            </ListSubheader>
-                            {options
-                              .filter((option) => option.specialSchedule)
-                              .sort((a, b) => a.label.localeCompare(b.label))
-                              .map((option) => (
-                                <MenuItem key={option.id} value={option.label}>
-                                  {option.label}
-                                </MenuItem>
-                              ))}
-                            <Divider />
-                            {permissions?.includes(
-                              PERMISSIONS.CREATE_SCHEDULES
-                            ) && (
-                              <>
-                                <MenuItem
-                                  value={"Other"}
-                                  onClick={() => navigate("/schedules")}
-                                >
-                                  <Box
-                                    display="flex"
-                                    justifyContent="space-between"
-                                    width="100%"
-                                    alignItems="center"
-                                  >
-                                    Otro
-                                    <AddIcon fontSize="small" />
-                                  </Box>
-                                </MenuItem>
-                              </>
-                            )}
-                          </Select>
-                        </FormControl>
-                      </TableCell>
-                    );
-                  })}
-                  {permissions?.includes(
-                    PERMISSIONS.VIEW_EMPLOYEE_ROLES_HOURS
-                  ) && (
-                    <>
-                      <TableCell
-                        align="center"
-                        sx={{
-                          padding: isSmallScreen ? "8px" : "16px",
-                        }}
-                      >
-                        <ModalComponent
-                          buttonType="button"
-                          buttonIcon={<MoreTimeIcon />}
-                          variant="contained"
-                          buttonStyle={{ height: "56px" }}
-                          modalStyle={{ width: isSmallScreen ? "80%" : "40%" }}
-                          disabled={!hasWorkedCurrentWeek(employee)}
-                          modalTooltip="Ajuste de Horas"
-                          modalTitle="Ajuste de Horas"
-                        >
-                          {({ handleClose }) =>
-                            modalContentEditTime(employee, handleClose)
-                          }
-                        </ModalComponent>
-                      </TableCell>
-                      <TableCell
-                        align="left"
-                        sx={{
-                          padding: isSmallScreen ? "8px" : "16px",
-                          position: isSmallScreen ? "static" : "sticky",
-                          right: 0,
-                          zIndex: 2,
-                          backgroundColor:
-                            rowIndex % 2 === 0 ? "white" : "#f5f5f5",
-                        }}
-                      >
-                        <Box
-                          sx={{
-                            display: "flex",
-                            justifyContent: "space-between",
-                            alignItems: "center",
-                            height: "64px",
-                            paddingX: 2,
-                          }}
-                        >
-                          <Box
-                            sx={{
-                              display: "flex",
-                              alignItems: "center",
-                              flexGrow: 1,
-                              justifyContent: "center",
-                              whiteSpace: "nowrap",
-                            }}
-                          >
-                            <strong>{resultTotalHours(employee)}</strong>
-                            &nbsp;horas
-                          </Box>
-                          <Box
-                            sx={{
-                              display: "flex",
-                              alignItems: "center",
-                              ml: 1,
-                            }}
-                          >
-                            <Tooltip title="Horas Extra" arrow>
-                              <Box>
-                                <Badge
-                                  badgeContent={resultOvertime(employee)}
-                                  max={9999999}
-                                  color={
-                                    resultOvertime(employee) === 0 ||
-                                    resultOvertime(employee) === "0/0"
-                                      ? "success"
-                                      : "warning"
-                                  }
-                                  showZero
-                                >
-                                  <AccessTimeRoundedIcon />
-                                </Badge>
-                              </Box>
-                            </Tooltip>
-                          </Box>
-                        </Box>
-                      </TableCell>
-                    </>
-                  )}
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
-        </TableContainer>
-        <Divider />
-        <Box display="flex" justifyContent="space-between" alignItems="center">
-          {!isSmallScreen && (
-            <div>
               {selectedPeriod === "weekly" ? (
-                <Typography variant="body2" sx={{ ml: 2 }}>
-                  Semana del{" "}
-                  {formatDateWithoutYear(new Date(currentWeek[0]?.date))} al{" "}
-                  {formatDate(new Date(currentWeek[6]?.date), false)}
-                </Typography>
+                <div>
+                  {hasMultipleYears(currentWeek) ? (
+                    <Typography variant="body2" fontWeight="bold">
+                      {`Semanas ${multiplePeriods.weekNumbers[1].weekNumber} / `}
+                      {multiplePeriods.weekNumbers[0].weekNumber}
+                    </Typography>
+                  ) : (
+                    <Typography variant="body2" fontWeight="bold">{`Semana ${weekNumber}`}</Typography>
+                  )}
+                </div>
               ) : selectedPeriod === "biweekly" ? (
                 <div>
                   {hasMultipleBiweeks(currentWeek) ? (
-                    <Typography
-                      variant="body2"
-                      sx={{ ml: 2 }}
-                    >{`Quincenas del ${formatDateWithoutYear(
-                      getBiweeklyDates(
-                        year,
-                        multiplePeriods.biweekNumbers[0].biweekNumber
-                      ).startDate
-                    )} al ${formatDateWithoutYear(
-                      getBiweeklyDates(
-                        year,
-                        multiplePeriods.biweekNumbers[0].biweekNumber
-                      ).endDate
-                    )} / ${formatDateWithoutYear(
-                      getBiweeklyDates(
-                        year,
-                        multiplePeriods.biweekNumbers[1].biweekNumber
-                      ).startDate
-                    )} al ${formatDateWithoutYear(
-                      getBiweeklyDates(
-                        year,
-                        multiplePeriods.biweekNumbers[1].biweekNumber
-                      ).endDate
-                    )} del ${year}`}</Typography>
+                    <Typography variant="body2" fontWeight="bold">
+                      {`Quincenas ${multiplePeriods.biweekNumbers[0].biweekNumber} / `}
+                      {multiplePeriods.biweekNumbers[1].biweekNumber}
+                    </Typography>
                   ) : (
-                    <Typography
-                      variant="body2"
-                      sx={{ ml: 2 }}
-                    >{`Quincena del ${formatDateWithoutYear(
-                      getBiweeklyDates(year, biweekNumber).startDate
-                    )} al ${formatDateWithoutYear(
-                      getBiweeklyDates(year, biweekNumber).endDate
-                    )}`}</Typography>
+                    <Typography variant="body2" fontWeight="bold">{`Quincena ${biweekNumber}`}</Typography>
                   )}
                 </div>
               ) : (
                 <div>
                   {hasMultipleMonths(currentWeek) ? (
-                    <Typography variant="body2" sx={{ ml: 2 }}>{`${getMonthName(
+                    <Typography variant="body2" fontWeight="bold">{`${getMonthName(
                       multiplePeriods.months[0].month
                     )} / ${getMonthName(
                       multiplePeriods.months[1].month
-                    )} del ${year}`}</Typography>
+                    )}`}</Typography>
                   ) : (
-                    <Typography variant="body2" sx={{ ml: 2 }}>{`${getMonthName(
+                    <Typography variant="body2" fontWeight="bold">{`${getMonthName(
                       month
                     )}`}</Typography>
                   )}
                 </div>
               )}
-            </div>
-          )}
-          <TablePagination
-            className="pagination"
-            rowsPerPageOptions={[5, 10, 25, 50, 100]}
-            component="div"
-            count={sortedEmployees.length}
-            rowsPerPage={rowsPerPage}
-            page={page}
-            onPageChange={(_, newPage) => setPage(newPage)}
-            onRowsPerPageChange={(event) => {
-              setRowsPerPage(parseInt(event.target.value, 10));
-              setPage(0);
+            </Box>
+          </Box>
+          <TableContainer
+            className="table-container"
+            sx={{ maxHeight: "65vh", overflowX: "auto" }}
+          >
+            <Table stickyHeader aria-label="sticky table">
+              <TableHead
+                sx={{
+                  position: "sticky",
+                  top: 0,
+                  zIndex: 4,
+                }}
+              >
+                <TableRow>
+                  <TableCell
+                    className="employee-column"
+                    sx={{
+                      padding: isSmallScreen ? "8px" : "16px",
+                      position: "sticky",
+                      left: 0,
+                      zIndex: 4,
+                    }}
+                  >
+                    <TableSortLabel
+                      direction={orderDirection}
+                      onClick={() =>
+                        setOrderDirection((prev) =>
+                          prev === "asc" ? "desc" : "asc"
+                        )
+                      }
+                    >
+                      Empleados
+                    </TableSortLabel>
+                  </TableCell>
+                  {currentWeek.map(({ day, date }) => (
+                    <TableCell
+                      key={day}
+                      align="center"
+                      sx={{
+                        padding: isSmallScreen ? "8px" : "16px",
+                        zIndex: 3,
+                      }}
+                    >
+                      {`${translateDayToAbrevSpanish(
+                        day as EnglishDayOfWeek
+                      )} ${formatHeaderDate(date)}`}
+                    </TableCell>
+                  ))}
+                  {permissions?.includes(
+                    PERMISSIONS.VIEW_EMPLOYEE_ROLES_HOURS
+                  ) && (
+                    <>
+                      <TableCell />
+                      <TableCell
+                        align="center"
+                        sx={{
+                          padding: isSmallScreen ? "8px" : "16px",
+                          position: isSmallScreen ? "static" : "sticky",
+                          right: 0,
+                          zIndex: 3,
+                        }}
+                        colSpan={2}
+                      >
+                        <FormControl>
+                          <InputLabel sx={{ 
+                            color: '#ffffff !important',
+                            '&.Mui-focused': {
+                              color: '#ffffff !important',
+                            },
+                            '&.Mui-focused.MuiInputLabel-shrink': {
+                              color: '#ffffff !important',
+                            }
+                          }}>Total</InputLabel>
+                          <Select
+                            value={selectedPeriod}
+                            onChange={(e) =>
+                              setSelectedPeriod(
+                                e.target.value as
+                                  | "weekly"
+                                  | "biweekly"
+                                  | "monthly"
+                              )
+                            }
+                            autoWidth
+                            label="Total"
+                            sx={{
+                              color: '#ffffff',
+                              '& .MuiOutlinedInput-notchedOutline': {
+                                borderColor: '#ffffff !important',
+                                borderWidth: '2px !important',
+                              },
+                              '&:hover .MuiOutlinedInput-notchedOutline': {
+                                borderColor: '#ffffff !important',
+                                borderWidth: '2px !important',
+                              },
+                              '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
+                                borderColor: '#ffffff !important',
+                                borderWidth: '2px !important',
+                              },
+                              '&.Mui-focused:hover .MuiOutlinedInput-notchedOutline': {
+                                borderColor: '#ffffff !important',
+                                borderWidth: '2px !important',
+                              },
+                              '& .MuiSelect-select': {
+                                color: '#ffffff',
+                              },
+                              '& .MuiSelect-icon': {
+                                color: '#ffffff',
+                              },
+                            }}
+                          >
+                            <MenuItem value="weekly">Semanal</MenuItem>
+                            <MenuItem value="biweekly">Quincenal</MenuItem>
+                            <MenuItem value="monthly">Mensual</MenuItem>
+                          </Select>
+                        </FormControl>
+                      </TableCell>
+                    </>
+                  )}
+                </TableRow>
+              </TableHead>
+              <TableBody>
+                {paginatedEmployees.map((employee, rowIndex) => (
+                  <TableRow
+                    key={employee.id}
+                    sx={{
+                      backgroundColor: rowIndex % 2 === 0 ? "white" : "#f5f5f5",
+                    }}
+                  >
+                    <TableCell
+                      sx={{
+                        padding: isSmallScreen ? "8px" : "16px",
+                        position: "sticky",
+                        left: 0,
+                        zIndex: 2,
+                        backgroundColor: rowIndex % 2 === 0 ? "white" : "#f5f5f5",
+                      }}
+                    >
+                      <Box
+                        display="flex"
+                        alignItems="center"
+                        justifyContent="space-between"
+                        sx={{
+                          whiteSpace: isSmallScreen ? "break-spaces" : "nowrap",
+                        }}
+                      >
+                        <Typography variant="body2">
+                          {employee.firstName} {employee.lastName}
+                        </Typography>
+                        {permissions?.includes(
+                          PERMISSIONS.VIEW_EMPLOYEE_ROLES_HOURS
+                        ) && (
+                          <Tooltip title="Resumen de Horas Trabajadas" arrow>
+                            <IconButton
+                              size="small"
+                              onClick={() => {
+                                setSelectedEmployee(employee);
+                                setSummaryModalOpen(true);
+                              }}
+                            >
+                              <InfoOutlinedIcon />
+                            </IconButton>
+                          </Tooltip>
+                        )}
+                      </Box>
+                    </TableCell>
+                    {currentWeek.map(({ day, date }) => {
+                      const formattedDate = format(new Date(date), "yyyy-MM-dd");
+                      const existingRecord = hoursWorked.find(
+                        (record) =>
+                          record.employeeId === employee.id &&
+                          format(new Date(record.date), "yyyy-MM-dd") ===
+                            formattedDate
+                      );
+                      const options = getOptionsForDay(day, schedules);
+                      const validLabels = options.map((option) => option.label);
+
+                      const selectedLabel =
+                        schedules.find(
+                          (schedule) => schedule.id === existingRecord?.scheduleId
+                        )?.label ?? STATE.FREE;
+
+                      const finalSelectedLabel = validLabels.includes(
+                        selectedLabel
+                      )
+                        ? selectedLabel
+                        : validLabels[0] ?? "";
+
+                      return (
+                        <TableCell
+                          key={day}
+                          sx={{
+                            padding: isSmallScreen ? "8px" : "16px",
+                            backgroundColor:
+                              format(new Date(), "yyyy-MM-dd") ===
+                              format(new Date(date), "yyyy-MM-dd")
+                                ? "#e4f5ed"
+                                : "inherit",
+                          }}
+                        >
+                          <FormControl fullWidth>
+                            <Select
+                              value={finalSelectedLabel}
+                              onChange={(event: SelectChangeEvent<string>) =>
+                                handleChange(event, employee.id, new Date(date))
+                              }
+                              disabled={
+                                !permissions?.includes(
+                                  PERMISSIONS.EDIT_EMPLOYEE_ROLES
+                                )
+                              }
+                            >
+                              <ListSubheader>
+                                <strong>Ubicaciones</strong>
+                              </ListSubheader>
+                              {options
+                                .filter((option) => !option.specialSchedule)
+                                .sort((a, b) => a.label.localeCompare(b.label))
+                                .map((option) => (
+                                  <MenuItem key={option.id} value={option.label}>
+                                    {option.label}
+                                  </MenuItem>
+                                ))}
+                              <Divider />
+                              <ListSubheader>
+                                <strong>Horarios Especiales</strong>
+                              </ListSubheader>
+                              {options
+                                .filter((option) => option.specialSchedule)
+                                .sort((a, b) => a.label.localeCompare(b.label))
+                                .map((option) => (
+                                  <MenuItem key={option.id} value={option.label}>
+                                    {option.label}
+                                  </MenuItem>
+                                ))}
+                              <Divider />
+                              {permissions?.includes(
+                                PERMISSIONS.CREATE_SCHEDULES
+                              ) && (
+                                <>
+                                  <MenuItem
+                                    value={"Other"}
+                                    onClick={() => navigate("/schedules")}
+                                  >
+                                    <Box
+                                      display="flex"
+                                      justifyContent="space-between"
+                                      width="100%"
+                                      alignItems="center"
+                                    >
+                                      Otro
+                                      <AddIcon fontSize="small" />
+                                    </Box>
+                                  </MenuItem>
+                                </>
+                              )}
+                            </Select>
+                          </FormControl>
+                        </TableCell>
+                      );
+                    })}
+                    {permissions?.includes(
+                      PERMISSIONS.VIEW_EMPLOYEE_ROLES_HOURS
+                    ) && (
+                      <>
+                        <TableCell
+                          align="center"
+                          sx={{
+                            padding: isSmallScreen ? "8px" : "16px",
+                          }}
+                        >
+                          <Tooltip title="Ajuste de Horas" arrow>
+                            <IconButton
+                              size="small"
+                              onClick={() => {
+                                setSelectedEmployee(employee);
+                                setTimeModalOpen(true);
+                              }}
+                            >
+                              <MoreTimeIcon />
+                            </IconButton>
+                          </Tooltip>
+                        </TableCell>
+                        <TableCell
+                          align="left"
+                          sx={{
+                            padding: isSmallScreen ? "8px" : "16px",
+                            position: isSmallScreen ? "static" : "sticky",
+                            right: 0,
+                            zIndex: 2,
+                            backgroundColor:
+                              rowIndex % 2 === 0 ? "white" : "#f5f5f5",
+                          }}
+                        >
+                          <Box
+                            sx={{
+                              display: "flex",
+                              justifyContent: "space-between",
+                              alignItems: "center",
+                              height: "64px",
+                              paddingX: 2,
+                            }}
+                          >
+                            <Box
+                              sx={{
+                                display: "flex",
+                                alignItems: "center",
+                                flexGrow: 1,
+                                justifyContent: "center",
+                                whiteSpace: "nowrap",
+                              }}
+                            >
+                              <strong>{resultTotalHours(employee)}</strong>
+                              &nbsp;horas
+                            </Box>
+                            <Box
+                              sx={{
+                                display: "flex",
+                                alignItems: "center",
+                                ml: 1,
+                              }}
+                            >
+                              <Tooltip title="Horas Extra" arrow>
+                                <Box>
+                                  <Badge
+                                    badgeContent={resultOvertime(employee)}
+                                    max={9999999}
+                                    color={
+                                      resultOvertime(employee) === 0 ||
+                                      resultOvertime(employee) === "0/0"
+                                        ? "success"
+                                        : "warning"
+                                    }
+                                    showZero
+                                  >
+                                    <AccessTimeRoundedIcon />
+                                  </Badge>
+                                </Box>
+                              </Tooltip>
+                            </Box>
+                          </Box>
+                        </TableCell>
+                      </>
+                    )}
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </TableContainer>
+          <Divider />
+          <Box display="flex" justifyContent="space-between" alignItems="center">
+            {!isSmallScreen && (
+              <div>
+                {selectedPeriod === "weekly" ? (
+                  <Typography variant="body2" sx={{ ml: 2 }}>
+                    Semana del{" "}
+                    {formatDateWithoutYear(new Date(currentWeek[0]?.date))} al{" "}
+                    {formatDate(new Date(currentWeek[6]?.date), false)}
+                  </Typography>
+                ) : selectedPeriod === "biweekly" ? (
+                  <div>
+                    {hasMultipleBiweeks(currentWeek) ? (
+                      <Typography
+                        variant="body2"
+                        sx={{ ml: 2 }}
+                      >{`Quincenas del ${formatDateWithoutYear(
+                        getBiweeklyDates(
+                          year,
+                          multiplePeriods.biweekNumbers[0].biweekNumber
+                        ).startDate
+                      )} al ${formatDateWithoutYear(
+                        getBiweeklyDates(
+                          year,
+                          multiplePeriods.biweekNumbers[0].biweekNumber
+                        ).endDate
+                      )} / ${formatDateWithoutYear(
+                        getBiweeklyDates(
+                          year,
+                          multiplePeriods.biweekNumbers[1].biweekNumber
+                        ).startDate
+                      )} al ${formatDateWithoutYear(
+                        getBiweeklyDates(
+                          year,
+                          multiplePeriods.biweekNumbers[1].biweekNumber
+                        ).endDate
+                      )} del ${year}`}</Typography>
+                    ) : (
+                      <Typography
+                        variant="body2"
+                        sx={{ ml: 2 }}
+                      >{`Quincena del ${formatDateWithoutYear(
+                        getBiweeklyDates(year, biweekNumber).startDate
+                      )} al ${formatDateWithoutYear(
+                        getBiweeklyDates(year, biweekNumber).endDate
+                      )}`}</Typography>
+                    )}
+                  </div>
+                ) : (
+                  <div>
+                    {hasMultipleMonths(currentWeek) ? (
+                      <Typography variant="body2" sx={{ ml: 2 }}>{`${getMonthName(
+                        multiplePeriods.months[0].month
+                      )} / ${getMonthName(
+                        multiplePeriods.months[1].month
+                      )} del ${year}`}</Typography>
+                    ) : (
+                      <Typography variant="body2" sx={{ ml: 2 }}>{`${getMonthName(
+                        month
+                      )}`}</Typography>
+                    )}
+                  </div>
+                )}
+              </div>
+            )}
+            <TablePagination
+              className="pagination"
+              rowsPerPageOptions={[5, 10, 25, 50, 100]}
+              component="div"
+              count={sortedEmployees.length}
+              rowsPerPage={rowsPerPage}
+              page={page}
+              onPageChange={(_, newPage) => setPage(newPage)}
+              onRowsPerPageChange={(event) => {
+                setRowsPerPage(parseInt(event.target.value, 10));
+                setPage(0);
+              }}
+              labelRowsPerPage={
+                <Typography variant="body2" component="span">
+                  {TABLE.ROWS_PER_PAGE}
+                </Typography>
+              }
+              labelDisplayedRows={() => ""}
+              ActionsComponent={PaginationActions}
+            />
+          </Box>
+        </Paper>
+        
+        {/* Modal de Resumen de Horas Trabajadas */}
+        {selectedEmployee && (
+          <Dialog
+            open={summaryModalOpen}
+            onClose={() => {
+              setSummaryModalOpen(false);
+              setSelectedEmployee(null);
             }}
-            labelRowsPerPage={
-              <Typography variant="body2" component="span">
-                {TABLE.ROWS_PER_PAGE}
+            maxWidth="lg"
+            fullWidth
+          >
+            <DialogTitle sx={{ 
+              backgroundColor: theme.palette.primary.main, 
+              color: theme.palette.primary.contrastText,
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between'
+            }}>
+              <Typography variant="h6" sx={{ fontWeight: 600 }}>
+                Resumen de Horas Trabajadas - {selectedEmployee.firstName} {selectedEmployee.lastName}
               </Typography>
-            }
-            labelDisplayedRows={() => ""}
-            ActionsComponent={PaginationActions}
-          />
-        </Box>
-      </Paper>
+              <IconButton
+                onClick={() => {
+                  setSummaryModalOpen(false);
+                  setSelectedEmployee(null);
+                }}
+                sx={{
+                  color: theme.palette.primary.contrastText,
+                  '&:hover': {
+                    backgroundColor: 'rgba(255,255,255,0.1)',
+                  },
+                }}
+              >
+                <CloseIcon />
+              </IconButton>
+            </DialogTitle>
+            <DialogContent sx={{ p: 3 }}>
+              {modalContentSummary(selectedEmployee)}
+            </DialogContent>
+          </Dialog>
+        )}
+        
+        {/* Modal de Ajuste de Horas */}
+        {selectedEmployee && (
+          <Dialog
+            open={timeModalOpen}
+            onClose={() => {
+              setTimeModalOpen(false);
+              setSelectedEmployee(null);
+            }}
+            maxWidth="sm"
+            fullWidth
+          >
+            <DialogTitle sx={{ 
+              backgroundColor: theme.palette.primary.main, 
+              color: theme.palette.primary.contrastText,
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between'
+            }}>
+              <Typography variant="h6" sx={{ fontWeight: 600 }}>
+                Ajuste de Horas - {selectedEmployee.firstName} {selectedEmployee.lastName}
+              </Typography>
+              <IconButton
+                onClick={() => {
+                  setTimeModalOpen(false);
+                  setSelectedEmployee(null);
+                }}
+                sx={{
+                  color: theme.palette.primary.contrastText,
+                  '&:hover': {
+                    backgroundColor: 'rgba(255,255,255,0.1)',
+                  },
+                }}
+              >
+                <CloseIcon />
+              </IconButton>
+            </DialogTitle>
+            <DialogContent sx={{ p: 3 }}>
+              {modalContentEditTime(selectedEmployee, () => {
+                setTimeModalOpen(false);
+                setSelectedEmployee(null);
+              })}
+            </DialogContent>
+          </Dialog>
+        )}
+      </>
     );
   }
 );

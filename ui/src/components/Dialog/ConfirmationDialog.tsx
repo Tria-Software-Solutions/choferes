@@ -92,12 +92,11 @@ const ConfirmationDialog: React.FC<ConfirmationDialogProps> = ({
       onClose={onClose}
       maxWidth="sm"
       fullWidth
-      fullScreen={isSmallScreen}
       PaperProps={{
         sx: {
-          borderRadius: isSmallScreen ? 0 : 2,
-          minWidth: isSmallScreen ? '100%' : 400,
-          maxWidth: isSmallScreen ? '100%' : 500,
+          borderRadius: 2,
+          minWidth: 400,
+          maxWidth: 500,
         },
       }}
     >

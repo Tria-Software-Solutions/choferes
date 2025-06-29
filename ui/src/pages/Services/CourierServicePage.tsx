@@ -15,6 +15,10 @@ import {
   Button,
   CircularProgress,
   Backdrop,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  IconButton,
 } from "@mui/material";
 import { LocalizationProvider } from "@mui/x-date-pickers";
 import { DatePicker } from "@mui/x-date-pickers/DatePicker";
@@ -39,12 +43,12 @@ import ArrowBackIosNewRoundedIcon from "@mui/icons-material/ArrowBackIosNewRound
 import ArrowForwardIosRoundedIcon from "@mui/icons-material/ArrowForwardIosRounded";
 import CalendarTodayRoundedIcon from "@mui/icons-material/CalendarTodayRounded";
 import CloseRoundedIcon from "@mui/icons-material/CloseRounded";
+import CloseIcon from "@mui/icons-material/Close";
 import ManageSearchIcon from "@mui/icons-material/ManageSearch";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faFileExcel, faFilePdf } from "@fortawesome/free-solid-svg-icons";
 import { Courier } from "../../models/Courier";
 import EditableTable from "../../components/Table/EditableTable/EditableTable";
-import ModalComponent from "../../components/Modal/ModalComponent";
 import AddCourierForm from "../../components/Forms/AddCourierForm";
 import ConfirmationDialog from "../../components/Dialog/ConfirmationDialog";
 
@@ -610,18 +614,42 @@ const CourierServicePage: React.FC = () => {
         cancelText="Cancelar"
         loading={isDeletingCourier}
       />
-      <ModalComponent
-        buttonType="none"
+      <Dialog
         open={openAddCourierModal}
-        onCloseModal={handleCloseAddCourierModal}
-        modalTitle="Agregar Servicio de Mensajería"
+        onClose={handleCloseAddCourierModal}
+        maxWidth="md"
+        fullWidth
       >
-        <AddCourierForm
-          onSubmit={handleCreateCourier}
-          onCancel={handleCloseAddCourierModal}
-          isLoading={isCreatingCourier}
-        />
-      </ModalComponent>
+        <DialogTitle sx={{ 
+          backgroundColor: theme.palette.primary.main, 
+          color: theme.palette.primary.contrastText,
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between'
+        }}>
+          <Typography variant="h6" sx={{ fontWeight: 600 }}>
+            Agregar Servicio de Mensajería
+          </Typography>
+          <IconButton
+            onClick={handleCloseAddCourierModal}
+            sx={{
+              color: theme.palette.primary.contrastText,
+              '&:hover': {
+                backgroundColor: 'rgba(255,255,255,0.1)',
+              },
+            }}
+          >
+            <CloseIcon />
+          </IconButton>
+        </DialogTitle>
+        <DialogContent sx={{ p: 3 }}>
+          <AddCourierForm
+            onSubmit={handleCreateCourier}
+            onCancel={handleCloseAddCourierModal}
+            isLoading={isCreatingCourier}
+          />
+        </DialogContent>
+      </Dialog>
     </Box>
   );
 };
