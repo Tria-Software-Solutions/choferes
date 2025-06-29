@@ -284,7 +284,7 @@ const AddRoleForm: React.FC<AddRoleFormProps> = ({
                 color: theme.palette.text.secondary,
                 fontSize: '0.875rem',
               }}>
-                Define el nombre, descripción y permisos del nuevo rol. Los permisos determinan qué acciones puede realizar un usuario con este rol en el sistema.
+                Define el nombre y permisos del nuevo rol. Los permisos determinan qué acciones puede realizar un usuario con este rol en el sistema.
               </Box>
             </Box>
           </Box>
