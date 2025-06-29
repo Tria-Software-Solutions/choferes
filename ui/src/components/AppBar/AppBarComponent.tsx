@@ -18,7 +18,7 @@ import {
   ListItemText,
   Popover,
 } from "@mui/material";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import { useAuthContext } from "../../context/AuthContext";
 import { APPBAR_MENU } from "../../constants/constants";
 import MenuRoundedIcon from "@mui/icons-material/MenuRounded";
@@ -49,6 +49,7 @@ const AppBarComponent: React.FC<AppBarComponentProps> = ({
 }) => {
   const { currentUser } = useAuthContext();
   const navigate = useNavigate();
+  const location = useLocation();
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("md"));
   
@@ -102,6 +103,10 @@ const AppBarComponent: React.FC<AppBarComponentProps> = ({
   const getUserInitials = () => {
     if (!currentUser) return "U";
     return `${currentUser.firstName.charAt(0)}${currentUser.lastName.charAt(0)}`.toUpperCase();
+  };
+
+  const isActivePage = (path: string) => {
+    return location.pathname === path;
   };
 
   console.log('AppBarComponent - links:', links, 'links.length:', links.length);
@@ -247,15 +252,27 @@ const AppBarComponent: React.FC<AppBarComponentProps> = ({
                           borderRadius: '50%',
                           minWidth: '56px',
                           height: '56px',
+                          backgroundColor: isActivePage(link.path || '') 
+                            ? 'rgba(255,255,255,0.25)' 
+                            : 'transparent',
+                          border: isActivePage(link.path || '') 
+                            ? '2px solid rgba(255,255,255,0.6)' 
+                            : 'none',
                           '&:hover': {
-                            backgroundColor: 'rgba(255,255,255,0.15)',
+                            backgroundColor: isActivePage(link.path || '')
+                              ? 'rgba(255,255,255,0.35)'
+                              : 'rgba(255,255,255,0.15)',
                             transform: 'translateY(-2px)',
                           },
                           transition: 'all 0.3s ease',
                         }}
                       >
                         {React.cloneElement(link.icon as React.ReactElement, {
-                          sx: { fontSize: '1.6rem' }
+                          sx: { 
+                            fontSize: '1.6rem',
+                            color: isActivePage(link.path || '') ? '#ffffff' : '#ffffff',
+                            filter: isActivePage(link.path || '') ? 'drop-shadow(0 0 8px rgba(255,255,255,0.6))' : 'none',
+                          }
                         })}
                       </IconButton>
                     </Tooltip>
