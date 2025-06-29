@@ -90,7 +90,7 @@ const AddScheduleForm: React.FC<AddScheduleFormProps> = ({
   return (
     <Box sx={{ width: '100%', p: 0 }}>
       <Grid container spacing={3} sx={{ mt: 0 }}>
-        <Grid item xs={12}>
+        <Grid item xs={12} sm={6}>
           <TextField
             label="Nombre del Horario"
             variant="outlined"
