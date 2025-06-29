@@ -5,6 +5,7 @@ import {
   TextField,
   Button,
   useTheme,
+  useMediaQuery,
 } from "@mui/material";
 import PostAddRoundedIcon from "@mui/icons-material/PostAddRounded";
 import CloseRoundedIcon from "@mui/icons-material/CloseRounded";
@@ -21,6 +22,9 @@ const AddEmployeeForm: React.FC<AddEmployeeFormProps> = ({
   isLoading = false,
 }) => {
   const theme = useTheme();
+  const isSmallScreen = useMediaQuery(theme.breakpoints.down("sm"));
+  const isMediumScreen = useMediaQuery(theme.breakpoints.down("md"));
+  
   const [formData, setFormData] = useState({
     firstName: "",
     lastName: "",
@@ -84,7 +88,6 @@ const AddEmployeeForm: React.FC<AddEmployeeFormProps> = ({
   return (
     <Box sx={{ width: '100%', p: 0 }}>
       <Grid container spacing={3} sx={{ mt: 0 }}>
-        {/* Nombre */}
         <Grid item xs={12} sm={6}>
           <TextField
             label="Nombre"
@@ -105,7 +108,6 @@ const AddEmployeeForm: React.FC<AddEmployeeFormProps> = ({
           />
         </Grid>
 
-        {/* Apellido */}
         <Grid item xs={12} sm={6}>
           <TextField
             label="Apellido"
@@ -126,20 +128,19 @@ const AddEmployeeForm: React.FC<AddEmployeeFormProps> = ({
           />
         </Grid>
 
-        {/* Información Adicional */}
         <Grid item xs={12}>
           <Box
             sx={{
               display: 'flex',
               alignItems: 'center',
-              p: 2,
+              p: { xs: 1.5, sm: 2 },
               backgroundColor: theme.palette.action.hover,
               borderRadius: 1,
               border: '1px solid',
               borderColor: theme.palette.divider,
             }}
           >
-            <Box sx={{ mr: 2, color: theme.palette.info.main }}>
+            <Box sx={{ mr: { xs: 1, sm: 2 }, color: theme.palette.info.main }}>
               ℹ️
             </Box>
             <Box>
@@ -147,12 +148,13 @@ const AddEmployeeForm: React.FC<AddEmployeeFormProps> = ({
                 fontWeight: 600,
                 color: theme.palette.text.primary,
                 mb: 0.5,
+                fontSize: 'clamp(0.875rem, 1.5vw, 1rem)',
               }}>
                 Información del Empleado
               </Box>
               <Box sx={{
                 color: theme.palette.text.secondary,
-                fontSize: '0.875rem',
+                fontSize: 'clamp(0.75rem, 1.25vw, 0.875rem)',
               }}>
                 Ingresa el nombre completo del empleado. Solo se permiten letras, espacios y guiones.
               </Box>
@@ -160,13 +162,13 @@ const AddEmployeeForm: React.FC<AddEmployeeFormProps> = ({
           </Box>
         </Grid>
 
-        {/* Botones de Acción */}
         <Grid item xs={12}>
           <Box
             sx={{
               display: 'flex',
+              flexDirection: { xs: 'column', sm: 'row' },
               justifyContent: 'space-between',
-              gap: 2,
+              gap: { xs: 1, sm: 2 },
               pt: 2,
               borderTop: '1px solid',
               borderColor: theme.palette.divider,
@@ -176,15 +178,34 @@ const AddEmployeeForm: React.FC<AddEmployeeFormProps> = ({
               variant="outlined"
               onClick={handleClearForm}
               startIcon={<CloseRoundedIcon />}
+              fullWidth={isSmallScreen}
+              sx={{
+                minHeight: { xs: 44, sm: 48 },
+                fontSize: 'clamp(0.75rem, 1.25vw, 0.875rem)',
+                order: { xs: 3, sm: 1 },
+              }}
             >
               Limpiar
             </Button>
-            <Box sx={{ display: 'flex', gap: 2 }}>
+            <Box 
+              sx={{ 
+                display: 'flex', 
+                flexDirection: { xs: 'column', sm: 'row' },
+                gap: { xs: 1, sm: 2 },
+                width: { xs: '100%', sm: 'auto' },
+                order: { xs: 1, sm: 2 },
+              }}
+            >
               {onCancel && (
                 <Button
                   variant="outlined"
                   onClick={onCancel}
                   disabled={isLoading}
+                  fullWidth={isSmallScreen}
+                  sx={{
+                    minHeight: { xs: 44, sm: 48 },
+                    fontSize: 'clamp(0.75rem, 1.25vw, 0.875rem)',
+                  }}
                 >
                   Cancelar
                 </Button>
@@ -194,13 +215,16 @@ const AddEmployeeForm: React.FC<AddEmployeeFormProps> = ({
                 onClick={handleSubmit}
                 disabled={!isFormValid() || isLoading}
                 startIcon={<PostAddRoundedIcon />}
+                fullWidth={isSmallScreen}
                 sx={{
-                  px: 4,
-                  py: 1.5,
-                  fontSize: '1rem',
+                  minHeight: { xs: 44, sm: 48 },
+                  fontSize: 'clamp(0.75rem, 1.25vw, 0.875rem)',
+                  fontWeight: 600,
+                  px: { xs: 2, sm: 4 },
+                  py: { xs: 1, sm: 1.5 },
                 }}
               >
-                {isLoading ? 'Creando...' : 'Crear Empleado'}
+                {isLoading ? 'Creando...' : (isSmallScreen ? 'Crear' : 'Crear Empleado')}
               </Button>
             </Box>
           </Box>

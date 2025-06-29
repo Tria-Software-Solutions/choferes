@@ -16,6 +16,7 @@ import {
   OutlinedInput,
   Button,
   useTheme,
+  useMediaQuery,
 } from '@mui/material';
 import { Schedule } from '../../models/Schedule';
 import { DAYS_LIST } from '../../constants/constants';
@@ -35,6 +36,9 @@ const AddScheduleForm: React.FC<AddScheduleFormProps> = ({
   isLoading = false,
 }) => {
   const theme = useTheme();
+  const isSmallScreen = useMediaQuery(theme.breakpoints.down("sm"));
+  const isMediumScreen = useMediaQuery(theme.breakpoints.down("md"));
+  
   const [formData, setFormData] = useState<{
     label: string;
     days: string[];
@@ -86,34 +90,26 @@ const AddScheduleForm: React.FC<AddScheduleFormProps> = ({
   return (
     <Box sx={{ width: '100%', p: 0 }}>
       <Grid container spacing={3} sx={{ mt: 0 }}>
-        {/* Nombre del Horario */}
-        <Grid item xs={12} sm={6}>
+        <Grid item xs={12}>
           <TextField
             label="Nombre del Horario"
             variant="outlined"
             fullWidth
-            placeholder="Ej: Lugar"
+            placeholder="Ej: Horario Matutino"
             value={formData.label}
             onChange={(e) =>
               setFormData({ ...formData, label: e.target.value })
             }
-            error={formData.label.length > 0 && !/^[a-zA-ZáéíóúÁÉÍÓÚñÑüÜëË\s-]+$/.test(formData.label)}
-            helperText={
-              formData.label.length > 0 && !/^[a-zA-ZáéíóúÁÉÍÓÚñÑüÜëË\s-]+$/.test(formData.label)
-                ? "Solo se permiten letras, espacios y guiones"
-                : ""
-            }
             InputProps={{
               startAdornment: (
                 <Box sx={{ mr: 1, color: theme.palette.text.secondary }}>
-                  📋
+                  📅
                 </Box>
               ),
             }}
           />
         </Grid>
 
-        {/* Horas de Trabajo */}
         <Grid item xs={12} sm={6}>
           <TextField
             label="Horas de Trabajo"
@@ -146,7 +142,6 @@ const AddScheduleForm: React.FC<AddScheduleFormProps> = ({
           />
         </Grid>
 
-        {/* Días de la Semana */}
         <Grid item xs={12}>
           <FormControl variant="outlined" fullWidth>
             <InputLabel>Días de Trabajo</InputLabel>
@@ -166,7 +161,7 @@ const AddScheduleForm: React.FC<AddScheduleFormProps> = ({
                         px: 1,
                         py: 0.5,
                         borderRadius: 1,
-                        fontSize: '0.75rem',
+                        fontSize: 'clamp(0.625rem, 1vw, 0.75rem)',
                         fontWeight: 500,
                       }}
                     >
@@ -193,7 +188,10 @@ const AddScheduleForm: React.FC<AddScheduleFormProps> = ({
                   <ListItemText 
                     primary={option.label}
                     primaryTypographyProps={{
-                      sx: { fontWeight: 500 }
+                      sx: { 
+                        fontWeight: 500,
+                        fontSize: 'clamp(0.75rem, 1.25vw, 0.875rem)',
+                      }
                     }}
                   />
                 </MenuItem>
@@ -204,6 +202,7 @@ const AddScheduleForm: React.FC<AddScheduleFormProps> = ({
                 mt: 0.5, 
                 display: 'block',
                 color: theme.palette.error.main,
+                fontSize: 'clamp(0.625rem, 1vw, 0.75rem)',
               }}>
                 Seleccione al menos un día
               </Typography>
@@ -211,20 +210,19 @@ const AddScheduleForm: React.FC<AddScheduleFormProps> = ({
           </FormControl>
         </Grid>
 
-        {/* Horario Especial */}
         <Grid item xs={12}>
           <Box
             sx={{
               display: 'flex',
               alignItems: 'center',
-              p: 2,
+              p: { xs: 1.5, sm: 2 },
               backgroundColor: theme.palette.action.hover,
               borderRadius: 1,
               border: '1px solid',
               borderColor: theme.palette.divider,
             }}
           >
-            <Box sx={{ mr: 2, color: theme.palette.warning.main }}>
+            <Box sx={{ mr: { xs: 1, sm: 2 }, color: theme.palette.warning.main }}>
               ⚠️
             </Box>
             <FormGroup>
@@ -245,11 +243,13 @@ const AddScheduleForm: React.FC<AddScheduleFormProps> = ({
                     <Typography variant="body1" sx={{ 
                       fontWeight: 600,
                       color: theme.palette.text.primary,
+                      fontSize: 'clamp(0.875rem, 1.5vw, 1rem)',
                     }}>
                       Horario Especial
                     </Typography>
                     <Typography variant="caption" sx={{
                       color: theme.palette.text.secondary,
+                      fontSize: 'clamp(0.75rem, 1.25vw, 0.875rem)',
                     }}>
                       Marque esta opción si es un horario con condiciones especiales
                     </Typography>
@@ -260,13 +260,13 @@ const AddScheduleForm: React.FC<AddScheduleFormProps> = ({
           </Box>
         </Grid>
 
-        {/* Botones de Acción */}
         <Grid item xs={12}>
           <Box
             sx={{
               display: 'flex',
+              flexDirection: { xs: 'column', sm: 'row' },
               justifyContent: 'space-between',
-              gap: 2,
+              gap: { xs: 1, sm: 2 },
               pt: 2,
               borderTop: '1px solid',
               borderColor: theme.palette.divider,
@@ -276,15 +276,34 @@ const AddScheduleForm: React.FC<AddScheduleFormProps> = ({
               variant="outlined"
               onClick={handleClearForm}
               startIcon={<CloseRoundedIcon />}
+              fullWidth={isSmallScreen}
+              sx={{
+                minHeight: { xs: 44, sm: 48 },
+                fontSize: 'clamp(0.75rem, 1.25vw, 0.875rem)',
+                order: { xs: 3, sm: 1 },
+              }}
             >
               Limpiar
             </Button>
-            <Box sx={{ display: 'flex', gap: 2 }}>
+            <Box 
+              sx={{ 
+                display: 'flex', 
+                flexDirection: { xs: 'column', sm: 'row' },
+                gap: { xs: 1, sm: 2 },
+                width: { xs: '100%', sm: 'auto' },
+                order: { xs: 1, sm: 2 },
+              }}
+            >
               {onCancel && (
                 <Button
                   variant="outlined"
                   onClick={onCancel}
                   disabled={isLoading}
+                  fullWidth={isSmallScreen}
+                  sx={{
+                    minHeight: { xs: 44, sm: 48 },
+                    fontSize: 'clamp(0.75rem, 1.25vw, 0.875rem)',
+                  }}
                 >
                   Cancelar
                 </Button>
@@ -294,13 +313,16 @@ const AddScheduleForm: React.FC<AddScheduleFormProps> = ({
                 onClick={handleSubmit}
                 disabled={!isFormValid || isLoading}
                 startIcon={<PostAddRoundedIcon />}
+                fullWidth={isSmallScreen}
                 sx={{
-                  px: 4,
-                  py: 1.5,
-                  fontSize: '1rem',
+                  minHeight: { xs: 44, sm: 48 },
+                  fontSize: 'clamp(0.75rem, 1.25vw, 0.875rem)',
+                  fontWeight: 600,
+                  px: { xs: 2, sm: 4 },
+                  py: { xs: 1, sm: 1.5 },
                 }}
               >
-                {isLoading ? 'Creando...' : 'Crear Horario'}
+                {isLoading ? 'Creando...' : (isSmallScreen ? 'Crear' : 'Crear Horario')}
               </Button>
             </Box>
           </Box>

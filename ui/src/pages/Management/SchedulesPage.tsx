@@ -56,7 +56,6 @@ const SchedulesPage: React.FC = () => {
   const [filteredSchedules, setFilteredSchedules] = useState<Schedule[]>([]);
   const [totalCountSchedules, setTotalCountSchedules] = useState(0);
   const [editRowId, setEditRowId] = useState<number | null>(null);
-  const [openAddModal, setOpenAddModal] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [editFields, setEditFields] = useState<{
     label: string;
@@ -138,9 +137,9 @@ const SchedulesPage: React.FC = () => {
 
   const handleCreate = async (newSchedule: Omit<Schedule, "id">) => {
     try {
-      setIsSubmitting(true);
-      dispatch(createSchedule(newSchedule));
-      setOpenAddModal(false);
+      setIsCreatingSchedule(true);
+      await dispatch(createSchedule(newSchedule));
+      setOpenAddScheduleModal(false);
       showNotification(
         "El registro del horario fue exitoso",
         "success",
@@ -156,7 +155,7 @@ const SchedulesPage: React.FC = () => {
         false
       );
     } finally {
-      setIsSubmitting(false);
+      setIsCreatingSchedule(false);
     }
   };
 
@@ -212,11 +211,11 @@ const SchedulesPage: React.FC = () => {
   };
 
   const handleOpenAddModal = () => {
-    setOpenAddModal(true);
+    setOpenAddScheduleModal(true);
   };
 
   const handleCloseAddModal = () => {
-    setOpenAddModal(false);
+    setOpenAddScheduleModal(false);
   };
 
   const handleDelete = async () => {
@@ -419,18 +418,33 @@ const SchedulesPage: React.FC = () => {
         cancelText="Cancelar"
         loading={isDeletingSchedule}
       />
-      <ModalComponent
-        buttonType="none"
+      
+      {/* Modal simple usando Dialog directamente */}
+      <Dialog
         open={openAddScheduleModal}
-        onCloseModal={handleCloseAddModal}
-        modalTitle="Agregar Horario"
+        onClose={handleCloseAddModal}
+        maxWidth="md"
+        fullWidth
       >
-        <AddScheduleForm
-          onSubmit={handleCreate}
-          onCancel={handleCloseAddModal}
-          isLoading={isCreatingSchedule}
-        />
-      </ModalComponent>
+        <DialogTitle sx={{ 
+          backgroundColor: theme.palette.primary.main, 
+          color: theme.palette.primary.contrastText,
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between'
+        }}>
+          <Typography variant="h6" sx={{ fontWeight: 600 }}>
+            Agregar Nuevo Horario
+          </Typography>
+        </DialogTitle>
+        <DialogContent sx={{ p: 3 }}>
+          <AddScheduleForm
+            onSubmit={handleCreate}
+            onCancel={handleCloseAddModal}
+            isLoading={isCreatingSchedule}
+          />
+        </DialogContent>
+      </Dialog>
     </Box>
   );
 };

@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useMemo } from "react";
 import {
   Box,
   Grid,
@@ -10,6 +10,7 @@ import {
   FormControlLabel,
   Checkbox,
   useTheme,
+  useMediaQuery,
 } from "@mui/material";
 import PostAddRoundedIcon from "@mui/icons-material/PostAddRounded";
 import CloseRoundedIcon from "@mui/icons-material/CloseRounded";
@@ -32,6 +33,9 @@ const AddRoleForm: React.FC<AddRoleFormProps> = ({
   permissions,
 }) => {
   const theme = useTheme();
+  const isSmallScreen = useMediaQuery(theme.breakpoints.down("sm"));
+  const isMediumScreen = useMediaQuery(theme.breakpoints.down("md"));
+  
   const [formData, setFormData] = useState({
     name: "",
     permissions: [] as string[],
@@ -41,33 +45,40 @@ const AddRoleForm: React.FC<AddRoleFormProps> = ({
     permissions: "",
   });
 
+  const groupedPermissions = useMemo(() => {
+    const grouped: { [key: string]: Permission[] } = {};
+    permissions.forEach(permission => {
+      const category = permission.name.split('_')[0];
+      if (!grouped[category]) {
+        grouped[category] = [];
+      }
+      grouped[category].push(permission);
+    });
+    return grouped;
+  }, [permissions]);
+
   const validateField = (name: string, value: string | string[]) => {
-    const nameRegex = /^[a-zA-ZáéíóúÁÉÍÓÚñÑüÜëË\s-]+$/;
+    if (name === "name") {
+      const nameValue = value as string;
+      if (!nameValue.trim()) {
+        return "El nombre del rol es requerido";
+      }
+      if (nameValue.trim().length < 2) {
+        return "Mínimo 2 caracteres";
+      }
+      if (nameValue.trim().length > 50) {
+        return "Máximo 50 caracteres";
+      }
+      const nameRegex = /^[a-zA-ZáéíóúÁÉÍÓÚñÑüÜëË\s-]+$/;
+      if (!nameRegex.test(nameValue)) {
+        return "Solo se permiten letras, espacios y guiones";
+      }
+    }
     
     if (name === "permissions") {
-      if ((value as string[]).length === 0) {
+      const permissionsValue = value as string[];
+      if (permissionsValue.length === 0) {
         return "Debe seleccionar al menos un permiso";
-      }
-      return "";
-    }
-    
-    if (!value || (typeof value === "string" && !value.trim())) {
-      return "Este campo es requerido";
-    }
-    
-    if (typeof value === "string") {
-      switch (name) {
-        case "name":
-          if (!nameRegex.test(value)) {
-            return "Solo se permiten letras, espacios y guiones";
-          }
-          if (value.trim().length < 2) {
-            return "Mínimo 2 caracteres";
-          }
-          if (value.trim().length > 50) {
-            return "Máximo 50 caracteres";
-          }
-          break;
       }
     }
     
@@ -107,24 +118,9 @@ const AddRoleForm: React.FC<AddRoleFormProps> = ({
   };
 
   const handleClearForm = () => {
-    setFormData({
-      name: "",
-      permissions: [],
-    });
-    setErrors({
-      name: "",
-      permissions: "",
-    });
+    setFormData({ name: "", permissions: [] });
+    setErrors({ name: "", permissions: "" });
   };
-
-  const groupedPermissions = permissions.reduce((acc, permission) => {
-    const category = permission.name.split('_')[0] || 'General';
-    if (!acc[category]) {
-      acc[category] = [];
-    }
-    acc[category].push(permission);
-    return acc;
-  }, {} as Record<string, Permission[]>);
 
   return (
     <Box sx={{ width: '100%', p: 0 }}>
@@ -156,6 +152,7 @@ const AddRoleForm: React.FC<AddRoleFormProps> = ({
                 fontWeight: 600,
                 color: theme.palette.text.primary,
                 mb: 1,
+                fontSize: 'clamp(0.875rem, 1.5vw, 1rem)',
               }}>
                 Permisos del Rol
               </Box>
@@ -172,7 +169,7 @@ const AddRoleForm: React.FC<AddRoleFormProps> = ({
               border: '1px solid',
               borderColor: theme.palette.divider,
               borderRadius: 1,
-              p: 2,
+              p: { xs: 1, sm: 2 },
               backgroundColor: theme.palette.background.paper,
             }}>
               {Object.entries(groupedPermissions).map(([category, categoryPermissions]) => (
@@ -181,7 +178,7 @@ const AddRoleForm: React.FC<AddRoleFormProps> = ({
                     fontWeight: 600,
                     color: theme.palette.primary.main,
                     mb: 1,
-                    fontSize: '0.9rem',
+                    fontSize: 'clamp(0.8rem, 1.25vw, 0.9rem)',
                     textTransform: 'capitalize',
                   }}>
                     {category}
@@ -204,15 +201,15 @@ const AddRoleForm: React.FC<AddRoleFormProps> = ({
                         }
                         label={
                           <Box sx={{ 
-                            fontSize: '0.875rem',
+                            fontSize: 'clamp(0.75rem, 1.25vw, 0.875rem)',
                             color: theme.palette.text.primary,
                           }}>
                             {permission.name.replace(/_/g, ' ').toLowerCase()}
                           </Box>
                         }
                         sx={{ 
-                          minWidth: 200,
-                          mr: 2,
+                          minWidth: { xs: 150, sm: 200 },
+                          mr: { xs: 1, sm: 2 },
                           mb: 1,
                         }}
                       />
@@ -231,6 +228,7 @@ const AddRoleForm: React.FC<AddRoleFormProps> = ({
                 fontWeight: 600,
                 color: theme.palette.text.primary,
                 mb: 1,
+                fontSize: 'clamp(0.875rem, 1.5vw, 1rem)',
               }}>
                 Permisos Seleccionados ({formData.permissions.length})
               </Box>
@@ -245,6 +243,7 @@ const AddRoleForm: React.FC<AddRoleFormProps> = ({
                       sx={{
                         backgroundColor: theme.palette.primary.main,
                         color: theme.palette.primary.contrastText,
+                        fontSize: 'clamp(0.625rem, 1vw, 0.75rem)',
                         '&:hover': {
                           backgroundColor: theme.palette.primary.dark,
                         },
@@ -262,14 +261,14 @@ const AddRoleForm: React.FC<AddRoleFormProps> = ({
             sx={{
               display: 'flex',
               alignItems: 'center',
-              p: 2,
+              p: { xs: 1.5, sm: 2 },
               backgroundColor: theme.palette.action.hover,
               borderRadius: 1,
               border: '1px solid',
               borderColor: theme.palette.divider,
             }}
           >
-            <Box sx={{ mr: 2, color: theme.palette.info.main }}>
+            <Box sx={{ mr: { xs: 1, sm: 2 }, color: theme.palette.info.main }}>
               ℹ️
             </Box>
             <Box>
@@ -277,12 +276,13 @@ const AddRoleForm: React.FC<AddRoleFormProps> = ({
                 fontWeight: 600,
                 color: theme.palette.text.primary,
                 mb: 0.5,
+                fontSize: 'clamp(0.875rem, 1.5vw, 1rem)',
               }}>
                 Información del Rol
               </Box>
               <Box sx={{
                 color: theme.palette.text.secondary,
-                fontSize: '0.875rem',
+                fontSize: 'clamp(0.75rem, 1.25vw, 0.875rem)',
               }}>
                 Define el nombre y permisos del nuevo rol. Los permisos determinan qué acciones puede realizar un usuario con este rol en el sistema.
               </Box>
@@ -294,8 +294,9 @@ const AddRoleForm: React.FC<AddRoleFormProps> = ({
           <Box
             sx={{
               display: 'flex',
+              flexDirection: { xs: 'column', sm: 'row' },
               justifyContent: 'space-between',
-              gap: 2,
+              gap: { xs: 1, sm: 2 },
               pt: 2,
               borderTop: '1px solid',
               borderColor: theme.palette.divider,
@@ -305,15 +306,34 @@ const AddRoleForm: React.FC<AddRoleFormProps> = ({
               variant="outlined"
               onClick={handleClearForm}
               startIcon={<CloseRoundedIcon />}
+              fullWidth={isSmallScreen}
+              sx={{
+                minHeight: { xs: 44, sm: 48 },
+                fontSize: 'clamp(0.75rem, 1.25vw, 0.875rem)',
+                order: { xs: 3, sm: 1 },
+              }}
             >
               Limpiar
             </Button>
-            <Box sx={{ display: 'flex', gap: 2 }}>
+            <Box 
+              sx={{ 
+                display: 'flex', 
+                flexDirection: { xs: 'column', sm: 'row' },
+                gap: { xs: 1, sm: 2 },
+                width: { xs: '100%', sm: 'auto' },
+                order: { xs: 1, sm: 2 },
+              }}
+            >
               {onCancel && (
                 <Button
                   variant="outlined"
                   onClick={onCancel}
                   disabled={isLoading}
+                  fullWidth={isSmallScreen}
+                  sx={{
+                    minHeight: { xs: 44, sm: 48 },
+                    fontSize: 'clamp(0.75rem, 1.25vw, 0.875rem)',
+                  }}
                 >
                   Cancelar
                 </Button>
@@ -323,13 +343,16 @@ const AddRoleForm: React.FC<AddRoleFormProps> = ({
                 onClick={handleSubmit}
                 disabled={!isFormValid() || isLoading}
                 startIcon={<PostAddRoundedIcon />}
+                fullWidth={isSmallScreen}
                 sx={{
-                  px: 4,
-                  py: 1.5,
-                  fontSize: '1rem',
+                  minHeight: { xs: 44, sm: 48 },
+                  fontSize: 'clamp(0.75rem, 1.25vw, 0.875rem)',
+                  fontWeight: 600,
+                  px: { xs: 2, sm: 4 },
+                  py: { xs: 1, sm: 1.5 },
                 }}
               >
-                {isLoading ? 'Creando...' : 'Crear Rol'}
+                {isLoading ? 'Creando...' : (isSmallScreen ? 'Crear' : 'Crear Rol')}
               </Button>
             </Box>
           </Box>

@@ -11,6 +11,7 @@ import {
   InputAdornment,
   IconButton,
   useTheme,
+  useMediaQuery,
 } from "@mui/material";
 import PostAddRoundedIcon from "@mui/icons-material/PostAddRounded";
 import CloseRoundedIcon from "@mui/icons-material/CloseRounded";
@@ -45,6 +46,9 @@ const AddUserForm: React.FC<AddUserFormProps> = ({
   roles,
 }) => {
   const theme = useTheme();
+  const isSmallScreen = useMediaQuery(theme.breakpoints.down("sm"));
+  const isMediumScreen = useMediaQuery(theme.breakpoints.down("md"));
+  
   const [formData, setFormData] = useState({
     firstName: "",
     lastName: "",
@@ -64,21 +68,57 @@ const AddUserForm: React.FC<AddUserFormProps> = ({
   const [showPassword, setShowPassword] = useState(false);
 
   const validateField = (name: string, value: string) => {
+    const nameRegex = /^[a-zA-ZáéíóúÁÉÍÓÚñÑüÜëË\s-]+$/;
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    const usernameRegex = /^[a-zA-Z0-9._-]+$/;
+    const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
+    
+    if (!value.trim()) {
+      return "Este campo es requerido";
+    }
+    
     switch (name) {
       case "firstName":
       case "lastName":
-        return validateName(value);
+        if (!nameRegex.test(value)) {
+          return "Solo se permiten letras, espacios y guiones";
+        }
+        if (value.trim().length < 2) {
+          return "Mínimo 2 caracteres";
+        }
+        if (value.trim().length > 50) {
+          return "Máximo 50 caracteres";
+        }
+        break;
       case "email":
-        return validateEmail(value);
+        if (!emailRegex.test(value)) {
+          return "Email inválido";
+        }
+        break;
       case "username":
-        return validateUsername(value);
+        if (!usernameRegex.test(value)) {
+          return "Solo se permiten letras, números, puntos, guiones y guiones bajos";
+        }
+        if (value.trim().length < 3) {
+          return "Mínimo 3 caracteres";
+        }
+        if (value.trim().length > 30) {
+          return "Máximo 30 caracteres";
+        }
+        break;
       case "password":
-        return validatePassword(value);
+        if (!passwordRegex.test(value)) {
+          return "La contraseña debe tener al menos 8 caracteres, una mayúscula, una minúscula, un número y un carácter especial";
+        }
+        break;
       case "roleName":
-        return validateName(value);
-      default:
-        return "";
+        if (!value.trim()) {
+          return "Debe seleccionar un rol";
+        }
+        break;
     }
+    
+    return "";
   };
 
   const handleFieldChange = (field: string, value: string) => {
@@ -111,7 +151,7 @@ const AddUserForm: React.FC<AddUserFormProps> = ({
         lastName: formData.lastName.trim(),
         email: formData.email.trim(),
         username: formData.username.trim(),
-        password: formData.password,
+        password: formData.password.trim(),
         roleName: formData.roleName.trim(),
       });
     }
@@ -287,14 +327,14 @@ const AddUserForm: React.FC<AddUserFormProps> = ({
             sx={{
               display: 'flex',
               alignItems: 'center',
-              p: 2,
+              p: { xs: 1.5, sm: 2 },
               backgroundColor: theme.palette.action.hover,
               borderRadius: 1,
               border: '1px solid',
               borderColor: theme.palette.divider,
             }}
           >
-            <Box sx={{ mr: 2, color: theme.palette.info.main }}>
+            <Box sx={{ mr: { xs: 1, sm: 2 }, color: theme.palette.info.main }}>
               ℹ️
             </Box>
             <Box>
@@ -302,12 +342,13 @@ const AddUserForm: React.FC<AddUserFormProps> = ({
                 fontWeight: 600,
                 color: theme.palette.text.primary,
                 mb: 0.5,
+                fontSize: 'clamp(0.875rem, 1.5vw, 1rem)',
               }}>
                 Información del Usuario
               </Box>
               <Box sx={{
                 color: theme.palette.text.secondary,
-                fontSize: '0.875rem',
+                fontSize: 'clamp(0.75rem, 1.25vw, 0.875rem)',
               }}>
                 Completa todos los campos para crear un nuevo usuario. La contraseña debe tener al menos 8 caracteres, una mayúscula, una minúscula, un número y un carácter especial.
               </Box>
@@ -319,8 +360,9 @@ const AddUserForm: React.FC<AddUserFormProps> = ({
           <Box
             sx={{
               display: 'flex',
+              flexDirection: { xs: 'column', sm: 'row' },
               justifyContent: 'space-between',
-              gap: 2,
+              gap: { xs: 1, sm: 2 },
               pt: 2,
               borderTop: '1px solid',
               borderColor: theme.palette.divider,
@@ -330,15 +372,34 @@ const AddUserForm: React.FC<AddUserFormProps> = ({
               variant="outlined"
               onClick={handleClearForm}
               startIcon={<CloseRoundedIcon />}
+              fullWidth={isSmallScreen}
+              sx={{
+                minHeight: { xs: 44, sm: 48 },
+                fontSize: 'clamp(0.75rem, 1.25vw, 0.875rem)',
+                order: { xs: 3, sm: 1 },
+              }}
             >
               Limpiar
             </Button>
-            <Box sx={{ display: 'flex', gap: 2 }}>
+            <Box 
+              sx={{ 
+                display: 'flex', 
+                flexDirection: { xs: 'column', sm: 'row' },
+                gap: { xs: 1, sm: 2 },
+                width: { xs: '100%', sm: 'auto' },
+                order: { xs: 1, sm: 2 },
+              }}
+            >
               {onCancel && (
                 <Button
                   variant="outlined"
                   onClick={onCancel}
                   disabled={isLoading}
+                  fullWidth={isSmallScreen}
+                  sx={{
+                    minHeight: { xs: 44, sm: 48 },
+                    fontSize: 'clamp(0.75rem, 1.25vw, 0.875rem)',
+                  }}
                 >
                   Cancelar
                 </Button>
@@ -348,13 +409,16 @@ const AddUserForm: React.FC<AddUserFormProps> = ({
                 onClick={handleSubmit}
                 disabled={!isFormValid() || isLoading}
                 startIcon={<PostAddRoundedIcon />}
+                fullWidth={isSmallScreen}
                 sx={{
-                  px: 4,
-                  py: 1.5,
-                  fontSize: '1rem',
+                  minHeight: { xs: 44, sm: 48 },
+                  fontSize: 'clamp(0.75rem, 1.25vw, 0.875rem)',
+                  fontWeight: 600,
+                  px: { xs: 2, sm: 4 },
+                  py: { xs: 1, sm: 1.5 },
                 }}
               >
-                {isLoading ? 'Creando...' : 'Crear Usuario'}
+                {isLoading ? 'Creando...' : (isSmallScreen ? 'Crear' : 'Crear Usuario')}
               </Button>
             </Box>
           </Box>

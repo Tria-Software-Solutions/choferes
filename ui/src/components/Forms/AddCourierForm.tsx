@@ -1,17 +1,18 @@
-import React, { useState, useCallback } from 'react';
+import React, { useState } from "react";
 import {
   Box,
   Grid,
   TextField,
   Button,
-  useTheme,
   FormControl,
   InputLabel,
   Select,
   MenuItem,
-} from '@mui/material';
-import PostAddRoundedIcon from '@mui/icons-material/PostAddRounded';
-import CloseRoundedIcon from '@mui/icons-material/CloseRounded';
+  useTheme,
+  useMediaQuery,
+} from "@mui/material";
+import PostAddRoundedIcon from "@mui/icons-material/PostAddRounded";
+import CloseRoundedIcon from "@mui/icons-material/CloseRounded";
 
 interface AddCourierFormProps {
   onSubmit: (courier: {
@@ -31,54 +32,76 @@ const AddCourierForm: React.FC<AddCourierFormProps> = ({
   isLoading = false,
 }) => {
   const theme = useTheme();
+  const isSmallScreen = useMediaQuery(theme.breakpoints.down("sm"));
+  const isMediumScreen = useMediaQuery(theme.breakpoints.down("md"));
+  
   const [formData, setFormData] = useState({
-    driver: '',
-    route: '',
+    driver: "",
+    route: "",
     distance: 0,
-    trackingNumber: '',
-    status: '',
+    trackingNumber: "",
+    status: "",
   });
-
   const [errors, setErrors] = useState({
-    driver: '',
-    route: '',
-    distance: '',
-    trackingNumber: '',
-    status: '',
+    driver: "",
+    route: "",
+    distance: "",
+    trackingNumber: "",
+    status: "",
   });
 
-  const validateField = useCallback((name: string, value: string | number) => {
-    const regex = {
-      number: /^\d+$/,
-      text: /^(?:[a-zA-ZáéíóúÁÉÍÓÚñÑüÜëË\s-]+|nulo|n\/a)$/i,
-    };
-
-    if (!value || (typeof value === 'string' && !value.trim())) {
-      return 'Este campo es requerido';
+  const validateField = (name: string, value: string | number) => {
+    if (name === "driver") {
+      if (!value || (typeof value === "string" && !value.trim())) {
+        return "El nombre del chofer es requerido";
+      }
+      if (typeof value === "string" && value.trim().length < 2) {
+        return "Mínimo 2 caracteres";
+      }
+      if (typeof value === "string" && value.trim().length > 100) {
+        return "Máximo 100 caracteres";
+      }
+      const nameRegex = /^[a-zA-ZáéíóúÁÉÍÓÚñÑüÜëË\s-]+$/;
+      if (typeof value === "string" && !nameRegex.test(value)) {
+        return "Solo se permiten letras, espacios y guiones";
+      }
     }
-
-    switch (name) {
-      case 'driver':
-      case 'trackingNumber':
-        if (!regex.text.test(value as string)) {
-          return 'Solo se permiten letras, espacios y guiones';
-        }
-        break;
-      case 'route':
-      case 'status':
-        if (!regex.text.test(value as string)) {
-          return 'Solo se permiten letras, espacios y guiones';
-        }
-        break;
-      case 'distance':
-        if (typeof value === 'number' && value <= 0) {
-          return 'La distancia debe ser mayor a 0';
-        }
-        break;
+    
+    if (name === "route") {
+      if (!value || (typeof value === "string" && !value.trim())) {
+        return "La ruta es requerida";
+      }
     }
-
-    return '';
-  }, []);
+    
+    if (name === "distance") {
+      if (typeof value === "number" && value <= 0) {
+        return "La distancia debe ser mayor a 0";
+      }
+      if (typeof value === "number" && value > 1000) {
+        return "La distancia no puede ser mayor a 1000 km";
+      }
+    }
+    
+    if (name === "trackingNumber") {
+      if (!value || (typeof value === "string" && !value.trim())) {
+        return "El número de guía es requerido";
+      }
+      if (typeof value === "string" && value.trim().length < 3) {
+        return "Mínimo 3 caracteres";
+      }
+      if (typeof value === "string" && value.trim().length > 50) {
+        return "Máximo 50 caracteres";
+      }
+    }
+    
+    if (name === "status") {
+      if (!value || (typeof value === "string" && !value.trim())) {
+        return "El estado es requerido";
+      }
+    }
+    
+    return "";
+  };
 
   const handleFieldChange = (field: string, value: string | number) => {
     setFormData(prev => ({ ...prev, [field]: value }));
@@ -88,12 +111,16 @@ const AddCourierForm: React.FC<AddCourierFormProps> = ({
 
   const isFormValid = () => {
     return (
-      formData.driver.trim() !== '' &&
-      formData.route.trim() !== '' &&
+      formData.driver.trim() !== "" &&
+      formData.route.trim() !== "" &&
       formData.distance > 0 &&
-      formData.trackingNumber.trim() !== '' &&
-      formData.status.trim() !== '' &&
-      Object.values(errors).every(error => error === '')
+      formData.trackingNumber.trim() !== "" &&
+      formData.status.trim() !== "" &&
+      errors.driver === "" &&
+      errors.route === "" &&
+      errors.distance === "" &&
+      errors.trackingNumber === "" &&
+      errors.status === ""
     );
   };
 
@@ -111,18 +138,18 @@ const AddCourierForm: React.FC<AddCourierFormProps> = ({
 
   const handleClearForm = () => {
     setFormData({
-      driver: '',
-      route: '',
+      driver: "",
+      route: "",
       distance: 0,
-      trackingNumber: '',
-      status: '',
+      trackingNumber: "",
+      status: "",
     });
     setErrors({
-      driver: '',
-      route: '',
-      distance: '',
-      trackingNumber: '',
-      status: '',
+      driver: "",
+      route: "",
+      distance: "",
+      trackingNumber: "",
+      status: "",
     });
   };
 
@@ -172,7 +199,6 @@ const AddCourierForm: React.FC<AddCourierFormProps> = ({
           </FormControl>
         </Grid>
 
-        {/* Distancia */}
         <Grid item xs={12} sm={6}>
           <TextField
             label="Distancia (km)"
@@ -194,7 +220,6 @@ const AddCourierForm: React.FC<AddCourierFormProps> = ({
           />
         </Grid>
 
-        {/* Número de Guía */}
         <Grid item xs={12} sm={6}>
           <TextField
             label="Número de Guía"
@@ -215,7 +240,6 @@ const AddCourierForm: React.FC<AddCourierFormProps> = ({
           />
         </Grid>
 
-        {/* Estado */}
         <Grid item xs={12} sm={6}>
           <FormControl variant="outlined" fullWidth>
             <InputLabel>Estado</InputLabel>
@@ -239,20 +263,19 @@ const AddCourierForm: React.FC<AddCourierFormProps> = ({
           </FormControl>
         </Grid>
 
-        {/* Información Adicional */}
         <Grid item xs={12}>
           <Box
             sx={{
               display: 'flex',
               alignItems: 'center',
-              p: 2,
+              p: { xs: 1.5, sm: 2 },
               backgroundColor: theme.palette.action.hover,
               borderRadius: 1,
               border: '1px solid',
               borderColor: theme.palette.divider,
             }}
           >
-            <Box sx={{ mr: 2, color: theme.palette.info.main }}>
+            <Box sx={{ mr: { xs: 1, sm: 2 }, color: theme.palette.info.main }}>
               ℹ️
             </Box>
             <Box>
@@ -260,12 +283,13 @@ const AddCourierForm: React.FC<AddCourierFormProps> = ({
                 fontWeight: 600,
                 color: theme.palette.text.primary,
                 mb: 0.5,
+                fontSize: 'clamp(0.875rem, 1.5vw, 1rem)',
               }}>
                 Información del Servicio de Mensajería
               </Box>
               <Box sx={{
                 color: theme.palette.text.secondary,
-                fontSize: '0.875rem',
+                fontSize: 'clamp(0.75rem, 1.25vw, 0.875rem)',
               }}>
                 Completa todos los campos requeridos para registrar un nuevo servicio de mensajería.
               </Box>
@@ -273,13 +297,13 @@ const AddCourierForm: React.FC<AddCourierFormProps> = ({
           </Box>
         </Grid>
 
-        {/* Botones de Acción */}
         <Grid item xs={12}>
           <Box
             sx={{
               display: 'flex',
+              flexDirection: { xs: 'column', sm: 'row' },
               justifyContent: 'space-between',
-              gap: 2,
+              gap: { xs: 1, sm: 2 },
               pt: 2,
               borderTop: '1px solid',
               borderColor: theme.palette.divider,
@@ -289,15 +313,34 @@ const AddCourierForm: React.FC<AddCourierFormProps> = ({
               variant="outlined"
               onClick={handleClearForm}
               startIcon={<CloseRoundedIcon />}
+              fullWidth={isSmallScreen}
+              sx={{
+                minHeight: { xs: 44, sm: 48 },
+                fontSize: 'clamp(0.75rem, 1.25vw, 0.875rem)',
+                order: { xs: 3, sm: 1 },
+              }}
             >
               Limpiar
             </Button>
-            <Box sx={{ display: 'flex', gap: 2 }}>
+            <Box 
+              sx={{ 
+                display: 'flex', 
+                flexDirection: { xs: 'column', sm: 'row' },
+                gap: { xs: 1, sm: 2 },
+                width: { xs: '100%', sm: 'auto' },
+                order: { xs: 1, sm: 2 },
+              }}
+            >
               {onCancel && (
                 <Button
                   variant="outlined"
                   onClick={onCancel}
                   disabled={isLoading}
+                  fullWidth={isSmallScreen}
+                  sx={{
+                    minHeight: { xs: 44, sm: 48 },
+                    fontSize: 'clamp(0.75rem, 1.25vw, 0.875rem)',
+                  }}
                 >
                   Cancelar
                 </Button>
@@ -307,14 +350,16 @@ const AddCourierForm: React.FC<AddCourierFormProps> = ({
                 onClick={handleSubmit}
                 disabled={!isFormValid() || isLoading}
                 startIcon={<PostAddRoundedIcon />}
+                fullWidth={isSmallScreen}
                 sx={{
-                  px: 4,
-                  py: 1.5,
-                  fontSize: '1rem',
-                  minHeight: 56,
+                  minHeight: { xs: 44, sm: 48 },
+                  fontSize: 'clamp(0.75rem, 1.25vw, 0.875rem)',
+                  fontWeight: 600,
+                  px: { xs: 2, sm: 4 },
+                  py: { xs: 1, sm: 1.5 },
                 }}
               >
-                {isLoading ? 'Agregando...' : 'Agregar Servicio'}
+                {isLoading ? 'Agregando...' : (isSmallScreen ? 'Agregar' : 'Agregar Servicio')}
               </Button>
             </Box>
           </Box>
