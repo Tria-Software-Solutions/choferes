@@ -558,7 +558,7 @@ const RolesPage: React.FC = () => {
             justifyContent="space-between"
             alignItems="center"
           >
-            <Grid item xs={12} md={6}>
+            <Grid item xs={12} md={4}>
               {filteredEmployees && (
                 <SearchBar
                   placeholder="Buscar empleado"
@@ -571,7 +571,7 @@ const RolesPage: React.FC = () => {
                 />
               )}
             </Grid>
-            <Grid item xs={12} md={6}>
+            <Grid item xs={12} md={8}>
               <Box
                 display="flex"
                 flexDirection={{ xs: "column", sm: "column", md: "row" }}

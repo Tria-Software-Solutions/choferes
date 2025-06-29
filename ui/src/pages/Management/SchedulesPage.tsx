@@ -320,7 +320,7 @@ const SchedulesPage: React.FC = () => {
             justifyContent="space-between"
             alignItems="center"
           >
-            <Grid item xs={12} md={4} lg={6}>
+            <Grid item xs={12} md={4}>
               {filteredSchedules && (
                 <SearchBar
                   placeholder="Buscar horario"
@@ -332,7 +332,7 @@ const SchedulesPage: React.FC = () => {
               )}
             </Grid>
             {userPermissions.includes(PERMISSIONS.CREATE_SCHEDULES) && (
-              <Grid item xs={12} md={8} lg={6}>
+              <Grid item xs={12} md={8}>
                 <Box
                   sx={{
                     display: 'flex',

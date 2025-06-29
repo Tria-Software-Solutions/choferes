@@ -12,6 +12,8 @@ import {
 import SearchBar from "../../components/SearchBar/SearchBar";
 import EditableTable from "../../components/Table/EditableTable/EditableTable";
 import CustomSpeedDial from "../../components/SpeedDial/CustomSpeedDial";
+import ModalComponent from "../../components/Modal/ModalComponent";
+import AddVehicleForm from "../../components/Forms/AddVehicleForm";
 import { useAppNotifications } from "../../components/Snackbar/SnackbarWrapper";
 import {
   Box,
@@ -19,25 +21,21 @@ import {
   useTheme,
   useMediaQuery,
   Grid,
-  TextField,
-  Tooltip,
   Button,
   Dialog,
   DialogTitle,
   DialogContent,
   DialogActions,
-  FormControl,
   CircularProgress,
   Backdrop,
-  Autocomplete,
+  Tooltip,
 } from "@mui/material";
 import { LocalizationProvider } from "@mui/x-date-pickers";
 import { DatePicker } from "@mui/x-date-pickers/DatePicker";
 import { AdapterDateFns } from "@mui/x-date-pickers/AdapterDateFns";
 import { format } from "date-fns";
 import { es } from "date-fns/locale";
-import { getMidnightDate, isTodayOrFuture } from "../../utils/dates";
-import { maskLicensePlate, maskParkingLot } from "../../utils/mask";
+import { isTodayOrFuture } from "../../utils/dates";
 import {
   createExportOptions,
   exportFileFormattedDate,
@@ -46,8 +44,6 @@ import {
 } from "../../utils/export";
 import { capitalizeFirstLetter } from "../../utils/string";
 import {
-  BRANDS_LIST,
-  COLORS_LIST,
   PAGE_TITLE,
   PERMISSIONS,
 } from "../../constants/constants";
@@ -65,7 +61,7 @@ const VehiclesPage: React.FC = () => {
   const dispatch = useDispatch<AppDispatch>();
   const { userPermissions } = useAuthContext();
   const [selectedDate, setSelectedDate] = useState<Date>(new Date());
-  const { vehicles, allVehicles, isLoadingVehicles } = useSelector(
+  const { allVehicles, isLoadingVehicles } = useSelector(
     (state: RootState) => state.vehicles
   );
   const { showNotification } = useAppNotifications();
@@ -74,14 +70,6 @@ const VehiclesPage: React.FC = () => {
   );
   const [totalCount, setTotalCount] = useState(0);
   const [editRowId, setEditRowId] = useState<number | null>(null);
-  const [addFields, setAddFields] = useState({
-    ticket: "",
-    licensePlate: "",
-    brand: "",
-    color: "",
-    parkingLot: "",
-    notes: "",
-  });
   const [editFields, setEditFields] = useState({
     ticket: "",
     licensePlate: "",
@@ -92,19 +80,14 @@ const VehiclesPage: React.FC = () => {
     parkingDate: new Date(),
   });
   const [openDeleteDialog, setOpenDeleteDialog] = useState(false);
-  const [openTicketTooltip, setOpenTicketTooltip] = useState(false);
-  const [openLicensePlateTooltip, setOpenLicensePlateTooltip] = useState(false);
   const [vehicleToDelete, setVehicleToDelete] = useState<number | null>(null);
   const [filter, setFilter] = useState("");
-  const [searchBrandTerm, setSearchBrandTerm] = useState("");
-  const [filteredBrands, setFilteredBrands] = useState(BRANDS_LIST);
-  const [searchColorTerm, setSearchColorTerm] = useState("");
-  const [filteredColors, setFilteredColors] = useState(COLORS_LIST);
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(5);
-  const [isAddFormValid, setIsAddFormValid] = useState(false);
   const [isEditFormValid, setIsEditFormValid] = useState(false);
   const [shouldRefetch, ] = useState(true);
+  const [openAddVehicleModal, setOpenAddVehicleModal] = useState(false);
+  const [isCreatingVehicle, setIsCreatingVehicle] = useState(false);
 
   const theme = useTheme();
   const isSmallScreen = useMediaQuery(theme.breakpoints.down("sm"));
@@ -186,7 +169,7 @@ const VehiclesPage: React.FC = () => {
     setFilteredWeekVehicles(vehiclesThisWeek);
   }, [allVehicles, selectedDate]);
 
-  const validateFields = useCallback((fields: typeof addFields) => {
+  const validateFields = useCallback((fields: typeof editFields) => {
     const regex = {
       number: /^\d+$/,
       plate: /^(?:[A-ZÑ]{3}-\d{3}|\d{6}|nulo|n\/a)$/i,
@@ -203,76 +186,17 @@ const VehiclesPage: React.FC = () => {
     );
   }, []);
 
-  useEffect(
-    () => setIsAddFormValid(validateFields(addFields)),
-    [addFields, validateFields]
-  );
-
   useEffect(() => {
-    if (editRowId !== null) setIsEditFormValid(validateFields(editFields));
-  }, [editFields, editRowId, validateFields]);
+    setIsEditFormValid(validateFields(editFields));
+  }, [editFields, validateFields]);
 
-  useEffect(() => {
-    setPage(0);
-  }, [selectedDate]);
+  const handleFilterChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setFilter(e.target.value);
+  };
 
-  const handleFilterChange = useCallback(
-    (e: React.ChangeEvent<HTMLInputElement>) => {
-      setFilter(e.target.value);
-    },
-    []
-  );
-
-  const handleCreate = async () => {
-    try {
-      if (!addFields.ticket || !addFields.licensePlate || !addFields.brand || !addFields.color || !addFields.parkingLot) {
-        showNotification(
-          "Todos los campos son obligatorios",
-          "error",
-          5000,
-          false
-        );
-        return;
-      }
-      
-      const newVehicle = {
-        ticket: addFields.ticket,
-        licensePlate: addFields.licensePlate,
-        brand: addFields.brand,
-        color: addFields.color,
-        parkingLot: addFields.parkingLot,
-        notes: addFields.notes,
-        parkingDate: selectedDate,
-      };
-      
-      await dispatch(createVehicle(newVehicle)).unwrap();
-      
-      setAddFields({
-        ticket: "",
-        licensePlate: "",
-        brand: "",
-        color: "",
-        parkingLot: "",
-        notes: "",
-      });
-      setSearchBrandTerm("");
-      setSearchColorTerm("");
-      setFilteredBrands(BRANDS_LIST);
-      setFilteredColors(COLORS_LIST);
-      showNotification(
-        "El registro del vehículo fue exitoso",
-        "success",
-        3000,
-        false
-      );
-    } catch (error) {
-      console.error('Error in handleCreate:', error);
-      showNotification(
-        "Ha ocurrido un error al registrar el vehículo",
-        "error",
-        5000,
-        false
-      );
+  const handleDateChange = (date: Date | null) => {
+    if (date) {
+      setSelectedDate(date);
     }
   };
 
@@ -285,7 +209,7 @@ const VehiclesPage: React.FC = () => {
       color: vehicle.color,
       parkingLot: vehicle.parkingLot,
       notes: vehicle.notes,
-      parkingDate: vehicle.parkingDate,
+      parkingDate: new Date(vehicle.parkingDate),
     });
   };
 
@@ -293,72 +217,39 @@ const VehiclesPage: React.FC = () => {
     setEditRowId(null);
   };
 
-  const handleUpdate = useCallback(
-    async (id: number) => {
-      try {
-        const updatedVehicle = {
-          ...editFields,
-        };
-        
-        await dispatch(updateVehicle({ id, updatedVehicle })).unwrap();
-        
-        setEditRowId(null);
-        setEditFields({
-          ticket: "",
-          licensePlate: "",
-          brand: "",
-          color: "",
-          parkingLot: "",
-          notes: "",
-          parkingDate: new Date(),
-        });
-        showNotification(
-          "La actualización del vehículo fue exitosa",
-          "success",
-          3000,
-          false
-        );
-      } catch (error) {
-        handleCancel();
-        console.error('Error in handleUpdate:', error);
-        showNotification(
-          "Ha ocurrido un error al actualizar el vehículo",
-          "error",
-          5000,
-          false
-        );
-      }
-    },
-    [dispatch, editFields, showNotification]
-  );
-
-  const handleOpenDeleteDialog = (id: number) => {
-    setOpenDeleteDialog(true);
-    setVehicleToDelete(id);
-  };
-
-  const handleCloseDeleteDialog = () => {
-    setOpenDeleteDialog(false);
-    setVehicleToDelete(null);
-  };
-
-  const handleDelete = async () => {
+  const handleUpdate = async (id: number) => {
     try {
-      if (vehicleToDelete !== null) {
-        dispatch(deleteVehicle(vehicleToDelete));
-        showNotification(
-          "La eliminación del vehículo fue exitosa",
-          "success",
-          3000,
-          false
-        );
-      }
-      handleCloseDeleteDialog();
+      const updatedVehicle = {
+        ticket: editFields.ticket,
+        licensePlate: editFields.licensePlate,
+        brand: editFields.brand,
+        color: editFields.color,
+        parkingLot: editFields.parkingLot,
+        notes: editFields.notes,
+        parkingDate: editFields.parkingDate,
+      };
+      await dispatch(updateVehicle({ id, updatedVehicle }));
+      setEditRowId(null);
+      setEditFields({
+        ticket: "",
+        licensePlate: "",
+        brand: "",
+        color: "",
+        parkingLot: "",
+        notes: "",
+        parkingDate: new Date(),
+      });
+      showNotification(
+        "La actualización del vehículo fue exitosa",
+        "success",
+        3000,
+        false
+      );
     } catch (error) {
       handleCancel();
       console.error(error);
       showNotification(
-        "Ha ocurrido un error al eliminar el vehículo",
+        "Ha ocurrido un error al actualizar el vehículo",
         "error",
         5000,
         false
@@ -366,140 +257,108 @@ const VehiclesPage: React.FC = () => {
     }
   };
 
-  const handleDateChange = useCallback((newDate: Date | null) => {
-    if (newDate) {
-      setSelectedDate(newDate);
+  const handleOpenDeleteDialog = (id: number) => {
+    setVehicleToDelete(id);
+    setOpenDeleteDialog(true);
+  };
+
+  const handleCloseDeleteDialog = () => {
+    setOpenDeleteDialog(false);
+  };
+
+  const handleDelete = async () => {
+    if (vehicleToDelete) {
+      try {
+        await dispatch(deleteVehicle(vehicleToDelete));
+        setOpenDeleteDialog(false);
+        showNotification(
+          "El vehículo fue eliminado exitosamente",
+          "success",
+          3000,
+          false
+        );
+      } catch (error) {
+        console.error(error);
+        showNotification(
+          "Ha ocurrido un error al eliminar el vehículo",
+          "error",
+          5000,
+          false
+        );
+      }
     }
-  }, []);
+  };
 
   const handleNextDate = () => {
-    if (!selectedDate) return;
-    const nextDay = new Date(getMidnightDate(selectedDate));
-    nextDay.setDate(nextDay.getDate() + 1);
-    setSelectedDate(nextDay);
+    const nextDate = new Date(selectedDate);
+    nextDate.setDate(selectedDate.getDate() + 1);
+    setSelectedDate(nextDate);
   };
 
   const handlePreviousDate = () => {
-    if (!selectedDate) return;
-    const previousDay = new Date(getMidnightDate(selectedDate));
-    previousDay.setDate(previousDay.getDate() - 1);
-    setSelectedDate(previousDay);
+    const previousDate = new Date(selectedDate);
+    previousDate.setDate(selectedDate.getDate() - 1);
+    setSelectedDate(previousDate);
   };
 
   const handleCurrentDate = () => {
-    const currentDate = getMidnightDate(new Date());
-    setSelectedDate(currentDate);
-  };
-
-  const showTemporaryTooltip = (
-    setTooltip: React.Dispatch<React.SetStateAction<boolean>>
-  ) => {
-    setTooltip(true);
-    setTimeout(() => setTooltip(false), 2000);
-  };
-
-  const handleSearchChangeBrand = (
-    event: React.SyntheticEvent,
-    value: string,
-    reason: string
-  ) => {
-    setSearchBrandTerm(value);
-    const filtered = BRANDS_LIST.filter((option) =>
-      option.label.toLowerCase().includes(value.toLowerCase())
-    );
-    setFilteredBrands(filtered);
-  };
-
-  const handleSearchChangeColor = (
-    event: React.SyntheticEvent,
-    value: string,
-    reason: string
-  ) => {
-    setSearchColorTerm(value);
-    const filtered = COLORS_LIST.filter((option) =>
-      option.label.toLowerCase().includes(value.toLowerCase())
-    );
-    setFilteredColors(filtered);
-  };
-
-  const checkTicketExistenceInAllVehicles = (
-    ticket: string
-  ): Vehicle | undefined => {
-    return allVehicles.find((vehicle) => String(vehicle.ticket) === ticket);
+    setSelectedDate(new Date());
   };
 
   const getNextTicketNumber = (): string => {
-    if (vehicles.length === 0) return "";
-    const lastTicket = vehicles
-      .map((vehicle) => vehicle.ticket)
-      .filter((ticket) => ticket && /^\d+$/.test(ticket))
-      .map((ticket) => BigInt(ticket!));
-    if (lastTicket.length === 0) return "";
-    const maxTicket = lastTicket.reduce(
-      (max, current) => (current > max ? current : max),
-      BigInt(0)
-    );
-    return (maxTicket + BigInt(1)).toString();
+    const tickets = allVehicles.map((vehicle) => parseInt(vehicle.ticket));
+    const maxTicket = Math.max(...tickets, 0);
+    return (maxTicket + 1).toString();
   };
 
-  const handleTicketOnFocus = () => {
-    if (addFields.ticket && /^\d+$/.test(addFields.ticket)) {
-      return;
+  const handleOpenAddVehicleModal = () => {
+    setOpenAddVehicleModal(true);
+  };
+
+  const handleCloseAddVehicleModal = () => {
+    setOpenAddVehicleModal(false);
+  };
+
+  const handleCreateVehicle = async (vehicleData: {
+    ticket: string;
+    licensePlate: string;
+    brand: string;
+    color: string;
+    parkingLot: string;
+    notes: string;
+    parkingDate: Date;
+  }) => {
+    setIsCreatingVehicle(true);
+    try {
+      const newVehicle = {
+        ticket: vehicleData.ticket,
+        licensePlate: vehicleData.licensePlate,
+        brand: vehicleData.brand,
+        color: vehicleData.color,
+        parkingLot: vehicleData.parkingLot,
+        notes: vehicleData.notes,
+        parkingDate: vehicleData.parkingDate,
+      };
+      
+      await dispatch(createVehicle(newVehicle));
+      setOpenAddVehicleModal(false);
+      showNotification(
+        "Vehículo creado exitosamente",
+        "success",
+        3000,
+        false
+      );
+    } catch (error) {
+      console.error("Error creating vehicle:", error);
+      showNotification(
+        "Error al crear el vehículo",
+        "error",
+        5000,
+        false
+      );
+    } finally {
+      setIsCreatingVehicle(false);
     }
-    let nextTicket = getNextTicketNumber();
-    while (checkTicketExistenceInAllVehicles(nextTicket)) {
-      nextTicket = (BigInt(nextTicket) + BigInt(1)).toString();
-    }
-    setAddFields((prevFields) => ({ ...prevFields, ticket: nextTicket }));
-  };
-
-  const handleTicketChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const value = event.target.value.trim();
-    if (!/^\d*$/.test(value)) return;
-    if (checkTicketExistenceInAllVehicles(value)) {
-      showTemporaryTooltip(setOpenTicketTooltip);
-      return;
-    }
-    setAddFields((prevFields) => ({ ...prevFields, ticket: value }));
-  };
-
-  const checkLicensePlateExistence = (licensePlate: string): boolean => {
-    return vehicles.some((vehicle) => vehicle.licensePlate === licensePlate);
-  };
-
-  const checkLicensePlateExistenceInAllVehicles = (
-    licensePlate: string
-  ): Vehicle | undefined => {
-    return allVehicles.find((vehicle) => vehicle.licensePlate === licensePlate);
-  };
-
-  const handleLicensePlateChange = (
-    event: React.ChangeEvent<HTMLInputElement>
-  ) => {
-    const maskedValue = maskLicensePlate(event.target.value);
-
-    if (checkLicensePlateExistence(maskedValue)) {
-      showTemporaryTooltip(setOpenLicensePlateTooltip);
-      return;
-    }
-
-    const existingVehicle =
-      checkLicensePlateExistenceInAllVehicles(maskedValue);
-
-    setAddFields((prevState) => ({
-      ...prevState,
-      licensePlate: maskedValue,
-      brand: existingVehicle?.brand || "",
-      color: existingVehicle?.color || "",
-    }));
-  };
-
-  const handleParkingLotChange = (
-    event: React.ChangeEvent<HTMLInputElement>
-  ) => {
-    const rawValue = event.target.value;
-    const maskedValue = maskParkingLot(rawValue);
-    setAddFields((prevState) => ({ ...prevState, parkingLot: maskedValue }));
   };
 
   const exportOptions = useMemo(() => {
@@ -521,17 +380,6 @@ const VehiclesPage: React.FC = () => {
     );
   }, [userPermissions, filteredWeekVehicles, selectedDate]);
 
-  const handleErroInTicket = () => {
-    setAddFields({
-      ticket: getNextTicketNumber(),
-      licensePlate: "N/A",
-      brand: "N/A",
-      color: "N/A",
-      parkingLot: "N/A",
-      notes: "N/A",
-    });
-  };
-
   return (
     <Box>
       <Box
@@ -543,8 +391,6 @@ const VehiclesPage: React.FC = () => {
         <Box display="flex" alignItems="center">
           <DirectionsCarIcon
             fontSize={isSmallScreen ? "small" : "large"}
-            style={{ cursor: "pointer" }}
-            onClick={handleErroInTicket}
           />
           <Box sx={{ ml: 1 }}>
             <Typography
@@ -596,7 +442,7 @@ const VehiclesPage: React.FC = () => {
             justifyContent="space-between"
             alignItems="center"
           >
-            <Grid item xs={12} md={6}>
+            <Grid item xs={12} md={4}>
               {filteredVehicles && (
                 <SearchBar
                   placeholder="Buscar vehículo"
@@ -609,65 +455,58 @@ const VehiclesPage: React.FC = () => {
                 />
               )}
             </Grid>
-            <Grid item xs={12} md={6}>
+            <Grid item xs={12} md={8}>
               <Box
                 display="flex"
                 flexDirection={{ xs: "column", sm: "column", md: "row" }}
-                alignItems="flex-start"
+                alignItems={{ xs: "stretch", sm: "stretch", md: "center" }}
                 justifyContent="flex-end"
                 gap={2}
               >
                 <Box
                   display="flex"
-                  flexDirection={{ xs: "row", sm: "row", md: "row" }}
+                  flexDirection="row"
                   alignItems="center"
-                  justifyContent="flex-end"
-                  gap={2}
-                  width="100%"
+                  justifyContent="center"
+                  gap={1}
                 >
                   <Tooltip title="Día Anterior" arrow>
-                    <Box>
-                      <Button
-                        variant="contained"
-                        sx={{
-                          height: "56px",
-                          width: { xs: "auto", sm: "auto", md: "auto" },
-                        }}
-                        onClick={handlePreviousDate}
-                      >
-                        <ArrowBackIosNewRoundedIcon />
-                      </Button>
-                    </Box>
+                    <Button
+                      variant="contained"
+                      sx={{
+                        height: "56px",
+                        minWidth: "56px",
+                      }}
+                      onClick={handlePreviousDate}
+                    >
+                      <ArrowBackIosNewRoundedIcon />
+                    </Button>
                   </Tooltip>
                   <Tooltip title="Día Siguiente" arrow>
-                    <Box>
-                      <Button
-                        variant="contained"
-                        sx={{
-                          height: "56px",
-                          width: { xs: "auto", sm: "auto", md: "auto" },
-                        }}
-                        disabled={isTodayOrFuture(selectedDate)}
-                        onClick={handleNextDate}
-                      >
-                        <ArrowForwardIosRoundedIcon />
-                      </Button>
-                    </Box>
+                    <Button
+                      variant="contained"
+                      sx={{
+                        height: "56px",
+                        minWidth: "56px",
+                      }}
+                      disabled={isTodayOrFuture(selectedDate)}
+                      onClick={handleNextDate}
+                    >
+                      <ArrowForwardIosRoundedIcon />
+                    </Button>
                   </Tooltip>
                   <Tooltip title="Día Actual" arrow>
-                    <Box>
-                      <Button
-                        variant="contained"
-                        sx={{
-                          height: "56px",
-                          width: { xs: "auto", sm: "auto", md: "auto" },
-                        }}
-                        disabled={isTodayOrFuture(selectedDate)}
-                        onClick={handleCurrentDate}
-                      >
-                        <CalendarTodayRoundedIcon />
-                      </Button>
-                    </Box>
+                    <Button
+                      variant="contained"
+                      sx={{
+                        height: "56px",
+                        minWidth: "56px",
+                      }}
+                      disabled={isTodayOrFuture(selectedDate)}
+                      onClick={handleCurrentDate}
+                    >
+                      <CalendarTodayRoundedIcon />
+                    </Button>
                   </Tooltip>
                 </Box>
                 <LocalizationProvider
@@ -678,8 +517,7 @@ const VehiclesPage: React.FC = () => {
                     label="Seleccionar fecha"
                     value={selectedDate || null}
                     sx={{
-                      width: { xs: "100%", sm: "100%", md: "auto" },
-                      mt: { xs: 2, sm: 2, md: 0 },
+                      width: { xs: "100%", sm: "100%", md: "200px" },
                     }}
                     maxDate={new Date()}
                     views={["year", "month", "day"]}
@@ -699,192 +537,29 @@ const VehiclesPage: React.FC = () => {
                     onChange={(date) => handleDateChange(date)}
                   />
                 </LocalizationProvider>
+                {userPermissions.includes(PERMISSIONS.CREATE_VEHICLES) && (
+                  <Button
+                    variant="contained"
+                    startIcon={<DirectionsCarIcon />}
+                    onClick={handleOpenAddVehicleModal}
+                    sx={{
+                      px: 4,
+                      py: 2,
+                      fontSize: '1rem',
+                      fontWeight: 600,
+                      height: 56,
+                      minWidth: { xs: '100%', sm: '100%', md: 'auto' },
+                      boxShadow: 2,
+                      '&:hover': {
+                        boxShadow: 4,
+                      },
+                    }}
+                  >
+                    Agregar Vehículo
+                  </Button>
+                )}
               </Box>
             </Grid>
-            {userPermissions.includes(PERMISSIONS.CREATE_VEHICLES) && (
-              <Grid item xs={12} md={12}>
-                <Box
-                  display="flex"
-                  flexDirection={{ xs: "column", sm: "column", md: "row" }}
-                  alignItems="center"
-                  justifyContent="flex-end"
-                  gap={2}
-                >
-                  <Grid container spacing={2} alignItems="center">
-                    <Grid item xs={6} sm={4} md={2} lg={1}>
-                      <Tooltip
-                        title="Este número de boleta ya está registrado"
-                        open={openTicketTooltip}
-                        disableHoverListener
-                        placement="bottom"
-                        arrow
-                      >
-                        <TextField
-                          label="Boleta"
-                          variant="outlined"
-                          fullWidth
-                          value={addFields.ticket}
-                          onFocus={handleTicketOnFocus}
-                          onChange={handleTicketChange}
-                        />
-                      </Tooltip>
-                    </Grid>
-                    <Grid item xs={6} sm={4} md={2} lg={1}>
-                      <Tooltip
-                        title="Esta placa ya está registrada"
-                        open={openLicensePlateTooltip}
-                        disableHoverListener
-                        placement="bottom"
-                        arrow
-                      >
-                        <TextField
-                          label="Placa"
-                          variant="outlined"
-                          fullWidth
-                          value={addFields.licensePlate}
-                          onChange={handleLicensePlateChange}
-                        />
-                      </Tooltip>
-                    </Grid>
-                    <Grid item xs={6} sm={4} md={2} lg={2}>
-                      <FormControl variant="outlined" fullWidth>
-                        <Autocomplete
-                          freeSolo
-                          value={
-                            addFields.brand
-                              ? {
-                                  value: addFields.brand,
-                                  label: addFields.brand,
-                                }
-                              : null
-                          }
-                          onChange={(event, newValue) => {
-                            if (newValue) {
-                              setAddFields((prev) => ({
-                                ...prev,
-                                brand:
-                                  typeof newValue === "object"
-                                    ? newValue.value
-                                    : newValue,
-                              }));
-                            } else {
-                              setAddFields((prev) => ({ ...prev, brand: "" }));
-                            }
-                            setSearchBrandTerm("");
-                            setFilteredBrands(BRANDS_LIST);
-                          }}
-                          inputValue={searchBrandTerm}
-                          onInputChange={handleSearchChangeBrand}
-                          options={filteredBrands}
-                          getOptionLabel={(option) =>
-                            typeof option === "string" ? option : option.label
-                          }
-                          noOptionsText="Sin coincidencias"
-                          renderInput={(params) => (
-                            <TextField
-                              {...params}
-                              label="Marca"
-                              variant="outlined"
-                              fullWidth
-                            />
-                          )}
-                        />
-                      </FormControl>
-                    </Grid>
-                    <Grid item xs={6} sm={4} md={2} lg={2}>
-                      <FormControl variant="outlined" fullWidth>
-                        <Autocomplete
-                          freeSolo
-                          value={
-                            addFields.color
-                              ? {
-                                  value: addFields.color,
-                                  label: addFields.color,
-                                }
-                              : null
-                          }
-                          onChange={(event, newValue) => {
-                            if (newValue) {
-                              setAddFields((prev) => ({
-                                ...prev,
-                                color:
-                                  typeof newValue === "object"
-                                    ? newValue.value
-                                    : newValue,
-                              }));
-                            } else {
-                              setAddFields((prev) => ({ ...prev, color: "" }));
-                            }
-                            setSearchColorTerm("");
-                            setFilteredColors(COLORS_LIST);
-                          }}
-                          inputValue={searchColorTerm}
-                          onInputChange={handleSearchChangeColor}
-                          options={filteredColors}
-                          getOptionLabel={(option) =>
-                            typeof option === "string" ? option : option.label
-                          }
-                          noOptionsText="Sin coincidencias"
-                          renderInput={(params) => (
-                            <TextField
-                              {...params}
-                              label="Color"
-                              variant="outlined"
-                              fullWidth
-                            />
-                          )}
-                        />
-                      </FormControl>
-                    </Grid>
-                    <Grid item xs={6} sm={4} md={2} lg={1}>
-                      <TextField
-                        label="Espacio"
-                        variant="outlined"
-                        fullWidth
-                        value={addFields.parkingLot}
-                        onChange={handleParkingLotChange}
-                      />
-                    </Grid>
-                    <Grid item xs={6} sm={4} md={2} lg={5}>
-                      <TextField
-                        label="Observaciones"
-                        variant="outlined"
-                        fullWidth
-                        value={addFields.notes}
-                        onChange={(e) =>
-                          setAddFields({ ...addFields, notes: e.target.value })
-                        }
-                      />
-                    </Grid>
-                  </Grid>
-                  <Tooltip title="Agregar Vehículo" arrow>
-                    <Box
-                      sx={{
-                        width: { xs: "100%", md: "auto" },
-                        display: "flex",
-                        justifyContent: { xs: "stretch", md: "flex-end" },
-                      }}
-                    >
-                      <Button
-                        variant="contained"
-                        color="primary"
-                        sx={{
-                          minHeight: 56,
-                          display: "flex",
-                          justifyContent: "center",
-                          lineHeight: "normal",
-                          width: { xs: "100%", md: "auto" },
-                        }}
-                        onClick={handleCreate}
-                        disabled={!isAddFormValid}
-                      >
-                        <DirectionsCarIcon />
-                      </Button>
-                    </Box>
-                  </Tooltip>
-                </Box>
-              </Grid>
-            )}
           </Grid>
           <br />
           {filteredVehicles.length > 0 ? (
@@ -965,6 +640,20 @@ const VehiclesPage: React.FC = () => {
           </Button>
         </DialogActions>
       </Dialog>
+      <ModalComponent
+        buttonType="none"
+        open={openAddVehicleModal}
+        onCloseModal={handleCloseAddVehicleModal}
+        modalTitle="Agregar Vehículo"
+      >
+        <AddVehicleForm
+          onSubmit={handleCreateVehicle}
+          onCancel={handleCloseAddVehicleModal}
+          isLoading={isCreatingVehicle}
+          existingVehicles={allVehicles.map(v => ({ ticket: v.ticket, licensePlate: v.licensePlate }))}
+          getNextTicketNumber={getNextTicketNumber}
+        />
+      </ModalComponent>
     </Box>
   );
 };

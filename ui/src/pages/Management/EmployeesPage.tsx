@@ -294,7 +294,7 @@ const EmployeesPage: React.FC = () => {
             justifyContent="space-between"
             alignItems="center"
           >
-            <Grid item xs={12} md={6}>
+            <Grid item xs={12} md={4}>
               {filteredEmployees && (
                 <SearchBar
                   placeholder="Buscar empleado"
@@ -306,7 +306,7 @@ const EmployeesPage: React.FC = () => {
               )}
             </Grid>
             {userPermissions.includes(PERMISSIONS.CREATE_EMPLOYEES) && (
-              <Grid item xs={12} md={6}>
+              <Grid item xs={12} md={8}>
                 <Box
                   sx={{
                     display: 'flex',
