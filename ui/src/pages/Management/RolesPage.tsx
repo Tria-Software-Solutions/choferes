@@ -70,6 +70,8 @@ import CalendarTodayRoundedIcon from "@mui/icons-material/CalendarTodayRounded";
 import CloseRoundedIcon from "@mui/icons-material/CloseRounded";
 import ManageSearchIcon from "@mui/icons-material/ManageSearch";
 import { faFileExcel, faFilePdf } from "@fortawesome/free-solid-svg-icons";
+import { useAppNotifications } from "../../components/Snackbar/SnackbarWrapper";
+import ConfirmationDialog from "../../components/Dialog/ConfirmationDialog";
 
 const RolesPage: React.FC = () => {
   const dispatch = useDispatch<AppDispatch>();
@@ -110,7 +112,8 @@ const RolesPage: React.FC = () => {
   const [currentYear, setCurrentYear] = useState<number>(0);
   const [filter, setFilter] = useState("");
   const [openExportDialog, setOpenExportDialog] = useState(false);
-  const [exportType, setExportType] = useState<"excel" | "pdf" | null>(null);
+  const [exportType, setExportType] = useState<"excel" | "pdf">("excel");
+  const [isExporting, setIsExporting] = useState(false);
 
   const theme = useTheme();
   const isSmallScreen = useMediaQuery(theme.breakpoints.down("sm"));
@@ -456,29 +459,36 @@ const RolesPage: React.FC = () => {
     setOpenExportDialog(false);
   };
 
-  const handleExportHours = (shouldExportHours: boolean) => {
-    const { dataForExport, fileName } = handleExportTableData(
-      filteredEmployees,
-      hoursWorked,
-      schedules,
-      weeklySummaries,
-      biweeklySummaries,
-      monthlySummaries,
-      currentWeekNumber,
-      currentBiweekNumber,
-      currentMonth,
-      currentYear,
-      getCurrentWeekDates(weekOffset),
-      shouldExportHours
-    );
-    setTimeout(() => {
+  const handleExportHours = async (shouldExportHours: boolean) => {
+    setIsExporting(true);
+    try {
+      const { dataForExport, fileName } = handleExportTableData(
+        filteredEmployees,
+        hoursWorked,
+        schedules,
+        weeklySummaries,
+        biweeklySummaries,
+        monthlySummaries,
+        currentWeekNumber,
+        currentBiweekNumber,
+        currentMonth,
+        currentYear,
+        getCurrentWeekDates(weekOffset),
+        shouldExportHours
+      );
+      
       if (exportType === "excel") {
-        exportToExcel(dataForExport, fileName);
+        await exportToExcel(dataForExport, fileName);
       } else if (exportType === "pdf") {
-        exportToPDF(dataForExport, fileName);
+        await exportToPDF(dataForExport, fileName);
       }
-      handleCloseExportDialog();
-    }, 0);
+      
+      setOpenExportDialog(false);
+    } catch (error) {
+      console.error("Error exporting data:", error);
+    } finally {
+      setIsExporting(false);
+    }
   };
 
   const exportOptions = useMemo(() => {
@@ -708,31 +718,17 @@ const RolesPage: React.FC = () => {
           )}
         </>
       )}
-      <Dialog open={openExportDialog} onClose={handleCloseExportDialog}>
-        <DialogTitle>Exportar Horas</DialogTitle>
-        <DialogContent>
-          <Typography>
-            ¿Quieres que se incluyan las horas trabajadas al exportar el{" "}
-            {exportType}?
-          </Typography>
-        </DialogContent>
-        <DialogActions>
-          <Button
-            color="primary"
-            sx={{ flex: 1 }}
-            onClick={() => handleExportHours(true)}
-          >
-            Sí
-          </Button>
-          <Button
-            color="secondary"
-            sx={{ flex: 1 }}
-            onClick={() => handleExportHours(false)}
-          >
-            No
-          </Button>
-        </DialogActions>
-      </Dialog>
+      <ConfirmationDialog
+        open={openExportDialog}
+        onClose={handleCloseExportDialog}
+        onConfirm={() => handleExportHours(true)}
+        title="Exportar Horas"
+        message={`¿Quieres que se incluyan las horas trabajadas al exportar el ${exportType}?`}
+        type="info"
+        confirmText="Sí, incluir horas"
+        cancelText="No, solo datos básicos"
+        loading={isExporting}
+      />
     </Box>
   );
 };

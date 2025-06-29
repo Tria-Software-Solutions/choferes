@@ -15,6 +15,7 @@ import CustomSpeedDial from "../../components/SpeedDial/CustomSpeedDial";
 import ModalComponent from "../../components/Modal/ModalComponent";
 import AddScheduleForm from "../../components/Forms/AddScheduleForm";
 import { useAppNotifications } from "../../components/Snackbar/SnackbarWrapper";
+import ConfirmationDialog from "../../components/Dialog/ConfirmationDialog";
 import {
   Button,
   Grid,
@@ -74,6 +75,9 @@ const SchedulesPage: React.FC = () => {
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(5);
   const [isEditFormValid, setIsEditFormValid] = useState(false);
+  const [openAddScheduleModal, setOpenAddScheduleModal] = useState(false);
+  const [isCreatingSchedule, setIsCreatingSchedule] = useState(false);
+  const [isDeletingSchedule, setIsDeletingSchedule] = useState(false);
 
   const theme = useTheme();
   const isSmallScreen = useMediaQuery(theme.breakpoints.down("sm"));
@@ -216,26 +220,29 @@ const SchedulesPage: React.FC = () => {
   };
 
   const handleDelete = async () => {
+    if (!scheduleToDelete) return;
+    
+    setIsDeletingSchedule(true);
     try {
-      if (scheduleToDelete !== null) {
-        dispatch(deleteSchedule(scheduleToDelete));
-        showNotification(
-          "La eliminación del horario fue exitosa",
-          "success",
-          3000,
-          false
-        );
-      }
-      handleCloseDeleteDialog();
-    } catch (error) {
-      handleCancel();
-      console.error(error);
+      await dispatch(deleteSchedule(scheduleToDelete));
+      setOpenDeleteDialog(false);
+      setScheduleToDelete(null);
       showNotification(
-        "Ha ocurrido un error al eliminar el horario",
+        "Horario eliminado exitosamente",
+        "success",
+        3000,
+        false
+      );
+    } catch (error) {
+      console.error("Error deleting schedule:", error);
+      showNotification(
+        "Error al eliminar el horario",
         "error",
         5000,
         false
       );
+    } finally {
+      setIsDeletingSchedule(false);
     }
   };
 
@@ -401,40 +408,27 @@ const SchedulesPage: React.FC = () => {
           )}
         </>
       )}
-      <Dialog open={openDeleteDialog} onClose={handleCloseDeleteDialog}>
-        <DialogTitle>Confirmar</DialogTitle>
-        <DialogContent>
-          <Typography>
-            ¿Estás seguro de que deseas eliminar este horario?
-          </Typography>
-        </DialogContent>
-        <DialogActions>
-          <Button color="primary" sx={{ flex: 1 }} onClick={handleDelete}>
-            Aceptar
-          </Button>
-          <Button
-            color="secondary"
-            sx={{ flex: 1 }}
-            onClick={handleCloseDeleteDialog}
-          >
-            Cancelar
-          </Button>
-        </DialogActions>
-      </Dialog>
-      
-      {/* Modal para Agregar Horario */}
+      <ConfirmationDialog
+        open={openDeleteDialog}
+        onClose={handleCloseDeleteDialog}
+        onConfirm={handleDelete}
+        title="Eliminar Horario"
+        message="¿Estás seguro de que deseas eliminar este horario? Esta acción no se puede deshacer."
+        type="delete"
+        confirmText="Eliminar"
+        cancelText="Cancelar"
+        loading={isDeletingSchedule}
+      />
       <ModalComponent
         buttonType="none"
-        open={openAddModal}
+        open={openAddScheduleModal}
         onCloseModal={handleCloseAddModal}
-        modalTitle="Agregar Nuevo Horario"
-        showActions={false}
-        maxWidth="md"
+        modalTitle="Agregar Horario"
       >
         <AddScheduleForm
           onSubmit={handleCreate}
           onCancel={handleCloseAddModal}
-          isLoading={isSubmitting}
+          isLoading={isCreatingSchedule}
         />
       </ModalComponent>
     </Box>

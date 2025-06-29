@@ -15,6 +15,7 @@ import CustomSpeedDial from "../../components/SpeedDial/CustomSpeedDial";
 import ModalComponent from "../../components/Modal/ModalComponent";
 import AddVehicleForm from "../../components/Forms/AddVehicleForm";
 import { useAppNotifications } from "../../components/Snackbar/SnackbarWrapper";
+import ConfirmationDialog from "../../components/Dialog/ConfirmationDialog";
 import {
   Box,
   Typography,
@@ -88,6 +89,7 @@ const VehiclesPage: React.FC = () => {
   const [shouldRefetch, ] = useState(true);
   const [openAddVehicleModal, setOpenAddVehicleModal] = useState(false);
   const [isCreatingVehicle, setIsCreatingVehicle] = useState(false);
+  const [isDeletingVehicle, setIsDeletingVehicle] = useState(false);
 
   const theme = useTheme();
   const isSmallScreen = useMediaQuery(theme.breakpoints.down("sm"));
@@ -267,25 +269,29 @@ const VehiclesPage: React.FC = () => {
   };
 
   const handleDelete = async () => {
-    if (vehicleToDelete) {
-      try {
-        await dispatch(deleteVehicle(vehicleToDelete));
-        setOpenDeleteDialog(false);
-        showNotification(
-          "El vehículo fue eliminado exitosamente",
-          "success",
-          3000,
-          false
-        );
-      } catch (error) {
-        console.error(error);
-        showNotification(
-          "Ha ocurrido un error al eliminar el vehículo",
-          "error",
-          5000,
-          false
-        );
-      }
+    if (!vehicleToDelete) return;
+    
+    setIsDeletingVehicle(true);
+    try {
+      await dispatch(deleteVehicle(vehicleToDelete));
+      setOpenDeleteDialog(false);
+      setVehicleToDelete(null);
+      showNotification(
+        "Vehículo eliminado exitosamente",
+        "success",
+        3000,
+        false
+      );
+    } catch (error) {
+      console.error("Error deleting vehicle:", error);
+      showNotification(
+        "Error al eliminar el vehículo",
+        "error",
+        5000,
+        false
+      );
+    } finally {
+      setIsDeletingVehicle(false);
     }
   };
 
@@ -620,26 +626,17 @@ const VehiclesPage: React.FC = () => {
           )}
         </>
       )}
-      <Dialog open={openDeleteDialog} onClose={handleCloseDeleteDialog}>
-        <DialogTitle>Confirmar</DialogTitle>
-        <DialogContent>
-          <Typography>
-            ¿Estás seguro de que deseas eliminar este vehículo?
-          </Typography>
-        </DialogContent>
-        <DialogActions>
-          <Button color="primary" sx={{ flex: 1 }} onClick={handleDelete}>
-            Aceptar
-          </Button>
-          <Button
-            color="secondary"
-            sx={{ flex: 1 }}
-            onClick={handleCloseDeleteDialog}
-          >
-            Cancelar
-          </Button>
-        </DialogActions>
-      </Dialog>
+      <ConfirmationDialog
+        open={openDeleteDialog}
+        onClose={handleCloseDeleteDialog}
+        onConfirm={handleDelete}
+        title="Eliminar Vehículo"
+        message="¿Estás seguro de que deseas eliminar este vehículo? Esta acción no se puede deshacer."
+        type="delete"
+        confirmText="Eliminar"
+        cancelText="Cancelar"
+        loading={isDeletingVehicle}
+      />
       <ModalComponent
         buttonType="none"
         open={openAddVehicleModal}

@@ -15,6 +15,7 @@ import EditableTable from "../../components/Table/EditableTable/EditableTable";
 import ModalComponent from "../../components/Modal/ModalComponent";
 import AddEmployeeForm from "../../components/Forms/AddEmployeeForm";
 import { useAppNotifications } from "../../components/Snackbar/SnackbarWrapper";
+import ConfirmationDialog from "../../components/Dialog/ConfirmationDialog";
 import {
   Button,
   Grid,
@@ -63,6 +64,9 @@ const EmployeesPage: React.FC = () => {
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(5);
   const [isEditFormValid, setIsEditFormValid] = useState(false);
+  const [openAddEmployeeModal, setOpenAddEmployeeModal] = useState(false);
+  const [isCreatingEmployee, setIsCreatingEmployee] = useState(false);
+  const [isDeletingEmployee, setIsDeletingEmployee] = useState(false);
 
   const theme = useTheme();
   const isSmallScreen = useMediaQuery(theme.breakpoints.down("sm"));
@@ -192,26 +196,29 @@ const EmployeesPage: React.FC = () => {
   };
 
   const handleDelete = async () => {
+    if (!employeeToDelete) return;
+    
+    setIsDeletingEmployee(true);
     try {
-      if (employeeToDelete !== null) {
-        dispatch(deleteEmployee(employeeToDelete));
-        showNotification(
-          "La eliminación del empleado fue exitosa",
-          "success",
-          3000,
-          false
-        );
-      }
-      handleCloseDeleteDialog();
-    } catch (error) {
-      handleCancel();
-      console.error(error);
+      await dispatch(deleteEmployee(employeeToDelete));
+      setOpenDeleteDialog(false);
+      setEmployeeToDelete(null);
       showNotification(
-        "Ha ocurrido un error al eliminar el empleado",
+        "Empleado eliminado exitosamente",
+        "success",
+        3000,
+        false
+      );
+    } catch (error) {
+      console.error("Error deleting employee:", error);
+      showNotification(
+        "Error al eliminar el empleado",
         "error",
         5000,
         false
       );
+    } finally {
+      setIsDeletingEmployee(false);
     }
   };
 
@@ -375,28 +382,18 @@ const EmployeesPage: React.FC = () => {
           )}
         </>
       )}
-      <Dialog open={openDeleteDialog} onClose={handleCloseDeleteDialog}>
-        <DialogTitle>Confirmar</DialogTitle>
-        <DialogContent>
-          <Typography>
-            ¿Estás seguro de que deseas eliminar este empleado?
-          </Typography>
-        </DialogContent>
-        <DialogActions>
-          <Button color="primary" sx={{ flex: 1 }} onClick={handleDelete}>
-            Aceptar
-          </Button>
-          <Button
-            color="secondary"
-            sx={{ flex: 1 }}
-            onClick={handleCloseDeleteDialog}
-          >
-            Cancelar
-          </Button>
-        </DialogActions>
-      </Dialog>
-      
-      {/* Modal para Agregar Empleado */}
+      <ConfirmationDialog
+        open={openDeleteDialog}
+        onClose={handleCloseDeleteDialog}
+        onConfirm={handleDelete}
+        title="Eliminar Empleado"
+        message="¿Estás seguro de que deseas eliminar este empleado? Esta acción no se puede deshacer."
+        type="delete"
+        confirmText="Eliminar"
+        cancelText="Cancelar"
+        loading={isDeletingEmployee}
+      />
+    
       <ModalComponent
         buttonType="none"
         open={openAddModal}
