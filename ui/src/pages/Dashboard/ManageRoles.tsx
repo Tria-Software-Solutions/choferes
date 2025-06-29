@@ -14,23 +14,21 @@ import { fetchPermissions } from "../../store/slices/permissionsSlice";
 import { fetchRolePermissions } from "../../store/slices/rolePermissionsSlice";
 import { useAppNotifications } from "../../components/Snackbar/SnackbarWrapper";
 import {
-  Autocomplete,
   Backdrop,
   Box,
   Button,
-  Chip,
   CircularProgress,
   Dialog,
   DialogActions,
   DialogContent,
   DialogTitle,
   Grid,
-  TextField,
-  Tooltip,
   Typography,
 } from "@mui/material";
 import EditableTable from "../../components/Table/EditableTable/EditableTable";
 import SearchBar from "../../components/SearchBar/SearchBar";
+import ModalComponent from "../../components/Modal/ModalComponent";
+import AddRoleForm from "../../components/Forms/AddRoleForm";
 import AddModeratorIcon from "@mui/icons-material/AddModerator";
 
 const ManageRoles: React.FC = () => {
@@ -40,12 +38,11 @@ const ManageRoles: React.FC = () => {
     (state: RootState) => state.roles
   );
   const { permissions } = useSelector((state: RootState) => state.permissions);
-  const { userRoles } = useSelector((state: RootState) => state.userRoles);
   const { showNotification } = useAppNotifications();
   const [filteredRoles, setFilteredRoles] = useState<Role[]>([]);
   const [totalCount, setTotalCount] = useState(0);
   const [editRowId, setEditRowId] = useState<number | null>(null);
-  const [addFields, setAddFields] = useState<{
+  const [addFields, ] = useState<{
     name: string;
     permissionNames: string[];
   }>({
@@ -64,8 +61,11 @@ const ManageRoles: React.FC = () => {
   const [filter, setFilter] = useState("");
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(5);
-  const [isAddFormValid, setIsAddFormValid] = useState(false);
+  const [, setIsAddFormValid] = useState(false);
   const [isEditFormValid, setIsEditFormValid] = useState(false);
+  
+  const [openAddRoleModal, setOpenAddRoleModal] = useState(false);
+  const [isCreatingRole, setIsCreatingRole] = useState(false);
 
   useEffect(() => {
     dispatch(fetchRoles());
@@ -113,41 +113,6 @@ const ManageRoles: React.FC = () => {
 
   const handleFilterChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setFilter(e.target.value);
-  };
-
-  const handleCreate = async () => {
-    try {
-      const newRole: Omit<Role, "id" | "permissions"> = {
-        name: addFields.name,
-        permissionNames: addFields.permissionNames,
-      };
-      dispatch(
-        createRole({
-          newRole,
-          newPermissionIds: permissions
-            .filter((permission) => addFields.permissionNames.includes(permission.name))
-            .map((permission) => permission.id),
-        })
-      );
-      setAddFields({
-        name: "",
-        permissionNames: [],
-      });
-      showNotification(
-        "El registro del rol fue exitoso",
-        "success",
-        3000,
-        false
-      );
-    } catch (error) {
-      console.error(error);
-      showNotification(
-        "Ha ocurrido un error al registrar el rol",
-        "error",
-        5000,
-        false
-      );
-    }
   };
 
   const handleEdit = (role: Role) => {
@@ -207,38 +172,71 @@ const ManageRoles: React.FC = () => {
   };
 
   const handleDelete = async () => {
-    try {
-      if (roleToDelete !== null) {
-        const userAsociation = userRoles.find(
-          (userRole) => userRole.roleId === roleToDelete
+    if (roleToDelete) {
+      try {
+        await dispatch(deleteRole(roleToDelete));
+        handleCloseDeleteDialog();
+        showNotification(
+          "El rol fue eliminado exitosamente",
+          "success",
+          3000,
+          false
         );
-        if (userAsociation) {
-          showNotification(
-            "No se puede eliminar este rol porque está vinculado a usuarios activos",
-            "warning",
-            8000,
-            false
-          );
-        } else {
-          dispatch(deleteRole(roleToDelete));
-          showNotification(
-            "La eliminación del rol fue exitosa",
-            "success",
-            3000,
-            false
-          );
-        }
+      } catch (error) {
+        console.error(error);
+        showNotification(
+          "Ha ocurrido un error al eliminar el rol",
+          "error",
+          5000,
+          false
+        );
       }
-      handleCloseDeleteDialog();
-    } catch (error) {
-      handleCancel();
-      console.error(error);
+    }
+  };
+
+  const handleOpenAddRoleModal = () => {
+    setOpenAddRoleModal(true);
+  };
+
+  const handleCloseAddRoleModal = () => {
+    setOpenAddRoleModal(false);
+  };
+
+  const handleCreateRole = async (roleData: {
+    name: string;
+    description: string;
+    permissions: string[];
+  }) => {
+    setIsCreatingRole(true);
+    try {
+      const newRole = {
+        name: roleData.name,
+        permissionNames: permissions
+          .filter((permission) => roleData.permissions.includes(permission.id.toString()))
+          .map((permission) => permission.name),
+      };
+      
+      await dispatch(createRole({
+        newRole,
+        newPermissionIds: roleData.permissions.map(id => parseInt(id)),
+      }));
+      setOpenAddRoleModal(false);
       showNotification(
-        "Ha ocurrido un error al eliminar el rol",
+        "Rol creado exitosamente",
+        "success",
+        3000,
+        false
+      );
+    } catch (error) {
+      console.error("Error creating role:", error);
+      showNotification(
+        "Error al crear el rol",
         "error",
         5000,
         false
       );
+    } finally {
+      setIsCreatingRole(false);
     }
   };
 
@@ -269,7 +267,7 @@ const ManageRoles: React.FC = () => {
             justifyContent="space-between"
             alignItems="center"
           >
-            <Grid item xs={12} md={3} lg={6}>
+            <Grid item xs={12} md={8}>
               {filteredRoles && (
                 <SearchBar
                   placeholder="Buscar rol"
@@ -280,94 +278,27 @@ const ManageRoles: React.FC = () => {
                 />
               )}
             </Grid>
-            <Grid item xs={12} md={9} lg={6}>
+            <Grid item xs={12} md={4}>
               <Box
                 display="flex"
-                flexDirection={{ xs: "column", sm: "column", md: "row" }}
+                flexDirection="row"
                 alignItems="center"
                 justifyContent="flex-end"
                 gap={2}
               >
-                <Grid container spacing={2} alignItems="center">
-                  <Grid item xs={12} md={4} lg={3}>
-                    <TextField
-                      label="Nombre"
-                      variant="outlined"
-                      fullWidth
-                      sx={{
-                        height: 56,
-                      }}
-                      value={addFields.name}
-                      onChange={(e) =>
-                        setAddFields({
-                          ...addFields,
-                          name: e.target.value,
-                        })
-                      }
-                    />
-                  </Grid>
-                  <Grid item xs={12} md={8} lg={9}>
-                    <Autocomplete
-                      multiple
-                      limitTags={2}
-                      value={permissions.filter((permission) =>
-                        addFields.permissionNames.includes(permission.name)
-                      )}
-                      onChange={(event, newValue) => {
-                        setAddFields({
-                          ...addFields,
-                          permissionNames: newValue.map(
-                            (permission) => permission.name
-                          ),
-                        });
-                      }}
-                      options={permissions}
-                      getOptionLabel={(option) => option.name}
-                      renderTags={(tagValue, getTagProps) =>
-                        tagValue.map((option, index) => {
-                          const { key, ...tagProps } = getTagProps({ index });
-                          return (
-                            <Chip key={key} label={option.name} {...tagProps} />
-                          );
-                        })
-                      }
-                      renderInput={(params) => (
-                        <TextField
-                          {...params}
-                          label="Permisos"
-                          variant="outlined"
-                          fullWidth
-                          placeholder="Buscar Permisos"
-                        />
-                      )}
-                    />
-                  </Grid>
-                </Grid>
-                <Tooltip title="Agregar Rol" arrow>
-                  <Box
-                    sx={{
-                      width: { xs: "100%", md: "auto" },
-                      display: "flex",
-                      justifyContent: { xs: "stretch", md: "flex-end" },
-                    }}
-                  >
-                    <Button
-                      variant="contained"
-                      color="primary"
-                      sx={{
-                        minHeight: 56,
-                        display: "flex",
-                        justifyContent: "center",
-                        lineHeight: "normal",
-                        width: { xs: "100%", md: "auto" },
-                      }}
-                      onClick={handleCreate}
-                      disabled={!isAddFormValid}
-                    >
-                      <AddModeratorIcon />
-                    </Button>
-                  </Box>
-                </Tooltip>
+                <Button
+                  variant="contained"
+                  startIcon={<AddModeratorIcon />}
+                  onClick={handleOpenAddRoleModal}
+                  sx={{
+                    px: 3,
+                    py: 1.5,
+                    fontSize: '1rem',
+                    minHeight: 56,
+                  }}
+                >
+                  Agregar Rol
+                </Button>
               </Box>
             </Grid>
           </Grid>
@@ -411,15 +342,15 @@ const ManageRoles: React.FC = () => {
         </>
       )}
       <Dialog open={openDeleteDialog} onClose={handleCloseDeleteDialog}>
-        <DialogTitle>Confirmar</DialogTitle>
+        <DialogTitle>Confirmar Eliminación</DialogTitle>
         <DialogContent>
           <Typography>
-            ¿Estás seguro de que deseas eliminar este rol?
+            ¿Estás seguro de que deseas eliminar este rol? Esta acción no se puede deshacer.
           </Typography>
         </DialogContent>
         <DialogActions>
           <Button color="primary" sx={{ flex: 1 }} onClick={handleDelete}>
-            Aceptar
+            Eliminar
           </Button>
           <Button
             color="secondary"
@@ -430,6 +361,18 @@ const ManageRoles: React.FC = () => {
           </Button>
         </DialogActions>
       </Dialog>
+      <ModalComponent
+        open={openAddRoleModal}
+        onCloseModal={handleCloseAddRoleModal}
+        modalTitle="Agregar Rol"
+      >
+        <AddRoleForm
+          onSubmit={handleCreateRole}
+          onCancel={handleCloseAddRoleModal}
+          isLoading={isCreatingRole}
+          permissions={permissions}
+        />
+      </ModalComponent>
     </Box>
   );
 };
