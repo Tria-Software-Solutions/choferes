@@ -326,21 +326,40 @@ const SchedulesPage: React.FC = () => {
             alignItems="center"
           >
             <Grid item xs={12} md={4}>
-              {filteredSchedules && (
-                <SearchBar
-                  placeholder="Buscar horario"
-                  value={filter}
-                  onChange={handleFilterChange}
-                  sx={{ maxWidth: "100%" }}
-                  fullWidth
-                />
-              )}
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+                {filteredSchedules && (
+                  <SearchBar
+                    placeholder="Buscar horario"
+                    value={filter}
+                    onChange={handleFilterChange}
+                    sx={{ flex: 1 }}
+                    fullWidth
+                  />
+                )}
+                {userPermissions.includes(PERMISSIONS.CREATE_SCHEDULES) && (
+                  <Button
+                    variant="contained"
+                    color="primary"
+                    onClick={handleOpenAddModal}
+                    sx={{
+                      display: { xs: 'flex', md: 'none' },
+                      minWidth: 'auto',
+                      width: 56,
+                      height: 56,
+                      borderRadius: '50%',
+                      p: 0,
+                    }}
+                  >
+                    <PostAddRoundedIcon />
+                  </Button>
+                )}
+              </Box>
             </Grid>
             {userPermissions.includes(PERMISSIONS.CREATE_SCHEDULES) && (
               <Grid item xs={12} md={8}>
                 <Box
                   sx={{
-                    display: 'flex',
+                    display: { xs: 'none', md: 'flex' },
                     justifyContent: 'flex-end',
                   }}
                 >

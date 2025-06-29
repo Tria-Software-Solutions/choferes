@@ -586,33 +586,62 @@ const RolesPage: React.FC = () => {
               >
                 <Box
                   display="flex"
-                  flexDirection={{ xs: "row", sm: "row", md: "row" }}
+                  flexDirection="row"
                   alignItems="center"
-                  justifyContent="flex-end"
                   gap={2}
-                  width="100%"
                 >
-                  <Tooltip title="Semana Anterior" arrow>
-                    <Box>
+                  <LocalizationProvider
+                    dateAdapter={AdapterDateFns}
+                    adapterLocale={es}
+                  >
+                    <DatePicker
+                      label="Seleccionar fecha"
+                      value={firstDayOfWeek || null}
+                      sx={{
+                        width: { xs: "100%", sm: "100%", md: "200px" },
+                      }}
+                      maxDate={nextWeekEnd}
+                      views={["year", "month", "day"]}
+                      slots={{
+                        toolbar: () => null,
+                      }}
+                      slotProps={{
+                        textField: {
+                          inputProps: { readOnly: true },
+                          onMouseDown: (e) => e.preventDefault(),
+                        },
+                        actionBar: {
+                          actions: [],
+                        },
+                      }}
+                      closeOnSelect
+                      onChange={handleDateChange}
+                    />
+                  </LocalizationProvider>
+                  <Box
+                    display="flex"
+                    flexDirection="row"
+                    alignItems="center"
+                    gap={1}
+                  >
+                    <Tooltip title="Semana Anterior" arrow>
                       <Button
                         variant="contained"
                         sx={{
                           height: "56px",
-                          width: { xs: "auto", sm: "auto", md: "auto" },
+                          minWidth: "56px",
                         }}
                         onClick={handlePreviousWeek}
                       >
                         <ArrowBackIosNewRoundedIcon />
                       </Button>
-                    </Box>
-                  </Tooltip>
-                  <Tooltip title="Semana Siguiente" arrow>
-                    <Box>
+                    </Tooltip>
+                    <Tooltip title="Semana Siguiente" arrow>
                       <Button
                         variant="contained"
                         sx={{
                           height: "56px",
-                          width: { xs: "auto", sm: "auto", md: "auto" },
+                          minWidth: "56px",
                         }}
                         disabled={
                           !isValidDateForSelect(
@@ -625,53 +654,22 @@ const RolesPage: React.FC = () => {
                       >
                         <ArrowForwardIosRoundedIcon />
                       </Button>
-                    </Box>
-                  </Tooltip>
-                  <Tooltip title="Semana Actual" arrow>
-                    <Box>
+                    </Tooltip>
+                    <Tooltip title="Semana Actual" arrow>
                       <Button
                         variant="contained"
                         sx={{
                           height: "56px",
-                          width: { xs: "auto", sm: "auto", md: "auto" },
+                          minWidth: "56px",
                         }}
                         disabled={weekOffset === 0}
                         onClick={handleCurrentWeek}
                       >
                         <CalendarTodayRoundedIcon />
                       </Button>
-                    </Box>
-                  </Tooltip>
+                    </Tooltip>
+                  </Box>
                 </Box>
-                <LocalizationProvider
-                  dateAdapter={AdapterDateFns}
-                  adapterLocale={es}
-                >
-                  <DatePicker
-                    label="Seleccionar fecha"
-                    value={firstDayOfWeek || null}
-                    sx={{
-                      width: { xs: "100%", sm: "100%", md: "auto" },
-                      mt: { xs: 2, sm: 2, md: 0 },
-                    }}
-                    maxDate={nextWeekEnd}
-                    views={["year", "month", "day"]}
-                    slots={{
-                      toolbar: () => null,
-                    }}
-                    slotProps={{
-                      textField: {
-                        inputProps: { readOnly: true },
-                        onMouseDown: (e) => e.preventDefault(),
-                      },
-                      actionBar: {
-                        actions: [],
-                      },
-                    }}
-                    closeOnSelect
-                    onChange={handleDateChange}
-                  />
-                </LocalizationProvider>
               </Box>
             </Grid>
           </Grid>

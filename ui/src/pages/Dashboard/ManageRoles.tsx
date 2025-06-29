@@ -296,15 +296,32 @@ const ManageRoles: React.FC<{ isExpanded?: boolean }> = ({ isExpanded = true }) 
             alignItems="center"
           >
             <Grid item xs={12} md={4}>
-              {filteredRoles && (
-                <SearchBar
-                  placeholder="Buscar rol"
-                  value={filter}
-                  onChange={handleFilterChange}
-                  sx={{ maxWidth: "100%" }}
-                  fullWidth
-                />
-              )}
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+                {filteredRoles && (
+                  <SearchBar
+                    placeholder="Buscar rol"
+                    value={filter}
+                    onChange={handleFilterChange}
+                    sx={{ flex: 1 }}
+                    fullWidth
+                  />
+                )}
+                <Button
+                  variant="contained"
+                  color="primary"
+                  onClick={handleOpenAddRoleModal}
+                  sx={{
+                    display: { xs: 'flex', md: 'none' },
+                    minWidth: 'auto',
+                    width: 56,
+                    height: 56,
+                    borderRadius: '50%',
+                    p: 0,
+                  }}
+                >
+                  <AddModeratorIcon />
+                </Button>
+              </Box>
             </Grid>
             <Grid item xs={12} md={8}>
               <Box
@@ -313,6 +330,9 @@ const ManageRoles: React.FC<{ isExpanded?: boolean }> = ({ isExpanded = true }) 
                 alignItems="center"
                 justifyContent="flex-end"
                 gap={2}
+                sx={{
+                  display: { xs: 'none', md: 'flex' },
+                }}
               >
                 <Button
                   variant="contained"

@@ -300,21 +300,40 @@ const EmployeesPage: React.FC = () => {
             alignItems="center"
           >
             <Grid item xs={12} md={4}>
-              {filteredEmployees && (
-                <SearchBar
-                  placeholder="Buscar empleado"
-                  value={filter}
-                  onChange={handleFilterChange}
-                  sx={{ maxWidth: "100%" }}
-                  fullWidth
-                />
-              )}
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+                {filteredEmployees && (
+                  <SearchBar
+                    placeholder="Buscar empleado"
+                    value={filter}
+                    onChange={handleFilterChange}
+                    sx={{ flex: 1 }}
+                    fullWidth
+                  />
+                )}
+                {userPermissions.includes(PERMISSIONS.CREATE_EMPLOYEES) && (
+                  <Button
+                    variant="contained"
+                    color="primary"
+                    onClick={handleOpenAddModal}
+                    sx={{
+                      display: { xs: 'flex', md: 'none' },
+                      minWidth: 'auto',
+                      width: 56,
+                      height: 56,
+                      borderRadius: '50%',
+                      p: 0,
+                    }}
+                  >
+                    <PersonAddAlt1RoundedIcon />
+                  </Button>
+                )}
+              </Box>
             </Grid>
             {userPermissions.includes(PERMISSIONS.CREATE_EMPLOYEES) && (
               <Grid item xs={12} md={8}>
                 <Box
                   sx={{
-                    display: 'flex',
+                    display: { xs: 'none', md: 'flex' },
                     justifyContent: 'flex-end',
                   }}
                 >
