@@ -10,7 +10,6 @@ import {
   updateUser,
   updateUserStatus,
   updateUserPassword,
-  updateUserTemporalPassword,
 } from "../../store/slices/userSlice";
 import { fetchRoles } from "../../store/slices/rolesSlice";
 import { fetchUserRoles } from "../../store/slices/userRolesSlice";
@@ -25,38 +24,28 @@ import {
   DialogActions,
   DialogContent,
   DialogTitle,
-  FormControl,
   FormControlLabel,
   Grid,
   IconButton,
   InputAdornment,
-  InputLabel,
-  Link,
-  MenuItem,
-  Select,
   Stack,
   Switch,
   TextField,
-  Tooltip,
   Typography,
   useMediaQuery,
   useTheme,
 } from "@mui/material";
 import EditableTable from "../../components/Table/EditableTable/EditableTable";
 import SearchBar from "../../components/SearchBar/SearchBar";
+import ModalComponent from "../../components/Modal/ModalComponent";
+import AddUserForm from "../../components/Forms/AddUserForm";
 import PersonAddAlt1RoundedIcon from "@mui/icons-material/PersonAddAlt1Rounded";
 import Visibility from "@mui/icons-material/Visibility";
 import VisibilityOff from "@mui/icons-material/VisibilityOff";
-import ContentCopyIcon from "@mui/icons-material/ContentCopy";
-
-interface TemporalPassword {
-  id: number;
-  temporalPassword: string;
-}
 
 const ManageUsers: React.FC = () => {
   const dispatch = useDispatch<AppDispatch>();
-  const { currentUser, setUser, userPermissions } = useAuthContext();
+  const { userPermissions } = useAuthContext();
   const { users, isLoadingUsers } = useSelector(
     (state: RootState) => state.users
   );
@@ -66,7 +55,7 @@ const ManageUsers: React.FC = () => {
   const [showInactive, setShowInactive] = useState(false);
   const [totalCount, setTotalCount] = useState(0);
   const [editRowId, setEditRowId] = useState<number | null>(null);
-  const [addFields, setAddFields] = useState({
+  const [addFields, ] = useState({
     firstName: "",
     lastName: "",
     email: "",
@@ -82,28 +71,24 @@ const ManageUsers: React.FC = () => {
     password: "",
     roleName: "",
   });
-  const [openEmailTooltip, setOpenEmailTooltip] = useState(false);
-  const [openUsernameTooltip, setOpenUsernameTooltip] = useState(false);
   const [openStatusDialog, setOpenStatusDialog] = useState(false);
   const [userToChange, setUserToChange] = useState<User | null>(null);
-  const [showPassword, setShowPassword] = useState(false);
   const [passwordFields, setPasswordFields] = useState({
     newPassword: "",
     confirmNewPassword: "",
   });
   const [showNewPassword, setShowNewPassword] = useState(false);
   const [showConfirmNewPassword, setShowConfirmNewPassword] = useState(false);
-  const [temporalPasswordHidden, setTemporalPasswordHidden] = useState(true);
-  const [generatedTemporalPassword, setGeneratedTemporalPassword] =
-    useState<TemporalPassword>({ id: 0, temporalPassword: "" });
-  const [copyTooltipOpen, setCopyTooltipOpen] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [filter, setFilter] = useState("");
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(5);
-  const [isAddFormValid, setIsAddFormValid] = useState(false);
+  const [, setIsAddFormValid] = useState(false);
   const [isEditFormValid, setIsEditFormValid] = useState(false);
   const [isPasswordFormValid, setIsPasswordFormValid] = useState(false);
+  
+  const [openAddUserModal, setOpenAddUserModal] = useState(false);
+  const [isCreatingUser, setIsCreatingUser] = useState(false);
 
   const theme = useTheme();
   const isSmallScreen = useMediaQuery(theme.breakpoints.down("sm"));
@@ -198,62 +183,26 @@ const ManageUsers: React.FC = () => {
     []
   );
 
-  useEffect(
-    () => setIsAddFormValid(validateFields(addFields, true)),
-    [addFields, validateFields]
-  );
+  useEffect(() => {
+    setIsAddFormValid(validateFields(addFields, true));
+  }, [addFields, validateFields]);
+
+  useEffect(() => {
+    if (editRowId !== null) {
+      setIsEditFormValid(validateFields(editFields, false));
+    }
+  }, [editFields, editRowId, validateFields]);
+
+  useEffect(() => {
+    const validatePassword = async () => {
+      const isValid = await validateNewPasswordFields(passwordFields);
+      setIsPasswordFormValid(isValid);
+    };
+    validatePassword();
+  }, [passwordFields, validateNewPasswordFields]);
 
   const handleFilterChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setFilter(e.target.value);
-  };
-
-  const showTemporaryTooltip = (
-    setTooltip: React.Dispatch<React.SetStateAction<boolean>>
-  ) => {
-    setTooltip(true);
-    setTimeout(() => setTooltip(false), 2000);
-  };
-
-  const handleCreate = async () => {
-    try {
-      const newUser: Omit<User, "id" | "temporalPassword" | "role"> = {
-        firstName: addFields.firstName,
-        lastName: addFields.lastName,
-        email: addFields.email,
-        username: addFields.username,
-        password: addFields.password,
-        roleName: addFields.roleName,
-        isActive: true,
-      };
-      dispatch(
-        createUser({
-          newUser,
-          newRoleId: roles.find((role) => addFields.roleName === role.name)?.id,
-        })
-      );
-      setAddFields({
-        firstName: "",
-        lastName: "",
-        email: "",
-        username: "",
-        password: "",
-        roleName: "",
-      });
-      showNotification(
-        "El registro del usuario fue exitoso",
-        "success",
-        3000,
-        false
-      );
-    } catch (error) {
-      console.error(error);
-      showNotification(
-        "Ha ocurrido un error al registrar el usuario",
-        "error",
-        5000,
-        false
-      );
-    }
   };
 
   const handleEdit = (user: User) => {
@@ -263,8 +212,8 @@ const ManageUsers: React.FC = () => {
       lastName: user.lastName,
       email: user.email,
       username: user.username,
-      password: user.password,
-      roleName: user?.roleName || "",
+      password: "",
+      roleName: user.roles?.map((role: Role) => role.name).join(", ") || "",
     });
   };
 
@@ -274,28 +223,29 @@ const ManageUsers: React.FC = () => {
 
   const handleUpdate = async (id: number) => {
     try {
-      const updatedUser: Partial<User> = {
-        ...editFields,
+      const updatedUser = {
+        firstName: editFields.firstName,
+        lastName: editFields.lastName,
+        email: editFields.email,
+        username: editFields.username,
       };
+      const role = roles.find((r) => r.name === editFields.roleName);
+      if (!role) {
+        showNotification(
+          "El rol seleccionado no existe",
+          "error",
+          5000,
+          false
+        );
+        return;
+      }
       dispatch(
         updateUser({
           id,
           updatedUser,
-          newRoleId: roles.find((role) => editFields.roleName === role.name)
-            ?.id,
+          newRoleId: role.id,
         })
       );
-      if (id === currentUser?.id) {
-        setUser({
-          id: currentUser.id,
-          firstName: updatedUser.firstName || "",
-          lastName: updatedUser.lastName || "",
-          email: updatedUser.email || "",
-          username: updatedUser.username || "",
-          password: updatedUser.password || "",
-          isActive: updatedUser.isActive || false,
-        });
-      }
       setEditRowId(null);
       setEditFields({
         firstName: "",
@@ -323,118 +273,41 @@ const ManageUsers: React.FC = () => {
     }
   };
 
-  const checkEmailExistence = useCallback(
-    (email: string): User | undefined => {
-      return users.find((user) => user.email === email);
-    },
-    [users]
-  );
-
-  const handleEmailChange = (
-    event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
-  ) => {
-    const value = event.target.value.trim();
-    if (checkEmailExistence(value)) {
-      showTemporaryTooltip(setOpenEmailTooltip);
-      return;
-    }
-    setAddFields((prevFields) => ({ ...prevFields, email: value }));
-  };
-
-  const checkUsernameExistence = useCallback(
-    (username: string): User | undefined => {
-      return users.find((user) => user.username === username);
-    },
-    [users]
-  );
-
-  const handleUsernameChange = (
-    event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
-  ) => {
-    const value = event.target.value.trim();
-    if (checkUsernameExistence(value)) {
-      showTemporaryTooltip(setOpenUsernameTooltip);
-      return;
-    }
-    setAddFields((prevFields) => ({ ...prevFields, username: value }));
-  };
-
-  useEffect(() => {
-    if (editRowId === null) return;
-
-    const selectedUser = users.find((user) => user.id === editRowId);
-    if (!selectedUser) return;
-
-    const isEmailModified = editFields.email !== selectedUser.email;
-    const isUsernameModified = editFields.username !== selectedUser.username;
-
-    const isValid = validateFields(editFields, false);
-
-    if (isEmailModified && isUsernameModified) {
-      setIsEditFormValid(
-        isValid &&
-          !checkEmailExistence(editFields.email) &&
-          !checkUsernameExistence(editFields.username)
-      );
-    } else if (isEmailModified) {
-      setIsEditFormValid(isValid && !checkEmailExistence(editFields.email));
-    } else if (isUsernameModified) {
-      setIsEditFormValid(
-        isValid && !checkUsernameExistence(editFields.username)
-      );
-    } else {
-      setIsEditFormValid(isValid);
-    }
-  }, [
-    users,
-    editFields,
-    editRowId,
-    validateFields,
-    checkEmailExistence,
-    checkUsernameExistence,
-  ]);
-
   const handleOpenStatusDialog = async (row: any) => {
-    setOpenStatusDialog(true);
     setUserToChange(row);
+    setOpenStatusDialog(true);
   };
 
   const handleCloseStatusDialog = () => {
     setOpenStatusDialog(false);
-    setUserToChange(null);
   };
 
   const handleStatusChange = async () => {
-    try {
-      if (userToChange !== null) {
-        dispatch(
+    if (userToChange) {
+      try {
+        await dispatch(
           updateUserStatus({
             id: userToChange.id,
             status: !userToChange.isActive,
           })
         );
+        setOpenStatusDialog(false);
         showNotification(
-          "La actualización del estado del usuario fue exitosa",
+          "El estado del usuario fue actualizado exitosamente",
           "success",
           3000,
           false
         );
+      } catch (error) {
+        console.error(error);
+        showNotification(
+          "Ha ocurrido un error al actualizar el estado del usuario",
+          "error",
+          5000,
+          false
+        );
       }
-      handleCloseStatusDialog();
-    } catch (error) {
-      handleCancel();
-      console.error(error);
-      showNotification(
-        "Ha ocurrido un error al actualizar el estado del usuario",
-        "error",
-        5000,
-        false
-      );
     }
-  };
-
-  const handleTogglePassword = () => {
-    setShowPassword((prev) => !prev);
   };
 
   const handleNewPassword = (
@@ -456,52 +329,11 @@ const ManageUsers: React.FC = () => {
   };
 
   const handleToggleNewPassword = () => {
-    setShowNewPassword((prev) => !prev);
+    setShowNewPassword(!showNewPassword);
   };
 
   const handleToggleConfirmNewPassword = () => {
-    setShowConfirmNewPassword((prev) => !prev);
-  };
-
-  const handleGeneratePassword = async (id: number) => {
-    try {
-      const passwordRegex =
-        /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
-      let temporalPassword = "";
-      do {
-        temporalPassword = Math.random().toString(36).slice(-8) + "@A1";
-      } while (!passwordRegex.test(temporalPassword));
-      setGeneratedTemporalPassword({ id, temporalPassword });
-      setTemporalPasswordHidden(false);
-      dispatch(updateUserTemporalPassword({ id, temporalPassword }));
-      showNotification(
-        "Se ha creado una contraseña temporal",
-        "success",
-        3000,
-        false
-      );
-    } catch (error) {
-      console.error(error);
-      showNotification(
-        "Ha ocurrido un error al crear la contraseña temporal",
-        "error",
-        5000,
-        false
-      );
-    }
-  };
-
-  const handleCopy = async () => {
-    try {
-      await navigator.clipboard.writeText(
-        generatedTemporalPassword.temporalPassword
-      );
-      setCopyTooltipOpen(true);
-      await new Promise((resolve) => setTimeout(resolve, 5000));
-      setCopyTooltipOpen(false);
-    } catch (error) {
-      console.error(error);
-    }
+    setShowConfirmNewPassword(!showConfirmNewPassword);
   };
 
   const handleChangePassword = async (
@@ -510,148 +342,171 @@ const ManageUsers: React.FC = () => {
     handleClose: () => void
   ) => {
     e.preventDefault();
-
     const isValid = await validateNewPasswordFields(passwordFields);
-    if (!isValid) return;
+    if (isValid) {
+      try {
+        await dispatch(
+          updateUserPassword({
+            id,
+            password: passwordFields.newPassword,
+          })
+        );
+        setPasswordFields({
+          newPassword: "",
+          confirmNewPassword: "",
+        });
+        setShowNewPassword(false);
+        setShowConfirmNewPassword(false);
+        handleClose();
+        showNotification(
+          "La contraseña fue actualizada exitosamente",
+          "success",
+          3000,
+          false
+        );
+      } catch (error) {
+        console.error(error);
+        showNotification(
+          "Ha ocurrido un error al actualizar la contraseña",
+          "error",
+          5000,
+          false
+        );
+      }
+    }
+  };
 
+  const modalContentChangeUserPassword = (
+    id: number,
+    handleClose: () => void
+  ) => (
+    <Box component="form" onSubmit={(e) => handleChangePassword(e, id, handleClose)}>
+      <Grid container spacing={2}>
+        <Grid item xs={12}>
+          <Typography variant="h6" gutterBottom>
+            Cambiar Contraseña
+          </Typography>
+        </Grid>
+        <Grid item xs={12}>
+          <TextField
+            label="Nueva Contraseña"
+            type={showNewPassword ? "text" : "password"}
+            variant="outlined"
+            fullWidth
+            value={passwordFields.newPassword}
+            onChange={handleNewPassword}
+            InputProps={{
+              endAdornment: (
+                <InputAdornment position="end">
+                  <IconButton onClick={handleToggleNewPassword} edge="end">
+                    {showNewPassword ? <VisibilityOff /> : <Visibility />}
+                  </IconButton>
+                </InputAdornment>
+              ),
+            }}
+          />
+        </Grid>
+        <Grid item xs={12}>
+          <TextField
+            label="Confirmar Nueva Contraseña"
+            type={showConfirmNewPassword ? "text" : "password"}
+            variant="outlined"
+            fullWidth
+            value={passwordFields.confirmNewPassword}
+            onChange={handleConfirmNewPassword}
+            InputProps={{
+              endAdornment: (
+                <InputAdornment position="end">
+                  <IconButton
+                    onClick={handleToggleConfirmNewPassword}
+                    edge="end"
+                  >
+                    {showConfirmNewPassword ? <VisibilityOff /> : <Visibility />}
+                  </IconButton>
+                </InputAdornment>
+              ),
+            }}
+          />
+        </Grid>
+        {error && (
+          <Grid item xs={12}>
+            <Alert severity="error" sx={{ whiteSpace: "pre-line" }}>
+              {error}
+            </Alert>
+          </Grid>
+        )}
+        <Grid item xs={12}>
+          <Stack direction="row" spacing={2} justifyContent="flex-end">
+            <Button variant="outlined" onClick={handleClose}>
+              Cancelar
+            </Button>
+            <Button
+              type="submit"
+              variant="contained"
+              disabled={!isPasswordFormValid}
+            >
+              Cambiar Contraseña
+            </Button>
+          </Stack>
+        </Grid>
+      </Grid>
+    </Box>
+  );
+
+  const handleOpenAddUserModal = () => {
+    setOpenAddUserModal(true);
+  };
+
+  const handleCloseAddUserModal = () => {
+    setOpenAddUserModal(false);
+  };
+
+  const handleCreateUser = async (userData: {
+    firstName: string;
+    lastName: string;
+    email: string;
+    username: string;
+    password: string;
+    roleName: string;
+  }) => {
+    setIsCreatingUser(true);
     try {
-      dispatch(
-        updateUserPassword({ id, password: passwordFields.newPassword })
-      );
-      setPasswordFields({
-        newPassword: "",
-        confirmNewPassword: "",
-      });
-      setTemporalPasswordHidden(true);
-      handleClose();
+      const role = roles.find(r => r.name === userData.roleName);
+      if (!role) {
+        throw new Error(`Rol "${userData.roleName}" no encontrado`);
+      }
+
+      const newUser = {
+        firstName: userData.firstName,
+        lastName: userData.lastName,
+        email: userData.email,
+        username: userData.username,
+        password: userData.password,
+        isActive: true,
+      };
+      
+      await dispatch(createUser({
+        newUser,
+        newRoleId: role.id,
+      }));
+      setOpenAddUserModal(false);
       showNotification(
-        "La actualización de la contraseña del usuario fue exitosa",
+        "Usuario creado exitosamente",
         "success",
         3000,
         false
       );
     } catch (error) {
-      console.error(error);
+      console.error("Error creating user:", error);
       showNotification(
-        "Ha ocurrido un error al actualizar la contraseña del usuario",
+        "Error al crear el usuario",
         "error",
         5000,
         false
       );
+    } finally {
+      setIsCreatingUser(false);
     }
-  };
-
-  useEffect(() => {
-    const hasPasswordChange =
-      passwordFields.newPassword.trim() !== "" ||
-      passwordFields.confirmNewPassword.trim() !== "";
-    setIsPasswordFormValid(hasPasswordChange);
-  }, [passwordFields]);
-
-  const modalContentChangeUserPassword = (
-    id: number,
-    handleClose: () => void
-  ) => {
-    return (
-      <Box
-        sx={{
-          display: "flex",
-          flexDirection: "column",
-          gap: 2,
-          margin: "auto",
-        }}
-      >
-        <Typography>
-          Puedes cambiar la contraseña manualmente o{" "}
-          <Link
-            sx={{ cursor: "pointer" }}
-            onClick={() => handleGeneratePassword(id)}
-          >
-            generar una contraseña temporal
-          </Link>
-        </Typography>
-        <Stack direction="row" alignItems="center" spacing={1}>
-          {!temporalPasswordHidden && id === generatedTemporalPassword.id && (
-            <>
-              <Typography variant="h6">
-                {generatedTemporalPassword.temporalPassword}
-              </Typography>
-              <Tooltip
-                title="Copiado!"
-                open={copyTooltipOpen}
-                placement="right"
-                disableHoverListener
-                arrow
-              >
-                <IconButton size="small" onClick={handleCopy}>
-                  <ContentCopyIcon fontSize="small" />
-                </IconButton>
-              </Tooltip>
-            </>
-          )}
-        </Stack>
-        <TextField
-          label="Nueva Contraseña"
-          variant="outlined"
-          type={showNewPassword ? "text" : "password"}
-          fullWidth
-          sx={{
-            height: 56,
-          }}
-          value={passwordFields.newPassword}
-          onChange={(e) => handleNewPassword(e)}
-          InputProps={{
-            endAdornment: (
-              <InputAdornment position="end">
-                <IconButton onClick={handleToggleNewPassword} edge="end">
-                  {showNewPassword ? <VisibilityOff /> : <Visibility />}
-                </IconButton>
-              </InputAdornment>
-            ),
-          }}
-        />
-        <TextField
-          label="Confirmar Contraseña"
-          variant="outlined"
-          type={showConfirmNewPassword ? "text" : "password"}
-          fullWidth
-          sx={{
-            height: 56,
-          }}
-          value={passwordFields.confirmNewPassword}
-          onChange={(e) => handleConfirmNewPassword(e)}
-          InputProps={{
-            endAdornment: (
-              <InputAdornment position="end">
-                <IconButton onClick={handleToggleConfirmNewPassword} edge="end">
-                  {showConfirmNewPassword ? <VisibilityOff /> : <Visibility />}
-                </IconButton>
-              </InputAdornment>
-            ),
-          }}
-        />
-        {error && (
-          <Alert severity="error" sx={{ mt: 2 }}>
-            {error}
-          </Alert>
-        )}
-        <Box sx={{ display: "flex", justifyContent: "flex-end", gap: 2 }}>
-          <Box>
-            <Button
-              variant="contained"
-              color="error"
-              sx={{ flex: 2, height: "56px" }}
-              onClick={async (e) => {
-                await handleChangePassword(e, id, handleClose);
-              }}
-              disabled={!isPasswordFormValid}
-            >
-              Aceptar
-            </Button>
-          </Box>
-        </Box>
-      </Box>
-    );
   };
 
   return (
@@ -681,7 +536,7 @@ const ManageUsers: React.FC = () => {
             justifyContent="space-between"
             alignItems="center"
           >
-            <Grid item xs={12} md={6}>
+            <Grid item xs={12} md={8}>
               {filteredUsers && (
                 <SearchBar
                   placeholder="Buscar usuario"
@@ -694,11 +549,11 @@ const ManageUsers: React.FC = () => {
                 />
               )}
             </Grid>
-            <Grid item xs={12} md={6}>
+            <Grid item xs={12} md={4}>
               <Box
                 display="flex"
                 flexDirection="row"
-                alignItems="flex-start"
+                alignItems="center"
                 justifyContent="flex-end"
                 gap={2}
               >
@@ -714,166 +569,19 @@ const ManageUsers: React.FC = () => {
                   label="Mostrar Inactivos"
                   labelPlacement="start"
                 />
-              </Box>
-            </Grid>
-            <Grid item xs={12} md={12}>
-              <Box
-                display="flex"
-                flexDirection={{ xs: "column", sm: "column", md: "row" }}
-                alignItems="center"
-                justifyContent="flex-end"
-                gap={2}
-              >
-                <Grid container spacing={2} alignItems="center">
-                  <Grid item xs={6} md={2}>
-                    <TextField
-                      label="Nombre"
-                      variant="outlined"
-                      fullWidth
-                      sx={{
-                        height: 56,
-                      }}
-                      value={addFields.firstName}
-                      onChange={(e) =>
-                        setAddFields({
-                          ...addFields,
-                          firstName: e.target.value,
-                        })
-                      }
-                    />
-                  </Grid>
-                  <Grid item xs={6} md={2}>
-                    <TextField
-                      label="Apellido"
-                      variant="outlined"
-                      fullWidth
-                      sx={{
-                        height: 56,
-                      }}
-                      value={addFields.lastName}
-                      onChange={(e) =>
-                        setAddFields({ ...addFields, lastName: e.target.value })
-                      }
-                    />
-                  </Grid>
-                  <Grid item xs={12} md={2}>
-                    <Tooltip
-                      title="Este correo electrónico ya está registrado"
-                      open={openEmailTooltip}
-                      disableHoverListener
-                      placement="bottom"
-                      arrow
-                    >
-                      <TextField
-                        label="Correo Eléctronico"
-                        variant="outlined"
-                        fullWidth
-                        sx={{
-                          height: 56,
-                        }}
-                        value={addFields.email}
-                        onChange={(e) => handleEmailChange(e)}
-                      />
-                    </Tooltip>
-                  </Grid>
-                  <Grid item xs={6} md={2}>
-                    <Tooltip
-                      title="Este nombre de usuario ya está registrado"
-                      open={openUsernameTooltip}
-                      disableHoverListener
-                      placement="bottom"
-                      arrow
-                    >
-                      <TextField
-                        label="Usuario"
-                        variant="outlined"
-                        fullWidth
-                        sx={{
-                          height: 56,
-                        }}
-                        value={addFields.username}
-                        onChange={(e) => handleUsernameChange(e)}
-                      />
-                    </Tooltip>
-                  </Grid>
-                  <Grid item xs={6} md={2}>
-                    <TextField
-                      label="Contraseña"
-                      variant="outlined"
-                      type={showPassword ? "text" : "password"}
-                      fullWidth
-                      sx={{
-                        height: 56,
-                      }}
-                      value={addFields.password}
-                      onChange={(e) =>
-                        setAddFields({ ...addFields, password: e.target.value })
-                      }
-                      InputProps={{
-                        endAdornment: (
-                          <InputAdornment position="end">
-                            <IconButton
-                              onClick={handleTogglePassword}
-                              edge="end"
-                            >
-                              {showPassword ? (
-                                <VisibilityOff />
-                              ) : (
-                                <Visibility />
-                              )}
-                            </IconButton>
-                          </InputAdornment>
-                        ),
-                      }}
-                    />
-                  </Grid>
-                  <Grid item xs={12} md={2}>
-                    <FormControl variant="outlined" fullWidth>
-                      <InputLabel>Seleccione un rol</InputLabel>
-                      <Select
-                        label="Seleccione un rol"
-                        value={addFields.roleName || ""}
-                        onChange={(e) =>
-                          setAddFields({
-                            ...addFields,
-                            roleName: e.target.value,
-                          })
-                        }
-                      >
-                        {roles.map((role) => (
-                          <MenuItem key={role.id} value={role.name}>
-                            {role.name}
-                          </MenuItem>
-                        ))}
-                      </Select>
-                    </FormControl>
-                  </Grid>
-                </Grid>
-                <Tooltip title="Agregar Usuario" arrow>
-                  <Box
-                    sx={{
-                      width: { xs: "100%", md: "auto" },
-                      display: "flex",
-                      justifyContent: { xs: "stretch", md: "flex-end" },
-                    }}
-                  >
-                    <Button
-                      variant="contained"
-                      color="primary"
-                      sx={{
-                        minHeight: 56,
-                        display: "flex",
-                        justifyContent: "center",
-                        lineHeight: "normal",
-                        width: { xs: "100%", md: "auto" },
-                      }}
-                      onClick={handleCreate}
-                      disabled={!isAddFormValid}
-                    >
-                      <PersonAddAlt1RoundedIcon />
-                    </Button>
-                  </Box>
-                </Tooltip>
+                <Button
+                  variant="contained"
+                  startIcon={<PersonAddAlt1RoundedIcon />}
+                  onClick={handleOpenAddUserModal}
+                  sx={{
+                    px: 3,
+                    py: 1.5,
+                    fontSize: '1rem',
+                    minHeight: 56,
+                  }}
+                >
+                  Agregar Usuario
+                </Button>
               </Box>
             </Grid>
           </Grid>
@@ -943,6 +651,18 @@ const ManageUsers: React.FC = () => {
           </Button>
         </DialogActions>
       </Dialog>
+      <ModalComponent
+        open={openAddUserModal}
+        onCloseModal={handleCloseAddUserModal}
+        modalTitle="Agregar Usuario"
+      >
+        <AddUserForm
+          onSubmit={handleCreateUser}
+          onCancel={handleCloseAddUserModal}
+          isLoading={isCreatingUser}
+          roles={roles}
+        />
+      </ModalComponent>
     </Box>
   );
 };
