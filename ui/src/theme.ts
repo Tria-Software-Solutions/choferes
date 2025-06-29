@@ -117,9 +117,11 @@ const theme = createTheme({
     MuiAppBar: {
       styleOverrides: {
         root: {
-          backgroundColor: "#000000",
-          color: "#ffffff",
-          boxShadow: "0 2px 8px rgba(0,0,0,0.1)",
+          background: 'linear-gradient(135deg, #000000 0%, #1a1a1a 100%)',
+          color: '#ffffff',
+          boxShadow: '0 4px 20px rgba(0,0,0,0.15)',
+          borderBottom: '1px solid rgba(255,255,255,0.1)',
+          backdropFilter: 'blur(10px)',
         },
       },
     },
@@ -331,6 +333,8 @@ const theme = createTheme({
         root: {
           color: "#000000",
           backgroundColor: "#ffffff",
+          padding: '12px 16px',
+          transition: 'all 0.2s ease',
           "&:hover": {
             backgroundColor: "#f5f5f5",
           },
@@ -386,9 +390,14 @@ const theme = createTheme({
         root: {
           backgroundColor: "#000000",
           color: "#ffffff",
-          fontWeight: 500,
+          fontWeight: 600,
+          borderRadius: '20px',
+          fontSize: '0.875rem',
+          transition: 'all 0.3s ease',
           "&:hover": {
             backgroundColor: "#333333",
+            transform: 'translateY(-1px)',
+            boxShadow: '0 4px 12px rgba(0,0,0,0.2)',
           },
         },
         outlined: {
@@ -612,6 +621,31 @@ const theme = createTheme({
               color: "#ffffff",
             },
           },
+        },
+      },
+    },
+    MuiAvatar: {
+      styleOverrides: {
+        root: {
+          backgroundColor: 'rgba(255,255,255,0.2)',
+          color: '#ffffff',
+          fontWeight: 600,
+          fontSize: '1rem',
+          transition: 'all 0.3s ease',
+          '&:hover': {
+            transform: 'scale(1.05)',
+          },
+        },
+      },
+    },
+    MuiMenu: {
+      styleOverrides: {
+        paper: {
+          backgroundColor: '#ffffff',
+          boxShadow: '0 8px 32px rgba(0,0,0,0.2)',
+          border: '1px solid rgba(0,0,0,0.1)',
+          borderRadius: '12px',
+          overflow: 'hidden',
         },
       },
     },
