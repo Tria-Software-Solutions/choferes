@@ -32,32 +32,23 @@ var __importStar = (this && this.__importStar) || (function () {
         return result;
     };
 })();
-var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
-    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
-    return new (P || (P = Promise))(function (resolve, reject) {
-        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
-        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
-        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
-        step((generator = generator.apply(thisArg, _arguments || [])).next());
-    });
-};
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.deleteEmployee = exports.updateEmployee = exports.createEmployee = exports.getEmployeeById = exports.getEmployees = void 0;
 const employeeService = __importStar(require("../services/employeeService"));
-const getEmployees = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+const getEmployees = async (req, res) => {
     try {
-        const employees = yield employeeService.getEmployees();
+        const employees = await employeeService.getEmployees();
         return res.status(200).json(employees);
     }
     catch (error) {
         return res.status(500).json({ message: "Error fetching Employees", error });
     }
-});
+};
 exports.getEmployees = getEmployees;
-const getEmployeeById = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+const getEmployeeById = async (req, res) => {
     try {
         const id = parseInt(req.params.id);
-        const employee = yield employeeService.getEmployeeById(id);
+        const employee = await employeeService.getEmployeeById(id);
         if (employee) {
             return res.status(200).json(employee);
         }
@@ -68,22 +59,22 @@ const getEmployeeById = (req, res) => __awaiter(void 0, void 0, void 0, function
     catch (error) {
         return res.status(500).json({ message: "Error fetching Employee", error });
     }
-});
+};
 exports.getEmployeeById = getEmployeeById;
-const createEmployee = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+const createEmployee = async (req, res) => {
     try {
-        const newEmployee = yield employeeService.createEmployee(req.body);
+        const newEmployee = await employeeService.createEmployee(req.body);
         return res.status(201).json(newEmployee);
     }
     catch (error) {
         return res.status(500).json({ message: "Error creating Employee", error });
     }
-});
+};
 exports.createEmployee = createEmployee;
-const updateEmployee = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+const updateEmployee = async (req, res) => {
     try {
         const id = parseInt(req.params.id);
-        const updatedEmployee = yield employeeService.updateEmployee(id, req.body);
+        const updatedEmployee = await employeeService.updateEmployee(id, req.body);
         if (updatedEmployee) {
             return res.status(200).json(updatedEmployee);
         }
@@ -94,12 +85,12 @@ const updateEmployee = (req, res) => __awaiter(void 0, void 0, void 0, function*
     catch (error) {
         return res.status(500).json({ message: "Error updating Employee", error });
     }
-});
+};
 exports.updateEmployee = updateEmployee;
-const deleteEmployee = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+const deleteEmployee = async (req, res) => {
     try {
         const id = parseInt(req.params.id);
-        const deleted = yield employeeService.deleteEmployee(id);
+        const deleted = await employeeService.deleteEmployee(id);
         if (deleted) {
             return res.status(204).end();
         }
@@ -110,5 +101,6 @@ const deleteEmployee = (req, res) => __awaiter(void 0, void 0, void 0, function*
     catch (error) {
         return res.status(500).json({ message: "Error deleting Employee", error });
     }
-});
+};
 exports.deleteEmployee = deleteEmployee;
+//# sourceMappingURL=employeeController.js.map

@@ -37,7 +37,7 @@ const Dashboard: React.FC = () => {
           <ManageAccountsIcon fontSize={isSmallScreen ? "small" : "large"} />
           <Box sx={{ ml: 1 }}>
             <Typography
-              variant={isSmallScreen ? "h5" : "h2"}
+              variant={isSmallScreen ? "h5" : "h4"}
               sx={{ flexGrow: 1 }}
             >
               {isSmallScreen
@@ -57,7 +57,7 @@ const Dashboard: React.FC = () => {
           </Typography>
         </AccordionSummary>
         <AccordionDetails>
-          <ManageUsers />
+          <ManageUsers isExpanded={expanded === "panel1"} />
         </AccordionDetails>
       </Accordion>
       <Accordion
@@ -70,7 +70,7 @@ const Dashboard: React.FC = () => {
           </Typography>
         </AccordionSummary>
         <AccordionDetails>
-          <ManageRoles />
+          <ManageRoles isExpanded={expanded === "panel2"} />
         </AccordionDetails>
       </Accordion>
       <Accordion

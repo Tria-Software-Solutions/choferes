@@ -1,19 +1,10 @@
 "use strict";
-var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
-    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
-    return new (P || (P = Promise))(function (resolve, reject) {
-        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
-        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
-        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
-        step((generator = generator.apply(thisArg, _arguments || [])).next());
-    });
-};
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.deleteRole = exports.updateRole = exports.createRole = exports.getRoleByName = exports.getRoleById = exports.getRoles = void 0;
 const Permission_1 = require("../models/Permission");
 const Role_1 = require("../models/Role");
-const getRoles = () => __awaiter(void 0, void 0, void 0, function* () {
-    return yield Role_1.Role.findAll({
+const getRoles = async () => {
+    return await Role_1.Role.findAll({
         include: [
             {
                 model: Permission_1.Permission,
@@ -22,10 +13,10 @@ const getRoles = () => __awaiter(void 0, void 0, void 0, function* () {
             },
         ],
     });
-});
+};
 exports.getRoles = getRoles;
-const getRoleById = (id) => __awaiter(void 0, void 0, void 0, function* () {
-    return yield Role_1.Role.findByPk(id, {
+const getRoleById = async (id) => {
+    return await Role_1.Role.findByPk(id, {
         include: [
             {
                 model: Permission_1.Permission,
@@ -34,10 +25,10 @@ const getRoleById = (id) => __awaiter(void 0, void 0, void 0, function* () {
             },
         ],
     });
-});
+};
 exports.getRoleById = getRoleById;
-const getRoleByName = (name) => __awaiter(void 0, void 0, void 0, function* () {
-    return yield Role_1.Role.findOne({
+const getRoleByName = async (name) => {
+    return await Role_1.Role.findOne({
         where: { name },
         include: [
             {
@@ -47,20 +38,21 @@ const getRoleByName = (name) => __awaiter(void 0, void 0, void 0, function* () {
             },
         ],
     });
-});
+};
 exports.getRoleByName = getRoleByName;
-const createRole = (data) => __awaiter(void 0, void 0, void 0, function* () {
-    const newRole = yield Role_1.Role.create(data);
-    yield newRole.reload();
+const createRole = async (data) => {
+    const newRole = await Role_1.Role.create(data);
+    await newRole.reload();
     return newRole;
-});
+};
 exports.createRole = createRole;
-const updateRole = (id, data) => __awaiter(void 0, void 0, void 0, function* () {
-    yield Role_1.Role.update(data, { where: { id } });
+const updateRole = async (id, data) => {
+    await Role_1.Role.update(data, { where: { id } });
     return Role_1.Role.findByPk(id);
-});
+};
 exports.updateRole = updateRole;
-const deleteRole = (id) => __awaiter(void 0, void 0, void 0, function* () {
-    return yield Role_1.Role.destroy({ where: { id } });
-});
+const deleteRole = async (id) => {
+    return await Role_1.Role.destroy({ where: { id } });
+};
 exports.deleteRole = deleteRole;
+//# sourceMappingURL=roleService.js.map

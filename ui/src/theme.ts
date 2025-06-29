@@ -394,18 +394,30 @@ const theme = createTheme({
           borderRadius: '20px',
           fontSize: '0.875rem',
           transition: 'all 0.3s ease',
+          "& .MuiChip-label": {
+            color: "#ffffff !important",
+          },
           "&:hover": {
             backgroundColor: "#333333",
             transform: 'translateY(-1px)',
             boxShadow: '0 4px 12px rgba(0,0,0,0.2)',
+            "& .MuiChip-label": {
+              color: "#ffffff !important",
+            },
           },
         },
         outlined: {
           borderColor: "#000000",
           color: "#000000",
+          "& .MuiChip-label": {
+            color: "#000000 !important",
+          },
           "&:hover": {
             backgroundColor: "#000000",
             color: "#ffffff",
+            "& .MuiChip-label": {
+              color: "#ffffff !important",
+            },
           },
         },
       },

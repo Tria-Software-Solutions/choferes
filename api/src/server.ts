@@ -52,27 +52,33 @@ app.use(compression({
   }
 }));
 
-// Rate limiting para prevenir abuso
+// Rate limiting para prevenir abuso (solo en producción)
 const limiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutos
-  max: 100, // Máximo 100 requests por ventana de tiempo
+  max: 1000, // Máximo 1000 requests por ventana de tiempo (aumentado para desarrollo)
   message: 'Too many requests from this IP, please try again later.',
   standardHeaders: true,
   legacyHeaders: false,
 });
 
-app.use('/api/', limiter);
+// Solo aplicar rate limiting en producción
+if (process.env.NODE_ENV === 'production') {
+  app.use('/api/', limiter);
+}
 
-// Rate limiting más estricto para autenticación
+// Rate limiting más estricto para autenticación (solo en producción)
 const authLimiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutos
-  max: 5, // Máximo 5 intentos de login por ventana de tiempo
+  max: 20, // Máximo 20 intentos de login por ventana de tiempo (aumentado para desarrollo)
   message: 'Too many login attempts, please try again later.',
   standardHeaders: true,
   legacyHeaders: false,
 });
 
-app.use('/api/auth', authLimiter);
+// Solo aplicar rate limiting de auth en producción
+if (process.env.NODE_ENV === 'production') {
+  app.use('/api/auth', authLimiter);
+}
 
 const allowedOrigins = [
   "http://localhost:3000",

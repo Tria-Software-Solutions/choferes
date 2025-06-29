@@ -25,3 +25,4 @@ Role.init({
     modelName: "Role",
     tableName: "roles",
 });
+//# sourceMappingURL=Role.js.map

@@ -47,3 +47,4 @@ router.post("/", authMiddleware_1.authenticateToken, weeklySummaryController.cre
 router.put("/:id", authMiddleware_1.authenticateToken, weeklySummaryController.updateWeeklySummary);
 router.delete("/:id", authMiddleware_1.authenticateToken, weeklySummaryController.deleteWeeklySummary);
 exports.default = router;
+//# sourceMappingURL=weeklySummaryRoutes.js.map

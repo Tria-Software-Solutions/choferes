@@ -32,21 +32,12 @@ var __importStar = (this && this.__importStar) || (function () {
         return result;
     };
 })();
-var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
-    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
-    return new (P || (P = Promise))(function (resolve, reject) {
-        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
-        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
-        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
-        step((generator = generator.apply(thisArg, _arguments || [])).next());
-    });
-};
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.deletePermission = exports.createPermission = exports.getPermissionsByNames = exports.getPermissionById = exports.getPermissions = void 0;
 const permissionService = __importStar(require("../services/permissionService"));
-const getPermissions = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+const getPermissions = async (req, res) => {
     try {
-        const permissions = yield permissionService.getPermissions();
+        const permissions = await permissionService.getPermissions();
         return res.status(200).json(permissions);
     }
     catch (error) {
@@ -54,11 +45,11 @@ const getPermissions = (req, res) => __awaiter(void 0, void 0, void 0, function*
             .status(500)
             .json({ message: "Error fetching Permissions", error });
     }
-});
+};
 exports.getPermissions = getPermissions;
-const getPermissionById = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+const getPermissionById = async (req, res) => {
     try {
-        const permission = yield permissionService.getPermissionById(Number(req.params.id));
+        const permission = await permissionService.getPermissionById(Number(req.params.id));
         if (!permission)
             return res.status(404).json({ error: "Permission not found" });
         return res.status(200).json(permission);
@@ -68,9 +59,9 @@ const getPermissionById = (req, res) => __awaiter(void 0, void 0, void 0, functi
             .status(500)
             .json({ message: "Error fetching Permission", error });
     }
-});
+};
 exports.getPermissionById = getPermissionById;
-const getPermissionsByNames = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+const getPermissionsByNames = async (req, res) => {
     try {
         const decodedPermissionsNames = decodeURIComponent(req.params.names);
         const permissionsNamesArray = decodedPermissionsNames
@@ -79,7 +70,7 @@ const getPermissionsByNames = (req, res) => __awaiter(void 0, void 0, void 0, fu
         if (permissionsNamesArray.length === 0) {
             return res.status(400).json({ error: "Invalid permissions array" });
         }
-        const permissions = yield permissionService.getPermissionsByNames(permissionsNamesArray);
+        const permissions = await permissionService.getPermissionsByNames(permissionsNamesArray);
         if (!permissions || permissions.length === 0) {
             return res.status(404).json({ error: "Permissions not found" });
         }
@@ -90,23 +81,23 @@ const getPermissionsByNames = (req, res) => __awaiter(void 0, void 0, void 0, fu
             .status(500)
             .json({ message: "Error fetching Permissions", error });
     }
-});
+};
 exports.getPermissionsByNames = getPermissionsByNames;
-const createPermission = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+const createPermission = async (req, res) => {
     try {
         const { name } = req.body;
-        const permission = yield permissionService.createPermission(name);
+        const permission = await permissionService.createPermission(name);
         res.status(201).json(permission);
     }
     catch (error) {
         res.status(500).json({ message: "Error creating Permission", error });
     }
-});
+};
 exports.createPermission = createPermission;
-const deletePermission = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+const deletePermission = async (req, res) => {
     try {
         const id = parseInt(req.params.id);
-        const deleted = yield permissionService.deletePermission(id);
+        const deleted = await permissionService.deletePermission(id);
         if (deleted) {
             return res.status(204).end();
         }
@@ -119,5 +110,6 @@ const deletePermission = (req, res) => __awaiter(void 0, void 0, void 0, functio
             .status(500)
             .json({ message: "Error deleting Permission", error });
     }
-});
+};
 exports.deletePermission = deletePermission;
+//# sourceMappingURL=permissionController.js.map

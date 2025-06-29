@@ -33,3 +33,4 @@ RolePermission.init({
     modelName: "RolePermission",
     tableName: "role_permission",
 });
+//# sourceMappingURL=RolePermission.js.map

@@ -24,16 +24,14 @@ import {
   DialogActions,
   DialogContent,
   DialogTitle,
-  FormControlLabel,
   Grid,
   IconButton,
   InputAdornment,
   Stack,
-  Switch,
   TextField,
   Typography,
-  useMediaQuery,
   useTheme,
+  Tooltip,
 } from "@mui/material";
 import EditableTable from "../../components/Table/EditableTable/EditableTable";
 import SearchBar from "../../components/SearchBar/SearchBar";
@@ -42,8 +40,10 @@ import AddUserForm from "../../components/Forms/AddUserForm";
 import PersonAddAlt1RoundedIcon from "@mui/icons-material/PersonAddAlt1Rounded";
 import Visibility from "@mui/icons-material/Visibility";
 import VisibilityOff from "@mui/icons-material/VisibilityOff";
+import VisibilityIcon from '@mui/icons-material/Visibility';
+import VisibilityOffIcon from '@mui/icons-material/VisibilityOff';
 
-const ManageUsers: React.FC = () => {
+const ManageUsers: React.FC<{ isExpanded?: boolean }> = ({ isExpanded = true }) => {
   const dispatch = useDispatch<AppDispatch>();
   const { userPermissions } = useAuthContext();
   const { users, isLoadingUsers } = useSelector(
@@ -91,7 +91,6 @@ const ManageUsers: React.FC = () => {
   const [isCreatingUser, setIsCreatingUser] = useState(false);
 
   const theme = useTheme();
-  const isSmallScreen = useMediaQuery(theme.breakpoints.down("sm"));
 
   useEffect(() => {
     dispatch(fetchUsers());
@@ -123,12 +122,6 @@ const ManageUsers: React.FC = () => {
     setFilteredUsers(filtered);
     setTotalCount(filtered.length);
   }, [filter, users, showInactive]);
-
-  const handleChangeShowInactive = (
-    event: React.ChangeEvent<HTMLInputElement>
-  ) => {
-    setShowInactive(event.target.checked);
-  };
 
   const validateFields = useCallback(
     (fields: typeof editFields, isAddForm: boolean) => {
@@ -536,7 +529,7 @@ const ManageUsers: React.FC = () => {
             justifyContent="space-between"
             alignItems="center"
           >
-            <Grid item xs={12} md={8}>
+            <Grid item xs={12} md={6}>
               {filteredUsers && (
                 <SearchBar
                   placeholder="Buscar usuario"
@@ -549,7 +542,7 @@ const ManageUsers: React.FC = () => {
                 />
               )}
             </Grid>
-            <Grid item xs={12} md={4}>
+            <Grid item xs={12} md={6}>
               <Box
                 display="flex"
                 flexDirection="row"
@@ -557,18 +550,88 @@ const ManageUsers: React.FC = () => {
                 justifyContent="flex-end"
                 gap={2}
               >
-                <FormControlLabel
-                  control={
-                    <Switch
-                      size={isSmallScreen ? "small" : "medium"}
-                      color="primary"
-                      checked={showInactive}
-                      onChange={handleChangeShowInactive}
-                    />
+                <Tooltip 
+                  title={showInactive 
+                    ? "Mostrando usuarios activos e inactivos" 
+                    : "Solo mostrando usuarios activos"
                   }
-                  label="Mostrar Inactivos"
-                  labelPlacement="start"
-                />
+                  arrow
+                  placement="top"
+                >
+                  <Box
+                    sx={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: 1,
+                      p: 1,
+                      borderRadius: 2,
+                      border: `2px solid ${showInactive ? theme.palette.primary.main : theme.palette.secondary.main}`,
+                      backgroundColor: showInactive 
+                        ? `${theme.palette.primary.main}10` 
+                        : `${theme.palette.secondary.main}10`,
+                      cursor: 'pointer',
+                      transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+                      '&:hover': {
+                        transform: 'translateY(-2px)',
+                        boxShadow: showInactive 
+                          ? `0 4px 12px ${theme.palette.primary.main}30`
+                          : `0 4px 12px ${theme.palette.secondary.main}30`,
+                        borderColor: showInactive 
+                          ? theme.palette.primary.dark 
+                          : theme.palette.secondary.dark,
+                        backgroundColor: showInactive 
+                          ? `${theme.palette.primary.main}20` 
+                          : `${theme.palette.secondary.main}20`,
+                      },
+                      '&:active': {
+                        transform: 'translateY(0px)',
+                      }
+                    }}
+                    onClick={() => setShowInactive(!showInactive)}
+                  >
+                    {showInactive ? (
+                      <>
+                        <VisibilityIcon 
+                          sx={{ 
+                            color: theme.palette.primary.main,
+                            fontSize: 20 
+                          }} 
+                        />
+                        <Typography
+                          variant="body2"
+                          sx={{
+                            fontWeight: 600,
+                            color: theme.palette.primary.main,
+                            fontSize: '0.875rem',
+                            whiteSpace: 'nowrap'
+                          }}
+                        >
+                          Mostrando Inactivos
+                        </Typography>
+                      </>
+                    ) : (
+                      <>
+                        <VisibilityOffIcon 
+                          sx={{ 
+                            color: theme.palette.secondary.main,
+                            fontSize: 20 
+                          }} 
+                        />
+                        <Typography
+                          variant="body2"
+                          sx={{
+                            fontWeight: 600,
+                            color: theme.palette.secondary.main,
+                            fontSize: '0.875rem',
+                            whiteSpace: 'nowrap'
+                          }}
+                        >
+                          Ocultar Inactivos
+                        </Typography>
+                      </>
+                    )}
+                  </Box>
+                </Tooltip>
                 <Button
                   variant="contained"
                   startIcon={<PersonAddAlt1RoundedIcon />}
@@ -614,6 +677,7 @@ const ManageUsers: React.FC = () => {
               setRowsPerPage={setRowsPerPage}
               isSaveDisabled={!isEditFormValid}
               userPermissions={userPermissions}
+              isExpanded={isExpanded}
             />
           ) : (
             <Box
@@ -631,38 +695,42 @@ const ManageUsers: React.FC = () => {
           )}
         </>
       )}
-      <Dialog open={openStatusDialog} onClose={handleCloseStatusDialog}>
-        <DialogTitle>Confirmar</DialogTitle>
-        <DialogContent>
-          <Typography>
-            ¿Estás seguro de que deseas cambiar el estado de este usuario?
-          </Typography>
-        </DialogContent>
-        <DialogActions>
-          <Button color="primary" sx={{ flex: 1 }} onClick={handleStatusChange}>
-            Aceptar
-          </Button>
-          <Button
-            color="secondary"
-            sx={{ flex: 1 }}
-            onClick={handleCloseStatusDialog}
+      {isExpanded && (
+        <>
+          <Dialog open={openStatusDialog} onClose={handleCloseStatusDialog}>
+            <DialogTitle>Confirmar</DialogTitle>
+            <DialogContent>
+              <Typography>
+                ¿Estás seguro de que deseas cambiar el estado de este usuario?
+              </Typography>
+            </DialogContent>
+            <DialogActions>
+              <Button color="primary" sx={{ flex: 1 }} onClick={handleStatusChange}>
+                Aceptar
+              </Button>
+              <Button
+                color="secondary"
+                sx={{ flex: 1 }}
+                onClick={handleCloseStatusDialog}
+              >
+                Cancelar
+              </Button>
+            </DialogActions>
+          </Dialog>
+          <ModalComponent
+            open={openAddUserModal}
+            onCloseModal={handleCloseAddUserModal}
+            modalTitle="Agregar Usuario"
           >
-            Cancelar
-          </Button>
-        </DialogActions>
-      </Dialog>
-      <ModalComponent
-        open={openAddUserModal}
-        onCloseModal={handleCloseAddUserModal}
-        modalTitle="Agregar Usuario"
-      >
-        <AddUserForm
-          onSubmit={handleCreateUser}
-          onCancel={handleCloseAddUserModal}
-          isLoading={isCreatingUser}
-          roles={roles}
-        />
-      </ModalComponent>
+            <AddUserForm
+              onSubmit={handleCreateUser}
+              onCancel={handleCloseAddUserModal}
+              isLoading={isCreatingUser}
+              roles={roles}
+            />
+          </ModalComponent>
+        </>
+      )}
     </Box>
   );
 };

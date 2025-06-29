@@ -1,48 +1,40 @@
 "use strict";
-var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
-    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
-    return new (P || (P = Promise))(function (resolve, reject) {
-        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
-        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
-        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
-        step((generator = generator.apply(thisArg, _arguments || [])).next());
-    });
-};
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.deleteHoursWorked = exports.updateHoursWorked = exports.createHoursWorked = exports.getHoursWorkedById = exports.getHoursWorked = void 0;
 const HoursWorked_1 = require("../models/HoursWorked");
 const Employee_1 = require("../models/Employee");
 const Schedule_1 = require("../models/Schedule");
-const getHoursWorked = () => __awaiter(void 0, void 0, void 0, function* () {
-    return yield HoursWorked_1.HoursWorked.findAll({
+const getHoursWorked = async () => {
+    return await HoursWorked_1.HoursWorked.findAll({
         include: [
             { model: Employee_1.Employee, attributes: ["firstName", "lastName"] },
             { model: Schedule_1.Schedule, attributes: ["days", "label", "hours"] },
         ],
     });
-});
+};
 exports.getHoursWorked = getHoursWorked;
-const getHoursWorkedById = (id) => __awaiter(void 0, void 0, void 0, function* () {
-    return yield HoursWorked_1.HoursWorked.findByPk(id, {
+const getHoursWorkedById = async (id) => {
+    return await HoursWorked_1.HoursWorked.findByPk(id, {
         include: [
             { model: Employee_1.Employee, attributes: ["firstName", "lastName"] },
             { model: Schedule_1.Schedule, attributes: ["days", "label", "hours"] },
         ],
     });
-});
+};
 exports.getHoursWorkedById = getHoursWorkedById;
-const createHoursWorked = (data) => __awaiter(void 0, void 0, void 0, function* () {
-    const newHoursWorked = yield HoursWorked_1.HoursWorked.create(data);
-    yield newHoursWorked.reload();
+const createHoursWorked = async (data) => {
+    const newHoursWorked = await HoursWorked_1.HoursWorked.create(data);
+    await newHoursWorked.reload();
     return newHoursWorked;
-});
+};
 exports.createHoursWorked = createHoursWorked;
-const updateHoursWorked = (id, data) => __awaiter(void 0, void 0, void 0, function* () {
-    yield HoursWorked_1.HoursWorked.update(data, { where: { id } });
+const updateHoursWorked = async (id, data) => {
+    await HoursWorked_1.HoursWorked.update(data, { where: { id } });
     return HoursWorked_1.HoursWorked.findByPk(id);
-});
+};
 exports.updateHoursWorked = updateHoursWorked;
-const deleteHoursWorked = (id) => __awaiter(void 0, void 0, void 0, function* () {
-    return yield HoursWorked_1.HoursWorked.destroy({ where: { id } });
-});
+const deleteHoursWorked = async (id) => {
+    return await HoursWorked_1.HoursWorked.destroy({ where: { id } });
+};
 exports.deleteHoursWorked = deleteHoursWorked;
+//# sourceMappingURL=hoursWorkedService.js.map

@@ -32,46 +32,37 @@ var __importStar = (this && this.__importStar) || (function () {
         return result;
     };
 })();
-var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
-    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
-    return new (P || (P = Promise))(function (resolve, reject) {
-        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
-        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
-        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
-        step((generator = generator.apply(thisArg, _arguments || [])).next());
-    });
-};
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.deleteRolePermission = exports.updateRolePermissions = exports.createRolePermission = exports.getRolePermissions = void 0;
 const rolePermissionService = __importStar(require("../services/rolePermissionService"));
-const getRolePermissions = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+const getRolePermissions = async (req, res) => {
     try {
-        const permissions = yield rolePermissionService.getRolePermissions();
+        const permissions = await rolePermissionService.getRolePermissions();
         return res.status(200).json(permissions);
     }
     catch (error) {
         return res.status(400).json({ message: "Error fetching RolePermissions", error });
     }
-});
+};
 exports.getRolePermissions = getRolePermissions;
-const createRolePermission = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+const createRolePermission = async (req, res) => {
     try {
-        const rolePermission = yield rolePermissionService.createRolePermission(req.body);
+        const rolePermission = await rolePermissionService.createRolePermission(req.body);
         return res.status(201).json(rolePermission);
     }
     catch (error) {
         return res.status(400).json({ message: "Error assigning RolePermission", error });
     }
-});
+};
 exports.createRolePermission = createRolePermission;
-const updateRolePermissions = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+const updateRolePermissions = async (req, res) => {
     try {
         const roleId = parseInt(req.params.id);
         const { permissionIds } = req.body;
         if (!Array.isArray(permissionIds)) {
             return res.status(400).json({ message: "Permission Ids must be an array" });
         }
-        const updatedRolePermissions = yield rolePermissionService.updateRolePermission(roleId, permissionIds);
+        const updatedRolePermissions = await rolePermissionService.updateRolePermission(roleId, permissionIds);
         if (updatedRolePermissions) {
             return res.status(200).json(updatedRolePermissions);
         }
@@ -82,12 +73,12 @@ const updateRolePermissions = (req, res) => __awaiter(void 0, void 0, void 0, fu
     catch (error) {
         return res.status(500).json({ message: "Error updating role permissions", error });
     }
-});
+};
 exports.updateRolePermissions = updateRolePermissions;
-const deleteRolePermission = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+const deleteRolePermission = async (req, res) => {
     try {
         const id = parseInt(req.params.id);
-        const deleted = yield rolePermissionService.deleteRolePermission(id);
+        const deleted = await rolePermissionService.deleteRolePermission(id);
         if (deleted) {
             return res.status(204).end();
         }
@@ -98,5 +89,6 @@ const deleteRolePermission = (req, res) => __awaiter(void 0, void 0, void 0, fun
     catch (error) {
         return res.status(500).json({ message: "Error deleting RolePermission", error });
     }
-});
+};
 exports.deleteRolePermission = deleteRolePermission;
+//# sourceMappingURL=rolePermissionController.js.map

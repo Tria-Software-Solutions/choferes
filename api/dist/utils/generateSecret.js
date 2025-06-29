@@ -74,7 +74,10 @@ const generateTokens = (userId, res) => {
         maxAge: 3600 * 1000,
     };
     res.cookie("accessToken", tokens.accessToken, cookieOptions);
-    res.cookie("refreshToken", tokens.refreshToken, Object.assign(Object.assign({}, cookieOptions), { maxAge: 7 * 24 * 60 * 60 * 1000 }));
+    res.cookie("refreshToken", tokens.refreshToken, {
+        ...cookieOptions,
+        maxAge: 7 * 24 * 60 * 60 * 1000,
+    });
     return tokens;
 };
 exports.generateTokens = generateTokens;
@@ -90,6 +93,4 @@ const validateTokenFormat = (token) => {
     return parts.length === 3;
 };
 exports.validateTokenFormat = validateTokenFormat;
-// Commands to generate secret keys:
-// node -e "console.log('JWT_SECRET_KEY=' + require('crypto').randomBytes(32).toString('hex'))"
-// node -e "console.log('JWT_SECRET_KEY_REFRESH=' + require('crypto').randomBytes(32).toString('hex'))"
+//# sourceMappingURL=generateSecret.js.map

@@ -45,3 +45,4 @@ router.post("/", authMiddleware_1.authenticateToken, rolePermissionController.cr
 router.put("/:id", authMiddleware_1.authenticateToken, rolePermissionController.updateRolePermissions);
 router.delete("/:id", authMiddleware_1.authenticateToken, rolePermissionController.deleteRolePermission);
 exports.default = router;
+//# sourceMappingURL=rolePermissionRoutes.js.map

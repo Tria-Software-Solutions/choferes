@@ -3,7 +3,6 @@ import { useAuthContext } from "../../context/AuthContext";
 import { useSelector, /*useDispatch*/ } from "react-redux";
 import { RootState, /*AppDispatch*/ } from "../../store/store";
 import SearchBar from "../../components/SearchBar/SearchBar";
-// import EditableTable from "../../components/Table/EditableTable/EditableTable";
 import CustomSpeedDial from "../../components/SpeedDial/CustomSpeedDial";
 import { useAppNotifications } from "../../components/Snackbar/SnackbarWrapper";
 import {
@@ -55,7 +54,6 @@ import { faFileExcel, faFilePdf } from "@fortawesome/free-solid-svg-icons";
 import { Courier } from "../../models/Courier";
 
 const CourierServicePage: React.FC = () => {
-  // const dispatch = useDispatch<AppDispatch>();
   const { userPermissions } = useAuthContext();
   const [selectedDate, setSelectedDate] = useState<Date>(new Date());
   const { /*couriers, allCouriers, isLoadingCourier,*/ isLoadingVehicles } = useSelector(
@@ -66,7 +64,6 @@ const CourierServicePage: React.FC = () => {
   const [filteredWeekCouriers, /*setFilteredWeekCouriers*/] = useState<Courier[]>(
     []
   );
-  //const [totalCount, setTotalCount] = useState(0);
   const [editRowId, setEditRowId] = useState<number | null>(null);
   const [addFields, /*setAddFields*/] = useState({
     driver: "",
@@ -94,10 +91,6 @@ const CourierServicePage: React.FC = () => {
   const theme = useTheme();
   const isSmallScreen = useMediaQuery(theme.breakpoints.down("sm"));
 
-  // useEffect(() => {
-  //   dispatch(fetchCouriers({}));
-  //   dispatch(fetchCouriersByDate(format(selectedDate, "yyyy-MM-dd")));
-  // }, [dispatch, selectedDate]);
 
   useEffect(() => {
     if (isSmallScreen) {
@@ -107,43 +100,12 @@ const CourierServicePage: React.FC = () => {
     }
   }, [isSmallScreen]);
 
-  // const cleanedFilter = useMemo(
-  //   () => filter.replace(/[\s-]/g, "").toLowerCase(),
-  //   [filter]
-  // );
 
-  // useEffect(() => {
-  //   const allCouriers = Object.values(couriers).flat();
-  //   const filtered = allCouriers.filter((courier) => {
-  //     return (
-  //       `${courier.name} ${courier.route} ${courier.distance} ${courier.trackingNumber} ${courier.status}`
-  //         .toLowerCase()
-  //         .includes(cleanedFilter)
-  //     );
-  //   });
-  //   setFilteredCouriers(filtered);
-  //   setTotalCount(filtered.length);
-  // }, [couriers cleanedFilter]);
 
-  // useEffect(() => {
-  //   const date = selectedDate;
-  //   const dayOfWeek = date.getDay();
 
-  //   const startOfWeek = new Date(date);
-  //   startOfWeek.setDate(date.getDate() - (dayOfWeek === 0 ? 6 : dayOfWeek - 1));
-  //   startOfWeek.setHours(0, 0, 0, 0);
 
-  //   const endOfWeek = new Date(startOfWeek);
-  //   endOfWeek.setDate(startOfWeek.getDate() + 6);
-  //   endOfWeek.setHours(23, 59, 59, 999);
 
-  //   const couriersThisWeek = allCouriers.filter((courier) => {
-  //     const serviceDate = new Date(courier.createdAt);
-  //     return serviceDate >= startOfWeek && serviceDate <= endOfWeek;
-  //   });
 
-  //   setFilteredWeekCouriers(couriersThisWeek);
-  // }, [allCouriers, selectedDate]);
 
   const validateFields = useCallback((fields: typeof addFields) => {
     const regex = {
@@ -180,101 +142,13 @@ const CourierServicePage: React.FC = () => {
     []
   );
 
-  // const handleCreate = async () => {
-  //   try {
-  //     const newCourier: Courier = {
-  //       id:
-  //         allCouriers.length > 0
-  //           ? Math.max(...allCouriers.map((courier) => courier.id)) + 1
-  //           : 1,
-  //       name: addFields.name,
-  //       route: addFields.route,
-  //       distance: addFields.distance,
-  //       trackingNumber: addFields.trackingNumber,
-  //       status: addFields.status,
-  //     };
-  //     dispatch(createCourier(newCourier));
-  //     setAddFields({
-  //       name: "",
-  //       route: "",
-  //       distance: 0,
-  //       trackingNumber: "",
-  //       status: "",
-  //     });
-  //     showNotification(
-  //       "El registro del servicio fue exitoso",
-  //       "success",
-  //       3000,
-  //       false
-  //     );
-  //   } catch (error) {
-  //     console.error(error);
-  //     showNotification(
-  //       "Ha ocurrido un error al registrar el servicio",
-  //       "error",
-  //       5000,
-  //       false
-  //     );
-  //   }
-  // };
 
-  // const handleEdit = (courier: Courier) => {
-  //   setEditRowId(courier.id);
-  //   setEditFields({
-  //     driver: courier.driver,
-  //     route: courier.route,
-  //     distance: courier.distance,
-  //     trackingNumber: courier.trackingNumber,
-  //     status: courier.status,
-  //     createdAt: courier.createdAt,
-  //   });
-  // };
 
   const handleCancel = () => {
     setEditRowId(null);
   };
 
-  // const handleUpdate = useCallback(
-  //   async (id: number) => {
-  //     try {
-  //       const updatedCourier = {
-  //         ...editFields,
-  //       };
-  //       await dispatch(updateCourier({ id, updatedCourier }));
-  //       dispatch(fetchCouriersByDate(format(selectedDate, "yyyy-MM-dd")));
-  //       setEditRowId(null);
-  //       setEditFields({
-  //         driver: "",
-  //         route: "",
-  //         distance: 0,
-  //         trackingNumber: "",
-  //         status: "",
-  //         createdAt: new Date(),
-  //       });
-  //       showNotification(
-  //         "La actualización del servicio fue exitosa",
-  //         "success",
-  //         3000,
-  //         false
-  //       );
-  //     } catch (error) {
-  //       handleCancel();
-  //       console.error(error);
-  //       showNotification(
-  //         "Ha ocurrido un error al actualizar el servicio",
-  //         "error",
-  //         5000,
-  //         false
-  //       );
-  //     }
-  //   },
-  //   [dispatch, editFields, selectedDate, showNotification]
-  // );
 
-  // const handleOpenDeleteDialog = (id: number) => {
-  //   setOpenDeleteDialog(true);
-  //   setCourierToDelete(id);
-  // };
 
   const handleCloseDeleteDialog = () => {
     setOpenDeleteDialog(false);
@@ -284,7 +158,6 @@ const CourierServicePage: React.FC = () => {
   const handleDelete = async () => {
     try {
       if (courierToDelete !== null) {
-        // dispatch(deleteCourier(courierToDelete));
         showNotification(
           "La eliminación del servicio fue exitosa",
           "success",
@@ -360,7 +233,7 @@ const CourierServicePage: React.FC = () => {
           <LocalShippingIcon fontSize={isSmallScreen ? "small" : "large"} />
           <Box sx={{ ml: 1 }}>
             <Typography
-              variant={isSmallScreen ? "h5" : "h2"}
+              variant={isSmallScreen ? "h5" : "h4"}
               sx={{ flexGrow: 1 }}
             >
               {isSmallScreen
@@ -544,7 +417,6 @@ const CourierServicePage: React.FC = () => {
                           label="Ruta"
                           sx={{ height: 56 }}
                           value={addFields.route}
-                          // onChange={handleChange}
                         >
                           <MenuItem value={10}>GAM</MenuItem>
                           <MenuItem value={20}>GAM Express</MenuItem>
@@ -581,7 +453,6 @@ const CourierServicePage: React.FC = () => {
                           label="Estado"
                           sx={{ height: 56 }}
                           value={addFields.status}
-                          // onChange={handleChange}
                         >
                           <MenuItem value={10}>Despachado</MenuItem>
                           <MenuItem value={20}>En Tránsito</MenuItem>
@@ -608,7 +479,6 @@ const CourierServicePage: React.FC = () => {
                           lineHeight: "normal",
                           width: { xs: "100%", md: "auto" },
                         }}
-                        // onClick={handleCreate}
                         disabled={!isAddFormValid}
                       >
                         <LocalShippingIcon />

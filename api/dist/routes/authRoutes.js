@@ -8,3 +8,4 @@ const authMiddleware_1 = require("../middleware/authMiddleware");
 const router = express_1.default.Router();
 router.post("/refresh-token", authMiddleware_1.authenticateRefreshToken);
 exports.default = router;
+//# sourceMappingURL=authRoutes.js.map

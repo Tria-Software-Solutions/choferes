@@ -22,3 +22,4 @@ const HoursWorked_1 = require("../models/HoursWorked");
 Object.defineProperty(exports, "HoursWorked", { enumerable: true, get: function () { return HoursWorked_1.HoursWorked; } });
 const associations_1 = __importDefault(require("./associations"));
 (0, associations_1.default)();
+//# sourceMappingURL=models.js.map

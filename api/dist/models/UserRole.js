@@ -35,3 +35,4 @@ UserRole.init({
     modelName: "UserRole",
     tableName: "user_role",
 });
+//# sourceMappingURL=UserRole.js.map

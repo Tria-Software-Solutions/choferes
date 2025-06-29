@@ -43,3 +43,4 @@ HoursWorked.init({
     modelName: "HoursWorked",
     tableName: "hours_worked",
 });
+//# sourceMappingURL=HoursWorked.js.map

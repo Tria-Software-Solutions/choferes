@@ -1,13 +1,4 @@
 "use strict";
-var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
-    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
-    return new (P || (P = Promise))(function (resolve, reject) {
-        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
-        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
-        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
-        step((generator = generator.apply(thisArg, _arguments || [])).next());
-    });
-};
 var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
@@ -19,8 +10,8 @@ const Role_1 = require("../models/Role");
 const Permission_1 = require("../models/Permission");
 const generateSecret_1 = require("../utils/generateSecret");
 const sequelize_1 = require("sequelize");
-const authenticateUser = (identifier, password, res) => __awaiter(void 0, void 0, void 0, function* () {
-    const user = yield User_1.User.findOne({
+const authenticateUser = async (identifier, password, res) => {
+    const user = await User_1.User.findOne({
         where: { [sequelize_1.Op.or]: [{ username: identifier }, { email: identifier }] },
         include: [
             {
@@ -32,14 +23,16 @@ const authenticateUser = (identifier, password, res) => __awaiter(void 0, void 0
             },
         ],
     });
-    if (!user)
+    if (!user) {
         throw new Error("User not found");
-    if (!user.isActive)
+    }
+    if (!user.isActive) {
         throw new Error("User is inactive");
-    const isMatch = yield bcrypt_1.default.compare(password, user.password);
+    }
+    const isMatch = await bcrypt_1.default.compare(password, user.password);
     if (!isMatch) {
         if (user.temporalPassword) {
-            const isMatchWithTemporalPassword = yield bcrypt_1.default.compare(password, user.temporalPassword);
+            const isMatchWithTemporalPassword = await bcrypt_1.default.compare(password, user.temporalPassword);
             if (!isMatchWithTemporalPassword) {
                 throw new Error("Incorrect password and temporary password");
             }
@@ -50,10 +43,10 @@ const authenticateUser = (identifier, password, res) => __awaiter(void 0, void 0
     }
     const { accessToken, refreshToken } = (0, generateSecret_1.generateTokens)(user.id.toString(), res);
     return { user, accessToken, refreshToken };
-});
+};
 exports.authenticateUser = authenticateUser;
-const getUsers = () => __awaiter(void 0, void 0, void 0, function* () {
-    return yield User_1.User.findAll({
+const getUsers = async () => {
+    return await User_1.User.findAll({
         include: [
             {
                 model: Role_1.Role,
@@ -62,10 +55,10 @@ const getUsers = () => __awaiter(void 0, void 0, void 0, function* () {
             },
         ],
     });
-});
+};
 exports.getUsers = getUsers;
-const getUserById = (id) => __awaiter(void 0, void 0, void 0, function* () {
-    return yield User_1.User.findByPk(id, {
+const getUserById = async (id) => {
+    return await User_1.User.findByPk(id, {
         include: [
             {
                 model: Role_1.Role,
@@ -74,10 +67,10 @@ const getUserById = (id) => __awaiter(void 0, void 0, void 0, function* () {
             },
         ],
     });
-});
+};
 exports.getUserById = getUserById;
-const getUserByEmail = (email) => __awaiter(void 0, void 0, void 0, function* () {
-    return yield User_1.User.findOne({
+const getUserByEmail = async (email) => {
+    return await User_1.User.findOne({
         where: { email },
         include: [
             {
@@ -87,10 +80,10 @@ const getUserByEmail = (email) => __awaiter(void 0, void 0, void 0, function* ()
             },
         ],
     });
-});
+};
 exports.getUserByEmail = getUserByEmail;
-const getUserByUsername = (username) => __awaiter(void 0, void 0, void 0, function* () {
-    return yield User_1.User.findOne({
+const getUserByUsername = async (username) => {
+    return await User_1.User.findOne({
         where: { username },
         include: [
             {
@@ -100,11 +93,10 @@ const getUserByUsername = (username) => __awaiter(void 0, void 0, void 0, functi
             },
         ],
     });
-});
+};
 exports.getUserByUsername = getUserByUsername;
-const getUserPermissions = (userId) => __awaiter(void 0, void 0, void 0, function* () {
-    var _a;
-    const user = yield User_1.User.findByPk(userId, {
+const getUserPermissions = async (userId) => {
+    const user = await User_1.User.findByPk(userId, {
         include: [
             {
                 model: Role_1.Role,
@@ -121,38 +113,42 @@ const getUserPermissions = (userId) => __awaiter(void 0, void 0, void 0, functio
     });
     if (!user)
         return null;
-    const permissions = ((_a = user.roles) === null || _a === void 0 ? void 0 : _a.flatMap((role) => { var _a; return (_a = role.permissions) === null || _a === void 0 ? void 0 : _a.map((permission) => permission.name); })) || [];
+    const permissions = user.roles?.flatMap((role) => role.permissions?.map((permission) => permission.name)) || [];
     return Array.from(new Set(permissions));
-});
+};
 exports.getUserPermissions = getUserPermissions;
-const createUser = (data) => __awaiter(void 0, void 0, void 0, function* () {
-    const hashedPassword = yield bcrypt_1.default.hash(data.password, 10);
-    return yield User_1.User.create(Object.assign(Object.assign({}, data), { password: hashedPassword }), { returning: true });
-});
+const createUser = async (data) => {
+    const hashedPassword = await bcrypt_1.default.hash(data.password, 10);
+    return await User_1.User.create({
+        ...data,
+        password: hashedPassword,
+    }, { returning: true });
+};
 exports.createUser = createUser;
-const updateUser = (id, data) => __awaiter(void 0, void 0, void 0, function* () {
-    yield User_1.User.update(data, { where: { id } });
+const updateUser = async (id, data) => {
+    await User_1.User.update(data, { where: { id } });
     return User_1.User.findByPk(id);
-});
+};
 exports.updateUser = updateUser;
-const updateUserStatus = (id, status) => __awaiter(void 0, void 0, void 0, function* () {
-    yield User_1.User.update({ isActive: status }, { where: { id } });
+const updateUserStatus = async (id, status) => {
+    await User_1.User.update({ isActive: status }, { where: { id } });
     return User_1.User.findByPk(id);
-});
+};
 exports.updateUserStatus = updateUserStatus;
-const updateUserPassword = (id, password) => __awaiter(void 0, void 0, void 0, function* () {
-    const hashedPassword = yield bcrypt_1.default.hash(password, 10);
-    yield User_1.User.update({ password: hashedPassword }, { where: { id } });
+const updateUserPassword = async (id, password) => {
+    const hashedPassword = await bcrypt_1.default.hash(password, 10);
+    await User_1.User.update({ password: hashedPassword }, { where: { id } });
     return User_1.User.findByPk(id);
-});
+};
 exports.updateUserPassword = updateUserPassword;
-const updateUserTemporalPassword = (id, temporalPassword) => __awaiter(void 0, void 0, void 0, function* () {
-    const hashedTemporalPassword = yield bcrypt_1.default.hash(temporalPassword, 10);
-    yield User_1.User.update({ temporalPassword: hashedTemporalPassword }, { where: { id } });
+const updateUserTemporalPassword = async (id, temporalPassword) => {
+    const hashedTemporalPassword = await bcrypt_1.default.hash(temporalPassword, 10);
+    await User_1.User.update({ temporalPassword: hashedTemporalPassword }, { where: { id } });
     return User_1.User.findByPk(id);
-});
+};
 exports.updateUserTemporalPassword = updateUserTemporalPassword;
-const deleteUser = (id) => __awaiter(void 0, void 0, void 0, function* () {
-    return yield User_1.User.destroy({ where: { id } });
-});
+const deleteUser = async (id) => {
+    return await User_1.User.destroy({ where: { id } });
+};
 exports.deleteUser = deleteUser;
+//# sourceMappingURL=userService.js.map

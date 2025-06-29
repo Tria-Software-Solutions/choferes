@@ -37,3 +37,4 @@ Schedule.init({
     modelName: "Schedule",
     tableName: "schedule",
 });
+//# sourceMappingURL=Schedule.js.map

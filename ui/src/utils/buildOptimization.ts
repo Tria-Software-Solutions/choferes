@@ -1,6 +1,4 @@
-// Configuraciones de optimización para build de producción
 
-// Configuración de webpack para optimización
 export const webpackOptimization = {
   splitChunks: {
     chunks: 'all',
@@ -18,14 +16,12 @@ export const webpackOptimization = {
         priority: 5,
         reuseExistingChunk: true,
       },
-      // Separar Material-UI en su propio chunk
       mui: {
         test: /[\\/]node_modules[\\/]@mui[\\/]/,
         name: 'mui',
         chunks: 'all',
         priority: 20,
       },
-      // Separar React en su propio chunk
       react: {
         test: /[\\/]node_modules[\\/](react|react-dom)[\\/]/,
         name: 'react',
@@ -37,7 +33,6 @@ export const webpackOptimization = {
   runtimeChunk: 'single',
   minimize: true,
   minimizer: [
-    // Configuraciones específicas para Terser
     {
       terserOptions: {
         compress: {
@@ -56,7 +51,6 @@ export const webpackOptimization = {
   ],
 };
 
-// Configuración de bundle analyzer
 export const bundleAnalyzerConfig = {
   analyzerMode: process.env.ANALYZE === 'true' ? 'server' : 'disabled',
   analyzerHost: 'localhost',
@@ -70,7 +64,6 @@ export const bundleAnalyzerConfig = {
   logLevel: 'info',
 };
 
-// Configuración de service worker para cache
 export const serviceWorkerConfig = {
   cacheName: 'choferes-cache-v1',
   urlsToCache: [
@@ -80,19 +73,16 @@ export const serviceWorkerConfig = {
     '/manifest.json',
   ],
   cacheStrategies: {
-    // Cache first para recursos estáticos
     static: {
       match: /\.(js|css|png|jpg|jpeg|gif|svg|ico|woff|woff2|ttf|eot)$/,
       strategy: 'cache-first',
       cacheName: 'static-resources',
     },
-    // Network first para API calls
     api: {
       match: /\/api\//,
       strategy: 'network-first',
       cacheName: 'api-cache',
     },
-    // Stale while revalidate para HTML
     html: {
       match: /\.html$/,
       strategy: 'stale-while-revalidate',
@@ -101,7 +91,6 @@ export const serviceWorkerConfig = {
   },
 };
 
-// Configuración de compresión
 export const compressionConfig = {
   algorithm: 'gzip',
   test: /\.(js|css|html|svg|json)$/,
@@ -109,7 +98,6 @@ export const compressionConfig = {
   minRatio: 0.8,
 };
 
-// Configuración de optimización de imágenes
 export const imageOptimizationConfig = {
   mozjpeg: {
     progressive: true,
@@ -130,16 +118,13 @@ export const imageOptimizationConfig = {
   },
 };
 
-// Configuración de preload de recursos críticos
 export const criticalResources = [
   '/static/js/bundle.js',
   '/static/css/main.css',
   '/manifest.json',
 ];
 
-// Configuración de lazy loading de rutas
 export const lazyRouteConfig = {
-  // Rutas que deben cargarse de forma lazy
   lazyRoutes: [
     '/dashboard',
     '/employees',
@@ -147,7 +132,6 @@ export const lazyRouteConfig = {
     '/schedules',
     '/roles',
   ],
-  // Rutas críticas que deben cargarse inmediatamente
   criticalRoutes: [
     '/',
     '/login',
@@ -155,7 +139,6 @@ export const lazyRouteConfig = {
   ],
 };
 
-// Configuración de optimización de fuentes
 export const fontOptimizationConfig = {
   preloadFonts: [
     'Roboto',
@@ -165,7 +148,6 @@ export const fontOptimizationConfig = {
   fontPreload: true,
 };
 
-// Configuración de PWA
 export const pwaConfig = {
   name: 'Choferes de Alquiler CR',
   short_name: 'Choferes',
@@ -188,9 +170,7 @@ export const pwaConfig = {
   ],
 };
 
-// Configuración de monitoreo de performance
 export const performanceMonitoringConfig = {
-  // Métricas a monitorear
   metrics: [
     'First Contentful Paint (FCP)',
     'Largest Contentful Paint (LCP)',
@@ -198,7 +178,6 @@ export const performanceMonitoringConfig = {
     'Cumulative Layout Shift (CLS)',
     'Time to Interactive (TTI)',
   ],
-  // Umbrales de performance
   thresholds: {
     fcp: 2000, // 2 segundos
     lcp: 2500, // 2.5 segundos
@@ -206,7 +185,6 @@ export const performanceMonitoringConfig = {
     cls: 0.1,  // 0.1
     tti: 3800, // 3.8 segundos
   },
-  // Configuración de reporting
   reporting: {
     endpoint: process.env.REACT_APP_PERFORMANCE_ENDPOINT,
     sampleRate: 0.1, // 10% de las sesiones

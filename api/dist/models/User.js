@@ -51,3 +51,4 @@ User.init({
     modelName: "User",
     tableName: "users",
 });
+//# sourceMappingURL=User.js.map

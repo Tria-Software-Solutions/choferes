@@ -46,3 +46,4 @@ router.post("/", authMiddleware_1.authenticateToken, scheduleController.createSc
 router.put("/:id", authMiddleware_1.authenticateToken, scheduleController.updateSchedule);
 router.delete("/:id", authMiddleware_1.authenticateToken, scheduleController.deleteSchedule);
 exports.default = router;
+//# sourceMappingURL=scheduleRoutes.js.map

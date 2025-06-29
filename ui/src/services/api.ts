@@ -3,7 +3,6 @@ import Cookies from "js-cookie";
 
 const API_URL = process.env.REACT_APP_API_URL || "http://localhost:5000";
 
-// Cache simple para requests GET
 const requestCache = new Map<string, { data: any; timestamp: number }>();
 const CACHE_DURATION = 5 * 60 * 1000; // 5 minutos
 
@@ -12,12 +11,10 @@ const api = axios.create({
   headers: { "Content-Type": "application/json" },
   withCredentials: true,
   timeout: 30000, // 30 segundos timeout
-  // Configuraciones de performance
   maxRedirects: 5,
   maxContentLength: 50 * 1024 * 1024, // 50MB
 });
 
-// Interceptor para cache de requests GET
 api.interceptors.request.use(
   (config) => {
     const accessToken = Cookies.get("accessToken");
@@ -25,13 +22,11 @@ api.interceptors.request.use(
       config.headers["Authorization"] = `Bearer ${accessToken}`;
     }
 
-    // Cache para requests GET
     if (config.method === 'get' && !config.headers['x-no-cache']) {
       const cacheKey = `${config.url}${JSON.stringify(config.params || {})}`;
       const cached = requestCache.get(cacheKey);
       
       if (cached && Date.now() - cached.timestamp < CACHE_DURATION) {
-        // Crear una respuesta simulada para datos cacheados
         const cachedResponse = {
           data: cached.data,
           status: 200,
@@ -40,7 +35,6 @@ api.interceptors.request.use(
           config,
         };
         
-        // Lanzar un error especial que será capturado por el interceptor de respuesta
         const error = new Error('CACHED_RESPONSE');
         (error as any).cachedResponse = cachedResponse;
         throw error;
@@ -52,10 +46,8 @@ api.interceptors.request.use(
   (error) => Promise.reject(error)
 );
 
-// Interceptor para guardar respuestas en cache
 api.interceptors.response.use(
   (response) => {
-    // Guardar en cache solo respuestas GET exitosas
     if (response.config.method === 'get' && response.status === 200) {
       const cacheKey = `${response.config.url}${JSON.stringify(response.config.params || {})}`;
       requestCache.set(cacheKey, {
@@ -66,7 +58,6 @@ api.interceptors.response.use(
     return response;
   },
   async (error) => {
-    // Si es una respuesta cacheados, retornarla
     if (error.message === 'CACHED_RESPONSE' && error.cachedResponse) {
       return error.cachedResponse;
     }
@@ -76,7 +67,6 @@ api.interceptors.response.use(
       error.response.data?.error === "Token expired"
     ) {
       try {
-        // Hacer request directo para refresh token
         const response = await axios.post(
           `${API_URL}/api/auth/refresh-token`,
           {},
@@ -102,12 +92,10 @@ api.interceptors.response.use(
   }
 );
 
-// Función para limpiar cache
 export const clearApiCache = () => {
   requestCache.clear();
 };
 
-// Función para invalidar cache específico
 export const invalidateCache = (url: string) => {
   for (const [key] of requestCache) {
     if (key.includes(url)) {

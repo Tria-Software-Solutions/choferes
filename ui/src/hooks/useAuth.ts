@@ -22,8 +22,29 @@ export const useAuth = () => {
         userPermissions
       );
       navigate("/roles");
-    } catch (error) {
-      setAuthError("Login failed. Please check your credentials.");
+    } catch (error: any) {
+      let errorMessage = "Error de autenticación";
+      
+      if (error.response?.data?.message) {
+        errorMessage = error.response.data.message;
+        
+        if (error.response.data.details) {
+          if (typeof error.response.data.details === 'string') {
+            errorMessage += `: ${error.response.data.details}`;
+          } else if (typeof error.response.data.details === 'object') {
+            const fieldErrors = Object.values(error.response.data.details)
+              .filter(Boolean)
+              .join(', ');
+            if (fieldErrors) {
+              errorMessage += `: ${fieldErrors}`;
+            }
+          }
+        }
+      } else if (error.message) {
+        errorMessage = error.message;
+      }
+      
+      setAuthError(errorMessage);
       throw error;
     }
   };

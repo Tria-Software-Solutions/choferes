@@ -46,3 +46,4 @@ router.get("/names/:names", authMiddleware_1.authenticateToken, permissionContro
 router.post("/", authMiddleware_1.authenticateToken, permissionController.createPermission);
 router.delete("/:id", authMiddleware_1.authenticateToken, permissionController.deletePermission);
 exports.default = router;
+//# sourceMappingURL=permissionRoutes.js.map

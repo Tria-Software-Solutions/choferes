@@ -47,3 +47,4 @@ WeeklySummary.init({
     tableName: "weekly_summary",
 });
 WeeklySummary.belongsTo(Employee_1.Employee, { foreignKey: "employeeId", onDelete: 'CASCADE' });
+//# sourceMappingURL=WeeklySummary.js.map

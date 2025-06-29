@@ -76,6 +76,3 @@ export const validateTokenFormat = (token: string): boolean => {
   return parts.length === 3;
 };
 
-// Commands to generate secret keys:
-// node -e "console.log('JWT_SECRET_KEY=' + require('crypto').randomBytes(32).toString('hex'))"
-// node -e "console.log('JWT_SECRET_KEY_REFRESH=' + require('crypto').randomBytes(32).toString('hex'))"

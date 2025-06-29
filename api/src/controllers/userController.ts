@@ -4,11 +4,54 @@ import * as userService from "../services/userService";
 export const authenticateUser = async (req: Request, res: Response) => {
   try {
     const { identifier, password } = req.body;
+    
+    if (!identifier || !password) {
+      return res.status(400).json({ 
+        message: "Credenciales incompletas",
+        details: {
+          identifier: !identifier ? "El usuario o email es requerido" : null,
+          password: !password ? "La contraseña es requerida" : null
+        }
+      });
+    }
+
     const { user, accessToken, refreshToken } =
       await userService.authenticateUser(identifier, password, res);
     return res.status(200).json({ user, accessToken, refreshToken });
-  } catch (error) {
-    return res.status(401).json({ message: "Error login User", error });
+  } catch (error: any) {
+    if (error.message === "User not found") {
+      return res.status(401).json({ 
+        message: "Usuario no encontrado",
+        details: "El usuario o email proporcionado no existe en el sistema"
+      });
+    }
+    
+    if (error.message === "User is inactive") {
+      return res.status(401).json({ 
+        message: "Usuario desactivado",
+        details: "Tu cuenta ha sido desactivada. Contacta al administrador"
+      });
+    }
+    
+    if (error.message === "Incorrect password") {
+      return res.status(401).json({ 
+        message: "Contraseña incorrecta",
+        details: "La contraseña proporcionada no es correcta"
+      });
+    }
+    
+    if (error.message === "Incorrect password and temporary password") {
+      return res.status(401).json({ 
+        message: "Credenciales incorrectas",
+        details: "Ni la contraseña principal ni la contraseña temporal son correctas"
+      });
+    }
+
+    console.error("Error en autenticación:", error);
+    return res.status(500).json({ 
+      message: "Error interno del servidor",
+      details: "Ocurrió un error inesperado durante la autenticación"
+    });
   }
 };
 
