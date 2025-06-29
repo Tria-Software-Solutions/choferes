@@ -39,7 +39,7 @@ import LogoutIcon from "@mui/icons-material/Logout";
 import wallpaper from "./assets/images/choferesblurred1.webp";
 
 const AppBarWrapper: React.FC = () => {
-  const { currentUser, userPermissions } = useAuthContext();
+  const { userPermissions } = useAuthContext();
   const { logoutUser } = useAuth();
 
   const theme = useTheme();
@@ -76,12 +76,6 @@ const AppBarWrapper: React.FC = () => {
       path: ROUTES.VEHICLES,
       permission: PERMISSIONS.VIEW_VEHICLES,
     },
-    {
-      label: APPBAR_MENU.DASHBOARD,
-      icon: <ManageAccountsIcon />,
-      path: ROUTES.DASHBOARD,
-      permission: PERMISSIONS.VIEW_ADMIN,
-    },
   ];
 
   const permissionsMap = {
@@ -90,32 +84,30 @@ const AppBarWrapper: React.FC = () => {
     [APPBAR_MENU.EMPLOYEES]: PERMISSIONS.VIEW_EMPLOYEES,
     [APPBAR_MENU.SCHEDULES]: PERMISSIONS.VIEW_SCHEDULES,
     [APPBAR_MENU.VEHICLES]: PERMISSIONS.VIEW_VEHICLES,
-    [APPBAR_MENU.DASHBOARD]: PERMISSIONS.VIEW_ADMIN,
   };
 
   const filteredLinks = links.filter((link) => {
     return (userPermissions || []).includes(permissionsMap[link.label]);
   });
 
-  const finalLinks = [
-    ...filteredLinks,
-    ...(currentUser
-      ? [
-          {
-            label: APPBAR_MENU.LOGOUT,
-            icon: <LogoutIcon />,
-            path: ROUTES.LOGIN,
-            onClick: logoutUser,
-          },
-        ]
-      : []),
-  ];
+  const finalLinks = filteredLinks;
 
   const userLinks = [
+    {
+      label: APPBAR_MENU.DASHBOARD,
+      icon: <ManageAccountsIcon />,
+      path: ROUTES.DASHBOARD,
+      permission: PERMISSIONS.VIEW_ADMIN,
+    },
     {
       label: APPBAR_MENU.SETTINGS,
       icon: <SettingsIcon />,
       path: ROUTES.SETTINGS,
+    },
+    {
+      label: APPBAR_MENU.LOGOUT,
+      icon: <LogoutIcon />,
+      onClick: logoutUser,
     },
   ];
 
