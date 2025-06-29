@@ -12,7 +12,6 @@ import {
 import SearchBar from "../../components/SearchBar/SearchBar";
 import CustomSpeedDial from "../../components/SpeedDial/CustomSpeedDial";
 import EditableTable from "../../components/Table/EditableTable/EditableTable";
-import ModalComponent from "../../components/Modal/ModalComponent";
 import AddEmployeeForm from "../../components/Forms/AddEmployeeForm";
 import { useAppNotifications } from "../../components/Snackbar/SnackbarWrapper";
 import ConfirmationDialog from "../../components/Dialog/ConfirmationDialog";
@@ -22,7 +21,6 @@ import {
   Box,
   Typography,
   Dialog,
-  DialogActions,
   DialogContent,
   DialogTitle,
   useTheme,
@@ -64,8 +62,6 @@ const EmployeesPage: React.FC = () => {
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(5);
   const [isEditFormValid, setIsEditFormValid] = useState(false);
-  const [openAddEmployeeModal, setOpenAddEmployeeModal] = useState(false);
-  const [isCreatingEmployee, setIsCreatingEmployee] = useState(false);
   const [isDeletingEmployee, setIsDeletingEmployee] = useState(false);
 
   const theme = useTheme();
@@ -394,20 +390,31 @@ const EmployeesPage: React.FC = () => {
         loading={isDeletingEmployee}
       />
     
-      <ModalComponent
-        buttonType="none"
+      <Dialog
         open={openAddModal}
-        onCloseModal={handleCloseAddModal}
-        modalTitle="Agregar Nuevo Empleado"
-        showActions={false}
+        onClose={handleCloseAddModal}
         maxWidth="md"
+        fullWidth
       >
-        <AddEmployeeForm
-          onSubmit={handleCreate}
-          onCancel={handleCloseAddModal}
-          isLoading={isSubmitting}
-        />
-      </ModalComponent>
+        <DialogTitle sx={{ 
+          backgroundColor: theme.palette.primary.main, 
+          color: theme.palette.primary.contrastText,
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between'
+        }}>
+          <Typography variant="h6" sx={{ fontWeight: 600 }}>
+            Agregar Nuevo Empleado
+          </Typography>
+        </DialogTitle>
+        <DialogContent sx={{ p: 3 }}>
+          <AddEmployeeForm
+            onSubmit={handleCreate}
+            onCancel={handleCloseAddModal}
+            isLoading={isSubmitting}
+          />
+        </DialogContent>
+      </Dialog>
     </Box>
   );
 };

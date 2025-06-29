@@ -26,10 +26,12 @@ import {
   TextField,
   Typography,
   useTheme,
+  Dialog,
+  DialogTitle,
+  DialogContent,
 } from "@mui/material";
 import EditableTable from "../../components/Table/EditableTable/EditableTable";
 import SearchBar from "../../components/SearchBar/SearchBar";
-import ModalComponent from "../../components/Modal/ModalComponent";
 import AddUserForm from "../../components/Forms/AddUserForm";
 import PersonAddAlt1RoundedIcon from "@mui/icons-material/PersonAddAlt1Rounded";
 import Visibility from "@mui/icons-material/Visibility";
@@ -428,10 +430,7 @@ const ManageUsers: React.FC<{ isExpanded?: boolean }> = ({ isExpanded = true }) 
     }
   }, [validateNewPasswordFields, passwordFields, dispatch, showNotification]);
 
-  const modalContentChangeUserPassword = useCallback((
-    id: number,
-    handleClose: () => void
-  ) => {
+  const handlePasswordModal = useCallback((id: number, handleClose: () => void) => {
     return (
       <Box sx={{ p: 2 }}>
         <Typography variant="h6" gutterBottom>
@@ -501,10 +500,6 @@ const ManageUsers: React.FC<{ isExpanded?: boolean }> = ({ isExpanded = true }) 
       </Box>
     );
   }, [showNewPassword, showConfirmNewPassword, passwordFields, handleNewPassword, handleConfirmNewPassword, handleToggleNewPassword, handleToggleConfirmNewPassword, error, isPasswordFormValid, handleChangePassword]);
-
-  const handlePasswordModal = useCallback((id: number, handleClose: () => void) => {
-    return modalContentChangeUserPassword(id, handleClose);
-  }, [modalContentChangeUserPassword]);
 
   const handleOpenAddUserModal = useCallback(() => {
     setOpenAddUserModal(true);
@@ -782,19 +777,32 @@ const ManageUsers: React.FC<{ isExpanded?: boolean }> = ({ isExpanded = true }) 
         loading={isUpdatingUserStatus}
       />
       
-      <ModalComponent
-        buttonType="none"
+      <Dialog
         open={openAddUserModal}
-        onCloseModal={handleCloseAddUserModal}
-        modalTitle="Agregar Usuario"
+        onClose={handleCloseAddUserModal}
+        maxWidth="md"
+        fullWidth
       >
-        <AddUserForm
-          onSubmit={handleCreateUser}
-          onCancel={handleCloseAddUserModal}
-          isLoading={isCreatingUser}
-          roles={roles}
-        />
-      </ModalComponent>
+        <DialogTitle sx={{ 
+          backgroundColor: theme.palette.primary.main, 
+          color: theme.palette.primary.contrastText,
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between'
+        }}>
+          <Typography variant="h6" sx={{ fontWeight: 600 }}>
+            Agregar Usuario
+          </Typography>
+        </DialogTitle>
+        <DialogContent sx={{ p: 3 }}>
+          <AddUserForm
+            onSubmit={handleCreateUser}
+            onCancel={handleCloseAddUserModal}
+            isLoading={isCreatingUser}
+            roles={roles}
+          />
+        </DialogContent>
+      </Dialog>
     </Box>
   );
 };

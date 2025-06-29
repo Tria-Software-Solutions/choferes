@@ -12,7 +12,6 @@ import {
 import SearchBar from "../../components/SearchBar/SearchBar";
 import EditableTable from "../../components/Table/EditableTable/EditableTable";
 import CustomSpeedDial from "../../components/SpeedDial/CustomSpeedDial";
-import ModalComponent from "../../components/Modal/ModalComponent";
 import AddVehicleForm from "../../components/Forms/AddVehicleForm";
 import { useAppNotifications } from "../../components/Snackbar/SnackbarWrapper";
 import ConfirmationDialog from "../../components/Dialog/ConfirmationDialog";
@@ -26,7 +25,6 @@ import {
   Dialog,
   DialogTitle,
   DialogContent,
-  DialogActions,
   CircularProgress,
   Backdrop,
   Tooltip,
@@ -637,20 +635,33 @@ const VehiclesPage: React.FC = () => {
         cancelText="Cancelar"
         loading={isDeletingVehicle}
       />
-      <ModalComponent
-        buttonType="none"
+      <Dialog
         open={openAddVehicleModal}
-        onCloseModal={handleCloseAddVehicleModal}
-        modalTitle="Agregar Vehículo"
+        onClose={handleCloseAddVehicleModal}
+        maxWidth="md"
+        fullWidth
       >
-        <AddVehicleForm
-          onSubmit={handleCreateVehicle}
-          onCancel={handleCloseAddVehicleModal}
-          isLoading={isCreatingVehicle}
-          existingVehicles={allVehicles.map(v => ({ ticket: v.ticket, licensePlate: v.licensePlate }))}
-          getNextTicketNumber={getNextTicketNumber}
-        />
-      </ModalComponent>
+        <DialogTitle sx={{ 
+          backgroundColor: theme.palette.primary.main, 
+          color: theme.palette.primary.contrastText,
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between'
+        }}>
+          <Typography variant="h6" sx={{ fontWeight: 600 }}>
+            Agregar Vehículo
+          </Typography>
+        </DialogTitle>
+        <DialogContent sx={{ p: 3 }}>
+          <AddVehicleForm
+            onSubmit={handleCreateVehicle}
+            onCancel={handleCloseAddVehicleModal}
+            isLoading={isCreatingVehicle}
+            existingVehicles={allVehicles.map(v => ({ ticket: v.ticket, licensePlate: v.licensePlate }))}
+            getNextTicketNumber={getNextTicketNumber}
+          />
+        </DialogContent>
+      </Dialog>
     </Box>
   );
 };
