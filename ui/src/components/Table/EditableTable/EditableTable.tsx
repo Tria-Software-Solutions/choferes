@@ -72,7 +72,7 @@ type EditableTableProps<T> = {
   handleUpdate?: (id: number) => void;
   handleOpenDeleteDialog?: (id: number) => void;
   handleOpenStatusDialog?: (row: any) => void;
-  handlePasswordModal?: (id: number, handleClose: () => void) => void;
+  handlePasswordModal?: (id: number, handleClose: () => void) => React.ReactNode;
   getRowId: (row: T) => number;
   totalCount: number;
   page: number;
@@ -687,7 +687,24 @@ const EditableTable = <T extends object>({
                                 )}
                               </Stack>
                             ) : (
-                              <Typography component="span">{String(row[column] ?? "")}</Typography>
+                              column === "email" ? (
+                                <Typography 
+                                  component="a" 
+                                  href={`mailto:${String(row[column] ?? "")}`}
+                                  sx={{
+                                    color: theme.palette.primary.main,
+                                    textDecoration: 'none',
+                                    cursor: 'pointer',
+                                    '&:hover': {
+                                      textDecoration: 'underline',
+                                    },
+                                  }}
+                                >
+                                  {String(row[column] ?? "")}
+                                </Typography>
+                              ) : (
+                                <Typography component="span">{String(row[column] ?? "")}</Typography>
+                              )
                             )
                           )}
                         </TableCell>
@@ -753,10 +770,9 @@ const EditableTable = <T extends object>({
                                     modalTooltip="Cambiar Contraseña"
                                     modalTitle="Cambiar Contraseña"
                                   >
-                                    {({ handleClose }) => {
-                                      handlePasswordModal(getRowId(row), handleClose);
-                                      return <></>;
-                                    }}
+                                    {({ handleClose }) => 
+                                      handlePasswordModal(getRowId(row), handleClose)
+                                    }
                                   </ModalComponent>
                                 )}
                                 <Tooltip title="Editar" arrow>
