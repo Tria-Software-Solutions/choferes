@@ -93,15 +93,35 @@ const ManagePermissions: React.FC = () => {
           <br />
           {filteredPermissions.length > 0 ? (
             <Grid container spacing={2}>
-              {[leftColumn, rightColumn].map((column, index) => (
-                <Grid item xs={6} key={index}>
-                  <List>
-                    {column.map((permission) => (
-                      <ListItem key={permission.id}>
-                        <ListItemText secondary={permission.name} />
-                      </ListItem>
-                    ))}
-                  </List>
+              {filteredPermissions.map((permission) => (
+                <Grid item xs={12} sm={6} md={3} lg={3} key={permission.id}>
+                  <Box
+                    sx={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      p: 1.2,
+                      borderRadius: 1,
+                      backgroundColor: 'background.paper',
+                      border: '1px solid',
+                      borderColor: 'divider',
+                      boxShadow: 'none',
+                      cursor: 'default',
+                      minHeight: 36,
+                    }}
+                  >
+                    <Box sx={{
+                      mr: 1,
+                      color: 'primary.main',
+                      fontSize: 18,
+                      display: 'flex',
+                      alignItems: 'center',
+                    }}>
+                      <span role="img" aria-label="permiso">🔑</span>
+                    </Box>
+                    <Typography variant="body2" fontWeight={400} color="text.primary" noWrap>
+                      {permission.name}
+                    </Typography>
+                  </Box>
                 </Grid>
               ))}
             </Grid>
