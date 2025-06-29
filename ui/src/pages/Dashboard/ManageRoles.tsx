@@ -23,7 +23,6 @@ import {
   Chip,
   Stack,
   useTheme,
-  useMediaQuery,
   Dialog,
   DialogTitle,
   DialogContent,
