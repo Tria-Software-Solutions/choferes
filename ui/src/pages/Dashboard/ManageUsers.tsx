@@ -718,6 +718,7 @@ const ManageUsers: React.FC<{ isExpanded?: boolean }> = ({ isExpanded = true }) 
             </DialogActions>
           </Dialog>
           <ModalComponent
+            buttonType="none"
             open={openAddUserModal}
             onCloseModal={handleCloseAddUserModal}
             modalTitle="Agregar Usuario"
