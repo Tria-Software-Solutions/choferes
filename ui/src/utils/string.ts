@@ -28,6 +28,11 @@ export const translateColumnHeaderToSpanish = (
     updatedAt: "Actualizado",
     roleName: "Rol",
     permissionNames: "Permisos",
+    driver: "Chofer",
+    route: "Ruta",
+    distance: "Distancia",
+    trackingNumber: "N. de Guía",
+    status: "Estado",
     createdAt: "",
   };
 

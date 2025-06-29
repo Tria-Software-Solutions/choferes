@@ -94,6 +94,9 @@ const AppBarWrapper: React.FC = () => {
   };
 
   const filteredLinks = links.filter((link) => {
+    if (link.label === APPBAR_MENU.COURIER_SERVICE) {
+      return true;
+    }
     return (userPermissions || []).includes(permissionsMap[link.label]);
   });
 
@@ -173,15 +176,7 @@ const AppContent: React.FC = () => {
           <Route element={<ProtectedRoute />}>
             <Route
               path="/courier-service"
-              element={
-                safeUserPermissions.includes(
-                  PERMISSIONS.VIEW_COURIER_SERVICE
-                ) ? (
-                  <CourierServicePage />
-                ) : (
-                  <Forbidden />
-                )
-              }
+              element={<CourierServicePage />}
             />
             <Route
               path="/roles"

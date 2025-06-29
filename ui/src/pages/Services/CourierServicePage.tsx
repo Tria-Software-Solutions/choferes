@@ -11,19 +11,14 @@ import {
   useTheme,
   useMediaQuery,
   Grid,
-  TextField,
   Tooltip,
   Button,
   Dialog,
   DialogTitle,
   DialogContent,
   DialogActions,
-  FormControl,
   CircularProgress,
   Backdrop,
-  InputLabel,
-  Select,
-  MenuItem,
 } from "@mui/material";
 import { LocalizationProvider } from "@mui/x-date-pickers";
 import { DatePicker } from "@mui/x-date-pickers/DatePicker";
@@ -40,7 +35,7 @@ import {
 import { capitalizeFirstLetter } from "../../utils/string";
 import {
   PAGE_TITLE,
-  PERMISSIONS,
+  // PERMISSIONS,
 } from "../../constants/constants";
 import LocalShippingIcon from "@mui/icons-material/LocalShipping";
 import DownloadRoundedIcon from "@mui/icons-material/DownloadRounded";
@@ -52,6 +47,9 @@ import ManageSearchIcon from "@mui/icons-material/ManageSearch";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faFileExcel, faFilePdf } from "@fortawesome/free-solid-svg-icons";
 import { Courier } from "../../models/Courier";
+import EditableTable from "../../components/Table/EditableTable/EditableTable";
+import ModalComponent from "../../components/Modal/ModalComponent";
+import AddCourierForm from "../../components/Forms/AddCourierForm";
 
 const CourierServicePage: React.FC = () => {
   const { userPermissions } = useAuthContext();
@@ -60,19 +58,66 @@ const CourierServicePage: React.FC = () => {
     (state: RootState) => state.vehicles
   );
   const { showNotification } = useAppNotifications();
-  const [filteredCouriers, /*setFilteredCouriers*/] = useState<Courier[]>([]);
-  const [filteredWeekCouriers, /*setFilteredWeekCouriers*/] = useState<Courier[]>(
-    []
-  );
+  const [filteredCouriers, setFilteredCouriers] = useState<Courier[]>([
+    {
+      id: 1,
+      driver: "Juan Pérez",
+      route: "GAM",
+      distance: 45,
+      trackingNumber: "TRK001",
+      status: "Despachado",
+      createdAt: new Date(),
+    },
+    {
+      id: 2,
+      driver: "María García",
+      route: "GAM Express",
+      distance: 30,
+      trackingNumber: "TRK002",
+      status: "En Tránsito",
+      createdAt: new Date(),
+    },
+    {
+      id: 3,
+      driver: "Carlos López",
+      route: "Rural",
+      distance: 80,
+      trackingNumber: "TRK003",
+      status: "Entregado",
+      createdAt: new Date(),
+    },
+  ]);
+  const [filteredWeekCouriers, setFilteredWeekCouriers] = useState<Courier[]>([
+    {
+      id: 1,
+      driver: "Juan Pérez",
+      route: "GAM",
+      distance: 45,
+      trackingNumber: "TRK001",
+      status: "Despachado",
+      createdAt: new Date(),
+    },
+    {
+      id: 2,
+      driver: "María García",
+      route: "GAM Express",
+      distance: 30,
+      trackingNumber: "TRK002",
+      status: "En Tránsito",
+      createdAt: new Date(),
+    },
+    {
+      id: 3,
+      driver: "Carlos López",
+      route: "Rural",
+      distance: 80,
+      trackingNumber: "TRK003",
+      status: "Entregado",
+      createdAt: new Date(),
+    },
+  ]);
   const [editRowId, setEditRowId] = useState<number | null>(null);
-  const [addFields, /*setAddFields*/] = useState({
-    driver: "",
-    route: "",
-    distance: 0,
-    trackingNumber: "",
-    status: "",
-  });
-  const [editFields, /*setEditFields*/] = useState({
+  const [editFields, setEditFields] = useState({
     driver: "",
     route: "",
     distance: 0,
@@ -83,14 +128,19 @@ const CourierServicePage: React.FC = () => {
   const [openDeleteDialog, setOpenDeleteDialog] = useState(false);
   const [courierToDelete, setCourierToDelete] = useState<number | null>(null);
   const [filter, setFilter] = useState("");
-  const [/*page*/, setPage] = useState(0);
-  const [/*rowsPerPage*/, setRowsPerPage] = useState(5);
-  const [isAddFormValid, setIsAddFormValid] = useState(false);
-  const [/*isEditFormValid*/, setIsEditFormValid] = useState(false);
+  const [page, setPage] = useState(0);
+  const [rowsPerPage, setRowsPerPage] = useState(5);
+  const [totalCount, setTotalCount] = useState(0);
+  const [isEditFormValid, setIsEditFormValid] = useState(false);
+  const [openAddCourierModal, setOpenAddCourierModal] = useState(false);
+  const [isCreatingCourier, setIsCreatingCourier] = useState(false);
 
   const theme = useTheme();
   const isSmallScreen = useMediaQuery(theme.breakpoints.down("sm"));
 
+  useEffect(() => {
+    setTotalCount(filteredCouriers.length);
+  }, [filteredCouriers]);
 
   useEffect(() => {
     if (isSmallScreen) {
@@ -100,14 +150,11 @@ const CourierServicePage: React.FC = () => {
     }
   }, [isSmallScreen]);
 
+  useEffect(() => {
+    setPage(0);
+  }, [selectedDate]);
 
-
-
-
-
-
-
-  const validateFields = useCallback((fields: typeof addFields) => {
+  const validateFields = useCallback((fields: typeof editFields) => {
     const regex = {
       number: /^\d+$/,
       text: /^(?:[a-zA-ZáéíóúÁÉÍÓÚñÑüÜëË\s-]+|nulo|n\/a)$/i,
@@ -122,18 +169,9 @@ const CourierServicePage: React.FC = () => {
     );
   }, []);
 
-  useEffect(
-    () => setIsAddFormValid(validateFields(addFields)),
-    [addFields, validateFields]
-  );
-
   useEffect(() => {
     if (editRowId !== null) setIsEditFormValid(validateFields(editFields));
   }, [editFields, editRowId, validateFields]);
-
-  useEffect(() => {
-    setPage(0);
-  }, [selectedDate]);
 
   const handleFilterChange = useCallback(
     (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -142,13 +180,47 @@ const CourierServicePage: React.FC = () => {
     []
   );
 
-
-
   const handleCancel = () => {
     setEditRowId(null);
   };
 
+  const handleEdit = (courier: Courier) => {
+    setEditRowId(courier.id);
+    setEditFields({
+      driver: courier.driver,
+      route: courier.route,
+      distance: courier.distance,
+      trackingNumber: courier.trackingNumber,
+      status: courier.status,
+      createdAt: courier.createdAt,
+    });
+  };
 
+  const handleUpdate = async (id: number) => {
+    try {
+      // TODO: Implementar actualización cuando se conecte con el backend
+      showNotification(
+        "La actualización del servicio fue exitosa",
+        "success",
+        3000,
+        false
+      );
+      setEditRowId(null);
+    } catch (error) {
+      console.error(error);
+      showNotification(
+        "Ha ocurrido un error al actualizar el servicio",
+        "error",
+        5000,
+        false
+      );
+    }
+  };
+
+  const handleOpenDeleteDialog = (id: number) => {
+    setCourierToDelete(id);
+    setOpenDeleteDialog(true);
+  };
 
   const handleCloseDeleteDialog = () => {
     setOpenDeleteDialog(false);
@@ -201,14 +273,8 @@ const CourierServicePage: React.FC = () => {
   };
 
   const exportOptions = useMemo(() => {
-    const excelOption = userPermissions.includes(
-      PERMISSIONS.EXPORT_EXCEL_VEHICLES
-    )
-      ? exportToExcel
-      : undefined;
-    const pdfOption = userPermissions.includes(PERMISSIONS.EXPORT_PDF_VEHICLES)
-      ? exportToPDF
-      : undefined;
+    const excelOption = exportToExcel;
+    const pdfOption = exportToPDF;
     return createExportOptions(
       <FontAwesomeIcon icon={faFileExcel} size="lg" />,
       <FontAwesomeIcon icon={faFilePdf} size="lg" />,
@@ -219,7 +285,57 @@ const CourierServicePage: React.FC = () => {
         selectedDate || new Date()
       )}`
     );
-  }, [userPermissions, filteredWeekCouriers, selectedDate]);
+  }, [filteredWeekCouriers, selectedDate]);
+
+  const handleOpenAddCourierModal = () => {
+    setOpenAddCourierModal(true);
+  };
+
+  const handleCloseAddCourierModal = () => {
+    setOpenAddCourierModal(false);
+  };
+
+  const handleCreateCourier = async (courierData: {
+    driver: string;
+    route: string;
+    distance: number;
+    trackingNumber: string;
+    status: string;
+  }) => {
+    setIsCreatingCourier(true);
+    try {
+      const newCourier: Courier = {
+        id: Math.max(...filteredCouriers.map(c => c.id)) + 1,
+        driver: courierData.driver,
+        route: courierData.route,
+        distance: courierData.distance,
+        trackingNumber: courierData.trackingNumber,
+        status: courierData.status,
+        createdAt: new Date(),
+      };
+      
+      setFilteredCouriers([...filteredCouriers, newCourier]);
+      setFilteredWeekCouriers([...filteredWeekCouriers, newCourier]);
+      
+      setOpenAddCourierModal(false);
+      showNotification(
+        "Servicio de mensajería creado exitosamente",
+        "success",
+        3000,
+        false
+      );
+    } catch (error) {
+      console.error("Error creating courier:", error);
+      showNotification(
+        "Error al crear el servicio de mensajería",
+        "error",
+        5000,
+        false
+      );
+    } finally {
+      setIsCreatingCourier(false);
+    }
+  };
 
   return (
     <Box>
@@ -242,19 +358,17 @@ const CourierServicePage: React.FC = () => {
             </Typography>
           </Box>
         </Box>
-        {userPermissions.includes(PERMISSIONS.EXPORT_EXCEL_VEHICLES) &&
-          userPermissions.includes(PERMISSIONS.EXPORT_PDF_VEHICLES) && (
-            <Box sx={{ minHeight: 65 }}>
-              {filteredWeekCouriers.length > 0 && (
-                <CustomSpeedDial
-                  actions={exportOptions}
-                  mainIcon={<DownloadRoundedIcon />}
-                  openIcon={<CloseRoundedIcon />}
-                  direction="left"
-                />
-              )}
-            </Box>
+        {/* Temporalmente mostrar botón de exportación sin verificar permisos */}
+        <Box sx={{ minHeight: 65 }}>
+          {filteredWeekCouriers.length > 0 && (
+            <CustomSpeedDial
+              actions={exportOptions}
+              mainIcon={<DownloadRoundedIcon />}
+              openIcon={<CloseRoundedIcon />}
+              direction="left"
+            />
           )}
+        </Box>
       </Box>
       {isLoadingVehicles ? (
         <Box
@@ -281,7 +395,7 @@ const CourierServicePage: React.FC = () => {
             justifyContent="space-between"
             alignItems="center"
           >
-            <Grid item xs={12} md={6}>
+            <Grid item xs={12} md={4}>
               {filteredCouriers && (
                 <SearchBar
                   placeholder="Buscar servicio"
@@ -294,65 +408,58 @@ const CourierServicePage: React.FC = () => {
                 />
               )}
             </Grid>
-            <Grid item xs={12} md={6}>
+            <Grid item xs={12} md={8}>
               <Box
                 display="flex"
                 flexDirection={{ xs: "column", sm: "column", md: "row" }}
-                alignItems="flex-start"
+                alignItems={{ xs: "stretch", sm: "stretch", md: "center" }}
                 justifyContent="flex-end"
                 gap={2}
               >
                 <Box
                   display="flex"
-                  flexDirection={{ xs: "row", sm: "row", md: "row" }}
+                  flexDirection="row"
                   alignItems="center"
-                  justifyContent="flex-end"
-                  gap={2}
-                  width="100%"
+                  justifyContent="center"
+                  gap={1}
                 >
                   <Tooltip title="Día Anterior" arrow>
-                    <Box>
-                      <Button
-                        variant="contained"
-                        sx={{
-                          height: "56px",
-                          width: { xs: "auto", sm: "auto", md: "auto" },
-                        }}
-                        onClick={handlePreviousDate}
-                      >
-                        <ArrowBackIosNewRoundedIcon />
-                      </Button>
-                    </Box>
+                    <Button
+                      variant="contained"
+                      sx={{
+                        height: "56px",
+                        minWidth: "56px",
+                      }}
+                      onClick={handlePreviousDate}
+                    >
+                      <ArrowBackIosNewRoundedIcon />
+                    </Button>
                   </Tooltip>
                   <Tooltip title="Día Siguiente" arrow>
-                    <Box>
-                      <Button
-                        variant="contained"
-                        sx={{
-                          height: "56px",
-                          width: { xs: "auto", sm: "auto", md: "auto" },
-                        }}
-                        disabled={isTodayOrFuture(selectedDate)}
-                        onClick={handleNextDate}
-                      >
-                        <ArrowForwardIosRoundedIcon />
-                      </Button>
-                    </Box>
+                    <Button
+                      variant="contained"
+                      sx={{
+                        height: "56px",
+                        minWidth: "56px",
+                      }}
+                      disabled={isTodayOrFuture(selectedDate)}
+                      onClick={handleNextDate}
+                    >
+                      <ArrowForwardIosRoundedIcon />
+                    </Button>
                   </Tooltip>
                   <Tooltip title="Día Actual" arrow>
-                    <Box>
-                      <Button
-                        variant="contained"
-                        sx={{
-                          height: "56px",
-                          width: { xs: "auto", sm: "auto", md: "auto" },
-                        }}
-                        disabled={isTodayOrFuture(selectedDate)}
-                        onClick={handleCurrentDate}
-                      >
-                        <CalendarTodayRoundedIcon />
-                      </Button>
-                    </Box>
+                    <Button
+                      variant="contained"
+                      sx={{
+                        height: "56px",
+                        minWidth: "56px",
+                      }}
+                      disabled={isTodayOrFuture(selectedDate)}
+                      onClick={handleCurrentDate}
+                    >
+                      <CalendarTodayRoundedIcon />
+                    </Button>
                   </Tooltip>
                 </Box>
                 <LocalizationProvider
@@ -363,8 +470,7 @@ const CourierServicePage: React.FC = () => {
                     label="Seleccionar fecha"
                     value={selectedDate || null}
                     sx={{
-                      width: { xs: "100%", sm: "100%", md: "auto" },
-                      mt: { xs: 2, sm: 2, md: 0 },
+                      width: { xs: "100%", sm: "100%", md: "200px" },
                     }}
                     maxDate={new Date()}
                     views={["year", "month", "day"]}
@@ -384,113 +490,30 @@ const CourierServicePage: React.FC = () => {
                     onChange={(date) => handleDateChange(date)}
                   />
                 </LocalizationProvider>
+                <Button
+                  variant="contained"
+                  startIcon={<LocalShippingIcon />}
+                  onClick={handleOpenAddCourierModal}
+                  sx={{
+                    px: 4,
+                    py: 2,
+                    fontSize: '1rem',
+                    fontWeight: 600,
+                    height: 56,
+                    minWidth: { xs: '100%', sm: '100%', md: 'auto' },
+                    boxShadow: 2,
+                    '&:hover': {
+                      boxShadow: 4,
+                    },
+                  }}
+                >
+                  Agregar Servicio
+                </Button>
               </Box>
             </Grid>
-            {userPermissions.includes(PERMISSIONS.CREATE_VEHICLES) && (
-              <Grid item xs={12} md={12}>
-                <Box
-                  display="flex"
-                  flexDirection={{ xs: "column", sm: "column", md: "row" }}
-                  alignItems="center"
-                  justifyContent="flex-end"
-                  gap={2}
-                >
-                  <Grid container spacing={2} alignItems="center">
-                    <Grid item xs={12} md={3}>
-                      <TextField
-                        label="Chofer"
-                        variant="outlined"
-                        fullWidth
-                        value={addFields.driver}
-                      />
-                    </Grid>
-                    <Grid item xs={6} md={2}>
-                      <FormControl
-                        variant="outlined"
-                        fullWidth
-                        sx={{
-                          height: 56,
-                        }}
-                      >
-                        <InputLabel>Ruta</InputLabel>
-                        <Select
-                          label="Ruta"
-                          sx={{ height: 56 }}
-                          value={addFields.route}
-                        >
-                          <MenuItem value={10}>GAM</MenuItem>
-                          <MenuItem value={20}>GAM Express</MenuItem>
-                          <MenuItem value={30}>Rural</MenuItem>
-                        </Select>
-                      </FormControl>
-                    </Grid>
-                    <Grid item xs={6} md={3}>
-                      <TextField
-                        label="Kilómetros"
-                        variant="outlined"
-                        fullWidth
-                        value={addFields.distance}
-                      />
-                    </Grid>
-                    <Grid item xs={6} md={2}>
-                      <TextField
-                        label="Número de guía"
-                        variant="outlined"
-                        fullWidth
-                        value={addFields.trackingNumber}
-                      />
-                    </Grid>
-                    <Grid item xs={6} md={2}>
-                      <FormControl
-                        variant="outlined"
-                        fullWidth
-                        sx={{
-                          height: 56,
-                        }}
-                      >
-                        <InputLabel>Estado</InputLabel>
-                        <Select
-                          label="Estado"
-                          sx={{ height: 56 }}
-                          value={addFields.status}
-                        >
-                          <MenuItem value={10}>Despachado</MenuItem>
-                          <MenuItem value={20}>En Tránsito</MenuItem>
-                          <MenuItem value={30}>Entregado</MenuItem>
-                        </Select>
-                      </FormControl>
-                    </Grid>
-                  </Grid>
-                  <Tooltip title="Agregar Servicio" arrow>
-                    <Box
-                      sx={{
-                        width: { xs: "100%", md: "auto" },
-                        display: "flex",
-                        justifyContent: { xs: "stretch", md: "flex-end" },
-                      }}
-                    >
-                      <Button
-                        variant="contained"
-                        color="primary"
-                        sx={{
-                          minHeight: 56,
-                          display: "flex",
-                          justifyContent: "center",
-                          lineHeight: "normal",
-                          width: { xs: "100%", md: "auto" },
-                        }}
-                        disabled={!isAddFormValid}
-                      >
-                        <LocalShippingIcon />
-                      </Button>
-                    </Box>
-                  </Tooltip>
-                </Box>
-              </Grid>
-            )}
           </Grid>
           <br />
-          {/* {filteredCouriers.length > 0 ? (
+          {filteredCouriers.length > 0 ? (
             <EditableTable<Courier>
               data={filteredCouriers}
               columns={[
@@ -499,7 +522,6 @@ const CourierServicePage: React.FC = () => {
                 "distance",
                 "trackingNumber",
                 "status",
-                "createdAt",
               ]}
               groupByDate={selectedDate}
               editRowId={editRowId}
@@ -518,9 +540,9 @@ const CourierServicePage: React.FC = () => {
               setPage={setPage}
               setRowsPerPage={setRowsPerPage}
               isSaveDisabled={!isEditFormValid}
-              userPermissions={userPermissions}
+              userPermissions={userPermissions || []}
             />
-          ) : ( */}
+          ) : (
             <Box
               sx={{
                 display: "flex",
@@ -544,7 +566,7 @@ const CourierServicePage: React.FC = () => {
                 No se encontraron servicios de mensajería para mostrar.
               </Typography>
             </Box>
-          {/* )} */}
+          )}
         </>
       )}
       <Dialog open={openDeleteDialog} onClose={handleCloseDeleteDialog}>
@@ -567,6 +589,18 @@ const CourierServicePage: React.FC = () => {
           </Button>
         </DialogActions>
       </Dialog>
+      <ModalComponent
+        buttonType="none"
+        open={openAddCourierModal}
+        onCloseModal={handleCloseAddCourierModal}
+        modalTitle="Agregar Servicio de Mensajería"
+      >
+        <AddCourierForm
+          onSubmit={handleCreateCourier}
+          onCancel={handleCloseAddCourierModal}
+          isLoading={isCreatingCourier}
+        />
+      </ModalComponent>
     </Box>
   );
 };
