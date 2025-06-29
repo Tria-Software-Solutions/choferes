@@ -1,38 +1,30 @@
 "use strict";
-var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
-    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
-    return new (P || (P = Promise))(function (resolve, reject) {
-        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
-        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
-        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
-        step((generator = generator.apply(thisArg, _arguments || [])).next());
-    });
-};
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.deleteBiweeklySummary = exports.updateBiweeklySummary = exports.createBiweeklySummary = exports.getCurrentBiweeklySummary = exports.getBiweeklySummaries = void 0;
 const BiweeklySummary_1 = require("../models/BiweeklySummary");
-const getBiweeklySummaries = () => __awaiter(void 0, void 0, void 0, function* () {
+const getBiweeklySummaries = async () => {
     return BiweeklySummary_1.BiweeklySummary.findAll();
-});
+};
 exports.getBiweeklySummaries = getBiweeklySummaries;
-const getCurrentBiweeklySummary = (employeeId, biweekNumber, month, year) => __awaiter(void 0, void 0, void 0, function* () {
+const getCurrentBiweeklySummary = async (employeeId, biweekNumber, month, year) => {
     return BiweeklySummary_1.BiweeklySummary.findOne({
         where: { employeeId, biweekNumber, month, year },
     });
-});
+};
 exports.getCurrentBiweeklySummary = getCurrentBiweeklySummary;
-const createBiweeklySummary = (data) => __awaiter(void 0, void 0, void 0, function* () {
-    const newBiweeklySummary = yield BiweeklySummary_1.BiweeklySummary.create(data);
-    yield newBiweeklySummary.reload();
+const createBiweeklySummary = async (data) => {
+    const newBiweeklySummary = await BiweeklySummary_1.BiweeklySummary.create(data);
+    await newBiweeklySummary.reload();
     return newBiweeklySummary;
-});
+};
 exports.createBiweeklySummary = createBiweeklySummary;
-const updateBiweeklySummary = (id, data) => __awaiter(void 0, void 0, void 0, function* () {
-    yield BiweeklySummary_1.BiweeklySummary.update(data, { where: { id } });
+const updateBiweeklySummary = async (id, data) => {
+    await BiweeklySummary_1.BiweeklySummary.update(data, { where: { id } });
     return BiweeklySummary_1.BiweeklySummary.findByPk(id);
-});
+};
 exports.updateBiweeklySummary = updateBiweeklySummary;
-const deleteBiweeklySummary = (id) => __awaiter(void 0, void 0, void 0, function* () {
+const deleteBiweeklySummary = async (id) => {
     return BiweeklySummary_1.BiweeklySummary.destroy({ where: { id } });
-});
+};
 exports.deleteBiweeklySummary = deleteBiweeklySummary;
+//# sourceMappingURL=biweeklySummaryService.js.map

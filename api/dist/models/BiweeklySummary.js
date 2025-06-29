@@ -47,3 +47,4 @@ BiweeklySummary.init({
     tableName: "biweekly_summary",
 });
 BiweeklySummary.belongsTo(Employee_1.Employee, { foreignKey: "employeeId", onDelete: 'CASCADE' });
+//# sourceMappingURL=BiweeklySummary.js.map

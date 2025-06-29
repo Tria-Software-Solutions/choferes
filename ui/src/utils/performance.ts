@@ -1,6 +1,4 @@
-// Utilidades para optimización de performance
 
-// Debounce function para evitar llamadas excesivas
 export const debounce = <T extends (...args: any[]) => any>(
   func: T,
   wait: number
@@ -12,7 +10,6 @@ export const debounce = <T extends (...args: any[]) => any>(
   };
 };
 
-// Throttle function para limitar la frecuencia de ejecución
 export const throttle = <T extends (...args: any[]) => any>(
   func: T,
   limit: number
@@ -27,7 +24,6 @@ export const throttle = <T extends (...args: any[]) => any>(
   };
 };
 
-// Memoización simple para funciones costosas
 export const memoize = <T extends (...args: any[]) => any>(
   func: T,
   resolver?: (...args: Parameters<T>) => string
@@ -47,14 +43,12 @@ export const memoize = <T extends (...args: any[]) => any>(
   }) as T;
 };
 
-// Lazy loading para componentes
 export const lazyLoad = (importFunc: () => Promise<any>) => {
   return new Promise((resolve) => {
     const timer = setTimeout(() => {
       importFunc().then(resolve);
     }, 100); // Pequeño delay para evitar bloqueo del UI
     
-    // Si el usuario interactúa antes del delay, cargar inmediatamente
     const handleInteraction = () => {
       clearTimeout(timer);
       importFunc().then(resolve);
@@ -69,7 +63,6 @@ export const lazyLoad = (importFunc: () => Promise<any>) => {
   });
 };
 
-// Optimización de listas virtuales
 export const createVirtualListConfig = (
   itemHeight: number,
   containerHeight: number,
@@ -98,7 +91,6 @@ export const createVirtualListConfig = (
   };
 };
 
-// Optimización de imágenes
 export const preloadImage = (src: string): Promise<void> => {
   return new Promise((resolve, reject) => {
     const img = new Image();
@@ -108,14 +100,12 @@ export const preloadImage = (src: string): Promise<void> => {
   });
 };
 
-// Optimización de fuentes
 export const preloadFont = (fontFamily: string, fontWeight: string = 'normal') => {
   if ('fonts' in document) {
     (document as any).fonts.load(`${fontWeight} 16px ${fontFamily}`);
   }
 };
 
-// Medición de performance
 export const measurePerformance = <T extends (...args: any[]) => any>(
   name: string,
   func: T
@@ -133,13 +123,11 @@ export const measurePerformance = <T extends (...args: any[]) => any>(
   };
 };
 
-// Limpieza de memoria
 export const cleanupMemory = () => {
   if ('gc' in window) {
     (window as any).gc();
   }
   
-  // Limpiar caches de imágenes
   if ('caches' in window) {
     caches.keys().then(names => {
       names.forEach(name => {
@@ -151,7 +139,6 @@ export const cleanupMemory = () => {
   }
 };
 
-// Configuración de Intersection Observer para lazy loading
 export const createIntersectionObserver = (
   callback: IntersectionObserverCallback,
   options: IntersectionObserverInit = {}

@@ -41,3 +41,4 @@ const healthController = __importStar(require("../controllers/healtController"))
 const router = express_1.default.Router();
 router.get("/", healthController.healthCheck);
 exports.default = router;
+//# sourceMappingURL=healthRoutes.js.map

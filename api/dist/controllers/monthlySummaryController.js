@@ -32,21 +32,12 @@ var __importStar = (this && this.__importStar) || (function () {
         return result;
     };
 })();
-var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
-    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
-    return new (P || (P = Promise))(function (resolve, reject) {
-        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
-        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
-        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
-        step((generator = generator.apply(thisArg, _arguments || [])).next());
-    });
-};
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.deleteMonthlySummary = exports.updateMonthlySummary = exports.createMonthlySummary = exports.getCurrentMonthlySummary = exports.getMonthlySummaries = void 0;
 const monthlySummaryService = __importStar(require("../services/monthlySummaryService"));
-const getMonthlySummaries = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+const getMonthlySummaries = async (req, res) => {
     try {
-        const summaries = yield monthlySummaryService.getMonthlySummaries();
+        const summaries = await monthlySummaryService.getMonthlySummaries();
         return res.status(200).json(summaries);
     }
     catch (error) {
@@ -54,11 +45,11 @@ const getMonthlySummaries = (req, res) => __awaiter(void 0, void 0, void 0, func
             .status(500)
             .json({ message: "Error fetching MonthlySummaries", error });
     }
-});
+};
 exports.getMonthlySummaries = getMonthlySummaries;
-const getCurrentMonthlySummary = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+const getCurrentMonthlySummary = async (req, res) => {
     try {
-        const summary = yield monthlySummaryService.getCurrentMonthlySummary(Number(req.params.id), Number(req.query.month), Number(req.query.year));
+        const summary = await monthlySummaryService.getCurrentMonthlySummary(Number(req.params.id), Number(req.query.month), Number(req.query.year));
         if (summary) {
             return res.status(200).json(summary);
         }
@@ -71,11 +62,11 @@ const getCurrentMonthlySummary = (req, res) => __awaiter(void 0, void 0, void 0,
             .status(500)
             .json({ message: "Error fetching MonthlySummary", error });
     }
-});
+};
 exports.getCurrentMonthlySummary = getCurrentMonthlySummary;
-const createMonthlySummary = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+const createMonthlySummary = async (req, res) => {
     try {
-        const newMonthlySummary = yield monthlySummaryService.createMonthlySummary(req.body);
+        const newMonthlySummary = await monthlySummaryService.createMonthlySummary(req.body);
         return res.status(201).json(newMonthlySummary);
     }
     catch (error) {
@@ -83,12 +74,12 @@ const createMonthlySummary = (req, res) => __awaiter(void 0, void 0, void 0, fun
             .status(500)
             .json({ message: "Error creating MonthlySummary", error });
     }
-});
+};
 exports.createMonthlySummary = createMonthlySummary;
-const updateMonthlySummary = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+const updateMonthlySummary = async (req, res) => {
     try {
         const id = parseInt(req.params.id);
-        const updatedSummary = yield monthlySummaryService.updateMonthlySummary(id, req.body);
+        const updatedSummary = await monthlySummaryService.updateMonthlySummary(id, req.body);
         if (updatedSummary) {
             return res.status(200).json(updatedSummary);
         }
@@ -101,12 +92,12 @@ const updateMonthlySummary = (req, res) => __awaiter(void 0, void 0, void 0, fun
             .status(500)
             .json({ message: "Error updating MonthlySummary", error });
     }
-});
+};
 exports.updateMonthlySummary = updateMonthlySummary;
-const deleteMonthlySummary = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+const deleteMonthlySummary = async (req, res) => {
     try {
         const id = parseInt(req.params.id);
-        const deleted = yield monthlySummaryService.deleteMonthlySummary(id);
+        const deleted = await monthlySummaryService.deleteMonthlySummary(id);
         if (deleted) {
             return res.status(204).end();
         }
@@ -119,5 +110,6 @@ const deleteMonthlySummary = (req, res) => __awaiter(void 0, void 0, void 0, fun
             .status(500)
             .json({ message: "Error deleting MonthlySummary", error });
     }
-});
+};
 exports.deleteMonthlySummary = deleteMonthlySummary;
+//# sourceMappingURL=monthlySummaryController.js.map

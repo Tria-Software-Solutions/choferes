@@ -32,32 +32,23 @@ var __importStar = (this && this.__importStar) || (function () {
         return result;
     };
 })();
-var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
-    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
-    return new (P || (P = Promise))(function (resolve, reject) {
-        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
-        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
-        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
-        step((generator = generator.apply(thisArg, _arguments || [])).next());
-    });
-};
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.deleteHoursWorked = exports.updateHoursWorked = exports.createHoursWorked = exports.getHoursWorkedById = exports.getHoursWorked = void 0;
 const hoursWorkedService = __importStar(require("../services/hoursWorkedService"));
-const getHoursWorked = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+const getHoursWorked = async (req, res) => {
     try {
-        const hoursWorked = yield hoursWorkedService.getHoursWorked();
+        const hoursWorked = await hoursWorkedService.getHoursWorked();
         return res.status(200).json(hoursWorked);
     }
     catch (error) {
         return res.status(500).json({ message: "Error fetching HoursWorked", error });
     }
-});
+};
 exports.getHoursWorked = getHoursWorked;
-const getHoursWorkedById = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+const getHoursWorkedById = async (req, res) => {
     try {
         const id = parseInt(req.params.id);
-        const hoursWorked = yield hoursWorkedService.getHoursWorkedById(id);
+        const hoursWorked = await hoursWorkedService.getHoursWorkedById(id);
         if (hoursWorked) {
             return res.status(200).json(hoursWorked);
         }
@@ -70,22 +61,22 @@ const getHoursWorkedById = (req, res) => __awaiter(void 0, void 0, void 0, funct
             .status(500)
             .json({ message: "Error fetching HoursWorked by ID", error });
     }
-});
+};
 exports.getHoursWorkedById = getHoursWorkedById;
-const createHoursWorked = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+const createHoursWorked = async (req, res) => {
     try {
-        const hoursWorked = yield hoursWorkedService.createHoursWorked(req.body);
+        const hoursWorked = await hoursWorkedService.createHoursWorked(req.body);
         return res.status(201).json(hoursWorked);
     }
     catch (error) {
         return res.status(500).json({ message: "Error creating HoursWorked", error });
     }
-});
+};
 exports.createHoursWorked = createHoursWorked;
-const updateHoursWorked = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+const updateHoursWorked = async (req, res) => {
     try {
         const id = parseInt(req.params.id);
-        const updatedHoursWorked = yield hoursWorkedService.updateHoursWorked(id, req.body);
+        const updatedHoursWorked = await hoursWorkedService.updateHoursWorked(id, req.body);
         if (updatedHoursWorked) {
             return res.status(200).json(updatedHoursWorked);
         }
@@ -96,12 +87,12 @@ const updateHoursWorked = (req, res) => __awaiter(void 0, void 0, void 0, functi
     catch (error) {
         return res.status(500).json({ message: "Error updating HoursWorked", error });
     }
-});
+};
 exports.updateHoursWorked = updateHoursWorked;
-const deleteHoursWorked = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+const deleteHoursWorked = async (req, res) => {
     try {
         const { id } = req.params;
-        const deleted = yield hoursWorkedService.deleteHoursWorked(Number(id));
+        const deleted = await hoursWorkedService.deleteHoursWorked(Number(id));
         if (deleted) {
             return res.status(204).send();
         }
@@ -112,5 +103,6 @@ const deleteHoursWorked = (req, res) => __awaiter(void 0, void 0, void 0, functi
     catch (error) {
         return res.status(500).json({ message: "Error deleting HoursWorked", error });
     }
-});
+};
 exports.deleteHoursWorked = deleteHoursWorked;
+//# sourceMappingURL=hoursWorkedController.js.map

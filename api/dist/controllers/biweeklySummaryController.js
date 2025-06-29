@@ -32,21 +32,12 @@ var __importStar = (this && this.__importStar) || (function () {
         return result;
     };
 })();
-var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
-    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
-    return new (P || (P = Promise))(function (resolve, reject) {
-        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
-        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
-        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
-        step((generator = generator.apply(thisArg, _arguments || [])).next());
-    });
-};
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.deleteBiweeklySummary = exports.updateBiweeklySummary = exports.createBiweeklySummary = exports.getCurrentBiweeklySummary = exports.getBiweeklySummaries = void 0;
 const biweeklySummaryService = __importStar(require("../services/biweeklySummaryService"));
-const getBiweeklySummaries = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+const getBiweeklySummaries = async (req, res) => {
     try {
-        const summaries = yield biweeklySummaryService.getBiweeklySummaries();
+        const summaries = await biweeklySummaryService.getBiweeklySummaries();
         return res.status(200).json(summaries);
     }
     catch (error) {
@@ -54,11 +45,11 @@ const getBiweeklySummaries = (req, res) => __awaiter(void 0, void 0, void 0, fun
             .status(500)
             .json({ message: "Error fetching BiweeklySummaries", error });
     }
-});
+};
 exports.getBiweeklySummaries = getBiweeklySummaries;
-const getCurrentBiweeklySummary = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+const getCurrentBiweeklySummary = async (req, res) => {
     try {
-        const summary = yield biweeklySummaryService.getCurrentBiweeklySummary(Number(req.params.id), Number(req.query.biweekNumber), Number(req.query.month), Number(req.query.year));
+        const summary = await biweeklySummaryService.getCurrentBiweeklySummary(Number(req.params.id), Number(req.query.biweekNumber), Number(req.query.month), Number(req.query.year));
         if (summary) {
             return res.status(200).json(summary);
         }
@@ -71,11 +62,11 @@ const getCurrentBiweeklySummary = (req, res) => __awaiter(void 0, void 0, void 0
             .status(500)
             .json({ message: "Error fetching BiweeklySummary", error });
     }
-});
+};
 exports.getCurrentBiweeklySummary = getCurrentBiweeklySummary;
-const createBiweeklySummary = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+const createBiweeklySummary = async (req, res) => {
     try {
-        const newBiweeklySummary = yield biweeklySummaryService.createBiweeklySummary(req.body);
+        const newBiweeklySummary = await biweeklySummaryService.createBiweeklySummary(req.body);
         return res.status(201).json(newBiweeklySummary);
     }
     catch (error) {
@@ -83,12 +74,12 @@ const createBiweeklySummary = (req, res) => __awaiter(void 0, void 0, void 0, fu
             .status(500)
             .json({ message: "Error creating BiweeklySummary", error });
     }
-});
+};
 exports.createBiweeklySummary = createBiweeklySummary;
-const updateBiweeklySummary = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+const updateBiweeklySummary = async (req, res) => {
     try {
         const id = parseInt(req.params.id);
-        const updatedSummary = yield biweeklySummaryService.updateBiweeklySummary(id, req.body);
+        const updatedSummary = await biweeklySummaryService.updateBiweeklySummary(id, req.body);
         if (updatedSummary) {
             return res.status(200).json(updatedSummary);
         }
@@ -101,12 +92,12 @@ const updateBiweeklySummary = (req, res) => __awaiter(void 0, void 0, void 0, fu
             .status(500)
             .json({ message: "Error updating BiweeklySummary", error });
     }
-});
+};
 exports.updateBiweeklySummary = updateBiweeklySummary;
-const deleteBiweeklySummary = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+const deleteBiweeklySummary = async (req, res) => {
     try {
         const id = parseInt(req.params.id);
-        const deleted = yield biweeklySummaryService.deleteBiweeklySummary(id);
+        const deleted = await biweeklySummaryService.deleteBiweeklySummary(id);
         if (deleted) {
             return res.status(204).end();
         }
@@ -119,5 +110,6 @@ const deleteBiweeklySummary = (req, res) => __awaiter(void 0, void 0, void 0, fu
             .status(500)
             .json({ message: "Error deleting BiweeklySummary", error });
     }
-});
+};
 exports.deleteBiweeklySummary = deleteBiweeklySummary;
+//# sourceMappingURL=biweeklySummaryController.js.map

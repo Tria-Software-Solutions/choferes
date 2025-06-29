@@ -25,3 +25,4 @@ Permission.init({
     modelName: "Permission",
     tableName: "permissions",
 });
+//# sourceMappingURL=Permission.js.map

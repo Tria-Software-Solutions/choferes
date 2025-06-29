@@ -46,3 +46,4 @@ router.post("/", authMiddleware_1.authenticateToken, employeeController.createEm
 router.put("/:id", authMiddleware_1.authenticateToken, employeeController.updateEmployee);
 router.delete("/:id", authMiddleware_1.authenticateToken, employeeController.deleteEmployee);
 exports.default = router;
+//# sourceMappingURL=employeeRoutes.js.map

@@ -32,42 +32,70 @@ var __importStar = (this && this.__importStar) || (function () {
         return result;
     };
 })();
-var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
-    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
-    return new (P || (P = Promise))(function (resolve, reject) {
-        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
-        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
-        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
-        step((generator = generator.apply(thisArg, _arguments || [])).next());
-    });
-};
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.deleteUser = exports.updateUserTemporalPassword = exports.updateUserPassword = exports.updateUserStatus = exports.updateUser = exports.createUser = exports.getUserPermissions = exports.getUserByUsername = exports.getUserByEmail = exports.getUserById = exports.getUsers = exports.authenticateUser = void 0;
 const userService = __importStar(require("../services/userService"));
-const authenticateUser = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+const authenticateUser = async (req, res) => {
     try {
         const { identifier, password } = req.body;
-        const { user, accessToken, refreshToken } = yield userService.authenticateUser(identifier, password, res);
+        if (!identifier || !password) {
+            return res.status(400).json({
+                message: "Credenciales incompletas",
+                details: {
+                    identifier: !identifier ? "El usuario o email es requerido" : null,
+                    password: !password ? "La contraseña es requerida" : null
+                }
+            });
+        }
+        const { user, accessToken, refreshToken } = await userService.authenticateUser(identifier, password, res);
         return res.status(200).json({ user, accessToken, refreshToken });
     }
     catch (error) {
-        return res.status(401).json({ message: "Error login User", error });
+        if (error.message === "User not found") {
+            return res.status(401).json({
+                message: "Usuario no encontrado",
+                details: "El usuario o email proporcionado no existe en el sistema"
+            });
+        }
+        if (error.message === "User is inactive") {
+            return res.status(401).json({
+                message: "Usuario desactivado",
+                details: "Tu cuenta ha sido desactivada. Contacta al administrador"
+            });
+        }
+        if (error.message === "Incorrect password") {
+            return res.status(401).json({
+                message: "Contraseña incorrecta",
+                details: "La contraseña proporcionada no es correcta"
+            });
+        }
+        if (error.message === "Incorrect password and temporary password") {
+            return res.status(401).json({
+                message: "Credenciales incorrectas",
+                details: "Ni la contraseña principal ni la contraseña temporal son correctas"
+            });
+        }
+        console.error("Error en autenticación:", error);
+        return res.status(500).json({
+            message: "Error interno del servidor",
+            details: "Ocurrió un error inesperado durante la autenticación"
+        });
     }
-});
+};
 exports.authenticateUser = authenticateUser;
-const getUsers = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+const getUsers = async (req, res) => {
     try {
-        const users = yield userService.getUsers();
+        const users = await userService.getUsers();
         return res.status(200).json(users);
     }
     catch (error) {
         return res.status(500).json({ message: "Error fetching Users", error });
     }
-});
+};
 exports.getUsers = getUsers;
-const getUserById = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+const getUserById = async (req, res) => {
     try {
-        const user = yield userService.getUserById(Number(req.params.id));
+        const user = await userService.getUserById(Number(req.params.id));
         if (!user) {
             return res.status(404).json({ message: "User not found" });
         }
@@ -76,11 +104,11 @@ const getUserById = (req, res) => __awaiter(void 0, void 0, void 0, function* ()
     catch (error) {
         return res.status(500).json({ message: "Error fetching User", error });
     }
-});
+};
 exports.getUserById = getUserById;
-const getUserByEmail = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+const getUserByEmail = async (req, res) => {
     try {
-        const user = yield userService.getUserByEmail(req.params.email);
+        const user = await userService.getUserByEmail(req.params.email);
         if (!user) {
             return res.status(404).json({ message: "User not found" });
         }
@@ -89,11 +117,11 @@ const getUserByEmail = (req, res) => __awaiter(void 0, void 0, void 0, function*
     catch (error) {
         return res.status(500).json({ message: "Error fetching User", error });
     }
-});
+};
 exports.getUserByEmail = getUserByEmail;
-const getUserByUsername = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+const getUserByUsername = async (req, res) => {
     try {
-        const user = yield userService.getUserByUsername(req.params.username);
+        const user = await userService.getUserByUsername(req.params.username);
         if (!user) {
             return res.status(404).json({ message: "User not found" });
         }
@@ -102,11 +130,11 @@ const getUserByUsername = (req, res) => __awaiter(void 0, void 0, void 0, functi
     catch (error) {
         return res.status(500).json({ message: "Error fetching User", error });
     }
-});
+};
 exports.getUserByUsername = getUserByUsername;
-const getUserPermissions = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+const getUserPermissions = async (req, res) => {
     try {
-        const user = yield userService.getUserPermissions(Number(req.params.id));
+        const user = await userService.getUserPermissions(Number(req.params.id));
         if (!user) {
             return res.status(404).json({ message: "User Permissions not found" });
         }
@@ -117,22 +145,22 @@ const getUserPermissions = (req, res) => __awaiter(void 0, void 0, void 0, funct
             .status(500)
             .json({ message: "Error fetching User Permissions", error });
     }
-});
+};
 exports.getUserPermissions = getUserPermissions;
-const createUser = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+const createUser = async (req, res) => {
     try {
-        const newUser = yield userService.createUser(req.body);
+        const newUser = await userService.createUser(req.body);
         return res.status(201).json(newUser);
     }
     catch (error) {
         return res.status(500).json({ message: "Error registering User", error });
     }
-});
+};
 exports.createUser = createUser;
-const updateUser = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+const updateUser = async (req, res) => {
     try {
         const id = parseInt(req.params.id);
-        const updatedUser = yield userService.updateUser(id, req.body);
+        const updatedUser = await userService.updateUser(id, req.body);
         if (updatedUser) {
             return res.status(200).json(updatedUser);
         }
@@ -143,12 +171,12 @@ const updateUser = (req, res) => __awaiter(void 0, void 0, void 0, function* () 
     catch (error) {
         return res.status(500).json({ message: "Error updating User", error });
     }
-});
+};
 exports.updateUser = updateUser;
-const updateUserStatus = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+const updateUserStatus = async (req, res) => {
     try {
         const id = parseInt(req.params.id);
-        const updatedUser = yield userService.updateUserStatus(id, req.body.isActive);
+        const updatedUser = await userService.updateUserStatus(id, req.body.isActive);
         if (updatedUser) {
             return res.status(200).json(updatedUser);
         }
@@ -159,12 +187,12 @@ const updateUserStatus = (req, res) => __awaiter(void 0, void 0, void 0, functio
     catch (error) {
         return res.status(500).json({ message: "Error updating User", error });
     }
-});
+};
 exports.updateUserStatus = updateUserStatus;
-const updateUserPassword = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+const updateUserPassword = async (req, res) => {
     try {
         const id = parseInt(req.params.id);
-        const updatedUser = yield userService.updateUserPassword(id, req.body.password);
+        const updatedUser = await userService.updateUserPassword(id, req.body.password);
         if (updatedUser) {
             return res.status(200).json(updatedUser);
         }
@@ -175,12 +203,12 @@ const updateUserPassword = (req, res) => __awaiter(void 0, void 0, void 0, funct
     catch (error) {
         return res.status(500).json({ message: "Error updating User", error });
     }
-});
+};
 exports.updateUserPassword = updateUserPassword;
-const updateUserTemporalPassword = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+const updateUserTemporalPassword = async (req, res) => {
     try {
         const id = parseInt(req.params.id);
-        const updatedUser = yield userService.updateUserTemporalPassword(id, req.body.temporalPassword);
+        const updatedUser = await userService.updateUserTemporalPassword(id, req.body.temporalPassword);
         if (updatedUser) {
             return res.status(200).json(updatedUser);
         }
@@ -191,12 +219,12 @@ const updateUserTemporalPassword = (req, res) => __awaiter(void 0, void 0, void 
     catch (error) {
         return res.status(500).json({ message: "Error updating User", error });
     }
-});
+};
 exports.updateUserTemporalPassword = updateUserTemporalPassword;
-const deleteUser = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+const deleteUser = async (req, res) => {
     try {
         const id = parseInt(req.params.id);
-        const deleted = yield userService.deleteUser(id);
+        const deleted = await userService.deleteUser(id);
         if (deleted) {
             return res.status(204).end();
         }
@@ -207,5 +235,6 @@ const deleteUser = (req, res) => __awaiter(void 0, void 0, void 0, function* () 
     catch (error) {
         return res.status(500).json({ message: "Error deleting User", error });
     }
-});
+};
 exports.deleteUser = deleteUser;
+//# sourceMappingURL=userController.js.map

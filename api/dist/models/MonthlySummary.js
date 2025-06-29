@@ -43,3 +43,4 @@ MonthlySummary.init({
     tableName: "monthly_summary",
 });
 MonthlySummary.belongsTo(Employee_1.Employee, { foreignKey: "employeeId", onDelete: 'CASCADE' });
+//# sourceMappingURL=MonthlySummary.js.map

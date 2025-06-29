@@ -46,3 +46,4 @@ router.post("/", authMiddleware_1.authenticateToken, monthlySummaryController.cr
 router.put("/:id", authMiddleware_1.authenticateToken, monthlySummaryController.updateMonthlySummary);
 router.delete("/:id", authMiddleware_1.authenticateToken, monthlySummaryController.deleteMonthlySummary);
 exports.default = router;
+//# sourceMappingURL=monthlySummaryRoutes.js.map

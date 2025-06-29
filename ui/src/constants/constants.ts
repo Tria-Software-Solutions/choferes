@@ -32,7 +32,7 @@ export const PAGE_TITLE = {
   VEHICLES: "Gestión de Vehículos",
   EMPLOYEES: "Gestión de Personal",
   SCHEDULES: "Gestión de Horarios",
-  DASHBOARD: "Panel de Administración",
+  DASHBOARD: "Panel de Control Administrativo",
   SETTINGS: "Configuración del Sistema",
   ROLES_SIMPLIFIED: "Roles",
   VEHICLES_SIMPLIFIED: "Vehículos",

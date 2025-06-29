@@ -28,3 +28,4 @@ Employee.init({
     modelName: 'Employee',
     tableName: 'employees',
 });
+//# sourceMappingURL=Employee.js.map

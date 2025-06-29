@@ -18,7 +18,6 @@ import { Permission } from "../../models/Permission";
 interface AddRoleFormProps {
   onSubmit: (role: { 
     name: string; 
-    description: string; 
     permissions: string[]; 
   }) => void;
   onCancel?: () => void;
@@ -35,12 +34,10 @@ const AddRoleForm: React.FC<AddRoleFormProps> = ({
   const theme = useTheme();
   const [formData, setFormData] = useState({
     name: "",
-    description: "",
     permissions: [] as string[],
   });
   const [errors, setErrors] = useState({
     name: "",
-    description: "",
     permissions: "",
   });
 
@@ -71,15 +68,6 @@ const AddRoleForm: React.FC<AddRoleFormProps> = ({
             return "Máximo 50 caracteres";
           }
           break;
-        
-        case "description":
-          if (value.trim().length < 10) {
-            return "Mínimo 10 caracteres";
-          }
-          if (value.trim().length > 200) {
-            return "Máximo 200 caracteres";
-          }
-          break;
       }
     }
     
@@ -103,10 +91,8 @@ const AddRoleForm: React.FC<AddRoleFormProps> = ({
   const isFormValid = () => {
     return (
       formData.name.trim() !== "" &&
-      formData.description.trim() !== "" &&
       formData.permissions.length > 0 &&
       errors.name === "" &&
-      errors.description === "" &&
       errors.permissions === ""
     );
   };
@@ -115,7 +101,6 @@ const AddRoleForm: React.FC<AddRoleFormProps> = ({
     if (isFormValid()) {
       onSubmit({
         name: formData.name.trim(),
-        description: formData.description.trim(),
         permissions: formData.permissions,
       });
     }
@@ -124,12 +109,10 @@ const AddRoleForm: React.FC<AddRoleFormProps> = ({
   const handleClearForm = () => {
     setFormData({
       name: "",
-      description: "",
       permissions: [],
     });
     setErrors({
       name: "",
-      description: "",
       permissions: "",
     });
   };
@@ -146,7 +129,7 @@ const AddRoleForm: React.FC<AddRoleFormProps> = ({
   return (
     <Box sx={{ width: '100%', p: 0 }}>
       <Grid container spacing={3} sx={{ mt: 0 }}>
-        <Grid item xs={12} sm={6}>
+        <Grid item xs={12}>
           <TextField
             label="Nombre del Rol"
             variant="outlined"
@@ -160,26 +143,6 @@ const AddRoleForm: React.FC<AddRoleFormProps> = ({
               startAdornment: (
                 <Box sx={{ mr: 1, color: theme.palette.text.secondary }}>
                   👥
-                </Box>
-              ),
-            }}
-          />
-        </Grid>
-
-        <Grid item xs={12} sm={6}>
-          <TextField
-            label="Descripción"
-            variant="outlined"
-            fullWidth
-            placeholder="Ej: Acceso completo al sistema"
-            value={formData.description}
-            onChange={(e) => handleFieldChange("description", e.target.value)}
-            error={errors.description !== ""}
-            helperText={errors.description}
-            InputProps={{
-              startAdornment: (
-                <Box sx={{ mr: 1, color: theme.palette.text.secondary }}>
-                  📝
                 </Box>
               ),
             }}

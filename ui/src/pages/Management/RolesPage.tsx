@@ -512,7 +512,7 @@ const RolesPage: React.FC = () => {
           />
           <Box sx={{ ml: 1 }}>
             <Typography
-              variant={isSmallScreen ? "h5" : "h2"}
+              variant={isSmallScreen ? "h5" : "h4"}
               sx={{ flexGrow: 1 }}
             >
               {isSmallScreen ? PAGE_TITLE.ROLES_SIMPLIFIED : PAGE_TITLE.ROLES}

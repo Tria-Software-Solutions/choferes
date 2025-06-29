@@ -47,3 +47,4 @@ router.post("/", authMiddleware_1.authenticateToken, vehicleController.createVeh
 router.put("/:id", authMiddleware_1.authenticateToken, vehicleController.updateVehicle);
 router.delete("/:id", authMiddleware_1.authenticateToken, vehicleController.deleteVehicle);
 exports.default = router;
+//# sourceMappingURL=vehicleRoutes.js.map

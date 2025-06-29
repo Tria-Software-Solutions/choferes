@@ -7,3 +7,4 @@ const healthCheck = (req, res) => {
     res.status(200).json(healthStatus);
 };
 exports.healthCheck = healthCheck;
+//# sourceMappingURL=healtController.js.map

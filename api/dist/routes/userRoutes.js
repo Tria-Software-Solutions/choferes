@@ -53,3 +53,4 @@ router.put("/:id/password", authMiddleware_1.authenticateToken, userController.u
 router.put("/:id/temporal-password", authMiddleware_1.authenticateToken, userController.updateUserTemporalPassword);
 router.delete("/:id", authMiddleware_1.authenticateToken, userController.deleteUser);
 exports.default = router;
+//# sourceMappingURL=userRoutes.js.map

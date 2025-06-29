@@ -88,6 +88,7 @@ type EditableTableProps<T> = {
   isSaveDisabled?: boolean;
   noActions?: boolean;
   userPermissions?: string[];
+  isExpanded?: boolean;
 };
 
 const EditableTable = <T extends object>({
@@ -114,6 +115,7 @@ const EditableTable = <T extends object>({
   isSaveDisabled,
   noActions,
   userPermissions,
+  isExpanded = true,
 }: EditableTableProps<T>) => {
   const { currentUser } = useAuthContext();
   const { roles } = useSelector((state: RootState) => state.roles);
@@ -750,7 +752,7 @@ const EditableTable = <T extends object>({
                           <>
                             {hasEditPermissions && (
                               <>
-                                {isUser && (
+                                {isUser && isExpanded && handlePasswordModal && (
                                   <ModalComponent
                                     buttonType="icon"
                                     buttonIcon={<PasswordIcon />}
@@ -761,15 +763,10 @@ const EditableTable = <T extends object>({
                                     modalTooltip="Cambiar Contraseña"
                                     modalTitle="Cambiar Contraseña"
                                   >
-                                    {({ handleClose }) => (
-                                      <>
-                                        {handlePasswordModal &&
-                                          handlePasswordModal(
-                                            getRowId(row),
-                                            handleClose
-                                          )}
-                                      </>
-                                    )}
+                                    {({ handleClose }) => {
+                                      handlePasswordModal(getRowId(row), handleClose);
+                                      return <></>;
+                                    }}
                                   </ModalComponent>
                                 )}
                                 <Tooltip title="Editar" arrow>

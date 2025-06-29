@@ -5,3 +5,4 @@ const checkHealth = () => {
     return { status: "OK" };
 };
 exports.checkHealth = checkHealth;
+//# sourceMappingURL=healthService.js.map

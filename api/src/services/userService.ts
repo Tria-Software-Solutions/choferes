@@ -24,8 +24,14 @@ export const authenticateUser = async (
     ],
   });
 
-  if (!user) throw new Error("User not found");
-  if (!user.isActive) throw new Error("User is inactive");
+  if (!user) {
+    throw new Error("User not found");
+  }
+
+  if (!user.isActive) {
+    throw new Error("User is inactive");
+  }
+
   const isMatch = await bcrypt.compare(password, user.password);
   if (!isMatch) {
     if (user.temporalPassword) {

@@ -46,3 +46,4 @@ router.post("/", authMiddleware_1.authenticateToken, biweeklySummaryController.c
 router.put("/:id", authMiddleware_1.authenticateToken, biweeklySummaryController.updateBiweeklySummary);
 router.delete("/:id", authMiddleware_1.authenticateToken, biweeklySummaryController.deleteBiweeklySummary);
 exports.default = router;
+//# sourceMappingURL=biweeklySummaryRoutes.js.map

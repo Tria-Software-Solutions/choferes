@@ -50,3 +50,4 @@ Vehicle.init({
     modelName: "Vehicle",
     tableName: "vehicles",
 });
+//# sourceMappingURL=Vehicle.js.map

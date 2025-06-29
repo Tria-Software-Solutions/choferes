@@ -32,31 +32,22 @@ var __importStar = (this && this.__importStar) || (function () {
         return result;
     };
 })();
-var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
-    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
-    return new (P || (P = Promise))(function (resolve, reject) {
-        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
-        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
-        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
-        step((generator = generator.apply(thisArg, _arguments || [])).next());
-    });
-};
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.deleteUserRole = exports.updateUserRole = exports.createUserRole = exports.getUserRoleByRoleId = exports.getUserRoleByUserId = exports.getUserRoles = void 0;
 const userRoleService = __importStar(require("../services/userRoleService"));
-const getUserRoles = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+const getUserRoles = async (req, res) => {
     try {
-        const roles = yield userRoleService.getUserRoles();
+        const roles = await userRoleService.getUserRoles();
         return res.status(200).json(roles);
     }
     catch (error) {
         return res.status(400).json({ message: "Error fetching UserRoles", error });
     }
-});
+};
 exports.getUserRoles = getUserRoles;
-const getUserRoleByUserId = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+const getUserRoleByUserId = async (req, res) => {
     try {
-        const user = yield userRoleService.getUserRoleByUserId(Number(req.params.userId));
+        const user = await userRoleService.getUserRoleByUserId(Number(req.params.userId));
         if (!user) {
             return res.status(404).json({ message: "UserRole not found" });
         }
@@ -65,11 +56,11 @@ const getUserRoleByUserId = (req, res) => __awaiter(void 0, void 0, void 0, func
     catch (error) {
         return res.status(500).json({ message: "Error fetching UserRole", error });
     }
-});
+};
 exports.getUserRoleByUserId = getUserRoleByUserId;
-const getUserRoleByRoleId = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+const getUserRoleByRoleId = async (req, res) => {
     try {
-        const role = yield userRoleService.getUserRoleByRoleId(Number(req.params.roleId));
+        const role = await userRoleService.getUserRoleByRoleId(Number(req.params.roleId));
         if (!role) {
             return res.status(404).json({ message: "UserRole not found" });
         }
@@ -78,22 +69,22 @@ const getUserRoleByRoleId = (req, res) => __awaiter(void 0, void 0, void 0, func
     catch (error) {
         return res.status(500).json({ message: "Error fetching UserRole", error });
     }
-});
+};
 exports.getUserRoleByRoleId = getUserRoleByRoleId;
-const createUserRole = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+const createUserRole = async (req, res) => {
     try {
-        const userRole = yield userRoleService.createUserRole(req.body);
+        const userRole = await userRoleService.createUserRole(req.body);
         return res.status(201).json(userRole);
     }
     catch (error) {
         return res.status(400).json({ message: "Error assigning UserRole", error });
     }
-});
+};
 exports.createUserRole = createUserRole;
-const updateUserRole = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+const updateUserRole = async (req, res) => {
     try {
         const id = parseInt(req.params.id);
-        const updatedUserRole = yield userRoleService.updateUserRole(Number(id), req.body.roleId);
+        const updatedUserRole = await userRoleService.updateUserRole(Number(id), req.body.roleId);
         if (updatedUserRole) {
             return res.status(200).json(updatedUserRole);
         }
@@ -104,12 +95,12 @@ const updateUserRole = (req, res) => __awaiter(void 0, void 0, void 0, function*
     catch (error) {
         return res.status(500).json({ message: "Error updating UserRole", error });
     }
-});
+};
 exports.updateUserRole = updateUserRole;
-const deleteUserRole = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+const deleteUserRole = async (req, res) => {
     try {
         const id = parseInt(req.params.id);
-        const deleted = yield userRoleService.deleteUserRole(id);
+        const deleted = await userRoleService.deleteUserRole(id);
         if (deleted) {
             return res.status(204).end();
         }
@@ -120,5 +111,6 @@ const deleteUserRole = (req, res) => __awaiter(void 0, void 0, void 0, function*
     catch (error) {
         return res.status(500).json({ message: "Error deleting UserRole", error });
     }
-});
+};
 exports.deleteUserRole = deleteUserRole;
+//# sourceMappingURL=userRoleController.js.map

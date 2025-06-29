@@ -283,17 +283,18 @@ const AddUserForm: React.FC<AddUserFormProps> = ({
         </Grid>
 
         <Grid item xs={12} sm={6}>
-          <FormControl fullWidth error={errors.roleName !== ""}>
+          <FormControl fullWidth error={errors.roleName !== ""} sx={{ mt: 0 }}>
             <InputLabel>Rol</InputLabel>
             <Select
               value={formData.roleName}
               label="Rol"
               onChange={(e) => handleFieldChange("roleName", e.target.value)}
-              startAdornment={
-                <Box sx={{ mr: 1, color: theme.palette.text.secondary }}>
-                  👥
-                </Box>
-              }
+              sx={{
+                "& .MuiSelect-select": {
+                  paddingLeft: "14px",
+                  paddingRight: "14px",
+                },
+              }}
             >
               {roles.map((role) => (
                 <MenuItem key={role.id} value={role.name}>

@@ -46,3 +46,4 @@ router.post("/", authMiddleware_1.authenticateToken, hoursWorkedController.creat
 router.put("/:id", authMiddleware_1.authenticateToken, hoursWorkedController.updateHoursWorked);
 router.delete("/:id", authMiddleware_1.authenticateToken, hoursWorkedController.deleteHoursWorked);
 exports.default = router;
+//# sourceMappingURL=hoursWorkedRoutes.js.map

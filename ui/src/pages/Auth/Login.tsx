@@ -19,17 +19,15 @@ import { PAGE_TITLE } from "../../constants/constants";
 import Visibility from "@mui/icons-material/Visibility";
 import VisibilityOff from "@mui/icons-material/VisibilityOff";
 import logo from "../../assets/images/logo.png";
-import { AxiosError } from "axios";
 
 const Login: React.FC = () => {
-  const { authenticateUser } = useAuth();
+  const { authenticateUser, authError } = useAuth();
   const [fields, setFields] = useState({
     identifier: "",
     password: "",
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
-  const [error, setError] = useState<string | null>(null);
 
   const theme = useTheme();
   const isSmallScreen = useMediaQuery(theme.breakpoints.down("sm"));
@@ -37,22 +35,11 @@ const Login: React.FC = () => {
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsSubmitting(true);
-    setError(null);
 
     try {
       await authenticateUser(fields.identifier, fields.password);
     } catch (error: unknown) {
-      if (error instanceof AxiosError) {
-        if (error.response?.status === 401) {
-          setError("Usuario o contraseña incorrectos.");
-        } else {
-          setError("Ocurrió un error con la autenticación. Intenta más tarde.");
-        }
-      } else if (error instanceof Error) {
-        setError("No se pudo conectar al servidor. Intenta más tarde.");
-      } else {
-        setError("Ocurrió un error desconocido. Intenta más tarde.");
-      }
+      console.error("Error en login:", error);
     }
 
     setIsSubmitting(false);
@@ -140,9 +127,9 @@ const Login: React.FC = () => {
               )}
             </Button>
           </form>
-          {error && (
+          {authError && (
             <Alert severity="error" sx={{ mt: 2 }}>
-              {error}
+              {authError}
             </Alert>
           )}
           <Typography align="center" sx={{ mt: 6 }}>

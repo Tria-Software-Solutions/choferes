@@ -32,33 +32,24 @@ var __importStar = (this && this.__importStar) || (function () {
         return result;
     };
 })();
-var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
-    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
-    return new (P || (P = Promise))(function (resolve, reject) {
-        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
-        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
-        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
-        step((generator = generator.apply(thisArg, _arguments || [])).next());
-    });
-};
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.deleteVehicle = exports.updateVehicle = exports.createVehicle = exports.getVehiclesByDate = exports.getVehicleById = exports.getVehicles = void 0;
 const vehicleService = __importStar(require("../services/vehicleService"));
 const date_fns_1 = require("date-fns");
-const getVehicles = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+const getVehicles = async (req, res) => {
     try {
-        const vehicles = yield vehicleService.getVehicles();
+        const vehicles = await vehicleService.getVehicles();
         return res.status(200).json(vehicles);
     }
     catch (error) {
         return res.status(500).json({ message: "Error fetching Vehicles", error });
     }
-});
+};
 exports.getVehicles = getVehicles;
-const getVehicleById = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+const getVehicleById = async (req, res) => {
     try {
         const id = parseInt(req.params.id);
-        const vehicle = yield vehicleService.getVehicleById(id);
+        const vehicle = await vehicleService.getVehicleById(id);
         if (vehicle) {
             return res.status(200).json(vehicle);
         }
@@ -69,9 +60,9 @@ const getVehicleById = (req, res) => __awaiter(void 0, void 0, void 0, function*
     catch (error) {
         return res.status(500).json({ message: "Error fetching Vehicle", error });
     }
-});
+};
 exports.getVehicleById = getVehicleById;
-const getVehiclesByDate = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+const getVehiclesByDate = async (req, res) => {
     try {
         const { date } = req.query;
         if (!date || typeof date !== 'string') {
@@ -81,33 +72,36 @@ const getVehiclesByDate = (req, res) => __awaiter(void 0, void 0, void 0, functi
         if (!(0, date_fns_1.isValid)(parsedDate)) {
             return res.status(400).json({ message: "Invalid date format" });
         }
-        const vehicles = yield vehicleService.getVehiclesByDate(parsedDate);
+        const vehicles = await vehicleService.getVehiclesByDate(parsedDate);
         return res.status(200).json(vehicles);
     }
     catch (error) {
         return res.status(500).json({ message: "Error fetching Vehicles by date", error });
     }
-});
+};
 exports.getVehiclesByDate = getVehiclesByDate;
-const createVehicle = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+const createVehicle = async (req, res) => {
     try {
-        const vehicleData = Object.assign(Object.assign({}, req.body), { parkingDate: req.body.parkingDate ? (0, date_fns_1.parseISO)(req.body.parkingDate) : new Date() });
-        const newVehicle = yield vehicleService.createVehicle(vehicleData);
+        const vehicleData = {
+            ...req.body,
+            parkingDate: req.body.parkingDate ? (0, date_fns_1.parseISO)(req.body.parkingDate) : new Date()
+        };
+        const newVehicle = await vehicleService.createVehicle(vehicleData);
         return res.status(201).json(newVehicle);
     }
     catch (error) {
         return res.status(500).json({ message: "Error creating Vehicle", error });
     }
-});
+};
 exports.createVehicle = createVehicle;
-const updateVehicle = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+const updateVehicle = async (req, res) => {
     try {
         const id = parseInt(req.params.id);
-        const updateData = Object.assign({}, req.body);
+        const updateData = { ...req.body };
         if (req.body.parkingDate) {
             updateData.parkingDate = (0, date_fns_1.parseISO)(req.body.parkingDate);
         }
-        const updatedVehicle = yield vehicleService.updateVehicle(id, updateData);
+        const updatedVehicle = await vehicleService.updateVehicle(id, updateData);
         if (updatedVehicle) {
             return res.status(200).json(updatedVehicle);
         }
@@ -118,12 +112,12 @@ const updateVehicle = (req, res) => __awaiter(void 0, void 0, void 0, function* 
     catch (error) {
         return res.status(500).json({ message: "Error updating Vehicle", error });
     }
-});
+};
 exports.updateVehicle = updateVehicle;
-const deleteVehicle = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+const deleteVehicle = async (req, res) => {
     try {
         const id = parseInt(req.params.id);
-        const deleted = yield vehicleService.deleteVehicle(id);
+        const deleted = await vehicleService.deleteVehicle(id);
         if (deleted) {
             return res.status(204).end();
         }
@@ -134,5 +128,6 @@ const deleteVehicle = (req, res) => __awaiter(void 0, void 0, void 0, function* 
     catch (error) {
         return res.status(500).json({ message: "Error deleting Vehicle", error });
     }
-});
+};
 exports.deleteVehicle = deleteVehicle;
+//# sourceMappingURL=vehicleController.js.map

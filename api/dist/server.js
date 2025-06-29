@@ -52,24 +52,30 @@ app.use((0, compression_1.default)({
         return compression_1.default.filter(req, res);
     }
 }));
-// Rate limiting para prevenir abuso
+// Rate limiting para prevenir abuso (solo en producción)
 const limiter = (0, express_rate_limit_1.default)({
     windowMs: 15 * 60 * 1000, // 15 minutos
-    max: 100, // Máximo 100 requests por ventana de tiempo
+    max: 1000, // Máximo 1000 requests por ventana de tiempo (aumentado para desarrollo)
     message: 'Too many requests from this IP, please try again later.',
     standardHeaders: true,
     legacyHeaders: false,
 });
-app.use('/api/', limiter);
-// Rate limiting más estricto para autenticación
+// Solo aplicar rate limiting en producción
+if (process.env.NODE_ENV === 'production') {
+    app.use('/api/', limiter);
+}
+// Rate limiting más estricto para autenticación (solo en producción)
 const authLimiter = (0, express_rate_limit_1.default)({
     windowMs: 15 * 60 * 1000, // 15 minutos
-    max: 5, // Máximo 5 intentos de login por ventana de tiempo
+    max: 20, // Máximo 20 intentos de login por ventana de tiempo (aumentado para desarrollo)
     message: 'Too many login attempts, please try again later.',
     standardHeaders: true,
     legacyHeaders: false,
 });
-app.use('/api/auth', authLimiter);
+// Solo aplicar rate limiting de auth en producción
+if (process.env.NODE_ENV === 'production') {
+    app.use('/api/auth', authLimiter);
+}
 const allowedOrigins = [
     "http://localhost:3000",
     process.env.REACT_APP_UI_URL
@@ -142,3 +148,4 @@ const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {
     console.log(`Server is running on port ${PORT}`);
 });
+//# sourceMappingURL=server.js.map

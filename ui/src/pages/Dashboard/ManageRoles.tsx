@@ -24,6 +24,8 @@ import {
   DialogTitle,
   Grid,
   Typography,
+  Chip,
+  Stack,
 } from "@mui/material";
 import EditableTable from "../../components/Table/EditableTable/EditableTable";
 import SearchBar from "../../components/SearchBar/SearchBar";
@@ -31,7 +33,7 @@ import ModalComponent from "../../components/Modal/ModalComponent";
 import AddRoleForm from "../../components/Forms/AddRoleForm";
 import AddModeratorIcon from "@mui/icons-material/AddModerator";
 
-const ManageRoles: React.FC = () => {
+const ManageRoles: React.FC<{ isExpanded?: boolean }> = ({ isExpanded = true }) => {
   const dispatch = useDispatch<AppDispatch>();
   const { userPermissions } = useAuthContext();
   const { roles, isLoadingRoles } = useSelector(
@@ -204,7 +206,6 @@ const ManageRoles: React.FC = () => {
 
   const handleCreateRole = async (roleData: {
     name: string;
-    description: string;
     permissions: string[];
   }) => {
     setIsCreatingRole(true);
@@ -240,6 +241,33 @@ const ManageRoles: React.FC = () => {
     }
   };
 
+  const renderColumnValue = (column: keyof Role, value: any) => {
+    if (column === "permissionNames" && Array.isArray(value)) {
+      return (
+        <Stack direction="row" spacing={0.5} flexWrap="wrap" useFlexGap>
+          {value.map((permission: string, index: number) => (
+            <Chip
+              key={index}
+              label={permission}
+              size="small"
+              style={{
+                backgroundColor: "black",
+                color: "white",
+                border: "1px solid white",
+              }}
+              sx={{
+                "& .MuiChip-label": {
+                  color: "white !important",
+                },
+              }}
+            />
+          ))}
+        </Stack>
+      );
+    }
+    return value;
+  };
+
   return (
     <Box>
       {isLoadingRoles ? (
@@ -267,7 +295,7 @@ const ManageRoles: React.FC = () => {
             justifyContent="space-between"
             alignItems="center"
           >
-            <Grid item xs={12} md={8}>
+            <Grid item xs={12} md={6}>
               {filteredRoles && (
                 <SearchBar
                   placeholder="Buscar rol"
@@ -278,7 +306,7 @@ const ManageRoles: React.FC = () => {
                 />
               )}
             </Grid>
-            <Grid item xs={12} md={4}>
+            <Grid item xs={12} md={6}>
               <Box
                 display="flex"
                 flexDirection="row"
@@ -324,6 +352,8 @@ const ManageRoles: React.FC = () => {
               setRowsPerPage={setRowsPerPage}
               isSaveDisabled={!isEditFormValid}
               userPermissions={userPermissions}
+              renderColumnValue={renderColumnValue}
+              isExpanded={isExpanded}
             />
           ) : (
             <Box
@@ -341,38 +371,43 @@ const ManageRoles: React.FC = () => {
           )}
         </>
       )}
-      <Dialog open={openDeleteDialog} onClose={handleCloseDeleteDialog}>
-        <DialogTitle>Confirmar Eliminación</DialogTitle>
-        <DialogContent>
-          <Typography>
-            ¿Estás seguro de que deseas eliminar este rol? Esta acción no se puede deshacer.
-          </Typography>
-        </DialogContent>
-        <DialogActions>
-          <Button color="primary" sx={{ flex: 1 }} onClick={handleDelete}>
-            Eliminar
-          </Button>
-          <Button
-            color="secondary"
-            sx={{ flex: 1 }}
-            onClick={handleCloseDeleteDialog}
+      {isExpanded && (
+        <>
+          <Dialog open={openDeleteDialog} onClose={handleCloseDeleteDialog}>
+            <DialogTitle>Confirmar Eliminación</DialogTitle>
+            <DialogContent>
+              <Typography>
+                ¿Estás seguro de que deseas eliminar este rol? Esta acción no se puede deshacer.
+              </Typography>
+            </DialogContent>
+            <DialogActions>
+              <Button color="primary" sx={{ flex: 1 }} onClick={handleDelete}>
+                Eliminar
+              </Button>
+              <Button
+                color="secondary"
+                sx={{ flex: 1 }}
+                onClick={handleCloseDeleteDialog}
+              >
+                Cancelar
+              </Button>
+            </DialogActions>
+          </Dialog>
+          <ModalComponent
+            buttonType="none"
+            open={openAddRoleModal}
+            onCloseModal={handleCloseAddRoleModal}
+            modalTitle="Agregar Rol"
           >
-            Cancelar
-          </Button>
-        </DialogActions>
-      </Dialog>
-      <ModalComponent
-        open={openAddRoleModal}
-        onCloseModal={handleCloseAddRoleModal}
-        modalTitle="Agregar Rol"
-      >
-        <AddRoleForm
-          onSubmit={handleCreateRole}
-          onCancel={handleCloseAddRoleModal}
-          isLoading={isCreatingRole}
-          permissions={permissions}
-        />
-      </ModalComponent>
+            <AddRoleForm
+              onSubmit={handleCreateRole}
+              onCancel={handleCloseAddRoleModal}
+              isLoading={isCreatingRole}
+              permissions={permissions}
+            />
+          </ModalComponent>
+        </>
+      )}
     </Box>
   );
 };
