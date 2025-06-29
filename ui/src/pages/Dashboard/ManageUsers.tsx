@@ -20,10 +20,6 @@ import {
   Box,
   Button,
   CircularProgress,
-  Dialog,
-  DialogActions,
-  DialogContent,
-  DialogTitle,
   Grid,
   IconButton,
   InputAdornment,
@@ -83,8 +79,6 @@ const ManageUsers: React.FC<{ isExpanded?: boolean }> = ({ isExpanded = true }) 
     const loadData = async () => {
       try {
         setLoadError(null);
-        
-        // Agregar timeout para evitar que se quede colgado
         const timeoutPromise = new Promise((_, reject) => {
           setTimeout(() => reject(new Error('Timeout: La carga tardó demasiado')), 30000);
         });
@@ -96,8 +90,6 @@ const ManageUsers: React.FC<{ isExpanded?: boolean }> = ({ isExpanded = true }) 
         ]);
         
         await Promise.race([loadPromise, timeoutPromise]);
-        
-        // Data loaded successfully
       } catch (error) {
         console.error('Error loading data:', error);
         setLoadError(error instanceof Error ? error.message : 'Error al cargar los datos. Por favor, recarga la página.');
@@ -396,7 +388,7 @@ const ManageUsers: React.FC<{ isExpanded?: boolean }> = ({ isExpanded = true }) 
     setShowConfirmNewPassword(!showConfirmNewPassword);
   }, [showConfirmNewPassword]);
 
-  const handleChangePassword = async (
+  const handleChangePassword = useCallback(async (
     e: React.FormEvent,
     id: number,
     handleClose: () => void
@@ -434,13 +426,9 @@ const ManageUsers: React.FC<{ isExpanded?: boolean }> = ({ isExpanded = true }) 
         );
       }
     }
-  };
+  }, [validateNewPasswordFields, passwordFields, dispatch, showNotification]);
 
-  const handlePasswordModal = useCallback((id: number, handleClose: () => void) => {
-    return modalContentChangeUserPassword(id, handleClose);
-  }, []);
-
-  const modalContentChangeUserPassword = (
+  const modalContentChangeUserPassword = useCallback((
     id: number,
     handleClose: () => void
   ) => {
@@ -512,7 +500,11 @@ const ManageUsers: React.FC<{ isExpanded?: boolean }> = ({ isExpanded = true }) 
         </Box>
       </Box>
     );
-  };
+  }, [showNewPassword, showConfirmNewPassword, passwordFields, handleNewPassword, handleConfirmNewPassword, handleToggleNewPassword, handleToggleConfirmNewPassword, error, isPasswordFormValid, handleChangePassword]);
+
+  const handlePasswordModal = useCallback((id: number, handleClose: () => void) => {
+    return modalContentChangeUserPassword(id, handleClose);
+  }, [modalContentChangeUserPassword]);
 
   const handleOpenAddUserModal = useCallback(() => {
     setOpenAddUserModal(true);
@@ -597,7 +589,6 @@ const ManageUsers: React.FC<{ isExpanded?: boolean }> = ({ isExpanded = true }) 
 
   const handleRetry = useCallback(() => {
     setLoadError(null);
-    // Disparar las acciones nuevamente
     dispatch(fetchUsers());
     dispatch(fetchRoles());
     dispatch(fetchUserRoles());
@@ -779,7 +770,6 @@ const ManageUsers: React.FC<{ isExpanded?: boolean }> = ({ isExpanded = true }) 
         </>
       )}
       
-      {/* Modales siempre renderizados pero controlados por estado */}
       <ConfirmationDialog
         open={openStatusDialog}
         onClose={handleCloseStatusDialog}
