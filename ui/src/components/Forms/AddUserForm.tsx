@@ -283,7 +283,7 @@ const AddUserForm: React.FC<AddUserFormProps> = ({
         </Grid>
 
         <Grid item xs={12} sm={6}>
-          <FormControl fullWidth error={errors.roleName !== ""} sx={{ mt: 0 }}>
+          <FormControl fullWidth error={errors.roleName !== ""} sx={{ marginTop: '8px' }}>
             <InputLabel>Rol</InputLabel>
             <Select
               value={formData.roleName}

@@ -27,7 +27,6 @@ import {
   Grid,
   IconButton,
   InputAdornment,
-  Stack,
   TextField,
   Typography,
   useTheme,
@@ -187,6 +186,10 @@ const ManageUsers: React.FC<{ isExpanded?: boolean }> = ({ isExpanded = true }) 
 
   useEffect(() => {
     const validatePassword = async () => {
+      if (passwordFields.newPassword.trim() === "" && passwordFields.confirmNewPassword.trim() === "") {
+        setIsPasswordFormValid(false);
+        return;
+      }
       const isValid = await validateNewPasswordFields(passwordFields);
       setIsPasswordFormValid(isValid);
     };
@@ -368,82 +371,94 @@ const ManageUsers: React.FC<{ isExpanded?: boolean }> = ({ isExpanded = true }) 
     }
   };
 
+  const clearPasswordFields = () => {
+    setPasswordFields({
+      newPassword: "",
+      confirmNewPassword: "",
+    });
+    setShowNewPassword(false);
+    setShowConfirmNewPassword(false);
+    setError(null);
+  };
+
   const modalContentChangeUserPassword = (
     id: number,
     handleClose: () => void
-  ) => (
-    <Box component="form" onSubmit={(e) => handleChangePassword(e, id, handleClose)}>
-      <Grid container spacing={2}>
-        <Grid item xs={12}>
-          <Typography variant="h6" gutterBottom>
-            Cambiar Contraseña
-          </Typography>
-        </Grid>
-        <Grid item xs={12}>
-          <TextField
-            label="Nueva Contraseña"
-            type={showNewPassword ? "text" : "password"}
-            variant="outlined"
-            fullWidth
-            value={passwordFields.newPassword}
-            onChange={handleNewPassword}
-            InputProps={{
-              endAdornment: (
-                <InputAdornment position="end">
-                  <IconButton onClick={handleToggleNewPassword} edge="end">
-                    {showNewPassword ? <VisibilityOff /> : <Visibility />}
-                  </IconButton>
-                </InputAdornment>
-              ),
-            }}
-          />
-        </Grid>
-        <Grid item xs={12}>
-          <TextField
-            label="Confirmar Nueva Contraseña"
-            type={showConfirmNewPassword ? "text" : "password"}
-            variant="outlined"
-            fullWidth
-            value={passwordFields.confirmNewPassword}
-            onChange={handleConfirmNewPassword}
-            InputProps={{
-              endAdornment: (
-                <InputAdornment position="end">
-                  <IconButton
-                    onClick={handleToggleConfirmNewPassword}
-                    edge="end"
-                  >
-                    {showConfirmNewPassword ? <VisibilityOff /> : <Visibility />}
-                  </IconButton>
-                </InputAdornment>
-              ),
-            }}
-          />
-        </Grid>
+  ) => {
+    clearPasswordFields();
+    return (
+      <Box sx={{ p: 2 }}>
+        <Typography variant="h6" gutterBottom>
+          Cambiar Contraseña para Usuario ID: {id}
+        </Typography>
+        <Typography variant="body2" color="textSecondary" sx={{ mb: 3 }}>
+          Ingresa una nueva contraseña para este usuario.
+        </Typography>
+        
+        <TextField
+          label="Nueva Contraseña"
+          type={showNewPassword ? "text" : "password"}
+          variant="outlined"
+          fullWidth
+          value={passwordFields.newPassword}
+          onChange={handleNewPassword}
+          sx={{ mb: 2 }}
+          placeholder="Mínimo 8 caracteres"
+          InputProps={{
+            endAdornment: (
+              <InputAdornment position="end">
+                <IconButton onClick={handleToggleNewPassword} edge="end">
+                  {showNewPassword ? <VisibilityOff /> : <Visibility />}
+                </IconButton>
+              </InputAdornment>
+            ),
+          }}
+        />
+        
+        <TextField
+          label="Confirmar Nueva Contraseña"
+          type={showConfirmNewPassword ? "text" : "password"}
+          variant="outlined"
+          fullWidth
+          value={passwordFields.confirmNewPassword}
+          onChange={handleConfirmNewPassword}
+          sx={{ mb: 2 }}
+          placeholder="Repite la nueva contraseña"
+          InputProps={{
+            endAdornment: (
+              <InputAdornment position="end">
+                <IconButton
+                  onClick={handleToggleConfirmNewPassword}
+                  edge="end"
+                >
+                  {showConfirmNewPassword ? <VisibilityOff /> : <Visibility />}
+                </IconButton>
+              </InputAdornment>
+            ),
+          }}
+        />
+        
         {error && (
-          <Grid item xs={12}>
-            <Alert severity="error" sx={{ whiteSpace: "pre-line" }}>
-              {error}
-            </Alert>
-          </Grid>
+          <Alert severity="error" sx={{ mb: 2, whiteSpace: "pre-line" }}>
+            {error}
+          </Alert>
         )}
-        <Grid item xs={12}>
-          <Stack direction="row" spacing={2} justifyContent="flex-end">
-            <Button variant="outlined" onClick={handleClose}>
-              Cancelar
-            </Button>
-            <Button
-              type="submit"
-              variant="contained"
-              disabled={!isPasswordFormValid}
-            >
-              Cambiar Contraseña
-            </Button>
-          </Stack>
-        </Grid>
-      </Grid>
-    </Box>
-  );
+        
+        <Box sx={{ display: 'flex', gap: 2, justifyContent: 'flex-end', mt: 3 }}>
+          <Button variant="outlined" onClick={handleClose}>
+            Cancelar
+          </Button>
+          <Button
+            variant="contained"
+            onClick={(e) => handleChangePassword(e, id, handleClose)}
+            disabled={!isPasswordFormValid}
+          >
+            Cambiar Contraseña
+          </Button>
+        </Box>
+      </Box>
+    );
+  };
 
   const handleOpenAddUserModal = () => {
     setOpenAddUserModal(true);
