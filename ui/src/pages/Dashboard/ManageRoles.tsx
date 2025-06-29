@@ -22,10 +22,13 @@ import {
   Typography,
   Chip,
   Stack,
+  useTheme,
+  Dialog,
+  DialogTitle,
+  DialogContent,
 } from "@mui/material";
 import EditableTable from "../../components/Table/EditableTable/EditableTable";
 import SearchBar from "../../components/SearchBar/SearchBar";
-import ModalComponent from "../../components/Modal/ModalComponent";
 import AddRoleForm from "../../components/Forms/AddRoleForm";
 import AddModeratorIcon from "@mui/icons-material/AddModerator";
 import ConfirmationDialog from "../../components/Dialog/ConfirmationDialog";
@@ -38,6 +41,7 @@ const ManageRoles: React.FC<{ isExpanded?: boolean }> = ({ isExpanded = true }) 
   );
   const { permissions } = useSelector((state: RootState) => state.permissions);
   const { showNotification } = useAppNotifications();
+  const theme = useTheme();
   const [editRowId, setEditRowId] = useState<number | null>(null);
   const [editFields, setEditFields] = useState<{
     name: string;
@@ -378,19 +382,32 @@ const ManageRoles: React.FC<{ isExpanded?: boolean }> = ({ isExpanded = true }) 
             cancelText="Cancelar"
             loading={isDeletingRole}
           />
-          <ModalComponent
-            buttonType="none"
+          <Dialog
             open={openAddRoleModal}
-            onCloseModal={handleCloseAddRoleModal}
-            modalTitle="Agregar Rol"
+            onClose={handleCloseAddRoleModal}
+            maxWidth="md"
+            fullWidth
           >
-            <AddRoleForm
-              onSubmit={handleCreateRole}
-              onCancel={handleCloseAddRoleModal}
-              isLoading={isCreatingRole}
-              permissions={permissions}
-            />
-          </ModalComponent>
+            <DialogTitle sx={{ 
+              backgroundColor: theme.palette.primary.main, 
+              color: theme.palette.primary.contrastText,
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between'
+            }}>
+              <Typography variant="h6" sx={{ fontWeight: 600 }}>
+                Agregar Rol
+              </Typography>
+            </DialogTitle>
+            <DialogContent sx={{ p: 3 }}>
+              <AddRoleForm
+                onSubmit={handleCreateRole}
+                onCancel={handleCloseAddRoleModal}
+                isLoading={isCreatingRole}
+                permissions={permissions}
+              />
+            </DialogContent>
+          </Dialog>
         </>
       )}
     </Box>
