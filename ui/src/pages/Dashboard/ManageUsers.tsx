@@ -26,6 +26,7 @@ import {
   TextField,
   Typography,
   useTheme,
+  useMediaQuery,
   Dialog,
   DialogTitle,
   DialogContent,
@@ -39,6 +40,7 @@ import VisibilityOff from "@mui/icons-material/VisibilityOff";
 import VisibilityIcon from '@mui/icons-material/Visibility';
 import VisibilityOffIcon from '@mui/icons-material/VisibilityOff';
 import ConfirmationDialog from "../../components/Dialog/ConfirmationDialog";
+import CloseIcon from "@mui/icons-material/Close";
 
 const ManageUsers: React.FC<{ isExpanded?: boolean }> = ({ isExpanded = true }) => {
   const dispatch = useDispatch<AppDispatch>();
@@ -793,6 +795,17 @@ const ManageUsers: React.FC<{ isExpanded?: boolean }> = ({ isExpanded = true }) 
           <Typography variant="h6" sx={{ fontWeight: 600 }}>
             Agregar Usuario
           </Typography>
+          <IconButton
+            onClick={handleCloseAddUserModal}
+            sx={{
+              color: theme.palette.primary.contrastText,
+              '&:hover': {
+                backgroundColor: 'rgba(255,255,255,0.1)',
+              },
+            }}
+          >
+            <CloseIcon />
+          </IconButton>
         </DialogTitle>
         <DialogContent sx={{ p: 3 }}>
           <AddUserForm
