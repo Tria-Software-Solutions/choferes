@@ -70,7 +70,7 @@ const ManagePermissions: React.FC = () => {
             justifyContent="space-between"
             alignItems="center"
           >
-            <Grid item xs={12} md={6}>
+            <Grid item xs={12} md={4}>
               {filteredPermissions && (
                 <SearchBar
                   placeholder="Buscar permiso"
@@ -81,7 +81,7 @@ const ManagePermissions: React.FC = () => {
                 />
               )}
             </Grid>
-            <Grid item xs={12} md={6}>
+            <Grid item xs={12} md={8}>
             </Grid>
           </Grid>
           <br />
