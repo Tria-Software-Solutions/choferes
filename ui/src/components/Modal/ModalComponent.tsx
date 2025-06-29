@@ -14,6 +14,7 @@ import {
 } from "@mui/material";
 import { SxProps } from "@mui/system";
 import CloseIcon from "@mui/icons-material/Close";
+import { useCallback } from "react";
 
 interface ModalComponentProps {
   buttonType?: "text" | "button" | "icon" | "none";
@@ -75,16 +76,16 @@ const ModalComponent: React.FC<ModalComponentProps> = ({
   const isControlled = externalOpen !== undefined;
   const open = isControlled ? externalOpen : internalOpen;
 
-  const handleOpen = () => {
+  const handleOpen = useCallback(() => {
     if (!isControlled) {
       setInternalOpen(true);
     }
     if (onOpen) {
       onOpen();
     }
-  };
+  }, [isControlled, onOpen]);
 
-  const handleClose = () => {
+  const handleClose = useCallback(() => {
     if (!isControlled) {
       setInternalOpen(false);
     }
@@ -94,13 +95,13 @@ const ModalComponent: React.FC<ModalComponentProps> = ({
     if (onCancel) {
       onCancel();
     }
-  };
+  }, [isControlled, onCloseModal, onCancel]);
 
-  const handleSave = () => {
+  const handleSave = useCallback(() => {
     if (onSave) {
       onSave();
     }
-  };
+  }, [onSave]);
 
   const renderButton = () => {
     if (buttonType === "none") return null;

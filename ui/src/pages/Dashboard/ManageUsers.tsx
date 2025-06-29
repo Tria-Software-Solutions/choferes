@@ -45,7 +45,7 @@ import ConfirmationDialog from "../../components/Dialog/ConfirmationDialog";
 const ManageUsers: React.FC<{ isExpanded?: boolean }> = ({ isExpanded = true }) => {
   const dispatch = useDispatch<AppDispatch>();
   const { userPermissions } = useAuthContext();
-  const { users, isLoadingUsers } = useSelector(
+  const { users, isLoadingUsers, error: usersError } = useSelector(
     (state: RootState) => state.users
   );
   const { roles } = useSelector((state: RootState) => state.roles);
@@ -75,51 +75,100 @@ const ManageUsers: React.FC<{ isExpanded?: boolean }> = ({ isExpanded = true }) 
   const [openAddUserModal, setOpenAddUserModal] = useState(false);
   const [isCreatingUser, setIsCreatingUser] = useState(false);
   const [isUpdatingUserStatus, setIsUpdatingUserStatus] = useState(false);
+  const [loadError, setLoadError] = useState<string | null>(null);
 
   const theme = useTheme();
 
   useEffect(() => {
-    dispatch(fetchUsers());
-    dispatch(fetchRoles());
-    dispatch(fetchUserRoles());
-  }, [dispatch]);
+    const loadData = async () => {
+      try {
+        setLoadError(null);
+        
+        // Agregar timeout para evitar que se quede colgado
+        const timeoutPromise = new Promise((_, reject) => {
+          setTimeout(() => reject(new Error('Timeout: La carga tardó demasiado')), 30000);
+        });
+        
+        const loadPromise = Promise.all([
+          dispatch(fetchUsers()),
+          dispatch(fetchRoles()),
+          dispatch(fetchUserRoles())
+        ]);
+        
+        await Promise.race([loadPromise, timeoutPromise]);
+        
+        // Data loaded successfully
+      } catch (error) {
+        console.error('Error loading data:', error);
+        setLoadError(error instanceof Error ? error.message : 'Error al cargar los datos. Por favor, recarga la página.');
+        showNotification(
+          "Error al cargar los datos",
+          "error",
+          5000,
+          false
+        );
+      }
+    };
+    
+    loadData();
+  }, [dispatch, showNotification]);
+
+  useEffect(() => {
+    if (usersError) {
+      console.error('Users error from Redux:', usersError);
+      setLoadError(`Error al cargar usuarios: ${usersError}`);
+      showNotification(
+        "Error al cargar usuarios",
+        "error",
+        5000,
+        false
+      );
+    }
+  }, [usersError, showNotification]);
 
   const filteredUsers = useMemo(() => {
-    if (!users || users.length === 0) return [];
+    if (!users || users.length === 0) {
+      return [];
+    }
     
-    const normalizeString = (str: string) =>
-      str.normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+    const normalizeString = (str: string) => {
+      if (!str) return '';
+      return str.normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+    };
 
-    const processUsers = (userList: typeof users) => {
-      return userList
-        .map((user) => ({
-          ...user,
-          roleName: user.roles?.map((role: Role) => role.name).join(", ") || "",
-        }))
-        .filter((user) => {
-          if (!showInactive && !user.isActive) return false;
-          
-          if (!filter.trim()) return true;
-          
+    const processedUsers = users
+      .map((user) => {
+        try {
+          return {
+            ...user,
+            roleName: user.roles?.map((role: Role) => role.name).join(", ") || "",
+          };
+        } catch (error) {
+          console.error('Error processing user:', user, error);
+          return {
+            ...user,
+            roleName: "",
+          };
+        }
+      })
+      .filter((user) => {
+        if (!showInactive && !user.isActive) return false;
+        
+        if (!filter.trim()) return true;
+        
+        try {
           const searchText = normalizeString(
-            `${user.firstName} ${user.lastName} ${user.email} ${user.username} ${user.roleName}`
+            `${user.firstName || ''} ${user.lastName || ''} ${user.email || ''} ${user.username || ''} ${user.roleName || ''}`
           ).toLowerCase();
           
           return searchText.includes(normalizeString(filter).toLowerCase());
-        });
-    };
+        } catch (error) {
+          console.error('Error filtering user:', user, error);
+          return true; // Include user if filtering fails
+        }
+      });
 
-    if (users.length > 100) {
-      const batchSize = 50;
-      const batches = [];
-      for (let i = 0; i < users.length; i += batchSize) {
-        batches.push(users.slice(i, i + batchSize));
-      }
-      
-      return batches.flatMap(processUsers);
-    }
-
-    return processUsers(users);
+    return processedUsers;
   }, [filter, users, showInactive]);
 
   const totalCount = useMemo(() => filteredUsers.length, [filteredUsers]);
@@ -198,25 +247,34 @@ const ManageUsers: React.FC<{ isExpanded?: boolean }> = ({ isExpanded = true }) 
     return validateFields(editFields, false);
   }, [editFields, editRowId, validateFields]);
 
-  const handleFilterChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFilterChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
     setFilter(e.target.value);
-  };
+    setPage(0);
+  }, [setPage]);
 
-  const handleEdit = (user: User) => {
+  const handleEdit = useCallback((user: User) => {
     setEditRowId(user.id);
     setEditFields({
-      firstName: user.firstName,
-      lastName: user.lastName,
-      email: user.email,
-      username: user.username,
+      firstName: user.firstName || "",
+      lastName: user.lastName || "",
+      email: user.email || "",
+      username: user.username || "",
       password: "",
       roleName: user.roles?.map((role: Role) => role.name).join(", ") || "",
     });
-  };
+  }, []);
 
-  const handleCancel = () => {
+  const handleCancel = useCallback(() => {
     setEditRowId(null);
-  };
+    setEditFields({
+      firstName: "",
+      lastName: "",
+      email: "",
+      username: "",
+      password: "",
+      roleName: "",
+    });
+  }, []);
 
   const handleUpdate = async (id: number) => {
     try {
@@ -270,14 +328,15 @@ const ManageUsers: React.FC<{ isExpanded?: boolean }> = ({ isExpanded = true }) 
     }
   };
 
-  const handleOpenStatusDialog = async (row: any) => {
+  const handleOpenStatusDialog = useCallback(async (row: any) => {
     setUserToChange(row);
     setOpenStatusDialog(true);
-  };
+  }, []);
 
-  const handleCloseStatusDialog = () => {
+  const handleCloseStatusDialog = useCallback(() => {
     setOpenStatusDialog(false);
-  };
+    setUserToChange(null);
+  }, []);
 
   const handleStatusChange = async () => {
     if (!userToChange) return;
@@ -311,31 +370,31 @@ const ManageUsers: React.FC<{ isExpanded?: boolean }> = ({ isExpanded = true }) 
     }
   };
 
-  const handleNewPassword = (
+  const handleNewPassword = useCallback((
     event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
   ) => {
     setPasswordFields({
       ...passwordFields,
       newPassword: event.target.value,
     });
-  };
+  }, [passwordFields]);
 
-  const handleConfirmNewPassword = (
+  const handleConfirmNewPassword = useCallback((
     event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
   ) => {
     setPasswordFields({
       ...passwordFields,
       confirmNewPassword: event.target.value,
     });
-  };
+  }, [passwordFields]);
 
-  const handleToggleNewPassword = () => {
+  const handleToggleNewPassword = useCallback(() => {
     setShowNewPassword(!showNewPassword);
-  };
+  }, [showNewPassword]);
 
-  const handleToggleConfirmNewPassword = () => {
+  const handleToggleConfirmNewPassword = useCallback(() => {
     setShowConfirmNewPassword(!showConfirmNewPassword);
-  };
+  }, [showConfirmNewPassword]);
 
   const handleChangePassword = async (
     e: React.FormEvent,
@@ -377,13 +436,9 @@ const ManageUsers: React.FC<{ isExpanded?: boolean }> = ({ isExpanded = true }) 
     }
   };
 
-  const handlePasswordModal = (id: number, handleClose: () => void) => {
-    setPasswordFields({ newPassword: "", confirmNewPassword: "" });
-    setShowNewPassword(false);
-    setShowConfirmNewPassword(false);
-    setError(null);
+  const handlePasswordModal = useCallback((id: number, handleClose: () => void) => {
     return modalContentChangeUserPassword(id, handleClose);
-  };
+  }, []);
 
   const modalContentChangeUserPassword = (
     id: number,
@@ -459,13 +514,13 @@ const ManageUsers: React.FC<{ isExpanded?: boolean }> = ({ isExpanded = true }) 
     );
   };
 
-  const handleOpenAddUserModal = () => {
+  const handleOpenAddUserModal = useCallback(() => {
     setOpenAddUserModal(true);
-  };
+  }, []);
 
-  const handleCloseAddUserModal = () => {
+  const handleCloseAddUserModal = useCallback(() => {
     setOpenAddUserModal(false);
-  };
+  }, []);
 
   const handleCreateUser = async (userData: {
     firstName: string;
@@ -540,9 +595,49 @@ const ManageUsers: React.FC<{ isExpanded?: boolean }> = ({ isExpanded = true }) 
     []
   );
 
+  const handleRetry = useCallback(() => {
+    setLoadError(null);
+    // Disparar las acciones nuevamente
+    dispatch(fetchUsers());
+    dispatch(fetchRoles());
+    dispatch(fetchUserRoles());
+  }, [dispatch]);
+
+  const setEditField = useCallback((field: string, value: string | boolean | number | string[] | Date) => {
+    setEditFields({ ...editFields, [field]: value });
+  }, [editFields]);
+
   return (
     <Box>
-      {isLoadingUsers ? (
+      {loadError ? (
+        <Box
+          sx={{
+            display: "flex",
+            flexDirection: "column",
+            justifyContent: "center",
+            alignItems: "center",
+            textAlign: "center",
+            paddingTop: "10%",
+            gap: 2,
+          }}
+        >
+          <Alert severity="error" sx={{ maxWidth: 600 }}>
+            <Typography variant="h6" gutterBottom>
+              Error de Carga
+            </Typography>
+            <Typography variant="body1" gutterBottom>
+              {loadError}
+            </Typography>
+            <Button
+              variant="contained"
+              onClick={handleRetry}
+              sx={{ mt: 2 }}
+            >
+              Reintentar
+            </Button>
+          </Alert>
+        </Box>
+      ) : isLoadingUsers ? (
         <Box
           sx={{
             display: "flex",
@@ -650,9 +745,7 @@ const ManageUsers: React.FC<{ isExpanded?: boolean }> = ({ isExpanded = true }) 
               ]}
               editRowId={editRowId}
               editFields={editFields}
-              setEditField={(field, value) =>
-                setEditFields({ ...editFields, [field]: value })
-              }
+              setEditField={setEditField}
               handleEdit={handleEdit}
               handleCancel={handleCancel}
               handleUpdate={handleUpdate}
@@ -685,34 +778,33 @@ const ManageUsers: React.FC<{ isExpanded?: boolean }> = ({ isExpanded = true }) 
           )}
         </>
       )}
-      {isExpanded && (
-        <>
-          <ConfirmationDialog
-            open={openStatusDialog}
-            onClose={handleCloseStatusDialog}
-            onConfirm={handleStatusChange}
-            title="Cambiar Estado de Usuario"
-            message="¿Estás seguro de que deseas cambiar el estado de este usuario?"
-            type="warning"
-            confirmText="Cambiar Estado"
-            cancelText="Cancelar"
-            loading={isUpdatingUserStatus}
-          />
-          <ModalComponent
-            buttonType="none"
-            open={openAddUserModal}
-            onCloseModal={handleCloseAddUserModal}
-            modalTitle="Agregar Usuario"
-          >
-            <AddUserForm
-              onSubmit={handleCreateUser}
-              onCancel={handleCloseAddUserModal}
-              isLoading={isCreatingUser}
-              roles={roles}
-            />
-          </ModalComponent>
-        </>
-      )}
+      
+      {/* Modales siempre renderizados pero controlados por estado */}
+      <ConfirmationDialog
+        open={openStatusDialog}
+        onClose={handleCloseStatusDialog}
+        onConfirm={handleStatusChange}
+        title="Cambiar Estado de Usuario"
+        message="¿Estás seguro de que deseas cambiar el estado de este usuario?"
+        type="warning"
+        confirmText="Cambiar Estado"
+        cancelText="Cancelar"
+        loading={isUpdatingUserStatus}
+      />
+      
+      <ModalComponent
+        buttonType="none"
+        open={openAddUserModal}
+        onCloseModal={handleCloseAddUserModal}
+        modalTitle="Agregar Usuario"
+      >
+        <AddUserForm
+          onSubmit={handleCreateUser}
+          onCancel={handleCloseAddUserModal}
+          isLoading={isCreatingUser}
+          roles={roles}
+        />
+      </ModalComponent>
     </Box>
   );
 };
