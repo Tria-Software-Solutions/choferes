@@ -31,7 +31,6 @@ import {
   TextField,
   Typography,
   useTheme,
-  Tooltip,
 } from "@mui/material";
 import EditableTable from "../../components/Table/EditableTable/EditableTable";
 import SearchBar from "../../components/SearchBar/SearchBar";
@@ -550,88 +549,39 @@ const ManageUsers: React.FC<{ isExpanded?: boolean }> = ({ isExpanded = true }) 
                 justifyContent="flex-end"
                 gap={2}
               >
-                <Tooltip 
-                  title={showInactive 
-                    ? "Mostrando usuarios activos e inactivos" 
-                    : "Solo mostrando usuarios activos"
-                  }
-                  arrow
-                  placement="top"
+                <Box
+                  onClick={() => setShowInactive(!showInactive)}
+                  sx={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: 1,
+                    cursor: 'pointer',
+                    userSelect: 'none',
+                    color: theme.palette.text.primary,
+                    transition: 'color 0.2s',
+                    '&:hover': {
+                      color: theme.palette.primary.main,
+                      textDecoration: 'underline',
+                    },
+                    px: 1,
+                  }}
                 >
-                  <Box
+                  {showInactive ? (
+                    <VisibilityIcon sx={{ fontSize: 20 }} />
+                  ) : (
+                    <VisibilityOffIcon sx={{ fontSize: 20 }} />
+                  )}
+                  <Typography
+                    variant="body2"
+                    fontWeight={600}
                     sx={{
-                      display: 'flex',
-                      alignItems: 'center',
-                      gap: 1,
-                      p: 1,
-                      borderRadius: 2,
-                      border: `2px solid ${showInactive ? theme.palette.primary.main : theme.palette.secondary.main}`,
-                      backgroundColor: showInactive 
-                        ? `${theme.palette.primary.main}10` 
-                        : `${theme.palette.secondary.main}10`,
-                      cursor: 'pointer',
-                      transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
-                      '&:hover': {
-                        transform: 'translateY(-2px)',
-                        boxShadow: showInactive 
-                          ? `0 4px 12px ${theme.palette.primary.main}30`
-                          : `0 4px 12px ${theme.palette.secondary.main}30`,
-                        borderColor: showInactive 
-                          ? theme.palette.primary.dark 
-                          : theme.palette.secondary.dark,
-                        backgroundColor: showInactive 
-                          ? `${theme.palette.primary.main}20` 
-                          : `${theme.palette.secondary.main}20`,
-                      },
-                      '&:active': {
-                        transform: 'translateY(0px)',
-                      }
+                      fontSize: '0.95rem',
+                      whiteSpace: 'nowrap',
                     }}
-                    onClick={() => setShowInactive(!showInactive)}
                   >
-                    {showInactive ? (
-                      <>
-                        <VisibilityIcon 
-                          sx={{ 
-                            color: theme.palette.primary.main,
-                            fontSize: 20 
-                          }} 
-                        />
-                        <Typography
-                          variant="body2"
-                          sx={{
-                            fontWeight: 600,
-                            color: theme.palette.primary.main,
-                            fontSize: '0.875rem',
-                            whiteSpace: 'nowrap'
-                          }}
-                        >
-                          Mostrando Inactivos
-                        </Typography>
-                      </>
-                    ) : (
-                      <>
-                        <VisibilityOffIcon 
-                          sx={{ 
-                            color: theme.palette.secondary.main,
-                            fontSize: 20 
-                          }} 
-                        />
-                        <Typography
-                          variant="body2"
-                          sx={{
-                            fontWeight: 600,
-                            color: theme.palette.secondary.main,
-                            fontSize: '0.875rem',
-                            whiteSpace: 'nowrap'
-                          }}
-                        >
-                          Ocultar Inactivos
-                        </Typography>
-                      </>
-                    )}
-                  </Box>
-                </Tooltip>
+                    {showInactive ? 'Mostrando Inactivos' : 'Ocultar Inactivos'}
+                  </Typography>
+                </Box>
                 <Button
                   variant="contained"
                   startIcon={<PersonAddAlt1RoundedIcon />}
