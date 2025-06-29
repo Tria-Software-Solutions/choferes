@@ -76,6 +76,12 @@ const AppBarWrapper: React.FC = () => {
       path: ROUTES.VEHICLES,
       permission: PERMISSIONS.VIEW_VEHICLES,
     },
+    {
+      label: APPBAR_MENU.DASHBOARD,
+      icon: <ManageAccountsIcon />,
+      path: ROUTES.DASHBOARD,
+      permission: PERMISSIONS.VIEW_ADMIN,
+    },
   ];
 
   const permissionsMap = {
@@ -84,6 +90,7 @@ const AppBarWrapper: React.FC = () => {
     [APPBAR_MENU.EMPLOYEES]: PERMISSIONS.VIEW_EMPLOYEES,
     [APPBAR_MENU.SCHEDULES]: PERMISSIONS.VIEW_SCHEDULES,
     [APPBAR_MENU.VEHICLES]: PERMISSIONS.VIEW_VEHICLES,
+    [APPBAR_MENU.DASHBOARD]: PERMISSIONS.VIEW_ADMIN,
   };
 
   const filteredLinks = links.filter((link) => {
@@ -93,12 +100,6 @@ const AppBarWrapper: React.FC = () => {
   const finalLinks = filteredLinks;
 
   const userLinks = [
-    {
-      label: APPBAR_MENU.DASHBOARD,
-      icon: <ManageAccountsIcon />,
-      path: ROUTES.DASHBOARD,
-      permission: PERMISSIONS.VIEW_ADMIN,
-    },
     {
       label: APPBAR_MENU.SETTINGS,
       icon: <SettingsIcon />,
