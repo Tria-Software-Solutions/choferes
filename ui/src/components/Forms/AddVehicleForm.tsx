@@ -1,0 +1,512 @@
+import React, { useState, useCallback } from 'react';
+import {
+  Box,
+  Grid,
+  TextField,
+  Button,
+  useTheme,
+  FormControl,
+  Autocomplete,
+} from '@mui/material';
+import { LocalizationProvider } from '@mui/x-date-pickers';
+import { DatePicker } from '@mui/x-date-pickers/DatePicker';
+import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns';
+import { es } from 'date-fns/locale';
+import { BRANDS_LIST, COLORS_LIST } from '../../constants/constants';
+import { maskLicensePlate, maskParkingLot } from '../../utils/mask';
+import PostAddRoundedIcon from '@mui/icons-material/PostAddRounded';
+import CloseRoundedIcon from '@mui/icons-material/CloseRounded';
+
+interface AddVehicleFormProps {
+  onSubmit: (vehicle: {
+    ticket: string;
+    licensePlate: string;
+    brand: string;
+    color: string;
+    parkingLot: string;
+    notes: string;
+    parkingDate: Date;
+  }) => void;
+  onCancel?: () => void;
+  isLoading?: boolean;
+  existingVehicles?: Array<{ ticket: string; licensePlate: string }>;
+  getNextTicketNumber: () => string;
+}
+
+const AddVehicleForm: React.FC<AddVehicleFormProps> = ({
+  onSubmit,
+  onCancel,
+  isLoading = false,
+  existingVehicles = [],
+  getNextTicketNumber,
+}) => {
+  const theme = useTheme();
+  const [formData, setFormData] = useState({
+    ticket: getNextTicketNumber(),
+    licensePlate: '',
+    brand: '',
+    color: '',
+    parkingLot: '',
+    notes: '',
+    parkingDate: new Date(),
+  });
+
+  const [errors, setErrors] = useState({
+    ticket: '',
+    licensePlate: '',
+    brand: '',
+    color: '',
+    parkingLot: '',
+  });
+
+  const [searchBrandTerm, setSearchBrandTerm] = useState('');
+  const [filteredBrands, setFilteredBrands] = useState(BRANDS_LIST);
+  const [searchColorTerm, setSearchColorTerm] = useState('');
+  const [filteredColors, setFilteredColors] = useState(COLORS_LIST);
+
+  const validateField = useCallback((name: string, value: string) => {
+    const regex = {
+      number: /^\d+$/,
+      plate: /^(?:[A-ZÑ]{3}-\d{3}|\d{6}|nulo|n\/a)$/i,
+      text: /^(?:[a-zA-ZáéíóúÁÉÍÓÚñÑüÜëË\s-]+|nulo|n\/a)$/i,
+      parkingLot: /^(?:ATP[1-9]-\d{3,4}|nulo|n\/a)$/i,
+    };
+
+    if (!value.trim()) {
+      return 'Este campo es requerido';
+    }
+
+    switch (name) {
+      case 'ticket':
+        if (!regex.number.test(value)) {
+          return 'Solo se permiten números';
+        }
+        if (existingVehicles.some(v => v.ticket === value)) {
+          return 'Este número de boleta ya está registrado';
+        }
+        break;
+      case 'licensePlate':
+        if (!regex.plate.test(value.trim())) {
+          return 'Formato inválido (ej: ABC-123, 123456, N/A)';
+        }
+        if (existingVehicles.some(v => v.licensePlate === value)) {
+          return 'Esta placa ya está registrada';
+        }
+        break;
+      case 'brand':
+      case 'color':
+        if (!regex.text.test(value)) {
+          return 'Solo se permiten letras, espacios y guiones';
+        }
+        break;
+      case 'parkingLot':
+        if (!regex.parkingLot.test(value.trim())) {
+          return 'Formato inválido (ej: ATP1-123, N/A)';
+        }
+        break;
+    }
+
+    return '';
+  }, [existingVehicles]);
+
+  const handleFieldChange = (field: string, value: string) => {
+    setFormData(prev => ({ ...prev, [field]: value }));
+    const error = validateField(field, value);
+    setErrors(prev => ({ ...prev, [field]: error }));
+  };
+
+  const handleSearchChangeBrand = (
+    event: React.SyntheticEvent,
+    value: string,
+    reason: string
+  ) => {
+    setSearchBrandTerm(value);
+    if (reason === 'input') {
+      const filtered = BRANDS_LIST.filter((brand) =>
+        brand.value.toLowerCase().includes(value.toLowerCase())
+      );
+      setFilteredBrands(filtered);
+    }
+  };
+
+  const handleSearchChangeColor = (
+    event: React.SyntheticEvent,
+    value: string,
+    reason: string
+  ) => {
+    setSearchColorTerm(value);
+    if (reason === 'input') {
+      const filtered = COLORS_LIST.filter((color) =>
+        color.value.toLowerCase().includes(value.toLowerCase())
+      );
+      setFilteredColors(filtered);
+    }
+  };
+
+  const handleLicensePlateChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const rawValue = event.target.value;
+    const maskedValue = maskLicensePlate(rawValue);
+    handleFieldChange('licensePlate', maskedValue);
+  };
+
+  const handleParkingLotChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const rawValue = event.target.value;
+    const maskedValue = maskParkingLot(rawValue);
+    handleFieldChange('parkingLot', maskedValue);
+  };
+
+  const isFormValid = () => {
+    return (
+      formData.ticket.trim() !== '' &&
+      formData.licensePlate.trim() !== '' &&
+      formData.brand.trim() !== '' &&
+      formData.color.trim() !== '' &&
+      formData.parkingLot.trim() !== '' &&
+      Object.values(errors).every(error => error === '')
+    );
+  };
+
+  const handleSubmit = () => {
+    if (isFormValid()) {
+      onSubmit({
+        ticket: formData.ticket.trim(),
+        licensePlate: formData.licensePlate.trim(),
+        brand: formData.brand.trim(),
+        color: formData.color.trim(),
+        parkingLot: formData.parkingLot.trim(),
+        notes: formData.notes.trim(),
+        parkingDate: formData.parkingDate,
+      });
+    }
+  };
+
+  const handleClearForm = () => {
+    setFormData({
+      ticket: getNextTicketNumber(),
+      licensePlate: '',
+      brand: '',
+      color: '',
+      parkingLot: '',
+      notes: '',
+      parkingDate: new Date(),
+    });
+    setErrors({
+      ticket: '',
+      licensePlate: '',
+      brand: '',
+      color: '',
+      parkingLot: '',
+    });
+    setSearchBrandTerm('');
+    setFilteredBrands(BRANDS_LIST);
+    setSearchColorTerm('');
+    setFilteredColors(COLORS_LIST);
+  };
+
+  return (
+    <Box sx={{ width: '100%', p: 0 }}>
+      <Grid container spacing={3} sx={{ mt: 0 }}>
+        {/* Boleta */}
+        <Grid item xs={12} sm={6}>
+          <TextField
+            label="Boleta"
+            variant="outlined"
+            fullWidth
+            placeholder="Ej: 12345"
+            value={formData.ticket}
+            onChange={(e) => handleFieldChange('ticket', e.target.value)}
+            error={errors.ticket !== ''}
+            helperText={errors.ticket}
+            InputProps={{
+              startAdornment: (
+                <Box sx={{ mr: 1, color: theme.palette.text.secondary }}>
+                  🎫
+                </Box>
+              ),
+            }}
+          />
+        </Grid>
+
+        {/* Placa */}
+        <Grid item xs={12} sm={6}>
+          <TextField
+            label="Placa"
+            variant="outlined"
+            fullWidth
+            placeholder="Ej: ABC-123"
+            value={formData.licensePlate}
+            onChange={handleLicensePlateChange}
+            error={errors.licensePlate !== ''}
+            helperText={errors.licensePlate}
+            InputProps={{
+              startAdornment: (
+                <Box sx={{ mr: 1, color: theme.palette.text.secondary }}>
+                  🚗
+                </Box>
+              ),
+            }}
+          />
+        </Grid>
+
+        {/* Marca */}
+        <Grid item xs={12} sm={6}>
+          <FormControl variant="outlined" fullWidth>
+            <Autocomplete
+              freeSolo
+              value={formData.brand ? { value: formData.brand, label: formData.brand } : null}
+              onChange={(event, newValue) => {
+                const brandValue = typeof newValue === 'object' ? newValue?.value || '' : newValue || '';
+                handleFieldChange('brand', brandValue);
+                setSearchBrandTerm('');
+                setFilteredBrands(BRANDS_LIST);
+              }}
+              inputValue={searchBrandTerm}
+              onInputChange={handleSearchChangeBrand}
+              options={filteredBrands}
+              getOptionLabel={(option) => typeof option === 'string' ? option : option.label}
+              noOptionsText="Sin coincidencias"
+              renderInput={(params) => (
+                <TextField
+                  {...params}
+                  label="Marca"
+                  variant="outlined"
+                  fullWidth
+                  error={errors.brand !== ''}
+                  helperText={errors.brand}
+                  InputProps={{
+                    ...params.InputProps,
+                    startAdornment: (
+                      <Box sx={{ mr: 1, color: theme.palette.text.secondary }}>
+                        🏭
+                      </Box>
+                    ),
+                  }}
+                />
+              )}
+            />
+          </FormControl>
+        </Grid>
+
+        {/* Color */}
+        <Grid item xs={12} sm={6}>
+          <FormControl variant="outlined" fullWidth>
+            <Autocomplete
+              freeSolo
+              value={formData.color ? { value: formData.color, label: formData.color } : null}
+              onChange={(event, newValue) => {
+                const colorValue = typeof newValue === 'object' ? newValue?.value || '' : newValue || '';
+                handleFieldChange('color', colorValue);
+                setSearchColorTerm('');
+                setFilteredColors(COLORS_LIST);
+              }}
+              inputValue={searchColorTerm}
+              onInputChange={handleSearchChangeColor}
+              options={filteredColors}
+              getOptionLabel={(option) => typeof option === 'string' ? option : option.label}
+              noOptionsText="Sin coincidencias"
+              renderInput={(params) => (
+                <TextField
+                  {...params}
+                  label="Color"
+                  variant="outlined"
+                  fullWidth
+                  error={errors.color !== ''}
+                  helperText={errors.color}
+                  InputProps={{
+                    ...params.InputProps,
+                    startAdornment: (
+                      <Box sx={{ mr: 1, color: theme.palette.text.secondary }}>
+                        🎨
+                      </Box>
+                    ),
+                  }}
+                />
+              )}
+            />
+          </FormControl>
+        </Grid>
+
+        {/* Espacio de Parqueo */}
+        <Grid item xs={12} sm={6}>
+          <TextField
+            label="Espacio de Parqueo"
+            variant="outlined"
+            fullWidth
+            placeholder="Ej: ATP1-123"
+            value={formData.parkingLot}
+            onChange={handleParkingLotChange}
+            error={errors.parkingLot !== ''}
+            helperText={errors.parkingLot}
+            InputProps={{
+              startAdornment: (
+                <Box sx={{ mr: 1, color: theme.palette.text.secondary }}>
+                  🅿️
+                </Box>
+              ),
+            }}
+          />
+        </Grid>
+
+        {/* Fecha de Parqueo */}
+        <Grid item xs={12} sm={6}>
+          <LocalizationProvider dateAdapter={AdapterDateFns} adapterLocale={es}>
+            <DatePicker
+              label="Fecha de Parqueo"
+              value={formData.parkingDate}
+              onChange={(date) => setFormData({ ...formData, parkingDate: date || new Date() })}
+              maxDate={new Date()}
+              slotProps={{
+                textField: {
+                  variant: 'outlined',
+                  fullWidth: true,
+                  InputProps: {
+                    startAdornment: (
+                      <Box sx={{ mr: 1, color: theme.palette.text.secondary }}>
+                        📅
+                      </Box>
+                    ),
+                  },
+                },
+              }}
+            />
+          </LocalizationProvider>
+        </Grid>
+
+        {/* Observaciones */}
+        <Grid item xs={12}>
+          <TextField
+            label="Observaciones"
+            variant="outlined"
+            fullWidth
+            multiline
+            rows={3}
+            placeholder="Observaciones adicionales sobre el vehículo..."
+            value={formData.notes}
+            onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
+            InputProps={{
+              startAdornment: (
+                <Box sx={{ mr: 1, color: theme.palette.text.secondary }}>
+                  📝
+                </Box>
+              ),
+            }}
+          />
+        </Grid>
+
+        {/* Información Adicional */}
+        <Grid item xs={12}>
+          <Box
+            sx={{
+              display: 'flex',
+              alignItems: 'center',
+              p: 2,
+              backgroundColor: theme.palette.action.hover,
+              borderRadius: 1,
+              border: '1px solid',
+              borderColor: theme.palette.divider,
+            }}
+          >
+            <Box sx={{ mr: 2, color: theme.palette.info.main }}>
+              ℹ️
+            </Box>
+            <Box>
+              <Box sx={{ 
+                fontWeight: 600,
+                color: theme.palette.text.primary,
+                mb: 0.5,
+              }}>
+                Información del Vehículo
+              </Box>
+              <Box sx={{
+                color: theme.palette.text.secondary,
+                fontSize: '0.875rem',
+              }}>
+                Completa todos los campos requeridos. La boleta y placa deben ser únicas.{' '}
+                <Box
+                  component="span"
+                  onClick={() => {
+                    setFormData({
+                      ...formData,
+                      licensePlate: 'N/A',
+                      brand: 'N/A',
+                      color: 'N/A',
+                      parkingLot: 'N/A',
+                      notes: 'N/A',
+                    });
+                    setErrors({
+                      ticket: '',
+                      licensePlate: '',
+                      brand: '',
+                      color: '',
+                      parkingLot: '',
+                    });
+                  }}
+                  sx={{
+                    color: theme.palette.primary.main,
+                    cursor: 'pointer',
+                    textDecoration: 'underline',
+                    fontWeight: 500,
+                    '&:hover': {
+                      color: theme.palette.primary.dark,
+                    },
+                  }}
+                >
+                  Puedes usar "N/A" para campos opcionales.
+                </Box>
+              </Box>
+            </Box>
+          </Box>
+        </Grid>
+
+        {/* Botones de Acción */}
+        <Grid item xs={12}>
+          <Box
+            sx={{
+              display: 'flex',
+              justifyContent: 'space-between',
+              gap: 2,
+              pt: 2,
+              borderTop: '1px solid',
+              borderColor: theme.palette.divider,
+            }}
+          >
+            <Button
+              variant="outlined"
+              onClick={handleClearForm}
+              startIcon={<CloseRoundedIcon />}
+            >
+              Limpiar
+            </Button>
+            <Box sx={{ display: 'flex', gap: 2 }}>
+              {onCancel && (
+                <Button
+                  variant="outlined"
+                  onClick={onCancel}
+                  disabled={isLoading}
+                >
+                  Cancelar
+                </Button>
+              )}
+              <Button
+                variant="contained"
+                onClick={handleSubmit}
+                disabled={!isFormValid() || isLoading}
+                startIcon={<PostAddRoundedIcon />}
+                sx={{
+                  px: 4,
+                  py: 1.5,
+                  fontSize: '1rem',
+                  minHeight: 56,
+                }}
+              >
+                {isLoading ? 'Agregando...' : 'Agregar Vehículo'}
+              </Button>
+            </Box>
+          </Box>
+        </Grid>
+      </Grid>
+    </Box>
+  );
+};
+
+export default AddVehicleForm; 

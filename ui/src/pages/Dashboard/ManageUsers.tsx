@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from "react";
+import React, { useState, useEffect, useCallback, useMemo } from "react";
 import { useAuthContext } from "../../context/AuthContext";
 import { User } from "../../models/User";
 import { Role } from "../../models/Role";
@@ -49,18 +49,8 @@ const ManageUsers: React.FC<{ isExpanded?: boolean }> = ({ isExpanded = true }) 
   );
   const { roles } = useSelector((state: RootState) => state.roles);
   const { showNotification } = useAppNotifications();
-  const [filteredUsers, setFilteredUsers] = useState<User[]>([]);
   const [showInactive, setShowInactive] = useState(false);
-  const [totalCount, setTotalCount] = useState(0);
   const [editRowId, setEditRowId] = useState<number | null>(null);
-  const [addFields, ] = useState({
-    firstName: "",
-    lastName: "",
-    email: "",
-    username: "",
-    password: "",
-    roleName: "",
-  });
   const [editFields, setEditFields] = useState({
     firstName: "",
     lastName: "",
@@ -81,10 +71,6 @@ const ManageUsers: React.FC<{ isExpanded?: boolean }> = ({ isExpanded = true }) 
   const [filter, setFilter] = useState("");
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(5);
-  const [, setIsAddFormValid] = useState(false);
-  const [isEditFormValid, setIsEditFormValid] = useState(false);
-  const [isPasswordFormValid, setIsPasswordFormValid] = useState(false);
-  
   const [openAddUserModal, setOpenAddUserModal] = useState(false);
   const [isCreatingUser, setIsCreatingUser] = useState(false);
 
@@ -96,30 +82,45 @@ const ManageUsers: React.FC<{ isExpanded?: boolean }> = ({ isExpanded = true }) 
     dispatch(fetchUserRoles());
   }, [dispatch]);
 
-  useEffect(() => {
+  const filteredUsers = useMemo(() => {
+    if (!users || users.length === 0) return [];
+    
     const normalizeString = (str: string) =>
       str.normalize("NFD").replace(/[\u0300-\u036f]/g, "");
 
-    let filtered = users
-      .map((user) => ({
-        ...user,
-        roleName: user.roles?.map((role: Role) => role.name).join(", "),
-      }))
-      .filter((user) =>
-        normalizeString(
-          `${user.firstName} ${user.lastName} ${user.email} ${user.username} ${user.roleName}`
-        )
-          .toLowerCase()
-          .includes(normalizeString(filter).toLowerCase())
-      );
+    const processUsers = (userList: typeof users) => {
+      return userList
+        .map((user) => ({
+          ...user,
+          roleName: user.roles?.map((role: Role) => role.name).join(", ") || "",
+        }))
+        .filter((user) => {
+          if (!showInactive && !user.isActive) return false;
+          
+          if (!filter.trim()) return true;
+          
+          const searchText = normalizeString(
+            `${user.firstName} ${user.lastName} ${user.email} ${user.username} ${user.roleName}`
+          ).toLowerCase();
+          
+          return searchText.includes(normalizeString(filter).toLowerCase());
+        });
+    };
 
-    if (!showInactive) {
-      filtered = filtered.filter((user) => user.isActive);
+    if (users.length > 100) {
+      const batchSize = 50;
+      const batches = [];
+      for (let i = 0; i < users.length; i += batchSize) {
+        batches.push(users.slice(i, i + batchSize));
+      }
+      
+      return batches.flatMap(processUsers);
     }
 
-    setFilteredUsers(filtered);
-    setTotalCount(filtered.length);
+    return processUsers(users);
   }, [filter, users, showInactive]);
+
+  const totalCount = useMemo(() => filteredUsers.length, [filteredUsers]);
 
   const validateFields = useCallback(
     (fields: typeof editFields, isAddForm: boolean) => {
@@ -174,27 +175,26 @@ const ManageUsers: React.FC<{ isExpanded?: boolean }> = ({ isExpanded = true }) 
     []
   );
 
-  useEffect(() => {
-    setIsAddFormValid(validateFields(addFields, true));
-  }, [addFields, validateFields]);
-
-  useEffect(() => {
-    if (editRowId !== null) {
-      setIsEditFormValid(validateFields(editFields, false));
+  const isPasswordFormValid = useMemo(() => {
+    const { newPassword, confirmNewPassword } = passwordFields;
+    
+    if (!newPassword.trim() && !confirmNewPassword.trim()) {
+      return false;
     }
-  }, [editFields, editRowId, validateFields]);
+    
+    if (newPassword !== confirmNewPassword) {
+      return false;
+    }
+    
+    const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
+    
+    return passwordRegex.test(newPassword) && passwordRegex.test(confirmNewPassword);
+  }, [passwordFields]);
 
-  useEffect(() => {
-    const validatePassword = async () => {
-      if (passwordFields.newPassword.trim() === "" && passwordFields.confirmNewPassword.trim() === "") {
-        setIsPasswordFormValid(false);
-        return;
-      }
-      const isValid = await validateNewPasswordFields(passwordFields);
-      setIsPasswordFormValid(isValid);
-    };
-    validatePassword();
-  }, [passwordFields, validateNewPasswordFields]);
+  const isEditFormValid = useMemo(() => {
+    if (editRowId === null) return false;
+    return validateFields(editFields, false);
+  }, [editFields, editRowId, validateFields]);
 
   const handleFilterChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setFilter(e.target.value);
@@ -371,21 +371,18 @@ const ManageUsers: React.FC<{ isExpanded?: boolean }> = ({ isExpanded = true }) 
     }
   };
 
-  const clearPasswordFields = () => {
-    setPasswordFields({
-      newPassword: "",
-      confirmNewPassword: "",
-    });
+  const handlePasswordModal = (id: number, handleClose: () => void) => {
+    setPasswordFields({ newPassword: "", confirmNewPassword: "" });
     setShowNewPassword(false);
     setShowConfirmNewPassword(false);
     setError(null);
+    return modalContentChangeUserPassword(id, handleClose);
   };
 
   const modalContentChangeUserPassword = (
     id: number,
     handleClose: () => void
   ) => {
-    clearPasswordFields();
     return (
       <Box sx={{ p: 2 }}>
         <Typography variant="h6" gutterBottom>
@@ -394,7 +391,6 @@ const ManageUsers: React.FC<{ isExpanded?: boolean }> = ({ isExpanded = true }) 
         <Typography variant="body2" color="textSecondary" sx={{ mb: 3 }}>
           Ingresa una nueva contraseña para este usuario.
         </Typography>
-        
         <TextField
           label="Nueva Contraseña"
           type={showNewPassword ? "text" : "password"}
@@ -414,7 +410,6 @@ const ManageUsers: React.FC<{ isExpanded?: boolean }> = ({ isExpanded = true }) 
             ),
           }}
         />
-        
         <TextField
           label="Confirmar Nueva Contraseña"
           type={showConfirmNewPassword ? "text" : "password"}
@@ -437,13 +432,11 @@ const ManageUsers: React.FC<{ isExpanded?: boolean }> = ({ isExpanded = true }) 
             ),
           }}
         />
-        
         {error && (
           <Alert severity="error" sx={{ mb: 2, whiteSpace: "pre-line" }}>
             {error}
           </Alert>
         )}
-        
         <Box sx={{ display: 'flex', gap: 2, justifyContent: 'flex-end', mt: 3 }}>
           <Button variant="outlined" onClick={handleClose}>
             Cancelar
@@ -515,6 +508,31 @@ const ManageUsers: React.FC<{ isExpanded?: boolean }> = ({ isExpanded = true }) 
       setIsCreatingUser(false);
     }
   };
+
+  const validateField = useCallback(
+    (field: string, value: string | string[] | boolean) => {
+      const regex = {
+        text: /^[a-zA-ZáéíóúÁÉÍÓÚñÑüÜëË\s-]+$/,
+        email: /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/,
+        username: /^[a-zA-Z][a-zA-Z0-9_.]{2,19}$/,
+      };
+
+      switch (field) {
+        case "firstName":
+        case "lastName":
+          return regex.text.test(String(value));
+        case "email":
+          return regex.email.test(String(value));
+        case "username":
+          return regex.username.test(String(value));
+        case "roleName":
+          return regex.text.test(String(value));
+        default:
+          return true;
+      }
+    },
+    []
+  );
 
   return (
     <Box>
@@ -633,7 +651,7 @@ const ManageUsers: React.FC<{ isExpanded?: boolean }> = ({ isExpanded = true }) 
               handleCancel={handleCancel}
               handleUpdate={handleUpdate}
               handleOpenStatusDialog={handleOpenStatusDialog}
-              handlePasswordModal={modalContentChangeUserPassword}
+              handlePasswordModal={handlePasswordModal}
               getRowId={(row) => row.id}
               totalCount={totalCount}
               page={page}
@@ -643,6 +661,7 @@ const ManageUsers: React.FC<{ isExpanded?: boolean }> = ({ isExpanded = true }) 
               isSaveDisabled={!isEditFormValid}
               userPermissions={userPermissions}
               isExpanded={isExpanded}
+              validateField={validateField}
             />
           ) : (
             <Box
