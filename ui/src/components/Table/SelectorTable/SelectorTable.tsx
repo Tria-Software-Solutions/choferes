@@ -34,6 +34,10 @@ import {
   TextField,
   Button,
   ListSubheader,
+  Card,
+  CardContent,
+  Alert,
+  InputAdornment,
 } from "@mui/material";
 import { TabContext, TabList, TabPanel } from "@mui/lab";
 import PaginationActions from "../Pagination/PaginationActions";
@@ -63,7 +67,14 @@ import InfoOutlinedIcon from "@mui/icons-material/InfoOutlined";
 import AccessTimeRoundedIcon from "@mui/icons-material/AccessTimeRounded";
 import MoreTimeIcon from "@mui/icons-material/MoreTime";
 import AddIcon from "@mui/icons-material/Add";
-import RemoveIcon from "@mui/icons-material/Remove";
+import PersonIcon from "@mui/icons-material/Person";
+import AccessTimeIcon from "@mui/icons-material/AccessTime";
+import TrendingUpIcon from "@mui/icons-material/TrendingUp";
+import TrendingDownIcon from "@mui/icons-material/TrendingDown";
+import AssessmentIcon from "@mui/icons-material/Assessment";
+import ScheduleIcon from "@mui/icons-material/Schedule";
+import CalendarMonthIcon from "@mui/icons-material/CalendarMonth";
+import WarningIcon from "@mui/icons-material/Warning";
 
 interface SelectorTableProps {
   filteredEmployees: Employee[];
@@ -259,214 +270,326 @@ const SelectorTable: React.FC<SelectorTableProps> = React.memo(
 
     const modalContentSummary = (employee: Employee) => {
       return (
-        <TabContext value={tabValue}>
-          <Box
-            sx={{
-              bgcolor: "background.paper",
+        <Box sx={{ width: '100%' }}>
+          {/* Header con información del empleado */}
+          <Card 
+            variant="outlined" 
+            sx={{ 
+              mb: 3,
+              borderColor: 'primary.main',
+              backgroundColor: 'primary.50'
             }}
           >
-            <TabList onChange={handleTabChange}>
-              <Tab label="Semanal" value="0" />
-              <Tab label="Quincenal" value="1" />
-              <Tab label="Mensual" value="2" />
-              <Tab label="Horas Extra" value="3" />
-            </TabList>
-          </Box>
-          <TabPanel
-            value="0"
-            sx={{
-              paddingLeft: 0,
-              paddingRight: 0,
-            }}
-          >
-            <TableContainer component={Paper}>
-              <Table>
-                <TableHead>
-                  <TableRow>
-                    <TableCell>Empleado</TableCell>
-                    <TableCell align="center" sx={{ whiteSpace: "nowrap" }}>
-                      Horas Trabajadas
-                    </TableCell>
-                    <TableCell align="center">Semana</TableCell>
-                    <TableCell align="center" sx={{ whiteSpace: "nowrap" }}>
-                      Rango de Fechas
-                    </TableCell>
-                  </TableRow>
-                </TableHead>
-                <TableBody>
-                  <TableRow>
-                    <TableCell sx={{ whiteSpace: "nowrap" }}>
-                      {employee.firstName} {employee.lastName}
-                    </TableCell>
-                    <TableCell align="center">
-                      <strong>
-                        {resultHoursForPeriod(employee, "weekly", "totalHours")}
-                      </strong>
-                    </TableCell>
-                    <TableCell align="center">{weekNumber}</TableCell>
-                    <TableCell align="center" sx={{ whiteSpace: "nowrap" }}>
-                      {`${formatDate(
-                        new Date(currentWeek[0]?.date),
-                        false
-                      )} - ${formatDate(
-                        new Date(currentWeek[6]?.date),
-                        false
-                      )}`}
-                    </TableCell>
-                  </TableRow>
-                </TableBody>
-              </Table>
-            </TableContainer>
-          </TabPanel>
-          <TabPanel value="1" sx={{ paddingLeft: 0, paddingRight: 0 }}>
-            <TableContainer component={Paper}>
-              <Table>
-                <TableHead>
-                  <TableRow>
-                    <TableCell>Empleado</TableCell>
-                    <TableCell align="center" sx={{ whiteSpace: "nowrap" }}>
-                      Horas Trabajadas
-                    </TableCell>
-                    <TableCell align="center">Quincena</TableCell>
-                    <TableCell align="center" sx={{ whiteSpace: "nowrap" }}>
-                      Rango de Fechas
-                    </TableCell>
-                  </TableRow>
-                </TableHead>
-                <TableBody>
-                  <TableRow>
-                    <TableCell sx={{ whiteSpace: "nowrap" }}>
-                      {employee.firstName} {employee.lastName}
-                    </TableCell>
-                    <TableCell align="center">
-                      <strong>
-                        {resultHoursForPeriod(
-                          employee,
-                          "biweekly",
-                          "totalHours"
-                        )}
-                      </strong>
-                    </TableCell>
-                    <TableCell align="center">{biweekNumber}</TableCell>
-                    <TableCell align="center" sx={{ whiteSpace: "nowrap" }}>
-                      {`${formatDate(
-                        getBiweeklyDates(year, biweekNumber).startDate,
-                        false
-                      )} -  ${formatDate(
-                        getBiweeklyDates(year, biweekNumber).endDate,
-                        false
-                      )}`}
-                    </TableCell>
-                  </TableRow>
-                </TableBody>
-              </Table>
-            </TableContainer>
-          </TabPanel>
-          <TabPanel value="2" sx={{ paddingLeft: 0, paddingRight: 0 }}>
-            <TableContainer component={Paper}>
-              <Table>
-                <TableHead>
-                  <TableRow>
-                    <TableCell>Empleado</TableCell>
-                    <TableCell align="center" sx={{ whiteSpace: "nowrap" }}>
-                      Horas Trabajadas
-                    </TableCell>
-                    <TableCell align="center">Mes</TableCell>
-                    <TableCell align="center">Año</TableCell>
-                  </TableRow>
-                </TableHead>
-                <TableBody>
-                  <TableRow>
-                    <TableCell sx={{ whiteSpace: "nowrap" }}>
-                      {employee.firstName} {employee.lastName}
-                    </TableCell>
-                    <TableCell align="center">
-                      <strong>
-                        {resultHoursForPeriod(
-                          employee,
-                          "monthly",
-                          "totalHours"
-                        )}
-                      </strong>
-                    </TableCell>
-                    <TableCell align="center">{getMonthName(month)}</TableCell>
-                    <TableCell align="center">{year}</TableCell>
-                  </TableRow>
-                </TableBody>
-              </Table>
-            </TableContainer>
-          </TabPanel>
-          <TabPanel value="3" sx={{ paddingLeft: 0, paddingRight: 0 }}>
-            <TableContainer component={Paper}>
-              <Table>
-                <TableHead>
-                  <TableRow>
-                    <TableCell>Empleado</TableCell>
-                    <TableCell align="center">Periodo</TableCell>
-                    <TableCell align="center" sx={{ whiteSpace: "nowrap" }}>
+            <CardContent sx={{ py: 2, px: 3 }}>
+              <Box display="flex" alignItems="center" gap={2}>
+                <AssessmentIcon color="primary" sx={{ fontSize: 28 }} />
+                <Box>
+                  <Typography variant="h6" fontWeight={600} color="primary">
+                    {employee.firstName} {employee.lastName}
+                  </Typography>
+                  <Typography variant="body2" color="text.secondary">
+                    Resumen Detallado de Horas Trabajadas
+                  </Typography>
+                </Box>
+              </Box>
+            </CardContent>
+          </Card>
+
+          <TabContext value={tabValue}>
+            <Box
+              sx={{
+                bgcolor: "background.paper",
+                borderBottom: 1,
+                borderColor: 'divider',
+                mb: 2
+              }}
+            >
+              <TabList 
+                onChange={handleTabChange}
+                sx={{
+                  '& .MuiTab-root': {
+                    fontWeight: 600,
+                    textTransform: 'none',
+                    fontSize: '0.95rem',
+                    minHeight: 48,
+                  }
+                }}
+              >
+                <Tab 
+                  label={
+                    <Box display="flex" alignItems="center" gap={1}>
+                      <ScheduleIcon fontSize="small" />
+                      Semanal
+                    </Box>
+                  } 
+                  value="0" 
+                />
+                <Tab 
+                  label={
+                    <Box display="flex" alignItems="center" gap={1}>
+                      <CalendarMonthIcon fontSize="small" />
+                      Quincenal
+                    </Box>
+                  } 
+                  value="1" 
+                />
+                <Tab 
+                  label={
+                    <Box display="flex" alignItems="center" gap={1}>
+                      <CalendarMonthIcon fontSize="small" />
+                      Mensual
+                    </Box>
+                  } 
+                  value="2" 
+                />
+                <Tab 
+                  label={
+                    <Box display="flex" alignItems="center" gap={1}>
+                      <WarningIcon fontSize="small" />
                       Horas Extra
-                    </TableCell>
-                    <TableCell align="center">Número</TableCell>
-                    <TableCell align="center" sx={{ whiteSpace: "nowrap" }}>
-                      Rango de Fechas
-                    </TableCell>
-                  </TableRow>
-                </TableHead>
-                <TableBody>
-                  <TableRow>
-                    <TableCell rowSpan={3} sx={{ whiteSpace: "nowrap" }}>
-                      {employee.firstName} {employee.lastName}
-                    </TableCell>
-                    <TableCell align="center">Semanal</TableCell>
-                    <TableCell align="center">
-                      <strong>
-                        {resultHoursForPeriod(employee, "weekly", "overtime")}
-                      </strong>
-                    </TableCell>
-                    <TableCell align="center">{weekNumber}</TableCell>
-                    <TableCell align="center" sx={{ whiteSpace: "nowrap" }}>
-                      {`${formatDate(
-                        new Date(currentWeek[0]?.date),
-                        false
-                      )} - ${formatDate(
-                        new Date(currentWeek[6]?.date),
-                        false
-                      )}`}
-                    </TableCell>
-                  </TableRow>
-                  <TableRow>
-                    <TableCell align="center">Quincenal</TableCell>
-                    <TableCell align="center">
-                      <strong>
-                        {resultHoursForPeriod(employee, "biweekly", "overtime")}
-                      </strong>
-                    </TableCell>
-                    <TableCell align="center">{biweekNumber}</TableCell>
-                    <TableCell align="center" sx={{ whiteSpace: "nowrap" }}>
-                      {`${formatDate(
-                        getBiweeklyDates(year, biweekNumber).startDate,
-                        false
-                      )} - ${formatDate(
-                        getBiweeklyDates(year, biweekNumber).endDate,
-                        false
-                      )}`}
-                    </TableCell>
-                  </TableRow>
-                  <TableRow>
-                    <TableCell align="center">Mensual</TableCell>
-                    <TableCell align="center">
-                      <strong>
-                        {resultHoursForPeriod(employee, "monthly", "overtime")}
-                      </strong>
-                    </TableCell>
-                    <TableCell align="center">{getMonthName(month)}</TableCell>
-                    <TableCell align="center">{year}</TableCell>
-                  </TableRow>
-                </TableBody>
-              </Table>
-            </TableContainer>
-          </TabPanel>
-        </TabContext>
+                    </Box>
+                  } 
+                  value="3" 
+                />
+              </TabList>
+            </Box>
+            
+            <TabPanel
+              value="0"
+              sx={{
+                paddingLeft: 0,
+                paddingRight: 0,
+                paddingTop: 2,
+              }}
+            >
+              <Card variant="outlined">
+                <CardContent sx={{ p: 0 }}>
+                  <Box sx={{ p: 2, backgroundColor: 'grey.50', borderBottom: 1, borderColor: 'divider' }}>
+                    <Typography variant="subtitle1" fontWeight={600} color="primary">
+                      Resumen Semanal - Semana {weekNumber}
+                    </Typography>
+                  </Box>
+                  <TableContainer>
+                    <Table>
+                      <TableHead>
+                        <TableRow sx={{ backgroundColor: 'grey.50' }}>
+                          <TableCell sx={{ fontWeight: 600 }}>Empleado</TableCell>
+                          <TableCell align="center" sx={{ whiteSpace: "nowrap", fontWeight: 600 }}>
+                            Horas Trabajadas
+                          </TableCell>
+                          <TableCell align="center" sx={{ fontWeight: 600 }}>Semana</TableCell>
+                          <TableCell align="center" sx={{ whiteSpace: "nowrap", fontWeight: 600 }}>
+                            Rango de Fechas
+                          </TableCell>
+                        </TableRow>
+                      </TableHead>
+                      <TableBody>
+                        <TableRow>
+                          <TableCell sx={{ whiteSpace: "nowrap" }}>
+                            {employee.firstName} {employee.lastName}
+                          </TableCell>
+                          <TableCell align="center">
+                            <Typography variant="h6" fontWeight={700} color="primary">
+                              {resultHoursForPeriod(employee, "weekly", "totalHours")}
+                            </Typography>
+                          </TableCell>
+                          <TableCell align="center">{weekNumber}</TableCell>
+                          <TableCell align="center" sx={{ whiteSpace: "nowrap" }}>
+                            {`${formatDate(
+                              new Date(currentWeek[0]?.date),
+                              false
+                            )} - ${formatDate(
+                              new Date(currentWeek[6]?.date),
+                              false
+                            )}`}
+                          </TableCell>
+                        </TableRow>
+                      </TableBody>
+                    </Table>
+                  </TableContainer>
+                </CardContent>
+              </Card>
+            </TabPanel>
+            
+            <TabPanel value="1" sx={{ paddingLeft: 0, paddingRight: 0, paddingTop: 2 }}>
+              <Card variant="outlined">
+                <CardContent sx={{ p: 0 }}>
+                  <Box sx={{ p: 2, backgroundColor: 'grey.50', borderBottom: 1, borderColor: 'divider' }}>
+                    <Typography variant="subtitle1" fontWeight={600} color="primary">
+                      Resumen Quincenal - Quincena {biweekNumber}
+                    </Typography>
+                  </Box>
+                  <TableContainer>
+                    <Table>
+                      <TableHead>
+                        <TableRow sx={{ backgroundColor: 'grey.50' }}>
+                          <TableCell sx={{ fontWeight: 600 }}>Empleado</TableCell>
+                          <TableCell align="center" sx={{ whiteSpace: "nowrap", fontWeight: 600 }}>
+                            Horas Trabajadas
+                          </TableCell>
+                          <TableCell align="center" sx={{ fontWeight: 600 }}>Quincena</TableCell>
+                          <TableCell align="center" sx={{ whiteSpace: "nowrap", fontWeight: 600 }}>
+                            Rango de Fechas
+                          </TableCell>
+                        </TableRow>
+                      </TableHead>
+                      <TableBody>
+                        <TableRow>
+                          <TableCell sx={{ whiteSpace: "nowrap" }}>
+                            {employee.firstName} {employee.lastName}
+                          </TableCell>
+                          <TableCell align="center">
+                            <Typography variant="h6" fontWeight={700} color="primary">
+                              {resultHoursForPeriod(
+                                employee,
+                                "biweekly",
+                                "totalHours"
+                              )}
+                            </Typography>
+                          </TableCell>
+                          <TableCell align="center">{biweekNumber}</TableCell>
+                          <TableCell align="center" sx={{ whiteSpace: "nowrap" }}>
+                            {`${formatDate(
+                              getBiweeklyDates(year, biweekNumber).startDate,
+                              false
+                            )} -  ${formatDate(
+                              getBiweeklyDates(year, biweekNumber).endDate,
+                              false
+                            )}`}
+                          </TableCell>
+                        </TableRow>
+                      </TableBody>
+                    </Table>
+                  </TableContainer>
+                </CardContent>
+              </Card>
+            </TabPanel>
+            
+            <TabPanel value="2" sx={{ paddingLeft: 0, paddingRight: 0, paddingTop: 2 }}>
+              <Card variant="outlined">
+                <CardContent sx={{ p: 0 }}>
+                  <Box sx={{ p: 2, backgroundColor: 'grey.50', borderBottom: 1, borderColor: 'divider' }}>
+                    <Typography variant="subtitle1" fontWeight={600} color="primary">
+                      Resumen Mensual - {getMonthName(month)} {year}
+                    </Typography>
+                  </Box>
+                  <TableContainer>
+                    <Table>
+                      <TableHead>
+                        <TableRow sx={{ backgroundColor: 'grey.50' }}>
+                          <TableCell sx={{ fontWeight: 600 }}>Empleado</TableCell>
+                          <TableCell align="center" sx={{ whiteSpace: "nowrap", fontWeight: 600 }}>
+                            Horas Trabajadas
+                          </TableCell>
+                          <TableCell align="center" sx={{ fontWeight: 600 }}>Mes</TableCell>
+                          <TableCell align="center" sx={{ fontWeight: 600 }}>Año</TableCell>
+                        </TableRow>
+                      </TableHead>
+                      <TableBody>
+                        <TableRow>
+                          <TableCell sx={{ whiteSpace: "nowrap" }}>
+                            {employee.firstName} {employee.lastName}
+                          </TableCell>
+                          <TableCell align="center">
+                            <Typography variant="h6" fontWeight={700} color="primary">
+                              {resultHoursForPeriod(
+                                employee,
+                                "monthly",
+                                "totalHours"
+                              )}
+                            </Typography>
+                          </TableCell>
+                          <TableCell align="center">{getMonthName(month)}</TableCell>
+                          <TableCell align="center">{year}</TableCell>
+                        </TableRow>
+                      </TableBody>
+                    </Table>
+                  </TableContainer>
+                </CardContent>
+              </Card>
+            </TabPanel>
+            
+            <TabPanel value="3" sx={{ paddingLeft: 0, paddingRight: 0, paddingTop: 2 }}>
+              <Card variant="outlined">
+                <CardContent sx={{ p: 0 }}>
+                  <Box sx={{ p: 2, backgroundColor: 'warning.50', borderBottom: 1, borderColor: 'divider' }}>
+                    <Typography variant="subtitle1" fontWeight={600} color="warning.main">
+                      Horas Extra Acumuladas
+                    </Typography>
+                  </Box>
+                  <TableContainer>
+                    <Table>
+                      <TableHead>
+                        <TableRow sx={{ backgroundColor: 'grey.50' }}>
+                          <TableCell sx={{ fontWeight: 600 }}>Empleado</TableCell>
+                          <TableCell align="center" sx={{ fontWeight: 600 }}>Periodo</TableCell>
+                          <TableCell align="center" sx={{ whiteSpace: "nowrap", fontWeight: 600 }}>
+                            Horas Extra
+                          </TableCell>
+                          <TableCell align="center" sx={{ fontWeight: 600 }}>Número</TableCell>
+                          <TableCell align="center" sx={{ whiteSpace: "nowrap", fontWeight: 600 }}>
+                            Rango de Fechas
+                          </TableCell>
+                        </TableRow>
+                      </TableHead>
+                      <TableBody>
+                        <TableRow>
+                          <TableCell rowSpan={3} sx={{ whiteSpace: "nowrap" }}>
+                            {employee.firstName} {employee.lastName}
+                          </TableCell>
+                          <TableCell align="center">Semanal</TableCell>
+                          <TableCell align="center">
+                            <Typography variant="h6" fontWeight={700} color="warning.main">
+                              {resultHoursForPeriod(employee, "weekly", "overtime")}
+                            </Typography>
+                          </TableCell>
+                          <TableCell align="center">{weekNumber}</TableCell>
+                          <TableCell align="center" sx={{ whiteSpace: "nowrap" }}>
+                            {`${formatDate(
+                              new Date(currentWeek[0]?.date),
+                              false
+                            )} - ${formatDate(
+                              new Date(currentWeek[6]?.date),
+                              false
+                            )}`}
+                          </TableCell>
+                        </TableRow>
+                        <TableRow>
+                          <TableCell align="center">Quincenal</TableCell>
+                          <TableCell align="center">
+                            <Typography variant="h6" fontWeight={700} color="warning.main">
+                              {resultHoursForPeriod(employee, "biweekly", "overtime")}
+                            </Typography>
+                          </TableCell>
+                          <TableCell align="center">{biweekNumber}</TableCell>
+                          <TableCell align="center" sx={{ whiteSpace: "nowrap" }}>
+                            {`${formatDate(
+                              getBiweeklyDates(year, biweekNumber).startDate,
+                              false
+                            )} - ${formatDate(
+                              getBiweeklyDates(year, biweekNumber).endDate,
+                              false
+                            )}`}
+                          </TableCell>
+                        </TableRow>
+                        <TableRow>
+                          <TableCell align="center">Mensual</TableCell>
+                          <TableCell align="center">
+                            <Typography variant="h6" fontWeight={700} color="warning.main">
+                              {resultHoursForPeriod(employee, "monthly", "overtime")}
+                            </Typography>
+                          </TableCell>
+                          <TableCell align="center">{getMonthName(month)}</TableCell>
+                          <TableCell align="center">{year}</TableCell>
+                        </TableRow>
+                      </TableBody>
+                    </Table>
+                  </TableContainer>
+                </CardContent>
+              </Card>
+            </TabPanel>
+          </TabContext>
+        </Box>
       );
     };
 
@@ -474,71 +597,158 @@ const SelectorTable: React.FC<SelectorTableProps> = React.memo(
       employee: Employee,
       handleClose: () => void
     ) => {
+      const currentHours = resultHoursForPeriod(employee, selectedPeriod, "totalHours");
+      const periodText = selectedPeriod === "weekly" 
+        ? "semana" 
+        : selectedPeriod === "biweekly" 
+        ? "quincena" 
+        : "mes";
+      
+      const periodNumber = selectedPeriod === "weekly" 
+        ? weekNumber 
+        : selectedPeriod === "biweekly" 
+        ? biweekNumber 
+        : getMonthName(month);
+
       return (
-        <Box
-          sx={{
-            display: "flex",
-            flexDirection: "column",
-            gap: 2,
-            margin: "auto",
-          }}
-        >
-          {selectedPeriod === "weekly" ? (
-            <Typography variant="body1">
-              <strong>Total de horas trabajadas en la semana:</strong>{" "}
-              {resultHoursForPeriod(employee, "weekly", "totalHours")} horas
-            </Typography>
-          ) : selectedPeriod === "biweekly" ? (
-            <Typography variant="body1">
-              <strong>Total de horas trabajadas en la quincena:</strong>{" "}
-              {resultHoursForPeriod(employee, "biweekly", "totalHours")} horas
-            </Typography>
-          ) : (
-            <Typography variant="body1">
-              <strong>Total de horas trabajadas en el mes:</strong>{" "}
-              {resultHoursForPeriod(employee, "monthly", "totalHours")} horas
-            </Typography>
-          )}
-          <TextField
-            label="Horas a ajustar"
-            variant="outlined"
-            type="number"
-            placeholder="0"
-            onChange={(e) => setTimeAdjustment(Number(e.target.value))}
-          />
-          <Box sx={{ display: "flex", justifyContent: "flex-end", gap: 2 }}>
-            <Tooltip title="Sumar Horas" arrow>
-              <Box>
-                <Button
-                  variant="contained"
-                  color="success"
-                  sx={{ height: "56px" }}
-                  onClick={() => {
-                    handleAdjustTime(employee.id, "sum", timeAdjustment);
-                    handleClose();
-                  }}
-                  disabled={timeAdjustment <= 0}
-                >
-                  <AddIcon />
-                </Button>
+        <Box sx={{ width: '100%', maxWidth: 500, mx: 'auto' }}>
+          {/* Información del empleado */}
+          <Card 
+            variant="outlined" 
+            sx={{ 
+              mb: 3,
+              borderColor: 'primary.main',
+              backgroundColor: 'primary.50'
+            }}
+          >
+            <CardContent sx={{ py: 2, px: 3 }}>
+              <Box display="flex" alignItems="center" gap={2}>
+                <PersonIcon color="primary" sx={{ fontSize: 28 }} />
+                <Box>
+                  <Typography variant="h6" fontWeight={600} color="primary">
+                    {employee.firstName} {employee.lastName}
+                  </Typography>
+                  <Typography variant="body2" color="text.secondary">
+                    Empleado
+                  </Typography>
+                </Box>
               </Box>
-            </Tooltip>
-            <Tooltip title="Restar Horas" arrow>
-              <Box>
-                <Button
-                  variant="contained"
-                  color="error"
-                  sx={{ height: "56px" }}
-                  onClick={() => {
-                    handleAdjustTime(employee.id, "substract", timeAdjustment);
-                    handleClose();
-                  }}
-                  disabled={timeAdjustment <= 0}
-                >
-                  <RemoveIcon />
-                </Button>
+            </CardContent>
+          </Card>
+
+          {/* Información actual de horas */}
+          <Card variant="outlined" sx={{ mb: 3 }}>
+            <CardContent sx={{ py: 2, px: 3 }}>
+              <Box display="flex" alignItems="center" gap={2} mb={2}>
+                <AccessTimeIcon color="info" sx={{ fontSize: 24 }} />
+                <Typography variant="h6" fontWeight={600}>
+                  Horas Actuales
+                </Typography>
               </Box>
-            </Tooltip>
+              <Typography variant="body1" color="text.secondary" sx={{ mb: 1 }}>
+                Total de horas trabajadas en la {periodText} {periodNumber}:
+              </Typography>
+              <Typography variant="h4" fontWeight={700} color="primary" sx={{ textAlign: 'center' }}>
+                {currentHours} horas
+              </Typography>
+            </CardContent>
+          </Card>
+
+          {/* Campo de ajuste */}
+          <Card variant="outlined" sx={{ mb: 3 }}>
+            <CardContent sx={{ py: 2, px: 3 }}>
+              <Typography variant="h6" fontWeight={600} sx={{ mb: 2 }}>
+                Ajuste de Horas
+              </Typography>
+              <TextField
+                fullWidth
+                label="Cantidad de horas a ajustar"
+                variant="outlined"
+                type="number"
+                placeholder="0"
+                value={timeAdjustment || ''}
+                onChange={(e) => setTimeAdjustment(Number(e.target.value) || 0)}
+                InputProps={{
+                  startAdornment: (
+                    <InputAdornment position="start">
+                      <AccessTimeIcon color="action" />
+                    </InputAdornment>
+                  ),
+                  inputProps: { 
+                    min: 0,
+                    step: 0.5
+                  }
+                }}
+                helperText="Ingresa la cantidad de horas que deseas sumar o restar"
+                sx={{ mb: 2 }}
+              />
+              
+              {timeAdjustment > 0 && (
+                <Alert severity="info" sx={{ mb: 2 }}>
+                  <Typography variant="body2">
+                    <strong>Nuevo total:</strong> {currentHours + timeAdjustment} horas
+                  </Typography>
+                </Alert>
+              )}
+            </CardContent>
+          </Card>
+
+          {/* Botones de acción */}
+          <Box 
+            sx={{ 
+              display: 'flex', 
+              gap: 2, 
+              justifyContent: 'center',
+              flexDirection: { xs: 'column', sm: 'row' }
+            }}
+          >
+            <Button
+              variant="contained"
+              color="success"
+              size="large"
+              startIcon={<TrendingUpIcon />}
+              onClick={() => {
+                handleAdjustTime(employee.id, "sum", timeAdjustment);
+                handleClose();
+              }}
+              disabled={timeAdjustment <= 0}
+              sx={{
+                minWidth: 140,
+                py: 1.5,
+                px: 3,
+                fontWeight: 600,
+                boxShadow: 2,
+                '&:hover': {
+                  boxShadow: 4,
+                },
+              }}
+            >
+              Sumar Horas
+            </Button>
+            
+            <Button
+              variant="contained"
+              color="error"
+              size="large"
+              startIcon={<TrendingDownIcon />}
+              onClick={() => {
+                handleAdjustTime(employee.id, "substract", timeAdjustment);
+                handleClose();
+              }}
+              disabled={timeAdjustment <= 0}
+              sx={{
+                minWidth: 140,
+                py: 1.5,
+                px: 3,
+                fontWeight: 600,
+                boxShadow: 2,
+                '&:hover': {
+                  boxShadow: 4,
+                },
+              }}
+            >
+              Restar Horas
+            </Button>
           </Box>
         </Box>
       );
@@ -757,10 +967,9 @@ const SelectorTable: React.FC<SelectorTableProps> = React.memo(
                           buttonType="icon"
                           buttonIcon={<InfoOutlinedIcon />}
                           variant="text"
-                          modalStyle={{ width: "80%" }}
+                          modalStyle={{ width: "90%", maxWidth: 1000 }}
                           modalTooltip="Resumen de Horas Trabajadas"
                           modalTitle="Resumen de Horas Trabajadas"
-                          modalDescription="Detalle de horas trabajadas en los diferentes períodos"
                           children={({ handleClose }) =>
                             modalContentSummary(employee)
                           }
@@ -882,7 +1091,6 @@ const SelectorTable: React.FC<SelectorTableProps> = React.memo(
                           disabled={!hasWorkedCurrentWeek(employee)}
                           modalTooltip="Ajuste de Horas"
                           modalTitle="Ajuste de Horas"
-                          modalDescription={`Ingresa la cantidad de horas que deseas sumar o restar al total de horas trabajadas por ${employee.firstName} ${employee.lastName}.`}
                         >
                           {({ handleClose }) =>
                             modalContentEditTime(employee, handleClose)
