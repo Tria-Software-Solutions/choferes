@@ -157,8 +157,7 @@ const AppBarComponent: React.FC<AppBarComponentProps> = ({
               alt="Logo"
               style={{
                 width: "32px",
-                height: "32px",
-                filter: 'brightness(0) invert(1)',
+                height: "auto",
               }}
             />
           </Box>
