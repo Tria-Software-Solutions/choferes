@@ -40,6 +40,7 @@ import Visibility from "@mui/icons-material/Visibility";
 import VisibilityOff from "@mui/icons-material/VisibilityOff";
 import VisibilityIcon from '@mui/icons-material/Visibility';
 import VisibilityOffIcon from '@mui/icons-material/VisibilityOff';
+import ConfirmationDialog from "../../components/Dialog/ConfirmationDialog";
 
 const ManageUsers: React.FC<{ isExpanded?: boolean }> = ({ isExpanded = true }) => {
   const dispatch = useDispatch<AppDispatch>();
@@ -73,6 +74,7 @@ const ManageUsers: React.FC<{ isExpanded?: boolean }> = ({ isExpanded = true }) 
   const [rowsPerPage, setRowsPerPage] = useState(5);
   const [openAddUserModal, setOpenAddUserModal] = useState(false);
   const [isCreatingUser, setIsCreatingUser] = useState(false);
+  const [isUpdatingUserStatus, setIsUpdatingUserStatus] = useState(false);
 
   const theme = useTheme();
 
@@ -278,30 +280,34 @@ const ManageUsers: React.FC<{ isExpanded?: boolean }> = ({ isExpanded = true }) 
   };
 
   const handleStatusChange = async () => {
-    if (userToChange) {
-      try {
-        await dispatch(
-          updateUserStatus({
-            id: userToChange.id,
-            status: !userToChange.isActive,
-          })
-        );
-        setOpenStatusDialog(false);
-        showNotification(
-          "El estado del usuario fue actualizado exitosamente",
-          "success",
-          3000,
-          false
-        );
-      } catch (error) {
-        console.error(error);
-        showNotification(
-          "Ha ocurrido un error al actualizar el estado del usuario",
-          "error",
-          5000,
-          false
-        );
-      }
+    if (!userToChange) return;
+    
+    setIsUpdatingUserStatus(true);
+    try {
+      await dispatch(
+        updateUserStatus({
+          id: userToChange.id,
+          status: !userToChange.isActive,
+        })
+      );
+      setOpenStatusDialog(false);
+      setUserToChange(null);
+      showNotification(
+        "Estado del usuario actualizado exitosamente",
+        "success",
+        3000,
+        false
+      );
+    } catch (error) {
+      console.error("Error updating user status:", error);
+      showNotification(
+        "Error al actualizar el estado del usuario",
+        "error",
+        5000,
+        false
+      );
+    } finally {
+      setIsUpdatingUserStatus(false);
     }
   };
 
@@ -681,26 +687,17 @@ const ManageUsers: React.FC<{ isExpanded?: boolean }> = ({ isExpanded = true }) 
       )}
       {isExpanded && (
         <>
-          <Dialog open={openStatusDialog} onClose={handleCloseStatusDialog}>
-            <DialogTitle>Confirmar</DialogTitle>
-            <DialogContent>
-              <Typography>
-                ¿Estás seguro de que deseas cambiar el estado de este usuario?
-              </Typography>
-            </DialogContent>
-            <DialogActions>
-              <Button color="primary" sx={{ flex: 1 }} onClick={handleStatusChange}>
-                Aceptar
-              </Button>
-              <Button
-                color="secondary"
-                sx={{ flex: 1 }}
-                onClick={handleCloseStatusDialog}
-              >
-                Cancelar
-              </Button>
-            </DialogActions>
-          </Dialog>
+          <ConfirmationDialog
+            open={openStatusDialog}
+            onClose={handleCloseStatusDialog}
+            onConfirm={handleStatusChange}
+            title="Cambiar Estado de Usuario"
+            message="¿Estás seguro de que deseas cambiar el estado de este usuario?"
+            type="warning"
+            confirmText="Cambiar Estado"
+            cancelText="Cancelar"
+            loading={isUpdatingUserStatus}
+          />
           <ModalComponent
             buttonType="none"
             open={openAddUserModal}

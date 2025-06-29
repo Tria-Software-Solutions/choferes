@@ -50,6 +50,7 @@ import { Courier } from "../../models/Courier";
 import EditableTable from "../../components/Table/EditableTable/EditableTable";
 import ModalComponent from "../../components/Modal/ModalComponent";
 import AddCourierForm from "../../components/Forms/AddCourierForm";
+import ConfirmationDialog from "../../components/Dialog/ConfirmationDialog";
 
 const CourierServicePage: React.FC = () => {
   const { userPermissions } = useAuthContext();
@@ -134,6 +135,7 @@ const CourierServicePage: React.FC = () => {
   const [isEditFormValid, setIsEditFormValid] = useState(false);
   const [openAddCourierModal, setOpenAddCourierModal] = useState(false);
   const [isCreatingCourier, setIsCreatingCourier] = useState(false);
+  const [isDeletingCourier, setIsDeletingCourier] = useState(false);
 
   const theme = useTheme();
   const isSmallScreen = useMediaQuery(theme.breakpoints.down("sm"));
@@ -228,25 +230,35 @@ const CourierServicePage: React.FC = () => {
   };
 
   const handleDelete = async () => {
+    if (!courierToDelete) return;
+    
+    setIsDeletingCourier(true);
     try {
-      if (courierToDelete !== null) {
-        showNotification(
-          "La eliminación del servicio fue exitosa",
-          "success",
-          3000,
-          false
-        );
-      }
-      handleCloseDeleteDialog();
-    } catch (error) {
-      handleCancel();
-      console.error(error);
+      // Simular eliminación
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      
+      setFilteredCouriers(prev => prev.filter(courier => courier.id !== courierToDelete));
+      setFilteredWeekCouriers(prev => prev.filter(courier => courier.id !== courierToDelete));
+      
+      setOpenDeleteDialog(false);
+      setCourierToDelete(null);
+      
       showNotification(
-        "Ha ocurrido un error al eliminar el servicio",
+        "Servicio de mensajería eliminado exitosamente",
+        "success",
+        3000,
+        false
+      );
+    } catch (error) {
+      console.error("Error deleting courier:", error);
+      showNotification(
+        "Error al eliminar el servicio de mensajería",
         "error",
         5000,
         false
       );
+    } finally {
+      setIsDeletingCourier(false);
     }
   };
 
@@ -569,26 +581,17 @@ const CourierServicePage: React.FC = () => {
           )}
         </>
       )}
-      <Dialog open={openDeleteDialog} onClose={handleCloseDeleteDialog}>
-        <DialogTitle>Confirmar</DialogTitle>
-        <DialogContent>
-          <Typography>
-            ¿Estás seguro de que deseas eliminar este servicio?
-          </Typography>
-        </DialogContent>
-        <DialogActions>
-          <Button color="primary" sx={{ flex: 1 }} onClick={handleDelete}>
-            Aceptar
-          </Button>
-          <Button
-            color="secondary"
-            sx={{ flex: 1 }}
-            onClick={handleCloseDeleteDialog}
-          >
-            Cancelar
-          </Button>
-        </DialogActions>
-      </Dialog>
+      <ConfirmationDialog
+        open={openDeleteDialog}
+        onClose={handleCloseDeleteDialog}
+        onConfirm={handleDelete}
+        title="Eliminar Servicio de Mensajería"
+        message="¿Estás seguro de que deseas eliminar este servicio de mensajería? Esta acción no se puede deshacer."
+        type="delete"
+        confirmText="Eliminar"
+        cancelText="Cancelar"
+        loading={isDeletingCourier}
+      />
       <ModalComponent
         buttonType="none"
         open={openAddCourierModal}

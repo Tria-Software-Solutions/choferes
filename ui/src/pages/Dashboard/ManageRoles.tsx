@@ -32,6 +32,7 @@ import SearchBar from "../../components/SearchBar/SearchBar";
 import ModalComponent from "../../components/Modal/ModalComponent";
 import AddRoleForm from "../../components/Forms/AddRoleForm";
 import AddModeratorIcon from "@mui/icons-material/AddModerator";
+import ConfirmationDialog from "../../components/Dialog/ConfirmationDialog";
 
 const ManageRoles: React.FC<{ isExpanded?: boolean }> = ({ isExpanded = true }) => {
   const dispatch = useDispatch<AppDispatch>();
@@ -56,6 +57,7 @@ const ManageRoles: React.FC<{ isExpanded?: boolean }> = ({ isExpanded = true }) 
   const [rowsPerPage, setRowsPerPage] = useState(5);
   const [openAddRoleModal, setOpenAddRoleModal] = useState(false);
   const [isCreatingRole, setIsCreatingRole] = useState(false);
+  const [isDeletingRole, setIsDeletingRole] = useState(false);
 
   useEffect(() => {
     dispatch(fetchRoles());
@@ -157,25 +159,29 @@ const ManageRoles: React.FC<{ isExpanded?: boolean }> = ({ isExpanded = true }) 
   };
 
   const handleDelete = async () => {
-    if (roleToDelete) {
-      try {
-        await dispatch(deleteRole(roleToDelete));
-        handleCloseDeleteDialog();
-        showNotification(
-          "El rol fue eliminado exitosamente",
-          "success",
-          3000,
-          false
-        );
-      } catch (error) {
-        console.error(error);
-        showNotification(
-          "Ha ocurrido un error al eliminar el rol",
-          "error",
-          5000,
-          false
-        );
-      }
+    if (!roleToDelete) return;
+    
+    setIsDeletingRole(true);
+    try {
+      await dispatch(deleteRole(roleToDelete));
+      setOpenDeleteDialog(false);
+      setRoleToDelete(null);
+      showNotification(
+        "Rol eliminado exitosamente",
+        "success",
+        3000,
+        false
+      );
+    } catch (error) {
+      console.error("Error deleting role:", error);
+      showNotification(
+        "Error al eliminar el rol",
+        "error",
+        5000,
+        false
+      );
+    } finally {
+      setIsDeletingRole(false);
     }
   };
 
@@ -365,26 +371,17 @@ const ManageRoles: React.FC<{ isExpanded?: boolean }> = ({ isExpanded = true }) 
       )}
       {isExpanded && (
         <>
-          <Dialog open={openDeleteDialog} onClose={handleCloseDeleteDialog}>
-            <DialogTitle>Confirmar Eliminación</DialogTitle>
-            <DialogContent>
-              <Typography>
-                ¿Estás seguro de que deseas eliminar este rol? Esta acción no se puede deshacer.
-              </Typography>
-            </DialogContent>
-            <DialogActions>
-              <Button color="primary" sx={{ flex: 1 }} onClick={handleDelete}>
-                Eliminar
-              </Button>
-              <Button
-                color="secondary"
-                sx={{ flex: 1 }}
-                onClick={handleCloseDeleteDialog}
-              >
-                Cancelar
-              </Button>
-            </DialogActions>
-          </Dialog>
+          <ConfirmationDialog
+            open={openDeleteDialog}
+            onClose={handleCloseDeleteDialog}
+            onConfirm={handleDelete}
+            title="Eliminar Rol"
+            message="¿Estás seguro de que deseas eliminar este rol? Esta acción no se puede deshacer."
+            type="delete"
+            confirmText="Eliminar"
+            cancelText="Cancelar"
+            loading={isDeletingRole}
+          />
           <ModalComponent
             buttonType="none"
             open={openAddRoleModal}
