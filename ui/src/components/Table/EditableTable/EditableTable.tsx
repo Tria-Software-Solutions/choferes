@@ -554,8 +554,42 @@ const EditableTable = <T extends object>({
       size: { xs: 12, sm: 12, md: 8, lg: 9 }
     },
     
-    createdAt: { type: "date", hidden: true },
     updatedAt: { type: "date", hidden: true },
+    route: {
+      type: "select",
+      options: [
+        { value: "GAM", label: "GAM" },
+        { value: "GAM Express", label: "GAM Express" },
+        { value: "Rural", label: "Rural" },
+      ],
+      size: { xs: 6, sm: 6, md: 3, lg: 3 }
+    },
+    status: {
+      type: "select",
+      options: [
+        { value: "Despachado", label: "Despachado" },
+        { value: "En Tránsito", label: "En Tránsito" },
+        { value: "Entregado", label: "Entregado" },
+      ],
+      size: { xs: 6, sm: 6, md: 3, lg: 3 }
+    },
+    driver: {
+      type: "text",
+      size: { xs: 6, sm: 6, md: 3, lg: 3 }
+    },
+    distance: {
+      type: "text",
+      size: { xs: 6, sm: 6, md: 2, lg: 2 }
+    },
+    trackingNumber: {
+      type: "text",
+      size: { xs: 6, sm: 6, md: 3, lg: 3 }
+    },
+    createdAt: { 
+      type: "date", 
+      hidden: true,
+      size: { xs: 6, sm: 6, md: 3, lg: 3 }
+    },
   };
 
   return (
@@ -730,6 +764,13 @@ const EditableTable = <T extends object>({
                             column,
                             (editFields[String(column)] || "").toString()
                           )}
+                        </TableCell>
+                      ))}
+                  {editRowId !== null && editRowId !== getRowId(row) &&
+                    columns
+                      .filter((column) => columnConfig[String(column)]?.hidden)
+                      .map((column) => (
+                        <TableCell key={`empty-${String(column)}`} className="tableCell">
                         </TableCell>
                       ))}
                   {!noActions && (

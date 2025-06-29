@@ -21,4 +21,9 @@ export type ColumnsTranslation = {
   updatedAt: string;
   roleName: string;
   permissionNames: string;
+  driver: string;
+  route: string;
+  distance: string;
+  trackingNumber: string;
+  status: string;
 };
