@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from "react";
+import React, { useState, useEffect, useCallback, useMemo } from "react";
 import { useAuthContext } from "../../context/AuthContext";
 import { Role } from "../../models/Role";
 import { Permission } from "../../models/Permission";
@@ -41,16 +41,7 @@ const ManageRoles: React.FC<{ isExpanded?: boolean }> = ({ isExpanded = true }) 
   );
   const { permissions } = useSelector((state: RootState) => state.permissions);
   const { showNotification } = useAppNotifications();
-  const [filteredRoles, setFilteredRoles] = useState<Role[]>([]);
-  const [totalCount, setTotalCount] = useState(0);
   const [editRowId, setEditRowId] = useState<number | null>(null);
-  const [addFields, ] = useState<{
-    name: string;
-    permissionNames: string[];
-  }>({
-    name: "",
-    permissionNames: [],
-  });
   const [editFields, setEditFields] = useState<{
     name: string;
     permissionNames: string[];
@@ -63,9 +54,6 @@ const ManageRoles: React.FC<{ isExpanded?: boolean }> = ({ isExpanded = true }) 
   const [filter, setFilter] = useState("");
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(5);
-  const [, setIsAddFormValid] = useState(false);
-  const [isEditFormValid, setIsEditFormValid] = useState(false);
-  
   const [openAddRoleModal, setOpenAddRoleModal] = useState(false);
   const [isCreatingRole, setIsCreatingRole] = useState(false);
 
@@ -75,11 +63,11 @@ const ManageRoles: React.FC<{ isExpanded?: boolean }> = ({ isExpanded = true }) 
     dispatch(fetchRolePermissions());
   }, [dispatch]);
 
-  useEffect(() => {
+  const filteredRoles = useMemo(() => {
     const normalizeString = (str: string) =>
       str.normalize("NFD").replace(/[\u0300-\u036f]/g, "");
 
-    const filtered = roles
+    return roles
       .map((role) => ({
         ...role,
         permissionNames: (role.permissions ?? []).map(
@@ -91,10 +79,9 @@ const ManageRoles: React.FC<{ isExpanded?: boolean }> = ({ isExpanded = true }) 
           .toLowerCase()
           .includes(normalizeString(filter).toLowerCase())
       );
-
-    setFilteredRoles(filtered);
-    setTotalCount(filtered.length);
   }, [filter, roles]);
+
+  const totalCount = useMemo(() => filteredRoles.length, [filteredRoles]);
 
   const validateFields = useCallback((fields: typeof editFields) => {
     const regex = {
@@ -104,13 +91,9 @@ const ManageRoles: React.FC<{ isExpanded?: boolean }> = ({ isExpanded = true }) 
     return regex.text.test(fields.name) && fields.permissionNames.length > 0;
   }, []);
 
-  useEffect(
-    () => setIsAddFormValid(validateFields(addFields)),
-    [addFields, validateFields]
-  );
-
-  useEffect(() => {
-    if (editRowId !== null) setIsEditFormValid(validateFields(editFields));
+  const isEditFormValid = useMemo(() => {
+    if (editRowId === null) return false;
+    return validateFields(editFields);
   }, [editFields, editRowId, validateFields]);
 
   const handleFilterChange = (e: React.ChangeEvent<HTMLInputElement>) => {

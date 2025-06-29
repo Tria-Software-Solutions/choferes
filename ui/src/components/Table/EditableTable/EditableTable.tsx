@@ -37,6 +37,7 @@ import { es } from "date-fns/locale";
 import {
   translateColumnHeaderToSpanish,
   translateDayOptionsToSpanish,
+  capitalizeFirstLetter,
 } from "../../../utils/string";
 import { formatDateWithDay } from "../../../utils/dates";
 import { maskLicensePlate, maskParkingLot } from "../../../utils/mask";
@@ -628,12 +629,12 @@ const EditableTable = <T extends object>({
               const isUser = "username" in row;
               
               return (
-                <TableRow key={getRowId(row)}>
+                <TableRow hover tabIndex={-1} key={getRowId(row)}>
                   {columns
                     .filter((column) => !columnConfig[String(column)]?.hidden)
                     .map((column) => {
                       return (
-                        <TableCell key={String(column)}>
+                        <TableCell key={String(column)} className="tableCell">
                           {editRowId === getRowId(row) ? (
                             renderEditField(
                               column,
@@ -657,55 +658,65 @@ const EditableTable = <T extends object>({
                             ) : (
                               <Typography component="span">{String(row[column] ?? "")}</Typography>
                             )
+                          ) : column === "days" ? (
+                            Array.isArray(row[column])
+                              ? (
+                                  <Typography component="span">
+                                    {(row[column] as string[])
+                                      .map((d: string) => capitalizeFirstLetter(translateDayOptionsToSpanish(String(d))))
+                                      .join(", ")}
+                                  </Typography>
+                                )
+                              : (
+                                  <Typography component="span">
+                                    {capitalizeFirstLetter(translateDayOptionsToSpanish(String(row[column])))}
+                                  </Typography>
+                                )
+                          ) : Array.isArray(row[column]) ? (
+                            <Stack
+                              direction="row"
+                              spacing={1}
+                              sx={{
+                                rowGap: 2,
+                                flexWrap: column === "permissionNames" ? "wrap" : "nowrap",
+                              }}
+                            >
+                              {(row[column] as string[]).map((item: string, index: number, array: string[]) =>
+                                column === "permissionNames" ? (
+                                  <Chip
+                                    key={index}
+                                    label={item}
+                                    sx={{
+                                      backgroundColor: theme.palette.primary.main,
+                                      color: '#fff',
+                                      '& .MuiChip-label': { color: '#fff' },
+                                    }}
+                                  />
+                                ) : (
+                                  <Typography key={index} component="span">
+                                    {item}
+                                    {index < array.length - 1 ? ", " : ""}
+                                  </Typography>
+                                )
+                              )}
+                            </Stack>
+                          ) : column === "email" ? (
+                            <Typography 
+                              component="a" 
+                              href={`mailto:${String(row[column] ?? "")}`}
+                              sx={{
+                                color: theme.palette.primary.main,
+                                textDecoration: 'none',
+                                cursor: 'pointer',
+                                '&:hover': {
+                                  textDecoration: 'underline',
+                                },
+                              }}
+                            >
+                              {String(row[column] ?? "")}
+                            </Typography>
                           ) : (
-                            Array.isArray(row[column]) ? (
-                              <Stack
-                                direction="row"
-                                spacing={1}
-                                sx={{
-                                  rowGap: 2,
-                                  flexWrap: column === "permissionNames" ? "wrap" : "nowrap",
-                                }}
-                              >
-                                {(row[column] as string[]).map((item: string, index: number, array: string[]) =>
-                                  column === "permissionNames" ? (
-                                    <Chip
-                                      key={index}
-                                      label={item}
-                                      sx={{
-                                        backgroundColor: theme.palette.primary.main,
-                                        color: '#fff',
-                                        '& .MuiChip-label': { color: '#fff' },
-                                      }}
-                                    />
-                                  ) : (
-                                    <Typography key={index} component="span">
-                                      {item}
-                                      {index < array.length - 1 ? ", " : ""}
-                                    </Typography>
-                                  )
-                                )}
-                              </Stack>
-                            ) : (
-                              column === "email" ? (
-                                <Typography 
-                                  component="a" 
-                                  href={`mailto:${String(row[column] ?? "")}`}
-                                  sx={{
-                                    color: theme.palette.primary.main,
-                                    textDecoration: 'none',
-                                    cursor: 'pointer',
-                                    '&:hover': {
-                                      textDecoration: 'underline',
-                                    },
-                                  }}
-                                >
-                                  {String(row[column] ?? "")}
-                                </Typography>
-                              ) : (
-                                <Typography component="span">{String(row[column] ?? "")}</Typography>
-                              )
-                            )
+                            <Typography component="span">{String(row[column] ?? "")}</Typography>
                           )}
                         </TableCell>
                       );
