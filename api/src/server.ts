@@ -35,9 +35,11 @@ app.use(helmet({
       styleSrc: ["'self'", "'unsafe-inline'"],
       scriptSrc: ["'self'"],
       imgSrc: ["'self'", "data:", "https:"],
+      connectSrc: ["'self'", "https://choferesdealquiler.onrender.com", "https://choferesdealquilercr.vercel.app"],
     },
   },
   crossOriginEmbedderPolicy: false,
+  crossOriginResourcePolicy: { policy: "cross-origin" },
 }));
 
 // Compresión gzip para reducir el tamaño de las respuestas
@@ -82,12 +84,17 @@ if (process.env.NODE_ENV === 'production') {
 
 const allowedOrigins = [
   "http://localhost:3000",
+  "https://choferesdealquilercr.vercel.app",
+  "https://choferesdealquilercr.vercel.app/",
   process.env.REACT_APP_UI_URL
 ].filter(Boolean);
+
+console.log('Allowed CORS origins:', allowedOrigins);
 
 app.use(
   cors({
     origin: (origin, callback) => {
+      // Permitir requests sin origin (como mobile apps o Postman)
       if (!origin) {
         return callback(null, true);
       }
@@ -96,12 +103,14 @@ app.use(
         callback(null, true);
       } else {
         console.warn(`CORS blocked request from origin: ${origin}`);
+        console.log('Allowed origins:', allowedOrigins);
         callback(new Error("Not allowed by CORS"));
       }
     },
     credentials: true,
-    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-    allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With'],
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS', 'PATCH'],
+    allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With', 'Accept', 'Origin'],
+    exposedHeaders: ['x-access-token', 'x-refresh-token'],
     maxAge: 86400
   })
 );
