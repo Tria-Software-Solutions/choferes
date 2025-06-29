@@ -23,10 +23,13 @@ import {
   Chip,
   Stack,
   useTheme,
+  useMediaQuery,
   Dialog,
   DialogTitle,
   DialogContent,
+  IconButton,
 } from "@mui/material";
+import CloseIcon from "@mui/icons-material/Close";
 import EditableTable from "../../components/Table/EditableTable/EditableTable";
 import SearchBar from "../../components/SearchBar/SearchBar";
 import AddRoleForm from "../../components/Forms/AddRoleForm";
@@ -398,6 +401,17 @@ const ManageRoles: React.FC<{ isExpanded?: boolean }> = ({ isExpanded = true }) 
               <Typography variant="h6" sx={{ fontWeight: 600 }}>
                 Agregar Rol
               </Typography>
+              <IconButton
+                onClick={handleCloseAddRoleModal}
+                sx={{
+                  color: theme.palette.primary.contrastText,
+                  '&:hover': {
+                    backgroundColor: 'rgba(255,255,255,0.1)',
+                  },
+                }}
+              >
+                <CloseIcon />
+              </IconButton>
             </DialogTitle>
             <DialogContent sx={{ p: 3 }}>
               <AddRoleForm
