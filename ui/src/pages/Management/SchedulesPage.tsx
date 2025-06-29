@@ -12,7 +12,6 @@ import {
 import SearchBar from "../../components/SearchBar/SearchBar";
 import EditableTable from "../../components/Table/EditableTable/EditableTable";
 import CustomSpeedDial from "../../components/SpeedDial/CustomSpeedDial";
-import ModalComponent from "../../components/Modal/ModalComponent";
 import AddScheduleForm from "../../components/Forms/AddScheduleForm";
 import { useAppNotifications } from "../../components/Snackbar/SnackbarWrapper";
 import ConfirmationDialog from "../../components/Dialog/ConfirmationDialog";
@@ -22,7 +21,6 @@ import {
   Box,
   Typography,
   Dialog,
-  DialogActions,
   DialogContent,
   DialogTitle,
   useTheme,
@@ -58,7 +56,6 @@ const SchedulesPage: React.FC = () => {
   const [filteredSchedules, setFilteredSchedules] = useState<Schedule[]>([]);
   const [totalCountSchedules, setTotalCountSchedules] = useState(0);
   const [editRowId, setEditRowId] = useState<number | null>(null);
-  const [isSubmitting, setIsSubmitting] = useState(false);
   const [editFields, setEditFields] = useState<{
     label: string;
     days: string[];

@@ -26,7 +26,6 @@ import {
   TextField,
   Typography,
   useTheme,
-  useMediaQuery,
   Dialog,
   DialogTitle,
   DialogContent,

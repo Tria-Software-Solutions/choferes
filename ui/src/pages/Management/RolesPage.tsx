@@ -41,10 +41,6 @@ import {
   CircularProgress,
   SelectChangeEvent,
   Backdrop,
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  DialogActions,
 } from "@mui/material";
 import {
   createExportOptions,
@@ -70,7 +66,6 @@ import CalendarTodayRoundedIcon from "@mui/icons-material/CalendarTodayRounded";
 import CloseRoundedIcon from "@mui/icons-material/CloseRounded";
 import ManageSearchIcon from "@mui/icons-material/ManageSearch";
 import { faFileExcel, faFilePdf } from "@fortawesome/free-solid-svg-icons";
-import { useAppNotifications } from "../../components/Snackbar/SnackbarWrapper";
 import ConfirmationDialog from "../../components/Dialog/ConfirmationDialog";
 
 const RolesPage: React.FC = () => {
