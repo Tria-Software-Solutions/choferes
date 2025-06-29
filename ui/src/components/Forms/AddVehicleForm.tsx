@@ -7,6 +7,7 @@ import {
   useTheme,
   FormControl,
   Autocomplete,
+  useMediaQuery,
 } from '@mui/material';
 import { LocalizationProvider } from '@mui/x-date-pickers';
 import { DatePicker } from '@mui/x-date-pickers/DatePicker';
@@ -41,6 +42,7 @@ const AddVehicleForm: React.FC<AddVehicleFormProps> = ({
   getNextTicketNumber,
 }) => {
   const theme = useTheme();
+  const isSmallScreen = useMediaQuery(theme.breakpoints.down("sm"));
   const [formData, setFormData] = useState({
     ticket: getNextTicketNumber(),
     licensePlate: '',
@@ -206,7 +208,6 @@ const AddVehicleForm: React.FC<AddVehicleFormProps> = ({
   return (
     <Box sx={{ width: '100%', p: 0 }}>
       <Grid container spacing={3} sx={{ mt: 0 }}>
-        {/* Boleta */}
         <Grid item xs={12} sm={6}>
           <TextField
             label="Boleta"
@@ -227,7 +228,6 @@ const AddVehicleForm: React.FC<AddVehicleFormProps> = ({
           />
         </Grid>
 
-        {/* Placa */}
         <Grid item xs={12} sm={6}>
           <TextField
             label="Placa"
@@ -248,7 +248,6 @@ const AddVehicleForm: React.FC<AddVehicleFormProps> = ({
           />
         </Grid>
 
-        {/* Marca */}
         <Grid item xs={12} sm={6}>
           <FormControl variant="outlined" fullWidth>
             <Autocomplete
@@ -287,7 +286,6 @@ const AddVehicleForm: React.FC<AddVehicleFormProps> = ({
           </FormControl>
         </Grid>
 
-        {/* Color */}
         <Grid item xs={12} sm={6}>
           <FormControl variant="outlined" fullWidth>
             <Autocomplete
@@ -326,7 +324,6 @@ const AddVehicleForm: React.FC<AddVehicleFormProps> = ({
           </FormControl>
         </Grid>
 
-        {/* Espacio de Parqueo */}
         <Grid item xs={12} sm={6}>
           <TextField
             label="Espacio de Parqueo"
@@ -347,7 +344,6 @@ const AddVehicleForm: React.FC<AddVehicleFormProps> = ({
           />
         </Grid>
 
-        {/* Fecha de Parqueo */}
         <Grid item xs={12} sm={6}>
           <LocalizationProvider dateAdapter={AdapterDateFns} adapterLocale={es}>
             <DatePicker
@@ -372,7 +368,6 @@ const AddVehicleForm: React.FC<AddVehicleFormProps> = ({
           </LocalizationProvider>
         </Grid>
 
-        {/* Observaciones */}
         <Grid item xs={12}>
           <TextField
             label="Observaciones"
@@ -393,20 +388,19 @@ const AddVehicleForm: React.FC<AddVehicleFormProps> = ({
           />
         </Grid>
 
-        {/* Información Adicional */}
         <Grid item xs={12}>
           <Box
             sx={{
               display: 'flex',
               alignItems: 'center',
-              p: 2,
+              p: { xs: 1.5, sm: 2 },
               backgroundColor: theme.palette.action.hover,
               borderRadius: 1,
               border: '1px solid',
               borderColor: theme.palette.divider,
             }}
           >
-            <Box sx={{ mr: 2, color: theme.palette.info.main }}>
+            <Box sx={{ mr: { xs: 1, sm: 2 }, color: theme.palette.info.main }}>
               ℹ️
             </Box>
             <Box>
@@ -414,12 +408,13 @@ const AddVehicleForm: React.FC<AddVehicleFormProps> = ({
                 fontWeight: 600,
                 color: theme.palette.text.primary,
                 mb: 0.5,
+                fontSize: 'clamp(0.875rem, 1.5vw, 1rem)',
               }}>
                 Información del Vehículo
               </Box>
               <Box sx={{
                 color: theme.palette.text.secondary,
-                fontSize: '0.875rem',
+                fontSize: 'clamp(0.75rem, 1.25vw, 0.875rem)',
               }}>
                 Completa todos los campos requeridos. La boleta y placa deben ser únicas.{' '}
                 <Box
@@ -458,13 +453,13 @@ const AddVehicleForm: React.FC<AddVehicleFormProps> = ({
           </Box>
         </Grid>
 
-        {/* Botones de Acción */}
         <Grid item xs={12}>
           <Box
             sx={{
               display: 'flex',
+              flexDirection: { xs: 'column', sm: 'row' },
               justifyContent: 'space-between',
-              gap: 2,
+              gap: { xs: 1, sm: 2 },
               pt: 2,
               borderTop: '1px solid',
               borderColor: theme.palette.divider,
@@ -474,15 +469,34 @@ const AddVehicleForm: React.FC<AddVehicleFormProps> = ({
               variant="outlined"
               onClick={handleClearForm}
               startIcon={<CloseRoundedIcon />}
+              fullWidth={isSmallScreen}
+              sx={{
+                minHeight: { xs: 44, sm: 48 },
+                fontSize: 'clamp(0.75rem, 1.25vw, 0.875rem)',
+                order: { xs: 3, sm: 1 },
+              }}
             >
               Limpiar
             </Button>
-            <Box sx={{ display: 'flex', gap: 2 }}>
+            <Box 
+              sx={{ 
+                display: 'flex', 
+                flexDirection: { xs: 'column', sm: 'row' },
+                gap: { xs: 1, sm: 2 },
+                width: { xs: '100%', sm: 'auto' },
+                order: { xs: 1, sm: 2 },
+              }}
+            >
               {onCancel && (
                 <Button
                   variant="outlined"
                   onClick={onCancel}
                   disabled={isLoading}
+                  fullWidth={isSmallScreen}
+                  sx={{
+                    minHeight: { xs: 44, sm: 48 },
+                    fontSize: 'clamp(0.75rem, 1.25vw, 0.875rem)',
+                  }}
                 >
                   Cancelar
                 </Button>
@@ -492,14 +506,16 @@ const AddVehicleForm: React.FC<AddVehicleFormProps> = ({
                 onClick={handleSubmit}
                 disabled={!isFormValid() || isLoading}
                 startIcon={<PostAddRoundedIcon />}
+                fullWidth={isSmallScreen}
                 sx={{
-                  px: 4,
-                  py: 1.5,
-                  fontSize: '1rem',
-                  minHeight: 56,
+                  minHeight: { xs: 44, sm: 48 },
+                  fontSize: 'clamp(0.75rem, 1.25vw, 0.875rem)',
+                  fontWeight: 600,
+                  px: { xs: 2, sm: 4 },
+                  py: { xs: 1, sm: 1.5 },
                 }}
               >
-                {isLoading ? 'Agregando...' : 'Agregar Vehículo'}
+                {isLoading ? 'Agregando...' : (isSmallScreen ? 'Agregar' : 'Agregar Vehículo')}
               </Button>
             </Box>
           </Box>
