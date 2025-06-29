@@ -111,7 +111,7 @@ const SelectorTable: React.FC<SelectorTableProps> = React.memo(
     const [selectedPeriod, setSelectedPeriod] = useState<
       "weekly" | "biweekly" | "monthly"
     >("weekly");
-    const [tabValue, setTabValue] = useState(0);
+    const [tabValue, setTabValue] = useState("0");
     const [timeAdjustment, setTimeAdjustment] = useState(0);
     const [orderDirection, setOrderDirection] = useState<"asc" | "desc">("asc");
     const [page, setPage] = useState(0);
@@ -244,7 +244,7 @@ const SelectorTable: React.FC<SelectorTableProps> = React.memo(
     }, [selectedPeriod, currentWeek, resultHoursForPeriod, resultHoursForPeriods]);
 
     const handleTabChange = useCallback((event: React.SyntheticEvent, newValue: number) => {
-      setTabValue(newValue);
+      setTabValue(newValue.toString());
     }, []);
 
     const hasWorkedCurrentWeek = useCallback((employee: Employee): boolean => {
@@ -266,14 +266,14 @@ const SelectorTable: React.FC<SelectorTableProps> = React.memo(
             }}
           >
             <TabList onChange={handleTabChange}>
-              <Tab label="Semanal" value={0} />
-              <Tab label="Quincenal" value={1} />
-              <Tab label="Mensual" value={2} />
-              <Tab label="Horas Extra" value={3} />
+              <Tab label="Semanal" value="0" />
+              <Tab label="Quincenal" value="1" />
+              <Tab label="Mensual" value="2" />
+              <Tab label="Horas Extra" value="3" />
             </TabList>
           </Box>
           <TabPanel
-            value={0}
+            value="0"
             sx={{
               paddingLeft: 0,
               paddingRight: 0,
@@ -318,7 +318,7 @@ const SelectorTable: React.FC<SelectorTableProps> = React.memo(
               </Table>
             </TableContainer>
           </TabPanel>
-          <TabPanel value={1} sx={{ paddingLeft: 0, paddingRight: 0 }}>
+          <TabPanel value="1" sx={{ paddingLeft: 0, paddingRight: 0 }}>
             <TableContainer component={Paper}>
               <Table>
                 <TableHead>
@@ -362,7 +362,7 @@ const SelectorTable: React.FC<SelectorTableProps> = React.memo(
               </Table>
             </TableContainer>
           </TabPanel>
-          <TabPanel value={2} sx={{ paddingLeft: 0, paddingRight: 0 }}>
+          <TabPanel value="2" sx={{ paddingLeft: 0, paddingRight: 0 }}>
             <TableContainer component={Paper}>
               <Table>
                 <TableHead>
@@ -396,7 +396,7 @@ const SelectorTable: React.FC<SelectorTableProps> = React.memo(
               </Table>
             </TableContainer>
           </TabPanel>
-          <TabPanel value={3} sx={{ paddingLeft: 0, paddingRight: 0 }}>
+          <TabPanel value="3" sx={{ paddingLeft: 0, paddingRight: 0 }}>
             <TableContainer component={Paper}>
               <Table>
                 <TableHead>
