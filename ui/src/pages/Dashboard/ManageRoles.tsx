@@ -244,20 +244,29 @@ const ManageRoles: React.FC<{ isExpanded?: boolean }> = ({ isExpanded = true }) 
   const renderColumnValue = (column: keyof Role, value: any) => {
     if (column === "permissionNames" && Array.isArray(value)) {
       return (
-        <Stack direction="row" spacing={0.5} flexWrap="wrap" useFlexGap>
+        <Stack direction="row" spacing={0.75} flexWrap="wrap" useFlexGap>
           {value.map((permission: string, index: number) => (
             <Chip
               key={index}
               label={permission}
               size="small"
-              style={{
-                backgroundColor: "black",
-                color: "white",
-                border: "1px solid white",
-              }}
               sx={{
-                "& .MuiChip-label": {
-                  color: "white !important",
+                backgroundColor: 'primary.main',
+                color: 'primary.contrastText',
+                border: '1px solid',
+                borderColor: 'primary.dark',
+                fontWeight: 500,
+                fontSize: '0.85rem',
+                px: 1.2,
+                py: 0.5,
+                borderRadius: 2,
+                boxShadow: 1,
+                letterSpacing: 0.2,
+                mb: 0.5,
+                '& .MuiChip-label': {
+                  color: 'primary.contrastText',
+                  fontWeight: 500,
+                  px: 0.5,
                 },
               }}
             />
