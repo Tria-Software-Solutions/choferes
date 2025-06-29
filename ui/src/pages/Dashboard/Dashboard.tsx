@@ -22,7 +22,7 @@ const Dashboard: React.FC = () => {
 
   const handleChange =
     (panel: string) => (event: React.SyntheticEvent, newExpanded: boolean) => {
-      setExpanded(newExpanded ? panel : expanded);
+      setExpanded(newExpanded ? panel : false);
     };
 
   return (
@@ -57,7 +57,7 @@ const Dashboard: React.FC = () => {
           </Typography>
         </AccordionSummary>
         <AccordionDetails>
-          <ManageUsers isExpanded={expanded === "panel1"} />
+          {expanded === "panel1" && <ManageUsers isExpanded />}
         </AccordionDetails>
       </Accordion>
       <Accordion
@@ -70,7 +70,7 @@ const Dashboard: React.FC = () => {
           </Typography>
         </AccordionSummary>
         <AccordionDetails>
-          <ManageRoles isExpanded={expanded === "panel2"} />
+          {expanded === "panel2" && <ManageRoles isExpanded />}
         </AccordionDetails>
       </Accordion>
       <Accordion
@@ -83,7 +83,7 @@ const Dashboard: React.FC = () => {
           </Typography>
         </AccordionSummary>
         <AccordionDetails>
-          <ManagePermissions />
+          {expanded === "panel3" && <ManagePermissions />}
         </AccordionDetails>
       </Accordion>
     </Box>
