@@ -449,17 +449,34 @@ const VehiclesPage: React.FC = () => {
             alignItems="center"
           >
             <Grid item xs={12} md={4}>
-              {filteredVehicles && (
-                <SearchBar
-                  placeholder="Buscar vehículo"
-                  value={filter}
-                  onChange={handleFilterChange}
-                  sx={{
-                    maxWidth: "100%",
-                  }}
-                  fullWidth
-                />
-              )}
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+                {filteredVehicles && (
+                  <SearchBar
+                    placeholder="Buscar vehículo"
+                    value={filter}
+                    onChange={handleFilterChange}
+                    sx={{ flex: 1 }}
+                    fullWidth
+                  />
+                )}
+                {userPermissions.includes(PERMISSIONS.CREATE_VEHICLES) && (
+                  <Button
+                    variant="contained"
+                    color="primary"
+                    onClick={handleOpenAddVehicleModal}
+                    sx={{
+                      display: { xs: 'flex', md: 'none' },
+                      minWidth: 'auto',
+                      width: 56,
+                      height: 56,
+                      borderRadius: '50%',
+                      p: 0,
+                    }}
+                  >
+                    <DirectionsCarIcon />
+                  </Button>
+                )}
+              </Box>
             </Grid>
             <Grid item xs={12} md={8}>
               <Box
@@ -473,88 +490,95 @@ const VehiclesPage: React.FC = () => {
                   display="flex"
                   flexDirection="row"
                   alignItems="center"
-                  justifyContent="center"
-                  gap={1}
+                  gap={2}
                 >
-                  <Tooltip title="Día Anterior" arrow>
-                    <Button
-                      variant="contained"
+                  <LocalizationProvider
+                    dateAdapter={AdapterDateFns}
+                    adapterLocale={es}
+                  >
+                    <DatePicker
+                      label="Seleccionar fecha"
+                      value={selectedDate || null}
                       sx={{
-                        height: "56px",
-                        minWidth: "56px",
+                        width: { xs: "100%", sm: "100%", md: "200px" },
                       }}
-                      onClick={handlePreviousDate}
-                    >
-                      <ArrowBackIosNewRoundedIcon />
-                    </Button>
-                  </Tooltip>
-                  <Tooltip title="Día Siguiente" arrow>
-                    <Button
-                      variant="contained"
-                      sx={{
-                        height: "56px",
-                        minWidth: "56px",
+                      maxDate={new Date()}
+                      views={["year", "month", "day"]}
+                      slots={{
+                        toolbar: () => null,
                       }}
-                      disabled={isTodayOrFuture(selectedDate)}
-                      onClick={handleNextDate}
-                    >
-                      <ArrowForwardIosRoundedIcon />
-                    </Button>
-                  </Tooltip>
-                  <Tooltip title="Día Actual" arrow>
-                    <Button
-                      variant="contained"
-                      sx={{
-                        height: "56px",
-                        minWidth: "56px",
+                      slotProps={{
+                        textField: {
+                          inputProps: { readOnly: true },
+                          onMouseDown: (e) => e.preventDefault(),
+                        },
+                        actionBar: {
+                          actions: [],
+                        },
                       }}
-                      disabled={isTodayOrFuture(selectedDate)}
-                      onClick={handleCurrentDate}
-                    >
-                      <CalendarTodayRoundedIcon />
-                    </Button>
-                  </Tooltip>
+                      closeOnSelect
+                      onChange={(date) => handleDateChange(date)}
+                    />
+                  </LocalizationProvider>
+                  <Box
+                    display="flex"
+                    flexDirection="row"
+                    alignItems="center"
+                    gap={1}
+                  >
+                    <Tooltip title="Día Anterior" arrow>
+                      <Button
+                        variant="contained"
+                        sx={{
+                          height: "56px",
+                          minWidth: "56px",
+                        }}
+                        onClick={handlePreviousDate}
+                      >
+                        <ArrowBackIosNewRoundedIcon />
+                      </Button>
+                    </Tooltip>
+                    <Tooltip title="Día Siguiente" arrow>
+                      <Button
+                        variant="contained"
+                        sx={{
+                          height: "56px",
+                          minWidth: "56px",
+                        }}
+                        disabled={isTodayOrFuture(selectedDate)}
+                        onClick={handleNextDate}
+                      >
+                        <ArrowForwardIosRoundedIcon />
+                      </Button>
+                    </Tooltip>
+                    <Tooltip title="Día Actual" arrow>
+                      <Button
+                        variant="contained"
+                        sx={{
+                          height: "56px",
+                          minWidth: "56px",
+                        }}
+                        disabled={isTodayOrFuture(selectedDate)}
+                        onClick={handleCurrentDate}
+                      >
+                        <CalendarTodayRoundedIcon />
+                      </Button>
+                    </Tooltip>
+                  </Box>
                 </Box>
-                <LocalizationProvider
-                  dateAdapter={AdapterDateFns}
-                  adapterLocale={es}
-                >
-                  <DatePicker
-                    label="Seleccionar fecha"
-                    value={selectedDate || null}
-                    sx={{
-                      width: { xs: "100%", sm: "100%", md: "200px" },
-                    }}
-                    maxDate={new Date()}
-                    views={["year", "month", "day"]}
-                    slots={{
-                      toolbar: () => null,
-                    }}
-                    slotProps={{
-                      textField: {
-                        inputProps: { readOnly: true },
-                        onMouseDown: (e) => e.preventDefault(),
-                      },
-                      actionBar: {
-                        actions: [],
-                      },
-                    }}
-                    closeOnSelect
-                    onChange={(date) => handleDateChange(date)}
-                  />
-                </LocalizationProvider>
                 {userPermissions.includes(PERMISSIONS.CREATE_VEHICLES) && (
                   <Button
                     variant="contained"
                     startIcon={<DirectionsCarIcon />}
                     onClick={handleOpenAddVehicleModal}
                     sx={{
+                      display: { xs: 'none', md: 'flex' },
                       px: 4,
                       py: 2,
                       fontSize: '1rem',
                       fontWeight: 600,
                       height: 56,
-                      minWidth: { xs: '100%', sm: '100%', md: 'auto' },
+                      minWidth: 'auto',
                       boxShadow: 2,
                       '&:hover': {
                         boxShadow: 4,
