@@ -17,11 +17,22 @@ import {
   useMediaQuery,
   IconButton,
   InputAdornment,
+  Fade,
+  Divider,
+  Stepper,
+  Step,
+  StepLabel,
+  Paper,
+  CircularProgress,
 } from "@mui/material";
 import Visibility from "@mui/icons-material/Visibility";
 import VisibilityOff from "@mui/icons-material/VisibilityOff";
 import { PAGE_TITLE } from "../../constants/constants";
-import AccountCircleIcon from "@mui/icons-material/AccountCircle";
+import PersonAddOutlinedIcon from "@mui/icons-material/PersonAddOutlined";
+import PersonOutlinedIcon from "@mui/icons-material/PersonOutlined";
+import EmailOutlinedIcon from "@mui/icons-material/EmailOutlined";
+import LockOutlinedIcon from "@mui/icons-material/LockOutlined";
+import logo from "../../assets/images/logo.png";
 
 const Register = () => {
   const dispatch = useDispatch<AppDispatch>();
@@ -36,6 +47,8 @@ const Register = () => {
   });
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [fieldErrors, setFieldErrors] = useState<{ [key: string]: string }>({});
 
   const theme = useTheme();
   const isSmallScreen = useMediaQuery(theme.breakpoints.down("sm"));
@@ -51,53 +64,40 @@ const Register = () => {
     const passwordRegex =
       /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
 
+    const newErrors: { [key: string]: string } = {};
+
     if (addFields.firstName === "") {
-      setError("El nombre es requerido.");
-      return false;
-    }
-    if (!nameRegex.test(addFields.firstName)) {
-      setError("El nombre es inválido.");
-      return false;
-    }
-    if (addFields.lastName === "") {
-      setError("El apellido es requerido.");
-      return false;
-    }
-    if (!nameRegex.test(addFields.lastName)) {
-      setError("El apellido es inválido.");
-      return false;
-    }
-    if (addFields.email === "") {
-      setError("El correo electrónico es requerido.");
-      return false;
-    }
-    if (!emailRegex.test(addFields.email)) {
-      setError("El correo electrónico es inválido.");
-      return false;
-    }
-    if (addFields.username === "") {
-      setError("El usuario es requerido.");
-      return false;
-    }
-    if (!usernameRegex.test(addFields.username)) {
-      setError(
-        "El usuario es inválido.\n\n- Solo letras, números, guiones y puntos.\n- Debe comenzar con una letra.\n- Longitud de 3 a 20 caracteres."
-      );
-      return false;
-    }
-    if (addFields.password === "") {
-      setError("La contraseña es requerida.");
-      return false;
-    }
-    if (!passwordRegex.test(addFields.password)) {
-      setError(
-        "La contraseña es inválida.\n\n- Mínimo 8 caracteres.\n- Al menos una letra mayúscula.\n- Al menos una letra minúscula.\n- Al menos un número.\n- Al menos un carácter especial"
-      );
-      return false;
+      newErrors.firstName = "El nombre es requerido";
+    } else if (!nameRegex.test(addFields.firstName)) {
+      newErrors.firstName = "El nombre solo puede contener letras, espacios y puntos";
     }
 
-    setError(null);
-    return true;
+    if (addFields.lastName === "") {
+      newErrors.lastName = "El apellido es requerido";
+    } else if (!nameRegex.test(addFields.lastName)) {
+      newErrors.lastName = "El apellido solo puede contener letras, espacios y puntos";
+    }
+
+    if (addFields.email === "") {
+      newErrors.email = "El correo electrónico es requerido";
+    } else if (!emailRegex.test(addFields.email)) {
+      newErrors.email = "El correo electrónico no tiene un formato válido";
+    }
+
+    if (addFields.username === "") {
+      newErrors.username = "El usuario es requerido";
+    } else if (!usernameRegex.test(addFields.username)) {
+      newErrors.username = "El usuario debe comenzar con una letra y tener 3-20 caracteres";
+    }
+
+    if (addFields.password === "") {
+      newErrors.password = "La contraseña es requerida";
+    } else if (!passwordRegex.test(addFields.password)) {
+      newErrors.password = "La contraseña debe tener al menos 8 caracteres, una mayúscula, una minúscula, un número y un carácter especial";
+    }
+
+    setFieldErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
   }, [addFields]);
 
   const handleRegister = async (e: React.FormEvent) => {
@@ -105,6 +105,8 @@ const Register = () => {
 
     const isValid = await validateFields();
     if (!isValid) return;
+
+    setIsSubmitting(true);
 
     try {
       const newUser: Omit<User, "id" | "temporalPassword" | "role"> = {
@@ -115,13 +117,21 @@ const Register = () => {
         password: addFields.password,
         isActive: true,
       };
-      dispatch(createUser({ newUser }));
+      await dispatch(createUser({ newUser })).unwrap();
       showNotification(
         "El registro del usuario fue exitoso",
         "success",
         3000,
         false
       );
+      // Clear form after successful registration
+      setAddFields({
+        firstName: "",
+        lastName: "",
+        email: "",
+        username: "",
+        password: "",
+      });
     } catch (error) {
       setError("Error al registrar usuario");
       showNotification(
@@ -130,6 +140,8 @@ const Register = () => {
         5000,
         false
       );
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -144,11 +156,11 @@ const Register = () => {
     const value = event.target.value.trim();
     if (!value) return;
 
-    const usernameExists = checkEmailExistence(value);
-    if (usernameExists) {
-      setError("El correo electrónico ya existe.");
+    const emailExists = checkEmailExistence(value);
+    if (emailExists) {
+      setFieldErrors(prev => ({ ...prev, email: "El correo electrónico ya existe" }));
     } else {
-      setError(null);
+      setFieldErrors(prev => ({ ...prev, email: "" }));
     }
   };
 
@@ -165,9 +177,9 @@ const Register = () => {
 
     const usernameExists = checkUsernameExistence(value);
     if (usernameExists) {
-      setError("El nombre de usuario ya existe.");
+      setFieldErrors(prev => ({ ...prev, username: "El nombre de usuario ya existe" }));
     } else {
-      setError(null);
+      setFieldErrors(prev => ({ ...prev, username: "" }));
     }
   };
 
@@ -175,128 +187,395 @@ const Register = () => {
     setShowPassword((prev) => !prev);
   };
 
+  const handleFieldChange = (field: string, value: string) => {
+    setAddFields({ ...addFields, [field]: value });
+    // Clear field error when user starts typing
+    if (fieldErrors[field]) {
+      setFieldErrors(prev => ({ ...prev, [field]: "" }));
+    }
+  };
+
   return (
     <Box
-      display="flex"
-      justifyContent="center"
-      alignItems="center"
-      height="100dvh"
-      padding={2}
+      className="auth-page"
+      sx={{
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        padding: { xs: 2, sm: 4 },
+        minHeight: "100vh",
+      }}
     >
-      <Card sx={{ width: 400, p: 3, boxShadow: 3 }}>
-        <CardContent>
-          <Box display="flex" justifyContent="center" mb={2}>
-            <AccountCircleIcon style={{ width: 95, height: "auto" }} />
-          </Box>
-          <Typography
-            variant={isSmallScreen ? "h6" : "h2"}
-            align="center"
-            sx={{ flexGrow: 1 }}
-            gutterBottom
-          >
-            {PAGE_TITLE.REGISTER}
-          </Typography>
-          <form onSubmit={handleRegister}>
-            <TextField
-              fullWidth
-              label="Nombre"
-              variant="outlined"
-              margin="normal"
-              value={addFields.firstName}
-              onChange={(e) =>
-                setAddFields({ ...addFields, firstName: e.target.value })
-              }
-            />
-            <TextField
-              fullWidth
-              label="Apellido"
-              variant="outlined"
-              margin="normal"
-              value={addFields.lastName}
-              onChange={(e) =>
-                setAddFields({ ...addFields, lastName: e.target.value })
-              }
-            />
-            <TextField
-              fullWidth
-              label="Correo Electrónico"
-              variant="outlined"
-              margin="normal"
-              value={addFields.email}
-              onChange={(e) =>
-                setAddFields({ ...addFields, email: e.target.value })
-              }
-              onBlur={handleEmailChange}
-            />
-            <TextField
-              fullWidth
-              label="Usuario"
-              variant="outlined"
-              margin="normal"
-              value={addFields.username}
-              autoComplete="username"
-              onChange={(e) =>
-                setAddFields({ ...addFields, username: e.target.value })
-              }
-              onBlur={handleUsernameChange}
-            />
-            <TextField
-              fullWidth
-              label="Contraseña"
-              type={showPassword ? "text" : "password"}
-              variant="outlined"
-              margin="normal"
-              value={addFields.password}
-              autoComplete="password"
-              onChange={(e) =>
-                setAddFields({ ...addFields, password: e.target.value })
-              }
-              InputProps={{
-                endAdornment: (
-                  <InputAdornment position="end">
-                    <IconButton onClick={handleTogglePassword} edge="end">
-                      {showPassword ? <VisibilityOff /> : <Visibility />}
-                    </IconButton>
-                  </InputAdornment>
-                ),
-              }}
-            />
-            <Button
-              type="submit"
-              fullWidth
-              variant="contained"
-              color="primary"
+      <Fade in timeout={800}>
+        <Card
+          className="auth-card"
+          sx={{
+            width: { xs: "100%", sm: 500, md: 600 },
+            maxWidth: "100%",
+            borderRadius: 3,
+            position: "relative",
+            overflow: "hidden",
+          }}
+        >
+          <CardContent sx={{ p: { xs: 3, sm: 4 } }}>
+            {/* Logo and Title Section */}
+            <Box
               sx={{
-                mt: 2,
-                minHeight: 56,
                 display: "flex",
-                justifyContent: "center",
-                lineHeight: "normal",
+                flexDirection: "column",
+                alignItems: "center",
+                mb: 4,
               }}
             >
-              Registrarse
-            </Button>
-          </form>
-          {error && (
-            <Alert severity="error" sx={{ whiteSpace: "pre-line", mt: 2 }}>
-              {error}
-            </Alert>
-          )}
-          <Typography align="center" sx={{ mt: 6 }}>
-            ¿Ya tienes una cuenta? {isSmallScreen ? <br /> : " "}
-            <Link
-              to="/"
-              style={{
-                textDecoration: "none",
-                color: "#1976d2",
-                fontWeight: "bold",
-              }}
-            >
-              Inicia sesión aquí
-            </Link>
-          </Typography>
-        </CardContent>
-      </Card>
+              <Box
+                sx={{
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  width: 80,
+                  height: 80,
+                  borderRadius: "50%",
+                  background: "linear-gradient(135deg, #000000 0%, #333333 100%)",
+                  mb: 2,
+                  boxShadow: "0 8px 24px rgba(0,0,0,0.15)",
+                  transition: "transform 0.3s ease, box-shadow 0.3s ease",
+                  "&:hover": {
+                    transform: "scale(1.05)",
+                    boxShadow: "0 12px 32px rgba(0,0,0,0.2)",
+                  },
+                }}
+              >
+                <img
+                  src={logo}
+                  alt="Logo"
+                  style={{
+                    width: 50,
+                    height: "auto",
+                  }}
+                />
+              </Box>
+              <Typography
+                variant={isSmallScreen ? "h5" : "h4"}
+                align="center"
+                sx={{
+                  fontWeight: 700,
+                  color: "#000000",
+                  mb: 1,
+                  fontFamily: "'Protest Guerrilla', sans-serif",
+                }}
+              >
+                {PAGE_TITLE.REGISTER}
+              </Typography>
+              <Typography
+                variant="body2"
+                align="center"
+                sx={{
+                  color: "#666666",
+                  maxWidth: 400,
+                }}
+              >
+                Completa el formulario para crear tu cuenta en el sistema
+              </Typography>
+            </Box>
+
+            {/* Form Section */}
+            <Box component="form" onSubmit={handleRegister} sx={{ width: "100%" }}>
+              <Box sx={{ 
+                display: "flex", 
+                flexDirection: { xs: "column", sm: "row" },
+                gap: 2, 
+                mb: 2 
+              }}>
+                <TextField
+                  fullWidth
+                  label="Nombre"
+                  variant="outlined"
+                  value={addFields.firstName}
+                  onChange={(e) => handleFieldChange("firstName", e.target.value)}
+                  error={!!fieldErrors.firstName}
+                  helperText={fieldErrors.firstName}
+                  disabled={isSubmitting}
+                  sx={{
+                    "& .MuiOutlinedInput-root": {
+                      borderRadius: 2,
+                      backgroundColor: "#ffffff",
+                      "&:hover .MuiOutlinedInput-notchedOutline": {
+                        borderColor: "#000000",
+                      },
+                      "&.Mui-focused .MuiOutlinedInput-notchedOutline": {
+                        borderColor: "#000000",
+                        borderWidth: 2,
+                      },
+                      "&.Mui-focused": {
+                        backgroundColor: "#ffffff",
+                      },
+                    },
+                  }}
+                  InputProps={{
+                    startAdornment: (
+                      <InputAdornment position="start">
+                        <PersonOutlinedIcon sx={{ color: "#666666" }} />
+                      </InputAdornment>
+                    ),
+                  }}
+                />
+                <TextField
+                  fullWidth
+                  label="Apellido"
+                  variant="outlined"
+                  value={addFields.lastName}
+                  onChange={(e) => handleFieldChange("lastName", e.target.value)}
+                  error={!!fieldErrors.lastName}
+                  helperText={fieldErrors.lastName}
+                  disabled={isSubmitting}
+                  sx={{
+                    "& .MuiOutlinedInput-root": {
+                      borderRadius: 2,
+                      backgroundColor: "#ffffff",
+                      "&:hover .MuiOutlinedInput-notchedOutline": {
+                        borderColor: "#000000",
+                      },
+                      "&.Mui-focused .MuiOutlinedInput-notchedOutline": {
+                        borderColor: "#000000",
+                        borderWidth: 2,
+                      },
+                      "&.Mui-focused": {
+                        backgroundColor: "#ffffff",
+                      },
+                    },
+                  }}
+                  InputProps={{
+                    startAdornment: (
+                      <InputAdornment position="start">
+                        <PersonOutlinedIcon sx={{ color: "#666666" }} />
+                      </InputAdornment>
+                    ),
+                  }}
+                />
+              </Box>
+
+              <TextField
+                fullWidth
+                label="Correo Electrónico"
+                variant="outlined"
+                value={addFields.email}
+                onChange={(e) => handleFieldChange("email", e.target.value)}
+                onBlur={handleEmailChange}
+                error={!!fieldErrors.email}
+                helperText={fieldErrors.email}
+                disabled={isSubmitting}
+                sx={{
+                  mb: 2,
+                  "& .MuiOutlinedInput-root": {
+                    borderRadius: 2,
+                    backgroundColor: "#ffffff",
+                    "&:hover .MuiOutlinedInput-notchedOutline": {
+                      borderColor: "#000000",
+                    },
+                    "&.Mui-focused .MuiOutlinedInput-notchedOutline": {
+                      borderColor: "#000000",
+                      borderWidth: 2,
+                    },
+                    "&.Mui-focused": {
+                      backgroundColor: "#ffffff",
+                    },
+                  },
+                }}
+                InputProps={{
+                  startAdornment: (
+                    <InputAdornment position="start">
+                      <EmailOutlinedIcon sx={{ color: "#666666" }} />
+                    </InputAdornment>
+                  ),
+                }}
+              />
+
+              <TextField
+                fullWidth
+                label="Usuario"
+                variant="outlined"
+                value={addFields.username}
+                autoComplete="username"
+                onChange={(e) => handleFieldChange("username", e.target.value)}
+                onBlur={handleUsernameChange}
+                error={!!fieldErrors.username}
+                helperText={fieldErrors.username}
+                disabled={isSubmitting}
+                sx={{
+                  mb: 2,
+                  "& .MuiOutlinedInput-root": {
+                    borderRadius: 2,
+                    backgroundColor: "#ffffff",
+                    "&:hover .MuiOutlinedInput-notchedOutline": {
+                      borderColor: "#000000",
+                    },
+                    "&.Mui-focused .MuiOutlinedInput-notchedOutline": {
+                      borderColor: "#000000",
+                      borderWidth: 2,
+                    },
+                    "&.Mui-focused": {
+                      backgroundColor: "#ffffff",
+                    },
+                  },
+                }}
+                InputProps={{
+                  startAdornment: (
+                    <InputAdornment position="start">
+                      <PersonOutlinedIcon sx={{ color: "#666666" }} />
+                    </InputAdornment>
+                  ),
+                }}
+              />
+
+              <TextField
+                fullWidth
+                label="Contraseña"
+                type={showPassword ? "text" : "password"}
+                variant="outlined"
+                value={addFields.password}
+                autoComplete="new-password"
+                onChange={(e) => handleFieldChange("password", e.target.value)}
+                error={!!fieldErrors.password}
+                helperText={fieldErrors.password}
+                disabled={isSubmitting}
+                sx={{
+                  mb: 3,
+                  "& .MuiOutlinedInput-root": {
+                    borderRadius: 2,
+                    backgroundColor: "#ffffff",
+                    "&:hover .MuiOutlinedInput-notchedOutline": {
+                      borderColor: "#000000",
+                    },
+                    "&.Mui-focused .MuiOutlinedInput-notchedOutline": {
+                      borderColor: "#000000",
+                      borderWidth: 2,
+                    },
+                    "&.Mui-focused": {
+                      backgroundColor: "#ffffff",
+                    },
+                  },
+                }}
+                InputProps={{
+                  startAdornment: (
+                    <InputAdornment position="start">
+                      <LockOutlinedIcon sx={{ color: "#666666" }} />
+                    </InputAdornment>
+                  ),
+                  endAdornment: (
+                    <InputAdornment position="end">
+                      <IconButton
+                        onClick={handleTogglePassword}
+                        edge="end"
+                        disabled={isSubmitting}
+                        sx={{
+                          color: "#666666",
+                          "&:hover": {
+                            color: "#000000",
+                          },
+                        }}
+                      >
+                        {showPassword ? <VisibilityOff /> : <Visibility />}
+                      </IconButton>
+                    </InputAdornment>
+                  ),
+                }}
+              />
+
+              <Button
+                type="submit"
+                fullWidth
+                variant="contained"
+                disabled={isSubmitting}
+                sx={{
+                  minHeight: 56,
+                  borderRadius: 2,
+                  background: "linear-gradient(135deg, #000000 0%, #333333 100%)",
+                  color: "#ffffff",
+                  fontWeight: 600,
+                  fontSize: "1rem",
+                  textTransform: "none",
+                  boxShadow: "0 4px 12px rgba(0,0,0,0.15)",
+                  transition: "all 0.3s ease",
+                  "&:hover": {
+                    background: "linear-gradient(135deg, #333333 0%, #000000 100%)",
+                    transform: "translateY(-2px)",
+                    boxShadow: "0 8px 24px rgba(0,0,0,0.25)",
+                  },
+                  "&:disabled": {
+                    background: "#bdbdbd",
+                    transform: "none",
+                    boxShadow: "none",
+                  },
+                }}
+              >
+                {isSubmitting ? (
+                  <>
+                    <CircularProgress
+                      color="inherit"
+                      size={24}
+                      sx={{ mr: 1 }}
+                    />
+                    Creando cuenta...
+                  </>
+                ) : (
+                  "Crear Cuenta"
+                )}
+              </Button>
+            </Box>
+
+            {/* Error Alert */}
+            {error && (
+              <Fade in timeout={300}>
+                <Alert
+                  severity="error"
+                  sx={{
+                    mt: 3,
+                    borderRadius: 2,
+                    "& .MuiAlert-icon": {
+                      alignItems: "center",
+                    },
+                  }}
+                >
+                  {error}
+                </Alert>
+              </Fade>
+            )}
+
+            {/* Divider */}
+            <Divider sx={{ my: 3, opacity: 0.6 }} />
+
+            {/* Login Link */}
+            <Box sx={{ textAlign: "center" }}>
+              <Typography
+                variant="body2"
+                sx={{
+                  color: "#666666",
+                  mb: 1,
+                }}
+              >
+                ¿Ya tienes una cuenta?
+              </Typography>
+              <Link
+                to="/"
+                style={{
+                  textDecoration: "none",
+                  color: "#000000",
+                  fontWeight: 600,
+                  transition: "color 0.3s ease",
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.color = "#333333";
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.color = "#000000";
+                }}
+              >
+                Inicia sesión aquí
+              </Link>
+            </Box>
+          </CardContent>
+        </Card>
+      </Fade>
     </Box>
   );
 };
