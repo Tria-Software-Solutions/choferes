@@ -8,16 +8,12 @@ import {
   updateUserPassword,
 } from "../../store/slices/userSlice";
 import {
-  Alert,
   Box,
   Button,
   Divider,
   Grid,
   IconButton,
-  InputAdornment,
-  TextField,
   Typography,
-  useMediaQuery,
   useTheme,
 } from "@mui/material";
 import { useAppNotifications } from "../../components/Snackbar/SnackbarWrapper";
@@ -33,6 +29,11 @@ import {
   validatePassword,
   validatePasswordMatch
 } from '../../utils/userValidation';
+import CustomTextField from '../../components/Textfield/CustomTextField';
+import PersonOutlinedIcon from '@mui/icons-material/PersonOutlined';
+import EmailOutlinedIcon from '@mui/icons-material/EmailOutlined';
+import AccountCircleOutlinedIcon from '@mui/icons-material/AccountCircleOutlined';
+import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined';
 
 const Settings: React.FC = () => {
   const dispatch = useDispatch<AppDispatch>();
@@ -57,7 +58,6 @@ const Settings: React.FC = () => {
   const [isPasswordFormValid, setIsPasswordFormValid] = useState(false);
 
   const theme = useTheme();
-  const isSmallScreen = useMediaQuery(theme.breakpoints.down("sm"));
 
   useEffect(() => {
     dispatch(fetchUsers());
@@ -234,24 +234,12 @@ const Settings: React.FC = () => {
   };
 
   return (
-    <Box sx={{ maxWidth: 1200, mx: 'auto', p: 3 }}>
-      <Box
-        display="flex"
-        justifyContent="space-between"
-        alignItems="center"
-        sx={{ mb: 5 }}
-      >
-        <Box display="flex" alignItems="center">
-          <SettingsIcon fontSize={isSmallScreen ? "small" : "large"} />
-          <Box sx={{ ml: 1 }}>
-            <Typography
-              variant={isSmallScreen ? "h5" : "h2"}
-              sx={{ flexGrow: 1 }}
-            >
-              {PAGE_TITLE.SETTINGS}
-            </Typography>
-          </Box>
-        </Box>
+    <Box sx={{ width: '100%', maxWidth: 1200, mx: 'auto', p: 3 }}>
+      <Box sx={{ display: 'flex', alignItems: 'center', mb: 3 }}>
+        <SettingsIcon sx={{ fontSize: 32, mr: 2 }} />
+        <Typography variant="h4" fontWeight={700}>
+          {PAGE_TITLE.SETTINGS}
+        </Typography>
       </Box>
       <Grid container spacing={4} justifyContent="space-between">
         <Grid item xs={12} md={5}>
@@ -261,143 +249,99 @@ const Settings: React.FC = () => {
           <Typography variant="body2" color="textSecondary" mb={3}>
             Modifica tu información personal y correo electrónico.
           </Typography>
-          <Grid item xs={12} md={12} lg={12} sx={{ mb: 3 }}>
-            <TextField
-              label="Nombre"
-              value={editFields.firstName}
-              onChange={(e) => {
-                const value = e.target.value;
-                setEditFields({ ...editFields, firstName: value });
-                const error = validateField("firstName", value);
-                if (error) setInfoError(error);
-                else setInfoError(null);
-              }}
-              fullWidth
-              margin="dense"
-              placeholder="Ej: Juan Carlos"
-              helperText={infoError || "Tu nombre completo"}
-              error={infoError !== null && infoError !== ""}
-              InputProps={{
-                startAdornment: (
-                  <Box sx={{ mr: 1, color: theme.palette.text.secondary }}>
-                    👤
-                  </Box>
-                ),
-              }}
-            />
+          <Grid container spacing={2}>
+            <Grid item xs={12} sm={6}>
+              <CustomTextField
+                label="Nombre"
+                name="firstName"
+                value={editFields.firstName}
+                onChange={e => setEditFields({ ...editFields, firstName: e.target.value })}
+                error={!!validateName(editFields.firstName)}
+                helperText={validateName(editFields.firstName)}
+                icon={<PersonOutlinedIcon sx={{ color: theme.palette.text.secondary }} />}
+              />
+            </Grid>
+            <Grid item xs={12} sm={6}>
+              <CustomTextField
+                label="Apellido"
+                name="lastName"
+                value={editFields.lastName}
+                onChange={e => setEditFields({ ...editFields, lastName: e.target.value })}
+                error={!!validateName(editFields.lastName)}
+                helperText={validateName(editFields.lastName)}
+                icon={<PersonOutlinedIcon sx={{ color: theme.palette.text.secondary }} />}
+              />
+            </Grid>
+            <Grid item xs={12}>
+              <CustomTextField
+                label="Correo electrónico"
+                name="email"
+                value={editFields.email}
+                onChange={e => { setEditFields({ ...editFields, email: e.target.value }); handleEmailChange(e); }}
+                error={!!validateEmail(editFields.email) || !!infoError}
+                helperText={infoError || validateEmail(editFields.email)}
+                icon={<EmailOutlinedIcon sx={{ color: theme.palette.text.secondary }} />}
+              />
+            </Grid>
+            <Grid item xs={12}>
+              <CustomTextField
+                label="Usuario"
+                name="username"
+                value={editFields.username}
+                onChange={e => { setEditFields({ ...editFields, username: e.target.value }); handleUsernameChange(e); }}
+                error={!!validateUsername(editFields.username) || !!infoError}
+                helperText={infoError || validateUsername(editFields.username)}
+                icon={<AccountCircleOutlinedIcon sx={{ color: theme.palette.text.secondary }} />}
+              />
+            </Grid>
           </Grid>
-          <Grid item xs={12} md={12} lg={12} sx={{ mb: 3 }}>
-            <TextField
-              label="Apellido"
-              value={editFields.lastName}
-              onChange={(e) => {
-                const value = e.target.value;
-                setEditFields({ ...editFields, lastName: value });
-                const error = validateField("lastName", value);
-                if (error) setInfoError(error);
-                else setInfoError(null);
-              }}
-              fullWidth
-              margin="dense"
-              placeholder="Ej: Pérez González"
-              helperText={infoError || "Tu apellido completo"}
-              error={infoError !== null && infoError !== ""}
-              InputProps={{
-                startAdornment: (
-                  <Box sx={{ mr: 1, color: theme.palette.text.secondary }}>
-                    👤
-                  </Box>
-                ),
-              }}
-            />
-          </Grid>
-          <Grid item xs={12} md={12} lg={12} sx={{ mb: 3 }}>
-            <TextField
-              label="Correo Electrónico"
-              type="email"
-              value={editFields.email}
-              onChange={(e) => {
-                const value = e.target.value;
-                setEditFields({ ...editFields, email: value });
-                const error = validateField("email", value);
-                if (error) setInfoError(error);
-                else handleEmailChange(e);
-              }}
-              fullWidth
-              margin="dense"
-              placeholder="ejemplo@correo.com"
-              helperText={infoError || "Tu dirección de correo electrónico"}
-              error={infoError !== null && infoError !== ""}
-              InputProps={{
-                startAdornment: (
-                  <Box sx={{ mr: 1, color: theme.palette.text.secondary }}>
-                    📧
-                  </Box>
-                ),
-              }}
-            />
-          </Grid>
-          <Grid item xs={12} md={12} lg={12} sx={{ mb: 3 }}>
-            <TextField
-              label="Usuario"
-              value={editFields.username}
-              onChange={(e) => {
-                const value = e.target.value;
-                setEditFields({ ...editFields, username: value });
-                const error = validateField("username", value);
-                if (error) setInfoError(error);
-                else handleUsernameChange(e);
-              }}
-              fullWidth
-              margin="dense"
-              placeholder="juan.perez"
-              helperText={infoError || "Tu nombre de usuario único"}
-              error={infoError !== null && infoError !== ""}
-              InputProps={{
-                startAdornment: (
-                  <Box sx={{ mr: 1, color: theme.palette.text.secondary }}>
-                    🆔
-                  </Box>
-                ),
-              }}
-            />
-          </Grid>
-          {infoError && (
-            <Alert severity="error" sx={{ mt: 2 }}>
-              {infoError}
-            </Alert>
-          )}
-          <Box sx={{ display: "flex", justifyContent: "flex-end", gap: 2 }}>
+          <Box
+            sx={{
+              display: 'flex',
+              alignItems: 'center',
+              p: { xs: 1.5, sm: 2 },
+              backgroundColor: theme.palette.action.hover,
+              borderRadius: 1,
+              border: '1px solid',
+              borderColor: theme.palette.divider,
+              mb: 2,
+              mt: 2,
+            }}
+          >
+            <Box sx={{ mr: { xs: 1, sm: 2 }, color: theme.palette.info.main }}>
+              <InfoOutlinedIcon sx={{ color: theme.palette.info.main, mr: { xs: 1, sm: 2 } }} />
+            </Box>
             <Box>
-              <Button
-                variant="contained"
-                color="primary"
-                sx={{ 
-                  flex: 2, 
-                  height: "56px",
-                  px: 4,
-                  py: 1.5,
-                  fontSize: '1rem',
-                  fontWeight: 600,
-                  minWidth: 140,
-                }}
-                onClick={handleSaveChanges}
-                disabled={!isEditFormValid || !!infoError}
-              >
-                Guardar Cambios
-              </Button>
+              <Box sx={{ fontWeight: 600, color: theme.palette.text.primary, mb: 0.5, fontSize: 'clamp(0.875rem, 1.5vw, 1rem)' }}>
+                Recomendación
+              </Box>
+              <Box sx={{ color: theme.palette.text.secondary, fontSize: 'clamp(0.75rem, 1.25vw, 0.875rem)' }}>
+                Verifica que tus datos sean correctos antes de guardar los cambios.
+              </Box>
             </Box>
           </Box>
+          <Box sx={{ display: "flex", justifyContent: "flex-end", gap: 2, mt: 2 }}>
+            <Button
+              variant="contained"
+              color="primary"
+              sx={{
+                flex: 2,
+                height: "56px",
+                px: 4,
+                py: 1.5,
+                fontSize: '1rem',
+                fontWeight: 600,
+                minWidth: 140,
+              }}
+              onClick={handleSaveChanges}
+              disabled={!isEditFormValid || !!infoError}
+            >
+              Guardar Cambios
+            </Button>
+          </Box>
         </Grid>
-        <Grid
-          item
-          xs={12}
-          md={1}
-          display="flex"
-          justifyContent="center"
-          alignItems="stretch"
-        >
-          <Divider orientation="vertical" flexItem />
+        <Grid item xs={12} md={1} display="flex" justifyContent="center" alignItems="stretch">
+          <Divider orientation="vertical" flexItem sx={{ display: { xs: 'none', md: 'block' } }} />
         </Grid>
         <Grid item xs={12} md={5}>
           <Typography variant="h5" fontWeight="bold" mb={1}>
@@ -406,92 +350,84 @@ const Settings: React.FC = () => {
           <Typography variant="body2" color="textSecondary" mb={3}>
             Ingresa una nueva contraseña para tu cuenta.
           </Typography>
-          <Grid item xs={12} md={12} lg={12} sx={{ mb: 3 }}>
-            <TextField
-              label="Nueva Contraseña"
-              type={showNewPassword ? "text" : "password"}
-              value={passwordFields.newPassword}
-              onChange={(e) => handleNewPassword(e)}
-              placeholder="Mínimo 8 caracteres"
-              helperText={passwordError || "Ingresa tu nueva contraseña"}
-              error={passwordError !== null && passwordError !== ""}
-              InputProps={{
-                startAdornment: (
-                  <Box sx={{ mr: 1, color: theme.palette.text.secondary }}>
-                    🔒
-                  </Box>
-                ),
-                endAdornment: (
-                  <InputAdornment position="end">
-                    <IconButton onClick={handleToggleNewPassword} edge="end">
-                      {showNewPassword ? <VisibilityOff /> : <Visibility />}
-                    </IconButton>
-                  </InputAdornment>
-                ),
-              }}
-              fullWidth
-              margin="dense"
-            />
+          <Grid container spacing={2}>
+            <Grid item xs={12}>
+              <CustomTextField
+                label="Nueva contraseña"
+                name="newPassword"
+                type={showNewPassword ? "text" : "password"}
+                value={passwordFields.newPassword}
+                onChange={handleNewPassword}
+                error={!!passwordError}
+                helperText={passwordError}
+                endAdornment={
+                  <IconButton onClick={handleToggleNewPassword} edge="end" size="small">
+                    {showNewPassword ? <VisibilityOff /> : <Visibility />}
+                  </IconButton>
+                }
+              />
+            </Grid>
+            <Grid item xs={12}>
+              <CustomTextField
+                label="Confirmar nueva contraseña"
+                name="confirmNewPassword"
+                type={showConfirmNewPassword ? "text" : "password"}
+                value={passwordFields.confirmNewPassword}
+                onChange={handleConfirmNewPassword}
+                error={!!passwordError}
+                helperText={passwordError}
+                endAdornment={
+                  <IconButton onClick={handleToggleConfirmNewPassword} edge="end" size="small">
+                    {showConfirmNewPassword ? <VisibilityOff /> : <Visibility />}
+                  </IconButton>
+                }
+              />
+            </Grid>
           </Grid>
-          <Grid item xs={12} md={12} lg={12} sx={{ mb: 3 }}>
-            <TextField
-              label="Confirmar Contraseña"
-              type={showConfirmNewPassword ? "text" : "password"}
-              value={passwordFields.confirmNewPassword}
-              onChange={(e) => handleConfirmNewPassword(e)}
-              placeholder="Repite la nueva contraseña"
-              helperText={passwordError || "Confirma tu nueva contraseña"}
-              error={passwordError !== null && passwordError !== ""}
-              InputProps={{
-                startAdornment: (
-                  <Box sx={{ mr: 1, color: theme.palette.text.secondary }}>
-                    🔒
-                  </Box>
-                ),
-                endAdornment: (
-                  <InputAdornment position="end">
-                    <IconButton
-                      onClick={handleToggleConfirmNewPassword}
-                      edge="end"
-                    >
-                      {showConfirmNewPassword ? (
-                        <VisibilityOff />
-                      ) : (
-                        <Visibility />
-                      )}
-                    </IconButton>
-                  </InputAdornment>
-                ),
-              }}
-              fullWidth
-              margin="dense"
-            />
-          </Grid>
-          {passwordError && (
-            <Alert severity="error" sx={{ mt: 2, whiteSpace: "pre-line" }}>
-              {passwordError}
-            </Alert>
-          )}
-          <Box sx={{ display: "flex", justifyContent: "flex-end", gap: 2 }}>
-            <Box>
-              <Button
-                variant="contained"
-                color="primary"
-                sx={{ 
-                  flex: 2, 
-                  height: "56px",
-                  px: 4,
-                  py: 1.5,
-                  fontSize: '1rem',
-                  fontWeight: 600,
-                  minWidth: 140,
-                }}
-                onClick={(e) => handleChangePassword(e)}
-                disabled={!isPasswordFormValid}
-              >
-                Cambiar Contraseña
-              </Button>
+          <Box
+            sx={{
+              display: 'flex',
+              alignItems: 'center',
+              p: { xs: 1.5, sm: 2 },
+              backgroundColor: theme.palette.action.hover,
+              borderRadius: 1,
+              border: '1px solid',
+              borderColor: theme.palette.divider,
+              mb: 2,
+              mt: 2,
+            }}
+          >
+            <Box sx={{ mr: { xs: 1, sm: 2 }, color: theme.palette.info.main }}>
+              <InfoOutlinedIcon sx={{ color: theme.palette.info.main, mr: { xs: 1, sm: 2 } }} />
             </Box>
+            <Box>
+              <Box sx={{ fontWeight: 600, color: theme.palette.text.primary, mb: 0.5, fontSize: 'clamp(0.875rem, 1.5vw, 1rem)' }}>
+                Consejo de seguridad
+              </Box>
+              <Box sx={{ color: theme.palette.text.secondary, fontSize: 'clamp(0.75rem, 1.25vw, 0.875rem)' }}>
+                Usa una contraseña única y no la compartas con nadie.<br/>
+                Debe tener mínimo 8 caracteres, una mayúscula y un número.
+              </Box>
+            </Box>
+          </Box>
+          <Box sx={{ display: "flex", justifyContent: "flex-end", gap: 2, mt: 2 }}>
+            <Button
+              variant="contained"
+              color="primary"
+              sx={{
+                flex: 2,
+                height: "56px",
+                px: 4,
+                py: 1.5,
+                fontSize: '1rem',
+                fontWeight: 600,
+                minWidth: 140,
+              }}
+              onClick={handleChangePassword}
+              disabled={!isPasswordFormValid}
+            >
+              Cambiar Contraseña
+            </Button>
           </Box>
         </Grid>
       </Grid>
