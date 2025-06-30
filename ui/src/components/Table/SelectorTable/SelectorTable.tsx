@@ -861,20 +861,7 @@ const SelectorTable: React.FC<SelectorTableProps> = React.memo(
                               : rowIndex % 2 === 0 ? "white" : "#f5f5f5",
                         }}
                       >
-                        <FormControl size="small" sx={{
-                          '&.MuiFormControl-root': {
-                            backgroundColor: "transparent !important",
-                          },
-                          '& .MuiFormControl-root': {
-                            backgroundColor: "transparent !important",
-                          },
-                          '&.Mui-focused': {
-                            backgroundColor: "transparent !important",
-                          },
-                          '& .Mui-focused': {
-                            backgroundColor: "transparent !important",
-                          },
-                        }}>
+                        <FormControl fullWidth>
                           <Select
                             value={finalSelectedLabel}
                             onChange={(event: SelectChangeEvent<string>) =>
