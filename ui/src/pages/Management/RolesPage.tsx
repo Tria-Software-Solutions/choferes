@@ -76,6 +76,8 @@ import TabList from '@mui/lab/TabList';
 import TabPanel from '@mui/lab/TabPanel';
 import Tab from '@mui/material/Tab';
 import Divider from '@mui/material/Divider';
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faFileExcel, faFilePdf } from "@fortawesome/free-solid-svg-icons";
 
 const RolesPage: React.FC = () => {
   const dispatch = useDispatch<AppDispatch>();
@@ -507,8 +509,8 @@ const RolesPage: React.FC = () => {
       : undefined;
 
     return createExportOptions(
-      <DownloadRoundedIcon />,
-      <DownloadRoundedIcon />,
+      <FontAwesomeIcon icon={faFileExcel} size="lg" />,
+      <FontAwesomeIcon icon={faFilePdf} size="lg" />,
       excelOption,
       pdfOption,
     );
