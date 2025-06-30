@@ -41,6 +41,10 @@ import {
   CircularProgress,
   SelectChangeEvent,
   Backdrop,
+  Avatar,
+  IconButton,
+  Dialog,
+  DialogContent,
 } from "@mui/material";
 import {
   createExportOptions,
@@ -67,6 +71,13 @@ import CloseRoundedIcon from "@mui/icons-material/CloseRounded";
 import ManageSearchIcon from "@mui/icons-material/ManageSearch";
 import { faFileExcel, faFilePdf } from "@fortawesome/free-solid-svg-icons";
 import DialogComponent from "../../components/Dialog/DialogComponent";
+import AccessTimeRoundedIcon from '@mui/icons-material/AccessTimeRounded';
+import BarChartIcon from '@mui/icons-material/BarChart';
+import TabContext from '@mui/lab/TabContext';
+import TabList from '@mui/lab/TabList';
+import TabPanel from '@mui/lab/TabPanel';
+import Tab from '@mui/material/Tab';
+import Divider from '@mui/material/Divider';
 
 const RolesPage: React.FC = () => {
   const dispatch = useDispatch<AppDispatch>();
@@ -109,6 +120,8 @@ const RolesPage: React.FC = () => {
   const [openExportDialog, setOpenExportDialog] = useState(false);
   const [exportType, setExportType] = useState<"excel" | "pdf">("excel");
   const [isExporting, setIsExporting] = useState(false);
+  const [openSummaryDialogEmployee, setOpenSummaryDialogEmployee] = useState<Employee | null>(null);
+  const [summaryTab, setSummaryTab] = useState<'weekly' | 'biweekly' | 'monthly' | 'overtime'>('weekly');
 
   const theme = useTheme();
   const isSmallScreen = useMediaQuery(theme.breakpoints.down("sm"));
@@ -503,6 +516,32 @@ const RolesPage: React.FC = () => {
     );
   }, [userPermissions]);
 
+  const getEmployeeWeeklyHours = (employeeId: number) => {
+    const summary = weeklySummaries.find(
+      (s) => s.employeeId === employeeId && s.weekNumber === currentWeekNumber && s.year === currentYear
+    );
+    return summary ? summary.totalHours : 0;
+  };
+
+  const getEmployeeBiweeklyHours = (employeeId: number) => {
+    const summary = biweeklySummaries.find(
+      (s) => s.employeeId === employeeId && s.biweekNumber === currentBiweekNumber && s.year === currentYear
+    );
+    return summary ? summary.totalHours : 0;
+  };
+
+  const getEmployeeMonthlyHours = (employeeId: number) => {
+    const summary = monthlySummaries.find(
+      (s) => s.employeeId === employeeId && s.month === currentMonth && s.year === currentYear
+    );
+    return summary ? summary.totalHours : 0;
+  };
+
+  const getEmployeeOvertime = (employeeId: number) => {
+    const weekly = getEmployeeWeeklyHours(employeeId);
+    return weekly > 48 ? weekly - 48 : 0;
+  };
+
   return (
     <Box>
       <Box
@@ -690,6 +729,7 @@ const RolesPage: React.FC = () => {
               handleChange={handleChange}
               handleAdjustTime={handleAdjustTime}
               permissions={userPermissions}
+              onInfoClick={setOpenSummaryDialogEmployee}
             />
           ) : (
             <Box
@@ -722,6 +762,107 @@ const RolesPage: React.FC = () => {
         cancelText="No, solo datos básicos"
         loading={isExporting}
       />
+      {/* Employee Hours Summary Dialog */}
+      {openSummaryDialogEmployee && (
+        <Dialog open={!!openSummaryDialogEmployee} onClose={() => setOpenSummaryDialogEmployee(null)} maxWidth="md" fullWidth>
+          <Box sx={{ background: theme.palette.primary.main, p: 3, borderTopLeftRadius: 12, borderTopRightRadius: 12 }}>
+            <Box display="flex" alignItems="center" gap={2}>
+              <Avatar sx={{ bgcolor: '#fff' }}>
+                <AccessTimeRoundedIcon color="primary" />
+              </Avatar>
+              <Box>
+                <Typography variant="h5" color="white" fontWeight={700}>
+                  {openSummaryDialogEmployee.firstName} {openSummaryDialogEmployee.lastName}
+                </Typography>
+                <Typography variant="subtitle2" color="white" fontWeight={400}>
+                  Resumen de Horas Trabajadas
+                </Typography>
+              </Box>
+              <Box flexGrow={1} />
+              <IconButton onClick={() => setOpenSummaryDialogEmployee(null)} sx={{ color: '#fff' }}>
+                <CloseRoundedIcon />
+              </IconButton>
+            </Box>
+          </Box>
+          <DialogContent sx={{ p: 0 }}>
+            <Box sx={{ p: 3 }}>
+              <TabContext value={summaryTab}>
+                <TabList onChange={(_, v) => setSummaryTab(v)} variant="fullWidth">
+                  <Tab label="Semanal" value="weekly" />
+                  <Tab label="Quincenal" value="biweekly" />
+                  <Tab label="Mensual" value="monthly" />
+                  <Tab label="Horas Extra" value="overtime" />
+                </TabList>
+                <Divider sx={{ mb: 2 }} />
+                <TabPanel value="weekly">
+                  <Box display="flex" alignItems="center" gap={3}>
+                    <Avatar sx={{ bgcolor: theme.palette.success.light, width: 56, height: 56 }}>
+                      <BarChartIcon color="success" />
+                    </Avatar>
+                    <Box>
+                      <Typography variant="h6" fontWeight={700}>Horas trabajadas esta semana</Typography>
+                      <Typography variant="h3" color="primary" fontWeight={800}>
+                        {getEmployeeWeeklyHours(openSummaryDialogEmployee.id)}
+                      </Typography>
+                      <Typography variant="body2" color="text.secondary">
+                        Semana #{currentWeekNumber}
+                      </Typography>
+                    </Box>
+                  </Box>
+                </TabPanel>
+                <TabPanel value="biweekly">
+                  <Box display="flex" alignItems="center" gap={3}>
+                    <Avatar sx={{ bgcolor: theme.palette.info.light, width: 56, height: 56 }}>
+                      <BarChartIcon color="info" />
+                    </Avatar>
+                    <Box>
+                      <Typography variant="h6" fontWeight={700}>Horas trabajadas esta quincena</Typography>
+                      <Typography variant="h3" color="primary" fontWeight={800}>
+                        {getEmployeeBiweeklyHours(openSummaryDialogEmployee.id)}
+                      </Typography>
+                      <Typography variant="body2" color="text.secondary">
+                        Quincena #{currentBiweekNumber}
+                      </Typography>
+                    </Box>
+                  </Box>
+                </TabPanel>
+                <TabPanel value="monthly">
+                  <Box display="flex" alignItems="center" gap={3}>
+                    <Avatar sx={{ bgcolor: theme.palette.warning.light, width: 56, height: 56 }}>
+                      <BarChartIcon color="warning" />
+                    </Avatar>
+                    <Box>
+                      <Typography variant="h6" fontWeight={700}>Horas trabajadas este mes</Typography>
+                      <Typography variant="h3" color="primary" fontWeight={800}>
+                        {getEmployeeMonthlyHours(openSummaryDialogEmployee.id)}
+                      </Typography>
+                      <Typography variant="body2" color="text.secondary">
+                        Mes #{currentMonth} / {currentYear}
+                      </Typography>
+                    </Box>
+                  </Box>
+                </TabPanel>
+                <TabPanel value="overtime">
+                  <Box display="flex" alignItems="center" gap={3}>
+                    <Avatar sx={{ bgcolor: theme.palette.error.light, width: 56, height: 56 }}>
+                      <AccessTimeRoundedIcon color="error" />
+                    </Avatar>
+                    <Box>
+                      <Typography variant="h6" fontWeight={700}>Horas Extra</Typography>
+                      <Typography variant="h3" color="error" fontWeight={800}>
+                        {getEmployeeOvertime(openSummaryDialogEmployee.id)}
+                      </Typography>
+                      <Typography variant="body2" color="text.secondary">
+                        Detalle de horas extra por periodo
+                      </Typography>
+                    </Box>
+                  </Box>
+                </TabPanel>
+              </TabContext>
+            </Box>
+          </DialogContent>
+        </Dialog>
+      )}
     </Box>
   );
 };
