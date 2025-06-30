@@ -16,9 +16,9 @@ import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns';
 import { es } from 'date-fns/locale';
 import { BRANDS_LIST, COLORS_LIST } from '../../constants/constants';
 import { maskLicensePlate, maskParkingLot } from '../../utils/mask';
-import PostAddRoundedIcon from '@mui/icons-material/PostAddRounded';
+import AddRoundedIcon from '@mui/icons-material/AddRounded';
 import CloseRoundedIcon from '@mui/icons-material/CloseRounded';
-import CustomTextField from './CustomTextField';
+import CustomTextField from '../Textfield/CustomTextField';
 import ConfirmationNumberOutlinedIcon from '@mui/icons-material/ConfirmationNumberOutlined';
 import DirectionsCarOutlinedIcon from '@mui/icons-material/DirectionsCarOutlined';
 import LocalParkingOutlinedIcon from '@mui/icons-material/LocalParkingOutlined';
@@ -497,7 +497,7 @@ const AddVehicleForm: React.FC<AddVehicleFormProps> = ({
                 variant="contained"
                 onClick={handleSubmit}
                 disabled={!isFormValid() || isLoading}
-                startIcon={<PostAddRoundedIcon />}
+                startIcon={<AddRoundedIcon />}
                 fullWidth={isSmallScreen}
                 sx={{
                   minHeight: { xs: 44, sm: 48 },
@@ -507,7 +507,7 @@ const AddVehicleForm: React.FC<AddVehicleFormProps> = ({
                   py: { xs: 1, sm: 1.5 },
                 }}
               >
-                {isLoading ? 'Agregando...' : (isSmallScreen ? 'Agregar' : 'Agregar Vehículo')}
+                {isLoading ? 'Agregando...' : 'Agregar'}
               </Button>
             </Box>
           </Box>

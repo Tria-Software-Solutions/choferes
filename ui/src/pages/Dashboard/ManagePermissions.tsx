@@ -9,9 +9,11 @@ import {
   CircularProgress,
   Grid,
   Typography,
+  Button,
 } from "@mui/material";
 import SearchBar from "../../components/SearchBar/SearchBar";
 import VpnKeyOutlinedIcon from '@mui/icons-material/VpnKeyOutlined';
+import AddRoundedIcon from '@mui/icons-material/AddRounded';
 
 const ManagePermissions: React.FC = () => {
   const dispatch = useDispatch<AppDispatch>();

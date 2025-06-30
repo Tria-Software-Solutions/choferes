@@ -57,6 +57,7 @@ import ManageSearchIcon from "@mui/icons-material/ManageSearch";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faFileExcel, faFilePdf } from "@fortawesome/free-solid-svg-icons";
 import CloseIcon from "@mui/icons-material/Close";
+import AddRoundedIcon from '@mui/icons-material/AddRounded';
 
 const VehiclesPage: React.FC = () => {
   const dispatch = useDispatch<AppDispatch>();
@@ -569,23 +570,11 @@ const VehiclesPage: React.FC = () => {
                 {userPermissions.includes(PERMISSIONS.CREATE_VEHICLES) && (
                   <Button
                     variant="contained"
-                    startIcon={<DirectionsCarIcon />}
+                    startIcon={<AddRoundedIcon />}
                     onClick={handleOpenAddVehicleModal}
-                    sx={{
-                      display: { xs: 'none', md: 'flex' },
-                      px: 4,
-                      py: 2,
-                      fontSize: '1rem',
-                      fontWeight: 600,
-                      height: 56,
-                      minWidth: 'auto',
-                      boxShadow: 2,
-                      '&:hover': {
-                        boxShadow: 4,
-                      },
-                    }}
+                    sx={{ px: 3, py: 1.5, fontSize: '1rem', minHeight: 56 }}
                   >
-                    Agregar Vehículo
+                    Agregar
                   </Button>
                 )}
               </Box>
@@ -656,7 +645,6 @@ const VehiclesPage: React.FC = () => {
         onConfirm={handleDelete}
         title="Eliminar Vehículo"
         message="¿Estás seguro de que deseas eliminar este vehículo? Esta acción no se puede deshacer."
-        type="delete"
         confirmText="Eliminar"
         cancelText="Cancelar"
         loading={isDeletingVehicle}
