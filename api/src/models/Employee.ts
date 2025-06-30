@@ -31,3 +31,5 @@ Employee.init(
     tableName: "employees",
   },
 );
+
+export default Employee;

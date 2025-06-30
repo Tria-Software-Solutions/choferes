@@ -1,5 +1,4 @@
 import { Model, DataTypes, Association } from "sequelize";
-import { AllowNull } from "sequelize-typescript";
 import sequelize from "../config/database";
 import { Role } from "./Role";
 
@@ -72,3 +71,5 @@ User.init(
     tableName: "users",
   },
 );
+
+export default User;

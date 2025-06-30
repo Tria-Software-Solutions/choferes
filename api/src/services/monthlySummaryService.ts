@@ -4,8 +4,18 @@ export const getMonthlySummaries = async () => MonthlySummary.findAll();
 
 export const getCurrentMonthlySummary = async (employeeId: number, month: number, year: number) =>
   MonthlySummary.findOne({
-  where: { employeeId, month, year },
-});
+    where: { employeeId, month, year },
+  });
+
+export const getMonthlySummariesByEmployee = async (employeeId: number) =>
+  MonthlySummary.findAll({
+    where: { employeeId },
+  });
+
+export const getMonthlySummariesByMonth = async (month: number, year: number) =>
+  MonthlySummary.findAll({
+    where: { month, year },
+  });
 
 export const createMonthlySummary = async (data: Omit<MonthlySummary, "id">) => {
   const newMonthlySummary = await MonthlySummary.create(data);

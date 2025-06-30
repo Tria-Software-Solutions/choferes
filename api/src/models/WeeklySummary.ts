@@ -60,3 +60,5 @@ WeeklySummary.belongsTo(Employee, {
   foreignKey: "employeeId",
   onDelete: "CASCADE",
 });
+
+export default WeeklySummary;

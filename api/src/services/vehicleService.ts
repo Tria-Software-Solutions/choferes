@@ -64,34 +64,14 @@ export const getVehiclesByDate = async (parkingDate: Date) => {
 };
 
 export const createVehicle = async (data: Omit<Vehicle, "id">) => {
-  const vehicleData = {
-    ...data,
-    parkingDate: data.parkingDate || new Date(),
-  };
-
-  const newVehicle = await Vehicle.create(vehicleData);
+  const newVehicle = await Vehicle.create(data);
+  await newVehicle.reload();
   return newVehicle;
 };
 
-export const updateVehicle = async (id: number, data: Partial<Vehicle>) => {
-  const [updatedRows] = await Vehicle.update(data, {
-    where: { id },
-    returning: true,
-  });
-
-  if (updatedRows === 0) {
-    throw new Error("Vehicle not found");
-  }
-
+export const updateVehicle = async (id: number, data: Omit<Vehicle, "id">) => {
+  await Vehicle.update(data, { where: { id } });
   return Vehicle.findByPk(id);
 };
 
-export const deleteVehicle = async (id: number) => {
-  const deletedRows = await Vehicle.destroy({ where: { id } });
-
-  if (deletedRows === 0) {
-    throw new Error("Vehicle not found");
-  }
-
-  return { success: true, deletedRows };
-};
+export const deleteVehicle = async (id: number) => Vehicle.destroy({ where: { id } });

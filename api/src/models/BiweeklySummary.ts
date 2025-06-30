@@ -60,3 +60,5 @@ BiweeklySummary.belongsTo(Employee, {
   foreignKey: "employeeId",
   onDelete: "CASCADE",
 });
+
+export default BiweeklySummary;

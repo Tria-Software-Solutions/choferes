@@ -2,20 +2,22 @@ import { BiweeklySummary } from "../models/BiweeklySummary";
 
 export const getBiweeklySummaries = async () => BiweeklySummary.findAll();
 
-export const getCurrentBiweeklySummary = async (
-  employeeId: number,
-  biweekNumber: number,
-  month: number,
-  year: number,
-) =>
+export const getBiweeklySummaryById = async (id: number) => BiweeklySummary.findByPk(id);
+
+export const getBiweeklySummariesByEmployee = async (employeeId: number) =>
+  BiweeklySummary.findAll({
+    where: { employeeId },
+  });
+
+export const getBiweeklySummariesByPeriod = async (period: number, year: number) =>
+  BiweeklySummary.findAll({
+    where: { period, year },
+  });
+
+export const getCurrentBiweeklySummary = async (employeeId: number, period: number, year: number) =>
   BiweeklySummary.findOne({
-  where: {
-    employeeId,
-    biweekNumber,
-    month,
-    year,
-  },
-});
+    where: { employeeId, period, year },
+  });
 
 export const createBiweeklySummary = async (data: Omit<BiweeklySummary, "id">) => {
   const newBiweeklySummary = await BiweeklySummary.create(data);

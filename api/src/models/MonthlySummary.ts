@@ -54,3 +54,5 @@ MonthlySummary.belongsTo(Employee, {
   foreignKey: "employeeId",
   onDelete: "CASCADE",
 });
+
+export default MonthlySummary;

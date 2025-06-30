@@ -33,3 +33,5 @@ Role.init(
     tableName: "roles",
   },
 );
+
+export default Role;

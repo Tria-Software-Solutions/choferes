@@ -44,3 +44,5 @@ Schedule.init(
     tableName: "schedule",
   },
 );
+
+export default Schedule;

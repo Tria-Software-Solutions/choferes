@@ -1,1 +1,3 @@
-export const checkHealth = () => ({ status: "OK" });
+const checkHealth = () => ({ status: "OK" });
+
+export default checkHealth;

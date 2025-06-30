@@ -1,4 +1,4 @@
-'use strict';
+"use strict";
 
 /** @type {import('sequelize-cli').Migration} */
 module.exports = {
@@ -22,17 +22,17 @@ module.exports = {
 
     await queryInterface.createTable("hours_worked", {
       id: { type: Sequelize.INTEGER, autoIncrement: true, primaryKey: true },
-      employeeId: { 
-        type: Sequelize.INTEGER, 
-        allowNull: false, 
-        references: { model: "employees", key: "id" }, 
-        onDelete: "CASCADE" 
+      employeeId: {
+        type: Sequelize.INTEGER,
+        allowNull: false,
+        references: { model: "employees", key: "id" },
+        onDelete: "CASCADE",
       },
       date: { type: Sequelize.DATE, allowNull: false },
-      scheduleId: { 
-        type: Sequelize.INTEGER, 
-        allowNull: false, 
-        references: { model: "schedule", key: "id" } 
+      scheduleId: {
+        type: Sequelize.INTEGER,
+        allowNull: false,
+        references: { model: "schedule", key: "id" },
       },
       createdAt: { type: Sequelize.DATE, allowNull: false },
       updatedAt: { type: Sequelize.DATE, allowNull: false },
@@ -40,11 +40,11 @@ module.exports = {
 
     await queryInterface.createTable("weekly_summary", {
       id: { type: Sequelize.INTEGER, autoIncrement: true, primaryKey: true },
-      employeeId: { 
-        type: Sequelize.INTEGER, 
-        allowNull: false, 
-        references: { model: "employees", key: "id" }, 
-        onDelete: "CASCADE" 
+      employeeId: {
+        type: Sequelize.INTEGER,
+        allowNull: false,
+        references: { model: "employees", key: "id" },
+        onDelete: "CASCADE",
       },
       weekNumber: { type: Sequelize.INTEGER, allowNull: false },
       month: { type: Sequelize.INTEGER, allowNull: false },
@@ -56,11 +56,11 @@ module.exports = {
 
     await queryInterface.createTable("biweekly_summary", {
       id: { type: Sequelize.INTEGER, autoIncrement: true, primaryKey: true },
-      employeeId: { 
-        type: Sequelize.INTEGER, 
-        allowNull: false, 
-        references: { model: "employees", key: "id" }, 
-        onDelete: "CASCADE" 
+      employeeId: {
+        type: Sequelize.INTEGER,
+        allowNull: false,
+        references: { model: "employees", key: "id" },
+        onDelete: "CASCADE",
       },
       biweekNumber: { type: Sequelize.INTEGER, allowNull: false },
       month: { type: Sequelize.INTEGER, allowNull: false },
@@ -72,11 +72,11 @@ module.exports = {
 
     await queryInterface.createTable("monthly_summary", {
       id: { type: Sequelize.INTEGER, autoIncrement: true, primaryKey: true },
-      employeeId: { 
-        type: Sequelize.INTEGER, 
-        allowNull: false, 
-        references: { model: "employees", key: "id" }, 
-        onDelete: "CASCADE" 
+      employeeId: {
+        type: Sequelize.INTEGER,
+        allowNull: false,
+        references: { model: "employees", key: "id" },
+        onDelete: "CASCADE",
       },
       month: { type: Sequelize.INTEGER, allowNull: false },
       year: { type: Sequelize.INTEGER, allowNull: false },
@@ -106,5 +106,5 @@ module.exports = {
     await queryInterface.dropTable("hours_worked");
     await queryInterface.dropTable("schedule");
     await queryInterface.dropTable("employees");
-  }
+  },
 };

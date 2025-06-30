@@ -1,22 +1,20 @@
-import sequelize from "../config/database";
 import { UserRole } from "../models/UserRole";
-import * as RoleService from "./roleService";
 
 export const getUserRoles = async () => UserRole.findAll();
 
 export const getUserRoleByUserId = async (userId: number) =>
   UserRole.findOne({
-  where: {
-    userId,
-  },
-});
+    where: {
+      userId,
+    },
+  });
 
 export const getUserRoleByRoleId = async (roleId: number) =>
   UserRole.findOne({
-  where: {
-    roleId,
-  },
-});
+    where: {
+      roleId,
+    },
+  });
 
 export const createUserRole = async (data: Omit<UserRole, "id">) => {
   const newUserRole = await UserRole.create(data);
