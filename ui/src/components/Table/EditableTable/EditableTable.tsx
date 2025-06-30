@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from "react";
+import React, { useState } from "react";
 import { useSelector } from "react-redux";
 import { RootState } from "../../../store/store";
 import { useAuthContext } from "../../../context/AuthContext";
@@ -32,7 +32,6 @@ import {
   Dialog,
   DialogTitle,
   DialogContent,
-  IconButton as MuiIconButton,
 } from "@mui/material";
 import { LocalizationProvider } from "@mui/x-date-pickers";
 import { DatePicker } from "@mui/x-date-pickers/DatePicker";
@@ -127,6 +126,7 @@ const EditableTable = <T extends object>({
   const [orderBy, setOrderBy] = useState<keyof T>(columns[0]);
   const [passwordModalOpen, setPasswordModalOpen] = useState(false);
   const [passwordUserId, setPasswordUserId] = useState<number | null>(null);
+  const [expandedRows, setExpandedRows] = useState<Record<number, boolean>>({});
 
   const theme = useTheme();
   const isSmallScreen = useMediaQuery(theme.breakpoints.down("sm"));
@@ -722,6 +722,52 @@ const EditableTable = <T extends object>({
                   {columns
                     .filter((column) => !columnConfig[String(column)]?.hidden)
                     .map((column) => {
+                      const value = row[column];
+                      const isPermissionNames = column === "permissionNames";
+                      if (isPermissionNames && Array.isArray(value) && editRowId !== getRowId(row)) {
+                        const expanded = !!expandedRows[rowId];
+                        const maxVisible = 4;
+                        const showAll = expanded && value.length > maxVisible;
+                        const visible = showAll ? value : value.slice(0, maxVisible);
+                        const hiddenCount = value.length - maxVisible;
+                        return (
+                          <TableCell key={String(column)} className="tableCell">
+                            <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5, py: 0.5, minHeight: 36 }}>
+                              {visible.map((perm: string) => (
+                                <Chip
+                                  key={perm}
+                                  label={perm}
+                                  size="small"
+                                  sx={{
+                                    backgroundColor: theme.palette.primary.main,
+                                    color: '#fff',
+                                    fontWeight: 500,
+                                    mb: 0.5
+                                  }}
+                                />
+                              ))}
+                              {hiddenCount > 0 && !expanded && (
+                                <Chip
+                                  label={`Ver más`}
+                                  size="small"
+                                  variant="outlined"
+                                  sx={{ borderColor: theme.palette.primary.main, color: theme.palette.primary.main, fontWeight: 500, background: '#fff', cursor: 'pointer', mb: 0.5 }}
+                                  onClick={() => setExpandedRows((prev) => ({ ...prev, [rowId]: true }))}
+                                />
+                              )}
+                              {showAll && (
+                                <Chip
+                                  label="Ver menos"
+                                  size="small"
+                                  variant="outlined"
+                                  sx={{ borderColor: theme.palette.primary.main, color: theme.palette.primary.main, fontWeight: 500, background: '#fff', cursor: 'pointer', mb: 0.5 }}
+                                  onClick={() => setExpandedRows((prev) => ({ ...prev, [rowId]: false }))}
+                                />
+                              )}
+                            </Box>
+                          </TableCell>
+                        );
+                      }
                       return (
                         <TableCell key={String(column)} className="tableCell">
                           {editRowId === getRowId(row) ? (
