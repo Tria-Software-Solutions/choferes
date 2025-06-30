@@ -136,7 +136,6 @@ const ManageRoles: React.FC<{ isExpanded?: boolean }> = ({ isExpanded = true }) 
       setEditFields({ name: "", permissionNames: [] });
       showNotification(
         "La actualización del rol fue exitosa",
-        "success",
         3000,
         false
       );
@@ -145,7 +144,6 @@ const ManageRoles: React.FC<{ isExpanded?: boolean }> = ({ isExpanded = true }) 
       console.error(error);
       showNotification(
         "Ha ocurrido un error al actualizar el rol",
-        "error",
         5000,
         false
       );
@@ -172,7 +170,6 @@ const ManageRoles: React.FC<{ isExpanded?: boolean }> = ({ isExpanded = true }) 
       setRoleToDelete(null);
       showNotification(
         "Rol eliminado exitosamente",
-        "success",
         3000,
         false
       );
@@ -180,7 +177,6 @@ const ManageRoles: React.FC<{ isExpanded?: boolean }> = ({ isExpanded = true }) 
       console.error("Error deleting role:", error);
       showNotification(
         "Error al eliminar el rol",
-        "error",
         5000,
         false
       );
@@ -217,7 +213,6 @@ const ManageRoles: React.FC<{ isExpanded?: boolean }> = ({ isExpanded = true }) 
       setOpenAddRoleModal(false);
       showNotification(
         "Rol creado exitosamente",
-        "success",
         3000,
         false
       );
@@ -225,7 +220,6 @@ const ManageRoles: React.FC<{ isExpanded?: boolean }> = ({ isExpanded = true }) 
       console.error("Error creating role:", error);
       showNotification(
         "Error al crear el rol",
-        "error",
         5000,
         false
       );
@@ -405,8 +399,8 @@ const ManageRoles: React.FC<{ isExpanded?: boolean }> = ({ isExpanded = true }) 
           <DialogComponent
             open={openAddRoleModal}
             onClose={handleCloseAddRoleModal}
-            title="Agregar Rol"
-            icon={<GroupRoundedIcon color="primary" />}
+            title="Agregar"
+            subtitle="Nuevo rol"
             hideActions
             paperSx={{ minWidth: { xs: '90vw', sm: 500, md: 700 }, maxWidth: { xs: '98vw', sm: 700 } }}
           >

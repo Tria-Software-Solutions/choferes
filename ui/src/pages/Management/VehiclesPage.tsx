@@ -244,7 +244,6 @@ const VehiclesPage: React.FC = () => {
       });
       showNotification(
         "La actualización del vehículo fue exitosa",
-        "success",
         3000,
         false
       );
@@ -253,7 +252,6 @@ const VehiclesPage: React.FC = () => {
       console.error(error);
       showNotification(
         "Ha ocurrido un error al actualizar el vehículo",
-        "error",
         5000,
         false
       );
@@ -279,7 +277,6 @@ const VehiclesPage: React.FC = () => {
       setVehicleToDelete(null);
       showNotification(
         "Vehículo eliminado exitosamente",
-        "success",
         3000,
         false
       );
@@ -287,7 +284,6 @@ const VehiclesPage: React.FC = () => {
       console.error("Error deleting vehicle:", error);
       showNotification(
         "Error al eliminar el vehículo",
-        "error",
         5000,
         false
       );
@@ -350,7 +346,6 @@ const VehiclesPage: React.FC = () => {
       setOpenAddVehicleModal(false);
       showNotification(
         "Vehículo creado exitosamente",
-        "success",
         3000,
         false
       );
@@ -358,7 +353,6 @@ const VehiclesPage: React.FC = () => {
       console.error("Error creating vehicle:", error);
       showNotification(
         "Error al crear el vehículo",
-        "error",
         5000,
         false
       );
@@ -659,8 +653,8 @@ const VehiclesPage: React.FC = () => {
       <DialogComponent
         open={openAddVehicleModal}
         onClose={handleCloseAddVehicleModal}
-        title="Agregar Vehículo"
-        icon={<DirectionsCarIcon color="primary" />}
+        title="Agregar"
+        subtitle="Nuevo vehículo"
         hideActions
         paperSx={{ minWidth: { xs: '90vw', sm: 500, md: 700 }, maxWidth: { xs: '98vw', sm: 700 } }}
       >

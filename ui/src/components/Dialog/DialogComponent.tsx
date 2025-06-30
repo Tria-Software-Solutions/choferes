@@ -35,6 +35,7 @@ interface ConfirmationDialogProps {
   hideActions?: boolean;
   icon?: React.ReactNode;
   paperSx?: object;
+  subtitle?: string;
 }
 
 const DialogComponent: React.FC<ConfirmationDialogProps> = ({
@@ -51,6 +52,7 @@ const DialogComponent: React.FC<ConfirmationDialogProps> = ({
   hideActions = false,
   icon,
   paperSx = {},
+  subtitle,
 }) => {
   const theme = useTheme();
   const isSmallScreen = useMediaQuery(theme.breakpoints.down('sm'));
@@ -112,33 +114,52 @@ const DialogComponent: React.FC<ConfirmationDialogProps> = ({
         },
       }}
     >
-      <DialogTitle
+      <Box
         sx={{
+          background: theme.palette.primary.main,
+          color: theme.palette.primary.contrastText,
           display: 'flex',
           alignItems: 'center',
-          justifyContent: 'space-between',
-          borderBottom: `1px solid ${theme.palette.divider}`,
+          gap: 2,
+          px: 3,
+          py: 2,
+          borderTopLeftRadius: 12,
+          borderTopRightRadius: 12,
         }}
       >
-        <Box display="flex" alignItems="center" gap={2}>
-          {icon ? icon : getIcon()}
-          <Typography variant="h6" component="div" sx={{ fontWeight: 600 }}>
+        {icon && (
+          <Box
+            sx={{
+              background: theme.palette.primary.contrastText,
+              borderRadius: '50%',
+              width: 40,
+              height: 40,
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+            }}
+          >
+            {icon}
+          </Box>
+        )}
+        <Box>
+          <Typography variant="h6" fontWeight={700} color="inherit">
             {title}
           </Typography>
+          {subtitle && (
+            <Typography variant="body2" color="inherit">
+              {subtitle}
+            </Typography>
+          )}
         </Box>
+        <Box flexGrow={1} />
         <IconButton
           onClick={onClose}
-          size="small"
-          sx={{
-            color: theme.palette.grey[500],
-            '&:hover': {
-              color: theme.palette.grey[700],
-            },
-          }}
+          sx={{ color: 'inherit' }}
         >
           <CloseIcon />
         </IconButton>
-      </DialogTitle>
+      </Box>
       
       <DialogContent sx={{ pt: 4, pb: 2, marginTop: '10px' }}>
         {children ? (

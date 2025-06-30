@@ -203,19 +203,13 @@ const CourierServicePage: React.FC = () => {
     try {
       // TODO: Implementar actualización cuando se conecte con el backend
       showNotification(
-        "La actualización del servicio fue exitosa",
-        "success",
-        3000,
-        false
+        "La actualización del servicio fue exitosa"
       );
       setEditRowId(null);
     } catch (error) {
       console.error(error);
       showNotification(
-        "Ha ocurrido un error al actualizar el servicio",
-        "error",
-        5000,
-        false
+        "Ha ocurrido un error al actualizar el servicio"
       );
     }
   };
@@ -245,18 +239,12 @@ const CourierServicePage: React.FC = () => {
       setCourierToDelete(null);
       
       showNotification(
-        "Servicio de mensajería eliminado exitosamente",
-        "success",
-        3000,
-        false
+        "Servicio de mensajería eliminado exitosamente"
       );
     } catch (error) {
       console.error("Error deleting courier:", error);
       showNotification(
-        "Error al eliminar el servicio de mensajería",
-        "error",
-        5000,
-        false
+        "Error al eliminar el servicio de mensajería"
       );
     } finally {
       setIsDeletingCourier(false);
@@ -332,18 +320,12 @@ const CourierServicePage: React.FC = () => {
       
       setOpenAddCourierModal(false);
       showNotification(
-        "Servicio de mensajería creado exitosamente",
-        "success",
-        3000,
-        false
+        "Servicio de mensajería creado exitosamente"
       );
     } catch (error) {
       console.error("Error creating courier:", error);
       showNotification(
-        "Error al crear el servicio de mensajería",
-        "error",
-        5000,
-        false
+        "Error al crear el servicio de mensajería"
       );
     } finally {
       setIsCreatingCourier(false);
@@ -613,8 +595,8 @@ const CourierServicePage: React.FC = () => {
       <DialogComponent
         open={openAddCourierModal}
         onClose={handleCloseAddCourierModal}
-        title="Agregar Servicio"
-        icon={<LocalShippingIcon color="primary" />}
+        title="Agregar"
+        subtitle="Nuevo servicio"
         hideActions
         paperSx={{ minWidth: { xs: '90vw', sm: 500, md: 700 }, maxWidth: { xs: '98vw', sm: 700 } }}
       >

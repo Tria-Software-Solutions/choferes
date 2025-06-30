@@ -172,20 +172,10 @@ const Settings: React.FC = () => {
       } else {
         throw new Error("Current User is null");
       }
-      showNotification(
-        "La actualización de lo datos fue exitosa",
-        "success",
-        3000,
-        false
-      );
+      showNotification("La actualización de lo datos fue exitosa");
     } catch (error) {
       console.error(error);
-      showNotification(
-        "Ha ocurrido un error al actualizar los datos",
-        "error",
-        5000,
-        false
-      );
+      showNotification("Ha ocurrido un error al actualizar los datos");
     }
   };
 
@@ -236,20 +226,10 @@ const Settings: React.FC = () => {
         newPassword: "",
         confirmNewPassword: "",
       });
-      showNotification(
-        "La actualización de la contraseña fue exitosa",
-        "success",
-        3000,
-        false
-      );
+      showNotification("La actualización de la contraseña fue exitosa");
     } catch (error) {
       console.error(error);
-      showNotification(
-        "Ha ocurrido un error al actualizar la contraseña",
-        "error",
-        5000,
-        false
-      );
+      showNotification("Ha ocurrido un error al actualizar la contraseña");
     }
   };
 

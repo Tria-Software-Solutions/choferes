@@ -1,15 +1,10 @@
 import React, { createContext, useContext, useState } from "react";
-import CheckCircleOutlinedIcon from "@mui/icons-material/CheckCircleOutlined";
-import ReportOutlinedIcon from "@mui/icons-material/ReportOutlined";
-import WarningAmberOutlinedIcon from "@mui/icons-material/WarningAmberOutlined";
-import InfoOutlinedIcon from "@mui/icons-material/InfoOutlined";
 import { Snackbar, IconButton, useTheme } from "@mui/material";
 import CloseIcon from "@mui/icons-material/Close";
 
 interface NotificationContextType {
   showNotification: (
     message: string,
-    severity?: "success" | "error" | "warning" | "info",
     duration?: number,
     closeable?: boolean,
     buttonText?: string,
@@ -31,54 +26,12 @@ export const useAppNotifications = () => {
   return context;
 };
 
-const NotificationIcon: React.FC<{
-  severity: "success" | "error" | "warning" | "info";
-}> = ({ severity }) => {
-  const theme = useTheme();
-  
-  const getIconColor = () => {
-    switch (severity) {
-      case "success":
-        return theme.palette.success.main;
-      case "error":
-        return theme.palette.error.main;
-      case "warning":
-        return theme.palette.warning.main;
-      case "info":
-        return theme.palette.info.main;
-      default:
-        return theme.palette.text.primary;
-    }
-  };
-
-  const iconStyle = { 
-    color: getIconColor(), 
-    marginRight: 8 
-  };
-
-  switch (severity) {
-    case "success":
-      return <CheckCircleOutlinedIcon style={iconStyle} />;
-    case "error":
-      return <ReportOutlinedIcon style={iconStyle} />;
-    case "warning":
-      return <WarningAmberOutlinedIcon style={iconStyle} />;
-    case "info":
-      return <InfoOutlinedIcon style={iconStyle} />;
-    default:
-      return null;
-  }
-};
-
 export const AppNotificationProvider: React.FC<{
   children: React.ReactNode;
 }> = ({ children }) => {
   const theme = useTheme();
   const [open, setOpen] = useState(false);
   const [message, setMessage] = useState("");
-  const [severity, setSeverity] = useState<
-    "success" | "error" | "warning" | "info"
-  >("success");
   const [duration, setDuration] = useState<number>(3000);
   const [closeable, setCloseable] = useState<boolean>(true);
   const [buttonText, setButtonText] = useState<string>("");
@@ -88,14 +41,12 @@ export const AppNotificationProvider: React.FC<{
 
   const showNotification = (
     message: string,
-    severity: "success" | "error" | "warning" | "info" = "success",
     duration: number = 3000,
     closeable: boolean = true,
     buttonText: string = "Cerrar",
     onButtonClick: () => void = () => {}
   ) => {
     setMessage(message);
-    setSeverity(severity);
     setDuration(duration);
     setCloseable(closeable);
     setButtonText(buttonText);
@@ -118,7 +69,6 @@ export const AppNotificationProvider: React.FC<{
         onClose={() => setOpen(false)}
         message={
           <span style={{ display: "flex", alignItems: "center" }}>
-            <NotificationIcon severity={severity} />
             {message}
           </span>
         }
