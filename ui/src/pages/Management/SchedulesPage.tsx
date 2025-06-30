@@ -34,13 +34,11 @@ import {
 import { translateDayOptionsToSpanish } from "../../utils/string";
 import { PAGE_TITLE, PERMISSIONS } from "../../constants/constants";
 import EditCalendarRoundedIcon from "@mui/icons-material/EditCalendarRounded";
-import PostAddRoundedIcon from "@mui/icons-material/PostAddRounded";
 import DownloadRoundedIcon from "@mui/icons-material/DownloadRounded";
 import CloseRoundedIcon from "@mui/icons-material/CloseRounded";
 import ManageSearchIcon from "@mui/icons-material/ManageSearch";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faFileExcel, faFilePdf } from "@fortawesome/free-solid-svg-icons";
-import CloseIcon from "@mui/icons-material/Close";
 import AddRoundedIcon from '@mui/icons-material/AddRounded';
 import DeleteOutlineIcon from '@mui/icons-material/DeleteOutline';
 
