@@ -25,8 +25,8 @@ interface ConfirmationDialogProps {
   open: boolean;
   onClose: () => void;
   onConfirm?: () => void;
-  title: string;
-  message?: string;
+  title: React.ReactNode;
+  message?: React.ReactNode;
   type?: DialogType;
   confirmText?: string;
   cancelText?: string;
@@ -35,7 +35,9 @@ interface ConfirmationDialogProps {
   hideActions?: boolean;
   icon?: React.ReactNode;
   paperSx?: object;
-  subtitle?: string;
+  subtitle?: React.ReactNode;
+  actions?: React.ReactNode;
+  header?: React.ReactNode;
 }
 
 const DialogComponent: React.FC<ConfirmationDialogProps> = ({
@@ -53,6 +55,8 @@ const DialogComponent: React.FC<ConfirmationDialogProps> = ({
   icon,
   paperSx = {},
   subtitle,
+  actions,
+  header,
 }) => {
   const theme = useTheme();
   const isSmallScreen = useMediaQuery(theme.breakpoints.down('sm'));
@@ -114,52 +118,56 @@ const DialogComponent: React.FC<ConfirmationDialogProps> = ({
         },
       }}
     >
-      <Box
-        sx={{
-          background: theme.palette.primary.main,
-          color: theme.palette.primary.contrastText,
-          display: 'flex',
-          alignItems: 'center',
-          gap: 2,
-          px: 3,
-          py: 2,
-          borderTopLeftRadius: 12,
-          borderTopRightRadius: 12,
-        }}
-      >
-        {icon && (
-          <Box
-            sx={{
-              background: theme.palette.primary.contrastText,
-              borderRadius: '50%',
-              width: 40,
-              height: 40,
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-            }}
-          >
-            {icon}
-          </Box>
-        )}
-        <Box>
-          <Typography variant="h6" fontWeight={700} color="inherit">
-            {title}
-          </Typography>
-          {subtitle && (
-            <Typography variant="body2" color="inherit">
-              {subtitle}
-            </Typography>
-          )}
-        </Box>
-        <Box flexGrow={1} />
-        <IconButton
-          onClick={onClose}
-          sx={{ color: 'inherit' }}
+      {header ? (
+        header
+      ) : (
+        <Box
+          sx={{
+            background: theme.palette.primary.main,
+            color: theme.palette.primary.contrastText,
+            display: 'flex',
+            alignItems: 'center',
+            gap: 2,
+            px: 3,
+            py: 2,
+            borderTopLeftRadius: 12,
+            borderTopRightRadius: 12,
+          }}
         >
-          <CloseIcon />
-        </IconButton>
-      </Box>
+          {icon && (
+            <Box
+              sx={{
+                background: theme.palette.primary.contrastText,
+                borderRadius: '50%',
+                width: 40,
+                height: 40,
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+              }}
+            >
+              {icon}
+            </Box>
+          )}
+          <Box>
+            <Typography variant="h6" fontWeight={700} color="inherit">
+              {title}
+            </Typography>
+            {subtitle && (
+              <Typography variant="body2" color="inherit">
+                {subtitle}
+              </Typography>
+            )}
+          </Box>
+          <Box flexGrow={1} />
+          <IconButton
+            onClick={onClose}
+            sx={{ color: 'inherit' }}
+          >
+            <CloseIcon />
+          </IconButton>
+        </Box>
+      )}
       
       <DialogContent sx={{ pt: 4, pb: 2, marginTop: '10px' }}>
         {children ? (
@@ -171,7 +179,10 @@ const DialogComponent: React.FC<ConfirmationDialogProps> = ({
         )}
       </DialogContent>
       
-      {!hideActions && (
+      {/* Custom actions if provided */}
+      {actions ? (
+        <Box sx={{ px: 3, pb: 3 }}>{actions}</Box>
+      ) : !hideActions && (
         <DialogActions
           sx={{
             gap: 2,
@@ -201,14 +212,10 @@ const DialogComponent: React.FC<ConfirmationDialogProps> = ({
                 minWidth: isSmallScreen ? '100%' : 120,
                 py: 1.5,
                 fontWeight: 600,
-                boxShadow: 2,
-                '&:hover': {
-                  boxShadow: 4,
-                },
               }}
               disabled={loading}
             >
-              {loading ? 'Procesando...' : (confirmText || getDefaultConfirmText())}
+              {confirmText || getDefaultConfirmText()}
             </Button>
           )}
         </DialogActions>
