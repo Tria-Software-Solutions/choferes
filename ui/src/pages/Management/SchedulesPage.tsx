@@ -425,6 +425,7 @@ const SchedulesPage: React.FC = () => {
         onConfirm={handleDelete}
         title="Eliminar Horario"
         message="¿Estás seguro de que deseas eliminar este horario? Esta acción no se puede deshacer."
+        type="delete"
         confirmText="Eliminar"
         cancelText="Cancelar"
         loading={isDeletingSchedule}

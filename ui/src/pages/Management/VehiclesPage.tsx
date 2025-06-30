@@ -644,6 +644,7 @@ const VehiclesPage: React.FC = () => {
         onConfirm={handleDelete}
         title="Eliminar Vehículo"
         message="¿Estás seguro de que deseas eliminar este vehículo? Esta acción no se puede deshacer."
+        type="delete"
         confirmText="Eliminar"
         cancelText="Cancelar"
         loading={isDeletingVehicle}
