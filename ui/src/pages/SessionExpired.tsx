@@ -1,6 +1,6 @@
 import { useAuth } from "../hooks/useAuth";
 import { Box, Typography, Button } from "@mui/material";
-import WarningIcon from '@mui/icons-material/Warning';
+import WarningIcon from "@mui/icons-material/Warning";
 
 const SessionExpired: React.FC = () => {
   const { logoutUser } = useAuth();
@@ -14,7 +14,7 @@ const SessionExpired: React.FC = () => {
       textAlign="center"
       px={3}
     >
-      <WarningIcon color="disabled" sx={{ mb: 3, fontSize: "50px" }}/>
+      <WarningIcon color="disabled" sx={{ mb: 3, fontSize: "50px" }} />
       <Typography variant="h2" color="textDisabled" fontWeight="bold">
         Sesión Expirada
       </Typography>

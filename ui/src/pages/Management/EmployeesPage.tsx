@@ -36,8 +36,8 @@ import GroupRoundedIcon from "@mui/icons-material/GroupRounded";
 import DownloadRoundedIcon from "@mui/icons-material/DownloadRounded";
 import CloseRoundedIcon from "@mui/icons-material/CloseRounded";
 import ManageSearchIcon from "@mui/icons-material/ManageSearch";
-import AddRoundedIcon from '@mui/icons-material/AddRounded';
-import DeleteOutlineIcon from '@mui/icons-material/DeleteOutline';
+import AddRoundedIcon from "@mui/icons-material/AddRounded";
+import DeleteOutlineIcon from "@mui/icons-material/DeleteOutline";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faFileExcel, faFilePdf } from "@fortawesome/free-solid-svg-icons";
 
@@ -45,7 +45,7 @@ const EmployeesPage: React.FC = () => {
   const dispatch = useDispatch<AppDispatch>();
   const { userPermissions } = useAuthContext();
   const { employees, isLoadingEmployees } = useSelector(
-    (state: RootState) => state.employees
+    (state: RootState) => state.employees,
   );
   const { showNotification } = useAppNotifications();
   const [filteredEmployees, setFilteredEmployees] = useState<Employee[]>([]);
@@ -85,8 +85,8 @@ const EmployeesPage: React.FC = () => {
       employees.filter((employee) =>
         normalizeString(`${employee.firstName} ${employee.lastName}`)
           .toLowerCase()
-          .includes(normalizeString(filter).toLowerCase())
-      )
+          .includes(normalizeString(filter).toLowerCase()),
+      ),
     );
     setTotalCount(filteredEmployees.length);
   }, [filter, employees, filteredEmployees.length]);
@@ -109,22 +109,21 @@ const EmployeesPage: React.FC = () => {
     setFilter(e.target.value);
   };
 
-  const handleCreate = async (newEmployee: { firstName: string; lastName: string }) => {
+  const handleCreate = async (newEmployee: {
+    firstName: string;
+    lastName: string;
+  }) => {
     try {
       setIsSubmitting(true);
       dispatch(createEmployee(newEmployee));
       setOpenAddModal(false);
-      showNotification(
-        "El registro del empleado fue exitoso",
-        3000,
-        false
-      );
+      showNotification("El registro del empleado fue exitoso", 3000, false);
     } catch (error) {
       console.error(error);
       showNotification(
         "Ha ocurrido un error al registrar el empleado",
         5000,
-        false
+        false,
       );
     } finally {
       setIsSubmitting(false);
@@ -162,7 +161,7 @@ const EmployeesPage: React.FC = () => {
       showNotification(
         "La actualización del empleado fue exitosa",
         3000,
-        false
+        false,
       );
     } catch (error) {
       handleCancel();
@@ -170,7 +169,7 @@ const EmployeesPage: React.FC = () => {
       showNotification(
         "Ha ocurrido un error al actualizar el empleado",
         5000,
-        false
+        false,
       );
     }
   };
@@ -187,24 +186,16 @@ const EmployeesPage: React.FC = () => {
 
   const handleDelete = async () => {
     if (!employeeToDelete) return;
-    
+
     setIsDeletingEmployee(true);
     try {
       await dispatch(deleteEmployee(employeeToDelete));
       setOpenDeleteDialog(false);
       setEmployeeToDelete(null);
-      showNotification(
-        "Empleado eliminado exitosamente",
-        3000,
-        false
-      );
+      showNotification("Empleado eliminado exitosamente", 3000, false);
     } catch (error) {
       console.error("Error deleting employee:", error);
-      showNotification(
-        "Error al eliminar el empleado",
-        5000,
-        false
-      );
+      showNotification("Error al eliminar el empleado", 5000, false);
     } finally {
       setIsDeletingEmployee(false);
     }
@@ -212,7 +203,7 @@ const EmployeesPage: React.FC = () => {
 
   const exportOptions = useMemo(() => {
     const excelOption = userPermissions.includes(
-      PERMISSIONS.EXPORT_EXCEL_EMPLOYEES
+      PERMISSIONS.EXPORT_EXCEL_EMPLOYEES,
     )
       ? exportToExcel
       : undefined;
@@ -290,7 +281,7 @@ const EmployeesPage: React.FC = () => {
             alignItems="center"
           >
             <Grid item xs={12} md={4}>
-              <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+              <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
                 {filteredEmployees && (
                   <SearchBar
                     placeholder="Buscar empleado"
@@ -306,11 +297,11 @@ const EmployeesPage: React.FC = () => {
                     color="primary"
                     onClick={handleOpenAddModal}
                     sx={{
-                      display: { xs: 'flex', md: 'none' },
-                      minWidth: 'auto',
+                      display: { xs: "flex", md: "none" },
+                      minWidth: "auto",
                       width: 56,
                       height: 56,
-                      borderRadius: '50%',
+                      borderRadius: "50%",
                       p: 0,
                     }}
                   >
@@ -323,15 +314,15 @@ const EmployeesPage: React.FC = () => {
               <Grid item xs={12} md={8}>
                 <Box
                   sx={{
-                    display: { xs: 'none', md: 'flex' },
-                    justifyContent: 'flex-end',
+                    display: { xs: "none", md: "flex" },
+                    justifyContent: "flex-end",
                   }}
                 >
                   <Button
                     variant="contained"
                     startIcon={<AddRoundedIcon />}
                     onClick={handleOpenAddModal}
-                    sx={{ px: 3, py: 1.5, fontSize: '1rem', minHeight: 56 }}
+                    sx={{ px: 3, py: 1.5, fontSize: "1rem", minHeight: 56 }}
                   >
                     Agregar
                   </Button>
@@ -392,17 +383,23 @@ const EmployeesPage: React.FC = () => {
         confirmText="Eliminar"
         cancelText="Cancelar"
         loading={isDeletingEmployee}
-        paperSx={{ minWidth: { xs: '80vw', sm: 320 }, maxWidth: { xs: '90vw', sm: 400 } }}
+        paperSx={{
+          minWidth: { xs: "80vw", sm: 320 },
+          maxWidth: { xs: "90vw", sm: 400 },
+        }}
         icon={<DeleteOutlineIcon color="error" />}
       />
-    
+
       <DialogComponent
         open={openAddModal}
         onClose={handleCloseAddModal}
         title="Agregar"
         subtitle="Nuevo empleado"
         hideActions
-        paperSx={{ minWidth: { xs: '90vw', sm: 500, md: 700 }, maxWidth: { xs: '98vw', sm: 700 } }}
+        paperSx={{
+          minWidth: { xs: "90vw", sm: 500, md: 700 },
+          maxWidth: { xs: "98vw", sm: 700 },
+        }}
       >
         <AddEmployeeForm
           onSubmit={handleCreate}

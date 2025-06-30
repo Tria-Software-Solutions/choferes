@@ -24,33 +24,49 @@ export const fetchRolePermissions = createAsyncThunk(
       const rolePermissions = await RolePermissionService.getRolePermissions();
       return rolePermissions;
     } catch (error: any) {
-      return rejectWithValue(error.response?.data || "Failed to fetch role permissions");
+      return rejectWithValue(
+        error.response?.data || "Failed to fetch role permissions",
+      );
     }
-  }
+  },
 );
 
 export const createRolePermission = createAsyncThunk(
   "rolePermissions/createRolePermission",
-  async (newRolePermission: Omit<RolePermission, "id">, { rejectWithValue }) => {
+  async (
+    newRolePermission: Omit<RolePermission, "id">,
+    { rejectWithValue },
+  ) => {
     try {
-      const createdRolePermission = await RolePermissionService.createRolePermission(newRolePermission);
+      const createdRolePermission =
+        await RolePermissionService.createRolePermission(newRolePermission);
       return createdRolePermission;
     } catch (error: any) {
-      return rejectWithValue(error.response?.data || "Failed to create role permission");
+      return rejectWithValue(
+        error.response?.data || "Failed to create role permission",
+      );
     }
-  }
+  },
 );
 
 export const updateRolePermission = createAsyncThunk(
   "rolePermissions/updateRolePermission",
-  async (args: { roleId: number; permissionIds: number[] }, { rejectWithValue }) => {
+  async (
+    args: { roleId: number; permissionIds: number[] },
+    { rejectWithValue },
+  ) => {
     try {
-      await RolePermissionService.updateRolePermission(args.roleId, args.permissionIds);
+      await RolePermissionService.updateRolePermission(
+        args.roleId,
+        args.permissionIds,
+      );
       return { roleId: args.roleId, permissionIds: args.permissionIds };
     } catch (error: any) {
-      return rejectWithValue(error.response?.data || "Failed to update role permission");
+      return rejectWithValue(
+        error.response?.data || "Failed to update role permission",
+      );
     }
-  }
+  },
 );
 
 export const deleteRolePermission = createAsyncThunk(
@@ -60,9 +76,11 @@ export const deleteRolePermission = createAsyncThunk(
       await RolePermissionService.deleteRolePermission(id);
       return id;
     } catch (error: any) {
-      return rejectWithValue(error.response?.data || "Failed to delete role permission");
+      return rejectWithValue(
+        error.response?.data || "Failed to delete role permission",
+      );
     }
-  }
+  },
 );
 
 const rolePermissionsSlice = createSlice({
@@ -75,38 +93,61 @@ const rolePermissionsSlice = createSlice({
         state.isLoadingRolePermissions = true;
         state.error = null;
       })
-      .addCase(fetchRolePermissions.fulfilled, (state, action: PayloadAction<RolePermission[]>) => {
-        state.rolePermissions = action.payload;
-        state.totalCountRolePermissions = action.payload.length;
-        state.isLoadingRolePermissions = false;
-      })
+      .addCase(
+        fetchRolePermissions.fulfilled,
+        (state, action: PayloadAction<RolePermission[]>) => {
+          state.rolePermissions = action.payload;
+          state.totalCountRolePermissions = action.payload.length;
+          state.isLoadingRolePermissions = false;
+        },
+      )
       .addCase(fetchRolePermissions.rejected, (state, action) => {
         state.isLoadingRolePermissions = false;
-        state.error = action.payload as string || "Failed to fetch role permissions";
+        state.error =
+          (action.payload as string) || "Failed to fetch role permissions";
       })
-      .addCase(createRolePermission.fulfilled, (state, action: PayloadAction<RolePermission>) => {
-        state.rolePermissions.push(action.payload);
-        state.totalCountRolePermissions += 1;
-      })
-      .addCase(updateRolePermission.fulfilled, (state, action: PayloadAction<{ roleId: number; permissionIds: number[] }>) => {
-        const { roleId, permissionIds } = action.payload;
-        const updatedRolePermissions = state.rolePermissions.map((rolePermission) =>
-          rolePermission.roleId === roleId
-            ? { ...rolePermission, permissionIds }
-            : rolePermission
-        );
-        state.rolePermissions = updatedRolePermissions;
-      })
-      .addCase(deleteRolePermission.fulfilled, (state, action: PayloadAction<number>) => {
-        state.rolePermissions = state.rolePermissions.filter((rolePermission) => rolePermission.id !== action.payload);
-        state.totalCountRolePermissions -= 1;
-      });
+      .addCase(
+        createRolePermission.fulfilled,
+        (state, action: PayloadAction<RolePermission>) => {
+          state.rolePermissions.push(action.payload);
+          state.totalCountRolePermissions += 1;
+        },
+      )
+      .addCase(
+        updateRolePermission.fulfilled,
+        (
+          state,
+          action: PayloadAction<{ roleId: number; permissionIds: number[] }>,
+        ) => {
+          const { roleId, permissionIds } = action.payload;
+          const updatedRolePermissions = state.rolePermissions.map(
+            (rolePermission) =>
+              rolePermission.roleId === roleId
+                ? { ...rolePermission, permissionIds }
+                : rolePermission,
+          );
+          state.rolePermissions = updatedRolePermissions;
+        },
+      )
+      .addCase(
+        deleteRolePermission.fulfilled,
+        (state, action: PayloadAction<number>) => {
+          state.rolePermissions = state.rolePermissions.filter(
+            (rolePermission) => rolePermission.id !== action.payload,
+          );
+          state.totalCountRolePermissions -= 1;
+        },
+      );
   },
 });
 
-export const selectRolePermissions = (state: RootState) => state.rolePermissions.rolePermissions;
-export const selectTotalCountRolePermissions = (state: RootState) => state.rolePermissions.totalCountRolePermissions;
-export const selectIsLoadingRolePermissions = (state: RootState) => state.rolePermissions.isLoadingRolePermissions;
-export const selectRolePermissionsError = (state: RootState) => state.rolePermissions.error;
+export const selectRolePermissions = (state: RootState) =>
+  state.rolePermissions.rolePermissions;
+export const selectTotalCountRolePermissions = (state: RootState) =>
+  state.rolePermissions.totalCountRolePermissions;
+export const selectIsLoadingRolePermissions = (state: RootState) =>
+  state.rolePermissions.isLoadingRolePermissions;
+export const selectRolePermissionsError = (state: RootState) =>
+  state.rolePermissions.error;
 
 export default rolePermissionsSlice.reducer;

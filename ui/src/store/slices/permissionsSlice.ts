@@ -30,9 +30,11 @@ export const fetchPermissions = createAsyncThunk(
         return [];
       }
     } catch (error: any) {
-      return rejectWithValue(error.response?.data || "Failed to fetch permissions");
+      return rejectWithValue(
+        error.response?.data || "Failed to fetch permissions",
+      );
     }
-  }
+  },
 );
 
 export const fetchPermissionById = createAsyncThunk(
@@ -42,9 +44,11 @@ export const fetchPermissionById = createAsyncThunk(
       const permission = await PermissionService.getPermissionById(id);
       return permission;
     } catch (error: any) {
-      return rejectWithValue(error.response?.data || "Failed to fetch permission by ID");
+      return rejectWithValue(
+        error.response?.data || "Failed to fetch permission by ID",
+      );
     }
-  }
+  },
 );
 
 export const fetchPermissionsByNames = createAsyncThunk(
@@ -54,21 +58,26 @@ export const fetchPermissionsByNames = createAsyncThunk(
       const permissions = await PermissionService.getPermissionsByNames(names);
       return permissions;
     } catch (error: any) {
-      return rejectWithValue(error.response?.data || "Failed to fetch permissions by names");
+      return rejectWithValue(
+        error.response?.data || "Failed to fetch permissions by names",
+      );
     }
-  }
+  },
 );
 
 export const createPermission = createAsyncThunk(
   "permissions/createPermission",
   async (newPermission: Omit<Permission, "id">, { rejectWithValue }) => {
     try {
-      const createdPermission = await PermissionService.createPermission(newPermission);
+      const createdPermission =
+        await PermissionService.createPermission(newPermission);
       return createdPermission;
     } catch (error: any) {
-      return rejectWithValue(error.response?.data || "Failed to create permission");
+      return rejectWithValue(
+        error.response?.data || "Failed to create permission",
+      );
     }
-  }
+  },
 );
 
 export const deletePermission = createAsyncThunk(
@@ -78,9 +87,11 @@ export const deletePermission = createAsyncThunk(
       await PermissionService.deletePermission(id);
       return id;
     } catch (error: any) {
-      return rejectWithValue(error.response?.data || "Failed to delete permission");
+      return rejectWithValue(
+        error.response?.data || "Failed to delete permission",
+      );
     }
-  }
+  },
 );
 
 const permissionsSlice = createSlice({
@@ -93,38 +104,60 @@ const permissionsSlice = createSlice({
         state.isLoadingPermissions = true;
         state.error = null;
       })
-      .addCase(fetchPermissions.fulfilled, (state, action: PayloadAction<Permission[]>) => {
-        state.permissions = action.payload;
-        state.totalCountPermissions = action.payload.length;
-        state.isLoadingPermissions = false;
-      })
+      .addCase(
+        fetchPermissions.fulfilled,
+        (state, action: PayloadAction<Permission[]>) => {
+          state.permissions = action.payload;
+          state.totalCountPermissions = action.payload.length;
+          state.isLoadingPermissions = false;
+        },
+      )
       .addCase(fetchPermissions.rejected, (state, action) => {
         state.isLoadingPermissions = false;
-        state.error = (action.payload as string | null) || "Failed to fetch permissions";
+        state.error =
+          (action.payload as string | null) || "Failed to fetch permissions";
       })
-      .addCase(fetchPermissionById.fulfilled, (state, action: PayloadAction<Permission>) => {
-        const updatedPermissions = state.permissions.map(permission =>
-          permission.id === action.payload.id ? action.payload : permission
-        );
-        state.permissions = updatedPermissions;
-      })
-      .addCase(fetchPermissionsByNames.fulfilled, (state, action: PayloadAction<Permission[]>) => {
-        state.permissions = action.payload;
-      })
-      .addCase(createPermission.fulfilled, (state, action: PayloadAction<Permission>) => {
-        state.permissions.push(action.payload);
-        state.totalCountPermissions += 1;
-      })
-      .addCase(deletePermission.fulfilled, (state, action: PayloadAction<number>) => {
-        state.permissions = state.permissions.filter((permission) => permission.id !== action.payload);
-        state.totalCountPermissions -= 1;
-      });
+      .addCase(
+        fetchPermissionById.fulfilled,
+        (state, action: PayloadAction<Permission>) => {
+          const updatedPermissions = state.permissions.map((permission) =>
+            permission.id === action.payload.id ? action.payload : permission,
+          );
+          state.permissions = updatedPermissions;
+        },
+      )
+      .addCase(
+        fetchPermissionsByNames.fulfilled,
+        (state, action: PayloadAction<Permission[]>) => {
+          state.permissions = action.payload;
+        },
+      )
+      .addCase(
+        createPermission.fulfilled,
+        (state, action: PayloadAction<Permission>) => {
+          state.permissions.push(action.payload);
+          state.totalCountPermissions += 1;
+        },
+      )
+      .addCase(
+        deletePermission.fulfilled,
+        (state, action: PayloadAction<number>) => {
+          state.permissions = state.permissions.filter(
+            (permission) => permission.id !== action.payload,
+          );
+          state.totalCountPermissions -= 1;
+        },
+      );
   },
 });
 
-export const selectPermissions = (state: RootState) => state.permissions.permissions;
-export const selectTotalCountPermissions = (state: RootState) => state.permissions.totalCountPermissions;
-export const selectIsLoadingPermissions = (state: RootState) => state.permissions.isLoadingPermissions;
-export const selectPermissionsError = (state: RootState) => state.permissions.error;
+export const selectPermissions = (state: RootState) =>
+  state.permissions.permissions;
+export const selectTotalCountPermissions = (state: RootState) =>
+  state.permissions.totalCountPermissions;
+export const selectIsLoadingPermissions = (state: RootState) =>
+  state.permissions.isLoadingPermissions;
+export const selectPermissionsError = (state: RootState) =>
+  state.permissions.error;
 
 export default permissionsSlice.reducer;

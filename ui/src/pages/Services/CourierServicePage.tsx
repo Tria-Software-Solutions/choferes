@@ -1,7 +1,7 @@
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { useAuthContext } from "../../context/AuthContext";
-import { useSelector, /*useDispatch*/ } from "react-redux";
-import { RootState, /*AppDispatch*/ } from "../../store/store";
+import { useSelector /*useDispatch*/ } from "react-redux";
+import { RootState /*AppDispatch*/ } from "../../store/store";
 import SearchBar from "../../components/SearchBar/SearchBar";
 import CustomSpeedDial from "../../components/SpeedDial/CustomSpeedDial";
 import { useAppNotifications } from "../../components/Snackbar/SnackbarWrapper";
@@ -46,15 +46,14 @@ import { Courier } from "../../models/Courier";
 import EditableTable from "../../components/Table/EditableTable/EditableTable";
 import AddCourierForm from "../../components/Forms/AddCourierForm";
 import DialogComponent from "../../components/Dialog/DialogComponent";
-import AddRoundedIcon from '@mui/icons-material/AddRounded';
-import DeleteOutlineIcon from '@mui/icons-material/DeleteOutline';
+import AddRoundedIcon from "@mui/icons-material/AddRounded";
+import DeleteOutlineIcon from "@mui/icons-material/DeleteOutline";
 
 const CourierServicePage: React.FC = () => {
   const { userPermissions } = useAuthContext();
   const [selectedDate, setSelectedDate] = useState<Date>(new Date());
-  const { /*couriers, allCouriers, isLoadingCourier,*/ isLoadingVehicles } = useSelector(
-    (state: RootState) => state.vehicles
-  );
+  const { /*couriers, allCouriers, isLoadingCourier,*/ isLoadingVehicles } =
+    useSelector((state: RootState) => state.vehicles);
   const { showNotification } = useAppNotifications();
   const [filteredCouriers, setFilteredCouriers] = useState<Courier[]>([
     {
@@ -176,7 +175,7 @@ const CourierServicePage: React.FC = () => {
     (e: React.ChangeEvent<HTMLInputElement>) => {
       setFilter(e.target.value);
     },
-    []
+    [],
   );
 
   const handleCancel = () => {
@@ -198,15 +197,11 @@ const CourierServicePage: React.FC = () => {
   const handleUpdate = async (id: number) => {
     try {
       // TODO: Implementar actualización cuando se conecte con el backend
-      showNotification(
-        "La actualización del servicio fue exitosa"
-      );
+      showNotification("La actualización del servicio fue exitosa");
       setEditRowId(null);
     } catch (error) {
       console.error(error);
-      showNotification(
-        "Ha ocurrido un error al actualizar el servicio"
-      );
+      showNotification("Ha ocurrido un error al actualizar el servicio");
     }
   };
 
@@ -222,26 +217,26 @@ const CourierServicePage: React.FC = () => {
 
   const handleDelete = async () => {
     if (!courierToDelete) return;
-    
+
     setIsDeletingCourier(true);
     try {
       // Simular eliminación
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      
-      setFilteredCouriers(prev => prev.filter(courier => courier.id !== courierToDelete));
-      setFilteredWeekCouriers(prev => prev.filter(courier => courier.id !== courierToDelete));
-      
+      await new Promise((resolve) => setTimeout(resolve, 1000));
+
+      setFilteredCouriers((prev) =>
+        prev.filter((courier) => courier.id !== courierToDelete),
+      );
+      setFilteredWeekCouriers((prev) =>
+        prev.filter((courier) => courier.id !== courierToDelete),
+      );
+
       setOpenDeleteDialog(false);
       setCourierToDelete(null);
-      
-      showNotification(
-        "Servicio de mensajería eliminado exitosamente"
-      );
+
+      showNotification("Servicio de mensajería eliminado exitosamente");
     } catch (error) {
       console.error("Error deleting courier:", error);
-      showNotification(
-        "Error al eliminar el servicio de mensajería"
-      );
+      showNotification("Error al eliminar el servicio de mensajería");
     } finally {
       setIsDeletingCourier(false);
     }
@@ -279,8 +274,8 @@ const CourierServicePage: React.FC = () => {
       pdfOption,
       filteredWeekCouriers,
       `reporte-de-servicios-de-mensajeria-${exportFileFormattedDate(
-        selectedDate || new Date()
-      )}`
+        selectedDate || new Date(),
+      )}`,
     );
   }, [filteredWeekCouriers, selectedDate]);
 
@@ -302,7 +297,7 @@ const CourierServicePage: React.FC = () => {
     setIsCreatingCourier(true);
     try {
       const newCourier: Courier = {
-        id: Math.max(...filteredCouriers.map(c => c.id)) + 1,
+        id: Math.max(...filteredCouriers.map((c) => c.id)) + 1,
         driver: courierData.driver,
         route: courierData.route,
         distance: courierData.distance,
@@ -310,19 +305,15 @@ const CourierServicePage: React.FC = () => {
         status: courierData.status,
         createdAt: new Date(),
       };
-      
+
       setFilteredCouriers([...filteredCouriers, newCourier]);
       setFilteredWeekCouriers([...filteredWeekCouriers, newCourier]);
-      
+
       setOpenAddCourierModal(false);
-      showNotification(
-        "Servicio de mensajería creado exitosamente"
-      );
+      showNotification("Servicio de mensajería creado exitosamente");
     } catch (error) {
       console.error("Error creating courier:", error);
-      showNotification(
-        "Error al crear el servicio de mensajería"
-      );
+      showNotification("Error al crear el servicio de mensajería");
     } finally {
       setIsCreatingCourier(false);
     }
@@ -387,7 +378,7 @@ const CourierServicePage: React.FC = () => {
             alignItems="center"
           >
             <Grid item xs={12} md={4}>
-              <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+              <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
                 {filteredCouriers && (
                   <SearchBar
                     placeholder="Buscar servicio"
@@ -402,11 +393,11 @@ const CourierServicePage: React.FC = () => {
                   color="primary"
                   onClick={handleOpenAddCourierModal}
                   sx={{
-                    display: { xs: 'flex', md: 'none' },
-                    minWidth: 'auto',
+                    display: { xs: "flex", md: "none" },
+                    minWidth: "auto",
                     width: 56,
                     height: 56,
-                    borderRadius: '50%',
+                    borderRadius: "50%",
                     p: 0,
                   }}
                 >
@@ -506,12 +497,12 @@ const CourierServicePage: React.FC = () => {
                   variant="contained"
                   startIcon={<AddRoundedIcon />}
                   onClick={handleOpenAddCourierModal}
-                  sx={{ 
-                    display: { xs: 'none', md: 'flex' },
-                    px: 3, 
-                    py: 1.5, 
-                    fontSize: '1rem', 
-                    minHeight: 56
+                  sx={{
+                    display: { xs: "none", md: "flex" },
+                    px: 3,
+                    py: 1.5,
+                    fontSize: "1rem",
+                    minHeight: 56,
                   }}
                 >
                   Agregar
@@ -566,7 +557,7 @@ const CourierServicePage: React.FC = () => {
                 {capitalizeFirstLetter(
                   format(selectedDate, "EEEE dd 'de' MMMM 'de' yyyy", {
                     locale: es,
-                  })
+                  }),
                 )}
               </Typography>
               <Typography variant="h6" color="textSecondary">
@@ -586,7 +577,10 @@ const CourierServicePage: React.FC = () => {
         confirmText="Eliminar"
         cancelText="Cancelar"
         loading={isDeletingCourier}
-        paperSx={{ minWidth: { xs: '80vw', sm: 320 }, maxWidth: { xs: '90vw', sm: 400 } }}
+        paperSx={{
+          minWidth: { xs: "80vw", sm: 320 },
+          maxWidth: { xs: "90vw", sm: 400 },
+        }}
         icon={<DeleteOutlineIcon color="error" />}
       />
       <DialogComponent
@@ -595,7 +589,10 @@ const CourierServicePage: React.FC = () => {
         title="Agregar"
         subtitle="Nuevo servicio"
         hideActions
-        paperSx={{ minWidth: { xs: '90vw', sm: 500, md: 700 }, maxWidth: { xs: '98vw', sm: 700 } }}
+        paperSx={{
+          minWidth: { xs: "90vw", sm: 500, md: 700 },
+          maxWidth: { xs: "98vw", sm: 700 },
+        }}
       >
         <AddCourierForm
           onSubmit={handleCreateCourier}

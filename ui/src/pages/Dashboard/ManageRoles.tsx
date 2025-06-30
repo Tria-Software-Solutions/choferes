@@ -34,15 +34,17 @@ import SearchBar from "../../components/SearchBar/SearchBar";
 import AddRoleForm from "../../components/Forms/AddRoleForm";
 import AddModeratorIcon from "@mui/icons-material/AddModerator";
 import DialogComponent from "../../components/Dialog/DialogComponent";
-import AddRoundedIcon from '@mui/icons-material/AddRounded';
-import GroupRoundedIcon from '@mui/icons-material/GroupRounded';
-import DeleteOutlineIcon from '@mui/icons-material/DeleteOutline';
+import AddRoundedIcon from "@mui/icons-material/AddRounded";
+import GroupRoundedIcon from "@mui/icons-material/GroupRounded";
+import DeleteOutlineIcon from "@mui/icons-material/DeleteOutline";
 
-const ManageRoles: React.FC<{ isExpanded?: boolean }> = ({ isExpanded = true }) => {
+const ManageRoles: React.FC<{ isExpanded?: boolean }> = ({
+  isExpanded = true,
+}) => {
   const dispatch = useDispatch<AppDispatch>();
   const { userPermissions } = useAuthContext();
   const { roles, isLoadingRoles } = useSelector(
-    (state: RootState) => state.roles
+    (state: RootState) => state.roles,
   );
   const { permissions } = useSelector((state: RootState) => state.permissions);
   const { showNotification } = useAppNotifications();
@@ -78,13 +80,13 @@ const ManageRoles: React.FC<{ isExpanded?: boolean }> = ({ isExpanded = true }) 
       .map((role) => ({
         ...role,
         permissionNames: (role.permissions ?? []).map(
-          (permission: Permission) => permission.name
+          (permission: Permission) => permission.name,
         ),
       }))
       .filter((role) =>
         normalizeString(`${role.name} ${role.permissionNames}`)
           .toLowerCase()
-          .includes(normalizeString(filter).toLowerCase())
+          .includes(normalizeString(filter).toLowerCase()),
       );
   }, [filter, roles]);
 
@@ -129,24 +131,22 @@ const ManageRoles: React.FC<{ isExpanded?: boolean }> = ({ isExpanded = true }) 
           id,
           updatedRole,
           newPermissionIds: permissions
-            .filter((permission) => editFields.permissionNames.includes(permission.name))
+            .filter((permission) =>
+              editFields.permissionNames.includes(permission.name),
+            )
             .map((permission) => permission.id),
-        })
+        }),
       );
       setEditRowId(null);
       setEditFields({ name: "", permissionNames: [] });
-      showNotification(
-        "La actualización del rol fue exitosa",
-        3000,
-        false
-      );
+      showNotification("La actualización del rol fue exitosa", 3000, false);
     } catch (error) {
       handleCancel();
       console.error(error);
       showNotification(
         "Ha ocurrido un error al actualizar el rol",
         5000,
-        false
+        false,
       );
     }
   };
@@ -163,24 +163,16 @@ const ManageRoles: React.FC<{ isExpanded?: boolean }> = ({ isExpanded = true }) 
 
   const handleDelete = async () => {
     if (!roleToDelete) return;
-    
+
     setIsDeletingRole(true);
     try {
       await dispatch(deleteRole(roleToDelete));
       setOpenDeleteDialog(false);
       setRoleToDelete(null);
-      showNotification(
-        "Rol eliminado exitosamente",
-        3000,
-        false
-      );
+      showNotification("Rol eliminado exitosamente", 3000, false);
     } catch (error) {
       console.error("Error deleting role:", error);
-      showNotification(
-        "Error al eliminar el rol",
-        5000,
-        false
-      );
+      showNotification("Error al eliminar el rol", 5000, false);
     } finally {
       setIsDeletingRole(false);
     }
@@ -203,27 +195,23 @@ const ManageRoles: React.FC<{ isExpanded?: boolean }> = ({ isExpanded = true }) 
       const newRole = {
         name: roleData.name,
         permissionNames: permissions
-          .filter((permission) => roleData.permissions.includes(permission.id.toString()))
+          .filter((permission) =>
+            roleData.permissions.includes(permission.id.toString()),
+          )
           .map((permission) => permission.name),
       };
-      
-      await dispatch(createRole({
-        newRole,
-        newPermissionIds: roleData.permissions.map(id => parseInt(id)),
-      }));
-      setOpenAddRoleModal(false);
-      showNotification(
-        "Rol creado exitosamente",
-        3000,
-        false
+
+      await dispatch(
+        createRole({
+          newRole,
+          newPermissionIds: roleData.permissions.map((id) => parseInt(id)),
+        }),
       );
+      setOpenAddRoleModal(false);
+      showNotification("Rol creado exitosamente", 3000, false);
     } catch (error) {
       console.error("Error creating role:", error);
-      showNotification(
-        "Error al crear el rol",
-        5000,
-        false
-      );
+      showNotification("Error al crear el rol", 5000, false);
     } finally {
       setIsCreatingRole(false);
     }
@@ -232,27 +220,32 @@ const ManageRoles: React.FC<{ isExpanded?: boolean }> = ({ isExpanded = true }) 
   const renderColumnValue = (column: keyof Role, value: any) => {
     if (column === "permissionNames" && Array.isArray(value)) {
       return (
-        <Stack direction="row" spacing={0.75} flexWrap={editRowId !== null ? 'nowrap' : 'wrap'} useFlexGap>
+        <Stack
+          direction="row"
+          spacing={0.75}
+          flexWrap={editRowId !== null ? "nowrap" : "wrap"}
+          useFlexGap
+        >
           {value.map((permission: string, index: number) => (
             <Chip
               key={index}
               label={permission}
               size="small"
               sx={{
-                backgroundColor: 'primary.main',
-                color: '#fff',
-                border: '1px solid',
-                borderColor: 'primary.dark',
+                backgroundColor: "primary.main",
+                color: "#fff",
+                border: "1px solid",
+                borderColor: "primary.dark",
                 fontWeight: 500,
-                fontSize: '0.85rem',
+                fontSize: "0.85rem",
                 px: 1.2,
                 py: 0.5,
                 borderRadius: 2,
                 boxShadow: 1,
                 letterSpacing: 0.2,
                 mb: 0.5,
-                '& .MuiChip-label': {
-                  color: '#fff',
+                "& .MuiChip-label": {
+                  color: "#fff",
                   fontWeight: 500,
                   px: 0.5,
                 },
@@ -293,7 +286,7 @@ const ManageRoles: React.FC<{ isExpanded?: boolean }> = ({ isExpanded = true }) 
             alignItems="center"
           >
             <Grid item xs={12} md={4}>
-              <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+              <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
                 {filteredRoles && (
                   <SearchBar
                     placeholder="Buscar rol"
@@ -308,11 +301,11 @@ const ManageRoles: React.FC<{ isExpanded?: boolean }> = ({ isExpanded = true }) 
                   color="primary"
                   onClick={handleOpenAddRoleModal}
                   sx={{
-                    display: { xs: 'flex', md: 'none' },
-                    minWidth: 'auto',
+                    display: { xs: "flex", md: "none" },
+                    minWidth: "auto",
                     width: 56,
                     height: 56,
-                    borderRadius: '50%',
+                    borderRadius: "50%",
                     p: 0,
                   }}
                 >
@@ -328,14 +321,14 @@ const ManageRoles: React.FC<{ isExpanded?: boolean }> = ({ isExpanded = true }) 
                 justifyContent="flex-end"
                 gap={2}
                 sx={{
-                  display: { xs: 'none', md: 'flex' },
+                  display: { xs: "none", md: "flex" },
                 }}
               >
                 <Button
                   variant="contained"
                   startIcon={<AddRoundedIcon />}
                   onClick={handleOpenAddRoleModal}
-                  sx={{ px: 3, py: 1.5, fontSize: '1rem', minHeight: 56 }}
+                  sx={{ px: 3, py: 1.5, fontSize: "1rem", minHeight: 56 }}
                 >
                   Agregar
                 </Button>
@@ -395,7 +388,10 @@ const ManageRoles: React.FC<{ isExpanded?: boolean }> = ({ isExpanded = true }) 
             confirmText="Eliminar"
             cancelText="Cancelar"
             loading={isDeletingRole}
-            paperSx={{ minWidth: { xs: '80vw', sm: 320 }, maxWidth: { xs: '90vw', sm: 400 } }}
+            paperSx={{
+              minWidth: { xs: "80vw", sm: 320 },
+              maxWidth: { xs: "90vw", sm: 400 },
+            }}
             icon={<DeleteOutlineIcon color="error" />}
           />
           <DialogComponent
@@ -404,7 +400,10 @@ const ManageRoles: React.FC<{ isExpanded?: boolean }> = ({ isExpanded = true }) 
             title="Agregar"
             subtitle="Nuevo rol"
             hideActions
-            paperSx={{ minWidth: { xs: '90vw', sm: 500, md: 700 }, maxWidth: { xs: '98vw', sm: 700 } }}
+            paperSx={{
+              minWidth: { xs: "90vw", sm: 500, md: 700 },
+              maxWidth: { xs: "98vw", sm: 700 },
+            }}
           >
             <AddRoleForm
               onSubmit={handleCreateRole}

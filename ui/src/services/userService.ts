@@ -3,7 +3,7 @@ import api from "./api";
 
 export const authenticateUser = async (
   identifier: string,
-  password: string
+  password: string,
 ) => {
   const response = await api.post("/users/login", {
     identifier,
@@ -19,7 +19,7 @@ export const refreshAccessToken = async () => {
       {},
       {
         withCredentials: true,
-      }
+      },
     );
 
     return response.data;
@@ -55,7 +55,7 @@ export const getUserPermissions = async (id: number) => {
 };
 
 export const createUser = async (
-  user: Omit<User, "id" | "temporalPassword">
+  user: Omit<User, "id" | "temporalPassword">,
 ) => {
   const response = await api.post("/users/register", user);
   return response.data;
@@ -75,7 +75,7 @@ export const updateUserPassword = async (id: number, password: string) => {
 
 export const updateUserTemporalPassword = async (
   id: number,
-  temporalPassword: string
+  temporalPassword: string,
 ) => {
   const response = await api.put(`/users/${id}/temporal-password`, {
     temporalPassword,

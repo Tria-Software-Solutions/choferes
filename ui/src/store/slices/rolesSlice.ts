@@ -33,7 +33,7 @@ export const fetchRoles = createAsyncThunk(
     } catch (error: any) {
       return rejectWithValue(error.response?.data || "Failed to fetch roles");
     }
-  }
+  },
 );
 
 export const fetchRoleById = createAsyncThunk(
@@ -44,10 +44,10 @@ export const fetchRoleById = createAsyncThunk(
       return role;
     } catch (error: any) {
       return rejectWithValue(
-        error.response?.data || "Failed to fetch role by ID"
+        error.response?.data || "Failed to fetch role by ID",
       );
     }
-  }
+  },
 );
 
 export const fetchRoleByName = createAsyncThunk(
@@ -58,10 +58,10 @@ export const fetchRoleByName = createAsyncThunk(
       return role;
     } catch (error: any) {
       return rejectWithValue(
-        error.response?.data || "Failed to fetch role by name"
+        error.response?.data || "Failed to fetch role by name",
       );
     }
-  }
+  },
 );
 
 export const createRole = createAsyncThunk(
@@ -71,7 +71,7 @@ export const createRole = createAsyncThunk(
       newRole,
       newPermissionIds,
     }: { newRole: Omit<Role, "id">; newPermissionIds?: number[] },
-    { rejectWithValue }
+    { rejectWithValue },
   ) => {
     try {
       const createdRole = await RoleService.createRole(newRole);
@@ -81,8 +81,8 @@ export const createRole = createAsyncThunk(
             RolePermissionService.createRolePermission({
               roleId: createdRole.id,
               permissionId,
-            })
-          )
+            }),
+          ),
         );
       }
       const updatedRole = await RoleService.getRoleById(createdRole.id);
@@ -90,7 +90,7 @@ export const createRole = createAsyncThunk(
     } catch (error: any) {
       return rejectWithValue(error.response?.data || "Failed to create role");
     }
-  }
+  },
 );
 
 export const updateRole = createAsyncThunk(
@@ -101,7 +101,7 @@ export const updateRole = createAsyncThunk(
       updatedRole,
       newPermissionIds,
     }: { id: number; updatedRole: Partial<Role>; newPermissionIds?: number[] },
-    { rejectWithValue }
+    { rejectWithValue },
   ) => {
     try {
       await RoleService.updateRole(id, updatedRole);
@@ -120,7 +120,7 @@ export const updateRole = createAsyncThunk(
     } catch (error: any) {
       return rejectWithValue(error.response?.data || "Failed to update role");
     }
-  }
+  },
 );
 
 export const deleteRole = createAsyncThunk(
@@ -132,7 +132,7 @@ export const deleteRole = createAsyncThunk(
     } catch (error: any) {
       return rejectWithValue(error.response?.data || "Failed to delete role");
     }
-  }
+  },
 );
 
 const rolesSlice = createSlice({
@@ -159,16 +159,16 @@ const rolesSlice = createSlice({
         fetchRoleById.fulfilled,
         (state, action: PayloadAction<Role>) => {
           const updatedRoles = state.roles.map((role) =>
-            role.id === action.payload.id ? action.payload : role
+            role.id === action.payload.id ? action.payload : role,
           );
           state.roles = updatedRoles;
-        }
+        },
       )
       .addCase(
         fetchRoleByName.fulfilled,
         (state, action: PayloadAction<Role>) => {
           state.roles = [action.payload];
-        }
+        },
       )
       .addCase(createRole.fulfilled, (state, action: PayloadAction<Role>) => {
         state.roles.push(action.payload);
@@ -182,12 +182,12 @@ const rolesSlice = createSlice({
             id: number;
             refreshedRole: Role;
             newPermissionIds?: number[];
-          }>
+          }>,
         ) => {
           state.roles = state.roles.map((role) =>
-            role.id === action.payload.id ? action.payload.refreshedRole : role
+            role.id === action.payload.id ? action.payload.refreshedRole : role,
           );
-        }
+        },
       )
       .addCase(deleteRole.fulfilled, (state, action: PayloadAction<number>) => {
         state.roles = state.roles.filter((role) => role.id !== action.payload);

@@ -4,7 +4,7 @@ import { BiweeklySummary } from "../models/BiweeklySummary";
 
 export const useBiweeklySummaries = () => {
   const [biweeklySummaries, setBiweeklySummaries] = useState<BiweeklySummary[]>(
-    []
+    [],
   );
   const [totalCountBiweeklySummaries, setTotalCountBiweeklySummaries] =
     useState(0);
@@ -29,7 +29,7 @@ export const useBiweeklySummaries = () => {
       employeeId: number,
       biweekNumber: number,
       month: number,
-      year: number
+      year: number,
     ) => {
       setIsLoadingBiweeklySummaries(true);
       try {
@@ -37,22 +37,19 @@ export const useBiweeklySummaries = () => {
           employeeId,
           biweekNumber,
           month,
-          year
+          year,
         );
       } catch (error) {
-        console.error(
-          "Error fetching current Biweekly Summary",
-          error
-        );
+        console.error("Error fetching current Biweekly Summary", error);
       } finally {
         setIsLoadingBiweeklySummaries(false);
       }
     },
-    []
+    [],
   );
 
   const createBiweeklySummary = async (
-    newBiweeklySummary: Omit<BiweeklySummary, "id">
+    newBiweeklySummary: Omit<BiweeklySummary, "id">,
   ) => {
     const createdBiweeklySummary =
       await BiweeklySummaryService.createBiweeklySummary(newBiweeklySummary);
@@ -62,23 +59,23 @@ export const useBiweeklySummaries = () => {
 
   const updateBiweeklySummary = async (
     id: number,
-    updatedBiweeklySummary: Partial<BiweeklySummary>
+    updatedBiweeklySummary: Partial<BiweeklySummary>,
   ) => {
     await BiweeklySummaryService.updateBiweeklySummary(
       id,
-      updatedBiweeklySummary
+      updatedBiweeklySummary,
     );
     setBiweeklySummaries((prev) =>
       prev.map((biweeklySummary) =>
         biweeklySummary.id === id
           ? { ...biweeklySummary, ...updatedBiweeklySummary }
-          : biweeklySummary
-      )
+          : biweeklySummary,
+      ),
     );
   };
 
   const createOrUpdateBiweeklySummary = async (
-    newBiweeklySummary: Omit<BiweeklySummary, "id"> | BiweeklySummary
+    newBiweeklySummary: Omit<BiweeklySummary, "id"> | BiweeklySummary,
   ) => {
     if ("id" in newBiweeklySummary) {
       await updateBiweeklySummary(newBiweeklySummary.id, newBiweeklySummary);
@@ -90,7 +87,7 @@ export const useBiweeklySummaries = () => {
   const deleteBiweeklySummary = async (id: number) => {
     await BiweeklySummaryService.deleteBiweeklySummary(id);
     setBiweeklySummaries((prev) =>
-      prev.filter((biweeklySummary) => biweeklySummary.id !== id)
+      prev.filter((biweeklySummary) => biweeklySummary.id !== id),
     );
     setTotalCountBiweeklySummaries((prev) => prev - 1);
   };

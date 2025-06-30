@@ -25,25 +25,33 @@ export const store = configureStore({
     getDefaultMiddleware({
       serializableCheck: {
         ignoredActions: [
-          'persist/PERSIST',
-          'persist/REHYDRATE',
-          'persist/PAUSE',
-          'persist/PURGE',
-          'persist/REGISTER',
-          'persist/FLUSH',
+          "persist/PERSIST",
+          "persist/REHYDRATE",
+          "persist/PAUSE",
+          "persist/PURGE",
+          "persist/REGISTER",
+          "persist/FLUSH",
         ],
         ignoredPaths: [
-          'hoursWorked.entities',
-          'employees.entities',
-          'users.entities',
+          "hoursWorked.entities",
+          "employees.entities",
+          "users.entities",
         ],
-        ignoredActionPaths: ['payload.date', 'payload.createdAt', 'payload.updatedAt'],
+        ignoredActionPaths: [
+          "payload.date",
+          "payload.createdAt",
+          "payload.updatedAt",
+        ],
       },
       immutableCheck: {
-        ignoredPaths: ['hoursWorked.entities', 'employees.entities', 'users.entities'],
+        ignoredPaths: [
+          "hoursWorked.entities",
+          "employees.entities",
+          "users.entities",
+        ],
       },
     }),
-  devTools: process.env.NODE_ENV !== 'production',
+  devTools: process.env.NODE_ENV !== "production",
   preloadedState: undefined,
 });
 

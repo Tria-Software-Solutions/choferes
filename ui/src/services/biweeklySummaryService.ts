@@ -10,7 +10,7 @@ export const getCurrentBiweeklySummary = async (
   employeeId: number,
   biweekNumber: number,
   month: number,
-  year: number
+  year: number,
 ) => {
   const response = await api.get(`/biweekly-summary/employee/${employeeId}`, {
     params: { biweekNumber, month, year },
@@ -19,7 +19,7 @@ export const getCurrentBiweeklySummary = async (
 };
 
 export const createBiweeklySummary = async (
-  newBiweeklySummary: Omit<BiweeklySummary, "id">
+  newBiweeklySummary: Omit<BiweeklySummary, "id">,
 ) => {
   const response = await api.post("/biweekly-summary", newBiweeklySummary);
   return response.data;
@@ -27,9 +27,12 @@ export const createBiweeklySummary = async (
 
 export const updateBiweeklySummary = async (
   id: number,
-  updatedBiweeklySummary: Partial<BiweeklySummary>
+  updatedBiweeklySummary: Partial<BiweeklySummary>,
 ) => {
-  const response = await api.put(`/biweekly-summary/${id}`, updatedBiweeklySummary);
+  const response = await api.put(
+    `/biweekly-summary/${id}`,
+    updatedBiweeklySummary,
+  );
   return response.data;
 };
 

@@ -18,14 +18,14 @@ export const calculateTotalHoursAndOvertimeForPeriod = (
   year: number,
   weeklySummaries: Summary[],
   biweeklySummaries: Summary[],
-  monthlySummaries: Summary[]
+  monthlySummaries: Summary[],
 ) => {
   const findWeeklySummary = () =>
     weeklySummaries.find(
       (s) =>
         s.employeeId === employeeId &&
         s.weekNumber === weekNumber &&
-        s.year === year
+        s.year === year,
     );
 
   const findBiweeklySummary = () =>
@@ -33,20 +33,21 @@ export const calculateTotalHoursAndOvertimeForPeriod = (
       (s) =>
         s.employeeId === employeeId &&
         s.biweekNumber === biweekNumber &&
-        s.year === year
+        s.year === year,
     );
 
   const findMonthlySummary = () =>
     monthlySummaries.find(
-      (s) => s.employeeId === employeeId && s.month === month && s.year === year
+      (s) =>
+        s.employeeId === employeeId && s.month === month && s.year === year,
     );
 
   const summary =
     selectedPeriod === "weekly"
       ? findWeeklySummary()
       : selectedPeriod === "biweekly"
-      ? findBiweeklySummary()
-      : findMonthlySummary();
+        ? findBiweeklySummary()
+        : findMonthlySummary();
 
   const totalHours = summary?.totalHours ?? 0;
 
@@ -79,14 +80,14 @@ export const calculateTotalHoursAndOvertimeForPeriods = (
   }[],
   weeklySummaries: Summary[],
   biweeklySummaries: Summary[],
-  monthlySummaries: Summary[]
+  monthlySummaries: Summary[],
 ) => {
   const findFirstWeeklySummary = () =>
     weeklySummaries.find(
       (s) =>
         s.employeeId === employeeId &&
         s.weekNumber === weekNumbers[1].weekNumber &&
-        s.year === weekNumbers[1].year
+        s.year === weekNumbers[1].year,
     );
 
   const findSecondWeeklySummary = () =>
@@ -94,7 +95,7 @@ export const calculateTotalHoursAndOvertimeForPeriods = (
       (s) =>
         s.employeeId === employeeId &&
         s.weekNumber === weekNumbers[0].weekNumber &&
-        s.year === weekNumbers[0].year
+        s.year === weekNumbers[0].year,
     );
 
   const findFirstBiweeklySummary = () =>
@@ -102,7 +103,7 @@ export const calculateTotalHoursAndOvertimeForPeriods = (
       (s) =>
         s.employeeId === employeeId &&
         s.biweekNumber === biweekNumbers[0].biweekNumber &&
-        s.year === biweekNumbers[1].year
+        s.year === biweekNumbers[1].year,
     );
 
   const findSecondBiweeklySummary = () =>
@@ -110,7 +111,7 @@ export const calculateTotalHoursAndOvertimeForPeriods = (
       (s) =>
         s.employeeId === employeeId &&
         s.biweekNumber === biweekNumbers[1].biweekNumber &&
-        s.year === biweekNumbers[0].year
+        s.year === biweekNumbers[0].year,
     );
 
   const findFirstMonthlySummary = () =>
@@ -118,7 +119,7 @@ export const calculateTotalHoursAndOvertimeForPeriods = (
       (s) =>
         s.employeeId === employeeId &&
         s.month === months[0].month &&
-        s.year === months[1].year
+        s.year === months[1].year,
     );
 
   const findSecondMonthlySummary = () =>
@@ -126,29 +127,29 @@ export const calculateTotalHoursAndOvertimeForPeriods = (
       (s) =>
         s.employeeId === employeeId &&
         s.month === months[1].month &&
-        s.year === months[0].year
+        s.year === months[0].year,
     );
 
   const firstSummary =
     selectedPeriod === "weekly"
-      ? findFirstWeeklySummary()?.totalHours ?? 0
+      ? (findFirstWeeklySummary()?.totalHours ?? 0)
       : selectedPeriod === "biweekly"
-      ? findFirstBiweeklySummary()?.totalHours ?? 0
-      : findFirstMonthlySummary()?.totalHours ?? 0;
+        ? (findFirstBiweeklySummary()?.totalHours ?? 0)
+        : (findFirstMonthlySummary()?.totalHours ?? 0);
 
   const secondSummary =
     selectedPeriod === "weekly"
-      ? findSecondWeeklySummary()?.totalHours ?? 0
+      ? (findSecondWeeklySummary()?.totalHours ?? 0)
       : selectedPeriod === "biweekly"
-      ? findSecondBiweeklySummary()?.totalHours ?? 0
-      : findSecondMonthlySummary()?.totalHours ?? 0;
+        ? (findSecondBiweeklySummary()?.totalHours ?? 0)
+        : (findSecondMonthlySummary()?.totalHours ?? 0);
 
   const overtimeThreshold =
     selectedPeriod === "weekly"
       ? OVERTIME.WEEKLY
       : selectedPeriod === "biweekly"
-      ? OVERTIME.BIWEEKLY
-      : OVERTIME.MONTHLY;
+        ? OVERTIME.BIWEEKLY
+        : OVERTIME.MONTHLY;
 
   const firstOvertime =
     firstSummary > overtimeThreshold ? firstSummary - overtimeThreshold : 0;

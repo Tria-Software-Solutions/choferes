@@ -25,7 +25,7 @@ export const fetchVehicles = createAsyncThunk(
   "vehicles/fetchVehicles",
   async (
     { page = 1, perPage = 10 }: { page?: number; perPage?: number },
-    { rejectWithValue }
+    { rejectWithValue },
   ) => {
     try {
       const response = await VehicleService.getVehicles(page, perPage);
@@ -38,10 +38,10 @@ export const fetchVehicles = createAsyncThunk(
       }
     } catch (error: any) {
       return rejectWithValue(
-        error.response?.data || "Failed to fetch vehicles"
+        error.response?.data || "Failed to fetch vehicles",
       );
     }
-  }
+  },
 );
 
 export const fetchVehiclesByDate = createAsyncThunk(
@@ -52,10 +52,10 @@ export const fetchVehiclesByDate = createAsyncThunk(
       return vehicles;
     } catch (error: any) {
       return rejectWithValue(
-        error.response?.data || "Failed to fetch vehicles by date"
+        error.response?.data || "Failed to fetch vehicles by date",
       );
     }
-  }
+  },
 );
 
 export const createVehicle = createAsyncThunk(
@@ -66,27 +66,30 @@ export const createVehicle = createAsyncThunk(
       return createdVehicle;
     } catch (error: any) {
       return rejectWithValue(
-        error.response?.data || "Failed to create vehicle"
+        error.response?.data || "Failed to create vehicle",
       );
     }
-  }
+  },
 );
 
 export const updateVehicle = createAsyncThunk(
   "vehicles/updateVehicle",
   async (
     { id, updatedVehicle }: { id: number; updatedVehicle: Partial<Vehicle> },
-    { rejectWithValue }
+    { rejectWithValue },
   ) => {
     try {
-      const updatedVehicleFromBackend = await VehicleService.updateVehicle(id, updatedVehicle);
+      const updatedVehicleFromBackend = await VehicleService.updateVehicle(
+        id,
+        updatedVehicle,
+      );
       return updatedVehicleFromBackend;
     } catch (error: any) {
       return rejectWithValue(
-        error.response?.data || "Failed to update vehicle"
+        error.response?.data || "Failed to update vehicle",
       );
     }
-  }
+  },
 );
 
 export const deleteVehicle = createAsyncThunk(
@@ -97,10 +100,10 @@ export const deleteVehicle = createAsyncThunk(
       return id;
     } catch (error: any) {
       return rejectWithValue(
-        error.response?.data || "Failed to delete vehicle"
+        error.response?.data || "Failed to delete vehicle",
       );
     }
-  }
+  },
 );
 
 const vehicleSlice = createSlice({
@@ -119,7 +122,7 @@ const vehicleSlice = createSlice({
           state.allVehicles = action.payload;
           state.totalCountAllVehicles = action.payload.length;
           state.isLoadingVehicles = false;
-        }
+        },
       )
       .addCase(fetchVehicles.rejected, (state, action) => {
         state.isLoadingVehicles = false;
@@ -130,7 +133,7 @@ const vehicleSlice = createSlice({
         (state, action: PayloadAction<Vehicle[]>) => {
           state.vehicles = action.payload;
           state.totalCountVehicles = action.payload.length;
-        }
+        },
       )
       .addCase(
         createVehicle.fulfilled,
@@ -138,7 +141,7 @@ const vehicleSlice = createSlice({
           state.vehicles.push(action.payload);
           state.allVehicles.push(action.payload);
           state.totalCountAllVehicles += 1;
-        }
+        },
       )
       .addCase(createVehicle.rejected, (state, action) => {
         state.error = action.payload as string;
@@ -148,29 +151,29 @@ const vehicleSlice = createSlice({
         (state, action: PayloadAction<Vehicle>) => {
           const updatedVehicle = action.payload;
           const id = updatedVehicle.id;
-          
+
           const updatedAllVehicles = state.allVehicles.map((vehicle) =>
-            vehicle.id === id ? updatedVehicle : vehicle
+            vehicle.id === id ? updatedVehicle : vehicle,
           );
           state.allVehicles = updatedAllVehicles;
-          
+
           const updatedVehicles = state.vehicles.map((vehicle) =>
-            vehicle.id === id ? updatedVehicle : vehicle
+            vehicle.id === id ? updatedVehicle : vehicle,
           );
           state.vehicles = updatedVehicles;
-        }
+        },
       )
       .addCase(
         deleteVehicle.fulfilled,
         (state, action: PayloadAction<number>) => {
           state.vehicles = state.vehicles.filter(
-            (vehicle) => vehicle.id !== action.payload
+            (vehicle) => vehicle.id !== action.payload,
           );
           state.allVehicles = state.allVehicles.filter(
-            (vehicle) => vehicle.id !== action.payload
+            (vehicle) => vehicle.id !== action.payload,
           );
           state.totalCountAllVehicles = state.allVehicles.length;
-        }
+        },
       );
   },
 });

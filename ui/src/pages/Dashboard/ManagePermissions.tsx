@@ -11,15 +11,15 @@ import {
   Typography,
 } from "@mui/material";
 import SearchBar from "../../components/SearchBar/SearchBar";
-import VpnKeyOutlinedIcon from '@mui/icons-material/VpnKeyOutlined';
+import VpnKeyOutlinedIcon from "@mui/icons-material/VpnKeyOutlined";
 
 const ManagePermissions: React.FC = () => {
   const dispatch = useDispatch<AppDispatch>();
   const { permissions, isLoadingPermissions } = useSelector(
-    (state: RootState) => state.permissions
+    (state: RootState) => state.permissions,
   );
   const [filteredPermissions, setFilteredPermissions] = useState<Permission[]>(
-    []
+    [],
   );
   const [filter, setFilter] = useState("");
 
@@ -35,8 +35,8 @@ const ManagePermissions: React.FC = () => {
       permissions.filter((permission) =>
         normalizeString(`${permission.name}`)
           .toLowerCase()
-          .includes(normalizeString(filter).toLowerCase())
-      )
+          .includes(normalizeString(filter).toLowerCase()),
+      ),
     );
   }, [filter, permissions, filteredPermissions.length]);
 
@@ -82,8 +82,7 @@ const ManagePermissions: React.FC = () => {
                 />
               )}
             </Grid>
-            <Grid item xs={12} md={8}>
-            </Grid>
+            <Grid item xs={12} md={8}></Grid>
           </Grid>
           <br />
           {filteredPermissions.length > 0 ? (
@@ -92,28 +91,37 @@ const ManagePermissions: React.FC = () => {
                 <Grid item xs={12} sm={6} md={3} lg={3} key={permission.id}>
                   <Box
                     sx={{
-                      display: 'flex',
-                      alignItems: 'center',
+                      display: "flex",
+                      alignItems: "center",
                       p: 1.2,
                       borderRadius: 1,
-                      backgroundColor: 'background.paper',
-                      border: '1px solid',
-                      borderColor: 'divider',
-                      boxShadow: 'none',
-                      cursor: 'default',
+                      backgroundColor: "background.paper",
+                      border: "1px solid",
+                      borderColor: "divider",
+                      boxShadow: "none",
+                      cursor: "default",
                       minHeight: 36,
                     }}
                   >
-                    <Box sx={{
-                      mr: 1,
-                      color: 'primary.main',
-                      fontSize: 18,
-                      display: 'flex',
-                      alignItems: 'center',
-                    }}>
-                      <VpnKeyOutlinedIcon sx={{ color: 'primary.main', fontSize: 22 }} />
+                    <Box
+                      sx={{
+                        mr: 1,
+                        color: "primary.main",
+                        fontSize: 18,
+                        display: "flex",
+                        alignItems: "center",
+                      }}
+                    >
+                      <VpnKeyOutlinedIcon
+                        sx={{ color: "primary.main", fontSize: 22 }}
+                      />
                     </Box>
-                    <Typography variant="body2" fontWeight={400} color="text.primary" noWrap>
+                    <Typography
+                      variant="body2"
+                      fontWeight={400}
+                      color="text.primary"
+                      noWrap
+                    >
                       {permission.name}
                     </Typography>
                   </Box>

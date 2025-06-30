@@ -69,13 +69,13 @@ import CalendarTodayRoundedIcon from "@mui/icons-material/CalendarTodayRounded";
 import CloseRoundedIcon from "@mui/icons-material/CloseRounded";
 import ManageSearchIcon from "@mui/icons-material/ManageSearch";
 import DialogComponent from "../../components/Dialog/DialogComponent";
-import AccessTimeRoundedIcon from '@mui/icons-material/AccessTimeRounded';
-import BarChartIcon from '@mui/icons-material/BarChart';
-import TabContext from '@mui/lab/TabContext';
-import TabList from '@mui/lab/TabList';
-import TabPanel from '@mui/lab/TabPanel';
-import Tab from '@mui/material/Tab';
-import Divider from '@mui/material/Divider';
+import AccessTimeRoundedIcon from "@mui/icons-material/AccessTimeRounded";
+import BarChartIcon from "@mui/icons-material/BarChart";
+import TabContext from "@mui/lab/TabContext";
+import TabList from "@mui/lab/TabList";
+import TabPanel from "@mui/lab/TabPanel";
+import Tab from "@mui/material/Tab";
+import Divider from "@mui/material/Divider";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faFileExcel, faFilePdf } from "@fortawesome/free-solid-svg-icons";
 
@@ -83,13 +83,13 @@ const RolesPage: React.FC = () => {
   const dispatch = useDispatch<AppDispatch>();
   const { userPermissions } = useAuthContext();
   const { employees, isLoadingEmployees } = useSelector(
-    (state: RootState) => state.employees
+    (state: RootState) => state.employees,
   );
   const { schedules, isLoadingSchedules } = useSelector(
-    (state: RootState) => state.schedules
+    (state: RootState) => state.schedules,
   );
   const { hoursWorked, isLoadingHoursWorked } = useSelector(
-    (state: RootState) => state.hoursWorked
+    (state: RootState) => state.hoursWorked,
   );
   const [filteredEmployees, setFilteredEmployees] = useState<Employee[]>([]);
   const {
@@ -120,8 +120,11 @@ const RolesPage: React.FC = () => {
   const [openExportDialog, setOpenExportDialog] = useState(false);
   const [exportType, setExportType] = useState<"excel" | "pdf">("excel");
   const [isExporting, setIsExporting] = useState(false);
-  const [openSummaryDialogEmployee, setOpenSummaryDialogEmployee] = useState<Employee | null>(null);
-  const [summaryTab, setSummaryTab] = useState<'weekly' | 'biweekly' | 'monthly' | 'overtime'>('weekly');
+  const [openSummaryDialogEmployee, setOpenSummaryDialogEmployee] =
+    useState<Employee | null>(null);
+  const [summaryTab, setSummaryTab] = useState<
+    "weekly" | "biweekly" | "monthly" | "overtime"
+  >("weekly");
 
   const theme = useTheme();
   const isSmallScreen = useMediaQuery(theme.breakpoints.down("sm"));
@@ -148,8 +151,8 @@ const RolesPage: React.FC = () => {
       employees.filter((employee) =>
         normalizeString(`${employee.firstName} ${employee.lastName}`)
           .toLowerCase()
-          .includes(normalizeString(filter).toLowerCase())
-      )
+          .includes(normalizeString(filter).toLowerCase()),
+      ),
     );
   }, [filter, employees]);
 
@@ -191,7 +194,7 @@ const RolesPage: React.FC = () => {
       const newWeekOffset = differenceInCalendarWeeks(
         newDate,
         today,
-        weekOptions
+        weekOptions,
       );
       setWeekOffset(newWeekOffset);
     }
@@ -207,12 +210,12 @@ const RolesPage: React.FC = () => {
       biweekNumber: number,
       month: number,
       year: number,
-      totalHours: number
+      totalHours: number,
     ) => {
       const existingHoursRecord = hoursWorked.find(
         (hours) =>
           hours.employeeId === employeeId &&
-          new Date(hours.date).getTime() === new Date(date).getTime()
+          new Date(hours.date).getTime() === new Date(date).getTime(),
       );
 
       let previousHours: number | undefined;
@@ -224,7 +227,7 @@ const RolesPage: React.FC = () => {
           scheduleId,
         };
         previousHours = schedules.find(
-          (schedule) => schedule.id === existingHoursRecord.scheduleId
+          (schedule) => schedule.id === existingHoursRecord.scheduleId,
         )?.hours;
       } else {
         createOrUpdatedHoursWorked = {
@@ -238,7 +241,7 @@ const RolesPage: React.FC = () => {
         (weeklySummary) =>
           weeklySummary.employeeId === employeeId &&
           weeklySummary.weekNumber === weekNumber &&
-          weeklySummary.year === year
+          weeklySummary.year === year,
       );
 
       let createOrUpdatedWeeklySummary:
@@ -268,7 +271,7 @@ const RolesPage: React.FC = () => {
         (biweeklySummary) =>
           biweeklySummary.employeeId === employeeId &&
           biweeklySummary.biweekNumber === biweekNumber &&
-          biweeklySummary.year === year
+          biweeklySummary.year === year,
       );
 
       let createOrUpdatedBiweeklySummary:
@@ -298,7 +301,7 @@ const RolesPage: React.FC = () => {
         (monthlySummary) =>
           monthlySummary.employeeId === employeeId &&
           monthlySummary.month === month &&
-          monthlySummary.year === year
+          monthlySummary.year === year,
       );
 
       let createOrUpdatedMonthlySummary:
@@ -339,13 +342,13 @@ const RolesPage: React.FC = () => {
       createOrUpdateWeeklySummary,
       createOrUpdateBiweeklySummary,
       createOrUpdateMonthlySummary,
-    ]
+    ],
   );
 
   const handleChange = (
     event: SelectChangeEvent<string>,
     employeeId: number,
-    date: Date
+    date: Date,
   ) => {
     if (event.target.value === "Other") {
       return;
@@ -354,7 +357,7 @@ const RolesPage: React.FC = () => {
     const selectedSchedule = schedules.find(
       (schedule) =>
         schedule.label === event.target.value &&
-        schedule.days.includes(getDayName(date))
+        schedule.days.includes(getDayName(date)),
     );
 
     if (!selectedSchedule) {
@@ -370,14 +373,14 @@ const RolesPage: React.FC = () => {
       getBiweekNumber(date),
       date.getMonth() + 1,
       date.getFullYear(),
-      selectedSchedule.hours
+      selectedSchedule.hours,
     );
   };
 
   const handleAdjustTime = async (
     employeeId: number,
     condition: string,
-    timeAdjustment: number
+    timeAdjustment: number,
   ) => {
     if (!timeAdjustment) return;
 
@@ -388,20 +391,20 @@ const RolesPage: React.FC = () => {
         weeklySummary.employeeId === employeeId &&
         weeklySummary.weekNumber === currentWeekNumber &&
         weeklySummary.month === currentMonth &&
-        weeklySummary.year === currentYear
+        weeklySummary.year === currentYear,
     );
     const existingBiweeklySummary = biweeklySummaries.find(
       (biweeklySummary) =>
         biweeklySummary.employeeId === employeeId &&
         biweeklySummary.biweekNumber === currentBiweekNumber &&
         biweeklySummary.month === currentMonth &&
-        biweeklySummary.year === currentYear
+        biweeklySummary.year === currentYear,
     );
     const existingMonthlySummary = monthlySummaries.find(
       (monthlySummary) =>
         monthlySummary.employeeId === employeeId &&
         monthlySummary.month === currentMonth &&
-        monthlySummary.year === currentYear
+        monthlySummary.year === currentYear,
     );
 
     const updatedWeeklySummary: WeeklySummary = {
@@ -482,15 +485,15 @@ const RolesPage: React.FC = () => {
         currentMonth,
         currentYear,
         getCurrentWeekDates(weekOffset),
-        shouldExportHours
+        shouldExportHours,
       );
-      
+
       if (exportType === "excel") {
         await exportToExcel(dataForExport, fileName);
       } else if (exportType === "pdf") {
         await exportToPDF(dataForExport, fileName);
       }
-      
+
       setOpenExportDialog(false);
     } catch (error) {
       console.error("Error exporting data:", error);
@@ -518,21 +521,30 @@ const RolesPage: React.FC = () => {
 
   const getEmployeeWeeklyHours = (employeeId: number) => {
     const summary = weeklySummaries.find(
-      (s) => s.employeeId === employeeId && s.weekNumber === currentWeekNumber && s.year === currentYear
+      (s) =>
+        s.employeeId === employeeId &&
+        s.weekNumber === currentWeekNumber &&
+        s.year === currentYear,
     );
     return summary ? summary.totalHours : 0;
   };
 
   const getEmployeeBiweeklyHours = (employeeId: number) => {
     const summary = biweeklySummaries.find(
-      (s) => s.employeeId === employeeId && s.biweekNumber === currentBiweekNumber && s.year === currentYear
+      (s) =>
+        s.employeeId === employeeId &&
+        s.biweekNumber === currentBiweekNumber &&
+        s.year === currentYear,
     );
     return summary ? summary.totalHours : 0;
   };
 
   const getEmployeeMonthlyHours = (employeeId: number) => {
     const summary = monthlySummaries.find(
-      (s) => s.employeeId === employeeId && s.month === currentMonth && s.year === currentYear
+      (s) =>
+        s.employeeId === employeeId &&
+        s.month === currentMonth &&
+        s.year === currentYear,
     );
     return summary ? summary.totalHours : 0;
   };
@@ -685,8 +697,8 @@ const RolesPage: React.FC = () => {
                         disabled={
                           !isValidDateForSelect(
                             new Date(
-                              getCurrentWeekDates(weekOffset + 1)[0].isoDate
-                            )
+                              getCurrentWeekDates(weekOffset + 1)[0].isoDate,
+                            ),
                           )
                         }
                         onClick={handleNextWeek}
@@ -763,18 +775,38 @@ const RolesPage: React.FC = () => {
         loading={isExporting}
       />
       {openSummaryDialogEmployee && (
-        <Dialog open={!!openSummaryDialogEmployee} onClose={() => setOpenSummaryDialogEmployee(null)} maxWidth="md" fullWidth>
-          <Box sx={{ background: theme.palette.primary.main, color: '#fff', p: { xs: 3, sm: 4 }, borderTopLeftRadius: 2, borderTopRightRadius: 2, display: 'flex', alignItems: 'center', gap: 2 }}>
+        <Dialog
+          open={!!openSummaryDialogEmployee}
+          onClose={() => setOpenSummaryDialogEmployee(null)}
+          maxWidth="md"
+          fullWidth
+        >
+          <Box
+            sx={{
+              background: theme.palette.primary.main,
+              color: "#fff",
+              p: { xs: 3, sm: 4 },
+              borderTopLeftRadius: 2,
+              borderTopRightRadius: 2,
+              display: "flex",
+              alignItems: "center",
+              gap: 2,
+            }}
+          >
             <Box>
               <Typography variant="h5" fontWeight={700} color="#fff">
                 Resumen de Horas Trabajadas
               </Typography>
               <Typography variant="subtitle2" color="#fff">
-                {openSummaryDialogEmployee.firstName} {openSummaryDialogEmployee.lastName}
+                {openSummaryDialogEmployee.firstName}{" "}
+                {openSummaryDialogEmployee.lastName}
               </Typography>
             </Box>
             <Box flexGrow={1} />
-            <IconButton onClick={() => setOpenSummaryDialogEmployee(null)} sx={{ color: '#fff' }}>
+            <IconButton
+              onClick={() => setOpenSummaryDialogEmployee(null)}
+              sx={{ color: "#fff" }}
+            >
               <CloseRoundedIcon />
             </IconButton>
           </Box>
@@ -782,7 +814,10 @@ const RolesPage: React.FC = () => {
             <Grid container spacing={3}>
               <Grid item xs={12}>
                 <TabContext value={summaryTab}>
-                  <TabList onChange={(_, v) => setSummaryTab(v)} variant="fullWidth">
+                  <TabList
+                    onChange={(_, v) => setSummaryTab(v)}
+                    variant="fullWidth"
+                  >
                     <Tab label="Semanal" value="weekly" />
                     <Tab label="Quincenal" value="biweekly" />
                     <Tab label="Mensual" value="monthly" />
@@ -791,12 +826,24 @@ const RolesPage: React.FC = () => {
                   <Divider sx={{ mb: 2 }} />
                   <TabPanel value="weekly">
                     <Box display="flex" alignItems="center" gap={3}>
-                      <Avatar sx={{ bgcolor: theme.palette.success.light, width: 56, height: 56 }}>
+                      <Avatar
+                        sx={{
+                          bgcolor: theme.palette.success.light,
+                          width: 56,
+                          height: 56,
+                        }}
+                      >
                         <BarChartIcon color="success" />
                       </Avatar>
                       <Box>
-                        <Typography variant="h6" fontWeight={700}>Horas trabajadas esta semana</Typography>
-                        <Typography variant="h3" color="primary" fontWeight={800}>
+                        <Typography variant="h6" fontWeight={700}>
+                          Horas trabajadas esta semana
+                        </Typography>
+                        <Typography
+                          variant="h3"
+                          color="primary"
+                          fontWeight={800}
+                        >
                           {getEmployeeWeeklyHours(openSummaryDialogEmployee.id)}
                         </Typography>
                         <Typography variant="body2" color="text.secondary">
@@ -807,13 +854,27 @@ const RolesPage: React.FC = () => {
                   </TabPanel>
                   <TabPanel value="biweekly">
                     <Box display="flex" alignItems="center" gap={3}>
-                      <Avatar sx={{ bgcolor: theme.palette.info.light, width: 56, height: 56 }}>
+                      <Avatar
+                        sx={{
+                          bgcolor: theme.palette.info.light,
+                          width: 56,
+                          height: 56,
+                        }}
+                      >
                         <BarChartIcon color="info" />
                       </Avatar>
                       <Box>
-                        <Typography variant="h6" fontWeight={700}>Horas trabajadas esta quincena</Typography>
-                        <Typography variant="h3" color="primary" fontWeight={800}>
-                          {getEmployeeBiweeklyHours(openSummaryDialogEmployee.id)}
+                        <Typography variant="h6" fontWeight={700}>
+                          Horas trabajadas esta quincena
+                        </Typography>
+                        <Typography
+                          variant="h3"
+                          color="primary"
+                          fontWeight={800}
+                        >
+                          {getEmployeeBiweeklyHours(
+                            openSummaryDialogEmployee.id,
+                          )}
                         </Typography>
                         <Typography variant="body2" color="text.secondary">
                           Quincena #{currentBiweekNumber}
@@ -823,13 +884,27 @@ const RolesPage: React.FC = () => {
                   </TabPanel>
                   <TabPanel value="monthly">
                     <Box display="flex" alignItems="center" gap={3}>
-                      <Avatar sx={{ bgcolor: theme.palette.warning.light, width: 56, height: 56 }}>
+                      <Avatar
+                        sx={{
+                          bgcolor: theme.palette.warning.light,
+                          width: 56,
+                          height: 56,
+                        }}
+                      >
                         <BarChartIcon color="warning" />
                       </Avatar>
                       <Box>
-                        <Typography variant="h6" fontWeight={700}>Horas trabajadas este mes</Typography>
-                        <Typography variant="h3" color="primary" fontWeight={800}>
-                          {getEmployeeMonthlyHours(openSummaryDialogEmployee.id)}
+                        <Typography variant="h6" fontWeight={700}>
+                          Horas trabajadas este mes
+                        </Typography>
+                        <Typography
+                          variant="h3"
+                          color="primary"
+                          fontWeight={800}
+                        >
+                          {getEmployeeMonthlyHours(
+                            openSummaryDialogEmployee.id,
+                          )}
                         </Typography>
                         <Typography variant="body2" color="text.secondary">
                           Mes #{currentMonth} / {currentYear}
@@ -839,11 +914,19 @@ const RolesPage: React.FC = () => {
                   </TabPanel>
                   <TabPanel value="overtime">
                     <Box display="flex" alignItems="center" gap={3}>
-                      <Avatar sx={{ bgcolor: theme.palette.error.light, width: 56, height: 56 }}>
+                      <Avatar
+                        sx={{
+                          bgcolor: theme.palette.error.light,
+                          width: 56,
+                          height: 56,
+                        }}
+                      >
                         <AccessTimeRoundedIcon color="error" />
                       </Avatar>
                       <Box>
-                        <Typography variant="h6" fontWeight={700}>Horas Extra</Typography>
+                        <Typography variant="h6" fontWeight={700}>
+                          Horas Extra
+                        </Typography>
                         <Typography variant="h3" color="error" fontWeight={800}>
                           {getEmployeeOvertime(openSummaryDialogEmployee.id)}
                         </Typography>
@@ -858,24 +941,48 @@ const RolesPage: React.FC = () => {
               <Grid item xs={12}>
                 <Box
                   sx={{
-                    display: 'flex',
-                    alignItems: 'center',
+                    display: "flex",
+                    alignItems: "center",
                     p: { xs: 1.5, sm: 2 },
                     backgroundColor: theme.palette.action.hover,
                     borderRadius: 1,
-                    border: '1px solid',
+                    border: "1px solid",
                     borderColor: theme.palette.divider,
                   }}
                 >
-                  <Box sx={{ mr: { xs: 1, sm: 2 }, color: theme.palette.info.main }}>
-                    <InfoOutlinedIcon sx={{ color: theme.palette.info.main, mr: { xs: 1, sm: 2 } }} />
+                  <Box
+                    sx={{
+                      mr: { xs: 1, sm: 2 },
+                      color: theme.palette.info.main,
+                    }}
+                  >
+                    <InfoOutlinedIcon
+                      sx={{
+                        color: theme.palette.info.main,
+                        mr: { xs: 1, sm: 2 },
+                      }}
+                    />
                   </Box>
                   <Box>
-                    <Box sx={{ fontWeight: 600, color: theme.palette.text.primary, mb: 0.5, fontSize: 'clamp(0.875rem, 1.5vw, 1rem)' }}>
+                    <Box
+                      sx={{
+                        fontWeight: 600,
+                        color: theme.palette.text.primary,
+                        mb: 0.5,
+                        fontSize: "clamp(0.875rem, 1.5vw, 1rem)",
+                      }}
+                    >
                       Información de Resumen
                     </Box>
-                    <Box sx={{ color: theme.palette.text.secondary, fontSize: 'clamp(0.75rem, 1.25vw, 0.875rem)' }}>
-                      Consulta el total de horas trabajadas por periodo. Usa las pestañas para cambiar entre semana, quincena, mes y horas extra.
+                    <Box
+                      sx={{
+                        color: theme.palette.text.secondary,
+                        fontSize: "clamp(0.75rem, 1.25vw, 0.875rem)",
+                      }}
+                    >
+                      Consulta el total de horas trabajadas por periodo. Usa las
+                      pestañas para cambiar entre semana, quincena, mes y horas
+                      extra.
                     </Box>
                   </Box>
                 </Box>

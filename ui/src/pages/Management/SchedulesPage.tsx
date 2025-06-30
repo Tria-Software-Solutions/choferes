@@ -39,14 +39,14 @@ import CloseRoundedIcon from "@mui/icons-material/CloseRounded";
 import ManageSearchIcon from "@mui/icons-material/ManageSearch";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faFileExcel, faFilePdf } from "@fortawesome/free-solid-svg-icons";
-import AddRoundedIcon from '@mui/icons-material/AddRounded';
-import DeleteOutlineIcon from '@mui/icons-material/DeleteOutline';
+import AddRoundedIcon from "@mui/icons-material/AddRounded";
+import DeleteOutlineIcon from "@mui/icons-material/DeleteOutline";
 
 const SchedulesPage: React.FC = () => {
   const dispatch = useDispatch<AppDispatch>();
   const { userPermissions } = useAuthContext();
   const { schedules, isLoadingSchedules } = useSelector(
-    (state: RootState) => state.schedules
+    (state: RootState) => state.schedules,
   );
   const { showNotification } = useAppNotifications();
   const [filteredSchedules, setFilteredSchedules] = useState<Schedule[]>([]);
@@ -98,7 +98,7 @@ const SchedulesPage: React.FC = () => {
         : translateDayOptionsToSpanish(schedule.days);
 
       return normalizeString(
-        `${schedule.label} ${daysString} ${schedule.hours}`
+        `${schedule.label} ${daysString} ${schedule.hours}`,
       )
         .toLowerCase()
         .includes(normalizeString(filter).toLowerCase());
@@ -114,9 +114,13 @@ const SchedulesPage: React.FC = () => {
       time: /^[0-9]+$/,
     };
 
-    const isLabelValid = fields.label.trim().length > 0 && regex.text.test(fields.label);
-    const isHoursValid = fields.hours.length > 0 && regex.time.test(fields.hours) && 
-                        parseInt(fields.hours) > 0 && parseInt(fields.hours) <= 24;
+    const isLabelValid =
+      fields.label.trim().length > 0 && regex.text.test(fields.label);
+    const isHoursValid =
+      fields.hours.length > 0 &&
+      regex.time.test(fields.hours) &&
+      parseInt(fields.hours) > 0 &&
+      parseInt(fields.hours) <= 24;
     const isDaysValid = fields.days.length > 0;
 
     return isLabelValid && isHoursValid && isDaysValid;
@@ -135,17 +139,13 @@ const SchedulesPage: React.FC = () => {
       setIsCreatingSchedule(true);
       await dispatch(createSchedule(newSchedule));
       setOpenAddScheduleModal(false);
-      showNotification(
-        "El registro del horario fue exitoso",
-        3000,
-        false
-      );
+      showNotification("El registro del horario fue exitoso", 3000, false);
     } catch (error) {
       console.error(error);
       showNotification(
         "Ha ocurrido un error al registrar el horario",
         5000,
-        false
+        false,
       );
     } finally {
       setIsCreatingSchedule(false);
@@ -175,18 +175,14 @@ const SchedulesPage: React.FC = () => {
       dispatch(updateSchedule({ id, updatedSchedule }));
       setEditRowId(null);
       setEditFields({ label: "", days: [], hours: "", specialSchedule: false });
-      showNotification(
-        "La actualización del horario fue exitosa",
-        3000,
-        false
-      );
+      showNotification("La actualización del horario fue exitosa", 3000, false);
     } catch (error) {
       handleCancel();
       console.error(error);
       showNotification(
         "Ha ocurrido un error al actualizar el horario",
         5000,
-        false
+        false,
       );
     }
   };
@@ -211,24 +207,16 @@ const SchedulesPage: React.FC = () => {
 
   const handleDelete = async () => {
     if (!scheduleToDelete) return;
-    
+
     setIsDeletingSchedule(true);
     try {
       await dispatch(deleteSchedule(scheduleToDelete));
       setOpenDeleteDialog(false);
       setScheduleToDelete(null);
-      showNotification(
-        "Horario eliminado exitosamente",
-        3000,
-        false
-      );
+      showNotification("Horario eliminado exitosamente", 3000, false);
     } catch (error) {
       console.error("Error deleting schedule:", error);
-      showNotification(
-        "Error al eliminar el horario",
-        5000,
-        false
-      );
+      showNotification("Error al eliminar el horario", 5000, false);
     } finally {
       setIsDeletingSchedule(false);
     }
@@ -236,7 +224,7 @@ const SchedulesPage: React.FC = () => {
 
   const exportOptions = useMemo(() => {
     const excelOption = userPermissions.includes(
-      PERMISSIONS.EXPORT_EXCEL_SCHEDULES
+      PERMISSIONS.EXPORT_EXCEL_SCHEDULES,
     )
       ? exportToExcel
       : undefined;
@@ -316,7 +304,7 @@ const SchedulesPage: React.FC = () => {
             alignItems="center"
           >
             <Grid item xs={12} md={4}>
-              <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+              <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
                 {filteredSchedules && (
                   <SearchBar
                     placeholder="Buscar horario"
@@ -332,11 +320,11 @@ const SchedulesPage: React.FC = () => {
                     color="primary"
                     onClick={handleOpenAddModal}
                     sx={{
-                      display: { xs: 'flex', md: 'none' },
-                      minWidth: 'auto',
+                      display: { xs: "flex", md: "none" },
+                      minWidth: "auto",
                       width: 56,
                       height: 56,
-                      borderRadius: '50%',
+                      borderRadius: "50%",
                       p: 0,
                     }}
                   >
@@ -349,15 +337,15 @@ const SchedulesPage: React.FC = () => {
               <Grid item xs={12} md={8}>
                 <Box
                   sx={{
-                    display: { xs: 'none', md: 'flex' },
-                    justifyContent: 'flex-end',
+                    display: { xs: "none", md: "flex" },
+                    justifyContent: "flex-end",
                   }}
                 >
                   <Button
                     variant="contained"
                     startIcon={<AddRoundedIcon />}
                     onClick={handleOpenAddModal}
-                    sx={{ px: 3, py: 1.5, fontSize: '1rem', minHeight: 56 }}
+                    sx={{ px: 3, py: 1.5, fontSize: "1rem", minHeight: 56 }}
                   >
                     Agregar
                   </Button>
@@ -418,7 +406,10 @@ const SchedulesPage: React.FC = () => {
         confirmText="Eliminar"
         cancelText="Cancelar"
         loading={isDeletingSchedule}
-        paperSx={{ minWidth: { xs: '80vw', sm: 320 }, maxWidth: { xs: '90vw', sm: 400 } }}
+        paperSx={{
+          minWidth: { xs: "80vw", sm: 320 },
+          maxWidth: { xs: "90vw", sm: 400 },
+        }}
         icon={<DeleteOutlineIcon color="error" />}
       />
       <DialogComponent
@@ -427,7 +418,10 @@ const SchedulesPage: React.FC = () => {
         title="Agregar"
         subtitle="Nuevo horario"
         hideActions
-        paperSx={{ minWidth: { xs: '90vw', sm: 500, md: 700 }, maxWidth: { xs: '98vw', sm: 700 } }}
+        paperSx={{
+          minWidth: { xs: "90vw", sm: 500, md: 700 },
+          maxWidth: { xs: "98vw", sm: 700 },
+        }}
       >
         <AddScheduleForm
           onSubmit={handleCreate}

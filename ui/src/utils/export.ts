@@ -104,7 +104,7 @@ export const exportToExcel = (data: any[], fileName: string) => {
   worksheet["!cols"] = columnOrder.map((key) => {
     const maxLength = Math.max(
       key.length,
-      ...translatedData.map((row) => row[key]?.toString().length || 0)
+      ...translatedData.map((row) => row[key]?.toString().length || 0),
     );
     return { width: maxLength + 2 };
   });
@@ -115,7 +115,7 @@ export const exportToExcel = (data: any[], fileName: string) => {
 export const exportToPDF = (
   data: any[],
   fileName: string,
-  customHeaders?: string[]
+  customHeaders?: string[],
 ) => {
   const doc = new jsPDF();
 
@@ -142,7 +142,7 @@ export const exportToPDF = (
     ? [customHeaders]
     : [
         Object.keys(cleanedData[0]).map((header) =>
-          header === "Fecha" ? "Fecha" : translateColumnHeaderToSpanish(header)
+          header === "Fecha" ? "Fecha" : translateColumnHeaderToSpanish(header),
         ),
       ];
 
@@ -195,12 +195,12 @@ export const exportToPDF = (
 
 export const exportFileFormattedDate = (date: Date) => {
   return `${String(date.getDate()).padStart(2, "0")}-${String(
-    date.getMonth() + 1
+    date.getMonth() + 1,
   ).padStart(2, "0")}-${date.getFullYear()}-${String(date.getHours()).padStart(
     2,
-    "0"
+    "0",
   )}-${String(date.getMinutes()).padStart(2, "0")}-${String(
-    date.getSeconds()
+    date.getSeconds(),
   ).padStart(2, "0")}`;
 };
 
@@ -216,7 +216,7 @@ export const handleExportTableData = (
   month: number,
   year: number,
   currentWeek: { day: string; date: string; isoDate: string }[],
-  withHours?: boolean
+  withHours?: boolean,
 ) => {
   const headers = !withHours
     ? [
@@ -251,7 +251,7 @@ export const handleExportTableData = (
         (record) =>
           record.employeeId === employee.id &&
           new Date(record.date).toISOString().split("T")[0] ===
-            dateObject.toISOString().split("T")[0]
+            dateObject.toISOString().split("T")[0],
       );
 
       const scheduleLabel =
@@ -276,8 +276,8 @@ export const handleExportTableData = (
             multiplePeriods.months,
             weeklySummaries,
             biweeklySummaries,
-            monthlySummaries
-          ).totalHours
+            monthlySummaries,
+          ).totalHours,
         );
 
         employeeData[
@@ -291,8 +291,8 @@ export const handleExportTableData = (
             multiplePeriods.months,
             weeklySummaries,
             biweeklySummaries,
-            monthlySummaries
-          ).overtime
+            monthlySummaries,
+          ).overtime,
         );
       } else {
         employeeData[`Total ${translatePeriodToSpanish("weekly")}`] =
@@ -305,7 +305,7 @@ export const handleExportTableData = (
             year,
             weeklySummaries,
             biweeklySummaries,
-            monthlySummaries
+            monthlySummaries,
           ).totalHours;
 
         employeeData[
@@ -319,7 +319,7 @@ export const handleExportTableData = (
           year,
           weeklySummaries,
           biweeklySummaries,
-          monthlySummaries
+          monthlySummaries,
         ).overtime;
       }
 
@@ -333,8 +333,8 @@ export const handleExportTableData = (
             multiplePeriods.months,
             weeklySummaries,
             biweeklySummaries,
-            monthlySummaries
-          ).totalHours
+            monthlySummaries,
+          ).totalHours,
         );
 
         employeeData[
@@ -348,8 +348,8 @@ export const handleExportTableData = (
             multiplePeriods.months,
             weeklySummaries,
             biweeklySummaries,
-            monthlySummaries
-          ).overtime
+            monthlySummaries,
+          ).overtime,
         );
       } else {
         employeeData[`Total ${translatePeriodToSpanish("biweekly")}`] =
@@ -362,7 +362,7 @@ export const handleExportTableData = (
             year,
             weeklySummaries,
             biweeklySummaries,
-            monthlySummaries
+            monthlySummaries,
           ).totalHours;
 
         employeeData[
@@ -376,7 +376,7 @@ export const handleExportTableData = (
           year,
           weeklySummaries,
           biweeklySummaries,
-          monthlySummaries
+          monthlySummaries,
         ).overtime;
       }
 
@@ -390,8 +390,8 @@ export const handleExportTableData = (
             multiplePeriods.months,
             weeklySummaries,
             biweeklySummaries,
-            monthlySummaries
-          ).totalHours
+            monthlySummaries,
+          ).totalHours,
         );
 
         employeeData[
@@ -405,8 +405,8 @@ export const handleExportTableData = (
             multiplePeriods.months,
             weeklySummaries,
             biweeklySummaries,
-            monthlySummaries
-          ).overtime
+            monthlySummaries,
+          ).overtime,
         );
       } else {
         employeeData[`Total ${translatePeriodToSpanish("monthly")}`] =
@@ -419,7 +419,7 @@ export const handleExportTableData = (
             year,
             weeklySummaries,
             biweeklySummaries,
-            monthlySummaries
+            monthlySummaries,
           ).totalHours;
 
         employeeData[
@@ -433,7 +433,7 @@ export const handleExportTableData = (
           year,
           weeklySummaries,
           biweeklySummaries,
-          monthlySummaries
+          monthlySummaries,
         ).overtime;
       }
     }
@@ -455,7 +455,7 @@ export const createExportOptions = (
   exportToPDF?: (dataForExport: any, fileName: string, headers?: any) => any,
   dataForExport?: any,
   fileName?: string,
-  headers?: any
+  headers?: any,
 ) => {
   const options = [];
   if (exportToExcel) {
@@ -466,7 +466,7 @@ export const createExportOptions = (
         exportToExcel(
           dataForExport,
           fileName || "excel-exported-file",
-          headers
+          headers,
         ),
     });
   }

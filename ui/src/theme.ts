@@ -117,11 +117,11 @@ const theme = createTheme({
     MuiAppBar: {
       styleOverrides: {
         root: {
-          background: 'linear-gradient(135deg, #000000 0%, #1a1a1a 100%)',
-          color: '#ffffff',
-          boxShadow: '0 4px 20px rgba(0,0,0,0.15)',
-          borderBottom: '1px solid rgba(255,255,255,0.1)',
-          backdropFilter: 'blur(10px)',
+          background: "linear-gradient(135deg, #000000 0%, #1a1a1a 100%)",
+          color: "#ffffff",
+          boxShadow: "0 4px 20px rgba(0,0,0,0.15)",
+          borderBottom: "1px solid rgba(255,255,255,0.1)",
+          backdropFilter: "blur(10px)",
         },
       },
     },
@@ -288,36 +288,36 @@ const theme = createTheme({
           color: "#000000",
           backgroundColor: "#fff",
           borderRadius: "8px",
-          '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
-            borderColor: '#000000',
-            borderWidth: '2px',
+          "&.Mui-focused .MuiOutlinedInput-notchedOutline": {
+            borderColor: "#000000",
+            borderWidth: "2px",
           },
-          '&:hover .MuiOutlinedInput-notchedOutline': {
-            borderColor: '#000000',
+          "&:hover .MuiOutlinedInput-notchedOutline": {
+            borderColor: "#000000",
           },
-          '&.Mui-focused': {
-            backgroundColor: '#fff',
-            outline: 'none',
-            boxShadow: 'none',
+          "&.Mui-focused": {
+            backgroundColor: "#fff",
+            outline: "none",
+            boxShadow: "none",
           },
         },
         select: {
-          backgroundColor: '#fff',
+          backgroundColor: "#fff",
         },
         icon: {
-          color: '#000000',
+          color: "#000000",
         },
       },
     },
     MuiOutlinedInput: {
       styleOverrides: {
         root: {
-          borderRadius: '8px',
-          backgroundColor: '#fff',
-          '&.Mui-focused': {
-            backgroundColor: '#fff',
-            outline: 'none',
-            boxShadow: 'none',
+          borderRadius: "8px",
+          backgroundColor: "#fff",
+          "&.Mui-focused": {
+            backgroundColor: "#fff",
+            outline: "none",
+            boxShadow: "none",
           },
         },
       },
@@ -327,8 +327,8 @@ const theme = createTheme({
         root: {
           color: "#000000",
           backgroundColor: "#ffffff",
-          padding: '12px 16px',
-          transition: 'all 0.2s ease',
+          padding: "12px 16px",
+          transition: "all 0.2s ease",
           "&:hover": {
             backgroundColor: "#f5f5f5",
           },
@@ -385,16 +385,16 @@ const theme = createTheme({
           backgroundColor: "#000000",
           color: "#ffffff",
           fontWeight: 600,
-          borderRadius: '20px',
-          fontSize: '0.875rem',
-          transition: 'all 0.3s ease',
+          borderRadius: "20px",
+          fontSize: "0.875rem",
+          transition: "all 0.3s ease",
           "& .MuiChip-label": {
             color: "#ffffff !important",
           },
           "&:hover": {
             backgroundColor: "#333333",
-            transform: 'translateY(-1px)',
-            boxShadow: '0 4px 12px rgba(0,0,0,0.2)',
+            transform: "translateY(-1px)",
+            boxShadow: "0 4px 12px rgba(0,0,0,0.2)",
             "& .MuiChip-label": {
               color: "#ffffff !important",
             },
@@ -633,13 +633,13 @@ const theme = createTheme({
     MuiAvatar: {
       styleOverrides: {
         root: {
-          backgroundColor: 'rgba(255,255,255,0.2)',
-          color: '#ffffff',
+          backgroundColor: "rgba(255,255,255,0.2)",
+          color: "#ffffff",
           fontWeight: 600,
-          fontSize: '1rem',
-          transition: 'all 0.3s ease',
-          '&:hover': {
-            transform: 'scale(1.05)',
+          fontSize: "1rem",
+          transition: "all 0.3s ease",
+          "&:hover": {
+            transform: "scale(1.05)",
           },
         },
       },
@@ -647,11 +647,11 @@ const theme = createTheme({
     MuiMenu: {
       styleOverrides: {
         paper: {
-          backgroundColor: '#ffffff',
-          boxShadow: '0 8px 32px rgba(0,0,0,0.2)',
-          border: '1px solid rgba(0,0,0,0.1)',
-          borderRadius: '12px',
-          overflow: 'hidden',
+          backgroundColor: "#ffffff",
+          boxShadow: "0 8px 32px rgba(0,0,0,0.2)",
+          border: "1px solid rgba(0,0,0,0.1)",
+          borderRadius: "12px",
+          overflow: "hidden",
         },
       },
     },

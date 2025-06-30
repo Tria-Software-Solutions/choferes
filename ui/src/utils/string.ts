@@ -4,7 +4,7 @@ import { EnglishDayOfWeek } from "./dayAbreviations";
 import { EnglishAbrevMonthOfYear } from "./monthAbreviations";
 
 export const translateColumnHeaderToSpanish = (
-  column: string | number | symbol
+  column: string | number | symbol,
 ): string => {
   const translations: ColumnsTranslation = {
     id: "Id",
@@ -45,15 +45,15 @@ export const translateColumnHeaderToSpanish = (
 
 export const getOptionsForDay = (
   day: string,
-  schedules: Schedule[]
+  schedules: Schedule[],
 ): Schedule[] => {
   return schedules.filter((schedule) =>
-    schedule.days.includes(day.toLowerCase())
+    schedule.days.includes(day.toLowerCase()),
   );
 };
 
 export const translateDayToAbrevSpanish = (
-  dayInEnglish: EnglishDayOfWeek
+  dayInEnglish: EnglishDayOfWeek,
 ): string => {
   const translationMap: Record<EnglishDayOfWeek, string> = {
     Sunday: "Dom",
@@ -82,7 +82,7 @@ export const translateDayOptionsToSpanish = (value: string): string => {
 };
 
 export const translateMonthToAbrevSpanish = (
-  monthInEnglish: EnglishAbrevMonthOfYear
+  monthInEnglish: EnglishAbrevMonthOfYear,
 ): string => {
   const translationMap: Record<EnglishAbrevMonthOfYear, string> = {
     Jan: "Ene",
@@ -126,7 +126,7 @@ export const getMonthName = (month: number) => {
 };
 
 export const translatePeriodToSpanish = (
-  period: "weekly" | "biweekly" | "monthly"
+  period: "weekly" | "biweekly" | "monthly",
 ): string => {
   switch (period) {
     case "weekly":

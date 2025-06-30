@@ -4,6 +4,6 @@ export interface Role {
   id: number;
   name: string;
   permissions?: Permission[];
-  permissionIds?: number[],
+  permissionIds?: number[];
   permissionNames?: string[];
 }

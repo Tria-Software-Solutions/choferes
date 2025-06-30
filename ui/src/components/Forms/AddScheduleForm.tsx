@@ -1,4 +1,4 @@
-import React, { useState, useCallback, useEffect } from 'react';
+import React, { useState, useCallback, useEffect } from "react";
 import {
   Grid,
   Box,
@@ -17,19 +17,19 @@ import {
   useTheme,
   useMediaQuery,
   InputAdornment,
-} from '@mui/material';
-import { Schedule } from '../../models/Schedule';
-import { DAYS_LIST } from '../../constants/constants';
-import { translateDayOptionsToSpanish } from '../../utils/string';
-import AddRoundedIcon from '@mui/icons-material/AddRounded';
-import CloseRoundedIcon from '@mui/icons-material/CloseRounded';
-import CustomTextField from '../Textfield/CustomTextField';
-import CalendarMonthOutlinedIcon from '@mui/icons-material/CalendarMonthOutlined';
-import AccessTimeOutlinedIcon from '@mui/icons-material/AccessTimeOutlined';
-import WarningAmberOutlinedIcon from '@mui/icons-material/WarningAmberOutlined';
+} from "@mui/material";
+import { Schedule } from "../../models/Schedule";
+import { DAYS_LIST } from "../../constants/constants";
+import { translateDayOptionsToSpanish } from "../../utils/string";
+import AddRoundedIcon from "@mui/icons-material/AddRounded";
+import CloseRoundedIcon from "@mui/icons-material/CloseRounded";
+import CustomTextField from "../Textfield/CustomTextField";
+import CalendarMonthOutlinedIcon from "@mui/icons-material/CalendarMonthOutlined";
+import AccessTimeOutlinedIcon from "@mui/icons-material/AccessTimeOutlined";
+import WarningAmberOutlinedIcon from "@mui/icons-material/WarningAmberOutlined";
 
 interface AddScheduleFormProps {
-  onSubmit: (schedule: Omit<Schedule, 'id'>) => void;
+  onSubmit: (schedule: Omit<Schedule, "id">) => void;
   onCancel?: () => void;
   isLoading?: boolean;
 }
@@ -41,7 +41,7 @@ const AddScheduleForm: React.FC<AddScheduleFormProps> = ({
 }) => {
   const theme = useTheme();
   const isSmallScreen = useMediaQuery(theme.breakpoints.down("sm"));
-  
+
   const [formData, setFormData] = useState<{
     label: string;
     days: string[];
@@ -62,9 +62,13 @@ const AddScheduleForm: React.FC<AddScheduleFormProps> = ({
       time: /^[0-9]+$/,
     };
 
-    const isLabelValid = fields.label.trim().length > 0 && regex.text.test(fields.label);
-    const isHoursValid = fields.hours.length > 0 && regex.time.test(fields.hours) && 
-                        parseInt(fields.hours) > 0 && parseInt(fields.hours) <= 24;
+    const isLabelValid =
+      fields.label.trim().length > 0 && regex.text.test(fields.label);
+    const isHoursValid =
+      fields.hours.length > 0 &&
+      regex.time.test(fields.hours) &&
+      parseInt(fields.hours) > 0 &&
+      parseInt(fields.hours) <= 24;
     const isDaysValid = fields.days.length > 0;
 
     return isLabelValid && isHoursValid && isDaysValid;
@@ -76,7 +80,7 @@ const AddScheduleForm: React.FC<AddScheduleFormProps> = ({
 
   const handleSubmit = () => {
     if (isFormValid) {
-      const newSchedule: Omit<Schedule, 'id'> = {
+      const newSchedule: Omit<Schedule, "id"> = {
         label: formData.label,
         days: formData.days,
         hours: parseInt(formData.hours, 10),
@@ -91,7 +95,7 @@ const AddScheduleForm: React.FC<AddScheduleFormProps> = ({
   };
 
   return (
-    <Box sx={{ width: '100%', p: 0 }}>
+    <Box sx={{ width: "100%", p: 0 }}>
       <Grid container spacing={3} sx={{ mt: 0 }}>
         <Grid item xs={12} sm={6}>
           <CustomTextField
@@ -103,7 +107,11 @@ const AddScheduleForm: React.FC<AddScheduleFormProps> = ({
             onChange={(e) =>
               setFormData({ ...formData, label: e.target.value })
             }
-            icon={<CalendarMonthOutlinedIcon sx={{ color: theme.palette.text.secondary }} />}
+            icon={
+              <CalendarMonthOutlinedIcon
+                sx={{ color: theme.palette.text.secondary }}
+              />
+            }
           />
         </Grid>
 
@@ -118,13 +126,25 @@ const AddScheduleForm: React.FC<AddScheduleFormProps> = ({
             onChange={(e) =>
               setFormData({ ...formData, hours: e.target.value })
             }
-            error={formData.hours.length > 0 && (!/^[0-9]+$/.test(formData.hours) || parseInt(formData.hours) <= 0 || parseInt(formData.hours) > 24)}
+            error={
+              formData.hours.length > 0 &&
+              (!/^[0-9]+$/.test(formData.hours) ||
+                parseInt(formData.hours) <= 0 ||
+                parseInt(formData.hours) > 24)
+            }
             helperText={
-              formData.hours.length > 0 && (!/^[0-9]+$/.test(formData.hours) || parseInt(formData.hours) <= 0 || parseInt(formData.hours) > 24)
+              formData.hours.length > 0 &&
+              (!/^[0-9]+$/.test(formData.hours) ||
+                parseInt(formData.hours) <= 0 ||
+                parseInt(formData.hours) > 24)
                 ? "Ingrese un número válido entre 1 y 24"
                 : ""
             }
-            icon={<AccessTimeOutlinedIcon sx={{ color: theme.palette.text.secondary }} />}
+            icon={
+              <AccessTimeOutlinedIcon
+                sx={{ color: theme.palette.text.secondary }}
+              />
+            }
             endAdornment={
               <Box sx={{ ml: 1, color: theme.palette.text.secondary }}>
                 horas
@@ -134,24 +154,28 @@ const AddScheduleForm: React.FC<AddScheduleFormProps> = ({
         </Grid>
 
         <Grid item xs={12}>
-          <FormControl variant="outlined" fullWidth sx={{
-            '& .MuiOutlinedInput-root, & .MuiSelect-select': {
-              backgroundColor: '#fff',
-              borderRadius: 2,
-              '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
-                borderColor: '#000',
-                borderWidth: 2,
+          <FormControl
+            variant="outlined"
+            fullWidth
+            sx={{
+              "& .MuiOutlinedInput-root, & .MuiSelect-select": {
+                backgroundColor: "#fff",
+                borderRadius: 2,
+                "&.Mui-focused .MuiOutlinedInput-notchedOutline": {
+                  borderColor: "#000",
+                  borderWidth: 2,
+                },
+                "&:hover .MuiOutlinedInput-notchedOutline": {
+                  borderColor: "#000",
+                },
+                "&.Mui-focused": {
+                  backgroundColor: "#fff",
+                  outline: "none",
+                  boxShadow: "none",
+                },
               },
-              '&:hover .MuiOutlinedInput-notchedOutline': {
-                borderColor: '#000',
-              },
-              '&.Mui-focused': {
-                backgroundColor: '#fff',
-                outline: 'none',
-                boxShadow: 'none',
-              },
-            },
-          }}>
+            }}
+          >
             <InputLabel>Días de Trabajo</InputLabel>
             <Select
               multiple
@@ -162,13 +186,15 @@ const AddScheduleForm: React.FC<AddScheduleFormProps> = ({
                   label="Días de Trabajo"
                   startAdornment={
                     <InputAdornment position="start">
-                      <CalendarMonthOutlinedIcon sx={{ color: theme.palette.text.secondary }} />
+                      <CalendarMonthOutlinedIcon
+                        sx={{ color: theme.palette.text.secondary }}
+                      />
                     </InputAdornment>
                   }
                 />
               }
               renderValue={(selected) => (
-                <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
+                <Box sx={{ display: "flex", flexWrap: "wrap", gap: 0.5 }}>
                   {selected.map((value) => (
                     <Box
                       key={value}
@@ -178,7 +204,7 @@ const AddScheduleForm: React.FC<AddScheduleFormProps> = ({
                         px: 1,
                         py: 0.5,
                         borderRadius: 1,
-                        fontSize: 'clamp(0.625rem, 1vw, 0.75rem)',
+                        fontSize: "clamp(0.625rem, 1vw, 0.75rem)",
                         fontWeight: 500,
                       }}
                     >
@@ -199,28 +225,29 @@ const AddScheduleForm: React.FC<AddScheduleFormProps> = ({
             >
               {DAYS_LIST.map((option) => (
                 <MenuItem key={option.value} value={option.value}>
-                  <Checkbox
-                    checked={formData.days.includes(option.value)}
-                  />
-                  <ListItemText 
+                  <Checkbox checked={formData.days.includes(option.value)} />
+                  <ListItemText
                     primary={option.label}
                     primaryTypographyProps={{
-                      sx: { 
+                      sx: {
                         fontWeight: 500,
-                        fontSize: 'clamp(0.75rem, 1.25vw, 0.875rem)',
-                      }
+                        fontSize: "clamp(0.75rem, 1.25vw, 0.875rem)",
+                      },
                     }}
                   />
                 </MenuItem>
               ))}
             </Select>
             {formData.days.length === 0 && (
-              <Typography variant="caption" sx={{ 
-                mt: 0.5, 
-                display: 'block',
-                color: theme.palette.error.main,
-                fontSize: 'clamp(0.625rem, 1vw, 0.75rem)',
-              }}>
+              <Typography
+                variant="caption"
+                sx={{
+                  mt: 0.5,
+                  display: "block",
+                  color: theme.palette.error.main,
+                  fontSize: "clamp(0.625rem, 1vw, 0.75rem)",
+                }}
+              >
                 Seleccione al menos un día
               </Typography>
             )}
@@ -230,17 +257,21 @@ const AddScheduleForm: React.FC<AddScheduleFormProps> = ({
         <Grid item xs={12}>
           <Box
             sx={{
-              display: 'flex',
-              alignItems: 'center',
+              display: "flex",
+              alignItems: "center",
               p: { xs: 1.5, sm: 2 },
               backgroundColor: theme.palette.action.hover,
               borderRadius: 1,
-              border: '1px solid',
+              border: "1px solid",
               borderColor: theme.palette.divider,
             }}
           >
-            <Box sx={{ mr: { xs: 1, sm: 2 }, color: theme.palette.warning.main }}>
-              <WarningAmberOutlinedIcon sx={{ color: theme.palette.warning.main, mr: { xs: 1, sm: 2 } }} />
+            <Box
+              sx={{ mr: { xs: 1, sm: 2 }, color: theme.palette.warning.main }}
+            >
+              <WarningAmberOutlinedIcon
+                sx={{ color: theme.palette.warning.main, mr: { xs: 1, sm: 2 } }}
+              />
             </Box>
             <FormGroup>
               <FormControlLabel
@@ -257,18 +288,25 @@ const AddScheduleForm: React.FC<AddScheduleFormProps> = ({
                 }
                 label={
                   <Box>
-                    <Typography variant="body1" sx={{ 
-                      fontWeight: 600,
-                      color: theme.palette.text.primary,
-                      fontSize: 'clamp(0.875rem, 1.5vw, 1rem)',
-                    }}>
+                    <Typography
+                      variant="body1"
+                      sx={{
+                        fontWeight: 600,
+                        color: theme.palette.text.primary,
+                        fontSize: "clamp(0.875rem, 1.5vw, 1rem)",
+                      }}
+                    >
                       Horario Especial
                     </Typography>
-                    <Typography variant="caption" sx={{
-                      color: theme.palette.text.secondary,
-                      fontSize: 'clamp(0.75rem, 1.25vw, 0.875rem)',
-                    }}>
-                      Marque esta opción si es un horario con condiciones especiales
+                    <Typography
+                      variant="caption"
+                      sx={{
+                        color: theme.palette.text.secondary,
+                        fontSize: "clamp(0.75rem, 1.25vw, 0.875rem)",
+                      }}
+                    >
+                      Marque esta opción si es un horario con condiciones
+                      especiales
                     </Typography>
                   </Box>
                 }
@@ -280,12 +318,12 @@ const AddScheduleForm: React.FC<AddScheduleFormProps> = ({
         <Grid item xs={12}>
           <Box
             sx={{
-              display: 'flex',
-              flexDirection: { xs: 'column', sm: 'row' },
-              justifyContent: 'space-between',
+              display: "flex",
+              flexDirection: { xs: "column", sm: "row" },
+              justifyContent: "space-between",
               gap: { xs: 1, sm: 2 },
               pt: 2,
-              borderTop: '1px solid',
+              borderTop: "1px solid",
               borderColor: theme.palette.divider,
             }}
           >
@@ -296,18 +334,18 @@ const AddScheduleForm: React.FC<AddScheduleFormProps> = ({
               fullWidth={isSmallScreen}
               sx={{
                 minHeight: { xs: 44, sm: 48 },
-                fontSize: 'clamp(0.75rem, 1.25vw, 0.875rem)',
+                fontSize: "clamp(0.75rem, 1.25vw, 0.875rem)",
                 order: { xs: 3, sm: 1 },
               }}
             >
               Limpiar
             </Button>
-            <Box 
-              sx={{ 
-                display: 'flex', 
-                flexDirection: { xs: 'column', sm: 'row' },
+            <Box
+              sx={{
+                display: "flex",
+                flexDirection: { xs: "column", sm: "row" },
                 gap: { xs: 1, sm: 2 },
-                width: { xs: '100%', sm: 'auto' },
+                width: { xs: "100%", sm: "auto" },
                 order: { xs: 1, sm: 2 },
               }}
             >
@@ -319,7 +357,7 @@ const AddScheduleForm: React.FC<AddScheduleFormProps> = ({
                   fullWidth={isSmallScreen}
                   sx={{
                     minHeight: { xs: 44, sm: 48 },
-                    fontSize: 'clamp(0.75rem, 1.25vw, 0.875rem)',
+                    fontSize: "clamp(0.75rem, 1.25vw, 0.875rem)",
                   }}
                 >
                   Cancelar
@@ -333,13 +371,13 @@ const AddScheduleForm: React.FC<AddScheduleFormProps> = ({
                 fullWidth={isSmallScreen}
                 sx={{
                   minHeight: { xs: 44, sm: 48 },
-                  fontSize: 'clamp(0.75rem, 1.25vw, 0.875rem)',
+                  fontSize: "clamp(0.75rem, 1.25vw, 0.875rem)",
                   fontWeight: 600,
                   px: { xs: 2, sm: 4 },
                   py: { xs: 1, sm: 1.5 },
                 }}
               >
-                {isLoading ? 'Agregando...' : 'Agregar'}
+                {isLoading ? "Agregando..." : "Agregar"}
               </Button>
             </Box>
           </Box>
@@ -349,4 +387,4 @@ const AddScheduleForm: React.FC<AddScheduleFormProps> = ({
   );
 };
 
-export default AddScheduleForm; 
+export default AddScheduleForm;
