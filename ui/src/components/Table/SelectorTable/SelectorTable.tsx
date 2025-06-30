@@ -685,26 +685,26 @@ const SelectorTable: React.FC<SelectorTableProps> = React.memo(
                                 color: "#ffffff",
                                 borderRadius: '8px',
                                 '& .MuiOutlinedInput-notchedOutline': {
-                                  borderColor: "#ffffff",
-                                  borderWidth: 1,
+                                  borderColor: "transparent",
+                                  borderWidth: 0,
                                   borderRadius: '8px',
                                 },
                                 '&:hover .MuiOutlinedInput-notchedOutline': {
-                                  borderColor: "#e0e0e0",
-                                  borderWidth: 1,
+                                  borderColor: "transparent",
+                                  borderWidth: 0,
                                   backgroundColor: "transparent !important",
                                 },
                                 '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
-                                  borderColor: "#ffffff",
-                                  borderWidth: 2,
+                                  borderColor: "transparent",
+                                  borderWidth: 0,
                                 },
                                 '&.Mui-focused': {
                                   backgroundColor: "transparent !important",
                                   color: "#ffffff",
                                 },
                                 '&.Mui-active .MuiOutlinedInput-notchedOutline': {
-                                  borderColor: "#ffffff",
-                                  borderWidth: 1,
+                                  borderColor: "transparent",
+                                  borderWidth: 0,
                                 },
                                 '&.Mui-focused .MuiOutlinedInput-input': {
                                   backgroundColor: "transparent !important",
