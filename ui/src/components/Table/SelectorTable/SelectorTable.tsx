@@ -25,7 +25,6 @@ import {
   useTheme,
   useMediaQuery,
   Typography,
-  Tab,
   SelectChangeEvent,
   Badge,
   Tooltip,
@@ -36,10 +35,8 @@ import {
   InputAdornment,
   IconButton,
   Dialog,
-  DialogContent,
-  Avatar,
+  Grid,
 } from "@mui/material";
-import { TabContext, TabList, TabPanel } from "@mui/lab";
 import PaginationActions from "../Pagination/PaginationActions";
 import {
   formatDate,
@@ -66,7 +63,6 @@ import { STATE, TABLE, PERMISSIONS } from "../../../constants/constants";
 import InfoOutlinedIcon from "@mui/icons-material/InfoOutlined";
 import AccessTimeRoundedIcon from "@mui/icons-material/AccessTimeRounded";
 import MoreTimeIcon from "@mui/icons-material/MoreTime";
-import DialogComponent from '../../Dialog/DialogComponent';
 import CloseRoundedIcon from "@mui/icons-material/CloseRounded";
 
 interface SelectorTableProps {
@@ -116,7 +112,6 @@ const SelectorTable: React.FC<SelectorTableProps> = React.memo(
     const [selectedPeriod, setSelectedPeriod] = useState<
       "weekly" | "biweekly" | "monthly"
     >("weekly");
-    const [tabValue, setTabValue] = React.useState('0');
     const [timeAdjustment, setTimeAdjustment] = useState(0);
     const [orderDirection, setOrderDirection] = useState<"asc" | "desc">("asc");
     const [page, setPage] = useState(0);
@@ -240,10 +235,6 @@ const SelectorTable: React.FC<SelectorTableProps> = React.memo(
         : hasMultipleYears(currentWeek) || hasMultipleMonths(currentWeek)
         ? resultHoursForPeriods(employee, selectedPeriod, "overtime")
         : resultHoursForPeriod(employee, selectedPeriod, "overtime");
-    };
-
-    const handleTabChange = (event: React.SyntheticEvent, newValue: string) => {
-      setTabValue(newValue);
     };
 
     const hasWorkedCurrentWeek = (employee: Employee): boolean => {
@@ -854,117 +845,148 @@ const SelectorTable: React.FC<SelectorTableProps> = React.memo(
           </Box>
         </Paper>
         {openAdjustDialogEmployee && (
-          <DialogComponent
-            open={!!openAdjustDialogEmployee}
-            onClose={() => setOpenAdjustDialogEmployee(null)}
-            paperSx={{ maxWidth: 420, borderRadius: 3, boxShadow: 12, p: 0, overflow: 'hidden' }}
-            header={
-              <Box sx={{ background: theme.palette.primary.main, p: 3, borderTopLeftRadius: 12, borderTopRightRadius: 12 }}>
-                <Box display="flex" alignItems="center" gap={2}>
-                  <Avatar sx={{ bgcolor: '#fff' }}>
-                    <AccessTimeRoundedIcon color="primary" />
-                  </Avatar>
-                  <Box>
-                    <Typography variant="h5" color="white" fontWeight={700}>
-                      {openAdjustDialogEmployee.firstName} {openAdjustDialogEmployee.lastName}
-                    </Typography>
-                    <Typography variant="subtitle2" color="white" fontWeight={400}>
-                      Ajuste de Horas
-                    </Typography>
-                  </Box>
-                  <Box flexGrow={1} />
-                  <IconButton onClick={() => setOpenAdjustDialogEmployee(null)} sx={{ color: '#fff' }}>
-                    <CloseRoundedIcon />
-                  </IconButton>
-                </Box>
-              </Box>
-            }
-            actions={
-              <Box sx={{
-                display: 'flex',
-                flexDirection: { xs: 'column', sm: 'row' },
-                gap: 2,
-                pt: 2,
-                bgcolor: 'background.paper',
-                borderTop: '1px solid',
-                borderColor: 'divider',
-                px: { xs: 2, sm: 3 },
-                pb: 3,
-              }}>
-                <Button
-                  variant="contained"
-                  color="primary"
-                  sx={{ fontWeight: 700, flex: 1, minHeight: 48, fontSize: '1rem', borderRadius: 2, boxShadow: 1, textTransform: 'none' }}
-                  onClick={() => {
-                    handleAdjustTime(openAdjustDialogEmployee.id, "sum", timeAdjustment);
-                    setOpenAdjustDialogEmployee(null);
-                  }}
-                  disabled={timeAdjustment <= 0}
-                >
-                  Sumar
-                </Button>
-                <Button
-                  variant="contained"
-                  color="secondary"
-                  sx={{ fontWeight: 700, flex: 1, minHeight: 48, fontSize: '1rem', borderRadius: 2, boxShadow: 1, textTransform: 'none' }}
-                  onClick={() => {
-                    handleAdjustTime(openAdjustDialogEmployee.id, "substract", timeAdjustment);
-                    setOpenAdjustDialogEmployee(null);
-                  }}
-                  disabled={timeAdjustment <= 0}
-                >
-                  Restar
-                </Button>
-                <Button
-                  variant="outlined"
-                  color="primary"
-                  sx={{ fontWeight: 500, flex: 1, minHeight: 48, fontSize: '1rem', borderRadius: 2, textTransform: 'none' }}
-                  onClick={() => setOpenAdjustDialogEmployee(null)}
-                >
-                  Cancelar
-                </Button>
-              </Box>
-            }
-            title=""
-          >
-            <Box sx={{ width: '100%', minHeight: 220, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', bgcolor: 'background.paper', p: { xs: 3, sm: 4 } }}>
-              <Box sx={{ width: '100%', maxWidth: 320, mx: 'auto', textAlign: 'center' }}>
-                <Typography variant="subtitle1" color="text.secondary" mb={1}>
-                  {selectedPeriod === "weekly"
-                    ? 'Total de horas trabajadas en la semana:'
-                    : selectedPeriod === "biweekly"
-                    ? 'Total de horas trabajadas en la quincena:'
-                    : 'Total de horas trabajadas en el mes:'}
+          <Dialog open={!!openAdjustDialogEmployee} onClose={() => setOpenAdjustDialogEmployee(null)} maxWidth="sm" fullWidth>
+            <Box sx={{ background: theme.palette.primary.main, color: '#fff', p: { xs: 3, sm: 4 }, borderTopLeftRadius: 2, borderTopRightRadius: 2, display: 'flex', alignItems: 'center', gap: 2 }}>
+              <Box>
+                <Typography variant="h5" fontWeight={700} color="#fff">
+                  Ajuste de Horas
                 </Typography>
-                <Typography variant="h3" color="primary" fontWeight={800} mb={2}>
-                  {selectedPeriod === "weekly"
-                    ? resultHoursForPeriod(openAdjustDialogEmployee, "weekly", "totalHours")
-                    : selectedPeriod === "biweekly"
-                    ? resultHoursForPeriod(openAdjustDialogEmployee, "biweekly", "totalHours")
-                    : resultHoursForPeriod(openAdjustDialogEmployee, "monthly", "totalHours")}
+                <Typography variant="subtitle2" color="#fff">
+                  {openAdjustDialogEmployee.firstName} {openAdjustDialogEmployee.lastName}
                 </Typography>
-                <TextField
-                  label="Horas a ajustar"
-                  variant="outlined"
-                  type="number"
-                  placeholder="0"
-                  value={timeAdjustment}
-                  onChange={(e) => setTimeAdjustment(Number(e.target.value))}
-                  sx={{ mt: 1, width: '100%', boxSizing: 'border-box' }}
-                  inputProps={{ min: 0 }}
-                  error={timeAdjustment < 0}
-                  helperText={timeAdjustment < 0 ? 'Debe ser un número positivo' : ' '}
-                  InputProps={{
-                    startAdornment: (
-                      <InputAdornment position="start">
-                        <AccessTimeRoundedIcon color={timeAdjustment < 0 ? 'error' : 'primary'} />
-                      </InputAdornment>
-                    ),
-                  }}
-                />
               </Box>
+              <Box flexGrow={1} />
+              <IconButton onClick={() => setOpenAdjustDialogEmployee(null)} sx={{ color: '#fff' }}>
+                <CloseRoundedIcon />
+              </IconButton>
             </Box>
-          </DialogComponent>
+            <Box sx={{ p: { xs: 2, sm: 3, md: 4 } }}>
+              <Grid container spacing={3}>
+                <Grid item xs={12}>
+                  <Typography variant="subtitle1" color="text.secondary" mb={1}>
+                    {selectedPeriod === "weekly"
+                      ? 'Total de horas trabajadas en la semana:'
+                      : selectedPeriod === "biweekly"
+                      ? 'Total de horas trabajadas en la quincena:'
+                      : 'Total de horas trabajadas en el mes:'}
+                  </Typography>
+                  <Typography variant="h3" color="primary" fontWeight={800} mb={2}>
+                    {selectedPeriod === "weekly"
+                      ? resultHoursForPeriod(openAdjustDialogEmployee, "weekly", "totalHours")
+                      : selectedPeriod === "biweekly"
+                      ? resultHoursForPeriod(openAdjustDialogEmployee, "biweekly", "totalHours")
+                      : resultHoursForPeriod(openAdjustDialogEmployee, "monthly", "totalHours")}
+                  </Typography>
+                  <TextField
+                    label="Horas a ajustar"
+                    variant="outlined"
+                    type="number"
+                    placeholder="0"
+                    value={timeAdjustment}
+                    onChange={(e) => setTimeAdjustment(Number(e.target.value))}
+                    sx={{ mt: 1, width: '100%', boxSizing: 'border-box' }}
+                    inputProps={{ min: 0 }}
+                    error={timeAdjustment < 0}
+                    helperText={timeAdjustment < 0 ? 'Debe ser un número positivo' : ' '}
+                    InputProps={{
+                      startAdornment: (
+                        <InputAdornment position="start">
+                          <AccessTimeRoundedIcon color={timeAdjustment < 0 ? 'error' : 'primary'} />
+                        </InputAdornment>
+                      ),
+                    }}
+                  />
+                </Grid>
+                <Grid item xs={12}>
+                  <Box
+                    sx={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      p: { xs: 1.5, sm: 2 },
+                      backgroundColor: theme.palette.action.hover,
+                      borderRadius: 1,
+                      border: '1px solid',
+                      borderColor: theme.palette.divider,
+                    }}
+                  >
+                    <Box sx={{ mr: { xs: 1, sm: 2 }, color: theme.palette.info.main }}>
+                      <InfoOutlinedIcon sx={{ color: theme.palette.info.main, mr: { xs: 1, sm: 2 } }} />
+                    </Box>
+                    <Box>
+                      <Box sx={{ fontWeight: 600, color: theme.palette.text.primary, mb: 0.5, fontSize: 'clamp(0.875rem, 1.5vw, 1rem)' }}>
+                        Información de Ajuste
+                      </Box>
+                      <Box sx={{ color: theme.palette.text.secondary, fontSize: 'clamp(0.75rem, 1.25vw, 0.875rem)' }}>
+                        Ingresa la cantidad de horas a sumar o restar. Solo se permiten valores positivos.
+                      </Box>
+                    </Box>
+                  </Box>
+                </Grid>
+                <Grid item xs={12}>
+                  <Box
+                    sx={{
+                      display: 'flex',
+                      flexDirection: { xs: 'column', sm: 'row' },
+                      justifyContent: 'space-between',
+                      gap: { xs: 1, sm: 2 },
+                      pt: 2,
+                      borderTop: '1px solid',
+                      borderColor: theme.palette.divider,
+                    }}
+                  >
+                    <Button
+                      variant="outlined"
+                      onClick={() => setOpenAdjustDialogEmployee(null)}
+                      fullWidth={isSmallScreen}
+                      sx={{
+                        minHeight: { xs: 44, sm: 48 },
+                        fontSize: 'clamp(0.75rem, 1.25vw, 0.875rem)',
+                      }}
+                    >
+                      Cancelar
+                    </Button>
+                    <Button
+                      variant="contained"
+                      onClick={() => {
+                        handleAdjustTime(openAdjustDialogEmployee.id, "sum", timeAdjustment);
+                        setOpenAdjustDialogEmployee(null);
+                      }}
+                      disabled={timeAdjustment <= 0}
+                      fullWidth={isSmallScreen}
+                      sx={{
+                        minHeight: { xs: 44, sm: 48 },
+                        fontSize: 'clamp(0.75rem, 1.25vw, 0.875rem)',
+                        fontWeight: 600,
+                        px: { xs: 2, sm: 4 },
+                        py: { xs: 1, sm: 1.5 },
+                      }}
+                    >
+                      Sumar
+                    </Button>
+                    <Button
+                      variant="contained"
+                      color="secondary"
+                      onClick={() => {
+                        handleAdjustTime(openAdjustDialogEmployee.id, "substract", timeAdjustment);
+                        setOpenAdjustDialogEmployee(null);
+                      }}
+                      disabled={timeAdjustment <= 0}
+                      fullWidth={isSmallScreen}
+                      sx={{
+                        minHeight: { xs: 44, sm: 48 },
+                        fontSize: 'clamp(0.75rem, 1.25vw, 0.875rem)',
+                        fontWeight: 600,
+                        px: { xs: 2, sm: 4 },
+                        py: { xs: 1, sm: 1.5 },
+                      }}
+                    >
+                      Restar
+                    </Button>
+                  </Box>
+                </Grid>
+              </Grid>
+            </Box>
+          </Dialog>
         )}
       </>
     );
