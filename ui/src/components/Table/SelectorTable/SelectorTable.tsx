@@ -64,6 +64,7 @@ import InfoOutlinedIcon from "@mui/icons-material/InfoOutlined";
 import AccessTimeRoundedIcon from "@mui/icons-material/AccessTimeRounded";
 import MoreTimeIcon from "@mui/icons-material/MoreTime";
 import CloseRoundedIcon from "@mui/icons-material/CloseRounded";
+import CalendarMonthOutlinedIcon from '@mui/icons-material/CalendarMonthOutlined';
 
 interface SelectorTableProps {
   filteredEmployees: Employee[];
@@ -265,6 +266,7 @@ const SelectorTable: React.FC<SelectorTableProps> = React.memo(
                 display: "flex",
                 justifyContent: "center",
                 alignItems: "center",
+                gap: 2,
               }}
             >
               {selectedPeriod === "weekly" ? (
@@ -370,27 +372,40 @@ const SelectorTable: React.FC<SelectorTableProps> = React.memo(
                         colSpan={2}
                       >
                         <FormControl size="small" sx={{
-                          '&.MuiFormControl-root': {
-                            backgroundColor: "transparent !important",
+                          minWidth: 120,
+                          backgroundColor: '#000',
+                          borderRadius: 2,
+                          '.MuiOutlinedInput-root': {
+                            borderRadius: 2,
+                            fontWeight: 700,
+                            fontSize: '1rem',
+                            color: '#fff',
+                            backgroundColor: '#000 !important',
+                            '& fieldset': {
+                              border: 'none',
+                            },
                           },
-                          '& .MuiFormControl-root': {
-                            backgroundColor: "transparent !important",
+                          '.MuiSelect-select': {
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: 1,
+                            fontWeight: 700,
+                            color: '#fff',
+                            backgroundColor: '#000 !important',
+                            pl: 0,
                           },
-                          '&.Mui-focused': {
-                            backgroundColor: "transparent !important",
-                          },
-                          '& .Mui-focused': {
-                            backgroundColor: "transparent !important",
+                          '.MuiSvgIcon-root': {
+                            color: '#fff',
                           },
                         }}>
-                          <InputLabel sx={{ 
-                            color: "#9e9e9e", 
-                            fontWeight: 600,
+                          <InputLabel sx={{
+                            color: theme.palette.text.disabled,
+                            fontWeight: 700,
                             '&.MuiInputLabel-shrink': {
-                              color: "#9e9e9e",
+                              color: theme.palette.text.disabled,
                             },
                             '&.Mui-focused': {
-                              color: "#9e9e9e",
+                              color: theme.palette.text.disabled,
                             },
                           }}>
                             Total
@@ -412,43 +427,17 @@ const SelectorTable: React.FC<SelectorTableProps> = React.memo(
                                 label="Total"
                                 startAdornment={
                                   <InputAdornment position="start">
-                                    {/* CalendarMonthOutlinedIcon */}
+                                    <CalendarMonthOutlinedIcon sx={{ color: '#fff', mr: 1 }} />
                                   </InputAdornment>
                                 }
                                 sx={{
-                                  backgroundColor: 'transparent',
-                                  border: 'none !important',
+                                  color: '#fff',
+                                  backgroundColor: '#000 !important',
+                                  borderRadius: 2,
+                                  fontWeight: 700,
+                                  fontSize: '1rem',
                                   '& .MuiOutlinedInput-notchedOutline': {
-                                    border: 'none !important',
-                                  },
-                                  '&:hover .MuiOutlinedInput-notchedOutline': {
-                                    border: 'none !important',
-                                  },
-                                  '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
-                                    border: 'none !important',
-                                  },
-                                  '&.Mui-focused': {
-                                    backgroundColor: "transparent !important",
-                                    color: "#ffffff",
-                                  },
-                                  '&.Mui-active .MuiOutlinedInput-notchedOutline': {
-                                    border: 'none !important',
-                                  },
-                                  '&.Mui-focused .MuiOutlinedInput-input': {
-                                    backgroundColor: "transparent !important",
-                                    color: "#ffffff !important",
-                                  },
-                                  '&.Mui-focused .MuiSelect-select': {
-                                    backgroundColor: "transparent !important",
-                                    color: "#ffffff !important",
-                                  },
-                                  '& .MuiOutlinedInput-input': {
-                                    backgroundColor: "transparent !important",
-                                    color: "#ffffff !important",
-                                  },
-                                  '& .MuiSelect-select': {
-                                    backgroundColor: "transparent !important",
-                                    color: "#ffffff !important",
+                                    border: 'none',
                                   },
                                 }}
                               />
@@ -456,70 +445,29 @@ const SelectorTable: React.FC<SelectorTableProps> = React.memo(
                             MenuProps={{
                               PaperProps: {
                                 sx: {
-                                  backgroundColor: theme.palette.background.paper,
-                                  color: theme.palette.text.primary,
-                                  border: "none",
-                                  borderRadius: '8px',
+                                  backgroundColor: '#000',
+                                  color: theme.palette.text.disabled,
+                                  borderRadius: 2,
                                   boxShadow: theme.shadows[8],
+                                  mt: 1,
                                   '& .MuiMenuItem-root': {
-                                    color: theme.palette.text.primary,
+                                    fontWeight: 600,
+                                    fontSize: '1rem',
+                                    color: theme.palette.text.disabled,
                                     '&:hover': {
-                                      backgroundColor: theme.palette.action.hover,
+                                      backgroundColor: theme.palette.grey[900],
+                                      color: '#fff',
                                     },
                                     '&.Mui-selected': {
                                       backgroundColor: theme.palette.primary.main,
-                                      color: theme.palette.primary.contrastText,
+                                      color: '#fff',
                                       '&:hover': {
                                         backgroundColor: theme.palette.primary.dark,
+                                        color: '#fff',
                                       },
                                     },
                                   },
                                 },
-                              },
-                            }}
-                            sx={{
-                              backgroundColor: 'transparent',
-                              border: 'none !important',
-                              '& .MuiSelect-select': {
-                                backgroundColor: 'transparent',
-                                color: "#ffffff",
-                                fontWeight: 600,
-                                border: 'none !important',
-                                '&:focus': {
-                                  backgroundColor: 'transparent',
-                                  color: "#ffffff",
-                                  border: 'none !important',
-                                },
-                              },
-                              '& .MuiInputLabel-root': {
-                                color: "#9e9e9e",
-                                fontWeight: 600,
-                                '&.Mui-focused': {
-                                  color: "#9e9e9e",
-                                },
-                                '&.MuiInputLabel-shrink': {
-                                  color: "#9e9e9e",
-                                  transform: 'translate(14px, -9px) scale(0.75)',
-                                },
-                              },
-                              '& .MuiSvgIcon-root': {
-                                color: "#ffffff",
-                              },
-                              '&:hover .MuiSelect-select': {
-                                backgroundColor: 'transparent',
-                                color: "#ffffff",
-                                border: 'none !important',
-                              },
-                              '&.Mui-focused .MuiSelect-select': {
-                                backgroundColor: 'transparent',
-                                color: "#ffffff",
-                                border: 'none !important',
-                              },
-                              '& .MuiOutlinedInput-root': {
-                                border: 'none !important',
-                              },
-                              '& .MuiOutlinedInput-notchedOutline': {
-                                border: 'none !important',
                               },
                             }}
                           >
@@ -615,10 +563,9 @@ const SelectorTable: React.FC<SelectorTableProps> = React.memo(
                                   PERMISSIONS.EDIT_EMPLOYEE_ROLES
                                 )
                               }
+                              input={<OutlinedInput notched={false} label="Ubicación" />}
                             >
-                              <ListSubheader>
-                                <strong>Ubicaciones</strong>
-                              </ListSubheader>
+                              <ListSubheader><strong>Ubicaciones</strong></ListSubheader>
                               {options
                                 .filter((option) => !option.specialSchedule)
                                 .sort((a, b) => a.label.localeCompare(b.label))
@@ -628,9 +575,7 @@ const SelectorTable: React.FC<SelectorTableProps> = React.memo(
                                   </MenuItem>
                                 ))}
                               <Divider />
-                              <ListSubheader>
-                                <strong>Horarios Especiales</strong>
-                              </ListSubheader>
+                              <ListSubheader><strong>Horarios Especiales</strong></ListSubheader>
                               {options
                                 .filter((option) => option.specialSchedule)
                                 .sort((a, b) => a.label.localeCompare(b.label))
@@ -643,20 +588,11 @@ const SelectorTable: React.FC<SelectorTableProps> = React.memo(
                               {permissions?.includes(
                                 PERMISSIONS.CREATE_SCHEDULES
                               ) && (
-                                <>
-                                  <MenuItem
-                                    value={"Other"}
-                                  >
-                                    <Box
-                                      display="flex"
-                                      justifyContent="space-between"
-                                      width="100%"
-                                      alignItems="center"
-                                    >
-                                      Otro
-                                    </Box>
-                                  </MenuItem>
-                                </>
+                                <MenuItem value={"Other"}>
+                                  <Box display="flex" justifyContent="space-between" width="100%" alignItems="center">
+                                    Otro
+                                  </Box>
+                                </MenuItem>
                               )}
                             </Select>
                           </FormControl>
