@@ -640,12 +640,13 @@ const SelectorTable: React.FC<SelectorTableProps> = React.memo(
                         position: isSmallScreen ? "static" : "sticky",
                         right: 0,
                         zIndex: 3,
-                        backgroundColor: '#000',
+                        backgroundColor: "#000000",
+                        borderLeft: "1px solid #333",
                       }}
                       colSpan={2}
                     >
-                      <FormControl>
-                        <InputLabel sx={{ color: '#fff' }}>Total</InputLabel>
+                      <FormControl size="small">
+                        <InputLabel sx={{ color: "#ffffff", fontWeight: 600 }}>Total</InputLabel>
                         <Select
                           value={selectedPeriod}
                           onChange={(e) =>
@@ -663,35 +664,34 @@ const SelectorTable: React.FC<SelectorTableProps> = React.memo(
                               label="Total"
                               startAdornment={
                                 <InputAdornment position="start">
-                                  <CalendarMonthOutlinedIcon sx={{ color: '#fff' }} />
+                                  <CalendarMonthOutlinedIcon sx={{ color: "#ffffff" }} />
                                 </InputAdornment>
                               }
                               sx={{
-                                backgroundColor: 'transparent',
-                                color: '#fff',
-                                borderRadius: '16px',
+                                backgroundColor: "transparent",
+                                color: "#ffffff",
+                                borderRadius: '8px',
                                 '& .MuiOutlinedInput-notchedOutline': {
-                                  borderColor: '#fff',
-                                  borderWidth: 2,
-                                  borderRadius: '16px',
+                                  borderColor: "#ffffff",
+                                  borderWidth: 1,
+                                  borderRadius: '8px',
                                 },
                                 '&:hover .MuiOutlinedInput-notchedOutline': {
-                                  borderColor: '#fff',
-                                  backgroundColor: '#000',
+                                  borderColor: "#ffffff",
+                                  borderWidth: 1,
+                                  backgroundColor: "transparent",
                                 },
                                 '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
-                                  borderColor: '#fff',
-                                  backgroundColor: '#000',
+                                  borderColor: "#ffffff",
+                                  borderWidth: 1,
                                 },
                                 '&.Mui-focused': {
-                                  backgroundColor: 'transparent',
-                                  color: '#fff',
-                                  outline: 'none',
-                                  boxShadow: 'none',
+                                  backgroundColor: "transparent",
+                                  color: "#ffffff",
                                 },
                                 '&.Mui-active .MuiOutlinedInput-notchedOutline': {
-                                  borderColor: '#fff',
-                                  backgroundColor: '#000',
+                                  borderColor: "#ffffff",
+                                  borderWidth: 1,
                                 },
                               }}
                             />
@@ -699,17 +699,21 @@ const SelectorTable: React.FC<SelectorTableProps> = React.memo(
                           MenuProps={{
                             PaperProps: {
                               sx: {
-                                backgroundColor: '#000',
-                                color: '#fff',
+                                backgroundColor: "#000000",
+                                color: "#ffffff",
+                                border: "1px solid #333",
+                                borderRadius: '8px',
+                                boxShadow: "0 4px 20px rgba(0,0,0,0.5)",
                                 '& .MuiMenuItem-root': {
-                                  color: '#fff',
+                                  color: "#ffffff",
                                   '&:hover': {
-                                    backgroundColor: '#333',
+                                    backgroundColor: "#333333",
                                   },
                                   '&.Mui-selected': {
-                                    backgroundColor: '#333',
+                                    backgroundColor: "#1976d2",
+                                    color: "#ffffff",
                                     '&:hover': {
-                                      backgroundColor: '#444',
+                                      backgroundColor: "#1565c0",
                                     },
                                   },
                                 },
@@ -720,14 +724,30 @@ const SelectorTable: React.FC<SelectorTableProps> = React.memo(
                             backgroundColor: 'transparent',
                             '& .MuiSelect-select': {
                               backgroundColor: 'transparent',
-                              color: '#fff',
-                              borderRadius: '16px',
+                              color: "#ffffff",
+                              fontWeight: 600,
+                              '&:focus': {
+                                backgroundColor: 'transparent',
+                                color: "#ffffff",
+                              },
                             },
                             '& .MuiInputLabel-root': {
-                              color: '#fff',
+                              color: "#ffffff",
+                              fontWeight: 600,
+                              '&.Mui-focused': {
+                                color: "#ffffff",
+                              },
                             },
                             '& .MuiSvgIcon-root': {
-                              color: '#fff',
+                              color: "#ffffff",
+                            },
+                            '&:hover .MuiSelect-select': {
+                              backgroundColor: 'transparent',
+                              color: "#ffffff",
+                            },
+                            '&.Mui-focused .MuiSelect-select': {
+                              backgroundColor: 'transparent',
+                              color: "#ffffff",
                             },
                           }}
                         >
