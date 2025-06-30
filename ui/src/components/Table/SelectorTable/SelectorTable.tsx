@@ -694,11 +694,21 @@ const SelectorTable: React.FC<SelectorTableProps> = React.memo(
                                 },
                                 '&:hover .MuiOutlinedInput-notchedOutline': {
                                   borderColor: '#fff',
+                                  backgroundColor: '#000',
+                                },
+                                '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
+                                  borderColor: '#fff',
+                                  backgroundColor: '#000',
                                 },
                                 '&.Mui-focused': {
                                   backgroundColor: 'transparent',
+                                  color: '#fff',
                                   outline: 'none',
                                   boxShadow: 'none',
+                                },
+                                '&.Mui-active .MuiOutlinedInput-notchedOutline': {
+                                  borderColor: '#fff',
+                                  backgroundColor: '#000',
                                 },
                               }}
                             />
