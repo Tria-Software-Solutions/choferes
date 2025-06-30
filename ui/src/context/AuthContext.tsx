@@ -12,7 +12,7 @@ interface AuthContextType {
     accessToken: string,
     refreshToken: string,
     user: User,
-    userPermissions: string[]
+    userPermissions: string[],
   ) => void;
   logout: () => void;
 }
@@ -44,7 +44,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     accessToken: string,
     refreshToken: string,
     currentUser: User,
-    userPermissions: string[]
+    userPermissions: string[],
   ) => {
     setAccessToken(accessToken);
     setRefreshToken(refreshToken);
@@ -80,7 +80,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         userPermissions,
         login,
         logout,
-        setUser
+        setUser,
       }}
     >
       {children}

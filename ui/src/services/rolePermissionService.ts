@@ -7,7 +7,7 @@ export const getRolePermissions = async () => {
 };
 
 export const createRolePermission = async (
-  newRolePermission: Omit<RolePermission, "id">
+  newRolePermission: Omit<RolePermission, "id">,
 ) => {
   const response = await api.post("/role-permission", newRolePermission);
   return response.data;
@@ -15,9 +15,11 @@ export const createRolePermission = async (
 
 export const updateRolePermission = async (
   roleId: number,
-  permissionIds: number[]
+  permissionIds: number[],
 ) => {
-  const response = await api.put(`/role-permission/${roleId}`, { permissionIds });
+  const response = await api.put(`/role-permission/${roleId}`, {
+    permissionIds,
+  });
   return response.data;
 };
 

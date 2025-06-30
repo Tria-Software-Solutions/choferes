@@ -26,7 +26,7 @@ export const useWeeklySummaries = () => {
       employeeId: number,
       weekNumber: number,
       month: number,
-      year: number
+      year: number,
     ) => {
       setIsLoadingWeeklySummaries(true);
       try {
@@ -34,7 +34,7 @@ export const useWeeklySummaries = () => {
           employeeId,
           weekNumber,
           month,
-          year
+          year,
         );
       } catch (error) {
         console.error("Error fetching current Weekly Summary", error);
@@ -42,7 +42,7 @@ export const useWeeklySummaries = () => {
         setIsLoadingWeeklySummaries(false);
       }
     },
-    []
+    [],
   );
 
   const hasWorkedCurrenWeeklySummary = useCallback(
@@ -50,7 +50,7 @@ export const useWeeklySummaries = () => {
       employeeId: number,
       weekNumber: number,
       month: number,
-      year: number
+      year: number,
     ) => {
       setIsLoadingWeeklySummaries(true);
       try {
@@ -58,7 +58,7 @@ export const useWeeklySummaries = () => {
           employeeId,
           weekNumber,
           month,
-          year
+          year,
         );
       } catch (error) {
         console.error("Error fetching current Weekly Summary", error);
@@ -66,35 +66,34 @@ export const useWeeklySummaries = () => {
         setIsLoadingWeeklySummaries(false);
       }
     },
-    []
+    [],
   );
 
   const createWeeklySummary = async (
-    newWeeklySummary: Omit<WeeklySummary, "id">
+    newWeeklySummary: Omit<WeeklySummary, "id">,
   ) => {
-    const createdWeeklySummary = await WeeklySummaryService.createWeeklySummary(
-      newWeeklySummary
-    );
+    const createdWeeklySummary =
+      await WeeklySummaryService.createWeeklySummary(newWeeklySummary);
     setWeeklySummaries((prev) => [...prev, createdWeeklySummary]);
     setTotalCountWeeklySummaries((prev) => prev + 1);
   };
 
   const updateWeeklySummary = async (
     id: number,
-    updatedWeeklySummary: Partial<WeeklySummary>
+    updatedWeeklySummary: Partial<WeeklySummary>,
   ) => {
     await WeeklySummaryService.updateWeeklySummary(id, updatedWeeklySummary);
     setWeeklySummaries((prev) =>
       prev.map((weeklySummary) =>
         weeklySummary.id === id
           ? { ...weeklySummary, ...updatedWeeklySummary }
-          : weeklySummary
-      )
+          : weeklySummary,
+      ),
     );
   };
 
   const createOrUpdateWeeklySummary = async (
-    newWeeklySummary: Omit<WeeklySummary, "id"> | WeeklySummary
+    newWeeklySummary: Omit<WeeklySummary, "id"> | WeeklySummary,
   ) => {
     if ("id" in newWeeklySummary) {
       await updateWeeklySummary(newWeeklySummary.id, newWeeklySummary);
@@ -106,7 +105,7 @@ export const useWeeklySummaries = () => {
   const deleteWeeklySummary = async (id: number) => {
     await WeeklySummaryService.deleteWeeklySummary(id);
     setWeeklySummaries((prev) =>
-      prev.filter((weeklySummary) => weeklySummary.id !== id)
+      prev.filter((weeklySummary) => weeklySummary.id !== id),
     );
     setTotalCountWeeklySummaries((prev) => prev - 1);
   };

@@ -8,7 +8,7 @@ interface PaginationActionsProps {
   rowsPerPage: number;
   onPageChange: (
     event: React.MouseEvent<HTMLButtonElement> | null,
-    newPage: number
+    newPage: number,
   ) => void;
 }
 
@@ -31,7 +31,7 @@ const PaginationActions: React.FC<PaginationActionsProps> = ({
         alignItems: "center",
         gap: "10px",
         whiteSpace: "nowrap",
-        padding: isSmallScreen ? "0" : "10px"
+        padding: isSmallScreen ? "0" : "10px",
       }}
     >
       {!isSmallScreen && (

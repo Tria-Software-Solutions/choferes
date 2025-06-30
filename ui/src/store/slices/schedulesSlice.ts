@@ -24,17 +24,22 @@ export const fetchSchedules = createAsyncThunk(
       const response = await ScheduleService.getSchedules();
       if (Array.isArray(response)) {
         return response;
-      } else if (response && typeof response === 'object' && 'schedules' in response && Array.isArray((response as any).schedules)) {
+      } else if (
+        response &&
+        typeof response === "object" &&
+        "schedules" in response &&
+        Array.isArray((response as any).schedules)
+      ) {
         return (response as any).schedules;
       } else {
         return [];
       }
     } catch (error: any) {
       return rejectWithValue(
-        error.response?.data || "Failed to fetch schedules"
+        error.response?.data || "Failed to fetch schedules",
       );
     }
-  }
+  },
 );
 
 export const createSchedule = createAsyncThunk(
@@ -45,27 +50,27 @@ export const createSchedule = createAsyncThunk(
       return createdSchedule;
     } catch (error: any) {
       return rejectWithValue(
-        error.response?.data || "Failed to create schedule"
+        error.response?.data || "Failed to create schedule",
       );
     }
-  }
+  },
 );
 
 export const updateSchedule = createAsyncThunk(
   "schedules/updateSchedule",
   async (
     args: { id: number; updatedSchedule: Partial<Schedule> },
-    { rejectWithValue }
+    { rejectWithValue },
   ) => {
     try {
       await ScheduleService.updateSchedule(args.id, args.updatedSchedule);
       return { id: args.id, updatedSchedule: args.updatedSchedule };
     } catch (error: any) {
       return rejectWithValue(
-        error.response?.data || "Failed to update schedule"
+        error.response?.data || "Failed to update schedule",
       );
     }
-  }
+  },
 );
 
 export const deleteSchedule = createAsyncThunk(
@@ -76,10 +81,10 @@ export const deleteSchedule = createAsyncThunk(
       return id;
     } catch (error: any) {
       return rejectWithValue(
-        error.response?.data || "Failed to delete schedule"
+        error.response?.data || "Failed to delete schedule",
       );
     }
-  }
+  },
 );
 
 const schedulesSlice = createSlice({
@@ -98,7 +103,7 @@ const schedulesSlice = createSlice({
           state.schedules = action.payload;
           state.totalCountSchedules = action.payload.length;
           state.isLoadingSchedules = false;
-        }
+        },
       )
       .addCase(fetchSchedules.rejected, (state, action) => {
         state.isLoadingSchedules = false;
@@ -110,7 +115,7 @@ const schedulesSlice = createSlice({
         (state, action: PayloadAction<Schedule>) => {
           state.schedules.push(action.payload);
           state.totalCountSchedules += 1;
-        }
+        },
       )
       .addCase(
         updateSchedule.fulfilled,
@@ -119,23 +124,23 @@ const schedulesSlice = createSlice({
           action: PayloadAction<{
             id: number;
             updatedSchedule: Partial<Schedule>;
-          }>
+          }>,
         ) => {
           const { id, updatedSchedule } = action.payload;
           const updatedSchedules = state.schedules.map((schedule) =>
-            schedule.id === id ? { ...schedule, ...updatedSchedule } : schedule
+            schedule.id === id ? { ...schedule, ...updatedSchedule } : schedule,
           );
           state.schedules = updatedSchedules;
-        }
+        },
       )
       .addCase(
         deleteSchedule.fulfilled,
         (state, action: PayloadAction<number>) => {
           state.schedules = state.schedules.filter(
-            (schedule) => schedule.id !== action.payload
+            (schedule) => schedule.id !== action.payload,
           );
           state.totalCountSchedules -= 1;
-        }
+        },
       );
   },
 });

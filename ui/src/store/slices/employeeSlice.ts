@@ -31,10 +31,10 @@ export const fetchEmployees = createAsyncThunk(
       }
     } catch (error: any) {
       return rejectWithValue(
-        error.response?.data || "Failed to fetch employees"
+        error.response?.data || "Failed to fetch employees",
       );
     }
-  }
+  },
 );
 
 export const createEmployee = createAsyncThunk(
@@ -45,27 +45,27 @@ export const createEmployee = createAsyncThunk(
       return createdEmployee;
     } catch (error: any) {
       return rejectWithValue(
-        error.response?.data || "Failed to create employee"
+        error.response?.data || "Failed to create employee",
       );
     }
-  }
+  },
 );
 
 export const updateEmployee = createAsyncThunk(
   "employees/updateEmployee",
   async (
     { id, updatedEmployee }: { id: number; updatedEmployee: Partial<Employee> },
-    { rejectWithValue }
+    { rejectWithValue },
   ) => {
     try {
       await EmployeeService.updateEmployee(id, updatedEmployee);
       return { id, updatedEmployee };
     } catch (error: any) {
       return rejectWithValue(
-        error.response?.data || "Failed to update employee"
+        error.response?.data || "Failed to update employee",
       );
     }
-  }
+  },
 );
 
 export const deleteEmployee = createAsyncThunk(
@@ -76,10 +76,10 @@ export const deleteEmployee = createAsyncThunk(
       return id;
     } catch (error: any) {
       return rejectWithValue(
-        error.response?.data || "Failed to delete employee"
+        error.response?.data || "Failed to delete employee",
       );
     }
-  }
+  },
 );
 
 const employeeSlice = createSlice({
@@ -98,7 +98,7 @@ const employeeSlice = createSlice({
           state.employees = action.payload;
           state.totalCountEmployees = action.payload.length;
           state.isLoadingEmployees = false;
-        }
+        },
       )
       .addCase(fetchEmployees.rejected, (state, action) => {
         state.isLoadingEmployees = false;
@@ -110,7 +110,7 @@ const employeeSlice = createSlice({
         (state, action: PayloadAction<Employee>) => {
           state.employees.push(action.payload);
           state.totalCountEmployees += 1;
-        }
+        },
       )
       .addCase(
         updateEmployee.fulfilled,
@@ -119,22 +119,22 @@ const employeeSlice = createSlice({
           action: PayloadAction<{
             id: number;
             updatedEmployee: Partial<Employee>;
-          }>
+          }>,
         ) => {
           const { id, updatedEmployee } = action.payload;
           state.employees = state.employees.map((employee) =>
-            employee.id === id ? { ...employee, ...updatedEmployee } : employee
+            employee.id === id ? { ...employee, ...updatedEmployee } : employee,
           );
-        }
+        },
       )
       .addCase(
         deleteEmployee.fulfilled,
         (state, action: PayloadAction<number>) => {
           state.employees = state.employees.filter(
-            (employee) => employee.id !== action.payload
+            (employee) => employee.id !== action.payload,
           );
           state.totalCountEmployees -= 1;
-        }
+        },
       );
   },
 });

@@ -1,5 +1,5 @@
 export interface WeeklySummary {
-  id: number; 
+  id: number;
   employeeId: number;
   weekNumber: number;
   month: number;

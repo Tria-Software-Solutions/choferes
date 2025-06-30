@@ -24,9 +24,11 @@ export const fetchUserRoles = createAsyncThunk(
       const userRoles = await UserRoleService.getUserRoles();
       return userRoles;
     } catch (error: any) {
-      return rejectWithValue(error.response?.data || "Failed to fetch user roles");
+      return rejectWithValue(
+        error.response?.data || "Failed to fetch user roles",
+      );
     }
-  }
+  },
 );
 
 export const fetchUserRoleByUserId = createAsyncThunk(
@@ -36,9 +38,11 @@ export const fetchUserRoleByUserId = createAsyncThunk(
       const userRole = await UserRoleService.getUserRoleByUserId(userId);
       return userRole;
     } catch (error: any) {
-      return rejectWithValue(error.response?.data || "Failed to fetch user role by userId");
+      return rejectWithValue(
+        error.response?.data || "Failed to fetch user role by userId",
+      );
     }
-  }
+  },
 );
 
 export const fetchUserRoleByRoleId = createAsyncThunk(
@@ -48,9 +52,11 @@ export const fetchUserRoleByRoleId = createAsyncThunk(
       const userRole = await UserRoleService.getUserRoleByRoleId(roleId);
       return userRole;
     } catch (error: any) {
-      return rejectWithValue(error.response?.data || "Failed to fetch user role by roleId");
+      return rejectWithValue(
+        error.response?.data || "Failed to fetch user role by roleId",
+      );
     }
-  }
+  },
 );
 
 export const createUserRole = createAsyncThunk(
@@ -60,9 +66,11 @@ export const createUserRole = createAsyncThunk(
       const createdUserRole = await UserRoleService.createUserRole(newUserRole);
       return createdUserRole;
     } catch (error: any) {
-      return rejectWithValue(error.response?.data || "Failed to create user role");
+      return rejectWithValue(
+        error.response?.data || "Failed to create user role",
+      );
     }
-  }
+  },
 );
 
 export const updateUserRole = createAsyncThunk(
@@ -72,9 +80,11 @@ export const updateUserRole = createAsyncThunk(
       await UserRoleService.updateUserRole(args.userId, args.roleId);
       return args;
     } catch (error: any) {
-      return rejectWithValue(error.response?.data || "Failed to update user role");
+      return rejectWithValue(
+        error.response?.data || "Failed to update user role",
+      );
     }
-  }
+  },
 );
 
 export const deleteUserRole = createAsyncThunk(
@@ -84,9 +94,11 @@ export const deleteUserRole = createAsyncThunk(
       await UserRoleService.deleteUserRole(id);
       return id;
     } catch (error: any) {
-      return rejectWithValue(error.response?.data || "Failed to delete user role");
+      return rejectWithValue(
+        error.response?.data || "Failed to delete user role",
+      );
     }
-  }
+  },
 );
 
 const userRolesSlice = createSlice({
@@ -99,42 +111,65 @@ const userRolesSlice = createSlice({
         state.isLoadingUserRoles = true;
         state.error = null;
       })
-      .addCase(fetchUserRoles.fulfilled, (state, action: PayloadAction<UserRole[]>) => {
-        state.userRoles = action.payload;
-        state.totalCountUserRoles = action.payload.length;
-        state.isLoadingUserRoles = false;
-      })
+      .addCase(
+        fetchUserRoles.fulfilled,
+        (state, action: PayloadAction<UserRole[]>) => {
+          state.userRoles = action.payload;
+          state.totalCountUserRoles = action.payload.length;
+          state.isLoadingUserRoles = false;
+        },
+      )
       .addCase(fetchUserRoles.rejected, (state, action) => {
         state.isLoadingUserRoles = false;
-        state.error = action.payload as string || "Failed to fetch user roles";
+        state.error =
+          (action.payload as string) || "Failed to fetch user roles";
       })
-      .addCase(fetchUserRoleByUserId.fulfilled, (state, action: PayloadAction<UserRole[]>) => {
-        state.userRoles = action.payload;
-      })
-      .addCase(fetchUserRoleByRoleId.fulfilled, (state, action: PayloadAction<UserRole[]>) => {
-        state.userRoles = action.payload;
-      })
-      .addCase(createUserRole.fulfilled, (state, action: PayloadAction<UserRole>) => {
-        state.userRoles.push(action.payload);
-        state.totalCountUserRoles += 1;
-      })
-      .addCase(updateUserRole.fulfilled, (state, action: PayloadAction<{ userId: number; roleId: number }>) => {
-        const { userId, roleId } = action.payload;
-        const updatedUserRoles = state.userRoles.map((userRole) =>
-          userRole.userId === userId ? { ...userRole, roleId } : userRole
-        );
-        state.userRoles = updatedUserRoles;
-      })
-      .addCase(deleteUserRole.fulfilled, (state, action: PayloadAction<number>) => {
-        state.userRoles = state.userRoles.filter((userRole) => userRole.id !== action.payload);
-        state.totalCountUserRoles -= 1;
-      });
+      .addCase(
+        fetchUserRoleByUserId.fulfilled,
+        (state, action: PayloadAction<UserRole[]>) => {
+          state.userRoles = action.payload;
+        },
+      )
+      .addCase(
+        fetchUserRoleByRoleId.fulfilled,
+        (state, action: PayloadAction<UserRole[]>) => {
+          state.userRoles = action.payload;
+        },
+      )
+      .addCase(
+        createUserRole.fulfilled,
+        (state, action: PayloadAction<UserRole>) => {
+          state.userRoles.push(action.payload);
+          state.totalCountUserRoles += 1;
+        },
+      )
+      .addCase(
+        updateUserRole.fulfilled,
+        (state, action: PayloadAction<{ userId: number; roleId: number }>) => {
+          const { userId, roleId } = action.payload;
+          const updatedUserRoles = state.userRoles.map((userRole) =>
+            userRole.userId === userId ? { ...userRole, roleId } : userRole,
+          );
+          state.userRoles = updatedUserRoles;
+        },
+      )
+      .addCase(
+        deleteUserRole.fulfilled,
+        (state, action: PayloadAction<number>) => {
+          state.userRoles = state.userRoles.filter(
+            (userRole) => userRole.id !== action.payload,
+          );
+          state.totalCountUserRoles -= 1;
+        },
+      );
   },
 });
 
 export const selectUserRoles = (state: RootState) => state.userRoles.userRoles;
-export const selectTotalCountUserRoles = (state: RootState) => state.userRoles.totalCountUserRoles;
-export const selectIsLoadingUserRoles = (state: RootState) => state.userRoles.isLoadingUserRoles;
+export const selectTotalCountUserRoles = (state: RootState) =>
+  state.userRoles.totalCountUserRoles;
+export const selectIsLoadingUserRoles = (state: RootState) =>
+  state.userRoles.isLoadingUserRoles;
 export const selectUserRolesError = (state: RootState) => state.userRoles.error;
 
 export default userRolesSlice.reducer;

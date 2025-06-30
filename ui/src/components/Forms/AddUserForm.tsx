@@ -16,23 +16,23 @@ import AddRoundedIcon from "@mui/icons-material/AddRounded";
 import CloseRoundedIcon from "@mui/icons-material/CloseRounded";
 import Visibility from "@mui/icons-material/Visibility";
 import VisibilityOff from "@mui/icons-material/VisibilityOff";
-import PersonOutlinedIcon from '@mui/icons-material/PersonOutlined';
-import EmailOutlinedIcon from '@mui/icons-material/EmailOutlined';
-import LockOutlinedIcon from '@mui/icons-material/LockOutlined';
-import GroupOutlinedIcon from '@mui/icons-material/GroupOutlined';
-import OutlinedInput from '@mui/material/OutlinedInput';
-import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined';
+import PersonOutlinedIcon from "@mui/icons-material/PersonOutlined";
+import EmailOutlinedIcon from "@mui/icons-material/EmailOutlined";
+import LockOutlinedIcon from "@mui/icons-material/LockOutlined";
+import GroupOutlinedIcon from "@mui/icons-material/GroupOutlined";
+import OutlinedInput from "@mui/material/OutlinedInput";
+import InfoOutlinedIcon from "@mui/icons-material/InfoOutlined";
 import { Role } from "../../models/Role";
-import CustomTextField from '../Textfield/CustomTextField';
+import CustomTextField from "../Textfield/CustomTextField";
 
 interface AddUserFormProps {
-  onSubmit: (user: { 
-    firstName: string; 
-    lastName: string; 
-    email: string; 
-    username: string; 
-    password: string; 
-    roleName: string; 
+  onSubmit: (user: {
+    firstName: string;
+    lastName: string;
+    email: string;
+    username: string;
+    password: string;
+    roleName: string;
   }) => void;
   onCancel?: () => void;
   isLoading?: boolean;
@@ -47,7 +47,7 @@ const AddUserForm: React.FC<AddUserFormProps> = ({
 }) => {
   const theme = useTheme();
   const isSmallScreen = useMediaQuery(theme.breakpoints.down("sm"));
-  
+
   const [formData, setFormData] = useState({
     firstName: "",
     lastName: "",
@@ -70,12 +70,13 @@ const AddUserForm: React.FC<AddUserFormProps> = ({
     const nameRegex = /^[a-zA-ZáéíóúÁÉÍÓÚñÑüÜëË\s-]+$/;
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     const usernameRegex = /^[a-zA-Z0-9._-]+$/;
-    const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
-    
+    const passwordRegex =
+      /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
+
     if (!value.trim()) {
       return "Este campo es requerido";
     }
-    
+
     switch (name) {
       case "firstName":
       case "lastName":
@@ -116,14 +117,14 @@ const AddUserForm: React.FC<AddUserFormProps> = ({
         }
         break;
     }
-    
+
     return "";
   };
 
   const handleFieldChange = (field: string, value: string) => {
-    setFormData(prev => ({ ...prev, [field]: value }));
+    setFormData((prev) => ({ ...prev, [field]: value }));
     const error = validateField(field, value);
-    setErrors(prev => ({ ...prev, [field]: error }));
+    setErrors((prev) => ({ ...prev, [field]: error }));
   };
 
   const isFormValid = () => {
@@ -180,7 +181,7 @@ const AddUserForm: React.FC<AddUserFormProps> = ({
   };
 
   return (
-    <Box sx={{ width: '100%', p: 0 }}>
+    <Box sx={{ width: "100%", p: 0 }}>
       <Grid container spacing={3} sx={{ mt: 0 }}>
         <Grid item xs={12} sm={6}>
           <CustomTextField
@@ -192,7 +193,11 @@ const AddUserForm: React.FC<AddUserFormProps> = ({
             onChange={(e) => handleFieldChange("firstName", e.target.value)}
             error={errors.firstName !== ""}
             helperText={errors.firstName}
-            icon={<PersonOutlinedIcon sx={{ color: theme.palette.text.secondary }} />}
+            icon={
+              <PersonOutlinedIcon
+                sx={{ color: theme.palette.text.secondary }}
+              />
+            }
           />
         </Grid>
 
@@ -206,7 +211,11 @@ const AddUserForm: React.FC<AddUserFormProps> = ({
             onChange={(e) => handleFieldChange("lastName", e.target.value)}
             error={errors.lastName !== ""}
             helperText={errors.lastName}
-            icon={<PersonOutlinedIcon sx={{ color: theme.palette.text.secondary }} />}
+            icon={
+              <PersonOutlinedIcon
+                sx={{ color: theme.palette.text.secondary }}
+              />
+            }
           />
         </Grid>
 
@@ -220,7 +229,9 @@ const AddUserForm: React.FC<AddUserFormProps> = ({
             onChange={(e) => handleFieldChange("email", e.target.value)}
             error={errors.email !== ""}
             helperText={errors.email}
-            icon={<EmailOutlinedIcon sx={{ color: theme.palette.text.secondary }} />}
+            icon={
+              <EmailOutlinedIcon sx={{ color: theme.palette.text.secondary }} />
+            }
           />
         </Grid>
 
@@ -234,7 +245,11 @@ const AddUserForm: React.FC<AddUserFormProps> = ({
             onChange={(e) => handleFieldChange("username", e.target.value)}
             error={errors.username !== ""}
             helperText={errors.username}
-            icon={<PersonOutlinedIcon sx={{ color: theme.palette.text.secondary }} />}
+            icon={
+              <PersonOutlinedIcon
+                sx={{ color: theme.palette.text.secondary }}
+              />
+            }
           />
         </Grid>
 
@@ -249,14 +264,13 @@ const AddUserForm: React.FC<AddUserFormProps> = ({
             onChange={(e) => handleFieldChange("password", e.target.value)}
             error={errors.password !== ""}
             helperText={errors.password}
-            icon={<LockOutlinedIcon sx={{ color: theme.palette.text.secondary }} />}
+            icon={
+              <LockOutlinedIcon sx={{ color: theme.palette.text.secondary }} />
+            }
             InputProps={{
               endAdornment: (
                 <InputAdornment position="end">
-                  <IconButton
-                    onClick={handleTogglePassword}
-                    edge="end"
-                  >
+                  <IconButton onClick={handleTogglePassword} edge="end">
                     {showPassword ? <VisibilityOff /> : <Visibility />}
                   </IconButton>
                 </InputAdornment>
@@ -266,24 +280,29 @@ const AddUserForm: React.FC<AddUserFormProps> = ({
         </Grid>
 
         <Grid item xs={12} sm={6}>
-          <FormControl fullWidth error={errors.roleName !== ""} sx={{ marginTop: '8px',
-            '& .MuiOutlinedInput-root, & .MuiSelect-select': {
-              backgroundColor: '#fff',
-              borderRadius: 2,
-              '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
-                borderColor: '#000',
-                borderWidth: 2,
+          <FormControl
+            fullWidth
+            error={errors.roleName !== ""}
+            sx={{
+              marginTop: "8px",
+              "& .MuiOutlinedInput-root, & .MuiSelect-select": {
+                backgroundColor: "#fff",
+                borderRadius: 2,
+                "&.Mui-focused .MuiOutlinedInput-notchedOutline": {
+                  borderColor: "#000",
+                  borderWidth: 2,
+                },
+                "&:hover .MuiOutlinedInput-notchedOutline": {
+                  borderColor: "#000",
+                },
+                "&.Mui-focused": {
+                  backgroundColor: "#fff",
+                  outline: "none",
+                  boxShadow: "none",
+                },
               },
-              '&:hover .MuiOutlinedInput-notchedOutline': {
-                borderColor: '#000',
-              },
-              '&.Mui-focused': {
-                backgroundColor: '#fff',
-                outline: 'none',
-                boxShadow: 'none',
-              },
-            },
-          }}>
+            }}
+          >
             <InputLabel>Rol</InputLabel>
             <Select
               value={formData.roleName}
@@ -294,7 +313,9 @@ const AddUserForm: React.FC<AddUserFormProps> = ({
                   label="Rol"
                   startAdornment={
                     <InputAdornment position="start">
-                      <GroupOutlinedIcon sx={{ color: theme.palette.text.secondary }} />
+                      <GroupOutlinedIcon
+                        sx={{ color: theme.palette.text.secondary }}
+                      />
                     </InputAdornment>
                   }
                 />
@@ -313,7 +334,13 @@ const AddUserForm: React.FC<AddUserFormProps> = ({
               ))}
             </Select>
             {errors.roleName && (
-              <Box sx={{ color: theme.palette.error.main, fontSize: '0.75rem', mt: 0.5 }}>
+              <Box
+                sx={{
+                  color: theme.palette.error.main,
+                  fontSize: "0.75rem",
+                  mt: 0.5,
+                }}
+              >
                 {errors.roleName}
               </Box>
             )}
@@ -323,32 +350,40 @@ const AddUserForm: React.FC<AddUserFormProps> = ({
         <Grid item xs={12}>
           <Box
             sx={{
-              display: 'flex',
-              alignItems: 'center',
+              display: "flex",
+              alignItems: "center",
               p: { xs: 1.5, sm: 2 },
               backgroundColor: theme.palette.action.hover,
               borderRadius: 1,
-              border: '1px solid',
+              border: "1px solid",
               borderColor: theme.palette.divider,
             }}
           >
             <Box sx={{ mr: { xs: 1, sm: 2 }, color: theme.palette.info.main }}>
-              <InfoOutlinedIcon sx={{ color: theme.palette.info.main, mr: { xs: 1, sm: 2 } }} />
+              <InfoOutlinedIcon
+                sx={{ color: theme.palette.info.main, mr: { xs: 1, sm: 2 } }}
+              />
             </Box>
             <Box>
-              <Box sx={{ 
-                fontWeight: 600,
-                color: theme.palette.text.primary,
-                mb: 0.5,
-                fontSize: 'clamp(0.875rem, 1.5vw, 1rem)',
-              }}>
+              <Box
+                sx={{
+                  fontWeight: 600,
+                  color: theme.palette.text.primary,
+                  mb: 0.5,
+                  fontSize: "clamp(0.875rem, 1.5vw, 1rem)",
+                }}
+              >
                 Información del Usuario
               </Box>
-              <Box sx={{
-                color: theme.palette.text.secondary,
-                fontSize: 'clamp(0.75rem, 1.25vw, 0.875rem)',
-              }}>
-                Completa todos los campos para crear un nuevo usuario. La contraseña debe tener al menos 8 caracteres, una mayúscula, una minúscula, un número y un carácter especial.
+              <Box
+                sx={{
+                  color: theme.palette.text.secondary,
+                  fontSize: "clamp(0.75rem, 1.25vw, 0.875rem)",
+                }}
+              >
+                Completa todos los campos para crear un nuevo usuario. La
+                contraseña debe tener al menos 8 caracteres, una mayúscula, una
+                minúscula, un número y un carácter especial.
               </Box>
             </Box>
           </Box>
@@ -357,12 +392,12 @@ const AddUserForm: React.FC<AddUserFormProps> = ({
         <Grid item xs={12}>
           <Box
             sx={{
-              display: 'flex',
-              flexDirection: { xs: 'column', sm: 'row' },
-              justifyContent: 'space-between',
+              display: "flex",
+              flexDirection: { xs: "column", sm: "row" },
+              justifyContent: "space-between",
               gap: { xs: 1, sm: 2 },
               pt: 2,
-              borderTop: '1px solid',
+              borderTop: "1px solid",
               borderColor: theme.palette.divider,
             }}
           >
@@ -373,18 +408,18 @@ const AddUserForm: React.FC<AddUserFormProps> = ({
               fullWidth={isSmallScreen}
               sx={{
                 minHeight: { xs: 44, sm: 48 },
-                fontSize: 'clamp(0.75rem, 1.25vw, 0.875rem)',
+                fontSize: "clamp(0.75rem, 1.25vw, 0.875rem)",
                 order: { xs: 3, sm: 1 },
               }}
             >
               Limpiar
             </Button>
-            <Box 
-              sx={{ 
-                display: 'flex', 
-                flexDirection: { xs: 'column', sm: 'row' },
+            <Box
+              sx={{
+                display: "flex",
+                flexDirection: { xs: "column", sm: "row" },
                 gap: { xs: 1, sm: 2 },
-                width: { xs: '100%', sm: 'auto' },
+                width: { xs: "100%", sm: "auto" },
                 order: { xs: 1, sm: 2 },
               }}
             >
@@ -396,7 +431,7 @@ const AddUserForm: React.FC<AddUserFormProps> = ({
                   fullWidth={isSmallScreen}
                   sx={{
                     minHeight: { xs: 44, sm: 48 },
-                    fontSize: 'clamp(0.75rem, 1.25vw, 0.875rem)',
+                    fontSize: "clamp(0.75rem, 1.25vw, 0.875rem)",
                   }}
                 >
                   Cancelar
@@ -410,13 +445,13 @@ const AddUserForm: React.FC<AddUserFormProps> = ({
                 fullWidth={isSmallScreen}
                 sx={{
                   minHeight: { xs: 44, sm: 48 },
-                  fontSize: 'clamp(0.75rem, 1.25vw, 0.875rem)',
+                  fontSize: "clamp(0.75rem, 1.25vw, 0.875rem)",
                   fontWeight: 600,
                   px: { xs: 2, sm: 4 },
                   py: { xs: 1, sm: 1.5 },
                 }}
               >
-                {isLoading ? 'Creando...' : 'Agregar'}
+                {isLoading ? "Creando..." : "Agregar"}
               </Button>
             </Box>
           </Box>
@@ -426,4 +461,4 @@ const AddUserForm: React.FC<AddUserFormProps> = ({
   );
 };
 
-export default AddUserForm; 
+export default AddUserForm;

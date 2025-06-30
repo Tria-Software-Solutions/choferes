@@ -13,7 +13,7 @@ export const createSchedule = async (newSchedule: Omit<Schedule, "id">) => {
 
 export const updateSchedule = async (
   id: number,
-  updatedSchedule: Partial<Schedule>
+  updatedSchedule: Partial<Schedule>,
 ) => {
   const response = await api.put(`/schedules/${id}`, updatedSchedule);
   return response.data;

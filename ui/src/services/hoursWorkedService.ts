@@ -1,5 +1,5 @@
-import { HoursWorked } from '../models/HoursWorked';
-import api from './api'; 
+import { HoursWorked } from "../models/HoursWorked";
+import api from "./api";
 
 export const getHoursWorked = async () => {
   const response = await api.get("/hours");
@@ -11,7 +11,10 @@ export const createHoursWorked = async (newHours: Omit<HoursWorked, "id">) => {
   return response.data;
 };
 
-export const updateHoursWorked = async (id: number, updatedHours: Partial<HoursWorked>) => {
+export const updateHoursWorked = async (
+  id: number,
+  updatedHours: Partial<HoursWorked>,
+) => {
   const response = await api.put(`/hours/${id}`, updatedHours);
   return response.data;
 };

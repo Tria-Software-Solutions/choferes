@@ -43,10 +43,7 @@ import {
   exportToPDF,
 } from "../../utils/export";
 import { capitalizeFirstLetter } from "../../utils/string";
-import {
-  PAGE_TITLE,
-  PERMISSIONS,
-} from "../../constants/constants";
+import { PAGE_TITLE, PERMISSIONS } from "../../constants/constants";
 import DirectionsCarIcon from "@mui/icons-material/DirectionsCar";
 import DownloadRoundedIcon from "@mui/icons-material/DownloadRounded";
 import ArrowBackIosNewRoundedIcon from "@mui/icons-material/ArrowBackIosNewRounded";
@@ -57,19 +54,19 @@ import ManageSearchIcon from "@mui/icons-material/ManageSearch";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faFileExcel, faFilePdf } from "@fortawesome/free-solid-svg-icons";
 import CloseIcon from "@mui/icons-material/Close";
-import AddRoundedIcon from '@mui/icons-material/AddRounded';
-import DeleteOutlineIcon from '@mui/icons-material/DeleteOutline';
+import AddRoundedIcon from "@mui/icons-material/AddRounded";
+import DeleteOutlineIcon from "@mui/icons-material/DeleteOutline";
 
 const VehiclesPage: React.FC = () => {
   const dispatch = useDispatch<AppDispatch>();
   const { userPermissions } = useAuthContext();
   const [selectedDate, setSelectedDate] = useState<Date>(new Date());
   const { allVehicles, isLoadingVehicles } = useSelector(
-    (state: RootState) => state.vehicles
+    (state: RootState) => state.vehicles,
   );
   const { showNotification } = useAppNotifications();
   const [filteredWeekVehicles, setFilteredWeekVehicles] = useState<Vehicle[]>(
-    []
+    [],
   );
   const [totalCount, setTotalCount] = useState(0);
   const [editRowId, setEditRowId] = useState<number | null>(null);
@@ -88,7 +85,7 @@ const VehiclesPage: React.FC = () => {
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(5);
   const [isEditFormValid, setIsEditFormValid] = useState(false);
-  const [shouldRefetch, ] = useState(true);
+  const [shouldRefetch] = useState(true);
   const [openAddVehicleModal, setOpenAddVehicleModal] = useState(false);
   const [isCreatingVehicle, setIsCreatingVehicle] = useState(false);
   const [isDeletingVehicle, setIsDeletingVehicle] = useState(false);
@@ -98,7 +95,7 @@ const VehiclesPage: React.FC = () => {
 
   const cleanedFilter = useMemo(
     () => filter.replace(/[\s-]/g, "").toLowerCase(),
-    [filter]
+    [filter],
   );
 
   const filteredVehicles = useMemo(() => {
@@ -106,16 +103,16 @@ const VehiclesPage: React.FC = () => {
       const vehicleDate = new Date(vehicle.parkingDate);
       const selectedDateMidnight = new Date(selectedDate);
       selectedDateMidnight.setHours(0, 0, 0, 0);
-      
+
       const vehicleDateMidnight = new Date(vehicleDate);
       vehicleDateMidnight.setHours(0, 0, 0, 0);
-      
-      const vehicleDateStr = vehicleDateMidnight.toISOString().split('T')[0];
-      const selectedDateStr = selectedDateMidnight.toISOString().split('T')[0];
-      
+
+      const vehicleDateStr = vehicleDateMidnight.toISOString().split("T")[0];
+      const selectedDateStr = selectedDateMidnight.toISOString().split("T")[0];
+
       return vehicleDateStr === selectedDateStr;
     });
-    
+
     const filtered = vehiclesForSelectedDate.filter((vehicle) => {
       const cleanedLicensePlate = vehicle.licensePlate
         .replace(/[\s-]/g, "")
@@ -246,7 +243,7 @@ const VehiclesPage: React.FC = () => {
       showNotification(
         "La actualización del vehículo fue exitosa",
         3000,
-        false
+        false,
       );
     } catch (error) {
       handleCancel();
@@ -254,7 +251,7 @@ const VehiclesPage: React.FC = () => {
       showNotification(
         "Ha ocurrido un error al actualizar el vehículo",
         5000,
-        false
+        false,
       );
     }
   };
@@ -270,24 +267,16 @@ const VehiclesPage: React.FC = () => {
 
   const handleDelete = async () => {
     if (!vehicleToDelete) return;
-    
+
     setIsDeletingVehicle(true);
     try {
       await dispatch(deleteVehicle(vehicleToDelete));
       setOpenDeleteDialog(false);
       setVehicleToDelete(null);
-      showNotification(
-        "Vehículo eliminado exitosamente",
-        3000,
-        false
-      );
+      showNotification("Vehículo eliminado exitosamente", 3000, false);
     } catch (error) {
       console.error("Error deleting vehicle:", error);
-      showNotification(
-        "Error al eliminar el vehículo",
-        5000,
-        false
-      );
+      showNotification("Error al eliminar el vehículo", 5000, false);
     } finally {
       setIsDeletingVehicle(false);
     }
@@ -342,21 +331,13 @@ const VehiclesPage: React.FC = () => {
         notes: vehicleData.notes,
         parkingDate: selectedDate,
       };
-      
+
       await dispatch(createVehicle(newVehicle));
       setOpenAddVehicleModal(false);
-      showNotification(
-        "Vehículo creado exitosamente",
-        3000,
-        false
-      );
+      showNotification("Vehículo creado exitosamente", 3000, false);
     } catch (error) {
       console.error("Error creating vehicle:", error);
-      showNotification(
-        "Error al crear el vehículo",
-        5000,
-        false
-      );
+      showNotification("Error al crear el vehículo", 5000, false);
     } finally {
       setIsCreatingVehicle(false);
     }
@@ -364,7 +345,7 @@ const VehiclesPage: React.FC = () => {
 
   const exportOptions = useMemo(() => {
     const excelOption = userPermissions.includes(
-      PERMISSIONS.EXPORT_EXCEL_VEHICLES
+      PERMISSIONS.EXPORT_EXCEL_VEHICLES,
     )
       ? exportToExcel
       : undefined;
@@ -377,7 +358,7 @@ const VehiclesPage: React.FC = () => {
       excelOption,
       pdfOption,
       filteredWeekVehicles,
-      `reporte-de-vehiculos-${exportFileFormattedDate(selectedDate || new Date())}`
+      `reporte-de-vehiculos-${exportFileFormattedDate(selectedDate || new Date())}`,
     );
   }, [userPermissions, filteredWeekVehicles, selectedDate]);
 
@@ -390,9 +371,7 @@ const VehiclesPage: React.FC = () => {
         sx={{ mb: 3 }}
       >
         <Box display="flex" alignItems="center">
-          <DirectionsCarIcon
-            fontSize={isSmallScreen ? "small" : "large"}
-          />
+          <DirectionsCarIcon fontSize={isSmallScreen ? "small" : "large"} />
           <Box sx={{ ml: 1 }}>
             <Typography
               variant={isSmallScreen ? "h5" : "h4"}
@@ -444,7 +423,7 @@ const VehiclesPage: React.FC = () => {
             alignItems="center"
           >
             <Grid item xs={12} md={4}>
-              <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+              <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
                 {filteredVehicles && (
                   <SearchBar
                     placeholder="Buscar vehículo"
@@ -460,11 +439,11 @@ const VehiclesPage: React.FC = () => {
                     color="primary"
                     onClick={handleOpenAddVehicleModal}
                     sx={{
-                      display: { xs: 'flex', md: 'none' },
-                      minWidth: 'auto',
+                      display: { xs: "flex", md: "none" },
+                      minWidth: "auto",
                       width: 56,
                       height: 56,
-                      borderRadius: '50%',
+                      borderRadius: "50%",
                       p: 0,
                     }}
                   >
@@ -566,12 +545,12 @@ const VehiclesPage: React.FC = () => {
                     variant="contained"
                     startIcon={<AddRoundedIcon />}
                     onClick={handleOpenAddVehicleModal}
-                    sx={{ 
-                      display: { xs: 'none', md: 'flex' },
-                      px: 3, 
-                      py: 1.5, 
-                      fontSize: '1rem', 
-                      minHeight: 56 
+                    sx={{
+                      display: { xs: "none", md: "flex" },
+                      px: 3,
+                      py: 1.5,
+                      fontSize: "1rem",
+                      minHeight: 56,
                     }}
                   >
                     Agregar
@@ -629,7 +608,7 @@ const VehiclesPage: React.FC = () => {
                 {capitalizeFirstLetter(
                   format(selectedDate, "EEEE dd 'de' MMMM 'de' yyyy", {
                     locale: es,
-                  })
+                  }),
                 )}
               </Typography>
               <Typography variant="h6" color="textSecondary">
@@ -649,7 +628,10 @@ const VehiclesPage: React.FC = () => {
         confirmText="Eliminar"
         cancelText="Cancelar"
         loading={isDeletingVehicle}
-        paperSx={{ minWidth: { xs: '80vw', sm: 320 }, maxWidth: { xs: '90vw', sm: 400 } }}
+        paperSx={{
+          minWidth: { xs: "80vw", sm: 320 },
+          maxWidth: { xs: "90vw", sm: 400 },
+        }}
         icon={<DeleteOutlineIcon color="error" />}
       />
       <DialogComponent
@@ -658,13 +640,19 @@ const VehiclesPage: React.FC = () => {
         title="Agregar"
         subtitle="Nuevo vehículo"
         hideActions
-        paperSx={{ minWidth: { xs: '90vw', sm: 500, md: 700 }, maxWidth: { xs: '98vw', sm: 700 } }}
+        paperSx={{
+          minWidth: { xs: "90vw", sm: 500, md: 700 },
+          maxWidth: { xs: "98vw", sm: 700 },
+        }}
       >
         <AddVehicleForm
           onSubmit={handleCreateVehicle}
           onCancel={handleCloseAddVehicleModal}
           isLoading={isCreatingVehicle}
-          existingVehicles={allVehicles.map(v => ({ ticket: v.ticket, licensePlate: v.licensePlate }))}
+          existingVehicles={allVehicles.map((v) => ({
+            ticket: v.ticket,
+            licensePlate: v.licensePlate,
+          }))}
           getNextTicketNumber={getNextTicketNumber}
           defaultParkingDate={selectedDate}
         />

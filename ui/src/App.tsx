@@ -174,10 +174,7 @@ const AppContent: React.FC = () => {
           />
           <Route path="/register" element={<Register />} />
           <Route element={<ProtectedRoute />}>
-            <Route
-              path="/courier-service"
-              element={<CourierServicePage />}
-            />
+            <Route path="/courier-service" element={<CourierServicePage />} />
             <Route
               path="/roles"
               element={

@@ -64,13 +64,15 @@ const Register = () => {
     if (addFields.firstName === "") {
       newErrors.firstName = "El nombre es requerido";
     } else if (!nameRegex.test(addFields.firstName)) {
-      newErrors.firstName = "El nombre solo puede contener letras, espacios y puntos";
+      newErrors.firstName =
+        "El nombre solo puede contener letras, espacios y puntos";
     }
 
     if (addFields.lastName === "") {
       newErrors.lastName = "El apellido es requerido";
     } else if (!nameRegex.test(addFields.lastName)) {
-      newErrors.lastName = "El apellido solo puede contener letras, espacios y puntos";
+      newErrors.lastName =
+        "El apellido solo puede contener letras, espacios y puntos";
     }
 
     if (addFields.email === "") {
@@ -82,13 +84,15 @@ const Register = () => {
     if (addFields.username === "") {
       newErrors.username = "El usuario es requerido";
     } else if (!usernameRegex.test(addFields.username)) {
-      newErrors.username = "El usuario debe comenzar con una letra y tener 3-20 caracteres";
+      newErrors.username =
+        "El usuario debe comenzar con una letra y tener 3-20 caracteres";
     }
 
     if (addFields.password === "") {
       newErrors.password = "La contraseña es requerida";
     } else if (!passwordRegex.test(addFields.password)) {
-      newErrors.password = "La contraseña debe tener al menos 8 caracteres, una mayúscula, una minúscula, un número y un carácter especial";
+      newErrors.password =
+        "La contraseña debe tener al menos 8 caracteres, una mayúscula, una minúscula, un número y un carácter especial";
     }
 
     setFieldErrors(newErrors);
@@ -113,11 +117,7 @@ const Register = () => {
         isActive: true,
       };
       await dispatch(createUser({ newUser })).unwrap();
-      showNotification(
-        "El registro del usuario fue exitoso",
-        3000,
-        false
-      );
+      showNotification("El registro del usuario fue exitoso", 3000, false);
       // Clear form after successful registration
       setAddFields({
         firstName: "",
@@ -131,7 +131,7 @@ const Register = () => {
       showNotification(
         "Ha ocurrido un error al registrar el usuario",
         5000,
-        false
+        false,
       );
     } finally {
       setIsSubmitting(false);
@@ -142,7 +142,7 @@ const Register = () => {
     (email: string): User | undefined => {
       return users.find((user) => user.email === email);
     },
-    [users]
+    [users],
   );
 
   const handleEmailChange = (event: React.FocusEvent<HTMLInputElement>) => {
@@ -151,9 +151,12 @@ const Register = () => {
 
     const emailExists = checkEmailExistence(value);
     if (emailExists) {
-      setFieldErrors(prev => ({ ...prev, email: "El correo electrónico ya existe" }));
+      setFieldErrors((prev) => ({
+        ...prev,
+        email: "El correo electrónico ya existe",
+      }));
     } else {
-      setFieldErrors(prev => ({ ...prev, email: "" }));
+      setFieldErrors((prev) => ({ ...prev, email: "" }));
     }
   };
 
@@ -161,7 +164,7 @@ const Register = () => {
     (username: string): User | undefined => {
       return users.find((user) => user.username === username);
     },
-    [users]
+    [users],
   );
 
   const handleUsernameChange = (event: React.FocusEvent<HTMLInputElement>) => {
@@ -170,9 +173,12 @@ const Register = () => {
 
     const usernameExists = checkUsernameExistence(value);
     if (usernameExists) {
-      setFieldErrors(prev => ({ ...prev, username: "El nombre de usuario ya existe" }));
+      setFieldErrors((prev) => ({
+        ...prev,
+        username: "El nombre de usuario ya existe",
+      }));
     } else {
-      setFieldErrors(prev => ({ ...prev, username: "" }));
+      setFieldErrors((prev) => ({ ...prev, username: "" }));
     }
   };
 
@@ -184,7 +190,7 @@ const Register = () => {
     setAddFields({ ...addFields, [field]: value });
     // Clear field error when user starts typing
     if (fieldErrors[field]) {
-      setFieldErrors(prev => ({ ...prev, [field]: "" }));
+      setFieldErrors((prev) => ({ ...prev, [field]: "" }));
     }
   };
 
@@ -228,7 +234,8 @@ const Register = () => {
                   width: 80,
                   height: 80,
                   borderRadius: "50%",
-                  background: "linear-gradient(135deg, #000000 0%, #333333 100%)",
+                  background:
+                    "linear-gradient(135deg, #000000 0%, #333333 100%)",
                   mb: 2,
                   boxShadow: "0 8px 24px rgba(0,0,0,0.15)",
                   transition: "transform 0.3s ease, box-shadow 0.3s ease",
@@ -272,19 +279,27 @@ const Register = () => {
             </Box>
 
             {/* Form Section */}
-            <Box component="form" onSubmit={handleRegister} sx={{ width: "100%" }}>
-              <Box sx={{ 
-                display: "flex", 
-                flexDirection: { xs: "column", sm: "row" },
-                gap: 2, 
-                mb: 2 
-              }}>
+            <Box
+              component="form"
+              onSubmit={handleRegister}
+              sx={{ width: "100%" }}
+            >
+              <Box
+                sx={{
+                  display: "flex",
+                  flexDirection: { xs: "column", sm: "row" },
+                  gap: 2,
+                  mb: 2,
+                }}
+              >
                 <TextField
                   fullWidth
                   label="Nombre"
                   variant="outlined"
                   value={addFields.firstName}
-                  onChange={(e) => handleFieldChange("firstName", e.target.value)}
+                  onChange={(e) =>
+                    handleFieldChange("firstName", e.target.value)
+                  }
                   error={!!fieldErrors.firstName}
                   helperText={fieldErrors.firstName}
                   disabled={isSubmitting}
@@ -317,7 +332,9 @@ const Register = () => {
                   label="Apellido"
                   variant="outlined"
                   value={addFields.lastName}
-                  onChange={(e) => handleFieldChange("lastName", e.target.value)}
+                  onChange={(e) =>
+                    handleFieldChange("lastName", e.target.value)
+                  }
                   error={!!fieldErrors.lastName}
                   helperText={fieldErrors.lastName}
                   disabled={isSubmitting}
@@ -482,7 +499,8 @@ const Register = () => {
                 sx={{
                   minHeight: 56,
                   borderRadius: 2,
-                  background: "linear-gradient(135deg, #000000 0%, #333333 100%)",
+                  background:
+                    "linear-gradient(135deg, #000000 0%, #333333 100%)",
                   color: "#ffffff",
                   fontWeight: 600,
                   fontSize: "1rem",
@@ -490,7 +508,8 @@ const Register = () => {
                   boxShadow: "0 4px 12px rgba(0,0,0,0.15)",
                   transition: "all 0.3s ease",
                   "&:hover": {
-                    background: "linear-gradient(135deg, #333333 0%, #000000 100%)",
+                    background:
+                      "linear-gradient(135deg, #333333 0%, #000000 100%)",
                     transform: "translateY(-2px)",
                     boxShadow: "0 8px 24px rgba(0,0,0,0.25)",
                   },

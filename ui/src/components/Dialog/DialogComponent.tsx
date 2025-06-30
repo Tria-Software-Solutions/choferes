@@ -1,4 +1,4 @@
-import React from 'react';
+import React from "react";
 import {
   Dialog,
   DialogActions,
@@ -10,16 +10,16 @@ import {
   IconButton,
   useTheme,
   useMediaQuery,
-} from '@mui/material';
+} from "@mui/material";
 import {
   Warning as WarningIcon,
   Delete as DeleteIcon,
   Info as InfoIcon,
   CheckCircle as CheckCircleIcon,
   Close as CloseIcon,
-} from '@mui/icons-material';
+} from "@mui/icons-material";
 
-export type DialogType = 'delete' | 'warning' | 'info' | 'success';
+export type DialogType = "delete" | "warning" | "info" | "success";
 
 interface ConfirmationDialogProps {
   open: boolean;
@@ -46,7 +46,7 @@ const DialogComponent: React.FC<ConfirmationDialogProps> = ({
   onConfirm,
   title,
   message,
-  type = 'info',
+  type = "info",
   confirmText,
   cancelText,
   loading = false,
@@ -59,15 +59,15 @@ const DialogComponent: React.FC<ConfirmationDialogProps> = ({
   header,
 }) => {
   const theme = useTheme();
-  const isSmallScreen = useMediaQuery(theme.breakpoints.down('sm'));
+  const isSmallScreen = useMediaQuery(theme.breakpoints.down("sm"));
 
   const getIcon = () => {
     switch (type) {
-      case 'delete':
+      case "delete":
         return <DeleteIcon color="error" sx={{ fontSize: 32 }} />;
-      case 'warning':
+      case "warning":
         return <WarningIcon color="warning" sx={{ fontSize: 32 }} />;
-      case 'success':
+      case "success":
         return <CheckCircleIcon color="success" sx={{ fontSize: 32 }} />;
       default:
         return <InfoIcon color="info" sx={{ fontSize: 32 }} />;
@@ -76,27 +76,27 @@ const DialogComponent: React.FC<ConfirmationDialogProps> = ({
 
   const getConfirmButtonColor = () => {
     switch (type) {
-      case 'delete':
-        return 'error';
-      case 'warning':
-        return 'warning';
-      case 'success':
-        return 'success';
+      case "delete":
+        return "error";
+      case "warning":
+        return "warning";
+      case "success":
+        return "success";
       default:
-        return 'primary';
+        return "primary";
     }
   };
 
   const getDefaultConfirmText = () => {
     switch (type) {
-      case 'delete':
-        return 'Eliminar';
-      case 'warning':
-        return 'Continuar';
-      case 'success':
-        return 'Aceptar';
+      case "delete":
+        return "Eliminar";
+      case "warning":
+        return "Continuar";
+      case "success":
+        return "Aceptar";
       default:
-        return 'Confirmar';
+        return "Confirmar";
     }
   };
 
@@ -108,12 +108,12 @@ const DialogComponent: React.FC<ConfirmationDialogProps> = ({
       fullWidth
       PaperProps={{
         sx: {
-          border: '1px solid #cccccc',
+          border: "1px solid #cccccc",
           borderRadius: 2,
           minWidth: 400,
           maxWidth: 500,
           boxShadow: 3,
-          bgcolor: 'background.paper',
+          bgcolor: "background.paper",
           ...paperSx,
         },
       }}
@@ -125,8 +125,8 @@ const DialogComponent: React.FC<ConfirmationDialogProps> = ({
           sx={{
             background: theme.palette.primary.main,
             color: theme.palette.primary.contrastText,
-            display: 'flex',
-            alignItems: 'center',
+            display: "flex",
+            alignItems: "center",
             gap: 2,
             px: 3,
             py: 2,
@@ -138,12 +138,12 @@ const DialogComponent: React.FC<ConfirmationDialogProps> = ({
             <Box
               sx={{
                 background: theme.palette.primary.contrastText,
-                borderRadius: '50%',
+                borderRadius: "50%",
                 width: 40,
                 height: 40,
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
               }}
             >
               {icon}
@@ -160,65 +160,68 @@ const DialogComponent: React.FC<ConfirmationDialogProps> = ({
             )}
           </Box>
           <Box flexGrow={1} />
-          <IconButton
-            onClick={onClose}
-            sx={{ color: 'inherit' }}
-          >
+          <IconButton onClick={onClose} sx={{ color: "inherit" }}>
             <CloseIcon />
           </IconButton>
         </Box>
       )}
-      
-      <DialogContent sx={{ pt: 4, pb: 2, marginTop: '10px' }}>
+
+      <DialogContent sx={{ pt: 4, pb: 2, marginTop: "10px" }}>
         {children ? (
           children
         ) : (
-          <Typography variant="body1" color="text.secondary" sx={{ lineHeight: 1.6 }}>
+          <Typography
+            variant="body1"
+            color="text.secondary"
+            sx={{ lineHeight: 1.6 }}
+          >
             {message}
           </Typography>
         )}
       </DialogContent>
-      
+
       {/* Custom actions if provided */}
       {actions ? (
         <Box sx={{ px: 3, pb: 3 }}>{actions}</Box>
-      ) : !hideActions && (
-        <DialogActions
-          sx={{
-            gap: 2,
-            flexDirection: isSmallScreen ? 'column' : 'row',
-          }}
-        >
-          <Button
-            onClick={onClose}
-            variant="outlined"
-            fullWidth={isSmallScreen}
+      ) : (
+        !hideActions && (
+          <DialogActions
             sx={{
-              minWidth: isSmallScreen ? '100%' : 120,
-              py: 1.5,
-              fontWeight: 600,
+              gap: 2,
+              flexDirection: isSmallScreen ? "column" : "row",
             }}
-            disabled={loading}
           >
-            {cancelText || 'Cancelar'}
-          </Button>
-          {onConfirm && (
             <Button
-              onClick={onConfirm}
-              variant="contained"
-              color={getConfirmButtonColor()}
+              onClick={onClose}
+              variant="outlined"
               fullWidth={isSmallScreen}
               sx={{
-                minWidth: isSmallScreen ? '100%' : 120,
+                minWidth: isSmallScreen ? "100%" : 120,
                 py: 1.5,
                 fontWeight: 600,
               }}
               disabled={loading}
             >
-              {confirmText || getDefaultConfirmText()}
+              {cancelText || "Cancelar"}
             </Button>
-          )}
-        </DialogActions>
+            {onConfirm && (
+              <Button
+                onClick={onConfirm}
+                variant="contained"
+                color={getConfirmButtonColor()}
+                fullWidth={isSmallScreen}
+                sx={{
+                  minWidth: isSmallScreen ? "100%" : 120,
+                  py: 1.5,
+                  fontWeight: 600,
+                }}
+                disabled={loading}
+              >
+                {confirmText || getDefaultConfirmText()}
+              </Button>
+            )}
+          </DialogActions>
+        )
       )}
     </Dialog>
   );

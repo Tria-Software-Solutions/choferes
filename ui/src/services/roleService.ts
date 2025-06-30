@@ -21,10 +21,7 @@ export const createRole = async (newRole: Omit<Role, "id">) => {
   return response.data;
 };
 
-export const updateRole = async (
-  id: number,
-  updatedRole: Partial<Role>
-) => {
+export const updateRole = async (id: number, updatedRole: Partial<Role>) => {
   const response = await api.put(`/roles/${id}`, updatedRole);
   return response.data;
 };

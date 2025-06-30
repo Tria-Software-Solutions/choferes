@@ -68,14 +68,17 @@ type EditableTableProps<T> = {
   editFields: Record<string, string | boolean | number | string[] | Date>;
   setEditField?: (
     field: string,
-    value: string | boolean | number | string[] | Date
+    value: string | boolean | number | string[] | Date,
   ) => void;
   handleEdit?: (row: T) => void;
   handleCancel?: () => void;
   handleUpdate?: (id: number) => void;
   handleOpenDeleteDialog?: (id: number) => void;
   handleOpenStatusDialog?: (row: any) => void;
-  handlePasswordModal?: (id: number, handleClose: () => void) => React.ReactNode;
+  handlePasswordModal?: (
+    id: number,
+    handleClose: () => void,
+  ) => React.ReactNode;
   getRowId: (row: T) => number;
   totalCount: number;
   page: number;
@@ -85,7 +88,7 @@ type EditableTableProps<T> = {
   renderColumnValue?: (column: keyof T, value: any) => React.ReactNode;
   validateField?: (
     field: string,
-    value: string | string[] | boolean
+    value: string | string[] | boolean,
   ) => boolean;
   isSaveDisabled?: boolean;
   noActions?: boolean;
@@ -147,7 +150,7 @@ const EditableTable = <T extends object>({
 
   const handlePageChange = (
     event: React.MouseEvent<HTMLButtonElement> | null,
-    newPage: number
+    newPage: number,
   ) => {
     setPage(newPage);
   };
@@ -159,7 +162,13 @@ const EditableTable = <T extends object>({
     }
 
     return (
-      <Grid item xs={config.size.xs} sm={config.size.sm} md={config.size.md} lg={config.size.lg}>
+      <Grid
+        item
+        xs={config.size.xs}
+        sm={config.size.sm}
+        md={config.size.md}
+        lg={config.size.lg}
+      >
         {component}
       </Grid>
     );
@@ -168,7 +177,7 @@ const EditableTable = <T extends object>({
   const renderEditField = (column: keyof T, value: string) => {
     const config = columnConfig[String(column)];
 
-    if (column === 'permissionNames' && config && config.options) {
+    if (column === "permissionNames" && config && config.options) {
       const selectedValues: string[] = Array.isArray(editFields[String(column)])
         ? (editFields[String(column)] as string[])
         : [];
@@ -181,22 +190,24 @@ const EditableTable = <T extends object>({
               setEditField && setEditField(String(column), e.target.value)
             }
             renderValue={(selected) => {
-              if (!Array.isArray(selected)) return '';
+              if (!Array.isArray(selected)) return "";
               const max = 5;
-              const labels = selected
-                .map((v) => config.options?.find(opt => opt.value === v)?.label || v);
+              const labels = selected.map(
+                (v) =>
+                  config.options?.find((opt) => opt.value === v)?.label || v,
+              );
               const visible = labels.slice(0, max);
               const hidden = labels.length > max ? labels.length - max : 0;
               return hidden > 0
-                ? `Permisos: ${visible.join(', ')} +${hidden} más`
-                : `Permisos: ${visible.join(', ')}`;
+                ? `Permisos: ${visible.join(", ")} +${hidden} más`
+                : `Permisos: ${visible.join(", ")}`;
             }}
             sx={{ height: 56 }}
             MenuProps={{
               PaperProps: {
                 style: {
                   maxHeight: 320,
-                  overflowY: 'auto',
+                  overflowY: "auto",
                 },
               },
             }}
@@ -214,7 +225,7 @@ const EditableTable = <T extends object>({
             ))}
           </Select>
         </FormControl>,
-        column
+        column,
       );
     }
 
@@ -228,7 +239,7 @@ const EditableTable = <T extends object>({
           }
           error={!validateField(String(column), value)}
         />,
-        column
+        column,
       );
     }
 
@@ -250,7 +261,7 @@ const EditableTable = <T extends object>({
           value={editFields[String(column)] || ""}
           onChange={handleChange}
         />,
-        column
+        column,
       );
     }
 
@@ -273,8 +284,8 @@ const EditableTable = <T extends object>({
                       typeof rawValue === "string"
                         ? rawValue
                         : rawValue instanceof Date
-                        ? rawValue.toISOString()
-                        : "";
+                          ? rawValue.toISOString()
+                          : "";
 
                     if (!dateStr) return null;
 
@@ -282,7 +293,7 @@ const EditableTable = <T extends object>({
                     return new Date(
                       Number(year),
                       Number(month) - 1,
-                      Number(day)
+                      Number(day),
                     );
                   })()
                 : null
@@ -310,13 +321,13 @@ const EditableTable = <T extends object>({
             onChange={(date) => handleDateChange(date)}
           />
         </LocalizationProvider>,
-        column
+        column,
       );
     }
 
     if (config.type === "select" && config.options) {
       const selectedValue = config.options.some(
-        (opt) => opt.value === editFields[String(column)]
+        (opt) => opt.value === editFields[String(column)],
       )
         ? editFields[String(column)]
         : "";
@@ -338,7 +349,7 @@ const EditableTable = <T extends object>({
             ))}
           </Select>
         </FormControl>,
-        column
+        column,
       );
     }
 
@@ -377,7 +388,7 @@ const EditableTable = <T extends object>({
             ))}
           </Select>
         </FormControl>,
-        column
+        column,
       );
     }
 
@@ -394,7 +405,7 @@ const EditableTable = <T extends object>({
             setEditField &&
               setEditField(
                 String(column),
-                newValue && typeof newValue !== "string" ? newValue.value : ""
+                newValue && typeof newValue !== "string" ? newValue.value : "",
               );
           }}
           inputValue={undefined}
@@ -416,7 +427,7 @@ const EditableTable = <T extends object>({
             />
           )}
         />,
-        column
+        column,
       );
     }
 
@@ -425,7 +436,7 @@ const EditableTable = <T extends object>({
         ? (editFields[String(column)] as string[])
         : [];
       const selectedOptions = config.options.filter((opt) =>
-        selectedValues.some((val) => val === opt.value)
+        selectedValues.some((val) => val === opt.value),
       );
 
       return wrapWithGrid(
@@ -437,7 +448,7 @@ const EditableTable = <T extends object>({
             setEditField &&
               setEditField(
                 String(column),
-                newValue.map((option) => option.value)
+                newValue.map((option) => option.value),
               );
           }}
           options={config.options}
@@ -460,7 +471,7 @@ const EditableTable = <T extends object>({
             />
           )}
         />,
-        column
+        column,
       );
     }
 
@@ -473,7 +484,7 @@ const EditableTable = <T extends object>({
         }
         error={!validateField(String(column), value)}
       />,
-      column
+      column,
     );
   };
 
@@ -495,7 +506,7 @@ const EditableTable = <T extends object>({
 
   const paginatedData = sortedData.slice(
     page * rowsPerPage,
-    page * rowsPerPage + rowsPerPage
+    page * rowsPerPage + rowsPerPage,
   );
 
   const columnConfig: Record<
@@ -519,86 +530,86 @@ const EditableTable = <T extends object>({
       };
     }
   > = {
-    licensePlate: { 
+    licensePlate: {
       type: "masked",
-      size: { xs: 6, sm: 4, md: 2, lg: 0.5 }
+      size: { xs: 6, sm: 4, md: 2, lg: 0.5 },
     },
-    parkingLot: { 
+    parkingLot: {
       type: "masked",
-      size: { xs: 6, sm: 4, md: 2, lg: 1 }
+      size: { xs: 6, sm: 4, md: 2, lg: 1 },
     },
     ticket: {
       type: "text",
-      size: { xs: 6, sm: 4, md: 2, lg: 0.5 }
+      size: { xs: 6, sm: 4, md: 2, lg: 0.5 },
     },
-    brand: { 
-      type: "autocomplete", 
+    brand: {
+      type: "autocomplete",
       options: BRANDS_LIST,
-      size: { xs: 6, sm: 4, md: 2, lg: 4 }
+      size: { xs: 6, sm: 4, md: 2, lg: 4 },
     },
-    color: { 
-      type: "autocomplete", 
+    color: {
+      type: "autocomplete",
       options: COLORS_LIST,
-      size: { xs: 6, sm: 4, md: 2, lg: 4 }
+      size: { xs: 6, sm: 4, md: 2, lg: 4 },
     },
     notes: {
       type: "text",
-      size: { xs: 6, sm: 4, md: 2, lg: 2 }
+      size: { xs: 6, sm: 4, md: 2, lg: 2 },
     },
-    parkingDate: { 
-      type: "date", 
+    parkingDate: {
+      type: "date",
       hidden: true,
-      size: { xs: 6, sm: 4, md: 2, lg: 2 }
+      size: { xs: 6, sm: 4, md: 2, lg: 2 },
     },
-    
+
     firstName: {
       type: "text",
-      size: { xs: 6, sm: 6, md: 6, lg: 6 }
+      size: { xs: 6, sm: 6, md: 6, lg: 6 },
     },
     lastName: {
       type: "text",
-      size: { xs: 6, sm: 6, md: 6, lg: 6 }
+      size: { xs: 6, sm: 6, md: 6, lg: 6 },
     },
-    
+
     label: {
       type: "text",
-      size: { xs: 6, sm: 6, md: 3, lg: 3 }
+      size: { xs: 6, sm: 6, md: 3, lg: 3 },
     },
-    days: { 
-      type: "select multiple", 
+    days: {
+      type: "select multiple",
       options: DAYS_LIST,
-      size: { xs: 6, sm: 6, md: 3, lg: 3 }
+      size: { xs: 6, sm: 6, md: 3, lg: 3 },
     },
     hours: {
       type: "text",
-      size: { xs: 6, sm: 6, md: 3, lg: 2 }
+      size: { xs: 6, sm: 6, md: 3, lg: 2 },
     },
     specialSchedule: {
       type: "text",
-      size: { xs: 6, sm: 6, md: 3, lg: 4 }
+      size: { xs: 6, sm: 6, md: 3, lg: 4 },
     },
-    
+
     email: {
       type: "text",
-      size: { xs: 12, sm: 12, md: 2, lg: 2 }
+      size: { xs: 12, sm: 12, md: 2, lg: 2 },
     },
     username: {
       type: "text",
-      size: { xs: 6, sm: 6, md: 2, lg: 2 }
+      size: { xs: 6, sm: 6, md: 2, lg: 2 },
     },
     password: {
       type: "text",
-      size: { xs: 6, sm: 6, md: 2, lg: 2 }
+      size: { xs: 6, sm: 6, md: 2, lg: 2 },
     },
     roleName: {
       type: "select",
       options: roles.map((role) => ({ value: role.name, label: role.name })),
-      size: { xs: 6, sm: 6, md: 2, lg: 2 }
+      size: { xs: 6, sm: 6, md: 2, lg: 2 },
     },
-    
+
     name: {
       type: "text",
-      size: { xs: 12, sm: 12, md: 4, lg: 3 }
+      size: { xs: 12, sm: 12, md: 4, lg: 3 },
     },
     permissionNames: {
       type: "autocomplete multiple",
@@ -606,9 +617,9 @@ const EditableTable = <T extends object>({
         value: permission.name,
         label: permission.name,
       })),
-      size: { xs: 12, sm: 12, md: 8, lg: 9 }
+      size: { xs: 12, sm: 12, md: 8, lg: 9 },
     },
-    
+
     updatedAt: { type: "date", hidden: true },
     route: {
       type: "select",
@@ -617,7 +628,7 @@ const EditableTable = <T extends object>({
         { value: "GAM Express", label: "GAM Express" },
         { value: "Rural", label: "Rural" },
       ],
-      size: { xs: 6, sm: 6, md: 3, lg: 3 }
+      size: { xs: 6, sm: 6, md: 3, lg: 3 },
     },
     status: {
       type: "select",
@@ -626,24 +637,24 @@ const EditableTable = <T extends object>({
         { value: "En Tránsito", label: "En Tránsito" },
         { value: "Entregado", label: "Entregado" },
       ],
-      size: { xs: 6, sm: 6, md: 3, lg: 3 }
+      size: { xs: 6, sm: 6, md: 3, lg: 3 },
     },
     driver: {
       type: "text",
-      size: { xs: 6, sm: 6, md: 3, lg: 3 }
+      size: { xs: 6, sm: 6, md: 3, lg: 3 },
     },
     distance: {
       type: "text",
-      size: { xs: 6, sm: 6, md: 2, lg: 2 }
+      size: { xs: 6, sm: 6, md: 2, lg: 2 },
     },
     trackingNumber: {
       type: "text",
-      size: { xs: 6, sm: 6, md: 3, lg: 3 }
+      size: { xs: 6, sm: 6, md: 3, lg: 3 },
     },
-    createdAt: { 
-      type: "date", 
+    createdAt: {
+      type: "date",
       hidden: true,
-      size: { xs: 6, sm: 6, md: 3, lg: 3 }
+      size: { xs: 6, sm: 6, md: 3, lg: 3 },
     },
   };
 
@@ -702,7 +713,10 @@ const EditableTable = <T extends object>({
                 columns
                   .filter((column) => columnConfig[String(column)]?.hidden)
                   .map((column) => (
-                    <TableCell key={`header-${String(column)}`} className="tableCell">
+                    <TableCell
+                      key={`header-${String(column)}`}
+                      className="tableCell"
+                    >
                       {translateColumnHeaderToSpanish(column)}
                     </TableCell>
                   ))}
@@ -716,7 +730,7 @@ const EditableTable = <T extends object>({
               const rowId = getRowId(row);
               const isCurrentUser = rowId === currentUser?.id;
               const isUser = "username" in row;
-              
+
               return (
                 <TableRow hover tabIndex={-1} key={getRowId(row)}>
                   {columns
@@ -724,15 +738,29 @@ const EditableTable = <T extends object>({
                     .map((column) => {
                       const value = row[column];
                       const isPermissionNames = column === "permissionNames";
-                      if (isPermissionNames && Array.isArray(value) && editRowId !== getRowId(row)) {
+                      if (
+                        isPermissionNames &&
+                        Array.isArray(value) &&
+                        editRowId !== getRowId(row)
+                      ) {
                         const expanded = !!expandedRows[rowId];
                         const maxVisible = 4;
                         const showAll = expanded && value.length > maxVisible;
-                        const visible = showAll ? value : value.slice(0, maxVisible);
+                        const visible = showAll
+                          ? value
+                          : value.slice(0, maxVisible);
                         const hiddenCount = value.length - maxVisible;
                         return (
                           <TableCell key={String(column)} className="tableCell">
-                            <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5, py: 0.5, minHeight: 36 }}>
+                            <Box
+                              sx={{
+                                display: "flex",
+                                flexWrap: "wrap",
+                                gap: 0.5,
+                                py: 0.5,
+                                minHeight: 36,
+                              }}
+                            >
                               {visible.map((perm: string) => (
                                 <Chip
                                   key={perm}
@@ -740,9 +768,9 @@ const EditableTable = <T extends object>({
                                   size="small"
                                   sx={{
                                     backgroundColor: theme.palette.primary.main,
-                                    color: '#fff',
+                                    color: "#fff",
                                     fontWeight: 500,
-                                    mb: 0.5
+                                    mb: 0.5,
                                   }}
                                 />
                               ))}
@@ -751,8 +779,20 @@ const EditableTable = <T extends object>({
                                   label={`Ver más`}
                                   size="small"
                                   variant="outlined"
-                                  sx={{ borderColor: theme.palette.primary.main, color: theme.palette.primary.main, fontWeight: 500, background: '#fff', cursor: 'pointer', mb: 0.5 }}
-                                  onClick={() => setExpandedRows((prev) => ({ ...prev, [rowId]: true }))}
+                                  sx={{
+                                    borderColor: theme.palette.primary.main,
+                                    color: theme.palette.primary.main,
+                                    fontWeight: 500,
+                                    background: "#fff",
+                                    cursor: "pointer",
+                                    mb: 0.5,
+                                  }}
+                                  onClick={() =>
+                                    setExpandedRows((prev) => ({
+                                      ...prev,
+                                      [rowId]: true,
+                                    }))
+                                  }
                                 />
                               )}
                               {showAll && (
@@ -760,8 +800,20 @@ const EditableTable = <T extends object>({
                                   label="Ver menos"
                                   size="small"
                                   variant="outlined"
-                                  sx={{ borderColor: theme.palette.primary.main, color: theme.palette.primary.main, fontWeight: 500, background: '#fff', cursor: 'pointer', mb: 0.5 }}
-                                  onClick={() => setExpandedRows((prev) => ({ ...prev, [rowId]: false }))}
+                                  sx={{
+                                    borderColor: theme.palette.primary.main,
+                                    color: theme.palette.primary.main,
+                                    fontWeight: 500,
+                                    background: "#fff",
+                                    cursor: "pointer",
+                                    mb: 0.5,
+                                  }}
+                                  onClick={() =>
+                                    setExpandedRows((prev) => ({
+                                      ...prev,
+                                      [rowId]: false,
+                                    }))
+                                  }
                                 />
                               )}
                             </Box>
@@ -773,85 +825,112 @@ const EditableTable = <T extends object>({
                           {editRowId === getRowId(row) ? (
                             renderEditField(
                               column,
-                              (editFields[String(column)] || "").toString()
+                              (editFields[String(column)] || "").toString(),
                             )
-                          ) : editRowId === getRowId(row) && column === "permissionNames" ? (
+                          ) : editRowId === getRowId(row) &&
+                            column === "permissionNames" ? (
                             Array.isArray(row[column]) ? (
-                              <Stack direction="row" spacing={1} flexWrap="nowrap">
-                                {(row[column] as string[]).map((item: string, index: number) => (
-                                  <Chip
-                                    key={index}
-                                    label={item}
-                                    sx={{
-                                      backgroundColor: theme.palette.primary.main,
-                                      color: '#fff',
-                                      '& .MuiChip-label': { color: '#fff' },
-                                    }}
-                                  />
-                                ))}
+                              <Stack
+                                direction="row"
+                                spacing={1}
+                                flexWrap="nowrap"
+                              >
+                                {(row[column] as string[]).map(
+                                  (item: string, index: number) => (
+                                    <Chip
+                                      key={index}
+                                      label={item}
+                                      sx={{
+                                        backgroundColor:
+                                          theme.palette.primary.main,
+                                        color: "#fff",
+                                        "& .MuiChip-label": { color: "#fff" },
+                                      }}
+                                    />
+                                  ),
+                                )}
                               </Stack>
                             ) : (
-                              <Typography component="span">{String(row[column] ?? "")}</Typography>
+                              <Typography component="span">
+                                {String(row[column] ?? "")}
+                              </Typography>
                             )
                           ) : column === "days" ? (
-                            Array.isArray(row[column])
-                              ? (
-                                  <Typography component="span">
-                                    {(row[column] as string[])
-                                      .map((d: string) => capitalizeFirstLetter(translateDayOptionsToSpanish(String(d))))
-                                      .join(", ")}
-                                  </Typography>
-                                )
-                              : (
-                                  <Typography component="span">
-                                    {capitalizeFirstLetter(translateDayOptionsToSpanish(String(row[column])))}
-                                  </Typography>
-                                )
+                            Array.isArray(row[column]) ? (
+                              <Typography component="span">
+                                {(row[column] as string[])
+                                  .map((d: string) =>
+                                    capitalizeFirstLetter(
+                                      translateDayOptionsToSpanish(String(d)),
+                                    ),
+                                  )
+                                  .join(", ")}
+                              </Typography>
+                            ) : (
+                              <Typography component="span">
+                                {capitalizeFirstLetter(
+                                  translateDayOptionsToSpanish(
+                                    String(row[column]),
+                                  ),
+                                )}
+                              </Typography>
+                            )
                           ) : Array.isArray(row[column]) ? (
                             <Stack
                               direction="row"
                               spacing={1}
                               sx={{
                                 rowGap: 2,
-                                flexWrap: column === "permissionNames" ? "wrap" : "nowrap",
+                                flexWrap:
+                                  column === "permissionNames"
+                                    ? "wrap"
+                                    : "nowrap",
                               }}
                             >
-                              {(row[column] as string[]).map((item: string, index: number, array: string[]) =>
-                                column === "permissionNames" ? (
-                                  <Chip
-                                    key={index}
-                                    label={item}
-                                    sx={{
-                                      backgroundColor: theme.palette.primary.main,
-                                      color: '#fff',
-                                      '& .MuiChip-label': { color: '#fff' },
-                                    }}
-                                  />
-                                ) : (
-                                  <Typography key={index} component="span">
-                                    {item}
-                                    {index < array.length - 1 ? ", " : ""}
-                                  </Typography>
-                                )
+                              {(row[column] as string[]).map(
+                                (
+                                  item: string,
+                                  index: number,
+                                  array: string[],
+                                ) =>
+                                  column === "permissionNames" ? (
+                                    <Chip
+                                      key={index}
+                                      label={item}
+                                      sx={{
+                                        backgroundColor:
+                                          theme.palette.primary.main,
+                                        color: "#fff",
+                                        "& .MuiChip-label": { color: "#fff" },
+                                      }}
+                                    />
+                                  ) : (
+                                    <Typography key={index} component="span">
+                                      {item}
+                                      {index < array.length - 1 ? ", " : ""}
+                                    </Typography>
+                                  ),
                               )}
                             </Stack>
                           ) : column === "email" ? (
-                            <Typography 
-                              component="a" 
+                            <Typography
+                              component="a"
                               href={`mailto:${String(row[column] ?? "")}`}
                               sx={{
                                 color: theme.palette.primary.main,
-                                textDecoration: 'none',
-                                cursor: 'pointer',
-                                '&:hover': {
-                                  textDecoration: 'underline',
+                                textDecoration: "none",
+                                cursor: "pointer",
+                                "&:hover": {
+                                  textDecoration: "underline",
                                 },
                               }}
                             >
                               {String(row[column] ?? "")}
                             </Typography>
                           ) : (
-                            <Typography component="span">{String(row[column] ?? "")}</Typography>
+                            <Typography component="span">
+                              {String(row[column] ?? "")}
+                            </Typography>
                           )}
                         </TableCell>
                       );
@@ -860,19 +939,25 @@ const EditableTable = <T extends object>({
                     columns
                       .filter((column) => columnConfig[String(column)]?.hidden)
                       .map((column) => (
-                        <TableCell key={`edit-${String(column)}`} className="tableCell">
+                        <TableCell
+                          key={`edit-${String(column)}`}
+                          className="tableCell"
+                        >
                           {renderEditField(
                             column,
-                            (editFields[String(column)] || "").toString()
+                            (editFields[String(column)] || "").toString(),
                           )}
                         </TableCell>
                       ))}
-                  {editRowId !== null && editRowId !== getRowId(row) &&
+                  {editRowId !== null &&
+                    editRowId !== getRowId(row) &&
                     columns
                       .filter((column) => columnConfig[String(column)]?.hidden)
                       .map((column) => (
-                        <TableCell key={`empty-${String(column)}`} className="tableCell">
-                        </TableCell>
+                        <TableCell
+                          key={`empty-${String(column)}`}
+                          className="tableCell"
+                        ></TableCell>
                       ))}
                   {!noActions && (
                     <TableCell>
@@ -912,21 +997,23 @@ const EditableTable = <T extends object>({
                           <>
                             {hasEditPermissions && (
                               <>
-                                {isUser && isExpanded && handlePasswordModal && (
-                                  <Tooltip title="Cambiar Contraseña" arrow>
-                                    <Box>
-                                      <IconButton
-                                        color="primary"
-                                        onClick={() => {
-                                          setPasswordUserId(getRowId(row));
-                                          setPasswordModalOpen(true);
-                                        }}
-                                      >
-                                        <PasswordIcon />
-                                      </IconButton>
-                                    </Box>
-                                  </Tooltip>
-                                )}
+                                {isUser &&
+                                  isExpanded &&
+                                  handlePasswordModal && (
+                                    <Tooltip title="Cambiar Contraseña" arrow>
+                                      <Box>
+                                        <IconButton
+                                          color="primary"
+                                          onClick={() => {
+                                            setPasswordUserId(getRowId(row));
+                                            setPasswordModalOpen(true);
+                                          }}
+                                        >
+                                          <PasswordIcon />
+                                        </IconButton>
+                                      </Box>
+                                    </Tooltip>
+                                  )}
                                 <Tooltip title="Editar" arrow>
                                   <Box>
                                     <IconButton
@@ -975,7 +1062,9 @@ const EditableTable = <T extends object>({
                                           color="error"
                                           onClick={() =>
                                             handleOpenDeleteDialog &&
-                                            handleOpenDeleteDialog(getRowId(row))
+                                            handleOpenDeleteDialog(
+                                              getRowId(row),
+                                            )
                                           }
                                         >
                                           <DeleteIcon />
@@ -1032,7 +1121,7 @@ const EditableTable = <T extends object>({
         labelDisplayedRows={() => ""}
         ActionsComponent={PaginationActions}
       />
-      
+
       {/* Modal de cambio de contraseña */}
       {passwordUserId !== null && handlePasswordModal && (
         <Dialog
@@ -1044,13 +1133,15 @@ const EditableTable = <T extends object>({
           maxWidth="sm"
           fullWidth
         >
-          <DialogTitle sx={{ 
-            backgroundColor: theme.palette.primary.main, 
-            color: theme.palette.primary.contrastText,
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'space-between'
-          }}>
+          <DialogTitle
+            sx={{
+              backgroundColor: theme.palette.primary.main,
+              color: theme.palette.primary.contrastText,
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "space-between",
+            }}
+          >
             <Typography variant="h6" sx={{ fontWeight: 600 }}>
               Cambiar Contraseña
             </Typography>
@@ -1061,8 +1152,8 @@ const EditableTable = <T extends object>({
               }}
               sx={{
                 color: theme.palette.primary.contrastText,
-                '&:hover': {
-                  backgroundColor: 'rgba(255,255,255,0.1)',
+                "&:hover": {
+                  backgroundColor: "rgba(255,255,255,0.1)",
                 },
               }}
             >

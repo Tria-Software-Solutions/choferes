@@ -27,13 +27,13 @@ import {
   validateEmail,
   validateUsername,
   validatePassword,
-  validatePasswordMatch
-} from '../../utils/userValidation';
-import CustomTextField from '../../components/Textfield/CustomTextField';
-import PersonOutlinedIcon from '@mui/icons-material/PersonOutlined';
-import EmailOutlinedIcon from '@mui/icons-material/EmailOutlined';
-import AccountCircleOutlinedIcon from '@mui/icons-material/AccountCircleOutlined';
-import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined';
+  validatePasswordMatch,
+} from "../../utils/userValidation";
+import CustomTextField from "../../components/Textfield/CustomTextField";
+import PersonOutlinedIcon from "@mui/icons-material/PersonOutlined";
+import EmailOutlinedIcon from "@mui/icons-material/EmailOutlined";
+import AccountCircleOutlinedIcon from "@mui/icons-material/AccountCircleOutlined";
+import InfoOutlinedIcon from "@mui/icons-material/InfoOutlined";
 
 const Settings: React.FC = () => {
   const dispatch = useDispatch<AppDispatch>();
@@ -80,7 +80,10 @@ const Settings: React.FC = () => {
   const validatePasswordFields = useCallback(
     (fields: typeof passwordFields) => {
       const passError = validatePassword(fields.newPassword);
-      const matchError = validatePasswordMatch(fields.newPassword, fields.confirmNewPassword);
+      const matchError = validatePasswordMatch(
+        fields.newPassword,
+        fields.confirmNewPassword,
+      );
       if (passError) {
         setPasswordError(passError);
         return false;
@@ -92,7 +95,7 @@ const Settings: React.FC = () => {
       setPasswordError(null);
       return true;
     },
-    []
+    [],
   );
 
   useEffect(() => {
@@ -103,7 +106,9 @@ const Settings: React.FC = () => {
       editFields.username !== currentUser?.username;
 
     (async () => {
-      const isValid = Object.entries(editFields).every(([key, value]) => validateField(key, value) === "");
+      const isValid = Object.entries(editFields).every(
+        ([key, value]) => validateField(key, value) === "",
+      );
       setIsEditFormValid(isValid && hasChanges);
     })();
   }, [editFields, currentUser, validateField]);
@@ -120,7 +125,7 @@ const Settings: React.FC = () => {
   };
 
   const handleEmailChange = async (
-    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
   ) => {
     const value = e.target.value.trim();
     if (!value) return;
@@ -134,13 +139,13 @@ const Settings: React.FC = () => {
   };
 
   const getUserByUsername = async (
-    username: string
+    username: string,
   ): Promise<User | undefined> => {
     return users.find((user) => user.username === username);
   };
 
   const handleUsernameChange = async (
-    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
   ) => {
     const value = e.target.value.trim();
     if (!value) return;
@@ -180,7 +185,7 @@ const Settings: React.FC = () => {
   };
 
   const handleNewPassword = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
   ) => {
     setPasswordFields({
       ...passwordFields,
@@ -189,7 +194,7 @@ const Settings: React.FC = () => {
   };
 
   const handleConfirmNewPassword = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
   ) => {
     setPasswordFields({
       ...passwordFields,
@@ -217,7 +222,7 @@ const Settings: React.FC = () => {
           updateUserPassword({
             id: currentUser.id,
             password: passwordFields.newPassword,
-          })
+          }),
         );
       } else {
         throw new Error("Current User is null");
@@ -234,8 +239,8 @@ const Settings: React.FC = () => {
   };
 
   return (
-    <Box sx={{ width: '100%', maxWidth: 1200, mx: 'auto', p: 3 }}>
-      <Box sx={{ display: 'flex', alignItems: 'center', mb: 3 }}>
+    <Box sx={{ width: "100%", maxWidth: 1200, mx: "auto", p: 3 }}>
+      <Box sx={{ display: "flex", alignItems: "center", mb: 3 }}>
         <SettingsIcon sx={{ fontSize: 32, mr: 2 }} />
         <Typography variant="h4" fontWeight={700}>
           {PAGE_TITLE.SETTINGS}
@@ -255,10 +260,16 @@ const Settings: React.FC = () => {
                 label="Nombre"
                 name="firstName"
                 value={editFields.firstName}
-                onChange={e => setEditFields({ ...editFields, firstName: e.target.value })}
+                onChange={(e) =>
+                  setEditFields({ ...editFields, firstName: e.target.value })
+                }
                 error={!!validateName(editFields.firstName)}
                 helperText={validateName(editFields.firstName)}
-                icon={<PersonOutlinedIcon sx={{ color: theme.palette.text.secondary }} />}
+                icon={
+                  <PersonOutlinedIcon
+                    sx={{ color: theme.palette.text.secondary }}
+                  />
+                }
               />
             </Grid>
             <Grid item xs={12} sm={6}>
@@ -266,10 +277,16 @@ const Settings: React.FC = () => {
                 label="Apellido"
                 name="lastName"
                 value={editFields.lastName}
-                onChange={e => setEditFields({ ...editFields, lastName: e.target.value })}
+                onChange={(e) =>
+                  setEditFields({ ...editFields, lastName: e.target.value })
+                }
                 error={!!validateName(editFields.lastName)}
                 helperText={validateName(editFields.lastName)}
-                icon={<PersonOutlinedIcon sx={{ color: theme.palette.text.secondary }} />}
+                icon={
+                  <PersonOutlinedIcon
+                    sx={{ color: theme.palette.text.secondary }}
+                  />
+                }
               />
             </Grid>
             <Grid item xs={12}>
@@ -277,10 +294,17 @@ const Settings: React.FC = () => {
                 label="Correo electrónico"
                 name="email"
                 value={editFields.email}
-                onChange={e => { setEditFields({ ...editFields, email: e.target.value }); handleEmailChange(e); }}
+                onChange={(e) => {
+                  setEditFields({ ...editFields, email: e.target.value });
+                  handleEmailChange(e);
+                }}
                 error={!!validateEmail(editFields.email) || !!infoError}
                 helperText={infoError || validateEmail(editFields.email)}
-                icon={<EmailOutlinedIcon sx={{ color: theme.palette.text.secondary }} />}
+                icon={
+                  <EmailOutlinedIcon
+                    sx={{ color: theme.palette.text.secondary }}
+                  />
+                }
               />
             </Grid>
             <Grid item xs={12}>
@@ -288,39 +312,63 @@ const Settings: React.FC = () => {
                 label="Usuario"
                 name="username"
                 value={editFields.username}
-                onChange={e => { setEditFields({ ...editFields, username: e.target.value }); handleUsernameChange(e); }}
+                onChange={(e) => {
+                  setEditFields({ ...editFields, username: e.target.value });
+                  handleUsernameChange(e);
+                }}
                 error={!!validateUsername(editFields.username) || !!infoError}
                 helperText={infoError || validateUsername(editFields.username)}
-                icon={<AccountCircleOutlinedIcon sx={{ color: theme.palette.text.secondary }} />}
+                icon={
+                  <AccountCircleOutlinedIcon
+                    sx={{ color: theme.palette.text.secondary }}
+                  />
+                }
               />
             </Grid>
           </Grid>
           <Box
             sx={{
-              display: 'flex',
-              alignItems: 'center',
+              display: "flex",
+              alignItems: "center",
               p: { xs: 1.5, sm: 2 },
               backgroundColor: theme.palette.action.hover,
               borderRadius: 1,
-              border: '1px solid',
+              border: "1px solid",
               borderColor: theme.palette.divider,
               mb: 2,
               mt: 2,
             }}
           >
             <Box sx={{ mr: { xs: 1, sm: 2 }, color: theme.palette.info.main }}>
-              <InfoOutlinedIcon sx={{ color: theme.palette.info.main, mr: { xs: 1, sm: 2 } }} />
+              <InfoOutlinedIcon
+                sx={{ color: theme.palette.info.main, mr: { xs: 1, sm: 2 } }}
+              />
             </Box>
             <Box>
-              <Box sx={{ fontWeight: 600, color: theme.palette.text.primary, mb: 0.5, fontSize: 'clamp(0.875rem, 1.5vw, 1rem)' }}>
+              <Box
+                sx={{
+                  fontWeight: 600,
+                  color: theme.palette.text.primary,
+                  mb: 0.5,
+                  fontSize: "clamp(0.875rem, 1.5vw, 1rem)",
+                }}
+              >
                 Recomendación
               </Box>
-              <Box sx={{ color: theme.palette.text.secondary, fontSize: 'clamp(0.75rem, 1.25vw, 0.875rem)' }}>
-                Verifica que tus datos sean correctos antes de guardar los cambios.
+              <Box
+                sx={{
+                  color: theme.palette.text.secondary,
+                  fontSize: "clamp(0.75rem, 1.25vw, 0.875rem)",
+                }}
+              >
+                Verifica que tus datos sean correctos antes de guardar los
+                cambios.
               </Box>
             </Box>
           </Box>
-          <Box sx={{ display: "flex", justifyContent: "flex-end", gap: 2, mt: 2 }}>
+          <Box
+            sx={{ display: "flex", justifyContent: "flex-end", gap: 2, mt: 2 }}
+          >
             <Button
               variant="contained"
               color="primary"
@@ -329,7 +377,7 @@ const Settings: React.FC = () => {
                 height: "56px",
                 px: 4,
                 py: 1.5,
-                fontSize: '1rem',
+                fontSize: "1rem",
                 fontWeight: 600,
                 minWidth: 140,
               }}
@@ -340,8 +388,19 @@ const Settings: React.FC = () => {
             </Button>
           </Box>
         </Grid>
-        <Grid item xs={12} md={1} display="flex" justifyContent="center" alignItems="stretch">
-          <Divider orientation="vertical" flexItem sx={{ display: { xs: 'none', md: 'block' } }} />
+        <Grid
+          item
+          xs={12}
+          md={1}
+          display="flex"
+          justifyContent="center"
+          alignItems="stretch"
+        >
+          <Divider
+            orientation="vertical"
+            flexItem
+            sx={{ display: { xs: "none", md: "block" } }}
+          />
         </Grid>
         <Grid item xs={12} md={5}>
           <Typography variant="h5" fontWeight="bold" mb={1}>
@@ -361,7 +420,11 @@ const Settings: React.FC = () => {
                 error={!!passwordError}
                 helperText={passwordError}
                 endAdornment={
-                  <IconButton onClick={handleToggleNewPassword} edge="end" size="small">
+                  <IconButton
+                    onClick={handleToggleNewPassword}
+                    edge="end"
+                    size="small"
+                  >
                     {showNewPassword ? <VisibilityOff /> : <Visibility />}
                   </IconButton>
                 }
@@ -377,8 +440,16 @@ const Settings: React.FC = () => {
                 error={!!passwordError}
                 helperText={passwordError}
                 endAdornment={
-                  <IconButton onClick={handleToggleConfirmNewPassword} edge="end" size="small">
-                    {showConfirmNewPassword ? <VisibilityOff /> : <Visibility />}
+                  <IconButton
+                    onClick={handleToggleConfirmNewPassword}
+                    edge="end"
+                    size="small"
+                  >
+                    {showConfirmNewPassword ? (
+                      <VisibilityOff />
+                    ) : (
+                      <Visibility />
+                    )}
                   </IconButton>
                 }
               />
@@ -386,31 +457,48 @@ const Settings: React.FC = () => {
           </Grid>
           <Box
             sx={{
-              display: 'flex',
-              alignItems: 'center',
+              display: "flex",
+              alignItems: "center",
               p: { xs: 1.5, sm: 2 },
               backgroundColor: theme.palette.action.hover,
               borderRadius: 1,
-              border: '1px solid',
+              border: "1px solid",
               borderColor: theme.palette.divider,
               mb: 2,
               mt: 2,
             }}
           >
             <Box sx={{ mr: { xs: 1, sm: 2 }, color: theme.palette.info.main }}>
-              <InfoOutlinedIcon sx={{ color: theme.palette.info.main, mr: { xs: 1, sm: 2 } }} />
+              <InfoOutlinedIcon
+                sx={{ color: theme.palette.info.main, mr: { xs: 1, sm: 2 } }}
+              />
             </Box>
             <Box>
-              <Box sx={{ fontWeight: 600, color: theme.palette.text.primary, mb: 0.5, fontSize: 'clamp(0.875rem, 1.5vw, 1rem)' }}>
+              <Box
+                sx={{
+                  fontWeight: 600,
+                  color: theme.palette.text.primary,
+                  mb: 0.5,
+                  fontSize: "clamp(0.875rem, 1.5vw, 1rem)",
+                }}
+              >
                 Consejo de seguridad
               </Box>
-              <Box sx={{ color: theme.palette.text.secondary, fontSize: 'clamp(0.75rem, 1.25vw, 0.875rem)' }}>
-                Usa una contraseña única y no la compartas con nadie.<br/>
+              <Box
+                sx={{
+                  color: theme.palette.text.secondary,
+                  fontSize: "clamp(0.75rem, 1.25vw, 0.875rem)",
+                }}
+              >
+                Usa una contraseña única y no la compartas con nadie.
+                <br />
                 Debe tener mínimo 8 caracteres, una mayúscula y un número.
               </Box>
             </Box>
           </Box>
-          <Box sx={{ display: "flex", justifyContent: "flex-end", gap: 2, mt: 2 }}>
+          <Box
+            sx={{ display: "flex", justifyContent: "flex-end", gap: 2, mt: 2 }}
+          >
             <Button
               variant="contained"
               color="primary"
@@ -419,7 +507,7 @@ const Settings: React.FC = () => {
                 height: "56px",
                 px: 4,
                 py: 1.5,
-                fontSize: '1rem',
+                fontSize: "1rem",
                 fontWeight: 600,
                 minWidth: 140,
               }}

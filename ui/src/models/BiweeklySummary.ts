@@ -1,5 +1,5 @@
 export interface BiweeklySummary {
-  id: number; 
+  id: number;
   employeeId: number;
   biweekNumber: number;
   month: number;

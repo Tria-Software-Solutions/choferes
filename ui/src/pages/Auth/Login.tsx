@@ -56,9 +56,9 @@ const Login: React.FC = () => {
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     if (!validateFields()) return;
-    
+
     setIsSubmitting(true);
 
     try {
@@ -122,7 +122,8 @@ const Login: React.FC = () => {
                   width: 80,
                   height: 80,
                   borderRadius: "50%",
-                  background: "linear-gradient(135deg, #000000 0%, #333333 100%)",
+                  background:
+                    "linear-gradient(135deg, #000000 0%, #333333 100%)",
                   mb: 2,
                   boxShadow: "0 8px 24px rgba(0,0,0,0.15)",
                   transition: "transform 0.3s ease, box-shadow 0.3s ease",
@@ -173,7 +174,9 @@ const Login: React.FC = () => {
                 variant="outlined"
                 value={fields.identifier}
                 autoComplete="username"
-                onChange={(e) => handleFieldChange("identifier", e.target.value)}
+                onChange={(e) =>
+                  handleFieldChange("identifier", e.target.value)
+                }
                 error={!!errors.identifier}
                 helperText={errors.identifier}
                 disabled={isSubmitting}
@@ -265,7 +268,8 @@ const Login: React.FC = () => {
                 sx={{
                   minHeight: 56,
                   borderRadius: 2,
-                  background: "linear-gradient(135deg, #000000 0%, #333333 100%)",
+                  background:
+                    "linear-gradient(135deg, #000000 0%, #333333 100%)",
                   color: "#ffffff",
                   fontWeight: 600,
                   fontSize: "1rem",
@@ -273,7 +277,8 @@ const Login: React.FC = () => {
                   boxShadow: "0 4px 12px rgba(0,0,0,0.15)",
                   transition: "all 0.3s ease",
                   "&:hover": {
-                    background: "linear-gradient(135deg, #333333 0%, #000000 100%)",
+                    background:
+                      "linear-gradient(135deg, #333333 0%, #000000 100%)",
                     transform: "translateY(-2px)",
                     boxShadow: "0 8px 24px rgba(0,0,0,0.25)",
                   },

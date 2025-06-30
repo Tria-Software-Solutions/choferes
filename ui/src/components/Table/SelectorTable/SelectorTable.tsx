@@ -63,7 +63,7 @@ import InfoOutlinedIcon from "@mui/icons-material/InfoOutlined";
 import AccessTimeRoundedIcon from "@mui/icons-material/AccessTimeRounded";
 import MoreTimeIcon from "@mui/icons-material/MoreTime";
 import CloseRoundedIcon from "@mui/icons-material/CloseRounded";
-import CalendarMonthOutlinedIcon from '@mui/icons-material/CalendarMonthOutlined';
+import CalendarMonthOutlinedIcon from "@mui/icons-material/CalendarMonthOutlined";
 
 interface SelectorTableProps {
   filteredEmployees: Employee[];
@@ -80,12 +80,12 @@ interface SelectorTableProps {
   handleChange: (
     event: SelectChangeEvent<string>,
     employeeId: number,
-    date: Date
+    date: Date,
   ) => void;
   handleAdjustTime: (
     employeeId: number,
     condition: string,
-    timeAdjustment: number
+    timeAdjustment: number,
   ) => void;
   permissions?: string[];
   onInfoClick?: (employee: Employee) => void;
@@ -116,7 +116,8 @@ const SelectorTable: React.FC<SelectorTableProps> = React.memo(
     const [orderDirection, setOrderDirection] = useState<"asc" | "desc">("asc");
     const [page, setPage] = useState(0);
     const [rowsPerPage, setRowsPerPage] = useState(5);
-    const [openAdjustDialogEmployee, setOpenAdjustDialogEmployee] = useState<Employee | null>(null);
+    const [openAdjustDialogEmployee, setOpenAdjustDialogEmployee] =
+      useState<Employee | null>(null);
 
     const theme = useTheme();
     const isSmallScreen = useMediaQuery(theme.breakpoints.down("sm"));
@@ -131,7 +132,7 @@ const SelectorTable: React.FC<SelectorTableProps> = React.memo(
 
     const currentWeek = useMemo(
       () => getCurrentWeekDates(weekOffset),
-      [weekOffset]
+      [weekOffset],
     );
     const multiplePeriods = getInvolvedPeriods(currentWeek);
 
@@ -150,7 +151,7 @@ const SelectorTable: React.FC<SelectorTableProps> = React.memo(
     const resultHoursForPeriod = (
       employee: Employee,
       period: "weekly" | "biweekly" | "monthly",
-      type: "totalHours" | "overtime"
+      type: "totalHours" | "overtime",
     ) => {
       if (type === "totalHours") {
         return calculateTotalHoursAndOvertimeForPeriod(
@@ -162,7 +163,7 @@ const SelectorTable: React.FC<SelectorTableProps> = React.memo(
           year,
           weeklySummaries,
           biweeklySummaries,
-          monthlySummaries
+          monthlySummaries,
         ).totalHours;
       } else {
         return calculateTotalHoursAndOvertimeForPeriod(
@@ -174,7 +175,7 @@ const SelectorTable: React.FC<SelectorTableProps> = React.memo(
           year,
           weeklySummaries,
           biweeklySummaries,
-          monthlySummaries
+          monthlySummaries,
         ).overtime;
       }
     };
@@ -182,7 +183,7 @@ const SelectorTable: React.FC<SelectorTableProps> = React.memo(
     const resultHoursForPeriods = (
       employee: Employee,
       period: "weekly" | "biweekly" | "monthly",
-      type: "totalHours" | "overtime"
+      type: "totalHours" | "overtime",
     ) => {
       if (type === "totalHours") {
         return calculateTotalHoursAndOvertimeForPeriods(
@@ -193,7 +194,7 @@ const SelectorTable: React.FC<SelectorTableProps> = React.memo(
           multiplePeriods.months,
           weeklySummaries,
           biweeklySummaries,
-          monthlySummaries
+          monthlySummaries,
         ).totalHours;
       } else {
         return calculateTotalHoursAndOvertimeForPeriods(
@@ -204,7 +205,7 @@ const SelectorTable: React.FC<SelectorTableProps> = React.memo(
           multiplePeriods.months,
           weeklySummaries,
           biweeklySummaries,
-          monthlySummaries
+          monthlySummaries,
         ).overtime;
       }
     };
@@ -215,12 +216,12 @@ const SelectorTable: React.FC<SelectorTableProps> = React.memo(
           ? resultHoursForPeriods(employee, selectedPeriod, "totalHours")
           : resultHoursForPeriod(employee, selectedPeriod, "totalHours")
         : selectedPeriod === "biweekly"
-        ? hasMultipleYears(currentWeek) || hasMultipleBiweeks(currentWeek)
-          ? resultHoursForPeriods(employee, selectedPeriod, "totalHours")
-          : resultHoursForPeriod(employee, selectedPeriod, "totalHours")
-        : hasMultipleYears(currentWeek) || hasMultipleMonths(currentWeek)
-        ? resultHoursForPeriods(employee, selectedPeriod, "totalHours")
-        : resultHoursForPeriod(employee, selectedPeriod, "totalHours");
+          ? hasMultipleYears(currentWeek) || hasMultipleBiweeks(currentWeek)
+            ? resultHoursForPeriods(employee, selectedPeriod, "totalHours")
+            : resultHoursForPeriod(employee, selectedPeriod, "totalHours")
+          : hasMultipleYears(currentWeek) || hasMultipleMonths(currentWeek)
+            ? resultHoursForPeriods(employee, selectedPeriod, "totalHours")
+            : resultHoursForPeriod(employee, selectedPeriod, "totalHours");
     };
 
     const resultOvertime = (employee: Employee) => {
@@ -229,12 +230,12 @@ const SelectorTable: React.FC<SelectorTableProps> = React.memo(
           ? resultHoursForPeriods(employee, selectedPeriod, "overtime")
           : resultHoursForPeriod(employee, selectedPeriod, "overtime")
         : selectedPeriod === "biweekly"
-        ? hasMultipleYears(currentWeek) || hasMultipleBiweeks(currentWeek)
-          ? resultHoursForPeriods(employee, selectedPeriod, "overtime")
-          : resultHoursForPeriod(employee, selectedPeriod, "overtime")
-        : hasMultipleYears(currentWeek) || hasMultipleMonths(currentWeek)
-        ? resultHoursForPeriods(employee, selectedPeriod, "overtime")
-        : resultHoursForPeriod(employee, selectedPeriod, "overtime");
+          ? hasMultipleYears(currentWeek) || hasMultipleBiweeks(currentWeek)
+            ? resultHoursForPeriods(employee, selectedPeriod, "overtime")
+            : resultHoursForPeriod(employee, selectedPeriod, "overtime")
+          : hasMultipleYears(currentWeek) || hasMultipleMonths(currentWeek)
+            ? resultHoursForPeriods(employee, selectedPeriod, "overtime")
+            : resultHoursForPeriod(employee, selectedPeriod, "overtime");
     };
 
     const hasWorkedCurrentWeek = (employee: Employee): boolean => {
@@ -242,7 +243,7 @@ const SelectorTable: React.FC<SelectorTableProps> = React.memo(
         (summary) =>
           summary.employeeId === employee.id &&
           summary.weekNumber === weekNumber &&
-          summary.year === year
+          summary.year === year,
       );
       return found;
     };
@@ -265,7 +266,7 @@ const SelectorTable: React.FC<SelectorTableProps> = React.memo(
                 display: "flex",
                 justifyContent: "center",
                 alignItems: "center",
-                gap: 2
+                gap: 2,
               }}
             >
               {selectedPeriod === "weekly" ? (
@@ -276,7 +277,10 @@ const SelectorTable: React.FC<SelectorTableProps> = React.memo(
                       {multiplePeriods.weekNumbers[0].weekNumber}
                     </Typography>
                   ) : (
-                    <Typography variant="body2" fontWeight="bold">{`Semana ${weekNumber}`}</Typography>
+                    <Typography
+                      variant="body2"
+                      fontWeight="bold"
+                    >{`Semana ${weekNumber}`}</Typography>
                   )}
                 </div>
               ) : selectedPeriod === "biweekly" ? (
@@ -287,21 +291,28 @@ const SelectorTable: React.FC<SelectorTableProps> = React.memo(
                       {multiplePeriods.biweekNumbers[1].biweekNumber}
                     </Typography>
                   ) : (
-                    <Typography variant="body2" fontWeight="bold">{`Quincena ${biweekNumber}`}</Typography>
+                    <Typography
+                      variant="body2"
+                      fontWeight="bold"
+                    >{`Quincena ${biweekNumber}`}</Typography>
                   )}
                 </div>
               ) : (
                 <div>
                   {hasMultipleMonths(currentWeek) ? (
-                    <Typography variant="body2" fontWeight="bold">{`${getMonthName(
-                      multiplePeriods.months[0].month
+                    <Typography
+                      variant="body2"
+                      fontWeight="bold"
+                    >{`${getMonthName(
+                      multiplePeriods.months[0].month,
                     )} / ${getMonthName(
-                      multiplePeriods.months[1].month
+                      multiplePeriods.months[1].month,
                     )}`}</Typography>
                   ) : (
-                    <Typography variant="body2" fontWeight="bold">{`${getMonthName(
-                      month
-                    )}`}</Typography>
+                    <Typography
+                      variant="body2"
+                      fontWeight="bold"
+                    >{`${getMonthName(month)}`}</Typography>
                   )}
                 </div>
               )}
@@ -314,7 +325,7 @@ const SelectorTable: React.FC<SelectorTableProps> = React.memo(
             <Table stickyHeader aria-label="sticky table">
               <TableHead
                 sx={{
-                  position: 'sticky',
+                  position: "sticky",
                   top: 0,
                   zIndex: 10,
                 }}
@@ -323,8 +334,8 @@ const SelectorTable: React.FC<SelectorTableProps> = React.memo(
                   <TableCell
                     className="employee-column"
                     sx={{
-                      padding: isSmallScreen ? '8px' : '16px',
-                      position: 'sticky',
+                      padding: isSmallScreen ? "8px" : "16px",
+                      position: "sticky",
                       left: 0,
                       zIndex: 11,
                     }}
@@ -333,7 +344,7 @@ const SelectorTable: React.FC<SelectorTableProps> = React.memo(
                       direction={orderDirection}
                       onClick={() =>
                         setOrderDirection((prev) =>
-                          prev === 'asc' ? 'desc' : 'asc'
+                          prev === "asc" ? "desc" : "asc",
                         )
                       }
                     >
@@ -345,17 +356,17 @@ const SelectorTable: React.FC<SelectorTableProps> = React.memo(
                       key={day}
                       align="center"
                       sx={{
-                        padding: isSmallScreen ? '8px' : '16px',
+                        padding: isSmallScreen ? "8px" : "16px",
                         zIndex: 10,
                       }}
                     >
                       {`${translateDayToAbrevSpanish(
-                        day as EnglishDayOfWeek
+                        day as EnglishDayOfWeek,
                       )} ${formatHeaderDate(date)}`}
                     </TableCell>
                   ))}
                   {permissions?.includes(
-                    PERMISSIONS.VIEW_EMPLOYEE_ROLES_HOURS
+                    PERMISSIONS.VIEW_EMPLOYEE_ROLES_HOURS,
                   ) && (
                     <>
                       <TableCell />
@@ -369,38 +380,44 @@ const SelectorTable: React.FC<SelectorTableProps> = React.memo(
                         }}
                         colSpan={2}
                       >
-                        <FormControl size="small" sx={{
-                          minWidth: 120,
-                          backgroundColor: '#000',
-                          borderRadius: 2,
-                          '.MuiOutlinedInput-root': {
+                        <FormControl
+                          size="small"
+                          sx={{
+                            minWidth: 120,
+                            backgroundColor: "#000",
                             borderRadius: 2,
-                            fontWeight: 700,
-                            fontSize: '1rem',
-                            color: '#fff',
-                            backgroundColor: '#000 !important',
-                            '& fieldset': {
-                              border: 'none',
+                            ".MuiOutlinedInput-root": {
+                              borderRadius: 2,
+                              fontWeight: 700,
+                              fontSize: "1rem",
+                              color: "#fff",
+                              backgroundColor: "#000 !important",
+                              "& fieldset": {
+                                border: "none",
+                              },
                             },
-                          },
-                          '.MuiSelect-select': {
-                            display: 'flex',
-                            alignItems: 'center',
-                            gap: 1,
-                            fontWeight: 700,
-                            color: '#fff',
-                            backgroundColor: '#000 !important',
-                            pl: 0,
-                          },
-                          '.MuiSvgIcon-root': {
-                            color: '#fff',
-                          },
-                        }}>
+                            ".MuiSelect-select": {
+                              display: "flex",
+                              alignItems: "center",
+                              gap: 1,
+                              fontWeight: 700,
+                              color: "#fff",
+                              backgroundColor: "#000 !important",
+                              pl: 0,
+                            },
+                            ".MuiSvgIcon-root": {
+                              color: "#fff",
+                            },
+                          }}
+                        >
                           <Select
                             value={selectedPeriod}
                             onChange={(e) =>
                               setSelectedPeriod(
-                                e.target.value as 'weekly' | 'biweekly' | 'monthly'
+                                e.target.value as
+                                  | "weekly"
+                                  | "biweekly"
+                                  | "monthly",
                               )
                             }
                             autoWidth
@@ -411,17 +428,19 @@ const SelectorTable: React.FC<SelectorTableProps> = React.memo(
                                 id="total-period-select"
                                 startAdornment={
                                   <InputAdornment position="start">
-                                    <CalendarMonthOutlinedIcon sx={{ color: '#fff', mr: 1 }} />
+                                    <CalendarMonthOutlinedIcon
+                                      sx={{ color: "#fff", mr: 1 }}
+                                    />
                                   </InputAdornment>
                                 }
                                 sx={{
-                                  color: '#fff',
-                                  backgroundColor: '#000 !important',
+                                  color: "#fff",
+                                  backgroundColor: "#000 !important",
                                   borderRadius: 2,
                                   fontWeight: 700,
-                                  fontSize: '1rem',
-                                  '& .MuiOutlinedInput-notchedOutline': {
-                                    border: 'none',
+                                  fontSize: "1rem",
+                                  "& .MuiOutlinedInput-notchedOutline": {
+                                    border: "none",
                                   },
                                 }}
                               />
@@ -429,25 +448,27 @@ const SelectorTable: React.FC<SelectorTableProps> = React.memo(
                             MenuProps={{
                               PaperProps: {
                                 sx: {
-                                  backgroundColor: '#000',
+                                  backgroundColor: "#000",
                                   color: theme.palette.text.disabled,
                                   borderRadius: 2,
                                   boxShadow: theme.shadows[8],
                                   mt: 1,
-                                  '& .MuiMenuItem-root': {
+                                  "& .MuiMenuItem-root": {
                                     fontWeight: 600,
-                                    fontSize: '1rem',
+                                    fontSize: "1rem",
                                     color: theme.palette.text.disabled,
-                                    '&:hover': {
+                                    "&:hover": {
                                       backgroundColor: theme.palette.grey[900],
-                                      color: '#fff',
+                                      color: "#fff",
                                     },
-                                    '&.Mui-selected': {
-                                      backgroundColor: theme.palette.primary.main,
-                                      color: '#fff',
-                                      '&:hover': {
-                                        backgroundColor: theme.palette.primary.dark,
-                                        color: '#fff',
+                                    "&.Mui-selected": {
+                                      backgroundColor:
+                                        theme.palette.primary.main,
+                                      color: "#fff",
+                                      "&:hover": {
+                                        backgroundColor:
+                                          theme.palette.primary.dark,
+                                        color: "#fff",
                                       },
                                     },
                                   },
@@ -479,7 +500,8 @@ const SelectorTable: React.FC<SelectorTableProps> = React.memo(
                         position: "sticky",
                         left: 0,
                         zIndex: 2,
-                        backgroundColor: rowIndex % 2 === 0 ? "white" : "#f5f5f5",
+                        backgroundColor:
+                          rowIndex % 2 === 0 ? "white" : "#f5f5f5",
                       }}
                     >
                       <Box
@@ -494,35 +516,41 @@ const SelectorTable: React.FC<SelectorTableProps> = React.memo(
                           {employee.firstName} {employee.lastName}
                         </Typography>
                         {permissions?.includes(
-                          PERMISSIONS.VIEW_EMPLOYEE_ROLES_HOURS
+                          PERMISSIONS.VIEW_EMPLOYEE_ROLES_HOURS,
                         ) && (
-                          <IconButton onClick={() => onInfoClick && onInfoClick(employee)}>
+                          <IconButton
+                            onClick={() => onInfoClick && onInfoClick(employee)}
+                          >
                             <InfoOutlinedIcon />
                           </IconButton>
                         )}
                       </Box>
                     </TableCell>
                     {currentWeek.map(({ day, date }) => {
-                      const formattedDate = format(new Date(date), "yyyy-MM-dd");
+                      const formattedDate = format(
+                        new Date(date),
+                        "yyyy-MM-dd",
+                      );
                       const existingRecord = hoursWorked.find(
                         (record) =>
                           record.employeeId === employee.id &&
                           format(new Date(record.date), "yyyy-MM-dd") ===
-                            formattedDate
+                            formattedDate,
                       );
                       const options = getOptionsForDay(day, schedules);
                       const validLabels = options.map((option) => option.label);
 
                       const selectedLabel =
                         schedules.find(
-                          (schedule) => schedule.id === existingRecord?.scheduleId
+                          (schedule) =>
+                            schedule.id === existingRecord?.scheduleId,
                         )?.label ?? STATE.FREE;
 
                       const finalSelectedLabel = validLabels.includes(
-                        selectedLabel
+                        selectedLabel,
                       )
                         ? selectedLabel
-                        : validLabels[0] ?? "";
+                        : (validLabels[0] ?? "");
 
                       return (
                         <TableCell
@@ -533,7 +561,9 @@ const SelectorTable: React.FC<SelectorTableProps> = React.memo(
                               format(new Date(), "yyyy-MM-dd") ===
                               format(new Date(date), "yyyy-MM-dd")
                                 ? "#e4f5ed"
-                                : rowIndex % 2 === 0 ? "white" : "#f5f5f5",
+                                : rowIndex % 2 === 0
+                                  ? "white"
+                                  : "#f5f5f5",
                           }}
                         >
                           <FormControl fullWidth>
@@ -544,36 +574,56 @@ const SelectorTable: React.FC<SelectorTableProps> = React.memo(
                               }
                               disabled={
                                 !permissions?.includes(
-                                  PERMISSIONS.EDIT_EMPLOYEE_ROLES
+                                  PERMISSIONS.EDIT_EMPLOYEE_ROLES,
                                 )
                               }
-                              input={<OutlinedInput notched={false} label="Ubicación" />}
+                              input={
+                                <OutlinedInput
+                                  notched={false}
+                                  label="Ubicación"
+                                />
+                              }
                             >
-                              <ListSubheader><strong>Ubicaciones</strong></ListSubheader>
+                              <ListSubheader>
+                                <strong>Ubicaciones</strong>
+                              </ListSubheader>
                               {options
                                 .filter((option) => !option.specialSchedule)
                                 .sort((a, b) => a.label.localeCompare(b.label))
                                 .map((option) => (
-                                  <MenuItem key={option.id} value={option.label}>
+                                  <MenuItem
+                                    key={option.id}
+                                    value={option.label}
+                                  >
                                     {option.label}
                                   </MenuItem>
                                 ))}
                               <Divider />
-                              <ListSubheader><strong>Horarios Especiales</strong></ListSubheader>
+                              <ListSubheader>
+                                <strong>Horarios Especiales</strong>
+                              </ListSubheader>
                               {options
                                 .filter((option) => option.specialSchedule)
                                 .sort((a, b) => a.label.localeCompare(b.label))
                                 .map((option) => (
-                                  <MenuItem key={option.id} value={option.label}>
+                                  <MenuItem
+                                    key={option.id}
+                                    value={option.label}
+                                  >
                                     {option.label}
                                   </MenuItem>
                                 ))}
                               <Divider />
                               {permissions?.includes(
-                                PERMISSIONS.CREATE_SCHEDULES
+                                PERMISSIONS.CREATE_SCHEDULES,
                               ) && (
                                 <MenuItem value={"Other"}>
-                                  <Box display="flex" justifyContent="space-between" width="100%" alignItems="center">
+                                  <Box
+                                    display="flex"
+                                    justifyContent="space-between"
+                                    width="100%"
+                                    alignItems="center"
+                                  >
                                     Otro
                                   </Box>
                                 </MenuItem>
@@ -584,25 +634,30 @@ const SelectorTable: React.FC<SelectorTableProps> = React.memo(
                       );
                     })}
                     {permissions?.includes(
-                      PERMISSIONS.VIEW_EMPLOYEE_ROLES_HOURS
+                      PERMISSIONS.VIEW_EMPLOYEE_ROLES_HOURS,
                     ) && (
                       <>
                         <TableCell
                           align="center"
                           sx={{
                             padding: isSmallScreen ? "8px" : "16px",
-                            backgroundColor: rowIndex % 2 === 0 ? "white" : "#f5f5f5",
+                            backgroundColor:
+                              rowIndex % 2 === 0 ? "white" : "#f5f5f5",
                           }}
                         >
                           <IconButton
-                            onClick={() => setOpenAdjustDialogEmployee(employee)}
+                            onClick={() =>
+                              setOpenAdjustDialogEmployee(employee)
+                            }
                             disabled={!hasWorkedCurrentWeek(employee)}
                             sx={{
-                              color: hasWorkedCurrentWeek(employee) ? '#000' : '#ccc',
-                              backgroundColor: 'transparent',
-                              borderRadius: '50%',
-                              '&:hover': {
-                                backgroundColor: 'rgba(0,0,0,0.04)',
+                              color: hasWorkedCurrentWeek(employee)
+                                ? "#000"
+                                : "#ccc",
+                              backgroundColor: "transparent",
+                              borderRadius: "50%",
+                              "&:hover": {
+                                backgroundColor: "rgba(0,0,0,0.04)",
                               },
                               width: 40,
                               height: 40,
@@ -678,7 +733,11 @@ const SelectorTable: React.FC<SelectorTableProps> = React.memo(
             </Table>
           </TableContainer>
           <Divider />
-          <Box display="flex" justifyContent="space-between" alignItems="center">
+          <Box
+            display="flex"
+            justifyContent="space-between"
+            alignItems="center"
+          >
             {!isSmallScreen && (
               <div>
                 {selectedPeriod === "weekly" ? (
@@ -696,47 +755,51 @@ const SelectorTable: React.FC<SelectorTableProps> = React.memo(
                       >{`Quincenas del ${formatDateWithoutYear(
                         getBiweeklyDates(
                           year,
-                          multiplePeriods.biweekNumbers[0].biweekNumber
-                        ).startDate
+                          multiplePeriods.biweekNumbers[0].biweekNumber,
+                        ).startDate,
                       )} al ${formatDateWithoutYear(
                         getBiweeklyDates(
                           year,
-                          multiplePeriods.biweekNumbers[0].biweekNumber
-                        ).endDate
+                          multiplePeriods.biweekNumbers[0].biweekNumber,
+                        ).endDate,
                       )} / ${formatDateWithoutYear(
                         getBiweeklyDates(
                           year,
-                          multiplePeriods.biweekNumbers[1].biweekNumber
-                        ).startDate
+                          multiplePeriods.biweekNumbers[1].biweekNumber,
+                        ).startDate,
                       )} al ${formatDateWithoutYear(
                         getBiweeklyDates(
                           year,
-                          multiplePeriods.biweekNumbers[1].biweekNumber
-                        ).endDate
+                          multiplePeriods.biweekNumbers[1].biweekNumber,
+                        ).endDate,
                       )} del ${year}`}</Typography>
                     ) : (
                       <Typography
                         variant="body2"
                         sx={{ ml: 2 }}
                       >{`Quincena del ${formatDateWithoutYear(
-                        getBiweeklyDates(year, biweekNumber).startDate
+                        getBiweeklyDates(year, biweekNumber).startDate,
                       )} al ${formatDateWithoutYear(
-                        getBiweeklyDates(year, biweekNumber).endDate
+                        getBiweeklyDates(year, biweekNumber).endDate,
                       )}`}</Typography>
                     )}
                   </div>
                 ) : (
                   <div>
                     {hasMultipleMonths(currentWeek) ? (
-                      <Typography variant="body2" sx={{ ml: 2 }}>{`${getMonthName(
-                        multiplePeriods.months[0].month
+                      <Typography
+                        variant="body2"
+                        sx={{ ml: 2 }}
+                      >{`${getMonthName(
+                        multiplePeriods.months[0].month,
                       )} / ${getMonthName(
-                        multiplePeriods.months[1].month
+                        multiplePeriods.months[1].month,
                       )} del ${year}`}</Typography>
                     ) : (
-                      <Typography variant="body2" sx={{ ml: 2 }}>{`${getMonthName(
-                        month
-                      )}`}</Typography>
+                      <Typography
+                        variant="body2"
+                        sx={{ ml: 2 }}
+                      >{`${getMonthName(month)}`}</Typography>
                     )}
                   </div>
                 )}
@@ -765,18 +828,38 @@ const SelectorTable: React.FC<SelectorTableProps> = React.memo(
           </Box>
         </Paper>
         {openAdjustDialogEmployee && (
-          <Dialog open={!!openAdjustDialogEmployee} onClose={() => setOpenAdjustDialogEmployee(null)} maxWidth="sm" fullWidth>
-            <Box sx={{ background: theme.palette.primary.main, color: '#fff', p: { xs: 3, sm: 4 }, borderTopLeftRadius: 2, borderTopRightRadius: 2, display: 'flex', alignItems: 'center', gap: 2 }}>
+          <Dialog
+            open={!!openAdjustDialogEmployee}
+            onClose={() => setOpenAdjustDialogEmployee(null)}
+            maxWidth="sm"
+            fullWidth
+          >
+            <Box
+              sx={{
+                background: theme.palette.primary.main,
+                color: "#fff",
+                p: { xs: 3, sm: 4 },
+                borderTopLeftRadius: 2,
+                borderTopRightRadius: 2,
+                display: "flex",
+                alignItems: "center",
+                gap: 2,
+              }}
+            >
               <Box>
                 <Typography variant="h5" fontWeight={700} color="#fff">
                   Ajuste de Horas
                 </Typography>
                 <Typography variant="subtitle2" color="#fff">
-                  {openAdjustDialogEmployee.firstName} {openAdjustDialogEmployee.lastName}
+                  {openAdjustDialogEmployee.firstName}{" "}
+                  {openAdjustDialogEmployee.lastName}
                 </Typography>
               </Box>
               <Box flexGrow={1} />
-              <IconButton onClick={() => setOpenAdjustDialogEmployee(null)} sx={{ color: '#fff' }}>
+              <IconButton
+                onClick={() => setOpenAdjustDialogEmployee(null)}
+                sx={{ color: "#fff" }}
+              >
                 <CloseRoundedIcon />
               </IconButton>
             </Box>
@@ -785,17 +868,34 @@ const SelectorTable: React.FC<SelectorTableProps> = React.memo(
                 <Grid item xs={12}>
                   <Typography variant="subtitle1" color="text.secondary" mb={1}>
                     {selectedPeriod === "weekly"
-                      ? 'Total de horas trabajadas en la semana:'
+                      ? "Total de horas trabajadas en la semana:"
                       : selectedPeriod === "biweekly"
-                      ? 'Total de horas trabajadas en la quincena:'
-                      : 'Total de horas trabajadas en el mes:'}
+                        ? "Total de horas trabajadas en la quincena:"
+                        : "Total de horas trabajadas en el mes:"}
                   </Typography>
-                  <Typography variant="h3" color="primary" fontWeight={800} mb={2}>
+                  <Typography
+                    variant="h3"
+                    color="primary"
+                    fontWeight={800}
+                    mb={2}
+                  >
                     {selectedPeriod === "weekly"
-                      ? resultHoursForPeriod(openAdjustDialogEmployee, "weekly", "totalHours")
+                      ? resultHoursForPeriod(
+                          openAdjustDialogEmployee,
+                          "weekly",
+                          "totalHours",
+                        )
                       : selectedPeriod === "biweekly"
-                      ? resultHoursForPeriod(openAdjustDialogEmployee, "biweekly", "totalHours")
-                      : resultHoursForPeriod(openAdjustDialogEmployee, "monthly", "totalHours")}
+                        ? resultHoursForPeriod(
+                            openAdjustDialogEmployee,
+                            "biweekly",
+                            "totalHours",
+                          )
+                        : resultHoursForPeriod(
+                            openAdjustDialogEmployee,
+                            "monthly",
+                            "totalHours",
+                          )}
                   </Typography>
                   <TextField
                     label="Horas a ajustar"
@@ -804,14 +904,18 @@ const SelectorTable: React.FC<SelectorTableProps> = React.memo(
                     placeholder="0"
                     value={timeAdjustment}
                     onChange={(e) => setTimeAdjustment(Number(e.target.value))}
-                    sx={{ mt: 1, width: '100%', boxSizing: 'border-box' }}
+                    sx={{ mt: 1, width: "100%", boxSizing: "border-box" }}
                     inputProps={{ min: 0 }}
                     error={timeAdjustment < 0}
-                    helperText={timeAdjustment < 0 ? 'Debe ser un número positivo' : ' '}
+                    helperText={
+                      timeAdjustment < 0 ? "Debe ser un número positivo" : " "
+                    }
                     InputProps={{
                       startAdornment: (
                         <InputAdornment position="start">
-                          <AccessTimeRoundedIcon color={timeAdjustment < 0 ? 'error' : 'primary'} />
+                          <AccessTimeRoundedIcon
+                            color={timeAdjustment < 0 ? "error" : "primary"}
+                          />
                         </InputAdornment>
                       ),
                     }}
@@ -820,24 +924,47 @@ const SelectorTable: React.FC<SelectorTableProps> = React.memo(
                 <Grid item xs={12}>
                   <Box
                     sx={{
-                      display: 'flex',
-                      alignItems: 'center',
+                      display: "flex",
+                      alignItems: "center",
                       p: { xs: 1.5, sm: 2 },
                       backgroundColor: theme.palette.action.hover,
                       borderRadius: 1,
-                      border: '1px solid',
+                      border: "1px solid",
                       borderColor: theme.palette.divider,
                     }}
                   >
-                    <Box sx={{ mr: { xs: 1, sm: 2 }, color: theme.palette.info.main }}>
-                      <InfoOutlinedIcon sx={{ color: theme.palette.info.main, mr: { xs: 1, sm: 2 } }} />
+                    <Box
+                      sx={{
+                        mr: { xs: 1, sm: 2 },
+                        color: theme.palette.info.main,
+                      }}
+                    >
+                      <InfoOutlinedIcon
+                        sx={{
+                          color: theme.palette.info.main,
+                          mr: { xs: 1, sm: 2 },
+                        }}
+                      />
                     </Box>
                     <Box>
-                      <Box sx={{ fontWeight: 600, color: theme.palette.text.primary, mb: 0.5, fontSize: 'clamp(0.875rem, 1.5vw, 1rem)' }}>
+                      <Box
+                        sx={{
+                          fontWeight: 600,
+                          color: theme.palette.text.primary,
+                          mb: 0.5,
+                          fontSize: "clamp(0.875rem, 1.5vw, 1rem)",
+                        }}
+                      >
                         Información de Ajuste
                       </Box>
-                      <Box sx={{ color: theme.palette.text.secondary, fontSize: 'clamp(0.75rem, 1.25vw, 0.875rem)' }}>
-                        Ingresa la cantidad de horas a sumar o restar. Solo se permiten valores positivos.
+                      <Box
+                        sx={{
+                          color: theme.palette.text.secondary,
+                          fontSize: "clamp(0.75rem, 1.25vw, 0.875rem)",
+                        }}
+                      >
+                        Ingresa la cantidad de horas a sumar o restar. Solo se
+                        permiten valores positivos.
                       </Box>
                     </Box>
                   </Box>
@@ -845,12 +972,12 @@ const SelectorTable: React.FC<SelectorTableProps> = React.memo(
                 <Grid item xs={12}>
                   <Box
                     sx={{
-                      display: 'flex',
-                      flexDirection: { xs: 'column', sm: 'row' },
-                      justifyContent: 'space-between',
+                      display: "flex",
+                      flexDirection: { xs: "column", sm: "row" },
+                      justifyContent: "space-between",
                       gap: { xs: 1, sm: 2 },
                       pt: 2,
-                      borderTop: '1px solid',
+                      borderTop: "1px solid",
                       borderColor: theme.palette.divider,
                     }}
                   >
@@ -860,7 +987,7 @@ const SelectorTable: React.FC<SelectorTableProps> = React.memo(
                       fullWidth={isSmallScreen}
                       sx={{
                         minHeight: { xs: 44, sm: 48 },
-                        fontSize: 'clamp(0.75rem, 1.25vw, 0.875rem)',
+                        fontSize: "clamp(0.75rem, 1.25vw, 0.875rem)",
                       }}
                     >
                       Cancelar
@@ -868,14 +995,18 @@ const SelectorTable: React.FC<SelectorTableProps> = React.memo(
                     <Button
                       variant="contained"
                       onClick={() => {
-                        handleAdjustTime(openAdjustDialogEmployee.id, "sum", timeAdjustment);
+                        handleAdjustTime(
+                          openAdjustDialogEmployee.id,
+                          "sum",
+                          timeAdjustment,
+                        );
                         setOpenAdjustDialogEmployee(null);
                       }}
                       disabled={timeAdjustment <= 0}
                       fullWidth={isSmallScreen}
                       sx={{
                         minHeight: { xs: 44, sm: 48 },
-                        fontSize: 'clamp(0.75rem, 1.25vw, 0.875rem)',
+                        fontSize: "clamp(0.75rem, 1.25vw, 0.875rem)",
                         fontWeight: 600,
                         px: { xs: 2, sm: 4 },
                         py: { xs: 1, sm: 1.5 },
@@ -887,14 +1018,18 @@ const SelectorTable: React.FC<SelectorTableProps> = React.memo(
                       variant="contained"
                       color="secondary"
                       onClick={() => {
-                        handleAdjustTime(openAdjustDialogEmployee.id, "substract", timeAdjustment);
+                        handleAdjustTime(
+                          openAdjustDialogEmployee.id,
+                          "substract",
+                          timeAdjustment,
+                        );
                         setOpenAdjustDialogEmployee(null);
                       }}
                       disabled={timeAdjustment <= 0}
                       fullWidth={isSmallScreen}
                       sx={{
                         minHeight: { xs: 44, sm: 48 },
-                        fontSize: 'clamp(0.75rem, 1.25vw, 0.875rem)',
+                        fontSize: "clamp(0.75rem, 1.25vw, 0.875rem)",
                         fontWeight: 600,
                         px: { xs: 2, sm: 4 },
                         py: { xs: 1, sm: 1.5 },
@@ -910,7 +1045,7 @@ const SelectorTable: React.FC<SelectorTableProps> = React.memo(
         )}
       </>
     );
-  }
+  },
 );
 
 export default SelectorTable;

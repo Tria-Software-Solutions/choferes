@@ -31,10 +31,10 @@ export const fetchHoursWorked = createAsyncThunk(
       }
     } catch (error: any) {
       return rejectWithValue(
-        error.response?.data || "Failed to fetch hours worked"
+        error.response?.data || "Failed to fetch hours worked",
       );
     }
-  }
+  },
 );
 
 export const createHoursWorked = createAsyncThunk(
@@ -45,54 +45,53 @@ export const createHoursWorked = createAsyncThunk(
       return createdHours;
     } catch (error: any) {
       return rejectWithValue(
-        error.response?.data || "Failed to create hours worked"
+        error.response?.data || "Failed to create hours worked",
       );
     }
-  }
+  },
 );
 
 export const updateHoursWorked = createAsyncThunk(
   "hoursWorked/updateHoursWorked",
   async (
     { id, updatedHours }: { id: number; updatedHours: Partial<HoursWorked> },
-    { rejectWithValue }
+    { rejectWithValue },
   ) => {
     try {
       await HoursWorkedService.updateHoursWorked(id, updatedHours);
       return { id, updatedHours };
     } catch (error: any) {
       return rejectWithValue(
-        error.response?.data || "Failed to update hours worked"
+        error.response?.data || "Failed to update hours worked",
       );
     }
-  }
+  },
 );
 
 export const createOrUpdateHoursWorked = createAsyncThunk(
   "hoursWorked/createOrUpdateHoursWorked",
   async (
     newHours: Omit<HoursWorked, "id"> | HoursWorked,
-    { rejectWithValue }
+    { rejectWithValue },
   ) => {
     try {
       if ("id" in newHours) {
         const updatedHoursWorked = await HoursWorkedService.updateHoursWorked(
           newHours.id,
-          newHours
+          newHours,
         );
         return updatedHoursWorked;
       } else {
-        const createdHoursWorked = await HoursWorkedService.createHoursWorked(
-          newHours
-        );
+        const createdHoursWorked =
+          await HoursWorkedService.createHoursWorked(newHours);
         return createdHoursWorked;
       }
     } catch (error: any) {
       return rejectWithValue(
-        error.response?.data || "Failed to create or update hours worked"
+        error.response?.data || "Failed to create or update hours worked",
       );
     }
-  }
+  },
 );
 
 export const deleteHoursWorked = createAsyncThunk(
@@ -103,10 +102,10 @@ export const deleteHoursWorked = createAsyncThunk(
       return id;
     } catch (error: any) {
       return rejectWithValue(
-        error.response?.data || "Failed to delete hours worked"
+        error.response?.data || "Failed to delete hours worked",
       );
     }
-  }
+  },
 );
 
 const hoursWorkedSlice = createSlice({
@@ -125,7 +124,7 @@ const hoursWorkedSlice = createSlice({
           state.hoursWorked = action.payload;
           state.totalCountHoursWorked = action.payload.length;
           state.isLoadingHoursWorked = false;
-        }
+        },
       )
       .addCase(fetchHoursWorked.rejected, (state, action) => {
         state.isLoadingHoursWorked = false;
@@ -137,7 +136,7 @@ const hoursWorkedSlice = createSlice({
         (state, action: PayloadAction<HoursWorked>) => {
           state.hoursWorked.push(action.payload);
           state.totalCountHoursWorked += 1;
-        }
+        },
       )
       .addCase(
         updateHoursWorked.fulfilled,
@@ -146,18 +145,18 @@ const hoursWorkedSlice = createSlice({
           action: PayloadAction<{
             id: number;
             updatedHours: Partial<HoursWorked>;
-          }>
+          }>,
         ) => {
           const { id, updatedHours } = action.payload;
           state.hoursWorked = state.hoursWorked.map((hours) =>
-            hours.id === id ? { ...hours, ...updatedHours } : hours
+            hours.id === id ? { ...hours, ...updatedHours } : hours,
           );
-        }
+        },
       )
       .addCase(createOrUpdateHoursWorked.fulfilled, (state, action) => {
         const updatedHoursWorked = action.payload;
         const index = state.hoursWorked.findIndex(
-          (hours) => hours.id === updatedHoursWorked.id
+          (hours) => hours.id === updatedHoursWorked.id,
         );
 
         if (index !== -1) {
@@ -170,10 +169,10 @@ const hoursWorkedSlice = createSlice({
         deleteHoursWorked.fulfilled,
         (state, action: PayloadAction<number>) => {
           state.hoursWorked = state.hoursWorked.filter(
-            (hours) => hours.id !== action.payload
+            (hours) => hours.id !== action.payload,
           );
           state.totalCountHoursWorked -= 1;
-        }
+        },
       );
   },
 });

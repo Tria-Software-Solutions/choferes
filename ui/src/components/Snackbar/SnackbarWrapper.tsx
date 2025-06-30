@@ -8,19 +8,19 @@ interface NotificationContextType {
     duration?: number,
     closeable?: boolean,
     buttonText?: string,
-    onButtonClick?: () => void
+    onButtonClick?: () => void,
   ) => void;
 }
 
 const NotificationContext = createContext<NotificationContextType | undefined>(
-  undefined
+  undefined,
 );
 
 export const useAppNotifications = () => {
   const context = useContext(NotificationContext);
   if (!context) {
     throw new Error(
-      "useAppNotifications must be used within a NotificationProvider"
+      "useAppNotifications must be used within a NotificationProvider",
     );
   }
   return context;
@@ -36,15 +36,15 @@ export const AppNotificationProvider: React.FC<{
   const [closeable, setCloseable] = useState<boolean>(true);
   const [buttonText, setButtonText] = useState<string>("");
   const [onButtonClick, setOnButtonClick] = useState<() => void>(
-    () => () => {}
+    () => () => {},
   );
 
   const showNotification = (
     message: string,
-    duration: number = 3000,
-    closeable: boolean = true,
-    buttonText: string = "Cerrar",
-    onButtonClick: () => void = () => {}
+    duration = 3000,
+    closeable = true,
+    buttonText = "Cerrar",
+    onButtonClick: () => void = () => {},
   ) => {
     setMessage(message);
     setDuration(duration);
@@ -82,8 +82,8 @@ export const AppNotificationProvider: React.FC<{
                 onClick={() => setOpen(false)}
                 sx={{
                   color: theme.palette.primary.contrastText,
-                  '&:hover': {
-                    backgroundColor: 'rgba(255,255,255,0.1)',
+                  "&:hover": {
+                    backgroundColor: "rgba(255,255,255,0.1)",
                   },
                 }}
               >
@@ -96,21 +96,22 @@ export const AppNotificationProvider: React.FC<{
                     setOpen(false);
                   }}
                   style={{
-                    backgroundColor: 'transparent',
-                    border: 'none',
+                    backgroundColor: "transparent",
+                    border: "none",
                     color: theme.palette.primary.contrastText,
-                    cursor: 'pointer',
-                    padding: '4px 8px',
-                    borderRadius: '4px',
-                    fontSize: '0.875rem',
+                    cursor: "pointer",
+                    padding: "4px 8px",
+                    borderRadius: "4px",
+                    fontSize: "0.875rem",
                     fontWeight: 500,
-                    transition: 'all 0.2s ease',
+                    transition: "all 0.2s ease",
                   }}
                   onMouseEnter={(e) => {
-                    e.currentTarget.style.backgroundColor = 'rgba(255,255,255,0.1)';
+                    e.currentTarget.style.backgroundColor =
+                      "rgba(255,255,255,0.1)";
                   }}
                   onMouseLeave={(e) => {
-                    e.currentTarget.style.backgroundColor = 'transparent';
+                    e.currentTarget.style.backgroundColor = "transparent";
                   }}
                 >
                   {buttonText}
@@ -120,7 +121,7 @@ export const AppNotificationProvider: React.FC<{
           )
         }
         sx={{
-          '& .MuiSnackbarContent-root': {
+          "& .MuiSnackbarContent-root": {
             backgroundColor: theme.palette.primary.main,
             color: theme.palette.primary.contrastText,
             borderRadius: theme.shape.borderRadius,

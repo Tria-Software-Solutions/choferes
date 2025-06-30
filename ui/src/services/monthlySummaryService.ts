@@ -9,7 +9,7 @@ export const getMonthlySummaries = async () => {
 export const getCurrentMonthlySummary = async (
   employeeId: number,
   month: number,
-  year: number
+  year: number,
 ) => {
   const response = await api.get(`/monthly-summary/employee/${employeeId}`, {
     params: { month, year },
@@ -18,7 +18,7 @@ export const getCurrentMonthlySummary = async (
 };
 
 export const createMonthlySummary = async (
-  newMonthlySummary: Omit<MonthlySummary, "id">
+  newMonthlySummary: Omit<MonthlySummary, "id">,
 ) => {
   const response = await api.post("/monthly-summary", newMonthlySummary);
   return response.data;
@@ -26,9 +26,12 @@ export const createMonthlySummary = async (
 
 export const updateMonthlySummary = async (
   id: number,
-  updatedMonthlySummary: Partial<MonthlySummary>
+  updatedMonthlySummary: Partial<MonthlySummary>,
 ) => {
-  const response = await api.put(`/monthly-summary/${id}`, updatedMonthlySummary);
+  const response = await api.put(
+    `/monthly-summary/${id}`,
+    updatedMonthlySummary,
+  );
   return response.data;
 };
 

@@ -1,5 +1,5 @@
 export interface RolePermission {
-  id: number; 
+  id: number;
   roleId: number;
   permissionId: number;
 }

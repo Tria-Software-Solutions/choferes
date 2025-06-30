@@ -73,7 +73,7 @@ export const formatDateWithoutYear = (date: Date) => {
 export const formatHeaderDate = (dateStr: string) => {
   const [day, month] = dateStr.split(" ");
   const transformedMonth = translateMonthToAbrevSpanish(
-    month as EnglishAbrevMonthOfYear
+    month as EnglishAbrevMonthOfYear,
   );
   return `${day} ${transformedMonth}`;
 };
@@ -81,7 +81,7 @@ export const formatHeaderDate = (dateStr: string) => {
 export const formatHeaderDateWithYear = (dateStr: string) => {
   const [day, month, year] = dateStr.split(" ");
   const transformedMonth = translateMonthToAbrevSpanish(
-    month as EnglishAbrevMonthOfYear
+    month as EnglishAbrevMonthOfYear,
   );
   return `${day} ${transformedMonth} ${year}`;
 };
@@ -142,7 +142,7 @@ export const isTodayOrFuture = (date: Date | null): boolean => {
 };
 
 export const getWeekNumberAndYear = (
-  date: Date
+  date: Date,
 ): { year: number; weekNumber: number } => {
   const tempDate = new Date(date);
   tempDate.setHours(0, 0, 0, 0);
@@ -151,12 +151,13 @@ export const getWeekNumberAndYear = (
 
   const firstThursday = new Date(tempDate.getFullYear(), 0, 4);
   firstThursday.setDate(
-    firstThursday.getDate() + 3 - ((firstThursday.getDay() + 6) % 7)
+    firstThursday.getDate() + 3 - ((firstThursday.getDay() + 6) % 7),
   );
 
   const weekNumber =
     Math.round(
-      (tempDate.getTime() - firstThursday.getTime()) / (7 * 24 * 60 * 60 * 1000)
+      (tempDate.getTime() - firstThursday.getTime()) /
+        (7 * 24 * 60 * 60 * 1000),
     ) + 1;
 
   const year = tempDate.getFullYear();
@@ -190,7 +191,7 @@ export const getWeekNumber = (date: Date): number => {
   const firstDayOfYear = new Date(currentDate.getFullYear(), 0, 1);
   const firstThursday = new Date(firstDayOfYear);
   firstThursday.setDate(
-    firstDayOfYear.getDate() + ((4 - firstDayOfYear.getDay() + 7) % 7)
+    firstDayOfYear.getDate() + ((4 - firstDayOfYear.getDay() + 7) % 7),
   );
 
   const firstMonday = new Date(firstThursday);
@@ -203,7 +204,7 @@ export const getWeekNumber = (date: Date): number => {
   const lastDayOfYear = new Date(currentDate.getFullYear(), 11, 31);
   const lastThursday = new Date(lastDayOfYear);
   lastThursday.setDate(
-    lastDayOfYear.getDate() - ((lastDayOfYear.getDay() + 3) % 7)
+    lastDayOfYear.getDate() - ((lastDayOfYear.getDay() + 3) % 7),
   );
 
   const lastMonday = new Date(lastThursday);
@@ -294,7 +295,7 @@ export const hasMultipleYears = (currentWeek: DayEntry[]): boolean => {
 };
 
 export const getInvolvedPeriods = (
-  currentWeek: DayEntry[]
+  currentWeek: DayEntry[],
 ): {
   weekNumbers: { year: number; weekNumber: number }[];
   biweekNumbers: { year: number; biweekNumber: number }[];

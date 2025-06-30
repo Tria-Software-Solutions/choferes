@@ -13,7 +13,7 @@ export const createEmployee = async (newEmployee: Omit<Employee, "id">) => {
 
 export const updateEmployee = async (
   id: number,
-  updatedEmployee: Partial<Employee>
+  updatedEmployee: Partial<Employee>,
 ) => {
   const response = await api.put(`/employees/${id}`, updatedEmployee);
   return response.data;

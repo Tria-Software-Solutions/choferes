@@ -36,20 +36,24 @@ import AddUserForm from "../../components/Forms/AddUserForm";
 import PersonAddAlt1RoundedIcon from "@mui/icons-material/PersonAddAlt1Rounded";
 import Visibility from "@mui/icons-material/Visibility";
 import VisibilityOff from "@mui/icons-material/VisibilityOff";
-import VisibilityIcon from '@mui/icons-material/Visibility';
-import VisibilityOffIcon from '@mui/icons-material/VisibilityOff';
+import VisibilityIcon from "@mui/icons-material/Visibility";
+import VisibilityOffIcon from "@mui/icons-material/VisibilityOff";
 import DialogComponent from "../../components/Dialog/DialogComponent";
 import CloseIcon from "@mui/icons-material/Close";
-import AddRoundedIcon from '@mui/icons-material/AddRounded';
-import ManageAccountsIcon from '@mui/icons-material/ManageAccounts';
-import DeleteOutlineIcon from '@mui/icons-material/DeleteOutline';
+import AddRoundedIcon from "@mui/icons-material/AddRounded";
+import ManageAccountsIcon from "@mui/icons-material/ManageAccounts";
+import DeleteOutlineIcon from "@mui/icons-material/DeleteOutline";
 
-const ManageUsers: React.FC<{ isExpanded?: boolean }> = ({ isExpanded = true }) => {
+const ManageUsers: React.FC<{ isExpanded?: boolean }> = ({
+  isExpanded = true,
+}) => {
   const dispatch = useDispatch<AppDispatch>();
   const { userPermissions } = useAuthContext();
-  const { users, isLoadingUsers, error: usersError } = useSelector(
-    (state: RootState) => state.users
-  );
+  const {
+    users,
+    isLoadingUsers,
+    error: usersError,
+  } = useSelector((state: RootState) => state.users);
   const { roles } = useSelector((state: RootState) => state.roles);
   const { showNotification } = useAppNotifications();
   const [showInactive, setShowInactive] = useState(false);
@@ -86,39 +90,38 @@ const ManageUsers: React.FC<{ isExpanded?: boolean }> = ({ isExpanded = true }) 
       try {
         setLoadError(null);
         const timeoutPromise = new Promise((_, reject) => {
-          setTimeout(() => reject(new Error('Timeout: La carga tardó demasiado')), 30000);
+          setTimeout(
+            () => reject(new Error("Timeout: La carga tardó demasiado")),
+            30000,
+          );
         });
-        
+
         const loadPromise = Promise.all([
           dispatch(fetchUsers()),
           dispatch(fetchRoles()),
-          dispatch(fetchUserRoles())
+          dispatch(fetchUserRoles()),
         ]);
-        
+
         await Promise.race([loadPromise, timeoutPromise]);
       } catch (error) {
-        console.error('Error loading data:', error);
-        setLoadError(error instanceof Error ? error.message : 'Error al cargar los datos. Por favor, recarga la página.');
-        showNotification(
-          "Error al cargar los datos",
-          5000,
-          false
+        console.error("Error loading data:", error);
+        setLoadError(
+          error instanceof Error
+            ? error.message
+            : "Error al cargar los datos. Por favor, recarga la página.",
         );
+        showNotification("Error al cargar los datos", 5000, false);
       }
     };
-    
+
     loadData();
   }, [dispatch, showNotification]);
 
   useEffect(() => {
     if (usersError) {
-      console.error('Users error from Redux:', usersError);
+      console.error("Users error from Redux:", usersError);
       setLoadError(`Error al cargar usuarios: ${usersError}`);
-      showNotification(
-        "Error al cargar usuarios",
-        5000,
-        false
-      );
+      showNotification("Error al cargar usuarios", 5000, false);
     }
   }, [usersError, showNotification]);
 
@@ -126,9 +129,9 @@ const ManageUsers: React.FC<{ isExpanded?: boolean }> = ({ isExpanded = true }) 
     if (!users || users.length === 0) {
       return [];
     }
-    
+
     const normalizeString = (str: string) => {
-      if (!str) return '';
+      if (!str) return "";
       return str.normalize("NFD").replace(/[\u0300-\u036f]/g, "");
     };
 
@@ -137,10 +140,11 @@ const ManageUsers: React.FC<{ isExpanded?: boolean }> = ({ isExpanded = true }) 
         try {
           return {
             ...user,
-            roleName: user.roles?.map((role: Role) => role.name).join(", ") || "",
+            roleName:
+              user.roles?.map((role: Role) => role.name).join(", ") || "",
           };
         } catch (error) {
-          console.error('Error processing user:', user, error);
+          console.error("Error processing user:", user, error);
           return {
             ...user,
             roleName: "",
@@ -149,17 +153,17 @@ const ManageUsers: React.FC<{ isExpanded?: boolean }> = ({ isExpanded = true }) 
       })
       .filter((user) => {
         if (!showInactive && !user.isActive) return false;
-        
+
         if (!filter.trim()) return true;
-        
+
         try {
           const searchText = normalizeString(
-            `${user.firstName || ''} ${user.lastName || ''} ${user.email || ''} ${user.username || ''} ${user.roleName || ''}`
+            `${user.firstName || ""} ${user.lastName || ""} ${user.email || ""} ${user.username || ""} ${user.roleName || ""}`,
           ).toLowerCase();
-          
+
           return searchText.includes(normalizeString(filter).toLowerCase());
         } catch (error) {
-          console.error('Error filtering user:', user, error);
+          console.error("Error filtering user:", user, error);
           return true; // Include user if filtering fails
         }
       });
@@ -191,7 +195,7 @@ const ManageUsers: React.FC<{ isExpanded?: boolean }> = ({ isExpanded = true }) 
             regex.text.test(fields.roleName)
         : isValid;
     },
-    []
+    [],
   );
 
   const validateNewPasswordFields = useCallback(
@@ -211,7 +215,7 @@ const ManageUsers: React.FC<{ isExpanded?: boolean }> = ({ isExpanded = true }) 
         !passwordRegex.test(fields.confirmNewPassword)
       ) {
         setError(
-          "El valor es inválido.\n\n- Mínimo 8 caracteres.\n- Al menos una letra mayúscula.\n- Al menos una letra minúscula.\n- Al menos un número.\n- Al menos un carácter especial"
+          "El valor es inválido.\n\n- Mínimo 8 caracteres.\n- Al menos una letra mayúscula.\n- Al menos una letra minúscula.\n- Al menos un número.\n- Al menos un carácter especial",
         );
         return false;
       }
@@ -219,23 +223,26 @@ const ManageUsers: React.FC<{ isExpanded?: boolean }> = ({ isExpanded = true }) 
       setError(null);
       return true;
     },
-    []
+    [],
   );
 
   const isPasswordFormValid = useMemo(() => {
     const { newPassword, confirmNewPassword } = passwordFields;
-    
+
     if (!newPassword.trim() && !confirmNewPassword.trim()) {
       return false;
     }
-    
+
     if (newPassword !== confirmNewPassword) {
       return false;
     }
-    
-    const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
-    
-    return passwordRegex.test(newPassword) && passwordRegex.test(confirmNewPassword);
+
+    const passwordRegex =
+      /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
+
+    return (
+      passwordRegex.test(newPassword) && passwordRegex.test(confirmNewPassword)
+    );
   }, [passwordFields]);
 
   const isEditFormValid = useMemo(() => {
@@ -243,10 +250,13 @@ const ManageUsers: React.FC<{ isExpanded?: boolean }> = ({ isExpanded = true }) 
     return validateFields(editFields, false);
   }, [editFields, editRowId, validateFields]);
 
-  const handleFilterChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
-    setFilter(e.target.value);
-    setPage(0);
-  }, [setPage]);
+  const handleFilterChange = useCallback(
+    (e: React.ChangeEvent<HTMLInputElement>) => {
+      setFilter(e.target.value);
+      setPage(0);
+    },
+    [setPage],
+  );
 
   const handleEdit = useCallback((user: User) => {
     setEditRowId(user.id);
@@ -282,11 +292,7 @@ const ManageUsers: React.FC<{ isExpanded?: boolean }> = ({ isExpanded = true }) 
       };
       const role = roles.find((r) => r.name === editFields.roleName);
       if (!role) {
-        showNotification(
-          "El rol seleccionado no existe",
-          5000,
-          false
-        );
+        showNotification("El rol seleccionado no existe", 5000, false);
         return;
       }
       dispatch(
@@ -294,7 +300,7 @@ const ManageUsers: React.FC<{ isExpanded?: boolean }> = ({ isExpanded = true }) 
           id,
           updatedUser,
           newRoleId: role.id,
-        })
+        }),
       );
       setEditRowId(null);
       setEditFields({
@@ -305,18 +311,14 @@ const ManageUsers: React.FC<{ isExpanded?: boolean }> = ({ isExpanded = true }) 
         password: "",
         roleName: "",
       });
-      showNotification(
-        "La actualización del usuario fue exitosa",
-        3000,
-        false
-      );
+      showNotification("La actualización del usuario fue exitosa", 3000, false);
     } catch (error) {
       handleCancel();
       console.error(error);
       showNotification(
         "Ha ocurrido un error al actualizar el usuario",
         5000,
-        false
+        false,
       );
     }
   };
@@ -333,51 +335,53 @@ const ManageUsers: React.FC<{ isExpanded?: boolean }> = ({ isExpanded = true }) 
 
   const handleStatusChange = async () => {
     if (!userToChange) return;
-    
+
     setIsUpdatingUserStatus(true);
     try {
       await dispatch(
         updateUserStatus({
           id: userToChange.id,
           status: !userToChange.isActive,
-        })
+        }),
       );
       setOpenStatusDialog(false);
       setUserToChange(null);
       showNotification(
         "Estado del usuario actualizado exitosamente",
         3000,
-        false
+        false,
       );
     } catch (error) {
       console.error("Error updating user status:", error);
       showNotification(
         "Error al actualizar el estado del usuario",
         5000,
-        false
+        false,
       );
     } finally {
       setIsUpdatingUserStatus(false);
     }
   };
 
-  const handleNewPassword = useCallback((
-    event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
-  ) => {
-    setPasswordFields({
-      ...passwordFields,
-      newPassword: event.target.value,
-    });
-  }, [passwordFields]);
+  const handleNewPassword = useCallback(
+    (event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+      setPasswordFields({
+        ...passwordFields,
+        newPassword: event.target.value,
+      });
+    },
+    [passwordFields],
+  );
 
-  const handleConfirmNewPassword = useCallback((
-    event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
-  ) => {
-    setPasswordFields({
-      ...passwordFields,
-      confirmNewPassword: event.target.value,
-    });
-  }, [passwordFields]);
+  const handleConfirmNewPassword = useCallback(
+    (event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+      setPasswordFields({
+        ...passwordFields,
+        confirmNewPassword: event.target.value,
+      });
+    },
+    [passwordFields],
+  );
 
   const handleToggleNewPassword = useCallback(() => {
     setShowNewPassword(!showNewPassword);
@@ -387,114 +391,133 @@ const ManageUsers: React.FC<{ isExpanded?: boolean }> = ({ isExpanded = true }) 
     setShowConfirmNewPassword(!showConfirmNewPassword);
   }, [showConfirmNewPassword]);
 
-  const handleChangePassword = useCallback(async (
-    e: React.FormEvent,
-    id: number,
-    handleClose: () => void
-  ) => {
-    e.preventDefault();
-    const isValid = await validateNewPasswordFields(passwordFields);
-    if (isValid) {
-      try {
-        await dispatch(
-          updateUserPassword({
-            id,
-            password: passwordFields.newPassword,
-          })
-        );
-        setPasswordFields({
-          newPassword: "",
-          confirmNewPassword: "",
-        });
-        setShowNewPassword(false);
-        setShowConfirmNewPassword(false);
-        handleClose();
-        showNotification(
-          "La contraseña fue actualizada exitosamente",
-          3000,
-          false
-        );
-      } catch (error) {
-        console.error(error);
-        showNotification(
-          "Ha ocurrido un error al actualizar la contraseña",
-          5000,
-          false
-        );
+  const handleChangePassword = useCallback(
+    async (e: React.FormEvent, id: number, handleClose: () => void) => {
+      e.preventDefault();
+      const isValid = await validateNewPasswordFields(passwordFields);
+      if (isValid) {
+        try {
+          await dispatch(
+            updateUserPassword({
+              id,
+              password: passwordFields.newPassword,
+            }),
+          );
+          setPasswordFields({
+            newPassword: "",
+            confirmNewPassword: "",
+          });
+          setShowNewPassword(false);
+          setShowConfirmNewPassword(false);
+          handleClose();
+          showNotification(
+            "La contraseña fue actualizada exitosamente",
+            3000,
+            false,
+          );
+        } catch (error) {
+          console.error(error);
+          showNotification(
+            "Ha ocurrido un error al actualizar la contraseña",
+            5000,
+            false,
+          );
+        }
       }
-    }
-  }, [validateNewPasswordFields, passwordFields, dispatch, showNotification]);
+    },
+    [validateNewPasswordFields, passwordFields, dispatch, showNotification],
+  );
 
-  const handlePasswordModal = useCallback((id: number, handleClose: () => void) => {
-    return (
-      <Box sx={{ p: 2 }}>
-        <Typography variant="h6" gutterBottom>
-          Cambiar Contraseña para Usuario ID: {id}
-        </Typography>
-        <Typography variant="body2" color="textSecondary" sx={{ mb: 3 }}>
-          Ingresa una nueva contraseña para este usuario.
-        </Typography>
-        <TextField
-          label="Nueva Contraseña"
-          type={showNewPassword ? "text" : "password"}
-          variant="outlined"
-          fullWidth
-          value={passwordFields.newPassword}
-          onChange={handleNewPassword}
-          sx={{ mb: 2 }}
-          placeholder="Mínimo 8 caracteres"
-          InputProps={{
-            endAdornment: (
-              <InputAdornment position="end">
-                <IconButton onClick={handleToggleNewPassword} edge="end">
-                  {showNewPassword ? <VisibilityOff /> : <Visibility />}
-                </IconButton>
-              </InputAdornment>
-            ),
-          }}
-        />
-        <TextField
-          label="Confirmar Nueva Contraseña"
-          type={showConfirmNewPassword ? "text" : "password"}
-          variant="outlined"
-          fullWidth
-          value={passwordFields.confirmNewPassword}
-          onChange={handleConfirmNewPassword}
-          sx={{ mb: 2 }}
-          placeholder="Repite la nueva contraseña"
-          InputProps={{
-            endAdornment: (
-              <InputAdornment position="end">
-                <IconButton
-                  onClick={handleToggleConfirmNewPassword}
-                  edge="end"
-                >
-                  {showConfirmNewPassword ? <VisibilityOff /> : <Visibility />}
-                </IconButton>
-              </InputAdornment>
-            ),
-          }}
-        />
-        {error && (
-          <Alert severity="error" sx={{ mb: 2, whiteSpace: "pre-line" }}>
-            {error}
-          </Alert>
-        )}
-        <Box sx={{ display: 'flex', gap: 2, justifyContent: 'flex-end', mt: 3 }}>
-          <Button variant="outlined" onClick={handleClose}>
-            Cancelar
-          </Button>
-          <Button
-            variant="contained"
-            onClick={(e) => handleChangePassword(e, id, handleClose)}
-            disabled={!isPasswordFormValid}
+  const handlePasswordModal = useCallback(
+    (id: number, handleClose: () => void) => {
+      return (
+        <Box sx={{ p: 2 }}>
+          <Typography variant="h6" gutterBottom>
+            Cambiar Contraseña para Usuario ID: {id}
+          </Typography>
+          <Typography variant="body2" color="textSecondary" sx={{ mb: 3 }}>
+            Ingresa una nueva contraseña para este usuario.
+          </Typography>
+          <TextField
+            label="Nueva Contraseña"
+            type={showNewPassword ? "text" : "password"}
+            variant="outlined"
+            fullWidth
+            value={passwordFields.newPassword}
+            onChange={handleNewPassword}
+            sx={{ mb: 2 }}
+            placeholder="Mínimo 8 caracteres"
+            InputProps={{
+              endAdornment: (
+                <InputAdornment position="end">
+                  <IconButton onClick={handleToggleNewPassword} edge="end">
+                    {showNewPassword ? <VisibilityOff /> : <Visibility />}
+                  </IconButton>
+                </InputAdornment>
+              ),
+            }}
+          />
+          <TextField
+            label="Confirmar Nueva Contraseña"
+            type={showConfirmNewPassword ? "text" : "password"}
+            variant="outlined"
+            fullWidth
+            value={passwordFields.confirmNewPassword}
+            onChange={handleConfirmNewPassword}
+            sx={{ mb: 2 }}
+            placeholder="Repite la nueva contraseña"
+            InputProps={{
+              endAdornment: (
+                <InputAdornment position="end">
+                  <IconButton
+                    onClick={handleToggleConfirmNewPassword}
+                    edge="end"
+                  >
+                    {showConfirmNewPassword ? (
+                      <VisibilityOff />
+                    ) : (
+                      <Visibility />
+                    )}
+                  </IconButton>
+                </InputAdornment>
+              ),
+            }}
+          />
+          {error && (
+            <Alert severity="error" sx={{ mb: 2, whiteSpace: "pre-line" }}>
+              {error}
+            </Alert>
+          )}
+          <Box
+            sx={{ display: "flex", gap: 2, justifyContent: "flex-end", mt: 3 }}
           >
-            Cambiar Contraseña
-          </Button>
+            <Button variant="outlined" onClick={handleClose}>
+              Cancelar
+            </Button>
+            <Button
+              variant="contained"
+              onClick={(e) => handleChangePassword(e, id, handleClose)}
+              disabled={!isPasswordFormValid}
+            >
+              Cambiar Contraseña
+            </Button>
+          </Box>
         </Box>
-      </Box>
-    );
-  }, [showNewPassword, showConfirmNewPassword, passwordFields, handleNewPassword, handleConfirmNewPassword, handleToggleNewPassword, handleToggleConfirmNewPassword, error, isPasswordFormValid, handleChangePassword]);
+      );
+    },
+    [
+      showNewPassword,
+      showConfirmNewPassword,
+      passwordFields,
+      handleNewPassword,
+      handleConfirmNewPassword,
+      handleToggleNewPassword,
+      handleToggleConfirmNewPassword,
+      error,
+      isPasswordFormValid,
+      handleChangePassword,
+    ],
+  );
 
   const handleOpenAddUserModal = useCallback(() => {
     setOpenAddUserModal(true);
@@ -514,7 +537,7 @@ const ManageUsers: React.FC<{ isExpanded?: boolean }> = ({ isExpanded = true }) 
   }) => {
     setIsCreatingUser(true);
     try {
-      const role = roles.find(r => r.name === userData.roleName);
+      const role = roles.find((r) => r.name === userData.roleName);
       if (!role) {
         throw new Error(`Rol "${userData.roleName}" no encontrado`);
       }
@@ -527,24 +550,18 @@ const ManageUsers: React.FC<{ isExpanded?: boolean }> = ({ isExpanded = true }) 
         password: userData.password,
         isActive: true,
       };
-      
-      await dispatch(createUser({
-        newUser,
-        newRoleId: role.id,
-      }));
-      setOpenAddUserModal(false);
-      showNotification(
-        "Usuario creado exitosamente",
-        3000,
-        false
+
+      await dispatch(
+        createUser({
+          newUser,
+          newRoleId: role.id,
+        }),
       );
+      setOpenAddUserModal(false);
+      showNotification("Usuario creado exitosamente", 3000, false);
     } catch (error) {
       console.error("Error creating user:", error);
-      showNotification(
-        "Error al crear el usuario",
-        5000,
-        false
-      );
+      showNotification("Error al crear el usuario", 5000, false);
     } finally {
       setIsCreatingUser(false);
     }
@@ -572,7 +589,7 @@ const ManageUsers: React.FC<{ isExpanded?: boolean }> = ({ isExpanded = true }) 
           return true;
       }
     },
-    []
+    [],
   );
 
   const handleRetry = useCallback(() => {
@@ -582,9 +599,12 @@ const ManageUsers: React.FC<{ isExpanded?: boolean }> = ({ isExpanded = true }) 
     dispatch(fetchUserRoles());
   }, [dispatch]);
 
-  const setEditField = useCallback((field: string, value: string | boolean | number | string[] | Date) => {
-    setEditFields({ ...editFields, [field]: value });
-  }, [editFields]);
+  const setEditField = useCallback(
+    (field: string, value: string | boolean | number | string[] | Date) => {
+      setEditFields({ ...editFields, [field]: value });
+    },
+    [editFields],
+  );
 
   return (
     <Box>
@@ -607,11 +627,7 @@ const ManageUsers: React.FC<{ isExpanded?: boolean }> = ({ isExpanded = true }) 
             <Typography variant="body1" gutterBottom>
               {loadError}
             </Typography>
-            <Button
-              variant="contained"
-              onClick={handleRetry}
-              sx={{ mt: 2 }}
-            >
+            <Button variant="contained" onClick={handleRetry} sx={{ mt: 2 }}>
               Reintentar
             </Button>
           </Alert>
@@ -642,7 +658,7 @@ const ManageUsers: React.FC<{ isExpanded?: boolean }> = ({ isExpanded = true }) 
             alignItems="center"
           >
             <Grid item xs={12} md={4}>
-              <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+              <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
                 {filteredUsers && (
                   <SearchBar
                     placeholder="Buscar usuario"
@@ -657,11 +673,11 @@ const ManageUsers: React.FC<{ isExpanded?: boolean }> = ({ isExpanded = true }) 
                   color="primary"
                   onClick={handleOpenAddUserModal}
                   sx={{
-                    display: { xs: 'flex', md: 'none' },
-                    minWidth: 'auto',
+                    display: { xs: "flex", md: "none" },
+                    minWidth: "auto",
                     width: 56,
                     height: 56,
-                    borderRadius: '50%',
+                    borderRadius: "50%",
                     p: 0,
                   }}
                 >
@@ -677,22 +693,22 @@ const ManageUsers: React.FC<{ isExpanded?: boolean }> = ({ isExpanded = true }) 
                 justifyContent="flex-end"
                 gap={2}
                 sx={{
-                  display: { xs: 'none', md: 'flex' },
+                  display: { xs: "none", md: "flex" },
                 }}
               >
                 <Box
                   onClick={() => setShowInactive(!showInactive)}
                   sx={{
-                    display: 'flex',
-                    alignItems: 'center',
+                    display: "flex",
+                    alignItems: "center",
                     gap: 1,
-                    cursor: 'pointer',
-                    userSelect: 'none',
+                    cursor: "pointer",
+                    userSelect: "none",
                     color: theme.palette.text.primary,
-                    transition: 'color 0.2s',
-                    '&:hover': {
+                    transition: "color 0.2s",
+                    "&:hover": {
                       color: theme.palette.primary.main,
-                      textDecoration: 'underline',
+                      textDecoration: "underline",
                     },
                     px: 1,
                   }}
@@ -706,24 +722,24 @@ const ManageUsers: React.FC<{ isExpanded?: boolean }> = ({ isExpanded = true }) 
                     variant="body2"
                     fontWeight={600}
                     sx={{
-                      fontSize: '0.95rem',
-                      whiteSpace: 'nowrap',
+                      fontSize: "0.95rem",
+                      whiteSpace: "nowrap",
                     }}
                   >
-                    {showInactive ? 'Mostrando Inactivos' : 'Ocultar Inactivos'}
+                    {showInactive ? "Mostrando Inactivos" : "Ocultar Inactivos"}
                   </Typography>
                 </Box>
                 <Button
                   variant="contained"
                   startIcon={<AddRoundedIcon />}
                   onClick={handleOpenAddUserModal}
-                  sx={{ px: 3, py: 1.5, fontSize: '1rem', minHeight: 56 }}
+                  sx={{ px: 3, py: 1.5, fontSize: "1rem", minHeight: 56 }}
                 >
                   Agregar
                 </Button>
               </Box>
             </Grid>
-            <Grid item xs={12} sx={{ display: { xs: 'block', md: 'none' } }}>
+            <Grid item xs={12} sx={{ display: { xs: "block", md: "none" } }}>
               <Box
                 display="flex"
                 justifyContent="center"
@@ -733,16 +749,16 @@ const ManageUsers: React.FC<{ isExpanded?: boolean }> = ({ isExpanded = true }) 
                 <Box
                   onClick={() => setShowInactive(!showInactive)}
                   sx={{
-                    display: 'flex',
-                    alignItems: 'center',
+                    display: "flex",
+                    alignItems: "center",
                     gap: 1,
-                    cursor: 'pointer',
-                    userSelect: 'none',
+                    cursor: "pointer",
+                    userSelect: "none",
                     color: theme.palette.text.primary,
-                    transition: 'color 0.2s',
-                    '&:hover': {
+                    transition: "color 0.2s",
+                    "&:hover": {
                       color: theme.palette.primary.main,
-                      textDecoration: 'underline',
+                      textDecoration: "underline",
                     },
                     px: 1,
                   }}
@@ -756,11 +772,11 @@ const ManageUsers: React.FC<{ isExpanded?: boolean }> = ({ isExpanded = true }) 
                     variant="body2"
                     fontWeight={600}
                     sx={{
-                      fontSize: '0.95rem',
-                      whiteSpace: 'nowrap',
+                      fontSize: "0.95rem",
+                      whiteSpace: "nowrap",
                     }}
                   >
-                    {showInactive ? 'Mostrando Inactivos' : 'Ocultar Inactivos'}
+                    {showInactive ? "Mostrando Inactivos" : "Ocultar Inactivos"}
                   </Typography>
                 </Box>
               </Box>
@@ -812,7 +828,7 @@ const ManageUsers: React.FC<{ isExpanded?: boolean }> = ({ isExpanded = true }) 
           )}
         </>
       )}
-      
+
       <DialogComponent
         open={openStatusDialog}
         onClose={handleCloseStatusDialog}
@@ -824,14 +840,17 @@ const ManageUsers: React.FC<{ isExpanded?: boolean }> = ({ isExpanded = true }) 
         cancelText="Cancelar"
         loading={isUpdatingUserStatus}
       />
-      
+
       <DialogComponent
         open={openAddUserModal}
         onClose={handleCloseAddUserModal}
         title="Agregar"
         subtitle="Nuevo usuario"
         hideActions
-        paperSx={{ minWidth: { xs: '90vw', sm: 500, md: 700 }, maxWidth: { xs: '98vw', sm: 700 } }}
+        paperSx={{
+          minWidth: { xs: "90vw", sm: 500, md: 700 },
+          maxWidth: { xs: "98vw", sm: 700 },
+        }}
       >
         <AddUserForm
           onSubmit={handleCreateUser}

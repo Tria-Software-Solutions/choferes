@@ -16,7 +16,9 @@ export const getPermissionsByNames = async (names: string[]) => {
   return response.data;
 };
 
-export const createPermission = async (newPermission: Omit<Permission, "id">) => {
+export const createPermission = async (
+  newPermission: Omit<Permission, "id">,
+) => {
   const response = await api.post("/permissions", newPermission);
   return response.data;
 };

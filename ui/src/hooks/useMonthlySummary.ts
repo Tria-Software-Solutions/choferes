@@ -4,7 +4,7 @@ import { MonthlySummary } from "../models/MonthlySummary";
 
 export const useMonthlySummaries = () => {
   const [monthlySummaries, setMonthlySummaries] = useState<MonthlySummary[]>(
-    []
+    [],
   );
   const [totalCountMonthlySummaries, setTotalCountMonthlySummaries] =
     useState(0);
@@ -25,33 +25,25 @@ export const useMonthlySummaries = () => {
   }, []);
 
   const getCurrentMonthlySummary = useCallback(
-      async (
-        employeeId: number,
-        month: number,
-        year: number
-      ) => {
-        setIsLoadingMonthlySummaries(true);
-        try {
-          return await MonthlySummaryService.getCurrentMonthlySummary(
-            employeeId,
-            month,
-            year
-          );
-        } catch (error) {
-          console.error(
-            "Error fetching current Biweekly Summary",
-            error
-          );
-        } finally {
-          setIsLoadingMonthlySummaries(false);
-        }
-      },
-      []
-    );
-  
+    async (employeeId: number, month: number, year: number) => {
+      setIsLoadingMonthlySummaries(true);
+      try {
+        return await MonthlySummaryService.getCurrentMonthlySummary(
+          employeeId,
+          month,
+          year,
+        );
+      } catch (error) {
+        console.error("Error fetching current Biweekly Summary", error);
+      } finally {
+        setIsLoadingMonthlySummaries(false);
+      }
+    },
+    [],
+  );
 
   const createMonthlySummary = async (
-    newMonthlySummary: Omit<MonthlySummary, "id">
+    newMonthlySummary: Omit<MonthlySummary, "id">,
   ) => {
     const createdMonthlySummary =
       await MonthlySummaryService.createMonthlySummary(newMonthlySummary);
@@ -61,20 +53,20 @@ export const useMonthlySummaries = () => {
 
   const updateMonthlySummary = async (
     id: number,
-    updatedMonthlySummary: Partial<MonthlySummary>
+    updatedMonthlySummary: Partial<MonthlySummary>,
   ) => {
     await MonthlySummaryService.updateMonthlySummary(id, updatedMonthlySummary);
     setMonthlySummaries((prev) =>
       prev.map((monthlySummary) =>
         monthlySummary.id === id
           ? { ...monthlySummary, ...updatedMonthlySummary }
-          : monthlySummary
-      )
+          : monthlySummary,
+      ),
     );
   };
 
   const createOrUpdateMonthlySummary = async (
-    newMonthlySummary: Omit<MonthlySummary, "id"> | MonthlySummary
+    newMonthlySummary: Omit<MonthlySummary, "id"> | MonthlySummary,
   ) => {
     if ("id" in newMonthlySummary) {
       await updateMonthlySummary(newMonthlySummary.id, newMonthlySummary);
@@ -86,7 +78,7 @@ export const useMonthlySummaries = () => {
   const deleteMonthlySummary = async (id: number) => {
     await MonthlySummaryService.deleteMonthlySummary(id);
     setMonthlySummaries((prev) =>
-      prev.filter((monthlySummary) => monthlySummary.id !== id)
+      prev.filter((monthlySummary) => monthlySummary.id !== id),
     );
     setTotalCountMonthlySummaries((prev) => prev - 1);
   };

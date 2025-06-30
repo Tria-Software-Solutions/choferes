@@ -41,7 +41,7 @@ export const fetchUsers = createAsyncThunk(
     } catch (error: any) {
       return rejectWithValue(error.response?.data || "Failed to fetch users");
     }
-  }
+  },
 );
 
 export const fetchUserById = createAsyncThunk(
@@ -51,10 +51,10 @@ export const fetchUserById = createAsyncThunk(
       return await UserService.getUserById(id);
     } catch (error: any) {
       return rejectWithValue(
-        error.response?.data || "Failed to fetch user by ID"
+        error.response?.data || "Failed to fetch user by ID",
       );
     }
-  }
+  },
 );
 
 export const fetchUserByEmail = createAsyncThunk(
@@ -64,10 +64,10 @@ export const fetchUserByEmail = createAsyncThunk(
       return await UserService.getUserByEmail(email);
     } catch (error: any) {
       return rejectWithValue(
-        error.response?.data || "Failed to fetch user by email"
+        error.response?.data || "Failed to fetch user by email",
       );
     }
-  }
+  },
 );
 
 export const fetchUserByUsername = createAsyncThunk(
@@ -77,10 +77,10 @@ export const fetchUserByUsername = createAsyncThunk(
       return await UserService.getUserByUsername(username);
     } catch (error: any) {
       return rejectWithValue(
-        error.response?.data || "Failed to fetch user by username"
+        error.response?.data || "Failed to fetch user by username",
       );
     }
-  }
+  },
 );
 
 export const fetchUserPermissions = createAsyncThunk(
@@ -90,10 +90,10 @@ export const fetchUserPermissions = createAsyncThunk(
       return await UserService.getUserPermissions(id);
     } catch (error: any) {
       return rejectWithValue(
-        error.response?.data || "Failed to fetch user permissions"
+        error.response?.data || "Failed to fetch user permissions",
       );
     }
-  }
+  },
 );
 
 export const createUser = createAsyncThunk(
@@ -103,7 +103,7 @@ export const createUser = createAsyncThunk(
       newUser,
       newRoleId,
     }: { newUser: Omit<User, "id" | "temporalPassword">; newRoleId?: number },
-    { rejectWithValue }
+    { rejectWithValue },
   ) => {
     try {
       const createdUser = await UserService.createUser(newUser);
@@ -117,7 +117,7 @@ export const createUser = createAsyncThunk(
     } catch (error: any) {
       return rejectWithValue(error.response?.data || "Failed to create user");
     }
-  }
+  },
 );
 
 export const updateUser = createAsyncThunk(
@@ -132,12 +132,12 @@ export const updateUser = createAsyncThunk(
       updatedUser: Partial<Omit<User, "id" | "temporalPassword">>;
       newRoleId?: number;
     },
-    { rejectWithValue }
+    { rejectWithValue },
   ) => {
     try {
       await UserService.updateUser(id, updatedUser);
 
-      if (newRoleId !== undefined && typeof newRoleId === 'number') {
+      if (newRoleId !== undefined && typeof newRoleId === "number") {
         await UserRoleService.updateUserRole(id, newRoleId);
       }
 
@@ -151,58 +151,58 @@ export const updateUser = createAsyncThunk(
     } catch (error: any) {
       return rejectWithValue(error.response?.data || "Failed to update user");
     }
-  }
+  },
 );
 
 export const updateUserStatus = createAsyncThunk(
   "users/updateUserStatus",
   async (
     { id, status }: { id: number; status: boolean },
-    { rejectWithValue }
+    { rejectWithValue },
   ) => {
     try {
       await UserService.updateUserStatus(id, status);
       return { id, status };
     } catch (error: any) {
       return rejectWithValue(
-        error.response?.data || "Failed to update user status"
+        error.response?.data || "Failed to update user status",
       );
     }
-  }
+  },
 );
 
 export const updateUserPassword = createAsyncThunk(
   "users/updateUserPassword",
   async (
     { id, password }: { id: number; password: string },
-    { rejectWithValue }
+    { rejectWithValue },
   ) => {
     try {
       await UserService.updateUserPassword(id, password);
       return { id, password };
     } catch (error: any) {
       return rejectWithValue(
-        error.response?.data || "Failed to update password"
+        error.response?.data || "Failed to update password",
       );
     }
-  }
+  },
 );
 
 export const updateUserTemporalPassword = createAsyncThunk(
   "users/updateUserTemporalPassword",
   async (
     { id, temporalPassword }: { id: number; temporalPassword: string },
-    { rejectWithValue }
+    { rejectWithValue },
   ) => {
     try {
       await UserService.updateUserTemporalPassword(id, temporalPassword);
       return { id, temporalPassword };
     } catch (error: any) {
       return rejectWithValue(
-        error.response?.data || "Failed to update temporal password"
+        error.response?.data || "Failed to update temporal password",
       );
     }
-  }
+  },
 );
 
 export const deleteUser = createAsyncThunk(
@@ -214,7 +214,7 @@ export const deleteUser = createAsyncThunk(
     } catch (error: any) {
       return rejectWithValue(error.response?.data || "Failed to delete user");
     }
-  }
+  },
 );
 
 const userSlice = createSlice({
@@ -245,25 +245,25 @@ const userSlice = createSlice({
         fetchUserById.fulfilled,
         (state, action: PayloadAction<User>) => {
           state.selectedUser = action.payload;
-        }
+        },
       )
       .addCase(
         fetchUserByEmail.fulfilled,
         (state, action: PayloadAction<User>) => {
           state.selectedUser = action.payload;
-        }
+        },
       )
       .addCase(
         fetchUserByUsername.fulfilled,
         (state, action: PayloadAction<User>) => {
           state.selectedUser = action.payload;
-        }
+        },
       )
       .addCase(
         fetchUserPermissions.fulfilled,
         (state, action: PayloadAction<string[]>) => {
           state.permissions = action.payload;
-        }
+        },
       )
       .addCase(createUser.fulfilled, (state, action: PayloadAction<User>) => {
         state.users.push(action.payload);
@@ -277,12 +277,12 @@ const userSlice = createSlice({
             id: number;
             refreshedUser: User;
             newRoleId?: number;
-          }>
+          }>,
         ) => {
           state.users = state.users.map((user) =>
-            user.id === action.payload.id ? action.payload.refreshedUser : user
+            user.id === action.payload.id ? action.payload.refreshedUser : user,
           );
-        }
+        },
       )
       .addCase(
         updateUserStatus.fulfilled,
@@ -290,9 +290,9 @@ const userSlice = createSlice({
           state.users = state.users.map((user) =>
             user.id === action.payload.id
               ? { ...user, isActive: action.payload.status }
-              : user
+              : user,
           );
-        }
+        },
       )
       .addCase(
         updateUserPassword.fulfilled,
@@ -300,22 +300,22 @@ const userSlice = createSlice({
           state.users = state.users.map((user) =>
             user.id === action.payload.id
               ? { ...user, password: action.payload.password }
-              : user
+              : user,
           );
-        }
+        },
       )
       .addCase(
         updateUserTemporalPassword.fulfilled,
         (
           state,
-          action: PayloadAction<{ id: number; temporalPassword: string }>
+          action: PayloadAction<{ id: number; temporalPassword: string }>,
         ) => {
           state.users = state.users.map((user) =>
             user.id === action.payload.id
               ? { ...user, temporalPassword: action.payload.temporalPassword }
-              : user
+              : user,
           );
-        }
+        },
       )
       .addCase(deleteUser.fulfilled, (state, action: PayloadAction<number>) => {
         state.users = state.users.filter((user) => user.id !== action.payload);

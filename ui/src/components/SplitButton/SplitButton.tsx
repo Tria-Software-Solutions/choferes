@@ -1,6 +1,15 @@
 import * as React from "react";
-import { ButtonGroup, Button, Popper, Grow, Paper, ClickAwayListener, MenuList, MenuItem } from "@mui/material";
-import ArrowDropDownIcon from '@mui/icons-material/ArrowDropDown';
+import {
+  ButtonGroup,
+  Button,
+  Popper,
+  Grow,
+  Paper,
+  ClickAwayListener,
+  MenuList,
+  MenuItem,
+} from "@mui/material";
+import ArrowDropDownIcon from "@mui/icons-material/ArrowDropDown";
 
 interface Option {
   label?: string;
@@ -58,11 +67,7 @@ const SplitButton: React.FC<SplitButtonProps> = ({
 
   return (
     <React.Fragment>
-      <ButtonGroup
-        variant="contained"
-        ref={anchorRef}
-        sx={{ height: "56px" }}
-      >
+      <ButtonGroup variant="contained" ref={anchorRef} sx={{ height: "56px" }}>
         <Button onClick={handleClick} startIcon={buttonIcon}>
           {buttonText}
         </Button>

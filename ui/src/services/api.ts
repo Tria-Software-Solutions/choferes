@@ -22,20 +22,20 @@ api.interceptors.request.use(
       config.headers["Authorization"] = `Bearer ${accessToken}`;
     }
 
-    if (config.method === 'get' && !config.headers['x-no-cache']) {
+    if (config.method === "get" && !config.headers["x-no-cache"]) {
       const cacheKey = `${config.url}${JSON.stringify(config.params || {})}`;
       const cached = requestCache.get(cacheKey);
-      
+
       if (cached && Date.now() - cached.timestamp < CACHE_DURATION) {
         const cachedResponse = {
           data: cached.data,
           status: 200,
-          statusText: 'OK',
+          statusText: "OK",
           headers: {},
           config,
         };
-        
-        const error = new Error('CACHED_RESPONSE');
+
+        const error = new Error("CACHED_RESPONSE");
         (error as any).cachedResponse = cachedResponse;
         throw error;
       }
@@ -43,22 +43,22 @@ api.interceptors.request.use(
 
     return config;
   },
-  (error) => Promise.reject(error)
+  (error) => Promise.reject(error),
 );
 
 api.interceptors.response.use(
   (response) => {
-    if (response.config.method === 'get' && response.status === 200) {
+    if (response.config.method === "get" && response.status === 200) {
       const cacheKey = `${response.config.url}${JSON.stringify(response.config.params || {})}`;
       requestCache.set(cacheKey, {
         data: response.data,
-        timestamp: Date.now()
+        timestamp: Date.now(),
       });
     }
     return response;
   },
   async (error) => {
-    if (error.message === 'CACHED_RESPONSE' && error.cachedResponse) {
+    if (error.message === "CACHED_RESPONSE" && error.cachedResponse) {
       return error.cachedResponse;
     }
 
@@ -73,12 +73,12 @@ api.interceptors.response.use(
           {
             withCredentials: true,
             headers: {
-              'Content-Type': 'application/json',
-              'Authorization': `Bearer ${Cookies.get("refreshToken")}`
-            }
-          }
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${Cookies.get("refreshToken")}`,
+            },
+          },
         );
-        
+
         const newAccessToken = response.data.accessToken;
         Cookies.set("accessToken", newAccessToken);
         error.config.headers["Authorization"] = `Bearer ${newAccessToken}`;
@@ -89,7 +89,7 @@ api.interceptors.response.use(
       }
     }
     return Promise.reject(error);
-  }
+  },
 );
 
 export const clearApiCache = () => {
