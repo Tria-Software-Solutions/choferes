@@ -12,17 +12,14 @@ export const getHoursWorked = async (req: Request, res: Response) => {
 
 export const getHoursWorkedById = async (req: Request, res: Response) => {
   try {
-    const id = parseInt(req.params.id);
+    const id = parseInt(req.params.id, 10);
     const hoursWorked = await hoursWorkedService.getHoursWorkedById(id);
     if (hoursWorked) {
       return res.status(200).json(hoursWorked);
-    } else {
-      return res.status(404).json({ message: "HoursWorked entry not found" });
     }
+    return res.status(404).json({ message: "HoursWorked entry not found" });
   } catch (error) {
-    return res
-      .status(500)
-      .json({ message: "Error fetching HoursWorked by ID", error });
+    return res.status(500).json({ message: "Error fetching HoursWorked by ID", error });
   }
 };
 
@@ -37,16 +34,12 @@ export const createHoursWorked = async (req: Request, res: Response) => {
 
 export const updateHoursWorked = async (req: Request, res: Response) => {
   try {
-    const id = parseInt(req.params.id);
-    const updatedHoursWorked = await hoursWorkedService.updateHoursWorked(
-      id,
-      req.body
-    );
+    const id = parseInt(req.params.id, 10);
+    const updatedHoursWorked = await hoursWorkedService.updateHoursWorked(id, req.body);
     if (updatedHoursWorked) {
       return res.status(200).json(updatedHoursWorked);
-    } else {
-      return res.status(404).json({ message: "HoursWorked entry not found" });
     }
+    return res.status(404).json({ message: "HoursWorked entry not found" });
   } catch (error) {
     return res.status(500).json({ message: "Error updating HoursWorked", error });
   }
@@ -59,9 +52,8 @@ export const deleteHoursWorked = async (req: Request, res: Response) => {
 
     if (deleted) {
       return res.status(204).send();
-    } else {
-      return res.status(404).json({ message: "HoursWorked entry not found" });
     }
+    return res.status(404).json({ message: "HoursWorked entry not found" });
   } catch (error) {
     return res.status(500).json({ message: "Error deleting HoursWorked", error });
   }

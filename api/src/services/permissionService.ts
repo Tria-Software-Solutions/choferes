@@ -1,23 +1,18 @@
 import { Op } from "sequelize";
 import { Permission } from "../models/Permission";
 
-export const getPermissions = async () => {
-  return await Permission.findAll();
-};
+export const getPermissions = async () => Permission.findAll();
 
-export const getPermissionById = async (id: number) => {
-  return await Permission.findByPk(id);
-};
+export const getPermissionById = async (id: number) => Permission.findByPk(id);
 
-export const getPermissionsByNames = async (names: string[]) => {
-  return await Permission.findAll({
-    where: {
-      name: {
-        [Op.in]: names, 
-      },
+export const getPermissionsByNames = async (names: string[]) =>
+  Permission.findAll({
+  where: {
+    name: {
+      [Op.in]: names,
     },
-  });
-};
+  },
+});
 
 export const createPermission = async (data: Omit<Permission, "id">) => {
   const newPermission = await Permission.create(data);
@@ -25,14 +20,9 @@ export const createPermission = async (data: Omit<Permission, "id">) => {
   return newPermission;
 };
 
-export const updatePermission = async (
-  id: number,
-  data: Omit<Permission, "id">
-) => {
+export const updatePermission = async (id: number, data: Omit<Permission, "id">) => {
   await Permission.update(data, { where: { id } });
   return Permission.findByPk(id);
 };
 
-export const deletePermission = async (id: number) => {
-  return await Permission.destroy({ where: { id } });
-};
+export const deletePermission = async (id: number) => Permission.destroy({ where: { id } });

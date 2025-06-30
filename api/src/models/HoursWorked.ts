@@ -5,8 +5,11 @@ import sequelize from "../config/database";
 
 export class HoursWorked extends Model {
   public id!: number;
+
   public employeeId!: number;
+
   public date!: Date;
+
   public scheduleId!: number;
 }
 
@@ -43,5 +46,5 @@ HoursWorked.init(
     sequelize,
     modelName: "HoursWorked",
     tableName: "hours_worked",
-  }
+  },
 );

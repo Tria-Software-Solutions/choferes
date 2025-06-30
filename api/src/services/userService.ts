@@ -1,15 +1,15 @@
 import bcrypt from "bcrypt";
-import { User } from "../models/User";
 import { Response } from "express";
+import { Op } from "sequelize";
+import { User } from "../models/User";
 import { Role } from "../models/Role";
 import { Permission } from "../models/Permission";
 import { generateTokens } from "../utils/generateSecret";
-import { Op } from "sequelize";
 
 export const authenticateUser = async (
   identifier: string,
   password: string,
-  res: Response<any, Record<string, any>>
+  res: Response<any, Record<string, any>>,
 ) => {
   const user = await User.findOne({
     where: { [Op.or]: [{ username: identifier }, { email: identifier }] },
@@ -17,9 +17,7 @@ export const authenticateUser = async (
       {
         model: Role,
         as: "roles",
-        include: [
-          { model: Permission, as: "permissions", through: { attributes: [] } },
-        ],
+        include: [{ model: Permission, as: "permissions", through: { attributes: [] } }],
       },
     ],
   });
@@ -35,10 +33,7 @@ export const authenticateUser = async (
   const isMatch = await bcrypt.compare(password, user.password);
   if (!isMatch) {
     if (user.temporalPassword) {
-      const isMatchWithTemporalPassword = await bcrypt.compare(
-        password,
-        user.temporalPassword
-      );
+      const isMatchWithTemporalPassword = await bcrypt.compare(password, user.temporalPassword);
       if (!isMatchWithTemporalPassword) {
         throw new Error("Incorrect password and temporary password");
       }
@@ -52,55 +47,51 @@ export const authenticateUser = async (
   return { user, accessToken, refreshToken };
 };
 
-export const getUsers = async () => {
-  return await User.findAll({
-    include: [
-      {
-        model: Role,
-        as: "roles",
-        through: { attributes: [] },
-      },
-    ],
-  });
-};
+export const getUsers = async () =>
+  User.findAll({
+  include: [
+    {
+      model: Role,
+      as: "roles",
+      through: { attributes: [] },
+    },
+  ],
+});
 
-export const getUserById = async (id: number) => {
-  return await User.findByPk(id, {
-    include: [
-      {
-        model: Role,
-        as: "roles",
-        through: { attributes: [] },
-      },
-    ],
-  });
-};
+export const getUserById = async (id: number) =>
+  User.findByPk(id, {
+  include: [
+    {
+      model: Role,
+      as: "roles",
+      through: { attributes: [] },
+    },
+  ],
+});
 
-export const getUserByEmail = async (email: string) => {
-  return await User.findOne({
-    where: { email },
-    include: [
-      {
-        model: Role,
-        as: "roles",
-        through: { attributes: [] },
-      },
-    ],
-  });
-};
+export const getUserByEmail = async (email: string) =>
+  User.findOne({
+  where: { email },
+  include: [
+    {
+      model: Role,
+      as: "roles",
+      through: { attributes: [] },
+    },
+  ],
+});
 
-export const getUserByUsername = async (username: string) => {
-  return await User.findOne({
-    where: { username },
-    include: [
-      {
-        model: Role,
-        as: "roles",
-        through: { attributes: [] },
-      },
-    ],
-  });
-};
+export const getUserByUsername = async (username: string) =>
+  User.findOne({
+  where: { username },
+  include: [
+    {
+      model: Role,
+      as: "roles",
+      through: { attributes: [] },
+    },
+  ],
+});
 
 export const getUserPermissions = async (userId: number) => {
   const user = await User.findByPk(userId, {
@@ -122,21 +113,19 @@ export const getUserPermissions = async (userId: number) => {
   if (!user) return null;
 
   const permissions =
-    user.roles?.flatMap((role) =>
-      role.permissions?.map((permission) => permission.name)
-    ) || [];
+    user.roles?.flatMap((role) => role.permissions?.map((permission) => permission.name)) || [];
 
   return Array.from(new Set(permissions));
 };
 
 export const createUser = async (data: Omit<User, "id">) => {
   const hashedPassword = await bcrypt.hash(data.password, 10);
-  return await User.create(
+  return User.create(
     {
       ...data,
       password: hashedPassword,
     },
-    { returning: true }
+    { returning: true },
   );
 };
 
@@ -156,18 +145,10 @@ export const updateUserPassword = async (id: number, password: string) => {
   return User.findByPk(id);
 };
 
-export const updateUserTemporalPassword = async (
-  id: number,
-  temporalPassword: string
-) => {
+export const updateUserTemporalPassword = async (id: number, temporalPassword: string) => {
   const hashedTemporalPassword = await bcrypt.hash(temporalPassword, 10);
-  await User.update(
-    { temporalPassword: hashedTemporalPassword },
-    { where: { id } }
-  );
+  await User.update({ temporalPassword: hashedTemporalPassword }, { where: { id } });
   return User.findByPk(id);
 };
 
-export const deleteUser = async (id: number) => {
-  return await User.destroy({ where: { id } });
-};
+export const deleteUser = async (id: number) => User.destroy({ where: { id } });

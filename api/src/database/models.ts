@@ -11,12 +11,5 @@ import setupAssociations from "./associations";
 setupAssociations();
 
 export {
-  User,
-  Role,
-  Permission,
-  UserRole,
-  RolePermission,
-  Employee,
-  Schedule,
-  HoursWorked,
+ User, Role, Permission, UserRole, RolePermission, Employee, Schedule, HoursWorked 
 };

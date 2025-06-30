@@ -3,9 +3,13 @@ import sequelize from "../config/database";
 
 export class Schedule extends Model {
   public id!: number;
+
   public days!: string[];
+
   public label!: string;
+
   public hours!: number;
+
   public specialSchedule!: boolean;
 }
 
@@ -38,5 +42,5 @@ Schedule.init(
     sequelize,
     modelName: "Schedule",
     tableName: "schedule",
-  }
+  },
 );

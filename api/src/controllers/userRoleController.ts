@@ -12,9 +12,7 @@ export const getUserRoles = async (req: Request, res: Response) => {
 
 export const getUserRoleByUserId = async (req: Request, res: Response) => {
   try {
-    const user = await userRoleService.getUserRoleByUserId(
-      Number(req.params.userId)
-    );
+    const user = await userRoleService.getUserRoleByUserId(Number(req.params.userId));
     if (!user) {
       return res.status(404).json({ message: "UserRole not found" });
     }
@@ -26,9 +24,7 @@ export const getUserRoleByUserId = async (req: Request, res: Response) => {
 
 export const getUserRoleByRoleId = async (req: Request, res: Response) => {
   try {
-    const role = await userRoleService.getUserRoleByRoleId(
-      Number(req.params.roleId)
-    );
+    const role = await userRoleService.getUserRoleByRoleId(Number(req.params.roleId));
     if (!role) {
       return res.status(404).json({ message: "UserRole not found" });
     }
@@ -49,16 +45,12 @@ export const createUserRole = async (req: Request, res: Response) => {
 
 export const updateUserRole = async (req: Request, res: Response) => {
   try {
-    const id = parseInt(req.params.id);
-    const updatedUserRole = await userRoleService.updateUserRole(
-      Number(id),
-      req.body.roleId
-    );
+    const id = parseInt(req.params.id, 10);
+    const updatedUserRole = await userRoleService.updateUserRole(Number(id), req.body.roleId);
     if (updatedUserRole) {
       return res.status(200).json(updatedUserRole);
-    } else {
-      return res.status(404).json({ message: "UserRole not found" });
     }
+    return res.status(404).json({ message: "UserRole not found" });
   } catch (error) {
     return res.status(500).json({ message: "Error updating UserRole", error });
   }
@@ -66,13 +58,12 @@ export const updateUserRole = async (req: Request, res: Response) => {
 
 export const deleteUserRole = async (req: Request, res: Response) => {
   try {
-    const id = parseInt(req.params.id);
+    const id = parseInt(req.params.id, 10);
     const deleted = await userRoleService.deleteUserRole(id);
     if (deleted) {
       return res.status(204).end();
-    } else {
-      return res.status(404).json({ message: "UserRole not found" });
     }
+    return res.status(404).json({ message: "UserRole not found" });
   } catch (error) {
     return res.status(500).json({ message: "Error deleting UserRole", error });
   }

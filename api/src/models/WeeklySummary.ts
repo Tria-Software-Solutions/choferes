@@ -4,10 +4,15 @@ import sequelize from "../config/database";
 
 export class WeeklySummary extends Model {
   public id!: number;
+
   public employeeId!: number;
+
   public weekNumber!: number;
+
   public month!: number;
+
   public year!: number;
+
   public totalHours!: number;
 }
 
@@ -23,9 +28,9 @@ WeeklySummary.init(
       allowNull: false,
       references: {
         model: Employee,
-        key: 'id',
+        key: "id",
       },
-      onDelete: 'CASCADE',
+      onDelete: "CASCADE",
     },
     weekNumber: {
       type: DataTypes.INTEGER,
@@ -48,7 +53,10 @@ WeeklySummary.init(
     sequelize,
     modelName: "WeeklySummary",
     tableName: "weekly_summary",
-  }
+  },
 );
 
-WeeklySummary.belongsTo(Employee, { foreignKey: "employeeId", onDelete: 'CASCADE' });
+WeeklySummary.belongsTo(Employee, {
+  foreignKey: "employeeId",
+  onDelete: "CASCADE",
+});
