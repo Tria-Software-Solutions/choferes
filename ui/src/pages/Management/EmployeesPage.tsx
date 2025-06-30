@@ -42,6 +42,7 @@ import DownloadRoundedIcon from "@mui/icons-material/DownloadRounded";
 import CloseRoundedIcon from "@mui/icons-material/CloseRounded";
 import ManageSearchIcon from "@mui/icons-material/ManageSearch";
 import AddRoundedIcon from '@mui/icons-material/AddRounded';
+import DeleteOutlineIcon from '@mui/icons-material/DeleteOutline';
 
 const EmployeesPage: React.FC = () => {
   const dispatch = useDispatch<AppDispatch>();
@@ -395,6 +396,7 @@ const EmployeesPage: React.FC = () => {
         cancelText="Cancelar"
         loading={isDeletingEmployee}
         paperSx={{ minWidth: { xs: '80vw', sm: 320 }, maxWidth: { xs: '90vw', sm: 400 } }}
+        icon={<DeleteOutlineIcon color="error" />}
       />
     
       <DialogComponent

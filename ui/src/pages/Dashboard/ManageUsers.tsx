@@ -42,6 +42,7 @@ import DialogComponent from "../../components/Dialog/DialogComponent";
 import CloseIcon from "@mui/icons-material/Close";
 import AddRoundedIcon from '@mui/icons-material/AddRounded';
 import ManageAccountsIcon from '@mui/icons-material/ManageAccounts';
+import DeleteOutlineIcon from '@mui/icons-material/DeleteOutline';
 
 const ManageUsers: React.FC<{ isExpanded?: boolean }> = ({ isExpanded = true }) => {
   const dispatch = useDispatch<AppDispatch>();

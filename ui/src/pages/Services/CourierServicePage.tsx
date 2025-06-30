@@ -15,10 +15,6 @@ import {
   Button,
   CircularProgress,
   Backdrop,
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  IconButton,
 } from "@mui/material";
 import { LocalizationProvider } from "@mui/x-date-pickers";
 import { DatePicker } from "@mui/x-date-pickers/DatePicker";
@@ -43,7 +39,6 @@ import ArrowBackIosNewRoundedIcon from "@mui/icons-material/ArrowBackIosNewRound
 import ArrowForwardIosRoundedIcon from "@mui/icons-material/ArrowForwardIosRounded";
 import CalendarTodayRoundedIcon from "@mui/icons-material/CalendarTodayRounded";
 import CloseRoundedIcon from "@mui/icons-material/CloseRounded";
-import CloseIcon from "@mui/icons-material/Close";
 import ManageSearchIcon from "@mui/icons-material/ManageSearch";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faFileExcel, faFilePdf } from "@fortawesome/free-solid-svg-icons";
@@ -52,6 +47,7 @@ import EditableTable from "../../components/Table/EditableTable/EditableTable";
 import AddCourierForm from "../../components/Forms/AddCourierForm";
 import DialogComponent from "../../components/Dialog/DialogComponent";
 import AddRoundedIcon from '@mui/icons-material/AddRounded';
+import DeleteOutlineIcon from '@mui/icons-material/DeleteOutline';
 
 const CourierServicePage: React.FC = () => {
   const { userPermissions } = useAuthContext();
@@ -584,13 +580,14 @@ const CourierServicePage: React.FC = () => {
         open={openDeleteDialog}
         onClose={handleCloseDeleteDialog}
         onConfirm={handleDelete}
-        title="Eliminar Servicio de Mensajería"
+        title="Eliminar Servicio"
         message="¿Estás seguro de que deseas eliminar este servicio de mensajería? Esta acción no se puede deshacer."
         type="delete"
         confirmText="Eliminar"
         cancelText="Cancelar"
         loading={isDeletingCourier}
         paperSx={{ minWidth: { xs: '80vw', sm: 320 }, maxWidth: { xs: '90vw', sm: 400 } }}
+        icon={<DeleteOutlineIcon color="error" />}
       />
       <DialogComponent
         open={openAddCourierModal}

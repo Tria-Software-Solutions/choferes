@@ -58,6 +58,7 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faFileExcel, faFilePdf } from "@fortawesome/free-solid-svg-icons";
 import CloseIcon from "@mui/icons-material/Close";
 import AddRoundedIcon from '@mui/icons-material/AddRounded';
+import DeleteOutlineIcon from '@mui/icons-material/DeleteOutline';
 
 const VehiclesPage: React.FC = () => {
   const dispatch = useDispatch<AppDispatch>();
@@ -649,6 +650,7 @@ const VehiclesPage: React.FC = () => {
         cancelText="Cancelar"
         loading={isDeletingVehicle}
         paperSx={{ minWidth: { xs: '80vw', sm: 320 }, maxWidth: { xs: '90vw', sm: 400 } }}
+        icon={<DeleteOutlineIcon color="error" />}
       />
       <DialogComponent
         open={openAddVehicleModal}
