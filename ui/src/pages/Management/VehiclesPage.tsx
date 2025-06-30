@@ -473,7 +473,7 @@ const VehiclesPage: React.FC = () => {
                       p: 0,
                     }}
                   >
-                    <DirectionsCarIcon />
+                    <AddRoundedIcon />
                   </Button>
                 )}
               </Box>
@@ -571,7 +571,13 @@ const VehiclesPage: React.FC = () => {
                     variant="contained"
                     startIcon={<AddRoundedIcon />}
                     onClick={handleOpenAddVehicleModal}
-                    sx={{ px: 3, py: 1.5, fontSize: '1rem', minHeight: 56 }}
+                    sx={{ 
+                      display: { xs: 'none', md: 'flex' },
+                      px: 3, 
+                      py: 1.5, 
+                      fontSize: '1rem', 
+                      minHeight: 56 
+                    }}
                   >
                     Agregar
                   </Button>

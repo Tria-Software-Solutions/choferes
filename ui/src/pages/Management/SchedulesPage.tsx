@@ -351,7 +351,7 @@ const SchedulesPage: React.FC = () => {
                       p: 0,
                     }}
                   >
-                    <PostAddRoundedIcon />
+                    <AddRoundedIcon />
                   </Button>
                 )}
               </Box>

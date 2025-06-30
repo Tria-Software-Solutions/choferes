@@ -432,7 +432,7 @@ const CourierServicePage: React.FC = () => {
                     p: 0,
                   }}
                 >
-                  <LocalShippingIcon />
+                  <AddRoundedIcon />
                 </Button>
               </Box>
             </Grid>
@@ -528,7 +528,13 @@ const CourierServicePage: React.FC = () => {
                   variant="contained"
                   startIcon={<AddRoundedIcon />}
                   onClick={handleOpenAddCourierModal}
-                  sx={{ px: 3, py: 1.5, fontSize: '1rem', minHeight: 56 }}
+                  sx={{ 
+                    display: { xs: 'none', md: 'flex' },
+                    px: 3, 
+                    py: 1.5, 
+                    fontSize: '1rem', 
+                    minHeight: 56
+                  }}
                 >
                   Agregar
                 </Button>
