@@ -2,7 +2,6 @@ import React, { useState, useMemo } from "react";
 import {
   Box,
   Grid,
-  TextField,
   Button,
   FormControl,
   Chip,
@@ -37,7 +36,6 @@ const AddRoleForm: React.FC<AddRoleFormProps> = ({
 }) => {
   const theme = useTheme();
   const isSmallScreen = useMediaQuery(theme.breakpoints.down("sm"));
-  const isMediumScreen = useMediaQuery(theme.breakpoints.down("md"));
   
   const [formData, setFormData] = useState({
     name: "",

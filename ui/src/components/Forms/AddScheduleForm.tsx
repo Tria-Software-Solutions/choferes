@@ -1,6 +1,5 @@
 import React, { useState, useCallback, useEffect } from 'react';
 import {
-  TextField,
   Grid,
   Box,
   Typography,
@@ -27,7 +26,6 @@ import CloseRoundedIcon from '@mui/icons-material/CloseRounded';
 import CustomTextField from '../Textfield/CustomTextField';
 import CalendarMonthOutlinedIcon from '@mui/icons-material/CalendarMonthOutlined';
 import AccessTimeOutlinedIcon from '@mui/icons-material/AccessTimeOutlined';
-import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined';
 import WarningAmberOutlinedIcon from '@mui/icons-material/WarningAmberOutlined';
 
 interface AddScheduleFormProps {

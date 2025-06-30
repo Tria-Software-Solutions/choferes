@@ -2,7 +2,6 @@ import React, { useState, useCallback } from 'react';
 import {
   Box,
   Grid,
-  TextField,
   Button,
   useTheme,
   FormControl,
@@ -10,10 +9,6 @@ import {
   useMediaQuery,
   InputAdornment,
 } from '@mui/material';
-import { LocalizationProvider } from '@mui/x-date-pickers';
-import { DatePicker } from '@mui/x-date-pickers/DatePicker';
-import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns';
-import { es } from 'date-fns/locale';
 import { BRANDS_LIST, COLORS_LIST } from '../../constants/constants';
 import { maskLicensePlate, maskParkingLot } from '../../utils/mask';
 import AddRoundedIcon from '@mui/icons-material/AddRounded';
@@ -24,7 +19,6 @@ import DirectionsCarOutlinedIcon from '@mui/icons-material/DirectionsCarOutlined
 import LocalParkingOutlinedIcon from '@mui/icons-material/LocalParkingOutlined';
 import PaletteOutlinedIcon from '@mui/icons-material/PaletteOutlined';
 import EditNoteOutlinedIcon from '@mui/icons-material/EditNoteOutlined';
-import CalendarMonthOutlinedIcon from '@mui/icons-material/CalendarMonthOutlined';
 import FactoryOutlinedIcon from '@mui/icons-material/FactoryOutlined';
 import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined';
 
@@ -36,7 +30,6 @@ interface AddVehicleFormProps {
     color: string;
     parkingLot: string;
     notes: string;
-    parkingDate: Date;
   }) => void;
   onCancel?: () => void;
   isLoading?: boolean;
@@ -60,7 +53,6 @@ const AddVehicleForm: React.FC<AddVehicleFormProps> = ({
     color: '',
     parkingLot: '',
     notes: '',
-    parkingDate: new Date(),
   });
 
   const [errors, setErrors] = useState({
@@ -187,7 +179,6 @@ const AddVehicleForm: React.FC<AddVehicleFormProps> = ({
         color: formData.color.trim(),
         parkingLot: formData.parkingLot.trim(),
         notes: formData.notes.trim(),
-        parkingDate: formData.parkingDate,
       });
     }
   };
@@ -200,7 +191,6 @@ const AddVehicleForm: React.FC<AddVehicleFormProps> = ({
       color: '',
       parkingLot: '',
       notes: '',
-      parkingDate: new Date(),
     });
     setErrors({
       ticket: '',
@@ -342,30 +332,6 @@ const AddVehicleForm: React.FC<AddVehicleFormProps> = ({
           />
         </Grid>
 
-        <Grid item xs={12} sm={6}>
-          <LocalizationProvider dateAdapter={AdapterDateFns} adapterLocale={es}>
-            <DatePicker
-              label="Fecha de Parqueo"
-              value={formData.parkingDate}
-              onChange={(date) => setFormData({ ...formData, parkingDate: date || new Date() })}
-              maxDate={new Date()}
-              slotProps={{
-                textField: {
-                  variant: 'outlined',
-                  fullWidth: true,
-                  InputProps: {
-                    startAdornment: (
-                      <InputAdornment position="start">
-                        <CalendarMonthOutlinedIcon sx={{ color: theme.palette.text.secondary }} />
-                      </InputAdornment>
-                    ),
-                  },
-                },
-              }}
-            />
-          </LocalizationProvider>
-        </Grid>
-
         <Grid item xs={12}>
           <CustomTextField
             label="Observaciones"
@@ -399,10 +365,10 @@ const AddVehicleForm: React.FC<AddVehicleFormProps> = ({
               <Box sx={{ 
                 fontWeight: 600,
                 color: theme.palette.text.primary,
+                fontSize: 'clamp(0.75rem, 1.25vw, 0.875rem)',
                 mb: 0.5,
-                fontSize: 'clamp(0.875rem, 1.5vw, 1rem)',
               }}>
-                Información del Vehículo
+                Información Importante
               </Box>
               <Box sx={{
                 color: theme.palette.text.secondary,

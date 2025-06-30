@@ -617,7 +617,7 @@ const CourierServicePage: React.FC = () => {
           justifyContent: 'space-between'
         }}>
           <Typography variant="h6" sx={{ fontWeight: 600 }}>
-            Agregar Servicio de Mensajería
+            Agregar Servicio
           </Typography>
           <IconButton
             onClick={handleCloseAddCourierModal}
