@@ -22,20 +22,12 @@ import {
   Typography,
   Chip,
   Stack,
-  useTheme,
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  IconButton,
 } from "@mui/material";
-import CloseIcon from "@mui/icons-material/Close";
 import EditableTable from "../../components/Table/EditableTable/EditableTable";
 import SearchBar from "../../components/SearchBar/SearchBar";
 import AddRoleForm from "../../components/Forms/AddRoleForm";
-import AddModeratorIcon from "@mui/icons-material/AddModerator";
 import DialogComponent from "../../components/Dialog/DialogComponent";
 import AddRoundedIcon from "@mui/icons-material/AddRounded";
-import GroupRoundedIcon from "@mui/icons-material/GroupRounded";
 import DeleteOutlineIcon from "@mui/icons-material/DeleteOutline";
 
 const ManageRoles: React.FC<{ isExpanded?: boolean }> = ({
@@ -48,7 +40,7 @@ const ManageRoles: React.FC<{ isExpanded?: boolean }> = ({
   );
   const { permissions } = useSelector((state: RootState) => state.permissions);
   const { showNotification } = useAppNotifications();
-  const theme = useTheme();
+
   const [editRowId, setEditRowId] = useState<number | null>(null);
   const [editFields, setEditFields] = useState<{
     name: string;
@@ -142,7 +134,6 @@ const ManageRoles: React.FC<{ isExpanded?: boolean }> = ({
       showNotification("La actualización del rol fue exitosa", 3000, false);
     } catch (error) {
       handleCancel();
-      console.error(error);
       showNotification(
         "Ha ocurrido un error al actualizar el rol",
         5000,
@@ -171,7 +162,6 @@ const ManageRoles: React.FC<{ isExpanded?: boolean }> = ({
       setRoleToDelete(null);
       showNotification("Rol eliminado exitosamente", 3000, false);
     } catch (error) {
-      console.error("Error deleting role:", error);
       showNotification("Error al eliminar el rol", 5000, false);
     } finally {
       setIsDeletingRole(false);
@@ -210,14 +200,13 @@ const ManageRoles: React.FC<{ isExpanded?: boolean }> = ({
       setOpenAddRoleModal(false);
       showNotification("Rol creado exitosamente", 3000, false);
     } catch (error) {
-      console.error("Error creating role:", error);
       showNotification("Error al crear el rol", 5000, false);
     } finally {
       setIsCreatingRole(false);
     }
   };
 
-  const renderColumnValue = (column: keyof Role, value: any) => {
+  const renderColumnValue = (column: keyof Role, value: unknown) => {
     if (column === "permissionNames" && Array.isArray(value)) {
       return (
         <Stack

@@ -12,6 +12,6 @@ declare module "xlsx-style";
 
 declare module "jspdf" {
   interface jsPDF {
-    autoTable: (options: any) => void;
+    autoTable: (options: unknown) => void;
   }
 }

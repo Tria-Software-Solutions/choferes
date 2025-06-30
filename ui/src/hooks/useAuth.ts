@@ -1,47 +1,43 @@
 import { useState } from "react";
-import * as UserService from "../services/userService";
 import { useNavigate } from "react-router-dom";
-import { useAuthContext } from "../context/AuthContext";
+import { useAuth as useAuthContext } from "../context/AuthContext";
+import { loginUser } from "../services/userService";
 
 export const useAuth = () => {
+  const [authError, setAuthError] = useState<string>("");
   const { login, logout } = useAuthContext();
-  const [authError, setAuthError] = useState<string | null>(null);
   const navigate = useNavigate();
 
   const authenticateUser = async (identifier: string, password: string) => {
-    setAuthError(null);
     try {
-      const response = await UserService.authenticateUser(identifier, password);
-      const userPermissions = await UserService.getUserPermissions(
-        response.user.id,
-      );
-      login(
-        response.accessToken,
-        response.refreshToken,
-        response.user,
-        userPermissions,
-      );
-      navigate("/roles");
-    } catch (error: any) {
+      const response = await loginUser(identifier, password);
+      login(response.user, response.token);
+      navigate("/dashboard");
+    } catch (error: unknown) {
       let errorMessage = "Error de autenticación";
 
-      if (error.response?.data?.message) {
-        errorMessage = error.response.data.message;
+      if (typeof error === "object" && error && "response" in error) {
+        const err = error as {
+          response?: { data?: { message?: string; details?: unknown } };
+        };
+        if (err.response?.data?.message) {
+          errorMessage = err.response.data.message;
 
-        if (error.response.data.details) {
-          if (typeof error.response.data.details === "string") {
-            errorMessage += `: ${error.response.data.details}`;
-          } else if (typeof error.response.data.details === "object") {
-            const fieldErrors = Object.values(error.response.data.details)
-              .filter(Boolean)
-              .join(", ");
-            if (fieldErrors) {
-              errorMessage += `: ${fieldErrors}`;
+          if (err.response.data.details) {
+            if (typeof err.response.data.details === "string") {
+              errorMessage += `: ${err.response.data.details}`;
+            } else if (typeof err.response.data.details === "object") {
+              const fieldErrors = Object.values(err.response.data.details)
+                .filter(Boolean)
+                .join(", ");
+              if (fieldErrors) {
+                errorMessage += `: ${fieldErrors}`;
+              }
             }
           }
         }
-      } else if (error.message) {
-        errorMessage = error.message;
+      } else if (typeof error === "object" && error && "message" in error) {
+        errorMessage = (error as { message: string }).message;
       }
 
       setAuthError(errorMessage);

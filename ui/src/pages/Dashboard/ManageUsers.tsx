@@ -25,24 +25,16 @@ import {
   InputAdornment,
   TextField,
   Typography,
-  useTheme,
-  Dialog,
-  DialogTitle,
-  DialogContent,
 } from "@mui/material";
 import EditableTable from "../../components/Table/EditableTable/EditableTable";
 import SearchBar from "../../components/SearchBar/SearchBar";
 import AddUserForm from "../../components/Forms/AddUserForm";
-import PersonAddAlt1RoundedIcon from "@mui/icons-material/PersonAddAlt1Rounded";
 import Visibility from "@mui/icons-material/Visibility";
 import VisibilityOff from "@mui/icons-material/VisibilityOff";
 import VisibilityIcon from "@mui/icons-material/Visibility";
 import VisibilityOffIcon from "@mui/icons-material/VisibilityOff";
 import DialogComponent from "../../components/Dialog/DialogComponent";
-import CloseIcon from "@mui/icons-material/Close";
 import AddRoundedIcon from "@mui/icons-material/AddRounded";
-import ManageAccountsIcon from "@mui/icons-material/ManageAccounts";
-import DeleteOutlineIcon from "@mui/icons-material/DeleteOutline";
 
 const ManageUsers: React.FC<{ isExpanded?: boolean }> = ({
   isExpanded = true,
@@ -83,8 +75,6 @@ const ManageUsers: React.FC<{ isExpanded?: boolean }> = ({
   const [isUpdatingUserStatus, setIsUpdatingUserStatus] = useState(false);
   const [loadError, setLoadError] = useState<string | null>(null);
 
-  const theme = useTheme();
-
   useEffect(() => {
     const loadData = async () => {
       try {
@@ -104,7 +94,6 @@ const ManageUsers: React.FC<{ isExpanded?: boolean }> = ({
 
         await Promise.race([loadPromise, timeoutPromise]);
       } catch (error) {
-        console.error("Error loading data:", error);
         setLoadError(
           error instanceof Error
             ? error.message
@@ -119,7 +108,6 @@ const ManageUsers: React.FC<{ isExpanded?: boolean }> = ({
 
   useEffect(() => {
     if (usersError) {
-      console.error("Users error from Redux:", usersError);
       setLoadError(`Error al cargar usuarios: ${usersError}`);
       showNotification("Error al cargar usuarios", 5000, false);
     }
@@ -144,7 +132,6 @@ const ManageUsers: React.FC<{ isExpanded?: boolean }> = ({
               user.roles?.map((role: Role) => role.name).join(", ") || "",
           };
         } catch (error) {
-          console.error("Error processing user:", user, error);
           return {
             ...user,
             roleName: "",
@@ -163,7 +150,6 @@ const ManageUsers: React.FC<{ isExpanded?: boolean }> = ({
 
           return searchText.includes(normalizeString(filter).toLowerCase());
         } catch (error) {
-          console.error("Error filtering user:", user, error);
           return true; // Include user if filtering fails
         }
       });
@@ -314,7 +300,6 @@ const ManageUsers: React.FC<{ isExpanded?: boolean }> = ({
       showNotification("La actualización del usuario fue exitosa", 3000, false);
     } catch (error) {
       handleCancel();
-      console.error(error);
       showNotification(
         "Ha ocurrido un error al actualizar el usuario",
         5000,
@@ -323,7 +308,7 @@ const ManageUsers: React.FC<{ isExpanded?: boolean }> = ({
     }
   };
 
-  const handleOpenStatusDialog = useCallback(async (row: any) => {
+  const handleOpenStatusDialog = useCallback(async (row: unknown) => {
     setUserToChange(row);
     setOpenStatusDialog(true);
   }, []);
@@ -352,7 +337,6 @@ const ManageUsers: React.FC<{ isExpanded?: boolean }> = ({
         false,
       );
     } catch (error) {
-      console.error("Error updating user status:", error);
       showNotification(
         "Error al actualizar el estado del usuario",
         5000,
@@ -416,7 +400,6 @@ const ManageUsers: React.FC<{ isExpanded?: boolean }> = ({
             false,
           );
         } catch (error) {
-          console.error(error);
           showNotification(
             "Ha ocurrido un error al actualizar la contraseña",
             5000,
@@ -560,7 +543,6 @@ const ManageUsers: React.FC<{ isExpanded?: boolean }> = ({
       setOpenAddUserModal(false);
       showNotification("Usuario creado exitosamente", 3000, false);
     } catch (error) {
-      console.error("Error creating user:", error);
       showNotification("Error al crear el usuario", 5000, false);
     } finally {
       setIsCreatingUser(false);

@@ -23,9 +23,11 @@ export const fetchRolePermissions = createAsyncThunk(
     try {
       const rolePermissions = await RolePermissionService.getRolePermissions();
       return rolePermissions;
-    } catch (error: any) {
+    } catch (error: unknown) {
       return rejectWithValue(
-        error.response?.data || "Failed to fetch role permissions",
+        error instanceof Error
+          ? error.message
+          : "Failed to fetch role permissions",
       );
     }
   },
@@ -41,9 +43,11 @@ export const createRolePermission = createAsyncThunk(
       const createdRolePermission =
         await RolePermissionService.createRolePermission(newRolePermission);
       return createdRolePermission;
-    } catch (error: any) {
+    } catch (error: unknown) {
       return rejectWithValue(
-        error.response?.data || "Failed to create role permission",
+        error instanceof Error
+          ? error.message
+          : "Failed to create role permission",
       );
     }
   },
@@ -61,7 +65,7 @@ export const updateRolePermission = createAsyncThunk(
         args.permissionIds,
       );
       return { roleId: args.roleId, permissionIds: args.permissionIds };
-    } catch (error: any) {
+    } catch (error: unknown) {
       return rejectWithValue(
         error.response?.data || "Failed to update role permission",
       );
@@ -75,7 +79,7 @@ export const deleteRolePermission = createAsyncThunk(
     try {
       await RolePermissionService.deleteRolePermission(id);
       return id;
-    } catch (error: any) {
+    } catch (error: unknown) {
       return rejectWithValue(
         error.response?.data || "Failed to delete role permission",
       );

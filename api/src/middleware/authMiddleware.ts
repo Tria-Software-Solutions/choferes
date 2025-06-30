@@ -57,10 +57,6 @@ export const authenticateToken = (req: AuthenticatedRequest, res: Response, next
       return next();
     });
   } catch (error) {
-    console.error(
-      "Authentication error:",
-      error instanceof Error ? error.message : "Unknown error",
-    );
     return res.status(500).json({
       error: "Internal server error",
       code: "AUTH_ERROR",
@@ -118,7 +114,6 @@ export const authenticateRefreshToken = (req: AuthenticatedRequest, res: Respons
       });
     });
   } catch (error) {
-    console.error("Refresh token error:", error instanceof Error ? error.message : "Unknown error");
     return res.status(500).json({
       error: "Internal server error",
       code: "REFRESH_ERROR",

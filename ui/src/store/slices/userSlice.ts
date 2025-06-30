@@ -33,13 +33,15 @@ export const fetchUsers = createAsyncThunk(
       const response = await UserService.getUsers();
       if (Array.isArray(response)) {
         return response;
-      } else if (response && Array.isArray((response as any).users)) {
-        return (response as any).users;
+      } else if (response && Array.isArray((response as unknown).users)) {
+        return (response as unknown).users;
       } else {
         return [];
       }
-    } catch (error: any) {
-      return rejectWithValue(error.response?.data || "Failed to fetch users");
+    } catch (error: unknown) {
+      return rejectWithValue(
+        error instanceof Error ? error.message : "Failed to fetch users",
+      );
     }
   },
 );
@@ -49,9 +51,9 @@ export const fetchUserById = createAsyncThunk(
   async (id: number, { rejectWithValue }) => {
     try {
       return await UserService.getUserById(id);
-    } catch (error: any) {
+    } catch (error: unknown) {
       return rejectWithValue(
-        error.response?.data || "Failed to fetch user by ID",
+        error instanceof Error ? error.message : "Failed to fetch user by ID",
       );
     }
   },
@@ -62,9 +64,11 @@ export const fetchUserByEmail = createAsyncThunk(
   async (email: string, { rejectWithValue }) => {
     try {
       return await UserService.getUserByEmail(email);
-    } catch (error: any) {
+    } catch (error: unknown) {
       return rejectWithValue(
-        error.response?.data || "Failed to fetch user by email",
+        error instanceof Error
+          ? error.message
+          : "Failed to fetch user by email",
       );
     }
   },
@@ -75,9 +79,11 @@ export const fetchUserByUsername = createAsyncThunk(
   async (username: string, { rejectWithValue }) => {
     try {
       return await UserService.getUserByUsername(username);
-    } catch (error: any) {
+    } catch (error: unknown) {
       return rejectWithValue(
-        error.response?.data || "Failed to fetch user by username",
+        error instanceof Error
+          ? error.message
+          : "Failed to fetch user by username",
       );
     }
   },
@@ -88,9 +94,11 @@ export const fetchUserPermissions = createAsyncThunk(
   async (id: number, { rejectWithValue }) => {
     try {
       return await UserService.getUserPermissions(id);
-    } catch (error: any) {
+    } catch (error: unknown) {
       return rejectWithValue(
-        error.response?.data || "Failed to fetch user permissions",
+        error instanceof Error
+          ? error.message
+          : "Failed to fetch user permissions",
       );
     }
   },
@@ -114,8 +122,10 @@ export const createUser = createAsyncThunk(
       await UserRoleService.createUserRole(createdUserRole);
       const updatedUser = await UserService.getUserById(createdUser.id);
       return updatedUser;
-    } catch (error: any) {
-      return rejectWithValue(error.response?.data || "Failed to create user");
+    } catch (error: unknown) {
+      return rejectWithValue(
+        error instanceof Error ? error.message : "Failed to create user",
+      );
     }
   },
 );
@@ -148,8 +158,10 @@ export const updateUser = createAsyncThunk(
         refreshedUser,
         newRoleId,
       };
-    } catch (error: any) {
-      return rejectWithValue(error.response?.data || "Failed to update user");
+    } catch (error: unknown) {
+      return rejectWithValue(
+        error instanceof Error ? error.message : "Failed to update user",
+      );
     }
   },
 );
@@ -163,9 +175,9 @@ export const updateUserStatus = createAsyncThunk(
     try {
       await UserService.updateUserStatus(id, status);
       return { id, status };
-    } catch (error: any) {
+    } catch (error: unknown) {
       return rejectWithValue(
-        error.response?.data || "Failed to update user status",
+        error instanceof Error ? error.message : "Failed to update user status",
       );
     }
   },
@@ -180,9 +192,9 @@ export const updateUserPassword = createAsyncThunk(
     try {
       await UserService.updateUserPassword(id, password);
       return { id, password };
-    } catch (error: any) {
+    } catch (error: unknown) {
       return rejectWithValue(
-        error.response?.data || "Failed to update password",
+        error instanceof Error ? error.message : "Failed to update password",
       );
     }
   },
@@ -197,9 +209,11 @@ export const updateUserTemporalPassword = createAsyncThunk(
     try {
       await UserService.updateUserTemporalPassword(id, temporalPassword);
       return { id, temporalPassword };
-    } catch (error: any) {
+    } catch (error: unknown) {
       return rejectWithValue(
-        error.response?.data || "Failed to update temporal password",
+        error instanceof Error
+          ? error.message
+          : "Failed to update temporal password",
       );
     }
   },
@@ -211,8 +225,10 @@ export const deleteUser = createAsyncThunk(
     try {
       await UserService.deleteUser(id);
       return id;
-    } catch (error: any) {
-      return rejectWithValue(error.response?.data || "Failed to delete user");
+    } catch (error: unknown) {
+      return rejectWithValue(
+        error instanceof Error ? error.message : "Failed to delete user",
+      );
     }
   },
 );

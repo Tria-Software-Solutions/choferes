@@ -1,4 +1,5 @@
 import { SpeedDial, SpeedDialIcon, SpeedDialAction } from "@mui/material";
+import PropTypes from "prop-types";
 
 interface Action {
   label: string;
@@ -42,6 +43,19 @@ const CustomSpeedDial: React.FC<CustomSpeedDialProps> = ({
       ))}
     </SpeedDial>
   );
+};
+
+CustomSpeedDial.propTypes = {
+  actions: PropTypes.arrayOf(
+    PropTypes.shape({
+      label: PropTypes.string.isRequired,
+      icon: PropTypes.node.isRequired,
+      onClick: PropTypes.func.isRequired,
+    }),
+  ).isRequired,
+  mainIcon: PropTypes.node,
+  openIcon: PropTypes.node,
+  direction: PropTypes.oneOf(["up", "down", "left", "right"]),
 };
 
 export default CustomSpeedDial;

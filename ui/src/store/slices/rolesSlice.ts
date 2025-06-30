@@ -30,8 +30,8 @@ export const fetchRoles = createAsyncThunk(
       } else {
         return [];
       }
-    } catch (error: any) {
-      return rejectWithValue(error.response?.data || "Failed to fetch roles");
+    } catch (error: unknown) {
+      return rejectWithValue((error as string) || "Failed to fetch roles");
     }
   },
 );
@@ -42,10 +42,8 @@ export const fetchRoleById = createAsyncThunk(
     try {
       const role = await RoleService.getRoleById(id);
       return role;
-    } catch (error: any) {
-      return rejectWithValue(
-        error.response?.data || "Failed to fetch role by ID",
-      );
+    } catch (error: unknown) {
+      return rejectWithValue((error as string) || "Failed to fetch role by ID");
     }
   },
 );
@@ -56,9 +54,9 @@ export const fetchRoleByName = createAsyncThunk(
     try {
       const role = await RoleService.getRoleByName(name);
       return role;
-    } catch (error: any) {
+    } catch (error: unknown) {
       return rejectWithValue(
-        error.response?.data || "Failed to fetch role by name",
+        (error as string) || "Failed to fetch role by name",
       );
     }
   },
@@ -87,8 +85,8 @@ export const createRole = createAsyncThunk(
       }
       const updatedRole = await RoleService.getRoleById(createdRole.id);
       return updatedRole;
-    } catch (error: any) {
-      return rejectWithValue(error.response?.data || "Failed to create role");
+    } catch (error: unknown) {
+      return rejectWithValue((error as string) || "Failed to create role");
     }
   },
 );
@@ -117,8 +115,8 @@ export const updateRole = createAsyncThunk(
         refreshedRole,
         newPermissionIds,
       };
-    } catch (error: any) {
-      return rejectWithValue(error.response?.data || "Failed to update role");
+    } catch (error: unknown) {
+      return rejectWithValue((error as string) || "Failed to update role");
     }
   },
 );
@@ -129,8 +127,8 @@ export const deleteRole = createAsyncThunk(
     try {
       await RoleService.deleteRole(id);
       return id;
-    } catch (error: any) {
-      return rejectWithValue(error.response?.data || "Failed to delete role");
+    } catch (error: unknown) {
+      return rejectWithValue((error as string) || "Failed to delete role");
     }
   },
 );

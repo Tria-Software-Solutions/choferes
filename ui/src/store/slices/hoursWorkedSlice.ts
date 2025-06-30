@@ -29,9 +29,9 @@ export const fetchHoursWorked = createAsyncThunk(
       } else {
         return [];
       }
-    } catch (error: any) {
+    } catch (error: unknown) {
       return rejectWithValue(
-        error.response?.data || "Failed to fetch hours worked",
+        error instanceof Error ? error.message : "Failed to fetch hours worked",
       );
     }
   },
@@ -43,9 +43,11 @@ export const createHoursWorked = createAsyncThunk(
     try {
       const createdHours = await HoursWorkedService.createHoursWorked(newHours);
       return createdHours;
-    } catch (error: any) {
+    } catch (error: unknown) {
       return rejectWithValue(
-        error.response?.data || "Failed to create hours worked",
+        error instanceof Error
+          ? error.message
+          : "Failed to create hours worked",
       );
     }
   },
@@ -60,9 +62,11 @@ export const updateHoursWorked = createAsyncThunk(
     try {
       await HoursWorkedService.updateHoursWorked(id, updatedHours);
       return { id, updatedHours };
-    } catch (error: any) {
+    } catch (error: unknown) {
       return rejectWithValue(
-        error.response?.data || "Failed to update hours worked",
+        error instanceof Error
+          ? error.message
+          : "Failed to update hours worked",
       );
     }
   },
@@ -86,9 +90,11 @@ export const createOrUpdateHoursWorked = createAsyncThunk(
           await HoursWorkedService.createHoursWorked(newHours);
         return createdHoursWorked;
       }
-    } catch (error: any) {
+    } catch (error: unknown) {
       return rejectWithValue(
-        error.response?.data || "Failed to create or update hours worked",
+        error instanceof Error
+          ? error.message
+          : "Failed to create or update hours worked",
       );
     }
   },
@@ -100,9 +106,11 @@ export const deleteHoursWorked = createAsyncThunk(
     try {
       await HoursWorkedService.deleteHoursWorked(id);
       return id;
-    } catch (error: any) {
+    } catch (error: unknown) {
       return rejectWithValue(
-        error.response?.data || "Failed to delete hours worked",
+        error instanceof Error
+          ? error.message
+          : "Failed to delete hours worked",
       );
     }
   },

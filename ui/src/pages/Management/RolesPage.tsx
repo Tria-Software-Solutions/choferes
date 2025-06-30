@@ -361,7 +361,6 @@ const RolesPage: React.FC = () => {
     );
 
     if (!selectedSchedule) {
-      console.error("No schedule found for the selected label");
       return;
     }
 
@@ -496,7 +495,6 @@ const RolesPage: React.FC = () => {
 
       setOpenExportDialog(false);
     } catch (error) {
-      console.error("Error exporting data:", error);
     } finally {
       setIsExporting(false);
     }

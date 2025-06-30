@@ -31,14 +31,14 @@ export const fetchVehicles = createAsyncThunk(
       const response = await VehicleService.getVehicles(page, perPage);
       if (Array.isArray(response)) {
         return response;
-      } else if (response && Array.isArray((response as any).vehicles)) {
-        return (response as any).vehicles;
+      } else if (response && Array.isArray((response as unknown).vehicles)) {
+        return (response as unknown).vehicles;
       } else {
         return [];
       }
-    } catch (error: any) {
+    } catch (error: unknown) {
       return rejectWithValue(
-        error.response?.data || "Failed to fetch vehicles",
+        error instanceof Error ? error.message : "Failed to fetch vehicles",
       );
     }
   },
@@ -50,7 +50,7 @@ export const fetchVehiclesByDate = createAsyncThunk(
     try {
       const vehicles = await VehicleService.getVehiclesByDate(date);
       return vehicles;
-    } catch (error: any) {
+    } catch (error: unknown) {
       return rejectWithValue(
         error.response?.data || "Failed to fetch vehicles by date",
       );
@@ -64,9 +64,9 @@ export const createVehicle = createAsyncThunk(
     try {
       const createdVehicle = await VehicleService.createVehicle(newVehicle);
       return createdVehicle;
-    } catch (error: any) {
+    } catch (error: unknown) {
       return rejectWithValue(
-        error.response?.data || "Failed to create vehicle",
+        error instanceof Error ? error.message : "Failed to create vehicle",
       );
     }
   },
@@ -84,9 +84,9 @@ export const updateVehicle = createAsyncThunk(
         updatedVehicle,
       );
       return updatedVehicleFromBackend;
-    } catch (error: any) {
+    } catch (error: unknown) {
       return rejectWithValue(
-        error.response?.data || "Failed to update vehicle",
+        error instanceof Error ? error.message : "Failed to update vehicle",
       );
     }
   },
@@ -98,9 +98,9 @@ export const deleteVehicle = createAsyncThunk(
     try {
       await VehicleService.deleteVehicle(id);
       return id;
-    } catch (error: any) {
+    } catch (error: unknown) {
       return rejectWithValue(
-        error.response?.data || "Failed to delete vehicle",
+        error instanceof Error ? error.message : "Failed to delete vehicle",
       );
     }
   },

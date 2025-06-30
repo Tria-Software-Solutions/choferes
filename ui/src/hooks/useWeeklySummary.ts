@@ -15,7 +15,7 @@ export const useWeeklySummaries = () => {
       setWeeklySummaries(data);
       setTotalCountWeeklySummaries(data.length);
     } catch (error) {
-      console.error("Error fetching Weekly Summaries:", error);
+      // console.error("Error fetching Weekly Summaries:", error);
     } finally {
       setIsLoadingWeeklySummaries(false);
     }
@@ -37,7 +37,7 @@ export const useWeeklySummaries = () => {
           year,
         );
       } catch (error) {
-        console.error("Error fetching current Weekly Summary", error);
+        // console.error("Error fetching current Weekly Summary", error);
       } finally {
         setIsLoadingWeeklySummaries(false);
       }
@@ -61,7 +61,7 @@ export const useWeeklySummaries = () => {
           year,
         );
       } catch (error) {
-        console.error("Error fetching current Weekly Summary", error);
+        // console.error("Error fetching current Weekly Summary", error);
       } finally {
         setIsLoadingWeeklySummaries(false);
       }

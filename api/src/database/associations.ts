@@ -44,5 +44,5 @@ HoursWorked.belongsTo(Schedule, { foreignKey: "scheduleId" });
 Schedule.hasMany(HoursWorked, { foreignKey: "scheduleId" });
 
 export default function setupAssociations() {
-  console.log("Associations have been set up!");
+  // Eliminar la línea con console.log
 }

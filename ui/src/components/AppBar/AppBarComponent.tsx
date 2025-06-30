@@ -67,7 +67,7 @@ const AppBarComponent: React.FC<AppBarComponentProps> = ({
     text: string;
     onClick?: () => void;
     icon?: React.ReactElement;
-    subMenuItems?: any;
+    subMenuItems?: unknown;
   }[] =>
     linkList.map(({ label, path, icon, subLinks, onClick }) => ({
       text: label,

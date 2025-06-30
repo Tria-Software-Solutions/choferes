@@ -3,7 +3,6 @@ import {
   Dialog,
   DialogActions,
   DialogContent,
-  DialogTitle,
   Button,
   Typography,
   Box,
@@ -11,13 +10,7 @@ import {
   useTheme,
   useMediaQuery,
 } from "@mui/material";
-import {
-  Warning as WarningIcon,
-  Delete as DeleteIcon,
-  Info as InfoIcon,
-  CheckCircle as CheckCircleIcon,
-  Close as CloseIcon,
-} from "@mui/icons-material";
+import { Close as CloseIcon } from "@mui/icons-material";
 
 export type DialogType = "delete" | "warning" | "info" | "success";
 
@@ -60,19 +53,6 @@ const DialogComponent: React.FC<ConfirmationDialogProps> = ({
 }) => {
   const theme = useTheme();
   const isSmallScreen = useMediaQuery(theme.breakpoints.down("sm"));
-
-  const getIcon = () => {
-    switch (type) {
-      case "delete":
-        return <DeleteIcon color="error" sx={{ fontSize: 32 }} />;
-      case "warning":
-        return <WarningIcon color="warning" sx={{ fontSize: 32 }} />;
-      case "success":
-        return <CheckCircleIcon color="success" sx={{ fontSize: 32 }} />;
-      default:
-        return <InfoIcon color="info" sx={{ fontSize: 32 }} />;
-    }
-  };
 
   const getConfirmButtonColor = () => {
     switch (type) {

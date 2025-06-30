@@ -18,7 +18,7 @@ export const useMonthlySummaries = () => {
       setMonthlySummaries(data);
       setTotalCountMonthlySummaries(data.length);
     } catch (error) {
-      console.error("Error fetching Monthly Summaries:", error);
+      // console.error("Error fetching Monthly Summaries:", error);
     } finally {
       setIsLoadingMonthlySummaries(false);
     }
@@ -34,7 +34,7 @@ export const useMonthlySummaries = () => {
           year,
         );
       } catch (error) {
-        console.error("Error fetching current Biweekly Summary", error);
+        // console.error("Error fetching current Biweekly Summary", error);
       } finally {
         setIsLoadingMonthlySummaries(false);
       }

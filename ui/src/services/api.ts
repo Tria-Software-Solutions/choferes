@@ -3,7 +3,7 @@ import Cookies from "js-cookie";
 
 const API_URL = process.env.REACT_APP_API_URL || "http://localhost:5000";
 
-const requestCache = new Map<string, { data: any; timestamp: number }>();
+const requestCache = new Map<string, { data: unknown; timestamp: number }>();
 const CACHE_DURATION = 5 * 60 * 1000; // 5 minutos
 
 const api = axios.create({
@@ -36,7 +36,7 @@ api.interceptors.request.use(
         };
 
         const error = new Error("CACHED_RESPONSE");
-        (error as any).cachedResponse = cachedResponse;
+        (error as { cachedResponse?: unknown }).cachedResponse = cachedResponse;
         throw error;
       }
     }
@@ -109,7 +109,7 @@ const disconnectUser = () => {
   Cookies.remove("refreshToken");
   sessionStorage.clear();
   localStorage.clear();
-  console.warn("Session expired. User disconnected.");
+
   window.location.href = "/session-expired";
 };
 

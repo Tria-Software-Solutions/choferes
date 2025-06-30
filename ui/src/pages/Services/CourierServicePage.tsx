@@ -200,7 +200,6 @@ const CourierServicePage: React.FC = () => {
       showNotification("La actualización del servicio fue exitosa");
       setEditRowId(null);
     } catch (error) {
-      console.error(error);
       showNotification("Ha ocurrido un error al actualizar el servicio");
     }
   };
@@ -235,7 +234,6 @@ const CourierServicePage: React.FC = () => {
 
       showNotification("Servicio de mensajería eliminado exitosamente");
     } catch (error) {
-      console.error("Error deleting courier:", error);
       showNotification("Error al eliminar el servicio de mensajería");
     } finally {
       setIsDeletingCourier(false);
@@ -312,7 +310,6 @@ const CourierServicePage: React.FC = () => {
       setOpenAddCourierModal(false);
       showNotification("Servicio de mensajería creado exitosamente");
     } catch (error) {
-      console.error("Error creating courier:", error);
       showNotification("Error al crear el servicio de mensajería");
     } finally {
       setIsCreatingCourier(false);
