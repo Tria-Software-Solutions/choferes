@@ -26,3 +26,5 @@ Permission.init(
     tableName: "permissions",
   },
 );
+
+export default Permission;

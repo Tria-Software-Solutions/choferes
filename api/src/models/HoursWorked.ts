@@ -48,3 +48,5 @@ HoursWorked.init(
     tableName: "hours_worked",
   },
 );
+
+export default HoursWorked;

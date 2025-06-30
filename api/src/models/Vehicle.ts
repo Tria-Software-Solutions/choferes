@@ -67,3 +67,5 @@ Vehicle.init(
     tableName: "vehicles",
   },
 );
+
+export default Vehicle;

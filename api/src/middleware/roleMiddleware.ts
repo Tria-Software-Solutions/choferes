@@ -1,17 +1,24 @@
 import { Request, Response, NextFunction } from "express";
 
 interface AuthenticatedRequest extends Request {
-  user?: { id: number; role: string };
+  user?: { id: number; roles?: Array<{ name: string }> };
 }
 
-export const authorizeRole =  (roles: string[]) => (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
+const roleMiddleware =
+  (roles: string[]) => (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
     if (!req.user) {
       return res.status(401).json({ error: "Unauthenticated user" });
     }
 
-    if (!roles.includes(req.user.role)) {
-      return res.status(403).json({ error: "Access denied. You do not have enough permissions." });
+    const userRoles = req.user.roles?.map((role) => role.name) || [];
+
+    const hasRequiredRole = roles.some((role) => userRoles.includes(role));
+
+    if (!hasRequiredRole) {
+      return res.status(403).json({ error: "Insufficient permissions" });
     }
 
-    next();
+    return next();
   };
+
+export default roleMiddleware;

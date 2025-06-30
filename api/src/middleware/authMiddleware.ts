@@ -24,7 +24,7 @@ export const authenticateToken = (req: AuthenticatedRequest, res: Response, next
       });
     }
 
-    jwt.verify(accessToken, JWT_SECRET_KEY, (error, decoded) => {
+    return jwt.verify(accessToken, JWT_SECRET_KEY, (error, decoded) => {
       if (error) {
         if (error.name === "TokenExpiredError") {
           return res.status(401).json({
@@ -54,7 +54,7 @@ export const authenticateToken = (req: AuthenticatedRequest, res: Response, next
       }
 
       req.user = { id: parseInt(payload.userId, 10) };
-      next();
+      return next();
     });
   } catch (error) {
     console.error(
@@ -68,11 +68,7 @@ export const authenticateToken = (req: AuthenticatedRequest, res: Response, next
   }
 };
 
-export const authenticateRefreshToken = (
-  req: AuthenticatedRequest,
-  res: Response,
-  next: NextFunction,
-) => {
+export const authenticateRefreshToken = (req: AuthenticatedRequest, res: Response) => {
   try {
     const { refreshToken } = req.cookies;
 
@@ -83,7 +79,7 @@ export const authenticateRefreshToken = (
       });
     }
 
-    jwt.verify(refreshToken, JWT_SECRET_KEY_REFRESH, (refreshErr, refreshDecoded) => {
+    return jwt.verify(refreshToken, JWT_SECRET_KEY_REFRESH, (refreshErr, refreshDecoded) => {
       if (refreshErr) {
         if (refreshErr.name === "TokenExpiredError") {
           return res.status(401).json({

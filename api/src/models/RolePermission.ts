@@ -34,3 +34,5 @@ RolePermission.init(
     tableName: "role_permission",
   },
 );
+
+export default RolePermission;

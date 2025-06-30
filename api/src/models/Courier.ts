@@ -49,3 +49,5 @@ Courier.init(
     tableName: "couriers",
   },
 );
+
+export default Courier;

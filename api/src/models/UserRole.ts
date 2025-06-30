@@ -36,3 +36,5 @@ UserRole.init(
     tableName: "user_role",
   },
 );
+
+export default UserRole;

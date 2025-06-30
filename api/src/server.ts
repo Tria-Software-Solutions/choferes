@@ -108,12 +108,11 @@ app.use(
       }
 
       if (allowedOrigins.includes(origin)) {
-        callback(null, true);
-      } else {
-        console.warn(`CORS blocked request from origin: ${origin}`);
-        console.log("Allowed origins:", allowedOrigins);
-        callback(new Error("Not allowed by CORS"));
+        return callback(null, true);
       }
+      console.warn(`CORS blocked request from origin: ${origin}`);
+      console.log("Allowed origins:", allowedOrigins);
+      return callback(new Error("Not allowed by CORS"));
     },
     credentials: true,
     methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"],
@@ -136,7 +135,7 @@ app.use((req, res, next) => {
   res.setHeader("Cache-Control", "no-cache, no-store, must-revalidate");
   res.setHeader("Pragma", "no-cache");
   res.setHeader("Expires", "0");
-  next();
+  return next();
 });
 
 app.use("/api/auth", authRoutes);
@@ -154,14 +153,13 @@ app.use("/api/monthly-summary", monthlySummaryRoutes);
 app.use("/api/schedules", scheduleRoutes);
 app.use("/api/vehicles", vehicleRoutes);
 
-app.use((error: Error, req: express.Request, res: express.Response, next: express.NextFunction) => {
+app.use((error: Error, req: express.Request, res: express.Response) => {
   if (process.env.NODE_ENV === "production") {
     console.error("Error:", error.message);
-    res.status(500).json({ error: "Internal server error" });
-  } else {
-    console.error(error.stack);
-    res.status(500).json({ error: error.message });
+    return res.status(500).json({ error: "Internal server error" });
   }
+  console.error(error.stack);
+  return res.status(500).json({ error: error.message });
 });
 
 sequelize
@@ -169,7 +167,7 @@ sequelize
   .then(() => {
     console.log("Database synchronized");
   })
-  .catch((error: any) => {
+  .catch((error: unknown) => {
     console.error("Error syncing database:", error);
   });
 

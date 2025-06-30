@@ -3,37 +3,37 @@ import { Role } from "../models/Role";
 
 export const getRoles = async () =>
   Role.findAll({
-  include: [
-    {
-      model: Permission,
-      as: "permissions",
-      through: { attributes: [] },
-    },
-  ],
-});
+    include: [
+      {
+        model: Permission,
+        as: "permissions",
+        through: { attributes: [] },
+      },
+    ],
+  });
 
 export const getRoleById = async (id: number) =>
   Role.findByPk(id, {
-  include: [
-    {
-      model: Permission,
-      as: "permissions",
-      through: { attributes: [] },
-    },
-  ],
-});
+    include: [
+      {
+        model: Permission,
+        as: "permissions",
+        through: { attributes: [] },
+      },
+    ],
+  });
 
 export const getRoleByName = async (name: string) =>
   Role.findOne({
-  where: { name },
-  include: [
-    {
-      model: Permission,
-      as: "permissions",
-      through: { attributes: [] },
-    },
-  ],
-});
+    where: { name },
+    include: [
+      {
+        model: Permission,
+        as: "permissions",
+        through: { attributes: [] },
+      },
+    ],
+  });
 
 export const createRole = async (data: Omit<Role, "id">) => {
   const newRole = await Role.create(data);

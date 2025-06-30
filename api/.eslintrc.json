@@ -16,19 +16,25 @@
     "sourceType": "module",
     "project": "./tsconfig.json"
   },
-  "plugins": [
-    "@typescript-eslint",
-    "prettier"
-  ],
+  "plugins": ["@typescript-eslint", "prettier"],
   "rules": {
-    "prettier/prettier": ["error", { "singleQuote": false }],
-    "@typescript-eslint/quotes": ["error", "double"],
-    "quotes": ["error", "double"],
-    "no-console": "warn"
+    "prettier/prettier": "error",
+    "@typescript-eslint/quotes": "off",
+    "quotes": "off",
+    "no-console": "warn",
+    "max-len": "off",
+    "@typescript-eslint/indent": "off",
+    "indent": "off",
+    "implicit-arrow-linebreak": "off",
+    "arrow-body-style": "off",
+    "function-paren-newline": "off",
+    "no-multi-spaces": "off",
+    "consistent-return": "warn",
+    "@typescript-eslint/no-explicit-any": "warn",
+    "@typescript-eslint/no-unused-vars": "error",
+    "import/no-extraneous-dependencies": "warn",
+    "import/extensions": "warn",
+    "operator-linebreak": "off"
   },
-  "ignorePatterns": [
-    "dist/",
-    "migrations/",
-    "seeders/"
-  ]
-} 
+  "ignorePatterns": ["dist/", "migrations/", "seeders/"]
+}

@@ -5,14 +5,19 @@ export const getPermissions = async () => Permission.findAll();
 
 export const getPermissionById = async (id: number) => Permission.findByPk(id);
 
+export const getPermissionByName = async (name: string) =>
+  Permission.findOne({
+    where: { name },
+  });
+
 export const getPermissionsByNames = async (names: string[]) =>
   Permission.findAll({
-  where: {
-    name: {
-      [Op.in]: names,
+    where: {
+      name: {
+        [Op.in]: names,
+      },
     },
-  },
-});
+  });
 
 export const createPermission = async (data: Omit<Permission, "id">) => {
   const newPermission = await Permission.create(data);

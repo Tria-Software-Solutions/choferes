@@ -5,3 +5,7 @@ export const healthCheck = (req: Request, res: Response) => {
   const healthStatus = checkHealth();
   res.status(200).json(healthStatus);
 };
+
+export default {
+  healthCheck,
+};

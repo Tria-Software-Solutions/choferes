@@ -6,11 +6,7 @@ import { Role } from "../models/Role";
 import { Permission } from "../models/Permission";
 import { generateTokens } from "../utils/generateSecret";
 
-export const authenticateUser = async (
-  identifier: string,
-  password: string,
-  res: Response<any, Record<string, any>>,
-) => {
+export const authenticateUser = async (identifier: string, password: string, res: Response) => {
   const user = await User.findOne({
     where: { [Op.or]: [{ username: identifier }, { email: identifier }] },
     include: [
@@ -49,49 +45,49 @@ export const authenticateUser = async (
 
 export const getUsers = async () =>
   User.findAll({
-  include: [
-    {
-      model: Role,
-      as: "roles",
-      through: { attributes: [] },
-    },
-  ],
-});
+    include: [
+      {
+        model: Role,
+        as: "roles",
+        through: { attributes: [] },
+      },
+    ],
+  });
 
 export const getUserById = async (id: number) =>
   User.findByPk(id, {
-  include: [
-    {
-      model: Role,
-      as: "roles",
-      through: { attributes: [] },
-    },
-  ],
-});
+    include: [
+      {
+        model: Role,
+        as: "roles",
+        through: { attributes: [] },
+      },
+    ],
+  });
 
 export const getUserByEmail = async (email: string) =>
   User.findOne({
-  where: { email },
-  include: [
-    {
-      model: Role,
-      as: "roles",
-      through: { attributes: [] },
-    },
-  ],
-});
+    where: { email },
+    include: [
+      {
+        model: Role,
+        as: "roles",
+        through: { attributes: [] },
+      },
+    ],
+  });
 
 export const getUserByUsername = async (username: string) =>
   User.findOne({
-  where: { username },
-  include: [
-    {
-      model: Role,
-      as: "roles",
-      through: { attributes: [] },
-    },
-  ],
-});
+    where: { username },
+    include: [
+      {
+        model: Role,
+        as: "roles",
+        through: { attributes: [] },
+      },
+    ],
+  });
 
 export const getUserPermissions = async (userId: number) => {
   const user = await User.findByPk(userId, {

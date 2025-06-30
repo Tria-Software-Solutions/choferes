@@ -1,22 +1,74 @@
+import { Op } from "sequelize";
 import { HoursWorked } from "../models/HoursWorked";
 import { Employee } from "../models/Employee";
-import { Schedule } from "../models/Schedule";
 
 export const getHoursWorked = async () =>
   HoursWorked.findAll({
-  include: [
-    { model: Employee, attributes: ["firstName", "lastName"] },
-    { model: Schedule, attributes: ["days", "label", "hours"] },
-  ],
-});
+    include: [
+      {
+        model: Employee,
+        as: "employee",
+      },
+    ],
+  });
 
 export const getHoursWorkedById = async (id: number) =>
   HoursWorked.findByPk(id, {
-  include: [
-    { model: Employee, attributes: ["firstName", "lastName"] },
-    { model: Schedule, attributes: ["days", "label", "hours"] },
-  ],
-});
+    include: [
+      {
+        model: Employee,
+        as: "employee",
+      },
+    ],
+  });
+
+export const getHoursWorkedByEmployee = async (employeeId: number) =>
+  HoursWorked.findAll({
+    where: { employeeId },
+    include: [
+      {
+        model: Employee,
+        as: "employee",
+      },
+    ],
+  });
+
+export const getHoursWorkedByDate = async (date: Date) => {
+  const startOfDay = new Date(date);
+  startOfDay.setHours(0, 0, 0, 0);
+
+  const endOfDay = new Date(date);
+  endOfDay.setHours(23, 59, 59, 999);
+
+  return HoursWorked.findAll({
+    where: {
+      date: {
+        [Op.between]: [startOfDay, endOfDay],
+      },
+    },
+    include: [
+      {
+        model: Employee,
+        as: "employee",
+      },
+    ],
+  });
+};
+
+export const getHoursWorkedByDateRange = async (startDate: Date, endDate: Date) =>
+  HoursWorked.findAll({
+    where: {
+      date: {
+        [Op.between]: [startDate, endDate],
+      },
+    },
+    include: [
+      {
+        model: Employee,
+        as: "employee",
+      },
+    ],
+  });
 
 export const createHoursWorked = async (data: Omit<HoursWorked, "id">) => {
   const newHoursWorked = await HoursWorked.create(data);
