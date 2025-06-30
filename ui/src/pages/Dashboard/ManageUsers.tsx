@@ -100,7 +100,6 @@ const ManageUsers: React.FC<{ isExpanded?: boolean }> = ({ isExpanded = true }) 
         setLoadError(error instanceof Error ? error.message : 'Error al cargar los datos. Por favor, recarga la página.');
         showNotification(
           "Error al cargar los datos",
-          "error",
           5000,
           false
         );
@@ -116,7 +115,6 @@ const ManageUsers: React.FC<{ isExpanded?: boolean }> = ({ isExpanded = true }) 
       setLoadError(`Error al cargar usuarios: ${usersError}`);
       showNotification(
         "Error al cargar usuarios",
-        "error",
         5000,
         false
       );
@@ -285,7 +283,6 @@ const ManageUsers: React.FC<{ isExpanded?: boolean }> = ({ isExpanded = true }) 
       if (!role) {
         showNotification(
           "El rol seleccionado no existe",
-          "error",
           5000,
           false
         );
@@ -309,7 +306,6 @@ const ManageUsers: React.FC<{ isExpanded?: boolean }> = ({ isExpanded = true }) 
       });
       showNotification(
         "La actualización del usuario fue exitosa",
-        "success",
         3000,
         false
       );
@@ -318,7 +314,6 @@ const ManageUsers: React.FC<{ isExpanded?: boolean }> = ({ isExpanded = true }) 
       console.error(error);
       showNotification(
         "Ha ocurrido un error al actualizar el usuario",
-        "error",
         5000,
         false
       );
@@ -350,7 +345,6 @@ const ManageUsers: React.FC<{ isExpanded?: boolean }> = ({ isExpanded = true }) 
       setUserToChange(null);
       showNotification(
         "Estado del usuario actualizado exitosamente",
-        "success",
         3000,
         false
       );
@@ -358,7 +352,6 @@ const ManageUsers: React.FC<{ isExpanded?: boolean }> = ({ isExpanded = true }) 
       console.error("Error updating user status:", error);
       showNotification(
         "Error al actualizar el estado del usuario",
-        "error",
         5000,
         false
       );
@@ -417,7 +410,6 @@ const ManageUsers: React.FC<{ isExpanded?: boolean }> = ({ isExpanded = true }) 
         handleClose();
         showNotification(
           "La contraseña fue actualizada exitosamente",
-          "success",
           3000,
           false
         );
@@ -425,7 +417,6 @@ const ManageUsers: React.FC<{ isExpanded?: boolean }> = ({ isExpanded = true }) 
         console.error(error);
         showNotification(
           "Ha ocurrido un error al actualizar la contraseña",
-          "error",
           5000,
           false
         );
@@ -543,7 +534,6 @@ const ManageUsers: React.FC<{ isExpanded?: boolean }> = ({ isExpanded = true }) 
       setOpenAddUserModal(false);
       showNotification(
         "Usuario creado exitosamente",
-        "success",
         3000,
         false
       );
@@ -551,7 +541,6 @@ const ManageUsers: React.FC<{ isExpanded?: boolean }> = ({ isExpanded = true }) 
       console.error("Error creating user:", error);
       showNotification(
         "Error al crear el usuario",
-        "error",
         5000,
         false
       );
@@ -838,8 +827,8 @@ const ManageUsers: React.FC<{ isExpanded?: boolean }> = ({ isExpanded = true }) 
       <DialogComponent
         open={openAddUserModal}
         onClose={handleCloseAddUserModal}
-        title="Agregar Usuario"
-        icon={<ManageAccountsIcon color="primary" />}
+        title="Agregar"
+        subtitle="Nuevo usuario"
         hideActions
         paperSx={{ minWidth: { xs: '90vw', sm: 500, md: 700 }, maxWidth: { xs: '98vw', sm: 700 } }}
       >

@@ -64,12 +64,12 @@ import {
 import { PAGE_TITLE, PERMISSIONS } from "../../constants/constants";
 import CalendarMonthRoundedIcon from "@mui/icons-material/CalendarMonthRounded";
 import DownloadRoundedIcon from "@mui/icons-material/DownloadRounded";
+import InfoOutlinedIcon from "@mui/icons-material/InfoOutlined";
 import ArrowBackIosNewRoundedIcon from "@mui/icons-material/ArrowBackIosNewRounded";
 import ArrowForwardIosRoundedIcon from "@mui/icons-material/ArrowForwardIosRounded";
 import CalendarTodayRoundedIcon from "@mui/icons-material/CalendarTodayRounded";
 import CloseRoundedIcon from "@mui/icons-material/CloseRounded";
 import ManageSearchIcon from "@mui/icons-material/ManageSearch";
-import { faFileExcel, faFilePdf } from "@fortawesome/free-solid-svg-icons";
 import DialogComponent from "../../components/Dialog/DialogComponent";
 import AccessTimeRoundedIcon from '@mui/icons-material/AccessTimeRounded';
 import BarChartIcon from '@mui/icons-material/BarChart';
@@ -509,8 +509,8 @@ const RolesPage: React.FC = () => {
       : undefined;
 
     return createExportOptions(
-      <FontAwesomeIcon icon={faFileExcel} size="lg" />,
-      <FontAwesomeIcon icon={faFilePdf} size="lg" />,
+      <DownloadRoundedIcon />,
+      <DownloadRoundedIcon />,
       excelOption,
       pdfOption,
     );
@@ -762,13 +762,12 @@ const RolesPage: React.FC = () => {
         cancelText="No, solo datos básicos"
         loading={isExporting}
       />
-      {/* Employee Hours Summary Dialog */}
       {openSummaryDialogEmployee && (
         <Dialog open={!!openSummaryDialogEmployee} onClose={() => setOpenSummaryDialogEmployee(null)} maxWidth="md" fullWidth>
           <Box sx={{ background: theme.palette.primary.main, p: 3, borderTopLeftRadius: 12, borderTopRightRadius: 12 }}>
             <Box display="flex" alignItems="center" gap={2}>
               <Avatar sx={{ bgcolor: '#fff' }}>
-                <AccessTimeRoundedIcon color="primary" />
+                <InfoOutlinedIcon color="primary" />
               </Avatar>
               <Box>
                 <Typography variant="h5" color="white" fontWeight={700}>

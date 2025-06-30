@@ -20,14 +20,10 @@ import {
   Grid,
   Box,
   Typography,
-  Dialog,
-  DialogContent,
-  DialogTitle,
   useTheme,
   useMediaQuery,
   CircularProgress,
   Backdrop,
-  IconButton,
 } from "@mui/material";
 import {
   createExportOptions,
@@ -142,7 +138,6 @@ const SchedulesPage: React.FC = () => {
       setOpenAddScheduleModal(false);
       showNotification(
         "El registro del horario fue exitoso",
-        "success",
         3000,
         false
       );
@@ -150,7 +145,6 @@ const SchedulesPage: React.FC = () => {
       console.error(error);
       showNotification(
         "Ha ocurrido un error al registrar el horario",
-        "error",
         5000,
         false
       );
@@ -184,7 +178,6 @@ const SchedulesPage: React.FC = () => {
       setEditFields({ label: "", days: [], hours: "", specialSchedule: false });
       showNotification(
         "La actualización del horario fue exitosa",
-        "success",
         3000,
         false
       );
@@ -193,7 +186,6 @@ const SchedulesPage: React.FC = () => {
       console.error(error);
       showNotification(
         "Ha ocurrido un error al actualizar el horario",
-        "error",
         5000,
         false
       );
@@ -228,7 +220,6 @@ const SchedulesPage: React.FC = () => {
       setScheduleToDelete(null);
       showNotification(
         "Horario eliminado exitosamente",
-        "success",
         3000,
         false
       );
@@ -236,7 +227,6 @@ const SchedulesPage: React.FC = () => {
       console.error("Error deleting schedule:", error);
       showNotification(
         "Error al eliminar el horario",
-        "error",
         5000,
         false
       );
@@ -434,8 +424,8 @@ const SchedulesPage: React.FC = () => {
       <DialogComponent
         open={openAddScheduleModal}
         onClose={handleCloseAddModal}
-        title="Agregar Nuevo Horario"
-        icon={<EditCalendarRoundedIcon color="primary" />}
+        title="Agregar"
+        subtitle="Nuevo horario"
         hideActions
         paperSx={{ minWidth: { xs: '90vw', sm: 500, md: 700 }, maxWidth: { xs: '98vw', sm: 700 } }}
       >

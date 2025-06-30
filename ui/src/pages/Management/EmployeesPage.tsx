@@ -41,9 +41,6 @@ import PersonAddAlt1RoundedIcon from "@mui/icons-material/PersonAddAlt1Rounded";
 import DownloadRoundedIcon from "@mui/icons-material/DownloadRounded";
 import CloseRoundedIcon from "@mui/icons-material/CloseRounded";
 import ManageSearchIcon from "@mui/icons-material/ManageSearch";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faFileExcel, faFilePdf } from "@fortawesome/free-solid-svg-icons";
-import CloseIcon from "@mui/icons-material/Close";
 import AddRoundedIcon from '@mui/icons-material/AddRounded';
 
 const EmployeesPage: React.FC = () => {
@@ -121,7 +118,6 @@ const EmployeesPage: React.FC = () => {
       setOpenAddModal(false);
       showNotification(
         "El registro del empleado fue exitoso",
-        "success",
         3000,
         false
       );
@@ -129,7 +125,6 @@ const EmployeesPage: React.FC = () => {
       console.error(error);
       showNotification(
         "Ha ocurrido un error al registrar el empleado",
-        "error",
         5000,
         false
       );
@@ -168,7 +163,6 @@ const EmployeesPage: React.FC = () => {
       setEditFields({ firstName: "", lastName: "" });
       showNotification(
         "La actualización del empleado fue exitosa",
-        "success",
         3000,
         false
       );
@@ -177,7 +171,6 @@ const EmployeesPage: React.FC = () => {
       console.error(error);
       showNotification(
         "Ha ocurrido un error al actualizar el empleado",
-        "error",
         5000,
         false
       );
@@ -204,7 +197,6 @@ const EmployeesPage: React.FC = () => {
       setEmployeeToDelete(null);
       showNotification(
         "Empleado eliminado exitosamente",
-        "success",
         3000,
         false
       );
@@ -212,7 +204,6 @@ const EmployeesPage: React.FC = () => {
       console.error("Error deleting employee:", error);
       showNotification(
         "Error al eliminar el empleado",
-        "error",
         5000,
         false
       );
@@ -231,8 +222,8 @@ const EmployeesPage: React.FC = () => {
       ? exportToPDF
       : undefined;
     return createExportOptions(
-      <FontAwesomeIcon icon={faFileExcel} size="lg" />,
-      <FontAwesomeIcon icon={faFilePdf} size="lg" />,
+      <ManageSearchIcon />,
+      <ManageSearchIcon />,
       excelOption,
       pdfOption,
       filteredEmployees,
@@ -409,8 +400,8 @@ const EmployeesPage: React.FC = () => {
       <DialogComponent
         open={openAddModal}
         onClose={handleCloseAddModal}
-        title="Agregar Nuevo Empleado"
-        icon={<PersonAddAlt1RoundedIcon color="primary" />}
+        title="Agregar"
+        subtitle="Nuevo empleado"
         hideActions
         paperSx={{ minWidth: { xs: '90vw', sm: 500, md: 700 }, maxWidth: { xs: '98vw', sm: 700 } }}
       >

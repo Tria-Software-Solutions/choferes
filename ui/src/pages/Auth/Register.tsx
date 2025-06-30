@@ -115,7 +115,6 @@ const Register = () => {
       await dispatch(createUser({ newUser })).unwrap();
       showNotification(
         "El registro del usuario fue exitoso",
-        "success",
         3000,
         false
       );
@@ -131,7 +130,6 @@ const Register = () => {
       setError("Error al registrar usuario");
       showNotification(
         "Ha ocurrido un error al registrar el usuario",
-        "error",
         5000,
         false
       );
