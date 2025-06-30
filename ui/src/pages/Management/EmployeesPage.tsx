@@ -119,7 +119,6 @@ const EmployeesPage: React.FC = () => {
       setOpenAddModal(false);
       showNotification("El registro del empleado fue exitoso", 3000, false);
     } catch (error) {
-      console.error(error);
       showNotification(
         "Ha ocurrido un error al registrar el empleado",
         5000,
@@ -165,7 +164,6 @@ const EmployeesPage: React.FC = () => {
       );
     } catch (error) {
       handleCancel();
-      console.error(error);
       showNotification(
         "Ha ocurrido un error al actualizar el empleado",
         5000,
@@ -194,7 +192,6 @@ const EmployeesPage: React.FC = () => {
       setEmployeeToDelete(null);
       showNotification("Empleado eliminado exitosamente", 3000, false);
     } catch (error) {
-      console.error("Error deleting employee:", error);
       showNotification("Error al eliminar el empleado", 5000, false);
     } finally {
       setIsDeletingEmployee(false);

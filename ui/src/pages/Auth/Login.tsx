@@ -64,7 +64,7 @@ const Login: React.FC = () => {
     try {
       await authenticateUser(fields.identifier, fields.password);
     } catch (error: unknown) {
-      console.error("Error en login:", error);
+      // Eliminar la línea con console.error en la línea 67
     }
 
     setIsSubmitting(false);

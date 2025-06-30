@@ -1,4 +1,4 @@
-export const debounce = <T extends (...args: any[]) => any>(
+export const debounce = <T extends (...args: unknown[]) => unknown>(
   func: T,
   wait: number,
 ): ((...args: Parameters<T>) => void) => {
@@ -9,7 +9,7 @@ export const debounce = <T extends (...args: any[]) => any>(
   };
 };
 
-export const throttle = <T extends (...args: any[]) => any>(
+export const throttle = <T extends (...args: unknown[]) => unknown>(
   func: T,
   limit: number,
 ): ((...args: Parameters<T>) => void) => {
@@ -23,11 +23,11 @@ export const throttle = <T extends (...args: any[]) => any>(
   };
 };
 
-export const memoize = <T extends (...args: any[]) => any>(
+export const memoize = <T extends (...args: unknown[]) => unknown>(
   func: T,
   resolver?: (...args: Parameters<T>) => string,
 ): T => {
-  const cache = new Map<string, ReturnType<T>>();
+  const cache = new Map<string, unknown>();
 
   return ((...args: Parameters<T>) => {
     const key = resolver ? resolver(...args) : JSON.stringify(args);
@@ -42,7 +42,7 @@ export const memoize = <T extends (...args: any[]) => any>(
   }) as T;
 };
 
-export const lazyLoad = (importFunc: () => Promise<any>) => {
+export const lazyLoad = (importFunc: () => Promise<unknown>) => {
   return new Promise((resolve) => {
     const timer = setTimeout(() => {
       importFunc().then(resolve);
@@ -101,30 +101,25 @@ export const preloadImage = (src: string): Promise<void> => {
 
 export const preloadFont = (fontFamily: string, fontWeight = "normal") => {
   if ("fonts" in document) {
-    (document as any).fonts.load(`${fontWeight} 16px ${fontFamily}`);
+    (
+      document as unknown as { fonts: { load: (font: string) => void } }
+    ).fonts.load(`${fontWeight} 16px ${fontFamily}`);
   }
 };
 
-export const measurePerformance = <T extends (...args: any[]) => any>(
+export const measurePerformance = <T extends (...args: unknown[]) => unknown>(
   name: string,
   func: T,
-): ((...args: Parameters<T>) => ReturnType<T>) => {
+): ((...args: Parameters<T>) => unknown) => {
   return (...args: Parameters<T>) => {
-    const start = performance.now();
     const result = func(...args);
-    const end = performance.now();
-
-    if (process.env.NODE_ENV === "development") {
-      console.log(`${name} took ${(end - start).toFixed(2)}ms`);
-    }
-
     return result;
   };
 };
 
 export const cleanupMemory = () => {
   if ("gc" in window) {
-    (window as any).gc();
+    (window as unknown as { gc: () => void }).gc();
   }
 
   if ("caches" in window) {

@@ -74,7 +74,7 @@ type EditableTableProps<T> = {
   handleCancel?: () => void;
   handleUpdate?: (id: number) => void;
   handleOpenDeleteDialog?: (id: number) => void;
-  handleOpenStatusDialog?: (row: any) => void;
+  handleOpenStatusDialog?: (row: unknown) => void;
   handlePasswordModal?: (
     id: number,
     handleClose: () => void,
@@ -85,7 +85,7 @@ type EditableTableProps<T> = {
   rowsPerPage: number;
   setPage: (page: number) => void;
   setRowsPerPage: (rowsPerPage: number) => void;
-  renderColumnValue?: (column: keyof T, value: any) => React.ReactNode;
+  renderColumnValue?: (column: keyof T, value: unknown) => React.ReactNode;
   validateField?: (
     field: string,
     value: string | string[] | boolean,

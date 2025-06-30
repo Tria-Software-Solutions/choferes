@@ -141,7 +141,6 @@ const SchedulesPage: React.FC = () => {
       setOpenAddScheduleModal(false);
       showNotification("El registro del horario fue exitoso", 3000, false);
     } catch (error) {
-      console.error(error);
       showNotification(
         "Ha ocurrido un error al registrar el horario",
         5000,
@@ -178,7 +177,6 @@ const SchedulesPage: React.FC = () => {
       showNotification("La actualización del horario fue exitosa", 3000, false);
     } catch (error) {
       handleCancel();
-      console.error(error);
       showNotification(
         "Ha ocurrido un error al actualizar el horario",
         5000,
@@ -215,7 +213,6 @@ const SchedulesPage: React.FC = () => {
       setScheduleToDelete(null);
       showNotification("Horario eliminado exitosamente", 3000, false);
     } catch (error) {
-      console.error("Error deleting schedule:", error);
       showNotification("Error al eliminar el horario", 5000, false);
     } finally {
       setIsDeletingSchedule(false);

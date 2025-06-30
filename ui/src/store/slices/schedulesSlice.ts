@@ -28,15 +28,15 @@ export const fetchSchedules = createAsyncThunk(
         response &&
         typeof response === "object" &&
         "schedules" in response &&
-        Array.isArray((response as any).schedules)
+        Array.isArray((response as unknown).schedules)
       ) {
-        return (response as any).schedules;
+        return (response as unknown).schedules;
       } else {
         return [];
       }
-    } catch (error: any) {
+    } catch (error: unknown) {
       return rejectWithValue(
-        error.response?.data || "Failed to fetch schedules",
+        error instanceof Error ? error.message : "Failed to fetch schedules",
       );
     }
   },
@@ -48,9 +48,9 @@ export const createSchedule = createAsyncThunk(
     try {
       const createdSchedule = await ScheduleService.createSchedule(newSchedule);
       return createdSchedule;
-    } catch (error: any) {
+    } catch (error: unknown) {
       return rejectWithValue(
-        error.response?.data || "Failed to create schedule",
+        error instanceof Error ? error.message : "Failed to create schedule",
       );
     }
   },
@@ -65,9 +65,9 @@ export const updateSchedule = createAsyncThunk(
     try {
       await ScheduleService.updateSchedule(args.id, args.updatedSchedule);
       return { id: args.id, updatedSchedule: args.updatedSchedule };
-    } catch (error: any) {
+    } catch (error: unknown) {
       return rejectWithValue(
-        error.response?.data || "Failed to update schedule",
+        error instanceof Error ? error.message : "Failed to update schedule",
       );
     }
   },
@@ -79,9 +79,9 @@ export const deleteSchedule = createAsyncThunk(
     try {
       await ScheduleService.deleteSchedule(id);
       return id;
-    } catch (error: any) {
+    } catch (error: unknown) {
       return rejectWithValue(
-        error.response?.data || "Failed to delete schedule",
+        error instanceof Error ? error.message : "Failed to delete schedule",
       );
     }
   },

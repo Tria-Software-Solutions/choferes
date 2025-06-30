@@ -18,7 +18,7 @@ export const useBiweeklySummaries = () => {
       setBiweeklySummaries(data);
       setTotalCountBiweeklySummaries(data.length);
     } catch (error) {
-      console.error("Error fetching Biweekly Summaries:", error);
+      // console.error("Error fetching Biweekly Summaries:", error);
     } finally {
       setIsLoadingBiweeklySummaries(false);
     }
@@ -40,7 +40,7 @@ export const useBiweeklySummaries = () => {
           year,
         );
       } catch (error) {
-        console.error("Error fetching current Biweekly Summary", error);
+        // console.error("Error fetching current Biweekly Summary", error);
       } finally {
         setIsLoadingBiweeklySummaries(false);
       }

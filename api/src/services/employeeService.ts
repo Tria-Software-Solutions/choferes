@@ -191,7 +191,7 @@ export const getEmployeesBySearch = async (searchTerm: string) =>
   });
 
 export const getEmployeesWithRelations = async (includeHoursWorked = false) => {
-  const include: any[] = [];
+  const include: unknown[] = [];
 
   if (includeHoursWorked) {
     include.push({

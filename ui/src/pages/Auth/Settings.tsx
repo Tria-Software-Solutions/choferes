@@ -179,7 +179,6 @@ const Settings: React.FC = () => {
       }
       showNotification("La actualización de lo datos fue exitosa");
     } catch (error) {
-      console.error(error);
       showNotification("Ha ocurrido un error al actualizar los datos");
     }
   };
@@ -233,7 +232,6 @@ const Settings: React.FC = () => {
       });
       showNotification("La actualización de la contraseña fue exitosa");
     } catch (error) {
-      console.error(error);
       showNotification("Ha ocurrido un error al actualizar la contraseña");
     }
   };

@@ -1,4 +1,5 @@
 import React, { useEffect, useMemo, useState } from "react";
+import PropTypes from "prop-types";
 import { Employee } from "../../../models/Employee";
 import { Schedule } from "../../../models/Schedule";
 import { HoursWorked } from "../../../models/HoursWorked";
@@ -1047,5 +1048,25 @@ const SelectorTable: React.FC<SelectorTableProps> = React.memo(
     );
   },
 );
+
+SelectorTable.displayName = "SelectorTable";
+
+SelectorTable.propTypes = {
+  filteredEmployees: PropTypes.array.isRequired,
+  schedules: PropTypes.array.isRequired,
+  hoursWorked: PropTypes.array.isRequired,
+  weeklySummaries: PropTypes.array.isRequired,
+  biweeklySummaries: PropTypes.array.isRequired,
+  monthlySummaries: PropTypes.array.isRequired,
+  weekOffset: PropTypes.number.isRequired,
+  weekNumber: PropTypes.number.isRequired,
+  biweekNumber: PropTypes.number.isRequired,
+  month: PropTypes.number.isRequired,
+  year: PropTypes.number.isRequired,
+  handleChange: PropTypes.func.isRequired,
+  handleAdjustTime: PropTypes.func.isRequired,
+  permissions: PropTypes.array,
+  onInfoClick: PropTypes.func,
+};
 
 export default SelectorTable;

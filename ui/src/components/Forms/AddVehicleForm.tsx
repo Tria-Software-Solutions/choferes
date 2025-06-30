@@ -23,7 +23,7 @@ import FactoryOutlinedIcon from "@mui/icons-material/FactoryOutlined";
 import InfoOutlinedIcon from "@mui/icons-material/InfoOutlined";
 import { DatePicker, LocalizationProvider } from "@mui/x-date-pickers";
 import { AdapterDateFns } from "@mui/x-date-pickers/AdapterDateFns";
-import { format } from "date-fns";
+
 import { es } from "date-fns/locale";
 
 interface AddVehicleFormProps {
@@ -491,7 +491,7 @@ const AddVehicleForm: React.FC<AddVehicleFormProps> = ({
                     },
                   }}
                 >
-                  Puedes usar "N/A" para campos opcionales.
+                  Puedes usar &quot;N/A&quot; para campos opcionales.
                 </Box>
               </Box>
             </Box>

@@ -18,17 +18,12 @@ import DialogComponent from "../../components/Dialog/DialogComponent";
 import {
   Box,
   Typography,
-  useTheme,
   useMediaQuery,
   Grid,
   Button,
-  Dialog,
-  DialogTitle,
-  DialogContent,
   CircularProgress,
   Backdrop,
   Tooltip,
-  IconButton,
 } from "@mui/material";
 import { LocalizationProvider } from "@mui/x-date-pickers";
 import { DatePicker } from "@mui/x-date-pickers/DatePicker";
@@ -53,7 +48,6 @@ import CloseRoundedIcon from "@mui/icons-material/CloseRounded";
 import ManageSearchIcon from "@mui/icons-material/ManageSearch";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faFileExcel, faFilePdf } from "@fortawesome/free-solid-svg-icons";
-import CloseIcon from "@mui/icons-material/Close";
 import AddRoundedIcon from "@mui/icons-material/AddRounded";
 import DeleteOutlineIcon from "@mui/icons-material/DeleteOutline";
 
@@ -90,8 +84,7 @@ const VehiclesPage: React.FC = () => {
   const [isCreatingVehicle, setIsCreatingVehicle] = useState(false);
   const [isDeletingVehicle, setIsDeletingVehicle] = useState(false);
 
-  const theme = useTheme();
-  const isSmallScreen = useMediaQuery(theme.breakpoints.down("sm"));
+  const isSmallScreen = useMediaQuery((theme) => theme.breakpoints.down("sm"));
 
   const cleanedFilter = useMemo(
     () => filter.replace(/[\s-]/g, "").toLowerCase(),
@@ -247,7 +240,6 @@ const VehiclesPage: React.FC = () => {
       );
     } catch (error) {
       handleCancel();
-      console.error(error);
       showNotification(
         "Ha ocurrido un error al actualizar el vehículo",
         5000,
@@ -275,7 +267,6 @@ const VehiclesPage: React.FC = () => {
       setVehicleToDelete(null);
       showNotification("Vehículo eliminado exitosamente", 3000, false);
     } catch (error) {
-      console.error("Error deleting vehicle:", error);
       showNotification("Error al eliminar el vehículo", 5000, false);
     } finally {
       setIsDeletingVehicle(false);
@@ -336,7 +327,6 @@ const VehiclesPage: React.FC = () => {
       setOpenAddVehicleModal(false);
       showNotification("Vehículo creado exitosamente", 3000, false);
     } catch (error) {
-      console.error("Error creating vehicle:", error);
       showNotification("Error al crear el vehículo", 5000, false);
     } finally {
       setIsCreatingVehicle(false);

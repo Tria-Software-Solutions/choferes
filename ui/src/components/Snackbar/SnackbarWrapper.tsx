@@ -35,16 +35,18 @@ export const AppNotificationProvider: React.FC<{
   const [duration, setDuration] = useState<number>(3000);
   const [closeable, setCloseable] = useState<boolean>(true);
   const [buttonText, setButtonText] = useState<string>("");
-  const [onButtonClick, setOnButtonClick] = useState<() => void>(
-    () => () => {},
-  );
+  const [onButtonClick, setOnButtonClick] = useState<() => void>(() => {
+    // noop
+  });
 
   const showNotification = (
     message: string,
     duration = 3000,
     closeable = true,
     buttonText = "Cerrar",
-    onButtonClick: () => void = () => {},
+    onButtonClick: () => void = () => {
+      // noop
+    },
   ) => {
     setMessage(message);
     setDuration(duration);

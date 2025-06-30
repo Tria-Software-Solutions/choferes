@@ -29,7 +29,7 @@ import { WeeklySummary } from "../models/WeeklySummary";
 import { BiweeklySummary } from "../models/BiweeklySummary";
 import { MonthlySummary } from "../models/MonthlySummary";
 
-export const exportToExcel = (data: any[], fileName: string) => {
+export const exportToExcel = (data: unknown[], fileName: string) => {
   if (!data || data.length === 0) return;
 
   const isVehicleData = "licensePlate" in data[0];
@@ -54,7 +54,7 @@ export const exportToExcel = (data: any[], fileName: string) => {
     : data.map(({ id, ...row }) => row);
 
   const translatedData = cleanedData.map((row) => {
-    const translatedRow: any = {};
+    const translatedRow: Record<string, unknown> = {};
     if (isVehicleData && row.Fecha) {
       translatedRow["Fecha"] = row.Fecha;
     }
@@ -113,7 +113,7 @@ export const exportToExcel = (data: any[], fileName: string) => {
 };
 
 export const exportToPDF = (
-  data: any[],
+  data: unknown[],
   fileName: string,
   customHeaders?: string[],
 ) => {
@@ -241,7 +241,7 @@ export const handleExportTableData = (
   });
 
   const dataForExport = sortedEmployees.map((employee) => {
-    const employeeData: any = {
+    const employeeData: Record<string, unknown> = {
       Nombre: `${employee.firstName} ${employee.lastName}`,
     };
 
@@ -451,11 +451,19 @@ export const handleExportTableData = (
 export const createExportOptions = (
   excelIcon: JSX.Element,
   pdfIcon: JSX.Element,
-  exportToExcel?: (dataForExport: any, fileName: string, headers?: any) => any,
-  exportToPDF?: (dataForExport: any, fileName: string, headers?: any) => any,
-  dataForExport?: any,
+  exportToExcel?: (
+    dataForExport: unknown,
+    fileName: string,
+    headers?: unknown,
+  ) => unknown,
+  exportToPDF?: (
+    dataForExport: unknown,
+    fileName: string,
+    headers?: unknown,
+  ) => unknown,
+  dataForExport?: unknown,
   fileName?: string,
-  headers?: any,
+  headers?: unknown,
 ) => {
   const options = [];
   if (exportToExcel) {

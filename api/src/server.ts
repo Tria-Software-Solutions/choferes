@@ -97,8 +97,6 @@ const allowedOrigins = [
   process.env.REACT_APP_UI_URL,
 ].filter(Boolean);
 
-console.log("Allowed CORS origins:", allowedOrigins);
-
 app.use(
   cors({
     origin: (origin, callback) => {
@@ -110,8 +108,6 @@ app.use(
       if (allowedOrigins.includes(origin)) {
         return callback(null, true);
       }
-      console.warn(`CORS blocked request from origin: ${origin}`);
-      console.log("Allowed origins:", allowedOrigins);
       return callback(new Error("Not allowed by CORS"));
     },
     credentials: true,
@@ -155,23 +151,21 @@ app.use("/api/vehicles", vehicleRoutes);
 
 app.use((error: Error, req: express.Request, res: express.Response) => {
   if (process.env.NODE_ENV === "production") {
-    console.error("Error:", error.message);
     return res.status(500).json({ error: "Internal server error" });
   }
-  console.error(error.stack);
   return res.status(500).json({ error: error.message });
 });
 
 sequelize
   .sync()
   .then(() => {
-    console.log("Database synchronized");
+    // Database synchronized successfully
   })
-  .catch((error: unknown) => {
-    console.error("Error syncing database:", error);
+  .catch(() => {
+    // Error syncing database
   });
 
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {
-  console.log(`Server is running on port ${PORT}`);
+  // Server is running on port ${PORT}
 });

@@ -29,10 +29,10 @@ export const fetchEmployees = createAsyncThunk(
       } else {
         return [];
       }
-    } catch (error: any) {
-      return rejectWithValue(
-        error.response?.data || "Failed to fetch employees",
-      );
+    } catch (error: unknown) {
+      const errorMessage =
+        error instanceof Error ? error.message : "Failed to fetch employees";
+      return rejectWithValue(errorMessage);
     }
   },
 );
@@ -43,10 +43,10 @@ export const createEmployee = createAsyncThunk(
     try {
       const createdEmployee = await EmployeeService.createEmployee(newEmployee);
       return createdEmployee;
-    } catch (error: any) {
-      return rejectWithValue(
-        error.response?.data || "Failed to create employee",
-      );
+    } catch (error: unknown) {
+      const errorMessage =
+        error instanceof Error ? error.message : "Failed to create employee";
+      return rejectWithValue(errorMessage);
     }
   },
 );
@@ -60,10 +60,10 @@ export const updateEmployee = createAsyncThunk(
     try {
       await EmployeeService.updateEmployee(id, updatedEmployee);
       return { id, updatedEmployee };
-    } catch (error: any) {
-      return rejectWithValue(
-        error.response?.data || "Failed to update employee",
-      );
+    } catch (error: unknown) {
+      const errorMessage =
+        error instanceof Error ? error.message : "Failed to update employee";
+      return rejectWithValue(errorMessage);
     }
   },
 );
@@ -74,10 +74,10 @@ export const deleteEmployee = createAsyncThunk(
     try {
       await EmployeeService.deleteEmployee(id);
       return id;
-    } catch (error: any) {
-      return rejectWithValue(
-        error.response?.data || "Failed to delete employee",
-      );
+    } catch (error: unknown) {
+      const errorMessage =
+        error instanceof Error ? error.message : "Failed to delete employee";
+      return rejectWithValue(errorMessage);
     }
   },
 );

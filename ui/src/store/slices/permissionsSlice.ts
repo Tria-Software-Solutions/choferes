@@ -29,9 +29,9 @@ export const fetchPermissions = createAsyncThunk(
       } else {
         return [];
       }
-    } catch (error: any) {
+    } catch (error: unknown) {
       return rejectWithValue(
-        error.response?.data || "Failed to fetch permissions",
+        error instanceof Error ? error.message : "Failed to fetch permissions",
       );
     }
   },
@@ -43,9 +43,11 @@ export const fetchPermissionById = createAsyncThunk(
     try {
       const permission = await PermissionService.getPermissionById(id);
       return permission;
-    } catch (error: any) {
+    } catch (error: unknown) {
       return rejectWithValue(
-        error.response?.data || "Failed to fetch permission by ID",
+        error instanceof Error
+          ? error.message
+          : "Failed to fetch permission by ID",
       );
     }
   },
@@ -57,9 +59,11 @@ export const fetchPermissionsByNames = createAsyncThunk(
     try {
       const permissions = await PermissionService.getPermissionsByNames(names);
       return permissions;
-    } catch (error: any) {
+    } catch (error: unknown) {
       return rejectWithValue(
-        error.response?.data || "Failed to fetch permissions by names",
+        error instanceof Error
+          ? error.message
+          : "Failed to fetch permissions by names",
       );
     }
   },
@@ -72,9 +76,9 @@ export const createPermission = createAsyncThunk(
       const createdPermission =
         await PermissionService.createPermission(newPermission);
       return createdPermission;
-    } catch (error: any) {
+    } catch (error: unknown) {
       return rejectWithValue(
-        error.response?.data || "Failed to create permission",
+        error instanceof Error ? error.message : "Failed to create permission",
       );
     }
   },
@@ -86,9 +90,9 @@ export const deletePermission = createAsyncThunk(
     try {
       await PermissionService.deletePermission(id);
       return id;
-    } catch (error: any) {
+    } catch (error: unknown) {
       return rejectWithValue(
-        error.response?.data || "Failed to delete permission",
+        error instanceof Error ? error.message : "Failed to delete permission",
       );
     }
   },
