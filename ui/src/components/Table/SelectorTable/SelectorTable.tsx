@@ -37,6 +37,7 @@ import {
   IconButton,
   Dialog,
   DialogContent,
+  Avatar,
 } from "@mui/material";
 import { TabContext, TabList, TabPanel } from "@mui/lab";
 import PaginationActions from "../Pagination/PaginationActions";
@@ -66,6 +67,7 @@ import InfoOutlinedIcon from "@mui/icons-material/InfoOutlined";
 import AccessTimeRoundedIcon from "@mui/icons-material/AccessTimeRounded";
 import MoreTimeIcon from "@mui/icons-material/MoreTime";
 import DialogComponent from '../../Dialog/DialogComponent';
+import CloseRoundedIcon from "@mui/icons-material/CloseRounded";
 
 interface SelectorTableProps {
   filteredEmployees: Employee[];
@@ -252,71 +254,6 @@ const SelectorTable: React.FC<SelectorTableProps> = React.memo(
           summary.year === year
       );
       return found;
-    };
-
-    const modalContentEditTime = (
-      employee: Employee,
-      handleClose: () => void
-    ) => {
-      return (
-        <Box sx={{ width: '100%', maxWidth: 900, minHeight: 220, maxHeight: { xs: '80vh', sm: 600 }, overflowY: 'auto', p: 0, display: 'flex', flexDirection: 'column' }}>
-          <Box sx={{ px: { xs: 0, sm: 0 }, pt: 0, pb: 2 }}>
-            {selectedPeriod === "weekly" ? (
-              <Typography variant="body1" mb={2}>
-                <strong>Total de horas trabajadas en la semana:</strong>{' '}
-                <Typography variant="h5" color="primary" fontWeight={700} component="span" sx={{ ml: 1 }}>{resultHoursForPeriod(employee, "weekly", "totalHours")}</Typography>
-              </Typography>
-            ) : selectedPeriod === "biweekly" ? (
-              <Typography variant="body1" mb={2}>
-                <strong>Total de horas trabajadas en la quincena:</strong>{' '}
-                <Typography variant="h5" color="primary" fontWeight={700} component="span" sx={{ ml: 1 }}>{resultHoursForPeriod(employee, "biweekly", "totalHours")}</Typography>
-              </Typography>
-            ) : (
-              <Typography variant="body1" mb={2}>
-                <strong>Total de horas trabajadas en el mes:</strong>{' '}
-                <Typography variant="h5" color="primary" fontWeight={700} component="span" sx={{ ml: 1 }}>{resultHoursForPeriod(employee, "monthly", "totalHours")}</Typography>
-              </Typography>
-            )}
-            <TextField
-              label="Horas a ajustar"
-              variant="outlined"
-              type="number"
-              placeholder="0"
-              onChange={(e) => setTimeAdjustment(Number(e.target.value))}
-              sx={{ mt: 1, maxWidth: 200 }}
-            />
-            <Box sx={{ display: "flex", justifyContent: "flex-end", gap: 2, mt: 4 }}>
-              <Button
-                variant="contained"
-                color="primary"
-                sx={{ height: "48px", minWidth: 120, fontWeight: 700, borderRadius: 2, px: 4, boxShadow: 1 }}
-                onClick={() => {
-                  handleAdjustTime(employee.id, "sum", timeAdjustment);
-                  handleClose();
-                }}
-                disabled={timeAdjustment <= 0}
-              >
-                Sumar
-              </Button>
-              <Button
-                variant="contained"
-                color="secondary"
-                sx={{ height: "48px", minWidth: 120, fontWeight: 700, borderRadius: 2, px: 4, boxShadow: 1 }}
-                onClick={() => {
-                  handleAdjustTime(employee.id, "substract", timeAdjustment);
-                  handleClose();
-                }}
-                disabled={timeAdjustment <= 0}
-              >
-                Restar
-              </Button>
-              <Button onClick={handleClose} variant="text" color="primary" size="large" sx={{ fontWeight: 500, borderRadius: 2, px: 3, py: 1.2 }}>
-                Cancelar
-              </Button>
-            </Box>
-          </Box>
-        </Box>
-      );
     };
 
     return (
@@ -920,13 +857,113 @@ const SelectorTable: React.FC<SelectorTableProps> = React.memo(
           <DialogComponent
             open={!!openAdjustDialogEmployee}
             onClose={() => setOpenAdjustDialogEmployee(null)}
-            icon={<MoreTimeIcon color="primary" sx={{ fontSize: 28 }} />}
-            title="Ajuste de Horas"
-            subtitle={`${openAdjustDialogEmployee.firstName} ${openAdjustDialogEmployee.lastName}`}
-            hideActions
-            paperSx={{ maxWidth: 600 }}
+            paperSx={{ maxWidth: 420, borderRadius: 3, boxShadow: 12, p: 0, overflow: 'hidden' }}
+            header={
+              <Box sx={{ background: theme.palette.primary.main, p: 3, borderTopLeftRadius: 12, borderTopRightRadius: 12 }}>
+                <Box display="flex" alignItems="center" gap={2}>
+                  <Avatar sx={{ bgcolor: '#fff' }}>
+                    <AccessTimeRoundedIcon color="primary" />
+                  </Avatar>
+                  <Box>
+                    <Typography variant="h5" color="white" fontWeight={700}>
+                      {openAdjustDialogEmployee.firstName} {openAdjustDialogEmployee.lastName}
+                    </Typography>
+                    <Typography variant="subtitle2" color="white" fontWeight={400}>
+                      Ajuste de Horas
+                    </Typography>
+                  </Box>
+                  <Box flexGrow={1} />
+                  <IconButton onClick={() => setOpenAdjustDialogEmployee(null)} sx={{ color: '#fff' }}>
+                    <CloseRoundedIcon />
+                  </IconButton>
+                </Box>
+              </Box>
+            }
+            actions={
+              <Box sx={{
+                display: 'flex',
+                flexDirection: { xs: 'column', sm: 'row' },
+                gap: 2,
+                pt: 2,
+                bgcolor: 'background.paper',
+                borderTop: '1px solid',
+                borderColor: 'divider',
+                px: { xs: 2, sm: 3 },
+                pb: 3,
+              }}>
+                <Button
+                  variant="contained"
+                  color="primary"
+                  sx={{ fontWeight: 700, flex: 1, minHeight: 48, fontSize: '1rem', borderRadius: 2, boxShadow: 1, textTransform: 'none' }}
+                  onClick={() => {
+                    handleAdjustTime(openAdjustDialogEmployee.id, "sum", timeAdjustment);
+                    setOpenAdjustDialogEmployee(null);
+                  }}
+                  disabled={timeAdjustment <= 0}
+                >
+                  Sumar
+                </Button>
+                <Button
+                  variant="contained"
+                  color="secondary"
+                  sx={{ fontWeight: 700, flex: 1, minHeight: 48, fontSize: '1rem', borderRadius: 2, boxShadow: 1, textTransform: 'none' }}
+                  onClick={() => {
+                    handleAdjustTime(openAdjustDialogEmployee.id, "substract", timeAdjustment);
+                    setOpenAdjustDialogEmployee(null);
+                  }}
+                  disabled={timeAdjustment <= 0}
+                >
+                  Restar
+                </Button>
+                <Button
+                  variant="outlined"
+                  color="primary"
+                  sx={{ fontWeight: 500, flex: 1, minHeight: 48, fontSize: '1rem', borderRadius: 2, textTransform: 'none' }}
+                  onClick={() => setOpenAdjustDialogEmployee(null)}
+                >
+                  Cancelar
+                </Button>
+              </Box>
+            }
+            title=""
           >
-            {modalContentEditTime(openAdjustDialogEmployee, () => setOpenAdjustDialogEmployee(null))}
+            <Box sx={{ width: '100%', minHeight: 220, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', bgcolor: 'background.paper', p: { xs: 3, sm: 4 } }}>
+              <Box sx={{ width: '100%', maxWidth: 320, mx: 'auto', textAlign: 'center' }}>
+                <Typography variant="subtitle1" color="text.secondary" mb={1}>
+                  {selectedPeriod === "weekly"
+                    ? 'Total de horas trabajadas en la semana:'
+                    : selectedPeriod === "biweekly"
+                    ? 'Total de horas trabajadas en la quincena:'
+                    : 'Total de horas trabajadas en el mes:'}
+                </Typography>
+                <Typography variant="h3" color="primary" fontWeight={800} mb={2}>
+                  {selectedPeriod === "weekly"
+                    ? resultHoursForPeriod(openAdjustDialogEmployee, "weekly", "totalHours")
+                    : selectedPeriod === "biweekly"
+                    ? resultHoursForPeriod(openAdjustDialogEmployee, "biweekly", "totalHours")
+                    : resultHoursForPeriod(openAdjustDialogEmployee, "monthly", "totalHours")}
+                </Typography>
+                <TextField
+                  label="Horas a ajustar"
+                  variant="outlined"
+                  type="number"
+                  placeholder="0"
+                  value={timeAdjustment}
+                  onChange={(e) => setTimeAdjustment(Number(e.target.value))}
+                  sx={{ mt: 1, width: '100%', boxSizing: 'border-box' }}
+                  inputProps={{ min: 0 }}
+                  error={timeAdjustment < 0}
+                  helperText={timeAdjustment < 0 ? 'Debe ser un número positivo' : ' '}
+                  InputProps={{
+                    startAdornment: (
+                      <InputAdornment position="start">
+                        <AccessTimeRoundedIcon color={timeAdjustment < 0 ? 'error' : 'primary'} />
+                      </InputAdornment>
+                    ),
+                  }}
+                />
+              </Box>
+            </Box>
           </DialogComponent>
         )}
       </>
