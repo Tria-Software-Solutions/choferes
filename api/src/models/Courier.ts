@@ -3,10 +3,15 @@ import sequelize from "../config/database";
 
 export class Courier extends Model {
   public id!: number;
+
   public driver!: string;
+
   public route!: string;
+
   public distance!: number;
+
   public trackingNumber!: string;
+
   public status!: string;
 }
 
@@ -42,5 +47,5 @@ Courier.init(
     sequelize,
     modelName: "Courier",
     tableName: "couriers",
-  }
+  },
 );

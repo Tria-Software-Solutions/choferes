@@ -5,6 +5,7 @@ import { Role } from "./Role";
 
 export class UserRole extends Model {
   public userId!: number;
+
   public roleId!: number;
 }
 
@@ -33,5 +34,5 @@ UserRole.init(
     sequelize,
     modelName: "UserRole",
     tableName: "user_role",
-  }
+  },
 );

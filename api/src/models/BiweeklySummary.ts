@@ -4,10 +4,15 @@ import sequelize from "../config/database";
 
 export class BiweeklySummary extends Model {
   public id!: number;
+
   public employeeId!: number;
+
   public biweekNumber!: number;
+
   public month!: number;
+
   public year!: number;
+
   public totalHours!: number;
 }
 
@@ -23,9 +28,9 @@ BiweeklySummary.init(
       allowNull: false,
       references: {
         model: Employee,
-        key: 'id',
+        key: "id",
       },
-      onDelete: 'CASCADE',
+      onDelete: "CASCADE",
     },
     biweekNumber: {
       type: DataTypes.INTEGER,
@@ -48,7 +53,10 @@ BiweeklySummary.init(
     sequelize,
     modelName: "BiweeklySummary",
     tableName: "biweekly_summary",
-  }
+  },
 );
 
-BiweeklySummary.belongsTo(Employee, { foreignKey: "employeeId", onDelete: 'CASCADE' });
+BiweeklySummary.belongsTo(Employee, {
+  foreignKey: "employeeId",
+  onDelete: "CASCADE",
+});

@@ -4,7 +4,9 @@ import { Permission } from "./Permission";
 
 export class Role extends Model {
   public id!: number;
+
   public name!: string;
+
   public permissions?: Permission[];
 
   public static associations: {
@@ -29,5 +31,5 @@ Role.init(
     sequelize,
     modelName: "Role",
     tableName: "roles",
-  }
+  },
 );

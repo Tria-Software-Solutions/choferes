@@ -1,26 +1,22 @@
 import sequelize from "../config/database";
 import { UserRole } from "../models/UserRole";
-import * as RoleService from "../services/roleService";
+import * as RoleService from "./roleService";
 
-export const getUserRoles = async () => {
-  return UserRole.findAll();
-};
+export const getUserRoles = async () => UserRole.findAll();
 
-export const getUserRoleByUserId = async (userId: number) => {
-  return await UserRole.findOne({
-    where: {
-      userId,
-    },
-  });
-};
+export const getUserRoleByUserId = async (userId: number) =>
+  UserRole.findOne({
+  where: {
+    userId,
+  },
+});
 
-export const getUserRoleByRoleId = async (roleId: number) => {
-  return await UserRole.findOne({
-    where: {
-      roleId,
-    },
-  });
-};
+export const getUserRoleByRoleId = async (roleId: number) =>
+  UserRole.findOne({
+  where: {
+    roleId,
+  },
+});
 
 export const createUserRole = async (data: Omit<UserRole, "id">) => {
   const newUserRole = await UserRole.create(data);
@@ -30,9 +26,7 @@ export const createUserRole = async (data: Omit<UserRole, "id">) => {
 
 export const updateUserRole = async (userId: number, roleId: number) => {
   await UserRole.update({ userId, roleId }, { where: { userId } });
-  return await UserRole.findOne({ where: { userId } });
+  return UserRole.findOne({ where: { userId } });
 };
 
-export const deleteUserRole = async (id: number) => {
-  return UserRole.destroy({ where: { id } });
-};
+export const deleteUserRole = async (id: number) => UserRole.destroy({ where: { id } });

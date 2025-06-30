@@ -13,16 +13,8 @@ router.get("/username/:username", userController.getUserByUsername);
 router.get("/:id/permissions", userController.getUserPermissions);
 router.put("/:id", authenticateToken, userController.updateUser);
 router.put("/:id/status", authenticateToken, userController.updateUserStatus);
-router.put(
-  "/:id/password",
-  authenticateToken,
-  userController.updateUserPassword
-);
-router.put(
-  "/:id/temporal-password",
-  authenticateToken,
-  userController.updateUserTemporalPassword
-);
+router.put("/:id/password", authenticateToken, userController.updateUserPassword);
+router.put("/:id/temporal-password", authenticateToken, userController.updateUserTemporalPassword);
 router.delete("/:id", authenticateToken, userController.deleteUser);
 
 export default router;

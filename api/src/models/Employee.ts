@@ -3,7 +3,9 @@ import sequelize from "../config/database";
 
 export class Employee extends Model {
   public id!: number;
+
   public firstName!: string;
+
   public lastName!: string;
 }
 
@@ -24,8 +26,8 @@ Employee.init(
     },
   },
   {
-    sequelize, 
-    modelName: 'Employee',
-    tableName: 'employees',
-  }
+    sequelize,
+    modelName: "Employee",
+    tableName: "employees",
+  },
 );

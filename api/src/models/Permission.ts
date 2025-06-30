@@ -3,6 +3,7 @@ import sequelize from "../config/database";
 
 export class Permission extends Model {
   public id!: number;
+
   public name!: string;
 }
 
@@ -23,5 +24,5 @@ Permission.init(
     sequelize,
     modelName: "Permission",
     tableName: "permissions",
-  }
+  },
 );

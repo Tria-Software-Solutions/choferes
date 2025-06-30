@@ -12,13 +12,12 @@ export const getEmployees = async (req: Request, res: Response) => {
 
 export const getEmployeeById = async (req: Request, res: Response) => {
   try {
-    const id = parseInt(req.params.id);
+    const id = parseInt(req.params.id, 10);
     const employee = await employeeService.getEmployeeById(id);
     if (employee) {
       return res.status(200).json(employee);
-    } else {
-      return res.status(404).json({ message: "Employee not found" });
     }
+    return res.status(404).json({ message: "Employee not found" });
   } catch (error) {
     return res.status(500).json({ message: "Error fetching Employee", error });
   }
@@ -35,13 +34,12 @@ export const createEmployee = async (req: Request, res: Response) => {
 
 export const updateEmployee = async (req: Request, res: Response) => {
   try {
-    const id = parseInt(req.params.id);
+    const id = parseInt(req.params.id, 10);
     const updatedEmployee = await employeeService.updateEmployee(id, req.body);
     if (updatedEmployee) {
       return res.status(200).json(updatedEmployee);
-    } else {
-      return res.status(404).json({ message: "Employee not found" });
     }
+    return res.status(404).json({ message: "Employee not found" });
   } catch (error) {
     return res.status(500).json({ message: "Error updating Employee", error });
   }
@@ -49,13 +47,12 @@ export const updateEmployee = async (req: Request, res: Response) => {
 
 export const deleteEmployee = async (req: Request, res: Response) => {
   try {
-    const id = parseInt(req.params.id);
+    const id = parseInt(req.params.id, 10);
     const deleted = await employeeService.deleteEmployee(id);
     if (deleted) {
       return res.status(204).end();
-    } else {
-      return res.status(404).json({ message: "Employee not found" });
     }
+    return res.status(404).json({ message: "Employee not found" });
   } catch (error) {
     return res.status(500).json({ message: "Error deleting Employee", error });
   }

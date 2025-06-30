@@ -4,9 +4,13 @@ import sequelize from "../config/database";
 
 export class MonthlySummary extends Model {
   public id!: number;
+
   public employeeId!: number;
+
   public month!: number;
+
   public year!: number;
+
   public totalHours!: number;
 }
 
@@ -22,9 +26,9 @@ MonthlySummary.init(
       allowNull: false,
       references: {
         model: Employee,
-        key: 'id',
+        key: "id",
       },
-      onDelete: 'CASCADE',
+      onDelete: "CASCADE",
     },
     month: {
       type: DataTypes.INTEGER,
@@ -43,7 +47,10 @@ MonthlySummary.init(
     sequelize,
     modelName: "MonthlySummary",
     tableName: "monthly_summary",
-  }
+  },
 );
 
-MonthlySummary.belongsTo(Employee, { foreignKey: "employeeId", onDelete: 'CASCADE' });
+MonthlySummary.belongsTo(Employee, {
+  foreignKey: "employeeId",
+  onDelete: "CASCADE",
+});

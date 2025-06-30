@@ -6,7 +6,6 @@
   "extends": [
     "eslint:recommended",
     "plugin:@typescript-eslint/recommended",
-    "plugin:security/recommended",
     "plugin:prettier/recommended",
     "airbnb-base",
     "airbnb-typescript/base"
@@ -19,11 +18,17 @@
   },
   "plugins": [
     "@typescript-eslint",
-    "security",
     "prettier"
   ],
   "rules": {
-    "prettier/prettier": "error",
+    "prettier/prettier": ["error", { "singleQuote": false }],
+    "@typescript-eslint/quotes": ["error", "double"],
+    "quotes": ["error", "double"],
     "no-console": "warn"
-  }
+  },
+  "ignorePatterns": [
+    "dist/",
+    "migrations/",
+    "seeders/"
+  ]
 } 

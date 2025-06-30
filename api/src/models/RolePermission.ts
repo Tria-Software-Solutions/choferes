@@ -5,6 +5,7 @@ import { Permission } from "./Permission";
 
 export class RolePermission extends Model {
   public roleId!: number;
+
   public permissionId!: number;
 }
 
@@ -15,7 +16,7 @@ RolePermission.init(
       allowNull: false,
       references: {
         model: Role,
-        key: 'id',
+        key: "id",
       },
     },
     permissionId: {
@@ -23,7 +24,7 @@ RolePermission.init(
       allowNull: false,
       references: {
         model: Permission,
-        key: 'id',
+        key: "id",
       },
     },
   },
@@ -31,5 +32,5 @@ RolePermission.init(
     sequelize,
     modelName: "RolePermission",
     tableName: "role_permission",
-  }
+  },
 );

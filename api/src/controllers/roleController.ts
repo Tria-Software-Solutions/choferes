@@ -45,13 +45,12 @@ export const createRole = async (req: Request, res: Response) => {
 
 export const updateRole = async (req: Request, res: Response) => {
   try {
-    const id = parseInt(req.params.id);
+    const id = parseInt(req.params.id, 10);
     const updatedRole = await roleService.updateRole(id, req.body);
     if (updatedRole) {
       return res.status(200).json(updatedRole);
-    } else {
-      return res.status(404).json({ message: "Role not found" });
     }
+    return res.status(404).json({ message: "Role not found" });
   } catch (error) {
     return res.status(500).json({ message: "Error updating Role", error });
   }
@@ -59,13 +58,12 @@ export const updateRole = async (req: Request, res: Response) => {
 
 export const deleteRole = async (req: Request, res: Response) => {
   try {
-    const id = parseInt(req.params.id);
+    const id = parseInt(req.params.id, 10);
     const deleted = await roleService.deleteRole(id);
     if (deleted) {
       return res.status(204).end();
-    } else {
-      return res.status(404).json({ message: "Role not found" });
     }
+    return res.status(404).json({ message: "Role not found" });
   } catch (error) {
     return res.status(500).json({ message: "Error deleting Role", error });
   }
