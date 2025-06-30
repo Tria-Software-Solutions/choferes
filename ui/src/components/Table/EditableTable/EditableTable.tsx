@@ -168,6 +168,56 @@ const EditableTable = <T extends object>({
   const renderEditField = (column: keyof T, value: string) => {
     const config = columnConfig[String(column)];
 
+    if (column === 'permissionNames' && config && config.options) {
+      const selectedValues: string[] = Array.isArray(editFields[String(column)])
+        ? (editFields[String(column)] as string[])
+        : [];
+      return wrapWithGrid(
+        <FormControl variant="outlined" fullWidth sx={{ height: 56 }}>
+          <Select
+            multiple
+            value={selectedValues}
+            onChange={(e) =>
+              setEditField && setEditField(String(column), e.target.value)
+            }
+            renderValue={(selected) => {
+              if (!Array.isArray(selected)) return '';
+              const max = 5;
+              const labels = selected
+                .map((v) => config.options?.find(opt => opt.value === v)?.label || v);
+              const visible = labels.slice(0, max);
+              const hidden = labels.length > max ? labels.length - max : 0;
+              return hidden > 0
+                ? `Permisos: ${visible.join(', ')} +${hidden} más`
+                : `Permisos: ${visible.join(', ')}`;
+            }}
+            sx={{ height: 56 }}
+            MenuProps={{
+              PaperProps: {
+                style: {
+                  maxHeight: 320,
+                  overflowY: 'auto',
+                },
+              },
+            }}
+          >
+            {config.options.map((option) => (
+              <MenuItem key={option.value} value={option.value}>
+                <Checkbox
+                  checked={
+                    Array.isArray(selectedValues) &&
+                    selectedValues.includes(option.value)
+                  }
+                />
+                <ListItemText primary={option.label} />
+              </MenuItem>
+            ))}
+          </Select>
+        </FormControl>,
+        column
+      );
+    }
+
     if (!config) {
       return wrapWithGrid(
         <TextField
