@@ -14,7 +14,7 @@ import CustomSpeedDial from "../../components/SpeedDial/CustomSpeedDial";
 import EditableTable from "../../components/Table/EditableTable/EditableTable";
 import AddEmployeeForm from "../../components/Forms/AddEmployeeForm";
 import { useAppNotifications } from "../../components/Snackbar/SnackbarWrapper";
-import ConfirmationDialog from "../../components/Dialog/ConfirmationDialog";
+import DialogComponent from "../../components/Dialog/DialogComponent";
 import {
   Button,
   Grid,
@@ -393,7 +393,7 @@ const EmployeesPage: React.FC = () => {
           )}
         </>
       )}
-      <ConfirmationDialog
+      <DialogComponent
         open={openDeleteDialog}
         onClose={handleCloseDeleteDialog}
         onConfirm={handleDelete}
@@ -403,44 +403,23 @@ const EmployeesPage: React.FC = () => {
         confirmText="Eliminar"
         cancelText="Cancelar"
         loading={isDeletingEmployee}
+        paperSx={{ minWidth: { xs: '80vw', sm: 320 }, maxWidth: { xs: '90vw', sm: 400 } }}
       />
     
-      <Dialog
+      <DialogComponent
         open={openAddModal}
         onClose={handleCloseAddModal}
-        maxWidth="md"
-        fullWidth
+        title="Agregar Nuevo Empleado"
+        icon={<PersonAddAlt1RoundedIcon color="primary" />}
+        hideActions
+        paperSx={{ minWidth: { xs: '90vw', sm: 500, md: 700 }, maxWidth: { xs: '98vw', sm: 700 } }}
       >
-        <DialogTitle sx={{ 
-          backgroundColor: theme.palette.primary.main, 
-          color: theme.palette.primary.contrastText,
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'space-between'
-        }}>
-          <Typography variant="h6" sx={{ fontWeight: 600 }}>
-            Agregar Nuevo Empleado
-          </Typography>
-          <IconButton
-            onClick={handleCloseAddModal}
-            sx={{
-              color: theme.palette.primary.contrastText,
-              '&:hover': {
-                backgroundColor: 'rgba(255,255,255,0.1)',
-              },
-            }}
-          >
-            <CloseIcon />
-          </IconButton>
-        </DialogTitle>
-        <DialogContent sx={{ p: 3 }}>
-          <AddEmployeeForm
-            onSubmit={handleCreate}
-            onCancel={handleCloseAddModal}
-            isLoading={isSubmitting}
-          />
-        </DialogContent>
-      </Dialog>
+        <AddEmployeeForm
+          onSubmit={handleCreate}
+          onCancel={handleCloseAddModal}
+          isLoading={isSubmitting}
+        />
+      </DialogComponent>
     </Box>
   );
 };

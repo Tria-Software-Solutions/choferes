@@ -14,7 +14,7 @@ import EditableTable from "../../components/Table/EditableTable/EditableTable";
 import CustomSpeedDial from "../../components/SpeedDial/CustomSpeedDial";
 import AddVehicleForm from "../../components/Forms/AddVehicleForm";
 import { useAppNotifications } from "../../components/Snackbar/SnackbarWrapper";
-import ConfirmationDialog from "../../components/Dialog/ConfirmationDialog";
+import DialogComponent from "../../components/Dialog/DialogComponent";
 import {
   Box,
   Typography,
@@ -638,7 +638,7 @@ const VehiclesPage: React.FC = () => {
           )}
         </>
       )}
-      <ConfirmationDialog
+      <DialogComponent
         open={openDeleteDialog}
         onClose={handleCloseDeleteDialog}
         onConfirm={handleDelete}
@@ -648,45 +648,24 @@ const VehiclesPage: React.FC = () => {
         confirmText="Eliminar"
         cancelText="Cancelar"
         loading={isDeletingVehicle}
+        paperSx={{ minWidth: { xs: '80vw', sm: 320 }, maxWidth: { xs: '90vw', sm: 400 } }}
       />
-      <Dialog
+      <DialogComponent
         open={openAddVehicleModal}
         onClose={handleCloseAddVehicleModal}
-        maxWidth="md"
-        fullWidth
+        title="Agregar Vehículo"
+        icon={<DirectionsCarIcon color="primary" />}
+        hideActions
+        paperSx={{ minWidth: { xs: '90vw', sm: 500, md: 700 }, maxWidth: { xs: '98vw', sm: 700 } }}
       >
-        <DialogTitle sx={{ 
-          backgroundColor: theme.palette.primary.main, 
-          color: theme.palette.primary.contrastText,
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'space-between'
-        }}>
-          <Typography variant="h6" sx={{ fontWeight: 600 }}>
-            Agregar Vehículo
-          </Typography>
-          <IconButton
-            onClick={handleCloseAddVehicleModal}
-            sx={{
-              color: theme.palette.primary.contrastText,
-              '&:hover': {
-                backgroundColor: 'rgba(255,255,255,0.1)',
-              },
-            }}
-          >
-            <CloseIcon />
-          </IconButton>
-        </DialogTitle>
-        <DialogContent sx={{ p: 3 }}>
-          <AddVehicleForm
-            onSubmit={handleCreateVehicle}
-            onCancel={handleCloseAddVehicleModal}
-            isLoading={isCreatingVehicle}
-            existingVehicles={allVehicles.map(v => ({ ticket: v.ticket, licensePlate: v.licensePlate }))}
-            getNextTicketNumber={getNextTicketNumber}
-          />
-        </DialogContent>
-      </Dialog>
+        <AddVehicleForm
+          onSubmit={handleCreateVehicle}
+          onCancel={handleCloseAddVehicleModal}
+          isLoading={isCreatingVehicle}
+          existingVehicles={allVehicles.map(v => ({ ticket: v.ticket, licensePlate: v.licensePlate }))}
+          getNextTicketNumber={getNextTicketNumber}
+        />
+      </DialogComponent>
     </Box>
   );
 };

@@ -33,8 +33,9 @@ import EditableTable from "../../components/Table/EditableTable/EditableTable";
 import SearchBar from "../../components/SearchBar/SearchBar";
 import AddRoleForm from "../../components/Forms/AddRoleForm";
 import AddModeratorIcon from "@mui/icons-material/AddModerator";
-import ConfirmationDialog from "../../components/Dialog/ConfirmationDialog";
+import DialogComponent from "../../components/Dialog/DialogComponent";
 import AddRoundedIcon from '@mui/icons-material/AddRounded';
+import GroupRoundedIcon from '@mui/icons-material/GroupRounded';
 
 const ManageRoles: React.FC<{ isExpanded?: boolean }> = ({ isExpanded = true }) => {
   const dispatch = useDispatch<AppDispatch>();
@@ -389,7 +390,7 @@ const ManageRoles: React.FC<{ isExpanded?: boolean }> = ({ isExpanded = true }) 
       )}
       {isExpanded && (
         <>
-          <ConfirmationDialog
+          <DialogComponent
             open={openDeleteDialog}
             onClose={handleCloseDeleteDialog}
             onConfirm={handleDelete}
@@ -399,44 +400,23 @@ const ManageRoles: React.FC<{ isExpanded?: boolean }> = ({ isExpanded = true }) 
             confirmText="Eliminar"
             cancelText="Cancelar"
             loading={isDeletingRole}
+            paperSx={{ minWidth: { xs: '80vw', sm: 320 }, maxWidth: { xs: '90vw', sm: 400 } }}
           />
-          <Dialog
+          <DialogComponent
             open={openAddRoleModal}
             onClose={handleCloseAddRoleModal}
-            maxWidth="md"
-            fullWidth
+            title="Agregar Rol"
+            icon={<GroupRoundedIcon color="primary" />}
+            hideActions
+            paperSx={{ minWidth: { xs: '90vw', sm: 500, md: 700 }, maxWidth: { xs: '98vw', sm: 700 } }}
           >
-            <DialogTitle sx={{ 
-              backgroundColor: theme.palette.primary.main, 
-              color: theme.palette.primary.contrastText,
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'space-between'
-            }}>
-              <Typography variant="h6" sx={{ fontWeight: 600 }}>
-                Agregar Rol
-              </Typography>
-              <IconButton
-                onClick={handleCloseAddRoleModal}
-                sx={{
-                  color: theme.palette.primary.contrastText,
-                  '&:hover': {
-                    backgroundColor: 'rgba(255,255,255,0.1)',
-                  },
-                }}
-              >
-                <CloseIcon />
-              </IconButton>
-            </DialogTitle>
-            <DialogContent sx={{ p: 3 }}>
-              <AddRoleForm
-                onSubmit={handleCreateRole}
-                onCancel={handleCloseAddRoleModal}
-                isLoading={isCreatingRole}
-                permissions={permissions}
-              />
-            </DialogContent>
-          </Dialog>
+            <AddRoleForm
+              onSubmit={handleCreateRole}
+              onCancel={handleCloseAddRoleModal}
+              isLoading={isCreatingRole}
+              permissions={permissions}
+            />
+          </DialogComponent>
         </>
       )}
     </Box>

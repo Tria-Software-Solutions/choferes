@@ -66,7 +66,7 @@ import CalendarTodayRoundedIcon from "@mui/icons-material/CalendarTodayRounded";
 import CloseRoundedIcon from "@mui/icons-material/CloseRounded";
 import ManageSearchIcon from "@mui/icons-material/ManageSearch";
 import { faFileExcel, faFilePdf } from "@fortawesome/free-solid-svg-icons";
-import ConfirmationDialog from "../../components/Dialog/ConfirmationDialog";
+import DialogComponent from "../../components/Dialog/DialogComponent";
 
 const RolesPage: React.FC = () => {
   const dispatch = useDispatch<AppDispatch>();
@@ -711,7 +711,7 @@ const RolesPage: React.FC = () => {
           )}
         </>
       )}
-      <ConfirmationDialog
+      <DialogComponent
         open={openExportDialog}
         onClose={handleCloseExportDialog}
         onConfirm={() => handleExportHours(true)}
