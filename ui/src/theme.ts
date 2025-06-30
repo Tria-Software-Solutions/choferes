@@ -286,44 +286,38 @@ const theme = createTheme({
       styleOverrides: {
         root: {
           color: "#000000",
-          "& .MuiOutlinedInput-notchedOutline": {
-            borderColor: "#e0e0e0",
-            borderWidth: "2px",
+          backgroundColor: "#fff",
+          borderRadius: "8px",
+          '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
+            borderColor: '#000000',
+            borderWidth: '2px',
           },
-          "&:hover .MuiOutlinedInput-notchedOutline": {
-            borderColor: "#000000",
+          '&:hover .MuiOutlinedInput-notchedOutline': {
+            borderColor: '#000000',
           },
-          "&.Mui-focused .MuiOutlinedInput-notchedOutline": {
-            borderColor: "#000000",
-            borderWidth: "2px",
+          '&.Mui-focused': {
+            backgroundColor: '#fff',
+            outline: 'none',
+            boxShadow: 'none',
           },
-          "& .MuiSelect-select": {
-            color: "#000000",
-            backgroundColor: "transparent",
-          },
-          "& .MuiSelect-icon": {
-            color: "#000000",
-          },
-          ".MuiTableHead &": {
-            color: "#ffffff",
-            "& .MuiOutlinedInput-notchedOutline": {
-              borderColor: "#ffffff",
-            },
-            "&:hover .MuiOutlinedInput-notchedOutline": {
-              borderColor: "#ffffff",
-            },
-            "&.Mui-focused .MuiOutlinedInput-notchedOutline": {
-              borderColor: "#ffffff",
-            },
-            "& .MuiSelect-select": {
-              color: "#ffffff",
-            },
-            "& .MuiSelect-icon": {
-              color: "#ffffff",
-            },
-            "& .MuiInputLabel-root": {
-              color: "#ffffff",
-            },
+        },
+        select: {
+          backgroundColor: '#fff',
+        },
+        icon: {
+          color: '#000000',
+        },
+      },
+    },
+    MuiOutlinedInput: {
+      styleOverrides: {
+        root: {
+          borderRadius: '8px',
+          backgroundColor: '#fff',
+          '&.Mui-focused': {
+            backgroundColor: '#fff',
+            outline: 'none',
+            boxShadow: 'none',
           },
         },
       },

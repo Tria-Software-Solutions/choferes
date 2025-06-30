@@ -2,13 +2,15 @@ import React, { useState } from "react";
 import {
   Box,
   Grid,
-  TextField,
   Button,
   useTheme,
   useMediaQuery,
 } from "@mui/material";
 import PostAddRoundedIcon from "@mui/icons-material/PostAddRounded";
 import CloseRoundedIcon from "@mui/icons-material/CloseRounded";
+import CustomTextField from './CustomTextField';
+import PersonOutlinedIcon from '@mui/icons-material/PersonOutlined';
+import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined';
 
 interface AddEmployeeFormProps {
   onSubmit: (employee: { firstName: string; lastName: string }) => void;
@@ -89,7 +91,7 @@ const AddEmployeeForm: React.FC<AddEmployeeFormProps> = ({
     <Box sx={{ width: '100%', p: 0 }}>
       <Grid container spacing={3} sx={{ mt: 0 }}>
         <Grid item xs={12} sm={6}>
-          <TextField
+          <CustomTextField
             label="Nombre"
             variant="outlined"
             fullWidth
@@ -98,18 +100,14 @@ const AddEmployeeForm: React.FC<AddEmployeeFormProps> = ({
             onChange={(e) => handleFieldChange("firstName", e.target.value)}
             error={errors.firstName !== ""}
             helperText={errors.firstName}
-            InputProps={{
-              startAdornment: (
-                <Box sx={{ mr: 1, color: theme.palette.text.secondary }}>
-                  👤
-                </Box>
-              ),
-            }}
+            icon={
+              <PersonOutlinedIcon sx={{ color: theme.palette.text.secondary }} />
+            }
           />
         </Grid>
 
         <Grid item xs={12} sm={6}>
-          <TextField
+          <CustomTextField
             label="Apellido"
             variant="outlined"
             fullWidth
@@ -118,13 +116,9 @@ const AddEmployeeForm: React.FC<AddEmployeeFormProps> = ({
             onChange={(e) => handleFieldChange("lastName", e.target.value)}
             error={errors.lastName !== ""}
             helperText={errors.lastName}
-            InputProps={{
-              startAdornment: (
-                <Box sx={{ mr: 1, color: theme.palette.text.secondary }}>
-                  👤
-                </Box>
-              ),
-            }}
+            icon={
+              <PersonOutlinedIcon sx={{ color: theme.palette.text.secondary }} />
+            }
           />
         </Grid>
 
@@ -141,7 +135,7 @@ const AddEmployeeForm: React.FC<AddEmployeeFormProps> = ({
             }}
           >
             <Box sx={{ mr: { xs: 1, sm: 2 }, color: theme.palette.info.main }}>
-              ℹ️
+              <InfoOutlinedIcon sx={{ color: theme.palette.info.main, mr: { xs: 1, sm: 2 } }} />
             </Box>
             <Box>
               <Box sx={{ 

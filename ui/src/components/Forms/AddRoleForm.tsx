@@ -14,7 +14,10 @@ import {
 } from "@mui/material";
 import PostAddRoundedIcon from "@mui/icons-material/PostAddRounded";
 import CloseRoundedIcon from "@mui/icons-material/CloseRounded";
+import GroupOutlinedIcon from '@mui/icons-material/GroupOutlined';
+import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined';
 import { Permission } from "../../models/Permission";
+import CustomTextField from './CustomTextField';
 
 interface AddRoleFormProps {
   onSubmit: (role: { 
@@ -126,7 +129,7 @@ const AddRoleForm: React.FC<AddRoleFormProps> = ({
     <Box sx={{ width: '100%', p: 0 }}>
       <Grid container spacing={3} sx={{ mt: 0 }}>
         <Grid item xs={12}>
-          <TextField
+          <CustomTextField
             label="Nombre del Rol"
             variant="outlined"
             fullWidth
@@ -135,13 +138,7 @@ const AddRoleForm: React.FC<AddRoleFormProps> = ({
             onChange={(e) => handleFieldChange("name", e.target.value)}
             error={errors.name !== ""}
             helperText={errors.name}
-            InputProps={{
-              startAdornment: (
-                <Box sx={{ mr: 1, color: theme.palette.text.secondary }}>
-                  👥
-                </Box>
-              ),
-            }}
+            icon={<GroupOutlinedIcon sx={{ color: theme.palette.text.secondary }} />}
           />
         </Grid>
 
@@ -269,7 +266,7 @@ const AddRoleForm: React.FC<AddRoleFormProps> = ({
             }}
           >
             <Box sx={{ mr: { xs: 1, sm: 2 }, color: theme.palette.info.main }}>
-              ℹ️
+              <InfoOutlinedIcon sx={{ color: theme.palette.info.main, mr: { xs: 1, sm: 2 } }} />
             </Box>
             <Box>
               <Box sx={{ 

@@ -8,6 +8,7 @@ import {
   FormControl,
   Autocomplete,
   useMediaQuery,
+  InputAdornment,
 } from '@mui/material';
 import { LocalizationProvider } from '@mui/x-date-pickers';
 import { DatePicker } from '@mui/x-date-pickers/DatePicker';
@@ -17,6 +18,15 @@ import { BRANDS_LIST, COLORS_LIST } from '../../constants/constants';
 import { maskLicensePlate, maskParkingLot } from '../../utils/mask';
 import PostAddRoundedIcon from '@mui/icons-material/PostAddRounded';
 import CloseRoundedIcon from '@mui/icons-material/CloseRounded';
+import CustomTextField from './CustomTextField';
+import ConfirmationNumberOutlinedIcon from '@mui/icons-material/ConfirmationNumberOutlined';
+import DirectionsCarOutlinedIcon from '@mui/icons-material/DirectionsCarOutlined';
+import LocalParkingOutlinedIcon from '@mui/icons-material/LocalParkingOutlined';
+import PaletteOutlinedIcon from '@mui/icons-material/PaletteOutlined';
+import EditNoteOutlinedIcon from '@mui/icons-material/EditNoteOutlined';
+import CalendarMonthOutlinedIcon from '@mui/icons-material/CalendarMonthOutlined';
+import FactoryOutlinedIcon from '@mui/icons-material/FactoryOutlined';
+import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined';
 
 interface AddVehicleFormProps {
   onSubmit: (vehicle: {
@@ -209,7 +219,7 @@ const AddVehicleForm: React.FC<AddVehicleFormProps> = ({
     <Box sx={{ width: '100%', p: 0 }}>
       <Grid container spacing={3} sx={{ mt: 0 }}>
         <Grid item xs={12} sm={6}>
-          <TextField
+          <CustomTextField
             label="Boleta"
             variant="outlined"
             fullWidth
@@ -218,18 +228,12 @@ const AddVehicleForm: React.FC<AddVehicleFormProps> = ({
             onChange={(e) => handleFieldChange('ticket', e.target.value)}
             error={errors.ticket !== ''}
             helperText={errors.ticket}
-            InputProps={{
-              startAdornment: (
-                <Box sx={{ mr: 1, color: theme.palette.text.secondary }}>
-                  🎫
-                </Box>
-              ),
-            }}
+            icon={<ConfirmationNumberOutlinedIcon sx={{ color: theme.palette.text.secondary }} />}
           />
         </Grid>
 
         <Grid item xs={12} sm={6}>
-          <TextField
+          <CustomTextField
             label="Placa"
             variant="outlined"
             fullWidth
@@ -238,13 +242,7 @@ const AddVehicleForm: React.FC<AddVehicleFormProps> = ({
             onChange={handleLicensePlateChange}
             error={errors.licensePlate !== ''}
             helperText={errors.licensePlate}
-            InputProps={{
-              startAdornment: (
-                <Box sx={{ mr: 1, color: theme.palette.text.secondary }}>
-                  🚗
-                </Box>
-              ),
-            }}
+            icon={<DirectionsCarOutlinedIcon sx={{ color: theme.palette.text.secondary }} />}
           />
         </Grid>
 
@@ -265,7 +263,7 @@ const AddVehicleForm: React.FC<AddVehicleFormProps> = ({
               getOptionLabel={(option) => typeof option === 'string' ? option : option.label}
               noOptionsText="Sin coincidencias"
               renderInput={(params) => (
-                <TextField
+                <CustomTextField
                   {...params}
                   label="Marca"
                   variant="outlined"
@@ -275,9 +273,12 @@ const AddVehicleForm: React.FC<AddVehicleFormProps> = ({
                   InputProps={{
                     ...params.InputProps,
                     startAdornment: (
-                      <Box sx={{ mr: 1, color: theme.palette.text.secondary }}>
-                        🏭
-                      </Box>
+                      <>
+                        <InputAdornment position="start">
+                          <FactoryOutlinedIcon sx={{ color: theme.palette.text.secondary }} />
+                        </InputAdornment>
+                        {params.InputProps.startAdornment}
+                      </>
                     ),
                   }}
                 />
@@ -303,7 +304,7 @@ const AddVehicleForm: React.FC<AddVehicleFormProps> = ({
               getOptionLabel={(option) => typeof option === 'string' ? option : option.label}
               noOptionsText="Sin coincidencias"
               renderInput={(params) => (
-                <TextField
+                <CustomTextField
                   {...params}
                   label="Color"
                   variant="outlined"
@@ -313,9 +314,12 @@ const AddVehicleForm: React.FC<AddVehicleFormProps> = ({
                   InputProps={{
                     ...params.InputProps,
                     startAdornment: (
-                      <Box sx={{ mr: 1, color: theme.palette.text.secondary }}>
-                        🎨
-                      </Box>
+                      <>
+                        <InputAdornment position="start">
+                          <PaletteOutlinedIcon sx={{ color: theme.palette.text.secondary }} />
+                        </InputAdornment>
+                        {params.InputProps.startAdornment}
+                      </>
                     ),
                   }}
                 />
@@ -325,7 +329,7 @@ const AddVehicleForm: React.FC<AddVehicleFormProps> = ({
         </Grid>
 
         <Grid item xs={12} sm={6}>
-          <TextField
+          <CustomTextField
             label="Espacio de Parqueo"
             variant="outlined"
             fullWidth
@@ -334,13 +338,7 @@ const AddVehicleForm: React.FC<AddVehicleFormProps> = ({
             onChange={handleParkingLotChange}
             error={errors.parkingLot !== ''}
             helperText={errors.parkingLot}
-            InputProps={{
-              startAdornment: (
-                <Box sx={{ mr: 1, color: theme.palette.text.secondary }}>
-                  🅿️
-                </Box>
-              ),
-            }}
+            icon={<LocalParkingOutlinedIcon sx={{ color: theme.palette.text.secondary }} />}
           />
         </Grid>
 
@@ -357,9 +355,9 @@ const AddVehicleForm: React.FC<AddVehicleFormProps> = ({
                   fullWidth: true,
                   InputProps: {
                     startAdornment: (
-                      <Box sx={{ mr: 1, color: theme.palette.text.secondary }}>
-                        📅
-                      </Box>
+                      <InputAdornment position="start">
+                        <CalendarMonthOutlinedIcon sx={{ color: theme.palette.text.secondary }} />
+                      </InputAdornment>
                     ),
                   },
                 },
@@ -369,7 +367,7 @@ const AddVehicleForm: React.FC<AddVehicleFormProps> = ({
         </Grid>
 
         <Grid item xs={12}>
-          <TextField
+          <CustomTextField
             label="Observaciones"
             variant="outlined"
             fullWidth
@@ -378,13 +376,7 @@ const AddVehicleForm: React.FC<AddVehicleFormProps> = ({
             placeholder="Observaciones adicionales sobre el vehículo..."
             value={formData.notes}
             onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
-            InputProps={{
-              startAdornment: (
-                <Box sx={{ mr: 1, color: theme.palette.text.secondary }}>
-                  📝
-                </Box>
-              ),
-            }}
+            icon={<EditNoteOutlinedIcon sx={{ color: theme.palette.text.secondary }} />}
           />
         </Grid>
 
@@ -401,7 +393,7 @@ const AddVehicleForm: React.FC<AddVehicleFormProps> = ({
             }}
           >
             <Box sx={{ mr: { xs: 1, sm: 2 }, color: theme.palette.info.main }}>
-              ℹ️
+              <InfoOutlinedIcon sx={{ color: theme.palette.info.main, mr: { xs: 1, sm: 2 } }} />
             </Box>
             <Box>
               <Box sx={{ 

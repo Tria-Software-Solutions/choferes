@@ -17,12 +17,18 @@ import {
   Button,
   useTheme,
   useMediaQuery,
+  InputAdornment,
 } from '@mui/material';
 import { Schedule } from '../../models/Schedule';
 import { DAYS_LIST } from '../../constants/constants';
 import { translateDayOptionsToSpanish } from '../../utils/string';
 import PostAddRoundedIcon from '@mui/icons-material/PostAddRounded';
 import CloseRoundedIcon from '@mui/icons-material/CloseRounded';
+import CustomTextField from './CustomTextField';
+import CalendarMonthOutlinedIcon from '@mui/icons-material/CalendarMonthOutlined';
+import AccessTimeOutlinedIcon from '@mui/icons-material/AccessTimeOutlined';
+import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined';
+import WarningAmberOutlinedIcon from '@mui/icons-material/WarningAmberOutlined';
 
 interface AddScheduleFormProps {
   onSubmit: (schedule: Omit<Schedule, 'id'>) => void;
@@ -90,7 +96,7 @@ const AddScheduleForm: React.FC<AddScheduleFormProps> = ({
     <Box sx={{ width: '100%', p: 0 }}>
       <Grid container spacing={3} sx={{ mt: 0 }}>
         <Grid item xs={12} sm={6}>
-          <TextField
+          <CustomTextField
             label="Nombre del Horario"
             variant="outlined"
             fullWidth
@@ -99,18 +105,12 @@ const AddScheduleForm: React.FC<AddScheduleFormProps> = ({
             onChange={(e) =>
               setFormData({ ...formData, label: e.target.value })
             }
-            InputProps={{
-              startAdornment: (
-                <Box sx={{ mr: 1, color: theme.palette.text.secondary }}>
-                  📅
-                </Box>
-              ),
-            }}
+            icon={<CalendarMonthOutlinedIcon sx={{ color: theme.palette.text.secondary }} />}
           />
         </Grid>
 
         <Grid item xs={12} sm={6}>
-          <TextField
+          <CustomTextField
             label="Horas de Trabajo"
             variant="outlined"
             type="number"
@@ -126,29 +126,49 @@ const AddScheduleForm: React.FC<AddScheduleFormProps> = ({
                 ? "Ingrese un número válido entre 1 y 24"
                 : ""
             }
-            InputProps={{
-              startAdornment: (
-                <Box sx={{ mr: 1, color: theme.palette.text.secondary }}>
-                  ⏰
-                </Box>
-              ),
-              endAdornment: (
-                <Box sx={{ ml: 1, color: theme.palette.text.secondary }}>
-                  horas
-                </Box>
-              ),
-            }}
+            icon={<AccessTimeOutlinedIcon sx={{ color: theme.palette.text.secondary }} />}
+            endAdornment={
+              <Box sx={{ ml: 1, color: theme.palette.text.secondary }}>
+                horas
+              </Box>
+            }
           />
         </Grid>
 
         <Grid item xs={12}>
-          <FormControl variant="outlined" fullWidth>
+          <FormControl variant="outlined" fullWidth sx={{
+            '& .MuiOutlinedInput-root, & .MuiSelect-select': {
+              backgroundColor: '#fff',
+              borderRadius: 2,
+              '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
+                borderColor: '#000',
+                borderWidth: 2,
+              },
+              '&:hover .MuiOutlinedInput-notchedOutline': {
+                borderColor: '#000',
+              },
+              '&.Mui-focused': {
+                backgroundColor: '#fff',
+                outline: 'none',
+                boxShadow: 'none',
+              },
+            },
+          }}>
             <InputLabel>Días de Trabajo</InputLabel>
             <Select
               multiple
               label="Días de Trabajo"
               value={formData.days}
-              input={<OutlinedInput label="Días de Trabajo" />}
+              input={
+                <OutlinedInput
+                  label="Días de Trabajo"
+                  startAdornment={
+                    <InputAdornment position="start">
+                      <CalendarMonthOutlinedIcon sx={{ color: theme.palette.text.secondary }} />
+                    </InputAdornment>
+                  }
+                />
+              }
               renderValue={(selected) => (
                 <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
                   {selected.map((value) => (
@@ -222,7 +242,7 @@ const AddScheduleForm: React.FC<AddScheduleFormProps> = ({
             }}
           >
             <Box sx={{ mr: { xs: 1, sm: 2 }, color: theme.palette.warning.main }}>
-              ⚠️
+              <WarningAmberOutlinedIcon sx={{ color: theme.palette.warning.main, mr: { xs: 1, sm: 2 } }} />
             </Box>
             <FormGroup>
               <FormControlLabel
