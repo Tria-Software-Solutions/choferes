@@ -25,7 +25,6 @@ const AddEmployeeForm: React.FC<AddEmployeeFormProps> = ({
 }) => {
   const theme = useTheme();
   const isSmallScreen = useMediaQuery(theme.breakpoints.down("sm"));
-  const isMediumScreen = useMediaQuery(theme.breakpoints.down("md"));
   
   const [formData, setFormData] = useState({
     firstName: "",

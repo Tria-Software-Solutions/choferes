@@ -2,7 +2,6 @@ import React, { useState } from "react";
 import {
   Box,
   Grid,
-  TextField,
   Button,
   FormControl,
   InputLabel,
@@ -24,12 +23,6 @@ import GroupOutlinedIcon from '@mui/icons-material/GroupOutlined';
 import OutlinedInput from '@mui/material/OutlinedInput';
 import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined';
 import { Role } from "../../models/Role";
-import {
-  validateName,
-  validateEmail,
-  validateUsername,
-  validatePassword
-} from '../../utils/userValidation';
 import CustomTextField from '../Textfield/CustomTextField';
 
 interface AddUserFormProps {
@@ -54,7 +47,6 @@ const AddUserForm: React.FC<AddUserFormProps> = ({
 }) => {
   const theme = useTheme();
   const isSmallScreen = useMediaQuery(theme.breakpoints.down("sm"));
-  const isMediumScreen = useMediaQuery(theme.breakpoints.down("md"));
   
   const [formData, setFormData] = useState({
     firstName: "",

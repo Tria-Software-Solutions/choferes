@@ -333,7 +333,6 @@ const VehiclesPage: React.FC = () => {
     color: string;
     parkingLot: string;
     notes: string;
-    parkingDate: Date;
   }) => {
     setIsCreatingVehicle(true);
     try {
@@ -344,7 +343,7 @@ const VehiclesPage: React.FC = () => {
         color: vehicleData.color,
         parkingLot: vehicleData.parkingLot,
         notes: vehicleData.notes,
-        parkingDate: vehicleData.parkingDate,
+        parkingDate: selectedDate,
       };
       
       await dispatch(createVehicle(newVehicle));
