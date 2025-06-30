@@ -15,14 +15,12 @@ import {
   IconButton,
   InputAdornment,
   Fade,
-  Paper,
   Divider,
 } from "@mui/material";
 import { PAGE_TITLE } from "../../constants/constants";
 import Visibility from "@mui/icons-material/Visibility";
 import VisibilityOff from "@mui/icons-material/VisibilityOff";
 import LockOutlinedIcon from "@mui/icons-material/LockOutlined";
-import EmailOutlinedIcon from "@mui/icons-material/EmailOutlined";
 import PersonOutlinedIcon from "@mui/icons-material/PersonOutlined";
 import logo from "../../assets/images/logo.png";
 

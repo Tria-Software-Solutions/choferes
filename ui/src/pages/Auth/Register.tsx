@@ -19,16 +19,11 @@ import {
   InputAdornment,
   Fade,
   Divider,
-  Stepper,
-  Step,
-  StepLabel,
-  Paper,
   CircularProgress,
 } from "@mui/material";
 import Visibility from "@mui/icons-material/Visibility";
 import VisibilityOff from "@mui/icons-material/VisibilityOff";
 import { PAGE_TITLE } from "../../constants/constants";
-import PersonAddOutlinedIcon from "@mui/icons-material/PersonAddOutlined";
 import PersonOutlinedIcon from "@mui/icons-material/PersonOutlined";
 import EmailOutlinedIcon from "@mui/icons-material/EmailOutlined";
 import LockOutlinedIcon from "@mui/icons-material/LockOutlined";
