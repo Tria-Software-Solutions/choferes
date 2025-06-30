@@ -13,6 +13,14 @@ import {
 } from "@mui/material";
 import PostAddRoundedIcon from "@mui/icons-material/PostAddRounded";
 import CloseRoundedIcon from "@mui/icons-material/CloseRounded";
+import CustomTextField from './CustomTextField';
+import PersonOutlinedIcon from '@mui/icons-material/PersonOutlined';
+import StraightenOutlinedIcon from '@mui/icons-material/StraightenOutlined';
+import AssignmentOutlinedIcon from '@mui/icons-material/AssignmentOutlined';
+import MapOutlinedIcon from '@mui/icons-material/MapOutlined';
+import OutlinedInput from '@mui/material/OutlinedInput';
+import InputAdornment from '@mui/material/InputAdornment';
+import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined';
 
 interface AddCourierFormProps {
   onSubmit: (courier: {
@@ -157,7 +165,7 @@ const AddCourierForm: React.FC<AddCourierFormProps> = ({
     <Box sx={{ width: '100%', p: 0 }}>
       <Grid container spacing={3} sx={{ mt: 0 }}>
         <Grid item xs={12} sm={6}>
-          <TextField
+          <CustomTextField
             label="Chofer"
             variant="outlined"
             fullWidth
@@ -166,31 +174,45 @@ const AddCourierForm: React.FC<AddCourierFormProps> = ({
             onChange={(e) => handleFieldChange('driver', e.target.value)}
             error={errors.driver !== ''}
             helperText={errors.driver}
-            InputProps={{
-              startAdornment: (
-                <Box sx={{ mr: 1, color: theme.palette.text.secondary }}>
-                  👤
-                </Box>
-              ),
-            }}
+            icon={<PersonOutlinedIcon sx={{ color: theme.palette.text.secondary }} />}
           />
         </Grid>
 
         <Grid item xs={12} sm={6}>
-          <FormControl variant="outlined" fullWidth sx={{ marginTop: '8px' }}>
+          <FormControl variant="outlined" fullWidth sx={{ marginTop: '8px',
+            '& .MuiOutlinedInput-root, & .MuiSelect-select': {
+              backgroundColor: '#fff',
+              borderRadius: 2,
+              '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
+                borderColor: '#000',
+                borderWidth: 2,
+              },
+              '&:hover .MuiOutlinedInput-notchedOutline': {
+                borderColor: '#000',
+              },
+              '&.Mui-focused': {
+                backgroundColor: '#fff',
+                outline: 'none',
+                boxShadow: 'none',
+              },
+            },
+          }}>
             <InputLabel>Ruta</InputLabel>
             <Select
               label="Ruta"
               value={formData.route}
               onChange={(e) => handleFieldChange('route', e.target.value)}
               error={errors.route !== ''}
-              inputProps={{
-                startAdornment: (
-                  <Box sx={{ mr: 1, color: theme.palette.text.secondary }}>
-                    🛣️
-                  </Box>
-                ),
-              }}
+              input={
+                <OutlinedInput
+                  label="Ruta"
+                  startAdornment={
+                    <InputAdornment position="start">
+                      <MapOutlinedIcon sx={{ color: theme.palette.text.secondary }} />
+                    </InputAdornment>
+                  }
+                />
+              }
             >
               <MenuItem value="GAM">GAM</MenuItem>
               <MenuItem value="GAM Express">GAM Express</MenuItem>
@@ -200,7 +222,7 @@ const AddCourierForm: React.FC<AddCourierFormProps> = ({
         </Grid>
 
         <Grid item xs={12} sm={6}>
-          <TextField
+          <CustomTextField
             label="Distancia (km)"
             variant="outlined"
             fullWidth
@@ -210,18 +232,12 @@ const AddCourierForm: React.FC<AddCourierFormProps> = ({
             onChange={(e) => handleFieldChange('distance', parseInt(e.target.value) || 0)}
             error={errors.distance !== ''}
             helperText={errors.distance}
-            InputProps={{
-              startAdornment: (
-                <Box sx={{ mr: 1, color: theme.palette.text.secondary }}>
-                  📏
-                </Box>
-              ),
-            }}
+            icon={<StraightenOutlinedIcon sx={{ color: theme.palette.text.secondary }} />}
           />
         </Grid>
 
         <Grid item xs={12} sm={6}>
-          <TextField
+          <CustomTextField
             label="Número de Guía"
             variant="outlined"
             fullWidth
@@ -230,13 +246,7 @@ const AddCourierForm: React.FC<AddCourierFormProps> = ({
             onChange={(e) => handleFieldChange('trackingNumber', e.target.value)}
             error={errors.trackingNumber !== ''}
             helperText={errors.trackingNumber}
-            InputProps={{
-              startAdornment: (
-                <Box sx={{ mr: 1, color: theme.palette.text.secondary }}>
-                  📋
-                </Box>
-              ),
-            }}
+            icon={<AssignmentOutlinedIcon sx={{ color: theme.palette.text.secondary }} />}
           />
         </Grid>
 
@@ -248,13 +258,16 @@ const AddCourierForm: React.FC<AddCourierFormProps> = ({
               value={formData.status}
               onChange={(e) => handleFieldChange('status', e.target.value)}
               error={errors.status !== ''}
-              inputProps={{
-                startAdornment: (
-                  <Box sx={{ mr: 1, color: theme.palette.text.secondary }}>
-                    📊
-                  </Box>
-                ),
-              }}
+              input={
+                <OutlinedInput
+                  label="Estado"
+                  startAdornment={
+                    <InputAdornment position="start">
+                      <AssignmentOutlinedIcon sx={{ color: theme.palette.text.secondary }} />
+                    </InputAdornment>
+                  }
+                />
+              }
             >
               <MenuItem value="Despachado">Despachado</MenuItem>
               <MenuItem value="En Tránsito">En Tránsito</MenuItem>
@@ -276,7 +289,7 @@ const AddCourierForm: React.FC<AddCourierFormProps> = ({
             }}
           >
             <Box sx={{ mr: { xs: 1, sm: 2 }, color: theme.palette.info.main }}>
-              ℹ️
+              <InfoOutlinedIcon sx={{ color: theme.palette.info.main, mr: { xs: 1, sm: 2 } }} />
             </Box>
             <Box>
               <Box sx={{ 

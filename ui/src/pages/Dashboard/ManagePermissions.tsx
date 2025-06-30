@@ -11,6 +11,7 @@ import {
   Typography,
 } from "@mui/material";
 import SearchBar from "../../components/SearchBar/SearchBar";
+import VpnKeyOutlinedIcon from '@mui/icons-material/VpnKeyOutlined';
 
 const ManagePermissions: React.FC = () => {
   const dispatch = useDispatch<AppDispatch>();
@@ -110,7 +111,7 @@ const ManagePermissions: React.FC = () => {
                       display: 'flex',
                       alignItems: 'center',
                     }}>
-                      <span role="img" aria-label="permiso">🔑</span>
+                      <VpnKeyOutlinedIcon sx={{ color: 'primary.main', fontSize: 22 }} />
                     </Box>
                     <Typography variant="body2" fontWeight={400} color="text.primary" noWrap>
                       {permission.name}

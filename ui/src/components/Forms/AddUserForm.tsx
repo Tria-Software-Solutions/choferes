@@ -17,6 +17,12 @@ import PostAddRoundedIcon from "@mui/icons-material/PostAddRounded";
 import CloseRoundedIcon from "@mui/icons-material/CloseRounded";
 import Visibility from "@mui/icons-material/Visibility";
 import VisibilityOff from "@mui/icons-material/VisibilityOff";
+import PersonOutlinedIcon from '@mui/icons-material/PersonOutlined';
+import EmailOutlinedIcon from '@mui/icons-material/EmailOutlined';
+import LockOutlinedIcon from '@mui/icons-material/LockOutlined';
+import GroupOutlinedIcon from '@mui/icons-material/GroupOutlined';
+import OutlinedInput from '@mui/material/OutlinedInput';
+import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined';
 import { Role } from "../../models/Role";
 import {
   validateName,
@@ -24,6 +30,7 @@ import {
   validateUsername,
   validatePassword
 } from '../../utils/userValidation';
+import CustomTextField from './CustomTextField';
 
 interface AddUserFormProps {
   onSubmit: (user: { 
@@ -184,7 +191,7 @@ const AddUserForm: React.FC<AddUserFormProps> = ({
     <Box sx={{ width: '100%', p: 0 }}>
       <Grid container spacing={3} sx={{ mt: 0 }}>
         <Grid item xs={12} sm={6}>
-          <TextField
+          <CustomTextField
             label="Nombre"
             variant="outlined"
             fullWidth
@@ -193,18 +200,12 @@ const AddUserForm: React.FC<AddUserFormProps> = ({
             onChange={(e) => handleFieldChange("firstName", e.target.value)}
             error={errors.firstName !== ""}
             helperText={errors.firstName}
-            InputProps={{
-              startAdornment: (
-                <Box sx={{ mr: 1, color: theme.palette.text.secondary }}>
-                  👤
-                </Box>
-              ),
-            }}
+            icon={<PersonOutlinedIcon sx={{ color: theme.palette.text.secondary }} />}
           />
         </Grid>
 
         <Grid item xs={12} sm={6}>
-          <TextField
+          <CustomTextField
             label="Apellido"
             variant="outlined"
             fullWidth
@@ -213,18 +214,12 @@ const AddUserForm: React.FC<AddUserFormProps> = ({
             onChange={(e) => handleFieldChange("lastName", e.target.value)}
             error={errors.lastName !== ""}
             helperText={errors.lastName}
-            InputProps={{
-              startAdornment: (
-                <Box sx={{ mr: 1, color: theme.palette.text.secondary }}>
-                  👤
-                </Box>
-              ),
-            }}
+            icon={<PersonOutlinedIcon sx={{ color: theme.palette.text.secondary }} />}
           />
         </Grid>
 
         <Grid item xs={12} sm={6}>
-          <TextField
+          <CustomTextField
             label="Email"
             variant="outlined"
             fullWidth
@@ -233,18 +228,12 @@ const AddUserForm: React.FC<AddUserFormProps> = ({
             onChange={(e) => handleFieldChange("email", e.target.value)}
             error={errors.email !== ""}
             helperText={errors.email}
-            InputProps={{
-              startAdornment: (
-                <Box sx={{ mr: 1, color: theme.palette.text.secondary }}>
-                  📧
-                </Box>
-              ),
-            }}
+            icon={<EmailOutlinedIcon sx={{ color: theme.palette.text.secondary }} />}
           />
         </Grid>
 
         <Grid item xs={12} sm={6}>
-          <TextField
+          <CustomTextField
             label="Nombre de Usuario"
             variant="outlined"
             fullWidth
@@ -253,18 +242,12 @@ const AddUserForm: React.FC<AddUserFormProps> = ({
             onChange={(e) => handleFieldChange("username", e.target.value)}
             error={errors.username !== ""}
             helperText={errors.username}
-            InputProps={{
-              startAdornment: (
-                <Box sx={{ mr: 1, color: theme.palette.text.secondary }}>
-                  🔑
-                </Box>
-              ),
-            }}
+            icon={<PersonOutlinedIcon sx={{ color: theme.palette.text.secondary }} />}
           />
         </Grid>
 
         <Grid item xs={12} sm={6}>
-          <TextField
+          <CustomTextField
             label="Contraseña"
             variant="outlined"
             fullWidth
@@ -274,12 +257,8 @@ const AddUserForm: React.FC<AddUserFormProps> = ({
             onChange={(e) => handleFieldChange("password", e.target.value)}
             error={errors.password !== ""}
             helperText={errors.password}
+            icon={<LockOutlinedIcon sx={{ color: theme.palette.text.secondary }} />}
             InputProps={{
-              startAdornment: (
-                <Box sx={{ mr: 1, color: theme.palette.text.secondary }}>
-                  🔒
-                </Box>
-              ),
               endAdornment: (
                 <InputAdornment position="end">
                   <IconButton
@@ -295,12 +274,39 @@ const AddUserForm: React.FC<AddUserFormProps> = ({
         </Grid>
 
         <Grid item xs={12} sm={6}>
-          <FormControl fullWidth error={errors.roleName !== ""} sx={{ marginTop: '8px' }}>
+          <FormControl fullWidth error={errors.roleName !== ""} sx={{ marginTop: '8px',
+            '& .MuiOutlinedInput-root, & .MuiSelect-select': {
+              backgroundColor: '#fff',
+              borderRadius: 2,
+              '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
+                borderColor: '#000',
+                borderWidth: 2,
+              },
+              '&:hover .MuiOutlinedInput-notchedOutline': {
+                borderColor: '#000',
+              },
+              '&.Mui-focused': {
+                backgroundColor: '#fff',
+                outline: 'none',
+                boxShadow: 'none',
+              },
+            },
+          }}>
             <InputLabel>Rol</InputLabel>
             <Select
               value={formData.roleName}
               label="Rol"
               onChange={(e) => handleFieldChange("roleName", e.target.value)}
+              input={
+                <OutlinedInput
+                  label="Rol"
+                  startAdornment={
+                    <InputAdornment position="start">
+                      <GroupOutlinedIcon sx={{ color: theme.palette.text.secondary }} />
+                    </InputAdornment>
+                  }
+                />
+              }
               sx={{
                 "& .MuiSelect-select": {
                   paddingLeft: "14px",
@@ -335,7 +341,7 @@ const AddUserForm: React.FC<AddUserFormProps> = ({
             }}
           >
             <Box sx={{ mr: { xs: 1, sm: 2 }, color: theme.palette.info.main }}>
-              ℹ️
+              <InfoOutlinedIcon sx={{ color: theme.palette.info.main, mr: { xs: 1, sm: 2 } }} />
             </Box>
             <Box>
               <Box sx={{ 
