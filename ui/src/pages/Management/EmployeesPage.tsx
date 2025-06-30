@@ -20,14 +20,10 @@ import {
   Grid,
   Box,
   Typography,
-  Dialog,
-  DialogContent,
-  DialogTitle,
   useTheme,
   useMediaQuery,
   CircularProgress,
   Backdrop,
-  IconButton,
 } from "@mui/material";
 import {
   createExportOptions,
@@ -37,7 +33,6 @@ import {
 } from "../../utils/export";
 import { PAGE_TITLE, PERMISSIONS } from "../../constants/constants";
 import GroupRoundedIcon from "@mui/icons-material/GroupRounded";
-import PersonAddAlt1RoundedIcon from "@mui/icons-material/PersonAddAlt1Rounded";
 import DownloadRoundedIcon from "@mui/icons-material/DownloadRounded";
 import CloseRoundedIcon from "@mui/icons-material/CloseRounded";
 import ManageSearchIcon from "@mui/icons-material/ManageSearch";
