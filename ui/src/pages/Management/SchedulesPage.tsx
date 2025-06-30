@@ -42,6 +42,7 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faFileExcel, faFilePdf } from "@fortawesome/free-solid-svg-icons";
 import CloseIcon from "@mui/icons-material/Close";
 import AddRoundedIcon from '@mui/icons-material/AddRounded';
+import DeleteOutlineIcon from '@mui/icons-material/DeleteOutline';
 
 const SchedulesPage: React.FC = () => {
   const dispatch = useDispatch<AppDispatch>();
@@ -420,6 +421,7 @@ const SchedulesPage: React.FC = () => {
         cancelText="Cancelar"
         loading={isDeletingSchedule}
         paperSx={{ minWidth: { xs: '80vw', sm: 320 }, maxWidth: { xs: '90vw', sm: 400 } }}
+        icon={<DeleteOutlineIcon color="error" />}
       />
       <DialogComponent
         open={openAddScheduleModal}

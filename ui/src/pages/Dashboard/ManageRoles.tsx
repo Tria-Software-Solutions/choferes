@@ -36,6 +36,7 @@ import AddModeratorIcon from "@mui/icons-material/AddModerator";
 import DialogComponent from "../../components/Dialog/DialogComponent";
 import AddRoundedIcon from '@mui/icons-material/AddRounded';
 import GroupRoundedIcon from '@mui/icons-material/GroupRounded';
+import DeleteOutlineIcon from '@mui/icons-material/DeleteOutline';
 
 const ManageRoles: React.FC<{ isExpanded?: boolean }> = ({ isExpanded = true }) => {
   const dispatch = useDispatch<AppDispatch>();
@@ -395,6 +396,7 @@ const ManageRoles: React.FC<{ isExpanded?: boolean }> = ({ isExpanded = true }) 
             cancelText="Cancelar"
             loading={isDeletingRole}
             paperSx={{ minWidth: { xs: '80vw', sm: 320 }, maxWidth: { xs: '90vw', sm: 400 } }}
+            icon={<DeleteOutlineIcon color="error" />}
           />
           <DialogComponent
             open={openAddRoleModal}
