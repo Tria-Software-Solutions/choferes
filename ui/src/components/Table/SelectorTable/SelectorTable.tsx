@@ -18,7 +18,6 @@ import {
   MenuItem,
   FormControl,
   TablePagination,
-  InputLabel,
   TableSortLabel,
   Divider,
   Box,
@@ -266,7 +265,7 @@ const SelectorTable: React.FC<SelectorTableProps> = React.memo(
                 display: "flex",
                 justifyContent: "center",
                 alignItems: "center",
-                gap: 2,
+                gap: 2
               }}
             >
               {selectedPeriod === "weekly" ? (
@@ -315,26 +314,26 @@ const SelectorTable: React.FC<SelectorTableProps> = React.memo(
             <Table stickyHeader aria-label="sticky table">
               <TableHead
                 sx={{
-                  position: "sticky",
+                  position: 'sticky',
                   top: 0,
-                  zIndex: 4,
+                  zIndex: 10,
                 }}
               >
                 <TableRow>
                   <TableCell
                     className="employee-column"
                     sx={{
-                      padding: isSmallScreen ? "8px" : "16px",
-                      position: "sticky",
+                      padding: isSmallScreen ? '8px' : '16px',
+                      position: 'sticky',
                       left: 0,
-                      zIndex: 4,
+                      zIndex: 11,
                     }}
                   >
                     <TableSortLabel
                       direction={orderDirection}
                       onClick={() =>
                         setOrderDirection((prev) =>
-                          prev === "asc" ? "desc" : "asc"
+                          prev === 'asc' ? 'desc' : 'asc'
                         )
                       }
                     >
@@ -346,8 +345,8 @@ const SelectorTable: React.FC<SelectorTableProps> = React.memo(
                       key={day}
                       align="center"
                       sx={{
-                        padding: isSmallScreen ? "8px" : "16px",
-                        zIndex: 3,
+                        padding: isSmallScreen ? '8px' : '16px',
+                        zIndex: 10,
                       }}
                     >
                       {`${translateDayToAbrevSpanish(
@@ -367,7 +366,6 @@ const SelectorTable: React.FC<SelectorTableProps> = React.memo(
                           position: isSmallScreen ? "static" : "sticky",
                           right: 0,
                           zIndex: 3,
-                          backgroundColor: "#000000",
                         }}
                         colSpan={2}
                       >
@@ -398,26 +396,11 @@ const SelectorTable: React.FC<SelectorTableProps> = React.memo(
                             color: '#fff',
                           },
                         }}>
-                          <InputLabel sx={{
-                            color: theme.palette.text.disabled,
-                            fontWeight: 700,
-                            '&.MuiInputLabel-shrink': {
-                              color: theme.palette.text.disabled,
-                            },
-                            '&.Mui-focused': {
-                              color: theme.palette.text.disabled,
-                            },
-                          }}>
-                            Total
-                          </InputLabel>
                           <Select
                             value={selectedPeriod}
                             onChange={(e) =>
                               setSelectedPeriod(
-                                e.target.value as
-                                  | "weekly"
-                                  | "biweekly"
-                                  | "monthly"
+                                e.target.value as 'weekly' | 'biweekly' | 'monthly'
                               )
                             }
                             autoWidth
@@ -425,6 +408,7 @@ const SelectorTable: React.FC<SelectorTableProps> = React.memo(
                             input={
                               <OutlinedInput
                                 label="Total"
+                                id="total-period-select"
                                 startAdornment={
                                   <InputAdornment position="start">
                                     <CalendarMonthOutlinedIcon sx={{ color: '#fff', mr: 1 }} />
