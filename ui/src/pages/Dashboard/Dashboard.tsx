@@ -22,7 +22,9 @@ const Dashboard: React.FC = () => {
 
   const handleChange =
     (panel: string) => (event: React.SyntheticEvent, newExpanded: boolean) => {
-      setExpanded(newExpanded ? panel : false);
+      if (newExpanded) {
+        setExpanded(panel);
+      }
     };
 
   return (
