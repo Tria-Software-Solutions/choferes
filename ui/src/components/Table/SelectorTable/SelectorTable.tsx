@@ -645,7 +645,20 @@ const SelectorTable: React.FC<SelectorTableProps> = React.memo(
                       }}
                       colSpan={2}
                     >
-                      <FormControl size="small">
+                      <FormControl size="small" sx={{
+                        '&.MuiFormControl-root': {
+                          backgroundColor: "transparent !important",
+                        },
+                        '& .MuiFormControl-root': {
+                          backgroundColor: "transparent !important",
+                        },
+                        '&.Mui-focused': {
+                          backgroundColor: "transparent !important",
+                        },
+                        '& .Mui-focused': {
+                          backgroundColor: "transparent !important",
+                        },
+                      }}>
                         <InputLabel sx={{ color: "#ffffff", fontWeight: 600 }}>Total</InputLabel>
                         <Select
                           value={selectedPeriod}
@@ -668,7 +681,7 @@ const SelectorTable: React.FC<SelectorTableProps> = React.memo(
                                 </InputAdornment>
                               }
                               sx={{
-                                backgroundColor: "transparent",
+                                backgroundColor: "transparent !important",
                                 color: "#ffffff",
                                 borderRadius: '8px',
                                 '& .MuiOutlinedInput-notchedOutline': {
@@ -677,21 +690,37 @@ const SelectorTable: React.FC<SelectorTableProps> = React.memo(
                                   borderRadius: '8px',
                                 },
                                 '&:hover .MuiOutlinedInput-notchedOutline': {
-                                  borderColor: "#ffffff",
+                                  borderColor: "#e0e0e0",
                                   borderWidth: 1,
-                                  backgroundColor: "transparent",
+                                  backgroundColor: "transparent !important",
                                 },
                                 '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
                                   borderColor: "#ffffff",
-                                  borderWidth: 1,
+                                  borderWidth: 2,
                                 },
                                 '&.Mui-focused': {
-                                  backgroundColor: "transparent",
+                                  backgroundColor: "transparent !important",
                                   color: "#ffffff",
                                 },
                                 '&.Mui-active .MuiOutlinedInput-notchedOutline': {
                                   borderColor: "#ffffff",
                                   borderWidth: 1,
+                                },
+                                '&.Mui-focused .MuiOutlinedInput-input': {
+                                  backgroundColor: "transparent !important",
+                                  color: "#ffffff !important",
+                                },
+                                '&.Mui-focused .MuiSelect-select': {
+                                  backgroundColor: "transparent !important",
+                                  color: "#ffffff !important",
+                                },
+                                '& .MuiOutlinedInput-input': {
+                                  backgroundColor: "transparent !important",
+                                  color: "#ffffff !important",
+                                },
+                                '& .MuiSelect-select': {
+                                  backgroundColor: "transparent !important",
+                                  color: "#ffffff !important",
                                 },
                               }}
                             />
@@ -699,21 +728,21 @@ const SelectorTable: React.FC<SelectorTableProps> = React.memo(
                           MenuProps={{
                             PaperProps: {
                               sx: {
-                                backgroundColor: "#000000",
-                                color: "#ffffff",
-                                border: "1px solid #333",
+                                backgroundColor: theme.palette.background.paper,
+                                color: theme.palette.text.primary,
+                                border: `1px solid ${theme.palette.divider}`,
                                 borderRadius: '8px',
-                                boxShadow: "0 4px 20px rgba(0,0,0,0.5)",
+                                boxShadow: theme.shadows[8],
                                 '& .MuiMenuItem-root': {
-                                  color: "#ffffff",
+                                  color: theme.palette.text.primary,
                                   '&:hover': {
-                                    backgroundColor: "#333333",
+                                    backgroundColor: theme.palette.action.hover,
                                   },
                                   '&.Mui-selected': {
-                                    backgroundColor: "#1976d2",
-                                    color: "#ffffff",
+                                    backgroundColor: theme.palette.primary.main,
+                                    color: theme.palette.primary.contrastText,
                                     '&:hover': {
-                                      backgroundColor: "#1565c0",
+                                      backgroundColor: theme.palette.primary.dark,
                                     },
                                   },
                                 },
@@ -832,7 +861,20 @@ const SelectorTable: React.FC<SelectorTableProps> = React.memo(
                               : rowIndex % 2 === 0 ? "white" : "#f5f5f5",
                         }}
                       >
-                        <FormControl fullWidth>
+                        <FormControl size="small" sx={{
+                          '&.MuiFormControl-root': {
+                            backgroundColor: "transparent !important",
+                          },
+                          '& .MuiFormControl-root': {
+                            backgroundColor: "transparent !important",
+                          },
+                          '&.Mui-focused': {
+                            backgroundColor: "transparent !important",
+                          },
+                          '& .Mui-focused': {
+                            backgroundColor: "transparent !important",
+                          },
+                        }}>
                           <Select
                             value={finalSelectedLabel}
                             onChange={(event: SelectChangeEvent<string>) =>
