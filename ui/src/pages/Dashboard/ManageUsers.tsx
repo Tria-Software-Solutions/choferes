@@ -675,7 +675,7 @@ const ManageUsers: React.FC<{ isExpanded?: boolean }> = ({ isExpanded = true }) 
                     p: 0,
                   }}
                 >
-                  <PersonAddAlt1RoundedIcon />
+                  <AddRoundedIcon />
                 </Button>
               </Box>
             </Grid>

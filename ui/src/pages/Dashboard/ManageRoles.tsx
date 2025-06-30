@@ -321,7 +321,7 @@ const ManageRoles: React.FC<{ isExpanded?: boolean }> = ({ isExpanded = true }) 
                     p: 0,
                   }}
                 >
-                  <AddModeratorIcon />
+                  <AddRoundedIcon />
                 </Button>
               </Box>
             </Grid>

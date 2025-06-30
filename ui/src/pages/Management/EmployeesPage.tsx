@@ -325,7 +325,7 @@ const EmployeesPage: React.FC = () => {
                       p: 0,
                     }}
                   >
-                    <PersonAddAlt1RoundedIcon />
+                    <AddRoundedIcon />
                   </Button>
                 )}
               </Box>
