@@ -11,9 +11,9 @@ import {
   useTheme,
   useMediaQuery,
 } from "@mui/material";
-import PostAddRoundedIcon from "@mui/icons-material/PostAddRounded";
+import AddRoundedIcon from "@mui/icons-material/AddRounded";
 import CloseRoundedIcon from "@mui/icons-material/CloseRounded";
-import CustomTextField from './CustomTextField';
+import CustomTextField from '../Textfield/CustomTextField';
 import PersonOutlinedIcon from '@mui/icons-material/PersonOutlined';
 import StraightenOutlinedIcon from '@mui/icons-material/StraightenOutlined';
 import AssignmentOutlinedIcon from '@mui/icons-material/AssignmentOutlined';
@@ -362,7 +362,7 @@ const AddCourierForm: React.FC<AddCourierFormProps> = ({
                 variant="contained"
                 onClick={handleSubmit}
                 disabled={!isFormValid() || isLoading}
-                startIcon={<PostAddRoundedIcon />}
+                startIcon={<AddRoundedIcon />}
                 fullWidth={isSmallScreen}
                 sx={{
                   minHeight: { xs: 44, sm: 48 },
@@ -372,7 +372,7 @@ const AddCourierForm: React.FC<AddCourierFormProps> = ({
                   py: { xs: 1, sm: 1.5 },
                 }}
               >
-                {isLoading ? 'Agregando...' : (isSmallScreen ? 'Agregar' : 'Agregar Servicio')}
+                {isLoading ? 'Agregando...' : 'Agregar'}
               </Button>
             </Box>
           </Box>

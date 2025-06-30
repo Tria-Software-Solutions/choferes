@@ -51,6 +51,7 @@ import { Courier } from "../../models/Courier";
 import EditableTable from "../../components/Table/EditableTable/EditableTable";
 import AddCourierForm from "../../components/Forms/AddCourierForm";
 import ConfirmationDialog from "../../components/Dialog/ConfirmationDialog";
+import AddRoundedIcon from '@mui/icons-material/AddRounded';
 
 const CourierServicePage: React.FC = () => {
   const { userPermissions } = useAuthContext();
@@ -525,23 +526,11 @@ const CourierServicePage: React.FC = () => {
                 </Box>
                 <Button
                   variant="contained"
-                  startIcon={<LocalShippingIcon />}
+                  startIcon={<AddRoundedIcon />}
                   onClick={handleOpenAddCourierModal}
-                  sx={{
-                    display: { xs: 'none', md: 'flex' },
-                    px: 4,
-                    py: 2,
-                    fontSize: '1rem',
-                    fontWeight: 600,
-                    height: 56,
-                    minWidth: 'auto',
-                    boxShadow: 2,
-                    '&:hover': {
-                      boxShadow: 4,
-                    },
-                  }}
+                  sx={{ px: 3, py: 1.5, fontSize: '1rem', minHeight: 56 }}
                 >
-                  Agregar Servicio
+                  Agregar
                 </Button>
               </Box>
             </Grid>

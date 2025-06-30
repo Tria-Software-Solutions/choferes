@@ -40,6 +40,7 @@ import VisibilityIcon from '@mui/icons-material/Visibility';
 import VisibilityOffIcon from '@mui/icons-material/VisibilityOff';
 import ConfirmationDialog from "../../components/Dialog/ConfirmationDialog";
 import CloseIcon from "@mui/icons-material/Close";
+import AddRoundedIcon from '@mui/icons-material/AddRounded';
 
 const ManageUsers: React.FC<{ isExpanded?: boolean }> = ({ isExpanded = true }) => {
   const dispatch = useDispatch<AppDispatch>();
@@ -723,16 +724,11 @@ const ManageUsers: React.FC<{ isExpanded?: boolean }> = ({ isExpanded = true }) 
                 </Box>
                 <Button
                   variant="contained"
-                  startIcon={<PersonAddAlt1RoundedIcon />}
+                  startIcon={<AddRoundedIcon />}
                   onClick={handleOpenAddUserModal}
-                  sx={{
-                    px: 3,
-                    py: 1.5,
-                    fontSize: '1rem',
-                    minHeight: 56,
-                  }}
+                  sx={{ px: 3, py: 1.5, fontSize: '1rem', minHeight: 56 }}
                 >
-                  Agregar Usuario
+                  Agregar
                 </Button>
               </Box>
             </Grid>

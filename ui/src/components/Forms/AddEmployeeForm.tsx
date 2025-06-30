@@ -6,9 +6,9 @@ import {
   useTheme,
   useMediaQuery,
 } from "@mui/material";
-import PostAddRoundedIcon from "@mui/icons-material/PostAddRounded";
+import AddRoundedIcon from "@mui/icons-material/AddRounded";
 import CloseRoundedIcon from "@mui/icons-material/CloseRounded";
-import CustomTextField from './CustomTextField';
+import CustomTextField from '../Textfield/CustomTextField';
 import PersonOutlinedIcon from '@mui/icons-material/PersonOutlined';
 import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined';
 
@@ -208,7 +208,7 @@ const AddEmployeeForm: React.FC<AddEmployeeFormProps> = ({
                 variant="contained"
                 onClick={handleSubmit}
                 disabled={!isFormValid() || isLoading}
-                startIcon={<PostAddRoundedIcon />}
+                startIcon={<AddRoundedIcon />}
                 fullWidth={isSmallScreen}
                 sx={{
                   minHeight: { xs: 44, sm: 48 },
@@ -218,7 +218,7 @@ const AddEmployeeForm: React.FC<AddEmployeeFormProps> = ({
                   py: { xs: 1, sm: 1.5 },
                 }}
               >
-                {isLoading ? 'Creando...' : (isSmallScreen ? 'Crear' : 'Crear Empleado')}
+                {isLoading ? 'Agregando...' : 'Agregar'}
               </Button>
             </Box>
           </Box>

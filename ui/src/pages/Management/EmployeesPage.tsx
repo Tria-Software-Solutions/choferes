@@ -44,6 +44,7 @@ import ManageSearchIcon from "@mui/icons-material/ManageSearch";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faFileExcel, faFilePdf } from "@fortawesome/free-solid-svg-icons";
 import CloseIcon from "@mui/icons-material/Close";
+import AddRoundedIcon from '@mui/icons-material/AddRounded';
 
 const EmployeesPage: React.FC = () => {
   const dispatch = useDispatch<AppDispatch>();
@@ -339,18 +340,11 @@ const EmployeesPage: React.FC = () => {
                 >
                   <Button
                     variant="contained"
-                    color="primary"
+                    startIcon={<AddRoundedIcon />}
                     onClick={handleOpenAddModal}
-                    startIcon={<PersonAddAlt1RoundedIcon />}
-                    sx={{
-                      px: 4,
-                      py: 1.5,
-                      fontWeight: 600,
-                      textTransform: 'none',
-                      fontSize: '1rem',
-                    }}
+                    sx={{ px: 3, py: 1.5, fontSize: '1rem', minHeight: 56 }}
                   >
-                    Agregar Empleado
+                    Agregar
                   </Button>
                 </Box>
               </Grid>
@@ -405,7 +399,6 @@ const EmployeesPage: React.FC = () => {
         onConfirm={handleDelete}
         title="Eliminar Empleado"
         message="¿Estás seguro de que deseas eliminar este empleado? Esta acción no se puede deshacer."
-        type="delete"
         confirmText="Eliminar"
         cancelText="Cancelar"
         loading={isDeletingEmployee}

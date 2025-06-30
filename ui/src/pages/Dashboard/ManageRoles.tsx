@@ -34,6 +34,7 @@ import SearchBar from "../../components/SearchBar/SearchBar";
 import AddRoleForm from "../../components/Forms/AddRoleForm";
 import AddModeratorIcon from "@mui/icons-material/AddModerator";
 import ConfirmationDialog from "../../components/Dialog/ConfirmationDialog";
+import AddRoundedIcon from '@mui/icons-material/AddRounded';
 
 const ManageRoles: React.FC<{ isExpanded?: boolean }> = ({ isExpanded = true }) => {
   const dispatch = useDispatch<AppDispatch>();
@@ -336,16 +337,11 @@ const ManageRoles: React.FC<{ isExpanded?: boolean }> = ({ isExpanded = true }) 
               >
                 <Button
                   variant="contained"
-                  startIcon={<AddModeratorIcon />}
+                  startIcon={<AddRoundedIcon />}
                   onClick={handleOpenAddRoleModal}
-                  sx={{
-                    px: 3,
-                    py: 1.5,
-                    fontSize: '1rem',
-                    minHeight: 56,
-                  }}
+                  sx={{ px: 3, py: 1.5, fontSize: '1rem', minHeight: 56 }}
                 >
-                  Agregar Rol
+                  Agregar
                 </Button>
               </Box>
             </Grid>

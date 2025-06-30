@@ -13,7 +13,7 @@ import {
   useTheme,
   useMediaQuery,
 } from "@mui/material";
-import PostAddRoundedIcon from "@mui/icons-material/PostAddRounded";
+import AddRoundedIcon from "@mui/icons-material/AddRounded";
 import CloseRoundedIcon from "@mui/icons-material/CloseRounded";
 import Visibility from "@mui/icons-material/Visibility";
 import VisibilityOff from "@mui/icons-material/VisibilityOff";
@@ -30,7 +30,7 @@ import {
   validateUsername,
   validatePassword
 } from '../../utils/userValidation';
-import CustomTextField from './CustomTextField';
+import CustomTextField from '../Textfield/CustomTextField';
 
 interface AddUserFormProps {
   onSubmit: (user: { 
@@ -414,7 +414,7 @@ const AddUserForm: React.FC<AddUserFormProps> = ({
                 variant="contained"
                 onClick={handleSubmit}
                 disabled={!isFormValid() || isLoading}
-                startIcon={<PostAddRoundedIcon />}
+                startIcon={<AddRoundedIcon />}
                 fullWidth={isSmallScreen}
                 sx={{
                   minHeight: { xs: 44, sm: 48 },
@@ -424,7 +424,7 @@ const AddUserForm: React.FC<AddUserFormProps> = ({
                   py: { xs: 1, sm: 1.5 },
                 }}
               >
-                {isLoading ? 'Creando...' : (isSmallScreen ? 'Crear' : 'Crear Usuario')}
+                {isLoading ? 'Creando...' : 'Agregar'}
               </Button>
             </Box>
           </Box>
