@@ -43,6 +43,8 @@ import CloseRoundedIcon from "@mui/icons-material/CloseRounded";
 import ManageSearchIcon from "@mui/icons-material/ManageSearch";
 import AddRoundedIcon from '@mui/icons-material/AddRounded';
 import DeleteOutlineIcon from '@mui/icons-material/DeleteOutline';
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faFileExcel, faFilePdf } from "@fortawesome/free-solid-svg-icons";
 
 const EmployeesPage: React.FC = () => {
   const dispatch = useDispatch<AppDispatch>();
@@ -223,8 +225,8 @@ const EmployeesPage: React.FC = () => {
       ? exportToPDF
       : undefined;
     return createExportOptions(
-      <ManageSearchIcon />,
-      <ManageSearchIcon />,
+      <FontAwesomeIcon icon={faFileExcel} size="lg" />,
+      <FontAwesomeIcon icon={faFilePdf} size="lg" />,
       excelOption,
       pdfOption,
       filteredEmployees,
