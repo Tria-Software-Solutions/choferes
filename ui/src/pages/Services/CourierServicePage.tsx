@@ -50,7 +50,7 @@ import { faFileExcel, faFilePdf } from "@fortawesome/free-solid-svg-icons";
 import { Courier } from "../../models/Courier";
 import EditableTable from "../../components/Table/EditableTable/EditableTable";
 import AddCourierForm from "../../components/Forms/AddCourierForm";
-import ConfirmationDialog from "../../components/Dialog/ConfirmationDialog";
+import DialogComponent from "../../components/Dialog/DialogComponent";
 import AddRoundedIcon from '@mui/icons-material/AddRounded';
 
 const CourierServicePage: React.FC = () => {
@@ -592,7 +592,7 @@ const CourierServicePage: React.FC = () => {
           )}
         </>
       )}
-      <ConfirmationDialog
+      <DialogComponent
         open={openDeleteDialog}
         onClose={handleCloseDeleteDialog}
         onConfirm={handleDelete}
@@ -602,43 +602,22 @@ const CourierServicePage: React.FC = () => {
         confirmText="Eliminar"
         cancelText="Cancelar"
         loading={isDeletingCourier}
+        paperSx={{ minWidth: { xs: '80vw', sm: 320 }, maxWidth: { xs: '90vw', sm: 400 } }}
       />
-      <Dialog
+      <DialogComponent
         open={openAddCourierModal}
         onClose={handleCloseAddCourierModal}
-        maxWidth="md"
-        fullWidth
+        title="Agregar Servicio"
+        icon={<LocalShippingIcon color="primary" />}
+        hideActions
+        paperSx={{ minWidth: { xs: '90vw', sm: 500, md: 700 }, maxWidth: { xs: '98vw', sm: 700 } }}
       >
-        <DialogTitle sx={{ 
-          backgroundColor: theme.palette.primary.main, 
-          color: theme.palette.primary.contrastText,
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'space-between'
-        }}>
-          <Typography variant="h6" sx={{ fontWeight: 600 }}>
-            Agregar Servicio
-          </Typography>
-          <IconButton
-            onClick={handleCloseAddCourierModal}
-            sx={{
-              color: theme.palette.primary.contrastText,
-              '&:hover': {
-                backgroundColor: 'rgba(255,255,255,0.1)',
-              },
-            }}
-          >
-            <CloseIcon />
-          </IconButton>
-        </DialogTitle>
-        <DialogContent sx={{ p: 3 }}>
-          <AddCourierForm
-            onSubmit={handleCreateCourier}
-            onCancel={handleCloseAddCourierModal}
-            isLoading={isCreatingCourier}
-          />
-        </DialogContent>
-      </Dialog>
+        <AddCourierForm
+          onSubmit={handleCreateCourier}
+          onCancel={handleCloseAddCourierModal}
+          isLoading={isCreatingCourier}
+        />
+      </DialogComponent>
     </Box>
   );
 };

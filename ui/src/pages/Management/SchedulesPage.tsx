@@ -14,7 +14,7 @@ import EditableTable from "../../components/Table/EditableTable/EditableTable";
 import CustomSpeedDial from "../../components/SpeedDial/CustomSpeedDial";
 import AddScheduleForm from "../../components/Forms/AddScheduleForm";
 import { useAppNotifications } from "../../components/Snackbar/SnackbarWrapper";
-import ConfirmationDialog from "../../components/Dialog/ConfirmationDialog";
+import DialogComponent from "../../components/Dialog/DialogComponent";
 import {
   Button,
   Grid,
@@ -419,7 +419,7 @@ const SchedulesPage: React.FC = () => {
           )}
         </>
       )}
-      <ConfirmationDialog
+      <DialogComponent
         open={openDeleteDialog}
         onClose={handleCloseDeleteDialog}
         onConfirm={handleDelete}
@@ -429,45 +429,22 @@ const SchedulesPage: React.FC = () => {
         confirmText="Eliminar"
         cancelText="Cancelar"
         loading={isDeletingSchedule}
+        paperSx={{ minWidth: { xs: '80vw', sm: 320 }, maxWidth: { xs: '90vw', sm: 400 } }}
       />
-      
-      {/* Modal simple usando Dialog directamente */}
-      <Dialog
+      <DialogComponent
         open={openAddScheduleModal}
         onClose={handleCloseAddModal}
-        maxWidth="md"
-        fullWidth
+        title="Agregar Nuevo Horario"
+        icon={<EditCalendarRoundedIcon color="primary" />}
+        hideActions
+        paperSx={{ minWidth: { xs: '90vw', sm: 500, md: 700 }, maxWidth: { xs: '98vw', sm: 700 } }}
       >
-        <DialogTitle sx={{ 
-          backgroundColor: theme.palette.primary.main, 
-          color: theme.palette.primary.contrastText,
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'space-between'
-        }}>
-          <Typography variant="h6" sx={{ fontWeight: 600 }}>
-            Agregar Nuevo Horario
-          </Typography>
-          <IconButton
-            onClick={handleCloseAddModal}
-            sx={{
-              color: theme.palette.primary.contrastText,
-              '&:hover': {
-                backgroundColor: 'rgba(255,255,255,0.1)',
-              },
-            }}
-          >
-            <CloseIcon />
-          </IconButton>
-        </DialogTitle>
-        <DialogContent sx={{ p: 3 }}>
-          <AddScheduleForm
-            onSubmit={handleCreate}
-            onCancel={handleCloseAddModal}
-            isLoading={isCreatingSchedule}
-          />
-        </DialogContent>
-      </Dialog>
+        <AddScheduleForm
+          onSubmit={handleCreate}
+          onCancel={handleCloseAddModal}
+          isLoading={isCreatingSchedule}
+        />
+      </DialogComponent>
     </Box>
   );
 };

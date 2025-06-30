@@ -38,9 +38,10 @@ import Visibility from "@mui/icons-material/Visibility";
 import VisibilityOff from "@mui/icons-material/VisibilityOff";
 import VisibilityIcon from '@mui/icons-material/Visibility';
 import VisibilityOffIcon from '@mui/icons-material/VisibilityOff';
-import ConfirmationDialog from "../../components/Dialog/ConfirmationDialog";
+import DialogComponent from "../../components/Dialog/DialogComponent";
 import CloseIcon from "@mui/icons-material/Close";
 import AddRoundedIcon from '@mui/icons-material/AddRounded';
+import ManageAccountsIcon from '@mui/icons-material/ManageAccounts';
 
 const ManageUsers: React.FC<{ isExpanded?: boolean }> = ({ isExpanded = true }) => {
   const dispatch = useDispatch<AppDispatch>();
@@ -822,7 +823,7 @@ const ManageUsers: React.FC<{ isExpanded?: boolean }> = ({ isExpanded = true }) 
         </>
       )}
       
-      <ConfirmationDialog
+      <DialogComponent
         open={openStatusDialog}
         onClose={handleCloseStatusDialog}
         onConfirm={handleStatusChange}
@@ -834,43 +835,21 @@ const ManageUsers: React.FC<{ isExpanded?: boolean }> = ({ isExpanded = true }) 
         loading={isUpdatingUserStatus}
       />
       
-      <Dialog
+      <DialogComponent
         open={openAddUserModal}
         onClose={handleCloseAddUserModal}
-        maxWidth="md"
-        fullWidth
+        title="Agregar Usuario"
+        icon={<ManageAccountsIcon color="primary" />}
+        hideActions
+        paperSx={{ minWidth: { xs: '90vw', sm: 500, md: 700 }, maxWidth: { xs: '98vw', sm: 700 } }}
       >
-        <DialogTitle sx={{ 
-          backgroundColor: theme.palette.primary.main, 
-          color: theme.palette.primary.contrastText,
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'space-between'
-        }}>
-          <Typography variant="h6" sx={{ fontWeight: 600 }}>
-            Agregar Usuario
-          </Typography>
-          <IconButton
-            onClick={handleCloseAddUserModal}
-            sx={{
-              color: theme.palette.primary.contrastText,
-              '&:hover': {
-                backgroundColor: 'rgba(255,255,255,0.1)',
-              },
-            }}
-          >
-            <CloseIcon />
-          </IconButton>
-        </DialogTitle>
-        <DialogContent sx={{ p: 3 }}>
-          <AddUserForm
-            onSubmit={handleCreateUser}
-            onCancel={handleCloseAddUserModal}
-            isLoading={isCreatingUser}
-            roles={roles}
-          />
-        </DialogContent>
-      </Dialog>
+        <AddUserForm
+          onSubmit={handleCreateUser}
+          onCancel={handleCloseAddUserModal}
+          isLoading={isCreatingUser}
+          roles={roles}
+        />
+      </DialogComponent>
     </Box>
   );
 };
