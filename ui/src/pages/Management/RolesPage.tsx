@@ -19,7 +19,6 @@ import { useMonthlySummaries } from "../../hooks/useMonthlySummary";
 import SearchBar from "../../components/SearchBar/SearchBar";
 import SelectorTable from "../../components/Table/SelectorTable/SelectorTable";
 import CustomSpeedDial from "../../components/SpeedDial/CustomSpeedDial";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { es } from "date-fns/locale";
 import { LocalizationProvider } from "@mui/x-date-pickers";
 import { DatePicker } from "@mui/x-date-pickers/DatePicker";
@@ -44,7 +43,6 @@ import {
   Avatar,
   IconButton,
   Dialog,
-  DialogContent,
 } from "@mui/material";
 import {
   createExportOptions,
@@ -764,102 +762,124 @@ const RolesPage: React.FC = () => {
       />
       {openSummaryDialogEmployee && (
         <Dialog open={!!openSummaryDialogEmployee} onClose={() => setOpenSummaryDialogEmployee(null)} maxWidth="md" fullWidth>
-          <Box sx={{ background: theme.palette.primary.main, p: 3, borderTopLeftRadius: 12, borderTopRightRadius: 12 }}>
-            <Box display="flex" alignItems="center" gap={2}>
-              <Avatar sx={{ bgcolor: '#fff' }}>
-                <InfoOutlinedIcon color="primary" />
-              </Avatar>
-              <Box>
-                <Typography variant="h5" color="white" fontWeight={700}>
-                  {openSummaryDialogEmployee.firstName} {openSummaryDialogEmployee.lastName}
-                </Typography>
-                <Typography variant="subtitle2" color="white" fontWeight={400}>
-                  Resumen de Horas Trabajadas
-                </Typography>
-              </Box>
-              <Box flexGrow={1} />
-              <IconButton onClick={() => setOpenSummaryDialogEmployee(null)} sx={{ color: '#fff' }}>
-                <CloseRoundedIcon />
-              </IconButton>
+          <Box sx={{ background: theme.palette.primary.main, color: '#fff', p: { xs: 3, sm: 4 }, borderTopLeftRadius: 2, borderTopRightRadius: 2, display: 'flex', alignItems: 'center', gap: 2 }}>
+            <Box>
+              <Typography variant="h5" fontWeight={700} color="#fff">
+                Resumen de Horas Trabajadas
+              </Typography>
+              <Typography variant="subtitle2" color="#fff">
+                {openSummaryDialogEmployee.firstName} {openSummaryDialogEmployee.lastName}
+              </Typography>
             </Box>
+            <Box flexGrow={1} />
+            <IconButton onClick={() => setOpenSummaryDialogEmployee(null)} sx={{ color: '#fff' }}>
+              <CloseRoundedIcon />
+            </IconButton>
           </Box>
-          <DialogContent sx={{ p: 0 }}>
-            <Box sx={{ p: 3 }}>
-              <TabContext value={summaryTab}>
-                <TabList onChange={(_, v) => setSummaryTab(v)} variant="fullWidth">
-                  <Tab label="Semanal" value="weekly" />
-                  <Tab label="Quincenal" value="biweekly" />
-                  <Tab label="Mensual" value="monthly" />
-                  <Tab label="Horas Extra" value="overtime" />
-                </TabList>
-                <Divider sx={{ mb: 2 }} />
-                <TabPanel value="weekly">
-                  <Box display="flex" alignItems="center" gap={3}>
-                    <Avatar sx={{ bgcolor: theme.palette.success.light, width: 56, height: 56 }}>
-                      <BarChartIcon color="success" />
-                    </Avatar>
-                    <Box>
-                      <Typography variant="h6" fontWeight={700}>Horas trabajadas esta semana</Typography>
-                      <Typography variant="h3" color="primary" fontWeight={800}>
-                        {getEmployeeWeeklyHours(openSummaryDialogEmployee.id)}
-                      </Typography>
-                      <Typography variant="body2" color="text.secondary">
-                        Semana #{currentWeekNumber}
-                      </Typography>
+          <Box sx={{ p: { xs: 2, sm: 3, md: 4 } }}>
+            <Grid container spacing={3}>
+              <Grid item xs={12}>
+                <TabContext value={summaryTab}>
+                  <TabList onChange={(_, v) => setSummaryTab(v)} variant="fullWidth">
+                    <Tab label="Semanal" value="weekly" />
+                    <Tab label="Quincenal" value="biweekly" />
+                    <Tab label="Mensual" value="monthly" />
+                    <Tab label="Horas Extra" value="overtime" />
+                  </TabList>
+                  <Divider sx={{ mb: 2 }} />
+                  <TabPanel value="weekly">
+                    <Box display="flex" alignItems="center" gap={3}>
+                      <Avatar sx={{ bgcolor: theme.palette.success.light, width: 56, height: 56 }}>
+                        <BarChartIcon color="success" />
+                      </Avatar>
+                      <Box>
+                        <Typography variant="h6" fontWeight={700}>Horas trabajadas esta semana</Typography>
+                        <Typography variant="h3" color="primary" fontWeight={800}>
+                          {getEmployeeWeeklyHours(openSummaryDialogEmployee.id)}
+                        </Typography>
+                        <Typography variant="body2" color="text.secondary">
+                          Semana #{currentWeekNumber}
+                        </Typography>
+                      </Box>
+                    </Box>
+                  </TabPanel>
+                  <TabPanel value="biweekly">
+                    <Box display="flex" alignItems="center" gap={3}>
+                      <Avatar sx={{ bgcolor: theme.palette.info.light, width: 56, height: 56 }}>
+                        <BarChartIcon color="info" />
+                      </Avatar>
+                      <Box>
+                        <Typography variant="h6" fontWeight={700}>Horas trabajadas esta quincena</Typography>
+                        <Typography variant="h3" color="primary" fontWeight={800}>
+                          {getEmployeeBiweeklyHours(openSummaryDialogEmployee.id)}
+                        </Typography>
+                        <Typography variant="body2" color="text.secondary">
+                          Quincena #{currentBiweekNumber}
+                        </Typography>
+                      </Box>
+                    </Box>
+                  </TabPanel>
+                  <TabPanel value="monthly">
+                    <Box display="flex" alignItems="center" gap={3}>
+                      <Avatar sx={{ bgcolor: theme.palette.warning.light, width: 56, height: 56 }}>
+                        <BarChartIcon color="warning" />
+                      </Avatar>
+                      <Box>
+                        <Typography variant="h6" fontWeight={700}>Horas trabajadas este mes</Typography>
+                        <Typography variant="h3" color="primary" fontWeight={800}>
+                          {getEmployeeMonthlyHours(openSummaryDialogEmployee.id)}
+                        </Typography>
+                        <Typography variant="body2" color="text.secondary">
+                          Mes #{currentMonth} / {currentYear}
+                        </Typography>
+                      </Box>
+                    </Box>
+                  </TabPanel>
+                  <TabPanel value="overtime">
+                    <Box display="flex" alignItems="center" gap={3}>
+                      <Avatar sx={{ bgcolor: theme.palette.error.light, width: 56, height: 56 }}>
+                        <AccessTimeRoundedIcon color="error" />
+                      </Avatar>
+                      <Box>
+                        <Typography variant="h6" fontWeight={700}>Horas Extra</Typography>
+                        <Typography variant="h3" color="error" fontWeight={800}>
+                          {getEmployeeOvertime(openSummaryDialogEmployee.id)}
+                        </Typography>
+                        <Typography variant="body2" color="text.secondary">
+                          Detalle de horas extra por periodo
+                        </Typography>
+                      </Box>
+                    </Box>
+                  </TabPanel>
+                </TabContext>
+              </Grid>
+              <Grid item xs={12}>
+                <Box
+                  sx={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    p: { xs: 1.5, sm: 2 },
+                    backgroundColor: theme.palette.action.hover,
+                    borderRadius: 1,
+                    border: '1px solid',
+                    borderColor: theme.palette.divider,
+                  }}
+                >
+                  <Box sx={{ mr: { xs: 1, sm: 2 }, color: theme.palette.info.main }}>
+                    <InfoOutlinedIcon sx={{ color: theme.palette.info.main, mr: { xs: 1, sm: 2 } }} />
+                  </Box>
+                  <Box>
+                    <Box sx={{ fontWeight: 600, color: theme.palette.text.primary, mb: 0.5, fontSize: 'clamp(0.875rem, 1.5vw, 1rem)' }}>
+                      Información de Resumen
+                    </Box>
+                    <Box sx={{ color: theme.palette.text.secondary, fontSize: 'clamp(0.75rem, 1.25vw, 0.875rem)' }}>
+                      Consulta el total de horas trabajadas por periodo. Usa las pestañas para cambiar entre semana, quincena, mes y horas extra.
                     </Box>
                   </Box>
-                </TabPanel>
-                <TabPanel value="biweekly">
-                  <Box display="flex" alignItems="center" gap={3}>
-                    <Avatar sx={{ bgcolor: theme.palette.info.light, width: 56, height: 56 }}>
-                      <BarChartIcon color="info" />
-                    </Avatar>
-                    <Box>
-                      <Typography variant="h6" fontWeight={700}>Horas trabajadas esta quincena</Typography>
-                      <Typography variant="h3" color="primary" fontWeight={800}>
-                        {getEmployeeBiweeklyHours(openSummaryDialogEmployee.id)}
-                      </Typography>
-                      <Typography variant="body2" color="text.secondary">
-                        Quincena #{currentBiweekNumber}
-                      </Typography>
-                    </Box>
-                  </Box>
-                </TabPanel>
-                <TabPanel value="monthly">
-                  <Box display="flex" alignItems="center" gap={3}>
-                    <Avatar sx={{ bgcolor: theme.palette.warning.light, width: 56, height: 56 }}>
-                      <BarChartIcon color="warning" />
-                    </Avatar>
-                    <Box>
-                      <Typography variant="h6" fontWeight={700}>Horas trabajadas este mes</Typography>
-                      <Typography variant="h3" color="primary" fontWeight={800}>
-                        {getEmployeeMonthlyHours(openSummaryDialogEmployee.id)}
-                      </Typography>
-                      <Typography variant="body2" color="text.secondary">
-                        Mes #{currentMonth} / {currentYear}
-                      </Typography>
-                    </Box>
-                  </Box>
-                </TabPanel>
-                <TabPanel value="overtime">
-                  <Box display="flex" alignItems="center" gap={3}>
-                    <Avatar sx={{ bgcolor: theme.palette.error.light, width: 56, height: 56 }}>
-                      <AccessTimeRoundedIcon color="error" />
-                    </Avatar>
-                    <Box>
-                      <Typography variant="h6" fontWeight={700}>Horas Extra</Typography>
-                      <Typography variant="h3" color="error" fontWeight={800}>
-                        {getEmployeeOvertime(openSummaryDialogEmployee.id)}
-                      </Typography>
-                      <Typography variant="body2" color="text.secondary">
-                        Detalle de horas extra por periodo
-                      </Typography>
-                    </Box>
-                  </Box>
-                </TabPanel>
-              </TabContext>
-            </Box>
-          </DialogContent>
+                </Box>
+              </Grid>
+            </Grid>
+          </Box>
         </Dialog>
       )}
     </Box>
