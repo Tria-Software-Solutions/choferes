@@ -21,6 +21,10 @@ import PaletteOutlinedIcon from '@mui/icons-material/PaletteOutlined';
 import EditNoteOutlinedIcon from '@mui/icons-material/EditNoteOutlined';
 import FactoryOutlinedIcon from '@mui/icons-material/FactoryOutlined';
 import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined';
+import { DatePicker, LocalizationProvider } from '@mui/x-date-pickers';
+import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns';
+import { format } from 'date-fns';
+import { es } from 'date-fns/locale';
 
 interface AddVehicleFormProps {
   onSubmit: (vehicle: {
@@ -30,11 +34,13 @@ interface AddVehicleFormProps {
     color: string;
     parkingLot: string;
     notes: string;
+    parkingDate: Date;
   }) => void;
   onCancel?: () => void;
   isLoading?: boolean;
   existingVehicles?: Array<{ ticket: string; licensePlate: string }>;
   getNextTicketNumber: () => string;
+  defaultParkingDate?: Date;
 }
 
 const AddVehicleForm: React.FC<AddVehicleFormProps> = ({
@@ -43,6 +49,7 @@ const AddVehicleForm: React.FC<AddVehicleFormProps> = ({
   isLoading = false,
   existingVehicles = [],
   getNextTicketNumber,
+  defaultParkingDate = new Date(),
 }) => {
   const theme = useTheme();
   const isSmallScreen = useMediaQuery(theme.breakpoints.down("sm"));
@@ -53,6 +60,7 @@ const AddVehicleForm: React.FC<AddVehicleFormProps> = ({
     color: '',
     parkingLot: '',
     notes: '',
+    parkingDate: defaultParkingDate,
   });
 
   const [errors, setErrors] = useState({
@@ -159,6 +167,10 @@ const AddVehicleForm: React.FC<AddVehicleFormProps> = ({
     handleFieldChange('parkingLot', maskedValue);
   };
 
+  const handleDateChange = (date: Date | null) => {
+    setFormData(prev => ({ ...prev, parkingDate: date || new Date() }));
+  };
+
   const isFormValid = () => {
     return (
       formData.ticket.trim() !== '' &&
@@ -166,6 +178,7 @@ const AddVehicleForm: React.FC<AddVehicleFormProps> = ({
       formData.brand.trim() !== '' &&
       formData.color.trim() !== '' &&
       formData.parkingLot.trim() !== '' &&
+      formData.parkingDate &&
       Object.values(errors).every(error => error === '')
     );
   };
@@ -179,6 +192,7 @@ const AddVehicleForm: React.FC<AddVehicleFormProps> = ({
         color: formData.color.trim(),
         parkingLot: formData.parkingLot.trim(),
         notes: formData.notes.trim(),
+        parkingDate: formData.parkingDate,
       });
     }
   };
@@ -191,6 +205,7 @@ const AddVehicleForm: React.FC<AddVehicleFormProps> = ({
       color: '',
       parkingLot: '',
       notes: '',
+      parkingDate: defaultParkingDate,
     });
     setErrors({
       ticket: '',
@@ -330,6 +345,24 @@ const AddVehicleForm: React.FC<AddVehicleFormProps> = ({
             helperText={errors.parkingLot}
             icon={<LocalParkingOutlinedIcon sx={{ color: theme.palette.text.secondary }} />}
           />
+        </Grid>
+
+        <Grid item xs={12} sm={6}>
+          <LocalizationProvider dateAdapter={AdapterDateFns} adapterLocale={es}>
+            <DatePicker
+              label="Fecha de Parqueo"
+              value={formData.parkingDate}
+              onChange={handleDateChange}
+              format="EEEE d 'de' MMMM 'de' yyyy"
+              slotProps={{
+                textField: {
+                  fullWidth: true,
+                  required: true,
+                  variant: 'outlined',
+                },
+              }}
+            />
+          </LocalizationProvider>
         </Grid>
 
         <Grid item xs={12}>

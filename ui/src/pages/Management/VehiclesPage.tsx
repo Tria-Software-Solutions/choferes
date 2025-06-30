@@ -664,6 +664,7 @@ const VehiclesPage: React.FC = () => {
           isLoading={isCreatingVehicle}
           existingVehicles={allVehicles.map(v => ({ ticket: v.ticket, licensePlate: v.licensePlate }))}
           getNextTicketNumber={getNextTicketNumber}
+          defaultParkingDate={selectedDate}
         />
       </DialogComponent>
     </Box>
