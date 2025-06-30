@@ -641,7 +641,6 @@ const SelectorTable: React.FC<SelectorTableProps> = React.memo(
                         right: 0,
                         zIndex: 3,
                         backgroundColor: "#000000",
-                        borderLeft: "1px solid #333",
                       }}
                       colSpan={2}
                     >
@@ -659,7 +658,18 @@ const SelectorTable: React.FC<SelectorTableProps> = React.memo(
                           backgroundColor: "transparent !important",
                         },
                       }}>
-                        <InputLabel sx={{ color: "#ffffff", fontWeight: 600 }}>Total</InputLabel>
+                        <InputLabel sx={{ 
+                          color: "#9e9e9e", 
+                          fontWeight: 600,
+                          '&.MuiInputLabel-shrink': {
+                            color: "#9e9e9e",
+                          },
+                          '&.Mui-focused': {
+                            color: "#9e9e9e",
+                          },
+                        }}>
+                          Total
+                        </InputLabel>
                         <Select
                           value={selectedPeriod}
                           onChange={(e) =>
@@ -681,30 +691,23 @@ const SelectorTable: React.FC<SelectorTableProps> = React.memo(
                                 </InputAdornment>
                               }
                               sx={{
-                                backgroundColor: "transparent !important",
-                                color: "#ffffff",
-                                borderRadius: '8px',
+                                backgroundColor: 'transparent',
+                                border: 'none !important',
                                 '& .MuiOutlinedInput-notchedOutline': {
-                                  borderColor: "transparent",
-                                  borderWidth: 0,
-                                  borderRadius: '8px',
+                                  border: 'none !important',
                                 },
                                 '&:hover .MuiOutlinedInput-notchedOutline': {
-                                  borderColor: "transparent",
-                                  borderWidth: 0,
-                                  backgroundColor: "transparent !important",
+                                  border: 'none !important',
                                 },
                                 '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
-                                  borderColor: "transparent",
-                                  borderWidth: 0,
+                                  border: 'none !important',
                                 },
                                 '&.Mui-focused': {
                                   backgroundColor: "transparent !important",
                                   color: "#ffffff",
                                 },
                                 '&.Mui-active .MuiOutlinedInput-notchedOutline': {
-                                  borderColor: "transparent",
-                                  borderWidth: 0,
+                                  border: 'none !important',
                                 },
                                 '&.Mui-focused .MuiOutlinedInput-input': {
                                   backgroundColor: "transparent !important",
@@ -730,7 +733,7 @@ const SelectorTable: React.FC<SelectorTableProps> = React.memo(
                               sx: {
                                 backgroundColor: theme.palette.background.paper,
                                 color: theme.palette.text.primary,
-                                border: `1px solid ${theme.palette.divider}`,
+                                border: "none",
                                 borderRadius: '8px',
                                 boxShadow: theme.shadows[8],
                                 '& .MuiMenuItem-root': {
@@ -751,20 +754,27 @@ const SelectorTable: React.FC<SelectorTableProps> = React.memo(
                           }}
                           sx={{
                             backgroundColor: 'transparent',
+                            border: 'none !important',
                             '& .MuiSelect-select': {
                               backgroundColor: 'transparent',
                               color: "#ffffff",
                               fontWeight: 600,
+                              border: 'none !important',
                               '&:focus': {
                                 backgroundColor: 'transparent',
                                 color: "#ffffff",
+                                border: 'none !important',
                               },
                             },
                             '& .MuiInputLabel-root': {
-                              color: "#ffffff",
+                              color: "#9e9e9e",
                               fontWeight: 600,
                               '&.Mui-focused': {
-                                color: "#ffffff",
+                                color: "#9e9e9e",
+                              },
+                              '&.MuiInputLabel-shrink': {
+                                color: "#9e9e9e",
+                                transform: 'translate(14px, -9px) scale(0.75)',
                               },
                             },
                             '& .MuiSvgIcon-root': {
@@ -773,10 +783,18 @@ const SelectorTable: React.FC<SelectorTableProps> = React.memo(
                             '&:hover .MuiSelect-select': {
                               backgroundColor: 'transparent',
                               color: "#ffffff",
+                              border: 'none !important',
                             },
                             '&.Mui-focused .MuiSelect-select': {
                               backgroundColor: 'transparent',
                               color: "#ffffff",
+                              border: 'none !important',
+                            },
+                            '& .MuiOutlinedInput-root': {
+                              border: 'none !important',
+                            },
+                            '& .MuiOutlinedInput-notchedOutline': {
+                              border: 'none !important',
                             },
                           }}
                         >
