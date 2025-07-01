@@ -1132,6 +1132,12 @@ const EditableTable = <T extends object>({
           }}
           maxWidth="sm"
           fullWidth
+          PaperProps={{
+            sx: {
+              border: "2px solid #fff",
+              borderRadius: 3,
+            },
+          }}
         >
           <DialogTitle
             sx={{

@@ -834,6 +834,12 @@ const SelectorTable: React.FC<SelectorTableProps> = React.memo(
             onClose={() => setOpenAdjustDialogEmployee(null)}
             maxWidth="sm"
             fullWidth
+            PaperProps={{
+              sx: {
+                border: "2px solid #fff",
+                borderRadius: 3,
+              },
+            }}
           >
             <Box
               sx={{
