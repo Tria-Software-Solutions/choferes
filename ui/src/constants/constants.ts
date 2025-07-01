@@ -186,3 +186,340 @@ export const STATE = {
 export const TABLE = {
   ROWS_PER_PAGE: "Filas por página",
 };
+
+export const SELECTOR_TABLE = {
+  // Headers
+  EMPLOYEES: "Empleados",
+  
+  // Period options
+  WEEKLY: "Semanal",
+  BIWEEKLY: "Quincenal", 
+  MONTHLY: "Mensual",
+  
+  // Period labels
+  WEEKS: "Semanas",
+  WEEK: "Semana",
+  BIWEEKS: "Quincenas",
+  BIWEEK: "Quincena",
+  
+  // Menu sections
+  LOCATIONS: "Ubicaciones",
+  SPECIAL_SCHEDULES: "Horarios Especiales",
+  OTHER: "Otro",
+  
+  // Hours display
+  HOURS: "horas",
+  OVERTIME_HOURS: "Horas Extra",
+  
+  // Dialog titles and content
+  ADJUST_HOURS: "Ajuste de Horas",
+  HOURS_TO_ADJUST: "Horas a ajustar",
+  ADJUSTMENT_INFO: "Información de Ajuste",
+  ADJUSTMENT_DESCRIPTION: "Ingresa la cantidad de horas a sumar o restar. Solo se permiten valores positivos.",
+  
+  // Dialog messages
+  WEEKLY_HOURS_MESSAGE: "Total de horas trabajadas en la semana:",
+  BIWEEKLY_HOURS_MESSAGE: "Total de horas trabajadas en la quincena:",
+  MONTHLY_HOURS_MESSAGE: "Total de horas trabajadas en el mes:",
+  
+  // Validation messages
+  POSITIVE_NUMBER_REQUIRED: "Debe ser un número positivo",
+  
+  // Buttons
+  CANCEL: "Cancelar",
+  ADD: "Sumar",
+  SUBTRACT: "Restar",
+  
+  // Date format helpers
+  FROM: "del",
+  TO: "al",
+};
+
+export const FORMS = {
+  // Common validation messages
+  REQUIRED_FIELD: "Este campo es requerido",
+  POSITIVE_NUMBER_ONLY: "Solo se permiten números",
+  ALREADY_REGISTERED: "Este elemento ya está registrado",
+  MIN_LENGTH: "Debe tener al menos {min} caracteres",
+  MAX_LENGTH: "Debe tener máximo {max} caracteres",
+  INVALID_FORMAT: "Formato inválido",
+  
+  // Common buttons
+  ADD: "Agregar",
+  ADDING: "Agregando...",
+  SAVE: "Guardar",
+  SAVING: "Guardando...",
+  CANCEL: "Cancelar",
+  DELETE: "Eliminar",
+  DELETING: "Eliminando...",
+  EDIT: "Editar",
+  EDITING: "Editando...",
+  
+  // Courier form
+  DRIVER: "Chofer",
+  DRIVER_REQUIRED: "El nombre del chofer es requerido",
+  DRIVER_MIN_LENGTH: "El nombre debe tener al menos 2 caracteres",
+  DRIVER_MAX_LENGTH: "El nombre debe tener máximo 100 caracteres",
+  DRIVER_INVALID_FORMAT: "El nombre solo puede contener letras y espacios",
+  
+  ROUTE: "Ruta",
+  ROUTE_REQUIRED: "La ruta es requerida",
+  ROUTE_OPTIONS: {
+    GAM: "GAM",
+    GAM_EXPRESS: "GAM Express",
+    RURAL: "Rural",
+  },
+  
+  DISTANCE: "Distancia",
+  DISTANCE_INVALID: "La distancia debe ser mayor a 0",
+  DISTANCE_MAX: "La distancia no puede ser mayor a 1000 km",
+  
+  TRACKING_NUMBER: "Número de Guía",
+  TRACKING_NUMBER_REQUIRED: "El número de guía es requerido",
+  TRACKING_NUMBER_MIN_LENGTH: "El número de guía debe tener al menos 3 caracteres",
+  TRACKING_NUMBER_MAX_LENGTH: "El número de guía debe tener máximo 50 caracteres",
+  
+  STATUS: "Estado",
+  STATUS_REQUIRED: "El estado es requerido",
+  STATUS_OPTIONS: {
+    DISPATCHED: "Despachado",
+    IN_TRANSIT: "En Tránsito",
+    DELIVERED: "Entregado",
+  },
+  
+  // Role form
+  ROLE_NAME: "Nombre del Rol",
+  ROLE_NAME_REQUIRED: "El nombre del rol es requerido",
+  PERMISSIONS: "Permisos",
+  PERMISSIONS_REQUIRED: "Debe seleccionar al menos un permiso",
+  
+  // Vehicle form
+  TICKET: "Boleta",
+  TICKET_NUMBERS_ONLY: "Solo se permiten números",
+  TICKET_ALREADY_REGISTERED: "Este número de boleta ya está registrado",
+  LICENSE_PLATE: "Placa",
+  LICENSE_PLATE_ALREADY_REGISTERED: "Esta placa ya está registrada",
+};
+
+export const AUTH = {
+  // Login
+  EMAIL_OR_USERNAME: "Correo Electrónico o Usuario",
+  EMAIL_OR_USERNAME_REQUIRED: "El correo electrónico o usuario es requerido",
+  PASSWORD: "Contraseña",
+  PASSWORD_REQUIRED: "La contraseña es requerida",
+  LOGIN: "Iniciar Sesión",
+  LOGGING_IN: "Iniciando Sesión...",
+  
+  // Settings
+  PERSONAL_INFO: "Información Personal",
+  PERSONAL_INFO_DESCRIPTION: "Actualiza tu información personal y credenciales de acceso",
+  FIRST_NAME: "Nombre",
+  LAST_NAME: "Apellido",
+  EMAIL: "Correo electrónico",
+  USERNAME: "Usuario",
+  UPDATE_PERSONAL_INFO: "Actualizar Información Personal",
+  UPDATING_PERSONAL_INFO: "Actualizando...",
+  PERSONAL_INFO_SUCCESS: "La actualización de lo datos fue exitosa",
+  PERSONAL_INFO_ERROR: "Ha ocurrido un error al actualizar los datos",
+  
+  CHANGE_PASSWORD: "Cambiar Contraseña",
+  CHANGE_PASSWORD_DESCRIPTION: "Actualiza tu contraseña para mantener tu cuenta segura",
+  NEW_PASSWORD: "Nueva contraseña",
+  CONFIRM_NEW_PASSWORD: "Confirmar nueva contraseña",
+  UPDATE_PASSWORD: "Actualizar Contraseña",
+  UPDATING_PASSWORD: "Actualizando...",
+  PASSWORD_SUCCESS: "La actualización de la contraseña fue exitosa",
+  PASSWORD_ERROR: "Ha ocurrido un error al actualizar la contraseña",
+  
+  // Common
+  SHOW_PASSWORD: "Mostrar contraseña",
+  HIDE_PASSWORD: "Ocultar contraseña",
+};
+
+export const MANAGEMENT = {
+  // Common actions
+  ADD: "Agregar",
+  EDIT: "Editar",
+  DELETE: "Eliminar",
+  CANCEL: "Cancelar",
+  SEARCH: "Buscar",
+  EXPORT: "Exportar",
+  
+  // Success messages
+  CREATE_SUCCESS: "El registro fue exitoso",
+  UPDATE_SUCCESS: "La actualización fue exitosa",
+  DELETE_SUCCESS: "Elemento eliminado exitosamente",
+  
+  // Error messages
+  CREATE_ERROR: "Ha ocurrido un error al registrar",
+  UPDATE_ERROR: "Ha ocurrido un error al actualizar",
+  DELETE_ERROR: "Error al eliminar",
+  
+  // Employees
+  EMPLOYEES: "Empleados",
+  EMPLOYEE: "Empleado",
+  NEW_EMPLOYEE: "Nuevo empleado",
+  SEARCH_EMPLOYEE: "Buscar empleado",
+  DELETE_EMPLOYEE: "Eliminar Empleado",
+  EMPLOYEE_CREATE_SUCCESS: "El registro del empleado fue exitoso",
+  EMPLOYEE_CREATE_ERROR: "Ha ocurrido un error al registrar el empleado",
+  EMPLOYEE_UPDATE_SUCCESS: "La actualización del empleado fue exitosa",
+  EMPLOYEE_UPDATE_ERROR: "Ha ocurrido un error al actualizar el empleado",
+  EMPLOYEE_DELETE_SUCCESS: "Empleado eliminado exitosamente",
+  EMPLOYEE_DELETE_ERROR: "Error al eliminar el empleado",
+  
+  // Schedules
+  SCHEDULES: "Horarios",
+  SCHEDULE: "Horario",
+  NEW_SCHEDULE: "Nuevo horario",
+  SEARCH_SCHEDULE: "Buscar horario",
+  DELETE_SCHEDULE: "Eliminar Horario",
+  SCHEDULE_CREATE_SUCCESS: "El registro del horario fue exitoso",
+  SCHEDULE_CREATE_ERROR: "Ha ocurrido un error al registrar el horario",
+  SCHEDULE_UPDATE_SUCCESS: "La actualización del horario fue exitosa",
+  SCHEDULE_UPDATE_ERROR: "Ha ocurrido un error al actualizar el horario",
+  SCHEDULE_DELETE_SUCCESS: "Horario eliminado exitosamente",
+  SCHEDULE_DELETE_ERROR: "Error al eliminar el horario",
+  
+  // Vehicles
+  VEHICLES: "Vehículos",
+  VEHICLE: "Vehículo",
+  NEW_VEHICLE: "Nuevo vehículo",
+  SEARCH_VEHICLE: "Buscar vehículo",
+  DELETE_VEHICLE: "Eliminar Vehículo",
+  VEHICLE_CREATE_SUCCESS: "El registro del vehículo fue exitoso",
+  VEHICLE_CREATE_ERROR: "Ha ocurrido un error al registrar el vehículo",
+  VEHICLE_UPDATE_SUCCESS: "La actualización del vehículo fue exitosa",
+  VEHICLE_UPDATE_ERROR: "Ha ocurrido un error al actualizar el vehículo",
+  VEHICLE_DELETE_SUCCESS: "Vehículo eliminado exitosamente",
+  VEHICLE_DELETE_ERROR: "Error al eliminar el vehículo",
+  
+  // Roles
+  ROLES: "Roles",
+  ROLE: "Rol",
+  NEW_ROLE: "Nuevo rol",
+  SEARCH_ROLE: "Buscar rol",
+  DELETE_ROLE: "Eliminar Rol",
+  ROLE_CREATE_SUCCESS: "El registro del rol fue exitoso",
+  ROLE_CREATE_ERROR: "Ha ocurrido un error al registrar el rol",
+  ROLE_UPDATE_SUCCESS: "La actualización del rol fue exitosa",
+  ROLE_UPDATE_ERROR: "Ha ocurrido un error al actualizar el rol",
+  ROLE_DELETE_SUCCESS: "Rol eliminado exitosamente",
+  ROLE_DELETE_ERROR: "Error al eliminar el rol",
+  
+  // Common UI
+  NO_RESULTS: "No se encontraron resultados",
+  NO_RESULTS_DESCRIPTION: "Intenta ajustar los filtros de búsqueda",
+  LOADING: "Cargando...",
+};
+
+export const ERRORS = {
+  // Error page
+  ERROR_TITLE: "¡Oops! Algo salió mal",
+  ERROR_SUBTITLE: "Ha ocurrido un error inesperado. Nuestro equipo ha sido notificado y estamos trabajando para solucionarlo.",
+  ERROR_CODE: "Código de Error",
+  GO_HOME: "Ir al Inicio",
+  RELOAD: "Recargar",
+  CONTACT_SUPPORT: "Si el problema persiste, contacta a soporte técnico",
+  
+  // Forbidden page
+  FORBIDDEN_TITLE: "Acceso Denegado",
+  FORBIDDEN_SUBTITLE: "No tienes permisos para acceder a esta página. Contacta a tu administrador si crees que esto es un error.",
+  ACCESS_DENIED: "Acceso Denegado",
+  CONTACT_ADMIN: "Contacta a tu administrador",
+  
+  // Not Found page
+  NOT_FOUND_TITLE: "Página No Encontrada",
+  NOT_FOUND_SUBTITLE: "La página que buscas no existe o ha sido movida.",
+  PAGE_NOT_FOUND: "Página No Encontrada",
+  
+  // Session Expired
+  SESSION_EXPIRED_TITLE: "Sesión Expirada",
+  SESSION_EXPIRED_SUBTITLE: "Tu sesión ha expirado. Por favor, inicia sesión nuevamente.",
+  SESSION_EXPIRED: "Sesión Expirada",
+  LOGIN_AGAIN: "Iniciar Sesión Nuevamente",
+};
+
+export const DIALOG = {
+  // Button texts
+  DELETE: "Eliminar",
+  CONTINUE: "Continuar",
+  ACCEPT: "Aceptar",
+  CONFIRM: "Confirmar",
+  CANCEL: "Cancelar",
+  
+  // Common actions
+  CLOSE: "Cerrar",
+  SAVE: "Guardar",
+  UPDATE: "Actualizar",
+  
+  // Confirmation messages
+  CONFIRM_DELETE: "¿Estás seguro de que deseas eliminar este elemento?",
+  CONFIRM_ACTION: "¿Estás seguro de que deseas realizar esta acción?",
+  
+  // Success messages
+  SUCCESS_TITLE: "Operación Exitosa",
+  SUCCESS_MESSAGE: "La operación se completó correctamente",
+  
+  // Warning messages
+  WARNING_TITLE: "Advertencia",
+  WARNING_MESSAGE: "Esta acción no se puede deshacer",
+  
+  // Info messages
+  INFO_TITLE: "Información",
+  INFO_MESSAGE: "Información importante",
+};
+
+export const TABLE_UI = {
+  // Common table actions
+  EDIT: "Editar",
+  DELETE: "Eliminar",
+  VIEW: "Ver",
+  VIEW_MORE: "Ver más",
+  VIEW_LESS: "Ver menos",
+  
+  // Table headers
+  ACTIONS: "Acciones",
+  NO_DATA: "No hay datos disponibles",
+  LOADING_DATA: "Cargando datos...",
+  
+  // Pagination
+  ROWS_PER_PAGE: "Filas por página",
+  OF: "de",
+  SHOWING: "Mostrando",
+  TO: "a",
+  ENTRIES: "registros",
+  
+  // Sorting
+  SORT_ASC: "Ordenar ascendente",
+  SORT_DESC: "Ordenar descendente",
+  
+  // Selection
+  SELECT_ALL: "Seleccionar todo",
+  DESELECT_ALL: "Deseleccionar todo",
+  SELECTED: "seleccionados",
+  
+  // Filters
+  FILTER: "Filtrar",
+  CLEAR_FILTERS: "Limpiar filtros",
+  SEARCH: "Buscar",
+  SEARCH_PLACEHOLDER: "Buscar...",
+  
+  // Export
+  EXPORT_EXCEL: "Exportar a Excel",
+  EXPORT_PDF: "Exportar a PDF",
+  EXPORT_CSV: "Exportar a CSV",
+  
+  // Status
+  ACTIVE: "Activo",
+  INACTIVE: "Inactivo",
+  ENABLED: "Habilitado",
+  DISABLED: "Deshabilitado",
+  
+  // Common fields
+  NAME: "Nombre",
+  DESCRIPTION: "Descripción",
+  CREATED_AT: "Creado el",
+  UPDATED_AT: "Actualizado el",
+  STATUS: "Estado",
+};
