@@ -25,6 +25,7 @@ import MenuRoundedIcon from "@mui/icons-material/MenuRounded";
 import NotificationsRoundedIcon from "@mui/icons-material/NotificationsRounded";
 import DashboardRoundedIcon from "@mui/icons-material/DashboardRounded";
 import logo from "../../assets/images/logo.png";
+import { MenuItemProps } from "../Menu/MenuComponent";
 
 interface Link {
   label: string;
@@ -61,14 +62,7 @@ const AppBarComponent: React.FC<AppBarComponentProps> = ({
   const [dashboardMenuAnchor, setDashboardMenuAnchor] =
     useState<null | HTMLElement>(null);
 
-  const mapLinksToMenuItems = (
-    linkList: Link[],
-  ): {
-    text: string;
-    onClick?: () => void;
-    icon?: React.ReactElement;
-    subMenuItems?: unknown;
-  }[] =>
+  const mapLinksToMenuItems = (linkList: Link[]): MenuItemProps[] =>
     linkList.map(({ label, path, icon, subLinks, onClick }) => ({
       text: label,
       onClick: onClick || (path ? () => navigate(path) : undefined),

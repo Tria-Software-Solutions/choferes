@@ -244,7 +244,7 @@ const ManageRoles: React.FC<{ isExpanded?: boolean }> = ({
         </Stack>
       );
     }
-    return value;
+    return value as React.ReactNode;
   };
 
   return (

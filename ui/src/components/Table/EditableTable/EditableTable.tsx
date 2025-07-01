@@ -115,7 +115,7 @@ const EditableTable = <T extends object>({
   rowsPerPage,
   setPage,
   setRowsPerPage,
-  renderColumnValue = (_, value) => value,
+  renderColumnValue = (_, value) => value as React.ReactNode,
   validateField = () => true,
   isSaveDisabled,
   noActions,

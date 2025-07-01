@@ -25,6 +25,7 @@ import {
   InputAdornment,
   TextField,
   Typography,
+  useTheme,
 } from "@mui/material";
 import EditableTable from "../../components/Table/EditableTable/EditableTable";
 import SearchBar from "../../components/SearchBar/SearchBar";
@@ -74,6 +75,7 @@ const ManageUsers: React.FC<{ isExpanded?: boolean }> = ({
   const [isCreatingUser, setIsCreatingUser] = useState(false);
   const [isUpdatingUserStatus, setIsUpdatingUserStatus] = useState(false);
   const [loadError, setLoadError] = useState<string | null>(null);
+  const theme = useTheme();
 
   useEffect(() => {
     const loadData = async () => {
@@ -309,7 +311,7 @@ const ManageUsers: React.FC<{ isExpanded?: boolean }> = ({
   };
 
   const handleOpenStatusDialog = useCallback(async (row: unknown) => {
-    setUserToChange(row);
+    setUserToChange(row as User);
     setOpenStatusDialog(true);
   }, []);
 

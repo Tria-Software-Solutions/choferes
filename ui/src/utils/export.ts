@@ -4,32 +4,31 @@ import "jspdf-autotable";
 import { Employee } from "../models/Employee";
 import { HoursWorked } from "../models/HoursWorked";
 import { Schedule } from "../models/Schedule";
+import { WeeklySummary } from "../models/WeeklySummary";
+import { BiweeklySummary } from "../models/BiweeklySummary";
+import { MonthlySummary } from "../models/MonthlySummary";
 import {
-  translateDayOptionsToSpanish,
   translateColumnHeaderToSpanish,
+  translateDayOptionsToSpanish,
   translateDayToAbrevSpanish,
   translatePeriodToSpanish,
 } from "./string";
-import {
-  calculateTotalHoursAndOvertimeForPeriod,
-  calculateTotalHoursAndOvertimeForPeriods,
-} from "./calculation";
+import { parseIsoDateWithoutTimeZone, formatDateWithDay } from "./dates";
 import {
   formatHeaderDateWithYear,
-  formatDate,
-  formatDateWithDay,
   hasMultipleYears,
   hasMultipleBiweeks,
   hasMultipleMonths,
   getInvolvedPeriods,
-  parseIsoDateWithoutTimeZone,
 } from "./dates";
 import { EnglishDayOfWeek } from "./dayAbreviations";
-import { WeeklySummary } from "../models/WeeklySummary";
-import { BiweeklySummary } from "../models/BiweeklySummary";
-import { MonthlySummary } from "../models/MonthlySummary";
+import {
+  calculateTotalHoursAndOvertimeForPeriod,
+  calculateTotalHoursAndOvertimeForPeriods,
+} from "./calculation";
 
-export const exportToExcel = (data: unknown[], fileName: string) => {
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export const exportToExcel = (data: any[], fileName: string) => {
   if (!data || data.length === 0) return;
 
   const isVehicleData = "licensePlate" in data[0];
@@ -63,61 +62,36 @@ export const exportToExcel = (data: unknown[], fileName: string) => {
       if (key === "Fecha") return;
 
       if (Array.isArray(value)) {
-        value = value
-          .map((item) => translateDayOptionsToSpanish(item))
+        translatedRow[translateColumnHeaderToSpanish(key)] = value
+          .map(translateDayOptionsToSpanish)
           .join(", ");
       } else if (typeof value === "boolean") {
-        value = value ? "Sí" : "No";
-      } else if (typeof value === "string") {
-        const isoDateRegex = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}/;
-        if (isoDateRegex.test(value)) {
-          const localDate = parseIsoDateWithoutTimeZone(value);
-          value = formatDate(localDate, false);
-        } else if (Object.keys(translateDayOptionsToSpanish).includes(value)) {
-          value = translateDayOptionsToSpanish(value);
-        }
+        translatedRow[translateColumnHeaderToSpanish(key)] = value
+          ? "Sí"
+          : "No";
+      } else if (value === null || value === undefined) {
+        translatedRow[translateColumnHeaderToSpanish(key)] = "";
+      } else {
+        translatedRow[translateColumnHeaderToSpanish(key)] = value;
       }
-
-      const translatedKey = translateColumnHeaderToSpanish(key);
-      translatedRow[translatedKey] = value;
     });
 
     return translatedRow;
   });
 
-  const columnOrder = Object.keys(translatedData[0] || {});
-  const worksheet = XLSX.utils.json_to_sheet(translatedData, {
-    header: columnOrder,
-  });
-  const workbook = XLSX.utils.book_new();
-  XLSX.utils.book_append_sheet(workbook, worksheet, "Sheet1");
-
-  columnOrder.forEach((key, index) => {
-    const cellAddress = XLSX.utils.encode_cell({ r: 0, c: index });
-    if (!worksheet[cellAddress]) return;
-    worksheet[cellAddress].s = {
-      fill: { fgColor: { rgb: "000000" } },
-      font: { color: { rgb: "FFFFFF" }, bold: true },
-    };
-  });
-
-  worksheet["!cols"] = columnOrder.map((key) => {
-    const maxLength = Math.max(
-      key.length,
-      ...translatedData.map((row) => row[key]?.toString().length || 0),
-    );
-    return { width: maxLength + 2 };
-  });
-
-  XLSX.writeFile(workbook, `${fileName}.xlsx`);
+  const ws = XLSX.utils.json_to_sheet(translatedData);
+  const wb = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb, ws, "Datos");
+  XLSX.writeFile(wb, `${fileName}.xlsx`);
 };
 
 export const exportToPDF = (
-  data: unknown[],
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  data: any[],
   fileName: string,
-  customHeaders?: string[],
+  headers?: unknown,
 ) => {
-  const doc = new jsPDF();
+  if (!data || data.length === 0) return;
 
   const isVehicleData = data.length > 0 && "licensePlate" in data[0];
 
@@ -138,8 +112,8 @@ export const exportToPDF = (
       })
     : data.map(({ id, ...row }) => row);
 
-  const headers = customHeaders
-    ? [customHeaders]
+  const tableHeaders = Array.isArray(headers)
+    ? [headers]
     : [
         Object.keys(cleanedData[0]).map((header) =>
           header === "Fecha" ? "Fecha" : translateColumnHeaderToSpanish(header),
@@ -150,44 +124,33 @@ export const exportToPDF = (
     return Object.entries(row).map(([key, value]) => {
       if (Array.isArray(value)) {
         return value.map(translateDayOptionsToSpanish).join(", ");
-      }
-
-      if (typeof value === "boolean") {
+      } else if (typeof value === "boolean") {
         return value ? "Sí" : "No";
+      } else if (value === null || value === undefined) {
+        return "";
+      } else {
+        return String(value);
       }
-
-      if (
-        typeof value === "string" &&
-        /^\d{4}-\d{2}-\d{2}T/.test(value) &&
-        !value.includes("/")
-      ) {
-        const parsedDate = parseIsoDateWithoutTimeZone(value);
-        return formatDate(parsedDate, false);
-      }
-
-      if (
-        typeof value === "string" &&
-        Object.keys(translateDayOptionsToSpanish).includes(value)
-      ) {
-        return translateDayOptionsToSpanish(value);
-      }
-
-      return value;
     });
   });
 
+  const doc = new jsPDF();
   doc.autoTable({
-    head: headers,
+    head: tableHeaders,
     body: tableData,
+    startY: 20,
+    styles: {
+      fontSize: 8,
+      cellPadding: 2,
+    },
     headStyles: {
-      fillColor: [0, 0, 0],
-      textColor: [255, 255, 255],
+      fillColor: [41, 128, 185],
+      textColor: 255,
       fontStyle: "bold",
     },
-    columnStyles: {
-      0: { cellWidth: "auto" },
+    alternateRowStyles: {
+      fillColor: [245, 245, 245],
     },
-    styles: { cellPadding: 2, fontSize: 10 },
   });
 
   doc.save(`${fileName}.pdf`);
@@ -448,25 +411,29 @@ export const handleExportTableData = (
   };
 };
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export const createExportOptions = (
   excelIcon: JSX.Element,
   pdfIcon: JSX.Element,
   exportToExcel?: (
-    dataForExport: unknown,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    dataForExport: any[],
     fileName: string,
     headers?: unknown,
   ) => unknown,
   exportToPDF?: (
-    dataForExport: unknown,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    dataForExport: any[],
     fileName: string,
     headers?: unknown,
   ) => unknown,
-  dataForExport?: unknown,
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  dataForExport?: any[],
   fileName?: string,
   headers?: unknown,
 ) => {
   const options = [];
-  if (exportToExcel) {
+  if (exportToExcel && dataForExport) {
     options.push({
       label: "Exportar a Excel",
       icon: excelIcon,
@@ -478,7 +445,7 @@ export const createExportOptions = (
         ),
     });
   }
-  if (exportToPDF) {
+  if (exportToPDF && dataForExport) {
     options.push({
       label: "Exportar a PDF",
       icon: pdfIcon,

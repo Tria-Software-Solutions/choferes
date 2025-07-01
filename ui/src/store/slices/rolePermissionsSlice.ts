@@ -67,7 +67,8 @@ export const updateRolePermission = createAsyncThunk(
       return { roleId: args.roleId, permissionIds: args.permissionIds };
     } catch (error: unknown) {
       return rejectWithValue(
-        error.response?.data || "Failed to update role permission",
+        (error as { response?: { data?: string } })?.response?.data ||
+          "Failed to update role permission",
       );
     }
   },
@@ -81,7 +82,8 @@ export const deleteRolePermission = createAsyncThunk(
       return id;
     } catch (error: unknown) {
       return rejectWithValue(
-        error.response?.data || "Failed to delete role permission",
+        (error as { response?: { data?: string } })?.response?.data ||
+          "Failed to delete role permission",
       );
     }
   },

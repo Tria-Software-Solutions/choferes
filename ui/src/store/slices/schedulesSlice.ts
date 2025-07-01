@@ -25,12 +25,11 @@ export const fetchSchedules = createAsyncThunk(
       if (Array.isArray(response)) {
         return response;
       } else if (
-        response &&
         typeof response === "object" &&
         "schedules" in response &&
-        Array.isArray((response as unknown).schedules)
+        Array.isArray((response as { schedules: unknown }).schedules)
       ) {
-        return (response as unknown).schedules;
+        return (response as { schedules: Schedule[] }).schedules;
       } else {
         return [];
       }
