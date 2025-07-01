@@ -15,6 +15,8 @@ import {
   IconButton,
   Typography,
   useTheme,
+  useMediaQuery,
+  Container,
 } from "@mui/material";
 import { useAppNotifications } from "../../components/Snackbar/SnackbarWrapper";
 import { PAGE_TITLE } from "../../constants/constants";
@@ -40,6 +42,10 @@ const Settings: React.FC = () => {
   const { currentUser, setUser } = useAuthContext();
   const { users } = useSelector((state: RootState) => state.users);
   const { showNotification } = useAppNotifications();
+  const theme = useTheme();
+  const isSmallScreen = useMediaQuery(theme.breakpoints.down("sm"));
+  const isMediumScreen = useMediaQuery(theme.breakpoints.down("md"));
+
   const [editFields, setEditFields] = useState({
     firstName: currentUser?.firstName || "",
     lastName: currentUser?.lastName || "",
@@ -56,8 +62,6 @@ const Settings: React.FC = () => {
   const [passwordError, setPasswordError] = useState<string | null>(null);
   const [isEditFormValid, setIsEditFormValid] = useState(false);
   const [isPasswordFormValid, setIsPasswordFormValid] = useState(false);
-
-  const theme = useTheme();
 
   useEffect(() => {
     dispatch(fetchUsers());
@@ -237,22 +241,54 @@ const Settings: React.FC = () => {
   };
 
   return (
-    <Box sx={{ width: "100%", maxWidth: 1200, mx: "auto", p: 3 }}>
-      <Box sx={{ display: "flex", alignItems: "center", mb: 3 }}>
-        <SettingsIcon sx={{ fontSize: 32, mr: 2 }} />
-        <Typography variant="h4" fontWeight={700}>
+    <Container maxWidth="lg" sx={{ py: { xs: 2, sm: 3, md: 4 } }}>
+      <Box
+        sx={{
+          display: "flex",
+          alignItems: "center",
+          mb: { xs: 2, sm: 3, md: 4 },
+        }}
+      >
+        <SettingsIcon
+          sx={{ fontSize: { xs: 28, sm: 32 }, mr: { xs: 1.5, sm: 2 } }}
+        />
+        <Typography
+          variant="h4"
+          fontWeight={700}
+          sx={{ fontSize: { xs: "1.5rem", sm: "2rem", md: "2.125rem" } }}
+        >
           {PAGE_TITLE.SETTINGS}
         </Typography>
       </Box>
-      <Grid container spacing={4} justifyContent="space-between">
-        <Grid item xs={12} md={5}>
-          <Typography variant="h5" fontWeight="bold" mb={1}>
+
+      <Grid
+        container
+        spacing={{ xs: 3, sm: 4, md: 6 }}
+        justifyContent="space-between"
+      >
+        <Grid item xs={12} lg={5}>
+          <Typography
+            variant="h5"
+            fontWeight="bold"
+            sx={{
+              mb: { xs: 0.5, sm: 1 },
+              fontSize: { xs: "1.25rem", sm: "1.5rem" },
+            }}
+          >
             Información Personal
           </Typography>
-          <Typography variant="body2" color="textSecondary" mb={3}>
+          <Typography
+            variant="body2"
+            color="textSecondary"
+            sx={{
+              mb: { xs: 2, sm: 3 },
+              fontSize: { xs: "0.875rem", sm: "1rem" },
+            }}
+          >
             Modifica tu información personal y correo electrónico.
           </Typography>
-          <Grid container spacing={2}>
+
+          <Grid container spacing={{ xs: 1.5, sm: 2 }}>
             <Grid item xs={12} sm={6}>
               <CustomTextField
                 label="Nombre"
@@ -324,6 +360,7 @@ const Settings: React.FC = () => {
               />
             </Grid>
           </Grid>
+
           <Box
             sx={{
               display: "flex",
@@ -333,13 +370,17 @@ const Settings: React.FC = () => {
               borderRadius: 1,
               border: "1px solid",
               borderColor: theme.palette.divider,
-              mb: 2,
-              mt: 2,
+              mb: { xs: 2, sm: 3 },
+              mt: { xs: 2, sm: 3 },
             }}
           >
             <Box sx={{ mr: { xs: 1, sm: 2 }, color: theme.palette.info.main }}>
               <InfoOutlinedIcon
-                sx={{ color: theme.palette.info.main, mr: { xs: 1, sm: 2 } }}
+                sx={{
+                  color: theme.palette.info.main,
+                  mr: { xs: 1, sm: 2 },
+                  fontSize: { xs: "1.25rem", sm: "1.5rem" },
+                }}
               />
             </Box>
             <Box>
@@ -364,20 +405,26 @@ const Settings: React.FC = () => {
               </Box>
             </Box>
           </Box>
+
           <Box
-            sx={{ display: "flex", justifyContent: "flex-end", gap: 2, mt: 2 }}
+            sx={{
+              display: "flex",
+              justifyContent: { xs: "center", sm: "flex-end" },
+              gap: 2,
+              mt: { xs: 2, sm: 3 },
+            }}
           >
             <Button
               variant="contained"
               color="primary"
+              fullWidth={isSmallScreen}
               sx={{
-                flex: 2,
-                height: "56px",
-                px: 4,
-                py: 1.5,
-                fontSize: "1rem",
+                minHeight: { xs: 44, sm: 48 },
+                fontSize: "clamp(0.75rem, 1.25vw, 0.875rem)",
                 fontWeight: 600,
-                minWidth: 140,
+                px: { xs: 2, sm: 4 },
+                py: { xs: 1, sm: 1.5 },
+                minWidth: { xs: "100%", sm: 140 },
               }}
               onClick={handleSaveChanges}
               disabled={!isEditFormValid || !!infoError}
@@ -386,28 +433,50 @@ const Settings: React.FC = () => {
             </Button>
           </Box>
         </Grid>
+
         <Grid
           item
           xs={12}
-          md={1}
+          lg={1}
           display="flex"
           justifyContent="center"
           alignItems="stretch"
+          sx={{ my: { xs: 2, lg: 0 } }}
         >
           <Divider
-            orientation="vertical"
+            orientation={isMediumScreen ? "horizontal" : "vertical"}
             flexItem
-            sx={{ display: { xs: "none", md: "block" } }}
+            sx={{
+              display: { xs: "block", lg: "block" },
+              width: { xs: "100%", lg: "auto" },
+              height: { xs: "auto", lg: "100%" },
+            }}
           />
         </Grid>
-        <Grid item xs={12} md={5}>
-          <Typography variant="h5" fontWeight="bold" mb={1}>
+
+        <Grid item xs={12} lg={5}>
+          <Typography
+            variant="h5"
+            fontWeight="bold"
+            sx={{
+              mb: { xs: 0.5, sm: 1 },
+              fontSize: { xs: "1.25rem", sm: "1.5rem" },
+            }}
+          >
             Cambiar Contraseña
           </Typography>
-          <Typography variant="body2" color="textSecondary" mb={3}>
+          <Typography
+            variant="body2"
+            color="textSecondary"
+            sx={{
+              mb: { xs: 2, sm: 3 },
+              fontSize: { xs: "0.875rem", sm: "1rem" },
+            }}
+          >
             Ingresa una nueva contraseña para tu cuenta.
           </Typography>
-          <Grid container spacing={2}>
+
+          <Grid container spacing={{ xs: 1.5, sm: 2 }}>
             <Grid item xs={12}>
               <CustomTextField
                 label="Nueva contraseña"
@@ -453,6 +522,7 @@ const Settings: React.FC = () => {
               />
             </Grid>
           </Grid>
+
           <Box
             sx={{
               display: "flex",
@@ -462,13 +532,17 @@ const Settings: React.FC = () => {
               borderRadius: 1,
               border: "1px solid",
               borderColor: theme.palette.divider,
-              mb: 2,
-              mt: 2,
+              mb: { xs: 2, sm: 3 },
+              mt: { xs: 2, sm: 3 },
             }}
           >
             <Box sx={{ mr: { xs: 1, sm: 2 }, color: theme.palette.info.main }}>
               <InfoOutlinedIcon
-                sx={{ color: theme.palette.info.main, mr: { xs: 1, sm: 2 } }}
+                sx={{
+                  color: theme.palette.info.main,
+                  mr: { xs: 1, sm: 2 },
+                  fontSize: { xs: "1.25rem", sm: "1.5rem" },
+                }}
               />
             </Box>
             <Box>
@@ -494,20 +568,26 @@ const Settings: React.FC = () => {
               </Box>
             </Box>
           </Box>
+
           <Box
-            sx={{ display: "flex", justifyContent: "flex-end", gap: 2, mt: 2 }}
+            sx={{
+              display: "flex",
+              justifyContent: { xs: "center", sm: "flex-end" },
+              gap: 2,
+              mt: { xs: 2, sm: 3 },
+            }}
           >
             <Button
               variant="contained"
               color="primary"
+              fullWidth={isSmallScreen}
               sx={{
-                flex: 2,
-                height: "56px",
-                px: 4,
-                py: 1.5,
-                fontSize: "1rem",
+                minHeight: { xs: 44, sm: 48 },
+                fontSize: "clamp(0.75rem, 1.25vw, 0.875rem)",
                 fontWeight: 600,
-                minWidth: 140,
+                px: { xs: 2, sm: 4 },
+                py: { xs: 1, sm: 1.5 },
+                minWidth: { xs: "100%", sm: 140 },
               }}
               onClick={handleChangePassword}
               disabled={!isPasswordFormValid}
@@ -517,7 +597,7 @@ const Settings: React.FC = () => {
           </Box>
         </Grid>
       </Grid>
-    </Box>
+    </Container>
   );
 };
 

@@ -173,7 +173,16 @@ const AppBarComponent: React.FC<AppBarComponentProps> = ({
 
         {/* Centro - Navegación Principal (solo desktop) */}
         {!isMobile && (
-          <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+          <Box
+            sx={{
+              display: "flex",
+              alignItems: "center",
+              gap: 1,
+              position: "absolute",
+              left: "50%",
+              transform: "translateX(-50%)",
+            }}
+          >
             <IconButton
               onClick={handleDashboardMenuOpen}
               sx={{
