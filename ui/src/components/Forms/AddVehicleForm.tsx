@@ -9,7 +9,7 @@ import {
   useMediaQuery,
   InputAdornment,
 } from "@mui/material";
-import { BRANDS_LIST, COLORS_LIST } from "../../constants/constants";
+import { BRANDS_LIST, COLORS_LIST, FORMS } from "../../constants/constants";
 import { maskLicensePlate, maskParkingLot } from "../../utils/mask";
 import AddRoundedIcon from "@mui/icons-material/AddRounded";
 import CloseRoundedIcon from "@mui/icons-material/CloseRounded";
@@ -86,35 +86,35 @@ const AddVehicleForm: React.FC<AddVehicleFormProps> = ({
       };
 
       if (!value.trim()) {
-        return "Este campo es requerido";
+        return FORMS.REQUIRED_FIELD;
       }
 
       switch (name) {
         case "ticket":
           if (!regex.number.test(value)) {
-            return "Solo se permiten números";
+            return FORMS.POSITIVE_NUMBER_ONLY;
           }
           if (existingVehicles.some((v) => v.ticket === value)) {
-            return "Este número de boleta ya está registrado";
+            return FORMS.ALREADY_REGISTERED;
           }
           break;
         case "licensePlate":
           if (!regex.plate.test(value.trim())) {
-            return "Formato inválido (ej: ABC-123, 123456, N/A)";
+            return FORMS.INVALID_FORMAT_EXAMPLE;
           }
           if (existingVehicles.some((v) => v.licensePlate === value)) {
-            return "Esta placa ya está registrada";
+            return FORMS.LICENSE_PLATE_ALREADY_REGISTERED;
           }
           break;
         case "brand":
         case "color":
           if (!regex.text.test(value)) {
-            return "Solo se permiten letras, espacios y guiones";
+            return FORMS.LETTERS_SPACES_HYPHENS;
           }
           break;
         case "parkingLot":
           if (!regex.parkingLot.test(value.trim())) {
-            return "Formato inválido (ej: ATP1-123, N/A)";
+            return FORMS.INVALID_FORMAT_PARKING;
           }
           break;
       }

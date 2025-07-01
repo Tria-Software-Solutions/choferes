@@ -5,6 +5,7 @@ import CloseRoundedIcon from "@mui/icons-material/CloseRounded";
 import CustomTextField from "../Textfield/CustomTextField";
 import PersonOutlinedIcon from "@mui/icons-material/PersonOutlined";
 import InfoOutlinedIcon from "@mui/icons-material/InfoOutlined";
+import { FORMS } from "../../constants/constants";
 
 interface AddEmployeeFormProps {
   onSubmit: (employee: { firstName: string; lastName: string }) => void;
@@ -33,19 +34,19 @@ const AddEmployeeForm: React.FC<AddEmployeeFormProps> = ({
     const nameRegex = /^[a-zA-ZáéíóúÁÉÍÓÚñÑüÜëË\s-]+$/;
 
     if (!value.trim()) {
-      return "Este campo es requerido";
+      return FORMS.REQUIRED_FIELD;
     }
 
     if (!nameRegex.test(value)) {
-      return "Solo se permiten letras, espacios y guiones";
+      return FORMS.NAME_LETTERS_ONLY;
     }
 
     if (value.trim().length < 2) {
-      return "Mínimo 2 caracteres";
+      return FORMS.MIN_2_CHARS;
     }
 
     if (value.trim().length > 50) {
-      return "Máximo 50 caracteres";
+      return FORMS.MAX_50_CHARS;
     }
 
     return "";
@@ -85,7 +86,7 @@ const AddEmployeeForm: React.FC<AddEmployeeFormProps> = ({
       <Grid container spacing={3} sx={{ mt: 0 }}>
         <Grid item xs={12} sm={6}>
           <CustomTextField
-            label="Nombre"
+            label={FORMS.FIRST_NAME}
             variant="outlined"
             fullWidth
             placeholder="Ej: Juan Carlos"
@@ -103,7 +104,7 @@ const AddEmployeeForm: React.FC<AddEmployeeFormProps> = ({
 
         <Grid item xs={12} sm={6}>
           <CustomTextField
-            label="Apellido"
+            label={FORMS.LAST_NAME}
             variant="outlined"
             fullWidth
             placeholder="Ej: Pérez González"

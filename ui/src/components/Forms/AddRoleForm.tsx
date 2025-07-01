@@ -17,6 +17,7 @@ import GroupOutlinedIcon from "@mui/icons-material/GroupOutlined";
 import InfoOutlinedIcon from "@mui/icons-material/InfoOutlined";
 import { Permission } from "../../models/Permission";
 import CustomTextField from "../Textfield/CustomTextField";
+import { FORMS } from "../../constants/constants";
 
 interface AddRoleFormProps {
   onSubmit: (role: { name: string; permissions: string[] }) => void;
@@ -59,24 +60,24 @@ const AddRoleForm: React.FC<AddRoleFormProps> = ({
     if (name === "name") {
       const nameValue = value as string;
       if (!nameValue.trim()) {
-        return "El nombre del rol es requerido";
+        return FORMS.LABEL_REQUIRED;
       }
       if (nameValue.trim().length < 2) {
-        return "Mínimo 2 caracteres";
+        return FORMS.MIN_2_CHARS;
       }
       if (nameValue.trim().length > 50) {
-        return "Máximo 50 caracteres";
+        return FORMS.MAX_50_CHARS;
       }
       const nameRegex = /^[a-zA-ZáéíóúÁÉÍÓÚñÑüÜëË\s-]+$/;
       if (!nameRegex.test(nameValue)) {
-        return "Solo se permiten letras, espacios y guiones";
+        return FORMS.NAME_LETTERS_ONLY;
       }
     }
 
     if (name === "permissions") {
       const permissionsValue = value as string[];
       if (permissionsValue.length === 0) {
-        return "Debe seleccionar al menos un permiso";
+        return FORMS.DAYS_REQUIRED;
       }
     }
 
@@ -125,7 +126,7 @@ const AddRoleForm: React.FC<AddRoleFormProps> = ({
       <Grid container spacing={3} sx={{ mt: 0 }}>
         <Grid item xs={12}>
           <CustomTextField
-            label="Nombre del Rol"
+            label={FORMS.LABEL_REQUIRED}
             variant="outlined"
             fullWidth
             placeholder="Ej: Administrador"

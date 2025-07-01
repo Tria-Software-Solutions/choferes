@@ -20,6 +20,7 @@ import MapOutlinedIcon from "@mui/icons-material/MapOutlined";
 import OutlinedInput from "@mui/material/OutlinedInput";
 import InputAdornment from "@mui/material/InputAdornment";
 import InfoOutlinedIcon from "@mui/icons-material/InfoOutlined";
+import { FORMS } from "../../constants/constants";
 
 interface AddCourierFormProps {
   onSubmit: (courier: {
@@ -59,50 +60,50 @@ const AddCourierForm: React.FC<AddCourierFormProps> = ({
   const validateField = (name: string, value: string | number) => {
     if (name === "driver") {
       if (!value || (typeof value === "string" && !value.trim())) {
-        return "El nombre del chofer es requerido";
+        return FORMS.REQUIRED_FIELD;
       }
       if (typeof value === "string" && value.trim().length < 2) {
-        return "Mínimo 2 caracteres";
+        return FORMS.MIN_2_CHARS;
       }
       if (typeof value === "string" && value.trim().length > 100) {
-        return "Máximo 100 caracteres";
+        return FORMS.MAX_100_CHARS;
       }
       const nameRegex = /^[a-zA-ZáéíóúÁÉÍÓÚñÑüÜëË\s-]+$/;
       if (typeof value === "string" && !nameRegex.test(value)) {
-        return "Solo se permiten letras, espacios y guiones";
+        return FORMS.NAME_LETTERS_ONLY;
       }
     }
 
     if (name === "route") {
       if (!value || (typeof value === "string" && !value.trim())) {
-        return "La ruta es requerida";
+        return FORMS.REQUIRED_FIELD;
       }
     }
 
     if (name === "distance") {
       if (typeof value === "number" && value <= 0) {
-        return "La distancia debe ser mayor a 0";
+        return FORMS.DISTANCE_GREATER_0;
       }
       if (typeof value === "number" && value > 1000) {
-        return "La distancia no puede ser mayor a 1000 km";
+        return FORMS.DISTANCE_MAX_1000;
       }
     }
 
     if (name === "trackingNumber") {
       if (!value || (typeof value === "string" && !value.trim())) {
-        return "El número de guía es requerido";
+        return FORMS.REQUIRED_FIELD;
       }
       if (typeof value === "string" && value.trim().length < 3) {
-        return "Mínimo 3 caracteres";
+        return FORMS.TRACKING_MIN_3;
       }
       if (typeof value === "string" && value.trim().length > 50) {
-        return "Máximo 50 caracteres";
+        return FORMS.TRACKING_MAX_50;
       }
     }
 
     if (name === "status") {
       if (!value || (typeof value === "string" && !value.trim())) {
-        return "El estado es requerido";
+        return FORMS.REQUIRED_FIELD;
       }
     }
 

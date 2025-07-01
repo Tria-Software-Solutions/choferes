@@ -1,81 +1,86 @@
 export const ROUTES = {
+  //Routes
+  COURIER_SERVICE: "/courier-service",
+  DASHBOARD: "/dashboard",
+  EMPLOYEES: "/employees",
   LOGIN: "/",
   REGISTER: "register",
   ROLES: "/roles",
-  VEHICLES: "/vehicles",
-  EMPLOYEES: "/employees",
   SCHEDULES: "/schedules",
-  COURIER_SERVICE: "/courier-service",
   SETTINGS: "/settings",
-  DASHBOARD: "/dashboard",
+  VEHICLES: "/vehicles",
 };
 
 export const APPBAR_MENU = {
-  TITLE: "Choferes de Alquiler",
-  TITLE_SIMPLIFIED: "Choferes",
-  ROLES: "Roles",
-  VEHICLES: "Vehículos",
-  MANAGE: "Gestión",
-  EMPLOYEES: "Empleados",
-  SCHEDULES: "Horarios",
+  //Menu items
   COURIER_SERVICE: "Mensajería",
   DASHBOARD: "Administración",
-  SETTINGS: "Configuración",
+  EMPLOYEES: "Empleados",
   LOGOUT: "Cerrar Sesión",
+  MANAGE: "Gestión",
+  ROLES: "Roles",
+  SCHEDULES: "Horarios",
+  SETTINGS: "Configuración",
+  TITLE: "Choferes de Alquiler",
+  TITLE_SIMPLIFIED: "Choferes",
+  VEHICLES: "Vehículos",
 };
 
 export const PAGE_TITLE = {
+  //Pages titles
+  COURIER_SERVICE: "Servicio de Mensajería",
+  COURIER_SERVICE_SIMPLIFIED: "Mensajería",
+  DASHBOARD: "Panel de Control Administrativo",
+  DASHBOARD_SIMPLIFIED: "Administración",
+  EMPLOYEES: "Gestión de Personal",
+  EMPLOYEES_SIMPLIFIED: "Empleados",
   LOGIN: "Iniciar Sesión",
   REGISTER: "Crear Cuenta",
-  COURIER_SERVICE: "Servicio de Mensajería",
   ROLES: "Gestión de Roles",
-  VEHICLES: "Gestión de Vehículos",
-  EMPLOYEES: "Gestión de Personal",
-  SCHEDULES: "Gestión de Horarios",
-  DASHBOARD: "Panel de Control Administrativo",
-  SETTINGS: "Configuración del Sistema",
   ROLES_SIMPLIFIED: "Roles",
-  VEHICLES_SIMPLIFIED: "Vehículos",
-  EMPLOYEES_SIMPLIFIED: "Empleados",
+  SCHEDULES: "Gestión de Horarios",
   SCHEDULES_SIMPLIFIED: "Horarios",
-  COURIER_SERVICE_SIMPLIFIED: "Mensajería",
-  DASHBOARD_SIMPLIFIED: "Administración",
+  SETTINGS: "Configuración del Sistema",
+  VEHICLES: "Gestión de Vehículos",
+  VEHICLES_SIMPLIFIED: "Vehículos",
 };
 
 export const PERMISSIONS = {
-  VIEW_COURIER_SERVICE: "Ver Mensajería",
-  VIEW_ROLES: "Ver Roles",
-  VIEW_EMPLOYEE_ROLES_HOURS: "Ver Horas de Empleados",
-  EDIT_EMPLOYEE_ROLES: "Editar Roles de Empleados",
-  EXPORT_EXCEL_ROLES: "Exportar Excel de Roles de Empleados",
-  EXPORT_PDF_ROLES: "Exportar PDF de Roles de Empleados",
-  VIEW_EMPLOYEES: "Ver Empleados",
+  //Permissions
   CREATE_EMPLOYEES: "Crear Empleado",
-  EDIT_EMPLOYEES: "Editar Empleado",
-  DELETE_EMPLOYEES: "Eliminar Empleado",
-  EXPORT_EXCEL_EMPLOYEES: "Exportar Excel de Empleados",
-  EXPORT_PDF_EMPLOYEES: "Exportar PDF de Empleados",
-  VIEW_SCHEDULES: "Ver Horarios",
+  CREATE_ROLE: "Crear Rol",
   CREATE_SCHEDULES: "Crear Horario",
-  EDIT_SCHEDULES: "Editar Horario",
-  DELETE_SCHEDULES: "Eliminar Horario",
-  EXPORT_EXCEL_SCHEDULES: "Exportar Excel de Horarios",
-  EXPORT_PDF_SCHEDULES: "Exportar PDF de Horarios",
-  VIEW_VEHICLES: "Ver Vehículos",
   CREATE_VEHICLES: "Crear Vehículo",
-  EDIT_VEHICLES: "Editar Vehículo",
+  DELETE_EMPLOYEES: "Eliminar Empleado",
+  DELETE_ROLE: "Eliminar Rol",
+  DELETE_SCHEDULES: "Eliminar Horario",
   DELETE_VEHICLES: "Eliminar Vehículo",
+  EDIT_EMPLOYEE_ROLES: "Editar Roles de Empleados",
+  EDIT_EMPLOYEES: "Editar Empleado",
+  EDIT_ROLE: "Editar Rol",
+  EDIT_SCHEDULES: "Editar Horario",
+  EDIT_USER: "Editar Usuario",
+  EDIT_VEHICLES: "Editar Vehículo",
+  ENABLE_DISABLE_USER: "Habilitar/Deshabilitar Usuario",
+  EXPORT_EXCEL_EMPLOYEES: "Exportar Excel de Empleados",
+  EXPORT_EXCEL_ROLES: "Exportar Excel de Roles de Empleados",
+  EXPORT_EXCEL_SCHEDULES: "Exportar Excel de Horarios",
   EXPORT_EXCEL_VEHICLES: "Exportar Excel de Vehículos",
+  EXPORT_PDF_EMPLOYEES: "Exportar PDF de Empleados",
+  EXPORT_PDF_ROLES: "Exportar PDF de Roles de Empleados",
+  EXPORT_PDF_SCHEDULES: "Exportar PDF de Horarios",
   EXPORT_PDF_VEHICLES: "Exportar PDF de Vehículos",
   VIEW_ADMIN: "Ver Admin",
-  EDIT_USER: "Editar Usuario",
-  ENABLE_DISABLE_USER: "Habilitar/Deshabilitar Usuario",
-  CREATE_ROLE: "Crear Rol",
-  EDIT_ROLE: "Editar Rol",
-  DELETE_ROLE: "Eliminar Rol",
+  VIEW_COURIER_SERVICE: "Ver Mensajería",
+  VIEW_EMPLOYEE_ROLES_HOURS: "Ver Horas de Empleados",
+  VIEW_EMPLOYEES: "Ver Empleados",
+  VIEW_ROLES: "Ver Roles",
+  VIEW_SCHEDULES: "Ver Horarios",
+  VIEW_VEHICLES: "Ver Vehículos",
 };
 
 export const DAYS_LIST = [
+  //Weekdays
   { value: "monday", label: "Lunes" },
   { value: "tuesday", label: "Martes" },
   { value: "wednesday", label: "Miércoles" },
@@ -86,12 +91,15 @@ export const DAYS_LIST = [
 ];
 
 export const OVERTIME = {
-  WEEKLY: 48,
+  //Overtime
   BIWEEKLY: 96,
   MONTHLY: 192,
+  WEEKLY: 48,
 };
 
+
 export const COLORS_LIST = [
+  //Colors
   { value: "Blanco", label: "Blanco" },
   { value: "Negro", label: "Negro" },
   { value: "Gris", label: "Gris" },
@@ -114,6 +122,7 @@ export const COLORS_LIST = [
 ];
 
 export const BRANDS_LIST = [
+  //Brands
   { value: "Acura", label: "Acura" },
   { value: "Alfa Romeo", label: "Alfa Romeo" },
   { value: "Aston Martin", label: "Aston Martin" },
@@ -180,137 +189,177 @@ export const BRANDS_LIST = [
 ];
 
 export const STATE = {
+//States
   FREE: "Libre",
 };
 
 export const TABLE = {
+  EDIT: "Editar",
+  SAVE: "Guardar",
+  CANCEL: "Cancelar",
+  DELETE: "Eliminar",
+  ACTIONS: "Acciones",
+  NO_DATA: "No hay registros para mostrar",
+  LOADING: "Cargando...",
   ROWS_PER_PAGE: "Filas por página",
+  PAGE: "Página",
+  OF: "de",
+  PERMISSIONS_LABEL: "Permisos:",
+  MORE: "+{n} más",
+  SEARCH_PLACEHOLDER: "Buscar...",
+  CONFIRM_DELETE_TITLE: "¿Eliminar registro?",
+  CONFIRM_DELETE_TEXT: "¿Estás seguro de que deseas eliminar este registro? Esta acción no se puede deshacer.",
+  CONFIRM_DELETE_ACCEPT: "Sí, eliminar",
+  CONFIRM_DELETE_CANCEL: "Cancelar",
+  TOOLTIP_EDIT: "Editar",
+  TOOLTIP_DELETE: "Eliminar",
+  TOOLTIP_SAVE: "Guardar cambios",
+  TOOLTIP_CANCEL: "Cancelar edición",
+  TOOLTIP_PASSWORD: "Cambiar contraseña",
+  TOOLTIP_STATUS: "Activar/Desactivar",
+  ENABLE: "Activar",
+  DISABLE: "Desactivar",
+  CHANGE_PASSWORD: "Cambiar contraseña",
 };
 
 export const SELECTOR_TABLE = {
-  // Headers
-  EMPLOYEES: "Empleados",
-  
-  // Period options
+  PERIOD_WEEKLY: "Semanal",
+  PERIOD_BIWEEKLY: "Quincenal",
+  PERIOD_MONTHLY: "Mensual",
   WEEKLY: "Semanal",
-  BIWEEKLY: "Quincenal", 
+  BIWEEKLY: "Quincenal",
   MONTHLY: "Mensual",
-  
-  // Period labels
   WEEKS: "Semanas",
   WEEK: "Semana",
   BIWEEKS: "Quincenas",
   BIWEEK: "Quincena",
-  
-  // Menu sections
+  EMPLOYEES: "Empleados",
   LOCATIONS: "Ubicaciones",
   SPECIAL_SCHEDULES: "Horarios Especiales",
   OTHER: "Otro",
-  
-  // Hours display
-  HOURS: "horas",
+  TOTAL_HOURS: "Horas totales",
+  OVERTIME: "Horas extra",
   OVERTIME_HOURS: "Horas Extra",
-  
-  // Dialog titles and content
+  NO_EMPLOYEES: "No hay empleados para mostrar",
+  ADJUST_TIME: "Ajustar tiempo",
+  INFO: "Información",
+  CLOSE: "Cerrar",
+  ADJUST: "Ajustar",
   ADJUST_HOURS: "Ajuste de Horas",
-  HOURS_TO_ADJUST: "Horas a ajustar",
-  ADJUSTMENT_INFO: "Información de Ajuste",
-  ADJUSTMENT_DESCRIPTION: "Ingresa la cantidad de horas a sumar o restar. Solo se permiten valores positivos.",
-  
-  // Dialog messages
+  HOURS: "Horas",
+  MINUTES: "Minutos",
+  SEARCH_EMPLOYEE: "Buscar empleado...",
+  SELECT_PERIOD: "Seleccionar periodo",
+  TOOLTIP_INFO: "Ver información del empleado",
+  TOOLTIP_ADJUST: "Ajustar horas trabajadas",
   WEEKLY_HOURS_MESSAGE: "Total de horas trabajadas en la semana:",
   BIWEEKLY_HOURS_MESSAGE: "Total de horas trabajadas en la quincena:",
   MONTHLY_HOURS_MESSAGE: "Total de horas trabajadas en el mes:",
-  
-  // Validation messages
+  HOURS_TO_ADJUST: "Horas a ajustar",
   POSITIVE_NUMBER_REQUIRED: "Debe ser un número positivo",
-  
-  // Buttons
+  ADJUSTMENT_INFO: "Información de Ajuste",
+  ADJUSTMENT_DESCRIPTION: "Ingresa la cantidad de horas a sumar o restar. Solo se permiten valores positivos.",
   CANCEL: "Cancelar",
   ADD: "Sumar",
   SUBTRACT: "Restar",
-  
-  // Date format helpers
-  FROM: "del",
-  TO: "al",
 };
 
 export const FORMS = {
-  // Common validation messages
+  // Etiquetas y validaciones generales
+  ALREADY_REGISTERED: "Ya está registrado",
+  DAYS_REQUIRED: "Debe seleccionar al menos un día",
+  DISTANCE_GREATER_0: "La distancia debe ser mayor a 0",
+  DISTANCE_MAX_1000: "La distancia no puede ser mayor a 1000 km",
+  EMAIL_EXISTS: "El correo electrónico ya existe",
+  EMAIL_FORMAT: "El correo electrónico no tiene un formato válido",
+  EMAIL_INVALID: "El correo electrónico no tiene un formato válido",
+  EMAIL_REQUIRED: "El correo electrónico es requerido",
+  FIRST_NAME: "Nombre",
+  FIRST_NAME_REQUIRED: "El nombre es requerido",
+  HOURS_INVALID: "Las horas deben ser un número entre 1 y 24",
+  HOURS_REQUIRED: "Las horas son requeridas",
+  INVALID_FORMAT_EXAMPLE: "Formato inválido. Ejemplo: 123ABC",
+  INVALID_FORMAT_PARKING: "Formato inválido. Ejemplo: A-12",
+  LABEL_REQUIRED: "Etiqueta requerida",
+  LAST_NAME: "Apellido",
+  LAST_NAME_REQUIRED: "El apellido es requerido",
+  LETTERS_SPACES_HYPHENS: "Solo se permiten letras, espacios y guiones",
+  LICENSE_PLATE_ALREADY_REGISTERED: "La placa ya está registrada",
+  LOGIN_DESCRIPTION: "Ingresa tus credenciales para acceder al sistema",
+  MAX_100_CHARS: "No puede tener más de 100 caracteres",
+  MAX_30_CHARS: "No puede tener más de 30 caracteres",
+  MAX_50_CHARS: "No puede tener más de 50 caracteres",
+  MIN_2_CHARS: "Debe tener al menos 2 caracteres",
+  MIN_3_CHARS: "Debe tener al menos 3 caracteres",
+  NAME_LETTERS_ONLY: "Solo se permiten letras, espacios y guiones",
+  PASSWORD_COMPLEXITY: "La contraseña debe tener al menos 8 caracteres, una mayúscula, una minúscula, un número y un carácter especial",
+  PASSWORD_INVALID: "La contraseña debe tener al menos 8 caracteres, una mayúscula, una minúscula, un número y un carácter especial",
+  PASSWORD_REQUIRED: "La contraseña es requerida",
+  PASSWORDS_DONT_MATCH: "Las contraseñas no coinciden",
+  PASSWORDS_REQUIRED: "Ambas contraseñas son requeridas",
+  POSITIVE_NUMBER_ONLY: "Solo se permiten números positivos",
   REQUIRED_FIELD: "Este campo es requerido",
-  POSITIVE_NUMBER_ONLY: "Solo se permiten números",
-  ALREADY_REGISTERED: "Este elemento ya está registrado",
-  MIN_LENGTH: "Debe tener al menos {min} caracteres",
-  MAX_LENGTH: "Debe tener máximo {max} caracteres",
-  INVALID_FORMAT: "Formato inválido",
+  ROLE_REQUIRED: "El rol es requerido",
+  TRACKING_MAX_50: "No puede tener más de 50 caracteres",
+  TRACKING_MIN_3: "Debe tener al menos 3 caracteres",
+  USERNAME_EXISTS: "El nombre de usuario ya existe",
+  USERNAME_FORMAT: "El usuario debe comenzar con una letra y tener entre 3 y 20 caracteres",
+  USERNAME_INVALID: "El usuario debe comenzar con una letra y tener 3-20 caracteres",
+  USERNAME_REQUIRED: "El usuario es requerido",
+  USERNAME_START_LETTER: "El usuario debe comenzar con una letra",
+};
+
+export const NOTIFICATIONS = {
+  // Success messages
+  USER_CREATED: "Usuario creado exitosamente",
+  USER_UPDATED: "Usuario actualizado exitosamente",
+  USER_DELETED: "Usuario eliminado exitosamente",
+  EMPLOYEE_CREATED: "El registro del empleado fue exitoso",
+  EMPLOYEE_UPDATED: "La actualización del empleado fue exitosa",
+  EMPLOYEE_DELETED: "Empleado eliminado exitosamente",
+  SCHEDULE_CREATED: "El registro del horario fue exitoso",
+  SCHEDULE_UPDATED: "La actualización del horario fue exitosa",
+  SCHEDULE_DELETED: "Horario eliminado exitosamente",
+  VEHICLE_CREATED: "El registro del vehículo fue exitoso",
+  VEHICLE_UPDATED: "La actualización del vehículo fue exitosa",
+  VEHICLE_DELETED: "Vehículo eliminado exitosamente",
+  ROLE_CREATED: "El registro del rol fue exitoso",
+  ROLE_UPDATED: "La actualización del rol fue exitosa",
+  ROLE_DELETED: "Rol eliminado exitosamente",
+  USER_REGISTERED: "El registro del usuario fue exitoso",
+  DATA_UPDATED: "La actualización de lo datos fue exitosa",
+  PASSWORD_UPDATED: "La actualización de la contraseña fue exitosa",
   
-  // Common buttons
-  ADD: "Agregar",
-  ADDING: "Agregando...",
-  SAVE: "Guardar",
-  SAVING: "Guardando...",
-  CANCEL: "Cancelar",
-  DELETE: "Eliminar",
-  DELETING: "Eliminando...",
-  EDIT: "Editar",
-  EDITING: "Editando...",
-  
-  // Courier form
-  DRIVER: "Chofer",
-  DRIVER_REQUIRED: "El nombre del chofer es requerido",
-  DRIVER_MIN_LENGTH: "El nombre debe tener al menos 2 caracteres",
-  DRIVER_MAX_LENGTH: "El nombre debe tener máximo 100 caracteres",
-  DRIVER_INVALID_FORMAT: "El nombre solo puede contener letras y espacios",
-  
-  ROUTE: "Ruta",
-  ROUTE_REQUIRED: "La ruta es requerida",
-  ROUTE_OPTIONS: {
-    GAM: "GAM",
-    GAM_EXPRESS: "GAM Express",
-    RURAL: "Rural",
-  },
-  
-  DISTANCE: "Distancia",
-  DISTANCE_INVALID: "La distancia debe ser mayor a 0",
-  DISTANCE_MAX: "La distancia no puede ser mayor a 1000 km",
-  
-  TRACKING_NUMBER: "Número de Guía",
-  TRACKING_NUMBER_REQUIRED: "El número de guía es requerido",
-  TRACKING_NUMBER_MIN_LENGTH: "El número de guía debe tener al menos 3 caracteres",
-  TRACKING_NUMBER_MAX_LENGTH: "El número de guía debe tener máximo 50 caracteres",
-  
-  STATUS: "Estado",
-  STATUS_REQUIRED: "El estado es requerido",
-  STATUS_OPTIONS: {
-    DISPATCHED: "Despachado",
-    IN_TRANSIT: "En Tránsito",
-    DELIVERED: "Entregado",
-  },
-  
-  // Role form
-  ROLE_NAME: "Nombre del Rol",
-  ROLE_NAME_REQUIRED: "El nombre del rol es requerido",
-  PERMISSIONS: "Permisos",
-  PERMISSIONS_REQUIRED: "Debe seleccionar al menos un permiso",
-  
-  // Vehicle form
-  TICKET: "Boleta",
-  TICKET_NUMBERS_ONLY: "Solo se permiten números",
-  TICKET_ALREADY_REGISTERED: "Este número de boleta ya está registrado",
-  LICENSE_PLATE: "Placa",
-  LICENSE_PLATE_ALREADY_REGISTERED: "Esta placa ya está registrada",
+  // Error messages
+  USER_CREATE_ERROR: "Error al crear el usuario",
+  USER_UPDATE_ERROR: "Error al actualizar el usuario",
+  USER_DELETE_ERROR: "Error al eliminar el usuario",
+  EMPLOYEE_CREATE_ERROR: "Ha ocurrido un error al registrar el empleado",
+  EMPLOYEE_UPDATE_ERROR: "Ha ocurrido un error al actualizar el empleado",
+  EMPLOYEE_DELETE_ERROR: "Error al eliminar el empleado",
+  SCHEDULE_CREATE_ERROR: "Ha ocurrido un error al registrar el horario",
+  SCHEDULE_UPDATE_ERROR: "Ha ocurrido un error al actualizar el horario",
+  SCHEDULE_DELETE_ERROR: "Error al eliminar el horario",
+  VEHICLE_CREATE_ERROR: "Ha ocurrido un error al registrar el vehículo",
+  VEHICLE_UPDATE_ERROR: "Ha ocurrido un error al actualizar el vehículo",
+  VEHICLE_DELETE_ERROR: "Error al eliminar el vehículo",
+  ROLE_CREATE_ERROR: "Ha ocurrido un error al registrar el rol",
+  ROLE_UPDATE_ERROR: "Ha ocurrido un error al actualizar el rol",
+  ROLE_DELETE_ERROR: "Error al eliminar el rol",
+  USER_REGISTER_ERROR: "Error al registrar usuario",
+  USER_REGISTER_ERROR_DETAIL: "Ha ocurrido un error al registrar el usuario",
+  DATA_UPDATE_ERROR: "Ha ocurrido un error al actualizar los datos",
+  PASSWORD_UPDATE_ERROR: "Ha ocurrido un error al actualizar la contraseña",
+  ROLE_NOT_FOUND: "Rol no encontrado",
+  RETRY_MESSAGE: "Intenta de nuevo",
 };
 
 export const AUTH = {
-  // Login
   EMAIL_OR_USERNAME: "Correo Electrónico o Usuario",
   EMAIL_OR_USERNAME_REQUIRED: "El correo electrónico o usuario es requerido",
   PASSWORD: "Contraseña",
-  PASSWORD_REQUIRED: "La contraseña es requerida",
   LOGIN: "Iniciar Sesión",
   LOGGING_IN: "Iniciando Sesión...",
-  
-  // Settings
   PERSONAL_INFO: "Información Personal",
   PERSONAL_INFO_DESCRIPTION: "Actualiza tu información personal y credenciales de acceso",
   FIRST_NAME: "Nombre",
@@ -321,7 +370,6 @@ export const AUTH = {
   UPDATING_PERSONAL_INFO: "Actualizando...",
   PERSONAL_INFO_SUCCESS: "La actualización de lo datos fue exitosa",
   PERSONAL_INFO_ERROR: "Ha ocurrido un error al actualizar los datos",
-  
   CHANGE_PASSWORD: "Cambiar Contraseña",
   CHANGE_PASSWORD_DESCRIPTION: "Actualiza tu contraseña para mantener tu cuenta segura",
   NEW_PASSWORD: "Nueva contraseña",
@@ -330,10 +378,11 @@ export const AUTH = {
   UPDATING_PASSWORD: "Actualizando...",
   PASSWORD_SUCCESS: "La actualización de la contraseña fue exitosa",
   PASSWORD_ERROR: "Ha ocurrido un error al actualizar la contraseña",
-  
-  // Common
   SHOW_PASSWORD: "Mostrar contraseña",
   HIDE_PASSWORD: "Ocultar contraseña",
+  REGISTER_DESCRIPTION: "Completa el formulario para crear una cuenta",
+  REGISTER_SUCCESS: "El registro del usuario fue exitoso",
+  REGISTER_ERROR: "Error al registrar usuario",
 };
 
 export const MANAGEMENT = {
@@ -522,4 +571,14 @@ export const TABLE_UI = {
   CREATED_AT: "Creado el",
   UPDATED_AT: "Actualizado el",
   STATUS: "Estado",
+};
+
+export const DASHBOARD = {
+  USERS: "Usuarios",
+  ROLES: "Roles",
+  PERMISSIONS: "Permisos",
+};
+
+export const SNACKBAR = {
+  CLOSE: "Cerrar",
 };

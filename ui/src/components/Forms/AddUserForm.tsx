@@ -24,6 +24,7 @@ import OutlinedInput from "@mui/material/OutlinedInput";
 import InfoOutlinedIcon from "@mui/icons-material/InfoOutlined";
 import { Role } from "../../models/Role";
 import CustomTextField from "../Textfield/CustomTextField";
+import { FORMS } from '../../constants/constants';
 
 interface AddUserFormProps {
   onSubmit: (user: {
@@ -74,46 +75,46 @@ const AddUserForm: React.FC<AddUserFormProps> = ({
       /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
 
     if (!value.trim()) {
-      return "Este campo es requerido";
+      return FORMS.REQUIRED_FIELD;
     }
 
     switch (name) {
       case "firstName":
       case "lastName":
         if (!nameRegex.test(value)) {
-          return "Solo se permiten letras, espacios y guiones";
+          return FORMS.NAME_LETTERS_ONLY;
         }
         if (value.trim().length < 2) {
-          return "Mínimo 2 caracteres";
+          return FORMS.MIN_2_CHARS;
         }
         if (value.trim().length > 50) {
-          return "Máximo 50 caracteres";
+          return FORMS.MAX_50_CHARS;
         }
         break;
       case "email":
         if (!emailRegex.test(value)) {
-          return "Email inválido";
+          return FORMS.EMAIL_INVALID;
         }
         break;
       case "username":
         if (!usernameRegex.test(value)) {
-          return "Solo se permiten letras, números, puntos, guiones y guiones bajos";
+          return FORMS.USERNAME_FORMAT;
         }
         if (value.trim().length < 3) {
-          return "Mínimo 3 caracteres";
+          return FORMS.MIN_3_CHARS;
         }
         if (value.trim().length > 30) {
-          return "Máximo 30 caracteres";
+          return FORMS.MAX_30_CHARS;
         }
         break;
       case "password":
         if (!passwordRegex.test(value)) {
-          return "La contraseña debe tener al menos 8 caracteres, una mayúscula, una minúscula, un número y un carácter especial";
+          return FORMS.PASSWORD_INVALID;
         }
         break;
       case "roleName":
         if (!value.trim()) {
-          return "Debe seleccionar un rol";
+          return FORMS.ROLE_REQUIRED;
         }
         break;
     }
