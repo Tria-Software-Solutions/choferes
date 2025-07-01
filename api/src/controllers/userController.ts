@@ -20,7 +20,19 @@ export const authenticateUser = async (req: Request, res: Response) => {
       password,
       res,
     );
-    return res.status(200).json({ user, accessToken, refreshToken });
+
+    const userPermissions = user.roles?.flatMap((role) => 
+      role.permissions?.map((permission) => permission.name)
+    ) || [];
+
+    const uniquePermissions = Array.from(new Set(userPermissions));
+
+    return res.status(200).json({ 
+      user, 
+      accessToken, 
+      refreshToken, 
+      userPermissions: uniquePermissions 
+    });
   } catch (error: unknown) {
     if (typeof error === "object" && error && "message" in error) {
       const errMsg = (error as { message: string }).message;
