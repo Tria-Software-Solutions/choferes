@@ -511,6 +511,7 @@ const SelectorTable: React.FC<SelectorTableProps> = React.memo(
                         justifyContent="space-between"
                         sx={{
                           whiteSpace: isSmallScreen ? "break-spaces" : "nowrap",
+                          gap: 0,
                         }}
                       >
                         <Typography variant="body2">
@@ -521,8 +522,10 @@ const SelectorTable: React.FC<SelectorTableProps> = React.memo(
                         ) && (
                           <IconButton
                             onClick={() => onInfoClick && onInfoClick(employee)}
+                            size="small"
+                            sx={{ ml: 0, p: 0.5 }}
                           >
-                            <InfoOutlinedIcon />
+                            <InfoOutlinedIcon fontSize="small" />
                           </IconButton>
                         )}
                       </Box>
@@ -684,7 +687,8 @@ const SelectorTable: React.FC<SelectorTableProps> = React.memo(
                               justifyContent: "space-between",
                               alignItems: "center",
                               height: "64px",
-                              paddingX: 2,
+                              paddingX: 0,
+                              gap: 0,
                             }}
                           >
                             <Box
@@ -703,7 +707,7 @@ const SelectorTable: React.FC<SelectorTableProps> = React.memo(
                               sx={{
                                 display: "flex",
                                 alignItems: "center",
-                                ml: 1,
+                                ml: 0,
                               }}
                             >
                               <Tooltip title="Horas Extra" arrow>
