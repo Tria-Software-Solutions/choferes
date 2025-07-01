@@ -45,7 +45,7 @@ const SearchBar: React.FC<SearchBarProps> = ({
           borderColor: theme.palette.primary.main,
           boxShadow: `0 0 0 2px ${theme.palette.primary.main}20`,
         },
-        ...sx,
+        ...(typeof sx === "object" && sx !== null ? sx : {}),
       }}
     >
       {value ? (

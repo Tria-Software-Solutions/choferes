@@ -33,8 +33,11 @@ export const fetchUsers = createAsyncThunk(
       const response = await UserService.getUsers();
       if (Array.isArray(response)) {
         return response;
-      } else if (response && Array.isArray((response as unknown).users)) {
-        return (response as unknown).users;
+      } else if (
+        response &&
+        Array.isArray((response as { users: unknown }).users)
+      ) {
+        return (response as { users: User[] }).users;
       } else {
         return [];
       }

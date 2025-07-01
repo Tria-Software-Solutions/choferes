@@ -11,7 +11,7 @@ import {
   useTheme,
 } from "@mui/material";
 
-interface MenuItemProps {
+export interface MenuItemProps {
   text: string;
   onClick?: () => void;
   icon?: React.ReactElement<SvgIconProps> | React.ReactElement;

@@ -31,8 +31,11 @@ export const fetchVehicles = createAsyncThunk(
       const response = await VehicleService.getVehicles(page, perPage);
       if (Array.isArray(response)) {
         return response;
-      } else if (response && Array.isArray((response as unknown).vehicles)) {
-        return (response as unknown).vehicles;
+      } else if (
+        response &&
+        Array.isArray((response as { vehicles: unknown }).vehicles)
+      ) {
+        return (response as { vehicles: Vehicle[] }).vehicles;
       } else {
         return [];
       }
@@ -52,7 +55,8 @@ export const fetchVehiclesByDate = createAsyncThunk(
       return vehicles;
     } catch (error: unknown) {
       return rejectWithValue(
-        error.response?.data || "Failed to fetch vehicles by date",
+        (error as { response?: { data?: string } })?.response?.data ||
+          "Failed to fetch vehicles by date",
       );
     }
   },

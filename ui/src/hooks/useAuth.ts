@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { useAuth as useAuthContext } from "../context/AuthContext";
-import { loginUser } from "../services/userService";
+import { useAuthContext } from "../context/AuthContext";
+import { authenticateUser as authenticateUserService } from "../services/userService";
 
 export const useAuth = () => {
   const [authError, setAuthError] = useState<string>("");
@@ -10,8 +10,13 @@ export const useAuth = () => {
 
   const authenticateUser = async (identifier: string, password: string) => {
     try {
-      const response = await loginUser(identifier, password);
-      login(response.user, response.token);
+      const response = await authenticateUserService(identifier, password);
+      login(
+        response.accessToken,
+        response.refreshToken,
+        response.user,
+        response.userPermissions || [],
+      );
       navigate("/dashboard");
     } catch (error: unknown) {
       let errorMessage = "Error de autenticación";
