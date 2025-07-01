@@ -778,6 +778,12 @@ const RolesPage: React.FC = () => {
           onClose={() => setOpenSummaryDialogEmployee(null)}
           maxWidth="md"
           fullWidth
+          PaperProps={{
+            sx: {
+              border: "2px solid #fff",
+              borderRadius: 3,
+            },
+          }}
         >
           <Box
             sx={{

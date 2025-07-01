@@ -88,8 +88,8 @@ const DialogComponent: React.FC<ConfirmationDialogProps> = ({
       fullWidth
       PaperProps={{
         sx: {
-          border: "1px solid #cccccc",
-          borderRadius: 2,
+          border: "2px solid #fff",
+          borderRadius: 3,
           minWidth: 400,
           maxWidth: 500,
           boxShadow: 3,

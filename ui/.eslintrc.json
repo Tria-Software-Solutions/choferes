@@ -5,10 +5,7 @@
   },
   "extends": [
     "react-app",
-    "react-app/jest",
-    "plugin:react/recommended",
-    "plugin:@typescript-eslint/recommended",
-    "plugin:prettier/recommended"
+    "react-app/jest"
   ],
   "parser": "@typescript-eslint/parser",
   "parserOptions": {
@@ -18,24 +15,22 @@
     "ecmaVersion": 12,
     "sourceType": "module"
   },
-  "plugins": ["react", "@typescript-eslint", "prettier"],
+  "plugins": ["react"],
   "rules": {
-    "prettier/prettier": "error",
     "react/react-in-jsx-scope": "off",
     "no-console": "warn",
     "react/prop-types": "off"
   },
-  "overrides": [
-    {
-      "files": ["*.ts", "*.tsx"],
-      "rules": {
-        "react/prop-types": "off"
-      }
-    }
-  ],
   "settings": {
     "react": {
       "version": "detect"
     }
-  }
+  },
+  "ignorePatterns": [
+    "node_modules/",
+    "build/",
+    "dist/",
+    "*.min.js",
+    "*.bundle.js"
+  ]
 }
