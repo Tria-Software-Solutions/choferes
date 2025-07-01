@@ -12,6 +12,7 @@ import {
 import TimerOffIcon from "@mui/icons-material/TimerOff";
 import LoginIcon from "@mui/icons-material/Login";
 import SecurityIcon from "@mui/icons-material/Security";
+import { ERRORS } from "../constants/constants";
 
 const SessionExpired: React.FC = () => {
   const { logoutUser } = useAuth();
@@ -87,7 +88,7 @@ const SessionExpired: React.FC = () => {
                   fontSize: { xs: "2rem", sm: "2.5rem", md: "3rem" },
                 }}
               >
-                Sesión Expirada
+                {ERRORS.SESSION_EXPIRED_TITLE}
               </Typography>
 
               <Typography
@@ -99,7 +100,7 @@ const SessionExpired: React.FC = () => {
                   fontSize: { xs: "1.1rem", sm: "1.25rem", md: "1.5rem" },
                 }}
               >
-                Tu sesión ha caducado
+                {ERRORS.SESSION_EXPIRED_SUBTITLE}
               </Typography>
 
               <Typography
@@ -112,8 +113,7 @@ const SessionExpired: React.FC = () => {
                   maxWidth: 500,
                 }}
               >
-                Por razones de seguridad, tu sesión ha expirado automáticamente.
-                Por favor, inicia sesión nuevamente para continuar.
+                {ERRORS.SESSION_EXPIRED_DESCRIPTION}
               </Typography>
 
               <Box
@@ -140,9 +140,9 @@ const SessionExpired: React.FC = () => {
                     px: { xs: 2, sm: 4 },
                     py: { xs: 1, sm: 1.5 },
                   }}
-                  aria-label="Iniciar sesión"
+                  aria-label={ERRORS.SESSION_EXPIRED_BUTTON}
                 >
-                  Iniciar Sesión
+                  {ERRORS.SESSION_EXPIRED_BUTTON}
                 </Button>
               </Box>
 
@@ -156,7 +156,7 @@ const SessionExpired: React.FC = () => {
                   fontSize: { xs: "0.75rem", sm: "0.875rem" },
                 }}
               >
-                Esta es una medida de seguridad para proteger tu cuenta
+                {ERRORS.SESSION_EXPIRED_CAPTION}
               </Typography>
             </Box>
           </Slide>

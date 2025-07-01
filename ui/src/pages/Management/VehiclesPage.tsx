@@ -38,7 +38,7 @@ import {
   exportToPDF,
 } from "../../utils/export";
 import { capitalizeFirstLetter } from "../../utils/string";
-import { PAGE_TITLE, PERMISSIONS } from "../../constants/constants";
+import { PAGE_TITLE, PERMISSIONS, VEHICLES_PAGE } from "../../constants/constants";
 import DirectionsCarIcon from "@mui/icons-material/DirectionsCar";
 import DownloadRoundedIcon from "@mui/icons-material/DownloadRounded";
 import ArrowBackIosNewRoundedIcon from "@mui/icons-material/ArrowBackIosNewRounded";
@@ -416,7 +416,7 @@ const VehiclesPage: React.FC = () => {
               <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
                 {filteredVehicles && (
                   <SearchBar
-                    placeholder="Buscar vehículo"
+                    placeholder={VEHICLES_PAGE.SEARCH_PLACEHOLDER}
                     value={filter}
                     onChange={handleFilterChange}
                     sx={{ flex: 1 }}
@@ -461,7 +461,7 @@ const VehiclesPage: React.FC = () => {
                     adapterLocale={es}
                   >
                     <DatePicker
-                      label="Seleccionar fecha"
+                      label={VEHICLES_PAGE.DATE_PICKER_LABEL}
                       value={selectedDate || null}
                       sx={{
                         width: { xs: "100%", sm: "100%", md: "200px" },
@@ -490,7 +490,7 @@ const VehiclesPage: React.FC = () => {
                     alignItems="center"
                     gap={1}
                   >
-                    <Tooltip title="Día Anterior" arrow>
+                    <Tooltip title={VEHICLES_PAGE.TOOLTIP_PREV_DAY} arrow>
                       <Button
                         variant="contained"
                         sx={{
@@ -502,7 +502,7 @@ const VehiclesPage: React.FC = () => {
                         <ArrowBackIosNewRoundedIcon />
                       </Button>
                     </Tooltip>
-                    <Tooltip title="Día Siguiente" arrow>
+                    <Tooltip title={VEHICLES_PAGE.TOOLTIP_NEXT_DAY} arrow>
                       <Button
                         variant="contained"
                         sx={{
@@ -515,7 +515,7 @@ const VehiclesPage: React.FC = () => {
                         <ArrowForwardIosRoundedIcon />
                       </Button>
                     </Tooltip>
-                    <Tooltip title="Día Actual" arrow>
+                    <Tooltip title={VEHICLES_PAGE.TOOLTIP_CURRENT_DAY} arrow>
                       <Button
                         variant="contained"
                         sx={{
@@ -543,7 +543,7 @@ const VehiclesPage: React.FC = () => {
                       minHeight: 56,
                     }}
                   >
-                    Agregar
+                    {VEHICLES_PAGE.ADD}
                   </Button>
                 )}
               </Box>
@@ -602,7 +602,7 @@ const VehiclesPage: React.FC = () => {
                 )}
               </Typography>
               <Typography variant="h6" color="textSecondary">
-                No se encontraron vehículos para mostrar.
+                {VEHICLES_PAGE.NO_VEHICLES}
               </Typography>
             </Box>
           )}
@@ -612,11 +612,11 @@ const VehiclesPage: React.FC = () => {
         open={openDeleteDialog}
         onClose={handleCloseDeleteDialog}
         onConfirm={handleDelete}
-        title="Eliminar Vehículo"
-        message="¿Estás seguro de que deseas eliminar este vehículo? Esta acción no se puede deshacer."
+        title={VEHICLES_PAGE.DIALOG_DELETE_TITLE}
+        message={VEHICLES_PAGE.DIALOG_DELETE_MESSAGE}
         type="delete"
-        confirmText="Eliminar"
-        cancelText="Cancelar"
+        confirmText={VEHICLES_PAGE.DIALOG_DELETE_CONFIRM}
+        cancelText={VEHICLES_PAGE.DIALOG_DELETE_CANCEL}
         loading={isDeletingVehicle}
         paperSx={{
           minWidth: { xs: "80vw", sm: 320 },
@@ -627,8 +627,8 @@ const VehiclesPage: React.FC = () => {
       <DialogComponent
         open={openAddVehicleModal}
         onClose={handleCloseAddVehicleModal}
-        title="Agregar"
-        subtitle="Nuevo vehículo"
+        title={VEHICLES_PAGE.DIALOG_ADD_TITLE}
+        subtitle={VEHICLES_PAGE.DIALOG_ADD_SUBTITLE}
         hideActions
         paperSx={{
           minWidth: { xs: "90vw", sm: 500, md: 700 },

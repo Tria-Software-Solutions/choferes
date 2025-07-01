@@ -32,7 +32,7 @@ import {
   exportToPDF,
 } from "../../utils/export";
 import { translateDayOptionsToSpanish } from "../../utils/string";
-import { PAGE_TITLE, PERMISSIONS } from "../../constants/constants";
+import { PAGE_TITLE, PERMISSIONS, SCHEDULES_PAGE } from "../../constants/constants";
 import EditCalendarRoundedIcon from "@mui/icons-material/EditCalendarRounded";
 import DownloadRoundedIcon from "@mui/icons-material/DownloadRounded";
 import CloseRoundedIcon from "@mui/icons-material/CloseRounded";
@@ -304,7 +304,7 @@ const SchedulesPage: React.FC = () => {
               <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
                 {filteredSchedules && (
                   <SearchBar
-                    placeholder="Buscar horario"
+                    placeholder={SCHEDULES_PAGE.SEARCH_PLACEHOLDER}
                     value={filter}
                     onChange={handleFilterChange}
                     sx={{ flex: 1 }}
@@ -344,7 +344,7 @@ const SchedulesPage: React.FC = () => {
                     onClick={handleOpenAddModal}
                     sx={{ px: 3, py: 1.5, fontSize: "1rem", minHeight: 56 }}
                   >
-                    Agregar
+                    {SCHEDULES_PAGE.ADD}
                   </Button>
                 </Box>
               </Grid>
@@ -387,7 +387,7 @@ const SchedulesPage: React.FC = () => {
             >
               <ManageSearchIcon color="disabled" sx={{ fontSize: "65px" }} />
               <Typography variant="h6" color="textSecondary">
-                No se encontraron horarios para mostrar.
+                {SCHEDULES_PAGE.NO_SCHEDULES}
               </Typography>
             </Box>
           )}
@@ -397,11 +397,11 @@ const SchedulesPage: React.FC = () => {
         open={openDeleteDialog}
         onClose={handleCloseDeleteDialog}
         onConfirm={handleDelete}
-        title="Eliminar Horario"
-        message="¿Estás seguro de que deseas eliminar este horario? Esta acción no se puede deshacer."
+        title={SCHEDULES_PAGE.DIALOG_DELETE_TITLE}
+        message={SCHEDULES_PAGE.DIALOG_DELETE_MESSAGE}
         type="delete"
-        confirmText="Eliminar"
-        cancelText="Cancelar"
+        confirmText={SCHEDULES_PAGE.DIALOG_DELETE_CONFIRM}
+        cancelText={SCHEDULES_PAGE.DIALOG_DELETE_CANCEL}
         loading={isDeletingSchedule}
         paperSx={{
           minWidth: { xs: "80vw", sm: 320 },
@@ -412,8 +412,8 @@ const SchedulesPage: React.FC = () => {
       <DialogComponent
         open={openAddScheduleModal}
         onClose={handleCloseAddModal}
-        title="Agregar"
-        subtitle="Nuevo horario"
+        title={SCHEDULES_PAGE.DIALOG_ADD_TITLE}
+        subtitle={SCHEDULES_PAGE.DIALOG_ADD_SUBTITLE}
         hideActions
         paperSx={{
           minWidth: { xs: "90vw", sm: 500, md: 700 },

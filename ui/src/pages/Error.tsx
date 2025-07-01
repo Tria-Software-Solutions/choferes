@@ -12,6 +12,7 @@ import {
 import ErrorOutlineIcon from "@mui/icons-material/ErrorOutline";
 import HomeIcon from "@mui/icons-material/Home";
 import RefreshIcon from "@mui/icons-material/Refresh";
+import { ERRORS } from "../constants/constants";
 
 const ErrorPage: React.FC = () => {
   const navigate = useNavigate();
@@ -77,7 +78,7 @@ const ErrorPage: React.FC = () => {
                   fontSize: { xs: "2rem", sm: "2.5rem", md: "3rem" },
                 }}
               >
-                Error 500
+                {ERRORS.ERROR_500_TITLE}
               </Typography>
 
               <Typography
@@ -89,7 +90,7 @@ const ErrorPage: React.FC = () => {
                   fontSize: { xs: "1.1rem", sm: "1.25rem", md: "1.5rem" },
                 }}
               >
-                Oops, algo salió mal
+                {ERRORS.ERROR_500_SUBTITLE}
               </Typography>
 
               <Typography
@@ -102,9 +103,7 @@ const ErrorPage: React.FC = () => {
                   maxWidth: 500,
                 }}
               >
-                Ha ocurrido un error inesperado en nuestro servidor. Nuestro
-                equipo técnico ha sido notificado y está trabajando para
-                solucionarlo.
+                {ERRORS.ERROR_500_DESCRIPTION}
               </Typography>
 
               <Box
@@ -131,9 +130,9 @@ const ErrorPage: React.FC = () => {
                     px: { xs: 2, sm: 4 },
                     py: { xs: 1, sm: 1.5 },
                   }}
-                  aria-label="Ir al inicio"
+                  aria-label={ERRORS.GO_HOME}
                 >
-                  Ir al Inicio
+                  {ERRORS.GO_HOME}
                 </Button>
 
                 <Button
@@ -147,9 +146,9 @@ const ErrorPage: React.FC = () => {
                     minHeight: { xs: 44, sm: 48 },
                     fontSize: "clamp(0.75rem, 1.25vw, 0.875rem)",
                   }}
-                  aria-label="Recargar"
+                  aria-label={ERRORS.RELOAD}
                 >
-                  Recargar
+                  {ERRORS.RELOAD}
                 </Button>
               </Box>
 
@@ -163,7 +162,7 @@ const ErrorPage: React.FC = () => {
                   fontSize: { xs: "0.75rem", sm: "0.875rem" },
                 }}
               >
-                Si el problema persiste, contacta a soporte técnico
+                {ERRORS.CONTACT_SUPPORT}
               </Typography>
             </Box>
           </Slide>

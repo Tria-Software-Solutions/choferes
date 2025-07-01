@@ -89,7 +89,7 @@ const AddEmployeeForm: React.FC<AddEmployeeFormProps> = ({
             label={FORMS.FIRST_NAME}
             variant="outlined"
             fullWidth
-            placeholder="Ej: Juan Carlos"
+            placeholder={FORMS.ADD_EMPLOYEE.FIRST_NAME_PLACEHOLDER}
             value={formData.firstName}
             onChange={(e) => handleFieldChange("firstName", e.target.value)}
             error={errors.firstName !== ""}
@@ -107,7 +107,7 @@ const AddEmployeeForm: React.FC<AddEmployeeFormProps> = ({
             label={FORMS.LAST_NAME}
             variant="outlined"
             fullWidth
-            placeholder="Ej: Pérez González"
+            placeholder={FORMS.ADD_EMPLOYEE.LAST_NAME_PLACEHOLDER}
             value={formData.lastName}
             onChange={(e) => handleFieldChange("lastName", e.target.value)}
             error={errors.lastName !== ""}
@@ -146,7 +146,7 @@ const AddEmployeeForm: React.FC<AddEmployeeFormProps> = ({
                   fontSize: "clamp(0.875rem, 1.5vw, 1rem)",
                 }}
               >
-                Información del Empleado
+                {FORMS.ADD_EMPLOYEE.INFO_TITLE}
               </Box>
               <Box
                 sx={{
@@ -154,8 +154,7 @@ const AddEmployeeForm: React.FC<AddEmployeeFormProps> = ({
                   fontSize: "clamp(0.75rem, 1.25vw, 0.875rem)",
                 }}
               >
-                Ingresa el nombre completo del empleado. Solo se permiten
-                letras, espacios y guiones.
+                {FORMS.ADD_EMPLOYEE.INFO_DESC}
               </Box>
             </Box>
           </Box>
@@ -223,7 +222,7 @@ const AddEmployeeForm: React.FC<AddEmployeeFormProps> = ({
                   py: { xs: 1, sm: 1.5 },
                 }}
               >
-                {isLoading ? "Agregando..." : "Agregar"}
+                {isLoading ? FORMS.ADD_EMPLOYEE.BUTTON_ADDING : FORMS.ADD_EMPLOYEE.BUTTON_ADD}
               </Button>
             </Box>
           </Box>

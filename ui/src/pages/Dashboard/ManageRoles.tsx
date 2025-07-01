@@ -29,6 +29,7 @@ import AddRoleForm from "../../components/Forms/AddRoleForm";
 import DialogComponent from "../../components/Dialog/DialogComponent";
 import AddRoundedIcon from "@mui/icons-material/AddRounded";
 import DeleteOutlineIcon from "@mui/icons-material/DeleteOutline";
+import { DASHBOARD_ROLES } from "../../constants/constants";
 
 const ManageRoles: React.FC<{ isExpanded?: boolean }> = ({
   isExpanded = true,
@@ -278,7 +279,7 @@ const ManageRoles: React.FC<{ isExpanded?: boolean }> = ({
               <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
                 {filteredRoles && (
                   <SearchBar
-                    placeholder="Buscar rol"
+                    placeholder={DASHBOARD_ROLES.SEARCH_PLACEHOLDER}
                     value={filter}
                     onChange={handleFilterChange}
                     sx={{ flex: 1 }}
@@ -319,7 +320,7 @@ const ManageRoles: React.FC<{ isExpanded?: boolean }> = ({
                   onClick={handleOpenAddRoleModal}
                   sx={{ px: 3, py: 1.5, fontSize: "1rem", minHeight: 56 }}
                 >
-                  Agregar
+                  {DASHBOARD_ROLES.ADD}
                 </Button>
               </Box>
             </Grid>
@@ -359,7 +360,7 @@ const ManageRoles: React.FC<{ isExpanded?: boolean }> = ({
               }}
             >
               <Typography variant="h6" color="textSecondary">
-                No se encontraron roles para mostrar.
+                {DASHBOARD_ROLES.NO_ROLES}
               </Typography>
             </Box>
           )}
@@ -371,11 +372,11 @@ const ManageRoles: React.FC<{ isExpanded?: boolean }> = ({
             open={openDeleteDialog}
             onClose={handleCloseDeleteDialog}
             onConfirm={handleDelete}
-            title="Eliminar Rol"
-            message="¿Estás seguro de que deseas eliminar este rol? Esta acción no se puede deshacer."
+            title={DASHBOARD_ROLES.DIALOG_DELETE_TITLE}
+            message={DASHBOARD_ROLES.DIALOG_DELETE_MESSAGE}
             type="delete"
-            confirmText="Eliminar"
-            cancelText="Cancelar"
+            confirmText={DASHBOARD_ROLES.DIALOG_DELETE_CONFIRM}
+            cancelText={DASHBOARD_ROLES.DIALOG_DELETE_CANCEL}
             loading={isDeletingRole}
             paperSx={{
               minWidth: { xs: "80vw", sm: 320 },
@@ -386,8 +387,8 @@ const ManageRoles: React.FC<{ isExpanded?: boolean }> = ({
           <DialogComponent
             open={openAddRoleModal}
             onClose={handleCloseAddRoleModal}
-            title="Agregar"
-            subtitle="Nuevo rol"
+            title={DASHBOARD_ROLES.DIALOG_ADD_TITLE}
+            subtitle={DASHBOARD_ROLES.DIALOG_ADD_SUBTITLE}
             hideActions
             paperSx={{
               minWidth: { xs: "90vw", sm: 500, md: 700 },

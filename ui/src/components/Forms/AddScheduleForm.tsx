@@ -99,10 +99,10 @@ const AddScheduleForm: React.FC<AddScheduleFormProps> = ({
       <Grid container spacing={3} sx={{ mt: 0 }}>
         <Grid item xs={12} sm={6}>
           <CustomTextField
-            label={FORMS.LABEL_REQUIRED}
+            label={FORMS.ADD_SCHEDULE.SPECIAL_LABEL}
             variant="outlined"
             fullWidth
-            placeholder="Ej: Horario Matutino"
+            placeholder={FORMS.ADD_SCHEDULE.SPECIAL_DESC}
             value={formData.label}
             onChange={(e) =>
               setFormData({ ...formData, label: e.target.value })
@@ -117,11 +117,11 @@ const AddScheduleForm: React.FC<AddScheduleFormProps> = ({
 
         <Grid item xs={12} sm={6}>
           <CustomTextField
-            label={FORMS.HOURS_REQUIRED}
+            label={FORMS.ADD_SCHEDULE.SPECIAL_LABEL}
             variant="outlined"
             type="number"
             fullWidth
-            placeholder="Ej: 8"
+            placeholder={FORMS.ADD_SCHEDULE.SPECIAL_DESC}
             value={formData.hours}
             onChange={(e) =>
               setFormData({ ...formData, hours: e.target.value })
@@ -182,8 +182,8 @@ const AddScheduleForm: React.FC<AddScheduleFormProps> = ({
               label={FORMS.DAYS_REQUIRED}
               value={formData.days}
               input={
-                                  <OutlinedInput
-                    label={FORMS.DAYS_REQUIRED}
+                <OutlinedInput
+                  label={FORMS.DAYS_REQUIRED}
                   startAdornment={
                     <InputAdornment position="start">
                       <CalendarMonthOutlinedIcon
@@ -248,7 +248,7 @@ const AddScheduleForm: React.FC<AddScheduleFormProps> = ({
                   fontSize: "clamp(0.625rem, 1vw, 0.75rem)",
                 }}
               >
-                Seleccione al menos un día
+                {FORMS.DAYS_REQUIRED}
               </Typography>
             )}
           </FormControl>
@@ -296,7 +296,7 @@ const AddScheduleForm: React.FC<AddScheduleFormProps> = ({
                         fontSize: "clamp(0.875rem, 1.5vw, 1rem)",
                       }}
                     >
-                      Horario Especial
+                      {FORMS.ADD_SCHEDULE.SPECIAL_LABEL}
                     </Typography>
                     <Typography
                       variant="caption"
@@ -305,8 +305,7 @@ const AddScheduleForm: React.FC<AddScheduleFormProps> = ({
                         fontSize: "clamp(0.75rem, 1.25vw, 0.875rem)",
                       }}
                     >
-                      Marque esta opción si es un horario con condiciones
-                      especiales
+                      {FORMS.ADD_SCHEDULE.SPECIAL_DESC}
                     </Typography>
                   </Box>
                 }
@@ -377,7 +376,7 @@ const AddScheduleForm: React.FC<AddScheduleFormProps> = ({
                   py: { xs: 1, sm: 1.5 },
                 }}
               >
-                {isLoading ? "Agregando..." : "Agregar"}
+                {isLoading ? FORMS.ADD_SCHEDULE.BUTTON_ADDING : FORMS.ADD_SCHEDULE.BUTTON_ADD}
               </Button>
             </Box>
           </Box>

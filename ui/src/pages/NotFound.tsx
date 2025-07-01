@@ -12,6 +12,7 @@ import {
 import SearchOffIcon from "@mui/icons-material/SearchOff";
 import HomeIcon from "@mui/icons-material/Home";
 import ExploreIcon from "@mui/icons-material/Explore";
+import { ERRORS } from "../constants/constants";
 
 const NotFound: React.FC = () => {
   const navigate = useNavigate();
@@ -69,7 +70,7 @@ const NotFound: React.FC = () => {
                   fontSize: { xs: "4rem", md: "6rem" },
                 }}
               >
-                404
+                {ERRORS.ERROR_404_TITLE}
               </Typography>
 
               <Typography
@@ -78,7 +79,7 @@ const NotFound: React.FC = () => {
                 fontWeight="medium"
                 sx={{ mb: 2 }}
               >
-                Página no encontrada
+                {ERRORS.ERROR_404_SUBTITLE}
               </Typography>
 
               <Typography
@@ -86,8 +87,7 @@ const NotFound: React.FC = () => {
                 color="text.secondary"
                 sx={{ mb: 4, lineHeight: 1.6 }}
               >
-                Lo sentimos, la página que estás buscando no existe o ha sido
-                movida. Verifica la URL o navega a una página diferente.
+                {ERRORS.ERROR_404_DESCRIPTION}
               </Typography>
 
               <Box
@@ -113,9 +113,9 @@ const NotFound: React.FC = () => {
                     px: { xs: 2, sm: 4 },
                     py: { xs: 1, sm: 1.5 },
                   }}
-                  aria-label="Ir al inicio"
+                  aria-label={ERRORS.GO_HOME}
                 >
-                  Ir al Inicio
+                  {ERRORS.GO_HOME}
                 </Button>
 
                 <Button
@@ -129,9 +129,9 @@ const NotFound: React.FC = () => {
                     minHeight: { xs: 44, sm: 48 },
                     fontSize: "clamp(0.75rem, 1.25vw, 0.875rem)",
                   }}
-                  aria-label="Explorar"
+                  aria-label={ERRORS.ERROR_404_EXPLORE}
                 >
-                  Explorar
+                  {ERRORS.ERROR_404_EXPLORE}
                 </Button>
               </Box>
 
@@ -144,7 +144,7 @@ const NotFound: React.FC = () => {
                   opacity: 0.7,
                 }}
               >
-                Si crees que esto es un error, contacta a soporte técnico
+                {ERRORS.ERROR_404_CONTACT}
               </Typography>
             </Box>
           </Slide>

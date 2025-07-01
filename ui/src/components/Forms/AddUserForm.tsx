@@ -186,10 +186,10 @@ const AddUserForm: React.FC<AddUserFormProps> = ({
       <Grid container spacing={3} sx={{ mt: 0 }}>
         <Grid item xs={12} sm={6}>
           <CustomTextField
-            label="Nombre"
+            label={FORMS.ADD_USER.FIRST_NAME}
             variant="outlined"
             fullWidth
-            placeholder="Ej: Juan Carlos"
+            placeholder={FORMS.ADD_USER.FIRST_NAME_PLACEHOLDER}
             value={formData.firstName}
             onChange={(e) => handleFieldChange("firstName", e.target.value)}
             error={errors.firstName !== ""}
@@ -204,10 +204,10 @@ const AddUserForm: React.FC<AddUserFormProps> = ({
 
         <Grid item xs={12} sm={6}>
           <CustomTextField
-            label="Apellido"
+            label={FORMS.ADD_USER.LAST_NAME}
             variant="outlined"
             fullWidth
-            placeholder="Ej: Pérez González"
+            placeholder={FORMS.ADD_USER.LAST_NAME_PLACEHOLDER}
             value={formData.lastName}
             onChange={(e) => handleFieldChange("lastName", e.target.value)}
             error={errors.lastName !== ""}
@@ -222,10 +222,10 @@ const AddUserForm: React.FC<AddUserFormProps> = ({
 
         <Grid item xs={12} sm={6}>
           <CustomTextField
-            label="Email"
+            label={FORMS.ADD_USER.EMAIL}
             variant="outlined"
             fullWidth
-            placeholder="Ej: juan.perez@empresa.com"
+            placeholder={FORMS.ADD_USER.EMAIL_PLACEHOLDER}
             value={formData.email}
             onChange={(e) => handleFieldChange("email", e.target.value)}
             error={errors.email !== ""}
@@ -238,10 +238,10 @@ const AddUserForm: React.FC<AddUserFormProps> = ({
 
         <Grid item xs={12} sm={6}>
           <CustomTextField
-            label="Nombre de Usuario"
+            label={FORMS.ADD_USER.USERNAME}
             variant="outlined"
             fullWidth
-            placeholder="Ej: juan.perez"
+            placeholder={FORMS.ADD_USER.USERNAME_PLACEHOLDER}
             value={formData.username}
             onChange={(e) => handleFieldChange("username", e.target.value)}
             error={errors.username !== ""}
@@ -256,11 +256,11 @@ const AddUserForm: React.FC<AddUserFormProps> = ({
 
         <Grid item xs={12} sm={6}>
           <CustomTextField
-            label="Contraseña"
+            label={FORMS.ADD_USER.PASSWORD}
             variant="outlined"
             fullWidth
             type={showPassword ? "text" : "password"}
-            placeholder="Mínimo 8 caracteres"
+            placeholder={FORMS.ADD_USER.PASSWORD_PLACEHOLDER}
             value={formData.password}
             onChange={(e) => handleFieldChange("password", e.target.value)}
             error={errors.password !== ""}
@@ -304,14 +304,14 @@ const AddUserForm: React.FC<AddUserFormProps> = ({
               },
             }}
           >
-            <InputLabel>Rol</InputLabel>
+            <InputLabel>{FORMS.ADD_USER.ROLE}</InputLabel>
             <Select
               value={formData.roleName}
-              label="Rol"
+              label={FORMS.ADD_USER.ROLE}
               onChange={(e) => handleFieldChange("roleName", e.target.value)}
               input={
                 <OutlinedInput
-                  label="Rol"
+                  label={FORMS.ADD_USER.ROLE}
                   startAdornment={
                     <InputAdornment position="start">
                       <GroupOutlinedIcon
@@ -374,7 +374,7 @@ const AddUserForm: React.FC<AddUserFormProps> = ({
                   fontSize: "clamp(0.875rem, 1.5vw, 1rem)",
                 }}
               >
-                Información del Usuario
+                {FORMS.ADD_USER.USER_INFO_TITLE}
               </Box>
               <Box
                 sx={{
@@ -382,9 +382,7 @@ const AddUserForm: React.FC<AddUserFormProps> = ({
                   fontSize: "clamp(0.75rem, 1.25vw, 0.875rem)",
                 }}
               >
-                Completa todos los campos para crear un nuevo usuario. La
-                contraseña debe tener al menos 8 caracteres, una mayúscula, una
-                minúscula, un número y un carácter especial.
+                {FORMS.ADD_USER.USER_INFO_DESCRIPTION}
               </Box>
             </Box>
           </Box>
@@ -413,7 +411,7 @@ const AddUserForm: React.FC<AddUserFormProps> = ({
                 order: { xs: 3, sm: 1 },
               }}
             >
-              Limpiar
+              {FORMS.ADD_USER.CLEAR}
             </Button>
             <Box
               sx={{
@@ -435,7 +433,7 @@ const AddUserForm: React.FC<AddUserFormProps> = ({
                     fontSize: "clamp(0.75rem, 1.25vw, 0.875rem)",
                   }}
                 >
-                  Cancelar
+                  {FORMS.ADD_USER.CANCEL}
                 </Button>
               )}
               <Button
@@ -452,7 +450,7 @@ const AddUserForm: React.FC<AddUserFormProps> = ({
                   py: { xs: 1, sm: 1.5 },
                 }}
               >
-                {isLoading ? "Creando..." : "Agregar"}
+                {isLoading ? FORMS.ADD_USER.CREATING : FORMS.ADD_USER.ADD}
               </Button>
             </Box>
           </Box>

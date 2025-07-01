@@ -19,7 +19,7 @@ import {
   Container,
 } from "@mui/material";
 import { useAppNotifications } from "../../components/Snackbar/SnackbarWrapper";
-import { PAGE_TITLE } from "../../constants/constants";
+import { PAGE_TITLE, SETTINGS_PAGE } from "../../constants/constants";
 import SettingsIcon from "@mui/icons-material/Settings";
 import Visibility from "@mui/icons-material/Visibility";
 import VisibilityOff from "@mui/icons-material/VisibilityOff";
@@ -136,7 +136,7 @@ const Settings: React.FC = () => {
 
     const user = await getUserByEmail(value);
     if (user && user.username !== editFields.username) {
-      setInfoError("El correo electrónico ya existe.");
+      setInfoError(SETTINGS_PAGE.EMAIL_EXISTS);
     } else {
       setInfoError(null);
     }
@@ -156,7 +156,7 @@ const Settings: React.FC = () => {
 
     const user = await getUserByUsername(value);
     if (user && user.email !== editFields.email) {
-      setInfoError("El nombre de usuario ya existe.");
+      setInfoError(SETTINGS_PAGE.USERNAME_EXISTS);
     } else {
       setInfoError(null);
     }
@@ -181,9 +181,9 @@ const Settings: React.FC = () => {
       } else {
         throw new Error("Current User is null");
       }
-      showNotification("La actualización de lo datos fue exitosa");
+      showNotification(SETTINGS_PAGE.UPDATE_SUCCESS);
     } catch (error) {
-      showNotification("Ha ocurrido un error al actualizar los datos");
+      showNotification(SETTINGS_PAGE.UPDATE_ERROR);
     }
   };
 
@@ -234,9 +234,9 @@ const Settings: React.FC = () => {
         newPassword: "",
         confirmNewPassword: "",
       });
-      showNotification("La actualización de la contraseña fue exitosa");
+      showNotification(SETTINGS_PAGE.PASSWORD_UPDATE_SUCCESS);
     } catch (error) {
-      showNotification("Ha ocurrido un error al actualizar la contraseña");
+      showNotification(SETTINGS_PAGE.PASSWORD_UPDATE_ERROR);
     }
   };
 
@@ -275,7 +275,7 @@ const Settings: React.FC = () => {
               fontSize: { xs: "1.25rem", sm: "1.5rem" },
             }}
           >
-            Información Personal
+            {SETTINGS_PAGE.PERSONAL_INFO_TITLE}
           </Typography>
           <Typography
             variant="body2"
@@ -285,7 +285,7 @@ const Settings: React.FC = () => {
               fontSize: { xs: "0.875rem", sm: "1rem" },
             }}
           >
-            Modifica tu información personal y correo electrónico.
+            {SETTINGS_PAGE.PERSONAL_INFO_DESC}
           </Typography>
 
           <Grid container spacing={{ xs: 1.5, sm: 2 }}>
@@ -392,7 +392,7 @@ const Settings: React.FC = () => {
                   fontSize: "clamp(0.875rem, 1.5vw, 1rem)",
                 }}
               >
-                Recomendación
+                {SETTINGS_PAGE.RECOMMENDATION_TITLE}
               </Box>
               <Box
                 sx={{
@@ -400,8 +400,7 @@ const Settings: React.FC = () => {
                   fontSize: "clamp(0.75rem, 1.25vw, 0.875rem)",
                 }}
               >
-                Verifica que tus datos sean correctos antes de guardar los
-                cambios.
+                {SETTINGS_PAGE.RECOMMENDATION_DESC}
               </Box>
             </Box>
           </Box>
@@ -429,7 +428,7 @@ const Settings: React.FC = () => {
               onClick={handleSaveChanges}
               disabled={!isEditFormValid || !!infoError}
             >
-              Guardar Cambios
+              {SETTINGS_PAGE.SAVE_CHANGES}
             </Button>
           </Box>
         </Grid>
@@ -463,7 +462,7 @@ const Settings: React.FC = () => {
               fontSize: { xs: "1.25rem", sm: "1.5rem" },
             }}
           >
-            Cambiar Contraseña
+            {SETTINGS_PAGE.PASSWORD_TITLE}
           </Typography>
           <Typography
             variant="body2"
@@ -473,13 +472,13 @@ const Settings: React.FC = () => {
               fontSize: { xs: "0.875rem", sm: "1rem" },
             }}
           >
-            Ingresa una nueva contraseña para tu cuenta.
+            {SETTINGS_PAGE.PASSWORD_DESC}
           </Typography>
 
           <Grid container spacing={{ xs: 1.5, sm: 2 }}>
             <Grid item xs={12}>
               <CustomTextField
-                label="Nueva contraseña"
+                label={SETTINGS_PAGE.NEW_PASSWORD_LABEL}
                 name="newPassword"
                 type={showNewPassword ? "text" : "password"}
                 value={passwordFields.newPassword}
@@ -499,7 +498,7 @@ const Settings: React.FC = () => {
             </Grid>
             <Grid item xs={12}>
               <CustomTextField
-                label="Confirmar nueva contraseña"
+                label={SETTINGS_PAGE.CONFIRM_NEW_PASSWORD_LABEL}
                 name="confirmNewPassword"
                 type={showConfirmNewPassword ? "text" : "password"}
                 value={passwordFields.confirmNewPassword}
@@ -554,7 +553,7 @@ const Settings: React.FC = () => {
                   fontSize: "clamp(0.875rem, 1.5vw, 1rem)",
                 }}
               >
-                Consejo de seguridad
+                {SETTINGS_PAGE.SECURITY_TIP_TITLE}
               </Box>
               <Box
                 sx={{
@@ -562,9 +561,7 @@ const Settings: React.FC = () => {
                   fontSize: "clamp(0.75rem, 1.25vw, 0.875rem)",
                 }}
               >
-                Usa una contraseña única y no la compartas con nadie.
-                <br />
-                Debe tener mínimo 8 caracteres, una mayúscula y un número.
+                {SETTINGS_PAGE.SECURITY_TIP_DESC}
               </Box>
             </Box>
           </Box>
@@ -592,7 +589,7 @@ const Settings: React.FC = () => {
               onClick={handleChangePassword}
               disabled={!isPasswordFormValid}
             >
-              Cambiar Contraseña
+              {SETTINGS_PAGE.CHANGE_PASSWORD}
             </Button>
           </Box>
         </Grid>
