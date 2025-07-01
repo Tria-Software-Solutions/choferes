@@ -59,7 +59,7 @@ import {
   calculateTotalHoursAndOvertimeForPeriods,
 } from "../../../utils/calculation";
 import { EnglishDayOfWeek } from "../../../utils/dayAbreviations";
-import { STATE, TABLE, PERMISSIONS } from "../../../constants/constants";
+import { STATE, TABLE, PERMISSIONS, SELECTOR_TABLE } from "../../../constants/constants";
 import InfoOutlinedIcon from "@mui/icons-material/InfoOutlined";
 import AccessTimeRoundedIcon from "@mui/icons-material/AccessTimeRounded";
 import MoreTimeIcon from "@mui/icons-material/MoreTime";
@@ -274,28 +274,28 @@ const SelectorTable: React.FC<SelectorTableProps> = React.memo(
                 <div>
                   {hasMultipleYears(currentWeek) ? (
                     <Typography variant="body2" fontWeight="bold">
-                      {`Semanas ${multiplePeriods.weekNumbers[1].weekNumber} / `}
+                      {`${SELECTOR_TABLE.WEEKS} ${multiplePeriods.weekNumbers[1].weekNumber} / `}
                       {multiplePeriods.weekNumbers[0].weekNumber}
                     </Typography>
                   ) : (
                     <Typography
                       variant="body2"
                       fontWeight="bold"
-                    >{`Semana ${weekNumber}`}</Typography>
+                    >{`${SELECTOR_TABLE.WEEK} ${weekNumber}`}</Typography>
                   )}
                 </div>
               ) : selectedPeriod === "biweekly" ? (
                 <div>
                   {hasMultipleBiweeks(currentWeek) ? (
                     <Typography variant="body2" fontWeight="bold">
-                      {`Quincenas ${multiplePeriods.biweekNumbers[0].biweekNumber} / `}
+                      {`${SELECTOR_TABLE.BIWEEKS} ${multiplePeriods.biweekNumbers[0].biweekNumber} / `}
                       {multiplePeriods.biweekNumbers[1].biweekNumber}
                     </Typography>
                   ) : (
                     <Typography
                       variant="body2"
                       fontWeight="bold"
-                    >{`Quincena ${biweekNumber}`}</Typography>
+                    >{`${SELECTOR_TABLE.BIWEEK} ${biweekNumber}`}</Typography>
                   )}
                 </div>
               ) : (
@@ -349,7 +349,7 @@ const SelectorTable: React.FC<SelectorTableProps> = React.memo(
                         )
                       }
                     >
-                      Empleados
+                      {SELECTOR_TABLE.EMPLOYEES}
                     </TableSortLabel>
                   </TableCell>
                   {currentWeek.map(({ day, date }) => (
@@ -477,9 +477,9 @@ const SelectorTable: React.FC<SelectorTableProps> = React.memo(
                               },
                             }}
                           >
-                            <MenuItem value="weekly">Semanal</MenuItem>
-                            <MenuItem value="biweekly">Quincenal</MenuItem>
-                            <MenuItem value="monthly">Mensual</MenuItem>
+                            <MenuItem value="weekly">{SELECTOR_TABLE.WEEKLY}</MenuItem>
+                            <MenuItem value="biweekly">{SELECTOR_TABLE.BIWEEKLY}</MenuItem>
+                            <MenuItem value="monthly">{SELECTOR_TABLE.MONTHLY}</MenuItem>
                           </Select>
                         </FormControl>
                       </TableCell>
@@ -588,9 +588,9 @@ const SelectorTable: React.FC<SelectorTableProps> = React.memo(
                                 />
                               }
                             >
-                              <ListSubheader>
-                                <strong>Ubicaciones</strong>
-                              </ListSubheader>
+                                                              <ListSubheader>
+                                  <strong>{SELECTOR_TABLE.LOCATIONS}</strong>
+                                </ListSubheader>
                               {options
                                 .filter((option) => !option.specialSchedule)
                                 .sort((a, b) => a.label.localeCompare(b.label))
@@ -603,9 +603,9 @@ const SelectorTable: React.FC<SelectorTableProps> = React.memo(
                                   </MenuItem>
                                 ))}
                               <Divider />
-                              <ListSubheader>
-                                <strong>Horarios Especiales</strong>
-                              </ListSubheader>
+                                                              <ListSubheader>
+                                  <strong>{SELECTOR_TABLE.SPECIAL_SCHEDULES}</strong>
+                                </ListSubheader>
                               {options
                                 .filter((option) => option.specialSchedule)
                                 .sort((a, b) => a.label.localeCompare(b.label))
@@ -628,7 +628,7 @@ const SelectorTable: React.FC<SelectorTableProps> = React.memo(
                                     width="100%"
                                     alignItems="center"
                                   >
-                                    Otro
+                                    {SELECTOR_TABLE.OTHER}
                                   </Box>
                                 </MenuItem>
                               )}
@@ -701,7 +701,7 @@ const SelectorTable: React.FC<SelectorTableProps> = React.memo(
                               }}
                             >
                               <strong>{resultTotalHours(employee)}</strong>
-                              &nbsp;horas
+                              &nbsp;{SELECTOR_TABLE.HOURS}
                             </Box>
                             <Box
                               sx={{
@@ -710,7 +710,7 @@ const SelectorTable: React.FC<SelectorTableProps> = React.memo(
                                 ml: 0,
                               }}
                             >
-                              <Tooltip title="Horas Extra" arrow>
+                              <Tooltip title={SELECTOR_TABLE.OVERTIME_HOURS} arrow>
                                 <Box>
                                   <Badge
                                     badgeContent={resultOvertime(employee)}
@@ -858,9 +858,9 @@ const SelectorTable: React.FC<SelectorTableProps> = React.memo(
               }}
             >
               <Box>
-                <Typography variant="h5" fontWeight={700} color="#fff">
-                  Ajuste de Horas
-                </Typography>
+                                  <Typography variant="h5" fontWeight={700} color="#fff">
+                    {SELECTOR_TABLE.ADJUST_HOURS}
+                  </Typography>
                 <Typography variant="subtitle2" color="#fff">
                   {openAdjustDialogEmployee.firstName}{" "}
                   {openAdjustDialogEmployee.lastName}
@@ -879,10 +879,10 @@ const SelectorTable: React.FC<SelectorTableProps> = React.memo(
                 <Grid item xs={12}>
                   <Typography variant="subtitle1" color="text.secondary" mb={1}>
                     {selectedPeriod === "weekly"
-                      ? "Total de horas trabajadas en la semana:"
+                      ? SELECTOR_TABLE.WEEKLY_HOURS_MESSAGE
                       : selectedPeriod === "biweekly"
-                        ? "Total de horas trabajadas en la quincena:"
-                        : "Total de horas trabajadas en el mes:"}
+                        ? SELECTOR_TABLE.BIWEEKLY_HOURS_MESSAGE
+                        : SELECTOR_TABLE.MONTHLY_HOURS_MESSAGE}
                   </Typography>
                   <Typography
                     variant="h3"
@@ -909,7 +909,7 @@ const SelectorTable: React.FC<SelectorTableProps> = React.memo(
                           )}
                   </Typography>
                   <TextField
-                    label="Horas a ajustar"
+                    label={SELECTOR_TABLE.HOURS_TO_ADJUST}
                     variant="outlined"
                     type="number"
                     placeholder="0"
@@ -919,7 +919,7 @@ const SelectorTable: React.FC<SelectorTableProps> = React.memo(
                     inputProps={{ min: 0 }}
                     error={timeAdjustment < 0}
                     helperText={
-                      timeAdjustment < 0 ? "Debe ser un número positivo" : " "
+                      timeAdjustment < 0 ? SELECTOR_TABLE.POSITIVE_NUMBER_REQUIRED : " "
                     }
                     InputProps={{
                       startAdornment: (
@@ -966,7 +966,7 @@ const SelectorTable: React.FC<SelectorTableProps> = React.memo(
                           fontSize: "clamp(0.875rem, 1.5vw, 1rem)",
                         }}
                       >
-                        Información de Ajuste
+                        {SELECTOR_TABLE.ADJUSTMENT_INFO}
                       </Box>
                       <Box
                         sx={{
@@ -974,8 +974,7 @@ const SelectorTable: React.FC<SelectorTableProps> = React.memo(
                           fontSize: "clamp(0.75rem, 1.25vw, 0.875rem)",
                         }}
                       >
-                        Ingresa la cantidad de horas a sumar o restar. Solo se
-                        permiten valores positivos.
+                        {SELECTOR_TABLE.ADJUSTMENT_DESCRIPTION}
                       </Box>
                     </Box>
                   </Box>
@@ -1001,7 +1000,7 @@ const SelectorTable: React.FC<SelectorTableProps> = React.memo(
                         fontSize: "clamp(0.75rem, 1.25vw, 0.875rem)",
                       }}
                     >
-                      Cancelar
+                      {SELECTOR_TABLE.CANCEL}
                     </Button>
                     <Button
                       variant="contained"
@@ -1023,7 +1022,7 @@ const SelectorTable: React.FC<SelectorTableProps> = React.memo(
                         py: { xs: 1, sm: 1.5 },
                       }}
                     >
-                      Sumar
+                      {SELECTOR_TABLE.ADD}
                     </Button>
                     <Button
                       variant="contained"
@@ -1046,7 +1045,7 @@ const SelectorTable: React.FC<SelectorTableProps> = React.memo(
                         py: { xs: 1, sm: 1.5 },
                       }}
                     >
-                      Restar
+                      {SELECTOR_TABLE.SUBTRACT}
                     </Button>
                   </Box>
                 </Grid>
