@@ -12,6 +12,7 @@ import {
 } from "@mui/material";
 import SearchBar from "../../components/SearchBar/SearchBar";
 import VpnKeyOutlinedIcon from "@mui/icons-material/VpnKeyOutlined";
+import { DASHBOARD_PERMISSIONS } from "../../constants/constants";
 
 const ManagePermissions: React.FC = () => {
   const dispatch = useDispatch<AppDispatch>();
@@ -74,7 +75,7 @@ const ManagePermissions: React.FC = () => {
             <Grid item xs={12} md={4}>
               {filteredPermissions && (
                 <SearchBar
-                  placeholder="Buscar permiso"
+                  placeholder={DASHBOARD_PERMISSIONS.SEARCH_PLACEHOLDER}
                   value={filter}
                   onChange={handleFilterChange}
                   sx={{ maxWidth: "100%" }}
@@ -138,7 +139,7 @@ const ManagePermissions: React.FC = () => {
               }}
             >
               <Typography variant="h6" color="textSecondary">
-                No se encontraron permisos para mostrar.
+                {DASHBOARD_PERMISSIONS.NO_PERMISSIONS}
               </Typography>
             </Box>
           )}

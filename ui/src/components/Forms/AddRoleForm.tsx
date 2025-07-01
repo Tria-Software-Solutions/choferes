@@ -126,10 +126,10 @@ const AddRoleForm: React.FC<AddRoleFormProps> = ({
       <Grid container spacing={3} sx={{ mt: 0 }}>
         <Grid item xs={12}>
           <CustomTextField
-            label={FORMS.LABEL_REQUIRED}
+            label={FORMS.ADD_ROLE.NAME_LABEL}
             variant="outlined"
             fullWidth
-            placeholder="Ej: Administrador"
+            placeholder={FORMS.ADD_ROLE.NAME_PLACEHOLDER}
             value={formData.name}
             onChange={(e) => handleFieldChange("name", e.target.value)}
             error={errors.name !== ""}
@@ -151,7 +151,7 @@ const AddRoleForm: React.FC<AddRoleFormProps> = ({
                   fontSize: "clamp(0.875rem, 1.5vw, 1rem)",
                 }}
               >
-                Permisos del Rol
+                {FORMS.ADD_ROLE.PERMISSIONS_LABEL}
               </Box>
               {errors.permissions && (
                 <Box
@@ -247,7 +247,7 @@ const AddRoleForm: React.FC<AddRoleFormProps> = ({
                   fontSize: "clamp(0.875rem, 1.5vw, 1rem)",
                 }}
               >
-                Permisos Seleccionados ({formData.permissions.length})
+                {FORMS.ADD_ROLE.PERMISSIONS_SELECTED(formData.permissions.length)}
               </Box>
               <Box sx={{ display: "flex", flexWrap: "wrap", gap: 1 }}>
                 {formData.permissions.map((permissionId) => {
@@ -301,7 +301,7 @@ const AddRoleForm: React.FC<AddRoleFormProps> = ({
                   fontSize: "clamp(0.875rem, 1.5vw, 1rem)",
                 }}
               >
-                Información del Rol
+                {FORMS.ADD_ROLE.INFO_TITLE}
               </Box>
               <Box
                 sx={{
@@ -309,9 +309,7 @@ const AddRoleForm: React.FC<AddRoleFormProps> = ({
                   fontSize: "clamp(0.75rem, 1.25vw, 0.875rem)",
                 }}
               >
-                Define el nombre y permisos del nuevo rol. Los permisos
-                determinan qué acciones puede realizar un usuario con este rol
-                en el sistema.
+                {FORMS.ADD_ROLE.INFO_DESC}
               </Box>
             </Box>
           </Box>
@@ -379,7 +377,7 @@ const AddRoleForm: React.FC<AddRoleFormProps> = ({
                   py: { xs: 1, sm: 1.5 },
                 }}
               >
-                {isLoading ? "Agregando..." : "Agregar"}
+                {isLoading ? FORMS.ADD_ROLE.BUTTON_ADDING : FORMS.ADD_ROLE.BUTTON_ADD}
               </Button>
             </Box>
           </Box>

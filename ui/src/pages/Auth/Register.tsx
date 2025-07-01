@@ -23,7 +23,7 @@ import {
 } from "@mui/material";
 import Visibility from "@mui/icons-material/Visibility";
 import VisibilityOff from "@mui/icons-material/VisibilityOff";
-import { PAGE_TITLE, AUTH, FORMS } from "../../constants/constants";
+import { PAGE_TITLE, AUTH, FORMS, REGISTER_VALIDATION } from "../../constants/constants";
 import PersonOutlinedIcon from "@mui/icons-material/PersonOutlined";
 import EmailOutlinedIcon from "@mui/icons-material/EmailOutlined";
 import LockOutlinedIcon from "@mui/icons-material/LockOutlined";
@@ -64,15 +64,13 @@ const Register = () => {
     if (addFields.firstName === "") {
       newErrors.firstName = FORMS.FIRST_NAME_REQUIRED;
     } else if (!nameRegex.test(addFields.firstName)) {
-      newErrors.firstName =
-        "El nombre solo puede contener letras, espacios y puntos";
+      newErrors.firstName = REGISTER_VALIDATION.FIRST_NAME_INVALID;
     }
 
     if (addFields.lastName === "") {
       newErrors.lastName = FORMS.LAST_NAME_REQUIRED;
     } else if (!nameRegex.test(addFields.lastName)) {
-      newErrors.lastName =
-        "El apellido solo puede contener letras, espacios y puntos";
+      newErrors.lastName = REGISTER_VALIDATION.LAST_NAME_INVALID;
     }
 
     if (addFields.email === "") {
@@ -84,15 +82,13 @@ const Register = () => {
     if (addFields.username === "") {
       newErrors.username = FORMS.USERNAME_REQUIRED;
     } else if (!usernameRegex.test(addFields.username)) {
-      newErrors.username =
-        "El usuario debe comenzar con una letra y tener 3-20 caracteres";
+      newErrors.username = REGISTER_VALIDATION.USERNAME_INVALID;
     }
 
     if (addFields.password === "") {
       newErrors.password = FORMS.PASSWORD_REQUIRED;
     } else if (!passwordRegex.test(addFields.password)) {
-      newErrors.password =
-        "La contraseña debe tener al menos 8 caracteres, una mayúscula, una minúscula, un número y un carácter especial";
+      newErrors.password = REGISTER_VALIDATION.PASSWORD_INVALID;
     }
 
     setFieldErrors(newErrors);
@@ -127,7 +123,7 @@ const Register = () => {
         password: "",
       });
     } catch (error) {
-      setError("Error al registrar usuario");
+      setError(REGISTER_VALIDATION.REGISTER_ERROR);
       showNotification(
         AUTH.REGISTER_ERROR,
         5000,

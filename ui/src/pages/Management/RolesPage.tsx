@@ -59,7 +59,7 @@ import {
   getWeekNumber,
   isValidDateForSelect,
 } from "../../utils/dates";
-import { PAGE_TITLE, PERMISSIONS } from "../../constants/constants";
+import { PAGE_TITLE, PERMISSIONS, ROLES_PAGE } from "../../constants/constants";
 import CalendarMonthRoundedIcon from "@mui/icons-material/CalendarMonthRounded";
 import DownloadRoundedIcon from "@mui/icons-material/DownloadRounded";
 import InfoOutlinedIcon from "@mui/icons-material/InfoOutlined";
@@ -615,7 +615,7 @@ const RolesPage: React.FC = () => {
             <Grid item xs={12} md={4}>
               {filteredEmployees && (
                 <SearchBar
-                  placeholder="Buscar empleado"
+                  placeholder={ROLES_PAGE.SEARCH_PLACEHOLDER}
                   value={filter}
                   onChange={handleFilterChange}
                   sx={{
@@ -644,7 +644,7 @@ const RolesPage: React.FC = () => {
                     adapterLocale={es}
                   >
                     <DatePicker
-                      label="Seleccionar fecha"
+                      label={ROLES_PAGE.DATE_PICKER_LABEL}
                       value={firstDayOfWeek || null}
                       sx={{
                         width: { xs: "100%", sm: "100%", md: "200px" },
@@ -673,7 +673,7 @@ const RolesPage: React.FC = () => {
                     alignItems="center"
                     gap={1}
                   >
-                    <Tooltip title="Semana Anterior" arrow>
+                    <Tooltip title={ROLES_PAGE.TOOLTIP_PREV_WEEK} arrow>
                       <Button
                         variant="contained"
                         sx={{
@@ -685,7 +685,7 @@ const RolesPage: React.FC = () => {
                         <ArrowBackIosNewRoundedIcon />
                       </Button>
                     </Tooltip>
-                    <Tooltip title="Semana Siguiente" arrow>
+                    <Tooltip title={ROLES_PAGE.TOOLTIP_NEXT_WEEK} arrow>
                       <Button
                         variant="contained"
                         sx={{
@@ -704,7 +704,7 @@ const RolesPage: React.FC = () => {
                         <ArrowForwardIosRoundedIcon />
                       </Button>
                     </Tooltip>
-                    <Tooltip title="Semana Actual" arrow>
+                    <Tooltip title={ROLES_PAGE.TOOLTIP_CURRENT_WEEK} arrow>
                       <Button
                         variant="contained"
                         sx={{
@@ -755,7 +755,7 @@ const RolesPage: React.FC = () => {
             >
               <ManageSearchIcon color="disabled" sx={{ fontSize: "65px" }} />
               <Typography variant="h6" color="textSecondary">
-                No se encontraron empleados para mostrar.
+                {ROLES_PAGE.NO_EMPLOYEES}
               </Typography>
             </Box>
           )}
@@ -765,11 +765,11 @@ const RolesPage: React.FC = () => {
         open={openExportDialog}
         onClose={handleCloseExportDialog}
         onConfirm={() => handleExportHours(true)}
-        title="Exportar Horas"
-        message={`¿Quieres que se incluyan las horas trabajadas al exportar el ${exportType}?`}
+        title={ROLES_PAGE.DIALOG_EXPORT_TITLE}
+        message={exportType === "excel" ? ROLES_PAGE.DIALOG_EXPORT_MESSAGE_EXCEL : ROLES_PAGE.DIALOG_EXPORT_MESSAGE_PDF}
         type="info"
-        confirmText="Sí, incluir horas"
-        cancelText="No, solo datos básicos"
+        confirmText={ROLES_PAGE.DIALOG_EXPORT_CONFIRM}
+        cancelText={ROLES_PAGE.DIALOG_EXPORT_CANCEL}
         loading={isExporting}
       />
       {openSummaryDialogEmployee && (
@@ -799,7 +799,7 @@ const RolesPage: React.FC = () => {
           >
             <Box>
               <Typography variant="h5" fontWeight={700} color="#fff">
-                Resumen de Horas Trabajadas
+                {ROLES_PAGE.SUMMARY_TITLE}
               </Typography>
               <Typography variant="subtitle2" color="#fff">
                 {openSummaryDialogEmployee.firstName}{" "}
@@ -822,10 +822,10 @@ const RolesPage: React.FC = () => {
                     onChange={(_, v) => setSummaryTab(v)}
                     variant="fullWidth"
                   >
-                    <Tab label="Semanal" value="weekly" />
-                    <Tab label="Quincenal" value="biweekly" />
-                    <Tab label="Mensual" value="monthly" />
-                    <Tab label="Horas Extra" value="overtime" />
+                    <Tab label={ROLES_PAGE.TAB_WEEKLY} value="weekly" />
+                    <Tab label={ROLES_PAGE.TAB_BIWEEKLY} value="biweekly" />
+                    <Tab label={ROLES_PAGE.TAB_MONTHLY} value="monthly" />
+                    <Tab label={ROLES_PAGE.TAB_OVERTIME} value="overtime" />
                   </TabList>
                   <Divider sx={{ mb: 2 }} />
                   <TabPanel value="weekly">
@@ -841,7 +841,7 @@ const RolesPage: React.FC = () => {
                       </Avatar>
                       <Box>
                         <Typography variant="h6" fontWeight={700}>
-                          Horas trabajadas esta semana
+                          {ROLES_PAGE.SUMMARY_WEEKLY}
                         </Typography>
                         <Typography
                           variant="h3"
@@ -869,7 +869,7 @@ const RolesPage: React.FC = () => {
                       </Avatar>
                       <Box>
                         <Typography variant="h6" fontWeight={700}>
-                          Horas trabajadas esta quincena
+                          {ROLES_PAGE.SUMMARY_BIWEEKLY}
                         </Typography>
                         <Typography
                           variant="h3"
@@ -899,7 +899,7 @@ const RolesPage: React.FC = () => {
                       </Avatar>
                       <Box>
                         <Typography variant="h6" fontWeight={700}>
-                          Horas trabajadas este mes
+                          {ROLES_PAGE.SUMMARY_MONTHLY}
                         </Typography>
                         <Typography
                           variant="h3"
@@ -929,13 +929,13 @@ const RolesPage: React.FC = () => {
                       </Avatar>
                       <Box>
                         <Typography variant="h6" fontWeight={700}>
-                          Horas Extra
+                          {ROLES_PAGE.SUMMARY_OVERTIME}
                         </Typography>
                         <Typography variant="h3" color="error" fontWeight={800}>
                           {getEmployeeOvertime(openSummaryDialogEmployee.id)}
                         </Typography>
                         <Typography variant="body2" color="text.secondary">
-                          Detalle de horas extra por periodo
+                          {ROLES_PAGE.SUMMARY_DETAIL_OVERTIME}
                         </Typography>
                       </Box>
                     </Box>
@@ -976,7 +976,7 @@ const RolesPage: React.FC = () => {
                         fontSize: "clamp(0.875rem, 1.5vw, 1rem)",
                       }}
                     >
-                      Información de Resumen
+                      {ROLES_PAGE.SUMMARY_INFO_TITLE}
                     </Box>
                     <Box
                       sx={{
@@ -984,9 +984,7 @@ const RolesPage: React.FC = () => {
                         fontSize: "clamp(0.75rem, 1.25vw, 0.875rem)",
                       }}
                     >
-                      Consulta el total de horas trabajadas por periodo. Usa las
-                      pestañas para cambiar entre semana, quincena, mes y horas
-                      extra.
+                      {ROLES_PAGE.SUMMARY_INFO_DESC}
                     </Box>
                   </Box>
                 </Box>

@@ -31,7 +31,7 @@ import {
   exportToExcel,
   exportToPDF,
 } from "../../utils/export";
-import { PAGE_TITLE, PERMISSIONS } from "../../constants/constants";
+import { PAGE_TITLE, PERMISSIONS, EMPLOYEES_PAGE } from "../../constants/constants";
 import GroupRoundedIcon from "@mui/icons-material/GroupRounded";
 import DownloadRoundedIcon from "@mui/icons-material/DownloadRounded";
 import CloseRoundedIcon from "@mui/icons-material/CloseRounded";
@@ -281,7 +281,7 @@ const EmployeesPage: React.FC = () => {
               <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
                 {filteredEmployees && (
                   <SearchBar
-                    placeholder="Buscar empleado"
+                    placeholder={EMPLOYEES_PAGE.SEARCH_PLACEHOLDER}
                     value={filter}
                     onChange={handleFilterChange}
                     sx={{ flex: 1 }}
@@ -321,7 +321,7 @@ const EmployeesPage: React.FC = () => {
                     onClick={handleOpenAddModal}
                     sx={{ px: 3, py: 1.5, fontSize: "1rem", minHeight: 56 }}
                   >
-                    Agregar
+                    {EMPLOYEES_PAGE.ADD}
                   </Button>
                 </Box>
               </Grid>
@@ -364,7 +364,7 @@ const EmployeesPage: React.FC = () => {
             >
               <ManageSearchIcon color="disabled" sx={{ fontSize: "65px" }} />
               <Typography variant="h6" color="textSecondary">
-                No se encontraron empleados para mostrar.
+                {EMPLOYEES_PAGE.NO_EMPLOYEES}
               </Typography>
             </Box>
           )}
@@ -374,11 +374,11 @@ const EmployeesPage: React.FC = () => {
         open={openDeleteDialog}
         onClose={handleCloseDeleteDialog}
         onConfirm={handleDelete}
-        title="Eliminar Empleado"
-        message="¿Estás seguro de que deseas eliminar este empleado? Esta acción no se puede deshacer."
+        title={EMPLOYEES_PAGE.DIALOG_DELETE_TITLE}
+        message={EMPLOYEES_PAGE.DIALOG_DELETE_MESSAGE}
         type="delete"
-        confirmText="Eliminar"
-        cancelText="Cancelar"
+        confirmText={EMPLOYEES_PAGE.DIALOG_DELETE_CONFIRM}
+        cancelText={EMPLOYEES_PAGE.DIALOG_DELETE_CANCEL}
         loading={isDeletingEmployee}
         paperSx={{
           minWidth: { xs: "80vw", sm: 320 },
@@ -390,8 +390,8 @@ const EmployeesPage: React.FC = () => {
       <DialogComponent
         open={openAddModal}
         onClose={handleCloseAddModal}
-        title="Agregar"
-        subtitle="Nuevo empleado"
+        title={EMPLOYEES_PAGE.DIALOG_ADD_TITLE}
+        subtitle={EMPLOYEES_PAGE.DIALOG_ADD_SUBTITLE}
         hideActions
         paperSx={{
           minWidth: { xs: "90vw", sm: 500, md: 700 },

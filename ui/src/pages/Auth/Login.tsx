@@ -17,7 +17,7 @@ import {
   Fade,
   Divider,
 } from "@mui/material";
-import { PAGE_TITLE, FORMS } from "../../constants/constants";
+import { PAGE_TITLE, FORMS, LOGIN } from "../../constants/constants";
 import Visibility from "@mui/icons-material/Visibility";
 import VisibilityOff from "@mui/icons-material/VisibilityOff";
 import LockOutlinedIcon from "@mui/icons-material/LockOutlined";
@@ -63,9 +63,7 @@ const Login: React.FC = () => {
 
     try {
       await authenticateUser(fields.identifier, fields.password);
-    } catch (error: unknown) {
-      // Eliminar la línea con console.error en la línea 67
-    }
+    } catch (error: unknown) {}
 
     setIsSubmitting(false);
   };
@@ -170,7 +168,7 @@ const Login: React.FC = () => {
             <Box component="form" onSubmit={handleLogin} sx={{ width: "100%" }}>
               <TextField
                 fullWidth
-                label="Correo Electrónico o Usuario"
+                label={LOGIN.IDENTIFIER_LABEL}
                 variant="outlined"
                 value={fields.identifier}
                 autoComplete="username"
@@ -208,7 +206,7 @@ const Login: React.FC = () => {
 
               <TextField
                 fullWidth
-                label="Contraseña"
+                label={LOGIN.PASSWORD_LABEL}
                 type={showPassword ? "text" : "password"}
                 variant="outlined"
                 value={fields.password}
@@ -296,10 +294,10 @@ const Login: React.FC = () => {
                       size={24}
                       sx={{ mr: 1 }}
                     />
-                    Iniciando sesión...
+                    {LOGIN.LOADING}
                   </>
                 ) : (
-                  "Iniciar Sesión"
+                  LOGIN.SUBMIT
                 )}
               </Button>
             </Box>
@@ -334,7 +332,7 @@ const Login: React.FC = () => {
                   mb: 1,
                 }}
               >
-                ¿Aún no tienes una cuenta?
+                {LOGIN.NO_ACCOUNT}
               </Typography>
               <Link
                 to="/register"
@@ -351,7 +349,7 @@ const Login: React.FC = () => {
                   e.currentTarget.style.color = "#000000";
                 }}
               >
-                Regístrate aquí
+                {LOGIN.REGISTER_LINK}
               </Link>
             </Box>
           </CardContent>

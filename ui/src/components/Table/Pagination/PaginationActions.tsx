@@ -1,6 +1,7 @@
 import { IconButton, Typography, useMediaQuery, useTheme } from "@mui/material";
 import { ArrowBack, ArrowForward } from "@mui/icons-material";
 import React from "react";
+import { PAGINATION } from "../../../constants/constants";
 
 interface PaginationActionsProps {
   count: number;
@@ -39,13 +40,13 @@ const PaginationActions: React.FC<PaginationActionsProps> = ({
           variant="body2"
           style={{ minWidth: "80px", textAlign: "center" }}
         >
-          Página {page + 1}
+          {PAGINATION.PAGE} {page + 1}
         </Typography>
       )}
       <IconButton
         onClick={(e) => onPageChange(e, page - 1)}
         disabled={page === 0}
-        aria-label="Página anterior"
+        aria-label={PAGINATION.PREVIOUS}
       >
         <ArrowBack />
       </IconButton>
@@ -53,12 +54,12 @@ const PaginationActions: React.FC<PaginationActionsProps> = ({
         variant="body2"
         style={{ minWidth: "80px", textAlign: "center" }}
       >
-        {startIndex}-{endIndex} de {count}
+        {startIndex}-{endIndex} {PAGINATION.OF} {count}
       </Typography>
       <IconButton
         onClick={(e) => onPageChange(e, page + 1)}
         disabled={page >= Math.ceil(count / rowsPerPage) - 1}
-        aria-label="Página siguiente"
+        aria-label={PAGINATION.NEXT}
       >
         <ArrowForward />
       </IconButton>

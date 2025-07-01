@@ -2,6 +2,7 @@ import React from "react";
 import { Box, IconButton, InputBase, useTheme } from "@mui/material";
 import SearchIcon from "@mui/icons-material/Search";
 import ClearRoundedIcon from "@mui/icons-material/ClearRounded";
+import { SEARCH_BAR } from "../../constants/constants";
 
 interface SearchBarProps {
   value: string;
@@ -13,7 +14,7 @@ interface SearchBarProps {
 }
 
 const SearchBar: React.FC<SearchBarProps> = ({
-  placeholder = "Buscar...",
+  placeholder = SEARCH_BAR.PLACEHOLDER,
   value,
   fullWidth,
   sx,

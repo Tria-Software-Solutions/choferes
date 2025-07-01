@@ -36,6 +36,7 @@ import VisibilityIcon from "@mui/icons-material/Visibility";
 import VisibilityOffIcon from "@mui/icons-material/VisibilityOff";
 import DialogComponent from "../../components/Dialog/DialogComponent";
 import AddRoundedIcon from "@mui/icons-material/AddRounded";
+import { DASHBOARD_USERS } from "../../constants/constants";
 
 const ManageUsers: React.FC<{ isExpanded?: boolean }> = ({
   isExpanded = true,
@@ -99,9 +100,9 @@ const ManageUsers: React.FC<{ isExpanded?: boolean }> = ({
         setLoadError(
           error instanceof Error
             ? error.message
-            : "Error al cargar los datos. Por favor, recarga la página.",
+            : DASHBOARD_USERS.LOAD_ERROR_TITLE,
         );
-        showNotification("Error al cargar los datos", 5000, false);
+        showNotification(DASHBOARD_USERS.LOAD_ERROR_TITLE, 5000, false);
       }
     };
 
@@ -111,7 +112,7 @@ const ManageUsers: React.FC<{ isExpanded?: boolean }> = ({
   useEffect(() => {
     if (usersError) {
       setLoadError(`Error al cargar usuarios: ${usersError}`);
-      showNotification("Error al cargar usuarios", 5000, false);
+      showNotification(DASHBOARD_USERS.LOAD_ERROR_TITLE, 5000, false);
     }
   }, [usersError, showNotification]);
 
@@ -418,20 +419,20 @@ const ManageUsers: React.FC<{ isExpanded?: boolean }> = ({
       return (
         <Box sx={{ p: 2 }}>
           <Typography variant="h6" gutterBottom>
-            Cambiar Contraseña para Usuario ID: {id}
+            {DASHBOARD_USERS.DIALOG_PASSWORD_TITLE} {id}
           </Typography>
           <Typography variant="body2" color="textSecondary" sx={{ mb: 3 }}>
-            Ingresa una nueva contraseña para este usuario.
+            {DASHBOARD_USERS.DIALOG_PASSWORD_SUBTITLE}
           </Typography>
           <TextField
-            label="Nueva Contraseña"
+            label={DASHBOARD_USERS.DIALOG_PASSWORD_NEW}
             type={showNewPassword ? "text" : "password"}
             variant="outlined"
             fullWidth
             value={passwordFields.newPassword}
             onChange={handleNewPassword}
             sx={{ mb: 2 }}
-            placeholder="Mínimo 8 caracteres"
+            placeholder={DASHBOARD_USERS.DIALOG_PASSWORD_NEW_PLACEHOLDER}
             InputProps={{
               endAdornment: (
                 <InputAdornment position="end">
@@ -443,14 +444,14 @@ const ManageUsers: React.FC<{ isExpanded?: boolean }> = ({
             }}
           />
           <TextField
-            label="Confirmar Nueva Contraseña"
+            label={DASHBOARD_USERS.DIALOG_PASSWORD_CONFIRM}
             type={showConfirmNewPassword ? "text" : "password"}
             variant="outlined"
             fullWidth
             value={passwordFields.confirmNewPassword}
             onChange={handleConfirmNewPassword}
             sx={{ mb: 2 }}
-            placeholder="Repite la nueva contraseña"
+            placeholder={DASHBOARD_USERS.DIALOG_PASSWORD_CONFIRM_PLACEHOLDER}
             InputProps={{
               endAdornment: (
                 <InputAdornment position="end">
@@ -477,14 +478,14 @@ const ManageUsers: React.FC<{ isExpanded?: boolean }> = ({
             sx={{ display: "flex", gap: 2, justifyContent: "flex-end", mt: 3 }}
           >
             <Button variant="outlined" onClick={handleClose}>
-              Cancelar
+              {DASHBOARD_USERS.DIALOG_PASSWORD_CANCEL}
             </Button>
             <Button
               variant="contained"
               onClick={(e) => handleChangePassword(e, id, handleClose)}
               disabled={!isPasswordFormValid}
             >
-              Cambiar Contraseña
+              {DASHBOARD_USERS.DIALOG_PASSWORD_CHANGE}
             </Button>
           </Box>
         </Box>
@@ -645,7 +646,7 @@ const ManageUsers: React.FC<{ isExpanded?: boolean }> = ({
               <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
                 {filteredUsers && (
                   <SearchBar
-                    placeholder="Buscar usuario"
+                    placeholder={DASHBOARD_USERS.SEARCH_PLACEHOLDER}
                     value={filter}
                     onChange={handleFilterChange}
                     sx={{ flex: 1 }}
@@ -710,7 +711,7 @@ const ManageUsers: React.FC<{ isExpanded?: boolean }> = ({
                       whiteSpace: "nowrap",
                     }}
                   >
-                    {showInactive ? "Mostrando Inactivos" : "Ocultar Inactivos"}
+                    {showInactive ? DASHBOARD_USERS.SHOW_INACTIVE : DASHBOARD_USERS.HIDE_INACTIVE}
                   </Typography>
                 </Box>
                 <Button
@@ -719,7 +720,7 @@ const ManageUsers: React.FC<{ isExpanded?: boolean }> = ({
                   onClick={handleOpenAddUserModal}
                   sx={{ px: 3, py: 1.5, fontSize: "1rem", minHeight: 56 }}
                 >
-                  Agregar
+                  {DASHBOARD_USERS.ADD}
                 </Button>
               </Box>
             </Grid>
@@ -760,7 +761,7 @@ const ManageUsers: React.FC<{ isExpanded?: boolean }> = ({
                       whiteSpace: "nowrap",
                     }}
                   >
-                    {showInactive ? "Mostrando Inactivos" : "Ocultar Inactivos"}
+                    {showInactive ? DASHBOARD_USERS.SHOW_INACTIVE : DASHBOARD_USERS.HIDE_INACTIVE}
                   </Typography>
                 </Box>
               </Box>
@@ -806,7 +807,7 @@ const ManageUsers: React.FC<{ isExpanded?: boolean }> = ({
               }}
             >
               <Typography variant="h6" color="textSecondary">
-                No se encontraron usuarios para mostrar.
+                {DASHBOARD_USERS.NO_USERS}
               </Typography>
             </Box>
           )}
@@ -817,18 +818,18 @@ const ManageUsers: React.FC<{ isExpanded?: boolean }> = ({
         open={openStatusDialog}
         onClose={handleCloseStatusDialog}
         onConfirm={handleStatusChange}
-        title="Cambiar Estado de Usuario"
-        message="¿Estás seguro de que deseas cambiar el estado de este usuario?"
+        title={DASHBOARD_USERS.DIALOG_STATUS_TITLE}
+        message={DASHBOARD_USERS.DIALOG_STATUS_MESSAGE}
         type="warning"
-        confirmText="Cambiar Estado"
-        cancelText="Cancelar"
+        confirmText={DASHBOARD_USERS.DIALOG_STATUS_CONFIRM}
+        cancelText={DASHBOARD_USERS.DIALOG_STATUS_CANCEL}
         loading={isUpdatingUserStatus}
       />
 
       <DialogComponent
         open={openAddUserModal}
         onClose={handleCloseAddUserModal}
-        title="Agregar"
+        title={DASHBOARD_USERS.ADD}
         subtitle="Nuevo usuario"
         hideActions
         paperSx={{

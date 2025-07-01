@@ -32,6 +32,7 @@ import { capitalizeFirstLetter } from "../../utils/string";
 import {
   PAGE_TITLE,
   // PERMISSIONS,
+  COURIER_SERVICE_PAGE,
 } from "../../constants/constants";
 import LocalShippingIcon from "@mui/icons-material/LocalShipping";
 import DownloadRoundedIcon from "@mui/icons-material/DownloadRounded";
@@ -378,7 +379,7 @@ const CourierServicePage: React.FC = () => {
               <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
                 {filteredCouriers && (
                   <SearchBar
-                    placeholder="Buscar servicio"
+                    placeholder={COURIER_SERVICE_PAGE.SEARCH_PLACEHOLDER}
                     value={filter}
                     onChange={handleFilterChange}
                     sx={{ flex: 1 }}
@@ -421,7 +422,7 @@ const CourierServicePage: React.FC = () => {
                     adapterLocale={es}
                   >
                     <DatePicker
-                      label="Seleccionar fecha"
+                      label={COURIER_SERVICE_PAGE.DATE_PICKER_LABEL}
                       value={selectedDate || null}
                       sx={{
                         width: { xs: "100%", sm: "100%", md: "200px" },
@@ -450,7 +451,7 @@ const CourierServicePage: React.FC = () => {
                     alignItems="center"
                     gap={1}
                   >
-                    <Tooltip title="Día Anterior" arrow>
+                    <Tooltip title={COURIER_SERVICE_PAGE.TOOLTIP_PREV_DAY} arrow>
                       <Button
                         variant="contained"
                         sx={{
@@ -462,7 +463,7 @@ const CourierServicePage: React.FC = () => {
                         <ArrowBackIosNewRoundedIcon />
                       </Button>
                     </Tooltip>
-                    <Tooltip title="Día Siguiente" arrow>
+                    <Tooltip title={COURIER_SERVICE_PAGE.TOOLTIP_NEXT_DAY} arrow>
                       <Button
                         variant="contained"
                         sx={{
@@ -475,7 +476,7 @@ const CourierServicePage: React.FC = () => {
                         <ArrowForwardIosRoundedIcon />
                       </Button>
                     </Tooltip>
-                    <Tooltip title="Día Actual" arrow>
+                    <Tooltip title={COURIER_SERVICE_PAGE.TOOLTIP_CURRENT_DAY} arrow>
                       <Button
                         variant="contained"
                         sx={{
@@ -502,7 +503,7 @@ const CourierServicePage: React.FC = () => {
                     minHeight: 56,
                   }}
                 >
-                  Agregar
+                  {COURIER_SERVICE_PAGE.ADD}
                 </Button>
               </Box>
             </Grid>
@@ -558,7 +559,7 @@ const CourierServicePage: React.FC = () => {
                 )}
               </Typography>
               <Typography variant="h6" color="textSecondary">
-                No se encontraron servicios de mensajería para mostrar.
+                {COURIER_SERVICE_PAGE.NO_SERVICES}
               </Typography>
             </Box>
           )}
@@ -568,11 +569,11 @@ const CourierServicePage: React.FC = () => {
         open={openDeleteDialog}
         onClose={handleCloseDeleteDialog}
         onConfirm={handleDelete}
-        title="Eliminar Servicio"
-        message="¿Estás seguro de que deseas eliminar este servicio de mensajería? Esta acción no se puede deshacer."
+        title={COURIER_SERVICE_PAGE.DIALOG_DELETE_TITLE}
+        message={COURIER_SERVICE_PAGE.DIALOG_DELETE_MESSAGE}
         type="delete"
-        confirmText="Eliminar"
-        cancelText="Cancelar"
+        confirmText={COURIER_SERVICE_PAGE.DIALOG_DELETE_CONFIRM}
+        cancelText={COURIER_SERVICE_PAGE.DIALOG_DELETE_CANCEL}
         loading={isDeletingCourier}
         paperSx={{
           minWidth: { xs: "80vw", sm: 320 },
@@ -583,8 +584,8 @@ const CourierServicePage: React.FC = () => {
       <DialogComponent
         open={openAddCourierModal}
         onClose={handleCloseAddCourierModal}
-        title="Agregar"
-        subtitle="Nuevo servicio"
+        title={COURIER_SERVICE_PAGE.DIALOG_ADD_TITLE}
+        subtitle={COURIER_SERVICE_PAGE.DIALOG_ADD_SUBTITLE}
         hideActions
         paperSx={{
           minWidth: { xs: "90vw", sm: 500, md: 700 },

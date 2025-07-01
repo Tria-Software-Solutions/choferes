@@ -12,6 +12,7 @@ import {
 import LockIcon from "@mui/icons-material/Lock";
 import HomeIcon from "@mui/icons-material/Home";
 import SecurityIcon from "@mui/icons-material/Security";
+import { ERRORS } from "../constants/constants";
 
 const Forbidden: React.FC = () => {
   const navigate = useNavigate();
@@ -91,7 +92,7 @@ const Forbidden: React.FC = () => {
                   fontSize: { xs: "2rem", sm: "2.5rem", md: "3rem" },
                 }}
               >
-                Error 403
+                {ERRORS.ERROR_403_TITLE}
               </Typography>
 
               <Typography
@@ -103,7 +104,7 @@ const Forbidden: React.FC = () => {
                   fontSize: { xs: "1.1rem", sm: "1.25rem", md: "1.5rem" },
                 }}
               >
-                Acceso Denegado
+                {ERRORS.ERROR_403_SUBTITLE}
               </Typography>
 
               <Typography
@@ -116,8 +117,7 @@ const Forbidden: React.FC = () => {
                   maxWidth: 500,
                 }}
               >
-                No tienes los permisos necesarios para acceder a esta página. Si
-                crees que esto es un error, contacta a tu administrador.
+                {ERRORS.ERROR_403_DESCRIPTION}
               </Typography>
 
               <Box
@@ -144,9 +144,9 @@ const Forbidden: React.FC = () => {
                     px: { xs: 2, sm: 4 },
                     py: { xs: 1, sm: 1.5 },
                   }}
-                  aria-label="Ir al inicio"
+                  aria-label={ERRORS.GO_HOME}
                 >
-                  Ir al Inicio
+                  {ERRORS.GO_HOME}
                 </Button>
               </Box>
 
@@ -160,8 +160,7 @@ const Forbidden: React.FC = () => {
                   fontSize: { xs: "0.75rem", sm: "0.875rem" },
                 }}
               >
-                Para solicitar acceso adicional, contacta a tu administrador del
-                sistema
+                {ERRORS.ERROR_403_CONTACT}
               </Typography>
             </Box>
           </Slide>

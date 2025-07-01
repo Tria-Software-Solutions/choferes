@@ -232,10 +232,10 @@ const AddVehicleForm: React.FC<AddVehicleFormProps> = ({
       <Grid container spacing={3} sx={{ mt: 0 }}>
         <Grid item xs={12} sm={6}>
           <CustomTextField
-            label="Boleta"
+            label={FORMS.ADD_VEHICLE.TICKET_LABEL}
             variant="outlined"
             fullWidth
-            placeholder="Ej: 12345"
+            placeholder={FORMS.ADD_VEHICLE.TICKET_PLACEHOLDER}
             value={formData.ticket}
             onChange={(e) => handleFieldChange("ticket", e.target.value)}
             error={errors.ticket !== ""}
@@ -250,10 +250,10 @@ const AddVehicleForm: React.FC<AddVehicleFormProps> = ({
 
         <Grid item xs={12} sm={6}>
           <CustomTextField
-            label="Placa"
+            label={FORMS.ADD_VEHICLE.LICENSE_PLATE_LABEL}
             variant="outlined"
             fullWidth
-            placeholder="Ej: ABC-123"
+            placeholder={FORMS.ADD_VEHICLE.LICENSE_PLATE_PLACEHOLDER}
             value={formData.licensePlate}
             onChange={handleLicensePlateChange}
             error={errors.licensePlate !== ""}
@@ -294,7 +294,7 @@ const AddVehicleForm: React.FC<AddVehicleFormProps> = ({
               renderInput={(params) => (
                 <CustomTextField
                   {...params}
-                  label="Marca"
+                  label={FORMS.ADD_VEHICLE.BRAND_LABEL}
                   variant="outlined"
                   fullWidth
                   error={errors.brand !== ""}
@@ -346,7 +346,7 @@ const AddVehicleForm: React.FC<AddVehicleFormProps> = ({
               renderInput={(params) => (
                 <CustomTextField
                   {...params}
-                  label="Color"
+                  label={FORMS.ADD_VEHICLE.COLOR_LABEL}
                   variant="outlined"
                   fullWidth
                   error={errors.color !== ""}
@@ -372,10 +372,10 @@ const AddVehicleForm: React.FC<AddVehicleFormProps> = ({
 
         <Grid item xs={12} sm={6}>
           <CustomTextField
-            label="Espacio de Parqueo"
+            label={FORMS.ADD_VEHICLE.PARKING_LOT_LABEL}
             variant="outlined"
             fullWidth
-            placeholder="Ej: ATP1-123"
+            placeholder={FORMS.ADD_VEHICLE.PARKING_LOT_PLACEHOLDER}
             value={formData.parkingLot}
             onChange={handleParkingLotChange}
             error={errors.parkingLot !== ""}
@@ -391,7 +391,7 @@ const AddVehicleForm: React.FC<AddVehicleFormProps> = ({
         <Grid item xs={12} sm={6}>
           <LocalizationProvider dateAdapter={AdapterDateFns} adapterLocale={es}>
             <DatePicker
-              label="Fecha de Parqueo"
+              label={FORMS.ADD_VEHICLE.PARKING_DATE_LABEL}
               value={formData.parkingDate}
               onChange={handleDateChange}
               format="EEEE d 'de' MMMM 'de' yyyy"
@@ -408,12 +408,12 @@ const AddVehicleForm: React.FC<AddVehicleFormProps> = ({
 
         <Grid item xs={12}>
           <CustomTextField
-            label="Observaciones"
+            label={FORMS.ADD_VEHICLE.OBSERVATIONS_LABEL}
             variant="outlined"
             fullWidth
             multiline
             rows={3}
-            placeholder="Observaciones adicionales sobre el vehículo..."
+            placeholder={FORMS.ADD_VEHICLE.OBSERVATIONS_PLACEHOLDER}
             value={formData.notes}
             onChange={(e) =>
               setFormData({ ...formData, notes: e.target.value })
@@ -452,7 +452,7 @@ const AddVehicleForm: React.FC<AddVehicleFormProps> = ({
                   mb: 0.5,
                 }}
               >
-                Información Importante
+                {FORMS.ADD_VEHICLE.INFO_TITLE}
               </Box>
               <Box
                 sx={{
@@ -460,8 +460,7 @@ const AddVehicleForm: React.FC<AddVehicleFormProps> = ({
                   fontSize: "clamp(0.75rem, 1.25vw, 0.875rem)",
                 }}
               >
-                Completa todos los campos requeridos. La boleta y placa deben
-                ser únicas.{" "}
+                {FORMS.ADD_VEHICLE.INFO_DESC}
                 <Box
                   component="span"
                   onClick={() => {
@@ -491,7 +490,7 @@ const AddVehicleForm: React.FC<AddVehicleFormProps> = ({
                     },
                   }}
                 >
-                  Puedes usar &quot;N/A&quot; para campos opcionales.
+                  {FORMS.ADD_VEHICLE.INFO_OPTIONAL}
                 </Box>
               </Box>
             </Box>
@@ -560,7 +559,7 @@ const AddVehicleForm: React.FC<AddVehicleFormProps> = ({
                   py: { xs: 1, sm: 1.5 },
                 }}
               >
-                {isLoading ? "Agregando..." : "Agregar"}
+                {isLoading ? FORMS.ADD_VEHICLE.BUTTON_ADDING : FORMS.ADD_VEHICLE.BUTTON_ADD}
               </Button>
             </Box>
           </Box>

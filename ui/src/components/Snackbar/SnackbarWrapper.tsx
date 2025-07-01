@@ -1,6 +1,7 @@
 import React, { createContext, useContext, useState } from "react";
 import { Snackbar, IconButton, useTheme } from "@mui/material";
 import CloseIcon from "@mui/icons-material/Close";
+import { SNACKBAR } from "../../constants/constants";
 
 interface NotificationContextType {
   showNotification: (
@@ -34,7 +35,7 @@ export const AppNotificationProvider: React.FC<{
   const [message, setMessage] = useState("");
   const [duration, setDuration] = useState<number>(3000);
   const [closeable, setCloseable] = useState<boolean>(true);
-  const [buttonText, setButtonText] = useState<string>("");
+  const [buttonText, setButtonText] = useState<string>(SNACKBAR.CLOSE);
   const [onButtonClick, setOnButtonClick] = useState<() => void>(() => {
     // noop
   });
@@ -43,7 +44,7 @@ export const AppNotificationProvider: React.FC<{
     message: string,
     duration = 3000,
     closeable = true,
-    buttonText = "Cerrar",
+    buttonText = SNACKBAR.CLOSE,
     onButtonClick: () => void = () => {
       // noop
     },

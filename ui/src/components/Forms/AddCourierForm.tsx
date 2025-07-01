@@ -165,10 +165,10 @@ const AddCourierForm: React.FC<AddCourierFormProps> = ({
       <Grid container spacing={3} sx={{ mt: 0 }}>
         <Grid item xs={12} sm={6}>
           <CustomTextField
-            label="Chofer"
+            label={FORMS.ADD_COURIER.DRIVER}
             variant="outlined"
             fullWidth
-            placeholder="Ej: Juan Pérez"
+            placeholder={FORMS.ADD_COURIER.DRIVER_PLACEHOLDER}
             value={formData.driver}
             onChange={(e) => handleFieldChange("driver", e.target.value)}
             error={errors.driver !== ""}
@@ -205,15 +205,15 @@ const AddCourierForm: React.FC<AddCourierFormProps> = ({
               },
             }}
           >
-            <InputLabel>Ruta</InputLabel>
+            <InputLabel>{FORMS.ADD_COURIER.ROUTE}</InputLabel>
             <Select
-              label="Ruta"
+              label={FORMS.ADD_COURIER.ROUTE}
               value={formData.route}
               onChange={(e) => handleFieldChange("route", e.target.value)}
               error={errors.route !== ""}
               input={
                 <OutlinedInput
-                  label="Ruta"
+                  label={FORMS.ADD_COURIER.ROUTE}
                   startAdornment={
                     <InputAdornment position="start">
                       <MapOutlinedIcon
@@ -233,11 +233,11 @@ const AddCourierForm: React.FC<AddCourierFormProps> = ({
 
         <Grid item xs={12} sm={6}>
           <CustomTextField
-            label="Distancia (km)"
+            label={FORMS.ADD_COURIER.DISTANCE}
             variant="outlined"
             fullWidth
             type="number"
-            placeholder="Ej: 45"
+            placeholder={FORMS.ADD_COURIER.DISTANCE_PLACEHOLDER}
             value={formData.distance}
             onChange={(e) =>
               handleFieldChange("distance", parseInt(e.target.value) || 0)
@@ -254,10 +254,10 @@ const AddCourierForm: React.FC<AddCourierFormProps> = ({
 
         <Grid item xs={12} sm={6}>
           <CustomTextField
-            label="Número de Guía"
+            label={FORMS.ADD_COURIER.TRACKING_NUMBER}
             variant="outlined"
             fullWidth
-            placeholder="Ej: TRK001"
+            placeholder={FORMS.ADD_COURIER.TRACKING_NUMBER_PLACEHOLDER}
             value={formData.trackingNumber}
             onChange={(e) =>
               handleFieldChange("trackingNumber", e.target.value)
@@ -274,15 +274,15 @@ const AddCourierForm: React.FC<AddCourierFormProps> = ({
 
         <Grid item xs={12} sm={6}>
           <FormControl variant="outlined" fullWidth>
-            <InputLabel>Estado</InputLabel>
+            <InputLabel>{FORMS.ADD_COURIER.STATUS}</InputLabel>
             <Select
-              label="Estado"
+              label={FORMS.ADD_COURIER.STATUS}
               value={formData.status}
               onChange={(e) => handleFieldChange("status", e.target.value)}
               error={errors.status !== ""}
               input={
                 <OutlinedInput
-                  label="Estado"
+                  label={FORMS.ADD_COURIER.STATUS}
                   startAdornment={
                     <InputAdornment position="start">
                       <AssignmentOutlinedIcon
@@ -293,9 +293,9 @@ const AddCourierForm: React.FC<AddCourierFormProps> = ({
                 />
               }
             >
-              <MenuItem value="Despachado">Despachado</MenuItem>
-              <MenuItem value="En Tránsito">En Tránsito</MenuItem>
-              <MenuItem value="Entregado">Entregado</MenuItem>
+              <MenuItem value="Despachado">{FORMS.ADD_COURIER.STATUS_DESPACHADO}</MenuItem>
+              <MenuItem value="En Tránsito">{FORMS.ADD_COURIER.STATUS_EN_TRANSITO}</MenuItem>
+              <MenuItem value="Entregado">{FORMS.ADD_COURIER.STATUS_ENTREGADO}</MenuItem>
             </Select>
           </FormControl>
         </Grid>
@@ -326,7 +326,7 @@ const AddCourierForm: React.FC<AddCourierFormProps> = ({
                   fontSize: "clamp(0.875rem, 1.5vw, 1rem)",
                 }}
               >
-                Información del Servicio de Mensajería
+                {FORMS.ADD_COURIER.INFO_TITLE}
               </Box>
               <Box
                 sx={{
@@ -334,8 +334,7 @@ const AddCourierForm: React.FC<AddCourierFormProps> = ({
                   fontSize: "clamp(0.75rem, 1.25vw, 0.875rem)",
                 }}
               >
-                Completa todos los campos requeridos para registrar un nuevo
-                servicio de mensajería.
+                {FORMS.ADD_COURIER.INFO_DESCRIPTION}
               </Box>
             </Box>
           </Box>
@@ -364,7 +363,7 @@ const AddCourierForm: React.FC<AddCourierFormProps> = ({
                 order: { xs: 3, sm: 1 },
               }}
             >
-              Limpiar
+              {FORMS.ADD_COURIER.CLEAR_BUTTON}
             </Button>
             <Box
               sx={{
@@ -386,7 +385,7 @@ const AddCourierForm: React.FC<AddCourierFormProps> = ({
                     fontSize: "clamp(0.75rem, 1.25vw, 0.875rem)",
                   }}
                 >
-                  Cancelar
+                  {FORMS.ADD_COURIER.CANCEL_BUTTON}
                 </Button>
               )}
               <Button
@@ -403,7 +402,7 @@ const AddCourierForm: React.FC<AddCourierFormProps> = ({
                   py: { xs: 1, sm: 1.5 },
                 }}
               >
-                {isLoading ? "Agregando..." : "Agregar"}
+                {isLoading ? FORMS.ADD_COURIER.LOADING_BUTTON : FORMS.ADD_COURIER.ADD_BUTTON}
               </Button>
             </Box>
           </Box>

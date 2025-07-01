@@ -234,7 +234,7 @@ const AppBarComponent: React.FC<AppBarComponentProps> = ({
               >
                 {links.length === 0 ? (
                   <Box sx={{ color: "white", p: 1 }}>
-                    No hay links disponibles
+                    {APPBAR_MENU.NO_LINKS}
                   </Box>
                 ) : (
                   links.map((link, index) => (
@@ -295,7 +295,7 @@ const AppBarComponent: React.FC<AppBarComponentProps> = ({
         {currentUser && (
           <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
             {/* Notificaciones */}
-            <Tooltip title="Notificaciones" arrow>
+            <Tooltip title={APPBAR_MENU.NOTIFICATIONS} arrow>
               <IconButton
                 onClick={handleNotificationsOpen}
                 sx={{
@@ -351,7 +351,7 @@ const AppBarComponent: React.FC<AppBarComponentProps> = ({
                 </Typography>
               </Box>
 
-              <Tooltip title="Menú de Usuario" arrow>
+              <Tooltip title={APPBAR_MENU.USER_MENU} arrow>
                 <IconButton
                   onClick={handleUserMenuOpen}
                   sx={{
