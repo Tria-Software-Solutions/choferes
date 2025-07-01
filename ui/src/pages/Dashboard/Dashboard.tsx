@@ -10,7 +10,7 @@ import {
   useMediaQuery,
   useTheme,
 } from "@mui/material";
-import { PAGE_TITLE } from "../../constants/constants";
+import { PAGE_TITLE, DASHBOARD } from "../../constants/constants";
 import ManageAccountsIcon from "@mui/icons-material/ManageAccounts";
 import ManagePermissions from "./ManagePermissions";
 
@@ -55,7 +55,7 @@ const Dashboard: React.FC = () => {
       >
         <AccordionSummary aria-controls="panel1d-content" id="panel1d-header">
           <Typography component="span" fontWeight="bold">
-            Usuarios
+            {DASHBOARD.USERS}
           </Typography>
         </AccordionSummary>
         <AccordionDetails>
@@ -68,7 +68,7 @@ const Dashboard: React.FC = () => {
       >
         <AccordionSummary aria-controls="panel2d-content" id="panel2d-header">
           <Typography component="span" fontWeight="bold">
-            Roles
+            {DASHBOARD.ROLES}
           </Typography>
         </AccordionSummary>
         <AccordionDetails>
@@ -81,7 +81,7 @@ const Dashboard: React.FC = () => {
       >
         <AccordionSummary aria-controls="panel3d-content" id="panel3d-header">
           <Typography component="span" fontWeight="bold">
-            Permisos
+            {DASHBOARD.PERMISSIONS}
           </Typography>
         </AccordionSummary>
         <AccordionDetails>

@@ -17,7 +17,7 @@ import {
   Fade,
   Divider,
 } from "@mui/material";
-import { PAGE_TITLE } from "../../constants/constants";
+import { PAGE_TITLE, FORMS } from "../../constants/constants";
 import Visibility from "@mui/icons-material/Visibility";
 import VisibilityOff from "@mui/icons-material/VisibilityOff";
 import LockOutlinedIcon from "@mui/icons-material/LockOutlined";
@@ -41,13 +41,13 @@ const Login: React.FC = () => {
     const newErrors: { [key: string]: string } = {};
 
     if (!fields.identifier.trim()) {
-      newErrors.identifier = "El correo electrónico o usuario es requerido";
+      newErrors.identifier = FORMS.EMAIL_REQUIRED;
     }
 
     if (!fields.password.trim()) {
-      newErrors.password = "La contraseña es requerida";
+      newErrors.password = FORMS.PASSWORD_REQUIRED;
     } else if (fields.password.length < 6) {
-      newErrors.password = "La contraseña debe tener al menos 6 caracteres";
+      newErrors.password = FORMS.PASSWORD_COMPLEXITY;
     }
 
     setErrors(newErrors);
@@ -162,7 +162,7 @@ const Login: React.FC = () => {
                   maxWidth: 300,
                 }}
               >
-                Ingresa tus credenciales para acceder al sistema
+                {FORMS.LOGIN_DESCRIPTION}
               </Typography>
             </Box>
 

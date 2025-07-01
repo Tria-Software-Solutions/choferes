@@ -23,7 +23,7 @@ import {
 } from "@mui/material";
 import Visibility from "@mui/icons-material/Visibility";
 import VisibilityOff from "@mui/icons-material/VisibilityOff";
-import { PAGE_TITLE } from "../../constants/constants";
+import { PAGE_TITLE, AUTH, FORMS } from "../../constants/constants";
 import PersonOutlinedIcon from "@mui/icons-material/PersonOutlined";
 import EmailOutlinedIcon from "@mui/icons-material/EmailOutlined";
 import LockOutlinedIcon from "@mui/icons-material/LockOutlined";
@@ -62,34 +62,34 @@ const Register = () => {
     const newErrors: { [key: string]: string } = {};
 
     if (addFields.firstName === "") {
-      newErrors.firstName = "El nombre es requerido";
+      newErrors.firstName = FORMS.FIRST_NAME_REQUIRED;
     } else if (!nameRegex.test(addFields.firstName)) {
       newErrors.firstName =
         "El nombre solo puede contener letras, espacios y puntos";
     }
 
     if (addFields.lastName === "") {
-      newErrors.lastName = "El apellido es requerido";
+      newErrors.lastName = FORMS.LAST_NAME_REQUIRED;
     } else if (!nameRegex.test(addFields.lastName)) {
       newErrors.lastName =
         "El apellido solo puede contener letras, espacios y puntos";
     }
 
     if (addFields.email === "") {
-      newErrors.email = "El correo electrónico es requerido";
+      newErrors.email = FORMS.EMAIL_REQUIRED;
     } else if (!emailRegex.test(addFields.email)) {
-      newErrors.email = "El correo electrónico no tiene un formato válido";
+      newErrors.email = FORMS.EMAIL_INVALID;
     }
 
     if (addFields.username === "") {
-      newErrors.username = "El usuario es requerido";
+      newErrors.username = FORMS.USERNAME_REQUIRED;
     } else if (!usernameRegex.test(addFields.username)) {
       newErrors.username =
         "El usuario debe comenzar con una letra y tener 3-20 caracteres";
     }
 
     if (addFields.password === "") {
-      newErrors.password = "La contraseña es requerida";
+      newErrors.password = FORMS.PASSWORD_REQUIRED;
     } else if (!passwordRegex.test(addFields.password)) {
       newErrors.password =
         "La contraseña debe tener al menos 8 caracteres, una mayúscula, una minúscula, un número y un carácter especial";
@@ -117,7 +117,7 @@ const Register = () => {
         isActive: true,
       };
       await dispatch(createUser({ newUser })).unwrap();
-      showNotification("El registro del usuario fue exitoso", 3000, false);
+      showNotification(AUTH.REGISTER_SUCCESS, 3000, false);
       // Clear form after successful registration
       setAddFields({
         firstName: "",
@@ -129,7 +129,7 @@ const Register = () => {
     } catch (error) {
       setError("Error al registrar usuario");
       showNotification(
-        "Ha ocurrido un error al registrar el usuario",
+        AUTH.REGISTER_ERROR,
         5000,
         false,
       );
@@ -153,7 +153,7 @@ const Register = () => {
     if (emailExists) {
       setFieldErrors((prev) => ({
         ...prev,
-        email: "El correo electrónico ya existe",
+        email: FORMS.EMAIL_EXISTS,
       }));
     } else {
       setFieldErrors((prev) => ({ ...prev, email: "" }));
@@ -175,7 +175,7 @@ const Register = () => {
     if (usernameExists) {
       setFieldErrors((prev) => ({
         ...prev,
-        username: "El nombre de usuario ya existe",
+        username: FORMS.USERNAME_EXISTS,
       }));
     } else {
       setFieldErrors((prev) => ({ ...prev, username: "" }));

@@ -19,7 +19,7 @@ import {
   InputAdornment,
 } from "@mui/material";
 import { Schedule } from "../../models/Schedule";
-import { DAYS_LIST } from "../../constants/constants";
+import { DAYS_LIST, FORMS } from "../../constants/constants";
 import { translateDayOptionsToSpanish } from "../../utils/string";
 import AddRoundedIcon from "@mui/icons-material/AddRounded";
 import CloseRoundedIcon from "@mui/icons-material/CloseRounded";
@@ -99,7 +99,7 @@ const AddScheduleForm: React.FC<AddScheduleFormProps> = ({
       <Grid container spacing={3} sx={{ mt: 0 }}>
         <Grid item xs={12} sm={6}>
           <CustomTextField
-            label="Nombre del Horario"
+            label={FORMS.LABEL_REQUIRED}
             variant="outlined"
             fullWidth
             placeholder="Ej: Horario Matutino"
@@ -117,7 +117,7 @@ const AddScheduleForm: React.FC<AddScheduleFormProps> = ({
 
         <Grid item xs={12} sm={6}>
           <CustomTextField
-            label="Horas de Trabajo"
+            label={FORMS.HOURS_REQUIRED}
             variant="outlined"
             type="number"
             fullWidth
@@ -137,7 +137,7 @@ const AddScheduleForm: React.FC<AddScheduleFormProps> = ({
               (!/^[0-9]+$/.test(formData.hours) ||
                 parseInt(formData.hours) <= 0 ||
                 parseInt(formData.hours) > 24)
-                ? "Ingrese un número válido entre 1 y 24"
+                ? FORMS.HOURS_INVALID
                 : ""
             }
             icon={
@@ -176,14 +176,14 @@ const AddScheduleForm: React.FC<AddScheduleFormProps> = ({
               },
             }}
           >
-            <InputLabel>Días de Trabajo</InputLabel>
+            <InputLabel>{FORMS.DAYS_REQUIRED}</InputLabel>
             <Select
               multiple
-              label="Días de Trabajo"
+              label={FORMS.DAYS_REQUIRED}
               value={formData.days}
               input={
-                <OutlinedInput
-                  label="Días de Trabajo"
+                                  <OutlinedInput
+                    label={FORMS.DAYS_REQUIRED}
                   startAdornment={
                     <InputAdornment position="start">
                       <CalendarMonthOutlinedIcon

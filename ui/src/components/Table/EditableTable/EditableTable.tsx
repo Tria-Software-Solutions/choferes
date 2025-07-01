@@ -199,8 +199,8 @@ const EditableTable = <T extends object>({
               const visible = labels.slice(0, max);
               const hidden = labels.length > max ? labels.length - max : 0;
               return hidden > 0
-                ? `Permisos: ${visible.join(", ")} +${hidden} más`
-                : `Permisos: ${visible.join(", ")}`;
+                ? `${TABLE.PERMISSIONS_LABEL}: ${visible.join(", ")} +${hidden} más`
+                : `${TABLE.PERMISSIONS_LABEL}: ${visible.join(", ")}`;
             }}
             sx={{ height: 56 }}
             MenuProps={{
@@ -966,7 +966,7 @@ const EditableTable = <T extends object>({
                       >
                         {editRowId === getRowId(row) ? (
                           <>
-                            <Tooltip title="Guardar" arrow>
+                            <Tooltip title={TABLE.SAVE} arrow>
                               <Box>
                                 <IconButton
                                   color="primary"
@@ -980,7 +980,7 @@ const EditableTable = <T extends object>({
                                 </IconButton>
                               </Box>
                             </Tooltip>
-                            <Tooltip title="Cancelar" arrow>
+                            <Tooltip title={TABLE.CANCEL} arrow>
                               <Box>
                                 <IconButton
                                   color="primary"
@@ -1000,7 +1000,7 @@ const EditableTable = <T extends object>({
                                 {isUser &&
                                   isExpanded &&
                                   handlePasswordModal && (
-                                    <Tooltip title="Cambiar Contraseña" arrow>
+                                    <Tooltip title={TABLE.CHANGE_PASSWORD} arrow>
                                       <Box>
                                         <IconButton
                                           color="primary"
@@ -1014,7 +1014,7 @@ const EditableTable = <T extends object>({
                                       </Box>
                                     </Tooltip>
                                   )}
-                                <Tooltip title="Editar" arrow>
+                                <Tooltip title={TABLE.EDIT} arrow>
                                   <Box>
                                     <IconButton
                                       color="primary"
@@ -1035,7 +1035,7 @@ const EditableTable = <T extends object>({
                                   ("isActive" in row ? (
                                     <Tooltip
                                       title={
-                                        row.isActive ? "Desactivar" : "Activar"
+                                        row.isActive ? TABLE.DISABLE : TABLE.ENABLE
                                       }
                                       arrow
                                     >
@@ -1056,7 +1056,7 @@ const EditableTable = <T extends object>({
                                       </Box>
                                     </Tooltip>
                                   ) : (
-                                    <Tooltip title="Eliminar" arrow>
+                                    <Tooltip title={TABLE.DELETE} arrow>
                                       <Box>
                                         <IconButton
                                           color="error"
@@ -1073,7 +1073,7 @@ const EditableTable = <T extends object>({
                                     </Tooltip>
                                   ))
                                 ) : (
-                                  <Tooltip title="Eliminar" arrow>
+                                  <Tooltip title={TABLE.DELETE} arrow>
                                     <Box>
                                       <IconButton
                                         color="error"

@@ -11,6 +11,7 @@ import {
   useMediaQuery,
 } from "@mui/material";
 import { Close as CloseIcon } from "@mui/icons-material";
+import { DIALOG } from "../../constants/constants";
 
 export type DialogType = "delete" | "warning" | "info" | "success";
 
@@ -70,13 +71,13 @@ const DialogComponent: React.FC<ConfirmationDialogProps> = ({
   const getDefaultConfirmText = () => {
     switch (type) {
       case "delete":
-        return "Eliminar";
+        return DIALOG.DELETE;
       case "warning":
-        return "Continuar";
+        return DIALOG.CONTINUE;
       case "success":
-        return "Aceptar";
+        return DIALOG.ACCEPT;
       default:
-        return "Confirmar";
+        return DIALOG.CONFIRM;
     }
   };
 
@@ -182,7 +183,7 @@ const DialogComponent: React.FC<ConfirmationDialogProps> = ({
               }}
               disabled={loading}
             >
-              {cancelText || "Cancelar"}
+              {cancelText || DIALOG.CANCEL}
             </Button>
             {onConfirm && (
               <Button
