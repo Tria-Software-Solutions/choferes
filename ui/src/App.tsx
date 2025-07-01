@@ -94,9 +94,6 @@ const AppBarWrapper: React.FC = () => {
   };
 
   const filteredLinks = links.filter((link) => {
-    if (link.label === APPBAR_MENU.COURIER_SERVICE) {
-      return true;
-    }
     return (userPermissions || []).includes(permissionsMap[link.label]);
   });
 
@@ -131,6 +128,28 @@ const AppContent: React.FC = () => {
     location.pathname === "/" || location.pathname === "/register";
 
   const safeUserPermissions = userPermissions || [];
+
+  const getDefaultRoute = (userPermissions: string[]) => {
+    const routePreferences = [
+      { route: ROUTES.ROLES, permission: PERMISSIONS.VIEW_ROLES },
+      { route: ROUTES.DASHBOARD, permission: PERMISSIONS.VIEW_ADMIN },
+      { route: ROUTES.EMPLOYEES, permission: PERMISSIONS.VIEW_EMPLOYEES },
+      { route: ROUTES.SCHEDULES, permission: PERMISSIONS.VIEW_SCHEDULES },
+      { route: ROUTES.VEHICLES, permission: PERMISSIONS.VIEW_VEHICLES },
+      {
+        route: ROUTES.COURIER_SERVICE,
+        permission: PERMISSIONS.VIEW_COURIER_SERVICE,
+      },
+    ];
+
+    for (const { route, permission } of routePreferences) {
+      if (userPermissions.includes(permission)) {
+        return route;
+      }
+    }
+
+    return ROUTES.COURIER_SERVICE;
+  };
 
   return (
     <>
@@ -170,11 +189,28 @@ const AppContent: React.FC = () => {
         <Routes>
           <Route
             path="/"
-            element={currentUser ? <Navigate to="/roles" /> : <Login />}
+            element={
+              currentUser ? (
+                <Navigate to={getDefaultRoute(safeUserPermissions)} />
+              ) : (
+                <Login />
+              )
+            }
           />
           <Route path="/register" element={<Register />} />
           <Route element={<ProtectedRoute />}>
-            <Route path="/courier-service" element={<CourierServicePage />} />
+            <Route
+              path="/courier-service"
+              element={
+                safeUserPermissions.includes(
+                  PERMISSIONS.VIEW_COURIER_SERVICE,
+                ) ? (
+                  <CourierServicePage />
+                ) : (
+                  <Forbidden />
+                )
+              }
+            />
             <Route
               path="/roles"
               element={
