@@ -1,5 +1,5 @@
-import { Sequelize } from "sequelize";
-import config from "./config";
+const { Sequelize } = require("sequelize");
+const config = require("./config");
 
 const env = process.env.NODE_ENV || "development";
 const dbConfig = config[env];
@@ -31,4 +31,4 @@ const sequelize = new Sequelize(dbConfig.database, dbConfig.username, dbConfig.p
   },
 });
 
-export default sequelize;
+module.exports = sequelize;

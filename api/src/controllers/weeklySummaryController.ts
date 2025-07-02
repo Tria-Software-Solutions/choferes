@@ -27,7 +27,6 @@ export const getCurrentWeeklySummary = async (req: Request, res: Response) => {
     const summary = await weeklySummaryService.getCurrentWeeklySummary(
       Number(req.params.id),
       Number(req.query.weekNumber),
-      Number(req.query.month),
       Number(req.query.year),
     );
     if (summary) {

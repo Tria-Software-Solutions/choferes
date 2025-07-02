@@ -36,5 +36,13 @@
     "import/extensions": "warn",
     "operator-linebreak": "off"
   },
-  "ignorePatterns": ["dist/", "migrations/", "seeders/"]
+  "ignorePatterns": ["dist/", "migrations/", "seeders/"],
+  "overrides": [
+    {
+      "files": ["*.js"],
+      "rules": {
+        "@typescript-eslint/no-var-requires": "off"
+      }
+    }
+  ]
 }

@@ -14,9 +14,19 @@ export const getBiweeklySummariesByPeriod = async (period: number, year: number)
     where: { period, year },
   });
 
-export const getCurrentBiweeklySummary = async (employeeId: number, period: number, year: number) =>
+export const getCurrentBiweeklySummary = async (
+  employeeId: number,
+  period: number,
+  month: number,
+  year: number,
+) =>
   BiweeklySummary.findOne({
-    where: { employeeId, period, year },
+    where: {
+      employeeId,
+      period,
+      month,
+      year,
+    },
   });
 
 export const createBiweeklySummary = async (data: Omit<BiweeklySummary, "id">) => {

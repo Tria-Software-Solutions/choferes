@@ -78,7 +78,7 @@ export const getUsers = async (req: Request, res: Response) => {
 
 export const getUserById = async (req: Request, res: Response) => {
   try {
-    const user = await userService.getUserById(Number(req.params.id, 10));
+    const user = await userService.getUserById(parseInt(req.params.id, 10));
     if (!user) {
       return res.status(404).json({ message: "User not found" });
     }
@@ -114,7 +114,7 @@ export const getUserByUsername = async (req: Request, res: Response) => {
 
 export const getUserPermissions = async (req: Request, res: Response) => {
   try {
-    const user = await userService.getUserPermissions(Number(req.params.id, 10));
+    const user = await userService.getUserPermissions(parseInt(req.params.id, 10));
     if (!user) {
       return res.status(404).json({ message: "User Permissions not found" });
     }
