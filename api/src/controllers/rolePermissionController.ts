@@ -1,3 +1,5 @@
+// Controller for handling HTTP requests related to role-permission assignments
+// Provides endpoints for managing role-permission relationships
 import { Request, Response } from "express";
 import * as rolePermissionService from "../services/rolePermissionService";
 

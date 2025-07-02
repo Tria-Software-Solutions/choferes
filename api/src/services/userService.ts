@@ -1,3 +1,4 @@
+// Service for business logic and database operations related to users and authentication
 import bcrypt from "bcrypt";
 import { Response } from "express";
 import { Op } from "sequelize";

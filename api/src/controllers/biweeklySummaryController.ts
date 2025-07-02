@@ -1,3 +1,5 @@
+// Controller for handling HTTP requests related to biweekly summaries
+// Provides endpoints for CRUD operations and fetching summaries for employees
 import { Request, Response } from "express";
 import * as biweeklySummaryService from "../services/biweeklySummaryService";
 

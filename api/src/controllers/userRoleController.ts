@@ -1,6 +1,9 @@
+// Controller for handling HTTP requests related to user-role assignments
+// Provides endpoints for managing user-role relationships
 import { Request, Response } from "express";
 import * as userRoleService from "../services/userRoleService";
 
+// Get all user-role assignments
 export const getUserRoles = async (req: Request, res: Response) => {
   try {
     const roles = await userRoleService.getUserRoles();
@@ -10,6 +13,7 @@ export const getUserRoles = async (req: Request, res: Response) => {
   }
 };
 
+// Get user-role assignments by user ID
 export const getUserRoleByUserId = async (req: Request, res: Response) => {
   try {
     const user = await userRoleService.getUserRoleByUserId(Number(req.params.userId));
@@ -22,6 +26,7 @@ export const getUserRoleByUserId = async (req: Request, res: Response) => {
   }
 };
 
+// Get user-role assignments by role ID
 export const getUserRoleByRoleId = async (req: Request, res: Response) => {
   try {
     const role = await userRoleService.getUserRoleByRoleId(Number(req.params.roleId));
@@ -34,6 +39,7 @@ export const getUserRoleByRoleId = async (req: Request, res: Response) => {
   }
 };
 
+// Create a new user-role assignment
 export const createUserRole = async (req: Request, res: Response) => {
   try {
     const userRole = await userRoleService.createUserRole(req.body);
@@ -43,6 +49,7 @@ export const createUserRole = async (req: Request, res: Response) => {
   }
 };
 
+// Update a user-role assignment by ID
 export const updateUserRole = async (req: Request, res: Response) => {
   try {
     const id = parseInt(req.params.id, 10);
@@ -56,6 +63,7 @@ export const updateUserRole = async (req: Request, res: Response) => {
   }
 };
 
+// Delete a user-role assignment by ID
 export const deleteUserRole = async (req: Request, res: Response) => {
   try {
     const id = parseInt(req.params.id, 10);

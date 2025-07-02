@@ -1,3 +1,5 @@
+// Controller for handling HTTP requests related to employees
+// Provides endpoints for CRUD operations on employees
 import { Request, Response } from "express";
 import * as employeeService from "../services/employeeService";
 

@@ -1,3 +1,4 @@
+// Middleware for authenticating and refreshing JWT tokens for protected routes
 import jwt, { JwtPayload } from "jsonwebtoken";
 import { Request, Response, NextFunction } from "express";
 import { generateTokens } from "../utils/generateSecret";
@@ -13,6 +14,7 @@ if (!JWT_SECRET_KEY || !JWT_SECRET_KEY_REFRESH) {
   throw new Error("Missing JWT secret keys in environment variables");
 }
 
+// Middleware to authenticate access tokens from cookies
 export const authenticateToken = (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
   try {
     const { accessToken } = req.cookies;
@@ -64,6 +66,7 @@ export const authenticateToken = (req: AuthenticatedRequest, res: Response, next
   }
 };
 
+// Middleware to authenticate and refresh refresh tokens from cookies
 export const authenticateRefreshToken = (req: AuthenticatedRequest, res: Response) => {
   try {
     const { refreshToken } = req.cookies;

@@ -1,6 +1,9 @@
+// Controller for handling HTTP requests related to users
+// Provides endpoints for authentication, user management, and permissions
 import { Request, Response } from "express";
 import * as userService from "../services/userService";
 
+// Authenticate a user and return tokens and permissions
 export const authenticateUser = async (req: Request, res: Response) => {
   try {
     const { identifier, password } = req.body;
@@ -67,6 +70,7 @@ export const authenticateUser = async (req: Request, res: Response) => {
   }
 };
 
+// Get all users
 export const getUsers = async (req: Request, res: Response) => {
   try {
     const users = await userService.getUsers();
@@ -76,6 +80,7 @@ export const getUsers = async (req: Request, res: Response) => {
   }
 };
 
+// Get a user by their ID
 export const getUserById = async (req: Request, res: Response) => {
   try {
     const user = await userService.getUserById(parseInt(req.params.id, 10));
@@ -88,6 +93,7 @@ export const getUserById = async (req: Request, res: Response) => {
   }
 };
 
+// Get a user by their email
 export const getUserByEmail = async (req: Request, res: Response) => {
   try {
     const user = await userService.getUserByEmail(req.params.email);
@@ -100,6 +106,7 @@ export const getUserByEmail = async (req: Request, res: Response) => {
   }
 };
 
+// Get a user by their username
 export const getUserByUsername = async (req: Request, res: Response) => {
   try {
     const user = await userService.getUserByUsername(req.params.username);
@@ -112,6 +119,7 @@ export const getUserByUsername = async (req: Request, res: Response) => {
   }
 };
 
+// Get permissions for a user by their ID
 export const getUserPermissions = async (req: Request, res: Response) => {
   try {
     const user = await userService.getUserPermissions(parseInt(req.params.id, 10));
@@ -124,6 +132,7 @@ export const getUserPermissions = async (req: Request, res: Response) => {
   }
 };
 
+// Create a new user
 export const createUser = async (req: Request, res: Response) => {
   try {
     const newUser = await userService.createUser(req.body);
@@ -133,6 +142,7 @@ export const createUser = async (req: Request, res: Response) => {
   }
 };
 
+// Update a user by their ID
 export const updateUser = async (req: Request, res: Response) => {
   try {
     const id = parseInt(req.params.id, 10);
@@ -146,6 +156,7 @@ export const updateUser = async (req: Request, res: Response) => {
   }
 };
 
+// Update a user's status (active/inactive) by their ID
 export const updateUserStatus = async (req: Request, res: Response) => {
   try {
     const id = parseInt(req.params.id, 10);
@@ -159,6 +170,7 @@ export const updateUserStatus = async (req: Request, res: Response) => {
   }
 };
 
+// Update a user's password by their ID
 export const updateUserPassword = async (req: Request, res: Response) => {
   try {
     const id = parseInt(req.params.id, 10);
@@ -172,6 +184,7 @@ export const updateUserPassword = async (req: Request, res: Response) => {
   }
 };
 
+// Update a user's temporary password by their ID
 export const updateUserTemporalPassword = async (req: Request, res: Response) => {
   try {
     const id = parseInt(req.params.id, 10);
@@ -185,6 +198,7 @@ export const updateUserTemporalPassword = async (req: Request, res: Response) =>
   }
 };
 
+// Delete a user by their ID
 export const deleteUser = async (req: Request, res: Response) => {
   try {
     const id = parseInt(req.params.id, 10);

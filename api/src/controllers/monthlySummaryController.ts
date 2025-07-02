@@ -1,3 +1,5 @@
+// Controller for handling HTTP requests related to monthly summaries
+// Provides endpoints for CRUD operations and fetching summaries for employees
 import { Request, Response } from "express";
 import * as monthlySummaryService from "../services/monthlySummaryService";
 

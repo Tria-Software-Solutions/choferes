@@ -1,3 +1,5 @@
+// Controller for handling HTTP requests related to roles
+// Provides endpoints for CRUD operations on roles
 import { Request, Response } from "express";
 import * as roleService from "../services/roleService";
 

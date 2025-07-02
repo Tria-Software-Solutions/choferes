@@ -1,9 +1,11 @@
+// Middleware to restrict access to routes based on user roles
 import { Request, Response, NextFunction } from "express";
 
 interface AuthenticatedRequest extends Request {
   user?: { id: number; roles?: Array<{ name: string }> };
 }
 
+// Returns middleware that checks if the user has at least one of the required roles
 const roleMiddleware =
   (roles: string[]) => (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
     if (!req.user) {
