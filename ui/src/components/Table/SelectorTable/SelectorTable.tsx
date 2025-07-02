@@ -1,5 +1,6 @@
 import React, { useEffect, useMemo, useState } from "react";
 import PropTypes from "prop-types";
+import { useNavigate } from "react-router-dom";
 import { Employee } from "../../../models/Employee";
 import { Schedule } from "../../../models/Schedule";
 import { HoursWorked } from "../../../models/HoursWorked";
@@ -131,6 +132,7 @@ const SelectorTable: React.FC<SelectorTableProps> = React.memo(
     permissions,
     onInfoClick,
   }) => {
+    const navigate = useNavigate();
     const [selectedPeriod, setSelectedPeriod] = useState<
       "weekly" | "biweekly" | "monthly"
     >("weekly");
@@ -672,7 +674,10 @@ const SelectorTable: React.FC<SelectorTableProps> = React.memo(
                               {permissions?.includes(
                                 PERMISSIONS.CREATE_SCHEDULES,
                               ) && (
-                                <MenuItem value={"Other"}>
+                                <MenuItem 
+                                  value={"Other"}
+                                  onClick={() => navigate("/schedules")}
+                                >
                                   <Box
                                     display="flex"
                                     justifyContent="space-between"
