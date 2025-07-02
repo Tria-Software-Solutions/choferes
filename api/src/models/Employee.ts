@@ -4,7 +4,9 @@ import sequelize from "../config/database";
 // Employee model definition for Sequelize ORM
 export class Employee extends Model {
   public id!: number; // Unique identifier for the employee
+
   public firstName!: string; // Employee's first name
+
   public lastName!: string; // Employee's last name
 }
 
