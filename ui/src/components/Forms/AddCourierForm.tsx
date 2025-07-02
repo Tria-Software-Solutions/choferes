@@ -334,7 +334,7 @@ const AddCourierForm: React.FC<AddCourierFormProps> = ({
                   fontSize: "clamp(0.75rem, 1.25vw, 0.875rem)",
                 }}
               >
-                {FORMS.ADD_COURIER.INFO_DESCRIPTION}
+                {FORMS.ADD_COURIER.INFO_DESC}
               </Box>
             </Box>
           </Box>
