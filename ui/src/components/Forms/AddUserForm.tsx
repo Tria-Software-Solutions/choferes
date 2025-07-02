@@ -333,6 +333,14 @@ const AddUserForm: React.FC<AddUserFormProps> = ({
                   paddingRight: "14px",
                 },
               }}
+              MenuProps={{
+                PaperProps: {
+                  style: {
+                    maxHeight: 320,
+                    overflowY: 'auto',
+                  },
+                },
+              }}
             >
               {roles.map((role) => (
                 <MenuItem key={role.id} value={role.name}>

@@ -221,6 +221,14 @@ const AddScheduleForm: React.FC<AddScheduleFormProps> = ({
                 })
               }
               error={formData.days.length === 0}
+              MenuProps={{
+                PaperProps: {
+                  style: {
+                    maxHeight: 320,
+                    overflowY: 'auto',
+                  },
+                },
+              }}
             >
               {DAYS_LIST.map((option) => (
                 <MenuItem key={option.value} value={option.value}>

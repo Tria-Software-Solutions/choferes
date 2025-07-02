@@ -64,7 +64,11 @@ import InfoOutlinedIcon from "@mui/icons-material/InfoOutlined";
 import AccessTimeRoundedIcon from "@mui/icons-material/AccessTimeRounded";
 import MoreTimeIcon from "@mui/icons-material/MoreTime";
 import CloseRoundedIcon from "@mui/icons-material/CloseRounded";
-import CalendarMonthOutlinedIcon from "@mui/icons-material/CalendarMonthOutlined";
+import LocationOnOutlinedIcon from '@mui/icons-material/LocationOnOutlined';
+import StarOutlineOutlinedIcon from '@mui/icons-material/StarOutlineOutlined';
+import CalendarTodayIcon from '@mui/icons-material/CalendarToday';
+import CalendarMonthIcon from '@mui/icons-material/CalendarMonth';
+import DateRangeIcon from '@mui/icons-material/DateRange';
 
 // SelectorTable component displays and manages employee schedules, hours worked, and summary data for different periods (weekly, biweekly, monthly).
 // Props:
@@ -453,9 +457,15 @@ const SelectorTable: React.FC<SelectorTableProps> = React.memo(
                                 id="total-period-select"
                                 startAdornment={
                                   <InputAdornment position="start">
-                                    <CalendarMonthOutlinedIcon
-                                      sx={{ color: "#fff", mr: 1 }}
-                                    />
+                                    {selectedPeriod === 'weekly' && (
+                                      <CalendarTodayIcon sx={{ color: '#fff', mr: 1 }} />
+                                    )}
+                                    {selectedPeriod === 'biweekly' && (
+                                      <DateRangeIcon sx={{ color: '#fff', mr: 1 }} />
+                                    )}
+                                    {selectedPeriod === 'monthly' && (
+                                      <CalendarMonthIcon sx={{ color: '#fff', mr: 1 }} />
+                                    )}
                                   </InputAdornment>
                                 }
                                 sx={{
@@ -472,38 +482,31 @@ const SelectorTable: React.FC<SelectorTableProps> = React.memo(
                             }
                             MenuProps={{
                               PaperProps: {
-                                sx: {
-                                  backgroundColor: "#000",
-                                  color: theme.palette.text.disabled,
-                                  borderRadius: 2,
-                                  boxShadow: theme.shadows[8],
-                                  mt: 1,
-                                  "& .MuiMenuItem-root": {
-                                    fontWeight: 600,
-                                    fontSize: "1rem",
-                                    color: theme.palette.text.disabled,
-                                    "&:hover": {
-                                      backgroundColor: theme.palette.grey[900],
-                                      color: "#fff",
-                                    },
-                                    "&.Mui-selected": {
-                                      backgroundColor:
-                                        theme.palette.primary.main,
-                                      color: "#fff",
-                                      "&:hover": {
-                                        backgroundColor:
-                                          theme.palette.primary.dark,
-                                        color: "#fff",
-                                      },
-                                    },
-                                  },
+                                style: {
+                                  maxHeight: 320,
+                                  overflowY: 'auto',
                                 },
                               },
                             }}
+                            renderValue={(selected) => {
+                              if (selected === 'weekly') return SELECTOR_TABLE.WEEKLY;
+                              if (selected === 'biweekly') return SELECTOR_TABLE.BIWEEKLY;
+                              if (selected === 'monthly') return SELECTOR_TABLE.MONTHLY;
+                              return '';
+                            }}
                           >
-                            <MenuItem value="weekly">{SELECTOR_TABLE.WEEKLY}</MenuItem>
-                            <MenuItem value="biweekly">{SELECTOR_TABLE.BIWEEKLY}</MenuItem>
-                            <MenuItem value="monthly">{SELECTOR_TABLE.MONTHLY}</MenuItem>
+                            <MenuItem value="weekly" sx={{ fontWeight: 500, fontSize: '0.98rem', pl: 3, py: 1.2, display: 'flex', alignItems: 'center', gap: 1 }}>
+                              <CalendarTodayIcon sx={{ color: 'primary.main', fontSize: 20, mr: 1 }} />
+                              {SELECTOR_TABLE.WEEKLY}
+                            </MenuItem>
+                            <MenuItem value="biweekly" sx={{ fontWeight: 500, fontSize: '0.98rem', pl: 3, py: 1.2, display: 'flex', alignItems: 'center', gap: 1 }}>
+                              <DateRangeIcon sx={{ color: 'primary.main', fontSize: 20, mr: 1 }} />
+                              {SELECTOR_TABLE.BIWEEKLY}
+                            </MenuItem>
+                            <MenuItem value="monthly" sx={{ fontWeight: 500, fontSize: '0.98rem', pl: 3, py: 1.2, display: 'flex', alignItems: 'center', gap: 1 }}>
+                              <CalendarMonthIcon sx={{ color: 'primary.main', fontSize: 20, mr: 1 }} />
+                              {SELECTOR_TABLE.MONTHLY}
+                            </MenuItem>
                           </Select>
                         </FormControl>
                       </TableCell>
@@ -611,10 +614,19 @@ const SelectorTable: React.FC<SelectorTableProps> = React.memo(
                                   label="Ubicación"
                                 />
                               }
+                              MenuProps={{
+                                PaperProps: {
+                                  style: {
+                                    maxHeight: 320,
+                                    overflowY: 'auto',
+                                  },
+                                },
+                              }}
                             >
-                                                              <ListSubheader>
-                                  <strong>{SELECTOR_TABLE.LOCATIONS}</strong>
-                                </ListSubheader>
+                              <ListSubheader sx={{ display: 'flex', alignItems: 'center', bgcolor: 'background.paper', fontWeight: 700, fontSize: '1rem', color: 'primary.main', py: 1 }}>
+                                <LocationOnOutlinedIcon sx={{ mr: 1, color: 'primary.main' }} fontSize="small" />
+                                {SELECTOR_TABLE.LOCATIONS}
+                              </ListSubheader>
                               {options
                                 .filter((option) => !option.specialSchedule)
                                 .sort((a, b) => a.label.localeCompare(b.label))
@@ -622,14 +634,22 @@ const SelectorTable: React.FC<SelectorTableProps> = React.memo(
                                   <MenuItem
                                     key={option.id}
                                     value={option.label}
+                                    sx={{
+                                      fontWeight: 500,
+                                      fontSize: '0.98rem',
+                                      pl: 4,
+                                      py: 1.2,
+                                      borderBottom: '1px solid #f0f0f0',
+                                    }}
                                   >
                                     {option.label}
                                   </MenuItem>
                                 ))}
-                              <Divider />
-                                                              <ListSubheader>
-                                  <strong>{SELECTOR_TABLE.SPECIAL_SCHEDULES}</strong>
-                                </ListSubheader>
+                              <Divider sx={{ my: 1 }} />
+                              <ListSubheader sx={{ display: 'flex', alignItems: 'center', bgcolor: 'background.paper', fontWeight: 700, fontSize: '1rem', color: 'warning.main', py: 1 }}>
+                                <StarOutlineOutlinedIcon sx={{ mr: 1, color: 'warning.main' }} fontSize="small" />
+                                {SELECTOR_TABLE.SPECIAL_SCHEDULES}
+                              </ListSubheader>
                               {options
                                 .filter((option) => option.specialSchedule)
                                 .sort((a, b) => a.label.localeCompare(b.label))
@@ -637,6 +657,13 @@ const SelectorTable: React.FC<SelectorTableProps> = React.memo(
                                   <MenuItem
                                     key={option.id}
                                     value={option.label}
+                                    sx={{
+                                      fontWeight: 500,
+                                      fontSize: '0.98rem',
+                                      pl: 4,
+                                      py: 1.2,
+                                      borderBottom: '1px solid #f0f0f0',
+                                    }}
                                   >
                                     {option.label}
                                   </MenuItem>
@@ -882,9 +909,9 @@ const SelectorTable: React.FC<SelectorTableProps> = React.memo(
               }}
             >
               <Box>
-                                  <Typography variant="h5" fontWeight={700} color="#fff">
-                    {SELECTOR_TABLE.ADJUST_HOURS}
-                  </Typography>
+                <Typography variant="h5" fontWeight={700} color="#fff">
+                  {SELECTOR_TABLE.ADJUST_HOURS}
+                </Typography>
                 <Typography variant="subtitle2" color="#fff">
                   {openAdjustDialogEmployee.firstName}{" "}
                   {openAdjustDialogEmployee.lastName}
