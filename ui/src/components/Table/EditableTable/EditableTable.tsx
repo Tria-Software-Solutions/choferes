@@ -768,7 +768,7 @@ const EditableTable = <T extends object>({
                         editRowId !== getRowId(row)
                       ) {
                         const expanded = !!expandedRows[rowId];
-                        const maxVisible = 4;
+                        const maxVisible = 6;
                         const showAll = expanded && value.length > maxVisible;
                         const visible = showAll
                           ? value
@@ -786,30 +786,40 @@ const EditableTable = <T extends object>({
                               }}
                             >
                               {visible.map((perm: string) => (
-                                <Chip
+                                <Box
                                   key={perm}
-                                  label={perm}
-                                  size="small"
                                   sx={{
                                     backgroundColor: theme.palette.primary.main,
-                                    color: "#fff",
+                                    color: theme.palette.primary.contrastText,
+                                    px: 1,
+                                    py: 0.5,
+                                    borderRadius: 1,
+                                    fontSize: "clamp(0.625rem, 1vw, 0.75rem)",
                                     fontWeight: 500,
                                     mb: 0.5,
+                                    textAlign: "center",
+                                    display: "flex",
+                                    alignItems: "center",
+                                    justifyContent: "center",
                                   }}
-                                />
+                                >
+                                  {perm}
+                                </Box>
                               ))}
                               {hiddenCount > 0 && !expanded && (
-                                <Chip
-                                  label={`Ver más`}
-                                  size="small"
-                                  variant="outlined"
+                                <Typography
                                   sx={{
-                                    borderColor: theme.palette.primary.main,
                                     color: theme.palette.primary.main,
                                     fontWeight: 500,
-                                    background: "#fff",
                                     cursor: "pointer",
-                                    mb: 0.5,
+                                    fontSize: "clamp(0.625rem, 1vw, 0.75rem)",
+                                    textDecoration: "underline",
+                                    "&:hover": {
+                                      textDecoration: "none",
+                                    },
+                                    display: "flex",
+                                    alignItems: "center",
+                                    height: "28px",
                                   }}
                                   onClick={() =>
                                     setExpandedRows((prev) => ({
@@ -817,20 +827,24 @@ const EditableTable = <T extends object>({
                                       [rowId]: true,
                                     }))
                                   }
-                                />
+                                >
+                                  Ver más
+                                </Typography>
                               )}
                               {showAll && (
-                                <Chip
-                                  label="Ver menos"
-                                  size="small"
-                                  variant="outlined"
+                                <Typography
                                   sx={{
-                                    borderColor: theme.palette.primary.main,
                                     color: theme.palette.primary.main,
                                     fontWeight: 500,
-                                    background: "#fff",
                                     cursor: "pointer",
-                                    mb: 0.5,
+                                    fontSize: "clamp(0.625rem, 1vw, 0.75rem)",
+                                    textDecoration: "underline",
+                                    "&:hover": {
+                                      textDecoration: "none",
+                                    },
+                                    display: "flex",
+                                    alignItems: "center",
+                                    height: "28px",
                                   }}
                                   onClick={() =>
                                     setExpandedRows((prev) => ({
@@ -838,7 +852,9 @@ const EditableTable = <T extends object>({
                                       [rowId]: false,
                                     }))
                                   }
-                                />
+                                >
+                                  Ver menos
+                                </Typography>
                               )}
                             </Box>
                           </TableCell>
@@ -854,26 +870,30 @@ const EditableTable = <T extends object>({
                           ) : editRowId === getRowId(row) &&
                             column === "permissionNames" ? (
                             Array.isArray(row[column]) ? (
-                              <Stack
-                                direction="row"
-                                spacing={1}
-                                flexWrap="nowrap"
-                              >
+                              <Box sx={{ display: "flex", flexWrap: "wrap", gap: 0.5 }}>
                                 {(row[column] as string[]).map(
                                   (item: string, index: number) => (
-                                    <Chip
+                                    <Box
                                       key={index}
-                                      label={item}
                                       sx={{
-                                        backgroundColor:
-                                          theme.palette.primary.main,
-                                        color: "#fff",
-                                        "& .MuiChip-label": { color: "#fff" },
+                                        backgroundColor: theme.palette.primary.main,
+                                        color: theme.palette.primary.contrastText,
+                                        px: 1,
+                                        py: 0.5,
+                                        borderRadius: 1,
+                                        fontSize: "clamp(0.625rem, 1vw, 0.75rem)",
+                                        fontWeight: 500,
+                                        textAlign: "center",
+                                        display: "flex",
+                                        alignItems: "center",
+                                        justifyContent: "center",
                                       }}
-                                    />
+                                    >
+                                      {item}
+                                    </Box>
                                   ),
                                 )}
-                              </Stack>
+                              </Box>
                             ) : (
                               <Typography component="span">
                                 {String(row[column] ?? "")}
@@ -900,42 +920,54 @@ const EditableTable = <T extends object>({
                               </Typography>
                             )
                           ) : Array.isArray(row[column]) ? (
-                            <Stack
-                              direction="row"
-                              spacing={1}
-                              sx={{
-                                rowGap: 2,
-                                flexWrap:
-                                  column === "permissionNames"
-                                    ? "wrap"
-                                    : "nowrap",
-                              }}
-                            >
-                              {(row[column] as string[]).map(
-                                (
-                                  item: string,
-                                  index: number,
-                                  array: string[],
-                                ) =>
-                                  column === "permissionNames" ? (
-                                    <Chip
+                            column === "permissionNames" ? (
+                              <Box sx={{ display: "flex", flexWrap: "wrap", gap: 0.5 }}>
+                                {(row[column] as string[]).map(
+                                  (item: string, index: number) => (
+                                    <Box
                                       key={index}
-                                      label={item}
                                       sx={{
-                                        backgroundColor:
-                                          theme.palette.primary.main,
-                                        color: "#fff",
-                                        "& .MuiChip-label": { color: "#fff" },
+                                        backgroundColor: theme.palette.primary.main,
+                                        color: theme.palette.primary.contrastText,
+                                        px: 1,
+                                        py: 0.5,
+                                        borderRadius: 1,
+                                        fontSize: "clamp(0.625rem, 1vw, 0.75rem)",
+                                        fontWeight: 500,
+                                        textAlign: "center",
+                                        display: "flex",
+                                        alignItems: "center",
+                                        justifyContent: "center",
                                       }}
-                                    />
-                                  ) : (
+                                    >
+                                      {item}
+                                    </Box>
+                                  ),
+                                )}
+                              </Box>
+                            ) : (
+                              <Stack
+                                direction="row"
+                                spacing={1}
+                                sx={{
+                                  rowGap: 2,
+                                  flexWrap: "nowrap",
+                                }}
+                              >
+                                {(row[column] as string[]).map(
+                                  (
+                                    item: string,
+                                    index: number,
+                                    array: string[],
+                                  ) => (
                                     <Typography key={index} component="span">
                                       {item}
                                       {index < array.length - 1 ? ", " : ""}
                                     </Typography>
                                   ),
-                              )}
-                            </Stack>
+                                )}
+                              </Stack>
+                            )
                           ) : column === "email" ? (
                             <Typography
                               component="a"
