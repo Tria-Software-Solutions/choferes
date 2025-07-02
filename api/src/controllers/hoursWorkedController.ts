@@ -1,3 +1,5 @@
+// Controller for handling HTTP requests related to hours worked records
+// Provides endpoints for CRUD operations on hours worked
 import { Request, Response } from "express";
 import * as hoursWorkedService from "../services/hoursWorkedService";
 

@@ -27,7 +27,7 @@ dotenv.config();
 
 const app = express();
 
-// Configuraciones de seguridad y performance
+// Security and performance configurations
 app.use(
   helmet({
     contentSecurityPolicy: {
@@ -48,11 +48,11 @@ app.use(
   }),
 );
 
-// Compresión gzip para reducir el tamaño de las respuestas
+// Gzip compression to reduce response size
 app.use(
   compression({
-    level: 6, // Nivel de compresión balanceado
-    threshold: 1024, // Comprimir solo archivos mayores a 1KB
+    level: 6, // Balanced compression level
+    threshold: 1024, // Only compress files larger than 1KB
     filter: (req, res) => {
       if (req.headers["x-no-compression"]) {
         return false;
@@ -62,30 +62,30 @@ app.use(
   }),
 );
 
-// Rate limiting para prevenir abuso (solo en producción)
+// Rate limiting to prevent abuse (production only)
 const limiter = rateLimit({
-  windowMs: 15 * 60 * 1000, // 15 minutos
-  max: 1000, // Máximo 1000 requests por ventana de tiempo (aumentado para desarrollo)
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 1000, // Max 1000 requests per window (increased for development)
   message: "Too many requests from this IP, please try again later.",
   standardHeaders: true,
   legacyHeaders: false,
 });
 
-// Solo aplicar rate limiting en producción
+// Only apply rate limiting in production
 if (process.env.NODE_ENV === "production") {
   app.use("/api/", limiter);
 }
 
-// Rate limiting más estricto para autenticación (solo en producción)
+// Stricter rate limiting for authentication (production only)
 const authLimiter = rateLimit({
-  windowMs: 15 * 60 * 1000, // 15 minutos
-  max: 20, // Máximo 20 intentos de login por ventana de tiempo (aumentado para desarrollo)
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 20, // Max 20 login attempts per window (increased for development)
   message: "Too many login attempts, please try again later.",
   standardHeaders: true,
   legacyHeaders: false,
 });
 
-// Solo aplicar rate limiting de auth en producción
+// Only apply auth rate limiting in production
 if (process.env.NODE_ENV === "production") {
   app.use("/api/auth", authLimiter);
 }
@@ -100,7 +100,7 @@ const allowedOrigins = [
 app.use(
   cors({
     origin: (origin, callback) => {
-      // Permitir requests sin origin (como mobile apps o Postman)
+      // Allow requests without origin (like mobile apps or Postman)
       if (!origin) {
         return callback(null, true);
       }
@@ -122,7 +122,7 @@ app.use(cookieParser());
 app.use(json({ limit: "10mb" }));
 app.use(urlencoded({ extended: true, limit: "10mb" }));
 
-// Headers de seguridad adicionales
+// Additional security headers
 app.use((req, res, next) => {
   res.setHeader("X-Content-Type-Options", "nosniff");
   res.setHeader("X-Frame-Options", "DENY");

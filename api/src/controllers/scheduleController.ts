@@ -1,6 +1,9 @@
+// Controller for handling HTTP requests related to schedules
+// Provides endpoints for CRUD operations on schedules
 import { Request, Response } from "express";
 import * as scheduleService from "../services/scheduleService";
 
+// Get all schedules
 export const getSchedules = async (req: Request, res: Response) => {
   try {
     const schedules = await scheduleService.getSchedules();
@@ -10,6 +13,7 @@ export const getSchedules = async (req: Request, res: Response) => {
   }
 };
 
+// Get a schedule by its ID
 export const getScheduleById = async (req: Request, res: Response) => {
   try {
     const id = parseInt(req.params.id, 10);
@@ -23,6 +27,7 @@ export const getScheduleById = async (req: Request, res: Response) => {
   }
 };
 
+// Create a new schedule
 export const createSchedule = async (req: Request, res: Response) => {
   try {
     const newSchedule = await scheduleService.createSchedule(req.body);
@@ -32,6 +37,7 @@ export const createSchedule = async (req: Request, res: Response) => {
   }
 };
 
+// Update a schedule by its ID
 export const updateSchedule = async (req: Request, res: Response) => {
   try {
     const id = parseInt(req.params.id, 10);
@@ -45,6 +51,7 @@ export const updateSchedule = async (req: Request, res: Response) => {
   }
 };
 
+// Delete a schedule by its ID
 export const deleteSchedule = async (req: Request, res: Response) => {
   try {
     const id = parseInt(req.params.id, 10);

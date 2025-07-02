@@ -1,3 +1,4 @@
+// Controller for handling health check requests for the application
 import { Request, Response } from "express";
 import checkHealth from "../services/healthService";
 

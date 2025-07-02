@@ -1,3 +1,4 @@
+// Service for business logic and database operations related to employees
 import { Op, Includeable } from "sequelize";
 // eslint-disable-next-line import/no-named-as-default
 import Employee from "../models/Employee";

@@ -1,3 +1,5 @@
+// Controller for handling HTTP requests related to permissions
+// Provides endpoints for CRUD operations on permissions
 import { Request, Response } from "express";
 import * as permissionService from "../services/permissionService";
 

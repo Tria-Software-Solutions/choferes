@@ -1,3 +1,4 @@
+// Utility functions for JWT token generation, secure secret generation, and token format validation
 import * as jwt from "jsonwebtoken";
 import * as dotenv from "dotenv";
 import { Response } from "express";
@@ -17,6 +18,7 @@ if (!JWT_SECRET_KEY_REFRESH || JWT_SECRET_KEY_REFRESH.length < 32) {
   throw new Error("JWT_SECRET_KEY_REFRESH must be at least 32 characters long");
 }
 
+// Generate access and refresh JWT tokens and set them as cookies in the response
 export const generateTokens = (userId: string, res: Response) => {
   const tokens = {
     accessToken: jwt.sign(
@@ -63,8 +65,10 @@ export const generateTokens = (userId: string, res: Response) => {
   return tokens;
 };
 
+// Generate a cryptographically secure random secret (hex string)
 export const generateSecureSecret = (): string => crypto.randomBytes(32).toString("hex");
 
+// Validate that a string is in JWT token format (three dot-separated parts)
 export const validateTokenFormat = (token: string): boolean => {
   if (!token || typeof token !== "string") {
     return false;

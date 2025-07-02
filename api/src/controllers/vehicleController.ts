@@ -1,7 +1,10 @@
+// Controller for handling HTTP requests related to vehicles
+// Provides endpoints for CRUD operations and vehicle queries
 import { Request, Response } from "express";
 import { parseISO, isValid } from "date-fns";
 import * as vehicleService from "../services/vehicleService";
 
+// Get all vehicles
 export const getVehicles = async (req: Request, res: Response) => {
   try {
     const vehicles = await vehicleService.getVehicles();
@@ -11,6 +14,7 @@ export const getVehicles = async (req: Request, res: Response) => {
   }
 };
 
+// Get a vehicle by its ID
 export const getVehicleById = async (req: Request, res: Response) => {
   try {
     const id = parseInt(req.params.id, 10);
@@ -24,6 +28,7 @@ export const getVehicleById = async (req: Request, res: Response) => {
   }
 };
 
+// Get vehicles by a specific date
 export const getVehiclesByDate = async (req: Request, res: Response) => {
   try {
     const { date } = req.query;
@@ -44,6 +49,7 @@ export const getVehiclesByDate = async (req: Request, res: Response) => {
   }
 };
 
+// Create a new vehicle
 export const createVehicle = async (req: Request, res: Response) => {
   try {
     const vehicleData = {
@@ -58,6 +64,7 @@ export const createVehicle = async (req: Request, res: Response) => {
   }
 };
 
+// Update a vehicle by its ID
 export const updateVehicle = async (req: Request, res: Response) => {
   try {
     const id = parseInt(req.params.id, 10);
@@ -77,6 +84,7 @@ export const updateVehicle = async (req: Request, res: Response) => {
   }
 };
 
+// Delete a vehicle by its ID
 export const deleteVehicle = async (req: Request, res: Response) => {
   try {
     const id = parseInt(req.params.id, 10);

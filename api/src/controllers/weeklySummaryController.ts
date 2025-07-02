@@ -1,3 +1,5 @@
+// Controller for handling HTTP requests related to weekly summaries
+// Provides endpoints for CRUD operations and fetching summaries for employees
 import { Request, Response } from "express";
 import * as weeklySummaryService from "../services/weeklySummaryService";
 
