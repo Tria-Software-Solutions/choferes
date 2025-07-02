@@ -186,7 +186,7 @@ const AddUserForm: React.FC<AddUserFormProps> = ({
       <Grid container spacing={3} sx={{ mt: 0 }}>
         <Grid item xs={12} sm={6}>
           <CustomTextField
-            label={FORMS.ADD_USER.FIRST_NAME}
+            label={FORMS.ADD_USER.FIRST_NAME_LABEL}
             variant="outlined"
             fullWidth
             placeholder={FORMS.ADD_USER.FIRST_NAME_PLACEHOLDER}
@@ -204,7 +204,7 @@ const AddUserForm: React.FC<AddUserFormProps> = ({
 
         <Grid item xs={12} sm={6}>
           <CustomTextField
-            label={FORMS.ADD_USER.LAST_NAME}
+            label={FORMS.ADD_USER.LAST_NAME_LABEL}
             variant="outlined"
             fullWidth
             placeholder={FORMS.ADD_USER.LAST_NAME_PLACEHOLDER}
@@ -222,7 +222,7 @@ const AddUserForm: React.FC<AddUserFormProps> = ({
 
         <Grid item xs={12} sm={6}>
           <CustomTextField
-            label={FORMS.ADD_USER.EMAIL}
+            label={FORMS.ADD_USER.EMAIL_LABEL}
             variant="outlined"
             fullWidth
             placeholder={FORMS.ADD_USER.EMAIL_PLACEHOLDER}
@@ -238,7 +238,7 @@ const AddUserForm: React.FC<AddUserFormProps> = ({
 
         <Grid item xs={12} sm={6}>
           <CustomTextField
-            label={FORMS.ADD_USER.USERNAME}
+            label={FORMS.ADD_USER.USERNAME_LABEL}
             variant="outlined"
             fullWidth
             placeholder={FORMS.ADD_USER.USERNAME_PLACEHOLDER}
@@ -256,7 +256,7 @@ const AddUserForm: React.FC<AddUserFormProps> = ({
 
         <Grid item xs={12} sm={6}>
           <CustomTextField
-            label={FORMS.ADD_USER.PASSWORD}
+            label={FORMS.ADD_USER.PASSWORD_LABEL}
             variant="outlined"
             fullWidth
             type={showPassword ? "text" : "password"}
@@ -304,14 +304,14 @@ const AddUserForm: React.FC<AddUserFormProps> = ({
               },
             }}
           >
-            <InputLabel>{FORMS.ADD_USER.ROLE}</InputLabel>
+            <InputLabel>{FORMS.ADD_USER.ROLE_LABEL}</InputLabel>
             <Select
               value={formData.roleName}
-              label={FORMS.ADD_USER.ROLE}
+              label={FORMS.ADD_USER.ROLE_LABEL}
               onChange={(e) => handleFieldChange("roleName", e.target.value)}
               input={
                 <OutlinedInput
-                  label={FORMS.ADD_USER.ROLE}
+                  label={FORMS.ADD_USER.ROLE_LABEL}
                   startAdornment={
                     <InputAdornment position="start">
                       <GroupOutlinedIcon
@@ -374,7 +374,7 @@ const AddUserForm: React.FC<AddUserFormProps> = ({
                   fontSize: "clamp(0.875rem, 1.5vw, 1rem)",
                 }}
               >
-                {FORMS.ADD_USER.USER_INFO_TITLE}
+                {FORMS.ADD_USER.INFO_TITLE}
               </Box>
               <Box
                 sx={{
@@ -382,7 +382,7 @@ const AddUserForm: React.FC<AddUserFormProps> = ({
                   fontSize: "clamp(0.75rem, 1.25vw, 0.875rem)",
                 }}
               >
-                {FORMS.ADD_USER.USER_INFO_DESCRIPTION}
+                {FORMS.ADD_USER.INFO_DESC}
               </Box>
             </Box>
           </Box>
@@ -411,7 +411,7 @@ const AddUserForm: React.FC<AddUserFormProps> = ({
                 order: { xs: 3, sm: 1 },
               }}
             >
-              {FORMS.ADD_USER.CLEAR}
+              {FORMS.ADD_USER.BUTTON_ADD}
             </Button>
             <Box
               sx={{
@@ -433,7 +433,7 @@ const AddUserForm: React.FC<AddUserFormProps> = ({
                     fontSize: "clamp(0.75rem, 1.25vw, 0.875rem)",
                   }}
                 >
-                  {FORMS.ADD_USER.CANCEL}
+                  {FORMS.ADD_USER.BUTTON_ADDING}
                 </Button>
               )}
               <Button
@@ -450,7 +450,7 @@ const AddUserForm: React.FC<AddUserFormProps> = ({
                   py: { xs: 1, sm: 1.5 },
                 }}
               >
-                {isLoading ? FORMS.ADD_USER.CREATING : FORMS.ADD_USER.ADD}
+                {isLoading ? FORMS.ADD_USER.BUTTON_ADDING : FORMS.ADD_USER.BUTTON_ADD}
               </Button>
             </Box>
           </Box>
