@@ -214,41 +214,30 @@ const theme = createTheme({
       styleOverrides: {
         root: {
           margin: "8px 0",
-          "& .MuiOutlinedInput-root": {
-            borderRadius: "8px",
-            transition: "all 0.3s ease",
-            "& fieldset": {
-              borderColor: "#e0e0e0",
-              borderWidth: "2px",
+          '& .MuiOutlinedInput-root': {
+            borderRadius: 2,
+            backgroundColor: '#ffffff',
+            transition: 'all 0.3s ease',
+            '& fieldset': {
+              borderColor: '#e0e0e0',
+              borderWidth: '2px',
             },
-            "&:hover fieldset": {
-              borderColor: "#000000",
+            '&:hover .MuiOutlinedInput-notchedOutline': {
+              borderColor: '#000000',
             },
-            "&.Mui-focused fieldset": {
-              borderColor: "#000000",
-              borderWidth: "2px",
+            '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
+              borderColor: '#000000',
+              borderWidth: 2,
             },
-            "& input": {
-              color: "#000000",
-              fontSize: "1rem",
+            '&.Mui-focused': {
+              backgroundColor: '#ffffff',
+              outline: 'none',
+              boxShadow: 'none',
             },
-            "& textarea": {
-              color: "#000000",
-              fontSize: "1rem",
+            '& input': {
+              outline: 'none',
+              boxShadow: 'none',
             },
-          },
-          "& .MuiInputLabel-root": {
-            color: "#666666",
-            fontSize: "1rem",
-            "&.Mui-focused": {
-              color: "#000000",
-              fontWeight: 600,
-            },
-          },
-          "& .MuiFormHelperText-root": {
-            color: "#d32f2f",
-            fontSize: "0.75rem",
-            marginTop: "4px",
           },
         },
       },

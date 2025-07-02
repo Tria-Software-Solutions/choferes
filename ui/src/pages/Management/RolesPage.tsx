@@ -43,9 +43,9 @@ import {
   Avatar,
   IconButton,
   Dialog,
+  ButtonGroup,
 } from "@mui/material";
 import {
-  createExportOptions,
   exportToExcel,
   exportToPDF,
   handleExportTableData,
@@ -507,20 +507,22 @@ const RolesPage: React.FC = () => {
   };
 
   const exportOptions = useMemo(() => {
-    const excelOption = userPermissions.includes(PERMISSIONS.EXPORT_EXCEL_ROLES)
-      ? () => handleOpenExportDialog("excel")
-      : undefined;
-
-    const pdfOption = userPermissions.includes(PERMISSIONS.EXPORT_PDF_ROLES)
-      ? () => handleOpenExportDialog("pdf")
-      : undefined;
-
-    return createExportOptions(
-      <FontAwesomeIcon icon={faFileExcel} size="lg" />,
-      <FontAwesomeIcon icon={faFilePdf} size="lg" />,
-      excelOption,
-      pdfOption,
-    );
+    const options = [];
+    if (userPermissions.includes(PERMISSIONS.EXPORT_EXCEL_ROLES)) {
+      options.push({
+        label: "Exportar a Excel",
+        icon: <FontAwesomeIcon icon={faFileExcel} size="lg" />,
+        onClick: () => handleOpenExportDialog("excel"),
+      });
+    }
+    if (userPermissions.includes(PERMISSIONS.EXPORT_PDF_ROLES)) {
+      options.push({
+        label: "Exportar a PDF",
+        icon: <FontAwesomeIcon icon={faFilePdf} size="lg" />,
+        onClick: () => handleOpenExportDialog("pdf"),
+      });
+    }
+    return options;
   }, [userPermissions]);
 
   const getEmployeeWeeklyHours = (employeeId: number) => {
@@ -639,91 +641,67 @@ const RolesPage: React.FC = () => {
                 justifyContent="flex-end"
                 gap={2}
               >
-                <Box
-                  display="flex"
-                  flexDirection="row"
-                  alignItems="center"
-                  gap={2}
-                >
-                  <LocalizationProvider
-                    dateAdapter={AdapterDateFns}
-                    adapterLocale={es}
-                  >
+                <Box display="flex" alignItems="center" justifyContent="flex-start" gap={1}>
+                  <LocalizationProvider dateAdapter={AdapterDateFns} adapterLocale={es}>
                     <DatePicker
                       label={ROLES_PAGE.DATE_PICKER_LABEL}
                       value={firstDayOfWeek || null}
-                      sx={{
-                        width: { xs: "100%", sm: "100%", md: "200px" },
-                      }}
                       maxDate={nextWeekEnd}
                       views={["year", "month", "day"]}
-                      slots={{
-                        toolbar: () => null,
-                      }}
+                      slots={{ toolbar: () => null }}
                       slotProps={{
                         textField: {
-                          inputProps: { readOnly: true },
-                          onMouseDown: (e) => e.preventDefault(),
-                        },
-                        actionBar: {
-                          actions: [],
+                          fullWidth: true,
+                          required: true,
+                          variant: "outlined",
+                          sx: {
+                            height: "56px",
+                            minWidth: "180px",
+                            "& .MuiOutlinedInput-root": {
+                              height: "56px",
+                              borderRadius: 2,
+                              backgroundColor: "#ffffff",
+                              "&:hover .MuiOutlinedInput-notchedOutline": {
+                                borderColor: "#000000",
+                              },
+                              "&.Mui-focused .MuiOutlinedInput-notchedOutline": {
+                                borderColor: "#000000",
+                                borderWidth: 2,
+                              },
+                              "&.Mui-focused": {
+                                backgroundColor: "#ffffff",
+                                outline: "none",
+                                boxShadow: "none",
+                              },
+                              "& input": {
+                                outline: "none",
+                                boxShadow: "none",
+                              },
+                            },
+                          },
                         },
                       }}
                       closeOnSelect
                       onChange={handleDateChange}
                     />
                   </LocalizationProvider>
-                  <Box
-                    display="flex"
-                    flexDirection="row"
-                    alignItems="center"
-                    gap={1}
-                  >
+                  <ButtonGroup variant="contained" sx={{ height: "56px" }}>
                     <Tooltip title={ROLES_PAGE.TOOLTIP_PREV_WEEK} arrow>
-                      <Button
-                        variant="contained"
-                        sx={{
-                          height: "56px",
-                          minWidth: "56px",
-                        }}
-                        onClick={handlePreviousWeek}
-                      >
+                      <Button onClick={handlePreviousWeek}>
                         <ArrowBackIosNewRoundedIcon />
                       </Button>
                     </Tooltip>
                     <Tooltip title={ROLES_PAGE.TOOLTIP_NEXT_WEEK} arrow>
-                      <Button
-                        variant="contained"
-                        sx={{
-                          height: "56px",
-                          minWidth: "56px",
-                        }}
-                        disabled={
-                          !isValidDateForSelect(
-                            new Date(
-                              getCurrentWeekDates(weekOffset + 1)[0].isoDate,
-                            ),
-                          )
-                        }
-                        onClick={handleNextWeek}
-                      >
+                      <Button disabled={!isValidDateForSelect(new Date(getCurrentWeekDates(weekOffset + 1)[0].isoDate))} onClick={handleNextWeek}>
                         <ArrowForwardIosRoundedIcon />
                       </Button>
                     </Tooltip>
                     <Tooltip title={ROLES_PAGE.TOOLTIP_CURRENT_WEEK} arrow>
-                      <Button
-                        variant="contained"
-                        sx={{
-                          height: "56px",
-                          minWidth: "56px",
-                        }}
-                        disabled={weekOffset === 0}
-                        onClick={handleCurrentWeek}
-                      >
+                      <Button disabled={weekOffset === 0} onClick={handleCurrentWeek}>
                         <CalendarTodayRoundedIcon />
                       </Button>
                     </Tooltip>
-                  </Box>
+                  </ButtonGroup>
                 </Box>
               </Box>
             </Grid>

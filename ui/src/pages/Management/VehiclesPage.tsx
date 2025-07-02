@@ -24,6 +24,7 @@ import {
   CircularProgress,
   Backdrop,
   Tooltip,
+  ButtonGroup,
 } from "@mui/material";
 import { LocalizationProvider } from "@mui/x-date-pickers";
 import { DatePicker } from "@mui/x-date-pickers/DatePicker";
@@ -462,85 +463,67 @@ const VehiclesPage: React.FC = () => {
                 justifyContent="flex-end"
                 gap={2}
               >
-                <Box
-                  display="flex"
-                  flexDirection="row"
-                  alignItems="center"
-                  gap={2}
-                >
-                  <LocalizationProvider
-                    dateAdapter={AdapterDateFns}
-                    adapterLocale={es}
-                  >
+                <Box display="flex" alignItems="center" justifyContent="flex-start" gap={1}>
+                  <LocalizationProvider dateAdapter={AdapterDateFns} adapterLocale={es}>
                     <DatePicker
                       label={VEHICLES_PAGE.DATE_PICKER_LABEL}
                       value={selectedDate || null}
-                      sx={{
-                        width: { xs: "100%", sm: "100%", md: "200px" },
-                      }}
                       maxDate={new Date()}
                       views={["year", "month", "day"]}
-                      slots={{
-                        toolbar: () => null,
-                      }}
+                      slots={{ toolbar: () => null }}
                       slotProps={{
                         textField: {
-                          inputProps: { readOnly: true },
-                          onMouseDown: (e) => e.preventDefault(),
-                        },
-                        actionBar: {
-                          actions: [],
+                          fullWidth: true,
+                          required: true,
+                          variant: "outlined",
+                          sx: {
+                            height: "56px",
+                            minWidth: "180px",
+                            "& .MuiOutlinedInput-root": {
+                              height: "56px",
+                              borderRadius: 2,
+                              backgroundColor: "#ffffff",
+                              "&:hover .MuiOutlinedInput-notchedOutline": {
+                                borderColor: "#000000",
+                              },
+                              "&.Mui-focused .MuiOutlinedInput-notchedOutline": {
+                                borderColor: "#000000",
+                                borderWidth: 2,
+                              },
+                              "&.Mui-focused": {
+                                backgroundColor: "#ffffff",
+                                outline: "none",
+                                boxShadow: "none",
+                              },
+                              "& input": {
+                                outline: "none",
+                                boxShadow: "none",
+                              },
+                            },
+                          },
                         },
                       }}
                       closeOnSelect
                       onChange={(date) => handleDateChange(date)}
                     />
                   </LocalizationProvider>
-                  <Box
-                    display="flex"
-                    flexDirection="row"
-                    alignItems="center"
-                    gap={1}
-                  >
+                  <ButtonGroup variant="contained" sx={{ height: "56px" }}>
                     <Tooltip title={VEHICLES_PAGE.TOOLTIP_PREV_DAY} arrow>
-                      <Button
-                        variant="contained"
-                        sx={{
-                          height: "56px",
-                          minWidth: "56px",
-                        }}
-                        onClick={handlePreviousDate}
-                      >
+                      <Button onClick={handlePreviousDate}>
                         <ArrowBackIosNewRoundedIcon />
                       </Button>
                     </Tooltip>
                     <Tooltip title={VEHICLES_PAGE.TOOLTIP_NEXT_DAY} arrow>
-                      <Button
-                        variant="contained"
-                        sx={{
-                          height: "56px",
-                          minWidth: "56px",
-                        }}
-                        disabled={isTodayOrFuture(selectedDate)}
-                        onClick={handleNextDate}
-                      >
+                      <Button disabled={isTodayOrFuture(selectedDate)} onClick={handleNextDate}>
                         <ArrowForwardIosRoundedIcon />
                       </Button>
                     </Tooltip>
                     <Tooltip title={VEHICLES_PAGE.TOOLTIP_CURRENT_DAY} arrow>
-                      <Button
-                        variant="contained"
-                        sx={{
-                          height: "56px",
-                          minWidth: "56px",
-                        }}
-                        disabled={isTodayOrFuture(selectedDate)}
-                        onClick={handleCurrentDate}
-                      >
+                      <Button disabled={isTodayOrFuture(selectedDate)} onClick={handleCurrentDate}>
                         <CalendarTodayRoundedIcon />
                       </Button>
                     </Tooltip>
-                  </Box>
+                  </ButtonGroup>
                 </Box>
                 {userPermissions.includes(PERMISSIONS.CREATE_VEHICLES) && (
                   <Button

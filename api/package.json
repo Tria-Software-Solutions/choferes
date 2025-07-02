@@ -12,7 +12,8 @@
     "undo:seed:dev": "npx sequelize-cli db:seed:undo:all --config src/config/config.js",
     "seed:prod": "NODE_ENV=production npx sequelize-cli db:seed:all --config src/config/config.js",
     "undo:seed:prod": "NODE_ENV=production npx sequelize-cli db:seed:undo:all --config src/config/config.js",
-    "lint": "eslint .",
+    "lint": "eslint 'src/**/*.{js,jsx,ts,tsx}'",
+    "lint:fix": "eslint 'src/**/*.{js,jsx,ts,tsx}' --fix",
     "prepare": "husky install"
   },
   "keywords": [],
@@ -59,7 +60,7 @@
     "typescript": "^5.7.3"
   },
   "engines": {
-    "node": "20.x"
+    "node": ">=20"
   },
   "lint-staged": {
     "*.{js,ts,tsx}": [
