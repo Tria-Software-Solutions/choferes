@@ -20,7 +20,6 @@ import {
   CircularProgress,
   Grid,
   Typography,
-  Chip,
   Stack,
 } from "@mui/material";
 import EditableTable from "../../components/Table/EditableTable/EditableTable";
@@ -131,7 +130,7 @@ const ManageRoles: React.FC<{ isExpanded?: boolean }> = ({
           updatedRole,
           newPermissionIds: permissions
             .filter((permission) =>
-              editFields.permissionNames.includes(permission.name),
+              Array.isArray(editFields.permissionNames) && editFields.permissionNames.includes(permission.name),
             )
             .map((permission) => permission.id),
         }),
@@ -193,7 +192,7 @@ const ManageRoles: React.FC<{ isExpanded?: boolean }> = ({
         name: roleData.name,
         permissionNames: permissions
           .filter((permission) =>
-            roleData.permissions.includes(permission.id.toString()),
+            Array.isArray(roleData.permissions) && roleData.permissions.includes(permission.id.toString()),
           )
           .map((permission) => permission.name),
       };
@@ -224,30 +223,18 @@ const ManageRoles: React.FC<{ isExpanded?: boolean }> = ({
           useFlexGap
         >
           {value.map((permission: string, index: number) => (
-            <Chip
+            <Typography
               key={index}
-              label={permission}
-              size="small"
               sx={{
-                backgroundColor: "primary.main",
-                color: "#fff",
-                border: "1px solid",
-                borderColor: "primary.dark",
                 fontWeight: 500,
-                fontSize: "0.85rem",
-                px: 1.2,
-                py: 0.5,
-                borderRadius: 2,
-                boxShadow: 1,
-                letterSpacing: 0.2,
+                fontSize: 'clamp(0.75rem, 1.25vw, 0.875rem)',
+                mr: 1,
                 mb: 0.5,
-                "& .MuiChip-label": {
-                  color: "#fff",
-                  fontWeight: 500,
-                  px: 0.5,
-                },
+                display: 'inline-block',
               }}
-            />
+            >
+              {permission}
+            </Typography>
           ))}
         </Stack>
       );

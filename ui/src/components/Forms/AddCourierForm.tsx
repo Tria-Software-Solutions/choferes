@@ -229,6 +229,14 @@ const AddCourierForm: React.FC<AddCourierFormProps> = ({
                   }
                 />
               }
+              MenuProps={{
+                PaperProps: {
+                  style: {
+                    maxHeight: 320,
+                    overflowY: 'auto',
+                  },
+                },
+              }}
             >
               <MenuItem value="GAM">GAM</MenuItem>
               <MenuItem value="GAM Express">GAM Express</MenuItem>

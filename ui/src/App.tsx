@@ -28,7 +28,6 @@ import { AuthProvider, useAuthContext } from "./context/AuthContext";
 import ProtectedRoute from "./routes/ProtectedRoute";
 import { Container, useMediaQuery, useTheme } from "@mui/material";
 import { APPBAR_MENU, PERMISSIONS, ROUTES } from "./constants/constants";
-import LocalShippingIcon from "@mui/icons-material/LocalShipping";
 import CalendarMonthRoundedIcon from "@mui/icons-material/CalendarMonthRounded";
 import DirectionsCarIcon from "@mui/icons-material/DirectionsCar";
 import GroupRoundedIcon from "@mui/icons-material/GroupRounded";
@@ -46,12 +45,6 @@ const AppBarWrapper: React.FC = () => {
   const isSmallScreen = useMediaQuery(theme.breakpoints.down("sm"));
 
   const links = [
-    {
-      label: APPBAR_MENU.COURIER_SERVICE,
-      icon: <LocalShippingIcon />,
-      path: ROUTES.COURIER_SERVICE,
-      permission: PERMISSIONS.VIEW_COURIER_SERVICE,
-    },
     {
       label: APPBAR_MENU.ROLES,
       icon: <CalendarMonthRoundedIcon />,
@@ -85,7 +78,6 @@ const AppBarWrapper: React.FC = () => {
   ];
 
   const permissionsMap = {
-    [APPBAR_MENU.COURIER_SERVICE]: PERMISSIONS.VIEW_COURIER_SERVICE,
     [APPBAR_MENU.ROLES]: PERMISSIONS.VIEW_ROLES,
     [APPBAR_MENU.EMPLOYEES]: PERMISSIONS.VIEW_EMPLOYEES,
     [APPBAR_MENU.SCHEDULES]: PERMISSIONS.VIEW_SCHEDULES,
@@ -94,7 +86,7 @@ const AppBarWrapper: React.FC = () => {
   };
 
   const filteredLinks = links.filter((link) => {
-    return (userPermissions || []).includes(permissionsMap[link.label]);
+    return Array.isArray(userPermissions) && userPermissions.includes(permissionsMap[link.label]);
   });
 
   const finalLinks = filteredLinks;
@@ -166,19 +158,15 @@ const AppContent: React.FC = () => {
       { route: ROUTES.EMPLOYEES, permission: PERMISSIONS.VIEW_EMPLOYEES },
       { route: ROUTES.SCHEDULES, permission: PERMISSIONS.VIEW_SCHEDULES },
       { route: ROUTES.VEHICLES, permission: PERMISSIONS.VIEW_VEHICLES },
-      {
-        route: ROUTES.COURIER_SERVICE,
-        permission: PERMISSIONS.VIEW_COURIER_SERVICE,
-      },
     ];
 
     for (const { route, permission } of routePreferences) {
-      if (userPermissions.includes(permission)) {
+      if (Array.isArray(userPermissions) && userPermissions.includes(permission)) {
         return route;
       }
     }
 
-    return ROUTES.COURIER_SERVICE;
+    return ROUTES.ROLES; // fallback to roles if nothing else
   };
 
   return (
