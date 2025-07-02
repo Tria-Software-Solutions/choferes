@@ -387,6 +387,10 @@ export const FORMS = {
     ADD_BUTTON: "Agregar",
   },
   ADD_SCHEDULE: {
+    SCHEDULE_LABEL: "Horario/Lugar",
+    SCHEDULE_LABEL_PLACEHOLDER: "Ej: Avenida 123",
+    SCHEDULE_TIME_LABEL: "Tiempo",
+    SCHEDULE_TIME_PLACEHOLDER: "Ej: 8",
     SPECIAL_LABEL: "Horario Especial",
     SPECIAL_DESC: "Marque esta opción si es un horario con condiciones especiales",
     BUTTON_ADD: "Agregar",

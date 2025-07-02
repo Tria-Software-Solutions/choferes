@@ -45,12 +45,12 @@ const AddScheduleForm: React.FC<AddScheduleFormProps> = ({
   const [formData, setFormData] = useState<{
     label: string;
     days: string[];
-    hours: string;
+    hours: number;
     specialSchedule: boolean;
   }>({
     label: "",
     days: [],
-    hours: "",
+    hours: 0,
     specialSchedule: false,
   });
 
@@ -59,16 +59,15 @@ const AddScheduleForm: React.FC<AddScheduleFormProps> = ({
   const validateFields = useCallback((fields: typeof formData) => {
     const regex = {
       text: /^[a-zA-ZáéíóúÁÉÍÓÚñÑüÜëË\s-]+$/,
-      time: /^[0-9]+$/,
     };
 
     const isLabelValid =
       fields.label.trim().length > 0 && regex.text.test(fields.label);
     const isHoursValid =
-      fields.hours.length > 0 &&
-      regex.time.test(fields.hours) &&
-      parseInt(fields.hours) > 0 &&
-      parseInt(fields.hours) <= 24;
+      typeof fields.hours === "number" &&
+      !isNaN(fields.hours) &&
+      fields.hours > 0 &&
+      fields.hours <= 24;
     const isDaysValid = fields.days.length > 0;
 
     return isLabelValid && isHoursValid && isDaysValid;
@@ -83,7 +82,7 @@ const AddScheduleForm: React.FC<AddScheduleFormProps> = ({
       const newSchedule: Omit<Schedule, "id"> = {
         label: formData.label,
         days: formData.days,
-        hours: parseInt(formData.hours, 10),
+        hours: formData.hours,
         specialSchedule: formData.specialSchedule,
       };
       onSubmit(newSchedule);
@@ -91,7 +90,7 @@ const AddScheduleForm: React.FC<AddScheduleFormProps> = ({
   };
 
   const handleClearForm = () => {
-    setFormData({ label: "", days: [], hours: "", specialSchedule: false });
+    setFormData({ label: "", days: [], hours: 0, specialSchedule: false });
   };
 
   return (
@@ -99,10 +98,10 @@ const AddScheduleForm: React.FC<AddScheduleFormProps> = ({
       <Grid container spacing={3} sx={{ mt: 0 }}>
         <Grid item xs={12} sm={6}>
           <CustomTextField
-            label={FORMS.ADD_SCHEDULE.SPECIAL_LABEL}
+            label={FORMS.ADD_SCHEDULE.SCHEDULE_LABEL}
             variant="outlined"
             fullWidth
-            placeholder={FORMS.ADD_SCHEDULE.SPECIAL_DESC}
+            placeholder={FORMS.ADD_SCHEDULE.SCHEDULE_LABEL_PLACEHOLDER}
             value={formData.label}
             onChange={(e) =>
               setFormData({ ...formData, label: e.target.value })
@@ -117,26 +116,26 @@ const AddScheduleForm: React.FC<AddScheduleFormProps> = ({
 
         <Grid item xs={12} sm={6}>
           <CustomTextField
-            label={FORMS.ADD_SCHEDULE.SPECIAL_LABEL}
+            label={FORMS.ADD_SCHEDULE.SCHEDULE_TIME_LABEL}
             variant="outlined"
             type="number"
             fullWidth
-            placeholder={FORMS.ADD_SCHEDULE.SPECIAL_DESC}
+            placeholder={FORMS.ADD_SCHEDULE.SCHEDULE_TIME_PLACEHOLDER}
             value={formData.hours}
             onChange={(e) =>
-              setFormData({ ...formData, hours: e.target.value })
+              setFormData({ ...formData, hours: Number(e.target.value) })
             }
             error={
-              formData.hours.length > 0 &&
-              (!/^[0-9]+$/.test(formData.hours) ||
-                parseInt(formData.hours) <= 0 ||
-                parseInt(formData.hours) > 24)
+              formData.hours !== 0 &&
+              (isNaN(formData.hours) ||
+                formData.hours <= 0 ||
+                formData.hours > 24)
             }
             helperText={
-              formData.hours.length > 0 &&
-              (!/^[0-9]+$/.test(formData.hours) ||
-                parseInt(formData.hours) <= 0 ||
-                parseInt(formData.hours) > 24)
+              formData.hours !== 0 &&
+              (isNaN(formData.hours) ||
+                formData.hours <= 0 ||
+                formData.hours > 24)
                 ? FORMS.HOURS_INVALID
                 : ""
             }
