@@ -41,6 +41,7 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faFileExcel, faFilePdf } from "@fortawesome/free-solid-svg-icons";
 import AddRoundedIcon from "@mui/icons-material/AddRounded";
 import DeleteOutlineIcon from "@mui/icons-material/DeleteOutline";
+import { NOTIFICATIONS } from "../../constants/constants";
 
 const SchedulesPage: React.FC = () => {
   const dispatch = useDispatch<AppDispatch>();
@@ -139,13 +140,9 @@ const SchedulesPage: React.FC = () => {
       setIsCreatingSchedule(true);
       await dispatch(createSchedule(newSchedule));
       setOpenAddScheduleModal(false);
-      showNotification("El registro del horario fue exitoso", 3000, false);
+      showNotification(NOTIFICATIONS.SCHEDULE_CREATE_SUCCESS, 3000, false);
     } catch (error) {
-      showNotification(
-        "Ha ocurrido un error al registrar el horario",
-        5000,
-        false,
-      );
+      showNotification(NOTIFICATIONS.SCHEDULE_CREATE_ERROR, 5000, false);
     } finally {
       setIsCreatingSchedule(false);
     }
@@ -174,14 +171,10 @@ const SchedulesPage: React.FC = () => {
       dispatch(updateSchedule({ id, updatedSchedule }));
       setEditRowId(null);
       setEditFields({ label: "", days: [], hours: "", specialSchedule: false });
-      showNotification("La actualización del horario fue exitosa", 3000, false);
+      showNotification(NOTIFICATIONS.SCHEDULE_UPDATE_SUCCESS, 3000, false);
     } catch (error) {
       handleCancel();
-      showNotification(
-        "Ha ocurrido un error al actualizar el horario",
-        5000,
-        false,
-      );
+      showNotification(NOTIFICATIONS.SCHEDULE_UPDATE_ERROR, 5000, false);
     }
   };
 
@@ -211,9 +204,9 @@ const SchedulesPage: React.FC = () => {
       await dispatch(deleteSchedule(scheduleToDelete));
       setOpenDeleteDialog(false);
       setScheduleToDelete(null);
-      showNotification("Horario eliminado exitosamente", 3000, false);
+      showNotification(NOTIFICATIONS.SCHEDULE_DELETE_SUCCESS, 3000, false);
     } catch (error) {
-      showNotification("Error al eliminar el horario", 5000, false);
+      showNotification(NOTIFICATIONS.SCHEDULE_DELETE_ERROR, 5000, false);
     } finally {
       setIsDeletingSchedule(false);
     }

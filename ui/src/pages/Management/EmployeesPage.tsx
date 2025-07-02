@@ -31,7 +31,7 @@ import {
   exportToExcel,
   exportToPDF,
 } from "../../utils/export";
-import { PAGE_TITLE, PERMISSIONS, EMPLOYEES_PAGE } from "../../constants/constants";
+import { PAGE_TITLE, PERMISSIONS, EMPLOYEES_PAGE, NOTIFICATIONS } from "../../constants/constants";
 import GroupRoundedIcon from "@mui/icons-material/GroupRounded";
 import DownloadRoundedIcon from "@mui/icons-material/DownloadRounded";
 import CloseRoundedIcon from "@mui/icons-material/CloseRounded";
@@ -117,10 +117,10 @@ const EmployeesPage: React.FC = () => {
       setIsSubmitting(true);
       dispatch(createEmployee(newEmployee));
       setOpenAddModal(false);
-      showNotification("El registro del empleado fue exitoso", 3000, false);
+      showNotification(NOTIFICATIONS.EMPLOYEE_CREATE_SUCCESS, 3000, false);
     } catch (error) {
       showNotification(
-        "Ha ocurrido un error al registrar el empleado",
+        NOTIFICATIONS.EMPLOYEE_CREATE_ERROR,
         5000,
         false,
       );
@@ -157,18 +157,10 @@ const EmployeesPage: React.FC = () => {
       dispatch(updateEmployee({ id, updatedEmployee }));
       setEditRowId(null);
       setEditFields({ firstName: "", lastName: "" });
-      showNotification(
-        "La actualización del empleado fue exitosa",
-        3000,
-        false,
-      );
+      showNotification(NOTIFICATIONS.EMPLOYEE_UPDATE_SUCCESS, 3000, false);
     } catch (error) {
       handleCancel();
-      showNotification(
-        "Ha ocurrido un error al actualizar el empleado",
-        5000,
-        false,
-      );
+      showNotification(NOTIFICATIONS.EMPLOYEE_UPDATE_ERROR, 5000, false);
     }
   };
 
@@ -190,9 +182,9 @@ const EmployeesPage: React.FC = () => {
       await dispatch(deleteEmployee(employeeToDelete));
       setOpenDeleteDialog(false);
       setEmployeeToDelete(null);
-      showNotification("Empleado eliminado exitosamente", 3000, false);
+      showNotification(NOTIFICATIONS.EMPLOYEE_DELETE_SUCCESS, 3000, false);
     } catch (error) {
-      showNotification("Error al eliminar el empleado", 5000, false);
+      showNotification(NOTIFICATIONS.EMPLOYEE_DELETE_ERROR, 5000, false);
     } finally {
       setIsDeletingEmployee(false);
     }

@@ -49,6 +49,7 @@ import AddCourierForm from "../../components/Forms/AddCourierForm";
 import DialogComponent from "../../components/Dialog/DialogComponent";
 import AddRoundedIcon from "@mui/icons-material/AddRounded";
 import DeleteOutlineIcon from "@mui/icons-material/DeleteOutline";
+import { NOTIFICATIONS } from "../../constants/constants";
 
 const CourierServicePage: React.FC = () => {
   const { userPermissions } = useAuthContext();
@@ -198,10 +199,10 @@ const CourierServicePage: React.FC = () => {
   const handleUpdate = async (id: number) => {
     try {
       // TODO: Implementar actualización cuando se conecte con el backend
-      showNotification("La actualización del servicio fue exitosa");
+      showNotification(NOTIFICATIONS.COURIER_UPDATE_SUCCESS);
       setEditRowId(null);
     } catch (error) {
-      showNotification("Ha ocurrido un error al actualizar el servicio");
+      showNotification(NOTIFICATIONS.COURIER_UPDATE_ERROR);
     }
   };
 
@@ -233,9 +234,9 @@ const CourierServicePage: React.FC = () => {
       setOpenDeleteDialog(false);
       setCourierToDelete(null);
 
-      showNotification("Servicio de mensajería eliminado exitosamente");
+      showNotification(NOTIFICATIONS.COURIER_DELETE_SUCCESS);
     } catch (error) {
-      showNotification("Error al eliminar el servicio de mensajería");
+      showNotification(NOTIFICATIONS.COURIER_DELETE_ERROR);
     } finally {
       setIsDeletingCourier(false);
     }
@@ -309,9 +310,9 @@ const CourierServicePage: React.FC = () => {
       setFilteredWeekCouriers([...filteredWeekCouriers, newCourier]);
 
       setOpenAddCourierModal(false);
-      showNotification("Servicio de mensajería creado exitosamente");
+      showNotification(NOTIFICATIONS.COURIER_CREATE_SUCCESS);
     } catch (error) {
-      showNotification("Error al crear el servicio de mensajería");
+      showNotification(NOTIFICATIONS.COURIER_CREATE_ERROR);
     } finally {
       setIsCreatingCourier(false);
     }
