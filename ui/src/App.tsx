@@ -124,8 +124,38 @@ const AppBarWrapper: React.FC = () => {
 const AppContent: React.FC = () => {
   const { currentUser, userPermissions } = useAuthContext();
   const location = useLocation();
-  const isAuthPage =
-    location.pathname === "/" || location.pathname === "/register";
+
+  // List of routes where the AppBar should be hidden
+  const hideAppBarRoutes = [
+    "/",
+    "/register",
+    "/error",
+    "/session-expired",
+    "/forbidden"
+  ];
+
+  // Only use wallpaper for login and register
+  const isAuthPage = location.pathname === "/" || location.pathname === "/register";
+
+  // Helper: known app routes (excluding error/forbidden/notfound/sessionexpired)
+  const knownAppRoutes = [
+    "/",
+    "/register",
+    "/courier-service",
+    "/roles",
+    "/employees",
+    "/schedules",
+    "/vehicles",
+    "/dashboard",
+    "/settings"
+  ];
+
+  // Hide AppBar if on any of the hideAppBarRoutes, or if on a not found route
+  const isHideAppBar =
+    hideAppBarRoutes.includes(location.pathname) ||
+    // NotFound: if current path is not in knownAppRoutes and not a subroute of them
+    (!knownAppRoutes.some((route) => location.pathname === route || location.pathname.startsWith(route + "/"))
+      && location.pathname !== "/error" && location.pathname !== "/session-expired");
 
   const safeUserPermissions = userPermissions || [];
 
@@ -153,7 +183,7 @@ const AppContent: React.FC = () => {
 
   return (
     <>
-      {!isAuthPage && <AppBarWrapper />}
+      {!isHideAppBar && <AppBarWrapper />}
       <Container
         maxWidth="xl"
         disableGutters
@@ -207,7 +237,7 @@ const AppContent: React.FC = () => {
                 ) ? (
                   <CourierServicePage />
                 ) : (
-                  <Forbidden />
+                  <Navigate to="/forbidden" replace />
                 )
               }
             />
@@ -217,7 +247,7 @@ const AppContent: React.FC = () => {
                 safeUserPermissions.includes(PERMISSIONS.VIEW_ROLES) ? (
                   <RolesPage />
                 ) : (
-                  <Forbidden />
+                  <Navigate to="/forbidden" replace />
                 )
               }
             />
@@ -227,7 +257,7 @@ const AppContent: React.FC = () => {
                 safeUserPermissions.includes(PERMISSIONS.VIEW_EMPLOYEES) ? (
                   <EmployeesPage />
                 ) : (
-                  <Forbidden />
+                  <Navigate to="/forbidden" replace />
                 )
               }
             />
@@ -237,7 +267,7 @@ const AppContent: React.FC = () => {
                 safeUserPermissions.includes(PERMISSIONS.VIEW_SCHEDULES) ? (
                   <SchedulesPage />
                 ) : (
-                  <Forbidden />
+                  <Navigate to="/forbidden" replace />
                 )
               }
             />
@@ -247,7 +277,7 @@ const AppContent: React.FC = () => {
                 safeUserPermissions.includes(PERMISSIONS.VIEW_VEHICLES) ? (
                   <VehiclesPage />
                 ) : (
-                  <Forbidden />
+                  <Navigate to="/forbidden" replace />
                 )
               }
             />
@@ -257,12 +287,13 @@ const AppContent: React.FC = () => {
                 safeUserPermissions.includes(PERMISSIONS.VIEW_ADMIN) ? (
                   <Dashboard />
                 ) : (
-                  <Forbidden />
+                  <Navigate to="/forbidden" replace />
                 )
               }
             />
             <Route path="/settings" element={<Settings />} />
           </Route>
+          <Route path="/forbidden" element={<Forbidden />} />
           <Route path="*" element={<NotFound />} />
           <Route path="/error" element={<ErrorPage />} />
           <Route path="/session-expired" element={<SessionExpired />} />

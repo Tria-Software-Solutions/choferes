@@ -26,20 +26,16 @@ const Forbidden: React.FC = () => {
   };
 
   return (
-    <Box
-      sx={{
-        position: "fixed",
-        top: 0,
-        left: 0,
-        right: 0,
-        bottom: 0,
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "center",
-        overflow: "hidden",
-      }}
-    >
-      <Container maxWidth="md" sx={{ p: 3 }}>
+    <Container maxWidth="md">
+      <Box
+        display="flex"
+        flexDirection="column"
+        justifyContent="center"
+        alignItems="center"
+        minHeight="100vh"
+        textAlign="center"
+        px={3}
+      >
         <Fade in timeout={800}>
           <Slide direction="up" in timeout={1000}>
             <Box
@@ -167,8 +163,8 @@ const Forbidden: React.FC = () => {
             </Box>
           </Slide>
         </Fade>
-      </Container>
-    </Box>
+      </Box>
+    </Container>
   );
 };
 
