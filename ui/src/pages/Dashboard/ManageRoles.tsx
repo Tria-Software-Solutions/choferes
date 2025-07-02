@@ -20,7 +20,7 @@ import {
   CircularProgress,
   Grid,
   Typography,
-  Stack,
+  useTheme,
 } from "@mui/material";
 import EditableTable from "../../components/Table/EditableTable/EditableTable";
 import SearchBar from "../../components/SearchBar/SearchBar";
@@ -37,6 +37,7 @@ const ManageRoles: React.FC<{ isExpanded?: boolean }> = ({
 }) => {
   const dispatch = useDispatch<AppDispatch>();
   const { userPermissions } = useAuthContext();
+  const theme = useTheme();
   const { roles, isLoadingRoles } = useSelector(
     (state: RootState) => state.roles,
   );
@@ -216,27 +217,24 @@ const ManageRoles: React.FC<{ isExpanded?: boolean }> = ({
   const renderColumnValue = (column: keyof Role, value: unknown) => {
     if (column === "permissionNames" && Array.isArray(value)) {
       return (
-        <Stack
-          direction="row"
-          spacing={0.75}
-          flexWrap={editRowId !== null ? "nowrap" : "wrap"}
-          useFlexGap
-        >
+        <Box sx={{ display: "flex", flexWrap: "wrap", gap: 0.5 }}>
           {value.map((permission: string, index: number) => (
-            <Typography
+            <Box
               key={index}
               sx={{
+                backgroundColor: theme.palette.primary.main,
+                color: theme.palette.primary.contrastText,
+                px: 1,
+                py: 0.5,
+                borderRadius: 1,
+                fontSize: "clamp(0.625rem, 1vw, 0.75rem)",
                 fontWeight: 500,
-                fontSize: 'clamp(0.75rem, 1.25vw, 0.875rem)',
-                mr: 1,
-                mb: 0.5,
-                display: 'inline-block',
               }}
             >
               {permission}
-            </Typography>
+            </Box>
           ))}
-        </Stack>
+        </Box>
       );
     }
     return value as React.ReactNode;
