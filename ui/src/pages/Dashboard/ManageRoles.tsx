@@ -32,6 +32,7 @@ import DeleteOutlineIcon from "@mui/icons-material/DeleteOutline";
 import { DASHBOARD_ROLES } from "../../constants/constants";
 import { NOTIFICATIONS } from "../../constants/constants";
 
+// ManageRoles page component for role management in the dashboard
 const ManageRoles: React.FC<{ isExpanded?: boolean }> = ({
   isExpanded = true,
 }) => {
@@ -60,12 +61,14 @@ const ManageRoles: React.FC<{ isExpanded?: boolean }> = ({
   const [isCreatingRole, setIsCreatingRole] = useState(false);
   const [isDeletingRole, setIsDeletingRole] = useState(false);
 
+  // Loads roles, permissions, and role permissions data on mount
   useEffect(() => {
     dispatch(fetchRoles());
     dispatch(fetchPermissions());
     dispatch(fetchRolePermissions());
   }, [dispatch]);
 
+  // Filters roles based on search input
   const filteredRoles = useMemo(() => {
     const normalizeString = (str: string) =>
       str.normalize("NFD").replace(/[\u0300-\u036f]/g, "");
@@ -86,6 +89,7 @@ const ManageRoles: React.FC<{ isExpanded?: boolean }> = ({
 
   const totalCount = useMemo(() => filteredRoles.length, [filteredRoles]);
 
+  // Validates role fields for add/edit forms
   const validateFields = useCallback((fields: typeof editFields) => {
     const regex = {
       text: /^[a-zA-ZáéíóúÁÉÍÓÚñÑüÜëË\s-]+$/,
@@ -115,6 +119,7 @@ const ManageRoles: React.FC<{ isExpanded?: boolean }> = ({
     setEditRowId(null);
   };
 
+  // Handles updating a role
   const handleUpdate = async (id: number) => {
     try {
       const updatedRole: Partial<Role> = {
@@ -140,6 +145,7 @@ const ManageRoles: React.FC<{ isExpanded?: boolean }> = ({
     }
   };
 
+  // Handles opening/closing delete dialog
   const handleOpenDeleteDialog = (id: number) => {
     setOpenDeleteDialog(true);
     setRoleToDelete(id);
@@ -150,6 +156,7 @@ const ManageRoles: React.FC<{ isExpanded?: boolean }> = ({
     setRoleToDelete(null);
   };
 
+  // Handles deleting a role
   const handleDelete = async () => {
     if (!roleToDelete) return;
 
@@ -166,6 +173,7 @@ const ManageRoles: React.FC<{ isExpanded?: boolean }> = ({
     }
   };
 
+  // Handles opening/closing add role modal
   const handleOpenAddRoleModal = () => {
     setOpenAddRoleModal(true);
   };
@@ -174,6 +182,7 @@ const ManageRoles: React.FC<{ isExpanded?: boolean }> = ({
     setOpenAddRoleModal(false);
   };
 
+  // Handles creating a new role
   const handleCreateRole = async (roleData: {
     name: string;
     permissions: string[];
@@ -204,6 +213,7 @@ const ManageRoles: React.FC<{ isExpanded?: boolean }> = ({
     }
   };
 
+  // Renders column values for the table
   const renderColumnValue = (column: keyof Role, value: unknown) => {
     if (column === "permissionNames" && Array.isArray(value)) {
       return (

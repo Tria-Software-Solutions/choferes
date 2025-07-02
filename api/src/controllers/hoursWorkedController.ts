@@ -1,6 +1,7 @@
 import { Request, Response } from "express";
 import * as hoursWorkedService from "../services/hoursWorkedService";
 
+// Get all hours worked records
 export const getHoursWorked = async (req: Request, res: Response) => {
   try {
     const hoursWorked = await hoursWorkedService.getHoursWorked();
@@ -10,6 +11,7 @@ export const getHoursWorked = async (req: Request, res: Response) => {
   }
 };
 
+// Get a specific hours worked record by ID
 export const getHoursWorkedById = async (req: Request, res: Response) => {
   try {
     const id = parseInt(req.params.id, 10);
@@ -23,6 +25,7 @@ export const getHoursWorkedById = async (req: Request, res: Response) => {
   }
 };
 
+// Create a new hours worked record
 export const createHoursWorked = async (req: Request, res: Response) => {
   try {
     const hoursWorked = await hoursWorkedService.createHoursWorked(req.body);
@@ -32,6 +35,7 @@ export const createHoursWorked = async (req: Request, res: Response) => {
   }
 };
 
+// Update an hours worked record by ID
 export const updateHoursWorked = async (req: Request, res: Response) => {
   try {
     const id = parseInt(req.params.id, 10);
@@ -45,6 +49,7 @@ export const updateHoursWorked = async (req: Request, res: Response) => {
   }
 };
 
+// Delete an hours worked record by ID
 export const deleteHoursWorked = async (req: Request, res: Response) => {
   try {
     const { id } = req.params;

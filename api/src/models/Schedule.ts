@@ -1,16 +1,17 @@
 import { Model, DataTypes } from "sequelize";
 import sequelize from "../config/database";
 
+// Schedule model definition for Sequelize ORM
 export class Schedule extends Model {
-  public id!: number;
+  public id!: number; // Unique identifier for the schedule
 
-  public days!: string[];
+  public days!: string[]; // Days of the week for the schedule
 
-  public label!: string;
+  public label!: string; // Label or name for the schedule
 
-  public hours!: number;
+  public hours!: number; // Number of hours for the schedule
 
-  public specialSchedule!: boolean;
+  public specialSchedule!: boolean; // Indicates if this is a special schedule
 }
 
 Schedule.init(

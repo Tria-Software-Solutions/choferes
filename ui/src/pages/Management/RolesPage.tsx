@@ -79,6 +79,7 @@ import Divider from "@mui/material/Divider";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faFileExcel, faFilePdf } from "@fortawesome/free-solid-svg-icons";
 
+// Roles management and summary page component
 const RolesPage: React.FC = () => {
   const dispatch = useDispatch<AppDispatch>();
   const { userPermissions } = useAuthContext();
@@ -129,6 +130,7 @@ const RolesPage: React.FC = () => {
   const theme = useTheme();
   const isSmallScreen = useMediaQuery(theme.breakpoints.down("sm"));
 
+  // Fetch employees, schedules, and hours worked on mount
   useEffect(() => {
     dispatch(fetchEmployees());
     dispatch(fetchSchedules());
@@ -143,6 +145,7 @@ const RolesPage: React.FC = () => {
     isLoadingBiweeklySummaries ||
     isLoadingMonthlySummaries;
 
+  // Filter employees by search input
   useEffect(() => {
     const normalizeString = (str: string) =>
       str.normalize("NFD").replace(/[\u0300-\u036f]/g, "");
@@ -156,6 +159,7 @@ const RolesPage: React.FC = () => {
     );
   }, [filter, employees]);
 
+  // Update week, biweek, month, and year based on week offset
   useEffect(() => {
     const currentWeek = getCurrentWeekDates(weekOffset);
 
@@ -181,10 +185,12 @@ const RolesPage: React.FC = () => {
     }
   }, [weekOffset]);
 
+  // Handle search bar input change
   const handleFilterChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setFilter(e.target.value);
   };
 
+  // Handle date picker change and update week offset
   const handleDateChange = useCallback((newDate: Date | null) => {
     if (newDate) {
       const today = new Date();

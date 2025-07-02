@@ -1,7 +1,10 @@
+// Utility functions for performance optimization: debounce, throttle, memoize, lazy loading, virtual lists, preloading, and more
+// Used to improve UI responsiveness and resource management
 export const debounce = <T extends (...args: unknown[]) => unknown>(
   func: T,
   wait: number,
 ): ((...args: Parameters<T>) => void) => {
+  // Returns a debounced version of the given function
   let timeout: NodeJS.Timeout;
   return (...args: Parameters<T>) => {
     clearTimeout(timeout);
@@ -13,6 +16,7 @@ export const throttle = <T extends (...args: unknown[]) => unknown>(
   func: T,
   limit: number,
 ): ((...args: Parameters<T>) => void) => {
+  // Returns a throttled version of the given function
   let inThrottle: boolean;
   return (...args: Parameters<T>) => {
     if (!inThrottle) {
@@ -27,6 +31,7 @@ export const memoize = <T extends (...args: unknown[]) => unknown>(
   func: T,
   resolver?: (...args: Parameters<T>) => string,
 ): T => {
+  // Returns a memoized version of the given function
   const cache = new Map<string, unknown>();
 
   return ((...args: Parameters<T>) => {
@@ -43,10 +48,11 @@ export const memoize = <T extends (...args: unknown[]) => unknown>(
 };
 
 export const lazyLoad = (importFunc: () => Promise<unknown>) => {
+  // Lazily loads a module after a delay or on user interaction
   return new Promise((resolve) => {
     const timer = setTimeout(() => {
       importFunc().then(resolve);
-    }, 100); // Pequeño delay para evitar bloqueo del UI
+    }, 100); // Small delay to avoid UI blocking
 
     const handleInteraction = () => {
       clearTimeout(timer);
@@ -67,8 +73,9 @@ export const createVirtualListConfig = (
   containerHeight: number,
   totalItems: number,
 ) => {
+  // Returns configuration for a virtualized list (windowing)
   const visibleItems = Math.ceil(containerHeight / itemHeight);
-  const bufferSize = Math.ceil(visibleItems * 0.5); // 50% de buffer
+  const bufferSize = Math.ceil(visibleItems * 0.5); // 50% buffer
 
   return {
     itemHeight,
@@ -91,6 +98,7 @@ export const createVirtualListConfig = (
 };
 
 export const preloadImage = (src: string): Promise<void> => {
+  // Preloads an image and resolves when loaded
   return new Promise((resolve, reject) => {
     const img = new Image();
     img.onload = () => resolve();
@@ -100,6 +108,7 @@ export const preloadImage = (src: string): Promise<void> => {
 };
 
 export const preloadFont = (fontFamily: string, fontWeight = "normal") => {
+  // Preloads a font using the Font Loading API
   if ("fonts" in document) {
     (
       document as unknown as { fonts: { load: (font: string) => void } }
@@ -111,6 +120,7 @@ export const measurePerformance = <T extends (...args: unknown[]) => unknown>(
   name: string,
   func: T,
 ): ((...args: Parameters<T>) => unknown) => {
+  // Wraps a function for performance measurement (placeholder)
   return (...args: Parameters<T>) => {
     const result = func(...args);
     return result;
@@ -118,6 +128,7 @@ export const measurePerformance = <T extends (...args: unknown[]) => unknown>(
 };
 
 export const cleanupMemory = () => {
+  // Cleans up memory and caches if supported by the environment
   if ("gc" in window) {
     (window as unknown as { gc: () => void }).gc();
   }
@@ -137,6 +148,7 @@ export const createIntersectionObserver = (
   callback: IntersectionObserverCallback,
   options: IntersectionObserverInit = {},
 ) => {
+  // Creates an IntersectionObserver with default options
   return new IntersectionObserver(callback, {
     root: null,
     rootMargin: "50px",

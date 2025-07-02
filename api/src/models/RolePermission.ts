@@ -3,10 +3,10 @@ import sequelize from "../config/database";
 import { Role } from "./Role";
 import { Permission } from "./Permission";
 
+// RolePermission model definition for Sequelize ORM
 export class RolePermission extends Model {
-  public roleId!: number;
-
-  public permissionId!: number;
+  public roleId!: number; // Reference to the role
+  public permissionId!: number; // Reference to the permission
 }
 
 RolePermission.init(

@@ -44,6 +44,7 @@ const AddRoleForm: React.FC<AddRoleFormProps> = ({
     permissions: "",
   });
 
+  // Groups permissions by category using useMemo
   const groupedPermissions = useMemo(() => {
     const grouped: { [key: string]: Permission[] } = {};
     permissions.forEach((permission) => {
@@ -56,6 +57,7 @@ const AddRoleForm: React.FC<AddRoleFormProps> = ({
     return grouped;
   }, [permissions]);
 
+  // Field validation for the form
   const validateField = (name: string, value: string | string[]) => {
     if (name === "name") {
       const nameValue = value as string;
@@ -84,12 +86,14 @@ const AddRoleForm: React.FC<AddRoleFormProps> = ({
     return "";
   };
 
+  // Handles field changes and validation
   const handleFieldChange = (field: string, value: string | string[]) => {
     setFormData((prev) => ({ ...prev, [field]: value }));
     const error = validateField(field, value);
     setErrors((prev) => ({ ...prev, [field]: error }));
   };
 
+  // Handles selected permissions changes
   const handlePermissionChange = (permissionId: string) => {
     const newPermissions = formData.permissions.includes(permissionId)
       ? formData.permissions.filter((id) => id !== permissionId)
@@ -98,6 +102,7 @@ const AddRoleForm: React.FC<AddRoleFormProps> = ({
     handleFieldChange("permissions", newPermissions);
   };
 
+  // Checks if the form is valid
   const isFormValid = () => {
     return (
       formData.name.trim() !== "" &&
@@ -107,6 +112,7 @@ const AddRoleForm: React.FC<AddRoleFormProps> = ({
     );
   };
 
+  // Submits the form data if valid
   const handleSubmit = () => {
     if (isFormValid()) {
       onSubmit({
@@ -116,6 +122,7 @@ const AddRoleForm: React.FC<AddRoleFormProps> = ({
     }
   };
 
+  // Clears the form and errors
   const handleClearForm = () => {
     setFormData({ name: "", permissions: [] });
     setErrors({ name: "", permissions: "" });

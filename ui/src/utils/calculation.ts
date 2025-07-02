@@ -9,6 +9,8 @@ interface Summary {
   year: number;
 }
 
+// Utility functions for calculating total hours and overtime for employees
+// Includes logic for single and multiple periods (weekly, biweekly, monthly)
 export const calculateTotalHoursAndOvertimeForPeriod = (
   employeeId: number,
   selectedPeriod: "weekly" | "biweekly" | "monthly",
@@ -20,6 +22,7 @@ export const calculateTotalHoursAndOvertimeForPeriod = (
   biweeklySummaries: Summary[],
   monthlySummaries: Summary[],
 ) => {
+  // Finds the summary for the given period and employee
   const findWeeklySummary = () =>
     weeklySummaries.find(
       (s) =>
@@ -51,6 +54,7 @@ export const calculateTotalHoursAndOvertimeForPeriod = (
 
   const totalHours = summary?.totalHours ?? 0;
 
+  // Calculates overtime based on the period's threshold
   let overtime = 0;
   if (selectedPeriod === "weekly" && totalHours > OVERTIME.WEEKLY) {
     overtime = totalHours - OVERTIME.WEEKLY;
@@ -82,6 +86,7 @@ export const calculateTotalHoursAndOvertimeForPeriods = (
   biweeklySummaries: Summary[],
   monthlySummaries: Summary[],
 ) => {
+  // Finds the summaries for the given periods and employee
   const findFirstWeeklySummary = () =>
     weeklySummaries.find(
       (s) =>
@@ -151,6 +156,7 @@ export const calculateTotalHoursAndOvertimeForPeriods = (
         ? OVERTIME.BIWEEKLY
         : OVERTIME.MONTHLY;
 
+  // Calculates overtime for each period based on the threshold
   const firstOvertime =
     firstSummary > overtimeThreshold ? firstSummary - overtimeThreshold : 0;
 

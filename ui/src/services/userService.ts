@@ -1,6 +1,7 @@
 import { User } from "../models/User";
 import api from "./api";
 
+// Authenticates a user with username/email and password
 export const authenticateUser = async (
   identifier: string,
   password: string,
@@ -12,6 +13,7 @@ export const authenticateUser = async (
   return response.data;
 };
 
+// Refreshes the access token using the refresh token (with credentials)
 export const refreshAccessToken = async () => {
   try {
     const response = await api.post(
@@ -28,11 +30,13 @@ export const refreshAccessToken = async () => {
   }
 };
 
+// Fetches all users
 export const getUsers = async () => {
   const response = await api.get("/users");
   return response.data;
 };
 
+// Fetches a user by their ID
 export const getUserById = async (id: number) => {
   const response = await api.get(`/users/${id}`);
   return response.data;

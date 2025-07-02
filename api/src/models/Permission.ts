@@ -1,10 +1,10 @@
 import { DataTypes, Model } from "sequelize";
 import sequelize from "../config/database";
 
+// Permission model definition for Sequelize ORM
 export class Permission extends Model {
-  public id!: number;
-
-  public name!: string;
+  public id!: number; // Unique identifier for the permission
+  public name!: string; // Name of the permission
 }
 
 Permission.init(

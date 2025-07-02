@@ -1,5 +1,5 @@
 export const ROUTES = {
-  //Routes
+  // Routes
   COURIER_SERVICE: "/courier-service",
   DASHBOARD: "/dashboard",
   EMPLOYEES: "/employees",
@@ -12,7 +12,7 @@ export const ROUTES = {
 };
 
 export const APPBAR_MENU = {
-  //Menu items
+  // Menu items
   COURIER_SERVICE: "Mensajería",
   DASHBOARD: "Administración",
   EMPLOYEES: "Empleados",
@@ -30,7 +30,7 @@ export const APPBAR_MENU = {
 };
 
 export const PAGE_TITLE = {
-  //Pages titles
+  // Page titles
   COURIER_SERVICE: "Servicio de Mensajería",
   COURIER_SERVICE_SIMPLIFIED: "Mensajería",
   DASHBOARD: "Panel de Control Administrativo",
@@ -49,7 +49,7 @@ export const PAGE_TITLE = {
 };
 
 export const PERMISSIONS = {
-  //Permissions
+  // Permissions
   CREATE_EMPLOYEES: "Crear Empleado",
   CREATE_ROLE: "Crear Rol",
   CREATE_SCHEDULES: "Crear Horario",
@@ -83,7 +83,7 @@ export const PERMISSIONS = {
 };
 
 export const DAYS_LIST = [
-  //Weekdays
+  // Weekdays
   { value: "monday", label: "Lunes" },
   { value: "tuesday", label: "Martes" },
   { value: "wednesday", label: "Miércoles" },
@@ -94,15 +94,14 @@ export const DAYS_LIST = [
 ];
 
 export const OVERTIME = {
-  //Overtime
+  // Overtime limits
   BIWEEKLY: 96,
   MONTHLY: 192,
   WEEKLY: 48,
 };
 
-
 export const COLORS_LIST = [
-  //Colors
+  // Vehicle colors
   { value: "Blanco", label: "Blanco" },
   { value: "Negro", label: "Negro" },
   { value: "Gris", label: "Gris" },
@@ -125,7 +124,7 @@ export const COLORS_LIST = [
 ];
 
 export const BRANDS_LIST = [
-  //Brands
+  // Vehicle brands
   { value: "Acura", label: "Acura" },
   { value: "Alfa Romeo", label: "Alfa Romeo" },
   { value: "Aston Martin", label: "Aston Martin" },
@@ -192,10 +191,11 @@ export const BRANDS_LIST = [
 ];
 
 export const STATE = {
-//States
+  // States
   FREE: "Libre",
 };
 
+// TABLE: Table-related labels and tooltips for UI tables
 export const TABLE = {
   EDIT: "Editar",
   SAVE: "Guardar",
@@ -225,6 +225,7 @@ export const TABLE = {
   CHANGE_PASSWORD: "Cambiar contraseña",
 };
 
+// SELECTOR_TABLE: Labels and tooltips for the SelectorTable component
 export const SELECTOR_TABLE = {
   PERIOD_WEEKLY: "Semanal",
   PERIOD_BIWEEKLY: "Quincenal",
@@ -268,7 +269,7 @@ export const SELECTOR_TABLE = {
 };
 
 export const FORMS = {
-  // Etiquetas y validaciones generales
+  // General validations and labels
   ALREADY_REGISTERED: "Ya está registrado",
   DAYS_REQUIRED: "Debe seleccionar al menos un día",
   DISTANCE_GREATER_0: "La distancia debe ser mayor a 0",
@@ -447,6 +448,8 @@ export const NOTIFICATIONS = {
   COURIER_CREATE_SUCCESS: "Servicio de mensajería creado exitosamente",
   COURIER_UPDATE_SUCCESS: "La actualización del servicio fue exitosa",
   COURIER_DELETE_SUCCESS: "Servicio de mensajería eliminado exitosamente",
+  COURIER_UPDATE_ERROR: "Ha ocurrido un error al actualizar el servicio de mensajería",
+  COURIER_DELETE_ERROR: "Ha ocurrido un error al eliminar el servicio de mensajería",
   ROLE_CREATE_SUCCESS: "Rol creado exitosamente",
   ROLE_UPDATE_SUCCESS: "La actualización del rol fue exitosa",
   ROLE_DELETE_SUCCESS: "Rol eliminado exitosamente",
@@ -457,6 +460,7 @@ export const NOTIFICATIONS = {
   USER_STATUS_UPDATE_ERROR: "Error al actualizar el estado del usuario",
   USER_PASSWORD_UPDATE_SUCCESS: "La contraseña fue actualizada exitosamente",
   USER_PASSWORD_UPDATE_ERROR: "Ha ocurrido un error al actualizar la contraseña",
+  COURIER_CREATE_ERROR: "Ha ocurrido un error al crear el servicio de mensajería",
 };
 
 export const AUTH = {

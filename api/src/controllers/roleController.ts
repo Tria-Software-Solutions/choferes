@@ -1,6 +1,7 @@
 import { Request, Response } from "express";
 import * as roleService from "../services/roleService";
 
+// Get all roles
 export const getRoles = async (req: Request, res: Response) => {
   try {
     const roles = await roleService.getRoles();
@@ -10,6 +11,7 @@ export const getRoles = async (req: Request, res: Response) => {
   }
 };
 
+// Get a role by its ID
 export const getRoleById = async (req: Request, res: Response) => {
   try {
     const role = await roleService.getRoleById(Number(req.params.id));
@@ -22,6 +24,7 @@ export const getRoleById = async (req: Request, res: Response) => {
   }
 };
 
+// Get a role by its name
 export const getRoleByName = async (req: Request, res: Response) => {
   try {
     const role = await roleService.getRoleByName(req.params.name);
@@ -34,6 +37,7 @@ export const getRoleByName = async (req: Request, res: Response) => {
   }
 };
 
+// Create a new role
 export const createRole = async (req: Request, res: Response) => {
   try {
     const newRole = await roleService.createRole(req.body);
@@ -43,6 +47,7 @@ export const createRole = async (req: Request, res: Response) => {
   }
 };
 
+// Update a role by its ID
 export const updateRole = async (req: Request, res: Response) => {
   try {
     const id = parseInt(req.params.id, 10);
@@ -56,6 +61,7 @@ export const updateRole = async (req: Request, res: Response) => {
   }
 };
 
+// Delete a role by its ID
 export const deleteRole = async (req: Request, res: Response) => {
   try {
     const id = parseInt(req.params.id, 10);

@@ -2,12 +2,14 @@ import { useState, useEffect, useCallback } from "react";
 import * as WeeklySummaryService from "../services/weeklySummaryService";
 import { WeeklySummary } from "../models/WeeklySummary";
 
+// Custom hook for managing weekly summaries state and operations
 export const useWeeklySummaries = () => {
   const [weeklySummaries, setWeeklySummaries] = useState<WeeklySummary[]>([]);
   const [totalCountWeeklySummaries, setTotalCountWeeklySummaries] = useState(0);
   const [isLoadingWeeklySummaries, setIsLoadingWeeklySummaries] =
     useState(false);
 
+  // Fetch all weekly summaries from the service and update state
   const getWeeklySummaries = useCallback(async () => {
     setIsLoadingWeeklySummaries(true);
     try {
@@ -21,6 +23,7 @@ export const useWeeklySummaries = () => {
     }
   }, []);
 
+  // Fetch the current weekly summary for a specific employee and week
   const getCurrentWeeklySummary = useCallback(
     async (
       employeeId: number,
@@ -45,6 +48,7 @@ export const useWeeklySummaries = () => {
     [],
   );
 
+  // Check if an employee has worked in the current weekly summary
   const hasWorkedCurrenWeeklySummary = useCallback(
     async (
       employeeId: number,
@@ -69,6 +73,7 @@ export const useWeeklySummaries = () => {
     [],
   );
 
+  // Create a new weekly summary and update state
   const createWeeklySummary = async (
     newWeeklySummary: Omit<WeeklySummary, "id">,
   ) => {
@@ -78,6 +83,7 @@ export const useWeeklySummaries = () => {
     setTotalCountWeeklySummaries((prev) => prev + 1);
   };
 
+  // Update a weekly summary and update state
   const updateWeeklySummary = async (
     id: number,
     updatedWeeklySummary: Partial<WeeklySummary>,
@@ -92,6 +98,7 @@ export const useWeeklySummaries = () => {
     );
   };
 
+  // Create or update a weekly summary based on presence of ID
   const createOrUpdateWeeklySummary = async (
     newWeeklySummary: Omit<WeeklySummary, "id"> | WeeklySummary,
   ) => {
@@ -102,6 +109,7 @@ export const useWeeklySummaries = () => {
     }
   };
 
+  // Delete a weekly summary and update state
   const deleteWeeklySummary = async (id: number) => {
     await WeeklySummaryService.deleteWeeklySummary(id);
     setWeeklySummaries((prev) =>
@@ -110,6 +118,7 @@ export const useWeeklySummaries = () => {
     setTotalCountWeeklySummaries((prev) => prev - 1);
   };
 
+  // Fetch weekly summaries on mount
   useEffect(() => {
     getWeeklySummaries();
   }, [getWeeklySummaries]);

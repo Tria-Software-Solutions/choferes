@@ -14,6 +14,7 @@ import LoginIcon from "@mui/icons-material/Login";
 import SecurityIcon from "@mui/icons-material/Security";
 import { ERRORS } from "../constants/constants";
 
+// SessionExpired page component for handling expired user sessions
 const SessionExpired: React.FC = () => {
   const { logoutUser } = useAuth();
   const theme = useTheme();

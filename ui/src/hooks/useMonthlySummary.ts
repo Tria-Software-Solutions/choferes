@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback } from "react";
 import * as MonthlySummaryService from "../services/monthlySummaryService";
 import { MonthlySummary } from "../models/MonthlySummary";
 
+// Custom hook for managing monthly summaries state and operations
 export const useMonthlySummaries = () => {
   const [monthlySummaries, setMonthlySummaries] = useState<MonthlySummary[]>(
     [],
@@ -11,6 +12,7 @@ export const useMonthlySummaries = () => {
   const [isLoadingMonthlySummaries, setIsLoadingMonthlySummaries] =
     useState(false);
 
+  // Fetch all monthly summaries from the service and update state
   const getMonthlySummaries = useCallback(async () => {
     setIsLoadingMonthlySummaries(true);
     try {
@@ -24,6 +26,7 @@ export const useMonthlySummaries = () => {
     }
   }, []);
 
+  // Fetch the current monthly summary for a specific employee and month
   const getCurrentMonthlySummary = useCallback(
     async (employeeId: number, month: number, year: number) => {
       setIsLoadingMonthlySummaries(true);
@@ -42,6 +45,7 @@ export const useMonthlySummaries = () => {
     [],
   );
 
+  // Create a new monthly summary and update state
   const createMonthlySummary = async (
     newMonthlySummary: Omit<MonthlySummary, "id">,
   ) => {
@@ -51,6 +55,7 @@ export const useMonthlySummaries = () => {
     setTotalCountMonthlySummaries((prev) => prev + 1);
   };
 
+  // Update a monthly summary and update state
   const updateMonthlySummary = async (
     id: number,
     updatedMonthlySummary: Partial<MonthlySummary>,
@@ -65,6 +70,7 @@ export const useMonthlySummaries = () => {
     );
   };
 
+  // Create or update a monthly summary based on presence of ID
   const createOrUpdateMonthlySummary = async (
     newMonthlySummary: Omit<MonthlySummary, "id"> | MonthlySummary,
   ) => {
@@ -75,6 +81,7 @@ export const useMonthlySummaries = () => {
     }
   };
 
+  // Delete a monthly summary and update state
   const deleteMonthlySummary = async (id: number) => {
     await MonthlySummaryService.deleteMonthlySummary(id);
     setMonthlySummaries((prev) =>
@@ -83,6 +90,7 @@ export const useMonthlySummaries = () => {
     setTotalCountMonthlySummaries((prev) => prev - 1);
   };
 
+  // Fetch monthly summaries on mount
   useEffect(() => {
     getMonthlySummaries();
   }, [getMonthlySummaries]);

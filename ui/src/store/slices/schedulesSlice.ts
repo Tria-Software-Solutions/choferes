@@ -3,6 +3,10 @@ import * as ScheduleService from "../../services/scheduleService";
 import { Schedule } from "../../models/Schedule";
 import { RootState } from "../store";
 
+// schedulesSlice manages the state and async logic for schedule data
+// Includes fetching, creating, updating, and deleting schedules
+// State: schedules array, total count, loading state, error
+
 interface SchedulesState {
   schedules: Schedule[];
   totalCountSchedules: number;
@@ -17,6 +21,7 @@ const initialState: SchedulesState = {
   error: null,
 };
 
+// Fetch all schedules from the API
 export const fetchSchedules = createAsyncThunk(
   "schedules/fetchSchedules",
   async (_, { rejectWithValue }) => {
@@ -41,6 +46,7 @@ export const fetchSchedules = createAsyncThunk(
   },
 );
 
+// Create a new schedule via the API
 export const createSchedule = createAsyncThunk(
   "schedules/createSchedule",
   async (newSchedule: Omit<Schedule, "id">, { rejectWithValue }) => {
@@ -55,6 +61,7 @@ export const createSchedule = createAsyncThunk(
   },
 );
 
+// Update a schedule by id via the API
 export const updateSchedule = createAsyncThunk(
   "schedules/updateSchedule",
   async (
@@ -72,6 +79,7 @@ export const updateSchedule = createAsyncThunk(
   },
 );
 
+// Delete a schedule by id via the API
 export const deleteSchedule = createAsyncThunk(
   "schedules/deleteSchedule",
   async (id: number, { rejectWithValue }) => {
@@ -91,6 +99,7 @@ const schedulesSlice = createSlice({
   initialState,
   reducers: {},
   extraReducers: (builder) => {
+    // Handle async actions for schedules
     builder
       .addCase(fetchSchedules.pending, (state) => {
         state.isLoadingSchedules = true;
@@ -112,6 +121,7 @@ const schedulesSlice = createSlice({
       .addCase(
         createSchedule.fulfilled,
         (state, action: PayloadAction<Schedule>) => {
+          // Add the newly created schedule to the state
           state.schedules.push(action.payload);
           state.totalCountSchedules += 1;
         },
@@ -125,6 +135,7 @@ const schedulesSlice = createSlice({
             updatedSchedule: Partial<Schedule>;
           }>,
         ) => {
+          // Update a schedule in the state after editing
           const { id, updatedSchedule } = action.payload;
           const updatedSchedules = state.schedules.map((schedule) =>
             schedule.id === id ? { ...schedule, ...updatedSchedule } : schedule,
@@ -135,6 +146,7 @@ const schedulesSlice = createSlice({
       .addCase(
         deleteSchedule.fulfilled,
         (state, action: PayloadAction<number>) => {
+          // Remove a schedule from the state by ID
           state.schedules = state.schedules.filter(
             (schedule) => schedule.id !== action.payload,
           );
@@ -144,11 +156,15 @@ const schedulesSlice = createSlice({
   },
 });
 
+// Selector to get all schedules from the state
 export const selectSchedules = (state: RootState) => state.schedules.schedules;
+// Selector to get the total count of schedules
 export const selectTotalCountSchedules = (state: RootState) =>
   state.schedules.totalCountSchedules;
+// Selector to get the loading state for schedules
 export const selectIsLoadingSchedules = (state: RootState) =>
   state.schedules.isLoadingSchedules;
+// Selector to get the error state for schedules
 export const selectSchedulesError = (state: RootState) => state.schedules.error;
 
 export default schedulesSlice.reducer;

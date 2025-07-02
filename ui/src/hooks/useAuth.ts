@@ -12,11 +12,13 @@ interface Permission {
   name: string;
 }
 
+// Custom hook for authentication logic and user session management
 export const useAuth = () => {
   const [authError, setAuthError] = useState<string>("");
   const { login, logout } = useAuthContext();
   const navigate = useNavigate();
 
+  // Determines the default route based on user permissions
   const getDefaultRoute = (userPermissions: string[]) => {
     // Define the order of preference for routes
     const routePreferences = [
@@ -42,6 +44,7 @@ export const useAuth = () => {
     return ROUTES.COURIER_SERVICE;
   };
 
+  // Authenticates the user and handles login, permissions extraction, and navigation
   const authenticateUser = async (identifier: string, password: string) => {
     try {
       const response = await authenticateUserService(identifier, password);
@@ -105,6 +108,7 @@ export const useAuth = () => {
     }
   };
 
+  // Logs out the user and navigates to the home page
   const logoutUser = () => {
     logout();
     navigate("/");

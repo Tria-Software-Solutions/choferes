@@ -51,6 +51,7 @@ import { faFileExcel, faFilePdf } from "@fortawesome/free-solid-svg-icons";
 import AddRoundedIcon from "@mui/icons-material/AddRounded";
 import DeleteOutlineIcon from "@mui/icons-material/DeleteOutline";
 
+// Vehicles management page component
 const VehiclesPage: React.FC = () => {
   const dispatch = useDispatch<AppDispatch>();
   const { userPermissions } = useAuthContext();
@@ -86,11 +87,13 @@ const VehiclesPage: React.FC = () => {
 
   const isSmallScreen = useMediaQuery((theme) => theme.breakpoints.down("sm"));
 
+  // Memoize cleaned filter for search
   const cleanedFilter = useMemo(
     () => filter.replace(/[\s-]/g, "").toLowerCase(),
     [filter],
   );
 
+  // Memoize filtered vehicles for selected date and search
   const filteredVehicles = useMemo(() => {
     const vehiclesForSelectedDate = allVehicles.filter((vehicle) => {
       const vehicleDate = new Date(vehicle.parkingDate);
@@ -125,16 +128,19 @@ const VehiclesPage: React.FC = () => {
     return filtered;
   }, [allVehicles, selectedDate, cleanedFilter]);
 
+  // Update total count when filtered vehicles change
   useEffect(() => {
     setTotalCount(filteredVehicles.length);
   }, [filteredVehicles]);
 
+  // Fetch all vehicles on mount
   useEffect(() => {
     if (shouldRefetch) {
       dispatch(fetchVehicles({}));
     }
   }, [dispatch, shouldRefetch]);
 
+  // Adjust rows per page based on screen size
   useEffect(() => {
     if (isSmallScreen) {
       setRowsPerPage(5);
@@ -143,6 +149,7 @@ const VehiclesPage: React.FC = () => {
     }
   }, [isSmallScreen]);
 
+  // Filter vehicles for the selected week
   useEffect(() => {
     const date = selectedDate;
     const dayOfWeek = date.getDay();
@@ -163,6 +170,7 @@ const VehiclesPage: React.FC = () => {
     setFilteredWeekVehicles(vehiclesThisWeek);
   }, [allVehicles, selectedDate]);
 
+  // Validate edit fields for vehicle
   const validateFields = useCallback((fields: typeof editFields) => {
     const regex = {
       number: /^\d+$/,
@@ -180,20 +188,24 @@ const VehiclesPage: React.FC = () => {
     );
   }, []);
 
+  // Update edit form validity when fields change
   useEffect(() => {
     setIsEditFormValid(validateFields(editFields));
   }, [editFields, validateFields]);
 
+  // Handle search bar input change
   const handleFilterChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setFilter(e.target.value);
   };
 
+  // Handle date picker change
   const handleDateChange = (date: Date | null) => {
     if (date) {
       setSelectedDate(date);
     }
   };
 
+  // Handle editing of a vehicle
   const handleEdit = (vehicle: Vehicle) => {
     setEditRowId(vehicle.id);
     setEditFields({
@@ -207,10 +219,12 @@ const VehiclesPage: React.FC = () => {
     });
   };
 
+  // Cancel editing
   const handleCancel = () => {
     setEditRowId(null);
   };
 
+  // Handle update of a vehicle
   const handleUpdate = async (id: number) => {
     try {
       const updatedVehicle = {
@@ -233,13 +247,14 @@ const VehiclesPage: React.FC = () => {
         notes: "",
         parkingDate: new Date(),
       });
-      showNotification(NOTIFICATIONS.VEHICLE_UPDATE_SUCCESS, 3000, false);
+      showNotification(NOTIFICATIONS.VEHICLE_UPDATED, 3000, false);
     } catch (error) {
       handleCancel();
       showNotification(NOTIFICATIONS.VEHICLE_UPDATE_ERROR, 5000, false);
     }
   };
 
+  // Open/close delete confirmation dialog
   const handleOpenDeleteDialog = (id: number) => {
     setVehicleToDelete(id);
     setOpenDeleteDialog(true);
@@ -249,6 +264,7 @@ const VehiclesPage: React.FC = () => {
     setOpenDeleteDialog(false);
   };
 
+  // Handle deletion of a vehicle
   const handleDelete = async () => {
     if (!vehicleToDelete) return;
 
@@ -265,6 +281,7 @@ const VehiclesPage: React.FC = () => {
     }
   };
 
+  // Handle navigation to next/previous/current date
   const handleNextDate = () => {
     const nextDate = new Date(selectedDate);
     nextDate.setDate(selectedDate.getDate() + 1);
@@ -281,12 +298,14 @@ const VehiclesPage: React.FC = () => {
     setSelectedDate(new Date());
   };
 
+  // Get the next available ticket number
   const getNextTicketNumber = (): string => {
     const tickets = allVehicles.map((vehicle) => parseInt(vehicle.ticket));
     const maxTicket = Math.max(...tickets, 0);
     return (maxTicket + 1).toString();
   };
 
+  // Open/close add vehicle modal
   const handleOpenAddVehicleModal = () => {
     setOpenAddVehicleModal(true);
   };
@@ -295,6 +314,7 @@ const VehiclesPage: React.FC = () => {
     setOpenAddVehicleModal(false);
   };
 
+  // Handle creation of a new vehicle
   const handleCreateVehicle = async (vehicleData: {
     ticket: string;
     licensePlate: string;

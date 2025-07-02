@@ -43,6 +43,7 @@ import AddRoundedIcon from "@mui/icons-material/AddRounded";
 import DeleteOutlineIcon from "@mui/icons-material/DeleteOutline";
 import { NOTIFICATIONS } from "../../constants/constants";
 
+// Schedules management page component
 const SchedulesPage: React.FC = () => {
   const dispatch = useDispatch<AppDispatch>();
   const { userPermissions } = useAuthContext();
@@ -77,10 +78,12 @@ const SchedulesPage: React.FC = () => {
   const theme = useTheme();
   const isSmallScreen = useMediaQuery(theme.breakpoints.down("sm"));
 
+  // Fetch all schedules on mount
   useEffect(() => {
     dispatch(fetchSchedules());
   }, [dispatch]);
 
+  // Adjust rows per page based on screen size
   useEffect(() => {
     if (isSmallScreen) {
       setRowsPerPage(5);
@@ -89,6 +92,7 @@ const SchedulesPage: React.FC = () => {
     }
   }, [isSmallScreen]);
 
+  // Filter schedules by search input
   useEffect(() => {
     const normalizeString = (str: string) =>
       str.normalize("NFD").replace(/[\u0300-\u036f]/g, "");
@@ -109,6 +113,7 @@ const SchedulesPage: React.FC = () => {
     setTotalCountSchedules(newFilteredSchedules.length);
   }, [filter, schedules]);
 
+  // Validate edit fields for schedule
   const validateFields = useCallback((fields: typeof editFields) => {
     const regex = {
       text: /^[a-zA-ZáéíóúÁÉÍÓÚñÑüÜëË\s-]+$/,
@@ -127,14 +132,17 @@ const SchedulesPage: React.FC = () => {
     return isLabelValid && isHoursValid && isDaysValid;
   }, []);
 
+  // Update edit form validity when fields change
   useEffect(() => {
     if (editRowId !== null) setIsEditFormValid(validateFields(editFields));
   }, [editFields, editRowId, validateFields]);
 
+  // Handle search bar input change
   const handleFilterChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setFilter(e.target.value);
   };
 
+  // Handle creation of a new schedule
   const handleCreate = async (newSchedule: Omit<Schedule, "id">) => {
     try {
       setIsCreatingSchedule(true);
@@ -148,6 +156,7 @@ const SchedulesPage: React.FC = () => {
     }
   };
 
+  // Handle editing of a schedule
   const handleEdit = (schedule: Schedule) => {
     setEditRowId(schedule.id);
     setEditFields({
@@ -158,10 +167,12 @@ const SchedulesPage: React.FC = () => {
     });
   };
 
+  // Cancel editing
   const handleCancel = () => {
     setEditRowId(null);
   };
 
+  // Handle update of a schedule
   const handleUpdate = async (id: number) => {
     try {
       const updatedSchedule = {
@@ -178,6 +189,7 @@ const SchedulesPage: React.FC = () => {
     }
   };
 
+  // Open/close delete confirmation dialog
   const handleOpenDeleteDialog = (id: number) => {
     setOpenDeleteDialog(true);
     setScheduleToDelete(id);
@@ -188,6 +200,7 @@ const SchedulesPage: React.FC = () => {
     setScheduleToDelete(null);
   };
 
+  // Open/close add schedule modal
   const handleOpenAddModal = () => {
     setOpenAddScheduleModal(true);
   };
@@ -196,6 +209,7 @@ const SchedulesPage: React.FC = () => {
     setOpenAddScheduleModal(false);
   };
 
+  // Handle deletion of a schedule
   const handleDelete = async () => {
     if (!scheduleToDelete) return;
 

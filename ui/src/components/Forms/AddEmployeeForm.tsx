@@ -30,6 +30,8 @@ const AddEmployeeForm: React.FC<AddEmployeeFormProps> = ({
     lastName: "",
   });
 
+  // Main hook for the employee form
+  // Validación de campos del formulario
   const validateField = (name: string, value: string) => {
     const nameRegex = /^[a-zA-ZáéíóúÁÉÍÓÚñÑüÜëË\s-]+$/;
 
@@ -52,12 +54,14 @@ const AddEmployeeForm: React.FC<AddEmployeeFormProps> = ({
     return "";
   };
 
+  // Handles field changes and validation
   const handleFieldChange = (field: string, value: string) => {
     setFormData((prev) => ({ ...prev, [field]: value }));
     const error = validateField(field, value);
     setErrors((prev) => ({ ...prev, [field]: error }));
   };
 
+  // Checks if the form is valid
   const isFormValid = () => {
     return (
       formData.firstName.trim() !== "" &&
@@ -67,6 +71,7 @@ const AddEmployeeForm: React.FC<AddEmployeeFormProps> = ({
     );
   };
 
+  // Submits the form data if valid
   const handleSubmit = () => {
     if (isFormValid()) {
       onSubmit({
@@ -76,6 +81,7 @@ const AddEmployeeForm: React.FC<AddEmployeeFormProps> = ({
     }
   };
 
+  // Clears the form and errors
   const handleClearForm = () => {
     setFormData({ firstName: "", lastName: "" });
     setErrors({ firstName: "", lastName: "" });

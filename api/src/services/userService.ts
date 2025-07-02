@@ -6,6 +6,7 @@ import { Role } from "../models/Role";
 import { Permission } from "../models/Permission";
 import { generateTokens } from "../utils/generateSecret";
 
+// Authenticates a user by username/email and password, returns tokens and user info
 export const authenticateUser = async (identifier: string, password: string, res: Response) => {
   const user = await User.findOne({
     where: { [Op.or]: [{ username: identifier }, { email: identifier }] },
@@ -43,6 +44,7 @@ export const authenticateUser = async (identifier: string, password: string, res
   return { user, accessToken, refreshToken };
 };
 
+// Fetches all users with their roles
 export const getUsers = async () =>
   User.findAll({
     include: [
@@ -54,6 +56,7 @@ export const getUsers = async () =>
     ],
   });
 
+// Fetches a user by ID with their roles
 export const getUserById = async (id: number) =>
   User.findByPk(id, {
     include: [
@@ -65,6 +68,7 @@ export const getUserById = async (id: number) =>
     ],
   });
 
+// Fetches a user by email with their roles
 export const getUserByEmail = async (email: string) =>
   User.findOne({
     where: { email },
@@ -77,6 +81,7 @@ export const getUserByEmail = async (email: string) =>
     ],
   });
 
+// Fetches a user by username with their roles
 export const getUserByUsername = async (username: string) =>
   User.findOne({
     where: { username },
@@ -89,6 +94,7 @@ export const getUserByUsername = async (username: string) =>
     ],
   });
 
+// Fetches all permissions for a user by aggregating permissions from all roles
 export const getUserPermissions = async (userId: number) => {
   const user = await User.findByPk(userId, {
     include: [
@@ -114,6 +120,7 @@ export const getUserPermissions = async (userId: number) => {
   return Array.from(new Set(permissions));
 };
 
+// Creates a new user with hashed password
 export const createUser = async (data: Omit<User, "id">) => {
   const hashedPassword = await bcrypt.hash(data.password, 10);
   return User.create(
@@ -125,26 +132,31 @@ export const createUser = async (data: Omit<User, "id">) => {
   );
 };
 
+// Updates user data by ID
 export const updateUser = async (id: number, data: Omit<User, "id">) => {
   await User.update(data, { where: { id } });
   return User.findByPk(id);
 };
 
+// Updates the active status of a user
 export const updateUserStatus = async (id: number, status: boolean) => {
   await User.update({ isActive: status }, { where: { id } });
   return User.findByPk(id);
 };
 
+// Updates the password of a user (hashes new password)
 export const updateUserPassword = async (id: number, password: string) => {
   const hashedPassword = await bcrypt.hash(password, 10);
   await User.update({ password: hashedPassword }, { where: { id } });
   return User.findByPk(id);
 };
 
+// Updates the temporary password of a user (hashes new password)
 export const updateUserTemporalPassword = async (id: number, temporalPassword: string) => {
   const hashedTemporalPassword = await bcrypt.hash(temporalPassword, 10);
   await User.update({ temporalPassword: hashedTemporalPassword }, { where: { id } });
   return User.findByPk(id);
 };
 
+// Deletes a user by ID
 export const deleteUser = async (id: number) => User.destroy({ where: { id } });

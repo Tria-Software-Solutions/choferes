@@ -3,6 +3,9 @@ import { Snackbar, IconButton, useTheme } from "@mui/material";
 import CloseIcon from "@mui/icons-material/Close";
 import { SNACKBAR } from "../../constants/constants";
 
+// SnackbarWrapper provides a context and provider for showing notifications across the app using Material-UI Snackbar.
+// Exposes a showNotification function via context for use in child components.
+
 interface NotificationContextType {
   showNotification: (
     message: string,
@@ -40,13 +43,14 @@ export const AppNotificationProvider: React.FC<{
     // noop
   });
 
+  // Function to show a notification with custom options
   const showNotification = (
     message: string,
     duration = 3000,
     closeable = true,
     buttonText = SNACKBAR.CLOSE,
     onButtonClick: () => void = () => {
-      // noop
+      // noop 
     },
   ) => {
     setMessage(message);
@@ -141,5 +145,6 @@ export default function SnackbarWrapper({
 }: {
   children: React.ReactNode;
 }) {
+  // Wraps children with the notification provider
   return <AppNotificationProvider>{children}</AppNotificationProvider>;
 }

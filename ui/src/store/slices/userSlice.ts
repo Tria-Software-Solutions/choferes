@@ -6,6 +6,9 @@ import { UserRole } from "../../models/UserRole";
 import { RootState } from "../store";
 import { Roles } from "../../enums/roles";
 
+// userSlice manages the state and async logic for user data
+// Includes fetching, creating, updating, and deleting users, as well as user permissions and roles
+// State: users array, current user, selected user, permissions, total count, loading state, error
 interface UserState {
   users: User[];
   currentUser: User | null;
@@ -26,6 +29,7 @@ const initialState: UserState = {
   error: null,
 };
 
+// Fetch all users from the API
 export const fetchUsers = createAsyncThunk(
   "users/fetchUsers",
   async (_, { rejectWithValue }) => {
@@ -49,6 +53,7 @@ export const fetchUsers = createAsyncThunk(
   },
 );
 
+// Fetch a user by ID from the API
 export const fetchUserById = createAsyncThunk(
   "users/fetchUserById",
   async (id: number, { rejectWithValue }) => {
@@ -62,6 +67,7 @@ export const fetchUserById = createAsyncThunk(
   },
 );
 
+// Fetch a user by email from the API
 export const fetchUserByEmail = createAsyncThunk(
   "users/fetchUserByEmail",
   async (email: string, { rejectWithValue }) => {
@@ -77,6 +83,7 @@ export const fetchUserByEmail = createAsyncThunk(
   },
 );
 
+// Fetch a user by username from the API
 export const fetchUserByUsername = createAsyncThunk(
   "users/fetchUserByUsername",
   async (username: string, { rejectWithValue }) => {
@@ -92,6 +99,7 @@ export const fetchUserByUsername = createAsyncThunk(
   },
 );
 
+// Fetch user permissions by user ID from the API
 export const fetchUserPermissions = createAsyncThunk(
   "users/fetchUserPermissions",
   async (id: number, { rejectWithValue }) => {
@@ -107,6 +115,7 @@ export const fetchUserPermissions = createAsyncThunk(
   },
 );
 
+// Create a new user and assign a role
 export const createUser = createAsyncThunk(
   "users/createUser",
   async (
@@ -133,6 +142,7 @@ export const createUser = createAsyncThunk(
   },
 );
 
+// Update a user and their role
 export const updateUser = createAsyncThunk(
   "users/updateUser",
   async (
@@ -169,6 +179,7 @@ export const updateUser = createAsyncThunk(
   },
 );
 
+// Update a user's active status
 export const updateUserStatus = createAsyncThunk(
   "users/updateUserStatus",
   async (
@@ -186,6 +197,7 @@ export const updateUserStatus = createAsyncThunk(
   },
 );
 
+// Update a user's password
 export const updateUserPassword = createAsyncThunk(
   "users/updateUserPassword",
   async (
@@ -245,15 +257,16 @@ const userSlice = createSlice({
     },
   },
   extraReducers: (builder) => {
+    // Handle async actions for users
     builder
       .addCase(fetchUsers.pending, (state) => {
         state.isLoadingUsers = true;
         state.error = null;
       })
       .addCase(fetchUsers.fulfilled, (state, action: PayloadAction<User[]>) => {
-        state.isLoadingUsers = false;
-        state.totalCountUsers = action.payload.length;
         state.users = action.payload;
+        state.totalCountUsers = action.payload.length;
+        state.isLoadingUsers = false;
       })
       .addCase(fetchUsers.rejected, (state, action) => {
         state.isLoadingUsers = false;
@@ -263,28 +276,36 @@ const userSlice = createSlice({
       .addCase(
         fetchUserById.fulfilled,
         (state, action: PayloadAction<User>) => {
-          state.selectedUser = action.payload;
+          // Update a single user in the state by ID
+          const updatedUsers = state.users.map((user) =>
+            user.id === action.payload.id ? action.payload : user,
+          );
+          state.users = updatedUsers;
         },
       )
       .addCase(
         fetchUserByEmail.fulfilled,
         (state, action: PayloadAction<User>) => {
-          state.selectedUser = action.payload;
+          // Replace users array with the fetched user by email
+          state.users = [action.payload];
         },
       )
       .addCase(
         fetchUserByUsername.fulfilled,
         (state, action: PayloadAction<User>) => {
-          state.selectedUser = action.payload;
+          // Replace users array with the fetched user by username
+          state.users = [action.payload];
         },
       )
       .addCase(
         fetchUserPermissions.fulfilled,
         (state, action: PayloadAction<string[]>) => {
+          // Update permissions for the current user
           state.permissions = action.payload;
         },
       )
       .addCase(createUser.fulfilled, (state, action: PayloadAction<User>) => {
+        // Add the newly created user to the state
         state.users.push(action.payload);
         state.totalCountUsers += 1;
       })
@@ -298,6 +319,7 @@ const userSlice = createSlice({
             newRoleId?: number;
           }>,
         ) => {
+          // Update a user in the state after editing
           state.users = state.users.map((user) =>
             user.id === action.payload.id ? action.payload.refreshedUser : user,
           );
@@ -306,6 +328,7 @@ const userSlice = createSlice({
       .addCase(
         updateUserStatus.fulfilled,
         (state, action: PayloadAction<{ id: number; status: boolean }>) => {
+          // Update a user's status in the state
           state.users = state.users.map((user) =>
             user.id === action.payload.id
               ? { ...user, isActive: action.payload.status }
@@ -316,11 +339,7 @@ const userSlice = createSlice({
       .addCase(
         updateUserPassword.fulfilled,
         (state, action: PayloadAction<{ id: number; password: string }>) => {
-          state.users = state.users.map((user) =>
-            user.id === action.payload.id
-              ? { ...user, password: action.payload.password }
-              : user,
-          );
+          // Update a user's password in the state (not stored for security)
         },
       )
       .addCase(
@@ -343,10 +362,14 @@ const userSlice = createSlice({
   },
 });
 
+// Selector to get the current user from the state
 export const selectCurrentUser = (state: RootState) => state.users.currentUser;
+// Selector to get all users from the state
 export const selectUsers = (state: RootState) => state.users.users;
+// Selector to get the selected user from the state
 export const selectSelectedUser = (state: RootState) =>
   state.users.selectedUser;
+// Selector to get the permissions for the current user
 export const selectPermissions = (state: RootState) => state.users.permissions;
 
 export const { logoutUser } = userSlice.actions;

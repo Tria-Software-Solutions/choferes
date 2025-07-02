@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback } from "react";
 import * as BiweeklySummaryService from "../services/biweeklySummaryService";
 import { BiweeklySummary } from "../models/BiweeklySummary";
 
+// Custom hook for managing biweekly summaries state and operations
 export const useBiweeklySummaries = () => {
   const [biweeklySummaries, setBiweeklySummaries] = useState<BiweeklySummary[]>(
     [],
@@ -11,6 +12,7 @@ export const useBiweeklySummaries = () => {
   const [isLoadingBiweeklySummaries, setIsLoadingBiweeklySummaries] =
     useState(false);
 
+  // Fetch all biweekly summaries from the service and update state
   const getBiweeklySummaries = useCallback(async () => {
     setIsLoadingBiweeklySummaries(true);
     try {
@@ -24,6 +26,7 @@ export const useBiweeklySummaries = () => {
     }
   }, []);
 
+  // Fetch the current biweekly summary for a specific employee and biweek
   const getCurrentBiweeklySummary = useCallback(
     async (
       employeeId: number,
@@ -48,6 +51,7 @@ export const useBiweeklySummaries = () => {
     [],
   );
 
+  // Create a new biweekly summary and update state
   const createBiweeklySummary = async (
     newBiweeklySummary: Omit<BiweeklySummary, "id">,
   ) => {
@@ -57,6 +61,7 @@ export const useBiweeklySummaries = () => {
     setTotalCountBiweeklySummaries((prev) => prev + 1);
   };
 
+  // Update a biweekly summary and update state
   const updateBiweeklySummary = async (
     id: number,
     updatedBiweeklySummary: Partial<BiweeklySummary>,
@@ -74,6 +79,7 @@ export const useBiweeklySummaries = () => {
     );
   };
 
+  // Create or update a biweekly summary based on presence of ID
   const createOrUpdateBiweeklySummary = async (
     newBiweeklySummary: Omit<BiweeklySummary, "id"> | BiweeklySummary,
   ) => {
@@ -84,6 +90,7 @@ export const useBiweeklySummaries = () => {
     }
   };
 
+  // Delete a biweekly summary and update state
   const deleteBiweeklySummary = async (id: number) => {
     await BiweeklySummaryService.deleteBiweeklySummary(id);
     setBiweeklySummaries((prev) =>
@@ -92,6 +99,7 @@ export const useBiweeklySummaries = () => {
     setTotalCountBiweeklySummaries((prev) => prev - 1);
   };
 
+  // Fetch biweekly summaries on mount
   useEffect(() => {
     getBiweeklySummaries();
   }, [getBiweeklySummaries]);

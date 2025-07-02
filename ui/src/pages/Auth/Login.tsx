@@ -24,6 +24,7 @@ import LockOutlinedIcon from "@mui/icons-material/LockOutlined";
 import PersonOutlinedIcon from "@mui/icons-material/PersonOutlined";
 import logo from "../../assets/images/logo.png";
 
+// Login page component for user authentication
 const Login: React.FC = () => {
   const { authenticateUser, authError } = useAuth();
   const [fields, setFields] = useState({
@@ -37,6 +38,7 @@ const Login: React.FC = () => {
   const theme = useTheme();
   const isSmallScreen = useMediaQuery(theme.breakpoints.down("sm"));
 
+  // Validates the login form fields
   const validateFields = () => {
     const newErrors: { [key: string]: string } = {};
 
@@ -54,6 +56,7 @@ const Login: React.FC = () => {
     return Object.keys(newErrors).length === 0;
   };
 
+  // Handles the login form submission
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
 
@@ -68,10 +71,12 @@ const Login: React.FC = () => {
     setIsSubmitting(false);
   };
 
+  // Toggles the password visibility
   const handleTogglePassword = () => {
     setShowPassword((prev) => !prev);
   };
 
+  // Handles changes in form fields and clears errors
   const handleFieldChange = (field: string, value: string) => {
     setFields({ ...fields, [field]: value });
     // Clear error when user starts typing

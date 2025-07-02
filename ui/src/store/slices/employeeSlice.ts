@@ -3,6 +3,9 @@ import * as EmployeeService from "../../services/employeeService";
 import { Employee } from "../../models/Employee";
 import { RootState } from "../store";
 
+// employeeSlice manages the state and async logic for employee data
+// Includes fetching, creating, updating, and deleting employees
+// State: employees array, total count, loading state, error
 interface EmployeeState {
   employees: Employee[];
   totalCountEmployees: number;
@@ -20,6 +23,7 @@ const initialState: EmployeeState = {
 export const fetchEmployees = createAsyncThunk(
   "employees/fetchEmployees",
   async (_, { rejectWithValue }) => {
+    // Fetches all employees from the API
     try {
       const response = await EmployeeService.getEmployees();
       if (Array.isArray(response)) {
@@ -40,6 +44,7 @@ export const fetchEmployees = createAsyncThunk(
 export const createEmployee = createAsyncThunk(
   "employees/createEmployee",
   async (newEmployee: Omit<Employee, "id">, { rejectWithValue }) => {
+    // Creates a new employee via the API
     try {
       const createdEmployee = await EmployeeService.createEmployee(newEmployee);
       return createdEmployee;
@@ -57,6 +62,7 @@ export const updateEmployee = createAsyncThunk(
     { id, updatedEmployee }: { id: number; updatedEmployee: Partial<Employee> },
     { rejectWithValue },
   ) => {
+    // Updates an employee by id via the API
     try {
       await EmployeeService.updateEmployee(id, updatedEmployee);
       return { id, updatedEmployee };
@@ -71,6 +77,7 @@ export const updateEmployee = createAsyncThunk(
 export const deleteEmployee = createAsyncThunk(
   "employees/deleteEmployee",
   async (id: number, { rejectWithValue }) => {
+    // Deletes an employee by id via the API
     try {
       await EmployeeService.deleteEmployee(id);
       return id;
@@ -87,6 +94,7 @@ const employeeSlice = createSlice({
   initialState,
   reducers: {},
   extraReducers: (builder) => {
+    // Handles async actions for employees
     builder
       .addCase(fetchEmployees.pending, (state) => {
         state.isLoadingEmployees = true;

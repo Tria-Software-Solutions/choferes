@@ -25,6 +25,12 @@ interface MenuComponentProps {
   menuItems: MenuItemProps[];
 }
 
+// MenuComponent renders a button (icon, text, or standard) that opens a menu with optional submenus.
+// Props:
+// - buttonType: type of button to trigger the menu (icon, text, or button)
+// - icon: icon to display if buttonType is 'icon'
+// - text: text to display if buttonType is 'text' or 'button'
+// - menuItems: array of menu item objects (text, onClick, icon, subMenuItems)
 const MenuComponent: React.FC<MenuComponentProps> = ({
   buttonType,
   icon,
@@ -32,23 +38,26 @@ const MenuComponent: React.FC<MenuComponentProps> = ({
   menuItems,
 }) => {
   const theme = useTheme();
-  const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
+  const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null); // Anchor for main menu
   const [subMenuAnchorEl, setSubMenuAnchorEl] = useState<null | HTMLElement>(
     null,
-  );
-  const open = Boolean(anchorEl);
-  const openSubMenu = Boolean(subMenuAnchorEl);
+  ); // Anchor for submenu
+  const open = Boolean(anchorEl); // Main menu open state
+  const openSubMenu = Boolean(subMenuAnchorEl); // Submenu open state
 
   const handleClick = (event: React.MouseEvent<HTMLButtonElement>) => {
+    // Opens the main menu
     setAnchorEl(event.currentTarget);
   };
 
   const handleClose = () => {
+    // Closes both main and submenu
     setAnchorEl(null);
     setSubMenuAnchorEl(null);
   };
 
   const handleSubMenuClick = (event: React.MouseEvent<HTMLElement>) => {
+    // Opens the submenu
     setSubMenuAnchorEl(event.currentTarget);
   };
 
