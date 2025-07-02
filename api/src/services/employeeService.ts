@@ -1,8 +1,8 @@
-import { Op } from "sequelize";
-import { Employee } from "../models/Employee";
+import { Op, Includeable } from "sequelize";
+// eslint-disable-next-line import/no-named-as-default
+import Employee from "../models/Employee";
 import { Schedule } from "../models/Schedule";
 import { HoursWorked } from "../models/HoursWorked";
-import { Includeable } from "sequelize";
 
 // Fetches all employees with their schedule
 export const getEmployees = async () =>

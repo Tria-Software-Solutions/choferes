@@ -4,6 +4,7 @@ import sequelize from "../config/database";
 // Permission model definition for Sequelize ORM
 export class Permission extends Model {
   public id!: number; // Unique identifier for the permission
+
   public name!: string; // Name of the permission
 }
 

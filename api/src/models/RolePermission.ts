@@ -6,6 +6,7 @@ import { Permission } from "./Permission";
 // RolePermission model definition for Sequelize ORM
 export class RolePermission extends Model {
   public roleId!: number; // Reference to the role
+
   public permissionId!: number; // Reference to the permission
 }
 
