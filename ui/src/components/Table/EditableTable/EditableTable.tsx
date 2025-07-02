@@ -59,6 +59,7 @@ import PaginationActions from "../Pagination/PaginationActions";
 import PasswordIcon from "@mui/icons-material/Password";
 import CheckCircleOutlineIcon from "@mui/icons-material/CheckCircleOutline";
 import BlockIcon from "@mui/icons-material/Block";
+import CustomTextField from "../../Textfield/CustomTextField";
 
 // EditableTable is a generic, highly-configurable table component for displaying and editing tabular data.
 // Supports inline editing, validation, pagination, sorting, custom renderers, and permission-based actions.
@@ -225,7 +226,25 @@ const EditableTable = <T extends object>({
                 ? `${TABLE.PERMISSIONS_LABEL}: ${visible.join(", ")} +${hidden} más`
                 : `${TABLE.PERMISSIONS_LABEL}: ${visible.join(", ")}`;
             }}
-            sx={{ height: 56 }}
+            sx={{ 
+              height: 56,
+              "& .MuiOutlinedInput-root": {
+                borderRadius: 2,
+                backgroundColor: "#ffffff",
+                "&:hover .MuiOutlinedInput-notchedOutline": {
+                  borderColor: "#000000",
+                },
+                "&.Mui-focused .MuiOutlinedInput-notchedOutline": {
+                  borderColor: "#000000",
+                  borderWidth: 2,
+                },
+                "&.Mui-focused": {
+                  backgroundColor: "#ffffff",
+                  outline: "none",
+                  boxShadow: "none",
+                },
+              },
+            }}
             MenuProps={{
               PaperProps: {
                 style: {
@@ -254,7 +273,7 @@ const EditableTable = <T extends object>({
 
     if (!config) {
       return wrapWithGrid(
-        <TextField
+        <CustomTextField
           fullWidth
           value={editFields[String(column)] || ""}
           onChange={(e) =>
@@ -277,9 +296,8 @@ const EditableTable = <T extends object>({
       };
 
       return wrapWithGrid(
-        <TextField
+        <CustomTextField
           label={translateColumnHeaderToSpanish(column)}
-          variant="outlined"
           fullWidth
           value={editFields[String(column)] || ""}
           onChange={handleChange}
@@ -335,6 +353,28 @@ const EditableTable = <T extends object>({
                 fullWidth: true,
                 inputProps: { readOnly: true },
                 onMouseDown: (e) => e.preventDefault(),
+                sx: {
+                  "& .MuiOutlinedInput-root": {
+                    borderRadius: 2,
+                    backgroundColor: "#ffffff",
+                    "&:hover .MuiOutlinedInput-notchedOutline": {
+                      borderColor: "#000000",
+                    },
+                    "&.Mui-focused .MuiOutlinedInput-notchedOutline": {
+                      borderColor: "#000000",
+                      borderWidth: 2,
+                    },
+                    "&.Mui-focused": {
+                      backgroundColor: "#ffffff",
+                      outline: "none",
+                      boxShadow: "none",
+                    },
+                    "& input": {
+                      outline: "none",
+                      boxShadow: "none",
+                    },
+                  },
+                },
               },
               actionBar: {
                 actions: [],
@@ -363,7 +403,25 @@ const EditableTable = <T extends object>({
               setEditField &&
               setEditField(String(column), String(e.target.value))
             }
-            sx={{ height: 56 }}
+            sx={{ 
+              height: 56,
+              "& .MuiOutlinedInput-root": {
+                borderRadius: 2,
+                backgroundColor: "#ffffff",
+                "&:hover .MuiOutlinedInput-notchedOutline": {
+                  borderColor: "#000000",
+                },
+                "&.Mui-focused .MuiOutlinedInput-notchedOutline": {
+                  borderColor: "#000000",
+                  borderWidth: 2,
+                },
+                "&.Mui-focused": {
+                  backgroundColor: "#ffffff",
+                  outline: "none",
+                  boxShadow: "none",
+                },
+              },
+            }}
           >
             {config.options.map((option) => (
               <MenuItem key={option.value} value={option.value}>
@@ -396,7 +454,25 @@ const EditableTable = <T extends object>({
                     .join(", ")
                 : ""
             }
-            sx={{ height: 56 }}
+            sx={{ 
+              height: 56,
+              "& .MuiOutlinedInput-root": {
+                borderRadius: 2,
+                backgroundColor: "#ffffff",
+                "&:hover .MuiOutlinedInput-notchedOutline": {
+                  borderColor: "#000000",
+                },
+                "&.Mui-focused .MuiOutlinedInput-notchedOutline": {
+                  borderColor: "#000000",
+                  borderWidth: 2,
+                },
+                "&.Mui-focused": {
+                  backgroundColor: "#ffffff",
+                  outline: "none",
+                  boxShadow: "none",
+                },
+              },
+            }}
           >
             {config.options.map((option) => (
               <MenuItem key={option.value} value={option.value}>
@@ -440,12 +516,10 @@ const EditableTable = <T extends object>({
             typeof option === "string" ? option : option.label
           }
           renderInput={(params) => (
-            <TextField
+            <CustomTextField
               {...params}
               label={translateColumnHeaderToSpanish(column)}
-              variant="outlined"
               fullWidth
-              sx={{ height: 56 }}
               placeholder={`Buscar ${translateColumnHeaderToSpanish(column)}`}
             />
           )}
@@ -484,12 +558,10 @@ const EditableTable = <T extends object>({
             })
           }
           renderInput={(params) => (
-            <TextField
+            <CustomTextField
               {...params}
               label={translateColumnHeaderToSpanish(column)}
-              variant="outlined"
               fullWidth
-              sx={{ height: 56 }}
               placeholder={`Buscar ${translateColumnHeaderToSpanish(column)}`}
             />
           )}
@@ -499,7 +571,7 @@ const EditableTable = <T extends object>({
     }
 
     return wrapWithGrid(
-      <TextField
+      <CustomTextField
         fullWidth
         value={editFields[String(column)] || ""}
         onChange={(e) =>
