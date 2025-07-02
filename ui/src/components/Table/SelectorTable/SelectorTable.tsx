@@ -360,6 +360,7 @@ const SelectorTable: React.FC<SelectorTableProps> = React.memo(
                       position: "sticky",
                       left: 0,
                       zIndex: 11,
+                      whiteSpace: "nowrap",
                     }}
                   >
                     <TableSortLabel
@@ -380,6 +381,7 @@ const SelectorTable: React.FC<SelectorTableProps> = React.memo(
                       sx={{
                         padding: isSmallScreen ? "8px" : "16px",
                         zIndex: 10,
+                        whiteSpace: "nowrap",
                       }}
                     >
                       {`${translateDayToAbrevSpanish(
@@ -399,6 +401,7 @@ const SelectorTable: React.FC<SelectorTableProps> = React.memo(
                           position: isSmallScreen ? "static" : "sticky",
                           right: 0,
                           zIndex: 3,
+                          whiteSpace: "nowrap",
                         }}
                         colSpan={2}
                       >

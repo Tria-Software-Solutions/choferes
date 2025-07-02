@@ -723,7 +723,7 @@ const EditableTable = <T extends object>({
               {columns
                 .filter((column) => !columnConfig[String(column)]?.hidden)
                 .map((column) => (
-                  <TableCell key={String(column)} className="tableCell">
+                  <TableCell key={String(column)} className="tableCell" sx={{ whiteSpace: 'nowrap' }}>
                     <TableSortLabel
                       direction={orderBy === column ? order : "asc"}
                       onClick={() => handleSortRequest(column)}
@@ -739,12 +739,13 @@ const EditableTable = <T extends object>({
                     <TableCell
                       key={`header-${String(column)}`}
                       className="tableCell"
+                      sx={{ whiteSpace: 'nowrap' }}
                     >
                       {translateColumnHeaderToSpanish(column)}
                     </TableCell>
                   ))}
               {!noActions || hasEditPermissions || hasDeletePermissions ? (
-                <TableCell className="tableCell" style={{ width: "100px" }} />
+                <TableCell className="tableCell" style={{ width: "100px", whiteSpace: 'nowrap' }} />
               ) : null}
             </TableRow>
           </TableHead>
