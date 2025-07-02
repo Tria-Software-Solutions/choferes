@@ -1,6 +1,7 @@
 import { Request, Response } from "express";
 import * as permissionService from "../services/permissionService";
 
+// Get all permissions
 export const getPermissions = async (req: Request, res: Response) => {
   try {
     const permissions = await permissionService.getPermissions();
@@ -10,6 +11,7 @@ export const getPermissions = async (req: Request, res: Response) => {
   }
 };
 
+// Get a permission by its ID
 export const getPermissionById = async (req: Request, res: Response) => {
   try {
     const permission = await permissionService.getPermissionById(Number(req.params.id));
@@ -22,6 +24,7 @@ export const getPermissionById = async (req: Request, res: Response) => {
   }
 };
 
+// Get permissions by an array of names
 export const getPermissionsByNames = async (req: Request, res: Response) => {
   try {
     const decodedPermissionsNames = decodeURIComponent(req.params.names);
@@ -39,6 +42,7 @@ export const getPermissionsByNames = async (req: Request, res: Response) => {
   }
 };
 
+// Create a new permission
 export const createPermission = async (req: Request, res: Response) => {
   try {
     const { name } = req.body;
@@ -49,6 +53,7 @@ export const createPermission = async (req: Request, res: Response) => {
   }
 };
 
+// Delete a permission by its ID
 export const deletePermission = async (req: Request, res: Response) => {
   try {
     const id = parseInt(req.params.id, 10);

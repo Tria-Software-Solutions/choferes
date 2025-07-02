@@ -14,6 +14,7 @@ import { PAGE_TITLE, DASHBOARD } from "../../constants/constants";
 import ManageAccountsIcon from "@mui/icons-material/ManageAccounts";
 import ManagePermissions from "./ManagePermissions";
 
+// Dashboard page component for managing users, roles, and permissions
 const Dashboard: React.FC = () => {
   const [expanded, setExpanded] = React.useState<string | false>("panel1");
 

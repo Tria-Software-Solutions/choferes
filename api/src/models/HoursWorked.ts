@@ -3,14 +3,15 @@ import { Employee } from "./Employee";
 import { Schedule } from "./Schedule";
 import sequelize from "../config/database";
 
+// HoursWorked model definition for Sequelize ORM
 export class HoursWorked extends Model {
-  public id!: number;
+  public id!: number; // Unique identifier for the hours worked record
 
-  public employeeId!: number;
+  public employeeId!: number; // Reference to the employee
 
-  public date!: Date;
+  public date!: Date; // Date of the worked hours
 
-  public scheduleId!: number;
+  public scheduleId!: number; // Reference to the schedule
 }
 
 HoursWorked.init(

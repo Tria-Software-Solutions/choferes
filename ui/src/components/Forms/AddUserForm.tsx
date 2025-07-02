@@ -67,6 +67,7 @@ const AddUserForm: React.FC<AddUserFormProps> = ({
   });
   const [showPassword, setShowPassword] = useState(false);
 
+  // Field validation for the form
   const validateField = (name: string, value: string) => {
     const nameRegex = /^[a-zA-ZáéíóúÁÉÍÓÚñÑüÜëË\s-]+$/;
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -122,12 +123,14 @@ const AddUserForm: React.FC<AddUserFormProps> = ({
     return "";
   };
 
+  // Handles field changes and validation
   const handleFieldChange = (field: string, value: string) => {
     setFormData((prev) => ({ ...prev, [field]: value }));
     const error = validateField(field, value);
     setErrors((prev) => ({ ...prev, [field]: error }));
   };
 
+  // Checks if the form is valid
   const isFormValid = () => {
     return (
       formData.firstName.trim() !== "" &&
@@ -145,6 +148,7 @@ const AddUserForm: React.FC<AddUserFormProps> = ({
     );
   };
 
+  // Submits the form data if valid
   const handleSubmit = () => {
     if (isFormValid()) {
       onSubmit({
@@ -158,6 +162,7 @@ const AddUserForm: React.FC<AddUserFormProps> = ({
     }
   };
 
+  // Clears the form and errors
   const handleClearForm = () => {
     setFormData({
       firstName: "",
@@ -177,6 +182,7 @@ const AddUserForm: React.FC<AddUserFormProps> = ({
     });
   };
 
+  // Toggles password visibility
   const handleTogglePassword = () => {
     setShowPassword(!showPassword);
   };

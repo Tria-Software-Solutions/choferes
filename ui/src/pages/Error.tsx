@@ -14,15 +14,18 @@ import HomeIcon from "@mui/icons-material/Home";
 import RefreshIcon from "@mui/icons-material/Refresh";
 import { ERRORS } from "../constants/constants";
 
+// Error page component for displaying 500/internal server errors
 const ErrorPage: React.FC = () => {
   const navigate = useNavigate();
   const theme = useTheme();
   const isSmallScreen = useMediaQuery(theme.breakpoints.down("sm"));
 
+  // Handler for navigating to the home page
   const handleGoHome = () => {
     navigate("/");
   };
 
+  // Handler for refreshing the page
   const handleRefresh = () => {
     window.location.reload();
   };

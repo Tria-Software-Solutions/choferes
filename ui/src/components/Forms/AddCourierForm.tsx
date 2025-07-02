@@ -57,6 +57,8 @@ const AddCourierForm: React.FC<AddCourierFormProps> = ({
     status: "",
   });
 
+  // Main hook for the courier form
+  // Validación de campos del formulario
   const validateField = (name: string, value: string | number) => {
     if (name === "driver") {
       if (!value || (typeof value === "string" && !value.trim())) {
@@ -110,12 +112,14 @@ const AddCourierForm: React.FC<AddCourierFormProps> = ({
     return "";
   };
 
+  // Handles field changes and validation
   const handleFieldChange = (field: string, value: string | number) => {
     setFormData((prev) => ({ ...prev, [field]: value }));
     const error = validateField(field, value);
     setErrors((prev) => ({ ...prev, [field]: error }));
   };
 
+  // Checks if the form is valid
   const isFormValid = () => {
     return (
       formData.driver.trim() !== "" &&
@@ -131,6 +135,7 @@ const AddCourierForm: React.FC<AddCourierFormProps> = ({
     );
   };
 
+  // Submits the form data if valid
   const handleSubmit = () => {
     if (isFormValid()) {
       onSubmit({
@@ -143,6 +148,7 @@ const AddCourierForm: React.FC<AddCourierFormProps> = ({
     }
   };
 
+  // Clears the form and errors
   const handleClearForm = () => {
     setFormData({
       driver: "",

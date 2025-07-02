@@ -60,6 +60,29 @@ import PasswordIcon from "@mui/icons-material/Password";
 import CheckCircleOutlineIcon from "@mui/icons-material/CheckCircleOutline";
 import BlockIcon from "@mui/icons-material/Block";
 
+// EditableTable is a generic, highly-configurable table component for displaying and editing tabular data.
+// Supports inline editing, validation, pagination, sorting, custom renderers, and permission-based actions.
+// Props:
+// - data: array of row objects
+// - columns: array of column keys to display
+// - groupByDate: optional date to group rows
+// - editRowId: id of the row currently being edited
+// - editFields: current values for the editable fields
+// - setEditField: function to update a field value
+// - handleEdit, handleCancel, handleUpdate: handlers for edit actions
+// - handleOpenDeleteDialog, handleOpenStatusDialog: handlers for row actions
+// - handlePasswordModal: function to render a password modal
+// - getRowId: function to get a row's unique id
+// - totalCount, page, rowsPerPage, setPage, setRowsPerPage: pagination controls
+// - renderColumnValue: custom renderer for cell values
+// - validateField: function to validate a field
+// - isSaveDisabled: disables save button if true
+// - noActions: disables action buttons if true
+// - userPermissions: array of user permissions
+// - isExpanded: whether rows are expanded by default
+//
+// The table supports responsive design, Redux integration, and custom logic for different data types.
+
 type EditableTableProps<T> = {
   data: T[];
   columns: (keyof T)[];
@@ -1122,7 +1145,7 @@ const EditableTable = <T extends object>({
         ActionsComponent={PaginationActions}
       />
 
-      {/* Modal de cambio de contraseña */}
+      {/* Password change modal */}
       {passwordUserId !== null && handlePasswordModal && (
         <Dialog
           open={passwordModalOpen}

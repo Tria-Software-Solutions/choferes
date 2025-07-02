@@ -37,6 +37,7 @@ import EmailOutlinedIcon from "@mui/icons-material/EmailOutlined";
 import AccountCircleOutlinedIcon from "@mui/icons-material/AccountCircleOutlined";
 import InfoOutlinedIcon from "@mui/icons-material/InfoOutlined";
 
+// Settings page component for user profile and password management
 const Settings: React.FC = () => {
   const dispatch = useDispatch<AppDispatch>();
   const { currentUser, setUser } = useAuthContext();
@@ -67,6 +68,7 @@ const Settings: React.FC = () => {
     dispatch(fetchUsers());
   }, [dispatch]);
 
+  // Validates individual profile fields
   const validateField = useCallback((name: string, value: string) => {
     switch (name) {
       case "firstName":
@@ -128,6 +130,7 @@ const Settings: React.FC = () => {
     return users.find((user) => user.email === email);
   };
 
+  // Handles email field change and checks for duplicates
   const handleEmailChange = async (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
   ) => {
@@ -148,6 +151,7 @@ const Settings: React.FC = () => {
     return users.find((user) => user.username === username);
   };
 
+  // Handles username field change and checks for duplicates
   const handleUsernameChange = async (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
   ) => {
@@ -162,6 +166,7 @@ const Settings: React.FC = () => {
     }
   };
 
+  // Handles saving profile changes
   const handleSaveChanges = async () => {
     try {
       const updatedUser: Partial<User> = {
@@ -187,6 +192,7 @@ const Settings: React.FC = () => {
     }
   };
 
+  // Handles new password field change
   const handleNewPassword = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
   ) => {
@@ -196,6 +202,7 @@ const Settings: React.FC = () => {
     });
   };
 
+  // Handles confirm new password field change
   const handleConfirmNewPassword = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
   ) => {
@@ -205,14 +212,17 @@ const Settings: React.FC = () => {
     });
   };
 
+  // Handles toggling new password visibility
   const handleToggleNewPassword = () => {
     setShowNewPassword((prev) => !prev);
   };
 
+  // Handles toggling confirm new password visibility
   const handleToggleConfirmNewPassword = () => {
     setShowConfirmNewPassword((prev) => !prev);
   };
 
+  // Handles password change form submission
   const handleChangePassword = async (e: React.FormEvent) => {
     e.preventDefault();
 

@@ -17,29 +17,37 @@ interface AuthContextType {
   logout: () => void;
 }
 
+// AuthContext provides authentication state and logic for the application.
+// Includes access/refresh tokens, current user, user permissions, and login/logout/setUser functions.
+// Use useAuthContext() to access the context in child components.
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
+  // State for access token, initialized from cookies
   const [accessToken, setAccessToken] = useState(() => {
     const storedAccessToken = Cookies.get("accessToken");
     return storedAccessToken ? storedAccessToken : null;
   });
 
+  // State for refresh token, initialized from cookies
   const [refreshToken, setRefreshToken] = useState(() => {
     const storedRefreshToken = Cookies.get("refreshToken");
     return storedRefreshToken ? storedRefreshToken : null;
   });
 
+  // State for current user, initialized from sessionStorage
   const [currentUser, setCurrentUser] = useState(() => {
     const storedUser = sessionStorage.getItem("currentUser");
     return storedUser ? JSON.parse(storedUser) : null;
   });
 
+  // State for user permissions, initialized from sessionStorage
   const [userPermissions, setUserPermissions] = useState(() => {
     const storedUserPermissions = sessionStorage.getItem("userPermissions");
     return storedUserPermissions ? JSON.parse(storedUserPermissions) : [];
   });
 
+  // Handles login: sets tokens, user, and permissions in state, cookies, and sessionStorage
   const login = (
     accessToken: string,
     refreshToken: string,
@@ -56,6 +64,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     sessionStorage.setItem("userPermissions", JSON.stringify(userPermissions));
   };
 
+  // Handles logout: clears all auth state, cookies, and sessionStorage
   const logout = () => {
     setAccessToken(null);
     setRefreshToken(null);
@@ -66,6 +75,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     sessionStorage.clear();
   };
 
+  // Updates the current user in state and sessionStorage
   const setUser = (updatedUser: User) => {
     setCurrentUser(updatedUser);
     sessionStorage.setItem("currentUser", JSON.stringify(updatedUser));
@@ -89,6 +99,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 };
 
 export const useAuthContext = () => {
+  // Custom hook to access the AuthContext
   const context = useContext(AuthContext);
   if (!context) {
     throw new Error("useAuth must be used within an AuthProvider");

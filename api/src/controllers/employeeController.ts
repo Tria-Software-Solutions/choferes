@@ -1,6 +1,7 @@
 import { Request, Response } from "express";
 import * as employeeService from "../services/employeeService";
 
+// Get all employees
 export const getEmployees = async (req: Request, res: Response) => {
   try {
     const employees = await employeeService.getEmployees();
@@ -10,6 +11,7 @@ export const getEmployees = async (req: Request, res: Response) => {
   }
 };
 
+// Get an employee by their ID
 export const getEmployeeById = async (req: Request, res: Response) => {
   try {
     const id = parseInt(req.params.id, 10);
@@ -23,6 +25,7 @@ export const getEmployeeById = async (req: Request, res: Response) => {
   }
 };
 
+// Create a new employee
 export const createEmployee = async (req: Request, res: Response) => {
   try {
     const newEmployee = await employeeService.createEmployee(req.body);
@@ -32,6 +35,7 @@ export const createEmployee = async (req: Request, res: Response) => {
   }
 };
 
+// Update an employee by their ID
 export const updateEmployee = async (req: Request, res: Response) => {
   try {
     const id = parseInt(req.params.id, 10);
@@ -45,6 +49,7 @@ export const updateEmployee = async (req: Request, res: Response) => {
   }
 };
 
+// Delete an employee by their ID
 export const deleteEmployee = async (req: Request, res: Response) => {
   try {
     const id = parseInt(req.params.id, 10);

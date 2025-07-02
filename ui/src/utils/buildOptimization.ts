@@ -1,3 +1,4 @@
+// Webpack optimization configuration for code splitting and chunking
 export const webpackOptimization = {
   splitChunks: {
     chunks: "all",
@@ -51,6 +52,7 @@ export const webpackOptimization = {
   ],
 };
 
+// Bundle analyzer configuration for visualizing bundle size
 export const bundleAnalyzerConfig = {
   analyzerMode: process.env.ANALYZE === "true" ? "server" : "disabled",
   analyzerHost: "localhost",
@@ -64,6 +66,7 @@ export const bundleAnalyzerConfig = {
   logLevel: "info",
 };
 
+// Service worker configuration for caching strategies
 export const serviceWorkerConfig = {
   cacheName: "choferes-cache-v1",
   urlsToCache: [
@@ -91,6 +94,7 @@ export const serviceWorkerConfig = {
   },
 };
 
+// Compression configuration for static assets
 export const compressionConfig = {
   algorithm: "gzip",
   test: /\.(js|css|html|svg|json)$/,
@@ -98,6 +102,7 @@ export const compressionConfig = {
   minRatio: 0.8,
 };
 
+// Image optimization configuration for various formats
 export const imageOptimizationConfig = {
   mozjpeg: {
     progressive: true,
@@ -118,23 +123,27 @@ export const imageOptimizationConfig = {
   },
 };
 
+// List of critical resources to preload or cache
 export const criticalResources = [
   "/static/js/bundle.js",
   "/static/css/main.css",
   "/manifest.json",
 ];
 
+// Configuration for lazy loading and critical routes
 export const lazyRouteConfig = {
   lazyRoutes: ["/dashboard", "/employees", "/vehicles", "/schedules", "/roles"],
   criticalRoutes: ["/", "/login", "/register"],
 };
 
+// Font optimization configuration for preloading and display
 export const fontOptimizationConfig = {
   preloadFonts: ["Roboto", "Material Icons"],
   fontDisplay: "swap",
   fontPreload: true,
 };
 
+// PWA (Progressive Web App) manifest configuration
 export const pwaConfig = {
   name: "Choferes de Alquiler CR",
   short_name: "Choferes",
@@ -157,6 +166,7 @@ export const pwaConfig = {
   ],
 };
 
+// Performance monitoring configuration for web vitals
 export const performanceMonitoringConfig = {
   metrics: [
     "First Contentful Paint (FCP)",
@@ -166,14 +176,14 @@ export const performanceMonitoringConfig = {
     "Time to Interactive (TTI)",
   ],
   thresholds: {
-    fcp: 2000, // 2 segundos
-    lcp: 2500, // 2.5 segundos
+    fcp: 2000, // 2 seconds
+    lcp: 2500, // 2.5 seconds
     fid: 100, // 100ms
     cls: 0.1, // 0.1
-    tti: 3800, // 3.8 segundos
+    tti: 3800, // 3.8 seconds
   },
   reporting: {
     endpoint: process.env.REACT_APP_PERFORMANCE_ENDPOINT,
-    sampleRate: 0.1, // 10% de las sesiones
+    sampleRate: 0.1, // 10% of sessions
   },
 };

@@ -3,6 +3,13 @@ import { ArrowBack, ArrowForward } from "@mui/icons-material";
 import React from "react";
 import { PAGINATION } from "../../../constants/constants";
 
+// PaginationActions component provides custom pagination controls for tables, including page navigation and item range display.
+// Props:
+// - count: total number of items
+// - page: current page index
+// - rowsPerPage: number of items per page
+// - onPageChange: handler for page changes
+
 interface PaginationActionsProps {
   count: number;
   page: number;
@@ -23,7 +30,7 @@ const PaginationActions: React.FC<PaginationActionsProps> = ({
   const endIndex = Math.min((page + 1) * rowsPerPage, count);
 
   const theme = useTheme();
-  const isSmallScreen = useMediaQuery(theme.breakpoints.down("sm"));
+  const isSmallScreen = useMediaQuery(theme.breakpoints.down("sm")); // Responsive check for small screens
 
   return (
     <div

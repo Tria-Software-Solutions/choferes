@@ -29,6 +29,7 @@ import EmailOutlinedIcon from "@mui/icons-material/EmailOutlined";
 import LockOutlinedIcon from "@mui/icons-material/LockOutlined";
 import logo from "../../assets/images/logo.png";
 
+// Register page component for user sign up
 const Register = () => {
   const dispatch = useDispatch<AppDispatch>();
   const { users } = useSelector((state: RootState) => state.users);
@@ -52,6 +53,7 @@ const Register = () => {
     dispatch(fetchUsers());
   }, [dispatch]);
 
+  // Validates the registration form fields
   const validateFields = useCallback(async () => {
     const nameRegex = /^[a-zA-ZáéíóúÁÉÍÓÚüÜñÑ.\s]+$/;
     const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
@@ -95,6 +97,7 @@ const Register = () => {
     return Object.keys(newErrors).length === 0;
   }, [addFields]);
 
+  // Handles the registration form submission
   const handleRegister = async (e: React.FormEvent) => {
     e.preventDefault();
 
@@ -134,6 +137,7 @@ const Register = () => {
     }
   };
 
+  // Checks if the email already exists
   const checkEmailExistence = useCallback(
     (email: string): User | undefined => {
       return users.find((user) => user.email === email);
@@ -141,6 +145,7 @@ const Register = () => {
     [users],
   );
 
+  // Handles email field blur event
   const handleEmailChange = (event: React.FocusEvent<HTMLInputElement>) => {
     const value = event.target.value.trim();
     if (!value) return;
@@ -156,6 +161,7 @@ const Register = () => {
     }
   };
 
+  // Checks if the username already exists
   const checkUsernameExistence = useCallback(
     (username: string): User | undefined => {
       return users.find((user) => user.username === username);
@@ -163,6 +169,7 @@ const Register = () => {
     [users],
   );
 
+  // Handles username field blur event
   const handleUsernameChange = (event: React.FocusEvent<HTMLInputElement>) => {
     const value = event.target.value.trim();
     if (!value) return;
@@ -178,10 +185,12 @@ const Register = () => {
     }
   };
 
+  // Toggles the password visibility
   const handleTogglePassword = () => {
     setShowPassword((prev) => !prev);
   };
 
+  // Handles changes in form fields and clears errors
   const handleFieldChange = (field: string, value: string) => {
     setAddFields({ ...addFields, [field]: value });
     // Clear field error when user starts typing

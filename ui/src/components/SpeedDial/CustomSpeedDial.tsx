@@ -14,6 +14,12 @@ interface CustomSpeedDialProps {
   direction?: "up" | "down" | "left" | "right";
 }
 
+// CustomSpeedDial component renders a Material-UI SpeedDial with customizable actions and icons.
+// Props:
+// - actions: array of action objects with label, icon, and onClick handler
+// - mainIcon: icon for the closed state
+// - openIcon: icon for the open state
+// - direction: direction in which actions open
 const CustomSpeedDial: React.FC<CustomSpeedDialProps> = ({
   actions,
   mainIcon = <SpeedDialIcon />,

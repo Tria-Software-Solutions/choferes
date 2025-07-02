@@ -41,6 +41,7 @@ import DeleteOutlineIcon from "@mui/icons-material/DeleteOutline";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faFileExcel, faFilePdf } from "@fortawesome/free-solid-svg-icons";
 
+// Employees management page component
 const EmployeesPage: React.FC = () => {
   const dispatch = useDispatch<AppDispatch>();
   const { userPermissions } = useAuthContext();
@@ -65,10 +66,12 @@ const EmployeesPage: React.FC = () => {
   const theme = useTheme();
   const isSmallScreen = useMediaQuery(theme.breakpoints.down("sm"));
 
+  // Fetch employees on mount
   useEffect(() => {
     dispatch(fetchEmployees());
   }, [dispatch]);
 
+  // Adjust rows per page based on screen size
   useEffect(() => {
     if (isSmallScreen) {
       setRowsPerPage(5);
@@ -77,6 +80,7 @@ const EmployeesPage: React.FC = () => {
     }
   }, [isSmallScreen]);
 
+  // Filter employees by search input
   useEffect(() => {
     const normalizeString = (str: string) =>
       str.normalize("NFD").replace(/[\u0300-\u036f]/g, "");
@@ -91,6 +95,7 @@ const EmployeesPage: React.FC = () => {
     setTotalCount(filteredEmployees.length);
   }, [filter, employees, filteredEmployees.length]);
 
+  // Validate edit fields for employee
   const validateFields = useCallback((fields: typeof editFields) => {
     const regex = {
       text: /^[a-zA-ZáéíóúÁÉÍÓÚñÑüÜëË\s-]+$/,
@@ -101,14 +106,17 @@ const EmployeesPage: React.FC = () => {
     );
   }, []);
 
+  // Update edit form validity when fields change
   useEffect(() => {
     if (editRowId !== null) setIsEditFormValid(validateFields(editFields));
   }, [editFields, editRowId, validateFields]);
 
+  // Handle search bar input change
   const handleFilterChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setFilter(e.target.value);
   };
 
+  // Handle creation of a new employee
   const handleCreate = async (newEmployee: {
     firstName: string;
     lastName: string;
@@ -129,6 +137,7 @@ const EmployeesPage: React.FC = () => {
     }
   };
 
+  // Open/close add employee modal
   const handleOpenAddModal = () => {
     setOpenAddModal(true);
   };
@@ -137,6 +146,7 @@ const EmployeesPage: React.FC = () => {
     setOpenAddModal(false);
   };
 
+  // Handle editing of an employee
   const handleEdit = (employee: Employee) => {
     setEditRowId(employee.id);
     setEditFields({
@@ -145,10 +155,12 @@ const EmployeesPage: React.FC = () => {
     });
   };
 
+  // Cancel editing
   const handleCancel = () => {
     setEditRowId(null);
   };
 
+  // Handle update of an employee
   const handleUpdate = async (id: number) => {
     try {
       const updatedEmployee = {
@@ -164,6 +176,7 @@ const EmployeesPage: React.FC = () => {
     }
   };
 
+  // Open/close delete confirmation dialog
   const handleOpenDeleteDialog = (id: number) => {
     setOpenDeleteDialog(true);
     setEmployeeToDelete(id);
@@ -174,6 +187,7 @@ const EmployeesPage: React.FC = () => {
     setEmployeeToDelete(null);
   };
 
+  // Handle deletion of an employee
   const handleDelete = async () => {
     if (!employeeToDelete) return;
 
@@ -190,6 +204,7 @@ const EmployeesPage: React.FC = () => {
     }
   };
 
+  // Memoize export options based on permissions
   const exportOptions = useMemo(() => {
     const excelOption = userPermissions.includes(
       PERMISSIONS.EXPORT_EXCEL_EMPLOYEES,

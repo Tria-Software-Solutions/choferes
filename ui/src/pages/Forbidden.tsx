@@ -14,11 +14,13 @@ import HomeIcon from "@mui/icons-material/Home";
 import SecurityIcon from "@mui/icons-material/Security";
 import { ERRORS } from "../constants/constants";
 
+// Forbidden page component for displaying 403/unauthorized errors
 const Forbidden: React.FC = () => {
   const navigate = useNavigate();
   const theme = useTheme();
   const isSmallScreen = useMediaQuery(theme.breakpoints.down("sm"));
 
+  // Handler for navigating to the home page
   const handleGoHome = () => {
     navigate("/");
   };

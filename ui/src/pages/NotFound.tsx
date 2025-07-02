@@ -14,11 +14,13 @@ import HomeIcon from "@mui/icons-material/Home";
 import ExploreIcon from "@mui/icons-material/Explore";
 import { ERRORS } from "../constants/constants";
 
+// NotFound page component for displaying 404 errors
 const NotFound: React.FC = () => {
   const navigate = useNavigate();
   const theme = useTheme();
   const isSmallScreen = useMediaQuery(theme.breakpoints.down("sm"));
 
+  // Handler for navigating to the home page
   const handleGoHome = () => {
     navigate("/");
   };

@@ -1,6 +1,7 @@
 import { Request, Response } from "express";
 import * as biweeklySummaryService from "../services/biweeklySummaryService";
 
+// Get all biweekly summaries
 export const getBiweeklySummaries = async (req: Request, res: Response) => {
   try {
     const summaries = await biweeklySummaryService.getBiweeklySummaries();
@@ -10,6 +11,7 @@ export const getBiweeklySummaries = async (req: Request, res: Response) => {
   }
 };
 
+// Get the current biweekly summary for a specific employee and biweek
 export const getCurrentBiweeklySummary = async (req: Request, res: Response) => {
   try {
     const summary = await biweeklySummaryService.getCurrentBiweeklySummary(
@@ -27,6 +29,7 @@ export const getCurrentBiweeklySummary = async (req: Request, res: Response) => 
   }
 };
 
+// Create a new biweekly summary
 export const createBiweeklySummary = async (req: Request, res: Response) => {
   try {
     const newBiweeklySummary = await biweeklySummaryService.createBiweeklySummary(req.body);
@@ -36,6 +39,7 @@ export const createBiweeklySummary = async (req: Request, res: Response) => {
   }
 };
 
+// Update a biweekly summary by its ID
 export const updateBiweeklySummary = async (req: Request, res: Response) => {
   try {
     const id = parseInt(req.params.id, 10);
@@ -49,6 +53,7 @@ export const updateBiweeklySummary = async (req: Request, res: Response) => {
   }
 };
 
+// Delete a biweekly summary by its ID
 export const deleteBiweeklySummary = async (req: Request, res: Response) => {
   try {
     const id = parseInt(req.params.id, 10);

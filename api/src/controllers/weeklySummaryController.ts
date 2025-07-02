@@ -1,6 +1,7 @@
 import { Request, Response } from "express";
 import * as weeklySummaryService from "../services/weeklySummaryService";
 
+// Get all weekly summaries
 export const getWeeklySummaries = async (req: Request, res: Response) => {
   try {
     const summaries = await weeklySummaryService.getWeeklySummaries();
@@ -10,6 +11,7 @@ export const getWeeklySummaries = async (req: Request, res: Response) => {
   }
 };
 
+// Create a new weekly summary
 export const createWeeklySummary = async (req: Request, res: Response) => {
   try {
     const newWeeklySummary = await weeklySummaryService.createWeeklySummary(req.body);
@@ -19,6 +21,7 @@ export const createWeeklySummary = async (req: Request, res: Response) => {
   }
 };
 
+// Get the current weekly summary for a specific employee and week
 export const getCurrentWeeklySummary = async (req: Request, res: Response) => {
   try {
     const summary = await weeklySummaryService.getCurrentWeeklySummary(
@@ -36,6 +39,7 @@ export const getCurrentWeeklySummary = async (req: Request, res: Response) => {
   }
 };
 
+// Check if an employee has worked in the current weekly summary
 export const hasWorkedCurrenWeeklySummary = async (req: Request, res: Response) => {
   try {
     const hasWorked = await weeklySummaryService.hasWorkedCurrenWeeklySummary(
@@ -50,6 +54,7 @@ export const hasWorkedCurrenWeeklySummary = async (req: Request, res: Response) 
   }
 };
 
+// Update a weekly summary by its ID
 export const updateWeeklySummary = async (req: Request, res: Response) => {
   try {
     const id = parseInt(req.params.id, 10);
@@ -63,6 +68,7 @@ export const updateWeeklySummary = async (req: Request, res: Response) => {
   }
 };
 
+// Delete a weekly summary by its ID
 export const deleteWeeklySummary = async (req: Request, res: Response) => {
   try {
     const id = parseInt(req.params.id, 10);

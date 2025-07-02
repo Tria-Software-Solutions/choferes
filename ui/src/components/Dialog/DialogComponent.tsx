@@ -34,6 +34,24 @@ interface ConfirmationDialogProps {
   header?: React.ReactNode;
 }
 
+// DialogComponent provides a customizable dialog for confirmations, warnings, info, and success messages.
+// Props:
+// - open: whether the dialog is open
+// - onClose: function to close the dialog
+// - onConfirm: function to confirm the action
+// - title: dialog title
+// - message: dialog message
+// - type: dialog type (delete, warning, info, success)
+// - confirmText: custom confirm button text
+// - cancelText: custom cancel button text
+// - loading: whether the confirm button is loading
+// - children: custom content
+// - hideActions: whether to hide action buttons
+// - icon: icon to display
+// - paperSx: custom Paper styles
+// - subtitle: subtitle text
+// - actions: custom actions
+// - header: custom header
 const DialogComponent: React.FC<ConfirmationDialogProps> = ({
   open,
   onClose,
@@ -55,6 +73,7 @@ const DialogComponent: React.FC<ConfirmationDialogProps> = ({
   const theme = useTheme();
   const isSmallScreen = useMediaQuery(theme.breakpoints.down("sm"));
 
+  // Returns the color of the confirm button based on dialog type
   const getConfirmButtonColor = () => {
     switch (type) {
       case "delete":
@@ -68,6 +87,7 @@ const DialogComponent: React.FC<ConfirmationDialogProps> = ({
     }
   };
 
+  // Returns the default confirm button text based on dialog type
   const getDefaultConfirmText = () => {
     switch (type) {
       case "delete":

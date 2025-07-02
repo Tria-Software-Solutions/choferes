@@ -39,6 +39,7 @@ import AddRoundedIcon from "@mui/icons-material/AddRounded";
 import { DASHBOARD_USERS } from "../../constants/constants";
 import { NOTIFICATIONS } from "../../constants/constants";
 
+// ManageUsers page component for user management in the dashboard
 const ManageUsers: React.FC<{ isExpanded?: boolean }> = ({
   isExpanded = true,
 }) => {
@@ -79,6 +80,7 @@ const ManageUsers: React.FC<{ isExpanded?: boolean }> = ({
   const [loadError, setLoadError] = useState<string | null>(null);
   const theme = useTheme();
 
+  // Loads users, roles, and user roles data on mount
   useEffect(() => {
     const loadData = async () => {
       try {
@@ -110,6 +112,7 @@ const ManageUsers: React.FC<{ isExpanded?: boolean }> = ({
     loadData();
   }, [dispatch, showNotification]);
 
+  // Handles errors when loading users
   useEffect(() => {
     if (usersError) {
       setLoadError(`Error al cargar usuarios: ${usersError}`);
@@ -117,6 +120,7 @@ const ManageUsers: React.FC<{ isExpanded?: boolean }> = ({
     }
   }, [usersError, showNotification]);
 
+  // Filters users based on search input and active status
   const filteredUsers = useMemo(() => {
     if (!users || users.length === 0) {
       return [];
@@ -163,6 +167,7 @@ const ManageUsers: React.FC<{ isExpanded?: boolean }> = ({
 
   const totalCount = useMemo(() => filteredUsers.length, [filteredUsers]);
 
+  // Validates user fields for add/edit forms
   const validateFields = useCallback(
     (fields: typeof editFields, isAddForm: boolean) => {
       const regex = {
@@ -188,6 +193,7 @@ const ManageUsers: React.FC<{ isExpanded?: boolean }> = ({
     [],
   );
 
+  // Validates new password fields
   const validateNewPasswordFields = useCallback(
     async (fields: typeof passwordFields) => {
       const passwordRegex =
@@ -541,9 +547,9 @@ const ManageUsers: React.FC<{ isExpanded?: boolean }> = ({
         }),
       );
       setOpenAddUserModal(false);
-      showNotification("Usuario creado exitosamente", 3000, false);
+      showNotification(NOTIFICATIONS.USER_CREATED, 3000, false);
     } catch (error) {
-      showNotification("Error al crear el usuario", 5000, false);
+      showNotification(NOTIFICATIONS.USER_CREATE_ERROR, 5000, false);
     } finally {
       setIsCreatingUser(false);
     }

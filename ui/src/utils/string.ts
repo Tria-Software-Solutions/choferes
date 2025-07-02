@@ -3,9 +3,12 @@ import { ColumnsTranslation } from "./columnsTranslation";
 import { EnglishDayOfWeek } from "./dayAbreviations";
 import { EnglishAbrevMonthOfYear } from "./monthAbreviations";
 
+// Utility functions for string translation, formatting, and mapping for UI labels and dates
+// Includes helpers for translating columns, days, months, and periods to Spanish, and for string capitalization
 export const translateColumnHeaderToSpanish = (
   column: string | number | symbol,
 ): string => {
+  // Translates a column header key to its Spanish label
   const translations: ColumnsTranslation = {
     id: "Id",
     name: "Nombre",
@@ -47,6 +50,7 @@ export const getOptionsForDay = (
   day: string,
   schedules: Schedule[],
 ): Schedule[] => {
+  // Returns all schedules that include the given day
   return schedules.filter((schedule) =>
     schedule.days.includes(day.toLowerCase()),
   );
@@ -55,6 +59,7 @@ export const getOptionsForDay = (
 export const translateDayToAbrevSpanish = (
   dayInEnglish: EnglishDayOfWeek,
 ): string => {
+  // Translates an English day of week to its Spanish abbreviation
   const translationMap: Record<EnglishDayOfWeek, string> = {
     Sunday: "Dom",
     Monday: "Lun",
@@ -69,6 +74,7 @@ export const translateDayToAbrevSpanish = (
 };
 
 export const translateDayOptionsToSpanish = (value: string): string => {
+  // Translates a lowercase English day to its full Spanish name
   const dayMap: Record<string, string> = {
     monday: "Lunes",
     tuesday: "Martes",
@@ -84,6 +90,7 @@ export const translateDayOptionsToSpanish = (value: string): string => {
 export const translateMonthToAbrevSpanish = (
   monthInEnglish: EnglishAbrevMonthOfYear,
 ): string => {
+  // Translates an abbreviated English month to its Spanish abbreviation
   const translationMap: Record<EnglishAbrevMonthOfYear, string> = {
     Jan: "Ene",
     Feb: "Feb",
@@ -103,6 +110,7 @@ export const translateMonthToAbrevSpanish = (
 };
 
 export const getMonthName = (month: number) => {
+  // Returns the full Spanish name for a month number (1-12)
   const months = [
     "Enero",
     "Febrero",
@@ -128,6 +136,7 @@ export const getMonthName = (month: number) => {
 export const translatePeriodToSpanish = (
   period: "weekly" | "biweekly" | "monthly",
 ): string => {
+  // Translates a period key to its Spanish label
   switch (period) {
     case "weekly":
       return "Semanal";
@@ -141,4 +150,5 @@ export const translatePeriodToSpanish = (
 };
 
 export const capitalizeFirstLetter = (str: string) =>
+  // Capitalizes the first letter of a string
   str.charAt(0).toUpperCase() + str.slice(1);

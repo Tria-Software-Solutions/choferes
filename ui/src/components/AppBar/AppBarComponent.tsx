@@ -42,6 +42,12 @@ interface AppBarComponentProps {
   links: Link[];
 }
 
+// AppBarComponent renders the main application bar with navigation, user menu, notifications, and branding.
+// Props:
+// - icon: optional icon to display
+// - title: app title
+// - userLinks: links for the user menu
+// - links: main navigation links
 const AppBarComponent: React.FC<AppBarComponentProps> = ({
   icon,
   title,
@@ -97,11 +103,13 @@ const AppBarComponent: React.FC<AppBarComponentProps> = ({
   };
 
   const getUserInitials = () => {
+    // Returns the initials of the current user for the avatar
     if (!currentUser) return "U";
     return `${currentUser.firstName.charAt(0)}${currentUser.lastName.charAt(0)}`.toUpperCase();
   };
 
   const isActivePage = (path: string) => {
+    // Checks if the given path matches the current location
     return location.pathname === path;
   };
 
@@ -122,7 +130,7 @@ const AppBarComponent: React.FC<AppBarComponentProps> = ({
           justifyContent: "space-between",
         }}
       >
-        {/* Logo y Título */}
+        {/* Logo and Title */}
         <Box
           sx={{
             display: "flex",
@@ -171,7 +179,7 @@ const AppBarComponent: React.FC<AppBarComponentProps> = ({
           </Typography>
         </Box>
 
-        {/* Centro - Navegación Principal (solo desktop) */}
+        {/* Center - Main Navigation (desktop only) */}
         {!isMobile && (
           <Box
             sx={{

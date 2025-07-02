@@ -14,6 +14,7 @@ import SearchBar from "../../components/SearchBar/SearchBar";
 import VpnKeyOutlinedIcon from "@mui/icons-material/VpnKeyOutlined";
 import { DASHBOARD_PERMISSIONS } from "../../constants/constants";
 
+// ManagePermissions page component for permission management in the dashboard
 const ManagePermissions: React.FC = () => {
   const dispatch = useDispatch<AppDispatch>();
   const { permissions, isLoadingPermissions } = useSelector(
@@ -24,10 +25,12 @@ const ManagePermissions: React.FC = () => {
   );
   const [filter, setFilter] = useState("");
 
+  // Loads permissions data on mount
   useEffect(() => {
     dispatch(fetchPermissions());
   }, [dispatch]);
 
+  // Filters permissions based on search input
   useEffect(() => {
     const normalizeString = (str: string) =>
       str.normalize("NFD").replace(/[\u0300-\u036f]/g, "");
@@ -41,6 +44,7 @@ const ManagePermissions: React.FC = () => {
     );
   }, [filter, permissions, filteredPermissions.length]);
 
+  // Handles search bar input change
   const handleFilterChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setFilter(e.target.value);
   };

@@ -1,26 +1,27 @@
 import { Model, DataTypes } from "sequelize";
 import sequelize from "../config/database";
 
+// Vehicle model definition for Sequelize ORM
 export class Vehicle extends Model {
-  public id!: number;
+  public id!: number; // Unique identifier for the vehicle
 
-  public ticket!: string;
+  public ticket!: string; // Ticket number for the vehicle
 
-  public licensePlate!: string;
+  public licensePlate!: string; // License plate of the vehicle
 
-  public brand!: string;
+  public brand!: string; // Brand of the vehicle
 
-  public color!: string;
+  public color!: string; // Color of the vehicle
 
-  public parkingLot!: string;
+  public parkingLot!: string; // Parking lot identifier
 
-  public notes!: string;
+  public notes!: string; // Optional notes about the vehicle
 
-  public parkingDate!: Date;
+  public parkingDate!: Date; // Date when the vehicle was parked
 
-  public createdAt!: Date;
+  public createdAt!: Date; // Record creation timestamp
 
-  public updatedAt!: Date;
+  public updatedAt!: Date; // Record update timestamp
 }
 
 Vehicle.init(

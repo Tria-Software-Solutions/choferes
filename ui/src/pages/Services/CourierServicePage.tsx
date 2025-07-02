@@ -51,6 +51,7 @@ import AddRoundedIcon from "@mui/icons-material/AddRounded";
 import DeleteOutlineIcon from "@mui/icons-material/DeleteOutline";
 import { NOTIFICATIONS } from "../../constants/constants";
 
+// CourierServicePage component for managing courier services
 const CourierServicePage: React.FC = () => {
   const { userPermissions } = useAuthContext();
   const [selectedDate, setSelectedDate] = useState<Date>(new Date());
@@ -138,10 +139,12 @@ const CourierServicePage: React.FC = () => {
   const theme = useTheme();
   const isSmallScreen = useMediaQuery(theme.breakpoints.down("sm"));
 
+  // Updates total count when filtered couriers change
   useEffect(() => {
     setTotalCount(filteredCouriers.length);
   }, [filteredCouriers]);
 
+  // Adjusts rows per page based on screen size
   useEffect(() => {
     if (isSmallScreen) {
       setRowsPerPage(5);
@@ -150,10 +153,12 @@ const CourierServicePage: React.FC = () => {
     }
   }, [isSmallScreen]);
 
+  // Resets page when selected date changes
   useEffect(() => {
     setPage(0);
   }, [selectedDate]);
 
+  // Validates courier fields for add/edit forms
   const validateFields = useCallback((fields: typeof editFields) => {
     const regex = {
       number: /^\d+$/,
@@ -169,10 +174,12 @@ const CourierServicePage: React.FC = () => {
     );
   }, []);
 
+  // Updates edit form validity when fields change
   useEffect(() => {
     if (editRowId !== null) setIsEditFormValid(validateFields(editFields));
   }, [editFields, editRowId, validateFields]);
 
+  // Handles search bar input change
   const handleFilterChange = useCallback(
     (e: React.ChangeEvent<HTMLInputElement>) => {
       setFilter(e.target.value);
@@ -180,10 +187,12 @@ const CourierServicePage: React.FC = () => {
     [],
   );
 
+  // Handles canceling edit
   const handleCancel = () => {
     setEditRowId(null);
   };
 
+  // Handles editing a courier
   const handleEdit = (courier: Courier) => {
     setEditRowId(courier.id);
     setEditFields({
@@ -196,6 +205,7 @@ const CourierServicePage: React.FC = () => {
     });
   };
 
+  // Handles updating a courier
   const handleUpdate = async (id: number) => {
     try {
       // TODO: Implementar actualización cuando se conecte con el backend
@@ -206,6 +216,7 @@ const CourierServicePage: React.FC = () => {
     }
   };
 
+  // Handles opening/closing delete dialog
   const handleOpenDeleteDialog = (id: number) => {
     setCourierToDelete(id);
     setOpenDeleteDialog(true);
@@ -216,6 +227,7 @@ const CourierServicePage: React.FC = () => {
     setCourierToDelete(null);
   };
 
+  // Handles deleting a courier
   const handleDelete = async () => {
     if (!courierToDelete) return;
 
@@ -242,6 +254,7 @@ const CourierServicePage: React.FC = () => {
     }
   };
 
+  // Handles navigation to next/previous/current date
   const handleDateChange = useCallback((newDate: Date | null) => {
     if (newDate) setSelectedDate(newDate);
   }, []);
@@ -339,7 +352,7 @@ const CourierServicePage: React.FC = () => {
             </Typography>
           </Box>
         </Box>
-        {/* Temporalmente mostrar botón de exportación sin verificar permisos */}
+        {/* Temporarily show export button without permission check */}
         <Box sx={{ minHeight: 65 }}>
           {filteredWeekCouriers.length > 0 && (
             <CustomSpeedDial

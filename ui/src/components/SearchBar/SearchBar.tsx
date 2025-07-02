@@ -13,6 +13,14 @@ interface SearchBarProps {
   onSearch?: () => void;
 }
 
+// SearchBar component provides a styled input for searching with clear and search icons.
+// Props:
+// - value: current input value
+// - onChange: handler for input changes
+// - placeholder: placeholder text
+// - fullWidth: whether the input should take full width
+// - sx: custom styles
+// - onSearch: optional search handler
 const SearchBar: React.FC<SearchBarProps> = ({
   placeholder = SEARCH_BAR.PLACEHOLDER,
   value,
@@ -23,6 +31,7 @@ const SearchBar: React.FC<SearchBarProps> = ({
   const theme = useTheme();
 
   const handleClear = () => {
+    // Clear the input by setting its value to an empty string
     onChange({ target: { value: "" } } as React.ChangeEvent<HTMLInputElement>);
   };
 

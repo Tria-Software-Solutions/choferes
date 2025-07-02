@@ -4,6 +4,10 @@ import * as RolePermissionService from "../../services/rolePermissionService";
 import { Role } from "../../models/Role";
 import { RootState } from "../store";
 
+// rolesSlice manages the state and async logic for role data
+// Includes fetching, creating, updating, and deleting roles, as well as role permissions
+// State: roles array, total count, loading state, error
+
 interface RolesState {
   roles: Role[];
   totalCountRoles: number;
@@ -18,6 +22,7 @@ const initialState: RolesState = {
   error: null,
 };
 
+// Fetch all roles from the API
 export const fetchRoles = createAsyncThunk(
   "roles/fetchRoles",
   async (_, { rejectWithValue }) => {
@@ -36,6 +41,7 @@ export const fetchRoles = createAsyncThunk(
   },
 );
 
+// Fetch a role by its ID from the API
 export const fetchRoleById = createAsyncThunk(
   "roles/fetchRoleById",
   async (id: number, { rejectWithValue }) => {
@@ -48,6 +54,7 @@ export const fetchRoleById = createAsyncThunk(
   },
 );
 
+// Fetch a role by its name from the API
 export const fetchRoleByName = createAsyncThunk(
   "roles/fetchRoleByName",
   async (name: string, { rejectWithValue }) => {
@@ -62,6 +69,7 @@ export const fetchRoleByName = createAsyncThunk(
   },
 );
 
+// Create a new role and assign permissions
 export const createRole = createAsyncThunk(
   "roles/createRole",
   async (
@@ -91,6 +99,7 @@ export const createRole = createAsyncThunk(
   },
 );
 
+// Update a role and its permissions
 export const updateRole = createAsyncThunk(
   "roles/updateRole",
   async (
@@ -121,6 +130,7 @@ export const updateRole = createAsyncThunk(
   },
 );
 
+// Delete a role by its ID
 export const deleteRole = createAsyncThunk(
   "roles/deleteRole",
   async (id: number, { rejectWithValue }) => {
@@ -138,6 +148,7 @@ const rolesSlice = createSlice({
   initialState,
   reducers: {},
   extraReducers: (builder) => {
+    // Handle async actions for roles
     builder
       .addCase(fetchRoles.pending, (state) => {
         state.isLoadingRoles = true;
@@ -156,6 +167,7 @@ const rolesSlice = createSlice({
       .addCase(
         fetchRoleById.fulfilled,
         (state, action: PayloadAction<Role>) => {
+          // Update a single role in the state by ID
           const updatedRoles = state.roles.map((role) =>
             role.id === action.payload.id ? action.payload : role,
           );
@@ -165,10 +177,12 @@ const rolesSlice = createSlice({
       .addCase(
         fetchRoleByName.fulfilled,
         (state, action: PayloadAction<Role>) => {
+          // Replace roles array with the fetched role by name
           state.roles = [action.payload];
         },
       )
       .addCase(createRole.fulfilled, (state, action: PayloadAction<Role>) => {
+        // Add the newly created role to the state
         state.roles.push(action.payload);
         state.totalCountRoles += 1;
       })
@@ -182,23 +196,29 @@ const rolesSlice = createSlice({
             newPermissionIds?: number[];
           }>,
         ) => {
+          // Update a role in the state after editing
           state.roles = state.roles.map((role) =>
             role.id === action.payload.id ? action.payload.refreshedRole : role,
           );
         },
       )
       .addCase(deleteRole.fulfilled, (state, action: PayloadAction<number>) => {
+        // Remove a role from the state by ID
         state.roles = state.roles.filter((role) => role.id !== action.payload);
         state.totalCountRoles -= 1;
       });
   },
 });
 
+// Selector to get all roles from the state
 export const selectRoles = (state: RootState) => state.roles.roles;
+// Selector to get the total count of roles
 export const selectTotalCountRoles = (state: RootState) =>
   state.roles.totalCountRoles;
+// Selector to get the loading state for roles
 export const selectIsLoadingRoles = (state: RootState) =>
   state.roles.isLoadingRoles;
+// Selector to get the error state for roles
 export const selectRolesError = (state: RootState) => state.roles.error;
 
 export default rolesSlice.reducer;

@@ -1,6 +1,7 @@
 import { Request, Response } from "express";
 import * as monthlySummaryService from "../services/monthlySummaryService";
 
+// Get all monthly summaries
 export const getMonthlySummaries = async (req: Request, res: Response) => {
   try {
     const summaries = await monthlySummaryService.getMonthlySummaries();
@@ -10,6 +11,7 @@ export const getMonthlySummaries = async (req: Request, res: Response) => {
   }
 };
 
+// Get the current monthly summary for a specific employee and month
 export const getCurrentMonthlySummary = async (req: Request, res: Response) => {
   try {
     const summary = await monthlySummaryService.getCurrentMonthlySummary(
@@ -26,6 +28,7 @@ export const getCurrentMonthlySummary = async (req: Request, res: Response) => {
   }
 };
 
+// Create a new monthly summary
 export const createMonthlySummary = async (req: Request, res: Response) => {
   try {
     const newMonthlySummary = await monthlySummaryService.createMonthlySummary(req.body);
@@ -35,6 +38,7 @@ export const createMonthlySummary = async (req: Request, res: Response) => {
   }
 };
 
+// Update a monthly summary by its ID
 export const updateMonthlySummary = async (req: Request, res: Response) => {
   try {
     const id = parseInt(req.params.id, 10);
@@ -48,6 +52,7 @@ export const updateMonthlySummary = async (req: Request, res: Response) => {
   }
 };
 
+// Delete a monthly summary by its ID
 export const deleteMonthlySummary = async (req: Request, res: Response) => {
   try {
     const id = parseInt(req.params.id, 10);

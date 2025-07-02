@@ -66,6 +66,23 @@ import MoreTimeIcon from "@mui/icons-material/MoreTime";
 import CloseRoundedIcon from "@mui/icons-material/CloseRounded";
 import CalendarMonthOutlinedIcon from "@mui/icons-material/CalendarMonthOutlined";
 
+// SelectorTable component displays and manages employee schedules, hours worked, and summary data for different periods (weekly, biweekly, monthly).
+// Props:
+// - filteredEmployees: list of employees to display
+// - schedules: list of schedules for employees
+// - hoursWorked: list of hours worked records
+// - weeklySummaries, biweeklySummaries, monthlySummaries: summary data for each period
+// - weekOffset, weekNumber, biweekNumber, month, year: period info
+// - handleChange: handler for schedule changes
+// - handleAdjustTime: handler for manual time adjustments
+// - permissions: user permissions for actions
+// - onInfoClick: handler for info button click
+//
+// The table supports sorting, pagination, period selection, and responsive design.
+// Main logic includes calculating total hours, overtime, and rendering period-based data.
+
+// SelectorTable component for displaying and managing employee schedules and hours
+// Props: filteredEmployees, schedules, hoursWorked, summaries, period info, handlers, permissions
 interface SelectorTableProps {
   filteredEmployees: Employee[];
   schedules: Schedule[];
@@ -123,6 +140,7 @@ const SelectorTable: React.FC<SelectorTableProps> = React.memo(
     const theme = useTheme();
     const isSmallScreen = useMediaQuery(theme.breakpoints.down("sm"));
 
+    // Adjusts rows per page based on screen size
     useEffect(() => {
       if (isSmallScreen) {
         setRowsPerPage(5);
@@ -137,6 +155,7 @@ const SelectorTable: React.FC<SelectorTableProps> = React.memo(
     );
     const multiplePeriods = getInvolvedPeriods(currentWeek);
 
+    // Memoizes the current week dates based on weekOffset
     const sortedEmployees = useMemo(() => {
       return [...filteredEmployees].sort((a, b) => {
         const nameA = `${a.firstName} ${a.lastName}`;
@@ -149,6 +168,7 @@ const SelectorTable: React.FC<SelectorTableProps> = React.memo(
     const endIndex = startIndex + rowsPerPage;
     const paginatedEmployees = sortedEmployees.slice(startIndex, endIndex);
 
+    // Calculates total hours or overtime for a single period
     const resultHoursForPeriod = (
       employee: Employee,
       period: "weekly" | "biweekly" | "monthly",
@@ -181,6 +201,7 @@ const SelectorTable: React.FC<SelectorTableProps> = React.memo(
       }
     };
 
+    // Calculates total hours or overtime for multiple periods
     const resultHoursForPeriods = (
       employee: Employee,
       period: "weekly" | "biweekly" | "monthly",

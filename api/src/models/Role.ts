@@ -2,15 +2,13 @@ import { Model, DataTypes, Association } from "sequelize";
 import sequelize from "../config/database";
 import { Permission } from "./Permission";
 
+// Role model definition for Sequelize ORM
 export class Role extends Model {
-  public id!: number;
-
-  public name!: string;
-
-  public permissions?: Permission[];
-
+  public id!: number; // Unique identifier for the role
+  public name!: string; // Name of the role
+  public permissions?: Permission[]; // Associated permissions for the role
   public static associations: {
-    permissions: Association<Role, Permission>;
+    permissions: Association<Role, Permission>; // Association with permissions
   };
 }
 

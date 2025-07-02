@@ -1,4 +1,5 @@
-// Utilidad de validación de campos de usuario
+// Utility functions and regex for validating user fields (name, email, username, password)
+// Provides validation logic for forms and user input
 
 import { FORMS } from '../constants/constants';
 
@@ -9,6 +10,7 @@ export const passwordRegex =
   /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
 
 export function validateName(value: string): string {
+  // Validates a user's name for required, format, and length
   if (!value.trim()) return FORMS.REQUIRED_FIELD;
   if (!nameRegex.test(value))
     return FORMS.NAME_LETTERS_ONLY;
@@ -18,12 +20,14 @@ export function validateName(value: string): string {
 }
 
 export function validateEmail(value: string): string {
+  // Validates a user's email for required and format
   if (!value.trim()) return FORMS.REQUIRED_FIELD;
   if (!emailRegex.test(value)) return FORMS.EMAIL_FORMAT;
   return "";
 }
 
 export function validateUsername(value: string): string {
+  // Validates a username for required and format
   if (!value.trim()) return FORMS.REQUIRED_FIELD;
   if (!usernameRegex.test(value))
     return FORMS.USERNAME_START_LETTER;
@@ -31,6 +35,7 @@ export function validateUsername(value: string): string {
 }
 
 export function validatePassword(value: string): string {
+  // Validates a password for required and complexity
   if (!value.trim()) return FORMS.REQUIRED_FIELD;
   if (!passwordRegex.test(value))
     return FORMS.PASSWORD_COMPLEXITY;
@@ -38,6 +43,7 @@ export function validatePassword(value: string): string {
 }
 
 export function validatePasswordMatch(pass1: string, pass2: string): string {
+  // Validates that two passwords match and are both provided
   if (!pass1 || !pass2) return FORMS.PASSWORDS_REQUIRED;
   if (pass1 !== pass2) return FORMS.PASSWORDS_DONT_MATCH;
   return "";

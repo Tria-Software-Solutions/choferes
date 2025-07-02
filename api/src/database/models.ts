@@ -1,3 +1,4 @@
+// This file imports all models and sets up their associations for Sequelize
 import { User } from "../models/User";
 import { Role } from "../models/Role";
 import { Permission } from "../models/Permission";
@@ -12,8 +13,10 @@ import { MonthlySummary } from "../models/MonthlySummary";
 import { BiweeklySummary } from "../models/BiweeklySummary";
 import setupAssociations from "./associations";
 
+// Setup all model associations
 setupAssociations();
 
+// Export all models for use throughout the application
 export {
   User,
   Role,
