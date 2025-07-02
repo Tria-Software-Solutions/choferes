@@ -400,6 +400,29 @@ const AddVehicleForm: React.FC<AddVehicleFormProps> = ({
                   fullWidth: true,
                   required: true,
                   variant: "outlined",
+                  sx: {
+                    mb: 2,
+                    "& .MuiOutlinedInput-root": {
+                      borderRadius: 2,
+                      backgroundColor: "#ffffff",
+                      "&:hover .MuiOutlinedInput-notchedOutline": {
+                        borderColor: "#000000",
+                      },
+                      "&.Mui-focused .MuiOutlinedInput-notchedOutline": {
+                        borderColor: "#000000",
+                        borderWidth: 2,
+                      },
+                      "&.Mui-focused": {
+                        backgroundColor: "#ffffff",
+                        outline: "none",
+                        boxShadow: "none",
+                      },
+                      "& input": {
+                        outline: "none",
+                        boxShadow: "none",
+                      },
+                    },
+                  },
                 },
               }}
             />

@@ -1,16 +1,19 @@
+// Load environment variables from .env file
 require("dotenv").config();
 
+// Database configuration for different environments (development, test, production)
+// Values are loaded from environment variables for security and flexibility
 const config = {
   development: {
-    username: process.env.PGUSER,
-    password: process.env.PGPASSWORD,
-    database: process.env.PGDATABASE,
-    host: process.env.PGHOST,
-    dialect: "postgres",
+    username: process.env.PGUSER, // Database username
+    password: process.env.PGPASSWORD, // Database password
+    database: process.env.PGDATABASE, // Database name
+    host: process.env.PGHOST, // Database host
+    dialect: "postgres", // Database dialect
     dialectOptions: {
       ssl: {
         require: true,
-        rejectUnauthorized: false,
+        rejectUnauthorized: false, // Accept self-signed certificates
       },
     },
   },
@@ -42,4 +45,5 @@ const config = {
   },
 };
 
+// Export the configuration object for use by Sequelize and other modules
 module.exports = config;

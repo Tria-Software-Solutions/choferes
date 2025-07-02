@@ -14,9 +14,9 @@ const sequelize = new Sequelize(dbConfig.database, dbConfig.username, dbConfig.p
   dialectOptions: dbConfig.dialectOptions || {}, // Additional dialect options (e.g., SSL)
   pool: {
     max: 20, // Maximum number of connections
-    min: 5,  // Minimum number of connections
+    min: 5, // Minimum number of connections
     acquire: 60000, // Maximum time (ms) to try getting a connection
-    idle: 10000,    // Maximum time (ms) a connection can be idle
+    idle: 10000, // Maximum time (ms) a connection can be idle
   },
   // Postgres-specific session timeouts
   ...(dbConfig.dialect === "postgres" && {
