@@ -38,7 +38,7 @@ import {
   exportToPDF,
 } from "../../utils/export";
 import { capitalizeFirstLetter } from "../../utils/string";
-import { PAGE_TITLE, PERMISSIONS, VEHICLES_PAGE } from "../../constants/constants";
+import { PAGE_TITLE, PERMISSIONS, VEHICLES_PAGE, NOTIFICATIONS } from "../../constants/constants";
 import DirectionsCarIcon from "@mui/icons-material/DirectionsCar";
 import DownloadRoundedIcon from "@mui/icons-material/DownloadRounded";
 import ArrowBackIosNewRoundedIcon from "@mui/icons-material/ArrowBackIosNewRounded";
@@ -233,18 +233,10 @@ const VehiclesPage: React.FC = () => {
         notes: "",
         parkingDate: new Date(),
       });
-      showNotification(
-        "La actualización del vehículo fue exitosa",
-        3000,
-        false,
-      );
+      showNotification(NOTIFICATIONS.VEHICLE_UPDATE_SUCCESS, 3000, false);
     } catch (error) {
       handleCancel();
-      showNotification(
-        "Ha ocurrido un error al actualizar el vehículo",
-        5000,
-        false,
-      );
+      showNotification(NOTIFICATIONS.VEHICLE_UPDATE_ERROR, 5000, false);
     }
   };
 
@@ -265,9 +257,9 @@ const VehiclesPage: React.FC = () => {
       await dispatch(deleteVehicle(vehicleToDelete));
       setOpenDeleteDialog(false);
       setVehicleToDelete(null);
-      showNotification("Vehículo eliminado exitosamente", 3000, false);
+      showNotification(NOTIFICATIONS.VEHICLE_DELETE_SUCCESS, 3000, false);
     } catch (error) {
-      showNotification("Error al eliminar el vehículo", 5000, false);
+      showNotification(NOTIFICATIONS.VEHICLE_DELETE_ERROR, 5000, false);
     } finally {
       setIsDeletingVehicle(false);
     }
@@ -325,9 +317,9 @@ const VehiclesPage: React.FC = () => {
 
       await dispatch(createVehicle(newVehicle));
       setOpenAddVehicleModal(false);
-      showNotification("Vehículo creado exitosamente", 3000, false);
+      showNotification(NOTIFICATIONS.VEHICLE_CREATE_SUCCESS, 3000, false);
     } catch (error) {
-      showNotification("Error al crear el vehículo", 5000, false);
+      showNotification(NOTIFICATIONS.VEHICLE_CREATE_ERROR, 5000, false);
     } finally {
       setIsCreatingVehicle(false);
     }

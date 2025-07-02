@@ -37,6 +37,7 @@ import VisibilityOffIcon from "@mui/icons-material/VisibilityOff";
 import DialogComponent from "../../components/Dialog/DialogComponent";
 import AddRoundedIcon from "@mui/icons-material/AddRounded";
 import { DASHBOARD_USERS } from "../../constants/constants";
+import { NOTIFICATIONS } from "../../constants/constants";
 
 const ManageUsers: React.FC<{ isExpanded?: boolean }> = ({
   isExpanded = true,
@@ -281,7 +282,7 @@ const ManageUsers: React.FC<{ isExpanded?: boolean }> = ({
       };
       const role = roles.find((r) => r.name === editFields.roleName);
       if (!role) {
-        showNotification("El rol seleccionado no existe", 5000, false);
+        showNotification(NOTIFICATIONS.USER_ROLE_NOT_FOUND, 5000, false);
         return;
       }
       dispatch(
@@ -300,14 +301,10 @@ const ManageUsers: React.FC<{ isExpanded?: boolean }> = ({
         password: "",
         roleName: "",
       });
-      showNotification("La actualización del usuario fue exitosa", 3000, false);
+      showNotification(NOTIFICATIONS.USER_UPDATE_SUCCESS, 3000, false);
     } catch (error) {
       handleCancel();
-      showNotification(
-        "Ha ocurrido un error al actualizar el usuario",
-        5000,
-        false,
-      );
+      showNotification(NOTIFICATIONS.USER_UPDATE_ERROR, 5000, false);
     }
   };
 

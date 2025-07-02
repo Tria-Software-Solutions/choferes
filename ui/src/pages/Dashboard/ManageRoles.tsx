@@ -30,6 +30,7 @@ import DialogComponent from "../../components/Dialog/DialogComponent";
 import AddRoundedIcon from "@mui/icons-material/AddRounded";
 import DeleteOutlineIcon from "@mui/icons-material/DeleteOutline";
 import { DASHBOARD_ROLES } from "../../constants/constants";
+import { NOTIFICATIONS } from "../../constants/constants";
 
 const ManageRoles: React.FC<{ isExpanded?: boolean }> = ({
   isExpanded = true,
@@ -132,14 +133,10 @@ const ManageRoles: React.FC<{ isExpanded?: boolean }> = ({
       );
       setEditRowId(null);
       setEditFields({ name: "", permissionNames: [] });
-      showNotification("La actualización del rol fue exitosa", 3000, false);
+      showNotification(NOTIFICATIONS.ROLE_UPDATE_SUCCESS, 3000, false);
     } catch (error) {
       handleCancel();
-      showNotification(
-        "Ha ocurrido un error al actualizar el rol",
-        5000,
-        false,
-      );
+      showNotification(NOTIFICATIONS.ROLE_UPDATE_ERROR, 5000, false);
     }
   };
 
@@ -161,9 +158,9 @@ const ManageRoles: React.FC<{ isExpanded?: boolean }> = ({
       await dispatch(deleteRole(roleToDelete));
       setOpenDeleteDialog(false);
       setRoleToDelete(null);
-      showNotification("Rol eliminado exitosamente", 3000, false);
+      showNotification(NOTIFICATIONS.ROLE_DELETE_SUCCESS, 3000, false);
     } catch (error) {
-      showNotification("Error al eliminar el rol", 5000, false);
+      showNotification(NOTIFICATIONS.ROLE_DELETE_ERROR, 5000, false);
     } finally {
       setIsDeletingRole(false);
     }
@@ -199,9 +196,9 @@ const ManageRoles: React.FC<{ isExpanded?: boolean }> = ({
         }),
       );
       setOpenAddRoleModal(false);
-      showNotification("Rol creado exitosamente", 3000, false);
+      showNotification(NOTIFICATIONS.ROLE_CREATE_SUCCESS, 3000, false);
     } catch (error) {
-      showNotification("Error al crear el rol", 5000, false);
+      showNotification(NOTIFICATIONS.ROLE_CREATE_ERROR, 5000, false);
     } finally {
       setIsCreatingRole(false);
     }
