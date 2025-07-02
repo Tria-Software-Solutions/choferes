@@ -1,5 +1,5 @@
 import { Request, Response } from "express";
-import { checkHealth } from "../services/healthService";
+import checkHealth from "../services/healthService";
 
 // Health controller for application health checks
 export const healthCheck = (req: Request, res: Response) => {
