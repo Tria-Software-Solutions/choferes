@@ -13,7 +13,7 @@ import { BRANDS_LIST, COLORS_LIST, FORMS } from "../../constants/constants";
 import { maskLicensePlate, maskParkingLot } from "../../utils/mask";
 import AddRoundedIcon from "@mui/icons-material/AddRounded";
 import CloseRoundedIcon from "@mui/icons-material/CloseRounded";
-import CustomTextField from "../Textfield/CustomTextField";
+import CustomTextField from "../../components/Textfield/CustomTextField";
 import ConfirmationNumberOutlinedIcon from "@mui/icons-material/ConfirmationNumberOutlined";
 import DirectionsCarOutlinedIcon from "@mui/icons-material/DirectionsCarOutlined";
 import LocalParkingOutlinedIcon from "@mui/icons-material/LocalParkingOutlined";

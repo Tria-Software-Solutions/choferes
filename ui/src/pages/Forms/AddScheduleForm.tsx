@@ -23,7 +23,7 @@ import { DAYS_LIST, FORMS } from "../../constants/constants";
 import { translateDayOptionsToSpanish } from "../../utils/string";
 import AddRoundedIcon from "@mui/icons-material/AddRounded";
 import CloseRoundedIcon from "@mui/icons-material/CloseRounded";
-import CustomTextField from "../Textfield/CustomTextField";
+import CustomTextField from "../../components/Textfield/CustomTextField";
 import CalendarMonthOutlinedIcon from "@mui/icons-material/CalendarMonthOutlined";
 import AccessTimeOutlinedIcon from "@mui/icons-material/AccessTimeOutlined";
 import WarningAmberOutlinedIcon from "@mui/icons-material/WarningAmberOutlined";

@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { Box, Grid, Button, useTheme, useMediaQuery } from "@mui/material";
 import AddRoundedIcon from "@mui/icons-material/AddRounded";
 import CloseRoundedIcon from "@mui/icons-material/CloseRounded";
-import CustomTextField from "../Textfield/CustomTextField";
+import CustomTextField from "../../components/Textfield/CustomTextField";
 import PersonOutlinedIcon from "@mui/icons-material/PersonOutlined";
 import InfoOutlinedIcon from "@mui/icons-material/InfoOutlined";
 import { FORMS } from "../../constants/constants";

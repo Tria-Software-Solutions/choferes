@@ -46,7 +46,7 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faFileExcel, faFilePdf } from "@fortawesome/free-solid-svg-icons";
 import { Courier } from "../../models/Courier";
 import EditableTable from "../../components/Table/EditableTable/EditableTable";
-import AddCourierForm from "../../components/Forms/AddCourierForm";
+import AddCourierForm from "../Forms/AddCourierForm";
 import DialogComponent from "../../components/Dialog/DialogComponent";
 import AddRoundedIcon from "@mui/icons-material/AddRounded";
 import DeleteOutlineIcon from "@mui/icons-material/DeleteOutline";

@@ -23,7 +23,7 @@ import GroupOutlinedIcon from "@mui/icons-material/GroupOutlined";
 import OutlinedInput from "@mui/material/OutlinedInput";
 import InfoOutlinedIcon from "@mui/icons-material/InfoOutlined";
 import { Role } from "../../models/Role";
-import CustomTextField from "../Textfield/CustomTextField";
+import CustomTextField from "../../components/Textfield/CustomTextField";
 import { FORMS } from '../../constants/constants';
 
 interface AddUserFormProps {

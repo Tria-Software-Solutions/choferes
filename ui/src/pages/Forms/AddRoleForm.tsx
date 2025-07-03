@@ -16,7 +16,7 @@ import CloseRoundedIcon from "@mui/icons-material/CloseRounded";
 import GroupOutlinedIcon from "@mui/icons-material/GroupOutlined";
 import InfoOutlinedIcon from "@mui/icons-material/InfoOutlined";
 import { Permission } from "../../models/Permission";
-import CustomTextField from "../Textfield/CustomTextField";
+import CustomTextField from "../../components/Textfield/CustomTextField";
 import { FORMS } from "../../constants/constants";
 
 interface AddRoleFormProps {
