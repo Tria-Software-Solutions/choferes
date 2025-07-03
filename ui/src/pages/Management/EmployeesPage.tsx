@@ -33,7 +33,7 @@ import {
   exportToPDF,
 } from "../../utils/export";
 import { PERMISSIONS, EMPLOYEES_PAGE, NOTIFICATIONS, PAGE_TITLE } from "../../constants/constants";
-import BadgeIcon from "@mui/icons-material/Badge";
+import GroupRoundedIcon from "@mui/icons-material/GroupRounded";
 import DownloadRoundedIcon from "@mui/icons-material/DownloadRounded";
 import CloseRoundedIcon from "@mui/icons-material/CloseRounded";
 import ManageSearchIcon from "@mui/icons-material/ManageSearch";
@@ -233,12 +233,17 @@ const EmployeesPage: React.FC = () => {
         alignItems="center"
         sx={{ mb: 3 }}
       >
-        <Box display="flex" flexDirection="column" alignItems="flex-start" sx={{ mb: 2 }}>
+        <Box
+          display="flex"
+          flexDirection="column"
+          alignItems="flex-start"
+          sx={{ mb: 2 }}
+        >
           <Typography
             variant={isSmallScreen ? "h5" : "h4"}
             sx={{
-              display: 'flex',
-              alignItems: 'center',
+              display: "flex",
+              alignItems: "center",
               fontFamily: "'Urbanist', sans-serif",
               fontWeight: 800,
               color: "#000000",
@@ -246,10 +251,22 @@ const EmployeesPage: React.FC = () => {
               gap: 1.5,
             }}
           >
-            <BadgeIcon fontSize={isSmallScreen ? "small" : "large"} sx={{ mr: 1, color: theme.palette.primary.main }} />
+            <GroupRoundedIcon
+              fontSize={isSmallScreen ? "small" : "large"}
+              sx={{ mr: 1, color: theme.palette.primary.main }}
+            />
             {PAGE_TITLE.EMPLOYEES}
           </Typography>
-          <Divider sx={{ width: 48, borderBottomWidth: 3, borderColor: theme.palette.primary.main, borderRadius: 2, mx: 'auto', mb: 0.5 }} />
+          <Divider
+            sx={{
+              width: 48,
+              borderBottomWidth: 3,
+              borderColor: theme.palette.primary.main,
+              borderRadius: 2,
+              mx: "auto",
+              mb: 0.5,
+            }}
+          />
         </Box>
         {userPermissions.includes(PERMISSIONS.EXPORT_EXCEL_EMPLOYEES) &&
           userPermissions.includes(PERMISSIONS.EXPORT_PDF_EMPLOYEES) && (
