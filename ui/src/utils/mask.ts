@@ -36,3 +36,23 @@ export const maskParkingLot = (parkingLot: string): string => {
   }
   return result;
 };
+
+export function maskParkingLotWithPrefix(prefix: string, rawValue: string): string {
+  // Remove prefix if user types it
+  let value = rawValue.replace(new RegExp(`^${prefix}`, "i"), "");
+  // Remove non-numeric and dash except for the first part
+  value = value.replace(/[^1-9\-\d]/g, "");
+  // Format: PREFIX1-1234
+  let match = value.match(/([1-9])-(\d{0,4})/);
+  if (match) {
+    return `${prefix}${match[1]}-${match[2]}`;
+  } else {
+    // Try to build as user types
+    let numMatch = value.match(/([1-9])/);
+    if (numMatch) {
+      return `${prefix}${numMatch[1]}-`;
+    } else {
+      return `${prefix}`;
+    }
+  }
+}

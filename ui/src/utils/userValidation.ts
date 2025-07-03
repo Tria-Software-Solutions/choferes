@@ -48,3 +48,14 @@ export function validatePasswordMatch(pass1: string, pass2: string): string {
   if (pass1 !== pass2) return FORMS.PASSWORDS_DONT_MATCH;
   return "";
 }
+
+export function validateParkingLotWithPrefix(prefix: string, value: string, invalidFormatMsg: string): string | null {
+  const dynamicRegex = new RegExp(
+    `^(?:${prefix}[1-9]-\\d{3,4}|nulo|n/a)$`,
+    "i"
+  );
+  if (!dynamicRegex.test(value.trim())) {
+    return invalidFormatMsg.replace("ATP", prefix);
+  }
+  return null;
+}

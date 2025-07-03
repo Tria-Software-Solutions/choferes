@@ -10,7 +10,9 @@ import {
   InputAdornment,
 } from "@mui/material";
 import { BRANDS_LIST, COLORS_LIST, FORMS } from "../../constants/constants";
-import { maskLicensePlate, maskParkingLot } from "../../utils/mask";
+import { maskLicensePlate } from "../../utils/mask";
+import { maskParkingLotWithPrefix } from "../../utils/mask";
+import { validateParkingLotWithPrefix } from "../../utils/userValidation";
 import AddRoundedIcon from "@mui/icons-material/AddRounded";
 import CloseRoundedIcon from "@mui/icons-material/CloseRounded";
 import CustomTextField from "../../components/Textfield/CustomTextField";
@@ -23,6 +25,7 @@ import FactoryOutlinedIcon from "@mui/icons-material/FactoryOutlined";
 import InfoOutlinedIcon from "@mui/icons-material/InfoOutlined";
 import { DatePicker, LocalizationProvider } from "@mui/x-date-pickers";
 import { AdapterDateFns } from "@mui/x-date-pickers/AdapterDateFns";
+import { AutocompleteChangeReason, AutocompleteChangeDetails } from "@mui/material";
 
 import { es } from "date-fns/locale";
 
@@ -76,16 +79,26 @@ const AddVehicleForm: React.FC<AddVehicleFormProps> = ({
   const [searchColorTerm, setSearchColorTerm] = useState("");
   const [filteredColors, setFilteredColors] = useState(COLORS_LIST);
 
+  const [parkingPrefix, setParkingPrefix] = useState<{ value: string; label: string }>({ value: "ATP", label: "ATP" });
+  const [parkingPrefixOptions, setParkingPrefixOptions] = useState([
+    { value: "ATP", label: "ATP" },
+    { value: "CE", label: "CE" },
+  ]);
+  const [searchParkingPrefixTerm, setSearchParkingPrefixTerm] = useState("");
+  const [filteredParkingPrefixes, setFilteredParkingPrefixes] = useState(parkingPrefixOptions);
+
   const validateField = useCallback(
     (name: string, value: string) => {
       const regex = {
         number: /^\d+$/,
         plate: /^(?:[A-ZÑ]{3}-\d{3}|\d{6}|nulo|n\/a)$/i,
         text: /^(?:[a-zA-ZáéíóúÁÉÍÓÚñÑüÜëË\s-]+|nulo|n\/a)$/i,
-        parkingLot: /^(?:ATP[1-9]-\d{3,4}|nulo|n\/a)$/i,
       };
 
       if (!value.trim()) {
+        if (name === "parkingLot" && parkingPrefix.value === "CE") {
+          return ""; // Not required if prefix is CE
+        }
         return FORMS.REQUIRED_FIELD;
       }
 
@@ -112,16 +125,17 @@ const AddVehicleForm: React.FC<AddVehicleFormProps> = ({
             return FORMS.LETTERS_SPACES_HYPHENS;
           }
           break;
-        case "parkingLot":
-          if (!regex.parkingLot.test(value.trim())) {
-            return FORMS.INVALID_FORMAT_PARKING;
-          }
+        case "parkingLot": {
+          const prefix = parkingPrefix.value;
+          const error = validateParkingLotWithPrefix(prefix, value, FORMS.INVALID_FORMAT_PARKING);
+          if (error) return error;
           break;
+        }
       }
 
       return "";
     },
-    [existingVehicles],
+    [existingVehicles, parkingPrefix],
   );
 
   const handleFieldChange = (field: string, value: string) => {
@@ -158,20 +172,67 @@ const AddVehicleForm: React.FC<AddVehicleFormProps> = ({
     }
   };
 
-  const handleLicensePlateChange = (
-    event: React.ChangeEvent<HTMLInputElement>,
+  const handleSearchChangeParkingPrefix = (
+    event: React.SyntheticEvent,
+    value: string,
+    reason: string,
   ) => {
-    const rawValue = event.target.value;
-    const maskedValue = maskLicensePlate(rawValue);
-    handleFieldChange("licensePlate", maskedValue);
+    setSearchParkingPrefixTerm(value);
+    if (reason === "input") {
+      const filtered = parkingPrefixOptions.filter((opt) =>
+        opt.value.toLowerCase().includes(value.toLowerCase()),
+      );
+      setFilteredParkingPrefixes(filtered);
+    }
+  };
+
+  const handleParkingPrefixChange = (
+    event: React.SyntheticEvent,
+    newValue: { value: string; label: string } | string | null,
+    reason: AutocompleteChangeReason,
+    details?: AutocompleteChangeDetails<{ value: string; label: string }> | undefined
+  ) => {
+    let prefixValue = "";
+    if (newValue === null || newValue === "") {
+      setParkingPrefix({ value: "", label: "" });
+      setFormData((prev) => ({ ...prev, parkingLot: "" }));
+      return;
+    }
+    if (typeof newValue === "object" && newValue !== null) {
+      prefixValue = newValue.value.toUpperCase();
+    } else if (typeof newValue === "string") {
+      prefixValue = newValue.toUpperCase();
+    }
+    if (prefixValue) {
+      if (!parkingPrefixOptions.some((opt) => opt.value === prefixValue)) {
+        const newOpt = { value: prefixValue, label: prefixValue };
+        setParkingPrefixOptions((prev) => [...prev, newOpt]);
+        setFilteredParkingPrefixes((prev) => [...prev, newOpt]);
+      }
+      setParkingPrefix({ value: prefixValue, label: prefixValue });
+      setSearchParkingPrefixTerm("");
+      if (prefixValue === "CE") {
+        setFormData((prev) => ({ ...prev, parkingLot: "CE" }));
+      } else {
+        setFormData((prev) => ({ ...prev, parkingLot: "" }));
+      }
+    }
   };
 
   const handleParkingLotChange = (
     event: React.ChangeEvent<HTMLInputElement>,
   ) => {
     const rawValue = event.target.value;
-    const maskedValue = maskParkingLot(rawValue);
+    const maskedValue = maskParkingLotWithPrefix(parkingPrefix.value, rawValue);
     handleFieldChange("parkingLot", maskedValue);
+  };
+
+  const handleLicensePlateChange = (
+    event: React.ChangeEvent<HTMLInputElement>,
+  ) => {
+    const rawValue = event.target.value;
+    const maskedValue = maskLicensePlate(rawValue);
+    handleFieldChange("licensePlate", maskedValue);
   };
 
   const handleDateChange = (date: Date | null) => {
@@ -225,6 +286,9 @@ const AddVehicleForm: React.FC<AddVehicleFormProps> = ({
     setFilteredBrands(BRANDS_LIST);
     setSearchColorTerm("");
     setFilteredColors(COLORS_LIST);
+    setParkingPrefix({ value: "ATP", label: "ATP" });
+    setSearchParkingPrefixTerm("");
+    setFilteredParkingPrefixes(parkingPrefixOptions);
   };
 
   return (
@@ -371,21 +435,49 @@ const AddVehicleForm: React.FC<AddVehicleFormProps> = ({
         </Grid>
 
         <Grid item xs={12} sm={6}>
-          <CustomTextField
-            label={FORMS.ADD_VEHICLE.PARKING_LOT_LABEL}
-            variant="outlined"
-            fullWidth
-            placeholder={FORMS.ADD_VEHICLE.PARKING_LOT_PLACEHOLDER}
-            value={formData.parkingLot}
-            onChange={handleParkingLotChange}
-            error={errors.parkingLot !== ""}
-            helperText={errors.parkingLot}
-            icon={
-              <LocalParkingOutlinedIcon
-                sx={{ color: theme.palette.text.secondary }}
+          <Box sx={{ display: "flex", gap: 1 }}>
+            <FormControl variant="outlined" sx={{ minWidth: 90, flex: "0 0 90px" }}>
+              <Autocomplete
+                freeSolo
+                value={parkingPrefix}
+                onChange={handleParkingPrefixChange}
+                inputValue={searchParkingPrefixTerm.toUpperCase()}
+                onInputChange={handleSearchChangeParkingPrefix}
+                options={filteredParkingPrefixes.map(opt => ({ value: opt.value.toUpperCase(), label: opt.label.toUpperCase() }))}
+                getOptionLabel={(option) =>
+                  typeof option === "string" ? option : option.label
+                }
+                noOptionsText="Sin coincidencias"
+                renderInput={(params) => (
+                  <CustomTextField
+                    {...params}
+                    label="Prefijo"
+                    variant="outlined"
+                    fullWidth
+                    sx={{ minWidth: 90 }}
+                  />
+                )}
               />
-            }
-          />
+            </FormControl>
+            <CustomTextField
+              label={FORMS.ADD_VEHICLE.PARKING_LOT_LABEL}
+              variant="outlined"
+              fullWidth
+              placeholder={FORMS.ADD_VEHICLE.PARKING_LOT_PLACEHOLDER.replace("ATP", parkingPrefix.value)}
+              value={formData.parkingLot}
+              onChange={handleParkingLotChange}
+              error={errors.parkingLot !== ""}
+              helperText={errors.parkingLot}
+              icon={
+                <LocalParkingOutlinedIcon
+                  sx={{ color: theme.palette.text.secondary }}
+                />
+              }
+              InputProps={{
+                readOnly: parkingPrefix.value === "CE"
+              }}
+            />
+          </Box>
         </Grid>
 
         <Grid item xs={12} sm={6}>
