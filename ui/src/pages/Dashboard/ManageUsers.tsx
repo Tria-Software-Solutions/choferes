@@ -854,7 +854,7 @@ const ManageUsers: React.FC<{ isExpanded?: boolean }> = ({
                 "lastName",
                 "username",
                 "email",
-                "roleName",
+                "roleName"
               ]}
               editRowId={editRowId}
               editFields={editFields}
@@ -878,6 +878,7 @@ const ManageUsers: React.FC<{ isExpanded?: boolean }> = ({
               passwordUserId={passwordUserId}
               onOpenPasswordModal={handleOpenPasswordModal}
               onClosePasswordModal={handleClosePasswordModal}
+              showStatusColumn={true}
             />
           ) : (
             <Box
