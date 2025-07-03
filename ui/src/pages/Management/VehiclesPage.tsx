@@ -19,12 +19,14 @@ import {
   Box,
   Typography,
   useMediaQuery,
+  useTheme,
   Grid,
   Button,
   CircularProgress,
   Backdrop,
   Tooltip,
   ButtonGroup,
+  Divider,
 } from "@mui/material";
 import { LocalizationProvider } from "@mui/x-date-pickers";
 import { DatePicker } from "@mui/x-date-pickers/DatePicker";
@@ -40,7 +42,7 @@ import {
 } from "../../utils/export";
 import { capitalizeFirstLetter } from "../../utils/string";
 import { PAGE_TITLE, PERMISSIONS, VEHICLES_PAGE, NOTIFICATIONS } from "../../constants/constants";
-import DirectionsCarIcon from "@mui/icons-material/DirectionsCar";
+import DirectionsCarFilledIcon from "@mui/icons-material/DirectionsCarFilled";
 import DownloadRoundedIcon from "@mui/icons-material/DownloadRounded";
 import ArrowBackIosNewRoundedIcon from "@mui/icons-material/ArrowBackIosNewRounded";
 import ArrowForwardIosRoundedIcon from "@mui/icons-material/ArrowForwardIosRounded";
@@ -86,7 +88,8 @@ const VehiclesPage: React.FC = () => {
   const [isCreatingVehicle, setIsCreatingVehicle] = useState(false);
   const [isDeletingVehicle, setIsDeletingVehicle] = useState(false);
 
-  const isSmallScreen = useMediaQuery((theme) => theme.breakpoints.down("sm"));
+  const theme = useTheme();
+  const isSmallScreen = useMediaQuery(theme.breakpoints.down("sm"));
 
   // Memoize cleaned filter for search
   const cleanedFilter = useMemo(
@@ -373,18 +376,23 @@ const VehiclesPage: React.FC = () => {
         alignItems="center"
         sx={{ mb: 3 }}
       >
-        <Box display="flex" alignItems="center">
-          <DirectionsCarIcon fontSize={isSmallScreen ? "small" : "large"} />
-          <Box sx={{ ml: 1 }}>
-            <Typography
-              variant={isSmallScreen ? "h5" : "h4"}
-              sx={{ flexGrow: 1 }}
-            >
-              {isSmallScreen
-                ? PAGE_TITLE.VEHICLES_SIMPLIFIED
-                : PAGE_TITLE.VEHICLES}
-            </Typography>
-          </Box>
+        <Box display="flex" flexDirection="column" alignItems="flex-start" sx={{ mb: 2 }}>
+          <Typography
+            variant={isSmallScreen ? "h5" : "h4"}
+            sx={{
+              display: 'flex',
+              alignItems: 'center',
+              fontFamily: "'Urbanist', sans-serif",
+              fontWeight: 800,
+              color: "#000000",
+              mb: 0.5,
+              gap: 1.5,
+            }}
+          >
+            <DirectionsCarFilledIcon fontSize={isSmallScreen ? "small" : "large"} sx={{ mr: 1, color: theme.palette.primary.main }} />
+            {PAGE_TITLE.VEHICLES}
+          </Typography>
+          <Divider sx={{ width: 48, borderBottomWidth: 3, borderColor: theme.palette.primary.main, borderRadius: 2, mx: 'auto', mb: 0.5 }} />
         </Box>
         {userPermissions.includes(PERMISSIONS.EXPORT_EXCEL_VEHICLES) &&
           userPermissions.includes(PERMISSIONS.EXPORT_PDF_VEHICLES) && (

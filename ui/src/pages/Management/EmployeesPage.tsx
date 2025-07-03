@@ -24,6 +24,7 @@ import {
   useMediaQuery,
   CircularProgress,
   Backdrop,
+  Divider,
 } from "@mui/material";
 import {
   createExportOptions,
@@ -31,8 +32,8 @@ import {
   exportToExcel,
   exportToPDF,
 } from "../../utils/export";
-import { PAGE_TITLE, PERMISSIONS, EMPLOYEES_PAGE, NOTIFICATIONS } from "../../constants/constants";
-import GroupRoundedIcon from "@mui/icons-material/GroupRounded";
+import { PERMISSIONS, EMPLOYEES_PAGE, NOTIFICATIONS, PAGE_TITLE } from "../../constants/constants";
+import BadgeIcon from "@mui/icons-material/Badge";
 import DownloadRoundedIcon from "@mui/icons-material/DownloadRounded";
 import CloseRoundedIcon from "@mui/icons-material/CloseRounded";
 import ManageSearchIcon from "@mui/icons-material/ManageSearch";
@@ -232,18 +233,23 @@ const EmployeesPage: React.FC = () => {
         alignItems="center"
         sx={{ mb: 3 }}
       >
-        <Box display="flex" alignItems="center">
-          <GroupRoundedIcon fontSize={isSmallScreen ? "small" : "large"} />
-          <Box sx={{ ml: 1 }}>
-            <Typography
-              variant={isSmallScreen ? "h5" : "h4"}
-              sx={{ flexGrow: 1 }}
-            >
-              {isSmallScreen
-                ? PAGE_TITLE.EMPLOYEES_SIMPLIFIED
-                : PAGE_TITLE.EMPLOYEES}
-            </Typography>
-          </Box>
+        <Box display="flex" flexDirection="column" alignItems="flex-start" sx={{ mb: 2 }}>
+          <Typography
+            variant={isSmallScreen ? "h5" : "h4"}
+            sx={{
+              display: 'flex',
+              alignItems: 'center',
+              fontFamily: "'Urbanist', sans-serif",
+              fontWeight: 800,
+              color: "#000000",
+              mb: 0.5,
+              gap: 1.5,
+            }}
+          >
+            <BadgeIcon fontSize={isSmallScreen ? "small" : "large"} sx={{ mr: 1, color: theme.palette.primary.main }} />
+            {PAGE_TITLE.EMPLOYEES}
+          </Typography>
+          <Divider sx={{ width: 48, borderBottomWidth: 3, borderColor: theme.palette.primary.main, borderRadius: 2, mx: 'auto', mb: 0.5 }} />
         </Box>
         {userPermissions.includes(PERMISSIONS.EXPORT_EXCEL_EMPLOYEES) &&
           userPermissions.includes(PERMISSIONS.EXPORT_PDF_EMPLOYEES) && (

@@ -23,6 +23,7 @@ import VisibilityOff from "@mui/icons-material/VisibilityOff";
 import LockOutlinedIcon from "@mui/icons-material/LockOutlined";
 import PersonOutlinedIcon from "@mui/icons-material/PersonOutlined";
 import logo from "../../assets/images/logo.png";
+import "@fontsource/urbanist";
 
 // Login page component for user authentication
 const Login: React.FC = () => {
@@ -149,14 +150,15 @@ const Login: React.FC = () => {
                 variant={isSmallScreen ? "h5" : "h4"}
                 align="center"
                 sx={{
-                  fontWeight: 700,
+                  fontFamily: "'Urbanist', sans-serif",
+                  fontWeight: 800,
                   color: "#000000",
                   mb: 1,
-                  fontFamily: "'Protest Guerrilla', sans-serif",
                 }}
               >
                 {PAGE_TITLE.LOGIN}
               </Typography>
+              <Divider sx={{ width: 48, borderBottomWidth: 3, borderColor: theme.palette.primary.main, mb: 1.5, mx: "auto", borderRadius: 2 }} />
               <Typography
                 variant="body2"
                 align="center"

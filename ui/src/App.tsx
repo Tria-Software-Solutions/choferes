@@ -28,11 +28,11 @@ import { AuthProvider, useAuthContext } from "./context/AuthContext";
 import ProtectedRoute from "./routes/ProtectedRoute";
 import { Container, useMediaQuery, useTheme } from "@mui/material";
 import { APPBAR_MENU, PERMISSIONS, ROUTES } from "./constants/constants";
-import CalendarMonthRoundedIcon from "@mui/icons-material/CalendarMonthRounded";
+import AssignmentIcon from "@mui/icons-material/Assignment";
 import DirectionsCarIcon from "@mui/icons-material/DirectionsCar";
 import GroupRoundedIcon from "@mui/icons-material/GroupRounded";
 import EditCalendarRoundedIcon from "@mui/icons-material/EditCalendarRounded";
-import ManageAccountsIcon from "@mui/icons-material/ManageAccounts";
+import AdminPanelSettingsIcon from "@mui/icons-material/AdminPanelSettings";
 import SettingsIcon from "@mui/icons-material/Settings";
 import LogoutIcon from "@mui/icons-material/Logout";
 import wallpaper from "./assets/images/choferesblurred1.webp";
@@ -47,7 +47,7 @@ const AppBarWrapper: React.FC = () => {
   const links = [
     {
       label: APPBAR_MENU.ROLES,
-      icon: <CalendarMonthRoundedIcon />,
+      icon: <AssignmentIcon />,
       path: ROUTES.ROLES,
       permission: PERMISSIONS.VIEW_ROLES,
     },
@@ -71,7 +71,7 @@ const AppBarWrapper: React.FC = () => {
     },
     {
       label: APPBAR_MENU.DASHBOARD,
-      icon: <ManageAccountsIcon />,
+      icon: <AdminPanelSettingsIcon />,
       path: ROUTES.DASHBOARD,
       permission: PERMISSIONS.VIEW_ADMIN,
     },

@@ -26,6 +26,7 @@ import NotificationsRoundedIcon from "@mui/icons-material/NotificationsRounded";
 import DashboardRoundedIcon from "@mui/icons-material/DashboardRounded";
 import logo from "../../assets/images/logo.png";
 import { MenuItemProps } from "../Menu/MenuComponent";
+import "@fontsource/urbanist";
 
 interface Link {
   label: string;
@@ -166,8 +167,11 @@ const AppBarComponent: React.FC<AppBarComponentProps> = ({
           <Typography
             variant="h5"
             sx={{
-              fontFamily: "'Protest Guerrilla', sans-serif",
-              fontWeight: 700,
+              fontFamily: "'Urbanist', sans-serif",
+              fontWeight: 800,
+              fontSize: { xs: '1.5rem', sm: '2rem', md: '1.5rem' },
+              lineHeight: 1.1,
+              letterSpacing: '0.04em',
               background: "linear-gradient(45deg, #ffffff 30%, #f0f0f0 90%)",
               backgroundClip: "text",
               WebkitBackgroundClip: "text",

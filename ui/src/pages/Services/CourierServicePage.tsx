@@ -16,6 +16,7 @@ import {
   CircularProgress,
   Backdrop,
   ButtonGroup,
+  Divider,
 } from "@mui/material";
 import { LocalizationProvider } from "@mui/x-date-pickers";
 import { DatePicker } from "@mui/x-date-pickers/DatePicker";
@@ -35,7 +36,6 @@ import {
   // PERMISSIONS,
   COURIER_SERVICE_PAGE,
 } from "../../constants/constants";
-import LocalShippingIcon from "@mui/icons-material/LocalShipping";
 import DownloadRoundedIcon from "@mui/icons-material/DownloadRounded";
 import ArrowBackIosNewRoundedIcon from "@mui/icons-material/ArrowBackIosNewRounded";
 import ArrowForwardIosRoundedIcon from "@mui/icons-material/ArrowForwardIosRounded";
@@ -51,6 +51,7 @@ import DialogComponent from "../../components/Dialog/DialogComponent";
 import AddRoundedIcon from "@mui/icons-material/AddRounded";
 import DeleteOutlineIcon from "@mui/icons-material/DeleteOutline";
 import { NOTIFICATIONS } from "../../constants/constants";
+import LocalShippingIcon from "@mui/icons-material/LocalShipping";
 
 // CourierServicePage component for managing courier services
 const CourierServicePage: React.FC = () => {
@@ -340,18 +341,23 @@ const CourierServicePage: React.FC = () => {
         alignItems="center"
         sx={{ mb: 3 }}
       >
-        <Box display="flex" alignItems="center">
-          <LocalShippingIcon fontSize={isSmallScreen ? "small" : "large"} />
-          <Box sx={{ ml: 1 }}>
-            <Typography
-              variant={isSmallScreen ? "h5" : "h4"}
-              sx={{ flexGrow: 1 }}
-            >
-              {isSmallScreen
-                ? PAGE_TITLE.COURIER_SERVICE_SIMPLIFIED
-                : PAGE_TITLE.COURIER_SERVICE}
-            </Typography>
-          </Box>
+        <Box display="flex" flexDirection="column" alignItems="flex-start" sx={{ mb: 2 }}>
+          <Typography
+            variant={isSmallScreen ? "h5" : "h4"}
+            sx={{
+              display: 'flex',
+              alignItems: 'center',
+              fontFamily: "'Urbanist', sans-serif",
+              fontWeight: 800,
+              color: "#000000",
+              mb: 0.5,
+              gap: 1.5,
+            }}
+          >
+            <LocalShippingIcon fontSize={isSmallScreen ? "small" : "large"} sx={{ mr: 1, color: theme.palette.primary.main }} />
+            {PAGE_TITLE.COURIER_SERVICE}
+          </Typography>
+          <Divider sx={{ width: 48, borderBottomWidth: 3, borderColor: theme.palette.primary.main, borderRadius: 2, mx: 'auto', mb: 0.5 }} />
         </Box>
         {/* Temporarily show export button without permission check */}
         <Box sx={{ minHeight: 65 }}>

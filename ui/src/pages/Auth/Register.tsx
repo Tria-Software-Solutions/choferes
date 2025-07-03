@@ -28,6 +28,7 @@ import PersonOutlinedIcon from "@mui/icons-material/PersonOutlined";
 import EmailOutlinedIcon from "@mui/icons-material/EmailOutlined";
 import LockOutlinedIcon from "@mui/icons-material/LockOutlined";
 import logo from "../../assets/images/logo.png";
+import "@fontsource/urbanist";
 
 // Register page component for user sign up
 const Register = () => {
@@ -263,14 +264,15 @@ const Register = () => {
                 variant={isSmallScreen ? "h5" : "h4"}
                 align="center"
                 sx={{
-                  fontWeight: 700,
+                  fontFamily: "'Urbanist', sans-serif",
+                  fontWeight: 800,
                   color: "#000000",
                   mb: 1,
-                  fontFamily: "'Protest Guerrilla', sans-serif",
                 }}
               >
                 {PAGE_TITLE.REGISTER}
               </Typography>
+              <Divider sx={{ width: 48, borderBottomWidth: 3, borderColor: theme.palette.primary.main, mb: 1.5, mx: "auto", borderRadius: 2 }} />
               <Typography
                 variant="body2"
                 align="center"

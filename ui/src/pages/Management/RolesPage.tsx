@@ -44,6 +44,7 @@ import {
   IconButton,
   Dialog,
   ButtonGroup,
+  Divider,
 } from "@mui/material";
 import {
   exportToExcel,
@@ -60,7 +61,6 @@ import {
   isValidDateForSelect,
 } from "../../utils/dates";
 import { PAGE_TITLE, PERMISSIONS, ROLES_PAGE } from "../../constants/constants";
-import CalendarMonthRoundedIcon from "@mui/icons-material/CalendarMonthRounded";
 import DownloadRoundedIcon from "@mui/icons-material/DownloadRounded";
 import InfoOutlinedIcon from "@mui/icons-material/InfoOutlined";
 import ArrowBackIosNewRoundedIcon from "@mui/icons-material/ArrowBackIosNewRounded";
@@ -75,9 +75,9 @@ import TabContext from "@mui/lab/TabContext";
 import TabList from "@mui/lab/TabList";
 import TabPanel from "@mui/lab/TabPanel";
 import Tab from "@mui/material/Tab";
-import Divider from "@mui/material/Divider";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faFileExcel, faFilePdf } from "@fortawesome/free-solid-svg-icons";
+import AssignmentIcon from "@mui/icons-material/Assignment";
 
 // Roles management and summary page component
 const RolesPage: React.FC = () => {
@@ -568,18 +568,23 @@ const RolesPage: React.FC = () => {
         alignItems="center"
         sx={{ mb: 3 }}
       >
-        <Box display="flex" alignItems="center">
-          <CalendarMonthRoundedIcon
-            fontSize={isSmallScreen ? "small" : "large"}
-          />
-          <Box sx={{ ml: 1 }}>
-            <Typography
-              variant={isSmallScreen ? "h5" : "h4"}
-              sx={{ flexGrow: 1 }}
-            >
-              {isSmallScreen ? PAGE_TITLE.ROLES_SIMPLIFIED : PAGE_TITLE.ROLES}
-            </Typography>
-          </Box>
+        <Box display="flex" flexDirection="column" alignItems="flex-start" sx={{ mb: 2 }}>
+          <Typography
+            variant={isSmallScreen ? "h5" : "h4"}
+            sx={{
+              display: 'flex',
+              alignItems: 'center',
+              fontFamily: "'Urbanist', sans-serif",
+              fontWeight: 800,
+              color: "#000000",
+              mb: 0.5,
+              gap: 1.5,
+            }}
+          >
+            <AssignmentIcon fontSize={isSmallScreen ? "small" : "large"} sx={{ mr: 1, color: theme.palette.primary.main }} />
+            {PAGE_TITLE.ROLES}
+          </Typography>
+          <Divider sx={{ width: 48, borderBottomWidth: 3, borderColor: theme.palette.primary.main, borderRadius: 2, mx: 'auto', mb: 0.5 }} />
         </Box>
         {userPermissions.includes(PERMISSIONS.EXPORT_EXCEL_ROLES) &&
           userPermissions.includes(PERMISSIONS.EXPORT_PDF_ROLES) && (

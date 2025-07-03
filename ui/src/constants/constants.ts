@@ -31,20 +31,20 @@ export const APPBAR_MENU = {
 
 export const PAGE_TITLE = {
   // Page titles
-  COURIER_SERVICE: "Servicio de Mensajería",
+  COURIER_SERVICE: "Gestión de Mensajería y Envíos",
   COURIER_SERVICE_SIMPLIFIED: "Mensajería",
-  DASHBOARD: "Panel de Control Administrativo",
-  DASHBOARD_SIMPLIFIED: "Administración",
-  EMPLOYEES: "Gestión de Personal",
+  DASHBOARD: "Panel de Control",
+  DASHBOARD_SIMPLIFIED: "Panel",
+  EMPLOYEES: "Gestión de Empleados",
   EMPLOYEES_SIMPLIFIED: "Empleados",
   LOGIN: "Iniciar Sesión",
   REGISTER: "Crear Cuenta",
-  ROLES: "Gestión de Roles",
+  ROLES: "Administración de Roles",
   ROLES_SIMPLIFIED: "Roles",
-  SCHEDULES: "Gestión de Horarios",
+  SCHEDULES: "Gestión de Horarios y Turnos",
   SCHEDULES_SIMPLIFIED: "Horarios",
   SETTINGS: "Configuración del Sistema",
-  VEHICLES: "Gestión de Vehículos",
+  VEHICLES: "Gestión de Vehículos y Parqueo",
   VEHICLES_SIMPLIFIED: "Vehículos",
 };
 
