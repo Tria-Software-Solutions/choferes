@@ -28,9 +28,6 @@ import {
   ListItemText,
   useMediaQuery,
   Grid,
-  Dialog,
-  DialogTitle,
-  DialogContent,
 } from "@mui/material";
 import { LocalizationProvider } from "@mui/x-date-pickers";
 import { DatePicker } from "@mui/x-date-pickers/DatePicker";
@@ -60,6 +57,8 @@ import VpnKeyRoundedIcon from '@mui/icons-material/VpnKeyRounded';
 import ToggleOnIcon from '@mui/icons-material/ToggleOn';
 import ToggleOffIcon from '@mui/icons-material/ToggleOff';
 import CustomTextField from "../../Textfield/CustomTextField";
+import DialogComponent from "../../Dialog/DialogComponent";
+import { User } from '../../../models/User';
 
 // EditableTable is a generic, highly-configurable table component for displaying and editing tabular data.
 // Supports inline editing, validation, pagination, sorting, custom renderers, and permission-based actions.
@@ -1314,57 +1313,29 @@ const EditableTable = <T extends object>({
 
       {/* Password change modal */}
       {passwordUserId !== null && handlePasswordModal && (
-        <Dialog
-          open={passwordModalOpen}
-          onClose={() => {
-            setPasswordModalOpen(false);
-            setPasswordUserId(null);
-          }}
-          maxWidth="sm"
-          fullWidth
-          PaperProps={{
-            sx: {
-              border: "2px solid #fff",
-              borderRadius: 3,
-              m: 1,
-              boxSizing: 'border-box',
-            },
-          }}
-        >
-          <DialogTitle
-            sx={{
-              backgroundColor: theme.palette.primary.main,
-              color: theme.palette.primary.contrastText,
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "space-between",
-            }}
-          >
-            <Typography variant="h6" sx={{ fontWeight: 600 }}>
-              Cambiar Contraseña
-            </Typography>
-            <IconButton
-              onClick={() => {
+        // Find the user by id
+        (() => {
+          const user = data.find((u) => getRowId(u) === passwordUserId) as User | undefined;
+          const userFullName = user ? `${user.firstName || ''} ${user.lastName || ''}`.trim() : '';
+          return (
+            <DialogComponent
+              open={passwordModalOpen}
+              onClose={() => {
                 setPasswordModalOpen(false);
                 setPasswordUserId(null);
               }}
-              sx={{
-                color: theme.palette.primary.contrastText,
-                "&:hover": {
-                  backgroundColor: "rgba(255,255,255,0.1)",
-                },
-              }}
+              title="Cambiar Contraseña"
+              subtitle={userFullName}
+              hideActions
+              paperSx={{ minWidth: { xs: '90vw', sm: 500, md: 700 }, maxWidth: { xs: '98vw', sm: 700 } }}
             >
-              <CancelIcon />
-            </IconButton>
-          </DialogTitle>
-          <DialogContent sx={{ p: 2, width: '100%', maxWidth: '100%' }}>
-            {handlePasswordModal(passwordUserId, () => {
-              setPasswordModalOpen(false);
-              setPasswordUserId(null);
-            })}
-          </DialogContent>
-        </Dialog>
+              {handlePasswordModal(passwordUserId, () => {
+                setPasswordModalOpen(false);
+                setPasswordUserId(null);
+              })}
+            </DialogComponent>
+          );
+        })()
       )}
     </Paper>
   );
