@@ -37,6 +37,7 @@ import {
   IconButton,
   Dialog,
   Grid,
+  Stack,
 } from "@mui/material";
 import PaginationActions from "../Pagination/PaginationActions";
 import {
@@ -540,22 +541,29 @@ const SelectorTable: React.FC<SelectorTableProps> = React.memo(
                         justifyContent="space-between"
                         sx={{
                           whiteSpace: isSmallScreen ? "break-spaces" : "nowrap",
-                          gap: 0,
+                          gap: 1,
                         }}
                       >
                         <Typography variant="body2">
                           {employee.firstName} {employee.lastName}
                         </Typography>
-                        {permissions?.includes(
-                          PERMISSIONS.VIEW_EMPLOYEE_ROLES_HOURS,
-                        ) && (
-                          <IconButton
-                            onClick={() => onInfoClick && onInfoClick(employee)}
-                            size="small"
-                            sx={{ ml: 0, p: 0.5 }}
-                          >
-                            <InfoOutlinedIcon fontSize="small" />
-                          </IconButton>
+                        {permissions?.includes(PERMISSIONS.VIEW_EMPLOYEE_ROLES_HOURS) && (
+                          <Tooltip title="Ver información" arrow>
+                            <span>
+                              <IconButton
+                                size="medium"
+                                sx={{
+                                  color: 'primary.main',
+                                  backgroundColor: 'transparent',
+                                  '&:hover': { backgroundColor: 'primary.lighter', boxShadow: 1 },
+                                  transition: 'background 0.2s',
+                                }}
+                                onClick={() => onInfoClick && onInfoClick(employee)}
+                              >
+                                <InfoOutlinedIcon fontSize="medium" />
+                              </IconButton>
+                            </span>
+                          </Tooltip>
                         )}
                       </Box>
                     </TableCell>
@@ -701,30 +709,28 @@ const SelectorTable: React.FC<SelectorTableProps> = React.memo(
                           align="center"
                           sx={{
                             padding: isSmallScreen ? "8px" : "16px",
-                            backgroundColor:
-                              rowIndex % 2 === 0 ? "white" : "#f5f5f5",
+                            backgroundColor: rowIndex % 2 === 0 ? "white" : "#f5f5f5",
                           }}
                         >
-                          <IconButton
-                            onClick={() =>
-                              setOpenAdjustDialogEmployee(employee)
-                            }
-                            disabled={!hasWorkedCurrentWeek(employee)}
-                            sx={{
-                              color: hasWorkedCurrentWeek(employee)
-                                ? "#000"
-                                : "#ccc",
-                              backgroundColor: "transparent",
-                              borderRadius: "50%",
-                              "&:hover": {
-                                backgroundColor: "rgba(0,0,0,0.04)",
-                              },
-                              width: 40,
-                              height: 40,
-                            }}
-                          >
-                            <MoreTimeIcon />
-                          </IconButton>
+                          <Stack direction="row" spacing={1} justifyContent="center" alignItems="center">
+                            <Tooltip title="Ajustar horas" arrow>
+                              <span>
+                                <IconButton
+                                  size="medium"
+                                  disabled={!hasWorkedCurrentWeek(employee)}
+                                  sx={{
+                                    color: hasWorkedCurrentWeek(employee) ? 'warning.main' : 'grey.400',
+                                    backgroundColor: 'transparent',
+                                    '&:hover': { backgroundColor: 'warning.lighter', boxShadow: 1 },
+                                    transition: 'background 0.2s',
+                                  }}
+                                  onClick={() => setOpenAdjustDialogEmployee(employee)}
+                                >
+                                  <MoreTimeIcon fontSize="medium" />
+                                </IconButton>
+                              </span>
+                            </Tooltip>
+                          </Stack>
                         </TableCell>
                         <TableCell
                           align="left"
@@ -733,58 +739,39 @@ const SelectorTable: React.FC<SelectorTableProps> = React.memo(
                             position: isSmallScreen ? "static" : "sticky",
                             right: 0,
                             zIndex: 2,
-                            backgroundColor:
-                              rowIndex % 2 === 0 ? "white" : "#f5f5f5",
+                            backgroundColor: rowIndex % 2 === 0 ? "white" : "#f5f5f5",
                           }}
                         >
-                          <Box
-                            sx={{
-                              display: "flex",
-                              justifyContent: "space-between",
-                              alignItems: "center",
-                              height: "64px",
-                              paddingX: 0,
-                              gap: 0,
-                            }}
-                          >
-                            <Box
-                              sx={{
-                                display: "flex",
-                                alignItems: "center",
-                                flexGrow: 1,
-                                justifyContent: "center",
-                                whiteSpace: "nowrap",
-                              }}
-                            >
-                              <strong>{resultTotalHours(employee)}</strong>
-                              &nbsp;{SELECTOR_TABLE.HOURS}
-                            </Box>
-                            <Box
-                              sx={{
-                                display: "flex",
-                                alignItems: "center",
-                                ml: 0,
-                              }}
-                            >
-                              <Tooltip title={SELECTOR_TABLE.OVERTIME_HOURS} arrow>
-                                <Box>
-                                  <Badge
-                                    badgeContent={resultOvertime(employee)}
-                                    max={9999999}
-                                    color={
-                                      resultOvertime(employee) === 0 ||
-                                      resultOvertime(employee) === "0/0"
-                                        ? "success"
-                                        : "warning"
-                                    }
-                                    showZero
-                                  >
-                                    <AccessTimeRoundedIcon />
-                                  </Badge>
-                                </Box>
-                              </Tooltip>
-                            </Box>
-                          </Box>
+                          <Stack direction="row" spacing={3.5} alignItems="center" justifyContent="center" sx={{ height: 1 }}>
+                            <Typography variant="body2" fontWeight={600} sx={{ minWidth: 48, textAlign: 'right' }}>
+                              {resultTotalHours(employee)} {SELECTOR_TABLE.HOURS}
+                            </Typography>
+                            <Tooltip title={SELECTOR_TABLE.OVERTIME_HOURS} arrow>
+                              <span>
+                                <Badge
+                                  badgeContent={resultOvertime(employee)}
+                                  max={9999999}
+                                  color={
+                                    resultOvertime(employee) === 0 || resultOvertime(employee) === "0/0"
+                                      ? "success"
+                                      : "warning"
+                                  }
+                                  showZero
+                                  sx={{
+                                    '& .MuiBadge-badge': {
+                                      fontSize: '0.95rem',
+                                      minWidth: 22,
+                                      height: 22,
+                                      borderRadius: '50%',
+                                      boxShadow: 1,
+                                    },
+                                  }}
+                                >
+                                  <AccessTimeRoundedIcon sx={{ color: 'primary.main', fontSize: 28 }} />
+                                </Badge>
+                              </span>
+                            </Tooltip>
+                          </Stack>
                         </TableCell>
                       </>
                     )}
