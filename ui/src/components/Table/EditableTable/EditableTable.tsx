@@ -49,15 +49,16 @@ import {
   DAYS_LIST,
   PERMISSIONS,
   TABLE,
+  TABLE_UI,
 } from "../../../constants/constants";
 import EditNoteIcon from '@mui/icons-material/EditNote';
 import DeleteForeverIcon from '@mui/icons-material/DeleteForever';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import CancelIcon from '@mui/icons-material/Cancel';
 import PaginationActions from "../Pagination/PaginationActions";
-import PasswordIcon from "@mui/icons-material/Password";
-import CheckCircleOutlineIcon from "@mui/icons-material/CheckCircleOutline";
-import BlockIcon from "@mui/icons-material/Block";
+import VpnKeyRoundedIcon from '@mui/icons-material/VpnKeyRounded';
+import ToggleOnIcon from '@mui/icons-material/ToggleOn';
+import ToggleOffIcon from '@mui/icons-material/ToggleOff';
 import CustomTextField from "../../Textfield/CustomTextField";
 
 // EditableTable is a generic, highly-configurable table component for displaying and editing tabular data.
@@ -942,6 +943,7 @@ const EditableTable = <T extends object>({
                                     display: "flex",
                                     alignItems: "center",
                                     height: "28px",
+                                    mt: 1,
                                   }}
                                   onClick={() =>
                                     setExpandedRows((prev) => ({
@@ -950,7 +952,7 @@ const EditableTable = <T extends object>({
                                     }))
                                   }
                                 >
-                                  Ver más
+                                  {TABLE_UI.VIEW_MORE}
                                 </Typography>
                               )}
                               {showAll && (
@@ -967,6 +969,7 @@ const EditableTable = <T extends object>({
                                     display: "flex",
                                     alignItems: "center",
                                     height: "28px",
+                                    mt: 1,
                                   }}
                                   onClick={() =>
                                     setExpandedRows((prev) => ({
@@ -975,7 +978,7 @@ const EditableTable = <T extends object>({
                                     }))
                                   }
                                 >
-                                  Ver menos
+                                  {TABLE_UI.VIEW_LESS}
                                 </Typography>
                               )}
                             </Box>
@@ -1195,7 +1198,7 @@ const EditableTable = <T extends object>({
                                             setPasswordModalOpen(true);
                                           }}
                                         >
-                                          <PasswordIcon />
+                                          <VpnKeyRoundedIcon />
                                         </IconButton>
                                       </Box>
                                     </Tooltip>
@@ -1234,9 +1237,9 @@ const EditableTable = <T extends object>({
                                           }
                                         >
                                           {row.isActive ? (
-                                            <CheckCircleOutlineIcon />
+                                            <ToggleOnIcon sx={{ color: 'success.main' }} />
                                           ) : (
-                                            <BlockIcon />
+                                            <ToggleOffIcon sx={{ color: 'grey.500' }} />
                                           )}
                                         </IconButton>
                                       </Box>
