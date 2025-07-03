@@ -39,9 +39,9 @@ import DialogComponent from "../../components/Dialog/DialogComponent";
 import AddRoundedIcon from "@mui/icons-material/AddRounded";
 import { DASHBOARD_USERS } from "../../constants/constants";
 import { NOTIFICATIONS } from "../../constants/constants";
-import CustomTextField from '../../components/Textfield/CustomTextField';
-import generateSecret from '../../utils/generateSecret';
-import ContentCopyIcon from '@mui/icons-material/ContentCopy';
+import CustomTextField from "../../components/Textfield/CustomTextField";
+import generateSecret from "../../utils/generateSecret";
+import ContentCopyIcon from "@mui/icons-material/ContentCopy";
 
 // ManageUsers page component for user management in the dashboard
 const ManageUsers: React.FC<{ isExpanded?: boolean }> = ({
@@ -94,7 +94,7 @@ const ManageUsers: React.FC<{ isExpanded?: boolean }> = ({
         const timeoutPromise = new Promise((_, reject) => {
           setTimeout(
             () => reject(new Error("Timeout: La carga tardó demasiado")),
-            30000,
+            30000
           );
         });
 
@@ -109,7 +109,7 @@ const ManageUsers: React.FC<{ isExpanded?: boolean }> = ({
         setLoadError(
           error instanceof Error
             ? error.message
-            : DASHBOARD_USERS.LOAD_ERROR_TITLE,
+            : DASHBOARD_USERS.LOAD_ERROR_TITLE
         );
         showNotification(DASHBOARD_USERS.LOAD_ERROR_TITLE, 5000, false);
       }
@@ -159,7 +159,7 @@ const ManageUsers: React.FC<{ isExpanded?: boolean }> = ({
 
         try {
           const searchText = normalizeString(
-            `${user.firstName || ""} ${user.lastName || ""} ${user.email || ""} ${user.username || ""} ${user.roleName || ""}`,
+            `${user.firstName || ""} ${user.lastName || ""} ${user.email || ""} ${user.username || ""} ${user.roleName || ""}`
           ).toLowerCase();
 
           return searchText.includes(normalizeString(filter).toLowerCase());
@@ -196,7 +196,7 @@ const ManageUsers: React.FC<{ isExpanded?: boolean }> = ({
             regex.text.test(fields.roleName)
         : isValid;
     },
-    [],
+    []
   );
 
   // Validates new password fields
@@ -217,7 +217,7 @@ const ManageUsers: React.FC<{ isExpanded?: boolean }> = ({
         !passwordRegex.test(fields.confirmNewPassword)
       ) {
         setError(
-          "El valor es inválido.\n\n- Mínimo 8 caracteres.\n- Al menos una letra mayúscula.\n- Al menos una letra minúscula.\n- Al menos un número.\n- Al menos un carácter especial",
+          "El valor es inválido.\n\n- Mínimo 8 caracteres.\n- Al menos una letra mayúscula.\n- Al menos una letra minúscula.\n- Al menos un número.\n- Al menos un carácter especial"
         );
         return false;
       }
@@ -225,7 +225,7 @@ const ManageUsers: React.FC<{ isExpanded?: boolean }> = ({
       setError(null);
       return true;
     },
-    [],
+    []
   );
 
   const isPasswordFormValid = useMemo(() => {
@@ -257,7 +257,7 @@ const ManageUsers: React.FC<{ isExpanded?: boolean }> = ({
       setFilter(e.target.value);
       setPage(0);
     },
-    [setPage],
+    [setPage]
   );
 
   const handleEdit = useCallback((user: User) => {
@@ -302,7 +302,7 @@ const ManageUsers: React.FC<{ isExpanded?: boolean }> = ({
           id,
           updatedUser,
           newRoleId: role.id,
-        }),
+        })
       );
       setEditRowId(null);
       setEditFields({
@@ -339,20 +339,20 @@ const ManageUsers: React.FC<{ isExpanded?: boolean }> = ({
         updateUserStatus({
           id: userToChange.id,
           status: !userToChange.isActive,
-        }),
+        })
       );
       setOpenStatusDialog(false);
       setUserToChange(null);
       showNotification(
         "Estado del usuario actualizado exitosamente",
         3000,
-        false,
+        false
       );
     } catch (error) {
       showNotification(
         "Error al actualizar el estado del usuario",
         5000,
-        false,
+        false
       );
     } finally {
       setIsUpdatingUserStatus(false);
@@ -366,7 +366,7 @@ const ManageUsers: React.FC<{ isExpanded?: boolean }> = ({
         newPassword: event.target.value,
       });
     },
-    [passwordFields],
+    [passwordFields]
   );
 
   const handleConfirmNewPassword = useCallback(
@@ -376,7 +376,7 @@ const ManageUsers: React.FC<{ isExpanded?: boolean }> = ({
         confirmNewPassword: event.target.value,
       });
     },
-    [passwordFields],
+    [passwordFields]
   );
 
   const handleToggleNewPassword = useCallback(() => {
@@ -397,7 +397,7 @@ const ManageUsers: React.FC<{ isExpanded?: boolean }> = ({
             updateUserPassword({
               id,
               password: passwordFields.newPassword,
-            }),
+            })
           );
           setPasswordFields({
             newPassword: "",
@@ -409,18 +409,18 @@ const ManageUsers: React.FC<{ isExpanded?: boolean }> = ({
           showNotification(
             "La contraseña fue actualizada exitosamente",
             3000,
-            false,
+            false
           );
         } catch (error) {
           showNotification(
             "Ha ocurrido un error al actualizar la contraseña",
             5000,
-            false,
+            false
           );
         }
       }
     },
-    [validateNewPasswordFields, passwordFields, dispatch, showNotification],
+    [validateNewPasswordFields, passwordFields, dispatch, showNotification]
   );
 
   const handlePasswordModal = useCallback(
@@ -444,14 +444,15 @@ const ManageUsers: React.FC<{ isExpanded?: boolean }> = ({
       };
 
       return (
-        <Box sx={{ p: 0 }}>
-          <Typography variant="h6" gutterBottom>
-            {DASHBOARD_USERS.DIALOG_PASSWORD_TITLE} {id}
-          </Typography>
-          <Typography variant="body2" color="textSecondary" sx={{ mb: 3 }}>
+        <Box>
+          <Typography
+            variant="body2"
+            color="textSecondary"
+            sx={{ mb: 3}}
+          >
             {DASHBOARD_USERS.DIALOG_PASSWORD_SUBTITLE}
           </Typography>
-          <Stack spacing={2} sx={{ width: '100%' }}>
+          <Stack>
             <CustomTextField
               label={DASHBOARD_USERS.DIALOG_PASSWORD_NEW}
               type={showNewPassword ? "text" : "password"}
@@ -503,7 +504,15 @@ const ManageUsers: React.FC<{ isExpanded?: boolean }> = ({
               Generar contraseña temporal
             </Button>
             {temporalPassword && (
-              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mt: 1, width: '100%' }}>
+              <Box
+                sx={{
+                  display: "flex",
+                  alignItems: "center",
+                  gap: 1,
+                  mt: 1,
+                  width: "100%",
+                }}
+              >
                 <CustomTextField
                   label="Contraseña temporal generada"
                   value={temporalPassword}
@@ -511,9 +520,19 @@ const ManageUsers: React.FC<{ isExpanded?: boolean }> = ({
                   InputProps={{
                     readOnly: true,
                     endAdornment: (
-                      <Tooltip title={copySuccess ? '¡Copiado!' : 'Copiar'} placement="top">
-                        <IconButton onClick={handleCopyTemporalPassword} edge="end" size="small">
-                          <ContentCopyIcon color={copySuccess ? 'success' : 'inherit'} fontSize="small" />
+                      <Tooltip
+                        title={copySuccess ? "¡Copiado!" : "Copiar"}
+                        placement="top"
+                      >
+                        <IconButton
+                          onClick={handleCopyTemporalPassword}
+                          edge="end"
+                          size="small"
+                        >
+                          <ContentCopyIcon
+                            color={copySuccess ? "success" : "inherit"}
+                            fontSize="small"
+                          />
                         </IconButton>
                       </Tooltip>
                     ),
@@ -527,7 +546,15 @@ const ManageUsers: React.FC<{ isExpanded?: boolean }> = ({
                 {error}
               </Alert>
             )}
-            <Box sx={{ display: "flex", gap: 2, justifyContent: "flex-end", mt: 2, width: '100%' }}>
+            <Box
+              sx={{
+                display: "flex",
+                gap: 2,
+                justifyContent: "flex-end",
+                mt: 2,
+                width: "100%",
+              }}
+            >
               <Button variant="outlined" onClick={handleClose} fullWidth>
                 {DASHBOARD_USERS.DIALOG_PASSWORD_CANCEL}
               </Button>
@@ -546,21 +573,19 @@ const ManageUsers: React.FC<{ isExpanded?: boolean }> = ({
     },
     [
       showNewPassword,
-      showConfirmNewPassword,
-      passwordFields,
+      passwordFields.newPassword,
+      passwordFields.confirmNewPassword,
       handleNewPassword,
-      handleConfirmNewPassword,
       handleToggleNewPassword,
+      showConfirmNewPassword,
+      handleConfirmNewPassword,
       handleToggleConfirmNewPassword,
+      temporalPassword,
+      copySuccess,
       error,
       isPasswordFormValid,
       handleChangePassword,
-      temporalPassword,
-      copySuccess,
-      setPasswordFields,
-      setTemporalPassword,
-      setCopySuccess
-    ],
+    ]
   );
 
   const handleOpenAddUserModal = useCallback(() => {
@@ -599,7 +624,7 @@ const ManageUsers: React.FC<{ isExpanded?: boolean }> = ({
         createUser({
           newUser,
           newRoleId: role.id,
-        }),
+        })
       );
       setOpenAddUserModal(false);
       showNotification(NOTIFICATIONS.USER_CREATED, 3000, false);
@@ -632,7 +657,7 @@ const ManageUsers: React.FC<{ isExpanded?: boolean }> = ({
           return true;
       }
     },
-    [],
+    []
   );
 
   const handleRetry = useCallback(() => {
@@ -646,7 +671,7 @@ const ManageUsers: React.FC<{ isExpanded?: boolean }> = ({
     (field: string, value: string | boolean | number | string[] | Date) => {
       setEditFields({ ...editFields, [field]: value });
     },
-    [editFields],
+    [editFields]
   );
 
   return (
@@ -769,7 +794,9 @@ const ManageUsers: React.FC<{ isExpanded?: boolean }> = ({
                       whiteSpace: "nowrap",
                     }}
                   >
-                    {showInactive ? DASHBOARD_USERS.HIDE_INACTIVE : DASHBOARD_USERS.SHOW_INACTIVE}
+                    {showInactive
+                      ? DASHBOARD_USERS.HIDE_INACTIVE
+                      : DASHBOARD_USERS.SHOW_INACTIVE}
                   </Typography>
                 </Box>
                 <Button
@@ -819,7 +846,9 @@ const ManageUsers: React.FC<{ isExpanded?: boolean }> = ({
                       whiteSpace: "nowrap",
                     }}
                   >
-                    {showInactive ? DASHBOARD_USERS.HIDE_INACTIVE : DASHBOARD_USERS.SHOW_INACTIVE}
+                    {showInactive
+                      ? DASHBOARD_USERS.HIDE_INACTIVE
+                      : DASHBOARD_USERS.SHOW_INACTIVE}
                   </Typography>
                 </Box>
               </Box>
@@ -828,7 +857,7 @@ const ManageUsers: React.FC<{ isExpanded?: boolean }> = ({
           <br />
           {filteredUsers.length > 0 ? (
             <EditableTable<User>
-              key={filteredUsers.map(u => u.id + '-' + u.isActive).join(',')}
+              key={filteredUsers.map((u) => u.id + "-" + u.isActive).join(",")}
               data={filteredUsers}
               columns={[
                 "firstName",
