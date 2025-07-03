@@ -121,6 +121,7 @@ type EditableTableProps<T> = {
   passwordUserId?: number | null;
   onOpenPasswordModal?: (userId: number) => void;
   onClosePasswordModal?: () => void;
+  showStatusColumn?: boolean;
 };
 
 const PARKING_PREFIX_OPTIONS = [
@@ -157,6 +158,7 @@ const EditableTable = <T extends object>({
   passwordUserId,
   onOpenPasswordModal,
   onClosePasswordModal = () => {},
+  showStatusColumn = false,
 }: EditableTableProps<T>) => {
   const { currentUser } = useAuthContext();
   const { roles } = useSelector((state: RootState) => state.roles);
@@ -895,22 +897,24 @@ const EditableTable = <T extends object>({
                     </TableSortLabel>
                   </TableCell>
                 ))}
-              <TableCell
-                className="tableCell"
-                sx={{
-                  position: 'sticky',
-                  top: 0,
-                  zIndex: 4,
-                  backgroundColor: theme => theme.palette.primary.main,
-                  color: theme => theme.palette.primary.contrastText,
-                  fontWeight: 700,
-                  fontSize: 'clamp(0.95rem, 1vw, 1.05rem)',
-                  padding: '12px 16px',
-                  whiteSpace: 'nowrap',
-                }}
-              >
-                Estado
-              </TableCell>
+              {showStatusColumn && (
+                <TableCell
+                  className="tableCell"
+                  sx={{
+                    position: 'sticky',
+                    top: 0,
+                    zIndex: 4,
+                    backgroundColor: theme => theme.palette.primary.main,
+                    color: theme => theme.palette.primary.contrastText,
+                    fontWeight: 700,
+                    fontSize: 'clamp(0.95rem, 1vw, 1.05rem)',
+                    padding: '12px 16px',
+                    whiteSpace: 'nowrap',
+                  }}
+                >
+                  Estado
+                </TableCell>
+              )}
               {columns
                 .filter((column) => !columnConfig[String(column)]?.hidden)
                 .slice(2)
@@ -1229,24 +1233,26 @@ const EditableTable = <T extends object>({
                         </TableCell>
                       );
                     })}
-                  <TableCell className="tableCell" sx={{ borderRight: '1px solid #f0f0f0', borderBottom: '1px solid #f0f0f0', padding: '10px 16px', textAlign: 'center' }}>
-                    {isUser && !isCurrentUser && ('isActive' in row) && hasDeletePermissions && (
-                      <Tooltip title={row.isActive ? TABLE.DISABLE : TABLE.ENABLE} arrow>
-                        <Box>
-                          <IconButton
-                            color="secondary"
-                            onClick={() => handleOpenStatusDialog && handleOpenStatusDialog(row)}
-                          >
-                            {row.isActive ? (
-                              <ToggleOnIcon sx={{ color: 'success.main' }} />
-                            ) : (
-                              <ToggleOffIcon sx={{ color: 'grey.500' }} />
-                            )}
-                          </IconButton>
-                        </Box>
-                      </Tooltip>
-                    )}
-                  </TableCell>
+                  {showStatusColumn && (
+                    <TableCell className="tableCell" sx={{ borderRight: '1px solid #f0f0f0', borderBottom: '1px solid #f0f0f0', padding: '10px 16px', textAlign: 'center' }}>
+                      {isUser && !isCurrentUser && ('isActive' in row) && hasDeletePermissions && (
+                        <Tooltip title={row.isActive ? TABLE.DISABLE : TABLE.ENABLE} arrow>
+                          <Box>
+                            <IconButton
+                              color="secondary"
+                              onClick={() => handleOpenStatusDialog && handleOpenStatusDialog(row)}
+                            >
+                              {row.isActive ? (
+                                <ToggleOnIcon sx={{ color: 'success.main' }} />
+                              ) : (
+                                <ToggleOffIcon sx={{ color: 'grey.500' }} />
+                              )}
+                            </IconButton>
+                          </Box>
+                        </Tooltip>
+                      )}
+                    </TableCell>
+                  )}
                   {columns
                     .filter((column) => !columnConfig[String(column)]?.hidden)
                     .slice(2)
