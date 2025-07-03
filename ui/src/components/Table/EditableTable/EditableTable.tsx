@@ -50,10 +50,10 @@ import {
   PERMISSIONS,
   TABLE,
 } from "../../../constants/constants";
-import DeleteIcon from "@mui/icons-material/Delete";
-import EditIcon from "@mui/icons-material/Edit";
-import SaveIcon from "@mui/icons-material/Save";
-import CloseIcon from "@mui/icons-material/Close";
+import EditNoteIcon from '@mui/icons-material/EditNote';
+import DeleteForeverIcon from '@mui/icons-material/DeleteForever';
+import CheckCircleIcon from '@mui/icons-material/CheckCircle';
+import CancelIcon from '@mui/icons-material/Cancel';
 import PaginationActions from "../Pagination/PaginationActions";
 import PasswordIcon from "@mui/icons-material/Password";
 import CheckCircleOutlineIcon from "@mui/icons-material/CheckCircleOutline";
@@ -753,7 +753,7 @@ const EditableTable = <T extends object>({
   };
 
   return (
-    <Paper sx={{ width: "100%" }}>
+    <Paper sx={{ width: "100%", borderRadius: 1, boxShadow: '0 4px 24px -4px rgba(0,0,0,0.10)', overflow: 'hidden' }}>
       {groupByDate && (
         <Box
           sx={{
@@ -780,24 +780,33 @@ const EditableTable = <T extends object>({
       )}
       <TableContainer
         className="table-container"
-        sx={{ maxHeight: "58vh", overflowX: "auto" }}
+        sx={{ maxHeight: "58vh", overflowY: "auto", overflowX: "auto", borderRadius: 0 }}
       >
-        <Table stickyHeader aria-label="sticky table">
-          <TableHead
-            sx={{
-              position: "sticky",
-              top: 0,
-              zIndex: 4,
-            }}
-          >
+        <Table stickyHeader aria-label="sticky table" sx={{ minWidth: 650, borderCollapse: 'separate', borderSpacing: 0 }}>
+          <TableHead>
             <TableRow>
               {columns
                 .filter((column) => !columnConfig[String(column)]?.hidden)
                 .map((column) => (
-                  <TableCell key={String(column)} className="tableCell" sx={{ whiteSpace: 'nowrap' }}>
+                  <TableCell
+                    key={String(column)}
+                    className="tableCell"
+                    sx={{
+                      position: 'sticky',
+                      top: 0,
+                      zIndex: 4,
+                      backgroundColor: theme => theme.palette.primary.main,
+                      color: theme => theme.palette.primary.contrastText,
+                      fontWeight: 700,
+                      fontSize: 'clamp(0.95rem, 1vw, 1.05rem)',
+                      padding: '12px 16px',
+                      whiteSpace: 'nowrap',
+                    }}
+                  >
                     <TableSortLabel
                       direction={orderBy === column ? order : "asc"}
                       onClick={() => handleSortRequest(column)}
+                      sx={{ color: 'inherit', '& .MuiTableSortLabel-icon': { color: 'inherit !important' } }}
                     >
                       {translateColumnHeaderToSpanish(column)}
                     </TableSortLabel>
@@ -810,24 +819,58 @@ const EditableTable = <T extends object>({
                     <TableCell
                       key={`header-${String(column)}`}
                       className="tableCell"
-                      sx={{ whiteSpace: 'nowrap' }}
+                      sx={{
+                        position: 'sticky',
+                        top: 0,
+                        zIndex: 4,
+                        backgroundColor: theme => theme.palette.primary.main,
+                        color: theme => theme.palette.primary.contrastText,
+                        fontWeight: 700,
+                        fontSize: 'clamp(0.95rem, 1vw, 1.05rem)',
+                        padding: '12px 16px',
+                        whiteSpace: 'nowrap',
+                      }}
                     >
                       {translateColumnHeaderToSpanish(column)}
                     </TableCell>
                   ))}
               {!noActions || hasEditPermissions || hasDeletePermissions ? (
-                <TableCell className="tableCell" style={{ width: "100px", whiteSpace: 'nowrap' }} />
+                <TableCell
+                  className="tableCell"
+                  style={{ width: "100px", whiteSpace: 'nowrap' }}
+                  sx={{
+                    position: 'sticky',
+                    top: 0,
+                    zIndex: 4,
+                    backgroundColor: theme => theme.palette.primary.main,
+                    color: theme => theme.palette.primary.contrastText,
+                    fontWeight: 700,
+                    fontSize: 'clamp(0.95rem, 1vw, 1.05rem)',
+                    padding: '12px 16px',
+                  }}
+                />
               ) : null}
             </TableRow>
           </TableHead>
           <TableBody>
-            {paginatedData.map((row) => {
+            {paginatedData.map((row, rowIndex) => {
               const rowId = getRowId(row);
               const isCurrentUser = rowId === currentUser?.id;
               const isUser = "username" in row;
 
               return (
-                <TableRow hover tabIndex={-1} key={getRowId(row)}>
+                <TableRow
+                  hover
+                  tabIndex={-1}
+                  key={getRowId(row)}
+                  sx={{
+                    backgroundColor: rowIndex % 2 === 0 ? '#fff' : '#f6f8fa',
+                    transition: 'background 0.2s',
+                    '&:hover': {
+                      backgroundColor: '#e3eafc',
+                    },
+                  }}
+                >
                   {columns
                     .filter((column) => !columnConfig[String(column)]?.hidden)
                     .map((column) => {
@@ -846,7 +889,15 @@ const EditableTable = <T extends object>({
                           : value.slice(0, maxVisible);
                         const hiddenCount = value.length - maxVisible;
                         return (
-                          <TableCell key={String(column)} className="tableCell">
+                          <TableCell
+                            key={String(column)}
+                            className="tableCell"
+                            sx={{
+                              borderRight: '1px solid #f0f0f0',
+                              borderBottom: '1px solid #f0f0f0',
+                              padding: '10px 16px',
+                            }}
+                          >
                             <Box
                               sx={{
                                 display: "flex",
@@ -932,7 +983,15 @@ const EditableTable = <T extends object>({
                         );
                       }
                       return (
-                        <TableCell key={String(column)} className="tableCell">
+                        <TableCell
+                          key={String(column)}
+                          className="tableCell"
+                          sx={{
+                            borderRight: '1px solid #f0f0f0',
+                            borderBottom: '1px solid #f0f0f0',
+                            padding: '10px 16px',
+                          }}
+                        >
                           {editRowId === getRowId(row) ? (
                             renderEditField(
                               column,
@@ -1103,7 +1162,7 @@ const EditableTable = <T extends object>({
                                   }
                                   disabled={isSaveDisabled}
                                 >
-                                  <SaveIcon />
+                                  <CheckCircleIcon />
                                 </IconButton>
                               </Box>
                             </Tooltip>
@@ -1115,7 +1174,7 @@ const EditableTable = <T extends object>({
                                     handleCancelClick && handleCancelClick()
                                   }
                                 >
-                                  <CloseIcon />
+                                  <CancelIcon />
                                 </IconButton>
                               </Box>
                             </Tooltip>
@@ -1149,7 +1208,7 @@ const EditableTable = <T extends object>({
                                         handleEditClick && handleEditClick(row)
                                       }
                                     >
-                                      <EditIcon />
+                                      <EditNoteIcon />
                                     </IconButton>
                                   </Box>
                                 </Tooltip>
@@ -1194,7 +1253,7 @@ const EditableTable = <T extends object>({
                                             )
                                           }
                                         >
-                                          <DeleteIcon />
+                                          <DeleteForeverIcon />
                                         </IconButton>
                                       </Box>
                                     </Tooltip>
@@ -1209,7 +1268,7 @@ const EditableTable = <T extends object>({
                                           handleOpenDeleteDialog(getRowId(row))
                                         }
                                       >
-                                        <DeleteIcon />
+                                        <DeleteForeverIcon />
                                       </IconButton>
                                     </Box>
                                   </Tooltip>
@@ -1247,6 +1306,7 @@ const EditableTable = <T extends object>({
         }
         labelDisplayedRows={() => ""}
         ActionsComponent={PaginationActions}
+        sx={{ borderRadius: '0 0 12px 12px' }}
       />
 
       {/* Password change modal */}
@@ -1290,7 +1350,7 @@ const EditableTable = <T extends object>({
                 },
               }}
             >
-              <CloseIcon />
+              <CancelIcon />
             </IconButton>
           </DialogTitle>
           <DialogContent sx={{ p: 3 }}>
