@@ -142,7 +142,24 @@ export const updateUser = async (id: number, data: Omit<User, "id">) => {
 // Updates the active status of a user
 export const updateUserStatus = async (id: number, status: boolean) => {
   await User.update({ isActive: status }, { where: { id } });
-  return User.findByPk(id);
+  const user = await User.findByPk(id, {
+    include: [
+      {
+        model: Role,
+        as: "roles",
+        through: { attributes: [] },
+        include: [
+          {
+            model: Permission,
+            as: "permissions",
+            through: { attributes: [] },
+          },
+        ],
+      },
+    ],
+  });
+  console.log('Returned user:', JSON.stringify(user, null, 2));
+  return user;
 };
 
 // Updates the password of a user (hashes new password)

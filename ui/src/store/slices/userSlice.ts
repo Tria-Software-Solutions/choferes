@@ -187,8 +187,8 @@ export const updateUserStatus = createAsyncThunk(
     { rejectWithValue },
   ) => {
     try {
-      await UserService.updateUserStatus(id, status);
-      return { id, status };
+      const updatedUser = await UserService.updateUserStatus(id, status);
+      return updatedUser;
     } catch (error: unknown) {
       return rejectWithValue(
         error instanceof Error ? error.message : "Failed to update user status",
@@ -327,12 +327,10 @@ const userSlice = createSlice({
       )
       .addCase(
         updateUserStatus.fulfilled,
-        (state, action: PayloadAction<{ id: number; status: boolean }>) => {
-          // Update a user's status in the state
+        (state, action: PayloadAction<User>) => {
+          // Update a user in the state with the full updated user object
           state.users = state.users.map((user) =>
-            user.id === action.payload.id
-              ? { ...user, isActive: action.payload.status }
-              : user,
+            user.id === action.payload.id ? action.payload : user
           );
         },
       )

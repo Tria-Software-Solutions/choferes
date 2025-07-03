@@ -22,6 +22,7 @@ import userRoleRoutes from "./routes/userRoleRoutes";
 import rolePermissionRoutes from "./routes/rolePermissionRoutes";
 import sequelize from "./config/database";
 import "./database/models";
+import "./database/associations";
 
 dotenv.config();
 

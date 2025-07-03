@@ -863,7 +863,7 @@ const EditableTable = <T extends object>({
                 <TableRow
                   hover
                   tabIndex={-1}
-                  key={getRowId(row)}
+                  key={getRowId(row) + '-' + String((row as T & { isActive?: boolean }).isActive)}
                   sx={{
                     backgroundColor: rowIndex % 2 === 0 ? '#fff' : '#f6f8fa',
                     transition: 'background 0.2s',
@@ -1326,6 +1326,8 @@ const EditableTable = <T extends object>({
             sx: {
               border: "2px solid #fff",
               borderRadius: 3,
+              m: 1,
+              boxSizing: 'border-box',
             },
           }}
         >
@@ -1356,7 +1358,7 @@ const EditableTable = <T extends object>({
               <CancelIcon />
             </IconButton>
           </DialogTitle>
-          <DialogContent sx={{ p: 3 }}>
+          <DialogContent sx={{ p: 2, width: '100%', maxWidth: '100%' }}>
             {handlePasswordModal(passwordUserId, () => {
               setPasswordModalOpen(false);
               setPasswordUserId(null);
