@@ -24,6 +24,7 @@ import {
   useMediaQuery,
   CircularProgress,
   Backdrop,
+  Divider,
 } from "@mui/material";
 import {
   createExportOptions,
@@ -33,7 +34,7 @@ import {
 } from "../../utils/export";
 import { translateDayOptionsToSpanish } from "../../utils/string";
 import { PAGE_TITLE, PERMISSIONS, SCHEDULES_PAGE } from "../../constants/constants";
-import EditCalendarRoundedIcon from "@mui/icons-material/EditCalendarRounded";
+import EditCalendarIcon from "@mui/icons-material/EditCalendar";
 import DownloadRoundedIcon from "@mui/icons-material/DownloadRounded";
 import CloseRoundedIcon from "@mui/icons-material/CloseRounded";
 import ManageSearchIcon from "@mui/icons-material/ManageSearch";
@@ -253,20 +254,23 @@ const SchedulesPage: React.FC = () => {
         alignItems="center"
         sx={{ mb: 3 }}
       >
-        <Box display="flex" alignItems="center">
-          <EditCalendarRoundedIcon
-            fontSize={isSmallScreen ? "small" : "large"}
-          />
-          <Box sx={{ ml: 1 }}>
-            <Typography
-              variant={isSmallScreen ? "h5" : "h4"}
-              sx={{ flexGrow: 1 }}
-            >
-              {isSmallScreen
-                ? PAGE_TITLE.SCHEDULES_SIMPLIFIED
-                : PAGE_TITLE.SCHEDULES}
-            </Typography>
-          </Box>
+        <Box display="flex" flexDirection="column" alignItems="flex-start" sx={{ mb: 2 }}>
+          <Typography
+            variant={isSmallScreen ? "h5" : "h4"}
+            sx={{
+              display: 'flex',
+              alignItems: 'center',
+              fontFamily: "'Urbanist', sans-serif",
+              fontWeight: 800,
+              color: "#000000",
+              mb: 0.5,
+              gap: 1.5,
+            }}
+          >
+            <EditCalendarIcon fontSize={isSmallScreen ? "small" : "large"} sx={{ mr: 1, color: theme.palette.primary.main }} />
+            {PAGE_TITLE.SCHEDULES}
+          </Typography>
+          <Divider sx={{ width: 48, borderBottomWidth: 3, borderColor: theme.palette.primary.main, borderRadius: 2, mx: 'auto', mb: 0.5 }} />
         </Box>
         {userPermissions.includes(PERMISSIONS.EXPORT_EXCEL_SCHEDULES) &&
           userPermissions.includes(PERMISSIONS.EXPORT_PDF_SCHEDULES) && (

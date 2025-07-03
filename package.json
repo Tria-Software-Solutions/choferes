@@ -6,5 +6,8 @@
   },
   "scripts": {
     "prepare": "husky install"
+  },
+  "dependencies": {
+    "@fontsource/moirai-one": "^5.2.6"
   }
 }
