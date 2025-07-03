@@ -11,7 +11,7 @@ interface SearchBarProps {
   onChange: (event: React.ChangeEvent<HTMLInputElement>) => void;
   placeholder?: string;
   fullWidth?: boolean;
-  sx?: unknown;
+  sx?: object;
   onSearch?: () => void;
 }
 
