@@ -53,7 +53,7 @@ import DeleteForeverIcon from '@mui/icons-material/DeleteForever';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import CancelIcon from '@mui/icons-material/Cancel';
 import PaginationActions from "../Pagination/PaginationActions";
-import VpnKeyRoundedIcon from '@mui/icons-material/VpnKeyRounded';
+import LockResetIcon from '@mui/icons-material/LockReset';
 import ToggleOnIcon from '@mui/icons-material/ToggleOn';
 import ToggleOffIcon from '@mui/icons-material/ToggleOff';
 import CustomTextField from "../../Textfield/CustomTextField";
@@ -117,6 +117,10 @@ type EditableTableProps<T> = {
   noActions?: boolean;
   userPermissions?: string[];
   isExpanded?: boolean;
+  passwordModalOpen?: boolean;
+  passwordUserId?: number | null;
+  onOpenPasswordModal?: (userId: number) => void;
+  onClosePasswordModal?: () => void;
 };
 
 const EditableTable = <T extends object>({
@@ -144,14 +148,16 @@ const EditableTable = <T extends object>({
   noActions,
   userPermissions,
   isExpanded = true,
+  passwordModalOpen,
+  passwordUserId,
+  onOpenPasswordModal,
+  onClosePasswordModal = () => {},
 }: EditableTableProps<T>) => {
   const { currentUser } = useAuthContext();
   const { roles } = useSelector((state: RootState) => state.roles);
   const { permissions } = useSelector((state: RootState) => state.permissions);
   const [order, setOrder] = useState<"asc" | "desc">("asc");
   const [orderBy, setOrderBy] = useState<keyof T>(columns[0]);
-  const [passwordModalOpen, setPasswordModalOpen] = useState(false);
-  const [passwordUserId, setPasswordUserId] = useState<number | null>(null);
   const [expandedRows, setExpandedRows] = useState<Record<number, boolean>>({});
 
   const theme = useTheme();
@@ -787,6 +793,7 @@ const EditableTable = <T extends object>({
             <TableRow>
               {columns
                 .filter((column) => !columnConfig[String(column)]?.hidden)
+                .slice(0, 2)
                 .map((column) => (
                   <TableCell
                     key={String(column)}
@@ -812,28 +819,50 @@ const EditableTable = <T extends object>({
                     </TableSortLabel>
                   </TableCell>
                 ))}
-              {editRowId !== null &&
-                columns
-                  .filter((column) => columnConfig[String(column)]?.hidden)
-                  .map((column) => (
-                    <TableCell
-                      key={`header-${String(column)}`}
-                      className="tableCell"
-                      sx={{
-                        position: 'sticky',
-                        top: 0,
-                        zIndex: 4,
-                        backgroundColor: theme => theme.palette.primary.main,
-                        color: theme => theme.palette.primary.contrastText,
-                        fontWeight: 700,
-                        fontSize: 'clamp(0.95rem, 1vw, 1.05rem)',
-                        padding: '12px 16px',
-                        whiteSpace: 'nowrap',
-                      }}
+              <TableCell
+                className="tableCell"
+                sx={{
+                  position: 'sticky',
+                  top: 0,
+                  zIndex: 4,
+                  backgroundColor: theme => theme.palette.primary.main,
+                  color: theme => theme.palette.primary.contrastText,
+                  fontWeight: 700,
+                  fontSize: 'clamp(0.95rem, 1vw, 1.05rem)',
+                  padding: '12px 16px',
+                  whiteSpace: 'nowrap',
+                }}
+              >
+                Estado
+              </TableCell>
+              {columns
+                .filter((column) => !columnConfig[String(column)]?.hidden)
+                .slice(2)
+                .map((column) => (
+                  <TableCell
+                    key={String(column)}
+                    className="tableCell"
+                    sx={{
+                      position: 'sticky',
+                      top: 0,
+                      zIndex: 4,
+                      backgroundColor: theme => theme.palette.primary.main,
+                      color: theme => theme.palette.primary.contrastText,
+                      fontWeight: 700,
+                      fontSize: 'clamp(0.95rem, 1vw, 1.05rem)',
+                      padding: '12px 16px',
+                      whiteSpace: 'nowrap',
+                    }}
+                  >
+                    <TableSortLabel
+                      direction={orderBy === column ? order : "asc"}
+                      onClick={() => handleSortRequest(column)}
+                      sx={{ color: 'inherit', '& .MuiTableSortLabel-icon': { color: 'inherit !important' } }}
                     >
                       {translateColumnHeaderToSpanish(column)}
-                    </TableCell>
-                  ))}
+                    </TableSortLabel>
+                  </TableCell>
+                ))}
               {!noActions || hasEditPermissions || hasDeletePermissions ? (
                 <TableCell
                   className="tableCell"
@@ -873,6 +902,7 @@ const EditableTable = <T extends object>({
                 >
                   {columns
                     .filter((column) => !columnConfig[String(column)]?.hidden)
+                    .slice(0, 2)
                     .map((column) => {
                       const value = row[column];
                       const isPermissionNames = column === "permissionNames";
@@ -1123,30 +1153,277 @@ const EditableTable = <T extends object>({
                         </TableCell>
                       );
                     })}
-                  {editRowId === getRowId(row) &&
-                    columns
-                      .filter((column) => columnConfig[String(column)]?.hidden)
-                      .map((column) => (
+                  <TableCell className="tableCell" sx={{ borderRight: '1px solid #f0f0f0', borderBottom: '1px solid #f0f0f0', padding: '10px 16px', textAlign: 'center' }}>
+                    {isUser && !isCurrentUser && ('isActive' in row) && hasDeletePermissions && (
+                      <Tooltip title={row.isActive ? TABLE.DISABLE : TABLE.ENABLE} arrow>
+                        <Box>
+                          <IconButton
+                            color="secondary"
+                            onClick={() => handleOpenStatusDialog && handleOpenStatusDialog(row)}
+                          >
+                            {row.isActive ? (
+                              <ToggleOnIcon sx={{ color: 'success.main' }} />
+                            ) : (
+                              <ToggleOffIcon sx={{ color: 'grey.500' }} />
+                            )}
+                          </IconButton>
+                        </Box>
+                      </Tooltip>
+                    )}
+                  </TableCell>
+                  {columns
+                    .filter((column) => !columnConfig[String(column)]?.hidden)
+                    .slice(2)
+                    .map((column) => {
+                      const value = row[column];
+                      const isPermissionNames = column === "permissionNames";
+                      if (
+                        isPermissionNames &&
+                        Array.isArray(value) &&
+                        editRowId !== getRowId(row)
+                      ) {
+                        const expanded = !!expandedRows[rowId];
+                        const maxVisible = 6;
+                        const showAll = expanded && value.length > maxVisible;
+                        const visible = showAll
+                          ? value
+                          : value.slice(0, maxVisible);
+                        const hiddenCount = value.length - maxVisible;
+                        return (
+                          <TableCell
+                            key={String(column)}
+                            className="tableCell"
+                            sx={{
+                              borderRight: '1px solid #f0f0f0',
+                              borderBottom: '1px solid #f0f0f0',
+                              padding: '10px 16px',
+                            }}
+                          >
+                            <Box
+                              sx={{
+                                display: "flex",
+                                flexWrap: "wrap",
+                                gap: 0.5,
+                                py: 0.5,
+                                minHeight: 36,
+                              }}
+                            >
+                              {visible.map((perm: string) => (
+                                <Box
+                                  key={perm}
+                                  sx={{
+                                    backgroundColor: theme.palette.primary.main,
+                                    color: theme.palette.primary.contrastText,
+                                    px: 1,
+                                    py: 0.5,
+                                    borderRadius: 1,
+                                    fontSize: "clamp(0.625rem, 1vw, 0.75rem)",
+                                    fontWeight: 500,
+                                    mb: 0.5,
+                                    textAlign: "center",
+                                    display: "flex",
+                                    alignItems: "center",
+                                    justifyContent: "center",
+                                  }}
+                                >
+                                  {perm}
+                                </Box>
+                              ))}
+                              {hiddenCount > 0 && !expanded && (
+                                <Typography
+                                  sx={{
+                                    color: theme.palette.primary.main,
+                                    fontWeight: 500,
+                                    cursor: "pointer",
+                                    fontSize: "clamp(0.625rem, 1vw, 0.75rem)",
+                                    textDecoration: "underline",
+                                    "&:hover": {
+                                      textDecoration: "none",
+                                    },
+                                    display: "flex",
+                                    alignItems: "center",
+                                    height: "28px",
+                                    mt: 1,
+                                  }}
+                                  onClick={() =>
+                                    setExpandedRows((prev) => ({
+                                      ...prev,
+                                      [rowId]: true,
+                                    }))
+                                  }
+                                >
+                                  {TABLE_UI.VIEW_MORE}
+                                </Typography>
+                              )}
+                              {showAll && (
+                                <Typography
+                                  sx={{
+                                    color: theme.palette.primary.main,
+                                    fontWeight: 500,
+                                    cursor: "pointer",
+                                    fontSize: "clamp(0.625rem, 1vw, 0.75rem)",
+                                    textDecoration: "underline",
+                                    "&:hover": {
+                                      textDecoration: "none",
+                                    },
+                                    display: "flex",
+                                    alignItems: "center",
+                                    height: "28px",
+                                    mt: 1,
+                                  }}
+                                  onClick={() =>
+                                    setExpandedRows((prev) => ({
+                                      ...prev,
+                                      [rowId]: false,
+                                    }))
+                                  }
+                                >
+                                  {TABLE_UI.VIEW_LESS}
+                                </Typography>
+                              )}
+                            </Box>
+                          </TableCell>
+                        );
+                      }
+                      return (
                         <TableCell
-                          key={`edit-${String(column)}`}
+                          key={String(column)}
                           className="tableCell"
+                          sx={{
+                            borderRight: '1px solid #f0f0f0',
+                            borderBottom: '1px solid #f0f0f0',
+                            padding: '10px 16px',
+                          }}
                         >
-                          {renderEditField(
-                            column,
-                            (editFields[String(column)] || "").toString(),
+                          {editRowId === getRowId(row) ? (
+                            renderEditField(
+                              column,
+                              (editFields[String(column)] || "").toString(),
+                            )
+                          ) : editRowId === getRowId(row) &&
+                            column === "permissionNames" ? (
+                            Array.isArray(row[column]) ? (
+                              <Box sx={{ display: "flex", flexWrap: "wrap", gap: 0.5 }}>
+                                {(row[column] as string[]).map(
+                                  (item: string, index: number) => (
+                                    <Box
+                                      key={index}
+                                      sx={{
+                                        backgroundColor: theme.palette.primary.main,
+                                        color: theme.palette.primary.contrastText,
+                                        px: 1,
+                                        py: 0.5,
+                                        borderRadius: 1,
+                                        fontSize: "clamp(0.625rem, 1vw, 0.75rem)",
+                                        fontWeight: 500,
+                                        textAlign: "center",
+                                        display: "flex",
+                                        alignItems: "center",
+                                        justifyContent: "center",
+                                      }}
+                                    >
+                                      {item}
+                                    </Box>
+                                  ),
+                                )}
+                              </Box>
+                            ) : (
+                              <Typography component="span">
+                                {String(row[column] ?? "")}
+                              </Typography>
+                            )
+                          ) : column === "days" ? (
+                            Array.isArray(row[column]) ? (
+                              <Typography component="span">
+                                {(row[column] as string[])
+                                  .map((d: string) =>
+                                    capitalizeFirstLetter(
+                                      translateDayOptionsToSpanish(String(d)),
+                                    ),
+                                  )
+                                  .join(", ")}
+                              </Typography>
+                            ) : (
+                              <Typography component="span">
+                                {capitalizeFirstLetter(
+                                  translateDayOptionsToSpanish(
+                                    String(row[column]),
+                                  ),
+                                )}
+                              </Typography>
+                            )
+                          ) : Array.isArray(row[column]) ? (
+                            column === "permissionNames" ? (
+                              <Box sx={{ display: "flex", flexWrap: "wrap", gap: 0.5 }}>
+                                {(row[column] as string[]).map(
+                                  (item: string, index: number) => (
+                                    <Box
+                                      key={index}
+                                      sx={{
+                                        backgroundColor: theme.palette.primary.main,
+                                        color: theme.palette.primary.contrastText,
+                                        px: 1,
+                                        py: 0.5,
+                                        borderRadius: 1,
+                                        fontSize: "clamp(0.625rem, 1vw, 0.75rem)",
+                                        fontWeight: 500,
+                                        textAlign: "center",
+                                        display: "flex",
+                                        alignItems: "center",
+                                        justifyContent: "center",
+                                      }}
+                                    >
+                                      {item}
+                                    </Box>
+                                  ),
+                                )}
+                              </Box>
+                            ) : (
+                              <Stack
+                                direction="row"
+                                spacing={1}
+                                sx={{
+                                  rowGap: 2,
+                                  flexWrap: "nowrap",
+                                }}
+                              >
+                                {(row[column] as string[]).map(
+                                  (
+                                    item: string,
+                                    index: number,
+                                    array: string[],
+                                  ) => (
+                                    <Typography key={index} component="span">
+                                      {item}
+                                      {index < array.length - 1 ? ", " : ""}
+                                    </Typography>
+                                  ),
+                                )}
+                              </Stack>
+                            )
+                          ) : column === "email" ? (
+                            <Typography
+                              component="a"
+                              href={`mailto:${String(row[column] ?? "")}`}
+                              sx={{
+                                color: theme.palette.primary.main,
+                                textDecoration: "none",
+                                cursor: "pointer",
+                                "&:hover": {
+                                  textDecoration: "underline",
+                                },
+                              }}
+                            >
+                              {String(row[column] ?? "")}
+                            </Typography>
+                          ) : (
+                            <Typography component="span">
+                              {String(row[column] ?? "")}
+                            </Typography>
                           )}
                         </TableCell>
-                      ))}
-                  {editRowId !== null &&
-                    editRowId !== getRowId(row) &&
-                    columns
-                      .filter((column) => columnConfig[String(column)]?.hidden)
-                      .map((column) => (
-                        <TableCell
-                          key={`empty-${String(column)}`}
-                          className="tableCell"
-                        ></TableCell>
-                      ))}
+                      );
+                    })}
                   {!noActions && (
                     <TableCell>
                       <Box
@@ -1192,12 +1469,9 @@ const EditableTable = <T extends object>({
                                       <Box>
                                         <IconButton
                                           color="primary"
-                                          onClick={() => {
-                                            setPasswordUserId(getRowId(row));
-                                            setPasswordModalOpen(true);
-                                          }}
+                                          onClick={() => onOpenPasswordModal && onOpenPasswordModal(getRowId(row))}
                                         >
-                                          <VpnKeyRoundedIcon />
+                                          <LockResetIcon />
                                         </IconButton>
                                       </Box>
                                     </Tooltip>
@@ -1220,46 +1494,25 @@ const EditableTable = <T extends object>({
                               <>
                                 {isUser ? (
                                   !isCurrentUser &&
-                                  ("isActive" in row ? (
-                                    <Tooltip
-                                      title={
-                                        row.isActive ? TABLE.DISABLE : TABLE.ENABLE
-                                      }
-                                      arrow
-                                    >
-                                      <Box>
-                                        <IconButton
-                                          color="secondary"
-                                          onClick={() =>
-                                            handleOpenStatusDialog &&
-                                            handleOpenStatusDialog(row)
-                                          }
-                                        >
-                                          {row.isActive ? (
-                                            <ToggleOnIcon sx={{ color: 'success.main' }} />
-                                          ) : (
-                                            <ToggleOffIcon sx={{ color: 'grey.500' }} />
-                                          )}
-                                        </IconButton>
-                                      </Box>
-                                    </Tooltip>
-                                  ) : (
-                                    <Tooltip title={TABLE.DELETE} arrow>
-                                      <Box>
-                                        <IconButton
-                                          color="error"
-                                          onClick={() =>
-                                            handleOpenDeleteDialog &&
-                                            handleOpenDeleteDialog(
-                                              getRowId(row),
-                                            )
-                                          }
-                                        >
-                                          <DeleteForeverIcon />
-                                        </IconButton>
-                                      </Box>
-                                    </Tooltip>
-                                  ))
+                                  (!('isActive' in row)
+                                    ? (
+                                        <Tooltip title={TABLE.DELETE} arrow>
+                                          <Box>
+                                            <IconButton
+                                              color="error"
+                                              onClick={() =>
+                                                handleOpenDeleteDialog &&
+                                                handleOpenDeleteDialog(
+                                                  getRowId(row),
+                                                )
+                                              }
+                                            >
+                                              <DeleteForeverIcon />
+                                            </IconButton>
+                                          </Box>
+                                        </Tooltip>
+                                      )
+                                    : null)
                                 ) : (
                                   <Tooltip title={TABLE.DELETE} arrow>
                                     <Box>
@@ -1311,32 +1564,27 @@ const EditableTable = <T extends object>({
         sx={{ borderRadius: '0 0 12px 12px' }}
       />
 
-      {/* Password change modal */}
-      {passwordUserId !== null && handlePasswordModal && (
-        // Find the user by id
-        (() => {
-          const user = data.find((u) => getRowId(u) === passwordUserId) as User | undefined;
-          const userFullName = user ? `${user.firstName || ''} ${user.lastName || ''}`.trim() : '';
-          return (
-            <DialogComponent
-              open={passwordModalOpen}
-              onClose={() => {
-                setPasswordModalOpen(false);
-                setPasswordUserId(null);
-              }}
-              title="Cambiar Contraseña"
-              subtitle={userFullName}
-              hideActions
-              paperSx={{ minWidth: { xs: '90vw', sm: 500, md: 700 }, maxWidth: { xs: '98vw', sm: 700 } }}
-            >
-              {handlePasswordModal(passwordUserId, () => {
-                setPasswordModalOpen(false);
-                setPasswordUserId(null);
-              })}
-            </DialogComponent>
-          );
-        })()
-      )}
+      {/* Password change modal: always mounted, only open prop changes */}
+      <DialogComponent
+        open={!!passwordModalOpen}
+        onClose={onClosePasswordModal}
+        title="Cambiar Contraseña"
+        subtitle={(() => {
+          if (typeof passwordUserId === 'number') {
+            const user = data.find((u) => getRowId(u) === passwordUserId) as User | undefined;
+            if (user) {
+              return `${user.firstName || ''} ${user.lastName || ''}`.trim();
+            }
+          }
+          return '';
+        })()}
+        hideActions
+        paperSx={{ minWidth: { xs: '90vw', sm: 500, md: 700 }, maxWidth: { xs: '98vw', sm: 700 } }}
+      >
+        {typeof passwordUserId === 'number' && handlePasswordModal
+          ? handlePasswordModal(passwordUserId, onClosePasswordModal)
+          : null}
+      </DialogComponent>
     </Paper>
   );
 };
