@@ -27,6 +27,7 @@ import DashboardRoundedIcon from "@mui/icons-material/DashboardRounded";
 import logo from "../../assets/images/logo.png";
 import { MenuItemProps } from "../Menu/MenuComponent";
 import "@fontsource/urbanist";
+import { Roles } from "../../enums/roles";
 
 interface Link {
   label: string;
@@ -62,7 +63,7 @@ const AppBarComponent: React.FC<AppBarComponentProps> = ({
   const isMobile = useMediaQuery(theme.breakpoints.down("md"));
 
   const [userMenuAnchor, setUserMenuAnchor] = useState<null | HTMLElement>(
-    null,
+    null
   );
   const [notificationsAnchor, setNotificationsAnchor] =
     useState<null | HTMLElement>(null);
@@ -112,6 +113,21 @@ const AppBarComponent: React.FC<AppBarComponentProps> = ({
   const isActivePage = (path: string) => {
     // Checks if the given path matches the current location
     return location.pathname === path;
+  };
+
+  const hasNotificationsAccess = () => {
+    // Check if user has "Gerencia" or "Administrativo" role
+    if (!currentUser?.roles || currentUser.roles.length === 0) return false;
+    const firstRole = currentUser.roles[0];
+    const userRole =
+      firstRole && "UserRole" in firstRole
+        ? (firstRole as { UserRole: { roleId: number } }).UserRole
+        : null;
+    if (!userRole?.roleId) return false;
+    return (
+      userRole.roleId === Roles.MANAGER ||
+      userRole.roleId === Roles.ADMINISTRATIVE
+    );
   };
 
   return (
@@ -169,9 +185,9 @@ const AppBarComponent: React.FC<AppBarComponentProps> = ({
             sx={{
               fontFamily: "'Urbanist', sans-serif",
               fontWeight: 800,
-              fontSize: { xs: '1.5rem', sm: '2rem', md: '1.5rem' },
+              fontSize: { xs: "1.5rem", sm: "2rem", md: "1.5rem" },
               lineHeight: 1.1,
-              letterSpacing: '0.04em',
+              letterSpacing: "0.04em",
               background: "linear-gradient(45deg, #ffffff 30%, #f0f0f0 90%)",
               backgroundClip: "text",
               WebkitBackgroundClip: "text",
@@ -306,33 +322,37 @@ const AppBarComponent: React.FC<AppBarComponentProps> = ({
         {/* Derecha - Acciones del Usuario */}
         {currentUser && (
           <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-            {/* Notificaciones */}
-            <Tooltip title={APPBAR_MENU.NOTIFICATIONS} arrow>
-              <IconButton
-                onClick={handleNotificationsOpen}
-                sx={{
-                  color: "#ffffff",
-                  backgroundColor: "rgba(255,255,255,0.1)",
-                  backdropFilter: "blur(10px)",
-                  border: "1px solid rgba(255,255,255,0.2)",
-                  "&:hover": {
-                    backgroundColor: "rgba(255,255,255,0.2)",
-                    transform: "scale(1.05)",
-                  },
-                  transition: "all 0.3s ease",
-                }}
-              >
-                <Badge badgeContent={3} color="error">
-                  <NotificationsRoundedIcon />
-                </Badge>
-              </IconButton>
-            </Tooltip>
+            {/* Notificaciones - Solo visible para Gerencia y Administrativo */}
+            {hasNotificationsAccess() && (
+              <>
+                <Tooltip title={APPBAR_MENU.NOTIFICATIONS} arrow>
+                  <IconButton
+                    onClick={handleNotificationsOpen}
+                    sx={{
+                      color: "#ffffff",
+                      backgroundColor: "rgba(255,255,255,0.1)",
+                      backdropFilter: "blur(10px)",
+                      border: "1px solid rgba(255,255,255,0.2)",
+                      "&:hover": {
+                        backgroundColor: "rgba(255,255,255,0.2)",
+                        transform: "scale(1.05)",
+                      },
+                      transition: "all 0.3s ease",
+                    }}
+                  >
+                    <Badge badgeContent={3} color="error">
+                      <NotificationsRoundedIcon />
+                    </Badge>
+                  </IconButton>
+                </Tooltip>
 
-            <Divider
-              orientation="vertical"
-              flexItem
-              sx={{ mx: 1, borderColor: "rgba(255,255,255,0.2)" }}
-            />
+                <Divider
+                  orientation="vertical"
+                  flexItem
+                  sx={{ mx: 1, borderColor: "rgba(255,255,255,0.2)" }}
+                />
+              </>
+            )}
 
             {/* Perfil del Usuario */}
             <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
