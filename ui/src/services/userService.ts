@@ -69,7 +69,8 @@ export const updateUser = async (id: number, updatedUser: Partial<User>) => {
 };
 
 export const updateUserStatus = async (id: number, status: boolean) => {
-  await api.put(`/users/${id}/status`, { isActive: status });
+  const response = await api.put(`/users/${id}/status`, { isActive: status });
+  return response.data;
 };
 
 export const updateUserPassword = async (id: number, password: string) => {

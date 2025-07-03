@@ -23,9 +23,10 @@ import {
   Grid,
   IconButton,
   InputAdornment,
-  TextField,
   Typography,
   useTheme,
+  Stack,
+  Tooltip,
 } from "@mui/material";
 import EditableTable from "../../components/Table/EditableTable/EditableTable";
 import SearchBar from "../../components/SearchBar/SearchBar";
@@ -38,6 +39,9 @@ import DialogComponent from "../../components/Dialog/DialogComponent";
 import AddRoundedIcon from "@mui/icons-material/AddRounded";
 import { DASHBOARD_USERS } from "../../constants/constants";
 import { NOTIFICATIONS } from "../../constants/constants";
+import CustomTextField from '../../components/Textfield/CustomTextField';
+import generateSecret from '../../utils/generateSecret';
+import ContentCopyIcon from '@mui/icons-material/ContentCopy';
 
 // ManageUsers page component for user management in the dashboard
 const ManageUsers: React.FC<{ isExpanded?: boolean }> = ({
@@ -79,6 +83,8 @@ const ManageUsers: React.FC<{ isExpanded?: boolean }> = ({
   const [isUpdatingUserStatus, setIsUpdatingUserStatus] = useState(false);
   const [loadError, setLoadError] = useState<string | null>(null);
   const theme = useTheme();
+  const [temporalPassword, setTemporalPassword] = useState<string>("");
+  const [copySuccess, setCopySuccess] = useState(false);
 
   // Loads users, roles, and user roles data on mount
   useEffect(() => {
@@ -419,78 +425,122 @@ const ManageUsers: React.FC<{ isExpanded?: boolean }> = ({
 
   const handlePasswordModal = useCallback(
     (id: number, handleClose: () => void) => {
+      const handleGenerateTemporalPassword = () => {
+        const tempPassword = generateSecret();
+        setPasswordFields({
+          newPassword: tempPassword,
+          confirmNewPassword: tempPassword,
+        });
+        setTemporalPassword(tempPassword);
+        setCopySuccess(false);
+      };
+
+      const handleCopyTemporalPassword = async () => {
+        if (temporalPassword) {
+          await navigator.clipboard.writeText(temporalPassword);
+          setCopySuccess(true);
+          setTimeout(() => setCopySuccess(false), 1500);
+        }
+      };
+
       return (
-        <Box sx={{ p: 2 }}>
+        <Box sx={{ p: 0 }}>
           <Typography variant="h6" gutterBottom>
             {DASHBOARD_USERS.DIALOG_PASSWORD_TITLE} {id}
           </Typography>
           <Typography variant="body2" color="textSecondary" sx={{ mb: 3 }}>
             {DASHBOARD_USERS.DIALOG_PASSWORD_SUBTITLE}
           </Typography>
-          <TextField
-            label={DASHBOARD_USERS.DIALOG_PASSWORD_NEW}
-            type={showNewPassword ? "text" : "password"}
-            variant="outlined"
-            fullWidth
-            value={passwordFields.newPassword}
-            onChange={handleNewPassword}
-            sx={{ mb: 2 }}
-            placeholder={DASHBOARD_USERS.DIALOG_PASSWORD_NEW_PLACEHOLDER}
-            InputProps={{
-              endAdornment: (
-                <InputAdornment position="end">
-                  <IconButton onClick={handleToggleNewPassword} edge="end">
-                    {showNewPassword ? <VisibilityOff /> : <Visibility />}
-                  </IconButton>
-                </InputAdornment>
-              ),
-            }}
-          />
-          <TextField
-            label={DASHBOARD_USERS.DIALOG_PASSWORD_CONFIRM}
-            type={showConfirmNewPassword ? "text" : "password"}
-            variant="outlined"
-            fullWidth
-            value={passwordFields.confirmNewPassword}
-            onChange={handleConfirmNewPassword}
-            sx={{ mb: 2 }}
-            placeholder={DASHBOARD_USERS.DIALOG_PASSWORD_CONFIRM_PLACEHOLDER}
-            InputProps={{
-              endAdornment: (
-                <InputAdornment position="end">
-                  <IconButton
-                    onClick={handleToggleConfirmNewPassword}
-                    edge="end"
-                  >
-                    {showConfirmNewPassword ? (
-                      <VisibilityOff />
-                    ) : (
-                      <Visibility />
-                    )}
-                  </IconButton>
-                </InputAdornment>
-              ),
-            }}
-          />
-          {error && (
-            <Alert severity="error" sx={{ mb: 2, whiteSpace: "pre-line" }}>
-              {error}
-            </Alert>
-          )}
-          <Box
-            sx={{ display: "flex", gap: 2, justifyContent: "flex-end", mt: 3 }}
-          >
-            <Button variant="outlined" onClick={handleClose}>
-              {DASHBOARD_USERS.DIALOG_PASSWORD_CANCEL}
-            </Button>
+          <Stack spacing={2} sx={{ width: '100%' }}>
+            <CustomTextField
+              label={DASHBOARD_USERS.DIALOG_PASSWORD_NEW}
+              type={showNewPassword ? "text" : "password"}
+              variant="outlined"
+              fullWidth
+              value={passwordFields.newPassword}
+              onChange={handleNewPassword}
+              placeholder={DASHBOARD_USERS.DIALOG_PASSWORD_NEW_PLACEHOLDER}
+              InputProps={{
+                endAdornment: (
+                  <InputAdornment position="end">
+                    <IconButton onClick={handleToggleNewPassword} edge="end">
+                      {showNewPassword ? <VisibilityOff /> : <Visibility />}
+                    </IconButton>
+                  </InputAdornment>
+                ),
+              }}
+            />
+            <CustomTextField
+              label={DASHBOARD_USERS.DIALOG_PASSWORD_CONFIRM}
+              type={showConfirmNewPassword ? "text" : "password"}
+              variant="outlined"
+              fullWidth
+              value={passwordFields.confirmNewPassword}
+              onChange={handleConfirmNewPassword}
+              placeholder={DASHBOARD_USERS.DIALOG_PASSWORD_CONFIRM_PLACEHOLDER}
+              InputProps={{
+                endAdornment: (
+                  <InputAdornment position="end">
+                    <IconButton
+                      onClick={handleToggleConfirmNewPassword}
+                      edge="end"
+                    >
+                      {showConfirmNewPassword ? (
+                        <VisibilityOff />
+                      ) : (
+                        <Visibility />
+                      )}
+                    </IconButton>
+                  </InputAdornment>
+                ),
+              }}
+            />
             <Button
-              variant="contained"
-              onClick={(e) => handleChangePassword(e, id, handleClose)}
-              disabled={!isPasswordFormValid}
+              variant="outlined"
+              onClick={handleGenerateTemporalPassword}
+              fullWidth
             >
-              {DASHBOARD_USERS.DIALOG_PASSWORD_CHANGE}
+              Generar contraseña temporal
             </Button>
-          </Box>
+            {temporalPassword && (
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mt: 1, width: '100%' }}>
+                <CustomTextField
+                  label="Contraseña temporal generada"
+                  value={temporalPassword}
+                  fullWidth
+                  InputProps={{
+                    readOnly: true,
+                    endAdornment: (
+                      <Tooltip title={copySuccess ? '¡Copiado!' : 'Copiar'} placement="top">
+                        <IconButton onClick={handleCopyTemporalPassword} edge="end" size="small">
+                          <ContentCopyIcon color={copySuccess ? 'success' : 'inherit'} fontSize="small" />
+                        </IconButton>
+                      </Tooltip>
+                    ),
+                  }}
+                  sx={{ flex: 1 }}
+                />
+              </Box>
+            )}
+            {error && (
+              <Alert severity="error" sx={{ whiteSpace: "pre-line" }}>
+                {error}
+              </Alert>
+            )}
+            <Box sx={{ display: "flex", gap: 2, justifyContent: "flex-end", mt: 2, width: '100%' }}>
+              <Button variant="outlined" onClick={handleClose} fullWidth>
+                {DASHBOARD_USERS.DIALOG_PASSWORD_CANCEL}
+              </Button>
+              <Button
+                variant="contained"
+                onClick={(e) => handleChangePassword(e, id, handleClose)}
+                disabled={!isPasswordFormValid}
+                fullWidth
+              >
+                {DASHBOARD_USERS.DIALOG_PASSWORD_CHANGE}
+              </Button>
+            </Box>
+          </Stack>
         </Box>
       );
     },
@@ -505,6 +555,11 @@ const ManageUsers: React.FC<{ isExpanded?: boolean }> = ({
       error,
       isPasswordFormValid,
       handleChangePassword,
+      temporalPassword,
+      copySuccess,
+      setPasswordFields,
+      setTemporalPassword,
+      setCopySuccess
     ],
   );
 
@@ -773,6 +828,7 @@ const ManageUsers: React.FC<{ isExpanded?: boolean }> = ({
           <br />
           {filteredUsers.length > 0 ? (
             <EditableTable<User>
+              key={filteredUsers.map(u => u.id + '-' + u.isActive).join(',')}
               data={filteredUsers}
               columns={[
                 "firstName",
