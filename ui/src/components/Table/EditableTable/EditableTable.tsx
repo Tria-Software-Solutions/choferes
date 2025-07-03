@@ -39,7 +39,7 @@ import {
   capitalizeFirstLetter,
 } from "../../../utils/string";
 import { formatDateWithDay } from "../../../utils/dates";
-import { maskLicensePlate, maskParkingLot } from "../../../utils/mask";
+import { maskLicensePlate, maskParkingLotWithPrefix } from "../../../utils/mask";
 import {
   BRANDS_LIST,
   COLORS_LIST,
@@ -122,6 +122,11 @@ type EditableTableProps<T> = {
   onOpenPasswordModal?: (userId: number) => void;
   onClosePasswordModal?: () => void;
 };
+
+const PARKING_PREFIX_OPTIONS = [
+  { value: 'ATP', label: 'ATP' },
+  { value: 'CE', label: 'CE' },
+];
 
 const EditableTable = <T extends object>({
   data,
@@ -276,6 +281,24 @@ const EditableTable = <T extends object>({
       );
     }
 
+    if (String(column) === 'licensePlate') {
+      const licensePlateValue = (editFields['licensePlate'] as string) || '';
+      const handleLicensePlateChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+        const rawValue = event.target.value;
+        const maskedValue = maskLicensePlate(rawValue);
+        setEditField && setEditField('licensePlate', maskedValue);
+      };
+      return wrapWithGrid(
+        <CustomTextField
+          label={translateColumnHeaderToSpanish(column)}
+          fullWidth
+          value={licensePlateValue}
+          onChange={handleLicensePlateChange}
+          error={!validateField('licensePlate', licensePlateValue)}
+        />, column
+      );
+    }
+
     if (!config) {
       return wrapWithGrid(
         <CustomTextField
@@ -290,24 +313,77 @@ const EditableTable = <T extends object>({
       );
     }
 
-    if (config.type === "masked") {
-      const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-        const rawValue = event.target.value;
-        const maskedValue =
-          column === "licensePlate"
-            ? maskLicensePlate(rawValue)
-            : maskParkingLot(rawValue);
-        setEditField && setEditField(String(column), maskedValue);
+    if (String(column) === 'parkingLot') {
+      // Get prefix from editFields or default to ATP
+      const parkingPrefix = (editFields['parkingPrefix'] as string) || 'ATP';
+      const parkingLotValue = (editFields['parkingLot'] as string) || '';
+      const prefixOptions = PARKING_PREFIX_OPTIONS.concat(
+        parkingPrefix && !PARKING_PREFIX_OPTIONS.some(opt => opt.value === parkingPrefix)
+          ? [{ value: parkingPrefix, label: parkingPrefix }]
+          : []
+      );
+
+      const handlePrefixChange = (
+        event: React.SyntheticEvent,
+        newValue: { value: string; label: string } | string | null
+      ) => {
+        let prefixValue = '';
+        if (newValue === null || newValue === '') {
+          setEditField && setEditField('parkingPrefix', '');
+          setEditField && setEditField('parkingLot', '');
+          return;
+        }
+        if (typeof newValue === 'object' && newValue !== null) {
+          prefixValue = newValue.value.toUpperCase();
+        } else if (typeof newValue === 'string') {
+          prefixValue = newValue.toUpperCase();
+        }
+        if (prefixValue) {
+          setEditField && setEditField('parkingPrefix', prefixValue);
+          if (prefixValue === 'CE') {
+            setEditField && setEditField('parkingLot', 'CE');
+          } else {
+            setEditField && setEditField('parkingLot', '');
+          }
+        }
       };
 
+      const handleParkingLotChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+        const rawValue = event.target.value;
+        const maskedValue = maskParkingLotWithPrefix(parkingPrefix, rawValue);
+        setEditField && setEditField('parkingLot', maskedValue);
+      };
+
+      const isReadOnly = parkingPrefix === 'CE';
+
       return wrapWithGrid(
-        <CustomTextField
-          label={translateColumnHeaderToSpanish(column)}
-          fullWidth
-          value={editFields[String(column)] || ""}
-          onChange={handleChange}
-        />,
-        column,
+        <Box sx={{ display: 'flex', gap: 1 }}>
+          <FormControl variant="outlined" sx={{ minWidth: 90, flex: '0 0 90px' }}>
+            <Autocomplete
+              freeSolo
+              value={{ value: parkingPrefix, label: parkingPrefix }}
+              onChange={handlePrefixChange}
+              inputValue={parkingPrefix}
+              onInputChange={(e, v) => setEditField && setEditField('parkingPrefix', v.toUpperCase())}
+              options={prefixOptions.map(opt => ({ value: opt.value.toUpperCase(), label: opt.label.toUpperCase() }))}
+              getOptionLabel={option => typeof option === 'string' ? option : option.label}
+              noOptionsText="Sin coincidencias"
+              renderInput={params => (
+                <CustomTextField {...params} label="Prefijo" variant="outlined" fullWidth sx={{ minWidth: 90 }} />
+              )}
+            />
+          </FormControl>
+          <CustomTextField
+            label={translateColumnHeaderToSpanish(column)}
+            variant="outlined"
+            fullWidth
+            value={parkingLotValue}
+            onChange={handleParkingLotChange}
+            InputProps={{ readOnly: isReadOnly }}
+            error={!validateField('parkingLot', parkingLotValue)}
+          />
+        </Box>,
+        column
       );
     }
 
