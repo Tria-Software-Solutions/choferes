@@ -507,7 +507,23 @@ const VehiclesPage: React.FC = () => {
                       onChange={(date) => handleDateChange(date)}
                     />
                   </LocalizationProvider>
-                  <ButtonGroup variant="contained" sx={{ height: "56px" }}>
+                  <ButtonGroup
+                    variant="contained"
+                    sx={{
+                      height: '56px',
+                      width: 'auto',
+                      flexDirection: 'row',
+                      '& .MuiButton-root': {
+                        minWidth: 0,
+                        px: 2,
+                        py: 1.2,
+                        fontSize: '1rem',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                      },
+                    }}
+                  >
                     <Tooltip title={VEHICLES_PAGE.TOOLTIP_PREV_DAY} arrow>
                       <Button onClick={handlePreviousDate}>
                         <ArrowBackIosNewRoundedIcon />
