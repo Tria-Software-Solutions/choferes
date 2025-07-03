@@ -943,7 +943,7 @@ const EditableTable = <T extends object>({
                     </TableSortLabel>
                   </TableCell>
                 ))}
-              {!noActions || hasEditPermissions || hasDeletePermissions ? (
+              {(!noActions && (hasEditPermissions || hasDeletePermissions)) ? (
                 <TableCell
                   className="tableCell"
                   style={{ width: "100px", whiteSpace: 'nowrap' }}
@@ -1506,8 +1506,16 @@ const EditableTable = <T extends object>({
                         </TableCell>
                       );
                     })}
-                  {!noActions && (
-                    <TableCell>
+                  {!noActions && (hasEditPermissions || hasDeletePermissions) && (
+                    <TableCell
+                      className="tableCell"
+                      style={{ width: "100px", whiteSpace: 'nowrap' }}
+                      sx={{
+                        borderRight: '1px solid #f0f0f0',
+                        borderBottom: '1px solid #f0f0f0',
+                        padding: '10px 16px',
+                      }}
+                    >
                       <Box
                         sx={{ display: "flex", alignItems: "center", gap: 1 }}
                       >
