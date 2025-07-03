@@ -702,9 +702,9 @@ const ManageUsers: React.FC<{ isExpanded?: boolean }> = ({
                   }}
                 >
                   {showInactive ? (
-                    <VisibilityIcon sx={{ fontSize: 20 }} />
-                  ) : (
                     <VisibilityOffIcon sx={{ fontSize: 20 }} />
+                  ) : (
+                    <VisibilityIcon sx={{ fontSize: 20 }} />
                   )}
                   <Typography
                     variant="body2"
@@ -714,7 +714,7 @@ const ManageUsers: React.FC<{ isExpanded?: boolean }> = ({
                       whiteSpace: "nowrap",
                     }}
                   >
-                    {showInactive ? DASHBOARD_USERS.SHOW_INACTIVE : DASHBOARD_USERS.HIDE_INACTIVE}
+                    {showInactive ? DASHBOARD_USERS.HIDE_INACTIVE : DASHBOARD_USERS.SHOW_INACTIVE}
                   </Typography>
                 </Box>
                 <Button
@@ -752,9 +752,9 @@ const ManageUsers: React.FC<{ isExpanded?: boolean }> = ({
                   }}
                 >
                   {showInactive ? (
-                    <VisibilityIcon sx={{ fontSize: 20 }} />
-                  ) : (
                     <VisibilityOffIcon sx={{ fontSize: 20 }} />
+                  ) : (
+                    <VisibilityIcon sx={{ fontSize: 20 }} />
                   )}
                   <Typography
                     variant="body2"
@@ -764,7 +764,7 @@ const ManageUsers: React.FC<{ isExpanded?: boolean }> = ({
                       whiteSpace: "nowrap",
                     }}
                   >
-                    {showInactive ? DASHBOARD_USERS.SHOW_INACTIVE : DASHBOARD_USERS.HIDE_INACTIVE}
+                    {showInactive ? DASHBOARD_USERS.HIDE_INACTIVE : DASHBOARD_USERS.SHOW_INACTIVE}
                   </Typography>
                 </Box>
               </Box>
