@@ -12,7 +12,7 @@ import {
 import SearchBar from "../../components/SearchBar/SearchBar";
 import EditableTable from "../../components/Table/EditableTable/EditableTable";
 import CustomSpeedDial from "../../components/SpeedDial/CustomSpeedDial";
-import AddScheduleForm from "../../components/Forms/AddScheduleForm";
+import AddScheduleForm from "../Forms/AddScheduleForm";
 import { useAppNotifications } from "../../components/Snackbar/SnackbarWrapper";
 import DialogComponent from "../../components/Dialog/DialogComponent";
 import {

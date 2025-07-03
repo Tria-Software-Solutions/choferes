@@ -12,7 +12,6 @@ import {
 } from "@mui/material";
 import AddRoundedIcon from "@mui/icons-material/AddRounded";
 import CloseRoundedIcon from "@mui/icons-material/CloseRounded";
-import CustomTextField from "../Textfield/CustomTextField";
 import PersonOutlinedIcon from "@mui/icons-material/PersonOutlined";
 import StraightenOutlinedIcon from "@mui/icons-material/StraightenOutlined";
 import AssignmentOutlinedIcon from "@mui/icons-material/AssignmentOutlined";
@@ -21,6 +20,7 @@ import OutlinedInput from "@mui/material/OutlinedInput";
 import InputAdornment from "@mui/material/InputAdornment";
 import InfoOutlinedIcon from "@mui/icons-material/InfoOutlined";
 import { FORMS } from "../../constants/constants";
+import CustomTextField from "../../components/Textfield/CustomTextField";
 
 interface AddCourierFormProps {
   onSubmit: (courier: {

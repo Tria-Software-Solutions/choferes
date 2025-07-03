@@ -24,7 +24,7 @@ import {
 } from "@mui/material";
 import EditableTable from "../../components/Table/EditableTable/EditableTable";
 import SearchBar from "../../components/SearchBar/SearchBar";
-import AddRoleForm from "../../components/Forms/AddRoleForm";
+import AddRoleForm from "../Forms/AddRoleForm";
 import DialogComponent from "../../components/Dialog/DialogComponent";
 import AddRoundedIcon from "@mui/icons-material/AddRounded";
 import DeleteOutlineIcon from "@mui/icons-material/DeleteOutline";
