@@ -1552,20 +1552,18 @@ const EditableTable = <T extends object>({
                           <>
                             {hasEditPermissions && (
                               <>
-                                {isUser &&
-                                  isExpanded &&
-                                  handlePasswordModal && (
-                                    <Tooltip title={TABLE.CHANGE_PASSWORD} arrow>
-                                      <Box>
-                                        <IconButton
-                                          color="primary"
-                                          onClick={() => onOpenPasswordModal && onOpenPasswordModal(getRowId(row))}
-                                        >
-                                          <LockResetIcon />
-                                        </IconButton>
-                                      </Box>
-                                    </Tooltip>
-                                  )}
+                                {isUser && isExpanded && onOpenPasswordModal && (
+                                  <Tooltip title={TABLE.CHANGE_PASSWORD} arrow>
+                                    <Box>
+                                      <IconButton
+                                        color="primary"
+                                        onClick={() => onOpenPasswordModal && onOpenPasswordModal(getRowId(row))}
+                                      >
+                                        <LockResetIcon />
+                                      </IconButton>
+                                    </Box>
+                                  </Tooltip>
+                                )}
                                 <Tooltip title={TABLE.EDIT} arrow>
                                   <Box>
                                     <IconButton

@@ -9,8 +9,6 @@ import {
   createUser,
   updateUser,
   updateUserStatus,
-  updateUserPassword,
-  updateUserTemporalPassword,
 } from "../../store/slices/userSlice";
 import { fetchRoles } from "../../store/slices/rolesSlice";
 import { fetchUserRoles } from "../../store/slices/userRolesSlice";
@@ -22,27 +20,19 @@ import {
   Button,
   CircularProgress,
   Grid,
-  IconButton,
-  InputAdornment,
   Typography,
   useTheme,
-  Stack,
-  Tooltip,
 } from "@mui/material";
 import EditableTable from "../../components/Table/EditableTable/EditableTable";
 import SearchBar from "../../components/SearchBar/SearchBar";
 import AddUserForm from "../Forms/AddUserForm";
-import Visibility from "@mui/icons-material/Visibility";
-import VisibilityOff from "@mui/icons-material/VisibilityOff";
 import VisibilityIcon from "@mui/icons-material/Visibility";
 import VisibilityOffIcon from "@mui/icons-material/VisibilityOff";
 import DialogComponent from "../../components/Dialog/DialogComponent";
 import AddRoundedIcon from "@mui/icons-material/AddRounded";
 import { DASHBOARD_USERS } from "../../constants/constants";
 import { NOTIFICATIONS } from "../../constants/constants";
-import CustomTextField from "../../components/Textfield/CustomTextField";
-import generateSecret from "../../utils/generateSecret";
-import ContentCopyIcon from "@mui/icons-material/ContentCopy";
+import PasswordChangeForm from "../Forms/PasswordChangeForm";
 
 // ManageUsers page component for user management in the dashboard
 const ManageUsers: React.FC<{ isExpanded?: boolean }> = ({
@@ -69,13 +59,6 @@ const ManageUsers: React.FC<{ isExpanded?: boolean }> = ({
   });
   const [openStatusDialog, setOpenStatusDialog] = useState(false);
   const [userToChange, setUserToChange] = useState<User | null>(null);
-  const [passwordFields, setPasswordFields] = useState({
-    newPassword: "",
-    confirmNewPassword: "",
-  });
-  const [showNewPassword, setShowNewPassword] = useState(false);
-  const [showConfirmNewPassword, setShowConfirmNewPassword] = useState(false);
-  const [error, setError] = useState<string | null>(null);
   const [filter, setFilter] = useState("");
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(5);
@@ -84,8 +67,6 @@ const ManageUsers: React.FC<{ isExpanded?: boolean }> = ({
   const [isUpdatingUserStatus, setIsUpdatingUserStatus] = useState(false);
   const [loadError, setLoadError] = useState<string | null>(null);
   const theme = useTheme();
-  const [temporalPassword, setTemporalPassword] = useState<string>("");
-  const [copySuccess, setCopySuccess] = useState(false);
   const [passwordModalOpen, setPasswordModalOpen] = useState(false);
   const [passwordUserId, setPasswordUserId] = useState<number | null>(null);
 
@@ -202,54 +183,6 @@ const ManageUsers: React.FC<{ isExpanded?: boolean }> = ({
     []
   );
 
-  // Validates new password fields
-  const validateNewPasswordFields = useCallback(
-    async (fields: typeof passwordFields) => {
-      const passwordRegex =
-        /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
-      if (fields.newPassword === "" || fields.confirmNewPassword === "") {
-        setError("Los espacios son requeridos.");
-        return false;
-      }
-      if (fields.newPassword !== fields.confirmNewPassword) {
-        setError("Las contraseñas no coinciden.");
-        return false;
-      }
-      if (
-        !passwordRegex.test(fields.newPassword) ||
-        !passwordRegex.test(fields.confirmNewPassword)
-      ) {
-        setError(
-          "El valor es inválido.\n\n- Mínimo 8 caracteres.\n- Al menos una letra mayúscula.\n- Al menos una letra minúscula.\n- Al menos un número.\n- Al menos un carácter especial"
-        );
-        return false;
-      }
-
-      setError(null);
-      return true;
-    },
-    []
-  );
-
-  const isPasswordFormValid = useMemo(() => {
-    const { newPassword, confirmNewPassword } = passwordFields;
-
-    if (!newPassword.trim() && !confirmNewPassword.trim()) {
-      return false;
-    }
-
-    if (newPassword !== confirmNewPassword) {
-      return false;
-    }
-
-    const passwordRegex =
-      /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
-
-    return (
-      passwordRegex.test(newPassword) && passwordRegex.test(confirmNewPassword)
-    );
-  }, [passwordFields]);
-
   const isEditFormValid = useMemo(() => {
     if (editRowId === null) return false;
     return validateFields(editFields, false);
@@ -362,42 +295,6 @@ const ManageUsers: React.FC<{ isExpanded?: boolean }> = ({
     }
   };
 
-  const handleChangePassword = useCallback(
-    async (e: React.FormEvent, id: number, handleClose: () => void) => {
-      e.preventDefault();
-      const isValid = await validateNewPasswordFields(passwordFields);
-      if (isValid) {
-        try {
-          await dispatch(
-            updateUserPassword({
-              id,
-              password: passwordFields.newPassword,
-            })
-          );
-          setPasswordFields({
-            newPassword: "",
-            confirmNewPassword: "",
-          });
-          setShowNewPassword(false);
-          setShowConfirmNewPassword(false);
-          handleClose();
-          showNotification(
-            "La contraseña fue actualizada exitosamente",
-            3000,
-            false
-          );
-        } catch (error) {
-          showNotification(
-            "Ha ocurrido un error al actualizar la contraseña",
-            5000,
-            false
-          );
-        }
-      }
-    },
-    [validateNewPasswordFields, passwordFields, dispatch, showNotification]
-  );
-
   const handleOpenAddUserModal = useCallback(() => {
     setOpenAddUserModal(true);
   }, []);
@@ -495,174 +392,6 @@ const ManageUsers: React.FC<{ isExpanded?: boolean }> = ({
     setPasswordModalOpen(false);
     setPasswordUserId(null);
   }, []);
-
-  const handlePasswordModal = useCallback(
-    (id: number, handleClose: () => void) => {
-      const handleGenerateTemporalPassword = async () => {
-        const tempPassword = generateSecret();
-        setPasswordFields({
-          newPassword: tempPassword,
-          confirmNewPassword: tempPassword,
-        });
-        setTemporalPassword(tempPassword);
-        setCopySuccess(false);
-        try {
-          await dispatch(
-            updateUserTemporalPassword({ id, temporalPassword: tempPassword })
-          );
-          showNotification("Contraseña temporal guardada", 3000, false);
-        } catch (error) {
-          showNotification(
-            "Error al guardar la contraseña temporal",
-            5000,
-            false
-          );
-        }
-      };
-
-      const handleCopyTemporalPassword = async () => {
-        if (temporalPassword) {
-          await navigator.clipboard.writeText(temporalPassword);
-          setCopySuccess(true);
-          setTimeout(() => setCopySuccess(false), 1500);
-        }
-      };
-
-      return (
-        <Box>
-          <Typography variant="body2" color="textSecondary" sx={{ mb: 3 }}>
-            {DASHBOARD_USERS.DIALOG_PASSWORD_SUBTITLE}
-          </Typography>
-          <Stack>
-            <CustomTextField
-              label={DASHBOARD_USERS.DIALOG_PASSWORD_NEW}
-              type={showNewPassword ? "text" : "password"}
-              variant="outlined"
-              fullWidth
-              value={passwordFields.newPassword}
-              onChange={(e) => setPasswordFields({ ...passwordFields, newPassword: e.target.value })}
-              placeholder={DASHBOARD_USERS.DIALOG_PASSWORD_NEW_PLACEHOLDER}
-              InputProps={{
-                endAdornment: (
-                  <InputAdornment position="end">
-                    <IconButton onClick={() => setShowNewPassword((v) => !v)} edge="end">
-                      {showNewPassword ? <VisibilityOff /> : <Visibility />}
-                    </IconButton>
-                  </InputAdornment>
-                ),
-              }}
-            />
-            <CustomTextField
-              label={DASHBOARD_USERS.DIALOG_PASSWORD_CONFIRM}
-              type={showConfirmNewPassword ? "text" : "password"}
-              variant="outlined"
-              fullWidth
-              value={passwordFields.confirmNewPassword}
-              onChange={(e) => setPasswordFields({ ...passwordFields, confirmNewPassword: e.target.value })}
-              placeholder={DASHBOARD_USERS.DIALOG_PASSWORD_CONFIRM_PLACEHOLDER}
-              InputProps={{
-                endAdornment: (
-                  <InputAdornment position="end">
-                    <IconButton onClick={() => setShowConfirmNewPassword((v) => !v)} edge="end">
-                      {showConfirmNewPassword ? <VisibilityOff /> : <Visibility />}
-                    </IconButton>
-                  </InputAdornment>
-                ),
-              }}
-            />
-            <Button
-              variant="outlined"
-              onClick={handleGenerateTemporalPassword}
-              fullWidth
-            >
-              Generar contraseña temporal
-            </Button>
-            {temporalPassword && (
-              <Box
-                sx={{
-                  display: "flex",
-                  alignItems: "center",
-                  gap: 1,
-                  mt: 1,
-                  width: "100%",
-                }}
-              >
-                <CustomTextField
-                  label="Contraseña temporal generada"
-                  value={temporalPassword}
-                  fullWidth
-                  InputProps={{
-                    readOnly: true,
-                    endAdornment: (
-                      <Tooltip
-                        title={copySuccess ? "¡Copiado!" : "Copiar"}
-                        placement="top"
-                      >
-                        <IconButton
-                          onClick={handleCopyTemporalPassword}
-                          edge="end"
-                          size="small"
-                        >
-                          <ContentCopyIcon
-                            color={copySuccess ? "success" : "inherit"}
-                            fontSize="small"
-                          />
-                        </IconButton>
-                      </Tooltip>
-                    ),
-                  }}
-                  sx={{ flex: 1 }}
-                />
-              </Box>
-            )}
-            {error && (
-              <Alert severity="error" sx={{ whiteSpace: "pre-line" }}>
-                {error}
-              </Alert>
-            )}
-            <Box
-              sx={{
-                display: "flex",
-                gap: 2,
-                justifyContent: "flex-end",
-                mt: 2,
-                width: "100%",
-              }}
-            >
-              <Button variant="outlined" onClick={handleClose} fullWidth>
-                {DASHBOARD_USERS.DIALOG_PASSWORD_CANCEL}
-              </Button>
-              <Button
-                variant="contained"
-                onClick={(e) => handleChangePassword(e, id, handleClose)}
-                disabled={!isPasswordFormValid}
-                fullWidth
-              >
-                {DASHBOARD_USERS.DIALOG_PASSWORD_CHANGE}
-              </Button>
-            </Box>
-          </Stack>
-        </Box>
-      );
-    },
-    [
-      passwordFields,
-      temporalPassword,
-      copySuccess,
-      showNewPassword,
-      showConfirmNewPassword,
-      error,
-      setPasswordFields,
-      setTemporalPassword,
-      setCopySuccess,
-      setShowNewPassword,
-      setShowConfirmNewPassword,
-      dispatch,
-      showNotification,
-      handleChangePassword,
-      isPasswordFormValid,
-    ]
-  );
 
   return (
     <Box>
@@ -863,7 +592,6 @@ const ManageUsers: React.FC<{ isExpanded?: boolean }> = ({
               handleCancel={handleCancel}
               handleUpdate={handleUpdate}
               handleOpenStatusDialog={handleOpenStatusDialog}
-              handlePasswordModal={handlePasswordModal}
               getRowId={(row) => row.id}
               totalCount={totalCount}
               page={page}
@@ -925,6 +653,33 @@ const ManageUsers: React.FC<{ isExpanded?: boolean }> = ({
           onCancel={handleCloseAddUserModal}
           isLoading={isCreatingUser}
           roles={roles}
+        />
+      </DialogComponent>
+
+      <DialogComponent
+        open={passwordModalOpen}
+        onClose={handleClosePasswordModal}
+        title="Cambiar Contraseña"
+        subtitle={(() => {
+          if (typeof passwordUserId === 'number') {
+            const user = users.find((u) => u.id === passwordUserId);
+            if (user) {
+              return `${user.firstName || ''} ${user.lastName || ''}`.trim();
+            }
+          }
+          return '';
+        })()}
+        hideActions
+        paperSx={{ minWidth: { xs: '90vw', sm: 500, md: 700 }, maxWidth: { xs: '98vw', sm: 700 } }}
+      >
+        <PasswordChangeForm
+          userId={passwordUserId}
+          onClose={handleClosePasswordModal}
+          onSuccess={() => {
+            handleClosePasswordModal();
+            showNotification("La contraseña fue actualizada exitosamente", 3000, false);
+          }}
+          onError={(msg) => showNotification(msg, 5000, true)}
         />
       </DialogComponent>
     </Box>
