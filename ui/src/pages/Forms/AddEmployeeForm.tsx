@@ -6,6 +6,20 @@ import CustomTextField from "../../components/Textfield/CustomTextField";
 import PersonOutlinedIcon from "@mui/icons-material/PersonOutlined";
 import InfoOutlinedIcon from "@mui/icons-material/InfoOutlined";
 import { FORMS } from "../../constants/constants";
+import {
+  boxRoot,
+  gridContainer,
+  iconSx,
+  infoBox,
+  infoIconBox,
+  infoTitle,
+  infoDesc,
+  actionsBox,
+  clearButton,
+  actionsInnerBox,
+  cancelButton,
+  submitButton,
+} from './AddEmployeeForm.styles';
 
 interface AddEmployeeFormProps {
   onSubmit: (employee: { firstName: string; lastName: string }) => void;
@@ -88,8 +102,8 @@ const AddEmployeeForm: React.FC<AddEmployeeFormProps> = ({
   };
 
   return (
-    <Box sx={{ width: "100%", p: 0 }}>
-      <Grid container spacing={3} sx={{ mt: 0 }}>
+    <Box sx={boxRoot}>
+      <Grid container spacing={3} sx={gridContainer}>
         <Grid item xs={12} sm={6}>
           <CustomTextField
             label={FORMS.FIRST_NAME}
@@ -102,7 +116,7 @@ const AddEmployeeForm: React.FC<AddEmployeeFormProps> = ({
             helperText={errors.firstName}
             icon={
               <PersonOutlinedIcon
-                sx={{ color: theme.palette.text.secondary }}
+                sx={iconSx(theme)}
               />
             }
           />
@@ -120,46 +134,24 @@ const AddEmployeeForm: React.FC<AddEmployeeFormProps> = ({
             helperText={errors.lastName}
             icon={
               <PersonOutlinedIcon
-                sx={{ color: theme.palette.text.secondary }}
+                sx={iconSx(theme)}
               />
             }
           />
         </Grid>
 
         <Grid item xs={12}>
-          <Box
-            sx={{
-              display: "flex",
-              alignItems: "center",
-              p: { xs: 1.5, sm: 2 },
-              backgroundColor: theme.palette.action.hover,
-              borderRadius: 1,
-              border: "1px solid",
-              borderColor: theme.palette.divider,
-            }}
-          >
-            <Box sx={{ mr: { xs: 1, sm: 2 }, color: theme.palette.info.main }}>
+          <Box sx={infoBox(theme)}>
+            <Box sx={infoIconBox(theme)}>
               <InfoOutlinedIcon
-                sx={{ color: theme.palette.info.main, mr: { xs: 1, sm: 2 } }}
+                sx={{ ...iconSx(theme), ...infoIconBox(theme) }}
               />
             </Box>
             <Box>
-              <Box
-                sx={{
-                  fontWeight: 600,
-                  color: theme.palette.text.primary,
-                  mb: 0.5,
-                  fontSize: "clamp(0.875rem, 1.5vw, 1rem)",
-                }}
-              >
+              <Box sx={infoTitle(theme)}>
                 {FORMS.ADD_EMPLOYEE.INFO_TITLE}
               </Box>
-              <Box
-                sx={{
-                  color: theme.palette.text.secondary,
-                  fontSize: "clamp(0.75rem, 1.25vw, 0.875rem)",
-                }}
-              >
+              <Box sx={infoDesc(theme)}>
                 {FORMS.ADD_EMPLOYEE.INFO_DESC}
               </Box>
             </Box>
@@ -167,49 +159,24 @@ const AddEmployeeForm: React.FC<AddEmployeeFormProps> = ({
         </Grid>
 
         <Grid item xs={12}>
-          <Box
-            sx={{
-              display: "flex",
-              flexDirection: { xs: "column", sm: "row" },
-              justifyContent: "space-between",
-              gap: { xs: 1, sm: 2 },
-              pt: 2,
-              borderTop: "1px solid",
-              borderColor: theme.palette.divider,
-            }}
-          >
+          <Box sx={actionsBox(theme)}>
             <Button
               variant="outlined"
               onClick={handleClearForm}
               startIcon={<CloseRoundedIcon />}
               fullWidth={isSmallScreen}
-              sx={{
-                minHeight: { xs: 44, sm: 48 },
-                fontSize: "clamp(0.75rem, 1.25vw, 0.875rem)",
-                order: { xs: 3, sm: 1 },
-              }}
+              sx={clearButton}
             >
               Limpiar
             </Button>
-            <Box
-              sx={{
-                display: "flex",
-                flexDirection: { xs: "column", sm: "row" },
-                gap: { xs: 1, sm: 2 },
-                width: { xs: "100%", sm: "auto" },
-                order: { xs: 1, sm: 2 },
-              }}
-            >
+            <Box sx={actionsInnerBox}>
               {onCancel && (
                 <Button
                   variant="outlined"
                   onClick={onCancel}
                   disabled={isLoading}
                   fullWidth={isSmallScreen}
-                  sx={{
-                    minHeight: { xs: 44, sm: 48 },
-                    fontSize: "clamp(0.75rem, 1.25vw, 0.875rem)",
-                  }}
+                  sx={cancelButton}
                 >
                   Cancelar
                 </Button>
@@ -220,15 +187,9 @@ const AddEmployeeForm: React.FC<AddEmployeeFormProps> = ({
                 disabled={!isFormValid() || isLoading}
                 startIcon={<AddRoundedIcon />}
                 fullWidth={isSmallScreen}
-                sx={{
-                  minHeight: { xs: 44, sm: 48 },
-                  fontSize: "clamp(0.75rem, 1.25vw, 0.875rem)",
-                  fontWeight: 600,
-                  px: { xs: 2, sm: 4 },
-                  py: { xs: 1, sm: 1.5 },
-                }}
+                sx={submitButton}
               >
-                {isLoading ? FORMS.ADD_EMPLOYEE.BUTTON_ADDING : FORMS.ADD_EMPLOYEE.BUTTON_ADD}
+                Agregar
               </Button>
             </Box>
           </Box>

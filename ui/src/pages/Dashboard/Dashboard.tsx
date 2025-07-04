@@ -14,6 +14,13 @@ import {
 import { PAGE_TITLE, DASHBOARD } from "../../constants/constants";
 import AdminPanelSettingsIcon from "@mui/icons-material/AdminPanelSettings";
 import ManagePermissions from "./ManagePermissions";
+import {
+  dashboardHeaderBoxStyles,
+  dashboardTitleBoxStyles,
+  dashboardTitleStyles,
+  dashboardIconStyles,
+  dashboardDividerStyles,
+} from "./Dashboard.styles";
 
 // Dashboard page component for managing users, roles, and permissions
 const Dashboard: React.FC = () => {
@@ -35,25 +42,17 @@ const Dashboard: React.FC = () => {
         display="flex"
         justifyContent="space-between"
         alignItems="center"
-        sx={{ mb: 2 }}
+        sx={dashboardHeaderBoxStyles}
       >
-        <Box display="flex" flexDirection="column" alignItems="flex-start" sx={{ mb: 2 }}>
+        <Box display="flex" flexDirection="column" alignItems="flex-start" sx={dashboardTitleBoxStyles}>
           <Typography
             variant={isSmallScreen ? "h5" : "h4"}
-            sx={{
-              display: 'flex',
-              alignItems: 'center',
-              fontFamily: "'Urbanist', sans-serif",
-              fontWeight: 800,
-              color: "#000000",
-              mb: 0.5,
-              gap: 1.5,
-            }}
+            sx={dashboardTitleStyles}
           >
-            <AdminPanelSettingsIcon fontSize={isSmallScreen ? "small" : "large"} sx={{ mr: 1, color: theme.palette.primary.main }} />
+            <AdminPanelSettingsIcon fontSize={isSmallScreen ? "small" : "large"} sx={dashboardIconStyles(theme)} />
             {PAGE_TITLE.DASHBOARD}
           </Typography>
-          <Divider sx={{ width: 48, borderBottomWidth: 3, borderColor: theme.palette.primary.main, borderRadius: 2, mx: 'auto', mb: 0.5 }} />
+          <Divider sx={dashboardDividerStyles(theme)} />
         </Box>
       </Box>
       <Accordion

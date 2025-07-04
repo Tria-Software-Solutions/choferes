@@ -78,6 +78,30 @@ import Tab from "@mui/material/Tab";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faFileExcel, faFilePdf } from "@fortawesome/free-solid-svg-icons";
 import AssignmentIcon from "@mui/icons-material/Assignment";
+import {
+  rolesHeaderBoxStyles,
+  rolesTitleBoxStyles,
+  rolesTitleStyles,
+  rolesIconStyles,
+  rolesDividerStyles,
+  exportSpeedDialBoxStyles,
+  loadingBoxStyles,
+  backdropStyles,
+  searchBarSx,
+  datePickerSx,
+  buttonGroupSx,
+  noEmployeesBoxStyles,
+  noEmployeesIconStyles,
+  summaryDialogPaperSx,
+  summaryDialogHeaderBoxStyles,
+  summaryDialogCloseIconStyles,
+  summaryTabPanelAvatarStyles,
+  summaryInfoBoxStyles,
+  summaryInfoIconBoxStyles,
+  summaryInfoIconStyles,
+  summaryInfoTitleStyles,
+  summaryInfoDescStyles,
+} from "./RolesPage.styles";
 
 // Roles management and summary page component
 const RolesPage: React.FC = () => {
@@ -566,29 +590,21 @@ const RolesPage: React.FC = () => {
         display="flex"
         justifyContent="space-between"
         alignItems="center"
-        sx={{ mb: 3 }}
+        sx={rolesHeaderBoxStyles}
       >
-        <Box display="flex" flexDirection="column" alignItems="flex-start" sx={{ mb: 2 }}>
+        <Box display="flex" flexDirection="column" alignItems="flex-start" sx={rolesTitleBoxStyles}>
           <Typography
             variant={isSmallScreen ? "h5" : "h4"}
-            sx={{
-              display: 'flex',
-              alignItems: 'center',
-              fontFamily: "'Urbanist', sans-serif",
-              fontWeight: 800,
-              color: "#000000",
-              mb: 0.5,
-              gap: 1.5,
-            }}
+            sx={rolesTitleStyles}
           >
-            <AssignmentIcon fontSize={isSmallScreen ? "small" : "large"} sx={{ mr: 1, color: theme.palette.primary.main }} />
+            <AssignmentIcon fontSize={isSmallScreen ? "small" : "large"} sx={rolesIconStyles(theme)} />
             {PAGE_TITLE.ROLES}
           </Typography>
-          <Divider sx={{ width: 48, borderBottomWidth: 3, borderColor: theme.palette.primary.main, borderRadius: 2, mx: 'auto', mb: 0.5 }} />
+          <Divider sx={rolesDividerStyles(theme)} />
         </Box>
         {userPermissions.includes(PERMISSIONS.EXPORT_EXCEL_ROLES) &&
           userPermissions.includes(PERMISSIONS.EXPORT_PDF_ROLES) && (
-            <Box sx={{ minHeight: 65 }}>
+            <Box sx={exportSpeedDialBoxStyles}>
               {filteredEmployees.length > 0 && (
                 <CustomSpeedDial
                   actions={exportOptions}
@@ -602,16 +618,10 @@ const RolesPage: React.FC = () => {
       </Box>
       {isLoading ? (
         <Box
-          sx={{
-            display: "flex",
-            justifyContent: "center",
-            alignItems: "center",
-            textAlign: "center",
-            paddingTop: "10%",
-          }}
+          sx={loadingBoxStyles}
         >
           <Backdrop
-            sx={(theme) => ({ color: "#fff", zIndex: theme.zIndex.drawer + 1 })}
+            sx={backdropStyles(theme)}
             open={isLoading}
           >
             <CircularProgress />
@@ -631,9 +641,7 @@ const RolesPage: React.FC = () => {
                   placeholder={ROLES_PAGE.SEARCH_PLACEHOLDER}
                   value={filter}
                   onChange={handleFilterChange}
-                  sx={{
-                    maxWidth: "100%",
-                  }}
+                  sx={searchBarSx ?? {}}
                   fullWidth
                 />
               )}
@@ -642,7 +650,7 @@ const RolesPage: React.FC = () => {
               <Box
                 display="flex"
                 flexDirection={{ xs: "column", sm: "column", md: "row" }}
-                alignItems="flex-start"
+                alignItems={{ xs: "stretch", sm: "stretch", md: "center" }}
                 justifyContent="flex-end"
                 gap={2}
               >
@@ -659,31 +667,7 @@ const RolesPage: React.FC = () => {
                           fullWidth: true,
                           required: true,
                           variant: "outlined",
-                          sx: {
-                            height: "56px",
-                            minWidth: "180px",
-                            "& .MuiOutlinedInput-root": {
-                              height: "56px",
-                              borderRadius: 2,
-                              backgroundColor: "#ffffff",
-                              "&:hover .MuiOutlinedInput-notchedOutline": {
-                                borderColor: "#000000",
-                              },
-                              "&.Mui-focused .MuiOutlinedInput-notchedOutline": {
-                                borderColor: "#000000",
-                                borderWidth: 2,
-                              },
-                              "&.Mui-focused": {
-                                backgroundColor: "#ffffff",
-                                outline: "none",
-                                boxShadow: "none",
-                              },
-                              "& input": {
-                                outline: "none",
-                                boxShadow: "none",
-                              },
-                            },
-                          },
+                          sx: datePickerSx,
                         },
                       }}
                       closeOnSelect
@@ -692,20 +676,7 @@ const RolesPage: React.FC = () => {
                   </LocalizationProvider>
                   <ButtonGroup
                     variant="contained"
-                    sx={{
-                      height: '56px',
-                      width: 'auto',
-                      flexDirection: 'row',
-                      '& .MuiButton-root': {
-                        minWidth: 0,
-                        px: 2,
-                        py: 1.2,
-                        fontSize: '1rem',
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                      },
-                    }}
+                    sx={buttonGroupSx}
                   >
                     <Tooltip title={ROLES_PAGE.TOOLTIP_PREV_WEEK} arrow>
                       <Button onClick={handlePreviousWeek}>
@@ -713,18 +684,14 @@ const RolesPage: React.FC = () => {
                       </Button>
                     </Tooltip>
                     <Tooltip title={ROLES_PAGE.TOOLTIP_NEXT_WEEK} arrow>
-                      <span style={{ display: 'inline-block' }}>
-                        <Button disabled={!isValidDateForSelect(new Date(getCurrentWeekDates(weekOffset + 1)[0].isoDate))} onClick={handleNextWeek}>
-                          <ArrowForwardIosRoundedIcon />
-                        </Button>
-                      </span>
+                      <Button disabled={!isValidDateForSelect(new Date(getCurrentWeekDates(weekOffset + 1)[0].isoDate))} onClick={handleNextWeek}>
+                        <ArrowForwardIosRoundedIcon />
+                      </Button>
                     </Tooltip>
                     <Tooltip title={ROLES_PAGE.TOOLTIP_CURRENT_WEEK} arrow>
-                      <span style={{ display: 'inline-block' }}>
-                        <Button disabled={weekOffset === 0} onClick={handleCurrentWeek}>
-                          <CalendarTodayRoundedIcon />
-                        </Button>
-                      </span>
+                      <Button disabled={weekOffset === 0} onClick={handleCurrentWeek}>
+                        <CalendarTodayRoundedIcon />
+                      </Button>
                     </Tooltip>
                   </ButtonGroup>
                 </Box>
@@ -752,17 +719,9 @@ const RolesPage: React.FC = () => {
             />
           ) : (
             <Box
-              sx={{
-                display: "flex",
-                flexDirection: "column",
-                justifyContent: "center",
-                alignItems: "center",
-                textAlign: "center",
-                paddingTop: "10%",
-                paddingBottom: "12%",
-              }}
+              sx={noEmployeesBoxStyles}
             >
-              <ManageSearchIcon color="disabled" sx={{ fontSize: "65px" }} />
+              <ManageSearchIcon color="disabled" sx={noEmployeesIconStyles} />
               <Typography variant="h6" color="textSecondary">
                 {ROLES_PAGE.NO_EMPLOYEES}
               </Typography>
@@ -788,23 +747,11 @@ const RolesPage: React.FC = () => {
           maxWidth="md"
           fullWidth
           PaperProps={{
-            sx: {
-              border: "2px solid #fff",
-              borderRadius: 3,
-            },
+            sx: summaryDialogPaperSx,
           }}
         >
           <Box
-            sx={{
-              background: theme.palette.primary.main,
-              color: "#fff",
-              p: { xs: 3, sm: 4 },
-              borderTopLeftRadius: 2,
-              borderTopRightRadius: 2,
-              display: "flex",
-              alignItems: "center",
-              gap: 2,
-            }}
+            sx={summaryDialogHeaderBoxStyles}
           >
             <Box>
               <Typography variant="h5" fontWeight={700} color="#fff">
@@ -818,7 +765,7 @@ const RolesPage: React.FC = () => {
             <Box flexGrow={1} />
             <IconButton
               onClick={() => setOpenSummaryDialogEmployee(null)}
-              sx={{ color: "#fff" }}
+              sx={summaryDialogCloseIconStyles}
             >
               <CloseRoundedIcon />
             </IconButton>
@@ -840,11 +787,7 @@ const RolesPage: React.FC = () => {
                   <TabPanel value="weekly">
                     <Box display="flex" alignItems="center" gap={3}>
                       <Avatar
-                        sx={{
-                          bgcolor: theme.palette.success.light,
-                          width: 56,
-                          height: 56,
-                        }}
+                        sx={summaryTabPanelAvatarStyles(theme, "success")}
                       >
                         <BarChartIcon color="success" />
                       </Avatar>
@@ -868,11 +811,7 @@ const RolesPage: React.FC = () => {
                   <TabPanel value="biweekly">
                     <Box display="flex" alignItems="center" gap={3}>
                       <Avatar
-                        sx={{
-                          bgcolor: theme.palette.info.light,
-                          width: 56,
-                          height: 56,
-                        }}
+                        sx={summaryTabPanelAvatarStyles(theme, "info")}
                       >
                         <BarChartIcon color="info" />
                       </Avatar>
@@ -898,11 +837,7 @@ const RolesPage: React.FC = () => {
                   <TabPanel value="monthly">
                     <Box display="flex" alignItems="center" gap={3}>
                       <Avatar
-                        sx={{
-                          bgcolor: theme.palette.warning.light,
-                          width: 56,
-                          height: 56,
-                        }}
+                        sx={summaryTabPanelAvatarStyles(theme, "warning")}
                       >
                         <BarChartIcon color="warning" />
                       </Avatar>
@@ -928,11 +863,7 @@ const RolesPage: React.FC = () => {
                   <TabPanel value="overtime">
                     <Box display="flex" alignItems="center" gap={3}>
                       <Avatar
-                        sx={{
-                          bgcolor: theme.palette.error.light,
-                          width: 56,
-                          height: 56,
-                        }}
+                        sx={summaryTabPanelAvatarStyles(theme, "error")}
                       >
                         <AccessTimeRoundedIcon color="error" />
                       </Avatar>
@@ -953,46 +884,20 @@ const RolesPage: React.FC = () => {
               </Grid>
               <Grid item xs={12}>
                 <Box
-                  sx={{
-                    display: "flex",
-                    alignItems: "center",
-                    p: { xs: 1.5, sm: 2 },
-                    backgroundColor: theme.palette.action.hover,
-                    borderRadius: 1,
-                    border: "1px solid",
-                    borderColor: theme.palette.divider,
-                  }}
+                  sx={summaryInfoBoxStyles(theme)}
                 >
                   <Box
-                    sx={{
-                      mr: { xs: 1, sm: 2 },
-                      color: theme.palette.info.main,
-                    }}
+                    sx={summaryInfoIconBoxStyles(theme)}
                   >
                     <InfoOutlinedIcon
-                      sx={{
-                        color: theme.palette.info.main,
-                        mr: { xs: 1, sm: 2 },
-                      }}
+                      sx={summaryInfoIconStyles(theme)}
                     />
                   </Box>
                   <Box>
-                    <Box
-                      sx={{
-                        fontWeight: 600,
-                        color: theme.palette.text.primary,
-                        mb: 0.5,
-                        fontSize: "clamp(0.875rem, 1.5vw, 1rem)",
-                      }}
-                    >
+                    <Box sx={summaryInfoTitleStyles(theme)}>
                       {ROLES_PAGE.SUMMARY_INFO_TITLE}
                     </Box>
-                    <Box
-                      sx={{
-                        color: theme.palette.text.secondary,
-                        fontSize: "clamp(0.75rem, 1.25vw, 0.875rem)",
-                      }}
-                    >
+                    <Box sx={summaryInfoDescStyles(theme)}>
                       {ROLES_PAGE.SUMMARY_INFO_DESC}
                     </Box>
                   </Box>

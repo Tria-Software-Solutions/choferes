@@ -53,6 +53,25 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faFileExcel, faFilePdf } from "@fortawesome/free-solid-svg-icons";
 import AddRoundedIcon from "@mui/icons-material/AddRounded";
 import DeleteOutlineIcon from "@mui/icons-material/DeleteOutline";
+import {
+  vehiclesHeaderBoxStyles,
+  vehiclesTitleBoxStyles,
+  vehiclesTitleStyles,
+  vehiclesIconStyles,
+  vehiclesDividerStyles,
+  exportSpeedDialBoxStyles,
+  loadingBoxStyles,
+  backdropStyles,
+  searchBarBoxStyles,
+  addButtonMobileStyles,
+  addButtonDesktopStyles,
+  datePickerSx,
+  buttonGroupSx,
+  noVehiclesBoxStyles,
+  noVehiclesIconStyles,
+  deleteDialogPaperSx,
+  addDialogPaperSx,
+} from "./VehiclesPage.styles";
 
 // Vehicles management page component
 const VehiclesPage: React.FC = () => {
@@ -374,29 +393,21 @@ const VehiclesPage: React.FC = () => {
         display="flex"
         justifyContent="space-between"
         alignItems="center"
-        sx={{ mb: 3 }}
+        sx={vehiclesHeaderBoxStyles}
       >
-        <Box display="flex" flexDirection="column" alignItems="flex-start" sx={{ mb: 2 }}>
+        <Box display="flex" flexDirection="column" alignItems="flex-start" sx={vehiclesTitleBoxStyles}>
           <Typography
             variant={isSmallScreen ? "h5" : "h4"}
-            sx={{
-              display: 'flex',
-              alignItems: 'center',
-              fontFamily: "'Urbanist', sans-serif",
-              fontWeight: 800,
-              color: "#000000",
-              mb: 0.5,
-              gap: 1.5,
-            }}
+            sx={vehiclesTitleStyles}
           >
-            <DirectionsCarFilledIcon fontSize={isSmallScreen ? "small" : "large"} sx={{ mr: 1, color: theme.palette.primary.main }} />
+            <DirectionsCarFilledIcon fontSize={isSmallScreen ? "small" : "large"} sx={vehiclesIconStyles(theme)} />
             {PAGE_TITLE.VEHICLES}
           </Typography>
-          <Divider sx={{ width: 48, borderBottomWidth: 3, borderColor: theme.palette.primary.main, borderRadius: 2, mx: 'auto', mb: 0.5 }} />
+          <Divider sx={vehiclesDividerStyles(theme)} />
         </Box>
         {userPermissions.includes(PERMISSIONS.EXPORT_EXCEL_VEHICLES) &&
           userPermissions.includes(PERMISSIONS.EXPORT_PDF_VEHICLES) && (
-            <Box sx={{ minHeight: 65 }}>
+            <Box sx={exportSpeedDialBoxStyles}>
               {filteredWeekVehicles.length > 0 && (
                 <CustomSpeedDial
                   actions={exportOptions}
@@ -410,16 +421,10 @@ const VehiclesPage: React.FC = () => {
       </Box>
       {isLoadingVehicles ? (
         <Box
-          sx={{
-            display: "flex",
-            justifyContent: "center",
-            alignItems: "center",
-            textAlign: "center",
-            paddingTop: "10%",
-          }}
+          sx={loadingBoxStyles}
         >
           <Backdrop
-            sx={(theme) => ({ color: "#fff", zIndex: theme.zIndex.drawer + 1 })}
+            sx={backdropStyles(theme)}
             open={isLoadingVehicles}
           >
             <CircularProgress />
@@ -434,7 +439,7 @@ const VehiclesPage: React.FC = () => {
             alignItems="center"
           >
             <Grid item xs={12} md={4}>
-              <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
+              <Box sx={searchBarBoxStyles}>
                 {filteredVehicles && (
                   <SearchBar
                     placeholder={VEHICLES_PAGE.SEARCH_PLACEHOLDER}
@@ -449,14 +454,7 @@ const VehiclesPage: React.FC = () => {
                     variant="contained"
                     color="primary"
                     onClick={handleOpenAddVehicleModal}
-                    sx={{
-                      display: { xs: "flex", md: "none" },
-                      minWidth: "auto",
-                      width: 56,
-                      height: 56,
-                      borderRadius: "50%",
-                      p: 0,
-                    }}
+                    sx={addButtonMobileStyles}
                   >
                     <AddRoundedIcon />
                   </Button>
@@ -484,31 +482,7 @@ const VehiclesPage: React.FC = () => {
                           fullWidth: true,
                           required: true,
                           variant: "outlined",
-                          sx: {
-                            height: "56px",
-                            minWidth: "180px",
-                            "& .MuiOutlinedInput-root": {
-                              height: "56px",
-                              borderRadius: 2,
-                              backgroundColor: "#ffffff",
-                              "&:hover .MuiOutlinedInput-notchedOutline": {
-                                borderColor: "#000000",
-                              },
-                              "&.Mui-focused .MuiOutlinedInput-notchedOutline": {
-                                borderColor: "#000000",
-                                borderWidth: 2,
-                              },
-                              "&.Mui-focused": {
-                                backgroundColor: "#ffffff",
-                                outline: "none",
-                                boxShadow: "none",
-                              },
-                              "& input": {
-                                outline: "none",
-                                boxShadow: "none",
-                              },
-                            },
-                          },
+                          sx: datePickerSx,
                         },
                       }}
                       closeOnSelect
@@ -517,20 +491,7 @@ const VehiclesPage: React.FC = () => {
                   </LocalizationProvider>
                   <ButtonGroup
                     variant="contained"
-                    sx={{
-                      height: '56px',
-                      width: 'auto',
-                      flexDirection: 'row',
-                      '& .MuiButton-root': {
-                        minWidth: 0,
-                        px: 2,
-                        py: 1.2,
-                        fontSize: '1rem',
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                      },
-                    }}
+                    sx={buttonGroupSx}
                   >
                     <Tooltip title={VEHICLES_PAGE.TOOLTIP_PREV_DAY} arrow>
                       <Button onClick={handlePreviousDate}>
@@ -554,13 +515,7 @@ const VehiclesPage: React.FC = () => {
                     variant="contained"
                     startIcon={<AddRoundedIcon />}
                     onClick={handleOpenAddVehicleModal}
-                    sx={{
-                      display: { xs: "none", md: "flex" },
-                      px: 3,
-                      py: 1.5,
-                      fontSize: "1rem",
-                      minHeight: 56,
-                    }}
+                    sx={addButtonDesktopStyles}
                   >
                     {VEHICLES_PAGE.ADD}
                   </Button>
@@ -602,17 +557,9 @@ const VehiclesPage: React.FC = () => {
             />
           ) : (
             <Box
-              sx={{
-                display: "flex",
-                flexDirection: "column",
-                justifyContent: "center",
-                alignItems: "center",
-                textAlign: "center",
-                paddingTop: "10%",
-                paddingBottom: "12%",
-              }}
+              sx={noVehiclesBoxStyles}
             >
-              <ManageSearchIcon color="disabled" sx={{ fontSize: "65px" }} />
+              <ManageSearchIcon color="disabled" sx={noVehiclesIconStyles} />
               <Typography variant="body1" color="textSecondary">
                 {capitalizeFirstLetter(
                   format(selectedDate, "EEEE dd 'de' MMMM 'de' yyyy", {
@@ -637,10 +584,7 @@ const VehiclesPage: React.FC = () => {
         confirmText={VEHICLES_PAGE.DIALOG_DELETE_CONFIRM}
         cancelText={VEHICLES_PAGE.DIALOG_DELETE_CANCEL}
         loading={isDeletingVehicle}
-        paperSx={{
-          minWidth: { xs: "80vw", sm: 320 },
-          maxWidth: { xs: "90vw", sm: 400 },
-        }}
+        paperSx={deleteDialogPaperSx ?? {}}
         icon={<DeleteOutlineIcon color="error" />}
       />
       <DialogComponent
@@ -649,10 +593,7 @@ const VehiclesPage: React.FC = () => {
         title={VEHICLES_PAGE.DIALOG_ADD_TITLE}
         subtitle={VEHICLES_PAGE.DIALOG_ADD_SUBTITLE}
         hideActions
-        paperSx={{
-          minWidth: { xs: "90vw", sm: 500, md: 700 },
-          maxWidth: { xs: "98vw", sm: 700 },
-        }}
+        paperSx={addDialogPaperSx ?? {}}
       >
         <AddVehicleForm
           onSubmit={handleCreateVehicle}

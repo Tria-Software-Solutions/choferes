@@ -41,6 +41,24 @@ import AddRoundedIcon from "@mui/icons-material/AddRounded";
 import DeleteOutlineIcon from "@mui/icons-material/DeleteOutline";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faFileExcel, faFilePdf } from "@fortawesome/free-solid-svg-icons";
+import {
+  employeesHeaderBoxStyles,
+  employeesTitleBoxStyles,
+  employeesTitleStyles,
+  employeesIconStyles,
+  employeesDividerStyles,
+  exportSpeedDialBoxStyles,
+  loadingBoxStyles,
+  backdropStyles,
+  searchBarBoxStyles,
+  addButtonMobileStyles,
+  addButtonDesktopBoxStyles,
+  addButtonDesktopStyles,
+  noEmployeesBoxStyles,
+  noEmployeesIconStyles,
+  deleteDialogPaperSx,
+  addDialogPaperSx,
+} from "./EmployeesPage.styles";
 
 // Employees management page component
 const EmployeesPage: React.FC = () => {
@@ -231,46 +249,29 @@ const EmployeesPage: React.FC = () => {
         display="flex"
         justifyContent="space-between"
         alignItems="center"
-        sx={{ mb: 3 }}
+        sx={employeesHeaderBoxStyles}
       >
         <Box
           display="flex"
           flexDirection="column"
           alignItems="flex-start"
-          sx={{ mb: 2 }}
+          sx={employeesTitleBoxStyles}
         >
           <Typography
             variant={isSmallScreen ? "h5" : "h4"}
-            sx={{
-              display: "flex",
-              alignItems: "center",
-              fontFamily: "'Urbanist', sans-serif",
-              fontWeight: 800,
-              color: "#000000",
-              mb: 0.5,
-              gap: 1.5,
-            }}
+            sx={employeesTitleStyles}
           >
             <GroupRoundedIcon
               fontSize={isSmallScreen ? "small" : "large"}
-              sx={{ mr: 1, color: theme.palette.primary.main }}
+              sx={employeesIconStyles(theme)}
             />
             {PAGE_TITLE.EMPLOYEES}
           </Typography>
-          <Divider
-            sx={{
-              width: 48,
-              borderBottomWidth: 3,
-              borderColor: theme.palette.primary.main,
-              borderRadius: 2,
-              mx: "auto",
-              mb: 0.5,
-            }}
-          />
+          <Divider sx={employeesDividerStyles(theme)} />
         </Box>
         {userPermissions.includes(PERMISSIONS.EXPORT_EXCEL_EMPLOYEES) &&
           userPermissions.includes(PERMISSIONS.EXPORT_PDF_EMPLOYEES) && (
-            <Box sx={{ minHeight: 65 }}>
+            <Box sx={exportSpeedDialBoxStyles}>
               {filteredEmployees.length > 0 && (
                 <CustomSpeedDial
                   actions={exportOptions}
@@ -284,16 +285,10 @@ const EmployeesPage: React.FC = () => {
       </Box>
       {isLoadingEmployees ? (
         <Box
-          sx={{
-            display: "flex",
-            justifyContent: "center",
-            alignItems: "center",
-            textAlign: "center",
-            paddingTop: "10%",
-          }}
+          sx={loadingBoxStyles}
         >
           <Backdrop
-            sx={(theme) => ({ color: "#fff", zIndex: theme.zIndex.drawer + 1 })}
+            sx={backdropStyles(theme)}
             open={isLoadingEmployees}
           >
             <CircularProgress />
@@ -308,7 +303,7 @@ const EmployeesPage: React.FC = () => {
             alignItems="center"
           >
             <Grid item xs={12} md={4}>
-              <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
+              <Box sx={searchBarBoxStyles}>
                 {filteredEmployees && (
                   <SearchBar
                     placeholder={EMPLOYEES_PAGE.SEARCH_PLACEHOLDER}
@@ -323,14 +318,7 @@ const EmployeesPage: React.FC = () => {
                     variant="contained"
                     color="primary"
                     onClick={handleOpenAddModal}
-                    sx={{
-                      display: { xs: "flex", md: "none" },
-                      minWidth: "auto",
-                      width: 56,
-                      height: 56,
-                      borderRadius: "50%",
-                      p: 0,
-                    }}
+                    sx={addButtonMobileStyles}
                   >
                     <AddRoundedIcon />
                   </Button>
@@ -340,16 +328,13 @@ const EmployeesPage: React.FC = () => {
             {userPermissions.includes(PERMISSIONS.CREATE_EMPLOYEES) && (
               <Grid item xs={12} md={8}>
                 <Box
-                  sx={{
-                    display: { xs: "none", md: "flex" },
-                    justifyContent: "flex-end",
-                  }}
+                  sx={addButtonDesktopBoxStyles}
                 >
                   <Button
                     variant="contained"
                     startIcon={<AddRoundedIcon />}
                     onClick={handleOpenAddModal}
-                    sx={{ px: 3, py: 1.5, fontSize: "1rem", minHeight: 56 }}
+                    sx={addButtonDesktopStyles}
                   >
                     {EMPLOYEES_PAGE.ADD}
                   </Button>
@@ -382,17 +367,9 @@ const EmployeesPage: React.FC = () => {
             />
           ) : (
             <Box
-              sx={{
-                display: "flex",
-                flexDirection: "column",
-                justifyContent: "center",
-                alignItems: "center",
-                textAlign: "center",
-                paddingTop: "10%",
-                paddingBottom: "12%",
-              }}
+              sx={noEmployeesBoxStyles}
             >
-              <ManageSearchIcon color="disabled" sx={{ fontSize: "65px" }} />
+              <ManageSearchIcon color="disabled" sx={noEmployeesIconStyles} />
               <Typography variant="h6" color="textSecondary">
                 {EMPLOYEES_PAGE.NO_EMPLOYEES}
               </Typography>
@@ -410,10 +387,7 @@ const EmployeesPage: React.FC = () => {
         confirmText={EMPLOYEES_PAGE.DIALOG_DELETE_CONFIRM}
         cancelText={EMPLOYEES_PAGE.DIALOG_DELETE_CANCEL}
         loading={isDeletingEmployee}
-        paperSx={{
-          minWidth: { xs: "80vw", sm: 320 },
-          maxWidth: { xs: "90vw", sm: 400 },
-        }}
+        paperSx={deleteDialogPaperSx ?? {}}
         icon={<DeleteOutlineIcon color="error" />}
       />
 
@@ -423,10 +397,7 @@ const EmployeesPage: React.FC = () => {
         title={EMPLOYEES_PAGE.DIALOG_ADD_TITLE}
         subtitle={EMPLOYEES_PAGE.DIALOG_ADD_SUBTITLE}
         hideActions
-        paperSx={{
-          minWidth: { xs: "90vw", sm: 500, md: 700 },
-          maxWidth: { xs: "98vw", sm: 700 },
-        }}
+        paperSx={addDialogPaperSx ?? {}}
       >
         <AddEmployeeForm
           onSubmit={handleCreate}

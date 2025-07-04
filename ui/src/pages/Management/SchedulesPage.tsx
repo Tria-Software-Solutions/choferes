@@ -43,6 +43,24 @@ import { faFileExcel, faFilePdf } from "@fortawesome/free-solid-svg-icons";
 import AddRoundedIcon from "@mui/icons-material/AddRounded";
 import DeleteOutlineIcon from "@mui/icons-material/DeleteOutline";
 import { NOTIFICATIONS } from "../../constants/constants";
+import {
+  schedulesHeaderBoxStyles,
+  schedulesTitleBoxStyles,
+  schedulesTitleStyles,
+  schedulesIconStyles,
+  schedulesDividerStyles,
+  exportSpeedDialBoxStyles,
+  loadingBoxStyles,
+  backdropStyles,
+  searchBarBoxStyles,
+  addButtonMobileStyles,
+  addButtonDesktopBoxStyles,
+  addButtonDesktopStyles,
+  noSchedulesBoxStyles,
+  noSchedulesIconStyles,
+  deleteDialogPaperSx,
+  addDialogPaperSx,
+} from "./SchedulesPage.styles";
 
 // Schedules management page component
 const SchedulesPage: React.FC = () => {
@@ -252,29 +270,21 @@ const SchedulesPage: React.FC = () => {
         display="flex"
         justifyContent="space-between"
         alignItems="center"
-        sx={{ mb: 3 }}
+        sx={schedulesHeaderBoxStyles}
       >
-        <Box display="flex" flexDirection="column" alignItems="flex-start" sx={{ mb: 2 }}>
+        <Box display="flex" flexDirection="column" alignItems="flex-start" sx={schedulesTitleBoxStyles}>
           <Typography
             variant={isSmallScreen ? "h5" : "h4"}
-            sx={{
-              display: 'flex',
-              alignItems: 'center',
-              fontFamily: "'Urbanist', sans-serif",
-              fontWeight: 800,
-              color: "#000000",
-              mb: 0.5,
-              gap: 1.5,
-            }}
+            sx={schedulesTitleStyles}
           >
-            <EditCalendarIcon fontSize={isSmallScreen ? "small" : "large"} sx={{ mr: 1, color: theme.palette.primary.main }} />
+            <EditCalendarIcon fontSize={isSmallScreen ? "small" : "large"} sx={schedulesIconStyles(theme)} />
             {PAGE_TITLE.SCHEDULES}
           </Typography>
-          <Divider sx={{ width: 48, borderBottomWidth: 3, borderColor: theme.palette.primary.main, borderRadius: 2, mx: 'auto', mb: 0.5 }} />
+          <Divider sx={schedulesDividerStyles(theme)} />
         </Box>
         {userPermissions.includes(PERMISSIONS.EXPORT_EXCEL_SCHEDULES) &&
           userPermissions.includes(PERMISSIONS.EXPORT_PDF_SCHEDULES) && (
-            <Box sx={{ minHeight: 65 }}>
+            <Box sx={exportSpeedDialBoxStyles}>
               {filteredSchedules.length > 0 && (
                 <CustomSpeedDial
                   actions={exportOptions}
@@ -288,16 +298,10 @@ const SchedulesPage: React.FC = () => {
       </Box>
       {isLoadingSchedules ? (
         <Box
-          sx={{
-            display: "flex",
-            justifyContent: "center",
-            alignItems: "center",
-            textAlign: "center",
-            paddingTop: "10%",
-          }}
+          sx={loadingBoxStyles}
         >
           <Backdrop
-            sx={(theme) => ({ color: "#fff", zIndex: theme.zIndex.drawer + 1 })}
+            sx={backdropStyles(theme)}
             open={isLoadingSchedules}
           >
             <CircularProgress />
@@ -312,7 +316,7 @@ const SchedulesPage: React.FC = () => {
             alignItems="center"
           >
             <Grid item xs={12} md={4}>
-              <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
+              <Box sx={searchBarBoxStyles}>
                 {filteredSchedules && (
                   <SearchBar
                     placeholder={SCHEDULES_PAGE.SEARCH_PLACEHOLDER}
@@ -327,14 +331,7 @@ const SchedulesPage: React.FC = () => {
                     variant="contained"
                     color="primary"
                     onClick={handleOpenAddModal}
-                    sx={{
-                      display: { xs: "flex", md: "none" },
-                      minWidth: "auto",
-                      width: 56,
-                      height: 56,
-                      borderRadius: "50%",
-                      p: 0,
-                    }}
+                    sx={addButtonMobileStyles}
                   >
                     <AddRoundedIcon />
                   </Button>
@@ -344,16 +341,13 @@ const SchedulesPage: React.FC = () => {
             {userPermissions.includes(PERMISSIONS.CREATE_SCHEDULES) && (
               <Grid item xs={12} md={8}>
                 <Box
-                  sx={{
-                    display: { xs: "none", md: "flex" },
-                    justifyContent: "flex-end",
-                  }}
+                  sx={addButtonDesktopBoxStyles}
                 >
                   <Button
                     variant="contained"
                     startIcon={<AddRoundedIcon />}
                     onClick={handleOpenAddModal}
-                    sx={{ px: 3, py: 1.5, fontSize: "1rem", minHeight: 56 }}
+                    sx={addButtonDesktopStyles}
                   >
                     {SCHEDULES_PAGE.ADD}
                   </Button>
@@ -386,17 +380,9 @@ const SchedulesPage: React.FC = () => {
             />
           ) : (
             <Box
-              sx={{
-                display: "flex",
-                flexDirection: "column",
-                justifyContent: "center",
-                alignItems: "center",
-                textAlign: "center",
-                paddingTop: "10%",
-                paddingBottom: "12%",
-              }}
+              sx={noSchedulesBoxStyles}
             >
-              <ManageSearchIcon color="disabled" sx={{ fontSize: "65px" }} />
+              <ManageSearchIcon color="disabled" sx={noSchedulesIconStyles} />
               <Typography variant="h6" color="textSecondary">
                 {SCHEDULES_PAGE.NO_SCHEDULES}
               </Typography>
@@ -414,10 +400,7 @@ const SchedulesPage: React.FC = () => {
         confirmText={SCHEDULES_PAGE.DIALOG_DELETE_CONFIRM}
         cancelText={SCHEDULES_PAGE.DIALOG_DELETE_CANCEL}
         loading={isDeletingSchedule}
-        paperSx={{
-          minWidth: { xs: "80vw", sm: 320 },
-          maxWidth: { xs: "90vw", sm: 400 },
-        }}
+        paperSx={deleteDialogPaperSx ?? {}}
         icon={<DeleteOutlineIcon color="error" />}
       />
       <DialogComponent
@@ -426,10 +409,7 @@ const SchedulesPage: React.FC = () => {
         title={SCHEDULES_PAGE.DIALOG_ADD_TITLE}
         subtitle={SCHEDULES_PAGE.DIALOG_ADD_SUBTITLE}
         hideActions
-        paperSx={{
-          minWidth: { xs: "90vw", sm: 500, md: 700 },
-          maxWidth: { xs: "98vw", sm: 700 },
-        }}
+        paperSx={addDialogPaperSx ?? {}}
       >
         <AddScheduleForm
           onSubmit={handleCreate}
