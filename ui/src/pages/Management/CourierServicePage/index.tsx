@@ -362,7 +362,7 @@ const CourierServicePage: React.FC = () => {
             sx={courierTitleStyles}
           >
             <LocalShippingIcon fontSize={isSmallScreen ? "small" : "large"} sx={courierIconStyles(theme)} />
-            {PAGE_TITLE.COURIER_SERVICE}
+            {isSmallScreen ? PAGE_TITLE.COURIER_SERVICE_SIMPLIFIED : PAGE_TITLE.COURIER_SERVICE}
           </Typography>
           <Divider sx={courierDividerStyles(theme)} />
         </Box>

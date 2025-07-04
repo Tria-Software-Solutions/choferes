@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { useSelector } from "react-redux";
 import { RootState } from "../../../store/store";
 import { useAuthContext } from "../../../context/AuthContext";
@@ -175,6 +175,7 @@ const EditableTableComponent = <T extends object>({
   const [order, setOrder] = useState<"asc" | "desc">("asc");
   const [orderBy, setOrderBy] = useState<keyof T>(columns[0]);
   const [expandedRows, setExpandedRows] = useState<Record<number, boolean>>({});
+  const tableContainerRef = useRef<HTMLDivElement>(null);
 
   const theme = useTheme();
   const isSmallScreen = useMediaQuery(theme.breakpoints.down("sm"));
@@ -768,6 +769,27 @@ const EditableTableComponent = <T extends object>({
     },
   };
 
+  useEffect(() => {
+    function calculateRowsPerPage() {
+      const maxHeight = window.innerHeight * 0.6; // 60vh
+      const headerHeight = 56; // Table header
+      const paginationHeight = 64; // Pagination footer
+      const extra = 24; // Buffer for borders/margins
+      const availableHeight = maxHeight - headerHeight - paginationHeight - extra;
+      const rowHeight = 48;
+      let rows = Math.floor(availableHeight / rowHeight);
+      rows = Math.max(3, Math.min(100, rows));
+      setRowsPerPage(rows);
+    }
+    calculateRowsPerPage();
+    window.addEventListener('resize', calculateRowsPerPage);
+    return () => window.removeEventListener('resize', calculateRowsPerPage);
+  }, [setRowsPerPage]);
+
+  // Compute rowsPerPageOptions to always include the current value
+  const defaultRowsPerPageOptions = [5, 10, 25, 50, 100];
+  const rowsPerPageOptions = Array.from(new Set([...defaultRowsPerPageOptions, rowsPerPage])).sort((a, b) => a - b);
+
   return (
     <Paper sx={{ width: "100%", borderRadius: 1, boxShadow: '0 4px 24px -4px rgba(0,0,0,0.10)', overflow: 'hidden' }}>
       {groupByDate && (
@@ -796,7 +818,8 @@ const EditableTableComponent = <T extends object>({
       )}
       <TableContainer
         className="table-container"
-        sx={{ maxHeight: "58vh", overflowY: "auto", overflowX: "auto", borderRadius: 0 }}
+        sx={{ maxHeight: "60vh", overflowY: "auto", overflowX: "auto", borderRadius: 0 }}
+        ref={tableContainerRef}
       >
         <Table stickyHeader aria-label="sticky table" sx={{ minWidth: 650, borderCollapse: 'separate', borderSpacing: 0 }}>
           <TableHead>
@@ -1418,7 +1441,7 @@ const EditableTableComponent = <T extends object>({
       <Divider />
       <TablePagination
         className="pagination"
-        rowsPerPageOptions={[5, 10, 25, 50, 100]}
+        rowsPerPageOptions={rowsPerPageOptions}
         component="div"
         count={totalCount}
         rowsPerPage={rowsPerPage}

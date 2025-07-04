@@ -52,7 +52,9 @@ export const backdropStyles = (theme: Theme): SxProps<Theme> => ({
 export const searchBarBoxStyles: SxProps<Theme> = {
   display: "flex",
   alignItems: "center",
+  justifyContent: "center",
   gap: 2,
+  height: 56,
 };
 
 export const addButtonMobileStyles: SxProps<Theme> = {
@@ -62,6 +64,7 @@ export const addButtonMobileStyles: SxProps<Theme> = {
   height: 56,
   borderRadius: "50%",
   p: 0,
+  alignSelf: "center",
 };
 
 export const datePickerSx: SxProps<Theme> = {
