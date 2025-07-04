@@ -2,6 +2,7 @@ import { IconButton, Typography, useMediaQuery, useTheme } from "@mui/material";
 import { ArrowBack, ArrowForward } from "@mui/icons-material";
 import React from "react";
 import { PAGINATION } from "../../../constants/constants";
+import { containerStyles, pageTextStyles } from "./PaginationActions.styles";
 
 // PaginationActions component provides custom pagination controls for tables, including page navigation and item range display.
 // Props:
@@ -16,7 +17,7 @@ interface PaginationActionsProps {
   rowsPerPage: number;
   onPageChange: (
     event: React.MouseEvent<HTMLButtonElement> | null,
-    newPage: number,
+    newPage: number
   ) => void;
 }
 
@@ -33,20 +34,9 @@ const PaginationActions: React.FC<PaginationActionsProps> = ({
   const isSmallScreen = useMediaQuery(theme.breakpoints.down("sm")); // Responsive check for small screens
 
   return (
-    <div
-      style={{
-        display: "flex",
-        alignItems: "center",
-        gap: "10px",
-        whiteSpace: "nowrap",
-        padding: isSmallScreen ? "0" : "10px",
-      }}
-    >
+    <div style={containerStyles(isSmallScreen)}>
       {!isSmallScreen && (
-        <Typography
-          variant="body2"
-          style={{ minWidth: "80px", textAlign: "center" }}
-        >
+        <Typography variant="body2" style={pageTextStyles}>
           {PAGINATION.PAGE} {page + 1}
         </Typography>
       )}
@@ -57,10 +47,7 @@ const PaginationActions: React.FC<PaginationActionsProps> = ({
       >
         <ArrowBack />
       </IconButton>
-      <Typography
-        variant="body2"
-        style={{ minWidth: "80px", textAlign: "center" }}
-      >
+      <Typography variant="body2" style={pageTextStyles}>
         {startIndex}-{endIndex} {PAGINATION.OF} {count}
       </Typography>
       <IconButton

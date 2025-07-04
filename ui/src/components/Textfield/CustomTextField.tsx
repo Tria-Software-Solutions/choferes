@@ -2,6 +2,7 @@ import React from "react";
 import TextField, { TextFieldProps } from "@mui/material/TextField";
 import InputAdornment from "@mui/material/InputAdornment";
 import { SxProps, Theme } from "@mui/material/styles";
+import { textFieldStyles, inputAdornmentStyles } from "./CustomTextField.styles";
 
 // CustomTextField component wraps MUI TextField with optional start/end adornments (icons/buttons).
 // Props:
@@ -33,7 +34,7 @@ const CustomTextField: React.FC<CustomTextFieldProps> = ({
         startAdornment: icon ? (
           <InputAdornment
             position="start"
-            sx={{ display: "flex", alignItems: "center", height: "100%" }}
+            sx={inputAdornmentStyles}
           >
             {icon}
           </InputAdornment>
@@ -41,37 +42,14 @@ const CustomTextField: React.FC<CustomTextFieldProps> = ({
         endAdornment: endAdornment ? (
           <InputAdornment
             position="end"
-            sx={{ display: "flex", alignItems: "center", height: "100%" }}
+            sx={inputAdornmentStyles}
           >
             {endAdornment}
           </InputAdornment>
         ) : undefined,
         ...InputProps,
       }}
-      sx={{
-        mb: 2,
-        "& .MuiOutlinedInput-root": {
-          borderRadius: 2,
-          backgroundColor: "#ffffff",
-          "&:hover .MuiOutlinedInput-notchedOutline": {
-            borderColor: "#000000",
-          },
-          "&.Mui-focused .MuiOutlinedInput-notchedOutline": {
-            borderColor: "#000000",
-            borderWidth: 2,
-          },
-          "&.Mui-focused": {
-            backgroundColor: "#ffffff",
-            outline: "none",
-            boxShadow: "none",
-          },
-          "& input": {
-            outline: "none",
-            boxShadow: "none",
-          },
-        },
-        ...sx,
-      }}
+      sx={textFieldStyles(sx ?? {})}
     />
   );
 };

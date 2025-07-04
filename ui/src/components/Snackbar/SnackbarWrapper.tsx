@@ -2,6 +2,11 @@ import React, { createContext, useContext, useState } from "react";
 import { Snackbar, IconButton, useTheme } from "@mui/material";
 import CloseIcon from "@mui/icons-material/Close";
 import { SNACKBAR } from "../../constants/constants";
+import {
+  snackbarContentStyles,
+  closeIconButtonStyles,
+  snackbarButtonStyles,
+} from "./SnackbarWrapper.styles";
 
 // SnackbarWrapper provides a context and provider for showing notifications across the app using Material-UI Snackbar.
 // Exposes a showNotification function via context for use in child components.
@@ -87,12 +92,7 @@ export const AppNotificationProvider: React.FC<{
                 aria-label="close"
                 color="inherit"
                 onClick={() => setOpen(false)}
-                sx={{
-                  color: theme.palette.primary.contrastText,
-                  "&:hover": {
-                    backgroundColor: "rgba(255,255,255,0.1)",
-                  },
-                }}
+                sx={closeIconButtonStyles(theme)}
               >
                 <CloseIcon />
               </IconButton>
@@ -102,17 +102,7 @@ export const AppNotificationProvider: React.FC<{
                     onButtonClick();
                     setOpen(false);
                   }}
-                  style={{
-                    backgroundColor: "transparent",
-                    border: "none",
-                    color: theme.palette.primary.contrastText,
-                    cursor: "pointer",
-                    padding: "4px 8px",
-                    borderRadius: "4px",
-                    fontSize: "0.875rem",
-                    fontWeight: 500,
-                    transition: "all 0.2s ease",
-                  }}
+                  style={snackbarButtonStyles(theme)}
                   onMouseEnter={(e) => {
                     e.currentTarget.style.backgroundColor =
                       "rgba(255,255,255,0.1)";
@@ -127,14 +117,7 @@ export const AppNotificationProvider: React.FC<{
             </>
           )
         }
-        sx={{
-          "& .MuiSnackbarContent-root": {
-            backgroundColor: theme.palette.primary.main,
-            color: theme.palette.primary.contrastText,
-            borderRadius: theme.shape.borderRadius,
-            boxShadow: theme.shadows[8],
-          },
-        }}
+        sx={snackbarContentStyles(theme)}
       />
     </NotificationContext.Provider>
   );

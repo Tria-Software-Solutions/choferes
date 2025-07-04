@@ -1,4 +1,5 @@
 import { SpeedDial, SpeedDialIcon, SpeedDialAction } from "@mui/material";
+import { speedDialStyles, speedDialActionStyles } from "./CustomSpeedDial.styles";
 
 interface Action {
   label: string;
@@ -32,17 +33,13 @@ const CustomSpeedDial: React.FC<CustomSpeedDialProps> = ({
       icon={mainIcon}
       openIcon={openIcon}
       direction={direction}
-      sx={{
-        zIndex: 1500,
-      }}
+      sx={speedDialStyles}
     >
       {actions.map((action) => (
         <SpeedDialAction
           key={action.label}
           icon={action.icon}
-          sx={{
-            zIndex: 2000,
-          }}
+          sx={speedDialActionStyles}
           tooltipTitle={action.label}
           onClick={action.onClick}
         />

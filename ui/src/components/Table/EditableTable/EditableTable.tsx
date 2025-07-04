@@ -59,6 +59,15 @@ import ToggleOffIcon from '@mui/icons-material/ToggleOff';
 import CustomTextField from "../../Textfield/CustomTextField";
 import DialogComponent from "../../Dialog/DialogComponent";
 import { User } from '../../../models/User';
+import {
+  formControlStyles,
+  selectStyles,
+  datePickerTextFieldStyles,
+  tableCellStyles,
+  permissionChipStyles,
+  viewMoreLessStyles,
+  emailLinkStyles
+} from "./EditableTable.styles";
 
 // EditableTable is a generic, highly-configurable table component for displaying and editing tabular data.
 // Supports inline editing, validation, pagination, sorting, custom renderers, and permission-based actions.
@@ -218,7 +227,7 @@ const EditableTable = <T extends object>({
         ? (editFields[String(column)] as string[])
         : [];
       return wrapWithGrid(
-        <FormControl variant="outlined" fullWidth sx={{ height: 56 }}>
+        <FormControl variant="outlined" fullWidth sx={formControlStyles}>
           <Select
             multiple
             value={selectedValues}
@@ -238,25 +247,7 @@ const EditableTable = <T extends object>({
                 ? `${TABLE.PERMISSIONS_LABEL}: ${visible.join(", ")} +${hidden} más`
                 : `${TABLE.PERMISSIONS_LABEL}: ${visible.join(", ")}`;
             }}
-            sx={{ 
-              height: 56,
-              "& .MuiOutlinedInput-root": {
-                borderRadius: 2,
-                backgroundColor: "#ffffff",
-                "&:hover .MuiOutlinedInput-notchedOutline": {
-                  borderColor: "#000000",
-                },
-                "&.Mui-focused .MuiOutlinedInput-notchedOutline": {
-                  borderColor: "#000000",
-                  borderWidth: 2,
-                },
-                "&.Mui-focused": {
-                  backgroundColor: "#ffffff",
-                  outline: "none",
-                  boxShadow: "none",
-                },
-              },
-            }}
+            sx={selectStyles}
             MenuProps={{
               PaperProps: {
                 style: {
@@ -422,9 +413,7 @@ const EditableTable = <T extends object>({
                   })()
                 : null
             }
-            sx={{
-              width: "100%",
-            }}
+            sx={{ width: "100%" }}
             maxDate={new Date()}
             views={["year", "month", "day"]}
             slots={{
@@ -436,28 +425,7 @@ const EditableTable = <T extends object>({
                 fullWidth: true,
                 inputProps: { readOnly: true },
                 onMouseDown: (e) => e.preventDefault(),
-                sx: {
-                  "& .MuiOutlinedInput-root": {
-                    borderRadius: 2,
-                    backgroundColor: "#ffffff",
-                    "&:hover .MuiOutlinedInput-notchedOutline": {
-                      borderColor: "#000000",
-                    },
-                    "&.Mui-focused .MuiOutlinedInput-notchedOutline": {
-                      borderColor: "#000000",
-                      borderWidth: 2,
-                    },
-                    "&.Mui-focused": {
-                      backgroundColor: "#ffffff",
-                      outline: "none",
-                      boxShadow: "none",
-                    },
-                    "& input": {
-                      outline: "none",
-                      boxShadow: "none",
-                    },
-                  },
-                },
+                sx: datePickerTextFieldStyles,
               },
               actionBar: {
                 actions: [],
@@ -479,32 +447,14 @@ const EditableTable = <T extends object>({
         : "";
 
       return wrapWithGrid(
-        <FormControl variant="outlined" fullWidth sx={{ height: 56 }}>
+        <FormControl variant="outlined" fullWidth sx={formControlStyles}>
           <Select
             value={selectedValue}
             onChange={(e) =>
               setEditField &&
               setEditField(String(column), String(e.target.value))
             }
-            sx={{ 
-              height: 56,
-              "& .MuiOutlinedInput-root": {
-                borderRadius: 2,
-                backgroundColor: "#ffffff",
-                "&:hover .MuiOutlinedInput-notchedOutline": {
-                  borderColor: "#000000",
-                },
-                "&.Mui-focused .MuiOutlinedInput-notchedOutline": {
-                  borderColor: "#000000",
-                  borderWidth: 2,
-                },
-                "&.Mui-focused": {
-                  backgroundColor: "#ffffff",
-                  outline: "none",
-                  boxShadow: "none",
-                },
-              },
-            }}
+            sx={selectStyles}
           >
             {config.options.map((option) => (
               <MenuItem key={option.value} value={option.value}>
@@ -523,7 +473,7 @@ const EditableTable = <T extends object>({
         : [];
 
       return wrapWithGrid(
-        <FormControl variant="outlined" fullWidth sx={{ height: 56 }}>
+        <FormControl variant="outlined" fullWidth sx={formControlStyles}>
           <Select
             multiple
             value={selectedValues}
@@ -537,25 +487,7 @@ const EditableTable = <T extends object>({
                     .join(", ")
                 : ""
             }
-            sx={{ 
-              height: 56,
-              "& .MuiOutlinedInput-root": {
-                borderRadius: 2,
-                backgroundColor: "#ffffff",
-                "&:hover .MuiOutlinedInput-notchedOutline": {
-                  borderColor: "#000000",
-                },
-                "&.Mui-focused .MuiOutlinedInput-notchedOutline": {
-                  borderColor: "#000000",
-                  borderWidth: 2,
-                },
-                "&.Mui-focused": {
-                  backgroundColor: "#ffffff",
-                  outline: "none",
-                  boxShadow: "none",
-                },
-              },
-            }}
+            sx={selectStyles}
           >
             {config.options.map((option) => (
               <MenuItem key={option.value} value={option.value}>
@@ -1002,11 +934,7 @@ const EditableTable = <T extends object>({
                           <TableCell
                             key={String(column)}
                             className="tableCell"
-                            sx={{
-                              borderRight: '1px solid #f0f0f0',
-                              borderBottom: '1px solid #f0f0f0',
-                              padding: '10px 16px',
-                            }}
+                            sx={tableCellStyles}
                           >
                             <Box
                               sx={{
@@ -1020,40 +948,14 @@ const EditableTable = <T extends object>({
                               {visible.map((perm: string) => (
                                 <Box
                                   key={perm}
-                                  sx={{
-                                    backgroundColor: theme.palette.primary.main,
-                                    color: theme.palette.primary.contrastText,
-                                    px: 1,
-                                    py: 0.5,
-                                    borderRadius: 1,
-                                    fontSize: "clamp(0.625rem, 1vw, 0.75rem)",
-                                    fontWeight: 500,
-                                    mb: 0.5,
-                                    textAlign: "center",
-                                    display: "flex",
-                                    alignItems: "center",
-                                    justifyContent: "center",
-                                  }}
+                                  sx={permissionChipStyles(theme)}
                                 >
                                   {perm}
                                 </Box>
                               ))}
                               {hiddenCount > 0 && !expanded && (
                                 <Typography
-                                  sx={{
-                                    color: theme.palette.primary.main,
-                                    fontWeight: 500,
-                                    cursor: "pointer",
-                                    fontSize: "clamp(0.625rem, 1vw, 0.75rem)",
-                                    textDecoration: "underline",
-                                    "&:hover": {
-                                      textDecoration: "none",
-                                    },
-                                    display: "flex",
-                                    alignItems: "center",
-                                    height: "28px",
-                                    mt: 1,
-                                  }}
+                                  sx={viewMoreLessStyles(theme)}
                                   onClick={() =>
                                     setExpandedRows((prev) => ({
                                       ...prev,
@@ -1066,20 +968,7 @@ const EditableTable = <T extends object>({
                               )}
                               {showAll && (
                                 <Typography
-                                  sx={{
-                                    color: theme.palette.primary.main,
-                                    fontWeight: 500,
-                                    cursor: "pointer",
-                                    fontSize: "clamp(0.625rem, 1vw, 0.75rem)",
-                                    textDecoration: "underline",
-                                    "&:hover": {
-                                      textDecoration: "none",
-                                    },
-                                    display: "flex",
-                                    alignItems: "center",
-                                    height: "28px",
-                                    mt: 1,
-                                  }}
+                                  sx={viewMoreLessStyles(theme)}
                                   onClick={() =>
                                     setExpandedRows((prev) => ({
                                       ...prev,
@@ -1098,11 +987,7 @@ const EditableTable = <T extends object>({
                         <TableCell
                           key={String(column)}
                           className="tableCell"
-                          sx={{
-                            borderRight: '1px solid #f0f0f0',
-                            borderBottom: '1px solid #f0f0f0',
-                            padding: '10px 16px',
-                          }}
+                          sx={tableCellStyles}
                         >
                           {editRowId === getRowId(row) ? (
                             renderEditField(
@@ -1117,19 +1002,7 @@ const EditableTable = <T extends object>({
                                   (item: string, index: number) => (
                                     <Box
                                       key={index}
-                                      sx={{
-                                        backgroundColor: theme.palette.primary.main,
-                                        color: theme.palette.primary.contrastText,
-                                        px: 1,
-                                        py: 0.5,
-                                        borderRadius: 1,
-                                        fontSize: "clamp(0.625rem, 1vw, 0.75rem)",
-                                        fontWeight: 500,
-                                        textAlign: "center",
-                                        display: "flex",
-                                        alignItems: "center",
-                                        justifyContent: "center",
-                                      }}
+                                      sx={permissionChipStyles(theme)}
                                     >
                                       {item}
                                     </Box>
@@ -1168,19 +1041,7 @@ const EditableTable = <T extends object>({
                                   (item: string, index: number) => (
                                     <Box
                                       key={index}
-                                      sx={{
-                                        backgroundColor: theme.palette.primary.main,
-                                        color: theme.palette.primary.contrastText,
-                                        px: 1,
-                                        py: 0.5,
-                                        borderRadius: 1,
-                                        fontSize: "clamp(0.625rem, 1vw, 0.75rem)",
-                                        fontWeight: 500,
-                                        textAlign: "center",
-                                        display: "flex",
-                                        alignItems: "center",
-                                        justifyContent: "center",
-                                      }}
+                                      sx={permissionChipStyles(theme)}
                                     >
                                       {item}
                                     </Box>
@@ -1214,14 +1075,7 @@ const EditableTable = <T extends object>({
                             <Typography
                               component="a"
                               href={`mailto:${String(row[column] ?? "")}`}
-                              sx={{
-                                color: theme.palette.primary.main,
-                                textDecoration: "none",
-                                cursor: "pointer",
-                                "&:hover": {
-                                  textDecoration: "underline",
-                                },
-                              }}
+                              sx={emailLinkStyles(theme)}
                             >
                               {String(row[column] ?? "")}
                             </Typography>
@@ -1234,7 +1088,7 @@ const EditableTable = <T extends object>({
                       );
                     })}
                   {showStatusColumn && (
-                    <TableCell className="tableCell" sx={{ borderRight: '1px solid #f0f0f0', borderBottom: '1px solid #f0f0f0', padding: '10px 16px', textAlign: 'center' }}>
+                    <TableCell className="tableCell" sx={tableCellStyles}>
                       {isUser && !isCurrentUser && ('isActive' in row) && hasDeletePermissions && (
                         <Tooltip title={row.isActive ? TABLE.DISABLE : TABLE.ENABLE} arrow>
                           <span>
@@ -1277,11 +1131,7 @@ const EditableTable = <T extends object>({
                           <TableCell
                             key={String(column)}
                             className="tableCell"
-                            sx={{
-                              borderRight: '1px solid #f0f0f0',
-                              borderBottom: '1px solid #f0f0f0',
-                              padding: '10px 16px',
-                            }}
+                            sx={tableCellStyles}
                           >
                             <Box
                               sx={{
@@ -1295,40 +1145,14 @@ const EditableTable = <T extends object>({
                               {visible.map((perm: string) => (
                                 <Box
                                   key={perm}
-                                  sx={{
-                                    backgroundColor: theme.palette.primary.main,
-                                    color: theme.palette.primary.contrastText,
-                                    px: 1,
-                                    py: 0.5,
-                                    borderRadius: 1,
-                                    fontSize: "clamp(0.625rem, 1vw, 0.75rem)",
-                                    fontWeight: 500,
-                                    mb: 0.5,
-                                    textAlign: "center",
-                                    display: "flex",
-                                    alignItems: "center",
-                                    justifyContent: "center",
-                                  }}
+                                  sx={permissionChipStyles(theme)}
                                 >
                                   {perm}
                                 </Box>
                               ))}
                               {hiddenCount > 0 && !expanded && (
                                 <Typography
-                                  sx={{
-                                    color: theme.palette.primary.main,
-                                    fontWeight: 500,
-                                    cursor: "pointer",
-                                    fontSize: "clamp(0.625rem, 1vw, 0.75rem)",
-                                    textDecoration: "underline",
-                                    "&:hover": {
-                                      textDecoration: "none",
-                                    },
-                                    display: "flex",
-                                    alignItems: "center",
-                                    height: "28px",
-                                    mt: 1,
-                                  }}
+                                  sx={viewMoreLessStyles(theme)}
                                   onClick={() =>
                                     setExpandedRows((prev) => ({
                                       ...prev,
@@ -1341,20 +1165,7 @@ const EditableTable = <T extends object>({
                               )}
                               {showAll && (
                                 <Typography
-                                  sx={{
-                                    color: theme.palette.primary.main,
-                                    fontWeight: 500,
-                                    cursor: "pointer",
-                                    fontSize: "clamp(0.625rem, 1vw, 0.75rem)",
-                                    textDecoration: "underline",
-                                    "&:hover": {
-                                      textDecoration: "none",
-                                    },
-                                    display: "flex",
-                                    alignItems: "center",
-                                    height: "28px",
-                                    mt: 1,
-                                  }}
+                                  sx={viewMoreLessStyles(theme)}
                                   onClick={() =>
                                     setExpandedRows((prev) => ({
                                       ...prev,
@@ -1373,11 +1184,7 @@ const EditableTable = <T extends object>({
                         <TableCell
                           key={String(column)}
                           className="tableCell"
-                          sx={{
-                            borderRight: '1px solid #f0f0f0',
-                            borderBottom: '1px solid #f0f0f0',
-                            padding: '10px 16px',
-                          }}
+                          sx={tableCellStyles}
                         >
                           {editRowId === getRowId(row) ? (
                             renderEditField(
@@ -1392,19 +1199,7 @@ const EditableTable = <T extends object>({
                                   (item: string, index: number) => (
                                     <Box
                                       key={index}
-                                      sx={{
-                                        backgroundColor: theme.palette.primary.main,
-                                        color: theme.palette.primary.contrastText,
-                                        px: 1,
-                                        py: 0.5,
-                                        borderRadius: 1,
-                                        fontSize: "clamp(0.625rem, 1vw, 0.75rem)",
-                                        fontWeight: 500,
-                                        textAlign: "center",
-                                        display: "flex",
-                                        alignItems: "center",
-                                        justifyContent: "center",
-                                      }}
+                                      sx={permissionChipStyles(theme)}
                                     >
                                       {item}
                                     </Box>
@@ -1443,19 +1238,7 @@ const EditableTable = <T extends object>({
                                   (item: string, index: number) => (
                                     <Box
                                       key={index}
-                                      sx={{
-                                        backgroundColor: theme.palette.primary.main,
-                                        color: theme.palette.primary.contrastText,
-                                        px: 1,
-                                        py: 0.5,
-                                        borderRadius: 1,
-                                        fontSize: "clamp(0.625rem, 1vw, 0.75rem)",
-                                        fontWeight: 500,
-                                        textAlign: "center",
-                                        display: "flex",
-                                        alignItems: "center",
-                                        justifyContent: "center",
-                                      }}
+                                      sx={permissionChipStyles(theme)}
                                     >
                                       {item}
                                     </Box>
@@ -1489,14 +1272,7 @@ const EditableTable = <T extends object>({
                             <Typography
                               component="a"
                               href={`mailto:${String(row[column] ?? "")}`}
-                              sx={{
-                                color: theme.palette.primary.main,
-                                textDecoration: "none",
-                                cursor: "pointer",
-                                "&:hover": {
-                                  textDecoration: "underline",
-                                },
-                              }}
+                              sx={emailLinkStyles(theme)}
                             >
                               {String(row[column] ?? "")}
                             </Typography>
@@ -1512,11 +1288,7 @@ const EditableTable = <T extends object>({
                     <TableCell
                       className="tableCell"
                       style={{ width: "100px", whiteSpace: 'nowrap' }}
-                      sx={{
-                        borderRight: '1px solid #f0f0f0',
-                        borderBottom: '1px solid #f0f0f0',
-                        padding: '10px 16px',
-                      }}
+                      sx={tableCellStyles}
                     >
                       <Box
                         sx={{ display: "flex", alignItems: "center", gap: 1 }}

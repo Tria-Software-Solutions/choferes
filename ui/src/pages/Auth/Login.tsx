@@ -24,6 +24,27 @@ import LockOutlinedIcon from "@mui/icons-material/LockOutlined";
 import PersonOutlinedIcon from "@mui/icons-material/PersonOutlined";
 import logo from "../../assets/images/logo.png";
 import "@fontsource/urbanist";
+import {
+  authPageBoxStyles,
+  authCardStyles,
+  cardContentStyles,
+  logoBoxStyles,
+  logoImgStyles,
+  titleStyles,
+  dividerStyles,
+  descriptionStyles,
+  formBoxStyles,
+  textFieldStyles,
+  passwordTextFieldStyles,
+  passwordIconButtonStyles,
+  submitButtonStyles,
+  submitProgressStyles,
+  alertStyles,
+  dividerSectionStyles,
+  registerBoxStyles,
+  registerTextStyles,
+  registerLinkStyles
+} from "./Login.styles";
 
 // Login page component for user authentication
 const Login: React.FC = () => {
@@ -89,26 +110,14 @@ const Login: React.FC = () => {
   return (
     <Box
       className="auth-page"
-      sx={{
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "center",
-        padding: { xs: 2, sm: 4 },
-        minHeight: "100vh",
-      }}
+      sx={authPageBoxStyles}
     >
       <Fade in timeout={800}>
         <Card
           className="auth-card"
-          sx={{
-            width: { xs: "100%", sm: 450, md: 500 },
-            maxWidth: "100%",
-            borderRadius: 3,
-            position: "relative",
-            overflow: "hidden",
-          }}
+          sx={authCardStyles}
         >
-          <CardContent sx={{ p: { xs: 3, sm: 4 } }}>
+          <CardContent sx={cardContentStyles}>
             {/* Logo and Title Section */}
             <Box
               sx={{
@@ -118,61 +127,32 @@ const Login: React.FC = () => {
                 mb: 4,
               }}
             >
-              <Box
-                sx={{
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  width: 80,
-                  height: 80,
-                  borderRadius: "50%",
-                  background:
-                    "linear-gradient(135deg, #000000 0%, #333333 100%)",
-                  mb: 2,
-                  boxShadow: "0 8px 24px rgba(0,0,0,0.15)",
-                  transition: "transform 0.3s ease, box-shadow 0.3s ease",
-                  "&:hover": {
-                    transform: "scale(1.05)",
-                    boxShadow: "0 12px 32px rgba(0,0,0,0.2)",
-                  },
-                }}
-              >
+              <Box sx={logoBoxStyles}>
                 <img
                   src={logo}
                   alt="Logo"
-                  style={{
-                    width: 50,
-                    height: "auto",
-                  }}
+                  style={logoImgStyles}
                 />
               </Box>
               <Typography
                 variant={isSmallScreen ? "h5" : "h4"}
                 align="center"
-                sx={{
-                  fontFamily: "'Urbanist', sans-serif",
-                  fontWeight: 800,
-                  color: "#000000",
-                  mb: 1,
-                }}
+                sx={titleStyles(isSmallScreen)}
               >
                 {PAGE_TITLE.LOGIN}
               </Typography>
-              <Divider sx={{ width: 48, borderBottomWidth: 3, borderColor: theme.palette.primary.main, mb: 1.5, mx: "auto", borderRadius: 2 }} />
+              <Divider sx={dividerStyles(theme)} />
               <Typography
                 variant="body2"
                 align="center"
-                sx={{
-                  color: "#666666",
-                  maxWidth: 300,
-                }}
+                sx={descriptionStyles}
               >
                 {FORMS.LOGIN_DESCRIPTION}
               </Typography>
             </Box>
 
             {/* Form Section */}
-            <Box component="form" onSubmit={handleLogin} sx={{ width: "100%" }}>
+            <Box component="form" onSubmit={handleLogin} sx={formBoxStyles}>
               <TextField
                 fullWidth
                 label={LOGIN.IDENTIFIER_LABEL}
@@ -185,23 +165,7 @@ const Login: React.FC = () => {
                 error={!!errors.identifier}
                 helperText={errors.identifier}
                 disabled={isSubmitting}
-                sx={{
-                  mb: 2,
-                  "& .MuiOutlinedInput-root": {
-                    borderRadius: 2,
-                    backgroundColor: "#ffffff",
-                    "&:hover .MuiOutlinedInput-notchedOutline": {
-                      borderColor: "#000000",
-                    },
-                    "&.Mui-focused .MuiOutlinedInput-notchedOutline": {
-                      borderColor: "#000000",
-                      borderWidth: 2,
-                    },
-                    "&.Mui-focused": {
-                      backgroundColor: "#ffffff",
-                    },
-                  },
-                }}
+                sx={textFieldStyles}
                 InputProps={{
                   startAdornment: (
                     <InputAdornment position="start">
@@ -222,23 +186,7 @@ const Login: React.FC = () => {
                 error={!!errors.password}
                 helperText={errors.password}
                 disabled={isSubmitting}
-                sx={{
-                  mb: 3,
-                  "& .MuiOutlinedInput-root": {
-                    borderRadius: 2,
-                    backgroundColor: "#ffffff",
-                    "&:hover .MuiOutlinedInput-notchedOutline": {
-                      borderColor: "#000000",
-                    },
-                    "&.Mui-focused .MuiOutlinedInput-notchedOutline": {
-                      borderColor: "#000000",
-                      borderWidth: 2,
-                    },
-                    "&.Mui-focused": {
-                      backgroundColor: "#ffffff",
-                    },
-                  },
-                }}
+                sx={passwordTextFieldStyles}
                 InputProps={{
                   startAdornment: (
                     <InputAdornment position="start">
@@ -251,12 +199,7 @@ const Login: React.FC = () => {
                         onClick={handleTogglePassword}
                         edge="end"
                         disabled={isSubmitting}
-                        sx={{
-                          color: "#666666",
-                          "&:hover": {
-                            color: "#000000",
-                          },
-                        }}
+                        sx={passwordIconButtonStyles}
                       >
                         {showPassword ? <VisibilityOff /> : <Visibility />}
                       </IconButton>
@@ -270,36 +213,14 @@ const Login: React.FC = () => {
                 fullWidth
                 variant="contained"
                 disabled={isSubmitting}
-                sx={{
-                  minHeight: 56,
-                  borderRadius: 2,
-                  background:
-                    "linear-gradient(135deg, #000000 0%, #333333 100%)",
-                  color: "#ffffff",
-                  fontWeight: 600,
-                  fontSize: "1rem",
-                  textTransform: "none",
-                  boxShadow: "0 4px 12px rgba(0,0,0,0.15)",
-                  transition: "all 0.3s ease",
-                  "&:hover": {
-                    background:
-                      "linear-gradient(135deg, #333333 0%, #000000 100%)",
-                    transform: "translateY(-2px)",
-                    boxShadow: "0 8px 24px rgba(0,0,0,0.25)",
-                  },
-                  "&:disabled": {
-                    background: "#bdbdbd",
-                    transform: "none",
-                    boxShadow: "none",
-                  },
-                }}
+                sx={submitButtonStyles}
               >
                 {isSubmitting ? (
                   <>
                     <CircularProgress
                       color="inherit"
                       size={24}
-                      sx={{ mr: 1 }}
+                      sx={submitProgressStyles}
                     />
                     {LOGIN.LOADING}
                   </>
@@ -314,13 +235,7 @@ const Login: React.FC = () => {
               <Fade in timeout={300}>
                 <Alert
                   severity="error"
-                  sx={{
-                    mt: 3,
-                    borderRadius: 2,
-                    "& .MuiAlert-icon": {
-                      alignItems: "center",
-                    },
-                  }}
+                  sx={alertStyles}
                 >
                   {authError}
                 </Alert>
@@ -328,27 +243,19 @@ const Login: React.FC = () => {
             )}
 
             {/* Divider */}
-            <Divider sx={{ my: 3, opacity: 0.6 }} />
+            <Divider sx={dividerSectionStyles} />
 
             {/* Register Link */}
-            <Box sx={{ textAlign: "center" }}>
+            <Box sx={registerBoxStyles}>
               <Typography
                 variant="body2"
-                sx={{
-                  color: "#666666",
-                  mb: 1,
-                }}
+                sx={registerTextStyles}
               >
                 {LOGIN.NO_ACCOUNT}
               </Typography>
               <Link
                 to="/register"
-                style={{
-                  textDecoration: "none",
-                  color: "#000000",
-                  fontWeight: 600,
-                  transition: "color 0.3s ease",
-                }}
+                style={registerLinkStyles}
                 onMouseEnter={(e) => {
                   e.currentTarget.style.color = "#333333";
                 }}
