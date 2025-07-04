@@ -1,5 +1,5 @@
 import { SpeedDial, SpeedDialIcon, SpeedDialAction } from "@mui/material";
-import { speedDialStyles, speedDialActionStyles } from "./CustomSpeedDial.styles";
+import { speedDialStyles, speedDialActionStyles } from "./SpeedDial.styles";
 
 interface Action {
   label: string;
@@ -7,7 +7,7 @@ interface Action {
   onClick: () => void;
 }
 
-interface CustomSpeedDialProps {
+interface SpeedDialComponentProps {
   actions: Action[];
   mainIcon?: React.ReactNode;
   openIcon?: React.ReactNode;
@@ -15,13 +15,13 @@ interface CustomSpeedDialProps {
   direction?: "up" | "down" | "left" | "right";
 }
 
-// CustomSpeedDial component renders a Material-UI SpeedDial with customizable actions and icons.
+// SpeedDialComponent renders a Material-UI SpeedDial with customizable actions and icons.
 // Props:
 // - actions: array of action objects with label, icon, and onClick handler
 // - mainIcon: icon for the closed state
 // - openIcon: icon for the open state
 // - direction: direction in which actions open
-const CustomSpeedDial: React.FC<CustomSpeedDialProps> = ({
+const SpeedDialComponent: React.FC<SpeedDialComponentProps> = ({
   actions,
   mainIcon = <SpeedDialIcon />,
   openIcon,
@@ -48,4 +48,4 @@ const CustomSpeedDial: React.FC<CustomSpeedDialProps> = ({
   );
 };
 
-export default CustomSpeedDial;
+export default SpeedDialComponent;

@@ -2,7 +2,7 @@ import { IconButton, Typography, useMediaQuery, useTheme } from "@mui/material";
 import { ArrowBack, ArrowForward } from "@mui/icons-material";
 import React from "react";
 import { PAGINATION } from "../../../constants/constants";
-import { containerStyles, pageTextStyles } from "./PaginationActions.styles";
+import { containerStyles, pageTextStyles } from "./Pagination.styles";
 
 // PaginationActions component provides custom pagination controls for tables, including page navigation and item range display.
 // Props:
@@ -21,7 +21,7 @@ interface PaginationActionsProps {
   ) => void;
 }
 
-const PaginationActions: React.FC<PaginationActionsProps> = ({
+const PaginationComponent: React.FC<PaginationActionsProps> = ({
   count,
   page,
   rowsPerPage,
@@ -61,4 +61,4 @@ const PaginationActions: React.FC<PaginationActionsProps> = ({
   );
 };
 
-export default PaginationActions;
+export default PaginationComponent;

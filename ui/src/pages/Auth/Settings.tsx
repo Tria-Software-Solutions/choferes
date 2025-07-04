@@ -18,7 +18,7 @@ import {
   useMediaQuery,
   Container,
 } from "@mui/material";
-import { useAppNotifications } from "../../components/Snackbar/SnackbarWrapper";
+import { useAppNotifications } from "../../components/Snackbar/Snackbar.component";
 import PAGE_TITLE from "../../constants/pageTitle.constants";
 import MANAGEMENT from "../../constants/management.constants";
 import SettingsIcon from "@mui/icons-material/Settings";
@@ -32,7 +32,7 @@ import {
   validatePassword,
   validatePasswordMatch,
 } from "../../utils/userValidation";
-import CustomTextField from "../../components/Textfield/CustomTextField";
+import TextfieldComponent from "../../components/Textfield/Textfield.component";
 import PersonOutlinedIcon from "@mui/icons-material/PersonOutlined";
 import EmailOutlinedIcon from "@mui/icons-material/EmailOutlined";
 import AccountCircleOutlinedIcon from "@mui/icons-material/AccountCircleOutlined";
@@ -301,7 +301,7 @@ const Settings: React.FC = () => {
 
           <Grid container spacing={{ xs: 1.5, sm: 2 }}>
             <Grid item xs={12} sm={6}>
-              <CustomTextField
+              <TextfieldComponent
                 label="Nombre"
                 name="firstName"
                 value={editFields.firstName}
@@ -318,7 +318,7 @@ const Settings: React.FC = () => {
               />
             </Grid>
             <Grid item xs={12} sm={6}>
-              <CustomTextField
+              <TextfieldComponent
                 label="Apellido"
                 name="lastName"
                 value={editFields.lastName}
@@ -335,7 +335,7 @@ const Settings: React.FC = () => {
               />
             </Grid>
             <Grid item xs={12}>
-              <CustomTextField
+              <TextfieldComponent
                 label="Correo electrónico"
                 name="email"
                 value={editFields.email}
@@ -353,7 +353,7 @@ const Settings: React.FC = () => {
               />
             </Grid>
             <Grid item xs={12}>
-              <CustomTextField
+              <TextfieldComponent
                 label="Usuario"
                 name="username"
                 value={editFields.username}
@@ -488,7 +488,7 @@ const Settings: React.FC = () => {
 
           <Grid container spacing={{ xs: 1.5, sm: 2 }}>
             <Grid item xs={12}>
-              <CustomTextField
+              <TextfieldComponent
                 label={MANAGEMENT.NEW_PASSWORD_LABEL}
                 name="newPassword"
                 type={showNewPassword ? "text" : "password"}
@@ -508,7 +508,7 @@ const Settings: React.FC = () => {
               />
             </Grid>
             <Grid item xs={12}>
-              <CustomTextField
+              <TextfieldComponent
                 label={MANAGEMENT.CONFIRM_NEW_PASSWORD_LABEL}
                 name="confirmNewPassword"
                 type={showConfirmNewPassword ? "text" : "password"}

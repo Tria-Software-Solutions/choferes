@@ -2,7 +2,7 @@ import React from "react";
 import TextField, { TextFieldProps } from "@mui/material/TextField";
 import InputAdornment from "@mui/material/InputAdornment";
 import { SxProps, Theme } from "@mui/material/styles";
-import { textFieldStyles, inputAdornmentStyles } from "./CustomTextField.styles";
+import { textFieldStyles, inputAdornmentStyles } from "./Textfield.styles";
 
 // CustomTextField component wraps MUI TextField with optional start/end adornments (icons/buttons).
 // Props:
@@ -18,7 +18,7 @@ interface CustomTextFieldProps extends Omit<TextFieldProps, "InputProps"> {
   sx?: SxProps<Theme>;
 }
 
-const CustomTextField: React.FC<CustomTextFieldProps> = ({
+const TextfieldComponent: React.FC<CustomTextFieldProps> = ({
   icon,
   endAdornment,
   sx,
@@ -54,4 +54,4 @@ const CustomTextField: React.FC<CustomTextFieldProps> = ({
   );
 };
 
-export default CustomTextField;
+export default TextfieldComponent;

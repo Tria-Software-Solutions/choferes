@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import MenuComponent from "../Menu/MenuComponent";
+import MenuComponent from "../Menu/Menu.component";
 import {
   AppBar,
   Toolbar,
@@ -25,7 +25,7 @@ import MenuRoundedIcon from "@mui/icons-material/MenuRounded";
 import NotificationsRoundedIcon from "@mui/icons-material/NotificationsRounded";
 import DashboardRoundedIcon from "@mui/icons-material/DashboardRounded";
 import logo from "../../assets/images/logo.png";
-import { MenuItemProps } from "../Menu/MenuComponent";
+import { MenuItemProps } from "../Menu/Menu.component";
 import "@fontsource/urbanist";
 import { Roles } from "../../enums/roles";
 import {
@@ -50,7 +50,7 @@ import {
   notificationsMenuPaperStyles,
   dashboardNoLinksBoxStyles,
   logoutMenuItemStyles
-} from "./AppBarComponent.styles";
+} from "./AppBar.styles";
 
 interface Link {
   label: string;

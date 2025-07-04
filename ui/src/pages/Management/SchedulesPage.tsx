@@ -9,12 +9,12 @@ import {
   updateSchedule,
   deleteSchedule,
 } from "../../store/slices/schedulesSlice";
-import SearchBar from "../../components/SearchBar/SearchBar";
-import EditableTable from "../../components/Table/EditableTable/EditableTable";
-import CustomSpeedDial from "../../components/SpeedDial/CustomSpeedDial";
+import SearchBarComponent from "../../components/SearchBar/SearchBar.component";
+import EditableTableComponent from "../../components/Table/EditableTable/EditableTable.component";
+import SpeedDialComponent from "../../components/SpeedDial/SpeedDial.component";
 import AddScheduleForm from "../Forms/AddScheduleForm";
-import { useAppNotifications } from "../../components/Snackbar/SnackbarWrapper";
-import DialogComponent from "../../components/Dialog/DialogComponent";
+import { useAppNotifications } from "../../components/Snackbar/Snackbar.component";
+import DialogComponent from "../../components/Dialog/Dialog.component";
 import {
   Button,
   Grid,
@@ -288,7 +288,7 @@ const SchedulesPage: React.FC = () => {
           userPermissions.includes(PERMISSIONS.EXPORT_PDF_SCHEDULES) && (
             <Box sx={exportSpeedDialBoxStyles}>
               {filteredSchedules.length > 0 && (
-                <CustomSpeedDial
+                <SpeedDialComponent
                   actions={exportOptions}
                   mainIcon={<DownloadRoundedIcon />}
                   openIcon={<CloseRoundedIcon />}
@@ -320,7 +320,7 @@ const SchedulesPage: React.FC = () => {
             <Grid item xs={12} md={4}>
               <Box sx={searchBarBoxStyles}>
                 {filteredSchedules && (
-                  <SearchBar
+                  <SearchBarComponent
                     placeholder={MANAGEMENT.SEARCH_PLACEHOLDER}
                     value={filter}
                     onChange={handleFilterChange}
@@ -359,7 +359,7 @@ const SchedulesPage: React.FC = () => {
           </Grid>
           <br />
           {filteredSchedules.length > 0 ? (
-            <EditableTable<Schedule>
+            <EditableTableComponent<Schedule>
               data={filteredSchedules}
               columns={["label", "days", "hours"]}
               editRowId={editRowId}

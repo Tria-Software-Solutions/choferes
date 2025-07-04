@@ -23,7 +23,7 @@ import GroupOutlinedIcon from "@mui/icons-material/GroupOutlined";
 import OutlinedInput from "@mui/material/OutlinedInput";
 import InfoOutlinedIcon from "@mui/icons-material/InfoOutlined";
 import { Role } from "../../models/Role";
-import CustomTextField from "../../components/Textfield/CustomTextField";
+import TextfieldComponent from "../../components/Textfield/Textfield.component";
 import FORMS from "../../constants/forms.constants";
 import {
   boxRoot,
@@ -207,7 +207,7 @@ const AddUserForm: React.FC<AddUserFormProps> = ({
     <Box sx={boxRoot}>
       <Grid container spacing={3} sx={gridContainer}>
         <Grid item xs={12} sm={6}>
-          <CustomTextField
+          <TextfieldComponent
             label={FORMS.ADD_USER.FIRST_NAME_LABEL}
             variant="outlined"
             fullWidth
@@ -221,7 +221,7 @@ const AddUserForm: React.FC<AddUserFormProps> = ({
         </Grid>
 
         <Grid item xs={12} sm={6}>
-          <CustomTextField
+          <TextfieldComponent
             label={FORMS.ADD_USER.LAST_NAME_LABEL}
             variant="outlined"
             fullWidth
@@ -235,7 +235,7 @@ const AddUserForm: React.FC<AddUserFormProps> = ({
         </Grid>
 
         <Grid item xs={12} sm={6}>
-          <CustomTextField
+          <TextfieldComponent
             label={FORMS.ADD_USER.EMAIL_LABEL}
             variant="outlined"
             fullWidth
@@ -249,7 +249,7 @@ const AddUserForm: React.FC<AddUserFormProps> = ({
         </Grid>
 
         <Grid item xs={12} sm={6}>
-          <CustomTextField
+          <TextfieldComponent
             label={FORMS.ADD_USER.USERNAME_LABEL}
             variant="outlined"
             fullWidth
@@ -263,7 +263,7 @@ const AddUserForm: React.FC<AddUserFormProps> = ({
         </Grid>
 
         <Grid item xs={12} sm={6}>
-          <CustomTextField
+          <TextfieldComponent
             label={FORMS.ADD_USER.PASSWORD_LABEL}
             variant="outlined"
             fullWidth

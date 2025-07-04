@@ -9,12 +9,12 @@ import {
   updateVehicle,
   deleteVehicle,
 } from "../../store/slices/vehiclesSlice";
-import SearchBar from "../../components/SearchBar/SearchBar";
-import EditableTable from "../../components/Table/EditableTable/EditableTable";
-import CustomSpeedDial from "../../components/SpeedDial/CustomSpeedDial";
+import SearchBarComponent from "../../components/SearchBar/SearchBar.component";
+import EditableTableComponent from "../../components/Table/EditableTable/EditableTable.component";
+import SpeedDialComponent from "../../components/SpeedDial/SpeedDial.component";
 import AddVehicleForm from "../Forms/AddVehicleForm";
-import { useAppNotifications } from "../../components/Snackbar/SnackbarWrapper";
-import DialogComponent from "../../components/Dialog/DialogComponent";
+import { useAppNotifications } from "../../components/Snackbar/Snackbar.component";
+import DialogComponent from "../../components/Dialog/Dialog.component";
 import {
   Box,
   Typography,
@@ -412,7 +412,7 @@ const VehiclesPage: React.FC = () => {
           userPermissions.includes(PERMISSIONS.EXPORT_PDF_VEHICLES) && (
             <Box sx={exportSpeedDialBoxStyles}>
               {filteredWeekVehicles.length > 0 && (
-                <CustomSpeedDial
+                <SpeedDialComponent
                   actions={exportOptions}
                   mainIcon={<DownloadRoundedIcon />}
                   openIcon={<CloseRoundedIcon />}
@@ -444,7 +444,7 @@ const VehiclesPage: React.FC = () => {
             <Grid item xs={12} md={4}>
               <Box sx={searchBarBoxStyles}>
                 {filteredVehicles && (
-                  <SearchBar
+                  <SearchBarComponent
                     placeholder={MANAGEMENT.VEHICLES_PAGE.SEARCH_PLACEHOLDER}
                     value={filter}
                     onChange={handleFilterChange}
@@ -528,7 +528,7 @@ const VehiclesPage: React.FC = () => {
           </Grid>
           <br />
           {filteredVehicles.length > 0 ? (
-            <EditableTable<Vehicle>
+            <EditableTableComponent<Vehicle>
               data={filteredVehicles}
               columns={[
                 "ticket",

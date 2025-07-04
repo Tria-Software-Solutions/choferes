@@ -9,7 +9,7 @@ import {
   Alert,
   Typography,
 } from "@mui/material";
-import CustomTextField from "../../components/Textfield/CustomTextField";
+import TextfieldComponent from "../../components/Textfield/Textfield.component";
 import generateSecret from "../../utils/generateSecret";
 import ContentCopyIcon from "@mui/icons-material/ContentCopy";
 import Visibility from "@mui/icons-material/Visibility";
@@ -135,7 +135,7 @@ const PasswordChangeForm: React.FC<PasswordChangeFormProps> = ({
         {MANAGEMENT.DIALOG_PASSWORD_SUBTITLE}
       </Typography>
       <Stack>
-        <CustomTextField
+        <TextfieldComponent
           label={MANAGEMENT.DIALOG_PASSWORD_NEW}
           type={showNewPassword ? "text" : "password"}
           variant="outlined"
@@ -156,7 +156,7 @@ const PasswordChangeForm: React.FC<PasswordChangeFormProps> = ({
             ),
           }}
         />
-        <CustomTextField
+        <TextfieldComponent
           label={MANAGEMENT.DIALOG_PASSWORD_CONFIRM}
           type={showConfirmNewPassword ? "text" : "password"}
           variant="outlined"
@@ -189,7 +189,7 @@ const PasswordChangeForm: React.FC<PasswordChangeFormProps> = ({
         </Button>
         {temporalPassword && (
           <Box sx={temporalPasswordBox}>
-            <CustomTextField
+            <TextfieldComponent
               label="Contraseña temporal generada"
               value={temporalPassword}
               fullWidth

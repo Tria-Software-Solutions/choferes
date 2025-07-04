@@ -52,12 +52,12 @@ import EditNoteIcon from '@mui/icons-material/EditNote';
 import DeleteForeverIcon from '@mui/icons-material/DeleteForever';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import CancelIcon from '@mui/icons-material/Cancel';
-import PaginationActions from "../Pagination/PaginationActions";
+import PaginationComponent from "../Pagination/Pagination.component";
 import LockResetIcon from '@mui/icons-material/LockReset';
 import ToggleOnIcon from '@mui/icons-material/ToggleOn';
 import ToggleOffIcon from '@mui/icons-material/ToggleOff';
-import CustomTextField from "../../Textfield/CustomTextField";
-import DialogComponent from "../../Dialog/DialogComponent";
+import TextfieldComponent from "../../Textfield/Textfield.component";
+import DialogComponent from "../../Dialog/Dialog.component";
 import { User } from '../../../models/User';
 import {
   formControlStyles,
@@ -138,7 +138,7 @@ const PARKING_PREFIX_OPTIONS = [
   { value: 'CE', label: 'CE' },
 ];
 
-const EditableTable = <T extends object>({
+const EditableTableComponent = <T extends object>({
   data,
   columns,
   groupByDate,
@@ -282,7 +282,7 @@ const EditableTable = <T extends object>({
         setEditField && setEditField('licensePlate', maskedValue);
       };
       return wrapWithGrid(
-        <CustomTextField
+        <TextfieldComponent
           label={translateColumnHeaderToSpanish(column)}
           fullWidth
           value={licensePlateValue}
@@ -294,7 +294,7 @@ const EditableTable = <T extends object>({
 
     if (!config) {
       return wrapWithGrid(
-        <CustomTextField
+        <TextfieldComponent
           fullWidth
           value={editFields[String(column)] || ""}
           onChange={(e) =>
@@ -362,11 +362,11 @@ const EditableTable = <T extends object>({
               getOptionLabel={option => typeof option === 'string' ? option : option.label}
               noOptionsText="Sin coincidencias"
               renderInput={params => (
-                <CustomTextField {...params} label="Prefijo" variant="outlined" fullWidth sx={{ minWidth: 90 }} />
+                <TextfieldComponent {...params} label="Prefijo" variant="outlined" fullWidth sx={{ minWidth: 90 }} />
               )}
             />
           </FormControl>
-          <CustomTextField
+          <TextfieldComponent
             label={translateColumnHeaderToSpanish(column)}
             variant="outlined"
             fullWidth
@@ -531,7 +531,7 @@ const EditableTable = <T extends object>({
             typeof option === "string" ? option : option.label
           }
           renderInput={(params) => (
-            <CustomTextField
+            <TextfieldComponent
               {...params}
               label={translateColumnHeaderToSpanish(column)}
               fullWidth
@@ -573,7 +573,7 @@ const EditableTable = <T extends object>({
             })
           }
           renderInput={(params) => (
-            <CustomTextField
+            <TextfieldComponent
               {...params}
               label={translateColumnHeaderToSpanish(column)}
               fullWidth
@@ -586,7 +586,7 @@ const EditableTable = <T extends object>({
     }
 
     return wrapWithGrid(
-      <CustomTextField
+      <TextfieldComponent
         fullWidth
         value={editFields[String(column)] || ""}
         onChange={(e) =>
@@ -1434,7 +1434,7 @@ const EditableTable = <T extends object>({
           </Typography>
         }
         labelDisplayedRows={() => ""}
-        ActionsComponent={PaginationActions}
+        ActionsComponent={PaginationComponent}
         sx={{ borderRadius: '0 0 12px 12px' }}
       />
 
@@ -1463,4 +1463,4 @@ const EditableTable = <T extends object>({
   );
 };
 
-export default EditableTable;
+export default EditableTableComponent;

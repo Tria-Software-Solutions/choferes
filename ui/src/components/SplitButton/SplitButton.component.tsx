@@ -32,7 +32,7 @@ interface SplitButtonProps {
 // - options: array of option objects (label, icon, action, disabled)
 // - defaultIndex: default selected option
 // - buttonIcon: icon for the main button
-const SplitButton: React.FC<SplitButtonProps> = ({
+const SplitButtonComponent: React.FC<SplitButtonProps> = ({
   buttonText,
   options,
   defaultIndex = 0,
@@ -132,4 +132,4 @@ const SplitButton: React.FC<SplitButtonProps> = ({
   );
 };
 
-export default SplitButton;
+export default SplitButtonComponent;
