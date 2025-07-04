@@ -23,7 +23,7 @@ import {
   dialogActionsStyles,
   cancelButtonStyles,
   confirmButtonStyles
-} from "./DialogComponent.styles";
+} from "./Dialog.styles";
 
 export type DialogType = "delete" | "warning" | "info" | "success";
 

@@ -17,7 +17,7 @@ import { maskParkingLotWithPrefix } from "../../utils/mask";
 import { validateParkingLotWithPrefix } from "../../utils/userValidation";
 import AddRoundedIcon from "@mui/icons-material/AddRounded";
 import CloseRoundedIcon from "@mui/icons-material/CloseRounded";
-import CustomTextField from "../../components/Textfield/CustomTextField";
+import TextfieldComponent from "../../components/Textfield/Textfield.component";
 import ConfirmationNumberOutlinedIcon from "@mui/icons-material/ConfirmationNumberOutlined";
 import DirectionsCarOutlinedIcon from "@mui/icons-material/DirectionsCarOutlined";
 import LocalParkingOutlinedIcon from "@mui/icons-material/LocalParkingOutlined";
@@ -312,7 +312,7 @@ const AddVehicleForm: React.FC<AddVehicleFormProps> = ({
     <Box sx={boxRoot}>
       <Grid container spacing={3} sx={gridContainer}>
         <Grid item xs={12} sm={6}>
-          <CustomTextField
+          <TextfieldComponent
             label={FORMS.ADD_VEHICLE.TICKET_LABEL}
             variant="outlined"
             fullWidth
@@ -326,7 +326,7 @@ const AddVehicleForm: React.FC<AddVehicleFormProps> = ({
         </Grid>
 
         <Grid item xs={12} sm={6}>
-          <CustomTextField
+          <TextfieldComponent
             label={FORMS.ADD_VEHICLE.LICENSE_PLATE_LABEL}
             variant="outlined"
             fullWidth
@@ -365,7 +365,7 @@ const AddVehicleForm: React.FC<AddVehicleFormProps> = ({
               }
               noOptionsText="Sin coincidencias"
               renderInput={(params) => (
-                <CustomTextField
+                <TextfieldComponent
                   {...params}
                   label={FORMS.ADD_VEHICLE.BRAND_LABEL}
                   variant="outlined"
@@ -415,7 +415,7 @@ const AddVehicleForm: React.FC<AddVehicleFormProps> = ({
               }
               noOptionsText="Sin coincidencias"
               renderInput={(params) => (
-                <CustomTextField
+                <TextfieldComponent
                   {...params}
                   label={FORMS.ADD_VEHICLE.COLOR_LABEL}
                   variant="outlined"
@@ -454,7 +454,7 @@ const AddVehicleForm: React.FC<AddVehicleFormProps> = ({
                 }
                 noOptionsText="Sin coincidencias"
                 renderInput={(params) => (
-                  <CustomTextField
+                  <TextfieldComponent
                     {...params}
                     label="Prefijo"
                     variant="outlined"
@@ -464,7 +464,7 @@ const AddVehicleForm: React.FC<AddVehicleFormProps> = ({
                 )}
               />
             </FormControl>
-            <CustomTextField
+            <TextfieldComponent
               label={FORMS.ADD_VEHICLE.PARKING_LOT_LABEL}
               variant="outlined"
               fullWidth
@@ -501,7 +501,7 @@ const AddVehicleForm: React.FC<AddVehicleFormProps> = ({
         </Grid>
 
         <Grid item xs={12}>
-          <CustomTextField
+          <TextfieldComponent
             label={FORMS.ADD_VEHICLE.OBSERVATIONS_LABEL}
             variant="outlined"
             fullWidth

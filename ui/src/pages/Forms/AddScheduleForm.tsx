@@ -23,7 +23,7 @@ import DAYS_LIST from "../../constants/days.constants";
 import { translateDayOptionsToSpanish } from "../../utils/string";
 import AddRoundedIcon from "@mui/icons-material/AddRounded";
 import CloseRoundedIcon from "@mui/icons-material/CloseRounded";
-import CustomTextField from "../../components/Textfield/CustomTextField";
+import TextfieldComponent from "../../components/Textfield/Textfield.component";
 import CalendarMonthOutlinedIcon from "@mui/icons-material/CalendarMonthOutlined";
 import AccessTimeOutlinedIcon from "@mui/icons-material/AccessTimeOutlined";
 import WarningAmberOutlinedIcon from "@mui/icons-material/WarningAmberOutlined";
@@ -113,7 +113,7 @@ const AddScheduleForm: React.FC<AddScheduleFormProps> = ({
     <Box sx={boxRoot}>
       <Grid container spacing={3} sx={gridContainer}>
         <Grid item xs={12} sm={6}>
-          <CustomTextField
+          <TextfieldComponent
             label={FORMS.ADD_SCHEDULE.SCHEDULE_LABEL}
             variant="outlined"
             fullWidth
@@ -127,7 +127,7 @@ const AddScheduleForm: React.FC<AddScheduleFormProps> = ({
         </Grid>
 
         <Grid item xs={12} sm={6}>
-          <CustomTextField
+          <TextfieldComponent
             label={FORMS.ADD_SCHEDULE.SCHEDULE_TIME_LABEL}
             variant="outlined"
             type="number"

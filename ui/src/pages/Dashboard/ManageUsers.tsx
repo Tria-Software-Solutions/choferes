@@ -12,7 +12,7 @@ import {
 } from "../../store/slices/userSlice";
 import { fetchRoles } from "../../store/slices/rolesSlice";
 import { fetchUserRoles } from "../../store/slices/userRolesSlice";
-import { useAppNotifications } from "../../components/Snackbar/SnackbarWrapper";
+import { useAppNotifications } from "../../components/Snackbar/Snackbar.component";
 import {
   Alert,
   Backdrop,
@@ -23,12 +23,12 @@ import {
   Typography,
   useTheme,
 } from "@mui/material";
-import EditableTable from "../../components/Table/EditableTable/EditableTable";
-import SearchBar from "../../components/SearchBar/SearchBar";
+import EditableTableComponent from "../../components/Table/EditableTable/EditableTable.component";
+import SearchBarComponent from "../../components/SearchBar/SearchBar.component";
 import AddUserForm from "../Forms/AddUserForm";
 import VisibilityIcon from "@mui/icons-material/Visibility";
 import VisibilityOffIcon from "@mui/icons-material/VisibilityOff";
-import DialogComponent from "../../components/Dialog/DialogComponent";
+import DialogComponent from "../../components/Dialog/Dialog.component";
 import AddRoundedIcon from "@mui/icons-material/AddRounded";
 import { DASHBOARD_USERS } from "../../constants/constants";
 import { NOTIFICATIONS } from "../../constants/constants";
@@ -449,7 +449,7 @@ const ManageUsers: React.FC<{ isExpanded?: boolean }> = ({
             <Grid item xs={12} md={4}>
               <Box sx={searchBarBoxStyles}>
                 {filteredUsers && (
-                  <SearchBar
+                  <SearchBarComponent
                     placeholder={DASHBOARD_USERS.SEARCH_PLACEHOLDER}
                     value={filter}
                     onChange={handleFilterChange}
@@ -536,7 +536,7 @@ const ManageUsers: React.FC<{ isExpanded?: boolean }> = ({
           </Grid>
           <br />
           {filteredUsers.length > 0 ? (
-            <EditableTable<User>
+            <EditableTableComponent<User>
               key="users-table"
               data={filteredUsers}
               columns={[

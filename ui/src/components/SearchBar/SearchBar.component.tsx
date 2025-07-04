@@ -24,7 +24,7 @@ interface SearchBarProps {
 // - fullWidth: whether the input should take full width
 // - sx: custom styles
 // - onSearch: optional search handler
-const SearchBar: React.FC<SearchBarProps> = ({
+const SearchBarComponent: React.FC<SearchBarProps> = ({
   placeholder = SEARCH_BAR.PLACEHOLDER,
   value,
   fullWidth,
@@ -72,4 +72,4 @@ const SearchBar: React.FC<SearchBarProps> = ({
   );
 };
 
-export default SearchBar;
+export default SearchBarComponent;

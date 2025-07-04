@@ -11,7 +11,7 @@ import {
   Typography,
   useTheme,
 } from "@mui/material";
-import SearchBar from "../../components/SearchBar/SearchBar";
+import SearchBarComponent from "../../components/SearchBar/SearchBar.component";
 import VpnKeyOutlinedIcon from "@mui/icons-material/VpnKeyOutlined";
 import { DASHBOARD_PERMISSIONS } from "../../constants/constants";
 import {
@@ -83,7 +83,7 @@ const ManagePermissions: React.FC = () => {
           >
             <Grid item xs={12} md={4}>
               {filteredPermissions && (
-                <SearchBar
+                <SearchBarComponent
                   placeholder={DASHBOARD_PERMISSIONS.SEARCH_PLACEHOLDER}
                   value={filter}
                   onChange={handleFilterChange}

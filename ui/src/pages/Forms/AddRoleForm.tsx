@@ -15,7 +15,7 @@ import AddRoundedIcon from "@mui/icons-material/AddRounded";
 import CloseRoundedIcon from "@mui/icons-material/CloseRounded";
 import GroupOutlinedIcon from "@mui/icons-material/GroupOutlined";
 import { Permission } from "../../models/Permission";
-import CustomTextField from "../../components/Textfield/CustomTextField";
+import TextfieldComponent from "../../components/Textfield/Textfield.component";
 import { FORMS } from "../../constants/constants";
 import {
   boxRoot,
@@ -147,7 +147,7 @@ const AddRoleForm: React.FC<AddRoleFormProps> = ({
     <Box sx={boxRoot}>
       <Grid container spacing={3} sx={gridContainer}>
         <Grid item xs={12}>
-          <CustomTextField
+          <TextfieldComponent
             label={FORMS.ADD_ROLE.NAME_LABEL}
             variant="outlined"
             fullWidth

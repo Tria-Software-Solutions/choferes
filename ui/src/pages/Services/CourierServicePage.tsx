@@ -2,9 +2,9 @@ import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { useAuthContext } from "../../context/AuthContext";
 import { useSelector /*useDispatch*/ } from "react-redux";
 import { RootState /*AppDispatch*/ } from "../../store/store";
-import SearchBar from "../../components/SearchBar/SearchBar";
-import CustomSpeedDial from "../../components/SpeedDial/CustomSpeedDial";
-import { useAppNotifications } from "../../components/Snackbar/SnackbarWrapper";
+import SearchBarComponent from "../../components/SearchBar/SearchBar.component";
+import SpeedDialComponent from "../../components/SpeedDial/SpeedDial.component";
+import { useAppNotifications } from "../../components/Snackbar/Snackbar.component";
 import {
   Box,
   Typography,
@@ -43,9 +43,9 @@ import ManageSearchIcon from "@mui/icons-material/ManageSearch";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faFileExcel, faFilePdf } from "@fortawesome/free-solid-svg-icons";
 import { Courier } from "../../models/Courier";
-import EditableTable from "../../components/Table/EditableTable/EditableTable";
+import EditableTableComponent from "../../components/Table/EditableTable/EditableTable.component";
 import AddCourierForm from "../Forms/AddCourierForm";
-import DialogComponent from "../../components/Dialog/DialogComponent";
+import DialogComponent from "../../components/Dialog/Dialog.component";
 import AddRoundedIcon from "@mui/icons-material/AddRounded";
 import DeleteOutlineIcon from "@mui/icons-material/DeleteOutline";
 import LocalShippingIcon from "@mui/icons-material/LocalShipping";
@@ -369,7 +369,7 @@ const CourierServicePage: React.FC = () => {
         {/* Temporarily show export button without permission check */}
         <Box sx={exportSpeedDialBoxStyles}>
           {filteredWeekCouriers.length > 0 && (
-            <CustomSpeedDial
+            <SpeedDialComponent
               actions={exportOptions}
               mainIcon={<DownloadRoundedIcon />}
               openIcon={<CloseRoundedIcon />}
@@ -400,7 +400,7 @@ const CourierServicePage: React.FC = () => {
             <Grid item xs={12} md={4}>
               <Box sx={searchBarBoxStyles}>
                 {filteredCouriers && (
-                  <SearchBar
+                  <SearchBarComponent
                     placeholder={MANAGEMENT.COURIER_SERVICE_PAGE.SEARCH_PLACEHOLDER}
                     value={filter}
                     onChange={handleFilterChange}
@@ -486,7 +486,7 @@ const CourierServicePage: React.FC = () => {
           </Grid>
           <br />
           {filteredCouriers.length > 0 ? (
-            <EditableTable<Courier>
+            <EditableTableComponent<Courier>
               data={filteredCouriers}
               columns={[
                 "driver",

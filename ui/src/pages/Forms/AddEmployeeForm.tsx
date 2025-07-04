@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { Box, Grid, Button, useTheme, useMediaQuery } from "@mui/material";
 import AddRoundedIcon from "@mui/icons-material/AddRounded";
 import CloseRoundedIcon from "@mui/icons-material/CloseRounded";
-import CustomTextField from "../../components/Textfield/CustomTextField";
+import TextfieldComponent from "../../components/Textfield/Textfield.component";
 import PersonOutlinedIcon from "@mui/icons-material/PersonOutlined";
 import InfoOutlinedIcon from "@mui/icons-material/InfoOutlined";
 import { FORMS } from "../../constants/constants";
@@ -105,7 +105,7 @@ const AddEmployeeForm: React.FC<AddEmployeeFormProps> = ({
     <Box sx={boxRoot}>
       <Grid container spacing={3} sx={gridContainer}>
         <Grid item xs={12} sm={6}>
-          <CustomTextField
+          <TextfieldComponent
             label={FORMS.FIRST_NAME}
             variant="outlined"
             fullWidth
@@ -123,7 +123,7 @@ const AddEmployeeForm: React.FC<AddEmployeeFormProps> = ({
         </Grid>
 
         <Grid item xs={12} sm={6}>
-          <CustomTextField
+          <TextfieldComponent
             label={FORMS.LAST_NAME}
             variant="outlined"
             fullWidth

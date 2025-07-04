@@ -16,9 +16,9 @@ import {
 import { useWeeklySummaries } from "../../hooks/useWeeklySummary";
 import { useBiweeklySummaries } from "../../hooks/useBiweeklySummary";
 import { useMonthlySummaries } from "../../hooks/useMonthlySummary";
-import SearchBar from "../../components/SearchBar/SearchBar";
-import SelectorTable from "../../components/Table/SelectorTable/SelectorTable";
-import CustomSpeedDial from "../../components/SpeedDial/CustomSpeedDial";
+import SearchBarComponent from "../../components/SearchBar/SearchBar.component";
+import SelectorTableComponent from "../../components/Table/SelectorTable/SelectorTable.component";
+import SpeedDialComponent from "../../components/SpeedDial/SpeedDial.component";
 import { es } from "date-fns/locale";
 import { LocalizationProvider } from "@mui/x-date-pickers";
 import { DatePicker } from "@mui/x-date-pickers/DatePicker";
@@ -70,7 +70,7 @@ import ArrowForwardIosRoundedIcon from "@mui/icons-material/ArrowForwardIosRound
 import CalendarTodayRoundedIcon from "@mui/icons-material/CalendarTodayRounded";
 import CloseRoundedIcon from "@mui/icons-material/CloseRounded";
 import ManageSearchIcon from "@mui/icons-material/ManageSearch";
-import DialogComponent from "../../components/Dialog/DialogComponent";
+import DialogComponent from "../../components/Dialog/Dialog.component";
 import AccessTimeRoundedIcon from "@mui/icons-material/AccessTimeRounded";
 import BarChartIcon from "@mui/icons-material/BarChart";
 import TabContext from "@mui/lab/TabContext";
@@ -608,7 +608,7 @@ const RolesPage: React.FC = () => {
           userPermissions.includes(PERMISSIONS.EXPORT_PDF_ROLES) && (
             <Box sx={exportSpeedDialBoxStyles}>
               {filteredEmployees.length > 0 && (
-                <CustomSpeedDial
+                <SpeedDialComponent
                   actions={exportOptions}
                   mainIcon={<DownloadRoundedIcon />}
                   openIcon={<CloseRoundedIcon />}
@@ -639,7 +639,7 @@ const RolesPage: React.FC = () => {
           >
             <Grid item xs={12} md={4}>
               {filteredEmployees && (
-                <SearchBar
+                <SearchBarComponent
                   placeholder={MANAGEMENT.SEARCH_PLACEHOLDER}
                   value={filter}
                   onChange={handleFilterChange}
@@ -702,7 +702,7 @@ const RolesPage: React.FC = () => {
           </Grid>
           <br />
           {filteredEmployees.length > 0 ? (
-            <SelectorTable
+            <SelectorTableComponent
               filteredEmployees={filteredEmployees}
               schedules={schedules}
               hoursWorked={hoursWorked}

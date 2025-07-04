@@ -38,7 +38,7 @@ import {
   Grid,
   Stack,
 } from "@mui/material";
-import PaginationActions from "../Pagination/PaginationActions";
+import PaginationComponent from "../Pagination/Pagination.component";
 import {
   formatDate,
   formatDateWithoutYear,
@@ -142,7 +142,7 @@ interface SelectorTableProps {
   onInfoClick?: (employee: Employee) => void;
 }
 
-const SelectorTable: React.FC<SelectorTableProps> = React.memo(
+const SelectorTableComponent: React.FC<SelectorTableProps> = React.memo(
   ({
     filteredEmployees,
     schedules,
@@ -819,7 +819,7 @@ const SelectorTable: React.FC<SelectorTableProps> = React.memo(
                 </Typography>
               }
               labelDisplayedRows={() => ""}
-              ActionsComponent={PaginationActions}
+              ActionsComponent={PaginationComponent}
             />
           </Box>
         </Paper>
@@ -937,9 +937,9 @@ const SelectorTable: React.FC<SelectorTableProps> = React.memo(
   },
 );
 
-SelectorTable.displayName = "SelectorTable";
+SelectorTableComponent.displayName = "SelectorTableComponent";
 
-SelectorTable.propTypes = {
+SelectorTableComponent.propTypes = {
   filteredEmployees: PropTypes.array.isRequired,
   schedules: PropTypes.array.isRequired,
   hoursWorked: PropTypes.array.isRequired,
@@ -957,4 +957,4 @@ SelectorTable.propTypes = {
   onInfoClick: PropTypes.func,
 };
 
-export default SelectorTable;
+export default SelectorTableComponent;

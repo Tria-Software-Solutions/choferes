@@ -9,12 +9,12 @@ import {
   updateEmployee,
   deleteEmployee,
 } from "../../store/slices/employeeSlice";
-import SearchBar from "../../components/SearchBar/SearchBar";
-import CustomSpeedDial from "../../components/SpeedDial/CustomSpeedDial";
-import EditableTable from "../../components/Table/EditableTable/EditableTable";
+import SearchBarComponent from "../../components/SearchBar/SearchBar.component";
+import SpeedDialComponent from "../../components/SpeedDial/SpeedDial.component";
+import EditableTableComponent from "../../components/Table/EditableTable/EditableTable.component";
 import AddEmployeeForm from "../Forms/AddEmployeeForm";
-import { useAppNotifications } from "../../components/Snackbar/SnackbarWrapper";
-import DialogComponent from "../../components/Dialog/DialogComponent";
+import { useAppNotifications } from "../../components/Snackbar/Snackbar.component";
+import DialogComponent from "../../components/Dialog/Dialog.component";
 import {
   Button,
   Grid,
@@ -276,7 +276,7 @@ const EmployeesPage: React.FC = () => {
           userPermissions.includes(PERMISSIONS.EXPORT_PDF_EMPLOYEES) && (
             <Box sx={exportSpeedDialBoxStyles}>
               {filteredEmployees.length > 0 && (
-                <CustomSpeedDial
+                <SpeedDialComponent
                   actions={exportOptions}
                   mainIcon={<DownloadRoundedIcon />}
                   openIcon={<CloseRoundedIcon />}
@@ -308,7 +308,7 @@ const EmployeesPage: React.FC = () => {
             <Grid item xs={12} md={4}>
               <Box sx={searchBarBoxStyles}>
                 {filteredEmployees && (
-                  <SearchBar
+                  <SearchBarComponent
                     placeholder={MANAGEMENT.EMPLOYEES_PAGE.SEARCH_PLACEHOLDER}
                     value={filter}
                     onChange={handleFilterChange}
@@ -347,7 +347,7 @@ const EmployeesPage: React.FC = () => {
           </Grid>
           <br />
           {filteredEmployees.length > 0 ? (
-            <EditableTable<Employee>
+            <EditableTableComponent<Employee>
               data={filteredEmployees}
               columns={["firstName", "lastName"]}
               editRowId={editRowId}

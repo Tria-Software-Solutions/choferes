@@ -12,7 +12,7 @@ import {
 } from "../../store/slices/rolesSlice";
 import { fetchPermissions } from "../../store/slices/permissionsSlice";
 import { fetchRolePermissions } from "../../store/slices/rolePermissionsSlice";
-import { useAppNotifications } from "../../components/Snackbar/SnackbarWrapper";
+import { useAppNotifications } from "../../components/Snackbar/Snackbar.component";
 import {
   Backdrop,
   Box,
@@ -22,10 +22,10 @@ import {
   Typography,
   useTheme,
 } from "@mui/material";
-import EditableTable from "../../components/Table/EditableTable/EditableTable";
-import SearchBar from "../../components/SearchBar/SearchBar";
+import EditableTableComponent from "../../components/Table/EditableTable/EditableTable.component";
+import SearchBarComponent from "../../components/SearchBar/SearchBar.component";
 import AddRoleForm from "../Forms/AddRoleForm";
-import DialogComponent from "../../components/Dialog/DialogComponent";
+import DialogComponent from "../../components/Dialog/Dialog.component";
 import AddRoundedIcon from "@mui/icons-material/AddRounded";
 import DeleteOutlineIcon from "@mui/icons-material/DeleteOutline";
 import { DASHBOARD_ROLES } from "../../constants/constants";
@@ -269,7 +269,7 @@ const ManageRoles: React.FC<{ isExpanded?: boolean }> = ({
             <Grid item xs={12} md={4}>
               <Box sx={searchBarBoxStyles}>
                 {filteredRoles && (
-                  <SearchBar
+                  <SearchBarComponent
                     placeholder={DASHBOARD_ROLES.SEARCH_PLACEHOLDER}
                     value={filter}
                     onChange={handleFilterChange}
@@ -309,7 +309,7 @@ const ManageRoles: React.FC<{ isExpanded?: boolean }> = ({
           </Grid>
           <br />
           {filteredRoles.length > 0 ? (
-            <EditableTable<Role>
+            <EditableTableComponent<Role>
               data={filteredRoles}
               columns={["name", "permissionNames"]}
               editRowId={editRowId}

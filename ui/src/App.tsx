@@ -20,8 +20,8 @@ import NotFound from "./pages/NotFound";
 import Forbidden from "./pages/Forbidden";
 import ErrorPage from "./pages/Error";
 import SessionExpired from "./pages/SessionExpired";
-import AppBarComponent from "./components/AppBar/AppBarComponent";
-import SnackbarWrapper from "./components/Snackbar/SnackbarWrapper";
+import AppBarComponent from "./components/AppBar/AppBar.component";
+import SnackbarComponent from "./components/Snackbar/Snackbar.component";
 import { Provider } from "react-redux";
 import { store } from "./store/store";
 import { AuthProvider, useAuthContext } from "./context/AuthContext";
@@ -296,9 +296,9 @@ const App: React.FC = () => {
     <Provider store={store}>
       <AuthProvider>
         <Router>
-          <SnackbarWrapper>
+          <SnackbarComponent>
             <AppContent />
-          </SnackbarWrapper>
+          </SnackbarComponent>
         </Router>
       </AuthProvider>
     </Provider>

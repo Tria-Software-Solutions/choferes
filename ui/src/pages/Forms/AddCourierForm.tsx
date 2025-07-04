@@ -20,7 +20,7 @@ import OutlinedInput from "@mui/material/OutlinedInput";
 import InputAdornment from "@mui/material/InputAdornment";
 import InfoOutlinedIcon from "@mui/icons-material/InfoOutlined";
 import FORMS from "../../constants/forms.constants";
-import CustomTextField from "../../components/Textfield/CustomTextField";
+import TextfieldComponent from "../../components/Textfield/Textfield.component";
 import {
   boxRoot,
   gridContainer,
@@ -185,7 +185,7 @@ const AddCourierForm: React.FC<AddCourierFormProps> = ({
     <Box sx={boxRoot}>
       <Grid container spacing={3} sx={gridContainer}>
         <Grid item xs={12} sm={6}>
-          <CustomTextField
+          <TextfieldComponent
             label={FORMS.ADD_COURIER.DRIVER}
             variant="outlined"
             fullWidth
@@ -243,7 +243,7 @@ const AddCourierForm: React.FC<AddCourierFormProps> = ({
         </Grid>
 
         <Grid item xs={12} sm={6}>
-          <CustomTextField
+          <TextfieldComponent
             label={FORMS.ADD_COURIER.DISTANCE}
             variant="outlined"
             fullWidth
@@ -264,7 +264,7 @@ const AddCourierForm: React.FC<AddCourierFormProps> = ({
         </Grid>
 
         <Grid item xs={12} sm={6}>
-          <CustomTextField
+          <TextfieldComponent
             label={FORMS.ADD_COURIER.TRACKING_NUMBER}
             variant="outlined"
             fullWidth

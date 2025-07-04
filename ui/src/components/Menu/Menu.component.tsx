@@ -18,7 +18,7 @@ import {
   menuItemStyles,
   subMenuPaperStyles,
   listItemTextStyles
-} from "./MenuComponent.styles";
+} from "./Menu.styles";
 
 export interface MenuItemProps {
   text: string;

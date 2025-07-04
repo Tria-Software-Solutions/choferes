@@ -6,7 +6,7 @@ import {
   snackbarContentStyles,
   closeIconButtonStyles,
   snackbarButtonStyles,
-} from "./SnackbarWrapper.styles";
+} from "./Snackbar.styles";
 
 // SnackbarWrapper provides a context and provider for showing notifications across the app using Material-UI Snackbar.
 // Exposes a showNotification function via context for use in child components.
@@ -123,11 +123,13 @@ export const AppNotificationProvider: React.FC<{
   );
 };
 
-export default function SnackbarWrapper({
+const SnackbarComponent = function SnackbarComponent({
   children,
 }: {
   children: React.ReactNode;
 }) {
   // Wraps children with the notification provider
   return <AppNotificationProvider>{children}</AppNotificationProvider>;
-}
+};
+
+export default SnackbarComponent;
