@@ -21,6 +21,21 @@ import InputAdornment from "@mui/material/InputAdornment";
 import InfoOutlinedIcon from "@mui/icons-material/InfoOutlined";
 import { FORMS } from "../../constants/constants";
 import CustomTextField from "../../components/Textfield/CustomTextField";
+import {
+  boxRoot,
+  gridContainer,
+  formControl,
+  iconSx,
+  infoBox,
+  infoIconBox,
+  infoTitle,
+  infoDesc,
+  actionsBox,
+  clearButton,
+  actionsInnerBox,
+  cancelButton,
+  submitButton,
+} from './AddCourierForm.styles';
 
 interface AddCourierFormProps {
   onSubmit: (courier: {
@@ -167,8 +182,8 @@ const AddCourierForm: React.FC<AddCourierFormProps> = ({
   };
 
   return (
-    <Box sx={{ width: "100%", p: 0 }}>
-      <Grid container spacing={3} sx={{ mt: 0 }}>
+    <Box sx={boxRoot}>
+      <Grid container spacing={3} sx={gridContainer}>
         <Grid item xs={12} sm={6}>
           <CustomTextField
             label={FORMS.ADD_COURIER.DRIVER}
@@ -181,7 +196,7 @@ const AddCourierForm: React.FC<AddCourierFormProps> = ({
             helperText={errors.driver}
             icon={
               <PersonOutlinedIcon
-                sx={{ color: theme.palette.text.secondary }}
+                sx={iconSx(theme)}
               />
             }
           />
@@ -191,25 +206,7 @@ const AddCourierForm: React.FC<AddCourierFormProps> = ({
           <FormControl
             variant="outlined"
             fullWidth
-            sx={{
-              marginTop: "8px",
-              "& .MuiOutlinedInput-root, & .MuiSelect-select": {
-                backgroundColor: "#fff",
-                borderRadius: 2,
-                "&.Mui-focused .MuiOutlinedInput-notchedOutline": {
-                  borderColor: "#000",
-                  borderWidth: 2,
-                },
-                "&:hover .MuiOutlinedInput-notchedOutline": {
-                  borderColor: "#000",
-                },
-                "&.Mui-focused": {
-                  backgroundColor: "#fff",
-                  outline: "none",
-                  boxShadow: "none",
-                },
-              },
-            }}
+            sx={formControl(theme)}
           >
             <InputLabel>{FORMS.ADD_COURIER.ROUTE}</InputLabel>
             <Select
@@ -223,7 +220,7 @@ const AddCourierForm: React.FC<AddCourierFormProps> = ({
                   startAdornment={
                     <InputAdornment position="start">
                       <MapOutlinedIcon
-                        sx={{ color: theme.palette.text.secondary }}
+                        sx={iconSx(theme)}
                       />
                     </InputAdornment>
                   }
@@ -233,7 +230,7 @@ const AddCourierForm: React.FC<AddCourierFormProps> = ({
                 PaperProps: {
                   style: {
                     maxHeight: 320,
-                    overflowY: 'auto',
+                    overflowY: 'auto' as React.CSSProperties['overflowY'],
                   },
                 },
               }}
@@ -260,7 +257,7 @@ const AddCourierForm: React.FC<AddCourierFormProps> = ({
             helperText={errors.distance}
             icon={
               <StraightenOutlinedIcon
-                sx={{ color: theme.palette.text.secondary }}
+                sx={iconSx(theme)}
               />
             }
           />
@@ -280,7 +277,7 @@ const AddCourierForm: React.FC<AddCourierFormProps> = ({
             helperText={errors.trackingNumber}
             icon={
               <AssignmentOutlinedIcon
-                sx={{ color: theme.palette.text.secondary }}
+                sx={iconSx(theme)}
               />
             }
           />
@@ -300,7 +297,7 @@ const AddCourierForm: React.FC<AddCourierFormProps> = ({
                   startAdornment={
                     <InputAdornment position="start">
                       <AssignmentOutlinedIcon
-                        sx={{ color: theme.palette.text.secondary }}
+                        sx={iconSx(theme)}
                       />
                     </InputAdornment>
                   }
@@ -315,39 +312,17 @@ const AddCourierForm: React.FC<AddCourierFormProps> = ({
         </Grid>
 
         <Grid item xs={12}>
-          <Box
-            sx={{
-              display: "flex",
-              alignItems: "center",
-              p: { xs: 1.5, sm: 2 },
-              backgroundColor: theme.palette.action.hover,
-              borderRadius: 1,
-              border: "1px solid",
-              borderColor: theme.palette.divider,
-            }}
-          >
-            <Box sx={{ mr: { xs: 1, sm: 2 }, color: theme.palette.info.main }}>
+          <Box sx={infoBox(theme)}>
+            <Box sx={infoIconBox(theme)}>
               <InfoOutlinedIcon
-                sx={{ color: theme.palette.info.main, mr: { xs: 1, sm: 2 } }}
+                sx={{ ...iconSx(theme), ...infoIconBox(theme) }}
               />
             </Box>
             <Box>
-              <Box
-                sx={{
-                  fontWeight: 600,
-                  color: theme.palette.text.primary,
-                  mb: 0.5,
-                  fontSize: "clamp(0.875rem, 1.5vw, 1rem)",
-                }}
-              >
+              <Box sx={infoTitle(theme)}>
                 {FORMS.ADD_COURIER.INFO_TITLE}
               </Box>
-              <Box
-                sx={{
-                  color: theme.palette.text.secondary,
-                  fontSize: "clamp(0.75rem, 1.25vw, 0.875rem)",
-                }}
-              >
+              <Box sx={infoDesc(theme)}>
                 {FORMS.ADD_COURIER.INFO_DESC}
               </Box>
             </Box>
@@ -355,49 +330,24 @@ const AddCourierForm: React.FC<AddCourierFormProps> = ({
         </Grid>
 
         <Grid item xs={12}>
-          <Box
-            sx={{
-              display: "flex",
-              flexDirection: { xs: "column", sm: "row" },
-              justifyContent: "space-between",
-              gap: { xs: 1, sm: 2 },
-              pt: 2,
-              borderTop: "1px solid",
-              borderColor: theme.palette.divider,
-            }}
-          >
+          <Box sx={actionsBox(theme)}>
             <Button
               variant="outlined"
               onClick={handleClearForm}
               startIcon={<CloseRoundedIcon />}
               fullWidth={isSmallScreen}
-              sx={{
-                minHeight: { xs: 44, sm: 48 },
-                fontSize: "clamp(0.75rem, 1.25vw, 0.875rem)",
-                order: { xs: 3, sm: 1 },
-              }}
+              sx={clearButton}
             >
               {FORMS.ADD_COURIER.CLEAR_BUTTON}
             </Button>
-            <Box
-              sx={{
-                display: "flex",
-                flexDirection: { xs: "column", sm: "row" },
-                gap: { xs: 1, sm: 2 },
-                width: { xs: "100%", sm: "auto" },
-                order: { xs: 1, sm: 2 },
-              }}
-            >
+            <Box sx={actionsInnerBox}>
               {onCancel && (
                 <Button
                   variant="outlined"
                   onClick={onCancel}
                   disabled={isLoading}
                   fullWidth={isSmallScreen}
-                  sx={{
-                    minHeight: { xs: 44, sm: 48 },
-                    fontSize: "clamp(0.75rem, 1.25vw, 0.875rem)",
-                  }}
+                  sx={cancelButton}
                 >
                   {FORMS.ADD_COURIER.CANCEL_BUTTON}
                 </Button>
@@ -408,13 +358,7 @@ const AddCourierForm: React.FC<AddCourierFormProps> = ({
                 disabled={!isFormValid() || isLoading}
                 startIcon={<AddRoundedIcon />}
                 fullWidth={isSmallScreen}
-                sx={{
-                  minHeight: { xs: 44, sm: 48 },
-                  fontSize: "clamp(0.75rem, 1.25vw, 0.875rem)",
-                  fontWeight: 600,
-                  px: { xs: 2, sm: 4 },
-                  py: { xs: 1, sm: 1.5 },
-                }}
+                sx={submitButton}
               >
                 {isLoading ? FORMS.ADD_COURIER.LOADING_BUTTON : FORMS.ADD_COURIER.ADD_BUTTON}
               </Button>

@@ -30,6 +30,19 @@ import AddRoundedIcon from "@mui/icons-material/AddRounded";
 import DeleteOutlineIcon from "@mui/icons-material/DeleteOutline";
 import { DASHBOARD_ROLES } from "../../constants/constants";
 import { NOTIFICATIONS } from "../../constants/constants";
+import {
+  permissionNamesBoxStyles,
+  permissionChipStyles,
+  loadingBoxStyles,
+  backdropStyles,
+  searchBarBoxStyles,
+  addButtonMobileStyles,
+  addButtonDesktopBoxStyles,
+  addButtonDesktopStyles,
+  noRolesBoxStyles,
+  deleteDialogPaperSx,
+  addDialogPaperSx,
+} from "./ManageRoles.styles";
 
 // ManageRoles page component for role management in the dashboard
 const ManageRoles: React.FC<{ isExpanded?: boolean }> = ({
@@ -217,19 +230,11 @@ const ManageRoles: React.FC<{ isExpanded?: boolean }> = ({
   const renderColumnValue = (column: keyof Role, value: unknown) => {
     if (column === "permissionNames" && Array.isArray(value)) {
       return (
-        <Box sx={{ display: "flex", flexWrap: "wrap", gap: 0.5 }}>
+        <Box sx={permissionNamesBoxStyles}>
           {value.map((permission: string, index: number) => (
             <Box
               key={index}
-              sx={{
-                backgroundColor: theme.palette.primary.main,
-                color: theme.palette.primary.contrastText,
-                px: 1,
-                py: 0.5,
-                borderRadius: 1,
-                fontSize: "clamp(0.625rem, 1vw, 0.75rem)",
-                fontWeight: 500,
-              }}
+              sx={permissionChipStyles(theme)}
             >
               {permission}
             </Box>
@@ -244,16 +249,10 @@ const ManageRoles: React.FC<{ isExpanded?: boolean }> = ({
     <Box>
       {isLoadingRoles ? (
         <Box
-          sx={{
-            display: "flex",
-            justifyContent: "center",
-            alignItems: "center",
-            textAlign: "center",
-            paddingTop: "10%",
-          }}
+          sx={loadingBoxStyles}
         >
           <Backdrop
-            sx={(theme) => ({ color: "#fff", zIndex: theme.zIndex.drawer + 1 })}
+            sx={backdropStyles(theme)}
             open={isLoadingRoles}
           >
             <CircularProgress />
@@ -268,7 +267,7 @@ const ManageRoles: React.FC<{ isExpanded?: boolean }> = ({
             alignItems="center"
           >
             <Grid item xs={12} md={4}>
-              <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
+              <Box sx={searchBarBoxStyles}>
                 {filteredRoles && (
                   <SearchBar
                     placeholder={DASHBOARD_ROLES.SEARCH_PLACEHOLDER}
@@ -282,14 +281,7 @@ const ManageRoles: React.FC<{ isExpanded?: boolean }> = ({
                   variant="contained"
                   color="primary"
                   onClick={handleOpenAddRoleModal}
-                  sx={{
-                    display: { xs: "flex", md: "none" },
-                    minWidth: "auto",
-                    width: 56,
-                    height: 56,
-                    borderRadius: "50%",
-                    p: 0,
-                  }}
+                  sx={addButtonMobileStyles}
                 >
                   <AddRoundedIcon />
                 </Button>
@@ -302,15 +294,13 @@ const ManageRoles: React.FC<{ isExpanded?: boolean }> = ({
                 alignItems="center"
                 justifyContent="flex-end"
                 gap={2}
-                sx={{
-                  display: { xs: "none", md: "flex" },
-                }}
+                sx={addButtonDesktopBoxStyles}
               >
                 <Button
                   variant="contained"
                   startIcon={<AddRoundedIcon />}
                   onClick={handleOpenAddRoleModal}
-                  sx={{ px: 3, py: 1.5, fontSize: "1rem", minHeight: 56 }}
+                  sx={addButtonDesktopStyles}
                 >
                   {DASHBOARD_ROLES.ADD}
                 </Button>
@@ -344,12 +334,7 @@ const ManageRoles: React.FC<{ isExpanded?: boolean }> = ({
             />
           ) : (
             <Box
-              sx={{
-                display: "flex",
-                justifyContent: "center",
-                alignItems: "center",
-                textAlign: "center",
-              }}
+              sx={noRolesBoxStyles}
             >
               <Typography variant="h6" color="textSecondary">
                 {DASHBOARD_ROLES.NO_ROLES}
@@ -370,10 +355,7 @@ const ManageRoles: React.FC<{ isExpanded?: boolean }> = ({
             confirmText={DASHBOARD_ROLES.DIALOG_DELETE_CONFIRM}
             cancelText={DASHBOARD_ROLES.DIALOG_DELETE_CANCEL}
             loading={isDeletingRole}
-            paperSx={{
-              minWidth: { xs: "80vw", sm: 320 },
-              maxWidth: { xs: "90vw", sm: 400 },
-            }}
+            paperSx={deleteDialogPaperSx ?? {}}
             icon={<DeleteOutlineIcon color="error" />}
           />
           <DialogComponent
@@ -382,10 +364,7 @@ const ManageRoles: React.FC<{ isExpanded?: boolean }> = ({
             title={DASHBOARD_ROLES.DIALOG_ADD_TITLE}
             subtitle={DASHBOARD_ROLES.DIALOG_ADD_SUBTITLE}
             hideActions
-            paperSx={{
-              minWidth: { xs: "90vw", sm: 500, md: 700 },
-              maxWidth: { xs: "98vw", sm: 700 },
-            }}
+            paperSx={addDialogPaperSx ?? {}}
           >
             <AddRoleForm
               onSubmit={handleCreateRole}

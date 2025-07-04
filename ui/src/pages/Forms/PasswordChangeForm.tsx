@@ -21,6 +21,12 @@ import {
   updateUserPassword,
   updateUserTemporalPassword,
 } from "../../store/slices/userSlice";
+import {
+  formBox,
+  subtitle,
+  temporalPasswordBox,
+  generateButton,
+} from './PasswordChangeForm.styles';
 
 interface PasswordChangeFormProps {
   userId: number | null;
@@ -122,8 +128,8 @@ const PasswordChangeForm: React.FC<PasswordChangeFormProps> = ({
   };
 
   return (
-    <Box component="form" onSubmit={handleSubmit}>
-      <Typography variant="body2" color="textSecondary" sx={{ mb: 3 }}>
+    <Box component="form" onSubmit={handleSubmit} sx={formBox}>
+      <Typography variant="body2" color="textSecondary" sx={subtitle}>
         {DASHBOARD_USERS.DIALOG_PASSWORD_SUBTITLE}
       </Typography>
       <Stack>
@@ -175,20 +181,12 @@ const PasswordChangeForm: React.FC<PasswordChangeFormProps> = ({
           variant="outlined"
           onClick={handleGenerateTemporalPassword}
           fullWidth
-          sx={{ mt: 1 }}
+          sx={generateButton}
         >
           Generar contraseña temporal
         </Button>
         {temporalPassword && (
-          <Box
-            sx={{
-              display: "flex",
-              alignItems: "center",
-              gap: 1,
-              mt: 1,
-              width: "100%",
-            }}
-          >
+          <Box sx={temporalPasswordBox}>
             <CustomTextField
               label="Contraseña temporal generada"
               value={temporalPassword}

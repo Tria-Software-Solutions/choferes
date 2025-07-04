@@ -33,6 +33,22 @@ import AddRoundedIcon from "@mui/icons-material/AddRounded";
 import { DASHBOARD_USERS } from "../../constants/constants";
 import { NOTIFICATIONS } from "../../constants/constants";
 import PasswordChangeForm from "../Forms/PasswordChangeForm";
+import {
+  errorBoxStyles,
+  errorAlertStyles,
+  retryButtonStyles,
+  loadingBoxStyles,
+  searchBarBoxStyles,
+  addButtonMobileStyles,
+  addButtonDesktopBoxStyles,
+  addButtonDesktopStyles,
+  showInactiveBoxStyles,
+  showInactiveTypographyStyles,
+  noUsersBoxStyles,
+  addDialogPaperSx,
+  passwordDialogPaperSx,
+  backdropStyles,
+} from "./ManageUsers.styles";
 
 // ManageUsers page component for user management in the dashboard
 const ManageUsers: React.FC<{ isExpanded?: boolean }> = ({
@@ -397,40 +413,26 @@ const ManageUsers: React.FC<{ isExpanded?: boolean }> = ({
     <Box>
       {loadError ? (
         <Box
-          sx={{
-            display: "flex",
-            flexDirection: "column",
-            justifyContent: "center",
-            alignItems: "center",
-            textAlign: "center",
-            paddingTop: "10%",
-            gap: 2,
-          }}
+          sx={errorBoxStyles}
         >
-          <Alert severity="error" sx={{ maxWidth: 600 }}>
+          <Alert severity="error" sx={errorAlertStyles}>
             <Typography variant="h6" gutterBottom>
               Error de Carga
             </Typography>
             <Typography variant="body1" gutterBottom>
               {loadError}
             </Typography>
-            <Button variant="contained" onClick={handleRetry} sx={{ mt: 2 }}>
+            <Button variant="contained" onClick={handleRetry} sx={retryButtonStyles}>
               Reintentar
             </Button>
           </Alert>
         </Box>
       ) : isLoadingUsers ? (
         <Box
-          sx={{
-            display: "flex",
-            justifyContent: "center",
-            alignItems: "center",
-            textAlign: "center",
-            paddingTop: "10%",
-          }}
+          sx={loadingBoxStyles}
         >
           <Backdrop
-            sx={(theme) => ({ color: "#fff", zIndex: theme.zIndex.drawer + 1 })}
+            sx={backdropStyles(theme)}
             open={isLoadingUsers}
           >
             <CircularProgress />
@@ -445,7 +447,7 @@ const ManageUsers: React.FC<{ isExpanded?: boolean }> = ({
             alignItems="center"
           >
             <Grid item xs={12} md={4}>
-              <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
+              <Box sx={searchBarBoxStyles}>
                 {filteredUsers && (
                   <SearchBar
                     placeholder={DASHBOARD_USERS.SEARCH_PLACEHOLDER}
@@ -459,14 +461,7 @@ const ManageUsers: React.FC<{ isExpanded?: boolean }> = ({
                   variant="contained"
                   color="primary"
                   onClick={handleOpenAddUserModal}
-                  sx={{
-                    display: { xs: "flex", md: "none" },
-                    minWidth: "auto",
-                    width: 56,
-                    height: 56,
-                    borderRadius: "50%",
-                    p: 0,
-                  }}
+                  sx={addButtonMobileStyles}
                 >
                   <AddRoundedIcon />
                 </Button>
@@ -479,26 +474,11 @@ const ManageUsers: React.FC<{ isExpanded?: boolean }> = ({
                 alignItems="center"
                 justifyContent="flex-end"
                 gap={2}
-                sx={{
-                  display: { xs: "none", md: "flex" },
-                }}
+                sx={addButtonDesktopBoxStyles}
               >
                 <Box
                   onClick={() => setShowInactive(!showInactive)}
-                  sx={{
-                    display: "flex",
-                    alignItems: "center",
-                    gap: 1,
-                    cursor: "pointer",
-                    userSelect: "none",
-                    color: theme.palette.text.primary,
-                    transition: "color 0.2s",
-                    "&:hover": {
-                      color: theme.palette.primary.main,
-                      textDecoration: "underline",
-                    },
-                    px: 1,
-                  }}
+                  sx={showInactiveBoxStyles(theme)}
                 >
                   {showInactive ? (
                     <VisibilityOffIcon sx={{ fontSize: 20 }} />
@@ -508,10 +488,7 @@ const ManageUsers: React.FC<{ isExpanded?: boolean }> = ({
                   <Typography
                     variant="body2"
                     fontWeight={600}
-                    sx={{
-                      fontSize: "0.95rem",
-                      whiteSpace: "nowrap",
-                    }}
+                    sx={showInactiveTypographyStyles}
                   >
                     {showInactive
                       ? DASHBOARD_USERS.HIDE_INACTIVE
@@ -522,7 +499,7 @@ const ManageUsers: React.FC<{ isExpanded?: boolean }> = ({
                   variant="contained"
                   startIcon={<AddRoundedIcon />}
                   onClick={handleOpenAddUserModal}
-                  sx={{ px: 3, py: 1.5, fontSize: "1rem", minHeight: 56 }}
+                  sx={addButtonDesktopStyles}
                 >
                   {DASHBOARD_USERS.ADD}
                 </Button>
@@ -537,20 +514,7 @@ const ManageUsers: React.FC<{ isExpanded?: boolean }> = ({
               >
                 <Box
                   onClick={() => setShowInactive(!showInactive)}
-                  sx={{
-                    display: "flex",
-                    alignItems: "center",
-                    gap: 1,
-                    cursor: "pointer",
-                    userSelect: "none",
-                    color: theme.palette.text.primary,
-                    transition: "color 0.2s",
-                    "&:hover": {
-                      color: theme.palette.primary.main,
-                      textDecoration: "underline",
-                    },
-                    px: 1,
-                  }}
+                  sx={showInactiveBoxStyles(theme)}
                 >
                   {showInactive ? (
                     <VisibilityOffIcon sx={{ fontSize: 20 }} />
@@ -560,10 +524,7 @@ const ManageUsers: React.FC<{ isExpanded?: boolean }> = ({
                   <Typography
                     variant="body2"
                     fontWeight={600}
-                    sx={{
-                      fontSize: "0.95rem",
-                      whiteSpace: "nowrap",
-                    }}
+                    sx={showInactiveTypographyStyles}
                   >
                     {showInactive
                       ? DASHBOARD_USERS.HIDE_INACTIVE
@@ -610,12 +571,7 @@ const ManageUsers: React.FC<{ isExpanded?: boolean }> = ({
             />
           ) : (
             <Box
-              sx={{
-                display: "flex",
-                justifyContent: "center",
-                alignItems: "center",
-                textAlign: "center",
-              }}
+              sx={noUsersBoxStyles}
             >
               <Typography variant="h6" color="textSecondary">
                 {DASHBOARD_USERS.NO_USERS}
@@ -643,10 +599,7 @@ const ManageUsers: React.FC<{ isExpanded?: boolean }> = ({
         title={DASHBOARD_USERS.ADD}
         subtitle="Nuevo usuario"
         hideActions
-        paperSx={{
-          minWidth: { xs: "90vw", sm: 500, md: 700 },
-          maxWidth: { xs: "98vw", sm: 700 },
-        }}
+        paperSx={addDialogPaperSx ?? {}}
       >
         <AddUserForm
           onSubmit={handleCreateUser}
@@ -670,7 +623,7 @@ const ManageUsers: React.FC<{ isExpanded?: boolean }> = ({
           return '';
         })()}
         hideActions
-        paperSx={{ minWidth: { xs: '90vw', sm: 500, md: 700 }, maxWidth: { xs: '98vw', sm: 700 } }}
+        paperSx={passwordDialogPaperSx ?? {}}
       >
         <PasswordChangeForm
           userId={passwordUserId}

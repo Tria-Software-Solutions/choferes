@@ -9,14 +9,13 @@ import {
   MenuItem,
   Checkbox,
   ListItemText,
-  FormGroup,
-  FormControlLabel,
-  Switch,
   OutlinedInput,
   Button,
   useTheme,
   useMediaQuery,
   InputAdornment,
+  FormControlLabel,
+  Switch,
 } from "@mui/material";
 import { Schedule } from "../../models/Schedule";
 import { DAYS_LIST, FORMS } from "../../constants/constants";
@@ -27,6 +26,22 @@ import CustomTextField from "../../components/Textfield/CustomTextField";
 import CalendarMonthOutlinedIcon from "@mui/icons-material/CalendarMonthOutlined";
 import AccessTimeOutlinedIcon from "@mui/icons-material/AccessTimeOutlined";
 import WarningAmberOutlinedIcon from "@mui/icons-material/WarningAmberOutlined";
+import {
+  boxRoot,
+  gridContainer,
+  iconSx,
+  formControl,
+  daysSelectBox,
+  dayChip,
+  infoBox,
+  infoTitle,
+  infoDesc,
+  actionsBox,
+  clearButton,
+  actionsInnerBox,
+  cancelButton,
+  submitButton,
+} from './AddScheduleForm.styles';
 
 interface AddScheduleFormProps {
   onSubmit: (schedule: Omit<Schedule, "id">) => void;
@@ -94,8 +109,8 @@ const AddScheduleForm: React.FC<AddScheduleFormProps> = ({
   };
 
   return (
-    <Box sx={{ width: "100%", p: 0 }}>
-      <Grid container spacing={3} sx={{ mt: 0 }}>
+    <Box sx={boxRoot}>
+      <Grid container spacing={3} sx={gridContainer}>
         <Grid item xs={12} sm={6}>
           <CustomTextField
             label={FORMS.ADD_SCHEDULE.SCHEDULE_LABEL}
@@ -106,11 +121,7 @@ const AddScheduleForm: React.FC<AddScheduleFormProps> = ({
             onChange={(e) =>
               setFormData({ ...formData, label: e.target.value })
             }
-            icon={
-              <CalendarMonthOutlinedIcon
-                sx={{ color: theme.palette.text.secondary }}
-              />
-            }
+            icon={<CalendarMonthOutlinedIcon sx={iconSx(theme)} />}
           />
         </Grid>
 
@@ -139,13 +150,9 @@ const AddScheduleForm: React.FC<AddScheduleFormProps> = ({
                 ? FORMS.HOURS_INVALID
                 : ""
             }
-            icon={
-              <AccessTimeOutlinedIcon
-                sx={{ color: theme.palette.text.secondary }}
-              />
-            }
+            icon={<AccessTimeOutlinedIcon sx={iconSx(theme)} />}
             endAdornment={
-              <Box sx={{ ml: 1, color: theme.palette.text.secondary }}>
+              <Box sx={iconSx(theme)}>
                 horas
               </Box>
             }
@@ -156,24 +163,7 @@ const AddScheduleForm: React.FC<AddScheduleFormProps> = ({
           <FormControl
             variant="outlined"
             fullWidth
-            sx={{
-              "& .MuiOutlinedInput-root, & .MuiSelect-select": {
-                backgroundColor: "#fff",
-                borderRadius: 2,
-                "&.Mui-focused .MuiOutlinedInput-notchedOutline": {
-                  borderColor: "#000",
-                  borderWidth: 2,
-                },
-                "&:hover .MuiOutlinedInput-notchedOutline": {
-                  borderColor: "#000",
-                },
-                "&.Mui-focused": {
-                  backgroundColor: "#fff",
-                  outline: "none",
-                  boxShadow: "none",
-                },
-              },
-            }}
+            sx={formControl(theme)}
           >
             <InputLabel>{FORMS.DAYS_REQUIRED}</InputLabel>
             <Select
@@ -185,28 +175,15 @@ const AddScheduleForm: React.FC<AddScheduleFormProps> = ({
                   label={FORMS.DAYS_REQUIRED}
                   startAdornment={
                     <InputAdornment position="start">
-                      <CalendarMonthOutlinedIcon
-                        sx={{ color: theme.palette.text.secondary }}
-                      />
+                      <CalendarMonthOutlinedIcon sx={iconSx(theme)} />
                     </InputAdornment>
                   }
                 />
               }
               renderValue={(selected) => (
-                <Box sx={{ display: "flex", flexWrap: "wrap", gap: 0.5 }}>
+                <Box sx={daysSelectBox(theme)}>
                   {selected.map((value) => (
-                    <Box
-                      key={value}
-                      sx={{
-                        backgroundColor: theme.palette.primary.main,
-                        color: theme.palette.primary.contrastText,
-                        px: 1,
-                        py: 0.5,
-                        borderRadius: 1,
-                        fontSize: "clamp(0.625rem, 1vw, 0.75rem)",
-                        fontWeight: 500,
-                      }}
-                    >
+                    <Box key={value} sx={dayChip(theme)}>
                       {translateDayOptionsToSpanish(value)}
                     </Box>
                   ))}
@@ -230,18 +207,10 @@ const AddScheduleForm: React.FC<AddScheduleFormProps> = ({
                 },
               }}
             >
-              {DAYS_LIST.map((option) => (
-                <MenuItem key={option.value} value={option.value}>
-                  <Checkbox checked={formData.days.includes(option.value)} />
-                  <ListItemText
-                    primary={option.label}
-                    primaryTypographyProps={{
-                      sx: {
-                        fontWeight: 500,
-                        fontSize: "clamp(0.75rem, 1.25vw, 0.875rem)",
-                      },
-                    }}
-                  />
+              {DAYS_LIST.map((day) => (
+                <MenuItem key={day.value} value={day.value}>
+                  <Checkbox checked={formData.days.indexOf(day.value) > -1} />
+                  <ListItemText primary={translateDayOptionsToSpanish(day.value)} />
                 </MenuItem>
               ))}
             </Select>
@@ -262,109 +231,51 @@ const AddScheduleForm: React.FC<AddScheduleFormProps> = ({
         </Grid>
 
         <Grid item xs={12}>
-          <Box
-            sx={{
-              display: "flex",
-              alignItems: "center",
-              p: { xs: 1.5, sm: 2 },
-              backgroundColor: theme.palette.action.hover,
-              borderRadius: 1,
-              border: "1px solid",
-              borderColor: theme.palette.divider,
-            }}
-          >
-            <Box
-              sx={{ mr: { xs: 1, sm: 2 }, color: theme.palette.warning.main }}
-            >
-              <WarningAmberOutlinedIcon
-                sx={{ color: theme.palette.warning.main, mr: { xs: 1, sm: 2 } }}
-              />
+          <Box sx={infoBox(theme)}>
+            <Box sx={{ mr: { xs: 1, sm: 2 }, color: theme.palette.warning.main }}>
+              <WarningAmberOutlinedIcon sx={{ color: theme.palette.warning.main, mr: { xs: 1, sm: 2 } }} />
             </Box>
-            <FormGroup>
+            <Box>
               <FormControlLabel
                 control={
                   <Switch
                     checked={formData.specialSchedule}
                     onChange={(e) =>
-                      setFormData({
-                        ...formData,
-                        specialSchedule: e.target.checked,
-                      })
+                      setFormData({ ...formData, specialSchedule: e.target.checked })
                     }
+                    color="warning"
                   />
                 }
                 label={
                   <Box>
-                    <Typography
-                      variant="body1"
-                      sx={{
-                        fontWeight: 600,
-                        color: theme.palette.text.primary,
-                        fontSize: "clamp(0.875rem, 1.5vw, 1rem)",
-                      }}
-                    >
-                      {FORMS.ADD_SCHEDULE.SPECIAL_LABEL}
-                    </Typography>
-                    <Typography
-                      variant="caption"
-                      sx={{
-                        color: theme.palette.text.secondary,
-                        fontSize: "clamp(0.75rem, 1.25vw, 0.875rem)",
-                      }}
-                    >
-                      {FORMS.ADD_SCHEDULE.SPECIAL_DESC}
-                    </Typography>
+                    <Typography sx={infoTitle(theme)}>{FORMS.ADD_SCHEDULE.SPECIAL_LABEL}</Typography>
+                    <Typography sx={infoDesc(theme)}>{FORMS.ADD_SCHEDULE.SPECIAL_DESC}</Typography>
                   </Box>
                 }
               />
-            </FormGroup>
+            </Box>
           </Box>
         </Grid>
 
         <Grid item xs={12}>
-          <Box
-            sx={{
-              display: "flex",
-              flexDirection: { xs: "column", sm: "row" },
-              justifyContent: "space-between",
-              gap: { xs: 1, sm: 2 },
-              pt: 2,
-              borderTop: "1px solid",
-              borderColor: theme.palette.divider,
-            }}
-          >
+          <Box sx={actionsBox(theme)}>
             <Button
               variant="outlined"
               onClick={handleClearForm}
               startIcon={<CloseRoundedIcon />}
               fullWidth={isSmallScreen}
-              sx={{
-                minHeight: { xs: 44, sm: 48 },
-                fontSize: "clamp(0.75rem, 1.25vw, 0.875rem)",
-                order: { xs: 3, sm: 1 },
-              }}
+              sx={clearButton}
             >
               Limpiar
             </Button>
-            <Box
-              sx={{
-                display: "flex",
-                flexDirection: { xs: "column", sm: "row" },
-                gap: { xs: 1, sm: 2 },
-                width: { xs: "100%", sm: "auto" },
-                order: { xs: 1, sm: 2 },
-              }}
-            >
+            <Box sx={actionsInnerBox}>
               {onCancel && (
                 <Button
                   variant="outlined"
                   onClick={onCancel}
                   disabled={isLoading}
                   fullWidth={isSmallScreen}
-                  sx={{
-                    minHeight: { xs: 44, sm: 48 },
-                    fontSize: "clamp(0.75rem, 1.25vw, 0.875rem)",
-                  }}
+                  sx={cancelButton}
                 >
                   Cancelar
                 </Button>
@@ -375,15 +286,9 @@ const AddScheduleForm: React.FC<AddScheduleFormProps> = ({
                 disabled={!isFormValid || isLoading}
                 startIcon={<AddRoundedIcon />}
                 fullWidth={isSmallScreen}
-                sx={{
-                  minHeight: { xs: 44, sm: 48 },
-                  fontSize: "clamp(0.75rem, 1.25vw, 0.875rem)",
-                  fontWeight: 600,
-                  px: { xs: 2, sm: 4 },
-                  py: { xs: 1, sm: 1.5 },
-                }}
+                sx={submitButton}
               >
-                {isLoading ? FORMS.ADD_SCHEDULE.BUTTON_ADDING : FORMS.ADD_SCHEDULE.BUTTON_ADD}
+                Agregar
               </Button>
             </Box>
           </Box>

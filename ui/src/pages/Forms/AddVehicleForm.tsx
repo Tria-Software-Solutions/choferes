@@ -28,6 +28,21 @@ import { AdapterDateFns } from "@mui/x-date-pickers/AdapterDateFns";
 import { AutocompleteChangeReason, AutocompleteChangeDetails } from "@mui/material";
 
 import { es } from "date-fns/locale";
+import {
+  boxRoot,
+  gridContainer,
+  iconSx,
+  formControl,
+  infoBox,
+  infoIconBox,
+  infoTitle,
+  infoDesc,
+  actionsBox,
+  clearButton,
+  actionsInnerBox,
+  cancelButton,
+  submitButton,
+} from './AddVehicleForm.styles';
 
 interface AddVehicleFormProps {
   onSubmit: (vehicle: {
@@ -292,8 +307,8 @@ const AddVehicleForm: React.FC<AddVehicleFormProps> = ({
   };
 
   return (
-    <Box sx={{ width: "100%", p: 0 }}>
-      <Grid container spacing={3} sx={{ mt: 0 }}>
+    <Box sx={boxRoot}>
+      <Grid container spacing={3} sx={gridContainer}>
         <Grid item xs={12} sm={6}>
           <CustomTextField
             label={FORMS.ADD_VEHICLE.TICKET_LABEL}
@@ -304,11 +319,7 @@ const AddVehicleForm: React.FC<AddVehicleFormProps> = ({
             onChange={(e) => handleFieldChange("ticket", e.target.value)}
             error={errors.ticket !== ""}
             helperText={errors.ticket}
-            icon={
-              <ConfirmationNumberOutlinedIcon
-                sx={{ color: theme.palette.text.secondary }}
-              />
-            }
+            icon={<ConfirmationNumberOutlinedIcon sx={iconSx(theme)} />}
           />
         </Grid>
 
@@ -322,11 +333,7 @@ const AddVehicleForm: React.FC<AddVehicleFormProps> = ({
             onChange={handleLicensePlateChange}
             error={errors.licensePlate !== ""}
             helperText={errors.licensePlate}
-            icon={
-              <DirectionsCarOutlinedIcon
-                sx={{ color: theme.palette.text.secondary }}
-              />
-            }
+            icon={<DirectionsCarOutlinedIcon sx={iconSx(theme)} />}
           />
         </Grid>
 
@@ -368,9 +375,7 @@ const AddVehicleForm: React.FC<AddVehicleFormProps> = ({
                     startAdornment: (
                       <>
                         <InputAdornment position="start">
-                          <FactoryOutlinedIcon
-                            sx={{ color: theme.palette.text.secondary }}
-                          />
+                          <FactoryOutlinedIcon sx={iconSx(theme)} />
                         </InputAdornment>
                         {params.InputProps.startAdornment}
                       </>
@@ -420,9 +425,7 @@ const AddVehicleForm: React.FC<AddVehicleFormProps> = ({
                     startAdornment: (
                       <>
                         <InputAdornment position="start">
-                          <PaletteOutlinedIcon
-                            sx={{ color: theme.palette.text.secondary }}
-                          />
+                          <PaletteOutlinedIcon sx={iconSx(theme)} />
                         </InputAdornment>
                         {params.InputProps.startAdornment}
                       </>
@@ -435,8 +438,8 @@ const AddVehicleForm: React.FC<AddVehicleFormProps> = ({
         </Grid>
 
         <Grid item xs={12} sm={6}>
-          <Box sx={{ display: "flex", gap: 1 }}>
-            <FormControl variant="outlined" sx={{ minWidth: 90, flex: "0 0 90px" }}>
+          <Box sx={{ display: 'flex', gap: 1 }}>
+            <FormControl variant="outlined" sx={{ minWidth: 90, flex: '0 0 90px' }}>
               <Autocomplete
                 freeSolo
                 value={parkingPrefix}
@@ -468,13 +471,9 @@ const AddVehicleForm: React.FC<AddVehicleFormProps> = ({
               onChange={handleParkingLotChange}
               error={errors.parkingLot !== ""}
               helperText={errors.parkingLot}
-              icon={
-                <LocalParkingOutlinedIcon
-                  sx={{ color: theme.palette.text.secondary }}
-                />
-              }
+              icon={<LocalParkingOutlinedIcon sx={iconSx(theme)} />}
               InputProps={{
-                readOnly: parkingPrefix.value === "CE"
+                readOnly: parkingPrefix.value === 'CE',
               }}
             />
           </Box>
@@ -491,30 +490,8 @@ const AddVehicleForm: React.FC<AddVehicleFormProps> = ({
                 textField: {
                   fullWidth: true,
                   required: true,
-                  variant: "outlined",
-                  sx: {
-                    mb: 2,
-                    "& .MuiOutlinedInput-root": {
-                      borderRadius: 2,
-                      backgroundColor: "#ffffff",
-                      "&:hover .MuiOutlinedInput-notchedOutline": {
-                        borderColor: "#000000",
-                      },
-                      "&.Mui-focused .MuiOutlinedInput-notchedOutline": {
-                        borderColor: "#000000",
-                        borderWidth: 2,
-                      },
-                      "&.Mui-focused": {
-                        backgroundColor: "#ffffff",
-                        outline: "none",
-                        boxShadow: "none",
-                      },
-                      "& input": {
-                        outline: "none",
-                        boxShadow: "none",
-                      },
-                    },
-                  },
+                  variant: 'outlined',
+                  sx: formControl(theme),
                 },
               }}
             />
@@ -533,74 +510,44 @@ const AddVehicleForm: React.FC<AddVehicleFormProps> = ({
             onChange={(e) =>
               setFormData({ ...formData, notes: e.target.value })
             }
-            icon={
-              <EditNoteOutlinedIcon
-                sx={{ color: theme.palette.text.secondary }}
-              />
-            }
+            icon={<EditNoteOutlinedIcon sx={iconSx(theme)} />}
           />
         </Grid>
 
         <Grid item xs={12}>
-          <Box
-            sx={{
-              display: "flex",
-              alignItems: "center",
-              p: { xs: 1.5, sm: 2 },
-              backgroundColor: theme.palette.action.hover,
-              borderRadius: 1,
-              border: "1px solid",
-              borderColor: theme.palette.divider,
-            }}
-          >
-            <Box sx={{ mr: { xs: 1, sm: 2 }, color: theme.palette.info.main }}>
-              <InfoOutlinedIcon
-                sx={{ color: theme.palette.info.main, mr: { xs: 1, sm: 2 } }}
-              />
+          <Box sx={infoBox(theme)}>
+            <Box sx={infoIconBox(theme)}>
+              <InfoOutlinedIcon sx={{ ...iconSx(theme), ...infoIconBox(theme) }} />
             </Box>
             <Box>
-              <Box
-                sx={{
-                  fontWeight: 600,
-                  color: theme.palette.text.primary,
-                  fontSize: "clamp(0.75rem, 1.25vw, 0.875rem)",
-                  mb: 0.5,
-                }}
-              >
-                {FORMS.ADD_VEHICLE.INFO_TITLE}
-              </Box>
-              <Box
-                sx={{
-                  color: theme.palette.text.secondary,
-                  fontSize: "clamp(0.75rem, 1.25vw, 0.875rem)",
-                }}
-              >
+              <Box sx={infoTitle(theme)}>{FORMS.ADD_VEHICLE.INFO_TITLE}</Box>
+              <Box sx={infoDesc(theme)}>
                 {FORMS.ADD_VEHICLE.INFO_DESC}
                 <Box
                   component="span"
                   onClick={() => {
                     setFormData({
                       ...formData,
-                      licensePlate: "N/A",
-                      brand: "N/A",
-                      color: "N/A",
-                      parkingLot: "N/A",
-                      notes: "N/A",
+                      licensePlate: 'N/A',
+                      brand: 'N/A',
+                      color: 'N/A',
+                      parkingLot: 'N/A',
+                      notes: 'N/A',
                     });
                     setErrors({
-                      ticket: "",
-                      licensePlate: "",
-                      brand: "",
-                      color: "",
-                      parkingLot: "",
+                      ticket: '',
+                      licensePlate: '',
+                      brand: '',
+                      color: '',
+                      parkingLot: '',
                     });
                   }}
                   sx={{
                     color: theme.palette.primary.main,
-                    cursor: "pointer",
-                    textDecoration: "underline",
+                    cursor: 'pointer',
+                    textDecoration: 'underline',
                     fontWeight: 500,
-                    "&:hover": {
+                    '&:hover': {
                       color: theme.palette.primary.dark,
                     },
                   }}
@@ -613,49 +560,24 @@ const AddVehicleForm: React.FC<AddVehicleFormProps> = ({
         </Grid>
 
         <Grid item xs={12}>
-          <Box
-            sx={{
-              display: "flex",
-              flexDirection: { xs: "column", sm: "row" },
-              justifyContent: "space-between",
-              gap: { xs: 1, sm: 2 },
-              pt: 2,
-              borderTop: "1px solid",
-              borderColor: theme.palette.divider,
-            }}
-          >
+          <Box sx={actionsBox(theme)}>
             <Button
               variant="outlined"
               onClick={handleClearForm}
               startIcon={<CloseRoundedIcon />}
               fullWidth={isSmallScreen}
-              sx={{
-                minHeight: { xs: 44, sm: 48 },
-                fontSize: "clamp(0.75rem, 1.25vw, 0.875rem)",
-                order: { xs: 3, sm: 1 },
-              }}
+              sx={clearButton}
             >
               Limpiar
             </Button>
-            <Box
-              sx={{
-                display: "flex",
-                flexDirection: { xs: "column", sm: "row" },
-                gap: { xs: 1, sm: 2 },
-                width: { xs: "100%", sm: "auto" },
-                order: { xs: 1, sm: 2 },
-              }}
-            >
+            <Box sx={actionsInnerBox}>
               {onCancel && (
                 <Button
                   variant="outlined"
                   onClick={onCancel}
                   disabled={isLoading}
                   fullWidth={isSmallScreen}
-                  sx={{
-                    minHeight: { xs: 44, sm: 48 },
-                    fontSize: "clamp(0.75rem, 1.25vw, 0.875rem)",
-                  }}
+                  sx={cancelButton}
                 >
                   Cancelar
                 </Button>
@@ -666,13 +588,7 @@ const AddVehicleForm: React.FC<AddVehicleFormProps> = ({
                 disabled={!isFormValid() || isLoading}
                 startIcon={<AddRoundedIcon />}
                 fullWidth={isSmallScreen}
-                sx={{
-                  minHeight: { xs: 44, sm: 48 },
-                  fontSize: "clamp(0.75rem, 1.25vw, 0.875rem)",
-                  fontWeight: 600,
-                  px: { xs: 2, sm: 4 },
-                  py: { xs: 1, sm: 1.5 },
-                }}
+                sx={submitButton}
               >
                 {isLoading ? FORMS.ADD_VEHICLE.BUTTON_ADDING : FORMS.ADD_VEHICLE.BUTTON_ADD}
               </Button>

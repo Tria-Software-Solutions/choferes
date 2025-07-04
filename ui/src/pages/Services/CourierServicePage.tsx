@@ -52,6 +52,24 @@ import AddRoundedIcon from "@mui/icons-material/AddRounded";
 import DeleteOutlineIcon from "@mui/icons-material/DeleteOutline";
 import { NOTIFICATIONS } from "../../constants/constants";
 import LocalShippingIcon from "@mui/icons-material/LocalShipping";
+import {
+  courierHeaderBoxStyles,
+  courierTitleBoxStyles,
+  courierTitleStyles,
+  courierIconStyles,
+  courierDividerStyles,
+  exportSpeedDialBoxStyles,
+  loadingBoxStyles,
+  backdropStyles,
+  searchBarBoxStyles,
+  addButtonMobileStyles,
+  datePickerSx,
+  buttonGroupSx,
+  noCouriersBoxStyles,
+  noCouriersIconStyles,
+  deleteDialogPaperSx,
+  addDialogPaperSx,
+} from "./CourierServicePage.styles";
 
 // CourierServicePage component for managing courier services
 const CourierServicePage: React.FC = () => {
@@ -339,28 +357,20 @@ const CourierServicePage: React.FC = () => {
         display="flex"
         justifyContent="space-between"
         alignItems="center"
-        sx={{ mb: 3 }}
+        sx={courierHeaderBoxStyles}
       >
-        <Box display="flex" flexDirection="column" alignItems="flex-start" sx={{ mb: 2 }}>
+        <Box display="flex" flexDirection="column" alignItems="flex-start" sx={courierTitleBoxStyles}>
           <Typography
             variant={isSmallScreen ? "h5" : "h4"}
-            sx={{
-              display: 'flex',
-              alignItems: 'center',
-              fontFamily: "'Urbanist', sans-serif",
-              fontWeight: 800,
-              color: "#000000",
-              mb: 0.5,
-              gap: 1.5,
-            }}
+            sx={courierTitleStyles}
           >
-            <LocalShippingIcon fontSize={isSmallScreen ? "small" : "large"} sx={{ mr: 1, color: theme.palette.primary.main }} />
+            <LocalShippingIcon fontSize={isSmallScreen ? "small" : "large"} sx={courierIconStyles(theme)} />
             {PAGE_TITLE.COURIER_SERVICE}
           </Typography>
-          <Divider sx={{ width: 48, borderBottomWidth: 3, borderColor: theme.palette.primary.main, borderRadius: 2, mx: 'auto', mb: 0.5 }} />
+          <Divider sx={courierDividerStyles(theme)} />
         </Box>
         {/* Temporarily show export button without permission check */}
-        <Box sx={{ minHeight: 65 }}>
+        <Box sx={exportSpeedDialBoxStyles}>
           {filteredWeekCouriers.length > 0 && (
             <CustomSpeedDial
               actions={exportOptions}
@@ -373,16 +383,10 @@ const CourierServicePage: React.FC = () => {
       </Box>
       {isLoadingVehicles ? (
         <Box
-          sx={{
-            display: "flex",
-            justifyContent: "center",
-            alignItems: "center",
-            textAlign: "center",
-            paddingTop: "10%",
-          }}
+          sx={loadingBoxStyles}
         >
           <Backdrop
-            sx={(theme) => ({ color: "#fff", zIndex: theme.zIndex.drawer + 1 })}
+            sx={backdropStyles(theme)}
             open={isLoadingVehicles}
           >
             <CircularProgress />
@@ -397,7 +401,7 @@ const CourierServicePage: React.FC = () => {
             alignItems="center"
           >
             <Grid item xs={12} md={4}>
-              <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
+              <Box sx={searchBarBoxStyles}>
                 {filteredCouriers && (
                   <SearchBar
                     placeholder={COURIER_SERVICE_PAGE.SEARCH_PLACEHOLDER}
@@ -411,14 +415,7 @@ const CourierServicePage: React.FC = () => {
                   variant="contained"
                   color="primary"
                   onClick={handleOpenAddCourierModal}
-                  sx={{
-                    display: { xs: "flex", md: "none" },
-                    minWidth: "auto",
-                    width: 56,
-                    height: 56,
-                    borderRadius: "50%",
-                    p: 0,
-                  }}
+                  sx={addButtonMobileStyles}
                 >
                   <AddRoundedIcon />
                 </Button>
@@ -445,53 +442,16 @@ const CourierServicePage: React.FC = () => {
                           fullWidth: true,
                           required: true,
                           variant: "outlined",
-                          sx: {
-                            height: "56px",
-                            minWidth: "180px",
-                            "& .MuiOutlinedInput-root": {
-                              height: "56px",
-                              borderRadius: 2,
-                              backgroundColor: "#ffffff",
-                              "&:hover .MuiOutlinedInput-notchedOutline": {
-                                borderColor: "#000000",
-                              },
-                              "&.Mui-focused .MuiOutlinedInput-notchedOutline": {
-                                borderColor: "#000000",
-                                borderWidth: 2,
-                              },
-                              "&.Mui-focused": {
-                                backgroundColor: "#ffffff",
-                                outline: "none",
-                                boxShadow: "none",
-                              },
-                              "& input": {
-                                outline: "none",
-                                boxShadow: "none",
-                              },
-                            },
-                          },
+                          sx: datePickerSx,
                         },
                       }}
                       closeOnSelect
-                      onChange={(date) => handleDateChange(date)}
+                      onChange={handleDateChange}
                     />
                   </LocalizationProvider>
                   <ButtonGroup
                     variant="contained"
-                    sx={{
-                      height: '56px',
-                      width: 'auto',
-                      flexDirection: 'row',
-                      '& .MuiButton-root': {
-                        minWidth: 0,
-                        px: 2,
-                        py: 1.2,
-                        fontSize: '1rem',
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                      },
-                    }}
+                    sx={buttonGroupSx}
                   >
                     <Tooltip title={COURIER_SERVICE_PAGE.TOOLTIP_PREV_DAY} arrow>
                       <Button onClick={handlePreviousDate}>
@@ -559,17 +519,9 @@ const CourierServicePage: React.FC = () => {
             />
           ) : (
             <Box
-              sx={{
-                display: "flex",
-                flexDirection: "column",
-                justifyContent: "center",
-                alignItems: "center",
-                textAlign: "center",
-                paddingTop: "10%",
-                paddingBottom: "12%",
-              }}
+              sx={noCouriersBoxStyles}
             >
-              <ManageSearchIcon color="disabled" sx={{ fontSize: "65px" }} />
+              <ManageSearchIcon color="disabled" sx={noCouriersIconStyles} />
               <Typography variant="body1" color="textSecondary">
                 {capitalizeFirstLetter(
                   format(selectedDate, "EEEE dd 'de' MMMM 'de' yyyy", {
@@ -594,10 +546,7 @@ const CourierServicePage: React.FC = () => {
         confirmText={COURIER_SERVICE_PAGE.DIALOG_DELETE_CONFIRM}
         cancelText={COURIER_SERVICE_PAGE.DIALOG_DELETE_CANCEL}
         loading={isDeletingCourier}
-        paperSx={{
-          minWidth: { xs: "80vw", sm: 320 },
-          maxWidth: { xs: "90vw", sm: 400 },
-        }}
+        paperSx={deleteDialogPaperSx ?? {}}
         icon={<DeleteOutlineIcon color="error" />}
       />
       <DialogComponent
@@ -606,10 +555,7 @@ const CourierServicePage: React.FC = () => {
         title={COURIER_SERVICE_PAGE.DIALOG_ADD_TITLE}
         subtitle={COURIER_SERVICE_PAGE.DIALOG_ADD_SUBTITLE}
         hideActions
-        paperSx={{
-          minWidth: { xs: "90vw", sm: 500, md: 700 },
-          maxWidth: { xs: "98vw", sm: 700 },
-        }}
+        paperSx={addDialogPaperSx ?? {}}
       >
         <AddCourierForm
           onSubmit={handleCreateCourier}

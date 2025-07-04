@@ -1,0 +1,175 @@
+import { SxProps, Theme } from "@mui/material";
+
+export const rolesHeaderBoxStyles: SxProps<Theme> = {
+  mb: 3,
+};
+
+export const rolesTitleBoxStyles: SxProps<Theme> = {
+  mb: 2,
+};
+
+export const rolesTitleStyles: SxProps<Theme> = {
+  display: "flex",
+  alignItems: "center",
+  fontFamily: "'Urbanist', sans-serif",
+  fontWeight: 800,
+  color: "#000000",
+  mb: 0.5,
+  gap: 1.5,
+};
+
+export const rolesIconStyles = (theme: Theme): SxProps<Theme> => ({
+  mr: 1,
+  color: theme.palette.primary.main,
+});
+
+export const rolesDividerStyles = (theme: Theme): SxProps<Theme> => ({
+  width: 48,
+  borderBottomWidth: 3,
+  borderColor: theme.palette.primary.main,
+  borderRadius: 2,
+  mx: "auto",
+  mb: 0.5,
+});
+
+export const exportSpeedDialBoxStyles: SxProps<Theme> = {
+  minHeight: 65,
+};
+
+export const loadingBoxStyles: SxProps<Theme> = {
+  display: "flex",
+  justifyContent: "center",
+  alignItems: "center",
+  textAlign: "center",
+  paddingTop: "10%",
+};
+
+export const backdropStyles = (theme: Theme): SxProps<Theme> => ({
+  color: "#fff",
+  zIndex: theme.zIndex.drawer + 1,
+});
+
+export const searchBarSx: SxProps<Theme> = {
+  maxWidth: "100%",
+};
+
+export const datePickerSx: SxProps<Theme> = {
+  height: "56px",
+  minWidth: "180px",
+  "& .MuiOutlinedInput-root": {
+    height: "56px",
+    borderRadius: 2,
+    backgroundColor: "#ffffff",
+    "&:hover .MuiOutlinedInput-notchedOutline": {
+      borderColor: "#000000",
+    },
+    "&.Mui-focused .MuiOutlinedInput-notchedOutline": {
+      borderColor: "#000000",
+      borderWidth: 2,
+    },
+    "&.Mui-focused": {
+      backgroundColor: "#ffffff",
+      outline: "none",
+      boxShadow: "none",
+    },
+    "& input": {
+      outline: "none",
+      boxShadow: "none",
+    },
+  },
+};
+
+export const buttonGroupSx: SxProps<Theme> = {
+  height: "56px",
+  width: "auto",
+  flexDirection: "row",
+  "& .MuiButton-root": {
+    minWidth: 0,
+    px: 2,
+    py: 1.2,
+    fontSize: "1rem",
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+  },
+};
+
+export const noEmployeesBoxStyles: SxProps<Theme> = {
+  display: "flex",
+  flexDirection: "column",
+  justifyContent: "center",
+  alignItems: "center",
+  textAlign: "center",
+  paddingTop: "10%",
+  paddingBottom: "12%",
+};
+
+export const noEmployeesIconStyles: SxProps<Theme> = {
+  fontSize: "65px",
+};
+
+export const summaryDialogPaperSx: SxProps<Theme> = {
+  border: "2px solid #fff",
+  borderRadius: 3,
+};
+
+export const summaryDialogHeaderBoxStyles: SxProps<Theme> = {
+  background: (theme: Theme) => theme.palette.primary.main,
+  color: "#fff",
+  p: { xs: 3, sm: 4 },
+  borderTopLeftRadius: 2,
+  borderTopRightRadius: 2,
+  display: "flex",
+  alignItems: "center",
+  gap: 2,
+};
+
+export const summaryDialogCloseIconStyles: SxProps<Theme> = {
+  color: "#fff",
+};
+
+export const summaryTabPanelAvatarStyles = (theme: Theme, color: "success" | "info" | "warning" | "error"): SxProps<Theme> => {
+  const colorMap = {
+    success: theme.palette.success.light,
+    info: theme.palette.info.light,
+    warning: theme.palette.warning.light,
+    error: theme.palette.error.light,
+  };
+  return {
+    bgcolor: colorMap[color],
+    width: 56,
+    height: 56,
+  };
+};
+
+export const summaryInfoBoxStyles = (theme: Theme): SxProps<Theme> => ({
+  display: "flex",
+  alignItems: "center",
+  p: { xs: 1.5, sm: 2 },
+  backgroundColor: theme.palette.action.hover,
+  borderRadius: 1,
+  border: "1px solid",
+  borderColor: theme.palette.divider,
+});
+
+export const summaryInfoIconBoxStyles = (theme: Theme): SxProps<Theme> => ({
+  mr: { xs: 1, sm: 2 },
+  color: theme.palette.info.main,
+});
+
+export const summaryInfoIconStyles = (theme: Theme): SxProps<Theme> => ({
+  color: theme.palette.info.main,
+  mr: { xs: 1, sm: 2 },
+});
+
+export const summaryInfoTitleStyles = (theme: Theme): SxProps<Theme> => ({
+  fontWeight: 600,
+  color: theme.palette.text.primary,
+  mb: 0.5,
+  fontSize: "clamp(0.875rem, 1.5vw, 1rem)",
+});
+
+export const summaryInfoDescStyles = (theme: Theme): SxProps<Theme> => ({
+  color: theme.palette.text.secondary,
+  fontSize: "clamp(0.75rem, 1.25vw, 0.875rem)",
+}); 

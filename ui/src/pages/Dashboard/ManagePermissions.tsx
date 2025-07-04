@@ -9,10 +9,20 @@ import {
   CircularProgress,
   Grid,
   Typography,
+  useTheme,
 } from "@mui/material";
 import SearchBar from "../../components/SearchBar/SearchBar";
 import VpnKeyOutlinedIcon from "@mui/icons-material/VpnKeyOutlined";
 import { DASHBOARD_PERMISSIONS } from "../../constants/constants";
+import {
+  loadingBoxStyles,
+  backdropStyles,
+  searchBarSx,
+  permissionBoxStyles,
+  permissionIconBoxStyles,
+  permissionIconStyles,
+  noPermissionsBoxStyles,
+} from "./ManagePermissions.styles";
 
 // ManagePermissions page component for permission management in the dashboard
 const ManagePermissions: React.FC = () => {
@@ -24,6 +34,7 @@ const ManagePermissions: React.FC = () => {
     [],
   );
   const [filter, setFilter] = useState("");
+  const theme = useTheme();
 
   // Loads permissions data on mount
   useEffect(() => {
@@ -53,16 +64,10 @@ const ManagePermissions: React.FC = () => {
     <Box>
       {isLoadingPermissions ? (
         <Box
-          sx={{
-            display: "flex",
-            justifyContent: "center",
-            alignItems: "center",
-            textAlign: "center",
-            paddingTop: "10%",
-          }}
+          sx={loadingBoxStyles}
         >
           <Backdrop
-            sx={(theme) => ({ color: "#fff", zIndex: theme.zIndex.drawer + 1 })}
+            sx={backdropStyles(theme)}
             open={isLoadingPermissions}
           >
             <CircularProgress />
@@ -82,7 +87,7 @@ const ManagePermissions: React.FC = () => {
                   placeholder={DASHBOARD_PERMISSIONS.SEARCH_PLACEHOLDER}
                   value={filter}
                   onChange={handleFilterChange}
-                  sx={{ maxWidth: "100%" }}
+                  sx={searchBarSx ?? {}}
                   fullWidth
                 />
               )}
@@ -95,30 +100,13 @@ const ManagePermissions: React.FC = () => {
               {filteredPermissions.map((permission) => (
                 <Grid item xs={12} sm={6} md={3} lg={3} key={permission.id}>
                   <Box
-                    sx={{
-                      display: "flex",
-                      alignItems: "center",
-                      p: 1.2,
-                      borderRadius: 1,
-                      backgroundColor: "background.paper",
-                      border: "1px solid",
-                      borderColor: "divider",
-                      boxShadow: "none",
-                      cursor: "default",
-                      minHeight: 36,
-                    }}
+                    sx={permissionBoxStyles}
                   >
                     <Box
-                      sx={{
-                        mr: 1,
-                        color: "primary.main",
-                        fontSize: 18,
-                        display: "flex",
-                        alignItems: "center",
-                      }}
+                      sx={permissionIconBoxStyles}
                     >
                       <VpnKeyOutlinedIcon
-                        sx={{ color: "primary.main", fontSize: 22 }}
+                        sx={permissionIconStyles}
                       />
                     </Box>
                     <Typography
@@ -135,12 +123,7 @@ const ManagePermissions: React.FC = () => {
             </Grid>
           ) : (
             <Box
-              sx={{
-                display: "flex",
-                justifyContent: "center",
-                alignItems: "center",
-                textAlign: "center",
-              }}
+              sx={noPermissionsBoxStyles}
             >
               <Typography variant="h6" color="textSecondary">
                 {DASHBOARD_PERMISSIONS.NO_PERMISSIONS}
