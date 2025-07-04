@@ -1237,18 +1237,20 @@ const EditableTable = <T extends object>({
                     <TableCell className="tableCell" sx={{ borderRight: '1px solid #f0f0f0', borderBottom: '1px solid #f0f0f0', padding: '10px 16px', textAlign: 'center' }}>
                       {isUser && !isCurrentUser && ('isActive' in row) && hasDeletePermissions && (
                         <Tooltip title={row.isActive ? TABLE.DISABLE : TABLE.ENABLE} arrow>
-                          <Box>
-                            <IconButton
-                              color="secondary"
-                              onClick={() => handleOpenStatusDialog && handleOpenStatusDialog(row)}
-                            >
-                              {row.isActive ? (
-                                <ToggleOnIcon sx={{ color: 'success.main' }} />
-                              ) : (
-                                <ToggleOffIcon sx={{ color: 'grey.500' }} />
-                              )}
-                            </IconButton>
-                          </Box>
+                          <span>
+                            <Box>
+                              <IconButton
+                                color="secondary"
+                                onClick={() => handleOpenStatusDialog && handleOpenStatusDialog(row)}
+                              >
+                                {row.isActive ? (
+                                  <ToggleOnIcon sx={{ color: 'success.main' }} />
+                                ) : (
+                                  <ToggleOffIcon sx={{ color: 'grey.500' }} />
+                                )}
+                              </IconButton>
+                            </Box>
+                          </span>
                         </Tooltip>
                       )}
                     </TableCell>
@@ -1522,30 +1524,34 @@ const EditableTable = <T extends object>({
                         {editRowId === getRowId(row) ? (
                           <>
                             <Tooltip title={TABLE.SAVE} arrow>
-                              <Box>
-                                <IconButton
-                                  color="primary"
-                                  onClick={() =>
-                                    handleSaveClick &&
-                                    handleSaveClick(getRowId(row))
-                                  }
-                                  disabled={isSaveDisabled}
-                                >
-                                  <CheckCircleIcon />
-                                </IconButton>
-                              </Box>
+                              <span>
+                                <Box>
+                                  <IconButton
+                                    color="primary"
+                                    onClick={() =>
+                                      handleSaveClick &&
+                                      handleSaveClick(getRowId(row))
+                                    }
+                                    disabled={isSaveDisabled}
+                                  >
+                                    <CheckCircleIcon />
+                                  </IconButton>
+                                </Box>
+                              </span>
                             </Tooltip>
                             <Tooltip title={TABLE.CANCEL} arrow>
-                              <Box>
-                                <IconButton
-                                  color="primary"
-                                  onClick={() =>
-                                    handleCancelClick && handleCancelClick()
-                                  }
-                                >
-                                  <CancelIcon />
-                                </IconButton>
-                              </Box>
+                              <span>
+                                <Box>
+                                  <IconButton
+                                    color="primary"
+                                    onClick={() =>
+                                      handleCancelClick && handleCancelClick()
+                                    }
+                                  >
+                                    <CancelIcon />
+                                  </IconButton>
+                                </Box>
+                              </span>
                             </Tooltip>
                           </>
                         ) : (
@@ -1554,27 +1560,31 @@ const EditableTable = <T extends object>({
                               <>
                                 {isUser && isExpanded && onOpenPasswordModal && (
                                   <Tooltip title={TABLE.CHANGE_PASSWORD} arrow>
-                                    <Box>
-                                      <IconButton
-                                        color="primary"
-                                        onClick={() => onOpenPasswordModal && onOpenPasswordModal(getRowId(row))}
-                                      >
-                                        <LockResetIcon />
-                                      </IconButton>
-                                    </Box>
+                                    <span>
+                                      <Box>
+                                        <IconButton
+                                          color="primary"
+                                          onClick={() => onOpenPasswordModal && onOpenPasswordModal(getRowId(row))}
+                                        >
+                                          <LockResetIcon />
+                                        </IconButton>
+                                      </Box>
+                                    </span>
                                   </Tooltip>
                                 )}
                                 <Tooltip title={TABLE.EDIT} arrow>
-                                  <Box>
-                                    <IconButton
-                                      color="primary"
-                                      onClick={() =>
-                                        handleEditClick && handleEditClick(row)
-                                      }
-                                    >
-                                      <EditNoteIcon />
-                                    </IconButton>
-                                  </Box>
+                                  <span>
+                                    <Box>
+                                      <IconButton
+                                        color="primary"
+                                        onClick={() =>
+                                          handleEditClick && handleEditClick(row)
+                                        }
+                                      >
+                                        <EditNoteIcon />
+                                      </IconButton>
+                                    </Box>
+                                  </span>
                                 </Tooltip>
                               </>
                             )}
@@ -1585,35 +1595,39 @@ const EditableTable = <T extends object>({
                                   (!('isActive' in row)
                                     ? (
                                         <Tooltip title={TABLE.DELETE} arrow>
-                                          <Box>
-                                            <IconButton
-                                              color="error"
-                                              onClick={() =>
-                                                handleOpenDeleteDialog &&
-                                                handleOpenDeleteDialog(
-                                                  getRowId(row),
-                                                )
-                                              }
-                                            >
-                                              <DeleteForeverIcon />
-                                            </IconButton>
-                                          </Box>
+                                          <span>
+                                            <Box>
+                                              <IconButton
+                                                color="error"
+                                                onClick={() =>
+                                                  handleOpenDeleteDialog &&
+                                                  handleOpenDeleteDialog(
+                                                    getRowId(row),
+                                                  )
+                                                }
+                                              >
+                                                <DeleteForeverIcon />
+                                              </IconButton>
+                                            </Box>
+                                          </span>
                                         </Tooltip>
                                       )
                                     : null)
                                 ) : (
                                   <Tooltip title={TABLE.DELETE} arrow>
-                                    <Box>
-                                      <IconButton
-                                        color="error"
-                                        onClick={() =>
-                                          handleOpenDeleteDialog &&
-                                          handleOpenDeleteDialog(getRowId(row))
-                                        }
-                                      >
-                                        <DeleteForeverIcon />
-                                      </IconButton>
-                                    </Box>
+                                    <span>
+                                      <Box>
+                                        <IconButton
+                                          color="error"
+                                          onClick={() =>
+                                            handleOpenDeleteDialog &&
+                                            handleOpenDeleteDialog(getRowId(row))
+                                          }
+                                        >
+                                          <DeleteForeverIcon />
+                                        </IconButton>
+                                      </Box>
+                                    </span>
                                   </Tooltip>
                                 )}
                               </>
