@@ -28,6 +28,29 @@ import logo from "../../assets/images/logo.png";
 import { MenuItemProps } from "../Menu/MenuComponent";
 import "@fontsource/urbanist";
 import { Roles } from "../../enums/roles";
+import {
+  appBarStyles,
+  toolbarStyles,
+  logoBoxStyles,
+  logoImgStyles,
+  titleStyles,
+  clickableBoxStyles,
+  dashboardPopoverBoxStyles,
+  dashboardIconButtonStyles,
+  dashboardIconStyles,
+  notificationsIconButtonStyles,
+  dividerStyles,
+  userBoxStyles,
+  userNameStyles,
+  userEmailStyles,
+  userMenuIconButtonStyles,
+  userAvatarStyles,
+  mobileDividerStyles,
+  menuPaperStyles,
+  notificationsMenuPaperStyles,
+  dashboardNoLinksBoxStyles,
+  logoutMenuItemStyles
+} from "./AppBarComponent.styles";
 
 interface Link {
   label: string;
@@ -134,66 +157,21 @@ const AppBarComponent: React.FC<AppBarComponentProps> = ({
     <AppBar
       position="static"
       elevation={0}
-      sx={{
-        background: "linear-gradient(135deg, #000000 0%, #1a1a1a 100%)",
-        borderBottom: "1px solid rgba(255,255,255,0.1)",
-        backdropFilter: "blur(10px)",
-      }}
+      sx={appBarStyles}
     >
-      <Toolbar
-        sx={{
-          minHeight: { xs: "64px", md: "72px" },
-          px: { xs: 2, md: 3 },
-          justifyContent: "space-between",
-        }}
-      >
+      <Toolbar sx={toolbarStyles}>
         {/* Logo and Title */}
-        <Box
-          sx={{
-            display: "flex",
-            alignItems: "center",
-            cursor: "pointer",
-            transition: "all 0.3s ease",
-            "&:hover": {
-              transform: "scale(1.02)",
-            },
-          }}
-          onClick={() => navigate("/")}
-        >
-          <Box
-            sx={{
-              display: "flex",
-              alignItems: "center",
-              mr: 2,
-              p: 1,
-              borderRadius: 2,
-              backgroundColor: "rgba(255,255,255,0.1)",
-              backdropFilter: "blur(10px)",
-            }}
-          >
+        <Box sx={clickableBoxStyles} onClick={() => navigate("/")}> 
+          <Box sx={logoBoxStyles}>
             <img
               src={logo}
               alt="Logo"
-              style={{
-                width: "32px",
-                height: "auto",
-              }}
+              style={logoImgStyles}
             />
           </Box>
           <Typography
             variant="h5"
-            sx={{
-              fontFamily: "'Urbanist', sans-serif",
-              fontWeight: 800,
-              fontSize: { xs: "1.5rem", sm: "2rem", md: "1.5rem" },
-              lineHeight: 1.1,
-              letterSpacing: "0.04em",
-              background: "linear-gradient(45deg, #ffffff 30%, #f0f0f0 90%)",
-              backgroundClip: "text",
-              WebkitBackgroundClip: "text",
-              WebkitTextFillColor: "transparent",
-              display: { xs: "none", sm: "block" },
-            }}
+            sx={titleStyles}
           >
             {title}
           </Typography>
@@ -213,21 +191,9 @@ const AppBarComponent: React.FC<AppBarComponentProps> = ({
           >
             <IconButton
               onClick={handleDashboardMenuOpen}
-              sx={{
-                color: "#ffffff",
-                cursor: "pointer",
-                p: 1.5,
-                borderRadius: "50%",
-                minWidth: "56px",
-                height: "56px",
-                "&:hover": {
-                  backgroundColor: "rgba(255,255,255,0.1)",
-                  transform: "translateY(-2px)",
-                },
-                transition: "all 0.3s cubic-bezier(0.4, 0, 0.2, 1)",
-              }}
+              sx={dashboardIconButtonStyles(false)}
             >
-              <DashboardRoundedIcon sx={{ fontSize: "1.8rem" }} />
+              <DashboardRoundedIcon sx={dashboardIconStyles(false)} />
             </IconButton>
             <Popover
               open={Boolean(dashboardMenuAnchor)}
@@ -249,19 +215,10 @@ const AppBarComponent: React.FC<AppBarComponentProps> = ({
               keepMounted
             >
               <Box
-                sx={{
-                  mt: 2,
-                  display: "flex",
-                  flexDirection: "row",
-                  gap: 2,
-                  alignItems: "center",
-                  backgroundColor: "rgba(0,0,0,0.8)",
-                  p: 2,
-                  borderRadius: 2,
-                }}
+                sx={dashboardPopoverBoxStyles}
               >
                 {links.length === 0 ? (
-                  <Box sx={{ color: "white", p: 1 }}>
+                  <Box sx={dashboardNoLinksBoxStyles}>
                     {APPBAR_MENU.NO_LINKS}
                   </Box>
                 ) : (
@@ -277,38 +234,10 @@ const AppBarComponent: React.FC<AppBarComponentProps> = ({
                           handleDashboardMenuClose();
                           link.path && navigate(link.path);
                         }}
-                        sx={{
-                          color: "#ffffff",
-                          cursor: "pointer",
-                          p: 1.5,
-                          borderRadius: "50%",
-                          minWidth: "56px",
-                          height: "56px",
-                          backgroundColor: isActivePage(link.path || "")
-                            ? "rgba(255,255,255,0.25)"
-                            : "transparent",
-                          border: isActivePage(link.path || "")
-                            ? "2px solid rgba(255,255,255,0.6)"
-                            : "none",
-                          "&:hover": {
-                            backgroundColor: isActivePage(link.path || "")
-                              ? "rgba(255,255,255,0.35)"
-                              : "rgba(255,255,255,0.15)",
-                            transform: "translateY(-2px)",
-                          },
-                          transition: "all 0.3s ease",
-                        }}
+                        sx={dashboardIconButtonStyles(isActivePage(link.path || ""))}
                       >
                         {React.cloneElement(link.icon as React.ReactElement, {
-                          sx: {
-                            fontSize: "1.6rem",
-                            color: isActivePage(link.path || "")
-                              ? "#ffffff"
-                              : "#ffffff",
-                            filter: isActivePage(link.path || "")
-                              ? "drop-shadow(0 0 8px rgba(255,255,255,0.6))"
-                              : "none",
-                          },
+                          sx: dashboardIconStyles(isActivePage(link.path || "")),
                         })}
                       </IconButton>
                     </Tooltip>
@@ -328,17 +257,7 @@ const AppBarComponent: React.FC<AppBarComponentProps> = ({
                 <Tooltip title={APPBAR_MENU.NOTIFICATIONS} arrow>
                   <IconButton
                     onClick={handleNotificationsOpen}
-                    sx={{
-                      color: "#ffffff",
-                      backgroundColor: "rgba(255,255,255,0.1)",
-                      backdropFilter: "blur(10px)",
-                      border: "1px solid rgba(255,255,255,0.2)",
-                      "&:hover": {
-                        backgroundColor: "rgba(255,255,255,0.2)",
-                        transform: "scale(1.05)",
-                      },
-                      transition: "all 0.3s ease",
-                    }}
+                    sx={notificationsIconButtonStyles}
                   >
                     <Badge badgeContent={3} color="error">
                       <NotificationsRoundedIcon />
@@ -349,35 +268,25 @@ const AppBarComponent: React.FC<AppBarComponentProps> = ({
                 <Divider
                   orientation="vertical"
                   flexItem
-                  sx={{ mx: 1, borderColor: "rgba(255,255,255,0.2)" }}
+                  sx={dividerStyles}
                 />
               </>
             )}
 
             {/* Perfil del Usuario */}
-            <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
+            <Box sx={userBoxStyles}>
               <Box
-                sx={{
-                  textAlign: "right",
-                  display: { xs: "none", md: "block" },
-                }}
+                sx={{ textAlign: "right", display: { xs: "none", md: "block" } }}
               >
                 <Typography
                   variant="body2"
-                  sx={{
-                    color: "#ffffff",
-                    fontWeight: 600,
-                    lineHeight: 1.2,
-                  }}
+                  sx={userNameStyles}
                 >
                   {currentUser.firstName} {currentUser.lastName}
                 </Typography>
                 <Typography
                   variant="caption"
-                  sx={{
-                    color: "rgba(255,255,255,0.7)",
-                    fontSize: "0.75rem",
-                  }}
+                  sx={userEmailStyles}
                 >
                   {currentUser.email}
                 </Typography>
@@ -386,28 +295,10 @@ const AppBarComponent: React.FC<AppBarComponentProps> = ({
               <Tooltip title={APPBAR_MENU.USER_MENU} arrow>
                 <IconButton
                   onClick={handleUserMenuOpen}
-                  sx={{
-                    p: 0.5,
-                    border: "2px solid rgba(255,255,255,0.3)",
-                    backgroundColor: "rgba(255,255,255,0.1)",
-                    backdropFilter: "blur(10px)",
-                    "&:hover": {
-                      borderColor: "rgba(255,255,255,0.5)",
-                      backgroundColor: "rgba(255,255,255,0.2)",
-                      transform: "scale(1.05)",
-                    },
-                    transition: "all 0.3s ease",
-                  }}
+                  sx={userMenuIconButtonStyles}
                 >
                   <Avatar
-                    sx={{
-                      width: 40,
-                      height: 40,
-                      backgroundColor: "rgba(255,255,255,0.2)",
-                      color: "#ffffff",
-                      fontWeight: 600,
-                      fontSize: "1rem",
-                    }}
+                    sx={userAvatarStyles}
                   >
                     {getUserInitials()}
                   </Avatar>
@@ -420,7 +311,7 @@ const AppBarComponent: React.FC<AppBarComponentProps> = ({
                   <Divider
                     orientation="vertical"
                     flexItem
-                    sx={{ borderColor: "rgba(255,255,255,0.2)" }}
+                    sx={mobileDividerStyles}
                   />
                   <MenuComponent
                     buttonType="icon"
@@ -439,14 +330,7 @@ const AppBarComponent: React.FC<AppBarComponentProps> = ({
           open={Boolean(userMenuAnchor)}
           onClose={handleUserMenuClose}
           PaperProps={{
-            sx: {
-              mt: 1,
-              minWidth: 200,
-              backgroundColor: "#ffffff",
-              boxShadow: "0 8px 32px rgba(0,0,0,0.2)",
-              border: "1px solid rgba(0,0,0,0.1)",
-              borderRadius: 2,
-            },
+            sx: menuPaperStyles,
           }}
           transformOrigin={{ horizontal: "right", vertical: "top" }}
           anchorOrigin={{ horizontal: "right", vertical: "bottom" }}
@@ -464,7 +348,7 @@ const AppBarComponent: React.FC<AppBarComponentProps> = ({
               }}
               sx={
                 link.label === APPBAR_MENU.LOGOUT
-                  ? { color: theme.palette.error.main }
+                  ? logoutMenuItemStyles(theme)
                   : {}
               }
             >
@@ -485,14 +369,7 @@ const AppBarComponent: React.FC<AppBarComponentProps> = ({
           open={Boolean(notificationsAnchor)}
           onClose={handleNotificationsClose}
           PaperProps={{
-            sx: {
-              mt: 1,
-              minWidth: 300,
-              backgroundColor: "#ffffff",
-              boxShadow: "0 8px 32px rgba(0,0,0,0.2)",
-              border: "1px solid rgba(0,0,0,0.1)",
-              borderRadius: 2,
-            },
+            sx: notificationsMenuPaperStyles,
           }}
           transformOrigin={{ horizontal: "right", vertical: "top" }}
           anchorOrigin={{ horizontal: "right", vertical: "bottom" }}

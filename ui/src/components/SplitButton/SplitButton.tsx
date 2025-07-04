@@ -10,6 +10,7 @@ import {
   MenuItem,
 } from "@mui/material";
 import ArrowDropDownIcon from "@mui/icons-material/ArrowDropDown";
+import { buttonGroupStyles, popperStyles, growStyles, menuIconSpanStyles } from "./SplitButton.styles";
 
 interface Option {
   label?: string;
@@ -77,7 +78,7 @@ const SplitButton: React.FC<SplitButtonProps> = ({
 
   return (
     <React.Fragment>
-      <ButtonGroup variant="contained" ref={anchorRef} sx={{ height: "56px" }}>
+      <ButtonGroup variant="contained" ref={anchorRef} sx={buttonGroupStyles}>
         <Button onClick={handleClick} startIcon={buttonIcon}>
           {buttonText}
         </Button>
@@ -93,7 +94,7 @@ const SplitButton: React.FC<SplitButtonProps> = ({
         </Button>
       </ButtonGroup>
       <Popper
-        sx={{ zIndex: 2 }}
+        sx={popperStyles}
         open={open}
         anchorEl={anchorRef.current}
         role={undefined}
@@ -103,10 +104,7 @@ const SplitButton: React.FC<SplitButtonProps> = ({
         {({ TransitionProps, placement }) => (
           <Grow
             {...TransitionProps}
-            style={{
-              transformOrigin:
-                placement === "bottom" ? "center top" : "center bottom",
-            }}
+            style={growStyles(placement)}
           >
             <Paper>
               <ClickAwayListener onClickAway={handleClose}>
@@ -119,7 +117,7 @@ const SplitButton: React.FC<SplitButtonProps> = ({
                       onClick={() => handleMenuItemClick(index)}
                     >
                       {option.icon && (
-                        <span style={{ marginRight: 8 }}>{option.icon}</span>
+                        <span style={menuIconSpanStyles}>{option.icon}</span>
                       )}
                       {option.label}
                     </MenuItem>

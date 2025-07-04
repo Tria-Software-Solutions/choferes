@@ -30,7 +30,6 @@ import {
   Badge,
   Tooltip,
   TextField,
-  Button,
   ListSubheader,
   OutlinedInput,
   InputAdornment,
@@ -71,6 +70,34 @@ import StarOutlineOutlinedIcon from '@mui/icons-material/StarOutlineOutlined';
 import CalendarTodayIcon from '@mui/icons-material/CalendarToday';
 import CalendarMonthIcon from '@mui/icons-material/CalendarMonth';
 import DateRangeIcon from '@mui/icons-material/DateRange';
+import {
+  paperStyles,
+  stickyHeaderBoxStyles,
+  headerFlexBoxStyles,
+  tableContainerStyles,
+  tableHeadStyles,
+  employeeColumnCellStyles,
+  tableCellStyles,
+  boldTypographyStyles,
+  menuItemStyles,
+  listSubheaderStyles,
+  dividerStyles,
+  badgeStyles,
+  stackTotalHoursStyles,
+  totalHoursTypographyStyles,
+  tableRowBackground,
+  tableCellBackground,
+  employeeCellBoxStyles,
+  dialogPaperStyles,
+  dialogHeaderBoxStyles,
+  dialogCloseButtonStyles,
+  dialogContentBoxStyles,
+  dialogInfoBoxStyles,
+  dialogInfoIconBoxStyles,
+  dialogInfoTitleBoxStyles,
+  dialogInfoDescBoxStyles,
+  dialogTextFieldStyles,
+} from "./SelectorTable.styles";
 
 // SelectorTable component displays and manages employee schedules, hours worked, and summary data for different periods (weekly, biweekly, monthly).
 // Props:
@@ -279,50 +306,34 @@ const SelectorTable: React.FC<SelectorTableProps> = React.memo(
 
     return (
       <>
-        <Paper sx={{ width: "100%" }}>
-          <Box
-            sx={{
-              position: "sticky",
-              top: 0,
-              zIndex: 5,
-              backgroundColor: "#f0f2f5",
-              padding: isSmallScreen ? "8px" : "16px",
-              borderBottom: "1px solid #ddd",
-            }}
-          >
-            <Box
-              sx={{
-                display: "flex",
-                justifyContent: "center",
-                alignItems: "center",
-                gap: 2,
-              }}
-            >
+        <Paper sx={paperStyles}>
+          <Box sx={stickyHeaderBoxStyles(isSmallScreen)}>
+            <Box sx={headerFlexBoxStyles}>
               {selectedPeriod === "weekly" ? (
                 <div>
                   {hasMultipleYears(currentWeek) ? (
-                    <Typography variant="body2" fontWeight="bold">
+                    <Typography variant="body2" sx={boldTypographyStyles}>
                       {`${SELECTOR_TABLE.WEEKS} ${multiplePeriods.weekNumbers[1].weekNumber} / `}
                       {multiplePeriods.weekNumbers[0].weekNumber}
                     </Typography>
                   ) : (
                     <Typography
                       variant="body2"
-                      fontWeight="bold"
+                      sx={boldTypographyStyles}
                     >{`${SELECTOR_TABLE.WEEK} ${weekNumber}`}</Typography>
                   )}
                 </div>
               ) : selectedPeriod === "biweekly" ? (
                 <div>
                   {hasMultipleBiweeks(currentWeek) ? (
-                    <Typography variant="body2" fontWeight="bold">
+                    <Typography variant="body2" sx={boldTypographyStyles}>
                       {`${SELECTOR_TABLE.BIWEEKS} ${multiplePeriods.biweekNumbers[0].biweekNumber} / `}
                       {multiplePeriods.biweekNumbers[1].biweekNumber}
                     </Typography>
                   ) : (
                     <Typography
                       variant="body2"
-                      fontWeight="bold"
+                      sx={boldTypographyStyles}
                     >{`${SELECTOR_TABLE.BIWEEK} ${biweekNumber}`}</Typography>
                   )}
                 </div>
@@ -331,7 +342,7 @@ const SelectorTable: React.FC<SelectorTableProps> = React.memo(
                   {hasMultipleMonths(currentWeek) ? (
                     <Typography
                       variant="body2"
-                      fontWeight="bold"
+                      sx={boldTypographyStyles}
                     >{`${getMonthName(
                       multiplePeriods.months[0].month,
                     )} / ${getMonthName(
@@ -340,7 +351,7 @@ const SelectorTable: React.FC<SelectorTableProps> = React.memo(
                   ) : (
                     <Typography
                       variant="body2"
-                      fontWeight="bold"
+                      sx={boldTypographyStyles}
                     >{`${getMonthName(month)}`}</Typography>
                   )}
                 </div>
@@ -349,26 +360,14 @@ const SelectorTable: React.FC<SelectorTableProps> = React.memo(
           </Box>
           <TableContainer
             className="table-container"
-            sx={{ maxHeight: "65vh", overflowX: "auto" }}
+            sx={tableContainerStyles}
           >
             <Table stickyHeader aria-label="sticky table">
-              <TableHead
-                sx={{
-                  position: "sticky",
-                  top: 0,
-                  zIndex: 10,
-                }}
-              >
+              <TableHead sx={tableHeadStyles}>
                 <TableRow>
                   <TableCell
                     className="employee-column"
-                    sx={{
-                      padding: isSmallScreen ? "8px" : "16px",
-                      position: "sticky",
-                      left: 0,
-                      zIndex: 11,
-                      whiteSpace: "nowrap",
-                    }}
+                    sx={employeeColumnCellStyles(isSmallScreen)}
                   >
                     <TableSortLabel
                       direction={orderDirection}
@@ -385,11 +384,7 @@ const SelectorTable: React.FC<SelectorTableProps> = React.memo(
                     <TableCell
                       key={day}
                       align="center"
-                      sx={{
-                        padding: isSmallScreen ? "8px" : "16px",
-                        zIndex: 10,
-                        whiteSpace: "nowrap",
-                      }}
+                      sx={tableCellStyles(isSmallScreen)}
                     >
                       {`${translateDayToAbrevSpanish(
                         day as EnglishDayOfWeek,
@@ -403,13 +398,7 @@ const SelectorTable: React.FC<SelectorTableProps> = React.memo(
                       <TableCell />
                       <TableCell
                         align="center"
-                        sx={{
-                          padding: isSmallScreen ? "8px" : "16px",
-                          position: isSmallScreen ? "static" : "sticky",
-                          right: 0,
-                          zIndex: 3,
-                          whiteSpace: "nowrap",
-                        }}
+                        sx={tableCellStyles(isSmallScreen)}
                         colSpan={2}
                       >
                         <FormControl
@@ -521,28 +510,16 @@ const SelectorTable: React.FC<SelectorTableProps> = React.memo(
                 {paginatedEmployees.map((employee, rowIndex) => (
                   <TableRow
                     key={employee.id}
-                    sx={{
-                      backgroundColor: rowIndex % 2 === 0 ? "white" : "#f5f5f5",
-                    }}
+                    sx={tableRowBackground(rowIndex)}
                   >
                     <TableCell
-                      sx={{
-                        padding: isSmallScreen ? "8px" : "16px",
-                        position: "sticky",
-                        left: 0,
-                        zIndex: 2,
-                        backgroundColor:
-                          rowIndex % 2 === 0 ? "white" : "#f5f5f5",
-                      }}
+                      sx={Object.assign({}, employeeColumnCellStyles(isSmallScreen), tableCellBackground(rowIndex, false))}
                     >
                       <Box
                         display="flex"
                         alignItems="center"
                         justifyContent="space-between"
-                        sx={{
-                          whiteSpace: isSmallScreen ? "break-spaces" : "nowrap",
-                          gap: 1,
-                        }}
+                        sx={employeeCellBoxStyles(isSmallScreen)}
                       >
                         <Typography variant="body2">
                           {employee.firstName} {employee.lastName}
@@ -596,16 +573,7 @@ const SelectorTable: React.FC<SelectorTableProps> = React.memo(
                       return (
                         <TableCell
                           key={day}
-                          sx={{
-                            padding: isSmallScreen ? "8px" : "16px",
-                            backgroundColor:
-                              format(new Date(), "yyyy-MM-dd") ===
-                              format(new Date(date), "yyyy-MM-dd")
-                                ? "#e4f5ed"
-                                : rowIndex % 2 === 0
-                                  ? "white"
-                                  : "#f5f5f5",
-                          }}
+                          sx={tableCellBackground(rowIndex, format(new Date(), "yyyy-MM-dd") === format(new Date(date), "yyyy-MM-dd"))}
                         >
                           <FormControl fullWidth>
                             <Select
@@ -633,7 +601,7 @@ const SelectorTable: React.FC<SelectorTableProps> = React.memo(
                                 },
                               }}
                             >
-                              <ListSubheader sx={{ display: 'flex', alignItems: 'center', bgcolor: 'background.paper', fontWeight: 700, fontSize: '1rem', color: 'primary.main', py: 1 }}>
+                              <ListSubheader sx={listSubheaderStyles('primary.main')}>
                                 <LocationOnOutlinedIcon sx={{ mr: 1, color: 'primary.main' }} fontSize="small" />
                                 {SELECTOR_TABLE.LOCATIONS}
                               </ListSubheader>
@@ -644,19 +612,13 @@ const SelectorTable: React.FC<SelectorTableProps> = React.memo(
                                   <MenuItem
                                     key={option.id}
                                     value={option.label}
-                                    sx={{
-                                      fontWeight: 500,
-                                      fontSize: '0.98rem',
-                                      pl: 4,
-                                      py: 1.2,
-                                      borderBottom: '1px solid #f0f0f0',
-                                    }}
+                                    sx={menuItemStyles}
                                   >
                                     {option.label}
                                   </MenuItem>
                                 ))}
-                              <Divider sx={{ my: 1 }} />
-                              <ListSubheader sx={{ display: 'flex', alignItems: 'center', bgcolor: 'background.paper', fontWeight: 700, fontSize: '1rem', color: 'warning.main', py: 1 }}>
+                              <Divider sx={dividerStyles} />
+                              <ListSubheader sx={listSubheaderStyles('warning.main')}>
                                 <StarOutlineOutlinedIcon sx={{ mr: 1, color: 'warning.main' }} fontSize="small" />
                                 {SELECTOR_TABLE.SPECIAL_SCHEDULES}
                               </ListSubheader>
@@ -667,13 +629,7 @@ const SelectorTable: React.FC<SelectorTableProps> = React.memo(
                                   <MenuItem
                                     key={option.id}
                                     value={option.label}
-                                    sx={{
-                                      fontWeight: 500,
-                                      fontSize: '0.98rem',
-                                      pl: 4,
-                                      py: 1.2,
-                                      borderBottom: '1px solid #f0f0f0',
-                                    }}
+                                    sx={menuItemStyles}
                                   >
                                     {option.label}
                                   </MenuItem>
@@ -742,8 +698,8 @@ const SelectorTable: React.FC<SelectorTableProps> = React.memo(
                             backgroundColor: rowIndex % 2 === 0 ? "white" : "#f5f5f5",
                           }}
                         >
-                          <Stack direction="row" spacing={3.5} alignItems="center" justifyContent="center" sx={{ height: 1 }}>
-                            <Typography variant="body2" fontWeight={600} sx={{ minWidth: 48, textAlign: 'right' }}>
+                          <Stack direction="row" spacing={3.5} alignItems="center" justifyContent="center" sx={stackTotalHoursStyles}>
+                            <Typography variant="body2" fontWeight={600} sx={totalHoursTypographyStyles}>
                               {resultTotalHours(employee)} {SELECTOR_TABLE.HOURS}
                             </Typography>
                             <Tooltip title={SELECTOR_TABLE.OVERTIME_HOURS} arrow>
@@ -757,15 +713,7 @@ const SelectorTable: React.FC<SelectorTableProps> = React.memo(
                                       : "warning"
                                   }
                                   showZero
-                                  sx={{
-                                    '& .MuiBadge-badge': {
-                                      fontSize: '0.95rem',
-                                      minWidth: 22,
-                                      height: 22,
-                                      borderRadius: '50%',
-                                      boxShadow: 1,
-                                    },
-                                  }}
+                                  sx={badgeStyles}
                                 >
                                   <AccessTimeRoundedIcon sx={{ color: 'primary.main', fontSize: 28 }} />
                                 </Badge>
@@ -882,42 +830,27 @@ const SelectorTable: React.FC<SelectorTableProps> = React.memo(
             maxWidth="sm"
             fullWidth
             PaperProps={{
-              sx: {
-                border: "2px solid #fff",
-                borderRadius: 3,
-              },
+              sx: dialogPaperStyles,
             }}
           >
-            <Box
-              sx={{
-                background: theme.palette.primary.main,
-                color: "#fff",
-                p: { xs: 3, sm: 4 },
-                borderTopLeftRadius: 2,
-                borderTopRightRadius: 2,
-                display: "flex",
-                alignItems: "center",
-                gap: 2,
-              }}
-            >
+            <Box sx={dialogHeaderBoxStyles}>
               <Box>
                 <Typography variant="h5" fontWeight={700} color="#fff">
                   {SELECTOR_TABLE.ADJUST_HOURS}
                 </Typography>
                 <Typography variant="subtitle2" color="#fff">
-                  {openAdjustDialogEmployee.firstName}{" "}
-                  {openAdjustDialogEmployee.lastName}
+                  {openAdjustDialogEmployee.firstName} {openAdjustDialogEmployee.lastName}
                 </Typography>
               </Box>
               <Box flexGrow={1} />
               <IconButton
                 onClick={() => setOpenAdjustDialogEmployee(null)}
-                sx={{ color: "#fff" }}
+                sx={dialogCloseButtonStyles}
               >
                 <CloseRoundedIcon />
               </IconButton>
             </Box>
-            <Box sx={{ p: { xs: 2, sm: 3, md: 4 } }}>
+            <Box sx={dialogContentBoxStyles}>
               <Grid container spacing={3}>
                 <Grid item xs={12}>
                   <Typography variant="subtitle1" color="text.secondary" mb={1}>
@@ -958,7 +891,7 @@ const SelectorTable: React.FC<SelectorTableProps> = React.memo(
                     placeholder="0"
                     value={timeAdjustment}
                     onChange={(e) => setTimeAdjustment(Number(e.target.value))}
-                    sx={{ mt: 1, width: "100%", boxSizing: "border-box" }}
+                    sx={dialogTextFieldStyles}
                     inputProps={{ min: 0 }}
                     error={timeAdjustment < 0}
                     helperText={
@@ -976,120 +909,23 @@ const SelectorTable: React.FC<SelectorTableProps> = React.memo(
                   />
                 </Grid>
                 <Grid item xs={12}>
-                  <Box
-                    sx={{
-                      display: "flex",
-                      alignItems: "center",
-                      p: { xs: 1.5, sm: 2 },
-                      backgroundColor: theme.palette.action.hover,
-                      borderRadius: 1,
-                      border: "1px solid",
-                      borderColor: theme.palette.divider,
-                    }}
-                  >
-                    <Box
-                      sx={{
-                        mr: { xs: 1, sm: 2 },
-                        color: theme.palette.info.main,
-                      }}
-                    >
+                  <Box sx={dialogInfoBoxStyles}>
+                    <Box sx={dialogInfoIconBoxStyles}>
                       <InfoOutlinedIcon
                         sx={{
-                          color: theme.palette.info.main,
+                          color: 'info.main',
                           mr: { xs: 1, sm: 2 },
                         }}
                       />
                     </Box>
                     <Box>
-                      <Box
-                        sx={{
-                          fontWeight: 600,
-                          color: theme.palette.text.primary,
-                          mb: 0.5,
-                          fontSize: "clamp(0.875rem, 1.5vw, 1rem)",
-                        }}
-                      >
+                      <Box sx={dialogInfoTitleBoxStyles}>
                         {SELECTOR_TABLE.ADJUSTMENT_INFO}
                       </Box>
-                      <Box
-                        sx={{
-                          color: theme.palette.text.secondary,
-                          fontSize: "clamp(0.75rem, 1.25vw, 0.875rem)",
-                        }}
-                      >
+                      <Box sx={dialogInfoDescBoxStyles}>
                         {SELECTOR_TABLE.ADJUSTMENT_DESCRIPTION}
                       </Box>
                     </Box>
-                  </Box>
-                </Grid>
-                <Grid item xs={12}>
-                  <Box
-                    sx={{
-                      display: "flex",
-                      flexDirection: { xs: "column", sm: "row" },
-                      justifyContent: "space-between",
-                      gap: { xs: 1, sm: 2 },
-                      pt: 2,
-                      borderTop: "1px solid",
-                      borderColor: theme.palette.divider,
-                    }}
-                  >
-                    <Button
-                      variant="outlined"
-                      onClick={() => setOpenAdjustDialogEmployee(null)}
-                      fullWidth={isSmallScreen}
-                      sx={{
-                        minHeight: { xs: 44, sm: 48 },
-                        fontSize: "clamp(0.75rem, 1.25vw, 0.875rem)",
-                      }}
-                    >
-                      {SELECTOR_TABLE.CANCEL}
-                    </Button>
-                    <Button
-                      variant="contained"
-                      onClick={() => {
-                        handleAdjustTime(
-                          openAdjustDialogEmployee.id,
-                          "sum",
-                          timeAdjustment,
-                        );
-                        setOpenAdjustDialogEmployee(null);
-                      }}
-                      disabled={timeAdjustment <= 0}
-                      fullWidth={isSmallScreen}
-                      sx={{
-                        minHeight: { xs: 44, sm: 48 },
-                        fontSize: "clamp(0.75rem, 1.25vw, 0.875rem)",
-                        fontWeight: 600,
-                        px: { xs: 2, sm: 4 },
-                        py: { xs: 1, sm: 1.5 },
-                      }}
-                    >
-                      {SELECTOR_TABLE.ADD}
-                    </Button>
-                    <Button
-                      variant="contained"
-                      color="secondary"
-                      onClick={() => {
-                        handleAdjustTime(
-                          openAdjustDialogEmployee.id,
-                          "substract",
-                          timeAdjustment,
-                        );
-                        setOpenAdjustDialogEmployee(null);
-                      }}
-                      disabled={timeAdjustment <= 0}
-                      fullWidth={isSmallScreen}
-                      sx={{
-                        minHeight: { xs: 44, sm: 48 },
-                        fontSize: "clamp(0.75rem, 1.25vw, 0.875rem)",
-                        fontWeight: 600,
-                        px: { xs: 2, sm: 4 },
-                        py: { xs: 1, sm: 1.5 },
-                      }}
-                    >
-                      {SELECTOR_TABLE.SUBTRACT}
-                    </Button>
                   </Box>
                 </Grid>
               </Grid>

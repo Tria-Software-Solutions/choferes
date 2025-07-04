@@ -13,6 +13,19 @@ import LockIcon from "@mui/icons-material/Lock";
 import HomeIcon from "@mui/icons-material/Home";
 import SecurityIcon from "@mui/icons-material/Security";
 import { ERRORS } from "../constants/constants";
+import {
+  outerBoxStyles,
+  innerBoxStyles,
+  lockBoxStyles,
+  lockIconStyles,
+  securityIconStyles,
+  titleStyles,
+  subtitleStyles,
+  descriptionStyles,
+  actionsBoxStyles,
+  homeButtonStyles,
+  captionStyles
+} from "./Forbidden.styles";
 
 // Forbidden page component for displaying 403/unauthorized errors
 const Forbidden: React.FC = () => {
@@ -27,107 +40,36 @@ const Forbidden: React.FC = () => {
 
   return (
     <Container maxWidth="md">
-      <Box
-        display="flex"
-        flexDirection="column"
-        justifyContent="center"
-        alignItems="center"
-        minHeight="100vh"
-        textAlign="center"
-        px={3}
-      >
+      <Box sx={outerBoxStyles}>
         <Fade in timeout={800}>
           <Slide direction="up" in timeout={1000}>
-            <Box
-              sx={{
-                display: "flex",
-                flexDirection: "column",
-                alignItems: "center",
-                textAlign: "center",
-                maxHeight: "100vh",
-                py: { xs: 2, sm: 3 },
-              }}
-            >
-              <Box
-                sx={{
-                  position: "relative",
-                  display: "inline-block",
-                  mb: { xs: 2, sm: 3 },
-                }}
-              >
-                <LockIcon
-                  sx={{
-                    fontSize: { xs: 80, sm: 100, md: 120 },
-                    color: theme.palette.warning.main,
-                    filter: "drop-shadow(0 4px 8px rgba(0,0,0,0.1))",
-                  }}
-                  aria-label="Lock icon"
-                />
-                <SecurityIcon
-                  sx={{
-                    fontSize: { xs: 30, sm: 35, md: 40 },
-                    color: theme.palette.warning.dark,
-                    position: "absolute",
-                    top: { xs: -8, sm: -10 },
-                    right: { xs: -8, sm: -10 },
-                    filter: "drop-shadow(0 2px 4px rgba(0,0,0,0.1))",
-                  }}
-                  aria-label="Security icon"
-                />
+            <Box sx={innerBoxStyles}>
+              <Box sx={lockBoxStyles}>
+                <LockIcon sx={lockIconStyles(theme)} aria-label="Lock icon" />
+                <SecurityIcon sx={securityIconStyles(theme)} aria-label="Security icon" />
               </Box>
-
               <Typography
                 variant="h3"
                 component="h1"
-                fontWeight="bold"
-                sx={{
-                  background: `linear-gradient(45deg, ${theme.palette.warning.main}, ${theme.palette.warning.dark})`,
-                  backgroundClip: "text",
-                  WebkitBackgroundClip: "text",
-                  WebkitTextFillColor: "transparent",
-                  mb: { xs: 1, sm: 2 },
-                  textShadow: "0 2px 4px rgba(0,0,0,0.1)",
-                  fontSize: { xs: "2rem", sm: "2.5rem", md: "3rem" },
-                }}
+                sx={titleStyles(theme)}
               >
                 {ERRORS.ERROR_403_TITLE}
               </Typography>
-
               <Typography
                 variant="h5"
                 color="text.primary"
-                fontWeight="medium"
-                sx={{
-                  mb: { xs: 1, sm: 2 },
-                  fontSize: { xs: "1.1rem", sm: "1.25rem", md: "1.5rem" },
-                }}
+                sx={subtitleStyles}
               >
                 {ERRORS.ERROR_403_SUBTITLE}
               </Typography>
-
               <Typography
                 variant="body1"
                 color="text.secondary"
-                sx={{
-                  mb: { xs: 2, sm: 3, md: 4 },
-                  lineHeight: 1.6,
-                  fontSize: { xs: "0.875rem", sm: "1rem" },
-                  maxWidth: 500,
-                }}
+                sx={descriptionStyles}
               >
                 {ERRORS.ERROR_403_DESCRIPTION}
               </Typography>
-
-              <Box
-                sx={{
-                  display: "flex",
-                  flexDirection: { xs: "column", sm: "row" },
-                  gap: { xs: 1, sm: 2 },
-                  justifyContent: "center",
-                  flexWrap: "wrap",
-                  width: "100%",
-                }}
-              >
+              <Box sx={actionsBoxStyles}>
                 <Button
                   variant="contained"
                   color="warning"
@@ -135,28 +77,16 @@ const Forbidden: React.FC = () => {
                   startIcon={<HomeIcon />}
                   onClick={handleGoHome}
                   fullWidth={isSmallScreen}
-                  sx={{
-                    minHeight: { xs: 44, sm: 48 },
-                    fontSize: "clamp(0.75rem, 1.25vw, 0.875rem)",
-                    fontWeight: 600,
-                    px: { xs: 2, sm: 4 },
-                    py: { xs: 1, sm: 1.5 },
-                  }}
+                  sx={homeButtonStyles}
                   aria-label={ERRORS.GO_HOME}
                 >
                   {ERRORS.GO_HOME}
                 </Button>
               </Box>
-
               <Typography
                 variant="caption"
                 color="text.disabled"
-                sx={{
-                  mt: { xs: 2, sm: 3, md: 4 },
-                  display: "block",
-                  opacity: 0.7,
-                  fontSize: { xs: "0.75rem", sm: "0.875rem" },
-                }}
+                sx={captionStyles}
               >
                 {ERRORS.ERROR_403_CONTACT}
               </Typography>

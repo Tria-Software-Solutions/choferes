@@ -10,6 +10,15 @@ import {
   ListItemText,
   useTheme,
 } from "@mui/material";
+import {
+  iconButtonStyles,
+  textButtonStyles,
+  buttonStyles,
+  menuPaperStyles,
+  menuItemStyles,
+  subMenuPaperStyles,
+  listItemTextStyles
+} from "./MenuComponent.styles";
 
 export interface MenuItemProps {
   text: string;
@@ -66,16 +75,7 @@ const MenuComponent: React.FC<MenuComponentProps> = ({
       {buttonType === "icon" ? (
         <IconButton
           color="inherit"
-          sx={{
-            height: "40px",
-            border: `1px solid ${theme.palette.divider}`,
-            borderRadius: theme.shape.borderRadius,
-            transition: "all 0.3s ease",
-            "&:hover": {
-              backgroundColor: theme.palette.action.hover,
-              transform: "translateY(-1px)",
-            },
-          }}
+          sx={iconButtonStyles(theme)}
           aria-controls={open ? "generic-menu" : undefined}
           aria-haspopup="true"
           aria-expanded={open ? "true" : undefined}
@@ -85,15 +85,7 @@ const MenuComponent: React.FC<MenuComponentProps> = ({
         </IconButton>
       ) : buttonType === "text" ? (
         <Button
-          sx={{
-            height: "40px",
-            color: theme.palette.primary.contrastText,
-            transition: "all 0.3s ease",
-            "&:hover": {
-              backgroundColor: "rgba(255,255,255,0.1)",
-              transform: "translateY(-1px)",
-            },
-          }}
+          sx={textButtonStyles(theme)}
           aria-controls={open ? "generic-menu" : undefined}
           aria-haspopup="true"
           aria-expanded={open ? "true" : undefined}
@@ -103,16 +95,7 @@ const MenuComponent: React.FC<MenuComponentProps> = ({
         </Button>
       ) : (
         <Button
-          sx={{
-            height: "40px",
-            border: `1px solid ${theme.palette.divider}`,
-            borderRadius: theme.shape.borderRadius,
-            transition: "all 0.3s ease",
-            "&:hover": {
-              backgroundColor: theme.palette.action.hover,
-              transform: "translateY(-1px)",
-            },
-          }}
+          sx={buttonStyles(theme)}
           aria-controls={open ? "generic-menu" : undefined}
           aria-haspopup="true"
           aria-expanded={open ? "true" : undefined}
@@ -127,13 +110,7 @@ const MenuComponent: React.FC<MenuComponentProps> = ({
         open={open}
         onClose={handleClose}
         PaperProps={{
-          sx: {
-            mt: 1.5,
-            borderTopLeftRadius: 0,
-            borderTopRightRadius: 0,
-            boxShadow: theme.shadows[8],
-            border: `1px solid ${theme.palette.divider}`,
-          },
+          sx: menuPaperStyles(theme),
         }}
       >
         {menuItems.map((item, index) => (
@@ -144,18 +121,13 @@ const MenuComponent: React.FC<MenuComponentProps> = ({
                 if (!item.subMenuItems) handleClose();
               }}
               onMouseEnter={item.subMenuItems ? handleSubMenuClick : undefined}
-              sx={{
-                transition: "all 0.2s ease",
-                "&:hover": {
-                  backgroundColor: theme.palette.action.hover,
-                },
-              }}
+              sx={menuItemStyles}
             >
               {item.icon && <ListItemIcon>{item.icon}</ListItemIcon>}
               <ListItemText
                 primary={item.text}
                 primaryTypographyProps={{
-                  sx: { fontWeight: 500 },
+                  sx: listItemTextStyles,
                 }}
               />
               {item.subMenuItems && (
@@ -169,22 +141,14 @@ const MenuComponent: React.FC<MenuComponentProps> = ({
                 open={openSubMenu}
                 onClose={handleClose}
                 PaperProps={{
-                  sx: {
-                    boxShadow: theme.shadows[8],
-                    border: `1px solid ${theme.palette.divider}`,
-                  },
+                  sx: subMenuPaperStyles(theme),
                 }}
               >
                 {item.subMenuItems.map((subItem, subIndex) => (
                   <MenuItem
                     key={subIndex}
                     onClick={subItem.onClick}
-                    sx={{
-                      transition: "all 0.2s ease",
-                      "&:hover": {
-                        backgroundColor: theme.palette.action.hover,
-                      },
-                    }}
+                    sx={menuItemStyles}
                   >
                     {subItem.icon && (
                       <ListItemIcon>{subItem.icon}</ListItemIcon>
@@ -192,7 +156,7 @@ const MenuComponent: React.FC<MenuComponentProps> = ({
                     <ListItemText
                       primary={subItem.text}
                       primaryTypographyProps={{
-                        sx: { fontWeight: 500 },
+                        sx: listItemTextStyles,
                       }}
                     />
                   </MenuItem>

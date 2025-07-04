@@ -12,6 +12,18 @@ import {
 } from "@mui/material";
 import { Close as CloseIcon } from "@mui/icons-material";
 import { DIALOG } from "../../constants/constants";
+import {
+  dialogPaperStyles,
+  headerBoxStyles,
+  iconBoxStyles,
+  closeButtonStyles,
+  dialogContentStyles,
+  messageTypographyStyles,
+  customActionsBoxStyles,
+  dialogActionsStyles,
+  cancelButtonStyles,
+  confirmButtonStyles
+} from "./DialogComponent.styles";
 
 export type DialogType = "delete" | "warning" | "info" | "success";
 
@@ -108,44 +120,18 @@ const DialogComponent: React.FC<ConfirmationDialogProps> = ({
       maxWidth="sm"
       fullWidth
       PaperProps={{
-        sx: {
-          border: "2px solid #fff",
-          borderRadius: 3,
-          minWidth: 400,
-          maxWidth: 500,
-          boxShadow: 3,
-          bgcolor: "background.paper",
-          ...paperSx,
-        },
+        sx: dialogPaperStyles(paperSx),
       }}
     >
       {header ? (
         header
       ) : (
         <Box
-          sx={{
-            background: theme.palette.primary.main,
-            color: theme.palette.primary.contrastText,
-            display: "flex",
-            alignItems: "center",
-            gap: 2,
-            px: 3,
-            py: 2,
-            borderTopLeftRadius: 12,
-            borderTopRightRadius: 12,
-          }}
+          sx={headerBoxStyles(theme)}
         >
           {icon && (
             <Box
-              sx={{
-                background: theme.palette.primary.contrastText,
-                borderRadius: "50%",
-                width: 40,
-                height: 40,
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-              }}
+              sx={iconBoxStyles(theme)}
             >
               {icon}
             </Box>
@@ -161,20 +147,20 @@ const DialogComponent: React.FC<ConfirmationDialogProps> = ({
             )}
           </Box>
           <Box flexGrow={1} />
-          <IconButton onClick={onClose} sx={{ color: "inherit" }}>
+          <IconButton onClick={onClose} sx={closeButtonStyles}>
             <CloseIcon />
           </IconButton>
         </Box>
       )}
 
-      <DialogContent sx={{ pt: 4, pb: 2, marginTop: "10px" }}>
+      <DialogContent sx={dialogContentStyles}>
         {children ? (
           children
         ) : (
           <Typography
             variant="body1"
             color="text.secondary"
-            sx={{ lineHeight: 1.6 }}
+            sx={messageTypographyStyles}
           >
             {message}
           </Typography>
@@ -183,24 +169,17 @@ const DialogComponent: React.FC<ConfirmationDialogProps> = ({
 
       {/* Custom actions if provided */}
       {actions ? (
-        <Box sx={{ px: 3, pb: 3 }}>{actions}</Box>
+        <Box sx={customActionsBoxStyles}>{actions}</Box>
       ) : (
         !hideActions && (
           <DialogActions
-            sx={{
-              gap: 2,
-              flexDirection: isSmallScreen ? "column" : "row",
-            }}
+            sx={dialogActionsStyles(isSmallScreen)}
           >
             <Button
               onClick={onClose}
               variant="outlined"
               fullWidth={isSmallScreen}
-              sx={{
-                minWidth: isSmallScreen ? "100%" : 120,
-                py: 1.5,
-                fontWeight: 600,
-              }}
+              sx={cancelButtonStyles(isSmallScreen)}
               disabled={loading}
             >
               {cancelText || DIALOG.CANCEL}
@@ -211,11 +190,7 @@ const DialogComponent: React.FC<ConfirmationDialogProps> = ({
                 variant="contained"
                 color={getConfirmButtonColor()}
                 fullWidth={isSmallScreen}
-                sx={{
-                  minWidth: isSmallScreen ? "100%" : 120,
-                  py: 1.5,
-                  fontWeight: 600,
-                }}
+                sx={confirmButtonStyles(isSmallScreen)}
                 disabled={loading}
               >
                 {confirmText || getDefaultConfirmText()}

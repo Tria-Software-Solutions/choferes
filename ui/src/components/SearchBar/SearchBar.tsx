@@ -5,6 +5,7 @@ import IconButton from "@mui/material/IconButton";
 import SearchIcon from "@mui/icons-material/Search";
 import ClearRoundedIcon from "@mui/icons-material/ClearRounded";
 import { SEARCH_BAR } from "../../constants/constants";
+import { textFieldStyles, searchIconStyles, clearIconStyles } from "./SearchBar.styles";
 
 interface SearchBarProps {
   value: string;
@@ -43,39 +44,11 @@ const SearchBar: React.FC<SearchBarProps> = ({
       value={value}
       onChange={onChange}
       fullWidth={fullWidth}
-      sx={{
-        mb: 2,
-        ...sx,
-        "& .MuiOutlinedInput-root": {
-          borderRadius: 2,
-          backgroundColor: "#ffffff",
-          transition: "all 0.3s ease",
-          "& fieldset": {
-            borderColor: "#e0e0e0",
-            borderWidth: "2px",
-          },
-          "&:hover .MuiOutlinedInput-notchedOutline": {
-            borderColor: "#000000",
-          },
-          "&.Mui-focused .MuiOutlinedInput-notchedOutline": {
-            borderColor: "#000000",
-            borderWidth: 2,
-          },
-          "&.Mui-focused": {
-            backgroundColor: "#ffffff",
-            outline: "none",
-            boxShadow: "none",
-          },
-          "& input": {
-            outline: "none",
-            boxShadow: "none",
-          },
-        },
-      }}
+      sx={textFieldStyles(sx)}
       InputProps={{
         startAdornment: (
           <InputAdornment position="start">
-            <SearchIcon sx={{ color: "#666666" }} />
+            <SearchIcon sx={searchIconStyles} />
           </InputAdornment>
         ),
         endAdornment: value ? (
@@ -86,7 +59,7 @@ const SearchBar: React.FC<SearchBarProps> = ({
               edge="end"
               size="small"
             >
-              <ClearRoundedIcon sx={{ fontSize: "20px" }} />
+              <ClearRoundedIcon sx={clearIconStyles} />
             </IconButton>
           </InputAdornment>
         ) : null,
