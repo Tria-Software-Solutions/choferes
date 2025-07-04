@@ -713,14 +713,18 @@ const RolesPage: React.FC = () => {
                       </Button>
                     </Tooltip>
                     <Tooltip title={ROLES_PAGE.TOOLTIP_NEXT_WEEK} arrow>
-                      <Button disabled={!isValidDateForSelect(new Date(getCurrentWeekDates(weekOffset + 1)[0].isoDate))} onClick={handleNextWeek}>
-                        <ArrowForwardIosRoundedIcon />
-                      </Button>
+                      <span style={{ display: 'inline-block' }}>
+                        <Button disabled={!isValidDateForSelect(new Date(getCurrentWeekDates(weekOffset + 1)[0].isoDate))} onClick={handleNextWeek}>
+                          <ArrowForwardIosRoundedIcon />
+                        </Button>
+                      </span>
                     </Tooltip>
                     <Tooltip title={ROLES_PAGE.TOOLTIP_CURRENT_WEEK} arrow>
-                      <Button disabled={weekOffset === 0} onClick={handleCurrentWeek}>
-                        <CalendarTodayRoundedIcon />
-                      </Button>
+                      <span style={{ display: 'inline-block' }}>
+                        <Button disabled={weekOffset === 0} onClick={handleCurrentWeek}>
+                          <CalendarTodayRoundedIcon />
+                        </Button>
+                      </span>
                     </Tooltip>
                   </ButtonGroup>
                 </Box>
