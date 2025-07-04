@@ -12,7 +12,7 @@ import {
 import SearchOffIcon from "@mui/icons-material/SearchOff";
 import HomeIcon from "@mui/icons-material/Home";
 import ExploreIcon from "@mui/icons-material/Explore";
-import { ERRORS } from "../constants/constants";
+import ERRORS from "../constants/errors.constants";
 import {
   outerBoxStyles,
   innerBoxStyles,

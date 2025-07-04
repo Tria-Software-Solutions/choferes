@@ -11,7 +11,7 @@ import {
   useMediaQuery,
 } from "@mui/material";
 import { Close as CloseIcon } from "@mui/icons-material";
-import { DIALOG } from "../../constants/constants";
+import DIALOG from "../../constants/dialog.constants";
 import {
   dialogPaperStyles,
   headerBoxStyles,

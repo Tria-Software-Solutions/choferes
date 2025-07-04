@@ -19,7 +19,8 @@ import {
   Container,
 } from "@mui/material";
 import { useAppNotifications } from "../../components/Snackbar/SnackbarWrapper";
-import { PAGE_TITLE, SETTINGS_PAGE } from "../../constants/constants";
+import PAGE_TITLE from "../../constants/pageTitle.constants";
+import MANAGEMENT from "../../constants/management.constants";
 import SettingsIcon from "@mui/icons-material/Settings";
 import Visibility from "@mui/icons-material/Visibility";
 import VisibilityOff from "@mui/icons-material/VisibilityOff";
@@ -139,7 +140,7 @@ const Settings: React.FC = () => {
 
     const user = await getUserByEmail(value);
     if (user && user.username !== editFields.username) {
-      setInfoError(SETTINGS_PAGE.EMAIL_EXISTS);
+      setInfoError(MANAGEMENT.EMAIL_EXISTS);
     } else {
       setInfoError(null);
     }
@@ -160,7 +161,7 @@ const Settings: React.FC = () => {
 
     const user = await getUserByUsername(value);
     if (user && user.email !== editFields.email) {
-      setInfoError(SETTINGS_PAGE.USERNAME_EXISTS);
+      setInfoError(MANAGEMENT.USERNAME_EXISTS);
     } else {
       setInfoError(null);
     }
@@ -186,9 +187,9 @@ const Settings: React.FC = () => {
       } else {
         throw new Error("Current User is null");
       }
-      showNotification(SETTINGS_PAGE.UPDATE_SUCCESS);
+      showNotification(MANAGEMENT.UPDATE_SUCCESS);
     } catch (error) {
-      showNotification(SETTINGS_PAGE.UPDATE_ERROR);
+      showNotification(MANAGEMENT.UPDATE_ERROR);
     }
   };
 
@@ -244,9 +245,9 @@ const Settings: React.FC = () => {
         newPassword: "",
         confirmNewPassword: "",
       });
-      showNotification(SETTINGS_PAGE.PASSWORD_UPDATE_SUCCESS);
+      showNotification(MANAGEMENT.PASSWORD_UPDATE_SUCCESS);
     } catch (error) {
-      showNotification(SETTINGS_PAGE.PASSWORD_UPDATE_ERROR);
+      showNotification(MANAGEMENT.PASSWORD_UPDATE_ERROR);
     }
   };
 
@@ -285,7 +286,7 @@ const Settings: React.FC = () => {
               fontSize: { xs: "1.25rem", sm: "1.5rem" },
             }}
           >
-            {SETTINGS_PAGE.PERSONAL_INFO_TITLE}
+            {MANAGEMENT.PERSONAL_INFO_TITLE}
           </Typography>
           <Typography
             variant="body2"
@@ -295,7 +296,7 @@ const Settings: React.FC = () => {
               fontSize: { xs: "0.875rem", sm: "1rem" },
             }}
           >
-            {SETTINGS_PAGE.PERSONAL_INFO_DESC}
+            {MANAGEMENT.PERSONAL_INFO_DESC}
           </Typography>
 
           <Grid container spacing={{ xs: 1.5, sm: 2 }}>
@@ -402,7 +403,7 @@ const Settings: React.FC = () => {
                   fontSize: "clamp(0.875rem, 1.5vw, 1rem)",
                 }}
               >
-                {SETTINGS_PAGE.RECOMMENDATION_TITLE}
+                {MANAGEMENT.RECOMMENDATION_TITLE}
               </Box>
               <Box
                 sx={{
@@ -410,7 +411,7 @@ const Settings: React.FC = () => {
                   fontSize: "clamp(0.75rem, 1.25vw, 0.875rem)",
                 }}
               >
-                {SETTINGS_PAGE.RECOMMENDATION_DESC}
+                {MANAGEMENT.RECOMMENDATION_DESC}
               </Box>
             </Box>
           </Box>
@@ -438,7 +439,7 @@ const Settings: React.FC = () => {
               onClick={handleSaveChanges}
               disabled={!isEditFormValid || !!infoError}
             >
-              {SETTINGS_PAGE.SAVE_CHANGES}
+              {MANAGEMENT.SAVE_CHANGES}
             </Button>
           </Box>
         </Grid>
@@ -472,7 +473,7 @@ const Settings: React.FC = () => {
               fontSize: { xs: "1.25rem", sm: "1.5rem" },
             }}
           >
-            {SETTINGS_PAGE.PASSWORD_TITLE}
+            {MANAGEMENT.PASSWORD_TITLE}
           </Typography>
           <Typography
             variant="body2"
@@ -482,13 +483,13 @@ const Settings: React.FC = () => {
               fontSize: { xs: "0.875rem", sm: "1rem" },
             }}
           >
-            {SETTINGS_PAGE.PASSWORD_DESC}
+            {MANAGEMENT.PASSWORD_DESC}
           </Typography>
 
           <Grid container spacing={{ xs: 1.5, sm: 2 }}>
             <Grid item xs={12}>
               <CustomTextField
-                label={SETTINGS_PAGE.NEW_PASSWORD_LABEL}
+                label={MANAGEMENT.NEW_PASSWORD_LABEL}
                 name="newPassword"
                 type={showNewPassword ? "text" : "password"}
                 value={passwordFields.newPassword}
@@ -508,7 +509,7 @@ const Settings: React.FC = () => {
             </Grid>
             <Grid item xs={12}>
               <CustomTextField
-                label={SETTINGS_PAGE.CONFIRM_NEW_PASSWORD_LABEL}
+                label={MANAGEMENT.CONFIRM_NEW_PASSWORD_LABEL}
                 name="confirmNewPassword"
                 type={showConfirmNewPassword ? "text" : "password"}
                 value={passwordFields.confirmNewPassword}
@@ -563,7 +564,7 @@ const Settings: React.FC = () => {
                   fontSize: "clamp(0.875rem, 1.5vw, 1rem)",
                 }}
               >
-                {SETTINGS_PAGE.SECURITY_TIP_TITLE}
+                {MANAGEMENT.SECURITY_TIP_TITLE}
               </Box>
               <Box
                 sx={{
@@ -571,7 +572,7 @@ const Settings: React.FC = () => {
                   fontSize: "clamp(0.75rem, 1.25vw, 0.875rem)",
                 }}
               >
-                {SETTINGS_PAGE.SECURITY_TIP_DESC}
+                {MANAGEMENT.SECURITY_TIP_DESC}
               </Box>
             </Box>
           </Box>
@@ -599,7 +600,7 @@ const Settings: React.FC = () => {
               onClick={handleChangePassword}
               disabled={!isPasswordFormValid}
             >
-              {SETTINGS_PAGE.CHANGE_PASSWORD}
+              {MANAGEMENT.CHANGE_PASSWORD}
             </Button>
           </Box>
         </Grid>

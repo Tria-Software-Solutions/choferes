@@ -33,7 +33,9 @@ import {
   exportToPDF,
 } from "../../utils/export";
 import { translateDayOptionsToSpanish } from "../../utils/string";
-import { PAGE_TITLE, PERMISSIONS, SCHEDULES_PAGE } from "../../constants/constants";
+import PAGE_TITLE from "../../constants/pageTitle.constants";
+import PERMISSIONS from "../../constants/permissions.constants";
+import MANAGEMENT from "../../constants/management.constants";
 import EditCalendarIcon from "@mui/icons-material/EditCalendar";
 import DownloadRoundedIcon from "@mui/icons-material/DownloadRounded";
 import CloseRoundedIcon from "@mui/icons-material/CloseRounded";
@@ -319,7 +321,7 @@ const SchedulesPage: React.FC = () => {
               <Box sx={searchBarBoxStyles}>
                 {filteredSchedules && (
                   <SearchBar
-                    placeholder={SCHEDULES_PAGE.SEARCH_PLACEHOLDER}
+                    placeholder={MANAGEMENT.SEARCH_PLACEHOLDER}
                     value={filter}
                     onChange={handleFilterChange}
                     sx={{ flex: 1 }}
@@ -349,7 +351,7 @@ const SchedulesPage: React.FC = () => {
                     onClick={handleOpenAddModal}
                     sx={addButtonDesktopStyles}
                   >
-                    {SCHEDULES_PAGE.ADD}
+                    {MANAGEMENT.ADD}
                   </Button>
                 </Box>
               </Grid>
@@ -384,7 +386,7 @@ const SchedulesPage: React.FC = () => {
             >
               <ManageSearchIcon color="disabled" sx={noSchedulesIconStyles} />
               <Typography variant="h6" color="textSecondary">
-                {SCHEDULES_PAGE.NO_SCHEDULES}
+                {MANAGEMENT.NO_SCHEDULES}
               </Typography>
             </Box>
           )}
@@ -394,11 +396,11 @@ const SchedulesPage: React.FC = () => {
         open={openDeleteDialog}
         onClose={handleCloseDeleteDialog}
         onConfirm={handleDelete}
-        title={SCHEDULES_PAGE.DIALOG_DELETE_TITLE}
-        message={SCHEDULES_PAGE.DIALOG_DELETE_MESSAGE}
+        title={MANAGEMENT.DIALOG_DELETE_TITLE}
+        message={MANAGEMENT.DIALOG_DELETE_MESSAGE}
         type="delete"
-        confirmText={SCHEDULES_PAGE.DIALOG_DELETE_CONFIRM}
-        cancelText={SCHEDULES_PAGE.DIALOG_DELETE_CANCEL}
+        confirmText={MANAGEMENT.DIALOG_DELETE_CONFIRM}
+        cancelText={MANAGEMENT.DIALOG_DELETE_CANCEL}
         loading={isDeletingSchedule}
         paperSx={deleteDialogPaperSx ?? {}}
         icon={<DeleteOutlineIcon color="error" />}
@@ -406,8 +408,8 @@ const SchedulesPage: React.FC = () => {
       <DialogComponent
         open={openAddScheduleModal}
         onClose={handleCloseAddModal}
-        title={SCHEDULES_PAGE.DIALOG_ADD_TITLE}
-        subtitle={SCHEDULES_PAGE.DIALOG_ADD_SUBTITLE}
+        title={MANAGEMENT.DIALOG_ADD_TITLE}
+        subtitle={MANAGEMENT.DIALOG_ADD_SUBTITLE}
         hideActions
         paperSx={addDialogPaperSx ?? {}}
       >

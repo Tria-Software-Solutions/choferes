@@ -14,7 +14,9 @@ import generateSecret from "../../utils/generateSecret";
 import ContentCopyIcon from "@mui/icons-material/ContentCopy";
 import Visibility from "@mui/icons-material/Visibility";
 import VisibilityOff from "@mui/icons-material/VisibilityOff";
-import { DASHBOARD_USERS, NOTIFICATIONS, FORMS } from "../../constants/constants";
+import FORMS from "../../constants/forms.constants";
+import NOTIFICATIONS from "../../constants/notifications.constants";
+import MANAGEMENT from "../../constants/management.constants";
 import { useDispatch } from "react-redux";
 import type { AppDispatch } from "../../store/store";
 import {
@@ -130,17 +132,17 @@ const PasswordChangeForm: React.FC<PasswordChangeFormProps> = ({
   return (
     <Box component="form" onSubmit={handleSubmit} sx={formBox}>
       <Typography variant="body2" color="textSecondary" sx={subtitle}>
-        {DASHBOARD_USERS.DIALOG_PASSWORD_SUBTITLE}
+        {MANAGEMENT.DIALOG_PASSWORD_SUBTITLE}
       </Typography>
       <Stack>
         <CustomTextField
-          label={DASHBOARD_USERS.DIALOG_PASSWORD_NEW}
+          label={MANAGEMENT.DIALOG_PASSWORD_NEW}
           type={showNewPassword ? "text" : "password"}
           variant="outlined"
           fullWidth
           value={fields.newPassword}
           onChange={(e) => handleFieldChange("newPassword", e.target.value)}
-          placeholder={DASHBOARD_USERS.DIALOG_PASSWORD_NEW_PLACEHOLDER}
+          placeholder={MANAGEMENT.DIALOG_PASSWORD_NEW_PLACEHOLDER}
           InputProps={{
             endAdornment: (
               <InputAdornment position="end">
@@ -155,7 +157,7 @@ const PasswordChangeForm: React.FC<PasswordChangeFormProps> = ({
           }}
         />
         <CustomTextField
-          label={DASHBOARD_USERS.DIALOG_PASSWORD_CONFIRM}
+          label={MANAGEMENT.DIALOG_PASSWORD_CONFIRM}
           type={showConfirmNewPassword ? "text" : "password"}
           variant="outlined"
           fullWidth
@@ -163,7 +165,7 @@ const PasswordChangeForm: React.FC<PasswordChangeFormProps> = ({
           onChange={(e) =>
             handleFieldChange("confirmNewPassword", e.target.value)
           }
-          placeholder={DASHBOARD_USERS.DIALOG_PASSWORD_CONFIRM_PLACEHOLDER}
+          placeholder={MANAGEMENT.DIALOG_PASSWORD_CONFIRM_PLACEHOLDER}
           InputProps={{
             endAdornment: (
               <InputAdornment position="end">
@@ -235,7 +237,7 @@ const PasswordChangeForm: React.FC<PasswordChangeFormProps> = ({
             fullWidth
             disabled={loading}
           >
-            {DASHBOARD_USERS.DIALOG_PASSWORD_CANCEL}
+            {MANAGEMENT.DIALOG_PASSWORD_CANCEL}
           </Button>
           <Button
             variant="contained"
@@ -243,7 +245,7 @@ const PasswordChangeForm: React.FC<PasswordChangeFormProps> = ({
             disabled={loading}
             fullWidth
           >
-            {DASHBOARD_USERS.DIALOG_PASSWORD_CHANGE}
+            {MANAGEMENT.DIALOG_PASSWORD_CHANGE}
           </Button>
         </Box>
       </Stack>

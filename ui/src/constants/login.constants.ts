@@ -1,0 +1,22 @@
+const LOGIN = {
+  IDENTIFIER_LABEL: "Correo o usuario",
+  PASSWORD_LABEL: "Contraseña",
+  LOADING: "Ingresando...",
+  SUBMIT: "Ingresar",
+  NO_ACCOUNT: "¿No tienes cuenta?",
+  REGISTER_LINK: "Regístrate aquí",
+  EMAIL_OR_USERNAME: "Correo o usuario",
+  EMAIL_OR_USERNAME_REQUIRED: "El correo o usuario es requerido",
+  PASSWORD: "Contraseña",
+  LOGIN: "Iniciar sesión",
+  LOGGING_IN: "Ingresando...",
+  PERSONAL_INFO: "Información personal",
+  PERSONAL_INFO_DESCRIPTION: "Actualiza tus datos personales aquí.",
+  FIRST_NAME: "Nombre",
+  LAST_NAME: "Apellido",
+  EMAIL: "Correo electrónico",
+  USERNAME: "Usuario",
+  PASSWORD_REQUIRED: "La contraseña es requerida",
+  REGISTER_ERROR: "Error al registrarse",
+};
+export default LOGIN; 

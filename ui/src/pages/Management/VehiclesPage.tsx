@@ -41,7 +41,10 @@ import {
   exportToPDF,
 } from "../../utils/export";
 import { capitalizeFirstLetter } from "../../utils/string";
-import { PAGE_TITLE, PERMISSIONS, VEHICLES_PAGE, NOTIFICATIONS } from "../../constants/constants";
+import PAGE_TITLE from "../../constants/pageTitle.constants";
+import PERMISSIONS from "../../constants/permissions.constants";
+import NOTIFICATIONS from "../../constants/notifications.constants";
+import MANAGEMENT from "../../constants/management.constants";
 import DirectionsCarFilledIcon from "@mui/icons-material/DirectionsCarFilled";
 import DownloadRoundedIcon from "@mui/icons-material/DownloadRounded";
 import ArrowBackIosNewRoundedIcon from "@mui/icons-material/ArrowBackIosNewRounded";
@@ -442,7 +445,7 @@ const VehiclesPage: React.FC = () => {
               <Box sx={searchBarBoxStyles}>
                 {filteredVehicles && (
                   <SearchBar
-                    placeholder={VEHICLES_PAGE.SEARCH_PLACEHOLDER}
+                    placeholder={MANAGEMENT.VEHICLES_PAGE.SEARCH_PLACEHOLDER}
                     value={filter}
                     onChange={handleFilterChange}
                     sx={{ flex: 1 }}
@@ -472,7 +475,7 @@ const VehiclesPage: React.FC = () => {
                 <Box display="flex" alignItems="center" justifyContent="flex-start" gap={1}>
                   <LocalizationProvider dateAdapter={AdapterDateFns} adapterLocale={es}>
                     <DatePicker
-                      label={VEHICLES_PAGE.DATE_PICKER_LABEL}
+                      label={MANAGEMENT.VEHICLES_PAGE.DATE_PICKER_LABEL}
                       value={selectedDate || null}
                       maxDate={new Date()}
                       views={["year", "month", "day"]}
@@ -493,17 +496,17 @@ const VehiclesPage: React.FC = () => {
                     variant="contained"
                     sx={buttonGroupSx}
                   >
-                    <Tooltip title={VEHICLES_PAGE.TOOLTIP_PREV_DAY} arrow>
+                    <Tooltip title={MANAGEMENT.VEHICLES_PAGE.TOOLTIP_PREV_DAY} arrow>
                       <Button onClick={handlePreviousDate}>
                         <ArrowBackIosNewRoundedIcon />
                       </Button>
                     </Tooltip>
-                    <Tooltip title={VEHICLES_PAGE.TOOLTIP_NEXT_DAY} arrow>
+                    <Tooltip title={MANAGEMENT.VEHICLES_PAGE.TOOLTIP_NEXT_DAY} arrow>
                       <Button disabled={isTodayOrFuture(selectedDate)} onClick={handleNextDate}>
                         <ArrowForwardIosRoundedIcon />
                       </Button>
                     </Tooltip>
-                    <Tooltip title={VEHICLES_PAGE.TOOLTIP_CURRENT_DAY} arrow>
+                    <Tooltip title={MANAGEMENT.VEHICLES_PAGE.TOOLTIP_CURRENT_DAY} arrow>
                       <Button disabled={isTodayOrFuture(selectedDate)} onClick={handleCurrentDate}>
                         <CalendarTodayRoundedIcon />
                       </Button>
@@ -517,7 +520,7 @@ const VehiclesPage: React.FC = () => {
                     onClick={handleOpenAddVehicleModal}
                     sx={addButtonDesktopStyles}
                   >
-                    {VEHICLES_PAGE.ADD}
+                    {MANAGEMENT.VEHICLES_PAGE.ADD}
                   </Button>
                 )}
               </Box>
@@ -568,7 +571,7 @@ const VehiclesPage: React.FC = () => {
                 )}
               </Typography>
               <Typography variant="h6" color="textSecondary">
-                {VEHICLES_PAGE.NO_VEHICLES}
+                {MANAGEMENT.VEHICLES_PAGE.NO_VEHICLES}
               </Typography>
             </Box>
           )}
@@ -578,11 +581,11 @@ const VehiclesPage: React.FC = () => {
         open={openDeleteDialog}
         onClose={handleCloseDeleteDialog}
         onConfirm={handleDelete}
-        title={VEHICLES_PAGE.DIALOG_DELETE_TITLE}
-        message={VEHICLES_PAGE.DIALOG_DELETE_MESSAGE}
+        title={MANAGEMENT.VEHICLES_PAGE.DIALOG_DELETE_TITLE}
+        message={MANAGEMENT.VEHICLES_PAGE.DIALOG_DELETE_MESSAGE}
         type="delete"
-        confirmText={VEHICLES_PAGE.DIALOG_DELETE_CONFIRM}
-        cancelText={VEHICLES_PAGE.DIALOG_DELETE_CANCEL}
+        confirmText={MANAGEMENT.VEHICLES_PAGE.DIALOG_DELETE_CONFIRM}
+        cancelText={MANAGEMENT.VEHICLES_PAGE.DIALOG_DELETE_CANCEL}
         loading={isDeletingVehicle}
         paperSx={deleteDialogPaperSx ?? {}}
         icon={<DeleteOutlineIcon color="error" />}
@@ -590,8 +593,8 @@ const VehiclesPage: React.FC = () => {
       <DialogComponent
         open={openAddVehicleModal}
         onClose={handleCloseAddVehicleModal}
-        title={VEHICLES_PAGE.DIALOG_ADD_TITLE}
-        subtitle={VEHICLES_PAGE.DIALOG_ADD_SUBTITLE}
+        title={MANAGEMENT.VEHICLES_PAGE.DIALOG_ADD_TITLE}
+        subtitle={MANAGEMENT.VEHICLES_PAGE.DIALOG_ADD_SUBTITLE}
         hideActions
         paperSx={addDialogPaperSx ?? {}}
       >

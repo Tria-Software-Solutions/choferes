@@ -18,7 +18,8 @@ import {
   Switch,
 } from "@mui/material";
 import { Schedule } from "../../models/Schedule";
-import { DAYS_LIST, FORMS } from "../../constants/constants";
+import FORMS from "../../constants/forms.constants";
+import DAYS_LIST from "../../constants/days.constants";
 import { translateDayOptionsToSpanish } from "../../utils/string";
 import AddRoundedIcon from "@mui/icons-material/AddRounded";
 import CloseRoundedIcon from "@mui/icons-material/CloseRounded";
