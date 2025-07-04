@@ -404,7 +404,7 @@ const VehiclesPage: React.FC = () => {
             sx={vehiclesTitleStyles}
           >
             <DirectionsCarFilledIcon fontSize={isSmallScreen ? "small" : "large"} sx={vehiclesIconStyles(theme)} />
-            {PAGE_TITLE.VEHICLES}
+            {isSmallScreen ? PAGE_TITLE.VEHICLES_SIMPLIFIED : PAGE_TITLE.VEHICLES}
           </Typography>
           <Divider sx={vehiclesDividerStyles(theme)} />
         </Box>
@@ -514,6 +514,7 @@ const VehiclesPage: React.FC = () => {
                   </ButtonGroup>
                 </Box>
                 {userPermissions.includes(PERMISSIONS.CREATE_VEHICLES) && (
+                  !isSmallScreen && (
                   <Button
                     variant="contained"
                     startIcon={<AddRoundedIcon />}
@@ -522,6 +523,7 @@ const VehiclesPage: React.FC = () => {
                   >
                     {MANAGEMENT.VEHICLES_PAGE.ADD}
                   </Button>
+                  )
                 )}
               </Box>
             </Grid>

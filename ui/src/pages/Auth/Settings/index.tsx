@@ -254,22 +254,21 @@ const Settings: React.FC = () => {
   return (
     <Container maxWidth="lg" sx={{ py: { xs: 2, sm: 3, md: 4 } }}>
       <Box
-        sx={{
-          display: "flex",
-          alignItems: "center",
-          mb: { xs: 2, sm: 3, md: 4 },
-        }}
+        display="flex"
+        justifyContent="space-between"
+        alignItems="center"
+        sx={{ mb: 3 }}
       >
-        <SettingsIcon
-          sx={{ fontSize: { xs: 28, sm: 32 }, mr: { xs: 1.5, sm: 2 } }}
-        />
-        <Typography
-          variant="h4"
-          fontWeight={700}
-          sx={{ fontSize: { xs: "1.5rem", sm: "2rem", md: "2.125rem" } }}
-        >
-          {PAGE_TITLE.SETTINGS}
-        </Typography>
+        <Box display="flex" flexDirection="column" alignItems="flex-start" sx={{ mb: 2 }}>
+          <Typography
+            variant={isSmallScreen ? "h5" : "h4"}
+            sx={{ display: "flex", alignItems: "center", fontFamily: "'Urbanist', sans-serif", fontWeight: 800, color: "#000000", mb: 0.5, gap: 1.5 }}
+          >
+            <SettingsIcon fontSize={isSmallScreen ? "small" : "large"} sx={{ mr: 1, color: theme.palette.primary.main }} />
+            {isSmallScreen ? PAGE_TITLE.SETTING_SIMPLIFIED : PAGE_TITLE.SETTINGS}
+          </Typography>
+          <Divider sx={{ width: 48, borderBottomWidth: 3, borderColor: theme.palette.primary.main, borderRadius: 2, mx: "auto", mb: 0.5 }} />
+        </Box>
       </Box>
 
       <Grid

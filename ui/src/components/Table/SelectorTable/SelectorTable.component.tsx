@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useEffect, useMemo, useState, useRef } from "react";
 import PropTypes from "prop-types";
 import { useNavigate } from "react-router-dom";
 import { Employee } from "../../../models/Employee";
@@ -174,6 +174,10 @@ const SelectorTableComponent: React.FC<SelectorTableProps> = React.memo(
     const theme = useTheme();
     const isSmallScreen = useMediaQuery(theme.breakpoints.down("sm"));
 
+    const tableContainerRef = useRef<HTMLDivElement>(null);
+    const tableHeadRef = useRef<HTMLTableSectionElement>(null);
+    const paginationRef = useRef<HTMLDivElement>(null);
+
     // Adjusts rows per page based on screen size
     useEffect(() => {
       if (isSmallScreen) {
@@ -182,6 +186,24 @@ const SelectorTableComponent: React.FC<SelectorTableProps> = React.memo(
         setRowsPerPage(25);
       }
     }, [isSmallScreen]);
+
+    useEffect(() => {
+      function calculateRowsPerPage() {
+        const maxHeight = window.innerHeight * 0.6; // 60vh
+        const headHeight = tableHeadRef.current ? tableHeadRef.current.getBoundingClientRect().height : 56;
+        const paginationHeight = paginationRef.current ? paginationRef.current.getBoundingClientRect().height : 64;
+        const extra = 24; // Buffer for borders/margins
+        const availableHeight = maxHeight - headHeight - paginationHeight - extra;
+        const rowHeight = 48;
+        let rows = Math.floor(availableHeight / rowHeight);
+        rows = Math.max(3, Math.min(100, rows));
+        setRowsPerPage(rows);
+      }
+      // Wait for layout to stabilize
+      setTimeout(calculateRowsPerPage, 0);
+      window.addEventListener('resize', calculateRowsPerPage);
+      return () => window.removeEventListener('resize', calculateRowsPerPage);
+    }, [setRowsPerPage]);
 
     const currentWeek = useMemo(
       () => getCurrentWeekDates(weekOffset),
@@ -304,6 +326,10 @@ const SelectorTableComponent: React.FC<SelectorTableProps> = React.memo(
       return found;
     };
 
+    // Compute rowsPerPageOptions to always include the current value
+    const defaultRowsPerPageOptions = [5, 10, 25, 50, 100];
+    const rowsPerPageOptions = Array.from(new Set([...defaultRowsPerPageOptions, rowsPerPage])).sort((a, b) => a - b);
+
     return (
       <>
         <Paper sx={paperStyles}>
@@ -360,10 +386,11 @@ const SelectorTableComponent: React.FC<SelectorTableProps> = React.memo(
           </Box>
           <TableContainer
             className="table-container"
-            sx={tableContainerStyles}
+            sx={{ ...tableContainerStyles, maxHeight: '60vh' }}
+            ref={tableContainerRef}
           >
             <Table stickyHeader aria-label="sticky table">
-              <TableHead sx={tableHeadStyles}>
+              <TableHead sx={tableHeadStyles} ref={tableHeadRef}>
                 <TableRow>
                   <TableCell
                     className="employee-column"
@@ -801,26 +828,28 @@ const SelectorTableComponent: React.FC<SelectorTableProps> = React.memo(
                 )}
               </div>
             )}
-            <TablePagination
-              className="pagination"
-              rowsPerPageOptions={[5, 10, 25, 50, 100]}
-              component="div"
-              count={sortedEmployees.length}
-              rowsPerPage={rowsPerPage}
-              page={page}
-              onPageChange={(_, newPage) => setPage(newPage)}
-              onRowsPerPageChange={(event) => {
-                setRowsPerPage(parseInt(event.target.value, 10));
-                setPage(0);
-              }}
-              labelRowsPerPage={
-                <Typography variant="body2" component="span">
-                  {TABLE.ROWS_PER_PAGE}
-                </Typography>
-              }
-              labelDisplayedRows={() => ""}
-              ActionsComponent={PaginationComponent}
-            />
+            <div ref={paginationRef}>
+              <TablePagination
+                className="pagination"
+                rowsPerPageOptions={rowsPerPageOptions}
+                component="div"
+                count={sortedEmployees.length}
+                rowsPerPage={rowsPerPage}
+                page={page}
+                onPageChange={(_, newPage) => setPage(newPage)}
+                onRowsPerPageChange={(event) => {
+                  setRowsPerPage(parseInt(event.target.value, 10));
+                  setPage(0);
+                }}
+                labelRowsPerPage={
+                  <Typography variant="body2" component="span">
+                    {TABLE.ROWS_PER_PAGE}
+                  </Typography>
+                }
+                labelDisplayedRows={() => ""}
+                ActionsComponent={PaginationComponent}
+              />
+            </div>
           </Box>
         </Paper>
         {openAdjustDialogEmployee && (

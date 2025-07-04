@@ -600,7 +600,7 @@ const RolesPage: React.FC = () => {
             sx={rolesTitleStyles}
           >
             <AssignmentIcon fontSize={isSmallScreen ? "small" : "large"} sx={rolesIconStyles(theme)} />
-            {PAGE_TITLE.ROLES}
+            {isSmallScreen ? PAGE_TITLE.ROLES_SIMPLIFIED : PAGE_TITLE.ROLES}
           </Typography>
           <Divider sx={rolesDividerStyles(theme)} />
         </Box>

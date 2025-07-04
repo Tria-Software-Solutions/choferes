@@ -280,7 +280,7 @@ const SchedulesPage: React.FC = () => {
             sx={schedulesTitleStyles}
           >
             <EditCalendarIcon fontSize={isSmallScreen ? "small" : "large"} sx={schedulesIconStyles(theme)} />
-            {PAGE_TITLE.SCHEDULES}
+            {isSmallScreen ? PAGE_TITLE.SCHEDULES_SIMPLIFIED : PAGE_TITLE.SCHEDULES}
           </Typography>
           <Divider sx={schedulesDividerStyles(theme)} />
         </Box>

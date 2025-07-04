@@ -268,7 +268,7 @@ const EmployeesPage: React.FC = () => {
               fontSize={isSmallScreen ? "small" : "large"}
               sx={employeesIconStyles(theme)}
             />
-            {PAGE_TITLE.EMPLOYEES}
+            {isSmallScreen ? PAGE_TITLE.EMPLOYEES_SIMPLIFIED : PAGE_TITLE.EMPLOYEES}
           </Typography>
           <Divider sx={employeesDividerStyles(theme)} />
         </Box>
