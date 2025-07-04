@@ -19,7 +19,7 @@ import MapOutlinedIcon from "@mui/icons-material/MapOutlined";
 import OutlinedInput from "@mui/material/OutlinedInput";
 import InputAdornment from "@mui/material/InputAdornment";
 import InfoOutlinedIcon from "@mui/icons-material/InfoOutlined";
-import { FORMS } from "../../constants/constants";
+import FORMS from "../../constants/forms.constants";
 import CustomTextField from "../../components/Textfield/CustomTextField";
 import {
   boxRoot,

@@ -9,7 +9,9 @@ import {
   useMediaQuery,
   InputAdornment,
 } from "@mui/material";
-import { BRANDS_LIST, COLORS_LIST, FORMS } from "../../constants/constants";
+import FORMS from "../../constants/forms.constants";
+import BRANDS_LIST from "../../constants/brands.constants";
+import COLORS_LIST from "../../constants/colors.constants";
 import { maskLicensePlate } from "../../utils/mask";
 import { maskParkingLotWithPrefix } from "../../utils/mask";
 import { validateParkingLotWithPrefix } from "../../utils/userValidation";

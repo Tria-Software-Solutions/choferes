@@ -23,7 +23,10 @@ import {
 } from "@mui/material";
 import Visibility from "@mui/icons-material/Visibility";
 import VisibilityOff from "@mui/icons-material/VisibilityOff";
-import { PAGE_TITLE, AUTH, FORMS, REGISTER_VALIDATION } from "../../constants/constants";
+import PAGE_TITLE from "../../constants/pageTitle.constants";
+import AUTH from "../../constants/auth.constants";
+import FORMS from "../../constants/forms.constants";
+import REGISTER_VALIDATION from "../../constants/registerValidation.constants";
 import PersonOutlinedIcon from "@mui/icons-material/PersonOutlined";
 import EmailOutlinedIcon from "@mui/icons-material/EmailOutlined";
 import LockOutlinedIcon from "@mui/icons-material/LockOutlined";

@@ -1,7 +1,7 @@
 // Utility functions and regex for validating user fields (name, email, username, password)
 // Provides validation logic for forms and user input
 
-import { FORMS } from '../constants/constants';
+import FORMS from "../constants/forms.constants";
 
 export const nameRegex = /^[a-zA-ZáéíóúÁÉÍÓÚñÑüÜëË\s-]+$/;
 export const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;

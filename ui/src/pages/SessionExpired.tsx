@@ -12,7 +12,7 @@ import {
 import TimerOffIcon from "@mui/icons-material/TimerOff";
 import LoginIcon from "@mui/icons-material/Login";
 import SecurityIcon from "@mui/icons-material/Security";
-import { ERRORS } from "../constants/constants";
+import ERRORS from "../constants/errors.constants";
 import {
   outerBoxStyles,
   innerBoxStyles,

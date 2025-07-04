@@ -1,0 +1,22 @@
+const COLORS_LIST = [
+  { value: "Blanco", label: "Blanco" },
+  { value: "Negro", label: "Negro" },
+  { value: "Gris", label: "Gris" },
+  { value: "Azul", label: "Azul" },
+  { value: "Rojo", label: "Rojo" },
+  { value: "Verde", label: "Verde" },
+  { value: "Amarillo", label: "Amarillo" },
+  { value: "Naranja", label: "Naranja" },
+  { value: "Café", label: "Café" },
+  { value: "Plateado", label: "Plateado" },
+  { value: "Dorado", label: "Dorado" },
+  { value: "Vino", label: "Vino" },
+  { value: "Beige", label: "Beige" },
+  { value: "Morado", label: "Morado" },
+  { value: "Turquesa", label: "Turquesa" },
+  { value: "Púrpura", label: "Púrpura" },
+  { value: "Celeste", label: "Celeste" },
+  { value: "Bronce", label: "Bronce" },
+  { value: "Champán", label: "Champán" },
+];
+export default COLORS_LIST; 

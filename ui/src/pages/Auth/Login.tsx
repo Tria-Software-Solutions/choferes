@@ -17,7 +17,9 @@ import {
   Fade,
   Divider,
 } from "@mui/material";
-import { PAGE_TITLE, FORMS, LOGIN } from "../../constants/constants";
+import PAGE_TITLE from "../../constants/pageTitle.constants";
+import FORMS from "../../constants/forms.constants";
+import LOGIN from "../../constants/login.constants";
 import Visibility from "@mui/icons-material/Visibility";
 import VisibilityOff from "@mui/icons-material/VisibilityOff";
 import LockOutlinedIcon from "@mui/icons-material/LockOutlined";

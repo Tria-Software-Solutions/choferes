@@ -44,9 +44,9 @@ import {
   BRANDS_LIST,
   COLORS_LIST,
   DAYS_LIST,
-  PERMISSIONS,
   TABLE,
   TABLE_UI,
+  PERMISSIONS,
 } from "../../../constants/constants";
 import EditNoteIcon from '@mui/icons-material/EditNote';
 import DeleteForeverIcon from '@mui/icons-material/DeleteForever';

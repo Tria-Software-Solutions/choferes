@@ -24,7 +24,7 @@ import OutlinedInput from "@mui/material/OutlinedInput";
 import InfoOutlinedIcon from "@mui/icons-material/InfoOutlined";
 import { Role } from "../../models/Role";
 import CustomTextField from "../../components/Textfield/CustomTextField";
-import { FORMS } from '../../constants/constants';
+import FORMS from "../../constants/forms.constants";
 import {
   boxRoot,
   gridContainer,

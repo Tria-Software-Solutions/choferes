@@ -31,11 +31,9 @@ import {
   exportToPDF,
 } from "../../utils/export";
 import { capitalizeFirstLetter } from "../../utils/string";
-import {
-  PAGE_TITLE,
-  // PERMISSIONS,
-  COURIER_SERVICE_PAGE,
-} from "../../constants/constants";
+import PAGE_TITLE from "../../constants/pageTitle.constants";
+import NOTIFICATIONS from "../../constants/notifications.constants";
+import MANAGEMENT from "../../constants/management.constants";
 import DownloadRoundedIcon from "@mui/icons-material/DownloadRounded";
 import ArrowBackIosNewRoundedIcon from "@mui/icons-material/ArrowBackIosNewRounded";
 import ArrowForwardIosRoundedIcon from "@mui/icons-material/ArrowForwardIosRounded";
@@ -50,7 +48,6 @@ import AddCourierForm from "../Forms/AddCourierForm";
 import DialogComponent from "../../components/Dialog/DialogComponent";
 import AddRoundedIcon from "@mui/icons-material/AddRounded";
 import DeleteOutlineIcon from "@mui/icons-material/DeleteOutline";
-import { NOTIFICATIONS } from "../../constants/constants";
 import LocalShippingIcon from "@mui/icons-material/LocalShipping";
 import {
   courierHeaderBoxStyles,
@@ -404,7 +401,7 @@ const CourierServicePage: React.FC = () => {
               <Box sx={searchBarBoxStyles}>
                 {filteredCouriers && (
                   <SearchBar
-                    placeholder={COURIER_SERVICE_PAGE.SEARCH_PLACEHOLDER}
+                    placeholder={MANAGEMENT.COURIER_SERVICE_PAGE.SEARCH_PLACEHOLDER}
                     value={filter}
                     onChange={handleFilterChange}
                     sx={{ flex: 1 }}
@@ -432,7 +429,7 @@ const CourierServicePage: React.FC = () => {
                 <Box display="flex" alignItems="center" justifyContent="flex-start" gap={1}>
                   <LocalizationProvider dateAdapter={AdapterDateFns} adapterLocale={es}>
                     <DatePicker
-                      label={COURIER_SERVICE_PAGE.DATE_PICKER_LABEL}
+                      label={MANAGEMENT.COURIER_SERVICE_PAGE.DATE_PICKER_LABEL}
                       value={selectedDate || null}
                       maxDate={new Date()}
                       views={["year", "month", "day"]}
@@ -453,17 +450,17 @@ const CourierServicePage: React.FC = () => {
                     variant="contained"
                     sx={buttonGroupSx}
                   >
-                    <Tooltip title={COURIER_SERVICE_PAGE.TOOLTIP_PREV_DAY} arrow>
+                    <Tooltip title={MANAGEMENT.COURIER_SERVICE_PAGE.TOOLTIP_PREV_DAY} arrow>
                       <Button onClick={handlePreviousDate}>
                         <ArrowBackIosNewRoundedIcon />
                       </Button>
                     </Tooltip>
-                    <Tooltip title={COURIER_SERVICE_PAGE.TOOLTIP_NEXT_DAY} arrow>
+                    <Tooltip title={MANAGEMENT.COURIER_SERVICE_PAGE.TOOLTIP_NEXT_DAY} arrow>
                       <Button disabled={isTodayOrFuture(selectedDate)} onClick={handleNextDate}>
                         <ArrowForwardIosRoundedIcon />
                       </Button>
                     </Tooltip>
-                    <Tooltip title={COURIER_SERVICE_PAGE.TOOLTIP_CURRENT_DAY} arrow>
+                    <Tooltip title={MANAGEMENT.COURIER_SERVICE_PAGE.TOOLTIP_CURRENT_DAY} arrow>
                       <Button disabled={isTodayOrFuture(selectedDate)} onClick={handleCurrentDate}>
                         <CalendarTodayRoundedIcon />
                       </Button>
@@ -482,7 +479,7 @@ const CourierServicePage: React.FC = () => {
                     minHeight: 56,
                   }}
                 >
-                  {COURIER_SERVICE_PAGE.ADD}
+                  {MANAGEMENT.COURIER_SERVICE_PAGE.ADD}
                 </Button>
               </Box>
             </Grid>
@@ -530,7 +527,7 @@ const CourierServicePage: React.FC = () => {
                 )}
               </Typography>
               <Typography variant="h6" color="textSecondary">
-                {COURIER_SERVICE_PAGE.NO_SERVICES}
+                {MANAGEMENT.COURIER_SERVICE_PAGE.NO_SERVICES}
               </Typography>
             </Box>
           )}
@@ -540,11 +537,11 @@ const CourierServicePage: React.FC = () => {
         open={openDeleteDialog}
         onClose={handleCloseDeleteDialog}
         onConfirm={handleDelete}
-        title={COURIER_SERVICE_PAGE.DIALOG_DELETE_TITLE}
-        message={COURIER_SERVICE_PAGE.DIALOG_DELETE_MESSAGE}
+        title={MANAGEMENT.COURIER_SERVICE_PAGE.DIALOG_DELETE_TITLE}
+        message={MANAGEMENT.COURIER_SERVICE_PAGE.DIALOG_DELETE_MESSAGE}
         type="delete"
-        confirmText={COURIER_SERVICE_PAGE.DIALOG_DELETE_CONFIRM}
-        cancelText={COURIER_SERVICE_PAGE.DIALOG_DELETE_CANCEL}
+        confirmText={MANAGEMENT.COURIER_SERVICE_PAGE.DIALOG_DELETE_CONFIRM}
+        cancelText={MANAGEMENT.COURIER_SERVICE_PAGE.DIALOG_DELETE_CANCEL}
         loading={isDeletingCourier}
         paperSx={deleteDialogPaperSx ?? {}}
         icon={<DeleteOutlineIcon color="error" />}
@@ -552,8 +549,8 @@ const CourierServicePage: React.FC = () => {
       <DialogComponent
         open={openAddCourierModal}
         onClose={handleCloseAddCourierModal}
-        title={COURIER_SERVICE_PAGE.DIALOG_ADD_TITLE}
-        subtitle={COURIER_SERVICE_PAGE.DIALOG_ADD_SUBTITLE}
+        title={MANAGEMENT.COURIER_SERVICE_PAGE.DIALOG_ADD_TITLE}
+        subtitle={MANAGEMENT.COURIER_SERVICE_PAGE.DIALOG_ADD_SUBTITLE}
         hideActions
         paperSx={addDialogPaperSx ?? {}}
       >

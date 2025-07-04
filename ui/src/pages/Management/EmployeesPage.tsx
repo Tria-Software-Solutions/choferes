@@ -32,7 +32,10 @@ import {
   exportToExcel,
   exportToPDF,
 } from "../../utils/export";
-import { PERMISSIONS, EMPLOYEES_PAGE, NOTIFICATIONS, PAGE_TITLE } from "../../constants/constants";
+import PAGE_TITLE from "../../constants/pageTitle.constants";
+import PERMISSIONS from "../../constants/permissions.constants";
+import NOTIFICATIONS from "../../constants/notifications.constants";
+import MANAGEMENT from "../../constants/management.constants";
 import GroupRoundedIcon from "@mui/icons-material/GroupRounded";
 import DownloadRoundedIcon from "@mui/icons-material/DownloadRounded";
 import CloseRoundedIcon from "@mui/icons-material/CloseRounded";
@@ -306,7 +309,7 @@ const EmployeesPage: React.FC = () => {
               <Box sx={searchBarBoxStyles}>
                 {filteredEmployees && (
                   <SearchBar
-                    placeholder={EMPLOYEES_PAGE.SEARCH_PLACEHOLDER}
+                    placeholder={MANAGEMENT.EMPLOYEES_PAGE.SEARCH_PLACEHOLDER}
                     value={filter}
                     onChange={handleFilterChange}
                     sx={{ flex: 1 }}
@@ -336,7 +339,7 @@ const EmployeesPage: React.FC = () => {
                     onClick={handleOpenAddModal}
                     sx={addButtonDesktopStyles}
                   >
-                    {EMPLOYEES_PAGE.ADD}
+                    {MANAGEMENT.EMPLOYEES_PAGE.ADD}
                   </Button>
                 </Box>
               </Grid>
@@ -371,7 +374,7 @@ const EmployeesPage: React.FC = () => {
             >
               <ManageSearchIcon color="disabled" sx={noEmployeesIconStyles} />
               <Typography variant="h6" color="textSecondary">
-                {EMPLOYEES_PAGE.NO_EMPLOYEES}
+                {MANAGEMENT.EMPLOYEES_PAGE.NO_EMPLOYEES}
               </Typography>
             </Box>
           )}
@@ -381,11 +384,11 @@ const EmployeesPage: React.FC = () => {
         open={openDeleteDialog}
         onClose={handleCloseDeleteDialog}
         onConfirm={handleDelete}
-        title={EMPLOYEES_PAGE.DIALOG_DELETE_TITLE}
-        message={EMPLOYEES_PAGE.DIALOG_DELETE_MESSAGE}
+        title={MANAGEMENT.EMPLOYEES_PAGE.DIALOG_DELETE_TITLE}
+        message={MANAGEMENT.EMPLOYEES_PAGE.DIALOG_DELETE_MESSAGE}
         type="delete"
-        confirmText={EMPLOYEES_PAGE.DIALOG_DELETE_CONFIRM}
-        cancelText={EMPLOYEES_PAGE.DIALOG_DELETE_CANCEL}
+        confirmText={MANAGEMENT.EMPLOYEES_PAGE.DIALOG_DELETE_CONFIRM}
+        cancelText={MANAGEMENT.EMPLOYEES_PAGE.DIALOG_DELETE_CANCEL}
         loading={isDeletingEmployee}
         paperSx={deleteDialogPaperSx ?? {}}
         icon={<DeleteOutlineIcon color="error" />}
@@ -394,8 +397,8 @@ const EmployeesPage: React.FC = () => {
       <DialogComponent
         open={openAddModal}
         onClose={handleCloseAddModal}
-        title={EMPLOYEES_PAGE.DIALOG_ADD_TITLE}
-        subtitle={EMPLOYEES_PAGE.DIALOG_ADD_SUBTITLE}
+        title={MANAGEMENT.EMPLOYEES_PAGE.DIALOG_ADD_TITLE}
+        subtitle={MANAGEMENT.EMPLOYEES_PAGE.DIALOG_ADD_SUBTITLE}
         hideActions
         paperSx={addDialogPaperSx ?? {}}
       >
