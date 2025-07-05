@@ -10,12 +10,7 @@ const config = {
     database: process.env.PGDATABASE, // Database name
     host: process.env.PGHOST, // Database host
     dialect: "postgres", // Database dialect
-    dialectOptions: {
-      ssl: {
-        require: true,
-        rejectUnauthorized: false, // Accept self-signed certificates
-      },
-    },
+    // No SSL for development
   },
   test: {
     username: process.env.PGUSER,
@@ -23,12 +18,7 @@ const config = {
     database: process.env.PGDATABASE,
     host: process.env.PGHOST,
     dialect: "postgres",
-    dialectOptions: {
-      ssl: {
-        require: true,
-        rejectUnauthorized: false,
-      },
-    },
+    // No SSL for test
   },
   production: {
     username: process.env.PGUSER,

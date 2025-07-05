@@ -11,14 +11,13 @@ const sequelize = new Sequelize(dbConfig.database, dbConfig.username, dbConfig.p
   host: dbConfig.host, // Database host
   dialect: dbConfig.dialect, // Database dialect (e.g., postgres)
   logging: false, // Disable SQL query logging
-  dialectOptions: dbConfig.dialectOptions || {}, // Additional dialect options (e.g., SSL)
   pool: {
     max: 20, // Maximum number of connections
     min: 5, // Minimum number of connections
     acquire: 60000, // Maximum time (ms) to try getting a connection
     idle: 10000, // Maximum time (ms) a connection can be idle
   },
-  // Postgres-specific session timeouts
+  // Postgres-specific session timeouts and SSL (only for production)
   ...(dbConfig.dialect === "postgres" && {
     dialectOptions: {
       ...dbConfig.dialectOptions,
