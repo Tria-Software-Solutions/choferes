@@ -12,7 +12,7 @@ const FORMS = {
   HOURS_INVALID: "Las horas deben ser un número entre 1 y 24",
   HOURS_REQUIRED: "Las horas son requeridas",
   INVALID_FORMAT_EXAMPLE: "Formato inválido. Ejemplo: 123ABC",
-  INVALID_FORMAT_PARKING: "Formato inválido. Ejemplo: A-12",
+  INVALID_FORMAT_PARKING: "Formato inválido. Ejemplo: ATP1-123",
   LABEL_REQUIRED: "Etiqueta requerida",
   LAST_NAME: "Apellido",
   LAST_NAME_REQUIRED: "El apellido es requerido",

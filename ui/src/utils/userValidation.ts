@@ -51,12 +51,17 @@ export function validateParkingLotWithPrefix(
   value: string,
   invalidFormatMsg: string,
 ): string | null {
-  const dynamicRegex = new RegExp(
-    `^(?:${prefix}[1-9]-\\d{3,4}|nulo|n/a)$`,
-    "i",
-  );
-  if (!dynamicRegex.test(value.trim())) {
-    return invalidFormatMsg.replace("ATP", prefix);
+  const trimmedValue = value.trim();
+  
+  // If value starts with ATP, use strict validation
+  if (trimmedValue.toUpperCase().startsWith("ATP")) {
+    const atpRegex = /^(?:ATP[1-9]-\d{3,4}|nulo|n\/a)$/i;
+    if (!atpRegex.test(trimmedValue)) {
+      return invalidFormatMsg.replace("ATP", "ATP");
+    }
+    return null;
   }
+  
+  // For any other prefix or format, consider it valid
   return null;
 }
