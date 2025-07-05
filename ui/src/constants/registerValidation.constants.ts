@@ -5,4 +5,4 @@ const REGISTER_VALIDATION = {
   PASSWORD_INVALID: "Contraseña inválida",
   REGISTER_ERROR: "Error al registrarse",
 };
-export default REGISTER_VALIDATION; 
+export default REGISTER_VALIDATION;

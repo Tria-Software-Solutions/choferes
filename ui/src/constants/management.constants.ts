@@ -19,7 +19,8 @@ const MANAGEMENT = {
     SEARCH_PLACEHOLDER: "Buscar empleado...",
     NO_EMPLOYEES: "No hay empleados registrados",
     DIALOG_DELETE_TITLE: "Eliminar empleado",
-    DIALOG_DELETE_MESSAGE: "¿Estás seguro de que deseas eliminar este empleado?",
+    DIALOG_DELETE_MESSAGE:
+      "¿Estás seguro de que deseas eliminar este empleado?",
     DIALOG_DELETE_CONFIRM: "Eliminar",
     DIALOG_DELETE_CANCEL: "Cancelar",
     DIALOG_ADD_TITLE: "Agregar",
@@ -36,7 +37,8 @@ const MANAGEMENT = {
     TOOLTIP_NEXT_DAY: "Día siguiente",
     TOOLTIP_CURRENT_DAY: "Hoy",
     DIALOG_DELETE_TITLE: "Eliminar vehículo",
-    DIALOG_DELETE_MESSAGE: "¿Estás seguro de que deseas eliminar este vehículo?",
+    DIALOG_DELETE_MESSAGE:
+      "¿Estás seguro de que deseas eliminar este vehículo?",
     DIALOG_DELETE_CONFIRM: "Eliminar",
     DIALOG_DELETE_CANCEL: "Cancelar",
     DIALOG_ADD_TITLE: "Agregar",
@@ -53,7 +55,8 @@ const MANAGEMENT = {
     TOOLTIP_NEXT_DAY: "Día siguiente",
     TOOLTIP_CURRENT_DAY: "Hoy",
     DIALOG_DELETE_TITLE: "Eliminar servicio",
-    DIALOG_DELETE_MESSAGE: "¿Estás seguro de que deseas eliminar este servicio?",
+    DIALOG_DELETE_MESSAGE:
+      "¿Estás seguro de que deseas eliminar este servicio?",
     DIALOG_DELETE_CONFIRM: "Eliminar",
     DIALOG_DELETE_CANCEL: "Cancelar",
     DIALOG_ADD_TITLE: "Agregar",
@@ -98,7 +101,8 @@ const MANAGEMENT = {
   SUMMARY_OVERTIME: "Horas extra",
   SUMMARY_DETAIL_OVERTIME: "Detalle de horas extra trabajadas",
   SUMMARY_INFO_TITLE: "Información de resumen",
-  SUMMARY_INFO_DESC: "Aquí puedes ver el resumen de horas trabajadas por el empleado.",
+  SUMMARY_INFO_DESC:
+    "Aquí puedes ver el resumen de horas trabajadas por el empleado.",
 
   // Export dialogs
   DIALOG_EXPORT_TITLE: "Exportar datos",
@@ -125,7 +129,8 @@ const MANAGEMENT = {
   PERSONAL_INFO_TITLE: "Información personal",
   PERSONAL_INFO_DESC: "Actualiza tus datos personales aquí.",
   RECOMMENDATION_TITLE: "Recomendaciones",
-  RECOMMENDATION_DESC: "Sigue las recomendaciones para mantener tu cuenta segura.",
+  RECOMMENDATION_DESC:
+    "Sigue las recomendaciones para mantener tu cuenta segura.",
   SAVE_CHANGES: "Guardar cambios",
   PASSWORD_TITLE: "Cambiar contraseña",
   PASSWORD_DESC: "Actualiza tu contraseña regularmente.",
@@ -151,4 +156,4 @@ const MANAGEMENT = {
   DIALOG_ADD_SUBTITLE: "Completa los datos para agregar un nuevo elemento",
   DATE_PICKER_LABEL: "Seleccionar fecha",
 };
-export default MANAGEMENT; 
+export default MANAGEMENT;

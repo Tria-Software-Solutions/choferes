@@ -259,15 +259,42 @@ const Settings: React.FC = () => {
         alignItems="center"
         sx={{ mb: 3 }}
       >
-        <Box display="flex" flexDirection="column" alignItems="flex-start" sx={{ mb: 2 }}>
+        <Box
+          display="flex"
+          flexDirection="column"
+          alignItems="flex-start"
+          sx={{ mb: 2 }}
+        >
           <Typography
             variant={isSmallScreen ? "h5" : "h4"}
-            sx={{ display: "flex", alignItems: "center", fontFamily: "'Urbanist', sans-serif", fontWeight: 800, color: "#000000", mb: 0.5, gap: 1.5 }}
+            sx={{
+              display: "flex",
+              alignItems: "center",
+              fontFamily: "'Urbanist', sans-serif",
+              fontWeight: 800,
+              color: "#000000",
+              mb: 0.5,
+              gap: 1.5,
+            }}
           >
-            <SettingsIcon fontSize={isSmallScreen ? "small" : "large"} sx={{ mr: 1, color: theme.palette.primary.main }} />
-            {isSmallScreen ? PAGE_TITLE.SETTING_SIMPLIFIED : PAGE_TITLE.SETTINGS}
+            <SettingsIcon
+              fontSize={isSmallScreen ? "small" : "large"}
+              sx={{ mr: 1, color: theme.palette.primary.main }}
+            />
+            {isSmallScreen
+              ? PAGE_TITLE.SETTING_SIMPLIFIED
+              : PAGE_TITLE.SETTINGS}
           </Typography>
-          <Divider sx={{ width: 48, borderBottomWidth: 3, borderColor: theme.palette.primary.main, borderRadius: 2, mx: "auto", mb: 0.5 }} />
+          <Divider
+            sx={{
+              width: 48,
+              borderBottomWidth: 3,
+              borderColor: theme.palette.primary.main,
+              borderRadius: 2,
+              mx: "auto",
+              mb: 0.5,
+            }}
+          />
         </Box>
       </Box>
 

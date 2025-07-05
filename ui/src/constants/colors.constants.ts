@@ -19,4 +19,4 @@ const COLORS_LIST = [
   { value: "Bronce", label: "Bronce" },
   { value: "Champán", label: "Champán" },
 ];
-export default COLORS_LIST; 
+export default COLORS_LIST;

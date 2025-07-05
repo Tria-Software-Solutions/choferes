@@ -45,7 +45,7 @@ import {
   dividerSectionStyles,
   registerBoxStyles,
   registerTextStyles,
-  registerLinkStyles
+  registerLinkStyles,
 } from "./styles";
 
 // Login page component for user authentication
@@ -110,15 +110,9 @@ const Login: React.FC = () => {
   };
 
   return (
-    <Box
-      className="auth-page"
-      sx={authPageBoxStyles}
-    >
+    <Box className="auth-page" sx={authPageBoxStyles}>
       <Fade in timeout={800}>
-        <Card
-          className="auth-card"
-          sx={authCardStyles}
-        >
+        <Card className="auth-card" sx={authCardStyles}>
           <CardContent sx={cardContentStyles}>
             {/* Logo and Title Section */}
             <Box
@@ -130,11 +124,7 @@ const Login: React.FC = () => {
               }}
             >
               <Box sx={logoBoxStyles}>
-                <img
-                  src={logo}
-                  alt="Logo"
-                  style={logoImgStyles}
-                />
+                <img src={logo} alt="Logo" style={logoImgStyles} />
               </Box>
               <Typography
                 variant={isSmallScreen ? "h5" : "h4"}
@@ -144,11 +134,7 @@ const Login: React.FC = () => {
                 {PAGE_TITLE.LOGIN}
               </Typography>
               <Divider sx={dividerStyles(theme)} />
-              <Typography
-                variant="body2"
-                align="center"
-                sx={descriptionStyles}
-              >
+              <Typography variant="body2" align="center" sx={descriptionStyles}>
                 {FORMS.LOGIN_DESCRIPTION}
               </Typography>
             </Box>
@@ -235,10 +221,7 @@ const Login: React.FC = () => {
             {/* Error Alert */}
             {authError && (
               <Fade in timeout={300}>
-                <Alert
-                  severity="error"
-                  sx={alertStyles}
-                >
+                <Alert severity="error" sx={alertStyles}>
                   {authError}
                 </Alert>
               </Fade>
@@ -249,10 +232,7 @@ const Login: React.FC = () => {
 
             {/* Register Link */}
             <Box sx={registerBoxStyles}>
-              <Typography
-                variant="body2"
-                sx={registerTextStyles}
-              >
+              <Typography variant="body2" sx={registerTextStyles}>
                 {LOGIN.NO_ACCOUNT}
               </Typography>
               <Link

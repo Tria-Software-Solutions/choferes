@@ -38,7 +38,7 @@ import {
   infoIconBox,
   infoTitle,
   infoDesc,
-} from './styles';
+} from "./styles";
 
 interface AddRoleFormProps {
   onSubmit: (role: { name: string; permissions: string[] }) => void;
@@ -152,7 +152,11 @@ const AddRoleForm: React.FC<AddRoleFormProps> = ({
   return (
     <Box sx={boxRoot}>
       <Box sx={{ mb: 2 }}>
-        <Typography variant="body2" color="text.secondary" sx={{ lineHeight: 1.4 }}>
+        <Typography
+          variant="body2"
+          color="text.secondary"
+          sx={{ lineHeight: 1.4 }}
+        >
           {FORMS.ADD_ROLE.DIALOG_CONTENT_TITLE}
         </Typography>
       </Box>
@@ -178,9 +182,7 @@ const AddRoleForm: React.FC<AddRoleFormProps> = ({
                 {FORMS.ADD_ROLE.PERMISSIONS_LABEL}
               </Box>
               {errors.permissions && (
-                <Box sx={permissionsError(theme)}>
-                  {errors.permissions}
-                </Box>
+                <Box sx={permissionsError(theme)}>{errors.permissions}</Box>
               )}
             </Box>
 
@@ -188,17 +190,19 @@ const AddRoleForm: React.FC<AddRoleFormProps> = ({
               {Object.entries(groupedPermissions).map(
                 ([category, categoryPermissions]) => (
                   <Box key={category} sx={categoryBox(theme)}>
-                    <Box sx={categoryTitle(theme)}>
-                      {category}
-                    </Box>
+                    <Box sx={categoryTitle(theme)}>{category}</Box>
                     <FormGroup row>
                       {categoryPermissions.map((permission) => (
                         <FormControlLabel
                           key={permission.id}
                           control={
                             <Checkbox
-                              checked={formData.permissions.includes(permission.id.toString())}
-                              onChange={() => handlePermissionChange(permission.id.toString())}
+                              checked={formData.permissions.includes(
+                                permission.id.toString(),
+                              )}
+                              onChange={() =>
+                                handlePermissionChange(permission.id.toString())
+                              }
                               color="primary"
                             />
                           }
@@ -211,7 +215,7 @@ const AddRoleForm: React.FC<AddRoleFormProps> = ({
                       ))}
                     </FormGroup>
                   </Box>
-                )
+                ),
               )}
             </Box>
           </FormControl>
@@ -228,7 +232,9 @@ const AddRoleForm: React.FC<AddRoleFormProps> = ({
                   fontSize: "clamp(0.875rem, 1.5vw, 1rem)",
                 }}
               >
-                {FORMS.ADD_ROLE.PERMISSIONS_SELECTED(formData.permissions.length)}
+                {FORMS.ADD_ROLE.PERMISSIONS_SELECTED(
+                  formData.permissions.length,
+                )}
               </Box>
               <Box sx={{ display: "flex", flexWrap: "wrap", gap: 1 }}>
                 {formData.permissions.map((permissionId) => {
@@ -259,11 +265,17 @@ const AddRoleForm: React.FC<AddRoleFormProps> = ({
         <Grid item xs={12}>
           <Box sx={infoBox(theme)}>
             <Box sx={infoIconBox(theme)}>
-              <InfoOutlinedIcon sx={{ ...iconSx(theme), ...infoIconBox(theme) }} />
+              <InfoOutlinedIcon
+                sx={{ ...iconSx(theme), ...infoIconBox(theme) }}
+              />
             </Box>
             <Box>
-              <Typography sx={infoTitle(theme)}>{FORMS.ADD_ROLE.INFO_TITLE}</Typography>
-              <Typography sx={infoDesc(theme)}>{FORMS.ADD_ROLE.INFO_DESC}</Typography>
+              <Typography sx={infoTitle(theme)}>
+                {FORMS.ADD_ROLE.INFO_TITLE}
+              </Typography>
+              <Typography sx={infoDesc(theme)}>
+                {FORMS.ADD_ROLE.INFO_DESC}
+              </Typography>
             </Box>
           </Box>
         </Grid>
@@ -299,7 +311,9 @@ const AddRoleForm: React.FC<AddRoleFormProps> = ({
                 fullWidth={isSmallScreen}
                 sx={submitButton}
               >
-                {isLoading ? FORMS.ADD_ROLE.BUTTON_ADDING : FORMS.ADD_ROLE.BUTTON_ADD}
+                {isLoading
+                  ? FORMS.ADD_ROLE.BUTTON_ADDING
+                  : FORMS.ADD_ROLE.BUTTON_ADD}
               </Button>
             </Box>
           </Box>

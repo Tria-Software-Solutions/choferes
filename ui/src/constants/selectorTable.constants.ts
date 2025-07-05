@@ -34,9 +34,10 @@ const SELECTOR_TABLE = {
   HOURS_TO_ADJUST: "Horas a ajustar",
   POSITIVE_NUMBER_REQUIRED: "Debe ser un número positivo",
   ADJUSTMENT_INFO: "Información de Ajuste",
-  ADJUSTMENT_DESCRIPTION: "Ingresa la cantidad de horas a sumar o restar. Solo se permiten valores positivos.",
+  ADJUSTMENT_DESCRIPTION:
+    "Ingresa la cantidad de horas a sumar o restar. Solo se permiten valores positivos.",
   CANCEL: "Cancelar",
   ADD: "Sumar",
   SUBTRACT: "Restar",
 };
-export default SELECTOR_TABLE; 
+export default SELECTOR_TABLE;

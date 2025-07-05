@@ -6,51 +6,51 @@ export const formControlStyles: SxProps<Theme> = {
 
 export const selectStyles: SxProps<Theme> = {
   height: 56,
-  '& .MuiOutlinedInput-root': {
+  "& .MuiOutlinedInput-root": {
     borderRadius: 2,
-    backgroundColor: '#ffffff',
-    '&:hover .MuiOutlinedInput-notchedOutline': {
-      borderColor: '#000000',
+    backgroundColor: "#ffffff",
+    "&:hover .MuiOutlinedInput-notchedOutline": {
+      borderColor: "#000000",
     },
-    '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
-      borderColor: '#000000',
+    "&.Mui-focused .MuiOutlinedInput-notchedOutline": {
+      borderColor: "#000000",
       borderWidth: 2,
     },
-    '&.Mui-focused': {
-      backgroundColor: '#ffffff',
-      outline: 'none',
-      boxShadow: 'none',
+    "&.Mui-focused": {
+      backgroundColor: "#ffffff",
+      outline: "none",
+      boxShadow: "none",
     },
   },
 };
 
 export const datePickerTextFieldStyles: SxProps<Theme> = {
-  '& .MuiOutlinedInput-root': {
+  "& .MuiOutlinedInput-root": {
     borderRadius: 2,
-    backgroundColor: '#ffffff',
-    '&:hover .MuiOutlinedInput-notchedOutline': {
-      borderColor: '#000000',
+    backgroundColor: "#ffffff",
+    "&:hover .MuiOutlinedInput-notchedOutline": {
+      borderColor: "#000000",
     },
-    '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
-      borderColor: '#000000',
+    "&.Mui-focused .MuiOutlinedInput-notchedOutline": {
+      borderColor: "#000000",
       borderWidth: 2,
     },
-    '&.Mui-focused': {
-      backgroundColor: '#ffffff',
-      outline: 'none',
-      boxShadow: 'none',
+    "&.Mui-focused": {
+      backgroundColor: "#ffffff",
+      outline: "none",
+      boxShadow: "none",
     },
-    '& input': {
-      outline: 'none',
-      boxShadow: 'none',
+    "& input": {
+      outline: "none",
+      boxShadow: "none",
     },
   },
 };
 
 export const tableCellStyles: SxProps<Theme> = {
-  borderRight: '1px solid #f0f0f0',
-  borderBottom: '1px solid #f0f0f0',
-  padding: '10px 16px',
+  borderRight: "1px solid #f0f0f0",
+  borderBottom: "1px solid #f0f0f0",
+  padding: "10px 16px",
 };
 
 export const permissionChipStyles = (theme: Theme): SxProps<Theme> => ({
@@ -59,35 +59,35 @@ export const permissionChipStyles = (theme: Theme): SxProps<Theme> => ({
   px: 1,
   py: 0.5,
   borderRadius: 1,
-  fontSize: 'clamp(0.625rem, 1vw, 0.75rem)',
+  fontSize: "clamp(0.625rem, 1vw, 0.75rem)",
   fontWeight: 500,
   mb: 0.5,
-  textAlign: 'center',
-  display: 'flex',
-  alignItems: 'center',
-  justifyContent: 'center',
+  textAlign: "center",
+  display: "flex",
+  alignItems: "center",
+  justifyContent: "center",
 });
 
 export const viewMoreLessStyles = (theme: Theme): SxProps<Theme> => ({
   color: theme.palette.primary.main,
   fontWeight: 500,
-  cursor: 'pointer',
-  fontSize: 'clamp(0.625rem, 1vw, 0.75rem)',
-  textDecoration: 'underline',
-  '&:hover': {
-    textDecoration: 'none',
+  cursor: "pointer",
+  fontSize: "clamp(0.625rem, 1vw, 0.75rem)",
+  textDecoration: "underline",
+  "&:hover": {
+    textDecoration: "none",
   },
-  display: 'flex',
-  alignItems: 'center',
-  height: '28px',
+  display: "flex",
+  alignItems: "center",
+  height: "28px",
   mt: 1,
 });
 
 export const emailLinkStyles = (theme: Theme): SxProps<Theme> => ({
   color: theme.palette.primary.main,
-  textDecoration: 'none',
-  cursor: 'pointer',
-  '&:hover': {
-    textDecoration: 'underline',
+  textDecoration: "none",
+  cursor: "pointer",
+  "&:hover": {
+    textDecoration: "underline",
   },
-}); 
+});

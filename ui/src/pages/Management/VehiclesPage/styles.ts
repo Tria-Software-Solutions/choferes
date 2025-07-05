@@ -142,4 +142,4 @@ export const deleteDialogPaperSx: SxProps<Theme> = {
 export const addDialogPaperSx: SxProps<Theme> = {
   minWidth: { xs: "90vw", sm: 500, md: 700 },
   maxWidth: { xs: "98vw", sm: 700 },
-}; 
+};

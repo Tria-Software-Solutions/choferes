@@ -14,4 +14,4 @@ export const growStyles = (placement: string): React.CSSProperties => ({
 
 export const menuIconSpanStyles: React.CSSProperties = {
   marginRight: 8,
-}; 
+};

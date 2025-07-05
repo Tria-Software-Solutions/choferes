@@ -54,4 +54,4 @@ export const subMenuPaperStyles = (theme: Theme): SxProps<Theme> => ({
 
 export const listItemTextStyles: SxProps<Theme> = {
   fontWeight: 500,
-}; 
+};

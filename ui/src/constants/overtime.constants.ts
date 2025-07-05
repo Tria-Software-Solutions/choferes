@@ -3,4 +3,4 @@ const OVERTIME = {
   MONTHLY: 192,
   WEEKLY: 48,
 };
-export default OVERTIME; 
+export default OVERTIME;

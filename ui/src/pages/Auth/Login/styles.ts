@@ -165,4 +165,4 @@ export const registerLinkStyles: CSSProperties = {
   color: "#000000",
   fontWeight: 600,
   transition: "color 0.3s ease",
-}; 
+};

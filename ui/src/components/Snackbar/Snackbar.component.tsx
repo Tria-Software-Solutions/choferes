@@ -55,7 +55,7 @@ export const AppNotificationProvider: React.FC<{
     closeable = true,
     buttonText = SNACKBAR.CLOSE,
     onButtonClick: () => void = () => {
-      // noop 
+      // noop
     },
   ) => {
     setMessage(message);

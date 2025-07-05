@@ -62,7 +62,9 @@ export const dashboardPopoverBoxStyles: SxProps<Theme> = {
   borderRadius: 2,
 };
 
-export const dashboardIconButtonStyles = (active: boolean = false): SxProps<Theme> => ({
+export const dashboardIconButtonStyles = (
+  active: boolean = false,
+): SxProps<Theme> => ({
   color: "#ffffff",
   cursor: "pointer",
   p: 1.5,
@@ -72,13 +74,17 @@ export const dashboardIconButtonStyles = (active: boolean = false): SxProps<Them
   backgroundColor: active ? "rgba(255,255,255,0.25)" : "transparent",
   border: active ? "2px solid rgba(255,255,255,0.6)" : "none",
   "&:hover": {
-    backgroundColor: active ? "rgba(255,255,255,0.35)" : "rgba(255,255,255,0.15)",
+    backgroundColor: active
+      ? "rgba(255,255,255,0.35)"
+      : "rgba(255,255,255,0.15)",
     transform: "translateY(-2px)",
   },
   transition: "all 0.3s ease",
 });
 
-export const dashboardIconStyles = (active: boolean = false): SxProps<Theme> => ({
+export const dashboardIconStyles = (
+  active: boolean = false,
+): SxProps<Theme> => ({
   fontSize: "1.6rem",
   color: "#ffffff",
   filter: active ? "drop-shadow(0 0 8px rgba(255,255,255,0.6))" : "none",
@@ -169,4 +175,4 @@ export const dashboardNoLinksBoxStyles: SxProps<Theme> = {
 
 export const logoutMenuItemStyles = (theme: Theme): SxProps<Theme> => ({
   color: theme.palette.error.main,
-}); 
+});

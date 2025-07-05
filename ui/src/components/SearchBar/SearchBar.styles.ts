@@ -36,4 +36,4 @@ export const searchIconStyles: SxProps<Theme> = {
 
 export const clearIconStyles: SxProps<Theme> = {
   fontSize: "20px",
-}; 
+};

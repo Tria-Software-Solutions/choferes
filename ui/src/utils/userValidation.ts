@@ -12,8 +12,7 @@ export const passwordRegex =
 export function validateName(value: string): string {
   // Validates a user's name for required, format, and length
   if (!value.trim()) return FORMS.REQUIRED_FIELD;
-  if (!nameRegex.test(value))
-    return FORMS.NAME_LETTERS_ONLY;
+  if (!nameRegex.test(value)) return FORMS.NAME_LETTERS_ONLY;
   if (value.trim().length < 2) return FORMS.MIN_2_CHARS;
   if (value.trim().length > 50) return FORMS.MAX_50_CHARS;
   return "";
@@ -29,16 +28,14 @@ export function validateEmail(value: string): string {
 export function validateUsername(value: string): string {
   // Validates a username for required and format
   if (!value.trim()) return FORMS.REQUIRED_FIELD;
-  if (!usernameRegex.test(value))
-    return FORMS.USERNAME_START_LETTER;
+  if (!usernameRegex.test(value)) return FORMS.USERNAME_START_LETTER;
   return "";
 }
 
 export function validatePassword(value: string): string {
   // Validates a password for required and complexity
   if (!value.trim()) return FORMS.REQUIRED_FIELD;
-  if (!passwordRegex.test(value))
-    return FORMS.PASSWORD_COMPLEXITY;
+  if (!passwordRegex.test(value)) return FORMS.PASSWORD_COMPLEXITY;
   return "";
 }
 
@@ -49,10 +46,14 @@ export function validatePasswordMatch(pass1: string, pass2: string): string {
   return "";
 }
 
-export function validateParkingLotWithPrefix(prefix: string, value: string, invalidFormatMsg: string): string | null {
+export function validateParkingLotWithPrefix(
+  prefix: string,
+  value: string,
+  invalidFormatMsg: string,
+): string | null {
   const dynamicRegex = new RegExp(
     `^(?:${prefix}[1-9]-\\d{3,4}|nulo|n/a)$`,
-    "i"
+    "i",
   );
   if (!dynamicRegex.test(value.trim())) {
     return invalidFormatMsg.replace("ATP", prefix);

@@ -26,4 +26,4 @@ export const snackbarButtonStyles = (theme: Theme): React.CSSProperties => ({
   fontSize: "0.875rem",
   fontWeight: 500,
   transition: "all 0.2s ease",
-}); 
+});

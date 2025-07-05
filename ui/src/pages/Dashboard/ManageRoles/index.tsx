@@ -143,8 +143,10 @@ const ManageRoles: React.FC<{ isExpanded?: boolean }> = ({
           id,
           updatedRole,
           newPermissionIds: permissions
-            .filter((permission) =>
-              Array.isArray(editFields.permissionNames) && editFields.permissionNames.includes(permission.name),
+            .filter(
+              (permission) =>
+                Array.isArray(editFields.permissionNames) &&
+                editFields.permissionNames.includes(permission.name),
             )
             .map((permission) => permission.id),
         }),
@@ -205,8 +207,10 @@ const ManageRoles: React.FC<{ isExpanded?: boolean }> = ({
       const newRole = {
         name: roleData.name,
         permissionNames: permissions
-          .filter((permission) =>
-            Array.isArray(roleData.permissions) && roleData.permissions.includes(permission.id.toString()),
+          .filter(
+            (permission) =>
+              Array.isArray(roleData.permissions) &&
+              roleData.permissions.includes(permission.id.toString()),
           )
           .map((permission) => permission.name),
       };
@@ -232,10 +236,7 @@ const ManageRoles: React.FC<{ isExpanded?: boolean }> = ({
       return (
         <Box sx={permissionNamesBoxStyles}>
           {value.map((permission: string, index: number) => (
-            <Box
-              key={index}
-              sx={permissionChipStyles(theme)}
-            >
+            <Box key={index} sx={permissionChipStyles(theme)}>
               {permission}
             </Box>
           ))}
@@ -248,13 +249,8 @@ const ManageRoles: React.FC<{ isExpanded?: boolean }> = ({
   return (
     <Box>
       {isLoadingRoles ? (
-        <Box
-          sx={loadingBoxStyles}
-        >
-          <Backdrop
-            sx={backdropStyles(theme)}
-            open={isLoadingRoles}
-          >
+        <Box sx={loadingBoxStyles}>
+          <Backdrop sx={backdropStyles(theme)} open={isLoadingRoles}>
             <CircularProgress />
           </Backdrop>
         </Box>
@@ -333,9 +329,7 @@ const ManageRoles: React.FC<{ isExpanded?: boolean }> = ({
               isExpanded={isExpanded}
             />
           ) : (
-            <Box
-              sx={noRolesBoxStyles}
-            >
+            <Box sx={noRolesBoxStyles}>
               <Typography variant="h6" color="textSecondary">
                 {DASHBOARD_ROLES.NO_ROLES}
               </Typography>

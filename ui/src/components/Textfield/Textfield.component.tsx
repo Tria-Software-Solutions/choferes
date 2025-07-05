@@ -32,18 +32,12 @@ const TextfieldComponent: React.FC<CustomTextFieldProps> = ({
       {...props}
       InputProps={{
         startAdornment: icon ? (
-          <InputAdornment
-            position="start"
-            sx={inputAdornmentStyles}
-          >
+          <InputAdornment position="start" sx={inputAdornmentStyles}>
             {icon}
           </InputAdornment>
         ) : undefined,
         endAdornment: endAdornment ? (
-          <InputAdornment
-            position="end"
-            sx={inputAdornmentStyles}
-          >
+          <InputAdornment position="end" sx={inputAdornmentStyles}>
             {endAdornment}
           </InputAdornment>
         ) : undefined,

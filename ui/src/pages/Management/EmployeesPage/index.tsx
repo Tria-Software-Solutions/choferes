@@ -149,11 +149,7 @@ const EmployeesPage: React.FC = () => {
       setOpenAddModal(false);
       showNotification(NOTIFICATIONS.EMPLOYEE_CREATE_SUCCESS, 3000, false);
     } catch (error) {
-      showNotification(
-        NOTIFICATIONS.EMPLOYEE_CREATE_ERROR,
-        5000,
-        false,
-      );
+      showNotification(NOTIFICATIONS.EMPLOYEE_CREATE_ERROR, 5000, false);
     } finally {
       setIsSubmitting(false);
     }
@@ -268,7 +264,9 @@ const EmployeesPage: React.FC = () => {
               fontSize={isSmallScreen ? "small" : "large"}
               sx={employeesIconStyles(theme)}
             />
-            {isSmallScreen ? PAGE_TITLE.EMPLOYEES_SIMPLIFIED : PAGE_TITLE.EMPLOYEES}
+            {isSmallScreen
+              ? PAGE_TITLE.EMPLOYEES_SIMPLIFIED
+              : PAGE_TITLE.EMPLOYEES}
           </Typography>
           <Divider sx={employeesDividerStyles(theme)} />
         </Box>
@@ -287,13 +285,8 @@ const EmployeesPage: React.FC = () => {
           )}
       </Box>
       {isLoadingEmployees ? (
-        <Box
-          sx={loadingBoxStyles}
-        >
-          <Backdrop
-            sx={backdropStyles(theme)}
-            open={isLoadingEmployees}
-          >
+        <Box sx={loadingBoxStyles}>
+          <Backdrop sx={backdropStyles(theme)} open={isLoadingEmployees}>
             <CircularProgress />
           </Backdrop>
         </Box>
@@ -330,9 +323,7 @@ const EmployeesPage: React.FC = () => {
             </Grid>
             {userPermissions.includes(PERMISSIONS.CREATE_EMPLOYEES) && (
               <Grid item xs={12} md={8}>
-                <Box
-                  sx={addButtonDesktopBoxStyles}
-                >
+                <Box sx={addButtonDesktopBoxStyles}>
                   <Button
                     variant="contained"
                     startIcon={<AddRoundedIcon />}
@@ -369,9 +360,7 @@ const EmployeesPage: React.FC = () => {
               userPermissions={userPermissions}
             />
           ) : (
-            <Box
-              sx={noEmployeesBoxStyles}
-            >
+            <Box sx={noEmployeesBoxStyles}>
               <ManageSearchIcon color="disabled" sx={noEmployeesIconStyles} />
               <Typography variant="h6" color="textSecondary">
                 {MANAGEMENT.EMPLOYEES_PAGE.NO_EMPLOYEES}

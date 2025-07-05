@@ -28,7 +28,10 @@ import FactoryOutlinedIcon from "@mui/icons-material/FactoryOutlined";
 import InfoOutlinedIcon from "@mui/icons-material/InfoOutlined";
 import { DatePicker, LocalizationProvider } from "@mui/x-date-pickers";
 import { AdapterDateFns } from "@mui/x-date-pickers/AdapterDateFns";
-import { AutocompleteChangeReason, AutocompleteChangeDetails } from "@mui/material";
+import {
+  AutocompleteChangeReason,
+  AutocompleteChangeDetails,
+} from "@mui/material";
 
 import { es } from "date-fns/locale";
 import {
@@ -45,7 +48,7 @@ import {
   actionsInnerBox,
   cancelButton,
   submitButton,
-} from './styles';
+} from "./styles";
 
 interface AddVehicleFormProps {
   onSubmit: (vehicle: {
@@ -97,13 +100,17 @@ const AddVehicleForm: React.FC<AddVehicleFormProps> = ({
   const [searchColorTerm, setSearchColorTerm] = useState("");
   const [filteredColors, setFilteredColors] = useState(COLORS_LIST);
 
-  const [parkingPrefix, setParkingPrefix] = useState<{ value: string; label: string }>({ value: "ATP", label: "ATP" });
+  const [parkingPrefix, setParkingPrefix] = useState<{
+    value: string;
+    label: string;
+  }>({ value: "ATP", label: "ATP" });
   const [parkingPrefixOptions, setParkingPrefixOptions] = useState([
     { value: "ATP", label: "ATP" },
     { value: "CE", label: "CE" },
   ]);
   const [searchParkingPrefixTerm, setSearchParkingPrefixTerm] = useState("");
-  const [filteredParkingPrefixes, setFilteredParkingPrefixes] = useState(parkingPrefixOptions);
+  const [filteredParkingPrefixes, setFilteredParkingPrefixes] =
+    useState(parkingPrefixOptions);
 
   const validateField = useCallback(
     (name: string, value: string) => {
@@ -145,7 +152,11 @@ const AddVehicleForm: React.FC<AddVehicleFormProps> = ({
           break;
         case "parkingLot": {
           const prefix = parkingPrefix.value;
-          const error = validateParkingLotWithPrefix(prefix, value, FORMS.INVALID_FORMAT_PARKING);
+          const error = validateParkingLotWithPrefix(
+            prefix,
+            value,
+            FORMS.INVALID_FORMAT_PARKING,
+          );
           if (error) return error;
           break;
         }
@@ -208,7 +219,9 @@ const AddVehicleForm: React.FC<AddVehicleFormProps> = ({
     event: React.SyntheticEvent,
     newValue: { value: string; label: string } | string | null,
     reason: AutocompleteChangeReason,
-    details?: AutocompleteChangeDetails<{ value: string; label: string }> | undefined
+    details?:
+      | AutocompleteChangeDetails<{ value: string; label: string }>
+      | undefined,
   ) => {
     let prefixValue = "";
     if (newValue === null || newValue === "") {
@@ -312,7 +325,11 @@ const AddVehicleForm: React.FC<AddVehicleFormProps> = ({
   return (
     <Box sx={boxRoot}>
       <Box sx={{ mb: 2 }}>
-        <Typography variant="body2" color="text.secondary" sx={{ lineHeight: 1.4 }}>
+        <Typography
+          variant="body2"
+          color="text.secondary"
+          sx={{ lineHeight: 1.4 }}
+        >
           {FORMS.ADD_VEHICLE.DIALOG_CONTENT_TITLE}
         </Typography>
       </Box>
@@ -446,15 +463,21 @@ const AddVehicleForm: React.FC<AddVehicleFormProps> = ({
         </Grid>
 
         <Grid item xs={12} sm={6}>
-          <Box sx={{ display: 'flex', gap: 1 }}>
-            <FormControl variant="outlined" sx={{ minWidth: 90, flex: '0 0 90px' }}>
+          <Box sx={{ display: "flex", gap: 1 }}>
+            <FormControl
+              variant="outlined"
+              sx={{ minWidth: 90, flex: "0 0 90px" }}
+            >
               <Autocomplete
                 freeSolo
                 value={parkingPrefix}
                 onChange={handleParkingPrefixChange}
                 inputValue={searchParkingPrefixTerm.toUpperCase()}
                 onInputChange={handleSearchChangeParkingPrefix}
-                options={filteredParkingPrefixes.map(opt => ({ value: opt.value.toUpperCase(), label: opt.label.toUpperCase() }))}
+                options={filteredParkingPrefixes.map((opt) => ({
+                  value: opt.value.toUpperCase(),
+                  label: opt.label.toUpperCase(),
+                }))}
                 getOptionLabel={(option) =>
                   typeof option === "string" ? option : option.label
                 }
@@ -474,14 +497,17 @@ const AddVehicleForm: React.FC<AddVehicleFormProps> = ({
               label={FORMS.ADD_VEHICLE.PARKING_LOT_LABEL}
               variant="outlined"
               fullWidth
-              placeholder={FORMS.ADD_VEHICLE.PARKING_LOT_PLACEHOLDER.replace("ATP", parkingPrefix.value)}
+              placeholder={FORMS.ADD_VEHICLE.PARKING_LOT_PLACEHOLDER.replace(
+                "ATP",
+                parkingPrefix.value,
+              )}
               value={formData.parkingLot}
               onChange={handleParkingLotChange}
               error={errors.parkingLot !== ""}
               helperText={errors.parkingLot}
               icon={<LocalParkingOutlinedIcon sx={iconSx(theme)} />}
               InputProps={{
-                readOnly: parkingPrefix.value === 'CE',
+                readOnly: parkingPrefix.value === "CE",
               }}
             />
           </Box>
@@ -498,7 +524,7 @@ const AddVehicleForm: React.FC<AddVehicleFormProps> = ({
                 textField: {
                   fullWidth: true,
                   required: true,
-                  variant: 'outlined',
+                  variant: "outlined",
                   sx: formControl(theme),
                 },
               }}
@@ -525,10 +551,14 @@ const AddVehicleForm: React.FC<AddVehicleFormProps> = ({
         <Grid item xs={12}>
           <Box sx={infoBox(theme)}>
             <Box sx={infoIconBox(theme)}>
-              <InfoOutlinedIcon sx={{ ...iconSx(theme), ...infoIconBox(theme) }} />
+              <InfoOutlinedIcon
+                sx={{ ...iconSx(theme), ...infoIconBox(theme) }}
+              />
             </Box>
             <Box>
-              <Typography sx={infoTitle(theme)}>{FORMS.ADD_VEHICLE.INFO_TITLE}</Typography>
+              <Typography sx={infoTitle(theme)}>
+                {FORMS.ADD_VEHICLE.INFO_TITLE}
+              </Typography>
               <Typography sx={infoDesc(theme)}>
                 {FORMS.ADD_VEHICLE.INFO_DESC}
               </Typography>
@@ -567,7 +597,9 @@ const AddVehicleForm: React.FC<AddVehicleFormProps> = ({
                 fullWidth={isSmallScreen}
                 sx={submitButton}
               >
-                {isLoading ? FORMS.ADD_VEHICLE.BUTTON_ADDING : FORMS.ADD_VEHICLE.BUTTON_ADD}
+                {isLoading
+                  ? FORMS.ADD_VEHICLE.BUTTON_ADDING
+                  : FORMS.ADD_VEHICLE.BUTTON_ADD}
               </Button>
             </Box>
           </Box>

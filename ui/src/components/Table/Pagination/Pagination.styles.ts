@@ -1,4 +1,6 @@
-export const containerStyles = (isSmallScreen: boolean): React.CSSProperties => ({
+export const containerStyles = (
+  isSmallScreen: boolean,
+): React.CSSProperties => ({
   display: "flex",
   alignItems: "center",
   gap: "10px",
@@ -9,4 +11,4 @@ export const containerStyles = (isSmallScreen: boolean): React.CSSProperties => 
 export const pageTextStyles: React.CSSProperties = {
   minWidth: "80px",
   textAlign: "center",
-}; 
+};

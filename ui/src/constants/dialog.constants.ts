@@ -16,4 +16,4 @@ const DIALOG = {
   INFO_TITLE: "Información",
   INFO_MESSAGE: "Información importante",
 };
-export default DIALOG; 
+export default DIALOG;

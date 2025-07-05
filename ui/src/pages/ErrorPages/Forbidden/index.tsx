@@ -24,7 +24,7 @@ import {
   descriptionStyles,
   actionsBoxStyles,
   homeButtonStyles,
-  captionStyles
+  captionStyles,
 } from "./styles";
 
 // Forbidden page component for displaying 403/unauthorized errors
@@ -46,20 +46,15 @@ const Forbidden: React.FC = () => {
             <Box sx={innerBoxStyles}>
               <Box sx={lockBoxStyles}>
                 <LockIcon sx={lockIconStyles(theme)} aria-label="Lock icon" />
-                <SecurityIcon sx={securityIconStyles(theme)} aria-label="Security icon" />
+                <SecurityIcon
+                  sx={securityIconStyles(theme)}
+                  aria-label="Security icon"
+                />
               </Box>
-              <Typography
-                variant="h3"
-                component="h1"
-                sx={titleStyles(theme)}
-              >
+              <Typography variant="h3" component="h1" sx={titleStyles(theme)}>
                 {ERRORS.ERROR_403_TITLE}
               </Typography>
-              <Typography
-                variant="h5"
-                color="text.primary"
-                sx={subtitleStyles}
-              >
+              <Typography variant="h5" color="text.primary" sx={subtitleStyles}>
                 {ERRORS.ERROR_403_SUBTITLE}
               </Typography>
               <Typography

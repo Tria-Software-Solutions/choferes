@@ -17,7 +17,7 @@ import {
   menuPaperStyles,
   menuItemStyles,
   subMenuPaperStyles,
-  listItemTextStyles
+  listItemTextStyles,
 } from "./Menu.styles";
 
 export interface MenuItemProps {

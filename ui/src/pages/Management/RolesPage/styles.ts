@@ -128,7 +128,10 @@ export const summaryDialogCloseIconStyles: SxProps<Theme> = {
   color: "#fff",
 };
 
-export const summaryTabPanelAvatarStyles = (theme: Theme, color: "success" | "info" | "warning" | "error"): SxProps<Theme> => {
+export const summaryTabPanelAvatarStyles = (
+  theme: Theme,
+  color: "success" | "info" | "warning" | "error",
+): SxProps<Theme> => {
   const colorMap = {
     success: theme.palette.success.light,
     info: theme.palette.info.light,
@@ -172,4 +175,4 @@ export const summaryInfoTitleStyles = (theme: Theme): SxProps<Theme> => ({
 export const summaryInfoDescStyles = (theme: Theme): SxProps<Theme> => ({
   color: theme.palette.text.secondary,
   fontSize: "clamp(0.75rem, 1.25vw, 0.875rem)",
-}); 
+});

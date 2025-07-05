@@ -13,7 +13,8 @@ const TABLE = {
   MORE: "+{n} más",
   SEARCH_PLACEHOLDER: "Buscar...",
   CONFIRM_DELETE_TITLE: "¿Eliminar registro?",
-  CONFIRM_DELETE_TEXT: "¿Estás seguro de que deseas eliminar este registro? Esta acción no se puede deshacer.",
+  CONFIRM_DELETE_TEXT:
+    "¿Estás seguro de que deseas eliminar este registro? Esta acción no se puede deshacer.",
   CONFIRM_DELETE_ACCEPT: "Sí, eliminar",
   CONFIRM_DELETE_CANCEL: "Cancelar",
   TOOLTIP_EDIT: "Editar",
@@ -26,4 +27,4 @@ const TABLE = {
   DISABLE: "Desactivar",
   CHANGE_PASSWORD: "Cambiar contraseña",
 };
-export default TABLE; 
+export default TABLE;

@@ -594,12 +594,20 @@ const RolesPage: React.FC = () => {
         alignItems="center"
         sx={rolesHeaderBoxStyles}
       >
-        <Box display="flex" flexDirection="column" alignItems="flex-start" sx={rolesTitleBoxStyles}>
+        <Box
+          display="flex"
+          flexDirection="column"
+          alignItems="flex-start"
+          sx={rolesTitleBoxStyles}
+        >
           <Typography
             variant={isSmallScreen ? "h5" : "h4"}
             sx={rolesTitleStyles}
           >
-            <AssignmentIcon fontSize={isSmallScreen ? "small" : "large"} sx={rolesIconStyles(theme)} />
+            <AssignmentIcon
+              fontSize={isSmallScreen ? "small" : "large"}
+              sx={rolesIconStyles(theme)}
+            />
             {isSmallScreen ? PAGE_TITLE.ROLES_SIMPLIFIED : PAGE_TITLE.ROLES}
           </Typography>
           <Divider sx={rolesDividerStyles(theme)} />
@@ -619,13 +627,8 @@ const RolesPage: React.FC = () => {
           )}
       </Box>
       {isLoading ? (
-        <Box
-          sx={loadingBoxStyles}
-        >
-          <Backdrop
-            sx={backdropStyles(theme)}
-            open={isLoading}
-          >
+        <Box sx={loadingBoxStyles}>
+          <Backdrop sx={backdropStyles(theme)} open={isLoading}>
             <CircularProgress />
           </Backdrop>
         </Box>
@@ -656,8 +659,16 @@ const RolesPage: React.FC = () => {
                 justifyContent="flex-end"
                 gap={2}
               >
-                <Box display="flex" alignItems="center" justifyContent="flex-start" gap={1}>
-                  <LocalizationProvider dateAdapter={AdapterDateFns} adapterLocale={es}>
+                <Box
+                  display="flex"
+                  alignItems="center"
+                  justifyContent="flex-start"
+                  gap={1}
+                >
+                  <LocalizationProvider
+                    dateAdapter={AdapterDateFns}
+                    adapterLocale={es}
+                  >
                     <DatePicker
                       label={MANAGEMENT.DATE_PICKER_LABEL}
                       value={firstDayOfWeek || null}
@@ -676,22 +687,31 @@ const RolesPage: React.FC = () => {
                       onChange={handleDateChange}
                     />
                   </LocalizationProvider>
-                  <ButtonGroup
-                    variant="contained"
-                    sx={buttonGroupSx}
-                  >
+                  <ButtonGroup variant="contained" sx={buttonGroupSx}>
                     <Tooltip title={MANAGEMENT.TOOLTIP_PREV_WEEK} arrow>
                       <Button onClick={handlePreviousWeek}>
                         <ArrowBackIosNewRoundedIcon />
                       </Button>
                     </Tooltip>
                     <Tooltip title={MANAGEMENT.TOOLTIP_NEXT_WEEK} arrow>
-                      <Button disabled={!isValidDateForSelect(new Date(getCurrentWeekDates(weekOffset + 1)[0].isoDate))} onClick={handleNextWeek}>
+                      <Button
+                        disabled={
+                          !isValidDateForSelect(
+                            new Date(
+                              getCurrentWeekDates(weekOffset + 1)[0].isoDate,
+                            ),
+                          )
+                        }
+                        onClick={handleNextWeek}
+                      >
                         <ArrowForwardIosRoundedIcon />
                       </Button>
                     </Tooltip>
                     <Tooltip title={MANAGEMENT.TOOLTIP_CURRENT_WEEK} arrow>
-                      <Button disabled={weekOffset === 0} onClick={handleCurrentWeek}>
+                      <Button
+                        disabled={weekOffset === 0}
+                        onClick={handleCurrentWeek}
+                      >
                         <CalendarTodayRoundedIcon />
                       </Button>
                     </Tooltip>
@@ -720,9 +740,7 @@ const RolesPage: React.FC = () => {
               onInfoClick={setOpenSummaryDialogEmployee}
             />
           ) : (
-            <Box
-              sx={noEmployeesBoxStyles}
-            >
+            <Box sx={noEmployeesBoxStyles}>
               <ManageSearchIcon color="disabled" sx={noEmployeesIconStyles} />
               <Typography variant="h6" color="textSecondary">
                 {MANAGEMENT.NO_EMPLOYEES}
@@ -736,7 +754,11 @@ const RolesPage: React.FC = () => {
         onClose={handleCloseExportDialog}
         onConfirm={() => handleExportHours(true)}
         title={MANAGEMENT.DIALOG_EXPORT_TITLE}
-        message={exportType === "excel" ? MANAGEMENT.DIALOG_EXPORT_MESSAGE_EXCEL : MANAGEMENT.DIALOG_EXPORT_MESSAGE_PDF}
+        message={
+          exportType === "excel"
+            ? MANAGEMENT.DIALOG_EXPORT_MESSAGE_EXCEL
+            : MANAGEMENT.DIALOG_EXPORT_MESSAGE_PDF
+        }
         type="info"
         confirmText={MANAGEMENT.DIALOG_EXPORT_CONFIRM}
         cancelText={MANAGEMENT.DIALOG_EXPORT_CANCEL}
@@ -752,9 +774,7 @@ const RolesPage: React.FC = () => {
             sx: summaryDialogPaperSx,
           }}
         >
-          <Box
-            sx={summaryDialogHeaderBoxStyles}
-          >
+          <Box sx={summaryDialogHeaderBoxStyles}>
             <Box>
               <Typography variant="h5" fontWeight={700} color="#fff">
                 {MANAGEMENT.SUMMARY_TITLE}
@@ -812,9 +832,7 @@ const RolesPage: React.FC = () => {
                   </TabPanel>
                   <TabPanel value="biweekly">
                     <Box display="flex" alignItems="center" gap={3}>
-                      <Avatar
-                        sx={summaryTabPanelAvatarStyles(theme, "info")}
-                      >
+                      <Avatar sx={summaryTabPanelAvatarStyles(theme, "info")}>
                         <BarChartIcon color="info" />
                       </Avatar>
                       <Box>
@@ -864,9 +882,7 @@ const RolesPage: React.FC = () => {
                   </TabPanel>
                   <TabPanel value="overtime">
                     <Box display="flex" alignItems="center" gap={3}>
-                      <Avatar
-                        sx={summaryTabPanelAvatarStyles(theme, "error")}
-                      >
+                      <Avatar sx={summaryTabPanelAvatarStyles(theme, "error")}>
                         <AccessTimeRoundedIcon color="error" />
                       </Avatar>
                       <Box>
@@ -885,15 +901,9 @@ const RolesPage: React.FC = () => {
                 </TabContext>
               </Grid>
               <Grid item xs={12}>
-                <Box
-                  sx={summaryInfoBoxStyles(theme)}
-                >
-                  <Box
-                    sx={summaryInfoIconBoxStyles(theme)}
-                  >
-                    <InfoOutlinedIcon
-                      sx={summaryInfoIconStyles(theme)}
-                    />
+                <Box sx={summaryInfoBoxStyles(theme)}>
+                  <Box sx={summaryInfoIconBoxStyles(theme)}>
+                    <InfoOutlinedIcon sx={summaryInfoIconStyles(theme)} />
                   </Box>
                   <Box>
                     <Box sx={summaryInfoTitleStyles(theme)}>

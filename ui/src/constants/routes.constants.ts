@@ -9,4 +9,4 @@ const ROUTES = {
   SETTINGS: "/settings",
   VEHICLES: "/vehicles",
 };
-export default ROUTES; 
+export default ROUTES;

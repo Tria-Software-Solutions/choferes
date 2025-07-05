@@ -39,7 +39,10 @@ import {
   capitalizeFirstLetter,
 } from "../../../utils/string";
 import { formatDateWithDay } from "../../../utils/dates";
-import { maskLicensePlate, maskParkingLotWithPrefix } from "../../../utils/mask";
+import {
+  maskLicensePlate,
+  maskParkingLotWithPrefix,
+} from "../../../utils/mask";
 import {
   BRANDS_LIST,
   COLORS_LIST,
@@ -48,17 +51,17 @@ import {
   TABLE_UI,
   PERMISSIONS,
 } from "../../../constants/constants";
-import EditNoteIcon from '@mui/icons-material/EditNote';
-import DeleteForeverIcon from '@mui/icons-material/DeleteForever';
-import CheckCircleIcon from '@mui/icons-material/CheckCircle';
-import CancelIcon from '@mui/icons-material/Cancel';
+import EditNoteIcon from "@mui/icons-material/EditNote";
+import DeleteForeverIcon from "@mui/icons-material/DeleteForever";
+import CheckCircleIcon from "@mui/icons-material/CheckCircle";
+import CancelIcon from "@mui/icons-material/Cancel";
 import PaginationComponent from "../Pagination/Pagination.component";
-import LockResetIcon from '@mui/icons-material/LockReset';
-import ToggleOnIcon from '@mui/icons-material/ToggleOn';
-import ToggleOffIcon from '@mui/icons-material/ToggleOff';
+import LockResetIcon from "@mui/icons-material/LockReset";
+import ToggleOnIcon from "@mui/icons-material/ToggleOn";
+import ToggleOffIcon from "@mui/icons-material/ToggleOff";
 import TextfieldComponent from "../../Textfield/Textfield.component";
 import DialogComponent from "../../Dialog/Dialog.component";
-import { User } from '../../../models/User';
+import { User } from "../../../models/User";
 import {
   formControlStyles,
   selectStyles,
@@ -66,7 +69,7 @@ import {
   tableCellStyles,
   permissionChipStyles,
   viewMoreLessStyles,
-  emailLinkStyles
+  emailLinkStyles,
 } from "./EditableTable.styles";
 
 // EditableTable is a generic, highly-configurable table component for displaying and editing tabular data.
@@ -134,8 +137,8 @@ type EditableTableProps<T> = {
 };
 
 const PARKING_PREFIX_OPTIONS = [
-  { value: 'ATP', label: 'ATP' },
-  { value: 'CE', label: 'CE' },
+  { value: "ATP", label: "ATP" },
+  { value: "CE", label: "CE" },
 ];
 
 const EditableTableComponent = <T extends object>({
@@ -275,12 +278,14 @@ const EditableTableComponent = <T extends object>({
       );
     }
 
-    if (String(column) === 'licensePlate') {
-      const licensePlateValue = (editFields['licensePlate'] as string) || '';
-      const handleLicensePlateChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    if (String(column) === "licensePlate") {
+      const licensePlateValue = (editFields["licensePlate"] as string) || "";
+      const handleLicensePlateChange = (
+        event: React.ChangeEvent<HTMLInputElement>,
+      ) => {
         const rawValue = event.target.value;
         const maskedValue = maskLicensePlate(rawValue);
-        setEditField && setEditField('licensePlate', maskedValue);
+        setEditField && setEditField("licensePlate", maskedValue);
       };
       return wrapWithGrid(
         <TextfieldComponent
@@ -288,8 +293,9 @@ const EditableTableComponent = <T extends object>({
           fullWidth
           value={licensePlateValue}
           onChange={handleLicensePlateChange}
-          error={!validateField('licensePlate', licensePlateValue)}
-        />, column
+          error={!validateField("licensePlate", licensePlateValue)}
+        />,
+        column,
       );
     }
 
@@ -307,63 +313,82 @@ const EditableTableComponent = <T extends object>({
       );
     }
 
-    if (String(column) === 'parkingLot') {
+    if (String(column) === "parkingLot") {
       // Get prefix from editFields or default to ATP
-      const parkingPrefix = (editFields['parkingPrefix'] as string) || 'ATP';
-      const parkingLotValue = (editFields['parkingLot'] as string) || '';
+      const parkingPrefix = (editFields["parkingPrefix"] as string) || "ATP";
+      const parkingLotValue = (editFields["parkingLot"] as string) || "";
       const prefixOptions = PARKING_PREFIX_OPTIONS.concat(
-        parkingPrefix && !PARKING_PREFIX_OPTIONS.some(opt => opt.value === parkingPrefix)
+        parkingPrefix &&
+          !PARKING_PREFIX_OPTIONS.some((opt) => opt.value === parkingPrefix)
           ? [{ value: parkingPrefix, label: parkingPrefix }]
-          : []
+          : [],
       );
 
       const handlePrefixChange = (
         event: React.SyntheticEvent,
-        newValue: { value: string; label: string } | string | null
+        newValue: { value: string; label: string } | string | null,
       ) => {
-        let prefixValue = '';
-        if (newValue === null || newValue === '') {
-          setEditField && setEditField('parkingPrefix', '');
-          setEditField && setEditField('parkingLot', '');
+        let prefixValue = "";
+        if (newValue === null || newValue === "") {
+          setEditField && setEditField("parkingPrefix", "");
+          setEditField && setEditField("parkingLot", "");
           return;
         }
-        if (typeof newValue === 'object' && newValue !== null) {
+        if (typeof newValue === "object" && newValue !== null) {
           prefixValue = newValue.value.toUpperCase();
-        } else if (typeof newValue === 'string') {
+        } else if (typeof newValue === "string") {
           prefixValue = newValue.toUpperCase();
         }
         if (prefixValue) {
-          setEditField && setEditField('parkingPrefix', prefixValue);
-          if (prefixValue === 'CE') {
-            setEditField && setEditField('parkingLot', 'CE');
+          setEditField && setEditField("parkingPrefix", prefixValue);
+          if (prefixValue === "CE") {
+            setEditField && setEditField("parkingLot", "CE");
           } else {
-            setEditField && setEditField('parkingLot', '');
+            setEditField && setEditField("parkingLot", "");
           }
         }
       };
 
-      const handleParkingLotChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+      const handleParkingLotChange = (
+        event: React.ChangeEvent<HTMLInputElement>,
+      ) => {
         const rawValue = event.target.value;
         const maskedValue = maskParkingLotWithPrefix(parkingPrefix, rawValue);
-        setEditField && setEditField('parkingLot', maskedValue);
+        setEditField && setEditField("parkingLot", maskedValue);
       };
 
-      const isReadOnly = parkingPrefix === 'CE';
+      const isReadOnly = parkingPrefix === "CE";
 
       return wrapWithGrid(
-        <Box sx={{ display: 'flex', gap: 1 }}>
-          <FormControl variant="outlined" sx={{ minWidth: 90, flex: '0 0 90px' }}>
+        <Box sx={{ display: "flex", gap: 1 }}>
+          <FormControl
+            variant="outlined"
+            sx={{ minWidth: 90, flex: "0 0 90px" }}
+          >
             <Autocomplete
               freeSolo
               value={{ value: parkingPrefix, label: parkingPrefix }}
               onChange={handlePrefixChange}
               inputValue={parkingPrefix}
-              onInputChange={(e, v) => setEditField && setEditField('parkingPrefix', v.toUpperCase())}
-              options={prefixOptions.map(opt => ({ value: opt.value.toUpperCase(), label: opt.label.toUpperCase() }))}
-              getOptionLabel={option => typeof option === 'string' ? option : option.label}
+              onInputChange={(e, v) =>
+                setEditField && setEditField("parkingPrefix", v.toUpperCase())
+              }
+              options={prefixOptions.map((opt) => ({
+                value: opt.value.toUpperCase(),
+                label: opt.label.toUpperCase(),
+              }))}
+              getOptionLabel={(option) =>
+                typeof option === "string" ? option : option.label
+              }
               noOptionsText="Sin coincidencias"
-              renderInput={params => (
-                <TextfieldComponent {...params} label="Prefijo" variant="outlined" fullWidth sx={{ minWidth: 90 }} />
+              renderInput={(params) => (
+                <TextfieldComponent
+                  {...params}
+                  label="Prefijo"
+                  variant="outlined"
+                  fullWidth
+                  sx={{ minWidth: 90 }}
+                />
               )}
             />
           </FormControl>
@@ -374,10 +399,10 @@ const EditableTableComponent = <T extends object>({
             value={parkingLotValue}
             onChange={handleParkingLotChange}
             InputProps={{ readOnly: isReadOnly }}
-            error={!validateField('parkingLot', parkingLotValue)}
+            error={!validateField("parkingLot", parkingLotValue)}
           />
         </Box>,
-        column
+        column,
       );
     }
 
@@ -775,23 +800,33 @@ const EditableTableComponent = <T extends object>({
       const headerHeight = 56; // Table header
       const paginationHeight = 64; // Pagination footer
       const extra = 24; // Buffer for borders/margins
-      const availableHeight = maxHeight - headerHeight - paginationHeight - extra;
+      const availableHeight =
+        maxHeight - headerHeight - paginationHeight - extra;
       const rowHeight = 48;
       let rows = Math.floor(availableHeight / rowHeight);
       rows = Math.max(3, Math.min(100, rows));
       setRowsPerPage(rows);
     }
     calculateRowsPerPage();
-    window.addEventListener('resize', calculateRowsPerPage);
-    return () => window.removeEventListener('resize', calculateRowsPerPage);
+    window.addEventListener("resize", calculateRowsPerPage);
+    return () => window.removeEventListener("resize", calculateRowsPerPage);
   }, [setRowsPerPage]);
 
   // Compute rowsPerPageOptions to always include the current value
   const defaultRowsPerPageOptions = [5, 10, 25, 50, 100];
-  const rowsPerPageOptions = Array.from(new Set([...defaultRowsPerPageOptions, rowsPerPage])).sort((a, b) => a - b);
+  const rowsPerPageOptions = Array.from(
+    new Set([...defaultRowsPerPageOptions, rowsPerPage]),
+  ).sort((a, b) => a - b);
 
   return (
-    <Paper sx={{ width: "100%", borderRadius: 1, boxShadow: '0 4px 24px -4px rgba(0,0,0,0.10)', overflow: 'hidden' }}>
+    <Paper
+      sx={{
+        width: "100%",
+        borderRadius: 1,
+        boxShadow: "0 4px 24px -4px rgba(0,0,0,0.10)",
+        overflow: "hidden",
+      }}
+    >
       {groupByDate && (
         <Box
           sx={{
@@ -818,10 +853,19 @@ const EditableTableComponent = <T extends object>({
       )}
       <TableContainer
         className="table-container"
-        sx={{ maxHeight: "60vh", overflowY: "auto", overflowX: "auto", borderRadius: 0 }}
+        sx={{
+          maxHeight: "60vh",
+          overflowY: "auto",
+          overflowX: "auto",
+          borderRadius: 0,
+        }}
         ref={tableContainerRef}
       >
-        <Table stickyHeader aria-label="sticky table" sx={{ minWidth: 650, borderCollapse: 'separate', borderSpacing: 0 }}>
+        <Table
+          stickyHeader
+          aria-label="sticky table"
+          sx={{ minWidth: 650, borderCollapse: "separate", borderSpacing: 0 }}
+        >
           <TableHead>
             <TableRow>
               {columns
@@ -832,21 +876,26 @@ const EditableTableComponent = <T extends object>({
                     key={String(column)}
                     className="tableCell"
                     sx={{
-                      position: 'sticky',
+                      position: "sticky",
                       top: 0,
                       zIndex: 4,
-                      backgroundColor: theme => theme.palette.primary.main,
-                      color: theme => theme.palette.primary.contrastText,
+                      backgroundColor: (theme) => theme.palette.primary.main,
+                      color: (theme) => theme.palette.primary.contrastText,
                       fontWeight: 700,
-                      fontSize: 'clamp(0.95rem, 1vw, 1.05rem)',
-                      padding: '12px 16px',
-                      whiteSpace: 'nowrap',
+                      fontSize: "clamp(0.95rem, 1vw, 1.05rem)",
+                      padding: "12px 16px",
+                      whiteSpace: "nowrap",
                     }}
                   >
                     <TableSortLabel
                       direction={orderBy === column ? order : "asc"}
                       onClick={() => handleSortRequest(column)}
-                      sx={{ color: 'inherit', '& .MuiTableSortLabel-icon': { color: 'inherit !important' } }}
+                      sx={{
+                        color: "inherit",
+                        "& .MuiTableSortLabel-icon": {
+                          color: "inherit !important",
+                        },
+                      }}
                     >
                       {translateColumnHeaderToSpanish(column)}
                     </TableSortLabel>
@@ -856,15 +905,15 @@ const EditableTableComponent = <T extends object>({
                 <TableCell
                   className="tableCell"
                   sx={{
-                    position: 'sticky',
+                    position: "sticky",
                     top: 0,
                     zIndex: 4,
-                    backgroundColor: theme => theme.palette.primary.main,
-                    color: theme => theme.palette.primary.contrastText,
+                    backgroundColor: (theme) => theme.palette.primary.main,
+                    color: (theme) => theme.palette.primary.contrastText,
                     fontWeight: 700,
-                    fontSize: 'clamp(0.95rem, 1vw, 1.05rem)',
-                    padding: '12px 16px',
-                    whiteSpace: 'nowrap',
+                    fontSize: "clamp(0.95rem, 1vw, 1.05rem)",
+                    padding: "12px 16px",
+                    whiteSpace: "nowrap",
                   }}
                 >
                   Estado
@@ -878,39 +927,44 @@ const EditableTableComponent = <T extends object>({
                     key={String(column)}
                     className="tableCell"
                     sx={{
-                      position: 'sticky',
+                      position: "sticky",
                       top: 0,
                       zIndex: 4,
-                      backgroundColor: theme => theme.palette.primary.main,
-                      color: theme => theme.palette.primary.contrastText,
+                      backgroundColor: (theme) => theme.palette.primary.main,
+                      color: (theme) => theme.palette.primary.contrastText,
                       fontWeight: 700,
-                      fontSize: 'clamp(0.95rem, 1vw, 1.05rem)',
-                      padding: '12px 16px',
-                      whiteSpace: 'nowrap',
+                      fontSize: "clamp(0.95rem, 1vw, 1.05rem)",
+                      padding: "12px 16px",
+                      whiteSpace: "nowrap",
                     }}
                   >
                     <TableSortLabel
                       direction={orderBy === column ? order : "asc"}
                       onClick={() => handleSortRequest(column)}
-                      sx={{ color: 'inherit', '& .MuiTableSortLabel-icon': { color: 'inherit !important' } }}
+                      sx={{
+                        color: "inherit",
+                        "& .MuiTableSortLabel-icon": {
+                          color: "inherit !important",
+                        },
+                      }}
                     >
                       {translateColumnHeaderToSpanish(column)}
                     </TableSortLabel>
                   </TableCell>
                 ))}
-              {(!noActions && (hasEditPermissions || hasDeletePermissions)) ? (
+              {!noActions && (hasEditPermissions || hasDeletePermissions) ? (
                 <TableCell
                   className="tableCell"
-                  style={{ width: "100px", whiteSpace: 'nowrap' }}
+                  style={{ width: "100px", whiteSpace: "nowrap" }}
                   sx={{
-                    position: 'sticky',
+                    position: "sticky",
                     top: 0,
                     zIndex: 4,
-                    backgroundColor: theme => theme.palette.primary.main,
-                    color: theme => theme.palette.primary.contrastText,
+                    backgroundColor: (theme) => theme.palette.primary.main,
+                    color: (theme) => theme.palette.primary.contrastText,
                     fontWeight: 700,
-                    fontSize: 'clamp(0.95rem, 1vw, 1.05rem)',
-                    padding: '12px 16px',
+                    fontSize: "clamp(0.95rem, 1vw, 1.05rem)",
+                    padding: "12px 16px",
                   }}
                 />
               ) : null}
@@ -926,12 +980,16 @@ const EditableTableComponent = <T extends object>({
                 <TableRow
                   hover
                   tabIndex={-1}
-                  key={getRowId(row) + '-' + String((row as T & { isActive?: boolean }).isActive)}
+                  key={
+                    getRowId(row) +
+                    "-" +
+                    String((row as T & { isActive?: boolean }).isActive)
+                  }
                   sx={{
-                    backgroundColor: rowIndex % 2 === 0 ? '#fff' : '#f6f8fa',
-                    transition: 'background 0.2s',
-                    '&:hover': {
-                      backgroundColor: '#e3eafc',
+                    backgroundColor: rowIndex % 2 === 0 ? "#fff" : "#f6f8fa",
+                    transition: "background 0.2s",
+                    "&:hover": {
+                      backgroundColor: "#e3eafc",
                     },
                   }}
                 >
@@ -1020,7 +1078,13 @@ const EditableTableComponent = <T extends object>({
                           ) : editRowId === getRowId(row) &&
                             column === "permissionNames" ? (
                             Array.isArray(row[column]) ? (
-                              <Box sx={{ display: "flex", flexWrap: "wrap", gap: 0.5 }}>
+                              <Box
+                                sx={{
+                                  display: "flex",
+                                  flexWrap: "wrap",
+                                  gap: 0.5,
+                                }}
+                              >
                                 {(row[column] as string[]).map(
                                   (item: string, index: number) => (
                                     <Box
@@ -1059,7 +1123,13 @@ const EditableTableComponent = <T extends object>({
                             )
                           ) : Array.isArray(row[column]) ? (
                             column === "permissionNames" ? (
-                              <Box sx={{ display: "flex", flexWrap: "wrap", gap: 0.5 }}>
+                              <Box
+                                sx={{
+                                  display: "flex",
+                                  flexWrap: "wrap",
+                                  gap: 0.5,
+                                }}
+                              >
                                 {(row[column] as string[]).map(
                                   (item: string, index: number) => (
                                     <Box
@@ -1112,24 +1182,35 @@ const EditableTableComponent = <T extends object>({
                     })}
                   {showStatusColumn && (
                     <TableCell className="tableCell" sx={tableCellStyles}>
-                      {isUser && !isCurrentUser && ('isActive' in row) && hasDeletePermissions && (
-                        <Tooltip title={row.isActive ? TABLE.DISABLE : TABLE.ENABLE} arrow>
-                          <span>
-                            <Box>
-                              <IconButton
-                                color="secondary"
-                                onClick={() => handleOpenStatusDialog && handleOpenStatusDialog(row)}
-                              >
-                                {row.isActive ? (
-                                  <ToggleOnIcon sx={{ color: 'success.main' }} />
-                                ) : (
-                                  <ToggleOffIcon sx={{ color: 'grey.500' }} />
-                                )}
-                              </IconButton>
-                            </Box>
-                          </span>
-                        </Tooltip>
-                      )}
+                      {isUser &&
+                        !isCurrentUser &&
+                        "isActive" in row &&
+                        hasDeletePermissions && (
+                          <Tooltip
+                            title={row.isActive ? TABLE.DISABLE : TABLE.ENABLE}
+                            arrow
+                          >
+                            <span>
+                              <Box>
+                                <IconButton
+                                  color="secondary"
+                                  onClick={() =>
+                                    handleOpenStatusDialog &&
+                                    handleOpenStatusDialog(row)
+                                  }
+                                >
+                                  {row.isActive ? (
+                                    <ToggleOnIcon
+                                      sx={{ color: "success.main" }}
+                                    />
+                                  ) : (
+                                    <ToggleOffIcon sx={{ color: "grey.500" }} />
+                                  )}
+                                </IconButton>
+                              </Box>
+                            </span>
+                          </Tooltip>
+                        )}
                     </TableCell>
                   )}
                   {columns
@@ -1217,7 +1298,13 @@ const EditableTableComponent = <T extends object>({
                           ) : editRowId === getRowId(row) &&
                             column === "permissionNames" ? (
                             Array.isArray(row[column]) ? (
-                              <Box sx={{ display: "flex", flexWrap: "wrap", gap: 0.5 }}>
+                              <Box
+                                sx={{
+                                  display: "flex",
+                                  flexWrap: "wrap",
+                                  gap: 0.5,
+                                }}
+                              >
                                 {(row[column] as string[]).map(
                                   (item: string, index: number) => (
                                     <Box
@@ -1256,7 +1343,13 @@ const EditableTableComponent = <T extends object>({
                             )
                           ) : Array.isArray(row[column]) ? (
                             column === "permissionNames" ? (
-                              <Box sx={{ display: "flex", flexWrap: "wrap", gap: 0.5 }}>
+                              <Box
+                                sx={{
+                                  display: "flex",
+                                  flexWrap: "wrap",
+                                  gap: 0.5,
+                                }}
+                              >
                                 {(row[column] as string[]).map(
                                   (item: string, index: number) => (
                                     <Box
@@ -1307,131 +1400,143 @@ const EditableTableComponent = <T extends object>({
                         </TableCell>
                       );
                     })}
-                  {!noActions && (hasEditPermissions || hasDeletePermissions) && (
-                    <TableCell
-                      className="tableCell"
-                      style={{ width: "100px", whiteSpace: 'nowrap' }}
-                      sx={tableCellStyles}
-                    >
-                      <Box
-                        sx={{ display: "flex", alignItems: "center", gap: 1 }}
+                  {!noActions &&
+                    (hasEditPermissions || hasDeletePermissions) && (
+                      <TableCell
+                        className="tableCell"
+                        style={{ width: "100px", whiteSpace: "nowrap" }}
+                        sx={tableCellStyles}
                       >
-                        {editRowId === getRowId(row) ? (
-                          <>
-                            <Tooltip title={TABLE.SAVE} arrow>
-                              <span>
-                                <Box>
-                                  <IconButton
-                                    color="primary"
-                                    onClick={() =>
-                                      handleSaveClick &&
-                                      handleSaveClick(getRowId(row))
-                                    }
-                                    disabled={isSaveDisabled}
-                                  >
-                                    <CheckCircleIcon />
-                                  </IconButton>
-                                </Box>
-                              </span>
-                            </Tooltip>
-                            <Tooltip title={TABLE.CANCEL} arrow>
-                              <span>
-                                <Box>
-                                  <IconButton
-                                    color="primary"
-                                    onClick={() =>
-                                      handleCancelClick && handleCancelClick()
-                                    }
-                                  >
-                                    <CancelIcon />
-                                  </IconButton>
-                                </Box>
-                              </span>
-                            </Tooltip>
-                          </>
-                        ) : (
-                          <>
-                            {hasEditPermissions && (
-                              <>
-                                {isUser && isExpanded && onOpenPasswordModal && (
-                                  <Tooltip title={TABLE.CHANGE_PASSWORD} arrow>
+                        <Box
+                          sx={{ display: "flex", alignItems: "center", gap: 1 }}
+                        >
+                          {editRowId === getRowId(row) ? (
+                            <>
+                              <Tooltip title={TABLE.SAVE} arrow>
+                                <span>
+                                  <Box>
+                                    <IconButton
+                                      color="primary"
+                                      onClick={() =>
+                                        handleSaveClick &&
+                                        handleSaveClick(getRowId(row))
+                                      }
+                                      disabled={isSaveDisabled}
+                                    >
+                                      <CheckCircleIcon />
+                                    </IconButton>
+                                  </Box>
+                                </span>
+                              </Tooltip>
+                              <Tooltip title={TABLE.CANCEL} arrow>
+                                <span>
+                                  <Box>
+                                    <IconButton
+                                      color="primary"
+                                      onClick={() =>
+                                        handleCancelClick && handleCancelClick()
+                                      }
+                                    >
+                                      <CancelIcon />
+                                    </IconButton>
+                                  </Box>
+                                </span>
+                              </Tooltip>
+                            </>
+                          ) : (
+                            <>
+                              {hasEditPermissions && (
+                                <>
+                                  {isUser &&
+                                    isExpanded &&
+                                    onOpenPasswordModal && (
+                                      <Tooltip
+                                        title={TABLE.CHANGE_PASSWORD}
+                                        arrow
+                                      >
+                                        <span>
+                                          <Box>
+                                            <IconButton
+                                              color="primary"
+                                              onClick={() =>
+                                                onOpenPasswordModal &&
+                                                onOpenPasswordModal(
+                                                  getRowId(row),
+                                                )
+                                              }
+                                            >
+                                              <LockResetIcon />
+                                            </IconButton>
+                                          </Box>
+                                        </span>
+                                      </Tooltip>
+                                    )}
+                                  <Tooltip title={TABLE.EDIT} arrow>
                                     <span>
                                       <Box>
                                         <IconButton
                                           color="primary"
-                                          onClick={() => onOpenPasswordModal && onOpenPasswordModal(getRowId(row))}
-                                        >
-                                          <LockResetIcon />
-                                        </IconButton>
-                                      </Box>
-                                    </span>
-                                  </Tooltip>
-                                )}
-                                <Tooltip title={TABLE.EDIT} arrow>
-                                  <span>
-                                    <Box>
-                                      <IconButton
-                                        color="primary"
-                                        onClick={() =>
-                                          handleEditClick && handleEditClick(row)
-                                        }
-                                      >
-                                        <EditNoteIcon />
-                                      </IconButton>
-                                    </Box>
-                                  </span>
-                                </Tooltip>
-                              </>
-                            )}
-                            {hasDeletePermissions && (
-                              <>
-                                {isUser ? (
-                                  !isCurrentUser &&
-                                  (!('isActive' in row)
-                                    ? (
-                                        <Tooltip title={TABLE.DELETE} arrow>
-                                          <span>
-                                            <Box>
-                                              <IconButton
-                                                color="error"
-                                                onClick={() =>
-                                                  handleOpenDeleteDialog &&
-                                                  handleOpenDeleteDialog(
-                                                    getRowId(row),
-                                                  )
-                                                }
-                                              >
-                                                <DeleteForeverIcon />
-                                              </IconButton>
-                                            </Box>
-                                          </span>
-                                        </Tooltip>
-                                      )
-                                    : null)
-                                ) : (
-                                  <Tooltip title={TABLE.DELETE} arrow>
-                                    <span>
-                                      <Box>
-                                        <IconButton
-                                          color="error"
                                           onClick={() =>
-                                            handleOpenDeleteDialog &&
-                                            handleOpenDeleteDialog(getRowId(row))
+                                            handleEditClick &&
+                                            handleEditClick(row)
                                           }
                                         >
-                                          <DeleteForeverIcon />
+                                          <EditNoteIcon />
                                         </IconButton>
                                       </Box>
                                     </span>
                                   </Tooltip>
-                                )}
-                              </>
-                            )}
-                          </>
-                        )}
-                      </Box>
-                    </TableCell>
-                  )}
+                                </>
+                              )}
+                              {hasDeletePermissions && (
+                                <>
+                                  {isUser ? (
+                                    !isCurrentUser &&
+                                    (!("isActive" in row) ? (
+                                      <Tooltip title={TABLE.DELETE} arrow>
+                                        <span>
+                                          <Box>
+                                            <IconButton
+                                              color="error"
+                                              onClick={() =>
+                                                handleOpenDeleteDialog &&
+                                                handleOpenDeleteDialog(
+                                                  getRowId(row),
+                                                )
+                                              }
+                                            >
+                                              <DeleteForeverIcon />
+                                            </IconButton>
+                                          </Box>
+                                        </span>
+                                      </Tooltip>
+                                    ) : null)
+                                  ) : (
+                                    <Tooltip title={TABLE.DELETE} arrow>
+                                      <span>
+                                        <Box>
+                                          <IconButton
+                                            color="error"
+                                            onClick={() =>
+                                              handleOpenDeleteDialog &&
+                                              handleOpenDeleteDialog(
+                                                getRowId(row),
+                                              )
+                                            }
+                                          >
+                                            <DeleteForeverIcon />
+                                          </IconButton>
+                                        </Box>
+                                      </span>
+                                    </Tooltip>
+                                  )}
+                                </>
+                              )}
+                            </>
+                          )}
+                        </Box>
+                      </TableCell>
+                    )}
                 </TableRow>
               );
             })}
@@ -1458,7 +1563,7 @@ const EditableTableComponent = <T extends object>({
         }
         labelDisplayedRows={() => ""}
         ActionsComponent={PaginationComponent}
-        sx={{ borderRadius: '0 0 12px 12px' }}
+        sx={{ borderRadius: "0 0 12px 12px" }}
       />
 
       {/* Password change modal: always mounted, only open prop changes */}
@@ -1467,18 +1572,23 @@ const EditableTableComponent = <T extends object>({
         onClose={onClosePasswordModal}
         title="Cambiar Contraseña"
         subtitle={(() => {
-          if (typeof passwordUserId === 'number') {
-            const user = data.find((u) => getRowId(u) === passwordUserId) as User | undefined;
+          if (typeof passwordUserId === "number") {
+            const user = data.find((u) => getRowId(u) === passwordUserId) as
+              | User
+              | undefined;
             if (user) {
-              return `${user.firstName || ''} ${user.lastName || ''}`.trim();
+              return `${user.firstName || ""} ${user.lastName || ""}`.trim();
             }
           }
-          return '';
+          return "";
         })()}
         hideActions
-        paperSx={{ minWidth: { xs: '90vw', sm: 500, md: 700 }, maxWidth: { xs: '98vw', sm: 700 } }}
+        paperSx={{
+          minWidth: { xs: "90vw", sm: 500, md: 700 },
+          maxWidth: { xs: "98vw", sm: 700 },
+        }}
       >
-        {typeof passwordUserId === 'number' && handlePasswordModal
+        {typeof passwordUserId === "number" && handlePasswordModal
           ? handlePasswordModal(passwordUserId, onClosePasswordModal)
           : null}
       </DialogComponent>

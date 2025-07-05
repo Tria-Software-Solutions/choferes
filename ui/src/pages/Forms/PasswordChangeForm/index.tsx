@@ -28,7 +28,7 @@ import {
   subtitle,
   temporalPasswordBox,
   generateButton,
-} from './styles';
+} from "./styles";
 
 interface PasswordChangeFormProps {
   userId: number | null;
@@ -91,7 +91,7 @@ const PasswordChangeForm: React.FC<PasswordChangeFormProps> = ({
         updateUserTemporalPassword({
           id: userId,
           temporalPassword: tempPassword,
-        })
+        }),
       ).unwrap();
     } catch (err: unknown) {
       onError(NOTIFICATIONS.PASSWORD_UPDATE_ERROR);
@@ -112,7 +112,7 @@ const PasswordChangeForm: React.FC<PasswordChangeFormProps> = ({
     setLoading(true);
     try {
       await dispatch(
-        updateUserPassword({ id: userId, password: fields.newPassword })
+        updateUserPassword({ id: userId, password: fields.newPassword }),
       ).unwrap();
       setFields({ newPassword: "", confirmNewPassword: "" });
       setTemporalPassword("");

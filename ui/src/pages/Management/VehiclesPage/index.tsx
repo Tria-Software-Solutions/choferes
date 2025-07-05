@@ -398,13 +398,23 @@ const VehiclesPage: React.FC = () => {
         alignItems="center"
         sx={vehiclesHeaderBoxStyles}
       >
-        <Box display="flex" flexDirection="column" alignItems="flex-start" sx={vehiclesTitleBoxStyles}>
+        <Box
+          display="flex"
+          flexDirection="column"
+          alignItems="flex-start"
+          sx={vehiclesTitleBoxStyles}
+        >
           <Typography
             variant={isSmallScreen ? "h5" : "h4"}
             sx={vehiclesTitleStyles}
           >
-            <DirectionsCarFilledIcon fontSize={isSmallScreen ? "small" : "large"} sx={vehiclesIconStyles(theme)} />
-            {isSmallScreen ? PAGE_TITLE.VEHICLES_SIMPLIFIED : PAGE_TITLE.VEHICLES}
+            <DirectionsCarFilledIcon
+              fontSize={isSmallScreen ? "small" : "large"}
+              sx={vehiclesIconStyles(theme)}
+            />
+            {isSmallScreen
+              ? PAGE_TITLE.VEHICLES_SIMPLIFIED
+              : PAGE_TITLE.VEHICLES}
           </Typography>
           <Divider sx={vehiclesDividerStyles(theme)} />
         </Box>
@@ -423,13 +433,8 @@ const VehiclesPage: React.FC = () => {
           )}
       </Box>
       {isLoadingVehicles ? (
-        <Box
-          sx={loadingBoxStyles}
-        >
-          <Backdrop
-            sx={backdropStyles(theme)}
-            open={isLoadingVehicles}
-          >
+        <Box sx={loadingBoxStyles}>
+          <Backdrop sx={backdropStyles(theme)} open={isLoadingVehicles}>
             <CircularProgress />
           </Backdrop>
         </Box>
@@ -472,8 +477,16 @@ const VehiclesPage: React.FC = () => {
                 justifyContent="flex-end"
                 gap={2}
               >
-                <Box display="flex" alignItems="center" justifyContent="flex-start" gap={1}>
-                  <LocalizationProvider dateAdapter={AdapterDateFns} adapterLocale={es}>
+                <Box
+                  display="flex"
+                  alignItems="center"
+                  justifyContent="flex-start"
+                  gap={1}
+                >
+                  <LocalizationProvider
+                    dateAdapter={AdapterDateFns}
+                    adapterLocale={es}
+                  >
                     <DatePicker
                       label={MANAGEMENT.VEHICLES_PAGE.DATE_PICKER_LABEL}
                       value={selectedDate || null}
@@ -492,39 +505,50 @@ const VehiclesPage: React.FC = () => {
                       onChange={(date) => handleDateChange(date)}
                     />
                   </LocalizationProvider>
-                  <ButtonGroup
-                    variant="contained"
-                    sx={buttonGroupSx}
-                  >
-                    <Tooltip title={MANAGEMENT.VEHICLES_PAGE.TOOLTIP_PREV_DAY} arrow>
+                  <ButtonGroup variant="contained" sx={buttonGroupSx}>
+                    <Tooltip
+                      title={MANAGEMENT.VEHICLES_PAGE.TOOLTIP_PREV_DAY}
+                      arrow
+                    >
                       <Button onClick={handlePreviousDate}>
                         <ArrowBackIosNewRoundedIcon />
                       </Button>
                     </Tooltip>
-                    <Tooltip title={MANAGEMENT.VEHICLES_PAGE.TOOLTIP_NEXT_DAY} arrow>
-                      <Button disabled={isTodayOrFuture(selectedDate)} onClick={handleNextDate}>
+                    <Tooltip
+                      title={MANAGEMENT.VEHICLES_PAGE.TOOLTIP_NEXT_DAY}
+                      arrow
+                    >
+                      <Button
+                        disabled={isTodayOrFuture(selectedDate)}
+                        onClick={handleNextDate}
+                      >
                         <ArrowForwardIosRoundedIcon />
                       </Button>
                     </Tooltip>
-                    <Tooltip title={MANAGEMENT.VEHICLES_PAGE.TOOLTIP_CURRENT_DAY} arrow>
-                      <Button disabled={isTodayOrFuture(selectedDate)} onClick={handleCurrentDate}>
+                    <Tooltip
+                      title={MANAGEMENT.VEHICLES_PAGE.TOOLTIP_CURRENT_DAY}
+                      arrow
+                    >
+                      <Button
+                        disabled={isTodayOrFuture(selectedDate)}
+                        onClick={handleCurrentDate}
+                      >
                         <CalendarTodayRoundedIcon />
                       </Button>
                     </Tooltip>
                   </ButtonGroup>
                 </Box>
-                {userPermissions.includes(PERMISSIONS.CREATE_VEHICLES) && (
+                {userPermissions.includes(PERMISSIONS.CREATE_VEHICLES) &&
                   !isSmallScreen && (
-                  <Button
-                    variant="contained"
-                    startIcon={<AddRoundedIcon />}
-                    onClick={handleOpenAddVehicleModal}
-                    sx={addButtonDesktopStyles}
-                  >
-                    {MANAGEMENT.ADD}
-                  </Button>
-                  )
-                )}
+                    <Button
+                      variant="contained"
+                      startIcon={<AddRoundedIcon />}
+                      onClick={handleOpenAddVehicleModal}
+                      sx={addButtonDesktopStyles}
+                    >
+                      {MANAGEMENT.ADD}
+                    </Button>
+                  )}
               </Box>
             </Grid>
           </Grid>
@@ -561,9 +585,7 @@ const VehiclesPage: React.FC = () => {
               userPermissions={userPermissions}
             />
           ) : (
-            <Box
-              sx={noVehiclesBoxStyles}
-            >
+            <Box sx={noVehiclesBoxStyles}>
               <ManageSearchIcon color="disabled" sx={noVehiclesIconStyles} />
               <Typography variant="body1" color="textSecondary">
                 {capitalizeFirstLetter(

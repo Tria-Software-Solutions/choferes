@@ -9,8 +9,8 @@ export const dashboardTitleBoxStyles: SxProps<Theme> = {
 };
 
 export const dashboardTitleStyles: SxProps<Theme> = {
-  display: 'flex',
-  alignItems: 'center',
+  display: "flex",
+  alignItems: "center",
   fontFamily: "'Urbanist', sans-serif",
   fontWeight: 800,
   color: "#000000",
@@ -28,6 +28,6 @@ export const dashboardDividerStyles = (theme: Theme): SxProps<Theme> => ({
   borderBottomWidth: 3,
   borderColor: theme.palette.primary.main,
   borderRadius: 2,
-  mx: 'auto',
+  mx: "auto",
   mb: 0.5,
-}); 
+});

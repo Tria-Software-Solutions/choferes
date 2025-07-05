@@ -65,7 +65,8 @@ export const updateRolePermission = createAsyncThunk(
         args.permissionIds,
       );
       // Fetch fresh data from server to ensure consistency
-      const refreshedRolePermissions = await RolePermissionService.getRolePermissionsByRoleId(args.roleId);
+      const refreshedRolePermissions =
+        await RolePermissionService.getRolePermissionsByRoleId(args.roleId);
       return refreshedRolePermissions;
     } catch (error: unknown) {
       return rejectWithValue(
@@ -128,9 +129,12 @@ const rolePermissionsSlice = createSlice({
           const updatedRolePermissions = action.payload;
           // Replace existing role permissions for this role with fresh data
           const otherRolePermissions = state.rolePermissions.filter(
-            (rp) => rp.roleId !== updatedRolePermissions[0]?.roleId
+            (rp) => rp.roleId !== updatedRolePermissions[0]?.roleId,
           );
-          state.rolePermissions = [...otherRolePermissions, ...updatedRolePermissions];
+          state.rolePermissions = [
+            ...otherRolePermissions,
+            ...updatedRolePermissions,
+          ];
         },
       )
       .addCase(

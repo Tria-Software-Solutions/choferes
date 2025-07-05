@@ -36,7 +36,7 @@ import {
   actionsInnerBox,
   cancelButton,
   submitButton,
-} from './styles';
+} from "./styles";
 
 interface AddCourierFormProps {
   onSubmit: (courier: {
@@ -185,7 +185,11 @@ const AddCourierForm: React.FC<AddCourierFormProps> = ({
   return (
     <Box sx={boxRoot}>
       <Box sx={{ mb: 2 }}>
-        <Typography variant="body2" color="text.secondary" sx={{ lineHeight: 1.4 }}>
+        <Typography
+          variant="body2"
+          color="text.secondary"
+          sx={{ lineHeight: 1.4 }}
+        >
           {FORMS.ADD_COURIER.DIALOG_CONTENT_TITLE}
         </Typography>
       </Box>
@@ -200,20 +204,12 @@ const AddCourierForm: React.FC<AddCourierFormProps> = ({
             onChange={(e) => handleFieldChange("driver", e.target.value)}
             error={errors.driver !== ""}
             helperText={errors.driver}
-            icon={
-              <PersonOutlinedIcon
-                sx={iconSx(theme)}
-              />
-            }
+            icon={<PersonOutlinedIcon sx={iconSx(theme)} />}
           />
         </Grid>
 
         <Grid item xs={12} sm={6}>
-          <FormControl
-            variant="outlined"
-            fullWidth
-            sx={formControl(theme)}
-          >
+          <FormControl variant="outlined" fullWidth sx={formControl(theme)}>
             <InputLabel>{FORMS.ADD_COURIER.ROUTE}</InputLabel>
             <Select
               label={FORMS.ADD_COURIER.ROUTE}
@@ -225,9 +221,7 @@ const AddCourierForm: React.FC<AddCourierFormProps> = ({
                   label={FORMS.ADD_COURIER.ROUTE}
                   startAdornment={
                     <InputAdornment position="start">
-                      <MapOutlinedIcon
-                        sx={iconSx(theme)}
-                      />
+                      <MapOutlinedIcon sx={iconSx(theme)} />
                     </InputAdornment>
                   }
                 />
@@ -236,7 +230,7 @@ const AddCourierForm: React.FC<AddCourierFormProps> = ({
                 PaperProps: {
                   style: {
                     maxHeight: 320,
-                    overflowY: 'auto' as React.CSSProperties['overflowY'],
+                    overflowY: "auto" as React.CSSProperties["overflowY"],
                   },
                 },
               }}
@@ -261,11 +255,7 @@ const AddCourierForm: React.FC<AddCourierFormProps> = ({
             }
             error={errors.distance !== ""}
             helperText={errors.distance}
-            icon={
-              <StraightenOutlinedIcon
-                sx={iconSx(theme)}
-              />
-            }
+            icon={<StraightenOutlinedIcon sx={iconSx(theme)} />}
           />
         </Grid>
 
@@ -281,11 +271,7 @@ const AddCourierForm: React.FC<AddCourierFormProps> = ({
             }
             error={errors.trackingNumber !== ""}
             helperText={errors.trackingNumber}
-            icon={
-              <AssignmentOutlinedIcon
-                sx={iconSx(theme)}
-              />
-            }
+            icon={<AssignmentOutlinedIcon sx={iconSx(theme)} />}
           />
         </Grid>
 
@@ -302,17 +288,21 @@ const AddCourierForm: React.FC<AddCourierFormProps> = ({
                   label={FORMS.ADD_COURIER.STATUS}
                   startAdornment={
                     <InputAdornment position="start">
-                      <AssignmentOutlinedIcon
-                        sx={iconSx(theme)}
-                      />
+                      <AssignmentOutlinedIcon sx={iconSx(theme)} />
                     </InputAdornment>
                   }
                 />
               }
             >
-              <MenuItem value="Despachado">{FORMS.ADD_COURIER.STATUS_DESPACHADO}</MenuItem>
-              <MenuItem value="En Tránsito">{FORMS.ADD_COURIER.STATUS_EN_TRANSITO}</MenuItem>
-              <MenuItem value="Entregado">{FORMS.ADD_COURIER.STATUS_ENTREGADO}</MenuItem>
+              <MenuItem value="Despachado">
+                {FORMS.ADD_COURIER.STATUS_DESPACHADO}
+              </MenuItem>
+              <MenuItem value="En Tránsito">
+                {FORMS.ADD_COURIER.STATUS_EN_TRANSITO}
+              </MenuItem>
+              <MenuItem value="Entregado">
+                {FORMS.ADD_COURIER.STATUS_ENTREGADO}
+              </MenuItem>
             </Select>
           </FormControl>
         </Grid>
@@ -366,7 +356,9 @@ const AddCourierForm: React.FC<AddCourierFormProps> = ({
                 fullWidth={isSmallScreen}
                 sx={submitButton}
               >
-                {isLoading ? FORMS.ADD_COURIER.LOADING_BUTTON : FORMS.ADD_COURIER.ADD_BUTTON}
+                {isLoading
+                  ? FORMS.ADD_COURIER.LOADING_BUTTON
+                  : FORMS.ADD_COURIER.ADD_BUTTON}
               </Button>
             </Box>
           </Box>

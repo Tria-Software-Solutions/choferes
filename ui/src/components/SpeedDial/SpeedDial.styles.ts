@@ -6,4 +6,4 @@ export const speedDialStyles: SxProps<Theme> = {
 
 export const speedDialActionStyles: SxProps<Theme> = {
   zIndex: 2000,
-}; 
+};

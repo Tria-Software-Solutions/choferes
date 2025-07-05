@@ -24,7 +24,7 @@ import {
   descriptionStyles,
   actionsBoxStyles,
   loginButtonStyles,
-  captionStyles
+  captionStyles,
 } from "./styles";
 
 // SessionExpired page component for handling expired user sessions
@@ -40,21 +40,19 @@ const SessionExpired: React.FC = () => {
           <Slide direction="up" in timeout={1000}>
             <Box sx={innerBoxStyles}>
               <Box sx={timerBoxStyles}>
-                <TimerOffIcon sx={timerIconStyles(theme)} aria-label="Timer off icon" />
-                <SecurityIcon sx={securityIconStyles(theme)} aria-label="Security icon" />
+                <TimerOffIcon
+                  sx={timerIconStyles(theme)}
+                  aria-label="Timer off icon"
+                />
+                <SecurityIcon
+                  sx={securityIconStyles(theme)}
+                  aria-label="Security icon"
+                />
               </Box>
-              <Typography
-                variant="h3"
-                component="h1"
-                sx={titleStyles(theme)}
-              >
+              <Typography variant="h3" component="h1" sx={titleStyles(theme)}>
                 {ERRORS.SESSION_EXPIRED_TITLE}
               </Typography>
-              <Typography
-                variant="h5"
-                color="text.primary"
-                sx={subtitleStyles}
-              >
+              <Typography variant="h5" color="text.primary" sx={subtitleStyles}>
                 {ERRORS.SESSION_EXPIRED_SUBTITLE}
               </Typography>
               <Typography
