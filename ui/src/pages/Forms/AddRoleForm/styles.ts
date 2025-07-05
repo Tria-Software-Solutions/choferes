@@ -27,7 +27,7 @@ export const permissionsError = (theme: Theme) => ({
 });
 
 export const permissionsBox = (theme: Theme) => ({
-  maxHeight: 300,
+  maxHeight: 200,
   overflowY: 'auto',
   border: '1px solid',
   borderColor: theme.palette.divider,
@@ -92,4 +92,35 @@ export const submitButton = {
   fontWeight: 600,
   px: { xs: 2, sm: 4 },
   py: { xs: 1, sm: 1.5 },
-}; 
+};
+
+export const infoBox = (theme: Theme) => ({
+  display: 'flex',
+  alignItems: 'flex-start',
+  gap: { xs: 1, sm: 2 },
+  p: { xs: 1.5, sm: 2 },
+  backgroundColor: theme.palette.background.default,
+  borderRadius: 1,
+  border: '1px solid',
+  borderColor: theme.palette.divider,
+  mb: 2,
+});
+
+export const infoIconBox = (theme: Theme) => ({
+  color: theme.palette.info.main,
+  flexShrink: 0,
+  mt: 0.25,
+});
+
+export const infoTitle = (theme: Theme) => ({
+  fontWeight: 600,
+  color: theme.palette.text.primary,
+  mb: 0.5,
+  fontSize: 'clamp(0.875rem, 1.5vw, 1rem)',
+});
+
+export const infoDesc = (theme: Theme) => ({
+  color: theme.palette.text.secondary,
+  fontSize: 'clamp(0.75rem, 1.25vw, 0.875rem)',
+  lineHeight: 1.4,
+}); 

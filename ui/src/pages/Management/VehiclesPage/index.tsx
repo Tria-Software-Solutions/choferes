@@ -521,7 +521,7 @@ const VehiclesPage: React.FC = () => {
                     onClick={handleOpenAddVehicleModal}
                     sx={addButtonDesktopStyles}
                   >
-                    {MANAGEMENT.VEHICLES_PAGE.ADD}
+                    {MANAGEMENT.ADD}
                   </Button>
                   )
                 )}

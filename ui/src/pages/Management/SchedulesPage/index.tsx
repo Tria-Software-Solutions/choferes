@@ -409,7 +409,7 @@ const SchedulesPage: React.FC = () => {
         open={openAddScheduleModal}
         onClose={handleCloseAddModal}
         title={MANAGEMENT.DIALOG_ADD_TITLE}
-        subtitle={MANAGEMENT.DIALOG_ADD_SUBTITLE}
+        subtitle={MANAGEMENT.SCHEDULES_PAGE.DIALOG_ADD_SUBTITLE}
         hideActions
         paperSx={addDialogPaperSx ?? {}}
       >

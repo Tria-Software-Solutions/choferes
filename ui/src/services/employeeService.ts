@@ -6,6 +6,11 @@ export const getEmployees = async () => {
   return response.data;
 };
 
+export const getEmployeeById = async (id: number) => {
+  const response = await api.get(`/employees/${id}`);
+  return response.data;
+};
+
 export const createEmployee = async (newEmployee: Omit<Employee, "id">) => {
   const response = await api.post("/employees", newEmployee);
   return response.data;

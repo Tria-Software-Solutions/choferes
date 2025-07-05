@@ -6,6 +6,11 @@ export const getRolePermissions = async () => {
   return response.data;
 };
 
+export const getRolePermissionsByRoleId = async (roleId: number) => {
+  const response = await api.get(`/role-permission/role/${roleId}`);
+  return response.data;
+};
+
 export const createRolePermission = async (
   newRolePermission: Omit<RolePermission, "id">,
 ) => {

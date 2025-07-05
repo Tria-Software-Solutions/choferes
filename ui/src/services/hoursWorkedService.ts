@@ -6,6 +6,11 @@ export const getHoursWorked = async () => {
   return response.data;
 };
 
+export const getHoursWorkedById = async (id: number) => {
+  const response = await api.get(`/hours/${id}`);
+  return response.data;
+};
+
 export const createHoursWorked = async (newHours: Omit<HoursWorked, "id">) => {
   const response = await api.post("/hours", newHours);
   return response.data;

@@ -6,6 +6,11 @@ export const getSchedules = async () => {
   return response.data;
 };
 
+export const getScheduleById = async (id: number) => {
+  const response = await api.get(`/schedules/${id}`);
+  return response.data;
+};
+
 export const createSchedule = async (newSchedule: Omit<Schedule, "id">) => {
   const response = await api.post("/schedules", newSchedule);
   return response.data;

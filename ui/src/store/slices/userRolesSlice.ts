@@ -91,7 +91,9 @@ export const updateUserRole = createAsyncThunk(
   async (args: { userId: number; roleId: number }, { rejectWithValue }) => {
     try {
       await UserRoleService.updateUserRole(args.userId, args.roleId);
-      return args;
+      // Fetch fresh data from server to ensure consistency
+      const refreshedUserRole = await UserRoleService.getUserRoleByUserId(args.userId);
+      return refreshedUserRole;
     } catch (error: unknown) {
       return rejectWithValue(
         error instanceof Error ? error.message : "Failed to update user role",
@@ -163,12 +165,9 @@ const userRolesSlice = createSlice({
       )
       .addCase(
         updateUserRole.fulfilled,
-        (state, action: PayloadAction<{ userId: number; roleId: number }>) => {
-          // Update a user role in the state after editing
-          const { userId, roleId } = action.payload;
-          const updatedUserRoles = state.userRoles.map((userRole) =>
-            userRole.userId === userId ? { ...userRole, roleId } : userRole,
-          );
+        (state, action: PayloadAction<UserRole[]>) => {
+          // Update user roles in the state after editing with fresh data from server
+          const updatedUserRoles = action.payload;
           state.userRoles = updatedUserRoles;
         },
       )

@@ -339,7 +339,7 @@ const EmployeesPage: React.FC = () => {
                     onClick={handleOpenAddModal}
                     sx={addButtonDesktopStyles}
                   >
-                    {MANAGEMENT.EMPLOYEES_PAGE.ADD}
+                    {MANAGEMENT.ADD}
                   </Button>
                 </Box>
               </Grid>

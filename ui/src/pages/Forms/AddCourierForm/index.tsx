@@ -9,6 +9,7 @@ import {
   MenuItem,
   useTheme,
   useMediaQuery,
+  Typography,
 } from "@mui/material";
 import AddRoundedIcon from "@mui/icons-material/AddRounded";
 import CloseRoundedIcon from "@mui/icons-material/CloseRounded";
@@ -183,6 +184,11 @@ const AddCourierForm: React.FC<AddCourierFormProps> = ({
 
   return (
     <Box sx={boxRoot}>
+      <Box sx={{ mb: 2 }}>
+        <Typography variant="body2" color="text.secondary" sx={{ lineHeight: 1.4 }}>
+          {FORMS.ADD_COURIER.DIALOG_CONTENT_TITLE}
+        </Typography>
+      </Box>
       <Grid container spacing={3} sx={gridContainer}>
         <Grid item xs={12} sm={6}>
           <TextfieldComponent
@@ -319,12 +325,12 @@ const AddCourierForm: React.FC<AddCourierFormProps> = ({
               />
             </Box>
             <Box>
-              <Box sx={infoTitle(theme)}>
+              <Typography sx={infoTitle(theme)}>
                 {FORMS.ADD_COURIER.INFO_TITLE}
-              </Box>
-              <Box sx={infoDesc(theme)}>
+              </Typography>
+              <Typography sx={infoDesc(theme)}>
                 {FORMS.ADD_COURIER.INFO_DESC}
-              </Box>
+              </Typography>
             </Box>
           </Box>
         </Grid>

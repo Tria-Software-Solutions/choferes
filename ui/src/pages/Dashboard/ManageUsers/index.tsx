@@ -412,9 +412,7 @@ const ManageUsers: React.FC<{ isExpanded?: boolean }> = ({
   return (
     <Box>
       {loadError ? (
-        <Box
-          sx={errorBoxStyles}
-        >
+        <Box sx={errorBoxStyles}>
           <Alert severity="error" sx={errorAlertStyles}>
             <Typography variant="h6" gutterBottom>
               Error de Carga
@@ -422,19 +420,18 @@ const ManageUsers: React.FC<{ isExpanded?: boolean }> = ({
             <Typography variant="body1" gutterBottom>
               {loadError}
             </Typography>
-            <Button variant="contained" onClick={handleRetry} sx={retryButtonStyles}>
+            <Button
+              variant="contained"
+              onClick={handleRetry}
+              sx={retryButtonStyles}
+            >
               Reintentar
             </Button>
           </Alert>
         </Box>
       ) : isLoadingUsers ? (
-        <Box
-          sx={loadingBoxStyles}
-        >
-          <Backdrop
-            sx={backdropStyles(theme)}
-            open={isLoadingUsers}
-          >
+        <Box sx={loadingBoxStyles}>
+          <Backdrop sx={backdropStyles(theme)} open={isLoadingUsers}>
             <CircularProgress />
           </Backdrop>
         </Box>
@@ -544,7 +541,7 @@ const ManageUsers: React.FC<{ isExpanded?: boolean }> = ({
                 "lastName",
                 "username",
                 "email",
-                "roleName"
+                "roleName",
               ]}
               editRowId={editRowId}
               editFields={editFields}
@@ -570,9 +567,7 @@ const ManageUsers: React.FC<{ isExpanded?: boolean }> = ({
               showStatusColumn={true}
             />
           ) : (
-            <Box
-              sx={noUsersBoxStyles}
-            >
+            <Box sx={noUsersBoxStyles}>
               <Typography variant="h6" color="textSecondary">
                 {DASHBOARD_USERS.NO_USERS}
               </Typography>
@@ -597,7 +592,7 @@ const ManageUsers: React.FC<{ isExpanded?: boolean }> = ({
         open={openAddUserModal}
         onClose={handleCloseAddUserModal}
         title={DASHBOARD_USERS.ADD}
-        subtitle="Nuevo usuario"
+        subtitle={DASHBOARD_USERS.ADD_SUBTITLE}
         hideActions
         paperSx={addDialogPaperSx ?? {}}
       >
@@ -614,13 +609,13 @@ const ManageUsers: React.FC<{ isExpanded?: boolean }> = ({
         onClose={handleClosePasswordModal}
         title="Cambiar Contraseña"
         subtitle={(() => {
-          if (typeof passwordUserId === 'number') {
+          if (typeof passwordUserId === "number") {
             const user = users.find((u) => u.id === passwordUserId);
             if (user) {
-              return `${user.firstName || ''} ${user.lastName || ''}`.trim();
+              return `${user.firstName || ""} ${user.lastName || ""}`.trim();
             }
           }
-          return '';
+          return "";
         })()}
         hideActions
         paperSx={passwordDialogPaperSx ?? {}}
@@ -630,7 +625,11 @@ const ManageUsers: React.FC<{ isExpanded?: boolean }> = ({
           onClose={handleClosePasswordModal}
           onSuccess={() => {
             handleClosePasswordModal();
-            showNotification("La contraseña fue actualizada exitosamente", 3000, false);
+            showNotification(
+              "La contraseña fue actualizada exitosamente",
+              3000,
+              false
+            );
           }}
           onError={(msg) => showNotification(msg, 5000, true)}
         />

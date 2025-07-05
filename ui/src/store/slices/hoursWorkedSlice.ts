@@ -61,7 +61,9 @@ export const updateHoursWorked = createAsyncThunk(
   ) => {
     try {
       await HoursWorkedService.updateHoursWorked(id, updatedHours);
-      return { id, updatedHours };
+      // Fetch fresh data from server to ensure consistency
+      const refreshedHours = await HoursWorkedService.getHoursWorkedById(id);
+      return refreshedHours;
     } catch (error: unknown) {
       return rejectWithValue(
         error instanceof Error
@@ -148,16 +150,11 @@ const hoursWorkedSlice = createSlice({
       )
       .addCase(
         updateHoursWorked.fulfilled,
-        (
-          state,
-          action: PayloadAction<{
-            id: number;
-            updatedHours: Partial<HoursWorked>;
-          }>,
-        ) => {
-          const { id, updatedHours } = action.payload;
+        (state, action: PayloadAction<HoursWorked>) => {
+          // Update hours worked in the state after editing with fresh data from server
+          const updatedHours = action.payload;
           state.hoursWorked = state.hoursWorked.map((hours) =>
-            hours.id === id ? { ...hours, ...updatedHours } : hours,
+            hours.id === updatedHours.id ? updatedHours : hours,
           );
         },
       )

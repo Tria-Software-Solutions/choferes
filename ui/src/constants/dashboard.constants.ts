@@ -16,7 +16,8 @@ export const DASHBOARD_USERS = {
   LOAD_ERROR_TITLE: "Error al cargar usuarios",
   HIDE_INACTIVE: "Ocultar inactivos",
   SHOW_INACTIVE: "Mostrar inactivos",
-  ADD: "Agregar usuario",
+  ADD: "Agregar",
+  ADD_SUBTITLE: "Nuevo Usuario",
   DIALOG_STATUS_TITLE: "Cambiar estado del usuario",
   DIALOG_STATUS_MESSAGE: "¿Estás seguro de que deseas cambiar el estado de este usuario?",
   DIALOG_STATUS_CONFIRM: "Confirmar",
@@ -30,13 +31,14 @@ export const DASHBOARD_ROLES = {
   DELETE_ROLE: "Eliminar Rol",
   SEARCH_PLACEHOLDER: "Buscar rol...",
   NO_ROLES: "No hay roles registrados",
-  ADD: "Agregar rol",
+  ADD: "Agregar",
+  ADD_SUBTITLE: "Nuevo Rol",
   DIALOG_DELETE_TITLE: "Eliminar rol",
   DIALOG_DELETE_MESSAGE: "¿Estás seguro de que deseas eliminar este rol?",
   DIALOG_DELETE_CONFIRM: "Eliminar",
   DIALOG_DELETE_CANCEL: "Cancelar",
-  DIALOG_ADD_TITLE: "Agregar rol",
-  DIALOG_ADD_SUBTITLE: "Completa los datos para agregar un nuevo rol",
+  DIALOG_ADD_TITLE: "Agregar",
+  DIALOG_ADD_SUBTITLE: "Nuevo rol",
 };
 
 export const DASHBOARD_PERMISSIONS = {

@@ -11,6 +11,7 @@ import {
   IconButton,
   useTheme,
   useMediaQuery,
+  Typography,
 } from "@mui/material";
 import AddRoundedIcon from "@mui/icons-material/AddRounded";
 import CloseRoundedIcon from "@mui/icons-material/CloseRounded";
@@ -205,6 +206,11 @@ const AddUserForm: React.FC<AddUserFormProps> = ({
 
   return (
     <Box sx={boxRoot}>
+      <Box sx={{ mb: 2 }}>
+        <Typography variant="body2" color="text.secondary" sx={{ lineHeight: 1.4 }}>
+          {FORMS.ADD_USER.DIALOG_CONTENT_TITLE}
+        </Typography>
+      </Box>
       <Grid container spacing={3} sx={gridContainer}>
         <Grid item xs={12} sm={6}>
           <TextfieldComponent
@@ -325,8 +331,8 @@ const AddUserForm: React.FC<AddUserFormProps> = ({
               <InfoOutlinedIcon sx={{ ...iconSx(theme), ...infoIconBox(theme) }} />
             </Box>
             <Box>
-              <Box sx={infoTitle(theme)}>{FORMS.ADD_USER.INFO_TITLE}</Box>
-              <Box sx={infoDesc(theme)}>{FORMS.ADD_USER.INFO_DESC}</Box>
+              <Typography sx={infoTitle(theme)}>{FORMS.ADD_USER.INFO_TITLE}</Typography>
+              <Typography sx={infoDesc(theme)}>{FORMS.ADD_USER.INFO_DESC}</Typography>
             </Box>
           </Box>
         </Grid>
