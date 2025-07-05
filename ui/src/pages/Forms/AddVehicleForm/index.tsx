@@ -62,7 +62,13 @@ interface AddVehicleFormProps {
   }) => void;
   onCancel?: () => void;
   isLoading?: boolean;
-  existingVehicles?: Array<{ ticket: string; licensePlate: string }>;
+  existingVehicles?: Array<{ 
+    ticket: string; 
+    licensePlate: string; 
+    brand: string; 
+    color: string; 
+    parkingDate: Date;
+  }>;
   getNextTicketNumber: () => string;
   defaultParkingDate?: Date;
 }
@@ -75,6 +81,7 @@ const AddVehicleForm: React.FC<AddVehicleFormProps> = ({
   getNextTicketNumber,
   defaultParkingDate = new Date(),
 }) => {
+  const [autoPopulated, setAutoPopulated] = useState(false);
   const theme = useTheme();
   const isSmallScreen = useMediaQuery(theme.breakpoints.down("sm"));
   const [formData, setFormData] = useState({
@@ -140,7 +147,15 @@ const AddVehicleForm: React.FC<AddVehicleFormProps> = ({
           if (!regex.plate.test(value.trim())) {
             return FORMS.INVALID_FORMAT_EXAMPLE;
           }
-          if (existingVehicles.some((v) => v.licensePlate === value)) {
+          // Check if license plate already exists on the same day
+          const sameDayVehicles = existingVehicles.filter((v) => {
+            const vehicleDate = new Date(v.parkingDate);
+            const formDate = new Date(formData.parkingDate);
+            const vehicleDateStr = vehicleDate.toISOString().split('T')[0];
+            const formDateStr = formDate.toISOString().split('T')[0];
+            return vehicleDateStr === formDateStr && v.licensePlate === value.trim();
+          });
+          if (sameDayVehicles.length > 0) {
             return FORMS.LICENSE_PLATE_ALREADY_REGISTERED;
           }
           break;
@@ -164,7 +179,7 @@ const AddVehicleForm: React.FC<AddVehicleFormProps> = ({
 
       return "";
     },
-    [existingVehicles, parkingPrefix],
+    [existingVehicles, parkingPrefix, formData.parkingDate],
   );
 
   const handleFieldChange = (field: string, value: string) => {
@@ -264,10 +279,48 @@ const AddVehicleForm: React.FC<AddVehicleFormProps> = ({
     const rawValue = event.target.value;
     const maskedValue = maskLicensePlate(rawValue);
     handleFieldChange("licensePlate", maskedValue);
+    
+    // Auto-populate brand and color if license plate exists from other days
+    if (maskedValue.trim()) {
+      const existingVehicle = existingVehicles.find((v) => {
+        const vehicleDate = new Date(v.parkingDate);
+        const formDate = new Date(formData.parkingDate);
+        const vehicleDateStr = vehicleDate.toISOString().split('T')[0];
+        const formDateStr = formDate.toISOString().split('T')[0];
+        // Only auto-populate if it's from a different day
+        return vehicleDateStr !== formDateStr && v.licensePlate === maskedValue.trim();
+      });
+      
+      if (existingVehicle) {
+        setFormData((prev) => ({
+          ...prev,
+          brand: existingVehicle.brand,
+          color: existingVehicle.color,
+        }));
+        // Clear any existing errors for brand and color
+        setErrors((prev) => ({
+          ...prev,
+          brand: "",
+          color: "",
+        }));
+        setAutoPopulated(true);
+        // Reset auto-populated flag after 3 seconds
+        setTimeout(() => setAutoPopulated(false), 3000);
+      } else {
+        setAutoPopulated(false);
+      }
+    }
   };
 
   const handleDateChange = (date: Date | null) => {
-    setFormData((prev) => ({ ...prev, parkingDate: date || new Date() }));
+    const newDate = date || new Date();
+    setFormData((prev) => ({ ...prev, parkingDate: newDate }));
+    
+    // Re-validate license plate when date changes
+    if (formData.licensePlate.trim()) {
+      const error = validateField("licensePlate", formData.licensePlate);
+      setErrors((prev) => ({ ...prev, licensePlate: error }));
+    }
   };
 
   const isFormValid = () => {
@@ -320,6 +373,7 @@ const AddVehicleForm: React.FC<AddVehicleFormProps> = ({
     setParkingPrefix({ value: "ATP", label: "ATP" });
     setSearchParkingPrefixTerm("");
     setFilteredParkingPrefixes(parkingPrefixOptions);
+    setAutoPopulated(false);
   };
 
   return (
@@ -394,7 +448,7 @@ const AddVehicleForm: React.FC<AddVehicleFormProps> = ({
                   variant="outlined"
                   fullWidth
                   error={errors.brand !== ""}
-                  helperText={errors.brand}
+                  helperText={autoPopulated ? "Datos auto-completados desde registro anterior" : errors.brand}
                   InputProps={{
                     ...params.InputProps,
                     startAdornment: (
@@ -444,7 +498,7 @@ const AddVehicleForm: React.FC<AddVehicleFormProps> = ({
                   variant="outlined"
                   fullWidth
                   error={errors.color !== ""}
-                  helperText={errors.color}
+                  helperText={autoPopulated ? "Datos auto-completados desde registro anterior" : errors.color}
                   InputProps={{
                     ...params.InputProps,
                     startAdornment: (

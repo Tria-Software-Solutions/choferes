@@ -202,7 +202,19 @@ const VehiclesPage: React.FC = () => {
       number: /^\d+$/,
       plate: /^(?:[A-ZÑ]{3}-\d{3}|\d{6}|nulo|n\/a)$/i,
       text: /^(?:[a-zA-ZáéíóúÁÉÍÓÚñÑüÜëË\s-]+|nulo|n\/a)$/i,
-      parkingLot: /^(?:ATP[1-9]-\d{3,4}|nulo|n\/a)$/i,
+    };
+
+    // Dynamic parking lot validation
+    const validateParkingLot = (parkingLot: string) => {
+      const trimmedParkingLot = parkingLot.trim();
+      
+      // If starts with ATP, use strict validation
+      if (trimmedParkingLot.toUpperCase().startsWith("ATP")) {
+        return /^(?:ATP[1-9]-\d{3,4}|nulo|n\/a)$/i.test(trimmedParkingLot);
+      }
+      
+      // For any other prefix or format, consider it valid
+      return true;
     };
 
     return (
@@ -210,7 +222,7 @@ const VehiclesPage: React.FC = () => {
       regex.plate.test(fields.licensePlate.trim()) &&
       regex.text.test(fields.brand) &&
       regex.text.test(fields.color) &&
-      regex.parkingLot.test(fields.parkingLot.trim())
+      validateParkingLot(fields.parkingLot)
     );
   }, []);
 
@@ -218,6 +230,22 @@ const VehiclesPage: React.FC = () => {
   useEffect(() => {
     setIsEditFormValid(validateFields(editFields));
   }, [editFields, validateFields]);
+
+  // Validate individual field for EditableTable
+  const validateField = useCallback((field: string, value: string | boolean | string[]) => {
+    if (field === "parkingLot" && typeof value === "string") {
+      const trimmedValue = value.trim();
+      
+      // If starts with ATP, use strict validation
+      if (trimmedValue.toUpperCase().startsWith("ATP")) {
+        return /^(?:ATP[1-9]-\d{3,4}|nulo|n\/a)$/i.test(trimmedValue);
+      }
+      
+      // For any other prefix or format, consider it valid
+      return true;
+    }
+    return true; // Default validation for other fields
+  }, []);
 
   // Handle search bar input change
   const handleFilterChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -583,6 +611,7 @@ const VehiclesPage: React.FC = () => {
               setRowsPerPage={setRowsPerPage}
               isSaveDisabled={!isEditFormValid}
               userPermissions={userPermissions}
+              validateField={validateField}
             />
           ) : (
             <Box sx={noVehiclesBoxStyles}>
@@ -629,6 +658,9 @@ const VehiclesPage: React.FC = () => {
           existingVehicles={allVehicles.map((v) => ({
             ticket: v.ticket,
             licensePlate: v.licensePlate,
+            brand: v.brand,
+            color: v.color,
+            parkingDate: new Date(v.parkingDate),
           }))}
           getNextTicketNumber={getNextTicketNumber}
           defaultParkingDate={selectedDate}
