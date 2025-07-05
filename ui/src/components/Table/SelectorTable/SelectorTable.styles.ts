@@ -4,7 +4,9 @@ export const paperStyles: SxProps<Theme> = {
   width: "100%",
 };
 
-export const stickyHeaderBoxStyles = (isSmallScreen: boolean): SxProps<Theme> => ({
+export const stickyHeaderBoxStyles = (
+  isSmallScreen: boolean,
+): SxProps<Theme> => ({
   position: "sticky",
   top: 0,
   zIndex: 5,
@@ -31,7 +33,9 @@ export const tableHeadStyles: SxProps<Theme> = {
   zIndex: 10,
 };
 
-export const employeeColumnCellStyles = (isSmallScreen: boolean): SxProps<Theme> => ({
+export const employeeColumnCellStyles = (
+  isSmallScreen: boolean,
+): SxProps<Theme> => ({
   padding: isSmallScreen ? "8px" : "16px",
   position: "sticky",
   left: 0,
@@ -51,58 +55,58 @@ export const boldTypographyStyles: SxProps<Theme> = {
 
 export const menuItemStyles: SxProps<Theme> = {
   fontWeight: 500,
-  fontSize: '0.98rem',
+  fontSize: "0.98rem",
   pl: 4,
   py: 1.2,
-  borderBottom: '1px solid #f0f0f0',
+  borderBottom: "1px solid #f0f0f0",
 };
 
 export const listSubheaderStyles = (color: string): SxProps<Theme> => ({
-  display: 'flex',
-  alignItems: 'center',
-  bgcolor: 'background.paper',
+  display: "flex",
+  alignItems: "center",
+  bgcolor: "background.paper",
   fontWeight: 700,
-  fontSize: '1rem',
+  fontSize: "1rem",
   color,
   py: 1,
 });
 
 export const formControlTotalStyles: SxProps<Theme> = {
   minWidth: 120,
-  backgroundColor: '#000',
+  backgroundColor: "#000",
   borderRadius: 2,
-  '.MuiOutlinedInput-root': {
+  ".MuiOutlinedInput-root": {
     borderRadius: 2,
     fontWeight: 700,
-    fontSize: '1rem',
-    color: '#fff',
-    backgroundColor: '#000 !important',
-    '& fieldset': {
-      border: 'none',
+    fontSize: "1rem",
+    color: "#fff",
+    backgroundColor: "#000 !important",
+    "& fieldset": {
+      border: "none",
     },
   },
-  '.MuiSelect-select': {
-    display: 'flex',
-    alignItems: 'center',
+  ".MuiSelect-select": {
+    display: "flex",
+    alignItems: "center",
     gap: 1,
     fontWeight: 700,
-    color: '#fff',
-    backgroundColor: '#000 !important',
+    color: "#fff",
+    backgroundColor: "#000 !important",
     pl: 0,
   },
-  '.MuiSvgIcon-root': {
-    color: '#fff',
+  ".MuiSvgIcon-root": {
+    color: "#fff",
   },
 };
 
 export const outlinedInputTotalStyles: SxProps<Theme> = {
-  color: '#fff',
-  backgroundColor: '#000 !important',
+  color: "#fff",
+  backgroundColor: "#000 !important",
   borderRadius: 2,
   fontWeight: 700,
-  fontSize: '1rem',
-  '& .MuiOutlinedInput-notchedOutline': {
-    border: 'none',
+  fontSize: "1rem",
+  "& .MuiOutlinedInput-notchedOutline": {
+    border: "none",
   },
 };
 
@@ -111,11 +115,11 @@ export const dividerStyles: SxProps<Theme> = {
 };
 
 export const badgeStyles: SxProps<Theme> = {
-  '& .MuiBadge-badge': {
-    fontSize: '0.95rem',
+  "& .MuiBadge-badge": {
+    fontSize: "0.95rem",
     minWidth: 22,
     height: 22,
-    borderRadius: '50%',
+    borderRadius: "50%",
     boxShadow: 1,
   },
 };
@@ -126,45 +130,46 @@ export const stackTotalHoursStyles: SxProps<Theme> = {
 
 export const totalHoursTypographyStyles: SxProps<Theme> = {
   minWidth: 48,
-  textAlign: 'right',
+  textAlign: "right",
 };
 
 export const tableRowBackground = (rowIndex: number): SxProps<Theme> => ({
-  backgroundColor: rowIndex % 2 === 0 ? 'white' : '#f5f5f5',
+  backgroundColor: rowIndex % 2 === 0 ? "white" : "#f5f5f5",
 });
 
-export const tableCellBackground = (rowIndex: number, today: boolean): SxProps<Theme> => ({
-  backgroundColor: today
-    ? '#e4f5ed'
-    : rowIndex % 2 === 0
-      ? 'white'
-      : '#f5f5f5',
+export const tableCellBackground = (
+  rowIndex: number,
+  today: boolean,
+): SxProps<Theme> => ({
+  backgroundColor: today ? "#e4f5ed" : rowIndex % 2 === 0 ? "white" : "#f5f5f5",
 });
 
-export const employeeCellBoxStyles = (isSmallScreen: boolean): SxProps<Theme> => ({
-  whiteSpace: isSmallScreen ? 'break-spaces' : 'nowrap',
+export const employeeCellBoxStyles = (
+  isSmallScreen: boolean,
+): SxProps<Theme> => ({
+  whiteSpace: isSmallScreen ? "break-spaces" : "nowrap",
   gap: 1,
 });
 
 // Dialog styles
 export const dialogPaperStyles: SxProps<Theme> = {
-  border: '2px solid #fff',
+  border: "2px solid #fff",
   borderRadius: 3,
 };
 
 export const dialogHeaderBoxStyles: SxProps<Theme> = {
   background: (theme) => theme.palette.primary.main,
-  color: '#fff',
+  color: "#fff",
   p: { xs: 3, sm: 4 },
   borderTopLeftRadius: 2,
   borderTopRightRadius: 2,
-  display: 'flex',
-  alignItems: 'center',
+  display: "flex",
+  alignItems: "center",
   gap: 2,
 };
 
 export const dialogCloseButtonStyles: SxProps<Theme> = {
-  color: '#fff',
+  color: "#fff",
 };
 
 export const dialogContentBoxStyles: SxProps<Theme> = {
@@ -172,12 +177,12 @@ export const dialogContentBoxStyles: SxProps<Theme> = {
 };
 
 export const dialogInfoBoxStyles: SxProps<Theme> = {
-  display: 'flex',
-  alignItems: 'center',
+  display: "flex",
+  alignItems: "center",
   p: { xs: 1.5, sm: 2 },
   backgroundColor: (theme) => theme.palette.action.hover,
   borderRadius: 1,
-  border: '1px solid',
+  border: "1px solid",
   borderColor: (theme) => theme.palette.divider,
 };
 
@@ -190,16 +195,16 @@ export const dialogInfoTitleBoxStyles: SxProps<Theme> = {
   fontWeight: 600,
   color: (theme) => theme.palette.text.primary,
   mb: 0.5,
-  fontSize: 'clamp(0.875rem, 1.5vw, 1rem)',
+  fontSize: "clamp(0.875rem, 1.5vw, 1rem)",
 };
 
 export const dialogInfoDescBoxStyles: SxProps<Theme> = {
   color: (theme) => theme.palette.text.secondary,
-  fontSize: 'clamp(0.75rem, 1.25vw, 0.875rem)',
+  fontSize: "clamp(0.75rem, 1.25vw, 0.875rem)",
 };
 
 export const dialogTextFieldStyles: SxProps<Theme> = {
   mt: 1,
-  width: '100%',
-  boxSizing: 'border-box',
-}; 
+  width: "100%",
+  boxSizing: "border-box",
+};

@@ -22,7 +22,7 @@ import {
   customActionsBoxStyles,
   dialogActionsStyles,
   cancelButtonStyles,
-  confirmButtonStyles
+  confirmButtonStyles,
 } from "./Dialog.styles";
 
 export type DialogType = "delete" | "warning" | "info" | "success";
@@ -126,16 +126,8 @@ const DialogComponent: React.FC<ConfirmationDialogProps> = ({
       {header ? (
         header
       ) : (
-        <Box
-          sx={headerBoxStyles(theme)}
-        >
-          {icon && (
-            <Box
-              sx={iconBoxStyles(theme)}
-            >
-              {icon}
-            </Box>
-          )}
+        <Box sx={headerBoxStyles(theme)}>
+          {icon && <Box sx={iconBoxStyles(theme)}>{icon}</Box>}
           <Box>
             <Typography variant="h6" fontWeight={700} color="inherit">
               {title}
@@ -172,9 +164,7 @@ const DialogComponent: React.FC<ConfirmationDialogProps> = ({
         <Box sx={customActionsBoxStyles}>{actions}</Box>
       ) : (
         !hideActions && (
-          <DialogActions
-            sx={dialogActionsStyles(isSmallScreen)}
-          >
+          <DialogActions sx={dialogActionsStyles(isSmallScreen)}>
             <Button
               onClick={onClose}
               variant="outlined"

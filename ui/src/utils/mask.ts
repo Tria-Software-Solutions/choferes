@@ -37,7 +37,10 @@ export const maskParkingLot = (parkingLot: string): string => {
   return result;
 };
 
-export function maskParkingLotWithPrefix(prefix: string, rawValue: string): string {
+export function maskParkingLotWithPrefix(
+  prefix: string,
+  rawValue: string,
+): string {
   // Remove prefix if user types it
   let value = rawValue.replace(new RegExp(`^${prefix}`, "i"), "");
   // Remove non-numeric and dash except for the first part

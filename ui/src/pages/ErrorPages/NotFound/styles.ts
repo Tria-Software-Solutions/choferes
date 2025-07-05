@@ -72,4 +72,4 @@ export const captionStyles: SxProps<Theme> = {
   mt: 4,
   display: "block",
   opacity: 0.7,
-}; 
+};

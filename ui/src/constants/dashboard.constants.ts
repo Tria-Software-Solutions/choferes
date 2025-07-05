@@ -19,7 +19,8 @@ export const DASHBOARD_USERS = {
   ADD: "Agregar",
   ADD_SUBTITLE: "Nuevo Usuario",
   DIALOG_STATUS_TITLE: "Cambiar estado del usuario",
-  DIALOG_STATUS_MESSAGE: "¿Estás seguro de que deseas cambiar el estado de este usuario?",
+  DIALOG_STATUS_MESSAGE:
+    "¿Estás seguro de que deseas cambiar el estado de este usuario?",
   DIALOG_STATUS_CONFIRM: "Confirmar",
   DIALOG_STATUS_CANCEL: "Cancelar",
 };
@@ -48,4 +49,4 @@ export const DASHBOARD_PERMISSIONS = {
   DELETE_PERMISSION: "Eliminar Permiso",
   SEARCH_PLACEHOLDER: "Buscar permiso...",
   NO_PERMISSIONS: "No hay permisos registrados",
-}; 
+};

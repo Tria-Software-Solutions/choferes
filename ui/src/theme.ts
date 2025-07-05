@@ -214,29 +214,29 @@ const theme = createTheme({
       styleOverrides: {
         root: {
           margin: "8px 0",
-          '& .MuiOutlinedInput-root': {
+          "& .MuiOutlinedInput-root": {
             borderRadius: 2,
-            backgroundColor: '#ffffff',
-            transition: 'all 0.3s ease',
-            '& fieldset': {
-              borderColor: '#e0e0e0',
-              borderWidth: '2px',
+            backgroundColor: "#ffffff",
+            transition: "all 0.3s ease",
+            "& fieldset": {
+              borderColor: "#e0e0e0",
+              borderWidth: "2px",
             },
-            '&:hover .MuiOutlinedInput-notchedOutline': {
-              borderColor: '#000000',
+            "&:hover .MuiOutlinedInput-notchedOutline": {
+              borderColor: "#000000",
             },
-            '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
-              borderColor: '#000000',
+            "&.Mui-focused .MuiOutlinedInput-notchedOutline": {
+              borderColor: "#000000",
               borderWidth: 2,
             },
-            '&.Mui-focused': {
-              backgroundColor: '#ffffff',
-              outline: 'none',
-              boxShadow: 'none',
+            "&.Mui-focused": {
+              backgroundColor: "#ffffff",
+              outline: "none",
+              boxShadow: "none",
             },
-            '& input': {
-              outline: 'none',
-              boxShadow: 'none',
+            "& input": {
+              outline: "none",
+              boxShadow: "none",
             },
           },
         },

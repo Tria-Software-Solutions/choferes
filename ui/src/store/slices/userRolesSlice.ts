@@ -92,7 +92,9 @@ export const updateUserRole = createAsyncThunk(
     try {
       await UserRoleService.updateUserRole(args.userId, args.roleId);
       // Fetch fresh data from server to ensure consistency
-      const refreshedUserRole = await UserRoleService.getUserRoleByUserId(args.userId);
+      const refreshedUserRole = await UserRoleService.getUserRoleByUserId(
+        args.userId,
+      );
       return refreshedUserRole;
     } catch (error: unknown) {
       return rejectWithValue(

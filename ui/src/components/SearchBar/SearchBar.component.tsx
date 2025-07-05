@@ -5,7 +5,11 @@ import IconButton from "@mui/material/IconButton";
 import SearchIcon from "@mui/icons-material/Search";
 import ClearRoundedIcon from "@mui/icons-material/ClearRounded";
 import { SEARCH_BAR } from "../../constants/constants";
-import { textFieldStyles, searchIconStyles, clearIconStyles } from "./SearchBar.styles";
+import {
+  textFieldStyles,
+  searchIconStyles,
+  clearIconStyles,
+} from "./SearchBar.styles";
 
 interface SearchBarProps {
   value: string;
@@ -65,9 +69,13 @@ const SearchBarComponent: React.FC<SearchBarProps> = ({
         ) : null,
       }}
       inputProps={{ "aria-label": placeholder }}
-      onKeyDown={onSearch ? (e) => {
-        if (e.key === "Enter") onSearch();
-      } : undefined}
+      onKeyDown={
+        onSearch
+          ? (e) => {
+              if (e.key === "Enter") onSearch();
+            }
+          : undefined
+      }
     />
   );
 };

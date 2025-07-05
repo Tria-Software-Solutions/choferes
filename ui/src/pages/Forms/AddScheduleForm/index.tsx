@@ -42,7 +42,7 @@ import {
   actionsInnerBox,
   cancelButton,
   submitButton,
-} from './styles';
+} from "./styles";
 
 interface AddScheduleFormProps {
   onSubmit: (schedule: Omit<Schedule, "id">) => void;
@@ -112,7 +112,11 @@ const AddScheduleForm: React.FC<AddScheduleFormProps> = ({
   return (
     <Box sx={boxRoot}>
       <Box sx={{ mb: 2 }}>
-        <Typography variant="body2" color="text.secondary" sx={{ lineHeight: 1.4 }}>
+        <Typography
+          variant="body2"
+          color="text.secondary"
+          sx={{ lineHeight: 1.4 }}
+        >
           {FORMS.ADD_SCHEDULE.DIALOG_CONTENT_TITLE}
         </Typography>
       </Box>
@@ -157,20 +161,12 @@ const AddScheduleForm: React.FC<AddScheduleFormProps> = ({
                 : ""
             }
             icon={<AccessTimeOutlinedIcon sx={iconSx(theme)} />}
-            endAdornment={
-              <Box sx={iconSx(theme)}>
-                horas
-              </Box>
-            }
+            endAdornment={<Box sx={iconSx(theme)}>horas</Box>}
           />
         </Grid>
 
         <Grid item xs={12}>
-          <FormControl
-            variant="outlined"
-            fullWidth
-            sx={formControl(theme)}
-          >
+          <FormControl variant="outlined" fullWidth sx={formControl(theme)}>
             <InputLabel>{FORMS.DAYS_REQUIRED}</InputLabel>
             <Select
               multiple
@@ -208,7 +204,7 @@ const AddScheduleForm: React.FC<AddScheduleFormProps> = ({
                 PaperProps: {
                   style: {
                     maxHeight: 320,
-                    overflowY: 'auto',
+                    overflowY: "auto",
                   },
                 },
               }}
@@ -216,7 +212,9 @@ const AddScheduleForm: React.FC<AddScheduleFormProps> = ({
               {DAYS_LIST.map((day) => (
                 <MenuItem key={day.value} value={day.value}>
                   <Checkbox checked={formData.days.indexOf(day.value) > -1} />
-                  <ListItemText primary={translateDayOptionsToSpanish(day.value)} />
+                  <ListItemText
+                    primary={translateDayOptionsToSpanish(day.value)}
+                  />
                 </MenuItem>
               ))}
             </Select>
@@ -238,8 +236,12 @@ const AddScheduleForm: React.FC<AddScheduleFormProps> = ({
 
         <Grid item xs={12}>
           <Box sx={infoBox(theme)}>
-            <Box sx={{ mr: { xs: 1, sm: 2 }, color: theme.palette.warning.main }}>
-              <WarningAmberOutlinedIcon sx={{ color: theme.palette.warning.main, mr: { xs: 1, sm: 2 } }} />
+            <Box
+              sx={{ mr: { xs: 1, sm: 2 }, color: theme.palette.warning.main }}
+            >
+              <WarningAmberOutlinedIcon
+                sx={{ color: theme.palette.warning.main, mr: { xs: 1, sm: 2 } }}
+              />
             </Box>
             <Box>
               <FormControlLabel
@@ -247,15 +249,22 @@ const AddScheduleForm: React.FC<AddScheduleFormProps> = ({
                   <Switch
                     checked={formData.specialSchedule}
                     onChange={(e) =>
-                      setFormData({ ...formData, specialSchedule: e.target.checked })
+                      setFormData({
+                        ...formData,
+                        specialSchedule: e.target.checked,
+                      })
                     }
                     color="warning"
                   />
                 }
                 label={
                   <Box>
-                    <Typography sx={infoTitle(theme)}>{FORMS.ADD_SCHEDULE.SPECIAL_LABEL}</Typography>
-                    <Typography sx={infoDesc(theme)}>{FORMS.ADD_SCHEDULE.SPECIAL_DESC}</Typography>
+                    <Typography sx={infoTitle(theme)}>
+                      {FORMS.ADD_SCHEDULE.SPECIAL_LABEL}
+                    </Typography>
+                    <Typography sx={infoDesc(theme)}>
+                      {FORMS.ADD_SCHEDULE.SPECIAL_DESC}
+                    </Typography>
                   </Box>
                 }
               />

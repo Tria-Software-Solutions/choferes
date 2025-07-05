@@ -86,4 +86,4 @@ export const captionStyles: SxProps<Theme> = {
   display: "block",
   opacity: 0.7,
   fontSize: { xs: "0.75rem", sm: "0.875rem" },
-}; 
+};

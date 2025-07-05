@@ -92,4 +92,4 @@ export const addDialogPaperSx: SxProps<Theme> = {
 export const passwordDialogPaperSx: SxProps<Theme> = {
   minWidth: { xs: "90vw", sm: 500, md: 700 },
   maxWidth: { xs: "98vw", sm: 700 },
-}; 
+};

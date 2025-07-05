@@ -3,4 +3,4 @@ const SNACKBAR = {
   SUCCESS: "Operación exitosa",
   ERROR: "Ha ocurrido un error",
 };
-export default SNACKBAR; 
+export default SNACKBAR;

@@ -30,4 +30,4 @@ const PERMISSIONS = {
   VIEW_SCHEDULES: "Ver Horarios",
   VIEW_VEHICLES: "Ver Vehículos",
 };
-export default PERMISSIONS; 
+export default PERMISSIONS;

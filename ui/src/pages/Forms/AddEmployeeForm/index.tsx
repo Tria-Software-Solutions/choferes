@@ -1,5 +1,12 @@
 import React, { useState } from "react";
-import { Box, Grid, Button, useTheme, useMediaQuery, Typography } from "@mui/material";
+import {
+  Box,
+  Grid,
+  Button,
+  useTheme,
+  useMediaQuery,
+  Typography,
+} from "@mui/material";
 import AddRoundedIcon from "@mui/icons-material/AddRounded";
 import CloseRoundedIcon from "@mui/icons-material/CloseRounded";
 import TextfieldComponent from "../../../components/Textfield/Textfield.component";
@@ -19,7 +26,7 @@ import {
   actionsInnerBox,
   cancelButton,
   submitButton,
-} from './styles';
+} from "./styles";
 
 interface AddEmployeeFormProps {
   onSubmit: (employee: { firstName: string; lastName: string }) => void;
@@ -104,7 +111,11 @@ const AddEmployeeForm: React.FC<AddEmployeeFormProps> = ({
   return (
     <Box sx={boxRoot}>
       <Box sx={{ mb: 2 }}>
-        <Typography variant="body2" color="text.secondary" sx={{ lineHeight: 1.4 }}>
+        <Typography
+          variant="body2"
+          color="text.secondary"
+          sx={{ lineHeight: 1.4 }}
+        >
           {FORMS.ADD_EMPLOYEE.DIALOG_CONTENT_TITLE}
         </Typography>
       </Box>
@@ -119,11 +130,7 @@ const AddEmployeeForm: React.FC<AddEmployeeFormProps> = ({
             onChange={(e) => handleFieldChange("firstName", e.target.value)}
             error={errors.firstName !== ""}
             helperText={errors.firstName}
-            icon={
-              <PersonOutlinedIcon
-                sx={iconSx(theme)}
-              />
-            }
+            icon={<PersonOutlinedIcon sx={iconSx(theme)} />}
           />
         </Grid>
 
@@ -137,11 +144,7 @@ const AddEmployeeForm: React.FC<AddEmployeeFormProps> = ({
             onChange={(e) => handleFieldChange("lastName", e.target.value)}
             error={errors.lastName !== ""}
             helperText={errors.lastName}
-            icon={
-              <PersonOutlinedIcon
-                sx={iconSx(theme)}
-              />
-            }
+            icon={<PersonOutlinedIcon sx={iconSx(theme)} />}
           />
         </Grid>
 

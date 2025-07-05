@@ -158,7 +158,6 @@ export const updateUserStatus = async (id: number, status: boolean) => {
       },
     ],
   });
-  console.log('Returned user:', JSON.stringify(user, null, 2));
   return user;
 };
 

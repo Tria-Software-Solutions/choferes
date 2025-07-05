@@ -19,4 +19,4 @@ const LOGIN = {
   PASSWORD_REQUIRED: "La contraseña es requerida",
   REGISTER_ERROR: "Error al registrarse",
 };
-export default LOGIN; 
+export default LOGIN;

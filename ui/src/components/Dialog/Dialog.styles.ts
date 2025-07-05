@@ -51,7 +51,9 @@ export const customActionsBoxStyles: SxProps<Theme> = {
   pb: 3,
 };
 
-export const dialogActionsStyles = (isSmallScreen: boolean): SxProps<Theme> => ({
+export const dialogActionsStyles = (
+  isSmallScreen: boolean,
+): SxProps<Theme> => ({
   gap: 2,
   flexDirection: isSmallScreen ? "column" : "row",
 });
@@ -62,8 +64,10 @@ export const cancelButtonStyles = (isSmallScreen: boolean): SxProps<Theme> => ({
   fontWeight: 600,
 });
 
-export const confirmButtonStyles = (isSmallScreen: boolean): SxProps<Theme> => ({
+export const confirmButtonStyles = (
+  isSmallScreen: boolean,
+): SxProps<Theme> => ({
   minWidth: isSmallScreen ? "100%" : 120,
   py: 1.5,
   fontWeight: 600,
-}); 
+});

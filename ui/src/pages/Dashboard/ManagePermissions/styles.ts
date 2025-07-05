@@ -48,4 +48,4 @@ export const noPermissionsBoxStyles: SxProps<Theme> = {
   justifyContent: "center",
   alignItems: "center",
   textAlign: "center",
-}; 
+};

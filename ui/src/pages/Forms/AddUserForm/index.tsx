@@ -41,7 +41,7 @@ import {
   actionsInnerBox,
   cancelButton,
   submitButton,
-} from './styles';
+} from "./styles";
 
 interface AddUserFormProps {
   onSubmit: (user: {
@@ -207,7 +207,11 @@ const AddUserForm: React.FC<AddUserFormProps> = ({
   return (
     <Box sx={boxRoot}>
       <Box sx={{ mb: 2 }}>
-        <Typography variant="body2" color="text.secondary" sx={{ lineHeight: 1.4 }}>
+        <Typography
+          variant="body2"
+          color="text.secondary"
+          sx={{ lineHeight: 1.4 }}
+        >
           {FORMS.ADD_USER.DIALOG_CONTENT_TITLE}
         </Typography>
       </Box>
@@ -293,11 +297,7 @@ const AddUserForm: React.FC<AddUserFormProps> = ({
         </Grid>
 
         <Grid item xs={12} sm={6}>
-          <FormControl
-            variant="outlined"
-            fullWidth
-            sx={formControl(theme)}
-          >
+          <FormControl variant="outlined" fullWidth sx={formControl(theme)}>
             <InputLabel>{FORMS.ADD_USER.ROLE_LABEL}</InputLabel>
             <Select
               label={FORMS.ADD_USER.ROLE_LABEL}
@@ -328,11 +328,17 @@ const AddUserForm: React.FC<AddUserFormProps> = ({
         <Grid item xs={12}>
           <Box sx={infoBox(theme)}>
             <Box sx={infoIconBox(theme)}>
-              <InfoOutlinedIcon sx={{ ...iconSx(theme), ...infoIconBox(theme) }} />
+              <InfoOutlinedIcon
+                sx={{ ...iconSx(theme), ...infoIconBox(theme) }}
+              />
             </Box>
             <Box>
-              <Typography sx={infoTitle(theme)}>{FORMS.ADD_USER.INFO_TITLE}</Typography>
-              <Typography sx={infoDesc(theme)}>{FORMS.ADD_USER.INFO_DESC}</Typography>
+              <Typography sx={infoTitle(theme)}>
+                {FORMS.ADD_USER.INFO_TITLE}
+              </Typography>
+              <Typography sx={infoDesc(theme)}>
+                {FORMS.ADD_USER.INFO_DESC}
+              </Typography>
             </Box>
           </Box>
         </Grid>

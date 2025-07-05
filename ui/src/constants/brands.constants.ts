@@ -63,4 +63,4 @@ const BRANDS_LIST = [
   { value: "Wuling", label: "Wuling" },
   { value: "Xpeng", label: "Xpeng" },
 ];
-export default BRANDS_LIST; 
+export default BRANDS_LIST;

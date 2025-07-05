@@ -25,8 +25,10 @@ const FORMS = {
   MIN_2_CHARS: "Debe tener al menos 2 caracteres",
   MIN_3_CHARS: "Debe tener al menos 3 caracteres",
   NAME_LETTERS_ONLY: "Solo se permiten letras, espacios y guiones",
-  PASSWORD_COMPLEXITY: "La contraseña debe tener al menos 8 caracteres, una mayúscula, una minúscula, un número y un carácter especial",
-  PASSWORD_INVALID: "La contraseña debe tener al menos 8 caracteres, una mayúscula, una minúscula, un número y un carácter especial",
+  PASSWORD_COMPLEXITY:
+    "La contraseña debe tener al menos 8 caracteres, una mayúscula, una minúscula, un número y un carácter especial",
+  PASSWORD_INVALID:
+    "La contraseña debe tener al menos 8 caracteres, una mayúscula, una minúscula, un número y un carácter especial",
   PASSWORD_REQUIRED: "La contraseña es requerida",
   PASSWORDS_DONT_MATCH: "Las contraseñas no coinciden",
   PASSWORDS_REQUIRED: "Ambas contraseñas son requeridas",
@@ -36,13 +38,16 @@ const FORMS = {
   TRACKING_MAX_50: "No puede tener más de 50 caracteres",
   TRACKING_MIN_3: "Debe tener al menos 3 caracteres",
   USERNAME_EXISTS: "El nombre de usuario ya existe",
-  USERNAME_FORMAT: "El usuario debe comenzar con una letra y tener entre 3 y 20 caracteres",
-  USERNAME_INVALID: "El usuario debe comenzar con una letra y tener 3-20 caracteres",
+  USERNAME_FORMAT:
+    "El usuario debe comenzar con una letra y tener entre 3 y 20 caracteres",
+  USERNAME_INVALID:
+    "El usuario debe comenzar con una letra y tener 3-20 caracteres",
   USERNAME_REQUIRED: "El usuario es requerido",
   USERNAME_START_LETTER: "El usuario debe comenzar con una letra",
   ADD_USER: {
     INFO_TITLE: "Información del Usuario",
-    INFO_DESC: "Guía para crear un nuevo usuario con acceso al sistema. La contraseña debe cumplir con los requisitos de seguridad.",
+    INFO_DESC:
+      "Guía para crear un nuevo usuario con acceso al sistema. La contraseña debe cumplir con los requisitos de seguridad.",
     DIALOG_CONTENT_TITLE: "Completa los datos para agregar un nuevo usuario",
     FIRST_NAME_LABEL: "Nombre",
     FIRST_NAME_PLACEHOLDER: "Ej: Juan Carlos",
@@ -60,7 +65,8 @@ const FORMS = {
   },
   ADD_EMPLOYEE: {
     INFO_TITLE: "Información del Empleado",
-    INFO_DESC: "Guía para registrar los datos personales del empleado. Solo se permiten letras, espacios y guiones.",
+    INFO_DESC:
+      "Guía para registrar los datos personales del empleado. Solo se permiten letras, espacios y guiones.",
     DIALOG_CONTENT_TITLE: "Completa los datos para agregar un nuevo empleado",
     FIRST_NAME_LABEL: "Nombre",
     FIRST_NAME_PLACEHOLDER: "Ej: Juan Carlos",
@@ -71,18 +77,21 @@ const FORMS = {
   },
   ADD_ROLE: {
     INFO_TITLE: "Información del Rol",
-    INFO_DESC: "Define el nombre y permisos del rol. Los permisos determinan las acciones disponibles para los usuarios.",
+    INFO_DESC:
+      "Define el nombre y permisos del rol. Los permisos determinan las acciones disponibles para los usuarios.",
     DIALOG_CONTENT_TITLE: "Completa los datos para agregar un nuevo rol",
     NAME_LABEL: "Nombre del Rol",
     NAME_PLACEHOLDER: "Ej: Administrador",
     PERMISSIONS_LABEL: "Permisos del Rol",
-    PERMISSIONS_SELECTED: (count: number) => `Permisos Seleccionados (${count})`,
+    PERMISSIONS_SELECTED: (count: number) =>
+      `Permisos Seleccionados (${count})`,
     BUTTON_ADD: "Agregar",
     BUTTON_ADDING: "Agregando...",
   },
   ADD_VEHICLE: {
     INFO_TITLE: "Información del Vehículo",
-    INFO_DESC: "Guía para registrar los datos del vehículo. La boleta y placa deben ser únicas en el sistema.",
+    INFO_DESC:
+      "Guía para registrar los datos del vehículo. La boleta y placa deben ser únicas en el sistema.",
     DIALOG_CONTENT_TITLE: "Completa los datos para agregar un nuevo vehículo",
     TICKET_LABEL: "Boleta",
     TICKET_PLACEHOLDER: "Ej: 12345",
@@ -101,7 +110,8 @@ const FORMS = {
   },
   ADD_COURIER: {
     INFO_TITLE: "Información del Servicio",
-    INFO_DESC: "Guía para registrar los datos del servicio de mensajería. Todos los campos son obligatorios.",
+    INFO_DESC:
+      "Guía para registrar los datos del servicio de mensajería. Todos los campos son obligatorios.",
     DIALOG_CONTENT_TITLE: "Completa los datos para agregar un nuevo servicio",
     DRIVER: "Chofer",
     DRIVER_PLACEHOLDER: "Ej: Juan Pérez",
@@ -121,16 +131,18 @@ const FORMS = {
   },
   ADD_SCHEDULE: {
     INFO_TITLE: "Información del Horario",
-    INFO_DESC: "Guía para configurar el horario y lugar de trabajo. Marca la opción especial si aplica.",
+    INFO_DESC:
+      "Guía para configurar el horario y lugar de trabajo. Marca la opción especial si aplica.",
     DIALOG_CONTENT_TITLE: "Completa los datos para agregar un nuevo horario",
     SCHEDULE_LABEL: "Horario/Lugar",
     SCHEDULE_LABEL_PLACEHOLDER: "Ej: Avenida 123",
     SCHEDULE_TIME_LABEL: "Tiempo",
     SCHEDULE_TIME_PLACEHOLDER: "Ej: 8",
     SPECIAL_LABEL: "Horario Especial",
-    SPECIAL_DESC: "Marque esta opción si es un horario con condiciones especiales",
+    SPECIAL_DESC:
+      "Marque esta opción si es un horario con condiciones especiales",
     BUTTON_ADD: "Agregar",
     BUTTON_ADDING: "Agregando...",
   },
 };
-export default FORMS; 
+export default FORMS;

@@ -44,12 +44,20 @@ const Dashboard: React.FC = () => {
         alignItems="center"
         sx={dashboardHeaderBoxStyles}
       >
-        <Box display="flex" flexDirection="column" alignItems="flex-start" sx={dashboardTitleBoxStyles}>
+        <Box
+          display="flex"
+          flexDirection="column"
+          alignItems="flex-start"
+          sx={dashboardTitleBoxStyles}
+        >
           <Typography
             variant={isSmallScreen ? "h5" : "h4"}
             sx={dashboardTitleStyles}
           >
-            <AdminPanelSettingsIcon fontSize={isSmallScreen ? "small" : "large"} sx={dashboardIconStyles(theme)} />
+            <AdminPanelSettingsIcon
+              fontSize={isSmallScreen ? "small" : "large"}
+              sx={dashboardIconStyles(theme)}
+            />
             {PAGE_TITLE.DASHBOARD}
           </Typography>
           <Divider sx={dashboardDividerStyles(theme)} />

@@ -16,4 +16,4 @@ const PAGE_TITLE = {
   VEHICLES: "Gestión de Vehículos y Parqueo",
   VEHICLES_SIMPLIFIED: "Vehículos y Parqueo",
 };
-export default PAGE_TITLE; 
+export default PAGE_TITLE;

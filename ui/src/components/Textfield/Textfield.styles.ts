@@ -29,4 +29,4 @@ export const inputAdornmentStyles: SxProps<Theme> = {
   display: "flex",
   alignItems: "center",
   height: "100%",
-}; 
+};

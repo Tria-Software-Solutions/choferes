@@ -356,13 +356,23 @@ const CourierServicePage: React.FC = () => {
         alignItems="center"
         sx={courierHeaderBoxStyles}
       >
-        <Box display="flex" flexDirection="column" alignItems="flex-start" sx={courierTitleBoxStyles}>
+        <Box
+          display="flex"
+          flexDirection="column"
+          alignItems="flex-start"
+          sx={courierTitleBoxStyles}
+        >
           <Typography
             variant={isSmallScreen ? "h5" : "h4"}
             sx={courierTitleStyles}
           >
-            <LocalShippingIcon fontSize={isSmallScreen ? "small" : "large"} sx={courierIconStyles(theme)} />
-            {isSmallScreen ? PAGE_TITLE.COURIER_SERVICE_SIMPLIFIED : PAGE_TITLE.COURIER_SERVICE}
+            <LocalShippingIcon
+              fontSize={isSmallScreen ? "small" : "large"}
+              sx={courierIconStyles(theme)}
+            />
+            {isSmallScreen
+              ? PAGE_TITLE.COURIER_SERVICE_SIMPLIFIED
+              : PAGE_TITLE.COURIER_SERVICE}
           </Typography>
           <Divider sx={courierDividerStyles(theme)} />
         </Box>
@@ -379,13 +389,8 @@ const CourierServicePage: React.FC = () => {
         </Box>
       </Box>
       {isLoadingVehicles ? (
-        <Box
-          sx={loadingBoxStyles}
-        >
-          <Backdrop
-            sx={backdropStyles(theme)}
-            open={isLoadingVehicles}
-          >
+        <Box sx={loadingBoxStyles}>
+          <Backdrop sx={backdropStyles(theme)} open={isLoadingVehicles}>
             <CircularProgress />
           </Backdrop>
         </Box>
@@ -401,7 +406,9 @@ const CourierServicePage: React.FC = () => {
               <Box sx={searchBarBoxStyles}>
                 {filteredCouriers && (
                   <SearchBarComponent
-                    placeholder={MANAGEMENT.COURIER_SERVICE_PAGE.SEARCH_PLACEHOLDER}
+                    placeholder={
+                      MANAGEMENT.COURIER_SERVICE_PAGE.SEARCH_PLACEHOLDER
+                    }
                     value={filter}
                     onChange={handleFilterChange}
                     sx={{ flex: 1 }}
@@ -426,8 +433,16 @@ const CourierServicePage: React.FC = () => {
                 justifyContent="flex-end"
                 gap={2}
               >
-                <Box display="flex" alignItems="center" justifyContent="flex-start" gap={1}>
-                  <LocalizationProvider dateAdapter={AdapterDateFns} adapterLocale={es}>
+                <Box
+                  display="flex"
+                  alignItems="center"
+                  justifyContent="flex-start"
+                  gap={1}
+                >
+                  <LocalizationProvider
+                    dateAdapter={AdapterDateFns}
+                    adapterLocale={es}
+                  >
                     <DatePicker
                       label={MANAGEMENT.COURIER_SERVICE_PAGE.DATE_PICKER_LABEL}
                       value={selectedDate || null}
@@ -446,22 +461,36 @@ const CourierServicePage: React.FC = () => {
                       onChange={handleDateChange}
                     />
                   </LocalizationProvider>
-                  <ButtonGroup
-                    variant="contained"
-                    sx={buttonGroupSx}
-                  >
-                    <Tooltip title={MANAGEMENT.COURIER_SERVICE_PAGE.TOOLTIP_PREV_DAY} arrow>
+                  <ButtonGroup variant="contained" sx={buttonGroupSx}>
+                    <Tooltip
+                      title={MANAGEMENT.COURIER_SERVICE_PAGE.TOOLTIP_PREV_DAY}
+                      arrow
+                    >
                       <Button onClick={handlePreviousDate}>
                         <ArrowBackIosNewRoundedIcon />
                       </Button>
                     </Tooltip>
-                    <Tooltip title={MANAGEMENT.COURIER_SERVICE_PAGE.TOOLTIP_NEXT_DAY} arrow>
-                      <Button disabled={isTodayOrFuture(selectedDate)} onClick={handleNextDate}>
+                    <Tooltip
+                      title={MANAGEMENT.COURIER_SERVICE_PAGE.TOOLTIP_NEXT_DAY}
+                      arrow
+                    >
+                      <Button
+                        disabled={isTodayOrFuture(selectedDate)}
+                        onClick={handleNextDate}
+                      >
                         <ArrowForwardIosRoundedIcon />
                       </Button>
                     </Tooltip>
-                    <Tooltip title={MANAGEMENT.COURIER_SERVICE_PAGE.TOOLTIP_CURRENT_DAY} arrow>
-                      <Button disabled={isTodayOrFuture(selectedDate)} onClick={handleCurrentDate}>
+                    <Tooltip
+                      title={
+                        MANAGEMENT.COURIER_SERVICE_PAGE.TOOLTIP_CURRENT_DAY
+                      }
+                      arrow
+                    >
+                      <Button
+                        disabled={isTodayOrFuture(selectedDate)}
+                        onClick={handleCurrentDate}
+                      >
                         <CalendarTodayRoundedIcon />
                       </Button>
                     </Tooltip>
@@ -515,9 +544,7 @@ const CourierServicePage: React.FC = () => {
               userPermissions={userPermissions || []}
             />
           ) : (
-            <Box
-              sx={noCouriersBoxStyles}
-            >
+            <Box sx={noCouriersBoxStyles}>
               <ManageSearchIcon color="disabled" sx={noCouriersIconStyles} />
               <Typography variant="body1" color="textSecondary">
                 {capitalizeFirstLetter(

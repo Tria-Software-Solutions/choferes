@@ -4,4 +4,4 @@ const PAGINATION = {
   PAGE: "Página",
   OF: "de",
 };
-export default PAGINATION; 
+export default PAGINATION;

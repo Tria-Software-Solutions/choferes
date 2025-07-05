@@ -49,7 +49,7 @@ import {
   menuPaperStyles,
   notificationsMenuPaperStyles,
   dashboardNoLinksBoxStyles,
-  logoutMenuItemStyles
+  logoutMenuItemStyles,
 } from "./AppBar.styles";
 
 interface Link {
@@ -86,7 +86,7 @@ const AppBarComponent: React.FC<AppBarComponentProps> = ({
   const isMobile = useMediaQuery(theme.breakpoints.down("md"));
 
   const [userMenuAnchor, setUserMenuAnchor] = useState<null | HTMLElement>(
-    null
+    null,
   );
   const [notificationsAnchor, setNotificationsAnchor] =
     useState<null | HTMLElement>(null);
@@ -154,25 +154,14 @@ const AppBarComponent: React.FC<AppBarComponentProps> = ({
   };
 
   return (
-    <AppBar
-      position="static"
-      elevation={0}
-      sx={appBarStyles}
-    >
+    <AppBar position="static" elevation={0} sx={appBarStyles}>
       <Toolbar sx={toolbarStyles}>
         {/* Logo and Title */}
-        <Box sx={clickableBoxStyles} onClick={() => navigate("/")}> 
+        <Box sx={clickableBoxStyles} onClick={() => navigate("/")}>
           <Box sx={logoBoxStyles}>
-            <img
-              src={logo}
-              alt="Logo"
-              style={logoImgStyles}
-            />
+            <img src={logo} alt="Logo" style={logoImgStyles} />
           </Box>
-          <Typography
-            variant="h5"
-            sx={titleStyles}
-          >
+          <Typography variant="h5" sx={titleStyles}>
             {title}
           </Typography>
         </Box>
@@ -214,9 +203,7 @@ const AppBarComponent: React.FC<AppBarComponentProps> = ({
               transitionDuration={300}
               keepMounted
             >
-              <Box
-                sx={dashboardPopoverBoxStyles}
-              >
+              <Box sx={dashboardPopoverBoxStyles}>
                 {links.length === 0 ? (
                   <Box sx={dashboardNoLinksBoxStyles}>
                     {APPBAR_MENU.NO_LINKS}
@@ -234,10 +221,14 @@ const AppBarComponent: React.FC<AppBarComponentProps> = ({
                           handleDashboardMenuClose();
                           link.path && navigate(link.path);
                         }}
-                        sx={dashboardIconButtonStyles(isActivePage(link.path || ""))}
+                        sx={dashboardIconButtonStyles(
+                          isActivePage(link.path || ""),
+                        )}
                       >
                         {React.cloneElement(link.icon as React.ReactElement, {
-                          sx: dashboardIconStyles(isActivePage(link.path || "")),
+                          sx: dashboardIconStyles(
+                            isActivePage(link.path || ""),
+                          ),
                         })}
                       </IconButton>
                     </Tooltip>
@@ -265,29 +256,22 @@ const AppBarComponent: React.FC<AppBarComponentProps> = ({
                   </IconButton>
                 </Tooltip>
 
-                <Divider
-                  orientation="vertical"
-                  flexItem
-                  sx={dividerStyles}
-                />
+                <Divider orientation="vertical" flexItem sx={dividerStyles} />
               </>
             )}
 
             {/* Perfil del Usuario */}
             <Box sx={userBoxStyles}>
               <Box
-                sx={{ textAlign: "right", display: { xs: "none", md: "block" } }}
+                sx={{
+                  textAlign: "right",
+                  display: { xs: "none", md: "block" },
+                }}
               >
-                <Typography
-                  variant="body2"
-                  sx={userNameStyles}
-                >
+                <Typography variant="body2" sx={userNameStyles}>
                   {currentUser.firstName} {currentUser.lastName}
                 </Typography>
-                <Typography
-                  variant="caption"
-                  sx={userEmailStyles}
-                >
+                <Typography variant="caption" sx={userEmailStyles}>
                   {currentUser.email}
                 </Typography>
               </Box>
@@ -297,11 +281,7 @@ const AppBarComponent: React.FC<AppBarComponentProps> = ({
                   onClick={handleUserMenuOpen}
                   sx={userMenuIconButtonStyles}
                 >
-                  <Avatar
-                    sx={userAvatarStyles}
-                  >
-                    {getUserInitials()}
-                  </Avatar>
+                  <Avatar sx={userAvatarStyles}>{getUserInitials()}</Avatar>
                 </IconButton>
               </Tooltip>
 

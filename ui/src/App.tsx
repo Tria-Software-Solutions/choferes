@@ -86,7 +86,10 @@ const AppBarWrapper: React.FC = () => {
   };
 
   const filteredLinks = links.filter((link) => {
-    return Array.isArray(userPermissions) && userPermissions.includes(permissionsMap[link.label]);
+    return (
+      Array.isArray(userPermissions) &&
+      userPermissions.includes(permissionsMap[link.label])
+    );
   });
 
   const finalLinks = filteredLinks;
@@ -123,11 +126,12 @@ const AppContent: React.FC = () => {
     "/register",
     "/error",
     "/session-expired",
-    "/forbidden"
+    "/forbidden",
   ];
 
   // Only use wallpaper for login and register
-  const isAuthPage = location.pathname === "/" || location.pathname === "/register";
+  const isAuthPage =
+    location.pathname === "/" || location.pathname === "/register";
 
   // Helper: known app routes (excluding error/forbidden/notfound/sessionexpired)
   const knownAppRoutes = [
@@ -139,15 +143,20 @@ const AppContent: React.FC = () => {
     "/schedules",
     "/vehicles",
     "/dashboard",
-    "/settings"
+    "/settings",
   ];
 
   // Hide AppBar if on any of the hideAppBarRoutes, or if on a not found route
   const isHideAppBar =
     hideAppBarRoutes.includes(location.pathname) ||
     // NotFound: if current path is not in knownAppRoutes and not a subroute of them
-    (!knownAppRoutes.some((route) => location.pathname === route || location.pathname.startsWith(route + "/"))
-      && location.pathname !== "/error" && location.pathname !== "/session-expired");
+    (!knownAppRoutes.some(
+      (route) =>
+        location.pathname === route ||
+        location.pathname.startsWith(route + "/"),
+    ) &&
+      location.pathname !== "/error" &&
+      location.pathname !== "/session-expired");
 
   const safeUserPermissions = userPermissions || [];
 
@@ -161,7 +170,10 @@ const AppContent: React.FC = () => {
     ];
 
     for (const { route, permission } of routePreferences) {
-      if (Array.isArray(userPermissions) && userPermissions.includes(permission)) {
+      if (
+        Array.isArray(userPermissions) &&
+        userPermissions.includes(permission)
+      ) {
         return route;
       }
     }

@@ -5,7 +5,8 @@ const AUTH = {
   LOGIN: "Iniciar Sesión",
   LOGGING_IN: "Iniciando Sesión...",
   PERSONAL_INFO: "Información Personal",
-  PERSONAL_INFO_DESCRIPTION: "Actualiza tu información personal y credenciales de acceso",
+  PERSONAL_INFO_DESCRIPTION:
+    "Actualiza tu información personal y credenciales de acceso",
   FIRST_NAME: "Nombre",
   LAST_NAME: "Apellido",
   EMAIL: "Correo electrónico",
@@ -15,7 +16,8 @@ const AUTH = {
   PERSONAL_INFO_SUCCESS: "La actualización de lo datos fue exitosa",
   PERSONAL_INFO_ERROR: "Ha ocurrido un error al actualizar los datos",
   CHANGE_PASSWORD: "Cambiar Contraseña",
-  CHANGE_PASSWORD_DESCRIPTION: "Actualiza tu contraseña para mantener tu cuenta segura",
+  CHANGE_PASSWORD_DESCRIPTION:
+    "Actualiza tu contraseña para mantener tu cuenta segura",
   NEW_PASSWORD: "Nueva contraseña",
   CONFIRM_NEW_PASSWORD: "Confirmar nueva contraseña",
   UPDATE_PASSWORD: "Actualizar Contraseña",
@@ -28,4 +30,4 @@ const AUTH = {
   REGISTER_SUCCESS: "El registro del usuario fue exitoso",
   REGISTER_ERROR: "Error al registrar usuario",
 };
-export default AUTH; 
+export default AUTH;

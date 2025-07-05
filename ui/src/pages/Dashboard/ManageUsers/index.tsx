@@ -94,7 +94,7 @@ const ManageUsers: React.FC<{ isExpanded?: boolean }> = ({
         const timeoutPromise = new Promise((_, reject) => {
           setTimeout(
             () => reject(new Error("Timeout: La carga tardó demasiado")),
-            30000
+            30000,
           );
         });
 
@@ -109,7 +109,7 @@ const ManageUsers: React.FC<{ isExpanded?: boolean }> = ({
         setLoadError(
           error instanceof Error
             ? error.message
-            : DASHBOARD_USERS.LOAD_ERROR_TITLE
+            : DASHBOARD_USERS.LOAD_ERROR_TITLE,
         );
         showNotification(DASHBOARD_USERS.LOAD_ERROR_TITLE, 5000, false);
       }
@@ -159,7 +159,7 @@ const ManageUsers: React.FC<{ isExpanded?: boolean }> = ({
 
         try {
           const searchText = normalizeString(
-            `${user.firstName || ""} ${user.lastName || ""} ${user.email || ""} ${user.username || ""} ${user.roleName || ""}`
+            `${user.firstName || ""} ${user.lastName || ""} ${user.email || ""} ${user.username || ""} ${user.roleName || ""}`,
           ).toLowerCase();
 
           return searchText.includes(normalizeString(filter).toLowerCase());
@@ -196,7 +196,7 @@ const ManageUsers: React.FC<{ isExpanded?: boolean }> = ({
             regex.text.test(fields.roleName)
         : isValid;
     },
-    []
+    [],
   );
 
   const isEditFormValid = useMemo(() => {
@@ -209,7 +209,7 @@ const ManageUsers: React.FC<{ isExpanded?: boolean }> = ({
       setFilter(e.target.value);
       setPage(0);
     },
-    [setPage]
+    [setPage],
   );
 
   const handleEdit = useCallback((user: User) => {
@@ -254,7 +254,7 @@ const ManageUsers: React.FC<{ isExpanded?: boolean }> = ({
           id,
           updatedUser,
           newRoleId: role.id,
-        })
+        }),
       );
       setEditRowId(null);
       setEditFields({
@@ -291,20 +291,20 @@ const ManageUsers: React.FC<{ isExpanded?: boolean }> = ({
         updateUserStatus({
           id: userToChange.id,
           status: !userToChange.isActive,
-        })
+        }),
       );
       setOpenStatusDialog(false);
       setUserToChange(null);
       showNotification(
         "Estado del usuario actualizado exitosamente",
         3000,
-        false
+        false,
       );
     } catch (error) {
       showNotification(
         "Error al actualizar el estado del usuario",
         5000,
-        false
+        false,
       );
     } finally {
       setIsUpdatingUserStatus(false);
@@ -347,7 +347,7 @@ const ManageUsers: React.FC<{ isExpanded?: boolean }> = ({
         createUser({
           newUser,
           newRoleId: role.id,
-        })
+        }),
       );
       setOpenAddUserModal(false);
       showNotification(NOTIFICATIONS.USER_CREATED, 3000, false);
@@ -380,7 +380,7 @@ const ManageUsers: React.FC<{ isExpanded?: boolean }> = ({
           return true;
       }
     },
-    []
+    [],
   );
 
   const handleRetry = useCallback(() => {
@@ -394,7 +394,7 @@ const ManageUsers: React.FC<{ isExpanded?: boolean }> = ({
     (field: string, value: string | boolean | number | string[] | Date) => {
       setEditFields({ ...editFields, [field]: value });
     },
-    [editFields]
+    [editFields],
   );
 
   // Handler to open password dialog
@@ -628,7 +628,7 @@ const ManageUsers: React.FC<{ isExpanded?: boolean }> = ({
             showNotification(
               "La contraseña fue actualizada exitosamente",
               3000,
-              false
+              false,
             );
           }}
           onError={(msg) => showNotification(msg, 5000, true)}

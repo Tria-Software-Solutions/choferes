@@ -330,7 +330,7 @@ const userSlice = createSlice({
         (state, action: PayloadAction<User>) => {
           // Update a user in the state with the full updated user object
           state.users = state.users.map((user) =>
-            user.id === action.payload.id ? action.payload : user
+            user.id === action.payload.id ? action.payload : user,
           );
         },
       )

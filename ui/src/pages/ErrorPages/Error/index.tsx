@@ -23,7 +23,7 @@ import {
   actionsBoxStyles,
   homeButtonStyles,
   reloadButtonStyles,
-  captionStyles
+  captionStyles,
 } from "./styles";
 
 // Error page component for displaying 500/internal server errors
@@ -48,19 +48,14 @@ const ErrorPage: React.FC = () => {
         <Fade in timeout={800}>
           <Slide direction="up" in timeout={1000}>
             <Box sx={innerBoxStyles}>
-              <ErrorOutlineIcon sx={iconStyles(theme)} aria-label="Error icon" />
-              <Typography
-                variant="h3"
-                component="h1"
-                sx={titleStyles(theme)}
-              >
+              <ErrorOutlineIcon
+                sx={iconStyles(theme)}
+                aria-label="Error icon"
+              />
+              <Typography variant="h3" component="h1" sx={titleStyles(theme)}>
                 {ERRORS.ERROR_500_TITLE}
               </Typography>
-              <Typography
-                variant="h5"
-                color="text.primary"
-                sx={subtitleStyles}
-              >
+              <Typography variant="h5" color="text.primary" sx={subtitleStyles}>
                 {ERRORS.ERROR_500_SUBTITLE}
               </Typography>
               <Typography

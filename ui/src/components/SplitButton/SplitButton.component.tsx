@@ -10,7 +10,12 @@ import {
   MenuItem,
 } from "@mui/material";
 import ArrowDropDownIcon from "@mui/icons-material/ArrowDropDown";
-import { buttonGroupStyles, popperStyles, growStyles, menuIconSpanStyles } from "./SplitButton.styles";
+import {
+  buttonGroupStyles,
+  popperStyles,
+  growStyles,
+  menuIconSpanStyles,
+} from "./SplitButton.styles";
 
 interface Option {
   label?: string;
@@ -102,10 +107,7 @@ const SplitButtonComponent: React.FC<SplitButtonProps> = ({
         disablePortal
       >
         {({ TransitionProps, placement }) => (
-          <Grow
-            {...TransitionProps}
-            style={growStyles(placement)}
-          >
+          <Grow {...TransitionProps} style={growStyles(placement)}>
             <Paper>
               <ClickAwayListener onClickAway={handleClose}>
                 <MenuList id="split-button-menu" autoFocusItem>

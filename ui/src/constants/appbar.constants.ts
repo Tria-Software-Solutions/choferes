@@ -14,4 +14,4 @@ const APPBAR_MENU = {
   NOTIFICATIONS: "Notificaciones",
   USER_MENU: "Menú de Usuario",
 };
-export default APPBAR_MENU; 
+export default APPBAR_MENU;

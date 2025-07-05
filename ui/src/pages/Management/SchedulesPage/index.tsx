@@ -274,13 +274,23 @@ const SchedulesPage: React.FC = () => {
         alignItems="center"
         sx={schedulesHeaderBoxStyles}
       >
-        <Box display="flex" flexDirection="column" alignItems="flex-start" sx={schedulesTitleBoxStyles}>
+        <Box
+          display="flex"
+          flexDirection="column"
+          alignItems="flex-start"
+          sx={schedulesTitleBoxStyles}
+        >
           <Typography
             variant={isSmallScreen ? "h5" : "h4"}
             sx={schedulesTitleStyles}
           >
-            <EditCalendarIcon fontSize={isSmallScreen ? "small" : "large"} sx={schedulesIconStyles(theme)} />
-            {isSmallScreen ? PAGE_TITLE.SCHEDULES_SIMPLIFIED : PAGE_TITLE.SCHEDULES}
+            <EditCalendarIcon
+              fontSize={isSmallScreen ? "small" : "large"}
+              sx={schedulesIconStyles(theme)}
+            />
+            {isSmallScreen
+              ? PAGE_TITLE.SCHEDULES_SIMPLIFIED
+              : PAGE_TITLE.SCHEDULES}
           </Typography>
           <Divider sx={schedulesDividerStyles(theme)} />
         </Box>
@@ -299,13 +309,8 @@ const SchedulesPage: React.FC = () => {
           )}
       </Box>
       {isLoadingSchedules ? (
-        <Box
-          sx={loadingBoxStyles}
-        >
-          <Backdrop
-            sx={backdropStyles(theme)}
-            open={isLoadingSchedules}
-          >
+        <Box sx={loadingBoxStyles}>
+          <Backdrop sx={backdropStyles(theme)} open={isLoadingSchedules}>
             <CircularProgress />
           </Backdrop>
         </Box>
@@ -342,9 +347,7 @@ const SchedulesPage: React.FC = () => {
             </Grid>
             {userPermissions.includes(PERMISSIONS.CREATE_SCHEDULES) && (
               <Grid item xs={12} md={8}>
-                <Box
-                  sx={addButtonDesktopBoxStyles}
-                >
+                <Box sx={addButtonDesktopBoxStyles}>
                   <Button
                     variant="contained"
                     startIcon={<AddRoundedIcon />}
@@ -381,9 +384,7 @@ const SchedulesPage: React.FC = () => {
               userPermissions={userPermissions}
             />
           ) : (
-            <Box
-              sx={noSchedulesBoxStyles}
-            >
+            <Box sx={noSchedulesBoxStyles}>
               <ManageSearchIcon color="disabled" sx={noSchedulesIconStyles} />
               <Typography variant="h6" color="textSecondary">
                 {MANAGEMENT.NO_SCHEDULES}

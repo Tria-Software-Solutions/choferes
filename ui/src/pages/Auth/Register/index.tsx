@@ -54,7 +54,7 @@ import {
   dividerSectionStyles,
   loginBoxStyles,
   loginTextStyles,
-  loginLinkStyles
+  loginLinkStyles,
 } from "./styles";
 
 // Register page component for user sign up
@@ -155,11 +155,7 @@ const Register = () => {
       });
     } catch (error) {
       setError(REGISTER_VALIDATION.REGISTER_ERROR);
-      showNotification(
-        AUTH.REGISTER_ERROR,
-        5000,
-        false,
-      );
+      showNotification(AUTH.REGISTER_ERROR, 5000, false);
     } finally {
       setIsSubmitting(false);
     }
@@ -228,15 +224,9 @@ const Register = () => {
   };
 
   return (
-    <Box
-      className="auth-page"
-      sx={authPageBoxStyles}
-    >
+    <Box className="auth-page" sx={authPageBoxStyles}>
       <Fade in timeout={800}>
-        <Card
-          className="auth-card"
-          sx={authCardStyles}
-        >
+        <Card className="auth-card" sx={authCardStyles}>
           <CardContent sx={cardContentStyles}>
             {/* Logo and Title Section */}
             <Box
@@ -248,11 +238,7 @@ const Register = () => {
               }}
             >
               <Box sx={logoBoxStyles}>
-                <img
-                  src={logo}
-                  alt="Logo"
-                  style={logoImgStyles}
-                />
+                <img src={logo} alt="Logo" style={logoImgStyles} />
               </Box>
               <Typography
                 variant={isSmallScreen ? "h5" : "h4"}
@@ -262,21 +248,13 @@ const Register = () => {
                 {PAGE_TITLE.REGISTER}
               </Typography>
               <Divider sx={dividerStyles(theme)} />
-              <Typography
-                variant="body2"
-                align="center"
-                sx={descriptionStyles}
-              >
+              <Typography variant="body2" align="center" sx={descriptionStyles}>
                 Completa el formulario para crear tu cuenta en el sistema
               </Typography>
             </Box>
 
             {/* Form Section */}
-            <Box
-              component="form"
-              onSubmit={handleRegister}
-              sx={formBoxStyles}
-            >
+            <Box component="form" onSubmit={handleRegister} sx={formBoxStyles}>
               <Box sx={nameFieldsBoxStyles}>
                 <TextField
                   fullWidth
@@ -419,10 +397,7 @@ const Register = () => {
             {/* Error Alert */}
             {error && (
               <Fade in timeout={300}>
-                <Alert
-                  severity="error"
-                  sx={alertStyles}
-                >
+                <Alert severity="error" sx={alertStyles}>
                   {error}
                 </Alert>
               </Fade>
@@ -433,10 +408,7 @@ const Register = () => {
 
             {/* Login Link */}
             <Box sx={loginBoxStyles}>
-              <Typography
-                variant="body2"
-                sx={loginTextStyles}
-              >
+              <Typography variant="body2" sx={loginTextStyles}>
                 ¿Ya tienes una cuenta?
               </Typography>
               <Link

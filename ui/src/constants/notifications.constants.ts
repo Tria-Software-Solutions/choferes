@@ -50,9 +50,12 @@ const NOTIFICATIONS = {
   COURIER_CREATE_SUCCESS: "Servicio de mensajería creado exitosamente",
   COURIER_UPDATE_SUCCESS: "La actualización del servicio fue exitosa",
   COURIER_DELETE_SUCCESS: "Servicio de mensajería eliminado exitosamente",
-  COURIER_CREATE_ERROR: "Ha ocurrido un error al crear el servicio de mensajería",
-  COURIER_UPDATE_ERROR: "Ha ocurrido un error al actualizar el servicio de mensajería",
-  COURIER_DELETE_ERROR: "Ha ocurrido un error al eliminar el servicio de mensajería",
+  COURIER_CREATE_ERROR:
+    "Ha ocurrido un error al crear el servicio de mensajería",
+  COURIER_UPDATE_ERROR:
+    "Ha ocurrido un error al actualizar el servicio de mensajería",
+  COURIER_DELETE_ERROR:
+    "Ha ocurrido un error al eliminar el servicio de mensajería",
   ROLE_CREATE_SUCCESS: "Rol creado exitosamente",
   ROLE_UPDATE_SUCCESS: "La actualización del rol fue exitosa",
   ROLE_DELETE_SUCCESS: "Rol eliminado exitosamente",
@@ -62,6 +65,7 @@ const NOTIFICATIONS = {
   USER_STATUS_UPDATE_SUCCESS: "Estado del usuario actualizado exitosamente",
   USER_STATUS_UPDATE_ERROR: "Error al actualizar el estado del usuario",
   USER_PASSWORD_UPDATE_SUCCESS: "La contraseña fue actualizada exitosamente",
-  USER_PASSWORD_UPDATE_ERROR: "Ha ocurrido un error al actualizar la contraseña",
+  USER_PASSWORD_UPDATE_ERROR:
+    "Ha ocurrido un error al actualizar la contraseña",
 };
-export default NOTIFICATIONS; 
+export default NOTIFICATIONS;

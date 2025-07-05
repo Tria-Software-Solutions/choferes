@@ -23,7 +23,7 @@ import {
   actionsBoxStyles,
   homeButtonStyles,
   exploreButtonStyles,
-  captionStyles
+  captionStyles,
 } from "./styles";
 
 // NotFound page component for displaying 404 errors
@@ -44,12 +44,11 @@ const NotFound: React.FC = () => {
           <Slide direction="up" in timeout={1000}>
             <Box sx={innerBoxStyles}>
               <Box sx={iconStyles(theme)}>
-                <SearchOffIcon sx={iconStyles(theme)} aria-label="Not found icon" />
-                <Typography
-                  variant="h1"
-                  component="h1"
-                  sx={titleStyles(theme)}
-                >
+                <SearchOffIcon
+                  sx={iconStyles(theme)}
+                  aria-label="Not found icon"
+                />
+                <Typography variant="h1" component="h1" sx={titleStyles(theme)}>
                   {ERRORS.ERROR_404_TITLE}
                 </Typography>
                 <Typography

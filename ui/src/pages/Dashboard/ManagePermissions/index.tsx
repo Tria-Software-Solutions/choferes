@@ -63,13 +63,8 @@ const ManagePermissions: React.FC = () => {
   return (
     <Box>
       {isLoadingPermissions ? (
-        <Box
-          sx={loadingBoxStyles}
-        >
-          <Backdrop
-            sx={backdropStyles(theme)}
-            open={isLoadingPermissions}
-          >
+        <Box sx={loadingBoxStyles}>
+          <Backdrop sx={backdropStyles(theme)} open={isLoadingPermissions}>
             <CircularProgress />
           </Backdrop>
         </Box>
@@ -99,15 +94,9 @@ const ManagePermissions: React.FC = () => {
             <Grid container spacing={2}>
               {filteredPermissions.map((permission) => (
                 <Grid item xs={12} sm={6} md={3} lg={3} key={permission.id}>
-                  <Box
-                    sx={permissionBoxStyles}
-                  >
-                    <Box
-                      sx={permissionIconBoxStyles}
-                    >
-                      <VpnKeyOutlinedIcon
-                        sx={permissionIconStyles}
-                      />
+                  <Box sx={permissionBoxStyles}>
+                    <Box sx={permissionIconBoxStyles}>
+                      <VpnKeyOutlinedIcon sx={permissionIconStyles} />
                     </Box>
                     <Typography
                       variant="body2"
@@ -122,9 +111,7 @@ const ManagePermissions: React.FC = () => {
               ))}
             </Grid>
           ) : (
-            <Box
-              sx={noPermissionsBoxStyles}
-            >
+            <Box sx={noPermissionsBoxStyles}>
               <Typography variant="h6" color="textSecondary">
                 {DASHBOARD_PERMISSIONS.NO_PERMISSIONS}
               </Typography>

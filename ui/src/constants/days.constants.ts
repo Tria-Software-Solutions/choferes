@@ -7,4 +7,4 @@ const DAYS_LIST = [
   { value: "saturday", label: "Sábado" },
   { value: "sunday", label: "Domingo" },
 ];
-export default DAYS_LIST; 
+export default DAYS_LIST;
