@@ -8,6 +8,7 @@ import {
   Autocomplete,
   useMediaQuery,
   InputAdornment,
+  Typography,
 } from "@mui/material";
 import FORMS from "../../../constants/forms.constants";
 import BRANDS_LIST from "../../../constants/brands.constants";
@@ -310,6 +311,11 @@ const AddVehicleForm: React.FC<AddVehicleFormProps> = ({
 
   return (
     <Box sx={boxRoot}>
+      <Box sx={{ mb: 2 }}>
+        <Typography variant="body2" color="text.secondary" sx={{ lineHeight: 1.4 }}>
+          {FORMS.ADD_VEHICLE.DIALOG_CONTENT_TITLE}
+        </Typography>
+      </Box>
       <Grid container spacing={3} sx={gridContainer}>
         <Grid item xs={12} sm={6}>
           <TextfieldComponent
@@ -522,41 +528,10 @@ const AddVehicleForm: React.FC<AddVehicleFormProps> = ({
               <InfoOutlinedIcon sx={{ ...iconSx(theme), ...infoIconBox(theme) }} />
             </Box>
             <Box>
-              <Box sx={infoTitle(theme)}>{FORMS.ADD_VEHICLE.INFO_TITLE}</Box>
-              <Box sx={infoDesc(theme)}>
+              <Typography sx={infoTitle(theme)}>{FORMS.ADD_VEHICLE.INFO_TITLE}</Typography>
+              <Typography sx={infoDesc(theme)}>
                 {FORMS.ADD_VEHICLE.INFO_DESC}
-                <Box
-                  component="span"
-                  onClick={() => {
-                    setFormData({
-                      ...formData,
-                      licensePlate: 'N/A',
-                      brand: 'N/A',
-                      color: 'N/A',
-                      parkingLot: 'N/A',
-                      notes: 'N/A',
-                    });
-                    setErrors({
-                      ticket: '',
-                      licensePlate: '',
-                      brand: '',
-                      color: '',
-                      parkingLot: '',
-                    });
-                  }}
-                  sx={{
-                    color: theme.palette.primary.main,
-                    cursor: 'pointer',
-                    textDecoration: 'underline',
-                    fontWeight: 500,
-                    '&:hover': {
-                      color: theme.palette.primary.dark,
-                    },
-                  }}
-                >
-                  {FORMS.ADD_VEHICLE.INFO_OPTIONAL}
-                </Box>
-              </Box>
+              </Typography>
             </Box>
           </Box>
         </Grid>

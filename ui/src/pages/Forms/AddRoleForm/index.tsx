@@ -10,10 +10,12 @@ import {
   Checkbox,
   useTheme,
   useMediaQuery,
+  Typography,
 } from "@mui/material";
 import AddRoundedIcon from "@mui/icons-material/AddRounded";
 import CloseRoundedIcon from "@mui/icons-material/CloseRounded";
 import GroupOutlinedIcon from "@mui/icons-material/GroupOutlined";
+import InfoOutlinedIcon from "@mui/icons-material/InfoOutlined";
 import { Permission } from "../../../models/Permission";
 import TextfieldComponent from "../../../components/Textfield/Textfield.component";
 import { FORMS } from "../../../constants/constants";
@@ -32,6 +34,10 @@ import {
   actionsInnerBox,
   cancelButton,
   submitButton,
+  infoBox,
+  infoIconBox,
+  infoTitle,
+  infoDesc,
 } from './styles';
 
 interface AddRoleFormProps {
@@ -145,6 +151,11 @@ const AddRoleForm: React.FC<AddRoleFormProps> = ({
 
   return (
     <Box sx={boxRoot}>
+      <Box sx={{ mb: 2 }}>
+        <Typography variant="body2" color="text.secondary" sx={{ lineHeight: 1.4 }}>
+          {FORMS.ADD_ROLE.DIALOG_CONTENT_TITLE}
+        </Typography>
+      </Box>
       <Grid container spacing={3} sx={gridContainer}>
         <Grid item xs={12}>
           <TextfieldComponent
@@ -246,24 +257,13 @@ const AddRoleForm: React.FC<AddRoleFormProps> = ({
         )}
 
         <Grid item xs={12}>
-          <Box sx={{ mb: 2 }}>
-            <Box
-              sx={{
-                fontWeight: 600,
-                color: theme.palette.text.primary,
-                mb: 1,
-                fontSize: "clamp(0.875rem, 1.5vw, 1rem)",
-              }}
-            >
-              {FORMS.ADD_ROLE.INFO_TITLE}
+          <Box sx={infoBox(theme)}>
+            <Box sx={infoIconBox(theme)}>
+              <InfoOutlinedIcon sx={{ ...iconSx(theme), ...infoIconBox(theme) }} />
             </Box>
-            <Box
-              sx={{
-                color: theme.palette.text.secondary,
-                fontSize: "clamp(0.75rem, 1.25vw, 0.875rem)",
-              }}
-            >
-              {FORMS.ADD_ROLE.INFO_DESC}
+            <Box>
+              <Typography sx={infoTitle(theme)}>{FORMS.ADD_ROLE.INFO_TITLE}</Typography>
+              <Typography sx={infoDesc(theme)}>{FORMS.ADD_ROLE.INFO_DESC}</Typography>
             </Box>
           </Box>
         </Grid>

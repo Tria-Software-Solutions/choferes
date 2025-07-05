@@ -479,7 +479,7 @@ const CourierServicePage: React.FC = () => {
                     minHeight: 56,
                   }}
                 >
-                  {MANAGEMENT.COURIER_SERVICE_PAGE.ADD}
+                  {MANAGEMENT.ADD}
                 </Button>
               </Box>
             </Grid>

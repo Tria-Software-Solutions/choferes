@@ -65,7 +65,9 @@ export const updateEmployee = createAsyncThunk(
     // Updates an employee by id via the API
     try {
       await EmployeeService.updateEmployee(id, updatedEmployee);
-      return { id, updatedEmployee };
+      // Fetch fresh data from server to ensure consistency
+      const refreshedEmployee = await EmployeeService.getEmployeeById(id);
+      return refreshedEmployee;
     } catch (error: unknown) {
       const errorMessage =
         error instanceof Error ? error.message : "Failed to update employee";
@@ -122,16 +124,11 @@ const employeeSlice = createSlice({
       )
       .addCase(
         updateEmployee.fulfilled,
-        (
-          state,
-          action: PayloadAction<{
-            id: number;
-            updatedEmployee: Partial<Employee>;
-          }>,
-        ) => {
-          const { id, updatedEmployee } = action.payload;
+        (state, action: PayloadAction<Employee>) => {
+          // Update a employee in the state after editing with fresh data from server
+          const updatedEmployee = action.payload;
           state.employees = state.employees.map((employee) =>
-            employee.id === id ? { ...employee, ...updatedEmployee } : employee,
+            employee.id === updatedEmployee.id ? updatedEmployee : employee,
           );
         },
       )

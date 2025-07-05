@@ -17,14 +17,13 @@ const MANAGEMENT = {
   // Employees Page
   EMPLOYEES_PAGE: {
     SEARCH_PLACEHOLDER: "Buscar empleado...",
-    ADD: "Agregar empleado",
     NO_EMPLOYEES: "No hay empleados registrados",
     DIALOG_DELETE_TITLE: "Eliminar empleado",
     DIALOG_DELETE_MESSAGE: "¿Estás seguro de que deseas eliminar este empleado?",
     DIALOG_DELETE_CONFIRM: "Eliminar",
     DIALOG_DELETE_CANCEL: "Cancelar",
-    DIALOG_ADD_TITLE: "Agregar empleado",
-    DIALOG_ADD_SUBTITLE: "Completa los datos para agregar un nuevo empleado",
+    DIALOG_ADD_TITLE: "Agregar",
+    DIALOG_ADD_SUBTITLE: "Nuevo empleado",
   },
 
   // Vehicles Page
@@ -40,8 +39,8 @@ const MANAGEMENT = {
     DIALOG_DELETE_MESSAGE: "¿Estás seguro de que deseas eliminar este vehículo?",
     DIALOG_DELETE_CONFIRM: "Eliminar",
     DIALOG_DELETE_CANCEL: "Cancelar",
-    DIALOG_ADD_TITLE: "Agregar vehículo",
-    DIALOG_ADD_SUBTITLE: "Completa los datos para agregar un nuevo vehículo",
+    DIALOG_ADD_TITLE: "Agregar",
+    DIALOG_ADD_SUBTITLE: "Nuevo vehículo",
   },
 
   // Courier Service Page
@@ -57,8 +56,8 @@ const MANAGEMENT = {
     DIALOG_DELETE_MESSAGE: "¿Estás seguro de que deseas eliminar este servicio?",
     DIALOG_DELETE_CONFIRM: "Eliminar",
     DIALOG_DELETE_CANCEL: "Cancelar",
-    DIALOG_ADD_TITLE: "Agregar servicio",
-    DIALOG_ADD_SUBTITLE: "Completa los datos para agregar un nuevo servicio",
+    DIALOG_ADD_TITLE: "Agregar",
+    DIALOG_ADD_SUBTITLE: "Nuevo servicio",
   },
 
   // Schedules Page
@@ -70,8 +69,8 @@ const MANAGEMENT = {
     DIALOG_DELETE_MESSAGE: "¿Estás seguro de que deseas eliminar este horario?",
     DIALOG_DELETE_CONFIRM: "Eliminar",
     DIALOG_DELETE_CANCEL: "Cancelar",
-    DIALOG_ADD_TITLE: "Agregar horario",
-    DIALOG_ADD_SUBTITLE: "Completa los datos para agregar un nuevo horario",
+    DIALOG_ADD_TITLE: "Agregar",
+    DIALOG_ADD_SUBTITLE: "Nuevo horario",
   },
 
   // Roles Page

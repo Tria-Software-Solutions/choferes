@@ -111,6 +111,11 @@ const AddScheduleForm: React.FC<AddScheduleFormProps> = ({
 
   return (
     <Box sx={boxRoot}>
+      <Box sx={{ mb: 2 }}>
+        <Typography variant="body2" color="text.secondary" sx={{ lineHeight: 1.4 }}>
+          {FORMS.ADD_SCHEDULE.DIALOG_CONTENT_TITLE}
+        </Typography>
+      </Box>
       <Grid container spacing={3} sx={gridContainer}>
         <Grid item xs={12} sm={6}>
           <TextfieldComponent

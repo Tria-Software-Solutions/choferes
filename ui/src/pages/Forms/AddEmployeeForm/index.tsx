@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Box, Grid, Button, useTheme, useMediaQuery } from "@mui/material";
+import { Box, Grid, Button, useTheme, useMediaQuery, Typography } from "@mui/material";
 import AddRoundedIcon from "@mui/icons-material/AddRounded";
 import CloseRoundedIcon from "@mui/icons-material/CloseRounded";
 import TextfieldComponent from "../../../components/Textfield/Textfield.component";
@@ -103,6 +103,11 @@ const AddEmployeeForm: React.FC<AddEmployeeFormProps> = ({
 
   return (
     <Box sx={boxRoot}>
+      <Box sx={{ mb: 2 }}>
+        <Typography variant="body2" color="text.secondary" sx={{ lineHeight: 1.4 }}>
+          {FORMS.ADD_EMPLOYEE.DIALOG_CONTENT_TITLE}
+        </Typography>
+      </Box>
       <Grid container spacing={3} sx={gridContainer}>
         <Grid item xs={12} sm={6}>
           <TextfieldComponent
@@ -148,12 +153,12 @@ const AddEmployeeForm: React.FC<AddEmployeeFormProps> = ({
               />
             </Box>
             <Box>
-              <Box sx={infoTitle(theme)}>
+              <Typography sx={infoTitle(theme)}>
                 {FORMS.ADD_EMPLOYEE.INFO_TITLE}
-              </Box>
-              <Box sx={infoDesc(theme)}>
+              </Typography>
+              <Typography sx={infoDesc(theme)}>
                 {FORMS.ADD_EMPLOYEE.INFO_DESC}
-              </Box>
+              </Typography>
             </Box>
           </Box>
         </Grid>

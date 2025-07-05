@@ -64,7 +64,9 @@ export const updateRolePermission = createAsyncThunk(
         args.roleId,
         args.permissionIds,
       );
-      return { roleId: args.roleId, permissionIds: args.permissionIds };
+      // Fetch fresh data from server to ensure consistency
+      const refreshedRolePermissions = await RolePermissionService.getRolePermissionsByRoleId(args.roleId);
+      return refreshedRolePermissions;
     } catch (error: unknown) {
       return rejectWithValue(
         (error as { response?: { data?: string } })?.response?.data ||
@@ -121,18 +123,14 @@ const rolePermissionsSlice = createSlice({
       )
       .addCase(
         updateRolePermission.fulfilled,
-        (
-          state,
-          action: PayloadAction<{ roleId: number; permissionIds: number[] }>,
-        ) => {
-          const { roleId, permissionIds } = action.payload;
-          const updatedRolePermissions = state.rolePermissions.map(
-            (rolePermission) =>
-              rolePermission.roleId === roleId
-                ? { ...rolePermission, permissionIds }
-                : rolePermission,
+        (state, action: PayloadAction<RolePermission[]>) => {
+          // Update role permissions in the state after editing with fresh data from server
+          const updatedRolePermissions = action.payload;
+          // Replace existing role permissions for this role with fresh data
+          const otherRolePermissions = state.rolePermissions.filter(
+            (rp) => rp.roleId !== updatedRolePermissions[0]?.roleId
           );
-          state.rolePermissions = updatedRolePermissions;
+          state.rolePermissions = [...otherRolePermissions, ...updatedRolePermissions];
         },
       )
       .addCase(

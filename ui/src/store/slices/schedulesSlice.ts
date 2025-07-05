@@ -70,7 +70,9 @@ export const updateSchedule = createAsyncThunk(
   ) => {
     try {
       await ScheduleService.updateSchedule(args.id, args.updatedSchedule);
-      return { id: args.id, updatedSchedule: args.updatedSchedule };
+      // Fetch fresh data from server to ensure consistency
+      const refreshedSchedule = await ScheduleService.getScheduleById(args.id);
+      return refreshedSchedule;
     } catch (error: unknown) {
       return rejectWithValue(
         error instanceof Error ? error.message : "Failed to update schedule",
@@ -128,19 +130,12 @@ const schedulesSlice = createSlice({
       )
       .addCase(
         updateSchedule.fulfilled,
-        (
-          state,
-          action: PayloadAction<{
-            id: number;
-            updatedSchedule: Partial<Schedule>;
-          }>,
-        ) => {
-          // Update a schedule in the state after editing
-          const { id, updatedSchedule } = action.payload;
-          const updatedSchedules = state.schedules.map((schedule) =>
-            schedule.id === id ? { ...schedule, ...updatedSchedule } : schedule,
+        (state, action: PayloadAction<Schedule>) => {
+          // Update a schedule in the state after editing with fresh data from server
+          const updatedSchedule = action.payload;
+          state.schedules = state.schedules.map((schedule) =>
+            schedule.id === updatedSchedule.id ? updatedSchedule : schedule,
           );
-          state.schedules = updatedSchedules;
         },
       )
       .addCase(
