@@ -326,7 +326,7 @@ const SchedulesPage: React.FC = () => {
               <Box sx={searchBarBoxStyles}>
                 {filteredSchedules && (
                   <SearchBarComponent
-                    placeholder={MANAGEMENT.SEARCH_PLACEHOLDER}
+                    placeholder={MANAGEMENT.SCHEDULES_PAGE.SEARCH_PLACEHOLDER}
                     value={filter}
                     onChange={handleFilterChange}
                     sx={{ flex: 1 }}
