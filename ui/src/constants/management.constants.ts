@@ -78,7 +78,7 @@ const MANAGEMENT = {
 
   // Roles Page
   ROLES_PAGE: {
-    SEARCH_PLACEHOLDER: "Buscar rol...",
+    SEARCH_PLACEHOLDER: "Buscar empleado...",
     ADD: "Agregar rol",
     NO_ROLES: "No hay roles registrados",
     DIALOG_DELETE_TITLE: "Eliminar rol",

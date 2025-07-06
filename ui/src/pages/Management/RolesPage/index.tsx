@@ -643,7 +643,7 @@ const RolesPage: React.FC = () => {
             <Grid item xs={12} md={4}>
               {filteredEmployees && (
                 <SearchBarComponent
-                  placeholder={MANAGEMENT.SEARCH_PLACEHOLDER}
+                  placeholder={MANAGEMENT.ROLES_PAGE.SEARCH_PLACEHOLDER}
                   value={filter}
                   onChange={handleFilterChange}
                   sx={searchBarSx ?? {}}

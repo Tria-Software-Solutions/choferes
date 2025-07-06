@@ -103,7 +103,7 @@ type EditableTableProps<T> = {
   editFields: Record<string, string | boolean | number | string[] | Date>;
   setEditField?: (
     field: string,
-    value: string | boolean | number | string[] | Date,
+    value: string | boolean | number | string[] | Date
   ) => void;
   handleEdit?: (row: T) => void;
   handleCancel?: () => void;
@@ -112,7 +112,7 @@ type EditableTableProps<T> = {
   handleOpenStatusDialog?: (row: unknown) => void;
   handlePasswordModal?: (
     id: number,
-    handleClose: () => void,
+    handleClose: () => void
   ) => React.ReactNode;
   getRowId: (row: T) => number;
   totalCount: number;
@@ -123,7 +123,7 @@ type EditableTableProps<T> = {
   renderColumnValue?: (column: keyof T, value: unknown) => React.ReactNode;
   validateField?: (
     field: string,
-    value: string | string[] | boolean,
+    value: string | string[] | boolean
   ) => boolean;
   isSaveDisabled?: boolean;
   noActions?: boolean;
@@ -199,7 +199,7 @@ const EditableTableComponent = <T extends object>({
 
   const handlePageChange = (
     event: React.MouseEvent<HTMLButtonElement> | null,
-    newPage: number,
+    newPage: number
   ) => {
     setPage(newPage);
   };
@@ -243,7 +243,7 @@ const EditableTableComponent = <T extends object>({
               const max = 5;
               const labels = selected.map(
                 (v) =>
-                  config.options?.find((opt) => opt.value === v)?.label || v,
+                  config.options?.find((opt) => opt.value === v)?.label || v
               );
               const visible = labels.slice(0, max);
               const hidden = labels.length > max ? labels.length - max : 0;
@@ -274,14 +274,14 @@ const EditableTableComponent = <T extends object>({
             ))}
           </Select>
         </FormControl>,
-        column,
+        column
       );
     }
 
     if (String(column) === "licensePlate") {
       const licensePlateValue = (editFields["licensePlate"] as string) || "";
       const handleLicensePlateChange = (
-        event: React.ChangeEvent<HTMLInputElement>,
+        event: React.ChangeEvent<HTMLInputElement>
       ) => {
         const rawValue = event.target.value;
         const maskedValue = maskLicensePlate(rawValue);
@@ -295,7 +295,7 @@ const EditableTableComponent = <T extends object>({
           error={!validateField("licensePlate", licensePlateValue)}
           sx={{ width: "120px" }}
         />,
-        column,
+        column
       );
     }
 
@@ -309,7 +309,23 @@ const EditableTableComponent = <T extends object>({
           error={!validateField(String(column), value)}
           sx={{ width: "80px" }}
         />,
-        column,
+        column
+      );
+    }
+
+    if (String(column) === "hours") {
+      return wrapWithGrid(
+        <TextfieldComponent
+          type="number"
+          label={translateColumnHeaderToSpanish(column)}
+          value={editFields[String(column)] || ""}
+          onChange={(e) =>
+            setEditField && setEditField(String(column), e.target.value)
+          }
+          error={!validateField(String(column), value)}
+          sx={{ width: "80px" }}
+        />,
+        column
       );
     }
 
@@ -323,7 +339,7 @@ const EditableTableComponent = <T extends object>({
           }
           error={!validateField(String(column), value)}
         />,
-        column,
+        column
       );
     }
 
@@ -335,12 +351,12 @@ const EditableTableComponent = <T extends object>({
         parkingPrefix &&
           !PARKING_PREFIX_OPTIONS.some((opt) => opt.value === parkingPrefix)
           ? [{ value: parkingPrefix, label: parkingPrefix }]
-          : [],
+          : []
       );
 
       const handlePrefixChange = (
         event: React.SyntheticEvent,
-        newValue: { value: string; label: string } | string | null,
+        newValue: { value: string; label: string } | string | null
       ) => {
         let prefixValue = "";
         if (newValue === null || newValue === "") {
@@ -364,7 +380,7 @@ const EditableTableComponent = <T extends object>({
       };
 
       const handleParkingLotChange = (
-        event: React.ChangeEvent<HTMLInputElement>,
+        event: React.ChangeEvent<HTMLInputElement>
       ) => {
         const rawValue = event.target.value;
         const maskedValue = maskParkingLotWithPrefix(parkingPrefix, rawValue);
@@ -415,7 +431,7 @@ const EditableTableComponent = <T extends object>({
             sx={{ width: "100px" }}
           />
         </Box>,
-        column,
+        column
       );
     }
 
@@ -447,7 +463,7 @@ const EditableTableComponent = <T extends object>({
                     return new Date(
                       Number(year),
                       Number(month) - 1,
-                      Number(day),
+                      Number(day)
                     );
                   })()
                 : null
@@ -474,13 +490,13 @@ const EditableTableComponent = <T extends object>({
             onChange={(date) => handleDateChange(date)}
           />
         </LocalizationProvider>,
-        column,
+        column
       );
     }
 
     if (config.type === "select" && config.options) {
       const selectedValue = config.options.some(
-        (opt) => opt.value === editFields[String(column)],
+        (opt) => opt.value === editFields[String(column)]
       )
         ? editFields[String(column)]
         : "";
@@ -502,7 +518,7 @@ const EditableTableComponent = <T extends object>({
             ))}
           </Select>
         </FormControl>,
-        column,
+        column
       );
     }
 
@@ -541,7 +557,7 @@ const EditableTableComponent = <T extends object>({
             ))}
           </Select>
         </FormControl>,
-        column,
+        column
       );
     }
 
@@ -558,7 +574,7 @@ const EditableTableComponent = <T extends object>({
             setEditField &&
               setEditField(
                 String(column),
-                newValue && typeof newValue !== "string" ? newValue.value : "",
+                newValue && typeof newValue !== "string" ? newValue.value : ""
               );
           }}
           inputValue={undefined}
@@ -574,13 +590,16 @@ const EditableTableComponent = <T extends object>({
               {...params}
               label={translateColumnHeaderToSpanish(column)}
               placeholder={`Buscar ${translateColumnHeaderToSpanish(column)}`}
-              sx={{ 
-                width: String(column) === "brand" || String(column) === "color" ? "180px" : "100%"
+              sx={{
+                width:
+                  String(column) === "brand" || String(column) === "color"
+                    ? "180px"
+                    : "100%",
               }}
             />
           )}
         />,
-        column,
+        column
       );
     }
 
@@ -589,7 +608,7 @@ const EditableTableComponent = <T extends object>({
         ? (editFields[String(column)] as string[])
         : [];
       const selectedOptions = config.options.filter((opt) =>
-        selectedValues.some((val) => val === opt.value),
+        selectedValues.some((val) => val === opt.value)
       );
 
       return wrapWithGrid(
@@ -601,7 +620,7 @@ const EditableTableComponent = <T extends object>({
             setEditField &&
               setEditField(
                 String(column),
-                newValue.map((option) => option.value),
+                newValue.map((option) => option.value)
               );
           }}
           options={config.options}
@@ -622,7 +641,7 @@ const EditableTableComponent = <T extends object>({
             />
           )}
         />,
-        column,
+        column
       );
     }
 
@@ -635,7 +654,7 @@ const EditableTableComponent = <T extends object>({
         }
         error={!validateField(String(column), value)}
       />,
-      column,
+      column
     );
   };
 
@@ -657,7 +676,7 @@ const EditableTableComponent = <T extends object>({
 
   const paginatedData = sortedData.slice(
     page * rowsPerPage,
-    page * rowsPerPage + rowsPerPage,
+    page * rowsPerPage + rowsPerPage
   );
 
   const columnConfig: Record<
@@ -829,7 +848,7 @@ const EditableTableComponent = <T extends object>({
   // Compute rowsPerPageOptions to always include the current value
   const defaultRowsPerPageOptions = [5, 10, 25, 50, 100];
   const rowsPerPageOptions = Array.from(
-    new Set([...defaultRowsPerPageOptions, rowsPerPage]),
+    new Set([...defaultRowsPerPageOptions, rowsPerPage])
   ).sort((a, b) => a - b);
 
   return (
@@ -966,24 +985,26 @@ const EditableTableComponent = <T extends object>({
                     </TableSortLabel>
                   </TableCell>
                 ))}
-              {editRowId !== null && (
-                <TableCell
-                  className="tableCell"
-                  sx={{
-                    position: "sticky",
-                    top: 0,
-                    zIndex: 4,
-                    backgroundColor: (theme) => theme.palette.primary.main,
-                    color: (theme) => theme.palette.primary.contrastText,
-                    fontWeight: 700,
-                    fontSize: "clamp(0.95rem, 1vw, 1.05rem)",
-                    padding: "12px 16px",
-                    whiteSpace: "nowrap",
-                  }}
-                >
-                  Fecha de Parqueo
-                </TableCell>
-              )}
+              {editRowId !== null &&
+                data.length > 0 &&
+                "licensePlate" in data[0] && (
+                  <TableCell
+                    className="tableCell"
+                    sx={{
+                      position: "sticky",
+                      top: 0,
+                      zIndex: 4,
+                      backgroundColor: (theme) => theme.palette.primary.main,
+                      color: (theme) => theme.palette.primary.contrastText,
+                      fontWeight: 700,
+                      fontSize: "clamp(0.95rem, 1vw, 1.05rem)",
+                      padding: "12px 16px",
+                      whiteSpace: "nowrap",
+                    }}
+                  >
+                    Fecha de Parqueo
+                  </TableCell>
+                )}
               {!noActions && (hasEditPermissions || hasDeletePermissions) ? (
                 <TableCell
                   className="tableCell"
@@ -1105,7 +1126,7 @@ const EditableTableComponent = <T extends object>({
                           {editRowId === getRowId(row) ? (
                             renderEditField(
                               column,
-                              (editFields[String(column)] || "").toString(),
+                              (editFields[String(column)] || "").toString()
                             )
                           ) : editRowId === getRowId(row) &&
                             column === "permissionNames" ? (
@@ -1125,7 +1146,7 @@ const EditableTableComponent = <T extends object>({
                                     >
                                       {item}
                                     </Box>
-                                  ),
+                                  )
                                 )}
                               </Box>
                             ) : (
@@ -1139,8 +1160,8 @@ const EditableTableComponent = <T extends object>({
                                 {(row[column] as string[])
                                   .map((d: string) =>
                                     capitalizeFirstLetter(
-                                      translateDayOptionsToSpanish(String(d)),
-                                    ),
+                                      translateDayOptionsToSpanish(String(d))
+                                    )
                                   )
                                   .join(", ")}
                               </Typography>
@@ -1148,8 +1169,8 @@ const EditableTableComponent = <T extends object>({
                               <Typography component="span">
                                 {capitalizeFirstLetter(
                                   translateDayOptionsToSpanish(
-                                    String(row[column]),
-                                  ),
+                                    String(row[column])
+                                  )
                                 )}
                               </Typography>
                             )
@@ -1170,7 +1191,7 @@ const EditableTableComponent = <T extends object>({
                                     >
                                       {item}
                                     </Box>
-                                  ),
+                                  )
                                 )}
                               </Box>
                             ) : (
@@ -1186,13 +1207,13 @@ const EditableTableComponent = <T extends object>({
                                   (
                                     item: string,
                                     index: number,
-                                    array: string[],
+                                    array: string[]
                                   ) => (
                                     <Typography key={index} component="span">
                                       {item}
                                       {index < array.length - 1 ? ", " : ""}
                                     </Typography>
-                                  ),
+                                  )
                                 )}
                               </Stack>
                             )
@@ -1206,7 +1227,12 @@ const EditableTableComponent = <T extends object>({
                             </Typography>
                           ) : columnConfig[String(column)]?.type === "date" ? (
                             <Typography component="span">
-                              {row[column] ? formatDateWithDay(new Date(row[column] as string), false) : ""}
+                              {row[column]
+                                ? formatDateWithDay(
+                                    new Date(row[column] as string),
+                                    false
+                                  )
+                                : ""}
                             </Typography>
                           ) : (
                             <Typography component="span">
@@ -1329,7 +1355,7 @@ const EditableTableComponent = <T extends object>({
                           {editRowId === getRowId(row) ? (
                             renderEditField(
                               column,
-                              (editFields[String(column)] || "").toString(),
+                              (editFields[String(column)] || "").toString()
                             )
                           ) : editRowId === getRowId(row) &&
                             column === "permissionNames" ? (
@@ -1349,7 +1375,7 @@ const EditableTableComponent = <T extends object>({
                                     >
                                       {item}
                                     </Box>
-                                  ),
+                                  )
                                 )}
                               </Box>
                             ) : (
@@ -1363,8 +1389,8 @@ const EditableTableComponent = <T extends object>({
                                 {(row[column] as string[])
                                   .map((d: string) =>
                                     capitalizeFirstLetter(
-                                      translateDayOptionsToSpanish(String(d)),
-                                    ),
+                                      translateDayOptionsToSpanish(String(d))
+                                    )
                                   )
                                   .join(", ")}
                               </Typography>
@@ -1372,8 +1398,8 @@ const EditableTableComponent = <T extends object>({
                               <Typography component="span">
                                 {capitalizeFirstLetter(
                                   translateDayOptionsToSpanish(
-                                    String(row[column]),
-                                  ),
+                                    String(row[column])
+                                  )
                                 )}
                               </Typography>
                             )
@@ -1394,7 +1420,7 @@ const EditableTableComponent = <T extends object>({
                                     >
                                       {item}
                                     </Box>
-                                  ),
+                                  )
                                 )}
                               </Box>
                             ) : (
@@ -1410,13 +1436,13 @@ const EditableTableComponent = <T extends object>({
                                   (
                                     item: string,
                                     index: number,
-                                    array: string[],
+                                    array: string[]
                                   ) => (
                                     <Typography key={index} component="span">
                                       {item}
                                       {index < array.length - 1 ? ", " : ""}
                                     </Typography>
-                                  ),
+                                  )
                                 )}
                               </Stack>
                             )
@@ -1430,7 +1456,12 @@ const EditableTableComponent = <T extends object>({
                             </Typography>
                           ) : columnConfig[String(column)]?.type === "date" ? (
                             <Typography component="span">
-                              {row[column] ? formatDateWithDay(new Date(row[column] as string), false) : ""}
+                              {row[column]
+                                ? formatDateWithDay(
+                                    new Date(row[column] as string),
+                                    false
+                                  )
+                                : ""}
                             </Typography>
                           ) : (
                             <Typography component="span">
@@ -1440,11 +1471,35 @@ const EditableTableComponent = <T extends object>({
                         </TableCell>
                       );
                     })}
-                  {editRowId === getRowId(row) && (
-                    <TableCell className="tableCell" sx={tableCellStyles} key="parkingDate-edit">
-                      {renderEditField("parkingDate" as keyof T, (editFields["parkingDate"] || "").toString())}
-                    </TableCell>
-                  )}
+                  {editRowId !== null &&
+                    data.length > 0 &&
+                    "licensePlate" in data[0] && (
+                      <TableCell
+                        className="tableCell"
+                        sx={tableCellStyles}
+                        key="parkingDate-edit"
+                      >
+                        {editRowId === getRowId(row) ? (
+                          renderEditField(
+                            "parkingDate" as keyof T,
+                            (editFields["parkingDate"] || "").toString()
+                          )
+                        ) : (
+                          <Typography component="span">
+                            {(row as { parkingDate?: string }).parkingDate
+                              ? formatDateWithDay(
+                                  new Date(
+                                    (
+                                      row as { parkingDate?: string }
+                                    ).parkingDate!
+                                  ),
+                                  false
+                                )
+                              : ""}
+                          </Typography>
+                        )}
+                      </TableCell>
+                    )}
                   {!noActions &&
                     (hasEditPermissions || hasDeletePermissions) && (
                       <TableCell
@@ -1506,7 +1561,7 @@ const EditableTableComponent = <T extends object>({
                                               onClick={() =>
                                                 onOpenPasswordModal &&
                                                 onOpenPasswordModal(
-                                                  getRowId(row),
+                                                  getRowId(row)
                                                 )
                                               }
                                             >
@@ -1546,7 +1601,7 @@ const EditableTableComponent = <T extends object>({
                                               onClick={() =>
                                                 handleOpenDeleteDialog &&
                                                 handleOpenDeleteDialog(
-                                                  getRowId(row),
+                                                  getRowId(row)
                                                 )
                                               }
                                             >
@@ -1565,7 +1620,7 @@ const EditableTableComponent = <T extends object>({
                                             onClick={() =>
                                               handleOpenDeleteDialog &&
                                               handleOpenDeleteDialog(
-                                                getRowId(row),
+                                                getRowId(row)
                                               )
                                             }
                                           >
