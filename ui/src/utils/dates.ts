@@ -7,7 +7,7 @@ import {
 import { EnglishAbrevMonthOfYear } from "./monthAbreviations";
 import { translateMonthToAbrevSpanish } from "./string";
 
-type DayEntry = {
+export type DayEntry = {
   day: string;
   date: string;
   isoDate: string;

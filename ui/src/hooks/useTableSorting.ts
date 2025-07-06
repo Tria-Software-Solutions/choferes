@@ -1,23 +1,16 @@
 import { useState } from "react";
-import { SortOrder, handleSortRequest } from "../utils/tableSorting";
+
+export type SortOrder = "asc" | "desc";
 
 export const useTableSorting = <T extends object>(initialOrderBy: keyof T) => {
   const [order, setOrder] = useState<SortOrder>("asc");
   const [orderBy, setOrderBy] = useState<keyof T>(initialOrderBy);
 
-  const handleSort = (column: keyof T) => {
-    const { order: newOrder, orderBy: newOrderBy } = handleSortRequest(
-      column,
-      order,
-      orderBy
-    );
-    setOrder(newOrder);
-    setOrderBy(newOrderBy);
+  const handleSort = (property: keyof T) => {
+    const isAsc = orderBy === property && order === "asc";
+    setOrder(isAsc ? "desc" : "asc");
+    setOrderBy(property);
   };
 
-  return {
-    order,
-    orderBy,
-    handleSort,
-  };
+  return { order, orderBy, handleSort };
 }; 

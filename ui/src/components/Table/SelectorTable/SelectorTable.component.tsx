@@ -7,7 +7,6 @@ import { HoursWorked } from "../../../models/HoursWorked";
 import { WeeklySummary } from "../../../models/WeeklySummary";
 import { BiweeklySummary } from "../../../models/BiweeklySummary";
 import { MonthlySummary } from "../../../models/MonthlySummary";
-import { format } from "date-fns";
 import {
   Table,
   TableBody,
@@ -40,28 +39,15 @@ import {
 } from "@mui/material";
 import PaginationComponent from "../Pagination/Pagination.component";
 import {
-  formatDate,
-  formatDateWithoutYear,
   formatHeaderDate,
-  getBiweeklyDates,
   getCurrentWeekDates,
   getInvolvedPeriods,
-  hasMultipleBiweeks,
-  hasMultipleMonths,
-  hasMultipleYears,
 } from "../../../utils/dates";
 import {
-  getMonthName,
-  getOptionsForDay,
   translateDayToAbrevSpanish,
 } from "../../../utils/string";
-import {
-  calculateTotalHoursAndOvertimeForPeriod,
-  calculateTotalHoursAndOvertimeForPeriods,
-} from "../../../utils/calculation";
 import { EnglishDayOfWeek } from "../../../utils/dayAbreviations";
 import {
-  STATE,
   TABLE,
   PERMISSIONS,
   SELECTOR_TABLE,
@@ -103,6 +89,26 @@ import {
   dialogInfoDescBoxStyles,
   dialogTextFieldStyles,
 } from "./SelectorTable.styles";
+
+// Import helper functions
+import {
+  calculateTotalHours,
+  calculateOvertime,
+  hasWorkedCurrentWeek,
+  sortEmployeesByName,
+  paginateEmployees,
+  generateRowsPerPageOptions,
+  renderPeriodHeader,
+  renderPeriodFooter,
+  getPeriodMessage,
+  getScheduleCellData,
+  isToday,
+  getOvertimeBadgeColor,
+  getDialogTitle,
+  getCurrentHoursDisplay,
+  getTimeAdjustmentError,
+  getTimeAdjustmentIconColor,
+} from "./helpers";
 
 // SelectorTable component displays and manages employee schedules, hours worked, and summary data for different periods (weekly, biweekly, monthly).
 // Props:
@@ -221,179 +227,69 @@ const SelectorTableComponent: React.FC<SelectorTableProps> = React.memo(
     );
     const multiplePeriods = getInvolvedPeriods(currentWeek);
 
-    // Memoizes the current week dates based on weekOffset
+    // Use helper functions for employee data processing
     const sortedEmployees = useMemo(() => {
-      return [...filteredEmployees].sort((a, b) => {
-        const nameA = `${a.firstName} ${a.lastName}`;
-        const nameB = `${b.firstName} ${b.lastName}`;
-        return nameA.localeCompare(nameB, "es", { sensitivity: "base" });
-      });
-    }, [filteredEmployees]);
+      return sortEmployeesByName(filteredEmployees, orderDirection);
+    }, [filteredEmployees, orderDirection]);
 
-    const startIndex = page * rowsPerPage;
-    const endIndex = startIndex + rowsPerPage;
-    const paginatedEmployees = sortedEmployees.slice(startIndex, endIndex);
+    const paginatedEmployees = paginateEmployees(sortedEmployees, page, rowsPerPage);
 
-    // Calculates total hours or overtime for a single period
-    const resultHoursForPeriod = (
-      employee: Employee,
-      period: "weekly" | "biweekly" | "monthly",
-      type: "totalHours" | "overtime",
-    ) => {
-      if (type === "totalHours") {
-        return calculateTotalHoursAndOvertimeForPeriod(
-          employee.id,
-          period,
-          weekNumber,
-          biweekNumber,
-          month,
-          year,
-          weeklySummaries,
-          biweeklySummaries,
-          monthlySummaries,
-        ).totalHours;
-      } else {
-        return calculateTotalHoursAndOvertimeForPeriod(
-          employee.id,
-          period,
-          weekNumber,
-          biweekNumber,
-          month,
-          year,
-          weeklySummaries,
-          biweeklySummaries,
-          monthlySummaries,
-        ).overtime;
-      }
-    };
-
-    // Calculates total hours or overtime for multiple periods
-    const resultHoursForPeriods = (
-      employee: Employee,
-      period: "weekly" | "biweekly" | "monthly",
-      type: "totalHours" | "overtime",
-    ) => {
-      if (type === "totalHours") {
-        return calculateTotalHoursAndOvertimeForPeriods(
-          employee.id,
-          period,
-          multiplePeriods.weekNumbers,
-          multiplePeriods.biweekNumbers,
-          multiplePeriods.months,
-          weeklySummaries,
-          biweeklySummaries,
-          monthlySummaries,
-        ).totalHours;
-      } else {
-        return calculateTotalHoursAndOvertimeForPeriods(
-          employee.id,
-          period,
-          multiplePeriods.weekNumbers,
-          multiplePeriods.biweekNumbers,
-          multiplePeriods.months,
-          weeklySummaries,
-          biweeklySummaries,
-          monthlySummaries,
-        ).overtime;
-      }
-    };
-
+    // Use helper functions for hours calculations
     const resultTotalHours = (employee: Employee) => {
-      return selectedPeriod === "weekly"
-        ? hasMultipleYears(currentWeek)
-          ? resultHoursForPeriods(employee, selectedPeriod, "totalHours")
-          : resultHoursForPeriod(employee, selectedPeriod, "totalHours")
-        : selectedPeriod === "biweekly"
-          ? hasMultipleYears(currentWeek) || hasMultipleBiweeks(currentWeek)
-            ? resultHoursForPeriods(employee, selectedPeriod, "totalHours")
-            : resultHoursForPeriod(employee, selectedPeriod, "totalHours")
-          : hasMultipleYears(currentWeek) || hasMultipleMonths(currentWeek)
-            ? resultHoursForPeriods(employee, selectedPeriod, "totalHours")
-            : resultHoursForPeriod(employee, selectedPeriod, "totalHours");
+      return calculateTotalHours(
+        employee,
+        selectedPeriod,
+        currentWeek,
+        weekNumber,
+        biweekNumber,
+        month,
+        year,
+        weeklySummaries,
+        biweeklySummaries,
+        monthlySummaries,
+        multiplePeriods,
+      );
     };
 
     const resultOvertime = (employee: Employee) => {
-      return selectedPeriod === "weekly"
-        ? hasMultipleYears(currentWeek)
-          ? resultHoursForPeriods(employee, selectedPeriod, "overtime")
-          : resultHoursForPeriod(employee, selectedPeriod, "overtime")
-        : selectedPeriod === "biweekly"
-          ? hasMultipleYears(currentWeek) || hasMultipleBiweeks(currentWeek)
-            ? resultHoursForPeriods(employee, selectedPeriod, "overtime")
-            : resultHoursForPeriod(employee, selectedPeriod, "overtime")
-          : hasMultipleYears(currentWeek) || hasMultipleMonths(currentWeek)
-            ? resultHoursForPeriods(employee, selectedPeriod, "overtime")
-            : resultHoursForPeriod(employee, selectedPeriod, "overtime");
-    };
-
-    const hasWorkedCurrentWeek = (employee: Employee): boolean => {
-      const found = weeklySummaries.some(
-        (summary) =>
-          summary.employeeId === employee.id &&
-          summary.weekNumber === weekNumber &&
-          summary.year === year,
+      return calculateOvertime(
+        employee,
+        selectedPeriod,
+        currentWeek,
+        weekNumber,
+        biweekNumber,
+        month,
+        year,
+        weeklySummaries,
+        biweeklySummaries,
+        monthlySummaries,
+        multiplePeriods,
       );
-      return found;
     };
 
-    // Compute rowsPerPageOptions to always include the current value
-    const defaultRowsPerPageOptions = [5, 10, 25, 50, 100];
-    const rowsPerPageOptions = Array.from(
-      new Set([...defaultRowsPerPageOptions, rowsPerPage]),
-    ).sort((a, b) => a - b);
+    const hasWorkedCurrentWeekForEmployee = (employee: Employee): boolean => {
+      return hasWorkedCurrentWeek(employee, weekNumber, year, weeklySummaries);
+    };
+
+    // Use helper function for rows per page options
+    const rowsPerPageOptions = generateRowsPerPageOptions(rowsPerPage);
 
     return (
       <>
         <Paper sx={paperStyles}>
           <Box sx={stickyHeaderBoxStyles(isSmallScreen)}>
             <Box sx={headerFlexBoxStyles}>
-              {selectedPeriod === "weekly" ? (
-                <div>
-                  {hasMultipleYears(currentWeek) ? (
-                    <Typography variant="body2" sx={boldTypographyStyles}>
-                      {`${SELECTOR_TABLE.WEEKS} ${multiplePeriods.weekNumbers[1].weekNumber} / `}
-                      {multiplePeriods.weekNumbers[0].weekNumber}
-                    </Typography>
-                  ) : (
-                    <Typography
-                      variant="body2"
-                      sx={boldTypographyStyles}
-                    >{`${SELECTOR_TABLE.WEEK} ${weekNumber}`}</Typography>
-                  )}
-                </div>
-              ) : selectedPeriod === "biweekly" ? (
-                <div>
-                  {hasMultipleBiweeks(currentWeek) ? (
-                    <Typography variant="body2" sx={boldTypographyStyles}>
-                      {`${SELECTOR_TABLE.BIWEEKS} ${multiplePeriods.biweekNumbers[0].biweekNumber} / `}
-                      {multiplePeriods.biweekNumbers[1].biweekNumber}
-                    </Typography>
-                  ) : (
-                    <Typography
-                      variant="body2"
-                      sx={boldTypographyStyles}
-                    >{`${SELECTOR_TABLE.BIWEEK} ${biweekNumber}`}</Typography>
-                  )}
-                </div>
-              ) : (
-                <div>
-                  {hasMultipleMonths(currentWeek) ? (
-                    <Typography
-                      variant="body2"
-                      sx={boldTypographyStyles}
-                    >{`${getMonthName(
-                      multiplePeriods.months[0].month,
-                    )} / ${getMonthName(
-                      multiplePeriods.months[1].month,
-                    )}`}</Typography>
-                  ) : (
-                    <Typography
-                      variant="body2"
-                      sx={boldTypographyStyles}
-                    >{`${getMonthName(month)}`}</Typography>
-                  )}
-                </div>
-              )}
+              <Typography variant="body2" sx={boldTypographyStyles}>
+                {renderPeriodHeader(
+                  selectedPeriod,
+                  currentWeek,
+                  weekNumber,
+                  biweekNumber,
+                  month,
+                  year,
+                  multiplePeriods,
+                )}
+              </Typography>
             </Box>
           </Box>
           <TableContainer
@@ -621,7 +517,11 @@ const SelectorTableComponent: React.FC<SelectorTableProps> = React.memo(
                         justifyContent="space-between"
                         sx={employeeCellBoxStyles(isSmallScreen)}
                       >
-                        <Typography variant="body2">
+                        <Typography
+                          variant="body2"
+                          fontWeight={600}
+                          sx={totalHoursTypographyStyles}
+                        >
                           {employee.firstName} {employee.lastName}
                         </Typography>
                         {permissions?.includes(
@@ -652,43 +552,25 @@ const SelectorTableComponent: React.FC<SelectorTableProps> = React.memo(
                       </Box>
                     </TableCell>
                     {currentWeek.map(({ day, date }) => {
-                      const formattedDate = format(
-                        new Date(date),
-                        "yyyy-MM-dd",
+                      const scheduleData = getScheduleCellData(
+                        employee,
+                        day,
+                        date,
+                        schedules,
+                        hoursWorked,
                       );
-                      const existingRecord = hoursWorked.find(
-                        (record) =>
-                          record.employeeId === employee.id &&
-                          format(new Date(record.date), "yyyy-MM-dd") ===
-                            formattedDate,
-                      );
-                      const options = getOptionsForDay(day, schedules);
-                      const validLabels = options.map((option) => option.label);
-
-                      const selectedLabel =
-                        schedules.find(
-                          (schedule) =>
-                            schedule.id === existingRecord?.scheduleId,
-                        )?.label ?? STATE.FREE;
-
-                      const finalSelectedLabel = validLabels.includes(
-                        selectedLabel,
-                      )
-                        ? selectedLabel
-                        : (validLabels[0] ?? "");
 
                       return (
                         <TableCell
                           key={day}
                           sx={tableCellBackground(
                             rowIndex,
-                            format(new Date(), "yyyy-MM-dd") ===
-                              format(new Date(date), "yyyy-MM-dd"),
+                            isToday(date),
                           )}
                         >
                           <FormControl fullWidth>
                             <Select
-                              value={finalSelectedLabel}
+                              value={scheduleData.finalSelectedLabel}
                               onChange={(event: SelectChangeEvent<string>) =>
                                 handleChange(event, employee.id, new Date(date))
                               }
@@ -721,7 +603,7 @@ const SelectorTableComponent: React.FC<SelectorTableProps> = React.memo(
                                 />
                                 {SELECTOR_TABLE.LOCATIONS}
                               </ListSubheader>
-                              {options
+                              {scheduleData.options
                                 .filter((option) => !option.specialSchedule)
                                 .sort((a, b) => a.label.localeCompare(b.label))
                                 .map((option) => (
@@ -743,7 +625,7 @@ const SelectorTableComponent: React.FC<SelectorTableProps> = React.memo(
                                 />
                                 {SELECTOR_TABLE.SPECIAL_SCHEDULES}
                               </ListSubheader>
-                              {options
+                              {scheduleData.options
                                 .filter((option) => option.specialSchedule)
                                 .sort((a, b) => a.label.localeCompare(b.label))
                                 .map((option) => (
@@ -800,9 +682,9 @@ const SelectorTableComponent: React.FC<SelectorTableProps> = React.memo(
                               <span>
                                 <IconButton
                                   size="medium"
-                                  disabled={!hasWorkedCurrentWeek(employee)}
+                                  disabled={!hasWorkedCurrentWeekForEmployee(employee)}
                                   sx={{
-                                    color: hasWorkedCurrentWeek(employee)
+                                    color: hasWorkedCurrentWeekForEmployee(employee)
                                       ? "warning.main"
                                       : "grey.400",
                                     backgroundColor: "transparent",
@@ -856,12 +738,7 @@ const SelectorTableComponent: React.FC<SelectorTableProps> = React.memo(
                                 <Badge
                                   badgeContent={resultOvertime(employee)}
                                   max={9999999}
-                                  color={
-                                    resultOvertime(employee) === 0 ||
-                                    resultOvertime(employee) === "0/0"
-                                      ? "success"
-                                      : "warning"
-                                  }
+                                  color={getOvertimeBadgeColor(resultOvertime(employee))}
                                   showZero
                                   sx={badgeStyles}
                                 >
@@ -887,71 +764,17 @@ const SelectorTableComponent: React.FC<SelectorTableProps> = React.memo(
             alignItems="center"
           >
             {!isSmallScreen && (
-              <div>
-                {selectedPeriod === "weekly" ? (
-                  <Typography variant="body2" sx={{ ml: 2 }}>
-                    Semana del{" "}
-                    {formatDateWithoutYear(new Date(currentWeek[0]?.date))} al{" "}
-                    {formatDate(new Date(currentWeek[6]?.date), false)}
-                  </Typography>
-                ) : selectedPeriod === "biweekly" ? (
-                  <div>
-                    {hasMultipleBiweeks(currentWeek) ? (
-                      <Typography
-                        variant="body2"
-                        sx={{ ml: 2 }}
-                      >{`Quincenas del ${formatDateWithoutYear(
-                        getBiweeklyDates(
-                          year,
-                          multiplePeriods.biweekNumbers[0].biweekNumber,
-                        ).startDate,
-                      )} al ${formatDateWithoutYear(
-                        getBiweeklyDates(
-                          year,
-                          multiplePeriods.biweekNumbers[0].biweekNumber,
-                        ).endDate,
-                      )} / ${formatDateWithoutYear(
-                        getBiweeklyDates(
-                          year,
-                          multiplePeriods.biweekNumbers[1].biweekNumber,
-                        ).startDate,
-                      )} al ${formatDateWithoutYear(
-                        getBiweeklyDates(
-                          year,
-                          multiplePeriods.biweekNumbers[1].biweekNumber,
-                        ).endDate,
-                      )} del ${year}`}</Typography>
-                    ) : (
-                      <Typography
-                        variant="body2"
-                        sx={{ ml: 2 }}
-                      >{`Quincena del ${formatDateWithoutYear(
-                        getBiweeklyDates(year, biweekNumber).startDate,
-                      )} al ${formatDateWithoutYear(
-                        getBiweeklyDates(year, biweekNumber).endDate,
-                      )}`}</Typography>
-                    )}
-                  </div>
-                ) : (
-                  <div>
-                    {hasMultipleMonths(currentWeek) ? (
-                      <Typography
-                        variant="body2"
-                        sx={{ ml: 2 }}
-                      >{`${getMonthName(
-                        multiplePeriods.months[0].month,
-                      )} / ${getMonthName(
-                        multiplePeriods.months[1].month,
-                      )} del ${year}`}</Typography>
-                    ) : (
-                      <Typography
-                        variant="body2"
-                        sx={{ ml: 2 }}
-                      >{`${getMonthName(month)}`}</Typography>
-                    )}
-                  </div>
+              <Typography variant="body2" sx={{ ml: 2 }}>
+                {renderPeriodFooter(
+                  selectedPeriod,
+                  currentWeek,
+                  weekNumber,
+                  biweekNumber,
+                  month,
+                  year,
+                  multiplePeriods,
                 )}
-              </div>
+              </Typography>
             )}
             <div ref={paginationRef}>
               <TablePagination
@@ -993,8 +816,7 @@ const SelectorTableComponent: React.FC<SelectorTableProps> = React.memo(
                   {SELECTOR_TABLE.ADJUST_HOURS}
                 </Typography>
                 <Typography variant="subtitle2" color="#fff">
-                  {openAdjustDialogEmployee.firstName}{" "}
-                  {openAdjustDialogEmployee.lastName}
+                  {getDialogTitle(openAdjustDialogEmployee)}
                 </Typography>
               </Box>
               <Box flexGrow={1} />
@@ -1008,12 +830,8 @@ const SelectorTableComponent: React.FC<SelectorTableProps> = React.memo(
             <Box sx={dialogContentBoxStyles}>
               <Grid container spacing={3}>
                 <Grid item xs={12}>
-                  <Typography variant="subtitle1" color="text.secondary" mb={1}>
-                    {selectedPeriod === "weekly"
-                      ? SELECTOR_TABLE.WEEKLY_HOURS_MESSAGE
-                      : selectedPeriod === "biweekly"
-                        ? SELECTOR_TABLE.BIWEEKLY_HOURS_MESSAGE
-                        : SELECTOR_TABLE.MONTHLY_HOURS_MESSAGE}
+                                    <Typography variant="subtitle1" color="text.secondary" mb={1}>
+                    {getPeriodMessage(selectedPeriod)}
                   </Typography>
                   <Typography
                     variant="h3"
@@ -1021,23 +839,17 @@ const SelectorTableComponent: React.FC<SelectorTableProps> = React.memo(
                     fontWeight={800}
                     mb={2}
                   >
-                    {selectedPeriod === "weekly"
-                      ? resultHoursForPeriod(
-                          openAdjustDialogEmployee,
-                          "weekly",
-                          "totalHours",
-                        )
-                      : selectedPeriod === "biweekly"
-                        ? resultHoursForPeriod(
-                            openAdjustDialogEmployee,
-                            "biweekly",
-                            "totalHours",
-                          )
-                        : resultHoursForPeriod(
-                            openAdjustDialogEmployee,
-                            "monthly",
-                            "totalHours",
-                          )}
+                    {getCurrentHoursDisplay(
+                      openAdjustDialogEmployee,
+                      selectedPeriod,
+                      weekNumber,
+                      biweekNumber,
+                      month,
+                      year,
+                      weeklySummaries,
+                      biweeklySummaries,
+                      monthlySummaries,
+                    )}
                   </Typography>
                   <TextField
                     label={SELECTOR_TABLE.HOURS_TO_ADJUST}
@@ -1049,16 +861,12 @@ const SelectorTableComponent: React.FC<SelectorTableProps> = React.memo(
                     sx={dialogTextFieldStyles}
                     inputProps={{ min: 0 }}
                     error={timeAdjustment < 0}
-                    helperText={
-                      timeAdjustment < 0
-                        ? SELECTOR_TABLE.POSITIVE_NUMBER_REQUIRED
-                        : " "
-                    }
+                    helperText={getTimeAdjustmentError(timeAdjustment)}
                     InputProps={{
                       startAdornment: (
                         <InputAdornment position="start">
                           <AccessTimeRoundedIcon
-                            color={timeAdjustment < 0 ? "error" : "primary"}
+                            color={getTimeAdjustmentIconColor(timeAdjustment)}
                           />
                         </InputAdornment>
                       ),

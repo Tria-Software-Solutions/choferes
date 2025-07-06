@@ -1,8 +1,8 @@
 import React from "react";
 import { Box, Typography, Stack, Theme, SxProps } from "@mui/material";
-import { capitalizeFirstLetter, translateDayOptionsToSpanish } from "./string";
-import { formatDateWithDay } from "./dates";
-import { permissionChipStyles, emailLinkStyles, viewMoreLessStyles } from "../components/Table/EditableTable/EditableTable.styles";
+import { capitalizeFirstLetter, translateDayOptionsToSpanish } from "../../../../utils/string";
+import { formatDateWithDay } from "../../../../utils/dates";
+import { permissionChipStyles, emailLinkStyles, viewMoreLessStyles } from "../EditableTable.styles";
 
 export function renderCellValue<T extends object>({
   column,
