@@ -28,14 +28,11 @@ import {
   SelectChangeEvent,
   Badge,
   Tooltip,
-  TextField,
-  ListSubheader,
+  Stack,
   OutlinedInput,
   InputAdornment,
   IconButton,
-  Dialog,
-  Grid,
-  Stack,
+  ListSubheader,
 } from "@mui/material";
 import PaginationComponent from "../Pagination/Pagination.component";
 import {
@@ -55,7 +52,6 @@ import {
 import InfoOutlinedIcon from "@mui/icons-material/InfoOutlined";
 import AccessTimeRoundedIcon from "@mui/icons-material/AccessTimeRounded";
 import MoreTimeIcon from "@mui/icons-material/MoreTime";
-import CloseRoundedIcon from "@mui/icons-material/CloseRounded";
 import LocationOnOutlinedIcon from "@mui/icons-material/LocationOnOutlined";
 import StarOutlineOutlinedIcon from "@mui/icons-material/StarOutlineOutlined";
 import CalendarTodayIcon from "@mui/icons-material/CalendarToday";
@@ -79,15 +75,6 @@ import {
   tableRowBackground,
   tableCellBackground,
   employeeCellBoxStyles,
-  dialogPaperStyles,
-  dialogHeaderBoxStyles,
-  dialogCloseButtonStyles,
-  dialogContentBoxStyles,
-  dialogInfoBoxStyles,
-  dialogInfoIconBoxStyles,
-  dialogInfoTitleBoxStyles,
-  dialogInfoDescBoxStyles,
-  dialogTextFieldStyles,
 } from "./SelectorTable.styles";
 
 // Import helper functions
@@ -109,6 +96,9 @@ import {
   getTimeAdjustmentError,
   getTimeAdjustmentIconColor,
 } from "./helpers";
+
+import AdjustHoursDialog from './AdjustHoursDialog.component';
+import WorkedHoursSummaryDialog from './WorkedHoursSummaryDialog.component';
 
 // SelectorTable component displays and manages employee schedules, hours worked, and summary data for different periods (weekly, biweekly, monthly).
 // Props:
@@ -146,7 +136,7 @@ interface SelectorTableProps {
   ) => void;
   handleAdjustTime: (
     employeeId: number,
-    condition: string,
+    condition: 'add' | 'subtract',
     timeAdjustment: number,
   ) => void;
   permissions?: string[];
@@ -181,6 +171,7 @@ const SelectorTableComponent: React.FC<SelectorTableProps> = React.memo(
     const [rowsPerPage, setRowsPerPage] = useState(5);
     const [openAdjustDialogEmployee, setOpenAdjustDialogEmployee] =
       useState<Employee | null>(null);
+    const [openInfoDialogEmployee, setOpenInfoDialogEmployee] = useState<Employee | null>(null);
 
     const theme = useTheme();
     const isSmallScreen = useMediaQuery(theme.breakpoints.down("sm"));
@@ -801,101 +792,45 @@ const SelectorTableComponent: React.FC<SelectorTableProps> = React.memo(
           </Box>
         </Paper>
         {openAdjustDialogEmployee && (
-          <Dialog
+          <AdjustHoursDialog
             open={!!openAdjustDialogEmployee}
             onClose={() => setOpenAdjustDialogEmployee(null)}
-            maxWidth="sm"
-            fullWidth
-            PaperProps={{
-              sx: dialogPaperStyles,
-            }}
-          >
-            <Box sx={dialogHeaderBoxStyles}>
-              <Box>
-                <Typography variant="h5" fontWeight={700} color="#fff">
-                  {SELECTOR_TABLE.ADJUST_HOURS}
-                </Typography>
-                <Typography variant="subtitle2" color="#fff">
-                  {getDialogTitle(openAdjustDialogEmployee)}
-                </Typography>
-              </Box>
-              <Box flexGrow={1} />
-              <IconButton
-                onClick={() => setOpenAdjustDialogEmployee(null)}
-                sx={dialogCloseButtonStyles}
-              >
-                <CloseRoundedIcon />
-              </IconButton>
-            </Box>
-            <Box sx={dialogContentBoxStyles}>
-              <Grid container spacing={3}>
-                <Grid item xs={12}>
-                                    <Typography variant="subtitle1" color="text.secondary" mb={1}>
-                    {getPeriodMessage(selectedPeriod)}
-                  </Typography>
-                  <Typography
-                    variant="h3"
-                    color="primary"
-                    fontWeight={800}
-                    mb={2}
-                  >
-                    {getCurrentHoursDisplay(
-                      openAdjustDialogEmployee,
-                      selectedPeriod,
-                      weekNumber,
-                      biweekNumber,
-                      month,
-                      year,
-                      weeklySummaries,
-                      biweeklySummaries,
-                      monthlySummaries,
-                    )}
-                  </Typography>
-                  <TextField
-                    label={SELECTOR_TABLE.HOURS_TO_ADJUST}
-                    variant="outlined"
-                    type="number"
-                    placeholder="0"
-                    value={timeAdjustment}
-                    onChange={(e) => setTimeAdjustment(Number(e.target.value))}
-                    sx={dialogTextFieldStyles}
-                    inputProps={{ min: 0 }}
-                    error={timeAdjustment < 0}
-                    helperText={getTimeAdjustmentError(timeAdjustment)}
-                    InputProps={{
-                      startAdornment: (
-                        <InputAdornment position="start">
-                          <AccessTimeRoundedIcon
-                            color={getTimeAdjustmentIconColor(timeAdjustment)}
-                          />
-                        </InputAdornment>
-                      ),
-                    }}
-                  />
-                </Grid>
-                <Grid item xs={12}>
-                  <Box sx={dialogInfoBoxStyles}>
-                    <Box sx={dialogInfoIconBoxStyles}>
-                      <InfoOutlinedIcon
-                        sx={{
-                          color: "info.main",
-                          mr: { xs: 1, sm: 2 },
-                        }}
-                      />
-                    </Box>
-                    <Box>
-                      <Box sx={dialogInfoTitleBoxStyles}>
-                        {SELECTOR_TABLE.ADJUSTMENT_INFO}
-                      </Box>
-                      <Box sx={dialogInfoDescBoxStyles}>
-                        {SELECTOR_TABLE.ADJUSTMENT_DESCRIPTION}
-                      </Box>
-                    </Box>
-                  </Box>
-                </Grid>
-              </Grid>
-            </Box>
-          </Dialog>
+            employee={openAdjustDialogEmployee}
+            selectedPeriod={selectedPeriod}
+            timeAdjustment={timeAdjustment}
+            setTimeAdjustment={setTimeAdjustment}
+            getDialogTitle={getDialogTitle}
+            getPeriodMessage={getPeriodMessage}
+            getCurrentHoursDisplay={getCurrentHoursDisplay}
+            getTimeAdjustmentError={getTimeAdjustmentError}
+            getTimeAdjustmentIconColor={getTimeAdjustmentIconColor}
+            handleAdjustTime={handleAdjustTime}
+            weekNumber={weekNumber}
+            biweekNumber={biweekNumber}
+            month={month}
+            year={year}
+            weeklySummaries={weeklySummaries}
+            biweeklySummaries={biweeklySummaries}
+            monthlySummaries={monthlySummaries}
+          />
+        )}
+        {openInfoDialogEmployee && (
+          <WorkedHoursSummaryDialog
+            open={!!openInfoDialogEmployee}
+            onClose={() => setOpenInfoDialogEmployee(null)}
+            employee={openInfoDialogEmployee}
+            selectedPeriod={selectedPeriod}
+            getDialogTitle={getDialogTitle}
+            getPeriodMessage={getPeriodMessage}
+            getCurrentHoursDisplay={getCurrentHoursDisplay}
+            weekNumber={weekNumber}
+            biweekNumber={biweekNumber}
+            month={month}
+            year={year}
+            weeklySummaries={weeklySummaries}
+            biweeklySummaries={biweeklySummaries}
+            monthlySummaries={monthlySummaries}
+          />
         )}
       </>
     );
