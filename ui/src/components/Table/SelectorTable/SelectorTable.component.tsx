@@ -96,9 +96,11 @@ import {
   getTimeAdjustmentError,
   getTimeAdjustmentIconColor,
 } from "./helpers";
+import AdjustHoursDialog from "../../../pages/Forms/AdjustHoursDialog";
+import WorkedHoursSummaryDialog from "../../../pages/Forms/WorkedHoursSummaryDialog";
+import DialogComponent from '../../Dialog/Dialog.component';
+import { addDialogPaperSx } from '../../../pages/Management/EmployeesPage/styles';
 
-import AdjustHoursDialog from './AdjustHoursDialog.component';
-import WorkedHoursSummaryDialog from './WorkedHoursSummaryDialog.component';
 
 // SelectorTable component displays and manages employee schedules, hours worked, and summary data for different periods (weekly, biweekly, monthly).
 // Props:
@@ -278,7 +280,7 @@ const SelectorTableComponent: React.FC<SelectorTableProps> = React.memo(
                   biweekNumber,
                   month,
                   year,
-                  multiplePeriods,
+                  multiplePeriods
                 )}
               </Typography>
             </Box>
@@ -299,7 +301,7 @@ const SelectorTableComponent: React.FC<SelectorTableProps> = React.memo(
                       direction={orderDirection}
                       onClick={() =>
                         setOrderDirection((prev) =>
-                          prev === "asc" ? "desc" : "asc",
+                          prev === "asc" ? "desc" : "asc"
                         )
                       }
                     >
@@ -313,12 +315,12 @@ const SelectorTableComponent: React.FC<SelectorTableProps> = React.memo(
                       sx={tableCellStyles(isSmallScreen)}
                     >
                       {`${translateDayToAbrevSpanish(
-                        day as EnglishDayOfWeek,
+                        day as EnglishDayOfWeek
                       )} ${formatHeaderDate(date)}`}
                     </TableCell>
                   ))}
                   {permissions?.includes(
-                    PERMISSIONS.VIEW_EMPLOYEE_ROLES_HOURS,
+                    PERMISSIONS.VIEW_EMPLOYEE_ROLES_HOURS
                   ) && (
                     <>
                       <TableCell />
@@ -364,7 +366,7 @@ const SelectorTableComponent: React.FC<SelectorTableProps> = React.memo(
                                 e.target.value as
                                   | "weekly"
                                   | "biweekly"
-                                  | "monthly",
+                                  | "monthly"
                               )
                             }
                             autoWidth
@@ -499,7 +501,7 @@ const SelectorTableComponent: React.FC<SelectorTableProps> = React.memo(
                       sx={Object.assign(
                         {},
                         employeeColumnCellStyles(isSmallScreen),
-                        tableCellBackground(rowIndex, false),
+                        tableCellBackground(rowIndex, false)
                       )}
                     >
                       <Box
@@ -516,7 +518,7 @@ const SelectorTableComponent: React.FC<SelectorTableProps> = React.memo(
                           {employee.firstName} {employee.lastName}
                         </Typography>
                         {permissions?.includes(
-                          PERMISSIONS.VIEW_EMPLOYEE_ROLES_HOURS,
+                          PERMISSIONS.VIEW_EMPLOYEE_ROLES_HOURS
                         ) && (
                           <Tooltip title="Ver información" arrow>
                             <span>
@@ -548,16 +550,13 @@ const SelectorTableComponent: React.FC<SelectorTableProps> = React.memo(
                         day,
                         date,
                         schedules,
-                        hoursWorked,
+                        hoursWorked
                       );
 
                       return (
                         <TableCell
                           key={day}
-                          sx={tableCellBackground(
-                            rowIndex,
-                            isToday(date),
-                          )}
+                          sx={tableCellBackground(rowIndex, isToday(date))}
                         >
                           <FormControl fullWidth>
                             <Select
@@ -567,7 +566,7 @@ const SelectorTableComponent: React.FC<SelectorTableProps> = React.memo(
                               }
                               disabled={
                                 !permissions?.includes(
-                                  PERMISSIONS.EDIT_EMPLOYEE_ROLES,
+                                  PERMISSIONS.EDIT_EMPLOYEE_ROLES
                                 )
                               }
                               input={
@@ -630,7 +629,7 @@ const SelectorTableComponent: React.FC<SelectorTableProps> = React.memo(
                                 ))}
                               <Divider />
                               {permissions?.includes(
-                                PERMISSIONS.CREATE_SCHEDULES,
+                                PERMISSIONS.CREATE_SCHEDULES
                               ) && (
                                 <MenuItem
                                   value={"Other"}
@@ -652,7 +651,7 @@ const SelectorTableComponent: React.FC<SelectorTableProps> = React.memo(
                       );
                     })}
                     {permissions?.includes(
-                      PERMISSIONS.VIEW_EMPLOYEE_ROLES_HOURS,
+                      PERMISSIONS.VIEW_EMPLOYEE_ROLES_HOURS
                     ) && (
                       <>
                         <TableCell
@@ -673,9 +672,13 @@ const SelectorTableComponent: React.FC<SelectorTableProps> = React.memo(
                               <span>
                                 <IconButton
                                   size="medium"
-                                  disabled={!hasWorkedCurrentWeekForEmployee(employee)}
+                                  disabled={
+                                    !hasWorkedCurrentWeekForEmployee(employee)
+                                  }
                                   sx={{
-                                    color: hasWorkedCurrentWeekForEmployee(employee)
+                                    color: hasWorkedCurrentWeekForEmployee(
+                                      employee
+                                    )
                                       ? "warning.main"
                                       : "grey.400",
                                     backgroundColor: "transparent",
@@ -729,7 +732,9 @@ const SelectorTableComponent: React.FC<SelectorTableProps> = React.memo(
                                 <Badge
                                   badgeContent={resultOvertime(employee)}
                                   max={9999999}
-                                  color={getOvertimeBadgeColor(resultOvertime(employee))}
+                                  color={getOvertimeBadgeColor(
+                                    resultOvertime(employee)
+                                  )}
                                   showZero
                                   sx={badgeStyles}
                                 >
@@ -763,7 +768,7 @@ const SelectorTableComponent: React.FC<SelectorTableProps> = React.memo(
                   biweekNumber,
                   month,
                   year,
-                  multiplePeriods,
+                  multiplePeriods
                 )}
               </Typography>
             )}
@@ -791,10 +796,16 @@ const SelectorTableComponent: React.FC<SelectorTableProps> = React.memo(
             </div>
           </Box>
         </Paper>
-        {openAdjustDialogEmployee && (
+        <DialogComponent
+          open={!!openAdjustDialogEmployee}
+          onClose={() => setOpenAdjustDialogEmployee(null)}
+          title={SELECTOR_TABLE.ADJUST_HOURS}
+          subtitle={getDialogTitle(openAdjustDialogEmployee)}
+          hideActions
+          paperSx={addDialogPaperSx as object}
+        >
           <AdjustHoursDialog
-            open={!!openAdjustDialogEmployee}
-            onClose={() => setOpenAdjustDialogEmployee(null)}
+            onCancel={() => setOpenAdjustDialogEmployee(null)}
             employee={openAdjustDialogEmployee}
             selectedPeriod={selectedPeriod}
             timeAdjustment={timeAdjustment}
@@ -812,12 +823,19 @@ const SelectorTableComponent: React.FC<SelectorTableProps> = React.memo(
             weeklySummaries={weeklySummaries}
             biweeklySummaries={biweeklySummaries}
             monthlySummaries={monthlySummaries}
+            isSmallScreen={isSmallScreen}
           />
-        )}
-        {openInfoDialogEmployee && (
+        </DialogComponent>
+        <DialogComponent
+          open={!!openInfoDialogEmployee}
+          onClose={() => setOpenInfoDialogEmployee(null)}
+          title={SELECTOR_TABLE.INFO}
+          subtitle={SELECTOR_TABLE.INFO}
+          hideActions
+          paperSx={addDialogPaperSx as object}
+        >
           <WorkedHoursSummaryDialog
-            open={!!openInfoDialogEmployee}
-            onClose={() => setOpenInfoDialogEmployee(null)}
+            onCancel={() => setOpenInfoDialogEmployee(null)}
             employee={openInfoDialogEmployee}
             selectedPeriod={selectedPeriod}
             getDialogTitle={getDialogTitle}
@@ -830,8 +848,9 @@ const SelectorTableComponent: React.FC<SelectorTableProps> = React.memo(
             weeklySummaries={weeklySummaries}
             biweeklySummaries={biweeklySummaries}
             monthlySummaries={monthlySummaries}
+            isSmallScreen={isSmallScreen}
           />
-        )}
+        </DialogComponent>
       </>
     );
   },
