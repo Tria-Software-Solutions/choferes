@@ -244,8 +244,23 @@ const VehiclesPage: React.FC = () => {
       // For any other prefix or format, consider it valid
       return true;
     }
+    
+    if (field === "licensePlate" && typeof value === "string") {
+      // Check if license plate already exists on the same day (excluding current row)
+      const sameDayVehicles = allVehicles.filter((v) => {
+        const vehicleDate = new Date(v.parkingDate);
+        const editDate = new Date(editFields.parkingDate);
+        const vehicleDateStr = vehicleDate.toISOString().split('T')[0];
+        const editDateStr = editDate.toISOString().split('T')[0];
+        return vehicleDateStr === editDateStr && 
+               v.licensePlate === value.trim() && 
+               v.id !== editRowId; // Exclude current row being edited
+      });
+      return sameDayVehicles.length === 0;
+    }
+    
     return true; // Default validation for other fields
-  }, []);
+  }, [allVehicles, editFields.parkingDate, editRowId]);
 
   // Handle search bar input change
   const handleFilterChange = (e: React.ChangeEvent<HTMLInputElement>) => {
