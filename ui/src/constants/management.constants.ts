@@ -138,6 +138,9 @@ const MANAGEMENT = {
   CONFIRM_NEW_PASSWORD_LABEL: "Confirmar nueva contraseña",
   SECURITY_TIP_TITLE: "Consejo de seguridad",
   SECURITY_TIP_DESC: "No compartas tu contraseña con nadie.",
+  PASSWORD_INFO_TITLE: "Información de la contraseña",
+  PASSWORD_INFO_DESC:
+    "La contraseña debe tener al menos 8 caracteres, incluir mayúsculas, minúsculas, un número y un carácter especial. Por seguridad, no compartas tu contraseña con nadie.",
   CHANGE_PASSWORD: "Cambiar contraseña",
   EMAIL_EXISTS: "El correo ya está registrado",
   USERNAME_EXISTS: "El nombre de usuario ya está registrado",

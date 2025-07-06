@@ -37,6 +37,7 @@ import PersonOutlinedIcon from "@mui/icons-material/PersonOutlined";
 import EmailOutlinedIcon from "@mui/icons-material/EmailOutlined";
 import AccountCircleOutlinedIcon from "@mui/icons-material/AccountCircleOutlined";
 import InfoOutlinedIcon from "@mui/icons-material/InfoOutlined";
+import { infoBox, infoIconBox, infoTitle, infoDesc, iconSx } from '../../Forms/AddEmployeeForm/styles';
 
 // Settings page component for user profile and password management
 const Settings: React.FC = () => {
@@ -398,49 +399,23 @@ const Settings: React.FC = () => {
             </Grid>
           </Grid>
 
-          <Box
-            sx={{
-              display: "flex",
-              alignItems: "center",
-              p: { xs: 1.5, sm: 2 },
-              backgroundColor: theme.palette.action.hover,
-              borderRadius: 1,
-              border: "1px solid",
-              borderColor: theme.palette.divider,
-              mb: { xs: 2, sm: 3 },
-              mt: { xs: 2, sm: 3 },
-            }}
-          >
-            <Box sx={{ mr: { xs: 1, sm: 2 }, color: theme.palette.info.main }}>
-              <InfoOutlinedIcon
-                sx={{
-                  color: theme.palette.info.main,
-                  mr: { xs: 1, sm: 2 },
-                  fontSize: { xs: "1.25rem", sm: "1.5rem" },
-                }}
-              />
-            </Box>
-            <Box>
-              <Box
-                sx={{
-                  fontWeight: 600,
-                  color: theme.palette.text.primary,
-                  mb: 0.5,
-                  fontSize: "clamp(0.875rem, 1.5vw, 1rem)",
-                }}
-              >
-                {MANAGEMENT.RECOMMENDATION_TITLE}
+          <Grid item xs={12} sx={{ mt: 3 }}>
+            <Box sx={infoBox(theme)}>
+              <Box sx={infoIconBox(theme)}>
+                <InfoOutlinedIcon
+                  sx={{ ...iconSx(theme), ...infoIconBox(theme) }}
+                />
               </Box>
-              <Box
-                sx={{
-                  color: theme.palette.text.secondary,
-                  fontSize: "clamp(0.75rem, 1.25vw, 0.875rem)",
-                }}
-              >
-                {MANAGEMENT.RECOMMENDATION_DESC}
+              <Box>
+                <Typography sx={infoTitle(theme)}>
+                  {MANAGEMENT.RECOMMENDATION_TITLE}
+                </Typography>
+                <Typography sx={infoDesc(theme)}>
+                  {MANAGEMENT.RECOMMENDATION_DESC}
+                </Typography>
               </Box>
             </Box>
-          </Box>
+          </Grid>
 
           <Box
             sx={{
@@ -559,49 +534,23 @@ const Settings: React.FC = () => {
             </Grid>
           </Grid>
 
-          <Box
-            sx={{
-              display: "flex",
-              alignItems: "center",
-              p: { xs: 1.5, sm: 2 },
-              backgroundColor: theme.palette.action.hover,
-              borderRadius: 1,
-              border: "1px solid",
-              borderColor: theme.palette.divider,
-              mb: { xs: 2, sm: 3 },
-              mt: { xs: 2, sm: 3 },
-            }}
-          >
-            <Box sx={{ mr: { xs: 1, sm: 2 }, color: theme.palette.info.main }}>
-              <InfoOutlinedIcon
-                sx={{
-                  color: theme.palette.info.main,
-                  mr: { xs: 1, sm: 2 },
-                  fontSize: { xs: "1.25rem", sm: "1.5rem" },
-                }}
-              />
-            </Box>
-            <Box>
-              <Box
-                sx={{
-                  fontWeight: 600,
-                  color: theme.palette.text.primary,
-                  mb: 0.5,
-                  fontSize: "clamp(0.875rem, 1.5vw, 1rem)",
-                }}
-              >
-                {MANAGEMENT.SECURITY_TIP_TITLE}
+          <Grid item xs={12} sx={{ mt: 3 }}>
+            <Box sx={infoBox(theme)}>
+              <Box sx={infoIconBox(theme)}>
+                <InfoOutlinedIcon
+                  sx={{ ...iconSx(theme), ...infoIconBox(theme) }}
+                />
               </Box>
-              <Box
-                sx={{
-                  color: theme.palette.text.secondary,
-                  fontSize: "clamp(0.75rem, 1.25vw, 0.875rem)",
-                }}
-              >
-                {MANAGEMENT.SECURITY_TIP_DESC}
+              <Box>
+                <Typography sx={infoTitle(theme)}>
+                  {MANAGEMENT.PASSWORD_INFO_TITLE}
+                </Typography>
+                <Typography sx={infoDesc(theme)}>
+                  {MANAGEMENT.PASSWORD_INFO_DESC}
+                </Typography>
               </Box>
             </Box>
-          </Box>
+          </Grid>
 
           <Box
             sx={{
