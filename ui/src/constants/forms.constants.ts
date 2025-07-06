@@ -145,4 +145,8 @@ const FORMS = {
     BUTTON_ADDING: "Agregando...",
   },
 };
+
+export const PASSWORD_INFO_TITLE = "Información de la contraseña";
+export const PASSWORD_INFO_DESC = "La contraseña debe tener al menos 8 caracteres, incluir mayúsculas, minúsculas, un número y un carácter especial. Por seguridad, no compartas tu contraseña con nadie. Puedes generar una contraseña temporal para el usuario si es necesario.";
+
 export default FORMS;
