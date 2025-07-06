@@ -40,9 +40,6 @@ import {
   CircularProgress,
   SelectChangeEvent,
   Backdrop,
-  Avatar,
-  IconButton,
-  Dialog,
   ButtonGroup,
   Divider,
 } from "@mui/material";
@@ -64,19 +61,12 @@ import PAGE_TITLE from "../../../constants/pageTitle.constants";
 import PERMISSIONS from "../../../constants/permissions.constants";
 import MANAGEMENT from "../../../constants/management.constants";
 import DownloadRoundedIcon from "@mui/icons-material/DownloadRounded";
-import InfoOutlinedIcon from "@mui/icons-material/InfoOutlined";
 import ArrowBackIosNewRoundedIcon from "@mui/icons-material/ArrowBackIosNewRounded";
 import ArrowForwardIosRoundedIcon from "@mui/icons-material/ArrowForwardIosRounded";
 import CalendarTodayRoundedIcon from "@mui/icons-material/CalendarTodayRounded";
 import CloseRoundedIcon from "@mui/icons-material/CloseRounded";
 import ManageSearchIcon from "@mui/icons-material/ManageSearch";
 import DialogComponent from "../../../components/Dialog/Dialog.component";
-import AccessTimeRoundedIcon from "@mui/icons-material/AccessTimeRounded";
-import BarChartIcon from "@mui/icons-material/BarChart";
-import TabContext from "@mui/lab/TabContext";
-import TabList from "@mui/lab/TabList";
-import TabPanel from "@mui/lab/TabPanel";
-import Tab from "@mui/material/Tab";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faFileExcel, faFilePdf } from "@fortawesome/free-solid-svg-icons";
 import AssignmentIcon from "@mui/icons-material/Assignment";
@@ -94,15 +84,6 @@ import {
   buttonGroupSx,
   noEmployeesBoxStyles,
   noEmployeesIconStyles,
-  summaryDialogPaperSx,
-  summaryDialogHeaderBoxStyles,
-  summaryDialogCloseIconStyles,
-  summaryTabPanelAvatarStyles,
-  summaryInfoBoxStyles,
-  summaryInfoIconBoxStyles,
-  summaryInfoIconStyles,
-  summaryInfoTitleStyles,
-  summaryInfoDescStyles,
 } from "./styles";
 
 // Roles management and summary page component
@@ -147,11 +128,6 @@ const RolesPage: React.FC = () => {
   const [openExportDialog, setOpenExportDialog] = useState(false);
   const [exportType, setExportType] = useState<"excel" | "pdf">("excel");
   const [isExporting, setIsExporting] = useState(false);
-  const [openSummaryDialogEmployee, setOpenSummaryDialogEmployee] =
-    useState<Employee | null>(null);
-  const [summaryTab, setSummaryTab] = useState<
-    "weekly" | "biweekly" | "monthly" | "overtime"
-  >("weekly");
 
   const theme = useTheme();
   const isSmallScreen = useMediaQuery(theme.breakpoints.down("sm"));
@@ -551,41 +527,6 @@ const RolesPage: React.FC = () => {
     return options;
   }, [userPermissions]);
 
-  const getEmployeeWeeklyHours = (employeeId: number) => {
-    const summary = weeklySummaries.find(
-      (s) =>
-        s.employeeId === employeeId &&
-        s.weekNumber === currentWeekNumber &&
-        s.year === currentYear,
-    );
-    return summary ? summary.totalHours : 0;
-  };
-
-  const getEmployeeBiweeklyHours = (employeeId: number) => {
-    const summary = biweeklySummaries.find(
-      (s) =>
-        s.employeeId === employeeId &&
-        s.biweekNumber === currentBiweekNumber &&
-        s.year === currentYear,
-    );
-    return summary ? summary.totalHours : 0;
-  };
-
-  const getEmployeeMonthlyHours = (employeeId: number) => {
-    const summary = monthlySummaries.find(
-      (s) =>
-        s.employeeId === employeeId &&
-        s.month === currentMonth &&
-        s.year === currentYear,
-    );
-    return summary ? summary.totalHours : 0;
-  };
-
-  const getEmployeeOvertime = (employeeId: number) => {
-    const weekly = getEmployeeWeeklyHours(employeeId);
-    return weekly > 48 ? weekly - 48 : 0;
-  };
-
   return (
     <Box>
       <Box
@@ -737,7 +678,6 @@ const RolesPage: React.FC = () => {
               handleChange={handleChange}
               handleAdjustTime={handleAdjustTime}
               permissions={userPermissions}
-              onInfoClick={setOpenSummaryDialogEmployee}
             />
           ) : (
             <Box sx={noEmployeesBoxStyles}>
@@ -764,161 +704,6 @@ const RolesPage: React.FC = () => {
         cancelText={MANAGEMENT.DIALOG_EXPORT_CANCEL}
         loading={isExporting}
       />
-      {openSummaryDialogEmployee && (
-        <Dialog
-          open={!!openSummaryDialogEmployee}
-          onClose={() => setOpenSummaryDialogEmployee(null)}
-          maxWidth="md"
-          fullWidth
-          PaperProps={{
-            sx: summaryDialogPaperSx,
-          }}
-        >
-          <Box sx={summaryDialogHeaderBoxStyles}>
-            <Box>
-              <Typography variant="h5" fontWeight={700} color="#fff">
-                {MANAGEMENT.SUMMARY_TITLE}
-              </Typography>
-              <Typography variant="subtitle2" color="#fff">
-                {openSummaryDialogEmployee.firstName}{" "}
-                {openSummaryDialogEmployee.lastName}
-              </Typography>
-            </Box>
-            <Box flexGrow={1} />
-            <IconButton
-              onClick={() => setOpenSummaryDialogEmployee(null)}
-              sx={summaryDialogCloseIconStyles}
-            >
-              <CloseRoundedIcon />
-            </IconButton>
-          </Box>
-          <Box sx={{ p: { xs: 2, sm: 3, md: 4 } }}>
-            <Grid container spacing={3}>
-              <Grid item xs={12}>
-                <TabContext value={summaryTab}>
-                  <TabList
-                    onChange={(_, v) => setSummaryTab(v)}
-                    variant="fullWidth"
-                  >
-                    <Tab label={MANAGEMENT.TAB_WEEKLY} value="weekly" />
-                    <Tab label={MANAGEMENT.TAB_BIWEEKLY} value="biweekly" />
-                    <Tab label={MANAGEMENT.TAB_MONTHLY} value="monthly" />
-                    <Tab label={MANAGEMENT.TAB_OVERTIME} value="overtime" />
-                  </TabList>
-                  <Divider sx={{ mb: 2 }} />
-                  <TabPanel value="weekly">
-                    <Box display="flex" alignItems="center" gap={3}>
-                      <Avatar
-                        sx={summaryTabPanelAvatarStyles(theme, "success")}
-                      >
-                        <BarChartIcon color="success" />
-                      </Avatar>
-                      <Box>
-                        <Typography variant="h6" fontWeight={700}>
-                          {MANAGEMENT.SUMMARY_WEEKLY}
-                        </Typography>
-                        <Typography
-                          variant="h3"
-                          color="primary"
-                          fontWeight={800}
-                        >
-                          {getEmployeeWeeklyHours(openSummaryDialogEmployee.id)}
-                        </Typography>
-                        <Typography variant="body2" color="text.secondary">
-                          Semana #{currentWeekNumber}
-                        </Typography>
-                      </Box>
-                    </Box>
-                  </TabPanel>
-                  <TabPanel value="biweekly">
-                    <Box display="flex" alignItems="center" gap={3}>
-                      <Avatar sx={summaryTabPanelAvatarStyles(theme, "info")}>
-                        <BarChartIcon color="info" />
-                      </Avatar>
-                      <Box>
-                        <Typography variant="h6" fontWeight={700}>
-                          {MANAGEMENT.SUMMARY_BIWEEKLY}
-                        </Typography>
-                        <Typography
-                          variant="h3"
-                          color="primary"
-                          fontWeight={800}
-                        >
-                          {getEmployeeBiweeklyHours(
-                            openSummaryDialogEmployee.id,
-                          )}
-                        </Typography>
-                        <Typography variant="body2" color="text.secondary">
-                          Quincena #{currentBiweekNumber}
-                        </Typography>
-                      </Box>
-                    </Box>
-                  </TabPanel>
-                  <TabPanel value="monthly">
-                    <Box display="flex" alignItems="center" gap={3}>
-                      <Avatar
-                        sx={summaryTabPanelAvatarStyles(theme, "warning")}
-                      >
-                        <BarChartIcon color="warning" />
-                      </Avatar>
-                      <Box>
-                        <Typography variant="h6" fontWeight={700}>
-                          {MANAGEMENT.SUMMARY_MONTHLY}
-                        </Typography>
-                        <Typography
-                          variant="h3"
-                          color="primary"
-                          fontWeight={800}
-                        >
-                          {getEmployeeMonthlyHours(
-                            openSummaryDialogEmployee.id,
-                          )}
-                        </Typography>
-                        <Typography variant="body2" color="text.secondary">
-                          Mes #{currentMonth} / {currentYear}
-                        </Typography>
-                      </Box>
-                    </Box>
-                  </TabPanel>
-                  <TabPanel value="overtime">
-                    <Box display="flex" alignItems="center" gap={3}>
-                      <Avatar sx={summaryTabPanelAvatarStyles(theme, "error")}>
-                        <AccessTimeRoundedIcon color="error" />
-                      </Avatar>
-                      <Box>
-                        <Typography variant="h6" fontWeight={700}>
-                          {MANAGEMENT.SUMMARY_OVERTIME}
-                        </Typography>
-                        <Typography variant="h3" color="error" fontWeight={800}>
-                          {getEmployeeOvertime(openSummaryDialogEmployee.id)}
-                        </Typography>
-                        <Typography variant="body2" color="text.secondary">
-                          {MANAGEMENT.SUMMARY_DETAIL_OVERTIME}
-                        </Typography>
-                      </Box>
-                    </Box>
-                  </TabPanel>
-                </TabContext>
-              </Grid>
-              <Grid item xs={12}>
-                <Box sx={summaryInfoBoxStyles(theme)}>
-                  <Box sx={summaryInfoIconBoxStyles(theme)}>
-                    <InfoOutlinedIcon sx={summaryInfoIconStyles(theme)} />
-                  </Box>
-                  <Box>
-                    <Box sx={summaryInfoTitleStyles(theme)}>
-                      {MANAGEMENT.SUMMARY_INFO_TITLE}
-                    </Box>
-                    <Box sx={summaryInfoDescStyles(theme)}>
-                      {MANAGEMENT.SUMMARY_INFO_DESC}
-                    </Box>
-                  </Box>
-                </Box>
-              </Grid>
-            </Grid>
-          </Box>
-        </Dialog>
-      )}
     </Box>
   );
 };

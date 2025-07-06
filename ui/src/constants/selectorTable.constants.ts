@@ -39,5 +39,6 @@ const SELECTOR_TABLE = {
   CANCEL: "Cancelar",
   ADD: "Sumar",
   SUBTRACT: "Restar",
+  SUMMARY_TITLE: "Resumen de horas trabajadas",
 };
 export default SELECTOR_TABLE;

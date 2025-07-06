@@ -3,107 +3,144 @@ import {
   Box,
   Grid,
   Typography,
-  Button,
-  useTheme,
+  Avatar,
   Divider,
+  Button,
 } from "@mui/material";
 import InfoOutlinedIcon from "@mui/icons-material/InfoOutlined";
-import {
-  infoBox,
-  infoIconBox,
-  infoTitle,
-  infoDesc,
-  iconSx,
-  actionsBox,
-  actionsInnerBox,
-} from "../AddEmployeeForm/styles";
+import BarChartIcon from "@mui/icons-material/BarChart";
+import AccessTimeRoundedIcon from "@mui/icons-material/AccessTimeRounded";
+import TabContext from "@mui/lab/TabContext";
+import TabList from "@mui/lab/TabList";
+import TabPanel from "@mui/lab/TabPanel";
+import Tab from "@mui/material/Tab";
+import MANAGEMENT from '../../../constants/management.constants';
+import { summaryTabPanelAvatarStyles } from '../../Management/RolesPage/styles';
+import { infoBox, infoIconBox, infoTitle, infoDesc, iconSx } from '../AddEmployeeForm/styles';
+import { actionsBox, actionsInnerBox } from '../AdjustHoursDialog/styles';
 import { Employee } from '../../../models/Employee';
-import SELECTOR_TABLE from '../../../constants/selectorTable.constants';
-import { PeriodType } from '../../../components/Table/SelectorTable/helpers/hoursCalculation';
-import { WeeklySummary } from '../../../models/WeeklySummary';
-import { BiweeklySummary } from '../../../models/BiweeklySummary';
-import { MonthlySummary } from '../../../models/MonthlySummary';
-import DIALOG from '../../../constants/dialog.constants';
+import { Theme } from '@mui/material/styles';
 
 interface WorkedHoursSummaryDialogProps {
   onCancel: () => void;
   employee: Employee | null;
-  selectedPeriod: PeriodType;
-  getDialogTitle: (employee: Employee | null) => string;
-  getPeriodMessage: (period: PeriodType) => string;
-  getCurrentHoursDisplay: (
-    employee: Employee | null,
-    selectedPeriod: PeriodType,
-    weekNumber: number,
-    biweekNumber: number,
-    month: number,
-    year: number,
-    weeklySummaries: WeeklySummary[],
-    biweeklySummaries: BiweeklySummary[],
-    monthlySummaries: MonthlySummary[],
-  ) => string;
-  weekNumber: number;
-  biweekNumber: number;
-  month: number;
-  year: number;
-  weeklySummaries: WeeklySummary[];
-  biweeklySummaries: BiweeklySummary[];
-  monthlySummaries: MonthlySummary[];
-  isSmallScreen: boolean;
+  summaryTab: "weekly" | "biweekly" | "monthly" | "overtime";
+  setSummaryTab: React.Dispatch<React.SetStateAction<"weekly" | "biweekly" | "monthly" | "overtime">>;
+  getEmployeeWeeklyHours: (employeeId: number) => number;
+  getEmployeeBiweeklyHours: (employeeId: number) => number;
+  getEmployeeMonthlyHours: (employeeId: number) => number;
+  getEmployeeOvertime: (employeeId: number) => number;
+  currentWeekNumber: number;
+  currentBiweekNumber: number;
+  currentMonth: number;
+  currentYear: number;
+  theme: Theme;
 }
 
 const WorkedHoursSummaryDialog: React.FC<WorkedHoursSummaryDialogProps> = ({
   onCancel,
   employee,
-  selectedPeriod,
-  getDialogTitle,
-  getPeriodMessage,
-  getCurrentHoursDisplay,
-  weekNumber,
-  biweekNumber,
-  month,
-  year,
-  weeklySummaries,
-  biweeklySummaries,
-  monthlySummaries,
-  isSmallScreen,
+  summaryTab,
+  setSummaryTab,
+  getEmployeeWeeklyHours,
+  getEmployeeBiweeklyHours,
+  getEmployeeMonthlyHours,
+  getEmployeeOvertime,
+  currentWeekNumber,
+  currentBiweekNumber,
+  currentMonth,
+  currentYear,
+  theme,
 }) => {
-  const theme = useTheme();
-
+  if (!employee) return null;
   return (
-    <Box sx={{ width: '100%' }}>
-      <Box sx={{ mb: 2 }}>
-        <Typography
-          variant="body2"
-          color="text.secondary"
-          sx={{ lineHeight: 1.4 }}
-        >
-          {getDialogTitle(employee)}
-        </Typography>
-      </Box>
+    <Box sx={{ p: 2 }}>
       <Grid container spacing={3}>
         <Grid item xs={12}>
-          <Typography variant="subtitle1" color="text.secondary" mb={1}>
-            {getPeriodMessage(selectedPeriod)}
-          </Typography>
-          <Typography
-            variant="h3"
-            color="primary"
-            fontWeight={800}
-            mb={2}
-          >
-            {getCurrentHoursDisplay(
-              employee,
-              selectedPeriod,
-              weekNumber,
-              biweekNumber,
-              month,
-              year,
-              weeklySummaries,
-              biweeklySummaries,
-              monthlySummaries,
-            )}
-          </Typography>
+          <TabContext value={summaryTab}>
+            <TabList
+              onChange={(_, v) => setSummaryTab(v as typeof summaryTab)}
+              variant="fullWidth"
+            >
+              <Tab label={MANAGEMENT.TAB_WEEKLY} value="weekly" />
+              <Tab label={MANAGEMENT.TAB_BIWEEKLY} value="biweekly" />
+              <Tab label={MANAGEMENT.TAB_MONTHLY} value="monthly" />
+              <Tab label={MANAGEMENT.TAB_OVERTIME} value="overtime" />
+            </TabList>
+            <Divider sx={{ mb: 2 }} />
+            <TabPanel value="weekly">
+              <Box display="flex" alignItems="center" gap={3}>
+                <Avatar sx={summaryTabPanelAvatarStyles(theme, "success")}> 
+                  <BarChartIcon color="success" />
+                </Avatar>
+                <Box>
+                  <Typography variant="h6" fontWeight={700}>
+                    {MANAGEMENT.SUMMARY_WEEKLY}
+                  </Typography>
+                  <Typography variant="h3" color="primary" fontWeight={800}>
+                    {getEmployeeWeeklyHours(employee.id)}
+                  </Typography>
+                  <Typography variant="body2" color="text.secondary">
+                    Semana #{currentWeekNumber}
+                  </Typography>
+                </Box>
+              </Box>
+            </TabPanel>
+            <TabPanel value="biweekly">
+              <Box display="flex" alignItems="center" gap={3}>
+                <Avatar sx={summaryTabPanelAvatarStyles(theme, "info")}> 
+                  <BarChartIcon color="info" />
+                </Avatar>
+                <Box>
+                  <Typography variant="h6" fontWeight={700}>
+                    {MANAGEMENT.SUMMARY_BIWEEKLY}
+                  </Typography>
+                  <Typography variant="h3" color="primary" fontWeight={800}>
+                    {getEmployeeBiweeklyHours(employee.id)}
+                  </Typography>
+                  <Typography variant="body2" color="text.secondary">
+                    Quincena #{currentBiweekNumber}
+                  </Typography>
+                </Box>
+              </Box>
+            </TabPanel>
+            <TabPanel value="monthly">
+              <Box display="flex" alignItems="center" gap={3}>
+                <Avatar sx={summaryTabPanelAvatarStyles(theme, "warning")}> 
+                  <BarChartIcon color="warning" />
+                </Avatar>
+                <Box>
+                  <Typography variant="h6" fontWeight={700}>
+                    {MANAGEMENT.SUMMARY_MONTHLY}
+                  </Typography>
+                  <Typography variant="h3" color="primary" fontWeight={800}>
+                    {getEmployeeMonthlyHours(employee.id)}
+                  </Typography>
+                  <Typography variant="body2" color="text.secondary">
+                    Mes #{currentMonth} / {currentYear}
+                  </Typography>
+                </Box>
+              </Box>
+            </TabPanel>
+            <TabPanel value="overtime">
+              <Box display="flex" alignItems="center" gap={3}>
+                <Avatar sx={summaryTabPanelAvatarStyles(theme, "error")}> 
+                  <AccessTimeRoundedIcon color="error" />
+                </Avatar>
+                <Box>
+                  <Typography variant="h6" fontWeight={700}>
+                    {MANAGEMENT.SUMMARY_OVERTIME}
+                  </Typography>
+                  <Typography variant="h3" color="error" fontWeight={800}>
+                    {getEmployeeOvertime(employee.id)}
+                  </Typography>
+                  <Typography variant="body2" color="text.secondary">
+                    {MANAGEMENT.SUMMARY_DETAIL_OVERTIME}
+                  </Typography>
+                </Box>
+              </Box>
+            </TabPanel>
+          </TabContext>
         </Grid>
         <Grid item xs={12}>
           <Box sx={infoBox(theme)}>
@@ -112,30 +149,25 @@ const WorkedHoursSummaryDialog: React.FC<WorkedHoursSummaryDialogProps> = ({
             </Box>
             <Box>
               <Typography sx={infoTitle(theme)}>
-                {SELECTOR_TABLE.INFO}
+                {MANAGEMENT.SUMMARY_INFO_TITLE}
               </Typography>
               <Typography sx={infoDesc(theme)}>
-                {selectedPeriod === 'weekly' && SELECTOR_TABLE.WEEKLY_HOURS_MESSAGE}
-                {selectedPeriod === 'biweekly' && SELECTOR_TABLE.BIWEEKLY_HOURS_MESSAGE}
-                {selectedPeriod === 'monthly' && SELECTOR_TABLE.MONTHLY_HOURS_MESSAGE}
+                {MANAGEMENT.SUMMARY_INFO_DESC}
               </Typography>
             </Box>
           </Box>
         </Grid>
         <Grid item xs={12}>
-          <Divider sx={{ mt: 3, mb: 2 }} />
           <Box sx={actionsBox(theme)}>
-            <Box sx={actionsInnerBox}>
-              <Button
-                onClick={onCancel}
-                variant="outlined"
-                color="inherit"
-                fullWidth={isSmallScreen}
-                sx={{ minWidth: isSmallScreen ? '100%' : 120, py: 1.5, fontWeight: 600 }}
-              >
-                {DIALOG.CLOSE}
-              </Button>
-            </Box>
+            <Button
+              onClick={onCancel}
+              variant="outlined"
+              color="inherit"
+              sx={{ minWidth: 120, py: 1.5, fontWeight: 600 }}
+            >
+              Cerrar
+            </Button>
+            <Box sx={actionsInnerBox} />
           </Box>
         </Grid>
       </Grid>

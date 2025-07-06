@@ -142,7 +142,6 @@ interface SelectorTableProps {
     timeAdjustment: number,
   ) => void;
   permissions?: string[];
-  onInfoClick?: (employee: Employee) => void;
 }
 
 const SelectorTableComponent: React.FC<SelectorTableProps> = React.memo(
@@ -161,7 +160,6 @@ const SelectorTableComponent: React.FC<SelectorTableProps> = React.memo(
     handleChange,
     handleAdjustTime,
     permissions,
-    onInfoClick,
   }) => {
     const navigate = useNavigate();
     const [selectedPeriod, setSelectedPeriod] = useState<
@@ -174,6 +172,7 @@ const SelectorTableComponent: React.FC<SelectorTableProps> = React.memo(
     const [openAdjustDialogEmployee, setOpenAdjustDialogEmployee] =
       useState<Employee | null>(null);
     const [openInfoDialogEmployee, setOpenInfoDialogEmployee] = useState<Employee | null>(null);
+    const [summaryTab, setSummaryTab] = useState<"weekly" | "biweekly" | "monthly" | "overtime">("weekly");
 
     const theme = useTheme();
     const isSmallScreen = useMediaQuery(theme.breakpoints.down("sm"));
@@ -266,6 +265,27 @@ const SelectorTableComponent: React.FC<SelectorTableProps> = React.memo(
 
     // Use helper function for rows per page options
     const rowsPerPageOptions = generateRowsPerPageOptions(rowsPerPage);
+
+    // Helper functions for tabbed summary dialog
+    function hasOvertime(s: unknown): s is { overtimeHours: number } {
+      return typeof s === 'object' && s !== null && 'overtimeHours' in s;
+    }
+    const getEmployeeWeeklyHours = (id: number) => {
+      const summary = weeklySummaries.find(s => s.employeeId === id && s.weekNumber === weekNumber && s.year === year);
+      return summary ? summary.totalHours : 0;
+    };
+    const getEmployeeBiweeklyHours = (id: number) => {
+      const summary = biweeklySummaries.find(s => s.employeeId === id && s.biweekNumber === biweekNumber && s.year === year);
+      return summary ? summary.totalHours : 0;
+    };
+    const getEmployeeMonthlyHours = (id: number) => {
+      const summary = monthlySummaries.find(s => s.employeeId === id && s.month === month && s.year === year);
+      return summary ? summary.totalHours : 0;
+    };
+    const getEmployeeOvertime = (id: number) => {
+      const summary = weeklySummaries.find(s => s.employeeId === id && s.weekNumber === weekNumber && s.year === year);
+      return summary && hasOvertime(summary) ? summary.overtimeHours || 0 : 0;
+    };
 
     return (
       <>
@@ -534,7 +554,7 @@ const SelectorTableComponent: React.FC<SelectorTableProps> = React.memo(
                                   transition: "background 0.2s",
                                 }}
                                 onClick={() =>
-                                  onInfoClick && onInfoClick(employee)
+                                  setOpenInfoDialogEmployee(employee)
                                 }
                               >
                                 <InfoOutlinedIcon fontSize="medium" />
@@ -829,26 +849,25 @@ const SelectorTableComponent: React.FC<SelectorTableProps> = React.memo(
         <DialogComponent
           open={!!openInfoDialogEmployee}
           onClose={() => setOpenInfoDialogEmployee(null)}
-          title={SELECTOR_TABLE.INFO}
-          subtitle={SELECTOR_TABLE.INFO}
+          title={SELECTOR_TABLE.SUMMARY_TITLE}
+          subtitle={getDialogTitle(openInfoDialogEmployee)}
           hideActions
           paperSx={addDialogPaperSx as object}
         >
           <WorkedHoursSummaryDialog
             onCancel={() => setOpenInfoDialogEmployee(null)}
             employee={openInfoDialogEmployee}
-            selectedPeriod={selectedPeriod}
-            getDialogTitle={getDialogTitle}
-            getPeriodMessage={getPeriodMessage}
-            getCurrentHoursDisplay={getCurrentHoursDisplay}
-            weekNumber={weekNumber}
-            biweekNumber={biweekNumber}
-            month={month}
-            year={year}
-            weeklySummaries={weeklySummaries}
-            biweeklySummaries={biweeklySummaries}
-            monthlySummaries={monthlySummaries}
-            isSmallScreen={isSmallScreen}
+            summaryTab={summaryTab}
+            setSummaryTab={setSummaryTab}
+            getEmployeeWeeklyHours={getEmployeeWeeklyHours}
+            getEmployeeBiweeklyHours={getEmployeeBiweeklyHours}
+            getEmployeeMonthlyHours={getEmployeeMonthlyHours}
+            getEmployeeOvertime={getEmployeeOvertime}
+            currentWeekNumber={weekNumber}
+            currentBiweekNumber={biweekNumber}
+            currentMonth={month}
+            currentYear={year}
+            theme={theme}
           />
         </DialogComponent>
       </>
@@ -873,7 +892,6 @@ SelectorTableComponent.propTypes = {
   handleChange: PropTypes.func.isRequired,
   handleAdjustTime: PropTypes.func.isRequired,
   permissions: PropTypes.array,
-  onInfoClick: PropTypes.func,
 };
 
 export default SelectorTableComponent;
