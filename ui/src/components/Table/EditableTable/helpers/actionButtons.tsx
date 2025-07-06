@@ -7,7 +7,7 @@ import CancelIcon from "@mui/icons-material/Cancel";
 import LockResetIcon from "@mui/icons-material/LockReset";
 import ToggleOnIcon from "@mui/icons-material/ToggleOn";
 import ToggleOffIcon from "@mui/icons-material/ToggleOff";
-import { TABLE } from "../constants/constants";
+import { TABLE } from "../../../../constants/constants";
 
 export function renderActionButtons<T extends object>({
   row,

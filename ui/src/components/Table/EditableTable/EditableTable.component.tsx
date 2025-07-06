@@ -34,14 +34,9 @@ import {
   permissionChipStyles,
   viewMoreLessStyles,
 } from "./EditableTable.styles";
-import { createColumnConfig } from "../../../utils/tableConfig";
-import { sortData, paginateData } from "../../../utils/tableSorting";
-import { checkEditPermissions, checkDeletePermissions } from "../../../utils/tablePermissions";
+import { createColumnConfig, sortData, paginateData, checkEditPermissions, checkDeletePermissions, renderEditField, renderCellValue, renderActionButtons, renderStatusButton } from "./helpers";
 import { useTableSorting } from "../../../hooks/useTableSorting";
 import { useExpandedRows } from "../../../hooks/useExpandedRows";
-import { renderEditField } from "../../../utils/tableEditFields";
-import { renderCellValue } from "../../../utils/tableCellRenderers";
-import { renderActionButtons, renderStatusButton } from "../../../utils/tableActionButtons";
 
 // EditableTable is a generic, highly-configurable table component for displaying and editing tabular data.
 // Supports inline editing, validation, pagination, sorting, custom renderers, and permission-based actions.
@@ -164,10 +159,10 @@ const EditableTableComponent = <T extends object>({
     handleSort(column);
   };
 
-  const sortedData = sortData(data, orderBy, order);
-  const paginatedData = paginateData(sortedData, page, rowsPerPage);
-
   const columnConfig = createColumnConfig(roles, permissions);
+  const columnsConfigArray = Object.keys(columnConfig).map((key) => ({ field: key as keyof T, sortable: true }));
+  const sortedData = sortData(data, orderBy, order, columnsConfigArray);
+  const paginatedData = paginateData(sortedData, page, rowsPerPage);
 
   useEffect(() => {
     function calculateRowsPerPage() {

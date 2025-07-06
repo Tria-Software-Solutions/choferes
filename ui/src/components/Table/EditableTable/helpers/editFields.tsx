@@ -1,14 +1,14 @@
 import React from "react";
-import { FormControl, Select, MenuItem, Checkbox, ListItemText, Box, Autocomplete, Typography } from "@mui/material";
-import TextfieldComponent from "../components/Textfield/Textfield.component";
+import { FormControl, Select, MenuItem, Checkbox, ListItemText, Box, Autocomplete } from "@mui/material";
+import TextfieldComponent from "../../../Textfield/Textfield.component";
 import { LocalizationProvider } from "@mui/x-date-pickers";
 import { DatePicker } from "@mui/x-date-pickers/DatePicker";
 import { AdapterDateFns } from "@mui/x-date-pickers/AdapterDateFns";
 import { es } from "date-fns/locale";
-import { translateColumnHeaderToSpanish } from "./string";
-import { maskLicensePlate, maskParkingLotWithPrefix } from "./mask";
-import { formControlStyles, selectStyles, datePickerTextFieldStyles } from "../components/Table/EditableTable/EditableTable.styles";
-import { ColumnConfigType, PARKING_PREFIX_OPTIONS } from "./tableConfig";
+import { translateColumnHeaderToSpanish } from "../../../../utils/string";
+import { maskLicensePlate, maskParkingLotWithPrefix } from "../../../../utils/mask";
+import { formControlStyles, selectStyles, datePickerTextFieldStyles } from "../EditableTable.styles";
+import { ColumnConfigType, PARKING_PREFIX_OPTIONS } from "./columnConfig";
 
 // This function is generic and can be used in EditableTable
 export function renderEditField<T extends object>({
@@ -198,8 +198,6 @@ export function renderEditField<T extends object>({
         setEditField && setEditField("parkingPrefix", prefixValue);
         if (prefixValue === "CE") {
           setEditField && setEditField("parkingLot", "CE");
-        } else {
-          setEditField && setEditField("parkingLot", "");
         }
       }
     };
@@ -208,129 +206,65 @@ export function renderEditField<T extends object>({
       event: React.ChangeEvent<HTMLInputElement>
     ) => {
       const rawValue = event.target.value;
-      const maskedValue = maskParkingLotWithPrefix(parkingPrefix, rawValue);
+      const maskedValue = maskParkingLotWithPrefix(rawValue, parkingPrefix);
       setEditField && setEditField("parkingLot", maskedValue);
     };
 
-    const isReadOnly = parkingPrefix === "CE";
-
     return (
-      <Box sx={{ display: "flex", gap: 1 }}>
-        <FormControl
-          variant="outlined"
-          sx={{ minWidth: 70, flex: "0 0 70px" }}
-        >
-          <Autocomplete
-            freeSolo
-            value={{ value: parkingPrefix, label: parkingPrefix }}
-            onChange={handlePrefixChange}
-            inputValue={parkingPrefix}
-            onInputChange={(e, v) =>
-              setEditField && setEditField("parkingPrefix", v.toUpperCase())
-            }
-            options={prefixOptions.map((opt) => ({
-              value: opt.value.toUpperCase(),
-              label: opt.label.toUpperCase(),
-            }))}
-            getOptionLabel={(option) =>
-              typeof option === "string" ? option : option.label
-            }
-            noOptionsText="Sin coincidencias"
-            renderInput={(params) => (
-              <TextfieldComponent
-                {...params}
-                label="Prefijo"
-                variant="outlined"
-                sx={{ minWidth: 70 }}
-              />
-            )}
-          />
-        </FormControl>
+      <Box sx={{ display: "flex", gap: 1, alignItems: "center" }}>
+        <Autocomplete
+          options={prefixOptions}
+          value={prefixOptions.find((opt) => opt.value === parkingPrefix) || null}
+          onChange={handlePrefixChange}
+          renderInput={(params) => (
+            <TextfieldComponent
+              {...params}
+              label="Prefijo"
+              sx={{ width: "80px" }}
+            />
+          )}
+          sx={{ width: "80px" }}
+        />
         <TextfieldComponent
           label={translateColumnHeaderToSpanish(column)}
-          variant="outlined"
           value={parkingLotValue}
           onChange={handleParkingLotChange}
-          InputProps={{ readOnly: isReadOnly }}
           error={!validateField("parkingLot", parkingLotValue)}
-          sx={{ width: "100px" }}
+          sx={{ width: "120px" }}
         />
       </Box>
     );
   }
 
-  if (config.type === "date") {
+  if (String(column) === "parkingDate") {
+    const dateValue = editFields[String(column)] as Date | undefined;
     const handleDateChange = (date: Date | null) => {
-      if (date) {
-        setEditField && setEditField(String(column), date);
-      }
+      setEditField && setEditField(String(column), date || new Date());
     };
 
     return (
       <LocalizationProvider dateAdapter={AdapterDateFns} adapterLocale={es}>
         <DatePicker
-          label={translateColumnHeaderToSpanish(column)}
-          value={
-            editFields[String(column)]
-              ? (() => {
-                  const rawValue = editFields[String(column)];
-                  const dateStr =
-                    typeof rawValue === "string"
-                      ? rawValue
-                      : rawValue instanceof Date
-                        ? rawValue.toISOString()
-                        : "";
-
-                  if (!dateStr) return null;
-
-                  const [year, month, day] = dateStr.split("T")[0].split("-");
-                  return new Date(
-                    Number(year),
-                    Number(month) - 1,
-                    Number(day)
-                  );
-                })()
-              : null
-          }
-          sx={{ width: "100%" }}
-          maxDate={new Date()}
-          views={["year", "month", "day"]}
-          slots={{
-            toolbar: () => null,
-          }}
+          value={dateValue}
+          onChange={handleDateChange}
           slotProps={{
             textField: {
-              variant: "outlined",
-              fullWidth: true,
-              inputProps: { readOnly: true },
-              onMouseDown: (e) => e.preventDefault(),
-              sx: datePickerTextFieldStyles,
-            },
-            actionBar: {
-              actions: [],
-            },
+              ...datePickerTextFieldStyles,
+              error: !validateField(String(column), value),
+            } as Record<string, unknown>,
           }}
-          closeOnSelect
-          onChange={(date) => handleDateChange(date)}
         />
       </LocalizationProvider>
     );
   }
 
   if (config.type === "select" && config.options) {
-    const selectedValue = config.options.some(
-      (opt) => opt.value === editFields[String(column)]
-    )
-      ? editFields[String(column)]
-      : "";
-
     return (
-      <FormControl variant="outlined" fullWidth sx={formControlStyles}>
+      <FormControl variant="outlined" sx={formControlStyles}>
         <Select
-          value={selectedValue}
+          value={editFields[String(column)] || ""}
           onChange={(e) =>
-            setEditField &&
-            setEditField(String(column), String(e.target.value))
+            setEditField && setEditField(String(column), e.target.value)
           }
           sx={selectStyles}
         >
@@ -344,131 +278,25 @@ export function renderEditField<T extends object>({
     );
   }
 
-  if (config.type === "select multiple" && config.options) {
-    const selectedValues = Array.isArray(editFields[String(column)])
-      ? editFields[String(column)]
-      : [];
+  if (config.type === "date") {
+    const dateValue = editFields[String(column)] as Date | undefined;
+    const handleDateChange = (date: Date | null) => {
+      setEditField && setEditField(String(column), date || new Date());
+    };
 
     return (
-      <FormControl variant="outlined" fullWidth sx={formControlStyles}>
-        <Select
-          multiple
-          value={selectedValues}
-          onChange={(e) =>
-            setEditField && setEditField(String(column), e.target.value)
-          }
-          renderValue={(selected) => {
-            if (!Array.isArray(selected)) return "";
-            const labels = selected.map(
-              (v) => config.options?.find((opt) => opt.value === v)?.label || v
-            );
-            return labels.join(", ");
+      <LocalizationProvider dateAdapter={AdapterDateFns} adapterLocale={es}>
+        <DatePicker
+          value={dateValue}
+          onChange={handleDateChange}
+          slotProps={{
+            textField: {
+              ...datePickerTextFieldStyles,
+              error: !validateField(String(column), value),
+            } as Record<string, unknown>,
           }}
-          sx={selectStyles}
-          MenuProps={{
-            PaperProps: {
-              style: {
-                maxHeight: 320,
-                overflowY: "auto",
-              },
-            },
-          }}
-        >
-          {config.options.map((option) => (
-            <MenuItem key={option.value} value={option.value}>
-              <Checkbox
-                checked={
-                  Array.isArray(selectedValues) &&
-                  selectedValues.includes(option.value)
-                }
-              />
-              <ListItemText primary={option.label} />
-            </MenuItem>
-          ))}
-        </Select>
-      </FormControl>
-    );
-  }
-
-  if (config.type === "autocomplete" && config.options) {
-    const selectedValue = editFields[String(column)] || "";
-    const selectedOption =
-      config.options?.find((opt) => opt.value === selectedValue) || null;
-
-    return (
-      <Autocomplete
-        freeSolo
-        value={selectedOption}
-        onChange={(event, newValue) => {
-          setEditField &&
-            setEditField(
-              String(column),
-              newValue && typeof newValue !== "string" ? newValue.value : ""
-            );
-        }}
-        inputValue={undefined}
-        onInputChange={(event, newInputValue) => {
-          if (!event) return;
-        }}
-        options={config.options || []}
-        getOptionLabel={(option) =>
-          typeof option === "string" ? option : option.label
-        }
-        renderInput={(params) => (
-          <TextfieldComponent
-            {...params}
-            label={translateColumnHeaderToSpanish(column)}
-            placeholder={`Buscar ${translateColumnHeaderToSpanish(column)}`}
-            sx={{
-              width:
-                String(column) === "brand" || String(column) === "color"
-                  ? "180px"
-                  : "100%",
-            }}
-          />
-        )}
-      />
-    );
-  }
-
-  if (config.type === "autocomplete multiple" && config.options) {
-    const selectedValues: string[] = Array.isArray(editFields[String(column)])
-      ? (editFields[String(column)] as string[])
-      : [];
-    const selectedOptions = config.options.filter((opt) =>
-      selectedValues.some((val) => val === opt.value)
-    );
-
-    return (
-      <Autocomplete
-        multiple
-        limitTags={5}
-        value={selectedOptions}
-        onChange={(event, newValue) => {
-          setEditField &&
-            setEditField(
-              String(column),
-              newValue.map((option) => option.value)
-            );
-        }}
-        options={config.options}
-        getOptionLabel={(option) => option.label}
-        isOptionEqualToValue={(option, value) => option.value === value.value}
-        renderTags={(tagValue, getTagProps) =>
-          tagValue.map((option, index) => {
-            const { key, ...tagProps } = getTagProps({ index });
-            return <Typography key={key} {...tagProps}>{option.label}</Typography>;
-          })
-        }
-        renderInput={(params) => (
-          <TextfieldComponent
-            {...params}
-            label={translateColumnHeaderToSpanish(column)}
-            fullWidth
-            placeholder={`Buscar ${translateColumnHeaderToSpanish(column)}`}
-          />
-        )}
-      />
+        />
+      </LocalizationProvider>
     );
   }
 
