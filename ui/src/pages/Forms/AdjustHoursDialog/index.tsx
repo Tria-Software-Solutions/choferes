@@ -5,13 +5,13 @@ import {
   Button,
   Typography,
   useTheme,
-  Divider,
 } from "@mui/material";
 import AccessTimeRoundedIcon from "@mui/icons-material/AccessTimeRounded";
 import InfoOutlinedIcon from "@mui/icons-material/InfoOutlined";
 import {
   dialogTextFieldStyles,
   actionsInnerBox,
+  actionsBox,
 } from "./styles";
 import {
   infoBox,
@@ -143,19 +143,17 @@ const AdjustHoursDialog: React.FC<AdjustHoursDialogProps> = ({
           </Box>
         </Grid>
         <Grid item xs={12}>
-          <Divider sx={{ mt: 3, mb: 2 }} />
-          <Box sx={{ display: 'flex', justifyContent: 'flex-end', pt: 2 }}>
+          <Box sx={actionsBox(theme)}>
+            <Button
+              onClick={onCancel}
+              variant="outlined"
+              color="inherit"
+              sx={{ minWidth: isSmallScreen ? '100%' : 120, py: 1.5, fontWeight: 600 }}
+              disabled={loading}
+            >
+              {DIALOG.CANCEL}
+            </Button>
             <Box sx={actionsInnerBox}>
-              <Button
-                onClick={onCancel}
-                variant="outlined"
-                color="inherit"
-                fullWidth={isSmallScreen}
-                sx={{ minWidth: isSmallScreen ? '100%' : 120, py: 1.5, fontWeight: 600 }}
-                disabled={loading}
-              >
-                {DIALOG.CANCEL}
-              </Button>
               <Button
                 onClick={() => employee && handleAdjustTime(employee.id, 'add', timeAdjustment)}
                 variant="contained"
