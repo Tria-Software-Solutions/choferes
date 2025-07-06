@@ -2,6 +2,26 @@ import { SxProps, Theme } from "@mui/material";
 
 export const formControlStyles: SxProps<Theme> = {
   height: 56,
+  mb: 1,
+  "& .MuiInputBase-root": {
+    height: 56,
+  },
+  "& .MuiOutlinedInput-root, & .MuiSelect-select": {
+    backgroundColor: "#fff",
+    borderRadius: 2,
+    "&.Mui-focused .MuiOutlinedInput-notchedOutline": {
+      borderColor: "#000",
+      borderWidth: 2,
+    },
+    "&:hover .MuiOutlinedInput-notchedOutline": {
+      borderColor: "#000",
+    },
+    "&.Mui-focused": {
+      backgroundColor: "#fff",
+      outline: "none",
+      boxShadow: "none",
+    },
+  },
 };
 
 export const selectStyles: SxProps<Theme> = {
@@ -9,6 +29,7 @@ export const selectStyles: SxProps<Theme> = {
   "& .MuiOutlinedInput-root": {
     borderRadius: 2,
     backgroundColor: "#ffffff",
+    height: 56,
     "&:hover .MuiOutlinedInput-notchedOutline": {
       borderColor: "#000000",
     },
@@ -28,6 +49,7 @@ export const datePickerTextFieldStyles: SxProps<Theme> = {
   "& .MuiOutlinedInput-root": {
     borderRadius: 2,
     backgroundColor: "#ffffff",
+    height: 56,
     "&:hover .MuiOutlinedInput-notchedOutline": {
       borderColor: "#000000",
     },
