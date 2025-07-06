@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useEffect, useRef } from "react";
 import { useSelector } from "react-redux";
 import { RootState } from "../../../store/store";
 import { useAuthContext } from "../../../context/AuthContext";
@@ -12,65 +12,36 @@ import {
   Paper,
   TablePagination,
   TableSortLabel,
-  FormControl,
-  Select,
-  MenuItem,
-  Tooltip,
-  IconButton,
   Divider,
   Box,
-  Autocomplete,
   Typography,
-  Stack,
-  Chip,
   useTheme,
-  Checkbox,
-  ListItemText,
   useMediaQuery,
-  Grid,
 } from "@mui/material";
-import { LocalizationProvider } from "@mui/x-date-pickers";
-import { DatePicker } from "@mui/x-date-pickers/DatePicker";
-import { AdapterDateFns } from "@mui/x-date-pickers/AdapterDateFns";
-import { es } from "date-fns/locale";
 import {
   translateColumnHeaderToSpanish,
-  translateDayOptionsToSpanish,
-  capitalizeFirstLetter,
 } from "../../../utils/string";
 import { formatDateWithDay } from "../../../utils/dates";
 import {
-  maskLicensePlate,
-  maskParkingLotWithPrefix,
-} from "../../../utils/mask";
-import {
-  BRANDS_LIST,
-  COLORS_LIST,
-  DAYS_LIST,
   TABLE,
   TABLE_UI,
-  PERMISSIONS,
 } from "../../../constants/constants";
-import EditNoteIcon from "@mui/icons-material/EditNote";
-import DeleteForeverIcon from "@mui/icons-material/DeleteForever";
-import CheckCircleIcon from "@mui/icons-material/CheckCircle";
-import CancelIcon from "@mui/icons-material/Cancel";
 import PaginationComponent from "../Pagination/Pagination.component";
-import LockResetIcon from "@mui/icons-material/LockReset";
-import ToggleOnIcon from "@mui/icons-material/ToggleOn";
-import ToggleOffIcon from "@mui/icons-material/ToggleOff";
-import TextfieldComponent from "../../Textfield/Textfield.component";
 import DialogComponent from "../../Dialog/Dialog.component";
 import { User } from "../../../models/User";
 import {
-  formControlStyles,
-  selectStyles,
-  datePickerTextFieldStyles,
   tableCellStyles,
   permissionChipStyles,
   viewMoreLessStyles,
-  emailLinkStyles,
 } from "./EditableTable.styles";
+import { createColumnConfig } from "../../../utils/tableConfig";
+import { sortData, paginateData } from "../../../utils/tableSorting";
+import { checkEditPermissions, checkDeletePermissions } from "../../../utils/tablePermissions";
+import { useTableSorting } from "../../../hooks/useTableSorting";
+import { useExpandedRows } from "../../../hooks/useExpandedRows";
+import { renderEditField } from "../../../utils/tableEditFields";
+import { renderCellValue } from "../../../utils/tableCellRenderers";
+import { renderActionButtons, renderStatusButton } from "../../../utils/tableActionButtons";
 
 // EditableTable is a generic, highly-configurable table component for displaying and editing tabular data.
 // Supports inline editing, validation, pagination, sorting, custom renderers, and permission-based actions.
@@ -136,10 +107,7 @@ type EditableTableProps<T> = {
   showStatusColumn?: boolean;
 };
 
-const PARKING_PREFIX_OPTIONS = [
-  { value: "ATP", label: "ATP" },
-  { value: "CE", label: "CE" },
-];
+
 
 const EditableTableComponent = <T extends object>({
   data,
@@ -175,27 +143,15 @@ const EditableTableComponent = <T extends object>({
   const { currentUser } = useAuthContext();
   const { roles } = useSelector((state: RootState) => state.roles);
   const { permissions } = useSelector((state: RootState) => state.permissions);
-  const [order, setOrder] = useState<"asc" | "desc">("asc");
-  const [orderBy, setOrderBy] = useState<keyof T>(columns[0]);
-  const [expandedRows, setExpandedRows] = useState<Record<number, boolean>>({});
+  const { order, orderBy, handleSort } = useTableSorting<T>(columns[0]);
+  const { expandedRows, expandRow, collapseRow } = useExpandedRows();
   const tableContainerRef = useRef<HTMLDivElement>(null);
 
   const theme = useTheme();
   const isSmallScreen = useMediaQuery(theme.breakpoints.down("sm"));
 
-  const hasEditPermissions =
-    userPermissions?.includes(PERMISSIONS.EDIT_EMPLOYEES) ||
-    userPermissions?.includes(PERMISSIONS.EDIT_SCHEDULES) ||
-    userPermissions?.includes(PERMISSIONS.EDIT_VEHICLES) ||
-    userPermissions?.includes(PERMISSIONS.EDIT_USER) ||
-    userPermissions?.includes(PERMISSIONS.EDIT_ROLE);
-
-  const hasDeletePermissions =
-    userPermissions?.includes(PERMISSIONS.DELETE_EMPLOYEES) ||
-    userPermissions?.includes(PERMISSIONS.DELETE_SCHEDULES) ||
-    userPermissions?.includes(PERMISSIONS.DELETE_VEHICLES) ||
-    userPermissions?.includes(PERMISSIONS.ENABLE_DISABLE_USER) ||
-    userPermissions?.includes(PERMISSIONS.DELETE_ROLE);
+  const hasEditPermissions = checkEditPermissions(userPermissions);
+  const hasDeletePermissions = checkDeletePermissions(userPermissions);
 
   const handlePageChange = (
     event: React.MouseEvent<HTMLButtonElement> | null,
@@ -204,628 +160,14 @@ const EditableTableComponent = <T extends object>({
     setPage(newPage);
   };
 
-  const wrapWithGrid = (component: React.ReactNode, column: keyof T) => {
-    const config = columnConfig[String(column)];
-    if (!config?.size) {
-      return component;
-    }
-
-    return (
-      <Grid
-        item
-        xs={config.size.xs}
-        sm={config.size.sm}
-        md={config.size.md}
-        lg={config.size.lg}
-      >
-        {component}
-      </Grid>
-    );
-  };
-
-  const renderEditField = (column: keyof T, value: string) => {
-    const config = columnConfig[String(column)];
-
-    if (column === "permissionNames" && config && config.options) {
-      const selectedValues: string[] = Array.isArray(editFields[String(column)])
-        ? (editFields[String(column)] as string[])
-        : [];
-      return wrapWithGrid(
-        <FormControl variant="outlined" fullWidth sx={formControlStyles}>
-          <Select
-            multiple
-            value={selectedValues}
-            onChange={(e) =>
-              setEditField && setEditField(String(column), e.target.value)
-            }
-            renderValue={(selected) => {
-              if (!Array.isArray(selected)) return "";
-              const max = 5;
-              const labels = selected.map(
-                (v) =>
-                  config.options?.find((opt) => opt.value === v)?.label || v
-              );
-              const visible = labels.slice(0, max);
-              const hidden = labels.length > max ? labels.length - max : 0;
-              return hidden > 0
-                ? `${TABLE.PERMISSIONS_LABEL}: ${visible.join(", ")} +${hidden} más`
-                : `${TABLE.PERMISSIONS_LABEL}: ${visible.join(", ")}`;
-            }}
-            sx={selectStyles}
-            MenuProps={{
-              PaperProps: {
-                style: {
-                  maxHeight: 320,
-                  overflowY: "auto",
-                },
-              },
-            }}
-          >
-            {config.options.map((option) => (
-              <MenuItem key={option.value} value={option.value}>
-                <Checkbox
-                  checked={
-                    Array.isArray(selectedValues) &&
-                    selectedValues.includes(option.value)
-                  }
-                />
-                <ListItemText primary={option.label} />
-              </MenuItem>
-            ))}
-          </Select>
-        </FormControl>,
-        column
-      );
-    }
-
-    if (String(column) === "licensePlate") {
-      const licensePlateValue = (editFields["licensePlate"] as string) || "";
-      const handleLicensePlateChange = (
-        event: React.ChangeEvent<HTMLInputElement>
-      ) => {
-        const rawValue = event.target.value;
-        const maskedValue = maskLicensePlate(rawValue);
-        setEditField && setEditField("licensePlate", maskedValue);
-      };
-      return wrapWithGrid(
-        <TextfieldComponent
-          label={translateColumnHeaderToSpanish(column)}
-          value={licensePlateValue}
-          onChange={handleLicensePlateChange}
-          error={!validateField("licensePlate", licensePlateValue)}
-          sx={{ width: "120px" }}
-        />,
-        column
-      );
-    }
-
-    if (String(column) === "ticket") {
-      return wrapWithGrid(
-        <TextfieldComponent
-          value={editFields[String(column)] || ""}
-          onChange={(e) =>
-            setEditField && setEditField(String(column), e.target.value)
-          }
-          error={!validateField(String(column), value)}
-          sx={{ width: "80px" }}
-        />,
-        column
-      );
-    }
-
-    if (String(column) === "hours") {
-      return wrapWithGrid(
-        <TextfieldComponent
-          type="number"
-          label={translateColumnHeaderToSpanish(column)}
-          value={editFields[String(column)] || ""}
-          onChange={(e) =>
-            setEditField && setEditField(String(column), e.target.value)
-          }
-          error={!validateField(String(column), value)}
-          sx={{ width: "80px" }}
-        />,
-        column
-      );
-    }
-
-    if (!config) {
-      return wrapWithGrid(
-        <TextfieldComponent
-          fullWidth
-          value={editFields[String(column)] || ""}
-          onChange={(e) =>
-            setEditField && setEditField(String(column), e.target.value)
-          }
-          error={!validateField(String(column), value)}
-        />,
-        column
-      );
-    }
-
-    if (String(column) === "parkingLot") {
-      // Get prefix from editFields or default to ATP
-      const parkingPrefix = (editFields["parkingPrefix"] as string) || "ATP";
-      const parkingLotValue = (editFields["parkingLot"] as string) || "";
-      const prefixOptions = PARKING_PREFIX_OPTIONS.concat(
-        parkingPrefix &&
-          !PARKING_PREFIX_OPTIONS.some((opt) => opt.value === parkingPrefix)
-          ? [{ value: parkingPrefix, label: parkingPrefix }]
-          : []
-      );
-
-      const handlePrefixChange = (
-        event: React.SyntheticEvent,
-        newValue: { value: string; label: string } | string | null
-      ) => {
-        let prefixValue = "";
-        if (newValue === null || newValue === "") {
-          setEditField && setEditField("parkingPrefix", "");
-          setEditField && setEditField("parkingLot", "");
-          return;
-        }
-        if (typeof newValue === "object" && newValue !== null) {
-          prefixValue = newValue.value.toUpperCase();
-        } else if (typeof newValue === "string") {
-          prefixValue = newValue.toUpperCase();
-        }
-        if (prefixValue) {
-          setEditField && setEditField("parkingPrefix", prefixValue);
-          if (prefixValue === "CE") {
-            setEditField && setEditField("parkingLot", "CE");
-          } else {
-            setEditField && setEditField("parkingLot", "");
-          }
-        }
-      };
-
-      const handleParkingLotChange = (
-        event: React.ChangeEvent<HTMLInputElement>
-      ) => {
-        const rawValue = event.target.value;
-        const maskedValue = maskParkingLotWithPrefix(parkingPrefix, rawValue);
-        setEditField && setEditField("parkingLot", maskedValue);
-      };
-
-      const isReadOnly = parkingPrefix === "CE";
-
-      return wrapWithGrid(
-        <Box sx={{ display: "flex", gap: 1 }}>
-          <FormControl
-            variant="outlined"
-            sx={{ minWidth: 70, flex: "0 0 70px" }}
-          >
-            <Autocomplete
-              freeSolo
-              value={{ value: parkingPrefix, label: parkingPrefix }}
-              onChange={handlePrefixChange}
-              inputValue={parkingPrefix}
-              onInputChange={(e, v) =>
-                setEditField && setEditField("parkingPrefix", v.toUpperCase())
-              }
-              options={prefixOptions.map((opt) => ({
-                value: opt.value.toUpperCase(),
-                label: opt.label.toUpperCase(),
-              }))}
-              getOptionLabel={(option) =>
-                typeof option === "string" ? option : option.label
-              }
-              noOptionsText="Sin coincidencias"
-              renderInput={(params) => (
-                <TextfieldComponent
-                  {...params}
-                  label="Prefijo"
-                  variant="outlined"
-                  sx={{ minWidth: 70 }}
-                />
-              )}
-            />
-          </FormControl>
-          <TextfieldComponent
-            label={translateColumnHeaderToSpanish(column)}
-            variant="outlined"
-            value={parkingLotValue}
-            onChange={handleParkingLotChange}
-            InputProps={{ readOnly: isReadOnly }}
-            error={!validateField("parkingLot", parkingLotValue)}
-            sx={{ width: "100px" }}
-          />
-        </Box>,
-        column
-      );
-    }
-
-    if (config.type === "date") {
-      const handleDateChange = (date: Date | null) => {
-        if (date) {
-          setEditField && setEditField(String(column), date);
-        }
-      };
-
-      return wrapWithGrid(
-        <LocalizationProvider dateAdapter={AdapterDateFns} adapterLocale={es}>
-          <DatePicker
-            label={translateColumnHeaderToSpanish(column)}
-            value={
-              editFields[String(column)]
-                ? (() => {
-                    const rawValue = editFields[String(column)];
-                    const dateStr =
-                      typeof rawValue === "string"
-                        ? rawValue
-                        : rawValue instanceof Date
-                          ? rawValue.toISOString()
-                          : "";
-
-                    if (!dateStr) return null;
-
-                    const [year, month, day] = dateStr.split("T")[0].split("-");
-                    return new Date(
-                      Number(year),
-                      Number(month) - 1,
-                      Number(day)
-                    );
-                  })()
-                : null
-            }
-            sx={{ width: "100%" }}
-            maxDate={new Date()}
-            views={["year", "month", "day"]}
-            slots={{
-              toolbar: () => null,
-            }}
-            slotProps={{
-              textField: {
-                variant: "outlined",
-                fullWidth: true,
-                inputProps: { readOnly: true },
-                onMouseDown: (e) => e.preventDefault(),
-                sx: datePickerTextFieldStyles,
-              },
-              actionBar: {
-                actions: [],
-              },
-            }}
-            closeOnSelect
-            onChange={(date) => handleDateChange(date)}
-          />
-        </LocalizationProvider>,
-        column
-      );
-    }
-
-    if (config.type === "select" && config.options) {
-      const selectedValue = config.options.some(
-        (opt) => opt.value === editFields[String(column)]
-      )
-        ? editFields[String(column)]
-        : "";
-
-      return wrapWithGrid(
-        <FormControl variant="outlined" fullWidth sx={formControlStyles}>
-          <Select
-            value={selectedValue}
-            onChange={(e) =>
-              setEditField &&
-              setEditField(String(column), String(e.target.value))
-            }
-            sx={selectStyles}
-          >
-            {config.options.map((option) => (
-              <MenuItem key={option.value} value={option.value}>
-                {option.label}
-              </MenuItem>
-            ))}
-          </Select>
-        </FormControl>,
-        column
-      );
-    }
-
-    if (config.type === "select multiple" && config.options) {
-      const selectedValues = Array.isArray(editFields[String(column)])
-        ? editFields[String(column)]
-        : [];
-
-      return wrapWithGrid(
-        <FormControl variant="outlined" fullWidth sx={formControlStyles}>
-          <Select
-            multiple
-            value={selectedValues}
-            onChange={(e) =>
-              setEditField && setEditField(String(column), e.target.value)
-            }
-            renderValue={(selected) =>
-              Array.isArray(selected)
-                ? selected
-                    .map((item) => translateDayOptionsToSpanish(item))
-                    .join(", ")
-                : ""
-            }
-            sx={selectStyles}
-          >
-            {config.options.map((option) => (
-              <MenuItem key={option.value} value={option.value}>
-                <Checkbox
-                  checked={
-                    Array.isArray(selectedValues) &&
-                    selectedValues.includes(option.value)
-                  }
-                />
-                <ListItemText primary={option.label} />
-              </MenuItem>
-            ))}
-          </Select>
-        </FormControl>,
-        column
-      );
-    }
-
-    if (config.type === "autocomplete" && config.options) {
-      const selectedValue = editFields[String(column)] || "";
-      const selectedOption =
-        config.options?.find((opt) => opt.value === selectedValue) || null;
-
-      return wrapWithGrid(
-        <Autocomplete
-          freeSolo
-          value={selectedOption}
-          onChange={(event, newValue) => {
-            setEditField &&
-              setEditField(
-                String(column),
-                newValue && typeof newValue !== "string" ? newValue.value : ""
-              );
-          }}
-          inputValue={undefined}
-          onInputChange={(event, newInputValue) => {
-            if (!event) return;
-          }}
-          options={config.options || []}
-          getOptionLabel={(option) =>
-            typeof option === "string" ? option : option.label
-          }
-          renderInput={(params) => (
-            <TextfieldComponent
-              {...params}
-              label={translateColumnHeaderToSpanish(column)}
-              placeholder={`Buscar ${translateColumnHeaderToSpanish(column)}`}
-              sx={{
-                width:
-                  String(column) === "brand" || String(column) === "color"
-                    ? "180px"
-                    : "100%",
-              }}
-            />
-          )}
-        />,
-        column
-      );
-    }
-
-    if (config.type === "autocomplete multiple" && config.options) {
-      const selectedValues: string[] = Array.isArray(editFields[String(column)])
-        ? (editFields[String(column)] as string[])
-        : [];
-      const selectedOptions = config.options.filter((opt) =>
-        selectedValues.some((val) => val === opt.value)
-      );
-
-      return wrapWithGrid(
-        <Autocomplete
-          multiple
-          limitTags={5}
-          value={selectedOptions}
-          onChange={(event, newValue) => {
-            setEditField &&
-              setEditField(
-                String(column),
-                newValue.map((option) => option.value)
-              );
-          }}
-          options={config.options}
-          getOptionLabel={(option) => option.label}
-          isOptionEqualToValue={(option, value) => option.value === value.value}
-          renderTags={(tagValue, getTagProps) =>
-            tagValue.map((option, index) => {
-              const { key, ...tagProps } = getTagProps({ index });
-              return <Chip key={key} label={option.label} {...tagProps} />;
-            })
-          }
-          renderInput={(params) => (
-            <TextfieldComponent
-              {...params}
-              label={translateColumnHeaderToSpanish(column)}
-              fullWidth
-              placeholder={`Buscar ${translateColumnHeaderToSpanish(column)}`}
-            />
-          )}
-        />,
-        column
-      );
-    }
-
-    return wrapWithGrid(
-      <TextfieldComponent
-        fullWidth
-        value={editFields[String(column)] || ""}
-        onChange={(e) =>
-          setEditField && setEditField(String(column), e.target.value)
-        }
-        error={!validateField(String(column), value)}
-      />,
-      column
-    );
-  };
-
   const handleSortRequest = (column: keyof T) => {
-    const isAsc = orderBy === column && order === "asc";
-    setOrder(isAsc ? "desc" : "asc");
-    setOrderBy(column);
+    handleSort(column);
   };
 
-  const sortedData = [...data].sort((a, b) => {
-    if (a[orderBy] < b[orderBy]) {
-      return order === "asc" ? -1 : 1;
-    }
-    if (a[orderBy] > b[orderBy]) {
-      return order === "asc" ? 1 : -1;
-    }
-    return 0;
-  });
+  const sortedData = sortData(data, orderBy, order);
+  const paginatedData = paginateData(sortedData, page, rowsPerPage);
 
-  const paginatedData = sortedData.slice(
-    page * rowsPerPage,
-    page * rowsPerPage + rowsPerPage
-  );
-
-  const columnConfig: Record<
-    string,
-    {
-      type:
-        | "text"
-        | "masked"
-        | "date"
-        | "select"
-        | "select multiple"
-        | "autocomplete"
-        | "autocomplete multiple";
-      options?: { value: string; label: string }[];
-      hidden?: boolean;
-      size?: {
-        xs: number;
-        sm: number;
-        md: number;
-        lg: number;
-      };
-    }
-  > = {
-    licensePlate: {
-      type: "masked",
-      size: { xs: 4, sm: 3, md: 1.5, lg: 0.3 },
-    },
-    parkingLot: {
-      type: "masked",
-      size: { xs: 4, sm: 3, md: 1.5, lg: 0.8 },
-    },
-    ticket: {
-      type: "text",
-      size: { xs: 4, sm: 3, md: 1.5, lg: 0.3 },
-    },
-    brand: {
-      type: "autocomplete",
-      options: BRANDS_LIST,
-      size: { xs: 8, sm: 6, md: 3, lg: 5 },
-    },
-    color: {
-      type: "autocomplete",
-      options: COLORS_LIST,
-      size: { xs: 8, sm: 6, md: 3, lg: 5 },
-    },
-    notes: {
-      type: "text",
-      size: { xs: 6, sm: 4, md: 2, lg: 2 },
-    },
-    parkingDate: {
-      type: "date",
-      hidden: true,
-      size: { xs: 6, sm: 4, md: 2, lg: 2 },
-    },
-
-    firstName: {
-      type: "text",
-      size: { xs: 6, sm: 6, md: 6, lg: 6 },
-    },
-    lastName: {
-      type: "text",
-      size: { xs: 6, sm: 6, md: 6, lg: 6 },
-    },
-
-    label: {
-      type: "text",
-      size: { xs: 6, sm: 6, md: 3, lg: 3 },
-    },
-    days: {
-      type: "select multiple",
-      options: DAYS_LIST,
-      size: { xs: 6, sm: 6, md: 3, lg: 3 },
-    },
-    hours: {
-      type: "text",
-      size: { xs: 6, sm: 6, md: 3, lg: 2 },
-    },
-    specialSchedule: {
-      type: "text",
-      size: { xs: 6, sm: 6, md: 3, lg: 4 },
-    },
-
-    email: {
-      type: "text",
-      size: { xs: 12, sm: 12, md: 2, lg: 2 },
-    },
-    username: {
-      type: "text",
-      size: { xs: 6, sm: 6, md: 2, lg: 2 },
-    },
-    password: {
-      type: "text",
-      size: { xs: 6, sm: 6, md: 2, lg: 2 },
-    },
-    roleName: {
-      type: "select",
-      options: roles.map((role) => ({ value: role.name, label: role.name })),
-      size: { xs: 6, sm: 6, md: 2, lg: 2 },
-    },
-
-    name: {
-      type: "text",
-      size: { xs: 12, sm: 12, md: 4, lg: 3 },
-    },
-    permissionNames: {
-      type: "autocomplete multiple",
-      options: permissions.map((permission) => ({
-        value: permission.name,
-        label: permission.name,
-      })),
-      size: { xs: 12, sm: 12, md: 8, lg: 9 },
-    },
-
-    updatedAt: { type: "date", hidden: true },
-    route: {
-      type: "select",
-      options: [
-        { value: "GAM", label: "GAM" },
-        { value: "GAM Express", label: "GAM Express" },
-        { value: "Rural", label: "Rural" },
-      ],
-      size: { xs: 6, sm: 6, md: 3, lg: 3 },
-    },
-    status: {
-      type: "select",
-      options: [
-        { value: "Despachado", label: "Despachado" },
-        { value: "En Tránsito", label: "En Tránsito" },
-        { value: "Entregado", label: "Entregado" },
-      ],
-      size: { xs: 6, sm: 6, md: 3, lg: 3 },
-    },
-    driver: {
-      type: "text",
-      size: { xs: 6, sm: 6, md: 3, lg: 3 },
-    },
-    distance: {
-      type: "text",
-      size: { xs: 6, sm: 6, md: 2, lg: 2 },
-    },
-    trackingNumber: {
-      type: "text",
-      size: { xs: 6, sm: 6, md: 3, lg: 3 },
-    },
-    createdAt: {
-      type: "date",
-      size: { xs: 6, sm: 6, md: 3, lg: 3 },
-    },
-  };
+  const columnConfig = createColumnConfig(roles, permissions);
 
   useEffect(() => {
     function calculateRowsPerPage() {
@@ -1090,12 +432,7 @@ const EditableTableComponent = <T extends object>({
                               {hiddenCount > 0 && !expanded && (
                                 <Typography
                                   sx={viewMoreLessStyles(theme)}
-                                  onClick={() =>
-                                    setExpandedRows((prev) => ({
-                                      ...prev,
-                                      [rowId]: true,
-                                    }))
-                                  }
+                                  onClick={() => expandRow(rowId)}
                                 >
                                   {TABLE_UI.VIEW_MORE}
                                 </Typography>
@@ -1103,12 +440,7 @@ const EditableTableComponent = <T extends object>({
                               {showAll && (
                                 <Typography
                                   sx={viewMoreLessStyles(theme)}
-                                  onClick={() =>
-                                    setExpandedRows((prev) => ({
-                                      ...prev,
-                                      [rowId]: false,
-                                    }))
-                                  }
+                                  onClick={() => collapseRow(rowId)}
                                 >
                                   {TABLE_UI.VIEW_LESS}
                                 </Typography>
@@ -1124,155 +456,40 @@ const EditableTableComponent = <T extends object>({
                           sx={tableCellStyles}
                         >
                           {editRowId === getRowId(row) ? (
-                            renderEditField(
+                            renderEditField({
                               column,
-                              (editFields[String(column)] || "").toString()
-                            )
-                          ) : editRowId === getRowId(row) &&
-                            column === "permissionNames" ? (
-                            Array.isArray(row[column]) ? (
-                              <Box
-                                sx={{
-                                  display: "flex",
-                                  flexWrap: "wrap",
-                                  gap: 0.5,
-                                }}
-                              >
-                                {(row[column] as string[]).map(
-                                  (item: string, index: number) => (
-                                    <Box
-                                      key={index}
-                                      sx={permissionChipStyles(theme)}
-                                    >
-                                      {item}
-                                    </Box>
-                                  )
-                                )}
-                              </Box>
-                            ) : (
-                              <Typography component="span">
-                                {String(row[column] ?? "")}
-                              </Typography>
-                            )
-                          ) : column === "days" ? (
-                            Array.isArray(row[column]) ? (
-                              <Typography component="span">
-                                {(row[column] as string[])
-                                  .map((d: string) =>
-                                    capitalizeFirstLetter(
-                                      translateDayOptionsToSpanish(String(d))
-                                    )
-                                  )
-                                  .join(", ")}
-                              </Typography>
-                            ) : (
-                              <Typography component="span">
-                                {capitalizeFirstLetter(
-                                  translateDayOptionsToSpanish(
-                                    String(row[column])
-                                  )
-                                )}
-                              </Typography>
-                            )
-                          ) : Array.isArray(row[column]) ? (
-                            column === "permissionNames" ? (
-                              <Box
-                                sx={{
-                                  display: "flex",
-                                  flexWrap: "wrap",
-                                  gap: 0.5,
-                                }}
-                              >
-                                {(row[column] as string[]).map(
-                                  (item: string, index: number) => (
-                                    <Box
-                                      key={index}
-                                      sx={permissionChipStyles(theme)}
-                                    >
-                                      {item}
-                                    </Box>
-                                  )
-                                )}
-                              </Box>
-                            ) : (
-                              <Stack
-                                direction="row"
-                                spacing={1}
-                                sx={{
-                                  rowGap: 2,
-                                  flexWrap: "nowrap",
-                                }}
-                              >
-                                {(row[column] as string[]).map(
-                                  (
-                                    item: string,
-                                    index: number,
-                                    array: string[]
-                                  ) => (
-                                    <Typography key={index} component="span">
-                                      {item}
-                                      {index < array.length - 1 ? ", " : ""}
-                                    </Typography>
-                                  )
-                                )}
-                              </Stack>
-                            )
-                          ) : column === "email" ? (
-                            <Typography
-                              component="a"
-                              href={`mailto:${String(row[column] ?? "")}`}
-                              sx={emailLinkStyles(theme)}
-                            >
-                              {String(row[column] ?? "")}
-                            </Typography>
-                          ) : columnConfig[String(column)]?.type === "date" ? (
-                            <Typography component="span">
-                              {row[column]
-                                ? formatDateWithDay(
-                                    new Date(row[column] as string),
-                                    false
-                                  )
-                                : ""}
-                            </Typography>
+                              value: (editFields[String(column)] || "").toString(),
+                              editFields,
+                              setEditField,
+                              validateField,
+                              columnConfig,
+                            })
                           ) : (
-                            <Typography component="span">
-                              {String(row[column] ?? "")}
-                            </Typography>
+                            renderCellValue({
+                              column,
+                              value,
+                              row,
+                              theme,
+                              expandedRows,
+                              expandRow,
+                              collapseRow,
+                              rowId,
+                              TABLE_UI,
+                              tableCellStyles,
+                            })
                           )}
                         </TableCell>
                       );
                     })}
                   {showStatusColumn && (
                     <TableCell className="tableCell" sx={tableCellStyles}>
-                      {isUser &&
-                        !isCurrentUser &&
-                        "isActive" in row &&
-                        hasDeletePermissions && (
-                          <Tooltip
-                            title={row.isActive ? TABLE.DISABLE : TABLE.ENABLE}
-                            arrow
-                          >
-                            <span>
-                              <Box>
-                                <IconButton
-                                  color="secondary"
-                                  onClick={() =>
-                                    handleOpenStatusDialog &&
-                                    handleOpenStatusDialog(row)
-                                  }
-                                >
-                                  {row.isActive ? (
-                                    <ToggleOnIcon
-                                      sx={{ color: "success.main" }}
-                                    />
-                                  ) : (
-                                    <ToggleOffIcon sx={{ color: "grey.500" }} />
-                                  )}
-                                </IconButton>
-                              </Box>
-                            </span>
-                          </Tooltip>
-                        )}
+                      {renderStatusButton({
+                        row,
+                        isUser,
+                        isCurrentUser,
+                        hasDeletePermissions: hasDeletePermissions || false,
+                        handleOpenStatusDialog,
+                      })}
                     </TableCell>
                   )}
                   {columns
@@ -1319,12 +536,7 @@ const EditableTableComponent = <T extends object>({
                               {hiddenCount > 0 && !expanded && (
                                 <Typography
                                   sx={viewMoreLessStyles(theme)}
-                                  onClick={() =>
-                                    setExpandedRows((prev) => ({
-                                      ...prev,
-                                      [rowId]: true,
-                                    }))
-                                  }
+                                  onClick={() => expandRow(rowId)}
                                 >
                                   {TABLE_UI.VIEW_MORE}
                                 </Typography>
@@ -1332,12 +544,7 @@ const EditableTableComponent = <T extends object>({
                               {showAll && (
                                 <Typography
                                   sx={viewMoreLessStyles(theme)}
-                                  onClick={() =>
-                                    setExpandedRows((prev) => ({
-                                      ...prev,
-                                      [rowId]: false,
-                                    }))
-                                  }
+                                  onClick={() => collapseRow(rowId)}
                                 >
                                   {TABLE_UI.VIEW_LESS}
                                 </Typography>
@@ -1353,120 +560,27 @@ const EditableTableComponent = <T extends object>({
                           sx={tableCellStyles}
                         >
                           {editRowId === getRowId(row) ? (
-                            renderEditField(
+                            renderEditField({
                               column,
-                              (editFields[String(column)] || "").toString()
-                            )
-                          ) : editRowId === getRowId(row) &&
-                            column === "permissionNames" ? (
-                            Array.isArray(row[column]) ? (
-                              <Box
-                                sx={{
-                                  display: "flex",
-                                  flexWrap: "wrap",
-                                  gap: 0.5,
-                                }}
-                              >
-                                {(row[column] as string[]).map(
-                                  (item: string, index: number) => (
-                                    <Box
-                                      key={index}
-                                      sx={permissionChipStyles(theme)}
-                                    >
-                                      {item}
-                                    </Box>
-                                  )
-                                )}
-                              </Box>
-                            ) : (
-                              <Typography component="span">
-                                {String(row[column] ?? "")}
-                              </Typography>
-                            )
-                          ) : column === "days" ? (
-                            Array.isArray(row[column]) ? (
-                              <Typography component="span">
-                                {(row[column] as string[])
-                                  .map((d: string) =>
-                                    capitalizeFirstLetter(
-                                      translateDayOptionsToSpanish(String(d))
-                                    )
-                                  )
-                                  .join(", ")}
-                              </Typography>
-                            ) : (
-                              <Typography component="span">
-                                {capitalizeFirstLetter(
-                                  translateDayOptionsToSpanish(
-                                    String(row[column])
-                                  )
-                                )}
-                              </Typography>
-                            )
-                          ) : Array.isArray(row[column]) ? (
-                            column === "permissionNames" ? (
-                              <Box
-                                sx={{
-                                  display: "flex",
-                                  flexWrap: "wrap",
-                                  gap: 0.5,
-                                }}
-                              >
-                                {(row[column] as string[]).map(
-                                  (item: string, index: number) => (
-                                    <Box
-                                      key={index}
-                                      sx={permissionChipStyles(theme)}
-                                    >
-                                      {item}
-                                    </Box>
-                                  )
-                                )}
-                              </Box>
-                            ) : (
-                              <Stack
-                                direction="row"
-                                spacing={1}
-                                sx={{
-                                  rowGap: 2,
-                                  flexWrap: "nowrap",
-                                }}
-                              >
-                                {(row[column] as string[]).map(
-                                  (
-                                    item: string,
-                                    index: number,
-                                    array: string[]
-                                  ) => (
-                                    <Typography key={index} component="span">
-                                      {item}
-                                      {index < array.length - 1 ? ", " : ""}
-                                    </Typography>
-                                  )
-                                )}
-                              </Stack>
-                            )
-                          ) : column === "email" ? (
-                            <Typography
-                              component="a"
-                              href={`mailto:${String(row[column] ?? "")}`}
-                              sx={emailLinkStyles(theme)}
-                            >
-                              {String(row[column] ?? "")}
-                            </Typography>
-                          ) : columnConfig[String(column)]?.type === "date" ? (
-                            <Typography component="span">
-                              {row[column]
-                                ? formatDateWithDay(
-                                    new Date(row[column] as string),
-                                    false
-                                  )
-                                : ""}
-                            </Typography>
+                              value: (editFields[String(column)] || "").toString(),
+                              editFields,
+                              setEditField,
+                              validateField,
+                              columnConfig,
+                            })
                           ) : (
-                            <Typography component="span">
-                              {String(row[column] ?? "")}
-                            </Typography>
+                            renderCellValue({
+                              column,
+                              value,
+                              row,
+                              theme,
+                              expandedRows,
+                              expandRow,
+                              collapseRow,
+                              rowId,
+                              TABLE_UI,
+                              tableCellStyles,
+                            })
                           )}
                         </TableCell>
                       );
@@ -1480,10 +594,14 @@ const EditableTableComponent = <T extends object>({
                         key="parkingDate-edit"
                       >
                         {editRowId === getRowId(row) ? (
-                          renderEditField(
-                            "parkingDate" as keyof T,
-                            (editFields["parkingDate"] || "").toString()
-                          )
+                          renderEditField({
+                            column: "parkingDate" as keyof T,
+                            value: (editFields["parkingDate"] || "").toString(),
+                            editFields,
+                            setEditField,
+                            validateField,
+                            columnConfig,
+                          })
                         ) : (
                           <Typography component="span">
                             {(row as { parkingDate?: string }).parkingDate
@@ -1496,9 +614,9 @@ const EditableTableComponent = <T extends object>({
                                   false
                                 )
                               : ""}
-                          </Typography>
-                        )}
-                      </TableCell>
+                            </Typography>
+                          )}
+                        </TableCell>
                     )}
                   {!noActions &&
                     (hasEditPermissions || hasDeletePermissions) && (
@@ -1507,134 +625,22 @@ const EditableTableComponent = <T extends object>({
                         style={{ width: "100px", whiteSpace: "nowrap" }}
                         sx={tableCellStyles}
                       >
-                        <Box
-                          sx={{ display: "flex", alignItems: "center", gap: 1 }}
-                        >
-                          {editRowId === getRowId(row) ? (
-                            <>
-                              <Tooltip title={TABLE.SAVE} arrow>
-                                <span>
-                                  <Box>
-                                    <IconButton
-                                      color="primary"
-                                      onClick={() =>
-                                        handleSaveClick &&
-                                        handleSaveClick(getRowId(row))
-                                      }
-                                      disabled={isSaveDisabled}
-                                    >
-                                      <CheckCircleIcon />
-                                    </IconButton>
-                                  </Box>
-                                </span>
-                              </Tooltip>
-                              <Tooltip title={TABLE.CANCEL} arrow>
-                                <span>
-                                  <Box>
-                                    <IconButton
-                                      color="primary"
-                                      onClick={() =>
-                                        handleCancelClick && handleCancelClick()
-                                      }
-                                    >
-                                      <CancelIcon />
-                                    </IconButton>
-                                  </Box>
-                                </span>
-                              </Tooltip>
-                            </>
-                          ) : (
-                            <>
-                              {hasEditPermissions && (
-                                <>
-                                  {isUser &&
-                                    isExpanded &&
-                                    onOpenPasswordModal && (
-                                      <Tooltip
-                                        title={TABLE.CHANGE_PASSWORD}
-                                        arrow
-                                      >
-                                        <span>
-                                          <Box>
-                                            <IconButton
-                                              color="primary"
-                                              onClick={() =>
-                                                onOpenPasswordModal &&
-                                                onOpenPasswordModal(
-                                                  getRowId(row)
-                                                )
-                                              }
-                                            >
-                                              <LockResetIcon />
-                                            </IconButton>
-                                          </Box>
-                                        </span>
-                                      </Tooltip>
-                                    )}
-                                  <Tooltip title={TABLE.EDIT} arrow>
-                                    <span>
-                                      <Box>
-                                        <IconButton
-                                          color="primary"
-                                          onClick={() =>
-                                            handleEditClick &&
-                                            handleEditClick(row)
-                                          }
-                                        >
-                                          <EditNoteIcon />
-                                        </IconButton>
-                                      </Box>
-                                    </span>
-                                  </Tooltip>
-                                </>
-                              )}
-                              {hasDeletePermissions && (
-                                <>
-                                  {isUser ? (
-                                    !isCurrentUser &&
-                                    (!("isActive" in row) ? (
-                                      <Tooltip title={TABLE.DELETE} arrow>
-                                        <span>
-                                          <Box>
-                                            <IconButton
-                                              color="error"
-                                              onClick={() =>
-                                                handleOpenDeleteDialog &&
-                                                handleOpenDeleteDialog(
-                                                  getRowId(row)
-                                                )
-                                              }
-                                            >
-                                              <DeleteForeverIcon />
-                                            </IconButton>
-                                          </Box>
-                                        </span>
-                                      </Tooltip>
-                                    ) : null)
-                                  ) : (
-                                    <Tooltip title={TABLE.DELETE} arrow>
-                                      <span>
-                                        <Box>
-                                          <IconButton
-                                            color="error"
-                                            onClick={() =>
-                                              handleOpenDeleteDialog &&
-                                              handleOpenDeleteDialog(
-                                                getRowId(row)
-                                              )
-                                            }
-                                          >
-                                            <DeleteForeverIcon />
-                                          </IconButton>
-                                        </Box>
-                                      </span>
-                                    </Tooltip>
-                                  )}
-                                </>
-                              )}
-                            </>
-                          )}
-                        </Box>
+                        {renderActionButtons({
+                          row,
+                          editRowId,
+                          getRowId,
+                          currentUser: currentUser || undefined,
+                          hasEditPermissions: hasEditPermissions || false,
+                          hasDeletePermissions: hasDeletePermissions || false,
+                          isExpanded: isExpanded || false,
+                          onOpenPasswordModal,
+                          handleEditClick,
+                          handleSaveClick,
+                          handleCancelClick,
+                          handleOpenDeleteDialog,
+                          handleOpenStatusDialog,
+                          isSaveDisabled: isSaveDisabled || false,
+                        })}
                       </TableCell>
                     )}
                 </TableRow>
