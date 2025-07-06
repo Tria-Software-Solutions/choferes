@@ -290,10 +290,24 @@ const EditableTableComponent = <T extends object>({
       return wrapWithGrid(
         <TextfieldComponent
           label={translateColumnHeaderToSpanish(column)}
-          fullWidth
           value={licensePlateValue}
           onChange={handleLicensePlateChange}
           error={!validateField("licensePlate", licensePlateValue)}
+          sx={{ width: "120px" }}
+        />,
+        column,
+      );
+    }
+
+    if (String(column) === "ticket") {
+      return wrapWithGrid(
+        <TextfieldComponent
+          value={editFields[String(column)] || ""}
+          onChange={(e) =>
+            setEditField && setEditField(String(column), e.target.value)
+          }
+          error={!validateField(String(column), value)}
+          sx={{ width: "80px" }}
         />,
         column,
       );
@@ -363,7 +377,7 @@ const EditableTableComponent = <T extends object>({
         <Box sx={{ display: "flex", gap: 1 }}>
           <FormControl
             variant="outlined"
-            sx={{ minWidth: 90, flex: "0 0 90px" }}
+            sx={{ minWidth: 70, flex: "0 0 70px" }}
           >
             <Autocomplete
               freeSolo
@@ -386,8 +400,7 @@ const EditableTableComponent = <T extends object>({
                   {...params}
                   label="Prefijo"
                   variant="outlined"
-                  fullWidth
-                  sx={{ minWidth: 90 }}
+                  sx={{ minWidth: 70 }}
                 />
               )}
             />
@@ -395,11 +408,11 @@ const EditableTableComponent = <T extends object>({
           <TextfieldComponent
             label={translateColumnHeaderToSpanish(column)}
             variant="outlined"
-            fullWidth
             value={parkingLotValue}
             onChange={handleParkingLotChange}
             InputProps={{ readOnly: isReadOnly }}
             error={!validateField("parkingLot", parkingLotValue)}
+            sx={{ width: "100px" }}
           />
         </Box>,
         column,
@@ -560,8 +573,10 @@ const EditableTableComponent = <T extends object>({
             <TextfieldComponent
               {...params}
               label={translateColumnHeaderToSpanish(column)}
-              fullWidth
               placeholder={`Buscar ${translateColumnHeaderToSpanish(column)}`}
+              sx={{ 
+                width: String(column) === "brand" || String(column) === "color" ? "180px" : "100%"
+              }}
             />
           )}
         />,
@@ -668,25 +683,25 @@ const EditableTableComponent = <T extends object>({
   > = {
     licensePlate: {
       type: "masked",
-      size: { xs: 6, sm: 4, md: 2, lg: 0.5 },
+      size: { xs: 4, sm: 3, md: 1.5, lg: 0.3 },
     },
     parkingLot: {
       type: "masked",
-      size: { xs: 6, sm: 4, md: 2, lg: 1 },
+      size: { xs: 4, sm: 3, md: 1.5, lg: 0.8 },
     },
     ticket: {
       type: "text",
-      size: { xs: 6, sm: 4, md: 2, lg: 0.5 },
+      size: { xs: 4, sm: 3, md: 1.5, lg: 0.3 },
     },
     brand: {
       type: "autocomplete",
       options: BRANDS_LIST,
-      size: { xs: 6, sm: 4, md: 2, lg: 4 },
+      size: { xs: 8, sm: 6, md: 3, lg: 5 },
     },
     color: {
       type: "autocomplete",
       options: COLORS_LIST,
-      size: { xs: 6, sm: 4, md: 2, lg: 4 },
+      size: { xs: 8, sm: 6, md: 3, lg: 5 },
     },
     notes: {
       type: "text",
@@ -789,7 +804,6 @@ const EditableTableComponent = <T extends object>({
     },
     createdAt: {
       type: "date",
-      hidden: true,
       size: { xs: 6, sm: 6, md: 3, lg: 3 },
     },
   };
@@ -952,6 +966,24 @@ const EditableTableComponent = <T extends object>({
                     </TableSortLabel>
                   </TableCell>
                 ))}
+              {editRowId !== null && (
+                <TableCell
+                  className="tableCell"
+                  sx={{
+                    position: "sticky",
+                    top: 0,
+                    zIndex: 4,
+                    backgroundColor: (theme) => theme.palette.primary.main,
+                    color: (theme) => theme.palette.primary.contrastText,
+                    fontWeight: 700,
+                    fontSize: "clamp(0.95rem, 1vw, 1.05rem)",
+                    padding: "12px 16px",
+                    whiteSpace: "nowrap",
+                  }}
+                >
+                  Fecha de Parqueo
+                </TableCell>
+              )}
               {!noActions && (hasEditPermissions || hasDeletePermissions) ? (
                 <TableCell
                   className="tableCell"
@@ -1171,6 +1203,10 @@ const EditableTableComponent = <T extends object>({
                               sx={emailLinkStyles(theme)}
                             >
                               {String(row[column] ?? "")}
+                            </Typography>
+                          ) : columnConfig[String(column)]?.type === "date" ? (
+                            <Typography component="span">
+                              {row[column] ? formatDateWithDay(new Date(row[column] as string), false) : ""}
                             </Typography>
                           ) : (
                             <Typography component="span">
@@ -1392,6 +1428,10 @@ const EditableTableComponent = <T extends object>({
                             >
                               {String(row[column] ?? "")}
                             </Typography>
+                          ) : columnConfig[String(column)]?.type === "date" ? (
+                            <Typography component="span">
+                              {row[column] ? formatDateWithDay(new Date(row[column] as string), false) : ""}
+                            </Typography>
                           ) : (
                             <Typography component="span">
                               {String(row[column] ?? "")}
@@ -1400,6 +1440,11 @@ const EditableTableComponent = <T extends object>({
                         </TableCell>
                       );
                     })}
+                  {editRowId === getRowId(row) && (
+                    <TableCell className="tableCell" sx={tableCellStyles} key="parkingDate-edit">
+                      {renderEditField("parkingDate" as keyof T, (editFields["parkingDate"] || "").toString())}
+                    </TableCell>
+                  )}
                   {!noActions &&
                     (hasEditPermissions || hasDeletePermissions) && (
                       <TableCell
