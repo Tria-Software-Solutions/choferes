@@ -36,7 +36,7 @@ export function renderEditField<T extends object>({
       ? (editFields[String(column)] as string[])
       : [];
     return (
-      <FormControl variant="outlined" fullWidth sx={formControlStyles}>
+      <FormControl variant="outlined" sx={{ ...formControlStyles, width: "1200px" }}>
         <Select
           multiple
           value={selectedValues}
@@ -52,8 +52,8 @@ export function renderEditField<T extends object>({
             const visible = labels.slice(0, max);
             const hidden = labels.length > max ? labels.length - max : 0;
             return hidden > 0
-              ? `Permisos: ${visible.join(", ")} +${hidden} más`
-              : `Permisos: ${visible.join(", ")}`;
+              ? `${visible.join(", ")} +${hidden} más`
+              : `${visible.join(", ")}`;
           }}
           sx={selectStyles}
           MenuProps={{
@@ -125,6 +125,32 @@ export function renderEditField<T extends object>({
         }
         error={!validateField(String(column), value)}
         sx={{ width: "80px" }}
+      />
+    );
+  }
+
+  if (String(column) === "name") {
+    return (
+      <TextfieldComponent
+        value={editFields[String(column)] || ""}
+        onChange={(e) =>
+          setEditField && setEditField(String(column), e.target.value)
+        }
+        error={!validateField(String(column), value)}
+        sx={{ width: "200px" }}
+      />
+    );
+  }
+
+  if (String(column) === "permissionNames") {
+    return (
+      <TextfieldComponent
+        value={editFields[String(column)] || ""}
+        onChange={(e) =>
+          setEditField && setEditField(String(column), e.target.value)
+        }
+        error={!validateField(String(column), value)}
+        sx={{ width: "150px" }}
       />
     );
   }
