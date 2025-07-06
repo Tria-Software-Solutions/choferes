@@ -410,12 +410,12 @@ const RolesPage: React.FC = () => {
 
   const handleAdjustTime = async (
     employeeId: number,
-    condition: string,
+    condition: 'add' | 'subtract',
     timeAdjustment: number,
   ) => {
-    if (!timeAdjustment) return;
+    if (!timeAdjustment || timeAdjustment < 0) return;
 
-    const adjustment = condition === "sum" ? timeAdjustment : -timeAdjustment;
+    const adjustment = condition === "add" ? timeAdjustment : -timeAdjustment;
 
     const existingWeeklySummary = weeklySummaries.find(
       (weeklySummary) =>
@@ -444,7 +444,7 @@ const RolesPage: React.FC = () => {
       weekNumber: existingWeeklySummary?.weekNumber ?? currentWeekNumber,
       month: existingWeeklySummary?.month ?? currentMonth,
       year: existingWeeklySummary?.year ?? currentYear,
-      totalHours: (existingWeeklySummary?.totalHours ?? 0) + adjustment,
+      totalHours: Math.max(0, (existingWeeklySummary?.totalHours ?? 0) + adjustment),
     };
 
     const updatedBiweeklySummary: BiweeklySummary = {
@@ -454,7 +454,7 @@ const RolesPage: React.FC = () => {
         existingBiweeklySummary?.biweekNumber ?? currentBiweekNumber,
       month: existingBiweeklySummary?.month ?? currentMonth,
       year: existingBiweeklySummary?.year ?? currentYear,
-      totalHours: (existingBiweeklySummary?.totalHours ?? 0) + adjustment,
+      totalHours: Math.max(0, (existingBiweeklySummary?.totalHours ?? 0) + adjustment),
     };
 
     const updatedMonthlySummary: MonthlySummary = {
@@ -462,7 +462,7 @@ const RolesPage: React.FC = () => {
       employeeId: existingMonthlySummary?.employeeId ?? employeeId,
       month: existingMonthlySummary?.month ?? currentMonth,
       year: existingMonthlySummary?.year ?? currentYear,
-      totalHours: (existingMonthlySummary?.totalHours ?? 0) + adjustment,
+      totalHours: Math.max(0, (existingMonthlySummary?.totalHours ?? 0) + adjustment),
     };
 
     await Promise.all([
