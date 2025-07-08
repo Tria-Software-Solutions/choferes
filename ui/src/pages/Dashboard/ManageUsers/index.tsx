@@ -50,6 +50,7 @@ import {
   backdropStyles,
 } from "./styles";
 import { useLocation } from "react-router-dom";
+import { useTablePreferences } from '../../../hooks/useTablePreferences';
 
 // ManageUsers page component for user management in the dashboard
 const ManageUsers: React.FC<{ isExpanded?: boolean }> = ({
@@ -76,9 +77,7 @@ const ManageUsers: React.FC<{ isExpanded?: boolean }> = ({
   });
   const [openStatusDialog, setOpenStatusDialog] = useState(false);
   const [userToChange, setUserToChange] = useState<User | null>(null);
-  const [filter, setFilter] = useState("");
   const [page, setPage] = useState(0);
-  const [rowsPerPage, setRowsPerPage] = useState(5);
   const [openAddUserModal, setOpenAddUserModal] = useState(false);
   const [isCreatingUser, setIsCreatingUser] = useState(false);
   const [isUpdatingUserStatus, setIsUpdatingUserStatus] = useState(false);
@@ -87,6 +86,22 @@ const ManageUsers: React.FC<{ isExpanded?: boolean }> = ({
   const [passwordModalOpen, setPasswordModalOpen] = useState(false);
   const [passwordUserId, setPasswordUserId] = useState<number | null>(null);
   const location = useLocation();
+
+  const getInitialRowsPerPage = () => {
+    if (typeof window !== 'undefined') {
+      const maxHeight = window.innerHeight * 0.6;
+      const headHeight = 56;
+      const paginationHeight = 64;
+      const extra = 24;
+      const availableHeight = maxHeight - headHeight - paginationHeight - extra;
+      const rowHeight = 48;
+      let rows = Math.floor(availableHeight / rowHeight);
+      return Math.max(3, Math.min(100, rows));
+    }
+    return 25;
+  };
+
+  const { search, setSearch, rowsPerPage, setRowsPerPage } = useTablePreferences('users', getInitialRowsPerPage);
 
   // Loads users, roles, and user roles data on mount
   useEffect(() => {
@@ -157,21 +172,21 @@ const ManageUsers: React.FC<{ isExpanded?: boolean }> = ({
       .filter((user) => {
         if (!showInactive && !user.isActive) return false;
 
-        if (!filter.trim()) return true;
+        if (!search.trim()) return true;
 
         try {
           const searchText = normalizeString(
             `${user.firstName || ""} ${user.lastName || ""} ${user.email || ""} ${user.username || ""} ${user.roleName || ""}`,
           ).toLowerCase();
 
-          return searchText.includes(normalizeString(filter).toLowerCase());
+          return searchText.includes(normalizeString(search).toLowerCase());
         } catch (error) {
           return true; // Include user if filtering fails
         }
       });
 
     return processedUsers;
-  }, [filter, users, showInactive]);
+  }, [search, users, showInactive]);
 
   const totalCount = useMemo(() => filteredUsers.length, [filteredUsers]);
 
@@ -205,14 +220,6 @@ const ManageUsers: React.FC<{ isExpanded?: boolean }> = ({
     if (editRowId === null) return false;
     return validateFields(editFields, false);
   }, [editFields, editRowId, validateFields]);
-
-  const handleFilterChange = useCallback(
-    (e: React.ChangeEvent<HTMLInputElement>) => {
-      setFilter(e.target.value);
-      setPage(0);
-    },
-    [setPage],
-  );
 
   const handleEdit = useCallback((user: User) => {
     setEditRowId(user.id);
@@ -450,8 +457,8 @@ const ManageUsers: React.FC<{ isExpanded?: boolean }> = ({
                 {filteredUsers && (
                   <SearchBarComponent
                     placeholder={DASHBOARD_USERS.SEARCH_PLACEHOLDER}
-                    value={filter}
-                    onChange={handleFilterChange}
+                    value={search}
+                    onChange={(e) => setSearch(e.target.value)}
                     sx={{ flex: 1 }}
                     fullWidth
                   />

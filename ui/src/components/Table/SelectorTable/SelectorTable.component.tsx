@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState, useRef } from "react";
+import React, { useMemo, useState, useRef } from "react";
 import PropTypes from "prop-types";
 import { useNavigate } from "react-router-dom";
 import { Employee } from "../../../models/Employee";
@@ -142,6 +142,8 @@ interface SelectorTableProps {
     timeAdjustment: number,
   ) => void;
   permissions?: string[];
+  rowsPerPage?: number;
+  setRowsPerPage?: (rows: number) => void;
 }
 
 const SelectorTableComponent: React.FC<SelectorTableProps> = ({
@@ -159,6 +161,8 @@ const SelectorTableComponent: React.FC<SelectorTableProps> = ({
   handleChange,
   handleAdjustTime,
   permissions,
+  rowsPerPage: rowsPerPageProp,
+  setRowsPerPage: setRowsPerPageProp,
 }) => {
   const navigate = useNavigate();
   const [selectedPeriod, setSelectedPeriod] = useState<
@@ -167,7 +171,9 @@ const SelectorTableComponent: React.FC<SelectorTableProps> = ({
   const [timeAdjustment, setTimeAdjustment] = useState(0);
   const [orderDirection, setOrderDirection] = useState<"asc" | "desc">("asc");
   const [page, setPage] = useState(0);
-  const [rowsPerPage, setRowsPerPage] = useState(5);
+  const [localRowsPerPage, setLocalRowsPerPage] = useState(5);
+  const rowsPerPage = rowsPerPageProp !== undefined ? rowsPerPageProp : localRowsPerPage;
+  const setRowsPerPage = setRowsPerPageProp !== undefined ? setRowsPerPageProp : setLocalRowsPerPage;
   const [openAdjustDialogEmployee, setOpenAdjustDialogEmployee] =
     useState<Employee | null>(null);
   const [openInfoDialogEmployee, setOpenInfoDialogEmployee] = useState<Employee | null>(null);
@@ -179,38 +185,6 @@ const SelectorTableComponent: React.FC<SelectorTableProps> = ({
   const tableContainerRef = useRef<HTMLDivElement>(null);
   const tableHeadRef = useRef<HTMLTableSectionElement>(null);
   const paginationRef = useRef<HTMLDivElement>(null);
-
-  // Adjusts rows per page based on screen size
-  useEffect(() => {
-    if (isSmallScreen) {
-      setRowsPerPage(5);
-    } else {
-      setRowsPerPage(25);
-    }
-  }, [isSmallScreen]);
-
-  useEffect(() => {
-    function calculateRowsPerPage() {
-      const maxHeight = window.innerHeight * 0.6; // 60vh
-      const headHeight = tableHeadRef.current
-        ? tableHeadRef.current.getBoundingClientRect().height
-        : 56;
-      const paginationHeight = paginationRef.current
-        ? paginationRef.current.getBoundingClientRect().height
-        : 64;
-      const extra = 24; // Buffer for borders/margins
-      const availableHeight =
-        maxHeight - headHeight - paginationHeight - extra;
-      const rowHeight = 48;
-      let rows = Math.floor(availableHeight / rowHeight);
-      rows = Math.max(3, Math.min(100, rows));
-      setRowsPerPage(rows);
-    }
-    // Wait for layout to stabilize
-    setTimeout(calculateRowsPerPage, 0);
-    window.addEventListener("resize", calculateRowsPerPage);
-    return () => window.removeEventListener("resize", calculateRowsPerPage);
-  }, [setRowsPerPage]);
 
   const currentWeek = useMemo(
     () => getCurrentWeekDates(weekOffset),
@@ -888,6 +862,8 @@ SelectorTableComponent.propTypes = {
   handleChange: PropTypes.func.isRequired,
   handleAdjustTime: PropTypes.func.isRequired,
   permissions: PropTypes.array,
+  rowsPerPage: PropTypes.number,
+  setRowsPerPage: PropTypes.func,
 };
 
 export default SelectorTableComponent;

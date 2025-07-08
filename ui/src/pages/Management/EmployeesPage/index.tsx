@@ -63,6 +63,23 @@ import {
   addDialogPaperSx,
 } from "./styles";
 import { useLocation } from "react-router-dom";
+import { useTablePreferences } from '../../../hooks/useTablePreferences';
+
+const getInitialRowsPerPage = () => {
+  // Example: calculate based on window size or available height
+  // You can refine this logic as needed
+  if (typeof window !== 'undefined') {
+    const maxHeight = window.innerHeight * 0.6;
+    const headHeight = 56;
+    const paginationHeight = 64;
+    const extra = 24;
+    const availableHeight = maxHeight - headHeight - paginationHeight - extra;
+    const rowHeight = 48;
+    let rows = Math.floor(availableHeight / rowHeight);
+    return Math.max(3, Math.min(100, rows));
+  }
+  return 25;
+};
 
 // Employees management page component
 const EmployeesPage: React.FC = () => {
@@ -80,11 +97,11 @@ const EmployeesPage: React.FC = () => {
   const [editFields, setEditFields] = useState({ firstName: "", lastName: "" });
   const [openDeleteDialog, setOpenDeleteDialog] = useState(false);
   const [employeeToDelete, setEmployeeToDelete] = useState<number | null>(null);
-  const [filter, setFilter] = useState("");
   const [page, setPage] = useState(0);
-  const [rowsPerPage, setRowsPerPage] = useState(5);
   const [isEditFormValid, setIsEditFormValid] = useState(false);
   const [isDeletingEmployee, setIsDeletingEmployee] = useState(false);
+
+  const { search, setSearch, rowsPerPage, setRowsPerPage } = useTablePreferences('employees', getInitialRowsPerPage);
 
   const theme = useTheme();
   const isSmallScreen = useMediaQuery(theme.breakpoints.down("sm"));
@@ -95,15 +112,6 @@ const EmployeesPage: React.FC = () => {
     dispatch(fetchEmployees());
   }, [dispatch, location.pathname]);
 
-  // Adjust rows per page based on screen size
-  useEffect(() => {
-    if (isSmallScreen) {
-      setRowsPerPage(5);
-    } else {
-      setRowsPerPage(25);
-    }
-  }, [isSmallScreen]);
-
   // Filter employees by search input
   useEffect(() => {
     const normalizeString = (str: string) =>
@@ -113,11 +121,11 @@ const EmployeesPage: React.FC = () => {
       employees.filter((employee) =>
         normalizeString(`${employee.firstName} ${employee.lastName}`)
           .toLowerCase()
-          .includes(normalizeString(filter).toLowerCase()),
+          .includes(normalizeString(search).toLowerCase()),
       ),
     );
     setTotalCount(filteredEmployees.length);
-  }, [filter, employees, filteredEmployees.length]);
+  }, [search, employees, filteredEmployees.length]);
 
   // Validate edit fields for employee
   const validateFields = useCallback((fields: typeof editFields) => {
@@ -137,7 +145,7 @@ const EmployeesPage: React.FC = () => {
 
   // Handle search bar input change
   const handleFilterChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setFilter(e.target.value);
+    setSearch(e.target.value);
   };
 
   // Handle creation of a new employee
@@ -305,7 +313,7 @@ const EmployeesPage: React.FC = () => {
                 {filteredEmployees && (
                   <SearchBarComponent
                     placeholder={MANAGEMENT.EMPLOYEES_PAGE.SEARCH_PLACEHOLDER}
-                    value={filter}
+                    value={search}
                     onChange={handleFilterChange}
                     sx={{ flex: 1 }}
                     fullWidth
@@ -355,8 +363,8 @@ const EmployeesPage: React.FC = () => {
               getRowId={(row) => row.id}
               totalCount={totalCount}
               page={page}
-              rowsPerPage={rowsPerPage}
               setPage={setPage}
+              rowsPerPage={rowsPerPage}
               setRowsPerPage={setRowsPerPage}
               isSaveDisabled={!isEditFormValid}
               userPermissions={userPermissions}
