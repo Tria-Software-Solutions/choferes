@@ -172,9 +172,9 @@ const SchedulesPage: React.FC = () => {
       setIsCreatingSchedule(true);
       await dispatch(createSchedule(newSchedule));
       setOpenAddScheduleModal(false);
-      showNotification(NOTIFICATIONS.SCHEDULE_CREATE_SUCCESS, 3000, false);
+      showNotification(NOTIFICATIONS.SCHEDULE_CREATE_SUCCESS, { severity: 'success', duration: 3000 });
     } catch (error) {
-      showNotification(NOTIFICATIONS.SCHEDULE_CREATE_ERROR, 5000, false);
+      showNotification(NOTIFICATIONS.SCHEDULE_CREATE_ERROR, { severity: 'error', duration: 5000 });
     } finally {
       setIsCreatingSchedule(false);
     }
@@ -206,10 +206,10 @@ const SchedulesPage: React.FC = () => {
       dispatch(updateSchedule({ id, updatedSchedule }));
       setEditRowId(null);
       setEditFields({ label: "", days: [], hours: "", specialSchedule: false });
-      showNotification(NOTIFICATIONS.SCHEDULE_UPDATE_SUCCESS, 3000, false);
+      showNotification(NOTIFICATIONS.SCHEDULE_UPDATE_SUCCESS, { severity: 'success', duration: 3000 });
     } catch (error) {
       handleCancel();
-      showNotification(NOTIFICATIONS.SCHEDULE_UPDATE_ERROR, 5000, false);
+      showNotification(NOTIFICATIONS.SCHEDULE_UPDATE_ERROR, { severity: 'error', duration: 5000 });
     }
   };
 
@@ -242,9 +242,9 @@ const SchedulesPage: React.FC = () => {
       await dispatch(deleteSchedule(scheduleToDelete));
       setOpenDeleteDialog(false);
       setScheduleToDelete(null);
-      showNotification(NOTIFICATIONS.SCHEDULE_DELETE_SUCCESS, 3000, false);
+      showNotification(NOTIFICATIONS.SCHEDULE_DELETE_SUCCESS, { severity: 'success', duration: 3000 });
     } catch (error) {
-      showNotification(NOTIFICATIONS.SCHEDULE_DELETE_ERROR, 5000, false);
+      showNotification(NOTIFICATIONS.SCHEDULE_DELETE_ERROR, { severity: 'error', duration: 5000 });
     } finally {
       setIsDeletingSchedule(false);
     }

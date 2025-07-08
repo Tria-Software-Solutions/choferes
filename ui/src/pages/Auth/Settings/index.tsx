@@ -188,9 +188,9 @@ const Settings: React.FC = () => {
       } else {
         throw new Error("Current User is null");
       }
-      showNotification(MANAGEMENT.UPDATE_SUCCESS);
+      showNotification(MANAGEMENT.UPDATE_SUCCESS, { severity: 'success', duration: 3000 });
     } catch (error) {
-      showNotification(MANAGEMENT.UPDATE_ERROR);
+      showNotification(MANAGEMENT.UPDATE_ERROR, { severity: 'error', duration: 5000 });
     }
   };
 
@@ -246,9 +246,9 @@ const Settings: React.FC = () => {
         newPassword: "",
         confirmNewPassword: "",
       });
-      showNotification(MANAGEMENT.PASSWORD_UPDATE_SUCCESS);
+      showNotification(MANAGEMENT.PASSWORD_UPDATE_SUCCESS, { severity: 'success', duration: 3000 });
     } catch (error) {
-      showNotification(MANAGEMENT.PASSWORD_UPDATE_ERROR);
+      showNotification(MANAGEMENT.PASSWORD_UPDATE_ERROR, { severity: 'error', duration: 5000 });
     }
   };
 

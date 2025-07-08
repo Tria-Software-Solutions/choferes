@@ -230,10 +230,10 @@ const CourierServicePage: React.FC = () => {
   const handleUpdate = async (id: number) => {
     try {
       // TODO: Implementar actualización cuando se conecte con el backend
-      showNotification(NOTIFICATIONS.COURIER_UPDATE_SUCCESS);
+      showNotification(NOTIFICATIONS.COURIER_UPDATE_SUCCESS, { severity: 'success', duration: 3000 });
       setEditRowId(null);
     } catch (error) {
-      showNotification(NOTIFICATIONS.COURIER_UPDATE_ERROR);
+      showNotification(NOTIFICATIONS.COURIER_UPDATE_ERROR, { severity: 'error', duration: 5000 });
     }
   };
 
@@ -267,9 +267,9 @@ const CourierServicePage: React.FC = () => {
       setOpenDeleteDialog(false);
       setCourierToDelete(null);
 
-      showNotification(NOTIFICATIONS.COURIER_DELETE_SUCCESS);
+      showNotification(NOTIFICATIONS.COURIER_DELETE_SUCCESS, { severity: 'success', duration: 3000 });
     } catch (error) {
-      showNotification(NOTIFICATIONS.COURIER_DELETE_ERROR);
+      showNotification(NOTIFICATIONS.COURIER_DELETE_ERROR, { severity: 'error', duration: 5000 });
     } finally {
       setIsDeletingCourier(false);
     }
@@ -348,9 +348,9 @@ const CourierServicePage: React.FC = () => {
       setFilteredWeekCouriers([...filteredWeekCouriers, newCourier]);
 
       setOpenAddCourierModal(false);
-      showNotification(NOTIFICATIONS.COURIER_CREATE_SUCCESS);
+      showNotification(NOTIFICATIONS.COURIER_CREATE_SUCCESS, { severity: 'success', duration: 3000 });
     } catch (error) {
-      showNotification(NOTIFICATIONS.COURIER_CREATE_ERROR);
+      showNotification(NOTIFICATIONS.COURIER_CREATE_ERROR, { severity: 'error', duration: 5000 });
     } finally {
       setIsCreatingCourier(false);
     }

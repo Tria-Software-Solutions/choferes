@@ -1,23 +1,26 @@
 import React, { createContext, useContext, useState } from "react";
-import { Snackbar, IconButton, useTheme } from "@mui/material";
-import CloseIcon from "@mui/icons-material/Close";
-import { SNACKBAR } from "../../constants/constants";
-import {
-  snackbarContentStyles,
-  closeIconButtonStyles,
-  snackbarButtonStyles,
-} from "./Snackbar.styles";
+import { Snackbar, Alert, Slide, SlideProps, useTheme } from "@mui/material";
+import CheckCircleIcon from '@mui/icons-material/CheckCircle';
+import ErrorIcon from '@mui/icons-material/Error';
+import InfoIcon from '@mui/icons-material/Info';
+import WarningIcon from '@mui/icons-material/Warning';
+import { green, red, blue, orange } from '@mui/material/colors';
 
 // SnackbarWrapper provides a context and provider for showing notifications across the app using Material-UI Snackbar.
 // Exposes a showNotification function via context for use in child components.
 
+type Severity = 'success' | 'error' | 'info' | 'warning';
+
 interface NotificationContextType {
   showNotification: (
     message: string,
-    duration?: number,
-    closeable?: boolean,
-    buttonText?: string,
-    onButtonClick?: () => void,
+    options?: {
+      severity?: Severity;
+      duration?: number;
+      closeable?: boolean;
+      buttonText?: string;
+      onButtonClick?: () => void;
+    }
   ) => void;
 }
 
@@ -35,40 +38,56 @@ export const useAppNotifications = () => {
   return context;
 };
 
+function SlideTransition(props: SlideProps) {
+  return <Slide {...props} direction="left" />;
+}
+
 export const AppNotificationProvider: React.FC<{
   children: React.ReactNode;
 }> = ({ children }) => {
-  const theme = useTheme();
   const [open, setOpen] = useState(false);
   const [message, setMessage] = useState("");
+  const [severity, setSeverity] = useState<Severity>("info");
   const [duration, setDuration] = useState<number>(3000);
   const [closeable, setCloseable] = useState<boolean>(true);
-  const [buttonText, setButtonText] = useState<string>(SNACKBAR.CLOSE);
-  const [onButtonClick, setOnButtonClick] = useState<() => void>(() => {
-    // noop
-  });
+  const theme = useTheme();
 
   // Function to show a notification with custom options
   const showNotification = (
     message: string,
-    duration = 3000,
-    closeable = true,
-    buttonText = SNACKBAR.CLOSE,
-    onButtonClick: () => void = () => {
-      // noop
-    },
+    options: {
+      severity?: Severity;
+      duration?: number;
+      closeable?: boolean;
+      buttonText?: string;
+      onButtonClick?: () => void;
+    } = {}
   ) => {
     setMessage(message);
-    setDuration(duration);
-    setCloseable(closeable);
-    setButtonText(buttonText);
-    setOnButtonClick(() => onButtonClick);
+    setSeverity(options.severity || "info");
+    setDuration(options.duration || 3000);
+    setCloseable(options.closeable !== undefined ? options.closeable : true);
     setOpen(true);
+  };
 
-    if (closeable) {
-      setTimeout(() => {
-        setOpen(false);
-      }, duration);
+  const handleClose = (_event?: React.SyntheticEvent | Event, reason?: string) => {
+    if (reason === 'clickaway') return;
+    setOpen(false);
+  };
+
+  // Custom icon with color only for the icon
+  const getSeverityIcon = (severity: Severity) => {
+    switch (severity) {
+      case 'success':
+        return <CheckCircleIcon fontSize="inherit" sx={{ color: green[600] }} />;
+      case 'error':
+        return <ErrorIcon fontSize="inherit" sx={{ color: red[600] }} />;
+      case 'info':
+        return <InfoIcon fontSize="inherit" sx={{ color: blue[600] }} />;
+      case 'warning':
+        return <WarningIcon fontSize="inherit" sx={{ color: orange[600] }} />;
+      default:
+        return undefined;
     }
   };
 
@@ -78,47 +97,26 @@ export const AppNotificationProvider: React.FC<{
       <Snackbar
         open={open}
         autoHideDuration={duration}
-        onClose={() => setOpen(false)}
-        message={
-          <span style={{ display: "flex", alignItems: "center" }}>
-            {message}
-          </span>
-        }
-        action={
-          closeable && (
-            <>
-              <IconButton
-                size="small"
-                aria-label="close"
-                color="inherit"
-                onClick={() => setOpen(false)}
-                sx={closeIconButtonStyles(theme)}
-              >
-                <CloseIcon />
-              </IconButton>
-              {buttonText && (
-                <button
-                  onClick={() => {
-                    onButtonClick();
-                    setOpen(false);
-                  }}
-                  style={snackbarButtonStyles(theme)}
-                  onMouseEnter={(e) => {
-                    e.currentTarget.style.backgroundColor =
-                      "rgba(255,255,255,0.1)";
-                  }}
-                  onMouseLeave={(e) => {
-                    e.currentTarget.style.backgroundColor = "transparent";
-                  }}
-                >
-                  {buttonText}
-                </button>
-              )}
-            </>
-          )
-        }
-        sx={snackbarContentStyles(theme)}
-      />
+        onClose={handleClose}
+        anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
+        TransitionComponent={SlideTransition}
+      >
+        <Alert
+          onClose={closeable ? handleClose : undefined}
+          severity={severity}
+          icon={getSeverityIcon(severity)}
+          variant="filled"
+          sx={{
+            minWidth: 320,
+            alignItems: 'center',
+            fontSize: '1rem',
+            backgroundColor: theme.palette.primary.dark,
+            color: theme.palette.primary.contrastText,
+          }}
+        >
+          {message}
+        </Alert>
+      </Snackbar>
     </NotificationContext.Provider>
   );
 };
