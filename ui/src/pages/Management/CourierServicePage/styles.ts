@@ -105,6 +105,11 @@ export const buttonGroupSx: SxProps<Theme> = {
     display: "flex",
     alignItems: "center",
     justifyContent: "center",
+    "&.Mui-disabled": {
+      backgroundColor: "rgba(0, 0, 0, 0.12)",
+      color: "rgba(0, 0, 0, 0.6)",
+      border: "none",
+    },
   },
 };
 
