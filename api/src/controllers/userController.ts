@@ -36,8 +36,6 @@ export const authenticateUser = async (req: Request, res: Response) => {
       userPermissions: uniquePermissions,
     });
   } catch (error: unknown) {
-    console.error("Authentication error:", error);
-
     if (typeof error === "object" && error && "message" in error) {
       const errMsg = (error as { message: string }).message;
       if (errMsg === "User not found") {
@@ -65,16 +63,6 @@ export const authenticateUser = async (req: Request, res: Response) => {
         });
       }
     }
-
-    // Log the full error for debugging in production
-    if (process.env.NODE_ENV === "production") {
-      console.error("Unexpected authentication error:", {
-        error: error instanceof Error ? error.message : "Unknown error",
-        stack: error instanceof Error ? error.stack : undefined,
-        timestamp: new Date().toISOString(),
-      });
-    }
-
     return res.status(500).json({
       message: "Error interno del servidor",
       details: "Ocurrió un error inesperado durante la autenticación",

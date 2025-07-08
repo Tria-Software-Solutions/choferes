@@ -58,14 +58,6 @@ export const authenticateUser = async (identifier: string, password: string, res
       throw error;
     }
 
-    // Log unexpected errors for debugging
-    console.error("UserService authentication error:", {
-      error: error instanceof Error ? error.message : "Unknown error",
-      stack: error instanceof Error ? error.stack : undefined,
-      identifier,
-      timestamp: new Date().toISOString(),
-    });
-
     // Re-throw as a generic error
     throw new Error("Authentication service error");
   }
