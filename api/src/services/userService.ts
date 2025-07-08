@@ -9,40 +9,66 @@ import { generateTokens } from "../utils/generateSecret";
 
 // Authenticates a user by username/email and password, returns tokens and user info
 export const authenticateUser = async (identifier: string, password: string, res: Response) => {
-  const user = await User.findOne({
-    where: { [Op.or]: [{ username: identifier }, { email: identifier }] },
-    include: [
-      {
-        model: Role,
-        as: "roles",
-        include: [{ model: Permission, as: "permissions", through: { attributes: [] } }],
-      },
-    ],
-  });
+  try {
+    const user = await User.findOne({
+      where: { [Op.or]: [{ username: identifier }, { email: identifier }] },
+      include: [
+        {
+          model: Role,
+          as: "roles",
+          include: [{ model: Permission, as: "permissions", through: { attributes: [] } }],
+        },
+      ],
+    });
 
-  if (!user) {
-    throw new Error("User not found");
-  }
-
-  if (!user.isActive) {
-    throw new Error("User is inactive");
-  }
-
-  const isMatch = await bcrypt.compare(password, user.password);
-  if (!isMatch) {
-    if (user.temporalPassword) {
-      const isMatchWithTemporalPassword = await bcrypt.compare(password, user.temporalPassword);
-      if (!isMatchWithTemporalPassword) {
-        throw new Error("Incorrect password and temporary password");
-      }
-    } else {
-      throw new Error("Incorrect password");
+    if (!user) {
+      throw new Error("User not found");
     }
+
+    if (!user.isActive) {
+      throw new Error("User is inactive");
+    }
+
+    const isMatch = await bcrypt.compare(password, user.password);
+    if (!isMatch) {
+      if (user.temporalPassword) {
+        const isMatchWithTemporalPassword = await bcrypt.compare(password, user.temporalPassword);
+        if (!isMatchWithTemporalPassword) {
+          throw new Error("Incorrect password and temporary password");
+        }
+      } else {
+        throw new Error("Incorrect password");
+      }
+    }
+
+    const { accessToken, refreshToken } = generateTokens(user.id.toString(), res);
+
+    return { user, accessToken, refreshToken };
+  } catch (error) {
+    // Re-throw known authentication errors
+    if (
+      error instanceof Error &&
+      [
+        "User not found",
+        "User is inactive",
+        "Incorrect password",
+        "Incorrect password and temporary password",
+      ].includes(error.message)
+    ) {
+      throw error;
+    }
+
+    // Log unexpected errors for debugging
+    console.error("UserService authentication error:", {
+      error: error instanceof Error ? error.message : "Unknown error",
+      stack: error instanceof Error ? error.stack : undefined,
+      identifier,
+      timestamp: new Date().toISOString(),
+    });
+
+    // Re-throw as a generic error
+    throw new Error("Authentication service error");
   }
-
-  const { accessToken, refreshToken } = generateTokens(user.id.toString(), res);
-
-  return { user, accessToken, refreshToken };
 };
 
 // Fetches all users with their roles

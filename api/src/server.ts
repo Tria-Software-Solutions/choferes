@@ -157,16 +157,27 @@ app.use((error: Error, req: express.Request, res: express.Response) => {
   return res.status(500).json({ error: error.message });
 });
 
-sequelize
-  .sync()
-  .then(() => {
-    // Database synchronized successfully
-  })
-  .catch(() => {
-    // Error syncing database
-  });
+// Database connection and server startup
+const startServer = async () => {
+  try {
+    // Test database connection
+    await sequelize.authenticate();
+    console.log("Database connection established successfully.");
 
-const PORT = process.env.PORT || 5000;
-app.listen(PORT, () => {
-  // Server is running on port ${PORT}
-});
+    // Sync database models
+    await sequelize.sync();
+    console.log("Database models synchronized successfully.");
+
+    // Start the server
+    const PORT = process.env.PORT || 5000;
+    app.listen(PORT, () => {
+      console.log(`Server is running on port ${PORT}`);
+      console.log(`Environment: ${process.env.NODE_ENV || "development"}`);
+    });
+  } catch (error) {
+    console.error("Failed to start server:", error);
+    process.exit(1);
+  }
+};
+
+startServer();
