@@ -144,7 +144,7 @@ const Register = () => {
         isActive: true,
       };
       await dispatch(createUser({ newUser })).unwrap();
-      showNotification(AUTH.REGISTER_SUCCESS, 3000, false);
+      showNotification(AUTH.REGISTER_SUCCESS, { severity: 'success', duration: 3000 });
       // Clear form after successful registration
       setAddFields({
         firstName: "",
@@ -155,7 +155,7 @@ const Register = () => {
       });
     } catch (error) {
       setError(REGISTER_VALIDATION.REGISTER_ERROR);
-      showNotification(AUTH.REGISTER_ERROR, 5000, false);
+      showNotification(AUTH.REGISTER_ERROR, { severity: 'error', duration: 5000 });
     } finally {
       setIsSubmitting(false);
     }

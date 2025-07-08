@@ -128,7 +128,7 @@ const ManageUsers: React.FC<{ isExpanded?: boolean }> = ({
             ? error.message
             : DASHBOARD_USERS.LOAD_ERROR_TITLE,
         );
-        showNotification(DASHBOARD_USERS.LOAD_ERROR_TITLE, 5000, false);
+        showNotification(DASHBOARD_USERS.LOAD_ERROR_TITLE, { severity: 'error', duration: 5000 });
       }
     };
 
@@ -139,7 +139,7 @@ const ManageUsers: React.FC<{ isExpanded?: boolean }> = ({
   useEffect(() => {
     if (usersError) {
       setLoadError(`Error al cargar usuarios: ${usersError}`);
-      showNotification(DASHBOARD_USERS.LOAD_ERROR_TITLE, 5000, false);
+      showNotification(DASHBOARD_USERS.LOAD_ERROR_TITLE, { severity: 'error', duration: 5000 });
     }
   }, [usersError, showNotification]);
 
@@ -255,7 +255,7 @@ const ManageUsers: React.FC<{ isExpanded?: boolean }> = ({
       };
       const role = roles.find((r) => r.name === editFields.roleName);
       if (!role) {
-        showNotification(NOTIFICATIONS.USER_ROLE_NOT_FOUND, 5000, false);
+        showNotification(NOTIFICATIONS.USER_ROLE_NOT_FOUND, { severity: 'error', duration: 5000 });
         return;
       }
       dispatch(
@@ -274,10 +274,10 @@ const ManageUsers: React.FC<{ isExpanded?: boolean }> = ({
         password: "",
         roleName: "",
       });
-      showNotification(NOTIFICATIONS.USER_UPDATE_SUCCESS, 3000, false);
+      showNotification(NOTIFICATIONS.USER_UPDATE_SUCCESS, { severity: 'success', duration: 3000 });
     } catch (error) {
       handleCancel();
-      showNotification(NOTIFICATIONS.USER_UPDATE_ERROR, 5000, false);
+      showNotification(NOTIFICATIONS.USER_UPDATE_ERROR, { severity: 'error', duration: 5000 });
     }
   };
 
@@ -306,14 +306,12 @@ const ManageUsers: React.FC<{ isExpanded?: boolean }> = ({
       setUserToChange(null);
       showNotification(
         "Estado del usuario actualizado exitosamente",
-        3000,
-        false,
+        { severity: 'success', duration: 3000 },
       );
     } catch (error) {
       showNotification(
         "Error al actualizar el estado del usuario",
-        5000,
-        false,
+        { severity: 'error', duration: 5000 },
       );
     } finally {
       setIsUpdatingUserStatus(false);
@@ -359,9 +357,9 @@ const ManageUsers: React.FC<{ isExpanded?: boolean }> = ({
         }),
       );
       setOpenAddUserModal(false);
-      showNotification(NOTIFICATIONS.USER_CREATED, 3000, false);
+      showNotification(NOTIFICATIONS.USER_CREATED, { severity: 'success', duration: 3000 });
     } catch (error) {
-      showNotification(NOTIFICATIONS.USER_CREATE_ERROR, 5000, false);
+      showNotification(NOTIFICATIONS.USER_CREATE_ERROR, { severity: 'error', duration: 5000 });
     } finally {
       setIsCreatingUser(false);
     }
@@ -636,11 +634,10 @@ const ManageUsers: React.FC<{ isExpanded?: boolean }> = ({
             handleClosePasswordModal();
             showNotification(
               "La contraseña fue actualizada exitosamente",
-              3000,
-              false,
+              { severity: 'success', duration: 3000 },
             );
           }}
-          onError={(msg) => showNotification(msg, 5000, true)}
+          onError={(msg) => showNotification(msg, { severity: 'error', duration: 5000 })}
         />
       </DialogComponent>
     </Box>

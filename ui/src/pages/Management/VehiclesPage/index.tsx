@@ -321,10 +321,10 @@ const VehiclesPage: React.FC = () => {
         notes: "",
         parkingDate: new Date(),
       });
-      showNotification(NOTIFICATIONS.VEHICLE_UPDATED, 3000, false);
+      showNotification(NOTIFICATIONS.VEHICLE_UPDATED, { severity: 'success', duration: 3000 });
     } catch (error) {
       handleCancel();
-      showNotification(NOTIFICATIONS.VEHICLE_UPDATE_ERROR, 5000, false);
+      showNotification(NOTIFICATIONS.VEHICLE_UPDATE_ERROR, { severity: 'error', duration: 5000 });
     }
   };
 
@@ -347,9 +347,9 @@ const VehiclesPage: React.FC = () => {
       await dispatch(deleteVehicle(vehicleToDelete));
       setOpenDeleteDialog(false);
       setVehicleToDelete(null);
-      showNotification(NOTIFICATIONS.VEHICLE_DELETE_SUCCESS, 3000, false);
+      showNotification(NOTIFICATIONS.VEHICLE_DELETE_SUCCESS, { severity: 'success', duration: 3000 });
     } catch (error) {
-      showNotification(NOTIFICATIONS.VEHICLE_DELETE_ERROR, 5000, false);
+      showNotification(NOTIFICATIONS.VEHICLE_DELETE_ERROR, { severity: 'error', duration: 5000 });
     } finally {
       setIsDeletingVehicle(false);
     }
@@ -411,9 +411,9 @@ const VehiclesPage: React.FC = () => {
 
       await dispatch(createVehicle(newVehicle));
       setOpenAddVehicleModal(false);
-      showNotification(NOTIFICATIONS.VEHICLE_CREATE_SUCCESS, 3000, false);
+      showNotification(NOTIFICATIONS.VEHICLE_CREATE_SUCCESS, { severity: 'success', duration: 3000 });
     } catch (error) {
-      showNotification(NOTIFICATIONS.VEHICLE_CREATE_ERROR, 5000, false);
+      showNotification(NOTIFICATIONS.VEHICLE_CREATE_ERROR, { severity: 'error', duration: 5000 });
     } finally {
       setIsCreatingVehicle(false);
     }

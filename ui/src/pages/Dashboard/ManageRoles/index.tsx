@@ -165,10 +165,10 @@ const ManageRoles: React.FC<{ isExpanded?: boolean }> = ({
       );
       setEditRowId(null);
       setEditFields({ name: "", permissionNames: [] });
-      showNotification(NOTIFICATIONS.ROLE_UPDATE_SUCCESS, 3000, false);
+      showNotification(NOTIFICATIONS.ROLE_UPDATE_SUCCESS, { severity: 'success', duration: 3000 });
     } catch (error) {
       handleCancel();
-      showNotification(NOTIFICATIONS.ROLE_UPDATE_ERROR, 5000, false);
+      showNotification(NOTIFICATIONS.ROLE_UPDATE_ERROR, { severity: 'error', duration: 5000 });
     }
   };
 
@@ -192,9 +192,9 @@ const ManageRoles: React.FC<{ isExpanded?: boolean }> = ({
       await dispatch(deleteRole(roleToDelete));
       setOpenDeleteDialog(false);
       setRoleToDelete(null);
-      showNotification(NOTIFICATIONS.ROLE_DELETE_SUCCESS, 3000, false);
+      showNotification(NOTIFICATIONS.ROLE_DELETE_SUCCESS, { severity: 'success', duration: 3000 });
     } catch (error) {
-      showNotification(NOTIFICATIONS.ROLE_DELETE_ERROR, 5000, false);
+      showNotification(NOTIFICATIONS.ROLE_DELETE_ERROR, { severity: 'error', duration: 5000 });
     } finally {
       setIsDeletingRole(false);
     }
@@ -234,9 +234,9 @@ const ManageRoles: React.FC<{ isExpanded?: boolean }> = ({
         }),
       );
       setOpenAddRoleModal(false);
-      showNotification(NOTIFICATIONS.ROLE_CREATE_SUCCESS, 3000, false);
+      showNotification(NOTIFICATIONS.ROLE_CREATE_SUCCESS, { severity: 'success', duration: 3000 });
     } catch (error) {
-      showNotification(NOTIFICATIONS.ROLE_CREATE_ERROR, 5000, false);
+      showNotification(NOTIFICATIONS.ROLE_CREATE_ERROR, { severity: 'error', duration: 5000 });
     } finally {
       setIsCreatingRole(false);
     }

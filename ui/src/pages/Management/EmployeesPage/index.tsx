@@ -157,9 +157,9 @@ const EmployeesPage: React.FC = () => {
       setIsSubmitting(true);
       dispatch(createEmployee(newEmployee));
       setOpenAddModal(false);
-      showNotification(NOTIFICATIONS.EMPLOYEE_CREATE_SUCCESS, 3000, false);
+      showNotification(NOTIFICATIONS.EMPLOYEE_CREATE_SUCCESS, { severity: 'success', duration: 3000 });
     } catch (error) {
-      showNotification(NOTIFICATIONS.EMPLOYEE_CREATE_ERROR, 5000, false);
+      showNotification(NOTIFICATIONS.EMPLOYEE_CREATE_ERROR, { severity: 'error', duration: 5000 });
     } finally {
       setIsSubmitting(false);
     }
@@ -197,10 +197,10 @@ const EmployeesPage: React.FC = () => {
       dispatch(updateEmployee({ id, updatedEmployee }));
       setEditRowId(null);
       setEditFields({ firstName: "", lastName: "" });
-      showNotification(NOTIFICATIONS.EMPLOYEE_UPDATE_SUCCESS, 3000, false);
+      showNotification(NOTIFICATIONS.EMPLOYEE_UPDATE_SUCCESS, { severity: 'success', duration: 3000 });
     } catch (error) {
       handleCancel();
-      showNotification(NOTIFICATIONS.EMPLOYEE_UPDATE_ERROR, 5000, false);
+      showNotification(NOTIFICATIONS.EMPLOYEE_UPDATE_ERROR, { severity: 'error', duration: 5000 });
     }
   };
 
@@ -224,9 +224,9 @@ const EmployeesPage: React.FC = () => {
       await dispatch(deleteEmployee(employeeToDelete));
       setOpenDeleteDialog(false);
       setEmployeeToDelete(null);
-      showNotification(NOTIFICATIONS.EMPLOYEE_DELETE_SUCCESS, 3000, false);
+      showNotification(NOTIFICATIONS.EMPLOYEE_DELETE_SUCCESS, { severity: 'success', duration: 3000 });
     } catch (error) {
-      showNotification(NOTIFICATIONS.EMPLOYEE_DELETE_ERROR, 5000, false);
+      showNotification(NOTIFICATIONS.EMPLOYEE_DELETE_ERROR, { severity: 'error', duration: 5000 });
     } finally {
       setIsDeletingEmployee(false);
     }
