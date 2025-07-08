@@ -27,10 +27,7 @@ const config = {
     host: process.env.PGHOST,
     dialect: "postgres",
     dialectOptions: {
-      ssl: {
-        require: true,
-        rejectUnauthorized: false,
-      },
+      ssl: false,
     },
   },
 };

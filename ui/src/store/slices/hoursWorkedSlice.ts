@@ -41,7 +41,12 @@ export const createHoursWorked = createAsyncThunk(
   "hoursWorked/createHoursWorked",
   async (newHours: Omit<HoursWorked, "id">, { rejectWithValue }) => {
     try {
-      const createdHours = await HoursWorkedService.createHoursWorked(newHours);
+      // Convert Date objects to ISO strings for serialization
+      const serializedHours = {
+        ...newHours,
+        date: newHours.date instanceof Date ? newHours.date.toISOString() : newHours.date,
+      };
+      const createdHours = await HoursWorkedService.createHoursWorked(serializedHours);
       return createdHours;
     } catch (error: unknown) {
       return rejectWithValue(
@@ -60,7 +65,12 @@ export const updateHoursWorked = createAsyncThunk(
     { rejectWithValue },
   ) => {
     try {
-      await HoursWorkedService.updateHoursWorked(id, updatedHours);
+      // Convert Date objects to ISO strings for serialization
+      const serializedHours = {
+        ...updatedHours,
+        date: updatedHours.date instanceof Date ? updatedHours.date.toISOString() : updatedHours.date,
+      };
+      await HoursWorkedService.updateHoursWorked(id, serializedHours);
       // Fetch fresh data from server to ensure consistency
       const refreshedHours = await HoursWorkedService.getHoursWorkedById(id);
       return refreshedHours;
@@ -81,15 +91,21 @@ export const createOrUpdateHoursWorked = createAsyncThunk(
     { rejectWithValue },
   ) => {
     try {
-      if ("id" in newHours) {
+      // Convert Date objects to ISO strings for serialization
+      const serializedHours = {
+        ...newHours,
+        date: newHours.date instanceof Date ? newHours.date.toISOString() : newHours.date,
+      };
+
+      if ("id" in serializedHours) {
         const updatedHoursWorked = await HoursWorkedService.updateHoursWorked(
-          newHours.id,
-          newHours,
+          serializedHours.id,
+          serializedHours,
         );
         return updatedHoursWorked;
       } else {
         const createdHoursWorked =
-          await HoursWorkedService.createHoursWorked(newHours);
+          await HoursWorkedService.createHoursWorked(serializedHours);
         return createdHoursWorked;
       }
     } catch (error: unknown) {

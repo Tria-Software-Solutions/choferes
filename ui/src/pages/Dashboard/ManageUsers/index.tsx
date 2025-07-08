@@ -49,6 +49,7 @@ import {
   passwordDialogPaperSx,
   backdropStyles,
 } from "./styles";
+import { useLocation } from "react-router-dom";
 
 // ManageUsers page component for user management in the dashboard
 const ManageUsers: React.FC<{ isExpanded?: boolean }> = ({
@@ -85,6 +86,7 @@ const ManageUsers: React.FC<{ isExpanded?: boolean }> = ({
   const theme = useTheme();
   const [passwordModalOpen, setPasswordModalOpen] = useState(false);
   const [passwordUserId, setPasswordUserId] = useState<number | null>(null);
+  const location = useLocation();
 
   // Loads users, roles, and user roles data on mount
   useEffect(() => {
@@ -116,7 +118,7 @@ const ManageUsers: React.FC<{ isExpanded?: boolean }> = ({
     };
 
     loadData();
-  }, [dispatch, showNotification]);
+  }, [dispatch, showNotification, location.pathname]);
 
   // Handles errors when loading users
   useEffect(() => {

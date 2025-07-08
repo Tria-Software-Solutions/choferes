@@ -43,6 +43,7 @@ import {
   deleteDialogPaperSx,
   addDialogPaperSx,
 } from "./styles";
+import { useLocation } from "react-router-dom";
 
 // ManageRoles page component for role management in the dashboard
 const ManageRoles: React.FC<{ isExpanded?: boolean }> = ({
@@ -56,6 +57,7 @@ const ManageRoles: React.FC<{ isExpanded?: boolean }> = ({
   );
   const { permissions } = useSelector((state: RootState) => state.permissions);
   const { showNotification } = useAppNotifications();
+  const location = useLocation();
 
   const [editRowId, setEditRowId] = useState<number | null>(null);
   const [editFields, setEditFields] = useState<{
@@ -79,7 +81,7 @@ const ManageRoles: React.FC<{ isExpanded?: boolean }> = ({
     dispatch(fetchRoles());
     dispatch(fetchPermissions());
     dispatch(fetchRolePermissions());
-  }, [dispatch]);
+  }, [dispatch, location.pathname]);
 
   // Filters roles based on search input
   const filteredRoles = useMemo(() => {

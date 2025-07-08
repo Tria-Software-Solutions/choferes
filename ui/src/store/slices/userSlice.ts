@@ -306,7 +306,7 @@ const userSlice = createSlice({
       )
       .addCase(createUser.fulfilled, (state, action: PayloadAction<User>) => {
         // Add the newly created user to the state
-        state.users.push(action.payload);
+        state.users = [...state.users, action.payload];
         state.totalCountUsers += 1;
       })
       .addCase(

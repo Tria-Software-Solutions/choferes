@@ -151,8 +151,8 @@ const vehicleSlice = createSlice({
         createVehicle.fulfilled,
         (state, action: PayloadAction<Vehicle>) => {
           // Add the newly created vehicle to the state
-          state.vehicles.push(action.payload);
-          state.allVehicles.push(action.payload);
+          state.vehicles = [...state.vehicles, action.payload];
+          state.allVehicles = [...state.allVehicles, action.payload];
           state.totalCountAllVehicles += 1;
         },
       )

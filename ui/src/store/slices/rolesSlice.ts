@@ -183,7 +183,7 @@ const rolesSlice = createSlice({
       )
       .addCase(createRole.fulfilled, (state, action: PayloadAction<Role>) => {
         // Add the newly created role to the state
-        state.roles.push(action.payload);
+        state.roles = [...state.roles, action.payload];
         state.totalCountRoles += 1;
       })
       .addCase(

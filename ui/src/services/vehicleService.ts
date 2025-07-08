@@ -1,5 +1,5 @@
 import { Vehicle } from "../models/Vehicle";
-import api from "./api";
+import api, { invalidateCache } from "./api";
 
 // Fetches a paginated list of vehicles
 export const getVehicles = async (
@@ -7,7 +7,7 @@ export const getVehicles = async (
   perPage = 10,
 ): Promise<Vehicle[]> => {
   const response = await api.get("/vehicles", {
-    params: { page, perPage },
+    params: { page, perPage, _t: Date.now() },
   });
   return response.data;
 };
@@ -34,17 +34,20 @@ export const createVehicle = async (newVehicle: Omit<Vehicle, "id">) => {
   };
 
   const response = await api.post("/vehicles", vehicleData);
+  invalidateCache("/vehicles");
   return response.data;
 };
 
 // Updates a vehicle by ID
 export const updateVehicle = async (id: number, vehicle: Partial<Vehicle>) => {
   const response = await api.put(`/vehicles/${id}`, vehicle);
+  invalidateCache("/vehicles");
   return response.data;
 };
 
 // Deletes a vehicle by ID
 export const deleteVehicle = async (id: number) => {
   const response = await api.delete(`/vehicles/${id}`);
+  invalidateCache("/vehicles");
   return { id, message: response.data };
 };

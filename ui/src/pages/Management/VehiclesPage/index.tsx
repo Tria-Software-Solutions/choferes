@@ -75,6 +75,7 @@ import {
   deleteDialogPaperSx,
   addDialogPaperSx,
 } from "./styles";
+import { useLocation } from "react-router-dom";
 
 // Vehicles management page component
 const VehiclesPage: React.FC = () => {
@@ -112,6 +113,7 @@ const VehiclesPage: React.FC = () => {
 
   const theme = useTheme();
   const isSmallScreen = useMediaQuery(theme.breakpoints.down("sm"));
+  const location = useLocation();
 
   // Memoize cleaned filter for search
   const cleanedFilter = useMemo(
@@ -164,7 +166,7 @@ const VehiclesPage: React.FC = () => {
     if (shouldRefetch) {
       dispatch(fetchVehicles({}));
     }
-  }, [dispatch, shouldRefetch]);
+  }, [dispatch, shouldRefetch, location.pathname]);
 
   // Adjust rows per page based on screen size
   useEffect(() => {
@@ -561,23 +563,27 @@ const VehiclesPage: React.FC = () => {
                       title={MANAGEMENT.VEHICLES_PAGE.TOOLTIP_NEXT_DAY}
                       arrow
                     >
-                      <Button
-                        disabled={isTodayOrFuture(selectedDate)}
-                        onClick={handleNextDate}
-                      >
-                        <ArrowForwardIosRoundedIcon />
-                      </Button>
+                      <span>
+                        <Button
+                          disabled={isTodayOrFuture(selectedDate)}
+                          onClick={handleNextDate}
+                        >
+                          <ArrowForwardIosRoundedIcon />
+                        </Button>
+                      </span>
                     </Tooltip>
                     <Tooltip
                       title={MANAGEMENT.VEHICLES_PAGE.TOOLTIP_CURRENT_DAY}
                       arrow
                     >
-                      <Button
-                        disabled={isTodayOrFuture(selectedDate)}
-                        onClick={handleCurrentDate}
-                      >
-                        <CalendarTodayRoundedIcon />
-                      </Button>
+                      <span>
+                        <Button
+                          disabled={isTodayOrFuture(selectedDate)}
+                          onClick={handleCurrentDate}
+                        >
+                          <CalendarTodayRoundedIcon />
+                        </Button>
+                      </span>
                     </Tooltip>
                   </ButtonGroup>
                 </Box>

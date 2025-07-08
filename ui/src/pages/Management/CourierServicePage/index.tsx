@@ -474,12 +474,14 @@ const CourierServicePage: React.FC = () => {
                       title={MANAGEMENT.COURIER_SERVICE_PAGE.TOOLTIP_NEXT_DAY}
                       arrow
                     >
-                      <Button
-                        disabled={isTodayOrFuture(selectedDate)}
-                        onClick={handleNextDate}
-                      >
-                        <ArrowForwardIosRoundedIcon />
-                      </Button>
+                      <span>
+                        <Button
+                          disabled={isTodayOrFuture(selectedDate)}
+                          onClick={handleNextDate}
+                        >
+                          <ArrowForwardIosRoundedIcon />
+                        </Button>
+                      </span>
                     </Tooltip>
                     <Tooltip
                       title={
@@ -487,12 +489,14 @@ const CourierServicePage: React.FC = () => {
                       }
                       arrow
                     >
-                      <Button
-                        disabled={isTodayOrFuture(selectedDate)}
-                        onClick={handleCurrentDate}
-                      >
+                      <span>
+                        <Button
+                          disabled={isTodayOrFuture(selectedDate)}
+                          onClick={handleCurrentDate}
+                        >
                         <CalendarTodayRoundedIcon />
                       </Button>
+                      </span>
                     </Tooltip>
                   </ButtonGroup>
                 </Box>

@@ -85,6 +85,7 @@ import {
   noEmployeesBoxStyles,
   noEmployeesIconStyles,
 } from "./styles";
+import { useLocation } from "react-router-dom";
 
 // Roles management and summary page component
 const RolesPage: React.FC = () => {
@@ -131,13 +132,14 @@ const RolesPage: React.FC = () => {
 
   const theme = useTheme();
   const isSmallScreen = useMediaQuery(theme.breakpoints.down("sm"));
+  const location = useLocation();
 
   // Fetch employees, schedules, and hours worked on mount
   useEffect(() => {
     dispatch(fetchEmployees());
     dispatch(fetchSchedules());
     dispatch(fetchHoursWorked());
-  }, [dispatch]);
+  }, [dispatch, location.pathname]);
 
   const isLoading =
     isLoadingEmployees ||
@@ -212,7 +214,7 @@ const RolesPage: React.FC = () => {
   const handleCreateOrUpdateHoursAndSummaries = useCallback(
     async (
       employeeId: number,
-      date: Date,
+      date: string,
       scheduleId: number,
       weekNumber: number,
       biweekNumber: number,
@@ -374,7 +376,7 @@ const RolesPage: React.FC = () => {
 
     handleCreateOrUpdateHoursAndSummaries(
       employeeId,
-      date,
+      date.toISOString(),
       selectedSchedule.id,
       getWeekNumber(date),
       getBiweekNumber(date),
@@ -635,26 +637,30 @@ const RolesPage: React.FC = () => {
                       </Button>
                     </Tooltip>
                     <Tooltip title={MANAGEMENT.TOOLTIP_NEXT_WEEK} arrow>
-                      <Button
-                        disabled={
-                          !isValidDateForSelect(
-                            new Date(
-                              getCurrentWeekDates(weekOffset + 1)[0].isoDate,
-                            ),
-                          )
-                        }
-                        onClick={handleNextWeek}
-                      >
-                        <ArrowForwardIosRoundedIcon />
-                      </Button>
+                      <span>
+                        <Button
+                          disabled={
+                            !isValidDateForSelect(
+                              new Date(
+                                getCurrentWeekDates(weekOffset + 1)[0].isoDate,
+                              ),
+                            )
+                          }
+                          onClick={handleNextWeek}
+                        >
+                          <ArrowForwardIosRoundedIcon />
+                        </Button>
+                      </span>
                     </Tooltip>
                     <Tooltip title={MANAGEMENT.TOOLTIP_CURRENT_WEEK} arrow>
-                      <Button
-                        disabled={weekOffset === 0}
-                        onClick={handleCurrentWeek}
-                      >
-                        <CalendarTodayRoundedIcon />
-                      </Button>
+                      <span>
+                        <Button
+                          disabled={weekOffset === 0}
+                          onClick={handleCurrentWeek}
+                        >
+                          <CalendarTodayRoundedIcon />
+                        </Button>
+                      </span>
                     </Tooltip>
                   </ButtonGroup>
                 </Box>
@@ -664,6 +670,7 @@ const RolesPage: React.FC = () => {
           <br />
           {filteredEmployees.length > 0 ? (
             <SelectorTableComponent
+              key={`schedules-${schedules.length}-${schedules.map(s => s.id).join('-')}`}
               filteredEmployees={filteredEmployees}
               schedules={schedules}
               hoursWorked={hoursWorked}

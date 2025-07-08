@@ -1,8 +1,7 @@
-
 import {
   BRANDS_LIST,
   COLORS_LIST,
-  DAYS_LIST,
+  //DAYS_LIST,
 } from "../../../../constants/constants";
 
 export type ColumnConfigType = {
@@ -71,11 +70,6 @@ export const createColumnConfig = (
 
   label: {
     type: "text",
-    size: { xs: 6, sm: 6, md: 3, lg: 3 },
-  },
-  days: {
-    type: "select multiple",
-    options: DAYS_LIST,
     size: { xs: 6, sm: 6, md: 3, lg: 3 },
   },
   hours: {

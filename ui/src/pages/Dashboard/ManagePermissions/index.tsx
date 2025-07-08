@@ -23,6 +23,7 @@ import {
   permissionIconStyles,
   noPermissionsBoxStyles,
 } from "./styles";
+import { useLocation } from "react-router-dom";
 
 // ManagePermissions page component for permission management in the dashboard
 const ManagePermissions: React.FC = () => {
@@ -35,11 +36,12 @@ const ManagePermissions: React.FC = () => {
   );
   const [filter, setFilter] = useState("");
   const theme = useTheme();
+  const location = useLocation();
 
   // Loads permissions data on mount
   useEffect(() => {
     dispatch(fetchPermissions());
-  }, [dispatch]);
+  }, [dispatch, location.pathname]);
 
   // Filters permissions based on search input
   useEffect(() => {
