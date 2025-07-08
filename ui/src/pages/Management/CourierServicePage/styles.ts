@@ -99,8 +99,8 @@ export const buttonGroupSx: SxProps<Theme> = {
   flexDirection: "row",
   "& .MuiButton-root": {
     minWidth: 0,
+    height: "100%",
     px: 2,
-    py: 1.2,
     fontSize: "1rem",
     display: "flex",
     alignItems: "center",
