@@ -110,7 +110,7 @@ const schedulesSlice = createSlice({
       .addCase(
         fetchSchedules.fulfilled,
         (state, action: PayloadAction<Schedule[]>) => {
-          state.schedules = action.payload;
+          state.schedules = [...action.payload];
           state.totalCountSchedules = action.payload.length;
           state.isLoadingSchedules = false;
         },
@@ -123,15 +123,13 @@ const schedulesSlice = createSlice({
       .addCase(
         createSchedule.fulfilled,
         (state, action: PayloadAction<Schedule>) => {
-          // Add the newly created schedule to the state
-          state.schedules.push(action.payload);
+          state.schedules = [...state.schedules, action.payload];
           state.totalCountSchedules += 1;
         },
       )
       .addCase(
         updateSchedule.fulfilled,
         (state, action: PayloadAction<Schedule>) => {
-          // Update a schedule in the state after editing with fresh data from server
           const updatedSchedule = action.payload;
           state.schedules = state.schedules.map((schedule) =>
             schedule.id === updatedSchedule.id ? updatedSchedule : schedule,
@@ -141,7 +139,6 @@ const schedulesSlice = createSlice({
       .addCase(
         deleteSchedule.fulfilled,
         (state, action: PayloadAction<number>) => {
-          // Remove a schedule from the state by ID
           state.schedules = state.schedules.filter(
             (schedule) => schedule.id !== action.payload,
           );

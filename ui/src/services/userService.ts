@@ -1,5 +1,5 @@
 import { User } from "../models/User";
-import api from "./api";
+import api, { invalidateCache } from "./api";
 
 // Authenticates a user with username/email and password
 export const authenticateUser = async (
@@ -32,7 +32,11 @@ export const refreshAccessToken = async () => {
 
 // Fetches all users
 export const getUsers = async () => {
-  const response = await api.get("/users");
+  const response = await api.get("/users", {
+    params: {
+      _t: Date.now() // Add timestamp to bypass cache
+    }
+  });
   return response.data;
 };
 
@@ -57,15 +61,21 @@ export const getUserPermissions = async (id: number) => {
   return response.data;
 };
 
-export const createUser = async (
-  user: Omit<User, "id" | "temporalPassword">,
-) => {
-  const response = await api.post("/users/register", user);
+export const createUser = async (newUser: Omit<User, "id">) => {
+  const response = await api.post("/users", newUser);
+  // Clear cache to ensure fresh data
+  invalidateCache("/users");
   return response.data;
 };
 
-export const updateUser = async (id: number, updatedUser: Partial<User>) => {
-  await api.put(`/users/${id}`, updatedUser);
+export const updateUser = async (
+  id: number,
+  updatedUser: Partial<User>,
+) => {
+  const response = await api.put(`/users/${id}`, updatedUser);
+  // Clear cache to ensure fresh data
+  invalidateCache("/users");
+  return response.data;
 };
 
 export const updateUserStatus = async (id: number, status: boolean) => {
@@ -89,5 +99,7 @@ export const updateUserTemporalPassword = async (
 
 export const deleteUser = async (id: number) => {
   const response = await api.delete(`/users/${id}`);
+  // Clear cache to ensure fresh data
+  invalidateCache("/users");
   return { id, message: response.data };
 };

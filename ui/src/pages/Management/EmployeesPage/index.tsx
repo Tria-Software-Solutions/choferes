@@ -62,6 +62,7 @@ import {
   deleteDialogPaperSx,
   addDialogPaperSx,
 } from "./styles";
+import { useLocation } from "react-router-dom";
 
 // Employees management page component
 const EmployeesPage: React.FC = () => {
@@ -87,11 +88,12 @@ const EmployeesPage: React.FC = () => {
 
   const theme = useTheme();
   const isSmallScreen = useMediaQuery(theme.breakpoints.down("sm"));
+  const location = useLocation();
 
   // Fetch employees on mount
   useEffect(() => {
     dispatch(fetchEmployees());
-  }, [dispatch]);
+  }, [dispatch, location.pathname]);
 
   // Adjust rows per page based on screen size
   useEffect(() => {

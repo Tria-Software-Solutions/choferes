@@ -1,8 +1,12 @@
 import { BiweeklySummary } from "../models/BiweeklySummary";
-import api from "./api";
+import api, { invalidateCache } from "./api";
 
 export const getBiweeklySummaries = async () => {
-  const response = await api.get("/biweekly-summary");
+  const response = await api.get("/biweekly-summary", {
+    params: {
+      _t: Date.now()
+    }
+  });
   return response.data;
 };
 
@@ -18,10 +22,16 @@ export const getCurrentBiweeklySummary = async (
   return response.data;
 };
 
+export const getBiweeklySummaryById = async (id: number) => {
+  const response = await api.get(`/biweekly-summary/${id}`);
+  return response.data;
+};
+
 export const createBiweeklySummary = async (
   newBiweeklySummary: Omit<BiweeklySummary, "id">,
 ) => {
   const response = await api.post("/biweekly-summary", newBiweeklySummary);
+  invalidateCache("/biweekly-summary");
   return response.data;
 };
 
@@ -29,14 +39,13 @@ export const updateBiweeklySummary = async (
   id: number,
   updatedBiweeklySummary: Partial<BiweeklySummary>,
 ) => {
-  const response = await api.put(
-    `/biweekly-summary/${id}`,
-    updatedBiweeklySummary,
-  );
+  const response = await api.put(`/biweekly-summary/${id}`, updatedBiweeklySummary);
+  invalidateCache("/biweekly-summary");
   return response.data;
 };
 
 export const deleteBiweeklySummary = async (id: number) => {
   const response = await api.delete(`/biweekly-summary/${id}`);
+  invalidateCache("/biweekly-summary");
   return { id, message: response.data };
 };

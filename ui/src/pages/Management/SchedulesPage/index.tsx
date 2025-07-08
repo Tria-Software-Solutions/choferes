@@ -63,6 +63,7 @@ import {
   deleteDialogPaperSx,
   addDialogPaperSx,
 } from "./styles";
+import { useLocation } from "react-router-dom";
 
 // Schedules management page component
 const SchedulesPage: React.FC = () => {
@@ -98,11 +99,12 @@ const SchedulesPage: React.FC = () => {
 
   const theme = useTheme();
   const isSmallScreen = useMediaQuery(theme.breakpoints.down("sm"));
+  const location = useLocation();
 
   // Fetch all schedules on mount
   useEffect(() => {
     dispatch(fetchSchedules());
-  }, [dispatch]);
+  }, [dispatch, location.pathname]);
 
   // Adjust rows per page based on screen size
   useEffect(() => {

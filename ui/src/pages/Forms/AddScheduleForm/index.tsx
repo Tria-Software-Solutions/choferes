@@ -162,6 +162,7 @@ const AddScheduleForm: React.FC<AddScheduleFormProps> = ({
             }
             icon={<AccessTimeOutlinedIcon sx={iconSx(theme)} />}
             endAdornment={<Box sx={iconSx(theme)}>horas</Box>}
+            inputProps={{ min: "0" }}
           />
         </Grid>
 

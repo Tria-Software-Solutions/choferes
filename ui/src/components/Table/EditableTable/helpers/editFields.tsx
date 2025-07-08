@@ -9,6 +9,7 @@ import { translateColumnHeaderToSpanish } from "../../../../utils/string";
 import { maskLicensePlate, maskParkingLotWithPrefix } from "../../../../utils/mask";
 import { formControlStyles, selectStyles, datePickerTextFieldStyles } from "../EditableTable.styles";
 import { ColumnConfigType, PARKING_PREFIX_OPTIONS } from "./columnConfig";
+import { DAYS_LIST } from "../../../../constants/constants";
 
 // This function is generic and can be used in EditableTable
 export function renderEditField<T extends object>({
@@ -125,6 +126,7 @@ export function renderEditField<T extends object>({
         }
         error={!validateField(String(column), value)}
         sx={{ width: "80px" }}
+        inputProps={{ min: "0" }}
       />
     );
   }
@@ -152,6 +154,60 @@ export function renderEditField<T extends object>({
         error={!validateField(String(column), value)}
         sx={{ width: "150px" }}
       />
+    );
+  }
+
+  if (String(column) === "days") {
+    const selectedValues: string[] = Array.isArray(editFields[String(column)])
+      ? (editFields[String(column)] as string[])
+      : [];
+    
+    // Use the existing DAYS_LIST constant which already has English values and Spanish labels
+    const dayOptions = DAYS_LIST;
+
+    return (
+      <FormControl variant="outlined" sx={{ ...formControlStyles, width: { xs: "100%", sm: "auto", minWidth: "200px", md: "400px", lg: "850px", xl: "1200px" } }}>
+        <Select
+          multiple
+          value={selectedValues}
+          onChange={(e) =>
+            setEditField && setEditField(String(column), e.target.value)
+          }
+          renderValue={(selected) => {
+            if (!Array.isArray(selected)) return "";
+            const max = 7; // Show all days since we have responsive width
+            const labels = selected.map(
+              (v) => dayOptions.find((opt: { value: string; label: string }) => opt.value === v)?.label || v
+            );
+            const visible = labels.slice(0, max);
+            const hidden = labels.length > max ? labels.length - max : 0;
+            return hidden > 0
+              ? `${visible.join(", ")} +${hidden} más`
+              : `${visible.join(", ")}`;
+          }}
+          sx={selectStyles}
+          MenuProps={{
+            PaperProps: {
+              style: {
+                maxHeight: 320,
+                overflowY: "auto",
+              },
+            },
+          }}
+        >
+          {dayOptions.map((option: { value: string; label: string }) => (
+            <MenuItem key={option.value} value={option.value}>
+              <Checkbox
+                checked={
+                  Array.isArray(selectedValues) &&
+                  selectedValues.includes(option.value)
+                }
+              />
+              <ListItemText primary={option.label} />
+            </MenuItem>
+          ))}
+        </Select>
+      </FormControl>
     );
   }
 

@@ -118,7 +118,7 @@ const employeeSlice = createSlice({
       .addCase(
         createEmployee.fulfilled,
         (state, action: PayloadAction<Employee>) => {
-          state.employees.push(action.payload);
+          state.employees = [...state.employees, action.payload];
           state.totalCountEmployees += 1;
         },
       )
