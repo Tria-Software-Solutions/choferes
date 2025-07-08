@@ -51,6 +51,7 @@ import {
 } from "./styles";
 import { useLocation } from "react-router-dom";
 import { useTablePreferences } from '../../../hooks/useTablePreferences';
+import { validateName, validateEmail, validateUsername, validatePassword } from '../../../utils/userValidation';
 
 // ManageUsers page component for user management in the dashboard
 const ManageUsers: React.FC<{ isExpanded?: boolean }> = ({
@@ -193,24 +194,13 @@ const ManageUsers: React.FC<{ isExpanded?: boolean }> = ({
   // Validates user fields for add/edit forms
   const validateFields = useCallback(
     (fields: typeof editFields, isAddForm: boolean) => {
-      const regex = {
-        text: /^[a-zA-ZáéíóúÁÉÍÓÚñÑüÜëË\s-]+$/,
-        email: /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/,
-        username: /^[a-zA-Z][a-zA-Z0-9_.]{2,19}$/,
-        password:
-          /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/,
-      };
-
       const isValid =
-        regex.text.test(fields.firstName) &&
-        regex.text.test(fields.lastName) &&
-        regex.email.test(fields.email) &&
-        regex.username.test(fields.username);
-
+        validateName(fields.firstName) === '' &&
+        validateName(fields.lastName) === '' &&
+        validateEmail(fields.email) === '' &&
+        validateUsername(fields.username) === '';
       return isAddForm
-        ? isValid &&
-            regex.password.test(fields.password) &&
-            regex.text.test(fields.roleName)
+        ? isValid && validatePassword(fields.password) === '' && fields.roleName.trim() !== ''
         : isValid;
     },
     [],
@@ -367,22 +357,18 @@ const ManageUsers: React.FC<{ isExpanded?: boolean }> = ({
 
   const validateField = useCallback(
     (field: string, value: string | string[] | boolean) => {
-      const regex = {
-        text: /^[a-zA-ZáéíóúÁÉÍÓÚñÑüÜëË\s-]+$/,
-        email: /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/,
-        username: /^[a-zA-Z][a-zA-Z0-9_.]{2,19}$/,
-      };
-
       switch (field) {
-        case "firstName":
-        case "lastName":
-          return regex.text.test(String(value));
-        case "email":
-          return regex.email.test(String(value));
-        case "username":
-          return regex.username.test(String(value));
-        case "roleName":
-          return regex.text.test(String(value));
+        case 'firstName':
+        case 'lastName':
+          return validateName(String(value)) === '';
+        case 'email':
+          return validateEmail(String(value)) === '';
+        case 'username':
+          return validateUsername(String(value)) === '';
+        case 'password':
+          return validatePassword(String(value)) === '';
+        case 'roleName':
+          return String(value).trim() !== '';
         default:
           return true;
       }

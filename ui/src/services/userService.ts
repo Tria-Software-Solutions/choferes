@@ -62,7 +62,7 @@ export const getUserPermissions = async (id: number) => {
 };
 
 export const createUser = async (newUser: Omit<User, "id">) => {
-  const response = await api.post("/users", newUser);
+  const response = await api.post("/users/register", newUser);
   // Clear cache to ensure fresh data
   invalidateCache("/users");
   return response.data;

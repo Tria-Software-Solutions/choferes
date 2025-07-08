@@ -42,6 +42,7 @@ import {
   cancelButton,
   submitButton,
 } from "./styles";
+import { validateName, validateEmail, validateUsername, validatePassword } from '../../../utils/userValidation';
 
 interface AddUserFormProps {
   onSubmit: (user: {
@@ -86,57 +87,25 @@ const AddUserForm: React.FC<AddUserFormProps> = ({
 
   // Field validation for the form
   const validateField = (name: string, value: string) => {
-    const nameRegex = /^[a-zA-ZáéíóúÁÉÍÓÚñÑüÜëË\s-]+$/;
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    const usernameRegex = /^[a-zA-Z0-9._-]+$/;
-    const passwordRegex =
-      /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
-
     if (!value.trim()) {
       return FORMS.REQUIRED_FIELD;
     }
-
     switch (name) {
       case "firstName":
       case "lastName":
-        if (!nameRegex.test(value)) {
-          return FORMS.NAME_LETTERS_ONLY;
-        }
-        if (value.trim().length < 2) {
-          return FORMS.MIN_2_CHARS;
-        }
-        if (value.trim().length > 50) {
-          return FORMS.MAX_50_CHARS;
-        }
-        break;
+        return validateName(value);
       case "email":
-        if (!emailRegex.test(value)) {
-          return FORMS.EMAIL_INVALID;
-        }
-        break;
+        return validateEmail(value);
       case "username":
-        if (!usernameRegex.test(value)) {
-          return FORMS.USERNAME_FORMAT;
-        }
-        if (value.trim().length < 3) {
-          return FORMS.MIN_3_CHARS;
-        }
-        if (value.trim().length > 30) {
-          return FORMS.MAX_30_CHARS;
-        }
-        break;
+        return validateUsername(value);
       case "password":
-        if (!passwordRegex.test(value)) {
-          return FORMS.PASSWORD_INVALID;
-        }
-        break;
+        return validatePassword(value);
       case "roleName":
         if (!value.trim()) {
           return FORMS.ROLE_REQUIRED;
         }
         break;
     }
-
     return "";
   };
 
