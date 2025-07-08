@@ -65,6 +65,7 @@ export const addButtonMobileStyles: SxProps<Theme> = {
   borderRadius: "50%",
   p: 0,
   alignSelf: "center",
+  mt: -1,
 };
 
 export const addButtonDesktopBoxStyles: SxProps<Theme> = {

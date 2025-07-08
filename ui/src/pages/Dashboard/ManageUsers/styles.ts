@@ -44,6 +44,7 @@ export const addButtonMobileStyles: SxProps<Theme> = {
   height: 56,
   borderRadius: "50%",
   p: 0,
+  mt: -1,
 };
 
 export const addButtonDesktopBoxStyles: SxProps<Theme> = {
