@@ -10,6 +10,7 @@ import { maskLicensePlate, maskParkingLotWithPrefix } from "../../../../utils/ma
 import { formControlStyles, selectStyles, datePickerTextFieldStyles } from "../EditableTable.styles";
 import { ColumnConfigType, PARKING_PREFIX_OPTIONS } from "./columnConfig";
 import { DAYS_LIST } from "../../../../constants/constants";
+import { datePickerSx } from '../../../../pages/Management/VehiclesPage/styles';
 
 // This function is generic and can be used in EditableTable
 export function renderEditField<T extends object>({
@@ -297,7 +298,6 @@ export function renderEditField<T extends object>({
     const handleDateChange = (date: Date | null) => {
       setEditField && setEditField(String(column), date || new Date());
     };
-
     return (
       <LocalizationProvider dateAdapter={AdapterDateFns} adapterLocale={es}>
         <DatePicker
@@ -305,7 +305,10 @@ export function renderEditField<T extends object>({
           onChange={handleDateChange}
           slotProps={{
             textField: {
-              ...datePickerTextFieldStyles,
+              fullWidth: true,
+              required: true,
+              variant: 'outlined',
+              sx: { ...datePickerSx, mt: 0 },
               error: !validateField(String(column), value),
             } as Record<string, unknown>,
           }}
