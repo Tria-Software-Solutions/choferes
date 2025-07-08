@@ -67,11 +67,18 @@ import {
   deleteDialogPaperSx,
   addDialogPaperSx,
 } from "./styles";
+import { useTablePreferences } from '../../../hooks/useTablePreferences';
+import { getPreferencesObject, setPreferencesObject } from '../../../utils/persistentState';
 
 // CourierServicePage component for managing courier services
 const CourierServicePage: React.FC = () => {
   const { userPermissions } = useAuthContext();
-  const [selectedDate, setSelectedDate] = useState<Date>(new Date());
+  const preferencesKey = 'couriers-preferences';
+  const defaultPreferences = { date: new Date().toISOString() };
+  const [selectedDate, setSelectedDate] = useState<Date>(() => {
+    const prefs = getPreferencesObject(preferencesKey, defaultPreferences);
+    return prefs.date ? new Date(prefs.date) : new Date();
+  });
   const { /*couriers, allCouriers, isLoadingCourier,*/ isLoadingVehicles } =
     useSelector((state: RootState) => state.vehicles);
   const { showNotification } = useAppNotifications();
@@ -144,9 +151,7 @@ const CourierServicePage: React.FC = () => {
   });
   const [openDeleteDialog, setOpenDeleteDialog] = useState(false);
   const [courierToDelete, setCourierToDelete] = useState<number | null>(null);
-  const [filter, setFilter] = useState("");
   const [page, setPage] = useState(0);
-  const [rowsPerPage, setRowsPerPage] = useState(5);
   const [totalCount, setTotalCount] = useState(0);
   const [isEditFormValid, setIsEditFormValid] = useState(false);
   const [openAddCourierModal, setOpenAddCourierModal] = useState(false);
@@ -156,19 +161,26 @@ const CourierServicePage: React.FC = () => {
   const theme = useTheme();
   const isSmallScreen = useMediaQuery(theme.breakpoints.down("sm"));
 
+  const getInitialRowsPerPage = () => {
+    if (typeof window !== 'undefined') {
+      const maxHeight = window.innerHeight * 0.6;
+      const headHeight = 56;
+      const paginationHeight = 64;
+      const extra = 24;
+      const availableHeight = maxHeight - headHeight - paginationHeight - extra;
+      const rowHeight = 48;
+      let rows = Math.floor(availableHeight / rowHeight);
+      return Math.max(3, Math.min(100, rows));
+    }
+    return 25;
+  };
+
+  const { search, setSearch, rowsPerPage, setRowsPerPage } = useTablePreferences('couriers', getInitialRowsPerPage);
+
   // Updates total count when filtered couriers change
   useEffect(() => {
     setTotalCount(filteredCouriers.length);
   }, [filteredCouriers]);
-
-  // Adjusts rows per page based on screen size
-  useEffect(() => {
-    if (isSmallScreen) {
-      setRowsPerPage(5);
-    } else {
-      setRowsPerPage(25);
-    }
-  }, [isSmallScreen]);
 
   // Resets page when selected date changes
   useEffect(() => {
@@ -195,14 +207,6 @@ const CourierServicePage: React.FC = () => {
   useEffect(() => {
     if (editRowId !== null) setIsEditFormValid(validateFields(editFields));
   }, [editFields, editRowId, validateFields]);
-
-  // Handles search bar input change
-  const handleFilterChange = useCallback(
-    (e: React.ChangeEvent<HTMLInputElement>) => {
-      setFilter(e.target.value);
-    },
-    [],
-  );
 
   // Handles canceling edit
   const handleCancel = () => {
@@ -272,9 +276,13 @@ const CourierServicePage: React.FC = () => {
   };
 
   // Handles navigation to next/previous/current date
-  const handleDateChange = useCallback((newDate: Date | null) => {
-    if (newDate) setSelectedDate(newDate);
-  }, []);
+  const handleDateChange = (date: Date | null) => {
+    if (date) {
+      setSelectedDate(date);
+      const prefs = getPreferencesObject(preferencesKey, defaultPreferences);
+      setPreferencesObject(preferencesKey, { ...prefs, date: date.toISOString() });
+    }
+  };
 
   const handleNextDate = () => {
     if (!selectedDate) return;
@@ -409,8 +417,8 @@ const CourierServicePage: React.FC = () => {
                     placeholder={
                       MANAGEMENT.COURIER_SERVICE_PAGE.SEARCH_PLACEHOLDER
                     }
-                    value={filter}
-                    onChange={handleFilterChange}
+                    value={search}
+                    onChange={e => setSearch(e.target.value)}
                     sx={{ flex: 1 }}
                     fullWidth
                   />
@@ -445,7 +453,7 @@ const CourierServicePage: React.FC = () => {
                   >
                     <DatePicker
                       label={MANAGEMENT.COURIER_SERVICE_PAGE.DATE_PICKER_LABEL}
-                      value={selectedDate || null}
+                      value={selectedDate}
                       maxDate={new Date()}
                       views={["year", "month", "day"]}
                       slots={{ toolbar: () => null }}

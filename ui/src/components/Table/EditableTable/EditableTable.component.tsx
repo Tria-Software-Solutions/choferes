@@ -1,4 +1,4 @@
-import React, { useEffect, useRef } from "react";
+import React, { useRef } from "react";
 import { useSelector } from "react-redux";
 import { RootState } from "../../../store/store";
 import { useAuthContext } from "../../../context/AuthContext";
@@ -163,24 +163,6 @@ const EditableTableComponent = <T extends object>({
   const columnsConfigArray = Object.keys(columnConfig).map((key) => ({ field: key as keyof T, sortable: true }));
   const sortedData = sortData(data, orderBy, order, columnsConfigArray);
   const paginatedData = paginateData(sortedData, page, rowsPerPage);
-
-  useEffect(() => {
-    function calculateRowsPerPage() {
-      const maxHeight = window.innerHeight * 0.6; // 60vh
-      const headerHeight = 56; // Table header
-      const paginationHeight = 64; // Pagination footer
-      const extra = 24; // Buffer for borders/margins
-      const availableHeight =
-        maxHeight - headerHeight - paginationHeight - extra;
-      const rowHeight = 48;
-      let rows = Math.floor(availableHeight / rowHeight);
-      rows = Math.max(3, Math.min(100, rows));
-      setRowsPerPage(rows);
-    }
-    calculateRowsPerPage();
-    window.addEventListener("resize", calculateRowsPerPage);
-    return () => window.removeEventListener("resize", calculateRowsPerPage);
-  }, [setRowsPerPage]);
 
   // Compute rowsPerPageOptions to always include the current value
   const defaultRowsPerPageOptions = [5, 10, 25, 50, 100];

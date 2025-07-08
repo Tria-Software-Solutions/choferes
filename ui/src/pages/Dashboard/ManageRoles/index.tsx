@@ -44,6 +44,7 @@ import {
   addDialogPaperSx,
 } from "./styles";
 import { useLocation } from "react-router-dom";
+import { useTablePreferences } from '../../../hooks/useTablePreferences';
 
 // ManageRoles page component for role management in the dashboard
 const ManageRoles: React.FC<{ isExpanded?: boolean }> = ({
@@ -69,12 +70,25 @@ const ManageRoles: React.FC<{ isExpanded?: boolean }> = ({
   });
   const [openDeleteDialog, setOpenDeleteDialog] = useState(false);
   const [roleToDelete, setRoleToDelete] = useState<number | null>(null);
-  const [filter, setFilter] = useState("");
-  const [page, setPage] = useState(0);
-  const [rowsPerPage, setRowsPerPage] = useState(5);
   const [openAddRoleModal, setOpenAddRoleModal] = useState(false);
   const [isCreatingRole, setIsCreatingRole] = useState(false);
   const [isDeletingRole, setIsDeletingRole] = useState(false);
+
+  const getInitialRowsPerPage = () => {
+    if (typeof window !== 'undefined') {
+      const maxHeight = window.innerHeight * 0.6;
+      const headHeight = 56;
+      const paginationHeight = 64;
+      const extra = 24;
+      const availableHeight = maxHeight - headHeight - paginationHeight - extra;
+      const rowHeight = 48;
+      let rows = Math.floor(availableHeight / rowHeight);
+      return Math.max(3, Math.min(100, rows));
+    }
+    return 25;
+  };
+
+  const { search, setSearch, rowsPerPage, setRowsPerPage } = useTablePreferences('roles', getInitialRowsPerPage);
 
   // Loads roles, permissions, and role permissions data on mount
   useEffect(() => {
@@ -98,9 +112,9 @@ const ManageRoles: React.FC<{ isExpanded?: boolean }> = ({
       .filter((role) =>
         normalizeString(`${role.name} ${role.permissionNames}`)
           .toLowerCase()
-          .includes(normalizeString(filter).toLowerCase()),
+          .includes(normalizeString(search).toLowerCase()),
       );
-  }, [filter, roles]);
+  }, [search, roles]);
 
   const totalCount = useMemo(() => filteredRoles.length, [filteredRoles]);
 
@@ -117,10 +131,6 @@ const ManageRoles: React.FC<{ isExpanded?: boolean }> = ({
     if (editRowId === null) return false;
     return validateFields(editFields);
   }, [editFields, editRowId, validateFields]);
-
-  const handleFilterChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setFilter(e.target.value);
-  };
 
   const handleEdit = (role: Role) => {
     setEditRowId(role.id);
@@ -269,8 +279,8 @@ const ManageRoles: React.FC<{ isExpanded?: boolean }> = ({
                 {filteredRoles && (
                   <SearchBarComponent
                     placeholder={DASHBOARD_ROLES.SEARCH_PLACEHOLDER}
-                    value={filter}
-                    onChange={handleFilterChange}
+                    value={search}
+                    onChange={(e) => setSearch(e.target.value)}
                     sx={{ flex: 1 }}
                     fullWidth
                   />
@@ -321,9 +331,9 @@ const ManageRoles: React.FC<{ isExpanded?: boolean }> = ({
               handleOpenDeleteDialog={handleOpenDeleteDialog}
               getRowId={(row) => row.id}
               totalCount={totalCount}
-              page={page}
+              page={0}
               rowsPerPage={rowsPerPage}
-              setPage={setPage}
+              setPage={(newPage) => setSearch(search)}
               setRowsPerPage={setRowsPerPage}
               isSaveDisabled={!isEditFormValid}
               userPermissions={userPermissions}

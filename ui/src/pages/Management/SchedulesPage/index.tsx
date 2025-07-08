@@ -64,6 +64,7 @@ import {
   addDialogPaperSx,
 } from "./styles";
 import { useLocation } from "react-router-dom";
+import { useTablePreferences } from '../../../hooks/useTablePreferences';
 
 // Schedules management page component
 const SchedulesPage: React.FC = () => {
@@ -89,9 +90,7 @@ const SchedulesPage: React.FC = () => {
   });
   const [openDeleteDialog, setOpenDeleteDialog] = useState(false);
   const [scheduleToDelete, setScheduleToDelete] = useState<number | null>(null);
-  const [filter, setFilter] = useState("");
   const [page, setPage] = useState(0);
-  const [rowsPerPage, setRowsPerPage] = useState(5);
   const [isEditFormValid, setIsEditFormValid] = useState(false);
   const [openAddScheduleModal, setOpenAddScheduleModal] = useState(false);
   const [isCreatingSchedule, setIsCreatingSchedule] = useState(false);
@@ -101,19 +100,26 @@ const SchedulesPage: React.FC = () => {
   const isSmallScreen = useMediaQuery(theme.breakpoints.down("sm"));
   const location = useLocation();
 
+  const getInitialRowsPerPage = () => {
+    if (typeof window !== 'undefined') {
+      const maxHeight = window.innerHeight * 0.6;
+      const headHeight = 56;
+      const paginationHeight = 64;
+      const extra = 24;
+      const availableHeight = maxHeight - headHeight - paginationHeight - extra;
+      const rowHeight = 48;
+      let rows = Math.floor(availableHeight / rowHeight);
+      return Math.max(3, Math.min(100, rows));
+    }
+    return 25;
+  };
+
+  const { search, setSearch, rowsPerPage, setRowsPerPage } = useTablePreferences('schedules', getInitialRowsPerPage);
+
   // Fetch all schedules on mount
   useEffect(() => {
     dispatch(fetchSchedules());
   }, [dispatch, location.pathname]);
-
-  // Adjust rows per page based on screen size
-  useEffect(() => {
-    if (isSmallScreen) {
-      setRowsPerPage(5);
-    } else {
-      setRowsPerPage(25);
-    }
-  }, [isSmallScreen]);
 
   // Filter schedules by search input
   useEffect(() => {
@@ -129,12 +135,12 @@ const SchedulesPage: React.FC = () => {
         `${schedule.label} ${daysString} ${schedule.hours}`,
       )
         .toLowerCase()
-        .includes(normalizeString(filter).toLowerCase());
+        .includes(normalizeString(search).toLowerCase());
     });
 
     setFilteredSchedules(newFilteredSchedules);
     setTotalCountSchedules(newFilteredSchedules.length);
-  }, [filter, schedules]);
+  }, [search, schedules]);
 
   // Validate edit fields for schedule
   const validateFields = useCallback((fields: typeof editFields) => {
@@ -159,11 +165,6 @@ const SchedulesPage: React.FC = () => {
   useEffect(() => {
     if (editRowId !== null) setIsEditFormValid(validateFields(editFields));
   }, [editFields, editRowId, validateFields]);
-
-  // Handle search bar input change
-  const handleFilterChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setFilter(e.target.value);
-  };
 
   // Handle creation of a new schedule
   const handleCreate = async (newSchedule: Omit<Schedule, "id">) => {
@@ -329,8 +330,8 @@ const SchedulesPage: React.FC = () => {
                 {filteredSchedules && (
                   <SearchBarComponent
                     placeholder={MANAGEMENT.SCHEDULES_PAGE.SEARCH_PLACEHOLDER}
-                    value={filter}
-                    onChange={handleFilterChange}
+                    value={search}
+                    onChange={(e) => setSearch(e.target.value)}
                     sx={{ flex: 1 }}
                     fullWidth
                   />

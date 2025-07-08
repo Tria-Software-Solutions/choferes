@@ -76,12 +76,33 @@ import {
   addDialogPaperSx,
 } from "./styles";
 import { useLocation } from "react-router-dom";
+import { useTablePreferences } from '../../../hooks/useTablePreferences';
+import { getPreferencesObject, setPreferencesObject } from '../../../utils/persistentState';
+
+const getInitialRowsPerPage = () => {
+  if (typeof window !== 'undefined') {
+    const maxHeight = window.innerHeight * 0.6;
+    const headHeight = 56;
+    const paginationHeight = 64;
+    const extra = 24;
+    const availableHeight = maxHeight - headHeight - paginationHeight - extra;
+    const rowHeight = 48;
+    let rows = Math.floor(availableHeight / rowHeight);
+    return Math.max(3, Math.min(100, rows));
+  }
+  return 25;
+};
 
 // Vehicles management page component
 const VehiclesPage: React.FC = () => {
   const dispatch = useDispatch<AppDispatch>();
   const { userPermissions } = useAuthContext();
-  const [selectedDate, setSelectedDate] = useState<Date>(new Date());
+  const preferencesKey = 'vehicles-preferences';
+  const defaultPreferences = { date: new Date().toISOString() };
+  const [selectedDate, setSelectedDate] = useState<Date>(() => {
+    const prefs = getPreferencesObject(preferencesKey, defaultPreferences);
+    return prefs.date ? new Date(prefs.date) : new Date();
+  });
   const { allVehicles, isLoadingVehicles } = useSelector(
     (state: RootState) => state.vehicles,
   );
@@ -102,9 +123,7 @@ const VehiclesPage: React.FC = () => {
   });
   const [openDeleteDialog, setOpenDeleteDialog] = useState(false);
   const [vehicleToDelete, setVehicleToDelete] = useState<number | null>(null);
-  const [filter, setFilter] = useState("");
   const [page, setPage] = useState(0);
-  const [rowsPerPage, setRowsPerPage] = useState(5);
   const [isEditFormValid, setIsEditFormValid] = useState(false);
   const [shouldRefetch] = useState(true);
   const [openAddVehicleModal, setOpenAddVehicleModal] = useState(false);
@@ -115,11 +134,7 @@ const VehiclesPage: React.FC = () => {
   const isSmallScreen = useMediaQuery(theme.breakpoints.down("sm"));
   const location = useLocation();
 
-  // Memoize cleaned filter for search
-  const cleanedFilter = useMemo(
-    () => filter.replace(/[\s-]/g, "").toLowerCase(),
-    [filter],
-  );
+  const { search, setSearch, rowsPerPage, setRowsPerPage } = useTablePreferences('vehicles', getInitialRowsPerPage);
 
   // Memoize filtered vehicles for selected date and search
   const filteredVehicles = useMemo(() => {
@@ -146,15 +161,15 @@ const VehiclesPage: React.FC = () => {
         .toLowerCase();
 
       return (
-        cleanedLicensePlate.includes(cleanedFilter) ||
+        cleanedLicensePlate.includes(search) ||
         `${vehicle.ticket} ${vehicle.brand} ${vehicle.color} ${cleanedParkingLot} ${vehicle.notes}`
           .toLowerCase()
-          .includes(cleanedFilter)
+          .includes(search)
       );
     });
 
     return filtered;
-  }, [allVehicles, selectedDate, cleanedFilter]);
+  }, [allVehicles, selectedDate, search]);
 
   // Update total count when filtered vehicles change
   useEffect(() => {
@@ -167,15 +182,6 @@ const VehiclesPage: React.FC = () => {
       dispatch(fetchVehicles({}));
     }
   }, [dispatch, shouldRefetch, location.pathname]);
-
-  // Adjust rows per page based on screen size
-  useEffect(() => {
-    if (isSmallScreen) {
-      setRowsPerPage(5);
-    } else {
-      setRowsPerPage(25);
-    }
-  }, [isSmallScreen]);
 
   // Filter vehicles for the selected week
   useEffect(() => {
@@ -264,15 +270,12 @@ const VehiclesPage: React.FC = () => {
     return true; // Default validation for other fields
   }, [allVehicles, editFields.parkingDate, editRowId]);
 
-  // Handle search bar input change
-  const handleFilterChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setFilter(e.target.value);
-  };
-
   // Handle date picker change
   const handleDateChange = (date: Date | null) => {
     if (date) {
       setSelectedDate(date);
+      const prefs = getPreferencesObject(preferencesKey, defaultPreferences);
+      setPreferencesObject(preferencesKey, { ...prefs, date: date.toISOString() });
     }
   };
 
@@ -496,8 +499,8 @@ const VehiclesPage: React.FC = () => {
                 {filteredVehicles && (
                   <SearchBarComponent
                     placeholder={MANAGEMENT.VEHICLES_PAGE.SEARCH_PLACEHOLDER}
-                    value={filter}
-                    onChange={handleFilterChange}
+                    value={search}
+                    onChange={(e) => setSearch(e.target.value)}
                     sx={{ flex: 1 }}
                     fullWidth
                   />
@@ -534,7 +537,7 @@ const VehiclesPage: React.FC = () => {
                   >
                     <DatePicker
                       label={MANAGEMENT.VEHICLES_PAGE.DATE_PICKER_LABEL}
-                      value={selectedDate || null}
+                      value={selectedDate}
                       maxDate={new Date()}
                       views={["year", "month", "day"]}
                       slots={{ toolbar: () => null }}
@@ -547,7 +550,7 @@ const VehiclesPage: React.FC = () => {
                         },
                       }}
                       closeOnSelect
-                      onChange={(date) => handleDateChange(date)}
+                      onChange={handleDateChange}
                     />
                   </LocalizationProvider>
                   <ButtonGroup variant="contained" sx={buttonGroupSx}>

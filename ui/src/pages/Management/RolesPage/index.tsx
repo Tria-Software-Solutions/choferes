@@ -86,6 +86,11 @@ import {
   noEmployeesIconStyles,
 } from "./styles";
 import { useLocation } from "react-router-dom";
+import { useTablePreferences } from '../../../hooks/useTablePreferences';
+import { getPreferencesObject, setPreferencesObject } from '../../../utils/persistentState';
+
+const preferencesKey = 'roles-preferences';
+const defaultPreferences = { date: new Date().toISOString() };
 
 // Roles management and summary page component
 const RolesPage: React.FC = () => {
@@ -120,12 +125,14 @@ const RolesPage: React.FC = () => {
     createOrUpdateMonthlySummary,
   } = useMonthlySummaries();
   const [weekOffset, setWeekOffset] = useState(0);
-  const [firstDayOfWeek, setFirstDayOfWeek] = useState<Date | null>(new Date());
+  const [firstDayOfWeek, setFirstDayOfWeek] = useState<Date | null>(() => {
+    const prefs = getPreferencesObject(preferencesKey, defaultPreferences);
+    return prefs.date ? new Date(prefs.date) : new Date();
+  });
   const [currentWeekNumber, setCurrentWeekNumber] = useState<number>(0);
   const [currentBiweekNumber, setCurrentBiweekNumber] = useState<number>(0);
   const [currentMonth, setCurrentMonth] = useState<number>(0);
   const [currentYear, setCurrentYear] = useState<number>(0);
-  const [filter, setFilter] = useState("");
   const [openExportDialog, setOpenExportDialog] = useState(false);
   const [exportType, setExportType] = useState<"excel" | "pdf">("excel");
   const [isExporting, setIsExporting] = useState(false);
@@ -133,6 +140,22 @@ const RolesPage: React.FC = () => {
   const theme = useTheme();
   const isSmallScreen = useMediaQuery(theme.breakpoints.down("sm"));
   const location = useLocation();
+
+  const getInitialRowsPerPage = () => {
+    if (typeof window !== 'undefined') {
+      const maxHeight = window.innerHeight * 0.6;
+      const headHeight = 56;
+      const paginationHeight = 64;
+      const extra = 24;
+      const availableHeight = maxHeight - headHeight - paginationHeight - extra;
+      const rowHeight = 48;
+      let rows = Math.floor(availableHeight / rowHeight);
+      return Math.max(3, Math.min(100, rows));
+    }
+    return 25;
+  };
+
+  const { search, setSearch, rowsPerPage, setRowsPerPage } = useTablePreferences('roles-selector', getInitialRowsPerPage);
 
   // Fetch employees, schedules, and hours worked on mount
   useEffect(() => {
@@ -158,10 +181,10 @@ const RolesPage: React.FC = () => {
       employees.filter((employee) =>
         normalizeString(`${employee.firstName} ${employee.lastName}`)
           .toLowerCase()
-          .includes(normalizeString(filter).toLowerCase()),
+          .includes(normalizeString(search).toLowerCase()),
       ),
     );
-  }, [filter, employees]);
+  }, [search, employees]);
 
   // Update week, biweek, month, and year based on week offset
   useEffect(() => {
@@ -189,14 +212,12 @@ const RolesPage: React.FC = () => {
     }
   }, [weekOffset]);
 
-  // Handle search bar input change
-  const handleFilterChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setFilter(e.target.value);
-  };
-
   // Handle date picker change and update week offset
   const handleDateChange = useCallback((newDate: Date | null) => {
     if (newDate) {
+      setFirstDayOfWeek(newDate);
+      const prefs = getPreferencesObject(preferencesKey, defaultPreferences);
+      setPreferencesObject(preferencesKey, { ...prefs, date: newDate.toISOString() });
       const today = new Date();
       const weekOptions: { weekStartsOn: 0 | 1 | 2 | 3 | 4 | 5 | 6 } = {
         weekStartsOn: 1,
@@ -208,7 +229,6 @@ const RolesPage: React.FC = () => {
       );
       setWeekOffset(newWeekOffset);
     }
-    setFirstDayOfWeek(newDate);
   }, []);
 
   const handleCreateOrUpdateHoursAndSummaries = useCallback(
@@ -587,8 +607,8 @@ const RolesPage: React.FC = () => {
               {filteredEmployees && (
                 <SearchBarComponent
                   placeholder={MANAGEMENT.ROLES_PAGE.SEARCH_PLACEHOLDER}
-                  value={filter}
-                  onChange={handleFilterChange}
+                  value={search}
+                  onChange={e => setSearch(e.target.value)}
                   sx={searchBarSx ?? {}}
                   fullWidth
                 />
@@ -614,7 +634,7 @@ const RolesPage: React.FC = () => {
                   >
                     <DatePicker
                       label={MANAGEMENT.DATE_PICKER_LABEL}
-                      value={firstDayOfWeek || null}
+                      value={firstDayOfWeek}
                       maxDate={nextWeekEnd}
                       views={["year", "month", "day"]}
                       slots={{ toolbar: () => null }}
@@ -685,6 +705,8 @@ const RolesPage: React.FC = () => {
               handleChange={handleChange}
               handleAdjustTime={handleAdjustTime}
               permissions={userPermissions}
+              rowsPerPage={rowsPerPage}
+              setRowsPerPage={setRowsPerPage}
             />
           ) : (
             <Box sx={noEmployeesBoxStyles}>
