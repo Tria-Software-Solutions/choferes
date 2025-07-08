@@ -2,7 +2,7 @@ import { UserRole } from "../models/UserRole";
 import api, { invalidateCache } from "./api";
 
 export const getUserRoles = async () => {
-  const response = await api.get("/user-roles", {
+  const response = await api.get("/user-role", {
     params: {
       _t: Date.now()
     }
@@ -21,8 +21,8 @@ export const getUserRoleByRoleId = async (roleId: number) => {
 };
 
 export const createUserRole = async (userRole: Omit<UserRole, "id">) => {
-  const response = await api.post("/user-roles", userRole);
-  invalidateCache("/user-roles");
+  const response = await api.post("/user-role", userRole);
+  invalidateCache("/user-role");
   return response.data;
 };
 
@@ -31,12 +31,12 @@ export const updateUserRole = async (
   roleId: number
 ) => {
   const response = await api.put(`/user-role/${userId}`, { roleId });
-  invalidateCache("/user-roles");
+  invalidateCache("/user-role");
   return response.data;
 };
 
 export const deleteUserRole = async (id: number) => {
-  const response = await api.delete(`/user-roles/${id}`);
-  invalidateCache("/user-roles");
+  const response = await api.delete(`/user-role/${id}`);
+  invalidateCache("/user-role");
   return { id, message: response.data };
 };

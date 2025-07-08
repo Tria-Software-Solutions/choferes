@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 import { useAuth } from "../../../hooks/useAuth";
 import {
   TextField,
@@ -50,10 +50,11 @@ import {
 
 // Login page component for user authentication
 const Login: React.FC = () => {
+  const location = useLocation();
   const { authenticateUser, authError } = useAuth();
   const [fields, setFields] = useState({
-    identifier: "",
-    password: "",
+    identifier: location.state?.username || "",
+    password: location.state?.password || "",
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showPassword, setShowPassword] = useState(false);

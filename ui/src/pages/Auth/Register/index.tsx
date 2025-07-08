@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { useSelector, useDispatch } from "react-redux";
 import { RootState, AppDispatch } from "../../../store/store";
 import { fetchUsers, createUser } from "../../../store/slices/userSlice";
@@ -56,6 +56,7 @@ import {
   loginTextStyles,
   loginLinkStyles,
 } from "./styles";
+import { validateName, validateEmail, validateUsername, validatePassword } from '../../../utils/userValidation';
 
 // Register page component for user sign up
 const Register = () => {
@@ -73,6 +74,7 @@ const Register = () => {
   const [error, setError] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [fieldErrors, setFieldErrors] = useState<{ [key: string]: string }>({});
+  const navigate = useNavigate();
 
   const theme = useTheme();
   const isSmallScreen = useMediaQuery(theme.breakpoints.down("sm"));
@@ -83,46 +85,14 @@ const Register = () => {
 
   // Validates the registration form fields
   const validateFields = useCallback(async () => {
-    const nameRegex = /^[a-zA-ZáéíóúÁÉÍÓÚüÜñÑ.\s]+$/;
-    const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
-    const usernameRegex = /^[a-zA-Z][a-zA-Z0-9_.]{2,19}$/;
-    const passwordRegex =
-      /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
-
     const newErrors: { [key: string]: string } = {};
-
-    if (addFields.firstName === "") {
-      newErrors.firstName = FORMS.FIRST_NAME_REQUIRED;
-    } else if (!nameRegex.test(addFields.firstName)) {
-      newErrors.firstName = REGISTER_VALIDATION.FIRST_NAME_INVALID;
-    }
-
-    if (addFields.lastName === "") {
-      newErrors.lastName = FORMS.LAST_NAME_REQUIRED;
-    } else if (!nameRegex.test(addFields.lastName)) {
-      newErrors.lastName = REGISTER_VALIDATION.LAST_NAME_INVALID;
-    }
-
-    if (addFields.email === "") {
-      newErrors.email = FORMS.EMAIL_REQUIRED;
-    } else if (!emailRegex.test(addFields.email)) {
-      newErrors.email = FORMS.EMAIL_INVALID;
-    }
-
-    if (addFields.username === "") {
-      newErrors.username = FORMS.USERNAME_REQUIRED;
-    } else if (!usernameRegex.test(addFields.username)) {
-      newErrors.username = REGISTER_VALIDATION.USERNAME_INVALID;
-    }
-
-    if (addFields.password === "") {
-      newErrors.password = FORMS.PASSWORD_REQUIRED;
-    } else if (!passwordRegex.test(addFields.password)) {
-      newErrors.password = REGISTER_VALIDATION.PASSWORD_INVALID;
-    }
-
+    newErrors.firstName = validateName(addFields.firstName);
+    newErrors.lastName = validateName(addFields.lastName);
+    newErrors.email = validateEmail(addFields.email);
+    newErrors.username = validateUsername(addFields.username);
+    newErrors.password = validatePassword(addFields.password);
     setFieldErrors(newErrors);
-    return Object.keys(newErrors).length === 0;
+    return Object.values(newErrors).every((v) => v === "");
   }, [addFields]);
 
   // Handles the registration form submission
@@ -145,6 +115,8 @@ const Register = () => {
       };
       await dispatch(createUser({ newUser })).unwrap();
       showNotification(AUTH.REGISTER_SUCCESS, { severity: 'success', duration: 3000 });
+      // Redirigir a login con usuario y contraseña
+      navigate("/", { state: { username: addFields.username, password: addFields.password } });
       // Clear form after successful registration
       setAddFields({
         firstName: "",

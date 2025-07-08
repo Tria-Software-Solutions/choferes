@@ -24,3 +24,8 @@ export const updateRolePermission = async (roleId: number, permissionIds: number
 
 // Delete a role-permission assignment by its ID
 export const deleteRolePermission = async (id: number) => RolePermission.destroy({ where: { id } });
+
+// Get all permissions for a specific role
+export const getRolePermissionsByRoleId = async (roleId: number) => {
+  return RolePermission.findAll({ where: { roleId } });
+};
