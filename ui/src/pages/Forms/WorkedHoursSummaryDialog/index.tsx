@@ -60,7 +60,16 @@ const WorkedHoursSummaryDialog: React.FC<WorkedHoursSummaryDialogProps> = ({
           <TabContext value={summaryTab}>
             <TabList
               onChange={(_, v) => setSummaryTab(v as typeof summaryTab)}
-              variant="fullWidth"
+              variant="scrollable"
+              scrollButtons="auto"
+              sx={{
+                minHeight: 48,
+                "& .MuiTab-root": {
+                  minWidth: "auto",
+                  fontSize: { xs: "0.75rem", sm: "0.875rem" },
+                  padding: { xs: "6px 8px", sm: "12px 16px" },
+                },
+              }}
             >
               <Tab label={MANAGEMENT.TAB_WEEKLY} value="weekly" />
               <Tab label={MANAGEMENT.TAB_BIWEEKLY} value="biweekly" />
