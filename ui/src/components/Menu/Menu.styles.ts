@@ -2,12 +2,36 @@ import { SxProps, Theme } from "@mui/material";
 
 export const iconButtonStyles = (theme: Theme): SxProps<Theme> => ({
   height: "40px",
-  border: `1px solid ${theme.palette.divider}`,
-  borderRadius: theme.shape.borderRadius,
+  color: "#ffffff",
+  backgroundColor: "#000000",
+  border: "2px solid #000000",
+  borderRadius: "8px",
   transition: "all 0.3s ease",
   "&:hover": {
-    backgroundColor: theme.palette.action.hover,
+    backgroundColor: "#333333",
+    borderColor: "#333333",
+    transform: "translateY(-2px)",
+    boxShadow: "0 4px 12px rgba(0,0,0,0.2)",
+  },
+  "&:focus": {
+    backgroundColor: "#333333",
+    borderColor: "#333333",
+    outline: "none",
     transform: "translateY(-1px)",
+    boxShadow: "0 2px 8px rgba(0,0,0,0.2)",
+  },
+  "&:active": {
+    backgroundColor: "#000000",
+    borderColor: "#000000",
+    transform: "translateY(0px)",
+    boxShadow: "0 2px 4px rgba(0,0,0,0.2)",
+  },
+  "&.Mui-focusVisible": {
+    backgroundColor: "#333333",
+    borderColor: "#333333",
+    outline: "none",
+    transform: "translateY(-1px)",
+    boxShadow: "0 2px 8px rgba(0,0,0,0.2)",
   },
 });
 
