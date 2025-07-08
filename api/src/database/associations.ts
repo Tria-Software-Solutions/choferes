@@ -43,13 +43,13 @@ Employee.hasMany(HoursWorked, {
 });
 
 // Schedule <-> HoursWorked (One-to-Many)
-HoursWorked.belongsTo(Schedule, { 
+HoursWorked.belongsTo(Schedule, {
   foreignKey: "scheduleId",
-  onDelete: "CASCADE"
+  onDelete: "CASCADE",
 });
-Schedule.hasMany(HoursWorked, { 
+Schedule.hasMany(HoursWorked, {
   foreignKey: "scheduleId",
-  onDelete: "CASCADE"
+  onDelete: "CASCADE",
 });
 
 // Function to ensure associations are set up (for import side effects)
