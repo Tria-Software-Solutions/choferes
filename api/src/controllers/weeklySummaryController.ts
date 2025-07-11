@@ -82,3 +82,13 @@ export const deleteWeeklySummary = async (req: Request, res: Response) => {
     return res.status(500).json({ message: "Error deleting WeeklySummary", error });
   }
 };
+
+// Delete all weekly summaries (bulk)
+export const deleteAllWeeklySummaries = async (req: Request, res: Response) => {
+  try {
+    await weeklySummaryService.deleteAllWeeklySummaries();
+    return res.status(204).end();
+  } catch (error) {
+    return res.status(500).json({ message: "Error deleting all weekly summaries", error });
+  }
+};

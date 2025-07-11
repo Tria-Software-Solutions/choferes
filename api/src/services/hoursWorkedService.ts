@@ -82,3 +82,6 @@ export const updateHoursWorked = async (id: number, data: Omit<HoursWorked, "id"
 };
 
 export const deleteHoursWorked = async (id: number) => HoursWorked.destroy({ where: { id } });
+
+// Delete all hours worked records
+export const deleteAllHoursWorked = async () => HoursWorked.destroy({ where: {} });

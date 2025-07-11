@@ -29,8 +29,6 @@ import {
 import {
   createExportOptions,
   exportFileFormattedDate,
-  exportToExcel,
-  exportToPDF,
 } from "../../../utils/export";
 import PAGE_TITLE from "../../../constants/pageTitle.constants";
 import PERMISSIONS from "../../../constants/permissions.constants";
@@ -42,8 +40,9 @@ import CloseRoundedIcon from "@mui/icons-material/CloseRounded";
 import ManageSearchIcon from "@mui/icons-material/ManageSearch";
 import AddRoundedIcon from "@mui/icons-material/AddRounded";
 import DeleteOutlineIcon from "@mui/icons-material/DeleteOutline";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faFileExcel, faFilePdf } from "@fortawesome/free-solid-svg-icons";
+import DescriptionIcon from "@mui/icons-material/Description";
+import PictureAsPdfIcon from "@mui/icons-material/PictureAsPdf";
+import AddCircleOutlineIcon from "@mui/icons-material/AddCircleOutline";
 import {
   employeesHeaderBoxStyles,
   employeesTitleBoxStyles,
@@ -63,12 +62,15 @@ import {
   addDialogPaperSx,
 } from "./styles";
 import { useLocation } from "react-router-dom";
-import { useTablePreferences } from '../../../hooks/useTablePreferences';
+import { useTablePreferences } from "../../../hooks/useTablePreferences";
+import { format } from "date-fns";
+import { es } from "date-fns/locale";
+import { capitalizeFirstLetter } from "../../../utils/string";
 
 const getInitialRowsPerPage = () => {
   // Example: calculate based on window size or available height
   // You can refine this logic as needed
-  if (typeof window !== 'undefined') {
+  if (typeof window !== "undefined") {
     const maxHeight = window.innerHeight * 0.6;
     const headHeight = 56;
     const paginationHeight = 64;
@@ -86,7 +88,7 @@ const EmployeesPage: React.FC = () => {
   const dispatch = useDispatch<AppDispatch>();
   const { userPermissions } = useAuthContext();
   const { employees, isLoadingEmployees } = useSelector(
-    (state: RootState) => state.employees,
+    (state: RootState) => state.employees
   );
   const { showNotification } = useAppNotifications();
   const [filteredEmployees, setFilteredEmployees] = useState<Employee[]>([]);
@@ -101,13 +103,14 @@ const EmployeesPage: React.FC = () => {
   const [isEditFormValid, setIsEditFormValid] = useState(false);
   const [isDeletingEmployee, setIsDeletingEmployee] = useState(false);
 
-  const { search, setSearch, rowsPerPage, setRowsPerPage } = useTablePreferences('employees', getInitialRowsPerPage);
+  const { search, setSearch, rowsPerPage, setRowsPerPage } =
+    useTablePreferences("employees", getInitialRowsPerPage);
 
   const theme = useTheme();
   const isSmallScreen = useMediaQuery(theme.breakpoints.down("sm"));
   const location = useLocation();
 
-  // Fetch employees on mount
+  // Fetch employees on mountexportOptions
   useEffect(() => {
     dispatch(fetchEmployees());
   }, [dispatch, location.pathname]);
@@ -121,8 +124,8 @@ const EmployeesPage: React.FC = () => {
       employees.filter((employee) =>
         normalizeString(`${employee.firstName} ${employee.lastName}`)
           .toLowerCase()
-          .includes(normalizeString(search).toLowerCase()),
-      ),
+          .includes(normalizeString(search).toLowerCase())
+      )
     );
     setTotalCount(filteredEmployees.length);
   }, [search, employees, filteredEmployees.length]);
@@ -157,9 +160,15 @@ const EmployeesPage: React.FC = () => {
       setIsSubmitting(true);
       dispatch(createEmployee(newEmployee));
       setOpenAddModal(false);
-      showNotification(NOTIFICATIONS.EMPLOYEE_CREATE_SUCCESS, { severity: 'success', duration: 3000 });
+      showNotification(NOTIFICATIONS.EMPLOYEE_CREATE_SUCCESS, {
+        severity: "success",
+        duration: 3000,
+      });
     } catch (error) {
-      showNotification(NOTIFICATIONS.EMPLOYEE_CREATE_ERROR, { severity: 'error', duration: 5000 });
+      showNotification(NOTIFICATIONS.EMPLOYEE_CREATE_ERROR, {
+        severity: "error",
+        duration: 5000,
+      });
     } finally {
       setIsSubmitting(false);
     }
@@ -197,10 +206,16 @@ const EmployeesPage: React.FC = () => {
       dispatch(updateEmployee({ id, updatedEmployee }));
       setEditRowId(null);
       setEditFields({ firstName: "", lastName: "" });
-      showNotification(NOTIFICATIONS.EMPLOYEE_UPDATE_SUCCESS, { severity: 'success', duration: 3000 });
+      showNotification(NOTIFICATIONS.EMPLOYEE_UPDATE_SUCCESS, {
+        severity: "success",
+        duration: 3000,
+      });
     } catch (error) {
       handleCancel();
-      showNotification(NOTIFICATIONS.EMPLOYEE_UPDATE_ERROR, { severity: 'error', duration: 5000 });
+      showNotification(NOTIFICATIONS.EMPLOYEE_UPDATE_ERROR, {
+        severity: "error",
+        duration: 5000,
+      });
     }
   };
 
@@ -224,33 +239,52 @@ const EmployeesPage: React.FC = () => {
       await dispatch(deleteEmployee(employeeToDelete));
       setOpenDeleteDialog(false);
       setEmployeeToDelete(null);
-      showNotification(NOTIFICATIONS.EMPLOYEE_DELETE_SUCCESS, { severity: 'success', duration: 3000 });
+      showNotification(NOTIFICATIONS.EMPLOYEE_DELETE_SUCCESS, {
+        severity: "success",
+        duration: 3000,
+      });
     } catch (error) {
-      showNotification(NOTIFICATIONS.EMPLOYEE_DELETE_ERROR, { severity: 'error', duration: 5000 });
+      showNotification(NOTIFICATIONS.EMPLOYEE_DELETE_ERROR, {
+        severity: "error",
+        duration: 5000,
+      });
     } finally {
       setIsDeletingEmployee(false);
     }
   };
 
+  // When preparing data for export, only include the desired fields:
+  const exportData = filteredEmployees.map(e => ({
+    Nombre: e.firstName,
+    Apellido: e.lastName,
+    Agregado: e.createdAt
+      ? capitalizeFirstLetter(
+          format(new Date(e.createdAt), "EEEE dd 'de' MMMM 'de' yyyy", {
+            locale: es,
+          })
+        )
+      : "",
+    Actualizado: e.updatedAt
+      ? capitalizeFirstLetter(
+          format(new Date(e.updatedAt), "EEEE dd 'de' MMMM 'de' yyyy", {
+            locale: es,
+          })
+        )
+      : "",
+  }));
+
   // Memoize export options based on permissions
   const exportOptions = useMemo(() => {
-    const excelOption = userPermissions.includes(
-      PERMISSIONS.EXPORT_EXCEL_EMPLOYEES,
-    )
-      ? exportToExcel
-      : undefined;
-    const pdfOption = userPermissions.includes(PERMISSIONS.EXPORT_PDF_EMPLOYEES)
-      ? exportToPDF
-      : undefined;
-    return createExportOptions(
-      <FontAwesomeIcon icon={faFileExcel} size="lg" />,
-      <FontAwesomeIcon icon={faFilePdf} size="lg" />,
-      excelOption,
-      pdfOption,
-      filteredEmployees,
-      `empleados-${exportFileFormattedDate(new Date())}`,
-    );
-  }, [userPermissions, filteredEmployees]);
+    const exportHeaders = ["Nombre", "Apellido", "Agregado", "Actualizado"];
+    return createExportOptions({
+      excelIcon: <DescriptionIcon />,
+      pdfIcon: <PictureAsPdfIcon />,
+      data: exportData,
+      fileName: `empleados-${exportFileFormattedDate(new Date())}`,
+      customHeaders: exportHeaders,
+    });
+  }, [exportData]);
+  // Use exportTable({ data: exportData, ... }) for export
 
   return (
     <Box>
@@ -400,6 +434,7 @@ const EmployeesPage: React.FC = () => {
         subtitle={MANAGEMENT.EMPLOYEES_PAGE.DIALOG_ADD_SUBTITLE}
         hideActions
         paperSx={addDialogPaperSx ?? {}}
+        icon={<AddCircleOutlineIcon color="info" />}
       >
         <AddEmployeeForm
           onSubmit={handleCreate}

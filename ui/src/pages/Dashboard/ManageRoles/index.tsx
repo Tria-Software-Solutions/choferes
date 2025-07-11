@@ -28,6 +28,7 @@ import AddRoleForm from "../../Forms/AddRoleForm";
 import DialogComponent from "../../../components/Dialog/Dialog.component";
 import AddRoundedIcon from "@mui/icons-material/AddRounded";
 import DeleteOutlineIcon from "@mui/icons-material/DeleteOutline";
+import AddCircleOutlineIcon from "@mui/icons-material/AddCircleOutline";
 import { DASHBOARD_ROLES } from "../../../constants/constants";
 import { NOTIFICATIONS } from "../../../constants/constants";
 import {
@@ -371,6 +372,7 @@ const ManageRoles: React.FC<{ isExpanded?: boolean }> = ({
             subtitle={DASHBOARD_ROLES.DIALOG_ADD_SUBTITLE}
             hideActions
             paperSx={addDialogPaperSx ?? {}}
+            icon={<AddCircleOutlineIcon color="info" />}
           >
             <AddRoleForm
               onSubmit={handleCreateRole}

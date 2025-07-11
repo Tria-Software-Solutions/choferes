@@ -58,3 +58,6 @@ export const updateWeeklySummary = async (id: number, data: Omit<WeeklySummary, 
 
 // Delete a weekly summary by its ID
 export const deleteWeeklySummary = async (id: number) => WeeklySummary.destroy({ where: { id } });
+
+// Delete all weekly summaries
+export const deleteAllWeeklySummaries = async () => WeeklySummary.destroy({ where: {} });

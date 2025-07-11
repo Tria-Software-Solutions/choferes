@@ -28,6 +28,7 @@ import SearchBarComponent from "../../../components/SearchBar/SearchBar.componen
 import AddUserForm from "../../Forms/AddUserForm";
 import VisibilityIcon from "@mui/icons-material/Visibility";
 import VisibilityOffIcon from "@mui/icons-material/VisibilityOff";
+import AddCircleOutlineIcon from "@mui/icons-material/AddCircleOutline";
 import DialogComponent from "../../../components/Dialog/Dialog.component";
 import AddRoundedIcon from "@mui/icons-material/AddRounded";
 import { DASHBOARD_USERS } from "../../../constants/constants";
@@ -588,6 +589,7 @@ const ManageUsers: React.FC<{ isExpanded?: boolean }> = ({
         subtitle={DASHBOARD_USERS.ADD_SUBTITLE}
         hideActions
         paperSx={addDialogPaperSx ?? {}}
+        icon={<AddCircleOutlineIcon color="info" />}
       >
         <AddUserForm
           onSubmit={handleCreateUser}
@@ -618,12 +620,14 @@ const ManageUsers: React.FC<{ isExpanded?: boolean }> = ({
           onClose={handleClosePasswordModal}
           onSuccess={() => {
             handleClosePasswordModal();
-            showNotification(
-              "La contraseña fue actualizada exitosamente",
-              { severity: 'success', duration: 3000 },
-            );
+            showNotification("La contraseña fue actualizada exitosamente", {
+              severity: "success",
+              duration: 3000,
+            });
           }}
-          onError={(msg) => showNotification(msg, { severity: 'error', duration: 5000 })}
+          onError={(msg) =>
+            showNotification(msg, { severity: "error", duration: 5000 })
+          }
         />
       </DialogComponent>
     </Box>

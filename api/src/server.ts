@@ -143,7 +143,7 @@ app.use("/api/permissions", permissionRoutes);
 app.use("/api/user-role", userRoleRoutes);
 app.use("/api/role-permission", rolePermissionRoutes);
 app.use("/api/employees", employeeRoutes);
-app.use("/api/hours", hoursWorkedRoutes);
+app.use("/api/hours-worked", hoursWorkedRoutes);
 app.use("/api/weekly-summary", weeklySummaryRoutes);
 app.use("/api/biweekly-summary", biweeklySummaryRoutes);
 app.use("/api/monthly-summary", monthlySummaryRoutes);

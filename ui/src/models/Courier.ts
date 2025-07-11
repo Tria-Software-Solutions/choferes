@@ -5,5 +5,6 @@ export interface Courier {
   distance: number;
   trackingNumber: string;
   status: string;
-  createdAt: Date;
+  createdAt?: string | Date;
+  updatedAt?: string | Date;
 }

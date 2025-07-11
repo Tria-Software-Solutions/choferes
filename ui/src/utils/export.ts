@@ -1,162 +1,23 @@
 import * as XLSX from "xlsx";
 import jsPDF from "jspdf";
 import "jspdf-autotable";
-import { Employee } from "../models/Employee";
-import { HoursWorked } from "../models/HoursWorked";
-import { Schedule } from "../models/Schedule";
-import { WeeklySummary } from "../models/WeeklySummary";
-import { BiweeklySummary } from "../models/BiweeklySummary";
-import { MonthlySummary } from "../models/MonthlySummary";
-import {
-  translateColumnHeaderToSpanish,
-  translateDayOptionsToSpanish,
-  translateDayToAbrevSpanish,
-  translatePeriodToSpanish,
-} from "./string";
-import { parseIsoDateWithoutTimeZone, formatDateWithDay } from "./dates";
-import {
-  formatHeaderDateWithYear,
-  hasMultipleYears,
-  hasMultipleBiweeks,
-  hasMultipleMonths,
-  getInvolvedPeriods,
-} from "./dates";
-import { EnglishDayOfWeek } from "./dayAbreviations";
-import {
-  calculateTotalHoursAndOvertimeForPeriod,
-  calculateTotalHoursAndOvertimeForPeriods,
-} from "./calculation";
+import { translateColumnHeaderToSpanish, translateDayOptionsToSpanish } from "./string";
+import { formatDateWithDay, parseIsoDateWithoutTimeZone } from "./dates";
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-export const exportToExcel = (data: any[], fileName: string) => {
-  if (!data || data.length === 0) return;
-
-  const isVehicleData = "licensePlate" in data[0];
-
-  if (isVehicleData) {
-    data.sort((a, b) => {
-      const ticketA = a.ticket ? BigInt(a.ticket) : BigInt(0);
-      const ticketB = b.ticket ? BigInt(b.ticket) : BigInt(0);
-      return ticketA < ticketB ? -1 : ticketA > ticketB ? 1 : 0;
-    });
-  }
-
-  const cleanedData = isVehicleData
-    ? data.map(({ id, updatedAt, createdAt, ...row }) => {
-        const newRow = { ...row };
-        if (createdAt) {
-          const localDate = parseIsoDateWithoutTimeZone(createdAt);
-          newRow.Fecha = formatDateWithDay(localDate, false);
-        }
-        return newRow;
-      })
-    : data.map(({ id, ...row }) => row);
-
-  const translatedData = cleanedData.map((row) => {
-    const translatedRow: Record<string, unknown> = {};
-    if (isVehicleData && row.Fecha) {
-      translatedRow["Fecha"] = row.Fecha;
-    }
-
-    Object.entries(row).forEach(([key, value]) => {
-      if (key === "Fecha") return;
-
-      if (Array.isArray(value)) {
-        translatedRow[translateColumnHeaderToSpanish(key)] = value
-          .map(translateDayOptionsToSpanish)
-          .join(", ");
-      } else if (typeof value === "boolean") {
-        translatedRow[translateColumnHeaderToSpanish(key)] = value
-          ? "Sí"
-          : "No";
-      } else if (value === null || value === undefined) {
-        translatedRow[translateColumnHeaderToSpanish(key)] = "";
-      } else {
-        translatedRow[translateColumnHeaderToSpanish(key)] = value;
-      }
-    });
-
-    return translatedRow;
-  });
-
-  const ws = XLSX.utils.json_to_sheet(translatedData);
-  const wb = XLSX.utils.book_new();
-  XLSX.utils.book_append_sheet(wb, ws, "Datos");
-  XLSX.writeFile(wb, `${fileName}.xlsx`);
-};
-
-export const exportToPDF = (
+/**
+ * Generic type for exportable records. Allows any value for flexibility in export data.
+ */
+export interface ExportableRecord {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  data: any[],
-  fileName: string,
-  headers?: unknown,
-) => {
-  if (!data || data.length === 0) return;
+  [key: string]: any;
+}
 
-  const isVehicleData = data.length > 0 && "licensePlate" in data[0];
-
-  if (isVehicleData) {
-    data.sort((a, b) => {
-      const ticketA = a.ticket ? BigInt(a.ticket) : BigInt(0);
-      const ticketB = b.ticket ? BigInt(b.ticket) : BigInt(0);
-      return ticketA < ticketB ? -1 : ticketA > ticketB ? 1 : 0;
-    });
-  }
-
-  const cleanedData = isVehicleData
-    ? data.map(({ id, updatedAt, createdAt, ...row }) => {
-        const formattedDate = createdAt
-          ? formatDateWithDay(parseIsoDateWithoutTimeZone(createdAt), false)
-          : "";
-        return { Fecha: formattedDate, ...row };
-      })
-    : data.map(({ id, ...row }) => row);
-
-  const tableHeaders = Array.isArray(headers)
-    ? [headers]
-    : [
-        Object.keys(cleanedData[0]).map((header) =>
-          header === "Fecha" ? "Fecha" : translateColumnHeaderToSpanish(header),
-        ),
-      ];
-
-  const tableData = cleanedData.map((row) => {
-    return Object.entries(row).map(([key, value]) => {
-      if (Array.isArray(value)) {
-        return value.map(translateDayOptionsToSpanish).join(", ");
-      } else if (typeof value === "boolean") {
-        return value ? "Sí" : "No";
-      } else if (value === null || value === undefined) {
-        return "";
-      } else {
-        return String(value);
-      }
-    });
-  });
-
-  const doc = new jsPDF();
-  doc.autoTable({
-    head: tableHeaders,
-    body: tableData,
-    startY: 20,
-    styles: {
-      fontSize: 8,
-      cellPadding: 2,
-    },
-    headStyles: {
-      fillColor: [41, 128, 185],
-      textColor: 255,
-      fontStyle: "bold",
-    },
-    alternateRowStyles: {
-      fillColor: [245, 245, 245],
-    },
-  });
-
-  doc.save(`${fileName}.pdf`);
-};
-
-export const exportFileFormattedDate = (date: Date) => {
+/**
+ * Formats a date for use in exported file names.
+ * @param date Date to format
+ * @returns Formatted string (e.g. 12-07-2024-15-30-45)
+ */
+export function exportFileFormattedDate(date: Date) {
   return `${String(date.getDate()).padStart(2, "0")}-${String(
     date.getMonth() + 1,
   ).padStart(2, "0")}-${date.getFullYear()}-${String(date.getHours()).padStart(
@@ -165,294 +26,220 @@ export const exportFileFormattedDate = (date: Date) => {
   )}-${String(date.getMinutes()).padStart(2, "0")}-${String(
     date.getSeconds(),
   ).padStart(2, "0")}`;
-};
+}
 
-export const handleExportTableData = (
-  filteredEmployees: Employee[],
-  hoursWorked: HoursWorked[],
-  schedules: Schedule[],
-  weeklySummaries: WeeklySummary[],
-  biweeklySummaries: BiweeklySummary[],
-  monthlySummaries: MonthlySummary[],
-  weekNumber: number,
-  biweekNumber: number,
-  month: number,
-  year: number,
-  currentWeek: { day: string; date: string; isoDate: string }[],
-  withHours?: boolean,
-) => {
-  const headers = !withHours
-    ? [
-        "Nombre",
-        ...currentWeek.map(({ date }) => formatHeaderDateWithYear(date)),
-      ]
-    : [
-        "Nombre",
-        ...currentWeek.map(({ date }) => formatHeaderDateWithYear(date)),
-        `Total ${translatePeriodToSpanish("weekly")}`,
-        `Total Horas Extra ${translatePeriodToSpanish("weekly")}`,
-        `Total ${translatePeriodToSpanish("biweekly")}`,
-        `Total Horas Extra ${translatePeriodToSpanish("biweekly")}`,
-        `Total ${translatePeriodToSpanish("monthly")}`,
-        `Total Horas Extra ${translatePeriodToSpanish("monthly")}`,
-      ];
+/**
+ * Prepares and translates data for export, including vehicle-specific formatting.
+ */
+function prepareExportData(
+  data: ExportableRecord[],
+  isVehicleData = false
+): { rows: ExportableRecord[]; headers: string[] } {
+  if (!data || data.length === 0) return { rows: [], headers: [] };
 
-  const sortedEmployees = filteredEmployees.sort((a, b) => {
-    const fullNameA = `${a.firstName} ${a.lastName}`.toLowerCase();
-    const fullNameB = `${b.firstName} ${b.lastName}`.toLowerCase();
-    return fullNameA.localeCompare(fullNameB);
+  const cleaned = data.map((row) => {
+    // Remove 'id', 'createdAt', 'updatedAt' from export
+    const { id, createdAt, updatedAt, ...rest } = row;
+    if (isVehicleData) {
+      let fecha = "";
+      if (row.parkingDate) {
+        fecha = formatDateWithDay(
+          row.parkingDate instanceof Date ? row.parkingDate : new Date(row.parkingDate),
+          false
+        );
+      } else if (row.createdAt) {
+        fecha = formatDateWithDay(parseIsoDateWithoutTimeZone(row.createdAt), false);
+      }
+      // Remove parkingDate from rest as well
+      const { parkingDate, ...restWithoutParkingDate } = rest;
+      return { Fecha: fecha, ...restWithoutParkingDate };
+    }
+    return rest;
   });
 
-  const dataForExport = sortedEmployees.map((employee) => {
-    const employeeData: Record<string, unknown> = {
-      Nombre: `${employee.firstName} ${employee.lastName}`,
-    };
-
-    currentWeek.forEach(({ day, date }) => {
-      const dateObject = new Date(date);
-      const selectedRecord = hoursWorked.find(
-        (record) =>
-          record.employeeId === employee.id &&
-          new Date(record.date).toISOString().split("T")[0] ===
-            dateObject.toISOString().split("T")[0],
-      );
-
-      const scheduleLabel =
-        selectedRecord?.scheduleId &&
-        schedules.find((schedule) => schedule.id === selectedRecord.scheduleId)
-          ?.label;
-
-      employeeData[translateDayToAbrevSpanish(day as EnglishDayOfWeek)] =
-        scheduleLabel || "Libre";
+  const translated = cleaned.map((row) => {
+    const translatedRow: ExportableRecord = {};
+    Object.entries(row).forEach(([key, value]) => {
+      if (key === "Fecha") {
+        translatedRow["Fecha"] = value;
+      } else if (Array.isArray(value)) {
+        translatedRow[translateColumnHeaderToSpanish(key)] = value.map(translateDayOptionsToSpanish).join(", ");
+      } else if (typeof value === "boolean") {
+        translatedRow[translateColumnHeaderToSpanish(key)] = value ? "Sí" : "No";
+      } else if (value === null || value === undefined) {
+        translatedRow[translateColumnHeaderToSpanish(key)] = "";
+      } else {
+        translatedRow[translateColumnHeaderToSpanish(key)] = value;
+      }
     });
+    return translatedRow;
+  });
 
-    if (withHours) {
-      const multiplePeriods = getInvolvedPeriods(currentWeek);
+  // After normalization, filter out 'id', 'createdAt', 'updatedAt' from headers
+  const allKeys = Array.from(new Set(translated.flatMap((row) => Object.keys(row))));
+  const filteredKeys = allKeys.filter(key => key !== 'id' && key !== 'createdAt' && key !== 'updatedAt');
+  const normalized = translated.map((row) => {
+    const norm: ExportableRecord = {};
+    filteredKeys.forEach((key) => {
+      norm[key] = row[key] ?? "";
+    });
+    return norm;
+  });
 
-      if (hasMultipleYears(currentWeek)) {
-        employeeData[`Total ${translatePeriodToSpanish("weekly")}`] = String(
-          calculateTotalHoursAndOvertimeForPeriods(
-            employee.id,
-            "weekly",
-            multiplePeriods.weekNumbers,
-            multiplePeriods.biweekNumbers,
-            multiplePeriods.months,
-            weeklySummaries,
-            biweeklySummaries,
-            monthlySummaries,
-          ).totalHours,
-        );
+  // Only include columns that have at least one non-empty, non-null, non-undefined value
+  const nonEmptyKeys = filteredKeys.filter((key) =>
+    normalized.some((row) => {
+      const value = row[key];
+      return value !== "" && value !== null && value !== undefined;
+    })
+  );
+  const filtered = normalized.map((row) => {
+    const filteredRow: ExportableRecord = {};
+    nonEmptyKeys.forEach((key) => {
+      filteredRow[key] = row[key];
+    });
+    return filteredRow;
+  });
 
-        employeeData[
-          `Total Horas Extra ${translatePeriodToSpanish("weekly")}`
-        ] = String(
-          calculateTotalHoursAndOvertimeForPeriods(
-            employee.id,
-            "weekly",
-            multiplePeriods.weekNumbers,
-            multiplePeriods.biweekNumbers,
-            multiplePeriods.months,
-            weeklySummaries,
-            biweeklySummaries,
-            monthlySummaries,
-          ).overtime,
-        );
-      } else {
-        employeeData[`Total ${translatePeriodToSpanish("weekly")}`] =
-          calculateTotalHoursAndOvertimeForPeriod(
-            employee.id,
-            "weekly",
-            weekNumber,
-            biweekNumber,
-            month,
-            year,
-            weeklySummaries,
-            biweeklySummaries,
-            monthlySummaries,
-          ).totalHours;
+  return { rows: filtered, headers: nonEmptyKeys };
+}
 
-        employeeData[
-          `Total Horas Extra ${translatePeriodToSpanish("weekly")}`
-        ] = calculateTotalHoursAndOvertimeForPeriod(
-          employee.id,
-          "weekly",
-          weekNumber,
-          biweekNumber,
-          month,
-          year,
-          weeklySummaries,
-          biweeklySummaries,
-          monthlySummaries,
-        ).overtime;
+/**
+ * Exports data to Excel or PDF, with translation, cleaning, and custom column order support.
+ * @param params Object with data, fileName, format, customHeaders, columnOrder, isVehicleData
+ */
+export function exportTable({
+  data,
+  fileName,
+  format,
+  customHeaders,
+  columnOrder,
+  isVehicleData = false,
+  groupedHeaders,
+}: {
+  data: ExportableRecord[];
+  fileName: string;
+  format: "excel" | "pdf";
+  customHeaders?: string[];
+  columnOrder?: string[];
+  isVehicleData?: boolean;
+  groupedHeaders?: string[][];
+}) {
+  const { rows, headers } = prepareExportData(data, isVehicleData);
+  if (rows.length === 0) return;
+
+  // Decide column order: customHeaders > columnOrder > headers
+  const exportHeaders = customHeaders ?? columnOrder ?? headers;
+
+  if (format === "excel") {
+    // Build a new array with only the exportHeaders keys for each row
+    const strictRows = rows.map((row) => {
+      const obj: ExportableRecord = {};
+      exportHeaders.forEach((key) => {
+        obj[key] = row[key];
+      });
+      return obj;
+    });
+    let ws;
+    if (groupedHeaders && groupedHeaders.length > 1) {
+      // Multi-level header: prepend groupedHeaders rows
+      // SheetJS expects arrays of arrays for aoa_to_sheet
+      const aoa = [...groupedHeaders, ...strictRows.map(row => exportHeaders.map(key => row[key]))];
+      ws = XLSX.utils.aoa_to_sheet(aoa);
+      // Calculate merges for the grouped header row (first row)
+      const merges = [];
+      for (let i = 0; i < groupedHeaders[0].length; ) {
+        const val = groupedHeaders[0][i];
+        let j = i + 1;
+        while (j < groupedHeaders[0].length && groupedHeaders[0][j] === val) j++;
+        if (j - i > 1) {
+          merges.push({ s: { r: 0, c: i }, e: { r: 0, c: j - 1 } });
+        }
+        i = j;
       }
-
-      if (hasMultipleBiweeks(currentWeek)) {
-        employeeData[`Total ${translatePeriodToSpanish("biweekly")}`] = String(
-          calculateTotalHoursAndOvertimeForPeriods(
-            employee.id,
-            "biweekly",
-            multiplePeriods.weekNumbers,
-            multiplePeriods.biweekNumbers,
-            multiplePeriods.months,
-            weeklySummaries,
-            biweeklySummaries,
-            monthlySummaries,
-          ).totalHours,
-        );
-
-        employeeData[
-          `Total Horas Extra ${translatePeriodToSpanish("biweekly")}`
-        ] = String(
-          calculateTotalHoursAndOvertimeForPeriods(
-            employee.id,
-            "biweekly",
-            multiplePeriods.weekNumbers,
-            multiplePeriods.biweekNumbers,
-            multiplePeriods.months,
-            weeklySummaries,
-            biweeklySummaries,
-            monthlySummaries,
-          ).overtime,
-        );
-      } else {
-        employeeData[`Total ${translatePeriodToSpanish("biweekly")}`] =
-          calculateTotalHoursAndOvertimeForPeriod(
-            employee.id,
-            "biweekly",
-            weekNumber,
-            biweekNumber,
-            month,
-            year,
-            weeklySummaries,
-            biweeklySummaries,
-            monthlySummaries,
-          ).totalHours;
-
-        employeeData[
-          `Total Horas Extra ${translatePeriodToSpanish("biweekly")}`
-        ] = calculateTotalHoursAndOvertimeForPeriod(
-          employee.id,
-          "biweekly",
-          weekNumber,
-          biweekNumber,
-          month,
-          year,
-          weeklySummaries,
-          biweeklySummaries,
-          monthlySummaries,
-        ).overtime;
+      ws['!merges'] = merges;
+      // Forzar el rango de la hoja para evitar columna vacía
+      if (ws['!ref']) {
+        const range = XLSX.utils.decode_range(ws['!ref']);
+        range.e.c = exportHeaders.length - 1;
+        ws['!ref'] = XLSX.utils.encode_range(range);
       }
-
-      if (hasMultipleMonths(currentWeek)) {
-        employeeData[`Total ${translatePeriodToSpanish("monthly")}`] = String(
-          calculateTotalHoursAndOvertimeForPeriods(
-            employee.id,
-            "monthly",
-            multiplePeriods.weekNumbers,
-            multiplePeriods.biweekNumbers,
-            multiplePeriods.months,
-            weeklySummaries,
-            biweeklySummaries,
-            monthlySummaries,
-          ).totalHours,
-        );
-
-        employeeData[
-          `Total Horas Extra ${translatePeriodToSpanish("monthly")}`
-        ] = String(
-          calculateTotalHoursAndOvertimeForPeriods(
-            employee.id,
-            "monthly",
-            multiplePeriods.weekNumbers,
-            multiplePeriods.biweekNumbers,
-            multiplePeriods.months,
-            weeklySummaries,
-            biweeklySummaries,
-            monthlySummaries,
-          ).overtime,
-        );
-      } else {
-        employeeData[`Total ${translatePeriodToSpanish("monthly")}`] =
-          calculateTotalHoursAndOvertimeForPeriod(
-            employee.id,
-            "monthly",
-            weekNumber,
-            biweekNumber,
-            month,
-            year,
-            weeklySummaries,
-            biweeklySummaries,
-            monthlySummaries,
-          ).totalHours;
-
-        employeeData[
-          `Total Horas Extra ${translatePeriodToSpanish("monthly")}`
-        ] = calculateTotalHoursAndOvertimeForPeriod(
-          employee.id,
-          "monthly",
-          weekNumber,
-          biweekNumber,
-          month,
-          year,
-          weeklySummaries,
-          biweeklySummaries,
-          monthlySummaries,
-        ).overtime;
+    } else {
+      ws = XLSX.utils.json_to_sheet(strictRows, { header: exportHeaders });
+      // Forzar el rango de la hoja para evitar columna vacía
+      if (ws['!ref']) {
+        const range = XLSX.utils.decode_range(ws['!ref']);
+        range.e.c = exportHeaders.length - 1;
+        ws['!ref'] = XLSX.utils.encode_range(range);
       }
     }
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, "Datos");
+    XLSX.writeFile(wb, `${fileName}.xlsx`);
+  } else {
+    // Reorder columns for PDF
+    const tableData = rows.map((row) => exportHeaders.map((key) => row[key]));
+    const doc = new jsPDF();
+    doc.autoTable({
+      head: [exportHeaders],
+      body: tableData,
+      startY: 20,
+      styles: { fontSize: 8, cellPadding: 2 },
+      headStyles: { fillColor: [41, 128, 185], textColor: 255, fontStyle: "bold" },
+      alternateRowStyles: { fillColor: [245, 245, 245] },
+    });
+    doc.save(`${fileName}.pdf`);
+  }
+}
 
-    return employeeData;
-  });
-
-  return {
-    dataForExport,
-    headers,
-    fileName: `roles-${exportFileFormattedDate(new Date())}`,
-  };
-};
-
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-export const createExportOptions = (
-  excelIcon: JSX.Element,
-  pdfIcon: JSX.Element,
-  exportToExcel?: (
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    dataForExport: any[],
-    fileName: string,
-    headers?: unknown,
-  ) => unknown,
-  exportToPDF?: (
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    dataForExport: any[],
-    fileName: string,
-    headers?: unknown,
-  ) => unknown,
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  dataForExport?: any[],
-  fileName?: string,
-  headers?: unknown,
-) => {
-  const options = [];
-  if (exportToExcel && dataForExport) {
-    options.push({
+/**
+ * Utility to create export options for UI buttons (Excel/PDF).
+ * @param params Object with icons, data, fileName, columnOrder, isVehicleData, customHeaders
+ * @returns Array of export option objects for UI
+ */
+export function createExportOptions({
+  excelIcon,
+  pdfIcon,
+  data,
+  fileName,
+  columnOrder,
+  isVehicleData = false,
+  customHeaders,
+}: {
+  excelIcon: JSX.Element;
+  pdfIcon: JSX.Element;
+  data: ExportableRecord[];
+  fileName: string;
+  columnOrder?: string[];
+  isVehicleData?: boolean;
+  customHeaders?: string[];
+}) {
+  return [
+    {
       label: "Exportar a Excel",
       icon: excelIcon,
       onClick: () =>
-        exportToExcel(
-          dataForExport,
-          fileName || "excel-exported-file",
-          headers,
-        ),
-    });
-  }
-  if (exportToPDF && dataForExport) {
-    options.push({
+        exportTable({
+          data,
+          fileName,
+          format: "excel",
+          columnOrder,
+          isVehicleData,
+          customHeaders,
+        }),
+    },
+    {
       label: "Exportar a PDF",
       icon: pdfIcon,
       onClick: () =>
-        exportToPDF(dataForExport, fileName || "pdf-exported-file", headers),
-    });
-  }
-
-  return options;
-};
+        exportTable({
+          data,
+          fileName,
+          format: "pdf",
+          columnOrder,
+          isVehicleData,
+          customHeaders,
+        }),
+    },
+  ];
+}

@@ -4,4 +4,6 @@ export interface Schedule {
   label: string;
   hours: number;
   specialSchedule: boolean;
+  createdAt?: string;
+  updatedAt?: string;
 }

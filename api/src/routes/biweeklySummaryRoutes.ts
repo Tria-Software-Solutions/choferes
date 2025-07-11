@@ -9,5 +9,6 @@ router.get("/employee/:id", authenticateToken, biweeklySummaryController.getCurr
 router.post("/", authenticateToken, biweeklySummaryController.createBiweeklySummary);
 router.put("/:id", authenticateToken, biweeklySummaryController.updateBiweeklySummary);
 router.delete("/:id", authenticateToken, biweeklySummaryController.deleteBiweeklySummary);
+router.delete("/bulk", authenticateToken, biweeklySummaryController.deleteAllBiweeklySummaries);
 
 export default router;
