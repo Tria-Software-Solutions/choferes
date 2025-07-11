@@ -97,3 +97,13 @@ export const deleteVehicle = async (req: Request, res: Response) => {
     return res.status(500).json({ message: "Error deleting Vehicle", error });
   }
 };
+
+// Delete all vehicles (bulk)
+export const deleteAllVehicles = async (req: Request, res: Response) => {
+  try {
+    await vehicleService.deleteAllVehicles();
+    return res.status(204).end();
+  } catch (error) {
+    return res.status(500).json({ message: "Error deleting all vehicles", error });
+  }
+};

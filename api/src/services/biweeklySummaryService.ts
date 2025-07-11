@@ -51,3 +51,6 @@ export const updateBiweeklySummary = async (id: number, data: Omit<BiweeklySumma
 // Delete a biweekly summary by its ID
 export const deleteBiweeklySummary = async (id: number) =>
   BiweeklySummary.destroy({ where: { id } });
+
+// Delete all biweekly summaries
+export const deleteAllBiweeklySummaries = async () => BiweeklySummary.destroy({ where: {} });

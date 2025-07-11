@@ -36,11 +36,7 @@ export const closeButtonStyles: SxProps<Theme> = {
   color: "inherit",
 };
 
-export const dialogContentStyles: SxProps<Theme> = {
-  pt: 4,
-  pb: 2,
-  marginTop: "10px",
-};
+export const dialogContentStyles: SxProps<Theme> = {};
 
 export const messageTypographyStyles: SxProps<Theme> = {
   lineHeight: 1.6,

@@ -82,3 +82,6 @@ export const updateVehicle = async (id: number, data: Omit<Vehicle, "id">) => {
 
 // Delete a vehicle by its ID
 export const deleteVehicle = async (id: number) => Vehicle.destroy({ where: { id } });
+
+// Delete all vehicles
+export const deleteAllVehicles = async () => Vehicle.destroy({ where: {} });

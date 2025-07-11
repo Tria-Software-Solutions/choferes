@@ -9,5 +9,6 @@ router.get("/employee/:id", authenticateToken, monthlySummaryController.getCurre
 router.post("/", authenticateToken, monthlySummaryController.createMonthlySummary);
 router.put("/:id", authenticateToken, monthlySummaryController.updateMonthlySummary);
 router.delete("/:id", authenticateToken, monthlySummaryController.deleteMonthlySummary);
+router.delete("/bulk", authenticateToken, monthlySummaryController.deleteAllMonthlySummaries);
 
 export default router;

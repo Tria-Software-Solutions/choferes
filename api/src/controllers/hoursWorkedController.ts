@@ -65,3 +65,13 @@ export const deleteHoursWorked = async (req: Request, res: Response) => {
     return res.status(500).json({ message: "Error deleting HoursWorked", error });
   }
 };
+
+// Delete all hours worked records (bulk)
+export const deleteAllHoursWorked = async (req: Request, res: Response) => {
+  try {
+    await hoursWorkedService.deleteAllHoursWorked();
+    return res.status(204).end();
+  } catch (error) {
+    return res.status(500).json({ message: "Error deleting all hours worked records", error });
+  }
+};

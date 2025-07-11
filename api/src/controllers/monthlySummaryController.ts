@@ -67,3 +67,13 @@ export const deleteMonthlySummary = async (req: Request, res: Response) => {
     return res.status(500).json({ message: "Error deleting MonthlySummary", error });
   }
 };
+
+// Delete all monthly summaries (bulk)
+export const deleteAllMonthlySummaries = async (req: Request, res: Response) => {
+  try {
+    await monthlySummaryService.deleteAllMonthlySummaries();
+    return res.status(204).end();
+  } catch (error) {
+    return res.status(500).json({ message: "Error deleting all monthly summaries", error });
+  }
+};

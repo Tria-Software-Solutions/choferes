@@ -27,8 +27,6 @@ import { getMidnightDate, isTodayOrFuture } from "../../../utils/dates";
 import {
   createExportOptions,
   exportFileFormattedDate,
-  exportToExcel,
-  exportToPDF,
 } from "../../../utils/export";
 import { capitalizeFirstLetter } from "../../../utils/string";
 import PAGE_TITLE from "../../../constants/pageTitle.constants";
@@ -40,8 +38,6 @@ import ArrowForwardIosRoundedIcon from "@mui/icons-material/ArrowForwardIosRound
 import CalendarTodayRoundedIcon from "@mui/icons-material/CalendarTodayRounded";
 import CloseRoundedIcon from "@mui/icons-material/CloseRounded";
 import ManageSearchIcon from "@mui/icons-material/ManageSearch";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faFileExcel, faFilePdf } from "@fortawesome/free-solid-svg-icons";
 import { Courier } from "../../../models/Courier";
 import EditableTableComponent from "../../../components/Table/EditableTable/EditableTable.component";
 import AddCourierForm from "../../Forms/AddCourierForm";
@@ -67,13 +63,19 @@ import {
   deleteDialogPaperSx,
   addDialogPaperSx,
 } from "./styles";
-import { useTablePreferences } from '../../../hooks/useTablePreferences';
-import { getPreferencesObject, setPreferencesObject } from '../../../utils/persistentState';
+import { useTablePreferences } from "../../../hooks/useTablePreferences";
+import {
+  getPreferencesObject,
+  setPreferencesObject,
+} from "../../../utils/persistentState";
+import DescriptionIcon from "@mui/icons-material/Description";
+import PictureAsPdfIcon from "@mui/icons-material/PictureAsPdf";
+import AddCircleOutlineIcon from "@mui/icons-material/AddCircleOutline";
 
 // CourierServicePage component for managing courier services
 const CourierServicePage: React.FC = () => {
   const { userPermissions } = useAuthContext();
-  const preferencesKey = 'couriers-preferences';
+  const preferencesKey = "couriers-preferences";
   const defaultPreferences = { date: new Date().toISOString() };
   const [selectedDate, setSelectedDate] = useState<Date>(() => {
     const prefs = getPreferencesObject(preferencesKey, defaultPreferences);
@@ -162,7 +164,7 @@ const CourierServicePage: React.FC = () => {
   const isSmallScreen = useMediaQuery(theme.breakpoints.down("sm"));
 
   const getInitialRowsPerPage = () => {
-    if (typeof window !== 'undefined') {
+    if (typeof window !== "undefined") {
       const maxHeight = window.innerHeight * 0.6;
       const headHeight = 56;
       const paginationHeight = 64;
@@ -175,7 +177,8 @@ const CourierServicePage: React.FC = () => {
     return 25;
   };
 
-  const { search, setSearch, rowsPerPage, setRowsPerPage } = useTablePreferences('couriers', getInitialRowsPerPage);
+  const { search, setSearch, rowsPerPage, setRowsPerPage } =
+    useTablePreferences("couriers", getInitialRowsPerPage);
 
   // Updates total count when filtered couriers change
   useEffect(() => {
@@ -222,7 +225,9 @@ const CourierServicePage: React.FC = () => {
       distance: courier.distance,
       trackingNumber: courier.trackingNumber,
       status: courier.status,
-      createdAt: courier.createdAt,
+      createdAt: courier.createdAt ? new Date(courier.createdAt) : new Date(),
+      // Si tienes updatedAt en el formulario, haz lo mismo:
+      // updatedAt: courier.updatedAt ? new Date(courier.updatedAt) : new Date(),
     });
   };
 
@@ -230,10 +235,16 @@ const CourierServicePage: React.FC = () => {
   const handleUpdate = async (id: number) => {
     try {
       // TODO: Implementar actualización cuando se conecte con el backend
-      showNotification(NOTIFICATIONS.COURIER_UPDATE_SUCCESS, { severity: 'success', duration: 3000 });
+      showNotification(NOTIFICATIONS.COURIER_UPDATE_SUCCESS, {
+        severity: "success",
+        duration: 3000,
+      });
       setEditRowId(null);
     } catch (error) {
-      showNotification(NOTIFICATIONS.COURIER_UPDATE_ERROR, { severity: 'error', duration: 5000 });
+      showNotification(NOTIFICATIONS.COURIER_UPDATE_ERROR, {
+        severity: "error",
+        duration: 5000,
+      });
     }
   };
 
@@ -258,18 +269,24 @@ const CourierServicePage: React.FC = () => {
       await new Promise((resolve) => setTimeout(resolve, 1000));
 
       setFilteredCouriers((prev) =>
-        prev.filter((courier) => courier.id !== courierToDelete),
+        prev.filter((courier) => courier.id !== courierToDelete)
       );
       setFilteredWeekCouriers((prev) =>
-        prev.filter((courier) => courier.id !== courierToDelete),
+        prev.filter((courier) => courier.id !== courierToDelete)
       );
 
       setOpenDeleteDialog(false);
       setCourierToDelete(null);
 
-      showNotification(NOTIFICATIONS.COURIER_DELETE_SUCCESS, { severity: 'success', duration: 3000 });
+      showNotification(NOTIFICATIONS.COURIER_DELETE_SUCCESS, {
+        severity: "success",
+        duration: 3000,
+      });
     } catch (error) {
-      showNotification(NOTIFICATIONS.COURIER_DELETE_ERROR, { severity: 'error', duration: 5000 });
+      showNotification(NOTIFICATIONS.COURIER_DELETE_ERROR, {
+        severity: "error",
+        duration: 5000,
+      });
     } finally {
       setIsDeletingCourier(false);
     }
@@ -280,7 +297,10 @@ const CourierServicePage: React.FC = () => {
     if (date) {
       setSelectedDate(date);
       const prefs = getPreferencesObject(preferencesKey, defaultPreferences);
-      setPreferencesObject(preferencesKey, { ...prefs, date: date.toISOString() });
+      setPreferencesObject(preferencesKey, {
+        ...prefs,
+        date: date.toISOString(),
+      });
     }
   };
 
@@ -302,20 +322,55 @@ const CourierServicePage: React.FC = () => {
     setSelectedDate(getMidnightDate(new Date()));
   };
 
+  // When preparing data for export, only include the desired fields:
+  const exportData = filteredWeekCouriers.map((c) => ({
+    Fecha: c.createdAt
+      ? capitalizeFirstLetter(
+          format(new Date(typeof c.createdAt === "string" ? c.createdAt : c.createdAt.toISOString()), "EEEE dd 'de' MMMM 'de' yyyy", {
+            locale: es,
+          })
+        )
+      : "",
+    Chofer: c.driver,
+    Distancia: c.distance,
+    Ruta: c.route,
+    Tracking: c.trackingNumber,
+    Estado: c.status,
+    Agregado: c.createdAt
+      ? capitalizeFirstLetter(
+          format(new Date(typeof c.createdAt === "string" ? c.createdAt : c.createdAt.toISOString()), "EEEE dd 'de' MMMM 'de' yyyy", {
+            locale: es,
+          })
+        )
+      : "",
+    Actualizado: c.updatedAt
+      ? capitalizeFirstLetter(
+          format(new Date(typeof c.updatedAt === "string" ? c.updatedAt : c.updatedAt.toISOString()), "EEEE dd 'de' MMMM 'de' yyyy", {
+            locale: es,
+          })
+        )
+      : "",
+  }));
+
   const exportOptions = useMemo(() => {
-    const excelOption = exportToExcel;
-    const pdfOption = exportToPDF;
-    return createExportOptions(
-      <FontAwesomeIcon icon={faFileExcel} size="lg" />,
-      <FontAwesomeIcon icon={faFilePdf} size="lg" />,
-      excelOption,
-      pdfOption,
-      filteredWeekCouriers,
-      `reporte-de-servicios-de-mensajeria-${exportFileFormattedDate(
-        selectedDate || new Date(),
-      )}`,
-    );
-  }, [filteredWeekCouriers, selectedDate]);
+    const exportHeaders = [
+      "Fecha",
+      "Chofer",
+      "Distancia",
+      "Ruta",
+      "Tracking",
+      "Estado",
+      "Agregado",
+      "Actualizado",
+    ];
+    return createExportOptions({
+      excelIcon: <DescriptionIcon />,
+      pdfIcon: <PictureAsPdfIcon />,
+      data: exportData,
+      fileName: `reporte-de-servicios-de-mensajeria-${exportFileFormattedDate(selectedDate || new Date())}`,
+      customHeaders: exportHeaders,
+    });
+  }, [exportData, selectedDate]);
 
   const handleOpenAddCourierModal = () => {
     setOpenAddCourierModal(true);
@@ -348,9 +403,15 @@ const CourierServicePage: React.FC = () => {
       setFilteredWeekCouriers([...filteredWeekCouriers, newCourier]);
 
       setOpenAddCourierModal(false);
-      showNotification(NOTIFICATIONS.COURIER_CREATE_SUCCESS, { severity: 'success', duration: 3000 });
+      showNotification(NOTIFICATIONS.COURIER_CREATE_SUCCESS, {
+        severity: "success",
+        duration: 3000,
+      });
     } catch (error) {
-      showNotification(NOTIFICATIONS.COURIER_CREATE_ERROR, { severity: 'error', duration: 5000 });
+      showNotification(NOTIFICATIONS.COURIER_CREATE_ERROR, {
+        severity: "error",
+        duration: 5000,
+      });
     } finally {
       setIsCreatingCourier(false);
     }
@@ -418,7 +479,7 @@ const CourierServicePage: React.FC = () => {
                       MANAGEMENT.COURIER_SERVICE_PAGE.SEARCH_PLACEHOLDER
                     }
                     value={search}
-                    onChange={e => setSearch(e.target.value)}
+                    onChange={(e) => setSearch(e.target.value)}
                     sx={{ flex: 1 }}
                     fullWidth
                   />
@@ -502,8 +563,8 @@ const CourierServicePage: React.FC = () => {
                           disabled={isTodayOrFuture(selectedDate)}
                           onClick={handleCurrentDate}
                         >
-                        <CalendarTodayRoundedIcon />
-                      </Button>
+                          <CalendarTodayRoundedIcon />
+                        </Button>
                       </span>
                     </Tooltip>
                   </ButtonGroup>
@@ -562,7 +623,7 @@ const CourierServicePage: React.FC = () => {
                 {capitalizeFirstLetter(
                   format(selectedDate, "EEEE dd 'de' MMMM 'de' yyyy", {
                     locale: es,
-                  }),
+                  })
                 )}
               </Typography>
               <Typography variant="h6" color="textSecondary">
@@ -592,6 +653,7 @@ const CourierServicePage: React.FC = () => {
         subtitle={MANAGEMENT.COURIER_SERVICE_PAGE.DIALOG_ADD_SUBTITLE}
         hideActions
         paperSx={addDialogPaperSx ?? {}}
+        icon={<AddCircleOutlineIcon color="info" />}
       >
         <AddCourierForm
           onSubmit={handleCreateCourier}

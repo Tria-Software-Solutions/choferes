@@ -9,5 +9,6 @@ router.get("/:id", authenticateToken, hoursWorkedController.getHoursWorkedById);
 router.post("/", authenticateToken, hoursWorkedController.createHoursWorked);
 router.put("/:id", authenticateToken, hoursWorkedController.updateHoursWorked);
 router.delete("/:id", authenticateToken, hoursWorkedController.deleteHoursWorked);
+router.delete("/bulk", authenticateToken, hoursWorkedController.deleteAllHoursWorked);
 
 export default router;

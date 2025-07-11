@@ -37,8 +37,6 @@ import { isTodayOrFuture } from "../../../utils/dates";
 import {
   createExportOptions,
   exportFileFormattedDate,
-  exportToExcel,
-  exportToPDF,
 } from "../../../utils/export";
 import { capitalizeFirstLetter } from "../../../utils/string";
 import PAGE_TITLE from "../../../constants/pageTitle.constants";
@@ -52,8 +50,6 @@ import ArrowForwardIosRoundedIcon from "@mui/icons-material/ArrowForwardIosRound
 import CalendarTodayRoundedIcon from "@mui/icons-material/CalendarTodayRounded";
 import CloseRoundedIcon from "@mui/icons-material/CloseRounded";
 import ManageSearchIcon from "@mui/icons-material/ManageSearch";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faFileExcel, faFilePdf } from "@fortawesome/free-solid-svg-icons";
 import AddRoundedIcon from "@mui/icons-material/AddRounded";
 import DeleteOutlineIcon from "@mui/icons-material/DeleteOutline";
 import {
@@ -76,11 +72,17 @@ import {
   addDialogPaperSx,
 } from "./styles";
 import { useLocation } from "react-router-dom";
-import { useTablePreferences } from '../../../hooks/useTablePreferences';
-import { getPreferencesObject, setPreferencesObject } from '../../../utils/persistentState';
+import { useTablePreferences } from "../../../hooks/useTablePreferences";
+import {
+  getPreferencesObject,
+  setPreferencesObject,
+} from "../../../utils/persistentState";
+import DescriptionIcon from "@mui/icons-material/Description";
+import PictureAsPdfIcon from "@mui/icons-material/PictureAsPdf";
+import AddCircleOutlineIcon from "@mui/icons-material/AddCircleOutline";
 
 const getInitialRowsPerPage = () => {
-  if (typeof window !== 'undefined') {
+  if (typeof window !== "undefined") {
     const maxHeight = window.innerHeight * 0.6;
     const headHeight = 56;
     const paginationHeight = 64;
@@ -97,18 +99,18 @@ const getInitialRowsPerPage = () => {
 const VehiclesPage: React.FC = () => {
   const dispatch = useDispatch<AppDispatch>();
   const { userPermissions } = useAuthContext();
-  const preferencesKey = 'vehicles-preferences';
+  const preferencesKey = "vehicles-preferences";
   const defaultPreferences = { date: new Date().toISOString() };
   const [selectedDate, setSelectedDate] = useState<Date>(() => {
     const prefs = getPreferencesObject(preferencesKey, defaultPreferences);
     return prefs.date ? new Date(prefs.date) : new Date();
   });
   const { allVehicles, isLoadingVehicles } = useSelector(
-    (state: RootState) => state.vehicles,
+    (state: RootState) => state.vehicles
   );
   const { showNotification } = useAppNotifications();
   const [filteredWeekVehicles, setFilteredWeekVehicles] = useState<Vehicle[]>(
-    [],
+    []
   );
   const [totalCount, setTotalCount] = useState(0);
   const [editRowId, setEditRowId] = useState<number | null>(null);
@@ -134,7 +136,8 @@ const VehiclesPage: React.FC = () => {
   const isSmallScreen = useMediaQuery(theme.breakpoints.down("sm"));
   const location = useLocation();
 
-  const { search, setSearch, rowsPerPage, setRowsPerPage } = useTablePreferences('vehicles', getInitialRowsPerPage);
+  const { search, setSearch, rowsPerPage, setRowsPerPage } =
+    useTablePreferences("vehicles", getInitialRowsPerPage);
 
   // Memoize filtered vehicles for selected date and search
   const filteredVehicles = useMemo(() => {
@@ -215,12 +218,12 @@ const VehiclesPage: React.FC = () => {
     // Dynamic parking lot validation
     const validateParkingLot = (parkingLot: string) => {
       const trimmedParkingLot = parkingLot.trim();
-      
+
       // If starts with ATP, use strict validation
       if (trimmedParkingLot.toUpperCase().startsWith("ATP")) {
         return /^(?:ATP[1-9]-\d{3,4}|nulo|n\/a)$/i.test(trimmedParkingLot);
       }
-      
+
       // For any other prefix or format, consider it valid
       return true;
     };
@@ -240,42 +243,50 @@ const VehiclesPage: React.FC = () => {
   }, [editFields, validateFields]);
 
   // Validate individual field for EditableTable
-  const validateField = useCallback((field: string, value: string | boolean | string[]) => {
-    if (field === "parkingLot" && typeof value === "string") {
-      const trimmedValue = value.trim();
-      
-      // If starts with ATP, use strict validation
-      if (trimmedValue.toUpperCase().startsWith("ATP")) {
-        return /^(?:ATP[1-9]-\d{3,4}|nulo|n\/a)$/i.test(trimmedValue);
+  const validateField = useCallback(
+    (field: string, value: string | boolean | string[]) => {
+      if (field === "parkingLot" && typeof value === "string") {
+        const trimmedValue = value.trim();
+
+        // If starts with ATP, use strict validation
+        if (trimmedValue.toUpperCase().startsWith("ATP")) {
+          return /^(?:ATP[1-9]-\d{3,4}|nulo|n\/a)$/i.test(trimmedValue);
+        }
+
+        // For any other prefix or format, consider it valid
+        return true;
       }
-      
-      // For any other prefix or format, consider it valid
-      return true;
-    }
-    
-    if (field === "licensePlate" && typeof value === "string") {
-      // Check if license plate already exists on the same day (excluding current row)
-      const sameDayVehicles = allVehicles.filter((v) => {
-        const vehicleDate = new Date(v.parkingDate);
-        const editDate = new Date(editFields.parkingDate);
-        const vehicleDateStr = vehicleDate.toISOString().split('T')[0];
-        const editDateStr = editDate.toISOString().split('T')[0];
-        return vehicleDateStr === editDateStr && 
-               v.licensePlate === value.trim() && 
-               v.id !== editRowId; // Exclude current row being edited
-      });
-      return sameDayVehicles.length === 0;
-    }
-    
-    return true; // Default validation for other fields
-  }, [allVehicles, editFields.parkingDate, editRowId]);
+
+      if (field === "licensePlate" && typeof value === "string") {
+        // Check if license plate already exists on the same day (excluding current row)
+        const sameDayVehicles = allVehicles.filter((v) => {
+          const vehicleDate = new Date(v.parkingDate);
+          const editDate = new Date(editFields.parkingDate);
+          const vehicleDateStr = vehicleDate.toISOString().split("T")[0];
+          const editDateStr = editDate.toISOString().split("T")[0];
+          return (
+            vehicleDateStr === editDateStr &&
+            v.licensePlate === value.trim() &&
+            v.id !== editRowId
+          ); // Exclude current row being edited
+        });
+        return sameDayVehicles.length === 0;
+      }
+
+      return true; // Default validation for other fields
+    },
+    [allVehicles, editFields.parkingDate, editRowId]
+  );
 
   // Handle date picker change
   const handleDateChange = (date: Date | null) => {
     if (date) {
       setSelectedDate(date);
       const prefs = getPreferencesObject(preferencesKey, defaultPreferences);
-      setPreferencesObject(preferencesKey, { ...prefs, date: date.toISOString() });
+      setPreferencesObject(preferencesKey, {
+        ...prefs,
+        date: date.toISOString(),
+      });
     }
   };
 
@@ -321,10 +332,16 @@ const VehiclesPage: React.FC = () => {
         notes: "",
         parkingDate: new Date(),
       });
-      showNotification(NOTIFICATIONS.VEHICLE_UPDATED, { severity: 'success', duration: 3000 });
+      showNotification(NOTIFICATIONS.VEHICLE_UPDATED, {
+        severity: "success",
+        duration: 3000,
+      });
     } catch (error) {
       handleCancel();
-      showNotification(NOTIFICATIONS.VEHICLE_UPDATE_ERROR, { severity: 'error', duration: 5000 });
+      showNotification(NOTIFICATIONS.VEHICLE_UPDATE_ERROR, {
+        severity: "error",
+        duration: 5000,
+      });
     }
   };
 
@@ -347,9 +364,15 @@ const VehiclesPage: React.FC = () => {
       await dispatch(deleteVehicle(vehicleToDelete));
       setOpenDeleteDialog(false);
       setVehicleToDelete(null);
-      showNotification(NOTIFICATIONS.VEHICLE_DELETE_SUCCESS, { severity: 'success', duration: 3000 });
+      showNotification(NOTIFICATIONS.VEHICLE_DELETE_SUCCESS, {
+        severity: "success",
+        duration: 3000,
+      });
     } catch (error) {
-      showNotification(NOTIFICATIONS.VEHICLE_DELETE_ERROR, { severity: 'error', duration: 5000 });
+      showNotification(NOTIFICATIONS.VEHICLE_DELETE_ERROR, {
+        severity: "error",
+        duration: 5000,
+      });
     } finally {
       setIsDeletingVehicle(false);
     }
@@ -411,32 +434,70 @@ const VehiclesPage: React.FC = () => {
 
       await dispatch(createVehicle(newVehicle));
       setOpenAddVehicleModal(false);
-      showNotification(NOTIFICATIONS.VEHICLE_CREATE_SUCCESS, { severity: 'success', duration: 3000 });
+      showNotification(NOTIFICATIONS.VEHICLE_CREATE_SUCCESS, {
+        severity: "success",
+        duration: 3000,
+      });
     } catch (error) {
-      showNotification(NOTIFICATIONS.VEHICLE_CREATE_ERROR, { severity: 'error', duration: 5000 });
+      showNotification(NOTIFICATIONS.VEHICLE_CREATE_ERROR, {
+        severity: "error",
+        duration: 5000,
+      });
     } finally {
       setIsCreatingVehicle(false);
     }
   };
 
+  // When preparing data for export, only include the desired fields:
+  const exportData = filteredWeekVehicles.map((v) => ({
+    Fecha: v.parkingDate
+      ? capitalizeFirstLetter(
+          format(new Date(v.parkingDate), "EEEE dd 'de' MMMM 'de' yyyy", {
+            locale: es,
+          })
+        )
+      : "",
+    Placa: v.licensePlate,
+    Marca: v.brand,
+    Color: v.color,
+    Espacio: v.parkingLot,
+    Observaciones: v.notes,
+    Agregado: v.createdAt
+      ? capitalizeFirstLetter(
+          format(new Date(v.createdAt), "EEEE dd 'de' MMMM 'de' yyyy", {
+            locale: es,
+          })
+        )
+      : "",
+    Actualizado: v.updatedAt
+      ? capitalizeFirstLetter(
+          format(new Date(v.updatedAt), "EEEE dd 'de' MMMM 'de' yyyy", {
+            locale: es,
+          })
+        )
+      : "",
+  }));
+
   const exportOptions = useMemo(() => {
-    const excelOption = userPermissions.includes(
-      PERMISSIONS.EXPORT_EXCEL_VEHICLES,
-    )
-      ? exportToExcel
-      : undefined;
-    const pdfOption = userPermissions.includes(PERMISSIONS.EXPORT_PDF_VEHICLES)
-      ? exportToPDF
-      : undefined;
-    return createExportOptions(
-      <FontAwesomeIcon icon={faFileExcel} size="lg" />,
-      <FontAwesomeIcon icon={faFilePdf} size="lg" />,
-      excelOption,
-      pdfOption,
-      filteredWeekVehicles,
-      `reporte-de-vehiculos-${exportFileFormattedDate(selectedDate || new Date())}`,
-    );
-  }, [userPermissions, filteredWeekVehicles, selectedDate]);
+    const exportHeaders = [
+      "Fecha",
+      "Placa",
+      "Marca",
+      "Color",
+      "Espacio",
+      "Observaciones",
+      "Agregado",
+      "Actualizado",
+    ];
+    return createExportOptions({
+      excelIcon: <DescriptionIcon />,
+      pdfIcon: <PictureAsPdfIcon />,
+      data: exportData,
+      fileName: `reporte-de-vehiculos-${exportFileFormattedDate(selectedDate || new Date())}`,
+      customHeaders: exportHeaders,
+    });
+  }, [exportData, selectedDate]);
+  // Use exportTable({ data: exportData, ... }) for export
 
   return (
     <Box>
@@ -644,7 +705,7 @@ const VehiclesPage: React.FC = () => {
                 {capitalizeFirstLetter(
                   format(selectedDate, "EEEE dd 'de' MMMM 'de' yyyy", {
                     locale: es,
-                  }),
+                  })
                 )}
               </Typography>
               <Typography variant="h6" color="textSecondary">
@@ -674,6 +735,7 @@ const VehiclesPage: React.FC = () => {
         subtitle={MANAGEMENT.VEHICLES_PAGE.DIALOG_ADD_SUBTITLE}
         hideActions
         paperSx={addDialogPaperSx ?? {}}
+        icon={<AddCircleOutlineIcon color="info" />}
       >
         <AddVehicleForm
           onSubmit={handleCreateVehicle}

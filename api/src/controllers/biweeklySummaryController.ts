@@ -68,3 +68,13 @@ export const deleteBiweeklySummary = async (req: Request, res: Response) => {
     return res.status(500).json({ message: "Error deleting BiweeklySummary", error });
   }
 };
+
+// Delete all biweekly summaries (bulk)
+export const deleteAllBiweeklySummaries = async (req: Request, res: Response) => {
+  try {
+    await biweeklySummaryService.deleteAllBiweeklySummaries();
+    return res.status(204).end();
+  } catch (error) {
+    return res.status(500).json({ message: "Error deleting all biweekly summaries", error });
+  }
+};

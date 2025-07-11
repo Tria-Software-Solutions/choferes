@@ -37,3 +37,6 @@ export const updateMonthlySummary = async (id: number, data: Omit<MonthlySummary
 
 // Delete a monthly summary by its ID
 export const deleteMonthlySummary = async (id: number) => MonthlySummary.destroy({ where: { id } });
+
+// Delete all monthly summaries
+export const deleteAllMonthlySummaries = async () => MonthlySummary.destroy({ where: {} });

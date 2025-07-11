@@ -28,6 +28,7 @@ import {
   differenceInCalendarWeeks,
   endOfWeek,
   startOfWeek,
+  format,
 } from "date-fns";
 import {
   Box,
@@ -43,11 +44,7 @@ import {
   ButtonGroup,
   Divider,
 } from "@mui/material";
-import {
-  exportToExcel,
-  exportToPDF,
-  handleExportTableData,
-} from "../../../utils/export";
+import { exportFileFormattedDate, exportTable } from "../../../utils/export";
 import {
   getBiweekNumber,
   getCurrentWeekDates,
@@ -56,6 +53,7 @@ import {
   getMonthNumber,
   getWeekNumber,
   isValidDateForSelect,
+  DayEntry,
 } from "../../../utils/dates";
 import PAGE_TITLE from "../../../constants/pageTitle.constants";
 import PERMISSIONS from "../../../constants/permissions.constants";
@@ -67,8 +65,6 @@ import CalendarTodayRoundedIcon from "@mui/icons-material/CalendarTodayRounded";
 import CloseRoundedIcon from "@mui/icons-material/CloseRounded";
 import ManageSearchIcon from "@mui/icons-material/ManageSearch";
 import DialogComponent from "../../../components/Dialog/Dialog.component";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faFileExcel, faFilePdf } from "@fortawesome/free-solid-svg-icons";
 import AssignmentIcon from "@mui/icons-material/Assignment";
 import {
   rolesHeaderBoxStyles,
@@ -86,10 +82,22 @@ import {
   noEmployeesIconStyles,
 } from "./styles";
 import { useLocation } from "react-router-dom";
-import { useTablePreferences } from '../../../hooks/useTablePreferences';
-import { getPreferencesObject, setPreferencesObject } from '../../../utils/persistentState';
+import { useTablePreferences } from "../../../hooks/useTablePreferences";
+import {
+  getPreferencesObject,
+  setPreferencesObject,
+} from "../../../utils/persistentState";
+import DescriptionIcon from "@mui/icons-material/Description";
+import PictureAsPdfIcon from "@mui/icons-material/PictureAsPdf";
+import FileDownloadIcon from "@mui/icons-material/FileDownload";
+import { capitalizeFirstLetter } from "../../../utils/string";
+import { getScheduleCellData } from "../../../components/Table/SelectorTable/helpers";
+import {
+  calculateTotalHours,
+  calculateOvertime,
+} from "../../../components/Table/SelectorTable/helpers/hoursCalculation";
 
-const preferencesKey = 'roles-preferences';
+const preferencesKey = "roles-preferences";
 const defaultPreferences = { date: new Date().toISOString() };
 
 // Roles management and summary page component
@@ -97,13 +105,13 @@ const RolesPage: React.FC = () => {
   const dispatch = useDispatch<AppDispatch>();
   const { userPermissions } = useAuthContext();
   const { employees, isLoadingEmployees } = useSelector(
-    (state: RootState) => state.employees,
+    (state: RootState) => state.employees
   );
   const { schedules, isLoadingSchedules } = useSelector(
-    (state: RootState) => state.schedules,
+    (state: RootState) => state.schedules
   );
   const { hoursWorked, isLoadingHoursWorked } = useSelector(
-    (state: RootState) => state.hoursWorked,
+    (state: RootState) => state.hoursWorked
   );
   const [filteredEmployees, setFilteredEmployees] = useState<Employee[]>([]);
   const {
@@ -142,7 +150,7 @@ const RolesPage: React.FC = () => {
   const location = useLocation();
 
   const getInitialRowsPerPage = () => {
-    if (typeof window !== 'undefined') {
+    if (typeof window !== "undefined") {
       const maxHeight = window.innerHeight * 0.6;
       const headHeight = 56;
       const paginationHeight = 64;
@@ -155,7 +163,8 @@ const RolesPage: React.FC = () => {
     return 25;
   };
 
-  const { search, setSearch, rowsPerPage, setRowsPerPage } = useTablePreferences('roles-selector', getInitialRowsPerPage);
+  const { search, setSearch, rowsPerPage, setRowsPerPage } =
+    useTablePreferences("roles-selector", getInitialRowsPerPage);
 
   // Fetch employees, schedules, and hours worked on mount
   useEffect(() => {
@@ -181,8 +190,8 @@ const RolesPage: React.FC = () => {
       employees.filter((employee) =>
         normalizeString(`${employee.firstName} ${employee.lastName}`)
           .toLowerCase()
-          .includes(normalizeString(search).toLowerCase()),
-      ),
+          .includes(normalizeString(search).toLowerCase())
+      )
     );
   }, [search, employees]);
 
@@ -217,7 +226,10 @@ const RolesPage: React.FC = () => {
     if (newDate) {
       setFirstDayOfWeek(newDate);
       const prefs = getPreferencesObject(preferencesKey, defaultPreferences);
-      setPreferencesObject(preferencesKey, { ...prefs, date: newDate.toISOString() });
+      setPreferencesObject(preferencesKey, {
+        ...prefs,
+        date: newDate.toISOString(),
+      });
       const today = new Date();
       const weekOptions: { weekStartsOn: 0 | 1 | 2 | 3 | 4 | 5 | 6 } = {
         weekStartsOn: 1,
@@ -225,7 +237,7 @@ const RolesPage: React.FC = () => {
       const newWeekOffset = differenceInCalendarWeeks(
         newDate,
         today,
-        weekOptions,
+        weekOptions
       );
       setWeekOffset(newWeekOffset);
     }
@@ -240,12 +252,12 @@ const RolesPage: React.FC = () => {
       biweekNumber: number,
       month: number,
       year: number,
-      totalHours: number,
+      totalHours: number
     ) => {
       const existingHoursRecord = hoursWorked.find(
         (hours) =>
           hours.employeeId === employeeId &&
-          new Date(hours.date).getTime() === new Date(date).getTime(),
+          new Date(hours.date).getTime() === new Date(date).getTime()
       );
 
       let previousHours: number | undefined;
@@ -257,7 +269,7 @@ const RolesPage: React.FC = () => {
           scheduleId,
         };
         previousHours = schedules.find(
-          (schedule) => schedule.id === existingHoursRecord.scheduleId,
+          (schedule) => schedule.id === existingHoursRecord.scheduleId
         )?.hours;
       } else {
         createOrUpdatedHoursWorked = {
@@ -271,7 +283,7 @@ const RolesPage: React.FC = () => {
         (weeklySummary) =>
           weeklySummary.employeeId === employeeId &&
           weeklySummary.weekNumber === weekNumber &&
-          weeklySummary.year === year,
+          weeklySummary.year === year
       );
 
       let createOrUpdatedWeeklySummary:
@@ -301,7 +313,7 @@ const RolesPage: React.FC = () => {
         (biweeklySummary) =>
           biweeklySummary.employeeId === employeeId &&
           biweeklySummary.biweekNumber === biweekNumber &&
-          biweeklySummary.year === year,
+          biweeklySummary.year === year
       );
 
       let createOrUpdatedBiweeklySummary:
@@ -331,7 +343,7 @@ const RolesPage: React.FC = () => {
         (monthlySummary) =>
           monthlySummary.employeeId === employeeId &&
           monthlySummary.month === month &&
-          monthlySummary.year === year,
+          monthlySummary.year === year
       );
 
       let createOrUpdatedMonthlySummary:
@@ -372,13 +384,13 @@ const RolesPage: React.FC = () => {
       createOrUpdateWeeklySummary,
       createOrUpdateBiweeklySummary,
       createOrUpdateMonthlySummary,
-    ],
+    ]
   );
 
   const handleChange = (
     event: SelectChangeEvent<string>,
     employeeId: number,
-    date: Date,
+    date: Date
   ) => {
     if (event.target.value === "Other") {
       return;
@@ -387,7 +399,7 @@ const RolesPage: React.FC = () => {
     const selectedSchedule = schedules.find(
       (schedule) =>
         schedule.label === event.target.value &&
-        schedule.days.includes(getDayName(date)),
+        schedule.days.includes(getDayName(date))
     );
 
     if (!selectedSchedule) {
@@ -402,14 +414,14 @@ const RolesPage: React.FC = () => {
       getBiweekNumber(date),
       date.getMonth() + 1,
       date.getFullYear(),
-      selectedSchedule.hours,
+      selectedSchedule.hours
     );
   };
 
   const handleAdjustTime = async (
     employeeId: number,
-    condition: 'add' | 'subtract',
-    timeAdjustment: number,
+    condition: "add" | "subtract",
+    timeAdjustment: number
   ) => {
     if (!timeAdjustment || timeAdjustment < 0) return;
 
@@ -420,20 +432,20 @@ const RolesPage: React.FC = () => {
         weeklySummary.employeeId === employeeId &&
         weeklySummary.weekNumber === currentWeekNumber &&
         weeklySummary.month === currentMonth &&
-        weeklySummary.year === currentYear,
+        weeklySummary.year === currentYear
     );
     const existingBiweeklySummary = biweeklySummaries.find(
       (biweeklySummary) =>
         biweeklySummary.employeeId === employeeId &&
         biweeklySummary.biweekNumber === currentBiweekNumber &&
         biweeklySummary.month === currentMonth &&
-        biweeklySummary.year === currentYear,
+        biweeklySummary.year === currentYear
     );
     const existingMonthlySummary = monthlySummaries.find(
       (monthlySummary) =>
         monthlySummary.employeeId === employeeId &&
         monthlySummary.month === currentMonth &&
-        monthlySummary.year === currentYear,
+        monthlySummary.year === currentYear
     );
 
     const updatedWeeklySummary: WeeklySummary = {
@@ -442,7 +454,10 @@ const RolesPage: React.FC = () => {
       weekNumber: existingWeeklySummary?.weekNumber ?? currentWeekNumber,
       month: existingWeeklySummary?.month ?? currentMonth,
       year: existingWeeklySummary?.year ?? currentYear,
-      totalHours: Math.max(0, (existingWeeklySummary?.totalHours ?? 0) + adjustment),
+      totalHours: Math.max(
+        0,
+        (existingWeeklySummary?.totalHours ?? 0) + adjustment
+      ),
     };
 
     const updatedBiweeklySummary: BiweeklySummary = {
@@ -452,7 +467,10 @@ const RolesPage: React.FC = () => {
         existingBiweeklySummary?.biweekNumber ?? currentBiweekNumber,
       month: existingBiweeklySummary?.month ?? currentMonth,
       year: existingBiweeklySummary?.year ?? currentYear,
-      totalHours: Math.max(0, (existingBiweeklySummary?.totalHours ?? 0) + adjustment),
+      totalHours: Math.max(
+        0,
+        (existingBiweeklySummary?.totalHours ?? 0) + adjustment
+      ),
     };
 
     const updatedMonthlySummary: MonthlySummary = {
@@ -460,7 +478,10 @@ const RolesPage: React.FC = () => {
       employeeId: existingMonthlySummary?.employeeId ?? employeeId,
       month: existingMonthlySummary?.month ?? currentMonth,
       year: existingMonthlySummary?.year ?? currentYear,
-      totalHours: Math.max(0, (existingMonthlySummary?.totalHours ?? 0) + adjustment),
+      totalHours: Math.max(
+        0,
+        (existingMonthlySummary?.totalHours ?? 0) + adjustment
+      ),
     };
 
     await Promise.all([
@@ -495,35 +516,152 @@ const RolesPage: React.FC = () => {
     setOpenExportDialog(true);
   };
 
-  const handleCloseExportDialog = () => {
-    setOpenExportDialog(false);
+  // Helper: gets the assigned schedule label for an employee on a given day
+  const getScheduleLabelForDay = (
+    employee: Employee,
+    day: string,
+    date: Date
+  ): string => {
+    // Uses the same helper as the grid to get the label
+    return getScheduleCellData(
+      employee,
+      day,
+      date.toISOString(),
+      schedules,
+      hoursWorked
+    ).finalSelectedLabel;
   };
 
+  // Helper: builds dynamic headers for export
+  const getExportHeaders = (
+    currentWeek: DayEntry[],
+    includeTotals: boolean
+  ): string[] => {
+    const dayHeaders = currentWeek.map(({ day, date }) => {
+      const dateObj = typeof date === "string" ? new Date(date) : date;
+      // Ejemplo: "Lunes 08 de Julio de 2024"
+      return capitalizeFirstLetter(
+        format(dateObj, "EEEE dd 'de' MMMM 'de' yyyy", { locale: es })
+      );
+    });
+    const baseHeaders = ["Empleado", ...dayHeaders];
+    return includeTotals
+      ? [...baseHeaders, "Total horas", "Horas extra"]
+      : baseHeaders;
+  };
+
+  // Helper: builds dynamic export data
+  const getExportData = (
+    employees: Employee[],
+    currentWeek: DayEntry[],
+    includeTotals: boolean,
+    dayHeaders: string[]
+  ): Record<string, string | number>[] => {
+    return employees.map((employee: Employee) => {
+      const row: Record<string, string | number> = {
+        Empleado: `${employee.firstName} ${employee.lastName}`,
+      };
+      currentWeek.forEach(({ day, date }, idx) => {
+        const dateObj = typeof date === "string" ? new Date(date) : date;
+        // Usar el mismo formato que los headers
+        const header = dayHeaders[idx];
+        row[header] = getScheduleLabelForDay(employee, day, dateObj);
+      });
+      if (includeTotals) {
+        row["Total horas"] = calculateTotalHours(
+          employee,
+          "weekly",
+          currentWeek,
+          currentWeekNumber,
+          currentBiweekNumber,
+          currentMonth,
+          currentYear,
+          weeklySummaries,
+          biweeklySummaries,
+          monthlySummaries,
+          {
+            weekNumbers: [{ weekNumber: currentWeekNumber, year: currentYear }],
+            biweekNumbers: [
+              { biweekNumber: currentBiweekNumber, year: currentYear },
+            ],
+            months: [{ month: currentMonth, year: currentYear }],
+          }
+        );
+        row["Horas extra"] = calculateOvertime(
+          employee,
+          "weekly",
+          currentWeek,
+          currentWeekNumber,
+          currentBiweekNumber,
+          currentMonth,
+          currentYear,
+          weeklySummaries,
+          biweeklySummaries,
+          monthlySummaries,
+          {
+            weekNumbers: [{ weekNumber: currentWeekNumber, year: currentYear }],
+            biweekNumbers: [
+              { biweekNumber: currentBiweekNumber, year: currentYear },
+            ],
+            months: [{ month: currentMonth, year: currentYear }],
+          }
+        );
+      }
+      return row;
+    });
+  };
+
+  // Helper: builds grouped headers for export (month/year row + day row)
+  const getGroupedHeaders = (
+    currentWeek: DayEntry[],
+    includeTotals: boolean
+  ) => {
+    if (!currentWeek.length) return undefined;
+    const dateObj =
+      typeof currentWeek[0].date === "string"
+        ? new Date(currentWeek[0].date)
+        : currentWeek[0].date;
+    const monthYear = capitalizeFirstLetter(
+      format(dateObj, "MMMM yyyy", { locale: es })
+    );
+    const firstRow = [
+      "",
+      ...currentWeek.map(() => monthYear),
+      ...(includeTotals ? ["", ""] : []),
+    ];
+    const secondRow = [
+      "Empleado",
+      ...currentWeek.map(({ day, date }) => {
+        const dateObj = typeof date === "string" ? new Date(date) : date;
+        return `${capitalizeFirstLetter(format(dateObj, "EEEE dd", { locale: es }))}`;
+      }),
+      ...(includeTotals ? ["Total horas", "Horas extra"] : []),
+    ];
+    return [firstRow, secondRow];
+  };
+
+  const currentWeek: DayEntry[] = getCurrentWeekDates(weekOffset);
+
+  // Export handler
   const handleExportHours = async (shouldExportHours: boolean) => {
     setIsExporting(true);
     try {
-      const { dataForExport, fileName } = handleExportTableData(
+      const headers = getExportHeaders(currentWeek, shouldExportHours);
+      const data = getExportData(
         filteredEmployees,
-        hoursWorked,
-        schedules,
-        weeklySummaries,
-        biweeklySummaries,
-        monthlySummaries,
-        currentWeekNumber,
-        currentBiweekNumber,
-        currentMonth,
-        currentYear,
-        getCurrentWeekDates(weekOffset),
+        currentWeek,
         shouldExportHours,
+        headers.slice(1, shouldExportHours ? -2 : undefined)
       );
-
-      if (exportType === "excel") {
-        await exportToExcel(dataForExport, fileName);
-      } else if (exportType === "pdf") {
-        await exportToPDF(dataForExport, fileName);
-      }
-
-      setOpenExportDialog(false);
+      const groupedHeaders = getGroupedHeaders(currentWeek, shouldExportHours);
+      const fileName = `Roles_${exportFileFormattedDate(new Date())}`;
+      await exportTable({
+        data,
+        fileName,
+        format: exportType,
+        customHeaders: headers,
+        groupedHeaders: exportType === "excel" ? groupedHeaders : undefined,
+      });
     } catch (error) {
     } finally {
       setIsExporting(false);
@@ -535,14 +673,14 @@ const RolesPage: React.FC = () => {
     if (userPermissions.includes(PERMISSIONS.EXPORT_EXCEL_ROLES)) {
       options.push({
         label: "Exportar a Excel",
-        icon: <FontAwesomeIcon icon={faFileExcel} size="lg" />,
+        icon: <DescriptionIcon />,
         onClick: () => handleOpenExportDialog("excel"),
       });
     }
     if (userPermissions.includes(PERMISSIONS.EXPORT_PDF_ROLES)) {
       options.push({
         label: "Exportar a PDF",
-        icon: <FontAwesomeIcon icon={faFilePdf} size="lg" />,
+        icon: <PictureAsPdfIcon />,
         onClick: () => handleOpenExportDialog("pdf"),
       });
     }
@@ -608,7 +746,7 @@ const RolesPage: React.FC = () => {
                 <SearchBarComponent
                   placeholder={MANAGEMENT.ROLES_PAGE.SEARCH_PLACEHOLDER}
                   value={search}
-                  onChange={e => setSearch(e.target.value)}
+                  onChange={(e) => setSearch(e.target.value)}
                   sx={searchBarSx ?? {}}
                   fullWidth
                 />
@@ -662,8 +800,8 @@ const RolesPage: React.FC = () => {
                           disabled={
                             !isValidDateForSelect(
                               new Date(
-                                getCurrentWeekDates(weekOffset + 1)[0].isoDate,
-                              ),
+                                getCurrentWeekDates(weekOffset + 1)[0].isoDate
+                              )
                             )
                           }
                           onClick={handleNextWeek}
@@ -690,7 +828,7 @@ const RolesPage: React.FC = () => {
           <br />
           {filteredEmployees.length > 0 ? (
             <SelectorTableComponent
-              key={`schedules-${schedules.length}-${schedules.map(s => s.id).join('-')}`}
+              key={`schedules-${schedules.length}-${schedules.map((s) => s.id).join("-")}`}
               filteredEmployees={filteredEmployees}
               schedules={schedules}
               hoursWorked={hoursWorked}
@@ -720,18 +858,21 @@ const RolesPage: React.FC = () => {
       )}
       <DialogComponent
         open={openExportDialog}
-        onClose={handleCloseExportDialog}
-        onConfirm={() => handleExportHours(true)}
+        onClose={() => {
+          setOpenExportDialog(false);
+          handleExportHours(false);
+        }}
+        onConfirm={() => {
+          setOpenExportDialog(false);
+          handleExportHours(true);
+        }}
         title={MANAGEMENT.DIALOG_EXPORT_TITLE}
-        message={
-          exportType === "excel"
-            ? MANAGEMENT.DIALOG_EXPORT_MESSAGE_EXCEL
-            : MANAGEMENT.DIALOG_EXPORT_MESSAGE_PDF
-        }
-        type="info"
+        message={MANAGEMENT.DIALOG_EXPORT_MESSAGE}
+        type="warning"
         confirmText={MANAGEMENT.DIALOG_EXPORT_CONFIRM}
         cancelText={MANAGEMENT.DIALOG_EXPORT_CANCEL}
         loading={isExporting}
+        icon={<FileDownloadIcon color="warning" />}
       />
     </Box>
   );

@@ -10,5 +10,6 @@ router.get("/employee/:id/has-worked", weeklySummaryController.hasWorkedCurrenWe
 router.post("/", authenticateToken, weeklySummaryController.createWeeklySummary);
 router.put("/:id", authenticateToken, weeklySummaryController.updateWeeklySummary);
 router.delete("/:id", authenticateToken, weeklySummaryController.deleteWeeklySummary);
+router.delete("/bulk", authenticateToken, weeklySummaryController.deleteAllWeeklySummaries);
 
 export default router;

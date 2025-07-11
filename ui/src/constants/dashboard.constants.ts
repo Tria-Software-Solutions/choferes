@@ -50,3 +50,14 @@ export const DASHBOARD_PERMISSIONS = {
   SEARCH_PLACEHOLDER: "Buscar permiso...",
   NO_PERMISSIONS: "No hay permisos registrados",
 };
+
+export const DASHBOARD_BULK_ACTIONS = {
+  EXPORT_EXCEL: "Exportar a Excel",
+  EXPORT_PDF: "Exportar a PDF",
+  DELETE_DIALOG_TITLE: "Confirmar eliminación",
+  DELETE_DIALOG_MESSAGE: "¿Quieres hacer una limpieza y eliminar los datos?\nEsta acción no se puede deshacer.",
+  DELETE_CONFIRM_TEXT: "Eliminar todo",
+  DELETE_CANCEL_TEXT: "Cancelar",
+  DELETE_SUCCESS: "Datos eliminados correctamente",
+  DELETE_ERROR: "Error al eliminar datos",
+};

@@ -29,8 +29,6 @@ import {
 import {
   createExportOptions,
   exportFileFormattedDate,
-  exportToExcel,
-  exportToPDF,
 } from "../../../utils/export";
 import { translateDayOptionsToSpanish } from "../../../utils/string";
 import PAGE_TITLE from "../../../constants/pageTitle.constants";
@@ -40,8 +38,6 @@ import EditCalendarIcon from "@mui/icons-material/EditCalendar";
 import DownloadRoundedIcon from "@mui/icons-material/DownloadRounded";
 import CloseRoundedIcon from "@mui/icons-material/CloseRounded";
 import ManageSearchIcon from "@mui/icons-material/ManageSearch";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faFileExcel, faFilePdf } from "@fortawesome/free-solid-svg-icons";
 import AddRoundedIcon from "@mui/icons-material/AddRounded";
 import DeleteOutlineIcon from "@mui/icons-material/DeleteOutline";
 import { NOTIFICATIONS } from "../../../constants/constants";
@@ -64,14 +60,20 @@ import {
   addDialogPaperSx,
 } from "./styles";
 import { useLocation } from "react-router-dom";
-import { useTablePreferences } from '../../../hooks/useTablePreferences';
+import { useTablePreferences } from "../../../hooks/useTablePreferences";
+import DescriptionIcon from "@mui/icons-material/Description";
+import PictureAsPdfIcon from "@mui/icons-material/PictureAsPdf";
+import AddCircleOutlineIcon from "@mui/icons-material/AddCircleOutline";
+import { format } from "date-fns";
+import { es } from "date-fns/locale";
+import { capitalizeFirstLetter } from "../../../utils/string";
 
 // Schedules management page component
 const SchedulesPage: React.FC = () => {
   const dispatch = useDispatch<AppDispatch>();
   const { userPermissions } = useAuthContext();
   const { schedules, isLoadingSchedules } = useSelector(
-    (state: RootState) => state.schedules,
+    (state: RootState) => state.schedules
   );
   const { showNotification } = useAppNotifications();
   const [filteredSchedules, setFilteredSchedules] = useState<Schedule[]>([]);
@@ -101,7 +103,7 @@ const SchedulesPage: React.FC = () => {
   const location = useLocation();
 
   const getInitialRowsPerPage = () => {
-    if (typeof window !== 'undefined') {
+    if (typeof window !== "undefined") {
       const maxHeight = window.innerHeight * 0.6;
       const headHeight = 56;
       const paginationHeight = 64;
@@ -114,7 +116,8 @@ const SchedulesPage: React.FC = () => {
     return 25;
   };
 
-  const { search, setSearch, rowsPerPage, setRowsPerPage } = useTablePreferences('schedules', getInitialRowsPerPage);
+  const { search, setSearch, rowsPerPage, setRowsPerPage } =
+    useTablePreferences("schedules", getInitialRowsPerPage);
 
   // Fetch all schedules on mount
   useEffect(() => {
@@ -132,7 +135,7 @@ const SchedulesPage: React.FC = () => {
         : translateDayOptionsToSpanish(schedule.days);
 
       return normalizeString(
-        `${schedule.label} ${daysString} ${schedule.hours}`,
+        `${schedule.label} ${daysString} ${schedule.hours}`
       )
         .toLowerCase()
         .includes(normalizeString(search).toLowerCase());
@@ -172,9 +175,15 @@ const SchedulesPage: React.FC = () => {
       setIsCreatingSchedule(true);
       await dispatch(createSchedule(newSchedule));
       setOpenAddScheduleModal(false);
-      showNotification(NOTIFICATIONS.SCHEDULE_CREATE_SUCCESS, { severity: 'success', duration: 3000 });
+      showNotification(NOTIFICATIONS.SCHEDULE_CREATE_SUCCESS, {
+        severity: "success",
+        duration: 3000,
+      });
     } catch (error) {
-      showNotification(NOTIFICATIONS.SCHEDULE_CREATE_ERROR, { severity: 'error', duration: 5000 });
+      showNotification(NOTIFICATIONS.SCHEDULE_CREATE_ERROR, {
+        severity: "error",
+        duration: 5000,
+      });
     } finally {
       setIsCreatingSchedule(false);
     }
@@ -206,10 +215,16 @@ const SchedulesPage: React.FC = () => {
       dispatch(updateSchedule({ id, updatedSchedule }));
       setEditRowId(null);
       setEditFields({ label: "", days: [], hours: "", specialSchedule: false });
-      showNotification(NOTIFICATIONS.SCHEDULE_UPDATE_SUCCESS, { severity: 'success', duration: 3000 });
+      showNotification(NOTIFICATIONS.SCHEDULE_UPDATE_SUCCESS, {
+        severity: "success",
+        duration: 3000,
+      });
     } catch (error) {
       handleCancel();
-      showNotification(NOTIFICATIONS.SCHEDULE_UPDATE_ERROR, { severity: 'error', duration: 5000 });
+      showNotification(NOTIFICATIONS.SCHEDULE_UPDATE_ERROR, {
+        severity: "error",
+        duration: 5000,
+      });
     }
   };
 
@@ -242,32 +257,57 @@ const SchedulesPage: React.FC = () => {
       await dispatch(deleteSchedule(scheduleToDelete));
       setOpenDeleteDialog(false);
       setScheduleToDelete(null);
-      showNotification(NOTIFICATIONS.SCHEDULE_DELETE_SUCCESS, { severity: 'success', duration: 3000 });
+      showNotification(NOTIFICATIONS.SCHEDULE_DELETE_SUCCESS, {
+        severity: "success",
+        duration: 3000,
+      });
     } catch (error) {
-      showNotification(NOTIFICATIONS.SCHEDULE_DELETE_ERROR, { severity: 'error', duration: 5000 });
+      showNotification(NOTIFICATIONS.SCHEDULE_DELETE_ERROR, {
+        severity: "error",
+        duration: 5000,
+      });
     } finally {
       setIsDeletingSchedule(false);
     }
   };
 
+  // When preparing data for export, only include the desired fields:
+  const exportData = filteredSchedules.map((s) => ({
+    Nombre: s.label,
+    Días: s.days,
+    Horas: s.hours,
+    Agregado: s.createdAt
+      ? capitalizeFirstLetter(
+          format(new Date(s.createdAt), "EEEE dd 'de' MMMM 'de' yyyy", {
+            locale: es,
+          })
+        )
+      : "",
+    Actualizado: s.updatedAt
+      ? capitalizeFirstLetter(
+          format(new Date(s.updatedAt), "EEEE dd 'de' MMMM 'de' yyyy", {
+            locale: es,
+          })
+        )
+      : "",
+  }));
+
   const exportOptions = useMemo(() => {
-    const excelOption = userPermissions.includes(
-      PERMISSIONS.EXPORT_EXCEL_SCHEDULES,
-    )
-      ? exportToExcel
-      : undefined;
-    const pdfOption = userPermissions.includes(PERMISSIONS.EXPORT_PDF_SCHEDULES)
-      ? exportToPDF
-      : undefined;
-    return createExportOptions(
-      <FontAwesomeIcon icon={faFileExcel} size="lg" />,
-      <FontAwesomeIcon icon={faFilePdf} size="lg" />,
-      excelOption,
-      pdfOption,
-      filteredSchedules,
-      `horarios-${exportFileFormattedDate(new Date())}`,
-    );
-  }, [userPermissions, filteredSchedules]);
+    const exportHeaders = [
+      "Nombre",
+      "Días",
+      "Horas",
+      "Agregado",
+      "Actualizado",
+    ];
+    return createExportOptions({
+      excelIcon: <DescriptionIcon />,
+      pdfIcon: <PictureAsPdfIcon />,
+      data: exportData,
+      fileName: `horarios-${exportFileFormattedDate(new Date())}`,
+      customHeaders: exportHeaders,
+    });
+  }, [exportData]);
 
   return (
     <Box>
@@ -416,6 +456,7 @@ const SchedulesPage: React.FC = () => {
         subtitle={MANAGEMENT.SCHEDULES_PAGE.DIALOG_ADD_SUBTITLE}
         hideActions
         paperSx={addDialogPaperSx ?? {}}
+        icon={<AddCircleOutlineIcon color="info" />}
       >
         <AddScheduleForm
           onSubmit={handleCreate}
