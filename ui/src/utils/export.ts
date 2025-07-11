@@ -146,19 +146,26 @@ export function exportTable({
       // SheetJS expects arrays of arrays for aoa_to_sheet
       const aoa = [...groupedHeaders, ...strictRows.map(row => exportHeaders.map(key => row[key]))];
       ws = XLSX.utils.aoa_to_sheet(aoa);
-      // Calculate merges for the grouped header row (first row)
-      const merges = [];
-      for (let i = 0; i < groupedHeaders[0].length; ) {
-        const val = groupedHeaders[0][i];
-        let j = i + 1;
-        while (j < groupedHeaders[0].length && groupedHeaders[0][j] === val) j++;
-        if (j - i > 1) {
-          merges.push({ s: { r: 0, c: i }, e: { r: 0, c: j - 1 } });
+      if (
+        groupedHeaders[0][0] &&
+        groupedHeaders[0].slice(1).every(cell => cell === "")
+      ) {
+        ws['!merges'] = [
+          { s: { r: 0, c: 0 }, e: { r: 0, c: exportHeaders.length - 1 } }
+        ];
+      } else {
+        const merges = [];
+        for (let i = 0; i < groupedHeaders[0].length; ) {
+          const val = groupedHeaders[0][i];
+          let j = i + 1;
+          while (j < groupedHeaders[0].length && groupedHeaders[0][j] === val) j++;
+          if (j - i > 1) {
+            merges.push({ s: { r: 0, c: i }, e: { r: 0, c: j - 1 } });
+          }
+          i = j;
         }
-        i = j;
+        ws['!merges'] = merges;
       }
-      ws['!merges'] = merges;
-      // Forzar el rango de la hoja para evitar columna vacía
       if (ws['!ref']) {
         const range = XLSX.utils.decode_range(ws['!ref']);
         range.e.c = exportHeaders.length - 1;
@@ -166,7 +173,6 @@ export function exportTable({
       }
     } else {
       ws = XLSX.utils.json_to_sheet(strictRows, { header: exportHeaders });
-      // Forzar el rango de la hoja para evitar columna vacía
       if (ws['!ref']) {
         const range = XLSX.utils.decode_range(ws['!ref']);
         range.e.c = exportHeaders.length - 1;

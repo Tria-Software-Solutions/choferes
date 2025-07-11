@@ -35,8 +35,9 @@ import { format } from "date-fns";
 import { es } from "date-fns/locale";
 import { isTodayOrFuture } from "../../../utils/dates";
 import {
-  createExportOptions,
   exportFileFormattedDate,
+  exportTable,
+  ExportableRecord,
 } from "../../../utils/export";
 import { capitalizeFirstLetter } from "../../../utils/string";
 import PAGE_TITLE from "../../../constants/pageTitle.constants";
@@ -448,55 +449,52 @@ const VehiclesPage: React.FC = () => {
     }
   };
 
-  // When preparing data for export, only include the desired fields:
-  const exportData = filteredWeekVehicles.map((v) => ({
-    Fecha: v.parkingDate
-      ? capitalizeFirstLetter(
-          format(new Date(v.parkingDate), "EEEE dd 'de' MMMM 'de' yyyy", {
-            locale: es,
-          })
-        )
-      : "",
-    Placa: v.licensePlate,
-    Marca: v.brand,
-    Color: v.color,
-    Espacio: v.parkingLot,
-    Observaciones: v.notes,
-    Agregado: v.createdAt
-      ? capitalizeFirstLetter(
-          format(new Date(v.createdAt), "EEEE dd 'de' MMMM 'de' yyyy", {
-            locale: es,
-          })
-        )
-      : "",
-    Actualizado: v.updatedAt
-      ? capitalizeFirstLetter(
-          format(new Date(v.updatedAt), "EEEE dd 'de' MMMM 'de' yyyy", {
-            locale: es,
-          })
-        )
-      : "",
-  }));
-
-  const exportOptions = useMemo(() => {
+  const getExportDataAndHeaders = () => {
+    const exportRows: ExportableRecord[] = [];
     const exportHeaders = [
       "Fecha",
+      "Boleta",
       "Placa",
       "Marca",
       "Color",
       "Espacio",
       "Observaciones",
-      "Agregado",
-      "Actualizado",
     ];
-    return createExportOptions({
-      excelIcon: <DescriptionIcon />,
-      pdfIcon: <PictureAsPdfIcon />,
-      data: exportData,
-      fileName: `reporte-de-vehiculos-${exportFileFormattedDate(selectedDate || new Date())}`,
-      customHeaders: exportHeaders,
+    const firstRow: string[] = [
+      capitalizeFirstLetter(
+        format(new Date(selectedDate), "EEEE dd 'de' MMMM 'de' yyyy", { locale: es })
+      ),
+      ...Array(exportHeaders.length - 1).fill("")
+    ];
+    const secondRow: string[] = [...exportHeaders];
+    filteredWeekVehicles.forEach((v) => {
+      exportRows.push({
+        Fecha: v.parkingDate
+          ? format(new Date(v.parkingDate), "dd/MM/yyyy")
+          : "",
+        Boleta: v.ticket,
+        Placa: v.licensePlate,
+        Marca: v.brand,
+        Color: v.color,
+        Espacio: v.parkingLot,
+        Observaciones: v.notes,
+      });
     });
-  }, [exportData, selectedDate]);
+    const groupedHeaders = [firstRow, secondRow];
+    return { exportRows, exportHeaders, groupedHeaders };
+  };
+
+  // Handler para exportar con groupedHeaders (solo Excel)
+  const handleExport = (format: 'excel' | 'pdf') => {
+    const { exportRows, exportHeaders, groupedHeaders } = getExportDataAndHeaders();
+    exportTable({
+      data: exportRows,
+      fileName: `reporte-de-vehiculos-${exportFileFormattedDate(selectedDate || new Date())}`,
+      format,
+      customHeaders: exportHeaders,
+      groupedHeaders: format === 'excel' ? groupedHeaders : undefined,
+    });
+  };
   // Use exportTable({ data: exportData, ... }) for export
 
   return (
@@ -532,7 +530,18 @@ const VehiclesPage: React.FC = () => {
             <Box sx={exportSpeedDialBoxStyles}>
               {filteredWeekVehicles.length > 0 && (
                 <SpeedDialComponent
-                  actions={exportOptions}
+                  actions={[
+                    {
+                      label: "Exportar a Excel",
+                      icon: <DescriptionIcon />,
+                      onClick: () => handleExport('excel'),
+                    },
+                    {
+                      label: "Exportar a PDF",
+                      icon: <PictureAsPdfIcon />,
+                      onClick: () => handleExport('pdf'),
+                    },
+                  ]}
                   mainIcon={<DownloadRoundedIcon />}
                   openIcon={<CloseRoundedIcon />}
                   direction="left"
