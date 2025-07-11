@@ -714,13 +714,9 @@ const SelectorTableComponent: React.FC<SelectorTableProps> = ({
                             fontWeight={600}
                             sx={totalHoursTypographyStyles}
                           >
-                            {resultTotalHours(employee)}{" "}
-                            {SELECTOR_TABLE.HOURS}
+                            {resultTotalHours(employee)} {SELECTOR_TABLE.HOURS}
                           </Typography>
-                          <Tooltip
-                            title={SELECTOR_TABLE.OVERTIME_HOURS}
-                            arrow
-                          >
+                          <Tooltip title={SELECTOR_TABLE.OVERTIME_HOURS} arrow>
                             <span>
                               <Badge
                                 badgeContent={resultOvertime(employee)}
@@ -747,11 +743,7 @@ const SelectorTableComponent: React.FC<SelectorTableProps> = ({
           </Table>
         </TableContainer>
         <Divider />
-        <Box
-          display="flex"
-          justifyContent="space-between"
-          alignItems="center"
-        >
+        <Box display="flex" justifyContent="space-between" alignItems="center">
           {!isSmallScreen && (
             <Typography variant="body2" sx={{ ml: 2 }}>
               {renderPeriodFooter(
@@ -796,6 +788,7 @@ const SelectorTableComponent: React.FC<SelectorTableProps> = ({
         subtitle={getDialogTitle(openAdjustDialogEmployee)}
         hideActions
         paperSx={addDialogPaperSx as object}
+        icon={<MoreTimeIcon color="warning" />}
       >
         <AdjustHoursDialog
           onCancel={() => setOpenAdjustDialogEmployee(null)}
@@ -826,6 +819,7 @@ const SelectorTableComponent: React.FC<SelectorTableProps> = ({
         subtitle={getDialogTitle(openInfoDialogEmployee)}
         hideActions
         paperSx={addDialogPaperSx as object}
+        icon={<InfoOutlinedIcon color="info" />}
       >
         <WorkedHoursSummaryDialog
           onCancel={() => setOpenInfoDialogEmployee(null)}
