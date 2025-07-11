@@ -624,12 +624,9 @@ const RolesPage: React.FC = () => {
     const monthYear = capitalizeFirstLetter(
       format(dateObj, "MMMM yyyy", { locale: es })
     );
-    const firstRow = [
-      "",
-      ...currentWeek.map(() => monthYear),
-      ...(includeTotals ? ["", ""] : []),
-    ];
-    const secondRow = [
+    const totalCols = 1 + currentWeek.length + (includeTotals ? 2 : 0);
+    const firstRow = [monthYear, ...Array(totalCols - 1).fill("")];
+       const secondRow = [
       "Empleado",
       ...currentWeek.map(({ day, date }) => {
         const dateObj = typeof date === "string" ? new Date(date) : date;
