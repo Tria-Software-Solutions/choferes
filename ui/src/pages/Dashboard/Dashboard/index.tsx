@@ -32,8 +32,9 @@ import DialogComponent from "../../../components/Dialog/Dialog.component";
 import { getEmployees } from "../../../services/employeeService";
 import { getHoursWorked } from "../../../services/hoursWorkedService";
 import { getWeeklySummaries } from "../../../services/weeklySummaryService";
-import { getVehicles } from "../../../services/vehicleService";
-import { exportTable, exportFileFormattedDate } from "../../../utils/export";
+import { getSchedules } from "../../../services/scheduleService";
+import { fetchAllVehicles } from "../../../services/vehicleService";
+import { exportTable, exportFileFormattedDate, buildWeeklySelectorTableExportData, buildVehiclesExportData } from "../../../utils/export";
 import { DASHBOARD_BULK_ACTIONS } from '../../../constants/dashboard.constants';
 
 // Dashboard page component for managing users, roles, and permissions
@@ -63,95 +64,42 @@ const Dashboard: React.FC = () => {
     { label: DASHBOARD_BULK_ACTIONS.EXPORT_PDF, icon: <PictureAsPdfIcon />, type: "pdf" },
   ];
 
-  // Define a minimal type for export
-  interface EmployeeExport {
-    ID: string;
-    Nombre: string;
-    Apellido: string;
-    DNI: string;
-    'Fecha de Nacimiento': string;
-    'Teléfono': string;
-    Email: string;
-    Dirección: string;
-    Cargo: string;
-    Estado: string;
-    'Fecha de Ingreso': string;
-    'Fecha de Salida': string;
-    'Horas Trabajadas': number;
-    'Semanas Trabajadas': number;
-    'Vehículos Asignados': number;
-    'Permisos Asignados': number;
-    'Roles Asignados': number;
-  }
-
-  // Define minimal types for export mapping
-  interface Employee {
-    id: string;
-    name: string;
-    lastName: string;
-    dni: string;
-    dateOfBirth: string;
-    phone: string;
-    email: string;
-    address: string;
-    role: string;
-    status: string;
-    dateOfHire: string;
-    dateOfLeave: string;
-    permissions: unknown[];
-    roles: unknown[];
-  }
-  interface HoursWorked {
-    employeeId: string;
-    totalHours: number;
-  }
-  interface WeeklySummary {
-    employeeId: string;
-    weeksWorked: number;
-  }
-
   // Main export handler: triggers backup export and then shows delete dialog
   const handleExport = async (type: "excel" | "pdf") => {
     setLoading(true);
     try {
       // 1. Fetch all required data
       const employeesResponse = await getEmployees();
-      const employees = Array.isArray(employeesResponse) ? employeesResponse : employeesResponse.employees;
+      const employees = Array.isArray(employeesResponse)
+        ? employeesResponse
+        : employeesResponse.employees;
       const hoursWorked = await getHoursWorked();
       const weeklySummaries = await getWeeklySummaries();
-      const vehicles = await getVehicles(1, 10000);
+      const schedules = await getSchedules();
+      const vehicles = await fetchAllVehicles();
 
-      // 2. Prepare roles data (same as management pages)
-      const rolesData = (employees as Employee[]).map((employee): EmployeeExport => ({
-        "ID": employee.id,
-        "Nombre": employee.name,
-        "Apellido": employee.lastName,
-        "DNI": employee.dni,
-        "Fecha de Nacimiento": employee.dateOfBirth,
-        "Teléfono": employee.phone,
-        "Email": employee.email,
-        "Dirección": employee.address,
-        "Cargo": employee.role,
-        "Estado": employee.status,
-        "Fecha de Ingreso": employee.dateOfHire,
-        "Fecha de Salida": employee.dateOfLeave,
-        "Horas Trabajadas": (hoursWorked as HoursWorked[]).find((h) => h.employeeId === employee.id)?.totalHours || 0,
-        "Semanas Trabajadas": (weeklySummaries as WeeklySummary[]).find((w) => w.employeeId === employee.id)?.weeksWorked || 0,
-        "Vehículos Asignados": (vehicles as unknown as { employeeId: string }[]).filter((v) => v.employeeId === employee.id).length,
-        "Permisos Asignados": employee.permissions.length,
-        "Roles Asignados": employee.roles.length,
-      }));
-      const rolesFileName = `backup-roles-${exportFileFormattedDate(new Date())}`;
-      const vehiclesFileName = `backup-vehiculos-${exportFileFormattedDate(new Date())}`;
-      // 3. Export both files directly (this triggers the save dialog)
+      // 2. Prepare SelectorTable weekly data
+      const { headers: selectorHeaders, rows: selectorRows } = buildWeeklySelectorTableExportData({
+        employees,
+        hoursWorked,
+        weeklySummaries,
+        schedules,
+      });
+      const selectorFileName = `Backup-roles-${exportFileFormattedDate(new Date())}`;
+
+      // 3. Prepare vehicles data
+      const { headers: vehiclesHeaders, rows: vehiclesRows } = buildVehiclesExportData(vehicles);
+      const vehiclesFileName = `Backup-reporte-de-vehículos-${exportFileFormattedDate(new Date())}`;
+
+      // 4. Export both files directly (this triggers the save dialog)
       if (type === "excel") {
-        exportTable({ data: rolesData, fileName: rolesFileName, format: 'excel' });
-        exportTable({ data: vehicles, fileName: vehiclesFileName, format: 'excel' });
+        exportTable({ data: selectorRows, fileName: selectorFileName, format: 'excel', customHeaders: selectorHeaders });
+        exportTable({ data: vehiclesRows, fileName: vehiclesFileName, format: 'excel', customHeaders: vehiclesHeaders });
       } else {
-        exportTable({ data: rolesData, fileName: rolesFileName, format: 'pdf' });
-        exportTable({ data: vehicles, fileName: vehiclesFileName, format: 'pdf' });
+        exportTable({ data: selectorRows, fileName: selectorFileName, format: 'pdf', customHeaders: selectorHeaders });
+        exportTable({ data: vehiclesRows, fileName: vehiclesFileName, format: 'pdf', customHeaders: vehiclesHeaders });
       }
-      // 4. Show the delete confirmation dialog
+      // 5. Show the delete confirmation dialog
       setShowDeleteDialog(true);
     } catch (e) {
       return {};

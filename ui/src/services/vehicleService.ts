@@ -51,3 +51,21 @@ export const deleteVehicle = async (id: number) => {
   invalidateCache("/vehicles");
   return { id, message: response.data };
 };
+
+// Utility to fetch all vehicles (for backup/export)
+export const fetchAllVehicles = async () => {
+  let page = 1;
+  const perPage = 100;
+  let allVehicles: Vehicle[] = [];
+  let keepFetching = true;
+  while (keepFetching) {
+    const vehicles: Vehicle[] = await getVehicles(page, perPage);
+    allVehicles = allVehicles.concat(vehicles);
+    if (vehicles.length < perPage) {
+      keepFetching = false;
+    } else {
+      page++;
+    }
+  }
+  return allVehicles;
+};
