@@ -279,41 +279,46 @@ export function buildWeeklySelectorTableExportData({
   weeklySummaries: WeeklySummary[];
   schedules: Schedule[];
 }) {
-  const weeksSet = new Set<string>();
-  weeklySummaries.forEach(ws => {
-    weeksSet.add(`${ws.year}-${ws.month}-${ws.weekNumber}`);
-  });
-  const allWeeks = Array.from(weeksSet).map(str => {
-    const [year, month, weekNumber] = str.split('-').map(Number);
-    return { year, month, weekNumber };
-  }).sort((a, b) => a.year - b.year || a.month - b.month || a.weekNumber - b.weekNumber);
+  // 1. Get all unique (employeeId, weekNumber, year) combinations from weeklySummaries
+  const summaryCombos = weeklySummaries.map(ws => ({
+    employeeId: ws.employeeId,
+    weekNumber: ws.weekNumber,
+    year: ws.year,
+    totalHours: ws.totalHours,
+  }));
 
+  // 2. Sort employees by name
   const sortedEmployees = [...employees].sort((a, b) => {
     const nameA = `${a.firstName} ${a.lastName}`.toLowerCase();
     const nameB = `${b.firstName} ${b.lastName}`.toLowerCase();
     return nameA.localeCompare(nameB);
   });
 
+  // 3. Build headers
   const dayNames = ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado', 'Domingo'];
-  const headers = ['Año', 'Mes', 'Semana', 'Empleado', ...dayNames, 'Total horas', 'Horas extra'];
+  const headers = ['Año', 'Semana', 'Empleado', ...dayNames, 'Total horas', 'Horas extra'];
 
+  // 4. Build rows
   const rows: ExportableRecord[] = [];
-  for (const week of allWeeks) {
-    const firstDay = getFirstDayOfWeek(week.year, week.month, week.weekNumber);
-    const lastDay = new Date(firstDay);
-    lastDay.setDate(firstDay.getDate() + 6);
-    const semanaLabel = `Semana ${week.weekNumber} (${firstDay.getDate().toString().padStart(2, '0')}/${(firstDay.getMonth()+1).toString().padStart(2, '0')}/${firstDay.getFullYear()} - ${lastDay.getDate().toString().padStart(2, '0')}/${(lastDay.getMonth()+1).toString().padStart(2, '0')}/${lastDay.getFullYear()})`;
-    for (const emp of sortedEmployees) {
+  for (const emp of sortedEmployees) {
+    // Find all summaries for this employee
+    const empSummaries = summaryCombos.filter(s => s.employeeId === emp.id);
+    for (const summary of empSummaries) {
+      // Calculate the Monday of the ISO week
+      const monday = getMondayOfISOWeek(summary.weekNumber, summary.year);
+      const lastDay = new Date(monday);
+      lastDay.setDate(monday.getDate() + 6);
+      const semanaLabel = `Semana ${summary.weekNumber} (${monday.getDate().toString().padStart(2, '0')}/${(monday.getMonth()+1).toString().padStart(2, '0')}/${monday.getFullYear()} - ${lastDay.getDate().toString().padStart(2, '0')}/${(lastDay.getMonth()+1).toString().padStart(2, '0')}/${lastDay.getFullYear()})`;
       const row: ExportableRecord = {
-        'Año': week.year,
-        'Mes': firstDay.toLocaleString('es-ES', { month: 'long' }),
+        'Año': summary.year,
         'Semana': semanaLabel,
         'Empleado': `${emp.firstName} ${emp.lastName}`,
       };
+      // For each day of the week
       for (let i = 0; i < 7; i++) {
-        const day = new Date(firstDay);
-        day.setDate(firstDay.getDate() + i);
-        // Find the hoursWorked record for that employee and day
+        const day = new Date(monday);
+        day.setDate(monday.getDate() + i);
+        // Find hoursWorked for this employee and exact date
         const hw = hoursWorked.find(h => h.employeeId === emp.id && new Date(h.date).toDateString() === day.toDateString());
         let label = 'Libre';
         if (hw && hw.scheduleId) {
@@ -322,26 +327,27 @@ export function buildWeeklySelectorTableExportData({
         }
         row[dayNames[i]] = label;
       }
-      // Find the weekly summary
-      const ws = weeklySummaries.find(w => w.employeeId === emp.id && w.weekNumber === week.weekNumber && w.year === week.year);
-      // If there is no weekly summary, or all days are 'Libre', total hours = 0
-      const allLibre = dayNames.every(dayName => row[dayName] === 'Libre');
-      row['Total horas'] = ws ? ws.totalHours : (allLibre ? 0 : '');
-      row['Horas extra'] = allLibre ? 0 : '';
+      row['Total horas'] = summary.totalHours;
+      // Horas extra: not available in WeeklySummary, always set to 0
+      row['Horas extra'] = 0;
       rows.push(row);
     }
   }
   return { headers, rows };
 }
 
-function getFirstDayOfWeek(year: number, month: number, weekNumber: number) {
-  const firstOfMonth = new Date(year, month - 1, 1);
-  let day = firstOfMonth;
-  while (day.getDay() !== 1) { // 1 = lunes
-    day = new Date(day.getFullYear(), day.getMonth(), day.getDate() + 1);
-  }
-  const weekOffset = weekNumber - 1;
-  return new Date(day.getFullYear(), day.getMonth(), day.getDate() + weekOffset * 7);
+/**
+ * Returns the Monday of a given ISO week and year
+ */
+function getMondayOfISOWeek(week: number, year: number) {
+  const simple = new Date(year, 0, 1 + (week - 1) * 7);
+  const dow = simple.getDay();
+  let monday = new Date(simple);
+  if (dow <= 4)
+    monday.setDate(simple.getDate() - simple.getDay() + 1);
+  else
+    monday.setDate(simple.getDate() + 8 - simple.getDay());
+  return monday;
 }
 
 export function buildVehiclesExportData(vehicles: Vehicle[]) {
