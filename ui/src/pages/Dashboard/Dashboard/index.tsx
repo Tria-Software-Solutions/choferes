@@ -26,6 +26,7 @@ import BackupIcon from "@mui/icons-material/Backup";
 import CloseRoundedIcon from "@mui/icons-material/CloseRounded";
 import DescriptionIcon from "@mui/icons-material/Description";
 import PictureAsPdfIcon from "@mui/icons-material/PictureAsPdf";
+import DeleteOutlineIcon from "@mui/icons-material/DeleteOutline";
 import { deleteAllExceptCoreTables } from "../../../services/backupService";
 import { useAppNotifications } from "../../../components/Snackbar/Snackbar.component";
 import DialogComponent from "../../../components/Dialog/Dialog.component";
@@ -34,8 +35,13 @@ import { getHoursWorked } from "../../../services/hoursWorkedService";
 import { getWeeklySummaries } from "../../../services/weeklySummaryService";
 import { getSchedules } from "../../../services/scheduleService";
 import { fetchAllVehicles } from "../../../services/vehicleService";
-import { exportTable, exportFileFormattedDate, buildWeeklySelectorTableExportData, buildVehiclesExportData } from "../../../utils/export";
-import { DASHBOARD_BULK_ACTIONS } from '../../../constants/dashboard.constants';
+import {
+  exportTable,
+  exportFileFormattedDate,
+  buildWeeklySelectorTableExportData,
+  buildVehiclesExportData,
+} from "../../../utils/export";
+import { DASHBOARD_BULK_ACTIONS } from "../../../constants/dashboard.constants";
 
 // Dashboard page component for managing users, roles, and permissions
 const Dashboard: React.FC = () => {
@@ -60,8 +66,16 @@ const Dashboard: React.FC = () => {
 
   // Export actions for SpeedDial (Excel/PDF)
   const exportActions = [
-    { label: DASHBOARD_BULK_ACTIONS.EXPORT_EXCEL, icon: <DescriptionIcon />, type: "excel" },
-    { label: DASHBOARD_BULK_ACTIONS.EXPORT_PDF, icon: <PictureAsPdfIcon />, type: "pdf" },
+    {
+      label: DASHBOARD_BULK_ACTIONS.EXPORT_EXCEL,
+      icon: <DescriptionIcon />,
+      type: "excel",
+    },
+    {
+      label: DASHBOARD_BULK_ACTIONS.EXPORT_PDF,
+      icon: <PictureAsPdfIcon />,
+      type: "pdf",
+    },
   ];
 
   // Main export handler: triggers backup export and then shows delete dialog
@@ -79,25 +93,47 @@ const Dashboard: React.FC = () => {
       const vehicles = await fetchAllVehicles();
 
       // 2. Prepare SelectorTable weekly data
-      const { headers: selectorHeaders, rows: selectorRows } = buildWeeklySelectorTableExportData({
-        employees,
-        hoursWorked,
-        weeklySummaries,
-        schedules,
-      });
+      const { headers: selectorHeaders, rows: selectorRows } =
+        buildWeeklySelectorTableExportData({
+          employees,
+          hoursWorked,
+          weeklySummaries,
+          schedules,
+        });
       const selectorFileName = `Backup-roles-${exportFileFormattedDate(new Date())}`;
 
       // 3. Prepare vehicles data
-      const { headers: vehiclesHeaders, rows: vehiclesRows } = buildVehiclesExportData(vehicles);
+      const { headers: vehiclesHeaders, rows: vehiclesRows } =
+        buildVehiclesExportData(vehicles);
       const vehiclesFileName = `Backup-reporte-de-vehículos-${exportFileFormattedDate(new Date())}`;
 
       // 4. Export both files directly (this triggers the save dialog)
       if (type === "excel") {
-        exportTable({ data: selectorRows, fileName: selectorFileName, format: 'excel', customHeaders: selectorHeaders });
-        exportTable({ data: vehiclesRows, fileName: vehiclesFileName, format: 'excel', customHeaders: vehiclesHeaders });
+        exportTable({
+          data: selectorRows,
+          fileName: selectorFileName,
+          format: "excel",
+          customHeaders: selectorHeaders,
+        });
+        exportTable({
+          data: vehiclesRows,
+          fileName: vehiclesFileName,
+          format: "excel",
+          customHeaders: vehiclesHeaders,
+        });
       } else {
-        exportTable({ data: selectorRows, fileName: selectorFileName, format: 'pdf', customHeaders: selectorHeaders });
-        exportTable({ data: vehiclesRows, fileName: vehiclesFileName, format: 'pdf', customHeaders: vehiclesHeaders });
+        exportTable({
+          data: selectorRows,
+          fileName: selectorFileName,
+          format: "pdf",
+          customHeaders: selectorHeaders,
+        });
+        exportTable({
+          data: vehiclesRows,
+          fileName: vehiclesFileName,
+          format: "pdf",
+          customHeaders: vehiclesHeaders,
+        });
       }
       // 5. Show the delete confirmation dialog
       setShowDeleteDialog(true);
@@ -114,9 +150,15 @@ const Dashboard: React.FC = () => {
     try {
       await deleteAllExceptCoreTables();
       setShowDeleteDialog(false);
-      showNotification(DASHBOARD_BULK_ACTIONS.DELETE_SUCCESS, { severity: 'success', duration: 4000 });
+      showNotification(DASHBOARD_BULK_ACTIONS.DELETE_SUCCESS, {
+        severity: "success",
+        duration: 4000,
+      });
     } catch {
-      showNotification(DASHBOARD_BULK_ACTIONS.DELETE_ERROR, { severity: 'error', duration: 4000 });
+      showNotification(DASHBOARD_BULK_ACTIONS.DELETE_ERROR, {
+        severity: "error",
+        duration: 4000,
+      });
     } finally {
       setLoading(false);
     }
@@ -211,20 +253,23 @@ const Dashboard: React.FC = () => {
           onClose={() => setShowDeleteDialog(false)}
           onConfirm={handleConfirmDelete}
           title={DASHBOARD_BULK_ACTIONS.DELETE_DIALOG_TITLE}
-          message={(
+          message={
             <>
-              {DASHBOARD_BULK_ACTIONS.DELETE_DIALOG_MESSAGE.split('\n').map((line, idx) => (
-                <React.Fragment key={idx}>
-                  {line}
-                  <br />
-                </React.Fragment>
-              ))}
+              {DASHBOARD_BULK_ACTIONS.DELETE_DIALOG_MESSAGE.split("\n").map(
+                (line, idx) => (
+                  <React.Fragment key={idx}>
+                    {line}
+                    <br />
+                  </React.Fragment>
+                )
+              )}
             </>
-          )}
+          }
           type="delete"
           confirmText={DASHBOARD_BULK_ACTIONS.DELETE_CONFIRM_TEXT}
           cancelText={DASHBOARD_BULK_ACTIONS.DELETE_CANCEL_TEXT}
           loading={loading}
+          icon={<DeleteOutlineIcon color="error" />}
         />
       )}
     </Box>
