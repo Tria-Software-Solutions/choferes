@@ -13,6 +13,8 @@ export const stickyHeaderBoxStyles = (
   backgroundColor: "#f0f2f5",
   padding: isSmallScreen ? "8px" : "16px",
   borderBottom: "1px solid #ddd",
+  borderTopLeftRadius: 8,
+  borderTopRightRadius: 8,
 });
 
 export const headerFlexBoxStyles: SxProps<Theme> = {

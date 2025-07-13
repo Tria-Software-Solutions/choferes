@@ -284,11 +284,36 @@ const SelectorTableComponent: React.FC<SelectorTableProps> = ({
           ref={tableContainerRef}
         >
           <Table stickyHeader aria-label="sticky table">
-            <TableHead sx={tableHeadStyles} ref={tableHeadRef}>
+            <TableHead
+              sx={{
+                ...tableHeadStyles,
+                position: 'relative',
+                backgroundColor: 'transparent',
+                '&::before': {
+                  content: '""',
+                  position: 'absolute',
+                  top: 0,
+                  left: 0,
+                  right: 0,
+                  height: '100%',
+                  backgroundColor: '#f0f2f5',
+                  borderTopLeftRadius: 8,
+                  borderTopRightRadius: 8,
+                  zIndex: 0,
+                },
+              }}
+              ref={tableHeadRef}
+            >
               <TableRow>
                 <TableCell
                   className="employee-column"
-                  sx={employeeColumnCellStyles(isSmallScreen)}
+                  sx={{
+                    ...employeeColumnCellStyles(isSmallScreen),
+                    backgroundColor: '#000', // fondo negro solo en la celda
+                    color: '#fff',
+                    position: 'relative',
+                    zIndex: 1,
+                  }}
                 >
                   <TableSortLabel
                     direction={orderDirection}
@@ -297,6 +322,7 @@ const SelectorTableComponent: React.FC<SelectorTableProps> = ({
                         prev === "asc" ? "desc" : "asc"
                       )
                     }
+                    sx={{ color: '#fff' }}
                   >
                     {SELECTOR_TABLE.EMPLOYEES}
                   </TableSortLabel>
@@ -305,7 +331,13 @@ const SelectorTableComponent: React.FC<SelectorTableProps> = ({
                   <TableCell
                     key={day}
                     align="center"
-                    sx={tableCellStyles(isSmallScreen)}
+                    sx={{
+                      ...tableCellStyles(isSmallScreen),
+                      backgroundColor: '#000', // fondo negro solo en la celda
+                      color: '#fff',
+                      position: 'relative',
+                      zIndex: 1,
+                    }}
                   >
                     {`${translateDayToAbrevSpanish(
                       day as EnglishDayOfWeek
