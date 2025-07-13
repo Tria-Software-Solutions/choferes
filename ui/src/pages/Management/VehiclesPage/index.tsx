@@ -320,7 +320,7 @@ const VehiclesPage: React.FC = () => {
         color: editFields.color,
         parkingLot: editFields.parkingLot,
         notes: editFields.notes,
-        parkingDate: editFields.parkingDate,
+        parkingDate: (editFields.parkingDate as Date).toISOString(),
       };
       await dispatch(updateVehicle({ id, updatedVehicle }));
       setEditRowId(null);
@@ -430,7 +430,7 @@ const VehiclesPage: React.FC = () => {
         color: vehicleData.color,
         parkingLot: vehicleData.parkingLot,
         notes: vehicleData.notes,
-        parkingDate: selectedDate,
+        parkingDate: selectedDate.toISOString(),
       };
 
       await dispatch(createVehicle(newVehicle));
@@ -755,7 +755,7 @@ const VehiclesPage: React.FC = () => {
             licensePlate: v.licensePlate,
             brand: v.brand,
             color: v.color,
-            parkingDate: new Date(v.parkingDate),
+            parkingDate: v.parkingDate,
           }))}
           getNextTicketNumber={getNextTicketNumber}
           defaultParkingDate={selectedDate}

@@ -294,14 +294,17 @@ export function renderEditField<T extends object>({
   }
 
   if (String(column) === "parkingDate") {
-    const dateValue = editFields[String(column)] as Date | undefined;
+    let dateValue = editFields[String(column)];
+    if (typeof dateValue === 'string') {
+      dateValue = new Date(dateValue);
+    }
     const handleDateChange = (date: Date | null) => {
       setEditField && setEditField(String(column), date || new Date());
     };
     return (
       <LocalizationProvider dateAdapter={AdapterDateFns} adapterLocale={es}>
         <DatePicker
-          value={dateValue}
+          value={dateValue as Date}
           onChange={handleDateChange}
           slotProps={{
             textField: {

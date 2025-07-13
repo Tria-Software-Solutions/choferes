@@ -58,7 +58,7 @@ interface AddVehicleFormProps {
     color: string;
     parkingLot: string;
     notes: string;
-    parkingDate: Date;
+    parkingDate: string;
   }) => void;
   onCancel?: () => void;
   isLoading?: boolean;
@@ -67,7 +67,7 @@ interface AddVehicleFormProps {
     licensePlate: string; 
     brand: string; 
     color: string; 
-    parkingDate: Date;
+    parkingDate: string;
   }>;
   getNextTicketNumber: () => string;
   defaultParkingDate?: Date;
@@ -284,7 +284,7 @@ const AddVehicleForm: React.FC<AddVehicleFormProps> = ({
     if (maskedValue.trim()) {
       const existingVehicle = existingVehicles.find((v) => {
         const vehicleDate = new Date(v.parkingDate);
-        const formDate = new Date(formData.parkingDate);
+        const formDate = formData.parkingDate;
         const vehicleDateStr = vehicleDate.toISOString().split('T')[0];
         const formDateStr = formDate.toISOString().split('T')[0];
         // Only auto-populate if it's from a different day
@@ -344,7 +344,7 @@ const AddVehicleForm: React.FC<AddVehicleFormProps> = ({
         color: formData.color.trim(),
         parkingLot: formData.parkingLot.trim(),
         notes: formData.notes.trim(),
-        parkingDate: formData.parkingDate,
+        parkingDate: formData.parkingDate.toISOString(),
       });
     }
   };

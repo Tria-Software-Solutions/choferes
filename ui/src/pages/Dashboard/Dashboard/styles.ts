@@ -31,3 +31,23 @@ export const dashboardDividerStyles = (theme: Theme): SxProps<Theme> => ({
   mx: "auto",
   mb: 0.5,
 });
+
+export const dashboardDeleteButtonStyles = {
+  ml: 2,
+  width: "62px",
+  height: "56px",
+  borderRadius: "8px",
+  boxShadow: "0 4px 12px rgba(0,0,0,0.2)",
+  backgroundColor: "#000",
+  color: "#fff",
+  display: "flex",
+  alignItems: "center",
+  justifyContent: "center",
+  transition: "all 0.3s ease",
+  fontSize: 32,
+  "&:hover": {
+    backgroundColor: "#333",
+    transform: "translateY(-2px)",
+    boxShadow: "0 6px 20px rgba(0,0,0,0.3)",
+  },
+};

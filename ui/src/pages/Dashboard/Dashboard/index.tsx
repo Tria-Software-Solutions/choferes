@@ -10,6 +10,8 @@ import {
   useMediaQuery,
   useTheme,
   Divider,
+  IconButton,
+  Tooltip,
 } from "@mui/material";
 import { PAGE_TITLE, DASHBOARD } from "../../../constants/constants";
 import AdminPanelSettingsIcon from "@mui/icons-material/AdminPanelSettings";
@@ -20,6 +22,7 @@ import {
   dashboardTitleStyles,
   dashboardIconStyles,
   dashboardDividerStyles,
+  dashboardDeleteButtonStyles,
 } from "./styles";
 import SpeedDialComponent from "../../../components/SpeedDial/SpeedDial.component";
 import BackupIcon from "@mui/icons-material/Backup";
@@ -51,6 +54,8 @@ const Dashboard: React.FC = () => {
   const [loading, setLoading] = React.useState(false);
   // Controls visibility of the delete confirmation dialog
   const [showDeleteDialog, setShowDeleteDialog] = React.useState(false);
+  // Controls if the backup was done
+  const [backupDone, setBackupDone] = React.useState(false);
 
   const theme = useTheme();
   const isSmallScreen = useMediaQuery(theme.breakpoints.down("sm"));
@@ -78,7 +83,7 @@ const Dashboard: React.FC = () => {
     },
   ];
 
-  // Main export handler: triggers backup export and then shows delete dialog
+  // Main export handler: triggers backup export only
   const handleExport = async (type: "excel" | "pdf") => {
     setLoading(true);
     try {
@@ -135,9 +140,12 @@ const Dashboard: React.FC = () => {
           customHeaders: vehiclesHeaders,
         });
       }
-      // 5. Show the delete confirmation dialog
-      setShowDeleteDialog(true);
+      setBackupDone(true);
     } catch (e) {
+      showNotification("Error al exportar backup", {
+        severity: "error",
+        duration: 4000,
+      });
       return {};
     } finally {
       setLoading(false);
@@ -191,8 +199,10 @@ const Dashboard: React.FC = () => {
           </Typography>
           <Divider sx={dashboardDividerStyles(theme)} />
         </Box>
-        <Box sx={{ minHeight: 65 }}>
-          {/* Backup SpeedDial: triggers export and then delete dialog */}
+        <Box
+          sx={{ minHeight: 65, display: "flex", alignItems: "center", gap: 0 }}
+        >
+          {/* Backup SpeedDial: triggers export only */}
           <SpeedDialComponent
             actions={exportActions.map((action) => ({
               ...action,
@@ -200,10 +210,27 @@ const Dashboard: React.FC = () => {
                 handleExport(action.type as "excel" | "pdf");
               },
             }))}
-            mainIcon={<BackupIcon />}
+            mainIcon={
+              <BackupIcon sx={{ color: theme.palette.primary.contrastText }} />
+            }
             openIcon={<CloseRoundedIcon />}
             direction="left"
           />
+          {/* Delete all data button: only appears after backup, visually identical to backup button */}
+          {backupDone && (
+            <Tooltip title="Eliminar todos los datos" arrow>
+              <span>
+                <IconButton
+                  onClick={() => setShowDeleteDialog(true)}
+                  sx={dashboardDeleteButtonStyles}
+                >
+                  <DeleteOutlineIcon
+                    sx={{ color: theme.palette.primary.contrastText }}
+                  />
+                </IconButton>
+              </span>
+            </Tooltip>
+          )}
         </Box>
       </Box>
       {/* Accordions for users, roles, permissions */}
