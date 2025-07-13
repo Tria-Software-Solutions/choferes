@@ -67,7 +67,6 @@ import ManageSearchIcon from "@mui/icons-material/ManageSearch";
 import DialogComponent from "../../../components/Dialog/Dialog.component";
 import AssignmentIcon from "@mui/icons-material/Assignment";
 import {
-  rolesHeaderBoxStyles,
   rolesTitleBoxStyles,
   rolesTitleStyles,
   rolesIconStyles,
@@ -687,42 +686,45 @@ const RolesPage: React.FC = () => {
   return (
     <Box>
       <Box
-        display="flex"
-        justifyContent="space-between"
-        alignItems="center"
-        sx={rolesHeaderBoxStyles}
+        sx={{ py: 1, mb: 2 }}
       >
         <Box
           display="flex"
-          flexDirection="column"
-          alignItems="flex-start"
-          sx={rolesTitleBoxStyles}
+          justifyContent="space-between"
+          alignItems="center"
         >
-          <Typography
-            variant={isSmallScreen ? "h5" : "h4"}
-            sx={rolesTitleStyles}
+          <Box
+            display="flex"
+            flexDirection="column"
+            alignItems="flex-start"
+            sx={rolesTitleBoxStyles}
           >
-            <AssignmentIcon
-              fontSize={isSmallScreen ? "small" : "large"}
-              sx={rolesIconStyles(theme)}
-            />
-            {isSmallScreen ? PAGE_TITLE.ROLES_SIMPLIFIED : PAGE_TITLE.ROLES}
-          </Typography>
-          <Divider sx={rolesDividerStyles(theme)} />
+            <Typography
+              variant={isSmallScreen ? "h5" : "h4"}
+              sx={rolesTitleStyles}
+            >
+              <AssignmentIcon
+                fontSize={isSmallScreen ? "small" : "large"}
+                sx={rolesIconStyles(theme)}
+              />
+              {isSmallScreen ? PAGE_TITLE.ROLES_SIMPLIFIED : PAGE_TITLE.ROLES}
+            </Typography>
+            <Divider sx={rolesDividerStyles(theme)} />
+          </Box>
+          {userPermissions.includes(PERMISSIONS.EXPORT_EXCEL_ROLES) &&
+            userPermissions.includes(PERMISSIONS.EXPORT_PDF_ROLES) && (
+              <Box sx={exportSpeedDialBoxStyles}>
+                {filteredEmployees.length > 0 && (
+                  <SpeedDialComponent
+                    actions={exportOptions}
+                    mainIcon={<DownloadRoundedIcon />}
+                    openIcon={<CloseRoundedIcon />}
+                    direction="left"
+                  />
+                )}
+              </Box>
+            )}
         </Box>
-        {userPermissions.includes(PERMISSIONS.EXPORT_EXCEL_ROLES) &&
-          userPermissions.includes(PERMISSIONS.EXPORT_PDF_ROLES) && (
-            <Box sx={exportSpeedDialBoxStyles}>
-              {filteredEmployees.length > 0 && (
-                <SpeedDialComponent
-                  actions={exportOptions}
-                  mainIcon={<DownloadRoundedIcon />}
-                  openIcon={<CloseRoundedIcon />}
-                  direction="left"
-                />
-              )}
-            </Box>
-          )}
       </Box>
       {isLoading ? (
         <Box sx={loadingBoxStyles}>

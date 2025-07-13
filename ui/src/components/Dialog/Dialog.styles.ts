@@ -11,8 +11,14 @@ export const dialogPaperStyles = (paperSx: object = {}): SxProps<Theme> => ({
 });
 
 export const headerBoxStyles = (theme: Theme): SxProps<Theme> => ({
-  background: theme.palette.primary.main,
-  color: theme.palette.primary.contrastText,
+  background:
+    theme.palette.mode === "dark"
+      ? "#111"
+      : theme.palette.primary.main,
+  color:
+    theme.palette.mode === "dark"
+      ? "#fff"
+      : theme.palette.primary.contrastText,
   display: "flex",
   alignItems: "center",
   gap: 2,

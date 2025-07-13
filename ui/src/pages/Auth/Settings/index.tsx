@@ -16,12 +16,11 @@ import {
   Typography,
   useTheme,
   useMediaQuery,
-  Container,
+  Tabs,
+  Tab,
   RadioGroup,
   FormControlLabel,
   Radio,
-  FormLabel,
-  Box as MuiBox,
 } from "@mui/material";
 import { useAppNotifications } from "../../../components/Snackbar/Snackbar.component";
 import PAGE_TITLE from "../../../constants/pageTitle.constants";
@@ -44,6 +43,7 @@ import AccountCircleOutlinedIcon from "@mui/icons-material/AccountCircleOutlined
 import InfoOutlinedIcon from "@mui/icons-material/InfoOutlined";
 import { infoBox, infoIconBox, infoTitle, infoDesc, iconSx } from '../../Forms/AddEmployeeForm/styles';
 import { useThemeMode } from "../../../index";
+import { rolesTitleStyles, rolesIconStyles, rolesDividerStyles } from '../../Management/RolesPage/styles';
 
 // Settings page component for user profile and password management
 const Settings: React.FC = () => {
@@ -53,7 +53,6 @@ const Settings: React.FC = () => {
   const { showNotification } = useAppNotifications();
   const theme = useTheme();
   const isSmallScreen = useMediaQuery(theme.breakpoints.down("sm"));
-  const isMediumScreen = useMediaQuery(theme.breakpoints.down("md"));
   const { mode, setMode } = useThemeMode();
 
   const [editFields, setEditFields] = useState({
@@ -72,6 +71,7 @@ const Settings: React.FC = () => {
   const [passwordError, setPasswordError] = useState<string | null>(null);
   const [isEditFormValid, setIsEditFormValid] = useState(false);
   const [isPasswordFormValid, setIsPasswordFormValid] = useState(false);
+  const [tabIndex, setTabIndex] = useState(0);
 
   useEffect(() => {
     dispatch(fetchUsers());
@@ -260,72 +260,48 @@ const Settings: React.FC = () => {
   };
 
   return (
-    <Container maxWidth="lg" sx={{ py: { xs: 2, sm: 3, md: 4 } }}>
-      <MuiBox sx={{ mb: 3 }}>
-        <FormLabel component="legend" sx={{ fontWeight: 700, mb: 1 }}>Tema de la aplicación</FormLabel>
-        <RadioGroup
-          row
-          value={mode}
-          onChange={e => setMode(e.target.value as "light" | "dark" | "high-contrast")}
-          aria-label="theme-mode"
-          name="theme-mode"
-        >
-          <FormControlLabel value="light" control={<Radio />} label="Claro" />
-          <FormControlLabel value="dark" control={<Radio />} label="Oscuro" />
-          <FormControlLabel value="high-contrast" control={<Radio />} label="Alto Contraste" />
-        </RadioGroup>
-      </MuiBox>
+    <Box sx={{ width: "100%" }}>
       <Box
-        display="flex"
-        justifyContent="space-between"
-        alignItems="center"
-        sx={{ mb: 3 }}
+        sx={{ py: 1, mb: 2 }}
       >
         <Box
           display="flex"
           flexDirection="column"
           alignItems="flex-start"
-          sx={{ mb: 2 }}
         >
-          <Typography
-            variant={isSmallScreen ? "h5" : "h4"}
-            sx={{
-              display: "flex",
-              alignItems: "center",
-              fontFamily: "'Urbanist', sans-serif",
-              fontWeight: 800,
-              color: theme.palette.text.primary,
-              mb: 0.5,
-              gap: 1.5,
-            }}
+          <Box
+            sx={{ display: 'inline-flex', flexDirection: 'column', alignItems: 'center' }}
           >
-            <SettingsIcon
-              fontSize={isSmallScreen ? "small" : "large"}
-              sx={{ mr: 1, color: theme.palette.primary.main }}
-            />
-            {isSmallScreen
-              ? PAGE_TITLE.SETTING_SIMPLIFIED
-              : PAGE_TITLE.SETTINGS}
-          </Typography>
-          <Divider
-            sx={{
-              width: 48,
-              borderBottomWidth: 3,
-              borderColor: theme.palette.primary.main,
-              borderRadius: 2,
-              mx: "auto",
-              mb: 0.5,
-            }}
-          />
+            <Typography
+              variant={isSmallScreen ? "h5" : "h4"}
+              sx={rolesTitleStyles}
+            >
+              <SettingsIcon
+                fontSize={isSmallScreen ? "small" : "large"}
+                sx={rolesIconStyles(theme)}
+              />
+              {isSmallScreen ? PAGE_TITLE.SETTING_SIMPLIFIED : PAGE_TITLE.SETTINGS}
+            </Typography>
+            <Divider sx={rolesDividerStyles(theme)} />
+          </Box>
+          <Tabs
+            value={tabIndex}
+            onChange={(_, newValue) => setTabIndex(newValue)}
+            sx={{ mt: 2 }}
+            variant="scrollable"
+            scrollButtons="auto"
+          >
+            <Tab label="Información personal" />
+            <Tab label="Cambiar contraseña" />
+            <Tab label="Tema de la aplicación" />
+          </Tabs>
         </Box>
       </Box>
 
-      <Grid
-        container
-        spacing={{ xs: 3, sm: 4, md: 6 }}
-        justifyContent="space-between"
-      >
-        <Grid item xs={12} lg={5}>
+      {/* Contenido de los tabs */}
+      {tabIndex === 0 && (
+        <Box sx={{ width: "100%", display: "block", px: { xs: 0, sm: 0, md: 0 } }}>
+          {/* Información personal */}
           <Typography
             variant="h5"
             fontWeight="bold"
@@ -465,29 +441,11 @@ const Settings: React.FC = () => {
               {MANAGEMENT.SAVE_CHANGES}
             </Button>
           </Box>
-        </Grid>
-
-        <Grid
-          item
-          xs={12}
-          lg={1}
-          display="flex"
-          justifyContent="center"
-          alignItems="stretch"
-          sx={{ my: { xs: 2, lg: 0 } }}
-        >
-          <Divider
-            orientation={isMediumScreen ? "horizontal" : "vertical"}
-            flexItem
-            sx={{
-              display: { xs: "block", lg: "block" },
-              width: { xs: "100%", lg: "auto" },
-              height: { xs: "auto", lg: "100%" },
-            }}
-          />
-        </Grid>
-
-        <Grid item xs={12} lg={5}>
+        </Box>
+      )}
+      {tabIndex === 1 && (
+        <Box sx={{ width: "100%", display: "block", px: { xs: 0, sm: 0, md: 0 } }}>
+          {/* Cambiar contraseña (antes estaba a la derecha del divider) */}
           <Typography
             variant="h5"
             fontWeight="bold"
@@ -601,9 +559,52 @@ const Settings: React.FC = () => {
               {MANAGEMENT.CHANGE_PASSWORD}
             </Button>
           </Box>
-        </Grid>
-      </Grid>
-    </Container>
+        </Box>
+      )}
+      {tabIndex === 2 && (
+        <Box sx={{ width: "100%", display: "block", px: { xs: 0, sm: 0, md: 0 } }}>
+          <Typography
+            variant="h5"
+            fontWeight="bold"
+            sx={{
+              mb: { xs: 0.5, sm: 1 },
+              fontSize: { xs: "1.25rem", sm: "1.5rem" },
+              color: theme.palette.text.primary,
+            }}
+          >
+            Tema de la aplicación
+          </Typography>
+          <Typography
+            variant="body2"
+            color="textSecondary"
+            sx={{
+              mb: { xs: 2, sm: 3 },
+              fontSize: { xs: "0.875rem", sm: "1rem" },
+            }}
+          >
+            Seleccione el tema que prefiera para la aplicación.
+          </Typography>
+
+          <RadioGroup
+            row
+            value={mode}
+            onChange={(e) =>
+              setMode(e.target.value as "light" | "dark" | "high-contrast")
+            }
+            aria-label="theme-mode"
+            name="theme-mode"
+          >
+            <FormControlLabel value="light" control={<Radio />} label="Claro" />
+            <FormControlLabel value="dark" control={<Radio />} label="Oscuro" />
+            <FormControlLabel
+              value="high-contrast"
+              control={<Radio />}
+              label="Alto Contraste"
+            />
+          </RadioGroup>
+        </Box>
+      )}
+    </Box>
   );
 };
 

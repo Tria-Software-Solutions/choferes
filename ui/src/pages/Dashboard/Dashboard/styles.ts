@@ -6,7 +6,7 @@ export const dashboardHeaderBoxStyles: SxProps<Theme> = {
 
 export const dashboardTitleBoxStyles: SxProps<Theme> = {
   mb: 2,
-  py: { xs: 2, sm: 3, md: 4 },
+  py: 1,
 };
 
 export const dashboardTitleStyles: SxProps<Theme> = (theme) => ({

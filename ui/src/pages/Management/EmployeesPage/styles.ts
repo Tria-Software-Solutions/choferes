@@ -6,7 +6,7 @@ export const employeesHeaderBoxStyles: SxProps<Theme> = {
 
 export const employeesTitleBoxStyles: SxProps<Theme> = {
   mb: 2,
-  py: { xs: 2, sm: 3, md: 4 },
+  py: 1,
 };
 
 export const employeesTitleStyles: SxProps<Theme> = {

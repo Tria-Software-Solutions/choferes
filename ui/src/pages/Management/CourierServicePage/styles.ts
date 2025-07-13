@@ -6,6 +6,7 @@ export const courierHeaderBoxStyles: SxProps<Theme> = {
 
 export const courierTitleBoxStyles: SxProps<Theme> = {
   mb: 2,
+  py: 1,
 };
 
 export const courierTitleStyles: SxProps<Theme> = {

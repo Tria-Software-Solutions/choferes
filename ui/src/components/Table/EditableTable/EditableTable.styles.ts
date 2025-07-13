@@ -117,3 +117,21 @@ export const emailLinkStyles = (theme: Theme): SxProps<Theme> => ({
     textDecoration: "underline",
   },
 });
+
+export const tableHeadCellStyles = (theme: Theme): SxProps<Theme> => ({
+  position: "sticky",
+  top: 0,
+  zIndex: 4,
+  backgroundColor:
+    theme.palette.mode === "dark"
+      ? "#111"
+      : theme.palette.primary.main,
+  color:
+    theme.palette.mode === "dark"
+      ? "#fff"
+      : theme.palette.primary.contrastText,
+  fontWeight: 700,
+  fontSize: "clamp(0.95rem, 1vw, 1.05rem)",
+  padding: "12px 16px",
+  whiteSpace: "nowrap",
+});
