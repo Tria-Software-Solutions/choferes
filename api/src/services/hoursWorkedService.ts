@@ -6,7 +6,7 @@ export const getHoursWorked = async () =>
   HoursWorked.findAll({
     include: [
       {
-        model: Employee
+        model: Employee,
       },
     ],
   });
@@ -15,7 +15,7 @@ export const getHoursWorkedById = async (id: number) =>
   HoursWorked.findByPk(id, {
     include: [
       {
-        model: Employee
+        model: Employee,
       },
     ],
   });
@@ -25,7 +25,7 @@ export const getHoursWorkedByEmployee = async (employeeId: number) =>
     where: { employeeId },
     include: [
       {
-        model: Employee
+        model: Employee,
       },
     ],
   });
@@ -45,7 +45,7 @@ export const getHoursWorkedByDate = async (date: Date) => {
     },
     include: [
       {
-        model: Employee
+        model: Employee,
       },
     ],
   });
@@ -60,7 +60,7 @@ export const getHoursWorkedByDateRange = async (startDate: Date, endDate: Date) 
     },
     include: [
       {
-        model: Employee
+        model: Employee,
       },
     ],
   });

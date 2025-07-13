@@ -2,24 +2,19 @@
 import { Op, Includeable } from "sequelize";
 // eslint-disable-next-line import/no-named-as-default
 import Employee from "../models/Employee";
-import { Schedule } from "../models/Schedule";
 import { HoursWorked } from "../models/HoursWorked";
 
 // Fetches all employees with their schedule
-export const getEmployees = async () =>
-  Employee.findAll();
+export const getEmployees = async () => Employee.findAll();
 
 // Fetches an employee by ID with their schedule
-export const getEmployeeById = async (id: number) =>
-  Employee.findByPk(id);
+export const getEmployeeById = async (id: number) => Employee.findByPk(id);
 
 // Fetches an employee by email with their schedule
-export const getEmployeeByEmail = async (email: string) =>
-  Employee.findOne({ where: { email } });
+export const getEmployeeByEmail = async (email: string) => Employee.findOne({ where: { email } });
 
 // Fetches an employee by phone with their schedule
-export const getEmployeeByPhone = async (phone: string) =>
-  Employee.findOne({ where: { phone } });
+export const getEmployeeByPhone = async (phone: string) => Employee.findOne({ where: { phone } });
 
 // Fetches an employee by document with their schedule
 export const getEmployeeByDocument = async (document: string) =>

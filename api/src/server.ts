@@ -1,3 +1,4 @@
+/* eslint-disable no-console */
 import dotenv from "dotenv";
 import express from "express";
 import cors from "cors";
@@ -150,7 +151,7 @@ app.use("/api/monthly-summary", monthlySummaryRoutes);
 app.use("/api/schedules", scheduleRoutes);
 app.use("/api/vehicles", vehicleRoutes);
 
-app.use((error: Error, req: express.Request, res: express.Response, next: express.NextFunction) => {
+app.use((error: Error, req: express.Request, res: express.Response) => {
   if (process.env.NODE_ENV === "production") {
     return res.status(500).json({ error: "Internal server error" });
   }
@@ -158,26 +159,26 @@ app.use((error: Error, req: express.Request, res: express.Response, next: expres
 });
 
 // Temporary logger to avoid no-console warnings
-function logInfo(): void {}
-function logError(): void {}
+function logInfo(...args: unknown[]): void {
+  console.error(...args);
+}
 
 // Database connection and server startup
 const startServer = async () => {
   try {
     // Test database connection
     await sequelize.authenticate();
-    logInfo();
+    logInfo("Database connection established");
     // Sync database models
     await sequelize.sync();
-    logInfo();
+    logInfo("Database synchronized");
     // Start the server
     const PORT = process.env.PORT || 5000;
     app.listen(PORT, () => {
-      logInfo();
-      logInfo();
+      logInfo(`API server is running on port ${PORT}`);
     });
   } catch (error) {
-    logError();
+    logInfo("Failed to start server:", error);
     process.exit(1);
   }
 };
