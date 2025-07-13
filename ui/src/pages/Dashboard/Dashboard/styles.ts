@@ -6,17 +6,18 @@ export const dashboardHeaderBoxStyles: SxProps<Theme> = {
 
 export const dashboardTitleBoxStyles: SxProps<Theme> = {
   mb: 2,
+  py: { xs: 2, sm: 3, md: 4 },
 };
 
-export const dashboardTitleStyles: SxProps<Theme> = {
+export const dashboardTitleStyles: SxProps<Theme> = (theme) => ({
   display: "flex",
   alignItems: "center",
   fontFamily: "'Urbanist', sans-serif",
   fontWeight: 800,
-  color: "#000000",
+  color: theme.palette.text.primary,
   mb: 0.5,
   gap: 1.5,
-};
+});
 
 export const dashboardIconStyles = (theme: Theme): SxProps<Theme> => ({
   mr: 1,

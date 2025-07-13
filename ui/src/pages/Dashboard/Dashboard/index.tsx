@@ -25,7 +25,6 @@ import {
   dashboardDeleteButtonStyles,
 } from "./styles";
 import SpeedDialComponent from "../../../components/SpeedDial/SpeedDial.component";
-import BackupIcon from "@mui/icons-material/Backup";
 import CloseRoundedIcon from "@mui/icons-material/CloseRounded";
 import DescriptionIcon from "@mui/icons-material/Description";
 import PictureAsPdfIcon from "@mui/icons-material/PictureAsPdf";
@@ -45,6 +44,7 @@ import {
   buildVehiclesExportData,
 } from "../../../utils/export";
 import { DASHBOARD_BULK_ACTIONS } from "../../../constants/dashboard.constants";
+import BackupIcon from "@mui/icons-material/Backup";
 
 // Dashboard page component for managing users, roles, and permissions
 const Dashboard: React.FC = () => {
@@ -203,19 +203,19 @@ const Dashboard: React.FC = () => {
           sx={{ minHeight: 65, display: "flex", alignItems: "center", gap: 0 }}
         >
           {/* Backup SpeedDial: triggers export only */}
-          <SpeedDialComponent
-            actions={exportActions.map((action) => ({
-              ...action,
-              onClick: () => {
-                handleExport(action.type as "excel" | "pdf");
-              },
-            }))}
-            mainIcon={
-              <BackupIcon sx={{ color: theme.palette.primary.contrastText }} />
-            }
-            openIcon={<CloseRoundedIcon />}
-            direction="left"
-          />
+          <Box sx={require("../../Management/SchedulesPage/styles").exportSpeedDialBoxStyles}>
+            <SpeedDialComponent
+              actions={exportActions.map((action) => ({
+                ...action,
+                onClick: () => {
+                  handleExport(action.type as "excel" | "pdf");
+                },
+              }))}
+              mainIcon={<BackupIcon sx={{ color: theme.palette.primary.main }} />}
+              openIcon={<CloseRoundedIcon />}
+              direction="left"
+            />
+          </Box>
           {/* Delete all data button: only appears after backup, visually identical to backup button */}
           {backupDone && (
             <Tooltip title="Eliminar todos los datos" arrow>

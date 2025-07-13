@@ -6,6 +6,7 @@ export const vehiclesHeaderBoxStyles: SxProps<Theme> = {
 
 export const vehiclesTitleBoxStyles: SxProps<Theme> = {
   mb: 2,
+  py: { xs: 2, sm: 3, md: 4 },
 };
 
 export const vehiclesTitleStyles: SxProps<Theme> = {
@@ -13,7 +14,7 @@ export const vehiclesTitleStyles: SxProps<Theme> = {
   alignItems: "center",
   fontFamily: "'Urbanist', sans-serif",
   fontWeight: 800,
-  color: "#000000",
+  color: (theme) => theme.palette.text.primary,
   mb: 0.5,
   gap: 1.5,
 };
@@ -80,33 +81,35 @@ export const addButtonDesktopStyles: SxProps<Theme> = {
   minHeight: 56,
 };
 
-export const datePickerSx: SxProps<Theme> = {
+export const datePickerSx: SxProps<Theme> = (theme) => ({
   height: "56px",
   minWidth: "180px",
   "& .MuiOutlinedInput-root": {
     height: "56px",
     borderRadius: 2,
-    backgroundColor: "#ffffff",
+    backgroundColor: theme.palette.background.paper,
+    color: theme.palette.text.primary,
     "&:hover .MuiOutlinedInput-notchedOutline": {
-      borderColor: "#000000",
+      borderColor: theme.palette.primary.main,
     },
     "&.Mui-focused .MuiOutlinedInput-notchedOutline": {
-      borderColor: "#000000",
+      borderColor: theme.palette.primary.main,
       borderWidth: 2,
     },
     "&.Mui-focused": {
-      backgroundColor: "#ffffff",
+      backgroundColor: theme.palette.background.paper,
       outline: "none",
       boxShadow: "none",
     },
     "& input": {
+      color: theme.palette.text.primary,
       outline: "none",
       boxShadow: "none",
     },
   },
-};
+});
 
-export const buttonGroupSx: SxProps<Theme> = {
+export const buttonGroupSx: SxProps<Theme> = (theme) => ({
   height: "56px",
   width: "auto",
   flexDirection: "row",
@@ -119,12 +122,12 @@ export const buttonGroupSx: SxProps<Theme> = {
     alignItems: "center",
     justifyContent: "center",
     "&.Mui-disabled": {
-      backgroundColor: "rgba(0, 0, 0, 0.12)",
-      color: "rgba(0, 0, 0, 0.6)",
+      backgroundColor: theme.palette.action.disabledBackground,
+      color: theme.palette.text.disabled,
       border: "none",
     },
   },
-};
+});
 
 export const noVehiclesBoxStyles: SxProps<Theme> = {
   display: "flex",

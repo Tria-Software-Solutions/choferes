@@ -1,23 +1,25 @@
 import { SxProps, Theme } from "@mui/material";
 
-export const textFieldStyles = (customSx: object = {}): SxProps<Theme> => ({
+export const textFieldStyles = (customSx: object = {}): SxProps<Theme> => (theme: Theme) => ({
   mb: 2,
   "& .MuiOutlinedInput-root": {
     borderRadius: 2,
-    backgroundColor: "#ffffff",
+    backgroundColor: theme.palette.background.paper,
+    color: theme.palette.text.primary,
     "&:hover .MuiOutlinedInput-notchedOutline": {
-      borderColor: "#000000",
+      borderColor: theme.palette.primary.main,
     },
     "&.Mui-focused .MuiOutlinedInput-notchedOutline": {
-      borderColor: "#000000",
+      borderColor: theme.palette.primary.main,
       borderWidth: 2,
     },
     "&.Mui-focused": {
-      backgroundColor: "#ffffff",
+      backgroundColor: theme.palette.background.paper,
       outline: "none",
       boxShadow: "none",
     },
     "& input": {
+      color: theme.palette.text.primary,
       outline: "none",
       boxShadow: "none",
     },

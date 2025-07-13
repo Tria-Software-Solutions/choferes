@@ -58,8 +58,8 @@ export const buttonStyles = (theme: Theme): SxProps<Theme> => ({
 
 export const menuPaperStyles = (theme: Theme): SxProps<Theme> => ({
   mt: 1.5,
-  borderTopLeftRadius: 0,
-  borderTopRightRadius: 0,
+  borderRadius: theme.shape.borderRadius,
+  backgroundColor: `${theme.palette.background.paper} !important`,
   boxShadow: theme.shadows[8],
   border: `1px solid ${theme.palette.divider}`,
 });

@@ -43,10 +43,10 @@ export const logoImgStyles: CSSProperties = {
   height: "auto",
 };
 
-export const titleStyles = (isSmallScreen: boolean): SxProps<Theme> => ({
+export const titleStyles = (isSmallScreen: boolean): SxProps<Theme> => (theme: Theme) => ({
   fontFamily: "'Urbanist', sans-serif",
   fontWeight: 800,
-  color: "#000000",
+  color: theme.palette.text.primary,
   mb: 1,
   ...(isSmallScreen ? { fontSize: "1.5rem" } : { fontSize: "2rem" }),
 });
@@ -60,10 +60,10 @@ export const dividerStyles = (theme: Theme): SxProps<Theme> => ({
   borderRadius: 2,
 });
 
-export const descriptionStyles: SxProps<Theme> = {
-  color: "#666666",
+export const descriptionStyles: SxProps<Theme> = (theme: Theme) => ({
+  color: theme.palette.text.secondary,
   maxWidth: 400,
-};
+});
 
 export const formBoxStyles: SxProps<Theme> = {
   width: "100%",
@@ -76,37 +76,30 @@ export const nameFieldsBoxStyles: SxProps<Theme> = {
   mb: 2,
 };
 
-export const textFieldStyles: SxProps<Theme> = {
+export const textFieldStyles: SxProps<Theme> = (theme: Theme) => ({
   "& .MuiOutlinedInput-root": {
     borderRadius: 2,
-    backgroundColor: "#ffffff",
+    backgroundColor: theme.palette.background.paper,
+    color: theme.palette.text.primary,
     "&:hover .MuiOutlinedInput-notchedOutline": {
-      borderColor: "#000000",
+      borderColor: theme.palette.primary.main,
     },
     "&.Mui-focused .MuiOutlinedInput-notchedOutline": {
-      borderColor: "#000000",
+      borderColor: theme.palette.primary.main,
       borderWidth: 2,
     },
     "&.Mui-focused": {
-      backgroundColor: "#ffffff",
+      backgroundColor: theme.palette.background.paper,
+    },
+    "& input": {
+      color: theme.palette.text.primary,
     },
   },
-};
+});
 
-export const emailTextFieldStyles: SxProps<Theme> = {
-  mb: 2,
-  ...textFieldStyles,
-};
-
-export const usernameTextFieldStyles: SxProps<Theme> = {
-  mb: 2,
-  ...textFieldStyles,
-};
-
-export const passwordTextFieldStyles: SxProps<Theme> = {
-  mb: 3,
-  ...textFieldStyles,
-};
+export const emailTextFieldStyles: SxProps<Theme> = textFieldStyles;
+export const usernameTextFieldStyles: SxProps<Theme> = textFieldStyles;
+export const passwordTextFieldStyles: SxProps<Theme> = textFieldStyles;
 
 export const passwordIconButtonStyles: SxProps<Theme> = {
   color: "#666666",
@@ -158,14 +151,14 @@ export const loginBoxStyles: SxProps<Theme> = {
   textAlign: "center",
 };
 
-export const loginTextStyles: SxProps<Theme> = {
-  color: "#666666",
+export const loginTextStyles: SxProps<Theme> = (theme: Theme) => ({
+  color: theme.palette.text.secondary,
   mb: 1,
-};
+});
 
 export const loginLinkStyles: CSSProperties = {
   textDecoration: "none",
-  color: "#000000",
+  color: "inherit",
   fontWeight: 600,
   transition: "color 0.3s ease",
 };
