@@ -725,6 +725,7 @@ export const darkTheme = createTheme({
           background: "linear-gradient(135deg, #232323 0%, #181818 100%)",
           color: "#ffffff",
           borderBottom: "1px solid #333333",
+          boxShadow: "0 4px 20px rgba(0,0,0,0.7)",
         },
       },
     },
@@ -733,6 +734,7 @@ export const darkTheme = createTheme({
         root: {
           backgroundColor: "#232323",
           color: "#ffffff",
+          marginBottom: "25px",
         },
       },
     },

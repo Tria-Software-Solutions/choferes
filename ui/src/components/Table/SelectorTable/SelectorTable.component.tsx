@@ -793,8 +793,8 @@ const SelectorTableComponent: React.FC<SelectorTableProps> = ({
           justifyContent="space-between" 
           alignItems="center"
           sx={{
-            backgroundColor: theme.palette.mode === "dark" ? "#111" : theme.palette.background.paper,
-            color: theme.palette.mode === "dark" ? "#fff" : theme.palette.text.primary,
+            backgroundColor: theme.palette.background.paper,
+            color: theme.palette.text.primary,
             borderBottomLeftRadius: 8,
             borderBottomRightRadius: 8,
           }}

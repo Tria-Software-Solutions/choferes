@@ -4,7 +4,7 @@ export const searchBarRoot: SxProps<Theme> = (theme) => ({
   background: theme.palette.background.paper,
   color: theme.palette.text.primary,
   borderRadius: 8,
-  border: `0.5px solid ${theme.palette.mode === "dark" ? "#444" : theme.palette.divider}`,
+  border: `2px solid ${theme.palette.divider}`,
   boxShadow: "none",
   transition: "border-color 0.2s",
   '&:hover': {
