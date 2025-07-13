@@ -7,85 +7,31 @@ import { HoursWorked } from "../models/HoursWorked";
 
 // Fetches all employees with their schedule
 export const getEmployees = async () =>
-  Employee.findAll({
-    include: [
-      {
-        model: Schedule,
-        as: "schedule",
-      },
-    ],
-  });
+  Employee.findAll();
 
 // Fetches an employee by ID with their schedule
 export const getEmployeeById = async (id: number) =>
-  Employee.findByPk(id, {
-    include: [
-      {
-        model: Schedule,
-        as: "schedule",
-      },
-    ],
-  });
+  Employee.findByPk(id);
 
 // Fetches an employee by email with their schedule
 export const getEmployeeByEmail = async (email: string) =>
-  Employee.findOne({
-    where: { email },
-    include: [
-      {
-        model: Schedule,
-        as: "schedule",
-      },
-    ],
-  });
+  Employee.findOne({ where: { email } });
 
 // Fetches an employee by phone with their schedule
 export const getEmployeeByPhone = async (phone: string) =>
-  Employee.findOne({
-    where: { phone },
-    include: [
-      {
-        model: Schedule,
-        as: "schedule",
-      },
-    ],
-  });
+  Employee.findOne({ where: { phone } });
 
 // Fetches an employee by document with their schedule
 export const getEmployeeByDocument = async (document: string) =>
-  Employee.findOne({
-    where: { document },
-    include: [
-      {
-        model: Schedule,
-        as: "schedule",
-      },
-    ],
-  });
+  Employee.findOne({ where: { document } });
 
 // Fetches all employees by schedule ID
 export const getEmployeesBySchedule = async (scheduleId: number) =>
-  Employee.findAll({
-    where: { scheduleId },
-    include: [
-      {
-        model: Schedule,
-        as: "schedule",
-      },
-    ],
-  });
+  Employee.findAll({ where: { scheduleId } });
 
 // Fetches all employees by active/inactive status
 export const getEmployeesByStatus = async (status: boolean) =>
-  Employee.findAll({
-    where: { isActive: status },
-    include: [
-      {
-        model: Schedule,
-        as: "schedule",
-      },
-    ],
-  });
+  Employee.findAll({ where: { isActive: status } });
 
 // Fetches all employees hired between two dates
 export const getEmployeesByHireDate = async (startDate: Date, endDate: Date) =>
@@ -95,12 +41,6 @@ export const getEmployeesByHireDate = async (startDate: Date, endDate: Date) =>
         [Op.between]: [startDate, endDate],
       },
     },
-    include: [
-      {
-        model: Schedule,
-        as: "schedule",
-      },
-    ],
   });
 
 // Fetches all employees with salary in a given range
@@ -111,12 +51,6 @@ export const getEmployeesBySalary = async (minSalary: number, maxSalary: number)
         [Op.between]: [minSalary, maxSalary],
       },
     },
-    include: [
-      {
-        model: Schedule,
-        as: "schedule",
-      },
-    ],
   });
 
 // Fetches employees by various filters (name, email, phone, document, status, schedule)
@@ -147,15 +81,7 @@ export const getEmployeesByFilter = async (filter: Record<string, unknown>) => {
     whereClause.scheduleId = filter.scheduleId;
   }
 
-  return Employee.findAll({
-    where: whereClause,
-    include: [
-      {
-        model: Schedule,
-        as: "schedule",
-      },
-    ],
-  });
+  return Employee.findAll({ where: whereClause });
 };
 
 // Creates a new employee and reloads the instance

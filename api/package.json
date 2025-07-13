@@ -4,7 +4,7 @@
   "main": "index.js",
   "scripts": {
     "build": "npm install && tsc && mkdir -p dist/config && cp src/config/config.js dist/config/config.js",
-    "start": "node dist/server.js",
+    "start": "node dist/src/server.js",
     "dev": "ts-node src/server.ts",
     "debug": "ts-node src/utils/debugConnection.ts",
     "migrate:dev": "npx sequelize-cli db:migrate --config src/config/config.js",

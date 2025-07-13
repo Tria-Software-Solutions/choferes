@@ -65,7 +65,7 @@ export const deleteRolePermission = async (req: Request, res: Response) => {
 export const getRolePermissionsByRoleId = async (req: Request, res: Response) => {
   try {
     const roleId = parseInt(req.params.roleId, 10);
-    if (isNaN(roleId)) {
+    if (Number.isNaN(roleId)) {
       return res.status(400).json({ message: "Invalid roleId" });
     }
     const permissions = await rolePermissionService.getRolePermissionsByRoleId(roleId);
