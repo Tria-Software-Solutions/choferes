@@ -150,7 +150,7 @@ app.use("/api/monthly-summary", monthlySummaryRoutes);
 app.use("/api/schedules", scheduleRoutes);
 app.use("/api/vehicles", vehicleRoutes);
 
-app.use((error: Error, req: express.Request, res: express.Response) => {
+app.use((error: Error, req: express.Request, res: express.Response, next: express.NextFunction) => {
   if (process.env.NODE_ENV === "production") {
     return res.status(500).json({ error: "Internal server error" });
   }
