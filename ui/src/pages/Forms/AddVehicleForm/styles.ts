@@ -16,17 +16,18 @@ export const iconSx = (theme: Theme) => ({
 export const formControl = (theme: Theme) => ({
   marginTop: "8px",
   "& .MuiOutlinedInput-root, & .MuiSelect-select": {
-    backgroundColor: "#fff",
+    backgroundColor: theme.palette.background.paper,
+    color: theme.palette.text.primary,
     borderRadius: 2,
     "&.Mui-focused .MuiOutlinedInput-notchedOutline": {
-      borderColor: "#000",
+      borderColor: theme.palette.primary.main,
       borderWidth: 2,
     },
     "&:hover .MuiOutlinedInput-notchedOutline": {
-      borderColor: "#000",
+      borderColor: theme.palette.primary.main,
     },
     "&.Mui-focused": {
-      backgroundColor: "#fff",
+      backgroundColor: theme.palette.background.paper,
       outline: "none",
       boxShadow: "none",
     },

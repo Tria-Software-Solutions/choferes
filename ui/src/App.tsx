@@ -119,6 +119,7 @@ const AppBarWrapper: React.FC = () => {
 const AppContent: React.FC = () => {
   const { currentUser, userPermissions } = useAuthContext();
   const location = useLocation();
+  const theme = useTheme();
 
   // List of routes where the AppBar should be hidden
   const hideAppBarRoutes = [
@@ -209,11 +210,12 @@ const AppContent: React.FC = () => {
             lg: "48px",
             xl: "0",
           },
+          backgroundColor: theme.palette.background.default,
           backgroundImage: isAuthPage ? `url(${wallpaper})` : "none",
-          backgroundSize: "cover",
-          backgroundPosition: "center",
-          backgroundRepeat: "no-repeat",
-          backgroundAttachment: "fixed",
+          backgroundSize: isAuthPage ? "cover" : undefined,
+          backgroundPosition: isAuthPage ? "center" : undefined,
+          backgroundRepeat: isAuthPage ? "no-repeat" : undefined,
+          backgroundAttachment: isAuthPage ? "fixed" : undefined,
         }}
       >
         <Routes>

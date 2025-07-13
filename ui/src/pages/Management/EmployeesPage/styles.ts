@@ -6,6 +6,7 @@ export const employeesHeaderBoxStyles: SxProps<Theme> = {
 
 export const employeesTitleBoxStyles: SxProps<Theme> = {
   mb: 2,
+  py: { xs: 2, sm: 3, md: 4 },
 };
 
 export const employeesTitleStyles: SxProps<Theme> = {
@@ -13,7 +14,7 @@ export const employeesTitleStyles: SxProps<Theme> = {
   alignItems: "center",
   fontFamily: "'Urbanist', sans-serif",
   fontWeight: 800,
-  color: "#000000",
+  color: (theme) => theme.palette.text.primary,
   mb: 0.5,
   gap: 1.5,
 };

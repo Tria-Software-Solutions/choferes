@@ -60,10 +60,12 @@ export function renderEditField<T extends object>({
           sx={selectStyles}
           MenuProps={{
             PaperProps: {
-              style: {
+              sx: (theme) => ({
                 maxHeight: 320,
                 overflowY: "auto",
-              },
+                backgroundColor: theme.palette.background.paper,
+                color: theme.palette.text.primary,
+              }),
             },
           }}
         >
@@ -189,10 +191,12 @@ export function renderEditField<T extends object>({
           sx={selectStyles}
           MenuProps={{
             PaperProps: {
-              style: {
+              sx: (theme) => ({
                 maxHeight: 320,
                 overflowY: "auto",
-              },
+                backgroundColor: theme.palette.background.paper,
+                color: theme.palette.text.primary,
+              }),
             },
           }}
         >

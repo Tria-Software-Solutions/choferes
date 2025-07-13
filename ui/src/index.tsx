@@ -1,17 +1,57 @@
-import React from "react";
+import React, { useMemo, useState, createContext, useContext, useEffect } from "react";
 import ReactDOM from "react-dom/client";
 import App from "./App";
 import { ThemeProvider } from "@mui/material/styles";
-import theme from "./theme";
+import { lightTheme, darkTheme, highContrastTheme } from "./theme";
 import "./index.css";
+
+const ThemeModeContext = createContext({
+  mode: "light",
+  setMode: (mode: "light" | "dark" | "high-contrast") => {},
+});
+
+export const useThemeMode = () => useContext(ThemeModeContext);
+
+const getThemeByMode = (mode: string) => {
+  switch (mode) {
+    case "dark":
+      return darkTheme;
+    case "high-contrast":
+      return highContrastTheme;
+    default:
+      return lightTheme;
+  }
+};
+
+const ThemeModeProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+  const [mode, setMode] = useState(() => localStorage.getItem("themeMode") || "light");
+
+  useEffect(() => {
+    localStorage.setItem("themeMode", mode);
+  }, [mode]);
+
+  const value = useMemo(() => ({ mode, setMode }), [mode]);
+  const theme = useMemo(() => getThemeByMode(mode), [mode]);
+
+  // Set body background color to match theme
+  useEffect(() => {
+    document.body.style.backgroundColor = theme.palette.background.default;
+  }, [theme]);
+
+  return (
+    <ThemeModeContext.Provider value={value}>
+      <ThemeProvider theme={theme}>{children}</ThemeProvider>
+    </ThemeModeContext.Provider>
+  );
+};
 
 const root = ReactDOM.createRoot(
   document.getElementById("root") as HTMLElement,
 );
 root.render(
   <React.StrictMode>
-    <ThemeProvider theme={theme}>
+    <ThemeModeProvider>
       <App />
-    </ThemeProvider>
+    </ThemeModeProvider>
   </React.StrictMode>,
 );

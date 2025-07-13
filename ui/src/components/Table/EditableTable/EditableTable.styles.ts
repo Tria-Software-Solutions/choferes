@@ -1,73 +1,77 @@
 import { SxProps, Theme } from "@mui/material";
 
-export const formControlStyles: SxProps<Theme> = {
+export const formControlStyles: SxProps<Theme> = (theme) => ({
   height: 56,
   mb: 1,
   "& .MuiInputBase-root": {
     height: 56,
   },
   "& .MuiOutlinedInput-root, & .MuiSelect-select": {
-    backgroundColor: "#fff",
+    backgroundColor: theme.palette.background.paper,
+    color: theme.palette.text.primary,
     borderRadius: 2,
     "&.Mui-focused .MuiOutlinedInput-notchedOutline": {
-      borderColor: "#000",
+      borderColor: theme.palette.primary.main,
       borderWidth: 2,
     },
     "&:hover .MuiOutlinedInput-notchedOutline": {
-      borderColor: "#000",
+      borderColor: theme.palette.primary.main,
     },
     "&.Mui-focused": {
-      backgroundColor: "#fff",
+      backgroundColor: theme.palette.background.paper,
       outline: "none",
       boxShadow: "none",
     },
   },
-};
+});
 
-export const selectStyles: SxProps<Theme> = {
+export const selectStyles: SxProps<Theme> = (theme) => ({
   height: 56,
   "& .MuiOutlinedInput-root": {
     borderRadius: 2,
-    backgroundColor: "#ffffff",
+    backgroundColor: theme.palette.background.paper,
+    color: theme.palette.text.primary,
     height: 56,
     "&:hover .MuiOutlinedInput-notchedOutline": {
-      borderColor: "#000000",
+      borderColor: theme.palette.primary.main,
     },
     "&.Mui-focused .MuiOutlinedInput-notchedOutline": {
-      borderColor: "#000000",
+      borderColor: theme.palette.primary.main,
       borderWidth: 2,
     },
     "&.Mui-focused": {
-      backgroundColor: "#ffffff",
+      backgroundColor: theme.palette.background.paper,
       outline: "none",
       boxShadow: "none",
     },
   },
-};
+});
 
-export const datePickerTextFieldStyles: SxProps<Theme> = {
+export const datePickerTextFieldStyles: SxProps<Theme> = (theme) => ({
   "& .MuiOutlinedInput-root": {
     borderRadius: 2,
-    backgroundColor: "#ffffff",
+    backgroundColor: theme.palette.background.paper,
+    color: theme.palette.text.primary,
     height: 56,
     "&:hover .MuiOutlinedInput-notchedOutline": {
-      borderColor: "#000000",
+      borderColor: theme.palette.primary.main,
     },
     "&.Mui-focused .MuiOutlinedInput-notchedOutline": {
-      borderColor: "#000000",
+      borderColor: theme.palette.primary.main,
       borderWidth: 2,
     },
     "&.Mui-focused": {
-      backgroundColor: "#ffffff",
+      backgroundColor: theme.palette.background.paper,
       outline: "none",
       boxShadow: "none",
     },
     "& input": {
+      color: theme.palette.text.primary,
       outline: "none",
       boxShadow: "none",
     },
   },
-};
+});
 
 export const tableCellStyles: SxProps<Theme> = {
   borderRight: "1px solid #f0f0f0",

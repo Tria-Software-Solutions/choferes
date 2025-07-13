@@ -17,6 +17,11 @@ import {
   useTheme,
   useMediaQuery,
   Container,
+  RadioGroup,
+  FormControlLabel,
+  Radio,
+  FormLabel,
+  Box as MuiBox,
 } from "@mui/material";
 import { useAppNotifications } from "../../../components/Snackbar/Snackbar.component";
 import PAGE_TITLE from "../../../constants/pageTitle.constants";
@@ -38,6 +43,7 @@ import EmailOutlinedIcon from "@mui/icons-material/EmailOutlined";
 import AccountCircleOutlinedIcon from "@mui/icons-material/AccountCircleOutlined";
 import InfoOutlinedIcon from "@mui/icons-material/InfoOutlined";
 import { infoBox, infoIconBox, infoTitle, infoDesc, iconSx } from '../../Forms/AddEmployeeForm/styles';
+import { useThemeMode } from "../../../index";
 
 // Settings page component for user profile and password management
 const Settings: React.FC = () => {
@@ -48,6 +54,7 @@ const Settings: React.FC = () => {
   const theme = useTheme();
   const isSmallScreen = useMediaQuery(theme.breakpoints.down("sm"));
   const isMediumScreen = useMediaQuery(theme.breakpoints.down("md"));
+  const { mode, setMode } = useThemeMode();
 
   const [editFields, setEditFields] = useState({
     firstName: currentUser?.firstName || "",
@@ -254,6 +261,20 @@ const Settings: React.FC = () => {
 
   return (
     <Container maxWidth="lg" sx={{ py: { xs: 2, sm: 3, md: 4 } }}>
+      <MuiBox sx={{ mb: 3 }}>
+        <FormLabel component="legend" sx={{ fontWeight: 700, mb: 1 }}>Tema de la aplicación</FormLabel>
+        <RadioGroup
+          row
+          value={mode}
+          onChange={e => setMode(e.target.value as "light" | "dark" | "high-contrast")}
+          aria-label="theme-mode"
+          name="theme-mode"
+        >
+          <FormControlLabel value="light" control={<Radio />} label="Claro" />
+          <FormControlLabel value="dark" control={<Radio />} label="Oscuro" />
+          <FormControlLabel value="high-contrast" control={<Radio />} label="Alto Contraste" />
+        </RadioGroup>
+      </MuiBox>
       <Box
         display="flex"
         justifyContent="space-between"
@@ -273,7 +294,7 @@ const Settings: React.FC = () => {
               alignItems: "center",
               fontFamily: "'Urbanist', sans-serif",
               fontWeight: 800,
-              color: "#000000",
+              color: theme.palette.text.primary,
               mb: 0.5,
               gap: 1.5,
             }}
@@ -311,6 +332,7 @@ const Settings: React.FC = () => {
             sx={{
               mb: { xs: 0.5, sm: 1 },
               fontSize: { xs: "1.25rem", sm: "1.5rem" },
+              color: theme.palette.text.primary,
             }}
           >
             {MANAGEMENT.PERSONAL_INFO_TITLE}
@@ -472,6 +494,7 @@ const Settings: React.FC = () => {
             sx={{
               mb: { xs: 0.5, sm: 1 },
               fontSize: { xs: "1.25rem", sm: "1.5rem" },
+              color: theme.palette.text.primary,
             }}
           >
             {MANAGEMENT.PASSWORD_TITLE}
