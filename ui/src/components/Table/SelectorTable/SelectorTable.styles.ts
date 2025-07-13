@@ -1,18 +1,20 @@
 import { SxProps, Theme } from "@mui/material";
 
-export const paperStyles: SxProps<Theme> = {
+export const paperStyles: SxProps<Theme> = (theme) => ({
   width: "100%",
-};
+  backgroundColor: theme.palette.mode === "dark" ? "#111" : theme.palette.background.paper,
+  color: theme.palette.text.primary,
+});
 
 export const stickyHeaderBoxStyles = (
   isSmallScreen: boolean,
-): SxProps<Theme> => ({
+): SxProps<Theme> => (theme) => ({
   position: "sticky",
   top: 0,
   zIndex: 5,
-  backgroundColor: "#f0f2f5",
+  backgroundColor: theme.palette.background.paper,
   padding: isSmallScreen ? "8px" : "16px",
-  borderBottom: "1px solid #ddd",
+  borderBottom: `1px solid ${theme.palette.divider}`,
   borderTopLeftRadius: 8,
   borderTopRightRadius: 8,
 });
@@ -45,10 +47,12 @@ export const employeeColumnCellStyles = (
   whiteSpace: "nowrap",
 });
 
-export const tableCellStyles = (isSmallScreen: boolean): SxProps<Theme> => ({
+export const tableCellStyles = (isSmallScreen: boolean): SxProps<Theme> => (theme) => ({
   padding: isSmallScreen ? "8px" : "16px",
   zIndex: 10,
   whiteSpace: "nowrap",
+  color: theme.palette.text.primary,
+  backgroundColor: theme.palette.background.paper,
 });
 
 export const boldTypographyStyles: SxProps<Theme> = {
@@ -135,15 +139,19 @@ export const totalHoursTypographyStyles: SxProps<Theme> = {
   textAlign: "right",
 };
 
-export const tableRowBackground = (rowIndex: number): SxProps<Theme> => ({
-  backgroundColor: rowIndex % 2 === 0 ? "white" : "#f5f5f5",
+export const tableRowBackground = (rowIndex: number): SxProps<Theme> => (theme) => ({
+  backgroundColor: rowIndex % 2 === 0 ? theme.palette.background.paper : theme.palette.action.hover,
 });
 
 export const tableCellBackground = (
   rowIndex: number,
   today: boolean,
-): SxProps<Theme> => ({
-  backgroundColor: today ? "#e4f5ed" : rowIndex % 2 === 0 ? "white" : "#f5f5f5",
+): SxProps<Theme> => (theme) => ({
+  backgroundColor: today
+    ? theme.palette.action.selected
+    : rowIndex % 2 === 0
+    ? theme.palette.background.paper
+    : theme.palette.action.hover,
 });
 
 export const employeeCellBoxStyles = (

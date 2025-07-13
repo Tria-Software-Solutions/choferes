@@ -31,6 +31,7 @@ import DialogComponent from "../../Dialog/Dialog.component";
 import { User } from "../../../models/User";
 import {
   tableCellStyles,
+  tableHeadCellStyles,
   permissionChipStyles,
   viewMoreLessStyles,
 } from "./EditableTable.styles";
@@ -227,17 +228,7 @@ const EditableTableComponent = <T extends object>({
                   <TableCell
                     key={String(column)}
                     className="tableCell"
-                    sx={{
-                      position: "sticky",
-                      top: 0,
-                      zIndex: 4,
-                      backgroundColor: (theme) => theme.palette.primary.main,
-                      color: (theme) => theme.palette.primary.contrastText,
-                      fontWeight: 700,
-                      fontSize: "clamp(0.95rem, 1vw, 1.05rem)",
-                      padding: "12px 16px",
-                      whiteSpace: "nowrap",
-                    }}
+                    sx={tableHeadCellStyles(theme)}
                   >
                     <TableSortLabel
                       direction={orderBy === column ? order : "asc"}
@@ -256,17 +247,7 @@ const EditableTableComponent = <T extends object>({
               {showStatusColumn && (
                 <TableCell
                   className="tableCell"
-                  sx={{
-                    position: "sticky",
-                    top: 0,
-                    zIndex: 4,
-                    backgroundColor: (theme) => theme.palette.primary.main,
-                    color: (theme) => theme.palette.primary.contrastText,
-                    fontWeight: 700,
-                    fontSize: "clamp(0.95rem, 1vw, 1.05rem)",
-                    padding: "12px 16px",
-                    whiteSpace: "nowrap",
-                  }}
+                  sx={tableHeadCellStyles(theme)}
                 >
                   Estado
                 </TableCell>
@@ -278,17 +259,7 @@ const EditableTableComponent = <T extends object>({
                   <TableCell
                     key={String(column)}
                     className="tableCell"
-                    sx={{
-                      position: "sticky",
-                      top: 0,
-                      zIndex: 4,
-                      backgroundColor: (theme) => theme.palette.primary.main,
-                      color: (theme) => theme.palette.primary.contrastText,
-                      fontWeight: 700,
-                      fontSize: "clamp(0.95rem, 1vw, 1.05rem)",
-                      padding: "12px 16px",
-                      whiteSpace: "nowrap",
-                    }}
+                    sx={tableHeadCellStyles(theme)}
                   >
                     <TableSortLabel
                       direction={orderBy === column ? order : "asc"}
@@ -309,17 +280,7 @@ const EditableTableComponent = <T extends object>({
                 "licensePlate" in data[0] && (
                   <TableCell
                     className="tableCell"
-                    sx={{
-                      position: "sticky",
-                      top: 0,
-                      zIndex: 4,
-                      backgroundColor: (theme) => theme.palette.primary.main,
-                      color: (theme) => theme.palette.primary.contrastText,
-                      fontWeight: 700,
-                      fontSize: "clamp(0.95rem, 1vw, 1.05rem)",
-                      padding: "12px 16px",
-                      whiteSpace: "nowrap",
-                    }}
+                    sx={tableHeadCellStyles(theme)}
                   >
                     Fecha de Parqueo
                   </TableCell>
@@ -327,17 +288,7 @@ const EditableTableComponent = <T extends object>({
               {!noActions && (hasEditPermissions || hasDeletePermissions) ? (
                 <TableCell
                   className="tableCell"
-                  style={{ width: "100px", whiteSpace: "nowrap" }}
-                  sx={{
-                    position: "sticky",
-                    top: 0,
-                    zIndex: 4,
-                    backgroundColor: (theme) => theme.palette.primary.main,
-                    color: (theme) => theme.palette.primary.contrastText,
-                    fontWeight: 700,
-                    fontSize: "clamp(0.95rem, 1vw, 1.05rem)",
-                    padding: "12px 16px",
-                  }}
+                  sx={tableHeadCellStyles(theme)}
                 />
               ) : null}
             </TableRow>

@@ -309,8 +309,8 @@ const SelectorTableComponent: React.FC<SelectorTableProps> = ({
                   className="employee-column"
                   sx={{
                     ...employeeColumnCellStyles(isSmallScreen),
-                    backgroundColor: '#000', // fondo negro solo en la celda
-                    color: '#fff',
+                    backgroundColor: theme.palette.mode === "dark" ? "#111" : theme.palette.primary.main,
+                    color: theme.palette.mode === "dark" ? "#fff" : theme.palette.primary.contrastText,
                     position: 'relative',
                     zIndex: 1,
                   }}
@@ -322,7 +322,7 @@ const SelectorTableComponent: React.FC<SelectorTableProps> = ({
                         prev === "asc" ? "desc" : "asc"
                       )
                     }
-                    sx={{ color: '#fff' }}
+                    sx={{ color: theme.palette.mode === "dark" ? "#fff" : theme.palette.primary.contrastText }}
                   >
                     {SELECTOR_TABLE.EMPLOYEES}
                   </TableSortLabel>
@@ -333,8 +333,8 @@ const SelectorTableComponent: React.FC<SelectorTableProps> = ({
                     align="center"
                     sx={{
                       ...tableCellStyles(isSmallScreen),
-                      backgroundColor: '#000', // fondo negro solo en la celda
-                      color: '#fff',
+                      backgroundColor: theme.palette.mode === "dark" ? "#111" : theme.palette.primary.main,
+                      color: theme.palette.mode === "dark" ? "#fff" : theme.palette.primary.contrastText,
                       position: 'relative',
                       zIndex: 1,
                     }}
@@ -348,24 +348,37 @@ const SelectorTableComponent: React.FC<SelectorTableProps> = ({
                   PERMISSIONS.VIEW_EMPLOYEE_ROLES_HOURS
                 ) && (
                   <>
-                    <TableCell />
+                    <TableCell
+                      sx={{
+                        backgroundColor: theme.palette.mode === "dark" ? "#111" : theme.palette.primary.main,
+                        color: theme.palette.mode === "dark" ? "#fff" : theme.palette.primary.contrastText,
+                        position: 'relative',
+                        zIndex: 1,
+                      }}
+                    />
                     <TableCell
                       align="center"
-                      sx={tableCellStyles(isSmallScreen)}
+                      sx={{
+                        ...tableCellStyles(isSmallScreen),
+                        backgroundColor: theme.palette.mode === "dark" ? "#111" : theme.palette.primary.main,
+                        color: theme.palette.mode === "dark" ? "#fff" : theme.palette.primary.contrastText,
+                        position: 'relative',
+                        zIndex: 1,
+                      }}
                       colSpan={2}
                     >
                       <FormControl
                         size="small"
                         sx={{
                           minWidth: 120,
-                          backgroundColor: "#000",
+                          backgroundColor: theme.palette.mode === "dark" ? "#111" : theme.palette.primary.main,
                           borderRadius: 2,
                           ".MuiOutlinedInput-root": {
                             borderRadius: 2,
                             fontWeight: 700,
                             fontSize: "1rem",
-                            color: "#fff",
-                            backgroundColor: "#000 !important",
+                            color: theme.palette.mode === "dark" ? "#fff" : theme.palette.primary.contrastText,
+                            backgroundColor: theme.palette.mode === "dark" ? "#111" : theme.palette.primary.main,
                             "& fieldset": {
                               border: "none",
                             },
@@ -375,12 +388,12 @@ const SelectorTableComponent: React.FC<SelectorTableProps> = ({
                             alignItems: "center",
                             gap: 1,
                             fontWeight: 700,
-                            color: "#fff",
-                            backgroundColor: "#000 !important",
+                            color: theme.palette.mode === "dark" ? "#fff" : theme.palette.primary.contrastText,
+                            backgroundColor: theme.palette.mode === "dark" ? "#111" : theme.palette.primary.main,
                             pl: 0,
                           },
                           ".MuiSvgIcon-root": {
-                            color: "#fff",
+                            color: theme.palette.mode === "dark" ? "#fff" : theme.palette.primary.contrastText,
                           },
                         }}
                       >
@@ -404,24 +417,24 @@ const SelectorTableComponent: React.FC<SelectorTableProps> = ({
                                 <InputAdornment position="start">
                                   {selectedPeriod === "weekly" && (
                                     <CalendarTodayIcon
-                                      sx={{ color: "#fff", mr: 1 }}
+                                      sx={{ color: theme.palette.mode === "dark" ? "#fff" : theme.palette.primary.contrastText, mr: 1 }}
                                     />
                                   )}
                                   {selectedPeriod === "biweekly" && (
                                     <DateRangeIcon
-                                      sx={{ color: "#fff", mr: 1 }}
+                                      sx={{ color: theme.palette.mode === "dark" ? "#fff" : theme.palette.primary.contrastText, mr: 1 }}
                                     />
                                   )}
                                   {selectedPeriod === "monthly" && (
                                     <CalendarMonthIcon
-                                      sx={{ color: "#fff", mr: 1 }}
+                                      sx={{ color: theme.palette.mode === "dark" ? "#fff" : theme.palette.primary.contrastText, mr: 1 }}
                                     />
                                   )}
                                 </InputAdornment>
                               }
                               sx={{
-                                color: "#fff",
-                                backgroundColor: "#000 !important",
+                                color: theme.palette.mode === "dark" ? "#fff" : theme.palette.primary.contrastText,
+                                backgroundColor: theme.palette.mode === "dark" ? "#111" : theme.palette.primary.main,
                                 borderRadius: 2,
                                 fontWeight: 700,
                                 fontSize: "1rem",
@@ -683,8 +696,8 @@ const SelectorTableComponent: React.FC<SelectorTableProps> = ({
                         align="center"
                         sx={{
                           padding: isSmallScreen ? "8px" : "16px",
-                          backgroundColor:
-                            rowIndex % 2 === 0 ? "white" : "#f5f5f5",
+                          backgroundColor: theme.palette.background.paper,
+                          color: theme.palette.text.primary,
                         }}
                       >
                         <Stack
@@ -730,8 +743,8 @@ const SelectorTableComponent: React.FC<SelectorTableProps> = ({
                           position: isSmallScreen ? "static" : "sticky",
                           right: 0,
                           zIndex: 2,
-                          backgroundColor:
-                            rowIndex % 2 === 0 ? "white" : "#f5f5f5",
+                          backgroundColor: theme.palette.background.paper,
+                          color: theme.palette.text.primary,
                         }}
                       >
                         <Stack
@@ -775,9 +788,22 @@ const SelectorTableComponent: React.FC<SelectorTableProps> = ({
           </Table>
         </TableContainer>
         <Divider />
-        <Box display="flex" justifyContent="space-between" alignItems="center">
+        <Box 
+          display="flex" 
+          justifyContent="space-between" 
+          alignItems="center"
+          sx={{
+            backgroundColor: theme.palette.mode === "dark" ? "#111" : theme.palette.background.paper,
+            color: theme.palette.mode === "dark" ? "#fff" : theme.palette.text.primary,
+            borderBottomLeftRadius: 8,
+            borderBottomRightRadius: 8,
+          }}
+        >
           {!isSmallScreen && (
-            <Typography variant="body2" sx={{ ml: 2 }}>
+            <Typography 
+              variant="body2" 
+              sx={{ ml: 2 }}
+            >
               {renderPeriodFooter(
                 selectedPeriod,
                 currentWeek,
@@ -809,6 +835,18 @@ const SelectorTableComponent: React.FC<SelectorTableProps> = ({
               }
               labelDisplayedRows={() => ""}
               ActionsComponent={PaginationComponent}
+              sx={{
+                color: theme.palette.mode === "dark" ? "#fff" : theme.palette.primary.contrastText,
+                '.MuiTablePagination-toolbar': {
+                  backgroundColor: 'transparent',
+                },
+                '.MuiTablePagination-selectLabel, .MuiTablePagination-input, .MuiTablePagination-displayedRows': {
+                  color: theme.palette.mode === "dark" ? "#fff" : theme.palette.primary.contrastText,
+                },
+                '.MuiSvgIcon-root': {
+                  color: theme.palette.mode === "dark" ? "#fff" : theme.palette.primary.contrastText,
+                },
+              }}
             />
           </div>
         </Box>
