@@ -4,7 +4,6 @@ import {
   IconButton,
   Menu,
   MenuItem,
-  Divider,
   SvgIconProps,
   ListItemIcon,
   ListItemText,
@@ -14,10 +13,7 @@ import {
   iconButtonStyles,
   textButtonStyles,
   buttonStyles,
-  menuPaperStyles,
-  menuItemStyles,
   subMenuPaperStyles,
-  listItemTextStyles,
 } from "./Menu.styles";
 
 export interface MenuItemProps {
@@ -109,9 +105,6 @@ const MenuComponent: React.FC<MenuComponentProps> = ({
         anchorEl={anchorEl}
         open={open}
         onClose={handleClose}
-        PaperProps={{
-          sx: menuPaperStyles(theme),
-        }}
       >
         {menuItems.map((item, index) => (
           <div key={index}>
@@ -121,14 +114,10 @@ const MenuComponent: React.FC<MenuComponentProps> = ({
                 if (!item.subMenuItems) handleClose();
               }}
               onMouseEnter={item.subMenuItems ? handleSubMenuClick : undefined}
-              sx={menuItemStyles}
             >
               {item.icon && <ListItemIcon>{item.icon}</ListItemIcon>}
               <ListItemText
                 primary={item.text}
-                primaryTypographyProps={{
-                  sx: listItemTextStyles,
-                }}
               />
               {item.subMenuItems && (
                 <IconButton onClick={handleSubMenuClick}></IconButton>
@@ -148,23 +137,19 @@ const MenuComponent: React.FC<MenuComponentProps> = ({
                   <MenuItem
                     key={subIndex}
                     onClick={subItem.onClick}
-                    sx={menuItemStyles}
                   >
                     {subItem.icon && (
                       <ListItemIcon>{subItem.icon}</ListItemIcon>
                     )}
                     <ListItemText
                       primary={subItem.text}
-                      primaryTypographyProps={{
-                        sx: listItemTextStyles,
-                      }}
                     />
                   </MenuItem>
                 ))}
               </Menu>
             )}
 
-            {index < menuItems.length - 1 && <Divider />}
+            {/* Removed Divider for unified look */}
           </div>
         ))}
       </Menu>
