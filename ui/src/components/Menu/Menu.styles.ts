@@ -4,7 +4,7 @@ export const iconButtonStyles = (theme: Theme): SxProps<Theme> => ({
   height: "40px",
   color: "#ffffff",
   backgroundColor: "#000000",
-  border: "2px solid #000000",
+  border: `1px solid ${theme.palette.mode === "dark" ? "#222" : "#000000"}`,
   borderRadius: "8px",
   transition: "all 0.3s ease",
   "&:hover": {
@@ -60,8 +60,8 @@ export const menuPaperStyles = (theme: Theme): SxProps<Theme> => ({
   mt: 1.5,
   borderRadius: theme.shape.borderRadius,
   backgroundColor: `${theme.palette.background.paper} !important`,
-  boxShadow: theme.shadows[8],
-  border: `1px solid ${theme.palette.divider}`,
+  boxShadow: '0 4px 24px rgba(0,0,0,0.7)',
+  border: 'none',
 });
 
 export const menuItemStyles: SxProps<Theme> = {
@@ -72,8 +72,9 @@ export const menuItemStyles: SxProps<Theme> = {
 };
 
 export const subMenuPaperStyles = (theme: Theme): SxProps<Theme> => ({
-  boxShadow: theme.shadows[8],
-  border: `1px solid ${theme.palette.divider}`,
+  boxShadow: '0 4px 24px rgba(0,0,0,0.7)',
+  border: 'none',
+  backgroundColor: `${theme.palette.background.paper} !important`,
 });
 
 export const listItemTextStyles: SxProps<Theme> = {

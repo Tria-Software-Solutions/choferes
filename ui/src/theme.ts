@@ -314,22 +314,22 @@ export const lightTheme = createTheme({
     },
     MuiMenuItem: {
       styleOverrides: {
-        root: {
-          color: "#000000",
-          backgroundColor: "#ffffff",
+        root: ({ theme }) => ({
+          color: theme.palette.text.primary,
+          backgroundColor: theme.palette.background.paper,
           padding: "12px 16px",
           transition: "all 0.2s ease",
           "&:hover": {
-            backgroundColor: "#f5f5f5",
+            backgroundColor: theme.palette.action.hover,
           },
           "&.Mui-selected": {
-            backgroundColor: "#e3f2fd",
-            color: "#000000",
+            backgroundColor: theme.palette.action.selected,
+            color: theme.palette.text.primary,
             "&:hover": {
-              backgroundColor: "#e3f2fd",
+              backgroundColor: theme.palette.action.selected,
             },
           },
-        },
+        }),
       },
     },
     MuiListSubheader: {
@@ -636,13 +636,15 @@ export const lightTheme = createTheme({
     },
     MuiMenu: {
       styleOverrides: {
-        paper: {
-          backgroundColor: "#ffffff",
-          boxShadow: "0 8px 32px rgba(0,0,0,0.2)",
-          border: "1px solid rgba(0,0,0,0.1)",
+        paper: ({ theme }) => ({
+          backgroundColor: theme.palette.background.paper,
+          border: "none",
+          boxShadow: theme.palette.mode === "dark"
+            ? "0 4px 24px rgba(0,0,0,0.85)"
+            : "0 4px 24px rgba(0,0,0,0.15)",
           borderRadius: "12px",
           overflow: "hidden",
-        },
+        }),
       },
     },
   },
@@ -747,12 +749,12 @@ export const darkTheme = createTheme({
           fontSize: "0.875rem",
           padding: "8px 24px",
           transition: "all 0.3s ease",
-          borderWidth: "2px",
+          borderWidth: "1px", // Cambiado a 1px
         },
         contained: {
           backgroundColor: "#333333",
           color: "#bdbdbd",
-          border: "2px solid #bdbdbd",
+          border: "1px solid #bdbdbd", // Cambiado a 1px
           '&:hover': {
             backgroundColor: "#444444",
             borderColor: "#e0e0e0",
@@ -768,7 +770,7 @@ export const darkTheme = createTheme({
         outlined: {
           borderColor: "#bdbdbd",
           color: "#bdbdbd",
-          borderWidth: "2px",
+          borderWidth: "1px", // Cambiado a 1px
           '&:hover': {
             backgroundColor: "#232323",
             color: "#ffffff",
@@ -924,17 +926,17 @@ export const darkTheme = createTheme({
     },
     MuiMenuItem: {
       styleOverrides: {
-        root: {
-          color: "#ffffff",
-          backgroundColor: "#232323",
+        root: ({ theme }) => ({
+          color: theme.palette.text.primary,
+          backgroundColor: theme.palette.background.paper,
           '&:hover': {
-            backgroundColor: "#333333",
+            backgroundColor: theme.palette.action.hover,
           },
           '&.Mui-selected': {
-            backgroundColor: "#333333",
-            color: "#bdbdbd",
+            backgroundColor: theme.palette.action.selected,
+            color: theme.palette.text.primary,
           },
-        },
+        }),
       },
     },
     MuiListSubheader: {
@@ -1026,10 +1028,10 @@ export const darkTheme = createTheme({
           backgroundColor: "#232323",
           color: "#bdbdbd",
           fontWeight: 600,
-          borderBottom: "2px solid #bdbdbd",
+          borderBottom: "2px solid #222", // Cambiado a un color más oscuro
         },
         body: {
-          borderBottom: "1px solid #bdbdbd",
+          borderBottom: "1px solid #222", // Cambiado a un color más oscuro
         },
       },
     },
@@ -1225,13 +1227,15 @@ export const darkTheme = createTheme({
     },
     MuiMenu: {
       styleOverrides: {
-        paper: {
-          backgroundColor: "#232323",
+        paper: ({ theme }) => ({
+          backgroundColor: theme.palette.background.paper,
+          border: "none",
+          boxShadow: theme.palette.mode === "dark"
+            ? "0 4px 24px rgba(0,0,0,0.85)"
+            : "0 4px 24px rgba(0,0,0,0.15)",
           borderRadius: "12px",
-          boxShadow: "0 8px 32px rgba(0,0,0,0.32)",
-          border: "1px solid #333333",
           overflow: "hidden",
-        },
+        }),
       },
     },
     MuiDivider: {
@@ -1492,17 +1496,17 @@ export const highContrastTheme = createTheme({
     },
     MuiMenuItem: {
       styleOverrides: {
-        root: {
-          color: "#000000",
-          backgroundColor: "#ffff00",
-          "&:hover": {
-            backgroundColor: "#ffff66",
+        root: ({ theme }) => ({
+          color: theme.palette.text.primary,
+          backgroundColor: theme.palette.background.paper,
+          '&:hover': {
+            backgroundColor: theme.palette.action.hover,
           },
-          "&.Mui-selected": {
-            backgroundColor: "#000000",
-            color: "#ffff00",
+          '&.Mui-selected': {
+            backgroundColor: theme.palette.action.selected,
+            color: theme.palette.text.primary,
           },
-        },
+        }),
       },
     },
     MuiListSubheader: {
@@ -1785,13 +1789,15 @@ export const highContrastTheme = createTheme({
     },
     MuiMenu: {
       styleOverrides: {
-        paper: {
-          backgroundColor: "#ffff00",
-          boxShadow: "0 8px 32px #000000",
-          border: "2px solid #000000",
+        paper: ({ theme }) => ({
+          backgroundColor: theme.palette.background.paper,
+          border: "none",
+          boxShadow: theme.palette.mode === "dark"
+            ? "0 4px 24px rgba(0,0,0,0.85)"
+            : "0 4px 24px rgba(0,0,0,0.15)",
           borderRadius: "12px",
           overflow: "hidden",
-        },
+        }),
       },
     },
   },

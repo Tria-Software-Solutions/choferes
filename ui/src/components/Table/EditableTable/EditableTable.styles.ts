@@ -73,11 +73,11 @@ export const datePickerTextFieldStyles: SxProps<Theme> = (theme) => ({
   },
 });
 
-export const tableCellStyles: SxProps<Theme> = {
-  borderRight: "1px solid #f0f0f0",
-  borderBottom: "1px solid #f0f0f0",
+export const tableCellStyles: SxProps<Theme> = (theme) => ({
+  borderRight: `1px solid ${theme.palette.mode === "dark" ? "#222" : "#f0f0f0"}`,
+  borderBottom: `1.5px solid ${theme.palette.mode === "dark" ? "#222" : "#f0f0f0"}`,
   padding: "10px 16px",
-};
+});
 
 export const permissionChipStyles = (theme: Theme): SxProps<Theme> => ({
   backgroundColor: theme.palette.primary.main,

@@ -586,7 +586,6 @@ const Settings: React.FC = () => {
           </Typography>
 
           <RadioGroup
-            row
             value={mode}
             onChange={(e) =>
               setMode(e.target.value as "light" | "dark" | "high-contrast")

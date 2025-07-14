@@ -75,6 +75,7 @@ import {
   tableRowBackground,
   tableCellBackground,
   employeeCellBoxStyles,
+  formControlTotalStyles,
 } from "./SelectorTable.styles";
 
 // Import helper functions
@@ -369,33 +370,7 @@ const SelectorTableComponent: React.FC<SelectorTableProps> = ({
                     >
                       <FormControl
                         size="small"
-                        sx={{
-                          minWidth: 120,
-                          backgroundColor: theme.palette.mode === "dark" ? "#111" : theme.palette.primary.main,
-                          borderRadius: 2,
-                          ".MuiOutlinedInput-root": {
-                            borderRadius: 2,
-                            fontWeight: 700,
-                            fontSize: "1rem",
-                            color: theme.palette.mode === "dark" ? "#fff" : theme.palette.primary.contrastText,
-                            backgroundColor: theme.palette.mode === "dark" ? "#111" : theme.palette.primary.main,
-                            "& fieldset": {
-                              border: "none",
-                            },
-                          },
-                          ".MuiSelect-select": {
-                            display: "flex",
-                            alignItems: "center",
-                            gap: 1,
-                            fontWeight: 700,
-                            color: theme.palette.mode === "dark" ? "#fff" : theme.palette.primary.contrastText,
-                            backgroundColor: theme.palette.mode === "dark" ? "#111" : theme.palette.primary.main,
-                            pl: 0,
-                          },
-                          ".MuiSvgIcon-root": {
-                            color: theme.palette.mode === "dark" ? "#fff" : theme.palette.primary.contrastText,
-                          },
-                        }}
+                        sx={formControlTotalStyles}
                       >
                         <Select
                           value={selectedPeriod}
@@ -434,7 +409,7 @@ const SelectorTableComponent: React.FC<SelectorTableProps> = ({
                               }
                               sx={{
                                 color: theme.palette.mode === "dark" ? "#fff" : theme.palette.primary.contrastText,
-                                backgroundColor: theme.palette.mode === "dark" ? "#111" : theme.palette.primary.main,
+                                backgroundColor: theme.palette.background.paper,
                                 borderRadius: 2,
                                 fontWeight: 700,
                                 fontSize: "1rem",
