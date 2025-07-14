@@ -292,7 +292,6 @@ const SelectorTableComponent: React.FC<SelectorTableProps> = ({
                 backgroundColor: 'transparent',
                 '&::before': {
                   content: '""',
-                  position: 'absolute',
                   top: 0,
                   left: 0,
                   right: 0,
