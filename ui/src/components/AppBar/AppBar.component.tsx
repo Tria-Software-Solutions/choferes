@@ -46,8 +46,6 @@ import {
   userMenuIconButtonStyles,
   userAvatarStyles,
   mobileDividerStyles,
-  menuPaperStyles,
-  notificationsMenuPaperStyles,
   dashboardNoLinksBoxStyles,
   logoutMenuItemStyles,
 } from "./AppBar.styles";
@@ -328,9 +326,6 @@ const AppBarComponent: React.FC<AppBarComponentProps> = ({
           anchorEl={userMenuAnchor}
           open={Boolean(userMenuAnchor)}
           onClose={handleUserMenuClose}
-          PaperProps={{
-            sx: menuPaperStyles,
-          }}
           transformOrigin={{ horizontal: "right", vertical: "top" }}
           anchorOrigin={{ horizontal: "right", vertical: "bottom" }}
         >
@@ -367,9 +362,6 @@ const AppBarComponent: React.FC<AppBarComponentProps> = ({
           anchorEl={notificationsAnchor}
           open={Boolean(notificationsAnchor)}
           onClose={handleNotificationsClose}
-          PaperProps={{
-            sx: notificationsMenuPaperStyles,
-          }}
           transformOrigin={{ horizontal: "right", vertical: "top" }}
           anchorOrigin={{ horizontal: "right", vertical: "bottom" }}
         >

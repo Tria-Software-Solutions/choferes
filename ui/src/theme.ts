@@ -637,14 +637,30 @@ export const lightTheme = createTheme({
     MuiMenu: {
       styleOverrides: {
         paper: ({ theme }) => ({
-          backgroundColor: theme.palette.background.paper,
+          backgroundColor: theme.palette.mode === "dark"
+            ? "#181818"
+            : theme.palette.background.paper,
           border: "none",
           boxShadow: theme.palette.mode === "dark"
             ? "0 4px 24px rgba(0,0,0,0.85)"
             : "0 4px 24px rgba(0,0,0,0.15)",
-          borderRadius: "12px",
+          borderRadius: "0px !important",
           overflow: "hidden",
         }),
+      },
+    },
+    MuiPopover: {
+      styleOverrides: {
+        paper: {
+          borderRadius: "0px !important",
+        },
+      },
+    },
+    MuiDivider: {
+      styleOverrides: {
+        root: {
+          borderColor: "#bdbdbd",
+        },
       },
     },
   },
@@ -876,9 +892,9 @@ export const darkTheme = createTheme({
     },
     MuiSelect: {
       styleOverrides: {
-        root: {
+        root: ({ theme }) => ({
           color: "#ffffff",
-          backgroundColor: "#232323",
+          backgroundColor: theme.palette.mode === "dark" ? "#232323" : "#fff",
           borderRadius: "8px",
           '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
             borderColor: "#bdbdbd",
@@ -889,10 +905,10 @@ export const darkTheme = createTheme({
           },
           // Unificar fondo y borde
           '& .MuiOutlinedInput-root': {
-            backgroundColor: "#232323",
+            backgroundColor: theme.palette.mode === "dark" ? "#232323" : "#fff",
             borderRadius: "8px",
           },
-        },
+        }),
         select: {
           backgroundColor: "#232323",
         },
@@ -903,22 +919,22 @@ export const darkTheme = createTheme({
     },
     MuiOutlinedInput: {
       styleOverrides: {
-        root: {
+        root: ({ theme }) => ({
           borderRadius: "8px",
-          backgroundColor: "#232323",
+          backgroundColor: theme.palette.background.paper,
           color: "#ffffff",
           '& input': {
             color: "#ffffff",
           },
           // Unificar fondo y borde
           '&.Mui-focused': {
-            backgroundColor: "#232323",
+            backgroundColor: theme.palette.background.paper,
           },
           // Adornos (iconos)
           '& .MuiSvgIcon-root, & .MuiInputAdornment-root': {
             color: "#ffffff",
           },
-        },
+        }),
         notchedOutline: {
           borderColor: "#333333",
         },
@@ -1228,14 +1244,23 @@ export const darkTheme = createTheme({
     MuiMenu: {
       styleOverrides: {
         paper: ({ theme }) => ({
-          backgroundColor: theme.palette.background.paper,
+          backgroundColor: theme.palette.mode === "dark"
+            ? "#181818"
+            : theme.palette.background.paper,
           border: "none",
           boxShadow: theme.palette.mode === "dark"
             ? "0 4px 24px rgba(0,0,0,0.85)"
             : "0 4px 24px rgba(0,0,0,0.15)",
-          borderRadius: "12px",
+          borderRadius: "0px !important",
           overflow: "hidden",
         }),
+      },
+    },
+    MuiPopover: {
+      styleOverrides: {
+        paper: {
+          borderRadius: "0px !important",
+        },
       },
     },
     MuiDivider: {
@@ -1790,14 +1815,30 @@ export const highContrastTheme = createTheme({
     MuiMenu: {
       styleOverrides: {
         paper: ({ theme }) => ({
-          backgroundColor: theme.palette.background.paper,
+          backgroundColor: theme.palette.mode === "dark"
+            ? "#181818"
+            : theme.palette.background.paper,
           border: "none",
           boxShadow: theme.palette.mode === "dark"
             ? "0 4px 24px rgba(0,0,0,0.85)"
             : "0 4px 24px rgba(0,0,0,0.15)",
-          borderRadius: "12px",
+          borderRadius: "0px !important",
           overflow: "hidden",
         }),
+      },
+    },
+    MuiPopover: {
+      styleOverrides: {
+        paper: {
+          borderRadius: "0px !important",
+        },
+      },
+    },
+    MuiDivider: {
+      styleOverrides: {
+        root: {
+          borderColor: "#bdbdbd",
+        },
       },
     },
   },
