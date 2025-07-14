@@ -211,7 +211,7 @@ const Dashboard: React.FC = () => {
                   handleExport(action.type as "excel" | "pdf");
                 },
               }))}
-              mainIcon={<BackupIcon sx={{ color: theme.palette.primary.main }} />}
+              mainIcon={<BackupIcon />}
               openIcon={<CloseRoundedIcon />}
               direction="left"
             />

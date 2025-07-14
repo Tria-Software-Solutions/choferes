@@ -150,23 +150,23 @@ export const mobileDividerStyles: SxProps<Theme> = {
   borderColor: "rgba(255,255,255,0.2)",
 };
 
-export const menuPaperStyles: SxProps<Theme> = {
+export const menuPaperStyles: SxProps<Theme> = (theme) => ({
   mt: 1,
   minWidth: 200,
-  backgroundColor: "#ffffff",
+  backgroundColor: theme.palette.background.paper,
   boxShadow: "0 8px 32px rgba(0,0,0,0.2)",
   border: "1px solid rgba(0,0,0,0.1)",
   borderRadius: 2,
-};
+});
 
-export const notificationsMenuPaperStyles: SxProps<Theme> = {
+export const notificationsMenuPaperStyles: SxProps<Theme> = (theme) => ({
   mt: 1,
   minWidth: 300,
-  backgroundColor: "#ffffff",
+  backgroundColor: theme.palette.background.paper,
   boxShadow: "0 8px 32px rgba(0,0,0,0.2)",
   border: "1px solid rgba(0,0,0,0.1)",
   borderRadius: 2,
-};
+});
 
 export const dashboardNoLinksBoxStyles: SxProps<Theme> = {
   color: "white",
