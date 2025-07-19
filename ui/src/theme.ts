@@ -315,8 +315,6 @@ export const lightTheme = createTheme({
     MuiMenuItem: {
       styleOverrides: {
         root: ({ theme }) => ({
-          color: theme.palette.text.primary,
-          backgroundColor: theme.palette.background.paper,
           padding: "12px 16px",
           transition: "all 0.2s ease",
           "&:hover": {
@@ -334,11 +332,9 @@ export const lightTheme = createTheme({
     },
     MuiListSubheader: {
       styleOverrides: {
-        root: {
-          color: "#000000",
-          backgroundColor: "#f5f5f5",
+        root: ({ theme }) => ({
           fontWeight: 600,
-        },
+        }),
       },
     },
     MuiCheckbox: {
@@ -637,14 +633,16 @@ export const lightTheme = createTheme({
     MuiMenu: {
       styleOverrides: {
         paper: ({ theme }) => ({
-          backgroundColor: theme.palette.mode === "dark"
-            ? "#181818"
-            : theme.palette.background.paper,
+          backgroundColor:
+            theme.palette.mode === "dark"
+              ? "#181818"
+              : theme.palette.background.paper,
           border: "none",
-          boxShadow: theme.palette.mode === "dark"
-            ? "0 4px 24px rgba(0,0,0,0.85)"
-            : "0 4px 24px rgba(0,0,0,0.15)",
-          borderRadius: "0px !important",
+          boxShadow:
+            theme.palette.mode === "dark"
+              ? "0 4px 24px rgba(0,0,0,0.85)"
+              : "0 4px 24px rgba(0,0,0,0.15)",
+          borderRadius: "8px !important",
           overflow: "hidden",
         }),
       },
@@ -731,9 +729,19 @@ export const darkTheme = createTheme({
     subtitle2: { fontSize: "1rem", fontWeight: 500, color: "#b0b0b0" },
     body1: { fontSize: "1rem", color: "#ffffff" },
     body2: { fontSize: "0.875rem", color: "#b0b0b0" },
-    button: { fontSize: "0.875rem", fontWeight: 600, textTransform: "none", color: "#bdbdbd" },
+    button: {
+      fontSize: "0.875rem",
+      fontWeight: 600,
+      textTransform: "none",
+      color: "#bdbdbd",
+    },
     caption: { fontSize: "0.75rem", color: "#b0b0b0" },
-    overline: { fontSize: "0.75rem", fontWeight: 600, color: "#b0b0b0", letterSpacing: 1 },
+    overline: {
+      fontSize: "0.75rem",
+      fontWeight: 600,
+      color: "#b0b0b0",
+      letterSpacing: 1,
+    },
   },
   shape: { borderRadius: 8 },
   components: {
@@ -771,12 +779,12 @@ export const darkTheme = createTheme({
           backgroundColor: "#333333",
           color: "#bdbdbd",
           border: "1px solid #bdbdbd", // Cambiado a 1px
-          '&:hover': {
+          "&:hover": {
             backgroundColor: "#444444",
             borderColor: "#e0e0e0",
             boxShadow: "0 6px 20px rgba(0,0,0,0.5)",
           },
-          '&:disabled': {
+          "&:disabled": {
             backgroundColor: "#444444",
             borderColor: "#444444",
             color: "#888888",
@@ -787,13 +795,13 @@ export const darkTheme = createTheme({
           borderColor: "#bdbdbd",
           color: "#bdbdbd",
           borderWidth: "1px", // Cambiado a 1px
-          '&:hover': {
+          "&:hover": {
             backgroundColor: "#232323",
             color: "#ffffff",
             borderColor: "#e0e0e0",
             boxShadow: "0 4px 12px rgba(0,0,0,0.4)",
           },
-          '&:disabled': {
+          "&:disabled": {
             borderColor: "#444444",
             color: "#444444",
             boxShadow: "none",
@@ -801,7 +809,7 @@ export const darkTheme = createTheme({
         },
         text: {
           color: "#bdbdbd",
-          '&:hover': {
+          "&:hover": {
             backgroundColor: "#232323",
           },
         },
@@ -811,13 +819,13 @@ export const darkTheme = createTheme({
       styleOverrides: {
         root: {
           color: "#bdbdbd",
-          '&:hover': {
+          "&:hover": {
             backgroundColor: "#232323",
           },
         },
         colorInherit: {
           color: "#ffffff",
-          '&:hover': {
+          "&:hover": {
             backgroundColor: "rgba(255,255,255,0.1)",
           },
         },
@@ -827,29 +835,29 @@ export const darkTheme = createTheme({
       styleOverrides: {
         root: {
           margin: "8px 0",
-          '& .MuiOutlinedInput-root': {
+          "& .MuiOutlinedInput-root": {
             borderRadius: 2,
             backgroundColor: "#232323",
             color: "#ffffff",
-            '& fieldset': {
+            "& fieldset": {
               borderColor: "#333333",
               borderWidth: "2px",
             },
-            '&:hover .MuiOutlinedInput-notchedOutline': {
+            "&:hover .MuiOutlinedInput-notchedOutline": {
               borderColor: "#bdbdbd",
             },
-            '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
+            "&.Mui-focused .MuiOutlinedInput-notchedOutline": {
               borderColor: "#bdbdbd",
               borderWidth: 2,
             },
-            '&.Mui-focused': {
+            "&.Mui-focused": {
               backgroundColor: "#232323",
             },
-            '& input': {
+            "& input": {
               color: "#ffffff",
             },
             // Adornos (iconos)
-            '& .MuiSvgIcon-root, & .MuiInputAdornment-root': {
+            "& .MuiSvgIcon-root, & .MuiInputAdornment-root": {
               color: "#ffffff",
             },
           },
@@ -859,30 +867,30 @@ export const darkTheme = createTheme({
     MuiFormControl: {
       styleOverrides: {
         root: {
-          '& .MuiOutlinedInput-root': {
+          "& .MuiOutlinedInput-root": {
             borderRadius: "8px",
             backgroundColor: "#232323",
             color: "#ffffff",
-            '& fieldset': {
+            "& fieldset": {
               borderColor: "#333333",
               borderWidth: "2px",
             },
-            '&:hover fieldset': {
+            "&:hover fieldset": {
               borderColor: "#bdbdbd",
             },
-            '&.Mui-focused fieldset': {
+            "&.Mui-focused fieldset": {
               borderColor: "#bdbdbd",
               borderWidth: "2px",
             },
             // Adornos (iconos)
-            '& .MuiSvgIcon-root, & .MuiInputAdornment-root': {
+            "& .MuiSvgIcon-root, & .MuiInputAdornment-root": {
               color: "#ffffff",
             },
           },
-          '& .MuiInputLabel-root': {
+          "& .MuiInputLabel-root": {
             color: "#b0b0b0",
             fontSize: "1rem",
-            '&.Mui-focused': {
+            "&.Mui-focused": {
               color: "#bdbdbd",
               fontWeight: 600,
             },
@@ -896,15 +904,15 @@ export const darkTheme = createTheme({
           color: "#ffffff",
           backgroundColor: theme.palette.mode === "dark" ? "#232323" : "#fff",
           borderRadius: "8px",
-          '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
+          "&.Mui-focused .MuiOutlinedInput-notchedOutline": {
             borderColor: "#bdbdbd",
             borderWidth: "2px",
           },
-          '&:hover .MuiOutlinedInput-notchedOutline': {
+          "&:hover .MuiOutlinedInput-notchedOutline": {
             borderColor: "#bdbdbd",
           },
           // Unificar fondo y borde
-          '& .MuiOutlinedInput-root': {
+          "& .MuiOutlinedInput-root": {
             backgroundColor: theme.palette.mode === "dark" ? "#232323" : "#fff",
             borderRadius: "8px",
           },
@@ -923,15 +931,15 @@ export const darkTheme = createTheme({
           borderRadius: "8px",
           backgroundColor: theme.palette.background.paper,
           color: "#ffffff",
-          '& input': {
+          "& input": {
             color: "#ffffff",
           },
           // Unificar fondo y borde
-          '&.Mui-focused': {
+          "&.Mui-focused": {
             backgroundColor: theme.palette.background.paper,
           },
           // Adornos (iconos)
-          '& .MuiSvgIcon-root, & .MuiInputAdornment-root': {
+          "& .MuiSvgIcon-root, & .MuiInputAdornment-root": {
             color: "#ffffff",
           },
         }),
@@ -943,12 +951,10 @@ export const darkTheme = createTheme({
     MuiMenuItem: {
       styleOverrides: {
         root: ({ theme }) => ({
-          color: theme.palette.text.primary,
-          backgroundColor: theme.palette.background.paper,
-          '&:hover': {
+          "&:hover": {
             backgroundColor: theme.palette.action.hover,
           },
-          '&.Mui-selected': {
+          "&.Mui-selected": {
             backgroundColor: theme.palette.action.selected,
             color: theme.palette.text.primary,
           },
@@ -957,21 +963,19 @@ export const darkTheme = createTheme({
     },
     MuiListSubheader: {
       styleOverrides: {
-        root: {
-          color: "#ffffff",
-          backgroundColor: "#232323",
+        root: ({ theme }) => ({
           fontWeight: 600,
-        },
+        }),
       },
     },
     MuiCheckbox: {
       styleOverrides: {
         root: {
           color: "#90caf9",
-          '&.Mui-checked': {
+          "&.Mui-checked": {
             color: "#90caf9",
           },
-          '&:hover': {
+          "&:hover": {
             backgroundColor: "rgba(144,202,249,0.08)",
           },
         },
@@ -980,13 +984,13 @@ export const darkTheme = createTheme({
     MuiSwitch: {
       styleOverrides: {
         root: {
-          '& .MuiSwitch-switchBase.Mui-checked': {
+          "& .MuiSwitch-switchBase.Mui-checked": {
             color: "#90caf9",
-            '&:hover': {
+            "&:hover": {
               backgroundColor: "rgba(144,202,249,0.08)",
             },
           },
-          '& .MuiSwitch-switchBase.Mui-checked + .MuiSwitch-track': {
+          "& .MuiSwitch-switchBase.Mui-checked + .MuiSwitch-track": {
             backgroundColor: "#90caf9",
           },
         },
@@ -1000,12 +1004,12 @@ export const darkTheme = createTheme({
           fontWeight: 600,
           borderRadius: "20px",
           fontSize: "0.875rem",
-          '& .MuiChip-label': {
+          "& .MuiChip-label": {
             color: "#bdbdbd !important",
           },
-          '&:hover': {
+          "&:hover": {
             backgroundColor: "#333333",
-            '& .MuiChip-label': {
+            "& .MuiChip-label": {
               color: "#ffffff !important",
             },
           },
@@ -1013,10 +1017,10 @@ export const darkTheme = createTheme({
         outlined: {
           borderColor: "#bdbdbd",
           color: "#bdbdbd",
-          '& .MuiChip-label': {
+          "& .MuiChip-label": {
             color: "#bdbdbd !important",
           },
-          '&:hover': {
+          "&:hover": {
             backgroundColor: "#232323",
             color: "#ffffff",
           },
@@ -1062,13 +1066,13 @@ export const darkTheme = createTheme({
     MuiTableRow: {
       styleOverrides: {
         root: {
-          '&:nth-of-type(even)': {
+          "&:nth-of-type(even)": {
             backgroundColor: "#232323",
           },
-          '&:nth-of-type(odd)': {
+          "&:nth-of-type(odd)": {
             backgroundColor: "#181818",
           },
-          '&:hover': {
+          "&:hover": {
             backgroundColor: "#333333",
           },
         },
@@ -1087,9 +1091,9 @@ export const darkTheme = createTheme({
           color: "#bdbdbd",
         },
         actions: {
-          '& .MuiIconButton-root': {
+          "& .MuiIconButton-root": {
             color: "#bdbdbd",
-            '&:hover': {
+            "&:hover": {
               backgroundColor: "#232323",
             },
           },
@@ -1103,7 +1107,7 @@ export const darkTheme = createTheme({
           backgroundColor: "#232323",
           color: "#bdbdbd",
           boxShadow: "0 4px 12px rgba(0,0,0,0.4)",
-          '&:hover': {
+          "&:hover": {
             backgroundColor: "#333333",
           },
         },
@@ -1122,7 +1126,7 @@ export const darkTheme = createTheme({
           width: "45px",
           backgroundColor: "#232323",
           color: "#bdbdbd",
-          '&:hover': {
+          "&:hover": {
             backgroundColor: "#333333",
           },
         },
@@ -1145,7 +1149,7 @@ export const darkTheme = createTheme({
           backgroundColor: "#232323",
           color: "#bdbdbd",
           padding: "24px",
-          '& .MuiTypography-root': {
+          "& .MuiTypography-root": {
             fontWeight: 600,
             color: "#bdbdbd",
           },
@@ -1218,13 +1222,13 @@ export const darkTheme = createTheme({
         root: {
           color: "#b0b0b0",
           fontSize: "1rem",
-          '&.Mui-focused': {
+          "&.Mui-focused": {
             color: "#bdbdbd",
             fontWeight: 600,
           },
-          '.MuiTableHead &': {
+          ".MuiTableHead &": {
             color: "#bdbdbd",
-            '&.Mui-focused': {
+            "&.Mui-focused": {
               color: "#bdbdbd",
             },
           },
@@ -1244,14 +1248,13 @@ export const darkTheme = createTheme({
     MuiMenu: {
       styleOverrides: {
         paper: ({ theme }) => ({
-          backgroundColor: theme.palette.mode === "dark"
-            ? "#181818"
-            : theme.palette.background.paper,
+          backgroundColor: theme.palette.background.paper,
           border: "none",
-          boxShadow: theme.palette.mode === "dark"
-            ? "0 4px 24px rgba(0,0,0,0.85)"
-            : "0 4px 24px rgba(0,0,0,0.15)",
-          borderRadius: "0px !important",
+          boxShadow:
+            theme.palette.mode === "dark"
+              ? "0 4px 24px rgba(0,0,0,0.85)"
+              : "0 4px 24px rgba(0,0,0,0.15)",
+          borderRadius: "8px !important",
           overflow: "hidden",
         }),
       },
@@ -1522,12 +1525,10 @@ export const highContrastTheme = createTheme({
     MuiMenuItem: {
       styleOverrides: {
         root: ({ theme }) => ({
-          color: theme.palette.text.primary,
-          backgroundColor: theme.palette.background.paper,
-          '&:hover': {
+          "&:hover": {
             backgroundColor: theme.palette.action.hover,
           },
-          '&.Mui-selected': {
+          "&.Mui-selected": {
             backgroundColor: theme.palette.action.selected,
             color: theme.palette.text.primary,
           },
@@ -1536,11 +1537,9 @@ export const highContrastTheme = createTheme({
     },
     MuiListSubheader: {
       styleOverrides: {
-        root: {
-          color: "#000000",
-          backgroundColor: "#ffff00",
+        root: ({ theme }) => ({
           fontWeight: 600,
-        },
+        }),
       },
     },
     MuiCheckbox: {
@@ -1815,14 +1814,16 @@ export const highContrastTheme = createTheme({
     MuiMenu: {
       styleOverrides: {
         paper: ({ theme }) => ({
-          backgroundColor: theme.palette.mode === "dark"
-            ? "#181818"
-            : theme.palette.background.paper,
+          backgroundColor:
+            theme.palette.mode === "dark"
+              ? "#181818"
+              : theme.palette.background.paper,
           border: "none",
-          boxShadow: theme.palette.mode === "dark"
-            ? "0 4px 24px rgba(0,0,0,0.85)"
-            : "0 4px 24px rgba(0,0,0,0.15)",
-          borderRadius: "0px !important",
+          boxShadow:
+            theme.palette.mode === "dark"
+              ? "0 4px 24px rgba(0,0,0,0.85)"
+              : "0 4px 24px rgba(0,0,0,0.15)",
+          borderRadius: "8px !important",
           overflow: "hidden",
         }),
       },
