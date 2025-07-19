@@ -80,13 +80,13 @@ export const tableCellStyles: SxProps<Theme> = (theme) => ({
 });
 
 export const permissionChipStyles = (theme: Theme): SxProps<Theme> => ({
-  backgroundColor: theme.palette.primary.main,
-  color: theme.palette.primary.contrastText,
-  px: 1,
+  fontWeight: 500,
+  color: theme.palette.text.secondary,
+  backgroundColor: theme.palette.action.selected,
+  px: 1.5,
   py: 0.5,
   borderRadius: 1,
   fontSize: "clamp(0.625rem, 1vw, 0.75rem)",
-  fontWeight: 500,
   mb: 0.5,
   textAlign: "center",
   display: "flex",

@@ -244,15 +244,13 @@ const AddRoleForm: React.FC<AddRoleFormProps> = ({
                   return permission ? (
                     <Chip
                       key={permissionId}
-                      label={permission.name.replace(/_/g, " ").toLowerCase()}
+                      label={permission.name}
                       size="small"
                       sx={{
-                        backgroundColor: theme.palette.primary.main,
-                        color: theme.palette.primary.contrastText,
+                        color: theme.palette.text.secondary,
+                        backgroundColor: theme.palette.action.selected,
                         fontSize: "clamp(0.625rem, 1vw, 0.75rem)",
-                        "&:hover": {
-                          backgroundColor: theme.palette.primary.dark,
-                        },
+                        borderRadius: 1,
                       }}
                     />
                   ) : null;
