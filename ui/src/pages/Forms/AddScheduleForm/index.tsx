@@ -212,7 +212,18 @@ const AddScheduleForm: React.FC<AddScheduleFormProps> = ({
             >
               {DAYS_LIST.map((day) => (
                 <MenuItem key={day.value} value={day.value}>
-                  <Checkbox checked={formData.days.indexOf(day.value) > -1} />
+                  <Checkbox 
+                    checked={formData.days.indexOf(day.value) > -1} 
+                    sx={{
+                      color: theme.palette.primary.main,
+                      '&.Mui-checked': {
+                        color: theme.palette.primary.main,
+                      },
+                      '&.MuiCheckbox-indeterminate': {
+                        color: theme.palette.primary.main,
+                      },
+                    }}
+                  />
                   <ListItemText
                     primary={translateDayOptionsToSpanish(day.value)}
                   />

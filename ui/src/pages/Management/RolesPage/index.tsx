@@ -1,6 +1,7 @@
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { useAuthContext } from "../../../context/AuthContext";
 import { Employee } from "../../../models/Employee";
+import { Schedule } from "../../../models/Schedule";
 import { HoursWorked } from "../../../models/HoursWorked";
 import { WeeklySummary } from "../../../models/WeeklySummary";
 import { BiweeklySummary } from "../../../models/BiweeklySummary";
@@ -113,6 +114,7 @@ const RolesPage: React.FC = () => {
     (state: RootState) => state.hoursWorked
   );
   const [filteredEmployees, setFilteredEmployees] = useState<Employee[]>([]);
+  const [filteredSchedules, setFilteredSchedules] = useState<Schedule[]>([]);
   const {
     weeklySummaries,
     isLoadingWeeklySummaries,
@@ -143,6 +145,13 @@ const RolesPage: React.FC = () => {
   const [openExportDialog, setOpenExportDialog] = useState(false);
   const [exportType, setExportType] = useState<"excel" | "pdf">("excel");
   const [isExporting, setIsExporting] = useState(false);
+  // 1. Agrega el estado viewMode en RolesPage con localStorage
+  const [viewMode, setViewMode] = useState<'employee' | 'schedule'>(() => {
+    const savedViewMode = localStorage.getItem('selectorTableViewMode');
+    return (savedViewMode === 'employee' || savedViewMode === 'schedule') 
+      ? savedViewMode as 'employee' | 'schedule' 
+      : 'employee';
+  });
 
   const theme = useTheme();
   const isSmallScreen = useMediaQuery(theme.breakpoints.down("sm"));
@@ -165,12 +174,22 @@ const RolesPage: React.FC = () => {
   const { search, setSearch, rowsPerPage, setRowsPerPage } =
     useTablePreferences("roles-selector", getInitialRowsPerPage);
 
+  // Save viewMode to localStorage when it changes
+  useEffect(() => {
+    localStorage.setItem('selectorTableViewMode', viewMode);
+  }, [viewMode]);
+
   // Fetch employees, schedules, and hours worked on mount
   useEffect(() => {
     dispatch(fetchEmployees());
     dispatch(fetchSchedules());
     dispatch(fetchHoursWorked());
   }, [dispatch, location.pathname]);
+
+  // Initialize filteredSchedules with all schedules
+  useEffect(() => {
+    setFilteredSchedules(schedules);
+  }, [schedules]);
 
   const isLoading =
     isLoadingEmployees ||
@@ -180,19 +199,29 @@ const RolesPage: React.FC = () => {
     isLoadingBiweeklySummaries ||
     isLoadingMonthlySummaries;
 
-  // Filter employees by search input
+  // Filter employees or schedules by search input based on viewMode
   useEffect(() => {
     const normalizeString = (str: string) =>
       str.normalize("NFD").replace(/[\u0300-\u036f]/g, "");
 
-    setFilteredEmployees(
-      employees.filter((employee) =>
-        normalizeString(`${employee.firstName} ${employee.lastName}`)
-          .toLowerCase()
-          .includes(normalizeString(search).toLowerCase())
-      )
-    );
-  }, [search, employees]);
+    if (viewMode === 'employee') {
+      setFilteredEmployees(
+        employees.filter((employee) =>
+          normalizeString(`${employee.firstName} ${employee.lastName}`)
+            .toLowerCase()
+            .includes(normalizeString(search).toLowerCase())
+        )
+      );
+    } else {
+      setFilteredSchedules(
+        schedules.filter((schedule) =>
+          normalizeString(schedule.label)
+            .toLowerCase()
+            .includes(normalizeString(search).toLowerCase())
+        )
+      );
+    }
+  }, [search, employees, schedules, viewMode]);
 
   // Update week, biweek, month, and year based on week offset
   useEffect(() => {
@@ -714,7 +743,7 @@ const RolesPage: React.FC = () => {
           {userPermissions.includes(PERMISSIONS.EXPORT_EXCEL_ROLES) &&
             userPermissions.includes(PERMISSIONS.EXPORT_PDF_ROLES) && (
               <Box sx={exportSpeedDialBoxStyles}>
-                {filteredEmployees.length > 0 && (
+                {(viewMode === 'employee' ? filteredEmployees.length > 0 : filteredSchedules.length > 0) && (
                   <SpeedDialComponent
                     actions={exportOptions}
                     mainIcon={<DownloadRoundedIcon />}
@@ -741,9 +770,13 @@ const RolesPage: React.FC = () => {
             alignItems="center"
           >
             <Grid item xs={12} md={4}>
-              {filteredEmployees && (
+              {(viewMode === 'employee' ? filteredEmployees : filteredSchedules) && (
                 <SearchBarComponent
-                  placeholder={MANAGEMENT.ROLES_PAGE.SEARCH_PLACEHOLDER}
+                  placeholder={
+                    viewMode === 'employee' 
+                      ? MANAGEMENT.ROLES_PAGE.SEARCH_PLACEHOLDER 
+                      : MANAGEMENT.SCHEDULES_PAGE.SEARCH_PLACEHOLDER
+                  }
                   value={search}
                   onChange={(e) => setSearch(e.target.value)}
                   sx={searchBarSx ?? {}}
@@ -825,55 +858,90 @@ const RolesPage: React.FC = () => {
             </Grid>
           </Grid>
           <br />
-          {filteredEmployees.length > 0 ? (
-            <SelectorTableComponent
-              key={`schedules-${schedules.length}-${schedules.map((s) => s.id).join("-")}`}
-              filteredEmployees={filteredEmployees}
-              schedules={schedules}
-              hoursWorked={hoursWorked}
-              weeklySummaries={weeklySummaries}
-              biweeklySummaries={biweeklySummaries}
-              monthlySummaries={monthlySummaries}
-              weekOffset={weekOffset}
-              weekNumber={currentWeekNumber}
-              biweekNumber={currentBiweekNumber}
-              month={currentMonth}
-              year={currentYear}
-              handleChange={handleChange}
-              handleAdjustTime={handleAdjustTime}
-              permissions={userPermissions}
-              rowsPerPage={rowsPerPage}
-              setRowsPerPage={setRowsPerPage}
-            />
+          {viewMode === 'employee' ? (
+            filteredEmployees.length > 0 ? (
+              <SelectorTableComponent
+                key={`schedules-${schedules.length}-${schedules.map((s) => s.id).join("-")}`}
+                filteredEmployees={filteredEmployees}
+                schedules={schedules}
+                hoursWorked={hoursWorked}
+                weeklySummaries={weeklySummaries}
+                biweeklySummaries={biweeklySummaries}
+                monthlySummaries={monthlySummaries}
+                weekOffset={weekOffset}
+                weekNumber={currentWeekNumber}
+                biweekNumber={currentBiweekNumber}
+                month={currentMonth}
+                year={currentYear}
+                handleChange={handleChange}
+                handleAdjustTime={handleAdjustTime}
+                permissions={userPermissions}
+                rowsPerPage={rowsPerPage}
+                setRowsPerPage={setRowsPerPage}
+                viewMode={viewMode}
+                setViewMode={setViewMode}
+              />
+            ) : (
+              <Box sx={noEmployeesBoxStyles}>
+                <ManageSearchIcon color="disabled" sx={noEmployeesIconStyles} />
+                <Typography variant="h6" color="textSecondary">
+                  {MANAGEMENT.NO_EMPLOYEES}
+                </Typography>
+              </Box>
+            )
           ) : (
-            <Box sx={noEmployeesBoxStyles}>
-              <ManageSearchIcon color="disabled" sx={noEmployeesIconStyles} />
-              <Typography variant="h6" color="textSecondary">
-                {MANAGEMENT.NO_EMPLOYEES}
-              </Typography>
-            </Box>
+            filteredSchedules.length > 0 ? (
+              <SelectorTableComponent
+                key={`schedules-${filteredSchedules.length}-${filteredSchedules.map((s) => s.id).join("-")}`}
+                filteredEmployees={filteredEmployees}
+                schedules={filteredSchedules}
+                hoursWorked={hoursWorked}
+                weeklySummaries={weeklySummaries}
+                biweeklySummaries={biweeklySummaries}
+                monthlySummaries={monthlySummaries}
+                weekOffset={weekOffset}
+                weekNumber={currentWeekNumber}
+                biweekNumber={currentBiweekNumber}
+                month={currentMonth}
+                year={currentYear}
+                handleChange={handleChange}
+                handleAdjustTime={handleAdjustTime}
+                permissions={userPermissions}
+                rowsPerPage={rowsPerPage}
+                setRowsPerPage={setRowsPerPage}
+                viewMode={viewMode}
+                setViewMode={setViewMode}
+              />
+            ) : (
+              <Box sx={noEmployeesBoxStyles}>
+                <ManageSearchIcon color="disabled" sx={noEmployeesIconStyles} />
+                <Typography variant="h6" color="textSecondary">
+                  {MANAGEMENT.NO_SCHEDULES}
+                </Typography>
+              </Box>
+            )
           )}
+          <DialogComponent
+            open={openExportDialog}
+            onClose={() => {
+              setOpenExportDialog(false);
+              handleExportHours(false);
+            }}
+            onConfirm={() => {
+              setOpenExportDialog(false);
+              handleExportHours(true);
+            }}
+            title={MANAGEMENT.DIALOG_EXPORT_TITLE}
+            message={MANAGEMENT.DIALOG_EXPORT_MESSAGE}
+            type="warning"
+            confirmText={MANAGEMENT.DIALOG_EXPORT_CONFIRM}
+            cancelText={MANAGEMENT.DIALOG_EXPORT_CANCEL}
+            loading={isExporting}
+            icon={<FileDownloadIcon color="warning" />}
+          />
         </>
       )}
-      <DialogComponent
-        open={openExportDialog}
-        onClose={() => {
-          setOpenExportDialog(false);
-          handleExportHours(false);
-        }}
-        onConfirm={() => {
-          setOpenExportDialog(false);
-          handleExportHours(true);
-        }}
-        title={MANAGEMENT.DIALOG_EXPORT_TITLE}
-        message={MANAGEMENT.DIALOG_EXPORT_MESSAGE}
-        type="warning"
-        confirmText={MANAGEMENT.DIALOG_EXPORT_CONFIRM}
-        cancelText={MANAGEMENT.DIALOG_EXPORT_CANCEL}
-        loading={isExporting}
-        icon={<FileDownloadIcon color="warning" />}
-      />
-    </Box>
+      </Box>
   );
 };
 
