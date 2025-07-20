@@ -10,6 +10,7 @@ const SELECTOR_TABLE = {
   BIWEEKS: "Quincenas",
   BIWEEK: "Quincena",
   EMPLOYEES: "Empleados",
+  SCHEDULES: "Horarios",
   LOCATIONS: "Ubicaciones",
   SPECIAL_SCHEDULES: "Horarios Especiales",
   OTHER: "Otro",
@@ -40,5 +41,7 @@ const SELECTOR_TABLE = {
   ADD: "Sumar",
   SUBTRACT: "Restar",
   SUMMARY_TITLE: "Resumen de horas trabajadas",
+  UNASSIGNED: "Sin asignar",
+  SEARCH_EMPLOYEE_PLACEHOLDER: "Buscar empleado...",
 };
 export default SELECTOR_TABLE;

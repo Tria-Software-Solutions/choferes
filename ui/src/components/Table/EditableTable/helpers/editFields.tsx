@@ -76,6 +76,7 @@ export function renderEditField<T extends object>({
                   Array.isArray(selectedValues) &&
                   selectedValues.includes(option.value)
                 }
+                color="primary"
               />
               <ListItemText primary={option.label} />
             </MenuItem>
@@ -207,6 +208,7 @@ export function renderEditField<T extends object>({
                   Array.isArray(selectedValues) &&
                   selectedValues.includes(option.value)
                 }
+                color="primary"
               />
               <ListItemText primary={option.label} />
             </MenuItem>

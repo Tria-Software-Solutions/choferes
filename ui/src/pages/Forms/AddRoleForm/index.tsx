@@ -203,7 +203,15 @@ const AddRoleForm: React.FC<AddRoleFormProps> = ({
                               onChange={() =>
                                 handlePermissionChange(permission.id.toString())
                               }
-                              color="primary"
+                              sx={{
+                                color: theme.palette.primary.main,
+                                '&.Mui-checked': {
+                                  color: theme.palette.primary.main,
+                                },
+                                '&.MuiCheckbox-indeterminate': {
+                                  color: theme.palette.primary.main,
+                                },
+                              }}
                             />
                           }
                           label={
