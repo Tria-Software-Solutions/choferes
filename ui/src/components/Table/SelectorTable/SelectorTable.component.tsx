@@ -1,4 +1,4 @@
-import React, { useMemo, useState, useRef } from "react";
+import React, { useMemo, useState, useRef, useCallback } from "react";
 import PropTypes from "prop-types";
 import { useNavigate } from "react-router-dom";
 import { Employee } from "../../../models/Employee";
@@ -103,6 +103,7 @@ import {
   deleteHoursWorked, // <-- importa la acción de borrado
 } from "../../../store/slices/hoursWorkedSlice";
 import SwapHorizIcon from "@mui/icons-material/SwapHoriz";
+import SearchBarComponent from '../../SearchBar/SearchBar.component';
 
 // SelectorTable component displays and manages employee schedules, hours worked, and summary data for different periods (weekly, biweekly, monthly).
 // Props:
@@ -192,6 +193,19 @@ const SelectorTableComponent: React.FC<SelectorTableProps> = ({
   const theme = useTheme();
   const periodSelectorBg =
     theme.palette.mode === "dark" ? "#111111" : "#000000";
+  const [employeeSearchTerms, setEmployeeSearchTerms] = useState<Record<string, string>>({});
+
+  const getSearchKey = (scheduleId: number, date: string) => `${scheduleId}-${date}`;
+
+  const handleSearchChange = useCallback(
+    (scheduleId: number, date: string) => (e: React.ChangeEvent<HTMLInputElement>) => {
+      setEmployeeSearchTerms(prev => ({
+        ...prev,
+        [getSearchKey(scheduleId, date)]: e.target.value
+      }));
+    },
+    []
+  );
 
   // Handle menu state
   const handleMenuClose = () => {
@@ -411,6 +425,22 @@ const SelectorTableComponent: React.FC<SelectorTableProps> = ({
       }
     });
   };
+
+  const getFilteredDropdownEmployees = (scheduleId: number, date: string): Employee[] => {
+    const term = (employeeSearchTerms[getSearchKey(scheduleId, date)] || "").toLowerCase();
+    return filteredEmployees
+      .filter((emp: Employee) =>
+        `${emp.firstName} ${emp.lastName}`.toLowerCase().includes(term)
+      )
+      .sort((a: Employee, b: Employee) =>
+        `${a.firstName} ${a.lastName}`.localeCompare(
+          `${b.firstName} ${b.lastName}`,
+          "es",
+          { sensitivity: "base" }
+        )
+      );
+  };
+
   return (
     <>
       <Paper sx={paperStyles}>
@@ -1177,54 +1207,71 @@ const SelectorTableComponent: React.FC<SelectorTableProps> = ({
                                       },
                                     }}
                                   >
-                                    {filteredEmployees
-                                      .slice()
-                                      .sort((a, b) =>
-                                        `${a.firstName} ${a.lastName}`.localeCompare(
-                                          `${b.firstName} ${b.lastName}`,
-                                          "es",
-                                          { sensitivity: "base" }
-                                        )
-                                      )
-                                      .map((employee) => (
-                                        <MenuItem
-                                          key={employee.id}
-                                          value={employee.id}
+                                    {/* Sticky SearchBar as first MenuItem */}
+                                    <MenuItem tabIndex={-1} sx={{
+                                      position: 'sticky',
+                                      top: 0,
+                                      zIndex: 2,
+                                      backgroundColor: theme.palette.background.paper,
+                                      cursor: 'default',
+                                      padding: 0,
+                                      minHeight: '40px',
+                                      '&:hover': { backgroundColor: theme.palette.background.paper },
+                                      boxShadow: 1,
+                                    }}>
+                                      <Box sx={{ px: 1, py: 0.5, width: '100%' }}>
+                                        <SearchBarComponent
+                                          value={employeeSearchTerms[getSearchKey(scheduleForDay.id, date)] || ""}
+                                          onChange={handleSearchChange(scheduleForDay.id, date)}
+                                          placeholder="Buscar empleado..."
+                                          fullWidth
+                                          size="small"
+                                          margin="dense"
+                                          onKeyDown={(e: React.KeyboardEvent<HTMLInputElement>) => e.stopPropagation()}
+                                          onClick={(e: React.MouseEvent<HTMLInputElement>) => e.stopPropagation()}
+                                        />
+                                      </Box>
+                                    </MenuItem>
+                                    {/* Employee options */}
+                                    {getFilteredDropdownEmployees(scheduleForDay.id, date).map((employee: Employee) => (
+                                      <MenuItem
+                                        key={employee.id}
+                                        value={employee.id}
+                                        sx={{
+                                          ...menuItemStyles,
+                                          display: "flex",
+                                          alignItems: "center",
+                                          width: "100%",
+                                        }}
+                                      >
+                                        <Checkbox
+                                          checked={assignedEmployees.some(
+                                            (e) => e.id === employee.id
+                                          )}
+                                          size="small"
                                           sx={{
-                                            ...menuItemStyles,
-                                            display: "flex",
-                                            alignItems: "center",
-                                            width: "100%",
+                                            color: theme.palette.primary.main,
+                                            "&.Mui-checked": {
+                                              color:
+                                                theme.palette.primary.main,
+                                            },
+                                            "&.MuiCheckbox-indeterminate": {
+                                              color:
+                                                theme.palette.primary.main,
+                                            },
+                                          }}
+                                        />
+                                        <span
+                                          style={{
+                                            textAlign: "left",
+                                            flex: 1,
                                           }}
                                         >
-                                          <Checkbox
-                                            checked={assignedEmployees.some(
-                                              (e) => e.id === employee.id
-                                            )}
-                                            size="small"
-                                            sx={{
-                                              color: theme.palette.primary.main,
-                                              "&.Mui-checked": {
-                                                color:
-                                                  theme.palette.primary.main,
-                                              },
-                                              "&.MuiCheckbox-indeterminate": {
-                                                color:
-                                                  theme.palette.primary.main,
-                                              },
-                                            }}
-                                          />
-                                          <span
-                                            style={{
-                                              textAlign: "left",
-                                              flex: 1,
-                                            }}
-                                          >
-                                            {employee.firstName}{" "}
-                                            {employee.lastName}
-                                          </span>
-                                        </MenuItem>
-                                      ))}
+                                          {employee.firstName}{" "}
+                                          {employee.lastName}
+                                        </span>
+                                      </MenuItem>
+                                    ))}
                                   </Select>
                                 </FormControl>
                               </Box>
