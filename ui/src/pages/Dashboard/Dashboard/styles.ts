@@ -33,22 +33,33 @@ export const dashboardDividerStyles = (theme: Theme): SxProps<Theme> => ({
   mb: 0.5,
 });
 
-export const dashboardDeleteButtonStyles = {
+export const dashboardDeleteButtonStyles = (theme: Theme): SxProps<Theme> => ({
   ml: 2,
+  top: "-4px",
   width: "62px",
-  height: "56px",
+  height: "58px",
   borderRadius: "8px",
-  boxShadow: "0 4px 12px rgba(0,0,0,0.2)",
-  backgroundColor: "#000",
-  color: "#fff",
+  //boxShadow: theme.shadows[6],
+  backgroundColor:
+    theme.palette.mode === "dark"
+      ? theme.palette.background.paper
+      : theme.palette.primary.main,
+  color:
+    theme.palette.mode === "dark"
+      ? theme.palette.primary.main
+      : theme.palette.primary.contrastText,
   display: "flex",
   alignItems: "center",
   justifyContent: "center",
-  transition: "all 0.3s ease",
-  fontSize: 32,
+  transition: theme.transitions.create(
+    ["background", "box-shadow", "transform"],
+    {
+      duration: theme.transitions.duration.short,
+    }
+  ),
+  fontSize: 40,
   "&:hover": {
-    backgroundColor: "#333",
-    transform: "translateY(-2px)",
-    boxShadow: "0 6px 20px rgba(0,0,0,0.3)",
+    backgroundColor: "#333333",
   },
-};
+});
+

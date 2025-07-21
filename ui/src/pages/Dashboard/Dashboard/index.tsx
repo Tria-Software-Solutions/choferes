@@ -222,11 +222,9 @@ const Dashboard: React.FC = () => {
               <span>
                 <IconButton
                   onClick={() => setShowDeleteDialog(true)}
-                  sx={dashboardDeleteButtonStyles}
+                  sx={dashboardDeleteButtonStyles(theme)}
                 >
-                  <DeleteOutlineIcon
-                    sx={{ color: theme.palette.primary.contrastText }}
-                  />
+                  <DeleteOutlineIcon />
                 </IconButton>
               </span>
             </Tooltip>

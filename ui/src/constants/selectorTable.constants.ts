@@ -42,6 +42,7 @@ const SELECTOR_TABLE = {
   SUBTRACT: "Restar",
   SUMMARY_TITLE: "Resumen de horas trabajadas",
   UNASSIGNED: "Sin asignar",
+  NO_AVAILABLE: "No disponible",
   SEARCH_EMPLOYEE_PLACEHOLDER: "Buscar empleado...",
 };
 export default SELECTOR_TABLE;
