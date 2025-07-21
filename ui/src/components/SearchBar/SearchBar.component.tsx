@@ -18,6 +18,10 @@ interface SearchBarProps {
   fullWidth?: boolean;
   sx?: object;
   onSearch?: () => void;
+  size?: "small" | "medium";
+  margin?: "none" | "dense" | "normal";
+  onKeyDown?: (event: React.KeyboardEvent<HTMLInputElement>) => void;
+  onClick?: (event: React.MouseEvent<HTMLInputElement>) => void;
 }
 
 // SearchBar component provides a styled input for searching with clear and search icons.
@@ -35,6 +39,10 @@ const SearchBarComponent: React.FC<SearchBarProps> = ({
   sx,
   onChange,
   onSearch,
+  size = "medium",
+  margin = "none",
+  onKeyDown,
+  onClick,
 }) => {
   const handleClear = () => {
     // Clear the input by setting its value to an empty string
@@ -49,6 +57,8 @@ const SearchBarComponent: React.FC<SearchBarProps> = ({
       onChange={onChange}
       fullWidth={fullWidth}
       sx={textFieldStyles(sx)}
+      size={size}
+      margin={margin}
       InputProps={{
         startAdornment: (
           <InputAdornment position="start">
@@ -69,13 +79,8 @@ const SearchBarComponent: React.FC<SearchBarProps> = ({
         ) : null,
       }}
       inputProps={{ "aria-label": placeholder }}
-      onKeyDown={
-        onSearch
-          ? (e) => {
-              if (e.key === "Enter") onSearch();
-            }
-          : undefined
-      }
+      onKeyDown={onKeyDown}
+      onClick={onClick}
     />
   );
 };
