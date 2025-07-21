@@ -1219,7 +1219,7 @@ const SelectorTableComponent: React.FC<SelectorTableProps> = ({
                                       '&:hover': { backgroundColor: theme.palette.background.paper },
                                       boxShadow: 1,
                                     }}>
-                                      <Box sx={{ px: 1, py: 0.5, width: '100%' }}>
+                                      <Box sx={{ px: 1, py: 0.5, width: '100%', backgroundColor: theme.palette.background.paper }}>
                                         <SearchBarComponent
                                           value={employeeSearchTerms[getSearchKey(scheduleForDay.id, date)] || ""}
                                           onChange={handleSearchChange(scheduleForDay.id, date)}
@@ -1229,6 +1229,21 @@ const SelectorTableComponent: React.FC<SelectorTableProps> = ({
                                           margin="dense"
                                           onKeyDown={(e: React.KeyboardEvent<HTMLInputElement>) => e.stopPropagation()}
                                           onClick={(e: React.MouseEvent<HTMLInputElement>) => e.stopPropagation()}
+                                          sx={{
+                                            backgroundColor: 'none',
+                                            '& .MuiOutlinedInput-root': {
+                                              backgroundColor: 'none',
+                                              borderRadius: 1,
+                                              boxShadow: 'none',
+                                              border: 'none',
+                                              '& fieldset': {
+                                                border: 'none',
+                                              },
+                                            },
+                                            '& .MuiOutlinedInput-input': {
+                                              color: theme.palette.text.primary,
+                                            },
+                                          }}
                                         />
                                       </Box>
                                     </MenuItem>
