@@ -36,7 +36,10 @@ const PaginationComponent: React.FC<PaginationActionsProps> = ({
   return (
     <div style={containerStyles(isSmallScreen)}>
       {!isSmallScreen && (
-        <Typography variant="body2" style={{ ...pageTextStyles, color: theme.palette.text.primary }}>
+        <Typography
+          variant="body2"
+          style={{ ...pageTextStyles, color: theme.palette.text.primary }}
+        >
           {PAGINATION.PAGE} {page + 1}
         </Typography>
       )}
@@ -44,20 +47,34 @@ const PaginationComponent: React.FC<PaginationActionsProps> = ({
         onClick={(e) => onPageChange(e, page - 1)}
         disabled={page === 0}
         aria-label={PAGINATION.PREVIOUS}
-        sx={{ color: theme.palette.text.primary }}
       >
-        <ArrowBack sx={{ color: theme.palette.text.primary }} />
+        <ArrowBack
+          sx={{
+            color:
+              theme.palette.mode === "dark"
+                ? theme.palette.primary.main
+                : "#000000 !important",
+          }}
+        />
       </IconButton>
       <Typography variant="body2" style={pageTextStyles}>
-        <span style={{ color: theme.palette.text.primary }}>{startIndex}-{endIndex} {PAGINATION.OF} {count}</span>
+        <span style={{ color: theme.palette.text.primary }}>
+          {startIndex}-{endIndex} {PAGINATION.OF} {count}
+        </span>
       </Typography>
       <IconButton
         onClick={(e) => onPageChange(e, page + 1)}
         disabled={page >= Math.ceil(count / rowsPerPage) - 1}
         aria-label={PAGINATION.NEXT}
-        sx={{ color: theme.palette.text.primary }}
       >
-        <ArrowForward sx={{ color: theme.palette.text.primary }} />
+        <ArrowForward
+          sx={{
+            color:
+              theme.palette.mode === "dark"
+                ? theme.palette.primary.main
+                : "#000000 !important",
+          }}
+        />
       </IconButton>
     </div>
   );

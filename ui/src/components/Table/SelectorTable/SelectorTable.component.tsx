@@ -102,7 +102,6 @@ import { useDispatch } from "react-redux";
 import type { AppDispatch } from "../../../store/store";
 import { createOrUpdateHoursWorked } from "../../../store/slices/hoursWorkedSlice";
 import SwapHorizIcon from "@mui/icons-material/SwapHoriz";
-import SearchBarComponent from "../../SearchBar/SearchBar.component";
 
 
 // SelectorTable component displays and manages employee schedules, hours worked, and summary data for different periods (weekly, biweekly, monthly).
@@ -184,18 +183,12 @@ const SelectorTableComponent: React.FC<SelectorTableProps> = ({
   const [summaryTab, setSummaryTab] = useState<"weekly" | "biweekly" | "monthly" | "overtime">("weekly");
   type PeriodType = 'weekly' | 'biweekly' | 'monthly';
   const [selectedPeriod, setSelectedPeriod] = useState<PeriodType>('weekly');
-  const [employeeSearchTerm, setEmployeeSearchTerm] = useState<string>('');
   const [isMenuOpen, setIsMenuOpen] = useState<boolean>(false);
   const theme = useTheme();
   
   // Handle menu state
-  const handleMenuOpen = () => {
-    setIsMenuOpen(true);
-  };
-
   const handleMenuClose = () => {
     setIsMenuOpen(false);
-    setEmployeeSearchTerm('');
   };
 
   // Handle ESC key to close search
@@ -215,11 +208,6 @@ const SelectorTableComponent: React.FC<SelectorTableProps> = ({
     };
   }, [isMenuOpen]);
 
-  // Prevent menu from closing when clicking on search
-  const handleSearchClick = (event: React.MouseEvent) => {
-    event.stopPropagation();
-  };
-  
   const isSmallScreen = useMediaQuery(theme.breakpoints.down("sm"));
 
   const tableContainerRef = useRef<HTMLDivElement>(null);
@@ -320,26 +308,28 @@ const SelectorTableComponent: React.FC<SelectorTableProps> = ({
     });
   };
 
-  // All schedules for schedule view (unique by ID, sorted alphabetically with non-special first)
-  const allSchedules = useMemo(() => {
-    const uniqueSchedules = schedules.filter((s) => s.id !== undefined);
-    // Remove duplicates by ID
-    const seen = new Set();
-    const uniqueSchedulesList = uniqueSchedules.filter((schedule) => {
-      if (seen.has(schedule.id)) {
-        return false;
+  // Agrupa los schedules por label (ignorando mayúsculas/tildes)
+  const groupedSchedules = useMemo(() => {
+    const normalize = (str: string) => str.normalize("NFD").replace(/\p{Diacritic}/gu, "").toLowerCase();
+    const groups: Record<string, { label: string; dayToSchedule: Record<string, Schedule> }> = {};
+    for (const schedule of schedules) {
+      const normLabel = normalize(schedule.label);
+      if (!groups[normLabel]) {
+        groups[normLabel] = { label: schedule.label, dayToSchedule: {} };
       }
-      seen.add(schedule.id);
-      return true;
-    });
-    
-    // Sort: non-special schedules first, then alphabetically
-    return uniqueSchedulesList.sort((a, b) => {
-      // First, sort by specialSchedule (non-special first)
-      if (a.specialSchedule !== b.specialSchedule) {
-        return a.specialSchedule ? 1 : -1; // false (non-special) comes first
+      for (const day of schedule.days) {
+        // Si ya hay un schedule para ese día, prioriza el primero encontrado
+        if (!groups[normLabel].dayToSchedule[day]) {
+          groups[normLabel].dayToSchedule[day] = schedule;
+        }
       }
-      // Then sort alphabetically by label
+    }
+    // Ordena: primero los que no son especiales, luego especiales, y dentro de cada grupo, alfabéticamente
+    return Object.values(groups).sort((a, b) => {
+      // Busca si algún día de la semana es especial
+      const aSpecial = Object.values(a.dayToSchedule).some(s => s.specialSchedule);
+      const bSpecial = Object.values(b.dayToSchedule).some(s => s.specialSchedule);
+      if (aSpecial !== bSpecial) return aSpecial ? 1 : -1;
       return a.label.localeCompare(b.label, 'es', { sensitivity: 'base' });
     });
   }, [schedules]);
@@ -391,12 +381,9 @@ const SelectorTableComponent: React.FC<SelectorTableProps> = ({
       }
     });
   };
-
   return (
     <>
       <Paper sx={paperStyles}>
-
-        
         <Box sx={stickyHeaderBoxStyles(isSmallScreen)}>
           <Box
             sx={{
@@ -565,10 +552,7 @@ const SelectorTableComponent: React.FC<SelectorTableProps> = ({
                             theme.palette.mode === "dark"
                               ? "#111"
                               : theme.palette.primary.main,
-                          color:
-                            theme.palette.mode === "dark"
-                              ? "#fff"
-                              : theme.palette.primary.contrastText,
+                          color: "#fff",
                           position: "relative",
                           zIndex: 1,
                         }}
@@ -586,37 +570,33 @@ const SelectorTableComponent: React.FC<SelectorTableProps> = ({
                                 notched={false}
                                 label="Periodo"
                                 sx={{
-                                  backgroundColor: theme.palette.primary.dark,
-                                  color:
-                                    theme.palette.mode === "dark"
-                                      ? "#fff"
-                                      : theme.palette.primary.contrastText,
+                                  backgroundColor: "#111",
+                                  color: "#fff",
+                                  fontSize: '1rem',
+                                  fontWeight: 700,
+                                  "& .MuiOutlinedInput-input": {
+                                    color: "#fff",
+                                    fontSize: '1rem',
+                                    fontWeight: 700,
+                                  },
                                   border: "none",
-                                  boxShadow: "none",
-                                  "& .MuiOutlinedInput-notchedOutline": {
-                                    border: "none",
-                                  },
-                                  "&:hover .MuiOutlinedInput-notchedOutline": {
-                                    border: "none",
-                                  },
-                                  "&.Mui-focused .MuiOutlinedInput-notchedOutline":
-                                    {
-                                      border: "none",
-                                    },
                                 }}
                               />
                             }
                             sx={{
-                              backgroundColor:
-                                theme.palette.mode === "dark"
-                                  ? "#fff"
-                                  : theme.palette.background.paper,
-                              color:
-                                theme.palette.mode === "dark"
-                                  ? "#fff"
-                                  : theme.palette.background.paper,
-                              border: "none",
-                              boxShadow: "none",
+                              backgroundColor: "#111",
+                              color: "#fff",
+                              fontSize: '1rem',
+                              fontWeight: 700,
+                              "& .MuiSelect-select": {
+                                color: "#fff",
+                                backgroundColor: "#111",
+                                fontSize: '1rem',
+                                fontWeight: 700,
+                              },
+                              "& .MuiSelect-icon": {
+                                color: "#fff",
+                              },
                               "& .MuiOutlinedInput-notchedOutline": {
                                 border: "none",
                               },
@@ -637,11 +617,11 @@ const SelectorTableComponent: React.FC<SelectorTableProps> = ({
                                         sx={{
                                           fontSize: 18,
                                           mr: 1,
-                                          color: "primary.main",
+                                          color: "#fff",
                                           verticalAlign: "middle",
                                         }}
                                       />
-                                      {SELECTOR_TABLE.WEEKLY}
+                                      <span style={{ color: '#fff', fontSize: '1rem', fontWeight: 700 }}>{SELECTOR_TABLE.WEEKLY}</span>
                                     </>
                                   );
                                 case "biweekly":
@@ -651,11 +631,11 @@ const SelectorTableComponent: React.FC<SelectorTableProps> = ({
                                         sx={{
                                           fontSize: 18,
                                           mr: 1,
-                                          color: "primary.main",
+                                          color: "#fff",
                                           verticalAlign: "middle",
                                         }}
                                       />
-                                      {SELECTOR_TABLE.BIWEEKLY}
+                                      <span style={{ color: '#fff', fontSize: '1rem', fontWeight: 700 }}>{SELECTOR_TABLE.BIWEEKLY}</span>
                                     </>
                                   );
                                 case "monthly":
@@ -665,11 +645,11 @@ const SelectorTableComponent: React.FC<SelectorTableProps> = ({
                                         sx={{
                                           fontSize: 18,
                                           mr: 1,
-                                          color: "primary.main",
+                                          color: "#fff",
                                           verticalAlign: "middle",
                                         }}
                                       />
-                                      {SELECTOR_TABLE.MONTHLY}
+                                      <span style={{ color: '#fff', fontSize: '1rem', fontWeight: 700 }}>{SELECTOR_TABLE.MONTHLY}</span>
                                     </>
                                   );
                                 default:
@@ -681,11 +661,13 @@ const SelectorTableComponent: React.FC<SelectorTableProps> = ({
                                 style: {
                                   maxHeight: 320,
                                   overflowY: "auto",
+                                  backgroundColor: "#111",
+                                  color: "#fff",
                                 },
                               },
                             }}
                           >
-                            <MenuItem value="weekly">
+                            <MenuItem value="weekly" sx={{ fontSize: '1rem', fontWeight: 700, color: '#fff', backgroundColor: '#111' }}>
                               <CalendarTodayIcon
                                 sx={{
                                   fontSize: 18,
@@ -696,7 +678,7 @@ const SelectorTableComponent: React.FC<SelectorTableProps> = ({
                               />
                               {SELECTOR_TABLE.WEEKLY}
                             </MenuItem>
-                            <MenuItem value="biweekly">
+                            <MenuItem value="biweekly" sx={{ fontSize: '1rem', fontWeight: 700, color: '#fff', backgroundColor: '#111' }}>
                               <DateRangeIcon
                                 sx={{
                                   fontSize: 18,
@@ -707,7 +689,7 @@ const SelectorTableComponent: React.FC<SelectorTableProps> = ({
                               />
                               {SELECTOR_TABLE.BIWEEKLY}
                             </MenuItem>
-                            <MenuItem value="monthly">
+                            <MenuItem value="monthly" sx={{ fontSize: '1rem', fontWeight: 700, color: '#fff', backgroundColor: '#111' }}>
                               <CalendarMonthIcon
                                 sx={{
                                   fontSize: 18,
@@ -726,480 +708,493 @@ const SelectorTableComponent: React.FC<SelectorTableProps> = ({
               </TableRow>
             </TableHead>
             <TableBody>
-              {viewMode === "employee" ? (
-                paginatedEmployees.map((employee, rowIndex) => (
-                  <TableRow key={employee.id} sx={tableRowBackground(rowIndex)}>
-                    <TableCell
-                      sx={Object.assign(
-                        {},
-                        employeeColumnCellStyles(isSmallScreen),
-                        tableCellBackground(rowIndex, false)
-                      )}
+              {viewMode === "employee"
+                ? paginatedEmployees.map((employee, rowIndex) => (
+                    <TableRow
+                      key={employee.id}
+                      sx={tableRowBackground(rowIndex)}
                     >
-                      <Box
-                        display="flex"
-                        alignItems="center"
-                        justifyContent="space-between"
-                        sx={employeeCellBoxStyles(isSmallScreen)}
-                      >
-                        <Typography
-                          variant="body2"
-                          fontWeight={600}
-                          sx={totalHoursTypographyStyles}
-                        >
-                          {employee.firstName} {employee.lastName}
-                        </Typography>
-                        {permissions?.includes(
-                          PERMISSIONS.VIEW_EMPLOYEE_ROLES_HOURS
-                        ) && (
-                          <Tooltip title="Ver información" arrow>
-                            <span>
-                              <IconButton
-                                size="medium"
-                                sx={{
-                                  color: "primary.main",
-                                  backgroundColor: "transparent",
-                                  "&:hover": {
-                                    backgroundColor: "primary.lighter",
-                                    boxShadow: 1,
-                                  },
-                                  transition: "background 0.2s",
-                                }}
-                                onClick={() =>
-                                  setOpenInfoDialogEmployee(employee)
-                                }
-                              >
-                                <InfoOutlinedIcon fontSize="medium" />
-                              </IconButton>
-                            </span>
-                          </Tooltip>
+                      <TableCell
+                        sx={Object.assign(
+                          {},
+                          employeeColumnCellStyles(isSmallScreen),
+                          tableCellBackground(rowIndex, false)
                         )}
-                      </Box>
-                    </TableCell>
-                    {currentWeek.map(({ day, date }) => {
-                      const scheduleData = getScheduleCellData(
-                        employee,
-                        day,
-                        date,
-                        schedules,
-                        hoursWorked
-                      );
-
-                      return (
-                        <TableCell
-                          key={day}
-                          sx={tableCellBackground(rowIndex, isToday(date))}
+                      >
+                        <Box
+                          display="flex"
+                          alignItems="center"
+                          justifyContent="space-between"
+                          sx={employeeCellBoxStyles(isSmallScreen)}
                         >
-                          <FormControl fullWidth>
-                            <Select
-                              value={scheduleData.finalSelectedLabel}
-                              onChange={(event: SelectChangeEvent<string>) =>
-                                handleChange(event, employee.id, new Date(date))
-                              }
-                              disabled={
-                                !permissions?.includes(
-                                  PERMISSIONS.EDIT_EMPLOYEE_ROLES
-                                )
-                              }
-                              renderValue={(selected) => (
-                                <span style={{ fontSize: "0.85rem" }}>
-                                  {selected}
-                                </span>
-                              )}
-                              input={
-                                <OutlinedInput
-                                  notched={false}
-                                  label="Ubicación"
-                                />
-                              }
-                              MenuProps={{
-                                PaperProps: {
-                                  style: {
-                                    maxHeight: 320,
-                                    overflowY: "auto",
-                                  },
-                                },
-                              }}
-                            >
-                              <ListSubheader
-                                sx={listSubheaderStyles("primary.main")}
-                              >
-                                <LocationOnOutlinedIcon
-                                  sx={{ mr: 1, color: "primary.main" }}
-                                  fontSize="small"
-                                />
-                                {SELECTOR_TABLE.LOCATIONS}
-                              </ListSubheader>
-                              {scheduleData.options
-                                .filter((option) => !option.specialSchedule)
-                                .sort((a, b) => a.label.localeCompare(b.label))
-                                .map((option) => (
-                                  <MenuItem
-                                    key={option.id}
-                                    value={option.label}
-                                    sx={menuItemStyles}
-                                  >
-                                    {option.label}
-                                  </MenuItem>
-                                ))}
-                              <ListSubheader
-                                sx={listSubheaderStyles("warning.main")}
-                              >
-                                <StarOutlineOutlinedIcon
-                                  sx={{ mr: 1, color: "warning.main" }}
-                                  fontSize="small"
-                                />
-                                {SELECTOR_TABLE.SPECIAL_SCHEDULES}
-                              </ListSubheader>
-                              {scheduleData.options
-                                .filter((option) => option.specialSchedule)
-                                .sort((a, b) => a.label.localeCompare(b.label))
-                                .map((option) => (
-                                  <MenuItem
-                                    key={option.id}
-                                    value={option.label}
-                                    sx={menuItemStyles}
-                                  >
-                                    {option.label}
-                                  </MenuItem>
-                                ))}
-                              {permissions?.includes(
-                                PERMISSIONS.CREATE_SCHEDULES
-                              ) && (
-                                <MenuItem
-                                  value={"Other"}
-                                  onClick={() => navigate("/schedules")}
-                                >
-                                  <Box
-                                    display="flex"
-                                    justifyContent="space-between"
-                                    width="100%"
-                                    alignItems="center"
-                                  >
-                                    {SELECTOR_TABLE.OTHER}
-                                  </Box>
-                                </MenuItem>
-                              )}
-                            </Select>
-                          </FormControl>
-                        </TableCell>
-                      );
-                    })}
-                    {permissions?.includes(
-                      PERMISSIONS.VIEW_EMPLOYEE_ROLES_HOURS
-                    ) && (
-                      <>
-                        <TableCell
-                          align="center"
-                          sx={{
-                            padding: isSmallScreen ? "8px" : "16px",
-                            backgroundColor: theme.palette.background.paper,
-                            color: theme.palette.text.primary,
-                          }}
-                        >
-                          <Stack
-                            direction="row"
-                            spacing={1}
-                            justifyContent="center"
-                            alignItems="center"
+                          <Typography
+                            variant="body2"
+                            fontWeight={600}
+                            sx={totalHoursTypographyStyles}
                           >
-                            <Tooltip title="Ajustar horas" arrow>
+                            {employee.firstName} {employee.lastName}
+                          </Typography>
+                          {permissions?.includes(
+                            PERMISSIONS.VIEW_EMPLOYEE_ROLES_HOURS
+                          ) && (
+                            <Tooltip title="Ver información" arrow>
                               <span>
                                 <IconButton
                                   size="medium"
-                                  disabled={
-                                    !hasWorkedCurrentWeekForEmployee(employee)
-                                  }
                                   sx={{
-                                    color: hasWorkedCurrentWeekForEmployee(
-                                      employee
-                                    )
-                                      ? "warning.main"
-                                      : "grey.400",
+                                    color: "primary.main",
                                     backgroundColor: "transparent",
                                     "&:hover": {
-                                      backgroundColor: "warning.lighter",
+                                      backgroundColor: "primary.lighter",
                                       boxShadow: 1,
                                     },
                                     transition: "background 0.2s",
                                   }}
                                   onClick={() =>
-                                    setOpenAdjustDialogEmployee(employee)
+                                    setOpenInfoDialogEmployee(employee)
                                   }
                                 >
-                                  <MoreTimeIcon fontSize="medium" />
+                                  <InfoOutlinedIcon fontSize="medium" />
                                 </IconButton>
                               </span>
                             </Tooltip>
-                          </Stack>
-                        </TableCell>
-                        <TableCell
-                          align="left"
-                          sx={{
-                            padding: isSmallScreen ? "8px" : "16px",
-                            position: isSmallScreen ? "static" : "sticky",
-                            right: 0,
-                            zIndex: 2,
-                            backgroundColor: theme.palette.background.paper,
-                            color: theme.palette.text.primary,
-                          }}
-                        >
-                          <Stack
-                            direction="row"
-                            spacing={3.5}
-                            alignItems="center"
-                            justifyContent="center"
-                            sx={stackTotalHoursStyles}
+                          )}
+                        </Box>
+                      </TableCell>
+                      {currentWeek.map(({ day, date }) => {
+                        const scheduleData = getScheduleCellData(
+                          employee,
+                          day,
+                          date,
+                          schedules,
+                          hoursWorked
+                        );
+
+                        return (
+                          <TableCell
+                            key={day}
+                            sx={tableCellBackground(rowIndex, isToday(date))}
                           >
-                            <Typography
-                              variant="body2"
-                              fontWeight={600}
-                              sx={totalHoursTypographyStyles}
-                            >
-                              {resultTotalHours(employee)}{" "}
-                              {SELECTOR_TABLE.HOURS}
-                            </Typography>
-                            <Tooltip
-                              title={SELECTOR_TABLE.OVERTIME_HOURS}
-                              arrow
-                            >
-                              <span>
-                                <Badge
-                                  badgeContent={resultOvertime(employee)}
-                                  max={9999999}
-                                  color={getOvertimeBadgeColor(
-                                    resultOvertime(employee)
-                                  )}
-                                  showZero
-                                  overlap="circular"
-                                  anchorOrigin={{
-                                    vertical: "top",
-                                    horizontal: "right",
-                                  }}
-                                  sx={{
-                                    "& .MuiBadge-badge": {
-                                      minWidth: 22,
-                                      height: 22,
-                                      fontSize: "0.95rem",
-                                      fontWeight: 500,
-                                      borderRadius: "8px",
-                                      right:
-                                        String(resultOvertime(employee))
-                                          .length > 1
-                                          ? -25
-                                          : -10,
-                                      top: -10,
-                                      transform: "none",
-                                      padding: "0 6px",
-                                    },
-                                  }}
-                                >
-                                  <AccessTimeRoundedIcon
-                                    sx={{ color: "primary.main", fontSize: 28 }}
-                                  />
-                                </Badge>
-                              </span>
-                            </Tooltip>
-                          </Stack>
-                        </TableCell>
-                      </>
-                    )}
-                  </TableRow>
-                ))
-              ) : (
-                allSchedules.map((schedule, rowIndex) => (
-                  <TableRow key={schedule.id} sx={tableRowBackground(rowIndex)}>
-                    <TableCell
-                      sx={Object.assign(
-                        {},
-                        employeeColumnCellStyles(isSmallScreen),
-                        tableCellBackground(rowIndex, false)
-                      )}
-                    >
-                      <Typography
-                        variant="body2"
-                        fontWeight={600}
-                        sx={totalHoursTypographyStyles}
-                        component="span"
-                      >
-                        {schedule.label}
-                      </Typography>
-                    </TableCell>
-                    {currentWeek.map(({ day, date }) => {
-                      const assignedEmployees = getEmployeesForScheduleAndDay(
-                        schedule.id,
-                        date,
-                        filteredEmployees,
-                        hoursWorked
-                      );
-                      return (
-                        <TableCell
-                          key={day}
-                          sx={tableCellBackground(rowIndex, isToday(date))}
-                        >
-                          <FormControl fullWidth>
-                            <Select
-                              multiple
-                              displayEmpty
-                              value={assignedEmployees.map((e) => e.id)}
-                              onChange={(event) =>
-                                handleScheduleEmployeesChange(
-                                  event,
-                                  schedule.id,
-                                  date
-                                )
-                              }
-                              renderValue={(selected) => {
-                                // Check if selected is empty or null/undefined
-                                const selectedArray = selected as number[];
-                                if (!selectedArray || selectedArray.length === 0) {
-                                  return (
-                                    <span
-                                      style={{
-                                        color: theme.palette.text.disabled,
-                                        fontStyle: "italic",
-                                        fontSize: "0.85rem",
-                                        fontWeight: 400,
-                                      }}
-                                    >
-                                      {SELECTOR_TABLE.UNASSIGNED}
-                                    </span>
-                                  );
+                            <FormControl fullWidth>
+                              <Select
+                                value={scheduleData.finalSelectedLabel}
+                                onChange={(event: SelectChangeEvent<string>) =>
+                                  handleChange(
+                                    event,
+                                    employee.id,
+                                    new Date(date)
+                                  )
                                 }
-                                
-                                const names = selectedArray
-                                  .map((id) => {
-                                    const emp = filteredEmployees.find(
-                                      (e) => e.id === id
-                                    );
-                                    return emp
-                                      ? `${emp.firstName} ${emp.lastName}`
-                                      : "";
-                                  })
-                                  .filter(Boolean);
-                                
-                                return (
-                                  <Box sx={{ display: 'flex', flexDirection: 'column', gap: 0.5 }}>
-                                    {names.map((name, index) => (
-                                      <Typography 
-                                        key={index} 
-                                        variant="body2" 
-                                        component="span"
-                                        sx={{
-                                          fontSize: "0.85rem",
-                                          fontWeight: 500,
-                                          fontStyle: "normal",
-                                        }}
-                                      >
-                                        {name}
-                                      </Typography>
-                                    ))}
-                                  </Box>
-                                );
-                              }}
-                              disabled={
-                                !permissions?.includes(
-                                  PERMISSIONS.EDIT_EMPLOYEE_ROLES
-                                )
-                              }
-                              input={
-                                <OutlinedInput
-                                  notched={false}
-                                />
-                              }
-                              MenuProps={{
-                                PaperProps: {
-                                  style: {
-                                    maxHeight: 320,
-                                    overflowY: "auto",
+                                disabled={
+                                  !permissions?.includes(
+                                    PERMISSIONS.EDIT_EMPLOYEE_ROLES
+                                  )
+                                }
+                                renderValue={(selected) => (
+                                  <span style={{ fontSize: "0.85rem" }}>
+                                    {selected}
+                                  </span>
+                                )}
+                                input={
+                                  <OutlinedInput
+                                    notched={false}
+                                    label="Ubicación"
+                                  />
+                                }
+                                MenuProps={{
+                                  PaperProps: {
+                                    style: {
+                                      maxHeight: 320,
+                                      overflowY: "auto",
+                                    },
                                   },
-                                },
-                                onClose: handleMenuClose,
-                              }}
-                              onOpen={handleMenuOpen}
-                            >
-                              {/* Search Bar inside menu - Sticky */}
-                              <Box 
-                                sx={{ 
-                                  p: 1, 
-                                  borderBottom: 1, 
-                                  borderColor: 'divider',
-                                  position: 'sticky',
-                                  top: 0,
-                                  backgroundColor: theme.palette.background.paper,
-                                  zIndex: 1,
                                 }}
-                                onClick={handleSearchClick}
                               >
-                                <SearchBarComponent
-                                  value={employeeSearchTerm}
-                                  onChange={(e) => setEmployeeSearchTerm(e.target.value)}
-                                  placeholder="Buscar empleado..."
-                                  fullWidth
-                                />
-                              </Box>
-                              
-                              {filteredEmployees
-                                .filter((employee) => {
-                                  if (!employeeSearchTerm) return true;
-                                  const fullName = `${employee.firstName} ${employee.lastName}`.toLowerCase();
-                                  return fullName.includes(employeeSearchTerm.toLowerCase());
-                                })
-                                .sort((a, b) => {
-                                  const nameA = `${a.firstName} ${a.lastName}`.toLowerCase();
-                                  const nameB = `${b.firstName} ${b.lastName}`.toLowerCase();
-                                  return nameA.localeCompare(nameB);
-                                })
-                                .map((employee) => {
-                                  const assignedEmployees = getEmployeesForScheduleAndDay(
-                                    schedule.id,
-                                    date,
-                                    filteredEmployees,
-                                    hoursWorked
-                                  );
-                                  const isSelected = assignedEmployees.some(e => e.id === employee.id);
-                                  
-                                  return (
-                                    <MenuItem 
-                                      key={employee.id} 
-                                      value={employee.id} 
-                                      sx={{
-                                        ...menuItemStyles,
-                                        display: 'flex',
-                                        alignItems: 'center',
-                                        width: '100%',
-                                        '& .MuiCheckbox-root': {
-                                          marginRight: 1,
-                                        },
-                                      }}
+                                <ListSubheader
+                                  sx={listSubheaderStyles("primary.main")}
+                                >
+                                  <LocationOnOutlinedIcon
+                                    sx={{ mr: 1, color: "primary.main" }}
+                                    fontSize="small"
+                                  />
+                                  {SELECTOR_TABLE.LOCATIONS}
+                                </ListSubheader>
+                                {scheduleData.options
+                                  .filter((option) => !option.specialSchedule)
+                                  .sort((a, b) =>
+                                    a.label.localeCompare(b.label)
+                                  )
+                                  .map((option) => (
+                                    <MenuItem
+                                      key={option.id}
+                                      value={option.label}
+                                      sx={menuItemStyles}
                                     >
-                                      <Checkbox
-                                        checked={isSelected}
-                                        size="small"
-                                        sx={{
-                                          color: theme.palette.primary.main,
-                                          '&.Mui-checked': {
-                                            color: theme.palette.primary.main,
-                                          },
-                                          '&.MuiCheckbox-indeterminate': {
-                                            color: theme.palette.primary.main,
-                                          },
-                                        }}
-                                      />
-                                      <span style={{ textAlign: 'left', flex: 1 }}>
-                                        {employee.firstName} {employee.lastName}
-                                      </span>
+                                      {option.label}
                                     </MenuItem>
-                                  );
-                                })}
-                            </Select>
-                          </FormControl>
-                        </TableCell>
-                      );
-                    })}
-                  </TableRow>
-                ))
-              )}
+                                  ))}
+                                <ListSubheader
+                                  sx={listSubheaderStyles("warning.main")}
+                                >
+                                  <StarOutlineOutlinedIcon
+                                    sx={{ mr: 1, color: "warning.main" }}
+                                    fontSize="small"
+                                  />
+                                  {SELECTOR_TABLE.SPECIAL_SCHEDULES}
+                                </ListSubheader>
+                                {scheduleData.options
+                                  .filter((option) => option.specialSchedule)
+                                  .sort((a, b) =>
+                                    a.label.localeCompare(b.label)
+                                  )
+                                  .map((option) => (
+                                    <MenuItem
+                                      key={option.id}
+                                      value={option.label}
+                                      sx={menuItemStyles}
+                                    >
+                                      {option.label}
+                                    </MenuItem>
+                                  ))}
+                                {permissions?.includes(
+                                  PERMISSIONS.CREATE_SCHEDULES
+                                ) && (
+                                  <MenuItem
+                                    value={"Other"}
+                                    onClick={() => navigate("/schedules")}
+                                  >
+                                    <Box
+                                      display="flex"
+                                      justifyContent="space-between"
+                                      width="100%"
+                                      alignItems="center"
+                                    >
+                                      {SELECTOR_TABLE.OTHER}
+                                    </Box>
+                                  </MenuItem>
+                                )}
+                              </Select>
+                            </FormControl>
+                          </TableCell>
+                        );
+                      })}
+                      {permissions?.includes(
+                        PERMISSIONS.VIEW_EMPLOYEE_ROLES_HOURS
+                      ) && (
+                        <>
+                          <TableCell
+                            align="center"
+                            sx={{
+                              padding: isSmallScreen ? "8px" : "16px",
+                              backgroundColor: theme.palette.background.paper,
+                              color: theme.palette.text.primary,
+                            }}
+                          >
+                            <Stack
+                              direction="row"
+                              spacing={1}
+                              justifyContent="center"
+                              alignItems="center"
+                            >
+                              <Tooltip title="Ajustar horas" arrow>
+                                <span>
+                                  <IconButton
+                                    size="medium"
+                                    disabled={
+                                      !hasWorkedCurrentWeekForEmployee(employee)
+                                    }
+                                    sx={{
+                                      color: hasWorkedCurrentWeekForEmployee(
+                                        employee
+                                      )
+                                        ? "warning.main"
+                                        : "grey.400",
+                                      backgroundColor: "transparent",
+                                      "&:hover": {
+                                        backgroundColor: "warning.lighter",
+                                        boxShadow: 1,
+                                      },
+                                      transition: "background 0.2s",
+                                    }}
+                                    onClick={() =>
+                                      setOpenAdjustDialogEmployee(employee)
+                                    }
+                                  >
+                                    <MoreTimeIcon fontSize="medium" />
+                                  </IconButton>
+                                </span>
+                              </Tooltip>
+                            </Stack>
+                          </TableCell>
+                          <TableCell
+                            align="left"
+                            sx={{
+                              padding: isSmallScreen ? "8px" : "16px",
+                              position: isSmallScreen ? "static" : "sticky",
+                              right: 0,
+                              zIndex: 2,
+                              backgroundColor: theme.palette.background.paper,
+                              color: theme.palette.text.primary,
+                            }}
+                          >
+                            <Stack
+                              direction="row"
+                              spacing={3.5}
+                              alignItems="center"
+                              justifyContent="center"
+                              sx={stackTotalHoursStyles}
+                            >
+                              <Typography
+                                variant="body2"
+                                fontWeight={600}
+                                sx={totalHoursTypographyStyles}
+                              >
+                                {resultTotalHours(employee)}{" "}
+                                {SELECTOR_TABLE.HOURS}
+                              </Typography>
+                              <Tooltip
+                                title={SELECTOR_TABLE.OVERTIME_HOURS}
+                                arrow
+                              >
+                                <span>
+                                  <Badge
+                                    badgeContent={resultOvertime(employee)}
+                                    max={9999999}
+                                    color={getOvertimeBadgeColor(
+                                      resultOvertime(employee)
+                                    )}
+                                    showZero
+                                    overlap="circular"
+                                    anchorOrigin={{
+                                      vertical: "top",
+                                      horizontal: "right",
+                                    }}
+                                    sx={{
+                                      "& .MuiBadge-badge": {
+                                        minWidth: 22,
+                                        height: 22,
+                                        fontSize: "0.95rem",
+                                        fontWeight: 500,
+                                        borderRadius: "8px",
+                                        right:
+                                          String(resultOvertime(employee))
+                                            .length > 1
+                                            ? -25
+                                            : -10,
+                                        top: -10,
+                                        transform: "none",
+                                        padding: "0 6px",
+                                      },
+                                    }}
+                                  >
+                                    <AccessTimeRoundedIcon
+                                      sx={{
+                                        color: "primary.main",
+                                        fontSize: 28,
+                                      }}
+                                    />
+                                  </Badge>
+                                </span>
+                              </Tooltip>
+                            </Stack>
+                          </TableCell>
+                        </>
+                      )}
+                    </TableRow>
+                  ))
+                : groupedSchedules.map((group, rowIndex) => (
+                    <TableRow
+                      key={group.label}
+                      sx={tableRowBackground(rowIndex)}
+                    >
+                      <TableCell
+                        sx={Object.assign(
+                          {},
+                          employeeColumnCellStyles(isSmallScreen),
+                          tableCellBackground(rowIndex, false)
+                        )}
+                      >
+                        <Typography
+                          variant="body2"
+                          fontWeight={600}
+                          sx={totalHoursTypographyStyles}
+                          component="span"
+                        >
+                          {group.label}
+                        </Typography>
+                      </TableCell>
+                      {currentWeek.map(({ day, date }) => {
+                        const scheduleForDay =
+                          group.dayToSchedule[day.toLowerCase()];
+                        const isAvailable = !!scheduleForDay;
+                        const assignedEmployees = isAvailable
+                          ? getEmployeesForScheduleAndDay(
+                              scheduleForDay.id,
+                              date,
+                              filteredEmployees,
+                              hoursWorked
+                            )
+                          : [];
+                        return (
+                          <TableCell
+                            key={day}
+                            sx={tableCellBackground(rowIndex, isToday(date))}
+                          >
+                            {isAvailable ? (
+                              <Box>
+                                <FormControl fullWidth>
+                                  <Select
+                                    multiple
+                                    displayEmpty
+                                    value={assignedEmployees.map((e) => e.id)}
+                                    onChange={(event) =>
+                                      handleScheduleEmployeesChange(
+                                        event,
+                                        scheduleForDay.id,
+                                        date
+                                      )
+                                    }
+                                    renderValue={(selected) => {
+                                      const selectedArray =
+                                        selected as number[];
+                                      if (
+                                        !selectedArray ||
+                                        selectedArray.length === 0
+                                      ) {
+                                        return (
+                                          <span
+                                            style={{
+                                              color:
+                                                theme.palette.text.disabled,
+                                              fontStyle: "italic",
+                                              fontSize: "0.85rem",
+                                              fontWeight: 400,
+                                            }}
+                                          >
+                                            {SELECTOR_TABLE.UNASSIGNED}
+                                          </span>
+                                        );
+                                      }
+                                      const names = selectedArray
+                                        .map((id) => {
+                                          const emp = filteredEmployees.find(
+                                            (e) => e.id === id
+                                          );
+                                          return emp
+                                            ? `${emp.firstName} ${emp.lastName}`
+                                            : "";
+                                        })
+                                        .filter(Boolean);
+                                      return (
+                                        <Box
+                                          sx={{
+                                            display: "flex",
+                                            flexDirection: "column",
+                                            gap: 0.5,
+                                          }}
+                                        >
+                                          {names.map((name, index) => (
+                                            <Typography
+                                              key={index}
+                                              variant="body2"
+                                              component="span"
+                                              sx={{
+                                                fontSize: "0.85rem",
+                                                fontWeight: 500,
+                                                fontStyle: "normal",
+                                              }}
+                                            >
+                                              {name}
+                                            </Typography>
+                                          ))}
+                                        </Box>
+                                      );
+                                    }}
+                                    disabled={
+                                      !permissions?.includes(
+                                        PERMISSIONS.EDIT_EMPLOYEE_ROLES
+                                      )
+                                    }
+                                    input={<OutlinedInput notched={false} />}
+                                    MenuProps={{
+                                      PaperProps: {
+                                        style: {
+                                          maxHeight: 320,
+                                          overflowY: "auto",
+                                        },
+                                      },
+                                      onClose: handleMenuClose,
+                                    }}
+                                  >
+                                    {filteredEmployees
+                                      .slice()
+                                      .sort((a, b) =>
+                                        `${a.firstName} ${a.lastName}`.localeCompare(
+                                          `${b.firstName} ${b.lastName}`,
+                                          "es",
+                                          { sensitivity: "base" }
+                                        )
+                                      )
+                                      .map((employee) => (
+                                        <MenuItem
+                                          key={employee.id}
+                                          value={employee.id}
+                                          sx={{
+                                            ...menuItemStyles,
+                                            display: "flex",
+                                            alignItems: "center",
+                                            width: "100%",
+                                          }}
+                                        >
+                                          <Checkbox
+                                            checked={assignedEmployees.some(
+                                              (e) => e.id === employee.id
+                                            )}
+                                            size="small"
+                                            sx={{
+                                              color: theme.palette.primary.main,
+                                              "&.Mui-checked": {
+                                                color:
+                                                  theme.palette.primary.main,
+                                              },
+                                              "&.MuiCheckbox-indeterminate": {
+                                                color:
+                                                  theme.palette.primary.main,
+                                              },
+                                            }}
+                                          />
+                                          <span
+                                            style={{
+                                              textAlign: "left",
+                                              flex: 1,
+                                            }}
+                                          >
+                                            {employee.firstName}{" "}
+                                            {employee.lastName}
+                                          </span>
+                                        </MenuItem>
+                                      ))}
+                                  </Select>
+                                </FormControl>
+                              </Box>
+                            ) : (
+                              <Typography
+                                variant="body2"
+                                sx={{
+                                  color: theme.palette.text.disabled,
+                                  fontSize: "0.85rem",
+                                  fontWeight: 400,
+                                  textAlign: "center",
+                                }}
+                              >
+                                {SELECTOR_TABLE.NO_AVAILABLE}
+                              </Typography>
+                            )}
+                          </TableCell>
+                        );
+                      })}
+                    </TableRow>
+                  ))}
             </TableBody>
           </Table>
         </TableContainer>
