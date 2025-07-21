@@ -45,6 +45,8 @@ import { infoBox, infoIconBox, infoTitle, infoDesc, iconSx } from '../../Forms/A
 import { useThemeMode } from "../../../index";
 import { rolesTitleStyles, rolesIconStyles, rolesDividerStyles } from '../../Management/RolesPage/styles';
 
+type ThemeMode = "default" | "light" | "dark" | "high-contrast";
+
 // Settings page component for user profile and password management
 const Settings: React.FC = () => {
   const dispatch = useDispatch<AppDispatch>();
@@ -53,7 +55,10 @@ const Settings: React.FC = () => {
   const { showNotification } = useAppNotifications();
   const theme = useTheme();
   const isSmallScreen = useMediaQuery(theme.breakpoints.down("sm"));
-  const { mode, setMode } = useThemeMode();
+  const { mode, setMode } = useThemeMode() as {
+    mode: ThemeMode;
+    setMode: (mode: ThemeMode) => void;
+  };
 
   const [editFields, setEditFields] = useState({
     firstName: currentUser?.firstName || "",
@@ -261,16 +266,14 @@ const Settings: React.FC = () => {
 
   return (
     <Box sx={{ width: "100%" }}>
-      <Box
-        sx={{ py: 1, mb: 2 }}
-      >
-        <Box
-          display="flex"
-          flexDirection="column"
-          alignItems="flex-start"
-        >
+      <Box sx={{ py: 1, mb: 2 }}>
+        <Box display="flex" flexDirection="column" alignItems="flex-start">
           <Box
-            sx={{ display: 'inline-flex', flexDirection: 'column', alignItems: 'center' }}
+            sx={{
+              display: "inline-flex",
+              flexDirection: "column",
+              alignItems: "center",
+            }}
           >
             <Typography
               variant={isSmallScreen ? "h5" : "h4"}
@@ -280,7 +283,9 @@ const Settings: React.FC = () => {
                 fontSize={isSmallScreen ? "small" : "large"}
                 sx={rolesIconStyles(theme)}
               />
-              {isSmallScreen ? PAGE_TITLE.SETTING_SIMPLIFIED : PAGE_TITLE.SETTINGS}
+              {isSmallScreen
+                ? PAGE_TITLE.SETTING_SIMPLIFIED
+                : PAGE_TITLE.SETTINGS}
             </Typography>
             <Divider sx={rolesDividerStyles(theme)} />
           </Box>
@@ -300,7 +305,9 @@ const Settings: React.FC = () => {
 
       {/* Contenido de los tabs */}
       {tabIndex === 0 && (
-        <Box sx={{ width: "100%", display: "block", px: { xs: 0, sm: 0, md: 0 } }}>
+        <Box
+          sx={{ width: "100%", display: "block", px: { xs: 0, sm: 0, md: 0 } }}
+        >
           {/* Información personal */}
           <Typography
             variant="h5"
@@ -444,7 +451,9 @@ const Settings: React.FC = () => {
         </Box>
       )}
       {tabIndex === 1 && (
-        <Box sx={{ width: "100%", display: "block", px: { xs: 0, sm: 0, md: 0 } }}>
+        <Box
+          sx={{ width: "100%", display: "block", px: { xs: 0, sm: 0, md: 0 } }}
+        >
           {/* Cambiar contraseña (antes estaba a la derecha del divider) */}
           <Typography
             variant="h5"
@@ -562,7 +571,9 @@ const Settings: React.FC = () => {
         </Box>
       )}
       {tabIndex === 2 && (
-        <Box sx={{ width: "100%", display: "block", px: { xs: 0, sm: 0, md: 0 } }}>
+        <Box
+          sx={{ width: "100%", display: "block", px: { xs: 0, sm: 0, md: 0 } }}
+        >
           <Typography
             variant="h5"
             fontWeight="bold"
@@ -587,19 +598,18 @@ const Settings: React.FC = () => {
 
           <RadioGroup
             value={mode}
-            onChange={(e) =>
-              setMode(e.target.value as "light" | "dark" | "high-contrast")
-            }
+            onChange={(e) => setMode(e.target.value as ThemeMode)}
             aria-label="theme-mode"
             name="theme-mode"
           >
+            <FormControlLabel value="default" control={<Radio />} label="Predeterminado" />
             <FormControlLabel value="light" control={<Radio />} label="Claro" />
             <FormControlLabel value="dark" control={<Radio />} label="Oscuro" />
-            <FormControlLabel
+            {/* <FormControlLabel
               value="high-contrast"
               control={<Radio />}
               label="Alto Contraste"
-            />
+            /> */}
           </RadioGroup>
         </Box>
       )}
