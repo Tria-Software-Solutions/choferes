@@ -98,7 +98,10 @@ import DialogComponent from "../../Dialog/Dialog.component";
 import { addDialogPaperSx } from "../../../pages/Management/EmployeesPage/styles";
 import { useDispatch } from "react-redux";
 import type { AppDispatch } from "../../../store/store";
-import { createOrUpdateHoursWorked } from "../../../store/slices/hoursWorkedSlice";
+import {
+  createOrUpdateHoursWorked,
+  deleteHoursWorked, // <-- importa la acción de borrado
+} from "../../../store/slices/hoursWorkedSlice";
 import SwapHorizIcon from "@mui/icons-material/SwapHoriz";
 
 // SelectorTable component displays and manages employee schedules, hours worked, and summary data for different periods (weekly, biweekly, monthly).
@@ -403,12 +406,7 @@ const SelectorTableComponent: React.FC<SelectorTableProps> = ({
             new Date(r.date).toDateString() === new Date(date).toDateString()
         );
         if (record) {
-          dispatch(
-            createOrUpdateHoursWorked({
-              ...record,
-              scheduleId: undefined,
-            })
-          );
+          dispatch(deleteHoursWorked(record.id));
         }
       }
     });
@@ -1177,7 +1175,6 @@ const SelectorTableComponent: React.FC<SelectorTableProps> = ({
                                           overflowY: "auto",
                                         },
                                       },
-                                      onClose: handleMenuClose,
                                     }}
                                   >
                                     {filteredEmployees

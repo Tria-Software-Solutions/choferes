@@ -204,14 +204,16 @@ const RolesPage: React.FC = () => {
     const normalizeString = (str: string) =>
       str.normalize("NFD").replace(/[\u0300-\u036f]/g, "");
 
+    setFilteredEmployees(
+      employees.filter((employee) =>
+        normalizeString(`${employee.firstName} ${employee.lastName}`)
+          .toLowerCase()
+          .includes(normalizeString(search).toLowerCase())
+      )
+    );
+
     if (viewMode === 'employee') {
-      setFilteredEmployees(
-        employees.filter((employee) =>
-          normalizeString(`${employee.firstName} ${employee.lastName}`)
-            .toLowerCase()
-            .includes(normalizeString(search).toLowerCase())
-        )
-      );
+      // filteredEmployees ya está actualizado arriba
     } else {
       setFilteredSchedules(
         schedules.filter((schedule) =>
