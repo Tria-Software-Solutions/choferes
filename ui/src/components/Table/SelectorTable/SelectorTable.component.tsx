@@ -40,9 +40,7 @@ import {
   getCurrentWeekDates,
   getInvolvedPeriods,
 } from "../../../utils/dates";
-import {
-  translateDayToAbrevSpanish,
-} from "../../../utils/string";
+import { translateDayToAbrevSpanish } from "../../../utils/string";
 import { EnglishDayOfWeek } from "../../../utils/dayAbreviations";
 import {
   TABLE,
@@ -96,13 +94,12 @@ import {
 } from "./helpers";
 import AdjustHoursDialog from "../../../pages/Forms/AdjustHoursDialog";
 import WorkedHoursSummaryDialog from "../../../pages/Forms/WorkedHoursSummaryDialog";
-import DialogComponent from '../../Dialog/Dialog.component';
-import { addDialogPaperSx } from '../../../pages/Management/EmployeesPage/styles';
+import DialogComponent from "../../Dialog/Dialog.component";
+import { addDialogPaperSx } from "../../../pages/Management/EmployeesPage/styles";
 import { useDispatch } from "react-redux";
 import type { AppDispatch } from "../../../store/store";
 import { createOrUpdateHoursWorked } from "../../../store/slices/hoursWorkedSlice";
 import SwapHorizIcon from "@mui/icons-material/SwapHoriz";
-
 
 // SelectorTable component displays and manages employee schedules, hours worked, and summary data for different periods (weekly, biweekly, monthly).
 // Props:
@@ -136,18 +133,18 @@ interface SelectorTableProps {
   handleChange: (
     event: SelectChangeEvent<string>,
     employeeId: number,
-    date: Date,
+    date: Date
   ) => void;
   handleAdjustTime: (
     employeeId: number,
-    condition: 'add' | 'subtract',
-    timeAdjustment: number,
+    condition: "add" | "subtract",
+    timeAdjustment: number
   ) => void;
   permissions?: string[];
   rowsPerPage?: number;
   setRowsPerPage?: (rows: number) => void;
-  viewMode: 'employee' | 'schedule';
-  setViewMode: React.Dispatch<React.SetStateAction<'employee' | 'schedule'>>;
+  viewMode: "employee" | "schedule";
+  setViewMode: React.Dispatch<React.SetStateAction<"employee" | "schedule">>;
 }
 
 const SelectorTableComponent: React.FC<SelectorTableProps> = ({
@@ -175,17 +172,24 @@ const SelectorTableComponent: React.FC<SelectorTableProps> = ({
   const [orderDirection, setOrderDirection] = useState<"asc" | "desc">("asc");
   const [page, setPage] = useState(0);
   const [localRowsPerPage, setLocalRowsPerPage] = useState(5);
-  const rowsPerPage = rowsPerPageProp !== undefined ? rowsPerPageProp : localRowsPerPage;
-  const setRowsPerPage = setRowsPerPageProp !== undefined ? setRowsPerPageProp : setLocalRowsPerPage;
+  const rowsPerPage =
+    rowsPerPageProp !== undefined ? rowsPerPageProp : localRowsPerPage;
+  const setRowsPerPage =
+    setRowsPerPageProp !== undefined ? setRowsPerPageProp : setLocalRowsPerPage;
   const [openAdjustDialogEmployee, setOpenAdjustDialogEmployee] =
     useState<Employee | null>(null);
-  const [openInfoDialogEmployee, setOpenInfoDialogEmployee] = useState<Employee | null>(null);
-  const [summaryTab, setSummaryTab] = useState<"weekly" | "biweekly" | "monthly" | "overtime">("weekly");
-  type PeriodType = 'weekly' | 'biweekly' | 'monthly';
-  const [selectedPeriod, setSelectedPeriod] = useState<PeriodType>('weekly');
+  const [openInfoDialogEmployee, setOpenInfoDialogEmployee] =
+    useState<Employee | null>(null);
+  const [summaryTab, setSummaryTab] = useState<
+    "weekly" | "biweekly" | "monthly" | "overtime"
+  >("weekly");
+  type PeriodType = "weekly" | "biweekly" | "monthly";
+  const [selectedPeriod, setSelectedPeriod] = useState<PeriodType>("weekly");
   const [isMenuOpen, setIsMenuOpen] = useState<boolean>(false);
   const theme = useTheme();
-  
+  const periodSelectorBg =
+    theme.palette.mode === "dark" ? "#111111" : "#000000";
+
   // Handle menu state
   const handleMenuClose = () => {
     setIsMenuOpen(false);
@@ -194,17 +198,17 @@ const SelectorTableComponent: React.FC<SelectorTableProps> = ({
   // Handle ESC key to close search
   React.useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {
-      if (event.key === 'Escape' && isMenuOpen) {
+      if (event.key === "Escape" && isMenuOpen) {
         handleMenuClose();
       }
     };
 
     if (isMenuOpen) {
-      document.addEventListener('keydown', handleKeyDown);
+      document.addEventListener("keydown", handleKeyDown);
     }
 
     return () => {
-      document.removeEventListener('keydown', handleKeyDown);
+      document.removeEventListener("keydown", handleKeyDown);
     };
   }, [isMenuOpen]);
 
@@ -216,7 +220,7 @@ const SelectorTableComponent: React.FC<SelectorTableProps> = ({
 
   const currentWeek = useMemo(
     () => getCurrentWeekDates(weekOffset),
-    [weekOffset],
+    [weekOffset]
   );
   const multiplePeriods = getInvolvedPeriods(currentWeek);
 
@@ -227,7 +231,11 @@ const SelectorTableComponent: React.FC<SelectorTableProps> = ({
     return sortEmployeesByName(filteredEmployees, orderDirection);
   }, [filteredEmployees, orderDirection]);
 
-  const paginatedEmployees = paginateEmployees(sortedEmployees, page, rowsPerPage);
+  const paginatedEmployees = paginateEmployees(
+    sortedEmployees,
+    page,
+    rowsPerPage
+  );
 
   // Use helper functions for hours calculations
   // 2. Usar selectedPeriod en lugar de 'weekly' en las funciones de totales y overtime
@@ -243,7 +251,7 @@ const SelectorTableComponent: React.FC<SelectorTableProps> = ({
       weeklySummaries,
       biweeklySummaries,
       monthlySummaries,
-      multiplePeriods,
+      multiplePeriods
     );
   };
 
@@ -259,7 +267,7 @@ const SelectorTableComponent: React.FC<SelectorTableProps> = ({
       weeklySummaries,
       biweeklySummaries,
       monthlySummaries,
-      multiplePeriods,
+      multiplePeriods
     );
   };
 
@@ -272,22 +280,35 @@ const SelectorTableComponent: React.FC<SelectorTableProps> = ({
 
   // Helper functions for tabbed summary dialog
   function hasOvertime(s: unknown): s is { overtimeHours: number } {
-    return typeof s === 'object' && s !== null && 'overtimeHours' in s;
+    return typeof s === "object" && s !== null && "overtimeHours" in s;
   }
   const getEmployeeWeeklyHours = (id: number) => {
-    const summary = weeklySummaries.find(s => s.employeeId === id && s.weekNumber === weekNumber && s.year === year);
+    const summary = weeklySummaries.find(
+      (s) =>
+        s.employeeId === id && s.weekNumber === weekNumber && s.year === year
+    );
     return summary ? summary.totalHours : 0;
   };
   const getEmployeeBiweeklyHours = (id: number) => {
-    const summary = biweeklySummaries.find(s => s.employeeId === id && s.biweekNumber === biweekNumber && s.year === year);
+    const summary = biweeklySummaries.find(
+      (s) =>
+        s.employeeId === id &&
+        s.biweekNumber === biweekNumber &&
+        s.year === year
+    );
     return summary ? summary.totalHours : 0;
   };
   const getEmployeeMonthlyHours = (id: number) => {
-    const summary = monthlySummaries.find(s => s.employeeId === id && s.month === month && s.year === year);
+    const summary = monthlySummaries.find(
+      (s) => s.employeeId === id && s.month === month && s.year === year
+    );
     return summary ? summary.totalHours : 0;
   };
   const getEmployeeOvertime = (id: number) => {
-    const summary = weeklySummaries.find(s => s.employeeId === id && s.weekNumber === weekNumber && s.year === year);
+    const summary = weeklySummaries.find(
+      (s) =>
+        s.employeeId === id && s.weekNumber === weekNumber && s.year === year
+    );
     return summary && hasOvertime(summary) ? summary.overtimeHours || 0 : 0;
   };
 
@@ -310,8 +331,15 @@ const SelectorTableComponent: React.FC<SelectorTableProps> = ({
 
   // Agrupa los schedules por label (ignorando mayúsculas/tildes)
   const groupedSchedules = useMemo(() => {
-    const normalize = (str: string) => str.normalize("NFD").replace(/\p{Diacritic}/gu, "").toLowerCase();
-    const groups: Record<string, { label: string; dayToSchedule: Record<string, Schedule> }> = {};
+    const normalize = (str: string) =>
+      str
+        .normalize("NFD")
+        .replace(/\p{Diacritic}/gu, "")
+        .toLowerCase();
+    const groups: Record<
+      string,
+      { label: string; dayToSchedule: Record<string, Schedule> }
+    > = {};
     for (const schedule of schedules) {
       const normLabel = normalize(schedule.label);
       if (!groups[normLabel]) {
@@ -327,10 +355,14 @@ const SelectorTableComponent: React.FC<SelectorTableProps> = ({
     // Ordena: primero los que no son especiales, luego especiales, y dentro de cada grupo, alfabéticamente
     return Object.values(groups).sort((a, b) => {
       // Busca si algún día de la semana es especial
-      const aSpecial = Object.values(a.dayToSchedule).some(s => s.specialSchedule);
-      const bSpecial = Object.values(b.dayToSchedule).some(s => s.specialSchedule);
+      const aSpecial = Object.values(a.dayToSchedule).some(
+        (s) => s.specialSchedule
+      );
+      const bSpecial = Object.values(b.dayToSchedule).some(
+        (s) => s.specialSchedule
+      );
       if (aSpecial !== bSpecial) return aSpecial ? 1 : -1;
-      return a.label.localeCompare(b.label, 'es', { sensitivity: 'base' });
+      return a.label.localeCompare(b.label, "es", { sensitivity: "base" });
     });
   }, [schedules]);
 
@@ -374,7 +406,7 @@ const SelectorTableComponent: React.FC<SelectorTableProps> = ({
           dispatch(
             createOrUpdateHoursWorked({
               ...record,
-              scheduleId: undefined, 
+              scheduleId: undefined,
             })
           );
         }
@@ -570,13 +602,13 @@ const SelectorTableComponent: React.FC<SelectorTableProps> = ({
                                 notched={false}
                                 label="Periodo"
                                 sx={{
-                                  backgroundColor: "#111",
+                                  backgroundColor: periodSelectorBg,
                                   color: "#fff",
-                                  fontSize: '1rem',
+                                  fontSize: "1rem",
                                   fontWeight: 700,
                                   "& .MuiOutlinedInput-input": {
                                     color: "#fff",
-                                    fontSize: '1rem',
+                                    fontSize: "1rem",
                                     fontWeight: 700,
                                   },
                                   border: "none",
@@ -584,14 +616,14 @@ const SelectorTableComponent: React.FC<SelectorTableProps> = ({
                               />
                             }
                             sx={{
-                              backgroundColor: "#111",
+                              backgroundColor: periodSelectorBg,
                               color: "#fff",
-                              fontSize: '1rem',
+                              fontSize: "1rem",
                               fontWeight: 700,
                               "& .MuiSelect-select": {
                                 color: "#fff",
-                                backgroundColor: "#111",
-                                fontSize: '1rem',
+                                backgroundColor: periodSelectorBg,
+                                fontSize: "1rem",
                                 fontWeight: 700,
                               },
                               "& .MuiSelect-icon": {
@@ -608,6 +640,14 @@ const SelectorTableComponent: React.FC<SelectorTableProps> = ({
                                   border: "none",
                                 },
                             }}
+                            MenuProps={{
+                              PaperProps: {
+                                style: {
+                                  maxHeight: 320,
+                                  overflowY: "auto",
+                                },
+                              },
+                            }}
                             renderValue={(selected) => {
                               switch (selected) {
                                 case "weekly":
@@ -621,7 +661,15 @@ const SelectorTableComponent: React.FC<SelectorTableProps> = ({
                                           verticalAlign: "middle",
                                         }}
                                       />
-                                      <span style={{ color: '#fff', fontSize: '1rem', fontWeight: 700 }}>{SELECTOR_TABLE.WEEKLY}</span>
+                                      <span
+                                        style={{
+                                          color: "#fff",
+                                          fontSize: "1rem",
+                                          fontWeight: 700,
+                                        }}
+                                      >
+                                        {SELECTOR_TABLE.WEEKLY}
+                                      </span>
                                     </>
                                   );
                                 case "biweekly":
@@ -635,7 +683,15 @@ const SelectorTableComponent: React.FC<SelectorTableProps> = ({
                                           verticalAlign: "middle",
                                         }}
                                       />
-                                      <span style={{ color: '#fff', fontSize: '1rem', fontWeight: 700 }}>{SELECTOR_TABLE.BIWEEKLY}</span>
+                                      <span
+                                        style={{
+                                          color: "#fff",
+                                          fontSize: "1rem",
+                                          fontWeight: 700,
+                                        }}
+                                      >
+                                        {SELECTOR_TABLE.BIWEEKLY}
+                                      </span>
                                     </>
                                   );
                                 case "monthly":
@@ -649,25 +705,23 @@ const SelectorTableComponent: React.FC<SelectorTableProps> = ({
                                           verticalAlign: "middle",
                                         }}
                                       />
-                                      <span style={{ color: '#fff', fontSize: '1rem', fontWeight: 700 }}>{SELECTOR_TABLE.MONTHLY}</span>
+                                      <span
+                                        style={{
+                                          color: "#fff",
+                                          fontSize: "1rem",
+                                          fontWeight: 700,
+                                        }}
+                                      >
+                                        {SELECTOR_TABLE.MONTHLY}
+                                      </span>
                                     </>
                                   );
                                 default:
                                   return "";
                               }
                             }}
-                            MenuProps={{
-                              PaperProps: {
-                                style: {
-                                  maxHeight: 320,
-                                  overflowY: "auto",
-                                  backgroundColor: "#111",
-                                  color: "#fff",
-                                },
-                              },
-                            }}
                           >
-                            <MenuItem value="weekly" sx={{ fontSize: '1rem', fontWeight: 700, color: '#fff', backgroundColor: '#111' }}>
+                            <MenuItem value="weekly">
                               <CalendarTodayIcon
                                 sx={{
                                   fontSize: 18,
@@ -678,7 +732,7 @@ const SelectorTableComponent: React.FC<SelectorTableProps> = ({
                               />
                               {SELECTOR_TABLE.WEEKLY}
                             </MenuItem>
-                            <MenuItem value="biweekly" sx={{ fontSize: '1rem', fontWeight: 700, color: '#fff', backgroundColor: '#111' }}>
+                            <MenuItem value="biweekly">
                               <DateRangeIcon
                                 sx={{
                                   fontSize: 18,
@@ -689,7 +743,7 @@ const SelectorTableComponent: React.FC<SelectorTableProps> = ({
                               />
                               {SELECTOR_TABLE.BIWEEKLY}
                             </MenuItem>
-                            <MenuItem value="monthly" sx={{ fontSize: '1rem', fontWeight: 700, color: '#fff', backgroundColor: '#111' }}>
+                            <MenuItem value="monthly">
                               <CalendarMonthIcon
                                 sx={{
                                   fontSize: 18,
