@@ -12,19 +12,24 @@ const ThemeModeContext = createContext({
 
 export const useThemeMode = () => useContext(ThemeModeContext);
 
+const getSystemTheme = () =>
+  window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
+
 const getThemeByMode = (mode: string) => {
   switch (mode) {
     case "dark":
       return darkTheme;
     case "high-contrast":
       return highContrastTheme;
+    case "default":
+      return getSystemTheme() === "dark" ? darkTheme : lightTheme;
     default:
       return lightTheme;
   }
 };
 
 const ThemeModeProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [mode, setMode] = useState(() => localStorage.getItem("themeMode") || "light");
+  const [mode, setMode] = useState(() => localStorage.getItem("themeMode") || "default");
 
   useEffect(() => {
     localStorage.setItem("themeMode", mode);
