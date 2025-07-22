@@ -254,7 +254,15 @@ const AppBarComponent: React.FC<AppBarComponentProps> = ({
                   </IconButton>
                 </Tooltip>
 
-                <Divider orientation="vertical" flexItem sx={dividerStyles} />
+                <Divider 
+                  orientation="vertical" 
+                  flexItem 
+                  sx={{ 
+                    ...dividerStyles,
+                    display: { xs: "none", md: "block" },
+                    mx: 2
+                  }} 
+                />
               </>
             )}
 
@@ -274,33 +282,36 @@ const AppBarComponent: React.FC<AppBarComponentProps> = ({
                 </Typography>
               </Box>
 
-              <Tooltip title={APPBAR_MENU.USER_MENU} arrow>
-                <IconButton
-                  onClick={handleUserMenuOpen}
-                  sx={userMenuIconButtonStyles}
-                >
-                  <Badge
-                    overlap="circular"
-                    anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
-                    variant="dot"
-                    sx={{
-                      '& .MuiBadge-dot': {
-                        backgroundColor: theme.palette.success.main,
-                        color: theme.palette.success.main,
-                        boxShadow: `0 0 0 2px ${theme.palette.background.paper}`,
-                        width: 11,
-                        height: 11,
-                        borderRadius: '50%',
-                        position: 'absolute',
-                        bottom: 1,
-                        right: 1,
-                      },
-                    }}
+              {/* Avatar Menu - Solo visible en pantallas medianas y grandes */}
+              <Box sx={{ display: { xs: "none", md: "block" } }}>
+                <Tooltip title={APPBAR_MENU.USER_MENU} arrow>
+                  <IconButton
+                    onClick={handleUserMenuOpen}
+                    sx={userMenuIconButtonStyles}
                   >
-                    <Avatar sx={userAvatarStyles}>{getUserInitials()}</Avatar>
-                  </Badge>
-                </IconButton>
-              </Tooltip>
+                    <Badge
+                      overlap="circular"
+                      anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
+                      variant="dot"
+                      sx={{
+                        '& .MuiBadge-dot': {
+                          backgroundColor: theme.palette.success.main,
+                          color: theme.palette.success.main,
+                          boxShadow: `0 0 0 2px ${theme.palette.background.paper}`,
+                          width: 11,
+                          height: 11,
+                          borderRadius: '50%',
+                          position: 'absolute',
+                          bottom: 1,
+                          right: 1,
+                        },
+                      }}
+                    >
+                      <Avatar sx={userAvatarStyles}>{getUserInitials()}</Avatar>
+                    </Badge>
+                  </IconButton>
+                </Tooltip>
+              </Box>
 
               {/* Menú Principal (solo mobile) */}
               {isMobile && (
@@ -313,7 +324,11 @@ const AppBarComponent: React.FC<AppBarComponentProps> = ({
                   <MenuComponent
                     buttonType="icon"
                     icon={<MenuRoundedIcon />}
-                    menuItems={menuItems}
+                    menuItems={[...menuItems, ...userLinks.map(link => ({
+                      text: link.label,
+                      onClick: link.onClick || (link.path ? () => navigate(link.path!) : undefined),
+                      icon: link.icon,
+                    }))]}
                   />
                 </>
               )}
