@@ -73,7 +73,7 @@ export function renderCellValue<T extends object>({
   }
   if (column === "days" && Array.isArray(value)) {
     return (
-      <Typography component="span">
+      <Typography component="span" variant="body2">
         {value
           .map((d: string) =>
             capitalizeFirstLetter(translateDayOptionsToSpanish(String(d)))
@@ -86,7 +86,7 @@ export function renderCellValue<T extends object>({
     return (
       <Stack direction="row" spacing={1} sx={{ rowGap: 2, flexWrap: "nowrap" }}>
         {value.map((item: string, index: number, array: string[]) => (
-          <Typography key={index} component="span">
+          <Typography key={index} component="span" variant="body2">
             {item}
             {index < array.length - 1 ? ", " : ""}
           </Typography>
@@ -99,6 +99,7 @@ export function renderCellValue<T extends object>({
       <Typography
         component="a"
         href={`mailto:${String(value ?? "")}`}
+        variant="body2"
         sx={emailLinkStyles(theme)}
       >
         {String(value ?? "")}
@@ -108,10 +109,10 @@ export function renderCellValue<T extends object>({
   if (typeof value === "string" && value.match(/^\d{4}-\d{2}-\d{2}/)) {
     // ISO date string
     return (
-      <Typography component="span">
+      <Typography component="span" variant="body2">
         {value ? formatDateWithDay(new Date(value), false) : ""}
       </Typography>
     );
   }
-  return <Typography component="span">{String(value ?? "")}</Typography>;
+  return <Typography component="span" variant="body2">{String(value ?? "")}</Typography>;
 } 

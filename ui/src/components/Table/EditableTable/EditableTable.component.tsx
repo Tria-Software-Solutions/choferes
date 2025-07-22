@@ -186,7 +186,7 @@ const EditableTableComponent = <T extends object>({
             position: "sticky",
             top: 0,
             zIndex: 5,
-            backgroundColor: "#f0f2f5",
+            backgroundColor: theme.palette.background.paper,
             padding: isSmallScreen ? "8px" : "16px",
             borderBottom: "1px solid #ddd",
           }}
@@ -198,7 +198,16 @@ const EditableTableComponent = <T extends object>({
               alignItems: "center",
             }}
           >
-            <Typography variant="body2" fontWeight="bold">
+            <Typography 
+              variant="body2" 
+              fontWeight="bold"
+              sx={{
+                color:
+                  theme.palette.mode === "dark"
+                    ? "#fff"
+                    : theme.palette.text.secondary,
+              }}
+            >
               {formatDateWithDay(groupByDate, false)}
             </Typography>
           </Box>

@@ -3,9 +3,10 @@ import { SxProps, Theme } from "@mui/material";
 export const textFieldStyles = (customSx: object = {}): SxProps<Theme> => (theme: Theme) => ({
   mb: 2,
   "& .MuiOutlinedInput-root": {
-    borderRadius: 2,
+    borderRadius: "12px",
     backgroundColor: theme.palette.background.paper,
     color: theme.palette.text.primary,
+    fontSize: "0.875rem",
     "&:hover .MuiOutlinedInput-notchedOutline": {
       borderColor: theme.palette.primary.main,
     },
@@ -22,6 +23,7 @@ export const textFieldStyles = (customSx: object = {}): SxProps<Theme> => (theme
       color: theme.palette.text.primary,
       outline: "none",
       boxShadow: "none",
+      fontSize: "0.875rem",
     },
   },
   ...customSx,

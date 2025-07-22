@@ -27,6 +27,7 @@ import {
   Tooltip,
   ButtonGroup,
   Divider,
+  IconButton,
 } from "@mui/material";
 import { LocalizationProvider } from "@mui/x-date-pickers";
 import { DatePicker } from "@mui/x-date-pickers/DatePicker";
@@ -81,6 +82,7 @@ import {
 import DescriptionIcon from "@mui/icons-material/Description";
 import PictureAsPdfIcon from "@mui/icons-material/PictureAsPdf";
 import AddCircleOutlineIcon from "@mui/icons-material/AddCircleOutline";
+import ImageIcon from "@mui/icons-material/Image";
 
 const getInitialRowsPerPage = () => {
   if (typeof window !== "undefined") {
@@ -132,6 +134,9 @@ const VehiclesPage: React.FC = () => {
   const [openAddVehicleModal, setOpenAddVehicleModal] = useState(false);
   const [isCreatingVehicle, setIsCreatingVehicle] = useState(false);
   const [isDeletingVehicle, setIsDeletingVehicle] = useState(false);
+
+  // File input ref for image upload
+  const fileInputRef = React.useRef<HTMLInputElement>(null);
 
   const theme = useTheme();
   const isSmallScreen = useMediaQuery(theme.breakpoints.down("sm"));
@@ -495,6 +500,34 @@ const VehiclesPage: React.FC = () => {
       groupedHeaders: format === 'excel' ? groupedHeaders : undefined,
     });
   };
+
+  // Handler para abrir archivo de imagen
+  const handleOpenImageFile = () => {
+    fileInputRef.current?.click();
+  };
+
+  // Handler para procesar el archivo seleccionado
+  const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (file) {
+      // Verificar que sea una imagen
+      if (file.type.startsWith('image/')) {
+        showNotification(`Archivo de imagen seleccionado: ${file.name}`, {
+          severity: "info",
+          duration: 3000,
+        });
+        // Aquí puedes agregar la lógica para procesar la imagen
+        // Por ejemplo, subirla al servidor, mostrarla en un modal, etc.
+      } else {
+        showNotification("Por favor selecciona un archivo de imagen válido", {
+          severity: "error",
+          duration: 3000,
+        });
+      }
+    }
+    // Limpiar el input para permitir seleccionar el mismo archivo nuevamente
+    event.target.value = '';
+  };
   // Use exportTable({ data: exportData, ... }) for export
 
   return (
@@ -525,30 +558,76 @@ const VehiclesPage: React.FC = () => {
           </Typography>
           <Divider sx={vehiclesDividerStyles(theme)} />
         </Box>
-        {userPermissions.includes(PERMISSIONS.EXPORT_EXCEL_VEHICLES) &&
-          userPermissions.includes(PERMISSIONS.EXPORT_PDF_VEHICLES) && (
-            <Box sx={exportSpeedDialBoxStyles}>
-              {filteredWeekVehicles.length > 0 && (
-                <SpeedDialComponent
-                  actions={[
-                    {
-                      label: "Exportar a Excel",
-                      icon: <DescriptionIcon />,
-                      onClick: () => handleExport('excel'),
-                    },
-                    {
-                      label: "Exportar a PDF",
-                      icon: <PictureAsPdfIcon />,
-                      onClick: () => handleExport('pdf'),
-                    },
-                  ]}
-                  mainIcon={<DownloadRoundedIcon />}
-                  openIcon={<CloseRoundedIcon />}
-                  direction="left"
-                />
-              )}
-            </Box>
-          )}
+        <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
+          {userPermissions.includes(PERMISSIONS.EXPORT_EXCEL_VEHICLES) &&
+            userPermissions.includes(PERMISSIONS.EXPORT_PDF_VEHICLES) && (
+              <Box sx={exportSpeedDialBoxStyles}>
+                {filteredWeekVehicles.length > 0 && (
+                  <SpeedDialComponent
+                    actions={[
+                      {
+                        label: "Exportar a Excel",
+                        icon: <DescriptionIcon />,
+                        onClick: () => handleExport('excel'),
+                      },
+                      {
+                        label: "Exportar a PDF",
+                        icon: <PictureAsPdfIcon />,
+                        onClick: () => handleExport('pdf'),
+                      },
+                    ]}
+                    mainIcon={<DownloadRoundedIcon />}
+                    openIcon={<CloseRoundedIcon />}
+                    direction="left"
+                  />
+                )}
+              </Box>
+            )}
+          
+          {/* Botón para abrir archivo de imagen */}
+          <Tooltip title="Abrir archivo de imagen" arrow>
+            <IconButton
+              onClick={handleOpenImageFile}
+              sx={{
+                top: "-4px",
+                width: "62px",
+                height: "58px",
+                borderRadius: "8px",
+                backgroundColor:
+                  theme.palette.mode === "dark"
+                    ? theme.palette.background.paper
+                    : theme.palette.primary.main,
+                color:
+                  theme.palette.mode === "dark"
+                    ? theme.palette.primary.main
+                    : theme.palette.primary.contrastText,
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                transition: theme.transitions.create(
+                  ["background", "box-shadow", "transform"],
+                  {
+                    duration: theme.transitions.duration.short,
+                  }
+                ),
+                fontSize: 40,
+                "&:hover": {
+                  backgroundColor: "#333333",
+                },
+              }}
+            >
+              <ImageIcon />
+            </IconButton>
+          </Tooltip>
+          
+          <input
+            ref={fileInputRef}
+            type="file"
+            accept="image/*"
+            onChange={handleFileChange}
+            style={{ display: 'none' }}
+          />
+        </Box>
       </Box>
       {isLoadingVehicles ? (
         <Box sx={loadingBoxStyles}>
