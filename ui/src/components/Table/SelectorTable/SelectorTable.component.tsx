@@ -465,14 +465,34 @@ const SelectorTableComponent: React.FC<SelectorTableProps> = ({
                 onClick={() =>
                   setViewMode(viewMode === "employee" ? "schedule" : "employee")
                 }
-                sx={{ mr: 1 }}
+                sx={{ 
+                  mr: 1,
+                  '&:hover': {
+                    backgroundColor: 'transparent',
+                  },
+                  '&:focus': {
+                    backgroundColor: 'transparent',
+                  },
+                  '&:active': {
+                    backgroundColor: 'transparent',
+                  },
+                  '&.Mui-focusVisible': {
+                    backgroundColor: 'transparent',
+                  }
+                }}
               >
                 <SwapHorizIcon />
               </IconButton>
-              <Typography variant="caption" sx={{ mr: 2 }}>
+              <Typography 
+                variant="caption" 
+                sx={{ 
+                  mr: 2,
+                  display: { xs: 'none', sm: 'block' }
+                }}
+              >
                 {viewMode === "employee"
-                  ? "Vista por empleado"
-                  : "Vista por horario"}
+                  ? SELECTOR_TABLE.EMPLOYEE_VIEW
+                  : SELECTOR_TABLE.SCHEDULE_VIEW}
               </Typography>
             </Box>
             {/* Center title */}

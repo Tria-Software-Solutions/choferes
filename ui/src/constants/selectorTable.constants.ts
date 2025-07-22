@@ -11,6 +11,8 @@ const SELECTOR_TABLE = {
   BIWEEK: "Quincena",
   EMPLOYEES: "Empleados",
   SCHEDULES: "Horarios",
+  EMPLOYEE_VIEW: "Vista por empleado",
+  SCHEDULE_VIEW: "Vista por horario",
   LOCATIONS: "Ubicaciones",
   SPECIAL_SCHEDULES: "Horarios Especiales",
   OTHER: "Otro",
