@@ -1168,7 +1168,6 @@ const SelectorTableComponent: React.FC<SelectorTableProps> = ({
                                             style={{
                                               color:
                                                 theme.palette.text.disabled,
-                                              fontStyle: "italic",
                                               fontSize: "0.85rem",
                                               fontWeight: 400,
                                             }}

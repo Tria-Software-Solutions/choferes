@@ -9,7 +9,8 @@ export const formControlStyles: SxProps<Theme> = (theme) => ({
   "& .MuiOutlinedInput-root, & .MuiSelect-select": {
     backgroundColor: theme.palette.background.paper,
     color: theme.palette.text.primary,
-    borderRadius: 2,
+    borderRadius: "12px",
+    fontSize: "0.875rem",
     "&.Mui-focused .MuiOutlinedInput-notchedOutline": {
       borderColor: theme.palette.primary.main,
       borderWidth: 2,
@@ -28,10 +29,11 @@ export const formControlStyles: SxProps<Theme> = (theme) => ({
 export const selectStyles: SxProps<Theme> = (theme) => ({
   height: 56,
   "& .MuiOutlinedInput-root": {
-    borderRadius: 2,
+    borderRadius: "12px",
     backgroundColor: theme.palette.background.paper,
     color: theme.palette.text.primary,
     height: 56,
+    fontSize: "0.875rem",
     "&:hover .MuiOutlinedInput-notchedOutline": {
       borderColor: theme.palette.primary.main,
     },
@@ -49,10 +51,11 @@ export const selectStyles: SxProps<Theme> = (theme) => ({
 
 export const datePickerTextFieldStyles: SxProps<Theme> = (theme) => ({
   "& .MuiOutlinedInput-root": {
-    borderRadius: 2,
+    borderRadius: "12px",
     backgroundColor: theme.palette.background.paper,
     color: theme.palette.text.primary,
     height: 56,
+    fontSize: "0.875rem",
     "&:hover .MuiOutlinedInput-notchedOutline": {
       borderColor: theme.palette.primary.main,
     },
@@ -69,6 +72,7 @@ export const datePickerTextFieldStyles: SxProps<Theme> = (theme) => ({
       color: theme.palette.text.primary,
       outline: "none",
       boxShadow: "none",
+      fontSize: "0.875rem",
     },
   },
 });
@@ -77,6 +81,7 @@ export const tableCellStyles: SxProps<Theme> = (theme) => ({
   borderRight: `1px solid ${theme.palette.mode === "dark" ? "#222" : "#f0f0f0"}`,
   borderBottom: `1.5px solid ${theme.palette.mode === "dark" ? "#222" : "#f0f0f0"}`,
   padding: "10px 16px",
+  fontSize: "0.875rem",
 });
 
 export const permissionChipStyles = (theme: Theme): SxProps<Theme> => ({
@@ -131,7 +136,7 @@ export const tableHeadCellStyles = (theme: Theme): SxProps<Theme> => ({
       ? "#fff"
       : theme.palette.primary.contrastText,
   fontWeight: 700,
-  fontSize: "clamp(0.95rem, 1vw, 1.05rem)",
+  fontSize: "0.875rem",
   padding: "12px 16px",
   whiteSpace: "nowrap",
 });
