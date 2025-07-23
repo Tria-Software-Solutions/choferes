@@ -1,4 +1,5 @@
 import { SxProps, Theme } from "@mui/material";
+import { OCRResult } from "../../services/ocrService";
 
 export const dialogPaperStyles: SxProps<Theme> = {
   border: "2px solid #fff",
@@ -13,9 +14,7 @@ export const headerBoxStyles = (theme: Theme): SxProps<Theme> => ({
   background:
     theme.palette.mode === "dark" ? "#111" : theme.palette.primary.main,
   color:
-    theme.palette.mode === "dark"
-      ? "#fff"
-      : theme.palette.primary.contrastText,
+    theme.palette.mode === "dark" ? "#fff" : theme.palette.primary.contrastText,
   display: "flex",
   alignItems: "center",
   justifyContent: "space-between",
@@ -65,7 +64,11 @@ export const closeButtonStyles: SxProps<Theme> = {
   },
 };
 
-export const dialogContentStyles = (result: any, isLoading: boolean, isImageFormatValid: boolean | null): SxProps<Theme> => ({
+export const dialogContentStyles = (
+  result: OCRResult | null,
+  isLoading: boolean,
+  isImageFormatValid: boolean | null
+): SxProps<Theme> => ({
   px: 3,
   py: 2,
   display: "flex",
@@ -168,9 +171,7 @@ export const tableStyles: SxProps<Theme> = {
 export const tableHeadCellStyles = (theme: Theme): SxProps<Theme> => ({
   fontWeight: "bold",
   background:
-    theme.palette.mode === "dark"
-      ? "#111"
-      : theme.palette.primary.main,
+    theme.palette.mode === "dark" ? "#111" : theme.palette.primary.main,
   color: "#fff",
 });
 
@@ -243,4 +244,4 @@ const getColorValue = (colorName: string): string => {
   };
 
   return colorMap[colorName.toLowerCase()] || "#cccccc";
-}; 
+};
