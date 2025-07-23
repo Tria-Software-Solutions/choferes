@@ -60,7 +60,7 @@ import {
   dialogActionsStyles,
   cancelButtonStyles,
   importButtonStyles,
-} from "./OCRResultModal.styles";
+} from "./OCRModal.styles";
 
 interface OCRResultModalProps {
   open: boolean;
