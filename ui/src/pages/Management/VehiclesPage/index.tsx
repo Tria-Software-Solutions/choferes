@@ -15,6 +15,8 @@ import SpeedDialComponent from "../../../components/SpeedDial/SpeedDial.componen
 import AddVehicleForm from "../../Forms/AddVehicleForm";
 import { useAppNotifications } from "../../../components/Snackbar/Snackbar.component";
 import DialogComponent from "../../../components/Dialog/Dialog.component";
+import OCRResultModal from "../../../components/OCRResultModal/OCRResultModal.component";
+import { OCRService, VehicleEntry, OCRResult } from "../../../services/ocrService";
 import {
   Box,
   Typography,
@@ -137,6 +139,12 @@ const VehiclesPage: React.FC = () => {
 
   // File input ref for image upload
   const fileInputRef = React.useRef<HTMLInputElement>(null);
+
+  // OCR states
+  const [ocrResult, setOcrResult] = useState<OCRResult | null>(null);
+  const [isOcrLoading, setIsOcrLoading] = useState(false);
+  const [ocrError, setOcrError] = useState<string | null>(null);
+  const [showOcrModal, setShowOcrModal] = useState(false);
 
   const theme = useTheme();
   const isSmallScreen = useMediaQuery(theme.breakpoints.down("sm"));
@@ -506,18 +514,35 @@ const VehiclesPage: React.FC = () => {
     fileInputRef.current?.click();
   };
 
-  // Handler para procesar el archivo seleccionado
-  const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+  // Handler para procesar el archivo seleccionado con OCR
+  const handleFileChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (file) {
       // Verificar que sea una imagen
       if (file.type.startsWith('image/')) {
-        showNotification(`Archivo de imagen seleccionado: ${file.name}`, {
-          severity: "info",
-          duration: 3000,
-        });
-        // Aquí puedes agregar la lógica para procesar la imagen
-        // Por ejemplo, subirla al servidor, mostrarla en un modal, etc.
+        try {
+          setIsOcrLoading(true);
+          setOcrError(null);
+          setShowOcrModal(true);
+          
+          // Procesar la imagen con OCR
+          const result = await OCRService.processImage(file);
+          setOcrResult(result);
+          
+          showNotification(`Imagen procesada exitosamente. Se encontraron ${result.entries.length} entradas.`, {
+            severity: "success",
+            duration: 3000,
+          });
+        } catch (error) {
+          const errorMessage = error instanceof Error ? error.message : 'Error al procesar la imagen';
+          setOcrError(errorMessage);
+          showNotification(errorMessage, {
+            severity: "error",
+            duration: 5000,
+          });
+        } finally {
+          setIsOcrLoading(false);
+        }
       } else {
         showNotification("Por favor selecciona un archivo de imagen válido", {
           severity: "error",
@@ -528,6 +553,51 @@ const VehiclesPage: React.FC = () => {
     // Limpiar el input para permitir seleccionar el mismo archivo nuevamente
     event.target.value = '';
   };
+  // OCR modal handlers
+  const handleCloseOcrModal = () => {
+    setShowOcrModal(false);
+    setOcrResult(null);
+    setOcrError(null);
+  };
+
+  const handleImportOcrData = async (entries: VehicleEntry[]) => {
+    try {
+      setIsCreatingVehicle(true);
+      
+      // Convert OCR entries to vehicle format and create them
+      for (const entry of entries) {
+        const vehicleData = {
+          ticket: entry.ticket,
+          licensePlate: entry.licensePlate,
+          brand: entry.brand,
+          color: entry.color,
+          parkingLot: entry.parkingSpace,
+          notes: entry.observation,
+          parkingDate: selectedDate.toISOString(), // Use the currently selected date
+        };
+        
+        await dispatch(createVehicle(vehicleData)).unwrap();
+      }
+      
+      showNotification(`Se importaron ${entries.length} vehículos exitosamente.`, {
+        severity: "success",
+        duration: 5000,
+      });
+      
+      // Refresh the vehicles list
+      dispatch(fetchVehicles({}));
+      
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : 'Error al importar los datos';
+      showNotification(errorMessage, {
+        severity: "error",
+        duration: 5000,
+      });
+    } finally {
+      setIsCreatingVehicle(false);
+    }
+  };
+
   // Use exportTable({ data: exportData, ... }) for export
 
   return (
@@ -584,8 +654,8 @@ const VehiclesPage: React.FC = () => {
               </Box>
             )}
           
-          {/* Botón para abrir archivo de imagen */}
-          <Tooltip title="Abrir archivo de imagen" arrow>
+          {/* Botón para procesar imagen con OCR */}
+          <Tooltip title="Procesar imagen" arrow>
             <IconButton
               onClick={handleOpenImageFile}
               sx={{
@@ -840,6 +910,16 @@ const VehiclesPage: React.FC = () => {
           defaultParkingDate={selectedDate}
         />
       </DialogComponent>
+      
+      {/* OCR Result Modal */}
+      <OCRResultModal
+        open={showOcrModal}
+        onClose={handleCloseOcrModal}
+        result={ocrResult}
+        isLoading={isOcrLoading}
+        error={ocrError}
+        onImportData={handleImportOcrData}
+      />
     </Box>
   );
 };
