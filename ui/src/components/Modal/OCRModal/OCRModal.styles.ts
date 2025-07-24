@@ -1,5 +1,5 @@
 import { SxProps, Theme } from "@mui/material";
-import { OCRResult } from "../../services/ocrService";
+import { OCRResult } from "../../../services/ocrService";
 
 export const dialogPaperStyles: SxProps<Theme> = {
   border: "2px solid #fff",

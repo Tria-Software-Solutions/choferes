@@ -239,12 +239,6 @@ const Login: React.FC = () => {
               <Link
                 to="/register"
                 style={registerLinkStyles}
-                onMouseEnter={(e) => {
-                  e.currentTarget.style.color = "#333333";
-                }}
-                onMouseLeave={(e) => {
-                  e.currentTarget.style.color = "#000000";
-                }}
               >
                 {LOGIN.REGISTER_LINK}
               </Link>

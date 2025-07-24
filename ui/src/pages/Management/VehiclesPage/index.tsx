@@ -15,7 +15,7 @@ import SpeedDialComponent from "../../../components/SpeedDial/SpeedDial.componen
 import AddVehicleForm from "../../Forms/AddVehicleForm";
 import { useAppNotifications } from "../../../components/Snackbar/Snackbar.component";
 import DialogComponent from "../../../components/Dialog/Dialog.component";
-import OCRResultModal from "../../../components/OCRModal/OCRModal.component";
+import OCRResultModal from "../../../components/Modal/OCRModal/OCRModal.component";
 import { OCRService, VehicleEntry, OCRResult } from "../../../services/ocrService";
 import {
   Box,

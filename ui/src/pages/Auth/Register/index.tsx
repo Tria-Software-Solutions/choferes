@@ -386,12 +386,6 @@ const Register = () => {
               <Link
                 to="/"
                 style={loginLinkStyles}
-                onMouseEnter={(e) => {
-                  e.currentTarget.style.color = "#333333";
-                }}
-                onMouseLeave={(e) => {
-                  e.currentTarget.style.color = "#000000";
-                }}
               >
                 Inicia sesión aquí
               </Link>

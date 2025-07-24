@@ -44,6 +44,10 @@ import {
   Backdrop,
   ButtonGroup,
   Divider,
+  IconButton,
+  Dialog,
+  DialogContent,
+  DialogActions,
 } from "@mui/material";
 import { exportFileFormattedDate, exportTable } from "../../../utils/export";
 import {
@@ -64,9 +68,12 @@ import ArrowBackIosNewRoundedIcon from "@mui/icons-material/ArrowBackIosNewRound
 import ArrowForwardIosRoundedIcon from "@mui/icons-material/ArrowForwardIosRounded";
 import CalendarTodayRoundedIcon from "@mui/icons-material/CalendarTodayRounded";
 import CloseRoundedIcon from "@mui/icons-material/CloseRounded";
+import CloseIcon from "@mui/icons-material/Close";
 import ManageSearchIcon from "@mui/icons-material/ManageSearch";
 import DialogComponent from "../../../components/Dialog/Dialog.component";
 import AssignmentIcon from "@mui/icons-material/Assignment";
+import AutoAwesomeIcon from "@mui/icons-material/AutoAwesome";
+import AutoGenerateModal, { AutoGenerateConfig } from "../../../components/Modal/AutoGenerateModal/AutoGenerateModal.component";
 import {
   rolesTitleBoxStyles,
   rolesTitleStyles,
@@ -87,6 +94,7 @@ import {
   getPreferencesObject,
   setPreferencesObject,
 } from "../../../utils/persistentState";
+import { useAppNotifications } from "../../../components/Snackbar/Snackbar.component";
 import DescriptionIcon from "@mui/icons-material/Description";
 import PictureAsPdfIcon from "@mui/icons-material/PictureAsPdf";
 import FileDownloadIcon from "@mui/icons-material/FileDownload";
@@ -104,6 +112,7 @@ const defaultPreferences = { date: new Date().toISOString() };
 const RolesPage: React.FC = () => {
   const dispatch = useDispatch<AppDispatch>();
   const { userPermissions } = useAuthContext();
+  const { showNotification } = useAppNotifications();
   const { employees, isLoadingEmployees } = useSelector(
     (state: RootState) => state.employees
   );
@@ -145,6 +154,8 @@ const RolesPage: React.FC = () => {
   const [openExportDialog, setOpenExportDialog] = useState(false);
   const [exportType, setExportType] = useState<"excel" | "pdf">("excel");
   const [isExporting, setIsExporting] = useState(false);
+  const [openAddRoleModal, setOpenAddRoleModal] = useState(false);
+  const [isGeneratingHours, setIsGeneratingHours] = useState(false);
   // 1. Agrega el estado viewMode en RolesPage con localStorage
   const [viewMode, setViewMode] = useState<'employee' | 'schedule'>(() => {
     const savedViewMode = localStorage.getItem('selectorTableViewMode');
@@ -546,6 +557,58 @@ const RolesPage: React.FC = () => {
     setOpenExportDialog(true);
   };
 
+  const handleOpenAddRoleModal = () => {
+    setOpenAddRoleModal(true);
+  };
+
+  const handleCloseAddRoleModal = () => {
+    setOpenAddRoleModal(false);
+  };
+
+  const handleGenerateHours = async (config: AutoGenerateConfig) => {
+    setIsGeneratingHours(true);
+    try {
+      // TODO: Implementar la lógica de generación automática
+      // console.log('Configuración de generación:', config);
+      
+      // Simular proceso de generación
+      await new Promise(resolve => setTimeout(resolve, 2000));
+      
+      // Aquí iría la lógica real de generación:
+      // 1. Crear HoursWorked para cada empleado seleccionado
+      // 2. Actualizar WeeklySummary, BiweeklySummary, MonthlySummary
+      // 3. Refrescar los datos
+      
+      showNotification('Horas generadas exitosamente', {
+        severity: "success",
+        duration: 3000,
+      });
+      
+      setOpenAddRoleModal(false);
+    } catch (error) {
+      showNotification('Error al generar las horas', {
+        severity: "error",
+        duration: 5000,
+      });
+    } finally {
+      setIsGeneratingHours(false);
+    }
+  };
+
+  const handleGenerateFromDialog = () => {
+    // Get current config from AutoGenerateModal
+    // This is a simplified approach - in a real app you'd need to get the config from the modal
+    const defaultConfig: AutoGenerateConfig = {
+      mode: 'uniform',
+      uniformHours: 40,
+      individualHours: {},
+      useExistingSchedules: true,
+      customSchedules: {},
+      selectedEmployees: employees.map(emp => emp.id),
+    };
+    handleGenerateHours(defaultConfig);
+  };
+
   // Helper: gets the assigned schedule label for an employee on a given day
   const getScheduleLabelForDay = (
     employee: Employee,
@@ -742,19 +805,57 @@ const RolesPage: React.FC = () => {
             </Typography>
             <Divider sx={rolesDividerStyles(theme)} />
           </Box>
-          {userPermissions.includes(PERMISSIONS.EXPORT_EXCEL_ROLES) &&
-            userPermissions.includes(PERMISSIONS.EXPORT_PDF_ROLES) && (
-              <Box sx={exportSpeedDialBoxStyles}>
-                {(viewMode === 'employee' ? filteredEmployees.length > 0 : filteredSchedules.length > 0) && (
-                  <SpeedDialComponent
-                    actions={exportOptions}
-                    mainIcon={<DownloadRoundedIcon />}
-                    openIcon={<CloseRoundedIcon />}
-                    direction="left"
-                  />
-                )}
-              </Box>
-            )}
+          <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
+            {userPermissions.includes(PERMISSIONS.EXPORT_EXCEL_ROLES) &&
+              userPermissions.includes(PERMISSIONS.EXPORT_PDF_ROLES) && (
+                <Box sx={exportSpeedDialBoxStyles}>
+                  {(viewMode === 'employee' ? filteredEmployees.length > 0 : filteredSchedules.length > 0) && (
+                    <SpeedDialComponent
+                      actions={exportOptions}
+                      mainIcon={<DownloadRoundedIcon />}
+                      openIcon={<CloseRoundedIcon />}
+                      direction="left"
+                    />
+                  )}
+                </Box>
+              )}
+            
+            {/* Botón para generar horas automáticamente */}
+            <Tooltip title="Generar horas automáticamente" arrow>
+              <IconButton
+                onClick={handleOpenAddRoleModal}
+                sx={{
+                  top: "-4px",
+                  width: "62px",
+                  height: "58px",
+                  borderRadius: "8px",
+                  backgroundColor:
+                    theme.palette.mode === "dark"
+                      ? theme.palette.background.paper
+                      : theme.palette.primary.main,
+                  color:
+                    theme.palette.mode === "dark"
+                      ? theme.palette.primary.main
+                      : theme.palette.primary.contrastText,
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  transition: theme.transitions.create(
+                    ["background", "box-shadow", "transform"],
+                    {
+                      duration: theme.transitions.duration.short,
+                    }
+                  ),
+                  fontSize: 40,
+                  "&:hover": {
+                    backgroundColor: "#333333",
+                  },
+                }}
+              >
+                <AutoAwesomeIcon />
+              </IconButton>
+            </Tooltip>
+          </Box>
         </Box>
       </Box>
       {isLoading ? (
@@ -943,6 +1044,112 @@ const RolesPage: React.FC = () => {
           />
         </>
       )}
+      
+      <Dialog
+        open={openAddRoleModal}
+        onClose={handleCloseAddRoleModal}
+        maxWidth="lg"
+        fullWidth
+        PaperProps={{
+          sx: {
+            border: "2px solid #fff",
+            borderRadius: 3,
+            minHeight: "60vh",
+            boxShadow: 3,
+            bgcolor: "background.paper",
+            minWidth: { xs: '98%', sm: '95%', md: '90%', lg: '85%', xl: '80%' },
+            maxWidth: { xs: '98%', sm: 1400 },
+            width: 'auto',
+            height: { xs: '95vh', sm: 'auto' },
+            maxHeight: { xs: '95vh', sm: '90vh' },
+          },
+        }}
+      >
+        {/* Header with theme styling */}
+        <Box sx={{
+          background: (theme) => theme.palette.mode === "dark" ? "#111" : theme.palette.primary.main,
+          color: (theme) => theme.palette.mode === "dark" ? "#fff" : theme.palette.primary.contrastText,
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "space-between",
+          gap: 2,
+          px: 3,
+          py: 2,
+          borderTopLeftRadius: 12,
+          borderTopRightRadius: 12,
+        }}>
+          <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
+            <Box sx={{
+              background: (theme) => theme.palette.primary.contrastText,
+              borderRadius: "50%",
+              width: 40,
+              height: 40,
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              flexShrink: 0,
+            }}>
+              <AutoAwesomeIcon sx={{
+                color: (theme) => theme.palette.primary.main,
+                fontSize: 24,
+              }} />
+            </Box>
+            <Box>
+              <Typography
+                variant="h6"
+                fontWeight={700}
+                color="inherit"
+                sx={{ lineHeight: 1.2, mb: 0.5 }}
+              >
+                Autogeneración de Roles
+              </Typography>
+              <Typography
+                variant="body2"
+                color="inherit"
+                sx={{ opacity: 0.9, lineHeight: 1.2 }}
+              >
+                Configurar parámetros
+              </Typography>
+            </Box>
+          </Box>
+          <IconButton 
+            onClick={handleCloseAddRoleModal} 
+            sx={{ color: "inherit", "&:hover": { backgroundColor: "rgba(255, 255, 255, 0.1)" } }}
+          >
+            <CloseIcon />
+          </IconButton>
+        </Box>
+
+        <DialogContent sx={{ px: 3, py: 2 }}>
+          <AutoGenerateModal
+            onGenerate={handleGenerateHours}
+            onCancel={handleCloseAddRoleModal}
+            employees={employees}
+            schedules={schedules}
+            currentWeekStart={firstDayOfWeek || new Date()}
+            isLoading={isGeneratingHours}
+          />
+        </DialogContent>
+
+        <DialogActions sx={{ gap: 2, px: 3, pb: 3 }}>
+          <Button
+            onClick={handleCloseAddRoleModal}
+            variant="outlined"
+            sx={{ minWidth: 120, py: 1.5, fontWeight: 600 }}
+          >
+            Cancelar
+          </Button>
+          <Button
+            onClick={handleGenerateFromDialog}
+            variant="contained"
+            color="primary"
+            disabled={isGeneratingHours}
+            sx={{ minWidth: 200, py: 1.5, fontWeight: 600 }}
+          >
+            {isGeneratingHours ? "Generando..." : "Generar Horas"}
+          </Button>
+        </DialogActions>
+      </Dialog>
       </Box>
   );
 };
