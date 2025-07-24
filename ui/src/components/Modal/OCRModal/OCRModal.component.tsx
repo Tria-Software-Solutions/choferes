@@ -26,11 +26,11 @@ import { Close as CloseIcon } from "@mui/icons-material";
 import ImageNotSupportedIcon from "@mui/icons-material/ImageNotSupported";
 import RefreshIcon from "@mui/icons-material/Refresh";
 import ImageIcon from "@mui/icons-material/Image";
-import { OCRResult, VehicleEntry } from "../../services/ocrService";
-import PaginationComponent from "../Table/Pagination/Pagination.component";
-import TABLE from "../../constants/table.constants";
-import { maskLicensePlate } from "../../utils/mask";
-import { capitalizeFirstLetter } from "../../utils/string";
+import { OCRResult, VehicleEntry } from "../../../services/ocrService";
+import PaginationComponent from "../../Table/Pagination/Pagination.component";
+import TABLE from "../../../constants/table.constants";
+import { maskLicensePlate } from "../../../utils/mask";
+import { capitalizeFirstLetter } from "../../../utils/string";
 import { TextField } from "@mui/material";
 import {
   dialogPaperStyles,
@@ -166,7 +166,7 @@ const OCRResultModal: React.FC<OCRResultModalProps> = ({
     result &&
     result.entries.length > 0 &&
     result.entries.every(
-      (entry) => entry.ticket && entry.licensePlate && entry.parkingSpace
+      (entry: VehicleEntry) => entry.ticket && entry.licensePlate && entry.parkingSpace
     );
 
   return (
@@ -302,7 +302,7 @@ const OCRResultModal: React.FC<OCRResultModalProps> = ({
                   </TableRow>
                 </TableHead>
                 <TableBody>
-                  {paginatedEntries.map((entry, index) => {
+                  {paginatedEntries.map((entry: VehicleEntry, index: number) => {
                     const actualRowIndex = page * rowsPerPage + index;
                     const currentEntry = editedEntries[actualRowIndex] || entry;
                     

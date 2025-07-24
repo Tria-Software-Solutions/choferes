@@ -284,33 +284,33 @@ const AppBarComponent: React.FC<AppBarComponentProps> = ({
 
               {/* Avatar Menu - Solo visible en pantallas medianas y grandes */}
               <Box sx={{ display: { xs: "none", md: "block" } }}>
-                <Tooltip title={APPBAR_MENU.USER_MENU} arrow>
-                  <IconButton
-                    onClick={handleUserMenuOpen}
-                    sx={userMenuIconButtonStyles}
+              <Tooltip title={APPBAR_MENU.USER_MENU} arrow>
+                <IconButton
+                  onClick={handleUserMenuOpen}
+                  sx={userMenuIconButtonStyles}
+                >
+                  <Badge
+                    overlap="circular"
+                    anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
+                    variant="dot"
+                    sx={{
+                      '& .MuiBadge-dot': {
+                        backgroundColor: theme.palette.success.main,
+                        color: theme.palette.success.main,
+                        boxShadow: `0 0 0 2px ${theme.palette.background.paper}`,
+                        width: 11,
+                        height: 11,
+                        borderRadius: '50%',
+                        position: 'absolute',
+                        bottom: 1,
+                        right: 1,
+                      },
+                    }}
                   >
-                    <Badge
-                      overlap="circular"
-                      anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
-                      variant="dot"
-                      sx={{
-                        '& .MuiBadge-dot': {
-                          backgroundColor: theme.palette.success.main,
-                          color: theme.palette.success.main,
-                          boxShadow: `0 0 0 2px ${theme.palette.background.paper}`,
-                          width: 11,
-                          height: 11,
-                          borderRadius: '50%',
-                          position: 'absolute',
-                          bottom: 1,
-                          right: 1,
-                        },
-                      }}
-                    >
-                      <Avatar sx={userAvatarStyles}>{getUserInitials()}</Avatar>
-                    </Badge>
-                  </IconButton>
-                </Tooltip>
+                    <Avatar sx={userAvatarStyles}>{getUserInitials()}</Avatar>
+                  </Badge>
+                </IconButton>
+              </Tooltip>
               </Box>
 
               {/* Menú Principal (solo mobile) */}
