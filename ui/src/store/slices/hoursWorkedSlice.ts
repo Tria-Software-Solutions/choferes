@@ -97,15 +97,20 @@ export const createOrUpdateHoursWorked = createAsyncThunk(
         date: newHours.date instanceof Date ? newHours.date.toISOString() : newHours.date,
       };
 
-      if ("id" in serializedHours) {
+      // Check if id exists and is a valid positive number (not 0)
+      if ("id" in serializedHours && serializedHours.id && serializedHours.id > 0) {
         const updatedHoursWorked = await HoursWorkedService.updateHoursWorked(
           serializedHours.id,
           serializedHours,
         );
         return updatedHoursWorked;
       } else {
+        // Remove id if it's 0 or invalid, then create
+        const hoursToCreate = "id" in serializedHours 
+          ? { date: serializedHours.date, employeeId: serializedHours.employeeId, scheduleId: serializedHours.scheduleId }
+          : serializedHours;
         const createdHoursWorked =
-          await HoursWorkedService.createHoursWorked(serializedHours);
+          await HoursWorkedService.createHoursWorked(hoursToCreate);
         return createdHoursWorked;
       }
     } catch (error: unknown) {
