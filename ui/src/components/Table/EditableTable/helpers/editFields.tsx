@@ -10,7 +10,6 @@ import { maskLicensePlate, maskParkingLotWithPrefix } from "../../../../utils/ma
 import { formControlStyles, selectStyles, datePickerTextFieldStyles } from "../EditableTable.styles";
 import { ColumnConfigType, PARKING_PREFIX_OPTIONS } from "./columnConfig";
 import { DAYS_LIST } from "../../../../constants/constants";
-import { datePickerSx } from '../../../../pages/Management/VehiclesPage/styles';
 
 // This function is generic and can be used in EditableTable
 export function renderEditField<T extends object>({
@@ -317,7 +316,20 @@ export function renderEditField<T extends object>({
               fullWidth: true,
               required: true,
               variant: 'outlined',
-              sx: { ...datePickerSx, mt: 0 },
+              sx: {
+                mt: 0,
+                "& .MuiOutlinedInput-root": {
+                  borderRadius: "12px",
+                  backgroundColor: "transparent",
+                  "&:hover .MuiOutlinedInput-notchedOutline": {
+                    borderColor: "primary.main",
+                  },
+                  "&.Mui-focused .MuiOutlinedInput-notchedOutline": {
+                    borderColor: "primary.main",
+                    borderWidth: 2,
+                  },
+                },
+              },
               error: !validateField(String(column), value),
             } as Record<string, unknown>,
           }}
