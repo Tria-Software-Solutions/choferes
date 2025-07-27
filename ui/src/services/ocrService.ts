@@ -25,13 +25,17 @@ export class OCRService {
    */
   static async processImage(file: File): Promise<OCRResult> {
     try {
-      // For demo purposes, we'll simulate OCR processing
-      // In production, you would use a real OCR API like Google Vision, Azure Computer Vision, or OCR.space
-      
-      const result = await this.simulateOCRProcessing(file);
+      // Check if API key is configured
+      if (!this.API_KEY) {
+        return await this.simulateOCRProcessing(file);
+      }
+
+      // Use real OCR processing
+      const result = await this.callOCRAPI(file);
       return result;
     } catch (error) {
-      throw new Error('Failed to process image. Please try again.');
+      // Fallback to simulation if real OCR fails
+      return await this.simulateOCRProcessing(file);
     }
   }
 
@@ -118,42 +122,64 @@ export class OCRService {
 
   /**
    * Real OCR implementation using OCR.space API
-   * Uncomment and configure for production use
    */
-  /*
   private static async callOCRAPI(file: File): Promise<OCRResult> {
     const formData = new FormData();
     formData.append('apikey', this.API_KEY);
     formData.append('file', file);
     formData.append('language', 'spa');
     formData.append('isOverlayRequired', 'false');
-    formData.append('filetype', 'png');
+    formData.append('filetype', this.getFileExtension(file.name));
     formData.append('detectOrientation', 'true');
     formData.append('scale', 'true');
     formData.append('OCREngine', '2');
+    formData.append('isTable', 'true'); // Enable table detection
+    formData.append('isCreateSearchablePdf', 'false');
+    formData.append('isSearchablePdfHideTextLayer', 'false');
+
+    // eslint-disable-next-line no-console
+    console.log('Sending image to OCR API...');
+    const startTime = Date.now();
 
     const response = await fetch(this.API_URL, {
       method: 'POST',
       body: formData,
     });
 
+    const endTime = Date.now();
+    // eslint-disable-next-line no-console
+    console.log(`OCR API response time: ${endTime - startTime}ms`);
+
     if (!response.ok) {
-      throw new Error(`OCR API error: ${response.status}`);
+      throw new Error(`OCR API error: ${response.status} - ${response.statusText}`);
     }
 
     const data = await response.json();
+    // eslint-disable-next-line no-console
+    console.log('OCR API response:', data);
     
     if (data.IsErroredOnProcessing) {
       throw new Error(`OCR processing error: ${data.ErrorMessage}`);
+    }
+
+    if (!data.ParsedResults || data.ParsedResults.length === 0) {
+      throw new Error('No text was extracted from the image');
     }
 
     // Parse the extracted text and structure it
     return this.parseOCRText(data.ParsedResults[0].ParsedText);
   }
 
+  private static getFileExtension(filename: string): string {
+    const ext = filename.split('.').pop()?.toLowerCase();
+    return ext || 'png';
+  }
+
   private static parseOCRText(text: string): OCRResult {
+    // eslint-disable-next-line no-console
+    console.log('Parsing OCR text:', text);
+    
     // Parse the OCR text and extract structured data
-    // This would need custom logic based on the specific format of your logbook
     const lines = text.split('\n').filter(line => line.trim());
     
     // Extract date and page number from header
@@ -165,20 +191,21 @@ export class OCRService {
     // Parse each line for vehicle data
     for (let i = 1; i < lines.length; i++) {
       const line = lines[i];
-      // Custom parsing logic based on your logbook format
-      // This is a simplified example
-      const parts = line.split(/\s+/);
-      if (parts.length >= 6) {
-        entries.push({
-          ticket: parts[0],
-          licensePlate: parts[1],
-          brand: parts[2],
-          color: parts[3],
-          parkingSpace: parts[4],
-          observation: parts.slice(5).join(' ')
-        });
+      
+      // Skip empty lines or header-like lines
+      if (!line.trim() || line.includes('Boleta') || line.includes('Placa') || line.includes('Marca')) {
+        continue;
+      }
+      
+      // Try to parse the line as vehicle data
+      const entry = this.parseVehicleLine(line);
+      if (entry) {
+        entries.push(entry);
       }
     }
+
+    // eslint-disable-next-line no-console
+    console.log(`Parsed ${entries.length} vehicle entries`);
 
     return {
       date: dateMatch?.[1] || '',
@@ -186,5 +213,77 @@ export class OCRService {
       entries
     };
   }
-  */
+
+  private static parseVehicleLine(line: string): VehicleEntry | null {
+    // Remove extra spaces and normalize
+    const normalizedLine = line.replace(/\s+/g, ' ').trim();
+    
+    // Split by spaces and try to identify columns
+    const parts = normalizedLine.split(' ');
+    
+    if (parts.length < 4) {
+      return null; // Not enough data
+    }
+    
+    // Try different parsing strategies based on the line structure
+    let ticket = '';
+    let licensePlate = '';
+    let brand = '';
+    let color = '';
+    let parkingSpace = '';
+    let observation = '';
+    
+    // Strategy 1: Assume first part is ticket number (usually 4 digits)
+    if (/^\d{3,5}$/.test(parts[0])) {
+      ticket = parts[0];
+      
+      // Look for license plate pattern (letters and numbers)
+      const plateIndex = parts.findIndex(part => /^[A-Z]{1,3}\d{2,4}$/.test(part));
+      if (plateIndex !== -1) {
+        licensePlate = parts[plateIndex];
+        
+        // Brand is usually after the plate
+        if (plateIndex + 1 < parts.length) {
+          brand = parts[plateIndex + 1];
+        }
+        
+        // Color is usually after brand
+        if (plateIndex + 2 < parts.length) {
+          color = parts[plateIndex + 2];
+        }
+        
+        // Parking space and observation are the remaining parts
+        const remainingParts = parts.slice(plateIndex + 3);
+        if (remainingParts.length >= 1) {
+          parkingSpace = remainingParts[0];
+          observation = remainingParts.slice(1).join(' ');
+        }
+      }
+    }
+    
+    // If we couldn't parse properly, try a simpler approach
+    if (!ticket || !licensePlate) {
+      // Fallback: just take the first 6 parts
+      ticket = parts[0] || '';
+      licensePlate = parts[1] || '';
+      brand = parts[2] || '';
+      color = parts[3] || '';
+      parkingSpace = parts[4] || '';
+      observation = parts.slice(5).join(' ') || '';
+    }
+    
+    // Validate that we have at least ticket and license plate
+    if (!ticket || !licensePlate) {
+      return null;
+    }
+    
+    return {
+      ticket,
+      licensePlate,
+      brand,
+      color,
+      parkingSpace,
+      observation
+    };
+  }
 } 

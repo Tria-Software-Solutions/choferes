@@ -160,6 +160,22 @@ const RolesPage: React.FC = () => {
   const [currentModalConfig, setCurrentModalConfig] = useState<AutoGenerateConfig | null>(null);
   const [viewMode, setViewMode] = useState<'employee' | 'schedule'>(() => {
     const savedViewMode = localStorage.getItem('selectorTableViewMode');
+    const hasRolesPermission = userPermissions.includes(PERMISSIONS.VIEW_ROLES);
+    const hasSchedulePermission = userPermissions.includes(PERMISSIONS.VIEW_SCHEDULES);
+    
+    // Si tiene permiso para roles, siempre mostrar vista de empleados por defecto
+    if (hasRolesPermission) {
+      return (savedViewMode === 'employee' || savedViewMode === 'schedule') 
+        ? savedViewMode as 'employee' | 'schedule' 
+        : 'employee';
+    }
+    
+    // Si no tiene permiso para roles pero sí para horarios, mostrar horarios
+    if (hasSchedulePermission) {
+      return 'schedule';
+    }
+    
+    // Si no tiene ninguno de los dos permisos, usar el guardado o default a empleados
     return (savedViewMode === 'employee' || savedViewMode === 'schedule') 
       ? savedViewMode as 'employee' | 'schedule' 
       : 'employee';
@@ -191,6 +207,17 @@ const RolesPage: React.FC = () => {
   useEffect(() => {
     localStorage.setItem('selectorTableViewMode', viewMode);
   }, [viewMode]);
+
+  // Handle view mode based on permissions
+  useEffect(() => {
+    const hasRolesPermission = userPermissions.includes(PERMISSIONS.VIEW_ROLES);
+    const hasSchedulePermission = userPermissions.includes(PERMISSIONS.VIEW_SCHEDULES);
+    
+    // Si no tiene permisos para roles pero sí para horarios, y está en vista de empleados, cambiar a horarios
+    if (!hasRolesPermission && hasSchedulePermission && viewMode === 'employee') {
+      setViewMode('schedule');
+    }
+  }, [userPermissions, viewMode]);
 
   // Fetch employees, schedules, and hours worked on mount
   useEffect(() => {
@@ -489,6 +516,14 @@ const RolesPage: React.FC = () => {
   };
 
   const handleOpenAddRoleModal = () => {
+    // Verificar permisos para generar horas
+    if (!userPermissions.includes(PERMISSIONS.EDIT_EMPLOYEE_ROLES)) {
+      showNotification("No tienes permisos para generar horas automáticamente", {
+        severity: "error",
+        duration: 3000,
+      });
+      return;
+    }
     setOpenAddRoleModal(true);
   };
 
@@ -867,6 +902,15 @@ const RolesPage: React.FC = () => {
   };
 
   const handleGenerateFromDialog = () => {
+    // Verificar permisos para generar horas
+    if (!userPermissions.includes(PERMISSIONS.EDIT_EMPLOYEE_ROLES)) {
+      showNotification("No tienes permisos para generar horas automáticamente", {
+        severity: "error",
+        duration: 3000,
+      });
+      return;
+    }
+    
     if (!currentModalConfig) {
       showNotification(NOTIFICATIONS.HOURS_GENERATION_NO_CONFIG, {
         severity: "error",
@@ -1101,40 +1145,42 @@ const RolesPage: React.FC = () => {
               )}
             
             {/* Botón para generar horas automáticamente */}
-            <Tooltip title="Generar horas automáticamente" arrow>
-              <IconButton
-                onClick={handleOpenAddRoleModal}
-                sx={{
-                  top: "-4px",
-                  width: "62px",
-                  height: "58px",
-                  borderRadius: "8px",
-                  backgroundColor:
-                    theme.palette.mode === "dark"
-                      ? theme.palette.background.paper
-                      : theme.palette.primary.main,
-                  color:
-                    theme.palette.mode === "dark"
-                      ? theme.palette.primary.main
-                      : theme.palette.primary.contrastText,
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  transition: theme.transitions.create(
-                    ["background", "box-shadow", "transform"],
-                    {
-                      duration: theme.transitions.duration.short,
-                    }
-                  ),
-                  fontSize: 40,
-                  "&:hover": {
-                    backgroundColor: "#333333",
-                  },
-                }}
-              >
-                <AutoAwesomeIcon />
-              </IconButton>
-            </Tooltip>
+            {userPermissions.includes(PERMISSIONS.EDIT_EMPLOYEE_ROLES) && (
+              <Tooltip title="Generar horas automáticamente" arrow>
+                <IconButton
+                  onClick={handleOpenAddRoleModal}
+                  sx={{
+                    top: "-4px",
+                    width: "62px",
+                    height: "58px",
+                    borderRadius: "8px",
+                    backgroundColor:
+                      theme.palette.mode === "dark"
+                        ? theme.palette.background.paper
+                        : theme.palette.primary.main,
+                    color:
+                      theme.palette.mode === "dark"
+                        ? theme.palette.primary.main
+                        : theme.palette.primary.contrastText,
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    transition: theme.transitions.create(
+                      ["background", "box-shadow", "transform"],
+                      {
+                        duration: theme.transitions.duration.short,
+                      }
+                    ),
+                    fontSize: 40,
+                    "&:hover": {
+                      backgroundColor: "#333333",
+                    },
+                  }}
+                >
+                  <AutoAwesomeIcon />
+                </IconButton>
+              </Tooltip>
+            )}
           </Box>
         </Box>
       </Box>
@@ -1241,9 +1287,24 @@ const RolesPage: React.FC = () => {
             </Grid>
           </Grid>
           <br />
-          {viewMode === 'employee' ? (
-            filteredEmployees.length > 0 ? (
-              <SelectorTableComponent
+          {(() => {
+            const hasRolesPermission = userPermissions.includes(PERMISSIONS.VIEW_ROLES);
+            
+            // Si no tiene permisos para ver roles, mostrar mensaje de error
+            if (!hasRolesPermission) {
+              return (
+                <Box sx={noEmployeesBoxStyles}>
+                  <ManageSearchIcon color="disabled" sx={noEmployeesIconStyles} />
+                  <Typography variant="h6" color="textSecondary">
+                    No tienes permisos para ver roles
+                  </Typography>
+                </Box>
+              );
+            }
+            
+            return viewMode === 'employee' ? (
+              filteredEmployees.length > 0 ? (
+                <SelectorTableComponent
                 key={`schedules-${schedules.length}-${schedules.map((s) => s.id).join("-")}`}
                 filteredEmployees={filteredEmployees}
                 schedules={schedules}
@@ -1305,7 +1366,8 @@ const RolesPage: React.FC = () => {
                 </Typography>
               </Box>
             )
-          )}
+          );
+        })()}
           <DialogComponent
             open={openExportDialog}
             onClose={() => {
@@ -1425,7 +1487,7 @@ const RolesPage: React.FC = () => {
             onClick={handleGenerateFromDialog}
             variant="contained"
             color="primary"
-            disabled={isGeneratingHours}
+            disabled={isGeneratingHours || !userPermissions.includes(PERMISSIONS.EDIT_EMPLOYEE_ROLES)}
             sx={{ minWidth: 200, py: 1.5, fontWeight: 600 }}
           >
             {isGeneratingHours ? "Generando..." : "Generar Horas"}

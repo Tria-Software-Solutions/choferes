@@ -17,7 +17,11 @@ import { useAppNotifications } from "../../../components/Snackbar/Snackbar.compo
 import DialogComponent from "../../../components/Dialog/Dialog.component";
 import { createVehicleNotification } from "../../../services/notificationService";
 import OCRResultModal from "../../../components/Modal/OCRModal/OCRModal.component";
-import { OCRService, VehicleEntry, OCRResult } from "../../../services/ocrService";
+import {
+  OCRService,
+  VehicleEntry,
+  OCRResult,
+} from "../../../services/ocrService";
 import {
   Box,
   Typography,
@@ -351,9 +355,12 @@ const VehiclesPage: React.FC = () => {
         severity: "success",
         duration: 3000,
       });
-      
+
       // Add notification to menu
-      createVehicleNotification('updated', `${editFields.licensePlate} - ${editFields.brand}`);
+      createVehicleNotification(
+        "updated",
+        `${editFields.licensePlate} - ${editFields.brand}`
+      );
     } catch (error) {
       handleCancel();
       showNotification(NOTIFICATIONS.VEHICLE_UPDATE_ERROR, {
@@ -386,11 +393,14 @@ const VehiclesPage: React.FC = () => {
         severity: "success",
         duration: 3000,
       });
-      
+
       // Add notification to menu
-      const vehicle = allVehicles.find(v => v.id === vehicleToDelete);
+      const vehicle = allVehicles.find((v) => v.id === vehicleToDelete);
       if (vehicle) {
-        createVehicleNotification('deleted', `${vehicle.licensePlate} - ${vehicle.brand}`);
+        createVehicleNotification(
+          "deleted",
+          `${vehicle.licensePlate} - ${vehicle.brand}`
+        );
       }
     } catch (error) {
       showNotification(NOTIFICATIONS.VEHICLE_DELETE_ERROR, {
@@ -462,9 +472,12 @@ const VehiclesPage: React.FC = () => {
         severity: "success",
         duration: 3000,
       });
-      
+
       // Add notification to menu
-      createVehicleNotification('created', `${vehicleData.licensePlate} - ${vehicleData.brand}`);
+      createVehicleNotification(
+        "created",
+        `${vehicleData.licensePlate} - ${vehicleData.brand}`
+      );
     } catch (error) {
       showNotification(NOTIFICATIONS.VEHICLE_CREATE_ERROR, {
         severity: "error",
@@ -488,9 +501,11 @@ const VehiclesPage: React.FC = () => {
     ];
     const firstRow: string[] = [
       capitalizeFirstLetter(
-        format(new Date(selectedDate), "EEEE dd 'de' MMMM 'de' yyyy", { locale: es })
+        format(new Date(selectedDate), "EEEE dd 'de' MMMM 'de' yyyy", {
+          locale: es,
+        })
       ),
-      ...Array(exportHeaders.length - 1).fill("")
+      ...Array(exportHeaders.length - 1).fill(""),
     ];
     const secondRow: string[] = [...exportHeaders];
     filteredWeekVehicles.forEach((v) => {
@@ -511,14 +526,15 @@ const VehiclesPage: React.FC = () => {
   };
 
   // Handler para exportar con groupedHeaders (solo Excel)
-  const handleExport = (format: 'excel' | 'pdf') => {
-    const { exportRows, exportHeaders, groupedHeaders } = getExportDataAndHeaders();
+  const handleExport = (format: "excel" | "pdf") => {
+    const { exportRows, exportHeaders, groupedHeaders } =
+      getExportDataAndHeaders();
     exportTable({
       data: exportRows,
       fileName: `reporte-de-vehiculos-${exportFileFormattedDate(selectedDate || new Date())}`,
       format,
       customHeaders: exportHeaders,
-      groupedHeaders: format === 'excel' ? groupedHeaders : undefined,
+      groupedHeaders: format === "excel" ? groupedHeaders : undefined,
     });
   };
 
@@ -528,26 +544,34 @@ const VehiclesPage: React.FC = () => {
   };
 
   // Handler para procesar el archivo seleccionado con OCR
-  const handleFileChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFileChange = async (
+    event: React.ChangeEvent<HTMLInputElement>
+  ) => {
     const file = event.target.files?.[0];
     if (file) {
       // Verificar que sea una imagen
-      if (file.type.startsWith('image/')) {
+      if (file.type.startsWith("image/")) {
         try {
           setIsOcrLoading(true);
           setOcrError(null);
           setShowOcrModal(true);
-          
+
           // Procesar la imagen con OCR
           const result = await OCRService.processImage(file);
           setOcrResult(result);
-          
-          showNotification(`Imagen procesada exitosamente. Se encontraron ${result.entries.length} entradas.`, {
-            severity: "success",
-            duration: 3000,
-          });
+
+          showNotification(
+            `Imagen procesada exitosamente. Se encontraron ${result.entries.length} entradas.`,
+            {
+              severity: "success",
+              duration: 3000,
+            }
+          );
         } catch (error) {
-          const errorMessage = error instanceof Error ? error.message : 'Error al procesar la imagen';
+          const errorMessage =
+            error instanceof Error
+              ? error.message
+              : "Error al procesar la imagen";
           setOcrError(errorMessage);
           showNotification(errorMessage, {
             severity: "error",
@@ -564,7 +588,7 @@ const VehiclesPage: React.FC = () => {
       }
     }
     // Limpiar el input para permitir seleccionar el mismo archivo nuevamente
-    event.target.value = '';
+    event.target.value = "";
   };
   // OCR modal handlers
   const handleCloseOcrModal = () => {
@@ -576,7 +600,7 @@ const VehiclesPage: React.FC = () => {
   const handleImportOcrData = async (entries: VehicleEntry[]) => {
     try {
       setIsCreatingVehicle(true);
-      
+
       // Convert OCR entries to vehicle format and create them
       for (const entry of entries) {
         const vehicleData = {
@@ -588,20 +612,23 @@ const VehiclesPage: React.FC = () => {
           notes: entry.observation,
           parkingDate: selectedDate.toISOString(), // Use the currently selected date
         };
-        
+
         await dispatch(createVehicle(vehicleData)).unwrap();
       }
-      
-      showNotification(`Se importaron ${entries.length} vehículos exitosamente.`, {
-        severity: "success",
-        duration: 5000,
-      });
-      
+
+      showNotification(
+        `Se importaron ${entries.length} vehículos exitosamente.`,
+        {
+          severity: "success",
+          duration: 5000,
+        }
+      );
+
       // Refresh the vehicles list
       dispatch(fetchVehicles({}));
-      
     } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : 'Error al importar los datos';
+      const errorMessage =
+        error instanceof Error ? error.message : "Error al importar los datos";
       showNotification(errorMessage, {
         severity: "error",
         duration: 5000,
@@ -651,12 +678,12 @@ const VehiclesPage: React.FC = () => {
                       {
                         label: "Exportar a Excel",
                         icon: <DescriptionIcon />,
-                        onClick: () => handleExport('excel'),
+                        onClick: () => handleExport("excel"),
                       },
                       {
                         label: "Exportar a PDF",
                         icon: <PictureAsPdfIcon />,
-                        onClick: () => handleExport('pdf'),
+                        onClick: () => handleExport("pdf"),
                       },
                     ]}
                     mainIcon={<DownloadRoundedIcon />}
@@ -666,49 +693,50 @@ const VehiclesPage: React.FC = () => {
                 )}
               </Box>
             )}
-          
+
           {/* Botón para procesar imagen con OCR */}
-          <Tooltip title="Procesar imagen" arrow>
-            <IconButton
-              onClick={handleOpenImageFile}
-              sx={{
-                top: "-4px",
-                width: "62px",
-                height: "58px",
-                borderRadius: "8px",
-                backgroundColor:
-                  theme.palette.mode === "dark"
-                    ? theme.palette.background.paper
-                    : theme.palette.primary.main,
-                color:
-                  theme.palette.mode === "dark"
-                    ? theme.palette.primary.main
-                    : theme.palette.primary.contrastText,
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                transition: theme.transitions.create(
-                  ["background", "box-shadow", "transform"],
-                  {
-                    duration: theme.transitions.duration.short,
-                  }
-                ),
-                fontSize: 40,
-                "&:hover": {
-                  backgroundColor: "#333333",
-                },
-              }}
-            >
-              <ImageIcon />
-            </IconButton>
-          </Tooltip>
-          
+          {userPermissions.includes(PERMISSIONS.CREATE_VEHICLES) && (
+            <Tooltip title="Procesar imagen" arrow>
+              <IconButton
+                onClick={handleOpenImageFile}
+                sx={{
+                  top: "-4px",
+                  width: "62px",
+                  height: "58px",
+                  borderRadius: "8px",
+                  backgroundColor:
+                    theme.palette.mode === "dark"
+                      ? theme.palette.background.paper
+                      : theme.palette.primary.main,
+                  color:
+                    theme.palette.mode === "dark"
+                      ? theme.palette.primary.main
+                      : theme.palette.primary.contrastText,
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  transition: theme.transitions.create(
+                    ["background", "box-shadow", "transform"],
+                    {
+                      duration: theme.transitions.duration.short,
+                    }
+                  ),
+                  fontSize: 40,
+                  "&:hover": {
+                    backgroundColor: "#333333",
+                  },
+                }}
+              >
+                <ImageIcon />
+              </IconButton>
+            </Tooltip>
+          )}
           <input
             ref={fileInputRef}
             type="file"
             accept="image/*"
             onChange={handleFileChange}
-            style={{ display: 'none' }}
+            style={{ display: "none" }}
           />
         </Box>
       </Box>
@@ -923,7 +951,7 @@ const VehiclesPage: React.FC = () => {
           defaultParkingDate={selectedDate}
         />
       </DialogComponent>
-      
+
       {/* OCR Result Modal */}
       <OCRResultModal
         open={showOcrModal}
