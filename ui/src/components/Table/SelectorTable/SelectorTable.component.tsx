@@ -144,6 +144,15 @@ interface SelectorTableProps {
     condition: "add" | "subtract",
     timeAdjustment: number
   ) => void;
+  recalculateEmployeeWeeklySummary?: (
+    employeeId: number,
+    date: Date,
+    newHoursWorkedEntry?: {
+      employeeId: number;
+      date: string;
+      scheduleId: number;
+    }
+  ) => Promise<void>;
   permissions?: string[];
   rowsPerPage?: number;
   setRowsPerPage?: (rows: number) => void;
@@ -165,6 +174,7 @@ const SelectorTableComponent: React.FC<SelectorTableProps> = ({
   year,
   handleChange,
   handleAdjustTime,
+  recalculateEmployeeWeeklySummary,
   permissions,
   rowsPerPage: rowsPerPageProp,
   setRowsPerPage: setRowsPerPageProp,
@@ -400,16 +410,32 @@ const SelectorTableComponent: React.FC<SelectorTableProps> = ({
     // Add new assigned
     selectedEmployeeIds.forEach((empId) => {
       if (!currentlyAssigned.includes(empId)) {
-        dispatch(
-          createOrUpdateHoursWorked({
+        // Get the schedule object
+        const schedule = schedules.find(s => s.id === scheduleId);
+        if (!schedule) return;
+        
+        // Use the same logic as handleChange in employee view
+        const dayDate = new Date(date);
+        const dayNameEnglish = dayDate.toLocaleDateString("en-US", { weekday: "long" }).toLowerCase();
+        
+        // Check if the schedule includes this specific day
+        if (schedule.days.includes(dayNameEnglish)) {
+          const hoursWorkedEntry = {
             employeeId: empId,
             scheduleId,
             date: new Date(date).toISOString(),
-          })
-        );
+          };
+          
+          dispatch(createOrUpdateHoursWorked(hoursWorkedEntry)).then(() => {
+            // Recalculate weekly summary for this employee
+            if (recalculateEmployeeWeeklySummary) {
+              recalculateEmployeeWeeklySummary(empId, new Date(date), hoursWorkedEntry);
+            }
+          });
+        }
       }
     });
-    // Remove unassinged
+    // Remove unassigned
     currentlyAssigned.forEach((empId) => {
       if (!selectedEmployeeIds.includes(empId)) {
         // Search hoursWorked for that empId, scheduleId, date
@@ -420,7 +446,12 @@ const SelectorTableComponent: React.FC<SelectorTableProps> = ({
             new Date(r.date).toDateString() === new Date(date).toDateString()
         );
         if (record) {
-          dispatch(deleteHoursWorked(record.id));
+          dispatch(deleteHoursWorked(record.id)).then(() => {
+            // Recalculate weekly summary for this employee after deletion
+            if (recalculateEmployeeWeeklySummary) {
+              recalculateEmployeeWeeklySummary(empId, new Date(date));
+            }
+          });
         }
       }
     });

@@ -2,7 +2,7 @@ import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { useAuthContext } from "../../../context/AuthContext";
 import { Employee } from "../../../models/Employee";
 import { Schedule } from "../../../models/Schedule";
-import { HoursWorked } from "../../../models/HoursWorked";
+
 import { WeeklySummary } from "../../../models/WeeklySummary";
 import { BiweeklySummary } from "../../../models/BiweeklySummary";
 import { MonthlySummary } from "../../../models/MonthlySummary";
@@ -26,6 +26,7 @@ import { DatePicker } from "@mui/x-date-pickers/DatePicker";
 import { AdapterDateFns } from "@mui/x-date-pickers/AdapterDateFns";
 import {
   addWeeks,
+  addDays,
   differenceInCalendarWeeks,
   endOfWeek,
   startOfWeek,
@@ -134,13 +135,11 @@ const RolesPage: React.FC = () => {
     biweeklySummaries,
     isLoadingBiweeklySummaries,
     updateBiweeklySummary,
-    createOrUpdateBiweeklySummary,
   } = useBiweeklySummaries();
   const {
     monthlySummaries,
     isLoadingMonthlySummaries,
     updateMonthlySummary,
-    createOrUpdateMonthlySummary,
   } = useMonthlySummaries();
   const [weekOffset, setWeekOffset] = useState(0);
   const [firstDayOfWeek, setFirstDayOfWeek] = useState<Date | null>(() => {
@@ -156,7 +155,7 @@ const RolesPage: React.FC = () => {
   const [isExporting, setIsExporting] = useState(false);
   const [openAddRoleModal, setOpenAddRoleModal] = useState(false);
   const [isGeneratingHours, setIsGeneratingHours] = useState(false);
-  // 1. Agrega el estado viewMode en RolesPage con localStorage
+  const [currentModalConfig, setCurrentModalConfig] = useState<AutoGenerateConfig | null>(null);
   const [viewMode, setViewMode] = useState<'employee' | 'schedule'>(() => {
     const savedViewMode = localStorage.getItem('selectorTableViewMode');
     return (savedViewMode === 'employee' || savedViewMode === 'schedule') 
@@ -236,6 +235,8 @@ const RolesPage: React.FC = () => {
     }
   }, [search, employees, schedules, viewMode]);
 
+
+
   // Update week, biweek, month, and year based on week offset
   useEffect(() => {
     const currentWeek = getCurrentWeekDates(weekOffset);
@@ -284,149 +285,67 @@ const RolesPage: React.FC = () => {
     }
   }, []);
 
-  const handleCreateOrUpdateHoursAndSummaries = useCallback(
-    async (
-      employeeId: number,
-      date: string,
-      scheduleId: number,
-      weekNumber: number,
-      biweekNumber: number,
-      month: number,
-      year: number,
-      totalHours: number
-    ) => {
-      const existingHoursRecord = hoursWorked.find(
-        (hours) =>
-          hours.employeeId === employeeId &&
-          new Date(hours.date).getTime() === new Date(date).getTime()
-      );
+  // Helper function to recalculate and update weekly summary for an employee
+  const recalculateEmployeeWeeklySummary = useCallback(async (
+    employeeId: number,
+    date: Date,
+    newHoursWorkedEntry?: {
+      employeeId: number;
+      date: string;
+      scheduleId: number;
+    }
+  ) => {
+    // Calculate total weekly hours for this employee
+    const weekStart = startOfWeek(date, { weekStartsOn: 1 });
+    const weekEnd = addDays(weekStart, 6);
+    
+    // Get all HoursWorked entries for this employee in this week
+    const employeeHoursWorked = hoursWorked.filter(hw => {
+      const hwDate = new Date(hw.date);
+      return hw.employeeId === employeeId && 
+             hwDate >= weekStart && 
+             hwDate <= weekEnd;
+    });
 
-      let previousHours: number | undefined;
-      let createOrUpdatedHoursWorked: Omit<HoursWorked, "id"> | HoursWorked;
-
-      if (existingHoursRecord) {
-        createOrUpdatedHoursWorked = {
-          ...existingHoursRecord,
-          scheduleId,
-        };
-        previousHours = schedules.find(
-          (schedule) => schedule.id === existingHoursRecord.scheduleId
-        )?.hours;
-      } else {
-        createOrUpdatedHoursWorked = {
-          employeeId,
-          date,
-          scheduleId,
-        };
+    // Add the new entry to the calculation if provided
+    const allEntries = newHoursWorkedEntry 
+      ? [...employeeHoursWorked, newHoursWorkedEntry]
+      : employeeHoursWorked;
+    
+    // Calculate total hours for the week
+    let totalWeeklyHours = 0;
+    allEntries.forEach(hw => {
+      const schedule = schedules.find(s => s.id === hw.scheduleId);
+      if (schedule) {
+        totalWeeklyHours += schedule.hours;
       }
+    });
 
-      const existingWeeklySummaryRecord = weeklySummaries.find(
-        (weeklySummary) =>
-          weeklySummary.employeeId === employeeId &&
-          weeklySummary.weekNumber === weekNumber &&
-          weeklySummary.year === year
-      );
+    // Update weekly summary
+    const weekNumber = getWeekNumber(date);
+    const month = date.getMonth() + 1;
+    const year = date.getFullYear();
+    
+    const existingWeeklySummary = weeklySummaries.find(
+      (ws) => ws.employeeId === employeeId &&
+               ws.weekNumber === weekNumber &&
+               ws.year === year
+    );
 
-      let createOrUpdatedWeeklySummary:
-        | Omit<WeeklySummary, "id">
-        | WeeklySummary;
+    const weeklySummary = {
+      employeeId,
+      weekNumber,
+      month,
+      year,
+      totalHours: totalWeeklyHours,
+    };
 
-      if (existingWeeklySummaryRecord) {
-        createOrUpdatedWeeklySummary = {
-          ...existingWeeklySummaryRecord,
-          totalHours: previousHours
-            ? existingWeeklySummaryRecord.totalHours +
-              totalHours -
-              previousHours
-            : existingWeeklySummaryRecord.totalHours + totalHours,
-        };
-      } else {
-        createOrUpdatedWeeklySummary = {
-          employeeId,
-          weekNumber,
-          month,
-          year,
-          totalHours,
-        };
-      }
-
-      const existingBiweeklySummaryRecord = biweeklySummaries.find(
-        (biweeklySummary) =>
-          biweeklySummary.employeeId === employeeId &&
-          biweeklySummary.biweekNumber === biweekNumber &&
-          biweeklySummary.year === year
-      );
-
-      let createOrUpdatedBiweeklySummary:
-        | Omit<BiweeklySummary, "id">
-        | BiweeklySummary;
-
-      if (existingBiweeklySummaryRecord) {
-        createOrUpdatedBiweeklySummary = {
-          ...existingBiweeklySummaryRecord,
-          totalHours: previousHours
-            ? existingBiweeklySummaryRecord.totalHours +
-              totalHours -
-              previousHours
-            : existingBiweeklySummaryRecord.totalHours + totalHours,
-        };
-      } else {
-        createOrUpdatedBiweeklySummary = {
-          employeeId,
-          biweekNumber,
-          month,
-          year,
-          totalHours,
-        };
-      }
-
-      const existingMonthlySummaryRecord = monthlySummaries.find(
-        (monthlySummary) =>
-          monthlySummary.employeeId === employeeId &&
-          monthlySummary.month === month &&
-          monthlySummary.year === year
-      );
-
-      let createOrUpdatedMonthlySummary:
-        | Omit<MonthlySummary, "id">
-        | MonthlySummary;
-
-      if (existingMonthlySummaryRecord) {
-        createOrUpdatedMonthlySummary = {
-          ...existingMonthlySummaryRecord,
-          totalHours: previousHours
-            ? existingMonthlySummaryRecord.totalHours +
-              totalHours -
-              previousHours
-            : existingMonthlySummaryRecord.totalHours + totalHours,
-        };
-      } else {
-        createOrUpdatedMonthlySummary = {
-          employeeId,
-          month,
-          year,
-          totalHours,
-        };
-      }
-      await Promise.all([
-        dispatch(createOrUpdateHoursWorked(createOrUpdatedHoursWorked)),
-        createOrUpdateWeeklySummary(createOrUpdatedWeeklySummary),
-        createOrUpdateBiweeklySummary(createOrUpdatedBiweeklySummary),
-        createOrUpdateMonthlySummary(createOrUpdatedMonthlySummary),
-      ]);
-    },
-    [
-      dispatch,
-      hoursWorked,
-      schedules,
-      weeklySummaries,
-      biweeklySummaries,
-      monthlySummaries,
-      createOrUpdateWeeklySummary,
-      createOrUpdateBiweeklySummary,
-      createOrUpdateMonthlySummary,
-    ]
-  );
+    if (existingWeeklySummary) {
+      await updateWeeklySummary(existingWeeklySummary.id, weeklySummary);
+    } else {
+      await createOrUpdateWeeklySummary(weeklySummary);
+    }
+  }, [hoursWorked, schedules, weeklySummaries, updateWeeklySummary, createOrUpdateWeeklySummary]);
 
   const handleChange = (
     event: SelectChangeEvent<string>,
@@ -447,16 +366,17 @@ const RolesPage: React.FC = () => {
       return;
     }
 
-    handleCreateOrUpdateHoursAndSummaries(
+    // Create/update HoursWorked entry
+    const hoursWorkedEntry = {
       employeeId,
-      date.toISOString(),
-      selectedSchedule.id,
-      getWeekNumber(date),
-      getBiweekNumber(date),
-      date.getMonth() + 1,
-      date.getFullYear(),
-      selectedSchedule.hours
-    );
+      date: date.toISOString(),
+      scheduleId: selectedSchedule.id,
+    };
+
+    // Update HoursWorked and recalculate summaries
+    dispatch(createOrUpdateHoursWorked(hoursWorkedEntry)).then(() => {
+      recalculateEmployeeWeeklySummary(employeeId, date, hoursWorkedEntry);
+    });
   };
 
   const handleAdjustTime = async (
@@ -566,18 +486,226 @@ const RolesPage: React.FC = () => {
   };
 
   const handleGenerateHours = async (config: AutoGenerateConfig) => {
-    setIsGeneratingHours(true);
     try {
-      // TODO: Implementar la lógica de generación automática
-      // console.log('Configuración de generación:', config);
+      // Validate configuration
+      if (config.selectedEmployees.length === 0) {
+        throw new Error('No hay empleados seleccionados');
+      }
       
-      // Simular proceso de generación
-      await new Promise(resolve => setTimeout(resolve, 2000));
+      // Get available schedules for balanced distribution
+      const availableSchedules = schedules.length > 0 ? schedules : [];
+      if (availableSchedules.length === 0) {
+        throw new Error('No hay horarios disponibles para asignar');
+      }
       
-      // Aquí iría la lógica real de generación:
-      // 1. Crear HoursWorked para cada empleado seleccionado
-      // 2. Actualizar WeeklySummary, BiweeklySummary, MonthlySummary
-      // 3. Refrescar los datos
+      // Get non-special schedules and special "Libre" schedule
+      const nonSpecialSchedules = availableSchedules.filter(schedule => !schedule.specialSchedule);
+      const libreSchedule = availableSchedules.find(schedule => 
+        schedule.specialSchedule && schedule.label.toLowerCase().includes('libre')
+      );
+      
+      if (nonSpecialSchedules.length === 0) {
+        throw new Error('No hay horarios regulares disponibles para asignar');
+      }
+      
+      // Calculate weekly hours for each schedule to plan distribution
+      const scheduleWeeklyHours: Record<string, number> = {};
+      const scheduleLabels = [...new Set(nonSpecialSchedules.map(s => s.label))];
+      
+      // Calculate total weekly hours for each schedule label
+      scheduleLabels.forEach(label => {
+        let totalHours = 0;
+        const weekStart = startOfWeek(firstDayOfWeek || new Date(), { weekStartsOn: 1 });
+        
+        for (let i = 0; i < 7; i++) {
+          const dayDate = addDays(weekStart, i);
+          const dayName = dayDate.toLocaleDateString("en-US", { weekday: "long" }).toLowerCase();
+          
+          const daySchedule = nonSpecialSchedules.find(s => 
+            s.label === label && s.days && s.days.includes(dayName)
+          );
+          
+          if (daySchedule) {
+            totalHours += daySchedule.hours;
+          }
+        }
+        
+        scheduleWeeklyHours[label] = totalHours;
+      });
+      
+      // All non-special schedules should be covered, regardless of their weekly hours
+      // The maxHoursPerWeek limit will be applied to individual employees, not to schedules
+      const validScheduleLabels = Object.keys(scheduleWeeklyHours);
+      
+      // Sort valid schedules by weekly hours (ascending) to prioritize shorter schedules
+      const sortedScheduleLabels = validScheduleLabels.sort((a, b) => 
+        scheduleWeeklyHours[a] - scheduleWeeklyHours[b]
+      );
+      
+      // Track schedule assignments to enforce max 3-4 employees per schedule
+      const scheduleAssignments: Record<string, number> = {};
+      const maxEmployeesPerSchedule = 4;
+      
+      // Initialize assignments for each schedule
+      sortedScheduleLabels.forEach(label => {
+        scheduleAssignments[label] = 0;
+      });
+      
+      // Distribute employees across schedules to balance hours
+      const employeeAssignments: Record<number, string> = {};
+      
+      // Separate employees with custom schedules
+      const employeesWithCustomSchedules = config.selectedEmployees.filter(employeeId => 
+        config.customSchedules[employeeId]
+      );
+      const employeesToDistribute = config.selectedEmployees.filter(employeeId => 
+        !config.customSchedules[employeeId]
+      );
+      
+      // First, assign employees with custom schedules
+      for (const employeeId of employeesWithCustomSchedules) {
+        const customSchedule = availableSchedules.find(s => s.id === config.customSchedules[employeeId]);
+        if (customSchedule) {
+          employeeAssignments[employeeId] = customSchedule.label;
+          scheduleAssignments[customSchedule.label] = (scheduleAssignments[customSchedule.label] || 0) + 1;
+        }
+      }
+      
+      // Calculate how many employees we need to assign to each schedule
+      const totalEmployeesToDistribute = employeesToDistribute.length;
+      const totalSchedules = sortedScheduleLabels.length;
+      
+      if (totalSchedules > 0) {
+        // Calculate base distribution (minimum employees per schedule)
+        const baseEmployeesPerSchedule = Math.floor(totalEmployeesToDistribute / totalSchedules);
+        const remainingEmployees = totalEmployeesToDistribute % totalSchedules;
+        
+         // Distribute base employees to each schedule
+         for (let i = 0; i < sortedScheduleLabels.length; i++) {
+           const label = sortedScheduleLabels[i];
+           const baseCount = baseEmployeesPerSchedule + (i < remainingEmployees ? 1 : 0);
+           scheduleAssignments[label] = baseCount;
+         }
+         
+         // Now assign employees to schedules based on the calculated distribution
+         let employeeIndex = 0;
+         for (const label of sortedScheduleLabels) {
+           const targetCount = scheduleAssignments[label];
+           
+           // Assign employees to this schedule
+           for (let i = 0; i < targetCount && employeeIndex < employeesToDistribute.length; i++) {
+             const employeeId = employeesToDistribute[employeeIndex];
+             employeeAssignments[employeeId] = label;
+             employeeIndex++;
+           }
+         }
+        
+        // If there are still employees to assign, distribute them evenly
+        while (employeeIndex < employeesToDistribute.length) {
+          // Find the schedule with the least employees
+          let minSchedule = sortedScheduleLabels[0];
+          let minCount = scheduleAssignments[minSchedule] || 0;
+          
+          for (const label of sortedScheduleLabels) {
+            const currentCount = scheduleAssignments[label] || 0;
+            if (currentCount < minCount && currentCount < maxEmployeesPerSchedule) {
+              minSchedule = label;
+              minCount = currentCount;
+            }
+          }
+          
+          // If all schedules are at max capacity, assign to "Libre"
+          if (minCount >= maxEmployeesPerSchedule) {
+            if (libreSchedule) {
+              const employeeId = employeesToDistribute[employeeIndex];
+              employeeAssignments[employeeId] = libreSchedule.label;
+            }
+          } else {
+            // Assign to the schedule with least employees
+            const employeeId = employeesToDistribute[employeeIndex];
+            employeeAssignments[employeeId] = minSchedule;
+            scheduleAssignments[minSchedule] = (scheduleAssignments[minSchedule] || 0) + 1;
+          }
+          
+          employeeIndex++;
+        }
+      }
+      
+      // Generate hours for each employee based on their assigned schedule
+      const promises = config.selectedEmployees.map(async (employeeId) => {
+        const employee = employees.find(emp => emp.id === employeeId);
+        if (!employee) {
+          return;
+        }
+
+        const assignedScheduleLabel = employeeAssignments[employeeId];
+        if (!assignedScheduleLabel) {
+          // Employee could not be assigned to any schedule
+          return;
+        }
+
+        // Process each day of the week - assign appropriate schedule for each day
+        let current = startOfWeek(firstDayOfWeek || new Date(), { weekStartsOn: 1 });
+        
+        // Calculate total weekly hours for this employee
+        let totalWeeklyHours = 0;
+        const weekDays = [];
+        
+        for (let i = 0; i < 7; i++) {
+          const dayDate = addDays(current, i);
+          const dayName = dayDate.toLocaleDateString("en-US", { weekday: "long" }).toLowerCase();
+          
+          // Find the schedule for this specific day and label
+          const daySchedule = availableSchedules.find(s => 
+            s.label === assignedScheduleLabel && 
+            s.days && s.days.includes(dayName)
+          );
+          
+          // Create HoursWorked entry for this day
+          if (daySchedule) {
+            const hoursWorkedEntry = {
+              employeeId,
+              date: dayDate.toISOString(),
+              scheduleId: daySchedule.id,
+            };
+            weekDays.push(hoursWorkedEntry);
+            
+            // Add to total weekly hours
+            totalWeeklyHours += daySchedule.hours;
+          }
+        }
+        
+        // Create all HoursWorked entries first
+        await Promise.all(
+          weekDays.map(async (entry) => {
+            await dispatch(createOrUpdateHoursWorked(entry));
+          })
+        );
+        
+        // Then create/update the weekly summary with the correct total
+        if (totalWeeklyHours > 0) {
+          const weekStartDate = startOfWeek(firstDayOfWeek || new Date(), { weekStartsOn: 1 });
+          
+          // Ensure totalWeeklyHours does not exceed the max limit
+          const maxLimit = config.maxHoursPerWeek || 48;
+          const finalTotalHours = Math.min(totalWeeklyHours, maxLimit);
+          
+          const weeklySummary = {
+            employeeId,
+            weekNumber: getWeekNumber(weekStartDate),
+            month: weekStartDate.getMonth() + 1,
+            year: weekStartDate.getFullYear(),
+            totalHours: finalTotalHours,
+          };
+          await createOrUpdateWeeklySummary(weeklySummary);
+        }
+      });
+
+      // Wait for all operations to complete
+      await Promise.all(promises);
+
+      // Refresh data
+      await dispatch(fetchHoursWorked());
       
       showNotification('Horas generadas exitosamente', {
         severity: "success",
@@ -595,18 +723,24 @@ const RolesPage: React.FC = () => {
     }
   };
 
+  const handleModalConfigChange = (config: AutoGenerateConfig) => {
+    setCurrentModalConfig(config);
+  };
+
   const handleGenerateFromDialog = () => {
-    // Get current config from AutoGenerateModal
-    // This is a simplified approach - in a real app you'd need to get the config from the modal
-    const defaultConfig: AutoGenerateConfig = {
-      mode: 'uniform',
-      uniformHours: 40,
-      individualHours: {},
-      useExistingSchedules: true,
-      customSchedules: {},
-      selectedEmployees: employees.map(emp => emp.id),
-    };
-    handleGenerateHours(defaultConfig);
+    if (!currentModalConfig) {
+      showNotification('Error: No hay configuración disponible', {
+        severity: "error",
+        duration: 3000,
+      });
+      return;
+    }
+    // Activate loading immediately for better UX
+    setIsGeneratingHours(true);
+    // Use setTimeout to ensure the loading state is rendered before starting the process
+    setTimeout(() => {
+      handleGenerateHours(currentModalConfig);
+    }, 50);
   };
 
   // Helper: gets the assigned schedule label for an employee on a given day
@@ -978,6 +1112,7 @@ const RolesPage: React.FC = () => {
                 year={currentYear}
                 handleChange={handleChange}
                 handleAdjustTime={handleAdjustTime}
+                recalculateEmployeeWeeklySummary={recalculateEmployeeWeeklySummary}
                 permissions={userPermissions}
                 rowsPerPage={rowsPerPage}
                 setRowsPerPage={setRowsPerPage}
@@ -1009,6 +1144,7 @@ const RolesPage: React.FC = () => {
                 year={currentYear}
                 handleChange={handleChange}
                 handleAdjustTime={handleAdjustTime}
+                recalculateEmployeeWeeklySummary={recalculateEmployeeWeeklySummary}
                 permissions={userPermissions}
                 rowsPerPage={rowsPerPage}
                 setRowsPerPage={setRowsPerPage}
@@ -1128,6 +1264,7 @@ const RolesPage: React.FC = () => {
             schedules={schedules}
             currentWeekStart={firstDayOfWeek || new Date()}
             isLoading={isGeneratingHours}
+            onConfigChange={handleModalConfigChange}
           />
         </DialogContent>
 

@@ -393,4 +393,46 @@ export const autoGenerateModalEmployeeCardStyles = (theme: Theme): SxProps<Theme
     background: `linear-gradient(135deg, ${theme.palette.primary.light}20, ${theme.palette.primary.main}10)`,
     borderColor: theme.palette.primary.main,
   },
-}); 
+});
+
+// Loading indicator styles
+export const autoGenerateModalLoadingBoxStyles: SxProps<Theme> = {
+  display: 'flex',
+  flexDirection: 'column',
+  justifyContent: 'center',
+  alignItems: 'center',
+  minHeight: '300px',
+  gap: 3,
+  padding: 4,
+  borderRadius: 2,
+  background: (theme) => `linear-gradient(135deg, ${theme.palette.primary.light}08, ${theme.palette.primary.main}05)`,
+  border: (theme) => `1px solid ${theme.palette.primary.light}20`,
+  animation: 'fadeIn 0.3s ease-in-out',
+  '@keyframes fadeIn': {
+    '0%': {
+      opacity: 0,
+      transform: 'scale(0.95)',
+    },
+    '100%': {
+      opacity: 1,
+      transform: 'scale(1)',
+    },
+  },
+};
+
+export const autoGenerateModalLoadingTextStyles: SxProps<Theme> = {
+  mt: 2,
+  color: 'text.secondary',
+  fontWeight: 600,
+  textAlign: 'center',
+  fontSize: '1.1rem',
+  animation: 'pulse 2s ease-in-out infinite',
+  '@keyframes pulse': {
+    '0%, 100%': {
+      opacity: 0.7,
+    },
+    '50%': {
+      opacity: 1,
+    },
+  },
+}; 

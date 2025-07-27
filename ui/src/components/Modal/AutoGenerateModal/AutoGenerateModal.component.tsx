@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import {
   Box,
   Typography,
@@ -16,6 +16,7 @@ import {
   LinearProgress,
   Avatar,
   MenuItem,
+  CircularProgress,
 } from '@mui/material';
 import {
   People as PeopleIcon,
@@ -49,6 +50,8 @@ import {
   autoGenerateModalEmployeeCardStyles,
   autoGenerateModalSwitchStyles,
   autoGenerateModalChipStyles,
+  autoGenerateModalLoadingBoxStyles,
+  autoGenerateModalLoadingTextStyles,
 } from './AutoGenerateModal.styles';
 
 interface AutoGenerateModalProps {
@@ -58,6 +61,7 @@ interface AutoGenerateModalProps {
   schedules: Schedule[];
   currentWeekStart: Date;
   isLoading?: boolean;
+  onConfigChange?: (config: AutoGenerateConfig) => void;
 }
 
 export interface AutoGenerateConfig {
@@ -67,6 +71,7 @@ export interface AutoGenerateConfig {
   useExistingSchedules: boolean;
   customSchedules: Record<number, number>; // employeeId -> scheduleId
   selectedEmployees: number[]; // employeeIds
+  maxHoursPerWeek?: number; // Maximum hours per week (default: 48)
 }
 
 const AutoGenerateModal: React.FC<AutoGenerateModalProps> = ({
@@ -76,6 +81,7 @@ const AutoGenerateModal: React.FC<AutoGenerateModalProps> = ({
   schedules,
   currentWeekStart,
   isLoading = false,
+  onConfigChange,
 }) => {
   const [config, setConfig] = useState<AutoGenerateConfig>({
     mode: 'uniform',
@@ -84,6 +90,7 @@ const AutoGenerateModal: React.FC<AutoGenerateModalProps> = ({
     useExistingSchedules: true,
     customSchedules: {},
     selectedEmployees: employees.map(emp => emp.id),
+    maxHoursPerWeek: 48,
   });
 
   const theme = useTheme();
@@ -111,11 +118,14 @@ const AutoGenerateModal: React.FC<AutoGenerateModalProps> = ({
   };
 
   const handleIndividualHoursChange = (employeeId: number, hours: number) => {
+    const maxLimit = config.maxHoursPerWeek || 48;
+    const clampedValue = Math.max(0, Math.min(maxLimit, hours));
+    
     setConfig(prev => ({
       ...prev,
       individualHours: {
         ...prev.individualHours,
-        [employeeId]: hours
+        [employeeId]: clampedValue
       }
     }));
   };
@@ -129,6 +139,45 @@ const AutoGenerateModal: React.FC<AutoGenerateModalProps> = ({
       }
     }));
   };
+
+  // Notify parent component of config changes
+  useEffect(() => {
+    onConfigChange?.(config);
+  }, [config, onConfigChange]);
+
+  // Auto-adjust uniform hours if they exceed the new max limit
+  useEffect(() => {
+    if (config.mode === 'uniform' && config.uniformHours > (config.maxHoursPerWeek || 48)) {
+      setConfig(prev => ({
+        ...prev,
+        uniformHours: config.maxHoursPerWeek || 48
+      }));
+    }
+  }, [config.maxHoursPerWeek, config.mode, config.uniformHours]);
+
+  // Auto-adjust individual hours if they exceed the new max limit
+  useEffect(() => {
+    if (config.mode === 'individual') {
+      const maxLimit = config.maxHoursPerWeek || 48;
+      const adjustedIndividualHours = { ...config.individualHours };
+      let hasChanges = false;
+
+      Object.keys(adjustedIndividualHours).forEach(employeeId => {
+        const currentHours = adjustedIndividualHours[Number(employeeId)];
+        if (currentHours > maxLimit) {
+          adjustedIndividualHours[Number(employeeId)] = maxLimit;
+          hasChanges = true;
+        }
+      });
+
+      if (hasChanges) {
+        setConfig(prev => ({
+          ...prev,
+          individualHours: adjustedIndividualHours
+        }));
+      }
+    }
+  }, [config.maxHoursPerWeek, config.mode, config.individualHours]);
 
 
 
@@ -216,7 +265,38 @@ const AutoGenerateModal: React.FC<AutoGenerateModalProps> = ({
 
       <Box sx={{ mt: 3, mb: 2 }} />
 
-      <Grid container sx={autoGenerateModalGridContainerStyles}>
+      {/* Loading indicator */}
+      {isLoading && (
+        <Box sx={autoGenerateModalLoadingBoxStyles}>
+          <CircularProgress 
+            size={80} 
+            thickness={4}
+            sx={{
+              color: (theme) => theme.palette.primary.main,
+              '& .MuiCircularProgress-circle': {
+                strokeLinecap: 'round',
+              },
+            }}
+          />
+          <Typography sx={autoGenerateModalLoadingTextStyles}>
+            Procesando generación de horas...
+          </Typography>
+          <Typography 
+            variant="body2" 
+            sx={{ 
+              color: 'text.secondary',
+              textAlign: 'center',
+              fontSize: '0.9rem',
+              opacity: 0.8,
+            }}
+          >
+            Esto puede tomar unos segundos
+          </Typography>
+        </Box>
+      )}
+
+      {!isLoading && (
+        <Grid container sx={autoGenerateModalGridContainerStyles}>
         {/* Left Column - Configuration */}
         <Grid item xs={12} lg={5.9}>
           <Typography
@@ -256,27 +336,63 @@ const AutoGenerateModal: React.FC<AutoGenerateModalProps> = ({
                 </FormControl>
               </Box>
 
-              {config.mode === "uniform" && (
+              {/* Hours Configuration Row */}
+              <Box sx={{ display: 'flex', gap: 2, flexDirection: { xs: 'column', sm: 'row' } }}>
+                {config.mode === "uniform" && (
+                  <TextField
+                    label="Horas uniformes por semana"
+                    type="number"
+                    value={config.uniformHours}
+                    onChange={(e) => {
+                      const value = parseInt(e.target.value) || 0;
+                      const maxLimit = config.maxHoursPerWeek || 48;
+                      const clampedValue = Math.max(0, Math.min(maxLimit, value));
+                      handleConfigChange("uniformHours", clampedValue);
+                    }}
+                    sx={{ 
+                      ...autoGenerateModalTextFieldStyles(theme),
+                      flex: 1,
+                      minWidth: { xs: '100%', sm: '200px' }
+                    }}
+                    inputProps={{ 
+                      min: 0, 
+                      max: config.maxHoursPerWeek || 48,
+                      step: 1,
+                      pattern: "[0-9]*"
+                    }}
+                    helperText={`Horas que se asignarán uniformemente a todos los empleados seleccionados (máximo ${config.maxHoursPerWeek || 48})`}
+                    error={config.uniformHours < 0 || config.uniformHours > (config.maxHoursPerWeek || 48)}
+                  />
+                )}
+
                 <TextField
-                  label="Horas por semana"
+                  label="Límite máximo de horas por semana"
                   type="number"
-                  value={config.uniformHours}
+                  value={config.maxHoursPerWeek || 48}
                   onChange={(e) => {
-                    const value = parseInt(e.target.value) || 0;
-                    const clampedValue = Math.max(0, Math.min(48, value));
-                    handleConfigChange("uniformHours", clampedValue);
+                    const value = parseInt(e.target.value) || 48;
+                    const clampedValue = Math.max(1, Math.min(168, value)); // 1 to 168 hours (7 days * 24 hours)
+                    handleConfigChange("maxHoursPerWeek", clampedValue);
                   }}
-                  sx={autoGenerateModalTextFieldStyles(theme)}
+                  sx={{ 
+                    ...autoGenerateModalTextFieldStyles(theme),
+                    flex: config.mode === "uniform" ? 1 : 'none',
+                    width: config.mode === "uniform" ? 'auto' : '100%',
+                    minWidth: { xs: '100%', sm: config.mode === "uniform" ? '200px' : '100%' }
+                  }}
                   inputProps={{ 
-                    min: 0, 
-                    max: 48,
+                    min: 1, 
+                    max: 168,
                     step: 1,
                     pattern: "[0-9]*"
                   }}
-                  helperText="Máximo 48 horas por semana"
-                  error={config.uniformHours < 0 || config.uniformHours > 48}
+                  helperText={config.mode === "uniform" 
+                    ? "Límite máximo de horas por semana para cada empleado durante la generación automática"
+                    : "Límite máximo de horas por semana que se aplicará a todos los empleados"
+                  }
+                  error={(config.maxHoursPerWeek || 48) < 1 || (config.maxHoursPerWeek || 48) > 168}
                 />
-              )}
+              </Box>
             </CardContent>
           </Card>
 
@@ -414,17 +530,17 @@ const AutoGenerateModal: React.FC<AutoGenerateModalProps> = ({
                             value={config.individualHours[employee.id] || 0}
                             onChange={(e) => {
                               const value = parseInt(e.target.value) || 0;
-                              const clampedValue = Math.max(0, Math.min(48, value));
-                              handleIndividualHoursChange(employee.id, clampedValue);
+                              handleIndividualHoursChange(employee.id, value);
                             }}
                             sx={autoGenerateModalIndividualHoursStyles(theme)}
                             inputProps={{ 
                               min: 0, 
-                              max: 48,
+                              max: config.maxHoursPerWeek || 48,
                               step: 1,
                               pattern: "[0-9]*"
                             }}
-                            error={(config.individualHours[employee.id] || 0) < 0 || (config.individualHours[employee.id] || 0) > 48}
+                            helperText={`Máximo ${config.maxHoursPerWeek || 48} horas`}
+                            error={(config.individualHours[employee.id] || 0) < 0 || (config.individualHours[employee.id] || 0) > (config.maxHoursPerWeek || 48)}
                           />
                         )}
 
@@ -510,9 +626,10 @@ const AutoGenerateModal: React.FC<AutoGenerateModalProps> = ({
             </CardContent>
           </Card>
         </Grid>
-      </Grid>
+        </Grid>
+      )}
 
-            {/* Actions moved to DialogActions */}
+      {/* Actions moved to DialogActions */}
     </Box>
   );
 };
