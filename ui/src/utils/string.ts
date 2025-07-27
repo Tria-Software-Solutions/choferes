@@ -149,6 +149,22 @@ export const translatePeriodToSpanish = (
   }
 };
 
+export const translatePriorityToSpanish = (
+  priority: "low" | "medium" | "high",
+): string => {
+  // Translates a priority key to its Spanish label
+  switch (priority) {
+    case "low":
+      return "Baja";
+    case "medium":
+      return "Media";
+    case "high":
+      return "Alta";
+    default:
+      return priority;
+  }
+};
+
 export const capitalizeFirstLetter = (str: string) =>
   // Capitalizes the first letter of a string
   str.charAt(0).toUpperCase() + str.slice(1);

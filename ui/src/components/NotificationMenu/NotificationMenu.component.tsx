@@ -29,6 +29,7 @@ import { useNotificationMenu } from '../../context/NotificationContext';
 import { Notification } from '../../models/Notification';
 import { formatDistanceToNow } from 'date-fns';
 import { es } from 'date-fns/locale';
+import { translatePriorityToSpanish } from '../../utils/string';
 
 interface NotificationMenuProps {
   anchorEl: HTMLElement | null;
@@ -204,21 +205,72 @@ const NotificationMenu: React.FC<NotificationMenuProps> = ({
               size="small"
               variant="outlined"
               onClick={() => handleFilterChange('read', false)}
-              sx={{ fontSize: '0.7rem', height: 24 }}
+              sx={{ 
+                fontSize: '0.7rem', 
+                height: 24,
+                '& .MuiChip-label': {
+                  color: theme.palette.mode === 'dark' 
+                    ? theme.palette.text.primary 
+                    : theme.palette.text.primary,
+                  fontWeight: 500,
+                },
+                '& .MuiChip-outlined': {
+                  borderColor: theme.palette.mode === 'dark' 
+                    ? theme.palette.divider 
+                    : theme.palette.text.secondary,
+                },
+                backgroundColor: theme.palette.mode === 'dark' 
+                  ? 'rgba(255, 255, 255, 0.05)' 
+                  : 'rgba(0, 0, 0, 0.05)',
+              }}
             />
             <Chip
               label="Leídas"
               size="small"
               variant="outlined"
               onClick={() => handleFilterChange('read', true)}
-              sx={{ fontSize: '0.7rem', height: 24 }}
+              sx={{ 
+                fontSize: '0.7rem', 
+                height: 24,
+                '& .MuiChip-label': {
+                  color: theme.palette.mode === 'dark' 
+                    ? theme.palette.text.primary 
+                    : theme.palette.text.primary,
+                  fontWeight: 500,
+                },
+                '& .MuiChip-outlined': {
+                  borderColor: theme.palette.mode === 'dark' 
+                    ? theme.palette.divider 
+                    : theme.palette.text.secondary,
+                },
+                backgroundColor: theme.palette.mode === 'dark' 
+                  ? 'rgba(255, 255, 255, 0.05)' 
+                  : 'rgba(0, 0, 0, 0.05)',
+              }}
             />
             <Chip
-              label="Alta prioridad"
+              label={`${translatePriorityToSpanish('high')} prioridad`}
               size="small"
               variant="outlined"
               onClick={() => handleFilterChange('priority', 'high')}
-              sx={{ fontSize: '0.7rem', height: 24 }}
+              sx={{ 
+                fontSize: '0.7rem', 
+                height: 24,
+                '& .MuiChip-label': {
+                  color: theme.palette.mode === 'dark' 
+                    ? theme.palette.text.primary 
+                    : theme.palette.text.primary,
+                  fontWeight: 500,
+                },
+                '& .MuiChip-outlined': {
+                  borderColor: theme.palette.mode === 'dark' 
+                    ? theme.palette.divider 
+                    : theme.palette.text.secondary,
+                },
+                backgroundColor: theme.palette.mode === 'dark' 
+                  ? 'rgba(255, 255, 255, 0.05)' 
+                  : 'rgba(0, 0, 0, 0.05)',
+              }}
             />
           </Box>
         </Box>
@@ -265,23 +317,38 @@ const NotificationMenu: React.FC<NotificationMenuProps> = ({
                           }}
                         />
                       )}
-                      <Box sx={{ display: 'flex', alignItems: 'center', flex: 1 }}>
-                        <Typography
-                          variant="body2"
-                          sx={{
-                            fontWeight: notification.read ? 400 : 600,
-                          }}
-                        >
-                          {notification.title}
-                        </Typography>
-                        <Chip
-                          label={notification.priority}
-                          size="small"
-                          color={getPriorityColor(notification.priority) as 'error' | 'warning' | 'default'}
-                          variant="outlined"
-                          sx={{ fontSize: '0.7rem', height: 20, ml: 0.5 }}
-                        />
-                      </Box>
+                      <Chip
+                        label={translatePriorityToSpanish(notification.priority)}
+                        size="small"
+                        color={getPriorityColor(notification.priority) as 'error' | 'warning' | 'default'}
+                        variant="outlined"
+                        sx={{ 
+                          fontSize: '0.7rem', 
+                          height: 20,
+                          '& .MuiChip-label': {
+                            color: theme.palette.mode === 'dark' 
+                              ? theme.palette.text.primary 
+                              : theme.palette.text.primary,
+                            fontWeight: 500,
+                          },
+                          '& .MuiChip-outlined': {
+                            borderColor: theme.palette.mode === 'dark' 
+                              ? theme.palette.divider 
+                              : theme.palette.text.secondary,
+                          },
+                          backgroundColor: theme.palette.mode === 'dark' 
+                            ? 'rgba(255, 255, 255, 0.05)' 
+                            : 'rgba(0, 0, 0, 0.05)',
+                        }}
+                      />
+                      <Typography
+                        variant="body2"
+                        sx={{
+                          fontWeight: 700,
+                        }}
+                      >
+                        {notification.title}
+                      </Typography>
                     </Box>
                   }
                   secondary={
@@ -309,7 +376,7 @@ const NotificationMenu: React.FC<NotificationMenuProps> = ({
                         minHeight: 24,
                       }}
                     >
-                      <DeleteIcon sx={{ fontSize: 16 }} />
+                                              <DeleteIcon sx={{ fontSize: 20 }} />
                     </IconButton>
                   </Tooltip>
                 </Box>
