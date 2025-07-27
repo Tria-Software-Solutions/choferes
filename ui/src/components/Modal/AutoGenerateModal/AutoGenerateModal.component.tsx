@@ -117,6 +117,20 @@ const AutoGenerateModal: React.FC<AutoGenerateModalProps> = ({
     }));
   };
 
+  const handleSelectAllEmployees = () => {
+    setConfig(prev => ({
+      ...prev,
+      selectedEmployees: employees.map(emp => emp.id)
+    }));
+  };
+
+  const handleClearAllEmployees = () => {
+    setConfig(prev => ({
+      ...prev,
+      selectedEmployees: []
+    }));
+  };
+
   const handleIndividualHoursChange = (employeeId: number, hours: number) => {
     const maxLimit = config.maxHoursPerWeek || 48;
     const clampedValue = Math.max(0, Math.min(maxLimit, hours));
@@ -296,9 +310,13 @@ const AutoGenerateModal: React.FC<AutoGenerateModalProps> = ({
       )}
 
       {!isLoading && (
-        <Grid container sx={autoGenerateModalGridContainerStyles}>
+        <Grid container sx={{
+          ...autoGenerateModalGridContainerStyles,
+          width: '100%',
+          minWidth: { xs: '100%', sm: '900px' }
+        }}>
         {/* Left Column - Configuration */}
-        <Grid item xs={12} lg={5.9}>
+        <Grid item xs={12} lg={5.9} sx={{ minWidth: { xs: '100%', sm: '450px' } }}>
           <Typography
             variant="h6"
             sx={autoGenerateModalSectionTitleStyles(theme)}
@@ -308,7 +326,11 @@ const AutoGenerateModal: React.FC<AutoGenerateModalProps> = ({
           </Typography>
 
           {/* Hours Mode */}
-          <Card sx={autoGenerateModalCardStyles(theme)}>
+          <Card sx={{
+            ...autoGenerateModalCardStyles(theme),
+            width: '100%',
+            minWidth: { xs: '100%', sm: '450px' }
+          }}>
             <CardContent sx={autoGenerateModalCardContentStyles}>
               <Typography
                 variant="subtitle1"
@@ -336,68 +358,80 @@ const AutoGenerateModal: React.FC<AutoGenerateModalProps> = ({
                 </FormControl>
               </Box>
 
-              {/* Hours Configuration Row */}
-              <Box sx={{ display: 'flex', gap: 2, flexDirection: { xs: 'column', sm: 'row' } }}>
-                {config.mode === "uniform" && (
-                  <TextField
-                    label="Horas uniformes por semana"
-                    type="number"
-                    value={config.uniformHours}
-                    onChange={(e) => {
-                      const value = parseInt(e.target.value) || 0;
-                      const maxLimit = config.maxHoursPerWeek || 48;
-                      const clampedValue = Math.max(0, Math.min(maxLimit, value));
-                      handleConfigChange("uniformHours", clampedValue);
-                    }}
-                    sx={{ 
-                      ...autoGenerateModalTextFieldStyles(theme),
-                      flex: 1,
-                      minWidth: { xs: '100%', sm: '200px' }
-                    }}
-                    inputProps={{ 
-                      min: 0, 
-                      max: config.maxHoursPerWeek || 48,
-                      step: 1,
-                      pattern: "[0-9]*"
-                    }}
-                    helperText={`Horas que se asignarán uniformemente a todos los empleados seleccionados (máximo ${config.maxHoursPerWeek || 48})`}
-                    error={config.uniformHours < 0 || config.uniformHours > (config.maxHoursPerWeek || 48)}
-                  />
-                )}
+                             {/* Hours Configuration Row */}
+               <Box sx={{ 
+                 display: 'flex', 
+                 gap: 2, 
+                 flexDirection: { xs: 'column', sm: 'row' },
+                 width: '100%',
+                 minWidth: { xs: '100%', sm: '450px' }
+               }}>
+                 <Box sx={{ 
+                   flex: 1, 
+                   minWidth: { xs: '100%', sm: '200px' },
+                   display: config.mode === "uniform" ? 'block' : 'none'
+                 }}>
+                   <TextField
+                     label="Horas uniformes por semana"
+                     type="number"
+                     value={config.uniformHours}
+                     onChange={(e) => {
+                       const value = parseInt(e.target.value) || 0;
+                       const maxLimit = config.maxHoursPerWeek || 48;
+                       const clampedValue = Math.max(0, Math.min(maxLimit, value));
+                       handleConfigChange("uniformHours", clampedValue);
+                     }}
+                     sx={{ 
+                       ...autoGenerateModalTextFieldStyles(theme),
+                       width: '100%'
+                     }}
+                     inputProps={{ 
+                       min: 0, 
+                       max: config.maxHoursPerWeek || 48,
+                       step: 1,
+                       pattern: "[0-9]*"
+                     }}
+                     helperText={`Máximo ${config.maxHoursPerWeek || 48} horas por semana`}
+                     error={config.uniformHours < 0 || config.uniformHours > (config.maxHoursPerWeek || 48)}
+                   />
+                 </Box>
 
-                <TextField
-                  label="Límite máximo de horas por semana"
-                  type="number"
-                  value={config.maxHoursPerWeek || 48}
-                  onChange={(e) => {
-                    const value = parseInt(e.target.value) || 48;
-                    const clampedValue = Math.max(1, Math.min(168, value)); // 1 to 168 hours (7 days * 24 hours)
-                    handleConfigChange("maxHoursPerWeek", clampedValue);
-                  }}
-                  sx={{ 
-                    ...autoGenerateModalTextFieldStyles(theme),
-                    flex: config.mode === "uniform" ? 1 : 'none',
-                    width: config.mode === "uniform" ? 'auto' : '100%',
-                    minWidth: { xs: '100%', sm: config.mode === "uniform" ? '200px' : '100%' }
-                  }}
-                  inputProps={{ 
-                    min: 1, 
-                    max: 168,
-                    step: 1,
-                    pattern: "[0-9]*"
-                  }}
-                  helperText={config.mode === "uniform" 
-                    ? "Límite máximo de horas por semana para cada empleado durante la generación automática"
-                    : "Límite máximo de horas por semana que se aplicará a todos los empleados"
-                  }
-                  error={(config.maxHoursPerWeek || 48) < 1 || (config.maxHoursPerWeek || 48) > 168}
-                />
-              </Box>
+                 <TextField
+                   label="Límite máximo de horas por semana"
+                   type="number"
+                   value={config.maxHoursPerWeek || 48}
+                   onChange={(e) => {
+                     const value = parseInt(e.target.value) || 48;
+                     const clampedValue = Math.max(1, Math.min(168, value)); // 1 to 168 hours (7 days * 24 hours)
+                     handleConfigChange("maxHoursPerWeek", clampedValue);
+                   }}
+                   sx={{ 
+                     ...autoGenerateModalTextFieldStyles(theme),
+                     flex: 1,
+                     minWidth: { xs: '100%', sm: '200px' }
+                   }}
+                   inputProps={{ 
+                     min: 1, 
+                     max: 168,
+                     step: 1,
+                     pattern: "[0-9]*"
+                   }}
+                   helperText={config.mode === "uniform" 
+                     ? "Límite máximo de horas por semana para cada empleado"
+                     : "Límite máximo de horas por semana que se aplicará a todos los empleados"
+                   }
+                   error={(config.maxHoursPerWeek || 48) < 1 || (config.maxHoursPerWeek || 48) > 168}
+                 />
+               </Box>
             </CardContent>
           </Card>
 
           {/* Schedule Configuration */}
-          <Card sx={autoGenerateModalCardStyles(theme)}>
+          <Card sx={{
+            ...autoGenerateModalCardStyles(theme),
+            width: '100%',
+            minWidth: { xs: '100%', sm: '450px' }
+          }}>
             <CardContent sx={autoGenerateModalCardContentStyles}>
               <Typography
                 variant="subtitle1"
@@ -416,6 +450,7 @@ const AutoGenerateModal: React.FC<AutoGenerateModalProps> = ({
                           e.target.checked
                         )
                       }
+                      size="small"
                       sx={autoGenerateModalSwitchStyles(theme)}
                     />
                   }
@@ -423,14 +458,18 @@ const AutoGenerateModal: React.FC<AutoGenerateModalProps> = ({
                 />
               </FormGroup>
 
-              {!config.useExistingSchedules && (
-                <Typography
-                  variant="body2"
-                  sx={autoGenerateModalHelperTextStyles(theme)}
-                >
-                  Selecciona horarios personalizados para cada empleado
-                </Typography>
-              )}
+              <Typography
+                variant="body2"
+                sx={{
+                  ...autoGenerateModalHelperTextStyles(theme),
+                  mt: 0
+                }}
+              >
+                {config.useExistingSchedules 
+                  ? "Se utilizarán las asignaciones de horarios ya configuradas para cada empleado"
+                  : "Selecciona horarios personalizados para cada empleado"
+                }
+              </Typography>
             </CardContent>
           </Card>
         </Grid>
@@ -439,14 +478,14 @@ const AutoGenerateModal: React.FC<AutoGenerateModalProps> = ({
         <Grid
           item
           xs={12}
-          lg={0.1}
+          lg={0.2}
           sx={{ display: { xs: "none", lg: "block" } }}
         >
           <Box sx={{ width: "100%", height: "100%" }} />
         </Grid>
 
         {/* Right Column - Employees and Preview */}
-        <Grid item xs={12} lg={5.9}>
+        <Grid item xs={12} lg={5.8} sx={{ minWidth: { xs: '100%', sm: '450px' } }}>
           <Typography
             variant="h6"
             sx={autoGenerateModalSectionTitleStyles(theme)}
@@ -456,14 +495,62 @@ const AutoGenerateModal: React.FC<AutoGenerateModalProps> = ({
           </Typography>
 
           {/* Employee Selection */}
-          <Card sx={autoGenerateModalCardStyles(theme)}>
+          <Card sx={{
+            ...autoGenerateModalCardStyles(theme),
+            width: '100%',
+            minWidth: { xs: '100%', sm: '450px' }
+          }}>
             <CardContent sx={autoGenerateModalCardContentStyles}>
-              <Typography
-                variant="subtitle1"
-                sx={autoGenerateModalSubtitleStyles}
-              >
-                Seleccionar Empleados
-              </Typography>
+              <Box sx={{ 
+                display: 'flex', 
+                justifyContent: 'space-between', 
+                alignItems: 'center',
+                mb: 0
+              }}>
+                <Typography
+                  variant="subtitle1"
+                  sx={autoGenerateModalSubtitleStyles}
+                >
+                  Seleccionar Empleados
+                </Typography>
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                  <Typography
+                    variant="body2"
+                    sx={{ 
+                      fontSize: '0.8rem',
+                      color: 'text.secondary',
+                      fontWeight: 500
+                    }}
+                  >
+                    {config.selectedEmployees.length === employees.length 
+                      ? 'Quitar Selección' 
+                      : 'Seleccionar Todos'
+                    }
+                  </Typography>
+                  <Switch
+                    checked={config.selectedEmployees.length === employees.length}
+                    onChange={() => {
+                      if (config.selectedEmployees.length === employees.length) {
+                        handleClearAllEmployees();
+                      } else {
+                        handleSelectAllEmployees();
+                      }
+                    }}
+                    size="small"
+                    sx={{
+                      '& .MuiSwitch-switchBase': {
+                        color: theme.palette.grey[400],
+                      },
+                      '& .MuiSwitch-switchBase.Mui-checked': {
+                        color: theme.palette.primary.main,
+                      },
+                      '& .MuiSwitch-switchBase.Mui-checked + .MuiSwitch-track': {
+                        backgroundColor: theme.palette.primary.main,
+                      },
+                    }}
+                  />
+                </Box>
+              </Box>
               <Box sx={autoGenerateModalEmployeeListStyles}>
                 {[...employees]
                   .sort((a, b) => 
@@ -593,7 +680,11 @@ const AutoGenerateModal: React.FC<AutoGenerateModalProps> = ({
           </Card>
 
           {/* Week Preview */}
-          <Card sx={autoGenerateModalCardStyles(theme)}>
+          <Card sx={{
+            ...autoGenerateModalCardStyles(theme),
+            width: '100%',
+            minWidth: { xs: '100%', sm: '450px' }
+          }}>
             <CardContent sx={autoGenerateModalCardContentStyles}>
               <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
                 <Typography

@@ -1,4 +1,4 @@
-import { useState, useCallback, useEffect, useMemo } from 'react';
+import React, { createContext, useContext, useState, useCallback, useEffect, useMemo } from 'react';
 import { Notification, NotificationFilters } from '../models/Notification';
 import { notificationEvents } from '../services/notificationService';
 
@@ -31,7 +31,26 @@ const saveNotificationsToStorage = (notifications: Notification[]) => {
   }
 };
 
-export const useNotificationMenu = () => {
+interface NotificationContextType {
+  notifications: Notification[];
+  unreadCount: number;
+  isLoading: boolean;
+  filters: NotificationFilters;
+  markAsRead: (notificationId: string) => void;
+  markAllAsRead: () => void;
+  deleteNotification: (notificationId: string) => void;
+  deleteAllNotifications: () => void;
+  addNotification: (notification: Omit<Notification, 'id' | 'timestamp' | 'read'>) => void;
+  updateFilters: (newFilters: Partial<NotificationFilters>) => void;
+  clearFilters: () => void;
+  getNotificationsByCategory: (category: Notification['category']) => Notification[];
+  getHighPriorityNotifications: () => Notification[];
+  cleanOldNotifications: () => void;
+}
+
+const NotificationContext = createContext<NotificationContextType | undefined>(undefined);
+
+export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [notifications, setNotifications] = useState<Notification[]>(() => {
     return loadNotificationsFromStorage();
   });
@@ -165,7 +184,7 @@ export const useNotificationMenu = () => {
     cleanOldNotifications();
   }, [cleanOldNotifications]);
 
-  return {
+  const value = {
     notifications: filteredNotifications,
     unreadCount,
     isLoading,
@@ -181,4 +200,18 @@ export const useNotificationMenu = () => {
     getHighPriorityNotifications,
     cleanOldNotifications
   };
+
+  return (
+    <NotificationContext.Provider value={value}>
+      {children}
+    </NotificationContext.Provider>
+  );
+};
+
+export const useNotificationMenu = () => {
+  const context = useContext(NotificationContext);
+  if (context === undefined) {
+    throw new Error('useNotificationMenu must be used within a NotificationProvider');
+  }
+  return context;
 }; 

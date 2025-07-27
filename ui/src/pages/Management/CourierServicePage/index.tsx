@@ -4,7 +4,7 @@ import { useSelector /*useDispatch*/ } from "react-redux";
 import { RootState /*AppDispatch*/ } from "../../../store/store";
 import SearchBarComponent from "../../../components/SearchBar/SearchBar.component";
 import SpeedDialComponent from "../../../components/SpeedDial/SpeedDial.component";
-import { useAppNotifications } from "../../../hooks/useNotifications";
+import { useAppNotifications } from "../../../components/Snackbar/Snackbar.component";
 import { createCourierNotification } from "../../../services/notificationService";
 import {
   Box,

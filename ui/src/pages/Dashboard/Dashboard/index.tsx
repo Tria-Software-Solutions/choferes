@@ -30,7 +30,8 @@ import DescriptionIcon from "@mui/icons-material/Description";
 import PictureAsPdfIcon from "@mui/icons-material/PictureAsPdf";
 import DeleteOutlineIcon from "@mui/icons-material/DeleteOutline";
 import { deleteAllExceptCoreTables } from "../../../services/backupService";
-import { useAppNotifications } from "../../../hooks/useNotifications";
+import { useAppNotifications } from "../../../components/Snackbar/Snackbar.component";
+import { createBackupNotification, createDataDeletionNotification } from "../../../services/notificationService";
 import DialogComponent from "../../../components/Dialog/Dialog.component";
 import { getEmployees } from "../../../services/employeeService";
 import { getHoursWorked } from "../../../services/hoursWorkedService";
@@ -141,11 +142,15 @@ const Dashboard: React.FC = () => {
         });
       }
       setBackupDone(true);
+      // Add notification to menu
+      createBackupNotification('created', type);
     } catch (e) {
       showNotification("Error al exportar backup", {
         severity: "error",
         duration: 4000,
       });
+      // Add error notification to menu
+      createBackupNotification('failed', type);
       return {};
     } finally {
       setLoading(false);
@@ -162,11 +167,15 @@ const Dashboard: React.FC = () => {
         severity: "success",
         duration: 4000,
       });
+      // Add notification to menu
+      createDataDeletionNotification('completed');
     } catch {
       showNotification(DASHBOARD_BULK_ACTIONS.DELETE_ERROR, {
         severity: "error",
         duration: 4000,
       });
+      // Add error notification to menu
+      createDataDeletionNotification('failed');
     } finally {
       setLoading(false);
     }

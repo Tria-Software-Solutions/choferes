@@ -95,7 +95,7 @@ import {
   getPreferencesObject,
   setPreferencesObject,
 } from "../../../utils/persistentState";
-import { useAppNotifications } from "../../../hooks/useNotifications";
+import { useAppNotifications } from "../../../components/Snackbar/Snackbar.component";
 import NOTIFICATIONS from "../../../constants/notifications.constants";
 import { createHoursGenerationNotification } from "../../../services/notificationService";
 import DescriptionIcon from "@mui/icons-material/Description";
@@ -315,12 +315,20 @@ const RolesPage: React.FC = () => {
       ? [...employeeHoursWorked, newHoursWorkedEntry]
       : employeeHoursWorked;
     
-    // Calculate total hours for the week
+    // Calculate total hours for the week by summing the hours of each assigned schedule
     let totalWeeklyHours = 0;
+    
     allEntries.forEach(hw => {
       const schedule = schedules.find(s => s.id === hw.scheduleId);
       if (schedule) {
-        totalWeeklyHours += schedule.hours;
+        // Use the specific hours from the entry if available, otherwise use schedule hours
+        let dayHours: number;
+        if ('hours' in hw && typeof hw.hours === 'number') {
+          dayHours = hw.hours;
+        } else {
+          dayHours = schedule.hours;
+        }
+        totalWeeklyHours += dayHours;
       }
     });
 
@@ -650,48 +658,116 @@ const RolesPage: React.FC = () => {
         // Process each day of the week - assign appropriate schedule for each day
         let current = startOfWeek(firstDayOfWeek || new Date(), { weekStartsOn: 1 });
         
+        // Determine if we need to redistribute hours for individual/uniform mode
+        const needsRedistribution = (config.mode === 'individual' && config.individualHours[employeeId]) ||
+                                   (config.mode === 'uniform' && config.uniformHours);
+        
         // Calculate total weekly hours for this employee
         let totalWeeklyHours = 0;
         const weekDays = [];
         
-        for (let i = 0; i < 7; i++) {
-          const dayDate = addDays(current, i);
-          const dayName = dayDate.toLocaleDateString("en-US", { weekday: "long" }).toLowerCase();
-          
-          // Find the schedule for this specific day and label
-          const daySchedule = availableSchedules.find(s => 
-            s.label === assignedScheduleLabel && 
-            s.days && s.days.includes(dayName)
-          );
-          
-          // Create HoursWorked entry for this day
-          if (daySchedule) {
-            const hoursWorkedEntry = {
-              employeeId,
-              date: dayDate.toISOString(),
-              scheduleId: daySchedule.id,
-            };
-            weekDays.push(hoursWorkedEntry);
+       
+        // Only calculate total if we're not redistributing (for individual/uniform mode, we'll calculate after redistribution)
+        if (!needsRedistribution) {
+          for (let i = 0; i < 7; i++) {
+            const dayDate = addDays(current, i);
+            const dayName = dayDate.toLocaleDateString("en-US", { weekday: "long" }).toLowerCase();
             
-            // Add to total weekly hours
-            totalWeeklyHours += daySchedule.hours;
+            // Find the schedule for this specific day and label
+            const daySchedule = availableSchedules.find(s => 
+              s.label === assignedScheduleLabel && 
+              s.days && s.days.includes(dayName)
+            );
+            
+            // Create HoursWorked entry for this day
+            if (daySchedule) {
+              const hoursWorkedEntry = {
+                employeeId,
+                date: dayDate.toISOString(),
+                scheduleId: daySchedule.id,
+              };
+              weekDays.push(hoursWorkedEntry);
+              
+              // Add to total weekly hours
+              totalWeeklyHours += daySchedule.hours;
+            }
           }
         }
         
-        // Create all HoursWorked entries first
-        await Promise.all(
-          weekDays.map(async (entry) => {
-            await dispatch(createOrUpdateHoursWorked(entry));
-          })
-        );
+        if (needsRedistribution) {
+          // Calculate how many days to assign based on target weekly hours
+          const targetWeeklyHours = config.mode === 'individual' 
+            ? config.individualHours[employeeId] 
+            : config.uniformHours;
+            
+          // Find the schedule's daily hours
+          const scheduleDailyHours = availableSchedules.find(s => 
+            s.label === assignedScheduleLabel && 
+            s.days && s.days.includes('monday') // Use any day to get the hours
+          )?.hours || 0;
+          
+          if (scheduleDailyHours > 0) {
+            // Calculate how many days we need to assign
+            const daysNeeded = Math.ceil(targetWeeklyHours / scheduleDailyHours);
+            
+            // Create entries only for the required number of days
+            const redistributedEntries = [];
+            for (let i = 0; i < 7; i++) {
+              const dayDate = addDays(current, i);
+              const dayName = dayDate.toLocaleDateString("en-US", { weekday: "long" }).toLowerCase();
+              
+              // Find the schedule for this specific day and label
+              const daySchedule = availableSchedules.find(s => 
+                s.label === assignedScheduleLabel && 
+                s.days && s.days.includes(dayName)
+              );
+              
+              if (daySchedule && i < daysNeeded) {
+                // Assign the schedule for this day
+                const hoursWorkedEntry = {
+                  employeeId,
+                  date: dayDate.toISOString(),
+                  scheduleId: daySchedule.id,
+                };
+                redistributedEntries.push(hoursWorkedEntry);
+              }
+            }
+            
+            // Create redistributed entries
+            await Promise.all(
+              redistributedEntries.map(async (entry) => {
+                await dispatch(createOrUpdateHoursWorked(entry));
+              })
+            );
+          }
+        } else {
+          // Create original entries without redistribution
+          await Promise.all(
+            weekDays.map(async (entry) => {
+              await dispatch(createOrUpdateHoursWorked(entry));
+            })
+          );
+        }
         
         // Then create/update the weekly summary with the correct total
         if (totalWeeklyHours > 0) {
           const weekStartDate = startOfWeek(firstDayOfWeek || new Date(), { weekStartsOn: 1 });
           
-          // Ensure totalWeeklyHours does not exceed the max limit
-          const maxLimit = config.maxHoursPerWeek || 48;
-          const finalTotalHours = Math.min(totalWeeklyHours, maxLimit);
+          // Calculate final total hours based on mode and limits
+          let finalTotalHours = totalWeeklyHours;
+          
+          if (config.mode === 'individual' && config.individualHours[employeeId]) {
+            // Use individual hours as the target weekly total
+            // The system will redistribute hours to reach exactly this total
+            const targetWeeklyHours = config.individualHours[employeeId];
+            finalTotalHours = targetWeeklyHours;
+          } else if (config.mode === 'uniform' && config.uniformHours) {
+            // Use uniform hours as the target weekly total for all employees
+            finalTotalHours = config.uniformHours;
+          } else {
+            // For default mode, show the actual calculated hours without limiting
+            finalTotalHours = totalWeeklyHours;
+          }
           
           const weeklySummary = {
             employeeId,
@@ -1206,8 +1282,8 @@ const RolesPage: React.FC = () => {
       <Dialog
         open={openAddRoleModal}
         onClose={handleCloseAddRoleModal}
-        maxWidth="lg"
-        fullWidth
+        maxWidth={false}
+        fullWidth={false}
         PaperProps={{
           sx: {
             border: "2px solid #fff",
@@ -1215,9 +1291,8 @@ const RolesPage: React.FC = () => {
             minHeight: "60vh",
             boxShadow: 3,
             bgcolor: "background.paper",
-            minWidth: { xs: '98%', sm: '95%', md: '90%', lg: '85%', xl: '80%' },
-            maxWidth: { xs: '98%', sm: 1400 },
-            width: 'auto',
+            width: { xs: '98%', sm: '1200px' },
+            maxWidth: { xs: '98%', sm: '1200px' },
             height: { xs: '95vh', sm: 'auto' },
             maxHeight: { xs: '95vh', sm: '90vh' },
           },

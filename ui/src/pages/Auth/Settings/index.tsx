@@ -22,7 +22,7 @@ import {
   FormControlLabel,
   Radio,
 } from "@mui/material";
-import { useAppNotifications } from "../../../hooks/useNotifications";
+import { useAppNotifications } from "../../../components/Snackbar/Snackbar.component";
 import PAGE_TITLE from "../../../constants/pageTitle.constants";
 import MANAGEMENT from "../../../constants/management.constants";
 import SettingsIcon from "@mui/icons-material/Settings";

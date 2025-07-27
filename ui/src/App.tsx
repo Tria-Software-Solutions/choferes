@@ -25,6 +25,7 @@ import SnackbarComponent from "./components/Snackbar/Snackbar.component";
 import { Provider } from "react-redux";
 import { store } from "./store/store";
 import { AuthProvider, useAuthContext } from "./context/AuthContext";
+import { NotificationProvider } from "./context/NotificationContext";
 import ProtectedRoute from "./routes/ProtectedRoute";
 import { Container, useMediaQuery, useTheme } from "@mui/material";
 import { APPBAR_MENU, PERMISSIONS, ROUTES } from "./constants/constants";
@@ -309,11 +310,13 @@ const App: React.FC = () => {
   return (
     <Provider store={store}>
       <AuthProvider>
-        <Router>
-          <SnackbarComponent>
-            <AppContent />
-          </SnackbarComponent>
-        </Router>
+        <NotificationProvider>
+          <Router>
+            <SnackbarComponent>
+              <AppContent />
+            </SnackbarComponent>
+          </Router>
+        </NotificationProvider>
       </AuthProvider>
     </Provider>
   );

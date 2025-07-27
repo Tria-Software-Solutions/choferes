@@ -13,7 +13,7 @@ import SearchBarComponent from "../../../components/SearchBar/SearchBar.componen
 import EditableTableComponent from "../../../components/Table/EditableTable/EditableTable.component";
 import SpeedDialComponent from "../../../components/SpeedDial/SpeedDial.component";
 import AddVehicleForm from "../../Forms/AddVehicleForm";
-import { useAppNotifications } from "../../../hooks/useNotifications";
+import { useAppNotifications } from "../../../components/Snackbar/Snackbar.component";
 import DialogComponent from "../../../components/Dialog/Dialog.component";
 import { createVehicleNotification } from "../../../services/notificationService";
 import OCRResultModal from "../../../components/Modal/OCRModal/OCRModal.component";

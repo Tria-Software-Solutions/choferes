@@ -25,7 +25,7 @@ import {
   Clear as ClearIcon,
   DeleteSweep as DeleteSweepIcon,
 } from '@mui/icons-material';
-import { useNotificationMenu } from '../../hooks/useNotificationMenu';
+import { useNotificationMenu } from '../../context/NotificationContext';
 import { Notification } from '../../models/Notification';
 import { formatDistanceToNow } from 'date-fns';
 import { es } from 'date-fns/locale';
