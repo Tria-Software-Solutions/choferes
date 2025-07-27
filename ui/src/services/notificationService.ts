@@ -104,6 +104,42 @@ export const createCourierNotification = (action: 'created' | 'updated' | 'delet
   });
 };
 
+export const createUserNotification = (action: 'created' | 'updated' | 'deleted', userName: string) => {
+  const actions = {
+    created: { title: 'Nuevo usuario registrado', message: `${userName} ha sido registrado en el sistema` },
+    updated: { title: 'Usuario actualizado', message: `${userName} ha sido actualizado` },
+    deleted: { title: 'Usuario eliminado', message: `${userName} ha sido eliminado del sistema` }
+  };
+
+  return addNotificationToMenu({
+    title: actions[action].title,
+    message: actions[action].message,
+    type: action === 'deleted' ? 'warning' : 'success',
+    category: 'system',
+    priority: 'high',
+    actionUrl: '/dashboard',
+    actionText: 'Ver usuarios'
+  });
+};
+
+export const createRoleNotification = (action: 'created' | 'updated' | 'deleted', roleName: string) => {
+  const actions = {
+    created: { title: 'Nuevo rol creado', message: `El rol "${roleName}" ha sido creado` },
+    updated: { title: 'Rol actualizado', message: `El rol "${roleName}" ha sido modificado` },
+    deleted: { title: 'Rol eliminado', message: `El rol "${roleName}" ha sido eliminado` }
+  };
+
+  return addNotificationToMenu({
+    title: actions[action].title,
+    message: actions[action].message,
+    type: action === 'deleted' ? 'warning' : 'success',
+    category: 'system',
+    priority: 'high',
+    actionUrl: '/dashboard',
+    actionText: 'Ver roles'
+  });
+};
+
 export const createHoursGenerationNotification = (success: boolean, employeeCount?: number) => {
   if (success) {
     return addNotificationToMenu({

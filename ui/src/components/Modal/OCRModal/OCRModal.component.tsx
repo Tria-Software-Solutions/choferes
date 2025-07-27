@@ -194,12 +194,23 @@ const OCRResultModal: React.FC<OCRResultModalProps> = ({
             >
               Resultados De Datos Extraídos
             </Typography>
-            {result && (
+            {!process.env.REACT_APP_OCR_API_KEY && (
               <Typography
-                variant="body2"
-                color="inherit"
-                sx={subtitleStyles}
+                variant="caption"
+                sx={{
+                  color: "warning.main",
+                  fontWeight: 500,
+                  display: "flex",
+                  alignItems: "center",
+                  gap: 0.5,
+                  mt: 0.5,
+                }}
               >
+                ⚠️ Modo simulación
+              </Typography>
+            )}
+            {result && (
+              <Typography variant="body2" color="inherit" sx={subtitleStyles}>
                 {result.date} • {result.entries.length} entradas extraídas
               </Typography>
             )}
@@ -215,8 +226,30 @@ const OCRResultModal: React.FC<OCRResultModalProps> = ({
       >
         {isLoading && (
           <Box sx={loadingBoxStyles}>
-            <CircularProgress />
+            <CircularProgress
+              size={80}
+              thickness={4}
+              sx={{
+                color: (theme) => theme.palette.primary.main,
+                "& .MuiCircularProgress-circle": {
+                  strokeLinecap: "round",
+                },
+              }}
+            />
             <Typography sx={loadingTextStyles}>Procesando imagen...</Typography>
+            <Typography
+              variant="body2"
+              sx={{
+                color: "text.secondary",
+                textAlign: "center",
+                fontSize: "0.9rem",
+                opacity: 0.8,
+              }}
+            >
+              {process.env.REACT_APP_OCR_API_KEY
+                ? "Esto puede tomar unos segundos..."
+                : "Modo simulación - Configura API key para OCR real"}
+            </Typography>
           </Box>
         )}
 
@@ -226,7 +259,7 @@ const OCRResultModal: React.FC<OCRResultModalProps> = ({
           </Alert>
         )}
 
-                {result && !isLoading && !isImageFormatValid && (
+        {result && !isLoading && !isImageFormatValid && (
           <Fade in timeout={800}>
             <Slide direction="up" in timeout={1000}>
               <Box sx={errorContainerStyles}>
@@ -234,16 +267,16 @@ const OCRResultModal: React.FC<OCRResultModalProps> = ({
                   sx={errorIconStyles(theme)}
                   aria-label="Formato de imagen no válido"
                 />
-                <Typography 
-                  variant="h4" 
-                  component="h2" 
+                <Typography
+                  variant="h4"
+                  component="h2"
                   sx={errorTitleStyles(theme)}
                 >
                   Formato de Imagen No Válido
                 </Typography>
-                <Typography 
-                  variant="h6" 
-                  color="text.primary" 
+                <Typography
+                  variant="h6"
+                  color="text.primary"
                   sx={errorSubtitleStyles}
                 >
                   La imagen no contiene datos de vehículos
@@ -276,206 +309,313 @@ const OCRResultModal: React.FC<OCRResultModalProps> = ({
         )}
 
         {result && !isLoading && isImageFormatValid && (
-          <Paper sx={tablePaperStyles(theme)}>
-            <TableContainer sx={tableContainerStyles}>
-              <Table stickyHeader size="small" sx={tableStyles}>
-                <TableHead>
-                  <TableRow>
-                    <TableCell sx={tableHeadCellStyles(theme)}>
-                      Boleta
-                    </TableCell>
-                    <TableCell sx={tableHeadCellStyles(theme)}>
-                      Placa
-                    </TableCell>
-                    <TableCell sx={tableHeadCellStyles(theme)}>
-                      Marca
-                    </TableCell>
-                    <TableCell sx={tableHeadCellStyles(theme)}>
-                      Color
-                    </TableCell>
-                    <TableCell sx={tableHeadCellStyles(theme)}>
-                      Espacio
-                    </TableCell>
-                    <TableCell sx={tableHeadCellStyles(theme)}>
-                      Observación
-                    </TableCell>
-                  </TableRow>
-                </TableHead>
-                <TableBody>
-                  {paginatedEntries.map((entry: VehicleEntry, index: number) => {
-                    const actualRowIndex = page * rowsPerPage + index;
-                    const currentEntry = editedEntries[actualRowIndex] || entry;
-                    
-                    return (
-                      <TableRow key={index} hover>
-                        <TableCell 
-                          sx={editableCellStyles}
-                          onClick={() => handleCellClick(index, 'ticket')}
-                        >
-                          {editingCell?.rowIndex === index && editingCell?.field === 'ticket' ? (
-                            <TextField
-                              value={currentEntry.ticket || ''}
-                              onChange={(e) => handleCellEdit(index, 'ticket', e.target.value)}
-                              onBlur={handleCellBlur}
-                              onKeyPress={handleCellKeyPress}
-                              size="small"
-                              fullWidth
-                              autoFocus
-                              variant="standard"
-                            />
-                          ) : (
-                            <Typography variant="body2" fontWeight="medium">
-                              {currentEntry.ticket}
-                            </Typography>
-                          )}
-                        </TableCell>
-                        <TableCell 
-                          sx={editableCellStyles}
-                          onClick={() => handleCellClick(index, 'licensePlate')}
-                        >
-                          {editingCell?.rowIndex === index && editingCell?.field === 'licensePlate' ? (
-                            <TextField
-                              value={currentEntry.licensePlate || ''}
-                              onChange={(e) => handleCellEdit(index, 'licensePlate', e.target.value)}
-                              onBlur={handleCellBlur}
-                              onKeyPress={handleCellKeyPress}
-                              size="small"
-                              fullWidth
-                              autoFocus
-                              variant="standard"
-                            />
-                          ) : (
-                            <Typography variant="body2" fontWeight="medium">
-                              {maskLicensePlate(currentEntry.licensePlate)}
-                            </Typography>
-                          )}
-                        </TableCell>
-                        <TableCell 
-                          sx={editableCellStyles}
-                          onClick={() => handleCellClick(index, 'brand')}
-                        >
-                          {editingCell?.rowIndex === index && editingCell?.field === 'brand' ? (
-                            <TextField
-                              value={currentEntry.brand || ''}
-                              onChange={(e) => handleCellEdit(index, 'brand', e.target.value)}
-                              onBlur={handleCellBlur}
-                              onKeyPress={handleCellKeyPress}
-                              size="small"
-                              fullWidth
-                              autoFocus
-                              variant="standard"
-                            />
-                          ) : (
-                            <Typography variant="body2">
-                              {currentEntry.brand
-                                ? capitalizeFirstLetter(currentEntry.brand)
-                                : "-"}
-                            </Typography>
-                          )}
-                        </TableCell>
-                        <TableCell 
-                          sx={editableCellStyles}
-                          onClick={() => handleCellClick(index, 'color')}
-                        >
-                          {editingCell?.rowIndex === index && editingCell?.field === 'color' ? (
-                            <TextField
-                              value={currentEntry.color || ''}
-                              onChange={(e) => handleCellEdit(index, 'color', e.target.value)}
-                              onBlur={handleCellBlur}
-                              onKeyPress={handleCellKeyPress}
-                              size="small"
-                              fullWidth
-                              autoFocus
-                              variant="standard"
-                            />
-                          ) : (
-                            <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                              <Box sx={colorIndicatorStyles(currentEntry.color)} />
-                              <Typography variant="body2" component="span">
-                                {capitalizeFirstLetter(currentEntry.color)}
-                              </Typography>
-                            </Box>
-                          )}
-                        </TableCell>
-                        <TableCell 
-                          sx={editableCellStyles}
-                          onClick={() => handleCellClick(index, 'parkingSpace')}
-                        >
-                          {editingCell?.rowIndex === index && editingCell?.field === 'parkingSpace' ? (
-                            <TextField
-                              value={currentEntry.parkingSpace || ''}
-                              onChange={(e) => handleCellEdit(index, 'parkingSpace', e.target.value)}
-                              onBlur={handleCellBlur}
-                              onKeyPress={handleCellKeyPress}
-                              size="small"
-                              fullWidth
-                              autoFocus
-                              variant="standard"
-                            />
-                          ) : (
-                            <Typography variant="body2" fontFamily="monospace">
-                              {currentEntry.parkingSpace}
-                            </Typography>
-                          )}
-                        </TableCell>
-                        <TableCell 
-                          sx={editableCellStyles}
-                          onClick={() => handleCellClick(index, 'observation')}
-                        >
-                          {editingCell?.rowIndex === index && editingCell?.field === 'observation' ? (
-                            <TextField
-                              value={currentEntry.observation || ''}
-                              onChange={(e) => handleCellEdit(index, 'observation', e.target.value)}
-                              onBlur={handleCellBlur}
-                              onKeyPress={handleCellKeyPress}
-                              size="small"
-                              fullWidth
-                              autoFocus
-                              variant="standard"
-                            />
-                          ) : (
-                            <Typography variant="body2" color="text.secondary">
-                              {currentEntry.observation
-                                ? capitalizeFirstLetter(currentEntry.observation)
-                                : "-"}
-                            </Typography>
-                          )}
-                        </TableCell>
-                      </TableRow>
-                    );
-                  })}
-                </TableBody>
-              </Table>
-            </TableContainer>
-            <Divider />
-            <TablePagination
-              className="pagination"
-              rowsPerPageOptions={[5, 10, 25, 50]}
-              component="div"
-              count={result.entries.length}
-              rowsPerPage={rowsPerPage}
-              page={page}
-              onPageChange={handlePageChange}
-              onRowsPerPageChange={handleRowsPerPageChange}
-              labelRowsPerPage={
-                <Typography variant="body2" component="span">
-                  {TABLE.ROWS_PER_PAGE}
+          <>
+            {/* Processing Info */}
+            <Box
+              sx={{
+                display: "flex",
+                justifyContent: "space-between",
+                alignItems: "center",
+                mb: 2,
+                p: 2,
+                borderRadius: 1,
+                background: (theme) =>
+                  `linear-gradient(135deg, ${theme.palette.success.light}10, ${theme.palette.success.main}05)`,
+                border: (theme) => `1px solid ${theme.palette.success.light}30`,
+              }}
+            >
+              <Box>
+                <Typography
+                  variant="body2"
+                  color="text.secondary"
+                  fontWeight={500}
+                >
+                  {process.env.REACT_APP_OCR_API_KEY
+                    ? "OCR Real"
+                    : "Simulación"}
                 </Typography>
-              }
-              labelDisplayedRows={() => ""}
-              ActionsComponent={PaginationComponent}
-              sx={{ borderRadius: "0 0 12px 12px" }}
-            />
-          </Paper>
+                <Typography variant="caption" color="text.secondary">
+                  {result.entries.length} entradas procesadas
+                </Typography>
+              </Box>
+              <Box sx={{ textAlign: "right" }}>
+                <Typography
+                  variant="body2"
+                  color="text.secondary"
+                  fontWeight={500}
+                >
+                  {result.date}
+                </Typography>
+                {result.pageNumber && (
+                  <Typography variant="caption" color="text.secondary">
+                    Página {result.pageNumber}
+                  </Typography>
+                )}
+              </Box>
+            </Box>
+
+            <Paper sx={tablePaperStyles(theme)}>
+              <TableContainer sx={tableContainerStyles}>
+                <Table stickyHeader size="small" sx={tableStyles}>
+                  <TableHead>
+                    <TableRow>
+                      <TableCell sx={tableHeadCellStyles(theme)}>
+                        Boleta
+                      </TableCell>
+                      <TableCell sx={tableHeadCellStyles(theme)}>
+                        Placa
+                      </TableCell>
+                      <TableCell sx={tableHeadCellStyles(theme)}>
+                        Marca
+                      </TableCell>
+                      <TableCell sx={tableHeadCellStyles(theme)}>
+                        Color
+                      </TableCell>
+                      <TableCell sx={tableHeadCellStyles(theme)}>
+                        Espacio
+                      </TableCell>
+                      <TableCell sx={tableHeadCellStyles(theme)}>
+                        Observación
+                      </TableCell>
+                    </TableRow>
+                  </TableHead>
+                  <TableBody>
+                    {paginatedEntries.map(
+                      (entry: VehicleEntry, index: number) => {
+                        const actualRowIndex = page * rowsPerPage + index;
+                        const currentEntry =
+                          editedEntries[actualRowIndex] || entry;
+
+                        return (
+                          <TableRow key={index} hover>
+                            <TableCell
+                              sx={editableCellStyles}
+                              onClick={() => handleCellClick(index, "ticket")}
+                            >
+                              {editingCell?.rowIndex === index &&
+                              editingCell?.field === "ticket" ? (
+                                <TextField
+                                  value={currentEntry.ticket || ""}
+                                  onChange={(e) =>
+                                    handleCellEdit(
+                                      index,
+                                      "ticket",
+                                      e.target.value
+                                    )
+                                  }
+                                  onBlur={handleCellBlur}
+                                  onKeyPress={handleCellKeyPress}
+                                  size="small"
+                                  fullWidth
+                                  autoFocus
+                                  variant="standard"
+                                />
+                              ) : (
+                                <Typography variant="body2" fontWeight="medium">
+                                  {currentEntry.ticket}
+                                </Typography>
+                              )}
+                            </TableCell>
+                            <TableCell
+                              sx={editableCellStyles}
+                              onClick={() =>
+                                handleCellClick(index, "licensePlate")
+                              }
+                            >
+                              {editingCell?.rowIndex === index &&
+                              editingCell?.field === "licensePlate" ? (
+                                <TextField
+                                  value={currentEntry.licensePlate || ""}
+                                  onChange={(e) =>
+                                    handleCellEdit(
+                                      index,
+                                      "licensePlate",
+                                      e.target.value
+                                    )
+                                  }
+                                  onBlur={handleCellBlur}
+                                  onKeyPress={handleCellKeyPress}
+                                  size="small"
+                                  fullWidth
+                                  autoFocus
+                                  variant="standard"
+                                />
+                              ) : (
+                                <Typography variant="body2" fontWeight="medium">
+                                  {maskLicensePlate(currentEntry.licensePlate)}
+                                </Typography>
+                              )}
+                            </TableCell>
+                            <TableCell
+                              sx={editableCellStyles}
+                              onClick={() => handleCellClick(index, "brand")}
+                            >
+                              {editingCell?.rowIndex === index &&
+                              editingCell?.field === "brand" ? (
+                                <TextField
+                                  value={currentEntry.brand || ""}
+                                  onChange={(e) =>
+                                    handleCellEdit(
+                                      index,
+                                      "brand",
+                                      e.target.value
+                                    )
+                                  }
+                                  onBlur={handleCellBlur}
+                                  onKeyPress={handleCellKeyPress}
+                                  size="small"
+                                  fullWidth
+                                  autoFocus
+                                  variant="standard"
+                                />
+                              ) : (
+                                <Typography variant="body2">
+                                  {currentEntry.brand
+                                    ? capitalizeFirstLetter(currentEntry.brand)
+                                    : "-"}
+                                </Typography>
+                              )}
+                            </TableCell>
+                            <TableCell
+                              sx={editableCellStyles}
+                              onClick={() => handleCellClick(index, "color")}
+                            >
+                              {editingCell?.rowIndex === index &&
+                              editingCell?.field === "color" ? (
+                                <TextField
+                                  value={currentEntry.color || ""}
+                                  onChange={(e) =>
+                                    handleCellEdit(
+                                      index,
+                                      "color",
+                                      e.target.value
+                                    )
+                                  }
+                                  onBlur={handleCellBlur}
+                                  onKeyPress={handleCellKeyPress}
+                                  size="small"
+                                  fullWidth
+                                  autoFocus
+                                  variant="standard"
+                                />
+                              ) : (
+                                <Box
+                                  sx={{ display: "flex", alignItems: "center" }}
+                                >
+                                  <Box
+                                    sx={colorIndicatorStyles(
+                                      currentEntry.color
+                                    )}
+                                  />
+                                  <Typography variant="body2" component="span">
+                                    {capitalizeFirstLetter(currentEntry.color)}
+                                  </Typography>
+                                </Box>
+                              )}
+                            </TableCell>
+                            <TableCell
+                              sx={editableCellStyles}
+                              onClick={() =>
+                                handleCellClick(index, "parkingSpace")
+                              }
+                            >
+                              {editingCell?.rowIndex === index &&
+                              editingCell?.field === "parkingSpace" ? (
+                                <TextField
+                                  value={currentEntry.parkingSpace || ""}
+                                  onChange={(e) =>
+                                    handleCellEdit(
+                                      index,
+                                      "parkingSpace",
+                                      e.target.value
+                                    )
+                                  }
+                                  onBlur={handleCellBlur}
+                                  onKeyPress={handleCellKeyPress}
+                                  size="small"
+                                  fullWidth
+                                  autoFocus
+                                  variant="standard"
+                                />
+                              ) : (
+                                <Typography
+                                  variant="body2"
+                                  fontFamily="monospace"
+                                >
+                                  {currentEntry.parkingSpace}
+                                </Typography>
+                              )}
+                            </TableCell>
+                            <TableCell
+                              sx={editableCellStyles}
+                              onClick={() =>
+                                handleCellClick(index, "observation")
+                              }
+                            >
+                              {editingCell?.rowIndex === index &&
+                              editingCell?.field === "observation" ? (
+                                <TextField
+                                  value={currentEntry.observation || ""}
+                                  onChange={(e) =>
+                                    handleCellEdit(
+                                      index,
+                                      "observation",
+                                      e.target.value
+                                    )
+                                  }
+                                  onBlur={handleCellBlur}
+                                  onKeyPress={handleCellKeyPress}
+                                  size="small"
+                                  fullWidth
+                                  autoFocus
+                                  variant="standard"
+                                />
+                              ) : (
+                                <Typography
+                                  variant="body2"
+                                  color="text.secondary"
+                                >
+                                  {currentEntry.observation
+                                    ? capitalizeFirstLetter(
+                                        currentEntry.observation
+                                      )
+                                    : "-"}
+                                </Typography>
+                              )}
+                            </TableCell>
+                          </TableRow>
+                        );
+                      }
+                    )}
+                  </TableBody>
+                </Table>
+              </TableContainer>
+              <Divider />
+              <TablePagination
+                className="pagination"
+                rowsPerPageOptions={[5, 10, 25, 50]}
+                component="div"
+                count={result.entries.length}
+                rowsPerPage={rowsPerPage}
+                page={page}
+                onPageChange={handlePageChange}
+                onRowsPerPageChange={handleRowsPerPageChange}
+                labelRowsPerPage={
+                  <Typography variant="body2" component="span">
+                    {TABLE.ROWS_PER_PAGE}
+                  </Typography>
+                }
+                labelDisplayedRows={() => ""}
+                ActionsComponent={PaginationComponent}
+                sx={{ borderRadius: "0 0 12px 12px" }}
+              />
+            </Paper>
+          </>
         )}
       </DialogContent>
 
       <DialogActions sx={dialogActionsStyles}>
-        <Button
-          onClick={onClose}
-          variant="outlined"
-          sx={cancelButtonStyles}
-        >
+        <Button onClick={onClose} variant="outlined" sx={cancelButtonStyles}>
           Cancelar
         </Button>
         {result && !isLoading && isImageFormatValid && (
@@ -486,7 +626,7 @@ const OCRResultModal: React.FC<OCRResultModalProps> = ({
             disabled={result.entries.length === 0}
             sx={importButtonStyles}
           >
-            Importar Datos ({result.entries.length} entradas)
+            Importar Datos
           </Button>
         )}
       </DialogActions>

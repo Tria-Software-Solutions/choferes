@@ -79,14 +79,44 @@ export const dialogContentStyles = (
 });
 
 export const loadingBoxStyles: SxProps<Theme> = {
-  display: "flex",
-  justifyContent: "center",
-  alignItems: "center",
-  minHeight: "200px",
+  display: 'flex',
+  flexDirection: 'column',
+  justifyContent: 'center',
+  alignItems: 'center',
+  minHeight: '300px',
+  gap: 3,
+  padding: 4,
+  borderRadius: 2,
+  background: (theme) => `linear-gradient(135deg, ${theme.palette.primary.light}08, ${theme.palette.primary.main}05)`,
+  border: (theme) => `1px solid ${theme.palette.primary.light}20`,
+  animation: 'fadeIn 0.3s ease-in-out',
+  '@keyframes fadeIn': {
+    '0%': {
+      opacity: 0,
+      transform: 'scale(0.95)',
+    },
+    '100%': {
+      opacity: 1,
+      transform: 'scale(1)',
+    },
+  },
 };
 
 export const loadingTextStyles: SxProps<Theme> = {
-  ml: 2,
+  mt: 2,
+  color: 'text.secondary',
+  fontWeight: 600,
+  textAlign: 'center',
+  fontSize: '1.1rem',
+  animation: 'pulse 2s ease-in-out infinite',
+  '@keyframes pulse': {
+    '0%, 100%': {
+      opacity: 0.7,
+    },
+    '50%': {
+      opacity: 1,
+    },
+  },
 };
 
 export const errorContainerStyles: SxProps<Theme> = {
@@ -94,16 +124,17 @@ export const errorContainerStyles: SxProps<Theme> = {
   flexDirection: "column",
   alignItems: "center",
   textAlign: "center",
-  py: { xs: 2, sm: 3 },
-  minHeight: "60vh",
+  py: { xs: 1.5, sm: 2 },
+  height: "100%",
   justifyContent: "center",
   width: "100%",
+  overflow: "hidden",
 };
 
 export const errorIconStyles = (theme: Theme): SxProps<Theme> => ({
-  fontSize: { xs: 80, sm: 100, md: 120 },
+  fontSize: { xs: 60, sm: 80, md: 100 },
   color: theme.palette.error.main,
-  mb: { xs: 2, sm: 3 },
+  mb: { xs: 1.5, sm: 2 },
   filter: "drop-shadow(0 4px 8px rgba(0,0,0,0.1))",
 });
 
@@ -112,23 +143,23 @@ export const errorTitleStyles = (theme: Theme): SxProps<Theme> => ({
   backgroundClip: "text",
   WebkitBackgroundClip: "text",
   WebkitTextFillColor: "transparent",
-  mb: { xs: 1, sm: 2 },
+  mb: { xs: 1, sm: 1.5 },
   textShadow: "0 2px 4px rgba(0,0,0,0.1)",
-  fontSize: { xs: "1.5rem", sm: "2rem", md: "2.5rem" },
+  fontSize: { xs: "1.25rem", sm: "1.75rem", md: "2rem" },
   fontWeight: "bold",
 });
 
 export const errorSubtitleStyles: SxProps<Theme> = {
-  mb: { xs: 1, sm: 2 },
-  fontSize: { xs: "1rem", sm: "1.25rem" },
+  mb: { xs: 0.5, sm: 1 },
+  fontSize: { xs: "0.875rem", sm: "1.125rem" },
   fontWeight: 500,
 };
 
 export const errorDescriptionStyles: SxProps<Theme> = {
-  mb: { xs: 2, sm: 3, md: 4 },
-  lineHeight: 1.6,
-  fontSize: { xs: "0.875rem", sm: "1rem" },
-  maxWidth: 500,
+  mb: { xs: 1.5, sm: 2, md: 2.5 },
+  lineHeight: 1.5,
+  fontSize: { xs: "0.8rem", sm: "0.9rem" },
+  maxWidth: 450,
 };
 
 export const errorActionsBoxStyles: SxProps<Theme> = {
