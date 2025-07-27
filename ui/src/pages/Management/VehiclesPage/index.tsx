@@ -13,8 +13,9 @@ import SearchBarComponent from "../../../components/SearchBar/SearchBar.componen
 import EditableTableComponent from "../../../components/Table/EditableTable/EditableTable.component";
 import SpeedDialComponent from "../../../components/SpeedDial/SpeedDial.component";
 import AddVehicleForm from "../../Forms/AddVehicleForm";
-import { useAppNotifications } from "../../../components/Snackbar/Snackbar.component";
+import { useAppNotifications } from "../../../hooks/useNotifications";
 import DialogComponent from "../../../components/Dialog/Dialog.component";
+import { createVehicleNotification } from "../../../services/notificationService";
 import OCRResultModal from "../../../components/Modal/OCRModal/OCRModal.component";
 import { OCRService, VehicleEntry, OCRResult } from "../../../services/ocrService";
 import {
@@ -350,6 +351,9 @@ const VehiclesPage: React.FC = () => {
         severity: "success",
         duration: 3000,
       });
+      
+      // Add notification to menu
+      createVehicleNotification('updated', `${editFields.licensePlate} - ${editFields.brand}`);
     } catch (error) {
       handleCancel();
       showNotification(NOTIFICATIONS.VEHICLE_UPDATE_ERROR, {
@@ -382,6 +386,12 @@ const VehiclesPage: React.FC = () => {
         severity: "success",
         duration: 3000,
       });
+      
+      // Add notification to menu
+      const vehicle = allVehicles.find(v => v.id === vehicleToDelete);
+      if (vehicle) {
+        createVehicleNotification('deleted', `${vehicle.licensePlate} - ${vehicle.brand}`);
+      }
     } catch (error) {
       showNotification(NOTIFICATIONS.VEHICLE_DELETE_ERROR, {
         severity: "error",
@@ -452,6 +462,9 @@ const VehiclesPage: React.FC = () => {
         severity: "success",
         duration: 3000,
       });
+      
+      // Add notification to menu
+      createVehicleNotification('created', `${vehicleData.licensePlate} - ${vehicleData.brand}`);
     } catch (error) {
       showNotification(NOTIFICATIONS.VEHICLE_CREATE_ERROR, {
         severity: "error",

@@ -89,13 +89,15 @@ import {
   noEmployeesBoxStyles,
   noEmployeesIconStyles,
 } from "./styles";
-import { useLocation } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import { useTablePreferences } from "../../../hooks/useTablePreferences";
 import {
   getPreferencesObject,
   setPreferencesObject,
 } from "../../../utils/persistentState";
-import { useAppNotifications } from "../../../components/Snackbar/Snackbar.component";
+import { useAppNotifications } from "../../../hooks/useNotifications";
+import NOTIFICATIONS from "../../../constants/notifications.constants";
+import { createHoursGenerationNotification } from "../../../services/notificationService";
 import DescriptionIcon from "@mui/icons-material/Description";
 import PictureAsPdfIcon from "@mui/icons-material/PictureAsPdf";
 import FileDownloadIcon from "@mui/icons-material/FileDownload";
@@ -166,6 +168,7 @@ const RolesPage: React.FC = () => {
   const theme = useTheme();
   const isSmallScreen = useMediaQuery(theme.breakpoints.down("sm"));
   const location = useLocation();
+  const navigate = useNavigate();
 
   const getInitialRowsPerPage = () => {
     if (typeof window !== "undefined") {
@@ -707,17 +710,29 @@ const RolesPage: React.FC = () => {
       // Refresh data
       await dispatch(fetchHoursWorked());
       
-      showNotification('Horas generadas exitosamente', {
+      showNotification(NOTIFICATIONS.HOURS_GENERATION_SUCCESS, {
         severity: "success",
-        duration: 3000,
+        duration: 5000,
+        closeable: true,
+        buttonText: "Ver resultados",
+        onButtonClick: () => {
+          // Navigate to the current page (roles) to show the generated results
+          navigate('/roles');
+        }
       });
+      
+      // Add notification to menu
+      createHoursGenerationNotification(true, config.selectedEmployees.length);
       
       setOpenAddRoleModal(false);
     } catch (error) {
-      showNotification('Error al generar las horas', {
+      showNotification(NOTIFICATIONS.HOURS_GENERATION_ERROR, {
         severity: "error",
         duration: 5000,
       });
+      
+      // Add error notification to menu
+      createHoursGenerationNotification(false);
     } finally {
       setIsGeneratingHours(false);
     }
@@ -729,7 +744,7 @@ const RolesPage: React.FC = () => {
 
   const handleGenerateFromDialog = () => {
     if (!currentModalConfig) {
-      showNotification('Error: No hay configuración disponible', {
+      showNotification(NOTIFICATIONS.HOURS_GENERATION_NO_CONFIG, {
         severity: "error",
         duration: 3000,
       });
@@ -737,6 +752,13 @@ const RolesPage: React.FC = () => {
     }
     // Activate loading immediately for better UX
     setIsGeneratingHours(true);
+    
+    // Show processing notification
+    showNotification(NOTIFICATIONS.HOURS_GENERATION_PROCESSING, {
+      severity: "info",
+      duration: 2000,
+    });
+    
     // Use setTimeout to ensure the loading state is rendered before starting the process
     setTimeout(() => {
       handleGenerateHours(currentModalConfig);

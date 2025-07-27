@@ -13,8 +13,9 @@ import SearchBarComponent from "../../../components/SearchBar/SearchBar.componen
 import SpeedDialComponent from "../../../components/SpeedDial/SpeedDial.component";
 import EditableTableComponent from "../../../components/Table/EditableTable/EditableTable.component";
 import AddEmployeeForm from "../../Forms/AddEmployeeForm";
-import { useAppNotifications } from "../../../components/Snackbar/Snackbar.component";
+import { useAppNotifications } from "../../../hooks/useNotifications";
 import DialogComponent from "../../../components/Dialog/Dialog.component";
+import { createEmployeeNotification } from "../../../services/notificationService";
 import {
   Button,
   Grid,
@@ -164,6 +165,9 @@ const EmployeesPage: React.FC = () => {
         severity: "success",
         duration: 3000,
       });
+      
+      // Add notification to menu
+      createEmployeeNotification('created', `${newEmployee.firstName} ${newEmployee.lastName}`);
     } catch (error) {
       showNotification(NOTIFICATIONS.EMPLOYEE_CREATE_ERROR, {
         severity: "error",
@@ -210,6 +214,9 @@ const EmployeesPage: React.FC = () => {
         severity: "success",
         duration: 3000,
       });
+      
+      // Add notification to menu
+      createEmployeeNotification('updated', `${editFields.firstName} ${editFields.lastName}`);
     } catch (error) {
       handleCancel();
       showNotification(NOTIFICATIONS.EMPLOYEE_UPDATE_ERROR, {
@@ -243,6 +250,12 @@ const EmployeesPage: React.FC = () => {
         severity: "success",
         duration: 3000,
       });
+      
+      // Add notification to menu
+      const employee = employees.find(emp => emp.id === employeeToDelete);
+      if (employee) {
+        createEmployeeNotification('deleted', `${employee.firstName} ${employee.lastName}`);
+      }
     } catch (error) {
       showNotification(NOTIFICATIONS.EMPLOYEE_DELETE_ERROR, {
         severity: "error",

@@ -67,5 +67,11 @@ const NOTIFICATIONS = {
   USER_PASSWORD_UPDATE_SUCCESS: "La contraseña fue actualizada exitosamente",
   USER_PASSWORD_UPDATE_ERROR:
     "Ha ocurrido un error al actualizar la contraseña",
+  HOURS_GENERATION_SUCCESS: "Horas generadas exitosamente",
+  HOURS_GENERATION_ERROR: "Error al generar las horas",
+  HOURS_GENERATION_NO_CONFIG: "Error: No hay configuración disponible",
+  HOURS_GENERATION_PROCESSING: "Procesando generación de horas...",
+  HOURS_GENERATION_COMPLETED: "Generación de horas completada",
+  HOURS_GENERATION_PARTIAL: "Algunas horas no pudieron ser generadas",
 };
 export default NOTIFICATIONS;

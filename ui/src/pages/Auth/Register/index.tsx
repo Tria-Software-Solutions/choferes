@@ -4,7 +4,7 @@ import { useSelector, useDispatch } from "react-redux";
 import { RootState, AppDispatch } from "../../../store/store";
 import { fetchUsers, createUser } from "../../../store/slices/userSlice";
 import { User } from "../../../models/User";
-import { useAppNotifications } from "../../../components/Snackbar/Snackbar.component";
+import { useAppNotifications } from "../../../hooks/useNotifications";
 import {
   TextField,
   Button,

@@ -30,7 +30,7 @@ import DescriptionIcon from "@mui/icons-material/Description";
 import PictureAsPdfIcon from "@mui/icons-material/PictureAsPdf";
 import DeleteOutlineIcon from "@mui/icons-material/DeleteOutline";
 import { deleteAllExceptCoreTables } from "../../../services/backupService";
-import { useAppNotifications } from "../../../components/Snackbar/Snackbar.component";
+import { useAppNotifications } from "../../../hooks/useNotifications";
 import DialogComponent from "../../../components/Dialog/Dialog.component";
 import { getEmployees } from "../../../services/employeeService";
 import { getHoursWorked } from "../../../services/hoursWorkedService";
