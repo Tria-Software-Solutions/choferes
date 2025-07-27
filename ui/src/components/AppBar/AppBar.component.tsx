@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import MenuComponent from "../Menu/Menu.component";
+import NotificationMenu from "../NotificationMenu/NotificationMenu.component";
 import {
   AppBar,
   Toolbar,
@@ -21,6 +22,7 @@ import {
 import { useNavigate, useLocation } from "react-router-dom";
 import { useAuthContext } from "../../context/AuthContext";
 import { APPBAR_MENU } from "../../constants/constants";
+import { useNotificationMenu } from "../../hooks/useNotificationMenu";
 import MenuRoundedIcon from "@mui/icons-material/MenuRounded";
 import NotificationsRoundedIcon from "@mui/icons-material/NotificationsRounded";
 import DashboardRoundedIcon from "@mui/icons-material/DashboardRounded";
@@ -82,6 +84,7 @@ const AppBarComponent: React.FC<AppBarComponentProps> = ({
   const location = useLocation();
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("md"));
+  const { unreadCount } = useNotificationMenu();
 
   const [userMenuAnchor, setUserMenuAnchor] = useState<null | HTMLElement>(
     null,
@@ -248,7 +251,7 @@ const AppBarComponent: React.FC<AppBarComponentProps> = ({
                     onClick={handleNotificationsOpen}
                     sx={notificationsIconButtonStyles}
                   >
-                    <Badge badgeContent={3} color="error">
+                    <Badge badgeContent={unreadCount} color="error">
                       <NotificationsRoundedIcon />
                     </Badge>
                   </IconButton>
@@ -373,32 +376,15 @@ const AppBarComponent: React.FC<AppBarComponentProps> = ({
           ))}
         </Menu>
 
-        <Menu
+        <NotificationMenu
           anchorEl={notificationsAnchor}
-          open={Boolean(notificationsAnchor)}
           onClose={handleNotificationsClose}
-          transformOrigin={{ horizontal: "right", vertical: "top" }}
-          anchorOrigin={{ horizontal: "right", vertical: "bottom" }}
-        >
-          <MenuItem>
-            <ListItemText
-              primary="Nuevo empleado registrado"
-              secondary="Hace 5 minutos"
-            />
-          </MenuItem>
-          <MenuItem>
-            <ListItemText
-              primary="Horario actualizado"
-              secondary="Hace 1 hora"
-            />
-          </MenuItem>
-          <MenuItem>
-            <ListItemText
-              primary="Reporte semanal disponible"
-              secondary="Hace 2 horas"
-            />
-          </MenuItem>
-        </Menu>
+          onNotificationClick={(notification) => {
+            if (notification.actionUrl) {
+              navigate(notification.actionUrl);
+            }
+          }}
+        />
       </Toolbar>
     </AppBar>
   );

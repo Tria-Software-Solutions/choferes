@@ -13,8 +13,9 @@ import SearchBarComponent from "../../../components/SearchBar/SearchBar.componen
 import EditableTableComponent from "../../../components/Table/EditableTable/EditableTable.component";
 import SpeedDialComponent from "../../../components/SpeedDial/SpeedDial.component";
 import AddScheduleForm from "../../Forms/AddScheduleForm";
-import { useAppNotifications } from "../../../components/Snackbar/Snackbar.component";
+import { useAppNotifications } from "../../../hooks/useNotifications";
 import DialogComponent from "../../../components/Dialog/Dialog.component";
+import { createScheduleNotification } from "../../../services/notificationService";
 import {
   Button,
   Grid,
@@ -179,6 +180,9 @@ const SchedulesPage: React.FC = () => {
         severity: "success",
         duration: 3000,
       });
+      
+      // Add notification to menu
+      createScheduleNotification('created', newSchedule.label);
     } catch (error) {
       showNotification(NOTIFICATIONS.SCHEDULE_CREATE_ERROR, {
         severity: "error",
@@ -219,6 +223,9 @@ const SchedulesPage: React.FC = () => {
         severity: "success",
         duration: 3000,
       });
+      
+      // Add notification to menu
+      createScheduleNotification('updated', editFields.label);
     } catch (error) {
       handleCancel();
       showNotification(NOTIFICATIONS.SCHEDULE_UPDATE_ERROR, {
@@ -261,6 +268,12 @@ const SchedulesPage: React.FC = () => {
         severity: "success",
         duration: 3000,
       });
+      
+      // Add notification to menu
+      const schedule = schedules.find(sch => sch.id === scheduleToDelete);
+      if (schedule) {
+        createScheduleNotification('deleted', schedule.label);
+      }
     } catch (error) {
       showNotification(NOTIFICATIONS.SCHEDULE_DELETE_ERROR, {
         severity: "error",

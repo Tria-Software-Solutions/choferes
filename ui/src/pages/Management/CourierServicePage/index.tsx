@@ -4,7 +4,8 @@ import { useSelector /*useDispatch*/ } from "react-redux";
 import { RootState /*AppDispatch*/ } from "../../../store/store";
 import SearchBarComponent from "../../../components/SearchBar/SearchBar.component";
 import SpeedDialComponent from "../../../components/SpeedDial/SpeedDial.component";
-import { useAppNotifications } from "../../../components/Snackbar/Snackbar.component";
+import { useAppNotifications } from "../../../hooks/useNotifications";
+import { createCourierNotification } from "../../../services/notificationService";
 import {
   Box,
   Typography,
@@ -239,6 +240,12 @@ const CourierServicePage: React.FC = () => {
         severity: "success",
         duration: 3000,
       });
+      
+      // Add notification to menu
+      const courier = filteredCouriers.find(c => c.id === id);
+      if (courier) {
+        createCourierNotification('updated', `${courier.driver} - ${courier.route}`);
+      }
       setEditRowId(null);
     } catch (error) {
       showNotification(NOTIFICATIONS.COURIER_UPDATE_ERROR, {
@@ -282,6 +289,12 @@ const CourierServicePage: React.FC = () => {
         severity: "success",
         duration: 3000,
       });
+      
+      // Add notification to menu
+      const courier = filteredCouriers.find(c => c.id === courierToDelete);
+      if (courier) {
+        createCourierNotification('deleted', `${courier.driver} - ${courier.route}`);
+      }
     } catch (error) {
       showNotification(NOTIFICATIONS.COURIER_DELETE_ERROR, {
         severity: "error",
@@ -407,6 +420,9 @@ const CourierServicePage: React.FC = () => {
         severity: "success",
         duration: 3000,
       });
+      
+      // Add notification to menu
+      createCourierNotification('created', `${courierData.driver} - ${courierData.route}`);
     } catch (error) {
       showNotification(NOTIFICATIONS.COURIER_CREATE_ERROR, {
         severity: "error",
