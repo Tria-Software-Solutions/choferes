@@ -276,145 +276,172 @@ const NotificationMenu: React.FC<NotificationMenuProps> = ({
         </Box>
       )}
 
-      {/* Notifications List */}
-      <Box sx={{ maxHeight: 400, overflow: 'auto' }}>
-        {notifications.length === 0 ? (
-          <Box sx={{ p: 3, textAlign: 'center' }}>
-            <NotificationsIcon sx={{ fontSize: 48, color: 'text.secondary', mb: 1 }} />
-            <Typography variant="body2" color="text.secondary">
-              No hay notificaciones
-            </Typography>
-          </Box>
-        ) : (
-          (showAllNotifications ? notifications : notifications.slice(0, 5)).map((notification, index) => (
-            <React.Fragment key={notification.id}>
-              <ListItemButton
-                onClick={() => handleNotificationClick(notification)}
-                sx={{
-                  py: 1.5,
-                  px: 2,
-                  backgroundColor: notification.read ? 'transparent' : theme.palette.action.hover,
-                  '&:hover': {
-                    backgroundColor: theme.palette.action.selected,
-                  },
-                }}
-              >
-                <ListItemIcon sx={{ minWidth: 40 }}>
-                  {getNotificationIcon(notification.type)}
-                </ListItemIcon>
+      {/* Main Content Container */}
+      <Box sx={{ 
+        display: 'flex', 
+        flexDirection: 'column', 
+        height: notifications.length === 0 ? 'auto' : 400,
+        minHeight: notifications.length === 0 ? 'auto' : 200,
+      }}>
+        {/* Scrollable Notifications List */}
+        <Box sx={{ 
+          flex: notifications.length === 0 ? 'none' : 1, 
+          overflow: 'auto',
+          minHeight: notifications.length === 0 ? 'auto' : 0,
+        }}>
+          {notifications.length === 0 ? (
+            <Box sx={{ 
+              p: 3, 
+              textAlign: 'center',
+              minHeight: notifications.length === 0 ? 120 : 'auto',
+              display: 'flex',
+              flexDirection: 'column',
+              justifyContent: 'center',
+              alignItems: 'center',
+            }}>
+              <NotificationsIcon sx={{ fontSize: 48, color: 'text.secondary', mb: 1 }} />
+              <Typography variant="body2" color="text.secondary">
+                No hay notificaciones
+              </Typography>
+            </Box>
+          ) : (
+            (showAllNotifications ? notifications : notifications.slice(0, 5)).map((notification, index) => (
+              <React.Fragment key={notification.id}>
+                <ListItemButton
+                  onClick={() => handleNotificationClick(notification)}
+                  sx={{
+                    py: 1.5,
+                    px: 2,
+                    backgroundColor: notification.read ? 'transparent' : theme.palette.action.hover,
+                    '&:hover': {
+                      backgroundColor: theme.palette.action.selected,
+                    },
+                  }}
+                >
+                  <ListItemIcon sx={{ minWidth: 40 }}>
+                    {getNotificationIcon(notification.type)}
+                  </ListItemIcon>
 
-                <ListItemText
-                  primary={
-                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 0.5 }}>
-                      {!notification.read && (
-                        <Box
-                          sx={{
-                            width: 6,
-                            height: 6,
-                            borderRadius: '50%',
-                            backgroundColor: theme.palette.primary.main,
-                            flexShrink: 0,
+                  <ListItemText
+                    primary={
+                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 0.5 }}>
+                        {!notification.read && (
+                          <Box
+                            sx={{
+                              width: 6,
+                              height: 6,
+                              borderRadius: '50%',
+                              backgroundColor: theme.palette.primary.main,
+                              flexShrink: 0,
+                            }}
+                          />
+                        )}
+                        <Chip
+                          label={translatePriorityToSpanish(notification.priority)}
+                          size="small"
+                          color={getPriorityColor(notification.priority) as 'error' | 'warning' | 'default'}
+                          variant="outlined"
+                          sx={{ 
+                            fontSize: '0.7rem', 
+                            height: 20,
+                            '& .MuiChip-label': {
+                              color: theme.palette.mode === 'dark' 
+                                ? theme.palette.text.primary 
+                                : theme.palette.text.primary,
+                              fontWeight: 500,
+                            },
+                            '& .MuiChip-outlined': {
+                              borderColor: theme.palette.mode === 'dark' 
+                                ? theme.palette.divider 
+                                : theme.palette.text.secondary,
+                            },
+                            backgroundColor: theme.palette.mode === 'dark' 
+                              ? 'rgba(255, 255, 255, 0.05)' 
+                              : 'rgba(0, 0, 0, 0.05)',
                           }}
                         />
-                      )}
-                      <Chip
-                        label={translatePriorityToSpanish(notification.priority)}
+                        <Typography
+                          variant="body2"
+                          sx={{
+                            fontWeight: 700,
+                          }}
+                        >
+                          {notification.title}
+                        </Typography>
+                      </Box>
+                    }
+                    secondary={
+                      <Box>
+                        <Typography variant="body2" color="text.secondary" sx={{ mb: 0.5, fontSize: '0.875rem' }}>
+                          {notification.message}
+                        </Typography>
+                        <Typography variant="caption" color="text.secondary" sx={{ fontSize: '0.75rem' }}>
+                          {formatTime(notification.timestamp)}
+                        </Typography>
+                      </Box>
+                    }
+                  />
+
+                  <Box sx={{ display: 'flex', alignItems: 'center', minWidth: 32 }}>
+                    <Tooltip title="Eliminar">
+                      <IconButton
                         size="small"
-                        color={getPriorityColor(notification.priority) as 'error' | 'warning' | 'default'}
-                        variant="outlined"
+                        onClick={(e) => handleDeleteNotification(e, notification.id)}
                         sx={{ 
-                          fontSize: '0.7rem', 
-                          height: 20,
-                          '& .MuiChip-label': {
-                            color: theme.palette.mode === 'dark' 
-                              ? theme.palette.text.primary 
-                              : theme.palette.text.primary,
-                            fontWeight: 500,
-                          },
-                          '& .MuiChip-outlined': {
-                            borderColor: theme.palette.mode === 'dark' 
-                              ? theme.palette.divider 
-                              : theme.palette.text.secondary,
-                          },
-                          backgroundColor: theme.palette.mode === 'dark' 
-                            ? 'rgba(255, 255, 255, 0.05)' 
-                            : 'rgba(0, 0, 0, 0.05)',
-                        }}
-                      />
-                      <Typography
-                        variant="body2"
-                        sx={{
-                          fontWeight: 700,
+                          opacity: 0.6, 
+                          '&:hover': { opacity: 1 },
+                          padding: 0.5,
+                          minWidth: 24,
+                          minHeight: 24,
                         }}
                       >
-                        {notification.title}
-                      </Typography>
-                    </Box>
-                  }
-                  secondary={
-                    <Box>
-                      <Typography variant="body2" color="text.secondary" sx={{ mb: 0.5, fontSize: '0.875rem' }}>
-                        {notification.message}
-                      </Typography>
-                      <Typography variant="caption" color="text.secondary" sx={{ fontSize: '0.75rem' }}>
-                        {formatTime(notification.timestamp)}
-                      </Typography>
-                    </Box>
-                  }
-                />
+                        <DeleteIcon sx={{ fontSize: 20 }} />
+                      </IconButton>
+                    </Tooltip>
+                  </Box>
+                </ListItemButton>
 
-                <Box sx={{ display: 'flex', alignItems: 'center', minWidth: 32 }}>
-                  <Tooltip title="Eliminar">
-                    <IconButton
-                      size="small"
-                      onClick={(e) => handleDeleteNotification(e, notification.id)}
-                      sx={{ 
-                        opacity: 0.6, 
-                        '&:hover': { opacity: 1 },
-                        padding: 0.5,
-                        minWidth: 24,
-                        minHeight: 24,
-                      }}
-                    >
-                                              <DeleteIcon sx={{ fontSize: 20 }} />
-                    </IconButton>
-                  </Tooltip>
-                </Box>
-              </ListItemButton>
+                {index < (showAllNotifications ? notifications : notifications.slice(0, 5)).length - 1 && (
+                  <Divider sx={{ mx: 2 }} />
+                )}
+              </React.Fragment>
+            ))
+          )}
+          
+          {/* Show More/Less Button */}
+          {notifications.length > 5 && (
+            <Box sx={{ p: 1, borderTop: `1px solid ${theme.palette.divider}` }}>
+              <Button
+                fullWidth
+                variant="text"
+                size="small"
+                onClick={() => setShowAllNotifications(!showAllNotifications)}
+                sx={{ 
+                  fontSize: '0.8rem', 
+                  padding: '4px 8px',
+                  textTransform: 'none',
+                  color: theme.palette.primary.main,
+                }}
+              >
+                {showAllNotifications 
+                  ? `Mostrar menos (${notifications.length - 5} menos)` 
+                  : `Ver todas las notificaciones (${notifications.length - 5} más)`
+                }
+              </Button>
+            </Box>
+          )}
+        </Box>
 
-              {index < (showAllNotifications ? notifications : notifications.slice(0, 5)).length - 1 && (
-                <Divider sx={{ mx: 2 }} />
-              )}
-            </React.Fragment>
-          ))
-        )}
-        
-        {/* Show More/Less Button */}
-        {notifications.length > 5 && (
-          <Box sx={{ p: 1, borderTop: `1px solid ${theme.palette.divider}` }}>
-            <Button
-              fullWidth
-              variant="text"
-              size="small"
-              onClick={() => setShowAllNotifications(!showAllNotifications)}
-              sx={{ 
-                fontSize: '0.8rem', 
-                padding: '4px 8px',
-                textTransform: 'none',
-                color: theme.palette.primary.main,
-              }}
-            >
-              {showAllNotifications 
-                ? `Mostrar menos (${notifications.length - 5} menos)` 
-                : `Ver todas las notificaciones (${notifications.length - 5} más)`
-              }
-            </Button>
-          </Box>
-        )}
-
-        {/* Delete All Button */}
+        {/* Sticky Footer with Delete All Button */}
         {notifications.length > 0 && (
-          <Box sx={{ p: 1, borderTop: `1px solid ${theme.palette.divider}` }}>
+          <Box sx={{ 
+            p: 1, 
+            borderTop: `1px solid ${theme.palette.divider}`,
+            backgroundColor: theme.palette.background.paper,
+            position: 'sticky',
+            bottom: 0,
+            zIndex: 1,
+          }}>
             <Button
               fullWidth
               variant="outlined"
@@ -437,8 +464,6 @@ const NotificationMenu: React.FC<NotificationMenuProps> = ({
             </Button>
           </Box>
         )}
-        
-
       </Box>
 
 
