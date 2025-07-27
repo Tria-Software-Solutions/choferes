@@ -148,4 +148,50 @@ export const createReportNotification = (title: string, message: string, actionU
     actionUrl,
     actionText: 'Ver reporte'
   });
+};
+
+export const createBackupNotification = (action: 'created' | 'failed', format: 'excel' | 'pdf') => {
+  const actions = {
+    created: { 
+      title: 'Backup creado exitosamente', 
+      message: `Se ha creado un backup en formato ${format.toUpperCase()} con todos los datos del sistema` 
+    },
+    failed: { 
+      title: 'Error al crear backup', 
+      message: `No se pudo crear el backup en formato ${format.toUpperCase()}` 
+    }
+  };
+
+  return addNotificationToMenu({
+    title: actions[action].title,
+    message: actions[action].message,
+    type: action === 'created' ? 'success' : 'error',
+    category: 'system',
+    priority: 'high',
+    actionUrl: '/dashboard',
+    actionText: 'Ir al dashboard'
+  });
+};
+
+export const createDataDeletionNotification = (action: 'completed' | 'failed') => {
+  const actions = {
+    completed: { 
+      title: 'Datos eliminados exitosamente', 
+      message: 'Todos los datos no esenciales han sido eliminados del sistema' 
+    },
+    failed: { 
+      title: 'Error al eliminar datos', 
+      message: 'No se pudieron eliminar todos los datos del sistema' 
+    }
+  };
+
+  return addNotificationToMenu({
+    title: actions[action].title,
+    message: actions[action].message,
+    type: action === 'completed' ? 'warning' : 'error',
+    category: 'system',
+    priority: 'high',
+    actionUrl: '/dashboard',
+    actionText: 'Ir al dashboard'
+  });
 }; 

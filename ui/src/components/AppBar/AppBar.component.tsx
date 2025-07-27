@@ -22,7 +22,7 @@ import {
 import { useNavigate, useLocation } from "react-router-dom";
 import { useAuthContext } from "../../context/AuthContext";
 import { APPBAR_MENU } from "../../constants/constants";
-import { useNotificationMenu } from "../../hooks/useNotificationMenu";
+import { useNotificationMenu } from "../../context/NotificationContext";
 import MenuRoundedIcon from "@mui/icons-material/MenuRounded";
 import NotificationsRoundedIcon from "@mui/icons-material/NotificationsRounded";
 import DashboardRoundedIcon from "@mui/icons-material/DashboardRounded";

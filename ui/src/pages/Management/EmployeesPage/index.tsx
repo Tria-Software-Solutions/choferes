@@ -13,7 +13,7 @@ import SearchBarComponent from "../../../components/SearchBar/SearchBar.componen
 import SpeedDialComponent from "../../../components/SpeedDial/SpeedDial.component";
 import EditableTableComponent from "../../../components/Table/EditableTable/EditableTable.component";
 import AddEmployeeForm from "../../Forms/AddEmployeeForm";
-import { useAppNotifications } from "../../../hooks/useNotifications";
+import { useAppNotifications } from "../../../components/Snackbar/Snackbar.component";
 import DialogComponent from "../../../components/Dialog/Dialog.component";
 import { createEmployeeNotification } from "../../../services/notificationService";
 import {

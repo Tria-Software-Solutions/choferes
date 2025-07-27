@@ -12,7 +12,7 @@ import {
 } from "../../../store/slices/userSlice";
 import { fetchRoles } from "../../../store/slices/rolesSlice";
 import { fetchUserRoles } from "../../../store/slices/userRolesSlice";
-import { useAppNotifications } from "../../../hooks/useNotifications";
+import { useAppNotifications } from "../../../components/Snackbar/Snackbar.component";
 import {
   Alert,
   Backdrop,
