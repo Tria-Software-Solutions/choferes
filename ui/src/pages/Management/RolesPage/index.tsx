@@ -659,16 +659,114 @@ const RolesPage: React.FC = () => {
         let current = startOfWeek(firstDayOfWeek || new Date(), { weekStartsOn: 1 });
         
         // Determine if we need to redistribute hours for individual/uniform mode
-        const needsRedistribution = (config.mode === 'individual' && config.individualHours[employeeId]) ||
-                                   (config.mode === 'uniform' && config.uniformHours);
+        const needsRedistribution = (config.mode === 'individual' && config.individualHours[employeeId] !== undefined) ||
+                                   (config.mode === 'uniform' && config.uniformHours > 0);
         
         // Calculate total weekly hours for this employee
         let totalWeeklyHours = 0;
         const weekDays = [];
         
-       
-        // Only calculate total if we're not redistributing (for individual/uniform mode, we'll calculate after redistribution)
-        if (!needsRedistribution) {
+        // Check if target hours is 0 (for both individual and uniform modes)
+        const targetWeeklyHours = config.mode === 'individual' 
+          ? (config.individualHours[employeeId] !== undefined ? config.individualHours[employeeId] : 0)
+          : config.uniformHours;
+          
+        // If target hours is 0, don't assign any hours
+        if (targetWeeklyHours === 0) {
+          totalWeeklyHours = 0;
+          // Still create/update the weekly summary with 0 hours
+          const weekStartDate = startOfWeek(firstDayOfWeek || new Date(), { weekStartsOn: 1 });
+          const weeklySummary = {
+            employeeId,
+            weekNumber: getWeekNumber(weekStartDate),
+            month: weekStartDate.getMonth() + 1,
+            year: weekStartDate.getFullYear(),
+            totalHours: 0,
+          };
+          await createOrUpdateWeeklySummary(weeklySummary);
+          return;
+        }
+        
+        // Find the minimum daily hours available in schedules
+        const minDailyHours = Math.min(...availableSchedules
+          .filter(s => s.label === assignedScheduleLabel && s.hours > 0)
+          .map(s => s.hours)
+        );
+        
+        // If target hours are less than the minimum daily hours, don't assign anything
+        if (targetWeeklyHours < minDailyHours) {
+          totalWeeklyHours = 0;
+          // Still create/update the weekly summary with 0 hours
+          const weekStartDate = startOfWeek(firstDayOfWeek || new Date(), { weekStartsOn: 1 });
+          const weeklySummary = {
+            employeeId,
+            weekNumber: getWeekNumber(weekStartDate),
+            month: weekStartDate.getMonth() + 1,
+            year: weekStartDate.getFullYear(),
+            totalHours: 0,
+          };
+          await createOrUpdateWeeklySummary(weeklySummary);
+          return;
+        }
+        
+        if (needsRedistribution) {
+            
+          // Apply maximum hours limit
+          const maxHoursPerWeek = config.maxHoursPerWeek || 48;
+          const limitedTargetHours = Math.min(targetWeeklyHours, maxHoursPerWeek);
+            
+          // Find the schedule's daily hours
+          const scheduleDailyHours = availableSchedules.find(s => 
+            s.label === assignedScheduleLabel && 
+            s.days && s.days.includes('monday') // Use any day to get the hours
+          )?.hours || 0;
+          
+          if (scheduleDailyHours > 0) {
+            // Calculate how many days we need to assign
+            const daysNeeded = Math.ceil(limitedTargetHours / scheduleDailyHours);
+            
+            // Create entries only for the required number of days
+            const redistributedEntries = [];
+            let accumulatedHours = 0;
+            
+            for (let i = 0; i < 7; i++) {
+              const dayDate = addDays(current, i);
+              const dayName = dayDate.toLocaleDateString("en-US", { weekday: "long" }).toLowerCase();
+              
+              // Find the schedule for this specific day and label
+              const daySchedule = availableSchedules.find(s => 
+                s.label === assignedScheduleLabel && 
+                s.days && s.days.includes(dayName)
+              );
+              
+              if (daySchedule && i < daysNeeded) {
+                // Check if adding this day's hours would exceed the limit
+                if (accumulatedHours + daySchedule.hours <= limitedTargetHours) {
+                  // Assign the schedule for this day
+                  const hoursWorkedEntry = {
+                    employeeId,
+                    date: dayDate.toISOString(),
+                    scheduleId: daySchedule.id,
+                  };
+                  redistributedEntries.push(hoursWorkedEntry);
+                  totalWeeklyHours += daySchedule.hours;
+                  accumulatedHours += daySchedule.hours;
+                } else {
+                  // Stop assigning more days to respect the limit
+                  break;
+                }
+              }
+            }
+            
+            // Create redistributed entries
+            await Promise.all(
+              redistributedEntries.map(async (entry) => {
+                await dispatch(createOrUpdateHoursWorked(entry));
+              })
+            );
+          }
+        } else {
+          // Create original entries without redistribution
           for (let i = 0; i < 7; i++) {
             const dayDate = addDays(current, i);
             const dayName = dayDate.toLocaleDateString("en-US", { weekday: "long" }).toLowerCase();
@@ -692,56 +790,8 @@ const RolesPage: React.FC = () => {
               totalWeeklyHours += daySchedule.hours;
             }
           }
-        }
-        
-        if (needsRedistribution) {
-          // Calculate how many days to assign based on target weekly hours
-          const targetWeeklyHours = config.mode === 'individual' 
-            ? config.individualHours[employeeId] 
-            : config.uniformHours;
-            
-          // Find the schedule's daily hours
-          const scheduleDailyHours = availableSchedules.find(s => 
-            s.label === assignedScheduleLabel && 
-            s.days && s.days.includes('monday') // Use any day to get the hours
-          )?.hours || 0;
           
-          if (scheduleDailyHours > 0) {
-            // Calculate how many days we need to assign
-            const daysNeeded = Math.ceil(targetWeeklyHours / scheduleDailyHours);
-            
-            // Create entries only for the required number of days
-            const redistributedEntries = [];
-            for (let i = 0; i < 7; i++) {
-              const dayDate = addDays(current, i);
-              const dayName = dayDate.toLocaleDateString("en-US", { weekday: "long" }).toLowerCase();
-              
-              // Find the schedule for this specific day and label
-              const daySchedule = availableSchedules.find(s => 
-                s.label === assignedScheduleLabel && 
-                s.days && s.days.includes(dayName)
-              );
-              
-              if (daySchedule && i < daysNeeded) {
-                // Assign the schedule for this day
-                const hoursWorkedEntry = {
-                  employeeId,
-                  date: dayDate.toISOString(),
-                  scheduleId: daySchedule.id,
-                };
-                redistributedEntries.push(hoursWorkedEntry);
-              }
-            }
-            
-            // Create redistributed entries
-            await Promise.all(
-              redistributedEntries.map(async (entry) => {
-                await dispatch(createOrUpdateHoursWorked(entry));
-              })
-            );
-          }
-        } else {
-          // Create original entries without redistribution
+          // Create original entries
           await Promise.all(
             weekDays.map(async (entry) => {
               await dispatch(createOrUpdateHoursWorked(entry));
@@ -757,15 +807,13 @@ const RolesPage: React.FC = () => {
           let finalTotalHours = totalWeeklyHours;
           
           if (config.mode === 'individual' && config.individualHours[employeeId]) {
-            // Use individual hours as the target weekly total
-            // The system will redistribute hours to reach exactly this total
-            const targetWeeklyHours = config.individualHours[employeeId];
-            finalTotalHours = targetWeeklyHours;
+            // Use the actual calculated hours (which respects the max limit)
+            finalTotalHours = totalWeeklyHours;
           } else if (config.mode === 'uniform' && config.uniformHours) {
-            // Use uniform hours as the target weekly total for all employees
-            finalTotalHours = config.uniformHours;
+            // Use the actual calculated hours (which respects the max limit)
+            finalTotalHours = totalWeeklyHours;
           } else {
-            // For default mode, show the actual calculated hours without limiting
+            // For default mode, show the actual calculated hours
             finalTotalHours = totalWeeklyHours;
           }
           
