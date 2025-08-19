@@ -202,7 +202,7 @@ const SelectorTableComponent: React.FC<SelectorTableProps> = ({
   const [isMenuOpen, setIsMenuOpen] = useState<boolean>(false);
   const theme = useTheme();
   const periodSelectorBg =
-    theme.palette.mode === "dark" ? "#111111" : "#000000";
+    theme.palette.mode === "dark" ? "#111" : "#000000";
   const [employeeSearchTerms, setEmployeeSearchTerms] = useState<Record<string, string>>({});
 
   const getSearchKey = (scheduleId: number, date: string) => `${scheduleId}-${date}`;
@@ -690,6 +690,12 @@ const SelectorTableComponent: React.FC<SelectorTableProps> = ({
                                     fontSize: "1rem",
                                     fontWeight: 700,
                                   },
+                                  "& .MuiOutlinedInput-root": {
+                                    backgroundColor: periodSelectorBg,
+                                  },
+                                  "& .MuiInputBase-root": {
+                                    backgroundColor: periodSelectorBg,
+                                  },
                                   border: "none",
                                 }}
                               />
@@ -718,6 +724,12 @@ const SelectorTableComponent: React.FC<SelectorTableProps> = ({
                                 {
                                   border: "none",
                                 },
+                              "& .MuiInputBase-root": {
+                                backgroundColor: periodSelectorBg,
+                              },
+                              "& .MuiOutlinedInput-root": {
+                                backgroundColor: periodSelectorBg,
+                              },
                             }}
                             MenuProps={{
                               PaperProps: {
