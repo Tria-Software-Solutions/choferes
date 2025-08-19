@@ -580,15 +580,20 @@ const SelectorTableComponent: React.FC<SelectorTableProps> = ({
                     backgroundColor:
                       theme.palette.mode === "dark"
                         ? "#111"
-                        : theme.palette.primary.main,
-                    color:
-                      theme.palette.mode === "dark"
-                        ? "#fff"
-                        : theme.palette.primary.contrastText,
+                        : "#000000",
+                    color: "#fff",
                     position: "relative",
                     zIndex: 1,
                     minHeight: viewMode === "schedule" ? "40px" : "auto",
                     height: viewMode === "schedule" ? "40px" : "auto",
+                    cursor: "pointer",
+                    transition: "background-color 0.2s ease",
+                    "&:hover": {
+                      backgroundColor:
+                        theme.palette.mode === "dark"
+                          ? "#333"
+                          : "#333",
+                    },
                   }}
                 >
                   <TableSortLabel
@@ -599,10 +604,7 @@ const SelectorTableComponent: React.FC<SelectorTableProps> = ({
                       )
                     }
                     sx={{
-                      color:
-                        theme.palette.mode === "dark"
-                          ? "#fff"
-                          : theme.palette.primary.contrastText,
+                      color: "#fff",
                     }}
                   >
                     {viewMode === "employee"
@@ -619,16 +621,21 @@ const SelectorTableComponent: React.FC<SelectorTableProps> = ({
                       backgroundColor:
                         theme.palette.mode === "dark"
                           ? "#111"
-                          : theme.palette.primary.main,
-                      color:
-                        theme.palette.mode === "dark"
-                          ? "#fff"
-                          : theme.palette.primary.contrastText,
+                          : "#000000",
+                      color: "#fff",
                       position: "relative",
                       zIndex: 1,
                       whiteSpace: "nowrap",
                       minHeight: viewMode === "schedule" ? "40px" : "auto",
                       height: viewMode === "schedule" ? "40px" : "auto",
+                      cursor: "pointer",
+                      transition: "background-color 0.2s ease",
+                      "&:hover": {
+                        backgroundColor:
+                          theme.palette.mode === "dark"
+                            ? "#333"
+                            : "#333",
+                      },
                     }}
                   >
                     {`${translateDayToAbrevSpanish(
@@ -646,11 +653,8 @@ const SelectorTableComponent: React.FC<SelectorTableProps> = ({
                           backgroundColor:
                             theme.palette.mode === "dark"
                               ? "#111"
-                              : theme.palette.primary.main,
-                          color:
-                            theme.palette.mode === "dark"
-                              ? "#fff"
-                              : theme.palette.primary.contrastText,
+                              : "#000000",
+                          color: "#fff",
                           position: "relative",
                           zIndex: 1,
                         }}
@@ -662,7 +666,7 @@ const SelectorTableComponent: React.FC<SelectorTableProps> = ({
                           backgroundColor:
                             theme.palette.mode === "dark"
                               ? "#111"
-                              : theme.palette.primary.main,
+                              : "#000000",
                           color: "#fff",
                           position: "relative",
                           zIndex: 1,
@@ -681,7 +685,7 @@ const SelectorTableComponent: React.FC<SelectorTableProps> = ({
                                 notched={false}
                                 label="Periodo"
                                 sx={{
-                                  backgroundColor: periodSelectorBg,
+                                  backgroundColor: `${periodSelectorBg} !important`,
                                   color: "#fff",
                                   fontSize: "1rem",
                                   fontWeight: 700,
@@ -691,23 +695,23 @@ const SelectorTableComponent: React.FC<SelectorTableProps> = ({
                                     fontWeight: 700,
                                   },
                                   "& .MuiOutlinedInput-root": {
-                                    backgroundColor: periodSelectorBg,
+                                    backgroundColor: `${periodSelectorBg} !important`,
                                   },
                                   "& .MuiInputBase-root": {
-                                    backgroundColor: periodSelectorBg,
+                                    backgroundColor: `${periodSelectorBg} !important`,
                                   },
                                   border: "none",
                                 }}
                               />
                             }
                             sx={{
-                              backgroundColor: periodSelectorBg,
+                              backgroundColor: `${periodSelectorBg} !important`,
                               color: "#fff",
                               fontSize: "1rem",
                               fontWeight: 700,
                               "& .MuiSelect-select": {
                                 color: "#fff",
-                                backgroundColor: periodSelectorBg,
+                                backgroundColor: `${periodSelectorBg} !important`,
                                 fontSize: "1rem",
                                 fontWeight: 700,
                               },
@@ -725,10 +729,10 @@ const SelectorTableComponent: React.FC<SelectorTableProps> = ({
                                   border: "none",
                                 },
                               "& .MuiInputBase-root": {
-                                backgroundColor: periodSelectorBg,
+                                backgroundColor: `${periodSelectorBg} !important`,
                               },
                               "& .MuiOutlinedInput-root": {
-                                backgroundColor: periodSelectorBg,
+                                backgroundColor: `${periodSelectorBg} !important`,
                               },
                             }}
                             MenuProps={{
@@ -857,7 +861,13 @@ const SelectorTableComponent: React.FC<SelectorTableProps> = ({
                 ? paginatedEmployees.map((employee, rowIndex) => (
                     <TableRow
                       key={employee.id}
-                      sx={tableRowBackground(rowIndex)}
+                      sx={{
+                        ...tableRowBackground(rowIndex),
+                        "&:hover": {
+                          backgroundColor: rowIndex % 2 === 0 ? "background.paper" : "action.hover",
+                        },
+                        borderBottom: theme.palette.mode === "dark" ? "1px solid #444" : "none",
+                      }}
                     >
                       <TableCell
                         sx={Object.assign(
@@ -944,6 +954,15 @@ const SelectorTableComponent: React.FC<SelectorTableProps> = ({
                                   <OutlinedInput
                                     notched={false}
                                     label="Ubicación"
+                                    sx={{
+                                      backgroundColor: "transparent",
+                                      "& .MuiOutlinedInput-root": {
+                                        backgroundColor: "transparent",
+                                      },
+                                      "& .MuiInputBase-root": {
+                                        backgroundColor: "transparent",
+                                      },
+                                    }}
                                   />
                                 }
                                 MenuProps={{
@@ -1031,7 +1050,7 @@ const SelectorTableComponent: React.FC<SelectorTableProps> = ({
                             align="center"
                             sx={{
                               padding: isSmallScreen ? "8px" : "16px",
-                              backgroundColor: theme.palette.background.paper,
+                              ...tableCellBackground(rowIndex, false),
                               color: theme.palette.text.primary,
                             }}
                           >
@@ -1078,7 +1097,7 @@ const SelectorTableComponent: React.FC<SelectorTableProps> = ({
                               position: isSmallScreen ? "static" : "sticky",
                               right: 0,
                               zIndex: 2,
-                              backgroundColor: theme.palette.background.paper,
+                              ...tableCellBackground(rowIndex, false),
                               color: theme.palette.text.primary,
                             }}
                           >
@@ -1150,7 +1169,13 @@ const SelectorTableComponent: React.FC<SelectorTableProps> = ({
                 : groupedSchedules.map((group, rowIndex) => (
                     <TableRow
                       key={group.label}
-                      sx={tableRowBackground(rowIndex)}
+                      sx={{
+                        ...tableRowBackground(rowIndex),
+                        "&:hover": {
+                          backgroundColor: rowIndex % 2 === 0 ? "background.paper" : "action.hover",
+                        },
+                        borderBottom: theme.palette.mode === "dark" ? "1px solid #444" : "none",
+                      }}
                     >
                       <TableCell
                         sx={Object.assign(
