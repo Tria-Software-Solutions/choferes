@@ -26,11 +26,13 @@ export const getScheduleCellData = (
   hoursWorked: HoursWorked[],
 ): ScheduleCellData => {
   const formattedDate = format(new Date(date), "yyyy-MM-dd");
-  const existingRecord = hoursWorked.find(
-    (record) =>
-      record.employeeId === employee.id &&
-      format(new Date(record.date), "yyyy-MM-dd") === formattedDate,
-  );
+  const existingRecord = hoursWorked
+    .filter(
+      (record) =>
+        record.employeeId === employee.id &&
+        format(new Date(record.date), "yyyy-MM-dd") === formattedDate,
+    )
+    .sort((a, b) => b.id - a.id)[0];
   const options = getOptionsForDay(day, schedules);
   const validLabels = options.map((option) => option.label);
 

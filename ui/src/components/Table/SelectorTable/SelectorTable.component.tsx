@@ -347,12 +347,16 @@ const SelectorTableComponent: React.FC<SelectorTableProps> = ({
     hoursWorked: HoursWorked[]
   ) => {
     return employees.filter((employee) => {
-      return hoursWorked.some(
-        (record) =>
-          record.employeeId === employee.id &&
-          record.scheduleId === scheduleId &&
-          new Date(record.date).toDateString() === new Date(date).toDateString()
-      );
+      const sameDayRecords = hoursWorked
+        .filter(
+          (record) =>
+            record.employeeId === employee.id &&
+            new Date(record.date).toDateString() === new Date(date).toDateString()
+        )
+        .sort((a, b) => b.id - a.id);
+
+      const latestRecord = sameDayRecords[0];
+      return latestRecord?.scheduleId === scheduleId;
     });
   };
 
