@@ -3,9 +3,6 @@ import { useAuthContext } from "../../../context/AuthContext";
 import { Employee } from "../../../models/Employee";
 import { Schedule } from "../../../models/Schedule";
 
-import { WeeklySummary } from "../../../models/WeeklySummary";
-import { BiweeklySummary } from "../../../models/BiweeklySummary";
-import { MonthlySummary } from "../../../models/MonthlySummary";
 import { useSelector, useDispatch } from "react-redux";
 import { RootState, AppDispatch } from "../../../store/store";
 import { fetchEmployees } from "../../../store/slices/employeeSlice";
@@ -53,6 +50,7 @@ import {
 import { exportFileFormattedDate, exportTable } from "../../../utils/export";
 import {
   getBiweekNumber,
+  getBiweeklyDates,
   getCurrentWeekDates,
   getDayName,
   getFirstDayOfWeek,
@@ -136,11 +134,13 @@ const RolesPage: React.FC = () => {
   const {
     biweeklySummaries,
     isLoadingBiweeklySummaries,
+    createOrUpdateBiweeklySummary,
     updateBiweeklySummary,
   } = useBiweeklySummaries();
   const {
     monthlySummaries,
     isLoadingMonthlySummaries,
+    createOrUpdateMonthlySummary,
     updateMonthlySummary,
   } = useMonthlySummaries();
   const [weekOffset, setWeekOffset] = useState(0);
@@ -325,39 +325,53 @@ const RolesPage: React.FC = () => {
       scheduleId: number;
     }
   ) => {
+    const calculateTotalHoursForRange = (
+      rangeStart: Date,
+      rangeEnd: Date,
+    ) => {
+      const employeeHoursWorked = hoursWorked.filter((hw) => {
+        const hwDate = new Date(hw.date);
+        return (
+          hw.employeeId === employeeId &&
+          hwDate >= rangeStart &&
+          hwDate <= rangeEnd
+        );
+      });
+
+      const allEntries = newHoursWorkedEntry
+        ? [
+            ...employeeHoursWorked.filter((hw) => {
+              const hwDate = new Date(hw.date);
+              const newEntryDate = new Date(newHoursWorkedEntry.date);
+              return hwDate.toDateString() !== newEntryDate.toDateString();
+            }),
+            newHoursWorkedEntry,
+          ]
+        : employeeHoursWorked;
+
+      let totalHours = 0;
+
+      allEntries.forEach((hw) => {
+        const schedule = schedules.find((s) => s.id === hw.scheduleId);
+        if (schedule) {
+          let dayHours: number;
+          if ("hours" in hw && typeof hw.hours === "number") {
+            dayHours = hw.hours;
+          } else {
+            dayHours = schedule.hours;
+          }
+          totalHours += dayHours;
+        }
+      });
+
+      return totalHours;
+    };
+
     // Calculate total weekly hours for this employee
     const weekStart = startOfWeek(date, { weekStartsOn: 1 });
     const weekEnd = addDays(weekStart, 6);
     
-    // Get all HoursWorked entries for this employee in this week
-    const employeeHoursWorked = hoursWorked.filter(hw => {
-      const hwDate = new Date(hw.date);
-      return hw.employeeId === employeeId && 
-             hwDate >= weekStart && 
-             hwDate <= weekEnd;
-    });
-
-    // Add the new entry to the calculation if provided
-    const allEntries = newHoursWorkedEntry 
-      ? [...employeeHoursWorked, newHoursWorkedEntry]
-      : employeeHoursWorked;
-    
-    // Calculate total hours for the week by summing the hours of each assigned schedule
-    let totalWeeklyHours = 0;
-    
-    allEntries.forEach(hw => {
-      const schedule = schedules.find(s => s.id === hw.scheduleId);
-      if (schedule) {
-        // Use the specific hours from the entry if available, otherwise use schedule hours
-        let dayHours: number;
-        if ('hours' in hw && typeof hw.hours === 'number') {
-          dayHours = hw.hours;
-        } else {
-          dayHours = schedule.hours;
-        }
-        totalWeeklyHours += dayHours;
-      }
-    });
+    const totalWeeklyHours = calculateTotalHoursForRange(weekStart, weekEnd);
 
     // Update weekly summary
     const weekNumber = getWeekNumber(date);
@@ -383,7 +397,196 @@ const RolesPage: React.FC = () => {
     } else {
       await createOrUpdateWeeklySummary(weeklySummary);
     }
-  }, [hoursWorked, schedules, weeklySummaries, updateWeeklySummary, createOrUpdateWeeklySummary]);
+
+    const biweekNumber = getBiweekNumber(date);
+    const { startDate: biweekStart, endDate: biweekEnd } = getBiweeklyDates(
+      year,
+      biweekNumber,
+    );
+    const totalBiweeklyHours = calculateTotalHoursForRange(
+      biweekStart,
+      biweekEnd,
+    );
+    const existingBiweeklySummary = biweeklySummaries.find(
+      (bs) =>
+        bs.employeeId === employeeId &&
+        bs.biweekNumber === biweekNumber &&
+        bs.year === year,
+    );
+
+    const biweeklySummary = {
+      employeeId,
+      biweekNumber,
+      month,
+      year,
+      totalHours: totalBiweeklyHours,
+    };
+
+    if (existingBiweeklySummary) {
+      await updateBiweeklySummary(existingBiweeklySummary.id, biweeklySummary);
+    } else {
+      await createOrUpdateBiweeklySummary(biweeklySummary);
+    }
+
+    const monthStart = new Date(year, month - 1, 1);
+    const monthEnd = new Date(year, month, 0);
+    const totalMonthlyHours = calculateTotalHoursForRange(
+      monthStart,
+      monthEnd,
+    );
+    const existingMonthlySummary = monthlySummaries.find(
+      (ms) =>
+        ms.employeeId === employeeId && ms.month === month && ms.year === year,
+    );
+
+    const monthlySummary = {
+      employeeId,
+      month,
+      year,
+      totalHours: totalMonthlyHours,
+    };
+
+    if (existingMonthlySummary) {
+      await updateMonthlySummary(existingMonthlySummary.id, monthlySummary);
+    } else {
+      await createOrUpdateMonthlySummary(monthlySummary);
+    }
+  }, [
+    hoursWorked,
+    schedules,
+    weeklySummaries,
+    biweeklySummaries,
+    monthlySummaries,
+    updateWeeklySummary,
+    createOrUpdateWeeklySummary,
+    updateBiweeklySummary,
+    createOrUpdateBiweeklySummary,
+    updateMonthlySummary,
+    createOrUpdateMonthlySummary,
+  ]);
+
+  useEffect(() => {
+    const backfillCurrentPeriodSummaries = async () => {
+      if (
+        employees.length === 0 ||
+        schedules.length === 0 ||
+        hoursWorked.length === 0 ||
+        !currentBiweekNumber ||
+        !currentMonth ||
+        !currentYear
+      ) {
+        return;
+      }
+
+      const calculateTotalHoursForRange = (
+        employeeId: number,
+        rangeStart: Date,
+        rangeEnd: Date,
+      ) => {
+        const employeeHoursWorked = hoursWorked.filter((hw) => {
+          const hwDate = new Date(hw.date);
+          return (
+            hw.employeeId === employeeId &&
+            hwDate >= rangeStart &&
+            hwDate <= rangeEnd
+          );
+        });
+
+        let totalHours = 0;
+        employeeHoursWorked.forEach((hw) => {
+          const schedule = schedules.find((s) => s.id === hw.scheduleId);
+          if (schedule) {
+            let dayHours: number;
+            if ("hours" in hw && typeof hw.hours === "number") {
+              dayHours = hw.hours;
+            } else {
+              dayHours = schedule.hours;
+            }
+            totalHours += dayHours;
+          }
+        });
+
+        return totalHours;
+      };
+
+      const { startDate: biweekStart, endDate: biweekEnd } = getBiweeklyDates(
+        currentYear,
+        currentBiweekNumber,
+      );
+      const monthStart = new Date(currentYear, currentMonth - 1, 1);
+      const monthEnd = new Date(currentYear, currentMonth, 0);
+
+      const biweeklyPromises = employees
+        .filter(
+          (employee) =>
+            !biweeklySummaries.some(
+              (bs) =>
+                bs.employeeId === employee.id &&
+                bs.biweekNumber === currentBiweekNumber &&
+                bs.year === currentYear,
+            ),
+        )
+        .map((employee) => {
+          const totalHours = calculateTotalHoursForRange(
+            employee.id,
+            biweekStart,
+            biweekEnd,
+          );
+          if (totalHours <= 0) {
+            return Promise.resolve();
+          }
+          return createOrUpdateBiweeklySummary({
+            employeeId: employee.id,
+            biweekNumber: currentBiweekNumber,
+            month: currentMonth,
+            year: currentYear,
+            totalHours,
+          });
+        });
+
+      const monthlyPromises = employees
+        .filter(
+          (employee) =>
+            !monthlySummaries.some(
+              (ms) =>
+                ms.employeeId === employee.id &&
+                ms.month === currentMonth &&
+                ms.year === currentYear,
+            ),
+        )
+        .map((employee) => {
+          const totalHours = calculateTotalHoursForRange(
+            employee.id,
+            monthStart,
+            monthEnd,
+          );
+          if (totalHours <= 0) {
+            return Promise.resolve();
+          }
+          return createOrUpdateMonthlySummary({
+            employeeId: employee.id,
+            month: currentMonth,
+            year: currentYear,
+            totalHours,
+          });
+        });
+
+      await Promise.all([...biweeklyPromises, ...monthlyPromises]);
+    };
+
+    void backfillCurrentPeriodSummaries();
+  }, [
+    employees,
+    schedules,
+    hoursWorked,
+    currentBiweekNumber,
+    currentMonth,
+    currentYear,
+    biweeklySummaries,
+    monthlySummaries,
+    createOrUpdateBiweeklySummary,
+    createOrUpdateMonthlySummary,
+  ]);
 
   const handleChange = (
     event: SelectChangeEvent<string>,
@@ -447,46 +650,55 @@ const RolesPage: React.FC = () => {
         monthlySummary.year === currentYear
     );
 
-    const updatedWeeklySummary: WeeklySummary = {
-      id: existingWeeklySummary?.id ?? 0,
-      employeeId: existingWeeklySummary?.employeeId ?? employeeId,
-      weekNumber: existingWeeklySummary?.weekNumber ?? currentWeekNumber,
-      month: existingWeeklySummary?.month ?? currentMonth,
-      year: existingWeeklySummary?.year ?? currentYear,
-      totalHours: Math.max(
-        0,
-        (existingWeeklySummary?.totalHours ?? 0) + adjustment
-      ),
-    };
-
-    const updatedBiweeklySummary: BiweeklySummary = {
-      id: existingBiweeklySummary?.id ?? 0,
-      employeeId: existingBiweeklySummary?.employeeId ?? employeeId,
-      biweekNumber:
-        existingBiweeklySummary?.biweekNumber ?? currentBiweekNumber,
-      month: existingBiweeklySummary?.month ?? currentMonth,
-      year: existingBiweeklySummary?.year ?? currentYear,
-      totalHours: Math.max(
-        0,
-        (existingBiweeklySummary?.totalHours ?? 0) + adjustment
-      ),
-    };
-
-    const updatedMonthlySummary: MonthlySummary = {
-      id: existingMonthlySummary?.id ?? 0,
-      employeeId: existingMonthlySummary?.employeeId ?? employeeId,
-      month: existingMonthlySummary?.month ?? currentMonth,
-      year: existingMonthlySummary?.year ?? currentYear,
-      totalHours: Math.max(
-        0,
-        (existingMonthlySummary?.totalHours ?? 0) + adjustment
-      ),
-    };
+    const updatedWeeklyTotal = Math.max(
+      0,
+      (existingWeeklySummary?.totalHours ?? 0) + adjustment
+    );
+    const updatedBiweeklyTotal = Math.max(
+      0,
+      (existingBiweeklySummary?.totalHours ?? 0) + adjustment
+    );
+    const updatedMonthlyTotal = Math.max(
+      0,
+      (existingMonthlySummary?.totalHours ?? 0) + adjustment
+    );
 
     await Promise.all([
-      updateWeeklySummary(updatedWeeklySummary.id, updatedWeeklySummary),
-      updateBiweeklySummary(updatedBiweeklySummary.id, updatedBiweeklySummary),
-      updateMonthlySummary(updatedMonthlySummary.id, updatedMonthlySummary),
+      existingWeeklySummary
+        ? updateWeeklySummary(existingWeeklySummary.id, {
+            ...existingWeeklySummary,
+            totalHours: updatedWeeklyTotal,
+          })
+        : createOrUpdateWeeklySummary({
+            employeeId,
+            weekNumber: currentWeekNumber,
+            month: currentMonth,
+            year: currentYear,
+            totalHours: updatedWeeklyTotal,
+          }),
+      existingBiweeklySummary
+        ? updateBiweeklySummary(existingBiweeklySummary.id, {
+            ...existingBiweeklySummary,
+            totalHours: updatedBiweeklyTotal,
+          })
+        : createOrUpdateBiweeklySummary({
+            employeeId,
+            biweekNumber: currentBiweekNumber,
+            month: currentMonth,
+            year: currentYear,
+            totalHours: updatedBiweeklyTotal,
+          }),
+      existingMonthlySummary
+        ? updateMonthlySummary(existingMonthlySummary.id, {
+            ...existingMonthlySummary,
+            totalHours: updatedMonthlyTotal,
+          })
+        : createOrUpdateMonthlySummary({
+            employeeId,
+            month: currentMonth,
+            year: currentYear,
+            totalHours: updatedMonthlyTotal,
+          }),
     ]);
   };
 
