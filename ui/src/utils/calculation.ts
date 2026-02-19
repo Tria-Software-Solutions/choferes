@@ -108,7 +108,7 @@ export const calculateTotalHoursAndOvertimeForPeriods = (
       (s) =>
         s.employeeId === employeeId &&
         s.biweekNumber === biweekNumbers[0].biweekNumber &&
-        s.year === biweekNumbers[1].year,
+        s.year === biweekNumbers[0].year,
     );
 
   const findSecondBiweeklySummary = () =>
@@ -116,7 +116,7 @@ export const calculateTotalHoursAndOvertimeForPeriods = (
       (s) =>
         s.employeeId === employeeId &&
         s.biweekNumber === biweekNumbers[1].biweekNumber &&
-        s.year === biweekNumbers[0].year,
+        s.year === biweekNumbers[1].year,
     );
 
   const findFirstMonthlySummary = () =>
@@ -124,7 +124,7 @@ export const calculateTotalHoursAndOvertimeForPeriods = (
       (s) =>
         s.employeeId === employeeId &&
         s.month === months[0].month &&
-        s.year === months[1].year,
+        s.year === months[0].year,
     );
 
   const findSecondMonthlySummary = () =>
@@ -132,7 +132,7 @@ export const calculateTotalHoursAndOvertimeForPeriods = (
       (s) =>
         s.employeeId === employeeId &&
         s.month === months[1].month &&
-        s.year === months[0].year,
+        s.year === months[1].year,
     );
 
   const firstSummary =
