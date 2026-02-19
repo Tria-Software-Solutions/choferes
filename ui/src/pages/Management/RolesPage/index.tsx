@@ -607,8 +607,16 @@ const RolesPage: React.FC = () => {
       return;
     }
 
+    const formattedDate = format(date, "yyyy-MM-dd");
+    const existingHoursWorkedRecord = hoursWorked.find(
+      (record) =>
+        record.employeeId === employeeId &&
+        format(new Date(record.date), "yyyy-MM-dd") === formattedDate
+    );
+
     // Create/update HoursWorked entry
     const hoursWorkedEntry = {
+      ...(existingHoursWorkedRecord ? { id: existingHoursWorkedRecord.id } : {}),
       employeeId,
       date: date.toISOString(),
       scheduleId: selectedSchedule.id,
