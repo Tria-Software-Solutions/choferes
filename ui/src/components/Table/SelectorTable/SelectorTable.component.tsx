@@ -60,7 +60,6 @@ import {
   stickyHeaderBoxStyles,
   headerFlexBoxStyles,
   tableContainerStyles,
-  tableHeadStyles,
   employeeColumnCellStyles,
   tableCellStyles,
   boldTypographyStyles,
@@ -553,29 +552,35 @@ const SelectorTableComponent: React.FC<SelectorTableProps> = ({
         </Box>
         <TableContainer
           className="table-container"
-          sx={{ ...tableContainerStyles, maxHeight: "60vh" }}
+          sx={{
+            ...tableContainerStyles,
+            "& thead th": {
+              position: "sticky !important",
+              top: "0 !important",
+              zIndex: "30 !important",
+              backgroundColor: `${
+                theme.palette.mode === "dark" ? "#111" : "#000000"
+              } !important`,
+              color: "#fff !important",
+            },
+          }}
           ref={tableContainerRef}
         >
-          <Table stickyHeader aria-label="sticky table">
-            <TableHead
-              sx={{
-                ...tableHeadStyles,
-                position: "relative",
-                backgroundColor: "transparent",
-                "&::before": {
-                  content: '""',
-                  top: 0,
-                  left: 0,
-                  right: 0,
-                  height: "100%",
-                  backgroundColor: "#f0f2f5",
-                  borderTopLeftRadius: 8,
-                  borderTopRightRadius: 8,
-                  zIndex: 0,
-                },
-              }}
-              ref={tableHeadRef}
-            >
+          <Table
+            stickyHeader
+            aria-label="sticky table"
+            sx={{
+              borderCollapse: "separate",
+              borderSpacing: 0,
+              "& .MuiTableCell-stickyHeader": {
+                backgroundColor:
+                  theme.palette.mode === "dark" ? "#111" : "#000000",
+                color: "#fff",
+                zIndex: 15,
+              },
+            }}
+          >
+            <TableHead ref={tableHeadRef}>
               <TableRow>
                 <TableCell
                   className="employee-column"
@@ -586,8 +591,8 @@ const SelectorTableComponent: React.FC<SelectorTableProps> = ({
                         ? "#111"
                         : "#000000",
                     color: "#fff",
-                    position: "relative",
-                    zIndex: 1,
+                    left: 0,
+                    zIndex: 16,
                     minHeight: viewMode === "schedule" ? "40px" : "auto",
                     height: viewMode === "schedule" ? "40px" : "auto",
                     cursor: "pointer",
@@ -627,8 +632,6 @@ const SelectorTableComponent: React.FC<SelectorTableProps> = ({
                           ? "#111"
                           : "#000000",
                       color: "#fff",
-                      position: "relative",
-                      zIndex: 1,
                       whiteSpace: "nowrap",
                       minHeight: viewMode === "schedule" ? "40px" : "auto",
                       height: viewMode === "schedule" ? "40px" : "auto",
@@ -659,8 +662,6 @@ const SelectorTableComponent: React.FC<SelectorTableProps> = ({
                               ? "#111"
                               : "#000000",
                           color: "#fff",
-                          position: "relative",
-                          zIndex: 1,
                         }}
                       />
                       <TableCell
@@ -672,8 +673,6 @@ const SelectorTableComponent: React.FC<SelectorTableProps> = ({
                               ? "#111"
                               : "#000000",
                           color: "#fff",
-                          position: "relative",
-                          zIndex: 1,
                         }}
                         colSpan={2}
                       >
@@ -1147,7 +1146,7 @@ const SelectorTableComponent: React.FC<SelectorTableProps> = ({
                                         right:
                                           String(resultOvertime(employee))
                                             .length > 1
-                                            ? -25
+                                            ? -15
                                             : -10,
                                         top: -10,
                                         transform: "none",

@@ -6,11 +6,26 @@ export const authenticateUser = async (
   identifier: string,
   password: string,
 ) => {
-  const response = await api.post("/users/login", {
+  const payload = {
     identifier,
     password,
-  });
-  return response.data;
+  };
+
+  try {
+    // First login can be slower on cold-started backends, so allow a longer timeout.
+    const response = await api.post("/users/login", payload, { timeout: 65000 });
+    return response.data;
+  } catch (error: unknown) {
+    const err = error as { code?: string };
+
+    // Retry once if the first attempt timed out.
+    if (err.code === "ECONNABORTED") {
+      const retryResponse = await api.post("/users/login", payload, { timeout: 65000 });
+      return retryResponse.data;
+    }
+
+    throw error;
+  }
 };
 
 // Refreshes the access token using the refresh token (with credentials)

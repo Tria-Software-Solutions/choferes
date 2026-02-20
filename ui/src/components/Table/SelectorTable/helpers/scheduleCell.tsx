@@ -81,6 +81,6 @@ export const handleScheduleChange = (
 /**
  * Gets the badge color for overtime display
  */
-export const getOvertimeBadgeColor = (overtime: string | number): "success" | "warning" => {
-  return overtime === 0 || overtime === "0/0" ? "success" : "warning";
+export const getOvertimeBadgeColor = (overtime: string | number): "success" | "error" | "warning" => {
+  return overtime === 0 || overtime === "0/0" ? "success" : "error";
 }; 
