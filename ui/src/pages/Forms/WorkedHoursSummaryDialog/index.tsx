@@ -29,7 +29,9 @@ interface WorkedHoursSummaryDialogProps {
   getEmployeeWeeklyHours: (employeeId: number) => number;
   getEmployeeBiweeklyHours: (employeeId: number) => number;
   getEmployeeMonthlyHours: (employeeId: number) => number;
-  getEmployeeOvertime: (employeeId: number) => number;
+  getEmployeeWeeklyOvertime: (employeeId: number) => number;
+  getEmployeeBiweeklyOvertime: (employeeId: number) => number;
+  getEmployeeMonthlyOvertime: (employeeId: number) => number;
   currentWeekNumber: number;
   currentBiweekNumber: number;
   currentMonth: number;
@@ -45,7 +47,9 @@ const WorkedHoursSummaryDialog: React.FC<WorkedHoursSummaryDialogProps> = ({
   getEmployeeWeeklyHours,
   getEmployeeBiweeklyHours,
   getEmployeeMonthlyHours,
-  getEmployeeOvertime,
+  getEmployeeWeeklyOvertime,
+  getEmployeeBiweeklyOvertime,
+  getEmployeeMonthlyOvertime,
   currentWeekNumber,
   currentBiweekNumber,
   currentMonth,
@@ -140,8 +144,17 @@ const WorkedHoursSummaryDialog: React.FC<WorkedHoursSummaryDialogProps> = ({
                   <Typography variant="h6" fontWeight={700}>
                     {MANAGEMENT.SUMMARY_OVERTIME}
                   </Typography>
-                  <Typography variant="h3" color="error" fontWeight={800}>
-                    {getEmployeeOvertime(employee.id)}
+                  <Typography variant="h3" color="error" fontWeight={800} sx={{ mb: 1 }}>
+                    {getEmployeeWeeklyOvertime(employee.id)}
+                  </Typography>
+                  <Typography variant="body2" color="text.secondary">
+                    Semanal: {getEmployeeWeeklyOvertime(employee.id)}
+                  </Typography>
+                  <Typography variant="body2" color="text.secondary">
+                    Quincenal: {getEmployeeBiweeklyOvertime(employee.id)}
+                  </Typography>
+                  <Typography variant="body2" color="text.secondary">
+                    Mensual: {getEmployeeMonthlyOvertime(employee.id)}
                   </Typography>
                   <Typography variant="body2" color="text.secondary">
                     {MANAGEMENT.SUMMARY_DETAIL_OVERTIME}

@@ -46,6 +46,7 @@ import {
   TABLE,
   PERMISSIONS,
   SELECTOR_TABLE,
+  OVERTIME,
 } from "../../../constants/constants";
 import InfoOutlinedIcon from "@mui/icons-material/InfoOutlined";
 import AccessTimeRoundedIcon from "@mui/icons-material/AccessTimeRounded";
@@ -305,9 +306,9 @@ const SelectorTableComponent: React.FC<SelectorTableProps> = ({
   const rowsPerPageOptions = generateRowsPerPageOptions(rowsPerPage);
 
   // Helper functions for tabbed summary dialog
-  function hasOvertime(s: unknown): s is { overtimeHours: number } {
-    return typeof s === "object" && s !== null && "overtimeHours" in s;
-  }
+  const calculateOvertimeHours = (totalHours: number, threshold: number) =>
+    totalHours > threshold ? totalHours - threshold : 0;
+
   const getEmployeeWeeklyHours = (id: number) => {
     const summary = weeklySummaries.find(
       (s) =>
@@ -330,13 +331,12 @@ const SelectorTableComponent: React.FC<SelectorTableProps> = ({
     );
     return summary ? summary.totalHours : 0;
   };
-  const getEmployeeOvertime = (id: number) => {
-    const summary = weeklySummaries.find(
-      (s) =>
-        s.employeeId === id && s.weekNumber === weekNumber && s.year === year
-    );
-    return summary && hasOvertime(summary) ? summary.overtimeHours || 0 : 0;
-  };
+  const getEmployeeWeeklyOvertime = (id: number) =>
+    calculateOvertimeHours(getEmployeeWeeklyHours(id), OVERTIME.WEEKLY);
+  const getEmployeeBiweeklyOvertime = (id: number) =>
+    calculateOvertimeHours(getEmployeeBiweeklyHours(id), OVERTIME.BIWEEKLY);
+  const getEmployeeMonthlyOvertime = (id: number) =>
+    calculateOvertimeHours(getEmployeeMonthlyHours(id), OVERTIME.MONTHLY);
 
   // Helper para obtener empleados asignados a un schedule en un día
   const getEmployeesForScheduleAndDay = (
@@ -1520,7 +1520,9 @@ const SelectorTableComponent: React.FC<SelectorTableProps> = ({
           getEmployeeWeeklyHours={getEmployeeWeeklyHours}
           getEmployeeBiweeklyHours={getEmployeeBiweeklyHours}
           getEmployeeMonthlyHours={getEmployeeMonthlyHours}
-          getEmployeeOvertime={getEmployeeOvertime}
+          getEmployeeWeeklyOvertime={getEmployeeWeeklyOvertime}
+          getEmployeeBiweeklyOvertime={getEmployeeBiweeklyOvertime}
+          getEmployeeMonthlyOvertime={getEmployeeMonthlyOvertime}
           currentWeekNumber={weekNumber}
           currentBiweekNumber={biweekNumber}
           currentMonth={month}
