@@ -9,9 +9,7 @@ export const paperStyles: SxProps<Theme> = (theme) => ({
 export const stickyHeaderBoxStyles = (
   isSmallScreen: boolean,
 ): SxProps<Theme> => (theme) => ({
-  position: "sticky",
-  top: 0,
-  zIndex: 5,
+  position: "relative",
   backgroundColor: theme.palette.background.paper,
   padding: isSmallScreen ? "8px" : "16px",
   borderBottom: `1px solid ${theme.palette.divider}`,
@@ -27,8 +25,10 @@ export const headerFlexBoxStyles: SxProps<Theme> = {
 };
 
 export const tableContainerStyles: SxProps<Theme> = {
-  maxHeight: "65vh",
+  position: "relative",
   overflowX: "auto",
+  overflowY: "auto",
+  maxHeight: "60vh",
 };
 
 export const tableHeadStyles: SxProps<Theme> = {
