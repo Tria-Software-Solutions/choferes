@@ -1,6 +1,7 @@
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { useAuth } from "../../../hooks/useAuth";
+import { wakeUpServer } from "../../../services/serverWakeUpService";
 import {
   TextField,
   Button,
@@ -59,9 +60,24 @@ const Login: React.FC = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [errors, setErrors] = useState<{ [key: string]: string }>({});
+  const [isWakingUp, setIsWakingUp] = useState(false);
+  const [serverReady, setServerReady] = useState(false);
+  const wakeUpAttempted = useRef(false);
 
   const theme = useTheme();
   const isSmallScreen = useMediaQuery(theme.breakpoints.down("sm"));
+
+  // Wake up server on page load (handles Render free tier cold start)
+  useEffect(() => {
+    if (wakeUpAttempted.current) return;
+    wakeUpAttempted.current = true;
+
+    setIsWakingUp(true);
+    wakeUpServer().then(() => {
+      setServerReady(true);
+      setIsWakingUp(false);
+    });
+  }, []);
 
   // Validates the login form fields
   const validateFields = () => {
@@ -201,7 +217,7 @@ const Login: React.FC = () => {
                 type="submit"
                 fullWidth
                 variant="contained"
-                disabled={isSubmitting}
+                disabled={isSubmitting || isWakingUp}
                 sx={submitButtonStyles}
               >
                 {isSubmitting ? (
@@ -218,6 +234,15 @@ const Login: React.FC = () => {
                 )}
               </Button>
             </Box>
+
+            {/* Server waking up info */}
+            {isWakingUp && (
+              <Fade in timeout={300}>
+                <Alert severity="info" sx={alertStyles} icon={<CircularProgress size={20} />}>
+                  Despertando servidor... (esto puede tomar hasta un minuto en el plan gratuito)
+                </Alert>
+              </Fade>
+            )}
 
             {/* Error Alert */}
             {authError && (
