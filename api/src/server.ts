@@ -138,6 +138,8 @@ app.use((req, res, next) => {
 
 app.use("/api/auth", authRoutes);
 app.use("/api/health", healthRoutes);
+// Direct health route for Render monitoring (no /api prefix)
+app.use("/health", healthRoutes);
 app.use("/api/users", userRoutes);
 app.use("/api/roles", roleRoutes);
 app.use("/api/permissions", permissionRoutes);

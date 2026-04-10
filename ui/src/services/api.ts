@@ -10,7 +10,7 @@ const api = axios.create({
   baseURL: `${API_URL}/api`,
   headers: { "Content-Type": "application/json" },
   withCredentials: true,
-  timeout: 30000, // 30 segundos timeout
+  timeout: 60000, // 60 segundos timeout (Render gratuito necesita tiempo para cold start)
   maxRedirects: 5,
   maxContentLength: 50 * 1024 * 1024, // 50MB
 });
