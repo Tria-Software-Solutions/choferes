@@ -1,4 +1,5 @@
 import { SxProps, Theme } from "@mui/material";
+import { CSSProperties } from "react";
 
 export const schedulesHeaderBoxStyles: SxProps<Theme> = {
   mb: 3,
@@ -91,8 +92,9 @@ export const noSchedulesBoxStyles: SxProps<Theme> = {
   paddingBottom: "12%",
 };
 
-export const noSchedulesIconStyles: SxProps<Theme> = {
-  fontSize: "65px",
+export const noSchedulesIconStyles: CSSProperties = {
+  width: "65px",
+  height: "65px",
 };
 
 export const deleteDialogPaperSx: SxProps<Theme> = {

@@ -7,16 +7,14 @@ import {
   Divider,
   Button,
 } from "@mui/material";
-import InfoOutlinedIcon from "@mui/icons-material/InfoOutlined";
-import BarChartIcon from "@mui/icons-material/BarChart";
-import AccessTimeRoundedIcon from "@mui/icons-material/AccessTimeRounded";
+import { Info, BarChart3, Clock } from "lucide-react";
 import TabContext from "@mui/lab/TabContext";
 import TabList from "@mui/lab/TabList";
 import TabPanel from "@mui/lab/TabPanel";
 import Tab from "@mui/material/Tab";
 import MANAGEMENT from '../../../constants/management.constants';
 import { summaryTabPanelAvatarStyles } from '../../Management/RolesPage/styles';
-import { infoBox, infoIconBox, infoTitle, infoDesc, iconSx } from '../AddEmployeeForm/styles';
+import { infoBox, infoIconBox, infoTitle, infoDesc, iconStyle } from '../AddEmployeeForm/styles';
 import { actionsBox, actionsInnerBox } from '../AdjustHoursDialog/styles';
 import { Employee } from '../../../models/Employee';
 import { Theme } from '@mui/material/styles';
@@ -84,7 +82,7 @@ const WorkedHoursSummaryDialog: React.FC<WorkedHoursSummaryDialogProps> = ({
             <TabPanel value="weekly">
               <Box display="flex" alignItems="center" gap={3}>
                 <Avatar sx={summaryTabPanelAvatarStyles(theme, "success")}> 
-                  <BarChartIcon color="success" />
+                  <BarChart3 color="success" />
                 </Avatar>
                 <Box>
                   <Typography variant="h6" fontWeight={700}>
@@ -102,7 +100,7 @@ const WorkedHoursSummaryDialog: React.FC<WorkedHoursSummaryDialogProps> = ({
             <TabPanel value="biweekly">
               <Box display="flex" alignItems="center" gap={3}>
                 <Avatar sx={summaryTabPanelAvatarStyles(theme, "info")}> 
-                  <BarChartIcon color="info" />
+                  <BarChart3 color="info" />
                 </Avatar>
                 <Box>
                   <Typography variant="h6" fontWeight={700}>
@@ -120,7 +118,7 @@ const WorkedHoursSummaryDialog: React.FC<WorkedHoursSummaryDialogProps> = ({
             <TabPanel value="monthly">
               <Box display="flex" alignItems="center" gap={3}>
                 <Avatar sx={summaryTabPanelAvatarStyles(theme, "warning")}> 
-                  <BarChartIcon color="warning" />
+                  <BarChart3 color="warning" />
                 </Avatar>
                 <Box>
                   <Typography variant="h6" fontWeight={700}>
@@ -138,7 +136,7 @@ const WorkedHoursSummaryDialog: React.FC<WorkedHoursSummaryDialogProps> = ({
             <TabPanel value="overtime">
               <Box display="flex" alignItems="center" gap={3}>
                 <Avatar sx={summaryTabPanelAvatarStyles(theme, "error")}> 
-                  <AccessTimeRoundedIcon color="error" />
+                  <Clock color="error" />
                 </Avatar>
                 <Box>
                   <Typography variant="h6" fontWeight={700}>
@@ -167,7 +165,7 @@ const WorkedHoursSummaryDialog: React.FC<WorkedHoursSummaryDialogProps> = ({
         <Grid item xs={12}>
           <Box sx={infoBox(theme)}>
             <Box sx={infoIconBox(theme)}>
-              <InfoOutlinedIcon sx={{ ...iconSx(theme), ...infoIconBox(theme) }} />
+              <Info style={iconStyle} />
             </Box>
             <Box>
               <Typography sx={infoTitle(theme)}>

@@ -21,10 +21,7 @@ import {
 import PAGE_TITLE from "../../../constants/pageTitle.constants";
 import FORMS from "../../../constants/forms.constants";
 import LOGIN from "../../../constants/login.constants";
-import Visibility from "@mui/icons-material/Visibility";
-import VisibilityOff from "@mui/icons-material/VisibilityOff";
-import LockOutlinedIcon from "@mui/icons-material/LockOutlined";
-import PersonOutlinedIcon from "@mui/icons-material/PersonOutlined";
+import { Eye, EyeOff, Lock, User } from "lucide-react";
 import logo from "../../../assets/images/logo.png";
 import "@fontsource/urbanist";
 import {
@@ -61,7 +58,7 @@ const Login: React.FC = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [errors, setErrors] = useState<{ [key: string]: string }>({});
   const [isWakingUp, setIsWakingUp] = useState(false);
-  const [serverReady, setServerReady] = useState(false);
+  const [, setServerReady] = useState(false);
   const wakeUpAttempted = useRef(false);
 
   const theme = useTheme();
@@ -174,7 +171,7 @@ const Login: React.FC = () => {
                 InputProps={{
                   startAdornment: (
                     <InputAdornment position="start">
-                      <PersonOutlinedIcon sx={{ color: "#666666" }} />
+                      <User size={20} color="#666666" />
                     </InputAdornment>
                   ),
                 }}
@@ -195,7 +192,7 @@ const Login: React.FC = () => {
                 InputProps={{
                   startAdornment: (
                     <InputAdornment position="start">
-                      <LockOutlinedIcon sx={{ color: "#666666" }} />
+                      <Lock size={20} color="#666666" />
                     </InputAdornment>
                   ),
                   endAdornment: (
@@ -206,7 +203,7 @@ const Login: React.FC = () => {
                         disabled={isSubmitting}
                         sx={passwordIconButtonStyles}
                       >
-                        {showPassword ? <VisibilityOff /> : <Visibility />}
+                        {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
                       </IconButton>
                     </InputAdornment>
                   ),

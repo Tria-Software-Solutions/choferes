@@ -6,8 +6,7 @@ import {
   Typography,
   useTheme,
 } from "@mui/material";
-import AccessTimeRoundedIcon from "@mui/icons-material/AccessTimeRounded";
-import InfoOutlinedIcon from "@mui/icons-material/InfoOutlined";
+import { Clock, Info } from "lucide-react";
 import {
   dialogTextFieldStyles,
   actionsInnerBox,
@@ -18,7 +17,7 @@ import {
   infoIconBox,
   infoTitle,
   infoDesc,
-  iconSx,
+  iconStyle,
 } from "../AddEmployeeForm/styles";
 import DIALOG from '../../../constants/dialog.constants';
 import { Employee } from '../../../models/Employee';
@@ -120,7 +119,7 @@ const AdjustHoursDialog: React.FC<AdjustHoursDialogProps> = ({
               const value = Number(e.target.value);
               setTimeAdjustment(value < 0 ? 0 : value);
             }}
-            icon={<AccessTimeRoundedIcon color={getTimeAdjustmentIconColor(timeAdjustment)} />}
+            icon={<Clock color={getTimeAdjustmentIconColor(timeAdjustment)} />}
             sx={dialogTextFieldStyles}
             inputProps={{ min: 0 }}
             error={timeAdjustment < 0}
@@ -130,7 +129,7 @@ const AdjustHoursDialog: React.FC<AdjustHoursDialogProps> = ({
         <Grid item xs={12}>
           <Box sx={infoBox(theme)}>
             <Box sx={infoIconBox(theme)}>
-              <InfoOutlinedIcon sx={{ ...iconSx(theme), ...infoIconBox(theme) }} />
+              <Info style={iconStyle} />
             </Box>
             <Box>
               <Typography sx={infoTitle(theme)}>

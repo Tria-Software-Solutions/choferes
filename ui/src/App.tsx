@@ -1,4 +1,4 @@
-import React from "react";
+import React, { Suspense, lazy } from "react";
 import {
   BrowserRouter as Router,
   Route,
@@ -7,19 +7,6 @@ import {
   Navigate,
 } from "react-router-dom";
 import { useAuth } from "./hooks/useAuth";
-import Login from "./pages/Auth/Login";
-import Register from "./pages/Auth/Register";
-import RolesPage from "./pages/Management/RolesPage";
-import EmployeesPage from "./pages/Management/EmployeesPage";
-import SchedulesPage from "./pages/Management/SchedulesPage";
-import VehiclesPage from "./pages/Management/VehiclesPage";
-import CourierServicePage from "./pages/Management/CourierServicePage";
-import Dashboard from "./pages/Dashboard/Dashboard";
-import Settings from "./pages/Auth/Settings";
-import NotFound from "./pages/ErrorPages/NotFound";
-import Forbidden from "./pages/ErrorPages/Forbidden";
-import ErrorPage from "./pages/ErrorPages/Error";
-import SessionExpired from "./pages/ErrorPages/SessionExpired";
 import AppBarComponent from "./components/AppBar/AppBar.component";
 import SnackbarComponent from "./components/Snackbar/Snackbar.component";
 import { Provider } from "react-redux";
@@ -27,16 +14,30 @@ import { store } from "./store/store";
 import { AuthProvider, useAuthContext } from "./context/AuthContext";
 import { NotificationProvider } from "./context/NotificationContext";
 import ProtectedRoute from "./routes/ProtectedRoute";
-import { Container, useMediaQuery, useTheme } from "@mui/material";
+import { Container, useMediaQuery, useTheme, CircularProgress, Box } from "@mui/material";
 import { APPBAR_MENU, PERMISSIONS, ROUTES } from "./constants/constants";
-import AssignmentIcon from "@mui/icons-material/Assignment";
-import DirectionsCarIcon from "@mui/icons-material/DirectionsCar";
-import GroupRoundedIcon from "@mui/icons-material/GroupRounded";
-import EditCalendarRoundedIcon from "@mui/icons-material/EditCalendarRounded";
-import AdminPanelSettingsIcon from "@mui/icons-material/AdminPanelSettings";
-import SettingsIcon from "@mui/icons-material/Settings";
-import LogoutIcon from "@mui/icons-material/Logout";
+import { ClipboardList, Car, Users, CalendarDays, Shield, Settings as SettingsIcon, LogOut } from "lucide-react";
 import wallpaper from "./assets/images/choferesblurred1.webp";
+
+const Login = lazy(() => import("./pages/Auth/Login"));
+const Register = lazy(() => import("./pages/Auth/Register"));
+const RolesPage = lazy(() => import("./pages/Management/RolesPage"));
+const EmployeesPage = lazy(() => import("./pages/Management/EmployeesPage"));
+const SchedulesPage = lazy(() => import("./pages/Management/SchedulesPage"));
+const VehiclesPage = lazy(() => import("./pages/Management/VehiclesPage"));
+const CourierServicePage = lazy(() => import("./pages/Management/CourierServicePage"));
+const Dashboard = lazy(() => import("./pages/Dashboard/Dashboard"));
+const Settings = lazy(() => import("./pages/Auth/Settings"));
+const NotFound = lazy(() => import("./pages/ErrorPages/NotFound"));
+const Forbidden = lazy(() => import("./pages/ErrorPages/Forbidden"));
+const ErrorPage = lazy(() => import("./pages/ErrorPages/Error"));
+const SessionExpired = lazy(() => import("./pages/ErrorPages/SessionExpired"));
+
+const PageLoader = () => (
+  <Box sx={{ display: "flex", justifyContent: "center", alignItems: "center", height: "100vh" }}>
+    <CircularProgress />
+  </Box>
+);
 
 const AppBarWrapper: React.FC = () => {
   const { userPermissions } = useAuthContext();
@@ -48,31 +49,31 @@ const AppBarWrapper: React.FC = () => {
   const links = [
     {
       label: APPBAR_MENU.ROLES,
-      icon: <AssignmentIcon />,
+      icon: <ClipboardList size={20} />,
       path: ROUTES.ROLES,
       permission: PERMISSIONS.VIEW_ROLES,
     },
     {
       label: APPBAR_MENU.EMPLOYEES,
-      icon: <GroupRoundedIcon />,
+      icon: <Users size={20} />,
       path: ROUTES.EMPLOYEES,
       permission: PERMISSIONS.VIEW_EMPLOYEES,
     },
     {
       label: APPBAR_MENU.SCHEDULES,
-      icon: <EditCalendarRoundedIcon />,
+      icon: <CalendarDays size={20} />,
       path: ROUTES.SCHEDULES,
       permission: PERMISSIONS.VIEW_SCHEDULES,
     },
     {
       label: APPBAR_MENU.VEHICLES,
-      icon: <DirectionsCarIcon />,
+      icon: <Car size={20} />,
       path: ROUTES.VEHICLES,
       permission: PERMISSIONS.VIEW_VEHICLES,
     },
     {
       label: APPBAR_MENU.DASHBOARD,
-      icon: <AdminPanelSettingsIcon />,
+      icon: <Shield size={20} />,
       path: ROUTES.DASHBOARD,
       permission: PERMISSIONS.VIEW_ADMIN,
     },
@@ -98,12 +99,12 @@ const AppBarWrapper: React.FC = () => {
   const userLinks = [
     {
       label: APPBAR_MENU.SETTINGS,
-      icon: <SettingsIcon />,
+      icon: <SettingsIcon size={20} />,
       path: ROUTES.SETTINGS,
     },
     {
       label: APPBAR_MENU.LOGOUT,
-      icon: <LogoutIcon />,
+      icon: <LogOut size={20} />,
       onClick: logoutUser,
     },
   ];
@@ -219,7 +220,8 @@ const AppContent: React.FC = () => {
           backgroundAttachment: isAuthPage ? "fixed" : undefined,
         }}
       >
-        <Routes>
+        <Suspense fallback={<PageLoader />}>
+          <Routes>
           <Route
             path="/"
             element={
@@ -301,6 +303,7 @@ const AppContent: React.FC = () => {
           <Route path="/error" element={<ErrorPage />} />
           <Route path="/session-expired" element={<SessionExpired />} />
         </Routes>
+        </Suspense>
       </Container>
     </>
   );

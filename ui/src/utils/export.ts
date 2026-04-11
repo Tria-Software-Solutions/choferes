@@ -1,6 +1,3 @@
-import * as XLSX from "xlsx";
-import jsPDF from "jspdf";
-import "jspdf-autotable";
 import { translateColumnHeaderToSpanish, translateDayOptionsToSpanish } from "./string";
 import { formatDateWithDay, parseIsoDateWithoutTimeZone } from "./dates";
 import { Employee } from '../models/Employee';
@@ -8,6 +5,29 @@ import { HoursWorked } from '../models/HoursWorked';
 import { WeeklySummary } from '../models/WeeklySummary';
 import { Schedule } from '../models/Schedule';
 import { Vehicle } from '../models/Vehicle';
+
+// Lazy load heavy libraries
+type XLSXType = typeof import("xlsx");
+type JSPDFType = typeof import("jspdf");
+
+let XLSX: XLSXType | null = null;
+let jsPDF: JSPDFType["default"] | null = null;
+
+async function loadXLSX(): Promise<XLSXType> {
+  if (!XLSX) {
+    XLSX = await import("xlsx");
+  }
+  return XLSX;
+}
+
+async function loadJSPDF(): Promise<JSPDFType["default"]> {
+  if (!jsPDF) {
+    const jspdfModule = await import("jspdf");
+    await import("jspdf-autotable");
+    jsPDF = jspdfModule.default;
+  }
+  return jsPDF;
+}
 
 /**
  * Generic type for exportable records. Allows any value for flexibility in export data.
@@ -113,7 +133,7 @@ function prepareExportData(
  * Exports data to Excel or PDF, with translation, cleaning, and custom column order support.
  * @param params Object with data, fileName, format, customHeaders, columnOrder, isVehicleData
  */
-export function exportTable({
+export async function exportTable({
   data,
   fileName,
   format,
@@ -129,7 +149,7 @@ export function exportTable({
   columnOrder?: string[];
   isVehicleData?: boolean;
   groupedHeaders?: string[][];
-}) {
+}): Promise<void> {
   const { rows, headers } = prepareExportData(data, isVehicleData);
   if (rows.length === 0) return;
 
@@ -137,6 +157,7 @@ export function exportTable({
   const exportHeaders = customHeaders ?? columnOrder ?? headers;
 
   if (format === "excel") {
+    const xlsx = await loadXLSX();
     // Build a new array with only the exportHeaders keys for each row
     const strictRows = rows.map((row) => {
       const obj: ExportableRecord = {};
@@ -150,7 +171,7 @@ export function exportTable({
       // Multi-level header: prepend groupedHeaders rows
       // SheetJS expects arrays of arrays for aoa_to_sheet
       const aoa = [...groupedHeaders, ...strictRows.map(row => exportHeaders.map(key => row[key]))];
-      ws = XLSX.utils.aoa_to_sheet(aoa);
+      ws = xlsx.utils.aoa_to_sheet(aoa);
       if (
         groupedHeaders[0][0] &&
         groupedHeaders[0].slice(1).every(cell => cell === "")
@@ -172,25 +193,26 @@ export function exportTable({
         ws['!merges'] = merges;
       }
       if (ws['!ref']) {
-        const range = XLSX.utils.decode_range(ws['!ref']);
+        const range = xlsx.utils.decode_range(ws['!ref']);
         range.e.c = exportHeaders.length - 1;
-        ws['!ref'] = XLSX.utils.encode_range(range);
+        ws['!ref'] = xlsx.utils.encode_range(range);
       }
     } else {
-      ws = XLSX.utils.json_to_sheet(strictRows, { header: exportHeaders });
+      ws = xlsx.utils.json_to_sheet(strictRows, { header: exportHeaders });
       if (ws['!ref']) {
-        const range = XLSX.utils.decode_range(ws['!ref']);
+        const range = xlsx.utils.decode_range(ws['!ref']);
         range.e.c = exportHeaders.length - 1;
-        ws['!ref'] = XLSX.utils.encode_range(range);
+        ws['!ref'] = xlsx.utils.encode_range(range);
       }
     }
-    const wb = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(wb, ws, "Datos");
-    XLSX.writeFile(wb, `${fileName}.xlsx`);
+    const wb = xlsx.utils.book_new();
+    xlsx.utils.book_append_sheet(wb, ws, "Datos");
+    xlsx.writeFile(wb, `${fileName}.xlsx`);
   } else {
+    const PDFDocument = await loadJSPDF();
     // Reorder columns for PDF
     const tableData = rows.map((row) => exportHeaders.map((key) => row[key]));
-    const doc = new jsPDF();
+    const doc = new PDFDocument();
     doc.autoTable({
       head: [exportHeaders],
       body: tableData,
@@ -230,7 +252,7 @@ export function createExportOptions({
       label: "Exportar a Excel",
       icon: excelIcon,
       onClick: () =>
-        exportTable({
+        void exportTable({
           data,
           fileName,
           format: "excel",
@@ -243,7 +265,7 @@ export function createExportOptions({
       label: "Exportar a PDF",
       icon: pdfIcon,
       onClick: () =>
-        exportTable({
+        void exportTable({
           data,
           fileName,
           format: "pdf",

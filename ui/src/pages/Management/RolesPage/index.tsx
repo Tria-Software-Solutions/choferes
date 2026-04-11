@@ -62,16 +62,9 @@ import {
 import PAGE_TITLE from "../../../constants/pageTitle.constants";
 import PERMISSIONS from "../../../constants/permissions.constants";
 import MANAGEMENT from "../../../constants/management.constants";
-import DownloadRoundedIcon from "@mui/icons-material/DownloadRounded";
-import ArrowBackIosNewRoundedIcon from "@mui/icons-material/ArrowBackIosNewRounded";
-import ArrowForwardIosRoundedIcon from "@mui/icons-material/ArrowForwardIosRounded";
-import CalendarTodayRoundedIcon from "@mui/icons-material/CalendarTodayRounded";
-import CloseRoundedIcon from "@mui/icons-material/CloseRounded";
-import CloseIcon from "@mui/icons-material/Close";
-import ManageSearchIcon from "@mui/icons-material/ManageSearch";
+import { Download, ChevronLeft, ChevronRight, Calendar, X, Search } from "lucide-react";
 import DialogComponent from "../../../components/Dialog/Dialog.component";
-import AssignmentIcon from "@mui/icons-material/Assignment";
-import AutoAwesomeIcon from "@mui/icons-material/AutoAwesome";
+import { ClipboardList, Sparkles } from "lucide-react";
 import AutoGenerateModal, { AutoGenerateConfig } from "../../../components/Modal/AutoGenerateModal/AutoGenerateModal.component";
 import {
   rolesTitleBoxStyles,
@@ -96,9 +89,7 @@ import {
 import { useAppNotifications } from "../../../components/Snackbar/Snackbar.component";
 import NOTIFICATIONS from "../../../constants/notifications.constants";
 import { createHoursGenerationNotification } from "../../../services/notificationService";
-import DescriptionIcon from "@mui/icons-material/Description";
-import PictureAsPdfIcon from "@mui/icons-material/PictureAsPdf";
-import FileDownloadIcon from "@mui/icons-material/FileDownload";
+import { FileText, FileType } from "lucide-react";
 import { capitalizeFirstLetter } from "../../../utils/string";
 import { getScheduleCellData } from "../../../components/Table/SelectorTable/helpers";
 import {
@@ -1307,14 +1298,14 @@ const RolesPage: React.FC = () => {
     if (userPermissions.includes(PERMISSIONS.EXPORT_EXCEL_ROLES)) {
       options.push({
         label: "Exportar a Excel",
-        icon: <DescriptionIcon />,
+        icon: <FileText size={20} />,
         onClick: () => handleOpenExportDialog("excel"),
       });
     }
     if (userPermissions.includes(PERMISSIONS.EXPORT_PDF_ROLES)) {
       options.push({
         label: "Exportar a PDF",
-        icon: <PictureAsPdfIcon />,
+        icon: <FileType size={20} />,
         onClick: () => handleOpenExportDialog("pdf"),
       });
     }
@@ -1341,9 +1332,9 @@ const RolesPage: React.FC = () => {
               variant={isSmallScreen ? "h5" : "h4"}
               sx={rolesTitleStyles}
             >
-              <AssignmentIcon
-                fontSize={isSmallScreen ? "small" : "large"}
-                sx={rolesIconStyles(theme)}
+              <ClipboardList
+                size={isSmallScreen ? 20 : 32}
+                style={rolesIconStyles(theme)}
               />
               {isSmallScreen ? PAGE_TITLE.ROLES_SIMPLIFIED : PAGE_TITLE.ROLES}
             </Typography>
@@ -1356,8 +1347,8 @@ const RolesPage: React.FC = () => {
                   {(viewMode === 'employee' ? filteredEmployees.length > 0 : filteredSchedules.length > 0) && (
                     <SpeedDialComponent
                       actions={exportOptions}
-                      mainIcon={<DownloadRoundedIcon />}
-                      openIcon={<CloseRoundedIcon />}
+                      mainIcon={<Download size={20} />}
+                      openIcon={<X size={20} />}
                       direction="left"
                     />
                   )}
@@ -1397,7 +1388,7 @@ const RolesPage: React.FC = () => {
                     },
                   }}
                 >
-                  <AutoAwesomeIcon />
+                  <Sparkles size={20} />
                 </IconButton>
               </Tooltip>
             )}
@@ -1472,7 +1463,7 @@ const RolesPage: React.FC = () => {
                   <ButtonGroup variant="contained" sx={buttonGroupSx}>
                     <Tooltip title={MANAGEMENT.TOOLTIP_PREV_WEEK} arrow>
                       <Button onClick={handlePreviousWeek}>
-                        <ArrowBackIosNewRoundedIcon />
+                        <ChevronLeft size={24} />
                       </Button>
                     </Tooltip>
                     <Tooltip title={MANAGEMENT.TOOLTIP_NEXT_WEEK} arrow>
@@ -1487,7 +1478,7 @@ const RolesPage: React.FC = () => {
                           }
                           onClick={handleNextWeek}
                         >
-                          <ArrowForwardIosRoundedIcon />
+                          <ChevronRight size={24} />
                         </Button>
                       </span>
                     </Tooltip>
@@ -1497,7 +1488,7 @@ const RolesPage: React.FC = () => {
                           disabled={weekOffset === 0}
                           onClick={handleCurrentWeek}
                         >
-                          <CalendarTodayRoundedIcon />
+                          <Calendar size={24} />
                         </Button>
                       </span>
                     </Tooltip>
@@ -1514,7 +1505,7 @@ const RolesPage: React.FC = () => {
             if (!hasRolesPermission) {
               return (
                 <Box sx={noEmployeesBoxStyles}>
-                  <ManageSearchIcon color="disabled" sx={noEmployeesIconStyles} />
+                  <Search size={48} style={{ color: theme.palette.text.disabled, ...noEmployeesIconStyles }} />
                   <Typography variant="h6" color="textSecondary">
                     No tienes permisos para ver roles
                   </Typography>
@@ -1548,7 +1539,7 @@ const RolesPage: React.FC = () => {
               />
             ) : (
               <Box sx={noEmployeesBoxStyles}>
-                <ManageSearchIcon color="disabled" sx={noEmployeesIconStyles} />
+                <Search size={48} style={{ color: theme.palette.text.disabled, ...noEmployeesIconStyles }} />
                 <Typography variant="h6" color="textSecondary">
                   {MANAGEMENT.NO_EMPLOYEES}
                 </Typography>
@@ -1580,7 +1571,7 @@ const RolesPage: React.FC = () => {
               />
             ) : (
               <Box sx={noEmployeesBoxStyles}>
-                <ManageSearchIcon color="disabled" sx={noEmployeesIconStyles} />
+                <Search size={48} style={{ color: theme.palette.text.disabled, ...noEmployeesIconStyles }} />
                 <Typography variant="h6" color="textSecondary">
                   {MANAGEMENT.NO_SCHEDULES}
                 </Typography>
@@ -1604,7 +1595,7 @@ const RolesPage: React.FC = () => {
             confirmText={MANAGEMENT.DIALOG_EXPORT_CONFIRM}
             cancelText={MANAGEMENT.DIALOG_EXPORT_CANCEL}
             loading={isExporting}
-            icon={<FileDownloadIcon color="warning" />}
+            icon={<Download size={24} color="orange" />}
           />
         </>
       )}
@@ -1652,10 +1643,7 @@ const RolesPage: React.FC = () => {
               justifyContent: "center",
               flexShrink: 0,
             }}>
-              <AutoAwesomeIcon sx={{
-                color: (theme) => theme.palette.primary.main,
-                fontSize: 24,
-              }} />
+              <Sparkles size={24} style={{ color: theme.palette.primary.main }} />
             </Box>
             <Box>
               <Typography
@@ -1679,7 +1667,7 @@ const RolesPage: React.FC = () => {
             onClick={handleCloseAddRoleModal} 
             sx={{ color: "inherit", "&:hover": { backgroundColor: "rgba(255, 255, 255, 0.1)" } }}
           >
-            <CloseIcon />
+            <X size={20} />
           </IconButton>
         </Box>
 

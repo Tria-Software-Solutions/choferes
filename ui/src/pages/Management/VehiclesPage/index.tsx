@@ -52,15 +52,7 @@ import PAGE_TITLE from "../../../constants/pageTitle.constants";
 import PERMISSIONS from "../../../constants/permissions.constants";
 import NOTIFICATIONS from "../../../constants/notifications.constants";
 import MANAGEMENT from "../../../constants/management.constants";
-import DirectionsCarFilledIcon from "@mui/icons-material/DirectionsCarFilled";
-import DownloadRoundedIcon from "@mui/icons-material/DownloadRounded";
-import ArrowBackIosNewRoundedIcon from "@mui/icons-material/ArrowBackIosNewRounded";
-import ArrowForwardIosRoundedIcon from "@mui/icons-material/ArrowForwardIosRounded";
-import CalendarTodayRoundedIcon from "@mui/icons-material/CalendarTodayRounded";
-import CloseRoundedIcon from "@mui/icons-material/CloseRounded";
-import ManageSearchIcon from "@mui/icons-material/ManageSearch";
-import AddRoundedIcon from "@mui/icons-material/AddRounded";
-import DeleteOutlineIcon from "@mui/icons-material/DeleteOutline";
+import { Car, Download, ChevronLeft, ChevronRight, Calendar, X, Search, Plus, Trash2, FileText, FileType, PlusCircle, Image } from "lucide-react";
 import {
   vehiclesHeaderBoxStyles,
   vehiclesTitleBoxStyles,
@@ -86,10 +78,6 @@ import {
   getPreferencesObject,
   setPreferencesObject,
 } from "../../../utils/persistentState";
-import DescriptionIcon from "@mui/icons-material/Description";
-import PictureAsPdfIcon from "@mui/icons-material/PictureAsPdf";
-import AddCircleOutlineIcon from "@mui/icons-material/AddCircleOutline";
-import ImageIcon from "@mui/icons-material/Image";
 
 const getInitialRowsPerPage = () => {
   if (typeof window !== "undefined") {
@@ -658,9 +646,9 @@ const VehiclesPage: React.FC = () => {
             variant={isSmallScreen ? "h5" : "h4"}
             sx={vehiclesTitleStyles}
           >
-            <DirectionsCarFilledIcon
-              fontSize={isSmallScreen ? "small" : "large"}
-              sx={vehiclesIconStyles(theme)}
+            <Car
+              size={isSmallScreen ? 24 : 32}
+              color={theme.palette.primary.main}
             />
             {isSmallScreen
               ? PAGE_TITLE.VEHICLES_SIMPLIFIED
@@ -677,17 +665,17 @@ const VehiclesPage: React.FC = () => {
                     actions={[
                       {
                         label: "Exportar a Excel",
-                        icon: <DescriptionIcon />,
+                        icon: <FileText />,
                         onClick: () => handleExport("excel"),
                       },
                       {
                         label: "Exportar a PDF",
-                        icon: <PictureAsPdfIcon />,
+                        icon: <FileType />,
                         onClick: () => handleExport("pdf"),
                       },
                     ]}
-                    mainIcon={<DownloadRoundedIcon />}
-                    openIcon={<CloseRoundedIcon />}
+                    mainIcon={<Download />}
+                    openIcon={<X />}
                     direction="left"
                   />
                 )}
@@ -727,7 +715,7 @@ const VehiclesPage: React.FC = () => {
                   },
                 }}
               >
-                <ImageIcon />
+                <Image />
               </IconButton>
             </Tooltip>
           )}
@@ -772,7 +760,7 @@ const VehiclesPage: React.FC = () => {
                     onClick={handleOpenAddVehicleModal}
                     sx={addButtonMobileStyles}
                   >
-                    <AddRoundedIcon />
+                    <Plus />
                   </Button>
                 )}
               </Box>
@@ -819,7 +807,7 @@ const VehiclesPage: React.FC = () => {
                       arrow
                     >
                       <Button onClick={handlePreviousDate}>
-                        <ArrowBackIosNewRoundedIcon />
+                        <ChevronLeft />
                       </Button>
                     </Tooltip>
                     <Tooltip
@@ -831,7 +819,7 @@ const VehiclesPage: React.FC = () => {
                           disabled={isTodayOrFuture(selectedDate)}
                           onClick={handleNextDate}
                         >
-                          <ArrowForwardIosRoundedIcon />
+                          <ChevronRight />
                         </Button>
                       </span>
                     </Tooltip>
@@ -844,7 +832,7 @@ const VehiclesPage: React.FC = () => {
                           disabled={isTodayOrFuture(selectedDate)}
                           onClick={handleCurrentDate}
                         >
-                          <CalendarTodayRoundedIcon />
+                          <Calendar />
                         </Button>
                       </span>
                     </Tooltip>
@@ -854,7 +842,7 @@ const VehiclesPage: React.FC = () => {
                   !isSmallScreen && (
                     <Button
                       variant="contained"
-                      startIcon={<AddRoundedIcon />}
+                      startIcon={<Plus />}
                       onClick={handleOpenAddVehicleModal}
                       sx={addButtonDesktopStyles}
                     >
@@ -899,7 +887,7 @@ const VehiclesPage: React.FC = () => {
             />
           ) : (
             <Box sx={noVehiclesBoxStyles}>
-              <ManageSearchIcon color="disabled" sx={noVehiclesIconStyles} />
+              <Search color="disabled" style={noVehiclesIconStyles} />
               <Typography variant="body1" color="textSecondary">
                 {capitalizeFirstLetter(
                   format(selectedDate, "EEEE dd 'de' MMMM 'de' yyyy", {
@@ -925,7 +913,7 @@ const VehiclesPage: React.FC = () => {
         cancelText={MANAGEMENT.VEHICLES_PAGE.DIALOG_DELETE_CANCEL}
         loading={isDeletingVehicle}
         paperSx={deleteDialogPaperSx ?? {}}
-        icon={<DeleteOutlineIcon color="error" />}
+        icon={<Trash2 color="var(--mui-palette-error-main)" />}
       />
       <DialogComponent
         open={openAddVehicleModal}
@@ -934,7 +922,7 @@ const VehiclesPage: React.FC = () => {
         subtitle={MANAGEMENT.VEHICLES_PAGE.DIALOG_ADD_SUBTITLE}
         hideActions
         paperSx={addDialogPaperSx ?? {}}
-        icon={<AddCircleOutlineIcon color="info" />}
+        icon={<PlusCircle color="var(--mui-palette-info-main)" />}
       >
         <AddVehicleForm
           onSubmit={handleCreateVehicle}

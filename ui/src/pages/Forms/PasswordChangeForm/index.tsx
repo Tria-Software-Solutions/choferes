@@ -12,9 +12,7 @@ import {
 } from "@mui/material";
 import TextfieldComponent from "../../../components/Textfield/Textfield.component";
 import generateSecret from "../../../utils/generateSecret";
-import ContentCopyIcon from "@mui/icons-material/ContentCopy";
-import Visibility from "@mui/icons-material/Visibility";
-import VisibilityOff from "@mui/icons-material/VisibilityOff";
+import { Copy, Eye, EyeOff, Info } from "lucide-react";
 import FORMS, { PASSWORD_INFO_TITLE, PASSWORD_INFO_DESC } from "../../../constants/forms.constants";
 import NOTIFICATIONS from "../../../constants/notifications.constants";
 import MANAGEMENT from "../../../constants/management.constants";
@@ -30,8 +28,7 @@ import {
   temporalPasswordBox,
 } from "./styles";
 import { actionsBox, actionsInnerBox } from '../AdjustHoursDialog/styles';
-import { infoBox, infoIconBox, infoTitle, infoDesc, iconSx, submitButton } from '../AddEmployeeForm/styles';
-import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined';
+import { infoBox, infoIconBox, infoTitle, infoDesc, iconStyle, submitButton } from '../AddEmployeeForm/styles';
 import { validatePassword, validatePasswordMatch } from '../../../utils/userValidation';
 
 interface PasswordChangeFormProps {
@@ -160,7 +157,7 @@ const PasswordChangeForm: React.FC<PasswordChangeFormProps> = ({
                     onClick={() => setShowNewPassword((v) => !v)}
                     edge="end"
                   >
-                    {showNewPassword ? <VisibilityOff /> : <Visibility />}
+                    {showNewPassword ? <EyeOff /> : <Eye />}
                   </IconButton>
                 </InputAdornment>
               ),
@@ -187,7 +184,7 @@ const PasswordChangeForm: React.FC<PasswordChangeFormProps> = ({
                     onClick={() => setShowConfirmNewPassword((v) => !v)}
                     edge="end"
                   >
-                    {showConfirmNewPassword ? <VisibilityOff /> : <Visibility />}
+                    {showConfirmNewPassword ? <EyeOff /> : <Eye />}
                   </IconButton>
                 </InputAdornment>
               ),
@@ -232,7 +229,7 @@ const PasswordChangeForm: React.FC<PasswordChangeFormProps> = ({
                         edge="end"
                         size="small"
                       >
-                        <ContentCopyIcon
+                        <Copy
                           color={copySuccess ? "success" : "inherit"}
                           fontSize="small"
                         />
@@ -248,7 +245,7 @@ const PasswordChangeForm: React.FC<PasswordChangeFormProps> = ({
         <Grid item xs={12}>
           <Box sx={infoBox(theme)}>
             <Box sx={infoIconBox(theme)}>
-              <InfoOutlinedIcon sx={{ ...iconSx(theme), ...infoIconBox(theme) }} />
+              <Info style={iconStyle} />
             </Box>
             <Box>
               <Typography sx={infoTitle(theme)}>{PASSWORD_INFO_TITLE}</Typography>

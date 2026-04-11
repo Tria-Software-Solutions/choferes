@@ -9,9 +9,7 @@ import {
   Slide,
   useMediaQuery,
 } from "@mui/material";
-import ErrorOutlineIcon from "@mui/icons-material/ErrorOutline";
-import HomeIcon from "@mui/icons-material/Home";
-import RefreshIcon from "@mui/icons-material/Refresh";
+import { AlertCircle, Home, RefreshCw } from "lucide-react";
 import { ERRORS } from "../../../constants/constants";
 import {
   outerBoxStyles,
@@ -48,8 +46,9 @@ const ErrorPage: React.FC = () => {
         <Fade in timeout={800}>
           <Slide direction="up" in timeout={1000}>
             <Box sx={innerBoxStyles}>
-              <ErrorOutlineIcon
-                sx={iconStyles(theme)}
+              <AlertCircle
+                size={64}
+                color={theme.palette.error.main}
                 aria-label="Error icon"
               />
               <Typography variant="h3" component="h1" sx={titleStyles(theme)}>
@@ -70,7 +69,7 @@ const ErrorPage: React.FC = () => {
                   variant="contained"
                   color="primary"
                   size="large"
-                  startIcon={<HomeIcon />}
+                  startIcon={<Home size={20} />}
                   onClick={handleGoHome}
                   fullWidth={isSmallScreen}
                   sx={homeButtonStyles}
@@ -82,7 +81,7 @@ const ErrorPage: React.FC = () => {
                   variant="outlined"
                   color="error"
                   size="large"
-                  startIcon={<RefreshIcon />}
+                  startIcon={<RefreshCw size={20} />}
                   onClick={handleRefresh}
                   fullWidth={isSmallScreen}
                   sx={reloadButtonStyles}

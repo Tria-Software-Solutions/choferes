@@ -9,9 +9,7 @@ import {
   Slide,
   useMediaQuery,
 } from "@mui/material";
-import LockIcon from "@mui/icons-material/Lock";
-import HomeIcon from "@mui/icons-material/Home";
-import SecurityIcon from "@mui/icons-material/Security";
+import { Lock, Home, Shield } from "lucide-react";
 import { ERRORS } from "../../../constants/constants";
 import {
   outerBoxStyles,
@@ -45,9 +43,11 @@ const Forbidden: React.FC = () => {
           <Slide direction="up" in timeout={1000}>
             <Box sx={innerBoxStyles}>
               <Box sx={lockBoxStyles}>
-                <LockIcon sx={lockIconStyles(theme)} aria-label="Lock icon" />
-                <SecurityIcon
-                  sx={securityIconStyles(theme)}
+                <Lock size={48} color={theme.palette.warning.main} aria-label="Lock icon" />
+                <Shield
+                  size={32}
+                  color={theme.palette.warning.dark}
+                  style={{ position: 'absolute', top: -10, right: -10 }}
                   aria-label="Security icon"
                 />
               </Box>
@@ -69,7 +69,7 @@ const Forbidden: React.FC = () => {
                   variant="contained"
                   color="warning"
                   size="large"
-                  startIcon={<HomeIcon />}
+                  startIcon={<Home size={20} />}
                   onClick={handleGoHome}
                   fullWidth={isSmallScreen}
                   sx={homeButtonStyles}

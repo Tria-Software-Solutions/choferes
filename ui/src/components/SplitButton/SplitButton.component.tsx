@@ -9,7 +9,7 @@ import {
   MenuList,
   MenuItem,
 } from "@mui/material";
-import ArrowDropDownIcon from "@mui/icons-material/ArrowDropDown";
+import { ChevronDown } from "lucide-react";
 import {
   buttonGroupStyles,
   popperStyles,
@@ -95,7 +95,7 @@ const SplitButtonComponent: React.FC<SplitButtonProps> = ({
           aria-haspopup="menu"
           onClick={handleToggle}
         >
-          <ArrowDropDownIcon />
+          <ChevronDown size={20} />
         </Button>
       </ButtonGroup>
       <Popper

@@ -1,4 +1,5 @@
 import { SxProps, Theme } from "@mui/material";
+import { CSSProperties } from "react";
 
 export const rolesHeaderBoxStyles: SxProps<Theme> = {
   mb: 3,
@@ -112,8 +113,9 @@ export const noEmployeesBoxStyles: SxProps<Theme> = {
   paddingBottom: "12%",
 };
 
-export const noEmployeesIconStyles: SxProps<Theme> = {
-  fontSize: "65px",
+export const noEmployeesIconStyles: CSSProperties = {
+  width: "65px",
+  height: "65px",
 };
 
 export const summaryDialogPaperSx: SxProps<Theme> = {
@@ -132,7 +134,7 @@ export const summaryDialogHeaderBoxStyles: SxProps<Theme> = {
   gap: 2,
 };
 
-export const summaryDialogCloseIconStyles: SxProps<Theme> = {
+export const summaryDialogCloseIconStyles: CSSProperties = {
   color: "#fff",
 };
 

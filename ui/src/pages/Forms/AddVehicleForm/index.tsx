@@ -16,16 +16,8 @@ import COLORS_LIST from "../../../constants/colors.constants";
 import { maskLicensePlate } from "../../../utils/mask";
 import { maskParkingLotWithPrefix } from "../../../utils/mask";
 import { validateParkingLotWithPrefix } from "../../../utils/userValidation";
-import AddRoundedIcon from "@mui/icons-material/AddRounded";
-import CloseRoundedIcon from "@mui/icons-material/CloseRounded";
+import { Plus, X, Ticket, Car, ParkingCircle, Palette, FileEdit, Factory, Info } from "lucide-react";
 import TextfieldComponent from "../../../components/Textfield/Textfield.component";
-import ConfirmationNumberOutlinedIcon from "@mui/icons-material/ConfirmationNumberOutlined";
-import DirectionsCarOutlinedIcon from "@mui/icons-material/DirectionsCarOutlined";
-import LocalParkingOutlinedIcon from "@mui/icons-material/LocalParkingOutlined";
-import PaletteOutlinedIcon from "@mui/icons-material/PaletteOutlined";
-import EditNoteOutlinedIcon from "@mui/icons-material/EditNoteOutlined";
-import FactoryOutlinedIcon from "@mui/icons-material/FactoryOutlined";
-import InfoOutlinedIcon from "@mui/icons-material/InfoOutlined";
 import { DatePicker, LocalizationProvider } from "@mui/x-date-pickers";
 import { AdapterDateFns } from "@mui/x-date-pickers/AdapterDateFns";
 import {
@@ -37,7 +29,7 @@ import { es } from "date-fns/locale";
 import {
   boxRoot,
   gridContainer,
-  iconSx,
+  iconStyle,
   formControl,
   infoBox,
   infoIconBox,
@@ -398,7 +390,7 @@ const AddVehicleForm: React.FC<AddVehicleFormProps> = ({
             onChange={(e) => handleFieldChange("ticket", e.target.value)}
             error={errors.ticket !== ""}
             helperText={errors.ticket}
-            icon={<ConfirmationNumberOutlinedIcon sx={iconSx(theme)} />}
+            icon={<Ticket style={iconStyle} />}
           />
         </Grid>
 
@@ -412,7 +404,7 @@ const AddVehicleForm: React.FC<AddVehicleFormProps> = ({
             onChange={handleLicensePlateChange}
             error={errors.licensePlate !== ""}
             helperText={errors.licensePlate}
-            icon={<DirectionsCarOutlinedIcon sx={iconSx(theme)} />}
+            icon={<Car style={iconStyle} />}
           />
         </Grid>
 
@@ -454,7 +446,7 @@ const AddVehicleForm: React.FC<AddVehicleFormProps> = ({
                     startAdornment: (
                       <>
                         <InputAdornment position="start">
-                          <FactoryOutlinedIcon sx={iconSx(theme)} />
+                          <Factory style={iconStyle} />
                         </InputAdornment>
                         {params.InputProps.startAdornment}
                       </>
@@ -504,7 +496,7 @@ const AddVehicleForm: React.FC<AddVehicleFormProps> = ({
                     startAdornment: (
                       <>
                         <InputAdornment position="start">
-                          <PaletteOutlinedIcon sx={iconSx(theme)} />
+                          <Palette style={iconStyle} />
                         </InputAdornment>
                         {params.InputProps.startAdornment}
                       </>
@@ -559,7 +551,7 @@ const AddVehicleForm: React.FC<AddVehicleFormProps> = ({
               onChange={handleParkingLotChange}
               error={errors.parkingLot !== ""}
               helperText={errors.parkingLot}
-              icon={<LocalParkingOutlinedIcon sx={iconSx(theme)} />}
+              icon={<ParkingCircle style={iconStyle} />}
               InputProps={{
                 readOnly: parkingPrefix.value === "CE",
               }}
@@ -598,15 +590,15 @@ const AddVehicleForm: React.FC<AddVehicleFormProps> = ({
             onChange={(e) =>
               setFormData({ ...formData, notes: e.target.value })
             }
-            icon={<EditNoteOutlinedIcon sx={iconSx(theme)} />}
+            icon={<FileEdit style={iconStyle} />}
           />
         </Grid>
 
         <Grid item xs={12}>
           <Box sx={infoBox(theme)}>
             <Box sx={infoIconBox(theme)}>
-              <InfoOutlinedIcon
-                sx={{ ...iconSx(theme), ...infoIconBox(theme) }}
+              <Info
+                style={iconStyle}
               />
             </Box>
             <Box>
@@ -625,7 +617,7 @@ const AddVehicleForm: React.FC<AddVehicleFormProps> = ({
             <Button
               variant="outlined"
               onClick={handleClearForm}
-              startIcon={<CloseRoundedIcon />}
+              startIcon={<X />}
               fullWidth={isSmallScreen}
               sx={clearButton}
             >
@@ -647,7 +639,7 @@ const AddVehicleForm: React.FC<AddVehicleFormProps> = ({
                 variant="contained"
                 onClick={handleSubmit}
                 disabled={!isFormValid() || isLoading}
-                startIcon={<AddRoundedIcon />}
+                startIcon={<Plus />}
                 fullWidth={isSmallScreen}
                 sx={submitButton}
               >

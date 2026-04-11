@@ -18,10 +18,7 @@ import {
   MenuItem,
   CircularProgress,
 } from '@mui/material';
-import {
-  People as PeopleIcon,
-  Settings as SettingsIcon,
-} from '@mui/icons-material';
+import { Users, Settings } from "lucide-react";
 import { format, startOfWeek, addDays } from 'date-fns';
 import { es } from 'date-fns/locale';
 import { Employee } from '../../../models/Employee';
@@ -321,7 +318,7 @@ const AutoGenerateModal: React.FC<AutoGenerateModalProps> = ({
             variant="h6"
             sx={autoGenerateModalSectionTitleStyles(theme)}
           >
-            <SettingsIcon />
+            <Settings size={20} />
             Configuración
           </Typography>
 
@@ -490,7 +487,7 @@ const AutoGenerateModal: React.FC<AutoGenerateModalProps> = ({
             variant="h6"
             sx={autoGenerateModalSectionTitleStyles(theme)}
           >
-            <PeopleIcon />
+            <Users size={20} />
             Empleados ({selectedEmployeesList.length})
           </Typography>
 

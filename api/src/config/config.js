@@ -10,7 +10,12 @@ const config = {
     database: process.env.PGDATABASE, // Database name
     host: process.env.PGHOST, // Database host
     dialect: "postgres", // Database dialect
-    // No SSL for development
+    dialectOptions: {
+      ssl: {
+        require: true,
+        rejectUnauthorized: false,
+      },
+    },
   },
   test: {
     username: process.env.PGUSER,
@@ -27,13 +32,10 @@ const config = {
     host: process.env.PGHOST,
     dialect: "postgres",
     dialectOptions: {
-      ssl:
-        process.env.DB_SSL === "true"
-          ? {
-              require: true,
-              rejectUnauthorized: false,
-            }
-          : false,
+      ssl: {
+        require: true,
+        rejectUnauthorized: false,
+      },
     },
   },
 };

@@ -9,9 +9,7 @@ import {
   Slide,
   useMediaQuery,
 } from "@mui/material";
-import TimerOffIcon from "@mui/icons-material/TimerOff";
-import LoginIcon from "@mui/icons-material/Login";
-import SecurityIcon from "@mui/icons-material/Security";
+import { TimerOff, LogIn, Shield } from "lucide-react";
 import ERRORS from "../../../constants/errors.constants";
 import {
   outerBoxStyles,
@@ -40,12 +38,15 @@ const SessionExpired: React.FC = () => {
           <Slide direction="up" in timeout={1000}>
             <Box sx={innerBoxStyles}>
               <Box sx={timerBoxStyles}>
-                <TimerOffIcon
-                  sx={timerIconStyles(theme)}
+                <TimerOff
+                  size={48}
+                  color={theme.palette.secondary.main}
                   aria-label="Timer off icon"
                 />
-                <SecurityIcon
-                  sx={securityIconStyles(theme)}
+                <Shield
+                  size={32}
+                  color={theme.palette.secondary.dark}
+                  style={{ position: 'absolute', top: -10, right: -10 }}
                   aria-label="Security icon"
                 />
               </Box>
@@ -67,7 +68,7 @@ const SessionExpired: React.FC = () => {
                   variant="contained"
                   color="secondary"
                   size="large"
-                  startIcon={<LoginIcon />}
+                  startIcon={<LogIn size={20} />}
                   onClick={logoutUser}
                   fullWidth={isSmallScreen}
                   sx={loginButtonStyles}

@@ -7,16 +7,13 @@ import {
   useMediaQuery,
   Typography,
 } from "@mui/material";
-import AddRoundedIcon from "@mui/icons-material/AddRounded";
-import CloseRoundedIcon from "@mui/icons-material/CloseRounded";
+import { Plus, X, User, Info } from "lucide-react";
 import TextfieldComponent from "../../../components/Textfield/Textfield.component";
-import PersonOutlinedIcon from "@mui/icons-material/PersonOutlined";
-import InfoOutlinedIcon from "@mui/icons-material/InfoOutlined";
 import { FORMS } from "../../../constants/constants";
 import {
   boxRoot,
   gridContainer,
-  iconSx,
+  iconStyle,
   infoBox,
   infoIconBox,
   infoTitle,
@@ -130,7 +127,7 @@ const AddEmployeeForm: React.FC<AddEmployeeFormProps> = ({
             onChange={(e) => handleFieldChange("firstName", e.target.value)}
             error={errors.firstName !== ""}
             helperText={errors.firstName}
-            icon={<PersonOutlinedIcon sx={iconSx(theme)} />}
+            icon={<User style={iconStyle} />}
           />
         </Grid>
 
@@ -144,15 +141,15 @@ const AddEmployeeForm: React.FC<AddEmployeeFormProps> = ({
             onChange={(e) => handleFieldChange("lastName", e.target.value)}
             error={errors.lastName !== ""}
             helperText={errors.lastName}
-            icon={<PersonOutlinedIcon sx={iconSx(theme)} />}
+            icon={<User style={iconStyle} />}
           />
         </Grid>
 
         <Grid item xs={12}>
           <Box sx={infoBox(theme)}>
             <Box sx={infoIconBox(theme)}>
-              <InfoOutlinedIcon
-                sx={{ ...iconSx(theme), ...infoIconBox(theme) }}
+              <Info
+                style={iconStyle}
               />
             </Box>
             <Box>
@@ -171,7 +168,7 @@ const AddEmployeeForm: React.FC<AddEmployeeFormProps> = ({
             <Button
               variant="outlined"
               onClick={handleClearForm}
-              startIcon={<CloseRoundedIcon />}
+              startIcon={<X />}
               fullWidth={isSmallScreen}
               sx={clearButton}
             >
@@ -193,7 +190,7 @@ const AddEmployeeForm: React.FC<AddEmployeeFormProps> = ({
                 variant="contained"
                 onClick={handleSubmit}
                 disabled={!isFormValid() || isLoading}
-                startIcon={<AddRoundedIcon />}
+                startIcon={<Plus />}
                 fullWidth={isSmallScreen}
                 sx={submitButton}
               >
