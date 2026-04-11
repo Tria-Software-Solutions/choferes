@@ -16,7 +16,7 @@ import { NotificationProvider } from "./context/NotificationContext";
 import ProtectedRoute from "./routes/ProtectedRoute";
 import { Container, useMediaQuery, useTheme, CircularProgress, Box } from "@mui/material";
 import { APPBAR_MENU, PERMISSIONS, ROUTES } from "./constants/constants";
-import { ClipboardList, Car, Users, CalendarDays, Shield, Settings as SettingsIcon, LogOut } from "lucide-react";
+import { ClipboardList, Car, Users, CalendarDays, Shield, LogOut, User } from "lucide-react";
 import wallpaper from "./assets/images/choferesblurred1.webp";
 
 const Login = lazy(() => import("./pages/Auth/Login"));
@@ -27,7 +27,7 @@ const SchedulesPage = lazy(() => import("./pages/Management/SchedulesPage"));
 const VehiclesPage = lazy(() => import("./pages/Management/VehiclesPage"));
 const CourierServicePage = lazy(() => import("./pages/Management/CourierServicePage"));
 const Dashboard = lazy(() => import("./pages/Dashboard/Dashboard"));
-const Settings = lazy(() => import("./pages/Auth/Settings"));
+const Profile = lazy(() => import("./pages/Auth/Profile"));
 const NotFound = lazy(() => import("./pages/ErrorPages/NotFound"));
 const Forbidden = lazy(() => import("./pages/ErrorPages/Forbidden"));
 const ErrorPage = lazy(() => import("./pages/ErrorPages/Error"));
@@ -49,31 +49,31 @@ const AppBarWrapper: React.FC = () => {
   const links = [
     {
       label: APPBAR_MENU.ROLES,
-      icon: <ClipboardList size={20} />,
+      icon: <ClipboardList size={22} strokeWidth={1.5} />,
       path: ROUTES.ROLES,
       permission: PERMISSIONS.VIEW_ROLES,
     },
     {
       label: APPBAR_MENU.EMPLOYEES,
-      icon: <Users size={20} />,
+      icon: <Users size={22} strokeWidth={1.5} />,
       path: ROUTES.EMPLOYEES,
       permission: PERMISSIONS.VIEW_EMPLOYEES,
     },
     {
       label: APPBAR_MENU.SCHEDULES,
-      icon: <CalendarDays size={20} />,
+      icon: <CalendarDays size={22} strokeWidth={1.5} />,
       path: ROUTES.SCHEDULES,
       permission: PERMISSIONS.VIEW_SCHEDULES,
     },
     {
       label: APPBAR_MENU.VEHICLES,
-      icon: <Car size={20} />,
+      icon: <Car size={22} strokeWidth={1.5} />,
       path: ROUTES.VEHICLES,
       permission: PERMISSIONS.VIEW_VEHICLES,
     },
     {
       label: APPBAR_MENU.DASHBOARD,
-      icon: <Shield size={20} />,
+      icon: <Shield size={22} strokeWidth={1.5} />,
       path: ROUTES.DASHBOARD,
       permission: PERMISSIONS.VIEW_ADMIN,
     },
@@ -98,9 +98,9 @@ const AppBarWrapper: React.FC = () => {
 
   const userLinks = [
     {
-      label: APPBAR_MENU.SETTINGS,
-      icon: <SettingsIcon size={20} />,
-      path: ROUTES.SETTINGS,
+      label: APPBAR_MENU.PROFILE,
+      icon: <User size={20} />,
+      path: ROUTES.PROFILE,
     },
     {
       label: APPBAR_MENU.LOGOUT,
@@ -146,7 +146,7 @@ const AppContent: React.FC = () => {
     "/schedules",
     "/vehicles",
     "/dashboard",
-    "/settings",
+    "/profile",
   ];
 
   // Hide AppBar if on any of the hideAppBarRoutes, or if on a not found route
@@ -188,31 +188,28 @@ const AppContent: React.FC = () => {
     <>
       {!isHideAppBar && <AppBarWrapper />}
       <Container
-        maxWidth="xl"
+        maxWidth={false}
         disableGutters
         sx={{
-          paddingLeft: {
-            xs: "16px",
-            sm: "24px",
-            md: "32px",
-            lg: "48px",
-            xl: "0",
+          paddingLeft: isAuthPage ? 0 : {
+            xs: "8px",
+            sm: "12px",
+            md: "16px",
+            lg: "16px",
+            xl: "16px",
           },
-          paddingRight: {
-            xs: "16px",
-            sm: "24px",
-            md: "32px",
-            lg: "48px",
-            xl: "0",
+          paddingRight: isAuthPage ? 0 : {
+            xs: "8px",
+            sm: "12px",
+            md: "16px",
+            lg: "16px",
+            xl: "16px",
           },
-          paddingBottom: {
-            xs: "16px",
-            sm: "24px",
-            md: "32px",
-            lg: "48px",
-            xl: "0",
-          },
-          backgroundColor: theme.palette.background.default,
+          paddingBottom: 0,
+          minHeight: isAuthPage ? "100vh" : undefined,
+          height: isAuthPage ? "100vh" : undefined,
+          overflow: isAuthPage ? "hidden" : undefined,
+          backgroundColor: isAuthPage ? "transparent" : theme.palette.background.default,
           backgroundImage: isAuthPage ? `url(${wallpaper})` : "none",
           backgroundSize: isAuthPage ? "cover" : undefined,
           backgroundPosition: isAuthPage ? "center" : undefined,
@@ -296,7 +293,7 @@ const AppContent: React.FC = () => {
                 )
               }
             />
-            <Route path="/settings" element={<Settings />} />
+            <Route path="/profile" element={<Profile />} />
           </Route>
           <Route path="/forbidden" element={<Forbidden />} />
           <Route path="*" element={<NotFound />} />

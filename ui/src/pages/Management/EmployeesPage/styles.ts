@@ -13,10 +13,11 @@ export const employeesTitleBoxStyles: SxProps<Theme> = {
 export const employeesTitleStyles: SxProps<Theme> = {
   display: "flex",
   alignItems: "center",
-  fontFamily: "'Urbanist', sans-serif",
   fontWeight: 800,
+  fontSize: "1.75rem",
+  letterSpacing: "-0.02em",
   color: (theme) => theme.palette.text.primary,
-  mb: 0.5,
+  mb: 1,
   gap: 1.5,
 };
 
@@ -29,7 +30,7 @@ export const employeesDividerStyles = (theme: Theme): SxProps<Theme> => ({
   width: 48,
   borderBottomWidth: 3,
   borderColor: theme.palette.primary.main,
-  borderRadius: 2,
+  borderRadius: "2px",
   mx: "auto",
   mb: 0.5,
 });
@@ -56,15 +57,15 @@ export const searchBarBoxStyles: SxProps<Theme> = {
   alignItems: "center",
   justifyContent: "center",
   gap: 2,
-  height: 56,
+  height: 48,
 };
 
 export const addButtonMobileStyles: SxProps<Theme> = {
   display: { xs: "flex", md: "none" },
   minWidth: "auto",
-  width: 56,
-  height: 56,
-  borderRadius: "50%",
+  width: 48,
+  height: 48,
+  borderRadius: "12px",
   p: 0,
   alignSelf: "center",
   mt: -1,
@@ -79,7 +80,7 @@ export const addButtonDesktopStyles: SxProps<Theme> = {
   px: 3,
   py: 1.5,
   fontSize: "1rem",
-  minHeight: 56,
+  minHeight: 48,
 };
 
 export const noEmployeesBoxStyles: SxProps<Theme> = {

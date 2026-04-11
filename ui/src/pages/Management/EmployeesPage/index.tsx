@@ -18,14 +18,13 @@ import DialogComponent from "../../../components/Dialog/Dialog.component";
 import { createEmployeeNotification } from "../../../services/notificationService";
 import {
   Button,
-  Grid,
   Box,
   Typography,
   useTheme,
   useMediaQuery,
   CircularProgress,
   Backdrop,
-  Divider,
+  Paper,
 } from "@mui/material";
 import {
   createExportOptions,
@@ -35,20 +34,11 @@ import PAGE_TITLE from "../../../constants/pageTitle.constants";
 import PERMISSIONS from "../../../constants/permissions.constants";
 import NOTIFICATIONS from "../../../constants/notifications.constants";
 import MANAGEMENT from "../../../constants/management.constants";
-import { Users, Download, X, Search, Plus, Trash2, FileText, FileType, PlusCircle } from "lucide-react";
+import { Users, Download, X, Search, Plus, Trash2, FileText, Table, PlusCircle } from "lucide-react";
 import {
-  employeesHeaderBoxStyles,
-  employeesTitleBoxStyles,
-  employeesTitleStyles,
-  employeesIconStyles,
-  employeesDividerStyles,
   exportSpeedDialBoxStyles,
   loadingBoxStyles,
   backdropStyles,
-  searchBarBoxStyles,
-  addButtonMobileStyles,
-  addButtonDesktopBoxStyles,
-  addButtonDesktopStyles,
   noEmployeesBoxStyles,
   noEmployeesIconStyles,
   deleteDialogPaperSx,
@@ -282,8 +272,8 @@ const EmployeesPage: React.FC = () => {
   const exportOptions = useMemo(() => {
     const exportHeaders = ["Nombre", "Apellido", "Agregado", "Actualizado"];
     return createExportOptions({
-      excelIcon: <FileText size={20} />,
-      pdfIcon: <FileType size={20} />,
+      excelIcon: <Table size={20} />,
+      pdfIcon: <FileText size={20} />,
       data: exportData,
       fileName: `empleados-${exportFileFormattedDate(new Date())}`,
       customHeaders: exportHeaders,
@@ -292,132 +282,197 @@ const EmployeesPage: React.FC = () => {
   // Use exportTable({ data: exportData, ... }) for export
 
   return (
-    <Box>
-      <Box
-        display="flex"
-        justifyContent="space-between"
-        alignItems="center"
-        sx={employeesHeaderBoxStyles}
+    <Box sx={{ height: "calc(100vh - 64px - 16px)", display: "flex", flexDirection: "column", overflow: "hidden", pb: 0, pt: 0, px: 0 }}>
+      {/* Premium Card with Header and Grid */}
+      <Paper
+        elevation={0}
+        sx={{
+          borderRadius: "16px",
+          border: "1px solid rgba(0,0,0,0.08)",
+          boxShadow: "0 4px 24px rgba(0,0,0,0.08), 0 1px 2px rgba(0,0,0,0.04)",
+          overflow: "hidden",
+          flex: 1,
+          display: "flex",
+          flexDirection: "column",
+        }}
       >
+        {/* Header Section */}
         <Box
-          display="flex"
-          flexDirection="column"
-          alignItems="flex-start"
-          sx={employeesTitleBoxStyles}
+          sx={{
+            px: { xs: 2, sm: 3 },
+            py: { xs: 2, sm: 2.5 },
+            backgroundColor: theme.palette.background.paper,
+            color: theme.palette.text.primary,
+            borderBottom: `1px solid ${theme.palette.mode === "dark" ? "rgba(255,255,255,0.08)" : "rgba(0,0,0,0.08)"}`,
+          }}
         >
-          <Typography
-            variant={isSmallScreen ? "h5" : "h4"}
-            sx={employeesTitleStyles}
+          <Box
+            display="flex"
+            justifyContent="space-between"
+            alignItems="flex-start"
+            mb={2}
           >
-            <Users
-              size={isSmallScreen ? 20 : 32}
-              style={employeesIconStyles(theme)}
-            />
-            {isSmallScreen
-              ? PAGE_TITLE.EMPLOYEES_SIMPLIFIED
-              : PAGE_TITLE.EMPLOYEES}
-          </Typography>
-          <Divider sx={employeesDividerStyles(theme)} />
-        </Box>
-        {userPermissions.includes(PERMISSIONS.EXPORT_EXCEL_EMPLOYEES) &&
-          userPermissions.includes(PERMISSIONS.EXPORT_PDF_EMPLOYEES) && (
-            <Box sx={exportSpeedDialBoxStyles}>
-              {filteredEmployees.length > 0 && (
-                <SpeedDialComponent
-                  actions={exportOptions}
-                  mainIcon={<Download size={20} />}
-                  openIcon={<X size={20} />}
-                  direction="left"
+            <Box display="flex" alignItems="center" gap={1.5}>
+              <Box
+                sx={{
+                  backgroundColor: theme.palette.primary.main,
+                  borderRadius: "10px",
+                  p: 1,
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                }}
+              >
+                <Users size={22} color={theme.palette.primary.contrastText} />
+              </Box>
+              <Box>
+                <Typography
+                  variant={isSmallScreen ? "h6" : "h5"}
+                  sx={{
+                    fontWeight: 700,
+                    fontSize: { xs: "1.1rem", sm: "1.25rem" },
+                    color: theme.palette.text.primary,
+                    letterSpacing: "-0.02em",
+                    lineHeight: 1.2,
+                  }}
+                >
+                  {isSmallScreen ? PAGE_TITLE.EMPLOYEES_SIMPLIFIED : PAGE_TITLE.EMPLOYEES}
+                </Typography>
+                <Typography
+                  variant="caption"
+                  sx={{
+                    color: theme.palette.text.secondary,
+                    fontSize: "0.75rem",
+                    letterSpacing: "0.02em",
+                  }}
+                >
+                  {filteredEmployees.length} empleados registrados
+                </Typography>
+              </Box>
+            </Box>
+
+            {/* Export Speed Dial */}
+            {userPermissions.includes(PERMISSIONS.EXPORT_EXCEL_EMPLOYEES) &&
+              userPermissions.includes(PERMISSIONS.EXPORT_PDF_EMPLOYEES) && (
+                <Box sx={{ ...exportSpeedDialBoxStyles, minHeight: 'auto' }}>
+                  {filteredEmployees.length > 0 && (
+                    <SpeedDialComponent
+                      actions={exportOptions}
+                      mainIcon={<Download size={20} />}
+                      openIcon={<X size={20} />}
+                      direction="left"
+                    />
+                  )}
+                </Box>
+              )}
+          </Box>
+
+          {/* Controls Row */}
+          <Box
+            display="flex"
+            flexDirection={{ xs: "column", sm: "row" }}
+            alignItems={{ xs: "stretch", sm: "center" }}
+            justifyContent="space-between"
+            gap={2}
+          >
+            {/* Search */}
+            <Box flex={1} maxWidth={{ sm: "320px" }}>
+              {filteredEmployees && (
+                <SearchBarComponent
+                  placeholder={MANAGEMENT.EMPLOYEES_PAGE.SEARCH_PLACEHOLDER}
+                  value={search}
+                  onChange={handleFilterChange}
+                  fullWidth
                 />
               )}
             </Box>
-          )}
-      </Box>
-      {isLoadingEmployees ? (
-        <Box sx={loadingBoxStyles}>
-          <Backdrop sx={backdropStyles(theme)} open={isLoadingEmployees}>
-            <CircularProgress />
-          </Backdrop>
-        </Box>
-      ) : (
-        <>
-          <Grid
-            container
-            spacing={2}
-            justifyContent="space-between"
-            alignItems="center"
-          >
-            <Grid item xs={12} md={4}>
-              <Box sx={searchBarBoxStyles}>
-                {filteredEmployees && (
-                  <SearchBarComponent
-                    placeholder={MANAGEMENT.EMPLOYEES_PAGE.SEARCH_PLACEHOLDER}
-                    value={search}
-                    onChange={handleFilterChange}
-                    sx={{ flex: 1 }}
-                    fullWidth
-                  />
-                )}
-                {userPermissions.includes(PERMISSIONS.CREATE_EMPLOYEES) && (
-                  <Button
-                    variant="contained"
-                    color="primary"
-                    onClick={handleOpenAddModal}
-                    sx={addButtonMobileStyles}
-                  >
-                    <Plus size={24} />
-                  </Button>
-                )}
-              </Box>
-            </Grid>
+
+            {/* Add Button */}
             {userPermissions.includes(PERMISSIONS.CREATE_EMPLOYEES) && (
-              <Grid item xs={12} md={8}>
-                <Box sx={addButtonDesktopBoxStyles}>
-                  <Button
-                    variant="contained"
-                    startIcon={<Plus size={20} />}
-                    onClick={handleOpenAddModal}
-                    sx={addButtonDesktopStyles}
-                  >
-                    {MANAGEMENT.ADD}
-                  </Button>
-                </Box>
-              </Grid>
+              <Box sx={{ display: { xs: 'none', sm: 'flex' }, gap: 1 }}>
+                <Button
+                  variant="contained"
+                  startIcon={<Plus size={18} />}
+                  onClick={handleOpenAddModal}
+                  sx={{
+                    px: 3,
+                    py: 1,
+                    fontWeight: 600,
+                    fontSize: "0.9rem",
+                    letterSpacing: "-0.01em",
+                    borderRadius: '10px',
+                  }}
+                >
+                  {MANAGEMENT.ADD}
+                </Button>
+              </Box>
             )}
-          </Grid>
-          <br />
-          {filteredEmployees.length > 0 ? (
-            <EditableTableComponent<Employee>
-              data={filteredEmployees}
-              columns={["firstName", "lastName"]}
-              editRowId={editRowId}
-              editFields={editFields}
-              setEditField={(field, value) =>
-                setEditFields({ ...editFields, [field]: value })
-              }
-              handleEdit={handleEdit}
-              handleCancel={handleCancel}
-              handleUpdate={handleUpdate}
-              handleOpenDeleteDialog={handleOpenDeleteDialog}
-              getRowId={(row) => row.id}
-              totalCount={totalCount}
-              page={page}
-              setPage={setPage}
-              rowsPerPage={rowsPerPage}
-              setRowsPerPage={setRowsPerPage}
-              isSaveDisabled={!isEditFormValid}
-              userPermissions={userPermissions}
-            />
-          ) : (
-            <Box sx={noEmployeesBoxStyles}>
-              <Search size={48} style={{ color: theme.palette.text.disabled, ...noEmployeesIconStyles }} />
-              <Typography variant="h6" color="textSecondary">
-                {MANAGEMENT.EMPLOYEES_PAGE.NO_EMPLOYEES}
-              </Typography>
+          </Box>
+        </Box>
+
+        {/* Mobile Add Button */}
+        {userPermissions.includes(PERMISSIONS.CREATE_EMPLOYEES) && (
+          <Box sx={{ display: { xs: 'flex', sm: 'none' }, p: 2, borderTop: `1px solid ${theme.palette.mode === "dark" ? "rgba(255,255,255,0.08)" : "rgba(0,0,0,0.08)"}` }}>
+            <Button
+              variant="contained"
+              fullWidth
+              startIcon={<Plus size={18} />}
+              onClick={handleOpenAddModal}
+              sx={{
+                py: 1.5,
+                fontWeight: 600,
+                borderRadius: '10px',
+              }}
+            >
+              {MANAGEMENT.ADD}
+            </Button>
+          </Box>
+        )}
+
+        {/* Content Section */}
+        <Box sx={{ flex: 1, overflow: "auto" }}>
+          {isLoadingEmployees ? (
+            <Box sx={loadingBoxStyles}>
+              <Backdrop sx={backdropStyles(theme)} open={isLoadingEmployees}>
+                <CircularProgress />
+              </Backdrop>
             </Box>
+          ) : (
+            <>
+              {filteredEmployees.length > 0 ? (
+                <EditableTableComponent<Employee>
+                  data={filteredEmployees}
+                  columns={["firstName", "lastName"]}
+                  editRowId={editRowId}
+                  editFields={editFields}
+                  setEditField={(field, value) =>
+                    setEditFields({ ...editFields, [field]: value })
+                  }
+                  handleEdit={handleEdit}
+                  handleCancel={handleCancel}
+                  handleUpdate={handleUpdate}
+                  handleOpenDeleteDialog={handleOpenDeleteDialog}
+                  getRowId={(row) => row.id}
+                  totalCount={totalCount}
+                  page={page}
+                  setPage={setPage}
+                  rowsPerPage={rowsPerPage}
+                  setRowsPerPage={setRowsPerPage}
+                  isSaveDisabled={!isEditFormValid}
+                  userPermissions={userPermissions}
+                />
+              ) : (
+                <Box sx={noEmployeesBoxStyles}>
+                  <Search size={48} style={{ color: theme.palette.text.disabled, ...noEmployeesIconStyles }} />
+                  <Typography variant="h6" color="textSecondary">
+                    {MANAGEMENT.EMPLOYEES_PAGE.NO_EMPLOYEES}
+                  </Typography>
+                </Box>
+              )}
+            </>
           )}
-        </>
-      )}
+        </Box>
+      </Paper>
       <DialogComponent
         open={openDeleteDialog}
         onClose={handleCloseDeleteDialog}

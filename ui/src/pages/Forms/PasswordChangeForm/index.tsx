@@ -4,7 +4,6 @@ import {
   Button,
   IconButton,
   InputAdornment,
-  Tooltip,
   Alert,
   Typography,
   useTheme,
@@ -18,6 +17,7 @@ import NOTIFICATIONS from "../../../constants/notifications.constants";
 import MANAGEMENT from "../../../constants/management.constants";
 import { useDispatch } from "react-redux";
 import type { AppDispatch } from "../../../store/store";
+import PremiumTooltip from "../../../components/PremiumTooltip/PremiumTooltip.component";
 import {
   updateUserPassword,
   updateUserTemporalPassword,
@@ -220,7 +220,7 @@ const PasswordChangeForm: React.FC<PasswordChangeFormProps> = ({
                 InputProps={{
                   readOnly: true,
                   endAdornment: (
-                    <Tooltip
+                    <PremiumTooltip
                       title={copySuccess ? "¡Copiado!" : "Copiar"}
                       placement="top"
                     >
@@ -234,7 +234,7 @@ const PasswordChangeForm: React.FC<PasswordChangeFormProps> = ({
                           fontSize="small"
                         />
                       </IconButton>
-                    </Tooltip>
+                    </PremiumTooltip>
                   ),
                 }}
                 sx={{ flex: 1 }}

@@ -11,13 +11,13 @@ import {
   Divider,
   useTheme,
   useMediaQuery,
-  Tooltip,
   Badge,
   Menu,
   MenuItem,
   ListItemIcon,
   ListItemText,
   Popover,
+  Grow,
 } from "@mui/material";
 import { useNavigate, useLocation } from "react-router-dom";
 import { useAuthContext } from "../../context/AuthContext";
@@ -26,7 +26,6 @@ import { useNotificationMenu } from "../../context/NotificationContext";
 import { Menu as MenuIcon, Bell, LayoutDashboard } from "lucide-react";
 import logo from "../../assets/images/logo.png";
 import { MenuItemProps } from "../Menu/Menu.component";
-import "@fontsource/urbanist";
 import { Roles } from "../../enums/roles";
 import {
   appBarStyles,
@@ -47,7 +46,6 @@ import {
   userAvatarStyles,
   mobileDividerStyles,
   dashboardNoLinksBoxStyles,
-  logoutMenuItemStyles,
 } from "./AppBar.styles";
 
 interface Link {
@@ -153,7 +151,7 @@ const AppBarComponent: React.FC<AppBarComponentProps> = ({
   };
 
   return (
-    <AppBar position="static" elevation={0} sx={appBarStyles}>
+    <AppBar position="sticky" elevation={0} sx={appBarStyles}>
       <Toolbar sx={toolbarStyles}>
         {/* Logo and Title */}
         <Box sx={clickableBoxStyles} onClick={() => navigate("/")}>
@@ -179,9 +177,35 @@ const AppBarComponent: React.FC<AppBarComponentProps> = ({
           >
             <IconButton
               onClick={handleDashboardMenuOpen}
-              sx={dashboardIconButtonStyles(false)}
+              sx={{
+                color: "#ffffff",
+                cursor: "pointer",
+                p: 1,
+                borderRadius: "12px",
+                minWidth: "48px",
+                height: "48px",
+                backgroundColor: Boolean(dashboardMenuAnchor) 
+                  ? "rgba(255,255,255,0.2)" 
+                  : "transparent",
+                border: "none",
+                transition: "all 0.2s cubic-bezier(0.4, 0, 0.2, 1)",
+                "&:hover": {
+                  backgroundColor: "rgba(255,255,255,0.1)",
+                },
+                "&:active": {
+                  backgroundColor: "rgba(255,255,255,0.15)",
+                },
+              }}
             >
-              <LayoutDashboard size={24} style={dashboardIconStyles(false)} />
+              <LayoutDashboard 
+                size={22} 
+                strokeWidth={1.5}
+                style={{
+                  color: "#ffffff",
+                  opacity: Boolean(dashboardMenuAnchor) ? 1 : 0.8,
+                  transition: "all 0.2s ease",
+                }} 
+              />
             </IconButton>
             <Popover
               open={Boolean(dashboardMenuAnchor)}
@@ -196,10 +220,11 @@ const AppBarComponent: React.FC<AppBarComponentProps> = ({
                   border: "none",
                   p: 0,
                   minWidth: 0,
+                  overflow: "visible",
                 },
               }}
-              TransitionComponent={undefined}
-              transitionDuration={300}
+              TransitionComponent={Grow}
+              TransitionProps={{ timeout: 200 }}
               keepMounted
             >
               <Box sx={dashboardPopoverBoxStyles}>
@@ -208,29 +233,23 @@ const AppBarComponent: React.FC<AppBarComponentProps> = ({
                     {APPBAR_MENU.NO_LINKS}
                   </Box>
                 ) : (
-                  links.map((link, index) => (
-                    <Tooltip
-                      title={link.label}
-                      arrow
+                  links.map((link) => (
+                    <IconButton
                       key={link.label}
-                      placement="bottom"
+                      onClick={() => {
+                        handleDashboardMenuClose();
+                        link.path && navigate(link.path);
+                      }}
+                      sx={dashboardIconButtonStyles(
+                        isActivePage(link.path || ""),
+                      )}
                     >
-                      <IconButton
-                        onClick={() => {
-                          handleDashboardMenuClose();
-                          link.path && navigate(link.path);
-                        }}
-                        sx={dashboardIconButtonStyles(
+                      {React.cloneElement(link.icon as React.ReactElement, {
+                        sx: dashboardIconStyles(
                           isActivePage(link.path || ""),
-                        )}
-                      >
-                        {React.cloneElement(link.icon as React.ReactElement, {
-                          sx: dashboardIconStyles(
-                            isActivePage(link.path || ""),
-                          ),
-                        })}
-                      </IconButton>
-                    </Tooltip>
+                        ),
+                      })}
+                    </IconButton>
                   ))
                 )}
               </Box>
@@ -244,16 +263,14 @@ const AppBarComponent: React.FC<AppBarComponentProps> = ({
             {/* Notificaciones - Solo visible para Gerencia y Administrativo */}
             {hasNotificationsAccess() && (
               <>
-                <Tooltip title={APPBAR_MENU.NOTIFICATIONS} arrow>
-                  <IconButton
-                    onClick={handleNotificationsOpen}
-                    sx={notificationsIconButtonStyles}
-                  >
-                    <Badge badgeContent={unreadCount} color="error">
-                      <Bell size={20} />
-                    </Badge>
-                  </IconButton>
-                </Tooltip>
+                <IconButton
+                  onClick={handleNotificationsOpen}
+                  sx={notificationsIconButtonStyles}
+                >
+                  <Badge badgeContent={unreadCount} color="error">
+                    <Bell size={20} />
+                  </Badge>
+                </IconButton>
 
                 <Divider 
                   orientation="vertical" 
@@ -285,7 +302,6 @@ const AppBarComponent: React.FC<AppBarComponentProps> = ({
 
               {/* Avatar Menu - Solo visible en pantallas medianas y grandes */}
               <Box sx={{ display: { xs: "none", md: "block" } }}>
-              <Tooltip title={APPBAR_MENU.USER_MENU} arrow>
                 <IconButton
                   onClick={handleUserMenuOpen}
                   sx={userMenuIconButtonStyles}
@@ -311,7 +327,6 @@ const AppBarComponent: React.FC<AppBarComponentProps> = ({
                     <Avatar sx={userAvatarStyles}>{getUserInitials()}</Avatar>
                   </Badge>
                 </IconButton>
-              </Tooltip>
               </Box>
 
               {/* Menú Principal (solo mobile) */}
@@ -337,40 +352,100 @@ const AppBarComponent: React.FC<AppBarComponentProps> = ({
           </Box>
         )}
 
-        {/* Menús */}
+        {/* Menú de Usuario Premium */}
         <Menu
           anchorEl={userMenuAnchor}
           open={Boolean(userMenuAnchor)}
           onClose={handleUserMenuClose}
           transformOrigin={{ horizontal: "right", vertical: "top" }}
           anchorOrigin={{ horizontal: "right", vertical: "bottom" }}
+          PaperProps={{
+            elevation: 0,
+            sx: {
+              mt: 1.5,
+              minWidth: 220,
+              background: "linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%)",
+              border: "1px solid rgba(0,0,0,0.08)",
+              borderRadius: "12px",
+              boxShadow: "0 10px 40px rgba(0,0,0,0.15), 0 2px 8px rgba(0,0,0,0.1)",
+              overflow: "visible",
+              '&:before': {
+                content: '""',
+                position: "absolute",
+                top: -6,
+                right: 24,
+                width: 12,
+                height: 12,
+                background: "#ffffff",
+                transform: "rotate(45deg)",
+                borderLeft: "1px solid rgba(0,0,0,0.08)",
+                borderTop: "1px solid rgba(0,0,0,0.08)",
+              },
+            },
+          }}
         >
-          {userLinks.map((link) => (
-            <MenuItem
-              key={link.label}
-              onClick={() => {
-                handleUserMenuClose();
-                if (link.onClick) {
-                  link.onClick();
-                } else if (link.path) {
-                  navigate(link.path);
-                }
-              }}
-              sx={
-                link.label === APPBAR_MENU.LOGOUT
-                  ? logoutMenuItemStyles(theme)
-                  : {}
-              }
-            >
-              <ListItemIcon>
-                {React.cloneElement(link.icon as React.ReactElement, {
-                  fontSize: "small",
-                  color:
-                    link.label === APPBAR_MENU.LOGOUT ? "error" : "inherit",
-                })}
-              </ListItemIcon>
-              <ListItemText primary={link.label} />
-            </MenuItem>
+          {userLinks.map((link, index) => (
+            <React.Fragment key={link.label}>
+              {index > 0 && link.label === APPBAR_MENU.LOGOUT && (
+                <Divider
+                  sx={{
+                    my: 0.5,
+                    mx: 1.5,
+                    borderColor: "rgba(0,0,0,0.08)",
+                  }}
+                />
+              )}
+              <MenuItem
+                onClick={() => {
+                  handleUserMenuClose();
+                  if (link.onClick) {
+                    link.onClick();
+                  } else if (link.path) {
+                    navigate(link.path);
+                  }
+                }}
+                sx={{
+                  py: 1.2,
+                  px: 2,
+                  mx: 0.75,
+                  my: 0.5,
+                  borderRadius: "8px",
+                  transition: "all 0.2s ease",
+                  color: link.label === APPBAR_MENU.LOGOUT
+                    ? theme.palette.error.main
+                    : theme.palette.text.primary,
+                  '&:hover': {
+                    backgroundColor: link.label === APPBAR_MENU.LOGOUT
+                      ? `${theme.palette.error.light}15`
+                      : "rgba(0,0,0,0.04)",
+                    transform: "translateX(4px)",
+                  },
+                  '& .MuiListItemIcon-root': {
+                    minWidth: 36,
+                    color: link.label === APPBAR_MENU.LOGOUT
+                      ? theme.palette.error.main
+                      : theme.palette.primary.main,
+                  },
+                }}
+              >
+                <ListItemIcon>
+                  {link.icon && React.cloneElement(link.icon as React.ReactElement, {
+                    size: 20,
+                    strokeWidth: 2,
+                    color: link.label === APPBAR_MENU.LOGOUT
+                      ? theme.palette.error.main
+                      : theme.palette.primary.main,
+                  })}
+                </ListItemIcon>
+                <ListItemText
+                  primary={link.label}
+                  primaryTypographyProps={{
+                    fontSize: "0.95rem",
+                    fontWeight: 500,
+                  }}
+                />
+              </MenuItem>
+            </React.Fragment>
           ))}
         </Menu>
 

@@ -6,7 +6,7 @@ const APPBAR_MENU = {
   MANAGE: "Gestión",
   ROLES: "Roles",
   SCHEDULES: "Horarios",
-  SETTINGS: "Configuración",
+  PROFILE: "Mi perfil",
   TITLE: "Choferes de Alquiler",
   TITLE_SIMPLIFIED: "Choferes",
   VEHICLES: "Vehículos",

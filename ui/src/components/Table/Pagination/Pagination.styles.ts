@@ -3,9 +3,9 @@ export const containerStyles = (
 ): React.CSSProperties => ({
   display: "flex",
   alignItems: "center",
-  gap: "10px",
+  gap: "6px",
   whiteSpace: "nowrap",
-  padding: isSmallScreen ? "0" : "10px",
+  padding: isSmallScreen ? "0" : "4px",
 });
 
 export const pageTextStyles: React.CSSProperties = {

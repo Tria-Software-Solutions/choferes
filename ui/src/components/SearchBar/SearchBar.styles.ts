@@ -27,7 +27,8 @@ export const textFieldStyles = (customSx: object = {}): SxProps<Theme> => (theme
   mb: 2,
   ...customSx,
   "& .MuiOutlinedInput-root": {
-    borderRadius: 2,
+    borderRadius: "12px",
+    minHeight: "48px",
     backgroundColor: theme.palette.background.paper,
     color: theme.palette.text.primary,
     transition: "all 0.3s ease",
