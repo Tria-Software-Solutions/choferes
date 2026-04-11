@@ -35,12 +35,7 @@ import { translateDayOptionsToSpanish } from "../../../utils/string";
 import PAGE_TITLE from "../../../constants/pageTitle.constants";
 import PERMISSIONS from "../../../constants/permissions.constants";
 import MANAGEMENT from "../../../constants/management.constants";
-import EditCalendarIcon from "@mui/icons-material/EditCalendar";
-import DownloadRoundedIcon from "@mui/icons-material/DownloadRounded";
-import CloseRoundedIcon from "@mui/icons-material/CloseRounded";
-import ManageSearchIcon from "@mui/icons-material/ManageSearch";
-import AddRoundedIcon from "@mui/icons-material/AddRounded";
-import DeleteOutlineIcon from "@mui/icons-material/DeleteOutline";
+import { CalendarDays, Download, X, Search, Plus, Trash2, FileText, FileType, PlusCircle } from "lucide-react";
 import { NOTIFICATIONS } from "../../../constants/constants";
 import {
   schedulesHeaderBoxStyles,
@@ -62,9 +57,6 @@ import {
 } from "./styles";
 import { useLocation } from "react-router-dom";
 import { useTablePreferences } from "../../../hooks/useTablePreferences";
-import DescriptionIcon from "@mui/icons-material/Description";
-import PictureAsPdfIcon from "@mui/icons-material/PictureAsPdf";
-import AddCircleOutlineIcon from "@mui/icons-material/AddCircleOutline";
 import { format } from "date-fns";
 import { es } from "date-fns/locale";
 import { capitalizeFirstLetter } from "../../../utils/string";
@@ -314,8 +306,8 @@ const SchedulesPage: React.FC = () => {
       "Actualizado",
     ];
     return createExportOptions({
-      excelIcon: <DescriptionIcon />,
-      pdfIcon: <PictureAsPdfIcon />,
+      excelIcon: <FileText />,
+      pdfIcon: <FileType />,
       data: exportData,
       fileName: `horarios-${exportFileFormattedDate(new Date())}`,
       customHeaders: exportHeaders,
@@ -340,9 +332,9 @@ const SchedulesPage: React.FC = () => {
             variant={isSmallScreen ? "h5" : "h4"}
             sx={schedulesTitleStyles}
           >
-            <EditCalendarIcon
-              fontSize={isSmallScreen ? "small" : "large"}
-              sx={schedulesIconStyles(theme)}
+            <CalendarDays
+              size={isSmallScreen ? 24 : 32}
+              color={theme.palette.primary.main}
             />
             {isSmallScreen
               ? PAGE_TITLE.SCHEDULES_SIMPLIFIED
@@ -356,8 +348,8 @@ const SchedulesPage: React.FC = () => {
               {filteredSchedules.length > 0 && (
                 <SpeedDialComponent
                   actions={exportOptions}
-                  mainIcon={<DownloadRoundedIcon />}
-                  openIcon={<CloseRoundedIcon />}
+                  mainIcon={<Download />}
+                  openIcon={<X />}
                   direction="left"
                 />
               )}
@@ -396,7 +388,7 @@ const SchedulesPage: React.FC = () => {
                     onClick={handleOpenAddModal}
                     sx={addButtonMobileStyles}
                   >
-                    <AddRoundedIcon />
+                    <Plus />
                   </Button>
                 )}
               </Box>
@@ -406,7 +398,7 @@ const SchedulesPage: React.FC = () => {
                 <Box sx={addButtonDesktopBoxStyles}>
                   <Button
                     variant="contained"
-                    startIcon={<AddRoundedIcon />}
+                    startIcon={<Plus />}
                     onClick={handleOpenAddModal}
                     sx={addButtonDesktopStyles}
                   >
@@ -441,7 +433,7 @@ const SchedulesPage: React.FC = () => {
             />
           ) : (
             <Box sx={noSchedulesBoxStyles}>
-              <ManageSearchIcon color="disabled" sx={noSchedulesIconStyles} />
+              <Search color="disabled" style={noSchedulesIconStyles} />
               <Typography variant="h6" color="textSecondary">
                 {MANAGEMENT.NO_SCHEDULES}
               </Typography>
@@ -460,7 +452,7 @@ const SchedulesPage: React.FC = () => {
         cancelText={MANAGEMENT.DIALOG_DELETE_CANCEL}
         loading={isDeletingSchedule}
         paperSx={deleteDialogPaperSx ?? {}}
-        icon={<DeleteOutlineIcon color="error" />}
+        icon={<Trash2 color="var(--mui-palette-error-main)" />}
       />
       <DialogComponent
         open={openAddScheduleModal}
@@ -469,7 +461,7 @@ const SchedulesPage: React.FC = () => {
         subtitle={MANAGEMENT.SCHEDULES_PAGE.DIALOG_ADD_SUBTITLE}
         hideActions
         paperSx={addDialogPaperSx ?? {}}
-        icon={<AddCircleOutlineIcon color="info" />}
+        icon={<PlusCircle color="var(--mui-palette-info-main)" />}
       >
         <AddScheduleForm
           onSubmit={handleCreate}

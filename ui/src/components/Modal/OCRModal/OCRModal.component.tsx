@@ -22,10 +22,7 @@ import {
   Fade,
   Slide,
 } from "@mui/material";
-import { Close as CloseIcon } from "@mui/icons-material";
-import ImageNotSupportedIcon from "@mui/icons-material/ImageNotSupported";
-import RefreshIcon from "@mui/icons-material/Refresh";
-import ImageIcon from "@mui/icons-material/Image";
+import { X, ImageOff, RefreshCw, Image } from "lucide-react";
 import { OCRResult, VehicleEntry } from "../../../services/ocrService";
 import PaginationComponent from "../../Table/Pagination/Pagination.component";
 import TABLE from "../../../constants/table.constants";
@@ -183,7 +180,7 @@ const OCRResultModal: React.FC<OCRResultModalProps> = ({
       <Box sx={headerBoxStyles(theme)}>
         <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
           <Box sx={iconBoxStyles(theme)}>
-            <ImageIcon sx={iconStyles(theme)} />
+            <Image size={24} color={theme.palette.primary.main} />
           </Box>
           <Box sx={titleBoxStyles}>
             <Typography
@@ -217,7 +214,7 @@ const OCRResultModal: React.FC<OCRResultModalProps> = ({
           </Box>
         </Box>
         <IconButton onClick={onClose} sx={closeButtonStyles}>
-          <CloseIcon />
+          <X size={20} />
         </IconButton>
       </Box>
 
@@ -263,8 +260,9 @@ const OCRResultModal: React.FC<OCRResultModalProps> = ({
           <Fade in timeout={800}>
             <Slide direction="up" in timeout={1000}>
               <Box sx={errorContainerStyles}>
-                <ImageNotSupportedIcon
-                  sx={errorIconStyles(theme)}
+                <ImageOff
+                  size={64}
+                  color={theme.palette.error.main}
                   aria-label="Formato de imagen no válido"
                 />
                 <Typography
@@ -295,7 +293,7 @@ const OCRResultModal: React.FC<OCRResultModalProps> = ({
                     variant="contained"
                     color="primary"
                     size="large"
-                    startIcon={<RefreshIcon />}
+                    startIcon={<RefreshCw size={20} />}
                     onClick={onClose}
                     fullWidth={false}
                     sx={errorButtonStyles}

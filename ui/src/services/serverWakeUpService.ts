@@ -34,6 +34,7 @@ export const wakeUpServer = async (): Promise<boolean> => {
 
       // If we get any response (even 404, 500), server is awake
       if (response.status >= 200 && response.status < 600) {
+        // eslint-disable-next-line no-console
         console.log("[WakeUp] Server is responding, status:", response.status);
         isServerAwake = true;
         return true;
@@ -41,6 +42,7 @@ export const wakeUpServer = async (): Promise<boolean> => {
 
       return false;
     } catch (error) {
+      // eslint-disable-next-line no-console
       console.error("[WakeUp] Error waking server:", error);
       // Reset so next call tries again
       isServerAwake = false;

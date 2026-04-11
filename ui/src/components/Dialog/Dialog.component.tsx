@@ -10,7 +10,7 @@ import {
   useTheme,
   useMediaQuery,
 } from "@mui/material";
-import { Close as CloseIcon } from "@mui/icons-material";
+import { X } from "lucide-react";
 import DIALOG from "../../constants/dialog.constants";
 import {
   dialogPaperStyles,
@@ -140,7 +140,7 @@ const DialogComponent: React.FC<ConfirmationDialogProps> = ({
           </Box>
           <Box flexGrow={1} />
           <IconButton onClick={onClose} sx={closeButtonStyles}>
-            <CloseIcon />
+            <X size={20} />
           </IconButton>
         </Box>
       )}

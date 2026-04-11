@@ -25,9 +25,7 @@ import {
 import { useAppNotifications } from "../../../components/Snackbar/Snackbar.component";
 import PAGE_TITLE from "../../../constants/pageTitle.constants";
 import MANAGEMENT from "../../../constants/management.constants";
-import SettingsIcon from "@mui/icons-material/Settings";
-import Visibility from "@mui/icons-material/Visibility";
-import VisibilityOff from "@mui/icons-material/VisibilityOff";
+import { Settings as SettingsIcon, Eye, EyeOff, User as UserIcon, Mail, UserCircle, Info } from "lucide-react";
 import { User } from "../../../models/User";
 import {
   validateName,
@@ -37,13 +35,9 @@ import {
   validatePasswordMatch,
 } from "../../../utils/userValidation";
 import TextfieldComponent from "../../../components/Textfield/Textfield.component";
-import PersonOutlinedIcon from "@mui/icons-material/PersonOutlined";
-import EmailOutlinedIcon from "@mui/icons-material/EmailOutlined";
-import AccountCircleOutlinedIcon from "@mui/icons-material/AccountCircleOutlined";
-import InfoOutlinedIcon from "@mui/icons-material/InfoOutlined";
-import { infoBox, infoIconBox, infoTitle, infoDesc, iconSx } from '../../Forms/AddEmployeeForm/styles';
+import { infoBox, infoIconBox, infoTitle, infoDesc, iconStyle } from '../../Forms/AddEmployeeForm/styles';
 import { useThemeMode } from "../../../index";
-import { rolesTitleStyles, rolesIconStyles, rolesDividerStyles } from '../../Management/RolesPage/styles';
+import { rolesTitleStyles, rolesDividerStyles } from '../../Management/RolesPage/styles';
 
 type ThemeMode = "default" | "light" | "dark" | "high-contrast";
 
@@ -280,8 +274,8 @@ const Settings: React.FC = () => {
               sx={rolesTitleStyles}
             >
               <SettingsIcon
-                fontSize={isSmallScreen ? "small" : "large"}
-                sx={rolesIconStyles(theme)}
+                size={isSmallScreen ? 24 : 32}
+                color={theme.palette.primary.main}
               />
               {isSmallScreen
                 ? PAGE_TITLE.SETTING_SIMPLIFIED
@@ -343,8 +337,9 @@ const Settings: React.FC = () => {
                 error={!!validateName(editFields.firstName)}
                 helperText={validateName(editFields.firstName)}
                 icon={
-                  <PersonOutlinedIcon
-                    sx={{ color: theme.palette.text.secondary }}
+                  <UserIcon
+                    size={20}
+                    color={theme.palette.text.secondary}
                   />
                 }
               />
@@ -360,8 +355,9 @@ const Settings: React.FC = () => {
                 error={!!validateName(editFields.lastName)}
                 helperText={validateName(editFields.lastName)}
                 icon={
-                  <PersonOutlinedIcon
-                    sx={{ color: theme.palette.text.secondary }}
+                  <UserIcon
+                    size={20}
+                    color={theme.palette.text.secondary}
                   />
                 }
               />
@@ -378,8 +374,9 @@ const Settings: React.FC = () => {
                 error={!!validateEmail(editFields.email) || !!infoError}
                 helperText={infoError || validateEmail(editFields.email)}
                 icon={
-                  <EmailOutlinedIcon
-                    sx={{ color: theme.palette.text.secondary }}
+                  <Mail
+                    size={20}
+                    color={theme.palette.text.secondary}
                   />
                 }
               />
@@ -396,8 +393,9 @@ const Settings: React.FC = () => {
                 error={!!validateUsername(editFields.username) || !!infoError}
                 helperText={infoError || validateUsername(editFields.username)}
                 icon={
-                  <AccountCircleOutlinedIcon
-                    sx={{ color: theme.palette.text.secondary }}
+                  <UserCircle
+                    size={20}
+                    color={theme.palette.text.secondary}
                   />
                 }
               />
@@ -407,8 +405,9 @@ const Settings: React.FC = () => {
           <Grid item xs={12} sx={{ mt: 3 }}>
             <Box sx={infoBox(theme)}>
               <Box sx={infoIconBox(theme)}>
-                <InfoOutlinedIcon
-                  sx={{ ...iconSx(theme), ...infoIconBox(theme) }}
+                <Info
+                  size={24}
+                  style={{ ...iconStyle, color: theme.palette.info.main }}
                 />
               </Box>
               <Box>
@@ -493,7 +492,7 @@ const Settings: React.FC = () => {
                     edge="end"
                     size="small"
                   >
-                    {showNewPassword ? <VisibilityOff /> : <Visibility />}
+                    {showNewPassword ? <EyeOff size={20} /> : <Eye size={20} />}
                   </IconButton>
                 }
               />
@@ -514,9 +513,9 @@ const Settings: React.FC = () => {
                     size="small"
                   >
                     {showConfirmNewPassword ? (
-                      <VisibilityOff />
+                      <EyeOff size={20} />
                     ) : (
-                      <Visibility />
+                      <Eye size={20} />
                     )}
                   </IconButton>
                 }
@@ -527,8 +526,9 @@ const Settings: React.FC = () => {
           <Grid item xs={12} sx={{ mt: 3 }}>
             <Box sx={infoBox(theme)}>
               <Box sx={infoIconBox(theme)}>
-                <InfoOutlinedIcon
-                  sx={{ ...iconSx(theme), ...infoIconBox(theme) }}
+                <Info
+                  size={24}
+                  style={{ ...iconStyle, color: theme.palette.info.main }}
                 />
               </Box>
               <Box>

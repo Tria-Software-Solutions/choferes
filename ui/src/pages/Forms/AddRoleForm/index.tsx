@@ -12,17 +12,14 @@ import {
   useMediaQuery,
   Typography,
 } from "@mui/material";
-import AddRoundedIcon from "@mui/icons-material/AddRounded";
-import CloseRoundedIcon from "@mui/icons-material/CloseRounded";
-import GroupOutlinedIcon from "@mui/icons-material/GroupOutlined";
-import InfoOutlinedIcon from "@mui/icons-material/InfoOutlined";
+import { Plus, X, Users, Info } from "lucide-react";
 import { Permission } from "../../../models/Permission";
 import TextfieldComponent from "../../../components/Textfield/Textfield.component";
 import { FORMS } from "../../../constants/constants";
 import {
   boxRoot,
   gridContainer,
-  iconSx,
+  iconStyle,
   permissionsLabel,
   permissionsError,
   permissionsBox,
@@ -171,7 +168,7 @@ const AddRoleForm: React.FC<AddRoleFormProps> = ({
             onChange={(e) => handleFieldChange("name", e.target.value)}
             error={errors.name !== ""}
             helperText={errors.name}
-            icon={<GroupOutlinedIcon sx={iconSx(theme)} />}
+            icon={<Users style={iconStyle} />}
           />
         </Grid>
 
@@ -271,8 +268,8 @@ const AddRoleForm: React.FC<AddRoleFormProps> = ({
         <Grid item xs={12}>
           <Box sx={infoBox(theme)}>
             <Box sx={infoIconBox(theme)}>
-              <InfoOutlinedIcon
-                sx={{ ...iconSx(theme), ...infoIconBox(theme) }}
+              <Info
+                style={iconStyle}
               />
             </Box>
             <Box>
@@ -291,7 +288,7 @@ const AddRoleForm: React.FC<AddRoleFormProps> = ({
             <Button
               variant="outlined"
               onClick={handleClearForm}
-              startIcon={<CloseRoundedIcon />}
+              startIcon={<X />}
               fullWidth={isSmallScreen}
               sx={clearButton}
             >
@@ -313,7 +310,7 @@ const AddRoleForm: React.FC<AddRoleFormProps> = ({
                 variant="contained"
                 onClick={handleSubmit}
                 disabled={!isFormValid() || isLoading}
-                startIcon={<AddRoundedIcon />}
+                startIcon={<Plus />}
                 fullWidth={isSmallScreen}
                 sx={submitButton}
               >

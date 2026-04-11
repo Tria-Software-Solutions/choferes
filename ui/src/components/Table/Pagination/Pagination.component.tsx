@@ -1,5 +1,5 @@
 import { IconButton, Typography, useMediaQuery, useTheme } from "@mui/material";
-import { ArrowBack, ArrowForward } from "@mui/icons-material";
+import { ArrowLeft, ArrowRight } from "lucide-react";
 import React from "react";
 import { PAGINATION } from "../../../constants/constants";
 import { containerStyles, pageTextStyles } from "./Pagination.styles";
@@ -48,12 +48,12 @@ const PaginationComponent: React.FC<PaginationActionsProps> = ({
         disabled={page === 0}
         aria-label={PAGINATION.PREVIOUS}
       >
-        <ArrowBack
-          sx={{
+        <ArrowLeft
+          style={{
             color:
               theme.palette.mode === "dark"
                 ? theme.palette.primary.main
-                : "#000000 !important",
+                : "#000000",
           }}
         />
       </IconButton>
@@ -67,12 +67,12 @@ const PaginationComponent: React.FC<PaginationActionsProps> = ({
         disabled={page >= Math.ceil(count / rowsPerPage) - 1}
         aria-label={PAGINATION.NEXT}
       >
-        <ArrowForward
-          sx={{
+        <ArrowRight
+          style={{
             color:
               theme.palette.mode === "dark"
                 ? theme.palette.primary.main
-                : "#000000 !important",
+                : "#000000",
           }}
         />
       </IconButton>

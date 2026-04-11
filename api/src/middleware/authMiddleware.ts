@@ -58,7 +58,7 @@ export const authenticateToken = (req: AuthenticatedRequest, res: Response, next
       req.user = { id: parseInt(payload.userId, 10) };
       return next();
     });
-  } catch (error) {
+  } catch {
     return res.status(500).json({
       error: "Internal server error",
       code: "AUTH_ERROR",
@@ -116,7 +116,7 @@ export const authenticateRefreshToken = (req: AuthenticatedRequest, res: Respons
         message: "Tokens refreshed successfully",
       });
     });
-  } catch (error) {
+  } catch {
     return res.status(500).json({
       error: "Internal server error",
       code: "REFRESH_ERROR",

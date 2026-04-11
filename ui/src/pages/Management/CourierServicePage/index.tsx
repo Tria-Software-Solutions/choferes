@@ -33,19 +33,12 @@ import { capitalizeFirstLetter } from "../../../utils/string";
 import PAGE_TITLE from "../../../constants/pageTitle.constants";
 import NOTIFICATIONS from "../../../constants/notifications.constants";
 import MANAGEMENT from "../../../constants/management.constants";
-import DownloadRoundedIcon from "@mui/icons-material/DownloadRounded";
-import ArrowBackIosNewRoundedIcon from "@mui/icons-material/ArrowBackIosNewRounded";
-import ArrowForwardIosRoundedIcon from "@mui/icons-material/ArrowForwardIosRounded";
-import CalendarTodayRoundedIcon from "@mui/icons-material/CalendarTodayRounded";
-import CloseRoundedIcon from "@mui/icons-material/CloseRounded";
-import ManageSearchIcon from "@mui/icons-material/ManageSearch";
+import { Download, ChevronLeft, ChevronRight, Calendar, X, Search } from "lucide-react";
 import { Courier } from "../../../models/Courier";
 import EditableTableComponent from "../../../components/Table/EditableTable/EditableTable.component";
 import AddCourierForm from "../../Forms/AddCourierForm";
 import DialogComponent from "../../../components/Dialog/Dialog.component";
-import AddRoundedIcon from "@mui/icons-material/AddRounded";
-import DeleteOutlineIcon from "@mui/icons-material/DeleteOutline";
-import LocalShippingIcon from "@mui/icons-material/LocalShipping";
+import { Plus, Trash2, Truck } from "lucide-react";
 import {
   courierHeaderBoxStyles,
   courierTitleBoxStyles,
@@ -69,9 +62,7 @@ import {
   getPreferencesObject,
   setPreferencesObject,
 } from "../../../utils/persistentState";
-import DescriptionIcon from "@mui/icons-material/Description";
-import PictureAsPdfIcon from "@mui/icons-material/PictureAsPdf";
-import AddCircleOutlineIcon from "@mui/icons-material/AddCircleOutline";
+import { FileText, FileType, PlusCircle } from "lucide-react";
 
 // CourierServicePage component for managing courier services
 const CourierServicePage: React.FC = () => {
@@ -377,8 +368,8 @@ const CourierServicePage: React.FC = () => {
       "Actualizado",
     ];
     return createExportOptions({
-      excelIcon: <DescriptionIcon />,
-      pdfIcon: <PictureAsPdfIcon />,
+      excelIcon: <FileText size={20} />,
+      pdfIcon: <FileType size={20} />,
       data: exportData,
       fileName: `reporte-de-servicios-de-mensajeria-${exportFileFormattedDate(selectedDate || new Date())}`,
       customHeaders: exportHeaders,
@@ -451,9 +442,9 @@ const CourierServicePage: React.FC = () => {
             variant={isSmallScreen ? "h5" : "h4"}
             sx={courierTitleStyles}
           >
-            <LocalShippingIcon
-              fontSize={isSmallScreen ? "small" : "large"}
-              sx={courierIconStyles(theme)}
+            <Truck
+              size={isSmallScreen ? 20 : 32}
+              style={courierIconStyles(theme)}
             />
             {isSmallScreen
               ? PAGE_TITLE.COURIER_SERVICE_SIMPLIFIED
@@ -466,8 +457,8 @@ const CourierServicePage: React.FC = () => {
           {filteredWeekCouriers.length > 0 && (
             <SpeedDialComponent
               actions={exportOptions}
-              mainIcon={<DownloadRoundedIcon />}
-              openIcon={<CloseRoundedIcon />}
+              mainIcon={<Download size={20} />}
+              openIcon={<X size={20} />}
               direction="left"
             />
           )}
@@ -506,7 +497,7 @@ const CourierServicePage: React.FC = () => {
                   onClick={handleOpenAddCourierModal}
                   sx={addButtonMobileStyles}
                 >
-                  <AddRoundedIcon />
+                  <Plus size={24} />
                 </Button>
               </Box>
             </Grid>
@@ -552,7 +543,7 @@ const CourierServicePage: React.FC = () => {
                       arrow
                     >
                       <Button onClick={handlePreviousDate}>
-                        <ArrowBackIosNewRoundedIcon />
+                        <ChevronLeft size={24} />
                       </Button>
                     </Tooltip>
                     <Tooltip
@@ -564,7 +555,7 @@ const CourierServicePage: React.FC = () => {
                           disabled={isTodayOrFuture(selectedDate)}
                           onClick={handleNextDate}
                         >
-                          <ArrowForwardIosRoundedIcon />
+                          <ChevronRight size={24} />
                         </Button>
                       </span>
                     </Tooltip>
@@ -579,7 +570,7 @@ const CourierServicePage: React.FC = () => {
                           disabled={isTodayOrFuture(selectedDate)}
                           onClick={handleCurrentDate}
                         >
-                          <CalendarTodayRoundedIcon />
+                          <Calendar size={24} />
                         </Button>
                       </span>
                     </Tooltip>
@@ -587,7 +578,7 @@ const CourierServicePage: React.FC = () => {
                 </Box>
                 <Button
                   variant="contained"
-                  startIcon={<AddRoundedIcon />}
+                  startIcon={<Plus size={20} />}
                   onClick={handleOpenAddCourierModal}
                   sx={{
                     display: { xs: "none", md: "flex" },
@@ -634,7 +625,7 @@ const CourierServicePage: React.FC = () => {
             />
           ) : (
             <Box sx={noCouriersBoxStyles}>
-              <ManageSearchIcon color="disabled" sx={noCouriersIconStyles} />
+              <Search size={48} style={{ color: theme.palette.text.disabled, ...noCouriersIconStyles }} />
               <Typography variant="body1" color="textSecondary">
                 {capitalizeFirstLetter(
                   format(selectedDate, "EEEE dd 'de' MMMM 'de' yyyy", {
@@ -660,7 +651,7 @@ const CourierServicePage: React.FC = () => {
         cancelText={MANAGEMENT.COURIER_SERVICE_PAGE.DIALOG_DELETE_CANCEL}
         loading={isDeletingCourier}
         paperSx={deleteDialogPaperSx ?? {}}
-        icon={<DeleteOutlineIcon color="error" />}
+        icon={<Trash2 size={24} color="red" />}
       />
       <DialogComponent
         open={openAddCourierModal}
@@ -669,7 +660,7 @@ const CourierServicePage: React.FC = () => {
         subtitle={MANAGEMENT.COURIER_SERVICE_PAGE.DIALOG_ADD_SUBTITLE}
         hideActions
         paperSx={addDialogPaperSx ?? {}}
-        icon={<AddCircleOutlineIcon color="info" />}
+        icon={<PlusCircle size={24} color="blue" />}
       >
         <AddCourierForm
           onSubmit={handleCreateCourier}

@@ -13,18 +13,7 @@ import {
   useTheme,
   ListItemButton,
 } from '@mui/material';
-import {
-  NotificationsRounded as NotificationsIcon,
-  CheckCircle as CheckCircleIcon,
-  Info as InfoIcon,
-  Warning as WarningIcon,
-  Error as ErrorIcon,
-  Delete as DeleteIcon,
-  DoneAll as DoneAllIcon,
-  FilterList as FilterIcon,
-  Clear as ClearIcon,
-  DeleteSweep as DeleteSweepIcon,
-} from '@mui/icons-material';
+import { Bell, CheckCircle, Info, AlertTriangle, AlertCircle, Trash2, CheckCheck, ListFilter, X, Trash } from "lucide-react";
 import { useNotificationMenu } from '../../context/NotificationContext';
 import { Notification } from '../../models/Notification';
 import { formatDistanceToNow } from 'date-fns';
@@ -40,14 +29,14 @@ interface NotificationMenuProps {
 const getNotificationIcon = (type: Notification['type']) => {
   switch (type) {
     case 'success':
-      return <CheckCircleIcon color="success" />;
+      return <CheckCircle size={20} color="green" />;
     case 'error':
-      return <ErrorIcon color="error" />;
+      return <AlertCircle size={20} color="red" />;
     case 'warning':
-      return <WarningIcon color="warning" />;
+      return <AlertTriangle size={20} color="orange" />;
     case 'info':
     default:
-      return <InfoIcon color="info" />;
+      return <Info size={20} color="blue" />;
   }
 };
 
@@ -160,7 +149,7 @@ const NotificationMenu: React.FC<NotificationMenuProps> = ({
                 color={showFilters ? 'primary' : 'default'}
                 sx={{ padding: 0.5 }}
               >
-                <FilterIcon sx={{ fontSize: 18 }} />
+                <ListFilter size={18} />
               </IconButton>
             </Tooltip>
             {unreadCount > 0 && (
@@ -170,7 +159,7 @@ const NotificationMenu: React.FC<NotificationMenuProps> = ({
                   onClick={handleMarkAllAsRead}
                   sx={{ padding: 0.5 }}
                 >
-                  <DoneAllIcon sx={{ fontSize: 18 }} />
+                  <CheckCheck size={18} />
                 </IconButton>
               </Tooltip>
             )}
@@ -193,7 +182,7 @@ const NotificationMenu: React.FC<NotificationMenuProps> = ({
             <Button 
               size="small" 
               onClick={clearFilters} 
-              startIcon={<ClearIcon sx={{ fontSize: 16 }} />}
+              startIcon={<X size={16} />}
               sx={{ fontSize: '0.75rem', padding: '4px 8px' }}
             >
               Limpiar
@@ -299,7 +288,7 @@ const NotificationMenu: React.FC<NotificationMenuProps> = ({
               justifyContent: 'center',
               alignItems: 'center',
             }}>
-              <NotificationsIcon sx={{ fontSize: 48, color: 'text.secondary', mb: 1 }} />
+              <Bell size={48} style={{ color: theme.palette.text.secondary, marginBottom: 8 }} />
               <Typography variant="body2" color="text.secondary">
                 No hay notificaciones
               </Typography>
@@ -395,7 +384,7 @@ const NotificationMenu: React.FC<NotificationMenuProps> = ({
                           minHeight: 24,
                         }}
                       >
-                        <DeleteIcon sx={{ fontSize: 20 }} />
+                        <Trash2 size={20} />
                       </IconButton>
                     </Tooltip>
                   </Box>
@@ -447,7 +436,7 @@ const NotificationMenu: React.FC<NotificationMenuProps> = ({
               variant="outlined"
               size="small"
               onClick={handleDeleteAllNotifications}
-              startIcon={<DeleteSweepIcon sx={{ fontSize: 16 }} />}
+              startIcon={<Trash size={16} />}
               sx={{ 
                 fontSize: '0.8rem', 
                 padding: '6px 16px',

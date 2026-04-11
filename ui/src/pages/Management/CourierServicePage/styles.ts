@@ -1,4 +1,5 @@
 import { SxProps, Theme } from "@mui/material";
+import { CSSProperties } from "react";
 
 export const courierHeaderBoxStyles: SxProps<Theme> = {
   mb: 3,
@@ -126,8 +127,9 @@ export const noCouriersBoxStyles: SxProps<Theme> = {
   paddingBottom: "12%",
 };
 
-export const noCouriersIconStyles: SxProps<Theme> = {
-  fontSize: "65px",
+export const noCouriersIconStyles: CSSProperties = {
+  width: "65px",
+  height: "65px",
 };
 
 export const deleteDialogPaperSx: SxProps<Theme> = {

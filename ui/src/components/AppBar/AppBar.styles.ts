@@ -84,8 +84,9 @@ export const dashboardIconButtonStyles = (
 
 export const dashboardIconStyles = (
   active: boolean = false,
-): SxProps<Theme> => ({
-  fontSize: "1.6rem",
+): CSSProperties => ({
+  width: "1.6rem",
+  height: "1.6rem",
   color: "#ffffff",
   filter: active ? "drop-shadow(0 0 8px rgba(255,255,255,0.6))" : "none",
 });

@@ -12,7 +12,7 @@ import {
   useTheme,
 } from "@mui/material";
 import SearchBarComponent from "../../../components/SearchBar/SearchBar.component";
-import VpnKeyOutlinedIcon from "@mui/icons-material/VpnKeyOutlined";
+import { Key } from "lucide-react";
 import { DASHBOARD_PERMISSIONS } from "../../../constants/constants";
 import {
   loadingBoxStyles,
@@ -98,7 +98,7 @@ const ManagePermissions: React.FC = () => {
                 <Grid item xs={12} sm={6} md={3} lg={3} key={permission.id}>
                   <Box sx={permissionBoxStyles}>
                     <Box sx={permissionIconBoxStyles}>
-                      <VpnKeyOutlinedIcon sx={permissionIconStyles} />
+                      <Key size={24} color={theme.palette.primary.main} />
                     </Box>
                     <Typography
                       variant="body2"

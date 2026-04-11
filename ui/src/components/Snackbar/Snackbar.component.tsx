@@ -1,10 +1,6 @@
 import React, { createContext, useContext, useState } from "react";
 import { Snackbar, Alert, Slide, SlideProps, useTheme } from "@mui/material";
-import CheckCircleIcon from '@mui/icons-material/CheckCircle';
-import ErrorIcon from '@mui/icons-material/Error';
-import InfoIcon from '@mui/icons-material/Info';
-import WarningIcon from '@mui/icons-material/Warning';
-import { green, red, blue, orange } from '@mui/material/colors';
+import { CheckCircle, XCircle, Info, AlertTriangle } from "lucide-react";
 
 // SnackbarWrapper provides a context and provider for showing notifications across the app using Material-UI Snackbar.
 // Exposes a showNotification function via context for use in child components.
@@ -77,15 +73,16 @@ export const AppNotificationProvider: React.FC<{
 
   // Custom icon with color only for the icon
   const getSeverityIcon = (severity: Severity) => {
+    const iconSize = 20;
     switch (severity) {
       case 'success':
-        return <CheckCircleIcon fontSize="inherit" sx={{ color: green[600] }} />;
+        return <CheckCircle size={iconSize} color="#4caf50" />;
       case 'error':
-        return <ErrorIcon fontSize="inherit" sx={{ color: red[600] }} />;
+        return <XCircle size={iconSize} color="#f44336" />;
       case 'info':
-        return <InfoIcon fontSize="inherit" sx={{ color: blue[600] }} />;
+        return <Info size={iconSize} color="#2196f3" />;
       case 'warning':
-        return <WarningIcon fontSize="inherit" sx={{ color: orange[600] }} />;
+        return <AlertTriangle size={iconSize} color="#ff9800" />;
       default:
         return undefined;
     }

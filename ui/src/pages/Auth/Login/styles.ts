@@ -88,6 +88,14 @@ export const textFieldStyles: SxProps<Theme> = (theme: Theme) => ({
     "& input": {
       color: theme.palette.text.primary,
     },
+    "& input:-webkit-autofill": {
+      WebkitBoxShadow: `0 0 0 100px ${theme.palette.background.paper} inset`,
+      WebkitTextFillColor: theme.palette.text.primary,
+    },
+    "& input:-webkit-autofill:focus": {
+      WebkitBoxShadow: `0 0 0 100px ${theme.palette.background.paper} inset`,
+      WebkitTextFillColor: theme.palette.text.primary,
+    },
   },
 });
 

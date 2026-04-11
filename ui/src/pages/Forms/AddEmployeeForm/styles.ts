@@ -1,4 +1,5 @@
 import { Theme } from "@mui/material/styles";
+import { CSSProperties } from "react";
 
 export const boxRoot = {
   width: "100%",
@@ -9,9 +10,9 @@ export const gridContainer = {
   mt: 0,
 };
 
-export const iconSx = (theme: Theme) => ({
-  color: theme.palette.text.secondary,
-});
+export const iconStyle: CSSProperties = {
+  color: "#666666",
+};
 
 export const infoBox = (theme: Theme) => ({
   display: "flex",

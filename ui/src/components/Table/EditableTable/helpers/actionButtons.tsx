@@ -1,12 +1,6 @@
 import React from "react";
 import { Box, IconButton, Tooltip } from "@mui/material";
-import EditNoteIcon from "@mui/icons-material/EditNote";
-import DeleteForeverIcon from "@mui/icons-material/DeleteForever";
-import CheckCircleIcon from "@mui/icons-material/CheckCircle";
-import CancelIcon from "@mui/icons-material/Cancel";
-import LockResetIcon from "@mui/icons-material/LockReset";
-import ToggleOnIcon from "@mui/icons-material/ToggleOn";
-import ToggleOffIcon from "@mui/icons-material/ToggleOff";
+import { FileEdit, Trash2, CheckCircle, X, Lock, ToggleLeft, ToggleRight } from "lucide-react";
 import { TABLE } from "../../../../constants/constants";
 
 export function renderActionButtons<T extends object>({
@@ -56,7 +50,7 @@ export function renderActionButtons<T extends object>({
                 onClick={() => handleSaveClick && handleSaveClick(rowId)}
                 disabled={isSaveDisabled}
               >
-                <CheckCircleIcon />
+                <CheckCircle size={20} />
               </IconButton>
             </Box>
           </span>
@@ -68,7 +62,7 @@ export function renderActionButtons<T extends object>({
                 color="primary"
                 onClick={() => handleCancelClick && handleCancelClick()}
               >
-                <CancelIcon />
+                <X size={20} />
               </IconButton>
             </Box>
           </span>
@@ -89,7 +83,7 @@ export function renderActionButtons<T extends object>({
                     color="primary"
                     onClick={() => onOpenPasswordModal(rowId)}
                   >
-                    <LockResetIcon />
+                    <Lock size={20} />
                   </IconButton>
                 </Box>
               </span>
@@ -102,7 +96,7 @@ export function renderActionButtons<T extends object>({
                   color="primary"
                   onClick={() => handleEditClick && handleEditClick(row)}
                 >
-                  <EditNoteIcon />
+                  <FileEdit size={20} />
                 </IconButton>
               </Box>
             </span>
@@ -122,7 +116,7 @@ export function renderActionButtons<T extends object>({
                         handleOpenDeleteDialog && handleOpenDeleteDialog(rowId)
                       }
                     >
-                      <DeleteForeverIcon />
+                      <Trash2 size={20} />
                     </IconButton>
                   </Box>
                 </span>
@@ -138,7 +132,7 @@ export function renderActionButtons<T extends object>({
                       handleOpenDeleteDialog && handleOpenDeleteDialog(rowId)
                     }
                   >
-                    <DeleteForeverIcon />
+                    <Trash2 size={20} />
                   </IconButton>
                 </Box>
               </span>
@@ -176,9 +170,9 @@ export function renderStatusButton<T extends object>({
             onClick={() => handleOpenStatusDialog && handleOpenStatusDialog(row)}
           >
             {row.isActive ? (
-              <ToggleOnIcon sx={{ color: "success.main" }} />
+              <ToggleLeft size={24} color="green" />
             ) : (
-              <ToggleOffIcon sx={{ color: "grey.500" }} />
+              <ToggleRight size={24} color="gray" />
             )}
           </IconButton>
         </Box>

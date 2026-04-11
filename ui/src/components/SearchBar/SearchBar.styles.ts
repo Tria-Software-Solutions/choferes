@@ -1,4 +1,5 @@
 import { SxProps, Theme } from "@mui/material";
+import { CSSProperties } from "react";
 
 export const searchBarRoot: SxProps<Theme> = (theme) => ({
   background: theme.palette.background.paper,
@@ -58,10 +59,10 @@ export const textFieldStyles = (customSx: object = {}): SxProps<Theme> => (theme
   },
 });
 
-export const searchIconStyles = (theme: Theme) => ({
-  color: theme.palette.text.secondary,
-});
+export const searchIconStyles: CSSProperties = {
+  color: "#666666",
+};
 
-export const clearIconStyles: SxProps<Theme> = {
+export const clearIconStyles: CSSProperties = {
   fontSize: "20px",
 };

@@ -27,11 +27,8 @@ import {
 import EditableTableComponent from "../../../components/Table/EditableTable/EditableTable.component";
 import SearchBarComponent from "../../../components/SearchBar/SearchBar.component";
 import AddUserForm from "../../Forms/AddUserForm";
-import VisibilityIcon from "@mui/icons-material/Visibility";
-import VisibilityOffIcon from "@mui/icons-material/VisibilityOff";
-import AddCircleOutlineIcon from "@mui/icons-material/AddCircleOutline";
+import { Eye, EyeOff, PlusCircle, Plus } from "lucide-react";
 import DialogComponent from "../../../components/Dialog/Dialog.component";
-import AddRoundedIcon from "@mui/icons-material/AddRounded";
 import { DASHBOARD_USERS } from "../../../constants/constants";
 import { NOTIFICATIONS } from "../../../constants/constants";
 import PasswordChangeForm from "../../Forms/PasswordChangeForm";
@@ -464,7 +461,7 @@ const ManageUsers: React.FC<{ isExpanded?: boolean }> = ({
                   onClick={handleOpenAddUserModal}
                   sx={addButtonMobileStyles}
                 >
-                  <AddRoundedIcon />
+                  <Plus />
                 </Button>
               </Box>
             </Grid>
@@ -482,9 +479,9 @@ const ManageUsers: React.FC<{ isExpanded?: boolean }> = ({
                   sx={showInactiveBoxStyles(theme)}
                 >
                   {showInactive ? (
-                    <VisibilityOffIcon sx={{ fontSize: 20 }} />
+                    <EyeOff size={20} />
                   ) : (
-                    <VisibilityIcon sx={{ fontSize: 20 }} />
+                    <Eye size={20} />
                   )}
                   <Typography
                     variant="body2"
@@ -498,7 +495,7 @@ const ManageUsers: React.FC<{ isExpanded?: boolean }> = ({
                 </Box>
                 <Button
                   variant="contained"
-                  startIcon={<AddRoundedIcon />}
+                  startIcon={<Plus />}
                   onClick={handleOpenAddUserModal}
                   sx={addButtonDesktopStyles}
                 >
@@ -518,9 +515,9 @@ const ManageUsers: React.FC<{ isExpanded?: boolean }> = ({
                   sx={showInactiveBoxStyles(theme)}
                 >
                   {showInactive ? (
-                    <VisibilityOffIcon sx={{ fontSize: 20 }} />
+                    <EyeOff size={20} />
                   ) : (
-                    <VisibilityIcon sx={{ fontSize: 20 }} />
+                    <Eye size={20} />
                   )}
                   <Typography
                     variant="body2"
@@ -599,7 +596,7 @@ const ManageUsers: React.FC<{ isExpanded?: boolean }> = ({
         subtitle={DASHBOARD_USERS.ADD_SUBTITLE}
         hideActions
         paperSx={addDialogPaperSx ?? {}}
-        icon={<AddCircleOutlineIcon color="info" />}
+        icon={<PlusCircle color="var(--mui-palette-info-main)" />}
       >
         <AddUserForm
           onSubmit={handleCreateUser}

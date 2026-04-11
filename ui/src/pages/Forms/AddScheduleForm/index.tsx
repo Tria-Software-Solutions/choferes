@@ -21,16 +21,12 @@ import { Schedule } from "../../../models/Schedule";
 import FORMS from "../../../constants/forms.constants";
 import DAYS_LIST from "../../../constants/days.constants";
 import { translateDayOptionsToSpanish } from "../../../utils/string";
-import AddRoundedIcon from "@mui/icons-material/AddRounded";
-import CloseRoundedIcon from "@mui/icons-material/CloseRounded";
+import { Plus, X, Calendar, Clock, AlertTriangle } from "lucide-react";
 import TextfieldComponent from "../../../components/Textfield/Textfield.component";
-import CalendarMonthOutlinedIcon from "@mui/icons-material/CalendarMonthOutlined";
-import AccessTimeOutlinedIcon from "@mui/icons-material/AccessTimeOutlined";
-import WarningAmberOutlinedIcon from "@mui/icons-material/WarningAmberOutlined";
 import {
   boxRoot,
   gridContainer,
-  iconSx,
+  iconStyle,
   formControl,
   daysSelectBox,
   dayChip,
@@ -131,7 +127,7 @@ const AddScheduleForm: React.FC<AddScheduleFormProps> = ({
             onChange={(e) =>
               setFormData({ ...formData, label: e.target.value })
             }
-            icon={<CalendarMonthOutlinedIcon sx={iconSx(theme)} />}
+            icon={<Calendar style={iconStyle} />}
           />
         </Grid>
 
@@ -160,8 +156,8 @@ const AddScheduleForm: React.FC<AddScheduleFormProps> = ({
                 ? FORMS.HOURS_INVALID
                 : ""
             }
-            icon={<AccessTimeOutlinedIcon sx={iconSx(theme)} />}
-            endAdornment={<Box sx={iconSx(theme)}>horas</Box>}
+            icon={<Clock style={iconStyle} />}
+            endAdornment={<Box style={iconStyle}>horas</Box>}
             inputProps={{ min: "0" }}
           />
         </Grid>
@@ -178,7 +174,7 @@ const AddScheduleForm: React.FC<AddScheduleFormProps> = ({
                   label={FORMS.DAYS_REQUIRED}
                   startAdornment={
                     <InputAdornment position="start">
-                      <CalendarMonthOutlinedIcon sx={iconSx(theme)} />
+                      <Calendar style={iconStyle} />
                     </InputAdornment>
                   }
                 />
@@ -251,7 +247,7 @@ const AddScheduleForm: React.FC<AddScheduleFormProps> = ({
             <Box
               sx={{ mr: { xs: 1, sm: 2 }, color: theme.palette.warning.main }}
             >
-              <WarningAmberOutlinedIcon
+              <AlertTriangle
                 sx={{ color: theme.palette.warning.main, mr: { xs: 1, sm: 2 } }}
               />
             </Box>
@@ -289,7 +285,7 @@ const AddScheduleForm: React.FC<AddScheduleFormProps> = ({
             <Button
               variant="outlined"
               onClick={handleClearForm}
-              startIcon={<CloseRoundedIcon />}
+              startIcon={<X />}
               fullWidth={isSmallScreen}
               sx={clearButton}
             >
@@ -311,7 +307,7 @@ const AddScheduleForm: React.FC<AddScheduleFormProps> = ({
                 variant="contained"
                 onClick={handleSubmit}
                 disabled={!isFormValid || isLoading}
-                startIcon={<AddRoundedIcon />}
+                startIcon={<Plus />}
                 fullWidth={isSmallScreen}
                 sx={submitButton}
               >

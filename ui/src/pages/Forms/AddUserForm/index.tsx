@@ -13,23 +13,15 @@ import {
   useMediaQuery,
   Typography,
 } from "@mui/material";
-import AddRoundedIcon from "@mui/icons-material/AddRounded";
-import CloseRoundedIcon from "@mui/icons-material/CloseRounded";
-import Visibility from "@mui/icons-material/Visibility";
-import VisibilityOff from "@mui/icons-material/VisibilityOff";
-import PersonOutlinedIcon from "@mui/icons-material/PersonOutlined";
-import EmailOutlinedIcon from "@mui/icons-material/EmailOutlined";
-import LockOutlinedIcon from "@mui/icons-material/LockOutlined";
-import GroupOutlinedIcon from "@mui/icons-material/GroupOutlined";
+import { Plus, X, Eye, EyeOff, User, Mail, Lock, Users, Info } from "lucide-react";
 import OutlinedInput from "@mui/material/OutlinedInput";
-import InfoOutlinedIcon from "@mui/icons-material/InfoOutlined";
 import { Role } from "../../../models/Role";
 import TextfieldComponent from "../../../components/Textfield/Textfield.component";
 import FORMS from "../../../constants/forms.constants";
 import {
   boxRoot,
   gridContainer,
-  iconSx,
+  iconStyle,
   formControl,
   menuPaperProps,
   infoBox,
@@ -195,7 +187,7 @@ const AddUserForm: React.FC<AddUserFormProps> = ({
             onChange={(e) => handleFieldChange("firstName", e.target.value)}
             error={errors.firstName !== ""}
             helperText={errors.firstName}
-            icon={<PersonOutlinedIcon sx={iconSx(theme)} />}
+            icon={<User style={iconStyle} />}
           />
         </Grid>
 
@@ -209,7 +201,7 @@ const AddUserForm: React.FC<AddUserFormProps> = ({
             onChange={(e) => handleFieldChange("lastName", e.target.value)}
             error={errors.lastName !== ""}
             helperText={errors.lastName}
-            icon={<PersonOutlinedIcon sx={iconSx(theme)} />}
+            icon={<User style={iconStyle} />}
           />
         </Grid>
 
@@ -223,7 +215,7 @@ const AddUserForm: React.FC<AddUserFormProps> = ({
             onChange={(e) => handleFieldChange("email", e.target.value)}
             error={errors.email !== ""}
             helperText={errors.email}
-            icon={<EmailOutlinedIcon sx={iconSx(theme)} />}
+            icon={<Mail style={iconStyle} />}
           />
         </Grid>
 
@@ -237,7 +229,7 @@ const AddUserForm: React.FC<AddUserFormProps> = ({
             onChange={(e) => handleFieldChange("username", e.target.value)}
             error={errors.username !== ""}
             helperText={errors.username}
-            icon={<PersonOutlinedIcon sx={iconSx(theme)} />}
+            icon={<User style={iconStyle} />}
           />
         </Grid>
 
@@ -252,12 +244,12 @@ const AddUserForm: React.FC<AddUserFormProps> = ({
             onChange={(e) => handleFieldChange("password", e.target.value)}
             error={errors.password !== ""}
             helperText={errors.password}
-            icon={<LockOutlinedIcon sx={iconSx(theme)} />}
+            icon={<Lock style={iconStyle} />}
             InputProps={{
               endAdornment: (
                 <InputAdornment position="end">
                   <IconButton onClick={handleTogglePassword} edge="end">
-                    {showPassword ? <VisibilityOff /> : <Visibility />}
+                    {showPassword ? <EyeOff /> : <Eye />}
                   </IconButton>
                 </InputAdornment>
               ),
@@ -278,7 +270,7 @@ const AddUserForm: React.FC<AddUserFormProps> = ({
                   label={FORMS.ADD_USER.ROLE_LABEL}
                   startAdornment={
                     <InputAdornment position="start">
-                      <GroupOutlinedIcon sx={iconSx(theme)} />
+                      <Users style={iconStyle} />
                     </InputAdornment>
                   }
                 />
@@ -297,9 +289,7 @@ const AddUserForm: React.FC<AddUserFormProps> = ({
         <Grid item xs={12}>
           <Box sx={infoBox(theme)}>
             <Box sx={infoIconBox(theme)}>
-              <InfoOutlinedIcon
-                sx={{ ...iconSx(theme), ...infoIconBox(theme) }}
-              />
+              <Info style={iconStyle} />
             </Box>
             <Box>
               <Typography sx={infoTitle(theme)}>
@@ -317,7 +307,7 @@ const AddUserForm: React.FC<AddUserFormProps> = ({
             <Button
               variant="outlined"
               onClick={handleClearForm}
-              startIcon={<CloseRoundedIcon />}
+              startIcon={<X />}
               fullWidth={isSmallScreen}
               sx={clearButton}
             >
@@ -339,7 +329,7 @@ const AddUserForm: React.FC<AddUserFormProps> = ({
                 variant="contained"
                 onClick={handleSubmit}
                 disabled={!isFormValid() || isLoading}
-                startIcon={<AddRoundedIcon />}
+                startIcon={<Plus />}
                 fullWidth={isSmallScreen}
                 sx={submitButton}
               >

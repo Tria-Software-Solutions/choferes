@@ -35,15 +35,7 @@ import PAGE_TITLE from "../../../constants/pageTitle.constants";
 import PERMISSIONS from "../../../constants/permissions.constants";
 import NOTIFICATIONS from "../../../constants/notifications.constants";
 import MANAGEMENT from "../../../constants/management.constants";
-import GroupRoundedIcon from "@mui/icons-material/GroupRounded";
-import DownloadRoundedIcon from "@mui/icons-material/DownloadRounded";
-import CloseRoundedIcon from "@mui/icons-material/CloseRounded";
-import ManageSearchIcon from "@mui/icons-material/ManageSearch";
-import AddRoundedIcon from "@mui/icons-material/AddRounded";
-import DeleteOutlineIcon from "@mui/icons-material/DeleteOutline";
-import DescriptionIcon from "@mui/icons-material/Description";
-import PictureAsPdfIcon from "@mui/icons-material/PictureAsPdf";
-import AddCircleOutlineIcon from "@mui/icons-material/AddCircleOutline";
+import { Users, Download, X, Search, Plus, Trash2, FileText, FileType, PlusCircle } from "lucide-react";
 import {
   employeesHeaderBoxStyles,
   employeesTitleBoxStyles,
@@ -290,8 +282,8 @@ const EmployeesPage: React.FC = () => {
   const exportOptions = useMemo(() => {
     const exportHeaders = ["Nombre", "Apellido", "Agregado", "Actualizado"];
     return createExportOptions({
-      excelIcon: <DescriptionIcon />,
-      pdfIcon: <PictureAsPdfIcon />,
+      excelIcon: <FileText size={20} />,
+      pdfIcon: <FileType size={20} />,
       data: exportData,
       fileName: `empleados-${exportFileFormattedDate(new Date())}`,
       customHeaders: exportHeaders,
@@ -317,9 +309,9 @@ const EmployeesPage: React.FC = () => {
             variant={isSmallScreen ? "h5" : "h4"}
             sx={employeesTitleStyles}
           >
-            <GroupRoundedIcon
-              fontSize={isSmallScreen ? "small" : "large"}
-              sx={employeesIconStyles(theme)}
+            <Users
+              size={isSmallScreen ? 20 : 32}
+              style={employeesIconStyles(theme)}
             />
             {isSmallScreen
               ? PAGE_TITLE.EMPLOYEES_SIMPLIFIED
@@ -333,8 +325,8 @@ const EmployeesPage: React.FC = () => {
               {filteredEmployees.length > 0 && (
                 <SpeedDialComponent
                   actions={exportOptions}
-                  mainIcon={<DownloadRoundedIcon />}
-                  openIcon={<CloseRoundedIcon />}
+                  mainIcon={<Download size={20} />}
+                  openIcon={<X size={20} />}
                   direction="left"
                 />
               )}
@@ -373,7 +365,7 @@ const EmployeesPage: React.FC = () => {
                     onClick={handleOpenAddModal}
                     sx={addButtonMobileStyles}
                   >
-                    <AddRoundedIcon />
+                    <Plus size={24} />
                   </Button>
                 )}
               </Box>
@@ -383,7 +375,7 @@ const EmployeesPage: React.FC = () => {
                 <Box sx={addButtonDesktopBoxStyles}>
                   <Button
                     variant="contained"
-                    startIcon={<AddRoundedIcon />}
+                    startIcon={<Plus size={20} />}
                     onClick={handleOpenAddModal}
                     sx={addButtonDesktopStyles}
                   >
@@ -418,7 +410,7 @@ const EmployeesPage: React.FC = () => {
             />
           ) : (
             <Box sx={noEmployeesBoxStyles}>
-              <ManageSearchIcon color="disabled" sx={noEmployeesIconStyles} />
+              <Search size={48} style={{ color: theme.palette.text.disabled, ...noEmployeesIconStyles }} />
               <Typography variant="h6" color="textSecondary">
                 {MANAGEMENT.EMPLOYEES_PAGE.NO_EMPLOYEES}
               </Typography>
@@ -437,7 +429,7 @@ const EmployeesPage: React.FC = () => {
         cancelText={MANAGEMENT.EMPLOYEES_PAGE.DIALOG_DELETE_CANCEL}
         loading={isDeletingEmployee}
         paperSx={deleteDialogPaperSx ?? {}}
-        icon={<DeleteOutlineIcon color="error" />}
+        icon={<Trash2 size={24} color="red" />}
       />
 
       <DialogComponent
@@ -447,7 +439,7 @@ const EmployeesPage: React.FC = () => {
         subtitle={MANAGEMENT.EMPLOYEES_PAGE.DIALOG_ADD_SUBTITLE}
         hideActions
         paperSx={addDialogPaperSx ?? {}}
-        icon={<AddCircleOutlineIcon color="info" />}
+        icon={<PlusCircle size={24} color="blue" />}
       >
         <AddEmployeeForm
           onSubmit={handleCreate}

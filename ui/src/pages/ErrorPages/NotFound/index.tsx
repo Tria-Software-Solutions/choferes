@@ -9,9 +9,7 @@ import {
   Slide,
   useMediaQuery,
 } from "@mui/material";
-import SearchOffIcon from "@mui/icons-material/SearchOff";
-import HomeIcon from "@mui/icons-material/Home";
-import ExploreIcon from "@mui/icons-material/Explore";
+import { SearchX, Home, Compass } from "lucide-react";
 import ERRORS from "../../../constants/errors.constants";
 import {
   outerBoxStyles,
@@ -44,8 +42,9 @@ const NotFound: React.FC = () => {
           <Slide direction="up" in timeout={1000}>
             <Box sx={innerBoxStyles}>
               <Box sx={iconStyles(theme)}>
-                <SearchOffIcon
-                  sx={iconStyles(theme)}
+                <SearchX
+                  size={64}
+                  color={theme.palette.info.main}
                   aria-label="Not found icon"
                 />
                 <Typography variant="h1" component="h1" sx={titleStyles(theme)}>
@@ -70,7 +69,7 @@ const NotFound: React.FC = () => {
                     variant="contained"
                     color="info"
                     size="large"
-                    startIcon={<HomeIcon />}
+                    startIcon={<Home size={20} />}
                     onClick={handleGoHome}
                     fullWidth={isSmallScreen}
                     sx={homeButtonStyles}
@@ -82,7 +81,7 @@ const NotFound: React.FC = () => {
                     variant="outlined"
                     color="primary"
                     size="large"
-                    startIcon={<ExploreIcon />}
+                    startIcon={<Compass size={20} />}
                     onClick={() => navigate("/dashboard")}
                     fullWidth={isSmallScreen}
                     sx={exploreButtonStyles}

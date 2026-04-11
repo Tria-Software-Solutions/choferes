@@ -27,9 +27,7 @@ import EditableTableComponent from "../../../components/Table/EditableTable/Edit
 import SearchBarComponent from "../../../components/SearchBar/SearchBar.component";
 import AddRoleForm from "../../Forms/AddRoleForm";
 import DialogComponent from "../../../components/Dialog/Dialog.component";
-import AddRoundedIcon from "@mui/icons-material/AddRounded";
-import DeleteOutlineIcon from "@mui/icons-material/DeleteOutline";
-import AddCircleOutlineIcon from "@mui/icons-material/AddCircleOutline";
+import { Plus, Trash2, PlusCircle } from "lucide-react";
 import { DASHBOARD_ROLES } from "../../../constants/constants";
 import { NOTIFICATIONS } from "../../../constants/constants";
 import {
@@ -305,7 +303,7 @@ const ManageRoles: React.FC<{ isExpanded?: boolean }> = ({
                   onClick={handleOpenAddRoleModal}
                   sx={addButtonMobileStyles}
                 >
-                  <AddRoundedIcon />
+                  <Plus />
                 </Button>
               </Box>
             </Grid>
@@ -320,7 +318,7 @@ const ManageRoles: React.FC<{ isExpanded?: boolean }> = ({
               >
                 <Button
                   variant="contained"
-                  startIcon={<AddRoundedIcon />}
+                  startIcon={<Plus />}
                   onClick={handleOpenAddRoleModal}
                   sx={addButtonDesktopStyles}
                 >
@@ -376,7 +374,7 @@ const ManageRoles: React.FC<{ isExpanded?: boolean }> = ({
             cancelText={DASHBOARD_ROLES.DIALOG_DELETE_CANCEL}
             loading={isDeletingRole}
             paperSx={deleteDialogPaperSx ?? {}}
-            icon={<DeleteOutlineIcon color="error" />}
+            icon={<Trash2 color="var(--mui-palette-error-main)" />}
           />
           <DialogComponent
             open={openAddRoleModal}
@@ -385,7 +383,7 @@ const ManageRoles: React.FC<{ isExpanded?: boolean }> = ({
             subtitle={DASHBOARD_ROLES.DIALOG_ADD_SUBTITLE}
             hideActions
             paperSx={addDialogPaperSx ?? {}}
-            icon={<AddCircleOutlineIcon color="info" />}
+            icon={<PlusCircle color="var(--mui-palette-info-main)" />}
           >
             <AddRoleForm
               onSubmit={handleCreateRole}

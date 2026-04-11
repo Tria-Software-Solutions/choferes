@@ -21,15 +21,11 @@ import {
   Divider,
   CircularProgress,
 } from "@mui/material";
-import Visibility from "@mui/icons-material/Visibility";
-import VisibilityOff from "@mui/icons-material/VisibilityOff";
+import { Eye, EyeOff, User as UserIcon, Mail, Lock } from "lucide-react";
 import PAGE_TITLE from "../../../constants/pageTitle.constants";
 import AUTH from "../../../constants/auth.constants";
 import FORMS from "../../../constants/forms.constants";
 import REGISTER_VALIDATION from "../../../constants/registerValidation.constants";
-import PersonOutlinedIcon from "@mui/icons-material/PersonOutlined";
-import EmailOutlinedIcon from "@mui/icons-material/EmailOutlined";
-import LockOutlinedIcon from "@mui/icons-material/LockOutlined";
 import logo from "../../../assets/images/logo.png";
 import "@fontsource/urbanist";
 import {
@@ -243,7 +239,7 @@ const Register = () => {
                   InputProps={{
                     startAdornment: (
                       <InputAdornment position="start">
-                        <PersonOutlinedIcon sx={{ color: "#666666" }} />
+                        <UserIcon size={20} color="#666666" />
                       </InputAdornment>
                     ),
                   }}
@@ -263,7 +259,7 @@ const Register = () => {
                   InputProps={{
                     startAdornment: (
                       <InputAdornment position="start">
-                        <PersonOutlinedIcon sx={{ color: "#666666" }} />
+                        <UserIcon size={20} color="#666666" />
                       </InputAdornment>
                     ),
                   }}
@@ -284,7 +280,7 @@ const Register = () => {
                 InputProps={{
                   startAdornment: (
                     <InputAdornment position="start">
-                      <EmailOutlinedIcon sx={{ color: "#666666" }} />
+                      <Mail size={20} color="#666666" />
                     </InputAdornment>
                   ),
                 }}
@@ -305,7 +301,7 @@ const Register = () => {
                 InputProps={{
                   startAdornment: (
                     <InputAdornment position="start">
-                      <PersonOutlinedIcon sx={{ color: "#666666" }} />
+                      <UserIcon sx={{ color: "#666666" }} />
                     </InputAdornment>
                   ),
                 }}
@@ -326,7 +322,7 @@ const Register = () => {
                 InputProps={{
                   startAdornment: (
                     <InputAdornment position="start">
-                      <LockOutlinedIcon sx={{ color: "#666666" }} />
+                      <Lock size={20} color="#666666" />
                     </InputAdornment>
                   ),
                   endAdornment: (
@@ -337,7 +333,7 @@ const Register = () => {
                         disabled={isSubmitting}
                         sx={passwordIconButtonStyles}
                       >
-                        {showPassword ? <VisibilityOff /> : <Visibility />}
+                        {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
                       </IconButton>
                     </InputAdornment>
                   ),

@@ -23,9 +23,7 @@ import { useNavigate, useLocation } from "react-router-dom";
 import { useAuthContext } from "../../context/AuthContext";
 import { APPBAR_MENU } from "../../constants/constants";
 import { useNotificationMenu } from "../../context/NotificationContext";
-import MenuRoundedIcon from "@mui/icons-material/MenuRounded";
-import NotificationsRoundedIcon from "@mui/icons-material/NotificationsRounded";
-import DashboardRoundedIcon from "@mui/icons-material/DashboardRounded";
+import { Menu as MenuIcon, Bell, LayoutDashboard } from "lucide-react";
 import logo from "../../assets/images/logo.png";
 import { MenuItemProps } from "../Menu/Menu.component";
 import "@fontsource/urbanist";
@@ -183,7 +181,7 @@ const AppBarComponent: React.FC<AppBarComponentProps> = ({
               onClick={handleDashboardMenuOpen}
               sx={dashboardIconButtonStyles(false)}
             >
-              <DashboardRoundedIcon sx={dashboardIconStyles(false)} />
+              <LayoutDashboard size={24} style={dashboardIconStyles(false)} />
             </IconButton>
             <Popover
               open={Boolean(dashboardMenuAnchor)}
@@ -252,7 +250,7 @@ const AppBarComponent: React.FC<AppBarComponentProps> = ({
                     sx={notificationsIconButtonStyles}
                   >
                     <Badge badgeContent={unreadCount} color="error">
-                      <NotificationsRoundedIcon />
+                      <Bell size={20} />
                     </Badge>
                   </IconButton>
                 </Tooltip>
@@ -326,7 +324,7 @@ const AppBarComponent: React.FC<AppBarComponentProps> = ({
                   />
                   <MenuComponent
                     buttonType="icon"
-                    icon={<MenuRoundedIcon />}
+                    icon={<MenuIcon size={24} />}
                     menuItems={[...menuItems, ...userLinks.map(link => ({
                       text: link.label,
                       onClick: link.onClick || (link.path ? () => navigate(link.path!) : undefined),

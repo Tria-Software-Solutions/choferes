@@ -11,22 +11,16 @@ import {
   useMediaQuery,
   Typography,
 } from "@mui/material";
-import AddRoundedIcon from "@mui/icons-material/AddRounded";
-import CloseRoundedIcon from "@mui/icons-material/CloseRounded";
-import PersonOutlinedIcon from "@mui/icons-material/PersonOutlined";
-import StraightenOutlinedIcon from "@mui/icons-material/StraightenOutlined";
-import AssignmentOutlinedIcon from "@mui/icons-material/AssignmentOutlined";
-import MapOutlinedIcon from "@mui/icons-material/MapOutlined";
+import { Plus, X, User, Ruler, FileText, MapPin, Info } from "lucide-react";
 import OutlinedInput from "@mui/material/OutlinedInput";
 import InputAdornment from "@mui/material/InputAdornment";
-import InfoOutlinedIcon from "@mui/icons-material/InfoOutlined";
 import FORMS from "../../../constants/forms.constants";
 import TextfieldComponent from "../../../components/Textfield/Textfield.component";
 import {
   boxRoot,
   gridContainer,
   formControl,
-  iconSx,
+  iconStyle,
   infoBox,
   infoIconBox,
   infoTitle,
@@ -204,7 +198,7 @@ const AddCourierForm: React.FC<AddCourierFormProps> = ({
             onChange={(e) => handleFieldChange("driver", e.target.value)}
             error={errors.driver !== ""}
             helperText={errors.driver}
-            icon={<PersonOutlinedIcon sx={iconSx(theme)} />}
+            icon={<User style={iconStyle} />}
           />
         </Grid>
 
@@ -221,7 +215,7 @@ const AddCourierForm: React.FC<AddCourierFormProps> = ({
                   label={FORMS.ADD_COURIER.ROUTE}
                   startAdornment={
                     <InputAdornment position="start">
-                      <MapOutlinedIcon sx={iconSx(theme)} />
+                      <MapPin style={iconStyle} />
                     </InputAdornment>
                   }
                 />
@@ -255,7 +249,7 @@ const AddCourierForm: React.FC<AddCourierFormProps> = ({
             }
             error={errors.distance !== ""}
             helperText={errors.distance}
-            icon={<StraightenOutlinedIcon sx={iconSx(theme)} />}
+            icon={<Ruler style={iconStyle} />}
           />
         </Grid>
 
@@ -271,7 +265,7 @@ const AddCourierForm: React.FC<AddCourierFormProps> = ({
             }
             error={errors.trackingNumber !== ""}
             helperText={errors.trackingNumber}
-            icon={<AssignmentOutlinedIcon sx={iconSx(theme)} />}
+            icon={<FileText style={iconStyle} />}
           />
         </Grid>
 
@@ -288,7 +282,7 @@ const AddCourierForm: React.FC<AddCourierFormProps> = ({
                   label={FORMS.ADD_COURIER.STATUS}
                   startAdornment={
                     <InputAdornment position="start">
-                      <AssignmentOutlinedIcon sx={iconSx(theme)} />
+                      <FileText style={iconStyle} />
                     </InputAdornment>
                   }
                 />
@@ -310,8 +304,8 @@ const AddCourierForm: React.FC<AddCourierFormProps> = ({
         <Grid item xs={12}>
           <Box sx={infoBox(theme)}>
             <Box sx={infoIconBox(theme)}>
-              <InfoOutlinedIcon
-                sx={{ ...iconSx(theme), ...infoIconBox(theme) }}
+              <Info
+                style={iconStyle}
               />
             </Box>
             <Box>
@@ -330,7 +324,7 @@ const AddCourierForm: React.FC<AddCourierFormProps> = ({
             <Button
               variant="outlined"
               onClick={handleClearForm}
-              startIcon={<CloseRoundedIcon />}
+              startIcon={<X />}
               fullWidth={isSmallScreen}
               sx={clearButton}
             >
@@ -352,7 +346,7 @@ const AddCourierForm: React.FC<AddCourierFormProps> = ({
                 variant="contained"
                 onClick={handleSubmit}
                 disabled={!isFormValid() || isLoading}
-                startIcon={<AddRoundedIcon />}
+                startIcon={<Plus />}
                 fullWidth={isSmallScreen}
                 sx={submitButton}
               >

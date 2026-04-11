@@ -1,4 +1,5 @@
 import { SxProps, Theme } from "@mui/material";
+import { CSSProperties } from "react";
 
 export const vehiclesHeaderBoxStyles: SxProps<Theme> = {
   mb: 3,
@@ -139,8 +140,9 @@ export const noVehiclesBoxStyles: SxProps<Theme> = {
   paddingBottom: "12%",
 };
 
-export const noVehiclesIconStyles: SxProps<Theme> = {
-  fontSize: "65px",
+export const noVehiclesIconStyles: CSSProperties = {
+  width: "65px",
+  height: "65px",
 };
 
 export const deleteDialogPaperSx: SxProps<Theme> = {
