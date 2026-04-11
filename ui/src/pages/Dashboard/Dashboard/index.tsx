@@ -11,16 +11,15 @@ import {
   useTheme,
   Divider,
   IconButton,
-  Tooltip,
 } from "@mui/material";
 import { PAGE_TITLE, DASHBOARD } from "../../../constants/constants";
+import PremiumTooltip from "../../../components/PremiumTooltip/PremiumTooltip.component";
 import { Shield, X, FileText, FileType, Trash2, Database } from "lucide-react";
 import ManagePermissions from "../ManagePermissions";
 import {
   dashboardHeaderBoxStyles,
   dashboardTitleBoxStyles,
   dashboardTitleStyles,
-  dashboardIconStyles,
   dashboardDividerStyles,
   dashboardDeleteButtonStyles,
 } from "./styles";
@@ -222,7 +221,7 @@ const Dashboard: React.FC = () => {
           </Box>
           {/* Delete all data button: only appears after backup, visually identical to backup button */}
           {backupDone && (
-            <Tooltip title="Eliminar todos los datos" arrow>
+            <PremiumTooltip title="Eliminar todos los datos">
               <span>
                 <IconButton
                   onClick={() => setShowDeleteDialog(true)}
@@ -231,7 +230,7 @@ const Dashboard: React.FC = () => {
                   <Trash2 />
                 </IconButton>
               </span>
-            </Tooltip>
+            </PremiumTooltip>
           )}
         </Box>
       </Box>

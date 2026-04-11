@@ -9,7 +9,6 @@ import {
   Divider,
   Chip,
   Button,
-  Tooltip,
   useTheme,
   ListItemButton,
 } from '@mui/material';
@@ -19,6 +18,7 @@ import { Notification } from '../../models/Notification';
 import { formatDistanceToNow } from 'date-fns';
 import { es } from 'date-fns/locale';
 import { translatePriorityToSpanish } from '../../utils/string';
+import PremiumTooltip from '../../components/PremiumTooltip/PremiumTooltip.component';
 
 interface NotificationMenuProps {
   anchorEl: HTMLElement | null;
@@ -142,7 +142,7 @@ const NotificationMenu: React.FC<NotificationMenuProps> = ({
             Notificaciones
           </Typography>
           <Box sx={{ display: 'flex', gap: 0.5 }}>
-            <Tooltip title="Filtros">
+            <PremiumTooltip title="Filtros">
               <IconButton
                 size="small"
                 onClick={() => setShowFilters(!showFilters)}
@@ -151,9 +151,9 @@ const NotificationMenu: React.FC<NotificationMenuProps> = ({
               >
                 <ListFilter size={18} />
               </IconButton>
-            </Tooltip>
+            </PremiumTooltip>
             {unreadCount > 0 && (
-              <Tooltip title="Marcar todas como leídas">
+              <PremiumTooltip title="Marcar todas como leídas">
                 <IconButton 
                   size="small" 
                   onClick={handleMarkAllAsRead}
@@ -161,7 +161,7 @@ const NotificationMenu: React.FC<NotificationMenuProps> = ({
                 >
                   <CheckCheck size={18} />
                 </IconButton>
-              </Tooltip>
+              </PremiumTooltip>
             )}
 
           </Box>
@@ -372,7 +372,7 @@ const NotificationMenu: React.FC<NotificationMenuProps> = ({
                   />
 
                   <Box sx={{ display: 'flex', alignItems: 'center', minWidth: 32 }}>
-                    <Tooltip title="Eliminar">
+                    <PremiumTooltip title="Eliminar">
                       <IconButton
                         size="small"
                         onClick={(e) => handleDeleteNotification(e, notification.id)}
@@ -386,7 +386,7 @@ const NotificationMenu: React.FC<NotificationMenuProps> = ({
                       >
                         <Trash2 size={20} />
                       </IconButton>
-                    </Tooltip>
+                    </PremiumTooltip>
                   </Box>
                 </ListItemButton>
 

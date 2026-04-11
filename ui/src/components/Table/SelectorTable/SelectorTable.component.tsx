@@ -1,4 +1,4 @@
-import React, { useMemo, useState, useRef, useCallback } from "react";
+import React, { useMemo, useState, useRef, useCallback, memo } from "react";
 import PropTypes from "prop-types";
 import { useNavigate } from "react-router-dom";
 import { Employee } from "../../../models/Employee";
@@ -20,14 +20,11 @@ import {
   FormControl,
   TablePagination,
   TableSortLabel,
-  Divider,
   Box,
   useTheme,
   useMediaQuery,
   Typography,
   SelectChangeEvent,
-  Badge,
-  Tooltip,
   Stack,
   OutlinedInput,
   IconButton,
@@ -49,7 +46,7 @@ import {
   OVERTIME,
 } from "../../../constants/constants";
 import InfoOutlinedIcon from "@mui/icons-material/InfoOutlined";
-import AccessTimeRoundedIcon from "@mui/icons-material/AccessTimeRounded";
+import PremiumTooltip from "../../../components/PremiumTooltip/PremiumTooltip.component";
 import MoreTimeIcon from "@mui/icons-material/MoreTime";
 import LocationOnOutlinedIcon from "@mui/icons-material/LocationOnOutlined";
 import StarOutlineOutlinedIcon from "@mui/icons-material/StarOutlineOutlined";
@@ -66,8 +63,6 @@ import {
   boldTypographyStyles,
   menuItemStyles,
   listSubheaderStyles,
-  stackTotalHoursStyles,
-  totalHoursTypographyStyles,
   tableRowBackground,
   tableCellBackground,
   employeeCellBoxStyles,
@@ -86,7 +81,6 @@ import {
   getPeriodMessage,
   getScheduleCellData,
   isToday,
-  getOvertimeBadgeColor,
   getDialogTitle,
   getCurrentHoursDisplay,
   getTimeAdjustmentError,
@@ -201,8 +195,6 @@ const SelectorTableComponent: React.FC<SelectorTableProps> = ({
   const [selectedPeriod, setSelectedPeriod] = useState<PeriodType>("weekly");
   const [isMenuOpen, setIsMenuOpen] = useState<boolean>(false);
   const theme = useTheme();
-  const periodSelectorBg =
-    theme.palette.mode === "dark" ? "#111" : "#000000";
   const [employeeSearchTerms, setEmployeeSearchTerms] = useState<Record<string, string>>({});
 
   const getSearchKey = (scheduleId: number, date: string) => `${scheduleId}-${date}`;
@@ -266,7 +258,7 @@ const SelectorTableComponent: React.FC<SelectorTableProps> = ({
 
   // Use helper functions for hours calculations
   // 2. Usar selectedPeriod en lugar de 'weekly' en las funciones de totales y overtime
-  const resultTotalHours = (employee: Employee) => {
+  const resultTotalHours = useCallback((employee: Employee) => {
     return calculateTotalHours(
       employee,
       selectedPeriod,
@@ -280,9 +272,9 @@ const SelectorTableComponent: React.FC<SelectorTableProps> = ({
       monthlySummaries,
       multiplePeriods
     );
-  };
+  }, [selectedPeriod, currentWeek, weekNumber, biweekNumber, month, year, weeklySummaries, biweeklySummaries, monthlySummaries, multiplePeriods]);
 
-  const resultOvertime = (employee: Employee) => {
+  const resultOvertime = useCallback((employee: Employee) => {
     return calculateOvertime(
       employee,
       selectedPeriod,
@@ -296,27 +288,27 @@ const SelectorTableComponent: React.FC<SelectorTableProps> = ({
       monthlySummaries,
       multiplePeriods
     );
-  };
+  }, [selectedPeriod, currentWeek, weekNumber, biweekNumber, month, year, weeklySummaries, biweeklySummaries, monthlySummaries, multiplePeriods]);
 
-  const hasWorkedCurrentWeekForEmployee = (employee: Employee): boolean => {
+  const hasWorkedCurrentWeekForEmployee = useCallback((employee: Employee): boolean => {
     return hasWorkedCurrentWeek(employee, weekNumber, year, weeklySummaries);
-  };
+  }, [weekNumber, year, weeklySummaries]);
 
   // Use helper function for rows per page options
-  const rowsPerPageOptions = generateRowsPerPageOptions(rowsPerPage);
+  const rowsPerPageOptions = useMemo(() => generateRowsPerPageOptions(rowsPerPage), [rowsPerPage]);
 
   // Helper functions for tabbed summary dialog
   const calculateOvertimeHours = (totalHours: number, threshold: number) =>
     totalHours > threshold ? totalHours - threshold : 0;
 
-  const getEmployeeWeeklyHours = (id: number) => {
+  const getEmployeeWeeklyHours = useCallback((id: number) => {
     const summary = weeklySummaries.find(
       (s) =>
         s.employeeId === id && s.weekNumber === weekNumber && s.year === year
     );
     return summary ? summary.totalHours : 0;
-  };
-  const getEmployeeBiweeklyHours = (id: number) => {
+  }, [weeklySummaries, weekNumber, year]);
+  const getEmployeeBiweeklyHours = useCallback((id: number) => {
     const summary = biweeklySummaries.find(
       (s) =>
         s.employeeId === id &&
@@ -324,13 +316,13 @@ const SelectorTableComponent: React.FC<SelectorTableProps> = ({
         s.year === year
     );
     return summary ? summary.totalHours : 0;
-  };
-  const getEmployeeMonthlyHours = (id: number) => {
+  }, [biweeklySummaries, biweekNumber, year]);
+  const getEmployeeMonthlyHours = useCallback((id: number) => {
     const summary = monthlySummaries.find(
       (s) => s.employeeId === id && s.month === month && s.year === year
     );
     return summary ? summary.totalHours : 0;
-  };
+  }, [monthlySummaries, month, year]);
   const getEmployeeWeeklyOvertime = (id: number) =>
     calculateOvertimeHours(getEmployeeWeeklyHours(id), OVERTIME.WEEKLY);
   const getEmployeeBiweeklyOvertime = (id: number) =>
@@ -558,9 +550,7 @@ const SelectorTableComponent: React.FC<SelectorTableProps> = ({
               position: "sticky !important",
               top: "0 !important",
               zIndex: "30 !important",
-              backgroundColor: `${
-                theme.palette.mode === "dark" ? "#111" : "#000000"
-              } !important`,
+              backgroundColor: "#000000 !important",
               color: "#fff !important",
             },
           }}
@@ -570,11 +560,39 @@ const SelectorTableComponent: React.FC<SelectorTableProps> = ({
             stickyHeader
             aria-label="sticky table"
             sx={{
+              width: "100%",
               borderCollapse: "separate",
               borderSpacing: 0,
+              "& th, & td": {
+                overflow: "hidden",
+                textOverflow: "ellipsis",
+                whiteSpace: "nowrap",
+              },
+              "& th:first-of-type, & td:first-of-type": {
+                width: viewMode === "employee" ? "12%" : "15%",
+                minWidth: viewMode === "employee" ? "140px" : "120px",
+              },
+              ...(viewMode === "employee" && {
+                "& th:nth-of-type(2), & td:nth-of-type(2)": {
+                  width: "5%",
+                  minWidth: "50px",
+                },
+              }),
+              ...(viewMode === "employee"
+                ? {
+                    "& th:nth-of-type(n+3):nth-of-type(-n+9), & td:nth-of-type(n+3):nth-of-type(-n+9)": {
+                      width: "11.8%",
+                      minWidth: "80px",
+                    },
+                  }
+                : {
+                    "& th:nth-of-type(n+2):nth-of-type(-n+8), & td:nth-of-type(n+2):nth-of-type(-n+8)": {
+                      width: "12.14%",
+                      minWidth: "100px",
+                    },
+                  }),
               "& .MuiTableCell-stickyHeader": {
-                backgroundColor:
-                  theme.palette.mode === "dark" ? "#111" : "#000000",
+                backgroundColor: "#000000",
                 color: "#fff",
                 zIndex: 15,
               },
@@ -586,22 +604,18 @@ const SelectorTableComponent: React.FC<SelectorTableProps> = ({
                   className="employee-column"
                   sx={{
                     ...employeeColumnCellStyles(isSmallScreen),
-                    backgroundColor:
-                      theme.palette.mode === "dark"
-                        ? "#111"
-                        : "#000000",
+                    backgroundColor: "#000000",
                     color: "#fff",
+                    position: "sticky",
                     left: 0,
-                    zIndex: 16,
-                    minHeight: viewMode === "schedule" ? "40px" : "auto",
-                    height: viewMode === "schedule" ? "40px" : "auto",
+                    top: 0,
+                    zIndex: 20,
+                    padding: "4px 8px",
+                    height: "36px",
                     cursor: "pointer",
                     transition: "background-color 0.2s ease",
                     "&:hover": {
-                      backgroundColor:
-                        theme.palette.mode === "dark"
-                          ? "#333"
-                          : "#333",
+                      backgroundColor: "#333",
                     },
                   }}
                 >
@@ -621,27 +635,38 @@ const SelectorTableComponent: React.FC<SelectorTableProps> = ({
                       : SELECTOR_TABLE.SCHEDULES || "Horarios"}
                   </TableSortLabel>
                 </TableCell>
+                {viewMode === "employee" && permissions?.includes(
+                  PERMISSIONS.VIEW_EMPLOYEE_ROLES_HOURS
+                ) && (
+                  <TableCell
+                    align="center"
+                    sx={{
+                      ...tableCellStyles(isSmallScreen),
+                      backgroundColor: "#000000",
+                      color: "#fff",
+                      padding: "4px 8px",
+                      height: "36px",
+                      width: "60px",
+                      minWidth: "60px",
+                    }}
+                  />
+                )}
+
                 {currentWeek.map(({ day, date }) => (
                   <TableCell
                     key={day}
                     align="center"
                     sx={{
                       ...tableCellStyles(isSmallScreen),
-                      backgroundColor:
-                        theme.palette.mode === "dark"
-                          ? "#111"
-                          : "#000000",
+                      backgroundColor: "#000000",
                       color: "#fff",
                       whiteSpace: "nowrap",
-                      minHeight: viewMode === "schedule" ? "40px" : "auto",
-                      height: viewMode === "schedule" ? "40px" : "auto",
+                      padding: "4px 8px",
+                      height: "36px",
                       cursor: "pointer",
                       transition: "background-color 0.2s ease",
                       "&:hover": {
-                        backgroundColor:
-                          theme.palette.mode === "dark"
-                            ? "#333"
-                            : "#333",
+                        backgroundColor: "#333",
                       },
                     }}
                   >
@@ -650,33 +675,23 @@ const SelectorTableComponent: React.FC<SelectorTableProps> = ({
                     )} ${formatHeaderDate(date)}`}
                   </TableCell>
                 ))}
-                {viewMode === "employee" &&
-                  permissions?.includes(
-                    PERMISSIONS.VIEW_EMPLOYEE_ROLES_HOURS
-                  ) && (
-                    <>
-                      <TableCell
-                        sx={{
-                          backgroundColor:
-                            theme.palette.mode === "dark"
-                              ? "#111"
-                              : "#000000",
-                          color: "#fff",
-                        }}
-                      />
-                      <TableCell
-                        align="center"
-                        sx={{
-                          ...tableCellStyles(isSmallScreen),
-                          backgroundColor:
-                            theme.palette.mode === "dark"
-                              ? "#111"
-                              : "#000000",
-                          color: "#fff",
-                        }}
-                        colSpan={2}
-                      >
-                        <FormControl size="small" sx={{ minWidth: 120 }}>
+                {viewMode === "employee" && permissions?.includes(
+                  PERMISSIONS.VIEW_EMPLOYEE_ROLES_HOURS
+                ) && (
+                  <TableCell
+                      align="center"
+                      sx={{
+                        ...tableCellStyles(isSmallScreen),
+                        backgroundColor: "#000000",
+                        color: "#fff",
+                        padding: "2px 8px",
+                        height: "36px",
+                        maxHeight: "36px",
+                        overflow: "hidden",
+                      }}
+                      colSpan={2}
+                    >
+                        <FormControl size="small" sx={{ minWidth: 100, height: 28 }}>
                           <Select
                             value={selectedPeriod}
                             onChange={(e) =>
@@ -688,38 +703,50 @@ const SelectorTableComponent: React.FC<SelectorTableProps> = ({
                                 notched={false}
                                 label="Periodo"
                                 sx={{
-                                  backgroundColor: `${periodSelectorBg} !important`,
+                                  backgroundColor: "#000000 !important",
                                   color: "#fff",
-                                  fontSize: "1rem",
+                                  fontSize: "0.8rem",
                                   fontWeight: 700,
+                                  height: 28,
                                   "& .MuiOutlinedInput-input": {
                                     color: "#fff",
-                                    fontSize: "1rem",
+                                    fontSize: "0.8rem",
                                     fontWeight: 700,
+                                    padding: "2px 28px 2px 8px !important",
                                   },
                                   "& .MuiOutlinedInput-root": {
-                                    backgroundColor: `${periodSelectorBg} !important`,
+                                    backgroundColor: "#000000 !important",
                                   },
                                   "& .MuiInputBase-root": {
-                                    backgroundColor: `${periodSelectorBg} !important`,
+                                    backgroundColor: "#000000 !important",
                                   },
                                   border: "none",
                                 }}
                               />
                             }
                             sx={{
-                              backgroundColor: `${periodSelectorBg} !important`,
+                              backgroundColor: "#000000",
                               color: "#fff",
-                              fontSize: "1rem",
-                              fontWeight: 700,
+                              fontSize: "0.8rem",
+                              fontWeight: 600,
+                              borderRadius: "8px",
+                              height: 28,
                               "& .MuiSelect-select": {
                                 color: "#fff",
-                                backgroundColor: `${periodSelectorBg} !important`,
-                                fontSize: "1rem",
-                                fontWeight: 700,
+                                backgroundColor: "#000000 !important",
+                                fontSize: "0.8rem",
+                                fontWeight: 600,
+                                padding: "2px 28px 2px 8px !important",
+                                display: "flex",
+                                alignItems: "center",
+                                gap: "4px",
+                                borderRadius: "8px",
+                                minHeight: "unset !important",
                               },
                               "& .MuiSelect-icon": {
-                                color: "#fff",
+                                color: "rgba(255,255,255,0.7)",
+                                fontSize: "1.1rem",
+                                right: "4px",
                               },
                               "& .MuiOutlinedInput-notchedOutline": {
                                 border: "none",
@@ -732,17 +759,52 @@ const SelectorTableComponent: React.FC<SelectorTableProps> = ({
                                   border: "none",
                                 },
                               "& .MuiInputBase-root": {
-                                backgroundColor: `${periodSelectorBg} !important`,
+                                backgroundColor: "transparent !important",
                               },
                               "& .MuiOutlinedInput-root": {
-                                backgroundColor: `${periodSelectorBg} !important`,
+                                backgroundColor: "transparent !important",
                               },
                             }}
                             MenuProps={{
                               PaperProps: {
-                                style: {
-                                  maxHeight: 320,
+                                sx: {
+                                  maxHeight: 280,
                                   overflowY: "auto",
+                                  backgroundColor: "#000000",
+                                  border: "2px solid rgba(255,255,255,0.2)",
+                                  borderRadius: "12px",
+                                  boxShadow: "0 16px 48px rgba(0,0,0,0.8), 0 0 0 1px rgba(255,255,255,0.05)",
+                                  marginTop: "8px",
+                                  minWidth: "200px",
+                                  "& .MuiList-root": {
+                                    padding: "6px",
+                                  },
+                                  "& .MuiMenuItem-root": {
+                                    fontSize: "0.9rem",
+                                    fontWeight: 600,
+                                    padding: "10px 14px",
+                                    margin: "2px 0",
+                                    borderRadius: "8px",
+                                    color: "rgba(255,255,255,0.8)",
+                                    backgroundColor: "transparent",
+                                    transition: "all 0.2s ease",
+                                    minHeight: "40px",
+                                    gap: "10px",
+                                    "&:hover": {
+                                      backgroundColor: "rgba(255,255,255,0.08)",
+                                      color: "#fff",
+                                    },
+                                    "&.Mui-selected": {
+                                      backgroundColor: "rgba(255,255,255,0.12)",
+                                      color: "#fff",
+                                      "& .MuiSvgIcon-root": {
+                                        color: "#fff",
+                                      },
+                                      "&:hover": {
+                                        backgroundColor: "rgba(255,255,255,0.18)",
+                                      },
+                                    },
+                                  },
                                 },
                               },
                             }}
@@ -750,69 +812,60 @@ const SelectorTableComponent: React.FC<SelectorTableProps> = ({
                               switch (selected) {
                                 case "weekly":
                                   return (
-                                    <>
-                                      <CalendarTodayIcon
-                                        sx={{
-                                          fontSize: 18,
-                                          mr: 1,
-                                          color: "#fff",
-                                          verticalAlign: "middle",
-                                        }}
-                                      />
-                                      <span
-                                        style={{
-                                          color: "#fff",
-                                          fontSize: "1rem",
-                                          fontWeight: 700,
-                                        }}
-                                      >
+                                    <Box sx={{ display: "flex", alignItems: "center", gap: 0.5 }}>
+                                      <Box sx={{
+                                        width: 16,
+                                        height: 16,
+                                        borderRadius: "3px",
+                                        backgroundColor: "rgba(255,255,255,0.15)",
+                                        display: "flex",
+                                        alignItems: "center",
+                                        justifyContent: "center",
+                                      }}>
+                                        <CalendarTodayIcon sx={{ fontSize: 10, color: "#fff" }} />
+                                      </Box>
+                                      <span style={{ color: "#fff", fontSize: "0.8rem", fontWeight: 600 }}>
                                         {SELECTOR_TABLE.WEEKLY}
                                       </span>
-                                    </>
+                                    </Box>
                                   );
                                 case "biweekly":
                                   return (
-                                    <>
-                                      <DateRangeIcon
-                                        sx={{
-                                          fontSize: 18,
-                                          mr: 1,
-                                          color: "#fff",
-                                          verticalAlign: "middle",
-                                        }}
-                                      />
-                                      <span
-                                        style={{
-                                          color: "#fff",
-                                          fontSize: "1rem",
-                                          fontWeight: 700,
-                                        }}
-                                      >
+                                    <Box sx={{ display: "flex", alignItems: "center", gap: 0.5 }}>
+                                      <Box sx={{
+                                        width: 16,
+                                        height: 16,
+                                        borderRadius: "3px",
+                                        backgroundColor: "rgba(255,255,255,0.15)",
+                                        display: "flex",
+                                        alignItems: "center",
+                                        justifyContent: "center",
+                                      }}>
+                                        <DateRangeIcon sx={{ fontSize: 10, color: "#fff" }} />
+                                      </Box>
+                                      <span style={{ color: "#fff", fontSize: "0.8rem", fontWeight: 600 }}>
                                         {SELECTOR_TABLE.BIWEEKLY}
                                       </span>
-                                    </>
+                                    </Box>
                                   );
                                 case "monthly":
                                   return (
-                                    <>
-                                      <CalendarMonthIcon
-                                        sx={{
-                                          fontSize: 18,
-                                          mr: 1,
-                                          color: "#fff",
-                                          verticalAlign: "middle",
-                                        }}
-                                      />
-                                      <span
-                                        style={{
-                                          color: "#fff",
-                                          fontSize: "1rem",
-                                          fontWeight: 700,
-                                        }}
-                                      >
+                                    <Box sx={{ display: "flex", alignItems: "center", gap: 0.5 }}>
+                                      <Box sx={{
+                                        width: 16,
+                                        height: 16,
+                                        borderRadius: "3px",
+                                        backgroundColor: "rgba(255,255,255,0.15)",
+                                        display: "flex",
+                                        alignItems: "center",
+                                        justifyContent: "center",
+                                      }}>
+                                        <CalendarMonthIcon sx={{ fontSize: 10, color: "#fff" }} />
+                                      </Box>
+                                      <span style={{ color: "#fff", fontSize: "0.8rem", fontWeight: 600 }}>
                                         {SELECTOR_TABLE.MONTHLY}
                                       </span>
-                                    </>
+                                    </Box>
                                   );
                                 default:
                                   return "";
@@ -820,42 +873,56 @@ const SelectorTableComponent: React.FC<SelectorTableProps> = ({
                             }}
                           >
                             <MenuItem value="weekly">
-                              <CalendarTodayIcon
-                                sx={{
-                                  fontSize: 18,
-                                  mr: 1,
-                                  color: "primary.main",
-                                  verticalAlign: "middle",
-                                }}
-                              />
-                              {SELECTOR_TABLE.WEEKLY}
+                              <Box sx={{ display: "flex", alignItems: "center", gap: 1.5, width: "100%" }}>
+                                <Box sx={{
+                                  width: 28,
+                                  height: 28,
+                                  borderRadius: "6px",
+                                  backgroundColor: "rgba(255,255,255,0.1)",
+                                  display: "flex",
+                                  alignItems: "center",
+                                  justifyContent: "center",
+                                }}>
+                                  <CalendarTodayIcon sx={{ fontSize: 16, color: "#fff" }} />
+                                </Box>
+                                {SELECTOR_TABLE.WEEKLY}
+                              </Box>
                             </MenuItem>
                             <MenuItem value="biweekly">
-                              <DateRangeIcon
-                                sx={{
-                                  fontSize: 18,
-                                  mr: 1,
-                                  color: "primary.main",
-                                  verticalAlign: "middle",
-                                }}
-                              />
-                              {SELECTOR_TABLE.BIWEEKLY}
+                              <Box sx={{ display: "flex", alignItems: "center", gap: 1.5, width: "100%" }}>
+                                <Box sx={{
+                                  width: 28,
+                                  height: 28,
+                                  borderRadius: "6px",
+                                  backgroundColor: "rgba(255,255,255,0.1)",
+                                  display: "flex",
+                                  alignItems: "center",
+                                  justifyContent: "center",
+                                }}>
+                                  <DateRangeIcon sx={{ fontSize: 16, color: "#fff" }} />
+                                </Box>
+                                {SELECTOR_TABLE.BIWEEKLY}
+                              </Box>
                             </MenuItem>
                             <MenuItem value="monthly">
-                              <CalendarMonthIcon
-                                sx={{
-                                  fontSize: 18,
-                                  mr: 1,
-                                  color: "primary.main",
-                                  verticalAlign: "middle",
-                                }}
-                              />
-                              {SELECTOR_TABLE.MONTHLY}
+                              <Box sx={{ display: "flex", alignItems: "center", gap: 1.5, width: "100%" }}>
+                                <Box sx={{
+                                  width: 28,
+                                  height: 28,
+                                  borderRadius: "6px",
+                                  backgroundColor: "rgba(255,255,255,0.1)",
+                                  display: "flex",
+                                  alignItems: "center",
+                                  justifyContent: "center",
+                                }}>
+                                  <CalendarMonthIcon sx={{ fontSize: 16, color: "#fff" }} />
+                                </Box>
+                                {SELECTOR_TABLE.MONTHLY}
+                              </Box>
                             </MenuItem>
                           </Select>
                         </FormControl>
-                      </TableCell>
-                    </>
+                    </TableCell>
                   )}
               </TableRow>
             </TableHead>
@@ -866,18 +933,17 @@ const SelectorTableComponent: React.FC<SelectorTableProps> = ({
                       key={employee.id}
                       sx={{
                         ...tableRowBackground(rowIndex),
-                        "&:hover": {
-                          backgroundColor: rowIndex % 2 === 0 ? "background.paper" : "action.hover",
-                        },
-                        borderBottom: theme.palette.mode === "dark" ? "1px solid #444" : "none",
                       }}
                     >
                       <TableCell
-                        sx={Object.assign(
-                          {},
-                          employeeColumnCellStyles(isSmallScreen),
-                          tableCellBackground(rowIndex, false)
-                        )}
+                        sx={{
+                          padding: isSmallScreen ? "3px 6px" : "4px 8px",
+                          whiteSpace: "nowrap",
+                          ...tableCellBackground(rowIndex, false),
+                          position: "sticky",
+                          left: 0,
+                          zIndex: 10,
+                        }}
                       >
                         <Box
                           display="flex"
@@ -888,37 +954,50 @@ const SelectorTableComponent: React.FC<SelectorTableProps> = ({
                           <Typography
                             variant="body2"
                             fontWeight={600}
-                            sx={totalHoursTypographyStyles}
+                            sx={{ minWidth: 48, textAlign: "right" }}
                           >
                             {employee.firstName} {employee.lastName}
                           </Typography>
-                          {permissions?.includes(
-                            PERMISSIONS.VIEW_EMPLOYEE_ROLES_HOURS
-                          ) && (
-                            <Tooltip title="Ver información" arrow>
-                              <span>
-                                <IconButton
-                                  size="medium"
-                                  sx={{
-                                    color: "primary.main",
-                                    backgroundColor: "transparent",
-                                    "&:hover": {
-                                      backgroundColor: "primary.lighter",
-                                      boxShadow: 1,
-                                    },
-                                    transition: "background 0.2s",
-                                  }}
-                                  onClick={() =>
-                                    setOpenInfoDialogEmployee(employee)
-                                  }
-                                >
-                                  <InfoOutlinedIcon fontSize="medium" />
-                                </IconButton>
-                              </span>
-                            </Tooltip>
-                          )}
                         </Box>
                       </TableCell>
+                      {viewMode === "employee" && permissions?.includes(
+                        PERMISSIONS.VIEW_EMPLOYEE_ROLES_HOURS
+                      ) && (
+                        <TableCell
+                          align="center"
+                          sx={{
+                            padding: isSmallScreen ? "3px 6px" : "4px 8px",
+                            ...tableCellBackground(rowIndex, false),
+                          }}
+                        >
+                          <PremiumTooltip title="Ver información">
+                            <span>
+                              <IconButton
+                                size="small"
+                                sx={{
+                                  color: "primary.main",
+                                  backgroundColor: "rgba(25, 118, 210, 0.08)",
+                                  border: "1px solid rgba(25, 118, 210, 0.2)",
+                                  borderRadius: "10px",
+                                  width: 36,
+                                  height: 36,
+                                  "&:hover": {
+                                    backgroundColor: "rgba(25, 118, 210, 0.15)",
+                                    borderColor: "rgba(25, 118, 210, 0.35)",
+                                    boxShadow: "0 2px 8px rgba(25, 118, 210, 0.2)",
+                                  },
+                                  transition: "all 0.2s ease",
+                                }}
+                                onClick={() =>
+                                  setOpenInfoDialogEmployee(employee)
+                                }
+                              >
+                                <InfoOutlinedIcon fontSize="small" />
+                              </IconButton>
+                            </span>
+                          </PremiumTooltip>
+                        </TableCell>
+                      )}
                       {currentWeek.map(({ day, date }) => {
                         const scheduleData = getScheduleCellData(
                           employee,
@@ -1045,14 +1124,14 @@ const SelectorTableComponent: React.FC<SelectorTableProps> = ({
                           </TableCell>
                         );
                       })}
-                      {permissions?.includes(
+                      {viewMode === "employee" && permissions?.includes(
                         PERMISSIONS.VIEW_EMPLOYEE_ROLES_HOURS
                       ) && (
                         <>
                           <TableCell
                             align="center"
                             sx={{
-                              padding: isSmallScreen ? "8px" : "16px",
+                              padding: isSmallScreen ? "3px 6px" : "4px 8px",
                               ...tableCellBackground(rowIndex, false),
                               color: theme.palette.text.primary,
                             }}
@@ -1063,10 +1142,10 @@ const SelectorTableComponent: React.FC<SelectorTableProps> = ({
                               justifyContent="center"
                               alignItems="center"
                             >
-                              <Tooltip title="Ajustar horas" arrow>
+                              <PremiumTooltip title="Ajustar horas">
                                 <span>
                                   <IconButton
-                                    size="medium"
+                                    size="small"
                                     disabled={
                                       !hasWorkedCurrentWeekForEmployee(employee)
                                     }
@@ -1076,27 +1155,42 @@ const SelectorTableComponent: React.FC<SelectorTableProps> = ({
                                       )
                                         ? "warning.main"
                                         : "grey.400",
-                                      backgroundColor: "transparent",
+                                      backgroundColor: hasWorkedCurrentWeekForEmployee(
+                                        employee
+                                      ) ? "rgba(237, 108, 2, 0.08)" : "transparent",
+                                      border: hasWorkedCurrentWeekForEmployee(
+                                        employee
+                                      ) ? "1px solid rgba(237, 108, 2, 0.25)" : "1px solid transparent",
+                                      borderRadius: "10px",
+                                      width: 36,
+                                      height: 36,
                                       "&:hover": {
-                                        backgroundColor: "warning.lighter",
-                                        boxShadow: 1,
+                                        backgroundColor: hasWorkedCurrentWeekForEmployee(
+                                          employee
+                                        ) ? "rgba(237, 108, 2, 0.15)" : "transparent",
+                                        borderColor: hasWorkedCurrentWeekForEmployee(
+                                          employee
+                                        ) ? "rgba(237, 108, 2, 0.4)" : "transparent",
+                                        boxShadow: hasWorkedCurrentWeekForEmployee(
+                                          employee
+                                        ) ? "0 2px 8px rgba(237, 108, 2, 0.2)" : "none",
                                       },
-                                      transition: "background 0.2s",
+                                      transition: "all 0.2s ease",
                                     }}
                                     onClick={() =>
                                       setOpenAdjustDialogEmployee(employee)
                                     }
                                   >
-                                    <MoreTimeIcon fontSize="medium" />
+                                    <MoreTimeIcon fontSize="small" />
                                   </IconButton>
                                 </span>
-                              </Tooltip>
+                              </PremiumTooltip>
                             </Stack>
                           </TableCell>
                           <TableCell
-                            align="left"
+                            align="center"
                             sx={{
-                              padding: isSmallScreen ? "8px" : "16px",
+                              padding: isSmallScreen ? "3px 6px" : "4px 8px",
                               position: isSmallScreen ? "static" : "sticky",
                               right: 0,
                               zIndex: 2,
@@ -1106,63 +1200,42 @@ const SelectorTableComponent: React.FC<SelectorTableProps> = ({
                           >
                             <Stack
                               direction="row"
-                              spacing={3.5}
+                              spacing={1}
                               alignItems="center"
                               justifyContent="center"
-                              sx={stackTotalHoursStyles}
                             >
                               <Typography
                                 variant="body2"
                                 fontWeight={600}
-                                sx={totalHoursTypographyStyles}
+                                sx={{
+                                  color: "text.primary",
+                                  fontSize: "0.875rem",
+                                }}
                               >
-                                {resultTotalHours(employee)}{" "}
-                                {SELECTOR_TABLE.HOURS}
+                                {resultTotalHours(employee)} {SELECTOR_TABLE.HOURS}
                               </Typography>
-                              <Tooltip
-                                title={SELECTOR_TABLE.OVERTIME_HOURS}
-                                arrow
+                              <PremiumTooltip
+                                title={Number(resultOvertime(employee)) > 0 ? `${resultOvertime(employee)} horas extra` : "Horas extra"}
                               >
-                                <span>
-                                  <Badge
-                                    badgeContent={resultOvertime(employee)}
-                                    max={9999999}
-                                    color={getOvertimeBadgeColor(
-                                      resultOvertime(employee)
-                                    )}
-                                    showZero
-                                    overlap="circular"
-                                    anchorOrigin={{
-                                      vertical: "top",
-                                      horizontal: "right",
-                                    }}
-                                    sx={{
-                                      "& .MuiBadge-badge": {
-                                        minWidth: 22,
-                                        height: 22,
-                                        fontSize: "0.95rem",
-                                        fontWeight: 500,
-                                        borderRadius: "8px",
-                                        right:
-                                          String(resultOvertime(employee))
-                                            .length > 1
-                                            ? -15
-                                            : -10,
-                                        top: -10,
-                                        transform: "none",
-                                        padding: "0 6px",
-                                      },
-                                    }}
-                                  >
-                                    <AccessTimeRoundedIcon
-                                      sx={{
-                                        color: "primary.main",
-                                        fontSize: 28,
-                                      }}
-                                    />
-                                  </Badge>
-                                </span>
-                              </Tooltip>
+                                <Box
+                                  sx={{
+                                    display: "flex",
+                                    alignItems: "center",
+                                    justifyContent: "center",
+                                    minWidth: 24,
+                                    height: 24,
+                                    px: 0.5,
+                                    borderRadius: "12px",
+                                    backgroundColor: Number(resultOvertime(employee)) > 0 ? "success.main" : "grey.300",
+                                    color: Number(resultOvertime(employee)) > 0 ? "#fff" : "grey.600",
+                                    fontSize: "0.75rem",
+                                    fontWeight: 700,
+                                    boxShadow: Number(resultOvertime(employee)) > 0 ? "0 2px 6px rgba(76, 175, 80, 0.3)" : "0 1px 3px rgba(0, 0, 0, 0.1)",
+                                  }}
+                                >
+                                  +{resultOvertime(employee)}
+                                </Box>
+                              </PremiumTooltip>
                             </Stack>
                           </TableCell>
                         </>
@@ -1174,28 +1247,29 @@ const SelectorTableComponent: React.FC<SelectorTableProps> = ({
                       key={group.label}
                       sx={{
                         ...tableRowBackground(rowIndex),
-                        "&:hover": {
-                          backgroundColor: rowIndex % 2 === 0 ? "background.paper" : "action.hover",
-                        },
                         borderBottom: theme.palette.mode === "dark" ? "1px solid #444" : "none",
                       }}
                     >
                       <TableCell
-                        sx={Object.assign(
-                          {},
-                          employeeColumnCellStyles(isSmallScreen),
-                          tableCellBackground(rowIndex, false)
-                        )}
+                        sx={{
+                          padding: isSmallScreen ? "3px 6px" : "4px 8px",
+                          whiteSpace: "nowrap",
+                          ...tableCellBackground(rowIndex, false),
+                          position: "sticky",
+                          left: 0,
+                          zIndex: 10,
+                        }}
                       >
                         <Typography
                           variant="body2"
                           fontWeight={600}
-                          sx={totalHoursTypographyStyles}
+                          sx={{ minWidth: 48, textAlign: "right" }}
                           component="span"
                         >
                           {group.label}
                         </Typography>
                       </TableCell>
+
                       {currentWeek.map(({ day, date }) => {
                         const scheduleForDay =
                           group.dayToSchedule[day.toLowerCase()];
@@ -1396,12 +1470,12 @@ const SelectorTableComponent: React.FC<SelectorTableProps> = ({
                           </TableCell>
                         );
                       })}
+
                     </TableRow>
                   ))}
             </TableBody>
           </Table>
         </TableContainer>
-        <Divider />
         <Box
           display="flex"
           justifyContent="space-between"
@@ -1409,12 +1483,15 @@ const SelectorTableComponent: React.FC<SelectorTableProps> = ({
           sx={{
             backgroundColor: theme.palette.background.paper,
             color: theme.palette.text.primary,
-            borderBottomLeftRadius: 8,
-            borderBottomRightRadius: 8,
+            minHeight: isSmallScreen ? "32px" : "36px",
+            px: { xs: 1, sm: 1.5 },
+            py: 0,
+            flexShrink: 0,
+            borderTop: `1px solid ${theme.palette.mode === "dark" ? "rgba(255,255,255,0.06)" : "rgba(0,0,0,0.06)"}`,
           }}
         >
           {!isSmallScreen && (
-            <Typography variant="body2" sx={{ ml: 2 }}>
+            <Typography variant="caption" sx={{ color: theme.palette.text.secondary, fontSize: "0.75rem", letterSpacing: "0.01em" }}>
               {renderPeriodFooter(
                 "weekly", // Assuming default to weekly for now, as selectedPeriod is removed
                 currentWeek,
@@ -1440,7 +1517,7 @@ const SelectorTableComponent: React.FC<SelectorTableProps> = ({
                 setPage(0);
               }}
               labelRowsPerPage={
-                <Typography variant="body2" component="span">
+                <Typography variant="caption" component="span" sx={{ fontSize: "0.75rem" }}>
                   {TABLE.ROWS_PER_PAGE}
                 </Typography>
               }
@@ -1453,6 +1530,9 @@ const SelectorTableComponent: React.FC<SelectorTableProps> = ({
                     : theme.palette.primary.contrastText,
                 ".MuiTablePagination-toolbar": {
                   backgroundColor: "transparent",
+                  minHeight: "36px",
+                  paddingLeft: 1,
+                  paddingRight: 1,
                 },
                 ".MuiTablePagination-selectLabel, .MuiTablePagination-input, .MuiTablePagination-displayedRows":
                   {
@@ -1460,12 +1540,20 @@ const SelectorTableComponent: React.FC<SelectorTableProps> = ({
                       theme.palette.mode === "dark"
                         ? "#fff"
                         : theme.palette.primary.contrastText,
+                    fontSize: "0.75rem",
                   },
                 ".MuiSvgIcon-root": {
                   color:
                     theme.palette.mode === "dark"
                       ? "#fff"
                       : theme.palette.primary.contrastText,
+                  fontSize: "1.25rem",
+                },
+                ".MuiIconButton-root": {
+                  padding: "4px",
+                },
+                ".MuiTablePagination-select": {
+                  fontSize: "0.75rem",
                 },
               }}
             />
@@ -1554,4 +1642,4 @@ SelectorTableComponent.propTypes = {
   setViewMode: PropTypes.func.isRequired,
 };
 
-export default SelectorTableComponent;
+export default memo(SelectorTableComponent);

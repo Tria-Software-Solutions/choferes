@@ -1,24 +1,10 @@
-import React from "react";
-import { Box, IconButton, Tooltip } from "@mui/material";
+import React, { useCallback } from "react";
+import { Box, IconButton } from "@mui/material";
+import PremiumTooltip from "../../../../components/PremiumTooltip/PremiumTooltip.component";
 import { FileEdit, Trash2, CheckCircle, X, Lock, ToggleLeft, ToggleRight } from "lucide-react";
 import { TABLE } from "../../../../constants/constants";
 
-export function renderActionButtons<T extends object>({
-  row,
-  editRowId,
-  getRowId,
-  currentUser,
-  hasEditPermissions,
-  hasDeletePermissions,
-  isExpanded,
-  onOpenPasswordModal,
-  handleEditClick,
-  handleSaveClick,
-  handleCancelClick,
-  handleOpenDeleteDialog,
-  handleOpenStatusDialog,
-  isSaveDisabled,
-}: {
+interface ActionButtonsProps<T extends object> {
   row: T;
   editRowId: number | null;
   getRowId: (row: T) => number;
@@ -31,116 +17,136 @@ export function renderActionButtons<T extends object>({
   handleSaveClick?: (id: number) => void;
   handleCancelClick?: () => void;
   handleOpenDeleteDialog?: (id: number) => void;
-  handleOpenStatusDialog?: (row: unknown) => void;
   isSaveDisabled?: boolean;
-}): React.ReactNode {
-  const rowId = getRowId(row);
-  const isCurrentUser = rowId === currentUser?.id;
+}
+
+function EditingActions({
+  rowId,
+  isSaveDisabled,
+  onSave,
+  onCancel,
+}: {
+  rowId: number;
+  isSaveDisabled?: boolean;
+  onSave: (id: number) => void;
+  onCancel: () => void;
+}): React.ReactElement {
+  return (
+    <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+      <PremiumTooltip title={TABLE.SAVE}>
+        <span>
+          <Box>
+            <IconButton color="primary" onClick={() => onSave(rowId)} disabled={isSaveDisabled}>
+              <CheckCircle size={20} />
+            </IconButton>
+          </Box>
+        </span>
+      </PremiumTooltip>
+      <PremiumTooltip title={TABLE.CANCEL}>
+        <span>
+          <Box>
+            <IconButton color="primary" onClick={onCancel}>
+              <X size={20} />
+            </IconButton>
+          </Box>
+        </span>
+      </PremiumTooltip>
+    </Box>
+  );
+}
+
+function ViewingActions<T extends object>({
+  row,
+  rowId,
+  currentUser,
+  hasEditPermissions,
+  hasDeletePermissions,
+  isExpanded,
+  onOpenPasswordModal,
+  handleEditClick,
+  handleOpenDeleteDialog,
+}: Required<Pick<ActionButtonsProps<T>, "row" | "currentUser" | "hasEditPermissions" | "hasDeletePermissions" | "isExpanded">> &
+  Pick<ActionButtonsProps<T>, "onOpenPasswordModal" | "handleEditClick" | "handleOpenDeleteDialog"> & { rowId: number }): React.ReactElement {
   const isUser = "username" in row;
+  const isCurrentUser = rowId === currentUser?.id;
+  const showPasswordButton = isUser && isExpanded && onOpenPasswordModal;
+  const showEditButton = hasEditPermissions;
+  const showDeleteButton = hasDeletePermissions && (!isUser || (!isCurrentUser && !("isActive" in row)));
+
+  const handleEdit = useCallback(() => handleEditClick?.(row), [handleEditClick, row]);
+  const handleDelete = useCallback(() => handleOpenDeleteDialog?.(rowId), [handleOpenDeleteDialog, rowId]);
+  const handlePassword = useCallback(() => onOpenPasswordModal?.(rowId), [onOpenPasswordModal, rowId]);
+
+  return (
+    <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+      {showPasswordButton && (
+        <PremiumTooltip title={TABLE.CHANGE_PASSWORD}>
+          <span>
+            <Box>
+              <IconButton color="primary" onClick={handlePassword}>
+                <Lock size={20} />
+              </IconButton>
+            </Box>
+          </span>
+        </PremiumTooltip>
+      )}
+      {showEditButton && (
+        <PremiumTooltip title={TABLE.EDIT}>
+          <span>
+            <Box>
+              <IconButton color="primary" onClick={handleEdit}>
+                <FileEdit size={20} />
+              </IconButton>
+            </Box>
+          </span>
+        </PremiumTooltip>
+      )}
+      {showDeleteButton && (
+        <PremiumTooltip title={TABLE.DELETE}>
+          <span>
+            <Box>
+              <IconButton color="error" onClick={handleDelete}>
+                <Trash2 size={20} />
+              </IconButton>
+            </Box>
+          </span>
+        </PremiumTooltip>
+      )}
+    </Box>
+  );
+}
+
+export function renderActionButtons<T extends object>(props: ActionButtonsProps<T>): React.ReactNode {
+  const { row, editRowId, getRowId, currentUser, hasEditPermissions, hasDeletePermissions, isExpanded } = props;
+
+  const rowId = getRowId(row);
   const isEditing = editRowId === rowId;
 
   if (isEditing) {
     return (
-      <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-        <Tooltip title={TABLE.SAVE} arrow>
-          <span>
-            <Box>
-              <IconButton
-                color="primary"
-                onClick={() => handleSaveClick && handleSaveClick(rowId)}
-                disabled={isSaveDisabled}
-              >
-                <CheckCircle size={20} />
-              </IconButton>
-            </Box>
-          </span>
-        </Tooltip>
-        <Tooltip title={TABLE.CANCEL} arrow>
-          <span>
-            <Box>
-              <IconButton
-                color="primary"
-                onClick={() => handleCancelClick && handleCancelClick()}
-              >
-                <X size={20} />
-              </IconButton>
-            </Box>
-          </span>
-        </Tooltip>
-      </Box>
+      <EditingActions
+        rowId={rowId}
+        isSaveDisabled={props.isSaveDisabled}
+        onSave={props.handleSaveClick ?? (() => {})}
+        onCancel={props.handleCancelClick ?? (() => {})}
+      />
     );
   }
 
+  if (!hasEditPermissions && !hasDeletePermissions) return null;
+
   return (
-    <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-      {hasEditPermissions && (
-        <>
-          {isUser && isExpanded && onOpenPasswordModal && (
-            <Tooltip title={TABLE.CHANGE_PASSWORD} arrow>
-              <span>
-                <Box>
-                  <IconButton
-                    color="primary"
-                    onClick={() => onOpenPasswordModal(rowId)}
-                  >
-                    <Lock size={20} />
-                  </IconButton>
-                </Box>
-              </span>
-            </Tooltip>
-          )}
-          <Tooltip title={TABLE.EDIT} arrow>
-            <span>
-              <Box>
-                <IconButton
-                  color="primary"
-                  onClick={() => handleEditClick && handleEditClick(row)}
-                >
-                  <FileEdit size={20} />
-                </IconButton>
-              </Box>
-            </span>
-          </Tooltip>
-        </>
-      )}
-      {hasDeletePermissions && (
-        <>
-          {isUser ? (
-            !isCurrentUser && !("isActive" in row) ? (
-              <Tooltip title={TABLE.DELETE} arrow>
-                <span>
-                  <Box>
-                    <IconButton
-                      color="error"
-                      onClick={() =>
-                        handleOpenDeleteDialog && handleOpenDeleteDialog(rowId)
-                      }
-                    >
-                      <Trash2 size={20} />
-                    </IconButton>
-                  </Box>
-                </span>
-              </Tooltip>
-            ) : null
-          ) : (
-            <Tooltip title={TABLE.DELETE} arrow>
-              <span>
-                <Box>
-                  <IconButton
-                    color="error"
-                    onClick={() =>
-                      handleOpenDeleteDialog && handleOpenDeleteDialog(rowId)
-                    }
-                  >
-                    <Trash2 size={20} />
-                  </IconButton>
-                </Box>
-              </span>
-            </Tooltip>
-          )}
-        </>
-      )}
-    </Box>
+    <ViewingActions
+      row={row}
+      rowId={rowId}
+      currentUser={currentUser ?? { id: 0 }}
+      hasEditPermissions={hasEditPermissions}
+      hasDeletePermissions={hasDeletePermissions}
+      isExpanded={isExpanded}
+      onOpenPasswordModal={props.onOpenPasswordModal}
+      handleEditClick={props.handleEditClick}
+      handleOpenDeleteDialog={props.handleOpenDeleteDialog}
+    />
   );
 }
 
@@ -162,7 +168,7 @@ export function renderStatusButton<T extends object>({
   }
 
   return (
-    <Tooltip title={row.isActive ? TABLE.DISABLE : TABLE.ENABLE} arrow>
+    <PremiumTooltip title={row.isActive ? TABLE.DISABLE : TABLE.ENABLE}>
       <span>
         <Box>
           <IconButton
@@ -177,6 +183,6 @@ export function renderStatusButton<T extends object>({
           </IconButton>
         </Box>
       </span>
-    </Tooltip>
+    </PremiumTooltip>
   );
 } 

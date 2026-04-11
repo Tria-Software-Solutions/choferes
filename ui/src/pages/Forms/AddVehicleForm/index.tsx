@@ -562,10 +562,9 @@ const AddVehicleForm: React.FC<AddVehicleFormProps> = ({
         <Grid item xs={12} sm={6}>
           <LocalizationProvider dateAdapter={AdapterDateFns} adapterLocale={es}>
             <DatePicker
-              label={FORMS.ADD_VEHICLE.PARKING_DATE_LABEL}
               value={formData.parkingDate}
               onChange={handleDateChange}
-              format="EEEE d 'de' MMMM 'de' yyyy"
+              format="EEEE d 'de' MMMM"
               slotProps={{
                 textField: {
                   fullWidth: true,

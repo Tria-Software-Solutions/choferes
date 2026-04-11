@@ -13,10 +13,11 @@ export const vehiclesTitleBoxStyles: SxProps<Theme> = {
 export const vehiclesTitleStyles: SxProps<Theme> = {
   display: "flex",
   alignItems: "center",
-  fontFamily: "'Urbanist', sans-serif",
   fontWeight: 800,
+  fontSize: "1.75rem",
+  letterSpacing: "-0.02em",
   color: (theme) => theme.palette.text.primary,
-  mb: 0.5,
+  mb: 1,
   gap: 1.5,
 };
 
@@ -29,7 +30,7 @@ export const vehiclesDividerStyles = (theme: Theme): SxProps<Theme> => ({
   width: 48,
   borderBottomWidth: 3,
   borderColor: theme.palette.primary.main,
-  borderRadius: 2,
+  borderRadius: "2px",
   mx: "auto",
   mb: 0.5,
 });
@@ -79,14 +80,14 @@ export const addButtonDesktopStyles: SxProps<Theme> = {
   px: 3,
   py: 1.5,
   fontSize: "1rem",
-  minHeight: 56,
+  minHeight: 48,
 };
 
 export const datePickerSx: SxProps<Theme> = (theme) => ({
-  height: "56px",
+  height: "48px",
   minWidth: "180px",
   "& .MuiOutlinedInput-root": {
-    height: "56px",
+    height: "48px",
     borderRadius: "12px",
     backgroundColor: theme.palette.background.paper,
     color: theme.palette.text.primary,
@@ -111,7 +112,7 @@ export const datePickerSx: SxProps<Theme> = (theme) => ({
 });
 
 export const buttonGroupSx: SxProps<Theme> = (theme) => ({
-  height: "56px",
+  height: "48px",
   width: "auto",
   flexDirection: "row",
   "& .MuiButton-root": {

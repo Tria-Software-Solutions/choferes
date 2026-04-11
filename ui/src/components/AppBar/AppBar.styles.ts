@@ -5,6 +5,8 @@ export const appBarStyles: SxProps<Theme> = {
   background: "linear-gradient(135deg, #000000 0%, #1a1a1a 100%)",
   borderBottom: "1px solid rgba(255,255,255,0.1)",
   backdropFilter: "blur(10px)",
+  top: 0,
+  zIndex: 1100,
 };
 
 export const toolbarStyles: SxProps<Theme> = {
@@ -39,15 +41,11 @@ export const logoImgStyles: CSSProperties = {
 };
 
 export const titleStyles: SxProps<Theme> = {
-  fontFamily: "'Urbanist', sans-serif",
   fontWeight: 800,
   fontSize: { xs: "1.5rem", sm: "2rem", md: "1.5rem" },
   lineHeight: 1.1,
   letterSpacing: "0.04em",
-  background: "linear-gradient(45deg, #ffffff 30%, #f0f0f0 90%)",
-  backgroundClip: "text",
-  WebkitBackgroundClip: "text",
-  WebkitTextFillColor: "transparent",
+  color: "#ffffff",
   display: { xs: "none", sm: "block" },
 };
 
@@ -55,11 +53,13 @@ export const dashboardPopoverBoxStyles: SxProps<Theme> = {
   mt: 2,
   display: "flex",
   flexDirection: "row",
-  gap: 2,
+  gap: 1,
   alignItems: "center",
-  backgroundColor: "rgba(0,0,0,0.8)",
-  p: 2,
-  borderRadius: 2,
+  backgroundColor: "#000000",
+  p: 1,
+  borderRadius: "12px",
+  border: "1px solid rgba(255,255,255,0.1)",
+  boxShadow: "0 4px 20px rgba(0,0,0,0.3)",
 };
 
 export const dashboardIconButtonStyles = (
@@ -67,28 +67,34 @@ export const dashboardIconButtonStyles = (
 ): SxProps<Theme> => ({
   color: "#ffffff",
   cursor: "pointer",
-  p: 1.5,
-  borderRadius: "50%",
-  minWidth: "56px",
-  height: "56px",
-  backgroundColor: active ? "rgba(255,255,255,0.25)" : "transparent",
-  border: active ? "2px solid rgba(255,255,255,0.6)" : "none",
+  p: 1,
+  borderRadius: "12px",
+  minWidth: "48px",
+  height: "48px",
+  backgroundColor: active ? "rgba(255,255,255,0.2)" : "transparent",
+  border: "none",
+  position: "relative",
   "&:hover": {
     backgroundColor: active
-      ? "rgba(255,255,255,0.35)"
-      : "rgba(255,255,255,0.15)",
-    transform: "translateY(-2px)",
+      ? "rgba(255,255,255,0.25)"
+      : "rgba(255,255,255,0.1)",
   },
-  transition: "all 0.3s ease",
+  "&:active": {
+    backgroundColor: active
+      ? "rgba(255,255,255,0.3)"
+      : "rgba(255,255,255,0.15)",
+  },
+  transition: "all 0.2s cubic-bezier(0.4, 0, 0.2, 1)",
 });
 
 export const dashboardIconStyles = (
   active: boolean = false,
 ): CSSProperties => ({
-  width: "1.6rem",
-  height: "1.6rem",
+  width: "1.4rem",
+  height: "1.4rem",
   color: "#ffffff",
-  filter: active ? "drop-shadow(0 0 8px rgba(255,255,255,0.6))" : "none",
+  opacity: active ? 1 : 0.8,
+  transition: "all 0.2s ease",
 });
 
 export const notificationsIconButtonStyles: SxProps<Theme> = {
@@ -126,14 +132,11 @@ export const userEmailStyles: SxProps<Theme> = {
 };
 
 export const userMenuIconButtonStyles: SxProps<Theme> = {
-  p: 0.5,
-  border: "2px solid rgba(255,255,255,0.3)",
-  backgroundColor: "rgba(255,255,255,0.1)",
-  backdropFilter: "blur(10px)",
+  p: 0,
+  border: "none",
+  backgroundColor: "transparent",
   "&:hover": {
-    borderColor: "rgba(255,255,255,0.5)",
-    backgroundColor: "rgba(255,255,255,0.2)",
-    transform: "scale(1.05)",
+    backgroundColor: "transparent",
   },
   transition: "all 0.3s ease",
 };
@@ -141,10 +144,18 @@ export const userMenuIconButtonStyles: SxProps<Theme> = {
 export const userAvatarStyles: SxProps<Theme> = {
   width: 40,
   height: 40,
-  backgroundColor: "rgba(255,255,255,0.2)",
+  backgroundColor: "rgba(255,255,255,0.1)",
+  backdropFilter: "blur(10px)",
   color: "#ffffff",
   fontWeight: 600,
-  fontSize: "1rem",
+  fontSize: "0.9rem",
+  border: "1px solid rgba(255,255,255,0.2)",
+  borderRadius: "50%",
+  transition: "all 0.3s ease",
+  "&:hover": {
+    backgroundColor: "rgba(255,255,255,0.2)",
+    transform: "scale(1.05)",
+  },
 };
 
 export const mobileDividerStyles: SxProps<Theme> = {
@@ -173,7 +184,3 @@ export const dashboardNoLinksBoxStyles: SxProps<Theme> = {
   color: "white",
   p: 1,
 };
-
-export const logoutMenuItemStyles = (theme: Theme): SxProps<Theme> => ({
-  color: theme.palette.error.main,
-});

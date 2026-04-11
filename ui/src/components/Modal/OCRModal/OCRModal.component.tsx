@@ -599,13 +599,27 @@ const OCRResultModal: React.FC<OCRResultModalProps> = ({
                 onPageChange={handlePageChange}
                 onRowsPerPageChange={handleRowsPerPageChange}
                 labelRowsPerPage={
-                  <Typography variant="body2" component="span">
+                  <Typography variant="body2" component="span" sx={{ fontSize: "0.75rem" }}>
                     {TABLE.ROWS_PER_PAGE}
                   </Typography>
                 }
                 labelDisplayedRows={() => ""}
                 ActionsComponent={PaginationComponent}
-                sx={{ borderRadius: "0 0 12px 12px" }}
+                sx={{
+                  borderRadius: "0 0 12px 12px",
+                  '.MuiTablePagination-toolbar': {
+                    minHeight: '36px',
+                  },
+                  '.MuiTablePagination-selectLabel, .MuiTablePagination-input, .MuiTablePagination-displayedRows': {
+                    fontSize: '0.75rem',
+                  },
+                  '.MuiTablePagination-select': {
+                    fontSize: '0.75rem',
+                  },
+                  '.MuiInputBase-root': {
+                    fontSize: '0.75rem',
+                  },
+                }}
               />
             </Paper>
           </>

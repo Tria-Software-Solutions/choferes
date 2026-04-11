@@ -25,7 +25,7 @@ import {
 import { useAppNotifications } from "../../../components/Snackbar/Snackbar.component";
 import PAGE_TITLE from "../../../constants/pageTitle.constants";
 import MANAGEMENT from "../../../constants/management.constants";
-import { Settings as SettingsIcon, Eye, EyeOff, User as UserIcon, Mail, UserCircle, Info } from "lucide-react";
+import { Eye, EyeOff, User as UserIcon, Mail, UserCircle, Info } from "lucide-react";
 import { User } from "../../../models/User";
 import {
   validateName,
@@ -42,7 +42,7 @@ import { rolesTitleStyles, rolesDividerStyles } from '../../Management/RolesPage
 type ThemeMode = "default" | "light" | "dark" | "high-contrast";
 
 // Settings page component for user profile and password management
-const Settings: React.FC = () => {
+const Profile: React.FC = () => {
   const dispatch = useDispatch<AppDispatch>();
   const { currentUser, setUser } = useAuthContext();
   const { users } = useSelector((state: RootState) => state.users);
@@ -273,13 +273,13 @@ const Settings: React.FC = () => {
               variant={isSmallScreen ? "h5" : "h4"}
               sx={rolesTitleStyles}
             >
-              <SettingsIcon
+              <UserIcon
                 size={isSmallScreen ? 24 : 32}
                 color={theme.palette.primary.main}
               />
               {isSmallScreen
-                ? PAGE_TITLE.SETTING_SIMPLIFIED
-                : PAGE_TITLE.SETTINGS}
+                ? PAGE_TITLE.PROFILE_SIMPLIFIED
+                : PAGE_TITLE.PROFILE}
             </Typography>
             <Divider sx={rolesDividerStyles(theme)} />
           </Box>
@@ -617,4 +617,4 @@ const Settings: React.FC = () => {
   );
 };
 
-export default Settings;
+export default Profile;

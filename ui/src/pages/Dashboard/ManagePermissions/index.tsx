@@ -8,19 +8,19 @@ import {
   Box,
   CircularProgress,
   Grid,
+  Paper,
   Typography,
   useTheme,
+  useMediaQuery,
 } from "@mui/material";
 import SearchBarComponent from "../../../components/SearchBar/SearchBar.component";
-import { Key } from "lucide-react";
+import { Key, ShieldCheck } from "lucide-react";
 import { DASHBOARD_PERMISSIONS } from "../../../constants/constants";
 import {
   loadingBoxStyles,
   backdropStyles,
-  searchBarSx,
   permissionBoxStyles,
   permissionIconBoxStyles,
-  permissionIconStyles,
   noPermissionsBoxStyles,
 } from "./styles";
 import { useLocation } from "react-router-dom";
@@ -36,6 +36,7 @@ const ManagePermissions: React.FC = () => {
   );
   const [filter, setFilter] = useState("");
   const theme = useTheme();
+  const isSmallScreen = useMediaQuery(theme.breakpoints.down("sm"));
   const location = useLocation();
 
   // Loads permissions data on mount
@@ -63,7 +64,99 @@ const ManagePermissions: React.FC = () => {
   };
 
   return (
-    <Box>
+    <Box sx={{ height: "100%", display: "flex", flexDirection: "column" }}>
+      {/* Premium Header with Paper */}
+      <Paper
+        elevation={0}
+        sx={{
+          borderRadius: "16px",
+          border: "1px solid rgba(0,0,0,0.08)",
+          boxShadow: "0 4px 24px rgba(0,0,0,0.08), 0 1px 2px rgba(0,0,0,0.04)",
+          overflow: "hidden",
+          mb: 2,
+        }}
+      >
+        {/* Header Section */}
+        <Box
+          sx={{
+            px: { xs: 2, sm: 3 },
+            py: { xs: 2, sm: 2.5 },
+            backgroundColor: theme.palette.background.paper,
+            color: theme.palette.text.primary,
+            borderBottom: `1px solid ${theme.palette.mode === "dark" ? "rgba(255,255,255,0.08)" : "rgba(0,0,0,0.08)"}`,
+          }}
+        >
+          <Box
+            display="flex"
+            justifyContent="space-between"
+            alignItems="flex-start"
+            mb={2}
+          >
+            <Box display="flex" alignItems="center" gap={1.5}>
+              <Box
+                sx={{
+                  backgroundColor: theme.palette.primary.main,
+                  borderRadius: "10px",
+                  p: 1,
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                }}
+              >
+                <ShieldCheck size={22} color={theme.palette.primary.contrastText} />
+              </Box>
+              <Box>
+                <Typography
+                  variant={isSmallScreen ? "h6" : "h5"}
+                  sx={{
+                    fontWeight: 700,
+                    fontSize: { xs: "1.1rem", sm: "1.25rem" },
+                    color: theme.palette.text.primary,
+                    letterSpacing: "-0.02em",
+                    lineHeight: 1.2,
+                  }}
+                >
+                  {isSmallScreen ? 'Permisos' : 'Gestión de Permisos'}
+                </Typography>
+                <Typography
+                  variant="caption"
+                  sx={{
+                    color: theme.palette.text.secondary,
+                    fontSize: "0.75rem",
+                    letterSpacing: "0.02em",
+                  }}
+                >
+                  {filteredPermissions.length} permisos disponibles
+                </Typography>
+              </Box>
+            </Box>
+          </Box>
+
+          {/* Controls Row */}
+          <Box
+            display="flex"
+            flexDirection={{ xs: "column", sm: "row" }}
+            alignItems={{ xs: "stretch", sm: "center" }}
+            justifyContent="space-between"
+            gap={2}
+          >
+            {/* Search */}
+            <Box flex={1} maxWidth={{ sm: "320px" }}>
+              {filteredPermissions && (
+                <SearchBarComponent
+                  placeholder={DASHBOARD_PERMISSIONS.SEARCH_PLACEHOLDER}
+                  value={filter}
+                  onChange={handleFilterChange}
+                  fullWidth
+                />
+              )}
+            </Box>
+          </Box>
+        </Box>
+      </Paper>
+
+      {/* Content Section */}
+      <Box sx={{ flex: 1, overflow: "auto" }}>
       {isLoadingPermissions ? (
         <Box sx={loadingBoxStyles}>
           <Backdrop sx={backdropStyles(theme)} open={isLoadingPermissions}>
@@ -72,26 +165,6 @@ const ManagePermissions: React.FC = () => {
         </Box>
       ) : (
         <>
-          <Grid
-            container
-            spacing={2}
-            justifyContent="space-between"
-            alignItems="center"
-          >
-            <Grid item xs={12} md={4}>
-              {filteredPermissions && (
-                <SearchBarComponent
-                  placeholder={DASHBOARD_PERMISSIONS.SEARCH_PLACEHOLDER}
-                  value={filter}
-                  onChange={handleFilterChange}
-                  sx={searchBarSx ?? {}}
-                  fullWidth
-                />
-              )}
-            </Grid>
-            <Grid item xs={12} md={8}></Grid>
-          </Grid>
-          <br />
           {filteredPermissions.length > 0 ? (
             <Grid container spacing={2}>
               {filteredPermissions.map((permission) => (
@@ -121,6 +194,7 @@ const ManagePermissions: React.FC = () => {
           )}
         </>
       )}
+      </Box>
     </Box>
   );
 };

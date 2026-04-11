@@ -38,7 +38,7 @@ const PaginationComponent: React.FC<PaginationActionsProps> = ({
       {!isSmallScreen && (
         <Typography
           variant="body2"
-          style={{ ...pageTextStyles, color: theme.palette.text.primary }}
+          style={{ ...pageTextStyles, color: theme.palette.text.primary, fontSize: "0.75rem" }}
         >
           {PAGINATION.PAGE} {page + 1}
         </Typography>
@@ -49,6 +49,7 @@ const PaginationComponent: React.FC<PaginationActionsProps> = ({
         aria-label={PAGINATION.PREVIOUS}
       >
         <ArrowLeft
+          size={16}
           style={{
             color:
               theme.palette.mode === "dark"
@@ -57,10 +58,8 @@ const PaginationComponent: React.FC<PaginationActionsProps> = ({
           }}
         />
       </IconButton>
-      <Typography variant="body2" style={pageTextStyles}>
-        <span style={{ color: theme.palette.text.primary }}>
-          {startIndex}-{endIndex} {PAGINATION.OF} {count}
-        </span>
+      <Typography variant="body2" style={{ ...pageTextStyles, fontSize: "0.75rem", color: theme.palette.text.primary }}>
+        {startIndex}-{endIndex} {PAGINATION.OF} {count}
       </Typography>
       <IconButton
         onClick={(e) => onPageChange(e, page + 1)}
@@ -68,6 +67,7 @@ const PaginationComponent: React.FC<PaginationActionsProps> = ({
         aria-label={PAGINATION.NEXT}
       >
         <ArrowRight
+          size={16}
           style={{
             color:
               theme.palette.mode === "dark"

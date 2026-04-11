@@ -17,6 +17,7 @@ import {
   InputAdornment,
   Fade,
   Divider,
+  keyframes,
 } from "@mui/material";
 import PAGE_TITLE from "../../../constants/pageTitle.constants";
 import FORMS from "../../../constants/forms.constants";
@@ -123,9 +124,74 @@ const Login: React.FC = () => {
     }
   };
 
+  // Floating animation keyframes
+  const float1 = keyframes`
+    0%, 100% { transform: translate(0, 0) scale(1); }
+    33% { transform: translate(30px, -50px) scale(1.05); }
+    66% { transform: translate(-20px, 20px) scale(0.95); }
+  `;
+  const float2 = keyframes`
+    0%, 100% { transform: translate(0, 0) scale(1); }
+    33% { transform: translate(-40px, 30px) scale(0.95); }
+    66% { transform: translate(30px, -20px) scale(1.05); }
+  `;
+  const float3 = keyframes`
+    0%, 100% { transform: translate(0, 0) scale(1); }
+    50% { transform: translate(20px, 40px) scale(1.1); }
+  `;
+
   return (
     <Box className="auth-page" sx={authPageBoxStyles}>
-      <Fade in timeout={800}>
+      {/* Floating decorative orbs */}
+      <Box
+        sx={{
+          position: "absolute",
+          width: 300,
+          height: 300,
+          borderRadius: "50%",
+          background: theme.palette.mode === "dark"
+            ? "radial-gradient(circle, rgba(120,119,198,0.4) 0%, rgba(120,119,198,0) 70%)"
+            : "radial-gradient(circle, rgba(99,102,241,0.25) 0%, rgba(99,102,241,0) 70%)",
+          filter: "blur(40px)",
+          top: "10%",
+          left: "10%",
+          animation: `${float1} 15s ease-in-out infinite`,
+          zIndex: 0,
+        }}
+      />
+      <Box
+        sx={{
+          position: "absolute",
+          width: 400,
+          height: 400,
+          borderRadius: "50%",
+          background: theme.palette.mode === "dark"
+            ? "radial-gradient(circle, rgba(255,119,198,0.25) 0%, rgba(255,119,198,0) 70%)"
+            : "radial-gradient(circle, rgba(236,72,153,0.15) 0%, rgba(236,72,153,0) 70%)",
+          filter: "blur(50px)",
+          bottom: "5%",
+          right: "15%",
+          animation: `${float2} 18s ease-in-out infinite`,
+          zIndex: 0,
+        }}
+      />
+      <Box
+        sx={{
+          position: "absolute",
+          width: 200,
+          height: 200,
+          borderRadius: "50%",
+          background: theme.palette.mode === "dark"
+            ? "radial-gradient(circle, rgba(120,219,255,0.3) 0%, rgba(120,219,255,0) 70%)"
+            : "radial-gradient(circle, rgba(59,130,246,0.2) 0%, rgba(59,130,246,0) 70%)",
+          filter: "blur(30px)",
+          top: "50%",
+          right: "5%",
+          animation: `${float3} 12s ease-in-out infinite`,
+          zIndex: 0,
+        }}
+      />
+      <Fade in timeout={1000}>
         <Card className="auth-card" sx={authCardStyles}>
           <CardContent sx={cardContentStyles}>
             {/* Logo and Title Section */}
@@ -157,7 +223,7 @@ const Login: React.FC = () => {
             <Box component="form" onSubmit={handleLogin} sx={formBoxStyles}>
               <TextField
                 fullWidth
-                label={LOGIN.IDENTIFIER_LABEL}
+                placeholder="Correo o usuario"
                 variant="outlined"
                 value={fields.identifier}
                 autoComplete="username"
@@ -170,16 +236,16 @@ const Login: React.FC = () => {
                 sx={textFieldStyles}
                 InputProps={{
                   startAdornment: (
-                    <InputAdornment position="start">
+                    <InputAdornment position="start" sx={{ position: 'absolute', left: '14px', zIndex: 2 }}>
                       <User size={20} color="#666666" />
                     </InputAdornment>
                   ),
                 }}
-              />
+                              />
 
               <TextField
                 fullWidth
-                label={LOGIN.PASSWORD_LABEL}
+                placeholder="Contraseña"
                 type={showPassword ? "text" : "password"}
                 variant="outlined"
                 value={fields.password}
@@ -191,12 +257,12 @@ const Login: React.FC = () => {
                 sx={passwordTextFieldStyles}
                 InputProps={{
                   startAdornment: (
-                    <InputAdornment position="start">
+                    <InputAdornment position="start" sx={{ position: 'absolute', left: '14px', zIndex: 2 }}>
                       <Lock size={20} color="#666666" />
                     </InputAdornment>
                   ),
                   endAdornment: (
-                    <InputAdornment position="end">
+                    <InputAdornment position="end" sx={{ position: 'absolute', right: '8px', zIndex: 2 }}>
                       <IconButton
                         onClick={handleTogglePassword}
                         edge="end"
@@ -208,7 +274,7 @@ const Login: React.FC = () => {
                     </InputAdornment>
                   ),
                 }}
-              />
+                              />
 
               <Button
                 type="submit"
@@ -260,7 +326,18 @@ const Login: React.FC = () => {
               </Typography>
               <Link
                 to="/register"
-                style={registerLinkStyles}
+                style={{
+                  ...registerLinkStyles,
+                  color: theme.palette.text.primary,
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.backgroundColor = theme.palette.mode === 'dark'
+                    ? 'rgba(255,255,255,0.05)'
+                    : 'rgba(0,0,0,0.03)';
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.backgroundColor = 'transparent';
+                }}
               >
                 {LOGIN.REGISTER_LINK}
               </Link>
