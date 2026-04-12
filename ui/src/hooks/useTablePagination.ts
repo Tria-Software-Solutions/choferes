@@ -18,7 +18,7 @@ export const useTablePagination = (totalCount: number) => {
 
   useEffect(() => {
     function calculateRowsPerPage() {
-      const maxHeight = window.innerHeight * 0.6; // 60vh
+      const maxHeight = window.innerHeight * 0.48; // 48vh
       const headerHeight = 56; // Table header
       const paginationHeight = 64; // Pagination footer
       const extra = 24; // Buffer for borders/margins

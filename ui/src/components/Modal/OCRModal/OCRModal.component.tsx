@@ -33,7 +33,6 @@ import {
   dialogPaperStyles,
   headerBoxStyles,
   iconBoxStyles,
-  iconStyles,
   titleBoxStyles,
   titleStyles,
   subtitleStyles,
@@ -42,7 +41,6 @@ import {
   loadingBoxStyles,
   loadingTextStyles,
   errorContainerStyles,
-  errorIconStyles,
   errorTitleStyles,
   errorSubtitleStyles,
   errorDescriptionStyles,
@@ -385,7 +383,7 @@ const OCRResultModal: React.FC<OCRResultModalProps> = ({
                           editedEntries[actualRowIndex] || entry;
 
                         return (
-                          <TableRow key={index} hover>
+                          <TableRow key={index}>
                             <TableCell
                               sx={editableCellStyles}
                               onClick={() => handleCellClick(index, "ticket")}

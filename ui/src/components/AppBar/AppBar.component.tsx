@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useCallback, useMemo } from "react";
 import MenuComponent from "../Menu/Menu.component";
 import NotificationMenu from "../NotificationMenu/NotificationMenu.component";
 import {
@@ -90,15 +90,15 @@ const AppBarComponent: React.FC<AppBarComponentProps> = ({
   const [dashboardMenuAnchor, setDashboardMenuAnchor] =
     useState<null | HTMLElement>(null);
 
-  const mapLinksToMenuItems = (linkList: Link[]): MenuItemProps[] =>
+  const mapLinksToMenuItems = useCallback((linkList: Link[]): MenuItemProps[] =>
     linkList.map(({ label, path, icon, subLinks, onClick }) => ({
       text: label,
       onClick: onClick || (path ? () => navigate(path) : undefined),
       icon,
       subMenuItems: subLinks ? mapLinksToMenuItems(subLinks) : undefined,
-    }));
+    })), [navigate]);
 
-  const menuItems = mapLinksToMenuItems(links);
+  const menuItems = useMemo(() => mapLinksToMenuItems(links), [links, mapLinksToMenuItems]);
 
   const handleUserMenuOpen = (event: React.MouseEvent<HTMLElement>) => {
     setUserMenuAnchor(event.currentTarget);
@@ -245,9 +245,15 @@ const AppBarComponent: React.FC<AppBarComponentProps> = ({
                       )}
                     >
                       {React.cloneElement(link.icon as React.ReactElement, {
-                        sx: dashboardIconStyles(
-                          isActivePage(link.path || ""),
-                        ),
+                        sx: {
+                          ...dashboardIconStyles(
+                            isActivePage(link.path || ""),
+                          ),
+                          color: isActivePage(link.path || "")
+                            ? theme.palette.primary.main
+                            : theme.palette.text.primary,
+                          opacity: isActivePage(link.path || "") ? 1 : 0.7,
+                        },
                       })}
                     </IconButton>
                   ))
@@ -362,25 +368,19 @@ const AppBarComponent: React.FC<AppBarComponentProps> = ({
           PaperProps={{
             elevation: 0,
             sx: {
-              mt: 1.5,
-              minWidth: 220,
-              background: "linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%)",
-              border: "1px solid rgba(0,0,0,0.08)",
+              mt: 1,
+              minWidth: 200,
+              background: theme.palette.mode === 'dark' 
+                ? 'linear-gradient(135deg, rgba(0,0,0,0.95) 0%, rgba(26,26,26,0.95) 100%)'
+                : 'linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%)',
+              backdropFilter: "blur(20px)",
+              border: theme.palette.mode === 'dark'
+                ? "1px solid rgba(255,255,255,0.1)"
+                : "1px solid rgba(0,0,0,0.08)",
               borderRadius: "12px",
-              boxShadow: "0 10px 40px rgba(0,0,0,0.15), 0 2px 8px rgba(0,0,0,0.1)",
-              overflow: "visible",
-              '&:before': {
-                content: '""',
-                position: "absolute",
-                top: -6,
-                right: 24,
-                width: 12,
-                height: 12,
-                background: "#ffffff",
-                transform: "rotate(45deg)",
-                borderLeft: "1px solid rgba(0,0,0,0.08)",
-                borderTop: "1px solid rgba(0,0,0,0.08)",
-              },
+              boxShadow: theme.palette.mode === 'dark'
+                ? "0 10px 40px rgba(0,0,0,0.4), 0 2px 8px rgba(0,0,0,0.2)"
+                : "0 10px 40px rgba(0,0,0,0.15), 0 2px 8px rgba(0,0,0,0.1)",
             },
           }}
         >
@@ -389,9 +389,11 @@ const AppBarComponent: React.FC<AppBarComponentProps> = ({
               {index > 0 && link.label === APPBAR_MENU.LOGOUT && (
                 <Divider
                   sx={{
-                    my: 0.5,
-                    mx: 1.5,
-                    borderColor: "rgba(0,0,0,0.08)",
+                    my: 0.25,
+                    mx: 1,
+                    borderColor: theme.palette.mode === 'dark'
+                      ? "rgba(255,255,255,0.1)"
+                      : "rgba(0,0,0,0.08)",
                   }}
                 />
               )}
@@ -405,23 +407,25 @@ const AppBarComponent: React.FC<AppBarComponentProps> = ({
                   }
                 }}
                 sx={{
-                  py: 1.2,
-                  px: 2,
-                  mx: 0.75,
-                  my: 0.5,
+                  py: 0.75,
+                  px: 1.5,
+                  mx: 0.5,
+                  my: 0.25,
                   borderRadius: "8px",
-                  transition: "all 0.2s ease",
+                  transition: "all 0.2s cubic-bezier(0.4, 0, 0.2, 1)",
                   color: link.label === APPBAR_MENU.LOGOUT
                     ? theme.palette.error.main
                     : theme.palette.text.primary,
                   '&:hover': {
                     backgroundColor: link.label === APPBAR_MENU.LOGOUT
                       ? `${theme.palette.error.light}15`
-                      : "rgba(0,0,0,0.04)",
-                    transform: "translateX(4px)",
+                      : theme.palette.mode === 'dark'
+                        ? "rgba(255,255,255,0.1)"
+                        : "rgba(0,0,0,0.04)",
+                    transform: "translateX(2px)",
                   },
                   '& .MuiListItemIcon-root': {
-                    minWidth: 36,
+                    minWidth: 32,
                     color: link.label === APPBAR_MENU.LOGOUT
                       ? theme.palette.error.main
                       : theme.palette.primary.main,
@@ -430,7 +434,7 @@ const AppBarComponent: React.FC<AppBarComponentProps> = ({
               >
                 <ListItemIcon>
                   {link.icon && React.cloneElement(link.icon as React.ReactElement, {
-                    size: 20,
+                    size: 18,
                     strokeWidth: 2,
                     color: link.label === APPBAR_MENU.LOGOUT
                       ? theme.palette.error.main
@@ -440,7 +444,7 @@ const AppBarComponent: React.FC<AppBarComponentProps> = ({
                 <ListItemText
                   primary={link.label}
                   primaryTypographyProps={{
-                    fontSize: "0.95rem",
+                    fontSize: "0.875rem",
                     fontWeight: 500,
                   }}
                 />
@@ -463,4 +467,4 @@ const AppBarComponent: React.FC<AppBarComponentProps> = ({
   );
 };
 
-export default AppBarComponent;
+export default React.memo(AppBarComponent);

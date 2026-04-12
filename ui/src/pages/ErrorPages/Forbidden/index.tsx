@@ -15,8 +15,6 @@ import {
   outerBoxStyles,
   innerBoxStyles,
   lockBoxStyles,
-  lockIconStyles,
-  securityIconStyles,
   titleStyles,
   subtitleStyles,
   descriptionStyles,

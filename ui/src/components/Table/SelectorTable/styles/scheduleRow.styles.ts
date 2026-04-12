@@ -1,9 +1,16 @@
 import type { Theme } from "@mui/material";
 
 const getRowBackgroundColor = (theme: Theme, rowIndex: number) => {
-  return rowIndex % 2 === 0 
-    ? theme.palette.background.paper 
-    : theme.palette.action.hover;
+  const isDarkMode = theme.palette.mode === "dark";
+  const isEven = rowIndex % 2 === 0;
+
+  // In dark mode, align with the global MuiTableRow theme colors:
+  // even rows: #232323, odd rows: #181818
+  if (isDarkMode) {
+    return isEven ? "#232323" : "#181818";
+  }
+
+  return isEven ? theme.palette.background.paper : theme.palette.action.hover;
 };
 
 export const getScheduleRowStyles = (theme: Theme, isSmallScreen: boolean, rowIndex: number) => ({

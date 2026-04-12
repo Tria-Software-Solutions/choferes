@@ -23,8 +23,6 @@ import {
   permissionIconBoxStyles,
   noPermissionsBoxStyles,
 } from "./styles";
-import { useLocation } from "react-router-dom";
-
 // ManagePermissions page component for permission management in the dashboard
 const ManagePermissions: React.FC = () => {
   const dispatch = useDispatch<AppDispatch>();
@@ -37,12 +35,13 @@ const ManagePermissions: React.FC = () => {
   const [filter, setFilter] = useState("");
   const theme = useTheme();
   const isSmallScreen = useMediaQuery(theme.breakpoints.down("sm"));
-  const location = useLocation();
 
-  // Loads permissions data on mount
+  // Loads permissions data on mount (only if not already loaded)
   useEffect(() => {
-    dispatch(fetchPermissions());
-  }, [dispatch, location.pathname]);
+    if (permissions.length === 0) {
+      dispatch(fetchPermissions());
+    }
+  }, [dispatch, permissions.length]);
 
   // Filters permissions based on search input
   useEffect(() => {
@@ -73,14 +72,13 @@ const ManagePermissions: React.FC = () => {
           border: "1px solid rgba(0,0,0,0.08)",
           boxShadow: "0 4px 24px rgba(0,0,0,0.08), 0 1px 2px rgba(0,0,0,0.04)",
           overflow: "hidden",
-          mb: 2,
         }}
       >
         {/* Header Section */}
         <Box
           sx={{
             px: { xs: 2, sm: 3 },
-            py: { xs: 2, sm: 2.5 },
+            py: { xs: 1.5, sm: 2 },
             backgroundColor: theme.palette.background.paper,
             color: theme.palette.text.primary,
             borderBottom: `1px solid ${theme.palette.mode === "dark" ? "rgba(255,255,255,0.08)" : "rgba(0,0,0,0.08)"}`,
@@ -90,7 +88,7 @@ const ManagePermissions: React.FC = () => {
             display="flex"
             justifyContent="space-between"
             alignItems="flex-start"
-            mb={2}
+            mb={1}
           >
             <Box display="flex" alignItems="center" gap={1.5}>
               <Box
@@ -141,7 +139,7 @@ const ManagePermissions: React.FC = () => {
             gap={2}
           >
             {/* Search */}
-            <Box flex={1} maxWidth={{ sm: "320px" }}>
+            <Box flex={1} maxWidth={{ sm: "380px" }}>
               {filteredPermissions && (
                 <SearchBarComponent
                   placeholder={DASHBOARD_PERMISSIONS.SEARCH_PLACEHOLDER}
@@ -156,7 +154,7 @@ const ManagePermissions: React.FC = () => {
       </Paper>
 
       {/* Content Section */}
-      <Box sx={{ flex: 1, overflow: "auto" }}>
+      <Box sx={{ flex: 1, minHeight: 0, display: "flex", flexDirection: "column", overflow: "hidden" }}>
       {isLoadingPermissions ? (
         <Box sx={loadingBoxStyles}>
           <Backdrop sx={backdropStyles(theme)} open={isLoadingPermissions}>

@@ -140,7 +140,7 @@ export const emailLinkStyles = (theme: Theme): SxProps<Theme> => ({
 export const tableHeadCellStyles = (theme: Theme): SxProps<Theme> => ({
   position: "sticky",
   top: 0,
-  zIndex: 4,
+  zIndex: 10,
   backgroundColor: theme.palette.mode === "dark" ? "#0a0a0a" : "#000000",
   color: "#ffffff",
   fontWeight: 600,

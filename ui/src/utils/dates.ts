@@ -88,6 +88,8 @@ export const formatHeaderDateWithYear = (dateStr: string) => {
 
 export const getCurrentWeekDates = (weekOffset: number) => {
   const today = new Date();
+  // Normalize to midnight to prevent constant recalculation due to millisecond changes
+  today.setHours(0, 0, 0, 0);
   const firstDayOfWeek =
     today.getDate() - today.getDay() + (today.getDay() === 0 ? -6 : 1);
   const startDate = new Date(today.setDate(firstDayOfWeek + weekOffset * 7));
@@ -95,6 +97,8 @@ export const getCurrentWeekDates = (weekOffset: number) => {
   return Array.from({ length: 7 }, (_, i) => {
     const date = new Date(startDate);
     date.setDate(startDate.getDate() + i);
+    // Also normalize each date to midnight
+    date.setHours(0, 0, 0, 0);
     return {
       day: date.toLocaleString("en-US", { weekday: "long" }),
       date: `${date.getDate()} ${date.toLocaleDateString("en-US", {

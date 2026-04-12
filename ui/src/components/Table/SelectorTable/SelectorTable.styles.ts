@@ -4,9 +4,10 @@ import { SxProps, Theme } from "@mui/material";
 export const paperStyles: SxProps<Theme> = (theme) => ({
   width: "100%",
   height: "100%",
+  minHeight: 0,
   display: "flex",
   flexDirection: "column",
-  overflow: "hidden",
+  overflow: "visible",
   backgroundColor: theme.palette.background.paper,
   color: theme.palette.text.primary,
   borderRadius: 0,
@@ -50,6 +51,7 @@ export const tableContainerStyles: SxProps<Theme> = {
   overflowY: "auto",
   flex: 1,
   minHeight: 0,
+  height: "100%",
 };
 
 // Premium table head styles with better typography

@@ -157,4 +157,4 @@ const MenuComponent: React.FC<MenuComponentProps> = ({
   );
 };
 
-export default MenuComponent;
+export default React.memo(MenuComponent);

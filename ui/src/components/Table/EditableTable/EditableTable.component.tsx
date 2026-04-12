@@ -76,6 +76,7 @@ interface EditableTableProps<T extends object> {
   onOpenPasswordModal?: (userId: number) => void;
   onClosePasswordModal?: () => void;
   showStatusColumn?: boolean;
+  maxTableHeight?: number;
 }
 
 const ROWS_PER_PAGE_OPTIONS = [5, 10, 25, 50, 100];
@@ -163,6 +164,7 @@ const EditableTableComponent = <T extends object>({
   onOpenPasswordModal,
   onClosePasswordModal = () => {},
   showStatusColumn = false,
+  maxTableHeight,
 }: EditableTableProps<T>) => {
   const { currentUser } = useAuthContext();
   const { roles } = useSelector((state: RootState) => state.roles);
@@ -259,9 +261,13 @@ const EditableTableComponent = <T extends object>({
       elevation={0}
       sx={{
         width: "100%",
+        minHeight: 0,
+        height: "100%",
+        display: "flex",
+        flexDirection: "column",
         borderRadius: 0,
         boxShadow: "none",
-        overflow: "hidden",
+        overflow: "visible",
         backgroundColor: "transparent",
       }}
     >
@@ -292,7 +298,10 @@ const EditableTableComponent = <T extends object>({
       <TableContainer
         className="table-container"
         sx={{
-          maxHeight: "60vh",
+          flex: 1,
+          minHeight: 0,
+          height: maxTableHeight ? `${maxTableHeight}px` : undefined,
+          maxHeight: maxTableHeight ? `${maxTableHeight}px` : undefined,
           overflowY: "auto",
           overflowX: "auto",
           borderRadius: 0,
@@ -301,7 +310,7 @@ const EditableTableComponent = <T extends object>({
         <Table
           stickyHeader
           aria-label="sticky table"
-          sx={{ minWidth: 650, borderCollapse: "separate", borderSpacing: 0 }}
+          sx={{ width: "100%", minWidth: 650, borderCollapse: "collapse" }}
         >
           <TableHead>
             <TableRow>
@@ -336,7 +345,7 @@ const EditableTableComponent = <T extends object>({
                 </TableCell>
               )}
               {!noActions && (hasEditPermissions || hasDeletePermissions) && (
-                <TableCell className="tableCell" sx={tableHeadCellStyles(theme)} />
+                <TableCell className="tableCell" sx={{ ...tableHeadCellStyles(theme), width: 0, whiteSpace: "nowrap", borderRight: `1px solid ${theme.palette.mode === "dark" ? "rgba(255,255,255,0.06)" : "rgba(0,0,0,0.06)"}` }} />
               )}
             </TableRow>
           </TableHead>
@@ -428,7 +437,13 @@ const EditableTableComponent = <T extends object>({
                     </TableCell>
                   )}
                   {!noActions && (hasEditPermissions || hasDeletePermissions) && (
-                    <TableCell className="tableCell" sx={{ ...tableCellStyles, width: "100px", whiteSpace: "nowrap" }}>
+                    <TableCell className="tableCell" sx={{ 
+                      ...tableCellStyles, 
+                      width: 0, 
+                      whiteSpace: "nowrap", 
+                      borderLeft: `1px solid ${theme.palette.mode === "dark" ? "rgba(255,255,255,0.06)" : "rgba(0,0,0,0.06)"}`,
+                      borderBottom: `1px solid ${theme.palette.mode === "dark" ? "rgba(255,255,255,0.04)" : "rgba(0,0,0,0.04)"}`
+                    }}>
                       {renderActionButtons({
                         row,
                         editRowId,
@@ -470,9 +485,12 @@ const EditableTableComponent = <T extends object>({
         labelDisplayedRows={() => ""}
         ActionsComponent={PaginationComponent}
         sx={{
+          flexShrink: 0,
           borderRadius: 0,
           '.MuiTablePagination-toolbar': {
             minHeight: '36px',
+            paddingTop: '4px',
+            paddingBottom: '4px',
           },
           '.MuiTablePagination-selectLabel, .MuiTablePagination-input, .MuiTablePagination-displayedRows': {
             fontSize: '0.75rem',
@@ -482,6 +500,9 @@ const EditableTableComponent = <T extends object>({
           },
           '.MuiInputBase-root': {
             fontSize: '0.75rem',
+          },
+          '.MuiIconButton-root': {
+            padding: '2px',
           },
         }}
       />

@@ -1,49 +1,62 @@
-import { useTheme, useMediaQuery } from "@mui/material";
-import { useEffect } from "react";
+import { useEffect, type RefObject } from "react";
 
 /**
  * Hook for managing responsive layout in SelectorTable
  */
 export const useSelectorTableLayout = (
   setRowsPerPage: (rows: number) => void,
-  tableHeadRef: React.RefObject<HTMLTableSectionElement>,
-  paginationRef: React.RefObject<HTMLDivElement>,
+  tableContainerRef: RefObject<HTMLDivElement>,
+  tableHeadRef: RefObject<HTMLTableSectionElement>,
+  paginationRef: RefObject<HTMLDivElement>,
+  isSmallScreen: boolean
 ) => {
-  const theme = useTheme();
-  const isSmallScreen = useMediaQuery(theme.breakpoints.down("sm"));
-
-  // Adjusts rows per page based on screen size
   useEffect(() => {
-    if (isSmallScreen) {
-      setRowsPerPage(5);
-    } else {
-      setRowsPerPage(25);
-    }
-  }, [isSmallScreen, setRowsPerPage]);
-
-  useEffect(() => {
-    function calculateRowsPerPage() {
-      const maxHeight = window.innerHeight * 0.6; // 60vh
+    const calculateRowsPerPage = () => {
       const headHeight = tableHeadRef.current
         ? tableHeadRef.current.getBoundingClientRect().height
         : 56;
       const paginationHeight = paginationRef.current
         ? paginationRef.current.getBoundingClientRect().height
         : 64;
-      const extra = 24; // Buffer for borders/margins
-      const availableHeight = maxHeight - headHeight - paginationHeight - extra;
+      const containerHeight = tableContainerRef.current
+        ? tableContainerRef.current.clientHeight
+        : window.innerHeight * 0.55;
+      const buffer = 16;
+      const availableHeight = containerHeight - headHeight - paginationHeight - buffer;
       const rowHeight = 48;
       let rows = Math.floor(availableHeight / rowHeight);
-      rows = Math.max(3, Math.min(100, rows));
+      rows = Math.max(5, Math.min(100, rows));
       setRowsPerPage(rows);
-    }
-    // Wait for layout to stabilize
-    setTimeout(calculateRowsPerPage, 0);
-    window.addEventListener("resize", calculateRowsPerPage);
-    return () => window.removeEventListener("resize", calculateRowsPerPage);
-  }, [setRowsPerPage, tableHeadRef, paginationRef]);
+    };
 
-  return { isSmallScreen };
+    calculateRowsPerPage();
+
+    const containerElement = tableContainerRef.current;
+    const resizeObserver =
+      typeof ResizeObserver !== "undefined" && containerElement
+        ? new ResizeObserver(calculateRowsPerPage)
+        : null;
+
+    if (resizeObserver && containerElement) {
+      resizeObserver.observe(containerElement);
+    }
+
+    window.addEventListener("resize", calculateRowsPerPage);
+
+    return () => {
+      window.removeEventListener("resize", calculateRowsPerPage);
+      if (resizeObserver && containerElement) {
+        resizeObserver.unobserve(containerElement);
+        resizeObserver.disconnect();
+      }
+    };
+  }, [isSmallScreen, setRowsPerPage, tableContainerRef, tableHeadRef, paginationRef]);
+
+  useEffect(() => {
+    if (isSmallScreen) {
+      setRowsPerPage(5);
+    }
+  }, [isSmallScreen, setRowsPerPage]);
 };
 
 /**
@@ -75,7 +88,7 @@ export const calculateOptimalRowsPerPage = (
   tableHeadRef: React.RefObject<HTMLTableSectionElement>,
   paginationRef: React.RefObject<HTMLDivElement>,
 ): number => {
-  const maxHeight = window.innerHeight * 0.6; // 60vh
+  const maxHeight = window.innerHeight * 0.48; // 48vh
   const headHeight = tableHeadRef.current
     ? tableHeadRef.current.getBoundingClientRect().height
     : 56;

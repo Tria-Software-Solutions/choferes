@@ -35,6 +35,7 @@ import {
   infoIconBox,
   infoTitle,
   infoDesc,
+  textFieldStyles,
 } from "./styles";
 
 interface AddRoleFormProps {
@@ -169,6 +170,7 @@ const AddRoleForm: React.FC<AddRoleFormProps> = ({
             error={errors.name !== ""}
             helperText={errors.name}
             icon={<Users style={iconStyle} />}
+            sx={textFieldStyles}
           />
         </Grid>
 

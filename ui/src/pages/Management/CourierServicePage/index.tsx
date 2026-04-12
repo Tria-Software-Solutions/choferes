@@ -4,6 +4,7 @@ import { useSelector /*useDispatch*/ } from "react-redux";
 import { RootState /*AppDispatch*/ } from "../../../store/store";
 import SearchBarComponent from "../../../components/SearchBar/SearchBar.component";
 import SpeedDialComponent from "../../../components/SpeedDial/SpeedDial.component";
+import AppModal from "../../../components/AppModal/AppModal.component";
 import { useAppNotifications } from "../../../components/Snackbar/Snackbar.component";
 import { createCourierNotification } from "../../../services/notificationService";
 import {
@@ -36,7 +37,6 @@ import PremiumTooltip from "../../../components/PremiumTooltip/PremiumTooltip.co
 import { Courier } from "../../../models/Courier";
 import EditableTableComponent from "../../../components/Table/EditableTable/EditableTable.component";
 import AddCourierForm from "../../Forms/AddCourierForm";
-import DialogComponent from "../../../components/Dialog/Dialog.component";
 import { Plus, Trash2, Truck } from "lucide-react";
 import {
   exportSpeedDialBoxStyles,
@@ -48,11 +48,15 @@ import {
   addDialogPaperSx,
 } from "./styles";
 import { useTablePreferences } from "../../../hooks/useTablePreferences";
+import { useResponsiveTableHeight } from "../../../hooks/useResponsiveTableHeight";
 import {
   getPreferencesObject,
   setPreferencesObject,
 } from "../../../utils/persistentState";
 import { FileText, Table, PlusCircle } from "lucide-react";
+
+// Define EditFieldValue type locally since it's not exported from EditableTableComponent
+type EditFieldValue = string | boolean | number | string[] | Date;
 
 // CourierServicePage component for managing courier services
 const CourierServicePage: React.FC = () => {
@@ -145,22 +149,11 @@ const CourierServicePage: React.FC = () => {
   const theme = useTheme();
   const isSmallScreen = useMediaQuery(theme.breakpoints.down("sm"));
 
-  const getInitialRowsPerPage = () => {
-    if (typeof window !== "undefined") {
-      const maxHeight = window.innerHeight * 0.6;
-      const headHeight = 56;
-      const paginationHeight = 64;
-      const extra = 24;
-      const availableHeight = maxHeight - headHeight - paginationHeight - extra;
-      const rowHeight = 48;
-      let rows = Math.floor(availableHeight / rowHeight);
-      return Math.max(3, Math.min(100, rows));
-    }
-    return 25;
-  };
+  // Use dynamic table height hook
+  const { maxHeight, rowsPerPage: calculatedRowsPerPage } = useResponsiveTableHeight();
 
   const { search, setSearch, rowsPerPage, setRowsPerPage } =
-    useTablePreferences("couriers", getInitialRowsPerPage);
+    useTablePreferences("couriers", () => calculatedRowsPerPage);
 
   // Updates total count when filtered couriers change
   useEffect(() => {
@@ -415,7 +408,7 @@ const CourierServicePage: React.FC = () => {
   };
 
   return (
-    <Box sx={{ height: "calc(100vh - 64px - 16px)", display: "flex", flexDirection: "column", overflow: "hidden", pb: 0, pt: 0, px: 0 }}>
+    <Box sx={{ height: "calc(100vh - 64px - 32px)", display: "flex", flexDirection: "column", overflow: "hidden", pb: 0, pt: 0, px: 0 }}>
       {/* Premium Card with Header and Grid */}
       <Paper
         elevation={0}
@@ -433,7 +426,7 @@ const CourierServicePage: React.FC = () => {
         <Box
           sx={{
             px: { xs: 2, sm: 3 },
-            py: { xs: 2, sm: 2.5 },
+            py: { xs: 1.5, sm: 2 },
             backgroundColor: theme.palette.background.paper,
             color: theme.palette.text.primary,
             borderBottom: `1px solid ${theme.palette.mode === "dark" ? "rgba(255,255,255,0.08)" : "rgba(0,0,0,0.08)"}`,
@@ -443,7 +436,7 @@ const CourierServicePage: React.FC = () => {
             display="flex"
             justifyContent="space-between"
             alignItems="flex-start"
-            mb={2}
+            mb={1}
           >
             <Box display="flex" alignItems="center" gap={1.5}>
               <Box
@@ -506,7 +499,7 @@ const CourierServicePage: React.FC = () => {
             gap={2}
           >
             {/* Search */}
-            <Box flex={1} maxWidth={{ sm: "320px" }}>
+            <Box flex={1} maxWidth={{ sm: "380px" }}>
               {filteredCouriers && (
                 <SearchBarComponent
                   placeholder={MANAGEMENT.COURIER_SERVICE_PAGE.SEARCH_PLACEHOLDER}
@@ -613,7 +606,7 @@ const CourierServicePage: React.FC = () => {
         </Box>
 
         {/* Mobile Add Button */}
-        <Box sx={{ display: { xs: 'flex', sm: 'none' }, p: 2, borderTop: `1px solid ${theme.palette.mode === "dark" ? "rgba(255,255,255,0.08)" : "rgba(0,0,0,0.08)"}` }}>
+        <Box sx={{ display: { xs: 'flex', sm: 'none' }, p: 1.5, borderTop: `1px solid ${theme.palette.mode === "dark" ? "rgba(255,255,255,0.08)" : "rgba(0,0,0,0.08)"}` }}>
           <Button
             variant="contained"
             fullWidth
@@ -630,7 +623,7 @@ const CourierServicePage: React.FC = () => {
         </Box>
 
         {/* Content Section */}
-        <Box sx={{ flex: 1, overflow: "auto" }}>
+        <Box sx={{ flex: 1, minHeight: 0, display: "flex", flexDirection: "column", overflow: "hidden" }}>
           {isLoadingVehicles ? (
             <Box sx={loadingBoxStyles}>
               <Backdrop sx={backdropStyles(theme)} open={isLoadingVehicles}>
@@ -652,14 +645,14 @@ const CourierServicePage: React.FC = () => {
                   groupByDate={selectedDate}
                   editRowId={editRowId}
                   editFields={editFields}
-                  setEditField={(field, value) =>
+                  setEditField={(field: string, value: EditFieldValue) =>
                     setEditFields({ ...editFields, [field]: value })
                   }
                   handleEdit={handleEdit}
                   handleCancel={handleCancel}
                   handleUpdate={handleUpdate}
                   handleOpenDeleteDialog={handleOpenDeleteDialog}
-                  getRowId={(row) => row.id}
+                  getRowId={(row: Courier) => row.id}
                   totalCount={totalCount}
                   page={page}
                   rowsPerPage={rowsPerPage}
@@ -667,6 +660,7 @@ const CourierServicePage: React.FC = () => {
                   setRowsPerPage={setRowsPerPage}
                   isSaveDisabled={!isEditFormValid}
                   userPermissions={userPermissions || []}
+                  maxTableHeight={maxHeight}
                 />
               ) : (
                 <Box sx={noCouriersBoxStyles}>
@@ -685,7 +679,7 @@ const CourierServicePage: React.FC = () => {
         </Box>
       </Paper>
 
-      <DialogComponent
+      <AppModal
         open={openDeleteDialog}
         onClose={handleCloseDeleteDialog}
         onConfirm={handleDelete}
@@ -698,7 +692,7 @@ const CourierServicePage: React.FC = () => {
         paperSx={deleteDialogPaperSx ?? {}}
         icon={<Trash2 size={24} color="red" />}
       />
-      <DialogComponent
+      <AppModal
         open={openAddCourierModal}
         onClose={handleCloseAddCourierModal}
         title={MANAGEMENT.COURIER_SERVICE_PAGE.DIALOG_ADD_TITLE}
@@ -712,7 +706,7 @@ const CourierServicePage: React.FC = () => {
           onCancel={handleCloseAddCourierModal}
           isLoading={isCreatingCourier}
         />
-      </DialogComponent>
+      </AppModal>
     </Box>
   );
 };
