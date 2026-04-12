@@ -4,7 +4,7 @@ import { OCRResult } from "../../../services/ocrService";
 export const dialogPaperStyles: SxProps<Theme> = {
   border: "2px solid #fff",
   borderRadius: 3,
-  minHeight: "60vh",
+  minHeight: "48vh",
   maxHeight: "80vh",
   boxShadow: 3,
   bgcolor: "background.paper",
@@ -74,7 +74,7 @@ export const dialogContentStyles = (
   display: "flex",
   flexDirection: "column",
   justifyContent: "center",
-  minHeight: result && !isLoading && !isImageFormatValid ? "60vh" : "auto",
+  minHeight: result && !isLoading && !isImageFormatValid ? "48vh" : "auto",
   height: result && !isLoading && isImageFormatValid ? "500px" : "auto",
 });
 

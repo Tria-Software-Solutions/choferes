@@ -42,19 +42,6 @@ const getNotificationIcon = (type: Notification['type']) => {
 
 
 
-const getPriorityColor = (priority: Notification['priority']) => {
-  switch (priority) {
-    case 'high':
-      return 'error';
-    case 'medium':
-      return 'warning';
-    case 'low':
-      return 'default';
-    default:
-      return 'default';
-  }
-};
-
 const NotificationMenu: React.FC<NotificationMenuProps> = ({
   anchorEl,
   onClose,
@@ -128,28 +115,40 @@ const NotificationMenu: React.FC<NotificationMenuProps> = ({
       transformOrigin={{ horizontal: 'right', vertical: 'top' }}
       anchorOrigin={{ horizontal: 'right', vertical: 'bottom' }}
       PaperProps={{
+        elevation: 0,
         sx: {
-          width: 400,
-          maxHeight: 600,
+          width: 380,
+          maxHeight: 580,
           mt: 1,
+          background: theme.palette.mode === 'dark'
+            ? 'linear-gradient(135deg, rgba(0,0,0,0.95) 0%, rgba(26,26,26,0.95) 100%)'
+            : 'linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%)',
+          backdropFilter: 'blur(20px)',
+          border: theme.palette.mode === 'dark'
+            ? '1px solid rgba(255,255,255,0.1)'
+            : '1px solid rgba(0,0,0,0.08)',
+          borderRadius: '12px',
+          boxShadow: theme.palette.mode === 'dark'
+            ? '0 10px 40px rgba(0,0,0,0.4), 0 2px 8px rgba(0,0,0,0.2)'
+            : '0 10px 40px rgba(0,0,0,0.15), 0 2px 8px rgba(0,0,0,0.1)',
         },
       }}
     >
       {/* Header */}
-      <Box sx={{ p: 2, borderBottom: `1px solid ${theme.palette.divider}` }}>
-        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 1 }}>
-          <Typography variant="h6" sx={{ fontWeight: 600, fontSize: '1.1rem' }}>
+      <Box sx={{ p: 1.5, borderBottom: theme.palette.mode === 'dark' ? '1px solid rgba(255,255,255,0.1)' : '1px solid rgba(0,0,0,0.08)' }}>
+        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 0.5 }}>
+          <Typography variant="h6" sx={{ fontWeight: 600, fontSize: '1rem', color: theme.palette.text.primary }}>
             Notificaciones
           </Typography>
-          <Box sx={{ display: 'flex', gap: 0.5 }}>
+          <Box sx={{ display: 'flex', gap: 0.25 }}>
             <PremiumTooltip title="Filtros">
               <IconButton
                 size="small"
                 onClick={() => setShowFilters(!showFilters)}
                 color={showFilters ? 'primary' : 'default'}
-                sx={{ padding: 0.5 }}
+                sx={{ padding: 0.4, color: theme.palette.text.primary }}
               >
-                <ListFilter size={18} />
+                <ListFilter size={16} />
               </IconButton>
             </PremiumTooltip>
             {unreadCount > 0 && (
@@ -157,9 +156,9 @@ const NotificationMenu: React.FC<NotificationMenuProps> = ({
                 <IconButton 
                   size="small" 
                   onClick={handleMarkAllAsRead}
-                  sx={{ padding: 0.5 }}
+                  sx={{ padding: 0.4, color: theme.palette.text.primary }}
                 >
-                  <CheckCheck size={18} />
+                  <CheckCheck size={16} />
                 </IconButton>
               </PremiumTooltip>
             )}
@@ -168,7 +167,7 @@ const NotificationMenu: React.FC<NotificationMenuProps> = ({
         </Box>
         
         {unreadCount > 0 && (
-          <Typography variant="body2" color="text.secondary" sx={{ fontSize: '0.8rem' }}>
+          <Typography variant="body2" sx={{ fontSize: '0.75rem', color: theme.palette.text.secondary }}>
             {unreadCount} {unreadCount === 1 ? 'notificación no leída' : 'notificaciones no leídas'}
           </Typography>
         )}
@@ -176,14 +175,14 @@ const NotificationMenu: React.FC<NotificationMenuProps> = ({
 
       {/* Filters */}
       {showFilters && (
-        <Box sx={{ p: 2, borderBottom: `1px solid ${theme.palette.divider}` }}>
-          <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 1 }}>
-            <Typography variant="subtitle2" sx={{ fontSize: '0.9rem' }}>Filtros</Typography>
+        <Box sx={{ p: 1.5, borderBottom: theme.palette.mode === 'dark' ? '1px solid rgba(255,255,255,0.1)' : '1px solid rgba(0,0,0,0.08)' }}>
+          <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 0.75 }}>
+            <Typography variant="subtitle2" sx={{ fontSize: '0.8rem', color: theme.palette.text.primary }}>Filtros</Typography>
             <Button 
               size="small" 
               onClick={clearFilters} 
-              startIcon={<X size={16} />}
-              sx={{ fontSize: '0.75rem', padding: '4px 8px' }}
+              startIcon={<X size={14} />}
+              sx={{ fontSize: '0.7rem', padding: '3px 8px', color: theme.palette.text.primary }}
             >
               Limpiar
             </Button>
@@ -195,21 +194,19 @@ const NotificationMenu: React.FC<NotificationMenuProps> = ({
               variant="outlined"
               onClick={() => handleFilterChange('read', false)}
               sx={{ 
-                fontSize: '0.7rem', 
-                height: 24,
+                fontSize: '0.65rem', 
+                height: 22,
                 '& .MuiChip-label': {
-                  color: theme.palette.mode === 'dark' 
-                    ? theme.palette.text.primary 
-                    : theme.palette.text.primary,
+                  color: theme.palette.text.primary,
                   fontWeight: 500,
                 },
                 '& .MuiChip-outlined': {
-                  borderColor: theme.palette.mode === 'dark' 
-                    ? theme.palette.divider 
-                    : theme.palette.text.secondary,
+                  borderColor: theme.palette.mode === 'dark'
+                    ? 'rgba(255,255,255,0.2)'
+                    : 'rgba(0,0,0,0.2)',
                 },
-                backgroundColor: theme.palette.mode === 'dark' 
-                  ? 'rgba(255, 255, 255, 0.05)' 
+                backgroundColor: theme.palette.mode === 'dark'
+                  ? 'rgba(255, 255, 255, 0.05)'
                   : 'rgba(0, 0, 0, 0.05)',
               }}
             />
@@ -219,21 +216,19 @@ const NotificationMenu: React.FC<NotificationMenuProps> = ({
               variant="outlined"
               onClick={() => handleFilterChange('read', true)}
               sx={{ 
-                fontSize: '0.7rem', 
-                height: 24,
+                fontSize: '0.65rem', 
+                height: 22,
                 '& .MuiChip-label': {
-                  color: theme.palette.mode === 'dark' 
-                    ? theme.palette.text.primary 
-                    : theme.palette.text.primary,
+                  color: theme.palette.text.primary,
                   fontWeight: 500,
                 },
                 '& .MuiChip-outlined': {
-                  borderColor: theme.palette.mode === 'dark' 
-                    ? theme.palette.divider 
-                    : theme.palette.text.secondary,
+                  borderColor: theme.palette.mode === 'dark'
+                    ? 'rgba(255,255,255,0.2)'
+                    : 'rgba(0,0,0,0.2)',
                 },
-                backgroundColor: theme.palette.mode === 'dark' 
-                  ? 'rgba(255, 255, 255, 0.05)' 
+                backgroundColor: theme.palette.mode === 'dark'
+                  ? 'rgba(255, 255, 255, 0.05)'
                   : 'rgba(0, 0, 0, 0.05)',
               }}
             />
@@ -243,21 +238,19 @@ const NotificationMenu: React.FC<NotificationMenuProps> = ({
               variant="outlined"
               onClick={() => handleFilterChange('priority', 'high')}
               sx={{ 
-                fontSize: '0.7rem', 
-                height: 24,
+                fontSize: '0.65rem', 
+                height: 22,
                 '& .MuiChip-label': {
-                  color: theme.palette.mode === 'dark' 
-                    ? theme.palette.text.primary 
-                    : theme.palette.text.primary,
+                  color: theme.palette.text.primary,
                   fontWeight: 500,
                 },
                 '& .MuiChip-outlined': {
-                  borderColor: theme.palette.mode === 'dark' 
-                    ? theme.palette.divider 
-                    : theme.palette.text.secondary,
+                  borderColor: theme.palette.mode === 'dark'
+                    ? 'rgba(255,255,255,0.2)'
+                    : 'rgba(0,0,0,0.2)',
                 },
-                backgroundColor: theme.palette.mode === 'dark' 
-                  ? 'rgba(255, 255, 255, 0.05)' 
+                backgroundColor: theme.palette.mode === 'dark'
+                  ? 'rgba(255, 255, 255, 0.05)'
                   : 'rgba(0, 0, 0, 0.05)',
               }}
             />
@@ -269,8 +262,8 @@ const NotificationMenu: React.FC<NotificationMenuProps> = ({
       <Box sx={{ 
         display: 'flex', 
         flexDirection: 'column', 
-        height: notifications.length === 0 ? 'auto' : 400,
-        minHeight: notifications.length === 0 ? 'auto' : 200,
+        height: notifications.length === 0 ? 'auto' : 380,
+        minHeight: notifications.length === 0 ? 'auto' : 180,
       }}>
         {/* Scrollable Notifications List */}
         <Box sx={{ 
@@ -280,16 +273,16 @@ const NotificationMenu: React.FC<NotificationMenuProps> = ({
         }}>
           {notifications.length === 0 ? (
             <Box sx={{ 
-              p: 3, 
+              p: 2, 
               textAlign: 'center',
-              minHeight: notifications.length === 0 ? 120 : 'auto',
+              minHeight: notifications.length === 0 ? 100 : 'auto',
               display: 'flex',
               flexDirection: 'column',
               justifyContent: 'center',
               alignItems: 'center',
             }}>
-              <Bell size={48} style={{ color: theme.palette.text.secondary, marginBottom: 8 }} />
-              <Typography variant="body2" color="text.secondary">
+              <Bell size={40} style={{ color: theme.palette.text.secondary, marginBottom: 8 }} />
+              <Typography variant="body2" sx={{ color: theme.palette.text.secondary, fontSize: '0.875rem' }}>
                 No hay notificaciones
               </Typography>
             </Box>
@@ -299,26 +292,32 @@ const NotificationMenu: React.FC<NotificationMenuProps> = ({
                 <ListItemButton
                   onClick={() => handleNotificationClick(notification)}
                   sx={{
-                    py: 1.5,
-                    px: 2,
-                    backgroundColor: notification.read ? 'transparent' : theme.palette.action.hover,
+                    py: 1,
+                    px: 1.5,
+                    backgroundColor: notification.read 
+                      ? 'transparent' 
+                      : theme.palette.mode === 'dark'
+                        ? 'rgba(255,255,255,0.05)'
+                        : 'rgba(0,0,0,0.04)',
                     '&:hover': {
-                      backgroundColor: theme.palette.action.selected,
+                      backgroundColor: theme.palette.mode === 'dark'
+                        ? 'rgba(255,255,255,0.08)'
+                        : theme.palette.action.hover,
                     },
                   }}
                 >
-                  <ListItemIcon sx={{ minWidth: 40 }}>
+                  <ListItemIcon sx={{ minWidth: 36 }}>
                     {getNotificationIcon(notification.type)}
                   </ListItemIcon>
 
                   <ListItemText
                     primary={
-                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 0.5 }}>
+                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.75, mb: 0.25 }}>
                         {!notification.read && (
                           <Box
                             sx={{
-                              width: 6,
-                              height: 6,
+                              width: 5,
+                              height: 5,
                               borderRadius: '50%',
                               backgroundColor: theme.palette.primary.main,
                               flexShrink: 0,
@@ -328,31 +327,30 @@ const NotificationMenu: React.FC<NotificationMenuProps> = ({
                         <Chip
                           label={translatePriorityToSpanish(notification.priority)}
                           size="small"
-                          color={getPriorityColor(notification.priority) as 'error' | 'warning' | 'default'}
                           variant="outlined"
                           sx={{ 
-                            fontSize: '0.7rem', 
-                            height: 20,
+                            fontSize: '0.65rem', 
+                            height: 18,
                             '& .MuiChip-label': {
-                              color: theme.palette.mode === 'dark' 
-                                ? theme.palette.text.primary 
-                                : theme.palette.text.primary,
+                              color: theme.palette.text.primary,
                               fontWeight: 500,
                             },
                             '& .MuiChip-outlined': {
-                              borderColor: theme.palette.mode === 'dark' 
-                                ? theme.palette.divider 
-                                : theme.palette.text.secondary,
+                              borderColor: theme.palette.mode === 'dark'
+                                ? 'rgba(255,255,255,0.2)'
+                                : 'rgba(0,0,0,0.2)',
                             },
-                            backgroundColor: theme.palette.mode === 'dark' 
-                              ? 'rgba(255, 255, 255, 0.05)' 
+                            backgroundColor: theme.palette.mode === 'dark'
+                              ? 'rgba(255, 255, 255, 0.05)'
                               : 'rgba(0, 0, 0, 0.05)',
                           }}
                         />
                         <Typography
                           variant="body2"
                           sx={{
-                            fontWeight: 700,
+                            fontWeight: 600,
+                            color: theme.palette.text.primary,
+                            fontSize: '0.875rem',
                           }}
                         >
                           {notification.title}
@@ -361,37 +359,38 @@ const NotificationMenu: React.FC<NotificationMenuProps> = ({
                     }
                     secondary={
                       <Box>
-                        <Typography variant="body2" color="text.secondary" sx={{ mb: 0.5, fontSize: '0.875rem' }}>
+                        <Typography variant="body2" sx={{ mb: 0.25, fontSize: '0.8rem', color: theme.palette.text.secondary }}>
                           {notification.message}
                         </Typography>
-                        <Typography variant="caption" color="text.secondary" sx={{ fontSize: '0.75rem' }}>
+                        <Typography variant="caption" sx={{ fontSize: '0.7rem', color: theme.palette.text.secondary }}>
                           {formatTime(notification.timestamp)}
                         </Typography>
                       </Box>
                     }
                   />
 
-                  <Box sx={{ display: 'flex', alignItems: 'center', minWidth: 32 }}>
+                  <Box sx={{ display: 'flex', alignItems: 'center', minWidth: 28 }}>
                     <PremiumTooltip title="Eliminar">
                       <IconButton
                         size="small"
                         onClick={(e) => handleDeleteNotification(e, notification.id)}
                         sx={{ 
-                          opacity: 0.6, 
+                          opacity: 0.5, 
                           '&:hover': { opacity: 1 },
-                          padding: 0.5,
-                          minWidth: 24,
-                          minHeight: 24,
+                          padding: 0.35,
+                          minWidth: 20,
+                          minHeight: 20,
+                          color: theme.palette.text.primary,
                         }}
                       >
-                        <Trash2 size={20} />
+                        <Trash2 size={16} />
                       </IconButton>
                     </PremiumTooltip>
                   </Box>
                 </ListItemButton>
 
                 {index < (showAllNotifications ? notifications : notifications.slice(0, 5)).length - 1 && (
-                  <Divider sx={{ mx: 2 }} />
+                  <Divider sx={{ mx: 1.5, borderColor: theme.palette.mode === 'dark' ? 'rgba(255,255,255,0.1)' : theme.palette.divider }} />
                 )}
               </React.Fragment>
             ))
@@ -399,15 +398,15 @@ const NotificationMenu: React.FC<NotificationMenuProps> = ({
           
           {/* Show More/Less Button */}
           {notifications.length > 5 && (
-            <Box sx={{ p: 1, borderTop: `1px solid ${theme.palette.divider}` }}>
+            <Box sx={{ p: 0.75, borderTop: theme.palette.mode === 'dark' ? '1px solid rgba(255,255,255,0.1)' : theme.palette.divider }}>
               <Button
                 fullWidth
                 variant="text"
                 size="small"
                 onClick={() => setShowAllNotifications(!showAllNotifications)}
                 sx={{ 
-                  fontSize: '0.8rem', 
-                  padding: '4px 8px',
+                  fontSize: '0.75rem', 
+                  padding: '3px 8px',
                   textTransform: 'none',
                   color: theme.palette.primary.main,
                 }}
@@ -424,9 +423,9 @@ const NotificationMenu: React.FC<NotificationMenuProps> = ({
         {/* Sticky Footer with Delete All Button */}
         {notifications.length > 0 && (
           <Box sx={{ 
-            p: 1, 
-            borderTop: `1px solid ${theme.palette.divider}`,
-            backgroundColor: theme.palette.background.paper,
+            p: 0.75, 
+            borderTop: theme.palette.mode === 'dark' ? '1px solid rgba(255,255,255,0.1)' : theme.palette.divider,
+            backgroundColor: theme.palette.mode === 'dark' ? 'rgba(0,0,0,0.3)' : theme.palette.background.paper,
             position: 'sticky',
             bottom: 0,
             zIndex: 1,
@@ -436,16 +435,20 @@ const NotificationMenu: React.FC<NotificationMenuProps> = ({
               variant="outlined"
               size="small"
               onClick={handleDeleteAllNotifications}
-              startIcon={<Trash size={16} />}
+              startIcon={<Trash size={14} />}
               sx={{ 
-                fontSize: '0.8rem', 
-                padding: '6px 16px',
+                fontSize: '0.75rem', 
+                padding: '4px 12px',
                 textTransform: 'none',
                 color: theme.palette.error.main,
-                borderColor: theme.palette.error.main,
+                borderColor: theme.palette.mode === 'dark'
+                  ? 'rgba(239, 68, 68, 0.5)'
+                  : theme.palette.error.main,
                 '&:hover': {
-                  borderColor: theme.palette.error.dark,
-                  backgroundColor: theme.palette.error.light + '20',
+                  borderColor: theme.palette.error.main,
+                  backgroundColor: theme.palette.mode === 'dark'
+                    ? 'rgba(239, 68, 68, 0.1)'
+                    : theme.palette.error.light + '20',
                 }
               }}
             >

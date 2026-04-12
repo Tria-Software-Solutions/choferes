@@ -62,30 +62,35 @@ api.interceptors.response.use(
       return error.cachedResponse;
     }
 
-    if (
-      error.response?.status === 401 &&
-      error.response.data?.error === "Token expired"
-    ) {
-      try {
-        const response = await axios.post(
-          `${API_URL}/api/auth/refresh-token`,
-          {},
-          {
-            withCredentials: true,
-            headers: {
-              "Content-Type": "application/json",
-              Authorization: `Bearer ${Cookies.get("refreshToken")}`,
+    if (error.response?.status === 401) {
+      // Try to refresh token first
+      const refreshToken = Cookies.get("refreshToken");
+      if (refreshToken && error.response.data?.error === "Token expired") {
+        try {
+          const response = await axios.post(
+            `${API_URL}/api/auth/refresh-token`,
+            {},
+            {
+              withCredentials: true,
+              headers: {
+                "Content-Type": "application/json",
+                Authorization: `Bearer ${refreshToken}`,
+              },
             },
-          },
-        );
+          );
 
-        const newAccessToken = response.data.accessToken;
-        Cookies.set("accessToken", newAccessToken);
-        error.config.headers["Authorization"] = `Bearer ${newAccessToken}`;
-        return api.request(error.config);
-      } catch (refreshError) {
+          const newAccessToken = response.data.accessToken;
+          Cookies.set("accessToken", newAccessToken);
+          error.config.headers["Authorization"] = `Bearer ${newAccessToken}`;
+          return api.request(error.config);
+        } catch (refreshError) {
+          disconnectUser();
+          return Promise.reject(refreshError);
+        }
+      } else {
+        // No refresh token or not a token expired error, redirect to login
         disconnectUser();
-        return Promise.reject(refreshError);
+        return Promise.reject(error);
       }
     }
     return Promise.reject(error);

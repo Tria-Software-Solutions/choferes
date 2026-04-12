@@ -122,6 +122,8 @@ const DialogComponent: React.FC<ConfirmationDialogProps> = ({
       PaperProps={{
         sx: dialogPaperStyles(paperSx),
       }}
+      TransitionComponent={require("@mui/material/Slide").default}
+      transitionDuration={300}
     >
       {header ? (
         header
@@ -129,17 +131,27 @@ const DialogComponent: React.FC<ConfirmationDialogProps> = ({
         <Box sx={headerBoxStyles(theme)}>
           {icon && <Box sx={iconBoxStyles(theme)}>{icon}</Box>}
           <Box>
-            <Typography variant="h6" fontWeight={700} color="inherit">
+            <Typography variant="h6" fontWeight={700} color="inherit" sx={{ fontSize: "1.1rem", letterSpacing: "-0.02em" }}>
               {title}
             </Typography>
             {subtitle && (
-              <Typography variant="body2" color="inherit">
+              <Typography variant="body2" color="inherit" sx={{ fontSize: "0.875rem", opacity: 0.8 }}>
                 {subtitle}
               </Typography>
             )}
           </Box>
           <Box flexGrow={1} />
-          <IconButton onClick={onClose} sx={closeButtonStyles}>
+          <IconButton 
+            onClick={onClose} 
+            sx={{
+              ...closeButtonStyles,
+              transition: "all 0.2s ease-in-out",
+              "&:hover": {
+                backgroundColor: "rgba(0,0,0,0.04)",
+                transform: "scale(1.1)",
+              },
+            }}
+          >
             <X size={20} />
           </IconButton>
         </Box>
@@ -152,7 +164,7 @@ const DialogComponent: React.FC<ConfirmationDialogProps> = ({
           <Typography
             variant="body1"
             color="text.secondary"
-            sx={messageTypographyStyles}
+            sx={messageTypographyStyles(theme)}
           >
             {message}
           </Typography>
@@ -193,4 +205,4 @@ const DialogComponent: React.FC<ConfirmationDialogProps> = ({
   );
 };
 
-export default DialogComponent;
+export default React.memo(DialogComponent);

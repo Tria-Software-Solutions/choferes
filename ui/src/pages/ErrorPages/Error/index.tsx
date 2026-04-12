@@ -14,7 +14,6 @@ import { ERRORS } from "../../../constants/constants";
 import {
   outerBoxStyles,
   innerBoxStyles,
-  iconStyles,
   titleStyles,
   subtitleStyles,
   descriptionStyles,

@@ -593,9 +593,6 @@ export const lightTheme = createTheme({
           "&:nth-of-type(odd)": {
             backgroundColor: "#ffffff",
           },
-          "&:hover": {
-            backgroundColor: "#f3f4f6",
-          },
         },
       },
     },
@@ -1520,9 +1517,6 @@ export const darkTheme = createTheme({
           "&:nth-of-type(odd)": {
             backgroundColor: "#181818",
           },
-          "&:hover": {
-            backgroundColor: "#333333",
-          },
         },
       },
     },
@@ -2078,9 +2072,6 @@ export const highContrastTheme = createTheme({
           },
           "&:nth-of-type(odd)": {
             backgroundColor: "#ffffff",
-          },
-          "&:hover": {
-            backgroundColor: "#ffff66",
           },
         },
       },

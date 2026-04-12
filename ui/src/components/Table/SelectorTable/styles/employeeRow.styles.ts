@@ -1,13 +1,20 @@
 import type { Theme } from "@mui/material";
 
 const getRowBackgroundColor = (theme: Theme, rowIndex: number, hover = false) => {
-  const baseColor = rowIndex % 2 === 0 
-    ? theme.palette.background.paper 
-    : theme.palette.action.hover;
+  const isDarkMode = theme.palette.mode === "dark";
+  const isEven = rowIndex % 2 === 0;
+
   if (hover) {
-    return rowIndex % 2 === 0 ? theme.palette.background.paper : theme.palette.action.hover;
+    return isEven ? theme.palette.background.paper : theme.palette.action.hover;
   }
-  return baseColor;
+
+  // In dark mode, align with the global MuiTableRow theme colors:
+  // even rows: #232323, odd rows: #181818
+  if (isDarkMode) {
+    return isEven ? "#232323" : "#181818";
+  }
+
+  return isEven ? theme.palette.background.paper : theme.palette.action.hover;
 };
 
 export const getEmployeeRowStyles = (theme: Theme, isSmallScreen: boolean, rowIndex: number) => ({

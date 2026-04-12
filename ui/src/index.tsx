@@ -54,9 +54,9 @@ const root = ReactDOM.createRoot(
   document.getElementById("root") as HTMLElement,
 );
 root.render(
-  <React.StrictMode>
+  // <React.StrictMode>
     <ThemeModeProvider>
       <App />
     </ThemeModeProvider>
-  </React.StrictMode>,
+  // </React.StrictMode>,
 );

@@ -49,52 +49,59 @@ export const titleStyles: SxProps<Theme> = {
   display: { xs: "none", sm: "block" },
 };
 
-export const dashboardPopoverBoxStyles: SxProps<Theme> = {
+export const dashboardPopoverBoxStyles: SxProps<Theme> = (theme) => ({
   mt: 2,
-  display: "flex",
-  flexDirection: "row",
+  display: 'flex',
+  flexDirection: 'row',
   gap: 1,
-  alignItems: "center",
-  backgroundColor: "#000000",
+  alignItems: 'center',
+  backgroundColor: theme.palette.mode === 'dark' 
+    ? 'rgba(0,0,0,0.95)' 
+    : '#ffffff',
+  backdropFilter: 'blur(20px)',
   p: 1,
-  borderRadius: "12px",
-  border: "1px solid rgba(255,255,255,0.1)",
-  boxShadow: "0 4px 20px rgba(0,0,0,0.3)",
-};
+  borderRadius: '12px',
+  border: theme.palette.mode === 'dark'
+    ? '1px solid rgba(255,255,255,0.1)'
+    : '1px solid rgba(0,0,0,0.08)',
+  boxShadow: theme.palette.mode === 'dark'
+    ? '0 10px 40px rgba(0,0,0,0.4), 0 2px 8px rgba(0,0,0,0.2)'
+    : '0 10px 40px rgba(0,0,0,0.15), 0 2px 8px rgba(0,0,0,0.1)',
+});
 
 export const dashboardIconButtonStyles = (
   active: boolean = false,
-): SxProps<Theme> => ({
-  color: "#ffffff",
-  cursor: "pointer",
+): SxProps<Theme> => (theme) => ({
+  color: theme.palette.text.primary,
+  cursor: 'pointer',
   p: 1,
-  borderRadius: "12px",
-  minWidth: "48px",
-  height: "48px",
-  backgroundColor: active ? "rgba(255,255,255,0.2)" : "transparent",
-  border: "none",
-  position: "relative",
-  "&:hover": {
+  borderRadius: '12px',
+  minWidth: '48px',
+  height: '48px',
+  backgroundColor: active 
+    ? (theme.palette.mode === 'dark' ? 'rgba(255,255,255,0.15)' : 'rgba(0,0,0,0.08)') 
+    : 'transparent',
+  border: 'none',
+  position: 'relative',
+  '&:hover': {
     backgroundColor: active
-      ? "rgba(255,255,255,0.25)"
-      : "rgba(255,255,255,0.1)",
+      ? (theme.palette.mode === 'dark' ? 'rgba(255,255,255,0.2)' : 'rgba(0,0,0,0.12)')
+      : (theme.palette.mode === 'dark' ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.04)'),
   },
-  "&:active": {
+  '&:active': {
     backgroundColor: active
-      ? "rgba(255,255,255,0.3)"
-      : "rgba(255,255,255,0.15)",
+      ? (theme.palette.mode === 'dark' ? 'rgba(255,255,255,0.25)' : 'rgba(0,0,0,0.16)')
+      : (theme.palette.mode === 'dark' ? 'rgba(255,255,255,0.12)' : 'rgba(0,0,0,0.08)'),
   },
-  transition: "all 0.2s cubic-bezier(0.4, 0, 0.2, 1)",
+  transition: 'all 0.2s cubic-bezier(0.4, 0, 0.2, 1)',
 });
 
 export const dashboardIconStyles = (
   active: boolean = false,
 ): CSSProperties => ({
-  width: "1.4rem",
-  height: "1.4rem",
-  color: "#ffffff",
-  opacity: active ? 1 : 0.8,
-  transition: "all 0.2s ease",
+  width: '1.4rem',
+  height: '1.4rem',
+  transition: 'all 0.2s ease',
 });
 
 export const notificationsIconButtonStyles: SxProps<Theme> = {

@@ -47,6 +47,7 @@ const PaginationComponent: React.FC<PaginationActionsProps> = ({
         onClick={(e) => onPageChange(e, page - 1)}
         disabled={page === 0}
         aria-label={PAGINATION.PREVIOUS}
+        sx={{ padding: "2px" }}
       >
         <ArrowLeft
           size={16}
@@ -65,6 +66,7 @@ const PaginationComponent: React.FC<PaginationActionsProps> = ({
         onClick={(e) => onPageChange(e, page + 1)}
         disabled={page >= Math.ceil(count / rowsPerPage) - 1}
         aria-label={PAGINATION.NEXT}
+        sx={{ padding: "2px" }}
       >
         <ArrowRight
           size={16}
@@ -80,4 +82,4 @@ const PaginationComponent: React.FC<PaginationActionsProps> = ({
   );
 };
 
-export default PaginationComponent;
+export default React.memo(PaginationComponent);
