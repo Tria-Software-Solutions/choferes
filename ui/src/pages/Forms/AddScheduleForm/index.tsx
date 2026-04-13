@@ -4,7 +4,6 @@ import {
   Box,
   Typography,
   FormControl,
-  InputLabel,
   Select,
   MenuItem,
   Checkbox,
@@ -37,7 +36,6 @@ import {
   clearButton,
   actionsInnerBox,
   cancelButton,
-  submitButton,
 } from "./styles";
 
 interface AddScheduleFormProps {
@@ -67,6 +65,7 @@ const AddScheduleForm: React.FC<AddScheduleFormProps> = ({
   });
 
   const [isFormValid, setIsFormValid] = useState(false);
+  const [formTouched, setFormTouched] = useState(false);
 
   const validateFields = useCallback((fields: typeof formData) => {
     const regex = {
@@ -90,6 +89,7 @@ const AddScheduleForm: React.FC<AddScheduleFormProps> = ({
   }, [formData, validateFields]);
 
   const handleSubmit = () => {
+    setFormTouched(true);
     if (isFormValid) {
       const newSchedule: Omit<Schedule, "id"> = {
         label: formData.label,
@@ -119,10 +119,9 @@ const AddScheduleForm: React.FC<AddScheduleFormProps> = ({
       <Grid container spacing={3} sx={gridContainer}>
         <Grid item xs={12} sm={6}>
           <TextfieldComponent
-            label={FORMS.ADD_SCHEDULE.SCHEDULE_LABEL}
+            placeholder={FORMS.ADD_SCHEDULE.SCHEDULE_LABEL_PLACEHOLDER}
             variant="outlined"
             fullWidth
-            placeholder={FORMS.ADD_SCHEDULE.SCHEDULE_LABEL_PLACEHOLDER}
             value={formData.label}
             onChange={(e) =>
               setFormData({ ...formData, label: e.target.value })
@@ -133,15 +132,15 @@ const AddScheduleForm: React.FC<AddScheduleFormProps> = ({
 
         <Grid item xs={12} sm={6}>
           <TextfieldComponent
-            label={FORMS.ADD_SCHEDULE.SCHEDULE_TIME_LABEL}
             variant="outlined"
             type="number"
             fullWidth
             placeholder={FORMS.ADD_SCHEDULE.SCHEDULE_TIME_PLACEHOLDER}
-            value={formData.hours}
-            onChange={(e) =>
-              setFormData({ ...formData, hours: Number(e.target.value) })
-            }
+            value={formData.hours === 0 ? "" : formData.hours}
+            onChange={(e) => {
+              const value = e.target.value;
+              setFormData({ ...formData, hours: value === "" ? 0 : Number(value) });
+            }}
             error={
               formData.hours !== 0 &&
               (isNaN(formData.hours) ||
@@ -157,21 +156,19 @@ const AddScheduleForm: React.FC<AddScheduleFormProps> = ({
                 : ""
             }
             icon={<Clock style={iconStyle} />}
-            endAdornment={<Box style={iconStyle}>horas</Box>}
             inputProps={{ min: "0" }}
           />
         </Grid>
 
         <Grid item xs={12}>
           <FormControl variant="outlined" fullWidth sx={formControl(theme)}>
-            <InputLabel>{FORMS.DAYS_REQUIRED}</InputLabel>
             <Select
               multiple
-              label={FORMS.DAYS_REQUIRED}
+              displayEmpty
               value={formData.days}
               input={
                 <OutlinedInput
-                  label={FORMS.DAYS_REQUIRED}
+                  placeholder={formData.days.length === 0 ? FORMS.DAYS_REQUIRED : ''}
                   startAdornment={
                     <InputAdornment position="start">
                       <Calendar style={iconStyle} />
@@ -196,7 +193,7 @@ const AddScheduleForm: React.FC<AddScheduleFormProps> = ({
                     : [e.target.value],
                 })
               }
-              error={formData.days.length === 0}
+              error={formTouched && formData.days.length === 0}
               MenuProps={{
                 PaperProps: {
                   style: {
@@ -226,7 +223,7 @@ const AddScheduleForm: React.FC<AddScheduleFormProps> = ({
                 </MenuItem>
               ))}
             </Select>
-            {formData.days.length === 0 && (
+            {formTouched && formData.days.length === 0 && (
               <Typography
                 variant="caption"
                 sx={{
@@ -307,9 +304,16 @@ const AddScheduleForm: React.FC<AddScheduleFormProps> = ({
                 variant="contained"
                 onClick={handleSubmit}
                 disabled={!isFormValid || isLoading}
-                startIcon={<Plus />}
+                startIcon={<Plus size={18} />}
                 fullWidth={isSmallScreen}
-                sx={submitButton}
+                sx={{
+                  fontWeight: 600,
+                  fontSize: "0.95rem",
+                  textTransform: "none",
+                  letterSpacing: "0.01em",
+                  borderRadius: "12px",
+                  minHeight: "42px",
+                }}
               >
                 Agregar
               </Button>

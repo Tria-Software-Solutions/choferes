@@ -66,7 +66,16 @@ export const PeriodSelector = memo(function PeriodSelector({
   const styles = getPeriodSelectorStyles(theme);
 
   return (
-    <FormControl size="small" sx={{ minWidth: 120 }}>
+    <FormControl 
+      size="small" 
+      sx={{ 
+        minWidth: 120, 
+        margin: 0,
+        padding: 0,
+        height: "32px",
+        backgroundColor: `${theme.palette.mode === "dark" ? "#111" : "#000000"} !important`,
+      }}
+    >
       <Select
         value={value}
         onChange={handleChange}

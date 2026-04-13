@@ -72,21 +72,76 @@ const DateSelectionComponent: React.FC<DateSelectionProps> = ({
         sx={{
           width: { xs: '100%', sm: '280px' },
           "& .MuiOutlinedInput-root": {
-            backgroundColor: theme.palette.background.paper,
-            borderRadius: "10px",
+            borderRadius: "12px",
+            minHeight: "42px",
+            position: "relative",
+            backgroundColor: theme.palette.mode === "dark"
+              ? "rgba(40,40,50,0.6)"
+              : "rgba(255,255,255,0.7)",
             color: theme.palette.text.primary,
-            fontSize: "14px",
-            fontWeight: 500,
-            height: "44px",
-            fieldset: {
-              borderColor: theme.palette.mode === "dark" ? "rgba(255,255,255,0.23)" : "rgba(0,0,0,0.23)",
-              borderWidth: "1px",
+            border: theme.palette.mode === "dark"
+              ? "1px solid rgba(255,255,255,0.1)"
+              : "1px solid rgba(0,0,0,0.08)",
+            transition: "all 0.3s cubic-bezier(0.4, 0, 0.2, 1)",
+            "&:hover": {
+              backgroundColor: theme.palette.mode === "dark"
+                ? "rgba(50,50,60,0.7)"
+                : "rgba(255,255,255,0.85)",
+              borderColor: theme.palette.mode === "dark"
+                ? "rgba(255,255,255,0.15)"
+                : "rgba(0,0,0,0.12)",
             },
-            "&:hover fieldset": {
-              borderColor: theme.palette.primary.main,
+            "&:hover .MuiOutlinedInput-notchedOutline": {
+              borderColor: "transparent",
             },
-            "&.Mui-focused fieldset": {
+            "&.Mui-focused": {
+              backgroundColor: theme.palette.mode === "dark"
+                ? "rgba(55,55,65,0.8)"
+                : "rgba(255,255,255,0.95)",
               borderColor: theme.palette.primary.main,
+              boxShadow: `0 0 0 3px ${theme.palette.mode === "dark" ? "rgba(255,255,255,0.08)" : "rgba(0,0,0,0.06)"}`,
+            },
+            "&.Mui-focused .MuiOutlinedInput-notchedOutline": {
+              borderColor: "transparent",
+            },
+            "& fieldset": {
+              border: "none",
+            },
+            "& input": {
+              color: theme.palette.text.primary,
+              fontSize: "0.9rem",
+              paddingTop: "10px",
+              paddingBottom: "10px",
+              paddingLeft: "14px",
+              paddingRight: "14px",
+              "&::placeholder": {
+                color: theme.palette.text.secondary,
+                opacity: 0.6,
+              },
+            },
+            "&.MuiInputBase-adornedStart input": {
+              paddingLeft: "36px",
+              paddingRight: "14px",
+            },
+            "&.MuiInputBase-adornedEnd input": {
+              paddingLeft: "14px",
+              paddingRight: "44px",
+            },
+            "&.MuiInputBase-adornedStart.MuiInputBase-adornedEnd input": {
+              paddingLeft: "36px",
+              paddingRight: "44px",
+            },
+            "& .MuiInputAdornment-positionStart": {
+              position: "absolute",
+              left: "12px",
+              marginRight: 0,
+              zIndex: 2,
+            },
+            "& .MuiInputAdornment-positionEnd": {
+              position: "absolute",
+              right: "12px",
+              marginLeft: 0,
+              zIndex: 2,
             },
             "&.Mui-disabled": {
               backgroundColor: theme.palette.action.disabled,

@@ -22,7 +22,6 @@ import {
   clearButton,
   actionsInnerBox,
   cancelButton,
-  submitButton,
 } from "./styles";
 
 interface AddEmployeeFormProps {
@@ -119,10 +118,9 @@ const AddEmployeeForm: React.FC<AddEmployeeFormProps> = ({
       <Grid container spacing={3} sx={gridContainer}>
         <Grid item xs={12} sm={6}>
           <TextfieldComponent
-            label={FORMS.FIRST_NAME}
+            placeholder={FORMS.ADD_EMPLOYEE.FIRST_NAME_PLACEHOLDER}
             variant="outlined"
             fullWidth
-            placeholder={FORMS.ADD_EMPLOYEE.FIRST_NAME_PLACEHOLDER}
             value={formData.firstName}
             onChange={(e) => handleFieldChange("firstName", e.target.value)}
             error={errors.firstName !== ""}
@@ -133,10 +131,9 @@ const AddEmployeeForm: React.FC<AddEmployeeFormProps> = ({
 
         <Grid item xs={12} sm={6}>
           <TextfieldComponent
-            label={FORMS.LAST_NAME}
+            placeholder={FORMS.ADD_EMPLOYEE.LAST_NAME_PLACEHOLDER}
             variant="outlined"
             fullWidth
-            placeholder={FORMS.ADD_EMPLOYEE.LAST_NAME_PLACEHOLDER}
             value={formData.lastName}
             onChange={(e) => handleFieldChange("lastName", e.target.value)}
             error={errors.lastName !== ""}
@@ -189,10 +186,17 @@ const AddEmployeeForm: React.FC<AddEmployeeFormProps> = ({
               <Button
                 variant="contained"
                 onClick={handleSubmit}
-                disabled={!isFormValid() || isLoading}
-                startIcon={<Plus />}
+                disabled={!isFormValid || isLoading}
+                startIcon={<Plus size={18} />}
                 fullWidth={isSmallScreen}
-                sx={submitButton}
+                sx={{
+                  fontWeight: 600,
+                  fontSize: "0.95rem",
+                  textTransform: "none",
+                  letterSpacing: "0.01em",
+                  borderRadius: "12px",
+                  minHeight: "42px",
+                }}
               >
                 Agregar
               </Button>

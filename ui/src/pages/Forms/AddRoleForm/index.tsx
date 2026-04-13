@@ -30,12 +30,10 @@ import {
   clearButton,
   actionsInnerBox,
   cancelButton,
-  submitButton,
   infoBox,
   infoIconBox,
   infoTitle,
   infoDesc,
-  textFieldStyles,
 } from "./styles";
 
 interface AddRoleFormProps {
@@ -161,16 +159,14 @@ const AddRoleForm: React.FC<AddRoleFormProps> = ({
       <Grid container spacing={3} sx={gridContainer}>
         <Grid item xs={12}>
           <TextfieldComponent
-            label={FORMS.ADD_ROLE.NAME_LABEL}
+            placeholder={FORMS.ADD_ROLE.NAME_PLACEHOLDER}
             variant="outlined"
             fullWidth
-            placeholder={FORMS.ADD_ROLE.NAME_PLACEHOLDER}
             value={formData.name}
             onChange={(e) => handleFieldChange("name", e.target.value)}
             error={errors.name !== ""}
             helperText={errors.name}
             icon={<Users style={iconStyle} />}
-            sx={textFieldStyles}
           />
         </Grid>
 
@@ -311,10 +307,17 @@ const AddRoleForm: React.FC<AddRoleFormProps> = ({
               <Button
                 variant="contained"
                 onClick={handleSubmit}
-                disabled={!isFormValid() || isLoading}
-                startIcon={<Plus />}
+                disabled={!isFormValid || isLoading}
+                startIcon={<Plus size={18} />}
                 fullWidth={isSmallScreen}
-                sx={submitButton}
+                sx={{
+                  fontWeight: 600,
+                  fontSize: "0.95rem",
+                  textTransform: "none",
+                  letterSpacing: "0.01em",
+                  borderRadius: "12px",
+                  minHeight: "42px",
+                }}
               >
                 {isLoading
                   ? FORMS.ADD_ROLE.BUTTON_ADDING

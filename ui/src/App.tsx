@@ -16,8 +16,7 @@ import { NotificationProvider } from "./context/NotificationContext";
 import ProtectedRoute from "./routes/ProtectedRoute";
 import { Container, useMediaQuery, useTheme, CircularProgress, Box } from "@mui/material";
 import { APPBAR_MENU, PERMISSIONS, ROUTES } from "./constants/constants";
-import { ClipboardList, Car, Users, CalendarDays, Shield, LogOut, User } from "lucide-react";
-import wallpaper from "./assets/images/choferesblurred1.webp";
+import { ClipboardList, Car, Users, CalendarDays, LogOut, User } from "lucide-react";
 
 const Login = lazy(() => import("./pages/Auth/Login"));
 const Register = lazy(() => import("./pages/Auth/Register"));
@@ -26,7 +25,6 @@ const EmployeesPage = lazy(() => import("./pages/Management/EmployeesPage"));
 const SchedulesPage = lazy(() => import("./pages/Management/SchedulesPage"));
 const VehiclesPage = lazy(() => import("./pages/Management/VehiclesPage"));
 const CourierServicePage = lazy(() => import("./pages/Management/CourierServicePage"));
-const Dashboard = lazy(() => import("./pages/Dashboard/Dashboard"));
 const Profile = lazy(() => import("./pages/Auth/Profile"));
 const NotFound = lazy(() => import("./pages/ErrorPages/NotFound"));
 const Forbidden = lazy(() => import("./pages/ErrorPages/Forbidden"));
@@ -71,12 +69,6 @@ const AppBarWrapper: React.FC = () => {
       path: ROUTES.VEHICLES,
       permission: PERMISSIONS.VIEW_VEHICLES,
     },
-    {
-      label: APPBAR_MENU.DASHBOARD,
-      icon: <Shield size={22} strokeWidth={1.5} />,
-      path: ROUTES.DASHBOARD,
-      permission: PERMISSIONS.VIEW_ADMIN,
-    },
   ];
 
   const permissionsMap = {
@@ -84,7 +76,6 @@ const AppBarWrapper: React.FC = () => {
     [APPBAR_MENU.EMPLOYEES]: PERMISSIONS.VIEW_EMPLOYEES,
     [APPBAR_MENU.SCHEDULES]: PERMISSIONS.VIEW_SCHEDULES,
     [APPBAR_MENU.VEHICLES]: PERMISSIONS.VIEW_VEHICLES,
-    [APPBAR_MENU.DASHBOARD]: PERMISSIONS.VIEW_ADMIN,
   };
 
   const filteredLinks = links.filter((link) => {
@@ -132,10 +123,6 @@ const AppContent: React.FC = () => {
     "/forbidden",
   ];
 
-  // Only use wallpaper for login and register
-  const isAuthPage =
-    location.pathname === "/" || location.pathname === "/register";
-
   // Helper: known app routes (excluding error/forbidden/notfound/sessionexpired)
   const knownAppRoutes = [
     "/",
@@ -148,6 +135,22 @@ const AppContent: React.FC = () => {
     "/dashboard",
     "/profile",
   ];
+
+  // Only use wallpaper for login, register, and error pages
+  const isAuthPage =
+    location.pathname === "/" ||
+    location.pathname === "/register" ||
+    location.pathname === "/error" ||
+    location.pathname === "/session-expired" ||
+    location.pathname === "/forbidden" ||
+    location.pathname === "/notfound" ||
+    (!knownAppRoutes.some(
+      (route) =>
+        location.pathname === route ||
+        location.pathname.startsWith(route + "/"),
+    ) &&
+      location.pathname !== "/error" &&
+      location.pathname !== "/session-expired");
 
   // Hide AppBar if on any of the hideAppBarRoutes, or if on a not found route
   const isHideAppBar =
@@ -166,7 +169,6 @@ const AppContent: React.FC = () => {
   const getDefaultRoute = (userPermissions: string[]) => {
     const routePreferences = [
       { route: ROUTES.ROLES, permission: PERMISSIONS.VIEW_ROLES },
-      { route: ROUTES.DASHBOARD, permission: PERMISSIONS.VIEW_ADMIN },
       { route: ROUTES.EMPLOYEES, permission: PERMISSIONS.VIEW_EMPLOYEES },
       { route: ROUTES.SCHEDULES, permission: PERMISSIONS.VIEW_SCHEDULES },
       { route: ROUTES.VEHICLES, permission: PERMISSIONS.VIEW_VEHICLES },
@@ -208,13 +210,8 @@ const AppContent: React.FC = () => {
           paddingBottom: 0,
           minHeight: isAuthPage ? "100vh" : undefined,
           height: isAuthPage ? "100vh" : undefined,
-          overflow: isAuthPage ? "hidden" : undefined,
+          overflow: "hidden",
           backgroundColor: isAuthPage ? "transparent" : theme.palette.background.default,
-          backgroundImage: isAuthPage ? `url(${wallpaper})` : "none",
-          backgroundSize: isAuthPage ? "cover" : undefined,
-          backgroundPosition: isAuthPage ? "center" : undefined,
-          backgroundRepeat: isAuthPage ? "no-repeat" : undefined,
-          backgroundAttachment: isAuthPage ? "fixed" : undefined,
         }}
       >
         <Suspense fallback={<PageLoader />}>
@@ -283,16 +280,7 @@ const AppContent: React.FC = () => {
                 )
               }
             />
-            <Route
-              path="/dashboard"
-              element={
-                safeUserPermissions.includes(PERMISSIONS.VIEW_ADMIN) ? (
-                  <Dashboard />
-                ) : (
-                  <Navigate to="/forbidden" replace />
-                )
-              }
-            />
+            <Route path="/dashboard" element={<Navigate to="/profile" replace />} />
             <Route path="/profile" element={<Profile />} />
           </Route>
           <Route path="/forbidden" element={<Forbidden />} />

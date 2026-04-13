@@ -55,8 +55,8 @@ export const dashboardPopoverBoxStyles: SxProps<Theme> = (theme) => ({
   flexDirection: 'row',
   gap: 1,
   alignItems: 'center',
-  backgroundColor: theme.palette.mode === 'dark' 
-    ? 'rgba(0,0,0,0.95)' 
+  backgroundColor: theme.palette.mode === 'dark'
+    ? 'rgba(0,0,0,0.95)'
     : '#ffffff',
   backdropFilter: 'blur(20px)',
   p: 1,
@@ -67,6 +67,21 @@ export const dashboardPopoverBoxStyles: SxProps<Theme> = (theme) => ({
   boxShadow: theme.palette.mode === 'dark'
     ? '0 10px 40px rgba(0,0,0,0.4), 0 2px 8px rgba(0,0,0,0.2)'
     : '0 10px 40px rgba(0,0,0,0.15), 0 2px 8px rgba(0,0,0,0.1)',
+  maxWidth: 'calc(100vw - 32px)',
+  overflowX: 'auto',
+  overflowY: 'hidden',
+  '&::-webkit-scrollbar': {
+    height: 4,
+  },
+  '&::-webkit-scrollbar-track': {
+    background: 'transparent',
+  },
+  '&::-webkit-scrollbar-thumb': {
+    background: theme.palette.mode === 'dark'
+      ? 'rgba(255,255,255,0.2)'
+      : 'rgba(0,0,0,0.2)',
+    borderRadius: 2,
+  },
 });
 
 export const dashboardIconButtonStyles = (

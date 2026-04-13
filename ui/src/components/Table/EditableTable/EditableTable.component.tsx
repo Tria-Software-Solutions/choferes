@@ -12,7 +12,6 @@ import {
   Paper,
   TablePagination,
   TableSortLabel,
-  Divider,
   Box,
   Typography,
   useTheme,
@@ -23,8 +22,6 @@ import { translateColumnHeaderToSpanish } from "../../../utils/string";
 import { formatDateWithDay } from "../../../utils/dates";
 import { TABLE } from "../../../constants/constants";
 import PaginationComponent from "../Pagination/Pagination.component";
-import DialogComponent from "../../Dialog/Dialog.component";
-import { User } from "../../../models/User";
 import { tableCellStyles, tableHeadCellStyles } from "./EditableTable.styles";
 import {
   createColumnConfig,
@@ -205,8 +202,26 @@ const EditableTableComponent = <T extends object>({
 
   // Memoizar opciones de rows per page
   const rowsPerPageOptions = useMemo(
-    () => Array.from(new Set([...ROWS_PER_PAGE_OPTIONS, rowsPerPage])).sort((a, b) => a - b),
-    [rowsPerPage]
+    () => {
+      const total = totalCount;
+      const defaultOptions = ROWS_PER_PAGE_OPTIONS;
+      
+      // Generate dynamic options based on total
+      const dynamicOptions: number[] = [];
+      let current = 5;
+      while (current < total) {
+        dynamicOptions.push(current);
+        current *= 2;
+      }
+      if (total > 0) {
+        dynamicOptions.push(total);
+      }
+      
+      // Combine with default options and remove duplicates
+      const allOptions = Array.from(new Set([...defaultOptions, ...dynamicOptions, rowsPerPage]));
+      return allOptions.filter((opt) => opt <= total || total === 0).sort((a, b) => a - b);
+    },
+    [rowsPerPage, totalCount]
   );
 
   const handlePageChange = useCallback(
@@ -243,13 +258,6 @@ const EditableTableComponent = <T extends object>({
     [expandedRows, expandRow, collapseRow]
   );
 
-  // Memoizar el diálogo de contraseña para evitar recálculos
-  const passwordModalSubtitle = useMemo(() => {
-    if (typeof passwordUserId !== "number") return "";
-    const user = data.find((u) => getRowId(u) === passwordUserId) as User | undefined;
-    return user ? `${user.firstName || ""} ${user.lastName || ""}`.trim() : "";
-  }, [passwordUserId, data, getRowId]);
-
   const isParkingTable = useMemo(() => data.length > 0 && "licensePlate" in data[0], [data]);
 
   // Split columns en posición del status column (2 para mantener diseño actual)
@@ -267,8 +275,11 @@ const EditableTableComponent = <T extends object>({
         flexDirection: "column",
         borderRadius: 0,
         boxShadow: "none",
-        overflow: "visible",
+        overflow: "hidden",
         backgroundColor: "transparent",
+        flex: 1,
+        position: "relative",
+        margin: 0,
       }}
     >
       {groupByDate && (
@@ -300,8 +311,7 @@ const EditableTableComponent = <T extends object>({
         sx={{
           flex: 1,
           minHeight: 0,
-          height: maxTableHeight ? `${maxTableHeight}px` : undefined,
-          maxHeight: maxTableHeight ? `${maxTableHeight}px` : undefined,
+          maxHeight: maxTableHeight || "none",
           overflowY: "auto",
           overflowX: "auto",
           borderRadius: 0,
@@ -467,7 +477,6 @@ const EditableTableComponent = <T extends object>({
           </TableBody>
         </Table>
       </TableContainer>
-      <Divider />
       <TablePagination
         className="pagination"
         rowsPerPageOptions={rowsPerPageOptions}
@@ -487,41 +496,66 @@ const EditableTableComponent = <T extends object>({
         sx={{
           flexShrink: 0,
           borderRadius: 0,
+          margin: 0,
+          border: 'none',
           '.MuiTablePagination-toolbar': {
-            minHeight: '36px',
-            paddingTop: '4px',
-            paddingBottom: '4px',
+            minHeight: '32px',
+            paddingTop: '2px',
+            paddingBottom: '0px',
+            border: 'none',
           },
           '.MuiTablePagination-selectLabel, .MuiTablePagination-input, .MuiTablePagination-displayedRows': {
             fontSize: '0.75rem',
           },
           '.MuiTablePagination-select': {
             fontSize: '0.75rem',
+            border: 'none',
           },
-          '.MuiInputBase-root': {
-            fontSize: '0.75rem',
+          '.MuiTablePagination-selectIcon': {
+            fontSize: '1rem',
           },
           '.MuiIconButton-root': {
             padding: '2px',
           },
+          '.MuiInputBase-root': {
+            border: 'none',
+            '&:before, &:after': {
+              display: 'none',
+            },
+            fontSize: '0.75rem',
+          },
+          '.MuiTablePagination-input': {
+            fontSize: '0.75rem',
+          },
+        }}
+        SelectProps={{
+          MenuProps: {
+            anchorOrigin: { horizontal: 'left', vertical: 'top' },
+            transformOrigin: { horizontal: 'left', vertical: 'bottom' },
+            PaperProps: {
+              sx: {
+                maxHeight: 200,
+                '& .MuiMenuItem-root': {
+                  fontSize: '0.75rem',
+                  padding: '6px 12px',
+                  border: 'none',
+                  '&.Mui-selected': {
+                    backgroundColor: theme.palette.action.selected,
+                    border: 'none',
+                  },
+                  '&:hover': {
+                    backgroundColor: theme.palette.action.hover,
+                    border: 'none',
+                  },
+                },
+              },
+            },
+          },
+          onBlur: (e) => {
+            e.target.blur();
+          },
         }}
       />
-
-      <DialogComponent
-        open={!!passwordModalOpen}
-        onClose={onClosePasswordModal}
-        title="Cambiar Contraseña"
-        subtitle={passwordModalSubtitle}
-        hideActions
-        paperSx={{
-          minWidth: { xs: "90vw", sm: 500, md: 700 },
-          maxWidth: { xs: "98vw", sm: 700 },
-        }}
-      >
-        {typeof passwordUserId === "number" && handlePasswordModal
-          ? handlePasswordModal(passwordUserId, onClosePasswordModal)
-          : null}
-      </DialogComponent>
     </Paper>
   );
 };

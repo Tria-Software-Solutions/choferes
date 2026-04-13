@@ -1,8 +1,8 @@
 import React, { useState, useEffect, useCallback, useMemo } from "react";
 import { useAuthContext } from "../../../context/AuthContext";
 import { Schedule } from "../../../models/Schedule";
-import { useReduxData, useAppDispatch } from "../../../hooks/useReduxData";
-import { useModal } from "../../../hooks/useModal";
+import { useSelector, useDispatch } from "react-redux";
+import { RootState, AppDispatch } from "../../../store/store";
 import {
   fetchSchedules,
   createSchedule,
@@ -12,9 +12,9 @@ import {
 import SearchBarComponent from "../../../components/SearchBar/SearchBar.component";
 import EditableTableComponent from "../../../components/Table/EditableTable/EditableTable.component";
 import SpeedDialComponent from "../../../components/SpeedDial/SpeedDial.component";
-import AppModal from "../../../components/AppModal/AppModal.component";
 import AddScheduleForm from "../../Forms/AddScheduleForm";
 import { useAppNotifications } from "../../../components/Snackbar/Snackbar.component";
+import DialogComponent from "../../../components/Dialog/Dialog.component";
 import { createScheduleNotification } from "../../../services/notificationService";
 import {
   Button,
@@ -44,19 +44,18 @@ import {
   deleteDialogPaperSx,
   addDialogPaperSx,
 } from "./styles";
+import { useLocation } from "react-router-dom";
 import { useTablePreferences } from "../../../hooks/useTablePreferences";
-import { useResponsiveTableHeight } from "../../../hooks/useResponsiveTableHeight";
 import { format } from "date-fns";
 import { es } from "date-fns/locale";
 import { capitalizeFirstLetter } from "../../../utils/string";
 
 // Schedules management page component
 const SchedulesPage: React.FC = () => {
-  const dispatch = useAppDispatch();
+  const dispatch = useDispatch<AppDispatch>();
   const { userPermissions } = useAuthContext();
-  const { schedules, isLoadingSchedules } = useReduxData(
-    (state) => state.schedules,
-    (prev, next) => prev.schedules === next.schedules && prev.isLoadingSchedules === next.isLoadingSchedules
+  const { schedules, isLoadingSchedules } = useSelector(
+    (state: RootState) => state.schedules
   );
   const { showNotification } = useAppNotifications();
   const [filteredSchedules, setFilteredSchedules] = useState<Schedule[]>([]);
@@ -73,29 +72,39 @@ const SchedulesPage: React.FC = () => {
     hours: "",
     specialSchedule: false,
   });
-  const deleteDialog = useModal();
-  const addScheduleModal = useModal();
+  const [openDeleteDialog, setOpenDeleteDialog] = useState(false);
   const [scheduleToDelete, setScheduleToDelete] = useState<number | null>(null);
   const [page, setPage] = useState(0);
   const [isEditFormValid, setIsEditFormValid] = useState(false);
+  const [openAddScheduleModal, setOpenAddScheduleModal] = useState(false);
   const [isCreatingSchedule, setIsCreatingSchedule] = useState(false);
   const [isDeletingSchedule, setIsDeletingSchedule] = useState(false);
 
   const theme = useTheme();
   const isSmallScreen = useMediaQuery(theme.breakpoints.down("sm"));
+  const location = useLocation();
 
-  // Use dynamic table height hook
-  const { maxHeight, rowsPerPage: calculatedRowsPerPage } = useResponsiveTableHeight();
+  const getInitialRowsPerPage = () => {
+    if (typeof window !== "undefined") {
+      const maxHeight = window.innerHeight * 0.6;
+      const headHeight = 56;
+      const paginationHeight = 64;
+      const extra = 24;
+      const availableHeight = maxHeight - headHeight - paginationHeight - extra;
+      const rowHeight = 48;
+      let rows = Math.floor(availableHeight / rowHeight);
+      return Math.max(3, Math.min(100, rows));
+    }
+    return 25;
+  };
 
   const { search, setSearch, rowsPerPage, setRowsPerPage } =
-    useTablePreferences("schedules", () => calculatedRowsPerPage);
+    useTablePreferences("schedules", getInitialRowsPerPage);
 
-  // Fetch all schedules on mount (only if not already loaded)
+  // Fetch all schedules on mount
   useEffect(() => {
-    if (schedules.length === 0) {
-      dispatch(fetchSchedules());
-    }
-  }, [dispatch, schedules.length]);
+    dispatch(fetchSchedules());
+  }, [dispatch, location.pathname]);
 
   // Filter schedules by search input
   useEffect(() => {
@@ -147,7 +156,7 @@ const SchedulesPage: React.FC = () => {
     try {
       setIsCreatingSchedule(true);
       await dispatch(createSchedule(newSchedule));
-      addScheduleModal.close();
+      setOpenAddScheduleModal(false);
       showNotification(NOTIFICATIONS.SCHEDULE_CREATE_SUCCESS, {
         severity: "success",
         duration: 3000,
@@ -209,18 +218,23 @@ const SchedulesPage: React.FC = () => {
 
   // Open/close delete confirmation dialog
   const handleOpenDeleteDialog = (id: number) => {
-    deleteDialog.open();
+    setOpenDeleteDialog(true);
     setScheduleToDelete(id);
   };
 
   const handleCloseDeleteDialog = () => {
-    deleteDialog.close();
+    setOpenDeleteDialog(false);
     setScheduleToDelete(null);
   };
 
   // Open/close add schedule modal
-  const handleOpenAddScheduleModal = () => addScheduleModal.open();
-  const handleCloseAddScheduleModal = () => addScheduleModal.close();
+  const handleOpenAddModal = () => {
+    setOpenAddScheduleModal(true);
+  };
+
+  const handleCloseAddModal = () => {
+    setOpenAddScheduleModal(false);
+  };
 
   // Handle deletion of a schedule
   const handleDelete = async () => {
@@ -229,7 +243,7 @@ const SchedulesPage: React.FC = () => {
     setIsDeletingSchedule(true);
     try {
       await dispatch(deleteSchedule(scheduleToDelete));
-      deleteDialog.close();
+      setOpenDeleteDialog(false);
       setScheduleToDelete(null);
       showNotification(NOTIFICATIONS.SCHEDULE_DELETE_SUCCESS, {
         severity: "success",
@@ -290,7 +304,7 @@ const SchedulesPage: React.FC = () => {
   }, [exportData]);
 
   return (
-    <Box sx={{ height: "calc(100vh - 64px - 32px)", display: "flex", flexDirection: "column", overflow: "hidden", pb: 0, pt: 0, px: 0 }}>
+    <Box sx={{ height: "calc(100vh - 100px)", display: "flex", flexDirection: "column", overflow: "hidden", pb: 0, pt: 0, px: 0 }}>
       {/* Premium Card with Header and Grid */}
       <Paper
         elevation={0}
@@ -308,7 +322,7 @@ const SchedulesPage: React.FC = () => {
         <Box
           sx={{
             px: { xs: 2, sm: 3 },
-            py: { xs: 1.5, sm: 2 },
+            py: { xs: 2, sm: 2.5 },
             backgroundColor: theme.palette.background.paper,
             color: theme.palette.text.primary,
             borderBottom: `1px solid ${theme.palette.mode === "dark" ? "rgba(255,255,255,0.08)" : "rgba(0,0,0,0.08)"}`,
@@ -318,7 +332,7 @@ const SchedulesPage: React.FC = () => {
             display="flex"
             justifyContent="space-between"
             alignItems="flex-start"
-            mb={1}
+            mb={2}
           >
             <Box display="flex" alignItems="center" gap={1.5}>
               <Box
@@ -384,7 +398,7 @@ const SchedulesPage: React.FC = () => {
             gap={2}
           >
             {/* Search */}
-            <Box flex={1} maxWidth={{ sm: "380px" }}>
+            <Box flex={1} maxWidth={{ sm: "320px" }}>
               {filteredSchedules && (
                 <SearchBarComponent
                   placeholder={MANAGEMENT.SCHEDULES_PAGE.SEARCH_PLACEHOLDER}
@@ -401,7 +415,7 @@ const SchedulesPage: React.FC = () => {
                 <Button
                   variant="contained"
                   startIcon={<Plus size={18} />}
-                  onClick={handleOpenAddScheduleModal}
+                  onClick={handleOpenAddModal}
                   sx={{
                     px: 3,
                     py: 1,
@@ -420,12 +434,12 @@ const SchedulesPage: React.FC = () => {
 
         {/* Mobile Add Button */}
         {userPermissions.includes(PERMISSIONS.CREATE_SCHEDULES) && (
-          <Box sx={{ display: { xs: 'flex', sm: 'none' }, p: 1.5, borderTop: `1px solid ${theme.palette.mode === "dark" ? "rgba(255,255,255,0.08)" : "rgba(0,0,0,0.08)"}` }}>
+          <Box sx={{ display: { xs: 'flex', sm: 'none' }, p: 2, borderTop: `1px solid ${theme.palette.mode === "dark" ? "rgba(255,255,255,0.08)" : "rgba(0,0,0,0.08)"}` }}>
             <Button
               variant="contained"
               fullWidth
               startIcon={<Plus size={18} />}
-              onClick={handleOpenAddScheduleModal}
+              onClick={handleOpenAddModal}
               sx={{
                 py: 1.5,
                 fontWeight: 600,
@@ -468,7 +482,6 @@ const SchedulesPage: React.FC = () => {
                   setRowsPerPage={setRowsPerPage}
                   isSaveDisabled={!isEditFormValid}
                   userPermissions={userPermissions}
-                  maxTableHeight={maxHeight}
                 />
               ) : (
                 <Box sx={noSchedulesBoxStyles}>
@@ -494,8 +507,8 @@ const SchedulesPage: React.FC = () => {
           )}
         </Box>
       </Paper>
-      <AppModal
-        open={deleteDialog.isOpen}
+      <DialogComponent
+        open={openDeleteDialog}
         onClose={handleCloseDeleteDialog}
         onConfirm={handleDelete}
         title={MANAGEMENT.DIALOG_DELETE_TITLE}
@@ -507,9 +520,9 @@ const SchedulesPage: React.FC = () => {
         paperSx={deleteDialogPaperSx ?? {}}
         icon={<Trash2 color="var(--mui-palette-error-main)" />}
       />
-      <AppModal
-        open={addScheduleModal.isOpen}
-        onClose={handleCloseAddScheduleModal}
+      <DialogComponent
+        open={openAddScheduleModal}
+        onClose={handleCloseAddModal}
         title={MANAGEMENT.DIALOG_ADD_TITLE}
         subtitle={MANAGEMENT.SCHEDULES_PAGE.DIALOG_ADD_SUBTITLE}
         hideActions
@@ -518,10 +531,10 @@ const SchedulesPage: React.FC = () => {
       >
         <AddScheduleForm
           onSubmit={handleCreate}
-          onCancel={handleCloseAddScheduleModal}
+          onCancel={handleCloseAddModal}
           isLoading={isCreatingSchedule}
         />
-      </AppModal>
+      </DialogComponent>
     </Box>
   );
 };

@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import { useAuthContext } from "../../../context/AuthContext";
 import { useSelector, useDispatch } from "react-redux";
 import { RootState, AppDispatch } from "../../../store/store";
@@ -10,14 +10,12 @@ import {
 import {
   Box,
   Button,
-  Divider,
   Grid,
   IconButton,
   Typography,
   useTheme,
   useMediaQuery,
-  Tabs,
-  Tab,
+  Paper,
   RadioGroup,
   FormControlLabel,
   Radio,
@@ -25,7 +23,11 @@ import {
 import { useAppNotifications } from "../../../components/Snackbar/Snackbar.component";
 import PAGE_TITLE from "../../../constants/pageTitle.constants";
 import MANAGEMENT from "../../../constants/management.constants";
-import { Eye, EyeOff, User as UserIcon, Mail, UserCircle, Info } from "lucide-react";
+import { DASHBOARD } from "../../../constants/dashboard.constants";
+import ManageUsers from "../../Dashboard/ManageUsers";
+import ManageRoles from "../../Dashboard/ManageRoles";
+import ManagePermissions from "../../Dashboard/ManagePermissions";
+import { Eye, EyeOff, User as UserIcon, Mail, UserCircle, Info, User as UserIcon2, Lock, Palette, Shield } from "lucide-react";
 import { User } from "../../../models/User";
 import {
   validateName,
@@ -35,9 +37,7 @@ import {
   validatePasswordMatch,
 } from "../../../utils/userValidation";
 import TextfieldComponent from "../../../components/Textfield/Textfield.component";
-import { infoBox, infoIconBox, infoTitle, infoDesc, iconStyle } from '../../Forms/AddEmployeeForm/styles';
 import { useThemeMode } from "../../../index";
-import { rolesTitleStyles, rolesDividerStyles } from '../../Management/RolesPage/styles';
 
 type ThemeMode = "default" | "light" | "dark" | "high-contrast";
 
@@ -70,7 +70,8 @@ const Profile: React.FC = () => {
   const [passwordError, setPasswordError] = useState<string | null>(null);
   const [isEditFormValid, setIsEditFormValid] = useState(false);
   const [isPasswordFormValid, setIsPasswordFormValid] = useState(false);
-  const [tabIndex, setTabIndex] = useState(0);
+  const [activeSection, setActiveSection] = useState<'personal' | 'password' | 'theme' | 'system'>('personal');
+  const [activeSystemSubSection, setActiveSystemSubSection] = useState<'users' | 'roles' | 'permissions'>('users');
 
   useEffect(() => {
     dispatch(fetchUsers());
@@ -90,6 +91,12 @@ const Profile: React.FC = () => {
         return "";
     }
   }, []);
+
+  // Wrapper function to convert string validation to boolean for TextfieldComponent
+  const validateFieldBoolean = useCallback((name: string, value: string | boolean | string[]) => {
+    if (typeof value !== 'string') return false;
+    return validateField(name, value) === "";
+  }, [validateField]);
 
   const validatePasswordFields = useCallback(
     (fields: typeof passwordFields) => {
@@ -259,360 +266,807 @@ const Profile: React.FC = () => {
   };
 
   return (
-    <Box sx={{ width: "100%" }}>
-      <Box sx={{ py: 1, mb: 2 }}>
-        <Box display="flex" flexDirection="column" alignItems="flex-start">
-          <Box
-            sx={{
-              display: "inline-flex",
-              flexDirection: "column",
-              alignItems: "center",
-            }}
-          >
-            <Typography
-              variant={isSmallScreen ? "h5" : "h4"}
-              sx={rolesTitleStyles}
-            >
-              <UserIcon
-                size={isSmallScreen ? 24 : 32}
-                color={theme.palette.primary.main}
-              />
-              {isSmallScreen
-                ? PAGE_TITLE.PROFILE_SIMPLIFIED
-                : PAGE_TITLE.PROFILE}
-            </Typography>
-            <Divider sx={rolesDividerStyles(theme)} />
-          </Box>
-          <Tabs
-            value={tabIndex}
-            onChange={(_, newValue) => setTabIndex(newValue)}
-            sx={{ mt: 2 }}
-            variant="scrollable"
-            scrollButtons="auto"
-          >
-            <Tab label="Información personal" />
-            <Tab label="Cambiar contraseña" />
-            <Tab label="Tema de la aplicación" />
-          </Tabs>
-        </Box>
-      </Box>
-
-      {/* Contenido de los tabs */}
-      {tabIndex === 0 && (
+    <Box sx={{ height: "calc(100vh - 64px - 40px)", minHeight: 0, display: "flex", flexDirection: "column", overflow: "hidden", pb: 0, pt: 0, px: 0 }}>
+      <Paper
+        elevation={0}
+        sx={{
+          flex: 1,
+          display: "flex",
+          flexDirection: "column",
+          overflow: "hidden",
+          border: "1px solid rgba(0,0,0,0.08)",
+          borderRadius: "16px",
+          boxShadow: "0 4px 24px rgba(0,0,0,0.08), 0 1px 2px rgba(0,0,0,0.04)",
+          p: 0,
+        }}
+      >
+        {/* Premium Header */}
         <Box
-          sx={{ width: "100%", display: "block", px: { xs: 0, sm: 0, md: 0 } }}
+          sx={{
+            px: { xs: 2, sm: 3 },
+            py: { xs: 0.5, sm: 1 },
+            backgroundColor: theme.palette.background.paper,
+            color: theme.palette.text.primary,
+            flexShrink: 0,
+            borderBottom: `1px solid ${theme.palette.mode === "dark" ? "rgba(255,255,255,0.08)" : "rgba(0,0,0,0.08)"}`,
+          }}
         >
-          {/* Información personal */}
-          <Typography
-            variant="h5"
-            fontWeight="bold"
-            sx={{
-              mb: { xs: 0.5, sm: 1 },
-              fontSize: { xs: "1.25rem", sm: "1.5rem" },
-              color: theme.palette.text.primary,
-            }}
+          {/* Title Row */}
+          <Box
+            display="flex"
+            justifyContent="space-between"
+            alignItems="center"
+            mb={0.5}
           >
-            {MANAGEMENT.PERSONAL_INFO_TITLE}
-          </Typography>
-          <Typography
-            variant="body2"
-            color="textSecondary"
-            sx={{
-              mb: { xs: 2, sm: 3 },
-              fontSize: { xs: "0.875rem", sm: "1rem" },
-            }}
-          >
-            {MANAGEMENT.PERSONAL_INFO_DESC}
-          </Typography>
-
-          <Grid container spacing={{ xs: 1.5, sm: 2 }}>
-            <Grid item xs={12} sm={6}>
-              <TextfieldComponent
-                label="Nombre"
-                name="firstName"
-                value={editFields.firstName}
-                onChange={(e) =>
-                  setEditFields({ ...editFields, firstName: e.target.value })
-                }
-                error={!!validateName(editFields.firstName)}
-                helperText={validateName(editFields.firstName)}
-                icon={
-                  <UserIcon
-                    size={20}
-                    color={theme.palette.text.secondary}
-                  />
-                }
-              />
-            </Grid>
-            <Grid item xs={12} sm={6}>
-              <TextfieldComponent
-                label="Apellido"
-                name="lastName"
-                value={editFields.lastName}
-                onChange={(e) =>
-                  setEditFields({ ...editFields, lastName: e.target.value })
-                }
-                error={!!validateName(editFields.lastName)}
-                helperText={validateName(editFields.lastName)}
-                icon={
-                  <UserIcon
-                    size={20}
-                    color={theme.palette.text.secondary}
-                  />
-                }
-              />
-            </Grid>
-            <Grid item xs={12}>
-              <TextfieldComponent
-                label="Correo electrónico"
-                name="email"
-                value={editFields.email}
-                onChange={(e) => {
-                  setEditFields({ ...editFields, email: e.target.value });
-                  handleEmailChange(e);
+            <Box display="flex" alignItems="center" gap={1.5}>
+              <Box
+                sx={{
+                  backgroundColor: theme.palette.primary.main,
+                  borderRadius: "10px",
+                  p: 0.75,
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
                 }}
-                error={!!validateEmail(editFields.email) || !!infoError}
-                helperText={infoError || validateEmail(editFields.email)}
-                icon={
-                  <Mail
-                    size={20}
-                    color={theme.palette.text.secondary}
-                  />
-                }
-              />
-            </Grid>
-            <Grid item xs={12}>
-              <TextfieldComponent
-                label="Usuario"
-                name="username"
-                value={editFields.username}
-                onChange={(e) => {
-                  setEditFields({ ...editFields, username: e.target.value });
-                  handleUsernameChange(e);
-                }}
-                error={!!validateUsername(editFields.username) || !!infoError}
-                helperText={infoError || validateUsername(editFields.username)}
-                icon={
-                  <UserCircle
-                    size={20}
-                    color={theme.palette.text.secondary}
-                  />
-                }
-              />
-            </Grid>
-          </Grid>
-
-          <Grid item xs={12} sx={{ mt: 3 }}>
-            <Box sx={infoBox(theme)}>
-              <Box sx={infoIconBox(theme)}>
-                <Info
-                  size={24}
-                  style={{ ...iconStyle, color: theme.palette.info.main }}
-                />
+              >
+                <UserIcon2 size={20} color={theme.palette.primary.contrastText} />
               </Box>
               <Box>
-                <Typography sx={infoTitle(theme)}>
-                  {MANAGEMENT.RECOMMENDATION_TITLE}
+                <Typography
+                  variant={isSmallScreen ? "h6" : "h5"}
+                  sx={{
+                    fontWeight: 700,
+                    fontSize: { xs: "1.1rem", sm: "1.25rem" },
+                    color: theme.palette.text.primary,
+                    letterSpacing: "-0.02em",
+                    lineHeight: 1.2,
+                  }}
+                >
+                  {isSmallScreen
+                    ? PAGE_TITLE.PROFILE_SIMPLIFIED
+                    : PAGE_TITLE.PROFILE}
                 </Typography>
-                <Typography sx={infoDesc(theme)}>
-                  {MANAGEMENT.RECOMMENDATION_DESC}
+                <Typography
+                  variant="caption"
+                  sx={{
+                    color: theme.palette.text.secondary,
+                    fontSize: "0.75rem",
+                    letterSpacing: "0.02em",
+                  }}
+                >
+                  Configuración de tu cuenta
                 </Typography>
               </Box>
             </Box>
-          </Grid>
+          </Box>
 
+          {/* Toggle Buttons Row */}
           <Box
-            sx={{
-              display: "flex",
-              justifyContent: { xs: "center", sm: "flex-end" },
-              gap: 2,
-              mt: { xs: 2, sm: 3 },
-            }}
+            display="flex"
+            flexDirection={{ xs: "column", sm: "row" }}
+            alignItems={{ xs: "stretch", sm: "center" }}
+            justifyContent="flex-start"
+            gap={1}
           >
-            <Button
-              variant="contained"
-              color="primary"
-              fullWidth={isSmallScreen}
+            <Box
               sx={{
-                minHeight: { xs: 44, sm: 48 },
-                fontSize: "clamp(0.75rem, 1.25vw, 0.875rem)",
-                fontWeight: 600,
-                px: { xs: 2, sm: 4 },
-                py: { xs: 1, sm: 1.5 },
-                minWidth: { xs: "100%", sm: 140 },
+                display: "flex",
+                alignItems: "center",
+                gap: 0.5,
+                flexWrap: "wrap",
               }}
-              onClick={handleSaveChanges}
-              disabled={!isEditFormValid || !!infoError}
             >
-              {MANAGEMENT.SAVE_CHANGES}
-            </Button>
+              <Button
+                variant={activeSection === 'personal' ? 'contained' : 'outlined'}
+                onClick={() => setActiveSection('personal')}
+                startIcon={<UserIcon2 size={16} />}
+                sx={{
+                  borderRadius: '10px',
+                  px: 2,
+                  py: 1,
+                  fontWeight: 600,
+                  fontSize: '0.875rem',
+                  textTransform: 'none',
+                  letterSpacing: '-0.01em',
+                  backgroundColor: activeSection === 'personal' ? theme.palette.primary.main : 'transparent',
+                  color: activeSection === 'personal' ? theme.palette.primary.contrastText : theme.palette.text.primary,
+                  border: activeSection === 'personal' ? 'none' : `1.5px solid ${theme.palette.mode === 'dark' ? 'rgba(255,255,255,0.2)' : 'rgba(0,0,0,0.15)'}`,
+                  '&:hover': {
+                    backgroundColor: activeSection === 'personal' ? theme.palette.primary.dark : (theme.palette.mode === 'dark' ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.04)'),
+                  },
+                }}
+              >
+                Información personal
+              </Button>
+              <Button
+                variant={activeSection === 'theme' ? 'contained' : 'outlined'}
+                onClick={() => setActiveSection('theme')}
+                startIcon={<Palette size={16} />}
+                sx={{
+                  borderRadius: '10px',
+                  px: 2,
+                  py: 1,
+                  fontWeight: 600,
+                  fontSize: '0.875rem',
+                  textTransform: 'none',
+                  letterSpacing: '-0.01em',
+                  backgroundColor: activeSection === 'theme' ? theme.palette.primary.main : 'transparent',
+                  color: activeSection === 'theme' ? theme.palette.primary.contrastText : theme.palette.text.primary,
+                  border: activeSection === 'theme' ? 'none' : `1.5px solid ${theme.palette.mode === 'dark' ? 'rgba(255,255,255,0.2)' : 'rgba(0,0,0,0.15)'}`,
+                  '&:hover': {
+                    backgroundColor: activeSection === 'theme' ? theme.palette.primary.dark : (theme.palette.mode === 'dark' ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.04)'),
+                  },
+                }}
+              >
+                Tema de la aplicación
+              </Button>
+              <Button
+                variant={activeSection === 'system' ? 'contained' : 'outlined'}
+                onClick={() => setActiveSection('system')}
+                startIcon={<Shield size={16} />}
+                sx={{
+                  borderRadius: '10px',
+                  px: 2,
+                  py: 1,
+                  fontWeight: 600,
+                  fontSize: '0.875rem',
+                  textTransform: 'none',
+                  letterSpacing: '-0.01em',
+                  backgroundColor: activeSection === 'system' ? theme.palette.primary.main : 'transparent',
+                  color: activeSection === 'system' ? theme.palette.primary.contrastText : theme.palette.text.primary,
+                  border: activeSection === 'system' ? 'none' : `1.5px solid ${theme.palette.mode === 'dark' ? 'rgba(255,255,255,0.2)' : 'rgba(0,0,0,0.15)'}`,
+                  '&:hover': {
+                    backgroundColor: activeSection === 'system' ? theme.palette.primary.dark : (theme.palette.mode === 'dark' ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.04)'),
+                  },
+                }}
+              >
+                Gestión del Sistema
+              </Button>
+            </Box>
           </Box>
         </Box>
-      )}
-      {tabIndex === 1 && (
-        <Box
-          sx={{ width: "100%", display: "block", px: { xs: 0, sm: 0, md: 0 } }}
-        >
-          {/* Cambiar contraseña (antes estaba a la derecha del divider) */}
-          <Typography
-            variant="h5"
-            fontWeight="bold"
-            sx={{
-              mb: { xs: 0.5, sm: 1 },
-              fontSize: { xs: "1.25rem", sm: "1.5rem" },
-              color: theme.palette.text.primary,
-            }}
-          >
-            {MANAGEMENT.PASSWORD_TITLE}
-          </Typography>
-          <Typography
-            variant="body2"
-            color="textSecondary"
-            sx={{
-              mb: { xs: 2, sm: 3 },
-              fontSize: { xs: "0.875rem", sm: "1rem" },
-            }}
-          >
-            {MANAGEMENT.PASSWORD_DESC}
-          </Typography>
 
-          <Grid container spacing={{ xs: 1.5, sm: 2 }}>
-            <Grid item xs={12}>
-              <TextfieldComponent
-                label={MANAGEMENT.NEW_PASSWORD_LABEL}
-                name="newPassword"
-                type={showNewPassword ? "text" : "password"}
-                value={passwordFields.newPassword}
-                onChange={handleNewPassword}
-                error={!!passwordError}
-                helperText={passwordError}
-                endAdornment={
-                  <IconButton
-                    onClick={handleToggleNewPassword}
-                    edge="end"
-                    size="small"
+        {/* Content Section */}
+        <Box sx={{ flex: 1, minHeight: 0, display: "flex", flexDirection: "column", overflow: "hidden", p: { xs: 2, sm: 3 } }}>
+          {activeSection === 'personal' && (
+            <Box sx={{ width: "100%", display: "block" }}>
+              {/* Section Header */}
+              <Box sx={{ mb: 3 }}>
+                <Box display="flex" alignItems="center" gap={1.5} mb={1}>
+                  <Box
+                    sx={{
+                      backgroundColor: theme.palette.primary.main,
+                      borderRadius: "10px",
+                      p: 0.75,
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                    }}
                   >
-                    {showNewPassword ? <EyeOff size={20} /> : <Eye size={20} />}
-                  </IconButton>
-                }
-              />
-            </Grid>
-            <Grid item xs={12}>
-              <TextfieldComponent
-                label={MANAGEMENT.CONFIRM_NEW_PASSWORD_LABEL}
-                name="confirmNewPassword"
-                type={showConfirmNewPassword ? "text" : "password"}
-                value={passwordFields.confirmNewPassword}
-                onChange={handleConfirmNewPassword}
-                error={!!passwordError}
-                helperText={passwordError}
-                endAdornment={
-                  <IconButton
-                    onClick={handleToggleConfirmNewPassword}
-                    edge="end"
-                    size="small"
+                    <UserIcon2 size={18} color={theme.palette.primary.contrastText} />
+                  </Box>
+                  <Typography
+                    variant="h6"
+                    sx={{
+                      fontWeight: 700,
+                      fontSize: "1.25rem",
+                      color: theme.palette.text.primary,
+                      letterSpacing: "-0.02em",
+                    }}
                   >
-                    {showConfirmNewPassword ? (
-                      <EyeOff size={20} />
-                    ) : (
-                      <Eye size={20} />
-                    )}
-                  </IconButton>
-                }
-              />
-            </Grid>
-          </Grid>
-
-          <Grid item xs={12} sx={{ mt: 3 }}>
-            <Box sx={infoBox(theme)}>
-              <Box sx={infoIconBox(theme)}>
-                <Info
-                  size={24}
-                  style={{ ...iconStyle, color: theme.palette.info.main }}
-                />
+                    {MANAGEMENT.PERSONAL_INFO_TITLE}
+                  </Typography>
+                </Box>
+                <Typography
+                  variant="body2"
+                  color="textSecondary"
+                  sx={{
+                    fontSize: "0.875rem",
+                    lineHeight: 1.5,
+                  }}
+                >
+                  {MANAGEMENT.PERSONAL_INFO_DESC}
+                </Typography>
               </Box>
-              <Box>
-                <Typography sx={infoTitle(theme)}>
-                  {MANAGEMENT.PASSWORD_INFO_TITLE}
+
+              {/* Two Column Layout */}
+              <Grid container spacing={3}>
+                {/* Left Column - Personal Info */}
+                <Grid item xs={12} md={6}>
+                  <Paper
+                    elevation={0}
+                    sx={{
+                      p: { xs: 2, sm: 3 },
+                      borderRadius: "16px",
+                      border: `1px solid ${theme.palette.mode === "dark" ? "rgba(255,255,255,0.08)" : "rgba(0,0,0,0.08)"}`,
+                      backgroundColor: theme.palette.background.paper,
+                      height: "100%",
+                      display: "flex",
+                      flexDirection: "column",
+                    }}
+                  >
+                    {/* Personal Data Section Header */}
+                    <Box sx={{ mb: 2 }}>
+                      <Box display="flex" alignItems="center" gap={1.5} mb={1}>
+                        <Box
+                          sx={{
+                            backgroundColor: theme.palette.primary.main,
+                            borderRadius: "10px",
+                            p: 0.75,
+                            display: "flex",
+                            alignItems: "center",
+                            justifyContent: "center",
+                          }}
+                        >
+                          <UserCircle size={18} color={theme.palette.primary.contrastText} />
+                        </Box>
+                        <Typography
+                          variant="h6"
+                          sx={{
+                            fontWeight: 700,
+                            fontSize: "1.1rem",
+                            color: theme.palette.text.primary,
+                            letterSpacing: "-0.02em",
+                          }}
+                        >
+                          Datos Personales
+                        </Typography>
+                      </Box>
+                      <Typography
+                        variant="body2"
+                        color="textSecondary"
+                        sx={{
+                          fontSize: "0.875rem",
+                          lineHeight: 1.5,
+                        }}
+                      >
+                        Modifica tu información
+                      </Typography>
+                    </Box>
+
+                    <Grid container spacing={{ xs: 2, sm: 3 }}>
+                      <Grid item xs={12}>
+                        <TextfieldComponent
+                          name="firstName"
+                          value={editFields.firstName}
+                          onChange={(e) =>
+                            setEditFields({ ...editFields, firstName: e.target.value })
+                          }
+                          error={!!validateName(editFields.firstName)}
+                          helperText={validateName(editFields.firstName)}
+                          validateField={validateFieldBoolean}
+                          icon={
+                            <UserIcon
+                              size={20}
+                              color={theme.palette.text.secondary}
+                            />
+                          }
+                        />
+                      </Grid>
+                      <Grid item xs={12}>
+                        <TextfieldComponent
+                          name="lastName"
+                          value={editFields.lastName}
+                          onChange={(e) =>
+                            setEditFields({ ...editFields, lastName: e.target.value })
+                          }
+                          error={!!validateName(editFields.lastName)}
+                          helperText={validateName(editFields.lastName)}
+                          validateField={validateFieldBoolean}
+                          icon={
+                            <UserIcon
+                              size={20}
+                              color={theme.palette.text.secondary}
+                            />
+                          }
+                        />
+                      </Grid>
+                      <Grid item xs={12}>
+                        <TextfieldComponent
+                          name="email"
+                          value={editFields.email}
+                          onChange={(e) => {
+                            setEditFields({ ...editFields, email: e.target.value });
+                            handleEmailChange(e);
+                          }}
+                          error={!!validateEmail(editFields.email) || !!infoError}
+                          helperText={infoError || validateEmail(editFields.email)}
+                          validateField={validateFieldBoolean}
+                          icon={
+                            <Mail
+                              size={20}
+                              color={theme.palette.text.secondary}
+                            />
+                          }
+                        />
+                      </Grid>
+                      <Grid item xs={12}>
+                        <TextfieldComponent
+                          name="username"
+                          value={editFields.username}
+                          onChange={(e) => {
+                            setEditFields({ ...editFields, username: e.target.value });
+                            handleUsernameChange(e);
+                          }}
+                          error={!!validateUsername(editFields.username) || !!infoError}
+                          helperText={infoError || validateUsername(editFields.username)}
+                          validateField={validateFieldBoolean}
+                          icon={
+                            <UserCircle
+                              size={20}
+                              color={theme.palette.text.secondary}
+                            />
+                          }
+                        />
+                      </Grid>
+                    </Grid>
+
+                    {/* Action Button */}
+                    <Box
+                      sx={{
+                        display: "flex",
+                        justifyContent: { xs: "center", sm: "flex-end" },
+                        gap: 2,
+                        mt: "auto",
+                        pt: 3,
+                      }}
+                    >
+                      <Button
+                        variant="contained"
+                        color="primary"
+                        fullWidth={isSmallScreen}
+                        sx={{
+                          minHeight: { xs: 44, sm: 48 },
+                          fontSize: "0.875rem",
+                          fontWeight: 600,
+                          px: { xs: 3, sm: 4 },
+                          py: { xs: 1.25, sm: 1.5 },
+                          minWidth: { xs: "100%", sm: 160 },
+                          borderRadius: "10px",
+                          letterSpacing: "-0.01em",
+                        }}
+                        onClick={handleSaveChanges}
+                        disabled={!isEditFormValid || !!infoError}
+                      >
+                        {MANAGEMENT.SAVE_CHANGES}
+                      </Button>
+                    </Box>
+                  </Paper>
+                </Grid>
+
+                {/* Right Column - Password Change */}
+                <Grid item xs={12} md={6}>
+                  <Paper
+                    elevation={0}
+                    sx={{
+                      p: { xs: 2, sm: 3 },
+                      borderRadius: "16px",
+                      border: `1px solid ${theme.palette.mode === "dark" ? "rgba(255,255,255,0.08)" : "rgba(0,0,0,0.08)"}`,
+                      backgroundColor: theme.palette.background.paper,
+                      height: "100%",
+                      display: "flex",
+                      flexDirection: "column",
+                    }}
+                  >
+                    {/* Password Section Header */}
+                    <Box sx={{ mb: 2 }}>
+                      <Box display="flex" alignItems="center" gap={1.5} mb={1}>
+                        <Box
+                          sx={{
+                            backgroundColor: theme.palette.primary.main,
+                            borderRadius: "10px",
+                            p: 0.75,
+                            display: "flex",
+                            alignItems: "center",
+                            justifyContent: "center",
+                          }}
+                        >
+                          <Shield size={18} color={theme.palette.primary.contrastText} />
+                        </Box>
+                        <Typography
+                          variant="h6"
+                          sx={{
+                            fontWeight: 700,
+                            fontSize: "1.1rem",
+                            color: theme.palette.text.primary,
+                            letterSpacing: "-0.02em",
+                          }}
+                        >
+                          Seguridad
+                        </Typography>
+                      </Box>
+                      <Typography
+                        variant="body2"
+                        color="textSecondary"
+                        sx={{
+                          fontSize: "0.875rem",
+                          lineHeight: 1.5,
+                        }}
+                      >
+                        Cambia tu contraseña
+                      </Typography>
+                    </Box>
+
+                    <Grid container spacing={{ xs: 2, sm: 3 }}>
+                      <Grid item xs={12}>
+                        <TextfieldComponent
+                          name="newPassword"
+                          type={showNewPassword ? "text" : "password"}
+                          value={passwordFields.newPassword}
+                          onChange={handleNewPassword}
+                          error={!!passwordError}
+                          helperText={passwordError}
+                          placeholder="Nueva contraseña"
+                          icon={<Lock size={20} color={theme.palette.text.secondary} />}
+                          endAdornment={
+                            <IconButton
+                              onClick={handleToggleNewPassword}
+                              edge="end"
+                              sx={{
+                                color: theme.palette.text.secondary,
+                                width: "36px",
+                                height: "36px",
+                                padding: "8px",
+                                overflow: "hidden",
+                                "&:hover": {
+                                  color: theme.palette.text.primary,
+                                  backgroundColor: "transparent",
+                                },
+                              }}
+                            >
+                              {showNewPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+                            </IconButton>
+                          }
+                        />
+                      </Grid>
+                      <Grid item xs={12}>
+                        <TextfieldComponent
+                          name="confirmNewPassword"
+                          type={showConfirmNewPassword ? "text" : "password"}
+                          value={passwordFields.confirmNewPassword}
+                          onChange={handleConfirmNewPassword}
+                          error={!!passwordError}
+                          helperText={passwordError}
+                          placeholder="Confirmar contraseña"
+                          icon={<Lock size={20} color={theme.palette.text.secondary} />}
+                          endAdornment={
+                            <IconButton
+                              onClick={handleToggleConfirmNewPassword}
+                              edge="end"
+                              sx={{
+                                color: theme.palette.text.secondary,
+                                width: "36px",
+                                height: "36px",
+                                padding: "8px",
+                                overflow: "hidden",
+                                "&:hover": {
+                                  color: theme.palette.text.primary,
+                                  backgroundColor: "transparent",
+                                },
+                              }}
+                            >
+                              {showConfirmNewPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+                            </IconButton>
+                          }
+                        />
+                      </Grid>
+                    </Grid>
+
+                    {/* Password Info Box */}
+                    <Box
+                      sx={{
+                        display: "flex",
+                        alignItems: "flex-start",
+                        gap: 2,
+                        p: { xs: 2, sm: 2.5 },
+                        borderRadius: "12px",
+                        backgroundColor: theme.palette.mode === "dark" ? "rgba(33, 150, 243, 0.1)" : "rgba(33, 150, 243, 0.08)",
+                        border: `1px solid ${theme.palette.mode === "dark" ? "rgba(33, 150, 243, 0.2)" : "rgba(33, 150, 243, 0.15)"}`,
+                        mt: 2,
+                      }}
+                    >
+                      <Box
+                        sx={{
+                          backgroundColor: theme.palette.mode === "dark" ? "rgba(33, 150, 243, 0.2)" : "rgba(33, 150, 243, 0.15)",
+                          borderRadius: "10px",
+                          p: 1,
+                          display: "flex",
+                          alignItems: "center",
+                          justifyContent: "center",
+                          flexShrink: 0,
+                        }}
+                      >
+                        <Info
+                          size={20}
+                          color={theme.palette.info.main}
+                        />
+                      </Box>
+                      <Box sx={{ flex: 1 }}>
+                        <Typography
+                          variant="subtitle2"
+                          sx={{
+                            fontWeight: 600,
+                            fontSize: "0.875rem",
+                            color: theme.palette.text.primary,
+                            mb: 0.5,
+                          }}
+                        >
+                          {MANAGEMENT.PASSWORD_INFO_TITLE}
+                        </Typography>
+                        <Typography
+                          variant="body2"
+                          sx={{
+                            fontSize: "0.875rem",
+                            color: theme.palette.text.secondary,
+                            lineHeight: 1.5,
+                          }}
+                        >
+                          {MANAGEMENT.PASSWORD_INFO_DESC}
+                        </Typography>
+                      </Box>
+                    </Box>
+
+                    {/* Password Action Button */}
+                    <Box
+                      sx={{
+                        display: "flex",
+                        justifyContent: { xs: "center", sm: "flex-end" },
+                        gap: 2,
+                        mt: "auto",
+                        pt: 3,
+                      }}
+                    >
+                      <Button
+                        variant="contained"
+                        color="primary"
+                        fullWidth={isSmallScreen}
+                        sx={{
+                          minHeight: { xs: 44, sm: 48 },
+                          fontSize: "0.875rem",
+                          fontWeight: 600,
+                          px: { xs: 3, sm: 4 },
+                          py: { xs: 1.25, sm: 1.5 },
+                          minWidth: { xs: "100%", sm: 160 },
+                          borderRadius: "10px",
+                          letterSpacing: "-0.01em",
+                        }}
+                        onClick={handleChangePassword}
+                        disabled={!isPasswordFormValid}
+                      >
+                        {MANAGEMENT.CHANGE_PASSWORD}
+                      </Button>
+                    </Box>
+                  </Paper>
+                </Grid>
+              </Grid>
+            </Box>
+          )}
+          {activeSection === 'theme' && (
+            <Box sx={{ width: "100%", display: "block" }}>
+              {/* Section Header */}
+              <Box sx={{ mb: 3 }}>
+                <Box display="flex" alignItems="center" gap={1.5} mb={1}>
+                  <Box
+                    sx={{
+                      backgroundColor: theme.palette.primary.main,
+                      borderRadius: "10px",
+                      p: 0.75,
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                    }}
+                  >
+                    <Palette size={18} color={theme.palette.primary.contrastText} />
+                  </Box>
+                  <Typography
+                    variant="h6"
+                    sx={{
+                      fontWeight: 700,
+                      fontSize: "1.25rem",
+                      color: theme.palette.text.primary,
+                      letterSpacing: "-0.02em",
+                    }}
+                  >
+                    Tema de la aplicación
+                  </Typography>
+                </Box>
+                <Typography
+                  variant="body2"
+                  color="textSecondary"
+                  sx={{
+                    fontSize: "0.875rem",
+                    lineHeight: 1.5,
+                  }}
+                >
+                  Seleccione el tema que prefiera para la aplicación.
                 </Typography>
-                <Typography sx={infoDesc(theme)}>
-                  {MANAGEMENT.PASSWORD_INFO_DESC}
+              </Box>
+
+              {/* Theme Card */}
+              <Paper
+                elevation={0}
+                sx={{
+                  p: { xs: 2, sm: 3 },
+                  borderRadius: "16px",
+                  border: `1px solid ${theme.palette.mode === "dark" ? "rgba(255,255,255,0.08)" : "rgba(0,0,0,0.08)"}`,
+                  backgroundColor: theme.palette.background.paper,
+                }}
+              >
+                <RadioGroup
+                  value={mode}
+                  onChange={(e) => setMode(e.target.value as ThemeMode)}
+                  aria-label="theme-mode"
+                  name="theme-mode"
+                  sx={{ gap: 2 }}
+                >
+                  <FormControlLabel 
+                    value="default" 
+                    control={<Radio />} 
+                    label={
+                      <Box sx={{ display: "flex", alignItems: "center", gap: 1.5 }}>
+                        <Typography sx={{ fontWeight: 500, fontSize: "0.95rem" }}>Predeterminado</Typography>
+                      </Box>
+                    }
+                  />
+                  <FormControlLabel 
+                    value="light" 
+                    control={<Radio />} 
+                    label={
+                      <Box sx={{ display: "flex", alignItems: "center", gap: 1.5 }}>
+                        <Typography sx={{ fontWeight: 500, fontSize: "0.95rem" }}>Claro</Typography>
+                      </Box>
+                    }
+                  />
+                  <FormControlLabel 
+                    value="dark" 
+                    control={<Radio />} 
+                    label={
+                      <Box sx={{ display: "flex", alignItems: "center", gap: 1.5 }}>
+                        <Typography sx={{ fontWeight: 500, fontSize: "0.95rem" }}>Oscuro</Typography>
+                      </Box>
+                    }
+                  />
+                </RadioGroup>
+              </Paper>
+            </Box>
+          )}
+          {activeSection === 'system' && (
+            <Box sx={{ width: "100%", display: "block" }}>
+              {/* Section Header */}
+              <Box sx={{ mb: 3 }}>
+                <Box display="flex" alignItems="center" gap={1.5} mb={1}>
+                  <Box
+                    sx={{
+                      backgroundColor: theme.palette.primary.main,
+                      borderRadius: "10px",
+                      p: 0.75,
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                    }}
+                  >
+                    <Shield size={18} color={theme.palette.primary.contrastText} />
+                  </Box>
+                  <Typography
+                    variant="h6"
+                    sx={{
+                      fontWeight: 700,
+                      fontSize: "1.25rem",
+                      color: theme.palette.text.primary,
+                      letterSpacing: "-0.02em",
+                    }}
+                  >
+                    Gestión del Sistema
+                  </Typography>
+                </Box>
+                <Typography
+                  variant="body2"
+                  color="textSecondary"
+                  sx={{
+                    fontSize: "0.875rem",
+                    lineHeight: 1.5,
+                  }}
+                >
+                  Administración de usuarios, roles, permisos y respaldos del sistema.
                 </Typography>
+              </Box>
+
+              {/* Sub-section Toggles */}
+              <Box
+                sx={{
+                  display: "flex",
+                  alignItems: "center",
+                  gap: 0.5,
+                  flexWrap: "wrap",
+                  mb: 3,
+                }}
+              >
+                <Button
+                  variant={activeSystemSubSection === 'users' ? 'contained' : 'outlined'}
+                  onClick={() => setActiveSystemSubSection('users')}
+                  startIcon={<UserIcon2 size={16} />}
+                  sx={{
+                    borderRadius: '10px',
+                    px: 2,
+                    py: 1,
+                    fontWeight: 600,
+                    fontSize: '0.875rem',
+                    textTransform: 'none',
+                    letterSpacing: '-0.01em',
+                    backgroundColor: activeSystemSubSection === 'users' ? theme.palette.primary.main : 'transparent',
+                    color: activeSystemSubSection === 'users' ? theme.palette.primary.contrastText : theme.palette.text.primary,
+                    border: activeSystemSubSection === 'users' ? 'none' : `1.5px solid ${theme.palette.mode === 'dark' ? 'rgba(255,255,255,0.2)' : 'rgba(0,0,0,0.15)'}`,
+                    '&:hover': {
+                      backgroundColor: activeSystemSubSection === 'users' ? theme.palette.primary.dark : (theme.palette.mode === 'dark' ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.04)'),
+                    },
+                  }}
+                >
+                  {DASHBOARD.USERS}
+                </Button>
+                <Button
+                  variant={activeSystemSubSection === 'roles' ? 'contained' : 'outlined'}
+                  onClick={() => setActiveSystemSubSection('roles')}
+                  startIcon={<Shield size={16} />}
+                  sx={{
+                    borderRadius: '10px',
+                    px: 2,
+                    py: 1,
+                    fontWeight: 600,
+                    fontSize: '0.875rem',
+                    textTransform: 'none',
+                    letterSpacing: '-0.01em',
+                    backgroundColor: activeSystemSubSection === 'roles' ? theme.palette.primary.main : 'transparent',
+                    color: activeSystemSubSection === 'roles' ? theme.palette.primary.contrastText : theme.palette.text.primary,
+                    border: activeSystemSubSection === 'roles' ? 'none' : `1.5px solid ${theme.palette.mode === 'dark' ? 'rgba(255,255,255,0.2)' : 'rgba(0,0,0,0.15)'}`,
+                    '&:hover': {
+                      backgroundColor: activeSystemSubSection === 'roles' ? theme.palette.primary.dark : (theme.palette.mode === 'dark' ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.04)'),
+                    },
+                  }}
+                >
+                  {DASHBOARD.ROLES}
+                </Button>
+                <Button
+                  variant={activeSystemSubSection === 'permissions' ? 'contained' : 'outlined'}
+                  onClick={() => setActiveSystemSubSection('permissions')}
+                  startIcon={<Lock size={16} />}
+                  sx={{
+                    borderRadius: '10px',
+                    px: 2,
+                    py: 1,
+                    fontWeight: 600,
+                    fontSize: '0.875rem',
+                    textTransform: 'none',
+                    letterSpacing: '-0.01em',
+                    backgroundColor: activeSystemSubSection === 'permissions' ? theme.palette.primary.main : 'transparent',
+                    color: activeSystemSubSection === 'permissions' ? theme.palette.primary.contrastText : theme.palette.text.primary,
+                    border: activeSystemSubSection === 'permissions' ? 'none' : `1.5px solid ${theme.palette.mode === 'dark' ? 'rgba(255,255,255,0.2)' : 'rgba(0,0,0,0.15)'}`,
+                    '&:hover': {
+                      backgroundColor: activeSystemSubSection === 'permissions' ? theme.palette.primary.dark : (theme.palette.mode === 'dark' ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.04)'),
+                    },
+                  }}
+                >
+                  {DASHBOARD.PERMISSIONS}
+                </Button>
+              </Box>
+
+              {/* Sub-section Content */}
+              <Box
+                sx={{
+                  flex: 1,
+                  minHeight: 0,
+                  display: "flex",
+                  flexDirection: "column",
+                  overflow: "hidden",
+                }}
+              >
+                {activeSystemSubSection === 'users' && <ManageUsers isExpanded />}
+                {activeSystemSubSection === 'roles' && <ManageRoles isExpanded />}
+                {activeSystemSubSection === 'permissions' && <ManagePermissions />}
               </Box>
             </Box>
-          </Grid>
-
-          <Box
-            sx={{
-              display: "flex",
-              justifyContent: { xs: "center", sm: "flex-end" },
-              gap: 2,
-              mt: { xs: 2, sm: 3 },
-            }}
-          >
-            <Button
-              variant="contained"
-              color="primary"
-              fullWidth={isSmallScreen}
-              sx={{
-                minHeight: { xs: 44, sm: 48 },
-                fontSize: "clamp(0.75rem, 1.25vw, 0.875rem)",
-                fontWeight: 600,
-                px: { xs: 2, sm: 4 },
-                py: { xs: 1, sm: 1.5 },
-                minWidth: { xs: "100%", sm: 140 },
-              }}
-              onClick={handleChangePassword}
-              disabled={!isPasswordFormValid}
-            >
-              {MANAGEMENT.CHANGE_PASSWORD}
-            </Button>
-          </Box>
+          )}
         </Box>
-      )}
-      {tabIndex === 2 && (
-        <Box
-          sx={{ width: "100%", display: "block", px: { xs: 0, sm: 0, md: 0 } }}
-        >
-          <Typography
-            variant="h5"
-            fontWeight="bold"
-            sx={{
-              mb: { xs: 0.5, sm: 1 },
-              fontSize: { xs: "1.25rem", sm: "1.5rem" },
-              color: theme.palette.text.primary,
-            }}
-          >
-            Tema de la aplicación
-          </Typography>
-          <Typography
-            variant="body2"
-            color="textSecondary"
-            sx={{
-              mb: { xs: 2, sm: 3 },
-              fontSize: { xs: "0.875rem", sm: "1rem" },
-            }}
-          >
-            Seleccione el tema que prefiera para la aplicación.
-          </Typography>
-
-          <RadioGroup
-            value={mode}
-            onChange={(e) => setMode(e.target.value as ThemeMode)}
-            aria-label="theme-mode"
-            name="theme-mode"
-          >
-            <FormControlLabel value="default" control={<Radio />} label="Predeterminado" />
-            <FormControlLabel value="light" control={<Radio />} label="Claro" />
-            <FormControlLabel value="dark" control={<Radio />} label="Oscuro" />
-            {/* <FormControlLabel
-              value="high-contrast"
-              control={<Radio />}
-              label="Alto Contraste"
-            /> */}
-          </RadioGroup>
-        </Box>
-      )}
+      </Paper>
     </Box>
   );
 };

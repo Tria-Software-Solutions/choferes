@@ -29,7 +29,7 @@ import EditableTableComponent from "../../../components/Table/EditableTable/Edit
 import SearchBarComponent from "../../../components/SearchBar/SearchBar.component";
 import AddUserForm from "../../Forms/AddUserForm";
 import { Eye, EyeOff, PlusCircle, Plus, Users } from "lucide-react";
-import AppModal from "../../../components/AppModal/AppModal.component";
+import DialogComponent from "../../../components/Dialog/Dialog.component";
 import { DASHBOARD_USERS } from "../../../constants/constants";
 import { NOTIFICATIONS } from "../../../constants/constants";
 import PasswordChangeForm from "../../Forms/PasswordChangeForm";
@@ -45,6 +45,7 @@ import {
   passwordDialogPaperSx,
   backdropStyles,
 } from "./styles";
+import { useLocation } from "react-router-dom";
 import { useTablePreferences } from '../../../hooks/useTablePreferences';
 import { validateName, validateEmail, validateUsername, validatePassword } from '../../../utils/userValidation';
 
@@ -82,10 +83,11 @@ const ManageUsers: React.FC<{ isExpanded?: boolean }> = ({
   const isSmallScreen = useMediaQuery(theme.breakpoints.down("sm"));
   const [passwordModalOpen, setPasswordModalOpen] = useState(false);
   const [passwordUserId, setPasswordUserId] = useState<number | null>(null);
+  const location = useLocation();
 
   const getInitialRowsPerPage = () => {
     if (typeof window !== 'undefined') {
-      const maxHeight = window.innerHeight * 0.48;
+      const maxHeight = window.innerHeight * 0.6;
       const headHeight = 56;
       const paginationHeight = 64;
       const extra = 24;
@@ -99,28 +101,23 @@ const ManageUsers: React.FC<{ isExpanded?: boolean }> = ({
 
   const { search, setSearch, rowsPerPage, setRowsPerPage } = useTablePreferences('users', getInitialRowsPerPage);
 
-  // Loads users, roles, and user roles data on mount (only if not already loaded)
+  // Loads users, roles, and user roles data on mount
   useEffect(() => {
     const loadData = async () => {
       try {
         setLoadError(null);
-        const timeoutPromise = new Promise<never>((_, reject) => {
+        const timeoutPromise = new Promise((_, reject) => {
           setTimeout(
             () => reject(new Error("Timeout: La carga tardó demasiado")),
             30000,
           );
         });
 
-        const fetchPromises = [];
-        if (users.length === 0) {
-          fetchPromises.push(dispatch(fetchUsers()));
-        }
-        if (roles.length === 0) {
-          fetchPromises.push(dispatch(fetchRoles()));
-        }
-        fetchPromises.push(dispatch(fetchUserRoles()));
-
-        const loadPromise = Promise.all(fetchPromises);
+        const loadPromise = Promise.all([
+          dispatch(fetchUsers()),
+          dispatch(fetchRoles()),
+          dispatch(fetchUserRoles()),
+        ]);
 
         await Promise.race([loadPromise, timeoutPromise]);
       } catch (error) {
@@ -134,7 +131,7 @@ const ManageUsers: React.FC<{ isExpanded?: boolean }> = ({
     };
 
     loadData();
-  }, [dispatch, showNotification, users.length, roles.length]);
+  }, [dispatch, showNotification, location.pathname]);
 
   // Handles errors when loading users
   useEffect(() => {
@@ -412,7 +409,7 @@ const ManageUsers: React.FC<{ isExpanded?: boolean }> = ({
   }, []);
 
   return (
-    <Box sx={{ height: "100%", display: "flex", flexDirection: "column" }}>
+    <Box sx={{ height: "100%", minHeight: "500px", display: "flex", flexDirection: "column", overflow: "hidden" }}>
       {loadError ? (
         <Box sx={errorBoxStyles}>
           <Alert severity="error" sx={errorAlertStyles}>
@@ -446,14 +443,18 @@ const ManageUsers: React.FC<{ isExpanded?: boolean }> = ({
               borderRadius: "16px",
               border: "1px solid rgba(0,0,0,0.08)",
               boxShadow: "0 4px 24px rgba(0,0,0,0.08), 0 1px 2px rgba(0,0,0,0.04)",
-              overflow: "hidden",
+              overflow: "visible",
+              flex: 1,
+              minHeight: 0,
+              display: "flex",
+              flexDirection: "column",
             }}
           >
             {/* Header Section */}
             <Box
               sx={{
                 px: { xs: 2, sm: 3 },
-                py: { xs: 1.5, sm: 2 },
+                py: { xs: 2, sm: 2.5 },
                 backgroundColor: theme.palette.background.paper,
                 color: theme.palette.text.primary,
                 borderBottom: `1px solid ${theme.palette.mode === "dark" ? "rgba(255,255,255,0.08)" : "rgba(0,0,0,0.08)"}`,
@@ -463,7 +464,7 @@ const ManageUsers: React.FC<{ isExpanded?: boolean }> = ({
                 display="flex"
                 justifyContent="space-between"
                 alignItems="flex-start"
-                mb={1}
+                mb={2}
               >
                 <Box display="flex" alignItems="center" gap={1.5}>
                   <Box
@@ -514,7 +515,7 @@ const ManageUsers: React.FC<{ isExpanded?: boolean }> = ({
                 gap={2}
               >
                 {/* Search */}
-                <Box flex={1} maxWidth={{ sm: "380px" }}>
+                <Box flex={1} maxWidth={{ sm: "320px" }}>
                   {filteredUsers && (
                     <SearchBarComponent
                       placeholder={DASHBOARD_USERS.SEARCH_PLACEHOLDER}
@@ -574,7 +575,7 @@ const ManageUsers: React.FC<{ isExpanded?: boolean }> = ({
             </Box>
 
             {/* Mobile Add Button */}
-            <Box sx={{ display: { xs: 'flex', sm: 'none' }, p: 1.5, borderTop: `1px solid ${theme.palette.mode === "dark" ? "rgba(255,255,255,0.08)" : "rgba(0,0,0,0.08)"}` }}>
+            <Box sx={{ display: { xs: 'flex', sm: 'none' }, p: 2, borderTop: `1px solid ${theme.palette.mode === "dark" ? "rgba(255,255,255,0.08)" : "rgba(0,0,0,0.08)"}` }}>
               <Button
                 variant="contained"
                 fullWidth
@@ -638,7 +639,7 @@ const ManageUsers: React.FC<{ isExpanded?: boolean }> = ({
       </>
     )}
 
-      <AppModal
+      <DialogComponent
         open={openStatusDialog}
         onClose={handleCloseStatusDialog}
         onConfirm={handleStatusChange}
@@ -650,7 +651,7 @@ const ManageUsers: React.FC<{ isExpanded?: boolean }> = ({
         loading={isUpdatingUserStatus}
       />
 
-      <AppModal
+      <DialogComponent
         open={openAddUserModal}
         onClose={handleCloseAddUserModal}
         title={DASHBOARD_USERS.ADD}
@@ -665,9 +666,9 @@ const ManageUsers: React.FC<{ isExpanded?: boolean }> = ({
           isLoading={isCreatingUser}
           roles={roles}
         />
-      </AppModal>
+      </DialogComponent>
 
-      <AppModal
+      <DialogComponent
         open={passwordModalOpen}
         onClose={handleClosePasswordModal}
         title="Cambiar Contraseña"
@@ -697,7 +698,7 @@ const ManageUsers: React.FC<{ isExpanded?: boolean }> = ({
             showNotification(msg, { severity: "error", duration: 5000 })
           }
         />
-      </AppModal>
+      </DialogComponent>
     </Box>
   );
 };

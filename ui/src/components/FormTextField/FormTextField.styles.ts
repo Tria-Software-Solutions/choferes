@@ -1,10 +1,11 @@
 import { SxProps, Theme } from "@mui/material";
 
-export const textFieldStyles = (customSx: object = {}): SxProps<Theme> => (theme: Theme) => ({
-  mb: 1.5,
+// Shared TextField styles based on login page design
+export const formTextFieldStyles: SxProps<Theme> = (theme: Theme) => ({
+  mb: 2.5,
   "& .MuiOutlinedInput-root": {
     borderRadius: "12px",
-    minHeight: "42px",
+    minHeight: "52px",
     position: "relative",
     backgroundColor: theme.palette.mode === "dark"
       ? "rgba(40,40,50,0.6)"
@@ -40,69 +41,39 @@ export const textFieldStyles = (customSx: object = {}): SxProps<Theme> => (theme
     },
     "& input": {
       color: theme.palette.text.primary,
-      fontSize: "0.9rem",
-      paddingTop: "10px",
-      paddingBottom: "10px",
-      paddingLeft: "14px",
-      paddingRight: "14px",
+      fontSize: "0.95rem",
+      paddingTop: "14px",
+      paddingBottom: "14px",
+      paddingLeft: "16px",
+      paddingRight: "16px",
       "&::placeholder": {
         color: theme.palette.text.secondary,
         opacity: 0.6,
       },
-    },
-    "& textarea": {
-      color: theme.palette.text.primary,
-      fontSize: "0.9rem",
-      paddingTop: "8px",
-      paddingBottom: "10px",
-      paddingLeft: "14px",
-      paddingRight: "14px",
-      lineHeight: "1.5",
-      "&::placeholder": {
-        color: theme.palette.text.secondary,
-        opacity: 0.6,
-      },
-    },
-    "&.MuiInputBase-multiline .MuiInputBase-input": {
-      paddingTop: "10px",
-      paddingBottom: "10px",
     },
     "&.MuiInputBase-adornedStart input": {
-      paddingLeft: "36px",
-      paddingRight: "14px",
-    },
-    "&.MuiInputBase-adornedStart textarea": {
-      paddingLeft: "36px",
-      paddingRight: "14px",
-      paddingTop: "12px",
+      paddingLeft: "38px",
+      paddingRight: "16px",
     },
     "&.MuiInputBase-adornedEnd input": {
-      paddingLeft: "14px",
-      paddingRight: "44px",
+      paddingLeft: "16px",
+      paddingRight: "48px",
     },
     "&.MuiInputBase-adornedStart.MuiInputBase-adornedEnd input": {
-      paddingLeft: "36px",
-      paddingRight: "44px",
+      paddingLeft: "38px",
+      paddingRight: "48px",
     },
     "& .MuiInputAdornment-positionStart": {
       position: "absolute",
-      left: "12px",
+      left: "14px",
       marginRight: 0,
       zIndex: 2,
-      top: "50%",
-      transform: "translateY(-50%)",
-    },
-    "&.MuiInputBase-multiline .MuiInputAdornment-positionStart": {
-      top: "13px",
-      transform: "none",
-      zIndex: 1,
     },
     "& .MuiInputAdornment-positionEnd": {
       position: "absolute",
-      right: "8px",
+      right: "14px",
       marginLeft: 0,
       zIndex: 2,
-      pointerEvents: "auto",
     },
     // Fix autofill background color
     "& input:-webkit-autofill": {
@@ -120,51 +91,4 @@ export const textFieldStyles = (customSx: object = {}): SxProps<Theme> => (theme
       WebkitTextFillColor: theme.palette.text.primary,
     },
   },
-  "& .MuiFormHelperText-root": {
-    boxShadow: "none !important",
-    border: "none !important",
-    margin: 0,
-    marginTop: "4px",
-    padding: 0,
-    backgroundColor: "transparent !important",
-    backgroundImage: "none !important",
-    "&:before": {
-      display: "none !important",
-    },
-    "&:after": {
-      display: "none !important",
-    },
-  },
-  "&.Mui-focused .MuiFormHelperText-root": {
-    boxShadow: "none !important",
-    border: "none !important",
-    backgroundColor: "transparent !important",
-    backgroundImage: "none !important",
-    "&:before": {
-      display: "none !important",
-    },
-    "&:after": {
-      display: "none !important",
-    },
-  },
-  "& .Mui-error .MuiFormHelperText-root": {
-    boxShadow: "none !important",
-    border: "none !important",
-    backgroundColor: "transparent !important",
-    backgroundImage: "none !important",
-    "&:before": {
-      display: "none !important",
-    },
-    "&:after": {
-      display: "none !important",
-    },
-  },
-  ...customSx,
 });
-
-export const inputAdornmentStyles: SxProps<Theme> = {
-  position: "absolute",
-  left: "14px",
-  marginRight: 0,
-  zIndex: 2,
-};

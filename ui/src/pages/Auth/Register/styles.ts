@@ -185,14 +185,15 @@ export const formBoxStyles: SxProps<Theme> = {
 export const nameFieldsBoxStyles: SxProps<Theme> = {
   display: "flex",
   flexDirection: { xs: "column", sm: "row" },
-  gap: 2.5,
-  mb: 2.5,
+  gap: 1.5,
+  mb: 1.5,
 };
 
 export const textFieldStyles: SxProps<Theme> = (theme: Theme) => ({
+  mb: 1.5,
   "& .MuiOutlinedInput-root": {
     borderRadius: "12px",
-    minHeight: "52px",
+    minHeight: "42px",
     position: "relative",
     backgroundColor: theme.palette.mode === "dark"
       ? "rgba(40,40,50,0.6)"
@@ -228,37 +229,37 @@ export const textFieldStyles: SxProps<Theme> = (theme: Theme) => ({
     },
     "& input": {
       color: theme.palette.text.primary,
-      fontSize: "0.95rem",
-      paddingTop: "14px",
-      paddingBottom: "14px",
-      paddingLeft: "16px",
-      paddingRight: "16px",
+      fontSize: "0.9rem",
+      paddingTop: "10px",
+      paddingBottom: "10px",
+      paddingLeft: "14px",
+      paddingRight: "14px",
       "&::placeholder": {
         color: theme.palette.text.secondary,
         opacity: 0.6,
       },
     },
     "&.MuiInputBase-adornedStart input": {
-      paddingLeft: "38px",
-      paddingRight: "16px",
+      paddingLeft: "36px",
+      paddingRight: "14px",
     },
     "&.MuiInputBase-adornedEnd input": {
-      paddingLeft: "16px",
-      paddingRight: "48px",
+      paddingLeft: "14px",
+      paddingRight: "44px",
     },
     "&.MuiInputBase-adornedStart.MuiInputBase-adornedEnd input": {
-      paddingLeft: "38px",
-      paddingRight: "48px",
+      paddingLeft: "36px",
+      paddingRight: "44px",
     },
     "& .MuiInputAdornment-positionStart": {
       position: "absolute",
-      left: "14px",
+      left: "12px",
       marginRight: 0,
       zIndex: 2,
     },
     "& .MuiInputAdornment-positionEnd": {
       position: "absolute",
-      right: "14px",
+      right: "12px",
       marginLeft: 0,
       zIndex: 2,
     },
@@ -278,20 +279,20 @@ export const textFieldStyles: SxProps<Theme> = (theme: Theme) => ({
       WebkitTextFillColor: theme.palette.text.primary,
     },
   },
-  });
+});
 
 export const emailTextFieldStyles: SxProps<Theme> = (theme) => ({
-  mb: 2.5,
+  mb: 1.5,
   ...textFieldStyles(theme),
 });
 
 export const usernameTextFieldStyles: SxProps<Theme> = (theme) => ({
-  mb: 2.5,
+  mb: 1.5,
   ...textFieldStyles(theme),
 });
 
 export const passwordTextFieldStyles: SxProps<Theme> = (theme) => ({
-  mb: 2.5,
+  mb: 1.5,
   ...textFieldStyles(theme),
 });
 
@@ -308,14 +309,14 @@ export const passwordIconButtonStyles: SxProps<Theme> = {
 };
 
 export const submitButtonStyles: SxProps<Theme> = (theme) => ({
-  minHeight: "52px",
+  minHeight: "42px",
   borderRadius: "12px",
   background: theme.palette.mode === "dark"
     ? "linear-gradient(135deg, #ffffff 0%, #e0e0e0 100%)"
     : "linear-gradient(135deg, #000000 0%, #1a1a1a 100%)",
   color: theme.palette.mode === "dark" ? "#000000" : "#ffffff",
   fontWeight: 600,
-  fontSize: "0.95rem",
+  fontSize: "0.9rem",
   textTransform: "none",
   letterSpacing: "0.01em",
   boxShadow: theme.palette.mode === "dark"

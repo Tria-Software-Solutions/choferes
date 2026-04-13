@@ -137,8 +137,7 @@ export const noVehiclesBoxStyles: SxProps<Theme> = {
   justifyContent: "center",
   alignItems: "center",
   textAlign: "center",
-  paddingTop: "10%",
-  paddingBottom: "12%",
+  height: "100%",
 };
 
 export const noVehiclesIconStyles: CSSProperties = {
@@ -152,6 +151,6 @@ export const deleteDialogPaperSx: SxProps<Theme> = {
 };
 
 export const addDialogPaperSx: SxProps<Theme> = {
-  minWidth: { xs: "90vw", sm: 500, md: 700 },
-  maxWidth: { xs: "98vw", sm: 700 },
+  minWidth: { xs: "90vw", sm: 450, md: 600 },
+  maxWidth: { xs: "98vw", sm: 600 },
 };

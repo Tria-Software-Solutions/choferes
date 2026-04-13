@@ -63,8 +63,11 @@ export const dialogActionsStyles = (
 
 export const cancelButtonStyles = (isSmallScreen: boolean): SxProps<Theme> => ({
   minWidth: isSmallScreen ? "100%" : 120,
-  py: 1.5,
+  px: 3,
+  py: 1,
   fontWeight: 600,
+  fontSize: "0.9rem",
+  letterSpacing: "-0.01em",
   borderRadius: "10px",
   border: `1px solid ${isSmallScreen ? "transparent" : "rgba(0,0,0,0.12)"}`,
   color: (theme) => theme.palette.text.secondary,
@@ -79,8 +82,11 @@ export const confirmButtonStyles = (
   isSmallScreen: boolean,
 ): SxProps<Theme> => ({
   minWidth: isSmallScreen ? "100%" : 120,
-  py: 1.5,
+  px: 3,
+  py: 1,
   fontWeight: 600,
+  fontSize: "0.9rem",
+  letterSpacing: "-0.01em",
   borderRadius: "10px",
   backgroundColor: (theme) => theme.palette.primary.main,
   color: (theme) => theme.palette.primary.contrastText,

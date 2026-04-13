@@ -32,7 +32,6 @@ import {
   clearButton,
   actionsInnerBox,
   cancelButton,
-  submitButton,
 } from "./styles";
 import { validateName, validateEmail, validateUsername, validatePassword } from '../../../utils/userValidation';
 
@@ -179,10 +178,9 @@ const AddUserForm: React.FC<AddUserFormProps> = ({
       <Grid container spacing={3} sx={gridContainer}>
         <Grid item xs={12} sm={6}>
           <TextfieldComponent
-            label={FORMS.ADD_USER.FIRST_NAME_LABEL}
+            placeholder={FORMS.ADD_USER.FIRST_NAME_PLACEHOLDER}
             variant="outlined"
             fullWidth
-            placeholder={FORMS.ADD_USER.FIRST_NAME_PLACEHOLDER}
             value={formData.firstName}
             onChange={(e) => handleFieldChange("firstName", e.target.value)}
             error={errors.firstName !== ""}
@@ -193,10 +191,9 @@ const AddUserForm: React.FC<AddUserFormProps> = ({
 
         <Grid item xs={12} sm={6}>
           <TextfieldComponent
-            label={FORMS.ADD_USER.LAST_NAME_LABEL}
+            placeholder={FORMS.ADD_USER.LAST_NAME_PLACEHOLDER}
             variant="outlined"
             fullWidth
-            placeholder={FORMS.ADD_USER.LAST_NAME_PLACEHOLDER}
             value={formData.lastName}
             onChange={(e) => handleFieldChange("lastName", e.target.value)}
             error={errors.lastName !== ""}
@@ -207,10 +204,9 @@ const AddUserForm: React.FC<AddUserFormProps> = ({
 
         <Grid item xs={12} sm={6}>
           <TextfieldComponent
-            label={FORMS.ADD_USER.EMAIL_LABEL}
+            placeholder={FORMS.ADD_USER.EMAIL_PLACEHOLDER}
             variant="outlined"
             fullWidth
-            placeholder={FORMS.ADD_USER.EMAIL_PLACEHOLDER}
             value={formData.email}
             onChange={(e) => handleFieldChange("email", e.target.value)}
             error={errors.email !== ""}
@@ -221,10 +217,9 @@ const AddUserForm: React.FC<AddUserFormProps> = ({
 
         <Grid item xs={12} sm={6}>
           <TextfieldComponent
-            label={FORMS.ADD_USER.USERNAME_LABEL}
+            placeholder={FORMS.ADD_USER.USERNAME_PLACEHOLDER}
             variant="outlined"
             fullWidth
-            placeholder={FORMS.ADD_USER.USERNAME_PLACEHOLDER}
             value={formData.username}
             onChange={(e) => handleFieldChange("username", e.target.value)}
             error={errors.username !== ""}
@@ -235,25 +230,20 @@ const AddUserForm: React.FC<AddUserFormProps> = ({
 
         <Grid item xs={12} sm={6}>
           <TextfieldComponent
-            label={FORMS.ADD_USER.PASSWORD_LABEL}
+            placeholder={FORMS.ADD_USER.PASSWORD_PLACEHOLDER}
             variant="outlined"
             fullWidth
             type={showPassword ? "text" : "password"}
-            placeholder={FORMS.ADD_USER.PASSWORD_PLACEHOLDER}
             value={formData.password}
             onChange={(e) => handleFieldChange("password", e.target.value)}
             error={errors.password !== ""}
             helperText={errors.password}
             icon={<Lock style={iconStyle} />}
-            InputProps={{
-              endAdornment: (
-                <InputAdornment position="end">
-                  <IconButton onClick={handleTogglePassword} edge="end">
-                    {showPassword ? <EyeOff /> : <Eye />}
-                  </IconButton>
-                </InputAdornment>
-              ),
-            }}
+            endAdornment={
+              <IconButton onClick={handleTogglePassword} edge="end" size="small">
+                {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+              </IconButton>
+            }
           />
         </Grid>
 
@@ -328,10 +318,17 @@ const AddUserForm: React.FC<AddUserFormProps> = ({
               <Button
                 variant="contained"
                 onClick={handleSubmit}
-                disabled={!isFormValid() || isLoading}
-                startIcon={<Plus />}
+                disabled={!isFormValid || isLoading}
+                startIcon={<Plus size={18} />}
                 fullWidth={isSmallScreen}
-                sx={submitButton}
+                sx={{
+                  fontWeight: 600,
+                  fontSize: "0.95rem",
+                  textTransform: "none",
+                  letterSpacing: "0.01em",
+                  borderRadius: "12px",
+                  minHeight: "42px",
+                }}
               >
                 Agregar
               </Button>

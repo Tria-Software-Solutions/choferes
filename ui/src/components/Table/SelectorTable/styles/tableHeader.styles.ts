@@ -147,11 +147,15 @@ export const getTableHeaderStyles = (theme: Theme, isSmallScreen: boolean) => ({
     height: "32px",
   },
   periodSelectorCell: {
-    padding: isSmallScreen ? "6px 12px" : "8px 12px",
+    padding: isSmallScreen ? "0 12px" : "0 12px",
     backgroundColor: theme.palette.mode === "dark" ? "#111" : "#000000",
     color: "#fff",
     minHeight: "32px",
     height: "32px",
     width: "100%",
+    borderBottom: "none",
+    display: "flex",
+    alignItems: "center",
+    verticalAlign: "middle",
   },
 });

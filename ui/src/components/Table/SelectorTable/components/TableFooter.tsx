@@ -51,9 +51,23 @@ const renderPeriodFooter = (
   }
 };
 
-const generateRowsPerPageOptions = (currentRows: number): number[] => {
+const generateRowsPerPageOptions = (currentRows: number, total: number): number[] => {
   const defaults = [5, 10, 25, 50, 100];
-  return Array.from(new Set([...defaults, currentRows])).sort((a, b) => a - b);
+  
+  // Generate dynamic options based on total
+  const dynamicOptions: number[] = [];
+  let current = 5;
+  while (current < total) {
+    dynamicOptions.push(current);
+    current *= 2;
+  }
+  if (total > 0) {
+    dynamicOptions.push(total);
+  }
+  
+  // Combine with default options and remove duplicates
+  const allOptions = Array.from(new Set([...defaults, ...dynamicOptions, currentRows]));
+  return allOptions.filter((opt) => opt <= total || total === 0).sort((a, b) => a - b);
 };
 
 export const TableFooter = memo(function TableFooter({
@@ -73,7 +87,7 @@ export const TableFooter = memo(function TableFooter({
   paginationRef,
 }: TableFooterProps) {
   const styles = getTableFooterStyles(theme);
-  const rowsPerPageOptions = generateRowsPerPageOptions(rowsPerPage);
+  const rowsPerPageOptions = generateRowsPerPageOptions(rowsPerPage, sortedEmployees.length);
 
   return (
     <Box sx={styles.container}>
@@ -105,6 +119,33 @@ export const TableFooter = memo(function TableFooter({
           labelDisplayedRows={() => ""}
           ActionsComponent={PaginationComponent}
           sx={styles.pagination}
+          SelectProps={{
+            MenuProps: {
+              anchorOrigin: { horizontal: 'left', vertical: 'top' },
+              transformOrigin: { horizontal: 'left', vertical: 'bottom' },
+              PaperProps: {
+                sx: {
+                  maxHeight: 200,
+                  '& .MuiMenuItem-root': {
+                    fontSize: '0.75rem',
+                    padding: '6px 12px',
+                    border: 'none',
+                    '&.Mui-selected': {
+                      backgroundColor: theme.palette.action.selected,
+                      border: 'none',
+                    },
+                    '&:hover': {
+                      backgroundColor: theme.palette.action.hover,
+                      border: 'none',
+                    },
+                  },
+                },
+              },
+            },
+            onBlur: (e) => {
+              e.target.blur();
+            },
+          }}
         />
       </div>
     </Box>

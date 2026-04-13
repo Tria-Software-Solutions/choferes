@@ -15,7 +15,6 @@ import DIALOG from "../../constants/dialog.constants";
 import {
   dialogPaperStyles,
   headerBoxStyles,
-  iconBoxStyles,
   closeButtonStyles,
   dialogContentStyles,
   messageTypographyStyles,
@@ -129,7 +128,6 @@ const DialogComponent: React.FC<ConfirmationDialogProps> = ({
         header
       ) : (
         <Box sx={headerBoxStyles(theme)}>
-          {icon && <Box sx={iconBoxStyles(theme)}>{icon}</Box>}
           <Box>
             <Typography variant="h6" fontWeight={700} color="inherit" sx={{ fontSize: "1.1rem", letterSpacing: "-0.02em" }}>
               {title}

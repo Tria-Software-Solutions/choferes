@@ -59,7 +59,7 @@ const PaginationComponent: React.FC<PaginationActionsProps> = ({
           }}
         />
       </IconButton>
-      <Typography variant="body2" style={{ ...pageTextStyles, fontSize: "0.75rem", color: theme.palette.text.primary }}>
+      <Typography variant="body2" style={{ ...pageTextStyles, fontSize: "0.75rem", color: theme.palette.text.primary, fontWeight: 400 }}>
         {startIndex}-{endIndex} {PAGINATION.OF} {count}
       </Typography>
       <IconButton
