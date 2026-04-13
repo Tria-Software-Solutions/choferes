@@ -1,8 +1,8 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { useAuthContext } from "../../../context/AuthContext";
 import { Vehicle } from "../../../models/Vehicle";
-import { useReduxData, useAppDispatch } from "../../../hooks/useReduxData";
+import { useSelector, useDispatch } from "react-redux";
+import { RootState, AppDispatch } from "../../../store/store";
 import {
   fetchVehicles,
   createVehicle,
@@ -12,14 +12,9 @@ import {
 import SearchBarComponent from "../../../components/SearchBar/SearchBar.component";
 import EditableTableComponent from "../../../components/Table/EditableTable/EditableTable.component";
 import SpeedDialComponent from "../../../components/SpeedDial/SpeedDial.component";
-import DateSelectionComponent from "../../../components/DateSelection/DateSelection.component";
 import AddVehicleForm from "../../Forms/AddVehicleForm";
-import { es } from "date-fns/locale";
-import { LocalizationProvider } from "@mui/x-date-pickers";
-import { DatePicker } from "@mui/x-date-pickers/DatePicker";
-import { AdapterDateFns } from "@mui/x-date-pickers/AdapterDateFns";
 import { useAppNotifications } from "../../../components/Snackbar/Snackbar.component";
-import AppModal from "../../../components/AppModal/AppModal.component";
+import DialogComponent from "../../../components/Dialog/Dialog.component";
 import { createVehicleNotification } from "../../../services/notificationService";
 import {
   Box,
@@ -31,7 +26,12 @@ import {
   Backdrop,
   Paper,
 } from "@mui/material";
+import { LocalizationProvider } from "@mui/x-date-pickers";
+import { DatePicker } from "@mui/x-date-pickers/DatePicker";
+import { AdapterDateFns } from "@mui/x-date-pickers/AdapterDateFns";
 import { format } from "date-fns";
+import { es } from "date-fns/locale";
+import { isTodayOrFuture } from "../../../utils/dates";
 import {
   exportFileFormattedDate,
   exportTable,
@@ -42,7 +42,8 @@ import PAGE_TITLE from "../../../constants/pageTitle.constants";
 import PERMISSIONS from "../../../constants/permissions.constants";
 import NOTIFICATIONS from "../../../constants/notifications.constants";
 import MANAGEMENT from "../../../constants/management.constants";
-import { Car, Download, X, Search, Plus, Trash2, FileText, Table, PlusCircle, ChevronLeft, ChevronRight, RotateCcw } from "lucide-react";
+import { Car, Download, ChevronLeft, ChevronRight, X, Search, Plus, Trash2, FileText, Table, PlusCircle, RotateCcw } from "lucide-react";
+import PremiumTooltip from "../../../components/PremiumTooltip/PremiumTooltip.component";
 import {
   exportSpeedDialBoxStyles,
   loadingBoxStyles,
@@ -52,36 +53,41 @@ import {
   deleteDialogPaperSx,
   addDialogPaperSx,
 } from "./styles";
-import { useResponsiveTableHeight } from "../../../hooks/useResponsiveTableHeight";
+import { useLocation } from "react-router-dom";
 import { useTablePreferences } from "../../../hooks/useTablePreferences";
 import {
   getPreferencesObject,
   setPreferencesObject,
 } from "../../../utils/persistentState";
 
+const getInitialRowsPerPage = () => {
+  if (typeof window !== "undefined") {
+    const maxHeight = window.innerHeight * 0.6;
+    const headHeight = 56;
+    const paginationHeight = 64;
+    const extra = 24;
+    const availableHeight = maxHeight - headHeight - paginationHeight - extra;
+    const rowHeight = 48;
+    let rows = Math.floor(availableHeight / rowHeight);
+    return Math.max(3, Math.min(100, rows));
+  }
+  return 25;
+};
+
 // Vehicles management page component
 const VehiclesPage: React.FC = () => {
-  const dispatch = useAppDispatch();
+  const dispatch = useDispatch<AppDispatch>();
   const { userPermissions } = useAuthContext();
   const preferencesKey = "vehicles-preferences";
   const defaultPreferences = { date: new Date().toISOString() };
   const [selectedDate, setSelectedDate] = useState<Date>(() => {
     const prefs = getPreferencesObject(preferencesKey, defaultPreferences);
-    const today = new Date();
-    const savedDate = prefs.date ? new Date(prefs.date) : today;
-    
-    // Check if saved date is today, if not use today
-    const isToday = savedDate.toDateString() === today.toDateString();
-    return isToday ? savedDate : today;
+    return prefs.date ? new Date(prefs.date) : new Date();
   });
-  const { allVehicles, isLoadingVehicles } = useReduxData(
-    (state) => state.vehicles,
-    (prev, next) => prev.allVehicles === next.allVehicles && prev.isLoadingVehicles === next.isLoadingVehicles
+  const { allVehicles, isLoadingVehicles } = useSelector(
+    (state: RootState) => state.vehicles
   );
   const { showNotification } = useAppNotifications();
-
-  // Use dynamic table height hook
-  const { maxHeight, rowsPerPage: calculatedRowsPerPage } = useResponsiveTableHeight();
   const [filteredWeekVehicles, setFilteredWeekVehicles] = useState<Vehicle[]>(
     []
   );
@@ -107,9 +113,10 @@ const VehiclesPage: React.FC = () => {
 
   const theme = useTheme();
   const isSmallScreen = useMediaQuery(theme.breakpoints.down("sm"));
+  const location = useLocation();
 
   const { search, setSearch, rowsPerPage, setRowsPerPage } =
-    useTablePreferences("vehicles", () => calculatedRowsPerPage);
+    useTablePreferences("vehicles", getInitialRowsPerPage);
 
   // Memoize filtered vehicles for selected date and search
   const filteredVehicles = useMemo(() => {
@@ -151,12 +158,12 @@ const VehiclesPage: React.FC = () => {
     setTotalCount(filteredVehicles.length);
   }, [filteredVehicles]);
 
-  // Fetch all vehicles on mount (only if not already loaded)
+  // Fetch all vehicles on mount
   useEffect(() => {
-    if (shouldRefetch && allVehicles.length === 0) {
+    if (shouldRefetch) {
       dispatch(fetchVehicles({}));
     }
-  }, [dispatch, shouldRefetch, allVehicles.length]);
+  }, [dispatch, shouldRefetch, location.pathname]);
 
   // Filter vehicles for the selected week
   useEffect(() => {
@@ -495,7 +502,7 @@ const VehiclesPage: React.FC = () => {
   // Use exportTable({ data: exportData, ... }) for export
 
   return (
-    <Box sx={{ height: "calc(100vh - 64px - 32px)", display: "flex", flexDirection: "column", overflow: "hidden", pb: 0, pt: 0, px: 0 }}>
+    <Box sx={{ height: "calc(100vh - 100px)", display: "flex", flexDirection: "column", overflow: "hidden", pb: 0, pt: 0, px: 0 }}>
       {/* Premium Card with Header and Grid */}
       <Paper
         elevation={0}
@@ -513,7 +520,7 @@ const VehiclesPage: React.FC = () => {
         <Box
           sx={{
             px: { xs: 2, sm: 3 },
-            py: { xs: 1.5, sm: 2 },
+            py: { xs: 2, sm: 2.5 },
             backgroundColor: theme.palette.background.paper,
             color: theme.palette.text.primary,
             borderBottom: `1px solid ${theme.palette.mode === "dark" ? "rgba(255,255,255,0.08)" : "rgba(0,0,0,0.08)"}`,
@@ -523,7 +530,7 @@ const VehiclesPage: React.FC = () => {
             display="flex"
             justifyContent="space-between"
             alignItems="flex-start"
-            mb={1}
+            mb={2}
           >
             <Box display="flex" alignItems="center" gap={1.5}>
               <Box
@@ -600,7 +607,7 @@ const VehiclesPage: React.FC = () => {
             gap={2}
           >
             {/* Search */}
-            <Box flex={1} maxWidth={{ sm: "380px" }}>
+            <Box flex={1} maxWidth={{ sm: "320px" }}>
               {filteredVehicles && (
                 <SearchBarComponent
                   placeholder={MANAGEMENT.VEHICLES_PAGE.SEARCH_PLACEHOLDER}
@@ -622,29 +629,35 @@ const VehiclesPage: React.FC = () => {
                 display="flex"
                 alignItems="center"
                 justifyContent={{ xs: "flex-start", sm: "flex-end" }}
-                gap={0.5}
-                flexWrap="wrap"
+                gap={1}
               >
-                {/* Previous Date Button */}
-                <Button
-                  variant="outlined"
-                  onClick={handlePreviousDate}
-                  disableRipple
-                  disableElevation
-                  sx={{
-                    minWidth: '44px',
-                    height: '44px',
-                    px: 1.5,
-                    borderRadius: '10px',
-                    borderColor: theme.palette.mode === "dark" ? "rgba(255,255,255,0.2)" : "rgba(0,0,0,0.15)",
-                    '&:hover': {
-                      backgroundColor: theme.palette.mode === "dark" ? "rgba(255,255,255,0.05)" : "rgba(0,0,0,0.04)",
-                      borderColor: theme.palette.mode === "dark" ? "rgba(255,255,255,0.3)" : "rgba(0,0,0,0.25)",
-                    },
-                  }}
-                >
-                  <ChevronLeft size={20} />
-                </Button>
+                {/* Previous Day Button */}
+                <PremiumTooltip title={MANAGEMENT.VEHICLES_PAGE.TOOLTIP_PREV_DAY}>
+                  <span>
+                    <Button
+                      variant="outlined"
+                      onClick={handlePreviousDate}
+                      disableRipple
+                      disableElevation
+                      sx={{
+                        minWidth: '44px',
+                        height: '44px',
+                        px: 1.5,
+                        borderRadius: '10px',
+                        borderColor: theme.palette.mode === "dark" ? "rgba(255,255,255,0.2)" : "rgba(0,0,0,0.15)",
+                        '&:hover': {
+                          backgroundColor: theme.palette.mode === "dark" ? "rgba(255,255,255,0.05)" : "rgba(0,0,0,0.04)",
+                          borderColor: theme.palette.mode === "dark" ? "rgba(255,255,255,0.3)" : "rgba(0,0,0,0.25)",
+                        },
+                        '&.Mui-disabled': {
+                          borderColor: theme.palette.mode === "dark" ? "rgba(255,255,255,0.1)" : "rgba(0,0,0,0.08)",
+                        },
+                      }}
+                    >
+                      <ChevronLeft size={20} />
+                    </Button>
+                  </span>
+                </PremiumTooltip>
 
                 {/* Date Picker */}
                 <LocalizationProvider
@@ -682,55 +695,63 @@ const VehiclesPage: React.FC = () => {
                   />
                 </LocalizationProvider>
 
-                {/* Next Date Button */}
-                <Button
-                  variant="outlined"
-                  disabled={selectedDate >= new Date()}
-                  onClick={handleNextDate}
-                  disableRipple
-                  disableElevation
-                  sx={{
-                    minWidth: '44px',
-                    height: '44px',
-                    px: 1.5,
-                    borderRadius: '10px',
-                    borderColor: theme.palette.mode === "dark" ? "rgba(255,255,255,0.2)" : "rgba(0,0,0,0.15)",
-                    '&:hover': {
-                      backgroundColor: theme.palette.mode === "dark" ? "rgba(255,255,255,0.05)" : "rgba(0,0,0,0.04)",
-                      borderColor: theme.palette.mode === "dark" ? "rgba(255,255,255,0.3)" : "rgba(0,0,0,0.25)",
-                    },
-                    '&.Mui-disabled': {
-                      borderColor: theme.palette.mode === "dark" ? "rgba(255,255,255,0.1)" : "rgba(0,0,0,0.08)",
-                    },
-                  }}
-                >
-                  <ChevronRight size={20} />
-                </Button>
+                {/* Next Day Button */}
+                <PremiumTooltip title={MANAGEMENT.VEHICLES_PAGE.TOOLTIP_NEXT_DAY}>
+                  <span>
+                    <Button
+                      variant="outlined"
+                      disabled={isTodayOrFuture(selectedDate)}
+                      onClick={handleNextDate}
+                      disableRipple
+                      disableElevation
+                      sx={{
+                        minWidth: '44px',
+                        height: '44px',
+                        px: 1.5,
+                        borderRadius: '10px',
+                        borderColor: theme.palette.mode === "dark" ? "rgba(255,255,255,0.2)" : "rgba(0,0,0,0.15)",
+                        '&:hover': {
+                          backgroundColor: theme.palette.mode === "dark" ? "rgba(255,255,255,0.05)" : "rgba(0,0,0,0.04)",
+                          borderColor: theme.palette.mode === "dark" ? "rgba(255,255,255,0.3)" : "rgba(0,0,0,0.25)",
+                        },
+                        '&.Mui-disabled': {
+                          borderColor: theme.palette.mode === "dark" ? "rgba(255,255,255,0.1)" : "rgba(0,0,0,0.08)",
+                        },
+                      }}
+                    >
+                      <ChevronRight size={20} />
+                    </Button>
+                  </span>
+                </PremiumTooltip>
 
-                {/* Current Date Button */}
-                <Button
-                  variant="outlined"
-                  disabled={selectedDate.toDateString() === new Date().toDateString()}
-                  onClick={handleCurrentDate}
-                  disableRipple
-                  disableElevation
-                  sx={{
-                    minWidth: '44px',
-                    height: '44px',
-                    px: 1.5,
-                    borderRadius: '10px',
-                    borderColor: theme.palette.mode === "dark" ? "rgba(255,255,255,0.2)" : "rgba(0,0,0,0.15)",
-                    '&:hover': {
-                      backgroundColor: theme.palette.mode === "dark" ? "rgba(255,255,255,0.05)" : "rgba(0,0,0,0.04)",
-                      borderColor: theme.palette.mode === "dark" ? "rgba(255,255,255,0.3)" : "rgba(0,0,0,0.25)",
-                    },
-                    '&.Mui-disabled': {
-                      borderColor: theme.palette.mode === "dark" ? "rgba(255,255,255,0.1)" : "rgba(0,0,0,0.08)",
-                    },
-                  }}
-                >
-                  <RotateCcw size={18} />
-                </Button>
+                {/* Current Day Button */}
+                <PremiumTooltip title={MANAGEMENT.VEHICLES_PAGE.TOOLTIP_CURRENT_DAY}>
+                  <span>
+                    <Button
+                      variant="outlined"
+                      disabled={isTodayOrFuture(selectedDate)}
+                      onClick={handleCurrentDate}
+                      disableRipple
+                      disableElevation
+                      sx={{
+                        minWidth: '44px',
+                        height: '44px',
+                        px: 1.5,
+                        borderRadius: '10px',
+                        borderColor: theme.palette.mode === "dark" ? "rgba(255,255,255,0.2)" : "rgba(0,0,0,0.15)",
+                        '&:hover': {
+                          backgroundColor: theme.palette.mode === "dark" ? "rgba(255,255,255,0.05)" : "rgba(0,0,0,0.04)",
+                          borderColor: theme.palette.mode === "dark" ? "rgba(255,255,255,0.3)" : "rgba(0,0,0,0.25)",
+                        },
+                        '&.Mui-disabled': {
+                          borderColor: theme.palette.mode === "dark" ? "rgba(255,255,255,0.1)" : "rgba(0,0,0,0.08)",
+                        },
+                      }}
+                    >
+                      <RotateCcw size={18} />
+                    </Button>
+                  </span>
+                </PremiumTooltip>
               </Box>
 
               {/* Add Button Desktop */}
@@ -760,7 +781,7 @@ const VehiclesPage: React.FC = () => {
 
         {/* Mobile Add Button */}
         {userPermissions.includes(PERMISSIONS.CREATE_VEHICLES) && (
-          <Box sx={{ display: { xs: 'flex', sm: 'none' }, p: 1.5, borderTop: `1px solid ${theme.palette.mode === "dark" ? "rgba(255,255,255,0.08)" : "rgba(0,0,0,0.08)"}` }}>
+          <Box sx={{ display: { xs: 'flex', sm: 'none' }, p: 2, borderTop: `1px solid ${theme.palette.mode === "dark" ? "rgba(255,255,255,0.08)" : "rgba(0,0,0,0.08)"}` }}>
             <Button
               variant="contained"
               fullWidth
@@ -818,7 +839,6 @@ const VehiclesPage: React.FC = () => {
                   isSaveDisabled={!isEditFormValid}
                   userPermissions={userPermissions}
                   validateField={validateField}
-                  maxTableHeight={maxHeight}
                 />
               ) : (
                 <Box sx={noVehiclesBoxStyles}>
@@ -839,7 +859,7 @@ const VehiclesPage: React.FC = () => {
           )}
         </Box>
       </Paper>
-      <AppModal
+      <DialogComponent
         open={openDeleteDialog}
         onClose={handleCloseDeleteDialog}
         onConfirm={handleDelete}
@@ -852,7 +872,7 @@ const VehiclesPage: React.FC = () => {
         paperSx={deleteDialogPaperSx ?? {}}
         icon={<Trash2 color="var(--mui-palette-error-main)" />}
       />
-      <AppModal
+      <DialogComponent
         open={openAddVehicleModal}
         onClose={handleCloseAddVehicleModal}
         title={MANAGEMENT.VEHICLES_PAGE.DIALOG_ADD_TITLE}
@@ -875,7 +895,7 @@ const VehiclesPage: React.FC = () => {
           getNextTicketNumber={getNextTicketNumber}
           defaultParkingDate={selectedDate}
         />
-      </AppModal>
+      </DialogComponent>
     </Box>
   );
 };

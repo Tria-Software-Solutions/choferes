@@ -13,9 +13,22 @@ import TabList from "@mui/lab/TabList";
 import TabPanel from "@mui/lab/TabPanel";
 import Tab from "@mui/material/Tab";
 import MANAGEMENT from '../../../constants/management.constants';
-import { summaryTabPanelAvatarStyles } from '../../Management/RolesPage/styles';
-import { infoBox, infoIconBox, infoTitle, infoDesc, iconStyle } from '../AddEmployeeForm/styles';
-import { actionsBox, actionsInnerBox } from '../AdjustHoursDialog/styles';
+import {
+  containerBox,
+  tabListSx,
+  premiumDivider,
+  premiumAvatarStyles,
+  titleTypography,
+  hoursTypography,
+  subtitleTypography,
+  infoBox,
+  infoIconBox,
+  infoIconStyle,
+  infoTitle,
+  infoDesc,
+  actionsBox,
+  closeButtonSx,
+} from './styles';
 import { Employee } from '../../../models/Employee';
 import { Theme } from '@mui/material/styles';
 
@@ -56,138 +69,110 @@ const WorkedHoursSummaryDialog: React.FC<WorkedHoursSummaryDialogProps> = ({
 }) => {
   if (!employee) return null;
   return (
-    <Box sx={{ p: 2 }}>
-      <Grid container spacing={3}>
+    <Box sx={containerBox}>
+      <Grid container spacing={2}>
         <Grid item xs={12}>
           <TabContext value={summaryTab}>
             <TabList
               onChange={(_, v) => setSummaryTab(v as typeof summaryTab)}
               variant="scrollable"
               scrollButtons="auto"
-              sx={{
-                minHeight: 48,
-                "& .MuiTab-root": {
-                  minWidth: "auto",
-                  fontSize: { xs: "0.75rem", sm: "0.875rem" },
-                  padding: { xs: "6px 8px", sm: "12px 16px" },
-                },
-              }}
+              sx={tabListSx}
             >
               <Tab label={MANAGEMENT.TAB_WEEKLY} value="weekly" />
               <Tab label={MANAGEMENT.TAB_BIWEEKLY} value="biweekly" />
               <Tab label={MANAGEMENT.TAB_MONTHLY} value="monthly" />
               <Tab label={MANAGEMENT.TAB_OVERTIME} value="overtime" />
             </TabList>
-            <Divider sx={{ mb: 2 }} />
+            <Divider sx={premiumDivider} />
             <TabPanel value="weekly">
-              <Box display="flex" alignItems="center" gap={3}>
-                <Avatar sx={summaryTabPanelAvatarStyles(theme, "success")}> 
-                  <BarChart3 color="success" />
+              <Box sx={{ textAlign: 'center', py: 2 }}>
+                <Avatar sx={{ ...premiumAvatarStyles(theme, "success"), mx: 'auto', mb: 2 }}>
+                  <BarChart3 color="#fff" size={32} />
                 </Avatar>
-                <Box>
-                  <Typography variant="h6" fontWeight={700}>
-                    {MANAGEMENT.SUMMARY_WEEKLY}
-                  </Typography>
-                  <Typography variant="h3" color="primary" fontWeight={800}>
-                    {getEmployeeWeeklyHours(employee.id)}
-                  </Typography>
-                  <Typography variant="body2" color="text.secondary">
-                    Semana #{currentWeekNumber}
-                  </Typography>
-                </Box>
+                <Typography sx={{ ...titleTypography(theme), mb: 1 }}>
+                  {MANAGEMENT.SUMMARY_WEEKLY}
+                </Typography>
+                <Typography sx={{ ...hoursTypography(theme), fontSize: '3rem' }}>
+                  {getEmployeeWeeklyHours(employee.id)}
+                </Typography>
+                <Typography sx={subtitleTypography(theme)}>
+                  Semana #{currentWeekNumber}
+                </Typography>
               </Box>
             </TabPanel>
             <TabPanel value="biweekly">
-              <Box display="flex" alignItems="center" gap={3}>
-                <Avatar sx={summaryTabPanelAvatarStyles(theme, "info")}> 
-                  <BarChart3 color="info" />
+              <Box sx={{ textAlign: 'center', py: 2 }}>
+                <Avatar sx={{ ...premiumAvatarStyles(theme, "info"), mx: 'auto', mb: 2 }}>
+                  <BarChart3 color="#fff" size={32} />
                 </Avatar>
-                <Box>
-                  <Typography variant="h6" fontWeight={700}>
-                    {MANAGEMENT.SUMMARY_BIWEEKLY}
-                  </Typography>
-                  <Typography variant="h3" color="primary" fontWeight={800}>
-                    {getEmployeeBiweeklyHours(employee.id)}
-                  </Typography>
-                  <Typography variant="body2" color="text.secondary">
-                    Quincena #{currentBiweekNumber}
-                  </Typography>
-                </Box>
+                <Typography sx={{ ...titleTypography(theme), mb: 1 }}>
+                  {MANAGEMENT.SUMMARY_BIWEEKLY}
+                </Typography>
+                <Typography sx={{ ...hoursTypography(theme), fontSize: '3rem' }}>
+                  {getEmployeeBiweeklyHours(employee.id)}
+                </Typography>
+                <Typography sx={subtitleTypography(theme)}>
+                  Quincena #{currentBiweekNumber}
+                </Typography>
               </Box>
             </TabPanel>
             <TabPanel value="monthly">
-              <Box display="flex" alignItems="center" gap={3}>
-                <Avatar sx={summaryTabPanelAvatarStyles(theme, "warning")}> 
-                  <BarChart3 color="warning" />
+              <Box sx={{ textAlign: 'center', py: 2 }}>
+                <Avatar sx={{ ...premiumAvatarStyles(theme, "warning"), mx: 'auto', mb: 2 }}>
+                  <BarChart3 color="#fff" size={32} />
                 </Avatar>
-                <Box>
-                  <Typography variant="h6" fontWeight={700}>
-                    {MANAGEMENT.SUMMARY_MONTHLY}
-                  </Typography>
-                  <Typography variant="h3" color="primary" fontWeight={800}>
-                    {getEmployeeMonthlyHours(employee.id)}
-                  </Typography>
-                  <Typography variant="body2" color="text.secondary">
-                    Mes #{currentMonth} / {currentYear}
-                  </Typography>
-                </Box>
+                <Typography sx={{ ...titleTypography(theme), mb: 1 }}>
+                  {MANAGEMENT.SUMMARY_MONTHLY}
+                </Typography>
+                <Typography sx={{ ...hoursTypography(theme), fontSize: '3rem' }}>
+                  {getEmployeeMonthlyHours(employee.id)}
+                </Typography>
+                <Typography sx={subtitleTypography(theme)}>
+                  Mes #{currentMonth} / {currentYear}
+                </Typography>
               </Box>
             </TabPanel>
             <TabPanel value="overtime">
-              <Box display="flex" alignItems="center" gap={3}>
-                <Avatar sx={summaryTabPanelAvatarStyles(theme, "error")}> 
-                  <Clock color="error" />
+              <Box sx={{ textAlign: 'center', py: 2 }}>
+                <Avatar sx={{ ...premiumAvatarStyles(theme, "error"), mx: 'auto', mb: 2 }}>
+                  <Clock color="#fff" size={32} />
                 </Avatar>
-                <Box>
-                  <Typography variant="h6" fontWeight={700}>
-                    {MANAGEMENT.SUMMARY_OVERTIME}
-                  </Typography>
-                  <Typography variant="h3" color="error" fontWeight={800} sx={{ mb: 1 }}>
-                    {getEmployeeWeeklyOvertime(employee.id)}
-                  </Typography>
-                  <Typography variant="body2" color="text.secondary">
-                    Semanal: {getEmployeeWeeklyOvertime(employee.id)}
-                  </Typography>
-                  <Typography variant="body2" color="text.secondary">
-                    Quincenal: {getEmployeeBiweeklyOvertime(employee.id)}
-                  </Typography>
-                  <Typography variant="body2" color="text.secondary">
-                    Mensual: {getEmployeeMonthlyOvertime(employee.id)}
-                  </Typography>
-                  <Typography variant="body2" color="text.secondary">
-                    {MANAGEMENT.SUMMARY_DETAIL_OVERTIME}
-                  </Typography>
-                </Box>
+                <Typography sx={{ ...titleTypography(theme), mb: 1 }}>
+                  {MANAGEMENT.SUMMARY_OVERTIME}
+                </Typography>
+                <Typography sx={{ ...hoursTypography(theme), fontSize: '3rem' }}>
+                  {getEmployeeWeeklyOvertime(employee.id)}
+                </Typography>
               </Box>
             </TabPanel>
           </TabContext>
         </Grid>
         <Grid item xs={12}>
-          <Box sx={infoBox(theme)}>
-            <Box sx={infoIconBox(theme)}>
-              <Info style={iconStyle} />
+          <Box sx={infoBox}>
+            <Box sx={infoIconBox}>
+              <Info style={infoIconStyle} size={20} />
             </Box>
             <Box>
-              <Typography sx={infoTitle(theme)}>
+              <Typography sx={infoTitle}>
                 {MANAGEMENT.SUMMARY_INFO_TITLE}
               </Typography>
-              <Typography sx={infoDesc(theme)}>
+              <Typography sx={infoDesc}>
                 {MANAGEMENT.SUMMARY_INFO_DESC}
               </Typography>
             </Box>
           </Box>
         </Grid>
         <Grid item xs={12}>
-          <Box sx={actionsBox(theme)}>
+          <Box sx={actionsBox}>
             <Button
               onClick={onCancel}
               variant="outlined"
               color="inherit"
-              sx={{ minWidth: 120, py: 1.5, fontWeight: 600 }}
+              sx={closeButtonSx}
             >
               Cerrar
             </Button>
-            <Box sx={actionsInnerBox} />
           </Box>
         </Grid>
       </Grid>

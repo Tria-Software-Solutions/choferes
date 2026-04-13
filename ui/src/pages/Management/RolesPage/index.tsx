@@ -1,10 +1,10 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
-import React, { useCallback, useEffect, useMemo, useState, memo } from "react";
+import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { useAuthContext } from "../../../context/AuthContext";
 import { Employee } from "../../../models/Employee";
 import { Schedule } from "../../../models/Schedule";
 
-import { useReduxData, useAppDispatch } from "../../../hooks/useReduxData";
+import { useSelector, useDispatch } from "react-redux";
+import { RootState, AppDispatch } from "../../../store/store";
 import { fetchEmployees } from "../../../store/slices/employeeSlice";
 import { fetchSchedules } from "../../../store/slices/schedulesSlice";
 import {
@@ -17,7 +17,6 @@ import { useMonthlySummaries } from "../../../hooks/useMonthlySummary";
 import SearchBarComponent from "../../../components/SearchBar/SearchBar.component";
 import SelectorTableComponent from "../../../components/Table/SelectorTable/SelectorTable.component";
 import SpeedDialComponent from "../../../components/SpeedDial/SpeedDial.component";
-import AppModal from "../../../components/AppModal/AppModal.component";
 import { es } from "date-fns/locale";
 import { LocalizationProvider } from "@mui/x-date-pickers";
 import { DatePicker } from "@mui/x-date-pickers/DatePicker";
@@ -61,6 +60,7 @@ import PAGE_TITLE from "../../../constants/pageTitle.constants";
 import PERMISSIONS from "../../../constants/permissions.constants";
 import MANAGEMENT from "../../../constants/management.constants";
 import { Download, ChevronLeft, ChevronRight, X, Search, RotateCcw } from "lucide-react";
+import DialogComponent from "../../../components/Dialog/Dialog.component";
 import { ClipboardList, Sparkles } from "lucide-react";
 import AutoGenerateModal, { AutoGenerateConfig } from "../../../components/Modal/AutoGenerateModal/AutoGenerateModal.component";
 import {
@@ -71,7 +71,7 @@ import {
   noEmployeesBoxStyles,
   noEmployeesIconStyles,
 } from "./styles";
-import { useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import PremiumTooltip from "../../../components/PremiumTooltip/PremiumTooltip.component";
 import { useTablePreferences } from "../../../hooks/useTablePreferences";
 import {
@@ -94,35 +94,37 @@ const defaultPreferences = { date: new Date().toISOString() };
 
 // Roles management and summary page component
 const RolesPage: React.FC = () => {
-  const dispatch = useAppDispatch();
+  const dispatch = useDispatch<AppDispatch>();
   const { userPermissions } = useAuthContext();
   const { showNotification } = useAppNotifications();
-  const employees = useReduxData((state) => state.employees.employees);
-  const isLoadingEmployees = useReduxData((state) => state.employees.isLoadingEmployees);
-  const schedules = useReduxData((state) => state.schedules.schedules);
-  const isLoadingSchedules = useReduxData((state) => state.schedules.isLoadingSchedules);
-  const hoursWorked = useReduxData((state) => state.hoursWorked.hoursWorked);
-  const isLoadingHoursWorked = useReduxData((state) => state.hoursWorked.isLoadingHoursWorked);
+  const { employees, isLoadingEmployees } = useSelector(
+    (state: RootState) => state.employees
+  );
+  const { schedules, isLoadingSchedules } = useSelector(
+    (state: RootState) => state.schedules
+  );
+  const { hoursWorked, isLoadingHoursWorked } = useSelector(
+    (state: RootState) => state.hoursWorked
+  );
+  const [filteredEmployees, setFilteredEmployees] = useState<Employee[]>([]);
+  const [filteredSchedules, setFilteredSchedules] = useState<Schedule[]>([]);
   const {
     weeklySummaries,
-    totalCountWeeklySummaries,
     isLoadingWeeklySummaries,
     updateWeeklySummary,
     createOrUpdateWeeklySummary,
   } = useWeeklySummaries();
   const {
     biweeklySummaries,
-    totalCountBiweeklySummaries,
     isLoadingBiweeklySummaries,
-    updateBiweeklySummary,
     createOrUpdateBiweeklySummary,
+    updateBiweeklySummary,
   } = useBiweeklySummaries();
   const {
     monthlySummaries,
-    totalCountMonthlySummaries,
     isLoadingMonthlySummaries,
-    updateMonthlySummary,
     createOrUpdateMonthlySummary,
+    updateMonthlySummary,
   } = useMonthlySummaries();
   const [weekOffset, setWeekOffset] = useState(0);
   const [firstDayOfWeek, setFirstDayOfWeek] = useState<Date | null>(() => {
@@ -139,36 +141,35 @@ const RolesPage: React.FC = () => {
   const [openAddRoleModal, setOpenAddRoleModal] = useState(false);
   const [isGeneratingHours, setIsGeneratingHours] = useState(false);
   const [currentModalConfig, setCurrentModalConfig] = useState<AutoGenerateConfig | null>(null);
-
-  // Debug: Track when viewMode changes
   const [viewMode, setViewMode] = useState<'employee' | 'schedule'>(() => {
     const savedViewMode = localStorage.getItem('selectorTableViewMode');
     const hasRolesPermission = userPermissions.includes(PERMISSIONS.VIEW_ROLES);
     const hasSchedulePermission = userPermissions.includes(PERMISSIONS.VIEW_SCHEDULES);
-
+    
     // Si tiene permiso para roles, mostrar vista de horarios por defecto
     if (hasRolesPermission) {
       return (savedViewMode === 'employee' || savedViewMode === 'schedule')
         ? savedViewMode as 'employee' | 'schedule'
         : 'schedule';
     }
-
+    
     // Si no tiene permiso para roles pero sí para horarios, mostrar horarios
     if (hasSchedulePermission) {
       return 'schedule';
     }
-
+    
     // Si no tiene ninguno de los dos permisos, usar el guardado o default a empleados
-    return (savedViewMode === 'employee' || savedViewMode === 'schedule')
-      ? savedViewMode as 'employee' | 'schedule'
+    return (savedViewMode === 'employee' || savedViewMode === 'schedule') 
+      ? savedViewMode as 'employee' | 'schedule' 
       : 'employee';
   });
 
   const theme = useTheme();
   const isSmallScreen = useMediaQuery(theme.breakpoints.down("sm"));
+  const location = useLocation();
   const navigate = useNavigate();
 
-  const getInitialRowsPerPage = useCallback(() => {
+  const getInitialRowsPerPage = () => {
     if (typeof window !== "undefined") {
       // Total chrome: appbar(64) + page header(110) + selector header(36) + table head(36) + footer(36) + borders/gaps(20)
       const totalChrome = 302;
@@ -178,7 +179,7 @@ const RolesPage: React.FC = () => {
       return Math.max(3, Math.min(100, rows));
     }
     return 25;
-  }, []);
+  };
 
   const { search, setSearch, rowsPerPage, setRowsPerPage } =
     useTablePreferences("roles-selector", getInitialRowsPerPage);
@@ -188,7 +189,7 @@ const RolesPage: React.FC = () => {
     localStorage.setItem('selectorTableViewMode', viewMode);
   }, [viewMode]);
 
-  // Handle view mode based on permissions - only check on permission changes
+  // Handle view mode based on permissions
   useEffect(() => {
     const hasRolesPermission = userPermissions.includes(PERMISSIONS.VIEW_ROLES);
     const hasSchedulePermission = userPermissions.includes(PERMISSIONS.VIEW_SCHEDULES);
@@ -199,26 +200,18 @@ const RolesPage: React.FC = () => {
     }
   }, [userPermissions, viewMode]);
 
-  // Fetch employees, schedules, and hours worked on mount (only if not already loaded)
+  // Fetch employees, schedules, and hours worked on mount
   useEffect(() => {
-    if (employees.length === 0) {
-      dispatch(fetchEmployees());
-    }
-  }, [employees.length, dispatch]);
+    dispatch(fetchEmployees());
+    dispatch(fetchSchedules());
+    dispatch(fetchHoursWorked());
+  }, [dispatch, location.pathname]);
 
+  // Initialize filteredSchedules with all schedules
   useEffect(() => {
-    if (schedules.length === 0) {
-      dispatch(fetchSchedules());
-    }
-  }, [schedules.length, dispatch]);
+    setFilteredSchedules(schedules);
+  }, [schedules]);
 
-  useEffect(() => {
-    if (hoursWorked.length === 0) {
-      dispatch(fetchHoursWorked());
-    }
-  }, [hoursWorked.length, dispatch]);
-
-  // Initialize filteredSchedules with all schedules - only when explicitly needed
   const isLoading =
     isLoadingEmployees ||
     isLoadingSchedules ||
@@ -227,80 +220,80 @@ const RolesPage: React.FC = () => {
     isLoadingBiweeklySummaries ||
     isLoadingMonthlySummaries;
 
-  // Memoized filtered employees to prevent unnecessary re-renders
-  const memoizedFilteredEmployees = useMemo(() => {
+  // Filter employees or schedules by search input based on viewMode
+  useEffect(() => {
     const normalizeString = (str: string) =>
       str.normalize("NFD").replace(/[\u0300-\u036f]/g, "");
-    const normalizedSearch = normalizeString(search).toLowerCase();
-    
-    const result = employees.filter((employee) =>
-      normalizeString(`${employee.firstName} ${employee.lastName}`)
-        .toLowerCase()
-        .includes(normalizedSearch)
+
+    setFilteredEmployees(
+      employees.filter((employee) =>
+        normalizeString(`${employee.firstName} ${employee.lastName}`)
+          .toLowerCase()
+          .includes(normalizeString(search).toLowerCase())
+      )
     );
-    return result;
-  }, [search, employees]);
 
-  // Memoized filtered schedules to prevent unnecessary re-renders
-  const memoizedFilteredSchedules = useMemo(() => {
-    const normalizeString = (str: string) =>
-      str.normalize("NFD").replace(/[\u0300-\u036f]/g, "");
-    const normalizedSearch = normalizeString(search).toLowerCase();
-    
-    const result = schedules.filter((schedule) =>
-      normalizeString(schedule.label)
-        .toLowerCase()
-        .includes(normalizedSearch)
-    );
-    return result;
-  }, [search, schedules]);
+    if (viewMode === 'employee') {
+      // filteredEmployees ya está actualizado arriba
+    } else {
+      setFilteredSchedules(
+        schedules.filter((schedule) =>
+          normalizeString(schedule.label)
+            .toLowerCase()
+            .includes(normalizeString(search).toLowerCase())
+        )
+      );
+    }
+  }, [search, employees, schedules, viewMode]);
 
 
-
-  // Memoize current week dates to prevent recalculation
-  const currentWeekDates = useMemo(() => getCurrentWeekDates(weekOffset), [weekOffset]);
 
   // Update week, biweek, month, and year based on week offset
   useEffect(() => {
-    if (currentWeekDates.length > 0) {
-      const firstDayOfWeek = new Date(currentWeekDates[0].date);
-      const newWeekNumber = getWeekNumber(firstDayOfWeek);
-      const newBiweekNumber = getBiweekNumber(firstDayOfWeek);
-      const newMonth = getMonthNumber(firstDayOfWeek);
-      const newYear = firstDayOfWeek.getFullYear();
+    const currentWeek = getCurrentWeekDates(weekOffset);
 
-      setCurrentWeekNumber(newWeekNumber);
-      setCurrentBiweekNumber(newBiweekNumber);
-      setCurrentMonth(newMonth);
-      setCurrentYear(newYear);
+    if (currentWeek.length > 0) {
+      const firstDayOfWeek = new Date(currentWeek[0].date);
+
+      setCurrentWeekNumber((prev) => {
+        const newWeekNumber = getWeekNumber(firstDayOfWeek);
+        return newWeekNumber !== prev ? newWeekNumber : prev;
+      });
+      setCurrentBiweekNumber((prev) => {
+        const newBiweekNumber = getBiweekNumber(firstDayOfWeek);
+        return newBiweekNumber !== prev ? newBiweekNumber : prev;
+      });
+      setCurrentMonth((prev) => {
+        const newMonth = getMonthNumber(firstDayOfWeek);
+        return newMonth !== prev ? newMonth : prev;
+      });
+      setCurrentYear((prev) => {
+        const newYear = new Date().getFullYear();
+        return newYear !== prev ? newYear : prev;
+      });
     }
-  }, [currentWeekDates]);
+  }, [weekOffset]);
 
   // Handle date picker change and update week offset
   const handleDateChange = useCallback((newDate: Date | null) => {
-    if (!newDate) return;
-    
-    setFirstDayOfWeek(newDate);
-    
-    // Debounce preference update to avoid blocking UI
-    requestAnimationFrame(() => {
+    if (newDate) {
+      setFirstDayOfWeek(newDate);
       const prefs = getPreferencesObject(preferencesKey, defaultPreferences);
       setPreferencesObject(preferencesKey, {
         ...prefs,
         date: newDate.toISOString(),
       });
-    });
-    
-    const today = new Date();
-    const weekOptions: { weekStartsOn: 0 | 1 | 2 | 3 | 4 | 5 | 6 } = {
-      weekStartsOn: 1,
-    };
-    const newWeekOffset = differenceInCalendarWeeks(
-      newDate,
-      today,
-      weekOptions
-    );
-    setWeekOffset(newWeekOffset);
+      const today = new Date();
+      const weekOptions: { weekStartsOn: 0 | 1 | 2 | 3 | 4 | 5 | 6 } = {
+        weekStartsOn: 1,
+      };
+      const newWeekOffset = differenceInCalendarWeeks(
+        newDate,
+        today,
+        weekOptions
+      );
+      setWeekOffset(newWeekOffset);
+    }
   }, []);
 
   // Helper function to recalculate and update weekly summary for an employee
@@ -313,97 +306,155 @@ const RolesPage: React.FC = () => {
       scheduleId: number;
     }
   ) => {
-    const startTime = performance.now();
-    // Lightweight calculation - just update the summaries
-    // The actual data is already in Redux, we just compute the totals
     const calculateTotalHoursForRange = (
       rangeStart: Date,
       rangeEnd: Date,
     ) => {
-      let totalHours = 0;
-      for (const hw of hoursWorked) {
-        if (hw.employeeId !== employeeId) continue;
+      const employeeHoursWorked = hoursWorked.filter((hw) => {
         const hwDate = new Date(hw.date);
-        if (hwDate < rangeStart || hwDate > rangeEnd) continue;
-        
+        return (
+          hw.employeeId === employeeId &&
+          hwDate >= rangeStart &&
+          hwDate <= rangeEnd
+        );
+      });
+
+      const allEntries = newHoursWorkedEntry
+        ? [
+            ...employeeHoursWorked.filter((hw) => {
+              const hwDate = new Date(hw.date);
+              const newEntryDate = new Date(newHoursWorkedEntry.date);
+              return hwDate.toDateString() !== newEntryDate.toDateString();
+            }),
+            newHoursWorkedEntry,
+          ]
+        : employeeHoursWorked;
+
+      let totalHours = 0;
+
+      allEntries.forEach((hw) => {
         const schedule = schedules.find((s) => s.id === hw.scheduleId);
         if (schedule) {
-          totalHours += "hours" in hw && typeof hw.hours === "number" ? hw.hours : schedule.hours;
+          let dayHours: number;
+          if ("hours" in hw && typeof hw.hours === "number") {
+            dayHours = hw.hours;
+          } else {
+            dayHours = schedule.hours;
+          }
+          totalHours += dayHours;
         }
-      }
+      });
+
       return totalHours;
     };
 
+    // Calculate total weekly hours for this employee
     const weekStart = startOfWeek(date, { weekStartsOn: 1 });
     const weekEnd = addDays(weekStart, 6);
+    
+    const totalWeeklyHours = calculateTotalHoursForRange(weekStart, weekEnd);
+
+    // Update weekly summary
     const weekNumber = getWeekNumber(date);
     const month = date.getMonth() + 1;
     const year = date.getFullYear();
+    
+    const existingWeeklySummary = weeklySummaries.find(
+      (ws) => ws.employeeId === employeeId &&
+               ws.weekNumber === weekNumber &&
+               ws.year === year
+    );
 
-    // Calculate all three summaries in parallel
-    const totalWeeklyHours = calculateTotalHoursForRange(weekStart, weekEnd);
+    const weeklySummary = {
+      employeeId,
+      weekNumber,
+      month,
+      year,
+      totalHours: totalWeeklyHours,
+    };
+
+    if (existingWeeklySummary) {
+      await updateWeeklySummary(existingWeeklySummary.id, weeklySummary);
+    } else {
+      await createOrUpdateWeeklySummary(weeklySummary);
+    }
+
     const biweekNumber = getBiweekNumber(date);
-    const { startDate: biweekStart, endDate: biweekEnd } = getBiweeklyDates(year, biweekNumber);
-    const totalBiweeklyHours = calculateTotalHoursForRange(biweekStart, biweekEnd);
+    const { startDate: biweekStart, endDate: biweekEnd } = getBiweeklyDates(
+      year,
+      biweekNumber,
+    );
+    const totalBiweeklyHours = calculateTotalHoursForRange(
+      biweekStart,
+      biweekEnd,
+    );
+    const existingBiweeklySummary = biweeklySummaries.find(
+      (bs) =>
+        bs.employeeId === employeeId &&
+        bs.biweekNumber === biweekNumber &&
+        bs.year === year,
+    );
+
+    const biweeklySummary = {
+      employeeId,
+      biweekNumber,
+      month,
+      year,
+      totalHours: totalBiweeklyHours,
+    };
+
+    if (existingBiweeklySummary) {
+      await updateBiweeklySummary(existingBiweeklySummary.id, biweeklySummary);
+    } else {
+      await createOrUpdateBiweeklySummary(biweeklySummary);
+    }
+
     const monthStart = new Date(year, month - 1, 1);
     const monthEnd = new Date(year, month, 0);
-    const totalMonthlyHours = calculateTotalHoursForRange(monthStart, monthEnd);
-
-    // Update all summaries
-    const existingWeeklySummary = weeklySummaries.find(
-      (ws) => ws.employeeId === employeeId && ws.weekNumber === weekNumber && ws.year === year
+    const totalMonthlyHours = calculateTotalHoursForRange(
+      monthStart,
+      monthEnd,
     );
-    if (existingWeeklySummary) {
-      await updateWeeklySummary(existingWeeklySummary.id, { employeeId, weekNumber, month, year, totalHours: totalWeeklyHours });
-    } else {
-      await createOrUpdateWeeklySummary({ employeeId, weekNumber, month, year, totalHours: totalWeeklyHours });
-    }
-
-    const existingBiweeklySummary = biweeklySummaries.find(
-      (bs) => bs.employeeId === employeeId && bs.biweekNumber === biweekNumber && bs.year === year
-    );
-    if (existingBiweeklySummary) {
-      await updateBiweeklySummary(existingBiweeklySummary.id, { employeeId, biweekNumber, month, year, totalHours: totalBiweeklyHours });
-    } else {
-      await createOrUpdateBiweeklySummary({ employeeId, biweekNumber, month, year, totalHours: totalBiweeklyHours });
-    }
-
     const existingMonthlySummary = monthlySummaries.find(
-      (ms) => ms.employeeId === employeeId && ms.month === month && ms.year === year
+      (ms) =>
+        ms.employeeId === employeeId && ms.month === month && ms.year === year,
     );
+
+    const monthlySummary = {
+      employeeId,
+      month,
+      year,
+      totalHours: totalMonthlyHours,
+    };
+
     if (existingMonthlySummary) {
-      await updateMonthlySummary(existingMonthlySummary.id, { employeeId, month, year, totalHours: totalMonthlyHours });
+      await updateMonthlySummary(existingMonthlySummary.id, monthlySummary);
     } else {
-      await createOrUpdateMonthlySummary({ employeeId, month, year, totalHours: totalMonthlyHours });
+      await createOrUpdateMonthlySummary(monthlySummary);
     }
-    const endTime = performance.now();
-  }, [hoursWorked, schedules, weeklySummaries, biweeklySummaries, monthlySummaries, updateWeeklySummary, createOrUpdateWeeklySummary, updateBiweeklySummary, createOrUpdateBiweeklySummary, updateMonthlySummary, createOrUpdateMonthlySummary]);
+  }, [
+    hoursWorked,
+    schedules,
+    weeklySummaries,
+    biweeklySummaries,
+    monthlySummaries,
+    updateWeeklySummary,
+    createOrUpdateWeeklySummary,
+    updateBiweeklySummary,
+    createOrUpdateBiweeklySummary,
+    updateMonthlySummary,
+    createOrUpdateMonthlySummary,
+  ]);
 
-  // Memoize backfill dependencies to prevent unnecessary re-execution
-  const backfillDependencies = useMemo(() => ({
-    employeesLength: employees.length,
-    schedulesLength: schedules.length,
-    hoursWorkedLength: hoursWorked.length,
-    currentBiweekNumber,
-    currentMonth,
-    currentYear,
-    biweeklySummariesLength: biweeklySummaries.length,
-    monthlySummariesLength: monthlySummaries.length,
-  }), [employees.length, schedules.length, hoursWorked.length, currentBiweekNumber, currentMonth, currentYear, biweeklySummaries.length, monthlySummaries.length]);
-
-  // Disabled backfill useEffect to prevent performance issues
-  // This effect has too many dependencies and runs heavy async operations repeatedly
-  // TODO: Implement a more efficient backfill strategy if needed
-  /*
   useEffect(() => {
     const backfillCurrentPeriodSummaries = async () => {
       if (
-        backfillDependencies.employeesLength === 0 ||
-        backfillDependencies.schedulesLength === 0 ||
-        backfillDependencies.hoursWorkedLength === 0 ||
-        !backfillDependencies.currentBiweekNumber ||
-        !backfillDependencies.currentMonth ||
-        !backfillDependencies.currentYear
+        employees.length === 0 ||
+        schedules.length === 0 ||
+        hoursWorked.length === 0 ||
+        !currentBiweekNumber ||
+        !currentMonth ||
+        !currentYear
       ) {
         return;
       }
@@ -440,11 +491,11 @@ const RolesPage: React.FC = () => {
       };
 
       const { startDate: biweekStart, endDate: biweekEnd } = getBiweeklyDates(
-        backfillDependencies.currentYear,
-        backfillDependencies.currentBiweekNumber,
+        currentYear,
+        currentBiweekNumber,
       );
-      const monthStart = new Date(backfillDependencies.currentYear, backfillDependencies.currentMonth - 1, 1);
-      const monthEnd = new Date(backfillDependencies.currentYear, backfillDependencies.currentMonth, 0);
+      const monthStart = new Date(currentYear, currentMonth - 1, 1);
+      const monthEnd = new Date(currentYear, currentMonth, 0);
 
       const biweeklyPromises = employees
         .filter(
@@ -452,8 +503,8 @@ const RolesPage: React.FC = () => {
             !biweeklySummaries.some(
               (bs) =>
                 bs.employeeId === employee.id &&
-                bs.biweekNumber === backfillDependencies.currentBiweekNumber &&
-                bs.year === backfillDependencies.currentYear,
+                bs.biweekNumber === currentBiweekNumber &&
+                bs.year === currentYear,
             ),
         )
         .map((employee) => {
@@ -467,9 +518,9 @@ const RolesPage: React.FC = () => {
           }
           return createOrUpdateBiweeklySummary({
             employeeId: employee.id,
-            biweekNumber: backfillDependencies.currentBiweekNumber,
-            month: backfillDependencies.currentMonth,
-            year: backfillDependencies.currentYear,
+            biweekNumber: currentBiweekNumber,
+            month: currentMonth,
+            year: currentYear,
             totalHours,
           });
         });
@@ -480,8 +531,8 @@ const RolesPage: React.FC = () => {
             !monthlySummaries.some(
               (ms) =>
                 ms.employeeId === employee.id &&
-                ms.month === backfillDependencies.currentMonth &&
-                ms.year === backfillDependencies.currentYear,
+                ms.month === currentMonth &&
+                ms.year === currentYear,
             ),
         )
         .map((employee) => {
@@ -495,8 +546,8 @@ const RolesPage: React.FC = () => {
           }
           return createOrUpdateMonthlySummary({
             employeeId: employee.id,
-            month: backfillDependencies.currentMonth,
-            year: backfillDependencies.currentYear,
+            month: currentMonth,
+            year: currentYear,
             totalHours,
           });
         });
@@ -505,98 +556,171 @@ const RolesPage: React.FC = () => {
     };
 
     void backfillCurrentPeriodSummaries();
-  }, [backfillDependencies, employees, schedules, hoursWorked, biweeklySummaries, monthlySummaries, createOrUpdateBiweeklySummary, createOrUpdateMonthlySummary]);
-  */
+  }, [
+    employees,
+    schedules,
+    hoursWorked,
+    currentBiweekNumber,
+    currentMonth,
+    currentYear,
+    biweeklySummaries,
+    monthlySummaries,
+    createOrUpdateBiweeklySummary,
+    createOrUpdateMonthlySummary,
+  ]);
 
-  const handleChange = useCallback((event: SelectChangeEvent<string>, employeeId: number, date: Date) => {
-    if (event.target.value === "Other") return;
+  const handleChange = (
+    event: SelectChangeEvent<string>,
+    employeeId: number,
+    date: Date
+  ) => {
+    if (event.target.value === "Other") {
+      return;
+    }
 
     const selectedSchedule = schedules.find(
-      (schedule) => schedule.label === event.target.value && schedule.days.includes(getDayName(date))
+      (schedule) =>
+        schedule.label === event.target.value &&
+        schedule.days.includes(getDayName(date))
     );
 
-    if (!selectedSchedule) return;
+    if (!selectedSchedule) {
+      return;
+    }
 
     const formattedDate = format(date, "yyyy-MM-dd");
-    const existingRecord = hoursWorked.find(
-      (record) => record.employeeId === employeeId && format(new Date(record.date), "yyyy-MM-dd") === formattedDate
+    const existingHoursWorkedRecord = hoursWorked.find(
+      (record) =>
+        record.employeeId === employeeId &&
+        format(new Date(record.date), "yyyy-MM-dd") === formattedDate
     );
 
+    // Create/update HoursWorked entry
     const hoursWorkedEntry = {
-      ...(existingRecord ? { id: existingRecord.id } : {}),
+      ...(existingHoursWorkedRecord ? { id: existingHoursWorkedRecord.id } : {}),
       employeeId,
       date: date.toISOString(),
       scheduleId: selectedSchedule.id,
     };
 
+    // Update HoursWorked and recalculate summaries
     dispatch(createOrUpdateHoursWorked(hoursWorkedEntry)).then(() => {
       recalculateEmployeeWeeklySummary(employeeId, date, hoursWorkedEntry);
     });
-  }, [schedules, hoursWorked, dispatch, recalculateEmployeeWeeklySummary]);
+  };
 
-  const handleAdjustTime = useCallback(async (employeeId: number, condition: "add" | "subtract", timeAdjustment: number) => {
+  const handleAdjustTime = async (
+    employeeId: number,
+    condition: "add" | "subtract",
+    timeAdjustment: number
+  ) => {
     if (!timeAdjustment || timeAdjustment < 0) return;
+
     const adjustment = condition === "add" ? timeAdjustment : -timeAdjustment;
 
     const existingWeeklySummary = weeklySummaries.find(
-      (ws) => ws.employeeId === employeeId && ws.weekNumber === currentWeekNumber && ws.month === currentMonth && ws.year === currentYear
+      (weeklySummary) =>
+        weeklySummary.employeeId === employeeId &&
+        weeklySummary.weekNumber === currentWeekNumber &&
+        weeklySummary.month === currentMonth &&
+        weeklySummary.year === currentYear
     );
     const existingBiweeklySummary = biweeklySummaries.find(
-      (bs) => bs.employeeId === employeeId && bs.biweekNumber === currentBiweekNumber && bs.month === currentMonth && bs.year === currentYear
+      (biweeklySummary) =>
+        biweeklySummary.employeeId === employeeId &&
+        biweeklySummary.biweekNumber === currentBiweekNumber &&
+        biweeklySummary.month === currentMonth &&
+        biweeklySummary.year === currentYear
     );
     const existingMonthlySummary = monthlySummaries.find(
-      (ms) => ms.employeeId === employeeId && ms.month === currentMonth && ms.year === currentYear
+      (monthlySummary) =>
+        monthlySummary.employeeId === employeeId &&
+        monthlySummary.month === currentMonth &&
+        monthlySummary.year === currentYear
     );
 
-    const updates = [];
-    if (existingWeeklySummary) {
-      updates.push(updateWeeklySummary(existingWeeklySummary.id, { employeeId, weekNumber: currentWeekNumber, month: currentMonth, year: currentYear, totalHours: Math.max(0, existingWeeklySummary.totalHours + adjustment) }));
-    } else {
-      updates.push(createOrUpdateWeeklySummary({ employeeId, weekNumber: currentWeekNumber, month: currentMonth, year: currentYear, totalHours: Math.max(0, adjustment) }));
-    }
-    if (existingBiweeklySummary) {
-      updates.push(updateBiweeklySummary(existingBiweeklySummary.id, { employeeId, biweekNumber: currentBiweekNumber, month: currentMonth, year: currentYear, totalHours: Math.max(0, existingBiweeklySummary.totalHours + adjustment) }));
-    } else {
-      updates.push(createOrUpdateBiweeklySummary({ employeeId, biweekNumber: currentBiweekNumber, month: currentMonth, year: currentYear, totalHours: Math.max(0, adjustment) }));
-    }
-    if (existingMonthlySummary) {
-      updates.push(updateMonthlySummary(existingMonthlySummary.id, { employeeId, month: currentMonth, year: currentYear, totalHours: Math.max(0, existingMonthlySummary.totalHours + adjustment) }));
-    } else {
-      updates.push(createOrUpdateMonthlySummary({ employeeId, month: currentMonth, year: currentYear, totalHours: Math.max(0, adjustment) }));
-    }
-    await Promise.all(updates);
-  }, [currentWeekNumber, currentBiweekNumber, currentMonth, currentYear, weeklySummaries, biweeklySummaries, monthlySummaries, updateWeeklySummary, createOrUpdateWeeklySummary, updateBiweeklySummary, createOrUpdateBiweeklySummary, updateMonthlySummary, createOrUpdateMonthlySummary]);
+    const updatedWeeklyTotal = Math.max(
+      0,
+      (existingWeeklySummary?.totalHours ?? 0) + adjustment
+    );
+    const updatedBiweeklyTotal = Math.max(
+      0,
+      (existingBiweeklySummary?.totalHours ?? 0) + adjustment
+    );
+    const updatedMonthlyTotal = Math.max(
+      0,
+      (existingMonthlySummary?.totalHours ?? 0) + adjustment
+    );
 
-  const handleNextWeek = useCallback(() => {
-    setWeekOffset(prev => prev + 1);
+    await Promise.all([
+      existingWeeklySummary
+        ? updateWeeklySummary(existingWeeklySummary.id, {
+            ...existingWeeklySummary,
+            totalHours: updatedWeeklyTotal,
+          })
+        : createOrUpdateWeeklySummary({
+            employeeId,
+            weekNumber: currentWeekNumber,
+            month: currentMonth,
+            year: currentYear,
+            totalHours: updatedWeeklyTotal,
+          }),
+      existingBiweeklySummary
+        ? updateBiweeklySummary(existingBiweeklySummary.id, {
+            ...existingBiweeklySummary,
+            totalHours: updatedBiweeklyTotal,
+          })
+        : createOrUpdateBiweeklySummary({
+            employeeId,
+            biweekNumber: currentBiweekNumber,
+            month: currentMonth,
+            year: currentYear,
+            totalHours: updatedBiweeklyTotal,
+          }),
+      existingMonthlySummary
+        ? updateMonthlySummary(existingMonthlySummary.id, {
+            ...existingMonthlySummary,
+            totalHours: updatedMonthlyTotal,
+          })
+        : createOrUpdateMonthlySummary({
+            employeeId,
+            month: currentMonth,
+            year: currentYear,
+            totalHours: updatedMonthlyTotal,
+          }),
+    ]);
+  };
+
+  const handleNextWeek = () => {
+    setWeekOffset(weekOffset + 1);
     setFirstDayOfWeek(getFirstDayOfWeek(weekOffset + 1));
-  }, [weekOffset]);
+  };
 
-  const handlePreviousWeek = useCallback(() => {
-    setWeekOffset(prev => prev - 1);
+  const handlePreviousWeek = () => {
+    setWeekOffset(weekOffset - 1);
     setFirstDayOfWeek(getFirstDayOfWeek(weekOffset - 1));
-  }, [weekOffset]);
+  };
 
-  const handleCurrentWeek = useCallback(() => {
+  const handleCurrentWeek = () => {
     setWeekOffset(0);
     setFirstDayOfWeek(new Date());
-  }, []);
+  };
 
   const nextWeekStart = startOfWeek(addWeeks(new Date(), 1), {
     weekStartsOn: 1,
   });
   const nextWeekEnd = endOfWeek(nextWeekStart, { weekStartsOn: 1 });
 
-  const handleOpenExportDialog = useCallback((type: "excel" | "pdf") => {
+  const handleOpenExportDialog = (type: "excel" | "pdf") => {
     setExportType(type);
     setOpenExportDialog(true);
-  }, []);
+  };
 
-  const handleCloseAddRoleModal = useCallback(() => {
+  const handleCloseAddRoleModal = () => {
     setOpenAddRoleModal(false);
-  }, []);
+  };
 
-  const handleGenerateHours = useCallback(async (config: AutoGenerateConfig) => {
+  const handleGenerateHours = async (config: AutoGenerateConfig) => {
     try {
       // Validate configuration
       if (config.selectedEmployees.length === 0) {
@@ -938,6 +1062,11 @@ const RolesPage: React.FC = () => {
         severity: "success",
         duration: 5000,
         closeable: true,
+        buttonText: "Ver resultados",
+        onButtonClick: () => {
+          // Navigate to the current page (roles) to show the generated results
+          navigate('/roles');
+        }
       });
       
       // Add notification to menu
@@ -953,25 +1082,15 @@ const RolesPage: React.FC = () => {
       // Add error notification to menu
       createHoursGenerationNotification(false);
     } finally {
-        setIsGeneratingHours(false);
-      }
-    }, [
-      schedules,
-      firstDayOfWeek,
-      employees,
-      dispatch,
-      createOrUpdateWeeklySummary,
-      showNotification,
-      setOpenAddRoleModal,
-      setIsGeneratingHours,
-    ]);
-  const handleModalConfigChange = useCallback((config: AutoGenerateConfig) => {
-    setCurrentModalConfig(config);
-  }, []);
+      setIsGeneratingHours(false);
+    }
+  };
 
-  const handleGenerateFromDialog = useCallback(() => {
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    // Note: handleGenerateHours intentionally not included to always access current data
+  const handleModalConfigChange = (config: AutoGenerateConfig) => {
+    setCurrentModalConfig(config);
+  };
+
+  const handleGenerateFromDialog = () => {
     // Verificar permisos para generar horas
     if (!userPermissions.includes(PERMISSIONS.EDIT_EMPLOYEE_ROLES)) {
       showNotification("No tienes permisos para generar horas automáticamente", {
@@ -1001,7 +1120,7 @@ const RolesPage: React.FC = () => {
     setTimeout(() => {
       handleGenerateHours(currentModalConfig);
     }, 50);
-  }, [currentModalConfig, userPermissions, showNotification, handleGenerateHours]);
+  };
 
   // Helper: gets the assigned schedule label for an employee on a given day
   const getScheduleLabelForDay = (
@@ -1132,7 +1251,7 @@ const RolesPage: React.FC = () => {
     try {
       const headers = getExportHeaders(currentWeek, shouldExportHours);
       const data = getExportData(
-        memoizedFilteredEmployees,
+        filteredEmployees,
         currentWeek,
         shouldExportHours,
         headers.slice(1, shouldExportHours ? -2 : undefined)
@@ -1169,11 +1288,10 @@ const RolesPage: React.FC = () => {
       });
     }
     return options;
-  }, [userPermissions, handleOpenExportDialog]);
+  }, [userPermissions]);
 
   return (
-    <>
-    <Box sx={{ height: "calc(100vh - 64px - 32px)", display: "flex", flexDirection: "column", overflow: "hidden", pb: 0, pt: 0, px: 0 }}>
+    <Box sx={{ height: "calc(100vh - 100px)", display: "flex", flexDirection: "column", overflow: "hidden", pb: 0, pt: 0, px: 0 }}>
       {isLoading ? (
         <Box sx={loadingBoxStyles}>
           <Backdrop sx={backdropStyles(theme)} open={isLoading}>
@@ -1197,7 +1315,7 @@ const RolesPage: React.FC = () => {
           <Box
             sx={{
               px: { xs: 2, sm: 3 },
-              py: { xs: 1, sm: 1.5 },
+              py: { xs: 2, sm: 2.5 },
               backgroundColor: theme.palette.background.paper,
               color: theme.palette.text.primary,
               flexShrink: 0,
@@ -1246,8 +1364,8 @@ const RolesPage: React.FC = () => {
                     }}
                   >
                     {viewMode === 'employee' 
-                      ? `${memoizedFilteredEmployees.length} empleados` 
-                      : `${memoizedFilteredSchedules.length} horarios`}
+                      ? `${filteredEmployees.length} empleados` 
+                      : `${filteredSchedules.length} horarios`}
                   </Typography>
                 </Box>
               </Box>
@@ -1256,7 +1374,7 @@ const RolesPage: React.FC = () => {
               {userPermissions.includes(PERMISSIONS.EXPORT_EXCEL_ROLES) &&
                 userPermissions.includes(PERMISSIONS.EXPORT_PDF_ROLES) && (
                   <Box sx={{ ...exportSpeedDialBoxStyles, minHeight: 'auto' }}>
-                    {(viewMode === 'employee' ? memoizedFilteredEmployees.length > 0 : memoizedFilteredSchedules.length > 0) && (
+                    {(viewMode === 'employee' ? filteredEmployees.length > 0 : filteredSchedules.length > 0) && (
                       <SpeedDialComponent
                         actions={exportOptions}
                         mainIcon={<Download size={20} />}
@@ -1278,7 +1396,7 @@ const RolesPage: React.FC = () => {
             >
               {/* Search */}
               <Box flex={1} maxWidth={{ sm: "380px" }}>
-                {(viewMode === 'employee' ? memoizedFilteredEmployees : memoizedFilteredSchedules) && (
+                {(viewMode === 'employee' ? filteredEmployees : filteredSchedules) && (
                   <SearchBarComponent
                     placeholder={
                       viewMode === 'employee'
@@ -1354,6 +1472,26 @@ const RolesPage: React.FC = () => {
                             borderRadius: '10px',
                             fontSize: '0.875rem',
                             fontWeight: 500,
+                            backgroundColor: theme.palette.background.paper,
+                            boxShadow: '0 1px 3px rgba(0,0,0,0.04)',
+                            transition: 'all 0.2s cubic-bezier(0.4, 0, 0.2, 1)',
+                            '& fieldset': {
+                              borderColor: theme.palette.mode === 'dark' ? 'rgba(255,255,255,0.15)' : 'rgba(0,0,0,0.12)',
+                              borderWidth: '1.5px',
+                            },
+                            '&:hover': {
+                              boxShadow: '0 2px 6px rgba(0,0,0,0.08)',
+                              '& fieldset': {
+                                borderColor: theme.palette.mode === 'dark' ? 'rgba(255,255,255,0.25)' : 'rgba(0,0,0,0.2)',
+                              },
+                            },
+                            '&.Mui-focused': {
+                              boxShadow: '0 0 0 3px rgba(0,0,0,0.04)',
+                              '& fieldset': {
+                                borderColor: theme.palette.primary.main,
+                                borderWidth: '2px',
+                              },
+                            },
                             '& input': {
                               textOverflow: 'ellipsis',
                               textAlign: 'center',
@@ -1369,67 +1507,71 @@ const RolesPage: React.FC = () => {
 
                 {/* Next Week Button */}
                 <PremiumTooltip title={MANAGEMENT.TOOLTIP_NEXT_WEEK}>
-                  <Button
-                    variant="outlined"
-                    disabled={
-                      !isValidDateForSelect(
-                        new Date(
-                          getCurrentWeekDates(weekOffset + 1)[0].isoDate
+                  <span>
+                    <Button
+                      variant="outlined"
+                      disabled={
+                        !isValidDateForSelect(
+                          new Date(
+                            getCurrentWeekDates(weekOffset + 1)[0].isoDate
+                          )
                         )
-                      )
-                    }
-                    onClick={handleNextWeek}
-                    disableRipple
-                    disableElevation
-                    sx={{
-                      minWidth: '44px',
-                      height: '44px',
-                      px: 1.5,
-                      borderRadius: '10px',
-                      borderColor: theme.palette.mode === "dark" ? "rgba(255,255,255,0.2)" : "rgba(0,0,0,0.15)",
-                      '&:hover': {
-                        backgroundColor: theme.palette.mode === "dark" ? "rgba(255,255,255,0.05)" : "rgba(0,0,0,0.04)",
-                        borderColor: theme.palette.mode === "dark" ? "rgba(255,255,255,0.3)" : "rgba(0,0,0,0.25)",
-                      },
-                      '&.Mui-disabled': {
-                        borderColor: theme.palette.mode === "dark" ? "rgba(255,255,255,0.1)" : "rgba(0,0,0,0.08)",
-                      },
-                    }}
-                  >
-                    <ChevronRight size={20} />
-                  </Button>
+                      }
+                      onClick={handleNextWeek}
+                      disableRipple
+                      disableElevation
+                      sx={{
+                        minWidth: '44px',
+                        height: '44px',
+                        px: 1.5,
+                        borderRadius: '10px',
+                        borderColor: theme.palette.mode === "dark" ? "rgba(255,255,255,0.2)" : "rgba(0,0,0,0.15)",
+                        '&:hover': {
+                          backgroundColor: theme.palette.mode === "dark" ? "rgba(255,255,255,0.05)" : "rgba(0,0,0,0.04)",
+                          borderColor: theme.palette.mode === "dark" ? "rgba(255,255,255,0.3)" : "rgba(0,0,0,0.25)",
+                        },
+                        '&.Mui-disabled': {
+                          borderColor: theme.palette.mode === "dark" ? "rgba(255,255,255,0.1)" : "rgba(0,0,0,0.08)",
+                        },
+                      }}
+                    >
+                      <ChevronRight size={20} />
+                    </Button>
+                  </span>
                 </PremiumTooltip>
 
                 {/* Current Week Button */}
                 <PremiumTooltip title={MANAGEMENT.TOOLTIP_CURRENT_WEEK}>
-                  <Button
-                    variant="outlined"
-                    disabled={weekOffset === 0}
-                    onClick={handleCurrentWeek}
-                    disableRipple
-                    disableElevation
-                    sx={{
-                      minWidth: '44px',
-                      height: '44px',
-                      px: 1.5,
-                      borderRadius: '10px',
-                      borderColor: theme.palette.mode === "dark" ? "rgba(255,255,255,0.2)" : "rgba(0,0,0,0.15)",
-                      '&:hover': {
-                        backgroundColor: theme.palette.mode === "dark" ? "rgba(255,255,255,0.05)" : "rgba(0,0,0,0.04)",
-                        borderColor: theme.palette.mode === "dark" ? "rgba(255,255,255,0.3)" : "rgba(0,0,0,0.25)",
-                      },
-                      '&.Mui-disabled': {
-                        borderColor: theme.palette.mode === "dark" ? "rgba(255,255,255,0.1)" : "rgba(0,0,0,0.08)",
-                      },
-                    }}
-                  >
-                    <RotateCcw size={18} />
-                  </Button>
+                  <span>
+                    <Button
+                      variant="outlined"
+                      disabled={weekOffset === 0}
+                      onClick={handleCurrentWeek}
+                      disableRipple
+                      disableElevation
+                      sx={{
+                        minWidth: '44px',
+                        height: '44px',
+                        px: 1.5,
+                        borderRadius: '10px',
+                        borderColor: theme.palette.mode === "dark" ? "rgba(255,255,255,0.2)" : "rgba(0,0,0,0.15)",
+                        '&:hover': {
+                          backgroundColor: theme.palette.mode === "dark" ? "rgba(255,255,255,0.05)" : "rgba(0,0,0,0.04)",
+                          borderColor: theme.palette.mode === "dark" ? "rgba(255,255,255,0.3)" : "rgba(0,0,0,0.25)",
+                        },
+                        '&.Mui-disabled': {
+                          borderColor: theme.palette.mode === "dark" ? "rgba(255,255,255,0.1)" : "rgba(0,0,0,0.08)",
+                        },
+                      }}
+                    >
+                      <RotateCcw size={18} />
+                    </Button>
+                  </span>
                 </PremiumTooltip>
               </Box>
             </Box>
           </Box>
-          <Box sx={{ flex: 1, overflow: "auto", p: 0 }}>
+          <Box sx={{ flex: 1, overflow: "hidden", p: 0 }}>
           {(() => {
             const hasRolesPermission = userPermissions.includes(PERMISSIONS.VIEW_ROLES);
             
@@ -1446,56 +1588,68 @@ const RolesPage: React.FC = () => {
             }
             
             return viewMode === 'employee' ? (
-              memoizedFilteredEmployees.length > 0 ? (
-                <SelectorTableComponent
-                  key={`roles-${viewMode}-${memoizedFilteredEmployees.length}-${schedules.length}`}
-                  filteredEmployees={memoizedFilteredEmployees}
-                  schedules={schedules}
-                  hoursWorked={hoursWorked}
-                  weeklySummaries={weeklySummaries}
-                  biweeklySummaries={biweeklySummaries}
-                  monthlySummaries={monthlySummaries}
-                  weekOffset={weekOffset}
-                  weekNumber={currentWeekNumber}
-                  biweekNumber={currentBiweekNumber}
-                  month={currentMonth}
-                  year={currentYear}
-                  handleChange={handleChange}
-                  handleAdjustTime={handleAdjustTime}
-                  recalculateEmployeeWeeklySummary={recalculateEmployeeWeeklySummary}
-                  permissions={userPermissions}
-                  rowsPerPage={rowsPerPage}
-                  setRowsPerPage={setRowsPerPage}
-                  viewMode={viewMode}
-                  setViewMode={setViewMode}
-                />
-              ) : (
-                <Box sx={noEmployeesBoxStyles}>
-                  <Search size={48} style={{ color: theme.palette.text.disabled, ...noEmployeesIconStyles }} />
-                  <Typography variant="h6" color="textSecondary">
-                    {MANAGEMENT.NO_EMPLOYEES}
-                  </Typography>
+              isLoadingEmployees ? (
+                <Box sx={loadingBoxStyles}>
+                  <Backdrop sx={backdropStyles(theme)} open={isLoadingEmployees}>
+                    <CircularProgress />
+                  </Backdrop>
                 </Box>
-              )
-            ) : (
-              memoizedFilteredSchedules.length > 0 ? (
+              ) : filteredEmployees.length > 0 ? (
                 <SelectorTableComponent
-                  key={`roles-${viewMode}-${memoizedFilteredSchedules.length}-${memoizedFilteredEmployees.length}`}
-                  filteredEmployees={memoizedFilteredEmployees}
-                  schedules={memoizedFilteredSchedules}
-                  hoursWorked={hoursWorked}
-                  weeklySummaries={weeklySummaries}
-                  biweeklySummaries={biweeklySummaries}
-                  monthlySummaries={monthlySummaries}
-                  weekOffset={weekOffset}
-                  weekNumber={currentWeekNumber}
-                  biweekNumber={currentBiweekNumber}
-                  month={currentMonth}
-                  year={currentYear}
-                  handleChange={handleChange}
-                  handleAdjustTime={handleAdjustTime}
-                  recalculateEmployeeWeeklySummary={recalculateEmployeeWeeklySummary}
-                  permissions={userPermissions}
+                key={`schedules-${schedules.length}-${schedules.map((s) => s.id).join("-")}`}
+                filteredEmployees={filteredEmployees}
+                schedules={schedules}
+                hoursWorked={hoursWorked}
+                weeklySummaries={weeklySummaries}
+                biweeklySummaries={biweeklySummaries}
+                monthlySummaries={monthlySummaries}
+                weekOffset={weekOffset}
+                weekNumber={currentWeekNumber}
+                biweekNumber={currentBiweekNumber}
+                month={currentMonth}
+                year={currentYear}
+                handleChange={handleChange}
+                handleAdjustTime={handleAdjustTime}
+                recalculateEmployeeWeeklySummary={recalculateEmployeeWeeklySummary}
+                permissions={userPermissions}
+                rowsPerPage={rowsPerPage}
+                setRowsPerPage={setRowsPerPage}
+                viewMode={viewMode}
+                setViewMode={setViewMode}
+              />
+            ) : (
+              <Box sx={noEmployeesBoxStyles}>
+                <Search size={48} style={{ color: theme.palette.text.disabled, ...noEmployeesIconStyles }} />
+                <Typography variant="h6" color="textSecondary">
+                  {MANAGEMENT.NO_EMPLOYEES}
+                </Typography>
+              </Box>
+            )
+          ) : (
+            isLoadingSchedules ? (
+              <Box sx={loadingBoxStyles}>
+                <Backdrop sx={backdropStyles(theme)} open={isLoadingSchedules}>
+                  <CircularProgress />
+                </Backdrop>
+              </Box>
+            ) : filteredSchedules.length > 0 ? (
+              <SelectorTableComponent
+                key={`schedules-${filteredSchedules.length}-${filteredSchedules.map((s) => s.id).join("-")}`}
+                filteredEmployees={filteredEmployees}
+                schedules={filteredSchedules}
+                hoursWorked={hoursWorked}
+                weeklySummaries={weeklySummaries}
+                biweeklySummaries={biweeklySummaries}
+                monthlySummaries={monthlySummaries}
+                weekOffset={weekOffset}
+                weekNumber={currentWeekNumber}
+                biweekNumber={currentBiweekNumber}
+                month={currentMonth}
+                year={currentYear}
+                handleChange={handleChange}
+                handleAdjustTime={handleAdjustTime}
+                recalculateEmployeeWeeklySummary={recalculateEmployeeWeeklySummary}
+                permissions={userPermissions}
                 rowsPerPage={rowsPerPage}
                 setRowsPerPage={setRowsPerPage}
                 viewMode={viewMode}
@@ -1512,7 +1666,7 @@ const RolesPage: React.FC = () => {
           );
         })()}
           </Box>
-          <AppModal
+          <DialogComponent
             open={openExportDialog}
             onClose={() => {
               setOpenExportDialog(false);
@@ -1532,7 +1686,6 @@ const RolesPage: React.FC = () => {
           />
         </Paper>
       )}
-      </Box>
       
       <Dialog
         open={openAddRoleModal}
@@ -1543,7 +1696,7 @@ const RolesPage: React.FC = () => {
           sx: {
             border: "2px solid #fff",
             borderRadius: 3,
-            minHeight: "48vh",
+            minHeight: "60vh",
             boxShadow: 3,
             bgcolor: "background.paper",
             width: { xs: '98%', sm: '1200px' },
@@ -1636,7 +1789,7 @@ const RolesPage: React.FC = () => {
           </Button>
         </DialogActions>
       </Dialog>
-    </>
+      </Box>
   );
 };
 

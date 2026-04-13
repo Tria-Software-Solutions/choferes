@@ -12,9 +12,9 @@ interface TableDimensions {
 export const useResponsiveTableHeight = (
   appBarHeight: number = 64,
   pagePadding: number = 0,
-  headerHeight: number = 120,
-  footerHeight: number = 56,
-  rowHeight: number = 48,
+  headerHeight: number = 80,
+  footerHeight: number = 32,
+  rowHeight: number = 38,
   bufferHeight: number = 16
 ): TableDimensions => {
   const [dimensions, setDimensions] = useState<TableDimensions>({

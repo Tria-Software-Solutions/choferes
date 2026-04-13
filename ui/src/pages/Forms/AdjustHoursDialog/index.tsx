@@ -87,44 +87,55 @@ const AdjustHoursDialog: React.FC<AdjustHoursDialogProps> = ({
 
   return (
     <>
-      <Grid container spacing={3}>
+      <Grid container spacing={2}>
         <Grid item xs={12}>
-          <Typography variant="subtitle1" color="text.secondary" mb={1}>
-            {getPeriodMessage(selectedPeriod)}
-          </Typography>
-          <Typography
-            variant="h3"
-            color="primary"
-            fontWeight={800}
-            mb={2}
-          >
-            {getCurrentHoursDisplay(
-              employee,
-              selectedPeriod,
-              weekNumber,
-              biweekNumber,
-              month,
-              year,
-              weeklySummaries,
-              biweeklySummaries,
-              monthlySummaries,
-            )}
-          </Typography>
-          <TextfieldComponent
-            label={SELECTOR_TABLE.HOURS_TO_ADJUST}
-            type="number"
-            placeholder="0"
-            value={timeAdjustment}
-            onChange={(e) => {
-              const value = Number(e.target.value);
-              setTimeAdjustment(value < 0 ? 0 : value);
-            }}
-            icon={<Clock color={getTimeAdjustmentIconColor(timeAdjustment)} />}
-            sx={dialogTextFieldStyles}
-            inputProps={{ min: 0 }}
-            error={timeAdjustment < 0}
-            helperText={getTimeAdjustmentError(timeAdjustment)}
-          />
+          <Box sx={{ textAlign: 'center', mb: 2 }}>
+            <Typography variant="body2" color="text.secondary" mb={1}>
+              {getPeriodMessage(selectedPeriod)}
+            </Typography>
+            <Typography
+              variant="h2"
+              color="primary"
+              fontWeight={800}
+              sx={{ fontSize: '2.5rem', letterSpacing: '-0.02em' }}
+            >
+              {getCurrentHoursDisplay(
+                employee,
+                selectedPeriod,
+                weekNumber,
+                biweekNumber,
+                month,
+                year,
+                weeklySummaries,
+                biweeklySummaries,
+                monthlySummaries,
+              )}
+            </Typography>
+          </Box>
+          <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1, alignItems: 'center' }}>
+            <Box sx={{ width: '100%', maxWidth: 280 }}>
+              <TextfieldComponent
+                type="number"
+                placeholder={SELECTOR_TABLE.HOURS_TO_ADJUST}
+                value={timeAdjustment}
+                onChange={(e) => {
+                  const inputValue = e.target.value;
+                  // Remove leading zero if user types something else
+                  let processedValue = inputValue;
+                  if (inputValue.startsWith('0') && inputValue.length > 1) {
+                    processedValue = inputValue.replace(/^0+/, '');
+                  }
+                  const value = Number(processedValue);
+                  setTimeAdjustment(value < 0 ? 0 : value);
+                }}
+                icon={<Clock color={getTimeAdjustmentIconColor(timeAdjustment)} />}
+                sx={{ ...dialogTextFieldStyles, width: '100%' }}
+                inputProps={{ min: 0, style: { textAlign: 'center', fontSize: '1.1rem' } }}
+                error={timeAdjustment < 0}
+                helperText={getTimeAdjustmentError(timeAdjustment)}
+              />
+            </Box>
+          </Box>
         </Grid>
         <Grid item xs={12}>
           <Box sx={infoBox(theme)}>
@@ -158,7 +169,14 @@ const AdjustHoursDialog: React.FC<AdjustHoursDialogProps> = ({
                 variant="contained"
                 color="success"
                 fullWidth={isSmallScreen}
-                sx={{ minWidth: isSmallScreen ? '100%' : 120, py: 1.5, fontWeight: 600 }}
+                sx={{
+                  fontWeight: 600,
+                  fontSize: "0.95rem",
+                  textTransform: "none",
+                  letterSpacing: "0.01em",
+                  borderRadius: "12px",
+                  minHeight: "42px",
+                }}
                 disabled={timeAdjustment <= 0 || loading}
               >
                 {SELECTOR_TABLE.ADD}
@@ -168,7 +186,14 @@ const AdjustHoursDialog: React.FC<AdjustHoursDialogProps> = ({
                 variant="contained"
                 color="error"
                 fullWidth={isSmallScreen}
-                sx={{ minWidth: isSmallScreen ? '100%' : 120, py: 1.5, fontWeight: 600 }}
+                sx={{
+                  fontWeight: 600,
+                  fontSize: "0.95rem",
+                  textTransform: "none",
+                  letterSpacing: "0.01em",
+                  borderRadius: "12px",
+                  minHeight: "42px",
+                }}
                 disabled={timeAdjustment <= 0 || loading}
               >
                 {SELECTOR_TABLE.SUBTRACT}

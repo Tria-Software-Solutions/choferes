@@ -66,33 +66,92 @@ export const autoGenerateModalFormControlStyles = (theme: Theme): SxProps<Theme>
 export const autoGenerateModalTextFieldStyles = (theme: Theme): SxProps<Theme> => ({
   mt: { xs: 1, sm: 1.25 },
   width: '100%',
+  mb: 1,
   '& .MuiOutlinedInput-root': {
-    backgroundColor: theme.palette.background.paper,
-    borderRadius: 1,
-    '& fieldset': {
-      borderColor: theme.palette.divider,
-      borderWidth: 1,
+    borderRadius: "12px",
+    minHeight: "42px",
+    position: "relative",
+    backgroundColor: theme.palette.mode === "dark"
+      ? "rgba(40,40,50,0.6)"
+      : "rgba(255,255,255,0.7)",
+    color: theme.palette.text.primary,
+    border: theme.palette.mode === "dark"
+      ? "1px solid rgba(255,255,255,0.1)"
+      : "1px solid rgba(0,0,0,0.08)",
+    transition: "all 0.3s cubic-bezier(0.4, 0, 0.2, 1)",
+    "&:hover": {
+      backgroundColor: theme.palette.mode === "dark"
+        ? "rgba(50,50,60,0.7)"
+        : "rgba(255,255,255,0.85)",
+      borderColor: theme.palette.mode === "dark"
+        ? "rgba(255,255,255,0.15)"
+        : "rgba(0,0,0,0.12)",
     },
-    '&:hover fieldset': {
-      borderColor: theme.palette.primary.light,
-      borderWidth: 1,
+    "&:hover .MuiOutlinedInput-notchedOutline": {
+      borderColor: "transparent",
     },
-    '&.Mui-focused fieldset': {
+    "&.Mui-focused": {
+      backgroundColor: theme.palette.mode === "dark"
+        ? "rgba(55,55,65,0.8)"
+        : "rgba(255,255,255,0.95)",
       borderColor: theme.palette.primary.main,
-      borderWidth: 2,
+      boxShadow: `0 0 0 3px ${theme.palette.mode === "dark" ? "rgba(255,255,255,0.08)" : "rgba(0,0,0,0.06)"}`,
     },
-    '&.Mui-error fieldset': {
-      borderColor: theme.palette.error.main,
-      borderWidth: 2,
+    "&.Mui-focused .MuiOutlinedInput-notchedOutline": {
+      borderColor: "transparent",
     },
-    '& input': {
+    "& fieldset": {
+      border: "none",
+    },
+    "& input": {
       color: theme.palette.text.primary,
-      fontSize: theme.typography.body1.fontSize,
-      fontWeight: theme.typography.body1.fontWeight,
-      '&::placeholder': {
+      fontSize: "0.9rem",
+      paddingTop: "10px",
+      paddingBottom: "10px",
+      paddingLeft: "14px",
+      paddingRight: "14px",
+      "&::placeholder": {
         color: theme.palette.text.secondary,
-        opacity: 1,
+        opacity: 0.6,
       },
+    },
+    "&.MuiInputBase-adornedStart input": {
+      paddingLeft: "36px",
+      paddingRight: "14px",
+    },
+    "&.MuiInputBase-adornedEnd input": {
+      paddingLeft: "14px",
+      paddingRight: "44px",
+    },
+    "&.MuiInputBase-adornedStart.MuiInputBase-adornedEnd input": {
+      paddingLeft: "36px",
+      paddingRight: "44px",
+    },
+    "& .MuiInputAdornment-positionStart": {
+      position: "absolute",
+      left: "12px",
+      marginRight: 0,
+      zIndex: 2,
+    },
+    "& .MuiInputAdornment-positionEnd": {
+      position: "absolute",
+      right: "12px",
+      marginLeft: 0,
+      zIndex: 2,
+    },
+    "& input:-webkit-autofill": {
+      WebkitBoxShadow: theme.palette.mode === "dark" 
+        ? "0 0 0 100px rgba(40,40,50,0.6) inset"
+        : "0 0 0 100px rgba(255,255,255,0.7) inset",
+      WebkitTextFillColor: theme.palette.text.primary,
+      borderRadius: "12px",
+      transition: "background-color 5000s ease-in-out 0s",
+    },
+    "& input:-webkit-autofill:focus": {
+      WebkitBoxShadow: theme.palette.mode === "dark"
+        ? "0 0 0 100px rgba(55,55,65,0.8) inset"
+        : "0 0 0 100px rgba(255,255,255,0.95) inset",
+      WebkitTextFillColor: theme.palette.text.primary,
     },
   },
   '& .MuiInputLabel-root': {
@@ -373,8 +432,8 @@ export const autoGenerateModalStatusChipStyles = (theme: Theme): SxProps<Theme> 
 export const autoGenerateModalConfigSectionStyles: SxProps<Theme> = {
   p: 2,
   borderRadius: 2,
-  background: (theme) => `linear-gradient(135deg, ${theme.palette.success.light}10, ${theme.palette.success.main}05)`,
-  border: (theme) => `1px solid ${theme.palette.success.light}30`,
+  bgcolor: 'background.paper',
+  border: (theme) => `1px solid ${theme.palette.divider}`,
   mb: 2,
 };
 
@@ -390,7 +449,9 @@ export const autoGenerateModalEmployeeCardStyles = (theme: Theme): SxProps<Theme
     borderColor: theme.palette.primary.light,
   },
   '&.selected': {
-    background: `linear-gradient(135deg, ${theme.palette.primary.light}20, ${theme.palette.primary.main}10)`,
+    background: theme.palette.mode === 'dark' 
+      ? 'rgba(99, 102, 241, 0.15)' 
+      : 'rgba(99, 102, 241, 0.08)',
     borderColor: theme.palette.primary.main,
   },
 });
@@ -405,8 +466,8 @@ export const autoGenerateModalLoadingBoxStyles: SxProps<Theme> = {
   gap: 3,
   padding: 4,
   borderRadius: 2,
-  background: (theme) => `linear-gradient(135deg, ${theme.palette.primary.light}08, ${theme.palette.primary.main}05)`,
-  border: (theme) => `1px solid ${theme.palette.primary.light}20`,
+  bgcolor: 'background.paper',
+  border: (theme) => `1px solid ${theme.palette.divider}`,
   animation: 'fadeIn 0.3s ease-in-out',
   '@keyframes fadeIn': {
     '0%': {

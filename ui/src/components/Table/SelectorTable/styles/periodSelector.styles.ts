@@ -6,50 +6,67 @@ export const getPeriodSelectorStyles = (theme: Theme) => {
   return {
     input: {
       backgroundColor: `${bgColor} !important`,
-      color: "#fff",
-      fontSize: "1rem",
-      fontWeight: 700,
+      color: "#fff !important",
+      fontSize: "0.8rem",
+      fontWeight: 600,
+      height: "32px",
+      padding: "0 !important",
       "& .MuiOutlinedInput-input": {
-        color: "#fff",
-        fontSize: "1rem",
-        fontWeight: 700,
+        color: "#fff !important",
+        fontSize: "0.8rem",
+        fontWeight: 600,
+        padding: "6px 12px !important",
+        backgroundColor: `${bgColor} !important`,
       },
       "& .MuiOutlinedInput-root": {
         backgroundColor: `${bgColor} !important`,
+        height: "32px",
       },
       "& .MuiInputBase-root": {
         backgroundColor: `${bgColor} !important`,
+        height: "32px",
       },
-      border: "none",
+      border: "none !important",
+      "& fieldset": {
+        border: "none !important",
+      },
     },
     select: {
       backgroundColor: `${bgColor} !important`,
-      color: "#fff",
-      fontSize: "1rem",
-      fontWeight: 700,
+      color: "#fff !important",
+      fontSize: "0.8rem",
+      fontWeight: 600,
+      height: "32px",
+      padding: "0 !important",
       "& .MuiSelect-select": {
-        color: "#fff",
+        color: "#fff !important",
         backgroundColor: `${bgColor} !important`,
-        fontSize: "1rem",
-        fontWeight: 700,
+        fontSize: "0.8rem",
+        fontWeight: 600,
+        padding: "6px 12px !important",
       },
       "& .MuiSelect-icon": {
-        color: "#fff",
+        color: "#fff !important",
       },
       "& .MuiOutlinedInput-notchedOutline": {
-        border: "none",
+        border: "none !important",
       },
       "&:hover .MuiOutlinedInput-notchedOutline": {
-        border: "none",
+        border: "none !important",
       },
       "&.Mui-focused .MuiOutlinedInput-notchedOutline": {
-        border: "none",
+        border: "none !important",
       },
       "& .MuiInputBase-root": {
         backgroundColor: `${bgColor} !important`,
+        height: "32px",
       },
       "& .MuiOutlinedInput-root": {
         backgroundColor: `${bgColor} !important`,
+        height: "32px",
+      },
+      "& fieldset": {
+        border: "none !important",
       },
     },
   };

@@ -24,7 +24,7 @@ import {
   noPermissionsBoxStyles,
 } from "./styles";
 // ManagePermissions page component for permission management in the dashboard
-const ManagePermissions: React.FC = () => {
+const ManagePermissions: React.FC<{ isExpanded?: boolean }> = ({ isExpanded = true }) => {
   const dispatch = useDispatch<AppDispatch>();
   const { permissions, isLoadingPermissions } = useSelector(
     (state: RootState) => state.permissions,
@@ -63,7 +63,7 @@ const ManagePermissions: React.FC = () => {
   };
 
   return (
-    <Box sx={{ height: "100%", display: "flex", flexDirection: "column" }}>
+    <Box sx={{ height: "100%", minHeight: "500px", display: "flex", flexDirection: "column" }}>
       {/* Premium Header with Paper */}
       <Paper
         elevation={0}
@@ -72,6 +72,10 @@ const ManagePermissions: React.FC = () => {
           border: "1px solid rgba(0,0,0,0.08)",
           boxShadow: "0 4px 24px rgba(0,0,0,0.08), 0 1px 2px rgba(0,0,0,0.04)",
           overflow: "hidden",
+          flex: 1,
+          minHeight: 0,
+          display: "flex",
+          flexDirection: "column",
         }}
       >
         {/* Header Section */}
@@ -164,7 +168,8 @@ const ManagePermissions: React.FC = () => {
       ) : (
         <>
           {filteredPermissions.length > 0 ? (
-            <Grid container spacing={2}>
+            <Box sx={{ flex: 1, overflow: "auto", p: 2 }}>
+              <Grid container spacing={2}>
               {filteredPermissions.map((permission) => (
                 <Grid item xs={12} sm={6} md={3} lg={3} key={permission.id}>
                   <Box sx={permissionBoxStyles}>
@@ -183,6 +188,7 @@ const ManagePermissions: React.FC = () => {
                 </Grid>
               ))}
             </Grid>
+            </Box>
           ) : (
             <Box sx={noPermissionsBoxStyles}>
               <Typography variant="h6" color="textSecondary">

@@ -33,7 +33,16 @@ export const getScheduleRowStyles = (theme: Theme, isSmallScreen: boolean, rowIn
   },
   dayCell: (isToday: boolean) => ({
     padding: isSmallScreen ? "8px" : "16px",
-    backgroundColor: isToday ? "rgba(25, 118, 210, 0.08)" : getRowBackgroundColor(theme, rowIndex),
+    backgroundColor: isToday
+      ? (theme.palette.mode === "dark"
+          ? "linear-gradient(135deg, #2a2a2a 0%, #333333 100%)"
+          : "linear-gradient(135deg, rgba(25, 118, 210, 0.12) 0%, rgba(25, 118, 210, 0.08) 100%)")
+      : getRowBackgroundColor(theme, rowIndex),
+    ...(isToday && {
+      boxShadow: theme.palette.mode === "dark"
+        ? "inset 0 0 0 1px rgba(255,255,255,0.06)"
+        : "inset 0 0 0 1px rgba(25, 118, 210, 0.15)",
+    }),
     transition: "background-color 0.15s ease",
   }),
   unassignedText: {

@@ -75,7 +75,6 @@ import {
   hasWorkedCurrentWeek,
   sortEmployeesByName,
   paginateEmployees,
-  generateRowsPerPageOptions,
   renderPeriodHeader,
   renderPeriodFooter,
   getPeriodMessage,
@@ -89,7 +88,8 @@ import {
 import AdjustHoursDialog from "../../../pages/Forms/AdjustHoursDialog";
 import WorkedHoursSummaryDialog from "../../../pages/Forms/WorkedHoursSummaryDialog";
 import DialogComponent from "../../Dialog/Dialog.component";
-import { addDialogPaperSx } from "../../../pages/Management/EmployeesPage/styles";
+import { adjustDialogPaperSx } from "../../../pages/Forms/AdjustHoursDialog/styles";
+import { summaryDialogPaperSx } from "../../../pages/Forms/WorkedHoursSummaryDialog/styles";
 import { useDispatch } from "react-redux";
 import type { AppDispatch } from "../../../store/store";
 import {
@@ -295,7 +295,25 @@ const SelectorTableComponent: React.FC<SelectorTableProps> = ({
   }, [weekNumber, year, weeklySummaries]);
 
   // Use helper function for rows per page options
-  const rowsPerPageOptions = useMemo(() => generateRowsPerPageOptions(rowsPerPage), [rowsPerPage]);
+  const rowsPerPageOptions = useMemo(() => {
+    const defaultOptions = [5, 10, 25, 50, 100];
+    const total = sortedEmployees.length;
+    
+    // Generate dynamic options based on total
+    const dynamicOptions: number[] = [];
+    let current = 5;
+    while (current < total) {
+      dynamicOptions.push(current);
+      current *= 2;
+    }
+    if (total > 0) {
+      dynamicOptions.push(total);
+    }
+    
+    // Combine with default options and remove duplicates
+    const allOptions = Array.from(new Set([...defaultOptions, ...dynamicOptions, rowsPerPage]));
+    return allOptions.filter((opt) => opt <= total || total === 0).sort((a, b) => a - b);
+  }, [rowsPerPage, sortedEmployees.length]);
 
   // Helper functions for tabbed summary dialog
   const calculateOvertimeHours = (totalHours: number, threshold: number) =>
@@ -546,13 +564,7 @@ const SelectorTableComponent: React.FC<SelectorTableProps> = ({
           className="table-container"
           sx={{
             ...tableContainerStyles,
-            "& thead th": {
-              position: "sticky !important",
-              top: "0 !important",
-              zIndex: "30 !important",
-              backgroundColor: "#000000 !important",
-              color: "#fff !important",
-            },
+            maxHeight: "100%",
           }}
           ref={tableContainerRef}
         >
@@ -561,12 +573,12 @@ const SelectorTableComponent: React.FC<SelectorTableProps> = ({
             aria-label="sticky table"
             sx={{
               width: "100%",
-              borderCollapse: "separate",
-              borderSpacing: 0,
+              borderCollapse: "collapse",
               "& th, & td": {
                 overflow: "hidden",
                 textOverflow: "ellipsis",
                 whiteSpace: "nowrap",
+                border: "none",
               },
               "& th:first-of-type, & td:first-of-type": {
                 width: viewMode === "employee" ? "12%" : "15%",
@@ -598,7 +610,7 @@ const SelectorTableComponent: React.FC<SelectorTableProps> = ({
               },
             }}
           >
-            <TableHead ref={tableHeadRef}>
+            <TableHead ref={tableHeadRef} sx={{ height: "36px", position: "sticky", top: 0, zIndex: 50 }}>
               <TableRow>
                 <TableCell
                   className="employee-column"
@@ -684,14 +696,13 @@ const SelectorTableComponent: React.FC<SelectorTableProps> = ({
                         ...tableCellStyles(isSmallScreen),
                         backgroundColor: "#000000",
                         color: "#fff",
-                        padding: "2px 8px",
+                        padding: "0 8px",
                         height: "36px",
-                        maxHeight: "36px",
-                        overflow: "hidden",
+                        verticalAlign: "middle",
                       }}
                       colSpan={2}
                     >
-                        <FormControl size="small" sx={{ minWidth: 100, height: 28 }}>
+                        <FormControl size="small" sx={{ minWidth: 100, height: "36px", m: 0, backgroundColor: "#000000", mt: "-8px" }}>
                           <Select
                             value={selectedPeriod}
                             onChange={(e) =>
@@ -705,14 +716,36 @@ const SelectorTableComponent: React.FC<SelectorTableProps> = ({
                                 sx={{
                                   backgroundColor: "#000000 !important",
                                   color: "#fff",
-                                  fontSize: "0.8rem",
+                                  fontSize: "0.85rem",
                                   fontWeight: 700,
-                                  height: 28,
+                                  height: "36px",
+                                  borderRadius: "10px",
+                                  boxShadow: "0 1px 3px rgba(0,0,0,0.08)",
+                                  transition: "all 0.2s cubic-bezier(0.4, 0, 0.2, 1)",
                                   "& .MuiOutlinedInput-input": {
                                     color: "#fff",
-                                    fontSize: "0.8rem",
+                                    fontSize: "0.85rem",
                                     fontWeight: 700,
-                                    padding: "2px 28px 2px 8px !important",
+                                    padding: "2px 28px 6px 8px !important",
+                                    lineHeight: "1.2",
+                                  },
+                                  "& fieldset": {
+                                    borderColor: "rgba(255,255,255,0.2)",
+                                    borderWidth: '1.5px',
+                                    borderRadius: "10px",
+                                  },
+                                  "&:hover": {
+                                    boxShadow: "0 2px 6px rgba(0,0,0,0.12)",
+                                    "& fieldset": {
+                                      borderColor: "rgba(255,255,255,0.3)",
+                                    },
+                                  },
+                                  "&.Mui-focused": {
+                                    boxShadow: "0 0 0 3px rgba(255,255,255,0.1)",
+                                    "& fieldset": {
+                                      borderColor: "rgba(255,255,255,0.5)",
+                                      borderWidth: "2px",
+                                    },
                                   },
                                   "& .MuiOutlinedInput-root": {
                                     backgroundColor: "#000000 !important",
@@ -720,43 +753,50 @@ const SelectorTableComponent: React.FC<SelectorTableProps> = ({
                                   "& .MuiInputBase-root": {
                                     backgroundColor: "#000000 !important",
                                   },
-                                  border: "none",
                                 }}
                               />
                             }
                             sx={{
                               backgroundColor: "#000000",
                               color: "#fff",
-                              fontSize: "0.8rem",
+                              fontSize: "0.85rem",
                               fontWeight: 600,
-                              borderRadius: "8px",
-                              height: 28,
+                              borderRadius: "10px",
+                              height: "36px",
                               "& .MuiSelect-select": {
                                 color: "#fff",
                                 backgroundColor: "#000000 !important",
-                                fontSize: "0.8rem",
+                                fontSize: "0.85rem",
                                 fontWeight: 600,
-                                padding: "2px 28px 2px 8px !important",
+                                padding: "2px 28px 6px 8px !important",
                                 display: "flex",
                                 alignItems: "center",
                                 gap: "4px",
-                                borderRadius: "8px",
-                                minHeight: "unset !important",
+                                borderRadius: "10px",
+                                minHeight: "36px !important",
+                                height: "36px",
+                                lineHeight: "1.2",
+                                justifyContent: "flex-start",
                               },
                               "& .MuiSelect-icon": {
                                 color: "rgba(255,255,255,0.7)",
                                 fontSize: "1.1rem",
                                 right: "4px",
+                                top: "50%",
+                                transform: "translateY(-50%)",
                               },
                               "& .MuiOutlinedInput-notchedOutline": {
-                                border: "none",
+                                borderColor: "rgba(255,255,255,0.2)",
+                                borderWidth: '1.5px',
+                                borderRadius: "10px",
                               },
                               "&:hover .MuiOutlinedInput-notchedOutline": {
-                                border: "none",
+                                borderColor: "rgba(255,255,255,0.3)",
                               },
                               "&.Mui-focused .MuiOutlinedInput-notchedOutline":
                                 {
-                                  border: "none",
+                                  borderColor: "rgba(255,255,255,0.5)",
+                                  borderWidth: "2px",
                                 },
                               "& .MuiInputBase-root": {
                                 backgroundColor: "transparent !important",
@@ -766,42 +806,59 @@ const SelectorTableComponent: React.FC<SelectorTableProps> = ({
                               },
                             }}
                             MenuProps={{
+                              anchorOrigin: { horizontal: "center", vertical: "bottom" },
+                              transformOrigin: { horizontal: "center", vertical: "top" },
                               PaperProps: {
+                                elevation: 0,
                                 sx: {
                                   maxHeight: 280,
                                   overflowY: "auto",
-                                  backgroundColor: "#000000",
-                                  border: "2px solid rgba(255,255,255,0.2)",
+                                  mt: 1,
+                                  minWidth: 200,
+                                  background: theme.palette.mode === 'dark' 
+                                    ? 'linear-gradient(135deg, rgba(0,0,0,0.95) 0%, rgba(26,26,26,0.95) 100%)'
+                                    : 'linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%)',
+                                  backdropFilter: "blur(20px)",
+                                  border: theme.palette.mode === 'dark'
+                                    ? "1px solid rgba(255,255,255,0.1)"
+                                    : "1px solid rgba(0,0,0,0.08)",
                                   borderRadius: "12px",
-                                  boxShadow: "0 16px 48px rgba(0,0,0,0.8), 0 0 0 1px rgba(255,255,255,0.05)",
-                                  marginTop: "8px",
-                                  minWidth: "200px",
+                                  boxShadow: theme.palette.mode === 'dark'
+                                    ? "0 10px 40px rgba(0,0,0,0.4), 0 2px 8px rgba(0,0,0,0.2)"
+                                    : "0 10px 40px rgba(0,0,0,0.15), 0 2px 8px rgba(0,0,0,0.1)",
                                   "& .MuiList-root": {
-                                    padding: "6px",
+                                    padding: "4px",
                                   },
                                   "& .MuiMenuItem-root": {
-                                    fontSize: "0.9rem",
-                                    fontWeight: 600,
-                                    padding: "10px 14px",
-                                    margin: "2px 0",
+                                    fontSize: "0.875rem",
+                                    fontWeight: 500,
+                                    padding: "8px 12px",
+                                    mx: 0.5,
+                                    my: 0.25,
                                     borderRadius: "8px",
-                                    color: "rgba(255,255,255,0.8)",
+                                    color: theme.palette.text.primary,
                                     backgroundColor: "transparent",
-                                    transition: "all 0.2s ease",
-                                    minHeight: "40px",
-                                    gap: "10px",
+                                    transition: "all 0.2s cubic-bezier(0.4, 0, 0.2, 1)",
+                                    minHeight: "36px",
+                                    gap: "8px",
                                     "&:hover": {
-                                      backgroundColor: "rgba(255,255,255,0.08)",
-                                      color: "#fff",
+                                      backgroundColor: theme.palette.mode === 'dark'
+                                        ? "rgba(255,255,255,0.1)"
+                                        : "rgba(0,0,0,0.04)",
+                                      transform: "translateX(2px)",
                                     },
                                     "&.Mui-selected": {
-                                      backgroundColor: "rgba(255,255,255,0.12)",
-                                      color: "#fff",
+                                      backgroundColor: theme.palette.mode === 'dark'
+                                        ? "rgba(255,255,255,0.12)"
+                                        : "rgba(0,0,0,0.08)",
+                                      color: theme.palette.text.primary,
                                       "& .MuiSvgIcon-root": {
-                                        color: "#fff",
+                                        color: theme.palette.primary.main,
                                       },
                                       "&:hover": {
-                                        backgroundColor: "rgba(255,255,255,0.18)",
+                                        backgroundColor: theme.palette.mode === 'dark'
+                                          ? "rgba(255,255,255,0.18)"
+                                          : "rgba(0,0,0,0.12)",
                                       },
                                     },
                                   },
@@ -812,7 +869,7 @@ const SelectorTableComponent: React.FC<SelectorTableProps> = ({
                               switch (selected) {
                                 case "weekly":
                                   return (
-                                    <Box sx={{ display: "flex", alignItems: "center", gap: 0.5 }}>
+                                    <Box sx={{ display: "flex", alignItems: "center", gap: 0.5, height: "100%", py: 0 }}>
                                       <Box sx={{
                                         width: 16,
                                         height: 16,
@@ -821,17 +878,18 @@ const SelectorTableComponent: React.FC<SelectorTableProps> = ({
                                         display: "flex",
                                         alignItems: "center",
                                         justifyContent: "center",
+                                        flexShrink: 0,
                                       }}>
                                         <CalendarTodayIcon sx={{ fontSize: 10, color: "#fff" }} />
                                       </Box>
-                                      <span style={{ color: "#fff", fontSize: "0.8rem", fontWeight: 600 }}>
+                                      <span style={{ color: "#fff", fontSize: "0.85rem", fontWeight: 600, lineHeight: "1.2", display: "flex", alignItems: "center" }}>
                                         {SELECTOR_TABLE.WEEKLY}
                                       </span>
                                     </Box>
                                   );
                                 case "biweekly":
                                   return (
-                                    <Box sx={{ display: "flex", alignItems: "center", gap: 0.5 }}>
+                                    <Box sx={{ display: "flex", alignItems: "center", gap: 0.5, height: "100%", py: 0 }}>
                                       <Box sx={{
                                         width: 16,
                                         height: 16,
@@ -840,17 +898,18 @@ const SelectorTableComponent: React.FC<SelectorTableProps> = ({
                                         display: "flex",
                                         alignItems: "center",
                                         justifyContent: "center",
+                                        flexShrink: 0,
                                       }}>
                                         <DateRangeIcon sx={{ fontSize: 10, color: "#fff" }} />
                                       </Box>
-                                      <span style={{ color: "#fff", fontSize: "0.8rem", fontWeight: 600 }}>
+                                      <span style={{ color: "#fff", fontSize: "0.85rem", fontWeight: 600, lineHeight: "1.2", display: "flex", alignItems: "center" }}>
                                         {SELECTOR_TABLE.BIWEEKLY}
                                       </span>
                                     </Box>
                                   );
                                 case "monthly":
                                   return (
-                                    <Box sx={{ display: "flex", alignItems: "center", gap: 0.5 }}>
+                                    <Box sx={{ display: "flex", alignItems: "center", gap: 0.5, height: "100%", py: 0 }}>
                                       <Box sx={{
                                         width: 16,
                                         height: 16,
@@ -859,10 +918,11 @@ const SelectorTableComponent: React.FC<SelectorTableProps> = ({
                                         display: "flex",
                                         alignItems: "center",
                                         justifyContent: "center",
+                                        flexShrink: 0,
                                       }}>
                                         <CalendarMonthIcon sx={{ fontSize: 10, color: "#fff" }} />
                                       </Box>
-                                      <span style={{ color: "#fff", fontSize: "0.8rem", fontWeight: 600 }}>
+                                      <span style={{ color: "#fff", fontSize: "0.85rem", fontWeight: 600, lineHeight: "1.2", display: "flex", alignItems: "center" }}>
                                         {SELECTOR_TABLE.MONTHLY}
                                       </span>
                                     </Box>
@@ -1047,6 +1107,16 @@ const SelectorTableComponent: React.FC<SelectorTableProps> = ({
                                     }}
                                   />
                                 }
+                                onOpen={() => {
+                                  setTimeout(() => {
+                                    const menuPaper = document.querySelector(
+                                      '.MuiPopover-root .MuiPaper-root'
+                                    );
+                                    if (menuPaper) {
+                                      menuPaper.scrollTop = 0;
+                                    }
+                                  }, 0);
+                                }}
                                 MenuProps={{
                                   PaperProps: {
                                     style: {
@@ -1362,6 +1432,16 @@ const SelectorTableComponent: React.FC<SelectorTableProps> = ({
                                       )
                                     }
                                     input={<OutlinedInput notched={false} />}
+                                    onOpen={() => {
+                                      setTimeout(() => {
+                                        const menuPaper = document.querySelector(
+                                          '.MuiPopover-root .MuiPaper-root'
+                                        );
+                                        if (menuPaper) {
+                                          menuPaper.scrollTop = 0;
+                                        }
+                                      }, 0);
+                                    }}
                                     MenuProps={{
                                       PaperProps: {
                                         style: {
@@ -1530,9 +1610,10 @@ const SelectorTableComponent: React.FC<SelectorTableProps> = ({
                     : theme.palette.primary.contrastText,
                 ".MuiTablePagination-toolbar": {
                   backgroundColor: "transparent",
-                  minHeight: "36px",
+                  minHeight: "32px",
                   paddingLeft: 1,
                   paddingRight: 1,
+                  border: "none",
                 },
                 ".MuiTablePagination-selectLabel, .MuiTablePagination-input, .MuiTablePagination-displayedRows":
                   {
@@ -1554,6 +1635,47 @@ const SelectorTableComponent: React.FC<SelectorTableProps> = ({
                 },
                 ".MuiTablePagination-select": {
                   fontSize: "0.75rem",
+                  border: "none",
+                },
+                ".MuiTablePagination-selectIcon": {
+                  fontSize: "1rem",
+                },
+                ".MuiInputBase-root": {
+                  border: "none",
+                  "&:before, &:after": {
+                    display: "none",
+                  },
+                  fontSize: "0.75rem",
+                },
+                ".MuiTablePagination-input": {
+                  fontSize: "0.75rem",
+                },
+              }}
+              SelectProps={{
+                MenuProps: {
+                  anchorOrigin: { horizontal: 'left', vertical: 'top' },
+                  transformOrigin: { horizontal: 'left', vertical: 'bottom' },
+                  PaperProps: {
+                    sx: {
+                      maxHeight: 200,
+                      '& .MuiMenuItem-root': {
+                        fontSize: '0.75rem',
+                        padding: '6px 12px',
+                        border: 'none',
+                        '&.Mui-selected': {
+                          backgroundColor: theme.palette.action.selected,
+                          border: 'none',
+                        },
+                        '&:hover': {
+                          backgroundColor: theme.palette.action.hover,
+                          border: 'none',
+                        },
+                      },
+                    },
+                  },
+                },
+                onBlur: (e) => {
+                  e.target.blur();
                 },
               }}
             />
@@ -1566,7 +1688,7 @@ const SelectorTableComponent: React.FC<SelectorTableProps> = ({
         title={SELECTOR_TABLE.ADJUST_HOURS}
         subtitle={getDialogTitle(openAdjustDialogEmployee)}
         hideActions
-        paperSx={addDialogPaperSx as object}
+        paperSx={adjustDialogPaperSx as object}
         icon={<MoreTimeIcon color="warning" />}
       >
         <AdjustHoursDialog
@@ -1597,7 +1719,7 @@ const SelectorTableComponent: React.FC<SelectorTableProps> = ({
         title={SELECTOR_TABLE.SUMMARY_TITLE}
         subtitle={getDialogTitle(openInfoDialogEmployee)}
         hideActions
-        paperSx={addDialogPaperSx as object}
+        paperSx={summaryDialogPaperSx as object}
         icon={<InfoOutlinedIcon color="info" />}
       >
         <WorkedHoursSummaryDialog

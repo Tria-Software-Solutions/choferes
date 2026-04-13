@@ -71,7 +71,9 @@ export const formatDateWithoutYear = (date: Date) => {
 };
 
 export const formatHeaderDate = (dateStr: string) => {
-  const [day, month] = dateStr.split(" ");
+  const parts = dateStr.split(" ");
+  const day = parts[0];
+  const month = parts[1];
   const transformedMonth = translateMonthToAbrevSpanish(
     month as EnglishAbrevMonthOfYear,
   );

@@ -48,6 +48,7 @@ import {
   errorButtonStyles,
   tablePaperStyles,
   tableContainerStyles,
+  ocrModalTextFieldStyles,
   tableStyles,
   tableHeadCellStyles,
   editableCellStyles,
@@ -315,9 +316,8 @@ const OCRResultModal: React.FC<OCRResultModalProps> = ({
                 mb: 2,
                 p: 2,
                 borderRadius: 1,
-                background: (theme) =>
-                  `linear-gradient(135deg, ${theme.palette.success.light}10, ${theme.palette.success.main}05)`,
-                border: (theme) => `1px solid ${theme.palette.success.light}30`,
+                bgcolor: "background.paper",
+                border: (theme) => `1px solid ${theme.palette.divider}`,
               }}
             >
               <Box>
@@ -405,6 +405,7 @@ const OCRResultModal: React.FC<OCRResultModalProps> = ({
                                   fullWidth
                                   autoFocus
                                   variant="standard"
+                                  sx={ocrModalTextFieldStyles}
                                 />
                               ) : (
                                 <Typography variant="body2" fontWeight="medium">
@@ -435,6 +436,7 @@ const OCRResultModal: React.FC<OCRResultModalProps> = ({
                                   fullWidth
                                   autoFocus
                                   variant="standard"
+                                  sx={ocrModalTextFieldStyles}
                                 />
                               ) : (
                                 <Typography variant="body2" fontWeight="medium">
@@ -463,6 +465,7 @@ const OCRResultModal: React.FC<OCRResultModalProps> = ({
                                   fullWidth
                                   autoFocus
                                   variant="standard"
+                                  sx={ocrModalTextFieldStyles}
                                 />
                               ) : (
                                 <Typography variant="body2">
@@ -493,6 +496,7 @@ const OCRResultModal: React.FC<OCRResultModalProps> = ({
                                   fullWidth
                                   autoFocus
                                   variant="standard"
+                                  sx={ocrModalTextFieldStyles}
                                 />
                               ) : (
                                 <Box
@@ -532,6 +536,7 @@ const OCRResultModal: React.FC<OCRResultModalProps> = ({
                                   fullWidth
                                   autoFocus
                                   variant="standard"
+                                  sx={ocrModalTextFieldStyles}
                                 />
                               ) : (
                                 <Typography
@@ -565,6 +570,7 @@ const OCRResultModal: React.FC<OCRResultModalProps> = ({
                                   fullWidth
                                   autoFocus
                                   variant="standard"
+                                  sx={ocrModalTextFieldStyles}
                                 />
                               ) : (
                                 <Typography

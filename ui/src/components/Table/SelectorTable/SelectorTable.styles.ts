@@ -7,7 +7,7 @@ export const paperStyles: SxProps<Theme> = (theme) => ({
   minHeight: 0,
   display: "flex",
   flexDirection: "column",
-  overflow: "visible",
+  overflow: "hidden",
   backgroundColor: theme.palette.background.paper,
   color: theme.palette.text.primary,
   borderRadius: 0,
@@ -22,7 +22,7 @@ export const stickyHeaderBoxStyles = (
   position: "relative",
   backgroundColor: theme.palette.mode === "dark" ? "#1a1a1a" : "#fafafa",
   padding: isSmallScreen ? "6px 12px" : "8px 16px",
-  borderBottom: `1px solid ${theme.palette.mode === "dark" ? "rgba(255,255,255,0.08)" : "rgba(0,0,0,0.06)"}`,
+  borderBottom: "none",
   flexShrink: 0,
   display: "flex",
   alignItems: "center",
@@ -52,13 +52,14 @@ export const tableContainerStyles: SxProps<Theme> = {
   flex: 1,
   minHeight: 0,
   height: "100%",
+  maxHeight: "100%",
 };
 
 // Premium table head styles with better typography
 export const tableHeadStyles: SxProps<Theme> = (theme) => ({
   position: "sticky",
   top: 0,
-  zIndex: 10,
+  zIndex: 50,
   backgroundColor: theme.palette.mode === "dark" ? "#0a0a0a" : "#000000",
   "& th": {
     color: "#ffffff",
@@ -71,6 +72,9 @@ export const tableHeadStyles: SxProps<Theme> = (theme) => ({
     fontFamily: "'Urbanist', -apple-system, BlinkMacSystemFont, sans-serif",
     lineHeight: 1.3,
     whiteSpace: "nowrap",
+    position: "sticky",
+    top: 0,
+    zIndex: 50,
   },
   "& th:first-of-type": {
     borderTopLeftRadius: "0",
@@ -93,7 +97,7 @@ export const employeeColumnCellStyles = (
   fontWeight: 600,
   fontSize: "0.875rem",
   fontFamily: "'Urbanist', -apple-system, BlinkMacSystemFont, sans-serif",
-  borderRight: `1px solid ${theme.palette.mode === "dark" ? "rgba(255,255,255,0.06)" : "rgba(0,0,0,0.06)"}`,
+  borderRight: "none",
   letterSpacing: "-0.01em",
 });
 
@@ -107,7 +111,7 @@ export const tableCellStyles = (isSmallScreen: boolean): SxProps<Theme> => (them
   fontSize: "0.875rem",
   fontWeight: 500,
   fontFamily: "'Urbanist', -apple-system, BlinkMacSystemFont, sans-serif",
-  borderBottom: `1px solid ${theme.palette.mode === "dark" ? "rgba(255,255,255,0.04)" : "rgba(0,0,0,0.04)"}`,
+  borderBottom: "none",
   letterSpacing: "-0.01em",
 });
 
@@ -167,6 +171,7 @@ export const listSubheaderStyles = (color: string): SxProps<Theme> => (theme) =>
   px: 2,
   letterSpacing: "-0.01em",
   borderBottom: `1px solid ${theme.palette.mode === "dark" ? "rgba(255,255,255,0.06)" : "rgba(0,0,0,0.06)"}`,
+  position: "static",
 });
 
 // Premium form control for period selection
@@ -262,12 +267,17 @@ export const tableCellBackground = (
   today: boolean,
 ): SxProps<Theme> => (theme) => ({
   backgroundColor: today
-    ? theme.palette.mode === "dark" 
-      ? "rgba(255,255,255,0.08)" 
-      : theme.palette.action.selected
+    ? theme.palette.mode === "dark"
+      ? "linear-gradient(135deg, #2a2a2a 0%, #333333 100%)"
+      : "linear-gradient(135deg, rgba(25, 118, 210, 0.12) 0%, rgba(25, 118, 210, 0.08) 100%)"
     : rowIndex % 2 === 0
     ? theme.palette.background.paper
     : theme.palette.mode === "dark" ? "#1f1f1f" : "#fafafa",
+  ...(today && {
+    boxShadow: theme.palette.mode === "dark"
+      ? "inset 0 0 0 1px rgba(255,255,255,0.06)"
+      : "inset 0 0 0 1px rgba(25, 118, 210, 0.15)",
+  }),
 });
 
 // Premium employee cell styles

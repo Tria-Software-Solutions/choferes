@@ -1,8 +1,8 @@
 import React, { useState, useEffect, useCallback, useMemo } from "react";
 import { useAuthContext } from "../../../context/AuthContext";
 import { Employee } from "../../../models/Employee";
-import { useReduxData, useAppDispatch } from "../../../hooks/useReduxData";
-import { useModal } from "../../../hooks/useModal";
+import { useSelector, useDispatch } from "react-redux";
+import { RootState, AppDispatch } from "../../../store/store";
 import {
   fetchEmployees,
   createEmployee,
@@ -14,7 +14,7 @@ import SpeedDialComponent from "../../../components/SpeedDial/SpeedDial.componen
 import EditableTableComponent from "../../../components/Table/EditableTable/EditableTable.component";
 import AddEmployeeForm from "../../Forms/AddEmployeeForm";
 import { useAppNotifications } from "../../../components/Snackbar/Snackbar.component";
-import AppModal from "../../../components/AppModal/AppModal.component";
+import DialogComponent from "../../../components/Dialog/Dialog.component";
 import { createEmployeeNotification } from "../../../services/notificationService";
 import {
   Button,
@@ -44,28 +44,40 @@ import {
   deleteDialogPaperSx,
   addDialogPaperSx,
 } from "./styles";
+import { useLocation } from "react-router-dom";
 import { useTablePreferences } from "../../../hooks/useTablePreferences";
-import { useResponsiveTableHeight } from "../../../hooks/useResponsiveTableHeight";
 import { format } from "date-fns";
 import { es } from "date-fns/locale";
 import { capitalizeFirstLetter } from "../../../utils/string";
 
+const getInitialRowsPerPage = () => {
+  // Example: calculate based on window size or available height
+  // You can refine this logic as needed
+  if (typeof window !== "undefined") {
+    const maxHeight = window.innerHeight * 0.6;
+    const headHeight = 56;
+    const paginationHeight = 64;
+    const extra = 24;
+    const availableHeight = maxHeight - headHeight - paginationHeight - extra;
+    const rowHeight = 48;
+    let rows = Math.floor(availableHeight / rowHeight);
+    return Math.max(3, Math.min(100, rows));
+  }
+  return 25;
+};
+
 // Employees management page component
 const EmployeesPage: React.FC = () => {
-  const dispatch = useAppDispatch();
+  const dispatch = useDispatch<AppDispatch>();
   const { userPermissions } = useAuthContext();
-  const { employees, isLoadingEmployees } = useReduxData(
-    (state) => state.employees,
-    (prev, next) => prev.employees === next.employees && prev.isLoadingEmployees === next.isLoadingEmployees
+  const { employees, isLoadingEmployees } = useSelector(
+    (state: RootState) => state.employees
   );
   const { showNotification } = useAppNotifications();
-  
-  // Use dynamic table height hook
-  const { maxHeight, rowsPerPage: calculatedRowsPerPage } = useResponsiveTableHeight();
   const [filteredEmployees, setFilteredEmployees] = useState<Employee[]>([]);
   const [totalCount, setTotalCount] = useState(0);
   const [editRowId, setEditRowId] = useState<number | null>(null);
-  const addModal = useModal();
+  const [openAddModal, setOpenAddModal] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [editFields, setEditFields] = useState({ firstName: "", lastName: "" });
   const [openDeleteDialog, setOpenDeleteDialog] = useState(false);
@@ -75,17 +87,16 @@ const EmployeesPage: React.FC = () => {
   const [isDeletingEmployee, setIsDeletingEmployee] = useState(false);
 
   const { search, setSearch, rowsPerPage, setRowsPerPage } =
-    useTablePreferences("employees", () => calculatedRowsPerPage);
+    useTablePreferences("employees", getInitialRowsPerPage);
 
   const theme = useTheme();
   const isSmallScreen = useMediaQuery(theme.breakpoints.down("sm"));
+  const location = useLocation();
 
-  // Fetch employees on mount (only if not already loaded)
+  // Fetch employees on mountexportOptions
   useEffect(() => {
-    if (employees.length === 0) {
-      dispatch(fetchEmployees());
-    }
-  }, [dispatch, employees.length]);
+    dispatch(fetchEmployees());
+  }, [dispatch, location.pathname]);
 
   // Filter employees by search input
   useEffect(() => {
@@ -131,7 +142,7 @@ const EmployeesPage: React.FC = () => {
     try {
       setIsSubmitting(true);
       dispatch(createEmployee(newEmployee));
-      addModal.close();
+      setOpenAddModal(false);
       showNotification(NOTIFICATIONS.EMPLOYEE_CREATE_SUCCESS, {
         severity: "success",
         duration: 3000,
@@ -150,8 +161,13 @@ const EmployeesPage: React.FC = () => {
   };
 
   // Open/close add employee modal
-  const handleOpenAddModal = () => addModal.open();
-  const handleCloseAddModal = () => addModal.close();
+  const handleOpenAddModal = () => {
+    setOpenAddModal(true);
+  };
+
+  const handleCloseAddModal = () => {
+    setOpenAddModal(false);
+  };
 
   // Handle editing of an employee
   const handleEdit = (employee: Employee) => {
@@ -266,7 +282,7 @@ const EmployeesPage: React.FC = () => {
   // Use exportTable({ data: exportData, ... }) for export
 
   return (
-    <Box sx={{ height: "calc(100vh - 64px - 32px)", display: "flex", flexDirection: "column", overflow: "hidden", pb: 0, pt: 0, px: 0 }}>
+    <Box sx={{ height: "calc(100vh - 100px)", display: "flex", flexDirection: "column", overflow: "hidden", pb: 0, pt: 0, px: 0 }}>
       {/* Premium Card with Header and Grid */}
       <Paper
         elevation={0}
@@ -284,7 +300,7 @@ const EmployeesPage: React.FC = () => {
         <Box
           sx={{
             px: { xs: 2, sm: 3 },
-            py: { xs: 1.5, sm: 2 },
+            py: { xs: 2, sm: 2.5 },
             backgroundColor: theme.palette.background.paper,
             color: theme.palette.text.primary,
             borderBottom: `1px solid ${theme.palette.mode === "dark" ? "rgba(255,255,255,0.08)" : "rgba(0,0,0,0.08)"}`,
@@ -294,7 +310,7 @@ const EmployeesPage: React.FC = () => {
             display="flex"
             justifyContent="space-between"
             alignItems="flex-start"
-            mb={1}
+            mb={2}
           >
             <Box display="flex" alignItems="center" gap={1.5}>
               <Box
@@ -360,7 +376,7 @@ const EmployeesPage: React.FC = () => {
             gap={2}
           >
             {/* Search */}
-            <Box flex={1} maxWidth={{ sm: "380px" }}>
+            <Box flex={1} maxWidth={{ sm: "320px" }}>
               {filteredEmployees && (
                 <SearchBarComponent
                   placeholder={MANAGEMENT.EMPLOYEES_PAGE.SEARCH_PLACEHOLDER}
@@ -396,7 +412,7 @@ const EmployeesPage: React.FC = () => {
 
         {/* Mobile Add Button */}
         {userPermissions.includes(PERMISSIONS.CREATE_EMPLOYEES) && (
-          <Box sx={{ display: { xs: 'flex', sm: 'none' }, p: 1.5, borderTop: `1px solid ${theme.palette.mode === "dark" ? "rgba(255,255,255,0.08)" : "rgba(0,0,0,0.08)"}` }}>
+          <Box sx={{ display: { xs: 'flex', sm: 'none' }, p: 2, borderTop: `1px solid ${theme.palette.mode === "dark" ? "rgba(255,255,255,0.08)" : "rgba(0,0,0,0.08)"}` }}>
             <Button
               variant="contained"
               fullWidth
@@ -444,7 +460,6 @@ const EmployeesPage: React.FC = () => {
                   setRowsPerPage={setRowsPerPage}
                   isSaveDisabled={!isEditFormValid}
                   userPermissions={userPermissions}
-                  maxTableHeight={maxHeight}
                 />
               ) : (
                 <Box sx={noEmployeesBoxStyles}>
@@ -458,7 +473,7 @@ const EmployeesPage: React.FC = () => {
           )}
         </Box>
       </Paper>
-      <AppModal
+      <DialogComponent
         open={openDeleteDialog}
         onClose={handleCloseDeleteDialog}
         onConfirm={handleDelete}
@@ -472,8 +487,8 @@ const EmployeesPage: React.FC = () => {
         icon={<Trash2 size={24} color="red" />}
       />
 
-      <AppModal
-        open={addModal.isOpen}
+      <DialogComponent
+        open={openAddModal}
         onClose={handleCloseAddModal}
         title={MANAGEMENT.EMPLOYEES_PAGE.DIALOG_ADD_TITLE}
         subtitle={MANAGEMENT.EMPLOYEES_PAGE.DIALOG_ADD_SUBTITLE}
@@ -486,7 +501,7 @@ const EmployeesPage: React.FC = () => {
           onCancel={handleCloseAddModal}
           isLoading={isSubmitting}
         />
-      </AppModal>
+      </DialogComponent>
     </Box>
   );
 };

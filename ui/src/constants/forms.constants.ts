@@ -137,7 +137,7 @@ const FORMS = {
     SCHEDULE_LABEL: "Horario/Lugar",
     SCHEDULE_LABEL_PLACEHOLDER: "Ej: Avenida 123",
     SCHEDULE_TIME_LABEL: "Tiempo",
-    SCHEDULE_TIME_PLACEHOLDER: "Ej: 8",
+    SCHEDULE_TIME_PLACEHOLDER: "Ej: 8 horas",
     SPECIAL_LABEL: "Horario Especial",
     SPECIAL_DESC:
       "Marque esta opción si es un horario con condiciones especiales",

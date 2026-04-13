@@ -23,6 +23,7 @@ export const getTableFooterStyles = (theme: Theme) => ({
       backgroundColor: "transparent",
       padding: 0,
       minHeight: "40px",
+      border: "none",
     },
     ".MuiTablePagination-selectLabel, .MuiTablePagination-input, .MuiTablePagination-displayedRows": {
       color: theme.palette.text.primary,
@@ -33,6 +34,20 @@ export const getTableFooterStyles = (theme: Theme) => ({
     },
     ".MuiInputBase-root": {
       fontSize: "0.75rem",
+      border: "none",
+      "&:before, &:after": {
+        display: "none",
+      },
+    },
+    ".MuiTablePagination-input": {
+      fontSize: "0.75rem",
+    },
+    ".MuiTablePagination-select": {
+      fontSize: "0.75rem",
+      border: "none",
+    },
+    ".MuiTablePagination-selectIcon": {
+      fontSize: "1rem",
     },
     ".MuiSvgIcon-root": {
       color: theme.palette.text.primary,

@@ -29,7 +29,6 @@ import {
   clearButton,
   actionsInnerBox,
   cancelButton,
-  submitButton,
 } from "./styles";
 
 interface AddCourierFormProps {
@@ -190,10 +189,9 @@ const AddCourierForm: React.FC<AddCourierFormProps> = ({
       <Grid container spacing={3} sx={gridContainer}>
         <Grid item xs={12} sm={6}>
           <TextfieldComponent
-            label={FORMS.ADD_COURIER.DRIVER}
+            placeholder={FORMS.ADD_COURIER.DRIVER_PLACEHOLDER}
             variant="outlined"
             fullWidth
-            placeholder={FORMS.ADD_COURIER.DRIVER_PLACEHOLDER}
             value={formData.driver}
             onChange={(e) => handleFieldChange("driver", e.target.value)}
             error={errors.driver !== ""}
@@ -238,11 +236,10 @@ const AddCourierForm: React.FC<AddCourierFormProps> = ({
 
         <Grid item xs={12} sm={6}>
           <TextfieldComponent
-            label={FORMS.ADD_COURIER.DISTANCE}
+            placeholder={FORMS.ADD_COURIER.DISTANCE_PLACEHOLDER}
             variant="outlined"
             fullWidth
             type="number"
-            placeholder={FORMS.ADD_COURIER.DISTANCE_PLACEHOLDER}
             value={formData.distance}
             onChange={(e) =>
               handleFieldChange("distance", parseInt(e.target.value) || 0)
@@ -255,10 +252,9 @@ const AddCourierForm: React.FC<AddCourierFormProps> = ({
 
         <Grid item xs={12} sm={6}>
           <TextfieldComponent
-            label={FORMS.ADD_COURIER.TRACKING_NUMBER}
+            placeholder={FORMS.ADD_COURIER.TRACKING_NUMBER_PLACEHOLDER}
             variant="outlined"
             fullWidth
-            placeholder={FORMS.ADD_COURIER.TRACKING_NUMBER_PLACEHOLDER}
             value={formData.trackingNumber}
             onChange={(e) =>
               handleFieldChange("trackingNumber", e.target.value)
@@ -345,10 +341,17 @@ const AddCourierForm: React.FC<AddCourierFormProps> = ({
               <Button
                 variant="contained"
                 onClick={handleSubmit}
-                disabled={!isFormValid() || isLoading}
-                startIcon={<Plus />}
+                disabled={!isFormValid || isLoading}
+                startIcon={<Plus size={18} />}
                 fullWidth={isSmallScreen}
-                sx={submitButton}
+                sx={{
+                  fontWeight: 600,
+                  fontSize: "0.95rem",
+                  textTransform: "none",
+                  letterSpacing: "0.01em",
+                  borderRadius: "12px",
+                  minHeight: "42px",
+                }}
               >
                 {isLoading
                   ? FORMS.ADD_COURIER.LOADING_BUTTON

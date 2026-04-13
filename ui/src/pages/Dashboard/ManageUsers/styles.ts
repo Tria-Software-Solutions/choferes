@@ -80,9 +80,11 @@ export const showInactiveTypographyStyles: SxProps<Theme> = {
 
 export const noUsersBoxStyles: SxProps<Theme> = {
   display: "flex",
+  flexDirection: "column",
   justifyContent: "center",
   alignItems: "center",
   textAlign: "center",
+  height: "100%",
 };
 
 export const addDialogPaperSx: SxProps<Theme> = {

@@ -89,8 +89,7 @@ export const noEmployeesBoxStyles: SxProps<Theme> = {
   justifyContent: "center",
   alignItems: "center",
   textAlign: "center",
-  paddingTop: "10%",
-  paddingBottom: "12%",
+  height: "100%",
 };
 
 export const noEmployeesIconStyles: CSSProperties = {

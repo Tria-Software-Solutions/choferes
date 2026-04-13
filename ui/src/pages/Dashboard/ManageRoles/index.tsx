@@ -2,8 +2,8 @@ import React, { useState, useEffect, useCallback, useMemo } from "react";
 import { useAuthContext } from "../../../context/AuthContext";
 import { Role } from "../../../models/Role";
 import { Permission } from "../../../models/Permission";
-import { useReduxData, useAppDispatch } from "../../../hooks/useReduxData";
-import { useModal } from "../../../hooks/useModal";
+import { useSelector, useDispatch } from "react-redux";
+import { RootState, AppDispatch } from "../../../store/store";
 import {
   fetchRoles,
   createRole,
@@ -27,7 +27,7 @@ import {
 import EditableTableComponent from "../../../components/Table/EditableTable/EditableTable.component";
 import SearchBarComponent from "../../../components/SearchBar/SearchBar.component";
 import AddRoleForm from "../../Forms/AddRoleForm";
-import AppModal from "../../../components/AppModal/AppModal.component";
+import DialogComponent from "../../../components/Dialog/Dialog.component";
 import { Plus, Trash2, PlusCircle, Shield } from "lucide-react";
 import PAGE_TITLE from "../../../constants/pageTitle.constants";
 import { DASHBOARD_ROLES } from "../../../constants/constants";
@@ -41,25 +41,23 @@ import {
   deleteDialogPaperSx,
   addDialogPaperSx,
 } from "./styles";
+import { useLocation } from "react-router-dom";
 import { useTablePreferences } from '../../../hooks/useTablePreferences';
 
 // ManageRoles page component for role management in the dashboard
 const ManageRoles: React.FC<{ isExpanded?: boolean }> = ({
   isExpanded = true,
 }) => {
-  const dispatch = useAppDispatch();
+  const dispatch = useDispatch<AppDispatch>();
   const { userPermissions } = useAuthContext();
   const theme = useTheme();
   const isSmallScreen = useMediaQuery(theme.breakpoints.down("sm"));
-  const { roles, isLoadingRoles } = useReduxData(
-    (state) => state.roles,
-    (prev, next) => prev.roles === next.roles && prev.isLoadingRoles === next.isLoadingRoles
+  const { roles, isLoadingRoles } = useSelector(
+    (state: RootState) => state.roles,
   );
-  const { permissions } = useReduxData(
-    (state) => state.permissions,
-    (prev, next) => prev.permissions === next.permissions
-  );
+  const { permissions } = useSelector((state: RootState) => state.permissions);
   const { showNotification } = useAppNotifications();
+  const location = useLocation();
 
   const [editRowId, setEditRowId] = useState<number | null>(null);
   const [editFields, setEditFields] = useState<{
@@ -69,26 +67,15 @@ const ManageRoles: React.FC<{ isExpanded?: boolean }> = ({
     name: "",
     permissionNames: [],
   });
-  const deleteDialog = useModal();
-  const addRoleModal = useModal();
+  const [openDeleteDialog, setOpenDeleteDialog] = useState(false);
   const [roleToDelete, setRoleToDelete] = useState<number | null>(null);
+  const [openAddRoleModal, setOpenAddRoleModal] = useState(false);
   const [isCreatingRole, setIsCreatingRole] = useState(false);
   const [isDeletingRole, setIsDeletingRole] = useState(false);
 
-  const paperSx = useMemo(() => ({
-    borderRadius: "16px",
-    border: "1px solid rgba(0,0,0,0.08)",
-    boxShadow: "0 4px 24px rgba(0,0,0,0.08), 0 1px 2px rgba(0,0,0,0.04)",
-    overflow: "visible",
-    flex: 1,
-    height: "100%",
-    display: "flex",
-    flexDirection: "column",
-  }), []);
-
   const getInitialRowsPerPage = () => {
     if (typeof window !== 'undefined') {
-      const maxHeight = window.innerHeight * 0.48;
+      const maxHeight = window.innerHeight * 0.6;
       const headHeight = 56;
       const paginationHeight = 64;
       const extra = 24;
@@ -102,16 +89,12 @@ const ManageRoles: React.FC<{ isExpanded?: boolean }> = ({
 
   const { search, setSearch, rowsPerPage, setRowsPerPage } = useTablePreferences('roles', getInitialRowsPerPage);
 
-  // Loads roles, permissions, and role permissions data on mount (only if not already loaded)
+  // Loads roles, permissions, and role permissions data on mount
   useEffect(() => {
-    if (roles.length === 0) {
-      dispatch(fetchRoles());
-    }
-    if (permissions.length === 0) {
-      dispatch(fetchPermissions());
-    }
+    dispatch(fetchRoles());
+    dispatch(fetchPermissions());
     dispatch(fetchRolePermissions());
-  }, [dispatch, roles.length, permissions.length]);
+  }, [dispatch, location.pathname]);
 
   // Filters roles based on search input
   const filteredRoles = useMemo(() => {
@@ -148,17 +131,17 @@ const ManageRoles: React.FC<{ isExpanded?: boolean }> = ({
     return validateFields(editFields);
   }, [editFields, editRowId, validateFields]);
 
-  const handleEdit = useCallback((role: Role) => {
+  const handleEdit = (role: Role) => {
     setEditRowId(role.id);
     setEditFields({
       name: role.name,
       permissionNames: role?.permissionNames || [],
     });
-  }, []);
+  };
 
-  const handleCancel = useCallback(() => {
+  const handleCancel = () => {
     setEditRowId(null);
-  }, []);
+  };
 
   // Handles updating a role
   const handleUpdate = async (id: number) => {
@@ -192,15 +175,15 @@ const ManageRoles: React.FC<{ isExpanded?: boolean }> = ({
   };
 
   // Handles opening/closing delete dialog
-  const handleOpenDeleteDialog = useCallback((id: number) => {
-    deleteDialog.open();
+  const handleOpenDeleteDialog = (id: number) => {
+    setOpenDeleteDialog(true);
     setRoleToDelete(id);
-  }, [deleteDialog]);
+  };
 
-  const handleCloseDeleteDialog = useCallback(() => {
-    deleteDialog.close();
+  const handleCloseDeleteDialog = () => {
+    setOpenDeleteDialog(false);
     setRoleToDelete(null);
-  }, [deleteDialog]);
+  };
 
   // Handles deleting a role
   const handleDelete = async () => {
@@ -209,7 +192,7 @@ const ManageRoles: React.FC<{ isExpanded?: boolean }> = ({
     setIsDeletingRole(true);
     try {
       await dispatch(deleteRole(roleToDelete));
-      deleteDialog.close();
+      setOpenDeleteDialog(false);
       setRoleToDelete(null);
       showNotification(NOTIFICATIONS.ROLE_DELETE_SUCCESS, { severity: 'success', duration: 3000 });
       
@@ -226,13 +209,13 @@ const ManageRoles: React.FC<{ isExpanded?: boolean }> = ({
   };
 
   // Handles opening/closing add role modal
-  const handleOpenAddRoleModal = useCallback(() => {
-    addRoleModal.open();
-  }, [addRoleModal]);
+  const handleOpenAddRoleModal = () => {
+    setOpenAddRoleModal(true);
+  };
 
-  const handleCloseAddRoleModal = useCallback(() => {
-    addRoleModal.close();
-  }, [addRoleModal]);
+  const handleCloseAddRoleModal = () => {
+    setOpenAddRoleModal(false);
+  };
 
   // Handles creating a new role
   const handleCreateRole = async (roleData: {
@@ -258,7 +241,7 @@ const ManageRoles: React.FC<{ isExpanded?: boolean }> = ({
           newPermissionIds: roleData.permissions.map((id) => parseInt(id)),
         }),
       );
-      addRoleModal.close();
+      setOpenAddRoleModal(false);
       showNotification(NOTIFICATIONS.ROLE_CREATE_SUCCESS, { severity: 'success', duration: 3000 });
       
       // Add notification to menu
@@ -271,7 +254,7 @@ const ManageRoles: React.FC<{ isExpanded?: boolean }> = ({
   };
 
   // Renders column values for the table
-  const renderColumnValue = useCallback((column: string, value: unknown) => {
+  const renderColumnValue = (column: string, value: unknown) => {
     if (column === "permissionNames" && Array.isArray(value)) {
       return (
         <Box sx={permissionNamesBoxStyles}>
@@ -284,20 +267,29 @@ const ManageRoles: React.FC<{ isExpanded?: boolean }> = ({
       );
     }
     return value as React.ReactNode;
-  }, [theme]);
+  };
 
   return (
-    <Box sx={{ height: "calc(100vh - 64px - 32px)", minHeight: 0, display: "flex", flexDirection: "column", overflow: "hidden", pb: 0, pt: 0, px: 0 }}>
+    <Box sx={{ height: "100%", minHeight: "500px", display: "flex", flexDirection: "column", overflow: "hidden", pb: 0, pt: 0, px: 0 }}>
       {/* Premium Card with Header and Grid */}
       <Paper
         elevation={0}
-        sx={paperSx}
+        sx={{
+          borderRadius: "16px",
+          border: "1px solid rgba(0,0,0,0.08)",
+          boxShadow: "0 4px 24px rgba(0,0,0,0.08), 0 1px 2px rgba(0,0,0,0.04)",
+          overflow: "hidden",
+          flex: 1,
+          minHeight: 0,
+          display: "flex",
+          flexDirection: "column",
+        }}
       >
         {/* Header Section */}
         <Box
           sx={{
             px: { xs: 2, sm: 3 },
-            py: { xs: 1.5, sm: 2 },
+            py: { xs: 2, sm: 2.5 },
             backgroundColor: theme.palette.background.paper,
             color: theme.palette.text.primary,
             borderBottom: `1px solid ${theme.palette.mode === "dark" ? "rgba(255,255,255,0.08)" : "rgba(0,0,0,0.08)"}`,
@@ -307,7 +299,7 @@ const ManageRoles: React.FC<{ isExpanded?: boolean }> = ({
             display="flex"
             justifyContent="space-between"
             alignItems="flex-start"
-            mb={1}
+            mb={2}
           >
             <Box display="flex" alignItems="center" gap={1.5}>
               <Box
@@ -358,7 +350,7 @@ const ManageRoles: React.FC<{ isExpanded?: boolean }> = ({
             gap={2}
           >
             {/* Search */}
-            <Box flex={1} maxWidth={{ sm: "380px" }}>
+            <Box flex={1} maxWidth={{ sm: "320px" }}>
               {filteredRoles && (
                 <SearchBarComponent
                   placeholder={DASHBOARD_ROLES.SEARCH_PLACEHOLDER}
@@ -391,7 +383,7 @@ const ManageRoles: React.FC<{ isExpanded?: boolean }> = ({
         </Box>
 
         {/* Mobile Add Button */}
-        <Box sx={{ display: { xs: 'flex', sm: 'none' }, p: 1.5, borderTop: `1px solid ${theme.palette.mode === "dark" ? "rgba(255,255,255,0.08)" : "rgba(0,0,0,0.08)"}` }}>
+        <Box sx={{ display: { xs: 'flex', sm: 'none' }, p: 2, borderTop: `1px solid ${theme.palette.mode === "dark" ? "rgba(255,255,255,0.08)" : "rgba(0,0,0,0.08)"}` }}>
           <Button
             variant="contained"
             fullWidth
@@ -408,7 +400,7 @@ const ManageRoles: React.FC<{ isExpanded?: boolean }> = ({
         </Box>
 
         {/* Content Section */}
-        <Box sx={{ flex: 1, minHeight: 0, display: "flex", flexDirection: "column", overflow: "auto" }}>
+        <Box sx={{ flex: 1, minHeight: 0, display: "flex", flexDirection: "column", overflow: "hidden" }}>
           {isLoadingRoles ? (
             <Box sx={loadingBoxStyles}>
               <Backdrop sx={backdropStyles(theme)} open={isLoadingRoles}>
@@ -456,8 +448,8 @@ const ManageRoles: React.FC<{ isExpanded?: boolean }> = ({
       {/* Dialogs - Outside the main Paper */}
       {isExpanded && (
         <>
-          <AppModal
-            open={deleteDialog.isOpen}
+          <DialogComponent
+            open={openDeleteDialog}
             onClose={handleCloseDeleteDialog}
             onConfirm={handleDelete}
             title={DASHBOARD_ROLES.DIALOG_DELETE_TITLE}
@@ -469,8 +461,8 @@ const ManageRoles: React.FC<{ isExpanded?: boolean }> = ({
             paperSx={deleteDialogPaperSx ?? {}}
             icon={<Trash2 color="var(--mui-palette-error-main)" />}
           />
-          <AppModal
-            open={addRoleModal.isOpen}
+          <DialogComponent
+            open={openAddRoleModal}
             onClose={handleCloseAddRoleModal}
             title={DASHBOARD_ROLES.DIALOG_ADD_TITLE}
             subtitle={DASHBOARD_ROLES.DIALOG_ADD_SUBTITLE}
@@ -484,7 +476,7 @@ const ManageRoles: React.FC<{ isExpanded?: boolean }> = ({
               isLoading={isCreatingRole}
               permissions={permissions}
             />
-          </AppModal>
+          </DialogComponent>
         </>
       )}
     </Box>

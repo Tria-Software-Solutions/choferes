@@ -3,7 +3,6 @@ import {
   Box,
   Button,
   IconButton,
-  InputAdornment,
   Alert,
   Typography,
   useTheme,
@@ -28,7 +27,7 @@ import {
   temporalPasswordBox,
 } from "./styles";
 import { actionsBox, actionsInnerBox } from '../AdjustHoursDialog/styles';
-import { infoBox, infoIconBox, infoTitle, infoDesc, iconStyle, submitButton } from '../AddEmployeeForm/styles';
+import { infoBox, infoIconBox, infoTitle, infoDesc, iconStyle } from '../AddEmployeeForm/styles';
 import { validatePassword, validatePasswordMatch } from '../../../utils/userValidation';
 
 interface PasswordChangeFormProps {
@@ -143,52 +142,42 @@ const PasswordChangeForm: React.FC<PasswordChangeFormProps> = ({
       <Grid container spacing={3}>
         <Grid item xs={12}>
           <TextfieldComponent
-            label={MANAGEMENT.DIALOG_PASSWORD_NEW}
             type={showNewPassword ? "text" : "password"}
             variant="outlined"
             fullWidth
-            value={fields.newPassword}
-            onChange={(e) => handleFieldChange("newPassword", e.target.value)}
             placeholder={MANAGEMENT.DIALOG_PASSWORD_NEW_PLACEHOLDER}
-            InputProps={{
-              endAdornment: (
-                <InputAdornment position="end">
-                  <IconButton
-                    onClick={() => setShowNewPassword((v) => !v)}
-                    edge="end"
-                  >
-                    {showNewPassword ? <EyeOff /> : <Eye />}
-                  </IconButton>
-                </InputAdornment>
-              ),
-            }}
+            onChange={(e) => handleFieldChange("newPassword", e.target.value)}
+            endAdornment={
+              <IconButton
+                onClick={() => setShowNewPassword((v) => !v)}
+                edge="end"
+                size="small"
+              >
+                {showNewPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+              </IconButton>
+            }
             error={!!validatePassword(fields.newPassword)}
             helperText={validatePassword(fields.newPassword) || ""}
           />
         </Grid>
         <Grid item xs={12}>
           <TextfieldComponent
-            label={MANAGEMENT.DIALOG_PASSWORD_CONFIRM}
             type={showConfirmNewPassword ? "text" : "password"}
             variant="outlined"
             fullWidth
-            value={fields.confirmNewPassword}
+            placeholder={MANAGEMENT.DIALOG_PASSWORD_CONFIRM_PLACEHOLDER}
             onChange={(e) =>
               handleFieldChange("confirmNewPassword", e.target.value)
             }
-            placeholder={MANAGEMENT.DIALOG_PASSWORD_CONFIRM_PLACEHOLDER}
-            InputProps={{
-              endAdornment: (
-                <InputAdornment position="end">
-                  <IconButton
-                    onClick={() => setShowConfirmNewPassword((v) => !v)}
-                    edge="end"
-                  >
-                    {showConfirmNewPassword ? <EyeOff /> : <Eye />}
-                  </IconButton>
-                </InputAdornment>
-              ),
-            }}
+            endAdornment={
+              <IconButton
+                onClick={() => setShowConfirmNewPassword((v) => !v)}
+                edge="end"
+                size="small"
+              >
+                {showConfirmNewPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+              </IconButton>
+            }
             error={!!validatePasswordMatch(fields.newPassword, fields.confirmNewPassword)}
             helperText={validatePasswordMatch(fields.newPassword, fields.confirmNewPassword) || ""}
           />
@@ -205,7 +194,11 @@ const PasswordChangeForm: React.FC<PasswordChangeFormProps> = ({
             variant="outlined"
             onClick={handleGenerateTemporalPassword}
             fullWidth
-            sx={submitButton}
+            sx={{
+              minHeight: { xs: 44, sm: 48 },
+              fontSize: "clamp(0.75rem, 1.25vw, 0.875rem)",
+              fontWeight: 600,
+            }}
           >
             Generar contraseña temporal
           </Button>
@@ -214,7 +207,7 @@ const PasswordChangeForm: React.FC<PasswordChangeFormProps> = ({
           {temporalPassword && (
             <Box sx={temporalPasswordBox}>
               <TextfieldComponent
-                label="Contraseña temporal generada"
+                placeholder="Contraseña temporal generada"
                 value={temporalPassword}
                 fullWidth
                 InputProps={{
@@ -269,7 +262,14 @@ const PasswordChangeForm: React.FC<PasswordChangeFormProps> = ({
                 type="submit"
                 variant="contained"
                 color="primary"
-                sx={{ minWidth: 120, py: 1.5, fontWeight: 600 }}
+                sx={{
+                  fontWeight: 600,
+                  fontSize: "0.95rem",
+                  textTransform: "none",
+                  letterSpacing: "0.01em",
+                  borderRadius: "12px",
+                  minHeight: "42px",
+                }}
                 disabled={
                   loading ||
                   !!validatePassword(fields.newPassword) ||

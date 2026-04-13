@@ -643,10 +643,47 @@ const AutoGenerateModal: React.FC<AutoGenerateModalProps> = ({
                             SelectProps={{
                               MenuProps: {
                                 PaperProps: {
-                                  style: {
+                                  sx: {
                                     maxHeight: 150,
                                     overflow: 'auto',
                                     overflowY: 'scroll',
+                                    backgroundColor: theme.palette.background.paper,
+                                    border: `1px solid ${theme.palette.mode === 'dark' ? 'rgba(255,255,255,0.12)' : 'rgba(0,0,0,0.08)'}`,
+                                    borderRadius: "12px",
+                                    boxShadow: theme.palette.mode === 'dark' 
+                                      ? "0 16px 48px rgba(0,0,0,0.5), 0 0 0 1px rgba(255,255,255,0.05)" 
+                                      : "0 16px 48px rgba(0,0,0,0.12), 0 4px 16px rgba(0,0,0,0.08)",
+                                    marginTop: "8px",
+                                    minWidth: "200px",
+                                    "& .MuiList-root": {
+                                      padding: "6px",
+                                    },
+                                    "& .MuiMenuItem-root": {
+                                      fontSize: "0.9rem",
+                                      fontWeight: 500,
+                                      padding: "10px 14px",
+                                      margin: "2px 0",
+                                      borderRadius: "8px",
+                                      color: theme.palette.text.primary,
+                                      backgroundColor: "transparent",
+                                      transition: "all 0.2s cubic-bezier(0.4, 0, 0.2, 1)",
+                                      minHeight: "40px",
+                                      gap: "10px",
+                                      "&:hover": {
+                                        backgroundColor: theme.palette.mode === 'dark' ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.04)',
+                                        color: theme.palette.text.primary,
+                                      },
+                                      "&.Mui-selected": {
+                                        backgroundColor: theme.palette.mode === 'dark' ? 'rgba(255,255,255,0.12)' : 'rgba(0,0,0,0.08)',
+                                        color: theme.palette.text.primary,
+                                        "& .MuiSvgIcon-root": {
+                                          color: theme.palette.primary.main,
+                                        },
+                                        "&:hover": {
+                                          backgroundColor: theme.palette.mode === 'dark' ? 'rgba(255,255,255,0.18)' : 'rgba(0,0,0,0.12)',
+                                        },
+                                      },
+                                    },
                                   },
                                 },
                                 anchorOrigin: {
@@ -659,7 +696,36 @@ const AutoGenerateModal: React.FC<AutoGenerateModalProps> = ({
                                 },
                               },
                             }}
-                            sx={autoGenerateModalCustomScheduleStyles(theme)}
+                            sx={{
+                              ...autoGenerateModalCustomScheduleStyles(theme),
+                              '& .MuiOutlinedInput-root': {
+                                borderRadius: '10px',
+                                backgroundColor: theme.palette.background.paper,
+                                boxShadow: '0 1px 3px rgba(0,0,0,0.08)',
+                                transition: 'all 0.2s cubic-bezier(0.4, 0, 0.2, 1)',
+                                '& fieldset': {
+                                  borderColor: theme.palette.mode === 'dark' ? 'rgba(255,255,255,0.15)' : 'rgba(0,0,0,0.12)',
+                                  borderWidth: '1.5px',
+                                  borderRadius: '10px',
+                                },
+                                '&:hover': {
+                                  boxShadow: '0 2px 6px rgba(0,0,0,0.12)',
+                                  '& fieldset': {
+                                    borderColor: theme.palette.mode === 'dark' ? 'rgba(255,255,255,0.25)' : 'rgba(0,0,0,0.2)',
+                                  },
+                                },
+                                '&.Mui-focused': {
+                                  boxShadow: '0 0 0 3px rgba(0,0,0,0.04)',
+                                  '& fieldset': {
+                                    borderColor: theme.palette.primary.main,
+                                    borderWidth: '2px',
+                                  },
+                                },
+                              },
+                              '& .MuiSelect-icon': {
+                                color: theme.palette.text.secondary,
+                              },
+                            }}
                           >
                             {schedules.map((schedule) => (
                               <MenuItem key={schedule.id} value={schedule.id}>
