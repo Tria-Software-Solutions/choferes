@@ -23,7 +23,7 @@ import { useNavigate, useLocation } from "react-router-dom";
 import { useAuthContext } from "../../context/AuthContext";
 import { APPBAR_MENU } from "../../constants/constants";
 import { useNotificationMenu } from "../../context/NotificationContext";
-import { Menu as MenuIcon, Bell, LayoutDashboard } from "lucide-react";
+import { Menu as MenuIcon, Bell, LayoutDashboard, User } from "lucide-react";
 import logo from "../../assets/images/logo.png";
 import { MenuItemProps } from "../Menu/Menu.component";
 import { Roles } from "../../enums/roles";
@@ -122,12 +122,6 @@ const AppBarComponent: React.FC<AppBarComponentProps> = ({
 
   const handleDashboardMenuClose = () => {
     setDashboardMenuAnchor(null);
-  };
-
-  const getUserInitials = () => {
-    // Returns the initials of the current user for the avatar
-    if (!currentUser) return "U";
-    return `${currentUser.firstName.charAt(0)}${currentUser.lastName.charAt(0)}`.toUpperCase();
   };
 
   const isActivePage = (path: string) => {
@@ -318,19 +312,31 @@ const AppBarComponent: React.FC<AppBarComponentProps> = ({
                     variant="dot"
                     sx={{
                       '& .MuiBadge-dot': {
-                        backgroundColor: theme.palette.success.main,
-                        color: theme.palette.success.main,
-                        boxShadow: `0 0 0 2px ${theme.palette.background.paper}`,
-                        width: 11,
-                        height: 11,
+                        background: 'linear-gradient(135deg, #4ade80 0%, #22c55e 100%)',
+                        boxShadow: '0 0 0 3px rgba(255,255,255,0.1), 0 0 12px rgba(74, 222, 128, 0.6)',
+                        width: 12,
+                        height: 12,
                         borderRadius: '50%',
                         position: 'absolute',
-                        bottom: 1,
-                        right: 1,
+                        bottom: -0.5,
+                        right: -0.5,
+                        animation: 'pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+                        '@keyframes pulse': {
+                          '0%, 100%': {
+                            opacity: 1,
+                            transform: 'scale(1)',
+                          },
+                          '50%': {
+                            opacity: 0.8,
+                            transform: 'scale(1.1)',
+                          },
+                        },
                       },
                     }}
                   >
-                    <Avatar sx={userAvatarStyles}>{getUserInitials()}</Avatar>
+                    <Avatar sx={userAvatarStyles}>
+                      <User size={22} strokeWidth={1.5} />
+                    </Avatar>
                   </Badge>
                 </IconButton>
               </Box>
@@ -358,7 +364,7 @@ const AppBarComponent: React.FC<AppBarComponentProps> = ({
           </Box>
         )}
 
-        {/* Menú de Usuario Premium */}
+        {/* Menú de Usuario */}
         <Menu
           anchorEl={userMenuAnchor}
           open={Boolean(userMenuAnchor)}
@@ -368,19 +374,19 @@ const AppBarComponent: React.FC<AppBarComponentProps> = ({
           PaperProps={{
             elevation: 0,
             sx: {
-              mt: 1,
+              mt: 0.5,
               minWidth: 200,
               background: theme.palette.mode === 'dark' 
-                ? 'linear-gradient(135deg, rgba(0,0,0,0.95) 0%, rgba(26,26,26,0.95) 100%)'
-                : 'linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%)',
+                ? 'rgba(30, 30, 35, 0.95)'
+                : '#ffffff',
               backdropFilter: "blur(20px)",
-              border: theme.palette.mode === 'dark'
-                ? "1px solid rgba(255,255,255,0.1)"
-                : "1px solid rgba(0,0,0,0.08)",
-              borderRadius: "12px",
+              border: 'none',
+              borderRadius: "16px",
               boxShadow: theme.palette.mode === 'dark'
-                ? "0 10px 40px rgba(0,0,0,0.4), 0 2px 8px rgba(0,0,0,0.2)"
-                : "0 10px 40px rgba(0,0,0,0.15), 0 2px 8px rgba(0,0,0,0.1)",
+                ? '0 8px 32px rgba(0, 0, 0, 0.5)'
+                : '0 8px 32px rgba(0, 0, 0, 0.12)',
+              overflow: 'hidden',
+              padding: 0,
             },
           }}
         >
@@ -389,8 +395,7 @@ const AppBarComponent: React.FC<AppBarComponentProps> = ({
               {index > 0 && link.label === APPBAR_MENU.LOGOUT && (
                 <Divider
                   sx={{
-                    my: 0.25,
-                    mx: 1,
+                    my: 0,
                     borderColor: theme.palette.mode === 'dark'
                       ? "rgba(255,255,255,0.1)"
                       : "rgba(0,0,0,0.08)",
@@ -407,11 +412,8 @@ const AppBarComponent: React.FC<AppBarComponentProps> = ({
                   }
                 }}
                 sx={{
-                  py: 0.75,
-                  px: 1.5,
-                  mx: 0.5,
-                  my: 0.25,
-                  borderRadius: "8px",
+                  py: 1,
+                  px: 2,
                   transition: "all 0.2s cubic-bezier(0.4, 0, 0.2, 1)",
                   color: link.label === APPBAR_MENU.LOGOUT
                     ? theme.palette.error.main

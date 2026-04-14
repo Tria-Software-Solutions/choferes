@@ -164,7 +164,7 @@ export const premiumMenuProps = {
       borderRadius: "16px",
       marginTop: "8px",
       boxShadow: "0 20px 60px rgba(0,0,0,0.15), 0 8px 24px rgba(0,0,0,0.1)",
-      border: `1px solid ${theme.palette.mode === "dark" ? "rgba(255,255,255,0.08)" : "rgba(0,0,0,0.06)"}`,
+      border: "none",
       "& .MuiList-root": {
         padding: "8px",
       },

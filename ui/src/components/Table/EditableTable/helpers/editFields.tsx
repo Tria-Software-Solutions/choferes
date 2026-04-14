@@ -298,20 +298,7 @@ export function renderEditField<T extends object>({
               fullWidth: true,
               required: true,
               variant: 'outlined',
-              sx: {
-                mt: 0,
-                "& .MuiOutlinedInput-root": {
-                  borderRadius: "12px",
-                  backgroundColor: "transparent",
-                  "&:hover .MuiOutlinedInput-notchedOutline": {
-                    borderColor: "primary.main",
-                  },
-                  "&.Mui-focused .MuiOutlinedInput-notchedOutline": {
-                    borderColor: "primary.main",
-                    borderWidth: 2,
-                  },
-                },
-              },
+              ...datePickerTextFieldStyles,
               error: !validateField(String(column), value),
             } as Record<string, unknown>,
           }}

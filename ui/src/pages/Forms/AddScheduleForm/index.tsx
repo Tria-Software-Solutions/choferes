@@ -196,9 +196,20 @@ const AddScheduleForm: React.FC<AddScheduleFormProps> = ({
               error={formTouched && formData.days.length === 0}
               MenuProps={{
                 PaperProps: {
-                  style: {
+                  sx: {
                     maxHeight: 320,
                     overflowY: "auto",
+                    mt: 0.5,
+                    borderRadius: "16px",
+                    background: theme.palette.mode === 'dark' 
+                      ? 'rgba(30,30,35,0.95)'
+                      : '#ffffff',
+                    boxShadow: theme.palette.mode === 'dark'
+                      ? "0 10px 40px rgba(0,0,0,0.4), 0 2px 8px rgba(0,0,0,0.2)"
+                      : "0 10px 40px rgba(0,0,0,0.15), 0 2px 8px rgba(0,0,0,0.1)",
+                    border: "none",
+                    overflow: 'hidden',
+                    pr: 0.5,
                   },
                 },
               }}

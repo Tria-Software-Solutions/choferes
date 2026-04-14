@@ -28,7 +28,6 @@ import {
   Stack,
   OutlinedInput,
   IconButton,
-  ListSubheader,
   Checkbox,
 } from "@mui/material";
 import PaginationComponent from "../Pagination/Pagination.component";
@@ -48,8 +47,6 @@ import {
 import InfoOutlinedIcon from "@mui/icons-material/InfoOutlined";
 import PremiumTooltip from "../../../components/PremiumTooltip/PremiumTooltip.component";
 import MoreTimeIcon from "@mui/icons-material/MoreTime";
-import LocationOnOutlinedIcon from "@mui/icons-material/LocationOnOutlined";
-import StarOutlineOutlinedIcon from "@mui/icons-material/StarOutlineOutlined";
 import CalendarTodayIcon from "@mui/icons-material/CalendarToday";
 import DateRangeIcon from "@mui/icons-material/DateRange";
 import CalendarMonthIcon from "@mui/icons-material/CalendarMonth";
@@ -62,7 +59,6 @@ import {
   tableCellStyles,
   boldTypographyStyles,
   menuItemStyles,
-  listSubheaderStyles,
   tableRowBackground,
   tableCellBackground,
   employeeCellBoxStyles,
@@ -504,40 +500,6 @@ const SelectorTableComponent: React.FC<SelectorTableProps> = ({
               justifyContent="flex-start"
               sx={{ position: "absolute", left: 0, top: 0, height: "100%" }}
             >
-              <IconButton
-                aria-label="Cambiar vista"
-                onClick={() =>
-                  setViewMode(viewMode === "employee" ? "schedule" : "employee")
-                }
-                sx={{ 
-                  mr: 1,
-                  '&:hover': {
-                    backgroundColor: 'transparent',
-                  },
-                  '&:focus': {
-                    backgroundColor: 'transparent',
-                  },
-                  '&:active': {
-                    backgroundColor: 'transparent',
-                  },
-                  '&.Mui-focusVisible': {
-                    backgroundColor: 'transparent',
-                  }
-                }}
-              >
-                <SwapHorizIcon />
-              </IconButton>
-              <Typography 
-                variant="caption" 
-                sx={{ 
-                  mr: 2,
-                  display: { xs: 'none', sm: 'block' }
-                }}
-              >
-                {viewMode === "employee"
-                  ? SELECTOR_TABLE.EMPLOYEE_VIEW
-                  : SELECTOR_TABLE.SCHEDULE_VIEW}
-              </Typography>
             </Box>
             {/* Center title */}
             <Box
@@ -631,21 +593,58 @@ const SelectorTableComponent: React.FC<SelectorTableProps> = ({
                     },
                   }}
                 >
-                  <TableSortLabel
-                    direction={orderDirection}
-                    onClick={() =>
-                      setOrderDirection((prev) =>
-                        prev === "asc" ? "desc" : "asc"
-                      )
-                    }
-                    sx={{
-                      color: "#fff",
-                    }}
-                  >
-                    {viewMode === "employee"
-                      ? SELECTOR_TABLE.EMPLOYEES
-                      : SELECTOR_TABLE.SCHEDULES || "Horarios"}
-                  </TableSortLabel>
+                  <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+                    <Box
+                      sx={{ display: "flex", alignItems: "center", gap: 1, cursor: "pointer" }}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setViewMode(viewMode === "employee" ? "schedule" : "employee");
+                      }}
+                    >
+                      <IconButton
+                        aria-label="Cambiar vista"
+                        title={viewMode === "employee" ? SELECTOR_TABLE.EMPLOYEES : SELECTOR_TABLE.SCHEDULES}
+                        sx={{
+                          backgroundColor: "transparent",
+                          padding: "4px",
+                          transition: "all 0.3s cubic-bezier(0.4, 0, 0.2, 1)",
+                          "&:hover": {
+                            backgroundColor: "transparent",
+                            transform: "scale(1.1)",
+                          },
+                        }}
+                      >
+                        <SwapHorizIcon sx={{ fontSize: "1.2rem", color: "#fff" }} />
+                      </IconButton>
+                      <Typography
+                        variant="caption"
+                        sx={{
+                          display: { xs: 'none', sm: 'block' },
+                          fontWeight: 500,
+                          fontSize: "0.875rem",
+                          letterSpacing: "-0.01em",
+                          color: "#fff",
+                          cursor: "pointer",
+                          userSelect: "none",
+                        }}
+                      >
+                        {viewMode === "employee"
+                          ? SELECTOR_TABLE.EMPLOYEES
+                          : SELECTOR_TABLE.SCHEDULES}
+                      </Typography>
+                    </Box>
+                    <TableSortLabel
+                      direction={orderDirection}
+                      onClick={() =>
+                        setOrderDirection((prev) =>
+                          prev === "asc" ? "desc" : "asc"
+                        )
+                      }
+                      sx={{
+                        color: "#fff",
+                      }}
+                    />
+                  </Box>
                 </TableCell>
                 {viewMode === "employee" && permissions?.includes(
                   PERMISSIONS.VIEW_EMPLOYEE_ROLES_HOURS
@@ -730,21 +729,23 @@ const SelectorTableComponent: React.FC<SelectorTableProps> = ({
                                     lineHeight: "1.2",
                                   },
                                   "& fieldset": {
-                                    borderColor: "rgba(255,255,255,0.2)",
-                                    borderWidth: '1.5px',
+                                    borderColor: "transparent",
+                                    borderWidth: 0,
+                                    border: "none",
                                     borderRadius: "10px",
                                   },
                                   "&:hover": {
                                     boxShadow: "0 2px 6px rgba(0,0,0,0.12)",
                                     "& fieldset": {
-                                      borderColor: "rgba(255,255,255,0.3)",
+                                      borderColor: "transparent",
                                     },
                                   },
                                   "&.Mui-focused": {
                                     boxShadow: "0 0 0 3px rgba(255,255,255,0.1)",
                                     "& fieldset": {
-                                      borderColor: "rgba(255,255,255,0.5)",
-                                      borderWidth: "2px",
+                                      borderColor: "transparent",
+                                      borderWidth: 0,
+                                      border: "none",
                                     },
                                   },
                                   "& .MuiOutlinedInput-root": {
@@ -786,18 +787,19 @@ const SelectorTableComponent: React.FC<SelectorTableProps> = ({
                                 transform: "translateY(-50%)",
                               },
                               "& .MuiOutlinedInput-notchedOutline": {
-                                borderColor: "rgba(255,255,255,0.2)",
-                                borderWidth: '1.5px',
+                                borderColor: "transparent",
+                                borderWidth: 0,
+                                border: "none",
                                 borderRadius: "10px",
                               },
                               "&:hover .MuiOutlinedInput-notchedOutline": {
-                                borderColor: "rgba(255,255,255,0.3)",
+                                borderColor: "transparent",
                               },
-                              "&.Mui-focused .MuiOutlinedInput-notchedOutline":
-                                {
-                                  borderColor: "rgba(255,255,255,0.5)",
-                                  borderWidth: "2px",
-                                },
+                              "&.Mui-focused .MuiOutlinedInput-notchedOutline": {
+                                borderColor: "transparent",
+                                borderWidth: 0,
+                                border: "none",
+                              },
                               "& .MuiInputBase-root": {
                                 backgroundColor: "transparent !important",
                               },
@@ -813,19 +815,18 @@ const SelectorTableComponent: React.FC<SelectorTableProps> = ({
                                 sx: {
                                   maxHeight: 280,
                                   overflowY: "auto",
-                                  mt: 1,
+                                  mt: 0.5,
                                   minWidth: 200,
                                   background: theme.palette.mode === 'dark' 
-                                    ? 'linear-gradient(135deg, rgba(0,0,0,0.95) 0%, rgba(26,26,26,0.95) 100%)'
-                                    : 'linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%)',
+                                    ? 'rgba(30,30,35,0.95)'
+                                    : '#ffffff',
                                   backdropFilter: "blur(20px)",
-                                  border: theme.palette.mode === 'dark'
-                                    ? "1px solid rgba(255,255,255,0.1)"
-                                    : "1px solid rgba(0,0,0,0.08)",
-                                  borderRadius: "12px",
+                                  border: "none",
+                                  borderRadius: "16px",
                                   boxShadow: theme.palette.mode === 'dark'
                                     ? "0 10px 40px rgba(0,0,0,0.4), 0 2px 8px rgba(0,0,0,0.2)"
                                     : "0 10px 40px rgba(0,0,0,0.15), 0 2px 8px rgba(0,0,0,0.1)",
+                                  pr: 0.5,
                                   "& .MuiList-root": {
                                     padding: "4px",
                                   },
@@ -833,9 +834,8 @@ const SelectorTableComponent: React.FC<SelectorTableProps> = ({
                                     fontSize: "0.875rem",
                                     fontWeight: 500,
                                     padding: "8px 12px",
-                                    mx: 0.5,
-                                    my: 0.25,
                                     borderRadius: "8px",
+                                    margin: 0,
                                     color: theme.palette.text.primary,
                                     backgroundColor: "transparent",
                                     transition: "all 0.2s cubic-bezier(0.4, 0, 0.2, 1)",
@@ -1119,22 +1119,23 @@ const SelectorTableComponent: React.FC<SelectorTableProps> = ({
                                 }}
                                 MenuProps={{
                                   PaperProps: {
-                                    style: {
+                                    sx: {
                                       maxHeight: 320,
                                       overflowY: "auto",
+                                      mt: 0.5,
+                                      borderRadius: "16px",
+                                      background: theme.palette.mode === 'dark' 
+                                        ? 'rgba(30,30,35,0.95)'
+                                        : '#ffffff',
+                                      boxShadow: theme.palette.mode === 'dark'
+                                        ? "0 10px 40px rgba(0,0,0,0.4), 0 2px 8px rgba(0,0,0,0.2)"
+                                        : "0 10px 40px rgba(0,0,0,0.15), 0 2px 8px rgba(0,0,0,0.1)",
+                                      border: "none",
+                                      pr: 0.5,
                                     },
                                   },
                                 }}
                               >
-                                <ListSubheader
-                                  sx={listSubheaderStyles("primary.main")}
-                                >
-                                  <LocationOnOutlinedIcon
-                                    sx={{ mr: 1, color: "primary.main" }}
-                                    fontSize="small"
-                                  />
-                                  {SELECTOR_TABLE.LOCATIONS}
-                                </ListSubheader>
                                 {scheduleData.options
                                   .filter((option) => !option.specialSchedule)
                                   .sort((a, b) =>
@@ -1149,15 +1150,6 @@ const SelectorTableComponent: React.FC<SelectorTableProps> = ({
                                       {option.label}
                                     </MenuItem>
                                   ))}
-                                <ListSubheader
-                                  sx={listSubheaderStyles("warning.main")}
-                                >
-                                  <StarOutlineOutlinedIcon
-                                    sx={{ mr: 1, color: "warning.main" }}
-                                    fontSize="small"
-                                  />
-                                  {SELECTOR_TABLE.SPECIAL_SCHEDULES}
-                                </ListSubheader>
                                 {scheduleData.options
                                   .filter((option) => option.specialSchedule)
                                   .sort((a, b) =>
@@ -1444,9 +1436,19 @@ const SelectorTableComponent: React.FC<SelectorTableProps> = ({
                                     }}
                                     MenuProps={{
                                       PaperProps: {
-                                        style: {
+                                        sx: {
                                           maxHeight: 320,
                                           overflowY: "auto",
+                                          mt: 0.5,
+                                          borderRadius: "16px",
+                                          background: theme.palette.mode === 'dark' 
+                                            ? 'rgba(30,30,35,0.95)'
+                                            : '#ffffff',
+                                          boxShadow: theme.palette.mode === 'dark'
+                                            ? "0 10px 40px rgba(0,0,0,0.4), 0 2px 8px rgba(0,0,0,0.2)"
+                                            : "0 10px 40px rgba(0,0,0,0.15), 0 2px 8px rgba(0,0,0,0.1)",
+                                          border: "none",
+                                          pr: 0.5,
                                         },
                                       },
                                     }}
@@ -1455,13 +1457,14 @@ const SelectorTableComponent: React.FC<SelectorTableProps> = ({
                                     <MenuItem tabIndex={-1} sx={{
                                       position: 'sticky',
                                       top: 0,
-                                      zIndex: 2,
+                                      zIndex: 10,
                                       backgroundColor: theme.palette.background.paper,
                                       cursor: 'default',
                                       padding: 0,
                                       minHeight: '40px',
                                       '&:hover': { backgroundColor: theme.palette.background.paper },
-                                      boxShadow: 1,
+                                      boxShadow: `0 2px 8px ${theme.palette.mode === 'dark' ? 'rgba(0,0,0,0.3)' : 'rgba(0,0,0,0.1)'}`,
+                                      borderBottom: `1px solid ${theme.palette.mode === 'dark' ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.08)'}`,
                                     }}>
                                       <Box sx={{ px: 1, py: 0.5, width: '100%', backgroundColor: theme.palette.background.paper }}>
                                         <SearchBarComponent

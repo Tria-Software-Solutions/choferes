@@ -20,7 +20,11 @@ export const formControl = (theme: Theme) => ({
     backgroundColor: theme.palette.background.paper,
     color: theme.palette.text.primary,
     borderRadius: "12px",
-    minHeight: "42px",
+    minHeight: "48px",
+    "& fieldset": {
+      borderColor: theme.palette.mode === "dark" ? "rgba(255,255,255,0.12)" : "rgba(0,0,0,0.12)",
+      borderWidth: "1.5px",
+    },
     "&.Mui-focused .MuiOutlinedInput-notchedOutline": {
       borderColor: theme.palette.primary.main,
       borderWidth: 2,

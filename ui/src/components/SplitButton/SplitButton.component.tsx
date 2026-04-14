@@ -108,7 +108,12 @@ const SplitButtonComponent: React.FC<SplitButtonProps> = ({
       >
         {({ TransitionProps, placement }) => (
           <Grow {...TransitionProps} style={growStyles(placement)}>
-            <Paper>
+            <Paper
+              sx={{
+                border: 'none',
+                boxShadow: 'none',
+              }}
+            >
               <ClickAwayListener onClickAway={handleClose}>
                 <MenuList id="split-button-menu" autoFocusItem>
                   {options.map((option, index) => (

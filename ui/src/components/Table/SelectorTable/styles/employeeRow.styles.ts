@@ -1,20 +1,14 @@
 import type { Theme } from "@mui/material";
 
 const getRowBackgroundColor = (theme: Theme, rowIndex: number, hover = false) => {
-  const isDarkMode = theme.palette.mode === "dark";
   const isEven = rowIndex % 2 === 0;
 
   if (hover) {
     return isEven ? theme.palette.background.paper : theme.palette.action.hover;
   }
 
-  // In dark mode, align with the global MuiTableRow theme colors:
-  // even rows: #232323, odd rows: #181818
-  if (isDarkMode) {
-    return isEven ? "#232323" : "#181818";
-  }
-
-  return isEven ? theme.palette.background.paper : theme.palette.action.hover;
+  // Consistent alternating row colors for both themes
+  return isEven ? theme.palette.background.paper : (theme.palette.mode === "dark" ? "#1f1f1f" : "#fafafa");
 };
 
 export const getEmployeeRowStyles = (theme: Theme, isSmallScreen: boolean, rowIndex: number) => ({
@@ -72,15 +66,38 @@ export const getEmployeeRowStyles = (theme: Theme, isSmallScreen: boolean, rowIn
   }),
   select: {
     fontSize: "0.875rem",
-    backgroundColor: "transparent",
+    fontWeight: 500,
+    backgroundColor: theme.palette.mode === "dark" ? "rgba(30, 30, 35, 0.8)" : "rgba(255, 255, 255, 0.9)",
+    color: theme.palette.text.primary,
+    borderRadius: "10px",
+    transition: "all 0.2s cubic-bezier(0.4, 0, 0.2, 1)",
+    boxShadow: theme.palette.mode === "dark"
+      ? "0 1px 4px rgba(0, 0, 0, 0.2)"
+      : "0 1px 4px rgba(0, 0, 0, 0.08)",
     "& .MuiSelect-select": {
-      padding: "6px 12px",
+      padding: "8px 12px",
+      fontSize: "0.875rem",
+      fontWeight: 500,
+      color: theme.palette.text.primary,
     },
     "& .MuiOutlinedInput-notchedOutline": {
-      borderColor: "rgba(0,0,0,0.15)",
+      borderColor: theme.palette.mode === "dark" ? "rgba(255, 255, 255, 0.12)" : "rgba(0, 0, 0, 0.08)",
+      borderRadius: "10px",
     },
     "&:hover .MuiOutlinedInput-notchedOutline": {
-      borderColor: "rgba(0,0,0,0.25)",
+      borderColor: theme.palette.mode === "dark" ? "rgba(255, 255, 255, 0.2)" : "rgba(0, 0, 0, 0.15)",
+      boxShadow: theme.palette.mode === "dark"
+        ? "0 2px 8px rgba(0, 0, 0, 0.3)"
+        : "0 2px 8px rgba(0, 0, 0, 0.12)",
+    },
+    "&.Mui-focused .MuiOutlinedInput-notchedOutline": {
+      borderColor: theme.palette.primary.main,
+      borderWidth: "2px",
+      boxShadow: `0 0 0 3px ${theme.palette.mode === "dark" ? "rgba(255, 255, 255, 0.08)" : "rgba(0, 0, 0, 0.06)"}`,
+    },
+    "& .MuiSelect-icon": {
+      color: theme.palette.text.secondary,
+      fontSize: "1.25rem",
     },
   },
   menuItem: {
@@ -88,8 +105,7 @@ export const getEmployeeRowStyles = (theme: Theme, isSmallScreen: boolean, rowIn
     fontWeight: 500,
     py: 1.25,
     px: 2,
-    mx: 0.5,
-    my: 0.25,
+    margin: 0,
     borderRadius: "10px",
     letterSpacing: "-0.01em",
     minHeight: "44px",
@@ -97,6 +113,41 @@ export const getEmployeeRowStyles = (theme: Theme, isSmallScreen: boolean, rowIn
     display: "flex",
     alignItems: "center",
     gap: "12px",
+    color: theme.palette.text.primary,
+    "&:hover": {
+      backgroundColor: theme.palette.mode === "dark"
+        ? "rgba(255, 255, 255, 0.08)"
+        : "rgba(0, 0, 0, 0.04)",
+      transform: "translateX(2px)",
+    },
+    "&.Mui-selected": {
+      backgroundColor: theme.palette.mode === "dark"
+        ? "rgba(255, 255, 255, 0.12)"
+        : "rgba(0, 0, 0, 0.06)",
+      fontWeight: 600,
+      "&:hover": {
+        backgroundColor: theme.palette.mode === "dark"
+          ? "rgba(255, 255, 255, 0.15)"
+          : "rgba(0, 0, 0, 0.08)",
+      },
+    },
+  },
+  unassignedContainer: {
+    display: "flex",
+    alignItems: "center",
+    gap: 1,
+    color: theme.palette.text.disabled,
+  },
+  unassignedIcon: {
+    fontSize: "1rem",
+    color: theme.palette.text.disabled,
+    opacity: 0.6,
+  },
+  unassignedText: {
+    color: theme.palette.text.disabled,
+    fontSize: "0.85rem",
+    fontWeight: 500,
+    letterSpacing: "-0.01em",
   },
   adjustCell: {
     padding: isSmallScreen ? "8px" : "16px",

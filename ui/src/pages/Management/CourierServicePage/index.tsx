@@ -550,6 +550,28 @@ const CourierServicePage: React.FC = () => {
                           '& .MuiOutlinedInput-root': {
                             height: "44px",
                             borderRadius: '10px',
+                            fontSize: '0.875rem',
+                            fontWeight: 500,
+                            backgroundColor: theme.palette.background.paper,
+                            boxShadow: '0 1px 3px rgba(0,0,0,0.04)',
+                            transition: 'all 0.2s cubic-bezier(0.4, 0, 0.2, 1)',
+                            '& fieldset': {
+                              borderColor: theme.palette.mode === 'dark' ? 'rgba(255,255,255,0.25)' : 'rgba(0,0,0,0.23)',
+                              borderWidth: '1.5px',
+                            },
+                            '&:hover': {
+                              boxShadow: '0 2px 6px rgba(0,0,0,0.08)',
+                              '& fieldset': {
+                                borderColor: theme.palette.mode === 'dark' ? 'rgba(255,255,255,0.35)' : 'rgba(0,0,0,0.3)',
+                              },
+                            },
+                            '&.Mui-focused': {
+                              boxShadow: '0 0 0 3px rgba(0,0,0,0.04)',
+                              '& fieldset': {
+                                borderColor: theme.palette.primary.main,
+                                borderWidth: '2px',
+                              },
+                            },
                           },
                         },
                       },
