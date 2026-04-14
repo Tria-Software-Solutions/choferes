@@ -1476,7 +1476,7 @@ const RolesPage: React.FC = () => {
                             boxShadow: '0 1px 3px rgba(0,0,0,0.04)',
                             transition: 'all 0.2s cubic-bezier(0.4, 0, 0.2, 1)',
                             '& fieldset': {
-                              borderColor: theme.palette.mode === 'dark' ? 'rgba(255,255,255,0.15)' : 'rgba(0,0,0,0.12)',
+                              borderColor: theme.palette.mode === 'dark' ? 'rgba(255,255,255,0.25)' : 'rgba(0,0,0,0.23)',
                               borderWidth: '1.5px',
                             },
                             '&:hover': {

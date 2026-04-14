@@ -78,6 +78,10 @@ export const datePickerSx: SxProps<Theme> = (theme) => ({
     borderRadius: 2,
     backgroundColor: theme.palette.background.paper,
     color: theme.palette.text.primary,
+    "& fieldset": {
+      borderColor: theme.palette.mode === "dark" ? "rgba(255,255,255,0.12)" : "rgba(0,0,0,0.12)",
+      borderWidth: "1.5px",
+    },
     "&:hover .MuiOutlinedInput-notchedOutline": {
       borderColor: theme.palette.primary.main,
     },

@@ -14,6 +14,7 @@ import {
 } from "@mui/material";
 import InfoOutlinedIcon from "@mui/icons-material/InfoOutlined";
 import MoreTimeIcon from "@mui/icons-material/MoreTime";
+import PersonIcon from "@mui/icons-material/Person";
 import type { Employee } from "../../../../models/Employee";
 import type { Schedule } from "../../../../models/Schedule";
 import type { DayEntry } from "../../../../utils/dates";
@@ -109,7 +110,23 @@ export const EmployeeRow = memo(function EmployeeRow({
                 input={<OutlinedInput notched={false} />}
                 sx={styles.select}
                 MenuProps={premiumSelectorMenuProps}
+                renderValue={(selected) => {
+                  if (selected === SELECTOR_TABLE.UNASSIGNED) {
+                    return (
+                      <Box sx={styles.unassignedContainer}>
+                        <PersonIcon sx={styles.unassignedIcon} />
+                        <span style={styles.unassignedText}>
+                          {SELECTOR_TABLE.UNASSIGNED}
+                        </span>
+                      </Box>
+                    );
+                  }
+                  return selected;
+                }}
               >
+                <MenuItem value={SELECTOR_TABLE.UNASSIGNED} sx={styles.menuItem}>
+                  {SELECTOR_TABLE.UNASSIGNED}
+                </MenuItem>
                 {cellData.options.map((option) => (
                   <MenuItem key={option.id} value={option.label} sx={styles.menuItem}>
                     {option.label}

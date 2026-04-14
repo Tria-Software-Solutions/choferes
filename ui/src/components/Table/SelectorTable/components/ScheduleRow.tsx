@@ -11,6 +11,9 @@ import {
   Checkbox,
   type SelectChangeEvent,
 } from "@mui/material";
+import SearchIcon from "@mui/icons-material/Search";
+import PersonIcon from "@mui/icons-material/Person";
+import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 import type { Employee } from "../../../../models/Employee";
 import type { Schedule } from "../../../../models/Schedule";
 import type { DayEntry } from "../../../../utils/dates";
@@ -133,13 +136,17 @@ export const ScheduleRow = memo(function ScheduleRow({
                   onChange={(e) =>
                     onScheduleEmployeesChange(e, scheduleForDay.id, date)
                   }
+                  sx={styles.select}
                   renderValue={(selected) => {
                     const selectedArray = selected as number[];
                     if (!selectedArray || selectedArray.length === 0) {
                       return (
-                        <span style={styles.unassignedText}>
-                          {SELECTOR_TABLE.UNASSIGNED}
-                        </span>
+                        <Box sx={styles.unassignedContainer}>
+                          <PersonIcon sx={styles.unassignedIcon} />
+                          <span style={styles.unassignedText}>
+                            {SELECTOR_TABLE.UNASSIGNED}
+                          </span>
+                        </Box>
                       );
                     }
                     const names = selectedArray
@@ -152,15 +159,17 @@ export const ScheduleRow = memo(function ScheduleRow({
                     return (
                       <Box sx={styles.namesContainer}>
                         {names.map((name, index) => (
-                          <Typography key={index} variant="body2" sx={styles.employeeName}>
-                            {name}
-                          </Typography>
+                          <Box key={index} sx={styles.employeeChip}>
+                            <Typography variant="body2" sx={styles.employeeName}>
+                              {name}
+                            </Typography>
+                          </Box>
                         ))}
                       </Box>
                     );
                   }}
                   disabled={!canEdit}
-                  input={<OutlinedInput notched={false} />}
+                  input={<OutlinedInput notched={false} sx={{ border: 'none' }} />}
                   MenuProps={premiumSelectorMenuProps}
                 >
                   {/* Search input item */}
@@ -168,38 +177,54 @@ export const ScheduleRow = memo(function ScheduleRow({
                     disableRipple
                     sx={styles.searchMenuItem}
                   >
-                    <input
-                      type="text"
-                      placeholder={SELECTOR_TABLE.SEARCH_EMPLOYEE_PLACEHOLDER}
-                      value={employeeSearchTerms[`${scheduleForDay.id}-${date}`] || ""}
-                      onChange={(e) =>
-                        onSearchChange(scheduleForDay.id, date, e.target.value)
-                      }
-                      onClick={(e) => e.stopPropagation()}
-                      onKeyDown={(e) => {
-                        if (e.key !== "Escape") e.stopPropagation();
-                      }}
-                      style={styles.searchInput}
-                    />
+                    <Box sx={styles.searchContainer}>
+                      <SearchIcon sx={styles.searchIcon} />
+                      <input
+                        type="text"
+                        placeholder={SELECTOR_TABLE.SEARCH_EMPLOYEE_PLACEHOLDER}
+                        value={employeeSearchTerms[`${scheduleForDay.id}-${date}`] || ""}
+                        onChange={(e) =>
+                          onSearchChange(scheduleForDay.id, date, e.target.value)
+                        }
+                        onClick={(e) => e.stopPropagation()}
+                        onKeyDown={(e) => {
+                          if (e.key !== "Escape") e.stopPropagation();
+                        }}
+                        style={styles.searchInput}
+                      />
+                    </Box>
                   </MenuItem>
 
                   {/* Employee options */}
-                  {getFilteredDropdownEmployees(scheduleForDay.id, date).map((employee) => (
-                    <MenuItem
-                      key={employee.id}
-                      value={employee.id}
-                      sx={styles.employeeMenuItem}
-                    >
-                      <Checkbox
-                        checked={assignedEmployees.some((e) => e.id === employee.id)}
-                        size="small"
-                        sx={styles.checkbox}
-                      />
-                      <span style={styles.menuItemText}>
-                        {employee.firstName} {employee.lastName}
-                      </span>
-                    </MenuItem>
-                  ))}
+                  {getFilteredDropdownEmployees(scheduleForDay.id, date).map((employee) => {
+                    const isSelected = assignedEmployees.some((e) => e.id === employee.id);
+                    return (
+                      <MenuItem
+                        key={employee.id}
+                        value={employee.id}
+                        sx={styles.employeeMenuItem(isSelected)}
+                      >
+                        <Box sx={styles.checkboxContainer}>
+                          <Checkbox
+                            checked={isSelected}
+                            size="small"
+                            sx={styles.checkbox(isSelected)}
+                            checkedIcon={<CheckCircleIcon sx={styles.checkedIcon} />}
+                          />
+                        </Box>
+                        <Box sx={styles.employeeInfo}>
+                          <Typography sx={styles.employeeNameText}>
+                            {employee.firstName} {employee.lastName}
+                          </Typography>
+                          {isSelected && (
+                            <Typography sx={styles.selectedBadge}>
+                              ✓
+                            </Typography>
+                          )}
+                        </Box>
+                      </MenuItem>
+                    );
+                  })}
                 </Select>
               </FormControl>
             ) : (

@@ -119,23 +119,23 @@ const NotificationMenu: React.FC<NotificationMenuProps> = ({
         sx: {
           width: 380,
           maxHeight: 580,
-          mt: 1,
+          mt: 0.5,
           background: theme.palette.mode === 'dark'
-            ? 'linear-gradient(135deg, rgba(0,0,0,0.95) 0%, rgba(26,26,26,0.95) 100%)'
-            : 'linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%)',
+            ? 'rgba(30,30,35,0.95)'
+            : '#ffffff',
           backdropFilter: 'blur(20px)',
-          border: theme.palette.mode === 'dark'
-            ? '1px solid rgba(255,255,255,0.1)'
-            : '1px solid rgba(0,0,0,0.08)',
-          borderRadius: '12px',
+          border: 'none',
+          borderRadius: '16px',
           boxShadow: theme.palette.mode === 'dark'
             ? '0 10px 40px rgba(0,0,0,0.4), 0 2px 8px rgba(0,0,0,0.2)'
             : '0 10px 40px rgba(0,0,0,0.15), 0 2px 8px rgba(0,0,0,0.1)',
+          overflow: 'hidden',
+          padding: 0,
         },
       }}
     >
       {/* Header */}
-      <Box sx={{ p: 1.5, borderBottom: theme.palette.mode === 'dark' ? '1px solid rgba(255,255,255,0.1)' : '1px solid rgba(0,0,0,0.08)' }}>
+      <Box sx={{ p: 2, borderBottom: theme.palette.mode === 'dark' ? '1px solid rgba(255,255,255,0.1)' : '1px solid rgba(0,0,0,0.08)' }}>
         <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 0.5 }}>
           <Typography variant="h6" sx={{ fontWeight: 600, fontSize: '1rem', color: theme.palette.text.primary }}>
             Notificaciones

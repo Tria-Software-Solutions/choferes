@@ -21,13 +21,18 @@ export const getPeriodSelectorStyles = (theme: Theme) => {
       "& .MuiOutlinedInput-root": {
         backgroundColor: `${bgColor} !important`,
         height: "32px",
+        border: "none !important",
       },
       "& .MuiInputBase-root": {
         backgroundColor: `${bgColor} !important`,
         height: "32px",
+        border: "none !important",
       },
       border: "none !important",
       "& fieldset": {
+        border: "none !important",
+      },
+      "& .MuiOutlinedInput-notchedOutline": {
         border: "none !important",
       },
     },

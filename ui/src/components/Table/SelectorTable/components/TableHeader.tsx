@@ -106,7 +106,7 @@ export const TableHeaderTop = memo(function TableHeaderTop({
 
               {/* Employee view option */}
               <Box sx={premiumStyles.option(isEmployeeView)}>
-                <Users size={14} style={{ marginRight: 6 }} />
+                <Users size={18} strokeWidth={2} style={{ marginRight: 8 }} />
                 <Typography
                   variant="caption"
                   sx={premiumStyles.optionText(isEmployeeView)}
@@ -117,7 +117,7 @@ export const TableHeaderTop = memo(function TableHeaderTop({
 
               {/* Schedule view option */}
               <Box sx={premiumStyles.option(!isEmployeeView)}>
-                <CalendarDays size={14} style={{ marginRight: 6 }} />
+                <CalendarDays size={18} strokeWidth={2} style={{ marginRight: 8 }} />
                 <Typography
                   variant="caption"
                   sx={premiumStyles.optionText(!isEmployeeView)}
@@ -138,7 +138,7 @@ export const TableHeaderTop = memo(function TableHeaderTop({
       </Box>
 
       {/* Table header row */}
-      <TableRow>
+      <TableRow sx={{ border: "none" }}>
         <TableCell
           className="employee-column"
           sx={styles.employeeColumn}
@@ -165,7 +165,7 @@ export const TableHeaderTop = memo(function TableHeaderTop({
         {viewMode === "employee" && showHoursColumn && (
           <>
             <TableCell sx={styles.emptyCell} />
-            <TableCell align="center" sx={styles.periodSelectorCell} colSpan={2}>
+            <TableCell align="center" sx={{...styles.periodSelectorCell, border: "none"}} colSpan={2}>
               <PeriodSelector
                 value={selectedPeriod}
                 onChange={onPeriodChange}

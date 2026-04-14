@@ -372,10 +372,14 @@ const EditableTableComponent = <T extends object>({
                   tabIndex={-1}
                   key={rowKey}
                   sx={{
-                    backgroundColor: rowIndex % 2 === 0 ? "#fff" : "#f6f8fa",
+                    backgroundColor: rowIndex % 2 === 0
+                      ? theme.palette.background.paper
+                      : theme.palette.mode === "dark" ? "#1f1f1f" : "#fafafa",
                     transition: "background 0.2s",
                     '&:hover': {
-                      backgroundColor: rowIndex % 2 === 0 ? "#fff" : "#f6f8fa",
+                      backgroundColor: rowIndex % 2 === 0
+                        ? theme.palette.background.paper
+                        : theme.palette.mode === "dark" ? "#1f1f1f" : "#fafafa",
                     },
                   }}
                 >

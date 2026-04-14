@@ -130,8 +130,7 @@ export const menuItemStyles: SxProps<Theme> = (theme) => ({
   pl: 2,
   py: 1.25,
   px: 2,
-  mx: 0.5,
-  my: 0.25,
+  margin: 0,
   borderRadius: "10px",
   letterSpacing: "-0.01em",
   minHeight: "44px",
@@ -337,35 +336,45 @@ export const scheduleSelectStyles: SxProps<Theme> = (theme) => ({
   },
 });
 
-// Premium MenuProps for all selects
+// Premium MenuProps for all selects - Ultra Premium Edition
 export const premiumSelectorMenuProps = {
   PaperProps: {
     sx: (theme: Theme) => ({
-      maxHeight: 360,
+      maxHeight: 380,
       overflowY: "auto",
-      backgroundColor: theme.palette.background.paper,
+      backgroundColor: theme.palette.mode === "dark" ? "#1e1e24" : "#ffffff",
       color: theme.palette.text.primary,
       borderRadius: "16px",
-      marginTop: "8px",
-      boxShadow: "0 20px 60px rgba(0,0,0,0.15), 0 8px 24px rgba(0,0,0,0.1)",
-      border: `1px solid ${theme.palette.mode === "dark" ? "rgba(255,255,255,0.08)" : "rgba(0,0,0,0.06)"}`,
+      marginTop: "4px",
+      boxShadow: theme.palette.mode === "dark"
+        ? "0 25px 80px rgba(0,0,0,0.5), 0 10px 30px rgba(0,0,0,0.3)"
+        : "0 25px 80px rgba(0,0,0,0.12), 0 10px 30px rgba(0,0,0,0.08)",
       "& .MuiList-root": {
-        padding: "8px",
+        padding: "6px",
+        gap: "2px",
+        display: "flex",
+        flexDirection: "column",
+        backgroundColor: theme.palette.mode === "dark" ? "#1e1e24" : "#ffffff",
       },
-      // Scrollbar styling
+      // Premium scrollbar styling
       "&::-webkit-scrollbar": {
-        width: "8px",
+        width: "6px",
       },
       "&::-webkit-scrollbar-track": {
-        background: "transparent",
+        background: theme.palette.mode === "dark" ? "rgba(20, 20, 25, 0.5)" : "transparent",
         borderRadius: "0 16px 16px 0",
       },
       "&::-webkit-scrollbar-thumb": {
-        background: theme.palette.mode === "dark" ? "rgba(255,255,255,0.2)" : "rgba(0,0,0,0.2)",
-        borderRadius: "4px",
+        background: theme.palette.mode === "dark" 
+          ? "linear-gradient(180deg, rgba(255,255,255,0.25) 0%, rgba(255,255,255,0.15) 100%)"
+          : "linear-gradient(180deg, rgba(0,0,0,0.25) 0%, rgba(0,0,0,0.15) 100%)",
+        borderRadius: "6px",
+        transition: "background 0.2s ease",
       },
       "&::-webkit-scrollbar-thumb:hover": {
-        background: theme.palette.mode === "dark" ? "rgba(255,255,255,0.3)" : "rgba(0,0,0,0.3)",
+        background: theme.palette.mode === "dark" 
+          ? "linear-gradient(180deg, rgba(255,255,255,0.35) 0%, rgba(255,255,255,0.25) 100%)"
+          : "linear-gradient(180deg, rgba(0,0,0,0.35) 0%, rgba(0,0,0,0.25) 100%)",
       },
     }),
   },
@@ -377,6 +386,7 @@ export const premiumSelectorMenuProps = {
     vertical: "top" as const,
     horizontal: "left" as const,
   },
+  disablePortal: false,
 };
 
 // Premium MultiSelect styles for schedule view
