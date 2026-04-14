@@ -23,6 +23,9 @@ export const stickyHeaderBoxStyles = (
   backgroundColor: theme.palette.mode === "dark" ? "#1a1a1a" : "#fafafa",
   padding: isSmallScreen ? "6px 12px" : "8px 16px",
   borderBottom: "none",
+  border: "none",
+  outline: "none",
+  boxShadow: "none",
   flexShrink: 0,
   display: "flex",
   alignItems: "center",
@@ -60,7 +63,7 @@ export const tableHeadStyles: SxProps<Theme> = (theme) => ({
   position: "sticky",
   top: 0,
   zIndex: 50,
-  backgroundColor: theme.palette.mode === "dark" ? "#0a0a0a" : "#000000",
+  backgroundColor: theme.palette.mode === "dark" ? "#232323" : "#000000",
   "& th": {
     color: "#ffffff",
     fontWeight: 600,
@@ -145,15 +148,13 @@ export const menuItemStyles: SxProps<Theme> = (theme) => ({
     transform: "translateX(2px)",
   },
   "&.Mui-selected": {
-    backgroundColor: theme.palette.mode === "dark" 
-      ? "rgba(25, 118, 210, 0.25)" 
-      : "rgba(25, 118, 210, 0.12)",
+    backgroundColor: "transparent",
     color: theme.palette.primary.main,
     fontWeight: 600,
     "&:hover": {
       backgroundColor: theme.palette.mode === "dark" 
-        ? "rgba(25, 118, 210, 0.35)" 
-        : "rgba(25, 118, 210, 0.18)",
+        ? "rgba(255,255,255,0.08)" 
+        : "rgba(25, 118, 210, 0.08)",
     },
   },
 });
@@ -255,9 +256,7 @@ export const totalHoursTypographyStyles: SxProps<Theme> = {
 
 // Premium alternating row backgrounds
 export const tableRowBackground = (rowIndex: number): SxProps<Theme> => (theme) => ({
-  backgroundColor: rowIndex % 2 === 0 
-    ? theme.palette.background.paper 
-    : theme.palette.mode === "dark" ? "#1f1f1f" : "#fafafa",
+  backgroundColor: "transparent",
 });
 
 // Premium cell background with today highlighting
@@ -265,18 +264,7 @@ export const tableCellBackground = (
   rowIndex: number,
   today: boolean,
 ): SxProps<Theme> => (theme) => ({
-  backgroundColor: today
-    ? theme.palette.mode === "dark"
-      ? "linear-gradient(135deg, #2a2a2a 0%, #333333 100%)"
-      : "linear-gradient(135deg, rgba(25, 118, 210, 0.12) 0%, rgba(25, 118, 210, 0.08) 100%)"
-    : rowIndex % 2 === 0
-    ? theme.palette.background.paper
-    : theme.palette.mode === "dark" ? "#1f1f1f" : "#fafafa",
-  ...(today && {
-    boxShadow: theme.palette.mode === "dark"
-      ? "inset 0 0 0 1px rgba(255,255,255,0.06)"
-      : "inset 0 0 0 1px rgba(25, 118, 210, 0.15)",
-  }),
+  backgroundColor: "transparent",
 });
 
 // Premium employee cell styles
@@ -340,21 +328,22 @@ export const scheduleSelectStyles: SxProps<Theme> = (theme) => ({
 export const premiumSelectorMenuProps = {
   PaperProps: {
     sx: (theme: Theme) => ({
-      maxHeight: 380,
+      maxHeight: 400,
       overflowY: "auto",
-      backgroundColor: theme.palette.mode === "dark" ? "#1e1e24" : "#ffffff",
+      backgroundColor: theme.palette.mode === "dark" ? "#1a1a1f" : "#ffffff",
       color: theme.palette.text.primary,
-      borderRadius: "16px",
-      marginTop: "4px",
+      borderRadius: "20px",
+      marginTop: "12px",
       boxShadow: theme.palette.mode === "dark"
-        ? "0 25px 80px rgba(0,0,0,0.5), 0 10px 30px rgba(0,0,0,0.3)"
-        : "0 25px 80px rgba(0,0,0,0.12), 0 10px 30px rgba(0,0,0,0.08)",
+        ? "0 25px 80px rgba(0,0,0,0.5), 0 12px 40px rgba(0,0,0,0.3), inset 0 1px 0 rgba(255,255,255,0.05)"
+        : "0 25px 80px rgba(0,0,0,0.15), 0 12px 40px rgba(0,0,0,0.08), inset 0 1px 0 rgba(255,255,255,1)",
+      border: theme.palette.mode === "dark" ? "1px solid rgba(255,255,255,0.1)" : "1px solid rgba(0,0,0,0.08)",
       "& .MuiList-root": {
-        padding: "6px",
-        gap: "2px",
+        padding: "12px",
+        gap: "6px",
         display: "flex",
         flexDirection: "column",
-        backgroundColor: theme.palette.mode === "dark" ? "#1e1e24" : "#ffffff",
+        backgroundColor: theme.palette.mode === "dark" ? "#1a1a1f" : "#ffffff",
       },
       // Premium scrollbar styling
       "&::-webkit-scrollbar": {

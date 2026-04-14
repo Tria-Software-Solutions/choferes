@@ -7,7 +7,6 @@ import {
   Select,
   MenuItem,
   FormControl,
-  OutlinedInput,
   Checkbox,
   type SelectChangeEvent,
 } from "@mui/material";
@@ -128,10 +127,11 @@ export const ScheduleRow = memo(function ScheduleRow({
         return (
           <TableCell key={day} sx={styles.dayCell(today)}>
             {isAvailable ? (
-              <FormControl fullWidth size="small">
+              <FormControl fullWidth sx={styles.formControl}>
                 <Select
                   multiple
                   displayEmpty
+                  variant="standard"
                   value={assignedEmployees.map((e) => e.id)}
                   onChange={(e) =>
                     onScheduleEmployeesChange(e, scheduleForDay.id, date)
@@ -169,7 +169,6 @@ export const ScheduleRow = memo(function ScheduleRow({
                     );
                   }}
                   disabled={!canEdit}
-                  input={<OutlinedInput notched={false} sx={{ border: 'none' }} />}
                   MenuProps={premiumSelectorMenuProps}
                 >
                   {/* Search input item */}

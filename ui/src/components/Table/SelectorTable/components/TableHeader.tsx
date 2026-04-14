@@ -85,6 +85,15 @@ export const TableHeaderTop = memo(function TableHeaderTop({
   const showHoursColumn = permissions?.includes(PERMISSIONS.VIEW_EMPLOYEE_ROLES_HOURS);
   const isEmployeeView = viewMode === "employee";
 
+  // Check if date is today
+  const isToday = (date: string) => {
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const targetDate = new Date(date);
+    targetDate.setHours(0, 0, 0, 0);
+    return today.getTime() === targetDate.getTime();
+  };
+
   return (
     <>
       {/* Top header bar */}
@@ -138,7 +147,41 @@ export const TableHeaderTop = memo(function TableHeaderTop({
       </Box>
 
       {/* Table header row */}
-      <TableRow sx={{ border: "none" }}>
+      <TableRow sx={{
+        border: "none !important",
+        outline: "none !important",
+        boxShadow: "none !important",
+        borderTop: "none !important",
+        borderBottom: "none !important",
+        borderLeft: "none !important",
+        borderRight: "none !important",
+        "&::before": {
+          display: "none !important",
+          border: "none !important",
+        },
+        "&::after": {
+          display: "none !important",
+          border: "none !important",
+        },
+        "& td": {
+          border: "none !important",
+          outline: "none !important",
+          boxShadow: "none !important",
+          borderTop: "none !important",
+          borderBottom: "none !important",
+          borderLeft: "none !important",
+          borderRight: "none !important",
+        },
+        "& th": {
+          border: "none !important",
+          outline: "none !important",
+          boxShadow: "none !important",
+          borderTop: "none !important",
+          borderBottom: "none !important",
+          borderLeft: "none !important",
+          borderRight: "none !important",
+        },
+      }}>
         <TableCell
           className="employee-column"
           sx={styles.employeeColumn}
@@ -152,25 +195,76 @@ export const TableHeaderTop = memo(function TableHeaderTop({
           </TableSortLabel>
         </TableCell>
 
-        {currentWeek.map(({ day, date }) => (
-          <TableCell
-            key={day}
-            align="center"
-            sx={styles.dayHeader}
-          >
-            {`${translateDayToAbrevSpanish(day as EnglishDayOfWeek)} ${formatHeaderDate(date)}`}
-          </TableCell>
-        ))}
+        {currentWeek.map(({ day, date, isoDate }, index) => {
+          const today = isToday(isoDate);
+          console.log('Date check:', { index, day, date, isoDate, today, now: new Date().toISOString() });
+          return (
+            <TableCell
+              key={day}
+              align="center"
+              sx={styles.dayHeader}
+            >
+              <Box sx={{ position: 'relative', paddingBottom: '12px' }}>
+                <Typography sx={styles.dayHeaderText(today)}>
+                  {`${translateDayToAbrevSpanish(day as EnglishDayOfWeek)} ${formatHeaderDate(date)}`}
+                </Typography>
+                {today && (
+                  <Box
+                    sx={{
+                      position: 'absolute',
+                      bottom: 0,
+                      left: '50%',
+                      transform: 'translateX(-50%)',
+                      width: '8px',
+                      height: '8px',
+                      borderRadius: '50%',
+                      backgroundColor: '#39ff14',
+                      boxShadow: '0 0 10px #39ff14, 0 0 20px #39ff14',
+                      zIndex: 10,
+                    }}
+                  />
+                )}
+              </Box>
+            </TableCell>
+          );
+        })}
 
         {viewMode === "employee" && showHoursColumn && (
           <>
             <TableCell sx={styles.emptyCell} />
-            <TableCell align="center" sx={{...styles.periodSelectorCell, border: "none"}} colSpan={2}>
-              <PeriodSelector
-                value={selectedPeriod}
-                onChange={onPeriodChange}
-                theme={theme}
-              />
+            <TableCell align="center" sx={{
+              ...styles.periodSelectorCell,
+              border: "none !important",
+              outline: "none !important",
+              boxShadow: "none !important",
+              borderTop: "none !important",
+              borderBottom: "none !important",
+              borderLeft: "none !important",
+              borderRight: "none !important",
+              appearance: "none !important",
+              WebkitAppearance: "none !important",
+              MozAppearance: "none !important",
+              "&::before": {
+                display: "none !important",
+                border: "none !important",
+              },
+              "&::after": {
+                display: "none !important",
+                border: "none !important",
+              },
+              "& *": {
+                border: "none !important",
+                outline: "none !important",
+                boxShadow: "none !important",
+              },
+            }} colSpan={2}>
+              <Box sx={{ border: "none !important", outline: "none !important", boxShadow: "none !important" }}>
+                <PeriodSelector
+                  value={selectedPeriod}
+                  onChange={onPeriodChange}
+                  theme={theme}
+                />
+              </Box>
             </TableCell>
           </>
         )}

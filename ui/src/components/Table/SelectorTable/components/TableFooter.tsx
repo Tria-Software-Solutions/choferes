@@ -131,7 +131,7 @@ export const TableFooter = memo(function TableFooter({
                     padding: '6px 12px',
                     border: 'none',
                     '&.Mui-selected': {
-                      backgroundColor: theme.palette.action.selected,
+                      backgroundColor: 'transparent',
                       border: 'none',
                     },
                     '&:hover': {

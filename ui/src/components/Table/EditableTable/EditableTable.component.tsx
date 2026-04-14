@@ -1,4 +1,4 @@
-import React, { useMemo, useCallback, memo } from "react";
+import React, { useMemo, useCallback, memo, useLayoutEffect, useRef, useState } from "react";
 import { useSelector } from "react-redux";
 import { RootState } from "../../../store/store";
 import { useAuthContext } from "../../../context/AuthContext";
@@ -85,8 +85,9 @@ const HeaderCell = memo<{
   order: "asc" | "desc";
   onSort: () => void;
   theme: Theme;
-}>(({ column, orderBy, order, onSort, theme }) => (
-  <TableCell className="tableCell" sx={tableHeadCellStyles(theme)}>
+  topOffset: number | string;
+}>(({ column, orderBy, order, onSort, theme, topOffset }) => (
+  <TableCell className="tableCell" sx={tableHeadCellStyles(theme, topOffset)}>
     <TableSortLabel
       direction={orderBy === column ? order : "asc"}
       onClick={onSort}
@@ -171,6 +172,27 @@ const EditableTableComponent = <T extends object>({
 
   const theme = useTheme();
   const isSmallScreen = useMediaQuery(theme.breakpoints.down("sm"));
+  const groupDateHeaderRef = useRef<HTMLDivElement | null>(null);
+  const [groupDateHeaderHeight, setGroupDateHeaderHeight] = useState<number>(0);
+
+  useLayoutEffect(() => {
+    if (!groupDateHeaderRef.current) {
+      setGroupDateHeaderHeight(0);
+      return;
+    }
+
+    const updateHeight = () => {
+      setGroupDateHeaderHeight(groupDateHeaderRef.current?.getBoundingClientRect().height ?? 0);
+    };
+
+    updateHeight();
+    const resizeObserver = new ResizeObserver(updateHeight);
+    resizeObserver.observe(groupDateHeaderRef.current);
+
+    return () => resizeObserver.disconnect();
+  }, [groupByDate, isSmallScreen]);
+
+  const tableHeadTopOffset = groupByDate ? groupDateHeaderHeight : 0;
 
   // Memoizar permisos para evitar recálculos
   const hasEditPermissions = useMemo(() => checkEditPermissions(userPermissions), [userPermissions]);
@@ -284,10 +306,11 @@ const EditableTableComponent = <T extends object>({
     >
       {groupByDate && (
         <Box
+          ref={groupDateHeaderRef}
           sx={{
             position: "sticky",
             top: 0,
-            zIndex: 5,
+            zIndex: 15,
             backgroundColor: theme.palette.background.paper,
             padding: isSmallScreen ? "8px" : "16px",
             borderBottom: "1px solid #ddd",
@@ -322,7 +345,7 @@ const EditableTableComponent = <T extends object>({
           aria-label="sticky table"
           sx={{ width: "100%", minWidth: 650, borderCollapse: "collapse" }}
         >
-          <TableHead>
+          <TableHead sx={{ position: "sticky", top: tableHeadTopOffset, zIndex: 20, backgroundColor: theme.palette.background.paper }}>
             <TableRow>
               {firstColumns.map((column) => (
                 <HeaderCell
@@ -332,10 +355,11 @@ const EditableTableComponent = <T extends object>({
                   order={order}
                   onSort={() => handleSortRequest(column)}
                   theme={theme}
+                  topOffset={tableHeadTopOffset}
                 />
               ))}
               {showStatusColumn && (
-                <TableCell className="tableCell" sx={tableHeadCellStyles(theme)}>
+                <TableCell className="tableCell" sx={tableHeadCellStyles(theme, tableHeadTopOffset)}>
                   Estado
                 </TableCell>
               )}
@@ -347,15 +371,16 @@ const EditableTableComponent = <T extends object>({
                   order={order}
                   onSort={() => handleSortRequest(column)}
                   theme={theme}
+                  topOffset={tableHeadTopOffset}
                 />
               ))}
               {editRowId !== null && isParkingTable && (
-                <TableCell className="tableCell" sx={tableHeadCellStyles(theme)}>
+                <TableCell className="tableCell" sx={tableHeadCellStyles(theme, tableHeadTopOffset)}>
                   Fecha de Parqueo
                 </TableCell>
               )}
               {!noActions && (hasEditPermissions || hasDeletePermissions) && (
-                <TableCell className="tableCell" sx={{ ...tableHeadCellStyles(theme), width: 0, whiteSpace: "nowrap", borderRight: `1px solid ${theme.palette.mode === "dark" ? "rgba(255,255,255,0.06)" : "rgba(0,0,0,0.06)"}` }} />
+                <TableCell className="tableCell" sx={{ ...tableHeadCellStyles(theme, tableHeadTopOffset), width: 0, whiteSpace: "nowrap", borderRight: `1px solid ${theme.palette.mode === "dark" ? "rgba(255,255,255,0.06)" : "rgba(0,0,0,0.06)"}` }} />
               )}
             </TableRow>
           </TableHead>
@@ -544,7 +569,7 @@ const EditableTableComponent = <T extends object>({
                   padding: '6px 12px',
                   border: 'none',
                   '&.Mui-selected': {
-                    backgroundColor: theme.palette.action.selected,
+                    backgroundColor: 'transparent',
                     border: 'none',
                   },
                   '&:hover': {

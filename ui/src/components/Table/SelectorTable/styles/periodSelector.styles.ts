@@ -1,7 +1,7 @@
 import type { Theme } from "@mui/material";
 
 export const getPeriodSelectorStyles = (theme: Theme) => {
-  const bgColor = theme.palette.mode === "dark" ? "#111" : "#000000";
+  const bgColor = theme.palette.mode === "dark" ? "#232323" : "#000000";
 
   return {
     input: {
@@ -72,6 +72,23 @@ export const getPeriodSelectorStyles = (theme: Theme) => {
       },
       "& fieldset": {
         border: "none !important",
+      },
+      "&::before": {
+        display: "none !important",
+        borderBottom: "none !important",
+      },
+      "&::after": {
+        display: "none !important",
+        borderBottom: "none !important",
+      },
+      "& .MuiInput-underline:before": {
+        borderBottom: "none !important",
+      },
+      "& .MuiInput-underline:after": {
+        borderBottom: "none !important",
+      },
+      "& .MuiInput-underline:hover:before": {
+        borderBottom: "none !important",
       },
     },
   };

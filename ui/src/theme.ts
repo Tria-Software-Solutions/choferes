@@ -468,10 +468,10 @@ export const lightTheme = createTheme({
             backgroundColor: theme.palette.action.hover,
           },
           "&.Mui-selected": {
-            backgroundColor: theme.palette.action.selected,
+            backgroundColor: "transparent",
             color: theme.palette.text.primary,
             "&:hover": {
-              backgroundColor: theme.palette.action.selected,
+              backgroundColor: theme.palette.action.hover,
             },
           },
         }),
@@ -1328,7 +1328,7 @@ export const darkTheme = createTheme({
             backgroundColor: theme.palette.action.hover,
           },
           "&.Mui-selected": {
-            backgroundColor: theme.palette.action.selected,
+            backgroundColor: "transparent",
             color: theme.palette.text.primary,
           },
         }),
@@ -1521,7 +1521,7 @@ export const darkTheme = createTheme({
           borderBottom: "none",
         },
         body: {
-          borderBottom: "1px solid rgba(255,255,255,0.08)",
+          borderBottom: "none",
         },
       },
     },
@@ -1993,7 +1993,7 @@ export const highContrastTheme = createTheme({
             backgroundColor: theme.palette.action.hover,
           },
           "&.Mui-selected": {
-            backgroundColor: theme.palette.action.selected,
+            backgroundColor: "transparent",
             color: theme.palette.text.primary,
           },
         }),

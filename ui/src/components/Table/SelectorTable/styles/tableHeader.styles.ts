@@ -65,7 +65,7 @@ export const getPremiumToggleStyles = (theme: Theme) => ({
 export const getTableHeaderStyles = (theme: Theme, isSmallScreen: boolean) => ({
   topHeader: {
     position: "relative" as const,
-    backgroundColor: theme.palette.mode === "dark" ? "#111" : "#000000",
+    backgroundColor: theme.palette.mode === "dark" ? "#232323" : "#000000",
     padding: isSmallScreen ? "12px 16px" : "16px 24px",
     borderBottom: "none",
     border: "none",
@@ -117,7 +117,7 @@ export const getTableHeaderStyles = (theme: Theme, isSmallScreen: boolean) => ({
     left: 0,
     top: 0,
     zIndex: 20,
-    backgroundColor: theme.palette.mode === "dark" ? "#111" : "#000000",
+    backgroundColor: theme.palette.mode === "dark" ? "#232323" : "#000000",
     color: "#fff",
     minHeight: "32px",
     height: "32px",
@@ -133,7 +133,7 @@ export const getTableHeaderStyles = (theme: Theme, isSmallScreen: boolean) => ({
   },
   dayHeader: {
     padding: isSmallScreen ? "6px 12px" : "8px 12px",
-    backgroundColor: theme.palette.mode === "dark" ? "#111" : "#000000",
+    backgroundColor: theme.palette.mode === "dark" ? "#232323" : "#000000",
     color: "#fff",
     whiteSpace: "nowrap" as const,
     minHeight: "32px",
@@ -148,8 +148,32 @@ export const getTableHeaderStyles = (theme: Theme, isSmallScreen: boolean) => ({
       backgroundColor: "#333",
     },
   },
+  dayHeaderText: (isToday: boolean) => ({
+    color: isToday
+      ? (theme.palette.mode === "dark"
+          ? "#00ffff"
+          : "#00d4ff")
+      : "#fff",
+    fontWeight: isToday ? 800 : 600,
+    fontSize: isToday ? "0.9rem" : "0.8rem",
+    textShadow: isToday
+      ? (theme.palette.mode === "dark"
+          ? "0 0 10px #00ffff, 0 0 20px #00ffff, 0 0 30px #00ffff"
+          : "0 0 10px #00d4ff, 0 0 20px #00d4ff, 0 0 30px #00d4ff")
+      : "none",
+    letterSpacing: isToday ? "0.05em" : "normal",
+    animation: isToday ? "pulse 2s ease-in-out infinite" : "none",
+    "@keyframes pulse": {
+      "0%, 100%": {
+        opacity: 1,
+      },
+      "50%": {
+        opacity: 0.8,
+      },
+    },
+  }),
   emptyCell: {
-    backgroundColor: theme.palette.mode === "dark" ? "#111" : "#000000",
+    backgroundColor: theme.palette.mode === "dark" ? "#232323" : "#000000",
     color: "#fff",
     minHeight: "32px",
     height: "32px",
@@ -157,15 +181,26 @@ export const getTableHeaderStyles = (theme: Theme, isSmallScreen: boolean) => ({
   },
   periodSelectorCell: {
     padding: isSmallScreen ? "0 12px" : "0 12px",
-    backgroundColor: theme.palette.mode === "dark" ? "#111" : "#000000",
+    backgroundColor: theme.palette.mode === "dark" ? "#232323" : "#000000",
     color: "#fff",
     minHeight: "32px",
     height: "32px",
     width: "100%",
     borderBottom: "none",
     border: "none",
+    borderTop: "none",
+    borderLeft: "none",
+    borderRight: "none",
     display: "flex",
     alignItems: "center",
     verticalAlign: "middle",
+    outline: "none",
+    boxShadow: "none",
+    "&::before": {
+      display: "none",
+    },
+    "&::after": {
+      display: "none",
+    },
   },
 });
