@@ -54,81 +54,117 @@ export const getEmployeeRowStyles = (theme: Theme, isSmallScreen: boolean, rowIn
     padding: isSmallScreen ? "8px" : "16px",
     backgroundColor: isToday
       ? (theme.palette.mode === "dark"
-          ? "linear-gradient(135deg, #2a2a2a 0%, #333333 100%)"
-          : "linear-gradient(135deg, rgba(25, 118, 210, 0.12) 0%, rgba(25, 118, 210, 0.08) 100%)")
+          ? "linear-gradient(135deg, rgba(25, 118, 210, 0.15) 0%, rgba(25, 118, 210, 0.08) 100%)"
+          : "linear-gradient(135deg, rgba(25, 118, 210, 0.12) 0%, rgba(25, 118, 210, 0.06) 100%)")
       : getRowBackgroundColor(theme, rowIndex),
     ...(isToday && {
       boxShadow: theme.palette.mode === "dark"
-        ? "inset 0 0 0 1px rgba(255,255,255,0.06)"
-        : "inset 0 0 0 1px rgba(25, 118, 210, 0.15)",
+        ? "0 0 30px rgba(25, 118, 210, 0.15)"
+        : "0 0 30px rgba(25, 118, 210, 0.12)",
     }),
     transition: "background-color 0.15s ease",
   }),
   select: {
     fontSize: "0.875rem",
     fontWeight: 500,
-    backgroundColor: theme.palette.mode === "dark" ? "rgba(30, 30, 35, 0.8)" : "rgba(255, 255, 255, 0.9)",
+    backgroundColor: theme.palette.mode === "dark" ? "rgba(35, 35, 40, 0.95)" : "rgba(255, 255, 255, 0.98)",
     color: theme.palette.text.primary,
-    borderRadius: "10px",
-    transition: "all 0.2s cubic-bezier(0.4, 0, 0.2, 1)",
+    borderRadius: "14px",
+    transition: "all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1)",
     boxShadow: theme.palette.mode === "dark"
-      ? "0 1px 4px rgba(0, 0, 0, 0.2)"
-      : "0 1px 4px rgba(0, 0, 0, 0.08)",
+      ? "0 4px 16px rgba(0, 0, 0, 0.25), 0 2px 8px rgba(0, 0, 0, 0.15), inset 0 1px 0 rgba(255, 255, 255, 0.05)"
+      : "0 4px 16px rgba(0, 0, 0, 0.12), 0 2px 8px rgba(0, 0, 0, 0.08), inset 0 1px 0 rgba(255, 255, 255, 0.8)",
+    border: theme.palette.mode === "dark" ? "1px solid rgba(255, 255, 255, 0.06)" : "1px solid rgba(0, 0, 0, 0.04)",
     "& .MuiSelect-select": {
-      padding: "8px 12px",
+      padding: "12px 16px",
       fontSize: "0.875rem",
       fontWeight: 500,
       color: theme.palette.text.primary,
     },
     "& .MuiOutlinedInput-notchedOutline": {
-      borderColor: theme.palette.mode === "dark" ? "rgba(255, 255, 255, 0.12)" : "rgba(0, 0, 0, 0.08)",
-      borderRadius: "10px",
+      borderColor: "transparent",
+      borderWidth: "0",
+      borderRadius: "14px",
+    },
+    "&:hover": {
+      backgroundColor: theme.palette.mode === "dark" ? "rgba(40, 40, 45, 0.98)" : "rgba(255, 255, 255, 1)",
+      boxShadow: theme.palette.mode === "dark"
+        ? "0 8px 24px rgba(0, 0, 0, 0.3), 0 4px 12px rgba(0, 0, 0, 0.2), inset 0 1px 0 rgba(255, 255, 255, 0.08)"
+        : "0 8px 24px rgba(0, 0, 0, 0.15), 0 4px 12px rgba(0, 0, 0, 0.1), inset 0 1px 0 rgba(255, 255, 255, 1)",
+      transform: "translateY(-2px) scale(1.01)",
+      border: theme.palette.mode === "dark" ? "1px solid rgba(255, 255, 255, 0.1)" : "1px solid rgba(0, 0, 0, 0.08)",
     },
     "&:hover .MuiOutlinedInput-notchedOutline": {
-      borderColor: theme.palette.mode === "dark" ? "rgba(255, 255, 255, 0.2)" : "rgba(0, 0, 0, 0.15)",
-      boxShadow: theme.palette.mode === "dark"
-        ? "0 2px 8px rgba(0, 0, 0, 0.3)"
-        : "0 2px 8px rgba(0, 0, 0, 0.12)",
+      borderColor: "transparent",
+    },
+    "&.Mui-focused": {
+      backgroundColor: theme.palette.mode === "dark" ? "rgba(40, 40, 45, 0.98)" : "rgba(255, 255, 255, 1)",
+      transform: "translateY(-2px) scale(1.01)",
+      border: theme.palette.mode === "dark" ? "1px solid rgba(25, 118, 210, 0.3)" : "1px solid rgba(25, 118, 210, 0.2)",
     },
     "&.Mui-focused .MuiOutlinedInput-notchedOutline": {
-      borderColor: theme.palette.primary.main,
-      borderWidth: "2px",
-      boxShadow: `0 0 0 3px ${theme.palette.mode === "dark" ? "rgba(255, 255, 255, 0.08)" : "rgba(0, 0, 0, 0.06)"}`,
+      borderColor: "transparent",
+      borderWidth: "0",
+      boxShadow: `0 0 0 4px ${theme.palette.mode === "dark" ? "rgba(25, 118, 210, 0.2)" : "rgba(25, 118, 210, 0.15)"}, 0 8px 24px rgba(25, 118, 210, 0.15)`,
     },
     "& .MuiSelect-icon": {
       color: theme.palette.text.secondary,
       fontSize: "1.25rem",
+      transition: "all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1)",
+    },
+    "&:hover .MuiSelect-icon": {
+      color: theme.palette.primary.main,
+      transform: "scale(1.15) rotate(5deg)",
+    },
+    "&.Mui-focused .MuiSelect-icon": {
+      color: theme.palette.primary.main,
+      transform: "scale(1.15) rotate(5deg)",
     },
   },
   menuItem: {
     fontSize: "0.875rem",
     fontWeight: 500,
-    py: 1.25,
-    px: 2,
-    margin: 0,
-    borderRadius: "10px",
+    py: 1.75,
+    px: 3,
+    margin: "3px 10px",
+    borderRadius: "14px",
     letterSpacing: "-0.01em",
-    minHeight: "44px",
-    transition: "all 0.2s cubic-bezier(0.4, 0, 0.2, 1)",
+    minHeight: "52px",
+    transition: "all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1)",
     display: "flex",
     alignItems: "center",
-    gap: "12px",
+    gap: "14px",
     color: theme.palette.text.primary,
+    border: theme.palette.mode === "dark" ? "1px solid rgba(255, 255, 255, 0.04)" : "1px solid rgba(0, 0, 0, 0.03)",
     "&:hover": {
       backgroundColor: theme.palette.mode === "dark"
-        ? "rgba(255, 255, 255, 0.08)"
-        : "rgba(0, 0, 0, 0.04)",
-      transform: "translateX(2px)",
+        ? "rgba(255, 255, 255, 0.12)"
+        : "rgba(0, 0, 0, 0.08)",
+      transform: "translateX(6px) scale(1.02)",
+      boxShadow: theme.palette.mode === "dark"
+        ? "0 4px 16px rgba(0, 0, 0, 0.3), 0 2px 8px rgba(0, 0, 0, 0.2)"
+        : "0 4px 16px rgba(0, 0, 0, 0.12), 0 2px 8px rgba(0, 0, 0, 0.08)",
+      border: theme.palette.mode === "dark" ? "1px solid rgba(255, 255, 255, 0.1)" : "1px solid rgba(0, 0, 0, 0.08)",
     },
     "&.Mui-selected": {
       backgroundColor: theme.palette.mode === "dark"
-        ? "rgba(255, 255, 255, 0.12)"
-        : "rgba(0, 0, 0, 0.06)",
+        ? "rgba(25, 118, 210, 0.18)"
+        : "rgba(25, 118, 210, 0.1)",
       fontWeight: 600,
+      color: theme.palette.primary.main,
+      boxShadow: theme.palette.mode === "dark"
+        ? "0 4px 16px rgba(25, 118, 210, 0.3), 0 2px 8px rgba(25, 118, 210, 0.2), inset 0 1px 0 rgba(255, 255, 255, 0.1)"
+        : "0 4px 16px rgba(25, 118, 210, 0.25), 0 2px 8px rgba(25, 118, 210, 0.15), inset 0 1px 0 rgba(255, 255, 255, 0.8)",
+      border: theme.palette.mode === "dark" ? "1px solid rgba(25, 118, 210, 0.3)" : "1px solid rgba(25, 118, 210, 0.2)",
+      transform: "scale(1.01)",
       "&:hover": {
         backgroundColor: theme.palette.mode === "dark"
-          ? "rgba(255, 255, 255, 0.15)"
-          : "rgba(0, 0, 0, 0.08)",
+          ? "rgba(25, 118, 210, 0.25)"
+          : "rgba(25, 118, 210, 0.15)",
+        transform: "translateX(6px) scale(1.03)",
+        boxShadow: theme.palette.mode === "dark"
+          ? "0 6px 20px rgba(25, 118, 210, 0.4), 0 3px 10px rgba(25, 118, 210, 0.3)"
+          : "0 6px 20px rgba(25, 118, 210, 0.35), 0 3px 10px rgba(25, 118, 210, 0.25)",
       },
     },
   },

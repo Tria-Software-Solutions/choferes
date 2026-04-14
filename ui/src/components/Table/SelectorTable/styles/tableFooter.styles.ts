@@ -38,6 +38,10 @@ export const getTableFooterStyles = (theme: Theme) => ({
       "&:before, &:after": {
         display: "none",
       },
+      "&:focus": {
+        outline: "none",
+        boxShadow: "none",
+      },
     },
     ".MuiTablePagination-input": {
       fontSize: "0.75rem",
@@ -45,6 +49,10 @@ export const getTableFooterStyles = (theme: Theme) => ({
     ".MuiTablePagination-select": {
       fontSize: "0.75rem",
       border: "none",
+      "&:focus": {
+        outline: "none",
+        boxShadow: "none",
+      },
     },
     ".MuiTablePagination-selectIcon": {
       fontSize: "1rem",

@@ -610,17 +610,37 @@ const OCRResultModal: React.FC<OCRResultModalProps> = ({
                 labelDisplayedRows={() => ""}
                 ActionsComponent={PaginationComponent}
                 sx={{
-                  borderRadius: "0 0 12px 12px",
+                  flexShrink: 0,
+                  borderRadius: 0,
+                  margin: 0,
+                  border: 'none',
                   '.MuiTablePagination-toolbar': {
-                    minHeight: '36px',
+                    minHeight: '32px',
+                    paddingTop: '2px',
+                    paddingBottom: '0px',
+                    border: 'none',
                   },
                   '.MuiTablePagination-selectLabel, .MuiTablePagination-input, .MuiTablePagination-displayedRows': {
                     fontSize: '0.75rem',
                   },
                   '.MuiTablePagination-select': {
                     fontSize: '0.75rem',
+                    border: 'none',
+                  },
+                  '.MuiTablePagination-selectIcon': {
+                    fontSize: '1rem',
+                  },
+                  '.MuiIconButton-root': {
+                    padding: '2px',
                   },
                   '.MuiInputBase-root': {
+                    border: 'none',
+                    '&:before, &:after': {
+                      display: 'none',
+                    },
+                    fontSize: '0.75rem',
+                  },
+                  '.MuiTablePagination-input': {
                     fontSize: '0.75rem',
                   },
                 }}

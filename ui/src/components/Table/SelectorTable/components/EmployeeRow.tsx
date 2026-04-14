@@ -9,7 +9,6 @@ import {
   Select,
   MenuItem,
   FormControl,
-  OutlinedInput,
   type SelectChangeEvent,
 } from "@mui/material";
 import InfoOutlinedIcon from "@mui/icons-material/InfoOutlined";
@@ -63,6 +62,7 @@ export const EmployeeRow = memo(function EmployeeRow({
 }: EmployeeRowProps) {
   const styles = getEmployeeRowStyles(theme, isSmallScreen, rowIndex);
   const showHoursColumn = permissions?.includes(PERMISSIONS.VIEW_EMPLOYEE_ROLES_HOURS);
+  const canEdit = permissions?.includes(PERMISSIONS.EDIT_EMPLOYEE_ROLES);
 
   const handleInfoClick = useCallback(() => {
     onInfoClick(employee);
@@ -103,13 +103,14 @@ export const EmployeeRow = memo(function EmployeeRow({
 
         return (
           <TableCell key={day} sx={styles.scheduleCell(today)}>
-            <FormControl fullWidth size="small">
+            <FormControl fullWidth>
               <Select
                 value={cellData.finalSelectedLabel}
                 onChange={(e) => onScheduleChange(e, employee.id, new Date(date))}
-                input={<OutlinedInput notched={false} />}
                 sx={styles.select}
                 MenuProps={premiumSelectorMenuProps}
+                displayEmpty
+                disabled={!canEdit}
                 renderValue={(selected) => {
                   if (selected === SELECTOR_TABLE.UNASSIGNED) {
                     return (

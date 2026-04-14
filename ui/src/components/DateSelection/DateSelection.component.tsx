@@ -72,40 +72,32 @@ const DateSelectionComponent: React.FC<DateSelectionProps> = ({
         sx={{
           width: { xs: '100%', sm: '280px' },
           "& .MuiOutlinedInput-root": {
-            borderRadius: "12px",
+            borderRadius: "10px",
             minHeight: "42px",
             position: "relative",
-            backgroundColor: theme.palette.mode === "dark"
-              ? "rgba(40,40,50,0.6)"
-              : "rgba(255,255,255,0.7)",
+            backgroundColor: theme.palette.background.paper,
             color: theme.palette.text.primary,
-            border: theme.palette.mode === "dark"
-              ? "1px solid rgba(255,255,255,0.1)"
-              : "1px solid rgba(0,0,0,0.08)",
+            border: `1px solid ${theme.palette.mode === "dark" ? "rgba(255,255,255,0.23)" : "rgba(0,0,0,0.23)"}`,
             transition: "all 0.3s cubic-bezier(0.4, 0, 0.2, 1)",
+            "& fieldset": {
+              border: "none !important",
+            },
+            "& .MuiOutlinedInput-notchedOutline": {
+              border: "none !important",
+            },
             "&:hover": {
-              backgroundColor: theme.palette.mode === "dark"
-                ? "rgba(50,50,60,0.7)"
-                : "rgba(255,255,255,0.85)",
-              borderColor: theme.palette.mode === "dark"
-                ? "rgba(255,255,255,0.15)"
-                : "rgba(0,0,0,0.12)",
+              backgroundColor: theme.palette.action.hover,
             },
             "&:hover .MuiOutlinedInput-notchedOutline": {
-              borderColor: "transparent",
+              border: "none !important",
             },
             "&.Mui-focused": {
-              backgroundColor: theme.palette.mode === "dark"
-                ? "rgba(55,55,65,0.8)"
-                : "rgba(255,255,255,0.95)",
+              backgroundColor: theme.palette.action.hover,
               borderColor: theme.palette.primary.main,
               boxShadow: `0 0 0 3px ${theme.palette.mode === "dark" ? "rgba(255,255,255,0.08)" : "rgba(0,0,0,0.06)"}`,
             },
             "&.Mui-focused .MuiOutlinedInput-notchedOutline": {
-              borderColor: "transparent",
-            },
-            "& fieldset": {
-              border: "none",
+              border: "none !important",
             },
             "& input": {
               color: theme.palette.text.primary,
@@ -146,6 +138,7 @@ const DateSelectionComponent: React.FC<DateSelectionProps> = ({
             "&.Mui-disabled": {
               backgroundColor: theme.palette.action.disabled,
               color: theme.palette.text.disabled,
+              borderColor: theme.palette.action.disabled,
             },
           },
           "& .MuiInputAdornment-root": {

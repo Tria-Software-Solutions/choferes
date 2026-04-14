@@ -1,6 +1,6 @@
 import React, { useMemo, useState, useRef, useCallback, memo } from "react";
 import PropTypes from "prop-types";
-import { useNavigate } from "react-router-dom";
+import { PlusCircle } from "lucide-react";
 import { Employee } from "../../../models/Employee";
 import { Schedule } from "../../../models/Schedule";
 import { HoursWorked } from "../../../models/HoursWorked";
@@ -29,6 +29,7 @@ import {
   OutlinedInput,
   IconButton,
   Checkbox,
+  ListSubheader,
 } from "@mui/material";
 import PaginationComponent from "../Pagination/Pagination.component";
 import {
@@ -50,17 +51,20 @@ import MoreTimeIcon from "@mui/icons-material/MoreTime";
 import CalendarTodayIcon from "@mui/icons-material/CalendarToday";
 import DateRangeIcon from "@mui/icons-material/DateRange";
 import CalendarMonthIcon from "@mui/icons-material/CalendarMonth";
+import AddScheduleForm from "../../../pages/Forms/AddScheduleForm";
+import MANAGEMENT from "../../../constants/management.constants";
+import { createSchedule } from "../../../store/slices/schedulesSlice";
 import {
-  paperStyles,
   stickyHeaderBoxStyles,
   headerFlexBoxStyles,
   tableContainerStyles,
+  paperStyles,
+  tableRowBackground,
+  tableCellBackground,
+  menuItemStyles,
   employeeColumnCellStyles,
   tableCellStyles,
   boldTypographyStyles,
-  menuItemStyles,
-  tableRowBackground,
-  tableCellBackground,
   employeeCellBoxStyles,
 } from "./SelectorTable.styles";
 
@@ -171,15 +175,28 @@ const SelectorTableComponent: React.FC<SelectorTableProps> = ({
   viewMode,
   setViewMode,
 }) => {
-  const navigate = useNavigate();
   const [timeAdjustment, setTimeAdjustment] = useState(0);
   const [orderDirection, setOrderDirection] = useState<"asc" | "desc">("asc");
   const [page, setPage] = useState(0);
   const [localRowsPerPage, setLocalRowsPerPage] = useState(5);
+  const [openAddScheduleModal, setOpenAddScheduleModal] = useState(false);
+  const [isCreatingSchedule, setIsCreatingSchedule] = useState(false);
   const rowsPerPage =
     rowsPerPageProp !== undefined ? rowsPerPageProp : localRowsPerPage;
   const setRowsPerPage =
     setRowsPerPageProp !== undefined ? setRowsPerPageProp : setLocalRowsPerPage;
+
+  const handleCreateSchedule = async (newSchedule: Omit<Schedule, "id">) => {
+    try {
+      setIsCreatingSchedule(true);
+      await dispatch(createSchedule(newSchedule));
+      setOpenAddScheduleModal(false);
+    } catch (error) {
+      // Error handling
+    } finally {
+      setIsCreatingSchedule(false);
+    }
+  };
   const [openAdjustDialogEmployee, setOpenAdjustDialogEmployee] =
     useState<Employee | null>(null);
   const [openInfoDialogEmployee, setOpenInfoDialogEmployee] =
@@ -527,6 +544,9 @@ const SelectorTableComponent: React.FC<SelectorTableProps> = ({
           sx={{
             ...tableContainerStyles,
             maxHeight: "100%",
+            border: "none !important",
+            outline: "none !important",
+            boxShadow: "none !important",
           }}
           ref={tableContainerRef}
         >
@@ -536,11 +556,12 @@ const SelectorTableComponent: React.FC<SelectorTableProps> = ({
             sx={{
               width: "100%",
               borderCollapse: "collapse",
-              "& th, & td": {
+              border: "none !important",
+              "& td, & th": {
+                border: "none !important",
                 overflow: "hidden",
                 textOverflow: "ellipsis",
                 whiteSpace: "nowrap",
-                border: "none",
               },
               "& th:first-of-type, & td:first-of-type": {
                 width: viewMode === "employee" ? "12%" : "15%",
@@ -569,10 +590,15 @@ const SelectorTableComponent: React.FC<SelectorTableProps> = ({
                 backgroundColor: "#000000",
                 color: "#fff",
                 zIndex: 15,
+                position: "sticky",
+                top: 0,
+                border: "none !important",
+                outline: "none !important",
+                boxShadow: "none !important",
               },
             }}
           >
-            <TableHead ref={tableHeadRef} sx={{ height: "36px", position: "sticky", top: 0, zIndex: 50 }}>
+            <TableHead ref={tableHeadRef} sx={{ height: "36px", position: "sticky", top: 0, zIndex: 50, backgroundColor: "#000", border: "none !important", "& th": { border: "none !important" } }}>
               <TableRow>
                 <TableCell
                   className="employee-column"
@@ -583,7 +609,7 @@ const SelectorTableComponent: React.FC<SelectorTableProps> = ({
                     position: "sticky",
                     left: 0,
                     top: 0,
-                    zIndex: 20,
+                    zIndex: 60,
                     padding: "4px 8px",
                     height: "36px",
                     cursor: "pointer",
@@ -663,29 +689,57 @@ const SelectorTableComponent: React.FC<SelectorTableProps> = ({
                   />
                 )}
 
-                {currentWeek.map(({ day, date }) => (
-                  <TableCell
-                    key={day}
-                    align="center"
-                    sx={{
-                      ...tableCellStyles(isSmallScreen),
-                      backgroundColor: "#000000",
-                      color: "#fff",
-                      whiteSpace: "nowrap",
-                      padding: "4px 8px",
-                      height: "36px",
-                      cursor: "pointer",
-                      transition: "background-color 0.2s ease",
-                      "&:hover": {
-                        backgroundColor: "#333",
-                      },
-                    }}
-                  >
-                    {`${translateDayToAbrevSpanish(
-                      day as EnglishDayOfWeek
-                    )} ${formatHeaderDate(date)}`}
-                  </TableCell>
-                ))}
+                {currentWeek.map(({ day, date, isoDate }) => {
+                  const today = new Date().toDateString() === new Date(isoDate).toDateString();
+                  return (
+                    <TableCell
+                      key={day}
+                      align="center"
+                      sx={{
+                        ...tableCellStyles(isSmallScreen),
+                        backgroundColor: "#000000",
+                        color: "#fff",
+                        whiteSpace: "nowrap",
+                        padding: "4px 8px",
+                        height: "36px",
+                        cursor: "pointer",
+                        transition: "background-color 0.2s ease",
+                        "&:hover": {
+                          backgroundColor: "#333",
+                        },
+                      }}
+                    >
+                      <Box sx={{ position: 'relative' }}>
+                        <Typography
+                          sx={{
+                            color: today ? "#00BCD4" : "#fff",
+                            fontWeight: today ? 700 : 600,
+                            fontSize: today ? "0.85rem" : "0.8rem",
+                            letterSpacing: today ? "0.05em" : "normal",
+                          }}
+                        >
+                          {`${translateDayToAbrevSpanish(
+                            day as EnglishDayOfWeek
+                          )} ${formatHeaderDate(date)}`}
+                        </Typography>
+                        {today && (
+                          <Box
+                            sx={{
+                              position: 'absolute',
+                              bottom: '-2px',
+                              left: '50%',
+                              transform: 'translateX(-50%)',
+                              width: '4px',
+                              height: '4px',
+                              borderRadius: '50%',
+                              backgroundColor: '#00BCD4',
+                            }}
+                          />
+                        )}
+                      </Box>
+                    </TableCell>
+                  );
+                })}
                 {viewMode === "employee" && permissions?.includes(
                   PERMISSIONS.VIEW_EMPLOYEE_ROLES_HOURS
                 ) && (
@@ -943,7 +997,7 @@ const SelectorTableComponent: React.FC<SelectorTableProps> = ({
                                   alignItems: "center",
                                   justifyContent: "center",
                                 }}>
-                                  <CalendarTodayIcon sx={{ fontSize: 16, color: "#fff" }} />
+                                  <CalendarTodayIcon sx={{ fontSize: 16, color: theme.palette.mode === "dark" ? "#fff" : "#000" }} />
                                 </Box>
                                 {SELECTOR_TABLE.WEEKLY}
                               </Box>
@@ -959,7 +1013,7 @@ const SelectorTableComponent: React.FC<SelectorTableProps> = ({
                                   alignItems: "center",
                                   justifyContent: "center",
                                 }}>
-                                  <DateRangeIcon sx={{ fontSize: 16, color: "#fff" }} />
+                                  <DateRangeIcon sx={{ fontSize: 16, color: theme.palette.mode === "dark" ? "#fff" : "#000" }} />
                                 </Box>
                                 {SELECTOR_TABLE.BIWEEKLY}
                               </Box>
@@ -975,7 +1029,7 @@ const SelectorTableComponent: React.FC<SelectorTableProps> = ({
                                   alignItems: "center",
                                   justifyContent: "center",
                                 }}>
-                                  <CalendarMonthIcon sx={{ fontSize: 16, color: "#fff" }} />
+                                  <CalendarMonthIcon sx={{ fontSize: 16, color: theme.palette.mode === "dark" ? "#fff" : "#000" }} />
                                 </Box>
                                 {SELECTOR_TABLE.MONTHLY}
                               </Box>
@@ -1150,6 +1204,25 @@ const SelectorTableComponent: React.FC<SelectorTableProps> = ({
                                       {option.label}
                                     </MenuItem>
                                   ))}
+                                {scheduleData.options.filter((option) => option.specialSchedule).length > 0 && (
+                                  <ListSubheader
+                                    sx={{
+                                      display: "flex",
+                                      alignItems: "center",
+                                      py: 1.5,
+                                      px: 2.5,
+                                      fontSize: "0.7rem",
+                                      fontWeight: 600,
+                                      letterSpacing: "0.08em",
+                                      textTransform: "uppercase",
+                                      backgroundColor: theme.palette.mode === "dark" ? "rgba(255,255,255,0.03)" : "rgba(0,0,0,0.02)",
+                                      color: theme.palette.text.secondary,
+                                      opacity: 0.8,
+                                    }}
+                                  >
+                                    {SELECTOR_TABLE.SPECIAL_SCHEDULES}
+                                  </ListSubheader>
+                                )}
                                 {scheduleData.options
                                   .filter((option) => option.specialSchedule)
                                   .sort((a, b) =>
@@ -1167,19 +1240,41 @@ const SelectorTableComponent: React.FC<SelectorTableProps> = ({
                                 {permissions?.includes(
                                   PERMISSIONS.CREATE_SCHEDULES
                                 ) && (
-                                  <MenuItem
-                                    value={"Other"}
-                                    onClick={() => navigate("/schedules")}
-                                  >
-                                    <Box
-                                      display="flex"
-                                      justifyContent="space-between"
-                                      width="100%"
-                                      alignItems="center"
+                                  <>
+                                    <ListSubheader
+                                      sx={{
+                                        display: "flex",
+                                        alignItems: "center",
+                                        py: 1.5,
+                                        px: 2.5,
+                                        fontSize: "0.7rem",
+                                        fontWeight: 600,
+                                        letterSpacing: "0.08em",
+                                        textTransform: "uppercase",
+                                        backgroundColor: theme.palette.mode === "dark" ? "rgba(255,255,255,0.03)" : "rgba(0,0,0,0.02)",
+                                        color: theme.palette.text.secondary,
+                                        opacity: 0.8,
+                                      }}
                                     >
-                                      {SELECTOR_TABLE.OTHER}
-                                    </Box>
-                                  </MenuItem>
+                                      Opciones
+                                    </ListSubheader>
+                                    <MenuItem
+                                      value={"Other"}
+                                      onClick={() => setOpenAddScheduleModal(true)}
+                                      sx={menuItemStyles}
+                                    >
+                                      <Box
+                                        display="flex"
+                                        justifyContent="space-between"
+                                        width="100%"
+                                        alignItems="center"
+                                      >
+                                        <Typography sx={{ color: theme.palette.primary.main, fontWeight: 600 }}>
+                                          {SELECTOR_TABLE.OTHER}
+                                        </Typography>
+                                      </Box>
+                                    </MenuItem>
+                                  </>
                                 )}
                               </Select>
                             </FormControl>
@@ -1607,51 +1702,38 @@ const SelectorTableComponent: React.FC<SelectorTableProps> = ({
               labelDisplayedRows={() => ""}
               ActionsComponent={PaginationComponent}
               sx={{
-                color:
-                  theme.palette.mode === "dark"
-                    ? "#fff"
-                    : theme.palette.primary.contrastText,
-                ".MuiTablePagination-toolbar": {
-                  backgroundColor: "transparent",
-                  minHeight: "32px",
-                  paddingLeft: 1,
-                  paddingRight: 1,
-                  border: "none",
+                flexShrink: 0,
+                borderRadius: 0,
+                margin: 0,
+                border: 'none',
+                '.MuiTablePagination-toolbar': {
+                  minHeight: '32px',
+                  paddingTop: '2px',
+                  paddingBottom: '0px',
+                  border: 'none',
                 },
-                ".MuiTablePagination-selectLabel, .MuiTablePagination-input, .MuiTablePagination-displayedRows":
-                  {
-                    color:
-                      theme.palette.mode === "dark"
-                        ? "#fff"
-                        : theme.palette.primary.contrastText,
-                    fontSize: "0.75rem",
+                '.MuiTablePagination-selectLabel, .MuiTablePagination-input, .MuiTablePagination-displayedRows': {
+                  fontSize: '0.75rem',
+                },
+                '.MuiTablePagination-select': {
+                  fontSize: '0.75rem',
+                  border: 'none',
+                },
+                '.MuiTablePagination-selectIcon': {
+                  fontSize: '1rem',
+                },
+                '.MuiIconButton-root': {
+                  padding: '2px',
+                },
+                '.MuiInputBase-root': {
+                  border: 'none',
+                  '&:before, &:after': {
+                    display: 'none',
                   },
-                ".MuiSvgIcon-root": {
-                  color:
-                    theme.palette.mode === "dark"
-                      ? "#fff"
-                      : theme.palette.primary.contrastText,
-                  fontSize: "1.25rem",
+                  fontSize: '0.75rem',
                 },
-                ".MuiIconButton-root": {
-                  padding: "4px",
-                },
-                ".MuiTablePagination-select": {
-                  fontSize: "0.75rem",
-                  border: "none",
-                },
-                ".MuiTablePagination-selectIcon": {
-                  fontSize: "1rem",
-                },
-                ".MuiInputBase-root": {
-                  border: "none",
-                  "&:before, &:after": {
-                    display: "none",
-                  },
-                  fontSize: "0.75rem",
-                },
-                ".MuiTablePagination-input": {
-                  fontSize: "0.75rem",
+                '.MuiTablePagination-input': {
+                  fontSize: '0.75rem',
                 },
               }}
               SelectProps={{
@@ -1666,7 +1748,7 @@ const SelectorTableComponent: React.FC<SelectorTableProps> = ({
                         padding: '6px 12px',
                         border: 'none',
                         '&.Mui-selected': {
-                          backgroundColor: theme.palette.action.selected,
+                          backgroundColor: 'transparent',
                           border: 'none',
                         },
                         '&:hover': {
@@ -1741,6 +1823,21 @@ const SelectorTableComponent: React.FC<SelectorTableProps> = ({
           currentMonth={month}
           currentYear={year}
           theme={theme}
+        />
+      </DialogComponent>
+      <DialogComponent
+        open={openAddScheduleModal}
+        onClose={() => setOpenAddScheduleModal(false)}
+        title={MANAGEMENT.DIALOG_ADD_TITLE}
+        subtitle={MANAGEMENT.SCHEDULES_PAGE.DIALOG_ADD_SUBTITLE}
+        hideActions
+        paperSx={{}}
+        icon={<PlusCircle color="var(--mui-palette-info-main)" />}
+      >
+        <AddScheduleForm
+          onSubmit={handleCreateSchedule}
+          onCancel={() => setOpenAddScheduleModal(false)}
+          isLoading={isCreatingSchedule}
         />
       </DialogComponent>
     </>

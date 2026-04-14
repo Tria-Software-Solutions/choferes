@@ -10,7 +10,7 @@ const getRowBackgroundColor = (theme: Theme, rowIndex: number) => {
 export const getScheduleRowStyles = (theme: Theme, isSmallScreen: boolean, rowIndex: number) => ({
   row: {
     backgroundColor: getRowBackgroundColor(theme, rowIndex),
-    borderBottom: theme.palette.mode === "dark" ? "1px solid #444" : "1px solid rgba(0,0,0,0.08)",
+    borderBottom: "none",
   },
   scheduleCell: {
     padding: isSmallScreen ? "8px" : "16px",
@@ -19,23 +19,25 @@ export const getScheduleRowStyles = (theme: Theme, isSmallScreen: boolean, rowIn
     position: "sticky" as const,
     left: 0,
     zIndex: 10,
-    borderRight: "1px solid rgba(0,0,0,0.04)",
+    borderRight: "none",
   },
   scheduleName: {
     color: theme.palette.text.primary,
     fontSize: "0.875rem",
   },
   dayCell: (isToday: boolean) => ({
-    padding: isSmallScreen ? "8px" : "16px",
+    padding: isSmallScreen ? "4px" : "8px",
     backgroundColor: isToday
       ? (theme.palette.mode === "dark"
-          ? "linear-gradient(135deg, #2a2a2a 0%, #333333 100%)"
-          : "linear-gradient(135deg, rgba(25, 118, 210, 0.12) 0%, rgba(25, 118, 210, 0.08) 100%)")
+          ? "linear-gradient(135deg, rgba(25, 118, 210, 0.5) 0%, rgba(25, 118, 210, 0.3) 100%)"
+          : "linear-gradient(135deg, rgba(25, 118, 210, 0.4) 0%, rgba(25, 118, 210, 0.25) 100%)")
       : getRowBackgroundColor(theme, rowIndex),
+    border: "none",
     ...(isToday && {
       boxShadow: theme.palette.mode === "dark"
-        ? "inset 0 0 0 1px rgba(255,255,255,0.06)"
-        : "inset 0 0 0 1px rgba(25, 118, 210, 0.15)",
+        ? "0 0 50px rgba(25, 118, 210, 0.6), 0 0 20px rgba(25, 118, 210, 0.4)"
+        : "0 0 50px rgba(25, 118, 210, 0.5), 0 0 20px rgba(25, 118, 210, 0.35)",
+      position: "relative" as const,
     }),
     transition: "background-color 0.15s ease",
   }),
@@ -56,40 +58,82 @@ export const getScheduleRowStyles = (theme: Theme, isSmallScreen: boolean, rowIn
     fontWeight: 500,
     letterSpacing: "-0.01em",
   },
+  formControl: {
+    border: "none",
+    outline: "none",
+    boxShadow: "none",
+    "& .MuiOutlinedInput-root": {
+      border: "none",
+    },
+    "& .MuiInputBase-root": {
+      border: "none",
+    },
+    "& .MuiInput-root": {
+      border: "none",
+      "&::before": {
+        display: "none",
+        borderBottom: "none",
+      },
+      "&::after": {
+        display: "none",
+        borderBottom: "none",
+      },
+    },
+  },
   select: {
     fontSize: "0.875rem",
     fontWeight: 500,
-    backgroundColor: theme.palette.mode === "dark" ? "rgba(30, 30, 35, 0.8)" : "rgba(255, 255, 255, 0.9)",
+    backgroundColor: getRowBackgroundColor(theme, rowIndex),
     color: theme.palette.text.primary,
-    borderRadius: "10px",
-    transition: "all 0.2s cubic-bezier(0.4, 0, 0.2, 1)",
-    boxShadow: theme.palette.mode === "dark"
-      ? "0 1px 4px rgba(0, 0, 0, 0.2)"
-      : "0 1px 4px rgba(0, 0, 0, 0.08)",
+    borderRadius: "0",
+    transition: "all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1)",
+    boxShadow: "none",
+    border: "none",
+    outline: "none",
     "& .MuiSelect-select": {
-      padding: "8px 12px",
+      padding: "12px 16px",
       fontSize: "0.875rem",
       fontWeight: 500,
       color: theme.palette.text.primary,
+      borderRadius: "0",
     },
-    "& .MuiOutlinedInput-notchedOutline": {
-      borderColor: "transparent",
-      borderRadius: "10px",
+    "&::before": {
+      display: "none",
     },
-    "&:hover .MuiOutlinedInput-notchedOutline": {
-      borderColor: "transparent",
-      boxShadow: theme.palette.mode === "dark"
-        ? "0 2px 8px rgba(0, 0, 0, 0.3)"
-        : "0 2px 8px rgba(0, 0, 0, 0.12)",
+    "&::after": {
+      display: "none",
     },
-    "&.Mui-focused .MuiOutlinedInput-notchedOutline": {
-      borderColor: "transparent",
-      borderWidth: "2px",
-      boxShadow: `0 0 0 3px ${theme.palette.mode === "dark" ? "rgba(255, 255, 255, 0.08)" : "rgba(0, 0, 0, 0.06)"}`,
+    "&:hover": {
+      backgroundColor: "transparent",
+      boxShadow: "none",
+      border: "none",
+      "&::before": {
+        display: "none",
+      },
+    },
+    "&.Mui-focused": {
+      backgroundColor: "transparent",
+      border: "none",
+      "&::before": {
+        display: "none",
+      },
+      "&::after": {
+        display: "none",
+      },
+      boxShadow: "none",
     },
     "& .MuiSelect-icon": {
       color: theme.palette.text.secondary,
       fontSize: "1.25rem",
+      transition: "all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1)",
+    },
+    "&:hover .MuiSelect-icon": {
+      color: theme.palette.primary.main,
+      transform: "scale(1.15) rotate(5deg)",
+    },
+    "&.Mui-focused .MuiSelect-icon": {
+      color: theme.palette.primary.main,
+      transform: "scale(1.15) rotate(5deg)",
     },
   },
   namesContainer: {
@@ -175,31 +219,45 @@ export const getScheduleRowStyles = (theme: Theme, isSmallScreen: boolean, rowIn
     display: "flex",
     alignItems: "center",
     width: "100%",
-    padding: "10px 12px",
+    padding: "14px 20px",
     fontSize: "0.875rem",
     fontWeight: isSelected ? 600 : 500,
     letterSpacing: "-0.01em",
-    borderRadius: "10px",
-    margin: "2px 4px",
-    transition: "all 0.2s cubic-bezier(0.4, 0, 0.2, 1)",
-    gap: "10px",
-    minHeight: "44px",
+    borderRadius: "14px",
+    margin: "3px 10px",
+    transition: "all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1)",
+    gap: "14px",
+    minHeight: "52px",
     color: isSelected ? theme.palette.primary.main : theme.palette.text.primary,
     backgroundColor: isSelected
       ? (theme.palette.mode === "dark"
-          ? "rgba(25, 118, 210, 0.2)"
+          ? "rgba(25, 118, 210, 0.18)"
           : "rgba(25, 118, 210, 0.1)")
       : "transparent",
-    border: "none",
+    border: theme.palette.mode === "dark" ? "1px solid rgba(255, 255, 255, 0.04)" : "1px solid rgba(0, 0, 0, 0.03)",
+    boxShadow: isSelected
+      ? (theme.palette.mode === "dark"
+          ? "0 4px 16px rgba(25, 118, 210, 0.3), 0 2px 8px rgba(25, 118, 210, 0.2), inset 0 1px 0 rgba(255, 255, 255, 0.1)"
+          : "0 4px 16px rgba(25, 118, 210, 0.25), 0 2px 8px rgba(25, 118, 210, 0.15), inset 0 1px 0 rgba(255, 255, 255, 0.8)")
+      : "none",
+    transform: isSelected ? "scale(1.01)" : "none",
     "&:hover": {
       backgroundColor: isSelected
         ? (theme.palette.mode === "dark"
             ? "rgba(25, 118, 210, 0.25)"
             : "rgba(25, 118, 210, 0.15)")
         : (theme.palette.mode === "dark"
-            ? "rgba(255, 255, 255, 0.06)"
-            : "rgba(0, 0, 0, 0.04)"),
-      transform: "translateX(2px)",
+            ? "rgba(255, 255, 255, 0.12)"
+            : "rgba(0, 0, 0, 0.08)"),
+      transform: "translateX(6px) scale(1.02)",
+      boxShadow: isSelected
+        ? (theme.palette.mode === "dark"
+            ? "0 6px 20px rgba(25, 118, 210, 0.4), 0 3px 10px rgba(25, 118, 210, 0.3)"
+            : "0 6px 20px rgba(25, 118, 210, 0.35), 0 3px 10px rgba(25, 118, 210, 0.25)")
+        : (theme.palette.mode === "dark"
+            ? "0 4px 16px rgba(0, 0, 0, 0.3), 0 2px 8px rgba(0, 0, 0, 0.2)"
+            : "0 4px 16px rgba(0, 0, 0, 0.12), 0 2px 8px rgba(0, 0, 0, 0.08)"),
+      border: theme.palette.mode === "dark" ? "1px solid rgba(255, 255, 255, 0.1)" : "1px solid rgba(0, 0, 0, 0.08)",
     },
   }),
   checkboxContainer: {

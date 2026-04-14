@@ -137,9 +137,9 @@ export const emailLinkStyles = (theme: Theme): SxProps<Theme> => ({
 });
 
 // Premium table head cell styles
-export const tableHeadCellStyles = (theme: Theme): SxProps<Theme> => ({
+export const tableHeadCellStyles = (theme: Theme, topOffset: number | string = 0): SxProps<Theme> => ({
   position: "sticky",
-  top: 0,
+  top: topOffset,
   zIndex: 10,
   backgroundColor: theme.palette.mode === "dark" ? "#0a0a0a" : "#000000",
   color: "#ffffff",
@@ -184,9 +184,7 @@ export const premiumMenuProps = {
             : "rgba(25, 118, 210, 0.08)",
         },
         "&.Mui-selected": {
-          backgroundColor: theme.palette.mode === "dark" 
-            ? "rgba(25, 118, 210, 0.25)" 
-            : "rgba(25, 118, 210, 0.12)",
+          backgroundColor: "transparent",
           color: theme.palette.primary.main,
           fontWeight: 600,
           "&:hover": {
