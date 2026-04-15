@@ -118,6 +118,7 @@ const DialogComponent: React.FC<ConfirmationDialogProps> = ({
       onClose={onClose}
       maxWidth="sm"
       fullWidth
+      disableEnforceFocus
       PaperProps={{
         sx: dialogPaperStyles(paperSx),
       }}

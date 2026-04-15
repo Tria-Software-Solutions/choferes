@@ -143,3 +143,8 @@ code {
 .Mui-focused {
   animation: focusRing 0.2s ease-out forwards;
 }
+
+/* Use viewport units for responsive positioning - menu will flip based on available space */
+.MuiPopper-root {
+  max-height: 50vh !important;
+}

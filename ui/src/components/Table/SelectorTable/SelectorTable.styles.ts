@@ -324,8 +324,9 @@ export const scheduleSelectStyles: SxProps<Theme> = (theme) => ({
   },
 });
 
-// Premium MenuProps for all selects - Ultra Premium Edition
+// Premium MenuProps for all selects - Ultra Premium Edition with responsive positioning
 export const premiumSelectorMenuProps = {
+  disableAutoFocusItem: true, // Prevents ARIA warning about aria-hidden on focused element
   PaperProps: {
     sx: (theme: Theme) => ({
       maxHeight: 400,
@@ -333,7 +334,7 @@ export const premiumSelectorMenuProps = {
       backgroundColor: theme.palette.mode === "dark" ? "#1a1a1f" : "#ffffff",
       color: theme.palette.text.primary,
       borderRadius: "20px",
-      marginTop: "12px",
+      marginTop: "8px",
       boxShadow: theme.palette.mode === "dark"
         ? "0 25px 80px rgba(0,0,0,0.5), 0 12px 40px rgba(0,0,0,0.3), inset 0 1px 0 rgba(255,255,255,0.05)"
         : "0 25px 80px rgba(0,0,0,0.15), 0 12px 40px rgba(0,0,0,0.08), inset 0 1px 0 rgba(255,255,255,1)",
@@ -345,7 +346,6 @@ export const premiumSelectorMenuProps = {
         flexDirection: "column",
         backgroundColor: theme.palette.mode === "dark" ? "#1a1a1f" : "#ffffff",
       },
-      // Premium scrollbar styling
       "&::-webkit-scrollbar": {
         width: "6px",
       },
@@ -369,13 +369,21 @@ export const premiumSelectorMenuProps = {
   },
   anchorOrigin: {
     vertical: "bottom" as const,
-    horizontal: "left" as const,
+    horizontal: "center" as const,
   },
   transformOrigin: {
     vertical: "top" as const,
-    horizontal: "left" as const,
+    horizontal: "center" as const,
   },
+  // Allow menu to flip to opposite side when there's not enough space
+  marginThreshold: 32,
   disablePortal: false,
+  // Disable auto focus to prevent scrolling issues
+  autoFocus: false,
+  // Enable auto width to prevent menu from being too narrow
+  autoWidth: true,
+  // Control where the menu anchors to prevent overlap
+  getContentAnchorEl: null,
 };
 
 // Premium MultiSelect styles for schedule view

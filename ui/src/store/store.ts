@@ -30,27 +30,7 @@ export const store = configureStore({
   // Customize middleware for serializability and immutability checks
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware({
-      serializableCheck: {
-        // Ignore redux-persist and date fields for serializability
-        ignoredActions: [
-          "persist/PERSIST",
-          "persist/REHYDRATE",
-          "persist/PAUSE",
-          "persist/PURGE",
-          "persist/REGISTER",
-          "persist/FLUSH",
-        ],
-        ignoredPaths: [
-          "hoursWorked.entities",
-          "employees.entities",
-          "users.entities",
-        ],
-        ignoredActionPaths: [
-          "payload.date",
-          "payload.createdAt",
-          "payload.updatedAt",
-        ],
-      },
+      serializableCheck: false, // Disabled due to performance warning with large state/actions
       immutableCheck: {
         // Ignore redux-persist entity paths for immutability
         ignoredPaths: [

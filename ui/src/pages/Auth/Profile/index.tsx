@@ -931,7 +931,15 @@ const Profile: React.FC = () => {
             </Box>
           )}
           {activeSection === 'system' && (
-            <Box sx={{ width: "100%", display: "block" }}>
+            <Box
+              sx={{
+                width: "100%",
+                flex: 1,
+                minHeight: 0,
+                display: "flex",
+                flexDirection: "column",
+              }}
+            >
               {/* Section Header */}
               <Box sx={{ mb: 3 }}>
                 <Box display="flex" alignItems="center" gap={1.5} mb={1}>
@@ -974,6 +982,7 @@ const Profile: React.FC = () => {
               {/* Sub-section Toggles */}
               <Box
                 sx={{
+                  flexShrink: 0,
                   display: "flex",
                   alignItems: "center",
                   gap: 0.5,

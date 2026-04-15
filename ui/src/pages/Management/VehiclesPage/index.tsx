@@ -676,7 +676,7 @@ const VehiclesPage: React.FC = () => {
                         required: true,
                         variant: "outlined",
                         sx: {
-                          width: { xs: '100%', sm: '280px' },
+                          width: { xs: '100%', sm: '320px', md: '360px' },
                           '& .MuiOutlinedInput-root': {
                             height: "44px",
                             borderRadius: '10px',
@@ -840,7 +840,6 @@ const VehiclesPage: React.FC = () => {
                     "notes",
                     "parkingDate",
                   ]}
-                  groupByDate={selectedDate}
                   editRowId={editRowId}
                   editFields={editFields}
                   setEditField={(field, value) =>

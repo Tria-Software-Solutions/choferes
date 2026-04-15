@@ -23,21 +23,29 @@ export const wakeUpServer = async (): Promise<boolean> => {
 
   // Create a new wake-up promise
   wakeUpPromise = (async (): Promise<boolean> => {
-    try {
-      // Simple health check - no auth needed, lightweight
-      // Use /health directly (no /api prefix) for better compatibility
-      const response = await axios.get(`${API_URL}/health`, {
-        timeout: 60000, // 60 seconds to allow for cold start
-        // Accept any response, even error codes - we just want to know server is up
-        validateStatus: () => true,
-      });
+    const startedAt = Date.now();
+    const maxWaitMs = 70000;
 
-      // If we get any response (even 404, 500), server is awake
-      if (response.status >= 200 && response.status < 600) {
-        // eslint-disable-next-line no-console
-        console.log("[WakeUp] Server is responding, status:", response.status);
-        isServerAwake = true;
-        return true;
+    try {
+      while (Date.now() - startedAt < maxWaitMs) {
+        const response = await axios.get(`${API_URL}/health`, {
+          timeout: 15000,
+          validateStatus: () => true,
+        });
+
+        const isReady =
+          response.status === 200 &&
+          response.data?.status === "OK" &&
+          response.data?.database?.status === "OK";
+
+        if (isReady) {
+          isServerAwake = true;
+          return true;
+        }
+
+        await new Promise((resolve) => {
+          setTimeout(resolve, 2000);
+        });
       }
 
       return false;

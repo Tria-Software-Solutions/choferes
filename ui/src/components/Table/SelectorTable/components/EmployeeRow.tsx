@@ -125,9 +125,6 @@ export const EmployeeRow = memo(function EmployeeRow({
                   return selected;
                 }}
               >
-                <MenuItem value={SELECTOR_TABLE.UNASSIGNED} sx={styles.menuItem}>
-                  {SELECTOR_TABLE.UNASSIGNED}
-                </MenuItem>
                 {cellData.options.map((option) => (
                   <MenuItem key={option.id} value={option.label} sx={styles.menuItem}>
                     {option.label}

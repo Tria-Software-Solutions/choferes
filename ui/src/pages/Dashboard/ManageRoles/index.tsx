@@ -270,7 +270,7 @@ const ManageRoles: React.FC<{ isExpanded?: boolean }> = ({
   };
 
   return (
-    <Box sx={{ height: "100%", minHeight: "500px", display: "flex", flexDirection: "column", overflow: "hidden", pb: 0, pt: 0, px: 0 }}>
+    <Box sx={{ height: "100%", minHeight: "500px", display: "flex", flexDirection: "column", overflow: "hidden" }}>
       {/* Premium Card with Header and Grid */}
       <Paper
         elevation={0}
