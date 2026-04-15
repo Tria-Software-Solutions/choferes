@@ -58,9 +58,11 @@ export const addButtonDesktopStyles: SxProps<Theme> = {
 
 export const noRolesBoxStyles: SxProps<Theme> = {
   display: "flex",
+  flexDirection: "column",
   justifyContent: "center",
   alignItems: "center",
   textAlign: "center",
+  height: "100%",
 };
 
 export const deleteDialogPaperSx: SxProps<Theme> = {

@@ -60,7 +60,7 @@ export const menuPaperStyles = (theme: Theme): SxProps<Theme> => ({
   mt: 1.5,
   borderRadius: theme.shape.borderRadius,
   backgroundColor: `${theme.palette.background.paper} !important`,
-  boxShadow: '0 4px 24px rgba(0,0,0,0.7)',
+  boxShadow: 'none',
   border: 'none',
 });
 
@@ -72,7 +72,7 @@ export const menuItemStyles: SxProps<Theme> = {
 };
 
 export const subMenuPaperStyles = (theme: Theme): SxProps<Theme> => ({
-  boxShadow: '0 4px 24px rgba(0,0,0,0.7)',
+  boxShadow: 'none',
   border: 'none',
   backgroundColor: `${theme.palette.background.paper} !important`,
 });

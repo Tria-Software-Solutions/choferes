@@ -1,5 +1,5 @@
 import { IconButton, Typography, useMediaQuery, useTheme } from "@mui/material";
-import { ArrowBack, ArrowForward } from "@mui/icons-material";
+import { ArrowLeft, ArrowRight } from "lucide-react";
 import React from "react";
 import { PAGINATION } from "../../../constants/constants";
 import { containerStyles, pageTextStyles } from "./Pagination.styles";
@@ -38,7 +38,7 @@ const PaginationComponent: React.FC<PaginationActionsProps> = ({
       {!isSmallScreen && (
         <Typography
           variant="body2"
-          style={{ ...pageTextStyles, color: theme.palette.text.primary }}
+          style={{ ...pageTextStyles, color: theme.palette.text.primary, fontSize: "0.75rem" }}
         >
           {PAGINATION.PAGE} {page + 1}
         </Typography>
@@ -47,32 +47,34 @@ const PaginationComponent: React.FC<PaginationActionsProps> = ({
         onClick={(e) => onPageChange(e, page - 1)}
         disabled={page === 0}
         aria-label={PAGINATION.PREVIOUS}
+        sx={{ padding: "2px" }}
       >
-        <ArrowBack
-          sx={{
+        <ArrowLeft
+          size={16}
+          style={{
             color:
               theme.palette.mode === "dark"
                 ? theme.palette.primary.main
-                : "#000000 !important",
+                : "#000000",
           }}
         />
       </IconButton>
-      <Typography variant="body2" style={pageTextStyles}>
-        <span style={{ color: theme.palette.text.primary }}>
-          {startIndex}-{endIndex} {PAGINATION.OF} {count}
-        </span>
+      <Typography variant="body2" style={{ ...pageTextStyles, fontSize: "0.75rem", color: theme.palette.text.primary, fontWeight: 400 }}>
+        {startIndex}-{endIndex} {PAGINATION.OF} {count}
       </Typography>
       <IconButton
         onClick={(e) => onPageChange(e, page + 1)}
         disabled={page >= Math.ceil(count / rowsPerPage) - 1}
         aria-label={PAGINATION.NEXT}
+        sx={{ padding: "2px" }}
       >
-        <ArrowForward
-          sx={{
+        <ArrowRight
+          size={16}
+          style={{
             color:
               theme.palette.mode === "dark"
                 ? theme.palette.primary.main
-                : "#000000 !important",
+                : "#000000",
           }}
         />
       </IconButton>
@@ -80,4 +82,4 @@ const PaginationComponent: React.FC<PaginationActionsProps> = ({
   );
 };
 
-export default PaginationComponent;
+export default React.memo(PaginationComponent);

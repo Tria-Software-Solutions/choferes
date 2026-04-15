@@ -1,14 +1,11 @@
 // Controller for handling health check requests for the application
 import { Request, Response } from "express";
+import checkHealth from "../services/healthService";
 
-// Simple health check - minimal, no dependencies
+// Health check that validates the app and the database are ready.
 export const healthCheck = async (req: Request, res: Response) => {
-  // Always return 200 OK - this is for Render wake-up monitoring
-  res.status(200).json({
-    status: "OK",
-    timestamp: new Date().toISOString(),
-    message: "Server is running",
-  });
+  const health = await checkHealth();
+  return res.status(health.status === "OK" ? 200 : 503).json(health);
 };
 
 // Returns the health status of the application

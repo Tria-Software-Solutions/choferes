@@ -10,6 +10,7 @@ import { fetchSchedules } from "../../../store/slices/schedulesSlice";
 import {
   fetchHoursWorked,
   createOrUpdateHoursWorked,
+  deleteHoursWorked,
 } from "../../../store/slices/hoursWorkedSlice";
 import { useWeeklySummaries } from "../../../hooks/useWeeklySummary";
 import { useBiweeklySummaries } from "../../../hooks/useBiweeklySummary";
@@ -34,18 +35,15 @@ import {
   Typography,
   useTheme,
   useMediaQuery,
-  Grid,
-  Tooltip,
   Button,
   CircularProgress,
   SelectChangeEvent,
   Backdrop,
-  ButtonGroup,
-  Divider,
   IconButton,
   Dialog,
   DialogContent,
   DialogActions,
+  Paper,
 } from "@mui/material";
 import { exportFileFormattedDate, exportTable } from "../../../utils/export";
 import {
@@ -62,32 +60,21 @@ import {
 import PAGE_TITLE from "../../../constants/pageTitle.constants";
 import PERMISSIONS from "../../../constants/permissions.constants";
 import MANAGEMENT from "../../../constants/management.constants";
-import DownloadRoundedIcon from "@mui/icons-material/DownloadRounded";
-import ArrowBackIosNewRoundedIcon from "@mui/icons-material/ArrowBackIosNewRounded";
-import ArrowForwardIosRoundedIcon from "@mui/icons-material/ArrowForwardIosRounded";
-import CalendarTodayRoundedIcon from "@mui/icons-material/CalendarTodayRounded";
-import CloseRoundedIcon from "@mui/icons-material/CloseRounded";
-import CloseIcon from "@mui/icons-material/Close";
-import ManageSearchIcon from "@mui/icons-material/ManageSearch";
+import { SELECTOR_TABLE } from "../../../constants/constants";
+import { Download, ChevronLeft, ChevronRight, X, Search, RotateCcw } from "lucide-react";
 import DialogComponent from "../../../components/Dialog/Dialog.component";
-import AssignmentIcon from "@mui/icons-material/Assignment";
-import AutoAwesomeIcon from "@mui/icons-material/AutoAwesome";
+import { ClipboardList, Sparkles } from "lucide-react";
 import AutoGenerateModal, { AutoGenerateConfig } from "../../../components/Modal/AutoGenerateModal/AutoGenerateModal.component";
 import {
-  rolesTitleBoxStyles,
-  rolesTitleStyles,
-  rolesIconStyles,
-  rolesDividerStyles,
   exportSpeedDialBoxStyles,
   loadingBoxStyles,
   backdropStyles,
   searchBarSx,
-  datePickerSx,
-  buttonGroupSx,
   noEmployeesBoxStyles,
   noEmployeesIconStyles,
 } from "./styles";
 import { useLocation, useNavigate } from "react-router-dom";
+import PremiumTooltip from "../../../components/PremiumTooltip/PremiumTooltip.component";
 import { useTablePreferences } from "../../../hooks/useTablePreferences";
 import {
   getPreferencesObject,
@@ -96,9 +83,7 @@ import {
 import { useAppNotifications } from "../../../components/Snackbar/Snackbar.component";
 import NOTIFICATIONS from "../../../constants/notifications.constants";
 import { createHoursGenerationNotification } from "../../../services/notificationService";
-import DescriptionIcon from "@mui/icons-material/Description";
-import PictureAsPdfIcon from "@mui/icons-material/PictureAsPdf";
-import FileDownloadIcon from "@mui/icons-material/FileDownload";
+import { PdfIcon, ExcelIcon } from "../../../components/Icons/FileIcons";
 import { capitalizeFirstLetter } from "../../../utils/string";
 import { getScheduleCellData } from "../../../components/Table/SelectorTable/helpers";
 import {
@@ -163,11 +148,11 @@ const RolesPage: React.FC = () => {
     const hasRolesPermission = userPermissions.includes(PERMISSIONS.VIEW_ROLES);
     const hasSchedulePermission = userPermissions.includes(PERMISSIONS.VIEW_SCHEDULES);
     
-    // Si tiene permiso para roles, siempre mostrar vista de empleados por defecto
+    // Si tiene permiso para roles, mostrar vista de horarios por defecto
     if (hasRolesPermission) {
-      return (savedViewMode === 'employee' || savedViewMode === 'schedule') 
-        ? savedViewMode as 'employee' | 'schedule' 
-        : 'employee';
+      return (savedViewMode === 'employee' || savedViewMode === 'schedule')
+        ? savedViewMode as 'employee' | 'schedule'
+        : 'schedule';
     }
     
     // Si no tiene permiso para roles pero sí para horarios, mostrar horarios
@@ -188,12 +173,10 @@ const RolesPage: React.FC = () => {
 
   const getInitialRowsPerPage = () => {
     if (typeof window !== "undefined") {
-      const maxHeight = window.innerHeight * 0.6;
-      const headHeight = 56;
-      const paginationHeight = 64;
-      const extra = 24;
-      const availableHeight = maxHeight - headHeight - paginationHeight - extra;
-      const rowHeight = 48;
+      // Total chrome: appbar(64) + page header(110) + selector header(36) + table head(36) + footer(36) + borders/gaps(20)
+      const totalChrome = 302;
+      const availableHeight = window.innerHeight - totalChrome;
+      const rowHeight = 42;
       let rows = Math.floor(availableHeight / rowHeight);
       return Math.max(3, Math.min(100, rows));
     }
@@ -597,6 +580,54 @@ const RolesPage: React.FC = () => {
       return;
     }
 
+    // Manejar el caso de "Sin Asignar"
+    if (event.target.value === SELECTOR_TABLE.UNASSIGNED) {
+      const formattedDate = format(date, "yyyy-MM-dd");
+      const existingHoursWorkedRecord = hoursWorked.find(
+        (record) =>
+          record.employeeId === employeeId &&
+          format(new Date(record.date), "yyyy-MM-dd") === formattedDate
+      );
+
+      if (existingHoursWorkedRecord) {
+        // Calcular las horas del registro que se va a eliminar
+        const scheduleToDelete = schedules.find((s) => s.id === existingHoursWorkedRecord.scheduleId);
+        const hoursToDelete = scheduleToDelete ? scheduleToDelete.hours : 0;
+
+        // Eliminar el registro de hoursWorked
+        dispatch(deleteHoursWorked(existingHoursWorkedRecord.id)).then(() => {
+          // Recalcular el total de horas sin el registro eliminado
+          recalculateEmployeeWeeklySummary(employeeId, date);
+
+          // Actualizar el weeklySummary con las nuevas horas
+          const weekNumber = getWeekNumber(date);
+          const month = date.getMonth() + 1;
+          const year = date.getFullYear();
+
+          const existingWeeklySummary = weeklySummaries.find(
+            (ws) => ws.employeeId === employeeId &&
+                     ws.weekNumber === weekNumber &&
+                     ws.year === year
+          );
+
+          if (existingWeeklySummary) {
+            const newTotalHours = Math.max(0, existingWeeklySummary.totalHours - hoursToDelete);
+
+            const weeklySummary = {
+              employeeId,
+              weekNumber,
+              month,
+              year,
+              totalHours: newTotalHours,
+            };
+
+            updateWeeklySummary(existingWeeklySummary.id, weeklySummary);
+          }
+        });
+      }
+      return;
+    }
+
     const selectedSchedule = schedules.find(
       (schedule) =>
         schedule.label === event.target.value &&
@@ -733,18 +764,6 @@ const RolesPage: React.FC = () => {
   const handleOpenExportDialog = (type: "excel" | "pdf") => {
     setExportType(type);
     setOpenExportDialog(true);
-  };
-
-  const handleOpenAddRoleModal = () => {
-    // Verificar permisos para generar horas
-    if (!userPermissions.includes(PERMISSIONS.EDIT_EMPLOYEE_ROLES)) {
-      showNotification("No tienes permisos para generar horas automáticamente", {
-        severity: "error",
-        duration: 3000,
-      });
-      return;
-    }
-    setOpenAddRoleModal(true);
   };
 
   const handleCloseAddRoleModal = () => {
@@ -1307,14 +1326,14 @@ const RolesPage: React.FC = () => {
     if (userPermissions.includes(PERMISSIONS.EXPORT_EXCEL_ROLES)) {
       options.push({
         label: "Exportar a Excel",
-        icon: <DescriptionIcon />,
+        icon: <ExcelIcon size={20} />,
         onClick: () => handleOpenExportDialog("excel"),
       });
     }
     if (userPermissions.includes(PERMISSIONS.EXPORT_PDF_ROLES)) {
       options.push({
         label: "Exportar a PDF",
-        icon: <PictureAsPdfIcon />,
+        icon: <PdfIcon size={20} />,
         onClick: () => handleOpenExportDialog("pdf"),
       });
     }
@@ -1322,88 +1341,7 @@ const RolesPage: React.FC = () => {
   }, [userPermissions]);
 
   return (
-    <Box>
-      <Box
-        sx={{ py: 1, mb: 2 }}
-      >
-        <Box
-          display="flex"
-          justifyContent="space-between"
-          alignItems="center"
-        >
-          <Box
-            display="flex"
-            flexDirection="column"
-            alignItems="flex-start"
-            sx={rolesTitleBoxStyles}
-          >
-            <Typography
-              variant={isSmallScreen ? "h5" : "h4"}
-              sx={rolesTitleStyles}
-            >
-              <AssignmentIcon
-                fontSize={isSmallScreen ? "small" : "large"}
-                sx={rolesIconStyles(theme)}
-              />
-              {isSmallScreen ? PAGE_TITLE.ROLES_SIMPLIFIED : PAGE_TITLE.ROLES}
-            </Typography>
-            <Divider sx={rolesDividerStyles(theme)} />
-          </Box>
-          <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
-            {userPermissions.includes(PERMISSIONS.EXPORT_EXCEL_ROLES) &&
-              userPermissions.includes(PERMISSIONS.EXPORT_PDF_ROLES) && (
-                <Box sx={exportSpeedDialBoxStyles}>
-                  {(viewMode === 'employee' ? filteredEmployees.length > 0 : filteredSchedules.length > 0) && (
-                    <SpeedDialComponent
-                      actions={exportOptions}
-                      mainIcon={<DownloadRoundedIcon />}
-                      openIcon={<CloseRoundedIcon />}
-                      direction="left"
-                    />
-                  )}
-                </Box>
-              )}
-            
-            {/* Botón para generar horas automáticamente */}
-            {userPermissions.includes(PERMISSIONS.EDIT_EMPLOYEE_ROLES) && (
-              <Tooltip title="Generar horas automáticamente" arrow>
-                <IconButton
-                  onClick={handleOpenAddRoleModal}
-                  sx={{
-                    top: "-4px",
-                    width: "62px",
-                    height: "58px",
-                    borderRadius: "8px",
-                    backgroundColor:
-                      theme.palette.mode === "dark"
-                        ? theme.palette.background.paper
-                        : theme.palette.primary.main,
-                    color:
-                      theme.palette.mode === "dark"
-                        ? theme.palette.primary.main
-                        : theme.palette.primary.contrastText,
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "center",
-                    transition: theme.transitions.create(
-                      ["background", "box-shadow", "transform"],
-                      {
-                        duration: theme.transitions.duration.short,
-                      }
-                    ),
-                    fontSize: 40,
-                    "&:hover": {
-                      backgroundColor: "#333333",
-                    },
-                  }}
-                >
-                  <AutoAwesomeIcon />
-                </IconButton>
-              </Tooltip>
-            )}
-          </Box>
-        </Box>
-      </Box>
+    <Box sx={{ height: "calc(100vh - 100px)", display: "flex", flexDirection: "column", overflow: "hidden", pb: 0, pt: 0, px: 0 }}>
       {isLoading ? (
         <Box sx={loadingBoxStyles}>
           <Backdrop sx={backdropStyles(theme)} open={isLoading}>
@@ -1411,102 +1349,279 @@ const RolesPage: React.FC = () => {
           </Backdrop>
         </Box>
       ) : (
-        <>
-          <Grid
-            container
-            spacing={2}
-            justifyContent="space-between"
-            alignItems="center"
+        <Paper
+          elevation={0}
+          sx={{
+            flex: 1,
+            display: "flex",
+            flexDirection: "column",
+            overflow: "hidden",
+            border: "1px solid rgba(0,0,0,0.08)",
+            borderRadius: "16px",
+            boxShadow: "0 4px 24px rgba(0,0,0,0.08), 0 1px 2px rgba(0,0,0,0.04)",
+          }}
+        >
+          {/* Premium Header with light background */}
+          <Box
+            sx={{
+              px: { xs: 2, sm: 3 },
+              py: { xs: 2, sm: 2.5 },
+              backgroundColor: theme.palette.background.paper,
+              color: theme.palette.text.primary,
+              flexShrink: 0,
+              borderBottom: `1px solid ${theme.palette.mode === "dark" ? "rgba(255,255,255,0.08)" : "rgba(0,0,0,0.08)"}`,
+            }}
           >
-            <Grid item xs={12} md={4}>
-              {(viewMode === 'employee' ? filteredEmployees : filteredSchedules) && (
-                <SearchBarComponent
-                  placeholder={
-                    viewMode === 'employee' 
-                      ? MANAGEMENT.ROLES_PAGE.SEARCH_PLACEHOLDER 
-                      : MANAGEMENT.SCHEDULES_PAGE.SEARCH_PLACEHOLDER
-                  }
-                  value={search}
-                  onChange={(e) => setSearch(e.target.value)}
-                  sx={searchBarSx ?? {}}
-                  fullWidth
-                />
-              )}
-            </Grid>
-            <Grid item xs={12} md={8}>
-              <Box
-                display="flex"
-                flexDirection={{ xs: "column", sm: "column", md: "row" }}
-                alignItems={{ xs: "stretch", sm: "stretch", md: "center" }}
-                justifyContent="flex-end"
-                gap={2}
-              >
+            {/* Title Row */}
+            <Box
+              display="flex"
+              justifyContent="space-between"
+              alignItems="center"
+              mb={1}
+            >
+              <Box display="flex" alignItems="center" gap={1.5}>
                 <Box
-                  display="flex"
-                  alignItems="center"
-                  justifyContent="flex-start"
-                  gap={1}
+                  sx={{
+                    backgroundColor: theme.palette.primary.main,
+                    borderRadius: "10px",
+                    p: 1,
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                  }}
                 >
-                  <LocalizationProvider
-                    dateAdapter={AdapterDateFns}
-                    adapterLocale={es}
+                  <ClipboardList size={22} color={theme.palette.primary.contrastText} />
+                </Box>
+                <Box>
+                  <Typography
+                    variant={isSmallScreen ? "h6" : "h5"}
+                    sx={{
+                      fontWeight: 700,
+                      fontSize: { xs: "1.1rem", sm: "1.25rem" },
+                      color: theme.palette.text.primary,
+                      letterSpacing: "-0.02em",
+                      lineHeight: 1.2,
+                    }}
                   >
-                    <DatePicker
-                      label={MANAGEMENT.DATE_PICKER_LABEL}
-                      value={firstDayOfWeek}
-                      maxDate={nextWeekEnd}
-                      views={["year", "month", "day"]}
-                      slots={{ toolbar: () => null }}
-                      slotProps={{
-                        textField: {
-                          fullWidth: true,
-                          required: true,
-                          variant: "outlined",
-                          sx: datePickerSx,
-                        },
-                      }}
-                      closeOnSelect
-                      onChange={handleDateChange}
-                    />
-                  </LocalizationProvider>
-                  <ButtonGroup variant="contained" sx={buttonGroupSx}>
-                    <Tooltip title={MANAGEMENT.TOOLTIP_PREV_WEEK} arrow>
-                      <Button onClick={handlePreviousWeek}>
-                        <ArrowBackIosNewRoundedIcon />
-                      </Button>
-                    </Tooltip>
-                    <Tooltip title={MANAGEMENT.TOOLTIP_NEXT_WEEK} arrow>
-                      <span>
-                        <Button
-                          disabled={
-                            !isValidDateForSelect(
-                              new Date(
-                                getCurrentWeekDates(weekOffset + 1)[0].isoDate
-                              )
-                            )
-                          }
-                          onClick={handleNextWeek}
-                        >
-                          <ArrowForwardIosRoundedIcon />
-                        </Button>
-                      </span>
-                    </Tooltip>
-                    <Tooltip title={MANAGEMENT.TOOLTIP_CURRENT_WEEK} arrow>
-                      <span>
-                        <Button
-                          disabled={weekOffset === 0}
-                          onClick={handleCurrentWeek}
-                        >
-                          <CalendarTodayRoundedIcon />
-                        </Button>
-                      </span>
-                    </Tooltip>
-                  </ButtonGroup>
+                    {isSmallScreen ? PAGE_TITLE.ROLES_SIMPLIFIED : PAGE_TITLE.ROLES}
+                  </Typography>
+                  <Typography
+                    variant="caption"
+                    sx={{
+                      color: theme.palette.text.secondary,
+                      fontSize: "0.75rem",
+                      letterSpacing: "0.02em",
+                    }}
+                  >
+                    {viewMode === 'employee' 
+                      ? `${filteredEmployees.length} empleados` 
+                      : `${filteredSchedules.length} horarios`}
+                  </Typography>
                 </Box>
               </Box>
-            </Grid>
-          </Grid>
-          <br />
+
+              {/* Export Speed Dial */}
+              {userPermissions.includes(PERMISSIONS.EXPORT_EXCEL_ROLES) &&
+                userPermissions.includes(PERMISSIONS.EXPORT_PDF_ROLES) && (
+                  <Box sx={{ ...exportSpeedDialBoxStyles, minHeight: 'auto' }}>
+                    {(viewMode === 'employee' ? filteredEmployees.length > 0 : filteredSchedules.length > 0) && (
+                      <SpeedDialComponent
+                        actions={exportOptions}
+                        mainIcon={<Download size={20} />}
+                        openIcon={<X size={20} />}
+                        direction="left"
+                      />
+                    )}
+                  </Box>
+                )}
+            </Box>
+
+            {/* Controls Row */}
+            <Box
+              display="flex"
+              flexDirection={{ xs: "column", sm: "row" }}
+              alignItems={{ xs: "stretch", sm: "center" }}
+              justifyContent="space-between"
+              gap={1}
+            >
+              {/* Search */}
+              <Box flex={1} maxWidth={{ sm: "380px" }}>
+                {(viewMode === 'employee' ? filteredEmployees : filteredSchedules) && (
+                  <SearchBarComponent
+                    placeholder={
+                      viewMode === 'employee'
+                        ? MANAGEMENT.ROLES_PAGE.SEARCH_PLACEHOLDER
+                        : MANAGEMENT.SCHEDULES_PAGE.SEARCH_PLACEHOLDER
+                    }
+                    value={search}
+                    onChange={(e) => setSearch(e.target.value)}
+                    size="small"
+                    sx={{
+                      ...searchBarSx,
+                      '& .MuiOutlinedInput-root': {
+                        height: '44px',
+                        borderRadius: '10px',
+                      },
+                    }}
+                    fullWidth
+                  />
+                )}
+              </Box>
+
+              {/* Date Picker and Navigation */}
+              <Box
+                display="flex"
+                alignItems="center"
+                gap={0.5}
+                flexWrap="wrap"
+                justifyContent={{ xs: "flex-start", sm: "flex-end" }}
+              >
+                {/* Previous Week Button */}
+                <PremiumTooltip title={MANAGEMENT.TOOLTIP_PREV_WEEK}>
+                  <Button
+                    variant="outlined"
+                    onClick={handlePreviousWeek}
+                    disableRipple
+                    disableElevation
+                    sx={{
+                      minWidth: '44px',
+                      height: '44px',
+                      px: 1.5,
+                      borderRadius: '10px',
+                      borderColor: theme.palette.mode === "dark" ? "rgba(255,255,255,0.2)" : "rgba(0,0,0,0.15)",
+                      '&:hover': {
+                        backgroundColor: theme.palette.mode === "dark" ? "rgba(255,255,255,0.05)" : "rgba(0,0,0,0.04)",
+                        borderColor: theme.palette.mode === "dark" ? "rgba(255,255,255,0.3)" : "rgba(0,0,0,0.25)",
+                      },
+                    }}
+                  >
+                    <ChevronLeft size={20} />
+                  </Button>
+                </PremiumTooltip>
+
+                {/* Date Picker */}
+                <LocalizationProvider
+                  dateAdapter={AdapterDateFns}
+                  adapterLocale={es}
+                >
+                  <DatePicker
+                    value={firstDayOfWeek}
+                    maxDate={nextWeekEnd}
+                    views={["year", "month", "day"]}
+                    format="EEEE d 'de' MMMM 'de' yyyy"
+                    slots={{ toolbar: () => null }}
+                    slotProps={{
+                      textField: {
+                        fullWidth: false,
+                        required: true,
+                        variant: "outlined",
+                        sx: {
+                          width: { xs: '100%', sm: '280px' },
+                          '& .MuiOutlinedInput-root': {
+                            height: "44px",
+                            borderRadius: '10px',
+                            fontSize: '0.875rem',
+                            fontWeight: 500,
+                            backgroundColor: theme.palette.background.paper,
+                            boxShadow: '0 1px 3px rgba(0,0,0,0.04)',
+                            transition: 'all 0.2s cubic-bezier(0.4, 0, 0.2, 1)',
+                            '& fieldset': {
+                              borderColor: theme.palette.mode === 'dark' ? 'rgba(255,255,255,0.2)' : 'rgba(0,0,0,0.15)',
+                              borderWidth: '1px',
+                            },
+                            '&:hover': {
+                              boxShadow: '0 2px 6px rgba(0,0,0,0.08)',
+                              '& fieldset': {
+                                borderColor: theme.palette.mode === 'dark' ? 'rgba(255,255,255,0.3)' : 'rgba(0,0,0,0.25)',
+                              },
+                            },
+                            '&.Mui-focused': {
+                              boxShadow: '0 0 0 3px rgba(0,0,0,0.04)',
+                              '& fieldset': {
+                                borderColor: theme.palette.primary.main,
+                                borderWidth: '2px',
+                              },
+                            },
+                            '& input': {
+                              textOverflow: 'ellipsis',
+                              textAlign: 'center',
+                            },
+                          },
+                        },
+                      },
+                    }}
+                    closeOnSelect
+                    onChange={handleDateChange}
+                  />
+                </LocalizationProvider>
+
+                {/* Next Week Button */}
+                <PremiumTooltip title={MANAGEMENT.TOOLTIP_NEXT_WEEK}>
+                  <span>
+                    <Button
+                      variant="outlined"
+                      disabled={
+                        !isValidDateForSelect(
+                          new Date(
+                            getCurrentWeekDates(weekOffset + 1)[0].isoDate
+                          )
+                        )
+                      }
+                      onClick={handleNextWeek}
+                      disableRipple
+                      disableElevation
+                      sx={{
+                        minWidth: '44px',
+                        height: '44px',
+                        px: 1.5,
+                        borderRadius: '10px',
+                        borderColor: theme.palette.mode === "dark" ? "rgba(255,255,255,0.2)" : "rgba(0,0,0,0.15)",
+                        '&:hover': {
+                          backgroundColor: theme.palette.mode === "dark" ? "rgba(255,255,255,0.05)" : "rgba(0,0,0,0.04)",
+                          borderColor: theme.palette.mode === "dark" ? "rgba(255,255,255,0.3)" : "rgba(0,0,0,0.25)",
+                        },
+                        '&.Mui-disabled': {
+                          borderColor: theme.palette.mode === "dark" ? "rgba(255,255,255,0.1)" : "rgba(0,0,0,0.08)",
+                        },
+                      }}
+                    >
+                      <ChevronRight size={20} />
+                    </Button>
+                  </span>
+                </PremiumTooltip>
+
+                {/* Current Week Button */}
+                <PremiumTooltip title={MANAGEMENT.TOOLTIP_CURRENT_WEEK}>
+                  <span>
+                    <Button
+                      variant="outlined"
+                      disabled={weekOffset === 0}
+                      onClick={handleCurrentWeek}
+                      disableRipple
+                      disableElevation
+                      sx={{
+                        minWidth: '44px',
+                        height: '44px',
+                        px: 1.5,
+                        borderRadius: '10px',
+                        borderColor: theme.palette.mode === "dark" ? "rgba(255,255,255,0.2)" : "rgba(0,0,0,0.15)",
+                        '&:hover': {
+                          backgroundColor: theme.palette.mode === "dark" ? "rgba(255,255,255,0.05)" : "rgba(0,0,0,0.04)",
+                          borderColor: theme.palette.mode === "dark" ? "rgba(255,255,255,0.3)" : "rgba(0,0,0,0.25)",
+                        },
+                        '&.Mui-disabled': {
+                          borderColor: theme.palette.mode === "dark" ? "rgba(255,255,255,0.1)" : "rgba(0,0,0,0.08)",
+                        },
+                      }}
+                    >
+                      <RotateCcw size={18} />
+                    </Button>
+                  </span>
+                </PremiumTooltip>
+              </Box>
+            </Box>
+          </Box>
+          <Box sx={{ flex: 1, overflow: "hidden", p: 0 }}>
           {(() => {
             const hasRolesPermission = userPermissions.includes(PERMISSIONS.VIEW_ROLES);
             
@@ -1514,7 +1629,7 @@ const RolesPage: React.FC = () => {
             if (!hasRolesPermission) {
               return (
                 <Box sx={noEmployeesBoxStyles}>
-                  <ManageSearchIcon color="disabled" sx={noEmployeesIconStyles} />
+                  <Search size={48} style={{ color: theme.palette.text.disabled, ...noEmployeesIconStyles }} />
                   <Typography variant="h6" color="textSecondary">
                     No tienes permisos para ver roles
                   </Typography>
@@ -1523,7 +1638,13 @@ const RolesPage: React.FC = () => {
             }
             
             return viewMode === 'employee' ? (
-              filteredEmployees.length > 0 ? (
+              isLoadingEmployees ? (
+                <Box sx={loadingBoxStyles}>
+                  <Backdrop sx={backdropStyles(theme)} open={isLoadingEmployees}>
+                    <CircularProgress />
+                  </Backdrop>
+                </Box>
+              ) : filteredEmployees.length > 0 ? (
                 <SelectorTableComponent
                 key={`schedules-${schedules.length}-${schedules.map((s) => s.id).join("-")}`}
                 filteredEmployees={filteredEmployees}
@@ -1548,14 +1669,20 @@ const RolesPage: React.FC = () => {
               />
             ) : (
               <Box sx={noEmployeesBoxStyles}>
-                <ManageSearchIcon color="disabled" sx={noEmployeesIconStyles} />
+                <Search size={48} style={{ color: theme.palette.text.disabled, ...noEmployeesIconStyles }} />
                 <Typography variant="h6" color="textSecondary">
                   {MANAGEMENT.NO_EMPLOYEES}
                 </Typography>
               </Box>
             )
           ) : (
-            filteredSchedules.length > 0 ? (
+            isLoadingSchedules ? (
+              <Box sx={loadingBoxStyles}>
+                <Backdrop sx={backdropStyles(theme)} open={isLoadingSchedules}>
+                  <CircularProgress />
+                </Backdrop>
+              </Box>
+            ) : filteredSchedules.length > 0 ? (
               <SelectorTableComponent
                 key={`schedules-${filteredSchedules.length}-${filteredSchedules.map((s) => s.id).join("-")}`}
                 filteredEmployees={filteredEmployees}
@@ -1580,7 +1707,7 @@ const RolesPage: React.FC = () => {
               />
             ) : (
               <Box sx={noEmployeesBoxStyles}>
-                <ManageSearchIcon color="disabled" sx={noEmployeesIconStyles} />
+                <Search size={48} style={{ color: theme.palette.text.disabled, ...noEmployeesIconStyles }} />
                 <Typography variant="h6" color="textSecondary">
                   {MANAGEMENT.NO_SCHEDULES}
                 </Typography>
@@ -1588,6 +1715,7 @@ const RolesPage: React.FC = () => {
             )
           );
         })()}
+          </Box>
           <DialogComponent
             open={openExportDialog}
             onClose={() => {
@@ -1604,9 +1732,9 @@ const RolesPage: React.FC = () => {
             confirmText={MANAGEMENT.DIALOG_EXPORT_CONFIRM}
             cancelText={MANAGEMENT.DIALOG_EXPORT_CANCEL}
             loading={isExporting}
-            icon={<FileDownloadIcon color="warning" />}
+            icon={<Download size={24} color="orange" />}
           />
-        </>
+        </Paper>
       )}
       
       <Dialog
@@ -1652,10 +1780,7 @@ const RolesPage: React.FC = () => {
               justifyContent: "center",
               flexShrink: 0,
             }}>
-              <AutoAwesomeIcon sx={{
-                color: (theme) => theme.palette.primary.main,
-                fontSize: 24,
-              }} />
+              <Sparkles size={24} style={{ color: theme.palette.primary.main }} />
             </Box>
             <Box>
               <Typography
@@ -1679,7 +1804,7 @@ const RolesPage: React.FC = () => {
             onClick={handleCloseAddRoleModal} 
             sx={{ color: "inherit", "&:hover": { backgroundColor: "rgba(255, 255, 255, 0.1)" } }}
           >
-            <CloseIcon />
+            <X size={20} />
           </IconButton>
         </Box>
 

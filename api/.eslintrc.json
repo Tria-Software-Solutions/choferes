@@ -7,8 +7,7 @@
     "eslint:recommended",
     "plugin:@typescript-eslint/recommended",
     "plugin:prettier/recommended",
-    "airbnb-base",
-    "airbnb-typescript/base"
+    "airbnb-base"
   ],
   "parser": "@typescript-eslint/parser",
   "parserOptions": {
@@ -31,16 +30,22 @@
     "no-multi-spaces": "off",
     "consistent-return": "warn",
     "@typescript-eslint/no-explicit-any": "warn",
-    "@typescript-eslint/no-unused-vars": "error",
+    "@typescript-eslint/no-unused-vars": ["error", { "argsIgnorePattern": "^_", "varsIgnorePattern": "^_" }],
     "import/no-extraneous-dependencies": "warn",
-    "import/extensions": "warn",
-    "operator-linebreak": "off"
+    "import/extensions": "off",
+    "import/no-unresolved": "off",
+    "no-use-before-define": "off",
+    "@typescript-eslint/no-use-before-define": "off",
+    "operator-linebreak": "off",
+    "@typescript-eslint/no-require-imports": "off"
   },
   "ignorePatterns": ["dist/", "migrations/", "seeders/"],
   "overrides": [
     {
       "files": ["*.js"],
       "rules": {
+        "@typescript-eslint/only-throw-error": "off",
+        "@typescript-eslint/no-throw-literal": "off",
         "@typescript-eslint/no-var-requires": "off"
       }
     }

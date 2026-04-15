@@ -1,4 +1,5 @@
 import { Theme } from "@mui/material/styles";
+import { CSSProperties } from "react";
 
 export const boxRoot = {
   width: "100%",
@@ -9,16 +10,21 @@ export const gridContainer = {
   mt: 0,
 };
 
-export const iconSx = (theme: Theme) => ({
-  color: theme.palette.text.secondary,
-});
+export const iconStyle: CSSProperties = {
+  color: "#666666",
+};
 
 export const formControl = (theme: Theme) => ({
-  marginTop: "8px",
+  marginTop: 0,
   "& .MuiOutlinedInput-root, & .MuiSelect-select": {
     backgroundColor: theme.palette.background.paper,
     color: theme.palette.text.primary,
-    borderRadius: 2,
+    borderRadius: "12px",
+    minHeight: "48px",
+    "& fieldset": {
+      borderColor: theme.palette.mode === "dark" ? "rgba(255,255,255,0.12)" : "rgba(0,0,0,0.12)",
+      borderWidth: "1.5px",
+    },
     "&.Mui-focused .MuiOutlinedInput-notchedOutline": {
       borderColor: theme.palette.primary.main,
       borderWidth: 2,
@@ -95,12 +101,4 @@ export const actionsInnerBox = {
 export const cancelButton = {
   minHeight: { xs: 44, sm: 48 },
   fontSize: "clamp(0.75rem, 1.25vw, 0.875rem)",
-};
-
-export const submitButton = {
-  minHeight: { xs: 44, sm: 48 },
-  fontSize: "clamp(0.75rem, 1.25vw, 0.875rem)",
-  fontWeight: 600,
-  px: { xs: 2, sm: 4 },
-  py: { xs: 1, sm: 1.5 },
 };

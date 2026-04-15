@@ -4,7 +4,7 @@ import { Employee } from "../../../../models/Employee";
 import { Schedule } from "../../../../models/Schedule";
 import { HoursWorked } from "../../../../models/HoursWorked";
 import { getOptionsForDay } from "../../../../utils/string";
-import { STATE } from "../../../../constants/constants";
+import { SELECTOR_TABLE } from "../../../../constants/constants";
 
 export interface ScheduleCellData {
   formattedDate: string;
@@ -33,15 +33,17 @@ export const getScheduleCellData = (
         format(new Date(record.date), "yyyy-MM-dd") === formattedDate,
     )
     .sort((a, b) => b.id - a.id)[0];
-  const options = getOptionsForDay(day, schedules);
-  const validLabels = options.map((option) => option.label);
+  let options = getOptionsForDay(day, schedules);
+  let validLabels = options.map((option) => option.label);
 
   const selectedLabel =
     schedules.find(
       (schedule) => schedule.id === existingRecord?.scheduleId,
-    )?.label ?? STATE.FREE;
+    )?.label ?? SELECTOR_TABLE.UNASSIGNED;
 
-  const finalSelectedLabel = validLabels.includes(selectedLabel)
+  const finalSelectedLabel = !existingRecord
+    ? SELECTOR_TABLE.UNASSIGNED
+    : validLabels.includes(selectedLabel)
     ? selectedLabel
     : validLabels[0] ?? "";
 

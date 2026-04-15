@@ -11,13 +11,11 @@ import {
   Typography,
   useTheme,
   useMediaQuery,
-  Grid,
-  Tooltip,
   Button,
   CircularProgress,
   Backdrop,
   ButtonGroup,
-  Divider,
+  Paper,
 } from "@mui/material";
 import { LocalizationProvider } from "@mui/x-date-pickers";
 import { DatePicker } from "@mui/x-date-pickers/DatePicker";
@@ -33,32 +31,17 @@ import { capitalizeFirstLetter } from "../../../utils/string";
 import PAGE_TITLE from "../../../constants/pageTitle.constants";
 import NOTIFICATIONS from "../../../constants/notifications.constants";
 import MANAGEMENT from "../../../constants/management.constants";
-import DownloadRoundedIcon from "@mui/icons-material/DownloadRounded";
-import ArrowBackIosNewRoundedIcon from "@mui/icons-material/ArrowBackIosNewRounded";
-import ArrowForwardIosRoundedIcon from "@mui/icons-material/ArrowForwardIosRounded";
-import CalendarTodayRoundedIcon from "@mui/icons-material/CalendarTodayRounded";
-import CloseRoundedIcon from "@mui/icons-material/CloseRounded";
-import ManageSearchIcon from "@mui/icons-material/ManageSearch";
+import { Download, ChevronLeft, ChevronRight, Calendar, X, Search } from "lucide-react";
+import PremiumTooltip from "../../../components/PremiumTooltip/PremiumTooltip.component";
 import { Courier } from "../../../models/Courier";
 import EditableTableComponent from "../../../components/Table/EditableTable/EditableTable.component";
 import AddCourierForm from "../../Forms/AddCourierForm";
 import DialogComponent from "../../../components/Dialog/Dialog.component";
-import AddRoundedIcon from "@mui/icons-material/AddRounded";
-import DeleteOutlineIcon from "@mui/icons-material/DeleteOutline";
-import LocalShippingIcon from "@mui/icons-material/LocalShipping";
+import { Plus, Trash2, Truck } from "lucide-react";
 import {
-  courierHeaderBoxStyles,
-  courierTitleBoxStyles,
-  courierTitleStyles,
-  courierIconStyles,
-  courierDividerStyles,
   exportSpeedDialBoxStyles,
   loadingBoxStyles,
   backdropStyles,
-  searchBarBoxStyles,
-  addButtonMobileStyles,
-  datePickerSx,
-  buttonGroupSx,
   noCouriersBoxStyles,
   noCouriersIconStyles,
   deleteDialogPaperSx,
@@ -69,9 +52,8 @@ import {
   getPreferencesObject,
   setPreferencesObject,
 } from "../../../utils/persistentState";
-import DescriptionIcon from "@mui/icons-material/Description";
-import PictureAsPdfIcon from "@mui/icons-material/PictureAsPdf";
-import AddCircleOutlineIcon from "@mui/icons-material/AddCircleOutline";
+import { PlusCircle } from "lucide-react";
+import { PdfIcon, ExcelIcon } from "../../../components/Icons/FileIcons";
 
 // CourierServicePage component for managing courier services
 const CourierServicePage: React.FC = () => {
@@ -377,8 +359,8 @@ const CourierServicePage: React.FC = () => {
       "Actualizado",
     ];
     return createExportOptions({
-      excelIcon: <DescriptionIcon />,
-      pdfIcon: <PictureAsPdfIcon />,
+      excelIcon: <ExcelIcon size={20} />,
+      pdfIcon: <PdfIcon size={20} />,
       data: exportData,
       fileName: `reporte-de-servicios-de-mensajeria-${exportFileFormattedDate(selectedDate || new Date())}`,
       customHeaders: exportHeaders,
@@ -434,221 +416,298 @@ const CourierServicePage: React.FC = () => {
   };
 
   return (
-    <Box>
-      <Box
-        display="flex"
-        justifyContent="space-between"
-        alignItems="center"
-        sx={courierHeaderBoxStyles}
+    <Box sx={{ height: "calc(100vh - 100px)", display: "flex", flexDirection: "column", overflow: "hidden", pb: 0, pt: 0, px: 0 }}>
+      {/* Premium Card with Header and Grid */}
+      <Paper
+        elevation={0}
+        sx={{
+          borderRadius: "16px",
+          border: "1px solid rgba(0,0,0,0.08)",
+          boxShadow: "0 4px 24px rgba(0,0,0,0.08), 0 1px 2px rgba(0,0,0,0.04)",
+          overflow: "hidden",
+          flex: 1,
+          display: "flex",
+          flexDirection: "column",
+        }}
       >
+        {/* Header Section */}
         <Box
-          display="flex"
-          flexDirection="column"
-          alignItems="flex-start"
-          sx={courierTitleBoxStyles}
+          sx={{
+            px: { xs: 2, sm: 3 },
+            py: { xs: 2, sm: 2.5 },
+            backgroundColor: theme.palette.background.paper,
+            color: theme.palette.text.primary,
+            borderBottom: `1px solid ${theme.palette.mode === "dark" ? "rgba(255,255,255,0.08)" : "rgba(0,0,0,0.08)"}`,
+          }}
         >
-          <Typography
-            variant={isSmallScreen ? "h5" : "h4"}
-            sx={courierTitleStyles}
-          >
-            <LocalShippingIcon
-              fontSize={isSmallScreen ? "small" : "large"}
-              sx={courierIconStyles(theme)}
-            />
-            {isSmallScreen
-              ? PAGE_TITLE.COURIER_SERVICE_SIMPLIFIED
-              : PAGE_TITLE.COURIER_SERVICE}
-          </Typography>
-          <Divider sx={courierDividerStyles(theme)} />
-        </Box>
-        {/* Temporarily show export button without permission check */}
-        <Box sx={exportSpeedDialBoxStyles}>
-          {filteredWeekCouriers.length > 0 && (
-            <SpeedDialComponent
-              actions={exportOptions}
-              mainIcon={<DownloadRoundedIcon />}
-              openIcon={<CloseRoundedIcon />}
-              direction="left"
-            />
-          )}
-        </Box>
-      </Box>
-      {isLoadingVehicles ? (
-        <Box sx={loadingBoxStyles}>
-          <Backdrop sx={backdropStyles(theme)} open={isLoadingVehicles}>
-            <CircularProgress />
-          </Backdrop>
-        </Box>
-      ) : (
-        <>
-          <Grid
-            container
-            spacing={2}
+          <Box
+            display="flex"
             justifyContent="space-between"
-            alignItems="center"
+            alignItems="flex-start"
+            mb={2}
           >
-            <Grid item xs={12} md={4}>
-              <Box sx={searchBarBoxStyles}>
-                {filteredCouriers && (
-                  <SearchBarComponent
-                    placeholder={
-                      MANAGEMENT.COURIER_SERVICE_PAGE.SEARCH_PLACEHOLDER
-                    }
-                    value={search}
-                    onChange={(e) => setSearch(e.target.value)}
-                    sx={{ flex: 1 }}
-                    fullWidth
-                  />
-                )}
-                <Button
-                  variant="contained"
-                  color="primary"
-                  onClick={handleOpenAddCourierModal}
-                  sx={addButtonMobileStyles}
-                >
-                  <AddRoundedIcon />
-                </Button>
+            <Box display="flex" alignItems="center" gap={1.5}>
+              <Box
+                sx={{
+                  backgroundColor: theme.palette.primary.main,
+                  borderRadius: "10px",
+                  p: 1,
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                }}
+              >
+                <Truck size={22} color={theme.palette.primary.contrastText} />
               </Box>
-            </Grid>
-            <Grid item xs={12} md={8}>
+              <Box>
+                <Typography
+                  variant={isSmallScreen ? "h6" : "h5"}
+                  sx={{
+                    fontWeight: 700,
+                    fontSize: { xs: "1.1rem", sm: "1.25rem" },
+                    color: theme.palette.text.primary,
+                    letterSpacing: "-0.02em",
+                    lineHeight: 1.2,
+                  }}
+                >
+                  {isSmallScreen ? PAGE_TITLE.COURIER_SERVICE_SIMPLIFIED : PAGE_TITLE.COURIER_SERVICE}
+                </Typography>
+                <Typography
+                  variant="caption"
+                  sx={{
+                    color: theme.palette.text.secondary,
+                    fontSize: "0.75rem",
+                    letterSpacing: "0.02em",
+                  }}
+                >
+                  {filteredCouriers.length} envíos registrados
+                </Typography>
+              </Box>
+            </Box>
+
+            {/* Export Speed Dial */}
+            <Box sx={{ ...exportSpeedDialBoxStyles, minHeight: 'auto' }}>
+              {filteredWeekCouriers.length > 0 && (
+                <SpeedDialComponent
+                  actions={exportOptions}
+                  mainIcon={<Download size={20} />}
+                  openIcon={<X size={20} />}
+                  direction="left"
+                />
+              )}
+            </Box>
+          </Box>
+
+          {/* Controls Row */}
+          <Box
+            display="flex"
+            flexDirection={{ xs: "column", sm: "row" }}
+            alignItems={{ xs: "stretch", sm: "center" }}
+            justifyContent="space-between"
+            gap={2}
+          >
+            {/* Search */}
+            <Box flex={1} maxWidth={{ sm: "320px" }}>
+              {filteredCouriers && (
+                <SearchBarComponent
+                  placeholder={MANAGEMENT.COURIER_SERVICE_PAGE.SEARCH_PLACEHOLDER}
+                  value={search}
+                  onChange={(e) => setSearch(e.target.value)}
+                  fullWidth
+                />
+              )}
+            </Box>
+
+            {/* Date Controls & Add Button */}
+            <Box
+              display="flex"
+              flexDirection={{ xs: "column", sm: "row" }}
+              alignItems={{ xs: "stretch", sm: "center" }}
+              gap={1}
+            >
               <Box
                 display="flex"
-                flexDirection={{ xs: "column", sm: "column", md: "row" }}
-                alignItems={{ xs: "stretch", sm: "stretch", md: "center" }}
-                justifyContent="flex-end"
-                gap={2}
+                alignItems="center"
+                justifyContent={{ xs: "flex-start", sm: "flex-end" }}
+                gap={0.5}
               >
-                <Box
-                  display="flex"
-                  alignItems="center"
-                  justifyContent="flex-start"
-                  gap={1}
+                <LocalizationProvider
+                  dateAdapter={AdapterDateFns}
+                  adapterLocale={es}
                 >
-                  <LocalizationProvider
-                    dateAdapter={AdapterDateFns}
-                    adapterLocale={es}
-                  >
-                    <DatePicker
-                      label={MANAGEMENT.COURIER_SERVICE_PAGE.DATE_PICKER_LABEL}
-                      value={selectedDate}
-                      maxDate={new Date()}
-                      views={["year", "month", "day"]}
-                      slots={{ toolbar: () => null }}
-                      slotProps={{
-                        textField: {
-                          fullWidth: true,
-                          required: true,
-                          variant: "outlined",
-                          sx: datePickerSx,
+                  <DatePicker
+                    value={selectedDate}
+                    maxDate={new Date()}
+                    views={["year", "month", "day"]}
+                    format="EEEE d 'de' MMMM"
+                    slots={{ toolbar: () => null }}
+                    slotProps={{
+                      textField: {
+                        fullWidth: false,
+                        required: true,
+                        variant: "outlined",
+                        sx: {
+                          width: { xs: '100%', sm: '200px' },
+                          '& .MuiOutlinedInput-root': {
+                            height: "44px",
+                            borderRadius: '10px',
+                            fontSize: '0.875rem',
+                            fontWeight: 500,
+                            backgroundColor: theme.palette.background.paper,
+                            boxShadow: '0 1px 3px rgba(0,0,0,0.04)',
+                            transition: 'all 0.2s cubic-bezier(0.4, 0, 0.2, 1)',
+                            '& fieldset': {
+                              borderColor: theme.palette.mode === 'dark' ? 'rgba(255,255,255,0.2)' : 'rgba(0,0,0,0.15)',
+                              borderWidth: '1px',
+                            },
+                            '&:hover': {
+                              boxShadow: '0 2px 6px rgba(0,0,0,0.08)',
+                              '& fieldset': {
+                                borderColor: theme.palette.mode === 'dark' ? 'rgba(255,255,255,0.3)' : 'rgba(0,0,0,0.25)',
+                              },
+                            },
+                            '&.Mui-focused': {
+                              boxShadow: '0 0 0 3px rgba(0,0,0,0.04)',
+                              '& fieldset': {
+                                borderColor: theme.palette.primary.main,
+                                borderWidth: '2px',
+                              },
+                            },
+                          },
                         },
-                      }}
-                      closeOnSelect
-                      onChange={handleDateChange}
-                    />
-                  </LocalizationProvider>
-                  <ButtonGroup variant="contained" sx={buttonGroupSx}>
-                    <Tooltip
-                      title={MANAGEMENT.COURIER_SERVICE_PAGE.TOOLTIP_PREV_DAY}
-                      arrow
-                    >
-                      <Button onClick={handlePreviousDate}>
-                        <ArrowBackIosNewRoundedIcon />
+                      },
+                    }}
+                    closeOnSelect
+                    onChange={handleDateChange}
+                  />
+                </LocalizationProvider>
+                <ButtonGroup variant="contained" sx={{ height: '44px' }}>
+                  <PremiumTooltip title={MANAGEMENT.COURIER_SERVICE_PAGE.TOOLTIP_PREV_DAY}>
+                    <Button onClick={handlePreviousDate} sx={{ minWidth: '44px', height: '44px', px: 1.5 }}>
+                      <ChevronLeft size={20} />
+                    </Button>
+                  </PremiumTooltip>
+                  <PremiumTooltip title={MANAGEMENT.COURIER_SERVICE_PAGE.TOOLTIP_NEXT_DAY}>
+                    <span>
+                      <Button
+                        disabled={isTodayOrFuture(selectedDate)}
+                        onClick={handleNextDate}
+                        sx={{ minWidth: '44px', height: '44px', px: 1.5 }}
+                      >
+                        <ChevronRight size={20} />
                       </Button>
-                    </Tooltip>
-                    <Tooltip
-                      title={MANAGEMENT.COURIER_SERVICE_PAGE.TOOLTIP_NEXT_DAY}
-                      arrow
-                    >
-                      <span>
-                        <Button
-                          disabled={isTodayOrFuture(selectedDate)}
-                          onClick={handleNextDate}
-                        >
-                          <ArrowForwardIosRoundedIcon />
-                        </Button>
-                      </span>
-                    </Tooltip>
-                    <Tooltip
-                      title={
-                        MANAGEMENT.COURIER_SERVICE_PAGE.TOOLTIP_CURRENT_DAY
-                      }
-                      arrow
-                    >
-                      <span>
-                        <Button
-                          disabled={isTodayOrFuture(selectedDate)}
-                          onClick={handleCurrentDate}
-                        >
-                          <CalendarTodayRoundedIcon />
-                        </Button>
-                      </span>
-                    </Tooltip>
-                  </ButtonGroup>
-                </Box>
+                    </span>
+                  </PremiumTooltip>
+                  <PremiumTooltip title={MANAGEMENT.COURIER_SERVICE_PAGE.TOOLTIP_CURRENT_DAY}>
+                    <span>
+                      <Button
+                        disabled={isTodayOrFuture(selectedDate)}
+                        onClick={handleCurrentDate}
+                        sx={{ minWidth: '44px', height: '44px', px: 1.5 }}
+                      >
+                        <Calendar size={18} />
+                      </Button>
+                    </span>
+                  </PremiumTooltip>
+                </ButtonGroup>
+              </Box>
+
+              {/* Add Button Desktop */}
+              <Box sx={{ display: { xs: 'none', sm: 'flex' } }}>
                 <Button
                   variant="contained"
-                  startIcon={<AddRoundedIcon />}
+                  startIcon={<Plus size={18} />}
                   onClick={handleOpenAddCourierModal}
                   sx={{
-                    display: { xs: "none", md: "flex" },
                     px: 3,
-                    py: 1.5,
-                    fontSize: "1rem",
-                    minHeight: 56,
+                    py: 1,
+                    fontWeight: 600,
+                    fontSize: "0.9rem",
+                    letterSpacing: "-0.01em",
+                    borderRadius: '10px',
+                    height: '44px',
                   }}
                 >
                   {MANAGEMENT.ADD}
                 </Button>
               </Box>
-            </Grid>
-          </Grid>
-          <br />
-          {filteredCouriers.length > 0 ? (
-            <EditableTableComponent<Courier>
-              data={filteredCouriers}
-              columns={[
-                "driver",
-                "route",
-                "distance",
-                "trackingNumber",
-                "status",
-              ]}
-              groupByDate={selectedDate}
-              editRowId={editRowId}
-              editFields={editFields}
-              setEditField={(field, value) =>
-                setEditFields({ ...editFields, [field]: value })
-              }
-              handleEdit={handleEdit}
-              handleCancel={handleCancel}
-              handleUpdate={handleUpdate}
-              handleOpenDeleteDialog={handleOpenDeleteDialog}
-              getRowId={(row) => row.id}
-              totalCount={totalCount}
-              page={page}
-              rowsPerPage={rowsPerPage}
-              setPage={setPage}
-              setRowsPerPage={setRowsPerPage}
-              isSaveDisabled={!isEditFormValid}
-              userPermissions={userPermissions || []}
-            />
-          ) : (
-            <Box sx={noCouriersBoxStyles}>
-              <ManageSearchIcon color="disabled" sx={noCouriersIconStyles} />
-              <Typography variant="body1" color="textSecondary">
-                {capitalizeFirstLetter(
-                  format(selectedDate, "EEEE dd 'de' MMMM 'de' yyyy", {
-                    locale: es,
-                  })
-                )}
-              </Typography>
-              <Typography variant="h6" color="textSecondary">
-                {MANAGEMENT.COURIER_SERVICE_PAGE.NO_SERVICES}
-              </Typography>
             </Box>
+          </Box>
+        </Box>
+
+        {/* Mobile Add Button */}
+        <Box sx={{ display: { xs: 'flex', sm: 'none' }, p: 2, borderTop: `1px solid ${theme.palette.mode === "dark" ? "rgba(255,255,255,0.08)" : "rgba(0,0,0,0.08)"}` }}>
+          <Button
+            variant="contained"
+            fullWidth
+            startIcon={<Plus size={18} />}
+            onClick={handleOpenAddCourierModal}
+            sx={{
+              py: 1.5,
+              fontWeight: 600,
+              borderRadius: '10px',
+            }}
+          >
+            {MANAGEMENT.ADD}
+          </Button>
+        </Box>
+
+        {/* Content Section */}
+        <Box sx={{ flex: 1, minHeight: 0, display: "flex", flexDirection: "column", overflow: "hidden" }}>
+          {isLoadingVehicles ? (
+            <Box sx={loadingBoxStyles}>
+              <Backdrop sx={backdropStyles(theme)} open={isLoadingVehicles}>
+                <CircularProgress />
+              </Backdrop>
+            </Box>
+          ) : (
+            <>
+              {filteredCouriers.length > 0 ? (
+                <EditableTableComponent<Courier>
+                  data={filteredCouriers}
+                  columns={[
+                    "driver",
+                    "route",
+                    "distance",
+                    "trackingNumber",
+                    "status",
+                  ]}
+                  groupByDate={selectedDate}
+                  editRowId={editRowId}
+                  editFields={editFields}
+                  setEditField={(field, value) =>
+                    setEditFields({ ...editFields, [field]: value })
+                  }
+                  handleEdit={handleEdit}
+                  handleCancel={handleCancel}
+                  handleUpdate={handleUpdate}
+                  handleOpenDeleteDialog={handleOpenDeleteDialog}
+                  getRowId={(row) => row.id}
+                  totalCount={totalCount}
+                  page={page}
+                  rowsPerPage={rowsPerPage}
+                  setPage={setPage}
+                  setRowsPerPage={setRowsPerPage}
+                  isSaveDisabled={!isEditFormValid}
+                  userPermissions={userPermissions || []}
+                />
+              ) : (
+                <Box sx={noCouriersBoxStyles}>
+                  <Search size={48} style={{ color: theme.palette.text.disabled, ...noCouriersIconStyles }} />
+                  <Typography variant="body1" color="textSecondary">
+                    {capitalizeFirstLetter(
+                      format(selectedDate, "EEEE dd 'de' MMMM 'de' yyyy", {
+                        locale: es,
+                      })
+                    )}
+                  </Typography>
+                </Box>
+              )}
+            </>
           )}
-        </>
-      )}
+        </Box>
+      </Paper>
+
       <DialogComponent
         open={openDeleteDialog}
         onClose={handleCloseDeleteDialog}
@@ -660,7 +719,7 @@ const CourierServicePage: React.FC = () => {
         cancelText={MANAGEMENT.COURIER_SERVICE_PAGE.DIALOG_DELETE_CANCEL}
         loading={isDeletingCourier}
         paperSx={deleteDialogPaperSx ?? {}}
-        icon={<DeleteOutlineIcon color="error" />}
+        icon={<Trash2 size={24} color="red" />}
       />
       <DialogComponent
         open={openAddCourierModal}
@@ -669,7 +728,7 @@ const CourierServicePage: React.FC = () => {
         subtitle={MANAGEMENT.COURIER_SERVICE_PAGE.DIALOG_ADD_SUBTITLE}
         hideActions
         paperSx={addDialogPaperSx ?? {}}
-        icon={<AddCircleOutlineIcon color="info" />}
+        icon={<PlusCircle size={24} color="blue" />}
       >
         <AddCourierForm
           onSubmit={handleCreateCourier}

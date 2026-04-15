@@ -13,23 +13,15 @@ import {
   useMediaQuery,
   Typography,
 } from "@mui/material";
-import AddRoundedIcon from "@mui/icons-material/AddRounded";
-import CloseRoundedIcon from "@mui/icons-material/CloseRounded";
-import Visibility from "@mui/icons-material/Visibility";
-import VisibilityOff from "@mui/icons-material/VisibilityOff";
-import PersonOutlinedIcon from "@mui/icons-material/PersonOutlined";
-import EmailOutlinedIcon from "@mui/icons-material/EmailOutlined";
-import LockOutlinedIcon from "@mui/icons-material/LockOutlined";
-import GroupOutlinedIcon from "@mui/icons-material/GroupOutlined";
+import { Plus, X, Eye, EyeOff, User, Mail, Lock, Users, Info } from "lucide-react";
 import OutlinedInput from "@mui/material/OutlinedInput";
-import InfoOutlinedIcon from "@mui/icons-material/InfoOutlined";
 import { Role } from "../../../models/Role";
 import TextfieldComponent from "../../../components/Textfield/Textfield.component";
 import FORMS from "../../../constants/forms.constants";
 import {
   boxRoot,
   gridContainer,
-  iconSx,
+  iconStyle,
   formControl,
   menuPaperProps,
   infoBox,
@@ -40,7 +32,6 @@ import {
   clearButton,
   actionsInnerBox,
   cancelButton,
-  submitButton,
 } from "./styles";
 import { validateName, validateEmail, validateUsername, validatePassword } from '../../../utils/userValidation';
 
@@ -187,81 +178,72 @@ const AddUserForm: React.FC<AddUserFormProps> = ({
       <Grid container spacing={3} sx={gridContainer}>
         <Grid item xs={12} sm={6}>
           <TextfieldComponent
-            label={FORMS.ADD_USER.FIRST_NAME_LABEL}
+            placeholder={FORMS.ADD_USER.FIRST_NAME_PLACEHOLDER}
             variant="outlined"
             fullWidth
-            placeholder={FORMS.ADD_USER.FIRST_NAME_PLACEHOLDER}
             value={formData.firstName}
             onChange={(e) => handleFieldChange("firstName", e.target.value)}
             error={errors.firstName !== ""}
             helperText={errors.firstName}
-            icon={<PersonOutlinedIcon sx={iconSx(theme)} />}
+            icon={<User style={iconStyle} />}
           />
         </Grid>
 
         <Grid item xs={12} sm={6}>
           <TextfieldComponent
-            label={FORMS.ADD_USER.LAST_NAME_LABEL}
+            placeholder={FORMS.ADD_USER.LAST_NAME_PLACEHOLDER}
             variant="outlined"
             fullWidth
-            placeholder={FORMS.ADD_USER.LAST_NAME_PLACEHOLDER}
             value={formData.lastName}
             onChange={(e) => handleFieldChange("lastName", e.target.value)}
             error={errors.lastName !== ""}
             helperText={errors.lastName}
-            icon={<PersonOutlinedIcon sx={iconSx(theme)} />}
+            icon={<User style={iconStyle} />}
           />
         </Grid>
 
         <Grid item xs={12} sm={6}>
           <TextfieldComponent
-            label={FORMS.ADD_USER.EMAIL_LABEL}
+            placeholder={FORMS.ADD_USER.EMAIL_PLACEHOLDER}
             variant="outlined"
             fullWidth
-            placeholder={FORMS.ADD_USER.EMAIL_PLACEHOLDER}
             value={formData.email}
             onChange={(e) => handleFieldChange("email", e.target.value)}
             error={errors.email !== ""}
             helperText={errors.email}
-            icon={<EmailOutlinedIcon sx={iconSx(theme)} />}
+            icon={<Mail style={iconStyle} />}
           />
         </Grid>
 
         <Grid item xs={12} sm={6}>
           <TextfieldComponent
-            label={FORMS.ADD_USER.USERNAME_LABEL}
+            placeholder={FORMS.ADD_USER.USERNAME_PLACEHOLDER}
             variant="outlined"
             fullWidth
-            placeholder={FORMS.ADD_USER.USERNAME_PLACEHOLDER}
             value={formData.username}
             onChange={(e) => handleFieldChange("username", e.target.value)}
             error={errors.username !== ""}
             helperText={errors.username}
-            icon={<PersonOutlinedIcon sx={iconSx(theme)} />}
+            icon={<User style={iconStyle} />}
           />
         </Grid>
 
         <Grid item xs={12} sm={6}>
           <TextfieldComponent
-            label={FORMS.ADD_USER.PASSWORD_LABEL}
+            placeholder={FORMS.ADD_USER.PASSWORD_PLACEHOLDER}
             variant="outlined"
             fullWidth
             type={showPassword ? "text" : "password"}
-            placeholder={FORMS.ADD_USER.PASSWORD_PLACEHOLDER}
             value={formData.password}
             onChange={(e) => handleFieldChange("password", e.target.value)}
             error={errors.password !== ""}
             helperText={errors.password}
-            icon={<LockOutlinedIcon sx={iconSx(theme)} />}
-            InputProps={{
-              endAdornment: (
-                <InputAdornment position="end">
-                  <IconButton onClick={handleTogglePassword} edge="end">
-                    {showPassword ? <VisibilityOff /> : <Visibility />}
-                  </IconButton>
-                </InputAdornment>
-              ),
-            }}
+            icon={<Lock style={iconStyle} />}
+            endAdornment={
+              <IconButton onClick={handleTogglePassword} edge="end" size="small">
+                {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+              </IconButton>
+            }
           />
         </Grid>
 
@@ -278,7 +260,7 @@ const AddUserForm: React.FC<AddUserFormProps> = ({
                   label={FORMS.ADD_USER.ROLE_LABEL}
                   startAdornment={
                     <InputAdornment position="start">
-                      <GroupOutlinedIcon sx={iconSx(theme)} />
+                      <Users style={iconStyle} />
                     </InputAdornment>
                   }
                 />
@@ -297,9 +279,7 @@ const AddUserForm: React.FC<AddUserFormProps> = ({
         <Grid item xs={12}>
           <Box sx={infoBox(theme)}>
             <Box sx={infoIconBox(theme)}>
-              <InfoOutlinedIcon
-                sx={{ ...iconSx(theme), ...infoIconBox(theme) }}
-              />
+              <Info style={iconStyle} />
             </Box>
             <Box>
               <Typography sx={infoTitle(theme)}>
@@ -317,7 +297,7 @@ const AddUserForm: React.FC<AddUserFormProps> = ({
             <Button
               variant="outlined"
               onClick={handleClearForm}
-              startIcon={<CloseRoundedIcon />}
+              startIcon={<X />}
               fullWidth={isSmallScreen}
               sx={clearButton}
             >
@@ -338,10 +318,17 @@ const AddUserForm: React.FC<AddUserFormProps> = ({
               <Button
                 variant="contained"
                 onClick={handleSubmit}
-                disabled={!isFormValid() || isLoading}
-                startIcon={<AddRoundedIcon />}
+                disabled={!isFormValid || isLoading}
+                startIcon={<Plus size={18} />}
                 fullWidth={isSmallScreen}
-                sx={submitButton}
+                sx={{
+                  fontWeight: 600,
+                  fontSize: "0.95rem",
+                  textTransform: "none",
+                  letterSpacing: "0.01em",
+                  borderRadius: "12px",
+                  minHeight: "42px",
+                }}
               >
                 Agregar
               </Button>

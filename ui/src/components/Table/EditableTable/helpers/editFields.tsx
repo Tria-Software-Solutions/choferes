@@ -7,7 +7,7 @@ import { AdapterDateFns } from "@mui/x-date-pickers/AdapterDateFns";
 import { es } from "date-fns/locale";
 import { translateColumnHeaderToSpanish } from "../../../../utils/string";
 import { maskLicensePlate, maskParkingLotWithPrefix } from "../../../../utils/mask";
-import { formControlStyles, selectStyles, datePickerTextFieldStyles } from "../EditableTable.styles";
+import { formControlStyles, selectStyles, datePickerTextFieldStyles, premiumMenuProps } from "../EditableTable.styles";
 import { ColumnConfigType, PARKING_PREFIX_OPTIONS } from "./columnConfig";
 import { DAYS_LIST } from "../../../../constants/constants";
 
@@ -57,16 +57,7 @@ export function renderEditField<T extends object>({
               : `${visible.join(", ")}`;
           }}
           sx={selectStyles}
-          MenuProps={{
-            PaperProps: {
-              sx: (theme) => ({
-                maxHeight: 320,
-                overflowY: "auto",
-                backgroundColor: theme.palette.background.paper,
-                color: theme.palette.text.primary,
-              }),
-            },
-          }}
+          MenuProps={premiumMenuProps}
         >
           {config.options.map((option) => (
             <MenuItem key={option.value} value={option.value}>
@@ -189,16 +180,7 @@ export function renderEditField<T extends object>({
               : `${visible.join(", ")}`;
           }}
           sx={selectStyles}
-          MenuProps={{
-            PaperProps: {
-              sx: (theme) => ({
-                maxHeight: 320,
-                overflowY: "auto",
-                backgroundColor: theme.palette.background.paper,
-                color: theme.palette.text.primary,
-              }),
-            },
-          }}
+          MenuProps={premiumMenuProps}
         >
           {dayOptions.map((option: { value: string; label: string }) => (
             <MenuItem key={option.value} value={option.value}>
@@ -316,20 +298,7 @@ export function renderEditField<T extends object>({
               fullWidth: true,
               required: true,
               variant: 'outlined',
-              sx: {
-                mt: 0,
-                "& .MuiOutlinedInput-root": {
-                  borderRadius: "12px",
-                  backgroundColor: "transparent",
-                  "&:hover .MuiOutlinedInput-notchedOutline": {
-                    borderColor: "primary.main",
-                  },
-                  "&.Mui-focused .MuiOutlinedInput-notchedOutline": {
-                    borderColor: "primary.main",
-                    borderWidth: 2,
-                  },
-                },
-              },
+              ...datePickerTextFieldStyles,
               error: !validateField(String(column), value),
             } as Record<string, unknown>,
           }}
@@ -347,6 +316,7 @@ export function renderEditField<T extends object>({
             setEditField && setEditField(String(column), e.target.value)
           }
           sx={selectStyles}
+          MenuProps={premiumMenuProps}
         >
           {config.options.map((option) => (
             <MenuItem key={option.value} value={option.value}>

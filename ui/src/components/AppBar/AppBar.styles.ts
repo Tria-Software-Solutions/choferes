@@ -5,6 +5,8 @@ export const appBarStyles: SxProps<Theme> = {
   background: "linear-gradient(135deg, #000000 0%, #1a1a1a 100%)",
   borderBottom: "1px solid rgba(255,255,255,0.1)",
   backdropFilter: "blur(10px)",
+  top: 0,
+  zIndex: 1100,
 };
 
 export const toolbarStyles: SxProps<Theme> = {
@@ -39,55 +41,78 @@ export const logoImgStyles: CSSProperties = {
 };
 
 export const titleStyles: SxProps<Theme> = {
-  fontFamily: "'Urbanist', sans-serif",
   fontWeight: 800,
   fontSize: { xs: "1.5rem", sm: "2rem", md: "1.5rem" },
   lineHeight: 1.1,
   letterSpacing: "0.04em",
-  background: "linear-gradient(45deg, #ffffff 30%, #f0f0f0 90%)",
-  backgroundClip: "text",
-  WebkitBackgroundClip: "text",
-  WebkitTextFillColor: "transparent",
+  color: "#ffffff",
   display: { xs: "none", sm: "block" },
 };
 
-export const dashboardPopoverBoxStyles: SxProps<Theme> = {
+export const dashboardPopoverBoxStyles: SxProps<Theme> = (theme) => ({
   mt: 2,
-  display: "flex",
-  flexDirection: "row",
-  gap: 2,
-  alignItems: "center",
-  backgroundColor: "rgba(0,0,0,0.8)",
-  p: 2,
-  borderRadius: 2,
-};
+  display: 'flex',
+  flexDirection: 'row',
+  gap: 1,
+  alignItems: 'center',
+  backgroundColor: theme.palette.mode === 'dark'
+    ? 'rgba(0,0,0,0.95)'
+    : '#ffffff',
+  backdropFilter: 'blur(20px)',
+  p: 1,
+  borderRadius: '12px',
+  border: 'none',
+  boxShadow: 'none',
+  maxWidth: 'calc(100vw - 32px)',
+  overflowX: 'auto',
+  overflowY: 'hidden',
+  '&::-webkit-scrollbar': {
+    height: 4,
+  },
+  '&::-webkit-scrollbar-track': {
+    background: 'transparent',
+  },
+  '&::-webkit-scrollbar-thumb': {
+    background: theme.palette.mode === 'dark'
+      ? 'rgba(255,255,255,0.2)'
+      : 'rgba(0,0,0,0.2)',
+    borderRadius: 2,
+  },
+});
 
 export const dashboardIconButtonStyles = (
   active: boolean = false,
-): SxProps<Theme> => ({
-  color: "#ffffff",
-  cursor: "pointer",
-  p: 1.5,
-  borderRadius: "50%",
-  minWidth: "56px",
-  height: "56px",
-  backgroundColor: active ? "rgba(255,255,255,0.25)" : "transparent",
-  border: active ? "2px solid rgba(255,255,255,0.6)" : "none",
-  "&:hover": {
+): SxProps<Theme> => (theme) => ({
+  color: theme.palette.text.primary,
+  cursor: 'pointer',
+  p: 1,
+  borderRadius: '12px',
+  minWidth: '48px',
+  height: '48px',
+  backgroundColor: active 
+    ? (theme.palette.mode === 'dark' ? 'rgba(255,255,255,0.15)' : 'rgba(0,0,0,0.08)') 
+    : 'transparent',
+  border: 'none',
+  position: 'relative',
+  '&:hover': {
     backgroundColor: active
-      ? "rgba(255,255,255,0.35)"
-      : "rgba(255,255,255,0.15)",
-    transform: "translateY(-2px)",
+      ? (theme.palette.mode === 'dark' ? 'rgba(255,255,255,0.2)' : 'rgba(0,0,0,0.12)')
+      : (theme.palette.mode === 'dark' ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.04)'),
   },
-  transition: "all 0.3s ease",
+  '&:active': {
+    backgroundColor: active
+      ? (theme.palette.mode === 'dark' ? 'rgba(255,255,255,0.25)' : 'rgba(0,0,0,0.16)')
+      : (theme.palette.mode === 'dark' ? 'rgba(255,255,255,0.12)' : 'rgba(0,0,0,0.08)'),
+  },
+  transition: 'all 0.2s cubic-bezier(0.4, 0, 0.2, 1)',
 });
 
 export const dashboardIconStyles = (
   active: boolean = false,
-): SxProps<Theme> => ({
-  fontSize: "1.6rem",
-  color: "#ffffff",
-  filter: active ? "drop-shadow(0 0 8px rgba(255,255,255,0.6))" : "none",
+): CSSProperties => ({
+  width: '1.4rem',
+  height: '1.4rem',
+  transition: 'all 0.2s ease',
 });
 
 export const notificationsIconButtonStyles: SxProps<Theme> = {
@@ -125,26 +150,51 @@ export const userEmailStyles: SxProps<Theme> = {
 };
 
 export const userMenuIconButtonStyles: SxProps<Theme> = {
-  p: 0.5,
-  border: "2px solid rgba(255,255,255,0.3)",
-  backgroundColor: "rgba(255,255,255,0.1)",
-  backdropFilter: "blur(10px)",
+  p: 0,
+  border: "none",
+  backgroundColor: "transparent",
   "&:hover": {
-    borderColor: "rgba(255,255,255,0.5)",
-    backgroundColor: "rgba(255,255,255,0.2)",
-    transform: "scale(1.05)",
+    backgroundColor: "transparent",
   },
   transition: "all 0.3s ease",
 };
 
-export const userAvatarStyles: SxProps<Theme> = {
-  width: 40,
-  height: 40,
-  backgroundColor: "rgba(255,255,255,0.2)",
+export const userAvatarStyles: SxProps<Theme> = (theme) => ({
+  width: 44,
+  height: 44,
+  background: "linear-gradient(135deg, rgba(255,255,255,0.15) 0%, rgba(255,255,255,0.05) 100%)",
+  backdropFilter: "blur(20px)",
   color: "#ffffff",
   fontWeight: 600,
-  fontSize: "1rem",
-};
+  fontSize: "0.9rem",
+  border: "1.5px solid rgba(255,255,255,0.25)",
+  borderRadius: "50%",
+  transition: "all 0.3s cubic-bezier(0.4, 0, 0.2, 1)",
+  boxShadow: "0 4px 20px rgba(0,0,0,0.3), inset 0 1px 0 rgba(255,255,255,0.2)",
+  position: "relative",
+  "&::before": {
+    content: '""',
+    position: "absolute",
+    inset: -2,
+    borderRadius: "50%",
+    padding: "2px",
+    background: "linear-gradient(135deg, rgba(255,255,255,0.4) 0%, rgba(255,255,255,0.1) 50%, rgba(255,255,255,0.4) 100%)",
+    WebkitMask: "linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0)",
+    WebkitMaskComposite: "xor",
+    maskComposite: "exclude",
+    opacity: 0,
+    transition: "opacity 0.3s ease",
+  },
+  "&:hover": {
+    background: "linear-gradient(135deg, rgba(255,255,255,0.25) 0%, rgba(255,255,255,0.1) 100%)",
+    transform: "scale(1.08)",
+    boxShadow: "0 8px 30px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.3), 0 0 20px rgba(255,255,255,0.15)",
+    borderColor: "rgba(255,255,255,0.4)",
+    "&::before": {
+      opacity: 1,
+    },
+  },
+});
 
 export const mobileDividerStyles: SxProps<Theme> = {
   borderColor: "rgba(255,255,255,0.2)",
@@ -172,7 +222,3 @@ export const dashboardNoLinksBoxStyles: SxProps<Theme> = {
   color: "white",
   p: 1,
 };
-
-export const logoutMenuItemStyles = (theme: Theme): SxProps<Theme> => ({
-  color: theme.palette.error.main,
-});

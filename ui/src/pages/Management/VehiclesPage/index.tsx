@@ -16,25 +16,15 @@ import AddVehicleForm from "../../Forms/AddVehicleForm";
 import { useAppNotifications } from "../../../components/Snackbar/Snackbar.component";
 import DialogComponent from "../../../components/Dialog/Dialog.component";
 import { createVehicleNotification } from "../../../services/notificationService";
-import OCRResultModal from "../../../components/Modal/OCRModal/OCRModal.component";
-import {
-  OCRService,
-  VehicleEntry,
-  OCRResult,
-} from "../../../services/ocrService";
 import {
   Box,
   Typography,
   useMediaQuery,
   useTheme,
-  Grid,
   Button,
   CircularProgress,
   Backdrop,
-  Tooltip,
-  ButtonGroup,
-  Divider,
-  IconButton,
+  Paper,
 } from "@mui/material";
 import { LocalizationProvider } from "@mui/x-date-pickers";
 import { DatePicker } from "@mui/x-date-pickers/DatePicker";
@@ -52,29 +42,13 @@ import PAGE_TITLE from "../../../constants/pageTitle.constants";
 import PERMISSIONS from "../../../constants/permissions.constants";
 import NOTIFICATIONS from "../../../constants/notifications.constants";
 import MANAGEMENT from "../../../constants/management.constants";
-import DirectionsCarFilledIcon from "@mui/icons-material/DirectionsCarFilled";
-import DownloadRoundedIcon from "@mui/icons-material/DownloadRounded";
-import ArrowBackIosNewRoundedIcon from "@mui/icons-material/ArrowBackIosNewRounded";
-import ArrowForwardIosRoundedIcon from "@mui/icons-material/ArrowForwardIosRounded";
-import CalendarTodayRoundedIcon from "@mui/icons-material/CalendarTodayRounded";
-import CloseRoundedIcon from "@mui/icons-material/CloseRounded";
-import ManageSearchIcon from "@mui/icons-material/ManageSearch";
-import AddRoundedIcon from "@mui/icons-material/AddRounded";
-import DeleteOutlineIcon from "@mui/icons-material/DeleteOutline";
+import { Car, Download, ChevronLeft, ChevronRight, X, Search, Plus, Trash2, PlusCircle, RotateCcw } from "lucide-react";
+import { PdfIcon, ExcelIcon } from "../../../components/Icons/FileIcons";
+import PremiumTooltip from "../../../components/PremiumTooltip/PremiumTooltip.component";
 import {
-  vehiclesHeaderBoxStyles,
-  vehiclesTitleBoxStyles,
-  vehiclesTitleStyles,
-  vehiclesIconStyles,
-  vehiclesDividerStyles,
   exportSpeedDialBoxStyles,
   loadingBoxStyles,
   backdropStyles,
-  searchBarBoxStyles,
-  addButtonMobileStyles,
-  addButtonDesktopStyles,
-  datePickerSx,
-  buttonGroupSx,
   noVehiclesBoxStyles,
   noVehiclesIconStyles,
   deleteDialogPaperSx,
@@ -86,10 +60,6 @@ import {
   getPreferencesObject,
   setPreferencesObject,
 } from "../../../utils/persistentState";
-import DescriptionIcon from "@mui/icons-material/Description";
-import PictureAsPdfIcon from "@mui/icons-material/PictureAsPdf";
-import AddCircleOutlineIcon from "@mui/icons-material/AddCircleOutline";
-import ImageIcon from "@mui/icons-material/Image";
 
 const getInitialRowsPerPage = () => {
   if (typeof window !== "undefined") {
@@ -141,15 +111,6 @@ const VehiclesPage: React.FC = () => {
   const [openAddVehicleModal, setOpenAddVehicleModal] = useState(false);
   const [isCreatingVehicle, setIsCreatingVehicle] = useState(false);
   const [isDeletingVehicle, setIsDeletingVehicle] = useState(false);
-
-  // File input ref for image upload
-  const fileInputRef = React.useRef<HTMLInputElement>(null);
-
-  // OCR states
-  const [ocrResult, setOcrResult] = useState<OCRResult | null>(null);
-  const [isOcrLoading, setIsOcrLoading] = useState(false);
-  const [ocrError, setOcrError] = useState<string | null>(null);
-  const [showOcrModal, setShowOcrModal] = useState(false);
 
   const theme = useTheme();
   const isSmallScreen = useMediaQuery(theme.breakpoints.down("sm"));
@@ -538,382 +499,386 @@ const VehiclesPage: React.FC = () => {
     });
   };
 
-  // Handler para abrir archivo de imagen
-  const handleOpenImageFile = () => {
-    fileInputRef.current?.click();
-  };
-
-  // Handler para procesar el archivo seleccionado con OCR
-  const handleFileChange = async (
-    event: React.ChangeEvent<HTMLInputElement>
-  ) => {
-    const file = event.target.files?.[0];
-    if (file) {
-      // Verificar que sea una imagen
-      if (file.type.startsWith("image/")) {
-        try {
-          setIsOcrLoading(true);
-          setOcrError(null);
-          setShowOcrModal(true);
-
-          // Procesar la imagen con OCR
-          const result = await OCRService.processImage(file);
-          setOcrResult(result);
-
-          showNotification(
-            `Imagen procesada exitosamente. Se encontraron ${result.entries.length} entradas.`,
-            {
-              severity: "success",
-              duration: 3000,
-            }
-          );
-        } catch (error) {
-          const errorMessage =
-            error instanceof Error
-              ? error.message
-              : "Error al procesar la imagen";
-          setOcrError(errorMessage);
-          showNotification(errorMessage, {
-            severity: "error",
-            duration: 5000,
-          });
-        } finally {
-          setIsOcrLoading(false);
-        }
-      } else {
-        showNotification("Por favor selecciona un archivo de imagen válido", {
-          severity: "error",
-          duration: 3000,
-        });
-      }
-    }
-    // Limpiar el input para permitir seleccionar el mismo archivo nuevamente
-    event.target.value = "";
-  };
-  // OCR modal handlers
-  const handleCloseOcrModal = () => {
-    setShowOcrModal(false);
-    setOcrResult(null);
-    setOcrError(null);
-  };
-
-  const handleImportOcrData = async (entries: VehicleEntry[]) => {
-    try {
-      setIsCreatingVehicle(true);
-
-      // Convert OCR entries to vehicle format and create them
-      for (const entry of entries) {
-        const vehicleData = {
-          ticket: entry.ticket,
-          licensePlate: entry.licensePlate,
-          brand: entry.brand,
-          color: entry.color,
-          parkingLot: entry.parkingSpace,
-          notes: entry.observation,
-          parkingDate: selectedDate.toISOString(), // Use the currently selected date
-        };
-
-        await dispatch(createVehicle(vehicleData)).unwrap();
-      }
-
-      showNotification(
-        `Se importaron ${entries.length} vehículos exitosamente.`,
-        {
-          severity: "success",
-          duration: 5000,
-        }
-      );
-
-      // Refresh the vehicles list
-      dispatch(fetchVehicles({}));
-    } catch (error) {
-      const errorMessage =
-        error instanceof Error ? error.message : "Error al importar los datos";
-      showNotification(errorMessage, {
-        severity: "error",
-        duration: 5000,
-      });
-    } finally {
-      setIsCreatingVehicle(false);
-    }
-  };
 
   // Use exportTable({ data: exportData, ... }) for export
 
   return (
-    <Box>
-      <Box
-        display="flex"
-        justifyContent="space-between"
-        alignItems="center"
-        sx={vehiclesHeaderBoxStyles}
+    <Box sx={{ height: "calc(100vh - 100px)", display: "flex", flexDirection: "column", overflow: "hidden", pb: 0, pt: 0, px: 0 }}>
+      {/* Premium Card with Header and Grid */}
+      <Paper
+        elevation={0}
+        sx={{
+          borderRadius: "16px",
+          border: "1px solid rgba(0,0,0,0.08)",
+          boxShadow: "0 4px 24px rgba(0,0,0,0.08), 0 1px 2px rgba(0,0,0,0.04)",
+          overflow: "hidden",
+          flex: 1,
+          display: "flex",
+          flexDirection: "column",
+        }}
       >
+        {/* Header Section */}
         <Box
-          display="flex"
-          flexDirection="column"
-          alignItems="flex-start"
-          sx={vehiclesTitleBoxStyles}
+          sx={{
+            px: { xs: 2, sm: 3 },
+            py: { xs: 2, sm: 2.5 },
+            backgroundColor: theme.palette.background.paper,
+            color: theme.palette.text.primary,
+            borderBottom: `1px solid ${theme.palette.mode === "dark" ? "rgba(255,255,255,0.08)" : "rgba(0,0,0,0.08)"}`,
+          }}
         >
-          <Typography
-            variant={isSmallScreen ? "h5" : "h4"}
-            sx={vehiclesTitleStyles}
+          <Box
+            display="flex"
+            justifyContent="space-between"
+            alignItems="flex-start"
+            mb={2}
           >
-            <DirectionsCarFilledIcon
-              fontSize={isSmallScreen ? "small" : "large"}
-              sx={vehiclesIconStyles(theme)}
-            />
-            {isSmallScreen
-              ? PAGE_TITLE.VEHICLES_SIMPLIFIED
-              : PAGE_TITLE.VEHICLES}
-          </Typography>
-          <Divider sx={vehiclesDividerStyles(theme)} />
-        </Box>
-        <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
-          {userPermissions.includes(PERMISSIONS.EXPORT_EXCEL_VEHICLES) &&
-            userPermissions.includes(PERMISSIONS.EXPORT_PDF_VEHICLES) && (
-              <Box sx={exportSpeedDialBoxStyles}>
-                {filteredWeekVehicles.length > 0 && (
-                  <SpeedDialComponent
-                    actions={[
-                      {
-                        label: "Exportar a Excel",
-                        icon: <DescriptionIcon />,
-                        onClick: () => handleExport("excel"),
-                      },
-                      {
-                        label: "Exportar a PDF",
-                        icon: <PictureAsPdfIcon />,
-                        onClick: () => handleExport("pdf"),
-                      },
-                    ]}
-                    mainIcon={<DownloadRoundedIcon />}
-                    openIcon={<CloseRoundedIcon />}
-                    direction="left"
-                  />
-                )}
-              </Box>
-            )}
-
-          {/* Botón para procesar imagen con OCR */}
-          {userPermissions.includes(PERMISSIONS.CREATE_VEHICLES) && (
-            <Tooltip title="Procesar imagen" arrow>
-              <IconButton
-                onClick={handleOpenImageFile}
+            <Box display="flex" alignItems="center" gap={1.5}>
+              <Box
                 sx={{
-                  top: "-4px",
-                  width: "62px",
-                  height: "58px",
-                  borderRadius: "8px",
-                  backgroundColor:
-                    theme.palette.mode === "dark"
-                      ? theme.palette.background.paper
-                      : theme.palette.primary.main,
-                  color:
-                    theme.palette.mode === "dark"
-                      ? theme.palette.primary.main
-                      : theme.palette.primary.contrastText,
+                  backgroundColor: theme.palette.primary.main,
+                  borderRadius: "10px",
+                  p: 1,
                   display: "flex",
                   alignItems: "center",
                   justifyContent: "center",
-                  transition: theme.transitions.create(
-                    ["background", "box-shadow", "transform"],
-                    {
-                      duration: theme.transitions.duration.short,
-                    }
-                  ),
-                  fontSize: 40,
-                  "&:hover": {
-                    backgroundColor: "#333333",
-                  },
                 }}
               >
-                <ImageIcon />
-              </IconButton>
-            </Tooltip>
-          )}
-          <input
-            ref={fileInputRef}
-            type="file"
-            accept="image/*"
-            onChange={handleFileChange}
-            style={{ display: "none" }}
-          />
-        </Box>
-      </Box>
-      {isLoadingVehicles ? (
-        <Box sx={loadingBoxStyles}>
-          <Backdrop sx={backdropStyles(theme)} open={isLoadingVehicles}>
-            <CircularProgress />
-          </Backdrop>
-        </Box>
-      ) : (
-        <>
-          <Grid
-            container
-            spacing={2}
-            justifyContent="space-between"
-            alignItems="center"
-          >
-            <Grid item xs={12} md={4}>
-              <Box sx={searchBarBoxStyles}>
-                {filteredVehicles && (
-                  <SearchBarComponent
-                    placeholder={MANAGEMENT.VEHICLES_PAGE.SEARCH_PLACEHOLDER}
-                    value={search}
-                    onChange={(e) => setSearch(e.target.value)}
-                    sx={{ flex: 1 }}
-                    fullWidth
-                  />
-                )}
-                {userPermissions.includes(PERMISSIONS.CREATE_VEHICLES) && (
-                  <Button
-                    variant="contained"
-                    color="primary"
-                    onClick={handleOpenAddVehicleModal}
-                    sx={addButtonMobileStyles}
-                  >
-                    <AddRoundedIcon />
-                  </Button>
-                )}
+                <Car size={22} color={theme.palette.primary.contrastText} />
               </Box>
-            </Grid>
-            <Grid item xs={12} md={8}>
+              <Box>
+                <Typography
+                  variant={isSmallScreen ? "h6" : "h5"}
+                  sx={{
+                    fontWeight: 700,
+                    fontSize: { xs: "1.1rem", sm: "1.25rem" },
+                    color: theme.palette.text.primary,
+                    letterSpacing: "-0.02em",
+                    lineHeight: 1.2,
+                  }}
+                >
+                  {isSmallScreen ? PAGE_TITLE.VEHICLES_SIMPLIFIED : PAGE_TITLE.VEHICLES}
+                </Typography>
+                <Typography
+                  variant="caption"
+                  sx={{
+                    color: theme.palette.text.secondary,
+                    fontSize: "0.75rem",
+                    letterSpacing: "0.02em",
+                  }}
+                >
+                  {filteredVehicles.length} vehículos registrados
+                </Typography>
+              </Box>
+            </Box>
+
+            {/* Export Speed Dial */}
+            {userPermissions.includes(PERMISSIONS.EXPORT_EXCEL_VEHICLES) &&
+              userPermissions.includes(PERMISSIONS.EXPORT_PDF_VEHICLES) && (
+                <Box sx={{ ...exportSpeedDialBoxStyles, minHeight: 'auto' }}>
+                  {filteredWeekVehicles.length > 0 && (
+                    <SpeedDialComponent
+                      actions={[
+                        {
+                          label: "Exportar a Excel",
+                          icon: <ExcelIcon size={20} />,
+                          onClick: () => handleExport("excel"),
+                        },
+                        {
+                          label: "Exportar a PDF",
+                          icon: <PdfIcon size={20} />,
+                          onClick: () => handleExport("pdf"),
+                        },
+                      ]}
+                      mainIcon={<Download size={20} />}
+                      openIcon={<X size={20} />}
+                      direction="left"
+                    />
+                  )}
+                </Box>
+              )}
+          </Box>
+
+          {/* Controls Row */}
+          <Box
+            display="flex"
+            flexDirection={{ xs: "column", sm: "row" }}
+            alignItems={{ xs: "stretch", sm: "center" }}
+            justifyContent="space-between"
+            gap={2}
+          >
+            {/* Search */}
+            <Box flex={1} maxWidth={{ sm: "320px" }}>
+              {filteredVehicles && (
+                <SearchBarComponent
+                  placeholder={MANAGEMENT.VEHICLES_PAGE.SEARCH_PLACEHOLDER}
+                  value={search}
+                  onChange={(e) => setSearch(e.target.value)}
+                  fullWidth
+                />
+              )}
+            </Box>
+
+            {/* Date Controls & Add Button */}
+            <Box
+              display="flex"
+              flexDirection={{ xs: "column", sm: "row" }}
+              alignItems={{ xs: "stretch", sm: "center" }}
+              gap={1}
+            >
               <Box
                 display="flex"
-                flexDirection={{ xs: "column", sm: "column", md: "row" }}
-                alignItems={{ xs: "stretch", sm: "stretch", md: "center" }}
-                justifyContent="flex-end"
-                gap={2}
+                alignItems="center"
+                justifyContent={{ xs: "flex-start", sm: "flex-end" }}
+                gap={1}
               >
-                <Box
-                  display="flex"
-                  alignItems="center"
-                  justifyContent="flex-start"
-                  gap={1}
-                >
-                  <LocalizationProvider
-                    dateAdapter={AdapterDateFns}
-                    adapterLocale={es}
-                  >
-                    <DatePicker
-                      label={MANAGEMENT.VEHICLES_PAGE.DATE_PICKER_LABEL}
-                      value={selectedDate}
-                      maxDate={new Date()}
-                      views={["year", "month", "day"]}
-                      slots={{ toolbar: () => null }}
-                      slotProps={{
-                        textField: {
-                          fullWidth: true,
-                          required: true,
-                          variant: "outlined",
-                          sx: datePickerSx,
+                {/* Previous Day Button */}
+                <PremiumTooltip title={MANAGEMENT.VEHICLES_PAGE.TOOLTIP_PREV_DAY}>
+                  <span>
+                    <Button
+                      variant="outlined"
+                      onClick={handlePreviousDate}
+                      disableRipple
+                      disableElevation
+                      sx={{
+                        minWidth: '44px',
+                        height: '44px',
+                        px: 1.5,
+                        borderRadius: '10px',
+                        borderColor: theme.palette.mode === "dark" ? "rgba(255,255,255,0.2)" : "rgba(0,0,0,0.15)",
+                        '&:hover': {
+                          backgroundColor: theme.palette.mode === "dark" ? "rgba(255,255,255,0.05)" : "rgba(0,0,0,0.04)",
+                          borderColor: theme.palette.mode === "dark" ? "rgba(255,255,255,0.3)" : "rgba(0,0,0,0.25)",
+                        },
+                        '&.Mui-disabled': {
+                          borderColor: theme.palette.mode === "dark" ? "rgba(255,255,255,0.1)" : "rgba(0,0,0,0.08)",
                         },
                       }}
-                      closeOnSelect
-                      onChange={handleDateChange}
-                    />
-                  </LocalizationProvider>
-                  <ButtonGroup variant="contained" sx={buttonGroupSx}>
-                    <Tooltip
-                      title={MANAGEMENT.VEHICLES_PAGE.TOOLTIP_PREV_DAY}
-                      arrow
                     >
-                      <Button onClick={handlePreviousDate}>
-                        <ArrowBackIosNewRoundedIcon />
-                      </Button>
-                    </Tooltip>
-                    <Tooltip
-                      title={MANAGEMENT.VEHICLES_PAGE.TOOLTIP_NEXT_DAY}
-                      arrow
-                    >
-                      <span>
-                        <Button
-                          disabled={isTodayOrFuture(selectedDate)}
-                          onClick={handleNextDate}
-                        >
-                          <ArrowForwardIosRoundedIcon />
-                        </Button>
-                      </span>
-                    </Tooltip>
-                    <Tooltip
-                      title={MANAGEMENT.VEHICLES_PAGE.TOOLTIP_CURRENT_DAY}
-                      arrow
-                    >
-                      <span>
-                        <Button
-                          disabled={isTodayOrFuture(selectedDate)}
-                          onClick={handleCurrentDate}
-                        >
-                          <CalendarTodayRoundedIcon />
-                        </Button>
-                      </span>
-                    </Tooltip>
-                  </ButtonGroup>
-                </Box>
-                {userPermissions.includes(PERMISSIONS.CREATE_VEHICLES) &&
-                  !isSmallScreen && (
-                    <Button
-                      variant="contained"
-                      startIcon={<AddRoundedIcon />}
-                      onClick={handleOpenAddVehicleModal}
-                      sx={addButtonDesktopStyles}
-                    >
-                      {MANAGEMENT.ADD}
+                      <ChevronLeft size={20} />
                     </Button>
-                  )}
+                  </span>
+                </PremiumTooltip>
+
+                {/* Date Picker */}
+                <LocalizationProvider
+                  dateAdapter={AdapterDateFns}
+                  adapterLocale={es}
+                >
+                  <DatePicker
+                    value={selectedDate}
+                    maxDate={new Date()}
+                    views={["year", "month", "day"]}
+                    format="EEEE d 'de' MMMM 'de' yyyy"
+                    slots={{ toolbar: () => null }}
+                    slotProps={{
+                      textField: {
+                        fullWidth: false,
+                        required: true,
+                        variant: "outlined",
+                        sx: {
+                          width: { xs: '100%', sm: '320px', md: '360px' },
+                          '& .MuiOutlinedInput-root': {
+                            height: "44px",
+                            borderRadius: '10px',
+                            fontSize: '0.875rem',
+                            fontWeight: 500,
+                            backgroundColor: theme.palette.background.paper,
+                            boxShadow: '0 1px 3px rgba(0,0,0,0.04)',
+                            transition: 'all 0.2s cubic-bezier(0.4, 0, 0.2, 1)',
+                            '& fieldset': {
+                              borderColor: 'transparent',
+                              borderWidth: '0',
+                            },
+                            '&:hover': {
+                              boxShadow: '0 2px 6px rgba(0,0,0,0.08)',
+                              '& fieldset': {
+                                borderColor: 'transparent',
+                              },
+                            },
+                            '&.Mui-focused': {
+                              boxShadow: '0 0 0 3px rgba(0,0,0,0.04)',
+                              '& fieldset': {
+                                borderColor: 'transparent',
+                                borderWidth: '0',
+                              },
+                            },
+                            '& input': {
+                              textOverflow: 'ellipsis',
+                              textAlign: 'center',
+                            },
+                          },
+                        },
+                      },
+                    }}
+                    closeOnSelect
+                    onChange={handleDateChange}
+                  />
+                </LocalizationProvider>
+
+                {/* Next Day Button */}
+                <PremiumTooltip title={MANAGEMENT.VEHICLES_PAGE.TOOLTIP_NEXT_DAY}>
+                  <span>
+                    <Button
+                      variant="outlined"
+                      disabled={isTodayOrFuture(selectedDate)}
+                      onClick={handleNextDate}
+                      disableRipple
+                      disableElevation
+                      sx={{
+                        minWidth: '44px',
+                        height: '44px',
+                        px: 1.5,
+                        borderRadius: '10px',
+                        borderColor: theme.palette.mode === "dark" ? "rgba(255,255,255,0.2)" : "rgba(0,0,0,0.15)",
+                        '&:hover': {
+                          backgroundColor: theme.palette.mode === "dark" ? "rgba(255,255,255,0.05)" : "rgba(0,0,0,0.04)",
+                          borderColor: theme.palette.mode === "dark" ? "rgba(255,255,255,0.3)" : "rgba(0,0,0,0.25)",
+                        },
+                        '&.Mui-disabled': {
+                          borderColor: theme.palette.mode === "dark" ? "rgba(255,255,255,0.1)" : "rgba(0,0,0,0.08)",
+                        },
+                      }}
+                    >
+                      <ChevronRight size={20} />
+                    </Button>
+                  </span>
+                </PremiumTooltip>
+
+                {/* Current Day Button */}
+                <PremiumTooltip title={MANAGEMENT.VEHICLES_PAGE.TOOLTIP_CURRENT_DAY}>
+                  <span>
+                    <Button
+                      variant="outlined"
+                      disabled={isTodayOrFuture(selectedDate)}
+                      onClick={handleCurrentDate}
+                      disableRipple
+                      disableElevation
+                      sx={{
+                        minWidth: '44px',
+                        height: '44px',
+                        px: 1.5,
+                        borderRadius: '10px',
+                        borderColor: theme.palette.mode === "dark" ? "rgba(255,255,255,0.2)" : "rgba(0,0,0,0.15)",
+                        '&:hover': {
+                          backgroundColor: theme.palette.mode === "dark" ? "rgba(255,255,255,0.05)" : "rgba(0,0,0,0.04)",
+                          borderColor: theme.palette.mode === "dark" ? "rgba(255,255,255,0.3)" : "rgba(0,0,0,0.25)",
+                        },
+                        '&.Mui-disabled': {
+                          borderColor: theme.palette.mode === "dark" ? "rgba(255,255,255,0.1)" : "rgba(0,0,0,0.08)",
+                        },
+                      }}
+                    >
+                      <RotateCcw size={18} />
+                    </Button>
+                  </span>
+                </PremiumTooltip>
               </Box>
-            </Grid>
-          </Grid>
-          <br />
-          {filteredVehicles.length > 0 ? (
-            <EditableTableComponent<Vehicle>
-              data={filteredVehicles}
-              columns={[
-                "ticket",
-                "licensePlate",
-                "brand",
-                "color",
-                "parkingLot",
-                "notes",
-                "parkingDate",
-              ]}
-              groupByDate={selectedDate}
-              editRowId={editRowId}
-              editFields={editFields}
-              setEditField={(field, value) =>
-                setEditFields({ ...editFields, [field]: value })
-              }
-              handleEdit={handleEdit}
-              handleCancel={handleCancel}
-              handleUpdate={handleUpdate}
-              handleOpenDeleteDialog={handleOpenDeleteDialog}
-              getRowId={(row) => row.id}
-              totalCount={totalCount}
-              page={page}
-              rowsPerPage={rowsPerPage}
-              setPage={setPage}
-              setRowsPerPage={setRowsPerPage}
-              isSaveDisabled={!isEditFormValid}
-              userPermissions={userPermissions}
-              validateField={validateField}
-            />
-          ) : (
-            <Box sx={noVehiclesBoxStyles}>
-              <ManageSearchIcon color="disabled" sx={noVehiclesIconStyles} />
-              <Typography variant="body1" color="textSecondary">
-                {capitalizeFirstLetter(
-                  format(selectedDate, "EEEE dd 'de' MMMM 'de' yyyy", {
-                    locale: es,
-                  })
-                )}
-              </Typography>
-              <Typography variant="h6" color="textSecondary">
-                {MANAGEMENT.VEHICLES_PAGE.NO_VEHICLES}
-              </Typography>
+
+              {/* Add Button Desktop */}
+              {userPermissions.includes(PERMISSIONS.CREATE_VEHICLES) && (
+                <Box sx={{ display: { xs: 'none', sm: 'flex' } }}>
+                  <Button
+                    variant="contained"
+                    startIcon={<Plus size={18} />}
+                    onClick={handleOpenAddVehicleModal}
+                    sx={{
+                      px: 3,
+                      py: 1,
+                      fontWeight: 600,
+                      fontSize: "0.9rem",
+                      letterSpacing: "-0.01em",
+                      borderRadius: '10px',
+                      height: '44px',
+                    }}
+                  >
+                    {MANAGEMENT.ADD}
+                  </Button>
+                </Box>
+              )}
             </Box>
+          </Box>
+        </Box>
+
+        {/* Mobile Add Button */}
+        {userPermissions.includes(PERMISSIONS.CREATE_VEHICLES) && (
+          <Box sx={{ display: { xs: 'flex', sm: 'none' }, p: 2, borderTop: `1px solid ${theme.palette.mode === "dark" ? "rgba(255,255,255,0.08)" : "rgba(0,0,0,0.08)"}` }}>
+            <Button
+              variant="contained"
+              fullWidth
+              startIcon={<Plus size={18} />}
+              onClick={handleOpenAddVehicleModal}
+              sx={{
+                py: 1.5,
+                fontWeight: 600,
+                borderRadius: '10px',
+              }}
+            >
+              {MANAGEMENT.ADD}
+            </Button>
+          </Box>
+        )}
+
+        {/* Content Section */}
+        <Box sx={{ flex: 1, minHeight: 0, display: "flex", flexDirection: "column", overflow: "hidden" }}>
+          {isLoadingVehicles ? (
+            <Box sx={loadingBoxStyles}>
+              <Backdrop sx={backdropStyles(theme)} open={isLoadingVehicles}>
+                <CircularProgress />
+              </Backdrop>
+            </Box>
+          ) : (
+            <>
+              {filteredVehicles.length > 0 ? (
+                <EditableTableComponent<Vehicle>
+                  data={filteredVehicles}
+                  columns={[
+                    "ticket",
+                    "licensePlate",
+                    "brand",
+                    "color",
+                    "parkingLot",
+                    "notes",
+                    "parkingDate",
+                  ]}
+                  editRowId={editRowId}
+                  editFields={editFields}
+                  setEditField={(field, value) =>
+                    setEditFields({ ...editFields, [field]: value })
+                  }
+                  handleEdit={handleEdit}
+                  handleCancel={handleCancel}
+                  handleUpdate={handleUpdate}
+                  handleOpenDeleteDialog={handleOpenDeleteDialog}
+                  getRowId={(row) => row.id}
+                  totalCount={totalCount}
+                  page={page}
+                  rowsPerPage={rowsPerPage}
+                  setPage={setPage}
+                  setRowsPerPage={setRowsPerPage}
+                  isSaveDisabled={!isEditFormValid}
+                  userPermissions={userPermissions}
+                  validateField={validateField}
+                />
+              ) : (
+                <Box sx={noVehiclesBoxStyles}>
+                  <Search color="disabled" style={noVehiclesIconStyles} />
+                  <Typography variant="body1" color="textSecondary">
+                    {capitalizeFirstLetter(
+                      format(selectedDate, "EEEE dd 'de' MMMM 'de' yyyy", {
+                        locale: es,
+                      })
+                    )}
+                  </Typography>
+                  <Typography variant="h6" color="textSecondary">
+                    {MANAGEMENT.VEHICLES_PAGE.NO_VEHICLES}
+                  </Typography>
+                </Box>
+              )}
+            </>
           )}
-        </>
-      )}
+        </Box>
+      </Paper>
       <DialogComponent
         open={openDeleteDialog}
         onClose={handleCloseDeleteDialog}
@@ -925,7 +890,7 @@ const VehiclesPage: React.FC = () => {
         cancelText={MANAGEMENT.VEHICLES_PAGE.DIALOG_DELETE_CANCEL}
         loading={isDeletingVehicle}
         paperSx={deleteDialogPaperSx ?? {}}
-        icon={<DeleteOutlineIcon color="error" />}
+        icon={<Trash2 color="var(--mui-palette-error-main)" />}
       />
       <DialogComponent
         open={openAddVehicleModal}
@@ -934,7 +899,7 @@ const VehiclesPage: React.FC = () => {
         subtitle={MANAGEMENT.VEHICLES_PAGE.DIALOG_ADD_SUBTITLE}
         hideActions
         paperSx={addDialogPaperSx ?? {}}
-        icon={<AddCircleOutlineIcon color="info" />}
+        icon={<PlusCircle color="var(--mui-palette-info-main)" />}
       >
         <AddVehicleForm
           onSubmit={handleCreateVehicle}
@@ -951,16 +916,6 @@ const VehiclesPage: React.FC = () => {
           defaultParkingDate={selectedDate}
         />
       </DialogComponent>
-
-      {/* OCR Result Modal */}
-      <OCRResultModal
-        open={showOcrModal}
-        onClose={handleCloseOcrModal}
-        result={ocrResult}
-        isLoading={isOcrLoading}
-        error={ocrError}
-        onImportData={handleImportOcrData}
-      />
     </Box>
   );
 };

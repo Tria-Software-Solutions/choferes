@@ -105,6 +105,9 @@ const MenuComponent: React.FC<MenuComponentProps> = ({
         anchorEl={anchorEl}
         open={open}
         onClose={handleClose}
+        PaperProps={{
+          sx: subMenuPaperStyles(theme),
+        }}
       >
         {menuItems.map((item, index) => (
           <div key={index}>
@@ -157,4 +160,4 @@ const MenuComponent: React.FC<MenuComponentProps> = ({
   );
 };
 
-export default MenuComponent;
+export default React.memo(MenuComponent);

@@ -20,18 +20,16 @@ import {
   Box,
   Button,
   CircularProgress,
-  Grid,
+  Paper,
   Typography,
   useTheme,
+  useMediaQuery,
 } from "@mui/material";
 import EditableTableComponent from "../../../components/Table/EditableTable/EditableTable.component";
 import SearchBarComponent from "../../../components/SearchBar/SearchBar.component";
 import AddUserForm from "../../Forms/AddUserForm";
-import VisibilityIcon from "@mui/icons-material/Visibility";
-import VisibilityOffIcon from "@mui/icons-material/VisibilityOff";
-import AddCircleOutlineIcon from "@mui/icons-material/AddCircleOutline";
+import { Eye, EyeOff, PlusCircle, Plus, Users } from "lucide-react";
 import DialogComponent from "../../../components/Dialog/Dialog.component";
-import AddRoundedIcon from "@mui/icons-material/AddRounded";
 import { DASHBOARD_USERS } from "../../../constants/constants";
 import { NOTIFICATIONS } from "../../../constants/constants";
 import PasswordChangeForm from "../../Forms/PasswordChangeForm";
@@ -40,10 +38,6 @@ import {
   errorAlertStyles,
   retryButtonStyles,
   loadingBoxStyles,
-  searchBarBoxStyles,
-  addButtonMobileStyles,
-  addButtonDesktopBoxStyles,
-  addButtonDesktopStyles,
   showInactiveBoxStyles,
   showInactiveTypographyStyles,
   noUsersBoxStyles,
@@ -86,6 +80,7 @@ const ManageUsers: React.FC<{ isExpanded?: boolean }> = ({
   const [isUpdatingUserStatus, setIsUpdatingUserStatus] = useState(false);
   const [loadError, setLoadError] = useState<string | null>(null);
   const theme = useTheme();
+  const isSmallScreen = useMediaQuery(theme.breakpoints.down("sm"));
   const [passwordModalOpen, setPasswordModalOpen] = useState(false);
   const [passwordUserId, setPasswordUserId] = useState<number | null>(null);
   const location = useLocation();
@@ -414,7 +409,7 @@ const ManageUsers: React.FC<{ isExpanded?: boolean }> = ({
   }, []);
 
   return (
-    <Box>
+    <Box sx={{ height: "100%", minHeight: "500px", display: "flex", flexDirection: "column", overflow: "hidden" }}>
       {loadError ? (
         <Box sx={errorBoxStyles}>
           <Alert severity="error" sx={errorAlertStyles}>
@@ -441,144 +436,208 @@ const ManageUsers: React.FC<{ isExpanded?: boolean }> = ({
         </Box>
       ) : (
         <>
-          <Grid
-            container
-            spacing={2}
-            justifyContent="space-between"
-            alignItems="center"
+          {/* Premium Header with Paper */}
+          <Paper
+            elevation={0}
+            sx={{
+              borderRadius: "16px",
+              border: "1px solid rgba(0,0,0,0.08)",
+              boxShadow: "0 4px 24px rgba(0,0,0,0.08), 0 1px 2px rgba(0,0,0,0.04)",
+              overflow: "hidden",
+              flex: 1,
+              minHeight: 0,
+              display: "flex",
+              flexDirection: "column",
+            }}
           >
-            <Grid item xs={12} md={4}>
-              <Box sx={searchBarBoxStyles}>
-                {filteredUsers && (
-                  <SearchBarComponent
-                    placeholder={DASHBOARD_USERS.SEARCH_PLACEHOLDER}
-                    value={search}
-                    onChange={(e) => setSearch(e.target.value)}
-                    sx={{ flex: 1 }}
-                    fullWidth
-                  />
-                )}
-                <Button
-                  variant="contained"
-                  color="primary"
-                  onClick={handleOpenAddUserModal}
-                  sx={addButtonMobileStyles}
-                >
-                  <AddRoundedIcon />
-                </Button>
-              </Box>
-            </Grid>
-            <Grid item xs={12} md={8}>
+            {/* Header Section */}
+            <Box
+              sx={{
+                px: { xs: 2, sm: 3 },
+                py: { xs: 2, sm: 2.5 },
+                backgroundColor: theme.palette.background.paper,
+                color: theme.palette.text.primary,
+                borderBottom: `1px solid ${theme.palette.mode === "dark" ? "rgba(255,255,255,0.08)" : "rgba(0,0,0,0.08)"}`,
+              }}
+            >
               <Box
                 display="flex"
-                flexDirection="row"
-                alignItems="center"
-                justifyContent="flex-end"
+                justifyContent="space-between"
+                alignItems="flex-start"
+                mb={2}
+              >
+                <Box display="flex" alignItems="center" gap={1.5}>
+                  <Box
+                    sx={{
+                      backgroundColor: theme.palette.primary.main,
+                      borderRadius: "10px",
+                      p: 1,
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                    }}
+                  >
+                    <Users size={22} color={theme.palette.primary.contrastText} />
+                  </Box>
+                  <Box>
+                    <Typography
+                      variant={isSmallScreen ? "h6" : "h5"}
+                      sx={{
+                        fontWeight: 700,
+                        fontSize: { xs: "1.1rem", sm: "1.25rem" },
+                        color: theme.palette.text.primary,
+                        letterSpacing: "-0.02em",
+                        lineHeight: 1.2,
+                      }}
+                    >
+                      {isSmallScreen ? 'Usuarios' : 'Gestión de Usuarios'}
+                    </Typography>
+                    <Typography
+                      variant="caption"
+                      sx={{
+                        color: theme.palette.text.secondary,
+                        fontSize: "0.75rem",
+                        letterSpacing: "0.02em",
+                      }}
+                    >
+                      {filteredUsers.length} usuarios {showInactive ? '(mostrando inactivos)' : 'activos'}
+                    </Typography>
+                  </Box>
+                </Box>
+              </Box>
+
+              {/* Controls Row */}
+              <Box
+                display="flex"
+                flexDirection={{ xs: "column", sm: "row" }}
+                alignItems={{ xs: "stretch", sm: "center" }}
+                justifyContent="space-between"
                 gap={2}
-                sx={addButtonDesktopBoxStyles}
               >
-                <Box
-                  onClick={() => setShowInactive(!showInactive)}
-                  sx={showInactiveBoxStyles(theme)}
-                >
-                  {showInactive ? (
-                    <VisibilityOffIcon sx={{ fontSize: 20 }} />
-                  ) : (
-                    <VisibilityIcon sx={{ fontSize: 20 }} />
+                {/* Search */}
+                <Box flex={1} maxWidth={{ sm: "320px" }}>
+                  {filteredUsers && (
+                    <SearchBarComponent
+                      placeholder={DASHBOARD_USERS.SEARCH_PLACEHOLDER}
+                      value={search}
+                      onChange={(e) => setSearch(e.target.value)}
+                      fullWidth
+                    />
                   )}
-                  <Typography
-                    variant="body2"
-                    fontWeight={600}
-                    sx={showInactiveTypographyStyles}
-                  >
-                    {showInactive
-                      ? DASHBOARD_USERS.HIDE_INACTIVE
-                      : DASHBOARD_USERS.SHOW_INACTIVE}
-                  </Typography>
                 </Box>
-                <Button
-                  variant="contained"
-                  startIcon={<AddRoundedIcon />}
-                  onClick={handleOpenAddUserModal}
-                  sx={addButtonDesktopStyles}
-                >
-                  {DASHBOARD_USERS.ADD}
-                </Button>
-              </Box>
-            </Grid>
-            <Grid item xs={12} sx={{ display: { xs: "block", md: "none" } }}>
-              <Box
-                display="flex"
-                justifyContent="center"
-                alignItems="center"
-                sx={{ mt: 1 }}
-              >
+
+                {/* Show Inactive Toggle & Add Button */}
                 <Box
-                  onClick={() => setShowInactive(!showInactive)}
-                  sx={showInactiveBoxStyles(theme)}
+                  display="flex"
+                  flexDirection={{ xs: "column", sm: "row" }}
+                  alignItems={{ xs: "stretch", sm: "center" }}
+                  gap={1}
                 >
-                  {showInactive ? (
-                    <VisibilityOffIcon sx={{ fontSize: 20 }} />
-                  ) : (
-                    <VisibilityIcon sx={{ fontSize: 20 }} />
-                  )}
-                  <Typography
-                    variant="body2"
-                    fontWeight={600}
-                    sx={showInactiveTypographyStyles}
+                  <Box
+                    onClick={() => setShowInactive(!showInactive)}
+                    sx={showInactiveBoxStyles(theme)}
                   >
-                    {showInactive
-                      ? DASHBOARD_USERS.HIDE_INACTIVE
-                      : DASHBOARD_USERS.SHOW_INACTIVE}
-                  </Typography>
+                    {showInactive ? (
+                      <EyeOff size={18} />
+                    ) : (
+                      <Eye size={18} />
+                    )}
+                    <Typography
+                      variant="body2"
+                      fontWeight={600}
+                      sx={showInactiveTypographyStyles}
+                    >
+                      {showInactive
+                        ? DASHBOARD_USERS.HIDE_INACTIVE
+                        : DASHBOARD_USERS.SHOW_INACTIVE}
+                    </Typography>
+                  </Box>
+
+                  <Box sx={{ display: { xs: 'none', sm: 'flex' } }}>
+                    <Button
+                      variant="contained"
+                      startIcon={<Plus size={18} />}
+                      onClick={handleOpenAddUserModal}
+                      sx={{
+                        px: 3,
+                        py: 1,
+                        fontWeight: 600,
+                        fontSize: "0.9rem",
+                        letterSpacing: "-0.01em",
+                        borderRadius: '10px',
+                      }}
+                    >
+                      {DASHBOARD_USERS.ADD}
+                    </Button>
+                  </Box>
                 </Box>
               </Box>
-            </Grid>
-          </Grid>
-          <br />
-          {filteredUsers.length > 0 ? (
-            <EditableTableComponent<User>
-              key="users-table"
-              data={filteredUsers}
-              columns={[
-                "firstName",
-                "lastName",
-                "username",
-                "email",
-                "roleName",
-              ]}
-              editRowId={editRowId}
-              editFields={editFields}
-              setEditField={setEditField}
-              handleEdit={handleEdit}
-              handleCancel={handleCancel}
-              handleUpdate={handleUpdate}
-              handleOpenStatusDialog={handleOpenStatusDialog}
-              getRowId={(row) => row.id}
-              totalCount={totalCount}
-              page={page}
-              rowsPerPage={rowsPerPage}
-              setPage={setPage}
-              setRowsPerPage={setRowsPerPage}
-              isSaveDisabled={!isEditFormValid}
-              userPermissions={userPermissions}
-              isExpanded={isExpanded}
-              validateField={validateField}
-              passwordModalOpen={passwordModalOpen}
-              passwordUserId={passwordUserId}
-              onOpenPasswordModal={handleOpenPasswordModal}
-              onClosePasswordModal={handleClosePasswordModal}
-              showStatusColumn={true}
-            />
-          ) : (
-            <Box sx={noUsersBoxStyles}>
-              <Typography variant="h6" color="textSecondary">
-                {DASHBOARD_USERS.NO_USERS}
-              </Typography>
             </Box>
-          )}
-        </>
-      )}
+
+            {/* Mobile Add Button */}
+            <Box sx={{ display: { xs: 'flex', sm: 'none' }, p: 2, borderTop: `1px solid ${theme.palette.mode === "dark" ? "rgba(255,255,255,0.08)" : "rgba(0,0,0,0.08)"}` }}>
+              <Button
+                variant="contained"
+                fullWidth
+                startIcon={<Plus size={18} />}
+                onClick={handleOpenAddUserModal}
+                sx={{
+                  py: 1.5,
+                  fontWeight: 600,
+                  borderRadius: '10px',
+                }}
+              >
+                {DASHBOARD_USERS.ADD}
+              </Button>
+            </Box>
+
+            {/* Content Section */}
+            <Box sx={{ flex: 1, minHeight: 0, display: "flex", flexDirection: "column", overflow: "hidden" }}>
+            {filteredUsers.length > 0 ? (
+              <EditableTableComponent<User>
+                key="users-table"
+                data={filteredUsers}
+                columns={[
+                  "firstName",
+                  "lastName",
+                  "username",
+                  "email",
+                  "roleName",
+                ]}
+                editRowId={editRowId}
+                editFields={editFields}
+                setEditField={setEditField}
+                handleEdit={handleEdit}
+                handleCancel={handleCancel}
+                handleUpdate={handleUpdate}
+                handleOpenStatusDialog={handleOpenStatusDialog}
+                getRowId={(row) => row.id}
+                totalCount={totalCount}
+                page={page}
+                rowsPerPage={rowsPerPage}
+                setPage={setPage}
+                setRowsPerPage={setRowsPerPage}
+                isSaveDisabled={!isEditFormValid}
+                userPermissions={userPermissions}
+                isExpanded={isExpanded}
+                validateField={validateField}
+                passwordModalOpen={passwordModalOpen}
+                passwordUserId={passwordUserId}
+                onOpenPasswordModal={handleOpenPasswordModal}
+                onClosePasswordModal={handleClosePasswordModal}
+                showStatusColumn={true}
+              />
+            ) : (
+              <Box sx={noUsersBoxStyles}>
+                <Typography variant="h6" color="textSecondary">
+                  {DASHBOARD_USERS.NO_USERS}
+                </Typography>
+              </Box>
+            )}
+          </Box>
+          </Paper>
+      </>
+    )}
 
       <DialogComponent
         open={openStatusDialog}
@@ -599,7 +658,7 @@ const ManageUsers: React.FC<{ isExpanded?: boolean }> = ({
         subtitle={DASHBOARD_USERS.ADD_SUBTITLE}
         hideActions
         paperSx={addDialogPaperSx ?? {}}
-        icon={<AddCircleOutlineIcon color="info" />}
+        icon={<PlusCircle color="var(--mui-palette-info-main)" />}
       >
         <AddUserForm
           onSubmit={handleCreateUser}

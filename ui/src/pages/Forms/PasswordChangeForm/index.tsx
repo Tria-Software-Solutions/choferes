@@ -3,8 +3,6 @@ import {
   Box,
   Button,
   IconButton,
-  InputAdornment,
-  Tooltip,
   Alert,
   Typography,
   useTheme,
@@ -12,14 +10,13 @@ import {
 } from "@mui/material";
 import TextfieldComponent from "../../../components/Textfield/Textfield.component";
 import generateSecret from "../../../utils/generateSecret";
-import ContentCopyIcon from "@mui/icons-material/ContentCopy";
-import Visibility from "@mui/icons-material/Visibility";
-import VisibilityOff from "@mui/icons-material/VisibilityOff";
+import { Copy, Eye, EyeOff, Info } from "lucide-react";
 import FORMS, { PASSWORD_INFO_TITLE, PASSWORD_INFO_DESC } from "../../../constants/forms.constants";
 import NOTIFICATIONS from "../../../constants/notifications.constants";
 import MANAGEMENT from "../../../constants/management.constants";
 import { useDispatch } from "react-redux";
 import type { AppDispatch } from "../../../store/store";
+import PremiumTooltip from "../../../components/PremiumTooltip/PremiumTooltip.component";
 import {
   updateUserPassword,
   updateUserTemporalPassword,
@@ -30,8 +27,7 @@ import {
   temporalPasswordBox,
 } from "./styles";
 import { actionsBox, actionsInnerBox } from '../AdjustHoursDialog/styles';
-import { infoBox, infoIconBox, infoTitle, infoDesc, iconSx, submitButton } from '../AddEmployeeForm/styles';
-import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined';
+import { infoBox, infoIconBox, infoTitle, infoDesc, iconStyle } from '../AddEmployeeForm/styles';
 import { validatePassword, validatePasswordMatch } from '../../../utils/userValidation';
 
 interface PasswordChangeFormProps {
@@ -146,52 +142,42 @@ const PasswordChangeForm: React.FC<PasswordChangeFormProps> = ({
       <Grid container spacing={3}>
         <Grid item xs={12}>
           <TextfieldComponent
-            label={MANAGEMENT.DIALOG_PASSWORD_NEW}
             type={showNewPassword ? "text" : "password"}
             variant="outlined"
             fullWidth
-            value={fields.newPassword}
-            onChange={(e) => handleFieldChange("newPassword", e.target.value)}
             placeholder={MANAGEMENT.DIALOG_PASSWORD_NEW_PLACEHOLDER}
-            InputProps={{
-              endAdornment: (
-                <InputAdornment position="end">
-                  <IconButton
-                    onClick={() => setShowNewPassword((v) => !v)}
-                    edge="end"
-                  >
-                    {showNewPassword ? <VisibilityOff /> : <Visibility />}
-                  </IconButton>
-                </InputAdornment>
-              ),
-            }}
+            onChange={(e) => handleFieldChange("newPassword", e.target.value)}
+            endAdornment={
+              <IconButton
+                onClick={() => setShowNewPassword((v) => !v)}
+                edge="end"
+                size="small"
+              >
+                {showNewPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+              </IconButton>
+            }
             error={!!validatePassword(fields.newPassword)}
             helperText={validatePassword(fields.newPassword) || ""}
           />
         </Grid>
         <Grid item xs={12}>
           <TextfieldComponent
-            label={MANAGEMENT.DIALOG_PASSWORD_CONFIRM}
             type={showConfirmNewPassword ? "text" : "password"}
             variant="outlined"
             fullWidth
-            value={fields.confirmNewPassword}
+            placeholder={MANAGEMENT.DIALOG_PASSWORD_CONFIRM_PLACEHOLDER}
             onChange={(e) =>
               handleFieldChange("confirmNewPassword", e.target.value)
             }
-            placeholder={MANAGEMENT.DIALOG_PASSWORD_CONFIRM_PLACEHOLDER}
-            InputProps={{
-              endAdornment: (
-                <InputAdornment position="end">
-                  <IconButton
-                    onClick={() => setShowConfirmNewPassword((v) => !v)}
-                    edge="end"
-                  >
-                    {showConfirmNewPassword ? <VisibilityOff /> : <Visibility />}
-                  </IconButton>
-                </InputAdornment>
-              ),
-            }}
+            endAdornment={
+              <IconButton
+                onClick={() => setShowConfirmNewPassword((v) => !v)}
+                edge="end"
+                size="small"
+              >
+                {showConfirmNewPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+              </IconButton>
+            }
             error={!!validatePasswordMatch(fields.newPassword, fields.confirmNewPassword)}
             helperText={validatePasswordMatch(fields.newPassword, fields.confirmNewPassword) || ""}
           />
@@ -208,7 +194,11 @@ const PasswordChangeForm: React.FC<PasswordChangeFormProps> = ({
             variant="outlined"
             onClick={handleGenerateTemporalPassword}
             fullWidth
-            sx={submitButton}
+            sx={{
+              minHeight: { xs: 44, sm: 48 },
+              fontSize: "clamp(0.75rem, 1.25vw, 0.875rem)",
+              fontWeight: 600,
+            }}
           >
             Generar contraseña temporal
           </Button>
@@ -217,13 +207,13 @@ const PasswordChangeForm: React.FC<PasswordChangeFormProps> = ({
           {temporalPassword && (
             <Box sx={temporalPasswordBox}>
               <TextfieldComponent
-                label="Contraseña temporal generada"
+                placeholder="Contraseña temporal generada"
                 value={temporalPassword}
                 fullWidth
                 InputProps={{
                   readOnly: true,
                   endAdornment: (
-                    <Tooltip
+                    <PremiumTooltip
                       title={copySuccess ? "¡Copiado!" : "Copiar"}
                       placement="top"
                     >
@@ -232,12 +222,12 @@ const PasswordChangeForm: React.FC<PasswordChangeFormProps> = ({
                         edge="end"
                         size="small"
                       >
-                        <ContentCopyIcon
+                        <Copy
                           color={copySuccess ? "success" : "inherit"}
                           fontSize="small"
                         />
                       </IconButton>
-                    </Tooltip>
+                    </PremiumTooltip>
                   ),
                 }}
                 sx={{ flex: 1 }}
@@ -248,7 +238,7 @@ const PasswordChangeForm: React.FC<PasswordChangeFormProps> = ({
         <Grid item xs={12}>
           <Box sx={infoBox(theme)}>
             <Box sx={infoIconBox(theme)}>
-              <InfoOutlinedIcon sx={{ ...iconSx(theme), ...infoIconBox(theme) }} />
+              <Info style={iconStyle} />
             </Box>
             <Box>
               <Typography sx={infoTitle(theme)}>{PASSWORD_INFO_TITLE}</Typography>
@@ -272,7 +262,14 @@ const PasswordChangeForm: React.FC<PasswordChangeFormProps> = ({
                 type="submit"
                 variant="contained"
                 color="primary"
-                sx={{ minWidth: 120, py: 1.5, fontWeight: 600 }}
+                sx={{
+                  fontWeight: 600,
+                  fontSize: "0.95rem",
+                  textTransform: "none",
+                  letterSpacing: "0.01em",
+                  borderRadius: "12px",
+                  minHeight: "42px",
+                }}
                 disabled={
                   loading ||
                   !!validatePassword(fields.newPassword) ||

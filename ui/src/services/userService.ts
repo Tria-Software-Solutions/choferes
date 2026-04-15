@@ -16,10 +16,13 @@ export const authenticateUser = async (
     const response = await api.post("/users/login", payload, { timeout: 65000 });
     return response.data;
   } catch (error: unknown) {
-    const err = error as { code?: string };
+    const err = error as { code?: string; response?: { status?: number } };
 
-    // Retry once if the first attempt timed out.
-    if (err.code === "ECONNABORTED") {
+    // Retry once if the first attempt timed out or hit a transient server error during cold recovery.
+    if (err.code === "ECONNABORTED" || err.response?.status === 500) {
+      await new Promise((resolve) => {
+        setTimeout(resolve, 1500);
+      });
       const retryResponse = await api.post("/users/login", payload, { timeout: 65000 });
       return retryResponse.data;
     }

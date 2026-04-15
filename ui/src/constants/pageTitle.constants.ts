@@ -11,8 +11,8 @@ const PAGE_TITLE = {
   ROLES_SIMPLIFIED: "Roles",
   SCHEDULES: "Gestión de Horarios y Turnos",
   SCHEDULES_SIMPLIFIED: "Horarios y Turnos",
-  SETTINGS: "Configuración del Sistema",
-  SETTING_SIMPLIFIED: "Configuración",
+  PROFILE: "Perfil de Usuario",
+  PROFILE_SIMPLIFIED: "Perfil",
   VEHICLES: "Gestión de Vehículos y Parqueo",
   VEHICLES_SIMPLIFIED: "Vehículos y Parqueo",
 };

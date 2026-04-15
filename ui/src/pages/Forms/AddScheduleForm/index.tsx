@@ -4,7 +4,6 @@ import {
   Box,
   Typography,
   FormControl,
-  InputLabel,
   Select,
   MenuItem,
   Checkbox,
@@ -21,16 +20,12 @@ import { Schedule } from "../../../models/Schedule";
 import FORMS from "../../../constants/forms.constants";
 import DAYS_LIST from "../../../constants/days.constants";
 import { translateDayOptionsToSpanish } from "../../../utils/string";
-import AddRoundedIcon from "@mui/icons-material/AddRounded";
-import CloseRoundedIcon from "@mui/icons-material/CloseRounded";
+import { Plus, X, Calendar, Clock, AlertTriangle } from "lucide-react";
 import TextfieldComponent from "../../../components/Textfield/Textfield.component";
-import CalendarMonthOutlinedIcon from "@mui/icons-material/CalendarMonthOutlined";
-import AccessTimeOutlinedIcon from "@mui/icons-material/AccessTimeOutlined";
-import WarningAmberOutlinedIcon from "@mui/icons-material/WarningAmberOutlined";
 import {
   boxRoot,
   gridContainer,
-  iconSx,
+  iconStyle,
   formControl,
   daysSelectBox,
   dayChip,
@@ -41,7 +36,6 @@ import {
   clearButton,
   actionsInnerBox,
   cancelButton,
-  submitButton,
 } from "./styles";
 
 interface AddScheduleFormProps {
@@ -71,6 +65,7 @@ const AddScheduleForm: React.FC<AddScheduleFormProps> = ({
   });
 
   const [isFormValid, setIsFormValid] = useState(false);
+  const [formTouched, setFormTouched] = useState(false);
 
   const validateFields = useCallback((fields: typeof formData) => {
     const regex = {
@@ -94,6 +89,7 @@ const AddScheduleForm: React.FC<AddScheduleFormProps> = ({
   }, [formData, validateFields]);
 
   const handleSubmit = () => {
+    setFormTouched(true);
     if (isFormValid) {
       const newSchedule: Omit<Schedule, "id"> = {
         label: formData.label,
@@ -123,29 +119,28 @@ const AddScheduleForm: React.FC<AddScheduleFormProps> = ({
       <Grid container spacing={3} sx={gridContainer}>
         <Grid item xs={12} sm={6}>
           <TextfieldComponent
-            label={FORMS.ADD_SCHEDULE.SCHEDULE_LABEL}
+            placeholder={FORMS.ADD_SCHEDULE.SCHEDULE_LABEL_PLACEHOLDER}
             variant="outlined"
             fullWidth
-            placeholder={FORMS.ADD_SCHEDULE.SCHEDULE_LABEL_PLACEHOLDER}
             value={formData.label}
             onChange={(e) =>
               setFormData({ ...formData, label: e.target.value })
             }
-            icon={<CalendarMonthOutlinedIcon sx={iconSx(theme)} />}
+            icon={<Calendar style={iconStyle} />}
           />
         </Grid>
 
         <Grid item xs={12} sm={6}>
           <TextfieldComponent
-            label={FORMS.ADD_SCHEDULE.SCHEDULE_TIME_LABEL}
             variant="outlined"
             type="number"
             fullWidth
             placeholder={FORMS.ADD_SCHEDULE.SCHEDULE_TIME_PLACEHOLDER}
-            value={formData.hours}
-            onChange={(e) =>
-              setFormData({ ...formData, hours: Number(e.target.value) })
-            }
+            value={formData.hours === 0 ? "" : formData.hours}
+            onChange={(e) => {
+              const value = e.target.value;
+              setFormData({ ...formData, hours: value === "" ? 0 : Number(value) });
+            }}
             error={
               formData.hours !== 0 &&
               (isNaN(formData.hours) ||
@@ -160,25 +155,23 @@ const AddScheduleForm: React.FC<AddScheduleFormProps> = ({
                 ? FORMS.HOURS_INVALID
                 : ""
             }
-            icon={<AccessTimeOutlinedIcon sx={iconSx(theme)} />}
-            endAdornment={<Box sx={iconSx(theme)}>horas</Box>}
+            icon={<Clock style={iconStyle} />}
             inputProps={{ min: "0" }}
           />
         </Grid>
 
         <Grid item xs={12}>
           <FormControl variant="outlined" fullWidth sx={formControl(theme)}>
-            <InputLabel>{FORMS.DAYS_REQUIRED}</InputLabel>
             <Select
               multiple
-              label={FORMS.DAYS_REQUIRED}
+              displayEmpty
               value={formData.days}
               input={
                 <OutlinedInput
-                  label={FORMS.DAYS_REQUIRED}
+                  placeholder={formData.days.length === 0 ? FORMS.DAYS_REQUIRED : ''}
                   startAdornment={
                     <InputAdornment position="start">
-                      <CalendarMonthOutlinedIcon sx={iconSx(theme)} />
+                      <Calendar style={iconStyle} />
                     </InputAdornment>
                   }
                 />
@@ -200,12 +193,23 @@ const AddScheduleForm: React.FC<AddScheduleFormProps> = ({
                     : [e.target.value],
                 })
               }
-              error={formData.days.length === 0}
+              error={formTouched && formData.days.length === 0}
               MenuProps={{
                 PaperProps: {
-                  style: {
+                  sx: {
                     maxHeight: 320,
                     overflowY: "auto",
+                    mt: 0.5,
+                    borderRadius: "16px",
+                    background: theme.palette.mode === 'dark' 
+                      ? 'rgba(30,30,35,0.95)'
+                      : '#ffffff',
+                    boxShadow: theme.palette.mode === 'dark'
+                      ? "0 10px 40px rgba(0,0,0,0.4), 0 2px 8px rgba(0,0,0,0.2)"
+                      : "0 10px 40px rgba(0,0,0,0.15), 0 2px 8px rgba(0,0,0,0.1)",
+                    border: "none",
+                    overflow: 'hidden',
+                    pr: 0.5,
                   },
                 },
               }}
@@ -230,7 +234,7 @@ const AddScheduleForm: React.FC<AddScheduleFormProps> = ({
                 </MenuItem>
               ))}
             </Select>
-            {formData.days.length === 0 && (
+            {formTouched && formData.days.length === 0 && (
               <Typography
                 variant="caption"
                 sx={{
@@ -251,7 +255,7 @@ const AddScheduleForm: React.FC<AddScheduleFormProps> = ({
             <Box
               sx={{ mr: { xs: 1, sm: 2 }, color: theme.palette.warning.main }}
             >
-              <WarningAmberOutlinedIcon
+              <AlertTriangle
                 sx={{ color: theme.palette.warning.main, mr: { xs: 1, sm: 2 } }}
               />
             </Box>
@@ -289,7 +293,7 @@ const AddScheduleForm: React.FC<AddScheduleFormProps> = ({
             <Button
               variant="outlined"
               onClick={handleClearForm}
-              startIcon={<CloseRoundedIcon />}
+              startIcon={<X />}
               fullWidth={isSmallScreen}
               sx={clearButton}
             >
@@ -311,9 +315,16 @@ const AddScheduleForm: React.FC<AddScheduleFormProps> = ({
                 variant="contained"
                 onClick={handleSubmit}
                 disabled={!isFormValid || isLoading}
-                startIcon={<AddRoundedIcon />}
+                startIcon={<Plus size={18} />}
                 fullWidth={isSmallScreen}
-                sx={submitButton}
+                sx={{
+                  fontWeight: 600,
+                  fontSize: "0.95rem",
+                  textTransform: "none",
+                  letterSpacing: "0.01em",
+                  borderRadius: "12px",
+                  minHeight: "42px",
+                }}
               >
                 Agregar
               </Button>

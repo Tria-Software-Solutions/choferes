@@ -19,17 +19,17 @@ import {
   Box,
   Button,
   CircularProgress,
-  Grid,
+  Paper,
   Typography,
   useTheme,
+  useMediaQuery,
 } from "@mui/material";
 import EditableTableComponent from "../../../components/Table/EditableTable/EditableTable.component";
 import SearchBarComponent from "../../../components/SearchBar/SearchBar.component";
 import AddRoleForm from "../../Forms/AddRoleForm";
 import DialogComponent from "../../../components/Dialog/Dialog.component";
-import AddRoundedIcon from "@mui/icons-material/AddRounded";
-import DeleteOutlineIcon from "@mui/icons-material/DeleteOutline";
-import AddCircleOutlineIcon from "@mui/icons-material/AddCircleOutline";
+import { Plus, Trash2, PlusCircle, Shield } from "lucide-react";
+import PAGE_TITLE from "../../../constants/pageTitle.constants";
 import { DASHBOARD_ROLES } from "../../../constants/constants";
 import { NOTIFICATIONS } from "../../../constants/constants";
 import {
@@ -37,10 +37,6 @@ import {
   permissionChipStyles,
   loadingBoxStyles,
   backdropStyles,
-  searchBarBoxStyles,
-  addButtonMobileStyles,
-  addButtonDesktopBoxStyles,
-  addButtonDesktopStyles,
   noRolesBoxStyles,
   deleteDialogPaperSx,
   addDialogPaperSx,
@@ -55,6 +51,7 @@ const ManageRoles: React.FC<{ isExpanded?: boolean }> = ({
   const dispatch = useDispatch<AppDispatch>();
   const { userPermissions } = useAuthContext();
   const theme = useTheme();
+  const isSmallScreen = useMediaQuery(theme.breakpoints.down("sm"));
   const { roles, isLoadingRoles } = useSelector(
     (state: RootState) => state.roles,
   );
@@ -257,7 +254,7 @@ const ManageRoles: React.FC<{ isExpanded?: boolean }> = ({
   };
 
   // Renders column values for the table
-  const renderColumnValue = (column: keyof Role, value: unknown) => {
+  const renderColumnValue = (column: string, value: unknown) => {
     if (column === "permissionNames" && Array.isArray(value)) {
       return (
         <Box sx={permissionNamesBoxStyles}>
@@ -273,96 +270,182 @@ const ManageRoles: React.FC<{ isExpanded?: boolean }> = ({
   };
 
   return (
-    <Box>
-      {isLoadingRoles ? (
-        <Box sx={loadingBoxStyles}>
-          <Backdrop sx={backdropStyles(theme)} open={isLoadingRoles}>
-            <CircularProgress />
-          </Backdrop>
-        </Box>
-      ) : (
-        <>
-          <Grid
-            container
-            spacing={2}
+    <Box sx={{ height: "100%", minHeight: "500px", display: "flex", flexDirection: "column", overflow: "hidden" }}>
+      {/* Premium Card with Header and Grid */}
+      <Paper
+        elevation={0}
+        sx={{
+          borderRadius: "16px",
+          border: "1px solid rgba(0,0,0,0.08)",
+          boxShadow: "0 4px 24px rgba(0,0,0,0.08), 0 1px 2px rgba(0,0,0,0.04)",
+          overflow: "hidden",
+          flex: 1,
+          minHeight: 0,
+          display: "flex",
+          flexDirection: "column",
+        }}
+      >
+        {/* Header Section */}
+        <Box
+          sx={{
+            px: { xs: 2, sm: 3 },
+            py: { xs: 2, sm: 2.5 },
+            backgroundColor: theme.palette.background.paper,
+            color: theme.palette.text.primary,
+            borderBottom: `1px solid ${theme.palette.mode === "dark" ? "rgba(255,255,255,0.08)" : "rgba(0,0,0,0.08)"}`,
+          }}
+        >
+          <Box
+            display="flex"
             justifyContent="space-between"
-            alignItems="center"
+            alignItems="flex-start"
+            mb={2}
           >
-            <Grid item xs={12} md={4}>
-              <Box sx={searchBarBoxStyles}>
-                {filteredRoles && (
-                  <SearchBarComponent
-                    placeholder={DASHBOARD_ROLES.SEARCH_PLACEHOLDER}
-                    value={search}
-                    onChange={(e) => setSearch(e.target.value)}
-                    sx={{ flex: 1 }}
-                    fullWidth
-                  />
-                )}
-                <Button
-                  variant="contained"
-                  color="primary"
-                  onClick={handleOpenAddRoleModal}
-                  sx={addButtonMobileStyles}
-                >
-                  <AddRoundedIcon />
-                </Button>
-              </Box>
-            </Grid>
-            <Grid item xs={12} md={8}>
+            <Box display="flex" alignItems="center" gap={1.5}>
               <Box
-                display="flex"
-                flexDirection="row"
-                alignItems="center"
-                justifyContent="flex-end"
-                gap={2}
-                sx={addButtonDesktopBoxStyles}
+                sx={{
+                  backgroundColor: theme.palette.primary.main,
+                  borderRadius: "10px",
+                  p: 1,
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                }}
               >
-                <Button
-                  variant="contained"
-                  startIcon={<AddRoundedIcon />}
-                  onClick={handleOpenAddRoleModal}
-                  sx={addButtonDesktopStyles}
-                >
-                  {DASHBOARD_ROLES.ADD}
-                </Button>
+                <Shield size={22} color={theme.palette.primary.contrastText} />
               </Box>
-            </Grid>
-          </Grid>
-          <br />
-          {filteredRoles.length > 0 ? (
-            <EditableTableComponent<Role>
-              data={filteredRoles}
-              columns={["name", "permissionNames"]}
-              editRowId={editRowId}
-              editFields={editFields}
-              setEditField={(field, value) =>
-                setEditFields({ ...editFields, [field]: value })
-              }
-              handleEdit={handleEdit}
-              handleCancel={handleCancel}
-              handleUpdate={handleUpdate}
-              handleOpenDeleteDialog={handleOpenDeleteDialog}
-              getRowId={(row) => row.id}
-              totalCount={totalCount}
-              page={0}
-              rowsPerPage={rowsPerPage}
-              setPage={(newPage) => setSearch(search)}
-              setRowsPerPage={setRowsPerPage}
-              isSaveDisabled={!isEditFormValid}
-              userPermissions={userPermissions}
-              renderColumnValue={renderColumnValue}
-              isExpanded={isExpanded}
-            />
-          ) : (
-            <Box sx={noRolesBoxStyles}>
-              <Typography variant="h6" color="textSecondary">
-                {DASHBOARD_ROLES.NO_ROLES}
-              </Typography>
+              <Box>
+                <Typography
+                  variant={isSmallScreen ? "h6" : "h5"}
+                  sx={{
+                    fontWeight: 700,
+                    fontSize: { xs: "1.1rem", sm: "1.25rem" },
+                    color: theme.palette.text.primary,
+                    letterSpacing: "-0.02em",
+                    lineHeight: 1.2,
+                  }}
+                >
+                  {isSmallScreen ? PAGE_TITLE.ROLES_SIMPLIFIED : PAGE_TITLE.ROLES}
+                </Typography>
+                <Typography
+                  variant="caption"
+                  sx={{
+                    color: theme.palette.text.secondary,
+                    fontSize: "0.75rem",
+                    letterSpacing: "0.02em",
+                  }}
+                >
+                  {filteredRoles.length} roles configurados
+                </Typography>
+              </Box>
             </Box>
+          </Box>
+
+          {/* Controls Row */}
+          <Box
+            display="flex"
+            flexDirection={{ xs: "column", sm: "row" }}
+            alignItems={{ xs: "stretch", sm: "center" }}
+            justifyContent="space-between"
+            gap={2}
+          >
+            {/* Search */}
+            <Box flex={1} maxWidth={{ sm: "320px" }}>
+              {filteredRoles && (
+                <SearchBarComponent
+                  placeholder={DASHBOARD_ROLES.SEARCH_PLACEHOLDER}
+                  value={search}
+                  onChange={(e) => setSearch(e.target.value)}
+                  fullWidth
+                />
+              )}
+            </Box>
+
+            {/* Add Button */}
+            <Box sx={{ display: { xs: 'none', sm: 'flex' }, gap: 1 }}>
+              <Button
+                variant="contained"
+                startIcon={<Plus size={18} />}
+                onClick={handleOpenAddRoleModal}
+                sx={{
+                  px: 3,
+                  py: 1,
+                  fontWeight: 600,
+                  fontSize: "0.9rem",
+                  letterSpacing: "-0.01em",
+                  borderRadius: '10px',
+                }}
+              >
+                {DASHBOARD_ROLES.ADD}
+              </Button>
+            </Box>
+          </Box>
+        </Box>
+
+        {/* Mobile Add Button */}
+        <Box sx={{ display: { xs: 'flex', sm: 'none' }, p: 2, borderTop: `1px solid ${theme.palette.mode === "dark" ? "rgba(255,255,255,0.08)" : "rgba(0,0,0,0.08)"}` }}>
+          <Button
+            variant="contained"
+            fullWidth
+            startIcon={<Plus size={18} />}
+            onClick={handleOpenAddRoleModal}
+            sx={{
+              py: 1.5,
+              fontWeight: 600,
+              borderRadius: '10px',
+            }}
+          >
+            {DASHBOARD_ROLES.ADD}
+          </Button>
+        </Box>
+
+        {/* Content Section */}
+        <Box sx={{ flex: 1, minHeight: 0, display: "flex", flexDirection: "column", overflow: "hidden" }}>
+          {isLoadingRoles ? (
+            <Box sx={loadingBoxStyles}>
+              <Backdrop sx={backdropStyles(theme)} open={isLoadingRoles}>
+                <CircularProgress />
+              </Backdrop>
+            </Box>
+          ) : (
+            <>
+              {filteredRoles.length > 0 ? (
+                <EditableTableComponent<Role>
+                  data={filteredRoles}
+                  columns={["name", "permissionNames"]}
+                  editRowId={editRowId}
+                  editFields={editFields}
+                  setEditField={(field, value) =>
+                    setEditFields({ ...editFields, [field]: value })
+                  }
+                  handleEdit={handleEdit}
+                  handleCancel={handleCancel}
+                  handleUpdate={handleUpdate}
+                  handleOpenDeleteDialog={handleOpenDeleteDialog}
+                  getRowId={(row) => row.id}
+                  totalCount={totalCount}
+                  page={0}
+                  rowsPerPage={rowsPerPage}
+                  setPage={(newPage) => setSearch(search)}
+                  setRowsPerPage={setRowsPerPage}
+                  isSaveDisabled={!isEditFormValid}
+                  userPermissions={userPermissions}
+                  renderColumnValue={renderColumnValue}
+                  isExpanded={isExpanded}
+                />
+              ) : (
+                <Box sx={noRolesBoxStyles}>
+                  <Typography variant="h6" color="textSecondary">
+                    {DASHBOARD_ROLES.NO_ROLES}
+                  </Typography>
+                </Box>
+              )}
+            </>
           )}
-        </>
-      )}
+        </Box>
+      </Paper>
+
+      {/* Dialogs - Outside the main Paper */}
       {isExpanded && (
         <>
           <DialogComponent
@@ -376,7 +459,7 @@ const ManageRoles: React.FC<{ isExpanded?: boolean }> = ({
             cancelText={DASHBOARD_ROLES.DIALOG_DELETE_CANCEL}
             loading={isDeletingRole}
             paperSx={deleteDialogPaperSx ?? {}}
-            icon={<DeleteOutlineIcon color="error" />}
+            icon={<Trash2 color="var(--mui-palette-error-main)" />}
           />
           <DialogComponent
             open={openAddRoleModal}
@@ -385,7 +468,7 @@ const ManageRoles: React.FC<{ isExpanded?: boolean }> = ({
             subtitle={DASHBOARD_ROLES.DIALOG_ADD_SUBTITLE}
             hideActions
             paperSx={addDialogPaperSx ?? {}}
-            icon={<AddCircleOutlineIcon color="info" />}
+            icon={<PlusCircle color="var(--mui-palette-info-main)" />}
           >
             <AddRoleForm
               onSubmit={handleCreateRole}
