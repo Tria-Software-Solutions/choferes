@@ -6,7 +6,7 @@ const ROUTES = {
   REGISTER: "register",
   ROLES: "/roles",
   SCHEDULES: "/schedules",
-  SETTINGS: "/settings",
+  PROFILE: "/profile",
   VEHICLES: "/vehicles",
 };
 export default ROUTES;

@@ -11,24 +11,20 @@ import {
   useTheme,
   Divider,
   IconButton,
-  Tooltip,
 } from "@mui/material";
 import { PAGE_TITLE, DASHBOARD } from "../../../constants/constants";
-import AdminPanelSettingsIcon from "@mui/icons-material/AdminPanelSettings";
+import PremiumTooltip from "../../../components/PremiumTooltip/PremiumTooltip.component";
+import { Shield, X, Trash2, Database } from "lucide-react";
+import { PdfIcon, ExcelIcon } from "../../../components/Icons/FileIcons";
 import ManagePermissions from "../ManagePermissions";
 import {
   dashboardHeaderBoxStyles,
   dashboardTitleBoxStyles,
   dashboardTitleStyles,
-  dashboardIconStyles,
   dashboardDividerStyles,
   dashboardDeleteButtonStyles,
 } from "./styles";
 import SpeedDialComponent from "../../../components/SpeedDial/SpeedDial.component";
-import CloseRoundedIcon from "@mui/icons-material/CloseRounded";
-import DescriptionIcon from "@mui/icons-material/Description";
-import PictureAsPdfIcon from "@mui/icons-material/PictureAsPdf";
-import DeleteOutlineIcon from "@mui/icons-material/DeleteOutline";
 import { deleteAllExceptCoreTables } from "../../../services/backupService";
 import { useAppNotifications } from "../../../components/Snackbar/Snackbar.component";
 import { createBackupNotification, createDataDeletionNotification } from "../../../services/notificationService";
@@ -45,7 +41,6 @@ import {
   buildVehiclesExportData,
 } from "../../../utils/export";
 import { DASHBOARD_BULK_ACTIONS } from "../../../constants/dashboard.constants";
-import BackupIcon from "@mui/icons-material/Backup";
 
 // Dashboard page component for managing users, roles, and permissions
 const Dashboard: React.FC = () => {
@@ -74,12 +69,12 @@ const Dashboard: React.FC = () => {
   const exportActions = [
     {
       label: DASHBOARD_BULK_ACTIONS.EXPORT_EXCEL,
-      icon: <DescriptionIcon />,
+      icon: <ExcelIcon />,
       type: "excel",
     },
     {
       label: DASHBOARD_BULK_ACTIONS.EXPORT_PDF,
-      icon: <PictureAsPdfIcon />,
+      icon: <PdfIcon />,
       type: "pdf",
     },
   ];
@@ -200,9 +195,9 @@ const Dashboard: React.FC = () => {
             variant={isSmallScreen ? "h5" : "h4"}
             sx={dashboardTitleStyles}
           >
-            <AdminPanelSettingsIcon
-              fontSize={isSmallScreen ? "small" : "large"}
-              sx={dashboardIconStyles(theme)}
+            <Shield
+              size={isSmallScreen ? 20 : 32}
+              color={theme.palette.primary.main}
             />
             {PAGE_TITLE.DASHBOARD}
           </Typography>
@@ -220,23 +215,23 @@ const Dashboard: React.FC = () => {
                   handleExport(action.type as "excel" | "pdf");
                 },
               }))}
-              mainIcon={<BackupIcon />}
-              openIcon={<CloseRoundedIcon />}
+              mainIcon={<Database />}
+              openIcon={<X />}
               direction="left"
             />
           </Box>
           {/* Delete all data button: only appears after backup, visually identical to backup button */}
           {backupDone && (
-            <Tooltip title="Eliminar todos los datos" arrow>
+            <PremiumTooltip title="Eliminar todos los datos">
               <span>
                 <IconButton
                   onClick={() => setShowDeleteDialog(true)}
                   sx={dashboardDeleteButtonStyles(theme)}
                 >
-                  <DeleteOutlineIcon />
+                  <Trash2 />
                 </IconButton>
               </span>
-            </Tooltip>
+            </PremiumTooltip>
           )}
         </Box>
       </Box>
@@ -303,7 +298,7 @@ const Dashboard: React.FC = () => {
           confirmText={DASHBOARD_BULK_ACTIONS.DELETE_CONFIRM_TEXT}
           cancelText={DASHBOARD_BULK_ACTIONS.DELETE_CANCEL_TEXT}
           loading={loading}
-          icon={<DeleteOutlineIcon color="error" />}
+          icon={<Trash2 color="var(--mui-palette-error-main)" />}
         />
       )}
     </Box>

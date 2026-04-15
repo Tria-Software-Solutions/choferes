@@ -12,7 +12,6 @@ export const dashboardTitleBoxStyles: SxProps<Theme> = {
 export const dashboardTitleStyles: SxProps<Theme> = (theme) => ({
   display: "flex",
   alignItems: "center",
-  fontFamily: "'Urbanist', sans-serif",
   fontWeight: 800,
   color: theme.palette.text.primary,
   mb: 0.5,

@@ -1,6 +1,6 @@
-import React, { useMemo, useState, useRef, useCallback } from "react";
+import React, { useMemo, useState, useRef, useCallback, memo } from "react";
 import PropTypes from "prop-types";
-import { useNavigate } from "react-router-dom";
+import { PlusCircle } from "lucide-react";
 import { Employee } from "../../../models/Employee";
 import { Schedule } from "../../../models/Schedule";
 import { HoursWorked } from "../../../models/HoursWorked";
@@ -20,19 +20,14 @@ import {
   FormControl,
   TablePagination,
   TableSortLabel,
-  Divider,
   Box,
   useTheme,
   useMediaQuery,
   Typography,
   SelectChangeEvent,
-  Badge,
-  Tooltip,
   Stack,
   OutlinedInput,
   IconButton,
-  ListSubheader,
-  Checkbox,
 } from "@mui/material";
 import PaginationComponent from "../Pagination/Pagination.component";
 import {
@@ -49,27 +44,26 @@ import {
   OVERTIME,
 } from "../../../constants/constants";
 import InfoOutlinedIcon from "@mui/icons-material/InfoOutlined";
-import AccessTimeRoundedIcon from "@mui/icons-material/AccessTimeRounded";
+import PremiumTooltip from "../../../components/PremiumTooltip/PremiumTooltip.component";
 import MoreTimeIcon from "@mui/icons-material/MoreTime";
-import LocationOnOutlinedIcon from "@mui/icons-material/LocationOnOutlined";
-import StarOutlineOutlinedIcon from "@mui/icons-material/StarOutlineOutlined";
+import { ScheduleCellDropdown } from "./components/ScheduleCellDropdown";
+import { EmployeeCellDropdown } from "./components/EmployeeCellDropdown";
 import CalendarTodayIcon from "@mui/icons-material/CalendarToday";
 import DateRangeIcon from "@mui/icons-material/DateRange";
 import CalendarMonthIcon from "@mui/icons-material/CalendarMonth";
+import AddScheduleForm from "../../../pages/Forms/AddScheduleForm";
+import MANAGEMENT from "../../../constants/management.constants";
+import { createSchedule } from "../../../store/slices/schedulesSlice";
 import {
-  paperStyles,
   stickyHeaderBoxStyles,
   headerFlexBoxStyles,
   tableContainerStyles,
+  paperStyles,
+  tableRowBackground,
+  tableCellBackground,
   employeeColumnCellStyles,
   tableCellStyles,
   boldTypographyStyles,
-  menuItemStyles,
-  listSubheaderStyles,
-  stackTotalHoursStyles,
-  totalHoursTypographyStyles,
-  tableRowBackground,
-  tableCellBackground,
   employeeCellBoxStyles,
 } from "./SelectorTable.styles";
 
@@ -77,16 +71,13 @@ import {
 import {
   calculateTotalHours,
   calculateOvertime,
-  hasWorkedCurrentWeek,
   sortEmployeesByName,
   paginateEmployees,
-  generateRowsPerPageOptions,
   renderPeriodHeader,
   renderPeriodFooter,
   getPeriodMessage,
   getScheduleCellData,
   isToday,
-  getOvertimeBadgeColor,
   getDialogTitle,
   getCurrentHoursDisplay,
   getTimeAdjustmentError,
@@ -95,7 +86,8 @@ import {
 import AdjustHoursDialog from "../../../pages/Forms/AdjustHoursDialog";
 import WorkedHoursSummaryDialog from "../../../pages/Forms/WorkedHoursSummaryDialog";
 import DialogComponent from "../../Dialog/Dialog.component";
-import { addDialogPaperSx } from "../../../pages/Management/EmployeesPage/styles";
+import { adjustDialogPaperSx } from "../../../pages/Forms/AdjustHoursDialog/styles";
+import { summaryDialogPaperSx } from "../../../pages/Forms/WorkedHoursSummaryDialog/styles";
 import { useDispatch } from "react-redux";
 import type { AppDispatch } from "../../../store/store";
 import {
@@ -103,7 +95,6 @@ import {
   deleteHoursWorked, // <-- importa la acción de borrado
 } from "../../../store/slices/hoursWorkedSlice";
 import SwapHorizIcon from "@mui/icons-material/SwapHoriz";
-import SearchBarComponent from '../../SearchBar/SearchBar.component';
 
 // SelectorTable component displays and manages employee schedules, hours worked, and summary data for different periods (weekly, biweekly, monthly).
 // Props:
@@ -181,15 +172,28 @@ const SelectorTableComponent: React.FC<SelectorTableProps> = ({
   viewMode,
   setViewMode,
 }) => {
-  const navigate = useNavigate();
   const [timeAdjustment, setTimeAdjustment] = useState(0);
   const [orderDirection, setOrderDirection] = useState<"asc" | "desc">("asc");
   const [page, setPage] = useState(0);
   const [localRowsPerPage, setLocalRowsPerPage] = useState(5);
+  const [openAddScheduleModal, setOpenAddScheduleModal] = useState(false);
+  const [isCreatingSchedule, setIsCreatingSchedule] = useState(false);
   const rowsPerPage =
     rowsPerPageProp !== undefined ? rowsPerPageProp : localRowsPerPage;
   const setRowsPerPage =
     setRowsPerPageProp !== undefined ? setRowsPerPageProp : setLocalRowsPerPage;
+
+  const handleCreateSchedule = async (newSchedule: Omit<Schedule, "id">) => {
+    try {
+      setIsCreatingSchedule(true);
+      await dispatch(createSchedule(newSchedule));
+      setOpenAddScheduleModal(false);
+    } catch (error) {
+      // Error handling
+    } finally {
+      setIsCreatingSchedule(false);
+    }
+  };
   const [openAdjustDialogEmployee, setOpenAdjustDialogEmployee] =
     useState<Employee | null>(null);
   const [openInfoDialogEmployee, setOpenInfoDialogEmployee] =
@@ -201,8 +205,6 @@ const SelectorTableComponent: React.FC<SelectorTableProps> = ({
   const [selectedPeriod, setSelectedPeriod] = useState<PeriodType>("weekly");
   const [isMenuOpen, setIsMenuOpen] = useState<boolean>(false);
   const theme = useTheme();
-  const periodSelectorBg =
-    theme.palette.mode === "dark" ? "#111" : "#000000";
   const [employeeSearchTerms, setEmployeeSearchTerms] = useState<Record<string, string>>({});
 
   const getSearchKey = (scheduleId: number, date: string) => `${scheduleId}-${date}`;
@@ -266,7 +268,7 @@ const SelectorTableComponent: React.FC<SelectorTableProps> = ({
 
   // Use helper functions for hours calculations
   // 2. Usar selectedPeriod en lugar de 'weekly' en las funciones de totales y overtime
-  const resultTotalHours = (employee: Employee) => {
+  const resultTotalHours = useCallback((employee: Employee) => {
     return calculateTotalHours(
       employee,
       selectedPeriod,
@@ -280,9 +282,9 @@ const SelectorTableComponent: React.FC<SelectorTableProps> = ({
       monthlySummaries,
       multiplePeriods
     );
-  };
+  }, [selectedPeriod, currentWeek, weekNumber, biweekNumber, month, year, weeklySummaries, biweeklySummaries, monthlySummaries, multiplePeriods]);
 
-  const resultOvertime = (employee: Employee) => {
+  const resultOvertime = useCallback((employee: Employee) => {
     return calculateOvertime(
       employee,
       selectedPeriod,
@@ -296,27 +298,51 @@ const SelectorTableComponent: React.FC<SelectorTableProps> = ({
       monthlySummaries,
       multiplePeriods
     );
-  };
+  }, [selectedPeriod, currentWeek, weekNumber, biweekNumber, month, year, weeklySummaries, biweeklySummaries, monthlySummaries, multiplePeriods]);
 
-  const hasWorkedCurrentWeekForEmployee = (employee: Employee): boolean => {
-    return hasWorkedCurrentWeek(employee, weekNumber, year, weeklySummaries);
-  };
+  const hasWorkedCurrentWeekForEmployee = useCallback((employee: Employee): boolean => {
+    const summary = weeklySummaries.find(
+      (summary) =>
+        summary.employeeId === employee.id &&
+        summary.weekNumber === weekNumber &&
+        summary.year === year
+    );
+    return summary ? Number(summary.totalHours) > 0 : false;
+  }, [weekNumber, year, weeklySummaries]);
 
   // Use helper function for rows per page options
-  const rowsPerPageOptions = generateRowsPerPageOptions(rowsPerPage);
+  const rowsPerPageOptions = useMemo(() => {
+    const defaultOptions = [5, 10, 25, 50, 100];
+    const total = sortedEmployees.length;
+    
+    // Generate dynamic options based on total
+    const dynamicOptions: number[] = [];
+    let current = 5;
+    while (current < total) {
+      dynamicOptions.push(current);
+      current *= 2;
+    }
+    if (total > 0) {
+      dynamicOptions.push(total);
+    }
+    
+    // Combine with default options and remove duplicates
+    const allOptions = Array.from(new Set([...defaultOptions, ...dynamicOptions, rowsPerPage]));
+    return allOptions.filter((opt) => opt <= total || total === 0).sort((a, b) => a - b);
+  }, [rowsPerPage, sortedEmployees.length]);
 
   // Helper functions for tabbed summary dialog
   const calculateOvertimeHours = (totalHours: number, threshold: number) =>
     totalHours > threshold ? totalHours - threshold : 0;
 
-  const getEmployeeWeeklyHours = (id: number) => {
+  const getEmployeeWeeklyHours = useCallback((id: number) => {
     const summary = weeklySummaries.find(
       (s) =>
         s.employeeId === id && s.weekNumber === weekNumber && s.year === year
     );
     return summary ? summary.totalHours : 0;
-  };
-  const getEmployeeBiweeklyHours = (id: number) => {
+  }, [weeklySummaries, weekNumber, year]);
+  const getEmployeeBiweeklyHours = useCallback((id: number) => {
     const summary = biweeklySummaries.find(
       (s) =>
         s.employeeId === id &&
@@ -324,13 +350,13 @@ const SelectorTableComponent: React.FC<SelectorTableProps> = ({
         s.year === year
     );
     return summary ? summary.totalHours : 0;
-  };
-  const getEmployeeMonthlyHours = (id: number) => {
+  }, [biweeklySummaries, biweekNumber, year]);
+  const getEmployeeMonthlyHours = useCallback((id: number) => {
     const summary = monthlySummaries.find(
       (s) => s.employeeId === id && s.month === month && s.year === year
     );
     return summary ? summary.totalHours : 0;
-  };
+  }, [monthlySummaries, month, year]);
   const getEmployeeWeeklyOvertime = (id: number) =>
     calculateOvertimeHours(getEmployeeWeeklyHours(id), OVERTIME.WEEKLY);
   const getEmployeeBiweeklyOvertime = (id: number) =>
@@ -398,11 +424,11 @@ const SelectorTableComponent: React.FC<SelectorTableProps> = ({
 
   // Handler to change the assigned employees to a schedule in one day
   const handleScheduleEmployeesChange = (
-    event: SelectChangeEvent<number[]>,
+    value: number[],
     scheduleId: number,
     date: string
   ) => {
-    const selectedEmployeeIds = event.target.value as number[];
+    const selectedEmployeeIds = value;
     // Get employees currently assigned
     const currentlyAssigned = getEmployeesForScheduleAndDay(
       scheduleId,
@@ -460,21 +486,6 @@ const SelectorTableComponent: React.FC<SelectorTableProps> = ({
     });
   };
 
-  const getFilteredDropdownEmployees = (scheduleId: number, date: string): Employee[] => {
-    const term = (employeeSearchTerms[getSearchKey(scheduleId, date)] || "").toLowerCase();
-    return filteredEmployees
-      .filter((emp: Employee) =>
-        `${emp.firstName} ${emp.lastName}`.toLowerCase().includes(term)
-      )
-      .sort((a: Employee, b: Employee) =>
-        `${a.firstName} ${a.lastName}`.localeCompare(
-          `${b.firstName} ${b.lastName}`,
-          "es",
-          { sensitivity: "base" }
-        )
-      );
-  };
-
   return (
     <>
       <Paper sx={paperStyles}>
@@ -494,40 +505,6 @@ const SelectorTableComponent: React.FC<SelectorTableProps> = ({
               justifyContent="flex-start"
               sx={{ position: "absolute", left: 0, top: 0, height: "100%" }}
             >
-              <IconButton
-                aria-label="Cambiar vista"
-                onClick={() =>
-                  setViewMode(viewMode === "employee" ? "schedule" : "employee")
-                }
-                sx={{ 
-                  mr: 1,
-                  '&:hover': {
-                    backgroundColor: 'transparent',
-                  },
-                  '&:focus': {
-                    backgroundColor: 'transparent',
-                  },
-                  '&:active': {
-                    backgroundColor: 'transparent',
-                  },
-                  '&.Mui-focusVisible': {
-                    backgroundColor: 'transparent',
-                  }
-                }}
-              >
-                <SwapHorizIcon />
-              </IconButton>
-              <Typography 
-                variant="caption" 
-                sx={{ 
-                  mr: 2,
-                  display: { xs: 'none', sm: 'block' }
-                }}
-              >
-                {viewMode === "employee"
-                  ? SELECTOR_TABLE.EMPLOYEE_VIEW
-                  : SELECTOR_TABLE.SCHEDULE_VIEW}
-              </Typography>
             </Box>
             {/* Center title */}
             <Box
@@ -554,15 +531,10 @@ const SelectorTableComponent: React.FC<SelectorTableProps> = ({
           className="table-container"
           sx={{
             ...tableContainerStyles,
-            "& thead th": {
-              position: "sticky !important",
-              top: "0 !important",
-              zIndex: "30 !important",
-              backgroundColor: `${
-                theme.palette.mode === "dark" ? "#111" : "#000000"
-              } !important`,
-              color: "#fff !important",
-            },
+            maxHeight: "100%",
+            border: "none !important",
+            outline: "none !important",
+            boxShadow: "none !important",
           }}
           ref={tableContainerRef}
         >
@@ -570,113 +542,208 @@ const SelectorTableComponent: React.FC<SelectorTableProps> = ({
             stickyHeader
             aria-label="sticky table"
             sx={{
-              borderCollapse: "separate",
-              borderSpacing: 0,
+              width: "100%",
+              borderCollapse: "collapse",
+              border: "none !important",
+              "& td, & th": {
+                border: "none !important",
+                overflow: "hidden",
+                textOverflow: "ellipsis",
+                whiteSpace: "nowrap",
+              },
+              "& th:first-of-type, & td:first-of-type": {
+                width: viewMode === "employee" ? "12%" : "15%",
+                minWidth: viewMode === "employee" ? "140px" : "120px",
+              },
+              ...(viewMode === "employee" && {
+                "& th:nth-of-type(2), & td:nth-of-type(2)": {
+                  width: "5%",
+                  minWidth: "50px",
+                },
+              }),
+              ...(viewMode === "employee"
+                ? {
+                    "& th:nth-of-type(n+3):nth-of-type(-n+9), & td:nth-of-type(n+3):nth-of-type(-n+9)": {
+                      width: "11.8%",
+                      minWidth: "80px",
+                    },
+                  }
+                : {
+                    "& th:nth-of-type(n+2):nth-of-type(-n+8), & td:nth-of-type(n+2):nth-of-type(-n+8)": {
+                      width: "12.14%",
+                      minWidth: "100px",
+                    },
+                  }),
               "& .MuiTableCell-stickyHeader": {
-                backgroundColor:
-                  theme.palette.mode === "dark" ? "#111" : "#000000",
+                backgroundColor: "#000000",
                 color: "#fff",
                 zIndex: 15,
+                position: "sticky",
+                top: 0,
+                border: "none !important",
+                outline: "none !important",
+                boxShadow: "none !important",
               },
             }}
           >
-            <TableHead ref={tableHeadRef}>
+            <TableHead ref={tableHeadRef} sx={{ height: "36px", position: "sticky", top: 0, zIndex: 50, backgroundColor: "#000", border: "none !important", "& th": { border: "none !important" } }}>
               <TableRow>
                 <TableCell
                   className="employee-column"
                   sx={{
                     ...employeeColumnCellStyles(isSmallScreen),
-                    backgroundColor:
-                      theme.palette.mode === "dark"
-                        ? "#111"
-                        : "#000000",
+                    backgroundColor: "#000000",
                     color: "#fff",
+                    position: "sticky",
                     left: 0,
-                    zIndex: 16,
-                    minHeight: viewMode === "schedule" ? "40px" : "auto",
-                    height: viewMode === "schedule" ? "40px" : "auto",
+                    top: 0,
+                    zIndex: 60,
+                    padding: "4px 8px",
+                    height: "36px",
                     cursor: "pointer",
                     transition: "background-color 0.2s ease",
                     "&:hover": {
-                      backgroundColor:
-                        theme.palette.mode === "dark"
-                          ? "#333"
-                          : "#333",
+                      backgroundColor: "#333",
                     },
                   }}
                 >
-                  <TableSortLabel
-                    direction={orderDirection}
-                    onClick={() =>
-                      setOrderDirection((prev) =>
-                        prev === "asc" ? "desc" : "asc"
-                      )
-                    }
-                    sx={{
-                      color: "#fff",
-                    }}
-                  >
-                    {viewMode === "employee"
-                      ? SELECTOR_TABLE.EMPLOYEES
-                      : SELECTOR_TABLE.SCHEDULES || "Horarios"}
-                  </TableSortLabel>
+                  <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+                    <Box
+                      sx={{ display: "flex", alignItems: "center", gap: 1, cursor: "pointer" }}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setViewMode(viewMode === "employee" ? "schedule" : "employee");
+                      }}
+                    >
+                      <IconButton
+                        aria-label="Cambiar vista"
+                        title={viewMode === "employee" ? SELECTOR_TABLE.EMPLOYEES : SELECTOR_TABLE.SCHEDULES}
+                        sx={{
+                          backgroundColor: "transparent",
+                          padding: "4px",
+                          transition: "all 0.3s cubic-bezier(0.4, 0, 0.2, 1)",
+                          "&:hover": {
+                            backgroundColor: "transparent",
+                            transform: "scale(1.1)",
+                          },
+                        }}
+                      >
+                        <SwapHorizIcon sx={{ fontSize: "1.2rem", color: "#fff" }} />
+                      </IconButton>
+                      <Typography
+                        variant="caption"
+                        sx={{
+                          display: { xs: 'none', sm: 'block' },
+                          fontWeight: 500,
+                          fontSize: "0.875rem",
+                          letterSpacing: "-0.01em",
+                          color: "#fff",
+                          cursor: "pointer",
+                          userSelect: "none",
+                        }}
+                      >
+                        {viewMode === "employee"
+                          ? SELECTOR_TABLE.EMPLOYEES
+                          : SELECTOR_TABLE.SCHEDULES}
+                      </Typography>
+                    </Box>
+                    <TableSortLabel
+                      direction={orderDirection}
+                      onClick={() =>
+                        setOrderDirection((prev) =>
+                          prev === "asc" ? "desc" : "asc"
+                        )
+                      }
+                      sx={{
+                        color: "#fff",
+                      }}
+                    />
+                  </Box>
                 </TableCell>
-                {currentWeek.map(({ day, date }) => (
+                {viewMode === "employee" && permissions?.includes(
+                  PERMISSIONS.VIEW_EMPLOYEE_ROLES_HOURS
+                ) && (
                   <TableCell
-                    key={day}
                     align="center"
                     sx={{
                       ...tableCellStyles(isSmallScreen),
-                      backgroundColor:
-                        theme.palette.mode === "dark"
-                          ? "#111"
-                          : "#000000",
+                      backgroundColor: "#000000",
                       color: "#fff",
-                      whiteSpace: "nowrap",
-                      minHeight: viewMode === "schedule" ? "40px" : "auto",
-                      height: viewMode === "schedule" ? "40px" : "auto",
-                      cursor: "pointer",
-                      transition: "background-color 0.2s ease",
-                      "&:hover": {
-                        backgroundColor:
-                          theme.palette.mode === "dark"
-                            ? "#333"
-                            : "#333",
-                      },
+                      padding: "4px 8px",
+                      height: "36px",
+                      width: "60px",
+                      minWidth: "60px",
                     }}
-                  >
-                    {`${translateDayToAbrevSpanish(
-                      day as EnglishDayOfWeek
-                    )} ${formatHeaderDate(date)}`}
-                  </TableCell>
-                ))}
-                {viewMode === "employee" &&
-                  permissions?.includes(
-                    PERMISSIONS.VIEW_EMPLOYEE_ROLES_HOURS
-                  ) && (
-                    <>
-                      <TableCell
-                        sx={{
-                          backgroundColor:
-                            theme.palette.mode === "dark"
-                              ? "#111"
-                              : "#000000",
-                          color: "#fff",
-                        }}
-                      />
-                      <TableCell
-                        align="center"
-                        sx={{
-                          ...tableCellStyles(isSmallScreen),
-                          backgroundColor:
-                            theme.palette.mode === "dark"
-                              ? "#111"
-                              : "#000000",
-                          color: "#fff",
-                        }}
-                        colSpan={2}
-                      >
-                        <FormControl size="small" sx={{ minWidth: 120 }}>
+                  />
+                )}
+
+                {currentWeek.map(({ day, date, isoDate }) => {
+                  const today = new Date().toDateString() === new Date(isoDate).toDateString();
+                  return (
+                    <TableCell
+                      key={day}
+                      align="center"
+                      sx={{
+                        ...tableCellStyles(isSmallScreen),
+                        backgroundColor: "#000000",
+                        color: "#fff",
+                        whiteSpace: "nowrap",
+                        padding: "4px 8px",
+                        height: "36px",
+                        cursor: "pointer",
+                        transition: "background-color 0.2s ease",
+                        "&:hover": {
+                          backgroundColor: "#333",
+                        },
+                      }}
+                    >
+                      <Box sx={{ position: 'relative' }}>
+                        <Typography
+                          sx={{
+                            color: today ? "#00BCD4" : "#fff",
+                            fontWeight: today ? 700 : 600,
+                            fontSize: today ? "0.85rem" : "0.8rem",
+                            letterSpacing: today ? "0.05em" : "normal",
+                          }}
+                        >
+                          {`${translateDayToAbrevSpanish(
+                            day as EnglishDayOfWeek
+                          )} ${formatHeaderDate(date)}`}
+                        </Typography>
+                        {today && (
+                          <Box
+                            sx={{
+                              position: 'absolute',
+                              bottom: '-2px',
+                              left: '50%',
+                              transform: 'translateX(-50%)',
+                              width: '4px',
+                              height: '4px',
+                              borderRadius: '50%',
+                              backgroundColor: '#00BCD4',
+                            }}
+                          />
+                        )}
+                      </Box>
+                    </TableCell>
+                  );
+                })}
+                {viewMode === "employee" && permissions?.includes(
+                  PERMISSIONS.VIEW_EMPLOYEE_ROLES_HOURS
+                ) && (
+                  <TableCell
+                      align="center"
+                      sx={{
+                        ...tableCellStyles(isSmallScreen),
+                        backgroundColor: "#000000",
+                        color: "#fff",
+                        padding: "0 8px",
+                        height: "36px",
+                        verticalAlign: "middle",
+                      }}
+                      colSpan={2}
+                    >
+                        <FormControl size="small" sx={{ minWidth: 100, height: "36px", m: 0, backgroundColor: "transparent", mt: "-8px" }}>
                           <Select
                             value={selectedPeriod}
                             onChange={(e) =>
@@ -688,61 +755,156 @@ const SelectorTableComponent: React.FC<SelectorTableProps> = ({
                                 notched={false}
                                 label="Periodo"
                                 sx={{
-                                  backgroundColor: `${periodSelectorBg} !important`,
-                                  color: "#fff",
-                                  fontSize: "1rem",
+                                  backgroundColor: theme.palette.mode === 'light' ? "#000000 !important" : "transparent !important",
+                                  color: theme.palette.mode === 'light' ? "#fff" : theme.palette.text.primary,
+                                  fontSize: "0.85rem",
                                   fontWeight: 700,
+                                  height: "36px",
+                                  borderRadius: 0,
+                                  boxShadow: "none",
+                                  transition: "none",
                                   "& .MuiOutlinedInput-input": {
-                                    color: "#fff",
-                                    fontSize: "1rem",
+                                    color: theme.palette.mode === 'light' ? "#fff" : theme.palette.text.primary,
+                                    fontSize: "0.85rem",
                                     fontWeight: 700,
+                                    padding: "2px 28px 6px 8px !important",
+                                    lineHeight: "1.2",
+                                  },
+                                  "& fieldset": {
+                                    borderColor: "transparent",
+                                    borderWidth: 0,
+                                    border: "none",
+                                    borderRadius: 0,
+                                  },
+                                  "&:hover": {
+                                    boxShadow: "none",
+                                    "& fieldset": {
+                                      borderColor: "transparent",
+                                    },
+                                  },
+                                  "&.Mui-focused": {
+                                    boxShadow: "none",
+                                    "& fieldset": {
+                                      borderColor: "transparent",
+                                      borderWidth: 0,
+                                      border: "none",
+                                    },
                                   },
                                   "& .MuiOutlinedInput-root": {
-                                    backgroundColor: `${periodSelectorBg} !important`,
+                                    backgroundColor: "transparent !important",
                                   },
                                   "& .MuiInputBase-root": {
-                                    backgroundColor: `${periodSelectorBg} !important`,
+                                    backgroundColor: "transparent !important",
                                   },
-                                  border: "none",
                                 }}
                               />
                             }
                             sx={{
-                              backgroundColor: `${periodSelectorBg} !important`,
-                              color: "#fff",
-                              fontSize: "1rem",
-                              fontWeight: 700,
+                              backgroundColor: theme.palette.mode === 'light' ? "#000000" : "transparent",
+                              color: theme.palette.mode === 'light' ? "#fff" : theme.palette.text.primary,
+                              fontSize: "0.85rem",
+                              fontWeight: 600,
+                              borderRadius: 0,
+                              height: "36px",
                               "& .MuiSelect-select": {
-                                color: "#fff",
-                                backgroundColor: `${periodSelectorBg} !important`,
-                                fontSize: "1rem",
-                                fontWeight: 700,
+                                color: theme.palette.mode === 'light' ? "#fff" : theme.palette.text.primary,
+                                backgroundColor: theme.palette.mode === 'light' ? "#000000 !important" : "transparent !important",
+                                fontSize: "0.85rem",
+                                fontWeight: 600,
+                                padding: "2px 28px 6px 8px !important",
+                                display: "flex",
+                                alignItems: "center",
+                                gap: "4px",
+                                borderRadius: 0,
+                                minHeight: "36px !important",
+                                height: "36px",
+                                lineHeight: "1.2",
+                                justifyContent: "flex-start",
                               },
                               "& .MuiSelect-icon": {
-                                color: "#fff",
+                                color: "rgba(255,255,255,0.7)",
+                                fontSize: "1.1rem",
+                                right: "4px",
+                                top: "50%",
+                                transform: "translateY(-50%)",
                               },
                               "& .MuiOutlinedInput-notchedOutline": {
+                                borderColor: "transparent",
+                                borderWidth: 0,
                                 border: "none",
+                                borderRadius: 0,
                               },
                               "&:hover .MuiOutlinedInput-notchedOutline": {
+                                borderColor: "transparent",
+                              },
+                              "&.Mui-focused .MuiOutlinedInput-notchedOutline": {
+                                borderColor: "transparent",
+                                borderWidth: 0,
                                 border: "none",
                               },
-                              "&.Mui-focused .MuiOutlinedInput-notchedOutline":
-                                {
-                                  border: "none",
-                                },
+                              "&.Mui-active .MuiOutlinedInput-notchedOutline": {
+                                borderColor: "transparent",
+                                borderWidth: 0,
+                                border: "none",
+                              },
                               "& .MuiInputBase-root": {
-                                backgroundColor: `${periodSelectorBg} !important`,
+                                backgroundColor: "transparent !important",
                               },
                               "& .MuiOutlinedInput-root": {
-                                backgroundColor: `${periodSelectorBg} !important`,
+                                backgroundColor: "transparent !important",
+                              },
+                              "&:hover": {
+                                backgroundColor: "transparent",
+                              },
+                              "&.Mui-focused": {
+                                backgroundColor: "transparent",
+                              },
+                              "&.Mui-active": {
+                                backgroundColor: "transparent",
                               },
                             }}
                             MenuProps={{
+                              anchorOrigin: { horizontal: "center", vertical: "bottom" },
+                              transformOrigin: { horizontal: "center", vertical: "top" },
+                              marginThreshold: 0,
                               PaperProps: {
-                                style: {
-                                  maxHeight: 320,
+                                elevation: 0,
+                                sx: {
+                                  maxHeight: 280,
                                   overflowY: "auto",
+                                  mt: -0.5,
+                                  minWidth: 200,
+                                  background: theme.palette.mode === 'light' ? '#000000' : '#000000',
+                                  backdropFilter: "none",
+                                  border: `1px solid ${theme.palette.mode === 'dark' ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.08)'}`,
+                                  borderRadius: "16px",
+                                  boxShadow: "0 4px 24px rgba(0,0,0,0.08), 0 1px 2px rgba(0,0,0,0.04)",
+                                  pr: 0,
+                                  "& .MuiList-root": {
+                                    padding: "4px",
+                                  },
+                                  "& .MuiMenuItem-root": {
+                                    fontSize: "0.875rem",
+                                    fontWeight: 600,
+                                    padding: "10px 12px",
+                                    borderRadius: "10px",
+                                    margin: "2px 0",
+                                    color: theme.palette.mode === 'light' ? '#fff' : '#fff',
+                                    backgroundColor: "transparent",
+                                    transition: "all 0.2s cubic-bezier(0.4, 0, 0.2, 1)",
+                                    minHeight: "40px",
+                                    gap: "8px",
+                                    "&:hover": {
+                                      backgroundColor: 'rgba(255,255,255,0.08)',
+                                    },
+                                    "&.Mui-selected": {
+                                      backgroundColor: 'rgba(255,255,255,0.12)',
+                                      color: '#fff',
+                                    },
+                                    "&.Mui-selected:hover": {
+                                      backgroundColor: 'rgba(255,255,255,0.16)',
+                                    },
+                                  },
                                 },
                               },
                             }}
@@ -750,69 +912,63 @@ const SelectorTableComponent: React.FC<SelectorTableProps> = ({
                               switch (selected) {
                                 case "weekly":
                                   return (
-                                    <>
-                                      <CalendarTodayIcon
-                                        sx={{
-                                          fontSize: 18,
-                                          mr: 1,
-                                          color: "#fff",
-                                          verticalAlign: "middle",
-                                        }}
-                                      />
-                                      <span
-                                        style={{
-                                          color: "#fff",
-                                          fontSize: "1rem",
-                                          fontWeight: 700,
-                                        }}
-                                      >
+                                    <Box sx={{ display: "flex", alignItems: "center", gap: 0.5, height: "100%", py: 0 }}>
+                                      <Box sx={{
+                                        width: 16,
+                                        height: 16,
+                                        borderRadius: "3px",
+                                        backgroundColor: theme.palette.mode === 'light' ? "rgba(255,255,255,0.15)" : "rgba(0,0,0,0.05)",
+                                        display: "flex",
+                                        alignItems: "center",
+                                        justifyContent: "center",
+                                        flexShrink: 0,
+                                      }}>
+                                        <CalendarTodayIcon sx={{ fontSize: 10, color: theme.palette.mode === 'light' ? "#fff" : theme.palette.text.primary }} />
+                                      </Box>
+                                      <span style={{ color: theme.palette.mode === 'light' ? "#fff" : theme.palette.text.primary, fontSize: "0.85rem", fontWeight: 600, lineHeight: "1.2", display: "flex", alignItems: "center" }}>
                                         {SELECTOR_TABLE.WEEKLY}
                                       </span>
-                                    </>
+                                    </Box>
                                   );
                                 case "biweekly":
                                   return (
-                                    <>
-                                      <DateRangeIcon
-                                        sx={{
-                                          fontSize: 18,
-                                          mr: 1,
-                                          color: "#fff",
-                                          verticalAlign: "middle",
-                                        }}
-                                      />
-                                      <span
-                                        style={{
-                                          color: "#fff",
-                                          fontSize: "1rem",
-                                          fontWeight: 700,
-                                        }}
-                                      >
+                                    <Box sx={{ display: "flex", alignItems: "center", gap: 0.5, height: "100%", py: 0 }}>
+                                      <Box sx={{
+                                        width: 16,
+                                        height: 16,
+                                        borderRadius: "3px",
+                                        backgroundColor: theme.palette.mode === 'light' ? "rgba(255,255,255,0.15)" : "rgba(0,0,0,0.05)",
+                                        display: "flex",
+                                        alignItems: "center",
+                                        justifyContent: "center",
+                                        flexShrink: 0,
+                                      }}>
+                                        <DateRangeIcon sx={{ fontSize: 10, color: theme.palette.mode === 'light' ? "#fff" : theme.palette.text.primary }} />
+                                      </Box>
+                                      <span style={{ color: theme.palette.mode === 'light' ? "#fff" : theme.palette.text.primary, fontSize: "0.85rem", fontWeight: 600, lineHeight: "1.2", display: "flex", alignItems: "center" }}>
                                         {SELECTOR_TABLE.BIWEEKLY}
                                       </span>
-                                    </>
+                                    </Box>
                                   );
                                 case "monthly":
                                   return (
-                                    <>
-                                      <CalendarMonthIcon
-                                        sx={{
-                                          fontSize: 18,
-                                          mr: 1,
-                                          color: "#fff",
-                                          verticalAlign: "middle",
-                                        }}
-                                      />
-                                      <span
-                                        style={{
-                                          color: "#fff",
-                                          fontSize: "1rem",
-                                          fontWeight: 700,
-                                        }}
-                                      >
+                                    <Box sx={{ display: "flex", alignItems: "center", gap: 0.5, height: "100%", py: 0 }}>
+                                      <Box sx={{
+                                        width: 16,
+                                        height: 16,
+                                        borderRadius: "3px",
+                                        backgroundColor: theme.palette.mode === 'light' ? "rgba(255,255,255,0.15)" : "rgba(0,0,0,0.05)",
+                                        display: "flex",
+                                        alignItems: "center",
+                                        justifyContent: "center",
+                                        flexShrink: 0,
+                                      }}>
+                                        <CalendarMonthIcon sx={{ fontSize: 10, color: theme.palette.mode === 'light' ? "#fff" : theme.palette.text.primary }} />
+                                      </Box>
+                                      <span style={{ color: theme.palette.mode === 'light' ? "#fff" : theme.palette.text.primary, fontSize: "0.85rem", fontWeight: 600, lineHeight: "1.2", display: "flex", alignItems: "center" }}>
                                         {SELECTOR_TABLE.MONTHLY}
                                       </span>
-                                    </>
+                                    </Box>
                                   );
                                 default:
                                   return "";
@@ -820,42 +976,56 @@ const SelectorTableComponent: React.FC<SelectorTableProps> = ({
                             }}
                           >
                             <MenuItem value="weekly">
-                              <CalendarTodayIcon
-                                sx={{
-                                  fontSize: 18,
-                                  mr: 1,
-                                  color: "primary.main",
-                                  verticalAlign: "middle",
-                                }}
-                              />
-                              {SELECTOR_TABLE.WEEKLY}
+                              <Box sx={{ display: "flex", alignItems: "center", gap: 1.5, width: "100%" }}>
+                                <Box sx={{
+                                  width: 28,
+                                  height: 28,
+                                  borderRadius: "6px",
+                                  backgroundColor: "rgba(255,255,255,0.1)",
+                                  display: "flex",
+                                  alignItems: "center",
+                                  justifyContent: "center",
+                                }}>
+                                  <CalendarTodayIcon sx={{ fontSize: 16, color: "#fff" }} />
+                                </Box>
+                                {SELECTOR_TABLE.WEEKLY}
+                              </Box>
                             </MenuItem>
                             <MenuItem value="biweekly">
-                              <DateRangeIcon
-                                sx={{
-                                  fontSize: 18,
-                                  mr: 1,
-                                  color: "primary.main",
-                                  verticalAlign: "middle",
-                                }}
-                              />
-                              {SELECTOR_TABLE.BIWEEKLY}
+                              <Box sx={{ display: "flex", alignItems: "center", gap: 1.5, width: "100%" }}>
+                                <Box sx={{
+                                  width: 28,
+                                  height: 28,
+                                  borderRadius: "6px",
+                                  backgroundColor: "rgba(255,255,255,0.1)",
+                                  display: "flex",
+                                  alignItems: "center",
+                                  justifyContent: "center",
+                                }}>
+                                  <DateRangeIcon sx={{ fontSize: 16, color: "#fff" }} />
+                                </Box>
+                                {SELECTOR_TABLE.BIWEEKLY}
+                              </Box>
                             </MenuItem>
                             <MenuItem value="monthly">
-                              <CalendarMonthIcon
-                                sx={{
-                                  fontSize: 18,
-                                  mr: 1,
-                                  color: "primary.main",
-                                  verticalAlign: "middle",
-                                }}
-                              />
-                              {SELECTOR_TABLE.MONTHLY}
+                              <Box sx={{ display: "flex", alignItems: "center", gap: 1.5, width: "100%" }}>
+                                <Box sx={{
+                                  width: 28,
+                                  height: 28,
+                                  borderRadius: "6px",
+                                  backgroundColor: "rgba(255,255,255,0.1)",
+                                  display: "flex",
+                                  alignItems: "center",
+                                  justifyContent: "center",
+                                }}>
+                                  <CalendarMonthIcon sx={{ fontSize: 16, color: "#fff" }} />
+                                </Box>
+                                {SELECTOR_TABLE.MONTHLY}
+                              </Box>
                             </MenuItem>
                           </Select>
                         </FormControl>
-                      </TableCell>
-                    </>
+                    </TableCell>
                   )}
               </TableRow>
             </TableHead>
@@ -866,18 +1036,17 @@ const SelectorTableComponent: React.FC<SelectorTableProps> = ({
                       key={employee.id}
                       sx={{
                         ...tableRowBackground(rowIndex),
-                        "&:hover": {
-                          backgroundColor: rowIndex % 2 === 0 ? "background.paper" : "action.hover",
-                        },
-                        borderBottom: theme.palette.mode === "dark" ? "1px solid #444" : "none",
                       }}
                     >
                       <TableCell
-                        sx={Object.assign(
-                          {},
-                          employeeColumnCellStyles(isSmallScreen),
-                          tableCellBackground(rowIndex, false)
-                        )}
+                        sx={{
+                          padding: isSmallScreen ? "3px 6px" : "4px 8px",
+                          whiteSpace: "nowrap",
+                          ...tableCellBackground(rowIndex, false),
+                          position: "sticky",
+                          left: 0,
+                          zIndex: 10,
+                        }}
                       >
                         <Box
                           display="flex"
@@ -888,37 +1057,37 @@ const SelectorTableComponent: React.FC<SelectorTableProps> = ({
                           <Typography
                             variant="body2"
                             fontWeight={600}
-                            sx={totalHoursTypographyStyles}
+                            sx={{ minWidth: 48, textAlign: "right" }}
                           >
                             {employee.firstName} {employee.lastName}
                           </Typography>
-                          {permissions?.includes(
-                            PERMISSIONS.VIEW_EMPLOYEE_ROLES_HOURS
-                          ) && (
-                            <Tooltip title="Ver información" arrow>
-                              <span>
-                                <IconButton
-                                  size="medium"
-                                  sx={{
-                                    color: "primary.main",
-                                    backgroundColor: "transparent",
-                                    "&:hover": {
-                                      backgroundColor: "primary.lighter",
-                                      boxShadow: 1,
-                                    },
-                                    transition: "background 0.2s",
-                                  }}
-                                  onClick={() =>
-                                    setOpenInfoDialogEmployee(employee)
-                                  }
-                                >
-                                  <InfoOutlinedIcon fontSize="medium" />
-                                </IconButton>
-                              </span>
-                            </Tooltip>
-                          )}
                         </Box>
                       </TableCell>
+                      {viewMode === "employee" && permissions?.includes(
+                        PERMISSIONS.VIEW_EMPLOYEE_ROLES_HOURS
+                      ) && (
+                        <TableCell
+                          align="center"
+                          sx={{
+                            padding: isSmallScreen ? "3px 6px" : "4px 8px",
+                            ...tableCellBackground(rowIndex, false),
+                          }}
+                        >
+                          <PremiumTooltip title="Ver información">
+                            <span>
+                              <IconButton
+                                size="small"
+                                color="primary"
+                                onClick={() =>
+                                  setOpenInfoDialogEmployee(employee)
+                                }
+                              >
+                                <InfoOutlinedIcon fontSize="small" />
+                              </IconButton>
+                            </span>
+                          </PremiumTooltip>
+                        </TableCell>
+                      )}
                       {currentWeek.map(({ day, date }) => {
                         const scheduleData = getScheduleCellData(
                           employee,
@@ -931,128 +1100,28 @@ const SelectorTableComponent: React.FC<SelectorTableProps> = ({
                         return (
                           <TableCell
                             key={day}
+                            align="center"
                             sx={tableCellBackground(rowIndex, isToday(date))}
                           >
-                            <FormControl fullWidth>
-                              <Select
-                                value={scheduleData.finalSelectedLabel}
-                                onChange={(event: SelectChangeEvent<string>) =>
-                                  handleChange(
-                                    event,
-                                    employee.id,
-                                    new Date(date)
-                                  )
-                                }
-                                disabled={
-                                  !permissions?.includes(
-                                    PERMISSIONS.EDIT_EMPLOYEE_ROLES
-                                  )
-                                }
-                                renderValue={(selected) => (
-                                  <span style={{ fontSize: "0.85rem" }}>
-                                    {selected}
-                                  </span>
-                                )}
-                                input={
-                                  <OutlinedInput
-                                    notched={false}
-                                    label="Ubicación"
-                                    sx={{
-                                      backgroundColor: "transparent",
-                                      "& .MuiOutlinedInput-root": {
-                                        backgroundColor: "transparent",
-                                      },
-                                      "& .MuiInputBase-root": {
-                                        backgroundColor: "transparent",
-                                      },
-                                    }}
-                                  />
-                                }
-                                MenuProps={{
-                                  PaperProps: {
-                                    style: {
-                                      maxHeight: 320,
-                                      overflowY: "auto",
-                                    },
-                                  },
-                                }}
-                              >
-                                <ListSubheader
-                                  sx={listSubheaderStyles("primary.main")}
-                                >
-                                  <LocationOnOutlinedIcon
-                                    sx={{ mr: 1, color: "primary.main" }}
-                                    fontSize="small"
-                                  />
-                                  {SELECTOR_TABLE.LOCATIONS}
-                                </ListSubheader>
-                                {scheduleData.options
-                                  .filter((option) => !option.specialSchedule)
-                                  .sort((a, b) =>
-                                    a.label.localeCompare(b.label)
-                                  )
-                                  .map((option) => (
-                                    <MenuItem
-                                      key={option.id}
-                                      value={option.label}
-                                      sx={menuItemStyles}
-                                    >
-                                      {option.label}
-                                    </MenuItem>
-                                  ))}
-                                <ListSubheader
-                                  sx={listSubheaderStyles("warning.main")}
-                                >
-                                  <StarOutlineOutlinedIcon
-                                    sx={{ mr: 1, color: "warning.main" }}
-                                    fontSize="small"
-                                  />
-                                  {SELECTOR_TABLE.SPECIAL_SCHEDULES}
-                                </ListSubheader>
-                                {scheduleData.options
-                                  .filter((option) => option.specialSchedule)
-                                  .sort((a, b) =>
-                                    a.label.localeCompare(b.label)
-                                  )
-                                  .map((option) => (
-                                    <MenuItem
-                                      key={option.id}
-                                      value={option.label}
-                                      sx={menuItemStyles}
-                                    >
-                                      {option.label}
-                                    </MenuItem>
-                                  ))}
-                                {permissions?.includes(
-                                  PERMISSIONS.CREATE_SCHEDULES
-                                ) && (
-                                  <MenuItem
-                                    value={"Other"}
-                                    onClick={() => navigate("/schedules")}
-                                  >
-                                    <Box
-                                      display="flex"
-                                      justifyContent="space-between"
-                                      width="100%"
-                                      alignItems="center"
-                                    >
-                                      {SELECTOR_TABLE.OTHER}
-                                    </Box>
-                                  </MenuItem>
-                                )}
-                              </Select>
-                            </FormControl>
+                            <EmployeeCellDropdown
+                              value={scheduleData.finalSelectedLabel}
+                              options={scheduleData.options}
+                              disabled={!permissions?.includes(PERMISSIONS.EDIT_EMPLOYEE_ROLES)}
+                              onChange={(event) => handleChange(event, employee.id, new Date(date))}
+                              theme={theme}
+                              styles={{}}
+                            />
                           </TableCell>
                         );
                       })}
-                      {permissions?.includes(
+                      {viewMode === "employee" && permissions?.includes(
                         PERMISSIONS.VIEW_EMPLOYEE_ROLES_HOURS
                       ) && (
                         <>
                           <TableCell
                             align="center"
                             sx={{
-                              padding: isSmallScreen ? "8px" : "16px",
+                              padding: isSmallScreen ? "3px 6px" : "4px 8px",
                               ...tableCellBackground(rowIndex, false),
                               color: theme.palette.text.primary,
                             }}
@@ -1063,40 +1132,31 @@ const SelectorTableComponent: React.FC<SelectorTableProps> = ({
                               justifyContent="center"
                               alignItems="center"
                             >
-                              <Tooltip title="Ajustar horas" arrow>
-                                <span>
-                                  <IconButton
-                                    size="medium"
-                                    disabled={
-                                      !hasWorkedCurrentWeekForEmployee(employee)
-                                    }
-                                    sx={{
-                                      color: hasWorkedCurrentWeekForEmployee(
-                                        employee
-                                      )
-                                        ? "warning.main"
-                                        : "grey.400",
-                                      backgroundColor: "transparent",
-                                      "&:hover": {
-                                        backgroundColor: "warning.lighter",
-                                        boxShadow: 1,
-                                      },
-                                      transition: "background 0.2s",
-                                    }}
-                                    onClick={() =>
-                                      setOpenAdjustDialogEmployee(employee)
-                                    }
-                                  >
-                                    <MoreTimeIcon fontSize="medium" />
-                                  </IconButton>
-                                </span>
-                              </Tooltip>
+                              {(() => {
+                                const hasWorked = hasWorkedCurrentWeekForEmployee(employee);
+                                return (
+                                  <PremiumTooltip title="Ajustar horas">
+                                    <span>
+                                      <IconButton
+                                        size="small"
+                                        color={hasWorked ? "warning" : "default"}
+                                        disabled={!hasWorked}
+                                        onClick={() =>
+                                          setOpenAdjustDialogEmployee(employee)
+                                        }
+                                      >
+                                        <MoreTimeIcon fontSize="small" />
+                                      </IconButton>
+                                    </span>
+                                  </PremiumTooltip>
+                                );
+                              })()}
                             </Stack>
                           </TableCell>
                           <TableCell
-                            align="left"
+                            align="center"
                             sx={{
-                              padding: isSmallScreen ? "8px" : "16px",
+                              padding: isSmallScreen ? "3px 6px" : "4px 8px",
                               position: isSmallScreen ? "static" : "sticky",
                               right: 0,
                               zIndex: 2,
@@ -1106,63 +1166,42 @@ const SelectorTableComponent: React.FC<SelectorTableProps> = ({
                           >
                             <Stack
                               direction="row"
-                              spacing={3.5}
+                              spacing={1}
                               alignItems="center"
                               justifyContent="center"
-                              sx={stackTotalHoursStyles}
                             >
                               <Typography
                                 variant="body2"
                                 fontWeight={600}
-                                sx={totalHoursTypographyStyles}
+                                sx={{
+                                  color: "text.primary",
+                                  fontSize: "0.875rem",
+                                }}
                               >
-                                {resultTotalHours(employee)}{" "}
-                                {SELECTOR_TABLE.HOURS}
+                                {resultTotalHours(employee)} {SELECTOR_TABLE.HOURS}
                               </Typography>
-                              <Tooltip
-                                title={SELECTOR_TABLE.OVERTIME_HOURS}
-                                arrow
+                              <PremiumTooltip
+                                title={Number(resultOvertime(employee)) > 0 ? `${resultOvertime(employee)} horas extra` : "Horas extra"}
                               >
-                                <span>
-                                  <Badge
-                                    badgeContent={resultOvertime(employee)}
-                                    max={9999999}
-                                    color={getOvertimeBadgeColor(
-                                      resultOvertime(employee)
-                                    )}
-                                    showZero
-                                    overlap="circular"
-                                    anchorOrigin={{
-                                      vertical: "top",
-                                      horizontal: "right",
-                                    }}
-                                    sx={{
-                                      "& .MuiBadge-badge": {
-                                        minWidth: 22,
-                                        height: 22,
-                                        fontSize: "0.95rem",
-                                        fontWeight: 500,
-                                        borderRadius: "8px",
-                                        right:
-                                          String(resultOvertime(employee))
-                                            .length > 1
-                                            ? -15
-                                            : -10,
-                                        top: -10,
-                                        transform: "none",
-                                        padding: "0 6px",
-                                      },
-                                    }}
-                                  >
-                                    <AccessTimeRoundedIcon
-                                      sx={{
-                                        color: "primary.main",
-                                        fontSize: 28,
-                                      }}
-                                    />
-                                  </Badge>
-                                </span>
-                              </Tooltip>
+                                <Box
+                                  sx={{
+                                    display: "flex",
+                                    alignItems: "center",
+                                    justifyContent: "center",
+                                    minWidth: 24,
+                                    height: 24,
+                                    px: 0.5,
+                                    borderRadius: "12px",
+                                    backgroundColor: Number(resultOvertime(employee)) > 0 ? "success.main" : "grey.300",
+                                    color: Number(resultOvertime(employee)) > 0 ? "#fff" : "grey.600",
+                                    fontSize: "0.75rem",
+                                    fontWeight: 700,
+                                    boxShadow: Number(resultOvertime(employee)) > 0 ? "0 2px 6px rgba(76, 175, 80, 0.3)" : "0 1px 3px rgba(0, 0, 0, 0.1)",
+                                  }}
+                                >
+                                  +{resultOvertime(employee)}
+                                </Box>
+                              </PremiumTooltip>
                             </Stack>
                           </TableCell>
                         </>
@@ -1174,28 +1213,29 @@ const SelectorTableComponent: React.FC<SelectorTableProps> = ({
                       key={group.label}
                       sx={{
                         ...tableRowBackground(rowIndex),
-                        "&:hover": {
-                          backgroundColor: rowIndex % 2 === 0 ? "background.paper" : "action.hover",
-                        },
                         borderBottom: theme.palette.mode === "dark" ? "1px solid #444" : "none",
                       }}
                     >
                       <TableCell
-                        sx={Object.assign(
-                          {},
-                          employeeColumnCellStyles(isSmallScreen),
-                          tableCellBackground(rowIndex, false)
-                        )}
+                        sx={{
+                          padding: isSmallScreen ? "3px 6px" : "4px 8px",
+                          whiteSpace: "nowrap",
+                          ...tableCellBackground(rowIndex, false),
+                          position: "sticky",
+                          left: 0,
+                          zIndex: 10,
+                        }}
                       >
                         <Typography
                           variant="body2"
                           fontWeight={600}
-                          sx={totalHoursTypographyStyles}
+                          sx={{ minWidth: 48, textAlign: "right" }}
                           component="span"
                         >
                           {group.label}
                         </Typography>
                       </TableCell>
+
                       {currentWeek.map(({ day, date }) => {
                         const scheduleForDay =
                           group.dayToSchedule[day.toLowerCase()];
@@ -1211,175 +1251,22 @@ const SelectorTableComponent: React.FC<SelectorTableProps> = ({
                         return (
                           <TableCell
                             key={day}
+                            align="center"
                             sx={tableCellBackground(rowIndex, isToday(date))}
                           >
                             {isAvailable ? (
-                              <Box>
-                                <FormControl fullWidth>
-                                  <Select
-                                    multiple
-                                    displayEmpty
-                                    value={assignedEmployees.map((e) => e.id)}
-                                    onChange={(event) =>
-                                      handleScheduleEmployeesChange(
-                                        event,
-                                        scheduleForDay.id,
-                                        date
-                                      )
-                                    }
-                                    renderValue={(selected) => {
-                                      const selectedArray =
-                                        selected as number[];
-                                      if (
-                                        !selectedArray ||
-                                        selectedArray.length === 0
-                                      ) {
-                                        return (
-                                          <span
-                                            style={{
-                                              color:
-                                                theme.palette.text.disabled,
-                                              fontSize: "0.85rem",
-                                              fontWeight: 400,
-                                            }}
-                                          >
-                                            {SELECTOR_TABLE.UNASSIGNED}
-                                          </span>
-                                        );
-                                      }
-                                      const names = selectedArray
-                                        .map((id) => {
-                                          const emp = filteredEmployees.find(
-                                            (e) => e.id === id
-                                          );
-                                          return emp
-                                            ? `${emp.firstName} ${emp.lastName}`
-                                            : "";
-                                        })
-                                        .filter(Boolean);
-                                      return (
-                                        <Box
-                                          sx={{
-                                            display: "flex",
-                                            flexDirection: "column",
-                                            gap: 0.5,
-                                          }}
-                                        >
-                                          {names.map((name, index) => (
-                                            <Typography
-                                              key={index}
-                                              variant="body2"
-                                              component="span"
-                                              sx={{
-                                                fontSize: "0.85rem",
-                                                fontWeight: 500,
-                                                fontStyle: "normal",
-                                              }}
-                                            >
-                                              {name}
-                                            </Typography>
-                                          ))}
-                                        </Box>
-                                      );
-                                    }}
-                                    disabled={
-                                      !permissions?.includes(
-                                        PERMISSIONS.EDIT_EMPLOYEE_ROLES
-                                      )
-                                    }
-                                    input={<OutlinedInput notched={false} />}
-                                    MenuProps={{
-                                      PaperProps: {
-                                        style: {
-                                          maxHeight: 320,
-                                          overflowY: "auto",
-                                        },
-                                      },
-                                    }}
-                                  >
-                                    {/* Sticky SearchBar as first MenuItem */}
-                                    <MenuItem tabIndex={-1} sx={{
-                                      position: 'sticky',
-                                      top: 0,
-                                      zIndex: 2,
-                                      backgroundColor: theme.palette.background.paper,
-                                      cursor: 'default',
-                                      padding: 0,
-                                      minHeight: '40px',
-                                      '&:hover': { backgroundColor: theme.palette.background.paper },
-                                      boxShadow: 1,
-                                    }}>
-                                      <Box sx={{ px: 1, py: 0.5, width: '100%', backgroundColor: theme.palette.background.paper }}>
-                                        <SearchBarComponent
-                                          value={employeeSearchTerms[getSearchKey(scheduleForDay.id, date)] || ""}
-                                          onChange={handleSearchChange(scheduleForDay.id, date)}
-                                          placeholder="Buscar empleado..."
-                                          fullWidth
-                                          size="small"
-                                          margin="dense"
-                                          onKeyDown={(e: React.KeyboardEvent<HTMLInputElement>) => e.stopPropagation()}
-                                          onClick={(e: React.MouseEvent<HTMLInputElement>) => e.stopPropagation()}
-                                          sx={{
-                                            backgroundColor: 'none',
-                                            '& .MuiOutlinedInput-root': {
-                                              backgroundColor: 'none',
-                                              borderRadius: 1,
-                                              boxShadow: 'none',
-                                              border: 'none',
-                                              '& fieldset': {
-                                                border: 'none',
-                                              },
-                                            },
-                                            '& .MuiOutlinedInput-input': {
-                                              color: theme.palette.text.primary,
-                                            },
-                                          }}
-                                        />
-                                      </Box>
-                                    </MenuItem>
-                                    {/* Employee options */}
-                                    {getFilteredDropdownEmployees(scheduleForDay.id, date).map((employee: Employee) => (
-                                      <MenuItem
-                                        key={employee.id}
-                                        value={employee.id}
-                                        sx={{
-                                          ...menuItemStyles,
-                                          display: "flex",
-                                          alignItems: "center",
-                                          width: "100%",
-                                        }}
-                                      >
-                                        <Checkbox
-                                          checked={assignedEmployees.some(
-                                            (e) => e.id === employee.id
-                                          )}
-                                          size="small"
-                                          sx={{
-                                            color: theme.palette.primary.main,
-                                            "&.Mui-checked": {
-                                              color:
-                                                theme.palette.primary.main,
-                                            },
-                                            "&.MuiCheckbox-indeterminate": {
-                                              color:
-                                                theme.palette.primary.main,
-                                            },
-                                          }}
-                                        />
-                                        <span
-                                          style={{
-                                            textAlign: "left",
-                                            flex: 1,
-                                          }}
-                                        >
-                                          {employee.firstName}{" "}
-                                          {employee.lastName}
-                                        </span>
-                                      </MenuItem>
-                                    ))}
-                                  </Select>
-                                </FormControl>
-                              </Box>
+                              <ScheduleCellDropdown
+                                assignedEmployees={assignedEmployees}
+                                filteredEmployees={filteredEmployees}
+                                canEdit={permissions?.includes(PERMISSIONS.EDIT_EMPLOYEE_ROLES)}
+                                employeeSearchTerms={employeeSearchTerms}
+                                onScheduleEmployeesChange={handleScheduleEmployeesChange}
+                                onSearchChange={handleSearchChange}
+                                scheduleForDay={scheduleForDay}
+                                date={date}
+                                theme={theme}
+                                styles={{}}
+                              />
                             ) : (
                               <Typography
                                 variant="body2"
@@ -1396,12 +1283,12 @@ const SelectorTableComponent: React.FC<SelectorTableProps> = ({
                           </TableCell>
                         );
                       })}
+
                     </TableRow>
                   ))}
             </TableBody>
           </Table>
         </TableContainer>
-        <Divider />
         <Box
           display="flex"
           justifyContent="space-between"
@@ -1409,12 +1296,15 @@ const SelectorTableComponent: React.FC<SelectorTableProps> = ({
           sx={{
             backgroundColor: theme.palette.background.paper,
             color: theme.palette.text.primary,
-            borderBottomLeftRadius: 8,
-            borderBottomRightRadius: 8,
+            minHeight: isSmallScreen ? "32px" : "36px",
+            px: { xs: 1, sm: 1.5 },
+            py: 0,
+            flexShrink: 0,
+            borderTop: `1px solid ${theme.palette.mode === "dark" ? "rgba(255,255,255,0.06)" : "rgba(0,0,0,0.06)"}`,
           }}
         >
           {!isSmallScreen && (
-            <Typography variant="body2" sx={{ ml: 2 }}>
+            <Typography variant="caption" sx={{ color: theme.palette.text.secondary, fontSize: "0.75rem", letterSpacing: "0.01em" }}>
               {renderPeriodFooter(
                 "weekly", // Assuming default to weekly for now, as selectedPeriod is removed
                 currentWeek,
@@ -1440,32 +1330,72 @@ const SelectorTableComponent: React.FC<SelectorTableProps> = ({
                 setPage(0);
               }}
               labelRowsPerPage={
-                <Typography variant="body2" component="span">
+                <Typography variant="caption" component="span" sx={{ fontSize: "0.75rem" }}>
                   {TABLE.ROWS_PER_PAGE}
                 </Typography>
               }
               labelDisplayedRows={() => ""}
               ActionsComponent={PaginationComponent}
               sx={{
-                color:
-                  theme.palette.mode === "dark"
-                    ? "#fff"
-                    : theme.palette.primary.contrastText,
-                ".MuiTablePagination-toolbar": {
-                  backgroundColor: "transparent",
+                flexShrink: 0,
+                borderRadius: 0,
+                margin: 0,
+                border: 'none',
+                '.MuiTablePagination-toolbar': {
+                  minHeight: '32px',
+                  paddingTop: '2px',
+                  paddingBottom: '0px',
+                  border: 'none',
                 },
-                ".MuiTablePagination-selectLabel, .MuiTablePagination-input, .MuiTablePagination-displayedRows":
-                  {
-                    color:
-                      theme.palette.mode === "dark"
-                        ? "#fff"
-                        : theme.palette.primary.contrastText,
+                '.MuiTablePagination-selectLabel, .MuiTablePagination-input, .MuiTablePagination-displayedRows': {
+                  fontSize: '0.75rem',
+                },
+                '.MuiTablePagination-select': {
+                  fontSize: '0.75rem',
+                  border: 'none',
+                },
+                '.MuiTablePagination-selectIcon': {
+                  fontSize: '1rem',
+                },
+                '.MuiIconButton-root': {
+                  padding: '2px',
+                },
+                '.MuiInputBase-root': {
+                  border: 'none',
+                  '&:before, &:after': {
+                    display: 'none',
                   },
-                ".MuiSvgIcon-root": {
-                  color:
-                    theme.palette.mode === "dark"
-                      ? "#fff"
-                      : theme.palette.primary.contrastText,
+                  fontSize: '0.75rem',
+                },
+                '.MuiTablePagination-input': {
+                  fontSize: '0.75rem',
+                },
+              }}
+              SelectProps={{
+                MenuProps: {
+                  anchorOrigin: { horizontal: 'left', vertical: 'top' },
+                  transformOrigin: { horizontal: 'left', vertical: 'bottom' },
+                  PaperProps: {
+                    sx: {
+                      maxHeight: 200,
+                      '& .MuiMenuItem-root': {
+                        fontSize: '0.75rem',
+                        padding: '6px 12px',
+                        border: 'none',
+                        '&.Mui-selected': {
+                          backgroundColor: 'transparent',
+                          border: 'none',
+                        },
+                        '&:hover': {
+                          backgroundColor: theme.palette.action.hover,
+                          border: 'none',
+                        },
+                      },
+                    },
+                  },
+                },
+                onBlur: (e) => {
+                  e.target.blur();
                 },
               }}
             />
@@ -1478,7 +1408,7 @@ const SelectorTableComponent: React.FC<SelectorTableProps> = ({
         title={SELECTOR_TABLE.ADJUST_HOURS}
         subtitle={getDialogTitle(openAdjustDialogEmployee)}
         hideActions
-        paperSx={addDialogPaperSx as object}
+        paperSx={adjustDialogPaperSx as object}
         icon={<MoreTimeIcon color="warning" />}
       >
         <AdjustHoursDialog
@@ -1509,7 +1439,7 @@ const SelectorTableComponent: React.FC<SelectorTableProps> = ({
         title={SELECTOR_TABLE.SUMMARY_TITLE}
         subtitle={getDialogTitle(openInfoDialogEmployee)}
         hideActions
-        paperSx={addDialogPaperSx as object}
+        paperSx={summaryDialogPaperSx as object}
         icon={<InfoOutlinedIcon color="info" />}
       >
         <WorkedHoursSummaryDialog
@@ -1528,6 +1458,21 @@ const SelectorTableComponent: React.FC<SelectorTableProps> = ({
           currentMonth={month}
           currentYear={year}
           theme={theme}
+        />
+      </DialogComponent>
+      <DialogComponent
+        open={openAddScheduleModal}
+        onClose={() => setOpenAddScheduleModal(false)}
+        title={MANAGEMENT.DIALOG_ADD_TITLE}
+        subtitle={MANAGEMENT.SCHEDULES_PAGE.DIALOG_ADD_SUBTITLE}
+        hideActions
+        paperSx={{}}
+        icon={<PlusCircle color="var(--mui-palette-info-main)" />}
+      >
+        <AddScheduleForm
+          onSubmit={handleCreateSchedule}
+          onCancel={() => setOpenAddScheduleModal(false)}
+          isLoading={isCreatingSchedule}
         />
       </DialogComponent>
     </>
@@ -1554,4 +1499,4 @@ SelectorTableComponent.propTypes = {
   setViewMode: PropTypes.func.isRequired,
 };
 
-export default SelectorTableComponent;
+export default memo(SelectorTableComponent);

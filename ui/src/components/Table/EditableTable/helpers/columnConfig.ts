@@ -157,65 +157,28 @@ export const shouldShowColumn = (column: string, config: Record<string, ColumnCo
   return !config[column]?.hidden;
 };
 
-export const PARKING_PREFIX_OPTIONS = [
-  { value: "ATP", label: "ATP" },
-  { value: "CE", label: "CE" },
-  { value: "CR", label: "CR" },
-  { value: "CT", label: "CT" },
-  { value: "CV", label: "CV" },
-  { value: "CX", label: "CX" },
-  { value: "CY", label: "CY" },
-  { value: "CZ", label: "CZ" },
-  { value: "DA", label: "DA" },
-  { value: "DB", label: "DB" },
-  { value: "DC", label: "DC" },
-  { value: "DD", label: "DD" },
-  { value: "DE", label: "DE" },
-  { value: "DF", label: "DF" },
-  { value: "DG", label: "DG" },
-  { value: "DH", label: "DH" },
-  { value: "DI", label: "DI" },
-  { value: "DJ", label: "DJ" },
-  { value: "DK", label: "DK" },
-  { value: "DL", label: "DL" },
-  { value: "DM", label: "DM" },
-  { value: "DN", label: "DN" },
-  { value: "DO", label: "DO" },
-  { value: "DP", label: "DP" },
-  { value: "DQ", label: "DQ" },
-  { value: "DR", label: "DR" },
-  { value: "DS", label: "DS" },
-  { value: "DT", label: "DT" },
-  { value: "DU", label: "DU" },
-  { value: "DV", label: "DV" },
-  { value: "DW", label: "DW" },
-  { value: "DX", label: "DX" },
-  { value: "DY", label: "DY" },
-  { value: "DZ", label: "DZ" },
-  { value: "EA", label: "EA" },
-  { value: "EB", label: "EB" },
-  { value: "EC", label: "EC" },
-  { value: "ED", label: "ED" },
-  { value: "EE", label: "EE" },
-  { value: "EF", label: "EF" },
-  { value: "EG", label: "EG" },
-  { value: "EH", label: "EH" },
-  { value: "EI", label: "EI" },
-  { value: "EJ", label: "EJ" },
-  { value: "EK", label: "EK" },
-  { value: "EL", label: "EL" },
-  { value: "EM", label: "EM" },
-  { value: "EN", label: "EN" },
-  { value: "EO", label: "EO" },
-  { value: "EP", label: "EP" },
-  { value: "EQ", label: "EQ" },
-  { value: "ER", label: "ER" },
-  { value: "ES", label: "ES" },
-  { value: "ET", label: "ET" },
-  { value: "EU", label: "EU" },
-  { value: "EV", label: "EV" },
-  { value: "EW", label: "EW" },
-  { value: "EX", label: "EX" },
-  { value: "EY", label: "EY" },
-  { value: "EZ", label: "EZ" },
-]; 
+// Generar opciones de prefijos de parqueo programáticamente
+const generatePrefixOptions = () => {
+  const options: { value: string; label: string }[] = [{ value: "ATP", label: "ATP" }];
+  
+  // CE es un caso especial
+  options.push({ value: "CE", label: "CE" });
+  
+  // Generar CR-CZ (C + R-Z)
+  for (let charCode = 82; charCode <= 90; charCode++) {
+    const prefix = `C${String.fromCharCode(charCode)}`;
+    options.push({ value: prefix, label: prefix });
+  }
+  
+  // Generar DA-EZ (D-E + A-Z)
+  for (let first = 68; first <= 69; first++) {
+    for (let second = 65; second <= 90; second++) {
+      const prefix = `${String.fromCharCode(first)}${String.fromCharCode(second)}`;
+      options.push({ value: prefix, label: prefix });
+    }
+  }
+  
+  return options;
+};
+
+export const PARKING_PREFIX_OPTIONS = generatePrefixOptions(); 

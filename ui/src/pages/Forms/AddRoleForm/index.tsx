@@ -12,17 +12,14 @@ import {
   useMediaQuery,
   Typography,
 } from "@mui/material";
-import AddRoundedIcon from "@mui/icons-material/AddRounded";
-import CloseRoundedIcon from "@mui/icons-material/CloseRounded";
-import GroupOutlinedIcon from "@mui/icons-material/GroupOutlined";
-import InfoOutlinedIcon from "@mui/icons-material/InfoOutlined";
+import { Plus, X, Users, Info } from "lucide-react";
 import { Permission } from "../../../models/Permission";
 import TextfieldComponent from "../../../components/Textfield/Textfield.component";
 import { FORMS } from "../../../constants/constants";
 import {
   boxRoot,
   gridContainer,
-  iconSx,
+  iconStyle,
   permissionsLabel,
   permissionsError,
   permissionsBox,
@@ -33,7 +30,6 @@ import {
   clearButton,
   actionsInnerBox,
   cancelButton,
-  submitButton,
   infoBox,
   infoIconBox,
   infoTitle,
@@ -163,15 +159,14 @@ const AddRoleForm: React.FC<AddRoleFormProps> = ({
       <Grid container spacing={3} sx={gridContainer}>
         <Grid item xs={12}>
           <TextfieldComponent
-            label={FORMS.ADD_ROLE.NAME_LABEL}
+            placeholder={FORMS.ADD_ROLE.NAME_PLACEHOLDER}
             variant="outlined"
             fullWidth
-            placeholder={FORMS.ADD_ROLE.NAME_PLACEHOLDER}
             value={formData.name}
             onChange={(e) => handleFieldChange("name", e.target.value)}
             error={errors.name !== ""}
             helperText={errors.name}
-            icon={<GroupOutlinedIcon sx={iconSx(theme)} />}
+            icon={<Users style={iconStyle} />}
           />
         </Grid>
 
@@ -271,8 +266,8 @@ const AddRoleForm: React.FC<AddRoleFormProps> = ({
         <Grid item xs={12}>
           <Box sx={infoBox(theme)}>
             <Box sx={infoIconBox(theme)}>
-              <InfoOutlinedIcon
-                sx={{ ...iconSx(theme), ...infoIconBox(theme) }}
+              <Info
+                style={iconStyle}
               />
             </Box>
             <Box>
@@ -291,7 +286,7 @@ const AddRoleForm: React.FC<AddRoleFormProps> = ({
             <Button
               variant="outlined"
               onClick={handleClearForm}
-              startIcon={<CloseRoundedIcon />}
+              startIcon={<X />}
               fullWidth={isSmallScreen}
               sx={clearButton}
             >
@@ -312,10 +307,17 @@ const AddRoleForm: React.FC<AddRoleFormProps> = ({
               <Button
                 variant="contained"
                 onClick={handleSubmit}
-                disabled={!isFormValid() || isLoading}
-                startIcon={<AddRoundedIcon />}
+                disabled={!isFormValid || isLoading}
+                startIcon={<Plus size={18} />}
                 fullWidth={isSmallScreen}
-                sx={submitButton}
+                sx={{
+                  fontWeight: 600,
+                  fontSize: "0.95rem",
+                  textTransform: "none",
+                  letterSpacing: "0.01em",
+                  borderRadius: "12px",
+                  minHeight: "42px",
+                }}
               >
                 {isLoading
                   ? FORMS.ADD_ROLE.BUTTON_ADDING

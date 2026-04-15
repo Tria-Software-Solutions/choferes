@@ -1,4 +1,5 @@
 import { Theme } from "@mui/material/styles";
+import { CSSProperties } from "react";
 
 export const boxRoot = {
   width: "100%",
@@ -29,9 +30,9 @@ export const formControl = (theme: Theme) => ({
   },
 });
 
-export const iconSx = (theme: Theme) => ({
-  color: theme.palette.text.secondary,
-});
+export const iconStyle: CSSProperties = {
+  color: "#666666",
+};
 
 export const infoBox = (theme: Theme) => ({
   display: "flex",
@@ -87,12 +88,4 @@ export const actionsInnerBox = {
 export const cancelButton = {
   minHeight: { xs: 44, sm: 48 },
   fontSize: "clamp(0.75rem, 1.25vw, 0.875rem)",
-};
-
-export const submitButton = {
-  minHeight: { xs: 44, sm: 48 },
-  fontSize: "clamp(0.75rem, 1.25vw, 0.875rem)",
-  fontWeight: 600,
-  px: { xs: 2, sm: 4 },
-  py: { xs: 1, sm: 1.5 },
 };

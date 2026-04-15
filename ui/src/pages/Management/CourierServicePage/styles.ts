@@ -1,4 +1,5 @@
 import { SxProps, Theme } from "@mui/material";
+import { CSSProperties } from "react";
 
 export const courierHeaderBoxStyles: SxProps<Theme> = {
   mb: 3,
@@ -12,10 +13,11 @@ export const courierTitleBoxStyles: SxProps<Theme> = {
 export const courierTitleStyles: SxProps<Theme> = {
   display: "flex",
   alignItems: "center",
-  fontFamily: "'Urbanist', sans-serif",
   fontWeight: 800,
-  color: "#000000",
-  mb: 0.5,
+  fontSize: "1.75rem",
+  letterSpacing: "-0.02em",
+  color: (theme) => theme.palette.text.primary,
+  mb: 1,
   gap: 1.5,
 };
 
@@ -28,7 +30,7 @@ export const courierDividerStyles = (theme: Theme): SxProps<Theme> => ({
   width: 48,
   borderBottomWidth: 3,
   borderColor: theme.palette.primary.main,
-  borderRadius: 2,
+  borderRadius: "2px",
   mx: "auto",
   mb: 0.5,
 });
@@ -55,27 +57,31 @@ export const searchBarBoxStyles: SxProps<Theme> = {
   alignItems: "center",
   justifyContent: "center",
   gap: 2,
-  height: 56,
+  height: 48,
 };
 
 export const addButtonMobileStyles: SxProps<Theme> = {
   display: { xs: "flex", md: "none" },
   minWidth: "auto",
-  width: 56,
-  height: 56,
-  borderRadius: "50%",
+  width: 48,
+  height: 48,
+  borderRadius: "12px",
   p: 0,
   alignSelf: "center",
 };
 
 export const datePickerSx: SxProps<Theme> = (theme) => ({
-  height: "56px",
+  height: "48px",
   minWidth: "180px",
   "& .MuiOutlinedInput-root": {
-    height: "56px",
+    height: "48px",
     borderRadius: 2,
     backgroundColor: theme.palette.background.paper,
     color: theme.palette.text.primary,
+    "& fieldset": {
+      borderColor: theme.palette.mode === "dark" ? "rgba(255,255,255,0.12)" : "rgba(0,0,0,0.12)",
+      borderWidth: "1.5px",
+    },
     "&:hover .MuiOutlinedInput-notchedOutline": {
       borderColor: theme.palette.primary.main,
     },
@@ -97,7 +103,7 @@ export const datePickerSx: SxProps<Theme> = (theme) => ({
 });
 
 export const buttonGroupSx: SxProps<Theme> = (theme) => ({
-  height: "56px",
+  height: "48px",
   width: "auto",
   flexDirection: "row",
   "& .MuiButton-root": {
@@ -126,8 +132,9 @@ export const noCouriersBoxStyles: SxProps<Theme> = {
   paddingBottom: "12%",
 };
 
-export const noCouriersIconStyles: SxProps<Theme> = {
-  fontSize: "65px",
+export const noCouriersIconStyles: CSSProperties = {
+  width: "65px",
+  height: "65px",
 };
 
 export const deleteDialogPaperSx: SxProps<Theme> = {

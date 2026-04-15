@@ -7,16 +7,13 @@ import {
   useMediaQuery,
   Typography,
 } from "@mui/material";
-import AddRoundedIcon from "@mui/icons-material/AddRounded";
-import CloseRoundedIcon from "@mui/icons-material/CloseRounded";
+import { Plus, X, User, Info } from "lucide-react";
 import TextfieldComponent from "../../../components/Textfield/Textfield.component";
-import PersonOutlinedIcon from "@mui/icons-material/PersonOutlined";
-import InfoOutlinedIcon from "@mui/icons-material/InfoOutlined";
 import { FORMS } from "../../../constants/constants";
 import {
   boxRoot,
   gridContainer,
-  iconSx,
+  iconStyle,
   infoBox,
   infoIconBox,
   infoTitle,
@@ -25,7 +22,6 @@ import {
   clearButton,
   actionsInnerBox,
   cancelButton,
-  submitButton,
 } from "./styles";
 
 interface AddEmployeeFormProps {
@@ -122,37 +118,35 @@ const AddEmployeeForm: React.FC<AddEmployeeFormProps> = ({
       <Grid container spacing={3} sx={gridContainer}>
         <Grid item xs={12} sm={6}>
           <TextfieldComponent
-            label={FORMS.FIRST_NAME}
+            placeholder={FORMS.ADD_EMPLOYEE.FIRST_NAME_PLACEHOLDER}
             variant="outlined"
             fullWidth
-            placeholder={FORMS.ADD_EMPLOYEE.FIRST_NAME_PLACEHOLDER}
             value={formData.firstName}
             onChange={(e) => handleFieldChange("firstName", e.target.value)}
             error={errors.firstName !== ""}
             helperText={errors.firstName}
-            icon={<PersonOutlinedIcon sx={iconSx(theme)} />}
+            icon={<User style={iconStyle} />}
           />
         </Grid>
 
         <Grid item xs={12} sm={6}>
           <TextfieldComponent
-            label={FORMS.LAST_NAME}
+            placeholder={FORMS.ADD_EMPLOYEE.LAST_NAME_PLACEHOLDER}
             variant="outlined"
             fullWidth
-            placeholder={FORMS.ADD_EMPLOYEE.LAST_NAME_PLACEHOLDER}
             value={formData.lastName}
             onChange={(e) => handleFieldChange("lastName", e.target.value)}
             error={errors.lastName !== ""}
             helperText={errors.lastName}
-            icon={<PersonOutlinedIcon sx={iconSx(theme)} />}
+            icon={<User style={iconStyle} />}
           />
         </Grid>
 
         <Grid item xs={12}>
           <Box sx={infoBox(theme)}>
             <Box sx={infoIconBox(theme)}>
-              <InfoOutlinedIcon
-                sx={{ ...iconSx(theme), ...infoIconBox(theme) }}
+              <Info
+                style={iconStyle}
               />
             </Box>
             <Box>
@@ -171,7 +165,7 @@ const AddEmployeeForm: React.FC<AddEmployeeFormProps> = ({
             <Button
               variant="outlined"
               onClick={handleClearForm}
-              startIcon={<CloseRoundedIcon />}
+              startIcon={<X />}
               fullWidth={isSmallScreen}
               sx={clearButton}
             >
@@ -192,10 +186,17 @@ const AddEmployeeForm: React.FC<AddEmployeeFormProps> = ({
               <Button
                 variant="contained"
                 onClick={handleSubmit}
-                disabled={!isFormValid() || isLoading}
-                startIcon={<AddRoundedIcon />}
+                disabled={!isFormValid || isLoading}
+                startIcon={<Plus size={18} />}
                 fullWidth={isSmallScreen}
-                sx={submitButton}
+                sx={{
+                  fontWeight: 600,
+                  fontSize: "0.95rem",
+                  textTransform: "none",
+                  letterSpacing: "0.01em",
+                  borderRadius: "12px",
+                  minHeight: "42px",
+                }}
               >
                 Agregar
               </Button>

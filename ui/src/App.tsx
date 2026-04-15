@@ -1,4 +1,4 @@
-import React from "react";
+import React, { Suspense, lazy } from "react";
 import {
   BrowserRouter as Router,
   Route,
@@ -7,19 +7,6 @@ import {
   Navigate,
 } from "react-router-dom";
 import { useAuth } from "./hooks/useAuth";
-import Login from "./pages/Auth/Login";
-import Register from "./pages/Auth/Register";
-import RolesPage from "./pages/Management/RolesPage";
-import EmployeesPage from "./pages/Management/EmployeesPage";
-import SchedulesPage from "./pages/Management/SchedulesPage";
-import VehiclesPage from "./pages/Management/VehiclesPage";
-import CourierServicePage from "./pages/Management/CourierServicePage";
-import Dashboard from "./pages/Dashboard/Dashboard";
-import Settings from "./pages/Auth/Settings";
-import NotFound from "./pages/ErrorPages/NotFound";
-import Forbidden from "./pages/ErrorPages/Forbidden";
-import ErrorPage from "./pages/ErrorPages/Error";
-import SessionExpired from "./pages/ErrorPages/SessionExpired";
 import AppBarComponent from "./components/AppBar/AppBar.component";
 import SnackbarComponent from "./components/Snackbar/Snackbar.component";
 import { Provider } from "react-redux";
@@ -27,16 +14,28 @@ import { store } from "./store/store";
 import { AuthProvider, useAuthContext } from "./context/AuthContext";
 import { NotificationProvider } from "./context/NotificationContext";
 import ProtectedRoute from "./routes/ProtectedRoute";
-import { Container, useMediaQuery, useTheme } from "@mui/material";
+import { Container, useMediaQuery, useTheme, CircularProgress, Box } from "@mui/material";
 import { APPBAR_MENU, PERMISSIONS, ROUTES } from "./constants/constants";
-import AssignmentIcon from "@mui/icons-material/Assignment";
-import DirectionsCarIcon from "@mui/icons-material/DirectionsCar";
-import GroupRoundedIcon from "@mui/icons-material/GroupRounded";
-import EditCalendarRoundedIcon from "@mui/icons-material/EditCalendarRounded";
-import AdminPanelSettingsIcon from "@mui/icons-material/AdminPanelSettings";
-import SettingsIcon from "@mui/icons-material/Settings";
-import LogoutIcon from "@mui/icons-material/Logout";
-import wallpaper from "./assets/images/choferesblurred1.webp";
+import { ClipboardList, Car, Users, CalendarDays, LogOut, User } from "lucide-react";
+
+const Login = lazy(() => import("./pages/Auth/Login"));
+const Register = lazy(() => import("./pages/Auth/Register"));
+const RolesPage = lazy(() => import("./pages/Management/RolesPage"));
+const EmployeesPage = lazy(() => import("./pages/Management/EmployeesPage"));
+const SchedulesPage = lazy(() => import("./pages/Management/SchedulesPage"));
+const VehiclesPage = lazy(() => import("./pages/Management/VehiclesPage"));
+const CourierServicePage = lazy(() => import("./pages/Management/CourierServicePage"));
+const Profile = lazy(() => import("./pages/Auth/Profile"));
+const NotFound = lazy(() => import("./pages/ErrorPages/NotFound"));
+const Forbidden = lazy(() => import("./pages/ErrorPages/Forbidden"));
+const ErrorPage = lazy(() => import("./pages/ErrorPages/Error"));
+const SessionExpired = lazy(() => import("./pages/ErrorPages/SessionExpired"));
+
+const PageLoader = () => (
+  <Box sx={{ display: "flex", justifyContent: "center", alignItems: "center", height: "100vh" }}>
+    <CircularProgress />
+  </Box>
+);
 
 const AppBarWrapper: React.FC = () => {
   const { userPermissions } = useAuthContext();
@@ -48,33 +47,27 @@ const AppBarWrapper: React.FC = () => {
   const links = [
     {
       label: APPBAR_MENU.ROLES,
-      icon: <AssignmentIcon />,
+      icon: <ClipboardList size={22} strokeWidth={1.5} />,
       path: ROUTES.ROLES,
       permission: PERMISSIONS.VIEW_ROLES,
     },
     {
       label: APPBAR_MENU.EMPLOYEES,
-      icon: <GroupRoundedIcon />,
+      icon: <Users size={22} strokeWidth={1.5} />,
       path: ROUTES.EMPLOYEES,
       permission: PERMISSIONS.VIEW_EMPLOYEES,
     },
     {
       label: APPBAR_MENU.SCHEDULES,
-      icon: <EditCalendarRoundedIcon />,
+      icon: <CalendarDays size={22} strokeWidth={1.5} />,
       path: ROUTES.SCHEDULES,
       permission: PERMISSIONS.VIEW_SCHEDULES,
     },
     {
       label: APPBAR_MENU.VEHICLES,
-      icon: <DirectionsCarIcon />,
+      icon: <Car size={22} strokeWidth={1.5} />,
       path: ROUTES.VEHICLES,
       permission: PERMISSIONS.VIEW_VEHICLES,
-    },
-    {
-      label: APPBAR_MENU.DASHBOARD,
-      icon: <AdminPanelSettingsIcon />,
-      path: ROUTES.DASHBOARD,
-      permission: PERMISSIONS.VIEW_ADMIN,
     },
   ];
 
@@ -83,7 +76,6 @@ const AppBarWrapper: React.FC = () => {
     [APPBAR_MENU.EMPLOYEES]: PERMISSIONS.VIEW_EMPLOYEES,
     [APPBAR_MENU.SCHEDULES]: PERMISSIONS.VIEW_SCHEDULES,
     [APPBAR_MENU.VEHICLES]: PERMISSIONS.VIEW_VEHICLES,
-    [APPBAR_MENU.DASHBOARD]: PERMISSIONS.VIEW_ADMIN,
   };
 
   const filteredLinks = links.filter((link) => {
@@ -97,13 +89,13 @@ const AppBarWrapper: React.FC = () => {
 
   const userLinks = [
     {
-      label: APPBAR_MENU.SETTINGS,
-      icon: <SettingsIcon />,
-      path: ROUTES.SETTINGS,
+      label: APPBAR_MENU.PROFILE,
+      icon: <User size={20} />,
+      path: ROUTES.PROFILE,
     },
     {
       label: APPBAR_MENU.LOGOUT,
-      icon: <LogoutIcon />,
+      icon: <LogOut size={20} />,
       onClick: logoutUser,
     },
   ];
@@ -131,10 +123,6 @@ const AppContent: React.FC = () => {
     "/forbidden",
   ];
 
-  // Only use wallpaper for login and register
-  const isAuthPage =
-    location.pathname === "/" || location.pathname === "/register";
-
   // Helper: known app routes (excluding error/forbidden/notfound/sessionexpired)
   const knownAppRoutes = [
     "/",
@@ -145,8 +133,24 @@ const AppContent: React.FC = () => {
     "/schedules",
     "/vehicles",
     "/dashboard",
-    "/settings",
+    "/profile",
   ];
+
+  // Only use wallpaper for login, register, and error pages
+  const isAuthPage =
+    location.pathname === "/" ||
+    location.pathname === "/register" ||
+    location.pathname === "/error" ||
+    location.pathname === "/session-expired" ||
+    location.pathname === "/forbidden" ||
+    location.pathname === "/notfound" ||
+    (!knownAppRoutes.some(
+      (route) =>
+        location.pathname === route ||
+        location.pathname.startsWith(route + "/"),
+    ) &&
+      location.pathname !== "/error" &&
+      location.pathname !== "/session-expired");
 
   // Hide AppBar if on any of the hideAppBarRoutes, or if on a not found route
   const isHideAppBar =
@@ -165,7 +169,6 @@ const AppContent: React.FC = () => {
   const getDefaultRoute = (userPermissions: string[]) => {
     const routePreferences = [
       { route: ROUTES.ROLES, permission: PERMISSIONS.VIEW_ROLES },
-      { route: ROUTES.DASHBOARD, permission: PERMISSIONS.VIEW_ADMIN },
       { route: ROUTES.EMPLOYEES, permission: PERMISSIONS.VIEW_EMPLOYEES },
       { route: ROUTES.SCHEDULES, permission: PERMISSIONS.VIEW_SCHEDULES },
       { route: ROUTES.VEHICLES, permission: PERMISSIONS.VIEW_VEHICLES },
@@ -187,39 +190,32 @@ const AppContent: React.FC = () => {
     <>
       {!isHideAppBar && <AppBarWrapper />}
       <Container
-        maxWidth="xl"
+        maxWidth={false}
         disableGutters
         sx={{
-          paddingLeft: {
-            xs: "16px",
-            sm: "24px",
-            md: "32px",
-            lg: "48px",
-            xl: "0",
+          paddingLeft: isAuthPage ? 0 : {
+            xs: "8px",
+            sm: "12px",
+            md: "16px",
+            lg: "16px",
+            xl: "16px",
           },
-          paddingRight: {
-            xs: "16px",
-            sm: "24px",
-            md: "32px",
-            lg: "48px",
-            xl: "0",
+          paddingRight: isAuthPage ? 0 : {
+            xs: "8px",
+            sm: "12px",
+            md: "16px",
+            lg: "16px",
+            xl: "16px",
           },
-          paddingBottom: {
-            xs: "16px",
-            sm: "24px",
-            md: "32px",
-            lg: "48px",
-            xl: "0",
-          },
-          backgroundColor: theme.palette.background.default,
-          backgroundImage: isAuthPage ? `url(${wallpaper})` : "none",
-          backgroundSize: isAuthPage ? "cover" : undefined,
-          backgroundPosition: isAuthPage ? "center" : undefined,
-          backgroundRepeat: isAuthPage ? "no-repeat" : undefined,
-          backgroundAttachment: isAuthPage ? "fixed" : undefined,
+          paddingBottom: 0,
+          minHeight: isAuthPage ? "100vh" : undefined,
+          height: isAuthPage ? "100vh" : undefined,
+          overflow: "hidden",
+          backgroundColor: isAuthPage ? "transparent" : theme.palette.background.default,
         }}
       >
-        <Routes>
+        <Suspense fallback={<PageLoader />}>
+          <Routes>
           <Route
             path="/"
             element={
@@ -284,29 +280,54 @@ const AppContent: React.FC = () => {
                 )
               }
             />
-            <Route
-              path="/dashboard"
-              element={
-                safeUserPermissions.includes(PERMISSIONS.VIEW_ADMIN) ? (
-                  <Dashboard />
-                ) : (
-                  <Navigate to="/forbidden" replace />
-                )
-              }
-            />
-            <Route path="/settings" element={<Settings />} />
+            <Route path="/dashboard" element={<Navigate to="/profile" replace />} />
+            <Route path="/profile" element={<Profile />} />
           </Route>
           <Route path="/forbidden" element={<Forbidden />} />
           <Route path="*" element={<NotFound />} />
           <Route path="/error" element={<ErrorPage />} />
           <Route path="/session-expired" element={<SessionExpired />} />
         </Routes>
+        </Suspense>
       </Container>
     </>
   );
 };
 
 const App: React.FC = () => {
+  // Fix accessibility warning: remove aria-hidden from MUI menus when they contain focused elements
+  React.useEffect(() => {
+    const handleFocusIn = (event: FocusEvent) => {
+      const target = event.target as HTMLElement;
+      // Find the closest MUI Menu/Popover/Modal root
+      const menuRoot = target.closest('.MuiMenu-root, .MuiPopover-root, .MuiModal-root');
+      if (menuRoot && menuRoot.getAttribute('aria-hidden') === 'true') {
+        menuRoot.setAttribute('aria-hidden', 'false');
+      }
+    };
+
+    const handleFocusOut = (event: FocusEvent) => {
+      const target = event.target as HTMLElement;
+      const menuRoot = target.closest('.MuiMenu-root, .MuiPopover-root, .MuiModal-root');
+      if (menuRoot) {
+        // Check if menu still has any focused elements
+        setTimeout(() => {
+          if (!menuRoot.contains(document.activeElement)) {
+            menuRoot.setAttribute('aria-hidden', 'true');
+          }
+        }, 0);
+      }
+    };
+
+    document.addEventListener('focusin', handleFocusIn, true);
+    document.addEventListener('focusout', handleFocusOut, true);
+
+    return () => {
+      document.removeEventListener('focusin', handleFocusIn, true);
+      document.removeEventListener('focusout', handleFocusOut, true);
+    };
+  }, []);
+
   return (
     <Provider store={store}>
       <AuthProvider>

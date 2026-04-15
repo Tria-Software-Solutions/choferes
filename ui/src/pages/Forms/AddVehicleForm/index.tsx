@@ -4,7 +4,6 @@ import {
   Grid,
   Button,
   useTheme,
-  FormControl,
   Autocomplete,
   useMediaQuery,
   InputAdornment,
@@ -16,28 +15,16 @@ import COLORS_LIST from "../../../constants/colors.constants";
 import { maskLicensePlate } from "../../../utils/mask";
 import { maskParkingLotWithPrefix } from "../../../utils/mask";
 import { validateParkingLotWithPrefix } from "../../../utils/userValidation";
-import AddRoundedIcon from "@mui/icons-material/AddRounded";
-import CloseRoundedIcon from "@mui/icons-material/CloseRounded";
+import { Plus, X, Ticket, Car, ParkingCircle, Palette, FileEdit, Factory, Info } from "lucide-react";
 import TextfieldComponent from "../../../components/Textfield/Textfield.component";
-import ConfirmationNumberOutlinedIcon from "@mui/icons-material/ConfirmationNumberOutlined";
-import DirectionsCarOutlinedIcon from "@mui/icons-material/DirectionsCarOutlined";
-import LocalParkingOutlinedIcon from "@mui/icons-material/LocalParkingOutlined";
-import PaletteOutlinedIcon from "@mui/icons-material/PaletteOutlined";
-import EditNoteOutlinedIcon from "@mui/icons-material/EditNoteOutlined";
-import FactoryOutlinedIcon from "@mui/icons-material/FactoryOutlined";
-import InfoOutlinedIcon from "@mui/icons-material/InfoOutlined";
 import { DatePicker, LocalizationProvider } from "@mui/x-date-pickers";
 import { AdapterDateFns } from "@mui/x-date-pickers/AdapterDateFns";
-import {
-  AutocompleteChangeReason,
-  AutocompleteChangeDetails,
-} from "@mui/material";
 
 import { es } from "date-fns/locale";
 import {
   boxRoot,
   gridContainer,
-  iconSx,
+  iconStyle,
   formControl,
   infoBox,
   infoIconBox,
@@ -47,7 +34,6 @@ import {
   clearButton,
   actionsInnerBox,
   cancelButton,
-  submitButton,
 } from "./styles";
 
 interface AddVehicleFormProps {
@@ -107,17 +93,7 @@ const AddVehicleForm: React.FC<AddVehicleFormProps> = ({
   const [searchColorTerm, setSearchColorTerm] = useState("");
   const [filteredColors, setFilteredColors] = useState(COLORS_LIST);
 
-  const [parkingPrefix, setParkingPrefix] = useState<{
-    value: string;
-    label: string;
-  }>({ value: "ATP", label: "ATP" });
-  const [parkingPrefixOptions, setParkingPrefixOptions] = useState([
-    { value: "ATP", label: "ATP" },
-    { value: "CE", label: "CE" },
-  ]);
-  const [searchParkingPrefixTerm, setSearchParkingPrefixTerm] = useState("");
-  const [filteredParkingPrefixes, setFilteredParkingPrefixes] =
-    useState(parkingPrefixOptions);
+  const parkingPrefix = "ATP";
 
   const validateField = useCallback(
     (name: string, value: string) => {
@@ -128,9 +104,6 @@ const AddVehicleForm: React.FC<AddVehicleFormProps> = ({
       };
 
       if (!value.trim()) {
-        if (name === "parkingLot" && parkingPrefix.value === "CE") {
-          return ""; // Not required if prefix is CE
-        }
         return FORMS.REQUIRED_FIELD;
       }
 
@@ -166,9 +139,8 @@ const AddVehicleForm: React.FC<AddVehicleFormProps> = ({
           }
           break;
         case "parkingLot": {
-          const prefix = parkingPrefix.value;
           const error = validateParkingLotWithPrefix(
-            prefix,
+            parkingPrefix,
             value,
             FORMS.INVALID_FORMAT_PARKING,
           );
@@ -216,60 +188,13 @@ const AddVehicleForm: React.FC<AddVehicleFormProps> = ({
     }
   };
 
-  const handleSearchChangeParkingPrefix = (
-    event: React.SyntheticEvent,
-    value: string,
-    reason: string,
-  ) => {
-    setSearchParkingPrefixTerm(value);
-    if (reason === "input") {
-      const filtered = parkingPrefixOptions.filter((opt) =>
-        opt.value.toLowerCase().includes(value.toLowerCase()),
-      );
-      setFilteredParkingPrefixes(filtered);
-    }
-  };
 
-  const handleParkingPrefixChange = (
-    event: React.SyntheticEvent,
-    newValue: { value: string; label: string } | string | null,
-    reason: AutocompleteChangeReason,
-    details?:
-      | AutocompleteChangeDetails<{ value: string; label: string }>
-      | undefined,
-  ) => {
-    let prefixValue = "";
-    if (newValue === null || newValue === "") {
-      setParkingPrefix({ value: "", label: "" });
-      setFormData((prev) => ({ ...prev, parkingLot: "" }));
-      return;
-    }
-    if (typeof newValue === "object" && newValue !== null) {
-      prefixValue = newValue.value.toUpperCase();
-    } else if (typeof newValue === "string") {
-      prefixValue = newValue.toUpperCase();
-    }
-    if (prefixValue) {
-      if (!parkingPrefixOptions.some((opt) => opt.value === prefixValue)) {
-        const newOpt = { value: prefixValue, label: prefixValue };
-        setParkingPrefixOptions((prev) => [...prev, newOpt]);
-        setFilteredParkingPrefixes((prev) => [...prev, newOpt]);
-      }
-      setParkingPrefix({ value: prefixValue, label: prefixValue });
-      setSearchParkingPrefixTerm("");
-      if (prefixValue === "CE") {
-        setFormData((prev) => ({ ...prev, parkingLot: "CE" }));
-      } else {
-        setFormData((prev) => ({ ...prev, parkingLot: "" }));
-      }
-    }
-  };
 
   const handleParkingLotChange = (
     event: React.ChangeEvent<HTMLInputElement>,
   ) => {
     const rawValue = event.target.value;
-    const maskedValue = maskParkingLotWithPrefix(parkingPrefix.value, rawValue);
+    const maskedValue = maskParkingLotWithPrefix(parkingPrefix, rawValue);
     handleFieldChange("parkingLot", maskedValue);
   };
 
@@ -370,210 +295,166 @@ const AddVehicleForm: React.FC<AddVehicleFormProps> = ({
     setFilteredBrands(BRANDS_LIST);
     setSearchColorTerm("");
     setFilteredColors(COLORS_LIST);
-    setParkingPrefix({ value: "ATP", label: "ATP" });
-    setSearchParkingPrefixTerm("");
-    setFilteredParkingPrefixes(parkingPrefixOptions);
     setAutoPopulated(false);
   };
 
   return (
     <Box sx={boxRoot}>
-      <Box sx={{ mb: 2 }}>
+      <Box sx={{ mb: 1 }}>
         <Typography
           variant="body2"
           color="text.secondary"
-          sx={{ lineHeight: 1.4 }}
+          sx={{ lineHeight: 1.3 }}
         >
           {FORMS.ADD_VEHICLE.DIALOG_CONTENT_TITLE}
         </Typography>
       </Box>
-      <Grid container spacing={3} sx={gridContainer}>
+      <Grid container spacing={1.5} sx={gridContainer}>
         <Grid item xs={12} sm={6}>
           <TextfieldComponent
-            label={FORMS.ADD_VEHICLE.TICKET_LABEL}
+            placeholder={FORMS.ADD_VEHICLE.TICKET_PLACEHOLDER}
             variant="outlined"
             fullWidth
-            placeholder={FORMS.ADD_VEHICLE.TICKET_PLACEHOLDER}
             value={formData.ticket}
             onChange={(e) => handleFieldChange("ticket", e.target.value)}
             error={errors.ticket !== ""}
             helperText={errors.ticket}
-            icon={<ConfirmationNumberOutlinedIcon sx={iconSx(theme)} />}
+            icon={<Ticket style={iconStyle} />}
           />
         </Grid>
 
         <Grid item xs={12} sm={6}>
           <TextfieldComponent
-            label={FORMS.ADD_VEHICLE.LICENSE_PLATE_LABEL}
+            placeholder={FORMS.ADD_VEHICLE.LICENSE_PLATE_PLACEHOLDER}
             variant="outlined"
             fullWidth
-            placeholder={FORMS.ADD_VEHICLE.LICENSE_PLATE_PLACEHOLDER}
             value={formData.licensePlate}
             onChange={handleLicensePlateChange}
             error={errors.licensePlate !== ""}
             helperText={errors.licensePlate}
-            icon={<DirectionsCarOutlinedIcon sx={iconSx(theme)} />}
+            icon={<Car style={iconStyle} />}
           />
         </Grid>
 
         <Grid item xs={12} sm={6}>
-          <FormControl variant="outlined" fullWidth>
-            <Autocomplete
-              freeSolo
-              value={
-                formData.brand
-                  ? { value: formData.brand, label: formData.brand }
-                  : null
-              }
-              onChange={(event, newValue) => {
-                const brandValue =
-                  typeof newValue === "object"
-                    ? newValue?.value || ""
-                    : newValue || "";
-                handleFieldChange("brand", brandValue);
-                setSearchBrandTerm("");
-                setFilteredBrands(BRANDS_LIST);
-              }}
-              inputValue={searchBrandTerm}
-              onInputChange={handleSearchChangeBrand}
-              options={filteredBrands}
-              getOptionLabel={(option) =>
-                typeof option === "string" ? option : option.label
-              }
-              noOptionsText="Sin coincidencias"
-              renderInput={(params) => (
-                <TextfieldComponent
-                  {...params}
-                  label={FORMS.ADD_VEHICLE.BRAND_LABEL}
-                  variant="outlined"
-                  fullWidth
-                  error={errors.brand !== ""}
-                  helperText={autoPopulated ? "Datos auto-completados desde registro anterior" : errors.brand}
-                  InputProps={{
-                    ...params.InputProps,
-                    startAdornment: (
-                      <>
-                        <InputAdornment position="start">
-                          <FactoryOutlinedIcon sx={iconSx(theme)} />
-                        </InputAdornment>
-                        {params.InputProps.startAdornment}
-                      </>
-                    ),
-                  }}
-                />
-              )}
-            />
-          </FormControl>
-        </Grid>
-
-        <Grid item xs={12} sm={6}>
-          <FormControl variant="outlined" fullWidth>
-            <Autocomplete
-              freeSolo
-              value={
-                formData.color
-                  ? { value: formData.color, label: formData.color }
-                  : null
-              }
-              onChange={(event, newValue) => {
-                const colorValue =
-                  typeof newValue === "object"
-                    ? newValue?.value || ""
-                    : newValue || "";
-                handleFieldChange("color", colorValue);
-                setSearchColorTerm("");
-                setFilteredColors(COLORS_LIST);
-              }}
-              inputValue={searchColorTerm}
-              onInputChange={handleSearchChangeColor}
-              options={filteredColors}
-              getOptionLabel={(option) =>
-                typeof option === "string" ? option : option.label
-              }
-              noOptionsText="Sin coincidencias"
-              renderInput={(params) => (
-                <TextfieldComponent
-                  {...params}
-                  label={FORMS.ADD_VEHICLE.COLOR_LABEL}
-                  variant="outlined"
-                  fullWidth
-                  error={errors.color !== ""}
-                  helperText={autoPopulated ? "Datos auto-completados desde registro anterior" : errors.color}
-                  InputProps={{
-                    ...params.InputProps,
-                    startAdornment: (
-                      <>
-                        <InputAdornment position="start">
-                          <PaletteOutlinedIcon sx={iconSx(theme)} />
-                        </InputAdornment>
-                        {params.InputProps.startAdornment}
-                      </>
-                    ),
-                  }}
-                />
-              )}
-            />
-          </FormControl>
-        </Grid>
-
-        <Grid item xs={12} sm={6}>
-          <Box sx={{ display: "flex", gap: 1 }}>
-            <FormControl
-              variant="outlined"
-              sx={{ minWidth: 90, flex: "0 0 90px" }}
-            >
-              <Autocomplete
-                freeSolo
-                value={parkingPrefix}
-                onChange={handleParkingPrefixChange}
-                inputValue={searchParkingPrefixTerm.toUpperCase()}
-                onInputChange={handleSearchChangeParkingPrefix}
-                options={filteredParkingPrefixes.map((opt) => ({
-                  value: opt.value.toUpperCase(),
-                  label: opt.label.toUpperCase(),
-                }))}
-                getOptionLabel={(option) =>
-                  typeof option === "string" ? option : option.label
-                }
-                noOptionsText="Sin coincidencias"
-                renderInput={(params) => (
-                  <TextfieldComponent
-                    {...params}
-                    label="Prefijo"
-                    variant="outlined"
-                    fullWidth
-                    sx={{ minWidth: 90 }}
-                  />
-                )}
+          <Autocomplete
+            freeSolo
+            value={
+              formData.brand
+                ? { value: formData.brand, label: formData.brand }
+                : null
+            }
+            onChange={(event, newValue) => {
+              const brandValue =
+                typeof newValue === "object"
+                  ? newValue?.value || ""
+                  : newValue || "";
+              handleFieldChange("brand", brandValue);
+              setSearchBrandTerm("");
+              setFilteredBrands(BRANDS_LIST);
+            }}
+            inputValue={searchBrandTerm}
+            onInputChange={handleSearchChangeBrand}
+            options={filteredBrands}
+            getOptionLabel={(option) =>
+              typeof option === "string" ? option : option.label
+            }
+            noOptionsText="Sin coincidencias"
+            renderInput={(params) => (
+              <TextfieldComponent
+                {...params}
+                placeholder={FORMS.ADD_VEHICLE.BRAND_LABEL}
+                variant="outlined"
+                fullWidth
+                error={errors.brand !== ""}
+                helperText={autoPopulated ? "Datos auto-completados desde registro anterior" : errors.brand}
+                InputProps={{
+                  ...params.InputProps,
+                  startAdornment: (
+                    <>
+                      <InputAdornment position="start">
+                        <Factory style={iconStyle} />
+                      </InputAdornment>
+                      {params.InputProps.startAdornment}
+                    </>
+                  ),
+                }}
               />
-            </FormControl>
-            <TextfieldComponent
-              label={FORMS.ADD_VEHICLE.PARKING_LOT_LABEL}
-              variant="outlined"
-              fullWidth
-              placeholder={FORMS.ADD_VEHICLE.PARKING_LOT_PLACEHOLDER.replace(
-                "ATP",
-                parkingPrefix.value,
-              )}
-              value={formData.parkingLot}
-              onChange={handleParkingLotChange}
-              error={errors.parkingLot !== ""}
-              helperText={errors.parkingLot}
-              icon={<LocalParkingOutlinedIcon sx={iconSx(theme)} />}
-              InputProps={{
-                readOnly: parkingPrefix.value === "CE",
-              }}
-            />
-          </Box>
+            )}
+          />
+        </Grid>
+
+        <Grid item xs={12} sm={6}>
+          <Autocomplete
+            freeSolo
+            value={
+              formData.color
+                ? { value: formData.color, label: formData.color }
+                : null
+            }
+            onChange={(event, newValue) => {
+              const colorValue =
+                typeof newValue === "object"
+                  ? newValue?.value || ""
+                  : newValue || "";
+              handleFieldChange("color", colorValue);
+              setSearchColorTerm("");
+              setFilteredColors(COLORS_LIST);
+            }}
+            inputValue={searchColorTerm}
+            onInputChange={handleSearchChangeColor}
+            options={filteredColors}
+            getOptionLabel={(option) =>
+              typeof option === "string" ? option : option.label
+            }
+            noOptionsText="Sin coincidencias"
+            renderInput={(params) => (
+              <TextfieldComponent
+                {...params}
+                placeholder={FORMS.ADD_VEHICLE.COLOR_LABEL}
+                variant="outlined"
+                fullWidth
+                error={errors.color !== ""}
+                helperText={autoPopulated ? "Datos auto-completados desde registro anterior" : errors.color}
+                InputProps={{
+                  ...params.InputProps,
+                  startAdornment: (
+                    <>
+                      <InputAdornment position="start">
+                        <Palette style={iconStyle} />
+                      </InputAdornment>
+                      {params.InputProps.startAdornment}
+                    </>
+                  ),
+                }}
+              />
+            )}
+          />
+        </Grid>
+
+        <Grid item xs={12} sm={6}>
+          <TextfieldComponent
+            placeholder={FORMS.ADD_VEHICLE.PARKING_LOT_PLACEHOLDER.replace(
+              "ATP",
+              parkingPrefix,
+            )}
+            variant="outlined"
+            fullWidth
+            value={formData.parkingLot}
+            onChange={handleParkingLotChange}
+            error={errors.parkingLot !== ""}
+            helperText={errors.parkingLot}
+            icon={<ParkingCircle style={iconStyle} />}
+            sx={formControl(theme)}
+          />
         </Grid>
 
         <Grid item xs={12} sm={6}>
           <LocalizationProvider dateAdapter={AdapterDateFns} adapterLocale={es}>
             <DatePicker
-              label={FORMS.ADD_VEHICLE.PARKING_DATE_LABEL}
               value={formData.parkingDate}
               onChange={handleDateChange}
-              format="EEEE d 'de' MMMM 'de' yyyy"
+              format="EEEE d 'de' MMMM"
               slotProps={{
                 textField: {
                   fullWidth: true,
@@ -588,25 +469,24 @@ const AddVehicleForm: React.FC<AddVehicleFormProps> = ({
 
         <Grid item xs={12}>
           <TextfieldComponent
-            label={FORMS.ADD_VEHICLE.OBSERVATIONS_LABEL}
+            placeholder={FORMS.ADD_VEHICLE.OBSERVATIONS_PLACEHOLDER}
             variant="outlined"
             fullWidth
             multiline
             rows={3}
-            placeholder={FORMS.ADD_VEHICLE.OBSERVATIONS_PLACEHOLDER}
             value={formData.notes}
             onChange={(e) =>
               setFormData({ ...formData, notes: e.target.value })
             }
-            icon={<EditNoteOutlinedIcon sx={iconSx(theme)} />}
+            icon={<FileEdit style={iconStyle} />}
           />
         </Grid>
 
         <Grid item xs={12}>
           <Box sx={infoBox(theme)}>
             <Box sx={infoIconBox(theme)}>
-              <InfoOutlinedIcon
-                sx={{ ...iconSx(theme), ...infoIconBox(theme) }}
+              <Info
+                style={iconStyle}
               />
             </Box>
             <Box>
@@ -625,7 +505,7 @@ const AddVehicleForm: React.FC<AddVehicleFormProps> = ({
             <Button
               variant="outlined"
               onClick={handleClearForm}
-              startIcon={<CloseRoundedIcon />}
+              startIcon={<X />}
               fullWidth={isSmallScreen}
               sx={clearButton}
             >
@@ -646,10 +526,17 @@ const AddVehicleForm: React.FC<AddVehicleFormProps> = ({
               <Button
                 variant="contained"
                 onClick={handleSubmit}
-                disabled={!isFormValid() || isLoading}
-                startIcon={<AddRoundedIcon />}
+                disabled={!isFormValid || isLoading}
+                startIcon={<Plus size={18} />}
                 fullWidth={isSmallScreen}
-                sx={submitButton}
+                sx={{
+                  fontWeight: 600,
+                  fontSize: "0.95rem",
+                  textTransform: "none",
+                  letterSpacing: "0.01em",
+                  borderRadius: "12px",
+                  minHeight: "42px",
+                }}
               >
                 {isLoading
                   ? FORMS.ADD_VEHICLE.BUTTON_ADDING

@@ -8,6 +8,7 @@
     "prepare": "husky install"
   },
   "dependencies": {
-    "@fontsource/moirai-one": "^5.2.6"
+    "@fontsource/moirai-one": "^5.2.6",
+    "lucide-react": "^1.8.0"
   }
 }

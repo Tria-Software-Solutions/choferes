@@ -2,8 +2,7 @@ import React from "react";
 import TextField from "@mui/material/TextField";
 import InputAdornment from "@mui/material/InputAdornment";
 import IconButton from "@mui/material/IconButton";
-import SearchIcon from "@mui/icons-material/Search";
-import ClearRoundedIcon from "@mui/icons-material/ClearRounded";
+import { Search, X } from "lucide-react";
 import { SEARCH_BAR } from "../../constants/constants";
 import {
   textFieldStyles,
@@ -62,7 +61,7 @@ const SearchBarComponent: React.FC<SearchBarProps> = ({
       InputProps={{
         startAdornment: (
           <InputAdornment position="start">
-            <SearchIcon sx={searchIconStyles} />
+            <Search size={20} style={searchIconStyles} />
           </InputAdornment>
         ),
         endAdornment: value ? (
@@ -73,7 +72,7 @@ const SearchBarComponent: React.FC<SearchBarProps> = ({
               edge="end"
               size="small"
             >
-              <ClearRoundedIcon sx={clearIconStyles} />
+              <X size={18} style={clearIconStyles} />
             </IconButton>
           </InputAdornment>
         ) : null,
@@ -85,4 +84,4 @@ const SearchBarComponent: React.FC<SearchBarProps> = ({
   );
 };
 
-export default SearchBarComponent;
+export default React.memo(SearchBarComponent);

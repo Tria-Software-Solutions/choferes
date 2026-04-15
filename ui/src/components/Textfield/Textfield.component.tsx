@@ -10,12 +10,14 @@ import { textFieldStyles, inputAdornmentStyles } from "./Textfield.styles";
 // - endAdornment: element to show at the end
 // - InputProps: additional input props
 // - sx: custom styles
+// - validateField: function to validate the field value
 
 interface CustomTextFieldProps extends Omit<TextFieldProps, "InputProps"> {
   icon?: React.ReactNode;
   endAdornment?: React.ReactNode;
   InputProps?: TextFieldProps["InputProps"];
   sx?: SxProps<Theme>;
+  validateField?: (name: string, value: string | string[] | boolean) => boolean;
 }
 
 const TextfieldComponent: React.FC<CustomTextFieldProps> = ({
@@ -23,13 +25,25 @@ const TextfieldComponent: React.FC<CustomTextFieldProps> = ({
   endAdornment,
   sx,
   InputProps,
+  validateField,
   ...props
 }) => {
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+    if (validateField && props.name) {
+      validateField(props.name, e.target.value);
+    }
+    // If there's an onChange prop, call it
+    if (props.onChange) {
+      props.onChange(e);
+    }
+  };
+
   return (
     <TextField
       variant="outlined"
       fullWidth
       {...props}
+      onChange={handleChange}
       InputProps={{
         startAdornment: icon ? (
           <InputAdornment position="start" sx={inputAdornmentStyles}>
@@ -37,9 +51,14 @@ const TextfieldComponent: React.FC<CustomTextFieldProps> = ({
           </InputAdornment>
         ) : undefined,
         endAdornment: endAdornment ? (
-          <InputAdornment position="end" sx={inputAdornmentStyles}>
-            {endAdornment}
-          </InputAdornment>
+          // Check if endAdornment is already an InputAdornment by checking its type
+          React.isValidElement(endAdornment) && (endAdornment as any).type?.displayName === 'InputAdornment' 
+            ? endAdornment 
+            : (
+              <InputAdornment position="end">
+                {endAdornment}
+              </InputAdornment>
+            )
         ) : undefined,
         ...InputProps,
       }}

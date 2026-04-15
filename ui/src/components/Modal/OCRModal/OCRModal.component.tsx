@@ -22,10 +22,7 @@ import {
   Fade,
   Slide,
 } from "@mui/material";
-import { Close as CloseIcon } from "@mui/icons-material";
-import ImageNotSupportedIcon from "@mui/icons-material/ImageNotSupported";
-import RefreshIcon from "@mui/icons-material/Refresh";
-import ImageIcon from "@mui/icons-material/Image";
+import { X, ImageOff, RefreshCw, Image } from "lucide-react";
 import { OCRResult, VehicleEntry } from "../../../services/ocrService";
 import PaginationComponent from "../../Table/Pagination/Pagination.component";
 import TABLE from "../../../constants/table.constants";
@@ -36,7 +33,6 @@ import {
   dialogPaperStyles,
   headerBoxStyles,
   iconBoxStyles,
-  iconStyles,
   titleBoxStyles,
   titleStyles,
   subtitleStyles,
@@ -45,7 +41,6 @@ import {
   loadingBoxStyles,
   loadingTextStyles,
   errorContainerStyles,
-  errorIconStyles,
   errorTitleStyles,
   errorSubtitleStyles,
   errorDescriptionStyles,
@@ -53,6 +48,7 @@ import {
   errorButtonStyles,
   tablePaperStyles,
   tableContainerStyles,
+  ocrModalTextFieldStyles,
   tableStyles,
   tableHeadCellStyles,
   editableCellStyles,
@@ -183,7 +179,7 @@ const OCRResultModal: React.FC<OCRResultModalProps> = ({
       <Box sx={headerBoxStyles(theme)}>
         <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
           <Box sx={iconBoxStyles(theme)}>
-            <ImageIcon sx={iconStyles(theme)} />
+            <Image size={24} color={theme.palette.primary.main} />
           </Box>
           <Box sx={titleBoxStyles}>
             <Typography
@@ -217,7 +213,7 @@ const OCRResultModal: React.FC<OCRResultModalProps> = ({
           </Box>
         </Box>
         <IconButton onClick={onClose} sx={closeButtonStyles}>
-          <CloseIcon />
+          <X size={20} />
         </IconButton>
       </Box>
 
@@ -263,8 +259,9 @@ const OCRResultModal: React.FC<OCRResultModalProps> = ({
           <Fade in timeout={800}>
             <Slide direction="up" in timeout={1000}>
               <Box sx={errorContainerStyles}>
-                <ImageNotSupportedIcon
-                  sx={errorIconStyles(theme)}
+                <ImageOff
+                  size={64}
+                  color={theme.palette.error.main}
                   aria-label="Formato de imagen no válido"
                 />
                 <Typography
@@ -295,7 +292,7 @@ const OCRResultModal: React.FC<OCRResultModalProps> = ({
                     variant="contained"
                     color="primary"
                     size="large"
-                    startIcon={<RefreshIcon />}
+                    startIcon={<RefreshCw size={20} />}
                     onClick={onClose}
                     fullWidth={false}
                     sx={errorButtonStyles}
@@ -319,9 +316,8 @@ const OCRResultModal: React.FC<OCRResultModalProps> = ({
                 mb: 2,
                 p: 2,
                 borderRadius: 1,
-                background: (theme) =>
-                  `linear-gradient(135deg, ${theme.palette.success.light}10, ${theme.palette.success.main}05)`,
-                border: (theme) => `1px solid ${theme.palette.success.light}30`,
+                bgcolor: "background.paper",
+                border: (theme) => `1px solid ${theme.palette.divider}`,
               }}
             >
               <Box>
@@ -387,7 +383,7 @@ const OCRResultModal: React.FC<OCRResultModalProps> = ({
                           editedEntries[actualRowIndex] || entry;
 
                         return (
-                          <TableRow key={index} hover>
+                          <TableRow key={index}>
                             <TableCell
                               sx={editableCellStyles}
                               onClick={() => handleCellClick(index, "ticket")}
@@ -409,6 +405,7 @@ const OCRResultModal: React.FC<OCRResultModalProps> = ({
                                   fullWidth
                                   autoFocus
                                   variant="standard"
+                                  sx={ocrModalTextFieldStyles}
                                 />
                               ) : (
                                 <Typography variant="body2" fontWeight="medium">
@@ -439,6 +436,7 @@ const OCRResultModal: React.FC<OCRResultModalProps> = ({
                                   fullWidth
                                   autoFocus
                                   variant="standard"
+                                  sx={ocrModalTextFieldStyles}
                                 />
                               ) : (
                                 <Typography variant="body2" fontWeight="medium">
@@ -467,6 +465,7 @@ const OCRResultModal: React.FC<OCRResultModalProps> = ({
                                   fullWidth
                                   autoFocus
                                   variant="standard"
+                                  sx={ocrModalTextFieldStyles}
                                 />
                               ) : (
                                 <Typography variant="body2">
@@ -497,6 +496,7 @@ const OCRResultModal: React.FC<OCRResultModalProps> = ({
                                   fullWidth
                                   autoFocus
                                   variant="standard"
+                                  sx={ocrModalTextFieldStyles}
                                 />
                               ) : (
                                 <Box
@@ -536,6 +536,7 @@ const OCRResultModal: React.FC<OCRResultModalProps> = ({
                                   fullWidth
                                   autoFocus
                                   variant="standard"
+                                  sx={ocrModalTextFieldStyles}
                                 />
                               ) : (
                                 <Typography
@@ -569,6 +570,7 @@ const OCRResultModal: React.FC<OCRResultModalProps> = ({
                                   fullWidth
                                   autoFocus
                                   variant="standard"
+                                  sx={ocrModalTextFieldStyles}
                                 />
                               ) : (
                                 <Typography
@@ -601,13 +603,47 @@ const OCRResultModal: React.FC<OCRResultModalProps> = ({
                 onPageChange={handlePageChange}
                 onRowsPerPageChange={handleRowsPerPageChange}
                 labelRowsPerPage={
-                  <Typography variant="body2" component="span">
+                  <Typography variant="body2" component="span" sx={{ fontSize: "0.75rem" }}>
                     {TABLE.ROWS_PER_PAGE}
                   </Typography>
                 }
                 labelDisplayedRows={() => ""}
                 ActionsComponent={PaginationComponent}
-                sx={{ borderRadius: "0 0 12px 12px" }}
+                sx={{
+                  flexShrink: 0,
+                  borderRadius: 0,
+                  margin: 0,
+                  border: 'none',
+                  '.MuiTablePagination-toolbar': {
+                    minHeight: '32px',
+                    paddingTop: '2px',
+                    paddingBottom: '0px',
+                    border: 'none',
+                  },
+                  '.MuiTablePagination-selectLabel, .MuiTablePagination-input, .MuiTablePagination-displayedRows': {
+                    fontSize: '0.75rem',
+                  },
+                  '.MuiTablePagination-select': {
+                    fontSize: '0.75rem',
+                    border: 'none',
+                  },
+                  '.MuiTablePagination-selectIcon': {
+                    fontSize: '1rem',
+                  },
+                  '.MuiIconButton-root': {
+                    padding: '2px',
+                  },
+                  '.MuiInputBase-root': {
+                    border: 'none',
+                    '&:before, &:after': {
+                      display: 'none',
+                    },
+                    fontSize: '0.75rem',
+                  },
+                  '.MuiTablePagination-input': {
+                    fontSize: '0.75rem',
+                  },
+                }}
               />
             </Paper>
           </>

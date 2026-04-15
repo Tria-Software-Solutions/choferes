@@ -20,16 +20,13 @@ import {
   Fade,
   Divider,
   CircularProgress,
+  keyframes,
 } from "@mui/material";
-import Visibility from "@mui/icons-material/Visibility";
-import VisibilityOff from "@mui/icons-material/VisibilityOff";
+import { Eye, EyeOff, User as UserIcon, Mail, Lock } from "lucide-react";
 import PAGE_TITLE from "../../../constants/pageTitle.constants";
 import AUTH from "../../../constants/auth.constants";
 import FORMS from "../../../constants/forms.constants";
 import REGISTER_VALIDATION from "../../../constants/registerValidation.constants";
-import PersonOutlinedIcon from "@mui/icons-material/PersonOutlined";
-import EmailOutlinedIcon from "@mui/icons-material/EmailOutlined";
-import LockOutlinedIcon from "@mui/icons-material/LockOutlined";
 import logo from "../../../assets/images/logo.png";
 import "@fontsource/urbanist";
 import {
@@ -195,9 +192,74 @@ const Register = () => {
     }
   };
 
+  // Floating animation keyframes
+  const float1 = keyframes`
+    0%, 100% { transform: translate(0, 0) scale(1); }
+    33% { transform: translate(30px, -50px) scale(1.05); }
+    66% { transform: translate(-20px, 20px) scale(0.95); }
+  `;
+  const float2 = keyframes`
+    0%, 100% { transform: translate(0, 0) scale(1); }
+    33% { transform: translate(-40px, 30px) scale(0.95); }
+    66% { transform: translate(30px, -20px) scale(1.05); }
+  `;
+  const float3 = keyframes`
+    0%, 100% { transform: translate(0, 0) scale(1); }
+    50% { transform: translate(20px, 40px) scale(1.1); }
+  `;
+
   return (
     <Box className="auth-page" sx={authPageBoxStyles}>
-      <Fade in timeout={800}>
+      {/* Floating decorative orbs */}
+      <Box
+        sx={{
+          position: "absolute",
+          width: 300,
+          height: 300,
+          borderRadius: "50%",
+          background: theme.palette.mode === "dark"
+            ? "radial-gradient(circle, rgba(120,119,198,0.4) 0%, rgba(120,119,198,0) 70%)"
+            : "radial-gradient(circle, rgba(99,102,241,0.25) 0%, rgba(99,102,241,0) 70%)",
+          filter: "blur(40px)",
+          top: "10%",
+          left: "10%",
+          animation: `${float1} 15s ease-in-out infinite`,
+          zIndex: 0,
+        }}
+      />
+      <Box
+        sx={{
+          position: "absolute",
+          width: 400,
+          height: 400,
+          borderRadius: "50%",
+          background: theme.palette.mode === "dark"
+            ? "radial-gradient(circle, rgba(255,119,198,0.25) 0%, rgba(255,119,198,0) 70%)"
+            : "radial-gradient(circle, rgba(236,72,153,0.15) 0%, rgba(236,72,153,0) 70%)",
+          filter: "blur(50px)",
+          bottom: "5%",
+          right: "15%",
+          animation: `${float2} 18s ease-in-out infinite`,
+          zIndex: 0,
+        }}
+      />
+      <Box
+        sx={{
+          position: "absolute",
+          width: 200,
+          height: 200,
+          borderRadius: "50%",
+          background: theme.palette.mode === "dark"
+            ? "radial-gradient(circle, rgba(120,219,255,0.3) 0%, rgba(120,219,255,0) 70%)"
+            : "radial-gradient(circle, rgba(59,130,246,0.2) 0%, rgba(59,130,246,0) 70%)",
+          filter: "blur(30px)",
+          top: "50%",
+          right: "5%",
+          animation: `${float3} 12s ease-in-out infinite`,
+          zIndex: 0,
+        }}
+      />
+      <Fade in timeout={1000}>
         <Card className="auth-card" sx={authCardStyles}>
           <CardContent sx={cardContentStyles}>
             {/* Logo and Title Section */}
@@ -230,7 +292,7 @@ const Register = () => {
               <Box sx={nameFieldsBoxStyles}>
                 <TextField
                   fullWidth
-                  label="Nombre"
+                  placeholder="Nombre"
                   variant="outlined"
                   value={addFields.firstName}
                   onChange={(e) =>
@@ -242,15 +304,15 @@ const Register = () => {
                   sx={textFieldStyles}
                   InputProps={{
                     startAdornment: (
-                      <InputAdornment position="start">
-                        <PersonOutlinedIcon sx={{ color: "#666666" }} />
+                      <InputAdornment position="start" sx={{ position: 'absolute', left: '14px', zIndex: 2 }}>
+                        <UserIcon size={20} color="#666666" />
                       </InputAdornment>
                     ),
                   }}
-                />
+                                  />
                 <TextField
                   fullWidth
-                  label="Apellido"
+                  placeholder="Apellido"
                   variant="outlined"
                   value={addFields.lastName}
                   onChange={(e) =>
@@ -262,17 +324,17 @@ const Register = () => {
                   sx={textFieldStyles}
                   InputProps={{
                     startAdornment: (
-                      <InputAdornment position="start">
-                        <PersonOutlinedIcon sx={{ color: "#666666" }} />
+                      <InputAdornment position="start" sx={{ position: 'absolute', left: '14px', zIndex: 2 }}>
+                        <UserIcon size={20} color="#666666" />
                       </InputAdornment>
                     ),
                   }}
-                />
+                                  />
               </Box>
 
               <TextField
                 fullWidth
-                label="Correo Electrónico"
+                placeholder="Correo Electrónico"
                 variant="outlined"
                 value={addFields.email}
                 onChange={(e) => handleFieldChange("email", e.target.value)}
@@ -283,8 +345,8 @@ const Register = () => {
                 sx={emailTextFieldStyles}
                 InputProps={{
                   startAdornment: (
-                    <InputAdornment position="start">
-                      <EmailOutlinedIcon sx={{ color: "#666666" }} />
+                    <InputAdornment position="start" sx={{ position: 'absolute', left: '14px', zIndex: 2 }}>
+                      <Mail size={20} color="#666666" />
                     </InputAdornment>
                   ),
                 }}
@@ -292,7 +354,7 @@ const Register = () => {
 
               <TextField
                 fullWidth
-                label="Usuario"
+                placeholder="Usuario"
                 variant="outlined"
                 value={addFields.username}
                 autoComplete="username"
@@ -304,8 +366,8 @@ const Register = () => {
                 sx={usernameTextFieldStyles}
                 InputProps={{
                   startAdornment: (
-                    <InputAdornment position="start">
-                      <PersonOutlinedIcon sx={{ color: "#666666" }} />
+                    <InputAdornment position="start" sx={{ position: 'absolute', left: '14px', zIndex: 2 }}>
+                      <UserIcon size={20} color="#666666" />
                     </InputAdornment>
                   ),
                 }}
@@ -313,7 +375,7 @@ const Register = () => {
 
               <TextField
                 fullWidth
-                label="Contraseña"
+                placeholder="Contraseña"
                 type={showPassword ? "text" : "password"}
                 variant="outlined"
                 value={addFields.password}
@@ -325,24 +387,24 @@ const Register = () => {
                 sx={passwordTextFieldStyles}
                 InputProps={{
                   startAdornment: (
-                    <InputAdornment position="start">
-                      <LockOutlinedIcon sx={{ color: "#666666" }} />
+                    <InputAdornment position="start" sx={{ position: 'absolute', left: '14px', zIndex: 2 }}>
+                      <Lock size={20} color="#666666" />
                     </InputAdornment>
                   ),
                   endAdornment: (
-                    <InputAdornment position="end">
+                    <InputAdornment position="end" sx={{ position: 'absolute', right: '8px', zIndex: 2 }}>
                       <IconButton
                         onClick={handleTogglePassword}
                         edge="end"
                         disabled={isSubmitting}
                         sx={passwordIconButtonStyles}
                       >
-                        {showPassword ? <VisibilityOff /> : <Visibility />}
+                        {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
                       </IconButton>
                     </InputAdornment>
                   ),
                 }}
-              />
+                              />
 
               <Button
                 type="submit"
@@ -385,7 +447,18 @@ const Register = () => {
               </Typography>
               <Link
                 to="/"
-                style={loginLinkStyles}
+                style={{
+                  ...loginLinkStyles,
+                  color: theme.palette.text.primary,
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.backgroundColor = theme.palette.mode === 'dark'
+                    ? 'rgba(255,255,255,0.05)'
+                    : 'rgba(0,0,0,0.03)';
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.backgroundColor = 'transparent';
+                }}
               >
                 Inicia sesión aquí
               </Link>

@@ -54,4 +54,9 @@ export const actionsInnerBox = {
   gap: { xs: 1, sm: 2 },
   width: { xs: "100%", sm: "auto" },
   order: { xs: 1, sm: 2 },
+};
+
+export const adjustDialogPaperSx = {
+  minWidth: { xs: "90vw", sm: 400, md: 450 },
+  maxWidth: { xs: "98vw", sm: 450 },
 }; 
