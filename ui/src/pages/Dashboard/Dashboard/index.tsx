@@ -14,7 +14,8 @@ import {
 } from "@mui/material";
 import { PAGE_TITLE, DASHBOARD } from "../../../constants/constants";
 import PremiumTooltip from "../../../components/PremiumTooltip/PremiumTooltip.component";
-import { Shield, X, FileText, FileType, Trash2, Database } from "lucide-react";
+import { Shield, X, Trash2, Database } from "lucide-react";
+import { PdfIcon, ExcelIcon } from "../../../components/Icons/FileIcons";
 import ManagePermissions from "../ManagePermissions";
 import {
   dashboardHeaderBoxStyles,
@@ -68,12 +69,12 @@ const Dashboard: React.FC = () => {
   const exportActions = [
     {
       label: DASHBOARD_BULK_ACTIONS.EXPORT_EXCEL,
-      icon: <FileText />,
+      icon: <ExcelIcon />,
       type: "excel",
     },
     {
       label: DASHBOARD_BULK_ACTIONS.EXPORT_PDF,
-      icon: <FileType />,
+      icon: <PdfIcon />,
       type: "pdf",
     },
   ];

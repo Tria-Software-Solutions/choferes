@@ -1,8 +1,9 @@
 import axios from "axios";
 
 const API_URL = process.env.REACT_APP_API_URL || "http://localhost:5000";
+const SERVER_AWAKE_KEY = "serverAwake";
 
-let isServerAwake = false;
+let isServerAwake = localStorage.getItem(SERVER_AWAKE_KEY) === "true";
 let wakeUpPromise: Promise<boolean> | null = null;
 
 /**
@@ -11,9 +12,31 @@ let wakeUpPromise: Promise<boolean> | null = null;
  * The first request after the server is asleep can take 30-60 seconds to respond.
  */
 export const wakeUpServer = async (): Promise<boolean> => {
-  // If already awake, return immediately
+  // If already marked as awake from localStorage, do a quick verification
   if (isServerAwake) {
-    return true;
+    try {
+      const response = await axios.get(`${API_URL}/health`, {
+        timeout: 5000,
+        validateStatus: () => true,
+      });
+
+      const isReady =
+        response.status === 200 &&
+        response.data?.status === "OK" &&
+        response.data?.database?.status === "OK";
+
+      if (isReady) {
+        return true;
+      }
+
+      // If quick check fails, mark as not awake and continue to wake-up process
+      isServerAwake = false;
+      localStorage.setItem(SERVER_AWAKE_KEY, "false");
+    } catch (error) {
+      // Quick check failed, mark as not awake and continue
+      isServerAwake = false;
+      localStorage.setItem(SERVER_AWAKE_KEY, "false");
+    }
   }
 
   // If there's already a wake-up in progress, wait for it
@@ -40,6 +63,7 @@ export const wakeUpServer = async (): Promise<boolean> => {
 
         if (isReady) {
           isServerAwake = true;
+          localStorage.setItem(SERVER_AWAKE_KEY, "true");
           return true;
         }
 
@@ -54,6 +78,7 @@ export const wakeUpServer = async (): Promise<boolean> => {
       console.error("[WakeUp] Error waking server:", error);
       // Reset so next call tries again
       isServerAwake = false;
+      localStorage.setItem(SERVER_AWAKE_KEY, "false");
       wakeUpPromise = null;
       return false;
     }
@@ -74,5 +99,6 @@ export const getApiUrl = (): string => API_URL;
  */
 export const resetServerStatus = (): void => {
   isServerAwake = false;
+  localStorage.setItem(SERVER_AWAKE_KEY, "false");
   wakeUpPromise = null;
 };

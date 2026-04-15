@@ -94,18 +94,18 @@ export const datePickerSx: SxProps<Theme> = (theme) => ({
     boxShadow: "0 1px 3px rgba(0,0,0,0.08), 0 1px 2px rgba(0,0,0,0.04)",
     transition: "all 0.2s cubic-bezier(0.4, 0, 0.2, 1)",
     "& fieldset": {
-      borderColor: theme.palette.mode === "dark" ? "rgba(255,255,255,0.12)" : "rgba(0,0,0,0.12)",
-      borderWidth: "1.5px",
+      borderColor: "transparent",
+      borderWidth: "0",
     },
     "&:hover": {
       boxShadow: "0 2px 6px rgba(0,0,0,0.08), 0 2px 4px rgba(0,0,0,0.04)",
     },
     "&:hover .MuiOutlinedInput-notchedOutline": {
-      borderColor: theme.palette.primary.main,
+      borderColor: "transparent",
     },
     "&.Mui-focused .MuiOutlinedInput-notchedOutline": {
-      borderColor: theme.palette.primary.main,
-      borderWidth: 2,
+      borderColor: "transparent",
+      borderWidth: 0,
     },
     "&.Mui-focused": {
       backgroundColor: theme.palette.background.paper,

@@ -10,6 +10,7 @@ import { fetchSchedules } from "../../../store/slices/schedulesSlice";
 import {
   fetchHoursWorked,
   createOrUpdateHoursWorked,
+  deleteHoursWorked,
 } from "../../../store/slices/hoursWorkedSlice";
 import { useWeeklySummaries } from "../../../hooks/useWeeklySummary";
 import { useBiweeklySummaries } from "../../../hooks/useBiweeklySummary";
@@ -59,6 +60,7 @@ import {
 import PAGE_TITLE from "../../../constants/pageTitle.constants";
 import PERMISSIONS from "../../../constants/permissions.constants";
 import MANAGEMENT from "../../../constants/management.constants";
+import { SELECTOR_TABLE } from "../../../constants/constants";
 import { Download, ChevronLeft, ChevronRight, X, Search, RotateCcw } from "lucide-react";
 import DialogComponent from "../../../components/Dialog/Dialog.component";
 import { ClipboardList, Sparkles } from "lucide-react";
@@ -81,7 +83,7 @@ import {
 import { useAppNotifications } from "../../../components/Snackbar/Snackbar.component";
 import NOTIFICATIONS from "../../../constants/notifications.constants";
 import { createHoursGenerationNotification } from "../../../services/notificationService";
-import { FileText, Table } from "lucide-react";
+import { PdfIcon, ExcelIcon } from "../../../components/Icons/FileIcons";
 import { capitalizeFirstLetter } from "../../../utils/string";
 import { getScheduleCellData } from "../../../components/Table/SelectorTable/helpers";
 import {
@@ -575,6 +577,54 @@ const RolesPage: React.FC = () => {
     date: Date
   ) => {
     if (event.target.value === "Other") {
+      return;
+    }
+
+    // Manejar el caso de "Sin Asignar"
+    if (event.target.value === SELECTOR_TABLE.UNASSIGNED) {
+      const formattedDate = format(date, "yyyy-MM-dd");
+      const existingHoursWorkedRecord = hoursWorked.find(
+        (record) =>
+          record.employeeId === employeeId &&
+          format(new Date(record.date), "yyyy-MM-dd") === formattedDate
+      );
+
+      if (existingHoursWorkedRecord) {
+        // Calcular las horas del registro que se va a eliminar
+        const scheduleToDelete = schedules.find((s) => s.id === existingHoursWorkedRecord.scheduleId);
+        const hoursToDelete = scheduleToDelete ? scheduleToDelete.hours : 0;
+
+        // Eliminar el registro de hoursWorked
+        dispatch(deleteHoursWorked(existingHoursWorkedRecord.id)).then(() => {
+          // Recalcular el total de horas sin el registro eliminado
+          recalculateEmployeeWeeklySummary(employeeId, date);
+
+          // Actualizar el weeklySummary con las nuevas horas
+          const weekNumber = getWeekNumber(date);
+          const month = date.getMonth() + 1;
+          const year = date.getFullYear();
+
+          const existingWeeklySummary = weeklySummaries.find(
+            (ws) => ws.employeeId === employeeId &&
+                     ws.weekNumber === weekNumber &&
+                     ws.year === year
+          );
+
+          if (existingWeeklySummary) {
+            const newTotalHours = Math.max(0, existingWeeklySummary.totalHours - hoursToDelete);
+
+            const weeklySummary = {
+              employeeId,
+              weekNumber,
+              month,
+              year,
+              totalHours: newTotalHours,
+            };
+
+            updateWeeklySummary(existingWeeklySummary.id, weeklySummary);
+          }
+        });
+      }
       return;
     }
 
@@ -1276,14 +1326,14 @@ const RolesPage: React.FC = () => {
     if (userPermissions.includes(PERMISSIONS.EXPORT_EXCEL_ROLES)) {
       options.push({
         label: "Exportar a Excel",
-        icon: <Table size={20} />,
+        icon: <ExcelIcon size={20} />,
         onClick: () => handleOpenExportDialog("excel"),
       });
     }
     if (userPermissions.includes(PERMISSIONS.EXPORT_PDF_ROLES)) {
       options.push({
         label: "Exportar a PDF",
-        icon: <FileText size={20} />,
+        icon: <PdfIcon size={20} />,
         onClick: () => handleOpenExportDialog("pdf"),
       });
     }

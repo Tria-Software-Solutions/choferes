@@ -34,7 +34,8 @@ import PAGE_TITLE from "../../../constants/pageTitle.constants";
 import PERMISSIONS from "../../../constants/permissions.constants";
 import NOTIFICATIONS from "../../../constants/notifications.constants";
 import MANAGEMENT from "../../../constants/management.constants";
-import { Users, Download, X, Search, Plus, Trash2, FileText, Table, PlusCircle } from "lucide-react";
+import { Users, Download, X, Search, Plus, Trash2, PlusCircle } from "lucide-react";
+import { PdfIcon, ExcelIcon } from "../../../components/Icons/FileIcons";
 import {
   exportSpeedDialBoxStyles,
   loadingBoxStyles,
@@ -272,8 +273,8 @@ const EmployeesPage: React.FC = () => {
   const exportOptions = useMemo(() => {
     const exportHeaders = ["Nombre", "Apellido", "Agregado", "Actualizado"];
     return createExportOptions({
-      excelIcon: <Table size={20} />,
-      pdfIcon: <FileText size={20} />,
+      excelIcon: <ExcelIcon size={20} />,
+      pdfIcon: <PdfIcon size={20} />,
       data: exportData,
       fileName: `empleados-${exportFileFormattedDate(new Date())}`,
       customHeaders: exportHeaders,

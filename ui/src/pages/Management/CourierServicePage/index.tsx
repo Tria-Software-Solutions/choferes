@@ -52,7 +52,8 @@ import {
   getPreferencesObject,
   setPreferencesObject,
 } from "../../../utils/persistentState";
-import { FileText, Table, PlusCircle } from "lucide-react";
+import { PlusCircle } from "lucide-react";
+import { PdfIcon, ExcelIcon } from "../../../components/Icons/FileIcons";
 
 // CourierServicePage component for managing courier services
 const CourierServicePage: React.FC = () => {
@@ -358,8 +359,8 @@ const CourierServicePage: React.FC = () => {
       "Actualizado",
     ];
     return createExportOptions({
-      excelIcon: <Table size={20} />,
-      pdfIcon: <FileText size={20} />,
+      excelIcon: <ExcelIcon size={20} />,
+      pdfIcon: <PdfIcon size={20} />,
       data: exportData,
       fileName: `reporte-de-servicios-de-mensajeria-${exportFileFormattedDate(selectedDate || new Date())}`,
       customHeaders: exportHeaders,

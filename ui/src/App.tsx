@@ -295,6 +295,39 @@ const AppContent: React.FC = () => {
 };
 
 const App: React.FC = () => {
+  // Fix accessibility warning: remove aria-hidden from MUI menus when they contain focused elements
+  React.useEffect(() => {
+    const handleFocusIn = (event: FocusEvent) => {
+      const target = event.target as HTMLElement;
+      // Find the closest MUI Menu/Popover/Modal root
+      const menuRoot = target.closest('.MuiMenu-root, .MuiPopover-root, .MuiModal-root');
+      if (menuRoot && menuRoot.getAttribute('aria-hidden') === 'true') {
+        menuRoot.setAttribute('aria-hidden', 'false');
+      }
+    };
+
+    const handleFocusOut = (event: FocusEvent) => {
+      const target = event.target as HTMLElement;
+      const menuRoot = target.closest('.MuiMenu-root, .MuiPopover-root, .MuiModal-root');
+      if (menuRoot) {
+        // Check if menu still has any focused elements
+        setTimeout(() => {
+          if (!menuRoot.contains(document.activeElement)) {
+            menuRoot.setAttribute('aria-hidden', 'true');
+          }
+        }, 0);
+      }
+    };
+
+    document.addEventListener('focusin', handleFocusIn, true);
+    document.addEventListener('focusout', handleFocusOut, true);
+
+    return () => {
+      document.removeEventListener('focusin', handleFocusIn, true);
+      document.removeEventListener('focusout', handleFocusOut, true);
+    };
+  }, []);
+
   return (
     <Provider store={store}>
       <AuthProvider>

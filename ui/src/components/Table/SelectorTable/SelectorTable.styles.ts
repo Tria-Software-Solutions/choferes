@@ -334,11 +334,11 @@ export const premiumSelectorMenuProps = {
       backgroundColor: theme.palette.mode === "dark" ? "#1a1a1f" : "#ffffff",
       color: theme.palette.text.primary,
       borderRadius: "20px",
-      marginTop: "8px",
       boxShadow: theme.palette.mode === "dark"
         ? "0 25px 80px rgba(0,0,0,0.5), 0 12px 40px rgba(0,0,0,0.3), inset 0 1px 0 rgba(255,255,255,0.05)"
         : "0 25px 80px rgba(0,0,0,0.15), 0 12px 40px rgba(0,0,0,0.08), inset 0 1px 0 rgba(255,255,255,1)",
       border: theme.palette.mode === "dark" ? "1px solid rgba(255,255,255,0.1)" : "1px solid rgba(0,0,0,0.08)",
+      marginTop: "8px",
       "& .MuiList-root": {
         padding: "12px",
         gap: "6px",
@@ -354,14 +354,14 @@ export const premiumSelectorMenuProps = {
         borderRadius: "0 16px 16px 0",
       },
       "&::-webkit-scrollbar-thumb": {
-        background: theme.palette.mode === "dark" 
+        background: theme.palette.mode === "dark"
           ? "linear-gradient(180deg, rgba(255,255,255,0.25) 0%, rgba(255,255,255,0.15) 100%)"
           : "linear-gradient(180deg, rgba(0,0,0,0.25) 0%, rgba(0,0,0,0.15) 100%)",
         borderRadius: "6px",
         transition: "background 0.2s ease",
       },
       "&::-webkit-scrollbar-thumb:hover": {
-        background: theme.palette.mode === "dark" 
+        background: theme.palette.mode === "dark"
           ? "linear-gradient(180deg, rgba(255,255,255,0.35) 0%, rgba(255,255,255,0.25) 100%)"
           : "linear-gradient(180deg, rgba(0,0,0,0.35) 0%, rgba(0,0,0,0.25) 100%)",
       },
@@ -369,21 +369,21 @@ export const premiumSelectorMenuProps = {
   },
   anchorOrigin: {
     vertical: "bottom" as const,
-    horizontal: "center" as const,
+    horizontal: "left" as const,
   },
   transformOrigin: {
     vertical: "top" as const,
-    horizontal: "center" as const,
+    horizontal: "left" as const,
   },
   // Allow menu to flip to opposite side when there's not enough space
-  marginThreshold: 32,
-  disablePortal: false,
+  marginThreshold: 0,
+  disablePortal: true,
   // Disable auto focus to prevent scrolling issues
   autoFocus: false,
   // Enable auto width to prevent menu from being too narrow
   autoWidth: true,
-  // Control where the menu anchors to prevent overlap
-  getContentAnchorEl: null,
+  // Fix accessibility warning by disabling enforce focus on modal
+  disableEnforceFocus: true,
 };
 
 // Premium MultiSelect styles for schedule view

@@ -34,7 +34,8 @@ import { translateDayOptionsToSpanish } from "../../../utils/string";
 import PAGE_TITLE from "../../../constants/pageTitle.constants";
 import PERMISSIONS from "../../../constants/permissions.constants";
 import MANAGEMENT from "../../../constants/management.constants";
-import { CalendarDays, Download, X, Plus, Trash2, FileText, Table, PlusCircle } from "lucide-react";
+import { CalendarDays, Download, X, Plus, Trash2, PlusCircle } from "lucide-react";
+import { PdfIcon, ExcelIcon } from "../../../components/Icons/FileIcons";
 import { NOTIFICATIONS } from "../../../constants/constants";
 import {
   exportSpeedDialBoxStyles,
@@ -295,8 +296,8 @@ const SchedulesPage: React.FC = () => {
       "Actualizado",
     ];
     return createExportOptions({
-      excelIcon: <Table />,
-      pdfIcon: <FileText />,
+      excelIcon: <ExcelIcon />,
+      pdfIcon: <PdfIcon />,
       data: exportData,
       fileName: `horarios-${exportFileFormattedDate(new Date())}`,
       customHeaders: exportHeaders,
