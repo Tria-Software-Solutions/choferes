@@ -129,17 +129,17 @@ export const ScheduleRow = memo(function ScheduleRow({
             {isAvailable ? (
               <FormControl fullWidth sx={styles.formControl}>
                 <Select
-                  multiple
-                  displayEmpty
-                  variant="standard"
                   value={assignedEmployees.map((e) => e.id)}
                   onChange={(e) =>
                     onScheduleEmployeesChange(e, scheduleForDay.id, date)
                   }
-                  sx={styles.select}
+                  multiple
+                  displayEmpty
+                  variant="standard"
+                  disabled={!canEdit}
+                  MenuProps={premiumSelectorMenuProps}
                   renderValue={(selected) => {
-                    const selectedArray = selected as number[];
-                    if (!selectedArray || selectedArray.length === 0) {
+                    if (selected.length === 0) {
                       return (
                         <Box sx={styles.unassignedContainer}>
                           <PersonIcon sx={styles.unassignedIcon} />
@@ -149,7 +149,7 @@ export const ScheduleRow = memo(function ScheduleRow({
                         </Box>
                       );
                     }
-                    const names = selectedArray
+                    const names = selected
                       .map((id) => {
                         const emp = filteredEmployees.find((e) => e.id === id);
                         return emp ? `${emp.firstName} ${emp.lastName}` : "";
@@ -168,8 +168,6 @@ export const ScheduleRow = memo(function ScheduleRow({
                       </Box>
                     );
                   }}
-                  disabled={!canEdit}
-                  MenuProps={premiumSelectorMenuProps}
                 >
                   {/* Search input item */}
                   <MenuItem

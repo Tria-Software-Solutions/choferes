@@ -36,7 +36,9 @@ export const fetchRoles = createAsyncThunk(
         return [];
       }
     } catch (error: unknown) {
-      return rejectWithValue((error as string) || "Failed to fetch roles");
+      return rejectWithValue(
+        error instanceof Error ? error.message : "Failed to fetch roles"
+      );
     }
   },
 );
@@ -49,7 +51,9 @@ export const fetchRoleById = createAsyncThunk(
       const role = await RoleService.getRoleById(id);
       return role;
     } catch (error: unknown) {
-      return rejectWithValue((error as string) || "Failed to fetch role by ID");
+      return rejectWithValue(
+        error instanceof Error ? error.message : "Failed to fetch role by ID"
+      );
     }
   },
 );
@@ -63,7 +67,7 @@ export const fetchRoleByName = createAsyncThunk(
       return role;
     } catch (error: unknown) {
       return rejectWithValue(
-        (error as string) || "Failed to fetch role by name",
+        error instanceof Error ? error.message : "Failed to fetch role by name"
       );
     }
   },
@@ -94,7 +98,9 @@ export const createRole = createAsyncThunk(
       const updatedRole = await RoleService.getRoleById(createdRole.id);
       return updatedRole;
     } catch (error: unknown) {
-      return rejectWithValue((error as string) || "Failed to create role");
+      return rejectWithValue(
+        error instanceof Error ? error.message : "Failed to create role"
+      );
     }
   },
 );
@@ -125,7 +131,9 @@ export const updateRole = createAsyncThunk(
         newPermissionIds,
       };
     } catch (error: unknown) {
-      return rejectWithValue((error as string) || "Failed to update role");
+      return rejectWithValue(
+        error instanceof Error ? error.message : "Failed to update role"
+      );
     }
   },
 );
@@ -138,7 +146,9 @@ export const deleteRole = createAsyncThunk(
       await RoleService.deleteRole(id);
       return id;
     } catch (error: unknown) {
-      return rejectWithValue((error as string) || "Failed to delete role");
+      return rejectWithValue(
+        error instanceof Error ? error.message : "Failed to delete role"
+      );
     }
   },
 );

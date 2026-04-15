@@ -33,8 +33,17 @@ export const getScheduleCellData = (
         format(new Date(record.date), "yyyy-MM-dd") === formattedDate,
     )
     .sort((a, b) => b.id - a.id)[0];
-  const options = getOptionsForDay(day, schedules);
-  const validLabels = options.map((option) => option.label);
+  let options = getOptionsForDay(day, schedules);
+  
+  // Add "Sin asignar" to options so it appears as a MenuItem in the Select
+  if (!options.some((opt) => opt.label === SELECTOR_TABLE.UNASSIGNED)) {
+    options = [
+      { id: -1, label: SELECTOR_TABLE.UNASSIGNED, days: [], hours: 0, specialSchedule: false },
+      ...options,
+    ];
+  }
+  
+  let validLabels = options.map((option) => option.label);
 
   const selectedLabel =
     schedules.find(

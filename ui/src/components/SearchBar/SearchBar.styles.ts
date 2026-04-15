@@ -27,34 +27,31 @@ export const textFieldStyles = (customSx: object = {}): SxProps<Theme> => (theme
   mb: 1,
   ...customSx,
   "& .MuiOutlinedInput-root": {
-    borderRadius: "12px",
-    minHeight: "42px",
+    borderRadius: "16px",
+    minHeight: "48px",
     position: "relative",
     backgroundColor: theme.palette.mode === "dark"
-      ? "rgba(40,40,50,0.6)"
-      : "rgba(255,255,255,0.7)",
+      ? "rgba(255,255,255,0.03)"
+      : "rgba(0,0,0,0.02)",
     color: theme.palette.text.primary,
-    border: theme.palette.mode === "dark"
-      ? "1px solid rgba(255,255,255,0.1)"
-      : "1px solid rgba(0,0,0,0.08)",
+    border: "none",
     transition: "all 0.3s cubic-bezier(0.4, 0, 0.2, 1)",
+    boxShadow: "0 1px 3px rgba(0,0,0,0.04)",
     "&:hover": {
       backgroundColor: theme.palette.mode === "dark"
-        ? "rgba(50,50,60,0.7)"
-        : "rgba(255,255,255,0.85)",
-      borderColor: theme.palette.mode === "dark"
-        ? "rgba(255,255,255,0.15)"
-        : "rgba(0,0,0,0.12)",
+        ? "rgba(255,255,255,0.06)"
+        : "rgba(0,0,0,0.04)",
+      boxShadow: "0 4px 12px rgba(0,0,0,0.08)",
+      transform: "translateY(-1px)",
     },
     "&:hover .MuiOutlinedInput-notchedOutline": {
       borderColor: "transparent",
     },
     "&.Mui-focused": {
       backgroundColor: theme.palette.mode === "dark"
-        ? "rgba(55,55,65,0.8)"
-        : "rgba(255,255,255,0.95)",
-      borderColor: theme.palette.primary.main,
-      boxShadow: `0 0 0 3px ${theme.palette.mode === "dark" ? "rgba(255,255,255,0.08)" : "rgba(0,0,0,0.06)"}`,
+        ? "rgba(255,255,255,0.08)"
+        : "rgba(0,0,0,0.06)",
+      boxShadow: `0 0 0 3px ${theme.palette.primary.main}15, 0 8px 24px rgba(0,0,0,0.12)`,
     },
     "&.Mui-focused .MuiOutlinedInput-notchedOutline": {
       borderColor: "transparent",
@@ -64,52 +61,54 @@ export const textFieldStyles = (customSx: object = {}): SxProps<Theme> => (theme
     },
     "& input": {
       color: theme.palette.text.primary,
-      fontSize: "0.9rem",
-      paddingTop: "10px",
-      paddingBottom: "10px",
-      paddingLeft: "14px",
-      paddingRight: "14px",
+      fontSize: "0.95rem",
+      fontWeight: 400,
+      paddingTop: "12px",
+      paddingBottom: "12px",
+      paddingLeft: "16px",
+      paddingRight: "16px",
       "&::placeholder": {
         color: theme.palette.text.secondary,
-        opacity: 0.6,
+        opacity: 0.5,
+        fontWeight: 400,
       },
     },
     "&.MuiInputBase-adornedStart input": {
-      paddingLeft: "36px",
-      paddingRight: "14px",
+      paddingLeft: "44px",
+      paddingRight: "16px",
     },
     "&.MuiInputBase-adornedEnd input": {
-      paddingLeft: "14px",
-      paddingRight: "44px",
+      paddingLeft: "16px",
+      paddingRight: "48px",
     },
     "&.MuiInputBase-adornedStart.MuiInputBase-adornedEnd input": {
-      paddingLeft: "36px",
-      paddingRight: "44px",
+      paddingLeft: "44px",
+      paddingRight: "48px",
     },
     "& .MuiInputAdornment-positionStart": {
       position: "absolute",
-      left: "12px",
+      left: "14px",
       marginRight: 0,
       zIndex: 2,
     },
     "& .MuiInputAdornment-positionEnd": {
       position: "absolute",
-      right: "12px",
+      right: "14px",
       marginLeft: 0,
       zIndex: 2,
     },
     "& input:-webkit-autofill": {
-      WebkitBoxShadow: theme.palette.mode === "dark" 
-        ? "0 0 0 100px rgba(40,40,50,0.6) inset"
-        : "0 0 0 100px rgba(255,255,255,0.7) inset",
+      WebkitBoxShadow: theme.palette.mode === "dark"
+        ? "0 0 0 100px rgba(255,255,255,0.03) inset"
+        : "0 0 0 100px rgba(0,0,0,0.02) inset",
       WebkitTextFillColor: theme.palette.text.primary,
-      borderRadius: "12px",
+      borderRadius: "16px",
       transition: "background-color 5000s ease-in-out 0s",
     },
     "& input:-webkit-autofill:focus": {
       WebkitBoxShadow: theme.palette.mode === "dark"
-        ? "0 0 0 100px rgba(55,55,65,0.8) inset"
-        : "0 0 0 100px rgba(255,255,255,0.95) inset",
+        ? "0 0 0 100px rgba(255,255,255,0.08) inset"
+        : "0 0 0 100px rgba(0,0,0,0.06) inset",
       WebkitTextFillColor: theme.palette.text.primary,
     },
   },

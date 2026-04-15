@@ -13,9 +13,24 @@ const sequelize = new Sequelize(dbConfig.database, dbConfig.username, dbConfig.p
   logging: false, // Disable SQL query logging
   pool: {
     max: 20, // Maximum number of connections
-    min: 5, // Minimum number of connections
+    min: 0, // Avoid keeping idle connections alive after long inactivity
     acquire: 60000, // Maximum time (ms) to try getting a connection
     idle: 10000, // Maximum time (ms) a connection can be idle
+    evict: 1000, // Reap stale idle connections quickly
+  },
+  retry: {
+    max: 2,
+    match: [
+      /SequelizeConnectionError/i,
+      /SequelizeConnectionAcquireTimeoutError/i,
+      /SequelizeConnectionRefusedError/i,
+      /SequelizeHostNotFoundError/i,
+      /SequelizeHostNotReachableError/i,
+      /SequelizeInvalidConnectionError/i,
+      /Connection terminated unexpectedly/i,
+      /ECONNRESET/i,
+      /ETIMEDOUT/i,
+    ],
   },
   // Apply dialectOptions from config (includes SSL settings) with session timeouts
   dialectOptions: {

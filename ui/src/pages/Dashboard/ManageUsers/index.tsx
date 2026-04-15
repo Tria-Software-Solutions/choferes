@@ -443,7 +443,7 @@ const ManageUsers: React.FC<{ isExpanded?: boolean }> = ({
               borderRadius: "16px",
               border: "1px solid rgba(0,0,0,0.08)",
               boxShadow: "0 4px 24px rgba(0,0,0,0.08), 0 1px 2px rgba(0,0,0,0.04)",
-              overflow: "visible",
+              overflow: "hidden",
               flex: 1,
               minHeight: 0,
               display: "flex",
@@ -590,52 +590,52 @@ const ManageUsers: React.FC<{ isExpanded?: boolean }> = ({
                 {DASHBOARD_USERS.ADD}
               </Button>
             </Box>
-          </Paper>
 
-          {/* Content Section */}
-          <Box sx={{ flex: 1, minHeight: 0, display: "flex", flexDirection: "column", overflow: "hidden" }}>
-          {filteredUsers.length > 0 ? (
-            <EditableTableComponent<User>
-              key="users-table"
-              data={filteredUsers}
-              columns={[
-                "firstName",
-                "lastName",
-                "username",
-                "email",
-                "roleName",
-              ]}
-              editRowId={editRowId}
-              editFields={editFields}
-              setEditField={setEditField}
-              handleEdit={handleEdit}
-              handleCancel={handleCancel}
-              handleUpdate={handleUpdate}
-              handleOpenStatusDialog={handleOpenStatusDialog}
-              getRowId={(row) => row.id}
-              totalCount={totalCount}
-              page={page}
-              rowsPerPage={rowsPerPage}
-              setPage={setPage}
-              setRowsPerPage={setRowsPerPage}
-              isSaveDisabled={!isEditFormValid}
-              userPermissions={userPermissions}
-              isExpanded={isExpanded}
-              validateField={validateField}
-              passwordModalOpen={passwordModalOpen}
-              passwordUserId={passwordUserId}
-              onOpenPasswordModal={handleOpenPasswordModal}
-              onClosePasswordModal={handleClosePasswordModal}
-              showStatusColumn={true}
-            />
-          ) : (
-            <Box sx={noUsersBoxStyles}>
-              <Typography variant="h6" color="textSecondary">
-                {DASHBOARD_USERS.NO_USERS}
-              </Typography>
-            </Box>
-          )}
-        </Box>
+            {/* Content Section */}
+            <Box sx={{ flex: 1, minHeight: 0, display: "flex", flexDirection: "column", overflow: "hidden" }}>
+            {filteredUsers.length > 0 ? (
+              <EditableTableComponent<User>
+                key="users-table"
+                data={filteredUsers}
+                columns={[
+                  "firstName",
+                  "lastName",
+                  "username",
+                  "email",
+                  "roleName",
+                ]}
+                editRowId={editRowId}
+                editFields={editFields}
+                setEditField={setEditField}
+                handleEdit={handleEdit}
+                handleCancel={handleCancel}
+                handleUpdate={handleUpdate}
+                handleOpenStatusDialog={handleOpenStatusDialog}
+                getRowId={(row) => row.id}
+                totalCount={totalCount}
+                page={page}
+                rowsPerPage={rowsPerPage}
+                setPage={setPage}
+                setRowsPerPage={setRowsPerPage}
+                isSaveDisabled={!isEditFormValid}
+                userPermissions={userPermissions}
+                isExpanded={isExpanded}
+                validateField={validateField}
+                passwordModalOpen={passwordModalOpen}
+                passwordUserId={passwordUserId}
+                onOpenPasswordModal={handleOpenPasswordModal}
+                onClosePasswordModal={handleClosePasswordModal}
+                showStatusColumn={true}
+              />
+            ) : (
+              <Box sx={noUsersBoxStyles}>
+                <Typography variant="h6" color="textSecondary">
+                  {DASHBOARD_USERS.NO_USERS}
+                </Typography>
+              </Box>
+            )}
+          </Box>
+          </Paper>
       </>
     )}
 
