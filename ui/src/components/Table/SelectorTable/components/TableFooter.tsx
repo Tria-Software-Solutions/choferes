@@ -123,6 +123,7 @@ export const TableFooter = memo(function TableFooter({
             MenuProps: {
               anchorOrigin: { horizontal: 'left', vertical: 'top' },
               transformOrigin: { horizontal: 'left', vertical: 'bottom' },
+              marginThreshold: 0,
               PaperProps: {
                 sx: {
                   maxHeight: 200,

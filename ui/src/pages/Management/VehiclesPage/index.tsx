@@ -42,7 +42,8 @@ import PAGE_TITLE from "../../../constants/pageTitle.constants";
 import PERMISSIONS from "../../../constants/permissions.constants";
 import NOTIFICATIONS from "../../../constants/notifications.constants";
 import MANAGEMENT from "../../../constants/management.constants";
-import { Car, Download, ChevronLeft, ChevronRight, X, Search, Plus, Trash2, FileText, Table, PlusCircle, RotateCcw } from "lucide-react";
+import { Car, Download, ChevronLeft, ChevronRight, X, Search, Plus, Trash2, PlusCircle, RotateCcw } from "lucide-react";
+import { PdfIcon, ExcelIcon } from "../../../components/Icons/FileIcons";
 import PremiumTooltip from "../../../components/PremiumTooltip/PremiumTooltip.component";
 import {
   exportSpeedDialBoxStyles,
@@ -580,12 +581,12 @@ const VehiclesPage: React.FC = () => {
                       actions={[
                         {
                           label: "Exportar a Excel",
-                          icon: <Table size={20} />,
+                          icon: <ExcelIcon size={20} />,
                           onClick: () => handleExport("excel"),
                         },
                         {
                           label: "Exportar a PDF",
-                          icon: <FileText size={20} />,
+                          icon: <PdfIcon size={20} />,
                           onClick: () => handleExport("pdf"),
                         },
                       ]}
@@ -686,20 +687,20 @@ const VehiclesPage: React.FC = () => {
                             boxShadow: '0 1px 3px rgba(0,0,0,0.04)',
                             transition: 'all 0.2s cubic-bezier(0.4, 0, 0.2, 1)',
                             '& fieldset': {
-                              borderColor: theme.palette.mode === 'dark' ? 'rgba(255,255,255,0.2)' : 'rgba(0,0,0,0.15)',
-                              borderWidth: '1px',
+                              borderColor: 'transparent',
+                              borderWidth: '0',
                             },
                             '&:hover': {
                               boxShadow: '0 2px 6px rgba(0,0,0,0.08)',
                               '& fieldset': {
-                                borderColor: theme.palette.mode === 'dark' ? 'rgba(255,255,255,0.3)' : 'rgba(0,0,0,0.25)',
+                                borderColor: 'transparent',
                               },
                             },
                             '&.Mui-focused': {
                               boxShadow: '0 0 0 3px rgba(0,0,0,0.04)',
                               '& fieldset': {
-                                borderColor: theme.palette.primary.main,
-                                borderWidth: '2px',
+                                borderColor: 'transparent',
+                                borderWidth: '0',
                               },
                             },
                             '& input': {

@@ -34,15 +34,6 @@ export const getScheduleCellData = (
     )
     .sort((a, b) => b.id - a.id)[0];
   let options = getOptionsForDay(day, schedules);
-  
-  // Add "Sin asignar" to options so it appears as a MenuItem in the Select
-  if (!options.some((opt) => opt.label === SELECTOR_TABLE.UNASSIGNED)) {
-    options = [
-      { id: -1, label: SELECTOR_TABLE.UNASSIGNED, days: [], hours: 0, specialSchedule: false },
-      ...options,
-    ];
-  }
-  
   let validLabels = options.map((option) => option.label);
 
   const selectedLabel =

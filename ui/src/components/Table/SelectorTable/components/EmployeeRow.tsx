@@ -6,14 +6,9 @@ import {
   Typography,
   IconButton,
   Stack,
-  Select,
-  MenuItem,
-  FormControl,
-  type SelectChangeEvent,
 } from "@mui/material";
 import InfoOutlinedIcon from "@mui/icons-material/InfoOutlined";
 import MoreTimeIcon from "@mui/icons-material/MoreTime";
-import PersonIcon from "@mui/icons-material/Person";
 import type { Employee } from "../../../../models/Employee";
 import type { Schedule } from "../../../../models/Schedule";
 import type { DayEntry } from "../../../../utils/dates";
@@ -21,7 +16,7 @@ import { SELECTOR_TABLE, PERMISSIONS } from "../../../../constants/constants";
 import PremiumTooltip from "../../../../components/PremiumTooltip/PremiumTooltip.component";
 import { getScheduleCellData, isToday } from "../helpers/scheduleCell";
 import { getEmployeeRowStyles } from "../styles/employeeRow.styles";
-import { premiumSelectorMenuProps } from "../SelectorTable.styles";
+import { EmployeeCellDropdown } from "./EmployeeCellDropdown";
 
 interface EmployeeRowProps {
   employee: Employee;
@@ -37,7 +32,7 @@ interface EmployeeRowProps {
   onInfoClick: (employee: Employee) => void;
   onAdjustClick: (employee: Employee) => void;
   onScheduleChange: (
-    event: SelectChangeEvent<string>,
+    value: string,
     employeeId: number,
     date: Date
   ) => void;
@@ -103,35 +98,14 @@ export const EmployeeRow = memo(function EmployeeRow({
 
         return (
           <TableCell key={day} sx={styles.scheduleCell(today)}>
-            <FormControl fullWidth>
-              <Select
-                value={cellData.finalSelectedLabel}
-                onChange={(e) => onScheduleChange(e, employee.id, new Date(date))}
-                sx={styles.select}
-                MenuProps={premiumSelectorMenuProps}
-                displayEmpty
-                disabled={!canEdit}
-                renderValue={(selected) => {
-                  if (selected === SELECTOR_TABLE.UNASSIGNED) {
-                    return (
-                      <Box sx={styles.unassignedContainer}>
-                        <PersonIcon sx={styles.unassignedIcon} />
-                        <span style={styles.unassignedText}>
-                          {SELECTOR_TABLE.UNASSIGNED}
-                        </span>
-                      </Box>
-                    );
-                  }
-                  return selected;
-                }}
-              >
-                {cellData.options.map((option) => (
-                  <MenuItem key={option.id} value={option.label} sx={styles.menuItem}>
-                    {option.label}
-                  </MenuItem>
-                ))}
-              </Select>
-            </FormControl>
+            <EmployeeCellDropdown
+              value={cellData.finalSelectedLabel}
+              options={cellData.options}
+              disabled={!canEdit}
+              onChange={(value) => onScheduleChange(value, employee.id, new Date(date))}
+              theme={theme}
+              styles={styles}
+            />
           </TableCell>
         );
       })}

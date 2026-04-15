@@ -28,8 +28,6 @@ import {
   Stack,
   OutlinedInput,
   IconButton,
-  Checkbox,
-  ListSubheader,
 } from "@mui/material";
 import PaginationComponent from "../Pagination/Pagination.component";
 import {
@@ -48,6 +46,8 @@ import {
 import InfoOutlinedIcon from "@mui/icons-material/InfoOutlined";
 import PremiumTooltip from "../../../components/PremiumTooltip/PremiumTooltip.component";
 import MoreTimeIcon from "@mui/icons-material/MoreTime";
+import { ScheduleCellDropdown } from "./components/ScheduleCellDropdown";
+import { EmployeeCellDropdown } from "./components/EmployeeCellDropdown";
 import CalendarTodayIcon from "@mui/icons-material/CalendarToday";
 import DateRangeIcon from "@mui/icons-material/DateRange";
 import CalendarMonthIcon from "@mui/icons-material/CalendarMonth";
@@ -61,7 +61,6 @@ import {
   paperStyles,
   tableRowBackground,
   tableCellBackground,
-  menuItemStyles,
   employeeColumnCellStyles,
   tableCellStyles,
   boldTypographyStyles,
@@ -72,7 +71,6 @@ import {
 import {
   calculateTotalHours,
   calculateOvertime,
-  hasWorkedCurrentWeek,
   sortEmployeesByName,
   paginateEmployees,
   renderPeriodHeader,
@@ -97,7 +95,6 @@ import {
   deleteHoursWorked, // <-- importa la acción de borrado
 } from "../../../store/slices/hoursWorkedSlice";
 import SwapHorizIcon from "@mui/icons-material/SwapHoriz";
-import SearchBarComponent from '../../SearchBar/SearchBar.component';
 
 // SelectorTable component displays and manages employee schedules, hours worked, and summary data for different periods (weekly, biweekly, monthly).
 // Props:
@@ -304,7 +301,13 @@ const SelectorTableComponent: React.FC<SelectorTableProps> = ({
   }, [selectedPeriod, currentWeek, weekNumber, biweekNumber, month, year, weeklySummaries, biweeklySummaries, monthlySummaries, multiplePeriods]);
 
   const hasWorkedCurrentWeekForEmployee = useCallback((employee: Employee): boolean => {
-    return hasWorkedCurrentWeek(employee, weekNumber, year, weeklySummaries);
+    const summary = weeklySummaries.find(
+      (summary) =>
+        summary.employeeId === employee.id &&
+        summary.weekNumber === weekNumber &&
+        summary.year === year
+    );
+    return summary ? Number(summary.totalHours) > 0 : false;
   }, [weekNumber, year, weeklySummaries]);
 
   // Use helper function for rows per page options
@@ -421,11 +424,11 @@ const SelectorTableComponent: React.FC<SelectorTableProps> = ({
 
   // Handler to change the assigned employees to a schedule in one day
   const handleScheduleEmployeesChange = (
-    event: SelectChangeEvent<number[]>,
+    value: number[],
     scheduleId: number,
     date: string
   ) => {
-    const selectedEmployeeIds = event.target.value as number[];
+    const selectedEmployeeIds = value;
     // Get employees currently assigned
     const currentlyAssigned = getEmployeesForScheduleAndDay(
       scheduleId,
@@ -481,21 +484,6 @@ const SelectorTableComponent: React.FC<SelectorTableProps> = ({
         }
       }
     });
-  };
-
-  const getFilteredDropdownEmployees = (scheduleId: number, date: string): Employee[] => {
-    const term = (employeeSearchTerms[getSearchKey(scheduleId, date)] || "").toLowerCase();
-    return filteredEmployees
-      .filter((emp: Employee) =>
-        `${emp.firstName} ${emp.lastName}`.toLowerCase().includes(term)
-      )
-      .sort((a: Employee, b: Employee) =>
-        `${a.firstName} ${a.lastName}`.localeCompare(
-          `${b.firstName} ${b.lastName}`,
-          "es",
-          { sensitivity: "base" }
-        )
-      );
   };
 
   return (
@@ -854,16 +842,31 @@ const SelectorTableComponent: React.FC<SelectorTableProps> = ({
                                 borderWidth: 0,
                                 border: "none",
                               },
+                              "&.Mui-active .MuiOutlinedInput-notchedOutline": {
+                                borderColor: "transparent",
+                                borderWidth: 0,
+                                border: "none",
+                              },
                               "& .MuiInputBase-root": {
                                 backgroundColor: "transparent !important",
                               },
                               "& .MuiOutlinedInput-root": {
                                 backgroundColor: "transparent !important",
                               },
+                              "&:hover": {
+                                backgroundColor: "transparent",
+                              },
+                              "&.Mui-focused": {
+                                backgroundColor: "transparent",
+                              },
+                              "&.Mui-active": {
+                                backgroundColor: "transparent",
+                              },
                             }}
                             MenuProps={{
                               anchorOrigin: { horizontal: "center", vertical: "bottom" },
                               transformOrigin: { horizontal: "center", vertical: "top" },
+                              marginThreshold: 0,
                               PaperProps: {
                                 elevation: 0,
                                 sx: {
@@ -1074,20 +1077,7 @@ const SelectorTableComponent: React.FC<SelectorTableProps> = ({
                             <span>
                               <IconButton
                                 size="small"
-                                sx={{
-                                  color: "primary.main",
-                                  backgroundColor: "rgba(25, 118, 210, 0.08)",
-                                  border: "1px solid rgba(25, 118, 210, 0.2)",
-                                  borderRadius: "10px",
-                                  width: 36,
-                                  height: 36,
-                                  "&:hover": {
-                                    backgroundColor: "rgba(25, 118, 210, 0.15)",
-                                    borderColor: "rgba(25, 118, 210, 0.35)",
-                                    boxShadow: "0 2px 8px rgba(25, 118, 210, 0.2)",
-                                  },
-                                  transition: "all 0.2s ease",
-                                }}
+                                color="primary"
                                 onClick={() =>
                                   setOpenInfoDialogEmployee(employee)
                                 }
@@ -1110,160 +1100,17 @@ const SelectorTableComponent: React.FC<SelectorTableProps> = ({
                         return (
                           <TableCell
                             key={day}
+                            align="center"
                             sx={tableCellBackground(rowIndex, isToday(date))}
                           >
-                            <FormControl fullWidth>
-                              <Select
-                                value={scheduleData.finalSelectedLabel}
-                                onChange={(event: SelectChangeEvent<string>) =>
-                                  handleChange(
-                                    event,
-                                    employee.id,
-                                    new Date(date)
-                                  )
-                                }
-                                disabled={
-                                  !permissions?.includes(
-                                    PERMISSIONS.EDIT_EMPLOYEE_ROLES
-                                  )
-                                }
-                                renderValue={(selected) => (
-                                  <span style={{ fontSize: "0.85rem" }}>
-                                    {selected}
-                                  </span>
-                                )}
-                                input={
-                                  <OutlinedInput
-                                    notched={false}
-                                    label="Ubicación"
-                                    sx={{
-                                      backgroundColor: "transparent",
-                                      "& .MuiOutlinedInput-root": {
-                                        backgroundColor: "transparent",
-                                      },
-                                      "& .MuiInputBase-root": {
-                                        backgroundColor: "transparent",
-                                      },
-                                    }}
-                                  />
-                                }
-                                onOpen={() => {
-                                  setTimeout(() => {
-                                    const menuPaper = document.querySelector(
-                                      '.MuiPopover-root .MuiPaper-root'
-                                    );
-                                    if (menuPaper) {
-                                      menuPaper.scrollTop = 0;
-                                    }
-                                  }, 0);
-                                }}
-                                MenuProps={{
-                                  PaperProps: {
-                                    sx: {
-                                      maxHeight: 320,
-                                      overflowY: "auto",
-                                      mt: 0.5,
-                                      borderRadius: "16px",
-                                      background: theme.palette.mode === 'dark' 
-                                        ? 'rgba(30,30,35,0.95)'
-                                        : '#ffffff',
-                                      boxShadow: theme.palette.mode === 'dark'
-                                        ? "0 10px 40px rgba(0,0,0,0.4), 0 2px 8px rgba(0,0,0,0.2)"
-                                        : "0 10px 40px rgba(0,0,0,0.15), 0 2px 8px rgba(0,0,0,0.1)",
-                                      border: "none",
-                                      pr: 0.5,
-                                    },
-                                  },
-                                }}
-                              >
-                                {scheduleData.options
-                                  .filter((option) => !option.specialSchedule)
-                                  .sort((a, b) =>
-                                    a.label.localeCompare(b.label)
-                                  )
-                                  .map((option) => (
-                                    <MenuItem
-                                      key={option.id}
-                                      value={option.label}
-                                      sx={menuItemStyles}
-                                    >
-                                      {option.label}
-                                    </MenuItem>
-                                  ))}
-                                {scheduleData.options.filter((option) => option.specialSchedule).length > 0 && (
-                                  <ListSubheader
-                                    sx={{
-                                      display: "flex",
-                                      alignItems: "center",
-                                      py: 1.5,
-                                      px: 2.5,
-                                      fontSize: "0.7rem",
-                                      fontWeight: 600,
-                                      letterSpacing: "0.08em",
-                                      textTransform: "uppercase",
-                                      backgroundColor: theme.palette.mode === "dark" ? "rgba(255,255,255,0.03)" : "rgba(0,0,0,0.02)",
-                                      color: theme.palette.text.secondary,
-                                      opacity: 0.8,
-                                    }}
-                                  >
-                                    {SELECTOR_TABLE.SPECIAL_SCHEDULES}
-                                  </ListSubheader>
-                                )}
-                                {scheduleData.options
-                                  .filter((option) => option.specialSchedule)
-                                  .sort((a, b) =>
-                                    a.label.localeCompare(b.label)
-                                  )
-                                  .map((option) => (
-                                    <MenuItem
-                                      key={option.id}
-                                      value={option.label}
-                                      sx={menuItemStyles}
-                                    >
-                                      {option.label}
-                                    </MenuItem>
-                                  ))}
-                                {permissions?.includes(
-                                  PERMISSIONS.CREATE_SCHEDULES
-                                ) && (
-                                  <>
-                                    <ListSubheader
-                                      sx={{
-                                        display: "flex",
-                                        alignItems: "center",
-                                        py: 1.5,
-                                        px: 2.5,
-                                        fontSize: "0.7rem",
-                                        fontWeight: 600,
-                                        letterSpacing: "0.08em",
-                                        textTransform: "uppercase",
-                                        backgroundColor: theme.palette.mode === "dark" ? "rgba(255,255,255,0.03)" : "rgba(0,0,0,0.02)",
-                                        color: theme.palette.text.secondary,
-                                        opacity: 0.8,
-                                      }}
-                                    >
-                                      Opciones
-                                    </ListSubheader>
-                                    <MenuItem
-                                      value={"Other"}
-                                      onClick={() => setOpenAddScheduleModal(true)}
-                                      sx={menuItemStyles}
-                                    >
-                                      <Box
-                                        display="flex"
-                                        justifyContent="space-between"
-                                        width="100%"
-                                        alignItems="center"
-                                      >
-                                        <Typography sx={{ color: theme.palette.primary.main, fontWeight: 600 }}>
-                                          {SELECTOR_TABLE.OTHER}
-                                        </Typography>
-                                      </Box>
-                                    </MenuItem>
-                                  </>
-                                )}
-                              </Select>
-                            </FormControl>
+                            <EmployeeCellDropdown
+                              value={scheduleData.finalSelectedLabel}
+                              options={scheduleData.options}
+                              disabled={!permissions?.includes(PERMISSIONS.EDIT_EMPLOYEE_ROLES)}
+                              onChange={(event) => handleChange(event, employee.id, new Date(date))}
+                              theme={theme}
+                              styles={{}}
+                            />
                           </TableCell>
                         );
                       })}
@@ -1285,49 +1132,25 @@ const SelectorTableComponent: React.FC<SelectorTableProps> = ({
                               justifyContent="center"
                               alignItems="center"
                             >
-                              <PremiumTooltip title="Ajustar horas">
-                                <span>
-                                  <IconButton
-                                    size="small"
-                                    disabled={
-                                      !hasWorkedCurrentWeekForEmployee(employee)
-                                    }
-                                    sx={{
-                                      color: hasWorkedCurrentWeekForEmployee(
-                                        employee
-                                      )
-                                        ? "warning.main"
-                                        : "grey.400",
-                                      backgroundColor: hasWorkedCurrentWeekForEmployee(
-                                        employee
-                                      ) ? "rgba(237, 108, 2, 0.08)" : "transparent",
-                                      border: hasWorkedCurrentWeekForEmployee(
-                                        employee
-                                      ) ? "1px solid rgba(237, 108, 2, 0.25)" : "1px solid transparent",
-                                      borderRadius: "10px",
-                                      width: 36,
-                                      height: 36,
-                                      "&:hover": {
-                                        backgroundColor: hasWorkedCurrentWeekForEmployee(
-                                          employee
-                                        ) ? "rgba(237, 108, 2, 0.15)" : "transparent",
-                                        borderColor: hasWorkedCurrentWeekForEmployee(
-                                          employee
-                                        ) ? "rgba(237, 108, 2, 0.4)" : "transparent",
-                                        boxShadow: hasWorkedCurrentWeekForEmployee(
-                                          employee
-                                        ) ? "0 2px 8px rgba(237, 108, 2, 0.2)" : "none",
-                                      },
-                                      transition: "all 0.2s ease",
-                                    }}
-                                    onClick={() =>
-                                      setOpenAdjustDialogEmployee(employee)
-                                    }
-                                  >
-                                    <MoreTimeIcon fontSize="small" />
-                                  </IconButton>
-                                </span>
-                              </PremiumTooltip>
+                              {(() => {
+                                const hasWorked = hasWorkedCurrentWeekForEmployee(employee);
+                                return (
+                                  <PremiumTooltip title="Ajustar horas">
+                                    <span>
+                                      <IconButton
+                                        size="small"
+                                        color={hasWorked ? "warning" : "default"}
+                                        disabled={!hasWorked}
+                                        onClick={() =>
+                                          setOpenAdjustDialogEmployee(employee)
+                                        }
+                                      >
+                                        <MoreTimeIcon fontSize="small" />
+                                      </IconButton>
+                                    </span>
+                                  </PremiumTooltip>
+                                );
+                              })()}
                             </Stack>
                           </TableCell>
                           <TableCell
@@ -1428,196 +1251,22 @@ const SelectorTableComponent: React.FC<SelectorTableProps> = ({
                         return (
                           <TableCell
                             key={day}
+                            align="center"
                             sx={tableCellBackground(rowIndex, isToday(date))}
                           >
                             {isAvailable ? (
-                              <Box>
-                                <FormControl fullWidth>
-                                  <Select
-                                    multiple
-                                    displayEmpty
-                                    value={assignedEmployees.map((e) => e.id)}
-                                    onChange={(event) =>
-                                      handleScheduleEmployeesChange(
-                                        event,
-                                        scheduleForDay.id,
-                                        date
-                                      )
-                                    }
-                                    renderValue={(selected) => {
-                                      const selectedArray =
-                                        selected as number[];
-                                      if (
-                                        !selectedArray ||
-                                        selectedArray.length === 0
-                                      ) {
-                                        return (
-                                          <span
-                                            style={{
-                                              color:
-                                                theme.palette.text.disabled,
-                                              fontSize: "0.85rem",
-                                              fontWeight: 400,
-                                            }}
-                                          >
-                                            {SELECTOR_TABLE.UNASSIGNED}
-                                          </span>
-                                        );
-                                      }
-                                      const names = selectedArray
-                                        .map((id) => {
-                                          const emp = filteredEmployees.find(
-                                            (e) => e.id === id
-                                          );
-                                          return emp
-                                            ? `${emp.firstName} ${emp.lastName}`
-                                            : "";
-                                        })
-                                        .filter(Boolean);
-                                      return (
-                                        <Box
-                                          sx={{
-                                            display: "flex",
-                                            flexDirection: "column",
-                                            gap: 0.5,
-                                          }}
-                                        >
-                                          {names.map((name, index) => (
-                                            <Typography
-                                              key={index}
-                                              variant="body2"
-                                              component="span"
-                                              sx={{
-                                                fontSize: "0.85rem",
-                                                fontWeight: 500,
-                                                fontStyle: "normal",
-                                              }}
-                                            >
-                                              {name}
-                                            </Typography>
-                                          ))}
-                                        </Box>
-                                      );
-                                    }}
-                                    disabled={
-                                      !permissions?.includes(
-                                        PERMISSIONS.EDIT_EMPLOYEE_ROLES
-                                      )
-                                    }
-                                    input={<OutlinedInput notched={false} />}
-                                    onOpen={() => {
-                                      setTimeout(() => {
-                                        const menuPaper = document.querySelector(
-                                          '.MuiPopover-root .MuiPaper-root'
-                                        );
-                                        if (menuPaper) {
-                                          menuPaper.scrollTop = 0;
-                                        }
-                                      }, 0);
-                                    }}
-                                    MenuProps={{
-                                      PaperProps: {
-                                        sx: {
-                                          maxHeight: 320,
-                                          overflowY: "auto",
-                                          mt: 0.5,
-                                          borderRadius: "16px",
-                                          background: theme.palette.mode === 'dark' 
-                                            ? 'rgba(30,30,35,0.95)'
-                                            : '#ffffff',
-                                          boxShadow: theme.palette.mode === 'dark'
-                                            ? "0 10px 40px rgba(0,0,0,0.4), 0 2px 8px rgba(0,0,0,0.2)"
-                                            : "0 10px 40px rgba(0,0,0,0.15), 0 2px 8px rgba(0,0,0,0.1)",
-                                          border: "none",
-                                          pr: 0.5,
-                                        },
-                                      },
-                                    }}
-                                  >
-                                    {/* Sticky SearchBar as first MenuItem */}
-                                    <MenuItem tabIndex={-1} sx={{
-                                      position: 'sticky',
-                                      top: 0,
-                                      zIndex: 10,
-                                      backgroundColor: theme.palette.background.paper,
-                                      cursor: 'default',
-                                      padding: 0,
-                                      minHeight: '40px',
-                                      '&:hover': { backgroundColor: theme.palette.background.paper },
-                                      boxShadow: `0 2px 8px ${theme.palette.mode === 'dark' ? 'rgba(0,0,0,0.3)' : 'rgba(0,0,0,0.1)'}`,
-                                      borderBottom: `1px solid ${theme.palette.mode === 'dark' ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.08)'}`,
-                                    }}>
-                                      <Box sx={{ px: 1, py: 0.5, width: '100%', backgroundColor: theme.palette.background.paper }}>
-                                        <SearchBarComponent
-                                          value={employeeSearchTerms[getSearchKey(scheduleForDay.id, date)] || ""}
-                                          onChange={handleSearchChange(scheduleForDay.id, date)}
-                                          placeholder="Buscar empleado..."
-                                          fullWidth
-                                          size="small"
-                                          margin="dense"
-                                          onKeyDown={(e: React.KeyboardEvent<HTMLInputElement>) => e.stopPropagation()}
-                                          onClick={(e: React.MouseEvent<HTMLInputElement>) => e.stopPropagation()}
-                                          sx={{
-                                            backgroundColor: 'none',
-                                            '& .MuiOutlinedInput-root': {
-                                              backgroundColor: 'none',
-                                              borderRadius: 1,
-                                              boxShadow: 'none',
-                                              border: 'none',
-                                              '& fieldset': {
-                                                border: 'none',
-                                              },
-                                            },
-                                            '& .MuiOutlinedInput-input': {
-                                              color: theme.palette.text.primary,
-                                            },
-                                          }}
-                                        />
-                                      </Box>
-                                    </MenuItem>
-                                    {/* Employee options */}
-                                    {getFilteredDropdownEmployees(scheduleForDay.id, date).map((employee: Employee) => (
-                                      <MenuItem
-                                        key={employee.id}
-                                        value={employee.id}
-                                        sx={{
-                                          ...menuItemStyles,
-                                          display: "flex",
-                                          alignItems: "center",
-                                          width: "100%",
-                                        }}
-                                      >
-                                        <Checkbox
-                                          checked={assignedEmployees.some(
-                                            (e) => e.id === employee.id
-                                          )}
-                                          size="small"
-                                          sx={{
-                                            color: theme.palette.primary.main,
-                                            "&.Mui-checked": {
-                                              color:
-                                                theme.palette.primary.main,
-                                            },
-                                            "&.MuiCheckbox-indeterminate": {
-                                              color:
-                                                theme.palette.primary.main,
-                                            },
-                                          }}
-                                        />
-                                        <span
-                                          style={{
-                                            textAlign: "left",
-                                            flex: 1,
-                                          }}
-                                        >
-                                          {employee.firstName}{" "}
-                                          {employee.lastName}
-                                        </span>
-                                      </MenuItem>
-                                    ))}
-                                  </Select>
-                                </FormControl>
-                              </Box>
+                              <ScheduleCellDropdown
+                                assignedEmployees={assignedEmployees}
+                                filteredEmployees={filteredEmployees}
+                                canEdit={permissions?.includes(PERMISSIONS.EDIT_EMPLOYEE_ROLES)}
+                                employeeSearchTerms={employeeSearchTerms}
+                                onScheduleEmployeesChange={handleScheduleEmployeesChange}
+                                onSearchChange={handleSearchChange}
+                                scheduleForDay={scheduleForDay}
+                                date={date}
+                                theme={theme}
+                                styles={{}}
+                              />
                             ) : (
                               <Typography
                                 variant="body2"

@@ -66,15 +66,21 @@ const Login: React.FC = () => {
   const isSmallScreen = useMediaQuery(theme.breakpoints.down("sm"));
 
   // Wake up server on page load (handles Render free tier cold start)
+  // Only run if NOT in localhost (development)
   useEffect(() => {
     if (wakeUpAttempted.current) return;
     wakeUpAttempted.current = true;
 
-    setIsWakingUp(true);
-    wakeUpServer().then(() => {
-      setServerReady(true);
-      setIsWakingUp(false);
-    });
+    const apiUrl = process.env.REACT_APP_API_URL || "http://localhost:5000";
+    const isLocalhost = apiUrl.includes("localhost") || apiUrl.includes("127.0.0.1");
+
+    if (!isLocalhost) {
+      setIsWakingUp(true);
+      wakeUpServer().then(() => {
+        setServerReady(true);
+        setIsWakingUp(false);
+      });
+    }
   }, []);
 
   // Validates the login form fields
@@ -302,7 +308,7 @@ const Login: React.FC = () => {
             {isWakingUp && (
               <Fade in timeout={300}>
                 <Alert severity="info" sx={alertStyles} icon={<CircularProgress size={20} />}>
-                  Despertando servidor... (esto puede tomar hasta un minuto en el plan gratuito)
+                  Despertando servidor... Esto puede tomar unos minutos
                 </Alert>
               </Fade>
             )}
