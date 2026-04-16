@@ -18,8 +18,9 @@ interface EmployeeCellDropdownProps {
   value: string;
   options: Array<{ id: number; label: string }>;
   disabled?: boolean;
-  onChange: (event: any) => void;
+  onChange: (value: string) => void;
   theme: Theme;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   styles: any;
 }
 
@@ -75,19 +76,12 @@ export const EmployeeCellDropdown: React.FC<EmployeeCellDropdownProps> = ({
 
   const handleClear = () => {
     setSearchValue("");
-    // Simular un evento completo para compatibilidad con handleChange
-    const event = {
-      target: { value: SELECTOR_TABLE.UNASSIGNED }
-    } as any;
-    onChange(event);
+    onChange(SELECTOR_TABLE.UNASSIGNED);
     handleClose();
   };
 
   const handleSelect = (label: string) => {
-    const event = {
-      target: { value: label }
-    } as any;
-    onChange(event);
+    onChange(label);
     handleClose();
   };
 
