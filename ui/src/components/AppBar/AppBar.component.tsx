@@ -318,8 +318,8 @@ const AppBarComponent: React.FC<AppBarComponentProps> = ({
                         height: 12,
                         borderRadius: '50%',
                         position: 'absolute',
-                        bottom: -0.5,
-                        right: -0.5,
+                        bottom: 0,
+                        right: 0,
                         animation: 'pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite',
                         '@keyframes pulse': {
                           '0%, 100%': {
@@ -380,11 +380,13 @@ const AppBarComponent: React.FC<AppBarComponentProps> = ({
                 ? 'rgba(30, 30, 35, 0.95)'
                 : '#ffffff',
               backdropFilter: "blur(20px)",
-              border: 'none',
-              borderRadius: "16px",
+              border: theme.palette.mode === 'dark'
+                ? "1px solid rgba(255,255,255,0.15)"
+                : "1px solid rgba(0,0,0,0.15)",
+              borderRadius: 2,
               boxShadow: theme.palette.mode === 'dark'
-                ? '0 8px 32px rgba(0, 0, 0, 0.5)'
-                : '0 8px 32px rgba(0, 0, 0, 0.12)',
+                ? "0 8px 32px rgba(0,0,0,0.4)"
+                : "0 8px 32px rgba(0,0,0,0.25)",
               overflow: 'hidden',
               padding: 0,
             },

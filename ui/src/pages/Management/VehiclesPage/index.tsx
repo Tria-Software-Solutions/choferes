@@ -199,13 +199,8 @@ const VehiclesPage: React.FC = () => {
     const validateParkingLot = (parkingLot: string) => {
       const trimmedParkingLot = parkingLot.trim();
 
-      // If starts with ATP, use strict validation
-      if (trimmedParkingLot.toUpperCase().startsWith("ATP")) {
-        return /^(?:ATP[1-9]-\d{3,4}|nulo|n\/a)$/i.test(trimmedParkingLot);
-      }
-
-      // For any other prefix or format, consider it valid
-      return true;
+      // Allow alphanumeric with letters, hyphens, and numbers
+      return /^[a-zA-Z0-9-]+$/i.test(trimmedParkingLot) || trimmedParkingLot === "";
     };
 
     return (
@@ -228,13 +223,8 @@ const VehiclesPage: React.FC = () => {
       if (field === "parkingLot" && typeof value === "string") {
         const trimmedValue = value.trim();
 
-        // If starts with ATP, use strict validation
-        if (trimmedValue.toUpperCase().startsWith("ATP")) {
-          return /^(?:ATP[1-9]-\d{3,4}|nulo|n\/a)$/i.test(trimmedValue);
-        }
-
-        // For any other prefix or format, consider it valid
-        return true;
+        // Allow alphanumeric with letters, hyphens, and numbers
+        return /^[a-zA-Z0-9-]+$/i.test(trimmedValue) || trimmedValue === "";
       }
 
       if (field === "licensePlate" && typeof value === "string") {
