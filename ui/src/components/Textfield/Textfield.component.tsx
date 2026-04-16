@@ -52,8 +52,8 @@ const TextfieldComponent: React.FC<CustomTextFieldProps> = ({
         ) : undefined,
         endAdornment: endAdornment ? (
           // Check if endAdornment is already an InputAdornment by checking its type
-          React.isValidElement(endAdornment) && (endAdornment as any).type?.displayName === 'InputAdornment' 
-            ? endAdornment 
+          React.isValidElement(endAdornment) && typeof endAdornment.type === 'function' && (endAdornment.type as { displayName?: string }).displayName === 'InputAdornment'
+            ? endAdornment
             : (
               <InputAdornment position="end">
                 {endAdornment}

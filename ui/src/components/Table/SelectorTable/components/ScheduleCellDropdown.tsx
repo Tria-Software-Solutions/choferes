@@ -30,6 +30,7 @@ interface ScheduleCellDropdownProps {
   scheduleForDay: Schedule;
   date: string;
   theme: Theme;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   styles: any;
 }
 
