@@ -113,11 +113,12 @@ const ErrorPage: React.FC = () => {
           <Slide direction="up" in timeout={1000}>
             <Card className="auth-card" sx={innerBoxStyles}>
               <CardContent sx={{ p: { xs: 4, sm: 5 } }}>
-              <AlertCircle
-                size={64}
-                style={iconStyles(theme)}
-                aria-label="Error icon"
-              />
+              <Box sx={iconStyles(theme)}>
+                <AlertCircle
+                  size={64}
+                  aria-label="Error icon"
+                />
+              </Box>
               <Typography variant="h3" component="h1" sx={titleStyles(theme)}>
                 {ERRORS.ERROR_500_TITLE}
               </Typography>

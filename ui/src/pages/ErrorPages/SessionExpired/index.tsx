@@ -105,16 +105,18 @@ const SessionExpired: React.FC = () => {
             <Card className="auth-card" sx={innerBoxStyles}>
               <CardContent sx={{ p: { xs: 4, sm: 5 } }}>
               <Box sx={timerBoxStyles}>
-                <TimerOff
-                  size={48}
-                  style={timerIconStyles(theme)}
-                  aria-label="Timer off icon"
-                />
-                <Shield
-                  size={32}
-                  style={securityIconStyles(theme)}
-                  aria-label="Security icon"
-                />
+                <Box sx={timerIconStyles(theme)}>
+                  <TimerOff
+                    size={48}
+                    aria-label="Timer off icon"
+                  />
+                </Box>
+                <Box sx={securityIconStyles(theme)}>
+                  <Shield
+                    size={32}
+                    aria-label="Security icon"
+                  />
+                </Box>
               </Box>
               <Typography variant="h3" component="h1" sx={titleStyles(theme)}>
                 {ERRORS.SESSION_EXPIRED_TITLE}
