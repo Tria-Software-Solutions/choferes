@@ -255,9 +255,7 @@ const AddScheduleForm: React.FC<AddScheduleFormProps> = ({
             <Box
               sx={{ mr: { xs: 1, sm: 2 }, color: theme.palette.warning.main }}
             >
-              <AlertTriangle
-                sx={{ color: theme.palette.warning.main, mr: { xs: 1, sm: 2 } }}
-              />
+              <AlertTriangle />
             </Box>
             <Box>
               <FormControlLabel

@@ -109,11 +109,12 @@ const NotFound: React.FC = () => {
             <Card className="auth-card" sx={innerBoxStyles}>
               <CardContent sx={{ p: { xs: 4, sm: 5 } }}>
               <Box sx={{ mb: { xs: 3, sm: 4, md: 5 } }}>
-                <SearchX
-                  size={64}
-                  style={iconStyles(theme)}
-                  aria-label="Not found icon"
-                />
+                <Box sx={iconStyles(theme)}>
+                  <SearchX
+                    size={64}
+                    aria-label="Not found icon"
+                  />
+                </Box>
                 <Typography variant="h1" component="h1" sx={titleStyles(theme)}>
                   {ERRORS.ERROR_404_TITLE}
                 </Typography>
