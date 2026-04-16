@@ -37,6 +37,7 @@ interface EmployeeRowProps {
     date: Date
   ) => void;
   theme: import("@mui/material").Theme;
+  onAddSchedule?: () => void;
 }
 
 export const EmployeeRow = memo(function EmployeeRow({
@@ -54,6 +55,7 @@ export const EmployeeRow = memo(function EmployeeRow({
   onAdjustClick,
   onScheduleChange,
   theme,
+  onAddSchedule,
 }: EmployeeRowProps) {
   const styles = getEmployeeRowStyles(theme, isSmallScreen, rowIndex);
   const showHoursColumn = permissions?.includes(PERMISSIONS.VIEW_EMPLOYEE_ROLES_HOURS);
@@ -105,6 +107,7 @@ export const EmployeeRow = memo(function EmployeeRow({
               onChange={(value) => onScheduleChange(value, employee.id, new Date(date))}
               theme={theme}
               styles={styles}
+              onAddSchedule={onAddSchedule}
             />
           </TableCell>
         );

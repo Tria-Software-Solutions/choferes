@@ -305,7 +305,7 @@ const SchedulesPage: React.FC = () => {
   }, [exportData]);
 
   return (
-    <Box sx={{ height: "calc(100vh - 100px)", display: "flex", flexDirection: "column", overflow: "hidden", pb: 0, pt: 0, px: 0 }}>
+    <Box className="scrollable-content" sx={{ height: "100%", display: "flex", flexDirection: "column", overflow: "hidden", pb: 0, pt: 0, px: 0 }}>
       {/* Premium Card with Header and Grid */}
       <Paper
         elevation={0}
@@ -317,6 +317,8 @@ const SchedulesPage: React.FC = () => {
           flex: 1,
           display: "flex",
           flexDirection: "column",
+          mx: { xs: 1, sm: 1.5, md: 2 },
+          my: 0,
         }}
       >
         {/* Header Section */}

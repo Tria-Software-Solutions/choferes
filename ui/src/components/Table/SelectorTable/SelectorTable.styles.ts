@@ -96,6 +96,7 @@ export const employeeColumnCellStyles = (
   left: 0,
   zIndex: 11,
   whiteSpace: "nowrap",
+  textAlign: "left",
   backgroundColor: "inherit",
   fontWeight: 600,
   fontSize: "0.875rem",
@@ -271,7 +272,8 @@ export const tableCellBackground = (
 export const employeeCellBoxStyles = (
   isSmallScreen: boolean,
 ): SxProps<Theme> => ({
-  whiteSpace: isSmallScreen ? "break-spaces" : "nowrap",
+  whiteSpace: "nowrap",
+  textAlign: "left",
   gap: 1,
   display: "flex",
   alignItems: "center",

@@ -56,7 +56,14 @@ import {
 import { validateName, validateEmail, validateUsername, validatePassword } from '../../../utils/userValidation';
 
 // Register page component for user sign up
-const Register = () => {
+const Register: React.FC = () => {
+  // Prevent body scroll on this page
+  useEffect(() => {
+    document.body.style.overflow = 'hidden';
+    return () => {
+      document.body.style.overflow = '';
+    };
+  }, []);
   const dispatch = useDispatch<AppDispatch>();
   const { users } = useSelector((state: RootState) => state.users);
   const { showNotification } = useAppNotifications();

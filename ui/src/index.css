@@ -148,3 +148,52 @@ code {
 .MuiPopper-root {
   max-height: 50vh !important;
 }
+
+/* Responsive height utilities for all devices */
+html, body {
+  height: 100%;
+  min-height: 100%;
+}
+
+/* Dynamic viewport height for mobile browsers with address bars */
+.full-height {
+  height: 100vh;
+  height: 100dvh;
+  min-height: 100vh;
+  min-height: 100dvh;
+}
+
+/* For pages with AppBar - use flexbox to fill available space */
+.content-height-with-appbar {
+  flex: 1;
+  height: 100%;
+  max-height: 100%;
+  overflow: hidden;
+  box-sizing: border-box;
+}
+
+/* Scrollable content container */
+.scrollable-content {
+  height: 100%;
+  overflow-y: auto;
+  overflow-x: hidden;
+  -webkit-overflow-scrolling: touch;
+}
+
+/* Hide scrollbar but keep functionality */
+.scrollable-content::-webkit-scrollbar {
+  width: 6px;
+}
+
+.scrollable-content::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.scrollable-content::-webkit-scrollbar-thumb {
+  background: rgba(0, 0, 0, 0.2);
+  border-radius: 3px;
+}
+
+.scrollable-content::-webkit-scrollbar-thumb:hover {
+  background: rgba(0, 0, 0, 0.3);
+}

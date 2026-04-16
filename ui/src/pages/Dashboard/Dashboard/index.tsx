@@ -177,7 +177,7 @@ const Dashboard: React.FC = () => {
   };
 
   return (
-    <Box>
+    <Box className="scrollable-content" sx={{ height: "100%", display: "flex", flexDirection: "column", overflow: "hidden", pb: 0, pt: 0, px: 0 }}>
       {/* Header and SpeedDial for backup/export */}
       <Box
         display="flex"

@@ -50,10 +50,19 @@ export const getOptionsForDay = (
   day: string,
   schedules: Schedule[],
 ): Schedule[] => {
-  // Returns all schedules that include the given day
-  return schedules.filter((schedule) =>
-    schedule.days.includes(day.toLowerCase()),
-  );
+  // Returns all schedules that include the given day, sorted by type and alphabetically
+  return schedules
+    .filter((schedule) =>
+      schedule.days.includes(day.toLowerCase()),
+    )
+    .sort((a, b) => {
+      // First sort by type: regular schedules (locations) first, then special schedules
+      if (a.specialSchedule !== b.specialSchedule) {
+        return a.specialSchedule ? 1 : -1;
+      }
+      // Then sort alphabetically by label
+      return a.label.localeCompare(b.label, 'es', { sensitivity: 'base' });
+    });
 };
 
 export const translateDayToAbrevSpanish = (

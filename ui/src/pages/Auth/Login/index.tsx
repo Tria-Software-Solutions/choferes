@@ -64,6 +64,14 @@ const Login: React.FC = () => {
   const theme = useTheme();
   const isSmallScreen = useMediaQuery(theme.breakpoints.down("sm"));
 
+  // Prevent body scroll on this page
+  useEffect(() => {
+    document.body.style.overflow = 'hidden';
+    return () => {
+      document.body.style.overflow = '';
+    };
+  }, []);
+
   // Wake up server on page load (handles Render free tier cold start)
   // Only run if NOT in localhost (development)
   useEffect(() => {

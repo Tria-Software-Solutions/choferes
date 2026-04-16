@@ -24,6 +24,8 @@ export const getScheduleRowStyles = (theme: Theme, isSmallScreen: boolean, rowIn
   scheduleName: {
     color: theme.palette.text.primary,
     fontSize: "0.875rem",
+    whiteSpace: "nowrap" as const,
+    textAlign: "left" as const,
   },
   dayCell: (isToday: boolean) => ({
     padding: isSmallScreen ? "4px" : "8px",
