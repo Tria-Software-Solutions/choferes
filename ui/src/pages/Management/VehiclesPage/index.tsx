@@ -199,13 +199,8 @@ const VehiclesPage: React.FC = () => {
     const validateParkingLot = (parkingLot: string) => {
       const trimmedParkingLot = parkingLot.trim();
 
-      // If starts with ATP, use strict validation
-      if (trimmedParkingLot.toUpperCase().startsWith("ATP")) {
-        return /^(?:ATP[1-9]-\d{3,4}|nulo|n\/a)$/i.test(trimmedParkingLot);
-      }
-
-      // For any other prefix or format, consider it valid
-      return true;
+      // Allow alphanumeric with letters, hyphens, and numbers
+      return /^[a-zA-Z0-9-]+$/i.test(trimmedParkingLot) || trimmedParkingLot === "";
     };
 
     return (
@@ -228,13 +223,8 @@ const VehiclesPage: React.FC = () => {
       if (field === "parkingLot" && typeof value === "string") {
         const trimmedValue = value.trim();
 
-        // If starts with ATP, use strict validation
-        if (trimmedValue.toUpperCase().startsWith("ATP")) {
-          return /^(?:ATP[1-9]-\d{3,4}|nulo|n\/a)$/i.test(trimmedValue);
-        }
-
-        // For any other prefix or format, consider it valid
-        return true;
+        // Allow alphanumeric with letters, hyphens, and numbers
+        return /^[a-zA-Z0-9-]+$/i.test(trimmedValue) || trimmedValue === "";
       }
 
       if (field === "licensePlate" && typeof value === "string") {
@@ -503,7 +493,7 @@ const VehiclesPage: React.FC = () => {
   // Use exportTable({ data: exportData, ... }) for export
 
   return (
-    <Box sx={{ height: "calc(100vh - 100px)", display: "flex", flexDirection: "column", overflow: "hidden", pb: 0, pt: 0, px: 0 }}>
+    <Box className="scrollable-content" sx={{ height: "100%", display: "flex", flexDirection: "column", overflow: "hidden", pb: 0, pt: 0, px: 0 }}>
       {/* Premium Card with Header and Grid */}
       <Paper
         elevation={0}
@@ -515,6 +505,8 @@ const VehiclesPage: React.FC = () => {
           flex: 1,
           display: "flex",
           flexDirection: "column",
+          mx: { xs: 1, sm: 1.5, md: 2 },
+          my: 0,
         }}
       >
         {/* Header Section */}

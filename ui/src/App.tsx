@@ -187,31 +187,20 @@ const AppContent: React.FC = () => {
   };
 
   return (
-    <>
+    <Box sx={{ display: "flex", flexDirection: "column", height: "100dvh", overflow: "hidden" }}>
       {!isHideAppBar && <AppBarWrapper />}
       <Container
         maxWidth={false}
         disableGutters
+        className={isAuthPage ? "full-height" : "content-height-with-appbar"}
         sx={{
-          paddingLeft: isAuthPage ? 0 : {
-            xs: "8px",
-            sm: "12px",
-            md: "16px",
-            lg: "16px",
-            xl: "16px",
-          },
-          paddingRight: isAuthPage ? 0 : {
-            xs: "8px",
-            sm: "12px",
-            md: "16px",
-            lg: "16px",
-            xl: "16px",
-          },
+          paddingLeft: 0,
+          paddingRight: 0,
           paddingBottom: 0,
-          minHeight: isAuthPage ? "100vh" : undefined,
-          height: isAuthPage ? "100vh" : undefined,
           overflow: "hidden",
           backgroundColor: isAuthPage ? "transparent" : theme.palette.background.default,
+          display: "flex",
+          flexDirection: "column",
         }}
       >
         <Suspense fallback={<PageLoader />}>
@@ -290,7 +279,7 @@ const AppContent: React.FC = () => {
         </Routes>
         </Suspense>
       </Container>
-    </>
+    </Box>
   );
 };
 

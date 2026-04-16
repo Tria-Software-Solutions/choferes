@@ -1,4 +1,5 @@
 import { useNavigate } from "react-router-dom";
+import { useEffect } from "react";
 import {
   Box,
   Typography,
@@ -29,6 +30,13 @@ import {
 // NotFound page component for displaying 404 errors
 const NotFound: React.FC = () => {
   const navigate = useNavigate();
+
+  useEffect(() => {
+    document.body.style.overflow = 'hidden';
+    return () => {
+      document.body.style.overflow = '';
+    };
+  }, []);
   const theme = useTheme();
   const isSmallScreen = useMediaQuery(theme.breakpoints.down("sm"));
 
@@ -107,8 +115,8 @@ const NotFound: React.FC = () => {
         <Fade in timeout={1000}>
           <Slide direction="up" in timeout={1000}>
             <Card className="auth-card" sx={innerBoxStyles}>
-              <CardContent sx={{ p: { xs: 4, sm: 5 } }}>
-              <Box sx={{ mb: { xs: 3, sm: 4, md: 5 } }}>
+              <CardContent>
+              <Box>
                 <Box sx={iconStyles(theme)}>
                   <SearchX
                     size={64}

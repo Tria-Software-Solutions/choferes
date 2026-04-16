@@ -126,7 +126,7 @@ const AddScheduleForm: React.FC<AddScheduleFormProps> = ({
             onChange={(e) =>
               setFormData({ ...formData, label: e.target.value })
             }
-            icon={<Calendar style={iconStyle} />}
+            icon={<Calendar style={iconStyle(theme)} />}
           />
         </Grid>
 
@@ -155,7 +155,7 @@ const AddScheduleForm: React.FC<AddScheduleFormProps> = ({
                 ? FORMS.HOURS_INVALID
                 : ""
             }
-            icon={<Clock style={iconStyle} />}
+            icon={<Clock style={iconStyle(theme)} />}
             inputProps={{ min: "0" }}
           />
         </Grid>
@@ -171,7 +171,7 @@ const AddScheduleForm: React.FC<AddScheduleFormProps> = ({
                   placeholder={formData.days.length === 0 ? FORMS.DAYS_REQUIRED : ''}
                   startAdornment={
                     <InputAdornment position="start">
-                      <Calendar style={iconStyle} />
+                      <Calendar style={iconStyle(theme)} />
                     </InputAdornment>
                   }
                 />

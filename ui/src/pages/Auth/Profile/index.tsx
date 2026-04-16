@@ -266,7 +266,7 @@ const Profile: React.FC = () => {
   };
 
   return (
-    <Box sx={{ height: "calc(100vh - 64px - 40px)", minHeight: 0, display: "flex", flexDirection: "column", overflow: "hidden", pb: 0, pt: 0, px: 0 }}>
+    <Box className="scrollable-content" sx={{ height: "100%", minHeight: 0, display: "flex", flexDirection: "column", overflow: "hidden", pb: 0, pt: 0, px: 0 }}>
       <Paper
         elevation={0}
         sx={{
@@ -277,7 +277,8 @@ const Profile: React.FC = () => {
           border: "1px solid rgba(0,0,0,0.08)",
           borderRadius: "16px",
           boxShadow: "0 4px 24px rgba(0,0,0,0.08), 0 1px 2px rgba(0,0,0,0.04)",
-          p: 0,
+          mx: { xs: 1, sm: 1.5, md: 2 },
+          my: 0,
         }}
       >
         {/* Premium Header */}
@@ -376,7 +377,7 @@ const Profile: React.FC = () => {
                   },
                 }}
               >
-                Información personal
+                {isSmallScreen ? 'Información' : 'Información personal'}
               </Button>
               <Button
                 variant={activeSection === 'theme' ? 'contained' : 'outlined'}
@@ -398,7 +399,7 @@ const Profile: React.FC = () => {
                   },
                 }}
               >
-                Tema de la aplicación
+                {isSmallScreen ? 'Tema' : 'Tema de la aplicación'}
               </Button>
               <Button
                 variant={activeSection === 'system' ? 'contained' : 'outlined'}
@@ -420,7 +421,7 @@ const Profile: React.FC = () => {
                   },
                 }}
               >
-                Gestión del Sistema
+                {isSmallScreen ? 'Gestión' : 'Gestión del Sistema'}
               </Button>
             </Box>
           </Box>
@@ -429,7 +430,7 @@ const Profile: React.FC = () => {
         {/* Content Section */}
         <Box sx={{ flex: 1, minHeight: 0, display: "flex", flexDirection: "column", overflow: "hidden", p: { xs: 2, sm: 3 } }}>
           {activeSection === 'personal' && (
-            <Box sx={{ width: "100%", display: "block" }}>
+            <Box sx={{ width: "100%", display: "block", overflowY: { xs: "auto", sm: "visible" }, maxHeight: { xs: "calc(100dvh - 300px)", sm: "none" } }}>
               {/* Section Header */}
               <Box sx={{ mb: 3 }}>
                 <Box display="flex" alignItems="center" gap={1.5} mb={1}>
@@ -1010,7 +1011,7 @@ const Profile: React.FC = () => {
                     },
                   }}
                 >
-                  {DASHBOARD.USERS}
+                  {isSmallScreen ? 'Usuarios' : DASHBOARD.USERS}
                 </Button>
                 <Button
                   variant={activeSystemSubSection === 'roles' ? 'contained' : 'outlined'}
@@ -1054,7 +1055,7 @@ const Profile: React.FC = () => {
                     },
                   }}
                 >
-                  {DASHBOARD.PERMISSIONS}
+                  {isSmallScreen ? 'Permisos' : DASHBOARD.PERMISSIONS}
                 </Button>
               </Box>
 
@@ -1066,6 +1067,7 @@ const Profile: React.FC = () => {
                   display: "flex",
                   flexDirection: "column",
                   overflow: "hidden",
+                  overflowY: "auto",
                 }}
               >
                 {activeSystemSubSection === 'users' && <ManageUsers isExpanded />}

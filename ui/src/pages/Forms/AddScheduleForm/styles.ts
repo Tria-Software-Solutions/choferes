@@ -1,5 +1,4 @@
 import { Theme } from "@mui/material/styles";
-import { CSSProperties } from "react";
 
 export const boxRoot = {
   width: "100%",
@@ -10,26 +9,38 @@ export const gridContainer = {
   mt: 0,
 };
 
-export const iconStyle: CSSProperties = {
-  color: "#666666",
-};
+export const iconStyle = (theme: Theme) => ({
+  color: theme.palette.mode === "dark" ? "rgba(255,255,255,0.5)" : "rgba(0,0,0,0.4)",
+});
 
 export const formControl = (theme: Theme) => ({
   "& .MuiOutlinedInput-root, & .MuiSelect-select": {
     backgroundColor: theme.palette.background.paper,
     color: theme.palette.text.primary,
-    borderRadius: 2,
+    borderRadius: "10px",
+    fontSize: "0.875rem",
+    fontWeight: 500,
+    transition: "all 0.25s cubic-bezier(0.4, 0, 0.2, 1)",
+    "& .MuiOutlinedInput-notchedOutline": {
+      borderColor: theme.palette.mode === "dark" ? "rgba(255,255,255,0.2)" : "rgba(0,0,0,0.15)",
+      borderWidth: "1px",
+    },
     "&.Mui-focused .MuiOutlinedInput-notchedOutline": {
       borderColor: theme.palette.primary.main,
-      borderWidth: 2,
+      borderWidth: "2px",
     },
     "&:hover .MuiOutlinedInput-notchedOutline": {
-      borderColor: theme.palette.primary.main,
+      borderColor: theme.palette.mode === "dark" ? "rgba(255,255,255,0.3)" : "rgba(0,0,0,0.25)",
     },
     "&.Mui-focused": {
       backgroundColor: theme.palette.background.paper,
       outline: "none",
-      boxShadow: "none",
+      boxShadow: theme.palette.mode === "dark"
+        ? "0 0 0 3px rgba(25, 118, 210, 0.15)"
+        : "0 0 0 3px rgba(25, 118, 210, 0.1)",
+    },
+    "& .MuiSelect-select": {
+      padding: "12px 16px",
     },
   },
 });
