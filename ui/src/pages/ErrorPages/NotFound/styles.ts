@@ -6,12 +6,12 @@ export const outerBoxStyles: SxProps<Theme> = (theme) => ({
   flexDirection: "column",
   justifyContent: "center",
   alignItems: "center",
-  minHeight: "100vh",
+  padding: { xs: 1, sm: 2 },
+  height: "100vh",
   textAlign: "center",
   position: "relative",
-  overflow: { xs: "auto", sm: "hidden" },
+  overflow: "hidden",
   margin: 0,
-  padding: 0,
   // Premium blurred background image
   backgroundImage: `url(${blurredBg})`,
   backgroundSize: "cover",
@@ -64,13 +64,12 @@ export const innerBoxStyles: SxProps<Theme> = (theme) => ({
   maxWidth: "100%",
   borderRadius: "24px",
   position: "relative",
-  overflow: "hidden",
   display: "flex",
   flexDirection: "column",
   alignItems: "center",
   textAlign: "center",
-  py: { xs: 4, sm: 5 },
-  px: { xs: 3, sm: 4, md: 5 },
+  py: { xs: 2, sm: 3 },
+  px: { xs: 2, sm: 2, md: 3 },
   mx: "auto",
   background: theme.palette.mode === "dark"
     ? "linear-gradient(145deg, rgba(26,26,26,0.9) 0%, rgba(35,35,35,0.85) 100%)"
@@ -95,30 +94,30 @@ export const innerBoxStyles: SxProps<Theme> = (theme) => ({
 });
 
 export const iconStyles = (theme: Theme): SxProps<Theme> => ({
-  fontSize: { xs: 64, sm: 80, md: 96 },
+  fontSize: { xs: 48, sm: 64, md: 72 },
   color: theme.palette.text.primary,
-  mb: { xs: 3, sm: 4, md: 5 },
+  mb: { xs: 2, sm: 3 },
 });
 
 export const titleStyles = (theme: Theme): SxProps<Theme> => ({
   color: theme.palette.text.primary,
-  mb: { xs: 2, sm: 3 },
-  fontSize: { xs: "4rem", sm: "5rem", md: "6rem" },
+  mb: { xs: 1, sm: 2 },
+  fontSize: { xs: "2.5rem", sm: "3.5rem", md: "4rem" },
   fontWeight: 800,
   letterSpacing: "-0.02em",
 });
 
 export const subtitleStyles: SxProps<Theme> = {
-  mb: { xs: 2, sm: 3 },
-  fontSize: { xs: "1rem", sm: "1.125rem", md: "1.25rem" },
+  mb: { xs: 1, sm: 2 },
+  fontSize: { xs: "0.9rem", sm: "1rem", md: "1.1rem" },
   fontWeight: 600,
   color: "text.primary",
 };
 
 export const descriptionStyles: SxProps<Theme> = {
-  mb: { xs: 3, sm: 4, md: 5 },
-  lineHeight: 1.6,
-  fontSize: { xs: "0.875rem", sm: "0.9375rem", md: "1rem" },
+  mb: { xs: 2, sm: 3 },
+  lineHeight: 1.5,
+  fontSize: { xs: "0.8rem", sm: "0.875rem", md: "0.9rem" },
   maxWidth: 500,
   color: "text.secondary",
 };
@@ -161,8 +160,8 @@ export const exploreButtonStyles: SxProps<Theme> = {
 };
 
 export const captionStyles: SxProps<Theme> = {
-  mt: { xs: 3, sm: 4, md: 5 },
+  mt: { xs: 2, sm: 3 },
   display: "block",
   opacity: 0.7,
-  fontSize: { xs: "0.75rem", sm: "0.875rem" },
+  fontSize: { xs: "0.7rem", sm: "0.75rem" },
 };

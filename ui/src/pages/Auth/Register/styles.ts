@@ -6,11 +6,11 @@ export const authPageBoxStyles: SxProps<Theme> = (theme) => ({
   display: "flex",
   alignItems: "center",
   justifyContent: "center",
-  padding: { xs: 2, sm: 4 },
-  minHeight: "100vh",
-  height: { xs: "auto", sm: "100vh" },
+  padding: { xs: 1, sm: 2 },
+  height: "100dvh",
+  minHeight: "100dvh",
   position: "relative",
-  overflow: { xs: "auto", sm: "hidden" },
+  overflow: "hidden",
   // Premium blurred background image
   backgroundImage: `url(${blurredBg})`,
   backgroundSize: "cover",
@@ -59,11 +59,10 @@ export const authPageBoxStyles: SxProps<Theme> = (theme) => ({
 });
 
 export const authCardStyles: SxProps<Theme> = (theme) => ({
-  width: { xs: "100%", sm: 480, md: 520 },
+  width: { xs: "100%", sm: 420, md: 440 },
   maxWidth: "100%",
   borderRadius: "24px",
   position: "relative",
-  overflow: "hidden",
   background: theme.palette.mode === "dark"
     ? "linear-gradient(145deg, rgba(26,26,26,0.9) 0%, rgba(35,35,35,0.85) 100%)"
     : "linear-gradient(145deg, rgba(255,255,255,0.95) 0%, rgba(250,250,250,0.9) 100%)",

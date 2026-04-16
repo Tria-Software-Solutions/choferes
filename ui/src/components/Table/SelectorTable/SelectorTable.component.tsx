@@ -1041,6 +1041,7 @@ const SelectorTableComponent: React.FC<SelectorTableProps> = ({
                         sx={{
                           padding: isSmallScreen ? "3px 6px" : "4px 8px",
                           whiteSpace: "nowrap",
+                          textAlign: "left",
                           ...tableCellBackground(rowIndex, false),
                           position: "sticky",
                           left: 0,
@@ -1056,7 +1057,7 @@ const SelectorTableComponent: React.FC<SelectorTableProps> = ({
                           <Typography
                             variant="body2"
                             fontWeight={600}
-                            sx={{ minWidth: 48, textAlign: "right" }}
+                            sx={{ whiteSpace: "nowrap", textAlign: "left" }}
                           >
                             {employee.firstName} {employee.lastName}
                           </Typography>
@@ -1109,6 +1110,7 @@ const SelectorTableComponent: React.FC<SelectorTableProps> = ({
                               onChange={(value) => handleChange(value, employee.id, new Date(date))}
                               theme={theme}
                               styles={{}}
+                              onAddSchedule={() => setOpenAddScheduleModal(true)}
                             />
                           </TableCell>
                         );

@@ -1,4 +1,5 @@
 import { useAuth } from "../../../hooks/useAuth";
+import { useEffect } from "react";
 import {
   Box,
   Typography,
@@ -11,14 +12,13 @@ import {
   Card,
   CardContent,
 } from "@mui/material";
-import { TimerOff, LogIn, Shield } from "lucide-react";
+import { TimerOff, LogIn } from "lucide-react";
 import ERRORS from "../../../constants/errors.constants";
 import {
   outerBoxStyles,
   innerBoxStyles,
   timerBoxStyles,
   timerIconStyles,
-  securityIconStyles,
   titleStyles,
   subtitleStyles,
   descriptionStyles,
@@ -30,6 +30,13 @@ import {
 // SessionExpired page component for handling expired user sessions
 const SessionExpired: React.FC = () => {
   const { logoutUser } = useAuth();
+
+  useEffect(() => {
+    document.body.style.overflow = 'hidden';
+    return () => {
+      document.body.style.overflow = '';
+    };
+  }, []);
   const theme = useTheme();
   const isSmallScreen = useMediaQuery(theme.breakpoints.down("sm"));
 
@@ -103,18 +110,12 @@ const SessionExpired: React.FC = () => {
         <Fade in timeout={1000}>
           <Slide direction="up" in timeout={1000}>
             <Card className="auth-card" sx={innerBoxStyles}>
-              <CardContent sx={{ p: { xs: 4, sm: 5 } }}>
+              <CardContent>
               <Box sx={timerBoxStyles}>
                 <Box sx={timerIconStyles(theme)}>
                   <TimerOff
                     size={48}
                     aria-label="Timer off icon"
-                  />
-                </Box>
-                <Box sx={securityIconStyles(theme)}>
-                  <Shield
-                    size={32}
-                    aria-label="Security icon"
                   />
                 </Box>
               </Box>

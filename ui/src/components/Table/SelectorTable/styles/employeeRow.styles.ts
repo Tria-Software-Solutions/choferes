@@ -34,6 +34,8 @@ export const getEmployeeRowStyles = (theme: Theme, isSmallScreen: boolean, rowIn
   employeeName: {
     color: theme.palette.text.primary,
     fontSize: "0.875rem",
+    whiteSpace: "nowrap" as const,
+    textAlign: "left" as const,
   },
   infoButton: {
     color: "primary.main",
