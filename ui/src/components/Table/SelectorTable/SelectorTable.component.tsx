@@ -24,7 +24,6 @@ import {
   useTheme,
   useMediaQuery,
   Typography,
-  SelectChangeEvent,
   Stack,
   OutlinedInput,
   IconButton,
@@ -126,7 +125,7 @@ interface SelectorTableProps {
   month: number;
   year: number;
   handleChange: (
-    event: SelectChangeEvent<string>,
+    value: string,
     employeeId: number,
     date: Date
   ) => void;
@@ -1107,7 +1106,7 @@ const SelectorTableComponent: React.FC<SelectorTableProps> = ({
                               value={scheduleData.finalSelectedLabel}
                               options={scheduleData.options}
                               disabled={!permissions?.includes(PERMISSIONS.EDIT_EMPLOYEE_ROLES)}
-                              onChange={(event) => handleChange(event, employee.id, new Date(date))}
+                              onChange={(value) => handleChange(value, employee.id, new Date(date))}
                               theme={theme}
                               styles={{}}
                             />

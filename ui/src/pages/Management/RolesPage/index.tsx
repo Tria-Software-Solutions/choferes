@@ -37,7 +37,6 @@ import {
   useMediaQuery,
   Button,
   CircularProgress,
-  SelectChangeEvent,
   Backdrop,
   IconButton,
   Dialog,
@@ -572,16 +571,16 @@ const RolesPage: React.FC = () => {
   ]);
 
   const handleChange = (
-    event: SelectChangeEvent<string>,
+    value: string,
     employeeId: number,
     date: Date
   ) => {
-    if (event.target.value === "Other") {
+    if (value === "Other") {
       return;
     }
 
     // Manejar el caso de "Sin Asignar"
-    if (event.target.value === SELECTOR_TABLE.UNASSIGNED) {
+    if (value === SELECTOR_TABLE.UNASSIGNED) {
       const formattedDate = format(date, "yyyy-MM-dd");
       const existingHoursWorkedRecord = hoursWorked.find(
         (record) =>
@@ -630,7 +629,7 @@ const RolesPage: React.FC = () => {
 
     const selectedSchedule = schedules.find(
       (schedule) =>
-        schedule.label === event.target.value &&
+        schedule.label === value &&
         schedule.days.includes(getDayName(date))
     );
 
