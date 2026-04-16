@@ -15,7 +15,7 @@ export const iconStyle: CSSProperties = {
 };
 
 export const formControl = (theme: Theme) => ({
-  marginTop: 0,
+  mb: 0,
   "& .MuiOutlinedInput-root, & .MuiSelect-select": {
     backgroundColor: theme.palette.background.paper,
     color: theme.palette.text.primary,

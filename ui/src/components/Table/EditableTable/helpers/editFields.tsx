@@ -1,15 +1,95 @@
-import React from "react";
-import { FormControl, Select, MenuItem, Checkbox, ListItemText, Box, Autocomplete } from "@mui/material";
+import React, { useState, useRef } from "react";
+import { FormControl, Select, MenuItem, Checkbox, ListItemText } from "@mui/material";
 import TextfieldComponent from "../../../Textfield/Textfield.component";
 import { LocalizationProvider } from "@mui/x-date-pickers";
 import { DatePicker } from "@mui/x-date-pickers/DatePicker";
 import { AdapterDateFns } from "@mui/x-date-pickers/AdapterDateFns";
 import { es } from "date-fns/locale";
-import { translateColumnHeaderToSpanish } from "../../../../utils/string";
-import { maskLicensePlate, maskParkingLotWithPrefix } from "../../../../utils/mask";
+import { maskLicensePlate } from "../../../../utils/mask";
 import { formControlStyles, selectStyles, datePickerTextFieldStyles, premiumMenuProps } from "../EditableTable.styles";
-import { ColumnConfigType, PARKING_PREFIX_OPTIONS } from "./columnConfig";
+import { ColumnConfigType } from "./columnConfig";
 import { DAYS_LIST } from "../../../../constants/constants";
+
+// Componente wrapper para dropdown de días con posicionamiento dinámico
+const DaysDropdown: React.FC<{
+  selectedValues: string[];
+  onChange: (value: string[]) => void;
+  dayOptions: { value: string; label: string }[];
+}> = ({ selectedValues, onChange, dayOptions }) => {
+  const anchorRef = useRef<HTMLDivElement>(null);
+  const [menuPosition, setMenuPosition] = useState<{ vertical: 'top' | 'bottom'; horizontal: 'left' }>({
+    vertical: 'bottom',
+    horizontal: 'left',
+  });
+
+  const handleOpen = () => {
+    if (!anchorRef.current) return;
+
+    const rect = anchorRef.current.getBoundingClientRect();
+    const windowHeight = window.innerHeight;
+    const menuHeight = 360; // maxHeight del menu
+    const spaceBelow = windowHeight - rect.bottom;
+    const spaceAbove = rect.top;
+
+    // Si no hay suficiente espacio abajo, posicionar arriba
+    if (spaceBelow < menuHeight && spaceAbove > spaceBelow) {
+      setMenuPosition({ vertical: 'top', horizontal: 'left' });
+    } else {
+      setMenuPosition({ vertical: 'bottom', horizontal: 'left' });
+    }
+  };
+
+  const getTransformOrigin = () => {
+    const vertical: 'top' | 'bottom' = menuPosition.vertical === 'bottom' ? 'top' : 'bottom';
+    return {
+      vertical,
+      horizontal: 'left' as const,
+    };
+  };
+
+  return (
+    <FormControl variant="outlined" sx={{ ...formControlStyles, width: { xs: "100%", sm: "auto", minWidth: "200px", md: "400px", lg: "850px", xl: "1200px" } }}>
+      <Select
+        multiple
+        value={selectedValues}
+        onChange={(e) => onChange(e.target.value as string[])}
+        onOpen={handleOpen}
+        ref={anchorRef}
+        renderValue={(selected) => {
+          if (!Array.isArray(selected)) return "";
+          const max = 7;
+          const labels = selected.map(
+            (v) => dayOptions.find((opt: { value: string; label: string }) => opt.value === v)?.label || v
+          );
+          const visible = labels.slice(0, max);
+          const hidden = labels.length > max ? labels.length - max : 0;
+          return hidden > 0
+            ? `${visible.join(", ")} +${hidden} más`
+            : `${visible.join(", ")}`;
+        }}
+        sx={selectStyles}
+        MenuProps={{
+          ...premiumMenuProps,
+          anchorOrigin: menuPosition,
+          transformOrigin: getTransformOrigin(),
+        }}
+      >
+        {dayOptions.map((option: { value: string; label: string }) => (
+          <MenuItem key={option.value} value={option.value}>
+            <Checkbox
+              checked={
+                Array.isArray(selectedValues) &&
+                selectedValues.includes(option.value)
+              }
+              color="primary"
+            />
+            <ListItemText primary={option.label} />
+          </MenuItem>
+        ))}
+      </Select>
+    </FormControl>
+  );
+};
 
 // This function is generic and can be used in EditableTable
 export function renderEditField<T extends object>({
@@ -87,7 +167,6 @@ export function renderEditField<T extends object>({
     };
     return (
       <TextfieldComponent
-        label={translateColumnHeaderToSpanish(column)}
         value={licensePlateValue}
         onChange={handleLicensePlateChange}
         error={!validateField("licensePlate", licensePlateValue)}
@@ -113,7 +192,6 @@ export function renderEditField<T extends object>({
     return (
       <TextfieldComponent
         type="number"
-        label={translateColumnHeaderToSpanish(column)}
         value={editFields[String(column)] || ""}
         onChange={(e) =>
           setEditField && setEditField(String(column), e.target.value)
@@ -155,47 +233,16 @@ export function renderEditField<T extends object>({
     const selectedValues: string[] = Array.isArray(editFields[String(column)])
       ? (editFields[String(column)] as string[])
       : [];
-    
+
     // Use the existing DAYS_LIST constant which already has English values and Spanish labels
     const dayOptions = DAYS_LIST;
 
     return (
-      <FormControl variant="outlined" sx={{ ...formControlStyles, width: { xs: "100%", sm: "auto", minWidth: "200px", md: "400px", lg: "850px", xl: "1200px" } }}>
-        <Select
-          multiple
-          value={selectedValues}
-          onChange={(e) =>
-            setEditField && setEditField(String(column), e.target.value)
-          }
-          renderValue={(selected) => {
-            if (!Array.isArray(selected)) return "";
-            const max = 7; // Show all days since we have responsive width
-            const labels = selected.map(
-              (v) => dayOptions.find((opt: { value: string; label: string }) => opt.value === v)?.label || v
-            );
-            const visible = labels.slice(0, max);
-            const hidden = labels.length > max ? labels.length - max : 0;
-            return hidden > 0
-              ? `${visible.join(", ")} +${hidden} más`
-              : `${visible.join(", ")}`;
-          }}
-          sx={selectStyles}
-          MenuProps={premiumMenuProps}
-        >
-          {dayOptions.map((option: { value: string; label: string }) => (
-            <MenuItem key={option.value} value={option.value}>
-              <Checkbox
-                checked={
-                  Array.isArray(selectedValues) &&
-                  selectedValues.includes(option.value)
-                }
-                color="primary"
-              />
-              <ListItemText primary={option.label} />
-            </MenuItem>
-          ))}
-        </Select>
-      </FormControl>
+      <DaysDropdown
+        selectedValues={selectedValues}
+        onChange={(value) => setEditField && setEditField(String(column), value)}
+        dayOptions={dayOptions}
+      />
     );
   }
 
@@ -213,70 +260,22 @@ export function renderEditField<T extends object>({
   }
 
   if (String(column) === "parkingLot") {
-    // Get prefix from editFields or default to ATP
-    const parkingPrefix = (editFields["parkingPrefix"] as string) || "ATP";
     const parkingLotValue = (editFields["parkingLot"] as string) || "";
-    const prefixOptions = PARKING_PREFIX_OPTIONS.concat(
-      parkingPrefix &&
-        !PARKING_PREFIX_OPTIONS.some((opt) => opt.value === parkingPrefix)
-        ? [{ value: parkingPrefix, label: parkingPrefix }]
-        : []
-    );
-
-    const handlePrefixChange = (
-      event: React.SyntheticEvent,
-      newValue: { value: string; label: string } | string | null
-    ) => {
-      let prefixValue = "";
-      if (newValue === null || newValue === "") {
-        setEditField && setEditField("parkingPrefix", "");
-        setEditField && setEditField("parkingLot", "");
-        return;
-      }
-      if (typeof newValue === "object" && newValue !== null) {
-        prefixValue = newValue.value.toUpperCase();
-      } else if (typeof newValue === "string") {
-        prefixValue = newValue.toUpperCase();
-      }
-      if (prefixValue) {
-        setEditField && setEditField("parkingPrefix", prefixValue);
-        if (prefixValue === "CE") {
-          setEditField && setEditField("parkingLot", "CE");
-        }
-      }
-    };
 
     const handleParkingLotChange = (
       event: React.ChangeEvent<HTMLInputElement>
     ) => {
       const rawValue = event.target.value;
-      const maskedValue = maskParkingLotWithPrefix(rawValue, parkingPrefix);
-      setEditField && setEditField("parkingLot", maskedValue);
+      setEditField && setEditField("parkingLot", rawValue);
     };
 
     return (
-      <Box sx={{ display: "flex", gap: 1, alignItems: "center" }}>
-        <Autocomplete
-          options={prefixOptions}
-          value={prefixOptions.find((opt) => opt.value === parkingPrefix) || null}
-          onChange={handlePrefixChange}
-          renderInput={(params) => (
-            <TextfieldComponent
-              {...params}
-              label="Prefijo"
-              sx={{ width: "80px" }}
-            />
-          )}
-          sx={{ width: "80px" }}
-        />
-        <TextfieldComponent
-          label={translateColumnHeaderToSpanish(column)}
-          value={parkingLotValue}
-          onChange={handleParkingLotChange}
-          error={!validateField("parkingLot", parkingLotValue)}
-          sx={{ width: "120px" }}
-        />
-      </Box>
+      <TextfieldComponent
+        value={parkingLotValue}
+        onChange={handleParkingLotChange}
+        error={!validateField("parkingLot", parkingLotValue)}
+        sx={{ width: "120px" }}
+      />
     );
   }
 

@@ -1,4 +1,4 @@
-import React, { useState, useCallback } from "react";
+import React, { useState, useCallback, useEffect, useRef } from "react";
 import {
   Box,
   Typography,
@@ -15,6 +15,8 @@ import CheckIcon from "@mui/icons-material/Check";
 import type { Employee } from "../../../../models/Employee";
 import type { Schedule } from "../../../../models/Schedule";
 import { SELECTOR_TABLE } from "../../../../constants/constants";
+import { useSpeechRecognition } from "../../../../hooks/useSpeechRecognition";
+import MicIcon from "@mui/icons-material/Mic";
 
 interface ScheduleCellDropdownProps {
   assignedEmployees: Employee[];
@@ -49,6 +51,54 @@ export const ScheduleCellDropdown: React.FC<ScheduleCellDropdownProps> = ({
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const [searchValue, setSearchValue] = useState("");
   const open = Boolean(anchorEl);
+  const { isListening, transcript, startListening, stopListening, isSupported, isInitializing, audioStream } = useSpeechRecognition();
+  const lastProcessedTranscriptRef = useRef<string>("");
+  const [audioLevel, setAudioLevel] = useState(0);
+  const audioContextRef = useRef<AudioContext | null>(null);
+  const analyserRef = useRef<AnalyserNode | null>(null);
+
+  // Configurar analizador de audio para visualizador de decibeles
+  useEffect(() => {
+    if (audioStream && isListening) {
+      const AudioContextClass = window.AudioContext || (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext;
+      const audioContext = new AudioContextClass();
+      const analyser = audioContext.createAnalyser();
+      const source = audioContext.createMediaStreamSource(audioStream);
+      
+      source.connect(analyser);
+      analyser.fftSize = 256;
+      
+      audioContextRef.current = audioContext;
+      analyserRef.current = analyser;
+
+      const updateAudioLevel = () => {
+        if (analyserRef.current) {
+          const dataArray = new Uint8Array(analyserRef.current.frequencyBinCount);
+          analyserRef.current.getByteFrequencyData(dataArray);
+          
+          // Calcular nivel promedio
+          let sum = 0;
+          for (let i = 0; i < dataArray.length; i++) {
+            sum += dataArray[i];
+          }
+          const average = sum / dataArray.length;
+          setAudioLevel(average);
+        }
+        
+        if (isListening) {
+          requestAnimationFrame(updateAudioLevel);
+        }
+      };
+
+      updateAudioLevel();
+
+      return () => {
+        if (audioContextRef.current) {
+          audioContextRef.current.close();
+        }
+      };
+    }
+  }, [audioStream, isListening]);
 
   // Detectar si hay suficiente espacio abajo
   const getAnchorPosition = () => {
@@ -99,6 +149,11 @@ export const ScheduleCellDropdown: React.FC<ScheduleCellDropdownProps> = ({
   const handleClear = () => {
     setSearchValue("");
     onScheduleEmployeesChange([], scheduleForDay.id, date);
+    lastProcessedTranscriptRef.current = "";
+    // Detener el reconocimiento de voz si está activo
+    if (isListening) {
+      stopListening();
+    }
     handleClose();
   };
 
@@ -118,6 +173,65 @@ export const ScheduleCellDropdown: React.FC<ScheduleCellDropdownProps> = ({
   }, [filteredEmployees, searchValue]);
 
   const filteredList = getFilteredEmployees();
+
+  // Procesar transcript de voz y seleccionar empleados coincidentes
+  useEffect(() => {
+    if (transcript && isSupported) {
+      const spokenText = transcript.toLowerCase().trim();
+      if (!spokenText) return;
+
+      // Verificar si hay nuevas palabras desde la última vez
+      const lastProcessed = lastProcessedTranscriptRef.current;
+      const isNewTranscript = spokenText !== lastProcessed;
+
+      if (!isNewTranscript) return;
+
+      // Dividir el texto en palabras individuales
+      const words = spokenText.split(/\s+/).filter(w => w.length > 0);
+
+      // Obtener las palabras nuevas (las que no estaban en el último transcript procesado)
+      const lastWords = lastProcessed.split(/\s+/).filter(w => w.length > 0);
+      const newWords = words.filter(word => !lastWords.includes(word));
+
+      // Buscar empleados que coincidan con las palabras nuevas
+      // Primero verificar si la combinación de palabras forma un nombre completo
+      const spokenPhrase = newWords.join(' ').toLowerCase();
+      const fullNameMatches = filteredEmployees
+        .filter((emp) => {
+          const fullName = `${emp.firstName} ${emp.lastName}`.toLowerCase();
+          return spokenPhrase === fullName;
+        })
+        .map((emp) => emp.id);
+
+      // Si hay coincidencias de nombre completo, usar solo esas
+      if (fullNameMatches.length > 0) {
+        const currentIds = assignedEmployees.map((e) => e.id);
+        const newIds = [...new Set([...currentIds, ...fullNameMatches])];
+        onScheduleEmployeesChange(newIds, scheduleForDay.id, date);
+        lastProcessedTranscriptRef.current = spokenText;
+        return;
+      }
+
+      // Si no hay coincidencias de nombre completo, buscar coincidencias de nombre o apellido individual
+      const nameMatches = filteredEmployees
+        .filter((emp) => {
+          const firstName = emp.firstName.toLowerCase();
+          const lastName = emp.lastName.toLowerCase();
+
+          return newWords.some((word) => word === firstName || word === lastName);
+        })
+        .map((emp) => emp.id);
+
+      if (nameMatches.length > 0) {
+        const currentIds = assignedEmployees.map((e) => e.id);
+        const newIds = [...new Set([...currentIds, ...nameMatches])];
+        onScheduleEmployeesChange(newIds, scheduleForDay.id, date);
+      }
+
+      // Marcar este transcript como procesado
+      lastProcessedTranscriptRef.current = spokenText;
+    }
+  }, [transcript, filteredEmployees, assignedEmployees, scheduleForDay.id, date, onScheduleEmployeesChange, isSupported]);
 
   const renderValue = () => {
     if (assignedEmployees.length === 0) {
@@ -258,6 +372,81 @@ export const ScheduleCellDropdown: React.FC<ScheduleCellDropdownProps> = ({
                 <CloseIcon sx={{ fontSize: 18 }} />
               </IconButton>
             )}
+            <IconButton
+              size="small"
+              onClick={(e) => {
+                e.stopPropagation();
+                if (isListening) {
+                  stopListening();
+                } else {
+                  startListening();
+                }
+              }}
+              sx={{
+                color: isInitializing ? 'text.secondary' : (isListening ? '#4CAF50' : 'text.secondary'),
+                backgroundColor: isInitializing ? 'rgba(0, 0, 0, 0.04)' : (isListening ? 'rgba(76, 175, 80, 0.1)' : 'transparent'),
+                '&:hover': {
+                  color: isInitializing ? 'text.secondary' : (isListening ? '#4CAF50' : 'primary.main'),
+                  backgroundColor: isInitializing ? 'rgba(0, 0, 0, 0.08)' : (isListening ? 'rgba(76, 175, 80, 0.2)' : 'rgba(0, 0, 0, 0.04)'),
+                },
+                animation: isListening ? 'pulse 1.5s infinite' : (isInitializing ? 'spin 1s linear infinite' : 'none'),
+                '@keyframes pulse': {
+                  '0%': { opacity: 1, transform: 'scale(1)' },
+                  '50%': { opacity: 0.7, transform: 'scale(1.1)' },
+                  '100%': { opacity: 1, transform: 'scale(1)' },
+                },
+                '@keyframes spin': {
+                  '0%': { transform: 'rotate(0deg)' },
+                  '100%': { transform: 'rotate(360deg)' },
+                },
+                transition: 'all 0.3s ease',
+                position: 'relative',
+              }}
+              disabled={!isSupported || isInitializing}
+              title={isInitializing ? 'Inicializando...' : (isListening ? 'Escuchando... (hable ahora)' : 'Activar reconocimiento de voz')}
+            >
+              {isInitializing ? (
+                <Box sx={{ width: 18, height: 18, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                  <Box sx={{
+                    width: 14,
+                    height: 14,
+                    border: '2px solid',
+                    borderColor: 'text.secondary',
+                    borderTopColor: 'transparent',
+                    borderRadius: '50%',
+                  }} />
+                </Box>
+              ) : (
+                <Box sx={{ position: 'relative', display: 'flex', alignItems: 'center' }}>
+                  <MicIcon sx={{ fontSize: 18 }} />
+                  {isListening && audioLevel > 10 && (
+                    <Box sx={{
+                      position: 'absolute',
+                      bottom: -2,
+                      left: '50%',
+                      transform: 'translateX(-50%)',
+                      display: 'flex',
+                      gap: '1px',
+                      alignItems: 'flex-end',
+                      height: 8,
+                    }}>
+                      {[...Array(5)].map((_, i) => (
+                        <Box
+                          key={i}
+                          sx={{
+                            width: 2,
+                            height: `${Math.min(100, (audioLevel / 50) * 100)}%`,
+                            backgroundColor: '#4CAF50',
+                            borderRadius: '1px',
+                            transition: 'height 0.1s ease',
+                          }}
+                        />
+                      ))}
+                    </Box>
+                  )}
+                </Box>
+              )}
+            </IconButton>
           </Box>
 
           {/* Employee options con scroll */}

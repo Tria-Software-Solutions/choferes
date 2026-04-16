@@ -68,7 +68,6 @@ import {
   exportSpeedDialBoxStyles,
   loadingBoxStyles,
   backdropStyles,
-  searchBarSx,
   noEmployeesBoxStyles,
   noEmployeesIconStyles,
 } from "./styles";
@@ -1340,7 +1339,7 @@ const RolesPage: React.FC = () => {
   }, [userPermissions]);
 
   return (
-    <Box sx={{ height: "calc(100vh - 100px)", display: "flex", flexDirection: "column", overflow: "hidden", pb: 0, pt: 0, px: 0 }}>
+    <Box className="scrollable-content" sx={{ height: "100%", display: "flex", flexDirection: "column", overflow: "hidden", pb: 0, pt: 0, px: 0 }}>
       {isLoading ? (
         <Box sx={loadingBoxStyles}>
           <Backdrop sx={backdropStyles(theme)} open={isLoading}>
@@ -1358,6 +1357,8 @@ const RolesPage: React.FC = () => {
             border: "1px solid rgba(0,0,0,0.08)",
             borderRadius: "16px",
             boxShadow: "0 4px 24px rgba(0,0,0,0.08), 0 1px 2px rgba(0,0,0,0.04)",
+            mx: { xs: 1, sm: 1.5, md: 2 },
+            my: 0,
           }}
         >
           {/* Premium Header with light background */}
@@ -1441,10 +1442,10 @@ const RolesPage: React.FC = () => {
               flexDirection={{ xs: "column", sm: "row" }}
               alignItems={{ xs: "stretch", sm: "center" }}
               justifyContent="space-between"
-              gap={1}
+              gap={2}
             >
               {/* Search */}
-              <Box flex={1} maxWidth={{ sm: "380px" }}>
+              <Box flex={1} maxWidth={{ sm: "320px" }}>
                 {(viewMode === 'employee' ? filteredEmployees : filteredSchedules) && (
                   <SearchBarComponent
                     placeholder={
@@ -1454,14 +1455,6 @@ const RolesPage: React.FC = () => {
                     }
                     value={search}
                     onChange={(e) => setSearch(e.target.value)}
-                    size="small"
-                    sx={{
-                      ...searchBarSx,
-                      '& .MuiOutlinedInput-root': {
-                        height: '44px',
-                        borderRadius: '10px',
-                      },
-                    }}
                     fullWidth
                   />
                 )}
@@ -1470,153 +1463,159 @@ const RolesPage: React.FC = () => {
               {/* Date Picker and Navigation */}
               <Box
                 display="flex"
-                alignItems="center"
-                gap={0.5}
-                flexWrap="wrap"
-                justifyContent={{ xs: "flex-start", sm: "flex-end" }}
+                flexDirection={{ xs: "column", sm: "row" }}
+                alignItems={{ xs: "stretch", sm: "center" }}
+                gap={1}
               >
-                {/* Previous Week Button */}
-                <PremiumTooltip title={MANAGEMENT.TOOLTIP_PREV_WEEK}>
-                  <Button
-                    variant="outlined"
-                    onClick={handlePreviousWeek}
-                    disableRipple
-                    disableElevation
-                    sx={{
-                      minWidth: '44px',
-                      height: '44px',
-                      px: 1.5,
-                      borderRadius: '10px',
-                      borderColor: theme.palette.mode === "dark" ? "rgba(255,255,255,0.2)" : "rgba(0,0,0,0.15)",
-                      '&:hover': {
-                        backgroundColor: theme.palette.mode === "dark" ? "rgba(255,255,255,0.05)" : "rgba(0,0,0,0.04)",
-                        borderColor: theme.palette.mode === "dark" ? "rgba(255,255,255,0.3)" : "rgba(0,0,0,0.25)",
-                      },
-                    }}
-                  >
-                    <ChevronLeft size={20} />
-                  </Button>
-                </PremiumTooltip>
-
-                {/* Date Picker */}
-                <LocalizationProvider
-                  dateAdapter={AdapterDateFns}
-                  adapterLocale={es}
+                <Box
+                  display="flex"
+                  alignItems="center"
+                  justifyContent={{ xs: "flex-start", sm: "flex-end" }}
+                  gap={1}
                 >
-                  <DatePicker
-                    value={firstDayOfWeek}
-                    maxDate={nextWeekEnd}
-                    views={["year", "month", "day"]}
-                    format="EEEE d 'de' MMMM 'de' yyyy"
-                    slots={{ toolbar: () => null }}
-                    slotProps={{
-                      textField: {
-                        fullWidth: false,
-                        required: true,
-                        variant: "outlined",
-                        sx: {
-                          width: { xs: '100%', sm: '280px' },
-                          '& .MuiOutlinedInput-root': {
-                            height: "44px",
-                            borderRadius: '10px',
-                            fontSize: '0.875rem',
-                            fontWeight: 500,
-                            backgroundColor: theme.palette.background.paper,
-                            boxShadow: '0 1px 3px rgba(0,0,0,0.04)',
-                            transition: 'all 0.2s cubic-bezier(0.4, 0, 0.2, 1)',
-                            '& fieldset': {
-                              borderColor: theme.palette.mode === 'dark' ? 'rgba(255,255,255,0.2)' : 'rgba(0,0,0,0.15)',
-                              borderWidth: '1px',
-                            },
-                            '&:hover': {
-                              boxShadow: '0 2px 6px rgba(0,0,0,0.08)',
+                  {/* Previous Week Button */}
+                  <PremiumTooltip title={MANAGEMENT.TOOLTIP_PREV_WEEK}>
+                    <Button
+                      variant="outlined"
+                      onClick={handlePreviousWeek}
+                      disableRipple
+                      disableElevation
+                      sx={{
+                        minWidth: '44px',
+                        height: '44px',
+                        px: 1.5,
+                        borderRadius: '10px',
+                        borderColor: theme.palette.mode === "dark" ? "rgba(255,255,255,0.2)" : "rgba(0,0,0,0.15)",
+                        '&:hover': {
+                          backgroundColor: theme.palette.mode === "dark" ? "rgba(255,255,255,0.05)" : "rgba(0,0,0,0.04)",
+                          borderColor: theme.palette.mode === "dark" ? "rgba(255,255,255,0.3)" : "rgba(0,0,0,0.25)",
+                        },
+                      }}
+                    >
+                      <ChevronLeft size={20} />
+                    </Button>
+                  </PremiumTooltip>
+
+                  {/* Date Picker */}
+                  <LocalizationProvider
+                    dateAdapter={AdapterDateFns}
+                    adapterLocale={es}
+                  >
+                    <DatePicker
+                      value={firstDayOfWeek}
+                      maxDate={nextWeekEnd}
+                      views={["year", "month", "day"]}
+                      format="EEEE d 'de' MMMM 'de' yyyy"
+                      slots={{ toolbar: () => null }}
+                      slotProps={{
+                        textField: {
+                          fullWidth: false,
+                          required: true,
+                          variant: "outlined",
+                          sx: {
+                            width: { xs: '100%', sm: '320px', md: '360px' },
+                            '& .MuiOutlinedInput-root': {
+                              height: "44px",
+                              borderRadius: '10px',
+                              fontSize: '0.875rem',
+                              fontWeight: 500,
+                              backgroundColor: theme.palette.background.paper,
+                              boxShadow: '0 1px 3px rgba(0,0,0,0.04)',
+                              transition: 'all 0.2s cubic-bezier(0.4, 0, 0.2, 1)',
                               '& fieldset': {
-                                borderColor: theme.palette.mode === 'dark' ? 'rgba(255,255,255,0.3)' : 'rgba(0,0,0,0.25)',
+                                borderColor: 'transparent',
+                                borderWidth: '0',
                               },
-                            },
-                            '&.Mui-focused': {
-                              boxShadow: '0 0 0 3px rgba(0,0,0,0.04)',
-                              '& fieldset': {
-                                borderColor: theme.palette.primary.main,
-                                borderWidth: '2px',
+                              '&:hover': {
+                                boxShadow: '0 2px 6px rgba(0,0,0,0.08)',
+                                '& fieldset': {
+                                  borderColor: 'transparent',
+                                },
                               },
-                            },
-                            '& input': {
-                              textOverflow: 'ellipsis',
-                              textAlign: 'center',
+                              '&.Mui-focused': {
+                                boxShadow: '0 0 0 3px rgba(0,0,0,0.04)',
+                                '& fieldset': {
+                                  borderColor: 'transparent',
+                                  borderWidth: '0',
+                                },
+                              },
+                              '& input': {
+                                textOverflow: 'ellipsis',
+                                textAlign: 'center',
+                              },
                             },
                           },
                         },
-                      },
-                    }}
-                    closeOnSelect
-                    onChange={handleDateChange}
-                  />
-                </LocalizationProvider>
+                      }}
+                      closeOnSelect
+                      onChange={handleDateChange}
+                    />
+                  </LocalizationProvider>
 
-                {/* Next Week Button */}
-                <PremiumTooltip title={MANAGEMENT.TOOLTIP_NEXT_WEEK}>
-                  <span>
-                    <Button
-                      variant="outlined"
-                      disabled={
-                        !isValidDateForSelect(
-                          new Date(
-                            getCurrentWeekDates(weekOffset + 1)[0].isoDate
+                  {/* Next Week Button */}
+                  <PremiumTooltip title={MANAGEMENT.TOOLTIP_NEXT_WEEK}>
+                    <span>
+                      <Button
+                        variant="outlined"
+                        disabled={
+                          !isValidDateForSelect(
+                            new Date(
+                              getCurrentWeekDates(weekOffset + 1)[0].isoDate
+                            )
                           )
-                        )
-                      }
-                      onClick={handleNextWeek}
-                      disableRipple
-                      disableElevation
-                      sx={{
-                        minWidth: '44px',
-                        height: '44px',
-                        px: 1.5,
-                        borderRadius: '10px',
-                        borderColor: theme.palette.mode === "dark" ? "rgba(255,255,255,0.2)" : "rgba(0,0,0,0.15)",
-                        '&:hover': {
-                          backgroundColor: theme.palette.mode === "dark" ? "rgba(255,255,255,0.05)" : "rgba(0,0,0,0.04)",
-                          borderColor: theme.palette.mode === "dark" ? "rgba(255,255,255,0.3)" : "rgba(0,0,0,0.25)",
-                        },
-                        '&.Mui-disabled': {
-                          borderColor: theme.palette.mode === "dark" ? "rgba(255,255,255,0.1)" : "rgba(0,0,0,0.08)",
-                        },
-                      }}
-                    >
-                      <ChevronRight size={20} />
-                    </Button>
-                  </span>
-                </PremiumTooltip>
+                        }
+                        onClick={handleNextWeek}
+                        disableRipple
+                        disableElevation
+                        sx={{
+                          minWidth: '44px',
+                          height: '44px',
+                          px: 1.5,
+                          borderRadius: '10px',
+                          borderColor: theme.palette.mode === "dark" ? "rgba(255,255,255,0.2)" : "rgba(0,0,0,0.15)",
+                          '&:hover': {
+                            backgroundColor: theme.palette.mode === "dark" ? "rgba(255,255,255,0.05)" : "rgba(0,0,0,0.04)",
+                            borderColor: theme.palette.mode === "dark" ? "rgba(255,255,255,0.3)" : "rgba(0,0,0,0.25)",
+                          },
+                          '&.Mui-disabled': {
+                            borderColor: theme.palette.mode === "dark" ? "rgba(255,255,255,0.1)" : "rgba(0,0,0,0.08)",
+                          },
+                        }}
+                      >
+                        <ChevronRight size={20} />
+                      </Button>
+                    </span>
+                  </PremiumTooltip>
 
-                {/* Current Week Button */}
-                <PremiumTooltip title={MANAGEMENT.TOOLTIP_CURRENT_WEEK}>
-                  <span>
-                    <Button
-                      variant="outlined"
-                      disabled={weekOffset === 0}
-                      onClick={handleCurrentWeek}
-                      disableRipple
-                      disableElevation
-                      sx={{
-                        minWidth: '44px',
-                        height: '44px',
-                        px: 1.5,
-                        borderRadius: '10px',
-                        borderColor: theme.palette.mode === "dark" ? "rgba(255,255,255,0.2)" : "rgba(0,0,0,0.15)",
-                        '&:hover': {
-                          backgroundColor: theme.palette.mode === "dark" ? "rgba(255,255,255,0.05)" : "rgba(0,0,0,0.04)",
-                          borderColor: theme.palette.mode === "dark" ? "rgba(255,255,255,0.3)" : "rgba(0,0,0,0.25)",
-                        },
-                        '&.Mui-disabled': {
-                          borderColor: theme.palette.mode === "dark" ? "rgba(255,255,255,0.1)" : "rgba(0,0,0,0.08)",
-                        },
-                      }}
-                    >
-                      <RotateCcw size={18} />
-                    </Button>
-                  </span>
-                </PremiumTooltip>
+                  {/* Current Week Button */}
+                  <PremiumTooltip title={MANAGEMENT.TOOLTIP_CURRENT_WEEK}>
+                    <span>
+                      <Button
+                        variant="outlined"
+                        disabled={weekOffset === 0}
+                        onClick={handleCurrentWeek}
+                        disableRipple
+                        disableElevation
+                        sx={{
+                          minWidth: '44px',
+                          height: '44px',
+                          px: 1.5,
+                          borderRadius: '10px',
+                          borderColor: theme.palette.mode === "dark" ? "rgba(255,255,255,0.2)" : "rgba(0,0,0,0.15)",
+                          '&:hover': {
+                            backgroundColor: theme.palette.mode === "dark" ? "rgba(255,255,255,0.05)" : "rgba(0,0,0,0.04)",
+                            borderColor: theme.palette.mode === "dark" ? "rgba(255,255,255,0.3)" : "rgba(0,0,0,0.25)",
+                          },
+                          '&.Mui-disabled': {
+                            borderColor: theme.palette.mode === "dark" ? "rgba(255,255,255,0.1)" : "rgba(0,0,0,0.08)",
+                          },
+                        }}
+                      >
+                        <RotateCcw size={18} />
+                      </Button>
+                    </span>
+                  </PremiumTooltip>
+                </Box>
               </Box>
             </Box>
           </Box>
