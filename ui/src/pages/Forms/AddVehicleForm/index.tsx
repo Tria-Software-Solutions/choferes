@@ -13,8 +13,6 @@ import FORMS from "../../../constants/forms.constants";
 import BRANDS_LIST from "../../../constants/brands.constants";
 import COLORS_LIST from "../../../constants/colors.constants";
 import { maskLicensePlate } from "../../../utils/mask";
-import { maskParkingLotWithPrefix } from "../../../utils/mask";
-import { validateParkingLotWithPrefix } from "../../../utils/userValidation";
 import { Plus, X, Ticket, Car, ParkingCircle, Palette, FileEdit, Factory, Info } from "lucide-react";
 import TextfieldComponent from "../../../components/Textfield/Textfield.component";
 import { DatePicker, LocalizationProvider } from "@mui/x-date-pickers";
@@ -93,8 +91,6 @@ const AddVehicleForm: React.FC<AddVehicleFormProps> = ({
   const [searchColorTerm, setSearchColorTerm] = useState("");
   const [filteredColors, setFilteredColors] = useState(COLORS_LIST);
 
-  const parkingPrefix = "ATP";
-
   const validateField = useCallback(
     (name: string, value: string) => {
       const regex = {
@@ -139,19 +135,17 @@ const AddVehicleForm: React.FC<AddVehicleFormProps> = ({
           }
           break;
         case "parkingLot": {
-          const error = validateParkingLotWithPrefix(
-            parkingPrefix,
-            value,
-            FORMS.INVALID_FORMAT_PARKING,
-          );
-          if (error) return error;
+          // Allow alphanumeric with letters, hyphens, and numbers
+          if (!/^[a-zA-Z0-9-]+$/i.test(value.trim())) {
+            return FORMS.INVALID_FORMAT_PARKING;
+          }
           break;
         }
       }
 
       return "";
     },
-    [existingVehicles, parkingPrefix, formData.parkingDate],
+    [existingVehicles, formData.parkingDate],
   );
 
   const handleFieldChange = (field: string, value: string) => {
@@ -194,8 +188,7 @@ const AddVehicleForm: React.FC<AddVehicleFormProps> = ({
     event: React.ChangeEvent<HTMLInputElement>,
   ) => {
     const rawValue = event.target.value;
-    const maskedValue = maskParkingLotWithPrefix(parkingPrefix, rawValue);
-    handleFieldChange("parkingLot", maskedValue);
+    handleFieldChange("parkingLot", rawValue);
   };
 
   const handleLicensePlateChange = (
@@ -300,7 +293,7 @@ const AddVehicleForm: React.FC<AddVehicleFormProps> = ({
 
   return (
     <Box sx={boxRoot}>
-      <Box sx={{ mb: 1 }}>
+      <Box sx={{ mb: 0 }}>
         <Typography
           variant="body2"
           color="text.secondary"
@@ -320,6 +313,7 @@ const AddVehicleForm: React.FC<AddVehicleFormProps> = ({
             error={errors.ticket !== ""}
             helperText={errors.ticket}
             icon={<Ticket style={iconStyle} />}
+            sx={formControl(theme)}
           />
         </Grid>
 
@@ -333,6 +327,7 @@ const AddVehicleForm: React.FC<AddVehicleFormProps> = ({
             error={errors.licensePlate !== ""}
             helperText={errors.licensePlate}
             icon={<Car style={iconStyle} />}
+            sx={formControl(theme)}
           />
         </Grid>
 
@@ -434,10 +429,7 @@ const AddVehicleForm: React.FC<AddVehicleFormProps> = ({
 
         <Grid item xs={12} sm={6}>
           <TextfieldComponent
-            placeholder={FORMS.ADD_VEHICLE.PARKING_LOT_PLACEHOLDER.replace(
-              "ATP",
-              parkingPrefix,
-            )}
+            placeholder={FORMS.ADD_VEHICLE.PARKING_LOT_PLACEHOLDER}
             variant="outlined"
             fullWidth
             value={formData.parkingLot}
@@ -479,6 +471,7 @@ const AddVehicleForm: React.FC<AddVehicleFormProps> = ({
               setFormData({ ...formData, notes: e.target.value })
             }
             icon={<FileEdit style={iconStyle} />}
+            sx={formControl(theme)}
           />
         </Grid>
 

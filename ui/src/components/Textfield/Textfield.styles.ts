@@ -53,7 +53,7 @@ export const textFieldStyles = (customSx: object = {}): SxProps<Theme> => (theme
     "& textarea": {
       color: theme.palette.text.primary,
       fontSize: "0.9rem",
-      paddingTop: "8px",
+      paddingTop: "10px",
       paddingBottom: "10px",
       paddingLeft: "14px",
       paddingRight: "14px",
@@ -64,7 +64,7 @@ export const textFieldStyles = (customSx: object = {}): SxProps<Theme> => (theme
       },
     },
     "&.MuiInputBase-multiline .MuiInputBase-input": {
-      paddingTop: "10px",
+      paddingTop: "8px",
       paddingBottom: "10px",
     },
     "&.MuiInputBase-adornedStart input": {
@@ -93,7 +93,7 @@ export const textFieldStyles = (customSx: object = {}): SxProps<Theme> => (theme
       transform: "translateY(-50%)",
     },
     "&.MuiInputBase-multiline .MuiInputAdornment-positionStart": {
-      top: "13px",
+      top: "23px",
       transform: "none",
       zIndex: 1,
     },

@@ -752,7 +752,6 @@ const SelectorTableComponent: React.FC<SelectorTableProps> = ({
                             input={
                               <OutlinedInput
                                 notched={false}
-                                label="Periodo"
                                 sx={{
                                   backgroundColor: theme.palette.mode === 'light' ? "#000000 !important" : "transparent !important",
                                   color: theme.palette.mode === 'light' ? "#fff" : theme.palette.text.primary,
