@@ -58,9 +58,6 @@ export const authenticateUser = async (identifier: string, password: string, res
       throw error;
     }
 
-    // Log the actual error for debugging
-    console.error("Authentication error details:", error);
-
     // Re-throw as a generic error
     throw new Error("Authentication service error");
   }

@@ -59,7 +59,6 @@ const Login: React.FC = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [errors, setErrors] = useState<{ [key: string]: string }>({});
   const [isWakingUp, setIsWakingUp] = useState(false);
-  const [, setServerReady] = useState(false);
   const wakeUpAttempted = useRef(false);
 
   const theme = useTheme();
@@ -77,7 +76,6 @@ const Login: React.FC = () => {
     if (!isLocalhost) {
       setIsWakingUp(true);
       wakeUpServer().then(() => {
-        setServerReady(true);
         setIsWakingUp(false);
       });
     }

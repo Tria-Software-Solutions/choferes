@@ -197,7 +197,6 @@ export const TableHeaderTop = memo(function TableHeaderTop({
 
         {currentWeek.map(({ day, date, isoDate }, index) => {
           const today = isToday(isoDate);
-          console.log('Date check:', { index, day, date, isoDate, today, now: new Date().toISOString() });
           return (
             <TableCell
               key={day}
