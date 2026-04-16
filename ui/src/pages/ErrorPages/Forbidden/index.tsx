@@ -110,12 +110,15 @@ const Forbidden: React.FC = () => {
             <Card className="auth-card" sx={innerBoxStyles}>
               <CardContent sx={{ p: { xs: 4, sm: 5 } }}>
               <Box sx={lockBoxStyles}>
-                <Lock size={48} style={lockIconStyles(theme)} aria-label="Lock icon" />
-                <Shield
-                  size={32}
-                  style={securityIconStyles(theme)}
-                  aria-label="Security icon"
-                />
+                <Box sx={lockIconStyles(theme)}>
+                  <Lock size={48} aria-label="Lock icon" />
+                </Box>
+                <Box sx={securityIconStyles(theme)}>
+                  <Shield
+                    size={32}
+                    aria-label="Security icon"
+                  />
+                </Box>
               </Box>
               <Typography variant="h3" component="h1" sx={titleStyles(theme)}>
                 {ERRORS.ERROR_403_TITLE}
