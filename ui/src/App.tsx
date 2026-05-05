@@ -19,7 +19,6 @@ import { APPBAR_MENU, PERMISSIONS, ROUTES } from "./constants/constants";
 import { ClipboardList, Car, Users, CalendarDays, LogOut, User } from "lucide-react";
 
 const Login = lazy(() => import("./pages/Auth/Login"));
-const Register = lazy(() => import("./pages/Auth/Register"));
 const RolesPage = lazy(() => import("./pages/Management/RolesPage"));
 const EmployeesPage = lazy(() => import("./pages/Management/EmployeesPage"));
 const SchedulesPage = lazy(() => import("./pages/Management/SchedulesPage"));
@@ -114,10 +113,9 @@ const AppContent: React.FC = () => {
   const location = useLocation();
   const theme = useTheme();
 
-  // List of routes where the AppBar should be hidden
+  // List of routes where AppBar should be hidden
   const hideAppBarRoutes = [
     "/",
-    "/register",
     "/error",
     "/session-expired",
     "/forbidden",
@@ -126,7 +124,6 @@ const AppContent: React.FC = () => {
   // Helper: known app routes (excluding error/forbidden/notfound/sessionexpired)
   const knownAppRoutes = [
     "/",
-    "/register",
     "/courier-service",
     "/roles",
     "/employees",
@@ -136,10 +133,9 @@ const AppContent: React.FC = () => {
     "/profile",
   ];
 
-  // Only use wallpaper for login, register, and error pages
+  // Only use wallpaper for login and error pages
   const isAuthPage =
     location.pathname === "/" ||
-    location.pathname === "/register" ||
     location.pathname === "/error" ||
     location.pathname === "/session-expired" ||
     location.pathname === "/forbidden" ||
@@ -215,8 +211,7 @@ const AppContent: React.FC = () => {
               )
             }
           />
-          <Route path="/register" element={<Register />} />
-          <Route element={<ProtectedRoute />}>
+                    <Route element={<ProtectedRoute />}>
             <Route
               path="/courier-service"
               element={
