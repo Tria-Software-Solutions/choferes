@@ -173,7 +173,8 @@ const disconnectUser = () => {
   sessionStorage.clear();
   localStorage.clear();
 
-  window.location.href = "/session-expired";
+  // Temporarily disabled session expired redirect for tablet compatibility
+  // window.location.href = "/session-expired";
 };
 
 export default api;
