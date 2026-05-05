@@ -2,6 +2,45 @@ import { createContext, useContext, useState } from "react";
 import Cookies from "js-cookie";
 import { User } from "../models/User";
 
+// Helper functions for token storage with localStorage fallback
+const setTokenWithFallback = (key: string, value: string, options?: any) => {
+  try {
+    // Try to set cookie first
+    Cookies.set(key, value, options);
+    // Also store in localStorage as backup
+    localStorage.setItem(key, value);
+  } catch (error) {
+    // Fallback to localStorage only
+    localStorage.setItem(key, value);
+  }
+};
+
+const getTokenWithFallback = (key: string): string | null => {
+  try {
+    // Try to get from cookie first
+    const cookieValue = Cookies.get(key);
+    if (cookieValue) return cookieValue;
+    
+    // Fallback to localStorage
+    return localStorage.getItem(key);
+  } catch (error) {
+    // Fallback to localStorage only
+    return localStorage.getItem(key);
+  }
+};
+
+const removeTokenWithFallback = (key: string, options?: any) => {
+  try {
+    // Try to remove from cookie first
+    Cookies.remove(key, options);
+    // Also remove from localStorage
+    localStorage.removeItem(key);
+  } catch (error) {
+    // Fallback to localStorage only
+    localStorage.removeItem(key);
+  }
+};
+
 interface AuthContextType {
   accessToken: string | null;
   refreshToken: string | null;
@@ -23,16 +62,14 @@ interface AuthContextType {
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
-  // State for access token, initialized from cookies
+  // State for access token, initialized from cookies or localStorage fallback
   const [accessToken, setAccessToken] = useState(() => {
-    const storedAccessToken = Cookies.get("accessToken");
-    return storedAccessToken ? storedAccessToken : null;
+    return getTokenWithFallback("accessToken");
   });
 
-  // State for refresh token, initialized from cookies
+  // State for refresh token, initialized from cookies or localStorage fallback
   const [refreshToken, setRefreshToken] = useState(() => {
-    const storedRefreshToken = Cookies.get("refreshToken");
-    return storedRefreshToken ? storedRefreshToken : null;
+    return getTokenWithFallback("refreshToken");
   });
 
   // State for current user, initialized from sessionStorage
@@ -72,8 +109,8 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       expires: 7,
     };
     
-    Cookies.set("accessToken", accessToken, cookieOptions);
-    Cookies.set("refreshToken", refreshToken, refreshCookieOptions);
+    setTokenWithFallback("accessToken", accessToken, cookieOptions);
+    setTokenWithFallback("refreshToken", refreshToken, refreshCookieOptions);
     sessionStorage.setItem("currentUser", JSON.stringify(currentUser));
     sessionStorage.setItem("userPermissions", JSON.stringify(userPermissions));
   };
@@ -91,8 +128,8 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       sameSite: isProduction ? "none" as const : "lax" as const,
     };
     
-    Cookies.remove("accessToken", cookieOptions);
-    Cookies.remove("refreshToken", cookieOptions);
+    removeTokenWithFallback("accessToken", cookieOptions);
+    removeTokenWithFallback("refreshToken", cookieOptions);
     sessionStorage.clear();
   };
 
