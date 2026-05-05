@@ -98,45 +98,10 @@ export const logoBoxStyles: SxProps<Theme> = (theme) => ({
   display: "flex",
   alignItems: "center",
   justifyContent: "center",
-  width: 80,
-  height: 80,
-  borderRadius: "24px",
-  background: theme.palette.mode === "dark"
-    ? "linear-gradient(135deg, #2d2d3a 0%, #1a1a2e 50%, #16213e 100%)"
-    : "linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%)",
-  mb: 3,
-  boxShadow: theme.palette.mode === "dark"
-    ? "0 8px 32px rgba(0,0,0,0.5), 0 0 0 1px rgba(255,255,255,0.08), inset 0 1px 0 rgba(255,255,255,0.1), 0 0 30px rgba(99,102,241,0.3)"
-    : "0 8px 32px rgba(0,0,0,0.2), 0 0 0 1px rgba(255,255,255,0.2), inset 0 1px 0 rgba(255,255,255,0.2), 0 0 30px rgba(99,102,241,0.2)",
-  transition: "all 0.4s cubic-bezier(0.4, 0, 0.2, 1)",
+  width: 85,
+  height: 100,
   position: "relative",
   overflow: "hidden",
-  "&::before": {
-    content: '""',
-    position: "absolute",
-    top: "-50%",
-    left: "-50%",
-    right: "-50%",
-    bottom: "-50%",
-    background: "conic-gradient(from 0deg, transparent, rgba(255,255,255,0.1), transparent 30%)",
-    animation: "rotate 4s linear infinite",
-  },
-  "&::after": {
-    content: '""',
-    position: "absolute",
-    top: 0,
-    left: 0,
-    right: 0,
-    bottom: 0,
-    background: "linear-gradient(135deg, rgba(255,255,255,0.15) 0%, transparent 50%)",
-    pointerEvents: "none",
-  },
-  "&:hover": {
-    transform: "scale(1.08) rotate(2deg)",
-    boxShadow: theme.palette.mode === "dark"
-      ? "0 12px 40px rgba(0,0,0,0.6), 0 0 0 1px rgba(255,255,255,0.1), inset 0 1px 0 rgba(255,255,255,0.15), 0 0 40px rgba(99,102,241,0.5)"
-      : "0 12px 40px rgba(0,0,0,0.25), 0 0 0 1px rgba(255,255,255,0.3), inset 0 1px 0 rgba(255,255,255,0.25), 0 0 40px rgba(99,102,241,0.35)",
-  },
   "@keyframes rotate": {
     "0%": { transform: "rotate(0deg)" },
     "100%": { transform: "rotate(360deg)" },
@@ -144,7 +109,7 @@ export const logoBoxStyles: SxProps<Theme> = (theme) => ({
 });
 
 export const logoImgStyles: CSSProperties = {
-  width: 44,
+  width: 65,
   height: "auto",
   filter: "drop-shadow(0 2px 8px rgba(0,0,0,0.2)) drop-shadow(0 0 20px rgba(255,255,255,0.1))",
   position: "relative",

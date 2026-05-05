@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from "react";
-import { Link, useLocation } from "react-router-dom";
+import { useLocation } from "react-router-dom";
 import { useAuth } from "../../../hooks/useAuth";
 import { wakeUpServer } from "../../../services/serverWakeUpService";
 import {
@@ -42,9 +42,6 @@ import {
   submitProgressStyles,
   alertStyles,
   dividerSectionStyles,
-  registerBoxStyles,
-  registerTextStyles,
-  registerLinkStyles,
 } from "./styles";
 
 // Login page component for user authentication
@@ -117,7 +114,7 @@ const Login: React.FC = () => {
 
     try {
       await authenticateUser(fields.identifier, fields.password);
-    } catch (error: unknown) {}
+    } catch (error: unknown) { }
 
     setIsSubmitting(false);
   };
@@ -253,7 +250,7 @@ const Login: React.FC = () => {
                     </InputAdornment>
                   ),
                 }}
-                              />
+              />
 
               <TextField
                 fullWidth
@@ -286,7 +283,7 @@ const Login: React.FC = () => {
                     </InputAdornment>
                   ),
                 }}
-                              />
+              />
 
               <Button
                 type="submit"
@@ -314,7 +311,7 @@ const Login: React.FC = () => {
             {isWakingUp && (
               <Fade in timeout={300}>
                 <Alert severity="info" sx={alertStyles} icon={<CircularProgress size={20} />}>
-                  Despertando servidor... Esto puede tomar unos minutos
+                  {LOGIN.SERVER}
                 </Alert>
               </Fade>
             )}
@@ -331,28 +328,24 @@ const Login: React.FC = () => {
             {/* Divider */}
             <Divider sx={dividerSectionStyles} />
 
-            {/* Register Link */}
-            <Box sx={registerBoxStyles}>
-              <Typography variant="body2" sx={registerTextStyles}>
-                {LOGIN.NO_ACCOUNT}
-              </Typography>
-              <Link
-                to="/register"
-                style={{
-                  ...registerLinkStyles,
-                  color: theme.palette.text.primary,
-                }}
-                onMouseEnter={(e) => {
-                  e.currentTarget.style.backgroundColor = theme.palette.mode === 'dark'
-                    ? 'rgba(255,255,255,0.05)'
-                    : 'rgba(0,0,0,0.03)';
-                }}
-                onMouseLeave={(e) => {
-                  e.currentTarget.style.backgroundColor = 'transparent';
-                }}
-              >
-                {LOGIN.REGISTER_LINK}
-              </Link>
+            {/* Footer */}
+            <Box
+              sx={{
+                mt: 2,
+                textAlign: "center",
+                color: theme.palette.text.secondary,
+              }}
+            >
+              <Box>
+                <Typography variant="caption" sx={{ fontSize: "0.7rem", opacity: 0.6 }}>
+                  {LOGIN.ACCESS_RESTRICTED}
+                </Typography>
+              </Box>
+              <Box sx={{ mb: 2 }}>
+                <Typography variant="caption" sx={{ fontSize: "0.75rem", opacity: 0.8 }}>
+                  © {new Date().getFullYear()} Choferes de Alquiler
+                </Typography>
+              </Box>
             </Box>
           </CardContent>
         </Card>
