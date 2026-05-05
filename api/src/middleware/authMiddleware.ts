@@ -19,13 +19,13 @@ export const authenticateToken = (req: AuthenticatedRequest, res: Response, next
   try {
     // Check Authorization header first
     const authHeader = req.headers.authorization;
-    let accessToken = null;
+    let accessToken: string | null = null;
 
     if (authHeader && authHeader.startsWith("Bearer ")) {
       accessToken = authHeader.substring(7); // Remove 'Bearer ' prefix
     } else {
       // Fallback to cookies
-      accessToken = req.cookies?.accessToken;
+      accessToken = req.cookies?.accessToken || null;
     }
 
     if (!accessToken) {
