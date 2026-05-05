@@ -58,8 +58,22 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     setRefreshToken(refreshToken);
     setCurrentUser(currentUser);
     setUserPermissions(userPermissions);
-    Cookies.set("accessToken", accessToken, { expires: 1, secure: true });
-    Cookies.set("refreshToken", refreshToken, { expires: 7, secure: true });
+    
+    // Check if we're in production to set appropriate cookie settings
+    const isProduction = process.env.NODE_ENV === "production";
+    const cookieOptions = {
+      expires: 1,
+      secure: isProduction,
+      sameSite: isProduction ? "none" as const : "lax" as const,
+    };
+    
+    const refreshCookieOptions = {
+      ...cookieOptions,
+      expires: 7,
+    };
+    
+    Cookies.set("accessToken", accessToken, cookieOptions);
+    Cookies.set("refreshToken", refreshToken, refreshCookieOptions);
     sessionStorage.setItem("currentUser", JSON.stringify(currentUser));
     sessionStorage.setItem("userPermissions", JSON.stringify(userPermissions));
   };
@@ -70,8 +84,15 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     setRefreshToken(null);
     setCurrentUser(null);
     setUserPermissions([]);
-    Cookies.remove("accessToken");
-    Cookies.remove("refreshToken");
+    
+    // Use same cookie options for removal as for setting
+    const isProduction = process.env.NODE_ENV === "production";
+    const cookieOptions = {
+      sameSite: isProduction ? "none" as const : "lax" as const,
+    };
+    
+    Cookies.remove("accessToken", cookieOptions);
+    Cookies.remove("refreshToken", cookieOptions);
     sessionStorage.clear();
   };
 
