@@ -102,6 +102,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       expires: 1,
       secure: isProduction,
       sameSite: isProduction ? "none" as const : "lax" as const,
+      path: "/",
     };
     
     const refreshCookieOptions = {
