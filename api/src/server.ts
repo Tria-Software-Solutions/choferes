@@ -42,6 +42,7 @@ app.use(
           "'self'",
           "https://choferesdealquiler.onrender.com",
           "https://choferesdealquiler.vercel.app",
+          "https://choferesdealquilercr.vercel.app",
         ],
       },
     },

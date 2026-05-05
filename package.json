@@ -1,5 +1,5 @@
 {
-  "name": "choferes",
+"name": "choferes",
   "devDependencies": {
     "husky": "^9.1.7",
     "lint-staged": "^16.1.2",
