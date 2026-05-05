@@ -18,5 +18,7 @@ const LOGIN = {
   USERNAME: "Usuario",
   PASSWORD_REQUIRED: "La contraseña es requerida",
   REGISTER_ERROR: "Error al registrarse",
+  SERVER: "Despertando servidor... Esto puede tomar unos minutos",
+  ACCESS_RESTRICTED: "Acceso exclusivo para personal autorizado",
 };
 export default LOGIN;
