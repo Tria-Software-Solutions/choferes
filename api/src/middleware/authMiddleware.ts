@@ -14,10 +14,19 @@ if (!JWT_SECRET_KEY || !JWT_SECRET_KEY_REFRESH) {
   throw new Error("Missing JWT secret keys in environment variables");
 }
 
-// Middleware to authenticate access tokens from cookies
+// Middleware to authenticate access tokens from Authorization header or cookies
 export const authenticateToken = (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
   try {
-    const { accessToken } = req.cookies;
+    // Check Authorization header first
+    const authHeader = req.headers.authorization;
+    let accessToken = null;
+
+    if (authHeader && authHeader.startsWith("Bearer ")) {
+      accessToken = authHeader.substring(7); // Remove 'Bearer ' prefix
+    } else {
+      // Fallback to cookies
+      accessToken = req.cookies?.accessToken;
+    }
 
     if (!accessToken) {
       return res.status(401).json({
