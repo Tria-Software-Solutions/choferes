@@ -80,7 +80,20 @@ api.interceptors.response.use(
           );
 
           const newAccessToken = response.data.accessToken;
-          Cookies.set("accessToken", newAccessToken);
+          const newRefreshToken = response.data.refreshToken;
+          
+          // Use same cookie options as in AuthContext
+          const isProduction = process.env.NODE_ENV === "production";
+          const cookieOptions = {
+            secure: isProduction,
+            sameSite: isProduction ? "none" as const : "lax" as const,
+          };
+          
+          Cookies.set("accessToken", newAccessToken, cookieOptions);
+          if (newRefreshToken) {
+            Cookies.set("refreshToken", newRefreshToken, { ...cookieOptions, expires: 7 });
+          }
+          
           error.config.headers["Authorization"] = `Bearer ${newAccessToken}`;
           return api.request(error.config);
         } catch (refreshError) {
@@ -110,8 +123,14 @@ export const invalidateCache = (url: string) => {
 };
 
 const disconnectUser = () => {
-  Cookies.remove("accessToken");
-  Cookies.remove("refreshToken");
+  // Use same cookie options for removal as for setting
+  const isProduction = process.env.NODE_ENV === "production";
+  const cookieOptions = {
+    sameSite: isProduction ? "none" as const : "lax" as const,
+  };
+  
+  Cookies.remove("accessToken", cookieOptions);
+  Cookies.remove("refreshToken", cookieOptions);
   sessionStorage.clear();
   localStorage.clear();
 
