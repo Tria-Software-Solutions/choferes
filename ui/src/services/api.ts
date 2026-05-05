@@ -4,7 +4,7 @@ import Cookies from "js-cookie";
 const API_URL = process.env.REACT_APP_API_URL || "http://localhost:5000";
 
 // Helper functions for token storage with localStorage fallback
-const setTokenWithFallback = (key: string, value: string, options?: any) => {
+const setTokenWithFallback = (key: string, value: string, options?: Cookies.CookieAttributes) => {
   try {
     // Try to set cookie first
     Cookies.set(key, value, options);
@@ -30,7 +30,7 @@ const getTokenWithFallback = (key: string): string | null => {
   }
 };
 
-const removeTokenWithFallback = (key: string, options?: any) => {
+const removeTokenWithFallback = (key: string, options?: Cookies.CookieAttributes) => {
   try {
     // Try to remove from cookie first
     Cookies.remove(key, options);
