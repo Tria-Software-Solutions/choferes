@@ -126,6 +126,7 @@ api.interceptors.response.use(
           const cookieOptions = {
             secure: isProduction,
             sameSite: isProduction ? "none" as const : "lax" as const,
+            path: "/",
           };
           
           setTokenWithFallback("accessToken", newAccessToken, cookieOptions);
@@ -172,9 +173,7 @@ const disconnectUser = () => {
   removeTokenWithFallback("refreshToken", cookieOptions);
   sessionStorage.clear();
   localStorage.clear();
-
-  // Temporarily disabled session expired redirect for tablet compatibility
-  // window.location.href = "/session-expired";
+  window.location.href = "/session-expired";
 };
 
 export default api;
