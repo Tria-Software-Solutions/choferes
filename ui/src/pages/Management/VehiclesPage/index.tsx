@@ -13,6 +13,9 @@ import SearchBarComponent from "../../../components/SearchBar/SearchBar.componen
 import EditableTableComponent from "../../../components/Table/EditableTable/EditableTable.component";
 import SpeedDialComponent from "../../../components/SpeedDial/SpeedDial.component";
 import AddVehicleForm from "../../Forms/AddVehicleForm";
+import ImageUploadModal from "../../../components/Modal/ImageUploadModal/ImageUploadModal.component";
+import OCRResultModal from "../../../components/Modal/OCRModal/OCRModal.component";
+import { OCRResult, VehicleEntry } from "../../../services/ocrService";
 import { useAppNotifications } from "../../../components/Snackbar/Snackbar.component";
 import DialogComponent from "../../../components/Dialog/Dialog.component";
 import { createVehicleNotification } from "../../../services/notificationService";
@@ -42,7 +45,7 @@ import PAGE_TITLE from "../../../constants/pageTitle.constants";
 import PERMISSIONS from "../../../constants/permissions.constants";
 import NOTIFICATIONS from "../../../constants/notifications.constants";
 import MANAGEMENT from "../../../constants/management.constants";
-import { Car, Download, ChevronLeft, ChevronRight, X, Search, Plus, Trash2, PlusCircle, RotateCcw } from "lucide-react";
+import { Car, Download, ChevronLeft, ChevronRight, X, Search, Plus, Trash2, PlusCircle, RotateCcw, ScanText } from "lucide-react";
 import { PdfIcon, ExcelIcon } from "../../../components/Icons/FileIcons";
 import PremiumTooltip from "../../../components/PremiumTooltip/PremiumTooltip.component";
 import {
@@ -111,6 +114,10 @@ const VehiclesPage: React.FC = () => {
   const [openAddVehicleModal, setOpenAddVehicleModal] = useState(false);
   const [isCreatingVehicle, setIsCreatingVehicle] = useState(false);
   const [isDeletingVehicle, setIsDeletingVehicle] = useState(false);
+  const [openImageUploadModal, setOpenImageUploadModal] = useState(false);
+  const [openOCRResultModal, setOpenOCRResultModal] = useState(false);
+  const [ocrResult, setOcrResult] = useState<OCRResult | null>(null);
+  const [ocrError, setOcrError] = useState<string | null>(null);
 
   const theme = useTheme();
   const isSmallScreen = useMediaQuery(theme.breakpoints.down("sm"));
@@ -394,6 +401,62 @@ const VehiclesPage: React.FC = () => {
 
   const handleCloseAddVehicleModal = () => {
     setOpenAddVehicleModal(false);
+  };
+
+  // Scan modal handlers
+  const handleOpenScanModal = () => {
+    setOpenImageUploadModal(true);
+  };
+
+  const handleCloseImageUploadModal = () => {
+    setOpenImageUploadModal(false);
+  };
+
+  const handleOCRComplete = (result: OCRResult) => {
+    setOcrResult(result);
+    setOpenOCRResultModal(true);
+  };
+
+  const handleCloseOCRResultModal = () => {
+    setOpenOCRResultModal(false);
+    setOcrResult(null);
+    setOcrError(null);
+  };
+
+  const handleImportOCRData = async (entries: VehicleEntry[]) => {
+    try {
+      // Convert OCR entries to vehicle data and create them
+      for (const entry of entries) {
+        const newVehicle = {
+          ticket: entry.ticket,
+          licensePlate: entry.licensePlate,
+          brand: entry.brand,
+          color: entry.color,
+          parkingLot: entry.parkingSpace,
+          notes: entry.observation,
+          parkingDate: selectedDate.toISOString(),
+        };
+        await dispatch(createVehicle(newVehicle));
+      }
+      
+      showNotification(`Se importaron ${entries.length} vehículos correctamente`, {
+        severity: "success",
+        duration: 3000,
+      });
+      
+      // Add notifications for each imported vehicle
+      entries.forEach((entry) => {
+        createVehicleNotification(
+          "created",
+          `${entry.licensePlate} - ${entry.brand}`
+        );
+      });
+    } catch (error) {
+      showNotification("Error al importar vehículos desde OCR", {
+        severity: "error",
+        duration: 5000,
+      });
+    }
   };
 
   // Handle creation of a new vehicle
@@ -767,9 +830,9 @@ const VehiclesPage: React.FC = () => {
                 </PremiumTooltip>
               </Box>
 
-              {/* Add Button Desktop */}
+              {/* Add and Scan Buttons Desktop */}
               {userPermissions.includes(PERMISSIONS.CREATE_VEHICLES) && (
-                <Box sx={{ display: { xs: 'none', sm: 'flex' } }}>
+                <Box sx={{ display: { xs: 'none', sm: 'flex' }, gap: 1 }}>
                   <Button
                     variant="contained"
                     startIcon={<Plus size={18} />}
@@ -786,27 +849,66 @@ const VehiclesPage: React.FC = () => {
                   >
                     {MANAGEMENT.ADD}
                   </Button>
+                  <Button
+                    variant="outlined"
+                    startIcon={<ScanText size={18} />}
+                    onClick={handleOpenScanModal}
+                    sx={{
+                      px: 2.5,
+                      py: 1,
+                      fontWeight: 600,
+                      fontSize: "0.9rem",
+                      letterSpacing: "-0.01em",
+                      borderRadius: '10px',
+                      height: '44px',
+                      borderColor: theme.palette.mode === "dark" ? "rgba(255,255,255,0.2)" : "rgba(0,0,0,0.15)",
+                      '&:hover': {
+                        backgroundColor: theme.palette.mode === "dark" ? "rgba(255,255,255,0.05)" : "rgba(0,0,0,0.04)",
+                        borderColor: theme.palette.mode === "dark" ? "rgba(255,255,255,0.3)" : "rgba(0,0,0,0.25)",
+                      },
+                    }}
+                    disabled
+                  >
+                    Escanear
+                  </Button>
                 </Box>
               )}
             </Box>
           </Box>
         </Box>
 
-        {/* Mobile Add Button */}
+        {/* Mobile Add and Scan Buttons */}
         {userPermissions.includes(PERMISSIONS.CREATE_VEHICLES) && (
-          <Box sx={{ display: { xs: 'flex', sm: 'none' }, p: 2, borderTop: `1px solid ${theme.palette.mode === "dark" ? "rgba(255,255,255,0.08)" : "rgba(0,0,0,0.08)"}` }}>
+          <Box sx={{ display: { xs: 'flex', sm: 'none' }, p: 2, borderTop: `1px solid ${theme.palette.mode === "dark" ? "rgba(255,255,255,0.08)" : "rgba(0,0,0,0.08)"}`, gap: 1 }}>
             <Button
               variant="contained"
-              fullWidth
               startIcon={<Plus size={18} />}
               onClick={handleOpenAddVehicleModal}
               sx={{
                 py: 1.5,
                 fontWeight: 600,
                 borderRadius: '10px',
+                flex: 1,
               }}
             >
               {MANAGEMENT.ADD}
+            </Button>
+            <Button
+              variant="outlined"
+              startIcon={<ScanText size={18} />}
+              onClick={handleOpenScanModal}
+              sx={{
+                py: 1.5,
+                fontWeight: 600,
+                borderRadius: '10px',
+                borderColor: theme.palette.mode === "dark" ? "rgba(255,255,255,0.2)" : "rgba(0,0,0,0.15)",
+                flex: 1,
+                '&:hover': {
+                  backgroundColor: theme.palette.mode === "dark" ? "rgba(255,255,255,0.05)" : "rgba(0,0,0,0.04)",
+                },
+              }}
+            >
+              Escanear
             </Button>
           </Box>
         )}
@@ -908,6 +1010,24 @@ const VehiclesPage: React.FC = () => {
           defaultParkingDate={selectedDate}
         />
       </DialogComponent>
+      
+      {/* Image Upload Modal */}
+      <ImageUploadModal
+        open={openImageUploadModal}
+        onClose={handleCloseImageUploadModal}
+        onOCRComplete={handleOCRComplete}
+        selectedDate={selectedDate}
+      />
+      
+      {/* OCR Result Modal */}
+      <OCRResultModal
+        open={openOCRResultModal}
+        onClose={handleCloseOCRResultModal}
+        result={ocrResult}
+        isLoading={false}
+        error={ocrError}
+        onImportData={handleImportOCRData}
+      />
     </Box>
   );
 };
