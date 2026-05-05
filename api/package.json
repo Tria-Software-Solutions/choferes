@@ -39,7 +39,7 @@
     "jsonwebtoken": "^9.0.2",
     "pg": "^8.13.1",
     "pg-hstore": "^2.3.4",
-    "sequelize": "^6.37.5",
+    "sequelize": "^6.37.8",
     "sequelize-typescript": "^2.1.6",
     "ts-node": "^10.9.2",
     "yocto-queue": "^1.2.0"
@@ -68,6 +68,7 @@
     ]
   },
   "overrides": {
-    "tar": "^7.5.2"
+    "tar": "^7.5.2",
+    "uuid": "^14.0.0"
   }
 }
