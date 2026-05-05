@@ -23,15 +23,9 @@ export class OCRService {
    * Process an image file and extract vehicle data using Gemini Vision API
    */
   static async processImage(file: File): Promise<OCRResult> {
-    try {
-      // eslint-disable-next-line no-console
-      console.log('Starting OCR processing with Gemini Vision API...');
-      
+    try {      
       // Use Gemini Vision API for processing
       const geminiResult = await GeminiVisionService.processImage(file);
-      
-      // eslint-disable-next-line no-console
-      console.log('Gemini Vision result:', geminiResult);
       
       // Convert Gemini result to OCR result format
       const ocrResult: OCRResult = {
@@ -46,8 +40,6 @@ export class OCRService {
         }))
       };
       
-      // eslint-disable-next-line no-console
-      console.log('Converted OCR result:', ocrResult);
       return ocrResult;
       
     } catch (error) {
