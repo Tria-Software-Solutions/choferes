@@ -77,10 +77,6 @@ Si no hay datos o no puedes leer la imagen, devuelve un JSON vacío: {"entries":
         }]
       };
 
-      // eslint-disable-next-line no-console
-      console.log('Sending image to Gemini Vision API...');
-      const startTime = Date.now();
-
       const response = await fetch(`${this.API_URL}?key=${this.API_KEY}`, {
         method: 'POST',
         headers: {
@@ -89,14 +85,8 @@ Si no hay datos o no puedes leer la imagen, devuelve un JSON vacío: {"entries":
         body: JSON.stringify(requestBody),
       });
 
-      const endTime = Date.now();
-      // eslint-disable-next-line no-console
-      console.log(`Gemini API response time: ${endTime - startTime}ms`);
-
       if (!response.ok) {
         const errorText = await response.text();
-        // eslint-disable-next-line no-console
-        console.error('Gemini API error:', errorText);
         
         // Parse error details for better error messages
         let errorMessage = 'Error al procesar la imagen con Gemini';
@@ -125,8 +115,6 @@ Si no hay datos o no puedes leer la imagen, devuelve un JSON vacío: {"entries":
       }
 
       const data = await response.json();
-      // eslint-disable-next-line no-console
-      console.log('Gemini API response:', data);
 
       // Extract the text from Gemini's response
       const generatedText = data.candidates?.[0]?.content?.parts?.[0]?.text;
@@ -142,15 +130,11 @@ Si no hay datos o no puedes leer la imagen, devuelve un JSON vacío: {"entries":
       }
 
       const parsedResult = JSON.parse(jsonMatch[0]);
-      // eslint-disable-next-line no-console
-      console.log('Parsed Gemini result:', parsedResult);
 
       // Validate and structure the result
       return this.validateAndStructureResult(parsedResult);
 
     } catch (error) {
-      // eslint-disable-next-line no-console
-      console.error('Error processing image with Gemini:', error);
       throw error; // Re-throw error instead of falling back to simulation
     }
   }
@@ -198,8 +182,6 @@ Si no hay datos o no puedes leer la imagen, devuelve un JSON vacío: {"entries":
       });
     }
 
-    // eslint-disable-next-line no-console
-    console.log('Structured Gemini result:', structuredResult);
     return structuredResult;
   }
 
@@ -280,8 +262,6 @@ Si no hay datos o no puedes leer la imagen, devuelve un JSON vacío: {"entries":
       ]
     };
 
-    // eslint-disable-next-line no-console
-    console.log('Simulated Gemini result:', mockResult);
     return mockResult;
   }
 }
