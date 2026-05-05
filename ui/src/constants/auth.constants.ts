@@ -1,0 +1,33 @@
+const AUTH = {
+  EMAIL_OR_USERNAME: "Correo Electrónico o Usuario",
+  EMAIL_OR_USERNAME_REQUIRED: "El correo electrónico o usuario es requerido",
+  PASSWORD: "Contraseña",
+  LOGIN: "Iniciar Sesión",
+  LOGGING_IN: "Iniciando Sesión...",
+  PERSONAL_INFO: "Información Personal",
+  PERSONAL_INFO_DESCRIPTION:
+    "Actualiza tu información personal y credenciales de acceso",
+  FIRST_NAME: "Nombre",
+  LAST_NAME: "Apellido",
+  EMAIL: "Correo electrónico",
+  USERNAME: "Usuario",
+  UPDATE_PERSONAL_INFO: "Actualizar Información Personal",
+  UPDATING_PERSONAL_INFO: "Actualizando...",
+  PERSONAL_INFO_SUCCESS: "La actualización de lo datos fue exitosa",
+  PERSONAL_INFO_ERROR: "Ha ocurrido un error al actualizar los datos",
+  CHANGE_PASSWORD: "Cambiar Contraseña",
+  CHANGE_PASSWORD_DESCRIPTION:
+    "Actualiza tu contraseña para mantener tu cuenta segura",
+  NEW_PASSWORD: "Nueva contraseña",
+  CONFIRM_NEW_PASSWORD: "Confirmar nueva contraseña",
+  UPDATE_PASSWORD: "Actualizar Contraseña",
+  UPDATING_PASSWORD: "Actualizando...",
+  PASSWORD_SUCCESS: "La actualización de la contraseña fue exitosa",
+  PASSWORD_ERROR: "Ha ocurrido un error al actualizar la contraseña",
+  SHOW_PASSWORD: "Mostrar contraseña",
+  HIDE_PASSWORD: "Ocultar contraseña",
+  REGISTER_DESCRIPTION: "Completa el formulario para crear una cuenta",
+  REGISTER_SUCCESS: "El registro del usuario fue exitoso",
+  REGISTER_ERROR: "Error al registrar usuario",
+};
+export default AUTH;

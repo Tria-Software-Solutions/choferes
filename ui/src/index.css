@@ -1,0 +1,199 @@
+/* Premium Design System - Global Styles */
+@import url('https://fonts.googleapis.com/css2?family=Urbanist:wght@400;500;600;700;800&display=swap');
+
+* {
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+body {
+  margin: 0;
+  font-family: 'Urbanist', -apple-system, BlinkMacSystemFont, sans-serif;
+  font-size: 16px;
+  line-height: 1.6;
+  color: #1f2937;
+  background-color: #f9fafb;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  overflow-x: hidden;
+}
+
+/* Selection styling */
+::selection {
+  background-color: rgba(0, 0, 0, 0.08);
+  color: #000000;
+}
+
+/* Scrollbar styling */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: #f3f4f6;
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #d1d5db;
+  border-radius: 4px;
+  transition: background 0.2s ease;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #9ca3af;
+}
+
+/* Smooth focus transitions */
+*:focus {
+  outline: none;
+}
+
+*:focus-visible {
+  outline: 2px solid #000000;
+  outline-offset: 2px;
+}
+
+/* Code blocks */
+code {
+  font-family: 'SF Mono', 'Fira Code', 'JetBrains Mono', source-code-pro, Menlo, Monaco, Consolas, monospace;
+  font-size: 0.9em;
+  background-color: #f3f4f6;
+  padding: 2px 6px;
+  border-radius: 4px;
+}
+
+/* Table styles */
+.table-container {
+  width: 100%;
+}
+
+.action-cell {
+  display: flex;
+  justify-content: flex-end;
+  padding: 8px;
+  width: 100%;
+  gap: 8px;
+}
+
+
+.actionCell {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+}
+
+.saveIconButton {
+  margin-left: 8px;
+}
+
+.pagination {
+  width: 100%;
+}
+
+/* Premium utility classes */
+.premium-shadow {
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.06), 0 1px 3px rgba(0, 0, 0, 0.04);
+}
+
+.premium-shadow-hover:hover {
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.08), 0 2px 4px rgba(0, 0, 0, 0.04);
+}
+
+.transition-smooth {
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Form page layout improvements */
+.page-container {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 24px;
+}
+
+@media (min-width: 1280px) {
+  .page-container {
+    padding: 32px 40px;
+  }
+}
+
+/* Card grid improvements */
+.card-grid {
+  display: grid;
+  gap: 24px;
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+}
+
+/* Input focus ring animation */
+@keyframes focusRing {
+  from {
+    box-shadow: 0 0 0 0 rgba(0, 0, 0, 0);
+  }
+  to {
+    box-shadow: 0 0 0 3px rgba(0, 0, 0, 0.05);
+  }
+}
+
+.Mui-focused {
+  animation: focusRing 0.2s ease-out forwards;
+}
+
+/* Use viewport units for responsive positioning - menu will flip based on available space */
+.MuiPopper-root {
+  max-height: 50vh !important;
+}
+
+/* Responsive height utilities for all devices */
+html, body {
+  height: 100%;
+  min-height: 100%;
+}
+
+/* Dynamic viewport height for mobile browsers with address bars */
+.full-height {
+  height: 100vh;
+  height: 100dvh;
+  min-height: 100vh;
+  min-height: 100dvh;
+}
+
+/* For pages with AppBar - use flexbox to fill available space */
+.content-height-with-appbar {
+  flex: 1;
+  height: 100%;
+  max-height: 100%;
+  overflow: hidden;
+  box-sizing: border-box;
+}
+
+/* Scrollable content container */
+.scrollable-content {
+  height: 100%;
+  overflow-y: auto;
+  overflow-x: hidden;
+  -webkit-overflow-scrolling: touch;
+}
+
+/* Hide scrollbar but keep functionality */
+.scrollable-content::-webkit-scrollbar {
+  width: 6px;
+}
+
+.scrollable-content::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.scrollable-content::-webkit-scrollbar-thumb {
+  background: rgba(0, 0, 0, 0.2);
+  border-radius: 3px;
+}
+
+.scrollable-content::-webkit-scrollbar-thumb:hover {
+  background: rgba(0, 0, 0, 0.3);
+}
