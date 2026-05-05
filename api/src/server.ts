@@ -94,8 +94,7 @@ if (process.env.NODE_ENV === "production") {
 
 const allowedOrigins = [
   "http://localhost:3000",
-  "https://choferesdealquilercr.vercel.app",
-  "https://choferesdealquilercr.vercel.app/",
+  "https://choferesdealquiler.vercel.app",
   process.env.REACT_APP_UI_URL,
 ].filter(Boolean);
 
