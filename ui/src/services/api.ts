@@ -125,7 +125,7 @@ api.interceptors.response.use(
           const isProduction = process.env.NODE_ENV === "production";
           const cookieOptions = {
             secure: isProduction,
-            sameSite: isProduction ? "none" as const : "lax" as const,
+            sameSite: isProduction ? "strict" as const : "lax" as const,
             path: "/",
           };
           
@@ -166,7 +166,7 @@ const disconnectUser = () => {
   // Use same cookie options for removal as for setting
   const isProduction = process.env.NODE_ENV === "production";
   const cookieOptions = {
-    sameSite: isProduction ? "none" as const : "lax" as const,
+    sameSite: isProduction ? "strict" as const : "lax" as const,
   };
   
   removeTokenWithFallback("accessToken", cookieOptions);

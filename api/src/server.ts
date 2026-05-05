@@ -41,6 +41,7 @@ app.use(
         connectSrc: [
           "'self'",
           "https://choferesdealquiler.onrender.com",
+          "https://choferesdealquiler.vercel.app",
           "https://choferesdealquilercr.vercel.app",
         ],
       },
