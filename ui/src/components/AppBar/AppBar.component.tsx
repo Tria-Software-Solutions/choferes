@@ -26,7 +26,7 @@ import { useNotificationMenu } from "../../context/NotificationContext";
 import { Menu as MenuIcon, Bell, LayoutDashboard, User } from "lucide-react";
 import logo from "../../assets/images/logo.png";
 import { MenuItemProps } from "../Menu/Menu.component";
-import { Roles } from "../../enums/roles";
+import { Roles } from "../../constants/roles";
 import {
   appBarStyles,
   toolbarStyles,
