@@ -1,15 +1,8 @@
 {
-"name": "choferes",
+  "name": "choferes",
+  "private": true,
   "devDependencies": {
     "husky": "^9.1.7",
-    "lint-staged": "^16.1.2",
-    "typescript": "^5.8.3"
-  },
-  "scripts": {
-    "prepare": "husky install"
-  },
-  "dependencies": {
-    "@fontsource/moirai-one": "^5.2.6",
-    "lucide-react": "^1.8.0"
+    "lint-staged": "^16.1.2"
   }
 }
