@@ -23,7 +23,7 @@ import { useNavigate, useLocation } from "react-router-dom";
 import { useAuthContext } from "../../context/AuthContext";
 import { APPBAR_MENU } from "../../constants/constants";
 import { useNotificationMenu } from "../../context/NotificationContext";
-import { Menu as MenuIcon, Bell, LayoutDashboard, User } from "lucide-react";
+import { Menu as MenuIcon, Bell, PanelTopOpen, PanelTopClose, User } from "lucide-react";
 import logo from "../../assets/images/logo.png";
 import { MenuItemProps } from "../Menu/Menu.component";
 import { Roles } from "../../constants/roles";
@@ -191,15 +191,27 @@ const AppBarComponent: React.FC<AppBarComponentProps> = ({
                 },
               }}
             >
-              <LayoutDashboard 
-                size={22} 
-                strokeWidth={1.5}
-                style={{
-                  color: "#ffffff",
-                  opacity: Boolean(dashboardMenuAnchor) ? 1 : 0.8,
-                  transition: "all 0.2s ease",
-                }} 
-              />
+              {Boolean(dashboardMenuAnchor) ? (
+                <PanelTopClose 
+                  size={22} 
+                  strokeWidth={1.5}
+                  style={{
+                    color: "#ffffff",
+                    opacity: 1,
+                    transition: "all 0.2s ease",
+                  }} 
+                />
+              ) : (
+                <PanelTopOpen 
+                  size={22} 
+                  strokeWidth={1.5}
+                  style={{
+                    color: "#ffffff",
+                    opacity: 0.8,
+                    transition: "all 0.2s ease",
+                  }} 
+                />
+              )}
             </IconButton>
             <Popover
               open={Boolean(dashboardMenuAnchor)}
