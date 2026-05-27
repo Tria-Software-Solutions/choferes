@@ -300,6 +300,7 @@ export const passwordIconButtonStyles: SxProps<Theme> = {
   width: "28px",
   height: "28px",
   padding: "4px",
+  mr: 0.1,
   overflow: "hidden",
   "& .MuiSvgIcon-root": {
     fontSize: "18px",
