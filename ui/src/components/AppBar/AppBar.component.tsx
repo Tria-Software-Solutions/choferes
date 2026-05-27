@@ -150,7 +150,7 @@ const AppBarComponent: React.FC<AppBarComponentProps> = ({
         {/* Logo and Title */}
         <Box sx={clickableBoxStyles} onClick={() => navigate("/")}>
           <Box sx={logoBoxStyles}>
-            <img src={logo} alt="Logo" style={logoImgStyles} />
+            <Box component="img" src={logo} alt="Logo" sx={logoImgStyles} />
           </Box>
           <Typography variant="h5" sx={titleStyles}>
             {title}

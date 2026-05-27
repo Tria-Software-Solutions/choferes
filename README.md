@@ -115,3 +115,38 @@ npm start
 ## Licencia
 
 Todos los derechos reservados.
+
+## Docker (Desarrollo y Entorno Local)
+
+Se incluyen Dockerfiles para `api` y `ui` y un `docker-compose.yml` para facilitar el despliegue local.
+
+Requisitos: Docker y Docker Compose instalados.
+
+1. Copia variables de entorno de ejemplo:
+
+```bash
+cp .env.example .env
+# Edita .env según sea necesario
+```
+
+2. Levanta los servicios:
+
+```bash
+docker compose up --build
+```
+
+Servicios expuestos por defecto:
+- UI: http://localhost:3000 (nginx sirve la build)
+- API: http://localhost:5000
+- Postgres: localhost:5432
+
+3. Para detener y limpiar:
+
+```bash
+docker compose down -v
+```
+
+Notas:
+- El `docker-compose.yml` crea una base de datos Postgres; modifica credenciales en `.env` si hace falta.
+- La configuración de Nginx en `ui/deploy/nginx/default.conf` enruta `/api/` hacia el servicio `api` dentro de Docker.
+
