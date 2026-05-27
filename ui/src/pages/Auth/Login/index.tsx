@@ -5,6 +5,7 @@ import { TextField, Button, Typography, Box, Alert, CircularProgress, IconButton
 import { Visibility, VisibilityOff } from '@mui/icons-material';
 import FORMS from '../../../constants/forms.constants';
 import LOGIN from '../../../constants/login.constants';
+import carSvg from '../../../assets/images/car.svg';
 import logo from '../../../assets/images/logo.png';
 import DotField from '../../../components/DotField/DotField';
 import TypewriterEffect from '../../../components/Typewriter/Typewriter';
@@ -99,7 +100,7 @@ const Login: React.FC = () => {
           >
             <Box
               component="img"
-              src="/car.svg"
+              src={carSvg}
               alt="Car illustration"
               sx={{
                 width: { xs: '80%', md: '85%' },
