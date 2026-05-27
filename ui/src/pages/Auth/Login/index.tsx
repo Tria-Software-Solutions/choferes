@@ -7,6 +7,7 @@ import FORMS from '../../../constants/forms.constants';
 import LOGIN from '../../../constants/login.constants';
 import logo from '../../../assets/images/logo.png';
 import DotField from '../../../components/DotField/DotField';
+import TypewriterEffect from '../../../components/Typewriter/Typewriter';
 import {
   wrapper,
   split,
@@ -122,7 +123,13 @@ const Login: React.FC = () => {
                 color: '#ffffff',
               }}
             >
-              Gestión de Choferes
+              <TypewriterEffect
+                words={[
+                  { text: 'Gestión' },
+                  { text: 'de' },
+                  { text: 'Choferes' },
+                ]}
+              />
             </Typography>
             <Typography
               sx={{
