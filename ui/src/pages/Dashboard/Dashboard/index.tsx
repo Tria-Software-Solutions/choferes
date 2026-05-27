@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useMemo } from "react";
+import { useEffect, useState, useMemo } from "react";
 import {
   Box,
   Typography,
@@ -16,16 +16,18 @@ import { getBiweeklySummaries } from "../../../services/biweeklySummaryService";
 import { getVehicles } from "../../../services/vehicleService";
 import { getHoursWorked } from "../../../services/hoursWorkedService";
 import { getSchedules } from "../../../services/scheduleService";
-import { getWeekNumber, getBiweekNumber, getMonthNumber } from "../../../utils/dates";
+import { getWeekNumber, getBiweekNumber, getMonthNumber, getBiweeklyDates, getFirstDayOfWeek } from "../../../utils/dates";
 import { LayoutDashboard } from "lucide-react";
 import { PAGE_TITLE } from "../../../constants/constants";
-import StatsCards from "./components/StatsCards";
-import OvertimeEmployees from "./components/OvertimeEmployees";
-import TopEmployeesChart from "./components/TopEmployeesChart";
-import ScheduleDistributionChart from "./components/ScheduleDistributionChart";
-import VehicleBrandChart from "./components/VehicleBrandChart";
-import DailyAttendanceChart from "./components/DailyAttendanceChart";
-
+import { BentoGrid, BentoGridItem } from "./components/BentoGrid";
+import {
+  TopEmployeesChart,
+  VehicleBrandChart,
+  DailyAttendanceChart,
+  ScheduleDistributionChart,
+  OvertimeBarList,
+  PeriodSummary,
+} from "./components/Charts";
 
 interface EmployeeName {
   id: number;
@@ -35,7 +37,6 @@ interface EmployeeName {
 
 interface OvertimeEmp {
   name: string;
-  period: string;
   totalHours: number;
   overtime: number;
 }
@@ -76,7 +77,7 @@ const getCurrentPeriodNum = (period: Period): number => {
   return getMonthNumber(today);
 };
 
-const Dashboard: React.FC = () => {
+const Dashboard = () => {
   const [loading, setLoading] = useState(true);
   const [period, setPeriod] = useState<Period>("biweekly");
   const [employeeMap, setEmployeeMap] = useState<Map<number, EmployeeName>>(new Map());
@@ -162,6 +163,37 @@ const Dashboard: React.FC = () => {
   const currentYear = new Date().getFullYear();
   const currentPeriod = getCurrentPeriodNum(period);
 
+  const filteredEmployeeIds = useMemo(() => {
+    const raw: RawEntry[] =
+      period === "weekly" ? weeklyRaw :
+      period === "biweekly" ? biweeklyRaw :
+      monthlyRaw;
+    const periodKey = PERIOD_KEYS[period];
+    return new Set(
+      raw
+        .filter((r) => r.year === currentYear && r[periodKey] === currentPeriod)
+        .map((r) => r.employeeId)
+    );
+  }, [period, weeklyRaw, biweeklyRaw, monthlyRaw, currentYear, currentPeriod]);
+
+  const periodDateRange = useMemo(() => {
+    if (period === "weekly") {
+      const monday = getFirstDayOfWeek(0);
+      const sunday = new Date(monday);
+      sunday.setDate(sunday.getDate() + 6);
+      sunday.setHours(23, 59, 59, 999);
+      return { start: monday, end: sunday };
+    }
+    if (period === "biweekly") {
+      const { startDate, endDate } = getBiweeklyDates(currentYear, currentPeriod);
+      endDate.setHours(23, 59, 59, 999);
+      return { start: startDate, end: endDate };
+    }
+    const start = new Date(currentYear, currentPeriod - 1, 1);
+    const end = new Date(currentYear, currentPeriod, 0, 23, 59, 59, 999);
+    return { start, end };
+  }, [period, currentYear, currentPeriod]);
+
   const filtered = useMemo(() => {
     const raw: RawEntry[] =
       period === "weekly" ? weeklyRaw :
@@ -169,14 +201,23 @@ const Dashboard: React.FC = () => {
       monthlyRaw;
 
     const periodKey = PERIOD_KEYS[period];
-
     const current = raw.filter((r) => r.year === currentYear && r[periodKey] === currentPeriod);
+
+    // Deduplicate by employeeId: DB can have duplicate entries for the same
+    // (employeeId, period, year) due to race conditions in RolesPage (prior to
+    // migration 20260527000000 which added unique constraints).
+    const deduped = Array.from(
+      current.reduce((acc, r) => {
+        if (!acc.has(r.employeeId)) acc.set(r.employeeId, r);
+        return acc;
+      }, new Map<number, RawEntry>()).values()
+    );
 
     const threshold = THRESHOLDS[period];
 
     const byEmp: Record<number, number> = {};
     let totalHrs = 0;
-    for (const r of current) {
+    for (const r of deduped) {
       totalHrs += r.totalHours;
       byEmp[r.employeeId] = (byEmp[r.employeeId] || 0) + r.totalHours;
     }
@@ -189,9 +230,8 @@ const Dashboard: React.FC = () => {
       .sort((a, b) => b.hours - a.hours)
       .slice(0, 20);
 
-    const overtime: OvertimeEmp[] = [];
     const overtimeByEmp: Record<number, { totalHours: number; overtime: number; name: string }> = {};
-    for (const r of current) {
+    for (const r of deduped) {
       if (r.totalHours > threshold) {
         const emp = employeeMap.get(r.employeeId);
         const name = emp ? `${emp.firstName} ${emp.lastName}`.trim() : `Empleado #${r.employeeId}`;
@@ -201,45 +241,33 @@ const Dashboard: React.FC = () => {
         overtimeByEmp[key].overtime += r.totalHours - threshold;
       }
     }
-    for (const entry of Object.values(overtimeByEmp)) {
-      overtime.push({ name: entry.name, period: PERIOD_LABELS[period], totalHours: Math.round(entry.totalHours * 10) / 10, overtime: Math.round(entry.overtime * 10) / 10 });
-    }
-    overtime.sort((a, b) => b.overtime - a.overtime);
+    const overtime: OvertimeEmp[] = Object.values(overtimeByEmp)
+      .map((e) => ({ name: e.name, totalHours: Math.round(e.totalHours * 10) / 10, overtime: Math.round(e.overtime * 10) / 10 }))
+      .sort((a, b) => b.overtime - a.overtime);
 
-    const avgHours = totalHrs > 0 && employeeMap.size > 0 ? Math.round((totalHrs / employeeMap.size) * 10) / 10 : 0;
-    const overtimeRate = employeeMap.size > 0 ? Math.round((overtimeByEmp ? Object.keys(overtimeByEmp).length : 0) / employeeMap.size * 100) : 0;
-
-    const employeesWithHours = new Set(current.map((r) => r.employeeId));
-    const employeesWithoutHours = employeeMap.size - employeesWithHours.size;
-
-    return {
-      top, overtime, totalHours: Math.round(totalHrs), employeeCount: employeeMap.size,
-      avgHours, employeesWithoutHours, overtimeRate,
-      employeesWithHours: Array.from(employeesWithHours),
-    };
+    return { top, overtime, totalHours: Math.round(totalHrs), employeeCount: employeeMap.size };
   }, [period, weeklyRaw, biweeklyRaw, monthlyRaw, employeeMap, currentYear, currentPeriod]);
 
-  // Schedule distribution
   const scheduleDist = useMemo(() => {
-    if (!hoursWorked.length || !schedules.length) return [];
+    if (!hoursWorked.length || !schedules.length || !filteredEmployeeIds.size) return [];
+    const { start, end } = periodDateRange;
     const schedMap = new Map(schedules.map((s) => [s.id as number, s.label as string]));
     const countBySched: Record<string, number> = {};
-    const seen = new Set<string>();
     for (const hw of hoursWorked) {
-      const eid = hw.employeeId as number;
+      if (!filteredEmployeeIds.has(hw.employeeId as number)) continue;
+      const dateStr = hw.date as string;
+      if (!dateStr) continue;
+      const d = new Date(dateStr);
+      if (d < start || d > end) continue;
       const sid = hw.scheduleId as number;
-      const key = `${eid}-${sid}`;
-      if (seen.has(key)) continue;
-      seen.add(key);
       const label = schedMap.get(sid) || `Horario #${sid}`;
       countBySched[label] = (countBySched[label] || 0) + 1;
     }
     return Object.entries(countBySched)
       .filter(([label]) => label.toLowerCase() !== "horario especial")
       .map(([label, count]) => ({ label, count }));
-  }, [hoursWorked, schedules]);
+  }, [hoursWorked, schedules, filteredEmployeeIds, periodDateRange]);
 
-  // Vehicle brands
   const vehicleBrands = useMemo(() => {
     if (!vehicles.length) return [];
     const count: Record<string, number> = {};
@@ -250,16 +278,14 @@ const Dashboard: React.FC = () => {
     return Object.entries(count).map(([brand, count]) => ({ brand, count }));
   }, [vehicles]);
 
-  // Daily attendance
   const dailyAttendance = useMemo(() => {
-    if (!hoursWorked.length) return [];
+    if (!hoursWorked.length || !filteredEmployeeIds.size) return [];
     const dayNames = ["Dom", "Lun", "Mar", "Mié", "Jue", "Vie", "Sáb"];
     const byDate: Record<string, Set<number>> = {};
     for (const hw of hoursWorked) {
+      if (!filteredEmployeeIds.has(hw.employeeId as number)) continue;
       const dateStr = hw.date as string;
       if (!dateStr) continue;
-      const d = new Date(dateStr);
-      if (d.getFullYear() !== currentYear || d.getMonth() !== new Date().getMonth()) continue;
       const key = dateStr.split("T")[0];
       if (!byDate[key]) byDate[key] = new Set();
       byDate[key].add(hw.employeeId as number);
@@ -270,7 +296,6 @@ const Dashboard: React.FC = () => {
       const dayName = dayNames[dayIdx];
       dayCount[dayName] = (dayCount[dayName] || 0) + emps.size;
     }
-    // Average per day of week
     const dayOccurrences: Record<string, number> = {};
     for (const [dateStr] of Object.entries(byDate)) {
       const dayIdx = new Date(dateStr).getDay();
@@ -283,12 +308,14 @@ const Dashboard: React.FC = () => {
       result.push({ day: dayName, count: Math.round(total / occurrences) });
     }
     return result;
-  }, [hoursWorked, currentYear]);
+  }, [hoursWorked, filteredEmployeeIds]);
 
   if (loading) {
     return (
       <Box className="scrollable-content" sx={{ height: "100%", display: "flex", flexDirection: "column", overflow: "hidden", pb: 0, pt: 0, px: 0 }}>
-        <Box sx={{ display: "flex", justifyContent: "center", alignItems: "center", flex: 1 }}><CircularProgress size={28} /></Box>
+        <Box sx={{ display: "flex", justifyContent: "center", alignItems: "center", flex: 1 }}>
+          <CircularProgress size={28} />
+        </Box>
       </Box>
     );
   }
@@ -326,24 +353,43 @@ const Dashboard: React.FC = () => {
               <Button variant={period === "weekly" ? "contained" : "outlined"} onClick={() => setPeriod("weekly")} disableRipple disableElevation>Semanal</Button>
             </ButtonGroup>
           </Box>
-          <StatsCards
-            employees={filtered.employeeCount}
-            overtimeCount={filtered.overtime.length}
-            totalHours={filtered.totalHours}
-            avgHours={filtered.avgHours}
-            employeesWithoutHours={filtered.employeesWithoutHours}
-          />
         </Box>
         <Box sx={{ flex: 1, overflow: "auto", p: { xs: 2, sm: 3 } }}>
-          <Box sx={{ display: "flex", flexWrap: "wrap", gap: 2, mb: 2 }}>
-            {filtered.top.length > 0 && <TopEmployeesChart data={filtered.top} />}
-            <OvertimeEmployees employees={filtered.overtime} overtimeRate={filtered.overtimeRate} />
-          </Box>
-          <Box sx={{ display: "flex", flexWrap: "wrap", gap: 2, mb: 2 }}>
-            <ScheduleDistributionChart data={scheduleDist} />
-            <VehicleBrandChart data={vehicleBrands} />
-            <DailyAttendanceChart data={dailyAttendance} />
-          </Box>
+          <BentoGrid>
+            <BentoGridItem
+              title="Resumen del período"
+              description={PERIOD_LABELS[period]}
+              colSpan={{ lg: 4, md: 4 }}
+              header={<PeriodSummary employeeCount={filtered.employeeCount} totalHours={filtered.totalHours} overtimeCount={filtered.overtime.length} periodLabel={PERIOD_LABELS[period]} />}
+            />
+            <BentoGridItem
+              title="Horas por empleado"
+              description="Top empleados con más horas trabajadas"
+              colSpan={{ md: 2 }}
+              rowSpan={2}
+              header={<TopEmployeesChart data={filtered.top} />}
+            />
+            <BentoGridItem
+              title="Horas extra"
+              description={`${filtered.overtime.length} empleados con horas extra`}
+              header={<OvertimeBarList data={filtered.overtime.map((e) => ({ name: e.name, value: e.overtime }))} />}
+            />
+            <BentoGridItem
+              title="Asistencia diaria"
+              description="Promedio de empleados por día"
+              header={<DailyAttendanceChart data={dailyAttendance} />}
+            />
+            <BentoGridItem
+              title="Distribución por horario"
+              description="Empleados agrupados por tipo de horario"
+              header={<ScheduleDistributionChart data={scheduleDist} />}
+            />
+            <BentoGridItem
+              title="Vehículos por marca"
+              description="Distribución de vehículos por fabricante"
+              header={<VehicleBrandChart data={vehicleBrands} />}
+            />
+          </BentoGrid>
         </Box>
       </Paper>
     </Box>
