@@ -1,7 +1,8 @@
 import { useState } from 'react';
 import { useLocation } from 'react-router-dom';
 import { useAuth } from '../../../hooks/useAuth';
-import { TextField, Button, Typography, Box, Alert, CircularProgress } from '@mui/material';
+import { TextField, Button, Typography, Box, Alert, CircularProgress, IconButton, InputAdornment } from '@mui/material';
+import { Visibility, VisibilityOff } from '@mui/icons-material';
 import FORMS from '../../../constants/forms.constants';
 import LOGIN from '../../../constants/login.constants';
 import logo from '../../../assets/images/logo.png';
@@ -15,7 +16,6 @@ import {
   formPanel,
   header,
   form,
-  footer,
 } from './styles';
 import {
   textFieldStyles,
@@ -23,6 +23,7 @@ import {
   submitButtonStyles,
   submitProgressStyles,
   alertStyles,
+  passwordIconButtonStyles,
 } from '../Register/styles';
 
 const Login: React.FC = () => {
@@ -34,6 +35,7 @@ const Login: React.FC = () => {
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [errors, setErrors] = useState<{ [key: string]: string }>({});
+  const [showPassword, setShowPassword] = useState(false);
 
   const validateFields = () => {
     const newErrors: { [key: string]: string } = {};
@@ -113,14 +115,14 @@ const Login: React.FC = () => {
               variant="h3"
               sx={{
                 fontWeight: 800,
-                fontSize: { xs: '2.75rem', md: '3.25rem' },
+                fontSize: { xs: '1.75rem', md: '2.25rem' },
                 letterSpacing: -0.5,
                 lineHeight: 1.2,
                 mb: 1.5,
                 color: '#ffffff',
               }}
             >
-              Sistema de Gestión de Choferes
+              Gestión de Choferes
             </Typography>
             <Typography
               sx={{
@@ -132,7 +134,7 @@ const Login: React.FC = () => {
                 color: '#ffffff',
               }}
             >
-              Controla tu flota de choferes desde un solo lugar
+              {LOGIN.FLEET_MANAGEMENT} {LOGIN.ACCESS_RESTRICTED}
             </Typography>
           </Box>
         </Box>
@@ -145,7 +147,7 @@ const Login: React.FC = () => {
                 <img
                   src={logo}
                   alt="Logo"
-                  style={{ width: 56, height: 'auto', marginBottom: 16 }}
+                  style={{ width: 72, height: 'auto', marginBottom: 16 }}
                 />
                 <Typography variant="h5" sx={{ fontWeight: 700, letterSpacing: -0.2 }}>
                   {LOGIN.LOGIN}
@@ -172,7 +174,7 @@ const Login: React.FC = () => {
                 <TextField
                   fullWidth
                   placeholder={LOGIN.PASSWORD}
-                  type="password"
+                  type={showPassword ? 'text' : 'password'}
                   variant="outlined"
                   value={fields.password}
                   autoComplete="current-password"
@@ -181,6 +183,20 @@ const Login: React.FC = () => {
                   helperText={errors.password}
                   disabled={isSubmitting}
                   sx={passwordTextFieldStyles}
+                  InputProps={{
+                    endAdornment: (
+                      <InputAdornment position="end">
+                        <IconButton
+                          onClick={() => setShowPassword(!showPassword)}
+                          edge="end"
+                          disabled={isSubmitting}
+                          sx={passwordIconButtonStyles}
+                        >
+                          {showPassword ? <VisibilityOff /> : <Visibility />}
+                        </IconButton>
+                      </InputAdornment>
+                    ),
+                  }}
                 />
 
                 <Button
@@ -206,15 +222,12 @@ const Login: React.FC = () => {
                 {authError}
               </Alert>
             )}
+          </Box>
 
-            <Box sx={footer}>
-              <Typography variant="caption" sx={{ color: 'text.secondary' }}>
-                {LOGIN.ACCESS_RESTRICTED}
-              </Typography>
-              <Typography variant="caption" sx={{ color: 'text.secondary' }}>
-                © {new Date().getFullYear()} Choferes de Alquiler
-              </Typography>
-            </Box>
+          <Box sx={{ position: 'absolute', bottom: 30, left: 0, right: 0, textAlign: 'center' }}>
+            <Typography variant="caption" sx={{ color: 'text.secondary' }}>
+              © {new Date().getFullYear()} Choferes de Alquiler
+            </Typography>
           </Box>
         </Box>
       </Box>

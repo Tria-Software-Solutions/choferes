@@ -23,7 +23,7 @@ export const split: SxProps<Theme> = (theme) => ({
 
 export const left: SxProps<Theme> = {
   flex: 1.15,
-  display: "flex",
+  display: { xs: 'none', md: 'flex' },
   flexDirection: "column",
   alignItems: "center",
   justifyContent: "space-between",
@@ -40,19 +40,20 @@ export const left: SxProps<Theme> = {
 };
 
 export const right: SxProps<Theme> = (theme: Theme) => ({
-  flex: 0.85,
+  flex: { xs: 1, md: 0.85 },
   display: "flex",
   alignItems: "center",
   justifyContent: "center",
-  p: { xs: 4, md: 8 },
+  p: { xs: 3, md: 8 },
   background: theme.palette.background.default,
   minHeight: "100vh",
   position: "relative",
+  overflow: "hidden",
 });
 
 export const formContainer: SxProps<Theme> = {
   width: "100%",
-  maxWidth: 420,
+  maxWidth: { xs: "100%", sm: 420 },
   margin: "0 auto",
   position: "relative",
   zIndex: 1,
@@ -78,10 +79,10 @@ export const form: SxProps<Theme> = {
 };
 
 export const footer: SxProps<Theme> = {
-  mt: 3,
+  py: 2,
   textAlign: "center",
-  color: "rgba(0,0,0,0.6)",
+  color: "rgba(0,0,0,0.4)",
   display: "flex",
   flexDirection: "column",
-  gap: 0.5,
+  gap: 0.25,
 };
