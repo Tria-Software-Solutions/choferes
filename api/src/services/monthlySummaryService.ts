@@ -22,10 +22,9 @@ export const getMonthlySummariesByMonth = async (month: number, year: number) =>
     where: { month, year },
   });
 
-// Create a new monthly summary
+// Create a new monthly summary (upserts on unique constraint conflict)
 export const createMonthlySummary = async (data: Omit<MonthlySummary, "id">) => {
-  const newMonthlySummary = await MonthlySummary.create(data);
-  await newMonthlySummary.reload();
+  const [newMonthlySummary] = await MonthlySummary.upsert(data);
   return newMonthlySummary;
 };
 

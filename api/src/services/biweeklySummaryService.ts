@@ -14,31 +14,30 @@ export const getBiweeklySummariesByEmployee = async (employeeId: number) =>
   });
 
 // Get all biweekly summaries for a specific period and year
-export const getBiweeklySummariesByPeriod = async (period: number, year: number) =>
+export const getBiweeklySummariesByPeriod = async (biweekNumber: number, year: number) =>
   BiweeklySummary.findAll({
-    where: { period, year },
+    where: { biweekNumber, year },
   });
 
-// Get the current biweekly summary for an employee, period, month, and year
+// Get the current biweekly summary for an employee, biweek, month, and year
 export const getCurrentBiweeklySummary = async (
   employeeId: number,
-  period: number,
+  biweekNumber: number,
   month: number,
   year: number,
 ) =>
   BiweeklySummary.findOne({
     where: {
       employeeId,
-      period,
+      biweekNumber,
       month,
       year,
     },
   });
 
-// Create a new biweekly summary
+// Create a new biweekly summary (upserts on unique constraint conflict)
 export const createBiweeklySummary = async (data: Omit<BiweeklySummary, "id">) => {
-  const newBiweeklySummary = await BiweeklySummary.create(data);
-  await newBiweeklySummary.reload();
+  const [newBiweeklySummary] = await BiweeklySummary.upsert(data);
   return newBiweeklySummary;
 };
 

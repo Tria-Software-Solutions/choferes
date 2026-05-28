@@ -20,5 +20,6 @@ const LOGIN = {
   REGISTER_ERROR: "Error al registrarse",
   SERVER: "Despertando servidor... Esto puede tomar unos minutos",
   ACCESS_RESTRICTED: "Acceso exclusivo para personal autorizado",
+  FLEET_MANAGEMENT: "Controla tu flota de choferes desde un solo lugar.",
 };
 export default LOGIN;

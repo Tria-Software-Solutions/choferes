@@ -16,7 +16,7 @@ import { NotificationProvider } from "./context/NotificationContext";
 import ProtectedRoute from "./routes/ProtectedRoute";
 import { Container, useMediaQuery, useTheme, CircularProgress, Box } from "@mui/material";
 import { APPBAR_MENU, PERMISSIONS, ROUTES } from "./constants/constants";
-import { ClipboardList, Car, Users, CalendarDays, LogOut, User } from "lucide-react";
+import { ClipboardList, Car, Users, CalendarDays, LogOut, User, LayoutDashboard } from "lucide-react";
 
 const Login = lazy(() => import("./pages/Auth/Login"));
 const RolesPage = lazy(() => import("./pages/Management/RolesPage"));
@@ -28,6 +28,7 @@ const Profile = lazy(() => import("./pages/Auth/Profile"));
 const NotFound = lazy(() => import("./pages/ErrorPages/NotFound"));
 const Forbidden = lazy(() => import("./pages/ErrorPages/Forbidden"));
 const ErrorPage = lazy(() => import("./pages/ErrorPages/Error"));
+const Dashboard = lazy(() => import("./pages/Dashboard/Dashboard"));
 const SessionExpired = lazy(() => import("./pages/ErrorPages/SessionExpired"));
 
 const PageLoader = () => (
@@ -44,6 +45,12 @@ const AppBarWrapper: React.FC = () => {
   const isSmallScreen = useMediaQuery(theme.breakpoints.down("sm"));
 
   const links = [
+    {
+      label: APPBAR_MENU.DASHBOARD,
+      icon: <LayoutDashboard size={22} strokeWidth={1.5} />,
+      path: ROUTES.DASHBOARD,
+      permission: PERMISSIONS.VIEW_ADMIN,
+    },
     {
       label: APPBAR_MENU.ROLES,
       icon: <ClipboardList size={22} strokeWidth={1.5} />,
@@ -71,6 +78,7 @@ const AppBarWrapper: React.FC = () => {
   ];
 
   const permissionsMap = {
+    [APPBAR_MENU.DASHBOARD]: PERMISSIONS.VIEW_ADMIN,
     [APPBAR_MENU.ROLES]: PERMISSIONS.VIEW_ROLES,
     [APPBAR_MENU.EMPLOYEES]: PERMISSIONS.VIEW_EMPLOYEES,
     [APPBAR_MENU.SCHEDULES]: PERMISSIONS.VIEW_SCHEDULES,
@@ -164,6 +172,7 @@ const AppContent: React.FC = () => {
 
   const getDefaultRoute = (userPermissions: string[]) => {
     const routePreferences = [
+      { route: ROUTES.DASHBOARD, permission: PERMISSIONS.VIEW_ADMIN },
       { route: ROUTES.ROLES, permission: PERMISSIONS.VIEW_ROLES },
       { route: ROUTES.EMPLOYEES, permission: PERMISSIONS.VIEW_EMPLOYEES },
       { route: ROUTES.SCHEDULES, permission: PERMISSIONS.VIEW_SCHEDULES },
@@ -264,7 +273,7 @@ const AppContent: React.FC = () => {
                 )
               }
             />
-            <Route path="/dashboard" element={<Navigate to="/profile" replace />} />
+            <Route path="/dashboard" element={<Dashboard />} />
             <Route path="/profile" element={<Profile />} />
           </Route>
           <Route path="/forbidden" element={<Forbidden />} />

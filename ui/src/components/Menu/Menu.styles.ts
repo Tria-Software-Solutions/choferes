@@ -3,35 +3,13 @@ import { SxProps, Theme } from "@mui/material";
 export const iconButtonStyles = (theme: Theme): SxProps<Theme> => ({
   height: "40px",
   color: "#ffffff",
-  backgroundColor: "#000000",
-  border: `1px solid ${theme.palette.mode === "dark" ? "#222" : "#000000"}`,
-  borderRadius: "8px",
+  backgroundColor: "rgba(255,255,255,0.1)",
+  backdropFilter: "blur(10px)",
+  border: "1px solid rgba(255,255,255,0.2)",
   transition: "all 0.3s ease",
   "&:hover": {
-    backgroundColor: "#333333",
-    borderColor: "#333333",
-    transform: "translateY(-2px)",
-    boxShadow: "0 4px 12px rgba(0,0,0,0.2)",
-  },
-  "&:focus": {
-    backgroundColor: "#333333",
-    borderColor: "#333333",
-    outline: "none",
-    transform: "translateY(-1px)",
-    boxShadow: "0 2px 8px rgba(0,0,0,0.2)",
-  },
-  "&:active": {
-    backgroundColor: "#000000",
-    borderColor: "#000000",
-    transform: "translateY(0px)",
-    boxShadow: "0 2px 4px rgba(0,0,0,0.2)",
-  },
-  "&.Mui-focusVisible": {
-    backgroundColor: "#333333",
-    borderColor: "#333333",
-    outline: "none",
-    transform: "translateY(-1px)",
-    boxShadow: "0 2px 8px rgba(0,0,0,0.2)",
+    backgroundColor: "rgba(255,255,255,0.2)",
+    transform: "scale(1.05)",
   },
 });
 
@@ -57,26 +35,57 @@ export const buttonStyles = (theme: Theme): SxProps<Theme> => ({
 });
 
 export const menuPaperStyles = (theme: Theme): SxProps<Theme> => ({
-  mt: 1.5,
-  borderRadius: theme.shape.borderRadius,
-  backgroundColor: `${theme.palette.background.paper} !important`,
-  boxShadow: 'none',
+  width: 380,
+  maxHeight: 580,
+  mt: 0.5,
+  background: theme.palette.mode === 'dark'
+    ? 'rgba(30,30,35,0.95)'
+    : '#ffffff',
+  backdropFilter: 'blur(20px)',
   border: 'none',
+  borderRadius: '16px',
+  boxShadow: theme.palette.mode === 'dark'
+    ? '0 10px 40px rgba(0,0,0,0.4), 0 2px 8px rgba(0,0,0,0.2)'
+    : '0 10px 40px rgba(0,0,0,0.15), 0 2px 8px rgba(0,0,0,0.1)',
+  overflow: 'hidden',
+  padding: 0,
 });
 
-export const menuItemStyles: SxProps<Theme> = {
-  transition: "all 0.2s ease",
-  "&:hover": {
-    backgroundColor: (theme: Theme) => theme.palette.action.hover,
+export const menuItemStyles: SxProps<Theme> = (theme) => ({
+  py: 1,
+  px: 1.5,
+  transition: "all 0.2s cubic-bezier(0.4, 0, 0.2, 1)",
+  color: theme.palette.text.primary,
+  '&:hover': {
+    backgroundColor: theme.palette.mode === 'dark'
+      ? "rgba(255,255,255,0.08)"
+      : theme.palette.action.hover,
+    transform: "translateX(2px)",
   },
-};
-
-export const subMenuPaperStyles = (theme: Theme): SxProps<Theme> => ({
-  boxShadow: 'none',
-  border: 'none',
-  backgroundColor: `${theme.palette.background.paper} !important`,
+  '& .MuiListItemIcon-root': {
+    minWidth: 32,
+    color: theme.palette.primary.main,
+  },
 });
 
 export const listItemTextStyles: SxProps<Theme> = {
   fontWeight: 500,
+  fontSize: "0.875rem",
 };
+
+export const subMenuPaperStyles = (theme: Theme): SxProps<Theme> => ({
+  width: 380,
+  maxHeight: 580,
+  mt: 0.5,
+  background: theme.palette.mode === 'dark'
+    ? 'rgba(30,30,35,0.95)'
+    : '#ffffff',
+  backdropFilter: 'blur(20px)',
+  border: 'none',
+  borderRadius: '16px',
+  boxShadow: theme.palette.mode === 'dark'
+    ? '0 10px 40px rgba(0,0,0,0.4), 0 2px 8px rgba(0,0,0,0.2)'
+    : '0 10px 40px rgba(0,0,0,0.15), 0 2px 8px rgba(0,0,0,0.1)',
+  overflow: 'hidden',
+  padding: 0,
+});

@@ -1,15 +1,19 @@
 {
-"name": "choferes",
-  "devDependencies": {
-    "husky": "^9.1.7",
-    "lint-staged": "^16.1.2",
-    "typescript": "^5.8.3"
-  },
+  "name": "choferes",
+  "private": true,
   "scripts": {
+    "lint": "npm --prefix api run lint && npm --prefix ui run lint",
+    "format": "npm --prefix api run format && npm --prefix ui run format",
     "prepare": "husky install"
   },
-  "dependencies": {
-    "@fontsource/moirai-one": "^5.2.6",
-    "lucide-react": "^1.8.0"
+  "devDependencies": {
+    "husky": "^9.1.7",
+    "lint-staged": "^16.1.2"
+  },
+  "lint-staged": {
+    "**/*.{js,jsx,ts,tsx}": [
+      "eslint --fix",
+      "git add"
+    ]
   }
 }

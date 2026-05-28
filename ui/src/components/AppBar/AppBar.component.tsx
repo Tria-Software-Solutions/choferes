@@ -23,20 +23,16 @@ import { useNavigate, useLocation } from "react-router-dom";
 import { useAuthContext } from "../../context/AuthContext";
 import { APPBAR_MENU } from "../../constants/constants";
 import { useNotificationMenu } from "../../context/NotificationContext";
-import { Menu as MenuIcon, Bell, LayoutDashboard, User } from "lucide-react";
+import { Menu as MenuIcon, Bell, PanelTopOpen, PanelTopClose, User } from "lucide-react";
 import logo from "../../assets/images/logo.png";
 import { MenuItemProps } from "../Menu/Menu.component";
-import { Roles } from "../../enums/roles";
+import { Roles } from "../../constants/roles";
 import {
   appBarStyles,
   toolbarStyles,
   logoBoxStyles,
   logoImgStyles,
-  titleStyles,
   clickableBoxStyles,
-  dashboardPopoverBoxStyles,
-  dashboardIconButtonStyles,
-  dashboardIconStyles,
   notificationsIconButtonStyles,
   dividerStyles,
   userBoxStyles,
@@ -45,7 +41,6 @@ import {
   userMenuIconButtonStyles,
   userAvatarStyles,
   mobileDividerStyles,
-  dashboardNoLinksBoxStyles,
 } from "./AppBar.styles";
 
 interface Link {
@@ -150,11 +145,18 @@ const AppBarComponent: React.FC<AppBarComponentProps> = ({
         {/* Logo and Title */}
         <Box sx={clickableBoxStyles} onClick={() => navigate("/")}>
           <Box sx={logoBoxStyles}>
-            <img src={logo} alt="Logo" style={logoImgStyles} />
+            <Box component="img" src={logo} alt="Logo" sx={logoImgStyles} />
           </Box>
-          <Typography variant="h5" sx={titleStyles}>
-            {title}
-          </Typography>
+          <Box sx={{ display: { xs: "none", sm: "flex" }, flexDirection: "column", lineHeight: 1.1, textAlign: "center" }}>
+            <Box sx={{ fontWeight: 800, fontSize: { sm: "1.2rem", md: "1.5rem" }, letterSpacing: "0.04em", color: "#ffffff" }}>
+              {title === "Choferes de Alquiler" ? "Choferes" : title}
+            </Box>
+            {title === "Choferes de Alquiler" && (
+              <Box sx={{ fontWeight: 600, fontSize: { sm: "0.65rem", md: "0.75rem" }, color: "rgba(255,255,255,0.6)", mt: -0.25, letterSpacing: { sm: "0.25em", md: "0.3em" } }}>
+                DE ALQUILER
+              </Box>
+            )}
+          </Box>
         </Box>
 
         {/* Center - Main Navigation (desktop only) */}
@@ -191,15 +193,27 @@ const AppBarComponent: React.FC<AppBarComponentProps> = ({
                 },
               }}
             >
-              <LayoutDashboard 
-                size={22} 
-                strokeWidth={1.5}
-                style={{
-                  color: "#ffffff",
-                  opacity: Boolean(dashboardMenuAnchor) ? 1 : 0.8,
-                  transition: "all 0.2s ease",
-                }} 
-              />
+              {Boolean(dashboardMenuAnchor) ? (
+                <PanelTopClose 
+                  size={22} 
+                  strokeWidth={1.5}
+                  style={{
+                    color: "#ffffff",
+                    opacity: 1,
+                    transition: "all 0.2s ease",
+                  }} 
+                />
+              ) : (
+                <PanelTopOpen 
+                  size={22} 
+                  strokeWidth={1.5}
+                  style={{
+                    color: "#ffffff",
+                    opacity: 0.8,
+                    transition: "all 0.2s ease",
+                  }} 
+                />
+              )}
             </IconButton>
             <Popover
               open={Boolean(dashboardMenuAnchor)}
@@ -208,49 +222,72 @@ const AppBarComponent: React.FC<AppBarComponentProps> = ({
               anchorOrigin={{ vertical: "bottom", horizontal: "center" }}
               transformOrigin={{ vertical: "top", horizontal: "center" }}
               PaperProps={{
+                elevation: 0,
                 sx: {
-                  background: "transparent",
-                  boxShadow: "none",
-                  border: "none",
-                  p: 0,
-                  minWidth: 0,
-                  overflow: "visible",
+                  width: 260,
+                  mt: 0.5,
+                  background: theme.palette.mode === 'dark'
+                    ? 'rgba(30,30,35,0.95)'
+                    : '#ffffff',
+                  backdropFilter: 'blur(20px)',
+                  border: 'none',
+                  borderRadius: '16px',
+                  boxShadow: theme.palette.mode === 'dark'
+                    ? '0 10px 40px rgba(0,0,0,0.4), 0 2px 8px rgba(0,0,0,0.2)'
+                    : '0 10px 40px rgba(0,0,0,0.15), 0 2px 8px rgba(0,0,0,0.1)',
+                  overflow: 'hidden',
+                  padding: 0,
                 },
               }}
               TransitionComponent={Grow}
               TransitionProps={{ timeout: 200 }}
               keepMounted
             >
-              <Box sx={dashboardPopoverBoxStyles}>
+              <Box>
                 {links.length === 0 ? (
-                  <Box sx={dashboardNoLinksBoxStyles}>
+                  <Box sx={{ p: 2, textAlign: 'center', color: theme.palette.text.secondary, fontSize: '0.85rem' }}>
                     {APPBAR_MENU.NO_LINKS}
                   </Box>
                 ) : (
-                  links.map((link) => (
-                    <IconButton
-                      key={link.label}
-                      onClick={() => {
-                        handleDashboardMenuClose();
-                        link.path && navigate(link.path);
-                      }}
-                      sx={dashboardIconButtonStyles(
-                        isActivePage(link.path || ""),
-                      )}
-                    >
-                      {React.cloneElement(link.icon as React.ReactElement, {
-                        sx: {
-                          ...dashboardIconStyles(
-                            isActivePage(link.path || ""),
-                          ),
-                          color: isActivePage(link.path || "")
+                  <Box sx={{ display: 'flex', gap: 0.5, p: 1.5, alignItems: 'center', justifyContent: 'center' }}>
+                    {links.map((link) => (
+                      <Box
+                        key={link.label}
+                        onClick={() => {
+                          handleDashboardMenuClose();
+                          link.path && navigate(link.path);
+                        }}
+                        sx={{
+                          display: 'flex',
+                          p: 1,
+                          borderRadius: '12px',
+                          cursor: 'pointer',
+                          transition: 'all 0.2s cubic-bezier(0.4, 0, 0.2, 1)',
+                          backgroundColor: isActivePage(link.path || '')
+                            ? theme.palette.mode === 'dark'
+                              ? 'rgba(255,255,255,0.15)'
+                              : 'rgba(0,0,0,0.08)'
+                            : 'transparent',
+                          '&:hover': {
+                            backgroundColor: theme.palette.mode === 'dark'
+                              ? 'rgba(255,255,255,0.08)'
+                              : 'rgba(0,0,0,0.04)',
+                          },
+                        }}
+                      >
+                        <Box sx={{
+                          color: isActivePage(link.path || '')
                             ? theme.palette.primary.main
-                            : theme.palette.text.primary,
-                          opacity: isActivePage(link.path || "") ? 1 : 0.7,
-                        },
-                      })}
-                    </IconButton>
-                  ))
+                            : theme.palette.text.secondary,
+                          display: 'flex',
+                          opacity: isActivePage(link.path || '') ? 1 : 0.6,
+                          transition: 'all 0.2s ease',
+                        }}>
+                          {link.icon}
+                        </Box>
+                      </Box>
+                    ))}
+                  </Box>
                 )}
               </Box>
             </Popover>

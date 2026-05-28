@@ -1,355 +1,244 @@
-import { useState, useEffect, useRef } from "react";
-import { useLocation } from "react-router-dom";
-import { useAuth } from "../../../hooks/useAuth";
-import { wakeUpServer } from "../../../services/serverWakeUpService";
+import { useState } from 'react';
+import { useLocation } from 'react-router-dom';
+import { useAuth } from '../../../hooks/useAuth';
+import { TextField, Button, Typography, Box, Alert, CircularProgress, IconButton, InputAdornment } from '@mui/material';
+import { Visibility, VisibilityOff } from '@mui/icons-material';
+import FORMS from '../../../constants/forms.constants';
+import LOGIN from '../../../constants/login.constants';
+import carSvg from '../../../assets/images/car.svg';
+import logo from '../../../assets/images/logo.png';
+import DotField from '../../../components/DotField/DotField';
+import TypewriterEffect from '../../../components/Typewriter/Typewriter';
 import {
-  TextField,
-  Button,
-  Card,
-  CardContent,
-  Typography,
-  Box,
-  Alert,
-  useTheme,
-  useMediaQuery,
-  CircularProgress,
-  IconButton,
-  InputAdornment,
-  Fade,
-  Divider,
-  keyframes,
-} from "@mui/material";
-import PAGE_TITLE from "../../../constants/pageTitle.constants";
-import FORMS from "../../../constants/forms.constants";
-import LOGIN from "../../../constants/login.constants";
-import { Eye, EyeOff, Lock, User } from "lucide-react";
-import logo from "../../../assets/images/logo.png";
-import "@fontsource/urbanist";
+  wrapper,
+  split,
+  left,
+  right,
+  formContainer,
+  formPanel,
+  header,
+  form,
+} from './styles';
 import {
-  authPageBoxStyles,
-  authCardStyles,
-  cardContentStyles,
-  logoBoxStyles,
-  logoImgStyles,
-  titleStyles,
-  dividerStyles,
-  descriptionStyles,
-  formBoxStyles,
   textFieldStyles,
   passwordTextFieldStyles,
-  passwordIconButtonStyles,
   submitButtonStyles,
   submitProgressStyles,
   alertStyles,
-  dividerSectionStyles,
-} from "./styles";
+  passwordIconButtonStyles,
+} from '../Register/styles';
 
-// Login page component for user authentication
 const Login: React.FC = () => {
   const location = useLocation();
   const { authenticateUser, authError } = useAuth();
   const [fields, setFields] = useState({
-    identifier: location.state?.username || "",
-    password: location.state?.password || "",
+    identifier: location.state?.username || '',
+    password: location.state?.password || '',
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [showPassword, setShowPassword] = useState(false);
   const [errors, setErrors] = useState<{ [key: string]: string }>({});
-  const [isWakingUp, setIsWakingUp] = useState(false);
-  const wakeUpAttempted = useRef(false);
+  const [showPassword, setShowPassword] = useState(false);
 
-  const theme = useTheme();
-  const isSmallScreen = useMediaQuery(theme.breakpoints.down("sm"));
-
-  // Prevent body scroll on this page
-  useEffect(() => {
-    document.body.style.overflow = 'hidden';
-    return () => {
-      document.body.style.overflow = '';
-    };
-  }, []);
-
-  // Wake up server on page load (handles Render free tier cold start)
-  // Only run if NOT in localhost (development)
-  useEffect(() => {
-    if (wakeUpAttempted.current) return;
-    wakeUpAttempted.current = true;
-
-    const apiUrl = process.env.REACT_APP_API_URL || "http://localhost:5000";
-    const isLocalhost = apiUrl.includes("localhost") || apiUrl.includes("127.0.0.1");
-
-    if (!isLocalhost) {
-      setIsWakingUp(true);
-      wakeUpServer().then(() => {
-        setIsWakingUp(false);
-      });
-    }
-  }, []);
-
-  // Validates the login form fields
   const validateFields = () => {
     const newErrors: { [key: string]: string } = {};
-
     if (!fields.identifier.trim()) {
       newErrors.identifier = FORMS.EMAIL_REQUIRED;
     }
-
     if (!fields.password.trim()) {
       newErrors.password = FORMS.PASSWORD_REQUIRED;
     } else if (fields.password.length < 6) {
       newErrors.password = FORMS.PASSWORD_COMPLEXITY;
     }
-
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
 
-  // Handles the login form submission
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
-
     if (!validateFields()) return;
-
     setIsSubmitting(true);
-
     try {
       await authenticateUser(fields.identifier, fields.password);
-    } catch (error: unknown) { }
-
+    } catch (error: unknown) {}
     setIsSubmitting(false);
   };
 
-  // Toggles the password visibility
-  const handleTogglePassword = () => {
-    setShowPassword((prev) => !prev);
-  };
-
-  // Handles changes in form fields and clears errors
   const handleFieldChange = (field: string, value: string) => {
     setFields({ ...fields, [field]: value });
-    // Clear error when user starts typing
     if (errors[field]) {
-      setErrors({ ...errors, [field]: "" });
+      setErrors({ ...errors, [field]: '' });
     }
   };
 
-  // Floating animation keyframes
-  const float1 = keyframes`
-    0%, 100% { transform: translate(0, 0) scale(1); }
-    33% { transform: translate(30px, -50px) scale(1.05); }
-    66% { transform: translate(-20px, 20px) scale(0.95); }
-  `;
-  const float2 = keyframes`
-    0%, 100% { transform: translate(0, 0) scale(1); }
-    33% { transform: translate(-40px, 30px) scale(0.95); }
-    66% { transform: translate(30px, -20px) scale(1.05); }
-  `;
-  const float3 = keyframes`
-    0%, 100% { transform: translate(0, 0) scale(1); }
-    50% { transform: translate(20px, 40px) scale(1.1); }
-  `;
-
   return (
-    <Box className="auth-page" sx={authPageBoxStyles}>
-      {/* Floating decorative orbs */}
-      <Box
-        sx={{
-          position: "absolute",
-          width: 300,
-          height: 300,
-          borderRadius: "50%",
-          background: theme.palette.mode === "dark"
-            ? "radial-gradient(circle, rgba(120,119,198,0.4) 0%, rgba(120,119,198,0) 70%)"
-            : "radial-gradient(circle, rgba(99,102,241,0.25) 0%, rgba(99,102,241,0) 70%)",
-          filter: "blur(40px)",
-          top: "10%",
-          left: "10%",
-          animation: `${float1} 15s ease-in-out infinite`,
-          zIndex: 0,
-        }}
-      />
-      <Box
-        sx={{
-          position: "absolute",
-          width: 400,
-          height: 400,
-          borderRadius: "50%",
-          background: theme.palette.mode === "dark"
-            ? "radial-gradient(circle, rgba(255,119,198,0.25) 0%, rgba(255,119,198,0) 70%)"
-            : "radial-gradient(circle, rgba(236,72,153,0.15) 0%, rgba(236,72,153,0) 70%)",
-          filter: "blur(50px)",
-          bottom: "5%",
-          right: "15%",
-          animation: `${float2} 18s ease-in-out infinite`,
-          zIndex: 0,
-        }}
-      />
-      <Box
-        sx={{
-          position: "absolute",
-          width: 200,
-          height: 200,
-          borderRadius: "50%",
-          background: theme.palette.mode === "dark"
-            ? "radial-gradient(circle, rgba(120,219,255,0.3) 0%, rgba(120,219,255,0) 70%)"
-            : "radial-gradient(circle, rgba(59,130,246,0.2) 0%, rgba(59,130,246,0) 70%)",
-          filter: "blur(30px)",
-          top: "50%",
-          right: "5%",
-          animation: `${float3} 12s ease-in-out infinite`,
-          zIndex: 0,
-        }}
-      />
-      <Fade in timeout={1000}>
-        <Card className="auth-card" sx={authCardStyles}>
-          <CardContent sx={cardContentStyles}>
-            {/* Logo and Title Section */}
+    <Box sx={wrapper}>
+      <Box sx={split}>
+        <Box sx={left}>
+          <Box
+            sx={{ position: 'absolute', width: { xs: '95%', md: '85%' }, maxWidth: 700, zIndex: 0 }}
+          >
+            <svg
+              viewBox="0 0 200 200"
+              xmlns="http://www.w3.org/2000/svg"
+              style={{ width: '100%', height: 'auto' }}
+            >
+              <path
+                fill="rgba(255,255,255,0.05)"
+                d="M35.5,-58.2C49.8,-53.3,67.8,-51.4,76.9,-42.2C85.9,-33,86.1,-16.5,83.8,-1.3C81.6,13.9,76.9,27.8,70.9,42.2C64.8,56.7,57.4,71.6,45.4,81.2C33.3,90.7,16.7,94.9,3,89.7C-10.6,84.5,-21.2,69.8,-34.2,60.8C-47.1,51.7,-62.3,48.2,-70.9,39.1C-79.6,29.9,-81.5,14.9,-81.6,-0.1C-81.8,-15.1,-80,-30.1,-72,-40.4C-64,-50.7,-49.8,-56.1,-36.8,-61.8C-23.7,-67.4,-11.9,-73.3,-0.6,-72.2C10.6,-71.1,21.3,-63.2,35.5,-58.2Z"
+                transform="translate(100 100)"
+              />
+            </svg>
+          </Box>
+          <Box
+            sx={{
+              flex: 1,
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              width: '100%',
+            }}
+          >
             <Box
+              component="img"
+              src={carSvg}
+              alt="Car illustration"
               sx={{
-                display: "flex",
-                flexDirection: "column",
-                alignItems: "center",
-                mb: 4,
+                width: { xs: '80%', md: '85%' },
+                maxWidth: 650,
+                height: 'auto',
+                position: 'relative',
+                zIndex: 1,
+                filter: 'drop-shadow(0 4px 24px rgba(0,0,0,0.08))',
+              }}
+            />
+          </Box>
+          <Box sx={{ width: '100%', zIndex: 2, pb: { xs: 5, md: 8 }, px: { xs: 4, md: 8 } }}>
+            <Typography
+              variant="h3"
+              sx={{
+                fontWeight: 800,
+                fontSize: { xs: '1.75rem', md: '2.25rem' },
+                letterSpacing: -0.5,
+                lineHeight: 1.2,
+                mb: 1.5,
+                color: '#ffffff',
               }}
             >
-              <Box sx={logoBoxStyles}>
-                <img src={logo} alt="Logo" style={logoImgStyles} />
+              <TypewriterEffect
+                words={[
+                  { text: 'Gestión' },
+                  { text: 'de' },
+                  { text: 'Choferes' },
+                ]}
+              />
+            </Typography>
+            <Typography
+              sx={{
+                fontSize: '1rem',
+                fontWeight: 400,
+                opacity: 0.5,
+                lineHeight: 1.7,
+                maxWidth: 440,
+                color: '#ffffff',
+              }}
+            >
+              {LOGIN.FLEET_MANAGEMENT} {LOGIN.ACCESS_RESTRICTED}
+            </Typography>
+          </Box>
+        </Box>
+
+        <Box sx={right}>
+          <DotField />
+          <Box sx={formContainer}>
+            <Box sx={formPanel}>
+              <Box sx={header}>
+                <img
+                  src={logo}
+                  alt="Logo"
+                  style={{ width: 72, height: 'auto', marginBottom: 16 }}
+                />
+                <Typography variant="h5" sx={{ fontWeight: 700, letterSpacing: -0.2 }}>
+                  {LOGIN.LOGIN}
+                </Typography>
+                <Typography variant="body2" sx={{ color: 'text.secondary', mt: 0.5 }}>
+                  Accede a tu panel de control
+                </Typography>
               </Box>
-              <Typography
-                variant={isSmallScreen ? "h5" : "h4"}
-                align="center"
-                sx={titleStyles(isSmallScreen)}
-              >
-                {PAGE_TITLE.LOGIN}
-              </Typography>
-              <Divider sx={dividerStyles(theme)} />
-              <Typography variant="body2" align="center" sx={descriptionStyles}>
-                {FORMS.LOGIN_DESCRIPTION}
-              </Typography>
+
+              <Box component="form" onSubmit={handleLogin} sx={form}>
+                <TextField
+                  fullWidth
+                  placeholder={LOGIN.EMAIL_OR_USERNAME}
+                  variant="outlined"
+                  value={fields.identifier}
+                  autoComplete="username"
+                  onChange={(e) => handleFieldChange('identifier', e.target.value)}
+                  error={!!errors.identifier}
+                  helperText={errors.identifier}
+                  disabled={isSubmitting}
+                  sx={textFieldStyles}
+                />
+
+                <TextField
+                  fullWidth
+                  placeholder={LOGIN.PASSWORD}
+                  type={showPassword ? 'text' : 'password'}
+                  variant="outlined"
+                  value={fields.password}
+                  autoComplete="current-password"
+                  onChange={(e) => handleFieldChange('password', e.target.value)}
+                  error={!!errors.password}
+                  helperText={errors.password}
+                  disabled={isSubmitting}
+                  sx={passwordTextFieldStyles}
+                  InputProps={{
+                    endAdornment: (
+                      <InputAdornment position="end">
+                        <IconButton
+                          onClick={() => setShowPassword(!showPassword)}
+                          edge="end"
+                          disabled={isSubmitting}
+                          sx={passwordIconButtonStyles}
+                        >
+                          {showPassword ? <VisibilityOff /> : <Visibility />}
+                        </IconButton>
+                      </InputAdornment>
+                    ),
+                  }}
+                />
+
+                <Button
+                  type="submit"
+                  fullWidth
+                  variant="contained"
+                  disabled={isSubmitting}
+                  sx={submitButtonStyles}
+                >
+                  {isSubmitting ? (
+                    <CircularProgress size={18} sx={submitProgressStyles} />
+                  ) : (
+                    LOGIN.SUBMIT
+                  )}
+                </Button>
+
+                {/* removed register / forgot-password links to match product decision */}
+              </Box>
             </Box>
 
-            {/* Form Section */}
-            <Box component="form" onSubmit={handleLogin} sx={formBoxStyles}>
-              <TextField
-                fullWidth
-                placeholder="Correo o usuario"
-                variant="outlined"
-                value={fields.identifier}
-                autoComplete="username"
-                onChange={(e) =>
-                  handleFieldChange("identifier", e.target.value)
-                }
-                error={!!errors.identifier}
-                helperText={errors.identifier}
-                disabled={isSubmitting}
-                sx={textFieldStyles}
-                InputProps={{
-                  startAdornment: (
-                    <InputAdornment position="start" sx={{ position: 'absolute', left: '14px', zIndex: 2 }}>
-                      <User size={20} color="#666666" />
-                    </InputAdornment>
-                  ),
-                }}
-              />
-
-              <TextField
-                fullWidth
-                placeholder="Contraseña"
-                type={showPassword ? "text" : "password"}
-                variant="outlined"
-                value={fields.password}
-                autoComplete="current-password"
-                onChange={(e) => handleFieldChange("password", e.target.value)}
-                error={!!errors.password}
-                helperText={errors.password}
-                disabled={isSubmitting}
-                sx={passwordTextFieldStyles}
-                InputProps={{
-                  startAdornment: (
-                    <InputAdornment position="start" sx={{ position: 'absolute', left: '14px', zIndex: 2 }}>
-                      <Lock size={20} color="#666666" />
-                    </InputAdornment>
-                  ),
-                  endAdornment: (
-                    <InputAdornment position="end" sx={{ position: 'absolute', right: '8px', zIndex: 2 }}>
-                      <IconButton
-                        onClick={handleTogglePassword}
-                        edge="end"
-                        disabled={isSubmitting}
-                        sx={passwordIconButtonStyles}
-                      >
-                        {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
-                      </IconButton>
-                    </InputAdornment>
-                  ),
-                }}
-              />
-
-              <Button
-                type="submit"
-                fullWidth
-                variant="contained"
-                disabled={isSubmitting || isWakingUp}
-                sx={submitButtonStyles}
-              >
-                {isSubmitting ? (
-                  <>
-                    <CircularProgress
-                      color="inherit"
-                      size={24}
-                      sx={submitProgressStyles}
-                    />
-                    {LOGIN.LOADING}
-                  </>
-                ) : (
-                  LOGIN.SUBMIT
-                )}
-              </Button>
-            </Box>
-
-            {/* Server waking up info */}
-            {isWakingUp && (
-              <Fade in timeout={300}>
-                <Alert severity="info" sx={alertStyles} icon={<CircularProgress size={20} />}>
-                  {LOGIN.SERVER}
-                </Alert>
-              </Fade>
-            )}
-
-            {/* Error Alert */}
             {authError && (
-              <Fade in timeout={300}>
-                <Alert severity="error" sx={alertStyles}>
-                  {authError}
-                </Alert>
-              </Fade>
+              <Alert severity="error" sx={alertStyles}>
+                {authError}
+              </Alert>
             )}
+          </Box>
 
-            {/* Divider */}
-            <Divider sx={dividerSectionStyles} />
-
-            {/* Footer */}
-            <Box
-              sx={{
-                mt: 2,
-                textAlign: "center",
-                color: theme.palette.text.secondary,
-              }}
-            >
-              <Box>
-                <Typography variant="caption" sx={{ fontSize: "0.7rem", opacity: 0.6 }}>
-                  {LOGIN.ACCESS_RESTRICTED}
-                </Typography>
-              </Box>
-              <Box sx={{ mb: 2 }}>
-                <Typography variant="caption" sx={{ fontSize: "0.75rem", opacity: 0.8 }}>
-                  © {new Date().getFullYear()} Choferes de Alquiler
-                </Typography>
-              </Box>
-            </Box>
-          </CardContent>
-        </Card>
-      </Fade>
+          <Box sx={{ position: 'absolute', bottom: 30, left: 0, right: 0, textAlign: 'center' }}>
+            <Typography variant="caption" sx={{ color: 'text.secondary' }}>
+              © {new Date().getFullYear()} Choferes de Alquiler
+            </Typography>
+          </Box>
+        </Box>
+      </Box>
     </Box>
   );
 };
