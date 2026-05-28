@@ -17,10 +17,12 @@ export const BentoGrid: React.FC<BentoGridProps> = ({ children, sx }) => {
           md: "repeat(4, 1fr)",
         },
         gridAutoRows: {
-          xs: "200px",
-          md: "280px",
+          xs: "auto",
+          md: "1fr",
         },
-        gap: 2,
+        gap: { xs: 1.5, sm: 2 },
+        flex: 1,
+        minHeight: 0,
         ...(sx as object),
       }}
     >
@@ -43,7 +45,7 @@ export interface BentoGridItemProps {
   icon?: React.ReactNode;
   sx?: SxProps<Theme>;
   colSpan?: ColSpanConfig;
-  rowSpan?: number;
+  rowSpan?: ColSpanConfig;
 }
 
 export const BentoGridItem: React.FC<BentoGridItemProps> = ({
@@ -53,7 +55,7 @@ export const BentoGridItem: React.FC<BentoGridItemProps> = ({
   icon,
   sx,
   colSpan,
-  rowSpan = 1,
+  rowSpan = {},
 }) => {
   const theme = useTheme();
   const isDark = theme.palette.mode === "dark";
@@ -65,17 +67,21 @@ export const BentoGridItem: React.FC<BentoGridItemProps> = ({
   if (colSpan?.md && colSpan.md > 1) gridColumn.md = `span ${colSpan.md}`;
   if (colSpan?.lg && colSpan.lg > 1) gridColumn.lg = `span ${colSpan.lg}`;
 
-  const rowSpanVal = rowSpan > 1 ? `span ${rowSpan}` : undefined;
+  const gridRow: Record<string, string> = {};
+  if (rowSpan.xs && rowSpan.xs > 1) gridRow.xs = `span ${rowSpan.xs}`;
+  if (rowSpan.sm && rowSpan.sm > 1) gridRow.sm = `span ${rowSpan.sm}`;
+  if (rowSpan.md && rowSpan.md > 1) gridRow.md = `span ${rowSpan.md}`;
+  if (rowSpan.lg && rowSpan.lg > 1) gridRow.lg = `span ${rowSpan.lg}`;
 
   return (
     <Box
       sx={{
         ...(Object.keys(gridColumn).length > 0 ? { gridColumn } : {}),
-        gridRow: rowSpanVal,
+        ...(Object.keys(gridRow).length > 0 ? { gridRow } : {}),
         borderRadius: "16px",
         border: `1px solid ${isDark ? "rgba(255,255,255,0.08)" : "rgba(0,0,0,0.08)"}`,
         boxShadow: "0 4px 24px rgba(0,0,0,0.08), 0 1px 2px rgba(0,0,0,0.04)",
-        p: 3,
+        p: { xs: 2, sm: 3 },
         display: "flex",
         flexDirection: "column",
         backgroundColor: theme.palette.background.paper,
