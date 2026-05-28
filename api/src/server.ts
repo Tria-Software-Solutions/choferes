@@ -137,8 +137,6 @@ app.use((req, res, next) => {
 });
 
 app.use("/api/auth", authRoutes);
-app.use("/api/health", healthRoutes);
-// Direct health route for Render monitoring (no /api prefix)
 app.use("/health", healthRoutes);
 app.use("/api/users", userRoutes);
 app.use("/api/roles", roleRoutes);
@@ -171,7 +169,18 @@ const wait = (ms: number) =>
     setTimeout(resolve, ms);
   });
 
-const startServer = async () => {
+const PORT = process.env.PORT || 5000;
+
+// Start the server IMMEDIATELY so Render can detect the open port.
+// Health checks will report 200 while we retry the DB in the background.
+const server = app.listen(PORT, () => {
+  logInfo(`API server is running on port ${PORT}`);
+});
+
+// Keep the process alive — Render's port scan only cares that
+// something is listening.
+
+const connectDatabase = async () => {
   const maxRetries = 60; // try for ~5 minutes (60 * 5s)
   const retryDelay = 5000; // 5 seconds
   let attempt = 0;
@@ -183,21 +192,19 @@ const startServer = async () => {
       // Test database connection
       await sequelize.authenticate();
       logInfo("Database connection established");
-      // Sync database models
-      await sequelize.sync();
-      logInfo("Database synchronized");
-      // Start the server
-      const PORT = process.env.PORT || 5000;
-      app.listen(PORT, () => {
-        logInfo(`API server is running on port ${PORT}`);
-      });
+      // NOTE: We intentionally do NOT call sequelize.sync() here.
+      // Schema changes are managed by migrations (sequelize-cli) during
+      // the build step. sync() can alter/drop tables in production.
       return;
     } catch (error) {
       const errorMsg = error instanceof Error ? error.message : String(error);
       logInfo(`Database connection attempt ${attempt} failed:`, errorMsg);
       if (attempt >= maxRetries) {
         logInfo("Exceeded max DB connection attempts. Exiting.");
-        process.exit(1);
+        server.close(() => {
+          process.exit(1);
+        });
+        return;
       }
       await wait(retryDelay);
     }
@@ -205,4 +212,4 @@ const startServer = async () => {
   /* eslint-enable no-await-in-loop */
 };
 
-startServer();
+connectDatabase();
