@@ -32,7 +32,6 @@ import {
   toolbarStyles,
   logoBoxStyles,
   logoImgStyles,
-  titleStyles,
   clickableBoxStyles,
   dashboardPopoverBoxStyles,
   dashboardIconButtonStyles,
@@ -152,9 +151,16 @@ const AppBarComponent: React.FC<AppBarComponentProps> = ({
           <Box sx={logoBoxStyles}>
             <Box component="img" src={logo} alt="Logo" sx={logoImgStyles} />
           </Box>
-          <Typography variant="h5" sx={titleStyles}>
-            {title}
-          </Typography>
+          <Box sx={{ display: { xs: "none", sm: "flex" }, flexDirection: "column", lineHeight: 1.1, textAlign: "center" }}>
+            <Box sx={{ fontWeight: 800, fontSize: { sm: "1.2rem", md: "1.5rem" }, letterSpacing: "0.04em", color: "#ffffff" }}>
+              {title === "Choferes de Alquiler" ? "Choferes" : title}
+            </Box>
+            {title === "Choferes de Alquiler" && (
+              <Box sx={{ fontWeight: 600, fontSize: { sm: "0.65rem", md: "0.75rem" }, color: "rgba(255,255,255,0.6)", mt: -0.25, letterSpacing: { sm: "0.25em", md: "0.3em" } }}>
+                DE ALQUILER
+              </Box>
+            )}
+          </Box>
         </Box>
 
         {/* Center - Main Navigation (desktop only) */}

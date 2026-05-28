@@ -14,6 +14,7 @@ import {
   textButtonStyles,
   buttonStyles,
   subMenuPaperStyles,
+  menuItemStyles,
 } from "./Menu.styles";
 
 export interface MenuItemProps {
@@ -105,6 +106,8 @@ const MenuComponent: React.FC<MenuComponentProps> = ({
         anchorEl={anchorEl}
         open={open}
         onClose={handleClose}
+        transformOrigin={{ horizontal: 'right', vertical: 'top' }}
+        anchorOrigin={{ horizontal: 'right', vertical: 'bottom' }}
         PaperProps={{
           sx: subMenuPaperStyles(theme),
         }}
@@ -117,6 +120,7 @@ const MenuComponent: React.FC<MenuComponentProps> = ({
                 if (!item.subMenuItems) handleClose();
               }}
               onMouseEnter={item.subMenuItems ? handleSubMenuClick : undefined}
+              sx={menuItemStyles}
             >
               {item.icon && <ListItemIcon>{item.icon}</ListItemIcon>}
               <ListItemText

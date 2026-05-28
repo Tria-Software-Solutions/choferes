@@ -322,9 +322,9 @@ const Dashboard = () => {
 
   return (
     <Box className="scrollable-content" sx={{ height: "100%", display: "flex", flexDirection: "column", overflow: "hidden", pb: 0, pt: 0, px: 0 }}>
-      <Paper elevation={0} sx={{ borderRadius: "16px", border: "1px solid rgba(0,0,0,0.08)", boxShadow: "0 4px 24px rgba(0,0,0,0.08), 0 1px 2px rgba(0,0,0,0.04)", overflow: "hidden", flex: 1, display: "flex", flexDirection: "column", mx: { xs: 1, sm: 1.5, md: 2 }, mb: 3, mt: 0 }}>
-        <Box sx={{ px: { xs: 2, sm: 3 }, py: { xs: 2, sm: 2.5 }, backgroundColor: theme.palette.background.paper, color: theme.palette.text.primary, borderBottom: `1px solid ${theme.palette.mode === "dark" ? "rgba(255,255,255,0.08)" : "rgba(0,0,0,0.08)"}` }}>
-          <Box display="flex" justifyContent="space-between" alignItems="flex-start" mb={2}>
+      <Paper elevation={0} sx={{ borderRadius: { xs: "12px", sm: "16px" }, border: "1px solid rgba(0,0,0,0.08)", boxShadow: "0 4px 24px rgba(0,0,0,0.08), 0 1px 2px rgba(0,0,0,0.04)", overflow: "hidden", flex: 1, display: "flex", flexDirection: "column", mx: { xs: 0.5, sm: 1.5, md: 2 }, mb: { xs: 1.5, sm: 3 }, mt: 0 }}>
+        <Box sx={{ px: { xs: 1.5, sm: 3 }, py: { xs: 1.5, sm: 2.5 }, backgroundColor: theme.palette.background.paper, color: theme.palette.text.primary, borderBottom: `1px solid ${theme.palette.mode === "dark" ? "rgba(255,255,255,0.08)" : "rgba(0,0,0,0.08)"}` }}>
+          <Box display="flex" justifyContent="space-between" alignItems={{ xs: "flex-start", sm: "center" }} flexDirection={{ xs: "column", sm: "row" }} gap={{ xs: 1.5, sm: 0 }} mb={2}>
             <Box display="flex" alignItems="center" gap={1.5}>
               <Box sx={{ backgroundColor: theme.palette.primary.main, borderRadius: "10px", p: 1, display: "flex", alignItems: "center", justifyContent: "center" }}>
                 <LayoutDashboard size={22} color={theme.palette.primary.contrastText} />
@@ -340,6 +340,7 @@ const Dashboard = () => {
             </Box>
             <ButtonGroup variant="outlined" size="small" sx={{
               gap: 0,
+              alignSelf: { xs: "stretch", sm: "auto" },
               "& .MuiButtonGroup-grouped": {
                 textTransform: "none", fontWeight: 600, fontSize: "0.8rem", px: 2, height: "38px",
                 border: `1px solid ${theme.palette.mode === "dark" ? "rgba(255,255,255,0.2)" : "rgba(0,0,0,0.15)"}`,
@@ -348,13 +349,13 @@ const Dashboard = () => {
                 "&.MuiButton-contained": { backgroundColor: theme.palette.primary.main, color: theme.palette.primary.contrastText, borderColor: theme.palette.primary.main, "&:hover": { backgroundColor: theme.palette.primary.dark, borderColor: theme.palette.primary.dark } },
               },
             }}>
-              <Button variant={period === "monthly" ? "contained" : "outlined"} onClick={() => setPeriod("monthly")} disableRipple disableElevation>Mensual</Button>
-              <Button variant={period === "biweekly" ? "contained" : "outlined"} onClick={() => setPeriod("biweekly")} disableRipple disableElevation>Quincenal</Button>
-              <Button variant={period === "weekly" ? "contained" : "outlined"} onClick={() => setPeriod("weekly")} disableRipple disableElevation>Semanal</Button>
+              <Button variant={period === "monthly" ? "contained" : "outlined"} onClick={() => setPeriod("monthly")} disableRipple disableElevation sx={{ flex: { xs: 1, sm: "none" } }}>Mensual</Button>
+              <Button variant={period === "biweekly" ? "contained" : "outlined"} onClick={() => setPeriod("biweekly")} disableRipple disableElevation sx={{ flex: { xs: 1, sm: "none" } }}>Quincenal</Button>
+              <Button variant={period === "weekly" ? "contained" : "outlined"} onClick={() => setPeriod("weekly")} disableRipple disableElevation sx={{ flex: { xs: 1, sm: "none" } }}>Semanal</Button>
             </ButtonGroup>
           </Box>
         </Box>
-        <Box sx={{ flex: 1, overflow: "auto", p: { xs: 2, sm: 3 } }}>
+        <Box sx={{ flex: 1, overflow: "auto", p: { xs: 2, sm: 3 }, display: "flex", flexDirection: "column" }}>
           <BentoGrid>
             <BentoGridItem
               title="Resumen del período"
@@ -366,7 +367,7 @@ const Dashboard = () => {
               title="Horas por empleado"
               description="Top empleados con más horas trabajadas"
               colSpan={{ md: 2 }}
-              rowSpan={2}
+              rowSpan={{ md: 2 }}
               header={<TopEmployeesChart data={filtered.top} />}
             />
             <BentoGridItem

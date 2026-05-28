@@ -63,7 +63,6 @@ interface VehicleBrandProps {
 }
 
 export const VehicleBrandChart = ({ data }: VehicleBrandProps) => {
-  const theme = useTheme();
 
   if (!data.length) {
     return (
@@ -73,35 +72,41 @@ export const VehicleBrandChart = ({ data }: VehicleBrandProps) => {
     );
   }
 
+  const items = data.slice(0, 8);
+
   return (
-    <Box sx={{ flex: 1, width: "100%", minHeight: 0 }}>
-      <ResponsiveContainer width="100%" height="100%">
-        <PieChart>
-          <Pie
-            data={data.slice(0, 8)}
-            dataKey="count"
-            nameKey="brand"
-            cx="50%"
-            cy="50%"
-            innerRadius={35}
-            outerRadius={60}
-            paddingAngle={2}
-            cornerRadius={4}
-          >
-            {data.slice(0, 8).map((_, i) => (
-              <Cell key={i} fill={COLORS[i % COLORS.length]} />
-            ))}
-          </Pie>
-          <Tooltip
-            contentStyle={{
-              backgroundColor: theme.palette.mode === "dark" ? "#1f2937" : "#fff",
-              border: `1px solid ${theme.palette.mode === "dark" ? "#374151" : "#e5e7eb"}`,
-              borderRadius: 8,
-              fontSize: 12,
-            }}
-          />
-        </PieChart>
-      </ResponsiveContainer>
+    <Box sx={{ flex: 1, display: "flex", gap: 1.5, minHeight: 0 }}>
+      <Box sx={{ width: "45%", minHeight: 0, flexShrink: 0 }}>
+        <ResponsiveContainer width="100%" height="100%">
+          <PieChart>
+            <Pie
+              data={items}
+              dataKey="count"
+              nameKey="brand"
+              cx="50%"
+              cy="50%"
+              innerRadius={22}
+              outerRadius={38}
+              paddingAngle={2}
+              cornerRadius={4}
+            >
+              {items.map((_, i) => (
+                <Cell key={i} fill={COLORS[i % COLORS.length]} />
+              ))}
+            </Pie>
+          </PieChart>
+        </ResponsiveContainer>
+      </Box>
+      <Box sx={{ flex: 1, display: "flex", flexDirection: "column", gap: 0.5, justifyContent: "center", minHeight: 0, overflow: "hidden", alignItems: "flex-end" }}>
+        {items.map((item, i) => (
+          <Box key={item.brand} sx={{ display: "flex", alignItems: "center", gap: 0.5 }}>
+            <Box sx={{ fontSize: "0.7rem", fontWeight: 500, color: "text.primary", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", textAlign: "right" }}>
+              {item.brand}
+            </Box>
+            <Box sx={{ width: 8, height: 8, borderRadius: "2px", backgroundColor: COLORS[i % COLORS.length], flexShrink: 0 }} />
+          </Box>
+        ))}
+      </Box>
     </Box>
   );
 };
@@ -228,12 +233,13 @@ export const PeriodSummary = ({ employeeCount, totalHours, overtimeCount, period
   ];
 
   return (
-    <Box sx={{ display: "flex", gap: 2, flex: 1, alignItems: "center" }}>
+    <Box sx={{ display: "flex", gap: { xs: 1, sm: 2 }, flex: 1, alignItems: "center", flexWrap: "wrap" }}>
       {stats.map((s) => (
         <Box
           key={s.label}
           sx={{
-            flex: 1,
+            flex: { xs: "1 1 calc(50% - 8px)", sm: 1 },
+            minWidth: { xs: 0, sm: 0 },
             display: "flex",
             flexDirection: "column",
             alignItems: "center",
@@ -244,7 +250,7 @@ export const PeriodSummary = ({ employeeCount, totalHours, overtimeCount, period
             border: `1px solid ${isDark ? "rgba(255,255,255,0.06)" : "rgba(0,0,0,0.06)"}`,
           }}
         >
-          <Box sx={{ fontSize: "1.5rem", fontWeight: 800, color: s.color, lineHeight: 1.2, letterSpacing: "-0.02em" }}>
+          <Box sx={{ fontSize: { xs: "1.1rem", sm: "1.5rem" }, fontWeight: 800, color: s.color, lineHeight: 1.2, letterSpacing: "-0.02em" }}>
             {s.value}{s.suffix || ""}
           </Box>
           <Box sx={{ fontSize: "0.7rem", fontWeight: 500, color: "text.secondary", textAlign: "center", mt: 0.25, textTransform: "uppercase", letterSpacing: "0.04em" }}>
