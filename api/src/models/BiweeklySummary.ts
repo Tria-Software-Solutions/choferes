@@ -53,6 +53,13 @@ BiweeklySummary.init(
     sequelize,
     modelName: "BiweeklySummary",
     tableName: "biweekly_summary",
+    indexes: [
+      {
+        unique: true,
+        fields: ["employeeId", "biweekNumber", "year"],
+        name: "biweekly_summary_employeeId_biweekNumber_year_key",
+      },
+    ],
   },
 );
 

@@ -33,9 +33,6 @@ import {
   logoBoxStyles,
   logoImgStyles,
   clickableBoxStyles,
-  dashboardPopoverBoxStyles,
-  dashboardIconButtonStyles,
-  dashboardIconStyles,
   notificationsIconButtonStyles,
   dividerStyles,
   userBoxStyles,
@@ -44,7 +41,6 @@ import {
   userMenuIconButtonStyles,
   userAvatarStyles,
   mobileDividerStyles,
-  dashboardNoLinksBoxStyles,
 } from "./AppBar.styles";
 
 interface Link {
@@ -226,49 +222,72 @@ const AppBarComponent: React.FC<AppBarComponentProps> = ({
               anchorOrigin={{ vertical: "bottom", horizontal: "center" }}
               transformOrigin={{ vertical: "top", horizontal: "center" }}
               PaperProps={{
+                elevation: 0,
                 sx: {
-                  background: "transparent",
-                  boxShadow: "none",
-                  border: "none",
-                  p: 0,
-                  minWidth: 0,
-                  overflow: "visible",
+                  width: 260,
+                  mt: 0.5,
+                  background: theme.palette.mode === 'dark'
+                    ? 'rgba(30,30,35,0.95)'
+                    : '#ffffff',
+                  backdropFilter: 'blur(20px)',
+                  border: 'none',
+                  borderRadius: '16px',
+                  boxShadow: theme.palette.mode === 'dark'
+                    ? '0 10px 40px rgba(0,0,0,0.4), 0 2px 8px rgba(0,0,0,0.2)'
+                    : '0 10px 40px rgba(0,0,0,0.15), 0 2px 8px rgba(0,0,0,0.1)',
+                  overflow: 'hidden',
+                  padding: 0,
                 },
               }}
               TransitionComponent={Grow}
               TransitionProps={{ timeout: 200 }}
               keepMounted
             >
-              <Box sx={dashboardPopoverBoxStyles}>
+              <Box>
                 {links.length === 0 ? (
-                  <Box sx={dashboardNoLinksBoxStyles}>
+                  <Box sx={{ p: 2, textAlign: 'center', color: theme.palette.text.secondary, fontSize: '0.85rem' }}>
                     {APPBAR_MENU.NO_LINKS}
                   </Box>
                 ) : (
-                  links.map((link) => (
-                    <IconButton
-                      key={link.label}
-                      onClick={() => {
-                        handleDashboardMenuClose();
-                        link.path && navigate(link.path);
-                      }}
-                      sx={dashboardIconButtonStyles(
-                        isActivePage(link.path || ""),
-                      )}
-                    >
-                      {React.cloneElement(link.icon as React.ReactElement, {
-                        sx: {
-                          ...dashboardIconStyles(
-                            isActivePage(link.path || ""),
-                          ),
-                          color: isActivePage(link.path || "")
+                  <Box sx={{ display: 'flex', gap: 0.5, p: 1.5, alignItems: 'center', justifyContent: 'center' }}>
+                    {links.map((link) => (
+                      <Box
+                        key={link.label}
+                        onClick={() => {
+                          handleDashboardMenuClose();
+                          link.path && navigate(link.path);
+                        }}
+                        sx={{
+                          display: 'flex',
+                          p: 1,
+                          borderRadius: '12px',
+                          cursor: 'pointer',
+                          transition: 'all 0.2s cubic-bezier(0.4, 0, 0.2, 1)',
+                          backgroundColor: isActivePage(link.path || '')
+                            ? theme.palette.mode === 'dark'
+                              ? 'rgba(255,255,255,0.15)'
+                              : 'rgba(0,0,0,0.08)'
+                            : 'transparent',
+                          '&:hover': {
+                            backgroundColor: theme.palette.mode === 'dark'
+                              ? 'rgba(255,255,255,0.08)'
+                              : 'rgba(0,0,0,0.04)',
+                          },
+                        }}
+                      >
+                        <Box sx={{
+                          color: isActivePage(link.path || '')
                             ? theme.palette.primary.main
-                            : theme.palette.text.primary,
-                          opacity: isActivePage(link.path || "") ? 1 : 0.7,
-                        },
-                      })}
-                    </IconButton>
-                  ))
+                            : theme.palette.text.secondary,
+                          display: 'flex',
+                          opacity: isActivePage(link.path || '') ? 1 : 0.6,
+                          transition: 'all 0.2s ease',
+                        }}>
+                          {link.icon}
+                        </Box>
+                      </Box>
+                    ))}
+                  </Box>
                 )}
               </Box>
             </Popover>

@@ -47,6 +47,13 @@ MonthlySummary.init(
     sequelize,
     modelName: "MonthlySummary",
     tableName: "monthly_summary",
+    indexes: [
+      {
+        unique: true,
+        fields: ["employeeId", "month", "year"],
+        name: "monthly_summary_employeeId_month_year_key",
+      },
+    ],
   },
 );
 

@@ -76,7 +76,7 @@ export const VehicleBrandChart = ({ data }: VehicleBrandProps) => {
 
   return (
     <Box sx={{ flex: 1, display: "flex", gap: 1.5, minHeight: 0 }}>
-      <Box sx={{ width: "45%", minHeight: 0, flexShrink: 0 }}>
+      <Box sx={{ width: "45%", height: "100%", minHeight: 0, flexShrink: 0, minWidth: 0 }}>
         <ResponsiveContainer width="100%" height="100%">
           <PieChart>
             <Pie
@@ -130,7 +130,7 @@ export const DailyAttendanceChart = ({ data }: DailyAttendanceProps) => {
   }
 
   return (
-    <Box sx={{ flex: 1, width: "100%", minHeight: 0 }}>
+    <Box sx={{ flex: 1, width: "100%", height: "100%", minHeight: 0 }}>
       <ResponsiveContainer width="100%" height="100%">
         <LineChart data={ordered} margin={{ left: 5, right: 5, top: 5, bottom: 5 }}>
           <XAxis dataKey="day" tick={{ fontSize: 10, fill: isDark ? "#9ca3af" : "#6b7280" }} axisLine={false} tickLine={false} />
