@@ -58,7 +58,11 @@ export const authenticateUser = async (identifier: string, password: string, res
       throw error;
     }
 
-    // Re-throw as a generic error
+    // Log unknown errors and re-throw as generic
+    console.error(
+      "[authenticateUser] Unexpected error:",
+      error instanceof Error ? error.message : error,
+    );
     throw new Error("Authentication service error");
   }
 };
