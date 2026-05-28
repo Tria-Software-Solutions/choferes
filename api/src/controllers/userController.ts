@@ -63,6 +63,10 @@ export const authenticateUser = async (req: Request, res: Response) => {
         });
       }
     }
+    console.error(
+      "[authenticateUser] Unhandled error:",
+      error instanceof Error ? error.message : error,
+    );
     return res.status(500).json({
       message: "Error interno del servidor",
       details: "Ocurrió un error inesperado durante la autenticación",
