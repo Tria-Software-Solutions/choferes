@@ -165,24 +165,44 @@ function logInfo(...args: unknown[]): void {
   console.error(...args);
 }
 
-// Database connection and server startup
+// Database connection with retry logic and server startup
+const wait = (ms: number) =>
+  new Promise((resolve) => {
+    setTimeout(resolve, ms);
+  });
+
 const startServer = async () => {
-  try {
-    // Test database connection
-    await sequelize.authenticate();
-    logInfo("Database connection established");
-    // Sync database models
-    await sequelize.sync();
-    logInfo("Database synchronized");
-    // Start the server
-    const PORT = process.env.PORT || 5000;
-    app.listen(PORT, () => {
-      logInfo(`API server is running on port ${PORT}`);
-    });
-  } catch (error) {
-    logInfo("Failed to start server:", error);
-    process.exit(1);
+  const maxRetries = 60; // try for ~5 minutes (60 * 5s)
+  const retryDelay = 5000; // 5 seconds
+  let attempt = 0;
+
+  /* eslint-disable no-await-in-loop */
+  while (attempt < maxRetries) {
+    try {
+      attempt += 1;
+      // Test database connection
+      await sequelize.authenticate();
+      logInfo("Database connection established");
+      // Sync database models
+      await sequelize.sync();
+      logInfo("Database synchronized");
+      // Start the server
+      const PORT = process.env.PORT || 5000;
+      app.listen(PORT, () => {
+        logInfo(`API server is running on port ${PORT}`);
+      });
+      return;
+    } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error);
+      logInfo(`Database connection attempt ${attempt} failed:`, errorMsg);
+      if (attempt >= maxRetries) {
+        logInfo("Exceeded max DB connection attempts. Exiting.");
+        process.exit(1);
+      }
+      await wait(retryDelay);
+    }
   }
+  /* eslint-enable no-await-in-loop */
 };
 
 startServer();

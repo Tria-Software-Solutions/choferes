@@ -111,3 +111,6 @@ jspm_packages/
 # Temporary folders
 tmp/
 temp/
+
+# Cookies and session files
+cookies.txt

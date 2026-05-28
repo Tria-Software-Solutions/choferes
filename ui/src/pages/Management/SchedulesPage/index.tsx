@@ -318,7 +318,8 @@ const SchedulesPage: React.FC = () => {
           display: "flex",
           flexDirection: "column",
           mx: { xs: 1, sm: 1.5, md: 2 },
-          my: 0,
+          mb: 3,
+          mt: 0,
         }}
       >
         {/* Header Section */}

@@ -574,7 +574,7 @@ const SelectorTableComponent: React.FC<SelectorTableProps> = ({
                     },
                   }),
               "& .MuiTableCell-stickyHeader": {
-                backgroundColor: "#000000",
+                backgroundColor: theme.palette.mode === "dark" ? "#232323" : "#000000",
                 color: "#fff",
                 zIndex: 15,
                 position: "sticky",
@@ -585,13 +585,13 @@ const SelectorTableComponent: React.FC<SelectorTableProps> = ({
               },
             }}
           >
-            <TableHead ref={tableHeadRef} sx={{ height: "36px", position: "sticky", top: 0, zIndex: 50, backgroundColor: "#000", border: "none !important", "& th": { border: "none !important" } }}>
+            <TableHead ref={tableHeadRef} sx={{ height: "36px", position: "sticky", top: 0, zIndex: 50, backgroundColor: theme.palette.mode === "dark" ? "#232323" : "#000", border: "none !important", "& th": { border: "none !important" } }}>
               <TableRow>
                 <TableCell
                   className="employee-column"
                   sx={{
                     ...employeeColumnCellStyles(isSmallScreen),
-                    backgroundColor: "#000000",
+                    backgroundColor: theme.palette.mode === "dark" ? "#232323" : "#000000",
                     color: "#fff",
                     position: "sticky",
                     left: 0,
@@ -602,7 +602,7 @@ const SelectorTableComponent: React.FC<SelectorTableProps> = ({
                     cursor: "pointer",
                     transition: "background-color 0.2s ease",
                     "&:hover": {
-                      backgroundColor: "#333",
+                      backgroundColor: theme.palette.mode === "dark" ? "#3a3a3a" : "#333",
                     },
                   }}
                 >

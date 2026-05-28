@@ -1358,7 +1358,8 @@ const RolesPage: React.FC = () => {
             borderRadius: "16px",
             boxShadow: "0 4px 24px rgba(0,0,0,0.08), 0 1px 2px rgba(0,0,0,0.04)",
             mx: { xs: 1, sm: 1.5, md: 2 },
-            my: 0,
+            mb: 3,
+            mt: 0,
           }}
         >
           {/* Premium Header with light background */}

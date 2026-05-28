@@ -43,10 +43,9 @@ export const hasWorkedCurrenWeeklySummary = async (
   return !!summary;
 };
 
-// Create a new weekly summary
+// Create a new weekly summary (upserts on unique constraint conflict)
 export const createWeeklySummary = async (data: Omit<WeeklySummary, "id">) => {
-  const newWeeklySummary = await WeeklySummary.create(data);
-  await newWeeklySummary.reload();
+  const [newWeeklySummary] = await WeeklySummary.upsert(data);
   return newWeeklySummary;
 };
 

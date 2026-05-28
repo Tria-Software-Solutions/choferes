@@ -297,10 +297,14 @@ export const passwordTextFieldStyles: SxProps<Theme> = (theme) => ({
 
 export const passwordIconButtonStyles: SxProps<Theme> = {
   color: "#666666",
-  width: "36px",
-  height: "36px",
-  padding: "8px",
+  width: "28px",
+  height: "28px",
+  padding: "4px",
+  mr: 0.1,
   overflow: "hidden",
+  "& .MuiSvgIcon-root": {
+    fontSize: "18px",
+  },
   "&:hover": {
     color: "#000000",
     backgroundColor: "transparent",

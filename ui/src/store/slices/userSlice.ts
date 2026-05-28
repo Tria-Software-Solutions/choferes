@@ -4,7 +4,7 @@ import * as UserRoleService from "../../services/userRoleService";
 import { User } from "../../models/User";
 import { UserRole } from "../../models/UserRole";
 import { RootState } from "../store";
-import { Roles } from "../../enums/roles";
+import { Roles } from "../../constants/roles";
 
 // userSlice manages the state and async logic for user data
 // Includes fetching, creating, updating, and deleting users, as well as user permissions and roles

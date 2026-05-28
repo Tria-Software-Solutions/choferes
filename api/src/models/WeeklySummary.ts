@@ -53,6 +53,13 @@ WeeklySummary.init(
     sequelize,
     modelName: "WeeklySummary",
     tableName: "weekly_summary",
+    indexes: [
+      {
+        unique: true,
+        fields: ["employeeId", "weekNumber", "year"],
+        name: "weekly_summary_employeeId_weekNumber_year_key",
+      },
+    ],
   },
 );
 
