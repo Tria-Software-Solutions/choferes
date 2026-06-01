@@ -63,6 +63,8 @@ interface VehicleBrandProps {
 }
 
 export const VehicleBrandChart = ({ data }: VehicleBrandProps) => {
+  const theme = useTheme();
+  const isDark = theme.palette.mode === "dark";
 
   if (!data.length) {
     return (
@@ -76,7 +78,7 @@ export const VehicleBrandChart = ({ data }: VehicleBrandProps) => {
 
   return (
     <Box sx={{ flex: 1, display: "flex", gap: 1.5, minHeight: 0 }}>
-      <Box sx={{ width: "45%", height: "100%", minHeight: 0, flexShrink: 0, minWidth: 0 }}>
+      <Box sx={{ width: "50%", height: "100%", minHeight: 0, flexShrink: 0, minWidth: 0 }}>
         <ResponsiveContainer width="100%" height="100%">
           <PieChart>
             <Pie
@@ -85,8 +87,8 @@ export const VehicleBrandChart = ({ data }: VehicleBrandProps) => {
               nameKey="brand"
               cx="50%"
               cy="50%"
-              innerRadius={22}
-              outerRadius={38}
+              innerRadius={28}
+              outerRadius={48}
               paddingAngle={2}
               cornerRadius={4}
             >
@@ -94,13 +96,22 @@ export const VehicleBrandChart = ({ data }: VehicleBrandProps) => {
                 <Cell key={i} fill={COLORS[i % COLORS.length]} />
               ))}
             </Pie>
+            <Tooltip
+              contentStyle={{
+                backgroundColor: isDark ? "#1f2937" : "#fff",
+                border: `1px solid ${isDark ? "#374151" : "#e5e7eb"}`,
+                borderRadius: 8,
+                fontSize: 12,
+              }}
+              formatter={(value: number, name: string) => [`${value} vehículos`, name]}
+            />
           </PieChart>
         </ResponsiveContainer>
       </Box>
-      <Box sx={{ flex: 1, display: "flex", flexDirection: "column", gap: 0.5, justifyContent: "center", minHeight: 0, overflow: "hidden", alignItems: "flex-end" }}>
+      <Box sx={{ flex: 1, display: "flex", flexDirection: "column", gap: 0.5, justifyContent: "center", minHeight: 0, alignItems: "flex-end" }}>
         {items.map((item, i) => (
-          <Box key={item.brand} sx={{ display: "flex", alignItems: "center", gap: 0.5 }}>
-            <Box sx={{ fontSize: "0.7rem", fontWeight: 500, color: "text.primary", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", textAlign: "right" }}>
+          <Box key={item.brand} sx={{ display: "flex", alignItems: "center", gap: 0.5, textAlign: "right" }}>
+            <Box sx={{ fontSize: "0.7rem", fontWeight: 500, color: "text.primary", lineHeight: 1.3, wordBreak: "break-word" }}>
               {item.brand}
             </Box>
             <Box sx={{ width: 8, height: 8, borderRadius: "2px", backgroundColor: COLORS[i % COLORS.length], flexShrink: 0 }} />

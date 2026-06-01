@@ -13,5 +13,7 @@ COPY package*.json ./
 RUN npm ci --production
 COPY --from=builder /usr/src/app/dist ./dist
 COPY src/config/config.js ./dist/config/config.js
+COPY --from=builder /usr/src/app/src/migrations ./dist/src/migrations
+COPY .sequelizerc ./
 EXPOSE 5000
 CMD ["node", "dist/src/server.js"]
