@@ -8,7 +8,7 @@ import LOGIN from '../../../constants/login.constants';
 import carSvg from '../../../assets/images/car.svg';
 import logo from '../../../assets/images/logo.png';
 import DotField from '../../../components/DotField/DotField';
-import TypewriterEffect from '../../../components/Typewriter/Typewriter';
+
 import {
   wrapper,
   split,
@@ -122,15 +122,10 @@ const Login: React.FC = () => {
                 lineHeight: 1.2,
                 mb: 1.5,
                 color: '#ffffff',
+                fontFamily: "'Urbanist', -apple-system, BlinkMacSystemFont, sans-serif",
               }}
             >
-              <TypewriterEffect
-                words={[
-                  { text: 'Gestión' },
-                  { text: 'de' },
-                  { text: 'Choferes' },
-                ]}
-              />
+              Gestión de Choferes
             </Typography>
             <Typography
               sx={{
@@ -232,9 +227,40 @@ const Login: React.FC = () => {
             )}
           </Box>
 
-          <Box sx={{ position: 'absolute', bottom: 30, left: 0, right: 0, textAlign: 'center' }}>
-            <Typography variant="caption" sx={{ color: 'text.secondary' }}>
-              © {new Date().getFullYear()} Choferes de Alquiler
+          <Box
+            sx={{
+              position: 'absolute',
+              bottom: 0,
+              left: 0,
+              right: 0,
+              textAlign: 'center',
+              py: 1.25,
+              px: 3,
+              background: 'rgba(0,0,0,0.015)',
+              backdropFilter: 'blur(4px)',
+              borderTop: '1px solid rgba(0,0,0,0.04)',
+            }}
+          >
+            <Typography
+              variant="caption"
+              sx={{
+                color: 'rgba(0,0,0,0.4)',
+                fontFamily: "'Urbanist', -apple-system, BlinkMacSystemFont, sans-serif",
+                fontSize: '0.6rem',
+                letterSpacing: '0.04em',
+                fontWeight: 400,
+              }}
+            >
+              Powered by{' '}
+              <Box
+                component="span"
+                sx={{ fontWeight: 600, color: 'rgba(0,0,0,0.55)', transition: 'color 0.2s', cursor: 'pointer', '&:hover': { color: 'rgba(0,0,0,0.75)' } }}
+                onClick={() => window.open('https://triacr.com', '_blank', 'noopener noreferrer')}
+              >
+                Tria
+              </Box>
+              {'  ·  '}
+              &copy; {new Date().getFullYear()} Choferes de Alquiler
             </Typography>
           </Box>
         </Box>

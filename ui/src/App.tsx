@@ -208,80 +208,118 @@ const AppContent: React.FC = () => {
           flexDirection: "column",
         }}
       >
-        <Suspense fallback={<PageLoader />}>
-          <Routes>
-          <Route
-            path="/"
-            element={
-              currentUser ? (
-                <Navigate to={getDefaultRoute(safeUserPermissions)} />
-              ) : (
-                <Login />
-              )
-            }
-          />
-                    <Route element={<ProtectedRoute />}>
+        <Box sx={{ flex: 1, overflow: "auto" }}>
+          <Suspense fallback={<PageLoader />}>
+            <Routes>
             <Route
-              path="/courier-service"
+              path="/"
               element={
-                safeUserPermissions.includes(
-                  PERMISSIONS.VIEW_COURIER_SERVICE,
-                ) ? (
-                  <CourierServicePage />
+                currentUser ? (
+                  <Navigate to={getDefaultRoute(safeUserPermissions)} />
                 ) : (
-                  <Navigate to="/forbidden" replace />
+                  <Login />
                 )
               }
             />
-            <Route
-              path="/roles"
-              element={
-                safeUserPermissions.includes(PERMISSIONS.VIEW_ROLES) ? (
-                  <RolesPage />
-                ) : (
-                  <Navigate to="/forbidden" replace />
-                )
-              }
-            />
-            <Route
-              path="/employees"
-              element={
-                safeUserPermissions.includes(PERMISSIONS.VIEW_EMPLOYEES) ? (
-                  <EmployeesPage />
-                ) : (
-                  <Navigate to="/forbidden" replace />
-                )
-              }
-            />
-            <Route
-              path="/schedules"
-              element={
-                safeUserPermissions.includes(PERMISSIONS.VIEW_SCHEDULES) ? (
-                  <SchedulesPage />
-                ) : (
-                  <Navigate to="/forbidden" replace />
-                )
-              }
-            />
-            <Route
-              path="/vehicles"
-              element={
-                safeUserPermissions.includes(PERMISSIONS.VIEW_VEHICLES) ? (
-                  <VehiclesPage />
-                ) : (
-                  <Navigate to="/forbidden" replace />
-                )
-              }
-            />
-            <Route path="/dashboard" element={<Dashboard />} />
-            <Route path="/profile" element={<Profile />} />
-          </Route>
-          <Route path="/forbidden" element={<Forbidden />} />
-          <Route path="*" element={<NotFound />} />
-          <Route path="/error" element={<ErrorPage />} />
-          <Route path="/session-expired" element={<SessionExpired />} />
-        </Routes>
-        </Suspense>
+                      <Route element={<ProtectedRoute />}>
+              <Route
+                path="/courier-service"
+                element={
+                  safeUserPermissions.includes(
+                    PERMISSIONS.VIEW_COURIER_SERVICE,
+                  ) ? (
+                    <CourierServicePage />
+                  ) : (
+                    <Navigate to="/forbidden" replace />
+                  )
+                }
+              />
+              <Route
+                path="/roles"
+                element={
+                  safeUserPermissions.includes(PERMISSIONS.VIEW_ROLES) ? (
+                    <RolesPage />
+                  ) : (
+                    <Navigate to="/forbidden" replace />
+                  )
+                }
+              />
+              <Route
+                path="/employees"
+                element={
+                  safeUserPermissions.includes(PERMISSIONS.VIEW_EMPLOYEES) ? (
+                    <EmployeesPage />
+                  ) : (
+                    <Navigate to="/forbidden" replace />
+                  )
+                }
+              />
+              <Route
+                path="/schedules"
+                element={
+                  safeUserPermissions.includes(PERMISSIONS.VIEW_SCHEDULES) ? (
+                    <SchedulesPage />
+                  ) : (
+                    <Navigate to="/forbidden" replace />
+                  )
+                }
+              />
+              <Route
+                path="/vehicles"
+                element={
+                  safeUserPermissions.includes(PERMISSIONS.VIEW_VEHICLES) ? (
+                    <VehiclesPage />
+                  ) : (
+                    <Navigate to="/forbidden" replace />
+                  )
+                }
+              />
+              <Route path="/dashboard" element={<Dashboard />} />
+              <Route path="/profile" element={<Profile />} />
+            </Route>
+            <Route path="/forbidden" element={<Forbidden />} />
+            <Route path="*" element={<NotFound />} />
+            <Route path="/error" element={<ErrorPage />} />
+            <Route path="/session-expired" element={<SessionExpired />} />
+          </Routes>
+          </Suspense>
+        </Box>
+        {!isHideAppBar && (
+          <Box
+            component="footer"
+            sx={{
+              flexShrink: 0,
+              textAlign: "center",
+              py: 1.25,
+              px: 3,
+              background: "rgba(0,0,0,0.015)",
+              backdropFilter: "blur(4px)",
+              borderTop: "1px solid rgba(0,0,0,0.04)",
+              fontFamily: "'Urbanist', -apple-system, BlinkMacSystemFont, sans-serif",
+              fontSize: "0.6rem",
+              letterSpacing: "0.04em",
+              fontWeight: 400,
+              color: "rgba(0,0,0,0.4)",
+            }}
+          >
+            Powered by{" "}
+            <Box
+              component="span"
+              sx={{
+                fontWeight: 600,
+                color: "rgba(0,0,0,0.55)",
+                transition: "color 0.2s",
+                cursor: "pointer",
+                "&:hover": { color: "rgba(0,0,0,0.75)" },
+              }}
+              onClick={() => window.open("https://triacr.com", "_blank", "noopener noreferrer")}
+            >
+              Tria
+            </Box>
+            {'  ·  '}
+            &copy; {new Date().getFullYear()} Choferes de Alquiler
+          </Box>
+        )}
       </Container>
     </Box>
   );
