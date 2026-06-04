@@ -8,6 +8,8 @@ export class Employee extends Model {
   public firstName!: string; // Employee's first name
 
   public lastName!: string; // Employee's last name
+
+  public email!: string; // Employee's email address
 }
 
 Employee.init(
@@ -24,6 +26,10 @@ Employee.init(
     lastName: {
       type: DataTypes.STRING,
       allowNull: false,
+    },
+    email: {
+      type: DataTypes.STRING,
+      allowNull: true,
     },
   },
   {

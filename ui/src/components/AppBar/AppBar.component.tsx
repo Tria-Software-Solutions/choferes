@@ -18,6 +18,7 @@ import {
   ListItemText,
   Popover,
   Grow,
+  Tooltip,
 } from "@mui/material";
 import { useNavigate, useLocation } from "react-router-dom";
 import { useAuthContext } from "../../context/AuthContext";
@@ -177,7 +178,7 @@ const AppBarComponent: React.FC<AppBarComponentProps> = ({
                 color: "#ffffff",
                 cursor: "pointer",
                 p: 1,
-                borderRadius: "12px",
+                borderRadius: "16px",
                 minWidth: "48px",
                 height: "48px",
                 backgroundColor: Boolean(dashboardMenuAnchor) 
@@ -243,7 +244,7 @@ const AppBarComponent: React.FC<AppBarComponentProps> = ({
               TransitionProps={{ timeout: 200 }}
               keepMounted
             >
-              <Box>
+              <Box sx={{ borderRadius: '16px', overflow: 'hidden' }}>
                 {links.length === 0 ? (
                   <Box sx={{ p: 2, textAlign: 'center', color: theme.palette.text.secondary, fontSize: '0.85rem' }}>
                     {APPBAR_MENU.NO_LINKS}
@@ -251,8 +252,26 @@ const AppBarComponent: React.FC<AppBarComponentProps> = ({
                 ) : (
                   <Box sx={{ display: 'flex', gap: 0.5, p: 1.5, alignItems: 'center', justifyContent: 'center' }}>
                     {links.map((link) => (
-                      <Box
+                      <Tooltip
                         key={link.label}
+                        title={link.label}
+                        placement="bottom"
+                        arrow={false}
+                        componentsProps={{
+                          tooltip: {
+                            sx: {
+                              borderRadius: '16px',
+                              backgroundColor: '#000000',
+                              color: '#ffffff',
+                              fontSize: '0.75rem',
+                              fontWeight: 500,
+                              padding: '6px 12px',
+                              boxShadow: '0 10px 40px rgba(0,0,0,0.15), 0 2px 8px rgba(0,0,0,0.1)',
+                            },
+                          },
+                        }}
+                      >
+                      <Box
                         onClick={() => {
                           handleDashboardMenuClose();
                           link.path && navigate(link.path);
@@ -260,9 +279,9 @@ const AppBarComponent: React.FC<AppBarComponentProps> = ({
                         sx={{
                           display: 'flex',
                           p: 1,
-                          borderRadius: '12px',
+                          borderRadius: '16px',
                           cursor: 'pointer',
-                          transition: 'all 0.2s cubic-bezier(0.4, 0, 0.2, 1)',
+                          transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
                           backgroundColor: isActivePage(link.path || '')
                             ? theme.palette.mode === 'dark'
                               ? 'rgba(255,255,255,0.15)'
@@ -272,6 +291,7 @@ const AppBarComponent: React.FC<AppBarComponentProps> = ({
                             backgroundColor: theme.palette.mode === 'dark'
                               ? 'rgba(255,255,255,0.08)'
                               : 'rgba(0,0,0,0.04)',
+                            transform: 'scale(1.15)',
                           },
                         }}
                       >
@@ -286,6 +306,7 @@ const AppBarComponent: React.FC<AppBarComponentProps> = ({
                           {link.icon}
                         </Box>
                       </Box>
+                      </Tooltip>
                     ))}
                   </Box>
                 )}
@@ -417,13 +438,11 @@ const AppBarComponent: React.FC<AppBarComponentProps> = ({
                 ? 'rgba(30, 30, 35, 0.95)'
                 : '#ffffff',
               backdropFilter: "blur(20px)",
-              border: theme.palette.mode === 'dark'
-                ? "1px solid rgba(255,255,255,0.15)"
-                : "1px solid rgba(0,0,0,0.15)",
-              borderRadius: 2,
+              border: 'none',
+              borderRadius: '16px',
               boxShadow: theme.palette.mode === 'dark'
-                ? "0 8px 32px rgba(0,0,0,0.4)"
-                : "0 8px 32px rgba(0,0,0,0.25)",
+                ? '0 10px 40px rgba(0,0,0,0.4), 0 2px 8px rgba(0,0,0,0.2)'
+                : '0 10px 40px rgba(0,0,0,0.15), 0 2px 8px rgba(0,0,0,0.1)',
               overflow: 'hidden',
               padding: 0,
             },

@@ -72,6 +72,8 @@ const FORMS = {
     FIRST_NAME_PLACEHOLDER: "Ej: Juan Carlos",
     LAST_NAME_LABEL: "Apellido",
     LAST_NAME_PLACEHOLDER: "Ej: Pérez González",
+    EMAIL_LABEL: "Correo Electrónico",
+    EMAIL_PLACEHOLDER: "Ej: juan.perez@empresa.com",
     BUTTON_ADD: "Agregar",
     BUTTON_ADDING: "Agregando...",
   },
