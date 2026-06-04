@@ -6,12 +6,12 @@ export const wrapper: SxProps<Theme> = {
   display: "flex",
   alignItems: "center",
   justifyContent: "center",
-  background: "#242438",
-  color: "#ffffff",
+  background: "#f4f5f7",
+  color: "#1a1a2e",
   position: "relative",
   overflow: "hidden",
   "& .MuiTypography-root": {
-    color: "#ffffff",
+    color: "#1a1a2e",
   },
 };
 
@@ -46,7 +46,7 @@ export const titleStyles: SxProps<Theme> = {
 export const subtitleStyles: SxProps<Theme> = {
   fontSize: { xs: "0.95rem", md: "1.05rem" },
   fontWeight: 600,
-  opacity: 0.8,
+  opacity: 0.85,
   mb: 1.5,
   lineHeight: 1.5,
 };
@@ -54,7 +54,7 @@ export const subtitleStyles: SxProps<Theme> = {
 export const descriptionStyles: SxProps<Theme> = {
   fontSize: { xs: "0.85rem", md: "0.95rem" },
   fontWeight: 400,
-  opacity: 0.5,
+  opacity: 0.65,
   lineHeight: 1.7,
   maxWidth: 480,
   mb: { xs: 3, sm: 4 },
@@ -87,17 +87,17 @@ export const secondaryButtonStyles: SxProps<Theme> = {
   py: { xs: 1.25, sm: 1.5 },
   borderRadius: "8px",
   textTransform: "none",
-  color: "#ffffff",
-  borderColor: "rgba(255,255,255,0.3)",
+  color: "#1a1a2e",
+  borderColor: "rgba(0,0,0,0.2)",
   "&:hover": {
-    borderColor: "rgba(255,255,255,0.6)",
-    backgroundColor: "rgba(255,255,255,0.05)",
+    borderColor: "rgba(0,0,0,0.5)",
+    backgroundColor: "rgba(0,0,0,0.04)",
   },
 };
 
 export const captionStyles: SxProps<Theme> = {
   mt: { xs: 3, sm: 4 },
   display: "block",
-  opacity: 0.4,
+  opacity: 0.55,
   fontSize: { xs: "0.7rem", sm: "0.75rem" },
 };

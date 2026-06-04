@@ -7,7 +7,7 @@ import {
   useMediaQuery,
   Typography,
 } from "@mui/material";
-import { Plus, X, User, Info } from "lucide-react";
+import { Plus, X, User, Info, Mail } from "lucide-react";
 import TextfieldComponent from "../../../components/Textfield/Textfield.component";
 import { FORMS } from "../../../constants/constants";
 import {
@@ -25,7 +25,7 @@ import {
 } from "./styles";
 
 interface AddEmployeeFormProps {
-  onSubmit: (employee: { firstName: string; lastName: string }) => void;
+  onSubmit: (employee: { firstName: string; lastName: string; email?: string }) => void;
   onCancel?: () => void;
   isLoading?: boolean;
 }
@@ -41,15 +41,25 @@ const AddEmployeeForm: React.FC<AddEmployeeFormProps> = ({
   const [formData, setFormData] = useState({
     firstName: "",
     lastName: "",
+    email: "",
   });
   const [errors, setErrors] = useState({
     firstName: "",
     lastName: "",
+    email: "",
   });
+
+  const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
 
   // Main hook for the employee form
   // Validación de campos del formulario
   const validateField = (name: string, value: string) => {
+    if (name === "email") {
+      if (!value.trim()) return "";
+      if (!emailRegex.test(value)) return FORMS.EMAIL_FORMAT;
+      return "";
+    }
+
     const nameRegex = /^[a-zA-ZáéíóúÁÉÍÓÚñÑüÜëË\s-]+$/;
 
     if (!value.trim()) {
@@ -84,7 +94,8 @@ const AddEmployeeForm: React.FC<AddEmployeeFormProps> = ({
       formData.firstName.trim() !== "" &&
       formData.lastName.trim() !== "" &&
       errors.firstName === "" &&
-      errors.lastName === ""
+      errors.lastName === "" &&
+      errors.email === ""
     );
   };
 
@@ -94,14 +105,15 @@ const AddEmployeeForm: React.FC<AddEmployeeFormProps> = ({
       onSubmit({
         firstName: formData.firstName.trim(),
         lastName: formData.lastName.trim(),
+        email: formData.email.trim() || undefined,
       });
     }
   };
 
   // Clears the form and errors
   const handleClearForm = () => {
-    setFormData({ firstName: "", lastName: "" });
-    setErrors({ firstName: "", lastName: "" });
+    setFormData({ firstName: "", lastName: "", email: "" });
+    setErrors({ firstName: "", lastName: "", email: "" });
   };
 
   return (
@@ -139,6 +151,19 @@ const AddEmployeeForm: React.FC<AddEmployeeFormProps> = ({
             error={errors.lastName !== ""}
             helperText={errors.lastName}
             icon={<User style={iconStyle} />}
+          />
+        </Grid>
+
+        <Grid item xs={12}>
+          <TextfieldComponent
+            placeholder={FORMS.ADD_EMPLOYEE.EMAIL_PLACEHOLDER}
+            variant="outlined"
+            fullWidth
+            value={formData.email}
+            onChange={(e) => handleFieldChange("email", e.target.value)}
+            error={errors.email !== ""}
+            helperText={errors.email}
+            icon={<Mail style={iconStyle} />}
           />
         </Grid>
 

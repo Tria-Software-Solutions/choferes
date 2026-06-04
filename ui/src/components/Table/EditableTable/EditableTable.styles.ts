@@ -150,7 +150,7 @@ export const tableHeadCellStyles = (theme: Theme, topOffset: number | string = 0
   padding: "14px 16px",
   whiteSpace: "nowrap",
   fontFamily: "'Urbanist', -apple-system, BlinkMacSystemFont, sans-serif",
-  borderBottom: "none",
+  borderBottom: `2px solid ${theme.palette.mode === "dark" ? "rgba(255,255,255,0.15)" : "rgba(255,255,255,0.25)"}`,
 });
 
 // Premium dropdown menu props styles

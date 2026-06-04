@@ -80,7 +80,7 @@ const EmployeesPage: React.FC = () => {
   const [editRowId, setEditRowId] = useState<number | null>(null);
   const [openAddModal, setOpenAddModal] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [editFields, setEditFields] = useState({ firstName: "", lastName: "" });
+  const [editFields, setEditFields] = useState({ firstName: "", lastName: "", email: "" });
   const [openDeleteDialog, setOpenDeleteDialog] = useState(false);
   const [employeeToDelete, setEmployeeToDelete] = useState<number | null>(null);
   const [page, setPage] = useState(0);
@@ -106,7 +106,7 @@ const EmployeesPage: React.FC = () => {
 
     setFilteredEmployees(
       employees.filter((employee) =>
-        normalizeString(`${employee.firstName} ${employee.lastName}`)
+        normalizeString(`${employee.firstName} ${employee.lastName} ${employee.email || ""}`)
           .toLowerCase()
           .includes(normalizeString(search).toLowerCase())
       )
@@ -116,12 +116,15 @@ const EmployeesPage: React.FC = () => {
 
   // Validate edit fields for employee
   const validateFields = useCallback((fields: typeof editFields) => {
+    const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
     const regex = {
       text: /^[a-zA-ZáéíóúÁÉÍÓÚñÑüÜëË\s-]+$/,
     };
 
     return (
-      regex.text.test(fields.firstName) && regex.text.test(fields.lastName)
+      regex.text.test(fields.firstName) &&
+      regex.text.test(fields.lastName) &&
+      (!fields.email || emailRegex.test(fields.email))
     );
   }, []);
 
@@ -139,6 +142,7 @@ const EmployeesPage: React.FC = () => {
   const handleCreate = async (newEmployee: {
     firstName: string;
     lastName: string;
+    email?: string;
   }) => {
     try {
       setIsSubmitting(true);
@@ -176,6 +180,7 @@ const EmployeesPage: React.FC = () => {
     setEditFields({
       firstName: employee.firstName,
       lastName: employee.lastName,
+      email: employee.email || "",
     });
   };
 
@@ -192,7 +197,7 @@ const EmployeesPage: React.FC = () => {
       };
       dispatch(updateEmployee({ id, updatedEmployee }));
       setEditRowId(null);
-      setEditFields({ firstName: "", lastName: "" });
+      setEditFields({ firstName: "", lastName: "", email: "" });
       showNotification(NOTIFICATIONS.EMPLOYEE_UPDATE_SUCCESS, {
         severity: "success",
         duration: 3000,
@@ -253,6 +258,7 @@ const EmployeesPage: React.FC = () => {
   const exportData = filteredEmployees.map(e => ({
     Nombre: e.firstName,
     Apellido: e.lastName,
+    Email: e.email || "",
     Agregado: e.createdAt
       ? capitalizeFirstLetter(
           format(new Date(e.createdAt), "EEEE dd 'de' MMMM 'de' yyyy", {
@@ -271,7 +277,7 @@ const EmployeesPage: React.FC = () => {
 
   // Memoize export options based on permissions
   const exportOptions = useMemo(() => {
-    const exportHeaders = ["Nombre", "Apellido", "Agregado", "Actualizado"];
+    const exportHeaders = ["Nombre", "Apellido", "Email", "Agregado", "Actualizado"];
     return createExportOptions({
       excelIcon: <ExcelIcon size={20} />,
       pdfIcon: <PdfIcon size={20} />,
@@ -446,7 +452,7 @@ const EmployeesPage: React.FC = () => {
               {filteredEmployees.length > 0 ? (
                 <EditableTableComponent<Employee>
                   data={filteredEmployees}
-                  columns={["firstName", "lastName"]}
+                  columns={["firstName", "lastName", "email"]}
                   editRowId={editRowId}
                   editFields={editFields}
                   setEditField={(field, value) =>
