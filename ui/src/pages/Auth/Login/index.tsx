@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useLocation } from 'react-router-dom';
 import { useAuth } from '../../../hooks/useAuth';
-import { TextField, Button, Typography, Box, Alert, CircularProgress, IconButton, InputAdornment } from '@mui/material';
+import { TextField, Button, Typography, Box, Alert, CircularProgress, IconButton, InputAdornment, useTheme } from '@mui/material';
 import { Visibility, VisibilityOff } from '@mui/icons-material';
 import FORMS from '../../../constants/forms.constants';
 import LOGIN from '../../../constants/login.constants';
@@ -29,6 +29,7 @@ import {
 } from '../Register/styles';
 
 const Login: React.FC = () => {
+  const theme = useTheme();
   const location = useLocation();
   const { authenticateUser, authError } = useAuth();
   const [fields, setFields] = useState({
@@ -236,15 +237,15 @@ const Login: React.FC = () => {
               textAlign: 'center',
               py: 1.25,
               px: 3,
-              background: 'rgba(0,0,0,0.015)',
+              background: theme.palette.mode === 'dark' ? 'rgba(255,255,255,0.02)' : 'rgba(0,0,0,0.015)',
               backdropFilter: 'blur(4px)',
-              borderTop: '1px solid rgba(0,0,0,0.04)',
+              borderTop: `1px solid ${theme.palette.divider}`,
             }}
           >
             <Typography
               variant="caption"
               sx={{
-                color: 'rgba(0,0,0,0.4)',
+                color: theme.palette.text.secondary,
                 fontFamily: "'Urbanist', -apple-system, BlinkMacSystemFont, sans-serif",
                 fontSize: '0.6rem',
                 letterSpacing: '0.04em',
@@ -254,7 +255,14 @@ const Login: React.FC = () => {
               Powered by{' '}
               <Box
                 component="span"
-                sx={{ fontWeight: 600, color: 'rgba(0,0,0,0.55)', transition: 'color 0.2s', cursor: 'pointer', '&:hover': { color: 'rgba(0,0,0,0.75)' } }}
+                sx={{
+                  fontWeight: 600,
+                  color: theme.palette.text.primary,
+                  opacity: 0.6,
+                  transition: 'opacity 0.2s',
+                  cursor: 'pointer',
+                  '&:hover': { opacity: 0.85 },
+                }}
                 onClick={() => window.open('https://triacr.com', '_blank', 'noopener noreferrer')}
               >
                 Tria

@@ -343,7 +343,7 @@ const EditableTableComponent = <T extends object>({
         <Table
           stickyHeader
           aria-label="sticky table"
-          sx={{ width: "100%", minWidth: 650, borderCollapse: "collapse" }}
+          sx={{ width: "100%", minWidth: 650, borderCollapse: "separate" }}
         >
           <TableHead sx={{ position: "sticky", top: tableHeadTopOffset, zIndex: 20, backgroundColor: theme.palette.mode === "dark" ? "#0a0a0a" : "#000000" }}>
             <TableRow>

@@ -292,14 +292,14 @@ const AppContent: React.FC = () => {
               textAlign: "center",
               py: 1.25,
               px: 3,
-              background: "rgba(0,0,0,0.015)",
+              background: theme.palette.mode === "dark" ? "rgba(255,255,255,0.02)" : "rgba(0,0,0,0.015)",
               backdropFilter: "blur(4px)",
-              borderTop: "1px solid rgba(0,0,0,0.04)",
+              borderTop: `1px solid ${theme.palette.divider}`,
               fontFamily: "'Urbanist', -apple-system, BlinkMacSystemFont, sans-serif",
               fontSize: "0.6rem",
               letterSpacing: "0.04em",
               fontWeight: 400,
-              color: "rgba(0,0,0,0.4)",
+              color: theme.palette.text.secondary,
             }}
           >
             Powered by{" "}
@@ -307,10 +307,11 @@ const AppContent: React.FC = () => {
               component="span"
               sx={{
                 fontWeight: 600,
-                color: "rgba(0,0,0,0.55)",
-                transition: "color 0.2s",
+                color: theme.palette.text.primary,
+                opacity: 0.6,
+                transition: "opacity 0.2s",
                 cursor: "pointer",
-                "&:hover": { color: "rgba(0,0,0,0.75)" },
+                "&:hover": { opacity: 0.85 },
               }}
               onClick={() => window.open("https://triacr.com", "_blank", "noopener noreferrer")}
             >
