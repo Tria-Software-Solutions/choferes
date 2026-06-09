@@ -5,7 +5,7 @@ import {
   TextField, Button, Typography, Box, Alert, CircularProgress, IconButton,
   InputAdornment, Checkbox, FormControlLabel,
 } from '@mui/material';
-import { Visibility, VisibilityOff, ArrowBack } from '@mui/icons-material';
+import { Visibility, VisibilityOff, MailOutline, Lock, ArrowBack } from '@mui/icons-material';
 import FORMS from '../../../constants/forms.constants';
 import LOGIN from '../../../constants/login.constants';
 import bg from '../../../assets/images/background.jpeg';
@@ -19,9 +19,7 @@ import {
   formContainer,
   header,
   form,
-  inputLabelStyles,
-  inputFieldStyles,
-  submitButtonStyles,
+  inputIconStyles,
   optionsRow,
   checkboxStyles,
   forgotLinkStyles,
@@ -32,9 +30,15 @@ import {
   forgotDescription,
   backLinkStyles,
   poweredByStyles,
+} from './styles';
+import {
+  textFieldStyles,
+  passwordTextFieldStyles,
+  submitButtonStyles,
   submitProgressStyles,
   alertStyles,
-} from './styles';
+  passwordIconButtonStyles,
+} from '../Register/styles';
 
 const Login: React.FC = () => {
   const location = useLocation();
@@ -180,7 +184,7 @@ const Login: React.FC = () => {
               <Box sx={{ ...(mounted ? animateStagger(0) : {}) }}>
                 <Box sx={header}>
                   <Typography variant="h5" sx={{ fontWeight: 700, letterSpacing: -0.2, mb: 0.5 }}>
-                    Iniciar sesión
+                    {LOGIN.LOGIN}
                   </Typography>
                   <Typography variant="body2" sx={{ color: 'text.secondary' }}>
                     Accede a tu panel de control
@@ -189,12 +193,9 @@ const Login: React.FC = () => {
 
                 <Box component="form" onSubmit={handleLogin} sx={form}>
                   <Box sx={mounted ? animateStagger(100) : {}}>
-                    <Typography component="label" sx={inputLabelStyles}>
-                      Correo electrónico o usuario
-                    </Typography>
                     <TextField
                       fullWidth
-                      placeholder="ejemplo@correo.com"
+                      placeholder={LOGIN.EMAIL_OR_USERNAME}
                       variant="outlined"
                       value={fields.identifier}
                       autoComplete="username"
@@ -202,19 +203,23 @@ const Login: React.FC = () => {
                       error={!!errors.identifier}
                       helperText={errors.identifier}
                       disabled={isSubmitting}
-                      sx={inputFieldStyles}
+                      sx={textFieldStyles}
+                      slotProps={{
+                        input: {
+                          startAdornment: (
+                            <InputAdornment position="start">
+                              <MailOutline sx={inputIconStyles} />
+                            </InputAdornment>
+                          ),
+                        },
+                      }}
                     />
                   </Box>
 
                   <Box sx={mounted ? animateStagger(200) : {}}>
-                    <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                      <Typography component="label" sx={inputLabelStyles}>
-                        Contraseña
-                      </Typography>
-                    </Box>
                     <TextField
                       fullWidth
-                      placeholder="••••••••"
+                      placeholder={LOGIN.PASSWORD}
                       type={showPassword ? 'text' : 'password'}
                       variant="outlined"
                       value={fields.password}
@@ -223,16 +228,21 @@ const Login: React.FC = () => {
                       error={!!errors.password}
                       helperText={errors.password}
                       disabled={isSubmitting}
-                      sx={inputFieldStyles}
+                      sx={passwordTextFieldStyles}
                       slotProps={{
                         input: {
+                          startAdornment: (
+                            <InputAdornment position="start">
+                              <Lock sx={inputIconStyles} />
+                            </InputAdornment>
+                          ),
                           endAdornment: (
                             <InputAdornment position="end">
                               <IconButton
                                 onClick={() => setShowPassword(!showPassword)}
                                 edge="end"
                                 disabled={isSubmitting}
-                                sx={{ color: 'text.secondary', '&:hover': { backgroundColor: 'transparent' } }}
+                                sx={passwordIconButtonStyles}
                               >
                                 {showPassword ? <VisibilityOff /> : <Visibility />}
                               </IconButton>
@@ -270,7 +280,7 @@ const Login: React.FC = () => {
                       {isSubmitting ? (
                         <CircularProgress size={18} sx={submitProgressStyles} />
                       ) : (
-                        'Iniciar sesión'
+                        LOGIN.SUBMIT
                       )}
                     </Button>
                   </Box>
@@ -301,15 +311,21 @@ const Login: React.FC = () => {
 
                 <Box component="form" onSubmit={(e) => e.preventDefault()} sx={form}>
                   <Box sx={mounted ? animateStagger(100) : {}}>
-                    <Typography component="label" sx={inputLabelStyles}>
-                      Correo electrónico o usuario
-                    </Typography>
                     <TextField
                       fullWidth
-                      placeholder="ejemplo@correo.com"
+                      placeholder={LOGIN.EMAIL_OR_USERNAME}
                       variant="outlined"
                       autoComplete="email"
-                      sx={inputFieldStyles}
+                      sx={textFieldStyles}
+                      slotProps={{
+                        input: {
+                          startAdornment: (
+                            <InputAdornment position="start">
+                              <MailOutline sx={inputIconStyles} />
+                            </InputAdornment>
+                          ),
+                        },
+                      }}
                     />
                   </Box>
 
