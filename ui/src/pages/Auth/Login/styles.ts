@@ -19,12 +19,6 @@ export const shake = keyframes`
   80% { transform: translateX(3px); }
 `;
 
-export const blobFloat = keyframes`
-  0%, 100% { transform: scale(1) translate(0, 0); }
-  33% { transform: scale(1.03) translate(8px, -8px); }
-  66% { transform: scale(0.97) translate(-4px, 4px); }
-`;
-
 export const wrapper: SxProps<Theme> = {
   width: "100%",
   minHeight: "100vh",
@@ -66,7 +60,7 @@ export const left: SxProps<Theme> = (theme) => ({
 
 export const right: SxProps<Theme> = (theme: Theme) => ({
   flex: { xs: 1, md: '0 0 auto' },
-  width: { xs: '100%', md: 560 },
+  width: { xs: '100%', md: 480 },
   display: "flex",
   alignItems: "center",
   justifyContent: "center",
@@ -79,7 +73,7 @@ export const right: SxProps<Theme> = (theme: Theme) => ({
 
 export const formContainer: SxProps<Theme> = {
   width: "100%",
-  maxWidth: { xs: "100%", sm: 420 },
+  maxWidth: { xs: "100%", sm: 384 },
   margin: "0 auto",
   position: "relative",
   zIndex: 1,
@@ -87,7 +81,7 @@ export const formContainer: SxProps<Theme> = {
 
 export const header: SxProps<Theme> = {
   mb: 4,
-  textAlign: "center",
+  textAlign: "left",
 };
 
 export const form: SxProps<Theme> = {
@@ -96,88 +90,149 @@ export const form: SxProps<Theme> = {
   gap: 2,
 };
 
-export const inputIconStyles: SxProps<Theme> = (theme) => ({
-  color: theme.palette.text.secondary,
-  fontSize: '1.1rem',
-  opacity: 0.5,
+export const inputLabelStyles: SxProps<Theme> = {
+  display: 'block',
+  fontSize: '0.875rem',
+  fontWeight: 500,
+  mb: 0.5,
+  color: 'text.primary',
+};
+
+export const inputFieldStyles: SxProps<Theme> = (theme: Theme) => ({
+  '& .MuiOutlinedInput-root': {
+    borderRadius: '8px',
+    backgroundColor: theme.palette.mode === 'dark' ? '#1a1a2e' : '#ffffff',
+    '& input': {
+      py: 1.5,
+      px: 1.5,
+      fontSize: '0.875rem',
+      color: theme.palette.text.primary,
+      '&::placeholder': {
+        color: theme.palette.text.secondary,
+        opacity: 0.5,
+      },
+    },
+    '& fieldset': {
+      borderColor: theme.palette.mode === 'dark'
+        ? 'rgba(255,255,255,0.15)'
+        : 'rgba(0,0,0,0.2)',
+      borderWidth: '1px',
+    },
+    '&:hover fieldset': {
+      borderColor: theme.palette.mode === 'dark'
+        ? 'rgba(255,255,255,0.3)'
+        : 'rgba(0,0,0,0.4)',
+    },
+    '&.Mui-focused fieldset': {
+      borderColor: theme.palette.primary.main,
+      borderWidth: '2px',
+    },
+    '&.Mui-error fieldset': {
+      borderColor: theme.palette.error.main,
+      borderWidth: '1px',
+    },
+    '&.Mui-focused.Mui-error fieldset': {
+      borderWidth: '2px',
+    },
+  },
+  '& .MuiFormHelperText-root': {
+    fontSize: '0.75rem',
+    mt: 0.5,
+  },
+});
+
+export const submitButtonStyles: SxProps<Theme> = (theme) => ({
+  borderRadius: '8px',
+  backgroundColor: theme.palette.primary.main,
+  color: '#ffffff',
+  fontWeight: 600,
+  fontSize: '0.875rem',
+  textTransform: 'none',
+  py: 1.5,
+  px: 3,
+  boxShadow: '0 1px 2px 0 rgba(0,0,0,0.05)',
+  '&:hover': {
+    backgroundColor: theme.palette.mode === 'dark'
+      ? theme.palette.primary.light
+      : theme.palette.primary.dark,
+    boxShadow: '0 1px 3px 0 rgba(0,0,0,0.1), 0 1px 2px -1px rgba(0,0,0,0.1)',
+  },
+  '&:disabled': {
+    backgroundColor: theme.palette.mode === 'dark'
+      ? 'rgba(255,255,255,0.12)'
+      : 'rgba(0,0,0,0.12)',
+    color: theme.palette.mode === 'dark'
+      ? 'rgba(255,255,255,0.3)'
+      : 'rgba(0,0,0,0.26)',
+  },
 });
 
 export const optionsRow: SxProps<Theme> = {
   display: 'flex',
   alignItems: 'center',
   justifyContent: 'space-between',
-  mx: 0.5,
   my: 0.5,
 };
 
 export const checkboxStyles: SxProps<Theme> = (theme) => ({
   '& .MuiCheckbox-root': {
     padding: '4px',
-    transition: 'all 0.2s cubic-bezier(0.4, 0, 0.2, 1)',
     '& .MuiSvgIcon-root': {
       fontSize: '1.1rem',
-      color: theme.palette.text.secondary,
-      transition: 'all 0.2s cubic-bezier(0.4, 0, 0.2, 1)',
+      color: theme.palette.mode === 'dark'
+        ? 'rgba(255,255,255,0.4)'
+        : 'rgba(0,0,0,0.3)',
     },
     '&.Mui-checked .MuiSvgIcon-root': {
       color: theme.palette.primary.main,
-      filter: `drop-shadow(0 0 4px ${theme.palette.primary.main}66)`,
-    },
-    '&:hover': {
-      '& .MuiSvgIcon-root': {
-        color: theme.palette.primary.main,
-        opacity: 0.7,
-      },
     },
   },
   '& .MuiFormControlLabel-label': {
-    fontSize: '0.8rem',
+    fontSize: '0.875rem',
     color: theme.palette.text.secondary,
     userSelect: 'none',
-    transition: 'color 0.2s ease',
-  },
-  '&:hover .MuiFormControlLabel-label': {
-    color: theme.palette.text.primary,
   },
 });
 
 export const forgotLinkStyles: SxProps<Theme> = (theme) => ({
-  fontSize: '0.8rem',
-  color: theme.palette.text.secondary,
+  fontSize: '0.875rem',
+  fontWeight: 600,
+  color: theme.palette.primary.main,
+  cursor: 'pointer',
   userSelect: 'none',
-  transition: 'color 0.2s ease',
   '&:hover': {
-    color: theme.palette.text.primary,
+    color: theme.palette.mode === 'dark'
+      ? theme.palette.primary.light
+      : theme.palette.primary.dark,
   },
 });
 
 export const forgotHeader: SxProps<Theme> = {
   mb: 4,
-  textAlign: 'center',
+  textAlign: 'left',
 };
 
 export const forgotDescription: SxProps<Theme> = (theme: Theme) => ({
   color: theme.palette.text.secondary,
-  fontSize: '0.85rem',
+  fontSize: '0.875rem',
   lineHeight: 1.6,
-  mb: 3,
-  textAlign: 'center',
+  textAlign: 'left',
 });
 
 export const backLinkStyles: SxProps<Theme> = (theme) => ({
   display: 'flex',
   alignItems: 'center',
-  justifyContent: 'center',
+  justifyContent: 'flex-start',
   gap: 0.5,
   mt: 3,
-  fontSize: '0.8rem',
-  color: theme.palette.text.secondary,
-  textDecoration: 'none',
-  fontWeight: 500,
+  fontSize: '0.875rem',
+  fontWeight: 600,
+  color: theme.palette.primary.main,
   cursor: 'pointer',
-  transition: 'color 0.2s ease',
   '&:hover': {
-    color: theme.palette.primary.main,
+    color: theme.palette.mode === 'dark'
+      ? theme.palette.primary.light
+      : theme.palette.primary.dark,
   },
 });
 
@@ -199,3 +254,15 @@ export const animateStagger = (delayMs: number): SxProps<Theme> => ({
   animationDelay: `${delayMs}ms`,
   opacity: 0,
 });
+
+export const submitProgressStyles: SxProps<Theme> = {
+  mr: 1,
+};
+
+export const alertStyles: SxProps<Theme> = {
+  mt: 3,
+  borderRadius: '8px',
+  '& .MuiAlert-icon': {
+    alignItems: 'center',
+  },
+};

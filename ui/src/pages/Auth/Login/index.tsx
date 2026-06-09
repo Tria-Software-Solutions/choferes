@@ -5,7 +5,7 @@ import {
   TextField, Button, Typography, Box, Alert, CircularProgress, IconButton,
   InputAdornment, Checkbox, FormControlLabel,
 } from '@mui/material';
-import { Visibility, VisibilityOff, MailOutline, Lock, ArrowBack } from '@mui/icons-material';
+import { Visibility, VisibilityOff, ArrowBack } from '@mui/icons-material';
 import FORMS from '../../../constants/forms.constants';
 import LOGIN from '../../../constants/login.constants';
 import bg from '../../../assets/images/background.jpeg';
@@ -19,7 +19,9 @@ import {
   formContainer,
   header,
   form,
-  inputIconStyles,
+  inputLabelStyles,
+  inputFieldStyles,
+  submitButtonStyles,
   optionsRow,
   checkboxStyles,
   forgotLinkStyles,
@@ -30,15 +32,9 @@ import {
   forgotDescription,
   backLinkStyles,
   poweredByStyles,
-} from './styles';
-import {
-  textFieldStyles,
-  passwordTextFieldStyles,
-  submitButtonStyles,
   submitProgressStyles,
   alertStyles,
-  passwordIconButtonStyles,
-} from '../Register/styles';
+} from './styles';
 
 const Login: React.FC = () => {
   const location = useLocation();
@@ -184,7 +180,7 @@ const Login: React.FC = () => {
               <Box sx={{ ...(mounted ? animateStagger(0) : {}) }}>
                 <Box sx={header}>
                   <Typography variant="h5" sx={{ fontWeight: 700, letterSpacing: -0.2, mb: 0.5 }}>
-                    {LOGIN.LOGIN}
+                    Iniciar sesión
                   </Typography>
                   <Typography variant="body2" sx={{ color: 'text.secondary' }}>
                     Accede a tu panel de control
@@ -193,9 +189,12 @@ const Login: React.FC = () => {
 
                 <Box component="form" onSubmit={handleLogin} sx={form}>
                   <Box sx={mounted ? animateStagger(100) : {}}>
+                    <Typography component="label" sx={inputLabelStyles}>
+                      Correo electrónico o usuario
+                    </Typography>
                     <TextField
                       fullWidth
-                      placeholder={LOGIN.EMAIL_OR_USERNAME}
+                      placeholder="ejemplo@correo.com"
                       variant="outlined"
                       value={fields.identifier}
                       autoComplete="username"
@@ -203,23 +202,19 @@ const Login: React.FC = () => {
                       error={!!errors.identifier}
                       helperText={errors.identifier}
                       disabled={isSubmitting}
-                      sx={textFieldStyles}
-                      slotProps={{
-                        input: {
-                          startAdornment: (
-                            <InputAdornment position="start">
-                              <MailOutline sx={inputIconStyles} />
-                            </InputAdornment>
-                          ),
-                        },
-                      }}
+                      sx={inputFieldStyles}
                     />
                   </Box>
 
                   <Box sx={mounted ? animateStagger(200) : {}}>
+                    <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                      <Typography component="label" sx={inputLabelStyles}>
+                        Contraseña
+                      </Typography>
+                    </Box>
                     <TextField
                       fullWidth
-                      placeholder={LOGIN.PASSWORD}
+                      placeholder="••••••••"
                       type={showPassword ? 'text' : 'password'}
                       variant="outlined"
                       value={fields.password}
@@ -228,21 +223,16 @@ const Login: React.FC = () => {
                       error={!!errors.password}
                       helperText={errors.password}
                       disabled={isSubmitting}
-                      sx={passwordTextFieldStyles}
+                      sx={inputFieldStyles}
                       slotProps={{
                         input: {
-                          startAdornment: (
-                            <InputAdornment position="start">
-                              <Lock sx={inputIconStyles} />
-                            </InputAdornment>
-                          ),
                           endAdornment: (
                             <InputAdornment position="end">
                               <IconButton
                                 onClick={() => setShowPassword(!showPassword)}
                                 edge="end"
                                 disabled={isSubmitting}
-                                sx={passwordIconButtonStyles}
+                                sx={{ color: 'text.secondary', '&:hover': { backgroundColor: 'transparent' } }}
                               >
                                 {showPassword ? <VisibilityOff /> : <Visibility />}
                               </IconButton>
@@ -261,7 +251,7 @@ const Login: React.FC = () => {
                         sx={checkboxStyles}
                       />
                       <Typography
-                        sx={{ ...forgotLinkStyles, cursor: 'pointer' }}
+                        sx={forgotLinkStyles}
                         onClick={() => setView('forgotPassword')}
                       >
                         ¿Olvidaste tu contraseña?
@@ -280,7 +270,7 @@ const Login: React.FC = () => {
                       {isSubmitting ? (
                         <CircularProgress size={18} sx={submitProgressStyles} />
                       ) : (
-                        LOGIN.SUBMIT
+                        'Iniciar sesión'
                       )}
                     </Button>
                   </Box>
@@ -311,21 +301,15 @@ const Login: React.FC = () => {
 
                 <Box component="form" onSubmit={(e) => e.preventDefault()} sx={form}>
                   <Box sx={mounted ? animateStagger(100) : {}}>
+                    <Typography component="label" sx={inputLabelStyles}>
+                      Correo electrónico o usuario
+                    </Typography>
                     <TextField
                       fullWidth
-                      placeholder={LOGIN.EMAIL_OR_USERNAME}
+                      placeholder="ejemplo@correo.com"
                       variant="outlined"
                       autoComplete="email"
-                      sx={textFieldStyles}
-                      slotProps={{
-                        input: {
-                          startAdornment: (
-                            <InputAdornment position="start">
-                              <MailOutline sx={inputIconStyles} />
-                            </InputAdornment>
-                          ),
-                        },
-                      }}
+                      sx={inputFieldStyles}
                     />
                   </Box>
 
