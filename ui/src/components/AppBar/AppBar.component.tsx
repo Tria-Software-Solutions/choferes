@@ -1,6 +1,7 @@
-import React, { useState, useCallback, useMemo } from "react";
+import React, { useState, useCallback, useMemo, useRef } from "react";
 import MenuComponent from "../Menu/Menu.component";
 import NotificationMenu from "../NotificationMenu/NotificationMenu.component";
+import Dock from "../Dock/Dock.component";
 import {
   AppBar,
   Toolbar,
@@ -18,13 +19,12 @@ import {
   ListItemText,
   Popover,
   Grow,
-  Tooltip,
 } from "@mui/material";
 import { useNavigate, useLocation } from "react-router-dom";
 import { useAuthContext } from "../../context/AuthContext";
 import { APPBAR_MENU } from "../../constants/constants";
 import { useNotificationMenu } from "../../context/NotificationContext";
-import { Menu as MenuIcon, Bell, PanelTopOpen, PanelTopClose } from "lucide-react";
+import { Menu as MenuIcon, Bell, Blocks } from "lucide-react";
 import logo from "../../assets/images/logo.png";
 import { MenuItemProps } from "../Menu/Menu.component";
 import { Roles } from "../../constants/roles";
@@ -85,6 +85,7 @@ const AppBarComponent: React.FC<AppBarComponentProps> = ({
     useState<null | HTMLElement>(null);
   const [dashboardMenuAnchor, setDashboardMenuAnchor] =
     useState<null | HTMLElement>(null);
+  const blocksButtonRef = useRef<HTMLButtonElement>(null);
 
   const mapLinksToMenuItems = useCallback((linkList: Link[]): MenuItemProps[] =>
     linkList.map(({ label, path, icon, subLinks, onClick }) => ({
@@ -173,48 +174,36 @@ const AppBarComponent: React.FC<AppBarComponentProps> = ({
             }}
           >
             <IconButton
+              ref={blocksButtonRef}
               onClick={handleDashboardMenuOpen}
+              disableRipple
+              disableFocusRipple
               sx={{
                 color: "#ffffff",
                 cursor: "pointer",
-                p: 1,
-                borderRadius: "16px",
-                minWidth: "48px",
-                height: "48px",
-                backgroundColor: Boolean(dashboardMenuAnchor)
-                  ? "rgba(255,255,255,0.2)"
-                  : "transparent",
+                p: 0.5,
+                borderRadius: "10px",
+                minWidth: 36,
+                height: 36,
                 border: "none",
                 transition: "all 0.2s cubic-bezier(0.4, 0, 0.2, 1)",
                 "&:hover": {
-                  backgroundColor: "rgba(255,255,255,0.1)",
+                  backgroundColor: "rgba(255,255,255,0.06)",
                 },
                 "&:active": {
-                  backgroundColor: "rgba(255,255,255,0.15)",
+                  backgroundColor: "rgba(255,255,255,0.1)",
                 },
               }}
             >
-              {Boolean(dashboardMenuAnchor) ? (
-                <PanelTopClose
-                  size={22}
-                  strokeWidth={1.5}
-                  style={{
-                    color: "#ffffff",
-                    opacity: 1,
-                    transition: "all 0.2s ease",
-                  }}
-                />
-              ) : (
-                <PanelTopOpen
-                  size={22}
-                  strokeWidth={1.5}
-                  style={{
-                    color: "#ffffff",
-                    opacity: 0.8,
-                    transition: "all 0.2s ease",
-                  }}
-                />
-              )}
+              <Blocks
+                size={20}
+                strokeWidth={1.5}
+                style={{
+                  color: "#ffffff",
+                  opacity: Boolean(dashboardMenuAnchor) ? 1 : 0.6,
+                  transition: "all 0.2s ease",
+                }}
+              />
             </IconButton>
             <Popover
               open={Boolean(dashboardMenuAnchor)}
@@ -225,92 +214,45 @@ const AppBarComponent: React.FC<AppBarComponentProps> = ({
               PaperProps={{
                 elevation: 0,
                 sx: {
-                  width: 260,
-                  mt: 0.5,
-                  background: theme.palette.mode === 'dark'
-                    ? 'rgba(30,30,35,0.95)'
-                    : '#ffffff',
-                  backdropFilter: 'blur(20px)',
+                  background: 'transparent',
+                  backgroundColor: 'transparent',
+                  boxShadow: 'none',
                   border: 'none',
-                  borderRadius: '16px',
-                  boxShadow: theme.palette.mode === 'dark'
-                    ? '0 10px 40px rgba(0,0,0,0.4), 0 2px 8px rgba(0,0,0,0.2)'
-                    : '0 10px 40px rgba(0,0,0,0.15), 0 2px 8px rgba(0,0,0,0.1)',
-                  overflow: 'hidden',
-                  padding: 0,
+                  overflow: 'visible',
+                  mt: 0.5,
                 },
               }}
               TransitionComponent={Grow}
               TransitionProps={{ timeout: 200 }}
               keepMounted
             >
-              <Box sx={{ borderRadius: '16px', overflow: 'hidden' }}>
-                {links.length === 0 ? (
-                  <Box sx={{ p: 2, textAlign: 'center', color: theme.palette.text.secondary, fontSize: '0.85rem' }}>
-                    {APPBAR_MENU.NO_LINKS}
-                  </Box>
-                ) : (
-                  <Box sx={{ display: 'flex', gap: 0.5, p: 1.5, alignItems: 'center', justifyContent: 'center' }}>
-                    {links.map((link) => (
-                      <Tooltip
-                        key={link.label}
-                        title={link.label}
-                        placement="bottom"
-                        arrow={false}
-                        componentsProps={{
-                          tooltip: {
-                            sx: {
-                              borderRadius: '16px',
-                              backgroundColor: '#000000',
-                              color: '#ffffff',
-                              fontSize: '0.75rem',
-                              fontWeight: 500,
-                              padding: '6px 12px',
-                              boxShadow: '0 10px 40px rgba(0,0,0,0.15), 0 2px 8px rgba(0,0,0,0.1)',
-                            },
-                          },
-                        }}
-                      >
-                      <Box
-                        onClick={() => {
+              <Dock
+                items={[
+                  ...links.map(link => ({
+                    label: link.label,
+                    icon: link.icon,
+                    onClick: () => {
+                      handleDashboardMenuClose();
+                      link.path && navigate(link.path);
+                    },
+                    active: isActivePage(link.path || ''),
+                  })),
+                  ...(hasNotificationsAccess()
+                    ? [{
+                        label: 'Notificaciones',
+                        icon: <Bell size={20} strokeWidth={1.5} />,
+                        onClick: () => {
                           handleDashboardMenuClose();
-                          link.path && navigate(link.path);
-                        }}
-                        sx={{
-                          display: 'flex',
-                          p: 1,
-                          borderRadius: '16px',
-                          cursor: 'pointer',
-                          transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
-                          backgroundColor: isActivePage(link.path || '')
-                            ? theme.palette.mode === 'dark'
-                              ? 'rgba(255,255,255,0.15)'
-                              : 'rgba(0,0,0,0.08)'
-                            : 'transparent',
-                          '&:hover': {
-                            backgroundColor: theme.palette.mode === 'dark'
-                              ? 'rgba(255,255,255,0.08)'
-                              : 'rgba(0,0,0,0.04)',
-                            transform: 'scale(1.15)',
-                          },
-                        }}
-                      >
-                        <Box sx={{
-                          color: isActivePage(link.path || '')
-                            ? theme.palette.primary.main
-                            : theme.palette.text.secondary,
-                          display: 'flex',
-                          opacity: isActivePage(link.path || '') ? 1 : 0.6,
-                          transition: 'all 0.2s ease',
-                        }}>
-                          {link.icon}
-                        </Box>
-                      </Box>
-                      </Tooltip>
-                    ))}
-                  </Box>
-                )}
-              </Box>
+                          if (blocksButtonRef.current) {
+                            const syntheticEvent = { currentTarget: blocksButtonRef.current } as React.MouseEvent<HTMLElement>;
+                            handleNotificationsOpen(syntheticEvent);
+                          }
+                        },
+                        active: false,
+                      }]
+                    : []),
+                ]}
+              />
             </Popover>
           </Box>
         )}
