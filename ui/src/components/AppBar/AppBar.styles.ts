@@ -29,10 +29,6 @@ export const logoBoxStyles: SxProps<Theme> = {
   display: "flex",
   alignItems: "center",
   mr: 2,
-  p: 1,
-  borderRadius: 2,
-  backgroundColor: "rgba(255,255,255,0.1)",
-  backdropFilter: "blur(10px)",
 };
 
 export const logoImgStyles: CSSProperties = {
@@ -163,37 +159,12 @@ export const userAvatarStyles: SxProps<Theme> = (theme) => ({
   width: 44,
   height: 44,
   background: "linear-gradient(135deg, rgba(255,255,255,0.15) 0%, rgba(255,255,255,0.05) 100%)",
-  backdropFilter: "blur(20px)",
   color: "#ffffff",
   fontWeight: 600,
   fontSize: "0.9rem",
   border: "1.5px solid rgba(255,255,255,0.25)",
   borderRadius: "50%",
-  transition: "all 0.3s cubic-bezier(0.4, 0, 0.2, 1)",
   boxShadow: "0 4px 20px rgba(0,0,0,0.3), inset 0 1px 0 rgba(255,255,255,0.2)",
-  position: "relative",
-  "&::before": {
-    content: '""',
-    position: "absolute",
-    inset: -2,
-    borderRadius: "50%",
-    padding: "2px",
-    background: "linear-gradient(135deg, rgba(255,255,255,0.4) 0%, rgba(255,255,255,0.1) 50%, rgba(255,255,255,0.4) 100%)",
-    WebkitMask: "linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0)",
-    WebkitMaskComposite: "xor",
-    maskComposite: "exclude",
-    opacity: 0,
-    transition: "opacity 0.3s ease",
-  },
-  "&:hover": {
-    background: "linear-gradient(135deg, rgba(255,255,255,0.25) 0%, rgba(255,255,255,0.1) 100%)",
-    transform: "scale(1.08)",
-    boxShadow: "0 8px 30px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.3), 0 0 20px rgba(255,255,255,0.15)",
-    borderColor: "rgba(255,255,255,0.4)",
-    "&::before": {
-      opacity: 1,
-    },
-  },
 });
 
 export const mobileDividerStyles: SxProps<Theme> = {

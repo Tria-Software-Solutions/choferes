@@ -24,7 +24,7 @@ import { useNavigate, useLocation } from "react-router-dom";
 import { useAuthContext } from "../../context/AuthContext";
 import { APPBAR_MENU } from "../../constants/constants";
 import { useNotificationMenu } from "../../context/NotificationContext";
-import { Menu as MenuIcon, Bell, PanelTopOpen, PanelTopClose, User } from "lucide-react";
+import { Menu as MenuIcon, Bell, PanelTopOpen, PanelTopClose } from "lucide-react";
 import logo from "../../assets/images/logo.png";
 import { MenuItemProps } from "../Menu/Menu.component";
 import { Roles } from "../../constants/roles";
@@ -181,8 +181,8 @@ const AppBarComponent: React.FC<AppBarComponentProps> = ({
                 borderRadius: "16px",
                 minWidth: "48px",
                 height: "48px",
-                backgroundColor: Boolean(dashboardMenuAnchor) 
-                  ? "rgba(255,255,255,0.2)" 
+                backgroundColor: Boolean(dashboardMenuAnchor)
+                  ? "rgba(255,255,255,0.2)"
                   : "transparent",
                 border: "none",
                 transition: "all 0.2s cubic-bezier(0.4, 0, 0.2, 1)",
@@ -195,24 +195,24 @@ const AppBarComponent: React.FC<AppBarComponentProps> = ({
               }}
             >
               {Boolean(dashboardMenuAnchor) ? (
-                <PanelTopClose 
-                  size={22} 
+                <PanelTopClose
+                  size={22}
                   strokeWidth={1.5}
                   style={{
                     color: "#ffffff",
                     opacity: 1,
                     transition: "all 0.2s ease",
-                  }} 
+                  }}
                 />
               ) : (
-                <PanelTopOpen 
-                  size={22} 
+                <PanelTopOpen
+                  size={22}
                   strokeWidth={1.5}
                   style={{
                     color: "#ffffff",
                     opacity: 0.8,
                     transition: "all 0.2s ease",
-                  }} 
+                  }}
                 />
               )}
             </IconButton>
@@ -330,14 +330,14 @@ const AppBarComponent: React.FC<AppBarComponentProps> = ({
                   </Badge>
                 </IconButton>
 
-                <Divider 
-                  orientation="vertical" 
-                  flexItem 
-                  sx={{ 
+                <Divider
+                  orientation="vertical"
+                  flexItem
+                  sx={{
                     ...dividerStyles,
                     display: { xs: "none", md: "block" },
                     mx: 2
-                  }} 
+                  }}
                 />
               </>
             )}
@@ -364,38 +364,9 @@ const AppBarComponent: React.FC<AppBarComponentProps> = ({
                   onClick={handleUserMenuOpen}
                   sx={userMenuIconButtonStyles}
                 >
-                  <Badge
-                    overlap="circular"
-                    anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
-                    variant="dot"
-                    sx={{
-                      '& .MuiBadge-dot': {
-                        background: 'linear-gradient(135deg, #4ade80 0%, #22c55e 100%)',
-                        boxShadow: '0 0 0 3px rgba(255,255,255,0.1), 0 0 12px rgba(74, 222, 128, 0.6)',
-                        width: 12,
-                        height: 12,
-                        borderRadius: '50%',
-                        position: 'absolute',
-                        bottom: 0,
-                        right: 0,
-                        animation: 'pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite',
-                        '@keyframes pulse': {
-                          '0%, 100%': {
-                            opacity: 1,
-                            transform: 'scale(1)',
-                          },
-                          '50%': {
-                            opacity: 0.8,
-                            transform: 'scale(1.1)',
-                          },
-                        },
-                      },
-                    }}
-                  >
-                    <Avatar sx={userAvatarStyles}>
-                      <User size={22} strokeWidth={1.5} />
-                    </Avatar>
-                  </Badge>
+                  <Avatar sx={userAvatarStyles}>
+                    {currentUser.firstName?.[0]}{currentUser.lastName?.[0]}
+                  </Avatar>
                 </IconButton>
               </Box>
 
@@ -434,7 +405,7 @@ const AppBarComponent: React.FC<AppBarComponentProps> = ({
             sx: {
               mt: 0.5,
               minWidth: 200,
-              background: theme.palette.mode === 'dark' 
+              background: theme.palette.mode === 'dark'
                 ? 'rgba(30, 30, 35, 0.95)'
                 : '#ffffff',
               backdropFilter: "blur(20px)",
