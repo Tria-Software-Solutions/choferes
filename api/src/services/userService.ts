@@ -59,6 +59,7 @@ export const authenticateUser = async (identifier: string, password: string, res
     }
 
     // Log unknown errors and re-throw as generic
+    // eslint-disable-next-line no-console
     console.error(
       "[authenticateUser] Unexpected error:",
       error instanceof Error ? error.message : error,
