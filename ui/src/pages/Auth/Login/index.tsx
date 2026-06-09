@@ -119,7 +119,7 @@ const Login: React.FC = () => {
               },
             }}
           />
-          <Box sx={{ width: '100%', zIndex: 2, pb: { xs: 5, md: 8 }, px: { xs: 4, md: 8 }, mt: 'auto' }}>
+          <Box sx={{ width: '100%', zIndex: 2, pb: { xs: 5, md: 8 }, px: { xs: 4, md: 8 }, mt: 'auto', pt: { xs: 30, md: 56 } }}>
             <Typography
               sx={{
                 fontSize: { xs: '1rem', md: '1.15rem' },
@@ -172,9 +172,7 @@ const Login: React.FC = () => {
                 color: 'inherit',
               }}
             >
-              Gestiona horarios, asigna turnos y mantén el control total de tu flota de
-              choferes desde un solo lugar. Una plataforma diseñada para optimizar las
-              operaciones de tu empresa con eficiencia y seguridad.
+              Gestiona tu flota de choferes desde un solo lugar optimizando las operaciones con eficiencia y seguridad.
             </Typography>
 
             <Typography
@@ -185,7 +183,7 @@ const Login: React.FC = () => {
                 mt: 4,
                 color: '#ffffff',
                 opacity: 0.35,
-                fontSize: '0.6rem',
+                fontSize: '0.75rem',
                 letterSpacing: '0.04em',
                 fontWeight: 400,
               }}
@@ -216,9 +214,6 @@ const Login: React.FC = () => {
                   </Typography>
                   <Typography variant="body2" sx={{ color: 'text.secondary' }}>
                     Accede a tu panel de control
-                  </Typography>
-                  <Typography variant="body2" sx={{ color: 'text.secondary', mt: 1.5, fontSize: '0.8rem', lineHeight: 1.5 }}>
-                    Acceso exclusivo para personal autorizado
                   </Typography>
                 </Box>
 
@@ -328,6 +323,12 @@ const Login: React.FC = () => {
                     </Alert>
                   </Box>
                 )}
+
+                <Box sx={{ textAlign: 'center', mt: 4 }}>
+                  <Typography variant="caption" sx={{ color: 'text.secondary', fontSize: '0.75rem' }}>
+                    Acceso exclusivo para personal autorizado
+                  </Typography>
+                </Box>
               </Box>
             ) : (
               <Box sx={{ ...(mounted ? animateStagger(0) : {}) }}>
