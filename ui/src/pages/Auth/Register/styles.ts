@@ -218,7 +218,7 @@ export const textFieldStyles: SxProps<Theme> = (theme: Theme) => ({
         ? "rgba(55,55,65,0.8)"
         : "rgba(255,255,255,0.95)",
       borderColor: theme.palette.primary.main,
-      boxShadow: `0 0 0 3px ${theme.palette.mode === "dark" ? "rgba(255,255,255,0.08)" : "rgba(0,0,0,0.06)"}`,
+      boxShadow: `0 0 0 3px ${theme.palette.primary.main}33`,
     },
     "&.Mui-focused .MuiOutlinedInput-notchedOutline": {
       borderColor: "transparent",
@@ -322,9 +322,10 @@ export const submitButtonStyles: SxProps<Theme> = (theme) => ({
   fontSize: "0.9rem",
   textTransform: "none",
   letterSpacing: "0.01em",
-  boxShadow: theme.palette.mode === "dark"
-    ? "0 4px 16px rgba(255,255,255,0.15)"
-    : "0 4px 16px rgba(0,0,0,0.15)",
+    boxShadow: theme.palette.mode === "dark"
+      ? "0 4px 16px rgba(255,255,255,0.15)"
+      : "0 4px 16px rgba(0,0,0,0.15)",
+    outline: `1px solid ${theme.palette.mode === "dark" ? "rgba(255,255,255,0.06)" : "rgba(0,0,0,0.04)"}`,
   transition: "all 0.3s cubic-bezier(0.4, 0, 0.2, 1)",
   position: "relative",
   overflow: "hidden",
@@ -341,8 +342,9 @@ export const submitButtonStyles: SxProps<Theme> = (theme) => ({
   "&:hover": {
     transform: "translateY(-2px) scale(1.01)",
     boxShadow: theme.palette.mode === "dark"
-      ? "0 8px 24px rgba(255,255,255,0.2)"
-      : "0 8px 24px rgba(0,0,0,0.25)",
+      ? "0 8px 24px rgba(255,255,255,0.25), 0 0 0 1px rgba(255,255,255,0.2)"
+      : "0 8px 24px rgba(0,0,0,0.3), 0 0 0 1px rgba(0,0,0,0.08)",
+    outline: `1px solid ${theme.palette.mode === "dark" ? "rgba(255,255,255,0.2)" : "rgba(0,0,0,0.08)"}`,
   },
   "&:active": {
     transform: "translateY(0) scale(0.99)",
