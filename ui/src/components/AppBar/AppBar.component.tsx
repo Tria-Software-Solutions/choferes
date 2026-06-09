@@ -237,20 +237,6 @@ const AppBarComponent: React.FC<AppBarComponentProps> = ({
                     },
                     active: isActivePage(link.path || ''),
                   })),
-                  ...(hasNotificationsAccess()
-                    ? [{
-                        label: 'Notificaciones',
-                        icon: <Bell size={20} strokeWidth={1.5} />,
-                        onClick: () => {
-                          handleDashboardMenuClose();
-                          if (blocksButtonRef.current) {
-                            const syntheticEvent = { currentTarget: blocksButtonRef.current } as React.MouseEvent<HTMLElement>;
-                            handleNotificationsOpen(syntheticEvent);
-                          }
-                        },
-                        active: false,
-                      }]
-                    : []),
                 ]}
               />
             </Popover>

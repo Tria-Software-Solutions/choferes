@@ -11,9 +11,9 @@ import {
   Tooltip,
 } from "recharts";
 
-const SCHEDULE_COLORS = ["#7BA4D8", "#A78BDB", "#7EC8C3", "#B8A8D8", "#A8D8A8", "#E8A0B4", "#F0B8A0", "#8DA8E0", "#A0C8B8", "#D8A0C0"];
+const SCHEDULE_COLORS = ["#4361EE", "#F72585", "#FF6B6B", "#20B2AA", "#FFB703", "#06D6A0", "#7209B7", "#00B4D8", "#A7C957", "#FF85A1"];
 
-const COLORS = ["#A78BDB", "#7BA4D8", "#7EC8C3", "#8DA8E0", "#A8D8A8", "#E8A0B4", "#F0B8A0", "#B8A8D8"];
+const COLORS = ["#F72585", "#4361EE", "#20B2AA", "#7209B7", "#FFB703", "#06D6A0", "#FF6B6B", "#00B4D8"];
 
 interface TopEmployeesProps {
   data: { name: string; hours: number }[];
@@ -44,12 +44,12 @@ export const TopEmployeesChart = ({ data }: TopEmployeesProps) => {
               <Box sx={{ fontSize: "0.8rem", fontWeight: 500, color: "text.primary", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", maxWidth: "65%" }}>
                 {item.name}
               </Box>
-              <Box sx={{ fontSize: "0.75rem", fontWeight: 700, color: "#A78BDB", background: "rgba(167,139,219,0.1)", px: 0.75, py: 0.15, borderRadius: "4px" }}>
+              <Box sx={{ fontSize: "0.75rem", fontWeight: 700, color: "#4361EE", background: "rgba(67,97,238,0.1)", px: 0.75, py: 0.15, borderRadius: "4px" }}>
                 {item.hours} hrs
               </Box>
             </Box>
             <Box sx={{ height: 6, borderRadius: "3px", bgcolor: isDark ? "rgba(255,255,255,0.06)" : "rgba(0,0,0,0.06)", overflow: "hidden" }}>
-              <Box sx={{ height: "100%", width: `${pct}%`, borderRadius: "3px", background: "linear-gradient(90deg, #C4B0E8, #A78BDB)", transition: "width 0.6s cubic-bezier(0.4, 0, 0.2, 1)" }} />
+              <Box sx={{ height: "100%", width: `${pct}%`, borderRadius: "3px", background: "linear-gradient(90deg, #6C83F5, #4361EE)", transition: "width 0.6s cubic-bezier(0.4, 0, 0.2, 1)" }} />
             </Box>
           </Box>
         );
@@ -155,7 +155,7 @@ export const DailyAttendanceChart = ({ data }: DailyAttendanceProps) => {
             }}
             formatter={(value: number) => [`${value} empleados`, "Asistencia"]}
           />
-          <Line type="monotone" dataKey="count" stroke="#7BA4D8" strokeWidth={2} dot={{ r: 3, fill: "#7BA4D8" }} activeDot={{ r: 5 }} />
+          <Line type="monotone" dataKey="count" stroke="#4361EE" strokeWidth={2} dot={{ r: 3, fill: "#4361EE" }} activeDot={{ r: 5 }} />
         </LineChart>
       </ResponsiveContainer>
     </Box>
@@ -237,10 +237,10 @@ export const PeriodSummary = ({ employeeCount, totalHours, overtimeCount, period
   const avgHours = employeeCount > 0 ? Math.round((totalHours / employeeCount) * 10) / 10 : 0;
 
   const stats = [
-    { label: "Empleados", value: employeeCount, color: "#7BA4D8" },
-    { label: "Horas totales", value: totalHours, color: "#A78BDB" },
-    { label: "Promedio / empleado", value: avgHours, suffix: " hrs", color: "#7EC8C3" },
-    { label: "Horas extra", value: overtimeCount, color: "#E8A0B4" },
+    { label: "Empleados", value: employeeCount, color: "#4361EE" },
+    { label: "Horas totales", value: totalHours, color: "#F72585" },
+    { label: "Promedio / empleado", value: avgHours, suffix: " hrs", color: "#20B2AA" },
+    { label: "Horas extra", value: overtimeCount, color: "#FF6B6B" },
   ];
 
   return (
@@ -300,12 +300,12 @@ export const OvertimeBarList = ({ data }: OvertimeProps) => {
             <Box sx={{ fontSize: "0.8rem", fontWeight: 500, color: "text.primary", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", maxWidth: "65%" }}>
               {item.name}
             </Box>
-            <Box sx={{ fontSize: "0.75rem", fontWeight: 700, color: "#E8A0B4", background: "rgba(232,160,180,0.1)", px: 0.75, py: 0.15, borderRadius: "4px" }}>
+            <Box sx={{ fontSize: "0.75rem", fontWeight: 700, color: "#F72585", background: "rgba(247,37,133,0.1)", px: 0.75, py: 0.15, borderRadius: "4px" }}>
               +{item.value}
             </Box>
           </Box>
           <Box sx={{ height: 6, borderRadius: "3px", bgcolor: isDark ? "rgba(255,255,255,0.06)" : "rgba(0,0,0,0.06)", overflow: "hidden" }}>
-            <Box sx={{ height: "100%", width: `${(item.value / maxVal) * 100}%`, borderRadius: "3px", background: "linear-gradient(90deg, #F0B8C8, #E8A0B4)", transition: "width 0.6s cubic-bezier(0.4, 0, 0.2, 1)" }} />
+            <Box sx={{ height: "100%", width: `${(item.value / maxVal) * 100}%`, borderRadius: "3px", background: "linear-gradient(90deg, #FF5EAA, #F72585)", transition: "width 0.6s cubic-bezier(0.4, 0, 0.2, 1)" }} />
           </Box>
         </Box>
       ))}
