@@ -21,5 +21,9 @@ const LOGIN = {
   SERVER: "Despertando servidor... Esto puede tomar unos minutos",
   ACCESS_RESTRICTED: "Acceso exclusivo para personal autorizado",
   FLEET_MANAGEMENT: "Controla tu flota de choferes desde un solo lugar.",
+  FORGOT_PASSWORD_TITLE: "Recuperar contraseña",
+  FORGOT_PASSWORD_DESC: "Ingresa tu correo electrónico y te enviaremos un enlace para restablecer tu contraseña.",
+  SEND_RESET_LINK: "Enviar enlace",
+  BACK_TO_LOGIN: "Volver a iniciar sesión",
 };
 export default LOGIN;
