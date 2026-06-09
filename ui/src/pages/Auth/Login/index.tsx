@@ -161,7 +161,7 @@ const Login: React.FC = () => {
               </Typography>
             </Box>
             <Box
-              sx={{ width: 48, height: 3, borderRadius: 2, bgcolor: 'primary.main', mb: 3 }}
+              sx={{ width: 48, height: 3, borderRadius: 2, bgcolor: '#ffffff', mb: 3 }}
             />
             <Typography
               sx={{
@@ -173,9 +173,30 @@ const Login: React.FC = () => {
                 color: 'inherit',
               }}
             >
-              {LOGIN.FLEET_MANAGEMENT} {LOGIN.ACCESS_RESTRICTED}
+              Controla tu flota de choferes desde un solo lugar.
             </Typography>
           </Box>
+
+          <Typography
+            variant="caption"
+            sx={poweredByStyles}
+          >
+            Powered by{' '}
+            <Box
+              component="span"
+              sx={{
+                fontWeight: 600,
+                color: '#ffffff',
+                opacity: 0.6,
+                transition: 'opacity 0.2s',
+                cursor: 'pointer',
+                '&:hover': { opacity: 0.85 },
+              }}
+              onClick={() => window.open('https://triacr.com', '_blank', 'noopener noreferrer')}
+            >
+              Tria
+            </Box>
+          </Typography>
         </Box>
 
         <Box sx={right}>
@@ -188,6 +209,9 @@ const Login: React.FC = () => {
                   </Typography>
                   <Typography variant="body2" sx={{ color: 'text.secondary' }}>
                     Accede a tu panel de control
+                  </Typography>
+                  <Typography variant="body2" sx={{ color: 'text.secondary', mt: 1.5, fontSize: '0.8rem', lineHeight: 1.5 }}>
+                    Acceso exclusivo para personal autorizado
                   </Typography>
                 </Box>
 
@@ -351,28 +375,6 @@ const Login: React.FC = () => {
               </Box>
             )}
 
-            <Typography
-              variant="caption"
-              sx={poweredByStyles}
-            >
-              Powered by{' '}
-              <Box
-                component="span"
-                sx={{
-                  fontWeight: 600,
-                  color: 'text.primary',
-                  opacity: 0.6,
-                  transition: 'opacity 0.2s',
-                  cursor: 'pointer',
-                  '&:hover': { opacity: 0.85 },
-                }}
-                onClick={() => window.open('https://triacr.com', '_blank', 'noopener noreferrer')}
-              >
-                Tria
-              </Box>
-              <Box component="span" sx={{ opacity: 0.4, px: 0.5 }}>·</Box>
-              &copy; {new Date().getFullYear()} Choferes de Alquiler
-            </Typography>
           </Box>
         </Box>
       </Box>
