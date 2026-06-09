@@ -29,7 +29,6 @@ import {
   forgotHeader,
   forgotDescription,
   backLinkStyles,
-  poweredByStyles,
 } from './styles';
 import {
   textFieldStyles,
@@ -173,30 +172,38 @@ const Login: React.FC = () => {
                 color: 'inherit',
               }}
             >
-              Controla tu flota de choferes desde un solo lugar.
+              Gestiona horarios, asigna turnos y mantén el control total de tu flota de
+              choferes desde un solo lugar. Una plataforma diseñada para optimizar las
+              operaciones de tu empresa con eficiencia y seguridad.
+            </Typography>
+
+            <Typography
+              variant="caption"
+              sx={{
+                display: 'block',
+                textAlign: 'left',
+                mt: 4,
+                color: '#ffffff',
+                opacity: 0.35,
+                fontSize: '0.6rem',
+                letterSpacing: '0.04em',
+                fontWeight: 400,
+              }}
+            >
+              Powered by{' '}
+              <Box
+                component="span"
+                sx={{
+                  fontWeight: 600,
+                  cursor: 'pointer',
+                  '&:hover': { opacity: 1 },
+                }}
+                onClick={() => window.open('https://triacr.com', '_blank', 'noopener noreferrer')}
+              >
+                Tria
+              </Box>
             </Typography>
           </Box>
-
-          <Typography
-            variant="caption"
-            sx={poweredByStyles}
-          >
-            Powered by{' '}
-            <Box
-              component="span"
-              sx={{
-                fontWeight: 600,
-                color: '#ffffff',
-                opacity: 0.6,
-                transition: 'opacity 0.2s',
-                cursor: 'pointer',
-                '&:hover': { opacity: 0.85 },
-              }}
-              onClick={() => window.open('https://triacr.com', '_blank', 'noopener noreferrer')}
-            >
-              Tria
-            </Box>
-          </Typography>
         </Box>
 
         <Box sx={right}>
