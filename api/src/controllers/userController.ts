@@ -63,6 +63,7 @@ export const authenticateUser = async (req: Request, res: Response) => {
         });
       }
     }
+    // eslint-disable-next-line no-console
     console.error(
       "[authenticateUser] Unhandled error:",
       error instanceof Error ? error.message : error,
