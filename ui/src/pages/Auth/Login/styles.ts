@@ -113,41 +113,33 @@ export const optionsRow: SxProps<Theme> = {
 export const checkboxStyles: SxProps<Theme> = (theme) => ({
   '& .MuiCheckbox-root': {
     padding: '4px',
-    transition: 'all 0.2s cubic-bezier(0.4, 0, 0.2, 1)',
     '& .MuiSvgIcon-root': {
       fontSize: '1.1rem',
-      color: theme.palette.text.secondary,
-      transition: 'all 0.2s cubic-bezier(0.4, 0, 0.2, 1)',
+      color: theme.palette.mode === 'dark'
+        ? 'rgba(255,255,255,0.4)'
+        : 'rgba(0,0,0,0.3)',
     },
     '&.Mui-checked .MuiSvgIcon-root': {
       color: theme.palette.primary.main,
-      filter: `drop-shadow(0 0 4px ${theme.palette.primary.main}66)`,
-    },
-    '&:hover': {
-      '& .MuiSvgIcon-root': {
-        color: theme.palette.primary.main,
-        opacity: 0.7,
-      },
     },
   },
   '& .MuiFormControlLabel-label': {
     fontSize: '0.8rem',
     color: theme.palette.text.secondary,
     userSelect: 'none',
-    transition: 'color 0.2s ease',
-  },
-  '&:hover .MuiFormControlLabel-label': {
-    color: theme.palette.text.primary,
   },
 });
 
 export const forgotLinkStyles: SxProps<Theme> = (theme) => ({
-  fontSize: '0.8rem',
-  color: theme.palette.text.secondary,
+  fontSize: '0.875rem',
+  fontWeight: 600,
+  color: theme.palette.primary.main,
+  cursor: 'pointer',
   userSelect: 'none',
-  transition: 'color 0.2s ease',
   '&:hover': {
-    color: theme.palette.text.primary,
+    color: theme.palette.mode === 'dark'
+      ? theme.palette.primary.light
+      : theme.palette.primary.dark,
   },
 });
 

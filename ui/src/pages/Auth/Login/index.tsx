@@ -29,7 +29,6 @@ import {
   forgotHeader,
   forgotDescription,
   backLinkStyles,
-  poweredByStyles,
 } from './styles';
 import {
   textFieldStyles,
@@ -120,7 +119,7 @@ const Login: React.FC = () => {
               },
             }}
           />
-          <Box sx={{ width: '100%', zIndex: 2, pb: { xs: 5, md: 8 }, px: { xs: 4, md: 8 }, mt: 'auto' }}>
+          <Box sx={{ width: '100%', zIndex: 2, pb: { xs: 5, md: 8 }, px: { xs: 4, md: 8 }, mt: 'auto', pt: { xs: 30, md: 56 } }}>
             <Typography
               sx={{
                 fontSize: { xs: '1rem', md: '1.15rem' },
@@ -161,7 +160,7 @@ const Login: React.FC = () => {
               </Typography>
             </Box>
             <Box
-              sx={{ width: 48, height: 3, borderRadius: 2, bgcolor: 'primary.main', mb: 3 }}
+              sx={{ width: 48, height: 3, borderRadius: 2, bgcolor: '#ffffff', mb: 3 }}
             />
             <Typography
               sx={{
@@ -173,7 +172,34 @@ const Login: React.FC = () => {
                 color: 'inherit',
               }}
             >
-              {LOGIN.FLEET_MANAGEMENT} {LOGIN.ACCESS_RESTRICTED}
+              Gestiona tu flota de choferes desde un solo lugar optimizando las operaciones con eficiencia y seguridad.
+            </Typography>
+
+            <Typography
+              variant="caption"
+              sx={{
+                display: 'block',
+                textAlign: 'left',
+                mt: 4,
+                color: '#ffffff',
+                opacity: 0.35,
+                fontSize: '0.75rem',
+                letterSpacing: '0.04em',
+                fontWeight: 400,
+              }}
+            >
+              Powered by{' '}
+              <Box
+                component="span"
+                sx={{
+                  fontWeight: 600,
+                  cursor: 'pointer',
+                  '&:hover': { opacity: 1 },
+                }}
+                onClick={() => window.open('https://triacr.com', '_blank', 'noopener noreferrer')}
+              >
+                Tria
+              </Box>
             </Typography>
           </Box>
         </Box>
@@ -261,7 +287,7 @@ const Login: React.FC = () => {
                         sx={checkboxStyles}
                       />
                       <Typography
-                        sx={{ ...forgotLinkStyles, cursor: 'pointer' }}
+                        sx={forgotLinkStyles}
                         onClick={() => setView('forgotPassword')}
                       >
                         ¿Olvidaste tu contraseña?
@@ -297,6 +323,12 @@ const Login: React.FC = () => {
                     </Alert>
                   </Box>
                 )}
+
+                <Box sx={{ textAlign: 'center', mt: 4 }}>
+                  <Typography variant="caption" sx={{ color: 'text.secondary', fontSize: '0.75rem' }}>
+                    Acceso exclusivo para personal autorizado
+                  </Typography>
+                </Box>
               </Box>
             ) : (
               <Box sx={{ ...(mounted ? animateStagger(0) : {}) }}>
@@ -351,28 +383,6 @@ const Login: React.FC = () => {
               </Box>
             )}
 
-            <Typography
-              variant="caption"
-              sx={poweredByStyles}
-            >
-              Powered by{' '}
-              <Box
-                component="span"
-                sx={{
-                  fontWeight: 600,
-                  color: 'text.primary',
-                  opacity: 0.6,
-                  transition: 'opacity 0.2s',
-                  cursor: 'pointer',
-                  '&:hover': { opacity: 0.85 },
-                }}
-                onClick={() => window.open('https://triacr.com', '_blank', 'noopener noreferrer')}
-              >
-                Tria
-              </Box>
-              <Box component="span" sx={{ opacity: 0.4, px: 0.5 }}>·</Box>
-              &copy; {new Date().getFullYear()} Choferes de Alquiler
-            </Typography>
           </Box>
         </Box>
       </Box>
