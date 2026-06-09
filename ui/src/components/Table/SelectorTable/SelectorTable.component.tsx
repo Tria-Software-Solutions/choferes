@@ -1394,9 +1394,7 @@ const SelectorTableComponent: React.FC<SelectorTableProps> = ({
                     },
                   },
                 },
-                onBlur: (e) => {
-                  e.target.blur();
-                },
+
               }}
             />
           </div>
