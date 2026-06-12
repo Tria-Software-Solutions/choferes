@@ -21,6 +21,7 @@ body {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   overflow-x: hidden;
+  -webkit-tap-highlight-color: transparent;
 }
 
 /* Selection styling */
@@ -58,6 +59,13 @@ body {
 *:focus-visible {
   outline: 2px solid #000000;
   outline-offset: 2px;
+}
+
+/* Ensure adequate touch target sizes on mobile */
+@media (pointer: coarse) {
+  button, a, [role="button"], .MuiIconButton-root, .MuiButtonBase-root {
+    min-height: 44px;
+  }
 }
 
 /* Code blocks */
@@ -114,20 +122,20 @@ code {
 .page-container {
   max-width: 1400px;
   margin: 0 auto;
-  padding: 24px;
+  padding: clamp(12px, 2vw, 24px);
 }
 
 @media (min-width: 1280px) {
   .page-container {
-    padding: 32px 40px;
+    padding: clamp(12px, 2vw, 24px) clamp(16px, 3vw, 40px);
   }
 }
 
 /* Card grid improvements */
 .card-grid {
   display: grid;
-  gap: 24px;
-  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  gap: clamp(12px, 2vw, 24px);
+  grid-template-columns: repeat(auto-fill, minmax(min(280px, 100%), 1fr));
 }
 
 /* Input focus ring animation */

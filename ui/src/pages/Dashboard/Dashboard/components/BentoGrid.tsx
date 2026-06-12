@@ -17,7 +17,8 @@ export const BentoGrid: React.FC<BentoGridProps> = ({ children, sx }) => {
           md: "repeat(4, 1fr)",
         },
         gridAutoRows: {
-          xs: "auto",
+          xs: "minmax(280px, auto)",
+          sm: "minmax(300px, auto)",
           md: "1fr",
         },
         gap: { xs: 1.5, sm: 2 },
