@@ -70,11 +70,11 @@ export const tableHeadStyles: SxProps<Theme> = (theme) => ({
     fontSize: "0.75rem",
     letterSpacing: "0.06em",
     textTransform: "uppercase",
-    padding: "12px 16px",
+    padding: { xs: "6px 8px", sm: "12px 16px" },
     borderBottom: "none",
     fontFamily: "'Urbanist', -apple-system, BlinkMacSystemFont, sans-serif",
     lineHeight: 1.3,
-    whiteSpace: "nowrap",
+    whiteSpace: { xs: "normal", sm: "nowrap" },
     position: "sticky",
     top: 0,
     zIndex: 50,
@@ -91,15 +91,15 @@ export const tableHeadStyles: SxProps<Theme> = (theme) => ({
 export const employeeColumnCellStyles = (
   isSmallScreen: boolean,
 ): SxProps<Theme> => (theme) => ({
-  padding: isSmallScreen ? "8px 12px" : "12px 16px",
+  padding: isSmallScreen ? "6px 8px" : "12px 16px",
   position: "sticky",
   left: 0,
   zIndex: 11,
-  whiteSpace: "nowrap",
+  whiteSpace: isSmallScreen ? "normal" : "nowrap",
   textAlign: "left",
   backgroundColor: "inherit",
   fontWeight: 600,
-  fontSize: "0.875rem",
+  fontSize: isSmallScreen ? "0.75rem" : "0.875rem",
   fontFamily: "'Urbanist', -apple-system, BlinkMacSystemFont, sans-serif",
   borderRight: "none",
   letterSpacing: "-0.01em",
@@ -107,12 +107,12 @@ export const employeeColumnCellStyles = (
 
 // Premium table cell styles
 export const tableCellStyles = (isSmallScreen: boolean): SxProps<Theme> => (theme) => ({
-  padding: isSmallScreen ? "8px 12px" : "12px 16px",
+  padding: isSmallScreen ? "6px 8px" : "12px 16px",
   zIndex: 10,
-  whiteSpace: "nowrap",
+  whiteSpace: isSmallScreen ? "normal" : "nowrap",
   color: theme.palette.text.primary,
   backgroundColor: "transparent",
-  fontSize: "0.875rem",
+  fontSize: isSmallScreen ? "0.75rem" : "0.875rem",
   fontWeight: 500,
   fontFamily: "'Urbanist', -apple-system, BlinkMacSystemFont, sans-serif",
   borderBottom: "none",
@@ -272,16 +272,17 @@ export const tableCellBackground = (
 export const employeeCellBoxStyles = (
   isSmallScreen: boolean,
 ): SxProps<Theme> => ({
-  whiteSpace: "nowrap",
+  whiteSpace: isSmallScreen ? "normal" : "nowrap",
   textAlign: "left",
-  gap: 1,
+  gap: 0.5,
   display: "flex",
   alignItems: "center",
+  flexWrap: isSmallScreen ? "wrap" : "nowrap",
 });
 
 // Premium Select styles for schedule cells
 export const scheduleSelectStyles: SxProps<Theme> = (theme) => ({
-  minWidth: "120px",
+  minWidth: { xs: "80px", sm: "120px" },
   "& .MuiOutlinedInput-root": {
     borderRadius: "12px",
     backgroundColor: theme.palette.background.paper,

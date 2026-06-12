@@ -97,8 +97,8 @@ const AppModal: React.FC<AppModalProps> = ({
             ? "1px solid rgba(255,255,255,0.08)"
             : "1px solid rgba(0,0,0,0.08)",
           borderRadius: "16px",
-          minWidth: 400,
-          maxWidth: 520,
+          minWidth: { xs: "92vw", sm: 400 },
+          maxWidth: { xs: "98vw", sm: 520 },
           boxShadow: "0 24px 48px rgba(0,0,0,0.12), 0 8px 16px rgba(0,0,0,0.08)",
           overflow: "hidden",
           bgcolor: "background.paper",

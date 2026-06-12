@@ -37,14 +37,12 @@ export const wrapper: SxProps<Theme> = {
 export const split: SxProps<Theme> = () => ({
   display: "flex",
   width: "100%",
-  minHeight: "100vh",
+  minHeight: "100dvh",
   flex: 1,
   overflow: "hidden",
   boxShadow: "none",
   borderRadius: 0,
-  "@media (max-width:900px)": {
-    flexDirection: "column",
-  },
+  flexDirection: { xs: "column", md: "row" },
 });
 
 export const left: SxProps<Theme> = (theme) => ({
@@ -55,7 +53,7 @@ export const left: SxProps<Theme> = (theme) => ({
   justifyContent: "space-between",
   p: { xs: 6, md: 10 },
   py: { xs: 6, md: 8 },
-  minHeight: "100vh",
+  minHeight: "100dvh",
   position: 'relative',
   background: theme.palette.mode === 'dark' ? '#0f0f1a' : theme.palette.background.default,
   color: '#ffffff',
@@ -70,9 +68,9 @@ export const right: SxProps<Theme> = (theme: Theme) => ({
   display: "flex",
   alignItems: "center",
   justifyContent: "center",
-  p: { xs: 3, md: 8 },
+  p: { xs: 2, sm: 3, md: 8 },
   background: theme.palette.mode === 'dark' ? '#0f0f1a' : theme.palette.background.default,
-  minHeight: "100vh",
+  minHeight: "100dvh",
   position: "relative",
   overflow: "hidden",
 });
@@ -83,6 +81,7 @@ export const formContainer: SxProps<Theme> = {
   margin: "0 auto",
   position: "relative",
   zIndex: 1,
+  px: { xs: 0.5, sm: 0 },
 };
 
 export const header: SxProps<Theme> = {

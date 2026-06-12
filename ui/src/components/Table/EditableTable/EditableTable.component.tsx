@@ -226,7 +226,9 @@ const EditableTableComponent = <T extends object>({
   const rowsPerPageOptions = useMemo(
     () => {
       const total = totalCount;
-      const defaultOptions = ROWS_PER_PAGE_OPTIONS;
+      const defaultOptions = isSmallScreen
+        ? ROWS_PER_PAGE_OPTIONS.filter(o => o <= 25)
+        : ROWS_PER_PAGE_OPTIONS;
       
       // Generate dynamic options based on total
       const dynamicOptions: number[] = [];
@@ -243,7 +245,7 @@ const EditableTableComponent = <T extends object>({
       const allOptions = Array.from(new Set([...defaultOptions, ...dynamicOptions, rowsPerPage]));
       return allOptions.filter((opt) => opt <= total || total === 0).sort((a, b) => a - b);
     },
-    [rowsPerPage, totalCount]
+    [isSmallScreen, rowsPerPage, totalCount]
   );
 
   const handlePageChange = useCallback(
@@ -343,7 +345,7 @@ const EditableTableComponent = <T extends object>({
         <Table
           stickyHeader
           aria-label="sticky table"
-          sx={{ width: "100%", minWidth: 650, borderCollapse: "separate" }}
+          sx={{ width: "100%", minWidth: { xs: "auto", md: 650 }, borderCollapse: "separate" }}
         >
           <TableHead sx={{ position: "sticky", top: tableHeadTopOffset, zIndex: 20, backgroundColor: theme.palette.mode === "dark" ? "#0a0a0a" : "#000000" }}>
             <TableRow>
@@ -380,7 +382,7 @@ const EditableTableComponent = <T extends object>({
                 </TableCell>
               )}
               {!noActions && (hasEditPermissions || hasDeletePermissions) && (
-                <TableCell className="tableCell" sx={{ ...tableHeadCellStyles(theme, tableHeadTopOffset), width: 0, whiteSpace: "nowrap", borderRight: `1px solid ${theme.palette.mode === "dark" ? "rgba(255,255,255,0.06)" : "rgba(0,0,0,0.06)"}` }} />
+                <TableCell className="tableCell" sx={{ ...tableHeadCellStyles(theme, tableHeadTopOffset), width: 0, whiteSpace: { xs: "normal", sm: "nowrap" }, borderRight: `1px solid ${theme.palette.mode === "dark" ? "rgba(255,255,255,0.06)" : "rgba(0,0,0,0.06)"}` }} />
               )}
             </TableRow>
           </TableHead>
@@ -479,7 +481,7 @@ const EditableTableComponent = <T extends object>({
                     <TableCell className="tableCell" sx={{ 
                       ...tableCellStyles, 
                       width: 0, 
-                      whiteSpace: "nowrap", 
+                      whiteSpace: { xs: "normal", sm: "nowrap" }, 
                       borderLeft: `1px solid ${theme.palette.mode === "dark" ? "rgba(255,255,255,0.06)" : "rgba(0,0,0,0.06)"}`,
                       borderBottom: `1px solid ${theme.palette.mode === "dark" ? "rgba(255,255,255,0.04)" : "rgba(0,0,0,0.04)"}`
                     }}>
@@ -497,6 +499,8 @@ const EditableTableComponent = <T extends object>({
                         handleCancelClick,
                         handleOpenDeleteDialog,
                         isSaveDisabled: isSaveDisabled || false,
+                        isSmallScreen,
+                        theme,
                       })}
                     </TableCell>
                   )}

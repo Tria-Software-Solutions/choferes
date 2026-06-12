@@ -1,7 +1,7 @@
-import React, { useCallback } from "react";
-import { Box, IconButton } from "@mui/material";
+import React, { useCallback, useState } from "react";
+import { Box, IconButton, Menu, MenuItem, ListItemIcon, ListItemText, Theme } from "@mui/material";
 import PremiumTooltip from "../../../../components/PremiumTooltip/PremiumTooltip.component";
-import { FileEdit, Trash2, CheckCircle, X, Lock, ToggleLeft, ToggleRight } from "lucide-react";
+import { FileEdit, Trash2, CheckCircle, X, Lock, ToggleLeft, ToggleRight, MoreVertical } from "lucide-react";
 import { TABLE } from "../../../../constants/constants";
 
 interface ActionButtonsProps<T extends object> {
@@ -18,6 +18,8 @@ interface ActionButtonsProps<T extends object> {
   handleCancelClick?: () => void;
   handleOpenDeleteDialog?: (id: number) => void;
   isSaveDisabled?: boolean;
+  isSmallScreen: boolean;
+  theme: Theme;
 }
 
 function EditingActions({
@@ -52,6 +54,77 @@ function EditingActions({
         </span>
       </PremiumTooltip>
     </Box>
+  );
+}
+
+function ViewingActionsMobile<T extends object>({
+  row,
+  rowId,
+  currentUser,
+  hasEditPermissions,
+  hasDeletePermissions,
+  isExpanded,
+  onOpenPasswordModal,
+  handleEditClick,
+  handleOpenDeleteDialog,
+  theme,
+}: Required<Pick<ActionButtonsProps<T>, "row" | "currentUser" | "hasEditPermissions" | "hasDeletePermissions" | "isExpanded">> &
+  Pick<ActionButtonsProps<T>, "onOpenPasswordModal" | "handleEditClick" | "handleOpenDeleteDialog"> & { rowId: number; theme: Theme }): React.ReactElement {
+  const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
+  const isUser = "username" in row;
+  const isCurrentUser = rowId === currentUser?.id;
+  const showPasswordButton = isUser && isExpanded && onOpenPasswordModal;
+  const showEditButton = hasEditPermissions;
+  const showDeleteButton = hasDeletePermissions && (!isUser || (!isCurrentUser && !("isActive" in row)));
+
+  const handleEdit = useCallback(() => { setAnchorEl(null); handleEditClick?.(row); }, [handleEditClick, row]);
+  const handleDelete = useCallback(() => { setAnchorEl(null); handleOpenDeleteDialog?.(rowId); }, [handleOpenDeleteDialog, rowId]);
+  const handlePassword = useCallback(() => { setAnchorEl(null); onOpenPasswordModal?.(rowId); }, [onOpenPasswordModal, rowId]);
+
+  return (
+    <>
+      <IconButton
+        onClick={(e) => setAnchorEl(e.currentTarget)}
+        size="small"
+        sx={{ p: 0.5 }}
+      >
+        <MoreVertical size={18} />
+      </IconButton>
+      <Menu
+        anchorEl={anchorEl}
+        open={Boolean(anchorEl)}
+        onClose={() => setAnchorEl(null)}
+        transformOrigin={{ horizontal: "right", vertical: "top" }}
+        anchorOrigin={{ horizontal: "right", vertical: "bottom" }}
+        PaperProps={{
+          sx: {
+            minWidth: 160,
+            borderRadius: 2,
+            boxShadow: "0 8px 32px rgba(0,0,0,0.15)",
+            border: `1px solid ${theme.palette.mode === "dark" ? "rgba(255,255,255,0.08)" : "rgba(0,0,0,0.08)"}`,
+          },
+        }}
+      >
+        {showPasswordButton && (
+          <MenuItem onClick={handlePassword} sx={{ gap: 1.5, py: 1 }}>
+            <ListItemIcon sx={{ minWidth: 28 }}><Lock size={16} /></ListItemIcon>
+            <ListItemText primaryTypographyProps={{ fontSize: "0.85rem" }}>{TABLE.CHANGE_PASSWORD}</ListItemText>
+          </MenuItem>
+        )}
+        {showEditButton && (
+          <MenuItem onClick={handleEdit} sx={{ gap: 1.5, py: 1 }}>
+            <ListItemIcon sx={{ minWidth: 28 }}><FileEdit size={16} /></ListItemIcon>
+            <ListItemText primaryTypographyProps={{ fontSize: "0.85rem" }}>{TABLE.EDIT}</ListItemText>
+          </MenuItem>
+        )}
+        {showDeleteButton && (
+          <MenuItem onClick={handleDelete} sx={{ gap: 1.5, py: 1, color: theme.palette.error.main }}>
+            <ListItemIcon sx={{ minWidth: 28, color: theme.palette.error.main }}><Trash2 size={16} /></ListItemIcon>
+            <ListItemText primaryTypographyProps={{ fontSize: "0.85rem" }}>{TABLE.DELETE}</ListItemText>
+          </MenuItem>
+        )}
+      </Menu>
+    </>
   );
 }
 
@@ -117,7 +190,7 @@ function ViewingActions<T extends object>({
 }
 
 export function renderActionButtons<T extends object>(props: ActionButtonsProps<T>): React.ReactNode {
-  const { row, editRowId, getRowId, currentUser, hasEditPermissions, hasDeletePermissions, isExpanded } = props;
+  const { row, editRowId, getRowId, currentUser, hasEditPermissions, hasDeletePermissions, isExpanded, isSmallScreen, theme } = props;
 
   const rowId = getRowId(row);
   const isEditing = editRowId === rowId;
@@ -134,6 +207,23 @@ export function renderActionButtons<T extends object>(props: ActionButtonsProps<
   }
 
   if (!hasEditPermissions && !hasDeletePermissions) return null;
+
+  if (isSmallScreen) {
+    return (
+      <ViewingActionsMobile
+        row={row}
+        rowId={rowId}
+        currentUser={currentUser ?? { id: 0 }}
+        hasEditPermissions={hasEditPermissions}
+        hasDeletePermissions={hasDeletePermissions}
+        isExpanded={isExpanded}
+        onOpenPasswordModal={props.onOpenPasswordModal}
+        handleEditClick={props.handleEditClick}
+        handleOpenDeleteDialog={props.handleOpenDeleteDialog}
+          theme={theme}
+        />
+    );
+  }
 
   return (
     <ViewingActions
