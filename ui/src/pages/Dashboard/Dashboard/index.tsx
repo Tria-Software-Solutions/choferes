@@ -324,7 +324,7 @@ const Dashboard = () => {
     <Box className="scrollable-content" sx={{ height: "100%", display: "flex", flexDirection: "column", overflow: "hidden", pb: 0, pt: 0, px: 0 }}>
       <Paper elevation={0} sx={{ borderRadius: { xs: "12px", sm: "16px" }, border: "1px solid rgba(0,0,0,0.08)", boxShadow: "0 4px 24px rgba(0,0,0,0.08), 0 1px 2px rgba(0,0,0,0.04)", overflow: "hidden", flex: 1, display: "flex", flexDirection: "column", mx: { xs: 0.5, sm: 1.5, md: 2 }, mb: { xs: 1.5, sm: 3 }, mt: 0 }}>
         <Box sx={{ px: { xs: 1.5, sm: 3 }, py: { xs: 1.5, sm: 2.5 }, backgroundColor: theme.palette.background.paper, color: theme.palette.text.primary, borderBottom: `1px solid ${theme.palette.mode === "dark" ? "rgba(255,255,255,0.08)" : "rgba(0,0,0,0.08)"}` }}>
-          <Box display="flex" justifyContent="space-between" alignItems={{ xs: "flex-start", sm: "center" }} flexDirection={{ xs: "column", sm: "row" }} gap={{ xs: 1.5, sm: 0 }} mb={2}>
+          <Box display="flex" justifyContent="space-between" alignItems={{ xs: "flex-start", sm: "center" }} flexDirection={{ xs: "column", sm: "row" }} gap={{ xs: 1, sm: 0 }} mb={{ xs: 1.5, sm: 2 }}>
             <Box display="flex" alignItems="center" gap={1.5}>
               <Box sx={{ backgroundColor: theme.palette.primary.main, borderRadius: "10px", p: 1, display: "flex", alignItems: "center", justifyContent: "center" }}>
                 <LayoutDashboard size={22} color={theme.palette.primary.contrastText} />
@@ -342,7 +342,7 @@ const Dashboard = () => {
               gap: 0,
               alignSelf: { xs: "stretch", sm: "auto" },
               "& .MuiButtonGroup-grouped": {
-                textTransform: "none", fontWeight: 600, fontSize: "0.8rem", px: 2, height: "38px",
+                textTransform: "none", fontWeight: 600, fontSize: { xs: "0.75rem", sm: "0.8rem" }, px: { xs: 1.5, sm: 2 }, height: { xs: "34px", sm: "38px" },
                 border: `1px solid ${theme.palette.mode === "dark" ? "rgba(255,255,255,0.2)" : "rgba(0,0,0,0.15)"}`,
                 color: theme.palette.text.secondary, backgroundColor: "transparent",
                 "&:hover": { backgroundColor: theme.palette.mode === "dark" ? "rgba(255,255,255,0.05)" : "rgba(0,0,0,0.04)", borderColor: theme.palette.mode === "dark" ? "rgba(255,255,255,0.3)" : "rgba(0,0,0,0.25)" },
@@ -355,7 +355,7 @@ const Dashboard = () => {
             </ButtonGroup>
           </Box>
         </Box>
-        <Box sx={{ flex: 1, overflow: "auto", p: { xs: 2, sm: 3 }, display: "flex", flexDirection: "column" }}>
+        <Box sx={{ flex: 1, overflow: "auto", p: { xs: 1.5, sm: 3 }, display: "flex", flexDirection: "column" }}>
           <BentoGrid>
             <BentoGridItem
               title="Resumen del período"

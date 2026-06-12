@@ -94,6 +94,7 @@ import {
   deleteHoursWorked, // <-- importa la acción de borrado
 } from "../../../store/slices/hoursWorkedSlice";
 import SwapHorizIcon from "@mui/icons-material/SwapHoriz";
+import SelectorTableMobileLayout from "./SelectorTableMobileLayout";
 
 // SelectorTable component displays and manages employee schedules, hours worked, and summary data for different periods (weekly, biweekly, monthly).
 // Props:
@@ -487,6 +488,36 @@ const SelectorTableComponent: React.FC<SelectorTableProps> = ({
 
   return (
     <>
+      {isSmallScreen ? (
+        <SelectorTableMobileLayout
+          filteredEmployees={filteredEmployees}
+          schedules={schedules}
+          hoursWorked={hoursWorked}
+          weeklySummaries={weeklySummaries}
+          biweeklySummaries={biweeklySummaries}
+          monthlySummaries={monthlySummaries}
+          weekOffset={weekOffset}
+          weekNumber={weekNumber}
+          biweekNumber={biweekNumber}
+          month={month}
+          year={year}
+          handleChange={handleChange}
+          permissions={permissions}
+          viewMode={viewMode}
+          setViewMode={setViewMode}
+          onInfoClick={(employee) => setOpenInfoDialogEmployee(employee)}
+          onAdjustClick={(employee) => setOpenAdjustDialogEmployee(employee)}
+          onAddScheduleClick={() => setOpenAddScheduleModal(true)}
+          page={page}
+          rowsPerPage={rowsPerPage}
+          totalCount={sortedEmployees.length}
+          onPageChange={setPage}
+          onRowsPerPageChange={setRowsPerPage as (rows: number) => void}
+          employeeSearchTerms={employeeSearchTerms}
+          onSearchChange={handleSearchChange}
+          onScheduleEmployeesChange={handleScheduleEmployeesChange}
+        />
+      ) : (
       <Paper sx={paperStyles}>
         <Box sx={stickyHeaderBoxStyles(isSmallScreen)}>
           <Box
@@ -1400,6 +1431,7 @@ const SelectorTableComponent: React.FC<SelectorTableProps> = ({
           </div>
         </Box>
       </Paper>
+      )}
       <DialogComponent
         open={!!openAdjustDialogEmployee}
         onClose={() => setOpenAdjustDialogEmployee(null)}
