@@ -35,20 +35,20 @@ export const TopEmployeesChart = ({ data }: TopEmployeesProps) => {
   const maxVal = Math.max(...limited.map((d) => d.hours), 1);
 
   return (
-    <Box sx={{ display: "flex", flexDirection: "column", gap: 1, overflow: "auto", flex: 1, minHeight: 0, pr: 0.5 }}>
+    <Box sx={{ display: "flex", flexDirection: "column", gap: 0.75, overflow: "auto", flex: 1, minHeight: 0, pr: 0.5 }}>
       {limited.map((item, i) => {
         const pct = Math.round((item.hours / maxVal) * 100);
         return (
           <Box key={item.name}>
             <Box sx={{ display: "flex", justifyContent: "space-between", mb: 0.25 }}>
-              <Box sx={{ fontSize: "0.8rem", fontWeight: 500, color: "text.primary", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", maxWidth: "65%" }}>
+              <Box sx={{ fontSize: { xs: "0.75rem", sm: "0.8rem" }, fontWeight: 500, color: "text.primary", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", maxWidth: { xs: "55%", sm: "65%" } }}>
                 {item.name}
               </Box>
-              <Box sx={{ fontSize: "0.75rem", fontWeight: 700, color: "#4361EE", background: "rgba(67,97,238,0.1)", px: 0.75, py: 0.15, borderRadius: "4px" }}>
+              <Box sx={{ fontSize: { xs: "0.7rem", sm: "0.75rem" }, fontWeight: 700, color: "#4361EE", background: "rgba(67,97,238,0.1)", px: 0.75, py: 0.15, borderRadius: "4px", whiteSpace: "nowrap" }}>
                 {item.hours} hrs
               </Box>
             </Box>
-            <Box sx={{ height: 6, borderRadius: "3px", bgcolor: isDark ? "rgba(255,255,255,0.06)" : "rgba(0,0,0,0.06)", overflow: "hidden" }}>
+            <Box sx={{ height: { xs: 4, sm: 6 }, borderRadius: "3px", bgcolor: isDark ? "rgba(255,255,255,0.06)" : "rgba(0,0,0,0.06)", overflow: "hidden" }}>
               <Box sx={{ height: "100%", width: `${pct}%`, borderRadius: "3px", background: "linear-gradient(90deg, #6C83F5, #4361EE)", transition: "width 0.6s cubic-bezier(0.4, 0, 0.2, 1)" }} />
             </Box>
           </Box>
@@ -77,8 +77,8 @@ export const VehicleBrandChart = ({ data }: VehicleBrandProps) => {
   const items = data.slice(0, 8);
 
   return (
-    <Box sx={{ flex: 1, display: "flex", gap: 1.5, minHeight: 0 }}>
-      <Box sx={{ width: "50%", height: "100%", minHeight: 0, flexShrink: 0, minWidth: 0 }}>
+    <Box sx={{ flex: 1, display: "flex", flexDirection: { xs: "column", sm: "row" }, gap: { xs: 0.5, sm: 1.5 }, minHeight: 0 }}>
+      <Box sx={{ width: { xs: "100%", sm: "50%" }, height: { xs: "60%", sm: "100%" }, minHeight: { xs: 120, sm: 0 }, flexShrink: 0, minWidth: 0 }}>
         <ResponsiveContainer width="100%" height="100%">
           <PieChart>
             <Pie
@@ -108,9 +108,9 @@ export const VehicleBrandChart = ({ data }: VehicleBrandProps) => {
           </PieChart>
         </ResponsiveContainer>
       </Box>
-      <Box sx={{ flex: 1, display: "flex", flexDirection: "column", gap: 0.5, justifyContent: "center", minHeight: 0, alignItems: "flex-end" }}>
+      <Box sx={{ flex: 1, display: "flex", flexDirection: "column", gap: 0.5, justifyContent: "center", minHeight: 0, alignItems: { xs: "center", sm: "flex-end" }, flexWrap: { xs: "wrap", sm: "nowrap" } }}>
         {items.map((item, i) => (
-          <Box key={item.brand} sx={{ display: "flex", alignItems: "center", gap: 0.5, textAlign: "right" }}>
+          <Box key={item.brand} sx={{ display: "flex", alignItems: "center", gap: 0.5, textAlign: { xs: "center", sm: "right" } }}>
             <Box sx={{ fontSize: "0.7rem", fontWeight: 500, color: "text.primary", lineHeight: 1.3, wordBreak: "break-word" }}>
               {item.brand}
             </Box>
@@ -143,8 +143,8 @@ export const DailyAttendanceChart = ({ data }: DailyAttendanceProps) => {
   return (
     <Box sx={{ flex: 1, width: "100%", height: "100%", minHeight: 0 }}>
       <ResponsiveContainer width="100%" height="100%">
-        <LineChart data={ordered} margin={{ left: 5, right: 5, top: 5, bottom: 5 }}>
-          <XAxis dataKey="day" tick={{ fontSize: 10, fill: isDark ? "#9ca3af" : "#6b7280" }} axisLine={false} tickLine={false} />
+        <LineChart data={ordered} margin={{ left: 0, right: 0, top: 5, bottom: 0 }}>
+          <XAxis dataKey="day" tick={{ fontSize: 9, fill: isDark ? "#9ca3af" : "#6b7280" }} axisLine={false} tickLine={false} interval="preserveStartEnd" />
           <YAxis hide />
           <Tooltip
             contentStyle={{
@@ -182,7 +182,7 @@ export const ScheduleDistributionChart = ({ data }: ScheduleDistributionProps) =
   const maxVal = Math.max(...sorted.map((d) => d.count), 1);
 
   return (
-    <Box sx={{ display: "flex", flexDirection: "column", gap: 1.25, overflow: "auto", flex: 1, minHeight: 0, pr: 0.5 }}>
+    <Box sx={{ display: "flex", flexDirection: "column", gap: { xs: 0.75, sm: 1.25 }, overflow: "auto", flex: 1, minHeight: 0, pr: 0.5 }}>
       {sorted.map((item, i) => {
         const pct = Math.round((item.count / maxVal) * 100);
         const color = SCHEDULE_COLORS[i % SCHEDULE_COLORS.length];
@@ -191,22 +191,22 @@ export const ScheduleDistributionChart = ({ data }: ScheduleDistributionProps) =
             <Box sx={{ display: "flex", justifyContent: "space-between", mb: 0.25 }}>
               <Box
                 sx={{
-                  fontSize: "0.75rem",
+                  fontSize: { xs: "0.7rem", sm: "0.75rem" },
                   fontWeight: 500,
                   color: "text.primary",
                   overflow: "hidden",
                   textOverflow: "ellipsis",
                   whiteSpace: "nowrap",
-                  maxWidth: "60%",
+                  maxWidth: { xs: "55%", sm: "60%" },
                 }}
               >
                 {item.label}
               </Box>
-              <Box sx={{ fontSize: "0.75rem", fontWeight: 700, color, px: 0.75, py: 0.15, borderRadius: "4px", background: `${color}1a` }}>
+              <Box sx={{ fontSize: { xs: "0.7rem", sm: "0.75rem" }, fontWeight: 700, color, px: 0.75, py: 0.15, borderRadius: "4px", background: `${color}1a` }}>
                 {item.count}
               </Box>
             </Box>
-            <Box sx={{ height: 8, borderRadius: "4px", bgcolor: isDark ? "rgba(255,255,255,0.06)" : "rgba(0,0,0,0.06)", overflow: "hidden" }}>
+            <Box sx={{ height: { xs: 6, sm: 8 }, borderRadius: "4px", bgcolor: isDark ? "rgba(255,255,255,0.06)" : "rgba(0,0,0,0.06)", overflow: "hidden" }}>
               <Box
                 sx={{
                   height: "100%",
@@ -293,18 +293,18 @@ export const OvertimeBarList = ({ data }: OvertimeProps) => {
   const displayData = data.slice(0, 10);
 
   return (
-    <Box sx={{ display: "flex", flexDirection: "column", gap: 1, overflow: "auto", flex: 1, minHeight: 0 }}>
+    <Box sx={{ display: "flex", flexDirection: "column", gap: 0.75, overflow: "auto", flex: 1, minHeight: 0 }}>
       {displayData.map((item, i) => (
         <Box key={i}>
           <Box sx={{ display: "flex", justifyContent: "space-between", mb: 0.25 }}>
-            <Box sx={{ fontSize: "0.8rem", fontWeight: 500, color: "text.primary", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", maxWidth: "65%" }}>
+            <Box sx={{ fontSize: { xs: "0.75rem", sm: "0.8rem" }, fontWeight: 500, color: "text.primary", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", maxWidth: { xs: "55%", sm: "65%" } }}>
               {item.name}
             </Box>
-            <Box sx={{ fontSize: "0.75rem", fontWeight: 700, color: "#F72585", background: "rgba(247,37,133,0.1)", px: 0.75, py: 0.15, borderRadius: "4px" }}>
+            <Box sx={{ fontSize: { xs: "0.7rem", sm: "0.75rem" }, fontWeight: 700, color: "#F72585", background: "rgba(247,37,133,0.1)", px: 0.75, py: 0.15, borderRadius: "4px", whiteSpace: "nowrap" }}>
               +{item.value}
             </Box>
           </Box>
-          <Box sx={{ height: 6, borderRadius: "3px", bgcolor: isDark ? "rgba(255,255,255,0.06)" : "rgba(0,0,0,0.06)", overflow: "hidden" }}>
+          <Box sx={{ height: { xs: 4, sm: 6 }, borderRadius: "3px", bgcolor: isDark ? "rgba(255,255,255,0.06)" : "rgba(0,0,0,0.06)", overflow: "hidden" }}>
             <Box sx={{ height: "100%", width: `${(item.value / maxVal) * 100}%`, borderRadius: "3px", background: "linear-gradient(90deg, #FF5EAA, #F72585)", transition: "width 0.6s cubic-bezier(0.4, 0, 0.2, 1)" }} />
           </Box>
         </Box>
