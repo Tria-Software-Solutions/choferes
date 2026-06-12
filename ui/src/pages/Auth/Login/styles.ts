@@ -63,16 +63,15 @@ export const left: SxProps<Theme> = (theme) => ({
 });
 
 export const right: SxProps<Theme> = (theme: Theme) => ({
-  flex: { xs: 1, md: '0 0 auto' },
-  width: { xs: '100%', md: 560 },
+  flex: { xs: 1, md: 1, lg: '0 0 auto' },
+  width: { xs: '100%', lg: 560 },
   display: "flex",
   alignItems: "center",
   justifyContent: "center",
-  p: { xs: 2, sm: 3, md: 8 },
+  p: { xs: 1.5, sm: 3, md: 6, lg: 8 },
   background: theme.palette.mode === 'dark' ? '#0f0f1a' : theme.palette.background.default,
   minHeight: "100dvh",
   position: "relative",
-  overflow: "hidden",
 });
 
 export const formContainer: SxProps<Theme> = {

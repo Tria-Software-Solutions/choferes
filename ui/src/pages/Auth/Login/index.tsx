@@ -109,12 +109,18 @@ const Login: React.FC = () => {
               inset: 0,
               backgroundImage: `url(${bg})`,
               backgroundSize: 'cover',
-              backgroundPosition: 'center',
+              backgroundPosition: {
+                md: '65% center',
+                lg: 'center',
+              },
               '&::after': {
                 content: '""',
                 position: 'absolute',
                 inset: 0,
-                background: 'linear-gradient(to top, rgba(0,0,0,0.7) 0%, rgba(0,0,0,0.3) 60%, transparent 100%)',
+                background: {
+                  md: 'linear-gradient(to top, rgba(0,0,0,0.75) 0%, rgba(0,0,0,0.35) 60%, rgba(0,0,0,0.15) 100%)',
+                  lg: 'linear-gradient(to top, rgba(0,0,0,0.7) 0%, rgba(0,0,0,0.3) 60%, transparent 100%)',
+                },
                 pointerEvents: 'none',
               },
             }}
@@ -205,6 +211,32 @@ const Login: React.FC = () => {
         </Box>
 
         <Box sx={right}>
+          <Box
+            sx={{
+              display: { xs: 'flex', md: 'none' },
+              alignItems: 'center',
+              gap: 1.5,
+              position: 'absolute',
+              top: { xs: 12, sm: 20 },
+              left: { xs: 12, sm: 24 },
+              zIndex: 2,
+            }}
+          >
+            <Box
+              component="img"
+              src={logo}
+              alt="Logo"
+              sx={{ width: 28, height: 'auto', flexShrink: 0 }}
+            />
+            <Box>
+              <Typography sx={{ fontWeight: 800, fontSize: '1rem', letterSpacing: '-0.02em', lineHeight: 1.2 }}>
+                Choferes
+              </Typography>
+              <Typography sx={{ fontSize: '0.6rem', fontWeight: 500, letterSpacing: '0.06em', textTransform: 'uppercase', color: 'text.secondary', opacity: 0.6 }}>
+                Gestión de flota
+              </Typography>
+            </Box>
+          </Box>
           <Box sx={formContainer}>
             {view === 'login' ? (
               <Box sx={{ ...(mounted ? animateStagger(0) : {}) }}>
@@ -217,7 +249,7 @@ const Login: React.FC = () => {
                   </Typography>
                 </Box>
 
-                <Box component="form" onSubmit={handleLogin} sx={form}>
+                <Box component="form" onSubmit={handleLogin} sx={{ ...form, gap: { xs: 1.5, sm: 2 } }}>
                   <Box sx={mounted ? animateStagger(100) : {}}>
                     <TextField
                       fullWidth
