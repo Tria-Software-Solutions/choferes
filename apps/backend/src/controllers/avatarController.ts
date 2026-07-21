@@ -1,5 +1,5 @@
 import { Request, Response } from "express";
-import multer, { FileFilterCallback, type File as MulterFile } from "multer";
+import multer, { FileFilterCallback } from "multer";
 import path from "path";
 import fs from "fs";
 import * as userService from "../services/userService";
@@ -24,7 +24,8 @@ const storage = multer.diskStorage({
   },
 });
 
-const fileFilter = (_req: Request, file: MulterFile, cb: FileFilterCallback) => {
+/* global Express */
+const fileFilter = (_req: Request, file: Express.Multer.File, cb: FileFilterCallback) => {
   const allowedMimes = ["image/jpeg", "image/png", "image/gif", "image/webp"];
   if (allowedMimes.includes(file.mimetype)) {
     cb(null, true);
