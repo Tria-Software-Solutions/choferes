@@ -1,0 +1,433 @@
+import React, { useState, useCallback, useMemo, useRef } from "react";
+import MenuComponent from "../Menu/Menu.component";
+import NotificationMenu from "../NotificationMenu/NotificationMenu.component";
+import Dock from "../Dock/Dock.component";
+import {
+  AppBar,
+  Toolbar,
+  Typography,
+  IconButton,
+  Box,
+  Avatar,
+  Divider,
+  useTheme,
+  useMediaQuery,
+  Badge,
+  Menu,
+  MenuItem,
+  ListItemIcon,
+  ListItemText,
+  Popover,
+  Grow,
+} from "@mui/material";
+import { useNavigate, useLocation } from "react-router-dom";
+import { useAuthContext } from "../../context/AuthContext";
+import { APPBAR_MENU } from "../../constants/constants";
+import { useNotificationMenu } from "../../context/NotificationContext";
+import { Menu as MenuIcon, Bell, Blocks } from "lucide-react";
+import { ThemeToggle } from "../ThemeToggle/ThemeToggle";
+import logo from "../../assets/images/logo.png";
+import { MenuItemProps } from "../Menu/Menu.component";
+import { Roles } from "../../constants/roles";
+import {
+  appBarStyles,
+  toolbarStyles,
+  logoBoxStyles,
+  logoImgStyles,
+  clickableBoxStyles,
+  notificationsIconButtonStyles,
+  dividerStyles,
+  userBoxStyles,
+  userNameStyles,
+  userEmailStyles,
+  userMenuIconButtonStyles,
+  userAvatarStyles,
+  mobileDividerStyles,
+} from "./AppBar.styles";
+
+interface Link {
+  label: string;
+  path?: string;
+  icon?: React.ReactElement;
+  subLinks?: Link[];
+  onClick?: () => void;
+}
+
+interface AppBarComponentProps {
+  icon?: React.ReactNode;
+  title: string;
+  userLinks?: Link[];
+  links: Link[];
+}
+
+// AppBarComponent renders the main application bar with navigation, user menu, notifications, and branding.
+// Props:
+// - icon: optional icon to display
+// - title: app title
+// - userLinks: links for the user menu
+// - links: main navigation links
+const AppBarComponent: React.FC<AppBarComponentProps> = ({
+  icon,
+  title,
+  userLinks = [],
+  links,
+}) => {
+  const { currentUser } = useAuthContext();
+  const navigate = useNavigate();
+  const location = useLocation();
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down("md"));
+  const { unreadCount } = useNotificationMenu();
+
+  const [userMenuAnchor, setUserMenuAnchor] = useState<null | HTMLElement>(
+    null,
+  );
+  const [notificationsAnchor, setNotificationsAnchor] =
+    useState<null | HTMLElement>(null);
+  const [dashboardMenuAnchor, setDashboardMenuAnchor] =
+    useState<null | HTMLElement>(null);
+  const blocksButtonRef = useRef<HTMLButtonElement>(null);
+
+  const mapLinksToMenuItems = useCallback((linkList: Link[]): MenuItemProps[] =>
+    linkList.map(({ label, path, icon, subLinks, onClick }) => ({
+      text: label,
+      onClick: onClick || (path ? () => navigate(path) : undefined),
+      icon,
+      subMenuItems: subLinks ? mapLinksToMenuItems(subLinks) : undefined,
+    })), [navigate]);
+
+  const menuItems = useMemo(() => mapLinksToMenuItems(links), [links, mapLinksToMenuItems]);
+
+  const handleUserMenuOpen = (event: React.MouseEvent<HTMLElement>) => {
+    setUserMenuAnchor(event.currentTarget);
+  };
+
+  const handleUserMenuClose = () => {
+    setUserMenuAnchor(null);
+  };
+
+  const handleNotificationsOpen = (event: React.MouseEvent<HTMLElement>) => {
+    setNotificationsAnchor(event.currentTarget);
+  };
+
+  const handleNotificationsClose = () => {
+    setNotificationsAnchor(null);
+  };
+
+  const handleDashboardMenuOpen = (event: React.MouseEvent<HTMLElement>) => {
+    setDashboardMenuAnchor(event.currentTarget);
+  };
+
+  const handleDashboardMenuClose = () => {
+    setDashboardMenuAnchor(null);
+  };
+
+  const isActivePage = (path: string) => {
+    // Checks if the given path matches the current location
+    return location.pathname === path;
+  };
+
+  const hasNotificationsAccess = () => {
+    // Check if user has "Gerencia" or "Administrativo" role
+    if (!currentUser?.roles || currentUser.roles.length === 0) return false;
+    const firstRole = currentUser.roles[0];
+    const userRole =
+      firstRole && "UserRole" in firstRole
+        ? (firstRole as { UserRole: { roleId: number } }).UserRole
+        : null;
+    if (!userRole?.roleId) return false;
+    return (
+      userRole.roleId === Roles.MANAGER ||
+      userRole.roleId === Roles.ADMINISTRATIVE
+    );
+  };
+
+  return (
+    <AppBar position="sticky" elevation={0} sx={appBarStyles}>
+      <Toolbar sx={toolbarStyles}>
+        {/* Logo and Title */}
+        <Box sx={clickableBoxStyles} onClick={() => navigate("/")}>
+          <Box sx={logoBoxStyles}>
+            <Box component="img" src={logo} alt="Logo" sx={logoImgStyles} />
+          </Box>
+          <Box sx={{ display: { xs: "none", sm: "flex" }, flexDirection: "column", lineHeight: 1.1, textAlign: "center" }}>
+            <Box sx={{ fontWeight: 800, fontSize: { xs: "1rem", sm: "1.2rem", md: "1.5rem" }, letterSpacing: "0.04em", color: "#ffffff" }}>
+              {title === "Choferes de Alquiler" ? "Choferes" : title}
+            </Box>
+            {title === "Choferes de Alquiler" && (
+              <Box sx={{ fontWeight: 600, fontSize: { xs: "0.55rem", sm: "0.65rem", md: "0.75rem" }, color: "rgba(255,255,255,0.6)", mt: -0.25, letterSpacing: { xs: "0.15em", sm: "0.25em", md: "0.3em" } }}>
+                DE ALQUILER
+              </Box>
+            )}
+          </Box>
+        </Box>
+
+        {/* Center - Main Navigation (desktop only) */}
+        {!isMobile && (
+          <Box
+            sx={{
+              display: "flex",
+              alignItems: "center",
+              gap: 1,
+              position: "absolute",
+              left: "50%",
+              transform: "translateX(-50%)",
+            }}
+          >
+            <IconButton
+              ref={blocksButtonRef}
+              onClick={handleDashboardMenuOpen}
+              disableRipple
+              disableFocusRipple
+              sx={{
+                color: "#ffffff",
+                cursor: "pointer",
+                p: 0.5,
+                borderRadius: "10px",
+                minWidth: 36,
+                height: 36,
+                border: "none",
+                transition: "all 0.2s cubic-bezier(0.4, 0, 0.2, 1)",
+                "&:hover": {
+                  backgroundColor: "rgba(255,255,255,0.06)",
+                },
+                "&:active": {
+                  backgroundColor: "rgba(255,255,255,0.1)",
+                },
+              }}
+            >
+              <Blocks
+                size={20}
+                strokeWidth={1.5}
+                style={{
+                  color: "#ffffff",
+                  opacity: Boolean(dashboardMenuAnchor) ? 1 : 0.6,
+                  transition: "all 0.2s ease",
+                }}
+              />
+            </IconButton>
+            <Popover
+              open={Boolean(dashboardMenuAnchor)}
+              anchorEl={dashboardMenuAnchor}
+              onClose={handleDashboardMenuClose}
+              anchorOrigin={{ vertical: "bottom", horizontal: "center" }}
+              transformOrigin={{ vertical: "top", horizontal: "center" }}
+              PaperProps={{
+                elevation: 0,
+                sx: {
+                  background: 'transparent',
+                  backgroundColor: 'transparent',
+                  boxShadow: 'none',
+                  border: 'none',
+                  overflow: 'visible',
+                  mt: 0.5,
+                },
+              }}
+              TransitionComponent={Grow}
+              TransitionProps={{ timeout: 200 }}
+              keepMounted
+            >
+              <Dock
+                items={[
+                  ...links.map(link => ({
+                    label: link.label,
+                    icon: link.icon,
+                    onClick: () => {
+                      handleDashboardMenuClose();
+                      link.path && navigate(link.path);
+                    },
+                    active: isActivePage(link.path || ''),
+                  })),
+                ]}
+              />
+            </Popover>
+          </Box>
+        )}
+
+        {/* Derecha - Acciones del Usuario */}
+        {currentUser && (
+          <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+            {/* Theme Toggle */}
+            <ThemeToggle />
+
+            {/* Notificaciones - Solo visible para Gerencia y Administrativo */}
+            {hasNotificationsAccess() && (
+              <>
+                <IconButton
+                  onClick={handleNotificationsOpen}
+                  sx={notificationsIconButtonStyles}
+                >
+                  <Badge badgeContent={unreadCount} color="error">
+                    <Bell size={20} />
+                  </Badge>
+                </IconButton>
+
+                <Divider
+                  orientation="vertical"
+                  flexItem
+                  sx={{
+                    ...dividerStyles,
+                    display: { xs: "none", md: "block" },
+                    mx: 2
+                  }}
+                />
+              </>
+            )}
+
+            {/* Perfil del Usuario */}
+            <Box sx={userBoxStyles}>
+              <Box
+                sx={{
+                  textAlign: "right",
+                  display: { xs: "none", md: "block" },
+                }}
+              >
+                <Typography variant="body2" sx={userNameStyles}>
+                  {currentUser.firstName} {currentUser.lastName}
+                </Typography>
+                <Typography variant="caption" sx={userEmailStyles}>
+                  {currentUser.email}
+                </Typography>
+              </Box>
+
+              {/* Avatar Menu - Solo visible en pantallas medianas y grandes */}
+              <Box sx={{ display: { xs: "none", md: "block" } }}>
+                <IconButton
+                  onClick={handleUserMenuOpen}
+                  sx={userMenuIconButtonStyles}
+                >
+                  <Avatar sx={userAvatarStyles}>
+                    {currentUser.firstName?.[0]}{currentUser.lastName?.[0]}
+                  </Avatar>
+                </IconButton>
+              </Box>
+
+              {/* Menú Principal (solo mobile) */}
+              {isMobile && (
+                <>
+                  <Divider
+                    orientation="vertical"
+                    flexItem
+                    sx={mobileDividerStyles}
+                  />
+                  <MenuComponent
+                    buttonType="icon"
+                    icon={<MenuIcon size={24} />}
+                    menuItems={[...menuItems, ...userLinks.map(link => ({
+                      text: link.label,
+                      onClick: link.onClick || (link.path ? () => navigate(link.path!) : undefined),
+                      icon: link.icon,
+                    }))]}
+                  />
+                </>
+              )}
+            </Box>
+          </Box>
+        )}
+
+        {/* Menú de Usuario */}
+        <Menu
+          anchorEl={userMenuAnchor}
+          open={Boolean(userMenuAnchor)}
+          onClose={handleUserMenuClose}
+          transformOrigin={{ horizontal: "right", vertical: "top" }}
+          anchorOrigin={{ horizontal: "right", vertical: "bottom" }}
+          PaperProps={{
+            elevation: 0,
+            sx: {
+              mt: 0.5,
+              minWidth: 200,
+              background: theme.palette.mode === 'dark'
+                ? 'rgba(30, 30, 35, 0.95)'
+                : '#ffffff',
+              backdropFilter: "blur(20px)",
+              border: 'none',
+              borderRadius: '16px',
+              boxShadow: theme.palette.mode === 'dark'
+                ? '0 10px 40px rgba(0,0,0,0.4), 0 2px 8px rgba(0,0,0,0.2)'
+                : '0 10px 40px rgba(0,0,0,0.15), 0 2px 8px rgba(0,0,0,0.1)',
+              overflow: 'hidden',
+              padding: 0,
+            },
+          }}
+        >
+          {userLinks.map((link, index) => (
+            <React.Fragment key={link.label}>
+              {index > 0 && link.label === APPBAR_MENU.LOGOUT && (
+                <Divider
+                  sx={{
+                    my: 0,
+                    borderColor: theme.palette.mode === 'dark'
+                      ? "rgba(255,255,255,0.1)"
+                      : "rgba(0,0,0,0.08)",
+                  }}
+                />
+              )}
+              <MenuItem
+                onClick={() => {
+                  handleUserMenuClose();
+                  if (link.onClick) {
+                    link.onClick();
+                  } else if (link.path) {
+                    navigate(link.path);
+                  }
+                }}
+                sx={{
+                  py: 1,
+                  px: 2,
+                  transition: "all 0.2s cubic-bezier(0.4, 0, 0.2, 1)",
+                  color: link.label === APPBAR_MENU.LOGOUT
+                    ? theme.palette.error.main
+                    : theme.palette.text.primary,
+                  '&:hover': {
+                    backgroundColor: link.label === APPBAR_MENU.LOGOUT
+                      ? `${theme.palette.error.light}15`
+                      : theme.palette.mode === 'dark'
+                        ? "rgba(255,255,255,0.1)"
+                        : "rgba(0,0,0,0.04)",
+                    transform: "translateX(2px)",
+                  },
+                  '& .MuiListItemIcon-root': {
+                    minWidth: 32,
+                    color: link.label === APPBAR_MENU.LOGOUT
+                      ? theme.palette.error.main
+                      : theme.palette.primary.main,
+                  },
+                }}
+              >
+                <ListItemIcon>
+                  {link.icon && React.cloneElement(link.icon as React.ReactElement, {
+                    size: 18,
+                    strokeWidth: 2,
+                    color: link.label === APPBAR_MENU.LOGOUT
+                      ? theme.palette.error.main
+                      : theme.palette.primary.main,
+                  })}
+                </ListItemIcon>
+                <ListItemText
+                  primary={link.label}
+                  primaryTypographyProps={{
+                    fontSize: "0.875rem",
+                    fontWeight: 500,
+                  }}
+                />
+              </MenuItem>
+            </React.Fragment>
+          ))}
+        </Menu>
+
+        <NotificationMenu
+          anchorEl={notificationsAnchor}
+          onClose={handleNotificationsClose}
+          onNotificationClick={(notification) => {
+            if (notification.actionUrl) {
+              navigate(notification.actionUrl);
+            }
+          }}
+        />
+      </Toolbar>
+    </AppBar>
+  );
+};
+
+export default React.memo(AppBarComponent);
