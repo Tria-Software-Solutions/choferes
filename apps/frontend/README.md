@@ -1,46 +1,134 @@
-# Choferes - Getting Started with Create React App
+# @choferes/frontend — Choferes de Alquiler
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+Frontend SPA for the Choferes de Alquiler management system.
+Built with React 18, TypeScript, and Material UI 6.
 
-## Available Scripts
+## Stack
 
-In the project directory, you can run:
+| Technology | Version | Purpose |
+| --- | --- | --- |
+| React | 18.3 | UI Library |
+| TypeScript | 4.9 | Static typing |
+| Material UI | 6.4 | Component system + themes |
+| Redux Toolkit | 2.6 | Global state |
+| React Router | 7.1 | Routing |
+| Recharts | 3.8 | Dashboard charts |
+| Motion | 12.40 | Animations (Dock, transitions) |
+| date-fns | 2.30 | Date manipulation |
+| Lucide React | 1.8 | Icons |
+| Axios | 1.7 | HTTP client |
 
-### `npm start`
+## Project Structure
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in the browser.
+```text
+src/
+├── components/          # Reusable components
+│   ├── AppBar/          # Top bar: logo, user, notifications
+│   ├── Dock/            # macOS-style navigation dock (animated)
+│   ├── Table/           # Table system (SelectorTable + EditableTable)
+│   │   ├── SelectorTable/   # Employee-to-schedule assignment grid
+│   │   └── EditableTable/   # Generic CRUD table
+│   ├── Modal/           # Modals (OCR, AutoGenerate, ImageUpload)
+│   ├── SearchBar/       # Search with debounce
+│   ├── Menu/            # Responsive hamburger menu
+│   └── ...              # 20+ additional components
+│
+├── pages/               # Domain-based pages
+│   ├── Auth/            # Login, Register, Profile
+│   ├── Dashboard/       # Main dashboard + ManageUsers/Roles/Permissions
+│   ├── Management/      # EmployeesPage, RolesPage, SchedulesPage, VehiclesPage
+│   ├── Forms/           # Forms (AddEmployee, AddVehicle, AddSchedule, etc.)
+│   └── ErrorPages/      # 404, Forbidden, SessionExpired, Error
+│
+├── constants/           # Constants (permissions, routes, labels)
+├── context/             # AuthContext, NotificationContext
+├── hooks/               # Custom hooks (useAuth, useTable*, use*Summary)
+├── models/              # TypeScript interfaces
+├── services/            # API clients (one axios service per resource)
+├── store/               # Redux store + slices
+├── theme/               # Light, dark, high-contrast themes
+└── utils/               # Utilities (dates, export, validation)
+```
 
-The page will reload if you make edits.\
-You will also see any lint errors in the console.
+## Scripts
 
-### `npm test`
+| Command | Description |
+| --- | --- |
+| `npm run dev` | Dev server (port 3000) |
+| `npm run build` | Production build → `build/` |
+| `npm run test` | Tests with React Testing Library |
+| `npm run lint` | ESLint |
+| `npm run lint:fix` | ESLint with auto-fix |
+| `npm run format` | Prettier |
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+## Themes
 
-### `npm run build`
+The system supports 3 toggleable themes:
 
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
+- **Light** — White background, dark text
+- **Dark** — Dark background, light text (default)
+- **High Contrast** — Maximum contrast for accessibility
 
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
+Themes are defined in `src/theme/` and applied via MUI's `ThemeProvider`.
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+## Responsive Design
 
-### `npm run eject`
+- **Mobile** (< 600px): Hamburger menu navigation, scrollable tables
+- **Tablet** (600-900px): Adaptive layout, compact dock
+- **Desktop** (900px+): Full navigation with macOS-style Dock
 
-**Note: this is a one-way operation. Once you `eject`, you can’t go back!**
+## Tests
 
-If you aren’t satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
+Tests use **React Testing Library** + **Jest**:
 
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you’re on your own.
+```bash
+npm test                 # Interactive mode
+npm test -- --coverage   # Coverage report
+```
 
-You don’t have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn’t feel obligated to use this feature. However we understand that this tool wouldn’t be useful if you couldn’t customize it when you are ready for it.
+## Main Pages
 
-## Learn More
+### /login
 
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
+Splash screen with animated background (WebGL / Three.js).
+Includes form validation and error handling.
 
-To learn React, check out the [React documentation](https://reactjs.org/).
+### /dashboard
+
+Dashboard with bento-grid cards:
+
+- Period summary (employees, hours, average, overtime)
+- Top employees by hours
+- Overtime alerts
+- Daily attendance average (line chart)
+- Schedule distribution (bar chart)
+- Vehicle brand distribution (pie chart)
+
+### /roles
+
+Main employee ↔ schedule assignment grid with:
+
+- Weekly date picker
+- View by employee or by schedule
+- Editable cells with schedule dropdowns
+- Automatic summary calculation (weekly, biweekly, monthly)
+- Excel / PDF export
+- Auto-generation with balanced hour distribution
+
+### /employees
+
+Employee CRUD with search, inline editing, and export.
+
+### /schedules
+
+Schedule (shift) management with day selector.
+
+### /vehicles
+
+Vehicle registration with OCR and auto-complete.
+
+## Deployment
+
+Frontend is deployed on **Vercel**.
+Build command: `npm run build`
+Output directory: `build/`
