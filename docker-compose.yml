@@ -18,7 +18,7 @@ services:
 
   api:
     build:
-      context: ./api
+      context: ./apps/backend
       dockerfile: Dockerfile
     environment:
       NODE_ENV: development
@@ -43,7 +43,7 @@ services:
 
   ui:
     build:
-      context: ./ui
+      context: ./apps/frontend
       dockerfile: Dockerfile
     environment:
       NODE_ENV: production
