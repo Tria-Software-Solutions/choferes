@@ -25,6 +25,12 @@ function parseDbUrl() {
 
 const db = parseDbUrl();
 
+if (!db.host || !db.database) {
+  throw new Error(
+    "Database not configured. Set DATABASE_URL (Render PostgreSQL) or PGUSER, PGPASSWORD, PGDATABASE, PGHOST environment variables.",
+  );
+}
+
 const sslConfig = {
   ssl: {
     require: true,
@@ -34,6 +40,8 @@ const sslConfig = {
 
 // Database configuration for different environments (development, test, production)
 // Values are loaded from environment variables for security and flexibility
+console.log(`[DB] Config: host=${db.host}, database=${db.database}, user=${db.username}`);
+
 const config = {
   development: {
     ...db,
