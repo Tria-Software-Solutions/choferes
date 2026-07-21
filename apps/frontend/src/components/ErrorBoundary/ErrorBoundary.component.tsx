@@ -239,7 +239,7 @@ class ErrorBoundaryClass extends React.Component<
                 startIcon={<RefreshCw size={18} />}
                 onClick={this.handleRetry}
                 sx={{
-                  minHeight: { xs: 44, sm: 48 },
+                  minHeight: 44,
                   fontSize: "0.875rem",
                   fontWeight: 600,
                   px: { xs: 3, sm: 5 },
@@ -275,7 +275,7 @@ class ErrorBoundaryClass extends React.Component<
                 startIcon={<Home size={18} />}
                 onClick={this.handleGoHome}
                 sx={{
-                  minHeight: { xs: 44, sm: 48 },
+                  minHeight: 44,
                   fontSize: "0.875rem",
                   fontWeight: 600,
                   px: { xs: 3, sm: 5 },

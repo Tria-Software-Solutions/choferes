@@ -22,6 +22,7 @@ import {
 } from "@mui/material";
 import { useNavigate, useLocation } from "react-router-dom";
 import { useAuthContext } from "../../context/AuthContext";
+import { API_URL } from "../../services/api";
 import { APPBAR_MENU } from "../../constants/constants";
 import { useNotificationMenu } from "../../context/NotificationContext";
 import { Menu as MenuIcon, Bell, Blocks } from "lucide-react";
@@ -296,9 +297,22 @@ const AppBarComponent: React.FC<AppBarComponentProps> = ({
                   onClick={handleUserMenuOpen}
                   sx={userMenuIconButtonStyles}
                 >
-                  <Avatar sx={userAvatarStyles}>
-                    {currentUser.firstName?.[0]}{currentUser.lastName?.[0]}
-                  </Avatar>
+                  {currentUser.avatar ? (
+                    <Avatar
+                      src={`${API_URL}${currentUser.avatar}`}
+                      sx={{
+                        width: 44,
+                        height: 44,
+                        border: "1.5px solid rgba(255,255,255,0.25)",
+                        borderRadius: "50%",
+                        boxShadow: "0 4px 20px rgba(0,0,0,0.3), inset 0 1px 0 rgba(255,255,255,0.2)",
+                      }}
+                    />
+                  ) : (
+                    <Avatar sx={userAvatarStyles}>
+                      {currentUser.firstName?.[0]}{currentUser.lastName?.[0]}
+                    </Avatar>
+                  )}
                 </IconButton>
               </Box>
 

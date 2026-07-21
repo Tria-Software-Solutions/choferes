@@ -8,6 +8,7 @@ import { json, urlencoded } from "body-parser";
 import compression from "compression";
 import helmet from "helmet";
 import rateLimit from "express-rate-limit";
+import path from "path";
 import authRoutes from "./routes/authRoutes";
 import healthRoutes from "./routes/healthRoutes";
 import userRoutes from "./routes/userRoutes";
@@ -22,6 +23,7 @@ import roleRoutes from "./routes/roleRoutes";
 import permissionRoutes from "./routes/permissionRoutes";
 import userRoleRoutes from "./routes/userRoleRoutes";
 import rolePermissionRoutes from "./routes/rolePermissionRoutes";
+import avatarRoutes from "./routes/avatarRoutes";
 import sequelize from "./config/database";
 import "./database/models";
 import "./database/associations";
@@ -29,6 +31,9 @@ import "./database/associations";
 dotenv.config();
 
 const app = express();
+
+// Serve uploaded static files (avatars)
+app.use("/uploads", express.static(path.resolve(process.cwd(), "uploads")));
 
 // Security and performance configurations
 app.use(
@@ -151,6 +156,7 @@ app.use("/api/biweekly-summary", biweeklySummaryRoutes);
 app.use("/api/monthly-summary", monthlySummaryRoutes);
 app.use("/api/schedules", scheduleRoutes);
 app.use("/api/vehicles", vehicleRoutes);
+app.use("/api/users", avatarRoutes);
 
 app.use(
   // eslint-disable-next-line @typescript-eslint/no-unused-vars, no-unused-vars

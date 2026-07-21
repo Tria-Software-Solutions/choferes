@@ -28,34 +28,29 @@ export const permissionsError = (theme: Theme) => ({
 });
 
 export const permissionsBox = (theme: Theme) => ({
-  maxHeight: 200,
+  maxHeight: 320,
   overflowY: "auto",
-  border: "1px solid",
-  borderColor: theme.palette.divider,
-  borderRadius: 1,
-  p: { xs: 1, sm: 2 },
-  backgroundColor: theme.palette.background.paper,
+  borderRadius: "10px",
+  p: { xs: 1, sm: 1.5 },
+  backgroundColor: theme.palette.mode === "dark" ? "rgba(255,255,255,0.02)" : "rgba(0,0,0,0.01)",
 });
 
-export const categoryBox = (theme: Theme) => ({
-  mb: 3,
-});
+export const categoryBox = {
+  mb: 2,
+};
 
 export const categoryTitle = (theme: Theme) => ({
   fontWeight: 600,
-  color: theme.palette.primary.main,
+  color: theme.palette.text.secondary,
   mb: 1,
-  fontSize: "clamp(0.8rem, 1.25vw, 0.9rem)",
+  fontSize: "0.75rem",
   textTransform: "capitalize",
 });
 
 export const chipSx = (theme: Theme) => ({
-  mr: 1,
-  mb: 1,
-  fontSize: "0.75rem",
+  fontSize: "0.85rem",
   fontWeight: 500,
-  color: theme.palette.text.secondary,
-  backgroundColor: theme.palette.action.selected,
+  color: theme.palette.text.primary,
 });
 
 export const actionsBox = (theme: Theme) => ({
@@ -69,7 +64,7 @@ export const actionsBox = (theme: Theme) => ({
 });
 
 export const clearButton = {
-  minHeight: { xs: 44, sm: 48 },
+  minHeight: 44,
   fontSize: "clamp(0.75rem, 1.25vw, 0.875rem)",
   order: { xs: 3, sm: 1 },
 };
@@ -83,7 +78,7 @@ export const actionsInnerBox = {
 };
 
 export const cancelButton = {
-  minHeight: { xs: 44, sm: 48 },
+  minHeight: 44,
   fontSize: "clamp(0.75rem, 1.25vw, 0.875rem)",
 };
 

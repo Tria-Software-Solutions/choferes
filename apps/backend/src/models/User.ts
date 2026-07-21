@@ -20,6 +20,8 @@ export class User extends Model {
 
   public isActive!: boolean; // Indicates if the user is active
 
+  public avatar?: string; // Avatar image file path
+
   public roles?: Role[]; // Associated roles for the user
 
   public static associations: {
@@ -64,6 +66,10 @@ User.init(
       type: DataTypes.BOOLEAN,
       allowNull: false,
       defaultValue: true,
+    },
+    avatar: {
+      type: DataTypes.STRING,
+      allowNull: true,
     },
   },
   {

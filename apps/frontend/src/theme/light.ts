@@ -173,18 +173,18 @@ export const lightTheme = createTheme({
     MuiButton: {
       styleOverrides: {
         root: {
-          borderRadius: "12px",
+          borderRadius: "10px",
           textTransform: "none",
           fontWeight: 600,
-          fontSize: "0.9375rem",
-          padding: "12px 28px",
-          minHeight: "48px",
+          fontSize: "0.875rem",
+          padding: "10px 24px",
+          minHeight: "44px",
           transition: "all 0.2s cubic-bezier(0.4, 0, 0.2, 1)",
           boxShadow: "0 1px 3px rgba(0,0,0,0.08), 0 1px 2px rgba(0,0,0,0.04)",
           letterSpacing: "-0.01em",
           "&:hover": {
-            transform: "translateY(-2px)",
-            boxShadow: "0 8px 20px rgba(0,0,0,0.15)",
+            transform: "translateY(-1px)",
+            boxShadow: "0 6px 20px rgba(0,0,0,0.12)",
           },
           "&:active": {
             transform: "translateY(0)",
@@ -198,7 +198,7 @@ export const lightTheme = createTheme({
           boxShadow: "0 2px 8px rgba(0,0,0,0.12), 0 1px 3px rgba(0,0,0,0.08)",
           "&:hover": {
             backgroundColor: "#1a1a1a",
-            boxShadow: "0 12px 28px rgba(0,0,0,0.2)",
+            boxShadow: "0 8px 20px rgba(0,0,0,0.2)",
           },
           "&:disabled": {
             backgroundColor: "#e5e5e5",
@@ -231,23 +231,23 @@ export const lightTheme = createTheme({
         },
         text: {
           color: "#374151",
-          padding: "10px 20px",
+          padding: "8px 16px",
           "&:hover": {
             backgroundColor: "rgba(0,0,0,0.05)",
             transform: "translateY(-1px)",
           },
         },
         sizeSmall: {
-          padding: "8px 16px",
-          fontSize: "0.875rem",
+          padding: "6px 14px",
+          fontSize: "0.8125rem",
           minHeight: "36px",
-          borderRadius: "10px",
+          borderRadius: "8px",
         },
         sizeLarge: {
-          padding: "16px 40px",
-          fontSize: "1rem",
-          minHeight: "56px",
-          borderRadius: "14px",
+          padding: "14px 32px",
+          fontSize: "0.9375rem",
+          minHeight: "52px",
+          borderRadius: "12px",
         },
       },
     },

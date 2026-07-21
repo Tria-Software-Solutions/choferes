@@ -4,7 +4,6 @@ import {
   Grid,
   Button,
   FormControl,
-  InputLabel,
   Select,
   MenuItem,
   useTheme,
@@ -202,15 +201,14 @@ const AddCourierForm: React.FC<AddCourierFormProps> = ({
 
         <Grid item xs={12} sm={6}>
           <FormControl variant="outlined" fullWidth sx={formControl(theme)}>
-            <InputLabel>{FORMS.ADD_COURIER.ROUTE}</InputLabel>
             <Select
-              label={FORMS.ADD_COURIER.ROUTE}
+              displayEmpty
               value={formData.route}
               onChange={(e) => handleFieldChange("route", e.target.value)}
               error={errors.route !== ""}
               input={
                 <OutlinedInput
-                  label={FORMS.ADD_COURIER.ROUTE}
+                  placeholder={FORMS.ADD_COURIER.ROUTE}
                   startAdornment={
                     <InputAdornment position="start">
                       <MapPin style={iconStyle} />
@@ -218,6 +216,23 @@ const AddCourierForm: React.FC<AddCourierFormProps> = ({
                   }
                 />
               }
+              renderValue={(selected: string) => {
+                if (!selected) {
+                  return (
+                    <Typography
+                      sx={{
+                        color: theme.palette.text.secondary,
+                        opacity: 0.6,
+                        fontSize: "0.875rem",
+                        fontWeight: 400,
+                      }}
+                    >
+                      {FORMS.ADD_COURIER.ROUTE}
+                    </Typography>
+                  );
+                }
+                return selected;
+              }}
               MenuProps={{
                 PaperProps: {
                   sx: {
@@ -277,16 +292,15 @@ const AddCourierForm: React.FC<AddCourierFormProps> = ({
         </Grid>
 
         <Grid item xs={12} sm={6}>
-          <FormControl variant="outlined" fullWidth>
-            <InputLabel>{FORMS.ADD_COURIER.STATUS}</InputLabel>
+          <FormControl variant="outlined" fullWidth sx={formControl(theme)}>
             <Select
-              label={FORMS.ADD_COURIER.STATUS}
+              displayEmpty
               value={formData.status}
               onChange={(e) => handleFieldChange("status", e.target.value)}
               error={errors.status !== ""}
               input={
                 <OutlinedInput
-                  label={FORMS.ADD_COURIER.STATUS}
+                  placeholder={FORMS.ADD_COURIER.STATUS}
                   startAdornment={
                     <InputAdornment position="start">
                       <FileText style={iconStyle} />
@@ -294,6 +308,23 @@ const AddCourierForm: React.FC<AddCourierFormProps> = ({
                   }
                 />
               }
+              renderValue={(selected: string) => {
+                if (!selected) {
+                  return (
+                    <Typography
+                      sx={{
+                        color: theme.palette.text.secondary,
+                        opacity: 0.6,
+                        fontSize: "0.875rem",
+                        fontWeight: 400,
+                      }}
+                    >
+                      {FORMS.ADD_COURIER.STATUS}
+                    </Typography>
+                  );
+                }
+                return selected;
+              }}
             >
               <MenuItem value="Despachado">
                 {FORMS.ADD_COURIER.STATUS_DESPACHADO}
@@ -360,8 +391,8 @@ const AddCourierForm: React.FC<AddCourierFormProps> = ({
                   fontSize: "0.95rem",
                   textTransform: "none",
                   letterSpacing: "0.01em",
-                  borderRadius: "12px",
-                  minHeight: "42px",
+                  borderRadius: "10px",
+                  minHeight: "44px",
                 }}
               >
                 {isLoading

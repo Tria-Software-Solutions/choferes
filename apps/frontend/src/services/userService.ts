@@ -116,6 +116,24 @@ export const updateUserTemporalPassword = async (
   return response.data;
 };
 
+// Upload avatar for a user (multipart/form-data)
+export const uploadAvatar = async (id: number, file: File) => {
+  const formData = new FormData();
+  formData.append("avatar", file);
+
+  const response = await api.post(`/users/${id}/avatar`, formData, {
+    headers: { "Content-Type": "multipart/form-data" },
+    timeout: 30000,
+  });
+  return response.data;
+};
+
+// Delete avatar for a user
+export const deleteAvatar = async (id: number) => {
+  const response = await api.delete(`/users/${id}/avatar`);
+  return response.data;
+};
+
 export const deleteUser = async (id: number) => {
   const response = await api.delete(`/users/${id}`);
   // Clear cache to ensure fresh data

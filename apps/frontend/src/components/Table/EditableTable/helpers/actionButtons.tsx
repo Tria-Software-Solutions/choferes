@@ -266,9 +266,9 @@ export function renderStatusButton<T extends object>({
             onClick={() => handleOpenStatusDialog && handleOpenStatusDialog(row)}
           >
             {row.isActive ? (
-              <ToggleLeft size={24} color="green" />
+              <ToggleRight size={24} color="green" />
             ) : (
-              <ToggleRight size={24} color="gray" />
+              <ToggleLeft size={24} color="gray" />
             )}
           </IconButton>
         </Box>

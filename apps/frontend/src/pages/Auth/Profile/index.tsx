@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useState } from "react";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 import { useAuthContext } from "../../../context/AuthContext";
 import { useSelector, useDispatch } from "react-redux";
 import { RootState, AppDispatch } from "../../../store/store";
@@ -46,6 +46,15 @@ import {
 } from "../../../utils/userValidation";
 import TextfieldComponent from "../../../components/Textfield/Textfield.component";
 import { useThemeMode } from "../../../index";
+import { API_URL } from "../../../services/api";
+import { updateUserAvatar, removeUserAvatar } from "../../../store/slices/userSlice";
+import {
+  Dialog,
+  DialogContent,
+  DialogActions,
+  CircularProgress,
+} from "@mui/material";
+import { Pencil, Camera, X, Loader2 } from "lucide-react";
 
 type ThemeMode = "default" | "light" | "dark" | "high-contrast";
 type TabId = "personal" | "password" | "theme" | "users" | "roles" | "permissions";
@@ -78,6 +87,11 @@ const Profile: React.FC = () => {
   const [showConfirmNewPassword, setShowConfirmNewPassword] = useState(false);
   const [infoError, setInfoError] = useState<string | null>(null);
   const [passwordError, setPasswordError] = useState<string | null>(null);
+  const [avatarDialogOpen, setAvatarDialogOpen] = useState(false);
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const [avatarPreview, setAvatarPreview] = useState<string | null>(null);
+  const [isUploadingAvatar, setIsUploadingAvatar] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
   const [isEditFormValid, setIsEditFormValid] = useState(false);
   const [isPasswordFormValid, setIsPasswordFormValid] = useState(false);
 
@@ -262,6 +276,94 @@ const Profile: React.FC = () => {
     }
   };
 
+  const getAvatarUrl = () => {
+    if (!currentUser?.avatar) return null;
+    return `${API_URL}${currentUser.avatar}`;
+  };
+
+  const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    // Validate file type
+    if (!["image/jpeg", "image/png", "image/gif", "image/webp"].includes(file.type)) {
+      showNotification("Solo se permiten imágenes (JPEG, PNG, GIF, WebP)", { severity: "error" });
+      return;
+    }
+
+    // Validate file size (5MB max)
+    if (file.size > 5 * 1024 * 1024) {
+      showNotification("La imagen no debe superar los 5MB", { severity: "error" });
+      return;
+    }
+
+    setSelectedFile(file);
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      setAvatarPreview(event.target?.result as string);
+    };
+    reader.readAsDataURL(file);
+  };
+
+  const handleUploadAvatar = async () => {
+    if (!selectedFile || !currentUser) return;
+
+    setIsUploadingAvatar(true);
+    try {
+      const result = await dispatch(
+        updateUserAvatar({ id: currentUser.id, file: selectedFile }),
+      ).unwrap();
+
+      // Update AuthContext with new avatar
+      setUser({
+        ...currentUser,
+        avatar: result.avatar,
+      });
+
+      showNotification("Avatar actualizado exitosamente", { severity: "success", duration: 3000 });
+      handleCloseAvatarDialog();
+    } catch (error) {
+      showNotification("Error al actualizar el avatar", { severity: "error", duration: 5000 });
+    } finally {
+      setIsUploadingAvatar(false);
+    }
+  };
+
+  const handleDeleteAvatar = async () => {
+    if (!currentUser) return;
+
+    setIsUploadingAvatar(true);
+    try {
+      await dispatch(removeUserAvatar(currentUser.id)).unwrap();
+
+      setUser({
+        ...currentUser,
+        avatar: undefined,
+      });
+
+      showNotification("Avatar eliminado exitosamente", { severity: "success", duration: 3000 });
+      handleCloseAvatarDialog();
+    } catch (error) {
+      showNotification("Error al eliminar el avatar", { severity: "error", duration: 5000 });
+    } finally {
+      setIsUploadingAvatar(false);
+    }
+  };
+
+  const handleOpenAvatarDialog = () => {
+    setAvatarDialogOpen(true);
+  };
+
+  const handleCloseAvatarDialog = () => {
+    if (isUploadingAvatar) return;
+    setAvatarDialogOpen(false);
+    setSelectedFile(null);
+    setAvatarPreview(null);
+    if (fileInputRef.current) {
+      fileInputRef.current.value = "";
+    }
+  };
+
   const getInitials = () => {
     if (!currentUser) return "?";
     const first = currentUser.firstName ? currentUser.firstName.charAt(0).toUpperCase() : "";
@@ -330,26 +432,71 @@ const Profile: React.FC = () => {
             <Box display="flex" alignItems="center" gap={2} sx={{ pb: 2, borderBottom: `1px solid ${theme.palette.mode === "dark" ? "rgba(255,255,255,0.08)" : "rgba(0,0,0,0.08)"}` }}>
               <Box
                 sx={{
+                  position: "relative",
                   width: 52,
                   height: 52,
                   borderRadius: "50%",
-                  background: `linear-gradient(135deg, ${theme.palette.primary.main} 0%, ${theme.palette.primary.light} 100%)`,
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  boxShadow: "0 4px 12px rgba(0,0,0,0.12)",
+                  flexShrink: 0,
+                  cursor: "pointer",
+                  "&:hover .avatar-overlay": {
+                    opacity: 1,
+                  },
                 }}
+                onClick={handleOpenAvatarDialog}
               >
-                <Typography
+                {getAvatarUrl() ? (
+                  <img
+                    src={getAvatarUrl()!}
+                    alt="Avatar"
+                    style={{
+                      width: "100%",
+                      height: "100%",
+                      borderRadius: "50%",
+                      objectFit: "cover",
+                    }}
+                  />
+                ) : (
+                  <Box
+                    sx={{
+                      width: "100%",
+                      height: "100%",
+                      borderRadius: "50%",
+                      background: `linear-gradient(135deg, ${theme.palette.primary.main} 0%, ${theme.palette.primary.light} 100%)`,
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      boxShadow: "0 4px 12px rgba(0,0,0,0.12)",
+                    }}
+                  >
+                    <Typography
+                      sx={{
+                        color: theme.palette.primary.contrastText,
+                        fontWeight: 700,
+                        fontSize: "1.15rem",
+                        letterSpacing: "0.05em",
+                      }}
+                    >
+                      {getInitials()}
+                    </Typography>
+                  </Box>
+                )}
+                {/* Hover overlay with pencil icon */}
+                <Box
+                  className="avatar-overlay"
                   sx={{
-                    color: theme.palette.primary.contrastText,
-                    fontWeight: 700,
-                    fontSize: "1.15rem",
-                    letterSpacing: "0.05em",
+                    position: "absolute",
+                    inset: 0,
+                    borderRadius: "50%",
+                    backgroundColor: "rgba(0,0,0,0.5)",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    opacity: 0,
+                    transition: "opacity 0.2s ease",
                   }}
                 >
-                  {getInitials()}
-                </Typography>
+                  <Pencil size={18} color="#fff" />
+                </Box>
               </Box>
               <Box sx={{ overflow: "hidden" }}>
                 <Typography
@@ -592,19 +739,20 @@ const Profile: React.FC = () => {
               }}
             >
               {/* Section Header */}
-              <Box sx={{ mb: 3 }}>
+              <Box sx={{ mb: 3, flexShrink: 0 }}>
                 <Box display="flex" alignItems="center" gap={1.5} mb={1}>
                   <Box
                     sx={{
-                      backgroundColor: theme.palette.text.primary,
-                      borderRadius: "10px",
-                      p: 0.75,
+                      backgroundColor: theme.palette.primary.main,
+                      borderRadius: "12px",
+                      p: 1,
                       display: "flex",
                       alignItems: "center",
                       justifyContent: "center",
+                      boxShadow: "0 4px 12px rgba(0,0,0,0.08)",
                     }}
                   >
-                    <UserIcon2 size={18} color={theme.palette.background.paper} />
+                    <UserIcon2 size={20} color={theme.palette.primary.contrastText} />
                   </Box>
                   <Typography
                     variant="h6"
@@ -621,131 +769,78 @@ const Profile: React.FC = () => {
                 <Typography
                   variant="body2"
                   color="textSecondary"
-                  sx={{ fontSize: "0.875rem", lineHeight: 1.5 }}
+                  sx={{ fontSize: "0.875rem", lineHeight: 1.5, pl: 6 }}
                 >
                   {MANAGEMENT.PERSONAL_INFO_DESC}
                 </Typography>
               </Box>
 
-              <Box sx={{ borderBottom: `1px solid ${theme.palette.mode === "dark" ? "rgba(255,255,255,0.08)" : "rgba(0,0,0,0.08)"}`, my: 3 }} />
+              <Box sx={{ flex: 1, minHeight: 0, overflow: "auto", display: "flex", flexDirection: "column" }}>
+              <Box sx={{ borderBottom: `1px solid ${theme.palette.mode === "dark" ? "rgba(255,255,255,0.08)" : "rgba(0,0,0,0.08)"}`, mb: { xs: 2, md: 3 } }} />
 
               {/* Form Fields */}
               <Grid container spacing={{ xs: 2.5, sm: 3 }}>
                 <Grid item xs={12} sm={6}>
-                  <Box>
-                    <Typography
-                      variant="body2"
-                      sx={{
-                        fontWeight: 650,
-                        fontSize: "0.85rem",
-                        mb: 1.25,
-                        color: theme.palette.text.primary,
-                        display: "block",
-                      }}
-                    >
-                      Nombre
-                    </Typography>
-                    <TextfieldComponent
-                      name="firstName"
-                      placeholder="Ingrese su nombre"
-                      value={editFields.firstName}
-                      onChange={(e) =>
-                        setEditFields({ ...editFields, firstName: e.target.value })
-                      }
-                      error={!!validateName(editFields.firstName)}
-                      helperText={validateName(editFields.firstName)}
-                      validateField={validateFieldBoolean}
-                      icon={<UserIcon size={20} color={theme.palette.text.secondary} />}
-                    />
-                  </Box>
+                  <TextfieldComponent
+                    name="firstName"
+                    placeholder="Nombre"
+                    value={editFields.firstName}
+                    onChange={(e) =>
+                      setEditFields({ ...editFields, firstName: e.target.value })
+                    }
+                    error={!!validateName(editFields.firstName)}
+                    helperText={validateName(editFields.firstName)}
+                    validateField={validateFieldBoolean}
+                    icon={<UserIcon size={20} color={theme.palette.text.secondary} />}
+                  />
                 </Grid>
                 <Grid item xs={12} sm={6}>
-                  <Box>
-                    <Typography
-                      variant="body2"
-                      sx={{
-                        fontWeight: 650,
-                        fontSize: "0.85rem",
-                        mb: 1.25,
-                        color: theme.palette.text.primary,
-                        display: "block",
-                      }}
-                    >
-                      Apellido
-                    </Typography>
-                    <TextfieldComponent
-                      name="lastName"
-                      placeholder="Ingrese su apellido"
-                      value={editFields.lastName}
-                      onChange={(e) =>
-                        setEditFields({ ...editFields, lastName: e.target.value })
-                      }
-                      error={!!validateName(editFields.lastName)}
-                      helperText={validateName(editFields.lastName)}
-                      validateField={validateFieldBoolean}
-                      icon={<UserIcon size={20} color={theme.palette.text.secondary} />}
-                    />
-                  </Box>
+                  <TextfieldComponent
+                    name="lastName"
+                    placeholder="Apellido"
+                    value={editFields.lastName}
+                    onChange={(e) =>
+                      setEditFields({ ...editFields, lastName: e.target.value })
+                    }
+                    error={!!validateName(editFields.lastName)}
+                    helperText={validateName(editFields.lastName)}
+                    validateField={validateFieldBoolean}
+                    icon={<UserIcon size={20} color={theme.palette.text.secondary} />}
+                  />
                 </Grid>
                 <Grid item xs={12} sm={6}>
-                  <Box>
-                    <Typography
-                      variant="body2"
-                      sx={{
-                        fontWeight: 650,
-                        fontSize: "0.85rem",
-                        mb: 1.25,
-                        color: theme.palette.text.primary,
-                        display: "block",
-                      }}
-                    >
-                      Correo Electrónico
-                    </Typography>
-                    <TextfieldComponent
-                      name="email"
-                      placeholder="ejemplo@correo.com"
-                      value={editFields.email}
-                      onChange={(e) => {
-                        setEditFields({ ...editFields, email: e.target.value });
-                        handleEmailChange(e);
-                      }}
-                      error={!!validateEmail(editFields.email) || !!infoError}
-                      helperText={infoError || validateEmail(editFields.email)}
-                      validateField={validateFieldBoolean}
-                      icon={<Mail size={20} color={theme.palette.text.secondary} />}
-                    />
-                  </Box>
+                  <TextfieldComponent
+                    name="email"
+                    placeholder="Correo Electrónico"
+                    value={editFields.email}
+                    onChange={(e) => {
+                      setEditFields({ ...editFields, email: e.target.value });
+                      handleEmailChange(e);
+                    }}
+                    error={!!validateEmail(editFields.email) || !!infoError}
+                    helperText={infoError || validateEmail(editFields.email)}
+                    validateField={validateFieldBoolean}
+                    icon={<Mail size={20} color={theme.palette.text.secondary} />}
+                  />
                 </Grid>
                 <Grid item xs={12} sm={6}>
-                  <Box>
-                    <Typography
-                      variant="body2"
-                      sx={{
-                        fontWeight: 650,
-                        fontSize: "0.85rem",
-                        mb: 1.25,
-                        color: theme.palette.text.primary,
-                        display: "block",
-                      }}
-                    >
-                      Nombre de Usuario
-                    </Typography>
-                    <TextfieldComponent
-                      name="username"
-                      placeholder="Ingrese su usuario"
-                      value={editFields.username}
-                      onChange={(e) => {
-                        setEditFields({ ...editFields, username: e.target.value });
-                        handleUsernameChange(e);
-                      }}
-                      error={!!validateUsername(editFields.username) || !!infoError}
-                      helperText={infoError || validateUsername(editFields.username)}
-                      validateField={validateFieldBoolean}
-                      icon={<UserCircle size={20} color={theme.palette.text.secondary} />}
-                    />
-                  </Box>
+                  <TextfieldComponent
+                    name="username"
+                    placeholder="Nombre de Usuario"
+                    value={editFields.username}
+                    onChange={(e) => {
+                      setEditFields({ ...editFields, username: e.target.value });
+                      handleUsernameChange(e);
+                    }}
+                    error={!!validateUsername(editFields.username) || !!infoError}
+                    helperText={infoError || validateUsername(editFields.username)}
+                    validateField={validateFieldBoolean}
+                    icon={<UserCircle size={20} color={theme.palette.text.secondary} />}
+                  />
                 </Grid>
               </Grid>
+
+              </Box>
 
               {/* Action Button */}
               <Box
@@ -753,8 +848,9 @@ const Profile: React.FC = () => {
                   display: "flex",
                   justifyContent: { xs: "center", sm: "flex-end" },
                   pt: 4,
-                  mt: 3,
+                  mt: { xs: 2, md: 3 },
                   borderTop: `1px solid ${theme.palette.mode === "dark" ? "rgba(255,255,255,0.08)" : "rgba(0,0,0,0.08)"}`,
+                  flexShrink: 0,
                 }}
               >
                 <Button
@@ -762,13 +858,13 @@ const Profile: React.FC = () => {
                   color="primary"
                   fullWidth={isSmallScreen}
                   sx={{
-                    minHeight: 48,
+                    minHeight: 44,
                     fontSize: "0.875rem",
                     fontWeight: 600,
                     px: 4,
                     py: 1.5,
                     minWidth: { xs: "100%", sm: 160 },
-                    borderRadius: "12px",
+                    borderRadius: "10px",
                     letterSpacing: "-0.01em",
                     boxShadow: "0 2px 8px rgba(0, 0, 0, 0.15)",
                     transition: "all 0.2s cubic-bezier(0.4, 0, 0.2, 1)",
@@ -804,19 +900,20 @@ const Profile: React.FC = () => {
               }}
             >
               {/* Section Header */}
-              <Box sx={{ mb: 3 }}>
+              <Box sx={{ mb: 3, flexShrink: 0 }}>
                 <Box display="flex" alignItems="center" gap={1.5} mb={1}>
                   <Box
                     sx={{
-                      backgroundColor: theme.palette.text.primary,
-                      borderRadius: "10px",
-                      p: 0.75,
+                      backgroundColor: theme.palette.primary.main,
+                      borderRadius: "12px",
+                      p: 1,
                       display: "flex",
                       alignItems: "center",
                       justifyContent: "center",
+                      boxShadow: "0 4px 12px rgba(0,0,0,0.08)",
                     }}
                   >
-                    <Lock size={18} color={theme.palette.background.paper} />
+                    <Lock size={20} color={theme.palette.primary.contrastText} />
                   </Box>
                   <Typography
                     variant="h6"
@@ -833,102 +930,75 @@ const Profile: React.FC = () => {
                 <Typography
                   variant="body2"
                   color="textSecondary"
-                  sx={{ fontSize: "0.875rem", lineHeight: 1.5 }}
+                  sx={{ fontSize: "0.875rem", lineHeight: 1.5, pl: 6 }}
                 >
                   Cambia tu contraseña para mantener tu cuenta segura.
                 </Typography>
               </Box>
 
-              <Box sx={{ borderBottom: `1px solid ${theme.palette.mode === "dark" ? "rgba(255,255,255,0.08)" : "rgba(0,0,0,0.08)"}`, my: 3 }} />
+              <Box sx={{ flex: 1, minHeight: 0, overflow: "auto", display: "flex", flexDirection: "column" }}>
+              <Box sx={{ borderBottom: `1px solid ${theme.palette.mode === "dark" ? "rgba(255,255,255,0.08)" : "rgba(0,0,0,0.08)"}`, mb: { xs: 2, md: 3 } }} />
 
               <Grid container spacing={{ xs: 2.5, sm: 3 }}>
                 <Grid item xs={12} md={6}>
                   <Box sx={{ display: "flex", flexDirection: "column", gap: 3 }}>
-                    <Box>
-                      <Typography
-                        variant="body2"
-                        sx={{
-                          fontWeight: 650,
-                          fontSize: "0.85rem",
-                          mb: 1.25,
-                          color: theme.palette.text.primary,
-                          display: "block",
-                        }}
-                      >
-                        Nueva Contraseña
-                      </Typography>
-                      <TextfieldComponent
-                        name="newPassword"
-                        type={showNewPassword ? "text" : "password"}
-                        value={passwordFields.newPassword}
-                        onChange={handleNewPassword}
-                        error={!!passwordError}
-                        helperText={passwordError}
-                        placeholder="Ingrese nueva contraseña"
-                        icon={<Lock size={20} color={theme.palette.text.secondary} />}
-                        endAdornment={
-                          <IconButton
-                            onClick={handleToggleNewPassword}
-                            edge="end"
-                            sx={{
-                              color: theme.palette.text.secondary,
-                              width: "36px",
-                              height: "36px",
-                              padding: "8px",
-                              "&:hover": {
-                                color: theme.palette.text.primary,
-                                backgroundColor: "transparent",
-                              },
-                            }}
-                          >
-                            {showNewPassword ? <EyeOff size={20} /> : <Eye size={20} />}
-                          </IconButton>
-                        }
-                      />
-                    </Box>
+                    <TextfieldComponent
+                      name="newPassword"
+                      placeholder="Nueva Contraseña"
+                      type={showNewPassword ? "text" : "password"}
+                      value={passwordFields.newPassword}
+                      onChange={handleNewPassword}
+                      error={!!passwordError}
+                      helperText={passwordError}
+                      icon={<Lock size={20} color={theme.palette.text.secondary} />}
+                      endAdornment={
+                        <IconButton
+                          onClick={handleToggleNewPassword}
+                          edge="end"
+                          sx={{
+                            color: theme.palette.text.secondary,
+                            width: "36px",
+                            height: "36px",
+                            padding: "8px",
+                            "&:hover": {
+                              color: theme.palette.text.primary,
+                              backgroundColor: "transparent",
+                            },
+                          }}
+                        >
+                          {showNewPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+                        </IconButton>
+                      }
+                    />
 
-                    <Box>
-                      <Typography
-                        variant="body2"
-                        sx={{
-                          fontWeight: 650,
-                          fontSize: "0.85rem",
-                          mb: 1.25,
-                          color: theme.palette.text.primary,
-                          display: "block",
-                        }}
-                      >
-                        Confirmar Nueva Contraseña
-                      </Typography>
-                      <TextfieldComponent
-                        name="confirmNewPassword"
-                        type={showConfirmNewPassword ? "text" : "password"}
-                        value={passwordFields.confirmNewPassword}
-                        onChange={handleConfirmNewPassword}
-                        error={!!passwordError}
-                        helperText={passwordError}
-                        placeholder="Confirme nueva contraseña"
-                        icon={<Lock size={20} color={theme.palette.text.secondary} />}
-                        endAdornment={
-                          <IconButton
-                            onClick={handleToggleConfirmNewPassword}
-                            edge="end"
-                            sx={{
-                              color: theme.palette.text.secondary,
-                              width: "36px",
-                              height: "36px",
-                              padding: "8px",
-                              "&:hover": {
-                                color: theme.palette.text.primary,
-                                backgroundColor: "transparent",
-                              },
-                            }}
-                          >
-                            {showConfirmNewPassword ? <EyeOff size={20} /> : <Eye size={20} />}
-                          </IconButton>
-                        }
-                      />
-                    </Box>
+                    <TextfieldComponent
+                      name="confirmNewPassword"
+                      placeholder="Confirmar Nueva Contraseña"
+                      type={showConfirmNewPassword ? "text" : "password"}
+                      value={passwordFields.confirmNewPassword}
+                      onChange={handleConfirmNewPassword}
+                      error={!!passwordError}
+                      helperText={passwordError}
+                      icon={<Lock size={20} color={theme.palette.text.secondary} />}
+                      endAdornment={
+                        <IconButton
+                          onClick={handleToggleConfirmNewPassword}
+                          edge="end"
+                          sx={{
+                            color: theme.palette.text.secondary,
+                            width: "36px",
+                            height: "36px",
+                            padding: "8px",
+                            "&:hover": {
+                              color: theme.palette.text.primary,
+                              backgroundColor: "transparent",
+                            },
+                          }}
+                        >
+                          {showConfirmNewPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+                        </IconButton>
+                      }
+                    />
                   </Box>
                 </Grid>
 
@@ -996,14 +1066,17 @@ const Profile: React.FC = () => {
                 </Grid>
               </Grid>
 
+              </Box>
+
               {/* Password Action Button */}
               <Box
                 sx={{
                   display: "flex",
                   justifyContent: { xs: "center", sm: "flex-end" },
                   pt: 4,
-                  mt: 3,
+                  mt: { xs: 2, md: 3 },
                   borderTop: `1px solid ${theme.palette.mode === "dark" ? "rgba(255,255,255,0.08)" : "rgba(0,0,0,0.08)"}`,
+                  flexShrink: 0,
                 }}
               >
                 <Button
@@ -1011,13 +1084,13 @@ const Profile: React.FC = () => {
                   color="primary"
                   fullWidth={isSmallScreen}
                   sx={{
-                    minHeight: 48,
+                    minHeight: 44,
                     fontSize: "0.875rem",
                     fontWeight: 600,
                     px: 4,
                     py: 1.5,
                     minWidth: { xs: "100%", sm: 160 },
-                    borderRadius: "12px",
+                    borderRadius: "10px",
                     letterSpacing: "-0.01em",
                     boxShadow: "0 2px 8px rgba(0, 0, 0, 0.15)",
                     transition: "all 0.2s cubic-bezier(0.4, 0, 0.2, 1)",
@@ -1403,16 +1476,289 @@ const Profile: React.FC = () => {
             </Paper>
           )}
 
-          {/* Admin cards stretch to fill full height of the container to match the sidebar */}
+          {/* Admin tables - same panel height as others, identical to standalone pages */}
           {["users", "roles", "permissions"].includes(activeTab) && (
-            <Box sx={{ flex: 1, minHeight: 0, height: { xs: "auto", md: "100%" }, "& .MuiPaper-root": { mb: 0 } }}>
-              {activeTab === "users" && <ManageUsers isExpanded />}
-              {activeTab === "roles" && <ManageRoles isExpanded />}
-              {activeTab === "permissions" && <ManagePermissions />}
+            <Box sx={{ flex: 1, minHeight: 0, display: "flex", flexDirection: "column" }}>
+              <Box sx={{ flex: 1, display: "flex", flexDirection: "column", "& .MuiPaper-root": { mb: 0 } }}>
+                {activeTab === "users" && <ManageUsers isExpanded />}
+                {activeTab === "roles" && <ManageRoles isExpanded />}
+                {activeTab === "permissions" && <ManagePermissions />}
+              </Box>
             </Box>
           )}
         </Box>
       </Box>
+
+      {/* Avatar Upload Dialog - Modern */}
+      <Dialog
+        open={avatarDialogOpen}
+        onClose={handleCloseAvatarDialog}
+        maxWidth="xs"
+        fullWidth
+        PaperProps={{
+          sx: {
+            borderRadius: "20px",
+            p: 0,
+            overflow: "hidden",
+            boxShadow: "0 25px 60px rgba(0,0,0,0.15), 0 4px 16px rgba(0,0,0,0.06)",
+          },
+        }}
+      >
+        {/* Header with icon box */}
+        <Box sx={{ px: { xs: 2.5, sm: 4 }, pt: { xs: 2.5, sm: 3.5 }, pb: 0 }}>
+          <Box display="flex" alignItems="center" gap={1.5} mb={0.75}>
+            <Box
+              sx={{
+                backgroundColor: theme.palette.primary.main,
+                borderRadius: "12px",
+                p: 1,
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                boxShadow: "0 4px 12px rgba(0,0,0,0.08)",
+              }}
+            >
+              <Camera size={18} color={theme.palette.primary.contrastText} />
+            </Box>
+            <Typography
+              variant="h6"
+              sx={{
+                fontWeight: 700,
+                fontSize: "1.15rem",
+                color: theme.palette.text.primary,
+                letterSpacing: "-0.02em",
+              }}
+            >
+              Foto de perfil
+            </Typography>
+          </Box>
+          <Typography
+            variant="body2"
+            color="textSecondary"
+            sx={{ fontSize: "0.85rem", lineHeight: 1.5, pl: 6 }}
+          >
+            Sube una foto para personalizar tu perfil.
+          </Typography>
+        </Box>
+
+        <DialogContent sx={{ pb: 1, pt: 3, px: { xs: 2.5, sm: 4 } }}>
+          <Box sx={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 3 }}>
+            {/* Avatar Preview Circle */}
+            <Box
+              sx={{
+                width: 180,
+                height: 180,
+                borderRadius: "50%",
+                overflow: "hidden",
+                position: "relative",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                backgroundColor: theme.palette.mode === "dark" ? "rgba(255,255,255,0.03)" : "rgba(0,0,0,0.03)",
+                border: `3px solid ${theme.palette.mode === "dark" ? "rgba(255,255,255,0.08)" : "rgba(0,0,0,0.06)"}`,
+                transition: "all 0.3s ease",
+                boxShadow: avatarPreview || getAvatarUrl()
+                  ? "0 8px 32px rgba(0,0,0,0.15)"
+                  : "0 4px 16px rgba(0,0,0,0.06)",
+              }}
+            >
+              {avatarPreview ? (
+                <img
+                  src={avatarPreview}
+                  alt="Preview"
+                  style={{
+                    width: "100%",
+                    height: "100%",
+                    objectFit: "cover",
+                  }}
+                />
+              ) : getAvatarUrl() ? (
+                <img
+                  src={getAvatarUrl()!}
+                  alt="Current avatar"
+                  style={{
+                    width: "100%",
+                    height: "100%",
+                    objectFit: "cover",
+                  }}
+                />
+              ) : (
+                <Typography
+                  sx={{
+                    fontWeight: 700,
+                    fontSize: "3.5rem",
+                    color: theme.palette.text.secondary,
+                    opacity: 0.6,
+                  }}
+                >
+                  {getInitials()}
+                </Typography>
+              )}
+              {isUploadingAvatar && (
+                <Box
+                  sx={{
+                    position: "absolute",
+                    inset: 0,
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    backgroundColor: "rgba(0,0,0,0.5)",
+                    borderRadius: "50%",
+                    backdropFilter: "blur(2px)",
+                  }}
+                >
+                  <CircularProgress size={44} sx={{ color: "#fff" }} />
+                </Box>
+              )}
+            </Box>
+
+            {/* Drop zone / Select area */}
+            <Box
+              onClick={() => fileInputRef.current?.click()}
+              sx={{
+                width: "100%",
+                border: `2px dashed ${theme.palette.mode === "dark" ? "rgba(255,255,255,0.12)" : "rgba(0,0,0,0.12)"}`,
+                borderRadius: "14px",
+                p: 3,
+                display: "flex",
+                flexDirection: "column",
+                alignItems: "center",
+                gap: 1.5,
+                cursor: "pointer",
+                transition: "all 0.2s cubic-bezier(0.4, 0, 0.2, 1)",
+                backgroundColor: selectedFile
+                  ? (theme.palette.mode === "dark" ? "rgba(255,255,255,0.04)" : "rgba(0,0,0,0.02)")
+                  : "transparent",
+                borderColor: selectedFile
+                  ? theme.palette.primary.main
+                  : (theme.palette.mode === "dark" ? "rgba(255,255,255,0.12)" : "rgba(0,0,0,0.12)"),
+                "&:hover": {
+                  borderColor: theme.palette.primary.main,
+                  backgroundColor: theme.palette.mode === "dark"
+                    ? "rgba(255,255,255,0.04)"
+                    : "rgba(0,0,0,0.02)",
+                },
+              }}
+            >
+              <Box
+                sx={{
+                  backgroundColor: theme.palette.mode === "dark"
+                    ? "rgba(255,255,255,0.06)"
+                    : "rgba(0,0,0,0.04)",
+                  borderRadius: "10px",
+                  p: 1.25,
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  transition: "all 0.2s ease",
+                }}
+              >
+                <Camera size={22} color={theme.palette.text.secondary} />
+              </Box>
+              {selectedFile ? (
+                <Typography
+                  variant="body2"
+                  sx={{
+                    fontWeight: 600,
+                    color: theme.palette.text.primary,
+                    fontSize: "0.875rem",
+                    textAlign: "center",
+                    wordBreak: "break-all",
+                    maxWidth: "100%",
+                  }}
+                >
+                  {selectedFile.name}
+                </Typography>
+              ) : (
+                <Box sx={{ textAlign: "center" }}>
+                  <Typography
+                    variant="body2"
+                    sx={{
+                      fontWeight: 600,
+                      color: theme.palette.text.primary,
+                      fontSize: "0.875rem",
+                    }}
+                  >
+                    Haz clic para seleccionar una imagen
+                  </Typography>
+                  <Typography
+                    variant="caption"
+                    sx={{
+                      color: theme.palette.text.secondary,
+                      fontSize: "0.75rem",
+                      mt: 0.25,
+                      display: "block",
+                    }}
+                  >
+                    JPEG, PNG, GIF o WebP · Máx 5MB
+                  </Typography>
+                </Box>
+              )}
+            </Box>
+
+            {/* File Input */}
+            <input
+              ref={fileInputRef}
+              type="file"
+              accept="image/jpeg,image/png,image/gif,image/webp"
+              onChange={handleFileSelect}
+              style={{ display: "none" }}
+            />
+          </Box>
+        </DialogContent>
+
+        <DialogActions sx={{ px: { xs: 2.5, sm: 4 }, pb: { xs: 2.5, sm: 3.5 }, pt: 1.5, gap: 1, flexDirection: { xs: "column", sm: "row" }, justifyContent: "space-between" }}>
+          {currentUser?.avatar && !selectedFile ? (
+            <Button
+              variant="text"
+              color="error"
+              onClick={handleDeleteAvatar}
+              disabled={isUploadingAvatar}
+              startIcon={isUploadingAvatar ? <Loader2 size={16} className="animate-spin" /> : <X size={16} />}
+              sx={{
+                order: { xs: 2, sm: 1 },
+                "&:hover": {
+                  backgroundColor: theme.palette.mode === "dark"
+                    ? "rgba(244,67,54,0.1)"
+                    : "rgba(244,67,54,0.06)",
+                },
+              }}
+            >
+              Eliminar
+            </Button>
+          ) : (
+            <Box /> /* Spacer */
+          )}
+          <Box sx={{ display: "flex", gap: 1, order: { xs: 1, sm: 2 } }}>
+            <Button
+              variant="outlined"
+              onClick={handleCloseAvatarDialog}
+              disabled={isUploadingAvatar}
+            >
+              Cancelar
+            </Button>
+            <Button
+              variant="contained"
+              onClick={selectedFile ? handleUploadAvatar : () => fileInputRef.current?.click()}
+              disabled={isUploadingAvatar}
+              sx={{ minWidth: 120 }}
+              startIcon={
+                isUploadingAvatar ? (
+                  <Loader2 size={16} className="animate-spin" />
+                ) : selectedFile ? (
+                  <Camera size={16} />
+                ) : undefined
+              }
+            >
+              {isUploadingAvatar
+                ? "Subiendo..."
+                : selectedFile
+                ? "Subir foto"
+                : "Seleccionar"}
+            </Button>
+          </Box>
+        </DialogActions>
+      </Dialog>
     </Box>
   );
 };

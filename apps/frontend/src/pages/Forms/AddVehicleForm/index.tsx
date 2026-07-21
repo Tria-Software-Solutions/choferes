@@ -527,8 +527,8 @@ const AddVehicleForm: React.FC<AddVehicleFormProps> = ({
                   fontSize: "0.95rem",
                   textTransform: "none",
                   letterSpacing: "0.01em",
-                  borderRadius: "12px",
-                  minHeight: "42px",
+                  borderRadius: "10px",
+                  minHeight: "44px",
                 }}
               >
                 {isLoading

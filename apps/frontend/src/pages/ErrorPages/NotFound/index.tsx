@@ -3,8 +3,7 @@ import {
   Box,
   Typography,
   Button,
-  Fade,
-  Slide,
+  Paper,
   useMediaQuery,
   useTheme,
 } from "@mui/material";
@@ -16,10 +15,9 @@ import {
   content,
   imageStyles,
   subtitleStyles,
+  errorCodeText,
   descriptionStyles,
   actionsBoxStyles,
-  primaryButtonStyles,
-  secondaryButtonStyles,
   captionStyles,
 } from "./styles";
 
@@ -28,36 +26,63 @@ const NotFound: React.FC = () => {
   const theme = useTheme();
   const isSmallScreen = useMediaQuery(theme.breakpoints.down("sm"));
 
-  const handleGoHome = () => {
-    navigate("/");
-  };
-
   return (
     <Box sx={wrapper}>
-      <Fade in timeout={1000}>
-        <Slide direction="up" in timeout={1000}>
-          <Box sx={content}>
+      <Box sx={content}>
+        <Paper
+          elevation={0}
+          sx={{
+            borderRadius: "16px",
+            border: `1px solid ${theme.palette.mode === "dark" ? "rgba(255,255,255,0.08)" : "rgba(0,0,0,0.08)"}`,
+            boxShadow:
+              "0 4px 24px rgba(0,0,0,0.08), 0 1px 2px rgba(0,0,0,0.04)",
+            overflow: "hidden",
+          }}
+        >
+          {/* Header */}
+          <Box
+            sx={{
+              px: { xs: 3, md: 5 },
+              py: { xs: 3, md: 4 },
+              backgroundColor: theme.palette.background.paper,
+              color: theme.palette.text.primary,
+              borderBottom: `1px solid ${theme.palette.mode === "dark" ? "rgba(255,255,255,0.08)" : "rgba(0,0,0,0.08)"}`,
+            }}
+          >
             <Box
               component="img"
               src={notFoundSvg}
               alt="Error 404"
               sx={imageStyles}
             />
+
             <Typography sx={subtitleStyles}>
               {ERRORS.ERROR_404_SUBTITLE}
             </Typography>
+            <Typography variant="caption" sx={errorCodeText}>
+              ERROR 404 — {ERRORS.PAGE_NOT_FOUND}
+            </Typography>
+          </Box>
+
+          {/* Body */}
+          <Box
+            sx={{
+              px: { xs: 3, md: 5 },
+              py: { xs: 3, md: 4 },
+              backgroundColor: theme.palette.background.paper,
+            }}
+          >
             <Typography sx={descriptionStyles}>
               {ERRORS.ERROR_404_DESCRIPTION}
             </Typography>
+
             <Box sx={actionsBoxStyles}>
               <Button
                 variant="contained"
-                color="info"
                 size="large"
                 startIcon={<Home size={20} />}
-                onClick={handleGoHome}
+                onClick={() => navigate("/")}
                 fullWidth={isSmallScreen}
-                sx={primaryButtonStyles}
                 aria-label={ERRORS.GO_HOME}
               >
                 {ERRORS.GO_HOME}
@@ -68,21 +93,18 @@ const NotFound: React.FC = () => {
                 startIcon={<Compass size={20} />}
                 onClick={() => navigate("/dashboard")}
                 fullWidth={isSmallScreen}
-                sx={secondaryButtonStyles}
                 aria-label={ERRORS.ERROR_404_EXPLORE}
               >
                 {ERRORS.ERROR_404_EXPLORE}
               </Button>
             </Box>
-            <Typography
-              variant="caption"
-              sx={captionStyles}
-            >
-              {ERRORS.ERROR_404_CONTACT}
-            </Typography>
           </Box>
-        </Slide>
-      </Fade>
+        </Paper>
+
+        <Typography variant="caption" sx={captionStyles}>
+          {ERRORS.ERROR_404_CONTACT}
+        </Typography>
+      </Box>
     </Box>
   );
 };

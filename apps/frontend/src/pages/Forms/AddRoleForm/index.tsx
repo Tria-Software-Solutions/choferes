@@ -4,7 +4,6 @@ import {
   Grid,
   Button,
   FormControl,
-  Chip,
   FormGroup,
   FormControlLabel,
   Checkbox,
@@ -184,12 +183,22 @@ const AddRoleForm: React.FC<AddRoleFormProps> = ({
             <Box sx={permissionsBox(theme)}>
               {Object.entries(groupedPermissions).map(
                 ([category, categoryPermissions]) => (
-                  <Box key={category} sx={categoryBox(theme)}>
+                  <Box key={category} sx={categoryBox}>
                     <Box sx={categoryTitle(theme)}>{category}</Box>
                     <FormGroup row>
                       {categoryPermissions.map((permission) => (
                         <FormControlLabel
                           key={permission.id}
+                          sx={{
+                            marginRight: 0,
+                            marginBottom: "4px",
+                            alignItems: "center",
+                            gap: "6px",
+                            "& .MuiFormControlLabel-label": {
+                              display: "flex",
+                              alignItems: "center",
+                            },
+                          }}
                           control={
                             <Checkbox
                               checked={formData.permissions.includes(
@@ -198,20 +207,53 @@ const AddRoleForm: React.FC<AddRoleFormProps> = ({
                               onChange={() =>
                                 handlePermissionChange(permission.id.toString())
                               }
-                              sx={{
-                                color: theme.palette.primary.main,
-                                '&.Mui-checked': {
-                                  color: theme.palette.primary.main,
-                                },
-                                '&.MuiCheckbox-indeterminate': {
-                                  color: theme.palette.primary.main,
-                                },
-                              }}
+                              disableRipple
+                              icon={
+                                <Box
+                                  sx={{
+                                    width: 18,
+                                    height: 18,
+                                    borderRadius: "5px",
+                                    border: `2px solid ${
+                                      theme.palette.mode === "dark"
+                                        ? "rgba(255,255,255,0.25)"
+                                        : "rgba(0,0,0,0.2)"
+                                    }`,
+                                    backgroundColor: "transparent",
+                                    transition: "all 0.2s cubic-bezier(0.4, 0, 0.2, 1)",
+                                  }}
+                                />
+                              }
+                              checkedIcon={
+                                <Box
+                                  sx={{
+                                    width: 18,
+                                    height: 18,
+                                    borderRadius: "5px",
+                                    border: `2px solid ${theme.palette.primary.main}`,
+                                    backgroundColor: theme.palette.primary.main,
+                                    display: "flex",
+                                    alignItems: "center",
+                                    justifyContent: "center",
+                                    transition: "all 0.2s cubic-bezier(0.4, 0, 0.2, 1)",
+                                    "&::after": {
+                                      content: '""',
+                                      width: 5,
+                                      height: 9,
+                                      border: "2px solid #fff",
+                                      borderTop: "none",
+                                      borderLeft: "none",
+                                      transform: "rotate(45deg) translateY(-1px)",
+                                      display: "block",
+                                    },
+                                  }}
+                                />
+                              }
                             />
                           }
                           label={
                             <Box component="span" sx={chipSx(theme)}>
-                              {permission.name.replace(/_/g, " ").toLowerCase()}
+                              {permission.name.split("_").slice(1).join(" ").toLowerCase()}
                             </Box>
                           }
                         />
@@ -223,45 +265,6 @@ const AddRoleForm: React.FC<AddRoleFormProps> = ({
             </Box>
           </FormControl>
         </Grid>
-
-        {formData.permissions.length > 0 && (
-          <Grid item xs={12}>
-            <Box sx={{ mb: 2 }}>
-              <Box
-                sx={{
-                  fontWeight: 600,
-                  color: theme.palette.text.primary,
-                  mb: 1,
-                  fontSize: "clamp(0.875rem, 1.5vw, 1rem)",
-                }}
-              >
-                {FORMS.ADD_ROLE.PERMISSIONS_SELECTED(
-                  formData.permissions.length,
-                )}
-              </Box>
-              <Box sx={{ display: "flex", flexWrap: "wrap", gap: 1 }}>
-                {formData.permissions.map((permissionId) => {
-                  const permission = permissions.find(
-                    (p) => p.id.toString() === permissionId,
-                  );
-                  return permission ? (
-                    <Chip
-                      key={permissionId}
-                      label={permission.name}
-                      size="small"
-                      sx={{
-                        color: theme.palette.text.secondary,
-                        backgroundColor: theme.palette.action.selected,
-                        fontSize: "clamp(0.625rem, 1vw, 0.75rem)",
-                        borderRadius: 1,
-                      }}
-                    />
-                  ) : null;
-                })}
-              </Box>
-            </Box>
-          </Grid>
-        )}
 
         <Grid item xs={12}>
           <Box sx={infoBox(theme)}>
@@ -315,8 +318,8 @@ const AddRoleForm: React.FC<AddRoleFormProps> = ({
                   fontSize: "0.95rem",
                   textTransform: "none",
                   letterSpacing: "0.01em",
-                  borderRadius: "12px",
-                  minHeight: "42px",
+                  borderRadius: "10px",
+                  minHeight: "44px",
                 }}
               >
                 {isLoading
