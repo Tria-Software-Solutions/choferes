@@ -43,7 +43,7 @@
     "operator-linebreak": "off",
     "@typescript-eslint/no-require-imports": "off"
   },
-  "ignorePatterns": ["dist/", "migrations/", "seeders/", "jest.config.ts"],
+  "ignorePatterns": ["dist/", "migrations/", "seeders/", "jest.config.ts", "src/__tests__/"],
   "overrides": [
     {
       "files": ["*.js"],
