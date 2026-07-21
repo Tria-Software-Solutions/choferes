@@ -17,7 +17,7 @@ export const formControl = (theme: Theme) => ({
   "& .MuiOutlinedInput-root": {
     backgroundColor: theme.palette.background.paper,
     color: theme.palette.text.primary,
-    borderRadius: "10px",
+    borderRadius: "12px",
     fontSize: "0.875rem",
     fontWeight: 500,
     position: "relative",
@@ -81,7 +81,9 @@ export const formControl = (theme: Theme) => ({
       borderRadius: "10px",
     },
     "& .MuiSelect-select": {
-      padding: "12px 16px",
+      paddingLeft: "36px",
+      paddingTop: "12px",
+      paddingBottom: "12px",
     },
   },
 });
@@ -140,7 +142,7 @@ export const actionsBox = (theme: Theme) => ({
 });
 
 export const clearButton = {
-  minHeight: { xs: 44, sm: 48 },
+  minHeight: 44,
   fontSize: "clamp(0.75rem, 1.25vw, 0.875rem)",
   order: { xs: 3, sm: 1 },
 };
@@ -154,7 +156,7 @@ export const actionsInnerBox = {
 };
 
 export const cancelButton = {
-  minHeight: { xs: 44, sm: 48 },
+  minHeight: 44,
   fontSize: "clamp(0.75rem, 1.25vw, 0.875rem)",
 };
 

@@ -11,21 +11,61 @@ export const gridContainer = {
 };
 
 export const formControl = (theme: Theme) => ({
-  marginTop: "8px",
-  "& .MuiOutlinedInput-root, & .MuiSelect-select": {
-    backgroundColor: "#fff",
-    borderRadius: 2,
-    "&.Mui-focused .MuiOutlinedInput-notchedOutline": {
-      borderColor: "#000",
-      borderWidth: 2,
-    },
-    "&:hover .MuiOutlinedInput-notchedOutline": {
-      borderColor: "#000",
+  "& .MuiOutlinedInput-root": {
+    backgroundColor: theme.palette.background.paper,
+    color: theme.palette.text.primary,
+    borderRadius: "12px",
+    fontSize: "0.875rem",
+    fontWeight: 500,
+    position: "relative",
+    border: `1px solid ${theme.palette.mode === "dark" ? "rgba(255,255,255,0.2)" : "rgba(0,0,0,0.15)"}`,
+    transition: "all 0.25s cubic-bezier(0.4, 0, 0.2, 1)",
+    "&:hover": {
+      borderColor: theme.palette.mode === "dark" ? "rgba(255,255,255,0.3)" : "rgba(0,0,0,0.25)",
     },
     "&.Mui-focused": {
-      backgroundColor: "#fff",
+      borderColor: theme.palette.primary.main,
+      borderWidth: "2px",
+      backgroundColor: theme.palette.background.paper,
       outline: "none",
       boxShadow: "none",
+    },
+    "& .MuiOutlinedInput-notchedOutline": {
+      border: "none",
+    },
+    "& .MuiSelect-select": {
+      paddingLeft: "36px",
+      paddingTop: "12px",
+      paddingBottom: "12px",
+    },
+    "& .MuiInputAdornment-positionStart": {
+      position: "absolute",
+      left: "12px",
+      marginRight: 0,
+      zIndex: 2,
+      top: "50%",
+      transform: "translateY(-50%)",
+    },
+    "& input": {
+      color: theme.palette.text.primary,
+      fontSize: "0.875rem",
+      paddingTop: "10px",
+      paddingBottom: "10px",
+      paddingLeft: "14px",
+      paddingRight: "14px",
+      "&::placeholder": {
+        color: theme.palette.text.secondary,
+        opacity: 0.6,
+      },
+    },
+    "&.MuiInputBase-adornedStart input": {
+      paddingLeft: "36px",
+      paddingRight: "14px",
+    },
+    "& input:-webkit-autofill": {
+      WebkitBoxShadow: `0 0 0 100px ${theme.palette.background.paper} inset`,
+      WebkitTextFillColor: theme.palette.text.primary,
+      borderRadius: "12px",
     },
   },
 });
@@ -72,7 +112,7 @@ export const actionsBox = (theme: Theme) => ({
 });
 
 export const clearButton = {
-  minHeight: { xs: 44, sm: 48 },
+  minHeight: 44,
   fontSize: "clamp(0.75rem, 1.25vw, 0.875rem)",
   order: { xs: 3, sm: 1 },
 };
@@ -86,6 +126,6 @@ export const actionsInnerBox = {
 };
 
 export const cancelButton = {
-  minHeight: { xs: 44, sm: 48 },
+  minHeight: 44,
   fontSize: "clamp(0.75rem, 1.25vw, 0.875rem)",
 };

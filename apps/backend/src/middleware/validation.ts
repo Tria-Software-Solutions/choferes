@@ -41,7 +41,7 @@ export const employeeRules = [
     .isLength({ max: 100 })
     .withMessage("El apellido no puede exceder 100 caracteres"),
   body("email")
-    .optional({ values: "null" })
+    .optional({ values: "falsy" })
     .trim()
     .isEmail()
     .withMessage("Email inválido")
@@ -66,7 +66,7 @@ export const employeeUpdateRules = [
     .isLength({ max: 100 })
     .withMessage("El apellido no puede exceder 100 caracteres"),
   body("email")
-    .optional({ values: "null" })
+    .optional({ values: "falsy" })
     .trim()
     .isEmail()
     .withMessage("Email inválido")

@@ -93,18 +93,23 @@ export const highContrastTheme = createTheme({
     MuiButton: {
       styleOverrides: {
         root: {
-          borderRadius: "8px",
+          borderRadius: "10px",
           textTransform: "none",
           fontWeight: 600,
           fontSize: "0.875rem",
-          padding: "8px 24px",
-          transition: "all 0.3s ease",
+          padding: "10px 24px",
+          minHeight: "44px",
+          transition: "all 0.2s cubic-bezier(0.4, 0, 0.2, 1)",
           borderWidth: "2px",
+          "&:hover": {
+            transform: "translateY(-1px)",
+          },
         },
         contained: {
           backgroundColor: "#000000",
           color: "#ffff00",
           border: "2px solid #000000",
+          boxShadow: "0 2px 8px rgba(0,0,0,0.12)",
           "&:hover": {
             backgroundColor: "#222222",
             borderColor: "#000000",
@@ -135,6 +140,7 @@ export const highContrastTheme = createTheme({
         },
         text: {
           color: "#000000",
+          padding: "8px 16px",
           "&:hover": {
             backgroundColor: "#ffff66",
           },

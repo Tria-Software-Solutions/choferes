@@ -195,7 +195,7 @@ const PasswordChangeForm: React.FC<PasswordChangeFormProps> = ({
             onClick={handleGenerateTemporalPassword}
             fullWidth
             sx={{
-              minHeight: { xs: 44, sm: 48 },
+              minHeight: 44,
               fontSize: "clamp(0.75rem, 1.25vw, 0.875rem)",
               fontWeight: 600,
             }}
@@ -267,8 +267,8 @@ const PasswordChangeForm: React.FC<PasswordChangeFormProps> = ({
                   fontSize: "0.95rem",
                   textTransform: "none",
                   letterSpacing: "0.01em",
-                  borderRadius: "12px",
-                  minHeight: "42px",
+                  borderRadius: "10px",
+                  minHeight: "44px",
                 }}
                 disabled={
                   loading ||

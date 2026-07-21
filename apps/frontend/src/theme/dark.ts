@@ -107,18 +107,18 @@ export const darkTheme = createTheme({
     MuiButton: {
       styleOverrides: {
         root: {
-          borderRadius: "12px",
+          borderRadius: "10px",
           textTransform: "none",
           fontWeight: 600,
-          fontSize: "0.9375rem",
-          padding: "12px 28px",
-          minHeight: "48px",
+          fontSize: "0.875rem",
+          padding: "10px 24px",
+          minHeight: "44px",
           transition: "all 0.2s cubic-bezier(0.4, 0, 0.2, 1)",
           letterSpacing: "-0.01em",
           boxShadow: "0 1px 3px rgba(0,0,0,0.25), 0 1px 2px rgba(0,0,0,0.18)",
           "&:hover": {
-            transform: "translateY(-2px)",
-            boxShadow: "0 8px 20px rgba(0,0,0,0.4)",
+            transform: "translateY(-1px)",
+            boxShadow: "0 6px 20px rgba(0,0,0,0.35)",
           },
           "&:active": {
             transform: "translateY(0)",
@@ -132,7 +132,7 @@ export const darkTheme = createTheme({
           boxShadow: "0 2px 8px rgba(0,0,0,0.35), 0 1px 3px rgba(0,0,0,0.2)",
           "&:hover": {
             backgroundColor: "#444444",
-            boxShadow: "0 12px 28px rgba(0,0,0,0.45)",
+            boxShadow: "0 8px 20px rgba(0,0,0,0.4)",
           },
           "&:disabled": {
             backgroundColor: "#2a2a2a",
@@ -159,23 +159,23 @@ export const darkTheme = createTheme({
         },
         text: {
           color: "#e0e0e0",
-          padding: "10px 20px",
+          padding: "8px 16px",
           "&:hover": {
             backgroundColor: "rgba(255,255,255,0.08)",
             transform: "translateY(-1px)",
           },
         },
         sizeSmall: {
-          padding: "8px 16px",
-          fontSize: "0.875rem",
+          padding: "6px 14px",
+          fontSize: "0.8125rem",
           minHeight: "36px",
-          borderRadius: "10px",
+          borderRadius: "8px",
         },
         sizeLarge: {
-          padding: "16px 40px",
-          fontSize: "1rem",
-          minHeight: "56px",
-          borderRadius: "14px",
+          padding: "14px 32px",
+          fontSize: "0.9375rem",
+          minHeight: "52px",
+          borderRadius: "12px",
         },
       },
     },

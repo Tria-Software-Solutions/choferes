@@ -52,7 +52,7 @@ export const actionsBox = (theme: Theme) => ({
 });
 
 export const clearButton = {
-  minHeight: { xs: 44, sm: 48 },
+  minHeight: 44,
   fontSize: "clamp(0.75rem, 1.25vw, 0.875rem)",
   order: { xs: 3, sm: 1 },
 };
@@ -66,6 +66,6 @@ export const actionsInnerBox = {
 };
 
 export const cancelButton = {
-  minHeight: { xs: 44, sm: 48 },
+  minHeight: 44,
   fontSize: "clamp(0.75rem, 1.25vw, 0.875rem)",
 };

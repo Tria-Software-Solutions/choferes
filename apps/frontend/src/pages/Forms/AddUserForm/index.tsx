@@ -4,7 +4,6 @@ import {
   Grid,
   Button,
   FormControl,
-  InputLabel,
   Select,
   MenuItem,
   InputAdornment,
@@ -249,15 +248,14 @@ const AddUserForm: React.FC<AddUserFormProps> = ({
 
         <Grid item xs={12} sm={6}>
           <FormControl variant="outlined" fullWidth sx={formControl(theme)}>
-            <InputLabel>{FORMS.ADD_USER.ROLE_LABEL}</InputLabel>
             <Select
-              label={FORMS.ADD_USER.ROLE_LABEL}
+              displayEmpty
               value={formData.roleName}
               onChange={(e) => handleFieldChange("roleName", e.target.value)}
               error={errors.roleName !== ""}
               input={
                 <OutlinedInput
-                  label={FORMS.ADD_USER.ROLE_LABEL}
+                  placeholder={FORMS.ADD_USER.ROLE_LABEL}
                   startAdornment={
                     <InputAdornment position="start">
                       <Users style={iconStyle} />
@@ -265,6 +263,23 @@ const AddUserForm: React.FC<AddUserFormProps> = ({
                   }
                 />
               }
+              renderValue={(selected: string) => {
+                if (!selected) {
+                  return (
+                    <Typography
+                      sx={{
+                        color: theme.palette.text.secondary,
+                        opacity: 0.6,
+                        fontSize: "0.875rem",
+                        fontWeight: 400,
+                      }}
+                    >
+                      {FORMS.ADD_USER.ROLE_LABEL}
+                    </Typography>
+                  );
+                }
+                return selected;
+              }}
               MenuProps={menuPaperProps}
             >
               {roles.map((role) => (
@@ -326,8 +341,8 @@ const AddUserForm: React.FC<AddUserFormProps> = ({
                   fontSize: "0.95rem",
                   textTransform: "none",
                   letterSpacing: "0.01em",
-                  borderRadius: "12px",
-                  minHeight: "42px",
+                  borderRadius: "10px",
+                  minHeight: "44px",
                 }}
               >
                 Agregar

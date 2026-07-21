@@ -234,6 +234,39 @@ export const updateUserTemporalPassword = createAsyncThunk(
   },
 );
 
+// Upload avatar for a user
+export const updateUserAvatar = createAsyncThunk(
+  "users/updateUserAvatar",
+  async (
+    { id, file }: { id: number; file: File },
+    { rejectWithValue },
+  ) => {
+    try {
+      const result = await UserService.uploadAvatar(id, file);
+      return { id, avatar: result.avatar };
+    } catch (error: unknown) {
+      return rejectWithValue(
+        error instanceof Error ? error.message : "Failed to upload avatar",
+      );
+    }
+  },
+);
+
+// Delete avatar for a user
+export const removeUserAvatar = createAsyncThunk(
+  "users/removeUserAvatar",
+  async (id: number, { rejectWithValue }) => {
+    try {
+      await UserService.deleteAvatar(id);
+      return { id, avatar: null };
+    } catch (error: unknown) {
+      return rejectWithValue(
+        error instanceof Error ? error.message : "Failed to delete avatar",
+      );
+    }
+  },
+);
+
 export const deleteUser = createAsyncThunk(
   "users/deleteUser",
   async (id: number, { rejectWithValue }) => {
@@ -353,6 +386,20 @@ const userSlice = createSlice({
           );
         },
       )
+      .addCase(updateUserAvatar.fulfilled, (state, action: PayloadAction<{ id: number; avatar: string | null }>) => {
+        state.users = state.users.map((user) =>
+          user.id === action.payload.id
+            ? { ...user, avatar: action.payload.avatar ?? undefined }
+            : user,
+        );
+      })
+      .addCase(removeUserAvatar.fulfilled, (state, action: PayloadAction<{ id: number; avatar: null }>) => {
+        state.users = state.users.map((user) =>
+          user.id === action.payload.id
+            ? { ...user, avatar: undefined }
+            : user,
+        );
+      })
       .addCase(deleteUser.fulfilled, (state, action: PayloadAction<number>) => {
         state.users = state.users.filter((user) => user.id !== action.payload);
         state.totalCountUsers -= 1;

@@ -6,7 +6,7 @@ import {
   removeTokenWithFallback,
 } from "../utils/tokenStorage";
 
-const API_URL = process.env.REACT_APP_API_URL || "http://localhost:5000";
+export const API_URL = process.env.REACT_APP_API_URL || "http://localhost:5000";
 
 const requestCache = new Map<string, { data: unknown; timestamp: number }>();
 const CACHE_DURATION = 5 * 60 * 1000; // 5 minutes

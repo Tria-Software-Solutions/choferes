@@ -6,57 +6,51 @@ export const wrapper: SxProps<Theme> = {
   display: "flex",
   alignItems: "center",
   justifyContent: "center",
-  background: "#f4f5f7",
-  color: "#1a1a2e",
+  background: (theme) => theme.palette.background.default,
   position: "relative",
   overflow: "hidden",
-  "& .MuiTypography-root": {
-    color: "#1a1a2e",
-  },
 };
 
 export const content: SxProps<Theme> = {
-  display: "flex",
-  flexDirection: "column",
-  alignItems: "center",
-  textAlign: "center",
   width: "100%",
-  maxWidth: 600,
-  px: { xs: 3, md: 6 },
-  position: "relative",
-  zIndex: 1,
+  maxWidth: 480,
+  mx: 2,
 };
 
 export const imageStyles: SxProps<Theme> = {
-  width: { xs: "85%", sm: "75%", md: "70%" },
-  maxWidth: 500,
+  width: { xs: "75%", sm: "65%" },
+  maxWidth: 340,
   height: "auto",
-  mb: { xs: 3, sm: 4 },
-  filter: "drop-shadow(0 4px 24px rgba(0,0,0,0.08))",
-};
-
-export const titleStyles: SxProps<Theme> = {
-  fontWeight: 800,
-  fontSize: { xs: "1.75rem", md: "2.25rem" },
-  letterSpacing: -0.5,
-  lineHeight: 1.2,
-  mb: 1.5,
+  display: "block",
+  mx: "auto",
+  mb: 3,
+  filter: "drop-shadow(0 4px 12px rgba(0,0,0,0.06))",
 };
 
 export const subtitleStyles: SxProps<Theme> = {
-  fontSize: { xs: "0.95rem", md: "1.05rem" },
-  fontWeight: 600,
-  opacity: 0.85,
-  mb: 1.5,
-  lineHeight: 1.5,
+  fontWeight: 700,
+  fontSize: { xs: "1.1rem", md: "1.25rem" },
+  letterSpacing: "-0.02em",
+  lineHeight: 1.2,
+  color: (theme) => theme.palette.text.primary,
+  textAlign: "center",
+  mb: 0.5,
+};
+
+export const errorCodeText: SxProps<Theme> = {
+  fontSize: "0.75rem",
+  fontWeight: 500,
+  letterSpacing: "0.02em",
+  color: (theme) => theme.palette.text.secondary,
+  textAlign: "center",
+  display: "block",
 };
 
 export const descriptionStyles: SxProps<Theme> = {
-  fontSize: { xs: "0.85rem", md: "0.95rem" },
+  fontSize: { xs: "0.875rem", md: "0.9375rem" },
   fontWeight: 400,
-  opacity: 0.65,
+  color: (theme) => theme.palette.text.secondary,
   lineHeight: 1.7,
-  maxWidth: 480,
   mb: { xs: 3, sm: 4 },
 };
 
@@ -68,36 +62,10 @@ export const actionsBoxStyles: SxProps<Theme> = {
   flexWrap: "wrap",
 };
 
-export const primaryButtonStyles: SxProps<Theme> = {
-  minHeight: { xs: 44, sm: 48 },
-  fontSize: "clamp(0.875rem, 1.25vw, 1rem)",
-  fontWeight: 600,
-  px: { xs: 3, sm: 5 },
-  py: { xs: 1.25, sm: 1.5 },
-  borderRadius: "8px",
-  textTransform: "none",
-  color: "#ffffff",
-};
-
-export const secondaryButtonStyles: SxProps<Theme> = {
-  minHeight: { xs: 44, sm: 48 },
-  fontSize: "clamp(0.875rem, 1.25vw, 1rem)",
-  fontWeight: 600,
-  px: { xs: 3, sm: 5 },
-  py: { xs: 1.25, sm: 1.5 },
-  borderRadius: "8px",
-  textTransform: "none",
-  color: "#1a1a2e",
-  borderColor: "rgba(0,0,0,0.2)",
-  "&:hover": {
-    borderColor: "rgba(0,0,0,0.5)",
-    backgroundColor: "rgba(0,0,0,0.04)",
-  },
-};
-
 export const captionStyles: SxProps<Theme> = {
   mt: { xs: 3, sm: 4 },
   display: "block",
-  opacity: 0.55,
-  fontSize: { xs: "0.7rem", sm: "0.75rem" },
+  textAlign: "center",
+  fontSize: { xs: "0.75rem", sm: "0.8rem" },
+  color: (theme) => theme.palette.text.secondary,
 };

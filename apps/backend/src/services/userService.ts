@@ -170,8 +170,8 @@ export const createUser = async (data: Omit<User, "id">) => {
   );
 };
 
-// Updates user data by ID
-export const updateUser = async (id: number, data: Omit<User, "id">) => {
+// Updates user data by ID (accepts partial data)
+export const updateUser = async (id: number, data: Partial<Omit<User, "id">>) => {
   await User.update(data, { where: { id } });
   return User.findByPk(id);
 };

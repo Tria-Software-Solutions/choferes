@@ -9,6 +9,7 @@ export interface User {
   password: string;
   temporalPassword?: string;
   isActive: boolean;
+  avatar?: string;
   roles?: Role[];
   roleId?: number;
   roleName?: string;
