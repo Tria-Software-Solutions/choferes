@@ -9,6 +9,7 @@ const dbConfig = config[env];
 // Create a new Sequelize instance with environment-specific configuration
 const sequelize = new Sequelize(dbConfig.database, dbConfig.username, dbConfig.password, {
   host: dbConfig.host, // Database host
+  port: dbConfig.port || 5432, // Database port (default PostgreSQL)
   dialect: dbConfig.dialect, // Database dialect (e.g., postgres)
   logging: false, // Disable SQL query logging
   operatorsAliases: {
@@ -40,7 +41,7 @@ const sequelize = new Sequelize(dbConfig.database, dbConfig.username, dbConfig.p
   },
   // Apply dialectOptions from config (includes SSL settings) with session timeouts
   dialectOptions: {
-    ...dbConfig.dialectOptions,
+    ...(dbConfig.dialectOptions || {}),
     statement_timeout: 30000,
     query_timeout: 30000,
     idle_in_transaction_session_timeout: 30000,
