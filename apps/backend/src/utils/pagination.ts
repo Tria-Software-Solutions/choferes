@@ -1,7 +1,28 @@
-import type { PaginationParams, PaginatedResult, QueryParams } from "@choferes/shared";
+export interface PaginationParams {
+  page: number;
+  limit: number;
+}
 
-// Re-export QueryParams for services that import from this module
-export type { QueryParams };
+export interface PaginatedResult<T> {
+  data: T[];
+  pagination: PaginationMeta;
+}
+
+export interface PaginationMeta {
+  page: number;
+  limit: number;
+  totalItems: number;
+  totalPages: number;
+  hasNextPage: boolean;
+  hasPreviousPage: boolean;
+}
+
+export interface QueryParams {
+  page?: string;
+  limit?: string;
+  search?: string;
+  [key: string]: string | undefined;
+}
 
 /**
  * Parse and validate pagination parameters from query string.
