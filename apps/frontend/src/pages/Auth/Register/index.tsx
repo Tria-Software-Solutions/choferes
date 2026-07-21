@@ -1,0 +1,480 @@
+import { useCallback, useEffect, useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
+import { useSelector, useDispatch } from "react-redux";
+import { RootState, AppDispatch } from "../../../store/store";
+import { fetchUsers, createUser } from "../../../store/slices/userSlice";
+import { User } from "../../../models/User";
+import { useAppNotifications } from "../../../components/Snackbar/Snackbar.component";
+import {
+  TextField,
+  Button,
+  Card,
+  CardContent,
+  Typography,
+  Box,
+  Alert,
+  useTheme,
+  useMediaQuery,
+  IconButton,
+  InputAdornment,
+  Fade,
+  Divider,
+  CircularProgress,
+  keyframes,
+} from "@mui/material";
+import { Eye, EyeOff, User as UserIcon, Mail, Lock } from "lucide-react";
+import PAGE_TITLE from "../../../constants/pageTitle.constants";
+import AUTH from "../../../constants/auth.constants";
+import FORMS from "../../../constants/forms.constants";
+import REGISTER_VALIDATION from "../../../constants/registerValidation.constants";
+import logo from "../../../assets/images/logo.png";
+import "@fontsource/urbanist";
+import {
+  authPageBoxStyles,
+  authCardStyles,
+  cardContentStyles,
+  logoBoxStyles,
+  logoImgStyles,
+  titleStyles,
+  dividerStyles,
+  descriptionStyles,
+  formBoxStyles,
+  nameFieldsBoxStyles,
+  textFieldStyles,
+  emailTextFieldStyles,
+  usernameTextFieldStyles,
+  passwordTextFieldStyles,
+  passwordIconButtonStyles,
+  submitButtonStyles,
+  submitProgressStyles,
+  alertStyles,
+  dividerSectionStyles,
+  loginBoxStyles,
+  loginTextStyles,
+  loginLinkStyles,
+} from "./styles";
+import { validateName, validateEmail, validateUsername, validatePassword } from '../../../utils/userValidation';
+
+// Register page component for user sign up
+const Register: React.FC = () => {
+  // Prevent body scroll on this page
+  useEffect(() => {
+    document.body.style.overflow = 'hidden';
+    return () => {
+      document.body.style.overflow = '';
+    };
+  }, []);
+  const dispatch = useDispatch<AppDispatch>();
+  const { users } = useSelector((state: RootState) => state.users);
+  const { showNotification } = useAppNotifications();
+  const [addFields, setAddFields] = useState({
+    firstName: "",
+    lastName: "",
+    email: "",
+    username: "",
+    password: "",
+  });
+  const [showPassword, setShowPassword] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [fieldErrors, setFieldErrors] = useState<{ [key: string]: string }>({});
+  const navigate = useNavigate();
+
+  const theme = useTheme();
+  const isSmallScreen = useMediaQuery(theme.breakpoints.down("sm"));
+
+  useEffect(() => {
+    dispatch(fetchUsers({}));
+  }, [dispatch]);
+
+  // Validates the registration form fields
+  const validateFields = useCallback(async () => {
+    const newErrors: { [key: string]: string } = {};
+    newErrors.firstName = validateName(addFields.firstName);
+    newErrors.lastName = validateName(addFields.lastName);
+    newErrors.email = validateEmail(addFields.email);
+    newErrors.username = validateUsername(addFields.username);
+    newErrors.password = validatePassword(addFields.password);
+    setFieldErrors(newErrors);
+    return Object.values(newErrors).every((v) => v === "");
+  }, [addFields]);
+
+  // Handles the registration form submission
+  const handleRegister = async (e: React.FormEvent) => {
+    e.preventDefault();
+
+    const isValid = await validateFields();
+    if (!isValid) return;
+
+    setIsSubmitting(true);
+
+    try {
+      const newUser: Omit<User, "id" | "temporalPassword" | "role"> = {
+        firstName: addFields.firstName,
+        lastName: addFields.lastName,
+        email: addFields.email,
+        username: addFields.username,
+        password: addFields.password,
+        isActive: true,
+      };
+      await dispatch(createUser({ newUser })).unwrap();
+      showNotification(AUTH.REGISTER_SUCCESS, { severity: 'success', duration: 3000 });
+      // Redirigir a login con usuario y contraseña
+      navigate("/", { state: { username: addFields.username, password: addFields.password } });
+      // Clear form after successful registration
+      setAddFields({
+        firstName: "",
+        lastName: "",
+        email: "",
+        username: "",
+        password: "",
+      });
+    } catch (error) {
+      setError(REGISTER_VALIDATION.REGISTER_ERROR);
+      showNotification(AUTH.REGISTER_ERROR, { severity: 'error', duration: 5000 });
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  // Checks if the email already exists
+  const checkEmailExistence = useCallback(
+    (email: string): User | undefined => {
+      return users.find((user) => user.email === email);
+    },
+    [users],
+  );
+
+  // Handles email field blur event
+  const handleEmailChange = (event: React.FocusEvent<HTMLInputElement>) => {
+    const value = event.target.value.trim();
+    if (!value) return;
+
+    const emailExists = checkEmailExistence(value);
+    if (emailExists) {
+      setFieldErrors((prev) => ({
+        ...prev,
+        email: FORMS.EMAIL_EXISTS,
+      }));
+    } else {
+      setFieldErrors((prev) => ({ ...prev, email: "" }));
+    }
+  };
+
+  // Checks if the username already exists
+  const checkUsernameExistence = useCallback(
+    (username: string): User | undefined => {
+      return users.find((user) => user.username === username);
+    },
+    [users],
+  );
+
+  // Handles username field blur event
+  const handleUsernameChange = (event: React.FocusEvent<HTMLInputElement>) => {
+    const value = event.target.value.trim();
+    if (!value) return;
+
+    const usernameExists = checkUsernameExistence(value);
+    if (usernameExists) {
+      setFieldErrors((prev) => ({
+        ...prev,
+        username: FORMS.USERNAME_EXISTS,
+      }));
+    } else {
+      setFieldErrors((prev) => ({ ...prev, username: "" }));
+    }
+  };
+
+  // Toggles the password visibility
+  const handleTogglePassword = () => {
+    setShowPassword((prev) => !prev);
+  };
+
+  // Handles changes in form fields and clears errors
+  const handleFieldChange = (field: string, value: string) => {
+    setAddFields({ ...addFields, [field]: value });
+    // Clear field error when user starts typing
+    if (fieldErrors[field]) {
+      setFieldErrors((prev) => ({ ...prev, [field]: "" }));
+    }
+  };
+
+  // Floating animation keyframes
+  const float1 = keyframes`
+    0%, 100% { transform: translate(0, 0) scale(1); }
+    33% { transform: translate(30px, -50px) scale(1.05); }
+    66% { transform: translate(-20px, 20px) scale(0.95); }
+  `;
+  const float2 = keyframes`
+    0%, 100% { transform: translate(0, 0) scale(1); }
+    33% { transform: translate(-40px, 30px) scale(0.95); }
+    66% { transform: translate(30px, -20px) scale(1.05); }
+  `;
+  const float3 = keyframes`
+    0%, 100% { transform: translate(0, 0) scale(1); }
+    50% { transform: translate(20px, 40px) scale(1.1); }
+  `;
+
+  return (
+    <Box className="auth-page" sx={authPageBoxStyles}>
+      {/* Floating decorative orbs */}
+      <Box
+        sx={{
+          position: "absolute",
+          width: 300,
+          height: 300,
+          borderRadius: "50%",
+          background: theme.palette.mode === "dark"
+            ? "radial-gradient(circle, rgba(120,119,198,0.4) 0%, rgba(120,119,198,0) 70%)"
+            : "radial-gradient(circle, rgba(99,102,241,0.25) 0%, rgba(99,102,241,0) 70%)",
+          filter: "blur(40px)",
+          top: "10%",
+          left: "10%",
+          animation: `${float1} 15s ease-in-out infinite`,
+          zIndex: 0,
+        }}
+      />
+      <Box
+        sx={{
+          position: "absolute",
+          width: 400,
+          height: 400,
+          borderRadius: "50%",
+          background: theme.palette.mode === "dark"
+            ? "radial-gradient(circle, rgba(255,119,198,0.25) 0%, rgba(255,119,198,0) 70%)"
+            : "radial-gradient(circle, rgba(236,72,153,0.15) 0%, rgba(236,72,153,0) 70%)",
+          filter: "blur(50px)",
+          bottom: "5%",
+          right: "15%",
+          animation: `${float2} 18s ease-in-out infinite`,
+          zIndex: 0,
+        }}
+      />
+      <Box
+        sx={{
+          position: "absolute",
+          width: 200,
+          height: 200,
+          borderRadius: "50%",
+          background: theme.palette.mode === "dark"
+            ? "radial-gradient(circle, rgba(120,219,255,0.3) 0%, rgba(120,219,255,0) 70%)"
+            : "radial-gradient(circle, rgba(59,130,246,0.2) 0%, rgba(59,130,246,0) 70%)",
+          filter: "blur(30px)",
+          top: "50%",
+          right: "5%",
+          animation: `${float3} 12s ease-in-out infinite`,
+          zIndex: 0,
+        }}
+      />
+      <Fade in timeout={1000}>
+        <Card className="auth-card" sx={authCardStyles}>
+          <CardContent sx={cardContentStyles}>
+            {/* Logo and Title Section */}
+            <Box
+              sx={{
+                display: "flex",
+                flexDirection: "column",
+                alignItems: "center",
+                mb: 4,
+              }}
+            >
+              <Box sx={logoBoxStyles}>
+                <img src={logo} alt="Logo" style={logoImgStyles} />
+              </Box>
+              <Typography
+                variant={isSmallScreen ? "h5" : "h4"}
+                align="center"
+                sx={titleStyles(isSmallScreen)}
+              >
+                {PAGE_TITLE.REGISTER}
+              </Typography>
+              <Divider sx={dividerStyles(theme)} />
+              <Typography variant="body2" align="center" sx={descriptionStyles}>
+                Completa el formulario para crear tu cuenta en el sistema
+              </Typography>
+            </Box>
+
+            {/* Form Section */}
+            <Box component="form" onSubmit={handleRegister} sx={formBoxStyles}>
+              <Box sx={nameFieldsBoxStyles}>
+                <TextField
+                  fullWidth
+                  placeholder="Nombre"
+                  variant="outlined"
+                  value={addFields.firstName}
+                  onChange={(e) =>
+                    handleFieldChange("firstName", e.target.value)
+                  }
+                  error={!!fieldErrors.firstName}
+                  helperText={fieldErrors.firstName}
+                  disabled={isSubmitting}
+                  sx={textFieldStyles}
+                  InputProps={{
+                    startAdornment: (
+                      <InputAdornment position="start" sx={{ position: 'absolute', left: '14px', zIndex: 2 }}>
+                        <UserIcon size={20} color="#666666" />
+                      </InputAdornment>
+                    ),
+                  }}
+                                  />
+                <TextField
+                  fullWidth
+                  placeholder="Apellido"
+                  variant="outlined"
+                  value={addFields.lastName}
+                  onChange={(e) =>
+                    handleFieldChange("lastName", e.target.value)
+                  }
+                  error={!!fieldErrors.lastName}
+                  helperText={fieldErrors.lastName}
+                  disabled={isSubmitting}
+                  sx={textFieldStyles}
+                  InputProps={{
+                    startAdornment: (
+                      <InputAdornment position="start" sx={{ position: 'absolute', left: '14px', zIndex: 2 }}>
+                        <UserIcon size={20} color="#666666" />
+                      </InputAdornment>
+                    ),
+                  }}
+                                  />
+              </Box>
+
+              <TextField
+                fullWidth
+                placeholder="Correo Electrónico"
+                variant="outlined"
+                value={addFields.email}
+                onChange={(e) => handleFieldChange("email", e.target.value)}
+                onBlur={handleEmailChange}
+                error={!!fieldErrors.email}
+                helperText={fieldErrors.email}
+                disabled={isSubmitting}
+                sx={emailTextFieldStyles}
+                InputProps={{
+                  startAdornment: (
+                    <InputAdornment position="start" sx={{ position: 'absolute', left: '14px', zIndex: 2 }}>
+                      <Mail size={20} color="#666666" />
+                    </InputAdornment>
+                  ),
+                }}
+              />
+
+              <TextField
+                fullWidth
+                placeholder="Usuario"
+                variant="outlined"
+                value={addFields.username}
+                autoComplete="username"
+                onChange={(e) => handleFieldChange("username", e.target.value)}
+                onBlur={handleUsernameChange}
+                error={!!fieldErrors.username}
+                helperText={fieldErrors.username}
+                disabled={isSubmitting}
+                sx={usernameTextFieldStyles}
+                InputProps={{
+                  startAdornment: (
+                    <InputAdornment position="start" sx={{ position: 'absolute', left: '14px', zIndex: 2 }}>
+                      <UserIcon size={20} color="#666666" />
+                    </InputAdornment>
+                  ),
+                }}
+              />
+
+              <TextField
+                fullWidth
+                placeholder="Contraseña"
+                type={showPassword ? "text" : "password"}
+                variant="outlined"
+                value={addFields.password}
+                autoComplete="new-password"
+                onChange={(e) => handleFieldChange("password", e.target.value)}
+                error={!!fieldErrors.password}
+                helperText={fieldErrors.password}
+                disabled={isSubmitting}
+                sx={passwordTextFieldStyles}
+                InputProps={{
+                  startAdornment: (
+                    <InputAdornment position="start" sx={{ position: 'absolute', left: '14px', zIndex: 2 }}>
+                      <Lock size={20} color="#666666" />
+                    </InputAdornment>
+                  ),
+                  endAdornment: (
+                    <InputAdornment position="end" sx={{ position: 'absolute', right: '8px', zIndex: 2 }}>
+                      <IconButton
+                        onClick={handleTogglePassword}
+                        edge="end"
+                        disabled={isSubmitting}
+                        sx={passwordIconButtonStyles}
+                      >
+                        {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+                      </IconButton>
+                    </InputAdornment>
+                  ),
+                }}
+                              />
+
+              <Button
+                type="submit"
+                fullWidth
+                variant="contained"
+                disabled={isSubmitting}
+                sx={submitButtonStyles}
+              >
+                {isSubmitting ? (
+                  <>
+                    <CircularProgress
+                      color="inherit"
+                      size={24}
+                      sx={submitProgressStyles}
+                    />
+                    Creando cuenta...
+                  </>
+                ) : (
+                  "Crear Cuenta"
+                )}
+              </Button>
+            </Box>
+
+            {/* Error Alert */}
+            {error && (
+              <Fade in timeout={300}>
+                <Alert severity="error" sx={alertStyles}>
+                  {error}
+                </Alert>
+              </Fade>
+            )}
+
+            {/* Divider */}
+            <Divider sx={dividerSectionStyles} />
+
+            {/* Login Link */}
+            <Box sx={loginBoxStyles}>
+              <Typography variant="body2" sx={loginTextStyles}>
+                ¿Ya tienes una cuenta?
+              </Typography>
+              <Link
+                to="/"
+                style={{
+                  ...loginLinkStyles,
+                  color: theme.palette.text.primary,
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.backgroundColor = theme.palette.mode === 'dark'
+                    ? 'rgba(255,255,255,0.05)'
+                    : 'rgba(0,0,0,0.03)';
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.backgroundColor = 'transparent';
+                }}
+              >
+                Inicia sesión aquí
+              </Link>
+            </Box>
+          </CardContent>
+        </Card>
+      </Fade>
+    </Box>
+  );
+};
+
+export default Register;
