@@ -587,7 +587,7 @@ const Profile: React.FC = () => {
                 boxShadow: "0 4px 24px rgba(0,0,0,0.06), 0 1px 2px rgba(0,0,0,0.04)",
                 display: "flex",
                 flexDirection: "column",
-                height: "auto", // Height is auto, wraps only information
+                height: { xs: "auto", md: "100%" },
                 mb: 0,
               }}
             >
@@ -799,7 +799,7 @@ const Profile: React.FC = () => {
                 boxShadow: "0 4px 24px rgba(0,0,0,0.06), 0 1px 2px rgba(0,0,0,0.04)",
                 display: "flex",
                 flexDirection: "column",
-                height: "auto", // Height is auto, wraps only information
+                height: { xs: "auto", md: "100%" },
                 mb: 0,
               }}
             >
@@ -1048,7 +1048,7 @@ const Profile: React.FC = () => {
                 boxShadow: "0 4px 24px rgba(0,0,0,0.06), 0 1px 2px rgba(0,0,0,0.04)",
                 display: "flex",
                 flexDirection: "column",
-                height: "auto", // Height is auto, wraps only information
+                height: { xs: "auto", md: "100%" },
                 mb: 0,
               }}
             >
