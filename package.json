@@ -1,19 +1,28 @@
 {
   "name": "choferes",
   "private": true,
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
   "scripts": {
-    "lint": "npm --prefix api run lint && npm --prefix ui run lint",
-    "format": "npm --prefix api run format && npm --prefix ui run format",
+    "dev": "turbo dev",
+    "build": "turbo build",
+    "test": "turbo test",
+    "lint": "turbo lint",
+    "format": "turbo format",
     "prepare": "husky install"
   },
   "devDependencies": {
     "husky": "^9.1.7",
-    "lint-staged": "^16.1.2"
+    "jest": "^30.4.2",
+    "lint-staged": "^16.1.2",
+    "turbo": "^2.5.0"
   },
   "lint-staged": {
-    "**/*.{js,jsx,ts,tsx}": [
-      "eslint --fix",
-      "git add"
+    "*.{js,jsx,ts,tsx}": [
+      "eslint --fix"
     ]
-  }
+  },
+  "packageManager": "npm@10.9.2"
 }

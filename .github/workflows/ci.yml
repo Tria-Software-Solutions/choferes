@@ -6,8 +6,9 @@ on:
   pull_request:
     branches: [ main, develop ]
 
+# ─── Stage 1: Install & prepare shared artifacts ──────────────────────────────
 jobs:
-  build:
+  install:
     runs-on: ubuntu-latest
     strategy:
       matrix:
@@ -16,25 +17,138 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Use Node.js
+      - name: Use Node.js ${{ matrix.node-version }}
         uses: actions/setup-node@v4
         with:
           node-version: ${{ matrix.node-version }}
 
-      - name: Install & Build API
-        working-directory: ./api
-        run: |
-          npm ci
-          npm run lint || true
-          npm run build
+      # Cache node_modules based on package.json hashes.
+      # Lock files are gitignored so we hash package.json instead.
+      - name: Cache node_modules
+        id: cache-modules
+        uses: actions/cache@v4
+        with:
+          path: node_modules
+          key: modules-${{ runner.os }}-${{ hashFiles('package.json', 'apps/*/package.json', 'packages/*/package.json') }}
+          restore-keys: |
+            modules-${{ runner.os }}-
 
-      - name: Install & Build UI
-        working-directory: ./ui
-        run: |
-          npm ci
-          npm run lint || true
-          npm run build
+      - name: Install Dependencies (all workspaces)
+        if: steps.cache-modules.outputs.cache-hit != 'true'
+        run: npm install
 
-      - name: Run basic smoke tests
-        run: |
-          echo "Built API and UI successfully"
+      - name: Build Shared Package
+        working-directory: ./packages/shared
+        run: npm run build
+
+      # Upload shared dist so parallel jobs don't need to rebuild
+      - name: Upload Shared Package Dist
+        uses: actions/upload-artifact@v4
+        with:
+          name: shared-dist
+          path: packages/shared/dist
+          compression-level: 1
+
+  # ─── Stage 2a: Backend (parallel with frontend) ────────────────────────────
+  backend:
+    needs: install
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        node-version: [20]
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Use Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node-version }}
+
+      # Restore node_modules from cache (saved by install job)
+      - name: Restore node_modules
+        id: cache-restore
+        uses: actions/cache/restore@v4
+        with:
+          path: node_modules
+          key: modules-${{ runner.os }}-${{ hashFiles('package.json', 'apps/*/package.json', 'packages/*/package.json') }}
+          restore-keys: |
+            modules-${{ runner.os }}-
+
+      # Safety fallback if cache was unavailable
+      - name: Install Dependencies (fallback)
+        if: steps.cache-restore.outputs.cache-hit != 'true'
+        run: npm install
+
+      - name: Download Shared Package
+        uses: actions/download-artifact@v4
+        with:
+          name: shared-dist
+          path: packages/shared/dist
+
+      - name: Lint Backend
+        if: always()
+        working-directory: ./apps/backend
+        run: npm run lint || true
+
+      - name: Build Backend
+        working-directory: ./apps/backend
+        run: npm run build
+
+      - name: Test Backend
+        if: always()
+        continue-on-error: true
+        working-directory: ./apps/backend
+        run: npm test -- --verbose --testTimeout=10000
+
+  # ─── Stage 2b: Frontend (parallel with backend) ────────────────────────────
+  frontend:
+    needs: install
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        node-version: [20]
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Use Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node-version }}
+
+      # Restore node_modules from cache (saved by install job)
+      - name: Restore node_modules
+        id: cache-restore
+        uses: actions/cache/restore@v4
+        with:
+          path: node_modules
+          key: modules-${{ runner.os }}-${{ hashFiles('package.json', 'apps/*/package.json', 'packages/*/package.json') }}
+          restore-keys: |
+            modules-${{ runner.os }}-
+
+      # Safety fallback if cache was unavailable
+      - name: Install Dependencies (fallback)
+        if: steps.cache-restore.outputs.cache-hit != 'true'
+        run: npm install
+
+      - name: Download Shared Package
+        uses: actions/download-artifact@v4
+        with:
+          name: shared-dist
+          path: packages/shared/dist
+
+      - name: Lint Frontend
+        if: always()
+        working-directory: ./apps/frontend
+        run: npm run lint || true
+
+      - name: Build Frontend
+        working-directory: ./apps/frontend
+        run: npm run build
+
+      - name: Test Frontend
+        if: always()
+        continue-on-error: true
+        working-directory: ./apps/frontend
+        run: CI=true npm test -- --watchAll=false --verbose
