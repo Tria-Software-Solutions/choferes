@@ -11,7 +11,8 @@
     "test": "turbo test",
     "lint": "turbo lint",
     "format": "turbo format",
-    "prepare": "husky install"
+    "render-build": "NODE_ENV=development npm install && npx turbo build --filter=@choferes/backend",
+    "postinstall": "husky install || true"
   },
   "devDependencies": {
     "husky": "^9.1.7",
