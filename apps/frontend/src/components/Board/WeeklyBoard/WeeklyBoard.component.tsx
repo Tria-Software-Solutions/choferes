@@ -9,6 +9,9 @@ import {
   ListItemButton,
   ListItemText,
   Chip,
+  TextField,
+  Dialog,
+  Button,
   type Theme,
 } from "@mui/material";
 import CalendarTodayIcon from "@mui/icons-material/CalendarToday";
@@ -958,13 +961,14 @@ interface TotalsColumnProps {
   onPeriodChange: (period: PeriodType) => void;
   onInfoClick?: (employee: Employee) => void;
   onAdjustClick?: (employee: Employee) => void;
+  handleAdjustTime?: (employeeId: number, condition: "add" | "subtract", timeAdjustment: number) => void;
   theme: Theme;
   isDark: boolean;
 }
 
 function TotalsColumn({
   employeeDataMap, filteredEmployees, selectedPeriod, onPeriodChange,
-  onInfoClick, onAdjustClick, theme, isDark,
+  onInfoClick, onAdjustClick, handleAdjustTime: onAdjust, theme, isDark,
 }: TotalsColumnProps) {
   const { setNodeRef, isOver } = useDroppable({
     id: "totals-column",
@@ -976,6 +980,56 @@ function TotalsColumn({
     boxShadow: `inset 0 0 0 2px ${isDark ? "rgba(99,102,241,0.35)" : "rgba(99,102,241,0.25)"}`,
     backgroundColor: isDark ? "rgba(99,102,241,0.08)" : "rgba(99,102,241,0.06)",
   } : {};
+
+  const [dialogEmpId, setDialogEmpId] = useState<number | null>(null);
+  const [dialogHours, setDialogHours] = useState("");
+  const [confirmOpen, setConfirmOpen] = useState(false);
+  const [pendingEdit, setPendingEdit] = useState<{ employeeId: number; condition: "add" | "subtract"; hours: number } | null>(null);
+
+  const openDialog = (empId: number) => {
+    setDialogEmpId(empId);
+    setDialogHours("");
+  };
+
+  const closeDialog = () => {
+    setDialogEmpId(null);
+    setDialogHours("");
+  };
+
+  const handleDialogConfirm = (condition: "add" | "subtract") => {
+    if (dialogEmpId === null) return;
+    const h = parseFloat(dialogHours);
+    if (isNaN(h) || h <= 0) return;
+    const empId = dialogEmpId;
+    closeDialog();
+    setPendingEdit({ employeeId: empId, condition, hours: h });
+    requestAnimationFrame(() => setConfirmOpen(true));
+  };
+
+  const applyPending = () => {
+    if (!pendingEdit) return;
+    onAdjust?.(pendingEdit.employeeId, pendingEdit.condition, pendingEdit.hours);
+    setConfirmOpen(false);
+    setPendingEdit(null);
+    closeDialog();
+  };
+
+  const cancelPending = () => {
+    setConfirmOpen(false);
+    setPendingEdit(null);
+  };
+
+  const confirmDialogEmployee = pendingEdit
+    ? filteredEmployees.find(e => e.id === pendingEdit.employeeId)
+    : null;
+
+  const dialogEmployee = dialogEmpId !== null
+    ? filteredEmployees.find(e => e.id === dialogEmpId)
+    : null;
+  const dialogEmpColor = dialogEmployee ? getEmployeeColor(dialogEmployee.id) : "#7c3aed";
+  const dialogInitials = dialogEmployee
+    ? getInitials(dialogEmployee.firstName, dialogEmployee.lastName)
+    : "";
 
   return (
     <Box
@@ -1043,14 +1097,33 @@ function TotalsColumn({
           const overtime = empData?.overtime ?? 0;
           const empColor = getEmployeeColor(employee.id);
           return (
-            <DraggableTotalsRow
-              key={employee.id}
-              employee={employee} hours={hours} overtime={overtime}
-              empColor={empColor} isDark={isDark}
-              onInfoClick={onInfoClick}
-              onAdjustClick={onAdjustClick}
-              theme={theme}
-            />
+            <Box key={employee.id} sx={{ display: "flex", alignItems: "center", gap: 0.25 }}>
+              <Box sx={{ flex: 1, minWidth: 0 }}>
+                <DraggableTotalsRow
+                  employee={employee} hours={hours} overtime={overtime}
+                  empColor={empColor} isDark={isDark}
+                  onInfoClick={onInfoClick}
+                  onAdjustClick={onAdjustClick}
+                  theme={theme}
+                />
+              </Box>
+              {onAdjust && (
+                <Box sx={{ display: "flex", alignItems: "center", flexShrink: 0, ml: 0.35 }}>
+                  <Box
+                    onClick={(e) => { e.stopPropagation(); openDialog(employee.id); }}
+                    title="Ajustar horas"
+                    sx={{
+                      display: "flex", alignItems: "center", justifyContent: "center",
+                      width: 28, height: 28, borderRadius: "7px", cursor: "pointer",
+                      fontSize: "1rem", fontWeight: 700, lineHeight: 1,
+                      color: "text.secondary",
+                      transition: "all 0.15s ease",
+                      "&:hover": { backgroundColor: isDark ? "rgba(139,92,246,0.15)" : "rgba(139,92,246,0.08)", color: "#a78bfa" },
+                    }}
+                  >±</Box>
+                </Box>
+              )}
+            </Box>
           );
         })}
       </Box>
@@ -1067,6 +1140,177 @@ function TotalsColumn({
           {Array.from(employeeDataMap.values()).reduce((s, d) => s + d.totalHours, 0)}h totales
         </Typography>
       </Box>
+
+      {/* Adjust hours dialog */}
+      <Dialog open={dialogEmpId !== null} onClose={closeDialog} maxWidth="xs" fullWidth
+        slotProps={{
+          backdrop: { sx: { backdropFilter: "blur(6px)", backgroundColor: isDark ? "rgba(0,0,0,0.6)" : "rgba(0,0,0,0.3)" } },
+          paper: { sx: { borderRadius: "20px", boxShadow: isDark ? "0 32px 80px rgba(0,0,0,0.6)" : "0 24px 80px rgba(0,0,0,0.15)", border: isDark ? "1px solid rgba(255,255,255,0.06)" : "none" } },
+        }}
+      >
+        <Box sx={{ p: 3, textAlign: "center", backgroundColor: isDark ? "rgba(18,18,24,0.98)" : undefined, borderRadius: "20px" }}>
+          {/* Employee avatar */}
+          <Box sx={{
+            width: 60, height: 60, borderRadius: "50%",
+            backgroundColor: dialogEmpColor,
+            display: "flex", alignItems: "center", justifyContent: "center",
+            mx: "auto", mb: 1.5,
+            boxShadow: `0 4px 16px ${dialogEmpColor}60`,
+          }}>
+            <Typography sx={{ fontSize: "1.15rem", fontWeight: 700, color: "#fff" }}>
+              {dialogInitials}
+            </Typography>
+          </Box>
+
+          {/* Title */}
+          <Typography sx={{ fontSize: "1.1rem", fontWeight: 700, mb: 0.25, color: isDark ? "#e8e8f0" : undefined }}>
+            Ajustar horas
+          </Typography>
+          <Typography sx={{ fontSize: "0.85rem", color: "text.secondary", mb: 2 }}>
+            {dialogEmployee?.firstName} {dialogEmployee?.lastName?.[0]}
+          </Typography>
+
+          {/* Accent bar */}
+          <Box sx={{ width: 36, height: 3.5, borderRadius: 2, mx: "auto", mb: 2.5, backgroundColor: "#a78bfa" }} />
+
+          {/* Hours input */}
+          <TextField
+            autoFocus
+            fullWidth
+            placeholder="0"
+            type="number"
+            value={dialogHours}
+            onChange={(e) => setDialogHours(e.target.value)}
+            onKeyDown={(e) => { if (e.key === "Enter") handleDialogConfirm("add"); }}
+            sx={{
+              mb: 2.5,
+              "& .MuiOutlinedInput-root": {
+                borderRadius: "12px",
+                minHeight: "42px",
+                backgroundColor: isDark ? "rgba(40,40,50,0.6)" : "rgba(255,255,255,0.7)",
+                color: theme.palette.text.primary,
+                border: isDark ? "1px solid rgba(255,255,255,0.1)" : "1px solid rgba(0,0,0,0.08)",
+                transition: "all 0.3s cubic-bezier(0.4, 0, 0.2, 1)",
+                "&:hover": {
+                  backgroundColor: isDark ? "rgba(50,50,60,0.7)" : "rgba(255,255,255,0.85)",
+                  borderColor: isDark ? "rgba(255,255,255,0.15)" : "rgba(0,0,0,0.12)",
+                },
+                "&:hover .MuiOutlinedInput-notchedOutline": { borderColor: "transparent" },
+                "&.Mui-focused": {
+                  backgroundColor: isDark ? "rgba(55,55,65,0.8)" : "rgba(255,255,255,0.95)",
+                  borderColor: "#a78bfa",
+                  boxShadow: `0 0 0 3px ${isDark ? "rgba(167,139,250,0.15)" : "rgba(167,139,250,0.1)"}`,
+                },
+                "&.Mui-focused .MuiOutlinedInput-notchedOutline": { borderColor: "transparent" },
+                "& fieldset": { border: "none" },
+                "& input": {
+                  color: theme.palette.text.primary,
+                  fontSize: "0.9rem",
+                  paddingTop: "10px",
+                  paddingBottom: "10px",
+                  paddingLeft: "14px",
+                  paddingRight: "14px",
+                  textAlign: "center",
+                  "&::placeholder": {
+                    color: isDark ? "rgba(255,255,255,0.25)" : "rgba(0,0,0,0.25)",
+                    opacity: 1,
+                  },
+                },
+              },
+            }}
+          />
+
+          {/* Add / Subtract buttons */}
+          <Box sx={{ display: "flex", gap: 1, mb: 1 }}>
+            <Button fullWidth size="medium" variant="contained" onClick={() => handleDialogConfirm("subtract")}
+              disabled={!dialogHours || parseFloat(dialogHours) <= 0}
+              sx={{
+                borderRadius: "12px", textTransform: "none", fontWeight: 700, fontSize: "0.9rem", py: 1,
+                backgroundColor: "#ef4444", color: "#fff",
+                "&:hover": { backgroundColor: "#dc2626" },
+                "&.Mui-disabled": { backgroundColor: isDark ? "rgba(239,68,68,0.12)" : "rgba(239,68,68,0.08)", color: isDark ? "rgba(255,255,255,0.2)" : "rgba(0,0,0,0.2)" },
+              }}
+            >
+              − Restar
+            </Button>
+            <Button fullWidth size="medium" variant="contained" onClick={() => handleDialogConfirm("add")}
+              disabled={!dialogHours || parseFloat(dialogHours) <= 0}
+              sx={{
+                borderRadius: "12px", textTransform: "none", fontWeight: 700, fontSize: "0.9rem", py: 1,
+                backgroundColor: "#34d399", color: "#fff",
+                "&:hover": { backgroundColor: "#2ecc71" },
+                "&.Mui-disabled": { backgroundColor: isDark ? "rgba(52,211,153,0.12)" : "rgba(52,211,153,0.08)", color: isDark ? "rgba(255,255,255,0.2)" : "rgba(0,0,0,0.2)" },
+              }}
+            >
+              + Agregar
+            </Button>
+          </Box>
+
+          {/* Cancel */}
+          <Button fullWidth size="small" onClick={closeDialog}
+            sx={{
+              borderRadius: "8px", textTransform: "none", fontWeight: 500, color: "text.secondary", py: 0.75,
+              "&:hover": { backgroundColor: isDark ? "rgba(255,255,255,0.06)" : "rgba(0,0,0,0.04)" },
+            }}
+          >
+            Cancelar
+          </Button>
+        </Box>
+      </Dialog>
+
+      {/* Confirmation dialog */}
+      <Dialog open={confirmOpen} onClose={cancelPending} maxWidth="xs" fullWidth
+        slotProps={{
+          backdrop: { sx: { backdropFilter: "blur(6px)", backgroundColor: isDark ? "rgba(0,0,0,0.6)" : "rgba(0,0,0,0.3)" } },
+          paper: { sx: { borderRadius: "20px", boxShadow: isDark ? "0 32px 80px rgba(0,0,0,0.6)" : "0 24px 80px rgba(0,0,0,0.15)", border: isDark ? "1px solid rgba(255,255,255,0.06)" : "none" } },
+        }}
+      >
+        <Box sx={{ p: 3, textAlign: "center", backgroundColor: isDark ? "rgba(18,18,24,0.98)" : undefined, borderRadius: "20px" }}>
+          <Box sx={{
+            width: 56, height: 56, borderRadius: "50%",
+            backgroundColor: pendingEdit?.condition === "add"
+              ? (isDark ? "rgba(52,211,153,0.15)" : "rgba(52,211,153,0.1)")
+              : (isDark ? "rgba(239,68,68,0.15)" : "rgba(239,68,68,0.1)"),
+            display: "flex", alignItems: "center", justifyContent: "center",
+            mx: "auto", mb: 1.5,
+          }}>
+            <Typography sx={{ fontSize: "1.5rem" }}>
+              {pendingEdit?.condition === "add" ? "+" : "−"}
+            </Typography>
+          </Box>
+          <Typography sx={{ fontSize: "1.05rem", fontWeight: 700, mb: 0.5, color: isDark ? "#e8e8f0" : undefined }}>
+            {pendingEdit?.condition === "add" ? "Agregar horas" : "Restar horas"}
+          </Typography>
+          <Typography sx={{ fontSize: "0.85rem", color: "text.secondary", mb: 1.5, lineHeight: 1.5 }}>
+            {pendingEdit
+              ? `Se ${pendingEdit.condition === "add" ? "agregarán" : "restarán"} ${pendingEdit.hours}h ${pendingEdit.condition === "add" ? "a" : "de"} ${confirmDialogEmployee?.firstName ?? ""} ${confirmDialogEmployee?.lastName?.[0] ?? ""}.`
+              : ""}
+          </Typography>
+
+          <Box sx={{ width: 36, height: 3.5, borderRadius: 2, mx: "auto", mb: 2.5,
+            backgroundColor: pendingEdit?.condition === "add" ? "#34d399" : "#ef4444",
+          }} />
+
+          <Box sx={{ display: "flex", gap: 1 }}>
+            <Button fullWidth size="medium" onClick={cancelPending}
+              sx={{ borderRadius: "12px", textTransform: "none", fontWeight: 600, py: 1, color: "text.secondary",
+                "&:hover": { backgroundColor: isDark ? "rgba(255,255,255,0.06)" : "rgba(0,0,0,0.04)" },
+              }}
+            >
+              Cancelar
+            </Button>
+            <Button fullWidth size="medium" variant="contained" onClick={applyPending}
+              sx={{
+                borderRadius: "12px", textTransform: "none", fontWeight: 600, py: 1,
+                backgroundColor: pendingEdit?.condition === "add" ? "#34d399" : "#ef4444",
+                "&:hover": { backgroundColor: pendingEdit?.condition === "add" ? "#2ecc71" : "#dc2626" },
+              }}
+            >
+              Confirmar
+            </Button>
+          </Box>
+        </Box>
+      </Dialog>
     </Box>
   );
 }
@@ -1200,7 +1444,7 @@ const WeeklyBoard: React.FC<WeeklyBoardProps> = ({
   filteredEmployees, schedules, hoursWorked,
   weeklySummaries, biweeklySummaries, monthlySummaries,
   weekOffset, weekNumber, biweekNumber, month, year,
-  handleChange, permissions,
+   handleChange, handleAdjustTime, permissions,
   viewMode, setViewMode,
   onInfoClick, onAdjustClick,
   recalculateEmployeeWeeklySummary,
@@ -1559,6 +1803,7 @@ const WeeklyBoard: React.FC<WeeklyBoardProps> = ({
                 onPeriodChange={setSelectedPeriod}
                 onInfoClick={showHours ? onInfoClick : undefined}
                 onAdjustClick={showHours ? onAdjustClick : undefined}
+                handleAdjustTime={handleAdjustTime}
                 theme={theme}
                 isDark={isDark}
               />
@@ -1595,6 +1840,7 @@ const WeeklyBoard: React.FC<WeeklyBoardProps> = ({
                 onPeriodChange={setSelectedPeriod}
                 onInfoClick={showHours ? onInfoClick : undefined}
                 onAdjustClick={showHours ? onAdjustClick : undefined}
+                handleAdjustTime={handleAdjustTime}
                 theme={theme}
                 isDark={isDark}
               />
