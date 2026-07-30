@@ -1,24 +1,44 @@
 import { Theme } from "@mui/material/styles";
-import { CSSProperties } from "react";
+import {
+  boxRoot,
+  gridContainer,
+  iconStyle,
+  infoBox,
+  infoIconBox,
+  infoTitle,
+  infoDesc,
+  actionsBox,
+  clearButton,
+  actionsInnerBox,
+  cancelButton,
+  submitButton,
+  textFieldSx,
+} from "../sharedStyles";
 
-export const boxRoot = {
-  width: "100%",
-  p: 0,
+export {
+  boxRoot,
+  gridContainer,
+  iconStyle,
+  infoBox,
+  infoIconBox,
+  infoTitle,
+  infoDesc,
+  actionsBox,
+  clearButton,
+  actionsInnerBox,
+  cancelButton,
+  submitButton,
 };
 
-export const gridContainer = {
-  mt: 0,
-};
-
-export const iconStyle: CSSProperties = {
-  color: "#666666",
-};
+export const formControl = (theme: Theme) => textFieldSx(theme);
 
 export const permissionsLabel = (theme: Theme) => ({
   fontWeight: 600,
   color: theme.palette.text.primary,
   mb: 1,
-  fontSize: "clamp(0.875rem, 1.5vw, 1rem)",
+  fontSize: "0.85rem",
+  textTransform: "uppercase" as const,
+  letterSpacing: "0.04em",
 });
 
 export const permissionsError = (theme: Theme) => ({
@@ -30,85 +50,27 @@ export const permissionsError = (theme: Theme) => ({
 export const permissionsBox = (theme: Theme) => ({
   maxHeight: 320,
   overflowY: "auto",
-  borderRadius: "10px",
-  p: { xs: 1, sm: 1.5 },
-  backgroundColor: theme.palette.mode === "dark" ? "rgba(255,255,255,0.02)" : "rgba(0,0,0,0.01)",
+  borderRadius: "12px",
+  p: { xs: 1.5, sm: 2 },
+  border: `1px solid ${theme.palette.mode === "dark" ? "rgba(255,255,255,0.08)" : "rgba(0,0,0,0.06)"}`,
+  backgroundColor: theme.palette.mode === "dark" ? "rgba(255,255,255,0.02)" : "rgba(0,0,0,0.015)",
 });
 
 export const categoryBox = {
-  mb: 2,
+  mb: 2.5,
 };
 
 export const categoryTitle = (theme: Theme) => ({
   fontWeight: 600,
   color: theme.palette.text.secondary,
   mb: 1,
-  fontSize: "0.75rem",
-  textTransform: "capitalize",
+  fontSize: "0.72rem",
+  textTransform: "uppercase" as const,
+  letterSpacing: "0.05em",
 });
 
 export const chipSx = (theme: Theme) => ({
-  fontSize: "0.85rem",
+  fontSize: "0.82rem",
   fontWeight: 500,
   color: theme.palette.text.primary,
-});
-
-export const actionsBox = (theme: Theme) => ({
-  display: "flex",
-  flexDirection: { xs: "column", sm: "row" },
-  justifyContent: "space-between",
-  gap: { xs: 1, sm: 2 },
-  pt: 2,
-  borderTop: "1px solid",
-  borderColor: theme.palette.divider,
-});
-
-export const clearButton = {
-  minHeight: 44,
-  fontSize: "clamp(0.75rem, 1.25vw, 0.875rem)",
-  order: { xs: 3, sm: 1 },
-};
-
-export const actionsInnerBox = {
-  display: "flex",
-  flexDirection: { xs: "column", sm: "row" },
-  gap: { xs: 1, sm: 2 },
-  width: { xs: "100%", sm: "auto" },
-  order: { xs: 1, sm: 2 },
-};
-
-export const cancelButton = {
-  minHeight: 44,
-  fontSize: "clamp(0.75rem, 1.25vw, 0.875rem)",
-};
-
-export const infoBox = (theme: Theme) => ({
-  display: "flex",
-  alignItems: "flex-start",
-  gap: { xs: 1, sm: 2 },
-  p: { xs: 1.5, sm: 2 },
-  backgroundColor: theme.palette.background.default,
-  borderRadius: 1,
-  border: "1px solid",
-  borderColor: theme.palette.divider,
-  mb: 2,
-});
-
-export const infoIconBox = (theme: Theme) => ({
-  color: theme.palette.info.main,
-  flexShrink: 0,
-  mt: 0.25,
-});
-
-export const infoTitle = (theme: Theme) => ({
-  fontWeight: 600,
-  color: theme.palette.text.primary,
-  mb: 0.5,
-  fontSize: "clamp(0.875rem, 1.5vw, 1rem)",
-});
-
-export const infoDesc = (theme: Theme) => ({
-  color: theme.palette.text.secondary,
-  fontSize: "clamp(0.75rem, 1.25vw, 0.875rem)",
-  lineHeight: 1.4,
 });

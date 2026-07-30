@@ -33,6 +33,8 @@ import {
   infoIconBox,
   infoTitle,
   infoDesc,
+  submitButton,
+  formControl,
 } from "./styles";
 
 interface AddRoleFormProps {
@@ -146,7 +148,7 @@ const AddRoleForm: React.FC<AddRoleFormProps> = ({
 
   return (
     <Box sx={boxRoot}>
-      <Box sx={{ mb: 2 }}>
+      <Box sx={{ mb: 1 }}>
         <Typography
           variant="body2"
           color="text.secondary"
@@ -155,7 +157,7 @@ const AddRoleForm: React.FC<AddRoleFormProps> = ({
           {FORMS.ADD_ROLE.DIALOG_CONTENT_TITLE}
         </Typography>
       </Box>
-      <Grid container spacing={3} sx={gridContainer}>
+      <Grid container spacing={2} sx={gridContainer}>
         <Grid item xs={12}>
           <TextfieldComponent
             placeholder={FORMS.ADD_ROLE.NAME_PLACEHOLDER}
@@ -166,12 +168,13 @@ const AddRoleForm: React.FC<AddRoleFormProps> = ({
             error={errors.name !== ""}
             helperText={errors.name}
             icon={<Users style={iconStyle} />}
+            sx={formControl(theme)}
           />
         </Grid>
 
         <Grid item xs={12}>
           <FormControl fullWidth error={errors.permissions !== ""}>
-            <Box sx={{ mb: 2 }}>
+            <Box sx={{ mb: 1 }}>
               <Box sx={permissionsLabel(theme)}>
                 {FORMS.ADD_ROLE.PERMISSIONS_LABEL}
               </Box>
@@ -269,9 +272,7 @@ const AddRoleForm: React.FC<AddRoleFormProps> = ({
         <Grid item xs={12}>
           <Box sx={infoBox(theme)}>
             <Box sx={infoIconBox(theme)}>
-              <Info
-                style={iconStyle}
-              />
+              <Info size={18} />
             </Box>
             <Box>
               <Typography sx={infoTitle(theme)}>
@@ -313,14 +314,7 @@ const AddRoleForm: React.FC<AddRoleFormProps> = ({
                 disabled={!isFormValid || isLoading}
                 startIcon={<Plus size={18} />}
                 fullWidth={isSmallScreen}
-                sx={{
-                  fontWeight: 600,
-                  fontSize: "0.95rem",
-                  textTransform: "none",
-                  letterSpacing: "0.01em",
-                  borderRadius: "10px",
-                  minHeight: "44px",
-                }}
+                sx={submitButton}
               >
                 {isLoading
                   ? FORMS.ADD_ROLE.BUTTON_ADDING

@@ -8,12 +8,32 @@ export const getSchedules = async (search?: string) => {
   if (search) params.search = search;
 
   const response = await api.get("/schedules", { params });
-  return response.data.data;
+  // Normalize: ensure scheduleDays is always an array
+  const data = response.data.data;
+  if (Array.isArray(data)) {
+    return data.map(normalizeSchedule);
+  }
+  return data;
 };
+
+// Helper to ensure scheduleDays is always present as an array
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+function normalizeSchedule(schedule: any) {
+  if (!schedule.scheduleDays) {
+    schedule.scheduleDays = [];
+  }
+  return schedule;
+}
+
+
 
 export const getScheduleById = async (id: number) => {
   const response = await api.get(`/schedules/${id}`);
-  return response.data;
+  const schedule = response.data;
+  if (!schedule.scheduleDays) {
+    schedule.scheduleDays = [];
+  }
+  return schedule;
 };
 
 export const createSchedule = async (newSchedule: Omit<Schedule, "id">) => {

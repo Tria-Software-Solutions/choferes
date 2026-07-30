@@ -1,4 +1,5 @@
 import { Schedule } from "../models/Schedule";
+import { sortSchedulesByType } from "./schedule";
 import { ColumnsTranslation } from "./columnsTranslation";
 import { EnglishDayOfWeek } from "./dayAbreviations";
 import { EnglishAbrevMonthOfYear } from "./monthAbreviations";
@@ -12,14 +13,14 @@ export const translateColumnHeaderToSpanish = (
   const translations: ColumnsTranslation = {
     id: "Id",
     name: "Nombre",
-    firstName: "Nombre",
+    firstName: "Nombre Completo",
     lastName: "Apellido",
     email: "Correo Electrónico",
     username: "Usuario",
     password: "Contraseña",
-    label: "Asignación",
-    days: "Días",
-    hours: "Horas",
+    label: "Horario / Ubicación",
+    days: "Días Semana",
+    hours: "Horas/Día",
     specialSchedule: "Horario Especial",
     ticket: "Boleta",
     licensePlate: "Placa",
@@ -51,18 +52,11 @@ export const getOptionsForDay = (
   schedules: Schedule[],
 ): Schedule[] => {
   // Returns all schedules that include the given day, sorted by type and alphabetically
-  return schedules
-    .filter((schedule) =>
+  return sortSchedulesByType(
+    schedules.filter((schedule) =>
       schedule.days.includes(day.toLowerCase()),
-    )
-    .sort((a, b) => {
-      // First sort by type: regular schedules (locations) first, then special schedules
-      if (a.specialSchedule !== b.specialSchedule) {
-        return a.specialSchedule ? 1 : -1;
-      }
-      // Then sort alphabetically by label
-      return a.label.localeCompare(b.label, 'es', { sensitivity: 'base' });
-    });
+    ),
+  );
 };
 
 export const translateDayToAbrevSpanish = (
@@ -177,3 +171,10 @@ export const translatePriorityToSpanish = (
 export const capitalizeFirstLetter = (str: string) =>
   // Capitalizes the first letter of a string
   str.charAt(0).toUpperCase() + str.slice(1);
+
+// Gets initials from first and last name (e.g., "Juan Herrera" → "JH")
+export const getInitials = (firstName: string, lastName: string): string => {
+  const first = firstName?.charAt(0)?.toUpperCase() ?? "";
+  const last = lastName?.charAt(0)?.toUpperCase() ?? "";
+  return `${first}${last}`;
+};

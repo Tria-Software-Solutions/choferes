@@ -91,16 +91,16 @@ export const calculateTotalHoursAndOvertimeForPeriods = (
     weeklySummaries.find(
       (s) =>
         s.employeeId === employeeId &&
-        s.weekNumber === weekNumbers[1].weekNumber &&
-        s.year === weekNumbers[1].year,
+        s.weekNumber === weekNumbers[0].weekNumber &&
+        s.year === weekNumbers[0].year,
     );
 
   const findSecondWeeklySummary = () =>
     weeklySummaries.find(
       (s) =>
         s.employeeId === employeeId &&
-        s.weekNumber === weekNumbers[0].weekNumber &&
-        s.year === weekNumbers[0].year,
+        s.weekNumber === weekNumbers[1].weekNumber &&
+        s.year === weekNumbers[1].year,
     );
 
   const findFirstBiweeklySummary = () =>
@@ -156,15 +156,11 @@ export const calculateTotalHoursAndOvertimeForPeriods = (
         ? OVERTIME.BIWEEKLY
         : OVERTIME.MONTHLY;
 
-  // Calculates overtime for each period based on the threshold
-  const firstOvertime =
-    firstSummary > overtimeThreshold ? firstSummary - overtimeThreshold : 0;
-
-  const secondOvertime =
-    secondSummary > overtimeThreshold ? secondSummary - overtimeThreshold : 0;
-
-  const totalHours = [firstSummary, secondSummary].join(" / ");
-  const overtime = [firstOvertime, secondOvertime].join("/");
+  // Sum totals first, then apply the threshold once to the combined total.
+  // This correctly handles periods that span across boundaries:
+  // e.g., a week crossing two months shouldn't apply the monthly threshold per sub-period.
+  const totalHours = (firstSummary ?? 0) + (secondSummary ?? 0);
+  const overtime = totalHours > overtimeThreshold ? totalHours - overtimeThreshold : 0;
 
   return { totalHours, overtime };
 };

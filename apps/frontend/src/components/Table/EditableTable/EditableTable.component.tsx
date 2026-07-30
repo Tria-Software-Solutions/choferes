@@ -62,7 +62,12 @@ interface EditableTableProps<T extends object> {
   setPage: (page: number) => void;
   setRowsPerPage: (rowsPerPage: number) => void;
   /** @deprecated Use custom cell rendering in parent component instead */
-  renderColumnValue?: (column: string, value: unknown) => React.ReactNode;
+  /** @deprecated Use custom cell rendering in parent component instead */
+  renderColumnValue?: (column: string, value: unknown, isEditing?: boolean, editProps?: {
+    editFields: Record<string, EditFieldValue>;
+    setEditField: (field: string, value: EditFieldValue) => void;
+    validateField: (field: string, value: string | string[] | boolean) => boolean;
+  }, row?: Record<string, unknown>) => React.ReactNode;
   validateField?: (field: string, value: string | string[] | boolean) => boolean;
   isSaveDisabled?: boolean;
   noActions?: boolean;
@@ -115,16 +120,33 @@ const DataCell = memo<{
   theme: Theme;
   expanded: boolean;
   onToggleExpand: () => void;
-  renderColumnValue?: (column: string, value: unknown) => React.ReactNode;
-}>(({ column, value, isEditing, editValue, editFields, setEditField, validateField, columnConfig, theme, expanded, onToggleExpand, renderColumnValue }) => {
+  row?: Record<string, unknown>;
+  renderColumnValue?: (column: string, value: unknown, isEditing?: boolean, editProps?: {
+    editFields: Record<string, EditFieldValue>;
+    setEditField: (field: string, value: EditFieldValue) => void;
+    validateField: (field: string, value: string | string[] | boolean) => boolean;
+  }, row?: Record<string, unknown>) => React.ReactNode;
+}>(({ column, value, isEditing, editValue, editFields, setEditField, validateField, columnConfig, theme, expanded, onToggleExpand, renderColumnValue, row }) => {
+  // Custom renderColumnValue can handle both view and edit modes
+  if (renderColumnValue) {
+    if (isEditing) {
+      const customEdit = renderColumnValue(column, value, true, {
+        editFields,
+        setEditField: setEditField || (() => {}),
+        validateField,
+      }, row);
+      if (customEdit !== null && customEdit !== undefined) {
+        return <>{customEdit}</>;
+      }
+    } else {
+      return <>{renderColumnValue(column, value, false, undefined, row)}</>;
+    }
+  }
+  // Fall back to default renderers
   if (isEditing) {
     return (
       <>{renderEditField({ column: column as keyof object, value: editValue, editFields, setEditField, validateField, columnConfig })}</>
     );
-  }
-  // Usar renderColumnValue si se proporciona, sino usar renderCellValue por defecto
-  if (renderColumnValue) {
-    return <>{renderColumnValue(column, value)}</>;
   }
   return <>{renderCellValue({ column, value, theme, expanded, onToggleExpand })}</>;
 });
@@ -415,6 +437,7 @@ const EditableTableComponent = <T extends object>({
                       <DataCell
                         column={String(column)}
                         value={row[column]}
+                        row={row as Record<string, unknown>}
                         isEditing={isEditing}
                         editValue={(editFields[String(column)] || "").toString()}
                         editFields={editFields}
@@ -444,6 +467,7 @@ const EditableTableComponent = <T extends object>({
                       <DataCell
                         column={String(column)}
                         value={row[column]}
+                        row={row as Record<string, unknown>}
                         isEditing={isEditing}
                         editValue={(editFields[String(column)] || "").toString()}
                         editFields={editFields}

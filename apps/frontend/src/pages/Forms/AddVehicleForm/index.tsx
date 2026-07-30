@@ -24,14 +24,11 @@ import {
   gridContainer,
   iconStyle,
   formControl,
-  infoBox,
-  infoIconBox,
-  infoTitle,
-  infoDesc,
   actionsBox,
   clearButton,
   actionsInnerBox,
   cancelButton,
+  submitButton,
 } from "./styles";
 
 interface AddVehicleFormProps {
@@ -67,6 +64,7 @@ const AddVehicleForm: React.FC<AddVehicleFormProps> = ({
 }) => {
   const [autoPopulated, setAutoPopulated] = useState(false);
   const theme = useTheme();
+  const isDark = theme.palette.mode === "dark";
   const isSmallScreen = useMediaQuery(theme.breakpoints.down("sm"));
   const [formData, setFormData] = useState({
     ticket: getNextTicketNumber(),
@@ -293,7 +291,7 @@ const AddVehicleForm: React.FC<AddVehicleFormProps> = ({
 
   return (
     <Box sx={boxRoot}>
-      <Box sx={{ mb: 0 }}>
+      <Box sx={{ mb: 1 }}>
         <Typography
           variant="body2"
           color="text.secondary"
@@ -302,7 +300,22 @@ const AddVehicleForm: React.FC<AddVehicleFormProps> = ({
           {FORMS.ADD_VEHICLE.DIALOG_CONTENT_TITLE}
         </Typography>
       </Box>
-      <Grid container spacing={1.5} sx={gridContainer}>
+      <Grid container spacing={2.5} sx={gridContainer}>
+        {/* Section: Información del vehículo */}
+        <Grid item xs={12}>
+          <Typography
+            sx={{
+              fontSize: "0.72rem",
+              fontWeight: 600,
+              color: theme.palette.text.secondary,
+              textTransform: "uppercase",
+              letterSpacing: "0.06em",
+            }}
+          >
+            Información del vehículo
+          </Typography>
+        </Grid>
+
         <Grid item xs={12} sm={6}>
           <TextfieldComponent
             placeholder={FORMS.ADD_VEHICLE.TICKET_PLACEHOLDER}
@@ -427,6 +440,22 @@ const AddVehicleForm: React.FC<AddVehicleFormProps> = ({
           />
         </Grid>
 
+        {/* Section: Estacionamiento */}
+        <Grid item xs={12}>
+          <Typography
+            sx={{
+              fontSize: "0.72rem",
+              fontWeight: 600,
+              color: theme.palette.text.secondary,
+              textTransform: "uppercase",
+              letterSpacing: "0.06em",
+              mt: 0.25,
+            }}
+          >
+            Estacionamiento
+          </Typography>
+        </Grid>
+
         <Grid item xs={12} sm={6}>
           <TextfieldComponent
             placeholder={FORMS.ADD_VEHICLE.PARKING_LOT_PLACEHOLDER}
@@ -475,18 +504,57 @@ const AddVehicleForm: React.FC<AddVehicleFormProps> = ({
           />
         </Grid>
 
+        {/* Premium info card */}
         <Grid item xs={12}>
-          <Box sx={infoBox(theme)}>
-            <Box sx={infoIconBox(theme)}>
-              <Info
-                style={iconStyle}
-              />
+          <Box
+            sx={{
+              display: "flex",
+              alignItems: "center",
+              gap: 1.5,
+              p: { xs: 1, sm: 1.5 },
+              borderRadius: "14px",
+              backgroundColor: isDark
+                ? "rgba(99,102,241,0.04)"
+                : "rgba(99,102,241,0.03)",
+              border: `1px solid ${isDark
+                ? "rgba(255,255,255,0.06)"
+                : "rgba(99,102,241,0.1)"}`,
+            }}
+          >
+            <Box
+              sx={{
+                width: 36,
+                height: 36,
+                borderRadius: "10px",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                background: `linear-gradient(135deg, ${theme.palette.primary.main}, ${theme.palette.primary.dark})`,
+                color: "#fff",
+                flexShrink: 0,
+                boxShadow: `0 4px 12px ${theme.palette.mode === "dark" ? "rgba(99,102,241,0.25)" : "rgba(99,102,241,0.15)"}`,
+              }}
+            >
+              <Info size={18} />
             </Box>
             <Box>
-              <Typography sx={infoTitle(theme)}>
+              <Typography
+                sx={{
+                  fontWeight: 600,
+                  color: theme.palette.text.primary,
+                  fontSize: "0.875rem",
+                }}
+              >
                 {FORMS.ADD_VEHICLE.INFO_TITLE}
               </Typography>
-              <Typography sx={infoDesc(theme)}>
+              <Typography
+                sx={{
+                  color: theme.palette.text.secondary,
+                  fontSize: "0.75rem",
+                  lineHeight: 1.4,
+                  mt: 0.15,
+                }}
+              >
                 {FORMS.ADD_VEHICLE.INFO_DESC}
               </Typography>
             </Box>
@@ -522,14 +590,7 @@ const AddVehicleForm: React.FC<AddVehicleFormProps> = ({
                 disabled={!isFormValid || isLoading}
                 startIcon={<Plus size={18} />}
                 fullWidth={isSmallScreen}
-                sx={{
-                  fontWeight: 600,
-                  fontSize: "0.95rem",
-                  textTransform: "none",
-                  letterSpacing: "0.01em",
-                  borderRadius: "10px",
-                  minHeight: "44px",
-                }}
+                sx={submitButton}
               >
                 {isLoading
                   ? FORMS.ADD_VEHICLE.BUTTON_ADDING

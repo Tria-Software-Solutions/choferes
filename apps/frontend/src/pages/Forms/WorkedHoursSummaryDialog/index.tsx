@@ -86,11 +86,11 @@ const WorkedHoursSummaryDialog: React.FC<WorkedHoursSummaryDialogProps> = ({
             </TabList>
             <Divider sx={premiumDivider} />
             <TabPanel value="weekly">
-              <Box sx={{ textAlign: 'center', py: 2 }}>
-                <Avatar sx={{ ...premiumAvatarStyles(theme, "success"), mx: 'auto', mb: 2 }}>
+              <Box sx={{ textAlign: 'center', py: 1 }}>
+                <Avatar sx={{ ...premiumAvatarStyles(theme, "success"), mx: 'auto', mb: 1 }}>
                   <BarChart3 color="#fff" size={32} />
                 </Avatar>
-                <Typography sx={{ ...titleTypography(theme), mb: 1 }}>
+                <Typography sx={{ ...titleTypography(theme), mb: 0.5 }}>
                   {MANAGEMENT.SUMMARY_WEEKLY}
                 </Typography>
                 <Typography sx={{ ...hoursTypography(theme), fontSize: '3rem' }}>
@@ -102,11 +102,11 @@ const WorkedHoursSummaryDialog: React.FC<WorkedHoursSummaryDialogProps> = ({
               </Box>
             </TabPanel>
             <TabPanel value="biweekly">
-              <Box sx={{ textAlign: 'center', py: 2 }}>
+              <Box sx={{ textAlign: 'center', py: 1 }}>
                 <Avatar sx={{ ...premiumAvatarStyles(theme, "info"), mx: 'auto', mb: 2 }}>
                   <BarChart3 color="#fff" size={32} />
                 </Avatar>
-                <Typography sx={{ ...titleTypography(theme), mb: 1 }}>
+                <Typography sx={{ ...titleTypography(theme), mb: 0.5 }}>
                   {MANAGEMENT.SUMMARY_BIWEEKLY}
                 </Typography>
                 <Typography sx={{ ...hoursTypography(theme), fontSize: '3rem' }}>
@@ -118,11 +118,11 @@ const WorkedHoursSummaryDialog: React.FC<WorkedHoursSummaryDialogProps> = ({
               </Box>
             </TabPanel>
             <TabPanel value="monthly">
-              <Box sx={{ textAlign: 'center', py: 2 }}>
+              <Box sx={{ textAlign: 'center', py: 1 }}>
                 <Avatar sx={{ ...premiumAvatarStyles(theme, "warning"), mx: 'auto', mb: 2 }}>
                   <BarChart3 color="#fff" size={32} />
                 </Avatar>
-                <Typography sx={{ ...titleTypography(theme), mb: 1 }}>
+                <Typography sx={{ ...titleTypography(theme), mb: 0.5 }}>
                   {MANAGEMENT.SUMMARY_MONTHLY}
                 </Typography>
                 <Typography sx={{ ...hoursTypography(theme), fontSize: '3rem' }}>
@@ -134,11 +134,11 @@ const WorkedHoursSummaryDialog: React.FC<WorkedHoursSummaryDialogProps> = ({
               </Box>
             </TabPanel>
             <TabPanel value="overtime">
-              <Box sx={{ textAlign: 'center', py: 2 }}>
+              <Box sx={{ textAlign: 'center', py: 1 }}>
                 <Avatar sx={{ ...premiumAvatarStyles(theme, "error"), mx: 'auto', mb: 2 }}>
                   <Clock color="#fff" size={32} />
                 </Avatar>
-                <Typography sx={{ ...titleTypography(theme), mb: 1 }}>
+                <Typography sx={{ ...titleTypography(theme), mb: 0.5 }}>
                   {MANAGEMENT.SUMMARY_OVERTIME}
                 </Typography>
                 <Typography sx={{ ...hoursTypography(theme), fontSize: '3rem' }}>

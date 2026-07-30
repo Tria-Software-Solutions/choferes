@@ -18,11 +18,11 @@ export const BentoGrid: React.FC<BentoGridProps> = ({ children, sx }) => {
           lg: "repeat(4, 1fr)",
         },
         gridAutoRows: {
-          xs: "minmax(200px, auto)",
-          sm: "minmax(240px, auto)",
+          xs: "1fr",
+          sm: "1fr",
           md: "1fr",
         },
-        gap: { xs: 1, sm: 1.5, md: 2 },
+        gap: { xs: 0.5, sm: 0.75, md: 1 },
         flex: 1,
         minHeight: 0,
         ...(sx as object),
@@ -65,7 +65,6 @@ export const BentoGridItem: React.FC<BentoGridItemProps> = ({
 
   const gridColumn: Record<string, string> = {};
   if (colSpan) {
-    // Default colSpan to 1 on all sizes, override only what's specified
     if (colSpan.xs && colSpan.xs > 1) gridColumn.xs = `span ${colSpan.xs}`;
     if (colSpan.sm && colSpan.sm > 1) gridColumn.sm = `span ${colSpan.sm}`;
     if (colSpan.md && colSpan.md > 1) gridColumn.md = `span ${colSpan.md}`;
@@ -83,25 +82,22 @@ export const BentoGridItem: React.FC<BentoGridItemProps> = ({
       sx={{
         ...(Object.keys(gridColumn).length > 0 ? { gridColumn } : {}),
         ...(Object.keys(gridRow).length > 0 ? { gridRow } : {}),
-        borderRadius: { xs: "12px", sm: "16px" },
-        border: `1px solid ${isDark ? "rgba(255,255,255,0.08)" : "rgba(0,0,0,0.08)"}`,
-        boxShadow: {
-          xs: "0 2px 12px rgba(0,0,0,0.06), 0 1px 2px rgba(0,0,0,0.04)",
-          sm: "0 4px 24px rgba(0,0,0,0.08), 0 1px 2px rgba(0,0,0,0.04)",
-        },
-        p: { xs: 1.5, sm: 2.5, md: 3 },
+        borderRadius: { xs: "8px", sm: "10px" },
+        boxShadow: isDark
+          ? "0 2px 8px rgba(0,0,0,0.2)"
+          : "0 2px 8px rgba(0,0,0,0.04)",
+        p: { xs: 1, sm: 1.25, md: 1.5 },
         display: "flex",
         flexDirection: "column",
         backgroundColor: theme.palette.background.paper,
-        transition: "all 0.2s ease",
+        transition: "box-shadow 0.2s ease",
         "&:hover": {
           boxShadow: isDark
-            ? { xs: "0 2px 12px rgba(0,0,0,0.06)", sm: "0 8px 32px rgba(0,0,0,0.3), 0 2px 4px rgba(0,0,0,0.1)" }
-            : { xs: "0 2px 12px rgba(0,0,0,0.06)", sm: "0 8px 32px rgba(0,0,0,0.12), 0 2px 4px rgba(0,0,0,0.06)" },
+            ? "0 4px 16px rgba(0,0,0,0.35)"
+            : "0 4px 16px rgba(0,0,0,0.08)",
         },
         overflow: "hidden",
         position: "relative",
-        minHeight: { xs: 180, sm: 240 },
         ...(sx as object),
       }}
     >

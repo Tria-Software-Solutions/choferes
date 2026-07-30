@@ -6,6 +6,7 @@ import { UserRole } from "../models/UserRole";
 import { RolePermission } from "../models/RolePermission";
 import { Employee } from "../models/Employee";
 import { Schedule } from "../models/Schedule";
+import { ScheduleDay } from "../models/ScheduleDay";
 import { HoursWorked } from "../models/HoursWorked";
 import { Vehicle } from "../models/Vehicle";
 import { WeeklySummary } from "../models/WeeklySummary";
@@ -25,6 +26,7 @@ export {
   RolePermission,
   Employee,
   Schedule,
+  ScheduleDay,
   HoursWorked,
   Vehicle,
   WeeklySummary,

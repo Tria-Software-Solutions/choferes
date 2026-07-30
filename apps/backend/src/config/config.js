@@ -40,23 +40,40 @@ const sslConfig = {
 
 // Database configuration for different environments (development, test, production)
 // Values are loaded from environment variables for security and flexibility
+// eslint-disable-next-line no-console
 console.log(`[DB] Config: host=${db.host}, database=${db.database}, user=${db.username}`);
+
+// Only use SSL for non-local connections (production/staging on Render/Heroku)
+const isLocalHost =
+  !db.host || db.host === "localhost" || db.host === "127.0.0.1" || db.host === "0.0.0.0";
+const useSSL = !isLocalHost && (process.env.NODE_ENV === "production" || process.env.DATABASE_URL);
+
+// eslint-disable-next-line no-console
+console.log(
+  `[DB] SSL: ${useSSL ? "enabled" : "disabled"} (host=${db.host}, NODE_ENV=${process.env.NODE_ENV || "development"})`,
+);
+
+const makeDialectOptions = () => {
+  if (useSSL) return sslConfig;
+  // Explicitly disable SSL for local connections to avoid pg default behavior
+  return { ssl: false };
+};
 
 const config = {
   development: {
     ...db,
     dialect: "postgres",
-    dialectOptions: sslConfig,
+    dialectOptions: makeDialectOptions(),
   },
   test: {
     ...db,
     dialect: "postgres",
-    dialectOptions: sslConfig,
+    dialectOptions: makeDialectOptions(),
   },
   production: {
     ...db,
     dialect: "postgres",
-    dialectOptions: sslConfig,
+    dialectOptions: makeDialectOptions(),
   },
 };
 

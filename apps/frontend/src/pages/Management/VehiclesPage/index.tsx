@@ -25,6 +25,7 @@ import {
   useMediaQuery,
   useTheme,
   Button,
+  IconButton,
   CircularProgress,
   Backdrop,
   Paper,
@@ -579,41 +580,40 @@ const VehiclesPage: React.FC = () => {
           mt: 0,
         }}
       >
-        {/* Header Section */}
+        {/* Simple Header */}
         <Box
           sx={{
-            px: { xs: 2, sm: 3 },
-            py: { xs: 2, sm: 2.5 },
+            px: { xs: 2, sm: 2.5 },
+            py: { xs: 1.5, sm: 2 },
             backgroundColor: theme.palette.background.paper,
             color: theme.palette.text.primary,
-            borderBottom: `1px solid ${theme.palette.mode === "dark" ? "rgba(255,255,255,0.08)" : "rgba(0,0,0,0.08)"}`,
+            flexShrink: 0,
+            borderBottom: `1px solid ${theme.palette.mode === "dark" ? "rgba(255,255,255,0.06)" : "rgba(0,0,0,0.06)"}`,
           }}
         >
+          {/* Title Row */}
           <Box
             display="flex"
             justifyContent="space-between"
-            alignItems="flex-start"
-            mb={2}
+            alignItems="center"
+            mb={1.5}
           >
             <Box display="flex" alignItems="center" gap={1.5}>
               <Box
                 sx={{
-                  backgroundColor: theme.palette.primary.main,
-                  borderRadius: "10px",
-                  p: 1,
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
+                  color: theme.palette.primary.main,
+                  display: 'flex',
+                  alignItems: 'center',
                 }}
               >
-                <Car size={22} color={theme.palette.primary.contrastText} />
+                <Car size={20} strokeWidth={1.5} />
               </Box>
               <Box>
                 <Typography
                   variant={isSmallScreen ? "h6" : "h5"}
                   sx={{
                     fontWeight: 700,
-                    fontSize: { xs: "1.1rem", sm: "1.25rem" },
+                    fontSize: { xs: "1rem", sm: "1.15rem" },
                     color: theme.palette.text.primary,
                     letterSpacing: "-0.02em",
                     lineHeight: 1.2,
@@ -625,7 +625,7 @@ const VehiclesPage: React.FC = () => {
                   variant="caption"
                   sx={{
                     color: theme.palette.text.secondary,
-                    fontSize: "0.75rem",
+                    fontSize: "0.7rem",
                     letterSpacing: "0.02em",
                   }}
                 >
@@ -652,8 +652,8 @@ const VehiclesPage: React.FC = () => {
                           onClick: () => handleExport("pdf"),
                         },
                       ]}
-                      mainIcon={<Download size={20} />}
-                      openIcon={<X size={20} />}
+                      mainIcon={<Download size={18} strokeWidth={1.5} />}
+                      openIcon={<X size={18} strokeWidth={1.5} />}
                       direction="left"
                     />
                   )}
@@ -667,10 +667,10 @@ const VehiclesPage: React.FC = () => {
             flexDirection={{ xs: "column", sm: "row" }}
             alignItems={{ xs: "stretch", sm: "center" }}
             justifyContent="space-between"
-            gap={2}
+            gap={1.5}
           >
             {/* Search */}
-            <Box flex={1} maxWidth={{ sm: "320px" }}>
+            <Box flex={1} maxWidth={{ sm: "280px" }}>
               {filteredVehicles && (
                 <SearchBarComponent
                   placeholder={MANAGEMENT.VEHICLES_PAGE.SEARCH_PLACEHOLDER}
@@ -687,40 +687,33 @@ const VehiclesPage: React.FC = () => {
               display="flex"
               flexDirection={{ xs: "column", sm: "row" }}
               alignItems={{ xs: "stretch", sm: "center" }}
-              gap={1}
+              gap={0.75}
             >
               <Box
                 display="flex"
                 alignItems="center"
                 justifyContent={{ xs: "flex-start", sm: "flex-end" }}
-                gap={1}
+                gap={0.5}
               >
                 {/* Previous Day Button */}
                 <PremiumTooltip title={MANAGEMENT.VEHICLES_PAGE.TOOLTIP_PREV_DAY}>
-                  <span>
-                    <Button
-                      variant="outlined"
-                      onClick={handlePreviousDate}
-                      disableRipple
-                      disableElevation
-                      sx={{
-                        minWidth: '44px',
-                        height: '44px',
-                        px: 1.5,
-                        borderRadius: '10px',
-                        borderColor: theme.palette.mode === "dark" ? "rgba(255,255,255,0.2)" : "rgba(0,0,0,0.15)",
-                        '&:hover': {
-                          backgroundColor: theme.palette.mode === "dark" ? "rgba(255,255,255,0.05)" : "rgba(0,0,0,0.04)",
-                          borderColor: theme.palette.mode === "dark" ? "rgba(255,255,255,0.3)" : "rgba(0,0,0,0.25)",
-                        },
-                        '&.Mui-disabled': {
-                          borderColor: theme.palette.mode === "dark" ? "rgba(255,255,255,0.1)" : "rgba(0,0,0,0.08)",
-                        },
-                      }}
-                    >
-                      <ChevronLeft size={20} />
-                    </Button>
-                  </span>
+                  <IconButton
+                    onClick={handlePreviousDate}
+                    size="small"
+                    sx={{
+                      width: 36,
+                      height: 36,
+                      borderRadius: '10px',
+                      color: theme.palette.mode === 'dark' ? 'rgba(255,255,255,0.4)' : 'rgba(0,0,0,0.35)',
+                      transition: 'all 0.15s ease',
+                      '&:hover': {
+                        background: theme.palette.mode === 'dark' ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.04)',
+                        color: theme.palette.mode === 'dark' ? 'rgba(255,255,255,0.7)' : 'rgba(0,0,0,0.7)',
+                      },
+                    }}
+                  >
+                    <ChevronLeft size={18} strokeWidth={1.5} />
+                  </IconButton>
                 </PremiumTooltip>
 
                 {/* Date Picker */}
@@ -732,36 +725,26 @@ const VehiclesPage: React.FC = () => {
                     value={selectedDate}
                     maxDate={new Date()}
                     views={["year", "month", "day"]}
-                    format="EEEE d 'de' MMMM 'de' yyyy"
+                    format="d MMM yyyy"
                     slots={{ toolbar: () => null }}
                     slotProps={{
                       textField: {
                         fullWidth: false,
                         required: true,
-                        variant: "outlined",
+                        variant: "standard",
                         sx: {
-                          width: { xs: '100%', sm: '320px', md: '360px' },
-                          '& .MuiOutlinedInput-root': {
-                            height: "44px",
-                            borderRadius: '10px',
-                            fontSize: '0.875rem',
+                          width: { xs: '100%', sm: '140px', md: '150px' },
+                          '& .MuiInputBase-root': {
+                            height: '36px',
+                            fontSize: '0.85rem',
                             fontWeight: 500,
-                            backgroundColor: theme.palette.background.paper,
-                            border: `1px solid ${theme.palette.mode === "dark" ? "rgba(255,255,255,0.2)" : "rgba(0,0,0,0.15)"}`,
-                            transition: 'border-color 0.2s cubic-bezier(0.4, 0, 0.2, 1)',
-                            '&:hover': {
-                              borderColor: theme.palette.mode === "dark" ? "rgba(255,255,255,0.3)" : "rgba(0,0,0,0.25)",
-                            },
-                            '&.Mui-focused': {
-                              borderColor: theme.palette.mode === "dark" ? "rgba(255,255,255,0.3)" : "rgba(0,0,0,0.25)",
-                            },
-                            '& .MuiOutlinedInput-notchedOutline': {
-                              border: 'none',
-                            },
-                            '& input': {
-                              textOverflow: 'ellipsis',
-                              textAlign: 'center',
-                            },
+                            '&:before, &:after': { display: 'none' },
+                            '&:hover:not(.Mui-disabled):before': { display: 'none' },
+                          },
+                          '& input': {
+                            textAlign: 'center',
+                            cursor: 'pointer',
+                            padding: '4px 0',
                           },
                         },
                       },
@@ -774,58 +757,54 @@ const VehiclesPage: React.FC = () => {
                 {/* Next Day Button */}
                 <PremiumTooltip title={MANAGEMENT.VEHICLES_PAGE.TOOLTIP_NEXT_DAY}>
                   <span>
-                    <Button
-                      variant="outlined"
+                    <IconButton
                       disabled={isTodayOrFuture(selectedDate)}
                       onClick={handleNextDate}
-                      disableRipple
-                      disableElevation
+                      size="small"
                       sx={{
-                        minWidth: '44px',
-                        height: '44px',
-                        px: 1.5,
+                        width: 36,
+                        height: 36,
                         borderRadius: '10px',
-                        borderColor: theme.palette.mode === "dark" ? "rgba(255,255,255,0.2)" : "rgba(0,0,0,0.15)",
+                        color: theme.palette.mode === 'dark' ? 'rgba(255,255,255,0.4)' : 'rgba(0,0,0,0.35)',
+                        transition: 'all 0.15s ease',
                         '&:hover': {
-                          backgroundColor: theme.palette.mode === "dark" ? "rgba(255,255,255,0.05)" : "rgba(0,0,0,0.04)",
-                          borderColor: theme.palette.mode === "dark" ? "rgba(255,255,255,0.3)" : "rgba(0,0,0,0.25)",
+                          background: theme.palette.mode === 'dark' ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.04)',
+                          color: theme.palette.mode === 'dark' ? 'rgba(255,255,255,0.7)' : 'rgba(0,0,0,0.7)',
                         },
                         '&.Mui-disabled': {
-                          borderColor: theme.palette.mode === "dark" ? "rgba(255,255,255,0.1)" : "rgba(0,0,0,0.08)",
+                          color: theme.palette.mode === 'dark' ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.08)',
                         },
                       }}
                     >
-                      <ChevronRight size={20} />
-                    </Button>
+                      <ChevronRight size={18} strokeWidth={1.5} />
+                    </IconButton>
                   </span>
                 </PremiumTooltip>
 
                 {/* Current Day Button */}
                 <PremiumTooltip title={MANAGEMENT.VEHICLES_PAGE.TOOLTIP_CURRENT_DAY}>
                   <span>
-                    <Button
-                      variant="outlined"
+                    <IconButton
                       disabled={isTodayOrFuture(selectedDate)}
                       onClick={handleCurrentDate}
-                      disableRipple
-                      disableElevation
+                      size="small"
                       sx={{
-                        minWidth: '44px',
-                        height: '44px',
-                        px: 1.5,
+                        width: 36,
+                        height: 36,
                         borderRadius: '10px',
-                        borderColor: theme.palette.mode === "dark" ? "rgba(255,255,255,0.2)" : "rgba(0,0,0,0.15)",
+                        color: theme.palette.mode === 'dark' ? 'rgba(255,255,255,0.4)' : 'rgba(0,0,0,0.35)',
+                        transition: 'all 0.15s ease',
                         '&:hover': {
-                          backgroundColor: theme.palette.mode === "dark" ? "rgba(255,255,255,0.05)" : "rgba(0,0,0,0.04)",
-                          borderColor: theme.palette.mode === "dark" ? "rgba(255,255,255,0.3)" : "rgba(0,0,0,0.25)",
+                          background: theme.palette.mode === 'dark' ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.04)',
+                          color: theme.palette.mode === 'dark' ? 'rgba(255,255,255,0.7)' : 'rgba(0,0,0,0.7)',
                         },
                         '&.Mui-disabled': {
-                          borderColor: theme.palette.mode === "dark" ? "rgba(255,255,255,0.1)" : "rgba(0,0,0,0.08)",
+                          color: theme.palette.mode === 'dark' ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.06)',
                         },
                       }}
                     >
-                      <RotateCcw size={18} />
-                    </Button>
+                      <RotateCcw size={16} strokeWidth={1.5} />
+                    </IconButton>
                   </span>
                 </PremiumTooltip>
               </Box>
@@ -835,39 +814,41 @@ const VehiclesPage: React.FC = () => {
                 <Box sx={{ display: { xs: 'none', sm: 'flex' }, gap: 1 }}>
                   <Button
                     variant="contained"
-                    startIcon={<Plus size={18} />}
+                    startIcon={<Plus size={16} strokeWidth={2} />}
                     onClick={handleOpenAddVehicleModal}
                     sx={{
-                      px: 3,
-                      py: 1,
+                      px: 2.5,
+                      py: 0.75,
                       fontWeight: 600,
-                      fontSize: "0.9rem",
+                      fontSize: "0.8rem",
                       letterSpacing: "-0.01em",
                       borderRadius: '10px',
-                      height: '44px',
+                      height: '36px',
+                      minWidth: 0,
                     }}
                   >
                     {MANAGEMENT.ADD}
                   </Button>
                   <Button
                     variant="outlined"
-                    startIcon={<ScanText size={18} />}
+                    startIcon={<ScanText size={14} strokeWidth={2} />}
                     onClick={handleOpenScanModal}
+                    disabled
                     sx={{
-                      px: 2.5,
-                      py: 1,
+                      px: 2,
+                      py: 0.75,
                       fontWeight: 600,
-                      fontSize: "0.9rem",
+                      fontSize: "0.8rem",
                       letterSpacing: "-0.01em",
                       borderRadius: '10px',
-                      height: '44px',
-                      borderColor: theme.palette.mode === "dark" ? "rgba(255,255,255,0.2)" : "rgba(0,0,0,0.15)",
+                      height: '36px',
+                      minWidth: 0,
+                      borderColor: theme.palette.mode === "dark" ? "rgba(255,255,255,0.15)" : "rgba(0,0,0,0.12)",
+                      color: theme.palette.mode === "dark" ? "rgba(255,255,255,0.3)" : "rgba(0,0,0,0.3)",
                       '&:hover': {
-                        backgroundColor: theme.palette.mode === "dark" ? "rgba(255,255,255,0.05)" : "rgba(0,0,0,0.04)",
-                        borderColor: theme.palette.mode === "dark" ? "rgba(255,255,255,0.3)" : "rgba(0,0,0,0.25)",
+                        backgroundColor: theme.palette.mode === "dark" ? "rgba(255,255,255,0.04)" : "rgba(0,0,0,0.03)",
                       },
                     }}
-                    disabled
                   >
                     Escanear
                   </Button>

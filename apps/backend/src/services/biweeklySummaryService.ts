@@ -47,9 +47,20 @@ export const getCurrentBiweeklySummary = async (
     },
   });
 
-// Create a new biweekly summary (upserts on unique constraint conflict)
+// Create a new biweekly summary (finds or creates based on unique constraint)
 export const createBiweeklySummary = async (data: Omit<BiweeklySummary, "id">) => {
-  const [newBiweeklySummary] = await BiweeklySummary.upsert(data);
+  const existing = await BiweeklySummary.findOne({
+    where: {
+      employeeId: data.employeeId,
+      biweekNumber: data.biweekNumber,
+      year: data.year,
+    },
+  });
+  if (existing) {
+    await existing.update(data);
+    return existing;
+  }
+  const newBiweeklySummary = await BiweeklySummary.create(data);
   return newBiweeklySummary;
 };
 

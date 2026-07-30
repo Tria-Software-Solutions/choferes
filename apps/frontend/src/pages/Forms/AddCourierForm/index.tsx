@@ -28,6 +28,7 @@ import {
   clearButton,
   actionsInnerBox,
   cancelButton,
+  submitButton,
 } from "./styles";
 
 interface AddCourierFormProps {
@@ -176,7 +177,7 @@ const AddCourierForm: React.FC<AddCourierFormProps> = ({
 
   return (
     <Box sx={boxRoot}>
-      <Box sx={{ mb: 2 }}>
+      <Box sx={{ mb: 1 }}>
         <Typography
           variant="body2"
           color="text.secondary"
@@ -185,7 +186,7 @@ const AddCourierForm: React.FC<AddCourierFormProps> = ({
           {FORMS.ADD_COURIER.DIALOG_CONTENT_TITLE}
         </Typography>
       </Box>
-      <Grid container spacing={3} sx={gridContainer}>
+      <Grid container spacing={2} sx={gridContainer}>
         <Grid item xs={12} sm={6}>
           <TextfieldComponent
             placeholder={FORMS.ADD_COURIER.DRIVER_PLACEHOLDER}
@@ -196,6 +197,7 @@ const AddCourierForm: React.FC<AddCourierFormProps> = ({
             error={errors.driver !== ""}
             helperText={errors.driver}
             icon={<User style={iconStyle} />}
+            sx={formControl(theme)}
           />
         </Grid>
 
@@ -273,6 +275,7 @@ const AddCourierForm: React.FC<AddCourierFormProps> = ({
             error={errors.distance !== ""}
             helperText={errors.distance}
             icon={<Ruler style={iconStyle} />}
+            sx={formControl(theme)}
           />
         </Grid>
 
@@ -288,6 +291,7 @@ const AddCourierForm: React.FC<AddCourierFormProps> = ({
             error={errors.trackingNumber !== ""}
             helperText={errors.trackingNumber}
             icon={<FileText style={iconStyle} />}
+            sx={formControl(theme)}
           />
         </Grid>
 
@@ -342,9 +346,7 @@ const AddCourierForm: React.FC<AddCourierFormProps> = ({
         <Grid item xs={12}>
           <Box sx={infoBox(theme)}>
             <Box sx={infoIconBox(theme)}>
-              <Info
-                style={iconStyle}
-              />
+              <Info size={18} />
             </Box>
             <Box>
               <Typography sx={infoTitle(theme)}>
@@ -386,14 +388,7 @@ const AddCourierForm: React.FC<AddCourierFormProps> = ({
                 disabled={!isFormValid || isLoading}
                 startIcon={<Plus size={18} />}
                 fullWidth={isSmallScreen}
-                sx={{
-                  fontWeight: 600,
-                  fontSize: "0.95rem",
-                  textTransform: "none",
-                  letterSpacing: "0.01em",
-                  borderRadius: "10px",
-                  minHeight: "44px",
-                }}
+                sx={submitButton}
               >
                 {isLoading
                   ? FORMS.ADD_COURIER.LOADING_BUTTON

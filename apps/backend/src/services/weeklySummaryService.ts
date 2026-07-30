@@ -55,9 +55,20 @@ export const hasWorkedCurrenWeeklySummary = async (
   return !!summary;
 };
 
-// Create a new weekly summary (upserts on unique constraint conflict)
+// Create a new weekly summary (finds or creates based on unique constraint)
 export const createWeeklySummary = async (data: Omit<WeeklySummary, "id">) => {
-  const [newWeeklySummary] = await WeeklySummary.upsert(data);
+  const existing = await WeeklySummary.findOne({
+    where: {
+      employeeId: data.employeeId,
+      weekNumber: data.weekNumber,
+      year: data.year,
+    },
+  });
+  if (existing) {
+    await existing.update(data);
+    return existing;
+  }
+  const newWeeklySummary = await WeeklySummary.create(data);
   return newWeeklySummary;
 };
 

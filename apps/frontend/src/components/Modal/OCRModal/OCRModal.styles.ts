@@ -2,42 +2,48 @@ import { SxProps, Theme } from "@mui/material";
 import { OCRResult } from "../../../services/ocrService";
 
 export const dialogPaperStyles: SxProps<Theme> = {
-  border: "2px solid #fff",
-  borderRadius: 3,
+  border: "none",
+  borderRadius: "24px",
   minHeight: "48vh",
   maxHeight: "80vh",
-  boxShadow: 3,
+  boxShadow: (theme) => theme.palette.mode === "dark"
+    ? "0 40px 80px rgba(0,0,0,0.6), 0 0 0 1px rgba(255,255,255,0.04)"
+    : "0 40px 80px rgba(0,0,0,0.12), 0 0 0 1px rgba(0,0,0,0.03)",
   bgcolor: "background.paper",
+  overflow: "hidden",
 };
 
 export const headerBoxStyles = (theme: Theme): SxProps<Theme> => ({
-  background:
-    theme.palette.mode === "dark" ? "#111" : theme.palette.primary.main,
-  color:
-    theme.palette.mode === "dark" ? "#fff" : theme.palette.primary.contrastText,
+  background: theme.palette.mode === "dark"
+    ? `linear-gradient(135deg, rgba(99,102,241,0.08), rgba(99,102,241,0.02))`
+    : `linear-gradient(135deg, rgba(99,102,241,0.06), rgba(99,102,241,0.01))`,
+  color: theme.palette.text.primary,
   display: "flex",
   alignItems: "center",
   justifyContent: "space-between",
-  gap: 2,
-  px: 3,
-  py: 2,
-  borderTopLeftRadius: 12,
-  borderTopRightRadius: 12,
+  gap: 2.5,
+  px: 3.5,
+  pt: 3.5,
+  pb: 2.5,
 });
 
 export const iconBoxStyles = (theme: Theme): SxProps<Theme> => ({
-  background: theme.palette.primary.contrastText,
-  borderRadius: "50%",
-  width: 40,
-  height: 40,
+  background: `linear-gradient(135deg, ${theme.palette.primary.main}, ${theme.palette.primary.dark})`,
+  borderRadius: "12px",
+  width: 44,
+  height: 44,
   display: "flex",
   alignItems: "center",
   justifyContent: "center",
+  color: "#fff",
   flexShrink: 0,
+  boxShadow: theme.palette.mode === "dark"
+    ? "0 4px 12px rgba(99,102,241,0.3)"
+    : "0 4px 12px rgba(99,102,241,0.2)",
 });
 
 export const iconStyles = (theme: Theme): SxProps<Theme> => ({
-  color: theme.palette.primary.main,
+  color: "#fff",
   fontSize: 24,
 });
 
@@ -49,18 +55,24 @@ export const titleBoxStyles: SxProps<Theme> = {
 
 export const titleStyles: SxProps<Theme> = {
   lineHeight: 1.2,
-  mb: 0.5,
+  mb: 0.25,
+  color: "inherit",
 };
 
 export const subtitleStyles: SxProps<Theme> = {
-  opacity: 0.9,
+  opacity: 0.8,
   lineHeight: 1.2,
+  color: "inherit",
 };
 
 export const closeButtonStyles: SxProps<Theme> = {
   color: "inherit",
+  opacity: 0.5,
+  transition: "all 0.2s ease",
   "&:hover": {
-    backgroundColor: "rgba(255, 255, 255, 0.1)",
+    opacity: 1,
+    transform: "scale(1.1)",
+    backgroundColor: "rgba(0,0,0,0.04)",
   },
 };
 
@@ -260,11 +272,22 @@ export const errorActionsBoxStyles: SxProps<Theme> = {
 };
 
 export const errorButtonStyles: SxProps<Theme> = {
-  minHeight: { xs: 44, sm: 48 },
-  fontSize: "clamp(0.75rem, 1.25vw, 0.875rem)",
+  minHeight: 48,
+  fontSize: "0.85rem",
   fontWeight: 600,
+  textTransform: "none" as const,
+  letterSpacing: "-0.01em",
+  borderRadius: "12px",
   px: { xs: 2, sm: 4 },
-  py: { xs: 1, sm: 1.5 },
+  py: 1.5,
+  transition: "all 0.25s cubic-bezier(0.4, 0, 0.2, 1)",
+  '&:hover': {
+    transform: "translateY(-1px)",
+    boxShadow: "0 4px 12px rgba(0,0,0,0.12)",
+  },
+  '&:active': {
+    transform: "translateY(0)",
+  },
 };
 
 export const tablePaperStyles = (theme: Theme): SxProps<Theme> => ({
@@ -288,10 +311,15 @@ export const tableStyles: SxProps<Theme> = {
 };
 
 export const tableHeadCellStyles = (theme: Theme): SxProps<Theme> => ({
-  fontWeight: "bold",
-  background:
-    theme.palette.mode === "dark" ? "#111" : theme.palette.primary.main,
-  color: "#fff",
+  fontWeight: 600,
+  fontSize: "0.75rem",
+  textTransform: "uppercase",
+  letterSpacing: "0.05em",
+  background: theme.palette.mode === "dark"
+    ? "rgba(99,102,241,0.08)"
+    : "rgba(99,102,241,0.04)",
+  color: theme.palette.text.primary,
+  borderBottom: `1px solid ${theme.palette.mode === "dark" ? "rgba(255,255,255,0.06)" : "rgba(0,0,0,0.06)"}`,
 });
 
 export const tableCellStyles: SxProps<Theme> = {
@@ -335,12 +363,36 @@ export const cancelButtonStyles: SxProps<Theme> = {
   minWidth: 120,
   py: 1.5,
   fontWeight: 600,
+  fontSize: "0.85rem",
+  textTransform: "none" as const,
+  letterSpacing: "-0.01em",
+  borderRadius: "12px",
+  transition: "all 0.25s cubic-bezier(0.4, 0, 0.2, 1)",
+  '&:hover': {
+    transform: "translateY(-1px)",
+    boxShadow: "0 4px 12px rgba(0,0,0,0.12)",
+  },
+  '&:active': {
+    transform: "translateY(0)",
+  },
 };
 
 export const importButtonStyles: SxProps<Theme> = {
   minWidth: 200,
   py: 1.5,
   fontWeight: 600,
+  fontSize: "0.85rem",
+  textTransform: "none" as const,
+  letterSpacing: "-0.01em",
+  borderRadius: "12px",
+  transition: "all 0.25s cubic-bezier(0.4, 0, 0.2, 1)",
+  '&:hover': {
+    transform: "translateY(-1px)",
+    boxShadow: "0 4px 12px rgba(0,0,0,0.12)",
+  },
+  '&:active': {
+    transform: "translateY(0)",
+  },
 };
 
 // Helper function to convert color names to hex values

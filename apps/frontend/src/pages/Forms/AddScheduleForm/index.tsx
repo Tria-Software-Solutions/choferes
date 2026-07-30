@@ -1,42 +1,30 @@
-import React, { useState, useCallback, useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import {
   Grid,
   Box,
   Typography,
-  FormControl,
-  Select,
-  MenuItem,
-  Checkbox,
-  ListItemText,
-  OutlinedInput,
   Button,
   useTheme,
   useMediaQuery,
-  InputAdornment,
-  FormControlLabel,
   Switch,
+  TextField,
+  Tooltip,
 } from "@mui/material";
 import { Schedule } from "../../../models/Schedule";
 import FORMS from "../../../constants/forms.constants";
-import DAYS_LIST from "../../../constants/days.constants";
 import { translateDayOptionsToSpanish } from "../../../utils/string";
-import { Plus, X, Calendar, Clock, AlertTriangle } from "lucide-react";
+import { Plus, X, Calendar, AlertTriangle } from "lucide-react";
 import TextfieldComponent from "../../../components/Textfield/Textfield.component";
 import {
   boxRoot,
   gridContainer,
   iconStyle,
-  formControl,
-  daysSelectBox,
-  dayChip,
-  infoBox,
-  infoTitle,
-  infoDesc,
   actionsBox,
   clearButton,
   actionsInnerBox,
   cancelButton,
-  textFieldSx,
+  submitButton,
+
 } from "./styles";
 
 interface AddScheduleFormProps {
@@ -51,64 +39,77 @@ const AddScheduleForm: React.FC<AddScheduleFormProps> = ({
   isLoading = false,
 }) => {
   const theme = useTheme();
+  const isDark = theme.palette.mode === "dark";
   const isSmallScreen = useMediaQuery(theme.breakpoints.down("sm"));
+  const daysOfWeek = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'];
+  const shortNames: Record<string, string> = {
+    monday: 'L', tuesday: 'M', wednesday: 'M', thursday: 'J', friday: 'V', saturday: 'S', sunday: 'D',
+  };
 
-  const [formData, setFormData] = useState<{
-    label: string;
-    days: string[];
-    hours: number;
-    specialSchedule: boolean;
-  }>({
-    label: "",
-    days: [],
-    hours: 0,
-    specialSchedule: false,
-  });
-
-  const [isFormValid, setIsFormValid] = useState(false);
+  const [label, setLabel] = useState("");
+  const [days, setDays] = useState<string[]>([]);
+  const [specialSchedule, setSpecialSchedule] = useState(false);
+  const [dayHours, setDayHours] = useState<Record<string, string>>({});
   const [formTouched, setFormTouched] = useState(false);
 
-  const validateFields = useCallback((fields: typeof formData) => {
-    const regex = {
-      text: /^[a-zA-ZáéíóúÁÉÍÓÚñÑüÜëË\s-]+$/,
-    };
+  const isFormValid =
+    label.trim().length > 0 &&
+    /^[a-zA-ZáéíóúÁÉÍÓÚñÑüÜëË\s-]+$/.test(label) &&
+    days.length > 0 &&
+    days.every((day) => {
+      const val = dayHours[day];
+      return val !== undefined && val !== "" && !isNaN(Number(val)) && Number(val) > 0 && Number(val) <= 24;
+    });
 
-    const isLabelValid =
-      fields.label.trim().length > 0 && regex.text.test(fields.label);
-    const isHoursValid =
-      typeof fields.hours === "number" &&
-      !isNaN(fields.hours) &&
-      fields.hours > 0 &&
-      fields.hours <= 24;
-    const isDaysValid = fields.days.length > 0;
-
-    return isLabelValid && isHoursValid && isDaysValid;
-  }, []);
-
+  // Sync dayHours when days change (add empty entries for new days, remove unselected)
   useEffect(() => {
-    setIsFormValid(validateFields(formData));
-  }, [formData, validateFields]);
+    setDayHours((prev) => {
+      const updated = { ...prev };
+      // Remove days no longer selected
+      Object.keys(updated).forEach((day) => {
+        if (!days.includes(day)) {
+          delete updated[day];
+        }
+      });
+      // Add newly selected days with empty value (user must fill them)
+      days.forEach((day) => {
+        if (!(day in updated)) {
+          updated[day] = "";
+        }
+      });
+      return updated;
+    });
+  }, [days]);
 
   const handleSubmit = () => {
     setFormTouched(true);
-    if (isFormValid) {
-      const newSchedule: Omit<Schedule, "id"> = {
-        label: formData.label,
-        days: formData.days,
-        hours: formData.hours,
-        specialSchedule: formData.specialSchedule,
-      };
-      onSubmit(newSchedule);
-    }
+    if (!isFormValid) return;
+
+    const scheduleDays = days.map((day) => ({
+      day,
+      hours: Number(dayHours[day]),
+    }));
+
+    const newSchedule: Omit<Schedule, "id"> & { scheduleDays: Array<{ day: string; hours: number }> } = {
+      label,
+      days,
+      hours: 0,
+      specialSchedule,
+      scheduleDays,
+    };
+    onSubmit(newSchedule);
   };
 
   const handleClearForm = () => {
-    setFormData({ label: "", days: [], hours: 0, specialSchedule: false });
+    setLabel("");
+    setDays([]);
+    setSpecialSchedule(false);
+    setDayHours({});
   };
 
   return (
     <Box sx={boxRoot}>
-      <Box sx={{ mb: 2 }}>
+      <Box sx={{ mb: 1 }}>
         <Typography
           variant="body2"
           color="text.secondary"
@@ -117,178 +118,267 @@ const AddScheduleForm: React.FC<AddScheduleFormProps> = ({
           {FORMS.ADD_SCHEDULE.DIALOG_CONTENT_TITLE}
         </Typography>
       </Box>
-      <Grid container spacing={3} sx={gridContainer}>
-        <Grid item xs={12} sm={6}>
-          <TextfieldComponent
-            placeholder={FORMS.ADD_SCHEDULE.SCHEDULE_LABEL_PLACEHOLDER}
-            variant="outlined"
-            fullWidth
-            value={formData.label}
-            onChange={(e) =>
-              setFormData({ ...formData, label: e.target.value })
-            }
-            icon={<Calendar style={iconStyle(theme)} />}
-            sx={textFieldSx(theme)}
-          />
-        </Grid>
-
-        <Grid item xs={12} sm={6}>
-          <TextfieldComponent
-            variant="outlined"
-            type="number"
-            fullWidth
-            placeholder={FORMS.ADD_SCHEDULE.SCHEDULE_TIME_PLACEHOLDER}
-            value={formData.hours === 0 ? "" : formData.hours}
-            onChange={(e) => {
-              const value = e.target.value;
-              setFormData({ ...formData, hours: value === "" ? 0 : Number(value) });
-            }}
-            error={
-              formData.hours !== 0 &&
-              (isNaN(formData.hours) ||
-                formData.hours <= 0 ||
-                formData.hours > 24)
-            }
-            helperText={
-              formData.hours !== 0 &&
-              (isNaN(formData.hours) ||
-                formData.hours <= 0 ||
-                formData.hours > 24)
-                ? FORMS.HOURS_INVALID
-                : ""
-            }
-            icon={<Clock style={iconStyle(theme)} />}
-            inputProps={{ min: "0" }}
-            sx={textFieldSx(theme)}
-          />
-        </Grid>
-
+      <Grid container spacing={2.5} sx={gridContainer}>
+        {/* Name */}
         <Grid item xs={12}>
-          <FormControl variant="outlined" fullWidth sx={formControl(theme)}>
-            <Select
-              multiple
-              displayEmpty
-              value={formData.days}
-              input={
-                <OutlinedInput
-                  placeholder={formData.days.length === 0 ? FORMS.DAYS_REQUIRED : ''}
-                  startAdornment={
-                    <InputAdornment position="start">
-                      <Calendar style={iconStyle(theme)} />
-                    </InputAdornment>
-                  }
-                />
-              }
-              renderValue={(selected) => (
-                <Box sx={daysSelectBox(theme)}>
-                  {selected.map((value) => (
-                    <Box key={value} sx={dayChip(theme)}>
-                      {translateDayOptionsToSpanish(value)}
-                    </Box>
-                  ))}
-                </Box>
-              )}
-              onChange={(e) =>
-                setFormData({
-                  ...formData,
-                  days: Array.isArray(e.target.value)
-                    ? e.target.value
-                    : [e.target.value],
-                })
-              }
-              error={formTouched && formData.days.length === 0}
-              MenuProps={{
-                PaperProps: {
-                  sx: {
-                    maxHeight: 320,
-                    overflowY: "auto",
-                    mt: 0.5,
-                    borderRadius: "16px",
-                    background: theme.palette.mode === 'dark' 
-                      ? 'rgba(30,30,35,0.95)'
-                      : '#ffffff',
-                    boxShadow: theme.palette.mode === 'dark'
-                      ? "0 10px 40px rgba(0,0,0,0.4), 0 2px 8px rgba(0,0,0,0.2)"
-                      : "0 10px 40px rgba(0,0,0,0.15), 0 2px 8px rgba(0,0,0,0.1)",
-                    border: "none",
-                    overflow: 'hidden',
-                    pr: 0.5,
-                  },
-                },
+          <Box sx={{ display: 'flex', flexDirection: 'column', gap: 0.5 }}>
+            <Typography
+              sx={{
+                fontSize: "0.72rem",
+                fontWeight: 600,
+                color: theme.palette.text.secondary,
+                textTransform: "uppercase",
+                letterSpacing: "0.06em",
               }}
             >
-              {DAYS_LIST.map((day) => (
-                <MenuItem key={day.value} value={day.value}>
-                  <Checkbox 
-                    checked={formData.days.indexOf(day.value) > -1} 
-                    sx={{
-                      color: theme.palette.primary.main,
-                      '&.Mui-checked': {
-                        color: theme.palette.primary.main,
-                      },
-                      '&.MuiCheckbox-indeterminate': {
-                        color: theme.palette.primary.main,
-                      },
-                    }}
-                  />
-                  <ListItemText
-                    primary={translateDayOptionsToSpanish(day.value)}
-                  />
-                </MenuItem>
-              ))}
-            </Select>
-            {formTouched && formData.days.length === 0 && (
-              <Typography
-                variant="caption"
-                sx={{
-                  mt: 0.5,
-                  display: "block",
-                  color: theme.palette.error.main,
-                  fontSize: "clamp(0.625rem, 1vw, 0.75rem)",
-                }}
-              >
-                {FORMS.DAYS_REQUIRED}
-              </Typography>
-            )}
-          </FormControl>
+              Nombre del horario
+            </Typography>
+            <TextfieldComponent
+              placeholder={FORMS.ADD_SCHEDULE.SCHEDULE_LABEL_PLACEHOLDER}
+              variant="outlined"
+              fullWidth
+              value={label}
+              onChange={(e) => setLabel(e.target.value)}
+              icon={<Calendar size={18} style={iconStyle(theme)} />}
+            />
+          </Box>
         </Grid>
 
-        <Grid item xs={12}>
-          <Box sx={infoBox(theme)}>
-            <Box
-              sx={{ mr: { xs: 1, sm: 2 }, color: theme.palette.warning.main }}
+        {/* Per-day hours - all 7 circles, click to toggle */}
+        <Grid item xs={12}>              <Box sx={{ display: 'flex', flexDirection: 'column', gap: 0.5 }}>
+            <Typography
+              sx={{
+                fontSize: "0.72rem",
+                fontWeight: 600,
+                color: theme.palette.text.secondary,
+                textTransform: "uppercase",
+                letterSpacing: "0.06em",
+              }}
             >
-              <AlertTriangle />
+              Horas por día
+            </Typography>
+            <Box
+              sx={{
+                display: "flex",
+                gap: { xs: 0.6, sm: 0.75 },
+                flexWrap: "nowrap",
+                overflowX: "auto",
+                overflowY: "visible",
+                py: 0.5,
+                scrollbarWidth: "thin",
+                scrollbarColor: isDark ? "rgba(255,255,255,0.15) transparent" : "rgba(0,0,0,0.1) transparent",
+                "&::-webkit-scrollbar": { height: "4px" },
+                "&::-webkit-scrollbar-thumb": { borderRadius: "4px", backgroundColor: isDark ? "rgba(255,255,255,0.15)" : "rgba(0,0,0,0.1)" },
+                "&::-webkit-scrollbar-track": { backgroundColor: "transparent" },
+                alignItems: "flex-start",
+              }}
+            >
+              {daysOfWeek.map((day) => {
+                const isActive = days.includes(day);
+                const currentVal = dayHours[day] ?? "";
+                const hasValue = currentVal !== "";
+                const numVal = Number(currentVal);
+                const isValid = hasValue && !isNaN(numVal) && numVal > 0 && numVal <= 24;
+                const isFilled = hasValue && isValid;
+                const dayLabel = translateDayOptionsToSpanish(day);
+
+                return (
+                  <Tooltip key={day} title={isActive ? `Quitar ${dayLabel}` : `Agregar ${dayLabel}`} arrow>
+                    <Box
+                      sx={{
+                        display: "flex",
+                        flexDirection: "column",
+                        alignItems: "center",
+                        gap: 0.25,
+                        minWidth: 32,
+                      }}
+                    >
+                      {/* Day circle - click to toggle */}
+                      <Box
+                        onClick={() => {
+                          if (isActive) {
+                            setDays(days.filter((d) => d !== day));
+                            const newHours = { ...dayHours };
+                            delete newHours[day];
+                            setDayHours(newHours);
+                          } else {
+                            setDays([...days, day]);
+                          }
+                        }}
+                        sx={{
+                          width: 28,
+                          height: 28,
+                          borderRadius: "8px",
+                          display: "flex",
+                          alignItems: "center",
+                          justifyContent: "center",
+                          fontSize: "0.68rem",
+                          fontWeight: 700,
+                          cursor: "pointer",
+                          background: isActive
+                            ? (t) => t.palette.primary.main
+                            : (t) => t.palette.mode === "dark"
+                              ? "rgba(255,255,255,0.04)"
+                              : "rgba(0,0,0,0.04)",
+                          color: isActive ? "#ffffff" : (t) => t.palette.mode === "dark" ? "rgba(255,255,255,0.2)" : "rgba(0,0,0,0.2)",
+                          transition: "all 0.15s ease",
+                          "&:hover": {
+                            boxShadow: isActive
+                              ? "0 4px 12px rgba(99,102,241,0.3)"
+                              : (t) => `0 0 0 2px ${t.palette.primary.main}50`,
+                          },
+                          "&:active": { transform: "scale(0.95)" },
+                        }}
+                      >
+                        {shortNames[day]}
+                      </Box>
+                      {/* Hours input below (only when active) */}
+                      {isActive && (
+                        <TextField
+                          type="number"
+                          placeholder="h"
+                          value={currentVal}
+                          onClick={(e) => e.stopPropagation()}
+                          onChange={(e) => {
+                            setDayHours((prev) => ({ ...prev, [day]: e.target.value }));
+                          }}
+                          error={formTouched && !isValid && hasValue}
+                          inputProps={{
+                            min: 0,
+                            max: 24,
+                            step: 0.5,
+                            style: { textAlign: "center", padding: "2px 0", fontSize: "0.7rem", fontWeight: 700 },
+                          }}
+                          sx={{
+                            "& .MuiOutlinedInput-root": {
+                              borderRadius: "6px",
+                              minHeight: "auto",
+                              backgroundColor: isFilled
+                                ? isDark ? "rgba(99,102,241,0.04)" : "#fff"
+                                : isDark ? "rgba(255,255,255,0.03)" : "rgba(0,0,0,0.02)",
+                              "& input": {
+                                textAlign: "center",
+                                padding: "2px 0",
+                                fontSize: "0.7rem",
+                                fontWeight: 700,
+                                width: "28px",
+                                color: isFilled ? "primary.main" : theme.palette.text.primary,
+                              },
+                              "& fieldset": {
+                                border: isFilled
+                                  ? `1.5px solid ${theme.palette.primary.main}40`
+                                  : formTouched && !hasValue
+                                    ? `1px solid ${theme.palette.error.main}60`
+                                    : "1px solid transparent",
+                              },
+                              "&:hover fieldset": {
+                                borderColor: isFilled ? theme.palette.primary.main : theme.palette.text.disabled,
+                              },
+                              "&.Mui-focused fieldset": {
+                                borderColor: theme.palette.primary.main,
+                                borderWidth: "2px",
+                              },
+                            },
+                          }}
+                        />
+                      )}
+                    </Box>
+                  </Tooltip>
+                );
+              })}
             </Box>
-            <Box>
-              <FormControlLabel
-                control={
-                  <Switch
-                    checked={formData.specialSchedule}
-                    onChange={(e) =>
-                      setFormData({
-                        ...formData,
-                        specialSchedule: e.target.checked,
-                      })
-                    }
-                    color="warning"
-                  />
-                }
-                label={
-                  <Box>
-                    <Typography sx={infoTitle(theme)}>
-                      {FORMS.ADD_SCHEDULE.SPECIAL_LABEL}
-                    </Typography>
-                    <Typography sx={infoDesc(theme)}>
-                      {FORMS.ADD_SCHEDULE.SPECIAL_DESC}
-                    </Typography>
-                  </Box>
-                }
-              />
+            {days.length === 0 && (
+              <Typography
+                sx={{
+                  fontSize: "0.75rem",
+                  color: theme.palette.text.disabled,
+                  fontStyle: "italic",
+                  ml: 0.5,
+                }}
+              >
+                Haz clic en los círculos para seleccionar días y asignar horas
+              </Typography>
+            )}
+          </Box>
+        </Grid>
+
+        {/* Special schedule toggle */}
+        <Grid item xs={12}>
+          <Box
+            sx={{
+              display: "flex",
+              alignItems: "center",
+              gap: 1.5,
+              p: { xs: 1, sm: 1.5 },
+              borderRadius: "14px",
+              backgroundColor: isDark
+                ? "rgba(255,183,77,0.04)"
+                : "rgba(255,152,0,0.04)",
+              border: `1px solid ${isDark
+                ? "rgba(255,183,77,0.08)"
+                : "rgba(255,152,0,0.1)"}`,
+            }}
+          >
+            <Box
+              sx={{
+                width: 36,
+                height: 36,
+                borderRadius: "10px",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                background: `linear-gradient(135deg, #FB8C00, #F57C00)`,
+                color: "#fff",
+                flexShrink: 0,
+                boxShadow: "0 4px 12px rgba(255,152,0,0.25)",
+              }}
+            >
+              <AlertTriangle size={18} />
+            </Box>
+            <Box sx={{ flex: 1 }}>
+              <Box sx={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 1 }}>
+                <Box>
+                  <Typography
+                    sx={{
+                      fontWeight: 600,
+                      color: theme.palette.text.primary,
+                      fontSize: "0.875rem",
+                    }}
+                  >
+                    {FORMS.ADD_SCHEDULE.SPECIAL_LABEL}
+                  </Typography>
+                  <Typography
+                    sx={{
+                      color: theme.palette.text.secondary,
+                      fontSize: "0.75rem",
+                      lineHeight: 1.4,
+                      mt: 0.15,
+                    }}
+                  >
+                    {FORMS.ADD_SCHEDULE.SPECIAL_DESC}
+                  </Typography>
+                </Box>
+                <Switch
+                  checked={specialSchedule}
+                  onChange={(e) => setSpecialSchedule(e.target.checked)}
+                  sx={{
+                    '& .MuiSwitch-switchBase.Mui-checked': {
+                      color: '#FB8C00',
+                      '&:hover': {
+                        backgroundColor: 'rgba(255,152,0,0.08)',
+                      },
+                    },
+                    '& .MuiSwitch-switchBase.Mui-checked + .MuiSwitch-track': {
+                      backgroundColor: '#FB8C00',
+                    },
+                  }}
+                />
+              </Box>
             </Box>
           </Box>
         </Grid>
 
+        {/* Actions */}
         <Grid item xs={12}>
           <Box sx={actionsBox(theme)}>
             <Button
@@ -318,14 +408,7 @@ const AddScheduleForm: React.FC<AddScheduleFormProps> = ({
                 disabled={!isFormValid || isLoading}
                 startIcon={<Plus size={18} />}
                 fullWidth={isSmallScreen}
-                sx={{
-                  fontWeight: 600,
-                  fontSize: "0.95rem",
-                  textTransform: "none",
-                  letterSpacing: "0.01em",
-                  borderRadius: "10px",
-                  minHeight: "44px",
-                }}
+                sx={submitButton}
               >
                 Agregar
               </Button>
