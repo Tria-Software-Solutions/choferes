@@ -1,7 +1,8 @@
 import React, { useState, useCallback, useMemo, useRef } from "react";
 import MenuComponent from "../Menu/Menu.component";
 import NotificationMenu from "../NotificationMenu/NotificationMenu.component";
-import Dock from "../Dock/Dock.component";
+import Dock, { DockItemData } from "../Dock/Dock.component";
+import { useMenuPreferences } from "../../hooks/useMenuPreferences";
 import {
   AppBar,
   Toolbar,
@@ -80,6 +81,19 @@ const AppBarComponent: React.FC<AppBarComponentProps> = ({
   const isMobile = useMediaQuery(theme.breakpoints.down("md"));
   const { unreadCount } = useNotificationMenu();
 
+  // Menu editor state
+  const [menuEditorOpen, setMenuEditorOpen] = useState(false);
+
+  // Extract keys from links for menu preferences
+  const linkKeys = useMemo(() => links.map(l => l.label), [links]);
+  const { preferences, itemOrder, toggleMenu, isMenuVisible, moveItem, resetDefaults } = useMenuPreferences(linkKeys);
+
+  // Filter links by menu preferences
+  const visibleLinks = useMemo(
+    () => links.filter(link => isMenuVisible(link.label)),
+    [links, isMenuVisible]
+  );
+
   const [userMenuAnchor, setUserMenuAnchor] = useState<null | HTMLElement>(
     null,
   );
@@ -97,7 +111,18 @@ const AppBarComponent: React.FC<AppBarComponentProps> = ({
       subMenuItems: subLinks ? mapLinksToMenuItems(subLinks) : undefined,
     })), [navigate]);
 
-  const menuItems = useMemo(() => mapLinksToMenuItems(links), [links, mapLinksToMenuItems]);
+  const menuItems = useMemo(() => mapLinksToMenuItems(visibleLinks), [visibleLinks, mapLinksToMenuItems]);
+
+  // Handle right-click / long-press on dock items - toggle edit mode
+  const handleDockContextMenu = useCallback((_item: DockItemData) => {
+    setMenuEditorOpen(prev => !prev);
+  }, []);
+
+  // Done editing - close the dock popover and exit edit mode
+  const handleEditDone = useCallback(() => {
+    setMenuEditorOpen(false);
+    handleDashboardMenuClose();
+  }, []);
 
   const handleUserMenuOpen = (event: React.MouseEvent<HTMLElement>) => {
     setUserMenuAnchor(event.currentTarget);
@@ -208,9 +233,9 @@ const AppBarComponent: React.FC<AppBarComponentProps> = ({
               />
             </IconButton>
             <Popover
-              open={Boolean(dashboardMenuAnchor)}
-              anchorEl={dashboardMenuAnchor}
-              onClose={handleDashboardMenuClose}
+              open={Boolean(dashboardMenuAnchor) || menuEditorOpen}
+              anchorEl={blocksButtonRef.current}
+              onClose={menuEditorOpen ? undefined : handleDashboardMenuClose}
               anchorOrigin={{ vertical: "bottom", horizontal: "center" }}
               transformOrigin={{ vertical: "top", horizontal: "center" }}
               PaperProps={{
@@ -230,16 +255,26 @@ const AppBarComponent: React.FC<AppBarComponentProps> = ({
             >
               <Dock
                 items={[
-                  ...links.map(link => ({
+                  ...(menuEditorOpen ? links : visibleLinks).map(link => ({
                     label: link.label,
                     icon: link.icon,
                     onClick: () => {
-                      handleDashboardMenuClose();
-                      link.path && navigate(link.path);
+                      if (!menuEditorOpen) {
+                        handleDashboardMenuClose();
+                        link.path && navigate(link.path);
+                      }
                     },
                     active: isActivePage(link.path || ''),
                   })),
                 ]}
+                onItemContextMenu={handleDockContextMenu}
+                editable={menuEditorOpen}
+                itemPreferences={preferences}
+                itemOrder={itemOrder}
+                onToggleItem={toggleMenu}
+                onMoveItem={moveItem}
+                onDone={handleEditDone}
+                onReset={resetDefaults}
               />
             </Popover>
           </Box>
@@ -439,6 +474,8 @@ const AppBarComponent: React.FC<AppBarComponentProps> = ({
             }
           }}
         />
+
+
       </Toolbar>
     </AppBar>
   );

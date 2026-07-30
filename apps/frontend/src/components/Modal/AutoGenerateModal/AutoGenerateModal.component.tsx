@@ -727,11 +727,22 @@ const AutoGenerateModal: React.FC<AutoGenerateModalProps> = ({
                               },
                             }}
                           >
-                            {schedules.map((schedule) => (
-                              <MenuItem key={schedule.id} value={schedule.id}>
-                                {schedule.label} ({schedule.hours}h)
-                              </MenuItem>
-                            ))}
+                            {schedules.map((schedule) => {
+                              // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                              const sDays = (schedule as any).scheduleDays;
+                              let hoursStr = '';
+                              if (sDays && Array.isArray(sDays) && sDays.length > 0) {
+                                const uniqueHours = [...new Set(sDays.map((sd: { hours: number }) => sd.hours))].sort((a, b) => b - a);
+                                hoursStr = uniqueHours.length === 1 ? `${uniqueHours[0]}h` : `${uniqueHours[0]}h - ${uniqueHours[uniqueHours.length - 1]}h`;
+                              } else {
+                                hoursStr = `${schedule.hours}h`;
+                              }
+                              return (
+                                <MenuItem key={schedule.id} value={schedule.id}>
+                                  {schedule.label} ({hoursStr})
+                                </MenuItem>
+                              );
+                            })}
                           </TextField>
                         )}
                       </Box>

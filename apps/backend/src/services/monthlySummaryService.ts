@@ -34,9 +34,20 @@ export const getMonthlySummariesByMonth = async (month: number, year: number) =>
     where: { month, year },
   });
 
-// Create a new monthly summary (upserts on unique constraint conflict)
+// Create a new monthly summary (finds or creates based on unique constraint)
 export const createMonthlySummary = async (data: Omit<MonthlySummary, "id">) => {
-  const [newMonthlySummary] = await MonthlySummary.upsert(data);
+  const existing = await MonthlySummary.findOne({
+    where: {
+      employeeId: data.employeeId,
+      month: data.month,
+      year: data.year,
+    },
+  });
+  if (existing) {
+    await existing.update(data);
+    return existing;
+  }
+  const newMonthlySummary = await MonthlySummary.create(data);
   return newMonthlySummary;
 };
 

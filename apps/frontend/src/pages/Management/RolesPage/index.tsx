@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useMemo, useState } from "react";
+import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useAuthContext } from "../../../context/AuthContext";
 import { Employee } from "../../../models/Employee";
 import { Schedule } from "../../../models/Schedule";
@@ -16,7 +16,7 @@ import { useWeeklySummaries } from "../../../hooks/useWeeklySummary";
 import { useBiweeklySummaries } from "../../../hooks/useBiweeklySummary";
 import { useMonthlySummaries } from "../../../hooks/useMonthlySummary";
 import SearchBarComponent from "../../../components/SearchBar/SearchBar.component";
-import SelectorTableComponent from "../../../components/Table/SelectorTable/SelectorTable.component";
+import WeeklyBoard from "../../../components/Board/WeeklyBoard/WeeklyBoard.component";
 import SpeedDialComponent from "../../../components/SpeedDial/SpeedDial.component";
 import { es } from "date-fns/locale";
 import { LocalizationProvider } from "@mui/x-date-pickers";
@@ -83,6 +83,7 @@ import NOTIFICATIONS from "../../../constants/notifications.constants";
 import { createHoursGenerationNotification } from "../../../services/notificationService";
 import { PdfIcon, ExcelIcon } from "../../../components/Icons/FileIcons";
 import { capitalizeFirstLetter } from "../../../utils/string";
+import { getScheduleHours, sortSchedulesByType } from "../../../utils/schedule";
 import { getScheduleCellData } from "../../../components/Table/SelectorTable/helpers";
 import {
   calculateTotalHours,
@@ -108,6 +109,8 @@ const RolesPage: React.FC = () => {
   );
   const [filteredEmployees, setFilteredEmployees] = useState<Employee[]>([]);
   const [filteredSchedules, setFilteredSchedules] = useState<Schedule[]>([]);
+  const hoursWorkedRef = useRef(hoursWorked);
+  useEffect(() => { hoursWorkedRef.current = hoursWorked; }, [hoursWorked]);
   const {
     weeklySummaries,
     isLoadingWeeklySummaries,
@@ -169,20 +172,8 @@ const RolesPage: React.FC = () => {
   const location = useLocation();
   const navigate = useNavigate();
 
-  const getInitialRowsPerPage = () => {
-    if (typeof window !== "undefined") {
-      // Total chrome: appbar(64) + page header(110) + selector header(36) + table head(36) + footer(36) + borders/gaps(20)
-      const totalChrome = 302;
-      const availableHeight = window.innerHeight - totalChrome;
-      const rowHeight = 42;
-      let rows = Math.floor(availableHeight / rowHeight);
-      return Math.max(3, Math.min(100, rows));
-    }
-    return 25;
-  };
-
-  const { search, setSearch, rowsPerPage, setRowsPerPage } =
-    useTablePreferences("roles-selector", getInitialRowsPerPage);
+  const { search, setSearch } =
+    useTablePreferences("roles-selector", () => 25);
 
   // Save viewMode to localStorage when it changes
   useEffect(() => {
@@ -207,9 +198,9 @@ const RolesPage: React.FC = () => {
     dispatch(fetchHoursWorked());
   }, [dispatch, location.pathname]);
 
-  // Initialize filteredSchedules with all schedules
+  // Initialize filteredSchedules with all schedules (sorted)
   useEffect(() => {
-    setFilteredSchedules(schedules);
+    setFilteredSchedules(sortSchedulesByType(schedules));
   }, [schedules]);
 
   const isLoading =
@@ -237,10 +228,12 @@ const RolesPage: React.FC = () => {
       // filteredEmployees ya está actualizado arriba
     } else {
       setFilteredSchedules(
-        schedules.filter((schedule) =>
-          normalizeString(schedule.label)
-            .toLowerCase()
-            .includes(normalizeString(search).toLowerCase())
+        sortSchedulesByType(
+          schedules.filter((schedule) =>
+            normalizeString(schedule.label)
+              .toLowerCase()
+              .includes(normalizeString(search).toLowerCase())
+          )
         )
       );
     }
@@ -339,7 +332,9 @@ const RolesPage: React.FC = () => {
           if ("hours" in hw && typeof hw.hours === "number") {
             dayHours = hw.hours;
           } else {
-            dayHours = schedule.hours;
+            const hwDate = new Date(hw.date);
+            const dayName = hwDate.toLocaleDateString("en-US", { weekday: "long" }).toLowerCase();
+            dayHours = getScheduleHours(schedule, dayName);
           }
           totalHours += dayHours;
         }
@@ -464,7 +459,7 @@ const RolesPage: React.FC = () => {
         rangeStart: Date,
         rangeEnd: Date,
       ) => {
-        const employeeHoursWorked = hoursWorked.filter((hw) => {
+      const employeeHoursWorked = hoursWorkedRef.current.filter((hw) => {
           const hwDate = new Date(hw.date);
           return (
             hw.employeeId === employeeId &&
@@ -481,7 +476,9 @@ const RolesPage: React.FC = () => {
             if ("hours" in hw && typeof hw.hours === "number") {
               dayHours = hw.hours;
             } else {
-              dayHours = schedule.hours;
+              const hwDate = new Date(hw.date);
+              const dayName = hwDate.toLocaleDateString("en-US", { weekday: "long" }).toLowerCase();
+              dayHours = getScheduleHours(schedule, dayName);
             }
             totalHours += dayHours;
           }
@@ -598,39 +595,12 @@ const RolesPage: React.FC = () => {
       );
 
       if (existingHoursWorkedRecord) {
-        // Calcular las horas del registro que se va a eliminar
-        const scheduleToDelete = schedules.find((s) => s.id === existingHoursWorkedRecord.scheduleId);
-        const hoursToDelete = scheduleToDelete ? scheduleToDelete.hours : 0;
-
-        // Eliminar el registro de hoursWorked
-        dispatch(deleteHoursWorked(existingHoursWorkedRecord.id)).then(() => {
-          // Recalcular el total de horas sin el registro eliminado
-          recalculateEmployeeWeeklySummary(employeeId, date);
-
-          // Actualizar el weeklySummary con las nuevas horas
-          const weekNumber = getWeekNumber(date);
-          const month = date.getMonth() + 1;
-          const year = date.getFullYear();
-
-          const existingWeeklySummary = weeklySummaries.find(
-            (ws) => ws.employeeId === employeeId &&
-                     ws.weekNumber === weekNumber &&
-                     ws.year === year
-          );
-
-          if (existingWeeklySummary) {
-            const newTotalHours = Math.max(0, existingWeeklySummary.totalHours - hoursToDelete);
-
-            const weeklySummary = {
-              employeeId,
-              weekNumber,
-              month,
-              year,
-              totalHours: newTotalHours,
-            };
-
-            updateWeeklySummary(existingWeeklySummary.id, weeklySummary);
-          }
+        // Eliminar el registro de hoursWorked, luego recalcular TODOS los summaries
+        // (weekly, biweekly, monthly) desde cero para evitar inconsistencias.
+        dispatch(deleteHoursWorked(existingHoursWorkedRecord.id)).then(async () => {
+          // recalculateEmployeeWeeklySummary recalcula los 3 summaries (semanal, quincenal, mensual)
+          // usando los datos actualizados de hoursWorked. Es la fuente única de verdad.
+          await recalculateEmployeeWeeklySummary(employeeId, date);
         });
       }
       return;
@@ -819,7 +789,7 @@ const RolesPage: React.FC = () => {
           );
           
           if (daySchedule) {
-            totalHours += daySchedule.hours;
+            totalHours += getScheduleHours(daySchedule, dayName);
           }
         }
         
@@ -969,11 +939,13 @@ const RolesPage: React.FC = () => {
           return;
         }
         
-        // Find the minimum daily hours available in schedules
-        const minDailyHours = Math.min(...availableSchedules
-          .filter(s => s.label === assignedScheduleLabel && s.hours > 0)
-          .map(s => s.hours)
-        );
+        // Find the minimum daily hours available in schedules (per-day)
+        const minDailyHours = Math.min(...Array.from({ length: 7 }, (_, i) => {
+          const d = addDays(current, i);
+          const dayN = d.toLocaleDateString("en-US", { weekday: "long" }).toLowerCase();
+          const dayS = availableSchedules.find(s => s.label === assignedScheduleLabel && s.days.includes(dayN));
+          return dayS ? getScheduleHours(dayS, dayN) : Infinity;
+        }));
         
         // If target hours are less than the minimum daily hours, don't assign anything
         if (targetWeeklyHours < minDailyHours) {
@@ -997,11 +969,12 @@ const RolesPage: React.FC = () => {
           const maxHoursPerWeek = config.maxHoursPerWeek || 48;
           const limitedTargetHours = Math.min(targetWeeklyHours, maxHoursPerWeek);
             
-          // Find the schedule's daily hours
-          const scheduleDailyHours = availableSchedules.find(s => 
+          // Find the schedule's daily hours (use the first available day's per-day hours)
+          const mondaySchedule = availableSchedules.find(s => 
             s.label === assignedScheduleLabel && 
-            s.days && s.days.includes('monday') // Use any day to get the hours
-          )?.hours || 0;
+            s.days && s.days.includes('monday')
+          );
+          const scheduleDailyHours = mondaySchedule ? getScheduleHours(mondaySchedule, 'monday') : 0;
           
           if (scheduleDailyHours > 0) {
             // Calculate how many days we need to assign
@@ -1022,8 +995,9 @@ const RolesPage: React.FC = () => {
               );
               
               if (daySchedule && i < daysNeeded) {
+                const dayActualHours = getScheduleHours(daySchedule, dayName);
                 // Check if adding this day's hours would exceed the limit
-                if (accumulatedHours + daySchedule.hours <= limitedTargetHours) {
+                if (accumulatedHours + dayActualHours <= limitedTargetHours) {
                   // Assign the schedule for this day
                   const hoursWorkedEntry = {
                     employeeId,
@@ -1031,8 +1005,8 @@ const RolesPage: React.FC = () => {
                     scheduleId: daySchedule.id,
                   };
                   redistributedEntries.push(hoursWorkedEntry);
-                  totalWeeklyHours += daySchedule.hours;
-                  accumulatedHours += daySchedule.hours;
+                  totalWeeklyHours += dayActualHours;
+                  accumulatedHours += dayActualHours;
                 } else {
                   // Stop assigning more days to respect the limit
                   break;
@@ -1061,6 +1035,7 @@ const RolesPage: React.FC = () => {
             
             // Create HoursWorked entry for this day
             if (daySchedule) {
+              const dayActualHours = getScheduleHours(daySchedule, dayName);
               const hoursWorkedEntry = {
                 employeeId,
                 date: dayDate.toISOString(),
@@ -1068,8 +1043,8 @@ const RolesPage: React.FC = () => {
               };
               weekDays.push(hoursWorkedEntry);
               
-              // Add to total weekly hours
-              totalWeeklyHours += daySchedule.hours;
+              // Add to total weekly hours (using per-day hours)
+              totalWeeklyHours += dayActualHours;
             }
           }
           
@@ -1324,6 +1299,10 @@ const RolesPage: React.FC = () => {
         groupedHeaders: exportType === "excel" ? groupedHeaders : undefined,
       });
     } catch (error) {
+      showNotification("Error al exportar los datos", {
+        severity: "error",
+        duration: 5000,
+      });
     } finally {
       setIsExporting(false);
     }
@@ -1372,15 +1351,15 @@ const RolesPage: React.FC = () => {
             mt: 0,
           }}
         >
-          {/* Premium Header with light background */}
+          {/* Simple Header */}
           <Box
             sx={{
-              px: { xs: 2, sm: 3 },
-              py: { xs: 2, sm: 2.5 },
+              px: { xs: 2, sm: 2.5 },
+              py: { xs: 1.5, sm: 2 },
               backgroundColor: theme.palette.background.paper,
               color: theme.palette.text.primary,
               flexShrink: 0,
-              borderBottom: `1px solid ${theme.palette.mode === "dark" ? "rgba(255,255,255,0.08)" : "rgba(0,0,0,0.08)"}`,
+              borderBottom: `1px solid ${theme.palette.mode === "dark" ? "rgba(255,255,255,0.06)" : "rgba(0,0,0,0.06)"}`,
             }}
           >
             {/* Title Row */}
@@ -1388,27 +1367,24 @@ const RolesPage: React.FC = () => {
               display="flex"
               justifyContent="space-between"
               alignItems="center"
-              mb={1}
+              mb={1.5}
             >
               <Box display="flex" alignItems="center" gap={1.5}>
                 <Box
                   sx={{
-                    backgroundColor: theme.palette.primary.main,
-                    borderRadius: "10px",
-                    p: 1,
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "center",
+                    color: theme.palette.primary.main,
+                    display: 'flex',
+                    alignItems: 'center',
                   }}
                 >
-                  <ClipboardList size={22} color={theme.palette.primary.contrastText} />
+                  <ClipboardList size={20} strokeWidth={1.5} />
                 </Box>
                 <Box>
                   <Typography
                     variant={isSmallScreen ? "h6" : "h5"}
                     sx={{
                       fontWeight: 700,
-                      fontSize: { xs: "1.1rem", sm: "1.25rem" },
+                      fontSize: { xs: "1rem", sm: "1.15rem" },
                       color: theme.palette.text.primary,
                       letterSpacing: "-0.02em",
                       lineHeight: 1.2,
@@ -1420,7 +1396,7 @@ const RolesPage: React.FC = () => {
                     variant="caption"
                     sx={{
                       color: theme.palette.text.secondary,
-                      fontSize: "0.75rem",
+                      fontSize: "0.7rem",
                       letterSpacing: "0.02em",
                     }}
                   >
@@ -1438,8 +1414,8 @@ const RolesPage: React.FC = () => {
                     {(viewMode === 'employee' ? filteredEmployees.length > 0 : filteredSchedules.length > 0) && (
                       <SpeedDialComponent
                         actions={exportOptions}
-                        mainIcon={<Download size={20} />}
-                        openIcon={<X size={20} />}
+                        mainIcon={<Download size={18} strokeWidth={1.5} />}
+                        openIcon={<X size={18} strokeWidth={1.5} />}
                         direction="left"
                       />
                     )}
@@ -1453,10 +1429,10 @@ const RolesPage: React.FC = () => {
               flexDirection={{ xs: "column", sm: "row" }}
               alignItems={{ xs: "stretch", sm: "center" }}
               justifyContent="space-between"
-              gap={2}
+              gap={1.5}
             >
               {/* Search */}
-              <Box flex={1} maxWidth={{ sm: "320px" }}>
+              <Box flex={1} maxWidth={{ sm: "280px" }}>
                 {(viewMode === 'employee' ? filteredEmployees : filteredSchedules) && (
                   <SearchBarComponent
                     placeholder={
@@ -1476,35 +1452,33 @@ const RolesPage: React.FC = () => {
                 display="flex"
                 flexDirection={{ xs: "column", sm: "row" }}
                 alignItems={{ xs: "stretch", sm: "center" }}
-                gap={1}
+                gap={0.75}
               >
                 <Box
                   display="flex"
                   alignItems="center"
                   justifyContent={{ xs: "flex-start", sm: "flex-end" }}
-                  gap={1}
+                  gap={0.5}
                 >
                   {/* Previous Week Button */}
                   <PremiumTooltip title={MANAGEMENT.TOOLTIP_PREV_WEEK}>
-                    <Button
-                      variant="outlined"
+                    <IconButton
                       onClick={handlePreviousWeek}
-                      disableRipple
-                      disableElevation
+                      size="small"
                       sx={{
-                        minWidth: '44px',
-                        height: '44px',
-                        px: 1.5,
+                        width: 36,
+                        height: 36,
                         borderRadius: '10px',
-                        borderColor: theme.palette.mode === "dark" ? "rgba(255,255,255,0.2)" : "rgba(0,0,0,0.15)",
+                        color: theme.palette.mode === 'dark' ? 'rgba(255,255,255,0.4)' : 'rgba(0,0,0,0.35)',
+                        transition: 'all 0.15s ease',
                         '&:hover': {
-                          backgroundColor: theme.palette.mode === "dark" ? "rgba(255,255,255,0.05)" : "rgba(0,0,0,0.04)",
-                          borderColor: theme.palette.mode === "dark" ? "rgba(255,255,255,0.3)" : "rgba(0,0,0,0.25)",
+                          background: theme.palette.mode === 'dark' ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.04)',
+                          color: theme.palette.mode === 'dark' ? 'rgba(255,255,255,0.7)' : 'rgba(0,0,0,0.7)',
                         },
                       }}
                     >
-                      <ChevronLeft size={20} />
-                    </Button>
+                      <ChevronLeft size={18} strokeWidth={1.5} />
+                    </IconButton>
                   </PremiumTooltip>
 
                   {/* Date Picker */}
@@ -1516,36 +1490,30 @@ const RolesPage: React.FC = () => {
                       value={firstDayOfWeek}
                       maxDate={nextWeekEnd}
                       views={["year", "month", "day"]}
-                      format="EEEE d 'de' MMMM 'de' yyyy"
+                      format="d MMM yyyy"
                       slots={{ toolbar: () => null }}
                       slotProps={{
                         textField: {
                           fullWidth: false,
                           required: true,
-                          variant: "outlined",
+                          variant: "standard",
                           sx: {
-                            width: { xs: '100%', sm: '320px', md: '360px' },
-                            '& .MuiOutlinedInput-root': {
-                              height: "44px",
-                              borderRadius: '10px',
-                              fontSize: '0.875rem',
+                            width: { xs: '100%', sm: '150px', md: '170px' },
+                            '& .MuiInputBase-root': {
+                              height: '36px',
+                              fontSize: '0.85rem',
                               fontWeight: 500,
-                              backgroundColor: theme.palette.background.paper,
-                              border: `1px solid ${theme.palette.mode === "dark" ? "rgba(255,255,255,0.2)" : "rgba(0,0,0,0.15)"}`,
-                              transition: 'border-color 0.2s cubic-bezier(0.4, 0, 0.2, 1)',
-                              '&:hover': {
-                                borderColor: theme.palette.mode === "dark" ? "rgba(255,255,255,0.3)" : "rgba(0,0,0,0.25)",
+                              '&:before, &:after': { 
+                                display: 'none' 
                               },
-                              '&.Mui-focused': {
-                                borderColor: theme.palette.mode === "dark" ? "rgba(255,255,255,0.3)" : "rgba(0,0,0,0.25)",
+                              '&:hover:not(.Mui-disabled):before': { 
+                                display: 'none' 
                               },
-                              '& .MuiOutlinedInput-notchedOutline': {
-                                border: 'none',
-                              },
-                              '& input': {
-                                textOverflow: 'ellipsis',
-                                textAlign: 'center',
-                              },
+                            },
+                            '& input': {
+                              textAlign: 'center',
+                              cursor: 'pointer',
+                              padding: '4px 0',
                             },
                           },
                         },
@@ -1558,8 +1526,7 @@ const RolesPage: React.FC = () => {
                   {/* Next Week Button */}
                   <PremiumTooltip title={MANAGEMENT.TOOLTIP_NEXT_WEEK}>
                     <span>
-                      <Button
-                        variant="outlined"
+                      <IconButton
                         disabled={
                           !isValidDateForSelect(
                             new Date(
@@ -1568,54 +1535,51 @@ const RolesPage: React.FC = () => {
                           )
                         }
                         onClick={handleNextWeek}
-                        disableRipple
-                        disableElevation
+                        size="small"
                         sx={{
-                          minWidth: '44px',
-                          height: '44px',
-                          px: 1.5,
+                          width: 36,
+                          height: 36,
                           borderRadius: '10px',
-                          borderColor: theme.palette.mode === "dark" ? "rgba(255,255,255,0.2)" : "rgba(0,0,0,0.15)",
+                          color: theme.palette.mode === 'dark' ? 'rgba(255,255,255,0.4)' : 'rgba(0,0,0,0.35)',
+                          transition: 'all 0.15s ease',
                           '&:hover': {
-                            backgroundColor: theme.palette.mode === "dark" ? "rgba(255,255,255,0.05)" : "rgba(0,0,0,0.04)",
-                            borderColor: theme.palette.mode === "dark" ? "rgba(255,255,255,0.3)" : "rgba(0,0,0,0.25)",
+                            background: theme.palette.mode === 'dark' ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.04)',
+                            color: theme.palette.mode === 'dark' ? 'rgba(255,255,255,0.7)' : 'rgba(0,0,0,0.7)',
                           },
                           '&.Mui-disabled': {
-                            borderColor: theme.palette.mode === "dark" ? "rgba(255,255,255,0.1)" : "rgba(0,0,0,0.08)",
+                            color: theme.palette.mode === 'dark' ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.08)',
                           },
                         }}
                       >
-                        <ChevronRight size={20} />
-                      </Button>
+                        <ChevronRight size={18} strokeWidth={1.5} />
+                      </IconButton>
                     </span>
                   </PremiumTooltip>
 
                   {/* Current Week Button */}
                   <PremiumTooltip title={MANAGEMENT.TOOLTIP_CURRENT_WEEK}>
                     <span>
-                      <Button
-                        variant="outlined"
+                      <IconButton
                         disabled={weekOffset === 0}
                         onClick={handleCurrentWeek}
-                        disableRipple
-                        disableElevation
+                        size="small"
                         sx={{
-                          minWidth: '44px',
-                          height: '44px',
-                          px: 1.5,
+                          width: 36,
+                          height: 36,
                           borderRadius: '10px',
-                          borderColor: theme.palette.mode === "dark" ? "rgba(255,255,255,0.2)" : "rgba(0,0,0,0.15)",
+                          color: theme.palette.mode === 'dark' ? 'rgba(255,255,255,0.4)' : 'rgba(0,0,0,0.35)',
+                          transition: 'all 0.15s ease',
                           '&:hover': {
-                            backgroundColor: theme.palette.mode === "dark" ? "rgba(255,255,255,0.05)" : "rgba(0,0,0,0.04)",
-                            borderColor: theme.palette.mode === "dark" ? "rgba(255,255,255,0.3)" : "rgba(0,0,0,0.25)",
+                            background: theme.palette.mode === 'dark' ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.04)',
+                            color: theme.palette.mode === 'dark' ? 'rgba(255,255,255,0.7)' : 'rgba(0,0,0,0.7)',
                           },
                           '&.Mui-disabled': {
-                            borderColor: theme.palette.mode === "dark" ? "rgba(255,255,255,0.1)" : "rgba(0,0,0,0.08)",
+                            color: theme.palette.mode === 'dark' ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.06)',
                           },
                         }}
                       >
-                        <RotateCcw size={18} />
-                      </Button>
+                        <RotateCcw size={16} strokeWidth={1.5} />
+                      </IconButton>
                     </span>
                   </PremiumTooltip>
                 </Box>
@@ -1638,18 +1602,10 @@ const RolesPage: React.FC = () => {
               );
             }
             
-            return viewMode === 'employee' ? (
-              isLoadingEmployees ? (
-                <Box sx={loadingBoxStyles}>
-                  <Backdrop sx={backdropStyles(theme)} open={isLoadingEmployees}>
-                    <CircularProgress />
-                  </Backdrop>
-                </Box>
-              ) : filteredEmployees.length > 0 ? (
-                <SelectorTableComponent
-                key={`schedules-${schedules.length}-${schedules.map((s) => s.id).join("-")}`}
+            return (
+              <WeeklyBoard
                 filteredEmployees={filteredEmployees}
-                schedules={schedules}
+                schedules={viewMode === 'schedule' ? filteredSchedules : schedules}
                 hoursWorked={hoursWorked}
                 weeklySummaries={weeklySummaries}
                 biweeklySummaries={biweeklySummaries}
@@ -1663,65 +1619,16 @@ const RolesPage: React.FC = () => {
                 handleAdjustTime={handleAdjustTime}
                 recalculateEmployeeWeeklySummary={recalculateEmployeeWeeklySummary}
                 permissions={userPermissions}
-                rowsPerPage={rowsPerPage}
-                setRowsPerPage={setRowsPerPage}
                 viewMode={viewMode}
                 setViewMode={setViewMode}
               />
-            ) : (
-              <Box sx={noEmployeesBoxStyles}>
-                <Search size={48} style={{ color: theme.palette.text.disabled, ...noEmployeesIconStyles }} />
-                <Typography variant="h6" color="textSecondary">
-                  {MANAGEMENT.NO_EMPLOYEES}
-                </Typography>
-              </Box>
-            )
-          ) : (
-            isLoadingSchedules ? (
-              <Box sx={loadingBoxStyles}>
-                <Backdrop sx={backdropStyles(theme)} open={isLoadingSchedules}>
-                  <CircularProgress />
-                </Backdrop>
-              </Box>
-            ) : filteredSchedules.length > 0 ? (
-              <SelectorTableComponent
-                key={`schedules-${filteredSchedules.length}-${filteredSchedules.map((s) => s.id).join("-")}`}
-                filteredEmployees={filteredEmployees}
-                schedules={filteredSchedules}
-                hoursWorked={hoursWorked}
-                weeklySummaries={weeklySummaries}
-                biweeklySummaries={biweeklySummaries}
-                monthlySummaries={monthlySummaries}
-                weekOffset={weekOffset}
-                weekNumber={currentWeekNumber}
-                biweekNumber={currentBiweekNumber}
-                month={currentMonth}
-                year={currentYear}
-                handleChange={handleChange}
-                handleAdjustTime={handleAdjustTime}
-                recalculateEmployeeWeeklySummary={recalculateEmployeeWeeklySummary}
-                permissions={userPermissions}
-                rowsPerPage={rowsPerPage}
-                setRowsPerPage={setRowsPerPage}
-                viewMode={viewMode}
-                setViewMode={setViewMode}
-              />
-            ) : (
-              <Box sx={noEmployeesBoxStyles}>
-                <Search size={48} style={{ color: theme.palette.text.disabled, ...noEmployeesIconStyles }} />
-                <Typography variant="h6" color="textSecondary">
-                  {MANAGEMENT.NO_SCHEDULES}
-                </Typography>
-              </Box>
-            )
-          );
+            );
         })()}
           </Box>
           <DialogComponent
             open={openExportDialog}
             onClose={() => {
               setOpenExportDialog(false);
-              handleExportHours(false);
             }}
             onConfirm={() => {
               setOpenExportDialog(false);

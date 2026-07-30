@@ -179,7 +179,7 @@ const OCRResultModal: React.FC<OCRResultModalProps> = ({
       <Box sx={headerBoxStyles(theme)}>
         <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
           <Box sx={iconBoxStyles(theme)}>
-            <Image size={24} color={theme.palette.primary.main} />
+            <Image size={24} color="#fff" />
           </Box>
           <Box sx={titleBoxStyles}>
             <Typography

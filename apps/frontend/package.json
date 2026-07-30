@@ -4,6 +4,8 @@
   "private": true,
   "dependencies": {
     "@choferes/shared": "*",
+    "@dnd-kit/core": "6.3.1",
+    "@dnd-kit/utilities": "3.2.2",
     "@emotion/react": "^11.14.0",
     "@emotion/styled": "^11.14.0",
     "@fontsource/moirai-one": "^5.2.6",

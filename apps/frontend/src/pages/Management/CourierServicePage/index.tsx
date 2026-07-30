@@ -14,7 +14,7 @@ import {
   Button,
   CircularProgress,
   Backdrop,
-  ButtonGroup,
+  IconButton,
   Paper,
 } from "@mui/material";
 import { LocalizationProvider } from "@mui/x-date-pickers";
@@ -433,41 +433,40 @@ const CourierServicePage: React.FC = () => {
           mt: 0,
         }}
       >
-        {/* Header Section */}
+        {/* Simple Header */}
         <Box
           sx={{
-            px: { xs: 2, sm: 3 },
-            py: { xs: 2, sm: 2.5 },
+            px: { xs: 2, sm: 2.5 },
+            py: { xs: 1.5, sm: 2 },
             backgroundColor: theme.palette.background.paper,
             color: theme.palette.text.primary,
-            borderBottom: `1px solid ${theme.palette.mode === "dark" ? "rgba(255,255,255,0.08)" : "rgba(0,0,0,0.08)"}`,
+            flexShrink: 0,
+            borderBottom: `1px solid ${theme.palette.mode === "dark" ? "rgba(255,255,255,0.06)" : "rgba(0,0,0,0.06)"}`,
           }}
         >
+          {/* Title Row */}
           <Box
             display="flex"
             justifyContent="space-between"
-            alignItems="flex-start"
-            mb={2}
+            alignItems="center"
+            mb={1.5}
           >
             <Box display="flex" alignItems="center" gap={1.5}>
               <Box
                 sx={{
-                  backgroundColor: theme.palette.primary.main,
-                  borderRadius: "10px",
-                  p: 1,
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
+                  color: theme.palette.primary.main,
+                  display: 'flex',
+                  alignItems: 'center',
                 }}
               >
-                <Truck size={22} color={theme.palette.primary.contrastText} />
+                <Truck size={20} strokeWidth={1.5} />
               </Box>
               <Box>
                 <Typography
                   variant={isSmallScreen ? "h6" : "h5"}
                   sx={{
                     fontWeight: 700,
-                    fontSize: { xs: "1.1rem", sm: "1.25rem" },
+                    fontSize: { xs: "1rem", sm: "1.15rem" },
                     color: theme.palette.text.primary,
                     letterSpacing: "-0.02em",
                     lineHeight: 1.2,
@@ -479,7 +478,7 @@ const CourierServicePage: React.FC = () => {
                   variant="caption"
                   sx={{
                     color: theme.palette.text.secondary,
-                    fontSize: "0.75rem",
+                    fontSize: "0.7rem",
                     letterSpacing: "0.02em",
                   }}
                 >
@@ -493,8 +492,8 @@ const CourierServicePage: React.FC = () => {
               {filteredWeekCouriers.length > 0 && (
                 <SpeedDialComponent
                   actions={exportOptions}
-                  mainIcon={<Download size={20} />}
-                  openIcon={<X size={20} />}
+                  mainIcon={<Download size={16} strokeWidth={1.5} />}
+                  openIcon={<X size={16} strokeWidth={1.5} />}
                   direction="left"
                 />
               )}
@@ -507,10 +506,10 @@ const CourierServicePage: React.FC = () => {
             flexDirection={{ xs: "column", sm: "row" }}
             alignItems={{ xs: "stretch", sm: "center" }}
             justifyContent="space-between"
-            gap={2}
+            gap={1.5}
           >
             {/* Search */}
-            <Box flex={1} maxWidth={{ sm: "320px" }}>
+            <Box flex={1} maxWidth={{ sm: "280px" }}>
               {filteredCouriers && (
                 <SearchBarComponent
                   placeholder={MANAGEMENT.COURIER_SERVICE_PAGE.SEARCH_PLACEHOLDER}
@@ -526,7 +525,7 @@ const CourierServicePage: React.FC = () => {
               display="flex"
               flexDirection={{ xs: "column", sm: "row" }}
               alignItems={{ xs: "stretch", sm: "center" }}
-              gap={1}
+              gap={0.75}
             >
               <Box
                 display="flex"
@@ -542,40 +541,26 @@ const CourierServicePage: React.FC = () => {
                     value={selectedDate}
                     maxDate={new Date()}
                     views={["year", "month", "day"]}
-                    format="EEEE d 'de' MMMM"
+                    format="d MMM yyyy"
                     slots={{ toolbar: () => null }}
                     slotProps={{
                       textField: {
                         fullWidth: false,
                         required: true,
-                        variant: "outlined",
+                        variant: "standard",
                         sx: {
-                          width: { xs: '100%', sm: '200px' },
-                          '& .MuiOutlinedInput-root': {
-                            height: "44px",
-                            borderRadius: '10px',
-                            fontSize: '0.875rem',
+                          width: { xs: '100%', sm: '140px', md: '150px' },
+                          '& .MuiInputBase-root': {
+                            height: '36px',
+                            fontSize: '0.85rem',
                             fontWeight: 500,
-                            backgroundColor: theme.palette.background.paper,
-                            boxShadow: '0 1px 3px rgba(0,0,0,0.04)',
-                            transition: 'all 0.2s cubic-bezier(0.4, 0, 0.2, 1)',
-                            '& fieldset': {
-                              borderColor: theme.palette.mode === 'dark' ? 'rgba(255,255,255,0.2)' : 'rgba(0,0,0,0.15)',
-                              borderWidth: '1px',
-                            },
-                            '&:hover': {
-                              boxShadow: '0 2px 6px rgba(0,0,0,0.08)',
-                              '& fieldset': {
-                                borderColor: theme.palette.mode === 'dark' ? 'rgba(255,255,255,0.3)' : 'rgba(0,0,0,0.25)',
-                              },
-                            },
-                            '&.Mui-focused': {
-                              boxShadow: '0 0 0 3px rgba(0,0,0,0.04)',
-                              '& fieldset': {
-                                borderColor: theme.palette.primary.main,
-                                borderWidth: '2px',
-                              },
-                            },
+                            '&:before, &:after': { display: 'none' },
+                            '&:hover:not(.Mui-disabled):before': { display: 'none' },
+                          },
+                          '& input': {
+                            textAlign: 'center',
+                            cursor: 'pointer',
+                            padding: '4px 0',
                           },
                         },
                       },
@@ -584,51 +569,94 @@ const CourierServicePage: React.FC = () => {
                     onChange={handleDateChange}
                   />
                 </LocalizationProvider>
-                <ButtonGroup variant="contained" sx={{ height: '44px' }}>
+                <Box sx={{ display: 'flex', gap: 0.5 }}>
                   <PremiumTooltip title={MANAGEMENT.COURIER_SERVICE_PAGE.TOOLTIP_PREV_DAY}>
-                    <Button onClick={handlePreviousDate} sx={{ minWidth: '44px', height: '44px', px: 1.5 }}>
-                      <ChevronLeft size={20} />
-                    </Button>
+                    <IconButton
+                      onClick={handlePreviousDate}
+                      size="small"
+                      sx={{
+                        width: 36,
+                        height: 36,
+                        borderRadius: '10px',
+                        color: theme.palette.mode === 'dark' ? 'rgba(255,255,255,0.4)' : 'rgba(0,0,0,0.35)',
+                        transition: 'all 0.15s ease',
+                        '&:hover': {
+                          background: theme.palette.mode === 'dark' ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.04)',
+                          color: theme.palette.mode === 'dark' ? 'rgba(255,255,255,0.7)' : 'rgba(0,0,0,0.7)',
+                        },
+                      }}
+                    >
+                      <ChevronLeft size={18} strokeWidth={1.5} />
+                    </IconButton>
                   </PremiumTooltip>
                   <PremiumTooltip title={MANAGEMENT.COURIER_SERVICE_PAGE.TOOLTIP_NEXT_DAY}>
                     <span>
-                      <Button
+                      <IconButton
                         disabled={isTodayOrFuture(selectedDate)}
                         onClick={handleNextDate}
-                        sx={{ minWidth: '44px', height: '44px', px: 1.5 }}
+                        size="small"
+                        sx={{
+                          width: 36,
+                          height: 36,
+                          borderRadius: '10px',
+                          color: theme.palette.mode === 'dark' ? 'rgba(255,255,255,0.4)' : 'rgba(0,0,0,0.35)',
+                          transition: 'all 0.15s ease',
+                          '&:hover': {
+                            background: theme.palette.mode === 'dark' ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.04)',
+                            color: theme.palette.mode === 'dark' ? 'rgba(255,255,255,0.7)' : 'rgba(0,0,0,0.7)',
+                          },
+                          '&.Mui-disabled': {
+                            color: theme.palette.mode === 'dark' ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.08)',
+                          },
+                        }}
                       >
-                        <ChevronRight size={20} />
-                      </Button>
+                        <ChevronRight size={18} strokeWidth={1.5} />
+                      </IconButton>
                     </span>
                   </PremiumTooltip>
                   <PremiumTooltip title={MANAGEMENT.COURIER_SERVICE_PAGE.TOOLTIP_CURRENT_DAY}>
                     <span>
-                      <Button
+                      <IconButton
                         disabled={isTodayOrFuture(selectedDate)}
                         onClick={handleCurrentDate}
-                        sx={{ minWidth: '44px', height: '44px', px: 1.5 }}
+                        size="small"
+                        sx={{
+                          width: 36,
+                          height: 36,
+                          borderRadius: '10px',
+                          color: theme.palette.mode === 'dark' ? 'rgba(255,255,255,0.4)' : 'rgba(0,0,0,0.35)',
+                          transition: 'all 0.15s ease',
+                          '&:hover': {
+                            background: theme.palette.mode === 'dark' ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.04)',
+                            color: theme.palette.mode === 'dark' ? 'rgba(255,255,255,0.7)' : 'rgba(0,0,0,0.7)',
+                          },
+                          '&.Mui-disabled': {
+                            color: theme.palette.mode === 'dark' ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.06)',
+                          },
+                        }}
                       >
-                        <Calendar size={18} />
-                      </Button>
+                        <Calendar size={16} strokeWidth={1.5} />
+                      </IconButton>
                     </span>
                   </PremiumTooltip>
-                </ButtonGroup>
+                </Box>
               </Box>
 
               {/* Add Button Desktop */}
               <Box sx={{ display: { xs: 'none', sm: 'flex' } }}>
                 <Button
                   variant="contained"
-                  startIcon={<Plus size={18} />}
+                  startIcon={<Plus size={16} strokeWidth={2} />}
                   onClick={handleOpenAddCourierModal}
                   sx={{
-                    px: 3,
-                    py: 1,
+                    px: 2.5,
+                    py: 0.75,
                     fontWeight: 600,
-                    fontSize: "0.9rem",
+                    fontSize: "0.8rem",
                     letterSpacing: "-0.01em",
                     borderRadius: '10px',
-                    height: '44px',
+                    height: '36px',
+                    minWidth: 0,
                   }}
                 >
                   {MANAGEMENT.ADD}

@@ -31,6 +31,7 @@ import {
   clearButton,
   actionsInnerBox,
   cancelButton,
+  submitButton,
 } from "./styles";
 import { validateName, validateEmail, validateUsername, validatePassword } from '../../../utils/userValidation';
 
@@ -165,7 +166,7 @@ const AddUserForm: React.FC<AddUserFormProps> = ({
 
   return (
     <Box sx={boxRoot}>
-      <Box sx={{ mb: 2 }}>
+      <Box sx={{ mb: 1 }}>
         <Typography
           variant="body2"
           color="text.secondary"
@@ -174,7 +175,7 @@ const AddUserForm: React.FC<AddUserFormProps> = ({
           {FORMS.ADD_USER.DIALOG_CONTENT_TITLE}
         </Typography>
       </Box>
-      <Grid container spacing={3} sx={gridContainer}>
+      <Grid container spacing={2} sx={gridContainer}>
         <Grid item xs={12} sm={6}>
           <TextfieldComponent
             placeholder={FORMS.ADD_USER.FIRST_NAME_PLACEHOLDER}
@@ -185,6 +186,7 @@ const AddUserForm: React.FC<AddUserFormProps> = ({
             error={errors.firstName !== ""}
             helperText={errors.firstName}
             icon={<User style={iconStyle} />}
+            sx={formControl(theme)}
           />
         </Grid>
 
@@ -198,6 +200,7 @@ const AddUserForm: React.FC<AddUserFormProps> = ({
             error={errors.lastName !== ""}
             helperText={errors.lastName}
             icon={<User style={iconStyle} />}
+            sx={formControl(theme)}
           />
         </Grid>
 
@@ -211,6 +214,7 @@ const AddUserForm: React.FC<AddUserFormProps> = ({
             error={errors.email !== ""}
             helperText={errors.email}
             icon={<Mail style={iconStyle} />}
+            sx={formControl(theme)}
           />
         </Grid>
 
@@ -224,6 +228,7 @@ const AddUserForm: React.FC<AddUserFormProps> = ({
             error={errors.username !== ""}
             helperText={errors.username}
             icon={<User style={iconStyle} />}
+            sx={formControl(theme)}
           />
         </Grid>
 
@@ -238,6 +243,7 @@ const AddUserForm: React.FC<AddUserFormProps> = ({
             error={errors.password !== ""}
             helperText={errors.password}
             icon={<Lock style={iconStyle} />}
+            sx={formControl(theme)}
             endAdornment={
               <IconButton onClick={handleTogglePassword} edge="end" size="small">
                 {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
@@ -294,7 +300,7 @@ const AddUserForm: React.FC<AddUserFormProps> = ({
         <Grid item xs={12}>
           <Box sx={infoBox(theme)}>
             <Box sx={infoIconBox(theme)}>
-              <Info style={iconStyle} />
+              <Info size={18} />
             </Box>
             <Box>
               <Typography sx={infoTitle(theme)}>
@@ -336,14 +342,7 @@ const AddUserForm: React.FC<AddUserFormProps> = ({
                 disabled={!isFormValid || isLoading}
                 startIcon={<Plus size={18} />}
                 fullWidth={isSmallScreen}
-                sx={{
-                  fontWeight: 600,
-                  fontSize: "0.95rem",
-                  textTransform: "none",
-                  letterSpacing: "0.01em",
-                  borderRadius: "10px",
-                  minHeight: "44px",
-                }}
+                sx={submitButton}
               >
                 Agregar
               </Button>

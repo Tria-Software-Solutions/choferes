@@ -88,6 +88,17 @@ export const scheduleRules = [
     .withMessage("Las horas deben ser un número entero entre 1 y 168"),
   body("days").isArray({ min: 1 }).withMessage("Debe incluir al menos un día"),
   body("days.*").isString().trim().notEmpty().withMessage("Cada día debe ser un texto válido"),
+  body("scheduleDays").optional().isArray().withMessage("scheduleDays debe ser un array"),
+  body("scheduleDays.*.day")
+    .optional()
+    .isString()
+    .trim()
+    .notEmpty()
+    .withMessage("Cada scheduleDay debe tener un día válido"),
+  body("scheduleDays.*.hours")
+    .optional()
+    .isInt({ min: 1, max: 168 })
+    .withMessage("Cada scheduleDay debe tener horas válidas (1-168)"),
   body("specialSchedule")
     .optional()
     .isBoolean()

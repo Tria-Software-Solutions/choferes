@@ -27,13 +27,16 @@ export const autoGenerateModalCardStyles = (theme: Theme): SxProps<Theme> => ({
   mb: { xs: 1.5, sm: 2, md: 2.5 },
   display: 'flex',
   flexDirection: 'column',
-  borderRadius: 2,
-  boxShadow: `0 4px 20px ${theme.palette.mode === 'dark' ? 'rgba(0,0,0,0.2)' : 'rgba(0,0,0,0.08)'}`,
-  border: `1px solid ${theme.palette.divider}`,
-  transition: 'all 0.3s ease-in-out',
+  borderRadius: "16px",
+  boxShadow: theme.palette.mode === 'dark'
+    ? '0 2px 16px rgba(0,0,0,0.2)'
+    : '0 2px 16px rgba(0,0,0,0.04)',
+  border: 'none',
+  transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
   '&:hover': {
-    transform: 'translateY(-1px)',
-    boxShadow: `0 6px 25px ${theme.palette.mode === 'dark' ? 'rgba(0,0,0,0.3)' : 'rgba(0,0,0,0.12)'}`,
+    boxShadow: theme.palette.mode === 'dark'
+      ? '0 8px 32px rgba(0,0,0,0.3)'
+      : '0 8px 32px rgba(0,0,0,0.08)',
   },
 });
 
@@ -359,18 +362,42 @@ export const autoGenerateModalActionsStyles: SxProps<Theme> = {
 
 export const autoGenerateModalButtonStyles: SxProps<Theme> = {
   minWidth: 120,
+  minHeight: 48,
   py: 1.5,
+  px: 3,
   fontWeight: 600,
+  fontSize: "0.85rem",
+  textTransform: "none" as const,
+  letterSpacing: "-0.01em",
+  borderRadius: "12px",
+  transition: "all 0.25s cubic-bezier(0.4, 0, 0.2, 1)",
+  '&:hover': {
+    transform: "translateY(-1px)",
+  },
+  '&:active': {
+    transform: "translateY(0)",
+  },
+  '&.Mui-disabled': {
+    boxShadow: "none",
+    transform: "none",
+    opacity: 0.6,
+  },
 };
 
 export const autoGenerateModalCancelButtonStyles: SxProps<Theme> = {
   ...autoGenerateModalButtonStyles,
-  variant: "outlined",
+  '&:hover': {
+    transform: "translateY(-1px)",
+    boxShadow: "0 4px 12px rgba(0,0,0,0.12)",
+  },
 };
 
 export const autoGenerateModalGenerateButtonStyles: SxProps<Theme> = {
   ...autoGenerateModalButtonStyles,
-  variant: "contained",
+  '&:hover': {
+    transform: "translateY(-2px)",
+    boxShadow: "0 8px 25px rgba(99,102,241,0.35)",
+  },
 };
 
 // Dashboard specific styles
@@ -382,15 +409,17 @@ export const autoGenerateModalMetricsContainerStyles: SxProps<Theme> = {
 };
 
 export const autoGenerateModalMetricCardStyles = (theme: Theme): SxProps<Theme> => ({
-  p: 1,
-  borderRadius: 1,
-  background: theme.palette.background.paper,
-  border: `1px solid ${theme.palette.divider}`,
+  p: 1.5,
+  borderRadius: "12px",
+  background: theme.palette.mode === 'dark'
+    ? 'rgba(99,102,241,0.04)'
+    : 'rgba(99,102,241,0.03)',
   textAlign: 'center',
-  transition: 'all 0.3s ease',
+  transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
   '&:hover': {
-    transform: 'scale(1.01)',
-    boxShadow: `0 2px 8px ${theme.palette.mode === 'dark' ? 'rgba(0,0,0,0.2)' : 'rgba(0,0,0,0.1)'}`,
+    boxShadow: theme.palette.mode === 'dark'
+      ? '0 4px 16px rgba(0,0,0,0.2)'
+      : '0 4px 16px rgba(0,0,0,0.06)',
   },
 });
 

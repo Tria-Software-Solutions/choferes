@@ -4,6 +4,7 @@ import { Role } from "../models/Role";
 import { Permission } from "../models/Permission";
 import { Employee } from "../models/Employee";
 import { Schedule } from "../models/Schedule";
+import { ScheduleDay } from "../models/ScheduleDay";
 import { HoursWorked } from "../models/HoursWorked";
 import { UserRole } from "../models/UserRole";
 import { RolePermission } from "../models/RolePermission";
@@ -40,6 +41,18 @@ HoursWorked.belongsTo(Employee, {
 Employee.hasMany(HoursWorked, {
   foreignKey: "employeeId",
   onDelete: "CASCADE",
+});
+
+// Schedule <-> ScheduleDay (One-to-Many)
+ScheduleDay.belongsTo(Schedule, {
+  foreignKey: "scheduleId",
+  onDelete: "CASCADE",
+  as: "schedule",
+});
+Schedule.hasMany(ScheduleDay, {
+  foreignKey: "scheduleId",
+  onDelete: "CASCADE",
+  as: "scheduleDays",
 });
 
 // Schedule <-> HoursWorked (One-to-Many)

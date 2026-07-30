@@ -22,6 +22,8 @@ import {
   clearButton,
   actionsInnerBox,
   cancelButton,
+  submitButton,
+  formControl,
 } from "./styles";
 
 interface AddEmployeeFormProps {
@@ -118,7 +120,7 @@ const AddEmployeeForm: React.FC<AddEmployeeFormProps> = ({
 
   return (
     <Box sx={boxRoot}>
-      <Box sx={{ mb: 2 }}>
+      <Box sx={{ mb: 1 }}>
         <Typography
           variant="body2"
           color="text.secondary"
@@ -127,7 +129,7 @@ const AddEmployeeForm: React.FC<AddEmployeeFormProps> = ({
           {FORMS.ADD_EMPLOYEE.DIALOG_CONTENT_TITLE}
         </Typography>
       </Box>
-      <Grid container spacing={3} sx={gridContainer}>
+      <Grid container spacing={2} sx={gridContainer}>
         <Grid item xs={12} sm={6}>
           <TextfieldComponent
             placeholder={FORMS.ADD_EMPLOYEE.FIRST_NAME_PLACEHOLDER}
@@ -138,6 +140,7 @@ const AddEmployeeForm: React.FC<AddEmployeeFormProps> = ({
             error={errors.firstName !== ""}
             helperText={errors.firstName}
             icon={<User style={iconStyle} />}
+            sx={formControl(theme)}
           />
         </Grid>
 
@@ -151,6 +154,7 @@ const AddEmployeeForm: React.FC<AddEmployeeFormProps> = ({
             error={errors.lastName !== ""}
             helperText={errors.lastName}
             icon={<User style={iconStyle} />}
+            sx={formControl(theme)}
           />
         </Grid>
 
@@ -164,15 +168,14 @@ const AddEmployeeForm: React.FC<AddEmployeeFormProps> = ({
             error={errors.email !== ""}
             helperText={errors.email}
             icon={<Mail style={iconStyle} />}
+            sx={formControl(theme)}
           />
         </Grid>
 
         <Grid item xs={12}>
           <Box sx={infoBox(theme)}>
             <Box sx={infoIconBox(theme)}>
-              <Info
-                style={iconStyle}
-              />
+              <Info size={18} />
             </Box>
             <Box>
               <Typography sx={infoTitle(theme)}>
@@ -214,14 +217,7 @@ const AddEmployeeForm: React.FC<AddEmployeeFormProps> = ({
                 disabled={!isFormValid || isLoading}
                 startIcon={<Plus size={18} />}
                 fullWidth={isSmallScreen}
-                sx={{
-                  fontWeight: 600,
-                  fontSize: "0.95rem",
-                  textTransform: "none",
-                  letterSpacing: "0.01em",
-                  borderRadius: "10px",
-                  minHeight: "44px",
-                }}
+                sx={submitButton}
               >
                 Agregar
               </Button>

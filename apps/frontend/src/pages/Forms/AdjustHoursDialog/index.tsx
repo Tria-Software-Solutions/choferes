@@ -11,14 +11,13 @@ import {
   dialogTextFieldStyles,
   actionsInnerBox,
   actionsBox,
-} from "./styles";
-import {
   infoBox,
   infoIconBox,
   infoTitle,
   infoDesc,
   iconStyle,
-} from "../AddEmployeeForm/styles";
+  formControl,
+} from "./styles";
 import DIALOG from '../../../constants/dialog.constants';
 import { Employee } from '../../../models/Employee';
 import SELECTOR_TABLE from '../../../constants/selectorTable.constants';
@@ -89,8 +88,8 @@ const AdjustHoursDialog: React.FC<AdjustHoursDialogProps> = ({
     <>
       <Grid container spacing={2}>
         <Grid item xs={12}>
-          <Box sx={{ textAlign: 'center', mb: 2 }}>
-            <Typography variant="body2" color="text.secondary" mb={1}>
+          <Box sx={{ textAlign: 'center', mb: 1 }}>
+            <Typography variant="body2" color="text.secondary" mb={0.5}>
               {getPeriodMessage(selectedPeriod)}
             </Typography>
             <Typography
@@ -129,7 +128,7 @@ const AdjustHoursDialog: React.FC<AdjustHoursDialogProps> = ({
                   setTimeAdjustment(value < 0 ? 0 : value);
                 }}
                 icon={<Clock color={getTimeAdjustmentIconColor(timeAdjustment)} />}
-                sx={{ ...dialogTextFieldStyles, width: '100%' }}
+                sx={{ ...dialogTextFieldStyles, ...formControl(theme), width: '100%' }}
                 inputProps={{ min: 0, style: { textAlign: 'center', fontSize: '1.1rem' } }}
                 error={timeAdjustment < 0}
                 helperText={getTimeAdjustmentError(timeAdjustment)}
@@ -158,7 +157,28 @@ const AdjustHoursDialog: React.FC<AdjustHoursDialogProps> = ({
               onClick={onCancel}
               variant="outlined"
               color="inherit"
-              sx={{ minWidth: isSmallScreen ? '100%' : 120, py: 1.5, fontWeight: 600 }}
+              sx={{
+                minWidth: isSmallScreen ? '100%' : 120,
+                px: 3,
+                py: 1.5,
+                fontWeight: 600,
+                fontSize: "0.85rem",
+                textTransform: "none",
+                letterSpacing: "-0.01em",
+                borderRadius: "12px",
+                transition: "all 0.25s cubic-bezier(0.4, 0, 0.2, 1)",
+                '&:hover': {
+                  transform: "translateY(-1px)",
+                  boxShadow: "0 4px 12px rgba(0,0,0,0.12)",
+                },
+                '&:active': {
+                  transform: "translateY(0)",
+                },
+                '&.Mui-disabled': {
+                  opacity: 0.6,
+                  transform: "none",
+                },
+              }}
               disabled={loading}
             >
               {DIALOG.CANCEL}
@@ -171,11 +191,26 @@ const AdjustHoursDialog: React.FC<AdjustHoursDialogProps> = ({
                 fullWidth={isSmallScreen}
                 sx={{
                   fontWeight: 600,
-                  fontSize: "0.95rem",
+                  fontSize: "0.9rem",
                   textTransform: "none",
-                  letterSpacing: "0.01em",
-                  borderRadius: "10px",
-                  minHeight: "44px",
+                  letterSpacing: "-0.01em",
+                  borderRadius: "12px",
+                  minHeight: "48px",
+                  px: 3,
+                  boxShadow: "0 4px 14px rgba(16,185,129,0.25)",
+                  transition: "all 0.25s cubic-bezier(0.4, 0, 0.2, 1)",
+                  '&:hover': {
+                    transform: "translateY(-2px)",
+                    boxShadow: "0 8px 25px rgba(16,185,129,0.35)",
+                  },
+                  '&:active': {
+                    transform: "translateY(0)",
+                  },
+                  '&.Mui-disabled': {
+                    boxShadow: "none",
+                    transform: "none",
+                    opacity: 0.6,
+                  },
                 }}
                 disabled={timeAdjustment <= 0 || loading}
               >
@@ -188,11 +223,26 @@ const AdjustHoursDialog: React.FC<AdjustHoursDialogProps> = ({
                 fullWidth={isSmallScreen}
                 sx={{
                   fontWeight: 600,
-                  fontSize: "0.95rem",
+                  fontSize: "0.9rem",
                   textTransform: "none",
-                  letterSpacing: "0.01em",
-                  borderRadius: "10px",
-                  minHeight: "44px",
+                  letterSpacing: "-0.01em",
+                  borderRadius: "12px",
+                  minHeight: "48px",
+                  px: 3,
+                  boxShadow: "0 4px 14px rgba(239,68,68,0.25)",
+                  transition: "all 0.25s cubic-bezier(0.4, 0, 0.2, 1)",
+                  '&:hover': {
+                    transform: "translateY(-2px)",
+                    boxShadow: "0 8px 25px rgba(239,68,68,0.35)",
+                  },
+                  '&:active': {
+                    transform: "translateY(0)",
+                  },
+                  '&.Mui-disabled': {
+                    boxShadow: "none",
+                    transform: "none",
+                    opacity: 0.6,
+                  },
                 }}
                 disabled={timeAdjustment <= 0 || loading}
               >

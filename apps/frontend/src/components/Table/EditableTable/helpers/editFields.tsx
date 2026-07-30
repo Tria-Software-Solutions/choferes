@@ -199,6 +199,13 @@ export function renderEditField<T extends object>({
         error={!validateField(String(column), value)}
         sx={{ width: "80px" }}
         inputProps={{ min: "0" }}
+        InputProps={{
+          endAdornment: (
+            <span style={{ fontSize: '0.8rem', fontWeight: 600, opacity: 0.4, marginRight: 4 }}>
+              h
+            </span>
+          ),
+        }}
       />
     );
   }

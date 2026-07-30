@@ -2,6 +2,7 @@ import { createSlice, createAsyncThunk, PayloadAction } from "@reduxjs/toolkit";
 import * as ScheduleService from "../../services/scheduleService";
 import { Schedule } from "../../models/Schedule";
 import { RootState } from "../store";
+import { sortSchedulesByType } from "../../utils/schedule";
 
 // schedulesSlice manages the state and async logic for schedule data
 // Includes fetching, creating, updating, and deleting schedules
@@ -110,7 +111,7 @@ const schedulesSlice = createSlice({
       .addCase(
         fetchSchedules.fulfilled,
         (state, action: PayloadAction<Schedule[]>) => {
-          state.schedules = [...action.payload];
+          state.schedules = sortSchedulesByType(action.payload);
           state.totalCountSchedules = action.payload.length;
           state.isLoadingSchedules = false;
         },
@@ -123,7 +124,7 @@ const schedulesSlice = createSlice({
       .addCase(
         createSchedule.fulfilled,
         (state, action: PayloadAction<Schedule>) => {
-          state.schedules = [...state.schedules, action.payload];
+          state.schedules = sortSchedulesByType([...state.schedules, action.payload]);
           state.totalCountSchedules += 1;
         },
       )
@@ -131,8 +132,10 @@ const schedulesSlice = createSlice({
         updateSchedule.fulfilled,
         (state, action: PayloadAction<Schedule>) => {
           const updatedSchedule = action.payload;
-          state.schedules = state.schedules.map((schedule) =>
-            schedule.id === updatedSchedule.id ? updatedSchedule : schedule,
+          state.schedules = sortSchedulesByType(
+            state.schedules.map((schedule) =>
+              schedule.id === updatedSchedule.id ? updatedSchedule : schedule,
+            ),
           );
         },
       )

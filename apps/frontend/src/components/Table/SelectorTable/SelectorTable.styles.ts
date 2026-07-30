@@ -255,18 +255,64 @@ export const totalHoursTypographyStyles: SxProps<Theme> = {
   textAlign: "right",
 };
 
-// Premium alternating row backgrounds
+// Alternating row backgrounds with subtle distinction
 export const tableRowBackground = (rowIndex: number): SxProps<Theme> => (theme) => ({
-  backgroundColor: "transparent",
+  backgroundColor:
+    rowIndex % 2 === 0
+      ? "transparent"
+      : theme.palette.mode === "dark"
+        ? "rgba(255, 255, 255, 0.025)"
+        : "rgba(0, 0, 0, 0.02)",
+  transition: "background-color 0.15s ease",
+  "&:hover": {
+    backgroundColor:
+      theme.palette.mode === "dark"
+        ? "rgba(255, 255, 255, 0.055)"
+        : "rgba(0, 0, 0, 0.04)",
+  },
 });
 
-// Premium cell background with today highlighting
+// Cell background with today & weekend highlighting
 export const tableCellBackground = (
   rowIndex: number,
   today: boolean,
-): SxProps<Theme> => (theme) => ({
-  backgroundColor: "transparent",
-});
+  isWeekend?: boolean,
+): SxProps<Theme> => (theme) => {
+  const isEvenRow = rowIndex % 2 === 0;
+
+  // Today gets a special highlight regardless of row or weekend
+  if (today) {
+    return {
+      backgroundColor:
+        theme.palette.mode === "dark"
+          ? "rgba(0, 188, 212, 0.12)"
+          : "rgba(0, 188, 212, 0.08)",
+      borderBottom: `2px solid ${theme.palette.mode === "dark" ? "rgba(0, 188, 212, 0.4)" : "rgba(0, 188, 212, 0.35)"}`,
+      boxShadow: "inset 0 0 20px rgba(0, 188, 212, 0.04)",
+      transition: "background-color 0.15s ease",
+    };
+  }
+
+  // Weekend gets a subtle different tint
+  if (isWeekend) {
+    return {
+      backgroundColor:
+        isEvenRow
+          ? theme.palette.mode === "dark"
+            ? "rgba(255, 255, 255, 0.02)"
+            : "rgba(0, 0, 0, 0.01)"
+          : theme.palette.mode === "dark"
+            ? "rgba(255, 255, 255, 0.04)"
+            : "rgba(0, 0, 0, 0.035)",
+      transition: "background-color 0.15s ease",
+    };
+  }
+
+  return {
+    backgroundColor: "transparent",
+    transition: "background-color 0.15s ease",
+  };
+};
 
 // Premium employee cell styles
 export const employeeCellBoxStyles = (

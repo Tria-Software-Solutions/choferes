@@ -15,9 +15,6 @@ import {
   TableHead,
   TableRow,
   Paper,
-  Select,
-  MenuItem,
-  FormControl,
   TablePagination,
   TableSortLabel,
   Box,
@@ -25,7 +22,6 @@ import {
   useMediaQuery,
   Typography,
   Stack,
-  OutlinedInput,
   IconButton,
 } from "@mui/material";
 import PaginationComponent from "../Pagination/Pagination.component";
@@ -47,9 +43,6 @@ import PremiumTooltip from "../../../components/PremiumTooltip/PremiumTooltip.co
 import MoreTimeIcon from "@mui/icons-material/MoreTime";
 import { ScheduleCellDropdown } from "./components/ScheduleCellDropdown";
 import { EmployeeCellDropdown } from "./components/EmployeeCellDropdown";
-import CalendarTodayIcon from "@mui/icons-material/CalendarToday";
-import DateRangeIcon from "@mui/icons-material/DateRange";
-import CalendarMonthIcon from "@mui/icons-material/CalendarMonth";
 import AddScheduleForm from "../../../pages/Forms/AddScheduleForm";
 import MANAGEMENT from "../../../constants/management.constants";
 import { createSchedule } from "../../../store/slices/schedulesSlice";
@@ -773,287 +766,50 @@ const SelectorTableComponent: React.FC<SelectorTableProps> = ({
                       }}
                       colSpan={2}
                     >
-                        <FormControl size="small" sx={{ minWidth: 100, height: "36px", m: 0, backgroundColor: "transparent", mt: "-8px" }}>
-                          <Select
-                            value={selectedPeriod}
-                            onChange={(e) =>
-                              setSelectedPeriod(e.target.value as PeriodType)
-                            }
-                            displayEmpty
-                            input={
-                              <OutlinedInput
-                                notched={false}
-                                sx={{
-                                  backgroundColor: theme.palette.mode === 'light' ? "#000000 !important" : "transparent !important",
-                                  color: theme.palette.mode === 'light' ? "#fff" : theme.palette.text.primary,
-                                  fontSize: "0.85rem",
-                                  fontWeight: 700,
-                                  height: "36px",
-                                  borderRadius: 0,
-                                  boxShadow: "none",
-                                  transition: "none",
-                                  "& .MuiOutlinedInput-input": {
-                                    color: theme.palette.mode === 'light' ? "#fff" : theme.palette.text.primary,
-                                    fontSize: "0.85rem",
-                                    fontWeight: 700,
-                                    padding: "2px 28px 6px 8px !important",
-                                    lineHeight: "1.2",
-                                  },
-                                  "& fieldset": {
-                                    borderColor: "transparent",
-                                    borderWidth: 0,
-                                    border: "none",
-                                    borderRadius: 0,
-                                  },
-                                  "&:hover": {
-                                    boxShadow: "none",
-                                    "& fieldset": {
-                                      borderColor: "transparent",
-                                    },
-                                  },
-                                  "&.Mui-focused": {
-                                    boxShadow: "none",
-                                    "& fieldset": {
-                                      borderColor: "transparent",
-                                      borderWidth: 0,
-                                      border: "none",
-                                    },
-                                  },
-                                  "& .MuiOutlinedInput-root": {
-                                    backgroundColor: "transparent !important",
-                                  },
-                                  "& .MuiInputBase-root": {
-                                    backgroundColor: "transparent !important",
-                                  },
-                                }}
-                              />
-                            }
+                      <Box
+                        sx={{
+                          display: 'inline-flex',
+                          backgroundColor: 'rgba(255,255,255,0.08)',
+                          borderRadius: '8px',
+                          p: '2px',
+                          gap: '1px',
+                        }}
+                      >
+                        {[
+                          { key: 'weekly' as const, label: SELECTOR_TABLE.WEEKLY },
+                          { key: 'biweekly' as const, label: SELECTOR_TABLE.BIWEEKLY },
+                          { key: 'monthly' as const, label: SELECTOR_TABLE.MONTHLY },
+                        ].map(({ key, label }) => (
+                          <Box
+                            key={key}
+                            onClick={() => setSelectedPeriod(key)}
                             sx={{
-                              backgroundColor: theme.palette.mode === 'light' ? "#000000" : "transparent",
-                              color: theme.palette.mode === 'light' ? "#fff" : theme.palette.text.primary,
-                              fontSize: "0.85rem",
-                              fontWeight: 600,
-                              borderRadius: 0,
-                              height: "36px",
-                              "& .MuiSelect-select": {
-                                color: theme.palette.mode === 'light' ? "#fff" : theme.palette.text.primary,
-                                backgroundColor: theme.palette.mode === 'light' ? "#000000 !important" : "transparent !important",
-                                fontSize: "0.85rem",
-                                fontWeight: 600,
-                                padding: "2px 28px 6px 8px !important",
-                                display: "flex",
-                                alignItems: "center",
-                                gap: "4px",
-                                borderRadius: 0,
-                                minHeight: "36px !important",
-                                height: "36px",
-                                lineHeight: "1.2",
-                                justifyContent: "flex-start",
-                              },
-                              "& .MuiSelect-icon": {
-                                color: "rgba(255,255,255,0.7)",
-                                fontSize: "1.1rem",
-                                right: "4px",
-                                top: "50%",
-                                transform: "translateY(-50%)",
-                              },
-                              "& .MuiOutlinedInput-notchedOutline": {
-                                borderColor: "transparent",
-                                borderWidth: 0,
-                                border: "none",
-                                borderRadius: 0,
-                              },
-                              "&:hover .MuiOutlinedInput-notchedOutline": {
-                                borderColor: "transparent",
-                              },
-                              "&.Mui-focused .MuiOutlinedInput-notchedOutline": {
-                                borderColor: "transparent",
-                                borderWidth: 0,
-                                border: "none",
-                              },
-                              "&.Mui-active .MuiOutlinedInput-notchedOutline": {
-                                borderColor: "transparent",
-                                borderWidth: 0,
-                                border: "none",
-                              },
-                              "& .MuiInputBase-root": {
-                                backgroundColor: "transparent !important",
-                              },
-                              "& .MuiOutlinedInput-root": {
-                                backgroundColor: "transparent !important",
-                              },
-                              "&:hover": {
-                                backgroundColor: "transparent",
-                              },
-                              "&.Mui-focused": {
-                                backgroundColor: "transparent",
-                              },
-                              "&.Mui-active": {
-                                backgroundColor: "transparent",
-                              },
-                            }}
-                            MenuProps={{
-                              anchorOrigin: { horizontal: "center", vertical: "bottom" },
-                              transformOrigin: { horizontal: "center", vertical: "top" },
-                              marginThreshold: 0,
-                              PaperProps: {
-                                elevation: 0,
-                                sx: {
-                                  maxHeight: 280,
-                                  overflowY: "auto",
-                                  mt: -0.5,
-                                  minWidth: 200,
-                                  background: theme.palette.mode === 'light' ? '#000000' : '#000000',
-                                  backdropFilter: "none",
-                                  border: `1px solid ${theme.palette.mode === 'dark' ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.08)'}`,
-                                  borderRadius: "16px",
-                                  boxShadow: "0 4px 24px rgba(0,0,0,0.08), 0 1px 2px rgba(0,0,0,0.04)",
-                                  pr: 0,
-                                  "& .MuiList-root": {
-                                    padding: "4px",
-                                  },
-                                  "& .MuiMenuItem-root": {
-                                    fontSize: "0.875rem",
-                                    fontWeight: 600,
-                                    padding: "10px 12px",
-                                    borderRadius: "10px",
-                                    margin: "2px 0",
-                                    color: theme.palette.mode === 'light' ? '#fff' : '#fff',
-                                    backgroundColor: "transparent",
-                                    transition: "all 0.2s cubic-bezier(0.4, 0, 0.2, 1)",
-                                    minHeight: "40px",
-                                    gap: "8px",
-                                    "&:hover": {
-                                      backgroundColor: 'rgba(255,255,255,0.08)',
-                                    },
-                                    "&.Mui-selected": {
-                                      backgroundColor: 'rgba(255,255,255,0.12)',
-                                      color: '#fff',
-                                    },
-                                    "&.Mui-selected:hover": {
-                                      backgroundColor: 'rgba(255,255,255,0.16)',
-                                    },
-                                  },
-                                },
-                              },
-                            }}
-                            renderValue={(selected) => {
-                              switch (selected) {
-                                case "weekly":
-                                  return (
-                                    <Box sx={{ display: "flex", alignItems: "center", gap: 0.5, height: "100%", py: 0 }}>
-                                      <Box sx={{
-                                        width: 16,
-                                        height: 16,
-                                        borderRadius: "3px",
-                                        backgroundColor: theme.palette.mode === 'light' ? "rgba(255,255,255,0.15)" : "rgba(0,0,0,0.05)",
-                                        display: "flex",
-                                        alignItems: "center",
-                                        justifyContent: "center",
-                                        flexShrink: 0,
-                                      }}>
-                                        <CalendarTodayIcon sx={{ fontSize: 10, color: theme.palette.mode === 'light' ? "#fff" : theme.palette.text.primary }} />
-                                      </Box>
-                                      <span style={{ color: theme.palette.mode === 'light' ? "#fff" : theme.palette.text.primary, fontSize: "0.85rem", fontWeight: 600, lineHeight: "1.2", display: "flex", alignItems: "center" }}>
-                                        {SELECTOR_TABLE.WEEKLY}
-                                      </span>
-                                    </Box>
-                                  );
-                                case "biweekly":
-                                  return (
-                                    <Box sx={{ display: "flex", alignItems: "center", gap: 0.5, height: "100%", py: 0 }}>
-                                      <Box sx={{
-                                        width: 16,
-                                        height: 16,
-                                        borderRadius: "3px",
-                                        backgroundColor: theme.palette.mode === 'light' ? "rgba(255,255,255,0.15)" : "rgba(0,0,0,0.05)",
-                                        display: "flex",
-                                        alignItems: "center",
-                                        justifyContent: "center",
-                                        flexShrink: 0,
-                                      }}>
-                                        <DateRangeIcon sx={{ fontSize: 10, color: theme.palette.mode === 'light' ? "#fff" : theme.palette.text.primary }} />
-                                      </Box>
-                                      <span style={{ color: theme.palette.mode === 'light' ? "#fff" : theme.palette.text.primary, fontSize: "0.85rem", fontWeight: 600, lineHeight: "1.2", display: "flex", alignItems: "center" }}>
-                                        {SELECTOR_TABLE.BIWEEKLY}
-                                      </span>
-                                    </Box>
-                                  );
-                                case "monthly":
-                                  return (
-                                    <Box sx={{ display: "flex", alignItems: "center", gap: 0.5, height: "100%", py: 0 }}>
-                                      <Box sx={{
-                                        width: 16,
-                                        height: 16,
-                                        borderRadius: "3px",
-                                        backgroundColor: theme.palette.mode === 'light' ? "rgba(255,255,255,0.15)" : "rgba(0,0,0,0.05)",
-                                        display: "flex",
-                                        alignItems: "center",
-                                        justifyContent: "center",
-                                        flexShrink: 0,
-                                      }}>
-                                        <CalendarMonthIcon sx={{ fontSize: 10, color: theme.palette.mode === 'light' ? "#fff" : theme.palette.text.primary }} />
-                                      </Box>
-                                      <span style={{ color: theme.palette.mode === 'light' ? "#fff" : theme.palette.text.primary, fontSize: "0.85rem", fontWeight: 600, lineHeight: "1.2", display: "flex", alignItems: "center" }}>
-                                        {SELECTOR_TABLE.MONTHLY}
-                                      </span>
-                                    </Box>
-                                  );
-                                default:
-                                  return "";
-                              }
+                              px: 1.25,
+                              py: '4px',
+                              borderRadius: '6px',
+                              cursor: 'pointer',
+                              userSelect: 'none',
+                              textTransform: 'none',
+                              fontWeight: selectedPeriod === key ? 700 : 500,
+                              fontSize: '0.75rem',
+                              letterSpacing: '-0.01em',
+                              color: selectedPeriod === key ? '#fff' : 'rgba(255,255,255,0.6)',
+                              backgroundColor: selectedPeriod === key
+                                ? theme.palette.primary.main
+                                : 'transparent',
+                              transition: 'all 0.2s cubic-bezier(0.4, 0, 0.2, 1)',
+                              whiteSpace: 'nowrap',
+                              textAlign: 'center',
+                              '&:hover': selectedPeriod !== key ? {
+                                backgroundColor: 'rgba(255,255,255,0.06)',
+                                color: '#fff',
+                              } : {},
                             }}
                           >
-                            <MenuItem value="weekly">
-                              <Box sx={{ display: "flex", alignItems: "center", gap: 1.5, width: "100%" }}>
-                                <Box sx={{
-                                  width: 28,
-                                  height: 28,
-                                  borderRadius: "6px",
-                                  backgroundColor: "rgba(255,255,255,0.1)",
-                                  display: "flex",
-                                  alignItems: "center",
-                                  justifyContent: "center",
-                                }}>
-                                  <CalendarTodayIcon sx={{ fontSize: 16, color: "#fff" }} />
-                                </Box>
-                                {SELECTOR_TABLE.WEEKLY}
-                              </Box>
-                            </MenuItem>
-                            <MenuItem value="biweekly">
-                              <Box sx={{ display: "flex", alignItems: "center", gap: 1.5, width: "100%" }}>
-                                <Box sx={{
-                                  width: 28,
-                                  height: 28,
-                                  borderRadius: "6px",
-                                  backgroundColor: "rgba(255,255,255,0.1)",
-                                  display: "flex",
-                                  alignItems: "center",
-                                  justifyContent: "center",
-                                }}>
-                                  <DateRangeIcon sx={{ fontSize: 16, color: "#fff" }} />
-                                </Box>
-                                {SELECTOR_TABLE.BIWEEKLY}
-                              </Box>
-                            </MenuItem>
-                            <MenuItem value="monthly">
-                              <Box sx={{ display: "flex", alignItems: "center", gap: 1.5, width: "100%" }}>
-                                <Box sx={{
-                                  width: 28,
-                                  height: 28,
-                                  borderRadius: "6px",
-                                  backgroundColor: "rgba(255,255,255,0.1)",
-                                  display: "flex",
-                                  alignItems: "center",
-                                  justifyContent: "center",
-                                }}>
-                                  <CalendarMonthIcon sx={{ fontSize: 16, color: "#fff" }} />
-                                </Box>
-                                {SELECTOR_TABLE.MONTHLY}
-                              </Box>
-                            </MenuItem>
-                          </Select>
-                        </FormControl>
+                            {label}
+                          </Box>
+                        ))}
+                      </Box>
                     </TableCell>
                   )}
               </TableRow>
@@ -1126,26 +882,47 @@ const SelectorTableComponent: React.FC<SelectorTableProps> = ({
                           schedules,
                           hoursWorked
                         );
+                        const isWeekend = day === 'saturday' || day === 'sunday';
+                        const selectedSchedule = scheduleData.options.find(
+                          (s) => s.label === scheduleData.finalSelectedLabel
+                        );
+                        const dayHours = selectedSchedule?.hours;
 
                         return (
                           <TableCell
                             key={day}
                             align="center"
-                            sx={tableCellBackground(rowIndex, isToday(date))}
+                            sx={tableCellBackground(rowIndex, isToday(date), isWeekend)}
                           >
-                            <EmployeeCellDropdown
-                              value={scheduleData.finalSelectedLabel}
-                              options={scheduleData.options}
-                              disabled={!permissions?.includes(PERMISSIONS.EDIT_EMPLOYEE_ROLES)}
-                              onChange={(value) => handleChange(value, employee.id, new Date(date))}
-                              theme={theme}
-                              styles={{}}
-                              onAddSchedule={() => setOpenAddScheduleModal(true)}
-                            />
+                            <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 0.75 }}>
+                              <EmployeeCellDropdown
+                                value={scheduleData.finalSelectedLabel}
+                                options={scheduleData.options}
+                                disabled={!permissions?.includes(PERMISSIONS.EDIT_EMPLOYEE_ROLES)}
+                                onChange={(value) => handleChange(value, employee.id, new Date(date))}
+                                theme={theme}
+                                styles={{}}
+                                onAddSchedule={() => setOpenAddScheduleModal(true)}
+                              />
+                              {dayHours && dayHours > 0 && scheduleData.finalSelectedLabel !== SELECTOR_TABLE.UNASSIGNED && (
+                                <Typography
+                                  variant="caption"
+                                  sx={{
+                                    fontSize: '0.65rem',
+                                    fontWeight: 700,
+                                    color: 'text.secondary',
+                                    opacity: 0.6,
+                                    lineHeight: 1,
+                                    flexShrink: 0,
+                                  }}
+                                >
+                                  {dayHours}h
+                                </Typography>
+                              )}
+                            </Box>
                           </TableCell>
                         );
-                      })}
-                      {viewMode === "employee" && permissions?.includes(
+                      })}                      {viewMode === "employee" && permissions?.includes(
                         PERMISSIONS.VIEW_EMPLOYEE_ROLES_HOURS
                       ) && (
                         <>
@@ -1201,16 +978,43 @@ const SelectorTableComponent: React.FC<SelectorTableProps> = ({
                               alignItems="center"
                               justifyContent="center"
                             >
-                              <Typography
-                                variant="body2"
-                                fontWeight={600}
+                              <Box
                                 sx={{
-                                  color: "text.primary",
-                                  fontSize: "0.875rem",
+                                  display: 'flex',
+                                  alignItems: 'center',
+                                  gap: 0.75,
+                                  px: 1,
+                                  py: 0.5,
+                                  borderRadius: '8px',
+                                  backgroundColor: Number(resultTotalHours(employee)) > 0
+                                    ? (theme.palette.mode === 'dark' ? 'rgba(0, 188, 212, 0.08)' : 'rgba(0, 188, 212, 0.06)')
+                                    : 'transparent',
                                 }}
                               >
-                                {resultTotalHours(employee)} {SELECTOR_TABLE.HOURS}
-                              </Typography>
+                                <Typography
+                                  variant="body2"
+                                  fontWeight={700}
+                                  sx={{
+                                    color: Number(resultTotalHours(employee)) > 0 ? 'primary.main' : 'text.secondary',
+                                    fontSize: '0.875rem',
+                                    letterSpacing: '-0.01em',
+                                  }}
+                                >
+                                  {resultTotalHours(employee)}
+                                </Typography>
+                                <Typography
+                                  variant="caption"
+                                  sx={{
+                                    fontSize: '0.65rem',
+                                    fontWeight: 600,
+                                    color: 'text.secondary',
+                                    opacity: 0.6,
+                                    lineHeight: 1,
+                                  }}
+                                >
+                                  {SELECTOR_TABLE.HOURS}
+                                </Typography>
+                              </Box>
                               <PremiumTooltip
                                 title={Number(resultOvertime(employee)) > 0 ? `${resultOvertime(employee)} horas extra` : "Horas extra"}
                               >
@@ -1271,6 +1075,7 @@ const SelectorTableComponent: React.FC<SelectorTableProps> = ({
                         const scheduleForDay =
                           group.dayToSchedule[day.toLowerCase()];
                         const isAvailable = !!scheduleForDay;
+                        const isWeekend = day === 'saturday' || day === 'sunday';
                         const assignedEmployees = isAvailable
                           ? getEmployeesForScheduleAndDay(
                               scheduleForDay.id,
@@ -1283,7 +1088,7 @@ const SelectorTableComponent: React.FC<SelectorTableProps> = ({
                           <TableCell
                             key={day}
                             align="center"
-                            sx={tableCellBackground(rowIndex, isToday(date))}
+                            sx={tableCellBackground(rowIndex, isToday(date), isWeekend)}
                           >
                             {isAvailable ? (
                               <ScheduleCellDropdown

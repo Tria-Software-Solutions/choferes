@@ -1,163 +1,153 @@
 import { SxProps, Theme } from "@mui/material";
 
 export const textFieldStyles = (customSx: object = {}): SxProps<Theme> => (theme: Theme) => ({
-  mb: 1.5,
+  mb: 2.5,
   "& .MuiOutlinedInput-root": {
-    borderRadius: "12px",
-    minHeight: "42px",
+    borderRadius: "16px",
+    minHeight: "54px",
     position: "relative",
     backgroundColor: theme.palette.mode === "dark"
-      ? "rgba(40,40,50,0.6)"
-      : "rgba(255,255,255,0.7)",
+      ? "rgba(255,255,255,0.05)"
+      : "rgba(99,102,241,0.04)",
     color: theme.palette.text.primary,
-    border: theme.palette.mode === "dark"
-      ? "1px solid rgba(255,255,255,0.1)"
-      : "1px solid rgba(0,0,0,0.08)",
-    transition: "all 0.3s cubic-bezier(0.4, 0, 0.2, 1)",
+    transition: "all 0.35s cubic-bezier(0.4, 0, 0.2, 1)",
+    "&::after": {
+      content: '""',
+      position: "absolute",
+      bottom: 0,
+      left: "50%",
+      right: "50%",
+      height: "2px",
+      borderRadius: "1px",
+      backgroundColor: theme.palette.primary.main,
+      transition: "all 0.35s cubic-bezier(0.4, 0, 0.2, 1)",
+      opacity: 0,
+    },
     "&:hover": {
       backgroundColor: theme.palette.mode === "dark"
-        ? "rgba(50,50,60,0.7)"
-        : "rgba(255,255,255,0.85)",
-      borderColor: theme.palette.mode === "dark"
-        ? "rgba(255,255,255,0.15)"
-        : "rgba(0,0,0,0.12)",
-    },
-    "&:hover .MuiOutlinedInput-notchedOutline": {
-      borderColor: "transparent",
+        ? "rgba(255,255,255,0.08)"
+        : "rgba(99,102,241,0.06)",
     },
     "&.Mui-focused": {
       backgroundColor: theme.palette.mode === "dark"
-        ? "rgba(55,55,65,0.8)"
-        : "rgba(255,255,255,0.95)",
-      borderColor: theme.palette.primary.main,
-      boxShadow: `0 0 0 3px ${theme.palette.mode === "dark" ? "rgba(255,255,255,0.08)" : "rgba(0,0,0,0.06)"}`,
+        ? "rgba(255,255,255,0.06)"
+        : "#fff",
+      boxShadow: theme.palette.mode === "dark"
+        ? `0 4px 20px rgba(0,0,0,0.3), 0 1px 4px rgba(0,0,0,0.1)`
+        : `0 4px 20px rgba(99,102,241,0.1), 0 1px 4px rgba(99,102,241,0.06)`,
+      "&::after": {
+        left: "10%",
+        right: "10%",
+        opacity: 1,
+      },
     },
-    "&.Mui-focused .MuiOutlinedInput-notchedOutline": {
-      borderColor: "transparent",
+    "&.Mui-error": {
+      backgroundColor: theme.palette.mode === "dark"
+        ? "rgba(239,68,68,0.06)"
+        : "rgba(239,68,68,0.04)",
+      "&::after": {
+        backgroundColor: theme.palette.error.main,
+      },
     },
-    "& fieldset": {
-      border: "none",
-    },
+    "& fieldset": { border: "none" },
     "& input": {
       color: theme.palette.text.primary,
       fontSize: "0.9rem",
-      paddingTop: "10px",
-      paddingBottom: "10px",
-      paddingLeft: "14px",
-      paddingRight: "14px",
+      fontWeight: 500,
+      paddingTop: "16px",
+      paddingBottom: "16px",
+      paddingLeft: "20px",
+      paddingRight: "20px",
       "&::placeholder": {
         color: theme.palette.text.secondary,
-        opacity: 0.6,
+        opacity: 0.45,
+        fontWeight: 400,
+        fontSize: "0.85rem",
+        letterSpacing: "-0.01em",
       },
     },
     "& textarea": {
       color: theme.palette.text.primary,
       fontSize: "0.9rem",
-      paddingTop: "10px",
-      paddingBottom: "10px",
-      paddingLeft: "14px",
-      paddingRight: "14px",
-      lineHeight: "1.5",
+      fontWeight: 500,
+      paddingTop: "16px",
+      paddingBottom: "16px",
+      paddingLeft: "20px",
+      paddingRight: "20px",
+      lineHeight: "1.6",
       "&::placeholder": {
         color: theme.palette.text.secondary,
-        opacity: 0.6,
+        opacity: 0.35,
+        fontSize: "0.85rem",
       },
     },
     "&.MuiInputBase-multiline .MuiInputBase-input": {
-      paddingTop: "8px",
-      paddingBottom: "10px",
+      paddingTop: "16px",
+      paddingBottom: "16px",
     },
     "&.MuiInputBase-adornedStart input": {
-      paddingLeft: "36px",
-      paddingRight: "14px",
+      paddingLeft: "54px",
+      paddingRight: "20px",
     },
     "&.MuiInputBase-adornedStart textarea": {
-      paddingLeft: "36px",
-      paddingRight: "14px",
-      paddingTop: "12px",
+      paddingLeft: "54px",
+      paddingRight: "20px",
+      paddingTop: "16px",
     },
     "&.MuiInputBase-adornedEnd input": {
-      paddingLeft: "14px",
-      paddingRight: "44px",
+      paddingLeft: "20px",
+      paddingRight: "56px",
     },
     "&.MuiInputBase-adornedStart.MuiInputBase-adornedEnd input": {
-      paddingLeft: "36px",
-      paddingRight: "44px",
+      paddingLeft: "54px",
+      paddingRight: "56px",
     },
     "& .MuiInputAdornment-positionStart": {
       position: "absolute",
-      left: "12px",
+      left: "20px",
       marginRight: 0,
       zIndex: 2,
       top: "50%",
       transform: "translateY(-50%)",
+      color: theme.palette.mode === "dark"
+        ? "rgba(255,255,255,0.2)"
+        : "rgba(99,102,241,0.4)",
+      "& svg": { fontSize: "18px !important" },
     },
     "&.MuiInputBase-multiline .MuiInputAdornment-positionStart": {
-      top: "23px",
+      top: "28px",
       transform: "none",
-      zIndex: 1,
     },
     "& .MuiInputAdornment-positionEnd": {
       position: "absolute",
-      right: "8px",
+      right: "14px",
       marginLeft: 0,
       zIndex: 2,
       pointerEvents: "auto",
     },
-    // Fix autofill background color
     "& input:-webkit-autofill": {
       WebkitBoxShadow: theme.palette.mode === "dark" 
-        ? "0 0 0 100px rgba(40,40,50,0.6) inset"
-        : "0 0 0 100px rgba(255,255,255,0.7) inset",
+        ? "0 0 0 100px rgba(255,255,255,0.05) inset"
+        : "0 0 0 100px rgba(99,102,241,0.04) inset",
       WebkitTextFillColor: theme.palette.text.primary,
-      borderRadius: "12px",
+      borderRadius: "16px",
       transition: "background-color 5000s ease-in-out 0s",
+      caretColor: theme.palette.text.primary,
     },
     "& input:-webkit-autofill:focus": {
       WebkitBoxShadow: theme.palette.mode === "dark"
-        ? "0 0 0 100px rgba(55,55,65,0.8) inset"
-        : "0 0 0 100px rgba(255,255,255,0.95) inset",
+        ? "0 0 0 100px rgba(255,255,255,0.06) inset"
+        : "0 0 0 100px #fff inset",
       WebkitTextFillColor: theme.palette.text.primary,
     },
   },
   "& .MuiFormHelperText-root": {
-    boxShadow: "none !important",
-    border: "none !important",
     margin: 0,
-    marginTop: "4px",
+    marginTop: "6px",
     padding: 0,
-    backgroundColor: "transparent !important",
-    backgroundImage: "none !important",
-    "&:before": {
-      display: "none !important",
-    },
-    "&:after": {
-      display: "none !important",
-    },
-  },
-  "&.Mui-focused .MuiFormHelperText-root": {
-    boxShadow: "none !important",
-    border: "none !important",
-    backgroundColor: "transparent !important",
-    backgroundImage: "none !important",
-    "&:before": {
-      display: "none !important",
-    },
-    "&:after": {
-      display: "none !important",
-    },
-  },
-  "& .Mui-error .MuiFormHelperText-root": {
-    boxShadow: "none !important",
-    border: "none !important",
-    backgroundColor: "transparent !important",
-    backgroundImage: "none !important",
-    "&:before": {
-      display: "none !important",
-    },
-    "&:after": {
-      display: "none !important",
-    },
+    fontSize: "0.7rem",
+    fontWeight: 500,
+    letterSpacing: "0.01em",
   },
   ...customSx,
 });

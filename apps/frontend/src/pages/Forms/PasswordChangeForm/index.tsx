@@ -26,8 +26,8 @@ import {
   subtitle,
   temporalPasswordBox,
 } from "./styles";
-import { actionsBox, actionsInnerBox } from '../AdjustHoursDialog/styles';
-import { infoBox, infoIconBox, infoTitle, infoDesc, iconStyle } from '../AddEmployeeForm/styles';
+import { actionsBox, actionsInnerBox } from '../sharedStyles';
+import { infoBox, infoIconBox, infoTitle, infoDesc, iconStyle, formControl } from '../sharedStyles';
 import { validatePassword, validatePasswordMatch } from '../../../utils/userValidation';
 
 interface PasswordChangeFormProps {
@@ -139,7 +139,7 @@ const PasswordChangeForm: React.FC<PasswordChangeFormProps> = ({
       <Typography variant="body2" color="textSecondary" sx={subtitle}>
         {MANAGEMENT.DIALOG_PASSWORD_SUBTITLE}
       </Typography>
-      <Grid container spacing={3}>
+      <Grid container spacing={2}>
         <Grid item xs={12}>
           <TextfieldComponent
             type={showNewPassword ? "text" : "password"}
@@ -156,6 +156,7 @@ const PasswordChangeForm: React.FC<PasswordChangeFormProps> = ({
                 {showNewPassword ? <EyeOff size={20} /> : <Eye size={20} />}
               </IconButton>
             }
+            sx={formControl(theme)}
             error={!!validatePassword(fields.newPassword)}
             helperText={validatePassword(fields.newPassword) || ""}
           />
@@ -178,13 +179,14 @@ const PasswordChangeForm: React.FC<PasswordChangeFormProps> = ({
                 {showConfirmNewPassword ? <EyeOff size={20} /> : <Eye size={20} />}
               </IconButton>
             }
+            sx={formControl(theme)}
             error={!!validatePasswordMatch(fields.newPassword, fields.confirmNewPassword)}
             helperText={validatePasswordMatch(fields.newPassword, fields.confirmNewPassword) || ""}
           />
         </Grid>
         {error && (
           <Grid item xs={12}>
-            <Alert severity="error" sx={{ mt: 2 }}>
+            <Alert severity="error" sx={{ mt: 1 }}>
               {error}
             </Alert>
           </Grid>
@@ -195,9 +197,21 @@ const PasswordChangeForm: React.FC<PasswordChangeFormProps> = ({
             onClick={handleGenerateTemporalPassword}
             fullWidth
             sx={{
-              minHeight: 44,
-              fontSize: "clamp(0.75rem, 1.25vw, 0.875rem)",
+              minHeight: 48,
+              py: 1.5,
+              fontSize: "0.85rem",
               fontWeight: 600,
+              textTransform: "none",
+              letterSpacing: "-0.01em",
+              borderRadius: "12px",
+              transition: "all 0.25s cubic-bezier(0.4, 0, 0.2, 1)",
+              '&:hover': {
+                transform: "translateY(-1px)",
+                boxShadow: "0 4px 12px rgba(0,0,0,0.12)",
+              },
+              '&:active': {
+                transform: "translateY(0)",
+              },
             }}
           >
             Generar contraseña temporal
@@ -252,7 +266,24 @@ const PasswordChangeForm: React.FC<PasswordChangeFormProps> = ({
               onClick={onClose}
               variant="outlined"
               color="inherit"
-              sx={{ minWidth: 120, py: 1.5, fontWeight: 600 }}
+              sx={{
+                minWidth: 120,
+                px: 3,
+                py: 1.5,
+                fontWeight: 600,
+                fontSize: "0.85rem",
+                textTransform: "none",
+                letterSpacing: "-0.01em",
+                borderRadius: "12px",
+                transition: "all 0.25s cubic-bezier(0.4, 0, 0.2, 1)",
+                '&:hover': {
+                  transform: "translateY(-1px)",
+                  boxShadow: "0 4px 12px rgba(0,0,0,0.12)",
+                },
+                '&:active': {
+                  transform: "translateY(0)",
+                },
+              }}
               disabled={loading}
             >
               Cancelar
@@ -264,11 +295,26 @@ const PasswordChangeForm: React.FC<PasswordChangeFormProps> = ({
                 color="primary"
                 sx={{
                   fontWeight: 600,
-                  fontSize: "0.95rem",
+                  fontSize: "0.9rem",
                   textTransform: "none",
-                  letterSpacing: "0.01em",
-                  borderRadius: "10px",
-                  minHeight: "44px",
+                  letterSpacing: "-0.01em",
+                  borderRadius: "12px",
+                  minHeight: "48px",
+                  px: 3,
+                  boxShadow: "0 4px 14px rgba(99,102,241,0.25)",
+                  transition: "all 0.25s cubic-bezier(0.4, 0, 0.2, 1)",
+                  '&:hover': {
+                    transform: "translateY(-2px)",
+                    boxShadow: "0 8px 25px rgba(99,102,241,0.35)",
+                  },
+                  '&:active': {
+                    transform: "translateY(0)",
+                  },
+                  '&.Mui-disabled': {
+                    boxShadow: "none",
+                    transform: "none",
+                    opacity: 0.6,
+                  },
                 }}
                 disabled={
                   loading ||

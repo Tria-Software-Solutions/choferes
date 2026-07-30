@@ -20,6 +20,8 @@ import {
   Button,
   Box,
   Typography,
+  TextField,
+  Avatar,
   useTheme,
   useMediaQuery,
   CircularProgress,
@@ -34,7 +36,7 @@ import PAGE_TITLE from "../../../constants/pageTitle.constants";
 import PERMISSIONS from "../../../constants/permissions.constants";
 import NOTIFICATIONS from "../../../constants/notifications.constants";
 import MANAGEMENT from "../../../constants/management.constants";
-import { Users, Download, X, Search, Plus, Trash2, PlusCircle } from "lucide-react";
+import { Users, Download, X, Search, Plus, Trash2, PlusCircle, Mail } from "lucide-react";
 import { PdfIcon, ExcelIcon } from "../../../components/Icons/FileIcons";
 import {
   exportSpeedDialBoxStyles,
@@ -51,6 +53,7 @@ import { useDebounce } from "../../../hooks/useDebounce";
 import { format } from "date-fns";
 import { es } from "date-fns/locale";
 import { capitalizeFirstLetter } from "../../../utils/string";
+import { getEmployeeColor } from "../../../utils/employeeColors";
 
 const getInitialRowsPerPage = () => {
   // Example: calculate based on window size or available height
@@ -87,6 +90,21 @@ const EmployeesPage: React.FC = () => {
   const [page, setPage] = useState(0);
   const [isEditFormValid, setIsEditFormValid] = useState(false);
   const [isDeletingEmployee, setIsDeletingEmployee] = useState(false);
+
+  const inputSx = {
+    '& .MuiInputBase-root': {
+      fontWeight: 600,
+      fontSize: '0.85rem',
+      '&:before, &:after': { border: 'none' },
+      '&:hover:not(.Mui-disabled):before': { border: 'none' },
+    },
+    '& .MuiInputBase-input': {
+      padding: '4px 0',
+      minWidth: 0,
+      '&::placeholder': { opacity: 0.4, fontWeight: 400 },
+      '&:focus': { outline: 'none' },
+    },
+  } as const;
 
   const { search, setSearch, rowsPerPage, setRowsPerPage } =
     useTablePreferences("employees", getInitialRowsPerPage);
@@ -466,7 +484,7 @@ const EmployeesPage: React.FC = () => {
               {filteredEmployees.length > 0 ? (
                 <EditableTableComponent<Employee>
                   data={filteredEmployees}
-                  columns={["firstName", "lastName", "email"]}
+                  columns={["firstName", "email"]}
                   editRowId={editRowId}
                   editFields={editFields}
                   setEditField={(field, value) =>
@@ -484,6 +502,139 @@ const EmployeesPage: React.FC = () => {
                   setRowsPerPage={setRowsPerPage}
                   isSaveDisabled={!isEditFormValid}
                   userPermissions={userPermissions}
+                  renderColumnValue={(column, value, isEditing, editProps, row) => {
+                    if (column === 'firstName') {
+                      const rowData = row as Record<string, unknown> | undefined;
+                      const firstName = String(editProps?.editFields?.['firstName'] || value || '');
+                      const lastName = isEditing && editProps
+                        ? String(editProps.editFields['lastName'] || '')
+                        : String((rowData?.lastName as string) || '');
+                      const fullName = `${firstName} ${lastName}`.trim() || 'Nombre Completo';
+                      const initials = `${(firstName.charAt(0) || '').toUpperCase()}${(lastName.charAt(0) || '').toUpperCase()}` || '?';
+                      const rowId = row?.id ? Number(row.id) : 0;
+                      const empColor = getEmployeeColor(rowId);
+                      
+                      if (isEditing && editProps) {
+                        return (
+                          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, py: 0.5 }}>
+                            <Avatar
+                              sx={{
+                                width: 32,
+                                height: 32,
+                                fontSize: '0.75rem',
+                                fontWeight: 700,
+                                bgcolor: empColor,
+                                color: '#fff',
+                                flexShrink: 0,
+                              }}
+                            >
+                              {initials}
+                            </Avatar>
+                            <Box sx={{ display: 'flex', gap: 0.5, flex: 1 }}>
+                              <TextField
+                                value={String(editProps.editFields['firstName'] || '')}
+                                onChange={(e) => editProps.setEditField('firstName', e.target.value)}
+                                placeholder="Nombre"
+                                variant="standard"
+                                size="small"
+                                sx={inputSx}
+                              />
+                              <TextField
+                                value={String(editProps.editFields['lastName'] || '')}
+                                onChange={(e) => editProps.setEditField('lastName', e.target.value)}
+                                placeholder="Apellido"
+                                variant="standard"
+                                size="small"
+                                sx={inputSx}
+                              />
+                            </Box>
+                          </Box>
+                        );
+                      }
+                      return (
+                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, py: 0.5 }}>
+                          <Avatar
+                            sx={{
+                              width: 32,
+                              height: 32,
+                              fontSize: '0.75rem',
+                              fontWeight: 700,
+                              bgcolor: empColor,
+                              color: '#fff',
+                              flexShrink: 0,
+                            }}
+                          >
+                            {initials}
+                          </Avatar>
+                          <Typography
+                            component="span"
+                            sx={{ fontWeight: 600, fontSize: '0.9rem' }}
+                          >
+                            {fullName}
+                          </Typography>
+                        </Box>
+                      );
+                    }
+                    if (column === 'email') {
+                      const email = String(value || '');
+                      if (isEditing && editProps) {
+                        return (
+                          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                            <Mail size={14} strokeWidth={1.5} style={{ opacity: 0.4, flexShrink: 0 }} />
+                            <TextField
+                              value={String(editProps.editFields['email'] || '')}
+                              onChange={(e) => editProps.setEditField('email', e.target.value)}
+                              variant="standard"
+                              fullWidth
+                              sx={{
+                                '& .MuiInputBase-root': {
+                                  fontSize: '0.85rem',
+                                  '&:before, &:after': { border: 'none' },
+                                  '&:hover:not(.Mui-disabled):before': { border: 'none' },
+                                },
+                                '& .MuiInputBase-input': {
+                                  padding: '4px 0',
+                                  color: 'text.secondary',
+                                  '&:focus': { outline: 'none' },
+                                },
+                              }}
+                            />
+                          </Box>
+                        );
+                      }
+                      if (email) {
+                        return (
+                          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                            <Mail size={14} strokeWidth={1.5} style={{ opacity: 0.4, flexShrink: 0 }} />
+                            <Typography
+                              component="a"
+                              href={`mailto:${email}`}
+                              sx={{
+                                fontSize: '0.85rem',
+                                color: 'text.secondary',
+                                textDecoration: 'none',
+                                '&:hover': {
+                                  color: 'primary.main',
+                                  textDecoration: 'underline',
+                                },
+                              }}
+                            >
+                              {email}
+                            </Typography>
+                          </Box>
+                        );
+                      }
+                      return (
+                        <Typography
+                          component="span"
+                          sx={{ fontSize: '0.85rem', color: 'text.disabled', fontStyle: 'italic' }}
+                        >
+                          Sin email
+                        </Typography>
+                      );
+                    }
+                    return undefined;
+                  }}
                 />
               ) : (
                 <Box sx={noEmployeesBoxStyles}>
