@@ -13,6 +13,7 @@ interface SchedulesState {
   totalCountSchedules: number;
   isLoadingSchedules: boolean;
   error: string | null;
+  customOrderIds: number[]; // Persisted user order from settings
 }
 
 const initialState: SchedulesState = {
@@ -20,6 +21,7 @@ const initialState: SchedulesState = {
   totalCountSchedules: 0,
   isLoadingSchedules: false,
   error: null,
+  customOrderIds: [],
 };
 
 // Fetch schedules from the API, optionally filtered by search term
@@ -100,7 +102,14 @@ export const deleteSchedule = createAsyncThunk(
 const schedulesSlice = createSlice({
   name: "schedules",
   initialState,
-  reducers: {},
+  reducers: {
+    // Override the sort order with a custom order (from user settings)
+    setScheduleOrder(state, action: PayloadAction<number[]>) {
+      const orderIds = action.payload;
+      state.customOrderIds = orderIds;
+      state.schedules = sortSchedulesByType(state.schedules, orderIds);
+    },
+  },
   extraReducers: (builder) => {
     // Handle async actions for schedules
     builder
@@ -111,7 +120,7 @@ const schedulesSlice = createSlice({
       .addCase(
         fetchSchedules.fulfilled,
         (state, action: PayloadAction<Schedule[]>) => {
-          state.schedules = sortSchedulesByType(action.payload);
+          state.schedules = sortSchedulesByType(action.payload, state.customOrderIds.length > 0 ? state.customOrderIds : undefined);
           state.totalCountSchedules = action.payload.length;
           state.isLoadingSchedules = false;
         },
@@ -124,7 +133,8 @@ const schedulesSlice = createSlice({
       .addCase(
         createSchedule.fulfilled,
         (state, action: PayloadAction<Schedule>) => {
-          state.schedules = sortSchedulesByType([...state.schedules, action.payload]);
+          const order = state.customOrderIds.length > 0 ? state.customOrderIds : undefined;
+          state.schedules = sortSchedulesByType([...state.schedules, action.payload], order);
           state.totalCountSchedules += 1;
         },
       )
@@ -132,10 +142,12 @@ const schedulesSlice = createSlice({
         updateSchedule.fulfilled,
         (state, action: PayloadAction<Schedule>) => {
           const updatedSchedule = action.payload;
+          const order = state.customOrderIds.length > 0 ? state.customOrderIds : undefined;
           state.schedules = sortSchedulesByType(
             state.schedules.map((schedule) =>
               schedule.id === updatedSchedule.id ? updatedSchedule : schedule,
             ),
+            order,
           );
         },
       )
@@ -150,6 +162,8 @@ const schedulesSlice = createSlice({
       );
   },
 });
+
+export const { setScheduleOrder } = schedulesSlice.actions;
 
 // Selector to get all schedules from the state
 export const selectSchedules = (state: RootState) => state.schedules.schedules;

@@ -293,7 +293,7 @@ export default function Dock({
             position: 'relative',
             opacity: isDragging ? 0.3 : 1,
             transform: isDragging ? 'scale(0.88)' : 'none',
-            transition: 'all 0.2s cubic-bezier(0.34, 1.56, 0.64, 1)',
+            transition: 'opacity 0.2s ease, transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1)',
             filter: isDragging ? 'grayscale(0.6) brightness(0.8)' : 'none',
           } : {}) as SxProps<Theme>}
           draggable={editable}

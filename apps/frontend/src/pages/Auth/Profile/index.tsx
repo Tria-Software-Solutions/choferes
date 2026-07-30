@@ -45,7 +45,7 @@ import {
   validatePasswordMatch,
 } from "../../../utils/userValidation";
 import TextfieldComponent from "../../../components/Textfield/Textfield.component";
-import { useThemeMode } from "../../../index";
+import { useThemeMode } from "../../../context/ThemeContext";
 import { API_URL } from "../../../services/api";
 import { updateUserAvatar, removeUserAvatar } from "../../../store/slices/userSlice";
 import {
@@ -411,18 +411,18 @@ const Profile: React.FC = () => {
           <Paper
             elevation={0}
             sx={{
-              width: 280,
+              width: 270,
               flexShrink: 0,
               borderRadius: "16px",
               border: `1px solid ${
                 theme.palette.mode === "dark" ? "rgba(255,255,255,0.08)" : "rgba(0,0,0,0.08)"
               }`,
               backgroundColor: theme.palette.background.paper,
-              boxShadow: "0 4px 24px rgba(0,0,0,0.06), 0 1px 2px rgba(0,0,0,0.04)",
-              p: 3,
+              boxShadow: "0 4px 24px rgba(0,0,0,0.08), 0 1px 2px rgba(0,0,0,0.04)",
+              p: 2.5,
               display: "flex",
               flexDirection: "column",
-              gap: 3,
+              gap: 2.5,
               height: "100%",
               overflowY: "auto",
               mb: 0,
@@ -725,61 +725,56 @@ const Profile: React.FC = () => {
             <Paper
               elevation={0}
               sx={{
-                p: { xs: 2.5, sm: 4 },
+                p: { xs: 2.5, sm: 3 },
                 borderRadius: "16px",
                 border: `1px solid ${
                   theme.palette.mode === "dark" ? "rgba(255,255,255,0.08)" : "rgba(0,0,0,0.08)"
                 }`,
                 backgroundColor: theme.palette.background.paper,
-                boxShadow: "0 4px 24px rgba(0,0,0,0.06), 0 1px 2px rgba(0,0,0,0.04)",
+                boxShadow: "0 4px 24px rgba(0,0,0,0.08), 0 1px 2px rgba(0,0,0,0.04)",
                 display: "flex",
                 flexDirection: "column",
                 height: { xs: "auto", md: "100%" },
                 mb: 0,
               }}
             >
-              {/* Section Header */}
-              <Box sx={{ mb: 3, flexShrink: 0 }}>
-                <Box display="flex" alignItems="center" gap={1.5} mb={1}>
-                  <Box
-                    sx={{
-                      backgroundColor: theme.palette.primary.main,
-                      borderRadius: "12px",
-                      p: 1,
-                      display: "flex",
-                      alignItems: "center",
-                      justifyContent: "center",
-                      boxShadow: "0 4px 12px rgba(0,0,0,0.08)",
-                    }}
-                  >
-                    <UserIcon2 size={20} color={theme.palette.primary.contrastText} />
+              {/* Section Header — estilo /roles */}
+              <Box sx={{ mb: 2, flexShrink: 0 }}>
+                <Box display="flex" alignItems="center" gap={1.5} mb={0.5}>
+                  <Box sx={{ color: theme.palette.primary.main, display: "flex", alignItems: "center" }}>
+                    <UserIcon2 size={20} strokeWidth={1.5} />
                   </Box>
                   <Typography
                     variant="h6"
                     sx={{
                       fontWeight: 700,
-                      fontSize: "1.25rem",
+                      fontSize: "1.15rem",
                       color: theme.palette.text.primary,
                       letterSpacing: "-0.02em",
+                      lineHeight: 1.2,
                     }}
                   >
                     {MANAGEMENT.PERSONAL_INFO_TITLE}
                   </Typography>
                 </Box>
                 <Typography
-                  variant="body2"
-                  color="textSecondary"
-                  sx={{ fontSize: "0.875rem", lineHeight: 1.5, pl: 6 }}
+                  variant="caption"
+                  sx={{
+                    color: theme.palette.text.secondary,
+                    fontSize: "0.7rem",
+                    letterSpacing: "0.02em",
+                    ml: 5,
+                  }}
                 >
                   {MANAGEMENT.PERSONAL_INFO_DESC}
                 </Typography>
               </Box>
 
-              <Box sx={{ flex: 1, minHeight: 0, overflow: "auto", display: "flex", flexDirection: "column" }}>
-              <Box sx={{ borderBottom: `1px solid ${theme.palette.mode === "dark" ? "rgba(255,255,255,0.08)" : "rgba(0,0,0,0.08)"}`, mb: { xs: 2, md: 3 } }} />
+              <Box sx={{ borderBottom: `1px solid ${theme.palette.mode === "dark" ? "rgba(255,255,255,0.06)" : "rgba(0,0,0,0.06)"}`, mb: { xs: 2, md: 2.5 } }} />
 
               {/* Form Fields */}
-              <Grid container spacing={{ xs: 2.5, sm: 3 }}>
+              <Box sx={{ flex: 1, minHeight: 0, overflow: "auto" }}>
+              <Grid container spacing={{ xs: 2, sm: 2.5 }}>
                 <Grid item xs={12} sm={6}>
                   <TextfieldComponent
                     name="firstName"
@@ -839,7 +834,6 @@ const Profile: React.FC = () => {
                   />
                 </Grid>
               </Grid>
-
               </Box>
 
               {/* Action Button */}
@@ -847,9 +841,9 @@ const Profile: React.FC = () => {
                 sx={{
                   display: "flex",
                   justifyContent: { xs: "center", sm: "flex-end" },
-                  pt: 4,
-                  mt: { xs: 2, md: 3 },
-                  borderTop: `1px solid ${theme.palette.mode === "dark" ? "rgba(255,255,255,0.08)" : "rgba(0,0,0,0.08)"}`,
+                  pt: 3,
+                  mt: { xs: 2, md: 2.5 },
+                  borderTop: `1px solid ${theme.palette.mode === "dark" ? "rgba(255,255,255,0.06)" : "rgba(0,0,0,0.06)"}`,
                   flexShrink: 0,
                 }}
               >
@@ -858,20 +852,11 @@ const Profile: React.FC = () => {
                   color="primary"
                   fullWidth={isSmallScreen}
                   sx={{
-                    minHeight: 44,
-                    fontSize: "0.875rem",
                     fontWeight: 600,
-                    px: 4,
-                    py: 1.5,
-                    minWidth: { xs: "100%", sm: 160 },
+                    px: 3.5,
+                    py: 1.25,
+                    minWidth: { xs: "100%", sm: 150 },
                     borderRadius: "10px",
-                    letterSpacing: "-0.01em",
-                    boxShadow: "0 2px 8px rgba(0, 0, 0, 0.15)",
-                    transition: "all 0.2s cubic-bezier(0.4, 0, 0.2, 1)",
-                    "&:hover": {
-                      transform: "translateY(-2px)",
-                      boxShadow: "0 8px 20px rgba(0, 0, 0, 0.2)",
-                    },
                   }}
                   onClick={handleSaveChanges}
                   disabled={!isEditFormValid || !!infoError}
@@ -886,186 +871,225 @@ const Profile: React.FC = () => {
             <Paper
               elevation={0}
               sx={{
-                p: { xs: 2.5, sm: 4 },
+                p: { xs: 2.5, sm: 3 },
                 borderRadius: "16px",
                 border: `1px solid ${
                   theme.palette.mode === "dark" ? "rgba(255,255,255,0.08)" : "rgba(0,0,0,0.08)"
                 }`,
                 backgroundColor: theme.palette.background.paper,
-                boxShadow: "0 4px 24px rgba(0,0,0,0.06), 0 1px 2px rgba(0,0,0,0.04)",
+                boxShadow: "0 4px 24px rgba(0,0,0,0.08), 0 1px 2px rgba(0,0,0,0.04)",
                 display: "flex",
                 flexDirection: "column",
                 height: { xs: "auto", md: "100%" },
                 mb: 0,
               }}
             >
-              {/* Section Header */}
-              <Box sx={{ mb: 3, flexShrink: 0 }}>
-                <Box display="flex" alignItems="center" gap={1.5} mb={1}>
-                  <Box
-                    sx={{
-                      backgroundColor: theme.palette.primary.main,
-                      borderRadius: "12px",
-                      p: 1,
-                      display: "flex",
-                      alignItems: "center",
-                      justifyContent: "center",
-                      boxShadow: "0 4px 12px rgba(0,0,0,0.08)",
-                    }}
-                  >
-                    <Lock size={20} color={theme.palette.primary.contrastText} />
+              {/* Section Header — estilo /roles */}
+              <Box sx={{ mb: 2, flexShrink: 0 }}>
+                <Box display="flex" alignItems="center" gap={1.5} mb={0.5}>
+                  <Box sx={{ color: theme.palette.primary.main, display: "flex", alignItems: "center" }}>
+                    <Lock size={20} strokeWidth={1.5} />
                   </Box>
                   <Typography
                     variant="h6"
                     sx={{
                       fontWeight: 700,
-                      fontSize: "1.25rem",
+                      fontSize: "1.15rem",
                       color: theme.palette.text.primary,
                       letterSpacing: "-0.02em",
+                      lineHeight: 1.2,
                     }}
                   >
                     Seguridad
                   </Typography>
                 </Box>
                 <Typography
-                  variant="body2"
-                  color="textSecondary"
-                  sx={{ fontSize: "0.875rem", lineHeight: 1.5, pl: 6 }}
+                  variant="caption"
+                  sx={{
+                    color: theme.palette.text.secondary,
+                    fontSize: "0.7rem",
+                    letterSpacing: "0.02em",
+                    ml: 5,
+                  }}
                 >
                   Cambia tu contraseña para mantener tu cuenta segura.
                 </Typography>
               </Box>
 
-              <Box sx={{ flex: 1, minHeight: 0, overflow: "auto", display: "flex", flexDirection: "column" }}>
-              <Box sx={{ borderBottom: `1px solid ${theme.palette.mode === "dark" ? "rgba(255,255,255,0.08)" : "rgba(0,0,0,0.08)"}`, mb: { xs: 2, md: 3 } }} />
+              <Box sx={{ borderBottom: `1px solid ${theme.palette.mode === "dark" ? "rgba(255,255,255,0.06)" : "rgba(0,0,0,0.06)"}`, mb: { xs: 2, md: 2.5 } }} />
 
-              <Grid container spacing={{ xs: 2.5, sm: 3 }}>
-                <Grid item xs={12} md={6}>
-                  <Box sx={{ display: "flex", flexDirection: "column", gap: 3 }}>
-                    <TextfieldComponent
-                      name="newPassword"
-                      placeholder="Nueva Contraseña"
-                      type={showNewPassword ? "text" : "password"}
-                      value={passwordFields.newPassword}
-                      onChange={handleNewPassword}
-                      error={!!passwordError}
-                      helperText={passwordError}
-                      icon={<Lock size={20} color={theme.palette.text.secondary} />}
-                      endAdornment={
-                        <IconButton
-                          onClick={handleToggleNewPassword}
-                          edge="end"
-                          sx={{
-                            color: theme.palette.text.secondary,
-                            width: "36px",
-                            height: "36px",
-                            padding: "8px",
-                            "&:hover": {
-                              color: theme.palette.text.primary,
-                              backgroundColor: "transparent",
-                            },
-                          }}
-                        >
-                          {showNewPassword ? <EyeOff size={20} /> : <Eye size={20} />}
-                        </IconButton>
-                      }
-                    />
-
-                    <TextfieldComponent
-                      name="confirmNewPassword"
-                      placeholder="Confirmar Nueva Contraseña"
-                      type={showConfirmNewPassword ? "text" : "password"}
-                      value={passwordFields.confirmNewPassword}
-                      onChange={handleConfirmNewPassword}
-                      error={!!passwordError}
-                      helperText={passwordError}
-                      icon={<Lock size={20} color={theme.palette.text.secondary} />}
-                      endAdornment={
-                        <IconButton
-                          onClick={handleToggleConfirmNewPassword}
-                          edge="end"
-                          sx={{
-                            color: theme.palette.text.secondary,
-                            width: "36px",
-                            height: "36px",
-                            padding: "8px",
-                            "&:hover": {
-                              color: theme.palette.text.primary,
-                              backgroundColor: "transparent",
-                            },
-                          }}
-                        >
-                          {showConfirmNewPassword ? <EyeOff size={20} /> : <Eye size={20} />}
-                        </IconButton>
-                      }
-                    />
-                  </Box>
+              <Box sx={{ flex: 1, minHeight: 0, overflow: "auto" }}>
+              <Grid container spacing={{ xs: 2, sm: 2.5 }}>
+                {/* Password fields side by side */}
+                <Grid item xs={12} sm={6}>
+                  <TextfieldComponent
+                    name="newPassword"
+                    placeholder="Nueva Contraseña"
+                    type={showNewPassword ? "text" : "password"}
+                    value={passwordFields.newPassword}
+                    onChange={handleNewPassword}
+                    error={!!passwordError}
+                    helperText={passwordError}
+                    icon={<Lock size={20} color={theme.palette.text.secondary} />}
+                    endAdornment={
+                      <IconButton
+                        onClick={handleToggleNewPassword}
+                        edge="end"
+                        sx={{
+                          color: theme.palette.text.secondary,
+                          width: "36px",
+                          height: "36px",
+                          padding: "8px",
+                          "&:hover": {
+                            color: theme.palette.text.primary,
+                            backgroundColor: "transparent",
+                          },
+                        }}
+                      >
+                        {showNewPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+                      </IconButton>
+                    }
+                  />
+                </Grid>
+                <Grid item xs={12} sm={6}>
+                  <TextfieldComponent
+                    name="confirmNewPassword"
+                    placeholder="Confirmar Nueva Contraseña"
+                    type={showConfirmNewPassword ? "text" : "password"}
+                    value={passwordFields.confirmNewPassword}
+                    onChange={handleConfirmNewPassword}
+                    error={!!passwordError}
+                    helperText={passwordError}
+                    icon={<Lock size={20} color={theme.palette.text.secondary} />}
+                    endAdornment={
+                      <IconButton
+                        onClick={handleToggleConfirmNewPassword}
+                        edge="end"
+                        sx={{
+                          color: theme.palette.text.secondary,
+                          width: "36px",
+                          height: "36px",
+                          padding: "8px",
+                          "&:hover": {
+                            color: theme.palette.text.primary,
+                            backgroundColor: "transparent",
+                          },
+                        }}
+                      >
+                        {showConfirmNewPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+                      </IconButton>
+                    }
+                  />
                 </Grid>
 
-                {/* Password guidelines info box */}
-                <Grid item xs={12} md={6}>
+                {/* Password info card — full width below */}
+                <Grid item xs={12}>
                   <Box
                     sx={{
                       display: "flex",
                       alignItems: "flex-start",
-                      gap: 2,
-                      p: 3,
+                      gap: 1.5,
+                      p: 2.5,
                       borderRadius: "12px",
                       backgroundColor:
                         theme.palette.mode === "dark"
-                          ? "rgba(255,255,255,0.03)"
-                          : "rgba(0,0,0,0.015)",
+                          ? "rgba(255,255,255,0.02)"
+                          : "rgba(0,0,0,0.012)",
                       border: `1px solid ${
                         theme.palette.mode === "dark"
-                          ? "rgba(255,255,255,0.08)"
-                          : "rgba(0,0,0,0.06)"
+                          ? "rgba(255,255,255,0.06)"
+                          : "rgba(0,0,0,0.05)"
                       }`,
-                      height: "100%",
                     }}
                   >
                     <Box
                       sx={{
-                        backgroundColor:
-                          theme.palette.mode === "dark"
-                            ? "rgba(255,255,255,0.08)"
-                            : "rgba(0,0,0,0.04)",
-                        borderRadius: "10px",
-                        p: 1,
+                        color: theme.palette.primary.main,
                         display: "flex",
                         alignItems: "center",
                         justifyContent: "center",
                         flexShrink: 0,
+                        mt: 0.3,
                       }}
                     >
-                      <Info size={20} color={theme.palette.text.primary} />
+                      <Info size={18} strokeWidth={1.5} />
                     </Box>
-                    <Box>
+                    <Box sx={{ flex: 1 }}>
                       <Typography
                         variant="subtitle2"
                         sx={{
                           fontWeight: 700,
-                          fontSize: "0.875rem",
-                          color: theme.palette.text.primary,
-                          mb: 0.75,
-                        }}
-                      >
-                        {MANAGEMENT.PASSWORD_INFO_TITLE}
-                      </Typography>
-                      <Typography
-                        variant="body2"
-                        sx={{
                           fontSize: "0.85rem",
-                          color: theme.palette.text.secondary,
-                          lineHeight: 1.6,
+                          color: theme.palette.text.primary,
+                          mb: 1,
+                          letterSpacing: "-0.01em",
                         }}
                       >
-                        {MANAGEMENT.PASSWORD_INFO_DESC}
+                        Información de la contraseña
+                      </Typography>
+                      <Box
+                        component="ul"
+                        sx={{
+                          m: 0,
+                          p: 0,
+                          pl: 1.25,
+                          display: "flex",
+                          flexDirection: "column",
+                          gap: 0.6,
+                          listStyle: "none",
+                        }}
+                      >
+                        {[
+                          "Mínimo 8 caracteres",
+                          "Incluir mayúsculas (A-Z)",
+                          "Incluir minúsculas (a-z)",
+                          "Incluir un número (0-9)",
+                          "Incluir un carácter especial (@, #, $, etc.)",
+                        ].map((item, i) => (
+                          <Box
+                            key={i}
+                            component="li"
+                            sx={{
+                              display: "flex",
+                              alignItems: "center",
+                              gap: 1,
+                              fontSize: "0.78rem",
+                              color: theme.palette.text.secondary,
+                              lineHeight: 1.3,
+                              "&::before": {
+                                content: '"•"',
+                                color: theme.palette.primary.main,
+                                fontWeight: 700,
+                                fontSize: "0.9rem",
+                              },
+                            }}
+                          >
+                            {item}
+                          </Box>
+                        ))}
+                      </Box>
+                      <Typography
+                        variant="caption"
+                        sx={{
+                          display: "block",
+                          mt: 1.25,
+                          pt: 1.25,
+                          borderTop: `1px solid ${
+                            theme.palette.mode === "dark"
+                              ? "rgba(255,255,255,0.04)"
+                              : "rgba(0,0,0,0.03)"
+                          }`,
+                          fontSize: "0.72rem",
+                          color: theme.palette.text.disabled,
+                          lineHeight: 1.4,
+                        }}
+                      >
+                        Por seguridad, no compartas tu contraseña con nadie.
                       </Typography>
                     </Box>
                   </Box>
                 </Grid>
               </Grid>
-
               </Box>
 
               {/* Password Action Button */}
@@ -1073,9 +1097,9 @@ const Profile: React.FC = () => {
                 sx={{
                   display: "flex",
                   justifyContent: { xs: "center", sm: "flex-end" },
-                  pt: 4,
-                  mt: { xs: 2, md: 3 },
-                  borderTop: `1px solid ${theme.palette.mode === "dark" ? "rgba(255,255,255,0.08)" : "rgba(0,0,0,0.08)"}`,
+                  pt: 3,
+                  mt: { xs: 2, md: 2.5 },
+                  borderTop: `1px solid ${theme.palette.mode === "dark" ? "rgba(255,255,255,0.06)" : "rgba(0,0,0,0.06)"}`,
                   flexShrink: 0,
                 }}
               >
@@ -1084,20 +1108,11 @@ const Profile: React.FC = () => {
                   color="primary"
                   fullWidth={isSmallScreen}
                   sx={{
-                    minHeight: 44,
-                    fontSize: "0.875rem",
                     fontWeight: 600,
-                    px: 4,
-                    py: 1.5,
-                    minWidth: { xs: "100%", sm: 160 },
+                    px: 3.5,
+                    py: 1.25,
+                    minWidth: { xs: "100%", sm: 150 },
                     borderRadius: "10px",
-                    letterSpacing: "-0.01em",
-                    boxShadow: "0 2px 8px rgba(0, 0, 0, 0.15)",
-                    transition: "all 0.2s cubic-bezier(0.4, 0, 0.2, 1)",
-                    "&:hover": {
-                      transform: "translateY(-2px)",
-                      boxShadow: "0 8px 20px rgba(0, 0, 0, 0.2)",
-                    },
                   }}
                   onClick={handleChangePassword}
                   disabled={!isPasswordFormValid}
@@ -1112,56 +1127,52 @@ const Profile: React.FC = () => {
             <Paper
               elevation={0}
               sx={{
-                p: { xs: 2.5, sm: 4 },
+                p: { xs: 2.5, sm: 3 },
                 borderRadius: "16px",
                 border: `1px solid ${
                   theme.palette.mode === "dark" ? "rgba(255,255,255,0.08)" : "rgba(0,0,0,0.08)"
                 }`,
                 backgroundColor: theme.palette.background.paper,
-                boxShadow: "0 4px 24px rgba(0,0,0,0.06), 0 1px 2px rgba(0,0,0,0.04)",
+                boxShadow: "0 4px 24px rgba(0,0,0,0.08), 0 1px 2px rgba(0,0,0,0.04)",
                 display: "flex",
                 flexDirection: "column",
                 height: { xs: "auto", md: "100%" },
                 mb: 0,
               }}
             >
-              {/* Section Header */}
-              <Box sx={{ mb: 3 }}>
-                <Box display="flex" alignItems="center" gap={1.5} mb={1}>
-                  <Box
-                    sx={{
-                      backgroundColor: theme.palette.text.primary,
-                      borderRadius: "10px",
-                      p: 0.75,
-                      display: "flex",
-                      alignItems: "center",
-                      justifyContent: "center",
-                    }}
-                  >
-                    <Palette size={18} color={theme.palette.background.paper} />
+              {/* Section Header — estilo /roles */}
+              <Box sx={{ mb: 2 }}>
+                <Box display="flex" alignItems="center" gap={1.5} mb={0.5}>
+                  <Box sx={{ color: theme.palette.primary.main, display: "flex", alignItems: "center" }}>
+                    <Palette size={20} strokeWidth={1.5} />
                   </Box>
                   <Typography
                     variant="h6"
                     sx={{
                       fontWeight: 700,
-                      fontSize: "1.25rem",
+                      fontSize: "1.15rem",
                       color: theme.palette.text.primary,
                       letterSpacing: "-0.02em",
+                      lineHeight: 1.2,
                     }}
                   >
                     Tema de la aplicación
                   </Typography>
                 </Box>
                 <Typography
-                  variant="body2"
-                  color="textSecondary"
-                  sx={{ fontSize: "0.875rem", lineHeight: 1.5 }}
+                  variant="caption"
+                  sx={{
+                    color: theme.palette.text.secondary,
+                    fontSize: "0.7rem",
+                    letterSpacing: "0.02em",
+                    ml: 5,
+                  }}
                 >
                   Seleccione el tema que prefiera para la aplicación.
                 </Typography>
               </Box>
 
-              <Box sx={{ borderBottom: `1px solid ${theme.palette.mode === "dark" ? "rgba(255,255,255,0.08)" : "rgba(0,0,0,0.08)"}`, my: 3 }} />
+              <Box sx={{ borderBottom: `1px solid ${theme.palette.mode === "dark" ? "rgba(255,255,255,0.06)" : "rgba(0,0,0,0.06)"}`, mb: { xs: 2, md: 2.5 } }} />
 
               {/* Theme Grid Choice */}
               <Grid container spacing={3}>
@@ -1480,9 +1491,9 @@ const Profile: React.FC = () => {
           {["users", "roles", "permissions"].includes(activeTab) && (
             <Box sx={{ flex: 1, minHeight: 0, display: "flex", flexDirection: "column" }}>
               <Box sx={{ flex: 1, display: "flex", flexDirection: "column", "& .MuiPaper-root": { mb: 0 } }}>
-                {activeTab === "users" && <ManageUsers isExpanded />}
-                {activeTab === "roles" && <ManageRoles isExpanded />}
-                {activeTab === "permissions" && <ManagePermissions />}
+                {activeTab === "users" && <ManageUsers isExpanded hideHeader />}
+                {activeTab === "roles" && <ManageRoles isExpanded hideHeader />}
+                {activeTab === "permissions" && <ManagePermissions hideHeader />}
               </Box>
             </Box>
           )}

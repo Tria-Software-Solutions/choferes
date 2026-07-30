@@ -24,7 +24,7 @@ import {
   noPermissionsBoxStyles,
 } from "./styles";
 // ManagePermissions page component for permission management in the dashboard
-const ManagePermissions: React.FC<{ isExpanded?: boolean }> = ({ isExpanded = true }) => {
+const ManagePermissions: React.FC<{ isExpanded?: boolean; hideHeader?: boolean }> = ({ isExpanded = true, hideHeader = false }) => {
   const dispatch = useDispatch<AppDispatch>();
   const { permissions, isLoadingPermissions } = useSelector(
     (state: RootState) => state.permissions,
@@ -78,7 +78,63 @@ const ManagePermissions: React.FC<{ isExpanded?: boolean }> = ({ isExpanded = tr
           flexDirection: "column",
         }}
       >
-        {/* Header Section */}
+        {!hideHeader && (
+          <Box
+            sx={{
+              px: { xs: 2, sm: 2.5 },
+              py: { xs: 1.5, sm: 2 },
+              backgroundColor: theme.palette.background.paper,
+              color: theme.palette.text.primary,
+              flexShrink: 0,
+              borderBottom: `1px solid ${theme.palette.mode === "dark" ? "rgba(255,255,255,0.06)" : "rgba(0,0,0,0.06)"}`,
+            }}
+          >
+            <Box
+              display="flex"
+              justifyContent="space-between"
+              alignItems="center"
+              mb={1.5}
+            >
+              <Box display="flex" alignItems="center" gap={1.5}>
+                <Box
+                  sx={{
+                    color: theme.palette.primary.main,
+                    display: 'flex',
+                    alignItems: 'center',
+                  }}
+                >
+                  <ShieldCheck size={20} strokeWidth={1.5} />
+                </Box>
+                <Box>
+                  <Typography
+                    variant={isSmallScreen ? "h6" : "h5"}
+                    sx={{
+                      fontWeight: 700,
+                      fontSize: { xs: "1rem", sm: "1.15rem" },
+                      color: theme.palette.text.primary,
+                      letterSpacing: "-0.02em",
+                      lineHeight: 1.2,
+                    }}
+                  >
+                    {isSmallScreen ? 'Permisos' : 'Gestión de Permisos'}
+                  </Typography>
+                  <Typography
+                    variant="caption"
+                    sx={{
+                      color: theme.palette.text.secondary,
+                      fontSize: "0.7rem",
+                      letterSpacing: "0.02em",
+                    }}
+                  >
+                    {filteredPermissions.length} permisos disponibles
+                  </Typography>
+                </Box>
+              </Box>
+            </Box>
+          </Box>
+        )}
+
+        {/* Controls Row */}
         <Box
           sx={{
             px: { xs: 2, sm: 2.5 },
@@ -89,50 +145,6 @@ const ManagePermissions: React.FC<{ isExpanded?: boolean }> = ({ isExpanded = tr
             borderBottom: `1px solid ${theme.palette.mode === "dark" ? "rgba(255,255,255,0.06)" : "rgba(0,0,0,0.06)"}`,
           }}
         >
-          <Box
-            display="flex"
-            justifyContent="space-between"
-            alignItems="center"
-            mb={1.5}
-          >
-            <Box display="flex" alignItems="center" gap={1.5}>
-              <Box
-                sx={{
-                  color: theme.palette.primary.main,
-                  display: 'flex',
-                  alignItems: 'center',
-                }}
-              >
-                <ShieldCheck size={20} strokeWidth={1.5} />
-              </Box>
-              <Box>
-                <Typography
-                  variant={isSmallScreen ? "h6" : "h5"}
-                  sx={{
-                    fontWeight: 700,
-                    fontSize: { xs: "1rem", sm: "1.15rem" },
-                    color: theme.palette.text.primary,
-                    letterSpacing: "-0.02em",
-                    lineHeight: 1.2,
-                  }}
-                >
-                  {isSmallScreen ? 'Permisos' : 'Gestión de Permisos'}
-                </Typography>
-                <Typography
-                  variant="caption"
-                  sx={{
-                    color: theme.palette.text.secondary,
-                    fontSize: "0.7rem",
-                    letterSpacing: "0.02em",
-                  }}
-                >
-                  {filteredPermissions.length} permisos disponibles
-                </Typography>
-              </Box>
-            </Box>
-          </Box>
-
-          {/* Controls Row */}
           <Box
             display="flex"
             flexDirection={{ xs: "column", sm: "row" }}
@@ -161,6 +173,62 @@ const ManagePermissions: React.FC<{ isExpanded?: boolean }> = ({ isExpanded = tr
               <Backdrop sx={backdropStyles(theme)} open={isLoadingPermissions}>
                 <CircularProgress />
               </Backdrop>
+            </Box>
+          ) : hideHeader ? (
+            /* Compact preview list for Profile mode — same style as users/roles */
+            <Box sx={{ flex: 1, minHeight: 0, overflow: "auto", p: 0 }}>
+              {filteredPermissions.slice(0, 5).map((permission, i) => (
+                <Box
+                  key={permission.id}
+                  sx={{
+                    display: "flex",
+                    alignItems: "center",
+                    gap: 1.5,
+                    px: { xs: 2, sm: 2.5 },
+                    py: 1.5,
+                    borderBottom: `1px solid ${theme.palette.mode === "dark" ? "rgba(255,255,255,0.04)" : "rgba(0,0,0,0.04)"}`,
+                    backgroundColor: i % 2 === 0 ? "transparent" : (theme.palette.mode === "dark" ? "rgba(255,255,255,0.015)" : "rgba(0,0,0,0.012)"),
+                    transition: "background-color 0.15s",
+                    "&:hover": {
+                      backgroundColor: theme.palette.mode === "dark" ? "rgba(255,255,255,0.04)" : "rgba(0,0,0,0.025)",
+                    },
+                  }}
+                >
+                  <Box
+                    sx={{
+                      width: 28,
+                      height: 28,
+                      borderRadius: "8px",
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      backgroundColor: theme.palette.mode === "dark" ? "rgba(255,255,255,0.06)" : "rgba(0,0,0,0.04)",
+                      flexShrink: 0,
+                    }}
+                  >
+                    <Key size={14} strokeWidth={1.5} color={theme.palette.primary.main} />
+                  </Box>
+                  <Box sx={{ flex: 1, minWidth: 0 }}>
+                    <Typography variant="body2" sx={{ fontWeight: 500, fontSize: "0.8rem", color: "text.primary" }}>
+                      {permission.name}
+                    </Typography>
+                  </Box>
+                </Box>
+              ))}
+              {filteredPermissions.length > 5 && (
+                <Box sx={{ px: { xs: 2, sm: 2.5 }, py: 1.5, textAlign: "center" }}>
+                  <Typography variant="caption" sx={{ color: "text.disabled", fontWeight: 500, fontSize: "0.7rem" }}>
+                    +{filteredPermissions.length - 5} permisos más
+                  </Typography>
+                </Box>
+              )}
+              {filteredPermissions.length === 0 && (
+                <Box sx={{ display: "flex", alignItems: "center", justifyContent: "center", flex: 1, minHeight: 100 }}>
+                  <Typography variant="body2" color="textSecondary">
+                    {DASHBOARD_PERMISSIONS.NO_PERMISSIONS}
+                  </Typography>
+                </Box>
+              )}
             </Box>
           ) : (
             <>

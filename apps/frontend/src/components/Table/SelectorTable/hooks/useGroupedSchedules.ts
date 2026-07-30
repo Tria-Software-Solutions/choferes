@@ -49,13 +49,10 @@ export const useGroupedSchedules = ({
       }
     }
     
-    // Sort: non-special first, then special, alphabetically within each group
-    return Object.values(groups).sort((a, b) => {
-      const aSpecial = Object.values(a.dayToSchedule).some((s) => s.specialSchedule);
-      const bSpecial = Object.values(b.dayToSchedule).some((s) => s.specialSchedule);
-      if (aSpecial !== bSpecial) return aSpecial ? 1 : -1;
-      return a.label.localeCompare(b.label, "es", { sensitivity: "base" });
-    });
+    // Sort alphabetically
+    return Object.values(groups).sort((a, b) =>
+      a.label.localeCompare(b.label, "es", { sensitivity: "base" })
+    );
   }, [schedules]);
 
   // Get employees assigned to a schedule on a specific day

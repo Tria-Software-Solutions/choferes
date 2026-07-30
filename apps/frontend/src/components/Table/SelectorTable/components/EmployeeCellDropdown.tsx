@@ -17,7 +17,7 @@ import { SELECTOR_TABLE } from "../../../../constants/constants";
 
 interface EmployeeCellDropdownProps {
   value: string;
-  options: Array<{ id: number; label: string; specialSchedule?: boolean }>;
+  options: Array<{ id: number; label: string }>;
   disabled?: boolean;
   onChange: (value: string) => void;
   theme: Theme;
@@ -92,9 +92,8 @@ export const EmployeeCellDropdown: React.FC<EmployeeCellDropdownProps> = ({
     option.label.toLowerCase().includes(searchValue.toLowerCase())
   );
 
-  // Group options by type
-  const regularOptions = filteredOptions.filter((option) => !option.specialSchedule);
-  const specialOptions = filteredOptions.filter((option) => option.specialSchedule);
+  // All options (no special grouping)
+  const regularOptions = filteredOptions;
 
   const renderValue = () => {
     if (value === SELECTOR_TABLE.UNASSIGNED) {
@@ -302,90 +301,7 @@ export const EmployeeCellDropdown: React.FC<EmployeeCellDropdownProps> = ({
               </>
             )}
 
-            {specialOptions.length > 0 && regularOptions.length > 0 && (
-              <Divider
-                sx={{
-                  borderColor: theme.palette.mode === 'dark' ? 'rgba(255,255,255,0.15)' : 'rgba(0,0,0,0.1)',
-                  my: 1,
-                  mx: 2,
-                }}
-              />
-            )}
 
-            {specialOptions.length > 0 && (
-              <>
-                <Typography
-                  sx={{
-                    px: 2,
-                    py: 1.5,
-                    fontSize: "0.7rem",
-                    fontWeight: 700,
-                    color: theme.palette.mode === 'dark'
-                      ? '#FF9800'
-                      : '#E65100',
-                    textTransform: "uppercase",
-                    letterSpacing: "0.08em",
-                    background: theme.palette.mode === 'dark'
-                      ? 'linear-gradient(135deg, rgba(255, 152, 0, 0.25) 0%, rgba(255, 152, 0, 0.1) 100%)'
-                      : 'linear-gradient(135deg, rgba(230, 81, 0, 0.15) 0%, rgba(230, 81, 0, 0.05) 100%)',
-                    borderLeft: `4px solid ${theme.palette.mode === 'dark'
-                      ? '#FF9800'
-                      : '#E65100'}`,
-                    ml: 1,
-                    borderRadius: '0 8px 8px 0',
-                  }}
-                >
-                  Horarios Especiales
-                </Typography>
-                {specialOptions.map((option, index) => {
-                  const isSelected = option.label === value;
-                  return (
-                    <React.Fragment key={option.id}>
-                      <MenuItem
-                        onClick={() => handleSelect(option.label)}
-                        sx={{
-                          py: 1,
-                          px: 2,
-                          my: 0,
-                          margin: 0,
-                          transition: "all 0.2s cubic-bezier(0.4, 0, 0.2, 1)",
-                          color: theme.palette.text.primary,
-                          "&:hover": {
-                            backgroundColor:
-                              theme.palette.mode === "dark"
-                                ? "rgba(255,255,255,0.1)"
-                                : "rgba(0,0,0,0.04)",
-                            transform: "translateX(2px)",
-                          },
-                        }}
-                      >
-                        <Box sx={{ display: "flex", alignItems: "center", gap: 2, width: "100%" }}>
-                          <Box sx={{ flex: 1 }}>
-                            <Typography sx={{ fontSize: "0.875rem", fontWeight: 500 }}>{option.label}</Typography>
-                          </Box>
-                          {isSelected && (
-                            <CheckIcon
-                              sx={{
-                                fontSize: 18,
-                                color: theme.palette.primary.main,
-                              }}
-                            />
-                          )}
-                        </Box>
-                      </MenuItem>
-                      {index < specialOptions.length - 1 && (
-                        <Divider
-                          sx={{
-                            borderColor: theme.palette.mode === 'dark' ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.05)',
-                            my: 0,
-                          }}
-                        />
-                      )}
-                    </React.Fragment>
-                  );
-                })}
-              </>
-            )}
 
             {onAddSchedule && (
               <>

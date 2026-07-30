@@ -6,14 +6,13 @@ import {
   Button,
   useTheme,
   useMediaQuery,
-  Switch,
   TextField,
   Tooltip,
 } from "@mui/material";
 import { Schedule } from "../../../models/Schedule";
 import FORMS from "../../../constants/forms.constants";
 import { translateDayOptionsToSpanish } from "../../../utils/string";
-import { Plus, X, Calendar, AlertTriangle } from "lucide-react";
+import { Plus, X, Calendar } from "lucide-react";
 import TextfieldComponent from "../../../components/Textfield/Textfield.component";
 import {
   boxRoot,
@@ -48,7 +47,6 @@ const AddScheduleForm: React.FC<AddScheduleFormProps> = ({
 
   const [label, setLabel] = useState("");
   const [days, setDays] = useState<string[]>([]);
-  const [specialSchedule, setSpecialSchedule] = useState(false);
   const [dayHours, setDayHours] = useState<Record<string, string>>({});
   const [formTouched, setFormTouched] = useState(false);
 
@@ -94,7 +92,6 @@ const AddScheduleForm: React.FC<AddScheduleFormProps> = ({
       label,
       days,
       hours: 0,
-      specialSchedule,
       scheduleDays,
     };
     onSubmit(newSchedule);
@@ -103,7 +100,6 @@ const AddScheduleForm: React.FC<AddScheduleFormProps> = ({
   const handleClearForm = () => {
     setLabel("");
     setDays([]);
-    setSpecialSchedule(false);
     setDayHours({});
   };
 
@@ -299,82 +295,6 @@ const AddScheduleForm: React.FC<AddScheduleFormProps> = ({
                 Haz clic en los círculos para seleccionar días y asignar horas
               </Typography>
             )}
-          </Box>
-        </Grid>
-
-        {/* Special schedule toggle */}
-        <Grid item xs={12}>
-          <Box
-            sx={{
-              display: "flex",
-              alignItems: "center",
-              gap: 1.5,
-              p: { xs: 1, sm: 1.5 },
-              borderRadius: "14px",
-              backgroundColor: isDark
-                ? "rgba(255,183,77,0.04)"
-                : "rgba(255,152,0,0.04)",
-              border: `1px solid ${isDark
-                ? "rgba(255,183,77,0.08)"
-                : "rgba(255,152,0,0.1)"}`,
-            }}
-          >
-            <Box
-              sx={{
-                width: 36,
-                height: 36,
-                borderRadius: "10px",
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                background: `linear-gradient(135deg, #FB8C00, #F57C00)`,
-                color: "#fff",
-                flexShrink: 0,
-                boxShadow: "0 4px 12px rgba(255,152,0,0.25)",
-              }}
-            >
-              <AlertTriangle size={18} />
-            </Box>
-            <Box sx={{ flex: 1 }}>
-              <Box sx={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 1 }}>
-                <Box>
-                  <Typography
-                    sx={{
-                      fontWeight: 600,
-                      color: theme.palette.text.primary,
-                      fontSize: "0.875rem",
-                    }}
-                  >
-                    {FORMS.ADD_SCHEDULE.SPECIAL_LABEL}
-                  </Typography>
-                  <Typography
-                    sx={{
-                      color: theme.palette.text.secondary,
-                      fontSize: "0.75rem",
-                      lineHeight: 1.4,
-                      mt: 0.15,
-                    }}
-                  >
-                    {FORMS.ADD_SCHEDULE.SPECIAL_DESC}
-                  </Typography>
-                </Box>
-                <Switch
-                  checked={specialSchedule}
-                  onChange={(e) => setSpecialSchedule(e.target.checked)}
-                  sx={{
-                    '& .MuiSwitch-switchBase.Mui-checked': {
-                      color: '#FB8C00',
-                      '&:hover': {
-                        backgroundColor: 'rgba(255,152,0,0.08)',
-                      },
-                    },
-                    '& .MuiSwitch-switchBase.Mui-checked + .MuiSwitch-track': {
-                      backgroundColor: '#FB8C00',
-                    },
-                  }}
-                />
-              </Box>
-            </Box>
           </Box>
         </Grid>
 

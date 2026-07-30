@@ -76,10 +76,6 @@ export const createColumnConfig = (
     type: "text",
     size: { xs: 6, sm: 6, md: 3, lg: 2 },
   },
-  specialSchedule: {
-    type: "text",
-    size: { xs: 6, sm: 6, md: 3, lg: 4 },
-  },
 
   email: {
     type: "text",

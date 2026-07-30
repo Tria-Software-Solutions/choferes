@@ -22,6 +22,8 @@ export class User extends Model {
 
   public avatar?: string; // Avatar image file path
 
+  public settings?: Record<string, unknown>; // User preferences (theme, language, etc.)
+
   public roles?: Role[]; // Associated roles for the user
 
   public static associations: {
@@ -70,6 +72,11 @@ User.init(
     avatar: {
       type: DataTypes.STRING,
       allowNull: true,
+    },
+    settings: {
+      type: DataTypes.JSONB,
+      allowNull: true,
+      defaultValue: {},
     },
   },
   {

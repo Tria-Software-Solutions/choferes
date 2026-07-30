@@ -47,7 +47,6 @@ const mockSchedule = {
   label: "Diurno",
   days: ["monday", "tuesday", "wednesday", "thursday", "friday"],
   hours: 8,
-  specialSchedule: false,
   createdAt: "2026-07-20T00:00:00.000Z",
   updatedAt: "2026-07-20T00:00:00.000Z",
 };
@@ -103,7 +102,7 @@ describe("GET /api/schedules/:id", () => {
 
 describe("POST /api/schedules", () => {
   it("debería devolver 201 con el horario creado", async () => {
-    const newSchedule = { label: "Nocturno", days: ["monday", "tuesday", "wednesday", "thursday", "friday"], hours: 6, specialSchedule: false };
+    const newSchedule = { label: "Nocturno", days: ["monday", "tuesday", "wednesday", "thursday", "friday"], hours: 6 };
     const createdSchedule = { id: 2, ...newSchedule, createdAt: new Date().toISOString(), updatedAt: new Date().toISOString() };
 
     service.createSchedule.mockResolvedValue(createdSchedule);

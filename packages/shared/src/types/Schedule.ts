@@ -10,7 +10,6 @@ export interface Schedule {
   days: string[];
   label: string;
   hours: number;
-  specialSchedule: boolean;
   scheduleDays?: ScheduleDay[];
   createdAt?: string;
   updatedAt?: string;

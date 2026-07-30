@@ -1,7 +1,7 @@
 import React from "react";
 import { IconButton, Tooltip, useTheme } from "@mui/material";
 import { Sun, Moon, Monitor } from "lucide-react";
-import { useThemeMode } from "../../index";
+import { useThemeMode } from "../../context/ThemeContext";
 
 type ThemeMode = "light" | "dark" | "default";
 

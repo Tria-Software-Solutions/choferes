@@ -12,7 +12,7 @@ import {
   useMediaQuery,
   Typography,
 } from "@mui/material";
-import { Plus, X, Eye, EyeOff, User, Mail, Lock, Users, Info } from "lucide-react";
+import { Plus, X, Eye, EyeOff, User, Mail, Lock, Users } from "lucide-react";
 import OutlinedInput from "@mui/material/OutlinedInput";
 import { Role } from "../../../models/Role";
 import TextfieldComponent from "../../../components/Textfield/Textfield.component";
@@ -23,10 +23,6 @@ import {
   iconStyle,
   formControl,
   menuPaperProps,
-  infoBox,
-  infoIconBox,
-  infoTitle,
-  infoDesc,
   actionsBox,
   clearButton,
   actionsInnerBox,
@@ -284,7 +280,17 @@ const AddUserForm: React.FC<AddUserFormProps> = ({
                     </Typography>
                   );
                 }
-                return selected;
+                return (
+                  <Typography
+                    sx={{
+                      fontWeight: 700,
+                      fontSize: "0.875rem",
+                      color: theme.palette.text.primary,
+                    }}
+                  >
+                    {selected}
+                  </Typography>
+                );
               }}
               MenuProps={menuPaperProps}
             >
@@ -295,22 +301,6 @@ const AddUserForm: React.FC<AddUserFormProps> = ({
               ))}
             </Select>
           </FormControl>
-        </Grid>
-
-        <Grid item xs={12}>
-          <Box sx={infoBox(theme)}>
-            <Box sx={infoIconBox(theme)}>
-              <Info size={18} />
-            </Box>
-            <Box>
-              <Typography sx={infoTitle(theme)}>
-                {FORMS.ADD_USER.INFO_TITLE}
-              </Typography>
-              <Typography sx={infoDesc(theme)}>
-                {FORMS.ADD_USER.INFO_DESC}
-              </Typography>
-            </Box>
-          </Box>
         </Grid>
 
         <Grid item xs={12}>

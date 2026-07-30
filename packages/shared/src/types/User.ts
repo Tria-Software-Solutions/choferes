@@ -10,6 +10,7 @@ export interface User {
   temporalPassword?: string;
   isActive: boolean;
   avatar?: string;
+  settings?: Record<string, unknown>;
   roles?: Role[];
   roleId?: number;
   roleName?: string;

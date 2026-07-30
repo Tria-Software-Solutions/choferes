@@ -358,7 +358,7 @@ const EditableTableComponent = <T extends object>({
         sx={{
           flex: 1,
           minHeight: 0,
-          maxHeight: maxTableHeight || "none",
+          maxHeight: maxTableHeight,
           overflowY: "auto",
           overflowX: "auto",
           borderRadius: 0,

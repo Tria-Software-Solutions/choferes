@@ -28,15 +28,38 @@ export function getScheduleHours(schedule: Schedule | null | undefined, day: str
 
 /**
  * Sorts schedules: normal first (alphabetically), then special (alphabetically).
+ * If orderByIds is provided, uses that custom order instead.
  * Used everywhere schedules are displayed to ensure consistent ordering.
  */
-export function sortSchedulesByType<T extends { specialSchedule?: boolean; label: string }>(list: T[]): T[] {
-  return [...list].sort((a, b) => {
-    if (a.specialSchedule !== b.specialSchedule) {
-      return a.specialSchedule ? 1 : -1;
+export function sortSchedulesByType<T extends { label: string; id: number }>(
+  list: T[],
+  orderByIds?: number[],
+): T[] {
+  const arr = [...list];
+
+  if (orderByIds && orderByIds.length > 0) {
+    // Use custom order; items not in the custom order go to the end
+    const ordered: T[] = [];
+    const remaining: T[] = [];
+
+    for (const item of arr) {
+      if (orderByIds.includes(item.id)) {
+        ordered.push(item);
+      } else {
+        remaining.push(item);
+      }
     }
-    return a.label.localeCompare(b.label, 'es', { sensitivity: 'base' });
-  });
+
+    // Sort ordered items by the custom order
+    ordered.sort((a, b) => orderByIds.indexOf(a.id) - orderByIds.indexOf(b.id));
+    // Sort remaining items alphabetically
+    remaining.sort((a, b) => a.label.localeCompare(b.label, 'es', { sensitivity: 'base' }));
+
+    return [...ordered, ...remaining];
+  }
+
+  // Default: alphabetical order
+  return arr.sort((a, b) => a.label.localeCompare(b.label, 'es', { sensitivity: 'base' }));
 }
 
 /**

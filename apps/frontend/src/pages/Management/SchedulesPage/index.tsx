@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from "react";
+import React, { useState, useEffect, useMemo, useCallback } from "react";
 import { useDebounce } from "../../../hooks/useDebounce";
 import { useAuthContext } from "../../../context/AuthContext";
 import { Schedule } from "../../../models/Schedule";
@@ -9,6 +9,7 @@ import {
   createSchedule,
   updateSchedule,
   deleteSchedule,
+  setScheduleOrder,
 } from "../../../store/slices/schedulesSlice";
 import SearchBarComponent from "../../../components/SearchBar/SearchBar.component";
 import EditableTableComponent from "../../../components/Table/EditableTable/EditableTable.component";
@@ -16,21 +17,21 @@ import SpeedDialComponent from "../../../components/SpeedDial/SpeedDial.componen
 import AddScheduleForm from "../../Forms/AddScheduleForm";
 import { useAppNotifications } from "../../../components/Snackbar/Snackbar.component";
 import DialogComponent from "../../../components/Dialog/Dialog.component";
+import ReorderDialog from "../../../components/ReorderDialog/ReorderDialog.component";
 import { createScheduleNotification } from "../../../services/notificationService";
 import { buildScheduleDays, sortSchedulesByType } from "../../../utils/schedule";
+import * as UserService from "../../../services/userService";
 import {
   Button,
   Box,
   Typography,
   TextField,
-  Switch,
   useTheme,
   useMediaQuery,
   CircularProgress,
   Backdrop,
   Paper,
   Tooltip,
-  Chip,
 } from "@mui/material";
 import {
   createExportOptions,
@@ -40,7 +41,7 @@ import { translateDayOptionsToSpanish } from "../../../utils/string";
 import PAGE_TITLE from "../../../constants/pageTitle.constants";
 import PERMISSIONS from "../../../constants/permissions.constants";
 import MANAGEMENT from "../../../constants/management.constants";
-import { CalendarDays, Download, X, Plus, Trash2, PlusCircle, Clock } from "lucide-react";
+import { CalendarDays, Download, X, Plus, Trash2, PlusCircle, Clock, GripVertical } from "lucide-react";
 import { PdfIcon, ExcelIcon } from "../../../components/Icons/FileIcons";
 import { NOTIFICATIONS } from "../../../constants/constants";
 import {
@@ -60,7 +61,7 @@ import { capitalizeFirstLetter } from "../../../utils/string";
 // Schedules management page component
 const SchedulesPage: React.FC = () => {
   const dispatch = useDispatch<AppDispatch>();
-  const { userPermissions } = useAuthContext();
+  const { currentUser, userPermissions } = useAuthContext();
   const { schedules, isLoadingSchedules } = useSelector(
     (state: RootState) => state.schedules
   );
@@ -72,12 +73,10 @@ const SchedulesPage: React.FC = () => {
     label: string;
     days: string[];
     hours: string;
-    specialSchedule: boolean;
   }>({
     label: "",
     days: [],
     hours: "",
-    specialSchedule: false,
   });
   const [dayHoursEditing, setDayHoursEditing] = useState<Record<string, string>>({});
   const [openDeleteDialog, setOpenDeleteDialog] = useState(false);
@@ -87,6 +86,7 @@ const SchedulesPage: React.FC = () => {
   const [openAddScheduleModal, setOpenAddScheduleModal] = useState(false);
   const [isCreatingSchedule, setIsCreatingSchedule] = useState(false);
   const [isDeletingSchedule, setIsDeletingSchedule] = useState(false);
+  const [openReorderDialog, setOpenReorderDialog] = useState(false);
 
   const theme = useTheme();
   const isSmallScreen = useMediaQuery(theme.breakpoints.down("sm"));
@@ -210,7 +210,6 @@ const SchedulesPage: React.FC = () => {
       label: schedule.label,
       days: schedule.days,
       hours: schedule.hours.toString(),
-      specialSchedule: schedule.specialSchedule,
     });
     setDayHoursEditing(dayHours);
   };
@@ -234,7 +233,7 @@ const SchedulesPage: React.FC = () => {
       };
       dispatch(updateSchedule({ id, updatedSchedule }));
       setEditRowId(null);
-      setEditFields({ label: "", days: [], hours: "", specialSchedule: false });
+      setEditFields({ label: "", days: [], hours: "" });
       setDayHoursEditing({});
       showNotification(NOTIFICATIONS.SCHEDULE_UPDATE_SUCCESS, {
         severity: "success",
@@ -271,6 +270,22 @@ const SchedulesPage: React.FC = () => {
   const handleCloseAddModal = () => {
     setOpenAddScheduleModal(false);
   };
+
+  // Handle saving the custom schedule order
+  const handleReorderSave = useCallback(async (orderedIds: number[]) => {
+    // Apply order locally
+    dispatch(setScheduleOrder(orderedIds));
+    // Save to user settings in DB
+    if (currentUser?.id) {
+      try {
+        await UserService.updateUserSettings(currentUser.id, {
+          scheduleOrder: orderedIds,
+        });
+      } catch {
+        // Silently fail - order still works locally
+      }
+    }
+  }, [dispatch, currentUser?.id]);
 
   // Handle deletion of a schedule
   const handleDelete = async () => {
@@ -460,9 +475,25 @@ const SchedulesPage: React.FC = () => {
               )}
             </Box>
 
-            {/* Add Button */}
+            {/* Actions Row */}
             {userPermissions.includes(PERMISSIONS.CREATE_SCHEDULES) && (
               <Box sx={{ display: { xs: 'none', sm: 'flex' }, gap: 1 }}>
+                <Button
+                  variant="outlined"
+                  startIcon={<GripVertical size={16} />}
+                  onClick={() => setOpenReorderDialog(true)}
+                  disabled={filteredSchedules.length < 2}
+                  sx={{
+                    px: 2,
+                    py: 1,
+                    fontWeight: 600,
+                    fontSize: "0.85rem",
+                    borderRadius: '10px',
+                    textTransform: 'none',
+                  }}
+                >
+                  Ordenar
+                </Button>
                 <Button
                   variant="contained"
                   startIcon={<Plus size={18} />}
@@ -515,7 +546,7 @@ const SchedulesPage: React.FC = () => {
               {filteredSchedules.length > 0 ? (
                 <EditableTableComponent<Schedule>
                   data={filteredSchedules}
-                  columns={["label", "hours", "specialSchedule"]}
+                  columns={["label", "hours"]}
                   editRowId={editRowId}
                   editFields={editFields}
                   setEditField={(field, value) =>
@@ -563,61 +594,6 @@ const SchedulesPage: React.FC = () => {
                         >
                           {String(value)}
                         </Typography>
-                      );
-                    }
-                    if (column === 'specialSchedule') {
-                      if (isEditing && editProps) {
-                        const isSpecial = Boolean(editProps.editFields['specialSchedule']);
-                        return (
-                          <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.75, py: 0.5 }}>
-                            <Switch
-                              checked={isSpecial}
-                              onChange={(e) => editProps.setEditField('specialSchedule', e.target.checked)}
-                              size="small"
-                              sx={{
-                                '& .MuiSwitch-switchBase': {
-                                  '&.Mui-checked': {
-                                    '& + .MuiSwitch-track': {
-                                      opacity: 1,
-                                      backgroundColor: (t) => t.palette.warning.main,
-                                    },
-                                  },
-                                  '& .MuiSwitch-thumb': {
-                                    backgroundColor: isSpecial
-                                      ? (t) => t.palette.warning.main
-                                      : (t) => t.palette.mode === 'dark' ? 'rgba(255,255,255,0.3)' : 'rgba(0,0,0,0.3)',
-                                    boxShadow: '0 1px 4px rgba(0,0,0,0.2)',
-                                  },
-                                },
-                              }}
-                            />
-                            <Typography
-                              sx={{
-                                fontSize: '0.75rem',
-                                fontWeight: 600,
-                                color: isSpecial ? 'warning.main' : 'text.disabled',
-                                userSelect: 'none',
-                              }}
-                            >
-                              {isSpecial ? 'Especial' : 'Normal'}
-                            </Typography>
-                          </Box>
-                        );
-                      }
-                      const isSpecial = Boolean(value);
-                      return (
-                        <Chip
-                          label={isSpecial ? 'Especial' : 'Normal'}
-                          size="small"
-                          variant={isSpecial ? 'filled' : 'outlined'}
-                          color={isSpecial ? 'warning' : 'default'}
-                          sx={{
-                            fontWeight: 600,
-                            fontSize: '0.7rem',
-                            borderRadius: '8px',
-                            height: 24,
-                          }}
-                        />
                       );
                     }
                     if (column === 'hours') {
@@ -885,6 +861,12 @@ const SchedulesPage: React.FC = () => {
           isLoading={isCreatingSchedule}
         />
       </DialogComponent>
+      <ReorderDialog
+        open={openReorderDialog}
+        schedules={filteredSchedules}
+        onClose={() => setOpenReorderDialog(false)}
+        onSave={handleReorderSave}
+      />
     </Box>
   );
 };

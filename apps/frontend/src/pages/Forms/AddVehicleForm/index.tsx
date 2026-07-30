@@ -13,7 +13,7 @@ import FORMS from "../../../constants/forms.constants";
 import BRANDS_LIST from "../../../constants/brands.constants";
 import COLORS_LIST from "../../../constants/colors.constants";
 import { maskLicensePlate } from "../../../utils/mask";
-import { Plus, X, Ticket, Car, ParkingCircle, Palette, FileEdit, Factory, Info } from "lucide-react";
+import { Plus, X, Ticket, Car, ParkingCircle, Palette, FileEdit, Factory } from "lucide-react";
 import TextfieldComponent from "../../../components/Textfield/Textfield.component";
 import { DatePicker, LocalizationProvider } from "@mui/x-date-pickers";
 import { AdapterDateFns } from "@mui/x-date-pickers/AdapterDateFns";
@@ -64,7 +64,6 @@ const AddVehicleForm: React.FC<AddVehicleFormProps> = ({
 }) => {
   const [autoPopulated, setAutoPopulated] = useState(false);
   const theme = useTheme();
-  const isDark = theme.palette.mode === "dark";
   const isSmallScreen = useMediaQuery(theme.breakpoints.down("sm"));
   const [formData, setFormData] = useState({
     ticket: getNextTicketNumber(),
@@ -502,63 +501,6 @@ const AddVehicleForm: React.FC<AddVehicleFormProps> = ({
             icon={<FileEdit style={iconStyle} />}
             sx={formControl(theme)}
           />
-        </Grid>
-
-        {/* Premium info card */}
-        <Grid item xs={12}>
-          <Box
-            sx={{
-              display: "flex",
-              alignItems: "center",
-              gap: 1.5,
-              p: { xs: 1, sm: 1.5 },
-              borderRadius: "14px",
-              backgroundColor: isDark
-                ? "rgba(99,102,241,0.04)"
-                : "rgba(99,102,241,0.03)",
-              border: `1px solid ${isDark
-                ? "rgba(255,255,255,0.06)"
-                : "rgba(99,102,241,0.1)"}`,
-            }}
-          >
-            <Box
-              sx={{
-                width: 36,
-                height: 36,
-                borderRadius: "10px",
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                background: `linear-gradient(135deg, ${theme.palette.primary.main}, ${theme.palette.primary.dark})`,
-                color: "#fff",
-                flexShrink: 0,
-                boxShadow: `0 4px 12px ${theme.palette.mode === "dark" ? "rgba(99,102,241,0.25)" : "rgba(99,102,241,0.15)"}`,
-              }}
-            >
-              <Info size={18} />
-            </Box>
-            <Box>
-              <Typography
-                sx={{
-                  fontWeight: 600,
-                  color: theme.palette.text.primary,
-                  fontSize: "0.875rem",
-                }}
-              >
-                {FORMS.ADD_VEHICLE.INFO_TITLE}
-              </Typography>
-              <Typography
-                sx={{
-                  color: theme.palette.text.secondary,
-                  fontSize: "0.75rem",
-                  lineHeight: 1.4,
-                  mt: 0.15,
-                }}
-              >
-                {FORMS.ADD_VEHICLE.INFO_DESC}
-              </Typography>
-            </Box>
-          </Box>
         </Grid>
 
         <Grid item xs={12}>

@@ -1,4 +1,4 @@
-import { useEffect, useState, useMemo } from "react";
+import { useEffect, useState, useMemo, useCallback, useRef } from "react";
 import {
   Box,
   Typography,
@@ -7,6 +7,7 @@ import {
   CircularProgress,
   Paper,
 } from "@mui/material";
+import { useLocation } from "react-router-dom";
 import { getEmployees } from "../../../services/employeeService";
 import { getMonthlySummaries } from "../../../services/monthlySummaryService";
 import { getWeeklySummaries } from "../../../services/weeklySummaryService";
@@ -77,6 +78,7 @@ const getCurrentPeriodNum = (period: Period): number => {
 
 const Dashboard = () => {
   const [loading, setLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
   const [period, setPeriod] = useState<Period>("biweekly");
   const [employeeMap, setEmployeeMap] = useState<Map<number, EmployeeName>>(new Map());
   const [weeklyRaw, setWeeklyRaw] = useState<RawEntry[]>([]);
@@ -89,74 +91,91 @@ const Dashboard = () => {
   const theme = useTheme();
   const isSmallScreen = useMediaQuery(theme.breakpoints.down("sm"));
 
-  useEffect(() => {
-    let cancelled = false;
+  const location = useLocation();
+  const cancelledRef = useRef(false);
+  const initialLoadDoneRef = useRef(false);
 
-    const load = async () => {
-      const results = await Promise.allSettled([
-        getEmployees(),
-        getWeeklySummaries(),
-        getBiweeklySummaries(),
-        getMonthlySummaries(),
-        getVehicles(1, 10000),
-        getHoursWorked(),
-        getSchedules(),
-      ]);
+  const load = useCallback(async () => {
+    cancelledRef.current = false;
+    if (!initialLoadDoneRef.current) {
+      setLoading(true);
+    } else {
+      setRefreshing(true);
+    }
 
-      if (cancelled) return;
+    const results = await Promise.allSettled([
+      getEmployees(),
+      getWeeklySummaries(),
+      getBiweeklySummaries(),
+      getMonthlySummaries(),
+      getVehicles(1, 10000),
+      getHoursWorked(),
+      getSchedules(),
+    ]);
 
-      const empRes = results[0].status === "fulfilled" ? results[0].value : null;
-      const wkRes = results[1].status === "fulfilled" ? results[1].value : null;
-      const biRes = results[2].status === "fulfilled" ? results[2].value : null;
-      const monRes = results[3].status === "fulfilled" ? results[3].value : null;
-      const vehRes = results[4].status === "fulfilled" ? results[4].value : null;
-      const hwRes = results[5].status === "fulfilled" ? results[5].value : null;
-      const schRes = results[6].status === "fulfilled" ? results[6].value : null;
+    if (cancelledRef.current) return;
 
-      const emap: Map<number, EmployeeName> = new Map();
-      if (empRes) {
-        const raw = Array.isArray(empRes) ? empRes : (empRes as { employees: unknown[] }).employees || [];
-        for (const e of raw as Record<string, unknown>[]) {
-          emap.set(e.id as number, { id: e.id as number, firstName: e.firstName as string, lastName: e.lastName as string });
-        }
+    const empRes = results[0].status === "fulfilled" ? results[0].value : null;
+    const wkRes = results[1].status === "fulfilled" ? results[1].value : null;
+    const biRes = results[2].status === "fulfilled" ? results[2].value : null;
+    const monRes = results[3].status === "fulfilled" ? results[3].value : null;
+    const vehRes = results[4].status === "fulfilled" ? results[4].value : null;
+    const hwRes = results[5].status === "fulfilled" ? results[5].value : null;
+    const schRes = results[6].status === "fulfilled" ? results[6].value : null;
+
+    if (cancelledRef.current) return;
+
+    const emap: Map<number, EmployeeName> = new Map();
+    if (empRes) {
+      const raw = Array.isArray(empRes) ? empRes : (empRes as { employees: unknown[] }).employees || [];
+      for (const e of raw as Record<string, unknown>[]) {
+        emap.set(e.id as number, { id: e.id as number, firstName: e.firstName as string, lastName: e.lastName as string });
       }
-      setEmployeeMap(emap);
+    }
+    setEmployeeMap(emap);
 
-      const extract = (res: unknown, key: string): RawEntry[] => {
-        if (!res) return [];
-        const raw = Array.isArray(res) ? res : (res as Record<string, unknown>)[key] || [];
-        return (raw as Record<string, unknown>[]).map((r) => ({
-          employeeId: r.employeeId as number,
-          totalHours: (r.totalHours as number) || 0,
-          year: (r.year as number) || 0,
-          month: r.month as number | undefined,
-          weekNumber: r.weekNumber as number | undefined,
-          biweekNumber: r.biweekNumber as number | undefined,
-        }));
-      };
-
-      setWeeklyRaw(extract(wkRes, "weeklySummaries"));
-      setBiweeklyRaw(extract(biRes, "biweeklySummaries"));
-      setMonthlyRaw(extract(monRes, "monthlySummaries"));
-
-      if (vehRes) {
-        const raw = Array.isArray(vehRes) ? vehRes : (vehRes as { vehicles: unknown[] }).vehicles || vehRes || [];
-        setVehicles(raw as Record<string, unknown>[]);
-      }
-      if (hwRes) {
-        const raw = Array.isArray(hwRes) ? hwRes : (hwRes as { hoursWorked: unknown[] }).hoursWorked || [];
-        setHoursWorked(raw as Record<string, unknown>[]);
-      }
-      if (schRes) {
-        const raw = Array.isArray(schRes) ? schRes : (schRes as { schedules: unknown[] }).schedules || [];
-        setSchedules(raw as Record<string, unknown>[]);
-      }
-
-      setLoading(false);
+    const extract = (res: unknown, key: string): RawEntry[] => {
+      if (!res) return [];
+      const raw = Array.isArray(res) ? res : (res as Record<string, unknown>)[key] || [];
+      return (raw as Record<string, unknown>[]).map((r) => ({
+        employeeId: r.employeeId as number,
+        totalHours: (r.totalHours as number) || 0,
+        year: (r.year as number) || 0,
+        month: r.month as number | undefined,
+        weekNumber: r.weekNumber as number | undefined,
+        biweekNumber: r.biweekNumber as number | undefined,
+      }));
     };
-    load();
-    return () => { cancelled = true; };
+
+    if (cancelledRef.current) return;
+    setWeeklyRaw(extract(wkRes, "weeklySummaries"));
+    setBiweeklyRaw(extract(biRes, "biweeklySummaries"));
+    setMonthlyRaw(extract(monRes, "monthlySummaries"));
+
+    if (cancelledRef.current) return;
+    if (vehRes) {
+      const raw = Array.isArray(vehRes) ? vehRes : (vehRes as { vehicles: unknown[] }).vehicles || vehRes || [];
+      setVehicles(raw as Record<string, unknown>[]);
+    }
+    if (hwRes) {
+      const raw = Array.isArray(hwRes) ? hwRes : (hwRes as { hoursWorked: unknown[] }).hoursWorked || [];
+      setHoursWorked(raw as Record<string, unknown>[]);
+    }
+    if (schRes) {
+      const raw = Array.isArray(schRes) ? schRes : (schRes as { schedules: unknown[] }).schedules || [];
+      setSchedules(raw as Record<string, unknown>[]);
+    }
+
+    if (cancelledRef.current) return;
+    initialLoadDoneRef.current = true;
+    setLoading(false);
+    setRefreshing(false);
   }, []);
+
+  useEffect(() => {
+    load();
+    return () => { cancelledRef.current = true; };
+  }, [load, location.pathname]);
 
   const currentYear = new Date().getFullYear();
   const currentPeriod = getCurrentPeriodNum(period);
@@ -243,7 +262,8 @@ const Dashboard = () => {
       .map((e) => ({ name: e.name, totalHours: Math.round(e.totalHours * 10) / 10, overtime: Math.round(e.overtime * 10) / 10 }))
       .sort((a, b) => b.overtime - a.overtime);
 
-    return { top, overtime, totalHours: Math.round(totalHrs), employeeCount: employeeMap.size };
+    const totalOvertime = overtime.reduce((sum, e) => sum + e.overtime, 0);
+    return { top, overtime, totalHours: Math.round(totalHrs), totalOvertime, employeeCount: employeeMap.size };
   }, [period, weeklyRaw, biweeklyRaw, monthlyRaw, employeeMap, currentYear, currentPeriod]);
 
   const scheduleDist = useMemo(() => {
@@ -260,10 +280,8 @@ const Dashboard = () => {
       const sid = hw.scheduleId as number;
       const label = schedMap.get(sid) || `Horario #${sid}`;
       countBySched[label] = (countBySched[label] || 0) + 1;
-    }
-    return Object.entries(countBySched)
-      .filter(([label]) => label.toLowerCase() !== "horario especial")
-      .map(([label, count]) => ({ label, count }));
+    }    
+    return Object.entries(countBySched).map(([label, count]) => ({ label, count }));
   }, [hoursWorked, schedules, filteredEmployeeIds, periodDateRange]);
 
   const vehicleBrands = useMemo(() => {
@@ -328,9 +346,26 @@ const Dashboard = () => {
                 <LayoutDashboard size={20} strokeWidth={1.5} />
               </Box>
               <Box minWidth={0}>
-                <Typography variant={isSmallScreen ? "h6" : "h5"} sx={{ fontWeight: 700, fontSize: { xs: "1rem", sm: "1.15rem" }, color: theme.palette.text.primary, letterSpacing: "-0.02em", lineHeight: 1.2, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
-                  {PAGE_TITLE.DASHBOARD}
-                </Typography>
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.75 }}>
+                  <Typography variant={isSmallScreen ? "h6" : "h5"} sx={{ fontWeight: 700, fontSize: { xs: "1rem", sm: "1.15rem" }, color: theme.palette.text.primary, letterSpacing: "-0.02em", lineHeight: 1.2, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                    {PAGE_TITLE.DASHBOARD}
+                  </Typography>
+                  {refreshing && (
+                    <Box
+                      sx={{
+                        width: 14,
+                        height: 14,
+                        border: '2px solid',
+                        borderColor: theme.palette.primary.main,
+                        borderTopColor: 'transparent',
+                        borderRadius: '50%',
+                        animation: 'spin 0.8s linear infinite',
+                        flexShrink: 0,
+                        '@keyframes spin': { '0%': { transform: 'rotate(0deg)' }, '100%': { transform: 'rotate(360deg)' } },
+                      }}
+                    />
+                  )}
+                </Box>
                 <Typography variant="caption" sx={{ color: theme.palette.text.secondary, fontSize: "0.7rem", letterSpacing: "0.02em", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", display: "block" }}>
                   {filtered.employeeCount} empleados · {filtered.totalHours} horas ({PERIOD_LABELS[period].toLowerCase()})
                 </Typography>
@@ -348,9 +383,9 @@ const Dashboard = () => {
               }}
             >
               {[
-                { key: 'monthly', label: 'Mensual' },
-                { key: 'biweekly', label: 'Quincenal' },
                 { key: 'weekly', label: 'Semanal' },
+                { key: 'biweekly', label: 'Quincenal' },
+                { key: 'monthly', label: 'Mensual' },
               ].map(({ key, label }) => (
                 <Box
                   key={key}
@@ -394,7 +429,7 @@ const Dashboard = () => {
               title="Resumen del período"
               description={PERIOD_LABELS[period]}
               colSpan={{ lg: 4, md: 4 }}
-              header={<PeriodSummary employeeCount={filtered.employeeCount} totalHours={filtered.totalHours} overtimeCount={filtered.overtime.length} />}
+              header={<PeriodSummary employeeCount={filtered.employeeCount} totalHours={filtered.totalHours} overtimeCount={filtered.overtime.length} totalOvertime={filtered.totalOvertime} />}
             />
             <BentoGridItem
               title="Horas por empleado"

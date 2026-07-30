@@ -10,8 +10,6 @@ export class Schedule extends Model {
   public label!: string; // Label or name for the schedule
 
   public hours!: number; // Number of hours for the schedule
-
-  public specialSchedule!: boolean; // Indicates if this is a special schedule
 }
 
 Schedule.init(
@@ -32,11 +30,6 @@ Schedule.init(
     hours: {
       type: DataTypes.INTEGER,
       allowNull: false,
-    },
-    specialSchedule: {
-      type: DataTypes.BOOLEAN,
-      allowNull: false,
-      defaultValue: false,
     },
   },
   {

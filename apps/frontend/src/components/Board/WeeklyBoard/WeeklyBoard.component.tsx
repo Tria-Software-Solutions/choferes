@@ -45,8 +45,11 @@ import {
   formatHeaderDate,
   getCurrentWeekDates,
   getInvolvedPeriods,
+  hasMultipleBiweeks,
+  hasMultipleMonths,
+  hasMultipleYears,
 } from "../../../utils/dates";
-import { translateDayToAbrevSpanish, capitalizeFirstLetter, getInitials } from "../../../utils/string";
+import { translateDayToAbrevSpanish, capitalizeFirstLetter, getInitials, getMonthName } from "../../../utils/string";
 import { getEmployeeColor } from "../../../utils/employeeColors";
 import { EnglishDayOfWeek } from "../../../utils/dayAbreviations";
 import { PERMISSIONS, SELECTOR_TABLE } from "../../../constants/constants";
@@ -123,7 +126,7 @@ interface WeeklyBoardProps {
   biweekNumber: number;
   month: number;
   year: number;
-  handleChange: (value: string, employeeId: number, date: Date) => void;
+  handleChange: (value: string, employeeId: number, date: Date, skipRecalc?: boolean) => void;
   handleAdjustTime: (employeeId: number, condition: "add" | "subtract", timeAdjustment: number) => void;
   recalculateEmployeeWeeklySummary?: (
     employeeId: number,
@@ -347,33 +350,37 @@ const DragOverlayCard = memo(function DragOverlayCard({
   return (
     <Box sx={{
       display: "flex", alignItems: "center", gap: 0.75, px: 1.25, py: 1.25,
-      borderRadius: "12px",
+      borderRadius: "14px",
       backgroundColor: isUnassigned
-        ? (isDark ? "rgba(30,30,40,0.95)" : "rgba(255,255,255,0.95)" )
-        : scheduleColor.bg.replace("0.08", "0.85"),
-      border: `2px solid ${isUnassigned ? (isDark ? "rgba(255,255,255,0.2)" : "rgba(0,0,0,0.15)") : scheduleColor.text}`,
+        ? (isDark ? "rgba(30,30,40,0.96)" : "rgba(255,255,255,0.96)" )
+        : scheduleColor.bg.replace("0.08", "0.92"),
+      border: `2px solid ${isUnassigned ? (isDark ? "rgba(255,255,255,0.25)" : "rgba(0,0,0,0.18)") : scheduleColor.text}`,
       boxShadow: isDark
-        ? "0 12px 48px rgba(0,0,0,0.5), 0 0 0 1px rgba(255,255,255,0.08)"
-        : "0 12px 48px rgba(0,0,0,0.2), 0 0 0 1px rgba(255,255,255,0.9)",
-      transform: "rotate(-3deg) scale(1.08)",
-      backdropFilter: "blur(8px)",
+        ? "0 20px 60px rgba(0,0,0,0.5), 0 0 0 1px rgba(255,255,255,0.1), 0 4px 20px rgba(0,0,0,0.3)"
+        : "0 20px 60px rgba(0,0,0,0.15), 0 0 0 1px rgba(255,255,255,0.9), 0 4px 20px rgba(0,0,0,0.08)",
+      transform: "scale(1.05) translateY(-4px)",
+      backdropFilter: "blur(12px)",
       width: 180,
       position: "relative",
       overflow: "hidden",
+      willChange: "transform",
+      cursor: "grabbing",
     }}>
       {/* Color accent line */}
       <Box sx={{
-        position: "absolute", left: 0, top: "15%", bottom: "15%", width: 3,
-        borderRadius: "0 3px 3px 0",
-        backgroundColor: isUnassigned ? (isDark ? "rgba(255,255,255,0.2)" : "rgba(0,0,0,0.15)") : scheduleColor.text,
+        position: "absolute", left: 0, top: "15%", bottom: "15%", width: 3.5,
+        borderRadius: "0 4px 4px 0",
+        backgroundColor: isUnassigned ? (isDark ? "rgba(255,255,255,0.25)" : "rgba(0,0,0,0.2)") : scheduleColor.text,
+        opacity: 0.6,
       }} />
 
       <Box sx={{
-        width: 30, height: 30, borderRadius: "50%",
+        width: 32, height: 32, borderRadius: "50%",
         backgroundColor: empColor,
         color: "#fff",
         display: "flex", alignItems: "center", justifyContent: "center",
-        fontSize: "0.72rem", fontWeight: 700, flexShrink: 0,
+        fontSize: "0.75rem", fontWeight: 700, flexShrink: 0,
+        boxShadow: `0 0 0 2px ${isDark ? "rgba(255,255,255,0.15)" : "rgba(255,255,255,0.8)"}`,
       }}>
         {initials}
       </Box>
@@ -382,7 +389,7 @@ const DragOverlayCard = memo(function DragOverlayCard({
         <Typography sx={{
           fontSize: "0.8rem", fontWeight: 700,
           color: isUnassigned
-            ? (isDark ? "rgba(255,255,255,0.7)" : "rgba(0,0,0,0.7)")
+            ? (isDark ? "rgba(255,255,255,0.8)" : "rgba(0,0,0,0.8)")
             : scheduleColor.text,
           lineHeight: 1.2,
           overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap",
@@ -391,8 +398,8 @@ const DragOverlayCard = memo(function DragOverlayCard({
         </Typography>
         <Typography sx={{
           fontSize: "0.6rem", fontWeight: 500,
-          color: isUnassigned ? "rgba(0,0,0,0.3)" : scheduleColor.text,
-          lineHeight: 1.3, opacity: isUnassigned ? 0.5 : 0.8,
+          color: isUnassigned ? "rgba(0,0,0,0.35)" : scheduleColor.text,
+          lineHeight: 1.3, opacity: isUnassigned ? 0.55 : 0.85,
         }}>
           {isUnassigned ? "Sin asignar" : scheduleLabel}
         </Typography>
@@ -400,14 +407,14 @@ const DragOverlayCard = memo(function DragOverlayCard({
 
       {!isUnassigned && (
         <Box sx={{ textAlign: "right", flexShrink: 0 }}>
-          <Typography sx={{ fontSize: "0.75rem", fontWeight: 800, color: scheduleColor.text, lineHeight: 1 }}>
+          <Typography sx={{ fontSize: "0.78rem", fontWeight: 800, color: scheduleColor.text, lineHeight: 1 }}>
             {hours}h
           </Typography>
-          <Typography sx={{ fontSize: "0.5rem", fontWeight: 600, color: scheduleColor.text, opacity: 0.5, lineHeight: 1.2 }}>
+          <Typography sx={{ fontSize: "0.52rem", fontWeight: 600, color: scheduleColor.text, opacity: 0.5, lineHeight: 1.2 }}>
             T: {periodTotal}h
           </Typography>
           {periodOvertime > 0 && (
-            <Typography sx={{ fontSize: "0.5rem", fontWeight: 700, color: "#34d399", lineHeight: 1.2 }}>
+            <Typography sx={{ fontSize: "0.52rem", fontWeight: 700, color: "#34d399", lineHeight: 1.2 }}>
               +{periodOvertime}h
             </Typography>
           )}
@@ -454,10 +461,11 @@ function DraggableCardWrapper({
       {...listeners}
       {...attributes}
       sx={{
-        opacity: isDragging ? 0.15 : 1,
-        transform: isDragging ? "scale(0.93)" : "none",
-        transition: "opacity 0.25s ease, transform 0.25s ease",
+        opacity: isDragging ? 0.08 : 1,
+        transform: isDragging ? "scale(0.92)" : "none",
+        transition: "opacity 0.3s cubic-bezier(0.4, 0, 0.2, 1), transform 0.3s cubic-bezier(0.4, 0, 0.2, 1)",
         touchAction: "none",
+        pointerEvents: isDragging ? "none" : undefined,
       }}
     >
       <EmployeeCard
@@ -480,10 +488,15 @@ interface DraggableTotalsRowProps {
   onInfoClick?: (employee: Employee) => void;
   onAdjustClick?: (employee: Employee) => void;
   theme: Theme;
+  firstPeriodLabel?: string;
+  secondPeriodLabel?: string;
+  firstPeriodHours?: number;
+  secondPeriodHours?: number;
 }
 
 function DraggableTotalsRow({
   employee, hours, overtime, empColor, isDark, onInfoClick, onAdjustClick, theme,
+  firstPeriodLabel, secondPeriodLabel, firstPeriodHours, secondPeriodHours,
 }: DraggableTotalsRowProps) {
   const initials = getInitials(employee.firstName, employee.lastName);
   const dragId: UniqueIdentifier = `totals-${employee.id}`;
@@ -574,6 +587,17 @@ function DraggableTotalsRow({
             lineHeight: 1.2,
           }}>
             +{overtime}h extra
+          </Typography>
+        )}
+        {firstPeriodLabel && secondPeriodLabel && (
+          <Typography sx={{
+            fontSize: "0.48rem", fontWeight: 500,
+            color: theme.palette.text.disabled,
+            lineHeight: 1.2, textAlign: "right",
+            mt: 0.15, opacity: 0.7,
+            whiteSpace: "nowrap",
+          }}>
+            {firstPeriodLabel}: {firstPeriodHours}h | {secondPeriodLabel}: {secondPeriodHours}h
           </Typography>
         )}
         <Box sx={{ display: "flex", alignItems: "center", gap: 0.25, mt: 0.3 }}>
@@ -954,8 +978,18 @@ function SwimlaneDayCell({ columnId, day, date, isTodayDate, isWeekend, children
 }
 
 // ─── Totals Column (droppable) ───
+interface EmployeePeriodData {
+  totalHours: number;
+  overtime: number;
+  hasWorked: boolean;
+  firstPeriodHours?: number;
+  secondPeriodHours?: number;
+  firstPeriodLabel?: string;
+  secondPeriodLabel?: string;
+}
+
 interface TotalsColumnProps {
-  employeeDataMap: Map<number, { totalHours: number; overtime: number; hasWorked: boolean }>;
+  employeeDataMap: Map<number, EmployeePeriodData>;
   filteredEmployees: Employee[];
   selectedPeriod: PeriodType;
   onPeriodChange: (period: PeriodType) => void;
@@ -980,6 +1014,17 @@ function TotalsColumn({
     boxShadow: `inset 0 0 0 2px ${isDark ? "rgba(99,102,241,0.35)" : "rgba(99,102,241,0.25)"}`,
     backgroundColor: isDark ? "rgba(99,102,241,0.08)" : "rgba(99,102,241,0.06)",
   } : {};
+
+  const entries = Array.from(employeeDataMap.values());
+  const totalHours = entries.reduce((s, d) => s + d.totalHours, 0);
+  const totalOvertime = entries.reduce((s, d) => s + d.overtime, 0);
+
+  // Per-period footer totals (when week spans multiple periods)
+  const footerFirstTotal = entries.reduce((s, d) => s + (d.firstPeriodHours ?? 0), 0);
+  const footerSecondTotal = entries.reduce((s, d) => s + (d.secondPeriodHours ?? 0), 0);
+  const footerFirstLabel = entries.find(e => e.firstPeriodLabel)?.firstPeriodLabel;
+  const footerSecondLabel = entries.find(e => e.secondPeriodLabel)?.secondPeriodLabel;
+  const hasPeriodBreakdown = !!(footerFirstLabel && footerSecondLabel);
 
   const [dialogEmpId, setDialogEmpId] = useState<number | null>(null);
   const [dialogHours, setDialogHours] = useState("");
@@ -1105,6 +1150,10 @@ function TotalsColumn({
                   onInfoClick={onInfoClick}
                   onAdjustClick={onAdjustClick}
                   theme={theme}
+                  firstPeriodLabel={empData?.firstPeriodLabel}
+                  secondPeriodLabel={empData?.secondPeriodLabel}
+                  firstPeriodHours={empData?.firstPeriodHours}
+                  secondPeriodHours={empData?.secondPeriodHours}
                 />
               </Box>
               {onAdjust && (
@@ -1129,16 +1178,36 @@ function TotalsColumn({
       </Box>
       {/* Footer - total */}
       <Box sx={{
-        px: 1.5, py: 0.65, textAlign: "center",
+        px: 1.5, py: 0.75, textAlign: "center",
         backgroundColor: isDark ? "rgba(139,92,246,0.06)" : "rgba(139,92,246,0.03)",
       }}>
+        {hasPeriodBreakdown && (
+          <Typography sx={{
+            fontSize: "0.58rem", fontWeight: 600,
+            color: isDark ? "rgba(167,139,250,0.55)" : "rgba(124,58,237,0.55)",
+            lineHeight: 1.3, mb: 0.35,
+            letterSpacing: "-0.01em",
+          }}>
+            {footerFirstLabel}: {footerFirstTotal}h + {footerSecondLabel}: {footerSecondTotal}h
+          </Typography>
+        )}
         <Typography sx={{
           fontSize: "0.72rem", fontWeight: 800,
           color: isDark ? "#a78bfa" : "#7c3aed",
           letterSpacing: "-0.02em",
         }}>
-          {Array.from(employeeDataMap.values()).reduce((s, d) => s + d.totalHours, 0)}h totales
+          {totalHours}h totales
         </Typography>
+        {totalOvertime > 0 && (
+          <Typography sx={{
+            fontSize: "0.6rem", fontWeight: 700,
+            color: "#34d399",
+            lineHeight: 1.2,
+            mt: 0.1,
+          }}>
+            +{totalOvertime}h extra
+          </Typography>
+        )}
       </Box>
 
       {/* Adjust hours dialog */}
@@ -1515,14 +1584,62 @@ const WeeklyBoard: React.FC<WeeklyBoardProps> = ({
 
   // Per-employee period totals
   const employeeDataMap = useMemo(() => {
-    const map = new Map<number, { totalHours: number; overtime: number; hasWorked: boolean }>();
+    const map = new Map<number, EmployeePeriodData>();
+    const hasMultiBiweeks = hasMultipleBiweeks(currentWeek);
+    const hasMultiMonths = hasMultipleMonths(currentWeek);
+    const hasMultiYears = hasMultipleYears(currentWeek);
+
     filteredEmployees.forEach((emp) => {
       const totalH = calculateTotalHours(emp, selectedPeriod, currentWeek, weekNumber, biweekNumber, month, year, weeklySummaries, biweeklySummaries, monthlySummaries, multiplePeriods);
       const overT = calculateOvertime(emp, selectedPeriod, currentWeek, weekNumber, biweekNumber, month, year, weeklySummaries, biweeklySummaries, monthlySummaries, multiplePeriods);
       const hasWkd = weeklySummaries.some(
         (s) => s.employeeId === emp.id && s.weekNumber === weekNumber && s.year === year && Number(s.totalHours) > 0,
       );
-      map.set(emp.id, { totalHours: Number(totalH), overtime: Number(overT), hasWorked: hasWkd });
+
+      // Per-period breakdown for display when week spans multiple periods
+      let firstPeriodHours: number | undefined;
+      let secondPeriodHours: number | undefined;
+      let firstPeriodLabel: string | undefined;
+      let secondPeriodLabel: string | undefined;
+
+      if (selectedPeriod === "biweekly" && hasMultiBiweeks && multiplePeriods.biweekNumbers.length >= 2) {
+        const p1 = multiplePeriods.biweekNumbers[0];
+        const p2 = multiplePeriods.biweekNumbers[1];
+        const s1 = biweeklySummaries.find(s => s.employeeId === emp.id && s.biweekNumber === p1.biweekNumber && s.year === p1.year);
+        const s2 = biweeklySummaries.find(s => s.employeeId === emp.id && s.biweekNumber === p2.biweekNumber && s.year === p2.year);
+        firstPeriodHours = Number(s1?.totalHours ?? 0);
+        secondPeriodHours = Number(s2?.totalHours ?? 0);
+        firstPeriodLabel = `Qna ${p1.biweekNumber}`;
+        secondPeriodLabel = `Qna ${p2.biweekNumber}`;
+      } else if (selectedPeriod === "monthly" && hasMultiMonths && multiplePeriods.months.length >= 2) {
+        const p1 = multiplePeriods.months[0];
+        const p2 = multiplePeriods.months[1];
+        const s1 = monthlySummaries.find(s => s.employeeId === emp.id && s.month === p1.month && s.year === p1.year);
+        const s2 = monthlySummaries.find(s => s.employeeId === emp.id && s.month === p2.month && s.year === p2.year);
+        firstPeriodHours = Number(s1?.totalHours ?? 0);
+        secondPeriodHours = Number(s2?.totalHours ?? 0);
+        firstPeriodLabel = getMonthName(p1.month);
+        secondPeriodLabel = getMonthName(p2.month);
+      } else if (selectedPeriod === "weekly" && hasMultiYears && multiplePeriods.weekNumbers.length >= 2) {
+        const p1 = multiplePeriods.weekNumbers[0];
+        const p2 = multiplePeriods.weekNumbers[1];
+        const s1 = weeklySummaries.find(s => s.employeeId === emp.id && s.weekNumber === p1.weekNumber && s.year === p1.year);
+        const s2 = weeklySummaries.find(s => s.employeeId === emp.id && s.weekNumber === p2.weekNumber && s.year === p2.year);
+        firstPeriodHours = Number(s1?.totalHours ?? 0);
+        secondPeriodHours = Number(s2?.totalHours ?? 0);
+        firstPeriodLabel = `Sem ${p1.weekNumber}`;
+        secondPeriodLabel = `Sem ${p2.weekNumber}`;
+      }
+
+      map.set(emp.id, {
+        totalHours: Number(totalH),
+        overtime: Number(overT),
+        hasWorked: hasWkd,
+        firstPeriodHours,
+        secondPeriodHours,
+        firstPeriodLabel,
+        secondPeriodLabel,
+      });
     });
     return map;
   }, [filteredEmployees, selectedPeriod, currentWeek, weekNumber, biweekNumber, month, year, weeklySummaries, biweeklySummaries, monthlySummaries, multiplePeriods]);
@@ -1603,8 +1720,8 @@ const WeeklyBoard: React.FC<WeeklyBoardProps> = ({
       // ── Dropping on an employee day column: assign first available + popover ──
       const firstAvailable = schedules.find((s) => s.days.includes(targetDay));
       if (!firstAvailable) return;
-      // Assign immediately so the card appears in the column
-      involvedIds.forEach((eid) => handleChange(firstAvailable.label, eid, targetDate));
+      // Asignar tarjeta visualmente sin recalcular totales (se hará al confirmar en popover)
+      involvedIds.forEach((eid) => handleChange(firstAvailable.label, eid, targetDate, true));
       // Open popover for single employee so they can change the schedule
       if (involvedIds.length === 1) {
         const anchorEl = document.querySelector(`[data-anchor-id="anchor-day-col-${targetData.day}"]`);
@@ -1662,9 +1779,21 @@ const WeeklyBoard: React.FC<WeeklyBoardProps> = ({
     const sourceDate = new Date(sourceData.sourceDate);
     involvedIds.forEach((eid) => handleChange(SELECTOR_TABLE.UNASSIGNED, eid, sourceDate));
 
-    // ── Apply to all involved employees ──
-    involvedIds.forEach((eid) => handleChange(scheduleToAssign!, eid, targetDate));
-    if (involvedIds.length > 1) clearSelection();
+    // ── Aplicar al día destino ──
+    // Solo saltar recalculo si se abrirá popover (1 empleado + vista empleados)
+    const willOpenPopover = involvedIds.length === 1 && targetData.viewType === 'employee';
+    involvedIds.forEach((eid) => handleChange(scheduleToAssign!, eid, targetDate, willOpenPopover));
+
+    // ── Abrir popover para que el usuario confirme/ajuste el horario ──
+    if (willOpenPopover) {
+      setSelectedEmployee(filteredEmployees.find((e) => e.id === involvedIds[0]) ?? null);
+      setSelectedDay(targetData.day);
+      setSelectedDateStr(targetData.date);
+      const anchorEl = document.querySelector(`[data-anchor-id="anchor-day-col-${targetData.day}"]`);
+      if (anchorEl) setPopoverAnchor(anchorEl as HTMLElement);
+    } else {
+      clearSelection();
+    }
   }, [schedules, handleChange, canEdit, selectedEmployeeIds, filteredEmployees, getDaySchedule, clearSelection]);
 
 
@@ -1862,15 +1991,17 @@ const WeeklyBoard: React.FC<WeeklyBoardProps> = ({
             ) : activeDragItem?.sourceType === 'totals' ? (
               <Box sx={{
                 display: "flex", alignItems: "center", gap: 1,
-                px: 1.5, py: 1.25, borderRadius: "12px",
-                backgroundColor: isDark ? "rgba(30,30,40,0.95)" : "rgba(255,255,255,0.95)",
+                px: 1.5, py: 1.25, borderRadius: "14px",
+                backgroundColor: isDark ? "rgba(30,30,40,0.96)" : "rgba(255,255,255,0.96)",
                 border: `2px solid ${isDark ? "#a78bfa" : "#7c3aed"}`,
                 boxShadow: isDark
-                  ? "0 12px 48px rgba(0,0,0,0.5), 0 0 0 1px rgba(255,255,255,0.08)"
-                  : "0 12px 48px rgba(0,0,0,0.2), 0 0 0 1px rgba(255,255,255,0.9)",
-                transform: "rotate(-3deg) scale(1.08)",
-                backdropFilter: "blur(8px)",
+                  ? "0 20px 60px rgba(0,0,0,0.5), 0 0 0 1px rgba(255,255,255,0.1), 0 4px 20px rgba(0,0,0,0.3)"
+                  : "0 20px 60px rgba(0,0,0,0.15), 0 0 0 1px rgba(255,255,255,0.9), 0 4px 20px rgba(0,0,0,0.08)",
+                transform: "scale(1.05) translateY(-4px)",
+                backdropFilter: "blur(12px)",
                 width: 160,
+                willChange: "transform",
+                cursor: "grabbing",
               }}>
                 <Box sx={{
                   width: 28, height: 28, borderRadius: "50%",
