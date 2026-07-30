@@ -321,17 +321,17 @@ const Dashboard = () => {
   return (
     <Box className="scrollable-content" sx={{ height: "100%", display: "flex", flexDirection: "column", overflow: "hidden", pb: 0, pt: 0, px: 0 }}>
       <Paper elevation={0} sx={{ borderRadius: { xs: "8px", sm: "12px" }, boxShadow: "0 2px 8px rgba(0,0,0,0.04)", overflow: "hidden", flex: 1, display: "flex", flexDirection: "column", mx: { xs: 0, sm: 0.5, md: 1 }, mt: 0 }}>
-        <Box sx={{ px: { xs: 1.5, sm: 2 }, py: { xs: 1, sm: 1.25 } }}>
+        <Box sx={{ px: { xs: 2, sm: 2.5 }, py: { xs: 1.5, sm: 2 }, flexShrink: 0, borderBottom: `1px solid ${theme.palette.mode === "dark" ? "rgba(255,255,255,0.06)" : "rgba(0,0,0,0.06)"}` }}>
           <Box display="flex" justifyContent="space-between" alignItems={{ xs: "stretch", sm: "center" }} flexDirection={{ xs: "column", sm: "row" }} gap={{ xs: 0.75, sm: 1 }}>
             <Box display="flex" alignItems="center" gap={1.5} flexShrink={0}>
-              <Box sx={{ backgroundColor: theme.palette.primary.main, borderRadius: "10px", p: { xs: 0.75, sm: 1 }, display: "flex", alignItems: "center", justifyContent: "center" }}>
-                <LayoutDashboard size={isSmallScreen ? 18 : 22} color={theme.palette.primary.contrastText} />
+              <Box sx={{ color: theme.palette.primary.main, display: 'flex', alignItems: 'center' }}>
+                <LayoutDashboard size={20} strokeWidth={1.5} />
               </Box>
               <Box minWidth={0}>
-                <Typography variant={isSmallScreen ? "h6" : "h5"} sx={{ fontWeight: 700, fontSize: { xs: "1rem", sm: "1.25rem" }, color: theme.palette.text.primary, letterSpacing: "-0.02em", lineHeight: 1.2, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                <Typography variant={isSmallScreen ? "h6" : "h5"} sx={{ fontWeight: 700, fontSize: { xs: "1rem", sm: "1.15rem" }, color: theme.palette.text.primary, letterSpacing: "-0.02em", lineHeight: 1.2, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
                   {PAGE_TITLE.DASHBOARD}
                 </Typography>
-                <Typography variant="caption" sx={{ color: theme.palette.text.secondary, fontSize: { xs: "0.65rem", sm: "0.75rem" }, letterSpacing: "0.02em", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", display: "block" }}>
+                <Typography variant="caption" sx={{ color: theme.palette.text.secondary, fontSize: "0.7rem", letterSpacing: "0.02em", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", display: "block" }}>
                   {filtered.employeeCount} empleados · {filtered.totalHours} horas ({PERIOD_LABELS[period].toLowerCase()})
                 </Typography>
               </Box>

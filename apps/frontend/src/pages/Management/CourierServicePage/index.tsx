@@ -492,8 +492,8 @@ const CourierServicePage: React.FC = () => {
               {filteredWeekCouriers.length > 0 && (
                 <SpeedDialComponent
                   actions={exportOptions}
-                  mainIcon={<Download size={16} strokeWidth={1.5} />}
-                  openIcon={<X size={16} strokeWidth={1.5} />}
+                  mainIcon={<Download size={18} strokeWidth={1.5} />}
+                  openIcon={<X size={18} strokeWidth={1.5} />}
                   direction="left"
                 />
               )}

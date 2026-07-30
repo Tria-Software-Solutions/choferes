@@ -129,6 +129,12 @@ const RolesPage: React.FC = () => {
     createOrUpdateMonthlySummary,
     updateMonthlySummary,
   } = useMonthlySummaries();
+  const weeklySummariesRef = useRef(weeklySummaries);
+  const biweeklySummariesRef = useRef(biweeklySummaries);
+  const monthlySummariesRef = useRef(monthlySummaries);
+  useEffect(() => { weeklySummariesRef.current = weeklySummaries; }, [weeklySummaries]);
+  useEffect(() => { biweeklySummariesRef.current = biweeklySummaries; }, [biweeklySummaries]);
+  useEffect(() => { monthlySummariesRef.current = monthlySummaries; }, [monthlySummaries]);
   const [weekOffset, setWeekOffset] = useState(0);
   const [firstDayOfWeek, setFirstDayOfWeek] = useState<Date | null>(() => {
     const prefs = getPreferencesObject(preferencesKey, defaultPreferences);
@@ -303,7 +309,7 @@ const RolesPage: React.FC = () => {
       rangeStart: Date,
       rangeEnd: Date,
     ) => {
-      const employeeHoursWorked = hoursWorked.filter((hw) => {
+      const employeeHoursWorked = hoursWorkedRef.current.filter((hw) => {
         const hwDate = new Date(hw.date);
         return (
           hw.employeeId === employeeId &&
@@ -354,7 +360,7 @@ const RolesPage: React.FC = () => {
     const month = date.getMonth() + 1;
     const year = date.getFullYear();
     
-    const existingWeeklySummary = weeklySummaries.find(
+    const existingWeeklySummary = weeklySummariesRef.current.find(
       (ws) => ws.employeeId === employeeId &&
                ws.weekNumber === weekNumber &&
                ws.year === year
@@ -383,7 +389,7 @@ const RolesPage: React.FC = () => {
       biweekStart,
       biweekEnd,
     );
-    const existingBiweeklySummary = biweeklySummaries.find(
+    const existingBiweeklySummary = biweeklySummariesRef.current.find(
       (bs) =>
         bs.employeeId === employeeId &&
         bs.biweekNumber === biweekNumber &&
@@ -410,7 +416,7 @@ const RolesPage: React.FC = () => {
       monthStart,
       monthEnd,
     );
-    const existingMonthlySummary = monthlySummaries.find(
+    const existingMonthlySummary = monthlySummariesRef.current.find(
       (ms) =>
         ms.employeeId === employeeId && ms.month === month && ms.year === year,
     );
@@ -428,11 +434,7 @@ const RolesPage: React.FC = () => {
       await createOrUpdateMonthlySummary(monthlySummary);
     }
   }, [
-    hoursWorked,
     schedules,
-    weeklySummaries,
-    biweeklySummaries,
-    monthlySummaries,
     updateWeeklySummary,
     createOrUpdateWeeklySummary,
     updateBiweeklySummary,
@@ -595,6 +597,36 @@ const RolesPage: React.FC = () => {
       );
 
       if (existingHoursWorkedRecord) {
+        // Actualizar el ref inmediatamente para reflejar el borrado
+        hoursWorkedRef.current = hoursWorkedRef.current.filter(
+          (hw) => hw.id !== existingHoursWorkedRecord.id
+        );
+        // Actualizar refs de summaries sincrónicamente para UI inmediata
+        const dayName = date.toLocaleDateString("en-US", { weekday: "long" }).toLowerCase();
+        const sched = schedules.find((s) => s.id === existingHoursWorkedRecord.scheduleId);
+        const removedHours = sched ? getScheduleHours(sched, dayName) : 0;
+        if (removedHours > 0) {
+          const wkNum = getWeekNumber(date);
+          const biNum = getBiweekNumber(date);
+          const mth = date.getMonth() + 1;
+          const yr = date.getFullYear();
+          const sub = (h: number) => Math.max(0, h - removedHours);
+          weeklySummariesRef.current = weeklySummariesRef.current.map((ws) =>
+            ws.employeeId === employeeId && ws.weekNumber === wkNum && ws.year === yr
+              ? { ...ws, totalHours: sub(Number(ws.totalHours)) }
+              : ws,
+          );
+          biweeklySummariesRef.current = biweeklySummariesRef.current.map((bs) =>
+            bs.employeeId === employeeId && bs.biweekNumber === biNum && bs.year === yr
+              ? { ...bs, totalHours: sub(Number(bs.totalHours)) }
+              : bs,
+          );
+          monthlySummariesRef.current = monthlySummariesRef.current.map((ms) =>
+            ms.employeeId === employeeId && ms.month === mth && ms.year === yr
+              ? { ...ms, totalHours: sub(Number(ms.totalHours)) }
+              : ms,
+          );
+        }
         // Eliminar el registro de hoursWorked, luego recalcular TODOS los summaries
         // (weekly, biweekly, monthly) desde cero para evitar inconsistencias.
         dispatch(deleteHoursWorked(existingHoursWorkedRecord.id)).then(async () => {
