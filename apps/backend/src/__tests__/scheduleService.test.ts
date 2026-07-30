@@ -24,7 +24,6 @@ const mockSchedule = {
   label: "Diurno",
   days: ["monday", "tuesday", "wednesday", "thursday", "friday"],
   hours: 8,
-  specialSchedule: false,
   createdAt: new Date(),
   updatedAt: new Date(),
 };
@@ -109,7 +108,6 @@ describe("createSchedule", () => {
       label: "Nocturno",
       days: ["monday", "tuesday", "wednesday", "thursday", "friday"],
       hours: 6,
-      specialSchedule: false,
     };
     const createdSchedule = { id: 2, ...newData, reload: jest.fn() };
 

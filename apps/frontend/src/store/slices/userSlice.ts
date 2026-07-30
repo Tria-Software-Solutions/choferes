@@ -252,6 +252,24 @@ export const updateUserAvatar = createAsyncThunk(
   },
 );
 
+// Update user settings (theme, preferences, etc.)
+export const updateUserSettings = createAsyncThunk(
+  "users/updateUserSettings",
+  async (
+    { id, settings }: { id: number; settings: Record<string, unknown> },
+    { rejectWithValue },
+  ) => {
+    try {
+      const updatedUser = await UserService.updateUserSettings(id, settings);
+      return updatedUser;
+    } catch (error: unknown) {
+      return rejectWithValue(
+        error instanceof Error ? error.message : "Failed to update user settings",
+      );
+    }
+  },
+);
+
 // Delete avatar for a user
 export const removeUserAvatar = createAsyncThunk(
   "users/removeUserAvatar",
@@ -386,6 +404,12 @@ const userSlice = createSlice({
           );
         },
       )
+      .addCase(updateUserSettings.fulfilled, (state, action: PayloadAction<User>) => {
+        state.currentUser = action.payload;
+        state.users = state.users.map((user) =>
+          user.id === action.payload.id ? action.payload : user,
+        );
+      })
       .addCase(updateUserAvatar.fulfilled, (state, action: PayloadAction<{ id: number; avatar: string | null }>) => {
         state.users = state.users.map((user) =>
           user.id === action.payload.id

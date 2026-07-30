@@ -99,10 +99,6 @@ export const scheduleRules = [
     .optional()
     .isInt({ min: 1, max: 168 })
     .withMessage("Cada scheduleDay debe tener horas válidas (1-168)"),
-  body("specialSchedule")
-    .optional()
-    .isBoolean()
-    .withMessage("specialSchedule debe ser un booleano"),
 ];
 
 export const scheduleUpdateRules = [
@@ -125,10 +121,6 @@ export const scheduleUpdateRules = [
     .trim()
     .notEmpty()
     .withMessage("Cada día debe ser un texto válido"),
-  body("specialSchedule")
-    .optional()
-    .isBoolean()
-    .withMessage("specialSchedule debe ser un booleano"),
 ];
 
 // ─── Vehicles ────────────────────────────────────────────────────────────────

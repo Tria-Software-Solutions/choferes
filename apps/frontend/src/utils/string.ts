@@ -21,7 +21,7 @@ export const translateColumnHeaderToSpanish = (
     label: "Horario / Ubicación",
     days: "Días Semana",
     hours: "Horas/Día",
-    specialSchedule: "Horario Especial",
+
     ticket: "Boleta",
     licensePlate: "Placa",
     brand: "Marca",

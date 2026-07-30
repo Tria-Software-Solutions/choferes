@@ -299,9 +299,10 @@ interface PeriodSummaryProps {
   employeeCount: number;
   totalHours: number;
   overtimeCount: number;
+  totalOvertime: number;
 }
 
-export const PeriodSummary = ({ employeeCount, totalHours, overtimeCount }: PeriodSummaryProps) => {
+export const PeriodSummary = ({ employeeCount, totalHours, overtimeCount, totalOvertime }: PeriodSummaryProps) => {
   const theme = useTheme();
   const isDark = theme.palette.mode === "dark";
   const avgHours = employeeCount > 0 ? Math.round((totalHours / employeeCount) * 10) / 10 : 0;
@@ -310,13 +311,14 @@ export const PeriodSummary = ({ employeeCount, totalHours, overtimeCount }: Peri
     { label: "Empleados", value: employeeCount, color: "#4361EE", icon: <Users size={12} /> },
     { label: "Horas totales", value: totalHours, color: "#F72585", icon: <Clock size={12} /> },
     { label: "Promedio / emp.", value: avgHours, suffix: " hrs", color: "#20B2AA", icon: <BarChart3 size={12} /> },
-    { label: "Con horas extra", value: overtimeCount, color: "#FF6B6B", icon: <Zap size={12} /> },
+    { label: "Horas extra", value: totalOvertime, color: "#FF6B6B", icon: <Zap size={12} /> },
+    { label: "Con horas extra", value: overtimeCount, suffix: " emp.", color: "#FF8E53", icon: <Users size={12} /> },
   ];
 
   return (
     <Box sx={{
       display: "grid",
-      gridTemplateColumns: { xs: "1fr", sm: "1fr 1fr", md: "repeat(4, 1fr)" },
+      gridTemplateColumns: { xs: "1fr", sm: "1fr 1fr", md: "repeat(5, 1fr)" },
       gap: { xs: 0.5, sm: 0.75, md: 1 },
       flex: 1,
       alignItems: "stretch",

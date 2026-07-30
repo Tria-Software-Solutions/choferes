@@ -401,18 +401,10 @@ const SelectorTableComponent: React.FC<SelectorTableProps> = ({
         }
       }
     }
-    // Ordena: primero los que no son especiales, luego especiales, y dentro de cada grupo, alfabéticamente
-    return Object.values(groups).sort((a, b) => {
-      // Busca si algún día de la semana es especial
-      const aSpecial = Object.values(a.dayToSchedule).some(
-        (s) => s.specialSchedule
-      );
-      const bSpecial = Object.values(b.dayToSchedule).some(
-        (s) => s.specialSchedule
-      );
-      if (aSpecial !== bSpecial) return aSpecial ? 1 : -1;
-      return a.label.localeCompare(b.label, "es", { sensitivity: "base" });
-    });
+    // Sort alphabetically
+    return Object.values(groups).sort((a, b) =>
+      a.label.localeCompare(b.label, "es", { sensitivity: "base" })
+    );
   }, [schedules]);
 
   // Handler to change the assigned employees to a schedule in one day

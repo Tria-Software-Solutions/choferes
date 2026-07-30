@@ -128,6 +128,15 @@ export const uploadAvatar = async (id: number, file: File) => {
   return response.data;
 };
 
+// Update user settings (theme, preferences, etc.)
+export const updateUserSettings = async (
+  id: number,
+  settings: Record<string, unknown>,
+) => {
+  const response = await api.put(`/users/${id}/settings`, { settings });
+  return response.data;
+};
+
 // Delete avatar for a user
 export const deleteAvatar = async (id: number) => {
   const response = await api.delete(`/users/${id}/avatar`);

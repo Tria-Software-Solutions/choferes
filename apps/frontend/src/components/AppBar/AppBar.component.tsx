@@ -1,4 +1,4 @@
-import React, { useState, useCallback, useMemo, useRef } from "react";
+import React, { useState, useCallback, useMemo, useRef, useEffect } from "react";
 import MenuComponent from "../Menu/Menu.component";
 import NotificationMenu from "../NotificationMenu/NotificationMenu.component";
 import Dock, { DockItemData } from "../Dock/Dock.component";
@@ -24,6 +24,7 @@ import {
 import { useNavigate, useLocation } from "react-router-dom";
 import { useAuthContext } from "../../context/AuthContext";
 import { API_URL } from "../../services/api";
+import * as UserService from "../../services/userService";
 import { APPBAR_MENU } from "../../constants/constants";
 import { useNotificationMenu } from "../../context/NotificationContext";
 import { Menu as MenuIcon, Bell, Blocks } from "lucide-react";
@@ -87,6 +88,22 @@ const AppBarComponent: React.FC<AppBarComponentProps> = ({
   // Extract keys from links for menu preferences
   const linkKeys = useMemo(() => links.map(l => l.label), [links]);
   const { preferences, itemOrder, toggleMenu, isMenuVisible, moveItem, resetDefaults } = useMenuPreferences(linkKeys);
+
+  // Sync dock preferences to user.settings.dock in DB when they change
+  const dockSyncRef = useRef<ReturnType<typeof setTimeout>>();
+  useEffect(() => {
+    if (!currentUser?.id) return;
+    clearTimeout(dockSyncRef.current);
+    dockSyncRef.current = setTimeout(() => {
+      UserService.updateUserSettings(currentUser.id, {
+        dock: {
+          preferences,
+          order: itemOrder,
+        },
+      }).catch(() => {});
+    }, 500);
+    return () => clearTimeout(dockSyncRef.current);
+  }, [preferences, itemOrder, currentUser?.id]);
 
   // Filter links by menu preferences
   const visibleLinks = useMemo(

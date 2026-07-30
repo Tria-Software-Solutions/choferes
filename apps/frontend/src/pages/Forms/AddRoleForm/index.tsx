@@ -11,7 +11,7 @@ import {
   useMediaQuery,
   Typography,
 } from "@mui/material";
-import { Plus, X, Users, Info } from "lucide-react";
+import { Plus, X, Users } from "lucide-react";
 import { Permission } from "../../../models/Permission";
 import TextfieldComponent from "../../../components/Textfield/Textfield.component";
 import { FORMS } from "../../../constants/constants";
@@ -29,10 +29,6 @@ import {
   clearButton,
   actionsInnerBox,
   cancelButton,
-  infoBox,
-  infoIconBox,
-  infoTitle,
-  infoDesc,
   submitButton,
   formControl,
 } from "./styles";
@@ -267,22 +263,6 @@ const AddRoleForm: React.FC<AddRoleFormProps> = ({
               )}
             </Box>
           </FormControl>
-        </Grid>
-
-        <Grid item xs={12}>
-          <Box sx={infoBox(theme)}>
-            <Box sx={infoIconBox(theme)}>
-              <Info size={18} />
-            </Box>
-            <Box>
-              <Typography sx={infoTitle(theme)}>
-                {FORMS.ADD_ROLE.INFO_TITLE}
-              </Typography>
-              <Typography sx={infoDesc(theme)}>
-                {FORMS.ADD_ROLE.INFO_DESC}
-              </Typography>
-            </Box>
-          </Box>
         </Grid>
 
         <Grid item xs={12}>

@@ -12,7 +12,6 @@ module.exports = {
         hours: 12,
         createdAt: new Date(),
         updatedAt: new Date(),
-        specialSchedule: false,
       },
       {
         id: 2,
@@ -21,7 +20,6 @@ module.exports = {
         hours: 11,
         createdAt: new Date(),
         updatedAt: new Date(),
-        specialSchedule: false,
       },
       {
         id: 3,
@@ -30,7 +28,6 @@ module.exports = {
         hours: 10,
         createdAt: new Date(),
         updatedAt: new Date(),
-        specialSchedule: false,
       },
       {
         id: 4,
@@ -39,7 +36,6 @@ module.exports = {
         hours: 11,
         createdAt: new Date(),
         updatedAt: new Date(),
-        specialSchedule: false,
       },
       {
         id: 5,
@@ -48,7 +44,6 @@ module.exports = {
         hours: 5,
         createdAt: new Date(),
         updatedAt: new Date(),
-        specialSchedule: false,
       },
       {
         id: 6,
@@ -57,7 +52,6 @@ module.exports = {
         hours: 0,
         createdAt: new Date(),
         updatedAt: new Date(),
-        specialSchedule: true,
       },
       {
         id: 7,
@@ -66,7 +60,6 @@ module.exports = {
         hours: 5,
         createdAt: new Date(),
         updatedAt: new Date(),
-        specialSchedule: true,
       },
       {
         id: 8,
@@ -75,7 +68,6 @@ module.exports = {
         hours: 5,
         createdAt: new Date(),
         updatedAt: new Date(),
-        specialSchedule: true,
       },
       {
         id: 9,
@@ -84,7 +76,6 @@ module.exports = {
         hours: 0,
         createdAt: new Date(),
         updatedAt: new Date(),
-        specialSchedule: true,
       },
       {
         id: 10,
@@ -93,7 +84,6 @@ module.exports = {
         hours: 0,
         createdAt: new Date(),
         updatedAt: new Date(),
-        specialSchedule: true,
       },
       {
         id: 11,
@@ -102,7 +92,6 @@ module.exports = {
         hours: 9,
         createdAt: new Date(),
         updatedAt: new Date(),
-        specialSchedule: true,
       },
       {
         id: 12,
@@ -111,7 +100,6 @@ module.exports = {
         hours: 12,
         createdAt: new Date(),
         updatedAt: new Date(),
-        specialSchedule: false,
       },
       {
         id: 13,
@@ -120,7 +108,6 @@ module.exports = {
         hours: 11,
         createdAt: new Date(),
         updatedAt: new Date(),
-        specialSchedule: false,
       },
       {
         id: 14,
@@ -129,7 +116,6 @@ module.exports = {
         hours: 10,
         createdAt: new Date(),
         updatedAt: new Date(),
-        specialSchedule: false,
       },
       {
         id: 15,
@@ -138,7 +124,6 @@ module.exports = {
         hours: 11,
         createdAt: new Date(),
         updatedAt: new Date(),
-        specialSchedule: false,
       },
       {
         id: 16,
@@ -147,7 +132,6 @@ module.exports = {
         hours: 12,
         createdAt: new Date(),
         updatedAt: new Date(),
-        specialSchedule: false,
       },
       {
         id: 17,
@@ -156,7 +140,6 @@ module.exports = {
         hours: 5,
         createdAt: new Date(),
         updatedAt: new Date(),
-        specialSchedule: false,
       },
       {
         id: 18,
@@ -165,7 +148,6 @@ module.exports = {
         hours: 12,
         createdAt: new Date(),
         updatedAt: new Date(),
-        specialSchedule: false,
       },
       {
         id: 19,
@@ -174,7 +156,6 @@ module.exports = {
         hours: 0,
         createdAt: new Date(),
         updatedAt: new Date(),
-        specialSchedule: true,
       },
       {
         id: 20,
@@ -183,7 +164,6 @@ module.exports = {
         hours: 4,
         createdAt: new Date(),
         updatedAt: new Date(),
-        specialSchedule: true,
       },
       {
         id: 21,
@@ -192,7 +172,6 @@ module.exports = {
         hours: 0,
         createdAt: new Date(),
         updatedAt: new Date(),
-        specialSchedule: true,
       },
       {
         id: 22,
@@ -201,7 +180,6 @@ module.exports = {
         hours: 0,
         createdAt: new Date(),
         updatedAt: new Date(),
-        specialSchedule: true,
       },
       {
         id: 23,
@@ -210,7 +188,6 @@ module.exports = {
         hours: 9,
         createdAt: new Date(),
         updatedAt: new Date(),
-        specialSchedule: true,
       },
       {
         id: 24,
@@ -219,7 +196,6 @@ module.exports = {
         hours: 12,
         createdAt: new Date(),
         updatedAt: new Date(),
-        specialSchedule: false,
       },
       {
         id: 25,
@@ -228,7 +204,6 @@ module.exports = {
         hours: 12,
         createdAt: new Date(),
         updatedAt: new Date(),
-        specialSchedule: false,
       },
       {
         id: 26,
@@ -237,7 +212,6 @@ module.exports = {
         hours: 12,
         createdAt: new Date(),
         updatedAt: new Date(),
-        specialSchedule: false,
       },
       {
         id: 27,
@@ -246,7 +220,6 @@ module.exports = {
         hours: 12,
         createdAt: new Date(),
         updatedAt: new Date(),
-        specialSchedule: false,
       },
       {
         id: 28,
@@ -255,7 +228,6 @@ module.exports = {
         hours: 0,
         createdAt: new Date(),
         updatedAt: new Date(),
-        specialSchedule: true,
       },
       {
         id: 29,
@@ -264,7 +236,6 @@ module.exports = {
         hours: 4,
         createdAt: new Date(),
         updatedAt: new Date(),
-        specialSchedule: true,
       },
       {
         id: 30,
@@ -273,7 +244,6 @@ module.exports = {
         hours: 0,
         createdAt: new Date(),
         updatedAt: new Date(),
-        specialSchedule: true,
       },
       {
         id: 31,
@@ -282,7 +252,6 @@ module.exports = {
         hours: 0,
         createdAt: new Date(),
         updatedAt: new Date(),
-        specialSchedule: true,
       },
       {
         id: 32,
@@ -291,7 +260,6 @@ module.exports = {
         hours: 9,
         createdAt: new Date(),
         updatedAt: new Date(),
-        specialSchedule: true,
       },
       {
         id: 33,
@@ -300,7 +268,6 @@ module.exports = {
         hours: 9,
         createdAt: new Date(),
         updatedAt: new Date(),
-        specialSchedule: false,
       },
       {
         id: 34,
@@ -309,7 +276,6 @@ module.exports = {
         hours: 9,
         createdAt: new Date(),
         updatedAt: new Date(),
-        specialSchedule: false,
       },
       {
         id: 35,
@@ -318,7 +284,6 @@ module.exports = {
         hours: 10,
         createdAt: new Date(),
         updatedAt: new Date(),
-        specialSchedule: false,
       },
       {
         id: 36,
@@ -327,7 +292,6 @@ module.exports = {
         hours: 11,
         createdAt: new Date(),
         updatedAt: new Date(),
-        specialSchedule: false,
       },
       {
         id: 37,
@@ -336,7 +300,6 @@ module.exports = {
         hours: 0,
         createdAt: new Date(),
         updatedAt: new Date(),
-        specialSchedule: true,
       },
       {
         id: 38,
@@ -345,7 +308,6 @@ module.exports = {
         hours: 4,
         createdAt: new Date(),
         updatedAt: new Date(),
-        specialSchedule: true,
       },
       {
         id: 39,
@@ -354,7 +316,6 @@ module.exports = {
         hours: 0,
         createdAt: new Date(),
         updatedAt: new Date(),
-        specialSchedule: true,
       },
       {
         id: 40,
@@ -363,7 +324,6 @@ module.exports = {
         hours: 0,
         createdAt: new Date(),
         updatedAt: new Date(),
-        specialSchedule: true,
       },
       {
         id: 41,
@@ -372,7 +332,6 @@ module.exports = {
         hours: 0,
         createdAt: new Date(),
         updatedAt: new Date(),
-        specialSchedule: true,
       },
       {
         id: 42,
@@ -381,7 +340,6 @@ module.exports = {
         hours: 9,
         createdAt: new Date(),
         updatedAt: new Date(),
-        specialSchedule: true,
       },
     ]);
     await queryInterface.bulkInsert("permissions", [
@@ -562,6 +520,73 @@ module.exports = {
       {
         id: 30,
         name: "Ver Mensajería",
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      },
+      // New permissions
+      {
+        id: 31,
+        name: "Ver Usuarios",
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      },
+      {
+        id: 32,
+        name: "Ver Resumen Semanal",
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      },
+      {
+        id: 33,
+        name: "Ver Resumen Quincenal",
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      },
+      {
+        id: 34,
+        name: "Ver Resumen Mensual",
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      },
+      {
+        id: 35,
+        name: "Editar Resumen Semanal",
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      },
+      {
+        id: 36,
+        name: "Editar Resumen Quincenal",
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      },
+      {
+        id: 37,
+        name: "Editar Resumen Mensual",
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      },
+      {
+        id: 38,
+        name: "Reordenar Horarios",
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      },
+      {
+        id: 39,
+        name: "Ver Courier",
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      },
+      {
+        id: 40,
+        name: "Crear Courier",
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      },
+      {
+        id: 41,
+        name: "Editar Courier",
         createdAt: new Date(),
         updatedAt: new Date(),
       },
@@ -760,6 +785,73 @@ module.exports = {
       {
         roleId: 1,
         permissionId: 30,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      },
+      // Gerencia — new permissions
+      {
+        roleId: 1,
+        permissionId: 31,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      },
+      {
+        roleId: 1,
+        permissionId: 32,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      },
+      {
+        roleId: 1,
+        permissionId: 33,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      },
+      {
+        roleId: 1,
+        permissionId: 34,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      },
+      {
+        roleId: 1,
+        permissionId: 35,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      },
+      {
+        roleId: 1,
+        permissionId: 36,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      },
+      {
+        roleId: 1,
+        permissionId: 37,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      },
+      {
+        roleId: 1,
+        permissionId: 38,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      },
+      {
+        roleId: 1,
+        permissionId: 39,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      },
+      {
+        roleId: 1,
+        permissionId: 40,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      },
+      {
+        roleId: 1,
+        permissionId: 41,
         createdAt: new Date(),
         updatedAt: new Date(),
       },

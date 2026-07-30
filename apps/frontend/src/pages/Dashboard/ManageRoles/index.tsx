@@ -18,8 +18,14 @@ import {
   Backdrop,
   Box,
   Button,
+  Checkbox,
   CircularProgress,
+  FormControl,
+  ListItemText,
+  MenuItem,
   Paper,
+  Select,
+  TextField,
   Typography,
   useTheme,
   useMediaQuery,
@@ -28,7 +34,7 @@ import EditableTableComponent from "../../../components/Table/EditableTable/Edit
 import SearchBarComponent from "../../../components/SearchBar/SearchBar.component";
 import AddRoleForm from "../../Forms/AddRoleForm";
 import DialogComponent from "../../../components/Dialog/Dialog.component";
-import { Plus, Trash2, PlusCircle, Shield } from "lucide-react";
+import { Check, Plus, PlusCircle, Shield, Trash2, X } from "lucide-react";
 import PAGE_TITLE from "../../../constants/pageTitle.constants";
 import { DASHBOARD_ROLES } from "../../../constants/constants";
 import { NOTIFICATIONS } from "../../../constants/constants";
@@ -45,8 +51,9 @@ import { useLocation } from "react-router-dom";
 import { useTablePreferences } from '../../../hooks/useTablePreferences';
 
 // ManageRoles page component for role management in the dashboard
-const ManageRoles: React.FC<{ isExpanded?: boolean }> = ({
+const ManageRoles: React.FC<{ isExpanded?: boolean; hideHeader?: boolean }> = ({
   isExpanded = true,
+  hideHeader = false,
 }) => {
   const dispatch = useDispatch<AppDispatch>();
   const { userPermissions } = useAuthContext();
@@ -285,7 +292,63 @@ const ManageRoles: React.FC<{ isExpanded?: boolean }> = ({
           flexDirection: "column",
         }}
       >
-        {/* Header Section */}
+        {!hideHeader && (
+          <Box
+            sx={{
+              px: { xs: 2, sm: 2.5 },
+              py: { xs: 1.5, sm: 2 },
+              backgroundColor: theme.palette.background.paper,
+              color: theme.palette.text.primary,
+              flexShrink: 0,
+              borderBottom: `1px solid ${theme.palette.mode === "dark" ? "rgba(255,255,255,0.06)" : "rgba(0,0,0,0.06)"}`,
+            }}
+          >
+            <Box
+              display="flex"
+              justifyContent="space-between"
+              alignItems="center"
+              mb={1.5}
+            >
+              <Box display="flex" alignItems="center" gap={1.5}>
+                <Box
+                  sx={{
+                    color: theme.palette.primary.main,
+                    display: 'flex',
+                    alignItems: 'center',
+                  }}
+                >
+                  <Shield size={20} strokeWidth={1.5} />
+                </Box>
+                <Box>
+                  <Typography
+                    variant={isSmallScreen ? "h6" : "h5"}
+                    sx={{
+                      fontWeight: 700,
+                      fontSize: { xs: "1rem", sm: "1.15rem" },
+                      color: theme.palette.text.primary,
+                      letterSpacing: "-0.02em",
+                      lineHeight: 1.2,
+                    }}
+                  >
+                    {isSmallScreen ? PAGE_TITLE.ROLES_SIMPLIFIED : PAGE_TITLE.ROLES}
+                  </Typography>
+                  <Typography
+                    variant="caption"
+                    sx={{
+                      color: theme.palette.text.secondary,
+                      fontSize: "0.7rem",
+                      letterSpacing: "0.02em",
+                    }}
+                  >
+                    {filteredRoles.length} roles configurados
+                  </Typography>
+                </Box>
+              </Box>
+            </Box>
+          </Box>
+        )}
+
+        {/* Controls Row */}
         <Box
           sx={{
             px: { xs: 2, sm: 2.5 },
@@ -296,50 +359,6 @@ const ManageRoles: React.FC<{ isExpanded?: boolean }> = ({
             borderBottom: `1px solid ${theme.palette.mode === "dark" ? "rgba(255,255,255,0.06)" : "rgba(0,0,0,0.06)"}`,
           }}
         >
-          <Box
-            display="flex"
-            justifyContent="space-between"
-            alignItems="center"
-            mb={1.5}
-          >
-            <Box display="flex" alignItems="center" gap={1.5}>
-              <Box
-                sx={{
-                  color: theme.palette.primary.main,
-                  display: 'flex',
-                  alignItems: 'center',
-                }}
-              >
-                <Shield size={20} strokeWidth={1.5} />
-              </Box>
-              <Box>
-                <Typography
-                  variant={isSmallScreen ? "h6" : "h5"}
-                  sx={{
-                    fontWeight: 700,
-                    fontSize: { xs: "1rem", sm: "1.15rem" },
-                    color: theme.palette.text.primary,
-                    letterSpacing: "-0.02em",
-                    lineHeight: 1.2,
-                  }}
-                >
-                  {isSmallScreen ? PAGE_TITLE.ROLES_SIMPLIFIED : PAGE_TITLE.ROLES}
-                </Typography>
-                <Typography
-                  variant="caption"
-                  sx={{
-                    color: theme.palette.text.secondary,
-                    fontSize: "0.7rem",
-                    letterSpacing: "0.02em",
-                  }}
-                >
-                  {filteredRoles.length} roles configurados
-                </Typography>
-              </Box>
-            </Box>
-          </Box>
-
-          {/* Controls Row */}
           <Box
             display="flex"
             flexDirection={{ xs: "column", sm: "row" }}
@@ -404,6 +423,240 @@ const ManageRoles: React.FC<{ isExpanded?: boolean }> = ({
               <Backdrop sx={backdropStyles(theme)} open={isLoadingRoles}>
                 <CircularProgress />
               </Backdrop>
+            </Box>
+          ) : hideHeader ? (
+            /* Compact preview list for Profile mode */
+            <Box sx={{ flex: 1, minHeight: 0, overflow: "auto", p: 0 }}>
+              {filteredRoles.slice(0, 5).map((role, i) => {
+                const isEditing = editRowId === role.id;
+                return (
+                  <Box
+                    key={role.id}
+                    sx={{
+                      display: "flex",
+                      alignItems: "center",
+                      gap: 1.5,
+                      px: { xs: 2, sm: 2.5 },
+                      py: isEditing ? 1.25 : 1.5,
+                      borderBottom: `1px solid ${theme.palette.mode === "dark" ? "rgba(255,255,255,0.04)" : "rgba(0,0,0,0.04)"}`,
+                      backgroundColor: isEditing
+                        ? (theme.palette.mode === "dark" ? "rgba(255,255,255,0.03)" : "rgba(0,0,0,0.02)")
+                        : (i % 2 === 0 ? "transparent" : (theme.palette.mode === "dark" ? "rgba(255,255,255,0.015)" : "rgba(0,0,0,0.012)")),
+                      transition: "background-color 0.15s",
+                      "&:hover": {
+                        backgroundColor: isEditing
+                          ? (theme.palette.mode === "dark" ? "rgba(255,255,255,0.03)" : "rgba(0,0,0,0.02)")
+                          : (theme.palette.mode === "dark" ? "rgba(255,255,255,0.04)" : "rgba(0,0,0,0.025)"),
+                      },
+                    }}
+                  >
+                    {isEditing ? (
+                      <>
+                        <Box
+                          sx={{
+                            width: 28,
+                            height: 28,
+                            borderRadius: "8px",
+                            display: "flex",
+                            alignItems: "center",
+                            justifyContent: "center",
+                            backgroundColor: theme.palette.mode === "dark" ? "rgba(255,255,255,0.06)" : "rgba(0,0,0,0.04)",
+                            flexShrink: 0,
+                            alignSelf: "flex-start",
+                            mt: 1.25,
+                          }}
+                        >
+                          <Shield size={14} strokeWidth={1.5} />
+                        </Box>
+                        <Box sx={{ flex: 1, minWidth: 0, display: "flex", flexDirection: "column", gap: { xs: 1, sm: 1.25 } }}>
+                          {/* Section: Información del rol */}
+                          <Typography
+                            variant="caption"
+                            sx={{
+                              fontWeight: 700,
+                              fontSize: "0.65rem",
+                              textTransform: "uppercase",
+                              letterSpacing: "0.08em",
+                              color: theme.palette.text.disabled,
+                              mb: 0.25,
+                            }}
+                          >
+                            Información del rol
+                          </Typography>
+                          <TextField
+                            size="small"
+                            value={editFields.name}
+                            onChange={(e) => {
+                              const value = e.target.value;
+                              setEditFields((prev) => ({ ...prev, name: value }));
+                            }}
+                            placeholder="Nombre del rol"
+                            fullWidth
+                            sx={{
+                              '& .MuiOutlinedInput-root': {
+                                borderRadius: '8px',
+                                backgroundColor: theme.palette.mode === 'dark' ? 'rgba(255,255,255,0.04)' : 'rgba(0,0,0,0.015)',
+                              },
+                              '& .MuiInputBase-input': { fontSize: '0.85rem', py: 0.75, px: 1 },
+                            }}
+                          />
+                          {/* Section: Permisos */}
+                          <Typography
+                            variant="caption"
+                            sx={{
+                              fontWeight: 700,
+                              fontSize: "0.65rem",
+                              textTransform: "uppercase",
+                              letterSpacing: "0.08em",
+                              color: theme.palette.text.disabled,
+                              mt: 0.25,
+                              mb: 0.25,
+                            }}
+                          >
+                            Permisos del rol
+                          </Typography>
+                          <FormControl size="small" fullWidth>
+                            <Select
+                              multiple
+                              value={editFields.permissionNames}
+                              onChange={(e) => {
+                                const value = e.target.value;
+                                setEditFields((prev) => ({
+                                  ...prev,
+                                  permissionNames: typeof value === 'string' ? value.split(',') : value,
+                                }));
+                              }}
+                              renderValue={(selected) => {
+                                if (selected.length === 0) {
+                                  return <Typography sx={{ color: "text.disabled", fontSize: "0.8rem" }}>Seleccionar permisos</Typography>;
+                                }
+                                return (
+                                  <Box sx={{ display: "flex", flexWrap: "wrap", gap: 0.5 }}>
+                                    <Typography sx={{ fontSize: "0.8rem", fontWeight: 700, color: "primary.main" }}>
+                                      {selected.length} permiso{selected.length !== 1 ? 's' : ''} seleccionados
+                                    </Typography>
+                                  </Box>
+                                );
+                              }}
+                              sx={{
+                                backgroundColor: theme.palette.mode === "dark" ? "rgba(99,102,241,0.06)" : "rgba(99,102,241,0.06)",
+                                border: `1.5px solid ${theme.palette.mode === "dark" ? "rgba(99,102,241,0.25)" : "rgba(99,102,241,0.25)"}`,
+                                borderRadius: "10px",
+                                fontSize: "0.8rem",
+                                '& .MuiSelect-select': { py: 0.75, px: 1 },
+                                '&:hover': {
+                                  borderColor: theme.palette.primary.main,
+                                },
+                              }}
+                            >
+                              {permissions.map((perm) => (
+                                <MenuItem key={perm.id} value={perm.name} sx={{ fontSize: '0.8rem' }}>
+                                  <Checkbox
+                                    checked={editFields.permissionNames.includes(perm.name)}
+                                    size="small"
+                                    sx={{ py: 0.25 }}
+                                  />
+                                  <ListItemText primary={perm.name} sx={{ '& .MuiListItemText-primary': { fontSize: '0.8rem' } }} />
+                                </MenuItem>
+                              ))}
+                            </Select>
+                          </FormControl>
+                        </Box>
+                        <Box sx={{ display: "flex", gap: 0.5, flexShrink: 0, alignSelf: "flex-start", mt: 1.25 }}>
+                          <Button
+                            size="small"
+                            variant="contained"
+                            onClick={() => handleUpdate(role.id)}
+                            disabled={!isEditFormValid}
+                            startIcon={<Check size={14} />}
+                            sx={{
+                              minWidth: "auto",
+                              px: 1.5,
+                              py: 0.5,
+                              fontSize: "0.7rem",
+                              fontWeight: 700,
+                              textTransform: "none",
+                              borderRadius: "8px",
+                              boxShadow: "none",
+                              '&:hover': { boxShadow: '0 2px 8px rgba(0,0,0,0.15)' },
+                            }}
+                          >
+                            Guardar
+                          </Button>
+                          <Button
+                            size="small"
+                            variant="outlined"
+                            onClick={handleCancel}
+                            startIcon={<X size={14} />}
+                            sx={{
+                              minWidth: "auto",
+                              px: 1.5,
+                              py: 0.5,
+                              fontSize: "0.7rem",
+                              fontWeight: 600,
+                              color: "text.secondary",
+                              textTransform: "none",
+                              borderRadius: "8px",
+                              borderColor: 'divider',
+                            }}
+                          >
+                            Cancelar
+                          </Button>
+                        </Box>
+                      </>
+                    ) : (
+                      <>
+                        <Box
+                          sx={{
+                            width: 28,
+                            height: 28,
+                            borderRadius: "8px",
+                            display: "flex",
+                            alignItems: "center",
+                            justifyContent: "center",
+                            backgroundColor: theme.palette.mode === "dark" ? "rgba(255,255,255,0.06)" : "rgba(0,0,0,0.04)",
+                            flexShrink: 0,
+                          }}
+                        >
+                          <Shield size={14} strokeWidth={1.5} />
+                        </Box>
+                        <Box sx={{ flex: 1, minWidth: 0 }}>
+                          <Typography variant="body2" sx={{ fontWeight: 600, fontSize: "0.85rem", color: "text.primary", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                            {role.name}
+                          </Typography>
+                          <Typography variant="caption" sx={{ fontSize: "0.7rem", color: "text.secondary", display: "block" }}>
+                            {role.permissionNames?.length || 0} permisos
+                          </Typography>
+                        </Box>
+                        <Box sx={{ display: "flex", gap: 0.5, flexShrink: 0 }}>
+                          <Button
+                            size="small"
+                            variant="text"
+                            onClick={() => handleEdit(role)}
+                            sx={{ minWidth: "auto", px: 1, fontSize: "0.7rem", fontWeight: 600, color: "primary.main", textTransform: "none" }}
+                          >
+                            Editar
+                          </Button>
+                        </Box>
+                      </>
+                    )}
+                  </Box>
+                );
+              })}
+              {filteredRoles.length > 5 && (
+                <Box sx={{ px: { xs: 2, sm: 2.5 }, py: 1.5, textAlign: "center" }}>
+                  <Typography variant="caption" sx={{ color: "text.disabled", fontWeight: 500, fontSize: "0.7rem" }}>
+                    +{filteredRoles.length - 5} roles más
+                  </Typography>
+                </Box>
+              )}
+              {filteredRoles.length === 0 && (
+                <Box sx={{ display: "flex", alignItems: "center", justifyContent: "center", flex: 1, minHeight: 100 }}>
+                  <Typography variant="body2" color="textSecondary">
+                    {DASHBOARD_ROLES.NO_ROLES}
+                  </Typography>
+                </Box>
+              )}
             </Box>
           ) : (
             <>

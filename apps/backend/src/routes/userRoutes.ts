@@ -41,6 +41,7 @@ router.put(
   validate,
   userController.updateUserTemporalPassword,
 );
+router.put("/:id/settings", authenticateToken, userController.updateUserSettings);
 router.delete("/:id", authenticateToken, idParam, validate, userController.deleteUser);
 
 export default router;

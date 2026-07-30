@@ -1,4 +1,4 @@
-import React, { Suspense, lazy } from "react";
+import React, { Suspense, lazy, useEffect, useRef } from "react";
 import {
   BrowserRouter as Router,
   Route,
@@ -9,8 +9,8 @@ import {
 import { useAuth } from "./hooks/useAuth";
 import AppBarComponent from "./components/AppBar/AppBar.component";
 import SnackbarComponent from "./components/Snackbar/Snackbar.component";
-import { Provider } from "react-redux";
-import { store } from "./store/store";
+import { Provider, useDispatch } from "react-redux";
+import { store, AppDispatch } from "./store/store";
 import { AuthProvider, useAuthContext } from "./context/AuthContext";
 import { NotificationProvider } from "./context/NotificationContext";
 import ProtectedRoute from "./routes/ProtectedRoute";
@@ -18,6 +18,9 @@ import { Container, useMediaQuery, useTheme, CircularProgress, Box } from "@mui/
 import { APPBAR_MENU, PERMISSIONS, ROUTES } from "./constants/constants";
 import { ClipboardList, Car, Users, CalendarDays, LogOut, User, LayoutDashboard } from "lucide-react";
 import ErrorBoundary from "./components/ErrorBoundary/ErrorBoundary.component";
+import { useThemeMode } from "./context/ThemeContext";
+import { updateUserSettings } from "./store/slices/userSlice";
+import { setScheduleOrder } from "./store/slices/schedulesSlice";
 
 const Login = lazy(() => import("./pages/Auth/Login"));
 const RolesPage = lazy(() => import("./pages/Management/RolesPage"));
@@ -329,6 +332,50 @@ const AppContent: React.FC = () => {
   );
 };
 
+// ─── ThemeSync: synchronizes theme preference between DB and localStorage ───
+const ThemeSync: React.FC = () => {
+  const { mode, setMode } = useThemeMode();
+  const { currentUser } = useAuthContext();
+  const dispatch = useDispatch<AppDispatch>();
+  const initFromDbDone = useRef(false);
+  const lastSyncedMode = useRef<string | null>(null);
+
+  // On user login, sync DB settings → localStorage/context + Redux (one-time)
+  useEffect(() => {
+    if (currentUser?.settings && !initFromDbDone.current) {
+      // Sync theme
+      const dbTheme = currentUser.settings.theme as "light" | "dark" | "default" | "high-contrast";
+      if (dbTheme && dbTheme !== mode) {
+        setMode(dbTheme);
+      }
+      // Sync schedule order to schedules store
+      const scheduleOrder = currentUser.settings.scheduleOrder as number[] | undefined;
+      if (scheduleOrder && Array.isArray(scheduleOrder) && scheduleOrder.length > 0) {
+        dispatch(setScheduleOrder(scheduleOrder));
+      }
+      initFromDbDone.current = true;
+      lastSyncedMode.current = dbTheme ?? null;
+    }
+    if (!currentUser) {
+      initFromDbDone.current = false;
+      lastSyncedMode.current = null;
+    }
+  }, [currentUser, mode, setMode, dispatch]);
+
+  // On theme change (from anywhere), sync → DB (debounced)
+  useEffect(() => {
+    if (currentUser?.id && initFromDbDone.current && mode !== lastSyncedMode.current) {
+      lastSyncedMode.current = mode;
+      const timer = setTimeout(() => {
+        dispatch(updateUserSettings({ id: currentUser.id, settings: { theme: mode } }));
+      }, 300);
+      return () => clearTimeout(timer);
+    }
+  }, [mode, currentUser?.id, dispatch]);
+
+  return null;
+};
+
 const App: React.FC = () => {
   // Fix accessibility warning: remove aria-hidden from MUI menus when they contain focused elements
   React.useEffect(() => {
@@ -366,6 +413,7 @@ const App: React.FC = () => {
   return (
     <Provider store={store}>
       <AuthProvider>
+        <ThemeSync />
         <NotificationProvider>
           <Router>
             <SnackbarComponent>

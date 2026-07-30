@@ -9,7 +9,6 @@ export type ColumnsTranslation = {
   label: string;
   days: string;
   hours: string;
-  specialSchedule: string;
   ticket: string;
   licensePlate: string;
   brand: string;

@@ -212,5 +212,17 @@ export const updateUserTemporalPassword = async (id: number, temporalPassword: s
   return User.findByPk(id);
 };
 
+// Updates user settings (merges with existing settings)
+export const updateUserSettings = async (id: number, settings: Record<string, unknown>) => {
+  const user = await User.findByPk(id);
+  if (!user) return null;
+
+  const currentSettings = (user.settings || {}) as Record<string, unknown>;
+  const mergedSettings = { ...currentSettings, ...settings };
+
+  await User.update({ settings: mergedSettings }, { where: { id } });
+  return User.findByPk(id);
+};
+
 // Deletes a user by ID
 export const deleteUser = async (id: number) => User.destroy({ where: { id } });

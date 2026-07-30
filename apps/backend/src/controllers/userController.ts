@@ -203,6 +203,26 @@ export const updateUserTemporalPassword = async (req: Request, res: Response) =>
   }
 };
 
+// Update a user's settings by their ID (merge with existing settings)
+export const updateUserSettings = async (req: Request, res: Response) => {
+  try {
+    const id = parseInt(req.params.id, 10);
+    const { settings } = req.body;
+
+    if (!settings || typeof settings !== "object") {
+      return res.status(400).json({ message: "Settings object is required" });
+    }
+
+    const updatedUser = await userService.updateUserSettings(id, settings);
+    if (updatedUser) {
+      return res.status(200).json(updatedUser);
+    }
+    return res.status(404).json({ message: "User not found" });
+  } catch (error) {
+    return res.status(500).json({ message: "Error updating user settings", error });
+  }
+};
+
 // Delete a user by their ID
 export const deleteUser = async (req: Request, res: Response) => {
   try {

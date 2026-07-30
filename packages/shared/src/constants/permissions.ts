@@ -34,6 +34,17 @@ const PERMISSIONS = {
   VIEW_ROLES: "Ver Roles",
   VIEW_SCHEDULES: "Ver Horarios",
   VIEW_VEHICLES: "Ver Vehículos",
+  VIEW_USERS: "Ver Usuarios",
+  VIEW_WEEKLY_SUMMARY: "Ver Resumen Semanal",
+  VIEW_BIWEEKLY_SUMMARY: "Ver Resumen Quincenal",
+  VIEW_MONTHLY_SUMMARY: "Ver Resumen Mensual",
+  EDIT_WEEKLY_SUMMARY: "Editar Resumen Semanal",
+  EDIT_BIWEEKLY_SUMMARY: "Editar Resumen Quincenal",
+  EDIT_MONTHLY_SUMMARY: "Editar Resumen Mensual",
+  REORDER_SCHEDULES: "Reordenar Horarios",
+  VIEW_COURIER: "Ver Courier",
+  CREATE_COURIER: "Crear Courier",
+  EDIT_COURIER: "Editar Courier",
 } as const;
 
 export default PERMISSIONS;

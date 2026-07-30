@@ -21,7 +21,11 @@ import {
   Box,
   Button,
   CircularProgress,
+  FormControl,
+  MenuItem,
   Paper,
+  Select,
+  TextField,
   Typography,
   useTheme,
   useMediaQuery,
@@ -29,7 +33,7 @@ import {
 import EditableTableComponent from "../../../components/Table/EditableTable/EditableTable.component";
 import SearchBarComponent from "../../../components/SearchBar/SearchBar.component";
 import AddUserForm from "../../Forms/AddUserForm";
-import { Eye, EyeOff, PlusCircle, Plus, Users } from "lucide-react";
+import { Check, Eye, EyeOff, PlusCircle, Plus, Users, X } from "lucide-react";
 import DialogComponent from "../../../components/Dialog/Dialog.component";
 import { DASHBOARD_USERS } from "../../../constants/constants";
 import { NOTIFICATIONS } from "../../../constants/constants";
@@ -51,8 +55,9 @@ import { useTablePreferences } from '../../../hooks/useTablePreferences';
 import { validateName, validateEmail, validateUsername, validatePassword } from '../../../utils/userValidation';
 
 // ManageUsers page component for user management in the dashboard
-const ManageUsers: React.FC<{ isExpanded?: boolean }> = ({
+const ManageUsers: React.FC<{ isExpanded?: boolean; hideHeader?: boolean }> = ({
   isExpanded = true,
+  hideHeader = false,
 }) => {
   const dispatch = useDispatch<AppDispatch>();
   const { userPermissions } = useAuthContext();
@@ -453,7 +458,7 @@ const ManageUsers: React.FC<{ isExpanded?: boolean }> = ({
               flexDirection: "column",
             }}
           >
-            {/* Header Section */}
+          {!hideHeader && (
             <Box
               sx={{
                 px: { xs: 2, sm: 2.5 },
@@ -506,75 +511,87 @@ const ManageUsers: React.FC<{ isExpanded?: boolean }> = ({
                   </Box>
                 </Box>
               </Box>
+            </Box>
+          )}
 
-              {/* Controls Row */}
+          {/* Controls Row */}
+          <Box
+            sx={{
+              px: { xs: 2, sm: 2.5 },
+              py: { xs: 1.5, sm: 2 },
+              backgroundColor: theme.palette.background.paper,
+              color: theme.palette.text.primary,
+              flexShrink: 0,
+              borderBottom: `1px solid ${theme.palette.mode === "dark" ? "rgba(255,255,255,0.06)" : "rgba(0,0,0,0.06)"}`,
+            }}
+          >
+            <Box
+              display="flex"
+              flexDirection={{ xs: "column", sm: "row" }}
+              alignItems={{ xs: "stretch", sm: "center" }}
+              justifyContent="space-between"
+              gap={2}
+            >
+              {/* Search */}
+              <Box flex={1} maxWidth={{ sm: "320px" }}>
+                {filteredUsers && (
+                  <SearchBarComponent
+                    placeholder={DASHBOARD_USERS.SEARCH_PLACEHOLDER}
+                    value={search}
+                    onChange={(e) => setSearch(e.target.value)}
+                    fullWidth
+                    isSearching={isLoadingUsers && search !== ""}
+                  />
+                )}
+              </Box>
+
+              {/* Show Inactive Toggle & Add Button */}
               <Box
                 display="flex"
                 flexDirection={{ xs: "column", sm: "row" }}
                 alignItems={{ xs: "stretch", sm: "center" }}
-                justifyContent="space-between"
-                gap={2}
+                gap={1}
               >
-                {/* Search */}
-                <Box flex={1} maxWidth={{ sm: "320px" }}>
-                  {filteredUsers && (
-                    <SearchBarComponent
-                      placeholder={DASHBOARD_USERS.SEARCH_PLACEHOLDER}
-                      value={search}
-                      onChange={(e) => setSearch(e.target.value)}
-                      fullWidth
-                      isSearching={isLoadingUsers && search !== ""}
-                    />
+                <Box
+                  onClick={() => setShowInactive(!showInactive)}
+                  sx={showInactiveBoxStyles(theme)}
+                >
+                  {showInactive ? (
+                    <EyeOff size={18} />
+                  ) : (
+                    <Eye size={18} />
                   )}
+                  <Typography
+                    variant="body2"
+                    fontWeight={600}
+                    sx={showInactiveTypographyStyles}
+                  >
+                    {showInactive
+                      ? DASHBOARD_USERS.HIDE_INACTIVE
+                      : DASHBOARD_USERS.SHOW_INACTIVE}
+                  </Typography>
                 </Box>
 
-                {/* Show Inactive Toggle & Add Button */}
-                <Box
-                  display="flex"
-                  flexDirection={{ xs: "column", sm: "row" }}
-                  alignItems={{ xs: "stretch", sm: "center" }}
-                  gap={1}
-                >
-                  <Box
-                    onClick={() => setShowInactive(!showInactive)}
-                    sx={showInactiveBoxStyles(theme)}
+                <Box sx={{ display: { xs: 'none', sm: 'flex' } }}>
+                  <Button
+                    variant="contained"
+                    startIcon={<Plus size={18} />}
+                    onClick={handleOpenAddUserModal}
+                    sx={{
+                      px: 3,
+                      py: 1,
+                      fontWeight: 600,
+                      fontSize: "0.9rem",
+                      letterSpacing: "-0.01em",
+                      borderRadius: '10px',
+                    }}
                   >
-                    {showInactive ? (
-                      <EyeOff size={18} />
-                    ) : (
-                      <Eye size={18} />
-                    )}
-                    <Typography
-                      variant="body2"
-                      fontWeight={600}
-                      sx={showInactiveTypographyStyles}
-                    >
-                      {showInactive
-                        ? DASHBOARD_USERS.HIDE_INACTIVE
-                        : DASHBOARD_USERS.SHOW_INACTIVE}
-                    </Typography>
-                  </Box>
-
-                  <Box sx={{ display: { xs: 'none', sm: 'flex' } }}>
-                    <Button
-                      variant="contained"
-                      startIcon={<Plus size={18} />}
-                      onClick={handleOpenAddUserModal}
-                      sx={{
-                        px: 3,
-                        py: 1,
-                        fontWeight: 600,
-                        fontSize: "0.9rem",
-                        letterSpacing: "-0.01em",
-                        borderRadius: '10px',
-                      }}
-                    >
-                      {DASHBOARD_USERS.ADD}
-                    </Button>
-                  </Box>
+                    {DASHBOARD_USERS.ADD}
+                  </Button>
                 </Box>
               </Box>
             </Box>
+          </Box>
 
             {/* Mobile Add Button */}
             <Box sx={{ display: { xs: 'flex', sm: 'none' }, p: 2, borderTop: `1px solid ${theme.palette.mode === "dark" ? "rgba(255,255,255,0.08)" : "rgba(0,0,0,0.08)"}` }}>
@@ -595,46 +612,306 @@ const ManageUsers: React.FC<{ isExpanded?: boolean }> = ({
 
             {/* Content Section */}
             <Box sx={{ flex: 1, minHeight: 0, display: "flex", flexDirection: "column", overflow: "hidden" }}>
-            {filteredUsers.length > 0 ? (
-              <EditableTableComponent<User>
-                key="users-table"
-                data={filteredUsers}
-                columns={[
-                  "firstName",
-                  "lastName",
-                  "username",
-                  "email",
-                  "roleName",
-                ]}
-                editRowId={editRowId}
-                editFields={editFields}
-                setEditField={setEditField}
-                handleEdit={handleEdit}
-                handleCancel={handleCancel}
-                handleUpdate={handleUpdate}
-                handleOpenStatusDialog={handleOpenStatusDialog}
-                getRowId={(row) => row.id}
-                totalCount={totalCount}
-                page={page}
-                rowsPerPage={rowsPerPage}
-                setPage={setPage}
-                setRowsPerPage={setRowsPerPage}
-                isSaveDisabled={!isEditFormValid}
-                userPermissions={userPermissions}
-                isExpanded={isExpanded}
-                validateField={validateField}
-                passwordModalOpen={passwordModalOpen}
-                passwordUserId={passwordUserId}
-                onOpenPasswordModal={handleOpenPasswordModal}
-                onClosePasswordModal={handleClosePasswordModal}
-                showStatusColumn={true}
-              />
-            ) : (
-              <Box sx={noUsersBoxStyles}>
-                <Typography variant="h6" color="textSecondary">
-                  {DASHBOARD_USERS.NO_USERS}
-                </Typography>
+            {hideHeader ? (
+              /* Compact preview list for Profile mode */
+              <Box sx={{ flex: 1, minHeight: 0, overflow: "auto", p: 0 }}>
+                {filteredUsers.slice(0, 5).map((user, i) => {
+                  const isEditing = editRowId === user.id;
+                  return (
+                    <Box
+                      key={user.id}
+                      sx={{
+                        display: "flex",
+                        alignItems: "center",
+                        gap: 1.5,
+                        px: { xs: 2, sm: 2.5 },
+                        py: isEditing ? 1.25 : 1.5,
+                        borderBottom: `1px solid ${theme.palette.mode === "dark" ? "rgba(255,255,255,0.04)" : "rgba(0,0,0,0.04)"}`,
+                        backgroundColor: isEditing
+                          ? (theme.palette.mode === "dark" ? "rgba(255,255,255,0.03)" : "rgba(0,0,0,0.02)")
+                          : (i % 2 === 0 ? "transparent" : (theme.palette.mode === "dark" ? "rgba(255,255,255,0.015)" : "rgba(0,0,0,0.012)")),
+                        transition: "background-color 0.15s",
+                        "&:hover": {
+                          backgroundColor: isEditing
+                            ? (theme.palette.mode === "dark" ? "rgba(255,255,255,0.03)" : "rgba(0,0,0,0.02)")
+                            : (theme.palette.mode === "dark" ? "rgba(255,255,255,0.04)" : "rgba(0,0,0,0.025)"),
+                        },
+                      }}
+                    >
+                      {isEditing ? (
+                        <>
+                          <Box sx={{ width: 8, height: 8, borderRadius: "50%", backgroundColor: user.isActive ? "#4CAF50" : "#BDBDBD", flexShrink: 0, alignSelf: "flex-start", mt: 2 }} />
+                          <Box sx={{ flex: 1, minWidth: 0, display: "flex", flexDirection: "column", gap: { xs: 1, sm: 1.25 } }}>
+                            {/* Section: Información personal */}
+                            <Typography
+                              variant="caption"
+                              sx={{
+                                fontWeight: 700,
+                                fontSize: "0.65rem",
+                                textTransform: "uppercase",
+                                letterSpacing: "0.08em",
+                                color: theme.palette.text.disabled,
+                                mb: 0.25,
+                              }}
+                            >
+                              Información personal
+                            </Typography>
+                            <Box sx={{ display: "flex", gap: 1 }}>
+                              <TextField
+                                size="small"
+                                value={editFields.firstName}
+                                onChange={(e) => setEditFields({ ...editFields, firstName: e.target.value })}
+                                placeholder="Nombre"
+                                sx={{
+                                  flex: 1,
+                                  '& .MuiOutlinedInput-root': {
+                                    borderRadius: '8px',
+                                    backgroundColor: theme.palette.mode === 'dark' ? 'rgba(255,255,255,0.04)' : 'rgba(0,0,0,0.015)',
+                                  },
+                                  '& .MuiInputBase-input': { fontSize: '0.8rem', py: 0.75, px: 1 },
+                                }}
+                              />
+                              <TextField
+                                size="small"
+                                value={editFields.lastName}
+                                onChange={(e) => setEditFields({ ...editFields, lastName: e.target.value })}
+                                placeholder="Apellido"
+                                sx={{
+                                  flex: 1,
+                                  '& .MuiOutlinedInput-root': {
+                                    borderRadius: '8px',
+                                    backgroundColor: theme.palette.mode === 'dark' ? 'rgba(255,255,255,0.04)' : 'rgba(0,0,0,0.015)',
+                                  },
+                                  '& .MuiInputBase-input': { fontSize: '0.8rem', py: 0.75, px: 1 },
+                                }}
+                              />
+                            </Box>
+                            {/* Section: Contacto */}
+                            <Typography
+                              variant="caption"
+                              sx={{
+                                fontWeight: 700,
+                                fontSize: "0.65rem",
+                                textTransform: "uppercase",
+                                letterSpacing: "0.08em",
+                                color: theme.palette.text.disabled,
+                                mt: 0.25,
+                                mb: 0.25,
+                              }}
+                            >
+                              Contacto
+                            </Typography>
+                            <Box sx={{ display: "flex", gap: 1 }}>
+                              <TextField
+                                size="small"
+                                value={editFields.email}
+                                onChange={(e) => setEditFields({ ...editFields, email: e.target.value })}
+                                placeholder="Correo"
+                                sx={{
+                                  flex: 1,
+                                  '& .MuiOutlinedInput-root': {
+                                    borderRadius: '8px',
+                                    backgroundColor: theme.palette.mode === 'dark' ? 'rgba(255,255,255,0.04)' : 'rgba(0,0,0,0.015)',
+                                  },
+                                  '& .MuiInputBase-input': { fontSize: '0.8rem', py: 0.75, px: 1 },
+                                }}
+                              />
+                              <TextField
+                                size="small"
+                                value={editFields.username}
+                                onChange={(e) => setEditFields({ ...editFields, username: e.target.value })}
+                                placeholder="Usuario"
+                                sx={{
+                                  flex: 1,
+                                  '& .MuiOutlinedInput-root': {
+                                    borderRadius: '8px',
+                                    backgroundColor: theme.palette.mode === 'dark' ? 'rgba(255,255,255,0.04)' : 'rgba(0,0,0,0.015)',
+                                  },
+                                  '& .MuiInputBase-input': { fontSize: '0.8rem', py: 0.75, px: 1 },
+                                }}
+                              />
+                            </Box>
+                            {/* Section: Rol */}
+                            <Typography
+                              variant="caption"
+                              sx={{
+                                fontWeight: 700,
+                                fontSize: "0.65rem",
+                                textTransform: "uppercase",
+                                letterSpacing: "0.08em",
+                                color: theme.palette.text.disabled,
+                                mt: 0.25,
+                                mb: 0.25,
+                              }}
+                            >
+                              Rol del usuario
+                            </Typography>
+                            <FormControl size="small" fullWidth>
+                              <Select
+                                value={editFields.roleName}
+                                onChange={(e) => setEditFields({ ...editFields, roleName: e.target.value })}
+                                displayEmpty
+                                renderValue={(selected) => {
+                                  if (!selected) return <Typography sx={{ color: "text.disabled", fontSize: "0.8rem" }}>Seleccionar rol</Typography>;
+                                  return (
+                                    <Typography sx={{ fontWeight: 700, fontSize: "0.8rem" }}>{selected}</Typography>
+                                  );
+                                }}
+                                sx={{
+                                  backgroundColor: theme.palette.mode === "dark" ? "rgba(99,102,241,0.06)" : "rgba(99,102,241,0.06)",
+                                  border: `1.5px solid ${theme.palette.mode === "dark" ? "rgba(99,102,241,0.25)" : "rgba(99,102,241,0.25)"}`,
+                                  borderRadius: "10px",
+                                  fontWeight: 600,
+                                  fontSize: "0.8rem",
+                                  '& .MuiSelect-select': { py: 0.75, px: 1 },
+                                  '&:hover': {
+                                    borderColor: theme.palette.primary.main,
+                                  },
+                                }}
+                              >
+                                {roles.map((role) => (
+                                  <MenuItem key={role.id} value={role.name} sx={{ fontSize: '0.8rem' }}>
+                                    {role.name}
+                                  </MenuItem>
+                                ))}
+                              </Select>
+                            </FormControl>
+                          </Box>
+                          <Box sx={{ display: "flex", gap: 0.5, flexShrink: 0, alignSelf: "flex-start", mt: 2 }}>
+                            <Button
+                              size="small"
+                              variant="contained"
+                              onClick={() => handleUpdate(user.id)}
+                              disabled={!isEditFormValid}
+                              startIcon={<Check size={14} />}
+                              sx={{
+                                minWidth: "auto",
+                                px: 1.5,
+                                py: 0.5,
+                                fontSize: "0.7rem",
+                                fontWeight: 700,
+                                textTransform: "none",
+                                borderRadius: "8px",
+                                boxShadow: "none",
+                                '&:hover': { boxShadow: '0 2px 8px rgba(0,0,0,0.15)' },
+                              }}
+                            >
+                              Guardar
+                            </Button>
+                            <Button
+                              size="small"
+                              variant="outlined"
+                              onClick={handleCancel}
+                              startIcon={<X size={14} />}
+                              sx={{
+                                minWidth: "auto",
+                                px: 1.5,
+                                py: 0.5,
+                                fontSize: "0.7rem",
+                                fontWeight: 600,
+                                color: "text.secondary",
+                                textTransform: "none",
+                                borderRadius: "8px",
+                                borderColor: 'divider',
+                              }}
+                            >
+                              Cancelar
+                            </Button>
+                          </Box>
+                        </>
+                      ) : (
+                        <>
+                          <Box
+                            sx={{
+                              width: 8,
+                              height: 8,
+                              borderRadius: "50%",
+                              backgroundColor: user.isActive ? "#4CAF50" : "#BDBDBD",
+                              flexShrink: 0,
+                            }}
+                          />
+                          <Box sx={{ flex: 1, minWidth: 0 }}>
+                            <Typography variant="body2" sx={{ fontWeight: 600, fontSize: "0.85rem", color: "text.primary", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                              {user.firstName} {user.lastName}
+                            </Typography>
+                            <Typography variant="caption" sx={{ fontSize: "0.7rem", color: "text.secondary", display: "block", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                              {user.email} · {user.roleName || "Sin rol"}
+                            </Typography>
+                          </Box>
+                          <Box sx={{ display: "flex", gap: 0.5, flexShrink: 0 }}>
+                            <Button
+                              size="small"
+                              variant="text"
+                              onClick={() => handleEdit(user)}
+                              sx={{ minWidth: "auto", px: 1, fontSize: "0.7rem", fontWeight: 600, color: "primary.main", textTransform: "none" }}
+                            >
+                              Editar
+                            </Button>
+                          </Box>
+                        </>
+                      )}
+                    </Box>
+                  );
+                })}
+                {filteredUsers.length > 5 && (
+                  <Box sx={{ px: { xs: 2, sm: 2.5 }, py: 1.5, textAlign: "center" }}>
+                    <Typography variant="caption" sx={{ color: "text.disabled", fontWeight: 500, fontSize: "0.7rem" }}>
+                      +{filteredUsers.length - 5} usuarios más
+                    </Typography>
+                  </Box>
+                )}
+                {filteredUsers.length === 0 && (
+                  <Box sx={{ display: "flex", alignItems: "center", justifyContent: "center", flex: 1, minHeight: 100 }}>
+                    <Typography variant="body2" color="textSecondary">
+                      {DASHBOARD_USERS.NO_USERS}
+                    </Typography>
+                  </Box>
+                )}
               </Box>
+            ) : (
+              <>
+                {filteredUsers.length > 0 ? (
+                  <EditableTableComponent<User>
+                    key="users-table"
+                    data={filteredUsers}
+                    columns={[
+                      "firstName",
+                      "lastName",
+                      "username",
+                      "email",
+                      "roleName",
+                    ]}
+                    editRowId={editRowId}
+                    editFields={editFields}
+                    setEditField={setEditField}
+                    handleEdit={handleEdit}
+                    handleCancel={handleCancel}
+                    handleUpdate={handleUpdate}
+                    handleOpenStatusDialog={handleOpenStatusDialog}
+                    getRowId={(row) => row.id}
+                    totalCount={totalCount}
+                    page={page}
+                    rowsPerPage={rowsPerPage}
+                    setPage={setPage}
+                    setRowsPerPage={setRowsPerPage}
+                    isSaveDisabled={!isEditFormValid}
+                    userPermissions={userPermissions}
+                    isExpanded={isExpanded}
+                    validateField={validateField}
+                    passwordModalOpen={passwordModalOpen}
+                    passwordUserId={passwordUserId}
+                    onOpenPasswordModal={handleOpenPasswordModal}
+                    onClosePasswordModal={handleClosePasswordModal}
+                    showStatusColumn={true}
+                  />
+                ) : (
+                  <Box sx={noUsersBoxStyles}>
+                    <Typography variant="h6" color="textSecondary">
+                      {DASHBOARD_USERS.NO_USERS}
+                    </Typography>
+                  </Box>
+                )}
+              </>
             )}
           </Box>
           </Paper>

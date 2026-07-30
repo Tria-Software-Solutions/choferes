@@ -140,10 +140,6 @@ const RolesPage: React.FC = () => {
     const prefs = getPreferencesObject(preferencesKey, defaultPreferences);
     return prefs.date ? new Date(prefs.date) : new Date();
   });
-  const [currentWeekNumber, setCurrentWeekNumber] = useState<number>(0);
-  const [currentBiweekNumber, setCurrentBiweekNumber] = useState<number>(0);
-  const [currentMonth, setCurrentMonth] = useState<number>(0);
-  const [currentYear, setCurrentYear] = useState<number>(0);
   const [openExportDialog, setOpenExportDialog] = useState(false);
   const [exportType, setExportType] = useState<"excel" | "pdf">("excel");
   const [isExporting, setIsExporting] = useState(false);
@@ -217,61 +213,43 @@ const RolesPage: React.FC = () => {
     isLoadingBiweeklySummaries ||
     isLoadingMonthlySummaries;
 
-  // Filter employees or schedules by search input based on viewMode
+  // Smart search: cada categoría se filtra independientemente.
+  // Si el texto coincide con empleados → filtra empleados; si no, muestra todos.
+  // Si coincide con horarios → filtra horarios; si no, muestra todos.
   useEffect(() => {
     const normalizeString = (str: string) =>
       str.normalize("NFD").replace(/[\u0300-\u036f]/g, "");
 
-    setFilteredEmployees(
-      employees.filter((employee) =>
-        normalizeString(`${employee.firstName} ${employee.lastName}`)
-          .toLowerCase()
-          .includes(normalizeString(search).toLowerCase())
-      )
+    const normalizedSearch = normalizeString(search).toLowerCase().trim();
+
+    if (!normalizedSearch) {
+      setFilteredEmployees(employees);
+      setFilteredSchedules(sortSchedulesByType(schedules));
+      return;
+    }
+
+    // Buscar en empleados — si hay match, filtrar; si no, mostrar todos
+    const matchedEmployees = employees.filter((employee) =>
+      normalizeString(`${employee.firstName} ${employee.lastName}`)
+        .toLowerCase()
+        .includes(normalizedSearch)
     );
+    setFilteredEmployees(matchedEmployees.length > 0 ? matchedEmployees : employees);
 
-    if (viewMode === 'employee') {
-      // filteredEmployees ya está actualizado arriba
-    } else {
-      setFilteredSchedules(
-        sortSchedulesByType(
-          schedules.filter((schedule) =>
-            normalizeString(schedule.label)
-              .toLowerCase()
-              .includes(normalizeString(search).toLowerCase())
-          )
-        )
-      );
-    }
-  }, [search, employees, schedules, viewMode]);
-
+    // Buscar en horarios — si hay match, filtrar; si no, mostrar todos
+    const matchedSchedules = schedules.filter((schedule) =>
+      normalizeString(schedule.label)
+        .toLowerCase()
+        .includes(normalizedSearch)
+    );
+    setFilteredSchedules(
+      matchedSchedules.length > 0
+        ? sortSchedulesByType(matchedSchedules)
+        : sortSchedulesByType(schedules)
+    );
+  }, [search, employees, schedules]);
 
 
-  // Update week, biweek, month, and year based on week offset
-  useEffect(() => {
-    const currentWeek = getCurrentWeekDates(weekOffset);
-
-    if (currentWeek.length > 0) {
-      const firstDayOfWeek = new Date(currentWeek[0].date);
-
-      setCurrentWeekNumber((prev) => {
-        const newWeekNumber = getWeekNumber(firstDayOfWeek);
-        return newWeekNumber !== prev ? newWeekNumber : prev;
-      });
-      setCurrentBiweekNumber((prev) => {
-        const newBiweekNumber = getBiweekNumber(firstDayOfWeek);
-        return newBiweekNumber !== prev ? newBiweekNumber : prev;
-      });
-      setCurrentMonth((prev) => {
-        const newMonth = getMonthNumber(firstDayOfWeek);
-        return newMonth !== prev ? newMonth : prev;
-      });
-      setCurrentYear((prev) => {
-        const newYear = new Date().getFullYear();
-        return newYear !== prev ? newYear : prev;
-      });
-    }
-  }, [weekOffset]);
 
   // Handle date picker change and update week offset
   const handleDateChange = useCallback((newDate: Date | null) => {
@@ -294,6 +272,16 @@ const RolesPage: React.FC = () => {
       setWeekOffset(newWeekOffset);
     }
   }, []);
+
+  const currentWeek: DayEntry[] = getCurrentWeekDates(weekOffset);
+  const firstDayOfCurrentWeek = currentWeek.length > 0
+    ? new Date(currentWeek[0].isoDate)
+    : new Date();
+  firstDayOfCurrentWeek.setHours(0, 0, 0, 0);
+  const currentWeekNumber = getWeekNumber(firstDayOfCurrentWeek);
+  const currentBiweekNumber = getBiweekNumber(firstDayOfCurrentWeek);
+  const currentMonth = getMonthNumber(firstDayOfCurrentWeek);
+  const currentYear = firstDayOfCurrentWeek.getFullYear();
 
   // Helper function to recalculate and update weekly summary for an employee
   const recalculateEmployeeWeeklySummary = useCallback(async (
@@ -581,7 +569,8 @@ const RolesPage: React.FC = () => {
   const handleChange = (
     value: string,
     employeeId: number,
-    date: Date
+    date: Date,
+    skipRecalc?: boolean,
   ) => {
     if (value === "Other") {
       return;
@@ -632,7 +621,9 @@ const RolesPage: React.FC = () => {
         dispatch(deleteHoursWorked(existingHoursWorkedRecord.id)).then(async () => {
           // recalculateEmployeeWeeklySummary recalcula los 3 summaries (semanal, quincenal, mensual)
           // usando los datos actualizados de hoursWorked. Es la fuente única de verdad.
-          await recalculateEmployeeWeeklySummary(employeeId, date);
+          if (!skipRecalc) {
+            await recalculateEmployeeWeeklySummary(employeeId, date);
+          }
         });
       }
       return;
@@ -663,9 +654,11 @@ const RolesPage: React.FC = () => {
       scheduleId: selectedSchedule.id,
     };
 
-    // Update HoursWorked and recalculate summaries
+    // Update HoursWorked (si skipRecalc=true, no recalcular summaries — se hará después desde el popover)
     dispatch(createOrUpdateHoursWorked(hoursWorkedEntry)).then(() => {
-      recalculateEmployeeWeeklySummary(employeeId, date, hoursWorkedEntry);
+      if (!skipRecalc) {
+        recalculateEmployeeWeeklySummary(employeeId, date, hoursWorkedEntry);
+      }
     });
   };
 
@@ -793,19 +786,15 @@ const RolesPage: React.FC = () => {
         throw new Error('No hay horarios disponibles para asignar');
       }
       
-      // Get non-special schedules and special "Libre" schedule
-      const nonSpecialSchedules = availableSchedules.filter(schedule => !schedule.specialSchedule);
-      const libreSchedule = availableSchedules.find(schedule => 
-        schedule.specialSchedule && schedule.label.toLowerCase().includes('libre')
-      );
+      // Get available schedules for balanced distribution
+      const scheduleLabels = [...new Set(availableSchedules.map(s => s.label))];
       
-      if (nonSpecialSchedules.length === 0) {
-        throw new Error('No hay horarios regulares disponibles para asignar');
+      if (scheduleLabels.length === 0) {
+        throw new Error('No hay horarios disponibles para asignar');
       }
       
       // Calculate weekly hours for each schedule to plan distribution
       const scheduleWeeklyHours: Record<string, number> = {};
-      const scheduleLabels = [...new Set(nonSpecialSchedules.map(s => s.label))];
       
       // Calculate total weekly hours for each schedule label
       scheduleLabels.forEach(label => {
@@ -816,7 +805,7 @@ const RolesPage: React.FC = () => {
           const dayDate = addDays(weekStart, i);
           const dayName = dayDate.toLocaleDateString("en-US", { weekday: "long" }).toLowerCase();
           
-          const daySchedule = nonSpecialSchedules.find(s => 
+          const daySchedule = availableSchedules.find(s => 
             s.label === label && s.days && s.days.includes(dayName)
           );
           
@@ -909,12 +898,8 @@ const RolesPage: React.FC = () => {
             }
           }
           
-          // If all schedules are at max capacity, assign to "Libre"
           if (minCount >= maxEmployeesPerSchedule) {
-            if (libreSchedule) {
-              const employeeId = employeesToDistribute[employeeIndex];
-              employeeAssignments[employeeId] = libreSchedule.label;
-            }
+            // All schedules at max capacity, just continue distributing
           } else {
             // Assign to the schedule with least employees
             const employeeId = employeesToDistribute[employeeIndex];
@@ -1308,8 +1293,6 @@ const RolesPage: React.FC = () => {
     return [firstRow, secondRow];
   };
 
-  const currentWeek: DayEntry[] = getCurrentWeekDates(weekOffset);
-
   // Export handler
   const handleExportHours = async (shouldExportHours: boolean) => {
     setIsExporting(true);
@@ -1463,20 +1446,14 @@ const RolesPage: React.FC = () => {
               justifyContent="space-between"
               gap={1.5}
             >
-              {/* Search */}
+              {/* Search - busca empleados Y horarios */}
               <Box flex={1} maxWidth={{ sm: "280px" }}>
-                {(viewMode === 'employee' ? filteredEmployees : filteredSchedules) && (
-                  <SearchBarComponent
-                    placeholder={
-                      viewMode === 'employee'
-                        ? MANAGEMENT.ROLES_PAGE.SEARCH_PLACEHOLDER
-                        : MANAGEMENT.SCHEDULES_PAGE.SEARCH_PLACEHOLDER
-                    }
-                    value={search}
-                    onChange={(e) => setSearch(e.target.value)}
-                    fullWidth
-                  />
-                )}
+                <SearchBarComponent
+                  placeholder="Buscar..."
+                  value={search}
+                  onChange={(e) => setSearch(e.target.value)}
+                  fullWidth
+                />
               </Box>
 
               {/* Date Picker and Navigation */}

@@ -7,17 +7,13 @@ import {
   useMediaQuery,
   Typography,
 } from "@mui/material";
-import { Plus, X, User, Info, Mail } from "lucide-react";
+import { Plus, X, User, Mail } from "lucide-react";
 import TextfieldComponent from "../../../components/Textfield/Textfield.component";
 import { FORMS } from "../../../constants/constants";
 import {
   boxRoot,
   gridContainer,
   iconStyle,
-  infoBox,
-  infoIconBox,
-  infoTitle,
-  infoDesc,
   actionsBox,
   clearButton,
   actionsInnerBox,
@@ -170,22 +166,6 @@ const AddEmployeeForm: React.FC<AddEmployeeFormProps> = ({
             icon={<Mail style={iconStyle} />}
             sx={formControl(theme)}
           />
-        </Grid>
-
-        <Grid item xs={12}>
-          <Box sx={infoBox(theme)}>
-            <Box sx={infoIconBox(theme)}>
-              <Info size={18} />
-            </Box>
-            <Box>
-              <Typography sx={infoTitle(theme)}>
-                {FORMS.ADD_EMPLOYEE.INFO_TITLE}
-              </Typography>
-              <Typography sx={infoDesc(theme)}>
-                {FORMS.ADD_EMPLOYEE.INFO_DESC}
-              </Typography>
-            </Box>
-          </Box>
         </Grid>
 
         <Grid item xs={12}>
