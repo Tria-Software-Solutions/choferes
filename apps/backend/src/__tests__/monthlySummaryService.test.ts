@@ -6,6 +6,7 @@ jest.mock("../models/MonthlySummary", () => {
     findAll: jest.fn(),
     findOne: jest.fn(),
     upsert: jest.fn(),
+    create: jest.fn(),
     update: jest.fn(),
     destroy: jest.fn(),
   };
@@ -98,7 +99,7 @@ describe("getMonthlySummariesByMonth", () => {
 });
 
 describe("createMonthlySummary", () => {
-  it("debería crear con upsert", async () => {
+  it("debería crear si no existe un resumen previo", async () => {
     const newData = {
       employeeId: 2,
       month: 8,
@@ -107,12 +108,33 @@ describe("createMonthlySummary", () => {
     };
     const created = { id: 2, ...newData };
 
-    MonthlySummary.upsert.mockResolvedValue([created, true]);
+    MonthlySummary.findOne.mockResolvedValue(null);
+    MonthlySummary.create.mockResolvedValue(created);
 
     const result = await monthlySummaryService.createMonthlySummary(newData as never);
 
-    expect(MonthlySummary.upsert).toHaveBeenCalledWith(newData);
+    expect(MonthlySummary.findOne).toHaveBeenCalledWith({
+      where: { employeeId: 2, month: 8, year: 2026 },
+    });
+    expect(MonthlySummary.create).toHaveBeenCalledWith(newData);
     expect(result).toEqual(created);
+  });
+
+  it("debería actualizar el resumen existente", async () => {
+    const newData = {
+      employeeId: 2,
+      month: 8,
+      year: 2026,
+      totalHours: 170,
+    };
+    const existing = { id: 2, ...newData, update: jest.fn().mockResolvedValue(undefined) };
+
+    MonthlySummary.findOne.mockResolvedValue(existing);
+
+    const result = await monthlySummaryService.createMonthlySummary(newData as never);
+
+    expect(existing.update).toHaveBeenCalledWith(newData);
+    expect(result).toEqual(existing);
   });
 });
 

@@ -6,6 +6,7 @@ jest.mock("../models/WeeklySummary", () => {
     findAll: jest.fn(),
     findOne: jest.fn(),
     upsert: jest.fn(),
+    create: jest.fn(),
     update: jest.fn(),
     destroy: jest.fn(),
   };
@@ -131,7 +132,7 @@ describe("hasWorkedCurrenWeeklySummary", () => {
 });
 
 describe("createWeeklySummary", () => {
-  it("debería crear con upsert", async () => {
+  it("debería crear si no existe un resumen previo", async () => {
     const newData = {
       employeeId: 2,
       weekNumber: 30,
@@ -141,12 +142,34 @@ describe("createWeeklySummary", () => {
     };
     const created = { id: 2, ...newData };
 
-    WeeklySummary.upsert.mockResolvedValue([created, true]);
+    WeeklySummary.findOne.mockResolvedValue(null);
+    WeeklySummary.create.mockResolvedValue(created);
 
     const result = await weeklySummaryService.createWeeklySummary(newData as never);
 
-    expect(WeeklySummary.upsert).toHaveBeenCalledWith(newData);
+    expect(WeeklySummary.findOne).toHaveBeenCalledWith({
+      where: { employeeId: 2, weekNumber: 30, year: 2026 },
+    });
+    expect(WeeklySummary.create).toHaveBeenCalledWith(newData);
     expect(result).toEqual(created);
+  });
+
+  it("debería actualizar el resumen existente", async () => {
+    const newData = {
+      employeeId: 2,
+      weekNumber: 30,
+      month: 7,
+      year: 2026,
+      totalHours: 45,
+    };
+    const existing = { id: 2, ...newData, update: jest.fn().mockResolvedValue(undefined) };
+
+    WeeklySummary.findOne.mockResolvedValue(existing);
+
+    const result = await weeklySummaryService.createWeeklySummary(newData as never);
+
+    expect(existing.update).toHaveBeenCalledWith(newData);
+    expect(result).toEqual(existing);
   });
 });
 
