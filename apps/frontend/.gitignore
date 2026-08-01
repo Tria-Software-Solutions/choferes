@@ -27,3 +27,5 @@ yarn-error.log*
 tsconfig.tsbuildinfo
 *.pack
 
+.vercel
+.env*
