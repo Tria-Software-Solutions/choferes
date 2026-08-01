@@ -30,10 +30,11 @@ const checkHealth = async (): Promise<HealthStatus> => {
         process.env.JWT_SECRET_KEY_REFRESH && process.env.JWT_SECRET_KEY_REFRESH.length >= 32
       ),
       hasDatabaseConfig: !!(
-        process.env.PGUSER &&
-        process.env.PGPASSWORD &&
-        process.env.PGDATABASE &&
-        process.env.PGHOST
+        (process.env.PGUSER &&
+          process.env.PGPASSWORD &&
+          process.env.PGDATABASE &&
+          process.env.PGHOST) ||
+        process.env.DATABASE_URL
       ),
     },
   };
