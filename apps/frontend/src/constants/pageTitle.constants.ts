@@ -1,8 +1,8 @@
 const PAGE_TITLE = {
   COURIER_SERVICE: "Gestión de Mensajería y Envíos",
   COURIER_SERVICE_SIMPLIFIED: "Mensajería y Envíos",
-  DASHBOARD: "Panel de Control",
-  DASHBOARD_SIMPLIFIED: "Panel",
+  DASHBOARD: "Reportes",
+  DASHBOARD_SIMPLIFIED: "Reportes",
   EMPLOYEES: "Gestión de Empleados",
   EMPLOYEES_SIMPLIFIED: "Empleados",
   LOGIN: "Sistema de Gestión",
@@ -12,8 +12,8 @@ const PAGE_TITLE = {
   ROLES_SIMPLIFIED: "Roles",
   SCHEDULES: "Gestión de Horarios y Turnos",
   SCHEDULES_SIMPLIFIED: "Horarios y Turnos",
-  PROFILE: "Perfil de Usuario",
-  PROFILE_SIMPLIFIED: "Perfil",
+  PROFILE: "Configuración",
+  PROFILE_SIMPLIFIED: "Configuración",
   VEHICLES: "Gestión de Vehículos y Parqueo",
   VEHICLES_SIMPLIFIED: "Vehículos y Parqueo",
 };

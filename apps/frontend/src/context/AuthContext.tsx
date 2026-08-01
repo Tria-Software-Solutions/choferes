@@ -1,10 +1,11 @@
-import { createContext, useContext, useState } from "react";
+import { createContext, useContext, useEffect, useState } from "react";
 import { User } from "../models/User";
 import {
   setTokenWithFallback,
   getTokenWithFallback,
   removeTokenWithFallback,
 } from "../utils/tokenStorage";
+import { getUserPermissions } from "../services/userService";
 
 interface AuthContextType {
   accessToken: string | null;
@@ -12,6 +13,7 @@ interface AuthContextType {
   currentUser: User | null;
   setUser: (updatedUser: User) => void;
   userPermissions: string[];
+  loggedInAt: string | null;
   login: (
     accessToken: string,
     refreshToken: string,
@@ -49,6 +51,11 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     return storedUserPermissions ? JSON.parse(storedUserPermissions) : [];
   });
 
+  // State for the login timestamp, initialized from sessionStorage
+  const [loggedInAt, setLoggedInAt] = useState<string | null>(() => {
+    return sessionStorage.getItem("loggedInAt");
+  });
+
   // Handles login: sets tokens, user, and permissions in state, cookies, and sessionStorage
   const login = (
     accessToken: string,
@@ -60,6 +67,8 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     setRefreshToken(refreshToken);
     setCurrentUser(currentUser);
     setUserPermissions(userPermissions);
+    const loginTime = new Date().toISOString();
+    setLoggedInAt(loginTime);
     
     // Check if we're in production to set appropriate cookie settings
         const isProduction = process.env.NODE_ENV === "production";
@@ -79,6 +88,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     setTokenWithFallback("refreshToken", refreshToken, refreshCookieOptions);
     sessionStorage.setItem("currentUser", JSON.stringify(currentUser));
     sessionStorage.setItem("userPermissions", JSON.stringify(userPermissions));
+    sessionStorage.setItem("loggedInAt", loginTime);
   };
 
   // Handles logout: clears all auth state, cookies, and sessionStorage
@@ -87,6 +97,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     setRefreshToken(null);
     setCurrentUser(null);
     setUserPermissions([]);
+    setLoggedInAt(null);
     
     // Use same cookie options for removal as for setting
     const isProduction = process.env.NODE_ENV === "production";
@@ -105,6 +116,27 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     sessionStorage.setItem("currentUser", JSON.stringify(updatedUser));
   };
 
+  // Refresh permissions from the server on mount so DB changes
+  // (e.g. newly granted permissions) take effect without re-login
+  useEffect(() => {
+    let cancelled = false;
+    if (!accessToken || !currentUser?.id) return;
+
+    getUserPermissions(currentUser.id)
+      .then((permissions) => {
+        if (cancelled) return;
+        setUserPermissions(permissions);
+        sessionStorage.setItem("userPermissions", JSON.stringify(permissions));
+      })
+      .catch(() => {
+        // Keep the sessionStorage permissions on failure
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [accessToken, currentUser?.id]);
+
   return (
     <AuthContext.Provider
       value={{
@@ -112,6 +144,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         refreshToken,
         currentUser,
         userPermissions,
+        loggedInAt,
         login,
         logout,
         setUser,

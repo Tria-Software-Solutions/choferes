@@ -15,6 +15,7 @@ import {
   dockItemSwitchStyles,
   dockDragHandleStyles,
   dockDropIndicatorStyles,
+  dockEndZoneTickStyles,
   dockEditFooterStyles,
   dockEditHiddenCountStyles,
   dockEditActionsStyles,
@@ -196,8 +197,9 @@ export default function Dock({
   const [dragIndex, setDragIndex] = useState<number | null>(null);
   const [dropIndex, setDropIndex] = useState<number | null>(null);
 
-  // Sort items by itemOrder when editable
-  const sortedItems = editable && itemOrder
+  // Sort items by itemOrder whenever provided so external reordering
+  // (e.g. from Profile > Quick Access) is reflected immediately
+  const sortedItems = itemOrder
     ? [...items].sort((a, b) => {
         const ai = itemOrder.indexOf(a.label);
         const bi = itemOrder.indexOf(b.label);
@@ -257,25 +259,6 @@ export default function Dock({
 
   const renderItems = () => {
     const result: React.ReactNode[] = [];
-
-    // Invisible spacer on the left to balance the end drop zone width
-    if (editable) {
-      result.push(
-        <Box key="left-spacer" sx={{
-          width: baseItemSize * 0.6,
-          minWidth: baseItemSize * 0.6,
-          flexShrink: 0,
-          opacity: 0,
-        }} />
-      );
-    }
-
-    // Drop zone at the start (before first item)
-    if (editable && dropIndex === 0 && dragIndex !== null && dragIndex !== 0) {
-      result.push(
-        <Box key="drop-start" sx={dockDropIndicatorStyles} />
-      );
-    }
 
     for (let i = 0; i < sortedItems.length; i++) {
       const item = sortedItems[i];
@@ -341,38 +324,19 @@ export default function Dock({
         </Box>
       );
 
-      // Drop indicator between items (before the next one)
-      if (editable && dropIndex === i + 1 && dragIndex !== null && dragIndex !== i + 1) {
+      // Drop indicator between items (before the next one).
+      // The end position (dropIndex === sortedItems.length) is owned by the end overlay.
+      if (
+        editable &&
+        dropIndex === i + 1 &&
+        dropIndex < sortedItems.length &&
+        dragIndex !== null &&
+        dragIndex !== i + 1
+      ) {
         result.push(
           <Box key={`drop-${i + 1}`} sx={dockDropIndicatorStyles} />
         );
       }
-    }
-
-    // End drop zone - catches drops after the last item
-    if (editable) {
-      const isHoveringEnd = dropIndex === sortedItems.length;
-      result.push(
-        <React.Fragment key="drop-zone-end">
-          {isHoveringEnd && dragIndex !== null && (
-            <Box sx={dockDropIndicatorStyles} />
-          )}
-          <Box
-            sx={{
-              width: baseItemSize * 0.6,
-              height: baseItemSize + 24,
-              borderRadius: '8px',
-              border: isHoveringEnd ? '2px dashed' : '2px dashed transparent',
-              borderColor: isHoveringEnd ? 'primary.main' : 'transparent',
-              opacity: isHoveringEnd ? 0.5 : 0.3,
-              transition: 'all 0.15s ease',
-              flexShrink: 0,
-            } as SxProps<Theme>}
-            onDragOver={handleDragOver('end')}
-            onDrop={handleDrop('end')}
-          />
-        </React.Fragment>
-      );
     }
 
     return result;
@@ -394,6 +358,72 @@ export default function Dock({
       {/* Items row */}
       <Box sx={dockItemsRowStyles}>
         {renderItems()}
+
+        {/* Start drop zone — absolute overlay so the items stay centered in edit mode */}
+        {editable && (
+          <Box
+            onDragOver={handleDragOver(0)}
+            onDragLeave={handleDragLeave}
+            onDrop={handleDrop(0)}
+            sx={{
+              position: 'absolute',
+              top: 0,
+              left: -20,
+              width: 40,
+              height: '100%',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              opacity:
+                dragIndex === null
+                  ? 0
+                  : dropIndex === 0
+                    ? 1
+                    : 0.5,
+              transition: 'opacity 0.15s ease',
+              pointerEvents: dragIndex === null ? 'none' : 'auto',
+            }}
+          >
+            {dropIndex === 0 && dragIndex !== null ? (
+              <Box sx={dockDropIndicatorStyles} />
+            ) : (
+              <Box sx={dockEndZoneTickStyles} />
+            )}
+          </Box>
+        )}
+
+        {/* End drop zone — absolute overlay so the items stay centered in edit mode */}
+        {editable && (
+          <Box
+            onDragOver={handleDragOver('end')}
+            onDragLeave={handleDragLeave}
+            onDrop={handleDrop('end')}
+            sx={{
+              position: 'absolute',
+              top: 0,
+              right: -20,
+              width: 40,
+              height: '100%',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              opacity:
+                dragIndex === null
+                  ? 0
+                  : dropIndex === sortedItems.length
+                    ? 1
+                    : 0.5,
+              transition: 'opacity 0.15s ease',
+              pointerEvents: dragIndex === null ? 'none' : 'auto',
+            }}
+          >
+            {dropIndex === sortedItems.length && dragIndex !== null ? (
+              <Box sx={dockDropIndicatorStyles} />
+            ) : (
+              <Box sx={dockEndZoneTickStyles} />
+            )}
+          </Box>
+        )}
       </Box>
 
       {/* Edit mode footer */}

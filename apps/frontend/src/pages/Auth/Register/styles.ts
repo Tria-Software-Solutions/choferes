@@ -64,16 +64,16 @@ export const authCardStyles: SxProps<Theme> = (theme) => ({
   borderRadius: "24px",
   position: "relative",
   background: theme.palette.mode === "dark"
-    ? "linear-gradient(145deg, rgba(26,26,26,0.9) 0%, rgba(35,35,35,0.85) 100%)"
-    : "linear-gradient(145deg, rgba(255,255,255,0.95) 0%, rgba(250,250,250,0.9) 100%)",
+    ? "linear-gradient(145deg, rgba(20,20,30,0.4) 0%, rgba(28,28,42,0.3) 100%)"
+    : "linear-gradient(145deg, rgba(255,255,255,0.62) 0%, rgba(255,255,255,0.4) 100%)",
   boxShadow: theme.palette.mode === "dark"
-    ? "0 32px 64px rgba(0,0,0,0.5), 0 12px 24px rgba(0,0,0,0.4), 0 0 0 1px rgba(255,255,255,0.05), inset 0 1px 0 rgba(255,255,255,0.08)"
-    : "0 32px 64px rgba(0,0,0,0.12), 0 12px 24px rgba(0,0,0,0.08), 0 0 0 1px rgba(0,0,0,0.02), inset 0 1px 0 rgba(255,255,255,0.9)",
+    ? "0 32px 64px rgba(0,0,0,0.5), 0 12px 24px rgba(0,0,0,0.35), 0 0 0 1px rgba(255,255,255,0.08), inset 0 1px 0 rgba(255,255,255,0.15)"
+    : "0 32px 64px rgba(0,0,0,0.2), 0 12px 24px rgba(0,0,0,0.12), 0 0 0 1px rgba(255,255,255,0.65), inset 0 1px 0 rgba(255,255,255,0.95)",
   border: theme.palette.mode === "dark"
-    ? "1px solid rgba(255,255,255,0.08)"
-    : "1px solid rgba(255,255,255,0.6)",
-  backdropFilter: "blur(24px) saturate(180%)",
-  WebkitBackdropFilter: "blur(24px) saturate(180%)",
+    ? "1px solid rgba(255,255,255,0.16)"
+    : "1px solid rgba(255,255,255,0.65)",
+  backdropFilter: "blur(28px) saturate(190%)",
+  WebkitBackdropFilter: "blur(28px) saturate(190%)",
   zIndex: 1,
   "&::before": {
     content: '""',

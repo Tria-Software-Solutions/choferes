@@ -58,25 +58,81 @@ export const addButtonDesktopStyles: SxProps<Theme> = {
   minHeight: 56,
 };
 
-export const showInactiveBoxStyles = (theme: Theme): SxProps<Theme> => ({
+export const statusFilterBoxStyles: SxProps<Theme> = (theme) => ({
   display: "flex",
   alignItems: "center",
-  gap: 1,
-  cursor: "pointer",
-  userSelect: "none",
-  color: theme.palette.text.primary,
-  transition: "color 0.2s",
-  "&:hover": {
-    color: theme.palette.primary.main,
-    textDecoration: "underline",
-  },
-  px: 1,
+  gap: 0.5,
+  padding: 0.5,
+  borderRadius: "12px",
+  backgroundColor:
+    theme.palette.mode === "dark"
+      ? "rgba(255,255,255,0.04)"
+      : "rgba(0,0,0,0.04)",
+  border: `1px solid ${
+    theme.palette.mode === "dark"
+      ? "rgba(255,255,255,0.06)"
+      : "rgba(0,0,0,0.06)"
+  }`,
 });
 
-export const showInactiveTypographyStyles: SxProps<Theme> = {
-  fontSize: "0.95rem",
+export const statusFilterOptionStyles = (
+  theme: Theme,
+  selected: boolean,
+): SxProps<Theme> => ({
+  display: "flex",
+  alignItems: "center",
+  gap: 0.75,
+  px: 1.5,
+  py: 0.6,
+  borderRadius: "9px",
+  cursor: "pointer",
+  userSelect: "none",
   whiteSpace: "nowrap",
-};
+  fontSize: "0.8rem",
+  fontWeight: selected ? 700 : 500,
+  color: selected ? theme.palette.text.primary : theme.palette.text.secondary,
+  backgroundColor: selected
+    ? theme.palette.mode === "dark"
+      ? "rgba(255,255,255,0.12)"
+      : "rgba(255,255,255,0.95)"
+    : "transparent",
+  boxShadow: selected ? "0 1px 4px rgba(0,0,0,0.08)" : "none",
+  transition: "all 0.2s ease",
+  "&:hover": {
+    color: theme.palette.text.primary,
+    backgroundColor: selected
+      ? theme.palette.mode === "dark"
+        ? "rgba(255,255,255,0.12)"
+        : "rgba(255,255,255,0.95)"
+      : theme.palette.mode === "dark"
+        ? "rgba(255,255,255,0.06)"
+        : "rgba(0,0,0,0.03)",
+  },
+});
+
+export const statusFilterCountStyles = (
+  theme: Theme,
+  selected: boolean,
+): SxProps<Theme> => ({
+  display: "inline-flex",
+  alignItems: "center",
+  justifyContent: "center",
+  minWidth: 20,
+  height: 18,
+  px: 0.6,
+  borderRadius: "6px",
+  fontSize: "0.65rem",
+  fontWeight: 700,
+  lineHeight: 1,
+  backgroundColor: selected
+    ? theme.palette.primary.main
+    : theme.palette.mode === "dark"
+      ? "rgba(255,255,255,0.08)"
+      : "rgba(0,0,0,0.06)",
+  color: selected
+    ? theme.palette.primary.contrastText
+    : theme.palette.text.secondary,
+});
 
 export const noUsersBoxStyles: SxProps<Theme> = {
   display: "flex",

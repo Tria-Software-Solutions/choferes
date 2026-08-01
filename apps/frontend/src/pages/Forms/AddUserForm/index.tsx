@@ -171,7 +171,22 @@ const AddUserForm: React.FC<AddUserFormProps> = ({
           {FORMS.ADD_USER.DIALOG_CONTENT_TITLE}
         </Typography>
       </Box>
-      <Grid container spacing={2} sx={gridContainer}>
+      <Grid container spacing={2.5} sx={gridContainer}>
+        {/* Section: Información personal */}
+        <Grid item xs={12}>
+          <Typography
+            sx={{
+              fontSize: "0.72rem",
+              fontWeight: 600,
+              color: theme.palette.text.secondary,
+              textTransform: "uppercase",
+              letterSpacing: "0.06em",
+            }}
+          >
+            Información personal
+          </Typography>
+        </Grid>
+
         <Grid item xs={12} sm={6}>
           <TextfieldComponent
             placeholder={FORMS.ADD_USER.FIRST_NAME_PLACEHOLDER}
@@ -198,6 +213,21 @@ const AddUserForm: React.FC<AddUserFormProps> = ({
             icon={<User style={iconStyle} />}
             sx={formControl(theme)}
           />
+        </Grid>
+
+        {/* Section: Acceso */}
+        <Grid item xs={12}>
+          <Typography
+            sx={{
+              fontSize: "0.72rem",
+              fontWeight: 600,
+              color: theme.palette.text.secondary,
+              textTransform: "uppercase",
+              letterSpacing: "0.06em",
+            }}
+          >
+            Acceso
+          </Typography>
         </Grid>
 
         <Grid item xs={12} sm={6}>
@@ -246,6 +276,21 @@ const AddUserForm: React.FC<AddUserFormProps> = ({
               </IconButton>
             }
           />
+        </Grid>
+
+        {/* Section: Rol */}
+        <Grid item xs={12}>
+          <Typography
+            sx={{
+              fontSize: "0.72rem",
+              fontWeight: 600,
+              color: theme.palette.text.secondary,
+              textTransform: "uppercase",
+              letterSpacing: "0.06em",
+            }}
+          >
+            Rol
+          </Typography>
         </Grid>
 
         <Grid item xs={12} sm={6}>

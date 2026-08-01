@@ -18,13 +18,15 @@ export const BentoGrid: React.FC<BentoGridProps> = ({ children, sx }) => {
           lg: "repeat(4, 1fr)",
         },
         gridAutoRows: {
-          xs: "1fr",
+          xs: "auto",
           sm: "1fr",
           md: "1fr",
         },
         gap: { xs: 0.5, sm: 0.75, md: 1 },
-        flex: 1,
-        minHeight: 0,
+        // xs: content-sized so stacked cards push the scroll area naturally
+        // sm+: flex-fill to keep the equal-height bento layout
+        flex: { xs: "0 0 auto", sm: 1 },
+        minHeight: { xs: "auto", sm: 0 },
         ...(sx as object),
       }}
     >

@@ -16,8 +16,9 @@ import { getVehicles } from "../../../services/vehicleService";
 import { getHoursWorked } from "../../../services/hoursWorkedService";
 import { getSchedules } from "../../../services/scheduleService";
 import { getWeekNumber, getBiweekNumber, getMonthNumber, getBiweeklyDates, getFirstDayOfWeek } from "../../../utils/dates";
-import { LayoutDashboard } from "lucide-react";
+import { ChartNoAxesCombined } from "lucide-react";
 import { PAGE_TITLE } from "../../../constants/constants";
+import SegmentedToggle from "../../../components/SegmentedToggle/SegmentedToggle.component";
 import { BentoGrid, BentoGridItem } from "./components/BentoGrid";
 import {
   TopEmployeesChart,
@@ -343,7 +344,7 @@ const Dashboard = () => {
           <Box display="flex" justifyContent="space-between" alignItems={{ xs: "stretch", sm: "center" }} flexDirection={{ xs: "column", sm: "row" }} gap={{ xs: 0.75, sm: 1 }}>
             <Box display="flex" alignItems="center" gap={1.5} flexShrink={0}>
               <Box sx={{ color: theme.palette.primary.main, display: 'flex', alignItems: 'center' }}>
-                <LayoutDashboard size={20} strokeWidth={1.5} />
+                <ChartNoAxesCombined size={20} strokeWidth={1.5} />
               </Box>
               <Box minWidth={0}>
                 <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.75 }}>
@@ -371,59 +372,20 @@ const Dashboard = () => {
                 </Typography>
               </Box>
             </Box>
-            <Box
-              sx={{
-                display: 'inline-flex',
-                alignSelf: { xs: 'stretch', sm: 'auto' },
-                width: { xs: '100%', sm: 'auto' },
-                backgroundColor: theme.palette.mode === 'dark' ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.04)',
-                borderRadius: '10px',
-                p: '3px',
-                gap: '2px',
-              }}
-            >
-              {[
-                { key: 'weekly', label: 'Semanal' },
-                { key: 'biweekly', label: 'Quincenal' },
-                { key: 'monthly', label: 'Mensual' },
-              ].map(({ key, label }) => (
-                <Box
-                  key={key}
-                  onClick={() => setPeriod(key as Period)}
-                  sx={{
-                    flex: { xs: 1, sm: 'none' },
-                    px: { xs: 1, sm: 2 },
-                    py: { xs: '5px', sm: '6px' },
-                    borderRadius: '8px',
-                    cursor: 'pointer',
-                    userSelect: 'none',
-                    textTransform: 'none',
-                    fontWeight: period === key ? 700 : 500,
-                    fontSize: { xs: '0.7rem', sm: '0.8rem' },
-                    color: period === key
-                      ? theme.palette.primary.contrastText
-                      : theme.palette.text.secondary,
-                    backgroundColor: period === key
-                      ? theme.palette.primary.main
-                      : 'transparent',
-                    transition: 'all 0.2s cubic-bezier(0.4, 0, 0.2, 1)',
-                    textAlign: 'center',
-                    letterSpacing: '-0.01em',
-                    whiteSpace: 'nowrap',
-                    '&:hover': period !== key ? {
-                      backgroundColor: theme.palette.mode === 'dark'
-                        ? 'rgba(255,255,255,0.08)'
-                        : 'rgba(0,0,0,0.06)',
-                    } : {},
-                  }}
-                >
-                  {label}
-                </Box>
-              ))}
-            </Box>
+            <SegmentedToggle
+              value={period}
+              onChange={(value) => setPeriod(value as Period)}
+              options={[
+                { value: "weekly" as Period, label: "Semanal" },
+                { value: "biweekly" as Period, label: "Quincenal" },
+                { value: "monthly" as Period, label: "Mensual" },
+              ]}
+              size={isSmallScreen ? "small" : "medium"}
+              fullWidth={isSmallScreen}
+            />
           </Box>
         </Box>
-        <Box sx={{ flex: 1, overflow: "hidden", p: { xs: 0.75, sm: 1 }, display: "flex", flexDirection: "column" }}>
+        <Box className="scrollable-content" sx={{ flex: 1, overflowX: "hidden", overflowY: { xs: "auto", sm: "hidden" }, p: { xs: 0.75, sm: 1 }, display: "flex", flexDirection: "column" }}>
           <BentoGrid>
             <BentoGridItem
               title="Resumen del período"

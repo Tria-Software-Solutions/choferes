@@ -19,9 +19,9 @@ import {
 } from "@mui/material";
 import { useAppNotifications } from "../../../components/Snackbar/Snackbar.component";
 import MANAGEMENT from "../../../constants/management.constants";
+import PERMISSIONS from "../../../constants/permissions.constants";
 import ManageUsers from "../../Dashboard/ManageUsers";
 import ManageRoles from "../../Dashboard/ManageRoles";
-import ManagePermissions from "../../Dashboard/ManagePermissions";
 import {
   Eye,
   EyeOff,
@@ -34,7 +34,6 @@ import {
   Palette,
   Shield,
   Users,
-  Key,
 } from "lucide-react";
 import { User } from "../../../models/User";
 import {
@@ -54,14 +53,93 @@ import {
   DialogActions,
   CircularProgress,
 } from "@mui/material";
-import { Pencil, Camera, X, Loader2 } from "lucide-react";
+import { Pencil, Camera, X, Loader2, Bell, ShieldCheck, HelpCircle, Blocks, Sun, Moon, Monitor, Check } from "lucide-react";
+import NotificationsTab from "./NotificationsTab";
+import SessionsTab from "./SessionsTab";
+import HelpCenterTab from "./HelpCenterTab";
+import QuickAccessTab from "./QuickAccessTab";
+import SegmentedToggle from "../../../components/SegmentedToggle/SegmentedToggle.component";
+import {
+  actionsBox,
+  actionsInnerBox,
+  clearButton,
+  submitButton,
+} from "../../Forms/sharedStyles";
 
 type ThemeMode = "default" | "light" | "dark" | "high-contrast";
-type TabId = "personal" | "password" | "theme" | "users" | "roles" | "permissions";
+type TabId =
+  | "personal"
+  | "password"
+  | "theme"
+  | "notifications"
+  | "sessions"
+  | "help"
+  | "quickaccess"
+  | "users"
+  | "roles";
+
+const ThemeMockup: React.FC<{ tone: "light" | "dark" }> = ({ tone }) => {
+  const bg = tone === "dark" ? "#0f172a" : "#f3f4f6";
+  const panel = tone === "dark" ? "#1e293b" : "#ffffff";
+  const line = tone === "dark" ? "#64748b" : "#9ca3af";
+  const line2 = tone === "dark" ? "#475569" : "#d1d5db";
+  const border = tone === "dark" ? "none" : "1px solid #e5e7eb";
+  return (
+    <Box
+      sx={{
+        flex: 1,
+        height: "100%",
+        borderRadius: "10px",
+        backgroundColor: bg,
+        p: 0.75,
+        display: "flex",
+        gap: 0.5,
+      }}
+    >
+      <Box
+        sx={{
+          width: "30%",
+          borderRadius: "8px",
+          backgroundColor: panel,
+          p: 0.5,
+          display: "flex",
+          flexDirection: "column",
+          gap: 0.4,
+          border,
+        }}
+      >
+        <Box sx={{ height: 6, width: "85%", borderRadius: 1, backgroundColor: line }} />
+        <Box sx={{ height: 5, width: "95%", borderRadius: 1, backgroundColor: line2 }} />
+        <Box sx={{ height: 5, width: "90%", borderRadius: 1, backgroundColor: line2 }} />
+      </Box>
+      <Box
+        sx={{
+          flex: 1,
+          borderRadius: "8px",
+          backgroundColor: panel,
+          p: 0.75,
+          display: "flex",
+          flexDirection: "column",
+          gap: 0.5,
+          border,
+        }}
+      >
+        <Box sx={{ height: 8, width: "55%", borderRadius: 1, backgroundColor: line }} />
+        <Box
+          sx={{
+            flex: 1,
+            borderRadius: "6px",
+            backgroundColor: tone === "dark" ? "rgba(255,255,255,0.04)" : "rgba(0,0,0,0.03)",
+          }}
+        />
+      </Box>
+    </Box>
+  );
+};
 
 const Profile: React.FC = () => {
   const dispatch = useDispatch<AppDispatch>();
-  const { currentUser, setUser } = useAuthContext();
+  const { currentUser, setUser, userPermissions } = useAuthContext();
   const { users } = useSelector((state: RootState) => state.users);
   const { showNotification } = useAppNotifications();
   const theme = useTheme();
@@ -154,11 +232,34 @@ const Profile: React.FC = () => {
   }, [editFields, currentUser, validateField]);
 
   useEffect(() => {
-    const hasPasswordChange =
-      passwordFields.newPassword.trim() !== "" ||
-      passwordFields.confirmNewPassword.trim() !== "";
-    setIsPasswordFormValid(hasPasswordChange);
+    const { newPassword, confirmNewPassword } = passwordFields;
+    const allRequirementsMet =
+      newPassword.length >= 8 &&
+      /[A-Z]/.test(newPassword) &&
+      /[a-z]/.test(newPassword) &&
+      /\d/.test(newPassword) &&
+      /[^A-Za-z0-9]/.test(newPassword) &&
+      confirmNewPassword !== "" &&
+      newPassword === confirmNewPassword;
+    setIsPasswordFormValid(allRequirementsMet);
   }, [passwordFields]);
+
+  const handleClearEditForm = () => {
+    setEditFields({
+      firstName: currentUser?.firstName || "",
+      lastName: currentUser?.lastName || "",
+      email: currentUser?.email || "",
+      username: currentUser?.username || "",
+    });
+    setInfoError(null);
+  };
+
+  const handleClearPasswordForm = () => {
+    setPasswordFields({ newPassword: "", confirmNewPassword: "" });
+    setPasswordError(null);
+    setShowNewPassword(false);
+    setShowConfirmNewPassword(false);
+  };
 
   const getUserByEmail = async (email: string): Promise<User | undefined> => {
     return users.find((user) => user.email === email);
@@ -371,26 +472,40 @@ const Profile: React.FC = () => {
     return `${first}${last}` || currentUser.username.charAt(0).toUpperCase() || "?";
   };
 
+  const adminTabPermissions: Record<string, string> = {
+    users: PERMISSIONS.VIEW_USERS,
+    roles: PERMISSIONS.VIEW_ROLES,
+  };
+
   const sidebarItems = [
-    { id: "personal", label: "Información Personal", icon: UserIcon2, group: "Ajustes" },
-    { id: "password", label: "Contraseña y Seguridad", icon: Lock, group: "Ajustes" },
-    { id: "theme", label: "Apariencia", icon: Palette, group: "Ajustes" },
+    { id: "personal", label: "Información Personal", icon: UserIcon2, group: "Cuenta" },
+    { id: "password", label: "Contraseña y Seguridad", icon: Lock, group: "Cuenta" },
+    { id: "sessions", label: "Sesiones activas", icon: ShieldCheck, group: "Cuenta" },
+    { id: "theme", label: "Apariencia", icon: Palette, group: "Preferencias" },
+    { id: "notifications", label: "Notificaciones", icon: Bell, group: "Preferencias" },
+    { id: "quickaccess", label: "Accesos rápidos", icon: Blocks, group: "Preferencias" },
+    { id: "help", label: "Centro de ayuda", icon: HelpCircle, group: "Soporte" },
     { id: "users", label: "Usuarios", icon: Users, group: "Administración" },
     { id: "roles", label: "Roles", icon: Shield, group: "Administración" },
-    { id: "permissions", label: "Permisos", icon: Key, group: "Administración" },
-  ];
+  ].filter(
+    (item) =>
+      item.group !== "Administración" ||
+      userPermissions.includes(adminTabPermissions[item.id]),
+  );
 
   const groupItems = (groupName: string) =>
     sidebarItems.filter((item) => item.group === groupName);
 
   return (
     <Box
+      className="scrollable-content"
       sx={{
         height: "100%",
         minHeight: 0,
         display: "flex",
         flexDirection: "column",
-        overflow: "hidden",
+        overflowY: { xs: "auto", md: "hidden" },
+        overflowX: "hidden",
         pb: { xs: 2, md: 3 },
         pt: 1,
         px: { xs: 1, sm: 1.5, md: 2 },
@@ -403,7 +518,7 @@ const Profile: React.FC = () => {
           gap: 3,
           flex: 1,
           minHeight: 0,
-          height: "100%",
+          height: { xs: "auto", md: "100%" },
         }}
       >
         {/* Navigation Sidebar (Desktop) / Horizontal Pills (Mobile) */}
@@ -530,137 +645,82 @@ const Profile: React.FC = () => {
 
             {/* Sidebar Sections */}
             <Box sx={{ display: "flex", flexDirection: "column", gap: 3.5 }}>
-              {/* Group: Ajustes */}
-              <Box>
-                <Typography
-                  variant="caption"
-                  sx={{
-                    fontWeight: 700,
-                    fontSize: "0.72rem",
-                    textTransform: "uppercase",
-                    letterSpacing: "0.1em",
-                    color: theme.palette.text.secondary,
-                    px: 1.5,
-                    mb: 1.5,
-                    display: "block",
-                  }}
-                >
-                  Ajustes de cuenta
-                </Typography>
-                <Box sx={{ display: "flex", flexDirection: "column", gap: 0.5 }}>
-                  {groupItems("Ajustes").map((item) => {
-                    const Icon = item.icon;
-                    const isActive = activeTab === item.id;
-                    const bg = isActive
-                      ? theme.palette.mode === "dark"
-                        ? "rgba(255,255,255,0.06)"
-                        : "rgba(0,0,0,0.04)"
-                      : "transparent";
-                    const textColor = isActive ? theme.palette.text.primary : theme.palette.text.secondary;
-                    const iconColor = isActive ? theme.palette.text.primary : theme.palette.text.secondary;
-                    return (
-                      <Button
-                        key={item.id}
-                        onClick={() => setActiveTab(item.id as TabId)}
-                        startIcon={<Icon size={18} color={iconColor} />}
-                        sx={{
-                          justifyContent: "flex-start",
-                          textTransform: "none",
-                          borderRadius: "12px",
-                          py: 1.25,
-                          px: 2,
-                          fontWeight: isActive ? 700 : 500,
-                          fontSize: "0.9rem",
-                          backgroundColor: bg,
-                          color: textColor,
-                          position: "relative",
-                          border: "none !important",
-                          borderLeft: "none !important",
-                          boxShadow: "none !important",
-                          transition: "all 0.2s cubic-bezier(0.4, 0, 0.2, 1)",
-                          "&:hover": {
-                            backgroundColor: isActive
-                              ? bg
-                              : theme.palette.mode === "dark"
-                              ? "rgba(255,255,255,0.04)"
-                              : "rgba(0,0,0,0.02)",
-                            transform: "translateX(2px)",
-                            boxShadow: "none !important",
-                          },
-                        }}
-                      >
-                        {item.label}
-                      </Button>
-                    );
-                  })}
-                </Box>
-              </Box>
-
-              {/* Group: Administración */}
-              <Box>
-                <Typography
-                  variant="caption"
-                  sx={{
-                    fontWeight: 700,
-                    fontSize: "0.72rem",
-                    textTransform: "uppercase",
-                    letterSpacing: "0.1em",
-                    color: theme.palette.text.secondary,
-                    px: 1.5,
-                    mb: 1.5,
-                    display: "block",
-                  }}
-                >
-                  Administración
-                </Typography>
-                <Box sx={{ display: "flex", flexDirection: "column", gap: 0.5 }}>
-                  {groupItems("Administración").map((item) => {
-                    const Icon = item.icon;
-                    const isActive = activeTab === item.id;
-                    const bg = isActive
-                      ? theme.palette.mode === "dark"
-                        ? "rgba(255,255,255,0.06)"
-                        : "rgba(0,0,0,0.04)"
-                      : "transparent";
-                    const textColor = isActive ? theme.palette.text.primary : theme.palette.text.secondary;
-                    const iconColor = isActive ? theme.palette.text.primary : theme.palette.text.secondary;
-                    return (
-                      <Button
-                        key={item.id}
-                        onClick={() => setActiveTab(item.id as TabId)}
-                        startIcon={<Icon size={18} color={iconColor} />}
-                        sx={{
-                          justifyContent: "flex-start",
-                          textTransform: "none",
-                          borderRadius: "12px",
-                          py: 1.25,
-                          px: 2,
-                          fontWeight: isActive ? 700 : 500,
-                          fontSize: "0.9rem",
-                          backgroundColor: bg,
-                          color: textColor,
-                          position: "relative",
-                          border: "none !important",
-                          borderLeft: "none !important",
-                          boxShadow: "none !important",
-                          transition: "all 0.2s cubic-bezier(0.4, 0, 0.2, 1)",
-                          "&:hover": {
-                            backgroundColor: isActive
-                              ? bg
-                              : theme.palette.mode === "dark"
-                              ? "rgba(255,255,255,0.04)"
-                              : "rgba(0,0,0,0.02)",
-                            transform: "translateX(2px)",
-                            boxShadow: "none !important",
-                          },
-                        }}
-                      >
-                        {item.label}
-                      </Button>
-                    );
-                  })}
-                </Box>
-              </Box>
+              {["Cuenta", "Preferencias", "Soporte", "Administración"].map(
+                (groupName) => (
+                  <Box key={groupName}>
+                    <Typography
+                      variant="caption"
+                      sx={{
+                        fontWeight: 700,
+                        fontSize: "0.72rem",
+                        textTransform: "uppercase",
+                        letterSpacing: "0.1em",
+                        color: theme.palette.text.secondary,
+                        px: 1.5,
+                        mb: 1.5,
+                        display: "block",
+                      }}
+                    >
+                      {groupName}
+                    </Typography>
+                    <Box sx={{ display: "flex", flexDirection: "column", gap: 0.5 }}>
+                      {groupItems(groupName).map((item) => {
+                        const Icon = item.icon;
+                        const isActive = activeTab === item.id;
+                        const bg = isActive
+                          ? theme.palette.mode === "dark"
+                            ? "rgba(139,92,246,0.15)"
+                            : "rgba(139,92,246,0.1)"
+                          : "transparent";
+                        const textColor = isActive
+                          ? theme.palette.mode === "dark"
+                            ? "#a78bfa"
+                            : "#7c3aed"
+                          : theme.palette.text.secondary;
+                        const iconColor = isActive
+                          ? theme.palette.mode === "dark"
+                            ? "#a78bfa"
+                            : "#7c3aed"
+                          : theme.palette.text.secondary;
+                        return (
+                          <Button
+                            key={item.id}
+                            onClick={() => setActiveTab(item.id as TabId)}
+                            startIcon={<Icon size={18} color={iconColor} />}
+                            sx={{
+                              justifyContent: "flex-start",
+                              textTransform: "none",
+                              borderRadius: "12px",
+                              py: 1.25,
+                              px: 2,
+                              fontWeight: isActive ? 700 : 500,
+                              fontSize: "0.9rem",
+                              backgroundColor: bg,
+                              color: textColor,
+                              position: "relative",
+                              border: "none !important",
+                              borderLeft: "none !important",
+                              boxShadow: "none !important",
+                              transition: "all 0.2s cubic-bezier(0.4, 0, 0.2, 1)",
+                              "&:hover": {
+                                backgroundColor: isActive
+                                  ? bg
+                                  : theme.palette.mode === "dark"
+                                  ? "rgba(255,255,255,0.04)"
+                                  : "rgba(0,0,0,0.02)",
+                                transform: "translateX(2px)",
+                                boxShadow: "none !important",
+                              },
+                            }}
+                          >
+                            {item.label}
+                          </Button>
+                        );
+                      })}
+                    </Box>
+                  </Box>
+                ),
+              )}
             </Box>
           </Paper>
         ) : (
@@ -754,7 +814,7 @@ const Profile: React.FC = () => {
                       lineHeight: 1.2,
                     }}
                   >
-                    {MANAGEMENT.PERSONAL_INFO_TITLE}
+                    Información Personal
                   </Typography>
                 </Box>
                 <Typography
@@ -837,32 +897,28 @@ const Profile: React.FC = () => {
               </Box>
 
               {/* Action Button */}
-              <Box
-                sx={{
-                  display: "flex",
-                  justifyContent: { xs: "center", sm: "flex-end" },
-                  pt: 3,
-                  mt: { xs: 2, md: 2.5 },
-                  borderTop: `1px solid ${theme.palette.mode === "dark" ? "rgba(255,255,255,0.06)" : "rgba(0,0,0,0.06)"}`,
-                  flexShrink: 0,
-                }}
-              >
+              <Box sx={actionsBox(theme)}>
                 <Button
-                  variant="contained"
-                  color="primary"
+                  variant="outlined"
+                  onClick={handleClearEditForm}
+                  startIcon={<X size={18} />}
                   fullWidth={isSmallScreen}
-                  sx={{
-                    fontWeight: 600,
-                    px: 3.5,
-                    py: 1.25,
-                    minWidth: { xs: "100%", sm: 150 },
-                    borderRadius: "10px",
-                  }}
-                  onClick={handleSaveChanges}
-                  disabled={!isEditFormValid || !!infoError}
+                  sx={clearButton}
                 >
-                  {MANAGEMENT.SAVE_CHANGES}
+                  Limpiar
                 </Button>
+                <Box sx={actionsInnerBox}>
+                  <Button
+                    variant="contained"
+                    onClick={handleSaveChanges}
+                    disabled={!isEditFormValid || !!infoError}
+                    startIcon={<Check size={18} />}
+                    fullWidth={isSmallScreen}
+                    sx={submitButton}
+                  >
+                    {MANAGEMENT.SAVE_CHANGES}
+                  </Button>
+                </Box>
               </Box>
             </Paper>
           )}
@@ -900,7 +956,7 @@ const Profile: React.FC = () => {
                       lineHeight: 1.2,
                     }}
                   >
-                    Seguridad
+                    Contraseña y Seguridad
                   </Typography>
                 </Box>
                 <Typography
@@ -982,143 +1038,151 @@ const Profile: React.FC = () => {
                   />
                 </Grid>
 
-                {/* Password info card — full width below */}
+                {/* Password info — full width below */}
                 <Grid item xs={12}>
-                  <Box
+                  <Typography
                     sx={{
                       display: "flex",
-                      alignItems: "flex-start",
-                      gap: 1.5,
-                      p: 2.5,
-                      borderRadius: "12px",
-                      backgroundColor:
-                        theme.palette.mode === "dark"
-                          ? "rgba(255,255,255,0.02)"
-                          : "rgba(0,0,0,0.012)",
-                      border: `1px solid ${
-                        theme.palette.mode === "dark"
-                          ? "rgba(255,255,255,0.06)"
-                          : "rgba(0,0,0,0.05)"
-                      }`,
+                      alignItems: "center",
+                      gap: 1,
+                      fontWeight: 700,
+                      fontSize: "0.85rem",
+                      color: theme.palette.text.primary,
+                      mb: 1.25,
+                      letterSpacing: "-0.01em",
                     }}
                   >
-                    <Box
-                      sx={{
-                        color: theme.palette.primary.main,
-                        display: "flex",
-                        alignItems: "center",
-                        justifyContent: "center",
-                        flexShrink: 0,
-                        mt: 0.3,
-                      }}
-                    >
-                      <Info size={18} strokeWidth={1.5} />
-                    </Box>
-                    <Box sx={{ flex: 1 }}>
-                      <Typography
-                        variant="subtitle2"
-                        sx={{
-                          fontWeight: 700,
-                          fontSize: "0.85rem",
-                          color: theme.palette.text.primary,
-                          mb: 1,
-                          letterSpacing: "-0.01em",
-                        }}
-                      >
-                        Información de la contraseña
-                      </Typography>
-                      <Box
-                        component="ul"
-                        sx={{
-                          m: 0,
-                          p: 0,
-                          pl: 1.25,
-                          display: "flex",
-                          flexDirection: "column",
-                          gap: 0.6,
-                          listStyle: "none",
-                        }}
-                      >
-                        {[
-                          "Mínimo 8 caracteres",
-                          "Incluir mayúsculas (A-Z)",
-                          "Incluir minúsculas (a-z)",
-                          "Incluir un número (0-9)",
-                          "Incluir un carácter especial (@, #, $, etc.)",
-                        ].map((item, i) => (
+                    <Info size={16} strokeWidth={1.5} color={theme.palette.primary.main} />
+                    Información de la contraseña
+                  </Typography>
+                  <Box sx={{ display: "flex", flexWrap: "wrap", gap: 1, mb: 1.5 }}>
+                    {(() => {
+                      const { newPassword, confirmNewPassword } = passwordFields;
+                      const requirements = [
+                        {
+                          label: "Mínimo 8 caracteres",
+                          met: newPassword.length >= 8,
+                        },
+                        {
+                          label: "Mayúsculas (A-Z)",
+                          met: /[A-Z]/.test(newPassword),
+                        },
+                        {
+                          label: "Minúsculas (a-z)",
+                          met: /[a-z]/.test(newPassword),
+                        },
+                        {
+                          label: "Un número (0-9)",
+                          met: /\d/.test(newPassword),
+                        },
+                        {
+                          label: "Carácter especial (@, #, $...)",
+                          met: /[^A-Za-z0-9]/.test(newPassword),
+                        },
+                        {
+                          label: "Las contraseñas coinciden",
+                          met:
+                            newPassword !== "" &&
+                            confirmNewPassword !== "" &&
+                            newPassword === confirmNewPassword,
+                        },
+                      ];
+                      return requirements.map((req) => {
+                        const met = req.met;
+                        return (
                           <Box
-                            key={i}
-                            component="li"
+                            key={req.label}
                             sx={{
                               display: "flex",
                               alignItems: "center",
-                              gap: 1,
-                              fontSize: "0.78rem",
-                              color: theme.palette.text.secondary,
-                              lineHeight: 1.3,
-                              "&::before": {
-                                content: '"•"',
-                                color: theme.palette.primary.main,
-                                fontWeight: 700,
-                                fontSize: "0.9rem",
-                              },
+                              gap: 0.75,
+                              px: 1.25,
+                              py: 0.6,
+                              borderRadius: "20px",
+                              fontSize: "0.72rem",
+                              fontWeight: 600,
+                              transition: "all 0.2s ease",
+                              ...(met
+                                ? {
+                                    backgroundColor:
+                                      theme.palette.mode === "dark"
+                                        ? "rgba(139,92,246,0.1)"
+                                        : "rgba(139,92,246,0.08)",
+                                    color:
+                                      theme.palette.mode === "dark"
+                                        ? "#a78bfa"
+                                        : "#7c3aed",
+                                  }
+                                : {
+                                    backgroundColor: "transparent",
+                                    color: theme.palette.text.secondary,
+                                    border: `1px dashed ${
+                                      theme.palette.mode === "dark"
+                                        ? "rgba(255,255,255,0.15)"
+                                        : "rgba(0,0,0,0.15)"
+                                    }`,
+                                  }),
                             }}
                           >
-                            {item}
+                            {met ? (
+                              <Check size={13} strokeWidth={2.5} />
+                            ) : (
+                              <Box
+                                sx={{
+                                  width: 5,
+                                  height: 5,
+                                  borderRadius: "50%",
+                                  backgroundColor: theme.palette.text.disabled,
+                                }}
+                              />
+                            )}
+                            {req.label}
                           </Box>
-                        ))}
-                      </Box>
-                      <Typography
-                        variant="caption"
-                        sx={{
-                          display: "block",
-                          mt: 1.25,
-                          pt: 1.25,
-                          borderTop: `1px solid ${
-                            theme.palette.mode === "dark"
-                              ? "rgba(255,255,255,0.04)"
-                              : "rgba(0,0,0,0.03)"
-                          }`,
-                          fontSize: "0.72rem",
-                          color: theme.palette.text.disabled,
-                          lineHeight: 1.4,
-                        }}
-                      >
-                        Por seguridad, no compartas tu contraseña con nadie.
-                      </Typography>
-                    </Box>
+                        );
+                      });
+                    })()}
                   </Box>
+                  <Typography
+                    variant="caption"
+                    sx={{
+                      display: "flex",
+                      alignItems: "center",
+                      gap: 0.75,
+                      fontSize: "0.72rem",
+                      color: theme.palette.text.disabled,
+                      lineHeight: 1.4,
+                    }}
+                  >
+                    <ShieldCheck size={14} strokeWidth={1.5} />
+                    Por seguridad, no compartas tu contraseña con nadie.
+                  </Typography>
                 </Grid>
               </Grid>
               </Box>
 
               {/* Password Action Button */}
-              <Box
-                sx={{
-                  display: "flex",
-                  justifyContent: { xs: "center", sm: "flex-end" },
-                  pt: 3,
-                  mt: { xs: 2, md: 2.5 },
-                  borderTop: `1px solid ${theme.palette.mode === "dark" ? "rgba(255,255,255,0.06)" : "rgba(0,0,0,0.06)"}`,
-                  flexShrink: 0,
-                }}
-              >
+              <Box sx={actionsBox(theme)}>
                 <Button
-                  variant="contained"
-                  color="primary"
+                  variant="outlined"
+                  onClick={handleClearPasswordForm}
+                  startIcon={<X size={18} />}
                   fullWidth={isSmallScreen}
-                  sx={{
-                    fontWeight: 600,
-                    px: 3.5,
-                    py: 1.25,
-                    minWidth: { xs: "100%", sm: 150 },
-                    borderRadius: "10px",
-                  }}
-                  onClick={handleChangePassword}
-                  disabled={!isPasswordFormValid}
+                  sx={clearButton}
                 >
-                  {MANAGEMENT.CHANGE_PASSWORD}
+                  Limpiar
                 </Button>
+                <Box sx={actionsInnerBox}>
+                  <Button
+                    variant="contained"
+                    onClick={handleChangePassword}
+                    disabled={!isPasswordFormValid}
+                    startIcon={<Check size={18} />}
+                    fullWidth={isSmallScreen}
+                    sx={submitButton}
+                  >
+                    {MANAGEMENT.CHANGE_PASSWORD}
+                  </Button>
+                </Box>
               </Box>
             </Paper>
           )}
@@ -1156,7 +1220,7 @@ const Profile: React.FC = () => {
                       lineHeight: 1.2,
                     }}
                   >
-                    Tema de la aplicación
+                    Apariencia
                   </Typography>
                 </Box>
                 <Typography
@@ -1174,327 +1238,95 @@ const Profile: React.FC = () => {
 
               <Box sx={{ borderBottom: `1px solid ${theme.palette.mode === "dark" ? "rgba(255,255,255,0.06)" : "rgba(0,0,0,0.06)"}`, mb: { xs: 2, md: 2.5 } }} />
 
-              {/* Theme Grid Choice */}
-              <Grid container spacing={3}>
-                {/* Option: Default / System */}
-                <Grid item xs={12} sm={4}>
-                  <Box
-                    onClick={() => setMode("default")}
-                    sx={{
-                      position: "relative",
-                      cursor: "pointer",
-                      border: `2.5px solid ${
-                        mode === "default"
-                          ? theme.palette.text.primary
-                          : theme.palette.mode === "dark"
-                          ? "rgba(255,255,255,0.08)"
-                          : "rgba(0,0,0,0.08)"
-                      }`,
-                      borderRadius: "16px",
-                      p: 2.5,
-                      backgroundColor: theme.palette.mode === "dark" ? "rgba(255,255,255,0.02)" : "rgba(0,0,0,0.01)",
-                      transition: "all 0.25s cubic-bezier(0.4, 0, 0.2, 1)",
-                      boxShadow:
-                        mode === "default"
-                          ? "0 8px 30px rgba(0, 0, 0, 0.12)"
-                          : "none",
-                      display: "flex",
-                      flexDirection: "column",
-                      alignItems: "center",
-                      gap: 2,
-                      "&:hover": {
-                        borderColor: mode === "default" ? theme.palette.text.primary : "rgba(0,0,0,0.3)",
-                        transform: "translateY(-4px)",
-                        boxShadow: "0 12px 36px rgba(0,0,0,0.08)",
-                      },
-                    }}
-                  >
-                    {/* Visual Checkmark Badge */}
-                    {mode === "default" && (
-                      <Box
-                        sx={{
-                          position: "absolute",
-                          top: 12,
-                          right: 12,
-                          backgroundColor: theme.palette.text.primary,
-                          borderRadius: "50%",
-                          width: 22,
-                          height: 22,
-                          display: "flex",
-                          alignItems: "center",
-                          justifyContent: "center",
-                          boxShadow: "0 2px 8px rgba(0,0,0,0.15)",
-                        }}
-                      >
-                        <svg
-                          width="12"
-                          height="12"
-                          viewBox="0 0 24 24"
-                          fill="none"
-                          stroke={theme.palette.background.paper}
-                          strokeWidth="3.5"
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                        >
-                          <polyline points="20 6 9 17 4 12" />
-                        </svg>
-                      </Box>
-                    )}
+              {/* Theme Segmented Toggle */}
+              <Box sx={{ display: "flex", justifyContent: "center", mb: 2.5 }}>
+                <SegmentedToggle
+                  value={mode}
+                  onChange={(value) => setMode(value as ThemeMode)}
+                  options={[
+                    { value: "default" as ThemeMode, label: "Sistema", icon: <Monitor size={15} /> },
+                    { value: "light" as ThemeMode, label: "Claro", icon: <Sun size={15} /> },
+                    { value: "dark" as ThemeMode, label: "Oscuro", icon: <Moon size={15} /> },
+                  ]}
+                  size="medium"
+                />
+              </Box>
 
-                    {/* Dual visual mockup UI */}
-                    <Box
-                      sx={{
-                        width: "100%",
-                        height: 80,
-                        borderRadius: "10px",
-                        display: "flex",
-                        overflow: "hidden",
-                        border: `1.5px solid ${theme.palette.mode === "dark" ? "rgba(255,255,255,0.08)" : "rgba(0,0,0,0.08)"}`,
-                      }}
-                    >
-                      {/* Left: Light Mockup */}
-                      <Box
-                        sx={{
-                          width: "50%",
-                          height: "100%",
-                          backgroundColor: "#f3f4f6",
-                          display: "flex",
-                          flexDirection: "column",
-                          p: 0.75,
-                          gap: 0.5,
-                          borderRight: "1px solid rgba(0,0,0,0.05)",
-                        }}
-                      >
-                        <Box sx={{ backgroundColor: "#ffffff", height: 8, borderRadius: "2px", width: "100%", border: "1px solid #e5e7eb" }} />
-                        <Box sx={{ display: "flex", gap: "3px", flex: 1 }}>
-                          <Box sx={{ backgroundColor: "#ffffff", width: 12, height: "100%", borderRadius: "2px", border: "1px solid #e5e7eb" }} />
-                          <Box sx={{ flex: 1, backgroundColor: "#ffffff", borderRadius: "2px", border: "1px solid #e5e7eb", p: "3px", display: "flex", flexDirection: "column", gap: "2px" }}>
-                            <Box sx={{ backgroundColor: "#9ca3af", width: "50%", height: 3, borderRadius: "0.5px" }} />
-                            <Box sx={{ backgroundColor: "#d1d5db", width: "80%", height: 2, borderRadius: "0.5px" }} />
-                          </Box>
-                        </Box>
-                      </Box>
-                      {/* Right: Dark Mockup */}
-                      <Box
-                        sx={{
-                          width: "50%",
-                          height: "100%",
-                          backgroundColor: "#0f172a",
-                          display: "flex",
-                          flexDirection: "column",
-                          p: 0.75,
-                          gap: 0.5,
-                        }}
-                      >
-                        <Box sx={{ backgroundColor: "#1e293b", height: 8, borderRadius: "2px", width: "100%" }} />
-                        <Box sx={{ display: "flex", gap: "3px", flex: 1 }}>
-                          <Box sx={{ backgroundColor: "#1e293b", width: 12, height: "100%", borderRadius: "2px" }} />
-                          <Box sx={{ flex: 1, backgroundColor: "#1e293b", borderRadius: "2px", p: "3px", display: "flex", flexDirection: "column", gap: "2px" }}>
-                            <Box sx={{ backgroundColor: "#64748b", width: "50%", height: 3, borderRadius: "0.5px" }} />
-                            <Box sx={{ backgroundColor: "#475569", width: "80%", height: 2, borderRadius: "0.5px" }} />
-                          </Box>
-                        </Box>
-                      </Box>
-                    </Box>
-                    <Typography sx={{ fontWeight: 650, fontSize: "0.95rem", color: theme.palette.text.primary }}>Sistema</Typography>
-                  </Box>
-                </Grid>
-
-                {/* Option: Light */}
-                <Grid item xs={12} sm={4}>
-                  <Box
-                    onClick={() => setMode("light")}
-                    sx={{
-                      position: "relative",
-                      cursor: "pointer",
-                      border: `2.5px solid ${
-                        mode === "light"
-                          ? theme.palette.text.primary
-                          : theme.palette.mode === "dark"
-                          ? "rgba(255,255,255,0.08)"
-                          : "rgba(0,0,0,0.08)"
-                      }`,
-                      borderRadius: "16px",
-                      p: 2.5,
-                      backgroundColor: "rgba(0,0,0,0.01)",
-                      transition: "all 0.25s cubic-bezier(0.4, 0, 0.2, 1)",
-                      boxShadow:
-                        mode === "light"
-                          ? "0 8px 30px rgba(0, 0, 0, 0.12)"
-                          : "none",
-                      display: "flex",
-                      flexDirection: "column",
-                      alignItems: "center",
-                      gap: 2,
-                      "&:hover": {
-                        borderColor: mode === "light" ? theme.palette.text.primary : "rgba(0,0,0,0.3)",
-                        transform: "translateY(-4px)",
-                        boxShadow: "0 12px 36px rgba(0,0,0,0.08)",
-                      },
-                    }}
-                  >
-                    {/* Visual Checkmark Badge */}
-                    {mode === "light" && (
-                      <Box
-                        sx={{
-                          position: "absolute",
-                          top: 12,
-                          right: 12,
-                          backgroundColor: theme.palette.text.primary,
-                          borderRadius: "50%",
-                          width: 22,
-                          height: 22,
-                          display: "flex",
-                          alignItems: "center",
-                          justifyContent: "center",
-                          boxShadow: "0 2px 8px rgba(0,0,0,0.15)",
-                        }}
-                      >
-                        <svg
-                          width="12"
-                          height="12"
-                          viewBox="0 0 24 24"
-                          fill="none"
-                          stroke={theme.palette.background.paper}
-                          strokeWidth="3.5"
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                        >
-                          <polyline points="20 6 9 17 4 12" />
-                        </svg>
-                      </Box>
-                    )}
-
-                    {/* Light Preview Mockup */}
-                    <Box
-                      sx={{
-                        width: "100%",
-                        height: 80,
-                        borderRadius: "10px",
-                        backgroundColor: "#f3f4f6",
-                        display: "flex",
-                        flexDirection: "column",
-                        p: 0.75,
-                        gap: 0.5,
-                        border: `1.5px solid ${theme.palette.mode === "dark" ? "rgba(255,255,255,0.08)" : "rgba(0,0,0,0.08)"}`,
-                      }}
-                    >
-                      <Box sx={{ backgroundColor: "#ffffff", height: 8, borderRadius: "2px", width: "100%", border: "1px solid #e5e7eb" }} />
-                      <Box sx={{ display: "flex", gap: "3px", flex: 1 }}>
-                        <Box sx={{ backgroundColor: "#ffffff", width: 14, height: "100%", borderRadius: "2px", border: "1px solid #e5e7eb" }} />
-                        <Box sx={{ flex: 1, backgroundColor: "#ffffff", borderRadius: "2px", border: "1px solid #e5e7eb", p: "4px", display: "flex", flexDirection: "column", gap: "3px" }}>
-                          <Box sx={{ backgroundColor: "#9ca3af", width: "50%", height: 4, borderRadius: "0.5px" }} />
-                          <Box sx={{ backgroundColor: "#d1d5db", width: "85%", height: 3, borderRadius: "0.5px" }} />
-                        </Box>
-                      </Box>
-                    </Box>
-                    <Typography sx={{ fontWeight: 650, fontSize: "0.95rem", color: theme.palette.text.primary }}>Claro</Typography>
-                  </Box>
-                </Grid>
-
-                {/* Option: Dark */}
-                <Grid item xs={12} sm={4}>
-                  <Box
-                    onClick={() => setMode("dark")}
-                    sx={{
-                      position: "relative",
-                      cursor: "pointer",
-                      border: `2.5px solid ${
-                        mode === "dark"
-                          ? theme.palette.text.primary
-                          : theme.palette.mode === "dark"
-                          ? "rgba(255,255,255,0.08)"
-                          : "rgba(0,0,0,0.08)"
-                      }`,
-                      borderRadius: "16px",
-                      p: 2.5,
-                      backgroundColor: "rgba(255,255,255,0.01)",
-                      transition: "all 0.25s cubic-bezier(0.4, 0, 0.2, 1)",
-                      boxShadow:
-                        mode === "dark"
-                          ? "0 8px 30px rgba(0, 0, 0, 0.12)"
-                          : "none",
-                      display: "flex",
-                      flexDirection: "column",
-                      alignItems: "center",
-                      gap: 2,
-                      "&:hover": {
-                        borderColor: mode === "dark" ? theme.palette.text.primary : "rgba(255,255,255,0.3)",
-                        transform: "translateY(-4px)",
-                        boxShadow: "0 12px 36px rgba(0,0,0,0.08)",
-                      },
-                    }}
-                  >
-                    {/* Visual Checkmark Badge */}
-                    {mode === "dark" && (
-                      <Box
-                        sx={{
-                          position: "absolute",
-                          top: 12,
-                          right: 12,
-                          backgroundColor: theme.palette.text.primary,
-                          borderRadius: "50%",
-                          width: 22,
-                          height: 22,
-                          display: "flex",
-                          alignItems: "center",
-                          justifyContent: "center",
-                          boxShadow: "0 2px 8px rgba(0,0,0,0.15)",
-                        }}
-                      >
-                        <svg
-                          width="12"
-                          height="12"
-                          viewBox="0 0 24 24"
-                          fill="none"
-                          stroke={theme.palette.background.paper}
-                          strokeWidth="3.5"
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                        >
-                          <polyline points="20 6 9 17 4 12" />
-                        </svg>
-                      </Box>
-                    )}
-
-                    {/* Dark Preview Mockup */}
-                    <Box
-                      sx={{
-                        width: "100%",
-                        height: 80,
-                        borderRadius: "10px",
-                        backgroundColor: "#0f172a",
-                        display: "flex",
-                        flexDirection: "column",
-                        p: 0.75,
-                        gap: 0.5,
-                        border: `1.5px solid ${theme.palette.mode === "dark" ? "rgba(255,255,255,0.08)" : "rgba(0,0,0,0.08)"}`,
-                      }}
-                    >
-                      <Box sx={{ backgroundColor: "#1e293b", height: 8, borderRadius: "2px", width: "100%" }} />
-                      <Box sx={{ display: "flex", gap: "3px", flex: 1 }}>
-                        <Box sx={{ backgroundColor: "#1e293b", width: 14, height: "100%", borderRadius: "2px" }} />
-                        <Box sx={{ flex: 1, backgroundColor: "#1e293b", borderRadius: "2px", p: "4px", display: "flex", flexDirection: "column", gap: "3px" }}>
-                          <Box sx={{ backgroundColor: "#64748b", width: "50%", height: 4, borderRadius: "0.5px" }} />
-                          <Box sx={{ backgroundColor: "#475569", width: "85%", height: 3, borderRadius: "0.5px" }} />
-                        </Box>
-                      </Box>
-                    </Box>
-                    <Typography sx={{ fontWeight: 650, fontSize: "0.95rem", color: theme.palette.text.primary }}>Oscuro</Typography>
-                  </Box>
-                </Grid>
-              </Grid>
-            </Paper>
+              {/* Preview Mockup */}
+              <Box sx={{ width: "100%", mb: 1.5 }}>
+                <Box
+                  sx={{
+                    width: "100%",
+                    height: 260,
+                    borderRadius: "14px",
+                    border: `1.5px solid ${
+                      theme.palette.mode === "dark" ? "rgba(255,255,255,0.08)" : "rgba(0,0,0,0.08)"
+                    }`,
+                    p: 1,
+                    display: "flex",
+                    gap: 0.75,
+                  }}
+                >
+                  {mode === "default" ? (
+                    <>
+                      <ThemeMockup tone="light" />
+                      <ThemeMockup tone="dark" />
+                    </>
+                  ) : (
+                    <ThemeMockup tone={mode === "dark" ? "dark" : "light"} />
+                  )}
+                </Box>
+                <Typography
+                  variant="caption"
+                  sx={{
+                    display: "block",
+                    textAlign: "center",
+                    mt: 1,
+                    color: theme.palette.text.secondary,
+                    fontSize: "0.72rem",
+                  }}
+                >
+                  {mode === "default"
+                    ? "Tema Sistema: se adapta a la configuración de tu dispositivo."
+                    : mode === "light"
+                      ? "Tema Claro: interfaz luminosa."
+                      : "Tema Oscuro: interfaz oscura."}
+                </Typography>
+              </Box>
+</Paper>
           )}
 
           {/* Admin tables - same panel height as others, identical to standalone pages */}
-          {["users", "roles", "permissions"].includes(activeTab) && (
+          {["users", "roles"].includes(activeTab) && (
             <Box sx={{ flex: 1, minHeight: 0, display: "flex", flexDirection: "column" }}>
               <Box sx={{ flex: 1, display: "flex", flexDirection: "column", "& .MuiPaper-root": { mb: 0 } }}>
                 {activeTab === "users" && <ManageUsers isExpanded hideHeader />}
                 {activeTab === "roles" && <ManageRoles isExpanded hideHeader />}
-                {activeTab === "permissions" && <ManagePermissions hideHeader />}
               </Box>
+            </Box>
+          )}
+
+          {activeTab === "notifications" && (
+            <Box sx={{ flex: 1, minHeight: 0, display: "flex", flexDirection: "column" }}>
+              <NotificationsTab />
+            </Box>
+          )}
+
+          {activeTab === "sessions" && (
+            <Box sx={{ flex: 1, minHeight: 0, display: "flex", flexDirection: "column" }}>
+              <SessionsTab />
+            </Box>
+          )}
+
+          {activeTab === "help" && (
+            <Box sx={{ flex: 1, minHeight: 0, display: "flex", flexDirection: "column" }}>
+              <HelpCenterTab />
+            </Box>
+          )}
+
+          {activeTab === "quickaccess" && (
+            <Box sx={{ flex: 1, minHeight: 0, display: "flex", flexDirection: "column" }}>
+              <QuickAccessTab />
             </Box>
           )}
         </Box>

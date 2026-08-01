@@ -12,6 +12,7 @@ import { Vehicle } from "../models/Vehicle";
 import { WeeklySummary } from "../models/WeeklySummary";
 import { MonthlySummary } from "../models/MonthlySummary";
 import { BiweeklySummary } from "../models/BiweeklySummary";
+import { Notification } from "../models/Notification";
 import setupAssociations from "./associations";
 
 // Setup all model associations (side effect)
@@ -32,4 +33,5 @@ export {
   WeeklySummary,
   MonthlySummary,
   BiweeklySummary,
+  Notification,
 };

@@ -18,6 +18,14 @@ import {
   useMediaQuery,
   type Theme,
 } from "@mui/material";
+import {
+  useReactTable,
+  getCoreRowModel,
+  getSortedRowModel,
+  getPaginationRowModel,
+  type ColumnDef,
+  type SortingState,
+} from "@tanstack/react-table";
 import { translateColumnHeaderToSpanish } from "../../../utils/string";
 import { formatDateWithDay } from "../../../utils/dates";
 import { TABLE } from "../../../constants/constants";
@@ -25,8 +33,6 @@ import PaginationComponent from "../Pagination/Pagination.component";
 import { tableCellStyles, tableHeadCellStyles } from "./EditableTable.styles";
 import {
   createColumnConfig,
-  sortData,
-  paginateData,
   checkEditPermissions,
   checkDeletePermissions,
   renderEditField,
@@ -34,11 +40,11 @@ import {
   renderActionButtons,
   renderStatusButton,
 } from "./helpers";
-import { useTableSorting } from "../../../hooks/useTableSorting";
 import { useExpandedRows } from "../../../hooks/useExpandedRows";
 
 /** EditableTable - Componente genérico y configurable para mostrar y editar datos tabulares.
- * Soporta edición inline, validación, paginación, ordenamiento, renderers personalizados y acciones basadas en permisos. */
+ * Usa TanStack Table v8 para sorting y pagination (headless) y MUI para el render,
+ * manteniendo el mismo look & feel. El header queda fijo (sticky) al hacer scroll. */
 
 type EditFieldValue = string | boolean | number | string[] | Date;
 
@@ -62,7 +68,6 @@ interface EditableTableProps<T extends object> {
   setPage: (page: number) => void;
   setRowsPerPage: (rowsPerPage: number) => void;
   /** @deprecated Use custom cell rendering in parent component instead */
-  /** @deprecated Use custom cell rendering in parent component instead */
   renderColumnValue?: (column: string, value: unknown, isEditing?: boolean, editProps?: {
     editFields: Record<string, EditFieldValue>;
     setEditField: (field: string, value: EditFieldValue) => void;
@@ -72,6 +77,8 @@ interface EditableTableProps<T extends object> {
   isSaveDisabled?: boolean;
   noActions?: boolean;
   userPermissions?: string[];
+  /** Permission names required for the row actions (edit/delete) of this entity */
+  permissionMap?: { edit?: string; delete?: string };
   isExpanded?: boolean;
   passwordModalOpen?: boolean;
   passwordUserId?: number | null;
@@ -79,6 +86,9 @@ interface EditableTableProps<T extends object> {
   onClosePasswordModal?: () => void;
   showStatusColumn?: boolean;
   maxTableHeight?: number;
+  showPagination?: boolean;
+  /** When true, the table respects the incoming data order (no initial sort). */
+  respectDataOrder?: boolean;
 }
 
 const ROWS_PER_PAGE_OPTIONS = [5, 10, 25, 50, 100];
@@ -95,6 +105,7 @@ const HeaderCell = memo<{
   <TableCell className="tableCell" sx={tableHeadCellStyles(theme, topOffset)}>
     <TableSortLabel
       direction={orderBy === column ? order : "asc"}
+      active={orderBy === column}
       onClick={onSort}
       sx={{
         color: "inherit",
@@ -178,6 +189,7 @@ const EditableTableComponent = <T extends object>({
   isSaveDisabled,
   noActions,
   userPermissions,
+  permissionMap,
   isExpanded = true,
   passwordModalOpen,
   passwordUserId,
@@ -185,11 +197,12 @@ const EditableTableComponent = <T extends object>({
   onClosePasswordModal = () => {},
   showStatusColumn = false,
   maxTableHeight,
+  showPagination = true,
+  respectDataOrder = false,
 }: EditableTableProps<T>) => {
   const { currentUser } = useAuthContext();
   const { roles } = useSelector((state: RootState) => state.roles);
   const { permissions } = useSelector((state: RootState) => state.permissions);
-  const { order, orderBy, handleSort } = useTableSorting<T>(columns[0]);
   const { expandedRows, expandRow, collapseRow } = useExpandedRows();
 
   const theme = useTheme();
@@ -217,8 +230,14 @@ const EditableTableComponent = <T extends object>({
   const tableHeadTopOffset = groupByDate ? groupDateHeaderHeight : 0;
 
   // Memoizar permisos para evitar recálculos
-  const hasEditPermissions = useMemo(() => checkEditPermissions(userPermissions), [userPermissions]);
-  const hasDeletePermissions = useMemo(() => checkDeletePermissions(userPermissions), [userPermissions]);
+  const hasEditPermissions = useMemo(
+    () => checkEditPermissions(userPermissions, permissionMap?.edit ? [permissionMap.edit] : undefined),
+    [userPermissions, permissionMap]
+  );
+  const hasDeletePermissions = useMemo(
+    () => checkDeletePermissions(userPermissions, permissionMap?.delete ? [permissionMap.delete] : undefined),
+    [userPermissions, permissionMap]
+  );
 
   // Memoizar configuración de columnas
   const columnConfig = useMemo(() => createColumnConfig(roles, permissions), [roles, permissions]);
@@ -229,20 +248,55 @@ const EditableTableComponent = <T extends object>({
     [columns, columnConfig]
   );
 
-  // Memoizar array de configuración de columnas para sorting
-  const columnsConfigArray = useMemo(
-    () => visibleColumns.map((key) => ({ field: key, sortable: true })),
+  // --- TanStack Table: definición de columnas (headless, solo para accessor/sort) ---
+  const columnDefs = useMemo<ColumnDef<T>[]>(
+    () =>
+      visibleColumns.map((column) => ({
+        id: String(column),
+        accessorFn: (row: T) => row[column],
+        enableSorting: true,
+      })),
     [visibleColumns]
   );
 
-  // Memoizar datos ordenados - solo recalcular cuando cambian dependencias relevantes
-  const sortedData = useMemo(
-    () => sortData(data, orderBy, order, columnsConfigArray),
-    [data, orderBy, order, columnsConfigArray]
+  // Sorting state (TanStack). respectDataOrder => sin sort inicial.
+  const [sorting, setSorting] = useState<SortingState>(
+    respectDataOrder ? [] : [{ id: String(columns[0]), desc: false }]
   );
 
-  // Memoizar datos paginados
-  const paginatedData = useMemo(() => paginateData(sortedData, page, rowsPerPage), [sortedData, page, rowsPerPage]);
+  // Pagination state (TanStack) controlado desde props para no cambiar la API externa
+  const pagination = useMemo(
+    () => ({ pageIndex: page, pageSize: rowsPerPage }),
+    [page, rowsPerPage]
+  );
+
+  const table = useReactTable<T>({
+    data,
+    columns: columnDefs,
+    state: {
+      sorting,
+      ...(showPagination ? { pagination } : {}),
+    },
+    onSortingChange: setSorting,
+    ...(showPagination
+      ? {
+          onPaginationChange: (updater) => {
+            const next = typeof updater === "function" ? updater(pagination) : updater;
+            setPage(next.pageIndex);
+            setRowsPerPage(next.pageSize);
+          },
+          getPaginationRowModel: getPaginationRowModel(),
+        }
+      : {}),
+    getCoreRowModel: getCoreRowModel(),
+    getSortedRowModel: getSortedRowModel(),
+  });
+
+  // Derivar orden actual para los TableSortLabel (misma API visual que antes)
+  const orderBy = sorting[0]?.id ?? null;
+  const order: "asc" | "desc" = sorting[0]?.desc ? "desc" : "asc";
+
+  const tableRows = table.getRowModel().rows;
 
   // Memoizar opciones de rows per page
   const rowsPerPageOptions = useMemo(
@@ -251,7 +305,7 @@ const EditableTableComponent = <T extends object>({
       const defaultOptions = isSmallScreen
         ? ROWS_PER_PAGE_OPTIONS.filter(o => o <= 25)
         : ROWS_PER_PAGE_OPTIONS;
-      
+
       // Generate dynamic options based on total
       const dynamicOptions: number[] = [];
       let current = 5;
@@ -262,7 +316,7 @@ const EditableTableComponent = <T extends object>({
       if (total > 0) {
         dynamicOptions.push(total);
       }
-      
+
       // Combine with default options and remove duplicates
       const allOptions = Array.from(new Set([...defaultOptions, ...dynamicOptions, rowsPerPage]));
       return allOptions.filter((opt) => opt <= total || total === 0).sort((a, b) => a - b);
@@ -279,9 +333,13 @@ const EditableTableComponent = <T extends object>({
 
   const handleSortRequest = useCallback(
     (column: keyof T) => {
-      handleSort(column);
+      setSorting((prev) => {
+        const id = String(column);
+        const isAsc = prev[0]?.id === id && !prev[0].desc;
+        return [{ id, desc: !isAsc }];
+      });
     },
-    [handleSort]
+    []
   );
 
   const handleRowsPerPageChange = useCallback(
@@ -369,13 +427,13 @@ const EditableTableComponent = <T extends object>({
           aria-label="sticky table"
           sx={{ width: "100%", minWidth: { xs: "auto", md: 650 }, borderCollapse: "separate" }}
         >
-          <TableHead sx={{ position: "sticky", top: tableHeadTopOffset, zIndex: 20, backgroundColor: theme.palette.mode === "dark" ? "#0a0a0a" : "#000000" }}>
+          <TableHead sx={{ backgroundColor: theme.palette.mode === "dark" ? "#0a0a0a" : "#000000" }}>
             <TableRow>
               {firstColumns.map((column) => (
                 <HeaderCell
                   key={String(column)}
                   column={String(column)}
-                  orderBy={String(orderBy)}
+                  orderBy={orderBy !== null ? String(orderBy) : ""}
                   order={order}
                   onSort={() => handleSortRequest(column)}
                   theme={theme}
@@ -391,7 +449,7 @@ const EditableTableComponent = <T extends object>({
                 <HeaderCell
                   key={String(column)}
                   column={String(column)}
-                  orderBy={String(orderBy)}
+                  orderBy={orderBy !== null ? String(orderBy) : ""}
                   order={order}
                   onSort={() => handleSortRequest(column)}
                   theme={theme}
@@ -409,7 +467,8 @@ const EditableTableComponent = <T extends object>({
             </TableRow>
           </TableHead>
           <TableBody>
-            {paginatedData.map((row, rowIndex) => {
+            {tableRows.map((tableRow, rowIndex) => {
+              const row = tableRow.original;
               const rowId = getRowId(row);
               const isCurrentUser = rowId === currentUser?.id;
               const isUser = "username" in row;
@@ -534,6 +593,7 @@ const EditableTableComponent = <T extends object>({
           </TableBody>
         </Table>
       </TableContainer>
+      {showPagination && (
       <TablePagination
         className="pagination"
         rowsPerPageOptions={rowsPerPageOptions}
@@ -613,6 +673,7 @@ const EditableTableComponent = <T extends object>({
           },
         }}
       />
+      )}
     </Paper>
   );
 };

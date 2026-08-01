@@ -1,38 +1,20 @@
-import React, { createContext, useContext, useState, useCallback, useEffect, useMemo } from 'react';
-import { Notification, NotificationFilters } from '../models/Notification';
-import { notificationEvents } from '../services/notificationService';
-
-// LocalStorage key for notifications
-const NOTIFICATIONS_STORAGE_KEY = 'app_notifications';
-
-// Helper functions for localStorage
-const loadNotificationsFromStorage = (): Notification[] => {
-  try {
-    const stored = localStorage.getItem(NOTIFICATIONS_STORAGE_KEY);
-    if (stored) {
-      const parsed = JSON.parse(stored);
-      // Convert timestamp strings back to Date objects
-      return parsed.map((notification: { timestamp: string; [key: string]: unknown }) => ({
-        ...notification,
-        timestamp: new Date(notification.timestamp)
-      }));
-    }
-  } catch (error) {
-    // Silently handle localStorage errors
-  }
-  return [];
-};
-
-const saveNotificationsToStorage = (notifications: Notification[]) => {
-  try {
-    localStorage.setItem(NOTIFICATIONS_STORAGE_KEY, JSON.stringify(notifications));
-  } catch (error) {
-    // Silently handle localStorage errors
-  }
-};
+import React, { createContext, useContext, useState, useCallback, useEffect, useMemo } from "react";
+import { Notification, NotificationFilters } from "../models/Notification";
+import { notificationEvents } from "../services/notificationService";
+import {
+  fetchNotificationsFromApi,
+  createNotificationInApi,
+  markAsReadInApi,
+  markAllAsReadInApi,
+  deleteNotificationInApi,
+  deleteAllNotificationsInApi,
+  generatePaymentRemindersInApi,
+} from "../services/notificationService";
+import { useAuthContext } from "./AuthContext";
 
 interface NotificationContextType {
   notifications: Notification[];
+  allNotifications: Notification[];
   unreadCount: number;
   isLoading: boolean;
   filters: NotificationFilters;
@@ -40,10 +22,10 @@ interface NotificationContextType {
   markAllAsRead: () => void;
   deleteNotification: (notificationId: string) => void;
   deleteAllNotifications: () => void;
-  addNotification: (notification: Omit<Notification, 'id' | 'timestamp' | 'read'>) => void;
+  addNotification: (notification: Omit<Notification, "id" | "timestamp" | "read">) => void;
   updateFilters: (newFilters: Partial<NotificationFilters>) => void;
   clearFilters: () => void;
-  getNotificationsByCategory: (category: Notification['category']) => Notification[];
+  getNotificationsByCategory: (category: Notification["category"]) => Notification[];
   getHighPriorityNotifications: () => Notification[];
   cleanOldNotifications: () => void;
 }
@@ -51,11 +33,48 @@ interface NotificationContextType {
 const NotificationContext = createContext<NotificationContextType | undefined>(undefined);
 
 export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [notifications, setNotifications] = useState<Notification[]>(() => {
-    return loadNotificationsFromStorage();
-  });
+  const { currentUser } = useAuthContext();
+  const [notifications, setNotifications] = useState<Notification[]>([]);
   const [filters, setFilters] = useState<NotificationFilters>({});
-  const [isLoading] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+
+  // Sync notifications from the database whenever the logged-in user changes.
+  // Also generates payment reminders (15th / last day of month) on open.
+  useEffect(() => {
+    if (!currentUser?.id) {
+      setNotifications([]);
+      return;
+    }
+
+    let cancelled = false;
+    setIsLoading(true);
+
+    const load = async () => {
+      try {
+        // Idempotent: creates today's payment reminder if today is the 15th
+        // or the last day of the month, otherwise does nothing.
+        await generatePaymentRemindersInApi();
+        const data = await fetchNotificationsFromApi();
+        if (!cancelled) {
+          setNotifications(data);
+        }
+      } catch (error) {
+        // Keep previous notifications on failure (offline / API down)
+        // eslint-disable-next-line no-console
+        console.error("[NotificationContext] Error loading notifications:", error);
+      } finally {
+        if (!cancelled) {
+          setIsLoading(false);
+        }
+      }
+    };
+
+    load();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [currentUser?.id]);
 
   // Get unread count
   const unreadCount = useMemo(() => {
@@ -80,57 +99,72 @@ export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({ 
     return true;
   });
 
-  // Mark notification as read
-  const markAsRead = useCallback((notificationId: string) => {
-    setNotifications(prev => {
-      const updated = prev.map(notification => 
-        notification.id === notificationId 
-          ? { ...notification, read: true }
-          : notification
+  // Mark notification as read (optimistic update + API sync)
+  const markAsRead = useCallback(
+    (notificationId: string) => {
+      setNotifications(prev =>
+        prev.map(notification =>
+          notification.id === notificationId ? { ...notification, read: true } : notification,
+        ),
       );
-      saveNotificationsToStorage(updated);
-      return updated;
-    });
-  }, []);
+      markAsReadInApi(notificationId).catch(() => {
+        // Silent: server will reconcile on next load
+      });
+    },
+    [],
+  );
 
-  // Mark all as read
+  // Mark all as read (optimistic update + API sync)
   const markAllAsRead = useCallback(() => {
-    setNotifications(prev => {
-      const updated = prev.map(notification => ({ ...notification, read: true }));
-      saveNotificationsToStorage(updated);
-      return updated;
+    setNotifications(prev => prev.map(notification => ({ ...notification, read: true })));
+    markAllAsReadInApi().catch(() => {
+      // Silent
     });
   }, []);
 
-  // Delete notification
+  // Delete notification (optimistic update + API sync)
   const deleteNotification = useCallback((notificationId: string) => {
-    setNotifications(prev => {
-      const updated = prev.filter(notification => notification.id !== notificationId);
-      saveNotificationsToStorage(updated);
-      return updated;
+    setNotifications(prev => prev.filter(notification => notification.id !== notificationId));
+    deleteNotificationInApi(notificationId).catch(() => {
+      // Silent
     });
   }, []);
 
-  // Delete all notifications
+  // Delete all notifications (optimistic update + API sync)
   const deleteAllNotifications = useCallback(() => {
     setNotifications([]);
-    saveNotificationsToStorage([]);
-  }, []);
-
-  // Add new notification
-  const addNotification = useCallback((notification: Omit<Notification, 'id' | 'timestamp' | 'read'>) => {
-    const newNotification: Notification = {
-      ...notification,
-      id: Date.now().toString(),
-      timestamp: new Date(),
-      read: false
-    };
-    setNotifications(prev => {
-      const updated = [newNotification, ...prev];
-      saveNotificationsToStorage(updated);
-      return updated;
+    deleteAllNotificationsInApi().catch(() => {
+      // Silent
     });
   }, []);
+
+  // Add new notification (optimistic local + persist to DB, then reconcile the id)
+  const addNotification = useCallback(
+    (notification: Omit<Notification, "id" | "timestamp" | "read">) => {
+      const tempId = `temp-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`;
+      const newNotification: Notification = {
+        ...notification,
+        id: tempId,
+        timestamp: new Date(),
+        read: false,
+      };
+      setNotifications(prev => [newNotification, ...prev]);
+
+      if (currentUser?.id) {
+        createNotificationInApi(notification)
+          .then(created => {
+            // Swap the optimistic temp id for the server-assigned id
+            setNotifications(prev =>
+              prev.map(n => (n.id === tempId ? { ...created } : n)),
+            );
+          })
+          .catch(() => {
+            // Silent: kept locally in memory with temp id
+          });
+      }
+    },
+    [currentUser?.id],
+  );
 
   // Update filters
   const updateFilters = useCallback((newFilters: Partial<NotificationFilters>) => {
@@ -143,49 +177,38 @@ export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({ 
   }, []);
 
   // Get notifications by category
-  const getNotificationsByCategory = useCallback((category: Notification['category']) => {
-    return notifications.filter(n => n.category === category);
-  }, [notifications]);
+  const getNotificationsByCategory = useCallback(
+    (category: Notification["category"]) => {
+      return notifications.filter(n => n.category === category);
+    },
+    [notifications],
+  );
 
   // Get high priority notifications
   const getHighPriorityNotifications = useCallback(() => {
-    return notifications.filter(n => n.priority === 'high' && !n.read);
+    return notifications.filter(n => n.priority === "high" && !n.read);
   }, [notifications]);
 
-  // Clean old notifications (older than 30 days)
+  // Clean old notifications (older than 30 days) locally
   const cleanOldNotifications = useCallback(() => {
     const thirtyDaysAgo = new Date();
     thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
-    
-    setNotifications(prev => {
-      const updated = prev.filter(notification => 
-        notification.timestamp > thirtyDaysAgo
-      );
-      saveNotificationsToStorage(updated);
-      return updated;
-    });
+
+    setNotifications(prev => prev.filter(notification => notification.timestamp > thirtyDaysAgo));
   }, []);
 
-  // Subscribe to notification events
+  // Subscribe to notification events (helpers like createEmployeeNotification)
   useEffect(() => {
-    const unsubscribe = notificationEvents.subscribe((newNotification) => {
-      setNotifications(prev => {
-        const updated = [newNotification, ...prev];
-        saveNotificationsToStorage(updated);
-        return updated;
-      });
+    const unsubscribe = notificationEvents.subscribe(newNotification => {
+      addNotification(newNotification);
     });
 
     return unsubscribe;
-  }, []);
-
-  // Clean old notifications on mount
-  useEffect(() => {
-    cleanOldNotifications();
-  }, [cleanOldNotifications]);
+  }, [addNotification]);
 
   const value = {
     notifications: filteredNotifications,
+    allNotifications: notifications,
     unreadCount,
     isLoading,
     filters,
@@ -198,20 +221,18 @@ export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({ 
     clearFilters,
     getNotificationsByCategory,
     getHighPriorityNotifications,
-    cleanOldNotifications
+    cleanOldNotifications,
   };
 
   return (
-    <NotificationContext.Provider value={value}>
-      {children}
-    </NotificationContext.Provider>
+    <NotificationContext.Provider value={value}>{children}</NotificationContext.Provider>
   );
 };
 
 export const useNotificationMenu = () => {
   const context = useContext(NotificationContext);
   if (context === undefined) {
-    throw new Error('useNotificationMenu must be used within a NotificationProvider');
+    throw new Error("useNotificationMenu must be used within a NotificationProvider");
   }
   return context;
-}; 
+};

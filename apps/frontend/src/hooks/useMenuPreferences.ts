@@ -1,13 +1,15 @@
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 
 const STORAGE_KEY = 'menuPreferences';
+
+export const MENU_PREFERENCES_EVENT = 'menuPreferencesChanged';
 
 export interface MenuPreferences {
   [key: string]: boolean;
 }
 
 export function useMenuPreferences(menuKeys: string[]) {
-  const [preferences, setPreferences] = useState<MenuPreferences>(() => {
+  const readPreferences = useCallback((): MenuPreferences => {
     try {
       const stored = localStorage.getItem(STORAGE_KEY);
       if (stored) {
@@ -25,10 +27,9 @@ export function useMenuPreferences(menuKeys: string[]) {
       // ignore parse errors
     }
     return getDefaults(menuKeys);
-  });
+  }, [menuKeys]);
 
-  // Item order state (stored separately in localStorage)
-  const [itemOrder, setItemOrder] = useState<string[]>(() => {
+  const readOrder = useCallback((): string[] => {
     try {
       const stored = localStorage.getItem(STORAGE_KEY);
       if (stored) {
@@ -46,10 +47,24 @@ export function useMenuPreferences(menuKeys: string[]) {
       // ignore
     }
     return [...menuKeys];
-  });
+  }, [menuKeys]);
+
+  const [preferences, setPreferences] = useState<MenuPreferences>(readPreferences);
+  const [itemOrder, setItemOrder] = useState<string[]>(readOrder);
+
+  // Keep multiple instances (e.g. AppBar dock + Profile tab) in sync
+  useEffect(() => {
+    const handleChange = () => {
+      setPreferences(readPreferences());
+      setItemOrder(readOrder());
+    };
+    window.addEventListener(MENU_PREFERENCES_EVENT, handleChange);
+    return () => window.removeEventListener(MENU_PREFERENCES_EVENT, handleChange);
+  }, [readPreferences, readOrder]);
 
   const saveAll = useCallback((prefs: MenuPreferences, order: string[]) => {
     localStorage.setItem(STORAGE_KEY, JSON.stringify({ ...prefs, _order: order }));
+    window.dispatchEvent(new Event(MENU_PREFERENCES_EVENT));
   }, []);
 
   const toggleMenu = useCallback((key: string) => {

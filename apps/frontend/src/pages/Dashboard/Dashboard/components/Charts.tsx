@@ -205,7 +205,7 @@ export const DailyAttendanceChart = ({ data }: DailyAttendanceProps) => {
   }
 
   return (
-    <Box sx={{ flex: 1, width: "100%", height: "100%", minHeight: 0 }}>
+    <Box sx={{ flex: 1, width: "100%", height: "100%", minHeight: { xs: 140, sm: 0 } }}>
       <ResponsiveContainer width="100%" height="100%">
         <LineChart data={ordered} margin={{ left: 0, right: 0, top: 5, bottom: 0 }}>
           <XAxis
@@ -318,15 +318,17 @@ export const PeriodSummary = ({ employeeCount, totalHours, overtimeCount, totalO
   return (
     <Box sx={{
       display: "grid",
-      gridTemplateColumns: { xs: "1fr", sm: "1fr 1fr", md: "repeat(5, 1fr)" },
+      gridTemplateColumns: { xs: "repeat(2, 1fr)", sm: "1fr 1fr", md: "repeat(5, 1fr)" },
       gap: { xs: 0.5, sm: 0.75, md: 1 },
       flex: 1,
       alignItems: "stretch",
     }}>
-      {stats.map((s) => (
+      {stats.map((s, idx) => (
         <Box
           key={s.label}
           sx={{
+            // Last stat spans full width below md so it doesn't sit alone in a 2-col grid
+            gridColumn: idx === stats.length - 1 ? { xs: "1 / -1", sm: "1 / -1", md: "auto" } : undefined,
             display: "flex",
             flexDirection: "column",
             alignItems: { xs: "flex-start", sm: "center" },

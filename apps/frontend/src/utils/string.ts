@@ -1,5 +1,4 @@
 import { Schedule } from "../models/Schedule";
-import { sortSchedulesByType } from "./schedule";
 import { ColumnsTranslation } from "./columnsTranslation";
 import { EnglishDayOfWeek } from "./dayAbreviations";
 import { EnglishAbrevMonthOfYear } from "./monthAbreviations";
@@ -51,11 +50,10 @@ export const getOptionsForDay = (
   day: string,
   schedules: Schedule[],
 ): Schedule[] => {
-  // Returns all schedules that include the given day, sorted by type and alphabetically
-  return sortSchedulesByType(
-    schedules.filter((schedule) =>
-      schedule.days.includes(day.toLowerCase()),
-    ),
+  // Returns all schedules that include the given day, preserving the incoming
+  // order (the store already sorts by the user's saved custom order).
+  return schedules.filter((schedule) =>
+    schedule.days.includes(day.toLowerCase()),
   );
 };
 

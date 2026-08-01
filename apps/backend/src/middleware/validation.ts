@@ -396,7 +396,52 @@ export const hoursWorkedUpdateRules = [
     .optional()
     .isInt({ min: 1 })
     .withMessage("El ID del horario debe ser un número entero positivo"),
-]; // ─── Pagination & search query params ───────────────────────────────────────
+]; // ─── Notifications ───────────────────────────────────────────────────────────
+
+export const notificationRules = [
+  body("title")
+    .trim()
+    .notEmpty()
+    .withMessage("El título es requerido")
+    .isLength({ max: 150 })
+    .withMessage("El título no puede exceder 150 caracteres"),
+  body("message")
+    .trim()
+    .notEmpty()
+    .withMessage("El mensaje es requerido")
+    .isLength({ max: 500 })
+    .withMessage("El mensaje no puede exceder 500 caracteres"),
+  body("type")
+    .optional()
+    .isIn(["info", "success", "warning", "error"])
+    .withMessage("type debe ser uno de: info, success, warning, error"),
+  body("category")
+    .optional()
+    .isIn(["employee", "schedule", "vehicle", "system", "report"])
+    .withMessage("category inválida"),
+  body("priority")
+    .optional()
+    .isIn(["low", "medium", "high"])
+    .withMessage("priority debe ser uno de: low, medium, high"),
+  body("actionUrl")
+    .optional({ values: "falsy" })
+    .isLength({ max: 255 })
+    .withMessage("actionUrl no puede exceder 255 caracteres"),
+  body("actionText")
+    .optional()
+    .trim()
+    .isLength({ max: 100 })
+    .withMessage("actionText no puede exceder 100 caracteres"),
+];
+
+export const paymentReminderRules = [
+  body("today")
+    .optional({ values: "falsy" })
+    .matches(/^\d{4}-\d{2}-\d{2}$/)
+    .withMessage("today debe tener formato YYYY-MM-DD"),
+];
+
+// ─── Pagination & search query params ───────────────────────────────────────
 export const paginationRules = [
   query("page").optional().isInt({ min: 1 }).withMessage("page debe ser un número entero positivo"),
   query("limit")

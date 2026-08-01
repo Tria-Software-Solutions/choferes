@@ -25,6 +25,7 @@ export const dockItemsRowStyles: SxProps<Theme> = {
   alignItems: 'center',
   justifyContent: 'center',
   gap: 1,
+  position: 'relative', // so absolute drop overlays anchor to the items row
 };
 
 export const dockIconRootStyles: SxProps<Theme> = {
@@ -103,6 +104,16 @@ export const dockDropIndicatorStyles: SxProps<Theme> = (theme) => ({
   opacity: 0.85,
   boxShadow: `0 0 16px ${theme.palette.primary.main}60, 0 0 4px ${theme.palette.primary.main}30`,
   transition: 'all 0.2s ease',
+});
+
+// Subtle tick shown in the empty start/end drop zones (edit mode)
+export const dockEndZoneTickStyles: SxProps<Theme> = (theme) => ({
+  width: 2,
+  height: 28,
+  borderRadius: 2,
+  background: theme.palette.mode === 'dark'
+    ? 'rgba(255,255,255,0.15)'
+    : 'rgba(0,0,0,0.12)',
 });
 
 export const dockItemSwitchStyles: SxProps<Theme> = {

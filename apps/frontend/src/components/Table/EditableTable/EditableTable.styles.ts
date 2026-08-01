@@ -1,6 +1,6 @@
 import { SxProps, Theme } from "@mui/material";
 
-// Base input styles compartidos - Premium Edition
+// Base input styles compartidos - Premium Edition (borderless: sin borde rectangular gris)
 const baseInputStyles = (theme: Theme) => ({
   borderRadius: "14px",
   backgroundColor: theme.palette.background.paper,
@@ -12,21 +12,11 @@ const baseInputStyles = (theme: Theme) => ({
   boxShadow: "0 2px 8px rgba(0,0,0,0.04), 0 1px 2px rgba(0,0,0,0.02)",
   transition: "all 0.25s cubic-bezier(0.4, 0, 0.2, 1)",
   "& fieldset": {
-    borderColor: theme.palette.mode === "dark" ? "rgba(255,255,255,0.12)" : "rgba(0,0,0,0.08)",
-    borderWidth: "1.5px",
-    borderRadius: "14px",
+    border: "none",
   },
   "&:hover": {
     boxShadow: "0 4px 16px rgba(0,0,0,0.08), 0 2px 4px rgba(0,0,0,0.04)",
     transform: "translateY(-1px)",
-  },
-  "&:hover .MuiOutlinedInput-notchedOutline": {
-    borderColor: theme.palette.mode === "dark" ? "rgba(255,255,255,0.35)" : "rgba(0,0,0,0.2)",
-  },
-  "&.Mui-focused .MuiOutlinedInput-notchedOutline": {
-    borderColor: theme.palette.primary.main,
-    borderWidth: "2px",
-    boxShadow: "0 0 0 4px rgba(25, 118, 210, 0.12)",
   },
   "&.Mui-focused": {
     backgroundColor: theme.palette.background.paper,

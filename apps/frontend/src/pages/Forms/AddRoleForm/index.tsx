@@ -1,12 +1,9 @@
-import React, { useState, useMemo } from "react";
+import React, { useState } from "react";
 import {
   Box,
   Grid,
   Button,
   FormControl,
-  FormGroup,
-  FormControlLabel,
-  Checkbox,
   useTheme,
   useMediaQuery,
   Typography,
@@ -14,17 +11,13 @@ import {
 import { Plus, X, Users } from "lucide-react";
 import { Permission } from "../../../models/Permission";
 import TextfieldComponent from "../../../components/Textfield/Textfield.component";
+import PermissionTogglePanel from "../../../components/PermissionTogglePanel/PermissionTogglePanel.component";
 import { FORMS } from "../../../constants/constants";
 import {
   boxRoot,
   gridContainer,
   iconStyle,
-  permissionsLabel,
   permissionsError,
-  permissionsBox,
-  categoryBox,
-  categoryTitle,
-  chipSx,
   actionsBox,
   clearButton,
   actionsInnerBox,
@@ -57,19 +50,6 @@ const AddRoleForm: React.FC<AddRoleFormProps> = ({
     name: "",
     permissions: "",
   });
-
-  // Groups permissions by category using useMemo
-  const groupedPermissions = useMemo(() => {
-    const grouped: { [key: string]: Permission[] } = {};
-    permissions.forEach((permission) => {
-      const category = permission.name.split("_")[0];
-      if (!grouped[category]) {
-        grouped[category] = [];
-      }
-      grouped[category].push(permission);
-    });
-    return grouped;
-  }, [permissions]);
 
   // Field validation for the form
   const validateField = (name: string, value: string | string[]) => {
@@ -153,7 +133,22 @@ const AddRoleForm: React.FC<AddRoleFormProps> = ({
           {FORMS.ADD_ROLE.DIALOG_CONTENT_TITLE}
         </Typography>
       </Box>
-      <Grid container spacing={2} sx={gridContainer}>
+      <Grid container spacing={2.5} sx={gridContainer}>
+        {/* Section: Información del rol */}
+        <Grid item xs={12}>
+          <Typography
+            sx={{
+              fontSize: "0.72rem",
+              fontWeight: 600,
+              color: theme.palette.text.secondary,
+              textTransform: "uppercase",
+              letterSpacing: "0.06em",
+            }}
+          >
+            Información del rol
+          </Typography>
+        </Grid>
+
         <Grid item xs={12}>
           <TextfieldComponent
             placeholder={FORMS.ADD_ROLE.NAME_PLACEHOLDER}
@@ -168,100 +163,31 @@ const AddRoleForm: React.FC<AddRoleFormProps> = ({
           />
         </Grid>
 
+        {/* Section: Permisos */}
         <Grid item xs={12}>
+          <Typography
+            sx={{
+              fontSize: "0.72rem",
+              fontWeight: 600,
+              color: theme.palette.text.secondary,
+              textTransform: "uppercase",
+              letterSpacing: "0.06em",
+            }}
+          >
+            {FORMS.ADD_ROLE.PERMISSIONS_LABEL}
+          </Typography>
           <FormControl fullWidth error={errors.permissions !== ""}>
             <Box sx={{ mb: 1 }}>
-              <Box sx={permissionsLabel(theme)}>
-                {FORMS.ADD_ROLE.PERMISSIONS_LABEL}
-              </Box>
               {errors.permissions && (
                 <Box sx={permissionsError(theme)}>{errors.permissions}</Box>
               )}
             </Box>
-
-            <Box sx={permissionsBox(theme)}>
-              {Object.entries(groupedPermissions).map(
-                ([category, categoryPermissions]) => (
-                  <Box key={category} sx={categoryBox}>
-                    <Box sx={categoryTitle(theme)}>{category}</Box>
-                    <FormGroup row>
-                      {categoryPermissions.map((permission) => (
-                        <FormControlLabel
-                          key={permission.id}
-                          sx={{
-                            marginRight: 0,
-                            marginBottom: "4px",
-                            alignItems: "center",
-                            gap: "6px",
-                            "& .MuiFormControlLabel-label": {
-                              display: "flex",
-                              alignItems: "center",
-                            },
-                          }}
-                          control={
-                            <Checkbox
-                              checked={formData.permissions.includes(
-                                permission.id.toString(),
-                              )}
-                              onChange={() =>
-                                handlePermissionChange(permission.id.toString())
-                              }
-                              disableRipple
-                              icon={
-                                <Box
-                                  sx={{
-                                    width: 18,
-                                    height: 18,
-                                    borderRadius: "5px",
-                                    border: `2px solid ${
-                                      theme.palette.mode === "dark"
-                                        ? "rgba(255,255,255,0.25)"
-                                        : "rgba(0,0,0,0.2)"
-                                    }`,
-                                    backgroundColor: "transparent",
-                                    transition: "all 0.2s cubic-bezier(0.4, 0, 0.2, 1)",
-                                  }}
-                                />
-                              }
-                              checkedIcon={
-                                <Box
-                                  sx={{
-                                    width: 18,
-                                    height: 18,
-                                    borderRadius: "5px",
-                                    border: `2px solid ${theme.palette.primary.main}`,
-                                    backgroundColor: theme.palette.primary.main,
-                                    display: "flex",
-                                    alignItems: "center",
-                                    justifyContent: "center",
-                                    transition: "all 0.2s cubic-bezier(0.4, 0, 0.2, 1)",
-                                    "&::after": {
-                                      content: '""',
-                                      width: 5,
-                                      height: 9,
-                                      border: "2px solid #fff",
-                                      borderTop: "none",
-                                      borderLeft: "none",
-                                      transform: "rotate(45deg) translateY(-1px)",
-                                      display: "block",
-                                    },
-                                  }}
-                                />
-                              }
-                            />
-                          }
-                          label={
-                            <Box component="span" sx={chipSx(theme)}>
-                              {permission.name.split("_").slice(1).join(" ").toLowerCase()}
-                            </Box>
-                          }
-                        />
-                      ))}
-                    </FormGroup>
-                  </Box>
-                ),
-              )}
-            </Box>
+            <PermissionTogglePanel
+              permissions={permissions}
+              selected={formData.permissions}
+              onToggle={handlePermissionChange}
+              getValue={(permission) => permission.id.toString()}
+            />
           </FormControl>
         </Grid>
 

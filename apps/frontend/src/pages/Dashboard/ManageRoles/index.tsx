@@ -18,26 +18,39 @@ import {
   Backdrop,
   Box,
   Button,
-  Checkbox,
   CircularProgress,
-  FormControl,
-  ListItemText,
-  MenuItem,
+  IconButton,
   Paper,
-  Select,
   TextField,
   Typography,
   useTheme,
   useMediaQuery,
 } from "@mui/material";
 import EditableTableComponent from "../../../components/Table/EditableTable/EditableTable.component";
+import PermissionTogglePanel from "../../../components/PermissionTogglePanel/PermissionTogglePanel.component";
 import SearchBarComponent from "../../../components/SearchBar/SearchBar.component";
 import AddRoleForm from "../../Forms/AddRoleForm";
 import DialogComponent from "../../../components/Dialog/Dialog.component";
-import { Check, Plus, PlusCircle, Shield, Trash2, X } from "lucide-react";
+import PremiumTooltip from "../../../components/PremiumTooltip/PremiumTooltip.component";
+import {
+  CheckCircle,
+  FileEdit,
+  Plus,
+  PlusCircle,
+  Shield,
+  Trash2,
+  X,
+} from "lucide-react";
+import {
+  editButtonStyles,
+  saveButtonStyles,
+  neutralButtonStyles,
+} from "../../../components/Table/EditableTable/helpers/actionButtons";
 import PAGE_TITLE from "../../../constants/pageTitle.constants";
+import PERMISSIONS from "../../../constants/permissions.constants";
 import { DASHBOARD_ROLES } from "../../../constants/constants";
 import { NOTIFICATIONS } from "../../../constants/constants";
+import { TABLE } from "../../../constants/constants";
 import {
   permissionNamesBoxStyles,
   permissionChipStyles,
@@ -59,6 +72,23 @@ const ManageRoles: React.FC<{ isExpanded?: boolean; hideHeader?: boolean }> = ({
   const { userPermissions } = useAuthContext();
   const theme = useTheme();
   const isSmallScreen = useMediaQuery(theme.breakpoints.down("sm"));
+  const canCreateRole = userPermissions.includes(PERMISSIONS.CREATE_ROLE);
+  const canEditRole = userPermissions.includes(PERMISSIONS.EDIT_ROLE);
+
+  const inputSx = {
+    '& .MuiInputBase-root': {
+      fontWeight: 600,
+      fontSize: '0.85rem',
+      '&:before, &:after': { border: 'none' },
+      '&:hover:not(.Mui-disabled):before': { border: 'none' },
+    },
+    '& .MuiInputBase-input': {
+      padding: '4px 0',
+      minWidth: 0,
+      '&::placeholder': { opacity: 0.4, fontWeight: 400 },
+      '&:focus': { outline: 'none' },
+    },
+  } as const;
   const { roles, isLoadingRoles } = useSelector(
     (state: RootState) => state.roles,
   );
@@ -123,6 +153,16 @@ const ManageRoles: React.FC<{ isExpanded?: boolean; hideHeader?: boolean }> = ({
   }, [search, roles]);
 
   const totalCount = useMemo(() => filteredRoles.length, [filteredRoles]);
+
+  // Toggles a permission name in the edit fields
+  const togglePermission = useCallback((name: string) => {
+    setEditFields((prev) => ({
+      ...prev,
+      permissionNames: prev.permissionNames.includes(name)
+        ? prev.permissionNames.filter((n) => n !== name)
+        : [...prev.permissionNames, name],
+    }));
+  }, []);
 
   // Validates role fields for add/edit forms
   const validateFields = useCallback((fields: typeof editFields) => {
@@ -380,40 +420,44 @@ const ManageRoles: React.FC<{ isExpanded?: boolean; hideHeader?: boolean }> = ({
 
             {/* Add Button */}
             <Box sx={{ display: { xs: 'none', sm: 'flex' }, gap: 1 }}>
-              <Button
-                variant="contained"
-                startIcon={<Plus size={18} />}
-                onClick={handleOpenAddRoleModal}
-                sx={{
-                  px: 3,
-                  py: 1,
-                  fontWeight: 600,
-                  fontSize: "0.9rem",
-                  letterSpacing: "-0.01em",
-                  borderRadius: '10px',
-                }}
-              >
-                {DASHBOARD_ROLES.ADD}
-              </Button>
+              {canCreateRole && (
+                <Button
+                  variant="contained"
+                  startIcon={<Plus size={18} />}
+                  onClick={handleOpenAddRoleModal}
+                  sx={{
+                    px: 3,
+                    py: 1,
+                    fontWeight: 600,
+                    fontSize: "0.9rem",
+                    letterSpacing: "-0.01em",
+                    borderRadius: '10px',
+                  }}
+                >
+                  {DASHBOARD_ROLES.ADD}
+                </Button>
+              )}
             </Box>
           </Box>
         </Box>
 
         {/* Mobile Add Button */}
         <Box sx={{ display: { xs: 'flex', sm: 'none' }, p: 2, borderTop: `1px solid ${theme.palette.mode === "dark" ? "rgba(255,255,255,0.08)" : "rgba(0,0,0,0.08)"}` }}>
-          <Button
-            variant="contained"
-            fullWidth
-            startIcon={<Plus size={18} />}
-            onClick={handleOpenAddRoleModal}
-            sx={{
-              py: 1.5,
-              fontWeight: 600,
-              borderRadius: '10px',
-            }}
-          >
-            {DASHBOARD_ROLES.ADD}
-          </Button>
+          {canCreateRole && (
+            <Button
+              variant="contained"
+              fullWidth
+              startIcon={<Plus size={18} />}
+              onClick={handleOpenAddRoleModal}
+              sx={{
+                py: 1.5,
+                fontWeight: 600,
+                borderRadius: '10px',
+              }}
+            >
+              {DASHBOARD_ROLES.ADD}
+            </Button>
+          )}
         </Box>
 
         {/* Content Section */}
@@ -468,21 +512,16 @@ const ManageRoles: React.FC<{ isExpanded?: boolean; hideHeader?: boolean }> = ({
                         >
                           <Shield size={14} strokeWidth={1.5} />
                         </Box>
-                        <Box sx={{ flex: 1, minWidth: 0, display: "flex", flexDirection: "column", gap: { xs: 1, sm: 1.25 } }}>
-                          {/* Section: Información del rol */}
-                          <Typography
-                            variant="caption"
-                            sx={{
-                              fontWeight: 700,
-                              fontSize: "0.65rem",
-                              textTransform: "uppercase",
-                              letterSpacing: "0.08em",
-                              color: theme.palette.text.disabled,
-                              mb: 0.25,
-                            }}
-                          >
-                            Información del rol
-                          </Typography>
+                        <Box
+                          sx={{
+                            flex: 1,
+                            minWidth: 0,
+                            display: "flex",
+                            flexDirection: "column",
+                            gap: 0.75,
+                            py: 0.5,
+                          }}
+                        >
                           <TextField
                             size="small"
                             value={editFields.name}
@@ -492,116 +531,62 @@ const ManageRoles: React.FC<{ isExpanded?: boolean; hideHeader?: boolean }> = ({
                             }}
                             placeholder="Nombre del rol"
                             fullWidth
-                            sx={{
-                              '& .MuiOutlinedInput-root': {
-                                borderRadius: '8px',
-                                backgroundColor: theme.palette.mode === 'dark' ? 'rgba(255,255,255,0.04)' : 'rgba(0,0,0,0.015)',
-                              },
-                              '& .MuiInputBase-input': { fontSize: '0.85rem', py: 0.75, px: 1 },
-                            }}
+                            variant="standard"
+                            sx={inputSx}
                           />
-                          {/* Section: Permisos */}
-                          <Typography
-                            variant="caption"
-                            sx={{
-                              fontWeight: 700,
-                              fontSize: "0.65rem",
-                              textTransform: "uppercase",
-                              letterSpacing: "0.08em",
-                              color: theme.palette.text.disabled,
-                              mt: 0.25,
-                              mb: 0.25,
-                            }}
-                          >
-                            Permisos del rol
-                          </Typography>
-                          <FormControl size="small" fullWidth>
-                            <Select
-                              multiple
-                              value={editFields.permissionNames}
-                              onChange={(e) => {
-                                const value = e.target.value;
-                                setEditFields((prev) => ({
-                                  ...prev,
-                                  permissionNames: typeof value === 'string' ? value.split(',') : value,
-                                }));
-                              }}
-                              renderValue={(selected) => {
-                                if (selected.length === 0) {
-                                  return <Typography sx={{ color: "text.disabled", fontSize: "0.8rem" }}>Seleccionar permisos</Typography>;
-                                }
-                                return (
-                                  <Box sx={{ display: "flex", flexWrap: "wrap", gap: 0.5 }}>
-                                    <Typography sx={{ fontSize: "0.8rem", fontWeight: 700, color: "primary.main" }}>
-                                      {selected.length} permiso{selected.length !== 1 ? 's' : ''} seleccionados
-                                    </Typography>
-                                  </Box>
-                                );
-                              }}
+                          <Box sx={{ mb: 0.5, display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+                            <Typography
                               sx={{
-                                backgroundColor: theme.palette.mode === "dark" ? "rgba(99,102,241,0.06)" : "rgba(99,102,241,0.06)",
-                                border: `1.5px solid ${theme.palette.mode === "dark" ? "rgba(99,102,241,0.25)" : "rgba(99,102,241,0.25)"}`,
-                                borderRadius: "10px",
-                                fontSize: "0.8rem",
-                                '& .MuiSelect-select': { py: 0.75, px: 1 },
-                                '&:hover': {
-                                  borderColor: theme.palette.primary.main,
-                                },
+                                fontSize: "0.62rem",
+                                fontWeight: 700,
+                                textTransform: "uppercase",
+                                letterSpacing: "0.08em",
+                                color: "text.secondary",
                               }}
                             >
-                              {permissions.map((perm) => (
-                                <MenuItem key={perm.id} value={perm.name} sx={{ fontSize: '0.8rem' }}>
-                                  <Checkbox
-                                    checked={editFields.permissionNames.includes(perm.name)}
-                                    size="small"
-                                    sx={{ py: 0.25 }}
-                                  />
-                                  <ListItemText primary={perm.name} sx={{ '& .MuiListItemText-primary': { fontSize: '0.8rem' } }} />
-                                </MenuItem>
-                              ))}
-                            </Select>
-                          </FormControl>
+                              Permisos
+                            </Typography>
+                            <Typography
+                              sx={{
+                                fontSize: "0.68rem",
+                                fontWeight: 600,
+                                color:
+                                  editFields.permissionNames.length > 0
+                                    ? "primary.main"
+                                    : "text.disabled",
+                              }}
+                            >
+                              {editFields.permissionNames.length === 0
+                                ? "Ninguno seleccionado"
+                                : `${editFields.permissionNames.length} seleccionado${editFields.permissionNames.length !== 1 ? 's' : ''}`}
+                            </Typography>
+                          </Box>
+                          <PermissionTogglePanel
+                            permissions={permissions}
+                            selected={editFields.permissionNames}
+                            onToggle={togglePermission}
+                            maxHeight={180}
+                          />
                         </Box>
                         <Box sx={{ display: "flex", gap: 0.5, flexShrink: 0, alignSelf: "flex-start", mt: 1.25 }}>
-                          <Button
-                            size="small"
-                            variant="contained"
-                            onClick={() => handleUpdate(role.id)}
-                            disabled={!isEditFormValid}
-                            startIcon={<Check size={14} />}
-                            sx={{
-                              minWidth: "auto",
-                              px: 1.5,
-                              py: 0.5,
-                              fontSize: "0.7rem",
-                              fontWeight: 700,
-                              textTransform: "none",
-                              borderRadius: "8px",
-                              boxShadow: "none",
-                              '&:hover': { boxShadow: '0 2px 8px rgba(0,0,0,0.15)' },
-                            }}
-                          >
-                            Guardar
-                          </Button>
-                          <Button
-                            size="small"
-                            variant="outlined"
-                            onClick={handleCancel}
-                            startIcon={<X size={14} />}
-                            sx={{
-                              minWidth: "auto",
-                              px: 1.5,
-                              py: 0.5,
-                              fontSize: "0.7rem",
-                              fontWeight: 600,
-                              color: "text.secondary",
-                              textTransform: "none",
-                              borderRadius: "8px",
-                              borderColor: 'divider',
-                            }}
-                          >
-                            Cancelar
-                          </Button>
+                          <PremiumTooltip title={TABLE.SAVE}>
+                            <span>
+                              <IconButton
+                                onClick={() => handleUpdate(role.id)}
+                                disabled={!isEditFormValid}
+                                sx={saveButtonStyles(theme)}
+                              >
+                                <CheckCircle size={17} />
+                              </IconButton>
+                            </span>
+                          </PremiumTooltip>
+                          <PremiumTooltip title={TABLE.CANCEL}>
+                            <span>
+                              <IconButton onClick={handleCancel} sx={neutralButtonStyles(theme)}>
+                                <X size={17} />
+                              </IconButton>
+                            </span>
+                          </PremiumTooltip>
                         </Box>
                       </>
                     ) : (
@@ -629,14 +614,15 @@ const ManageRoles: React.FC<{ isExpanded?: boolean; hideHeader?: boolean }> = ({
                           </Typography>
                         </Box>
                         <Box sx={{ display: "flex", gap: 0.5, flexShrink: 0 }}>
-                          <Button
-                            size="small"
-                            variant="text"
-                            onClick={() => handleEdit(role)}
-                            sx={{ minWidth: "auto", px: 1, fontSize: "0.7rem", fontWeight: 600, color: "primary.main", textTransform: "none" }}
-                          >
-                            Editar
-                          </Button>
+                          {canEditRole && (
+                            <PremiumTooltip title={TABLE.EDIT}>
+                              <span>
+                                <IconButton onClick={() => handleEdit(role)} sx={editButtonStyles(theme)}>
+                                  <FileEdit size={16} />
+                                </IconButton>
+                              </span>
+                            </PremiumTooltip>
+                          )}
                         </Box>
                       </>
                     )}
@@ -681,6 +667,10 @@ const ManageRoles: React.FC<{ isExpanded?: boolean; hideHeader?: boolean }> = ({
                   setRowsPerPage={setRowsPerPage}
                   isSaveDisabled={!isEditFormValid}
                   userPermissions={userPermissions}
+                  permissionMap={{
+                    edit: PERMISSIONS.EDIT_ROLE,
+                    delete: PERMISSIONS.DELETE_ROLE,
+                  }}
                   renderColumnValue={renderColumnValue}
                   isExpanded={isExpanded}
                 />

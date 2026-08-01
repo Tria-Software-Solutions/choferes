@@ -45,6 +45,8 @@ const PERMISSIONS = {
   VIEW_COURIER: "Ver Courier",
   CREATE_COURIER: "Crear Courier",
   EDIT_COURIER: "Editar Courier",
+  DELETE_COURIER: "Eliminar Courier",
+  CREATE_USERS: "Crear Usuario",
 } as const;
 
 export default PERMISSIONS;

@@ -16,7 +16,7 @@ import { NotificationProvider } from "./context/NotificationContext";
 import ProtectedRoute from "./routes/ProtectedRoute";
 import { Container, useMediaQuery, useTheme, CircularProgress, Box } from "@mui/material";
 import { APPBAR_MENU, PERMISSIONS, ROUTES } from "./constants/constants";
-import { ClipboardList, Car, Users, CalendarDays, LogOut, User, LayoutDashboard } from "lucide-react";
+import { NotepadText, CircleParking, UsersRound, CalendarDays, LogOut, Settings, ChartNoAxesCombined } from "lucide-react";
 import ErrorBoundary from "./components/ErrorBoundary/ErrorBoundary.component";
 import { useThemeMode } from "./context/ThemeContext";
 import { updateUserSettings } from "./store/slices/userSlice";
@@ -50,20 +50,26 @@ const AppBarWrapper: React.FC = () => {
 
   const links = [
     {
-      label: APPBAR_MENU.DASHBOARD,
-      icon: <LayoutDashboard size={22} strokeWidth={1.5} />,
-      path: ROUTES.DASHBOARD,
-      permission: PERMISSIONS.VIEW_ADMIN,
-    },
-    {
       label: APPBAR_MENU.ROLES,
-      icon: <ClipboardList size={22} strokeWidth={1.5} />,
+      icon: <NotepadText size={22} strokeWidth={1.5} />,
       path: ROUTES.ROLES,
       permission: PERMISSIONS.VIEW_ROLES,
     },
     {
+      label: APPBAR_MENU.DASHBOARD,
+      icon: <ChartNoAxesCombined size={22} strokeWidth={1.5} />,
+      path: ROUTES.DASHBOARD,
+      permission: PERMISSIONS.VIEW_ADMIN,
+    },
+    {
+      label: APPBAR_MENU.VEHICLES,
+      icon: <CircleParking size={22} strokeWidth={1.5} />,
+      path: ROUTES.VEHICLES,
+      permission: PERMISSIONS.VIEW_VEHICLES,
+    },
+    {
       label: APPBAR_MENU.EMPLOYEES,
-      icon: <Users size={22} strokeWidth={1.5} />,
+      icon: <UsersRound size={22} strokeWidth={1.5} />,
       path: ROUTES.EMPLOYEES,
       permission: PERMISSIONS.VIEW_EMPLOYEES,
     },
@@ -74,25 +80,27 @@ const AppBarWrapper: React.FC = () => {
       permission: PERMISSIONS.VIEW_SCHEDULES,
     },
     {
-      label: APPBAR_MENU.VEHICLES,
-      icon: <Car size={22} strokeWidth={1.5} />,
-      path: ROUTES.VEHICLES,
-      permission: PERMISSIONS.VIEW_VEHICLES,
+      label: APPBAR_MENU.PROFILE,
+      icon: <Settings size={22} strokeWidth={1.5} />,
+      path: ROUTES.PROFILE,
     },
   ];
 
   const permissionsMap = {
-    [APPBAR_MENU.DASHBOARD]: PERMISSIONS.VIEW_ADMIN,
     [APPBAR_MENU.ROLES]: PERMISSIONS.VIEW_ROLES,
+    [APPBAR_MENU.DASHBOARD]: PERMISSIONS.VIEW_ADMIN,
+    [APPBAR_MENU.VEHICLES]: PERMISSIONS.VIEW_VEHICLES,
     [APPBAR_MENU.EMPLOYEES]: PERMISSIONS.VIEW_EMPLOYEES,
     [APPBAR_MENU.SCHEDULES]: PERMISSIONS.VIEW_SCHEDULES,
-    [APPBAR_MENU.VEHICLES]: PERMISSIONS.VIEW_VEHICLES,
   };
 
   const filteredLinks = links.filter((link) => {
+    const requiredPermission = permissionsMap[link.label];
+    // Items without a mapped permission (e.g. Configuración) are always visible
+    if (!requiredPermission) return true;
     return (
       Array.isArray(userPermissions) &&
-      userPermissions.includes(permissionsMap[link.label])
+      userPermissions.includes(requiredPermission)
     );
   });
 
@@ -101,7 +109,7 @@ const AppBarWrapper: React.FC = () => {
   const userLinks = [
     {
       label: APPBAR_MENU.PROFILE,
-      icon: <User size={20} />,
+      icon: <Settings size={20} />,
       path: ROUTES.PROFILE,
     },
     {
@@ -142,6 +150,7 @@ const AppContent: React.FC = () => {
     "/schedules",
     "/vehicles",
     "/dashboard",
+    "/settings",
     "/profile",
   ];
 
@@ -175,12 +184,13 @@ const AppContent: React.FC = () => {
   const safeUserPermissions = userPermissions || [];
 
   const getDefaultRoute = (userPermissions: string[]) => {
+    // /roles is the default landing page
     const routePreferences = [
-      { route: ROUTES.DASHBOARD, permission: PERMISSIONS.VIEW_ADMIN },
       { route: ROUTES.ROLES, permission: PERMISSIONS.VIEW_ROLES },
+      { route: ROUTES.DASHBOARD, permission: PERMISSIONS.VIEW_ADMIN },
+      { route: ROUTES.VEHICLES, permission: PERMISSIONS.VIEW_VEHICLES },
       { route: ROUTES.EMPLOYEES, permission: PERMISSIONS.VIEW_EMPLOYEES },
       { route: ROUTES.SCHEDULES, permission: PERMISSIONS.VIEW_SCHEDULES },
-      { route: ROUTES.VEHICLES, permission: PERMISSIONS.VIEW_VEHICLES },
     ];
 
     for (const { route, permission } of routePreferences) {
@@ -280,7 +290,8 @@ const AppContent: React.FC = () => {
                 }
               />
               <Route path="/dashboard" element={<Dashboard />} />
-              <Route path="/profile" element={<Profile />} />
+              <Route path="/settings" element={<Profile />} />
+              <Route path="/profile" element={<Navigate to="/settings" replace />} />
             </Route>
             <Route path="/forbidden" element={<Forbidden />} />
             <Route path="*" element={<NotFound />} />

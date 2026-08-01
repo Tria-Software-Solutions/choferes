@@ -6,6 +6,7 @@ const LOGIN = {
   NO_ACCOUNT: "¿No tienes cuenta?",
   REGISTER_LINK: "Regístrate aquí",
   EMAIL_OR_USERNAME: "Correo o usuario",
+  EMAIL_PLACEHOLDER: "Correo electrónico",
   EMAIL_OR_USERNAME_REQUIRED: "El correo o usuario es requerido",
   PASSWORD: "Contraseña",
   LOGIN: "Iniciar sesión",
@@ -25,5 +26,10 @@ const LOGIN = {
   FORGOT_PASSWORD_DESC: "Ingresa tu correo electrónico y te enviaremos un enlace para restablecer tu contraseña.",
   SEND_RESET_LINK: "Enviar enlace",
   BACK_TO_LOGIN: "Volver a iniciar sesión",
+  FORGOT_SENDING: "Enviando...",
+  FORGOT_EMAIL_REQUIRED: "Ingresa tu correo electrónico",
+  FORGOT_INVALID_EMAIL: "Ingresa un correo electrónico válido",
+  FORGOT_SENT_TITLE: "¡Revisa tu correo!",
+  FORGOT_SENT_DESC: "Si existe una cuenta asociada a ese correo, recibirás un enlace para restablecer tu contraseña.",
 };
 export default LOGIN;
