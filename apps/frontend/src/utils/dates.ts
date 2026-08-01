@@ -1,8 +1,6 @@
 import {
   addDays,
-  differenceInCalendarDays,
   startOfWeek,
-  startOfYear,
 } from "date-fns";
 import { EnglishAbrevMonthOfYear } from "./monthAbreviations";
 import { translateMonthToAbrevSpanish } from "./string";
@@ -191,60 +189,18 @@ export const getMidnightDate = (date: Date) => {
 };
 
 export const getWeekNumber = (date: Date): number => {
-  const currentDate = new Date(date);
-  currentDate.setHours(0, 0, 0, 0);
-
-  const firstDayOfYear = new Date(currentDate.getFullYear(), 0, 1);
-  const firstThursday = new Date(firstDayOfYear);
-  firstThursday.setDate(
-    firstDayOfYear.getDate() + ((4 - firstDayOfYear.getDay() + 7) % 7),
-  );
-
-  const firstMonday = new Date(firstThursday);
-  firstMonday.setDate(firstThursday.getDate() - 3);
-
-  const diffInMillis = currentDate.getTime() - firstMonday.getTime();
-  const diffInDays = Math.floor(diffInMillis / (1000 * 60 * 60 * 24));
-  const weekNumber = Math.floor(diffInDays / 7) + 1;
-
-  const lastDayOfYear = new Date(currentDate.getFullYear(), 11, 31);
-  const lastThursday = new Date(lastDayOfYear);
-  lastThursday.setDate(
-    lastDayOfYear.getDate() - ((lastDayOfYear.getDay() + 3) % 7),
-  );
-
-  const lastMonday = new Date(lastThursday);
-  lastMonday.setDate(lastThursday.getDate() - 3);
-
-  const isWeek53 =
-    lastDayOfYear.getDay() === 4 ||
-    (lastDayOfYear.getDay() === 3 && weekNumber === 1);
-
-  if (currentDate >= lastMonday && currentDate <= lastDayOfYear) {
-    if (currentDate.getDate() === 30 || currentDate.getDate() === 31) {
-      return 53;
-    }
-    return isWeek53 ? 53 : 52;
-  }
-
-  if (
-    currentDate.getFullYear() === lastDayOfYear.getFullYear() &&
-    currentDate.getDate() <= 5 &&
-    currentDate.getMonth() === 0
-  ) {
-    return 1;
-  }
-
-  return weekNumber;
+  // Fuente única de verdad ISO: delega en getWeekNumberAndYear para que el
+  // número de semana (y su año) sea siempre consistente, incluso en bordes de
+  // año (ej: 29 dic 2025 pertenece a la semana 1 de 2026).
+  return getWeekNumberAndYear(date).weekNumber;
 };
 
 export const getBiweekNumber = (date: Date): number => {
-  const startOfYearDate = startOfYear(date);
-  const dayOfYear = differenceInCalendarDays(date, startOfYearDate) + 1;
-  const maxDayOfYear = 365;
-  const correctedDayOfYear = Math.min(dayOfYear, maxDayOfYear);
-  const biweek = Math.ceil(correctedDayOfYear / 15);
-  return biweek <= 24 ? biweek : 24;
+  // Quincenas alineadas al mes calendario (consistentes con getBiweeklyDates):
+  //   1: 1-15 ene, 2: 16-31 ene, 3: 1-15 feb, ..., 23: 1-15 dic, 24: 16-31 dic
+  const monthIndex = date.getMonth(); // 0-11
+  const isSecondHalf = date.getDate() > 15;
+  return monthIndex * 2 + (isSecondHalf ? 2 : 1);
 };
 
 export const getBiweeklyDates = (year: number, biweekNumber: number) => {

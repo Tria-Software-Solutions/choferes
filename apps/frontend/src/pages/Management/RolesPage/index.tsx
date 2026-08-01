@@ -51,8 +51,9 @@ import {
   getCurrentWeekDates,
   getDayName,
   getFirstDayOfWeek,
+  getInvolvedPeriods,
   getMonthNumber,
-  getWeekNumber,
+  getWeekNumberAndYear,
   isValidDateForSelect,
   DayEntry,
 } from "../../../utils/dates";
@@ -278,7 +279,8 @@ const RolesPage: React.FC = () => {
     ? new Date(currentWeek[0].isoDate)
     : new Date();
   firstDayOfCurrentWeek.setHours(0, 0, 0, 0);
-  const currentWeekNumber = getWeekNumber(firstDayOfCurrentWeek);
+  const { year: currentWeekYear, weekNumber: currentWeekNumber } =
+    getWeekNumberAndYear(firstDayOfCurrentWeek);
   const currentBiweekNumber = getBiweekNumber(firstDayOfCurrentWeek);
   const currentMonth = getMonthNumber(firstDayOfCurrentWeek);
   const currentYear = firstDayOfCurrentWeek.getFullYear();
@@ -344,21 +346,21 @@ const RolesPage: React.FC = () => {
     const totalWeeklyHours = calculateTotalHoursForRange(weekStart, weekEnd);
 
     // Update weekly summary
-    const weekNumber = getWeekNumber(date);
+    const { year: weekIsoYear, weekNumber } = getWeekNumberAndYear(date);
     const month = date.getMonth() + 1;
     const year = date.getFullYear();
     
     const existingWeeklySummary = weeklySummariesRef.current.find(
       (ws) => ws.employeeId === employeeId &&
                ws.weekNumber === weekNumber &&
-               ws.year === year
+               ws.year === weekIsoYear
     );
 
     const weeklySummary = {
       employeeId,
       weekNumber,
       month,
-      year,
+      year: weekIsoYear,
       totalHours: totalWeeklyHours,
     };
 
@@ -595,13 +597,13 @@ const RolesPage: React.FC = () => {
         const sched = schedules.find((s) => s.id === existingHoursWorkedRecord.scheduleId);
         const removedHours = sched ? getScheduleHours(sched, dayName) : 0;
         if (removedHours > 0) {
-          const wkNum = getWeekNumber(date);
+          const { year: wkYr, weekNumber: wkNum } = getWeekNumberAndYear(date);
           const biNum = getBiweekNumber(date);
           const mth = date.getMonth() + 1;
           const yr = date.getFullYear();
           const sub = (h: number) => Math.max(0, h - removedHours);
           weeklySummariesRef.current = weeklySummariesRef.current.map((ws) =>
-            ws.employeeId === employeeId && ws.weekNumber === wkNum && ws.year === yr
+            ws.employeeId === employeeId && ws.weekNumber === wkNum && ws.year === wkYr
               ? { ...ws, totalHours: sub(Number(ws.totalHours)) }
               : ws,
           );
@@ -676,7 +678,7 @@ const RolesPage: React.FC = () => {
         weeklySummary.employeeId === employeeId &&
         weeklySummary.weekNumber === currentWeekNumber &&
         weeklySummary.month === currentMonth &&
-        weeklySummary.year === currentYear
+        weeklySummary.year === currentWeekYear
     );
     const existingBiweeklySummary = biweeklySummaries.find(
       (biweeklySummary) =>
@@ -715,7 +717,7 @@ const RolesPage: React.FC = () => {
             employeeId,
             weekNumber: currentWeekNumber,
             month: currentMonth,
-            year: currentYear,
+            year: currentWeekYear,
             totalHours: updatedWeeklyTotal,
           }),
       existingBiweeklySummary
@@ -945,11 +947,13 @@ const RolesPage: React.FC = () => {
           totalWeeklyHours = 0;
           // Still create/update the weekly summary with 0 hours
           const weekStartDate = startOfWeek(firstDayOfWeek || new Date(), { weekStartsOn: 1 });
+          const { year: weekStartIsoYear, weekNumber: weekStartWeek } =
+            getWeekNumberAndYear(weekStartDate);
           const weeklySummary = {
             employeeId,
-            weekNumber: getWeekNumber(weekStartDate),
+            weekNumber: weekStartWeek,
             month: weekStartDate.getMonth() + 1,
-            year: weekStartDate.getFullYear(),
+            year: weekStartIsoYear,
             totalHours: 0,
           };
           await createOrUpdateWeeklySummary(weeklySummary);
@@ -969,11 +973,13 @@ const RolesPage: React.FC = () => {
           totalWeeklyHours = 0;
           // Still create/update the weekly summary with 0 hours
           const weekStartDate = startOfWeek(firstDayOfWeek || new Date(), { weekStartsOn: 1 });
+          const { year: weekStartIsoYear, weekNumber: weekStartWeek } =
+            getWeekNumberAndYear(weekStartDate);
           const weeklySummary = {
             employeeId,
-            weekNumber: getWeekNumber(weekStartDate),
+            weekNumber: weekStartWeek,
             month: weekStartDate.getMonth() + 1,
-            year: weekStartDate.getFullYear(),
+            year: weekStartIsoYear,
             totalHours: 0,
           };
           await createOrUpdateWeeklySummary(weeklySummary);
@@ -1091,11 +1097,13 @@ const RolesPage: React.FC = () => {
             finalTotalHours = totalWeeklyHours;
           }
           
+          const { year: weekStartIsoYear, weekNumber: weekStartWeek } =
+            getWeekNumberAndYear(weekStartDate);
           const weeklySummary = {
             employeeId,
-            weekNumber: getWeekNumber(weekStartDate),
+            weekNumber: weekStartWeek,
             month: weekStartDate.getMonth() + 1,
-            year: weekStartDate.getFullYear(),
+            year: weekStartIsoYear,
             totalHours: finalTotalHours,
           };
           await createOrUpdateWeeklySummary(weeklySummary);
@@ -1231,17 +1239,11 @@ const RolesPage: React.FC = () => {
           currentWeekNumber,
           currentBiweekNumber,
           currentMonth,
-          currentYear,
+          currentWeekYear,
           weeklySummaries,
           biweeklySummaries,
           monthlySummaries,
-          {
-            weekNumbers: [{ weekNumber: currentWeekNumber, year: currentYear }],
-            biweekNumbers: [
-              { biweekNumber: currentBiweekNumber, year: currentYear },
-            ],
-            months: [{ month: currentMonth, year: currentYear }],
-          }
+          getInvolvedPeriods(currentWeek)
         );
         row["Horas extra"] = calculateOvertime(
           employee,
@@ -1250,17 +1252,11 @@ const RolesPage: React.FC = () => {
           currentWeekNumber,
           currentBiweekNumber,
           currentMonth,
-          currentYear,
+          currentWeekYear,
           weeklySummaries,
           biweeklySummaries,
           monthlySummaries,
-          {
-            weekNumbers: [{ weekNumber: currentWeekNumber, year: currentYear }],
-            biweekNumbers: [
-              { biweekNumber: currentBiweekNumber, year: currentYear },
-            ],
-            months: [{ month: currentMonth, year: currentYear }],
-          }
+          getInvolvedPeriods(currentWeek)
         );
       }
       return row;
@@ -1635,7 +1631,7 @@ const RolesPage: React.FC = () => {
                 weekNumber={currentWeekNumber}
                 biweekNumber={currentBiweekNumber}
                 month={currentMonth}
-                year={currentYear}
+                year={currentWeekYear}
                 handleChange={handleChange}
                 handleAdjustTime={handleAdjustTime}
                 recalculateEmployeeWeeklySummary={recalculateEmployeeWeeklySummary}

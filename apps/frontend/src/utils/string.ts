@@ -71,7 +71,11 @@ export const translateDayToAbrevSpanish = (
     Saturday: "Sáb",
   };
 
-  return translationMap[dayInEnglish];
+  // Normalize: acepta "monday" o "Monday" por igual; si no se reconoce,
+  // devuelve el día original para no romper a los llamadores.
+  const normalized =
+    dayInEnglish.charAt(0).toUpperCase() + dayInEnglish.slice(1);
+  return translationMap[normalized as EnglishDayOfWeek] ?? dayInEnglish;
 };
 
 export const translateDayOptionsToSpanish = (value: string): string => {
@@ -167,8 +171,8 @@ export const translatePriorityToSpanish = (
 };
 
 export const capitalizeFirstLetter = (str: string) =>
-  // Capitalizes the first letter of a string
-  str.charAt(0).toUpperCase() + str.slice(1);
+  // Capitalizes the first letter of a string (defensive: tolera vacíos)
+  str ? str.charAt(0).toUpperCase() + str.slice(1) : "";
 
 // Gets initials from first and last name (e.g., "Juan Herrera" → "JH")
 export const getInitials = (firstName: string, lastName: string): string => {
