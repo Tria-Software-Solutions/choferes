@@ -62,7 +62,7 @@ import MANAGEMENT from "../../../constants/management.constants";
 import { SELECTOR_TABLE } from "../../../constants/constants";
 import { Download, ChevronLeft, ChevronRight, X, Search, RotateCcw } from "lucide-react";
 import DialogComponent from "../../../components/Dialog/Dialog.component";
-import { ClipboardList, Sparkles } from "lucide-react";
+import { NotepadText, Sparkles } from "lucide-react";
 import AutoGenerateModal, { AutoGenerateConfig } from "../../../components/Modal/AutoGenerateModal/AutoGenerateModal.component";
 import {
   exportSpeedDialBoxStyles,
@@ -101,7 +101,7 @@ const RolesPage: React.FC = () => {
   const { employees, isLoadingEmployees } = useSelector(
     (state: RootState) => state.employees
   );
-  const { schedules, isLoadingSchedules } = useSelector(
+  const { schedules, isLoadingSchedules, customOrderIds } = useSelector(
     (state: RootState) => state.schedules
   );
   const { hoursWorked, isLoadingHoursWorked } = useSelector(
@@ -200,10 +200,10 @@ const RolesPage: React.FC = () => {
     dispatch(fetchHoursWorked());
   }, [dispatch, location.pathname]);
 
-  // Initialize filteredSchedules with all schedules (sorted)
+  // Initialize filteredSchedules with all schedules (sorted by saved custom order)
   useEffect(() => {
-    setFilteredSchedules(sortSchedulesByType(schedules));
-  }, [schedules]);
+    setFilteredSchedules(sortSchedulesByType(schedules, customOrderIds));
+  }, [schedules, customOrderIds]);
 
   const isLoading =
     isLoadingEmployees ||
@@ -224,7 +224,7 @@ const RolesPage: React.FC = () => {
 
     if (!normalizedSearch) {
       setFilteredEmployees(employees);
-      setFilteredSchedules(sortSchedulesByType(schedules));
+      setFilteredSchedules(sortSchedulesByType(schedules, customOrderIds));
       return;
     }
 
@@ -244,10 +244,10 @@ const RolesPage: React.FC = () => {
     );
     setFilteredSchedules(
       matchedSchedules.length > 0
-        ? sortSchedulesByType(matchedSchedules)
-        : sortSchedulesByType(schedules)
+        ? sortSchedulesByType(matchedSchedules, customOrderIds)
+        : sortSchedulesByType(schedules, customOrderIds)
     );
-  }, [search, employees, schedules]);
+  }, [search, employees, schedules, customOrderIds]);
 
 
 
@@ -1383,6 +1383,8 @@ const RolesPage: React.FC = () => {
               justifyContent="space-between"
               alignItems="center"
               mb={1.5}
+              flexWrap="wrap"
+              gap={1}
             >
               <Box display="flex" alignItems="center" gap={1.5}>
                 <Box
@@ -1392,7 +1394,7 @@ const RolesPage: React.FC = () => {
                     alignItems: 'center',
                   }}
                 >
-                  <ClipboardList size={20} strokeWidth={1.5} />
+                  <NotepadText size={20} strokeWidth={1.5} />
                 </Box>
                 <Box>
                   <Typography
@@ -1468,6 +1470,7 @@ const RolesPage: React.FC = () => {
                   alignItems="center"
                   justifyContent={{ xs: "flex-start", sm: "flex-end" }}
                   gap={0.5}
+                  flexWrap="wrap"
                 >
                   {/* Previous Week Button */}
                   <PremiumTooltip title={MANAGEMENT.TOOLTIP_PREV_WEEK}>
@@ -1490,7 +1493,15 @@ const RolesPage: React.FC = () => {
                     </IconButton>
                   </PremiumTooltip>
 
-                  {/* Date Picker */}
+                  {/* Date Picker (full row on mobile) */}
+                  <Box
+                    sx={{
+                      flex: { xs: "1 1 100%", sm: "0 0 auto" },
+                      order: { xs: -1, sm: 0 },
+                      display: "flex",
+                      justifyContent: { xs: "center", sm: "flex-end" },
+                    }}
+                  >
                   <LocalizationProvider
                     dateAdapter={AdapterDateFns}
                     adapterLocale={es}
@@ -1507,7 +1518,7 @@ const RolesPage: React.FC = () => {
                           required: true,
                           variant: "standard",
                           sx: {
-                            width: { xs: '100%', sm: '150px', md: '170px' },
+                            width: { sm: "150px", md: "170px" },
                             '& .MuiInputBase-root': {
                               height: '36px',
                               fontSize: '0.85rem',
@@ -1531,6 +1542,7 @@ const RolesPage: React.FC = () => {
                       onChange={handleDateChange}
                     />
                   </LocalizationProvider>
+                  </Box>
 
                   {/* Next Week Button */}
                   <PremiumTooltip title={MANAGEMENT.TOOLTIP_NEXT_WEEK}>

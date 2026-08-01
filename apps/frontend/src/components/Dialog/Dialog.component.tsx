@@ -9,8 +9,9 @@ import {
   IconButton,
   useTheme,
   useMediaQuery,
+  CircularProgress,
 } from "@mui/material";
-import { X } from "lucide-react";
+import { X, Trash2 } from "lucide-react";
 import DIALOG from "../../constants/dialog.constants";
 import {
   dialogPaperStyles,
@@ -83,6 +84,8 @@ const DialogComponent: React.FC<ConfirmationDialogProps> = ({
 }) => {
   const theme = useTheme();
   const isSmallScreen = useMediaQuery(theme.breakpoints.down("sm"));
+  const isDark = theme.palette.mode === "dark";
+  const isDeleteType = type === "delete";
 
   // Returns the color of the confirm button based on dialog type
   const getConfirmButtonColor = () => {
@@ -111,6 +114,146 @@ const DialogComponent: React.FC<ConfirmationDialogProps> = ({
         return DIALOG.CONFIRM;
     }
   };
+
+  // Delete dialogs use a centered confirmation layout (same as the hours
+  // add/subtract confirmation in the schedules board)
+  if (isDeleteType) {
+    return (
+      <Dialog
+        open={open}
+        onClose={onClose}
+        maxWidth="xs"
+        fullWidth
+        disableEnforceFocus
+        slotProps={{
+          backdrop: {
+            sx: {
+              backdropFilter: "blur(6px)",
+              backgroundColor: isDark ? "rgba(0,0,0,0.6)" : "rgba(0,0,0,0.3)",
+            },
+          },
+        }}
+        PaperProps={{
+          sx: {
+            border: isDark ? "1px solid rgba(255,255,255,0.06)" : "none",
+            borderRadius: "20px",
+            minWidth: { xs: "calc(100vw - 32px)", sm: 360 },
+            maxWidth: { xs: "calc(100vw - 32px)", sm: 400 },
+            boxShadow: isDark
+              ? "0 32px 80px rgba(0,0,0,0.6)"
+              : "0 24px 80px rgba(0,0,0,0.15)",
+            overflow: "hidden",
+            bgcolor: "background.paper",
+            ...paperSx,
+          },
+        }}
+        TransitionComponent={require("@mui/material/Slide").default}
+        transitionDuration={300}
+      >
+        <Box sx={{ p: 3, textAlign: "center" }}>
+          <Box
+            sx={{
+              width: 56,
+              height: 56,
+              borderRadius: "50%",
+              backgroundColor: isDark ? "rgba(239,68,68,0.15)" : "rgba(239,68,68,0.1)",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              mx: "auto",
+              mb: 1.5,
+              color: "var(--mui-palette-error-main)",
+            }}
+          >
+            {icon ? (
+              <Box sx={{ display: "flex", alignItems: "center", justifyContent: "center" }}>{icon}</Box>
+            ) : (
+              <Trash2 size={26} />
+            )}
+          </Box>
+          <Typography
+            sx={{
+              fontSize: "1.05rem",
+              fontWeight: 700,
+              mb: 0.5,
+              color: isDark ? "#e8e8f0" : theme.palette.text.primary,
+            }}
+          >
+            {title}
+          </Typography>
+          {message && (
+            <Typography
+              sx={{
+                fontSize: "0.85rem",
+                color: "text.secondary",
+                mb: 1.5,
+                lineHeight: 1.5,
+              }}
+            >
+              {message}
+            </Typography>
+          )}
+
+          <Box
+            sx={{
+              width: 36,
+              height: 3.5,
+              borderRadius: 2,
+              mx: "auto",
+              mb: 2.5,
+              backgroundColor: "#ef4444",
+            }}
+          />
+
+          <Box sx={{ display: "flex", gap: 1 }}>
+            <Button
+              fullWidth
+              size="medium"
+              onClick={onClose}
+              disabled={loading}
+              sx={{
+                borderRadius: "12px",
+                textTransform: "none",
+                fontWeight: 600,
+                py: 1,
+                color: "text.secondary",
+                "&:hover": {
+                  backgroundColor: isDark ? "rgba(255,255,255,0.06)" : "rgba(0,0,0,0.04)",
+                },
+              }}
+            >
+              {cancelText || DIALOG.CANCEL}
+            </Button>
+            <Button
+              fullWidth
+              size="medium"
+              variant="contained"
+              onClick={onConfirm}
+              disabled={loading}
+              sx={{
+                borderRadius: "12px",
+                textTransform: "none",
+                fontWeight: 600,
+                py: 1,
+                backgroundColor: "#ef4444",
+                "&:hover": { backgroundColor: "#dc2626" },
+                "&.Mui-disabled": {
+                  backgroundColor: isDark ? "rgba(239,68,68,0.12)" : "rgba(239,68,68,0.08)",
+                  color: isDark ? "rgba(255,255,255,0.2)" : "rgba(0,0,0,0.2)",
+                },
+              }}
+            >
+              {loading ? (
+                <CircularProgress size={20} color="inherit" />
+              ) : (
+                confirmText || getDefaultConfirmText()
+              )}
+            </Button>
+          </Box>
+        </Box>
+      </Dialog>
+    );
+  }
 
   return (
     <Dialog

@@ -123,9 +123,6 @@ export const noSchedulesIconStyles: CSSProperties = {
 export const deleteDialogPaperSx: SxProps<Theme> = {
   minWidth: { xs: "80vw", sm: 320 },
   maxWidth: { xs: "90vw", sm: 400 },
-  borderRadius: "12px",
-  boxShadow: "0 24px 48px rgba(0,0,0,0.12), 0 8px 16px rgba(0,0,0,0.08)",
-  overflow: "hidden",
 };
 
 export const addDialogPaperSx: SxProps<Theme> = {

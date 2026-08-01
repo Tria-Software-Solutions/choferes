@@ -5,7 +5,10 @@ import {
   TextField, Button, Typography, Box, Alert, CircularProgress, IconButton,
   InputAdornment, Checkbox, FormControlLabel,
 } from '@mui/material';
-import { Visibility, VisibilityOff, MailOutline, Lock, ArrowBack } from '@mui/icons-material';
+import type { SxProps, Theme } from '@mui/material';
+import {
+  Visibility, VisibilityOff, MailOutline, Lock, ArrowBack, CheckCircleOutline,
+} from '@mui/icons-material';
 import FORMS from '../../../constants/forms.constants';
 import LOGIN from '../../../constants/login.constants';
 import bg from '../../../assets/images/background.jpeg';
@@ -14,11 +17,10 @@ import logo from '../../../assets/images/logo.png';
 import {
   wrapper,
   split,
-  left,
   right,
   formContainer,
-  header,
   form,
+  loginTextFieldStyles,
   inputIconStyles,
   optionsRow,
   checkboxStyles,
@@ -29,14 +31,15 @@ import {
   forgotHeader,
   forgotDescription,
   backLinkStyles,
+  inputShakeStyles,
+  errorBannerStyles,
+  submitGlowStyles,
+  forgotSuccessStyles,
+  loginSubmitButtonStyles,
+  loginPasswordIconButtonStyles,
 } from './styles';
 import {
-  textFieldStyles,
-  passwordTextFieldStyles,
-  submitButtonStyles,
   submitProgressStyles,
-  alertStyles,
-  passwordIconButtonStyles,
 } from '../Register/styles';
 
 const Login: React.FC = () => {
@@ -52,6 +55,13 @@ const Login: React.FC = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [rememberMe, setRememberMe] = useState(false);
   const [mounted, setMounted] = useState(false);
+  const [shakeKey, setShakeKey] = useState(0);
+
+  // Recuperación de contraseña
+  const [forgotEmail, setForgotEmail] = useState('');
+  const [forgotError, setForgotError] = useState('');
+  const [forgotSubmitting, setForgotSubmitting] = useState(false);
+  const [forgotSent, setForgotSent] = useState(false);
 
   useEffect(() => { setMounted(true); }, []);
 
@@ -79,7 +89,10 @@ const Login: React.FC = () => {
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!validateFields()) return;
+    if (!validateFields()) {
+      setShakeKey(k => k + 1); // Re-dispara la animación shake de los inputs inválidos
+      return;
+    }
     setIsSubmitting(true);
     try {
       if (rememberMe) {
@@ -99,169 +112,148 @@ const Login: React.FC = () => {
     }
   };
 
+  const handleForgotPassword = async (e: React.FormEvent) => {
+    e.preventDefault();
+    const email = forgotEmail.trim();
+    if (!email) {
+      setForgotError(LOGIN.FORGOT_EMAIL_REQUIRED);
+      return;
+    }
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+      setForgotError(LOGIN.FORGOT_INVALID_EMAIL);
+      return;
+    }
+    setForgotError('');
+    setForgotSubmitting(true);
+    try {
+      // TODO: conectar con el endpoint de recuperación cuando exista en el backend.
+      // Por ahora se simula el envío (mensaje genérico para no revelar usuarios registrados).
+      await new Promise((resolve) => setTimeout(resolve, 1200));
+      setForgotSent(true);
+    } finally {
+      setForgotSubmitting(false);
+    }
+  };
+
   return (
     <Box sx={wrapper}>
       <Box sx={split}>
-        <Box sx={left}>
-          <Box
-            sx={{
+        {/* Full-bleed background image covering the whole page (incl. mobile) */}
+        <Box
+          sx={{
+            position: 'absolute',
+            inset: 0,
+            backgroundImage: `url(${bg})`,
+            backgroundSize: 'cover',
+            backgroundPosition: {
+              xs: 'center',
+              md: '65% center',
+              lg: 'center',
+            },
+            backgroundRepeat: 'no-repeat',
+            '&::after': {
+              content: '""',
               position: 'absolute',
               inset: 0,
-              backgroundImage: `url(${bg})`,
-              backgroundSize: 'cover',
-              backgroundPosition: {
-                md: '65% center',
-                lg: 'center',
-              },
-              '&::after': {
-                content: '""',
-                position: 'absolute',
-                inset: 0,
-                background: {
-                  md: 'linear-gradient(to top, rgba(0,0,0,0.75) 0%, rgba(0,0,0,0.35) 60%, rgba(0,0,0,0.15) 100%)',
-                  lg: 'linear-gradient(to top, rgba(0,0,0,0.7) 0%, rgba(0,0,0,0.3) 60%, transparent 100%)',
-                },
-                pointerEvents: 'none',
-              },
-            }}
-          />
-          <Box sx={{ width: '100%', zIndex: 2, pb: { xs: 5, md: 8 }, px: { xs: 4, md: 8 }, mt: 'auto', pt: { xs: 30, md: 56 } }}>
-            <Typography
-              sx={{
-                fontSize: { xs: '1rem', md: '1.15rem' },
-                fontWeight: 500,
-                letterSpacing: '0.08em',
-                textTransform: 'uppercase',
-                color: 'inherit',
-                opacity: 0.7,
-                mb: 0.25,
-              }}
-            >
-              Gestión de
-            </Typography>
-            <Box
-              sx={{
-                display: 'flex',
-                alignItems: 'center',
-                gap: 2,
-                mb: 3,
-              }}
-            >
-              <Box
-                component="img"
-                src={logo}
-                alt="Logo"
-                sx={{ width: { xs: 40, md: 48 }, height: 'auto', flexShrink: 0 }}
-              />
-              <Typography
-                sx={{
-                  fontWeight: 900,
-                  fontSize: { xs: '2.25rem', md: '3.25rem' },
-                  letterSpacing: -0.5,
-                  lineHeight: 1.1,
-                  color: 'inherit',
-                }}
-              >
-                Choferes
-              </Typography>
-            </Box>
-            <Box
-              sx={{ width: 48, height: 3, borderRadius: 2, bgcolor: '#ffffff', mb: 3 }}
-            />
-            <Typography
-              sx={{
-                fontSize: '0.95rem',
-                fontWeight: 400,
-                opacity: 0.65,
-                lineHeight: 1.7,
-                maxWidth: 440,
-                color: 'inherit',
-              }}
-            >
-              Gestiona tu flota de choferes desde un solo lugar optimizando las operaciones con eficiencia y seguridad.
-            </Typography>
-
-            <Typography
-              variant="caption"
-              sx={{
-                display: 'block',
-                textAlign: 'left',
-                mt: 4,
-                color: '#ffffff',
-                opacity: 0.35,
-                fontSize: '0.75rem',
-                letterSpacing: '0.04em',
-                fontWeight: 400,
-              }}
-            >
-              Powered by{' '}
-              <Box
-                component="span"
-                sx={{
-                  fontWeight: 600,
-                  cursor: 'pointer',
-                  '&:hover': { opacity: 1 },
-                }}
-                onClick={() => window.open('https://triacr.com', '_blank', 'noopener noreferrer')}
-              >
-                Tria
-              </Box>
-            </Typography>
-          </Box>
-        </Box>
-
+              background: 'rgba(0,0,0,0.7)',
+              pointerEvents: 'none',
+            },
+          }}
+        />
         <Box sx={right}>
-          <Box
-            sx={{
-              display: { xs: 'flex', md: 'none' },
-              alignItems: 'center',
-              gap: 1.5,
-              position: 'absolute',
-              top: { xs: 12, sm: 20 },
-              left: { xs: 12, sm: 24 },
-              zIndex: 2,
-            }}
-          >
-            <Box
-              component="img"
-              src={logo}
-              alt="Logo"
-              sx={{ width: 28, height: 'auto', flexShrink: 0 }}
-            />
-            <Box>
-              <Typography sx={{ fontWeight: 800, fontSize: '1rem', letterSpacing: '-0.02em', lineHeight: 1.2 }}>
-                Choferes
-              </Typography>
-              <Typography sx={{ fontSize: '0.6rem', fontWeight: 500, letterSpacing: '0.06em', textTransform: 'uppercase', color: 'text.secondary', opacity: 0.6 }}>
-                Gestión de flota
-              </Typography>
-            </Box>
-          </Box>
           <Box sx={formContainer}>
             {view === 'login' ? (
               <Box sx={{ ...(mounted ? animateStagger(0) : {}) }}>
-                <Box sx={header}>
-                  <Typography variant="h5" sx={{ fontWeight: 700, letterSpacing: -0.2, mb: 0.5 }}>
-                    {LOGIN.LOGIN}
-                  </Typography>
-                  <Typography variant="body2" sx={{ color: 'text.secondary' }}>
-                    Accede a tu panel de control
+                <Box
+                  sx={{
+                    display: 'flex',
+                    flexDirection: 'column',
+                    alignItems: 'center',
+                    textAlign: 'center',
+                    mb: 3,
+                  }}
+                >
+                  <Box
+                    sx={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      mb: 2.5,
+                    }}
+                  >
+                    <Box
+                      component="img"
+                      src={logo}
+                      alt="Logo"
+                      sx={{
+                        width: 32,
+                        height: 'auto',
+                        flexShrink: 0,
+                        mr: 2,
+                      }}
+                    />
+                    <Box
+                      sx={{
+                        display: 'flex',
+                        flexDirection: 'column',
+                        lineHeight: 1.1,
+                        textAlign: 'center',
+                      }}
+                    >
+                      <Typography
+                        sx={{
+                          fontWeight: 800,
+                          fontSize: { xs: '1.4rem', sm: '1.5rem' },
+                          letterSpacing: '0.04em',
+                          color: '#ffffff',
+                        }}
+                      >
+                        Choferes
+                      </Typography>
+                      <Typography
+                        sx={{
+                          fontWeight: 600,
+                          fontSize: { xs: '0.68rem', sm: '0.75rem' },
+                          color: 'rgba(255,255,255,0.6)',
+                          mt: -0.25,
+                          letterSpacing: { xs: '0.22em', sm: '0.3em' },
+                        }}
+                      >
+                        DE ALQUILER
+                      </Typography>
+                    </Box>
+                  </Box>
+                  <Typography
+                    variant="body2"
+                    sx={{
+                      color: 'rgba(255,255,255,0.75)',
+                      fontSize: '0.88rem',
+                      fontWeight: 500,
+                      lineHeight: 1.6,
+                      width: '100%',
+                    }}
+                  >
+                    Toda tu flota de choferes en un solo lugar.
                   </Typography>
                 </Box>
 
                 <Box component="form" onSubmit={handleLogin} sx={{ ...form, gap: { xs: 1.5, sm: 2 } }}>
                   <Box sx={mounted ? animateStagger(100) : {}}>
+                  <Box
+                    key={`identifier-${shakeKey}`}
+                    sx={errors.identifier ? inputShakeStyles : {}}
+                  >
                     <TextField
                       fullWidth
                       placeholder={LOGIN.EMAIL_OR_USERNAME}
                       variant="outlined"
                       value={fields.identifier}
                       autoComplete="username"
+                      autoFocus
                       onChange={(e) => handleFieldChange('identifier', e.target.value)}
                       error={!!errors.identifier}
                       helperText={errors.identifier}
                       disabled={isSubmitting}
-                      sx={textFieldStyles}
+                      sx={loginTextFieldStyles}
                       slotProps={{
                         input: {
                           startAdornment: (
@@ -273,8 +265,13 @@ const Login: React.FC = () => {
                       }}
                     />
                   </Box>
+                  </Box>
 
                   <Box sx={mounted ? animateStagger(200) : {}}>
+                  <Box
+                    key={`password-${shakeKey}`}
+                    sx={errors.password ? inputShakeStyles : {}}
+                  >
                     <TextField
                       fullWidth
                       placeholder={LOGIN.PASSWORD}
@@ -286,7 +283,7 @@ const Login: React.FC = () => {
                       error={!!errors.password}
                       helperText={errors.password}
                       disabled={isSubmitting}
-                      sx={passwordTextFieldStyles}
+                      sx={loginTextFieldStyles}
                       slotProps={{
                         input: {
                           startAdornment: (
@@ -300,7 +297,7 @@ const Login: React.FC = () => {
                                 onClick={() => setShowPassword(!showPassword)}
                                 edge="end"
                                 disabled={isSubmitting}
-                                sx={passwordIconButtonStyles}
+                                sx={loginPasswordIconButtonStyles}
                               >
                                 {showPassword ? <VisibilityOff /> : <Visibility />}
                               </IconButton>
@@ -309,6 +306,7 @@ const Login: React.FC = () => {
                         },
                       }}
                     />
+                  </Box>
                   </Box>
 
                   <Box sx={mounted ? animateStagger(300) : {}}>
@@ -333,10 +331,15 @@ const Login: React.FC = () => {
                       fullWidth
                       variant="contained"
                       disabled={isSubmitting}
-                      sx={submitButtonStyles}
+                      sx={isSubmitting
+                        ? ([loginSubmitButtonStyles, submitGlowStyles] as SxProps<Theme>)
+                        : loginSubmitButtonStyles}
                     >
                       {isSubmitting ? (
-                        <CircularProgress size={18} sx={submitProgressStyles} />
+                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                          <CircularProgress size={18} sx={submitProgressStyles} />
+                          {LOGIN.LOADING}
+                        </Box>
                       ) : (
                         LOGIN.SUBMIT
                       )}
@@ -350,16 +353,47 @@ const Login: React.FC = () => {
                       animation: `${slideDown} 0.4s ease-out, ${shake} 0.5s ease-out 0.4s`,
                     }}
                   >
-                    <Alert severity="error" sx={alertStyles}>
+                    <Alert severity="error" sx={errorBannerStyles}>
                       {authError}
                     </Alert>
                   </Box>
                 )}
 
                 <Box sx={{ textAlign: 'center', mt: 4 }}>
-                  <Typography variant="caption" sx={{ color: 'text.secondary', fontSize: '0.75rem' }}>
+                  <Typography
+                    variant="caption"
+                    sx={{
+                      color: 'rgba(255,255,255,0.55)',
+                      fontSize: '0.75rem',
+                      fontWeight: 500,
+                    }}
+                  >
                     Acceso exclusivo para personal autorizado
                   </Typography>
+                </Box>
+              </Box>
+            ) : forgotSent ? (
+              <Box sx={{ ...(mounted ? animateStagger(0) : {}) }}>
+                <Box sx={forgotSuccessStyles}>
+                  <CheckCircleOutline />
+                  <Typography variant="h5" sx={{ fontWeight: 700, letterSpacing: -0.2, mb: 0.5 }}>
+                    {LOGIN.FORGOT_SENT_TITLE}
+                  </Typography>
+                  <Typography variant="body2">
+                    {LOGIN.FORGOT_SENT_DESC}
+                  </Typography>
+                  <Button
+                    fullWidth
+                    variant="contained"
+                    sx={loginSubmitButtonStyles}
+                    onClick={() => {
+                      setForgotSent(false);
+                      setForgotEmail('');
+                      setView('login');
+                    }}
+                  >
+                    {LOGIN.BACK_TO_LOGIN}
+                  </Button>
                 </Box>
               </Box>
             ) : (
@@ -373,14 +407,23 @@ const Login: React.FC = () => {
                   </Typography>
                 </Box>
 
-                <Box component="form" onSubmit={(e) => e.preventDefault()} sx={form}>
+                <Box component="form" onSubmit={handleForgotPassword} sx={form}>
                   <Box sx={mounted ? animateStagger(100) : {}}>
                     <TextField
                       fullWidth
-                      placeholder={LOGIN.EMAIL_OR_USERNAME}
+                      placeholder={LOGIN.EMAIL_PLACEHOLDER}
                       variant="outlined"
-                      autoComplete="email"
-                      sx={textFieldStyles}
+                      type="email"
+                      value={forgotEmail}
+                      onChange={(e) => {
+                        setForgotEmail(e.target.value);
+                        if (forgotError) setForgotError('');
+                      }}
+                      error={!!forgotError}
+                      helperText={forgotError}
+                      disabled={forgotSubmitting}
+                      autoFocus
+                      sx={loginTextFieldStyles}
                       slotProps={{
                         input: {
                           startAdornment: (
@@ -398,9 +441,19 @@ const Login: React.FC = () => {
                       type="submit"
                       fullWidth
                       variant="contained"
-                      sx={submitButtonStyles}
+                      disabled={forgotSubmitting}
+                      sx={forgotSubmitting
+                        ? ([loginSubmitButtonStyles, submitGlowStyles] as SxProps<Theme>)
+                        : loginSubmitButtonStyles}
                     >
-                      {LOGIN.SEND_RESET_LINK}
+                      {forgotSubmitting ? (
+                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                          <CircularProgress size={18} sx={submitProgressStyles} />
+                          {LOGIN.FORGOT_SENDING}
+                        </Box>
+                      ) : (
+                        LOGIN.SEND_RESET_LINK
+                      )}
                     </Button>
                   </Box>
                 </Box>
@@ -414,7 +467,6 @@ const Login: React.FC = () => {
                 </Box>
               </Box>
             )}
-
           </Box>
         </Box>
       </Box>

@@ -1,348 +1,249 @@
 "use strict";
 const bcrypt = require("bcrypt");
 
+const SEED_PASSWORDS = {
+  ADMIN: process.env.SEED_ADMIN_PASSWORD || "Admin123$",
+  MANAGEMENT: process.env.SEED_MANAGEMENT_PASSWORD || "Gerencia123$",
+  CUSTOMER_SERVICE: process.env.SEED_CUSTOMER_SERVICE_PASSWORD || "678900CS$",
+};
+
+if (process.env.NODE_ENV === "production") {
+  const required = {
+    SEED_ADMIN_PASSWORD: SEED_PASSWORDS.ADMIN,
+    SEED_MANAGEMENT_PASSWORD: SEED_PASSWORDS.MANAGEMENT,
+    SEED_CUSTOMER_SERVICE_PASSWORD: SEED_PASSWORDS.CUSTOMER_SERVICE,
+  };
+  for (const [name, value] of Object.entries(required)) {
+    if (!process.env[name] || value.length < 12) {
+      throw new Error(
+        `[seeder] ${name} es obligatoria en producción (min 12 chars). Evita las contraseñas por defecto.`
+      );
+    }
+  }
+}
+
 /** @type {import('sequelize-cli').Migration} */
 module.exports = {
   up: async (queryInterface) => {
     await queryInterface.bulkInsert("schedule", [
       {
         id: 1,
-        day: "weekday",
         label: "Avenida Escazú",
         hours: 12,
+        days: ["monday", "tuesday", "wednesday", "thursday", "friday", "saturday", "sunday"],
         createdAt: new Date(),
         updatedAt: new Date(),
       },
       {
         id: 2,
-        day: "weekday",
-        label: "BAC Latam",
+        label: "Hospital CIMA",
         hours: 11,
+        days: ["monday", "tuesday", "wednesday", "thursday", "friday"],
         createdAt: new Date(),
         updatedAt: new Date(),
       },
       {
         id: 3,
-        day: "weekday",
-        label: "Clínica Bíblica",
-        hours: 10,
-        createdAt: new Date(),
-        updatedAt: new Date(),
-      },
-      {
-        id: 4,
-        day: "weekday",
-        label: "Hospital CIMA",
+        label: "BAC Latam",
         hours: 11,
+        days: ["monday", "tuesday", "wednesday", "thursday", "friday"],
         createdAt: new Date(),
         updatedAt: new Date(),
       },
       {
         id: 5,
-        day: "weekday",
-        label: "Plaza Tempo",
-        hours: 5,
+        label: "Clínica Bíblica",
+        hours: 10,
+        days: ["monday", "tuesday", "wednesday", "thursday", "friday"],
         createdAt: new Date(),
         updatedAt: new Date(),
       },
       {
         id: 6,
-        day: "weekday",
-        label: "Ausencia",
-        hours: 0,
+        label: "Salida Programada",
+        hours: 9,
+        days: ["monday", "tuesday", "wednesday", "thursday", "friday", "saturday", "sunday"],
         createdAt: new Date(),
         updatedAt: new Date(),
       },
       {
         id: 7,
-        day: "weekday",
         label: "Cubre Almuerzo BAC",
         hours: 5,
+        days: ["monday", "tuesday", "wednesday", "thursday"],
         createdAt: new Date(),
         updatedAt: new Date(),
       },
       {
         id: 8,
-        day: "weekday",
-        label: "Cubre Almuerzo Promerica",
-        hours: 5,
+        label: "Libre",
+        hours: 0,
+        days: ["monday", "tuesday", "wednesday", "thursday", "friday", "saturday", "sunday"],
         createdAt: new Date(),
         updatedAt: new Date(),
       },
       {
         id: 9,
-        day: "weekday",
-        label: "Incapacidad",
+        label: "Ausencia",
         hours: 0,
-        createdAt: new Date(),
-        updatedAt: new Date(),
-      },
-      {
-        id: 10,
-        day: "weekday",
-        label: "Libre",
-        hours: 0,
+        days: ["monday", "tuesday", "wednesday", "thursday", "friday", "saturday", "sunday"],
         createdAt: new Date(),
         updatedAt: new Date(),
       },
       {
         id: 11,
-        day: "weekday",
-        label: "Salida Programada",
-        hours: 9,
-        createdAt: new Date(),
-        updatedAt: new Date(),
-      },
-      {
-        id: 12,
-        day: "friday",
-        label: "Avenida Escazú",
+        label: "Plaza Tempo",
         hours: 12,
-        createdAt: new Date(),
-        updatedAt: new Date(),
-      },
-      {
-        id: 13,
-        day: "friday",
-        label: "BAC Latam",
-        hours: 11,
-        createdAt: new Date(),
-        updatedAt: new Date(),
-      },
-      {
-        id: 14,
-        day: "friday",
-        label: "Clínica Bíblica",
-        hours: 10,
-        createdAt: new Date(),
-        updatedAt: new Date(),
-      },
-      {
-        id: 15,
-        day: "friday",
-        label: "Hospital CIMA",
-        hours: 11,
-        createdAt: new Date(),
-        updatedAt: new Date(),
-      },
-      {
-        id: 16,
-        day: "friday",
-        label: "Lincoln Plaza",
-        hours: 12,
+        days: ["friday", "saturday", "sunday"],
         createdAt: new Date(),
         updatedAt: new Date(),
       },
       {
         id: 17,
-        day: "friday",
-        label: "Plaza Tempo",
-        hours: 5,
-        createdAt: new Date(),
-        updatedAt: new Date(),
-      },
-      {
-        id: 18,
-        day: "friday",
-        label: "Terrazas Lindora",
-        hours: 12,
-        createdAt: new Date(),
-        updatedAt: new Date(),
-      },
-      {
-        id: 19,
-        day: "friday",
-        label: "Ausencia",
-        hours: 0,
-        createdAt: new Date(),
-        updatedAt: new Date(),
-      },
-      {
-        id: 20,
-        day: "friday",
         label: "Cubre Almuerzo Promerica",
         hours: 4,
+        days: ["monday", "tuesday", "wednesday", "thursday", "friday", "saturday", "sunday"],
         createdAt: new Date(),
         updatedAt: new Date(),
       },
       {
         id: 21,
-        day: "friday",
-        label: "Incapacidad",
-        hours: 0,
+        label: "Lincoln Plaza",
+        hours: 12,
+        days: ["friday", "saturday", "sunday"],
         createdAt: new Date(),
         updatedAt: new Date(),
       },
       {
         id: 22,
-        day: "friday",
-        label: "Libre",
-        hours: 0,
-        createdAt: new Date(),
-        updatedAt: new Date(),
-      },
-      {
-        id: 23,
-        day: "friday",
-        label: "Salida Programada",
-        hours: 9,
+        label: "Terrazas Lindora",
+        hours: 12,
+        days: ["friday", "saturday", "sunday"],
         createdAt: new Date(),
         updatedAt: new Date(),
       },
       {
         id: 24,
-        day: "saturday",
-        label: "Avenida Escazú",
-        hours: 12,
-        createdAt: new Date(),
-        updatedAt: new Date(),
-      },
-      {
-        id: 25,
-        day: "saturday",
-        label: "Lincoln Plaza",
-        hours: 12,
-        createdAt: new Date(),
-        updatedAt: new Date(),
-      },
-      {
-        id: 26,
-        day: "saturday",
-        label: "Terrazas Lindora",
-        hours: 12,
+        label: "Incapacidad",
+        hours: 0,
+        days: ["monday", "tuesday", "wednesday", "thursday", "friday", "saturday", "sunday"],
         createdAt: new Date(),
         updatedAt: new Date(),
       },
       {
         id: 27,
-        day: "saturday",
-        label: "Plaza Tempo",
-        hours: 12,
-        createdAt: new Date(),
-        updatedAt: new Date(),
-      },
-      {
-        id: 28,
-        day: "saturday",
-        label: "Ausencia",
-        hours: 0,
-        createdAt: new Date(),
-        updatedAt: new Date(),
-      },
-      {
-        id: 29,
-        day: "saturday",
         label: "Cubre Almuerzo",
         hours: 4,
+        days: ["saturday", "sunday"],
         createdAt: new Date(),
         updatedAt: new Date(),
       },
       {
-        id: 30,
-        day: "saturday",
-        label: "Incapacidad",
-        hours: 0,
-        createdAt: new Date(),
-        updatedAt: new Date(),
-      },
-      {
-        id: 31,
-        day: "saturday",
-        label: "Libre",
-        hours: 0,
-        createdAt: new Date(),
-        updatedAt: new Date(),
-      },
-      {
-        id: 32,
-        day: "saturday",
-        label: "Salida Programada",
-        hours: 9,
-        createdAt: new Date(),
-        updatedAt: new Date(),
-      },
-      {
-        id: 33,
-        day: "sunday",
-        label: "Avenida Escazú",
-        hours: 9,
-        createdAt: new Date(),
-        updatedAt: new Date(),
-      },
-      {
-        id: 34,
-        day: "sunday",
-        label: "Lincoln Plaza",
-        hours: 9,
-        createdAt: new Date(),
-        updatedAt: new Date(),
-      },
-      {
-        id: 35,
-        day: "sunday",
-        label: "Plaza Tempo",
-        hours: 10,
-        createdAt: new Date(),
-        updatedAt: new Date(),
-      },
-      {
-        id: 36,
-        day: "sunday",
-        label: "Terrazas Lindora",
-        hours: 11,
-        createdAt: new Date(),
-        updatedAt: new Date(),
-      },
-      {
-        id: 37,
-        day: "sunday",
-        label: "Ausencia",
-        hours: 0,
-        createdAt: new Date(),
-        updatedAt: new Date(),
-      },
-      {
-        id: 38,
-        day: "sunday",
-        label: "Cubre Almuerzo",
-        hours: 4,
-        createdAt: new Date(),
-        updatedAt: new Date(),
-      },
-      {
-        id: 39,
-        day: "sunday",
+        id: 44,
         label: "Horario Especial",
-        hours: 0,
+        hours: 8,
+        days: ["sunday"],
         createdAt: new Date(),
         updatedAt: new Date(),
       },
       {
-        id: 40,
-        day: "sunday",
-        label: "Incapacidad",
-        hours: 0,
-        createdAt: new Date(),
-        updatedAt: new Date(),
-      },
-      {
-        id: 41,
-        day: "sunday",
-        label: "Libre",
-        hours: 0,
-        createdAt: new Date(),
-        updatedAt: new Date(),
-      },
-      {
-        id: 42,
-        day: "sunday",
-        label: "Salida Programada",
-        hours: 9,
+        id: 55,
+        label: "Evento Especial",
+        hours: 4,
+        days: ["monday", "tuesday", "wednesday", "thursday", "friday", "saturday", "sunday"],
         createdAt: new Date(),
         updatedAt: new Date(),
       },
     ]);
-    await queryInterface.bulkInsert("permissions", [
+    await queryInterface.bulkInsert("schedule_day", [
+      { scheduleId: 1, day: "monday", hours: 12, createdAt: new Date(), updatedAt: new Date() },
+      { scheduleId: 1, day: "tuesday", hours: 12, createdAt: new Date(), updatedAt: new Date() },
+      { scheduleId: 1, day: "wednesday", hours: 12, createdAt: new Date(), updatedAt: new Date() },
+      { scheduleId: 1, day: "thursday", hours: 12, createdAt: new Date(), updatedAt: new Date() },
+      { scheduleId: 1, day: "friday", hours: 12, createdAt: new Date(), updatedAt: new Date() },
+      { scheduleId: 1, day: "saturday", hours: 12, createdAt: new Date(), updatedAt: new Date() },
+      { scheduleId: 1, day: "sunday", hours: 9, createdAt: new Date(), updatedAt: new Date() },
+      { scheduleId: 2, day: "monday", hours: 11, createdAt: new Date(), updatedAt: new Date() },
+      { scheduleId: 2, day: "tuesday", hours: 11, createdAt: new Date(), updatedAt: new Date() },
+      { scheduleId: 2, day: "wednesday", hours: 11, createdAt: new Date(), updatedAt: new Date() },
+      { scheduleId: 2, day: "thursday", hours: 11, createdAt: new Date(), updatedAt: new Date() },
+      { scheduleId: 2, day: "friday", hours: 11, createdAt: new Date(), updatedAt: new Date() },
+      { scheduleId: 3, day: "monday", hours: 11, createdAt: new Date(), updatedAt: new Date() },
+      { scheduleId: 3, day: "tuesday", hours: 11, createdAt: new Date(), updatedAt: new Date() },
+      { scheduleId: 3, day: "wednesday", hours: 11, createdAt: new Date(), updatedAt: new Date() },
+      { scheduleId: 3, day: "thursday", hours: 11, createdAt: new Date(), updatedAt: new Date() },
+      { scheduleId: 3, day: "friday", hours: 11, createdAt: new Date(), updatedAt: new Date() },
+      { scheduleId: 5, day: "monday", hours: 10, createdAt: new Date(), updatedAt: new Date() },
+      { scheduleId: 5, day: "tuesday", hours: 10, createdAt: new Date(), updatedAt: new Date() },
+      { scheduleId: 5, day: "wednesday", hours: 10, createdAt: new Date(), updatedAt: new Date() },
+      { scheduleId: 5, day: "thursday", hours: 10, createdAt: new Date(), updatedAt: new Date() },
+      { scheduleId: 5, day: "friday", hours: 10, createdAt: new Date(), updatedAt: new Date() },
+      { scheduleId: 6, day: "monday", hours: 9, createdAt: new Date(), updatedAt: new Date() },
+      { scheduleId: 6, day: "tuesday", hours: 9, createdAt: new Date(), updatedAt: new Date() },
+      { scheduleId: 6, day: "wednesday", hours: 9, createdAt: new Date(), updatedAt: new Date() },
+      { scheduleId: 6, day: "thursday", hours: 9, createdAt: new Date(), updatedAt: new Date() },
+      { scheduleId: 6, day: "friday", hours: 9, createdAt: new Date(), updatedAt: new Date() },
+      { scheduleId: 6, day: "saturday", hours: 9, createdAt: new Date(), updatedAt: new Date() },
+      { scheduleId: 6, day: "sunday", hours: 9, createdAt: new Date(), updatedAt: new Date() },
+      { scheduleId: 7, day: "monday", hours: 5, createdAt: new Date(), updatedAt: new Date() },
+      { scheduleId: 7, day: "tuesday", hours: 5, createdAt: new Date(), updatedAt: new Date() },
+      { scheduleId: 7, day: "wednesday", hours: 5, createdAt: new Date(), updatedAt: new Date() },
+      { scheduleId: 7, day: "thursday", hours: 5, createdAt: new Date(), updatedAt: new Date() },
+      { scheduleId: 8, day: "monday", hours: 0, createdAt: new Date(), updatedAt: new Date() },
+      { scheduleId: 8, day: "tuesday", hours: 0, createdAt: new Date(), updatedAt: new Date() },
+      { scheduleId: 8, day: "wednesday", hours: 0, createdAt: new Date(), updatedAt: new Date() },
+      { scheduleId: 8, day: "thursday", hours: 0, createdAt: new Date(), updatedAt: new Date() },
+      { scheduleId: 8, day: "friday", hours: 0, createdAt: new Date(), updatedAt: new Date() },
+      { scheduleId: 8, day: "saturday", hours: 0, createdAt: new Date(), updatedAt: new Date() },
+      { scheduleId: 8, day: "sunday", hours: 0, createdAt: new Date(), updatedAt: new Date() },
+      { scheduleId: 9, day: "monday", hours: 0, createdAt: new Date(), updatedAt: new Date() },
+      { scheduleId: 9, day: "tuesday", hours: 0, createdAt: new Date(), updatedAt: new Date() },
+      { scheduleId: 9, day: "wednesday", hours: 0, createdAt: new Date(), updatedAt: new Date() },
+      { scheduleId: 9, day: "thursday", hours: 0, createdAt: new Date(), updatedAt: new Date() },
+      { scheduleId: 9, day: "friday", hours: 0, createdAt: new Date(), updatedAt: new Date() },
+      { scheduleId: 9, day: "saturday", hours: 0, createdAt: new Date(), updatedAt: new Date() },
+      { scheduleId: 9, day: "sunday", hours: 0, createdAt: new Date(), updatedAt: new Date() },
+      { scheduleId: 11, day: "friday", hours: 12, createdAt: new Date(), updatedAt: new Date() },
+      { scheduleId: 11, day: "saturday", hours: 12, createdAt: new Date(), updatedAt: new Date() },
+      { scheduleId: 11, day: "sunday", hours: 9, createdAt: new Date(), updatedAt: new Date() },
+      { scheduleId: 17, day: "monday", hours: 4, createdAt: new Date(), updatedAt: new Date() },
+      { scheduleId: 17, day: "tuesday", hours: 4, createdAt: new Date(), updatedAt: new Date() },
+      { scheduleId: 17, day: "wednesday", hours: 4, createdAt: new Date(), updatedAt: new Date() },
+      { scheduleId: 17, day: "thursday", hours: 4, createdAt: new Date(), updatedAt: new Date() },
+      { scheduleId: 17, day: "friday", hours: 4, createdAt: new Date(), updatedAt: new Date() },
+      { scheduleId: 17, day: "saturday", hours: 4, createdAt: new Date(), updatedAt: new Date() },
+      { scheduleId: 17, day: "sunday", hours: 4, createdAt: new Date(), updatedAt: new Date() },
+      { scheduleId: 21, day: "friday", hours: 12, createdAt: new Date(), updatedAt: new Date() },
+      { scheduleId: 21, day: "saturday", hours: 12, createdAt: new Date(), updatedAt: new Date() },
+      { scheduleId: 21, day: "sunday", hours: 9, createdAt: new Date(), updatedAt: new Date() },
+      { scheduleId: 22, day: "friday", hours: 12, createdAt: new Date(), updatedAt: new Date() },
+      { scheduleId: 22, day: "saturday", hours: 12, createdAt: new Date(), updatedAt: new Date() },
+      { scheduleId: 22, day: "sunday", hours: 11, createdAt: new Date(), updatedAt: new Date() },
+      { scheduleId: 24, day: "monday", hours: 0, createdAt: new Date(), updatedAt: new Date() },
+      { scheduleId: 24, day: "tuesday", hours: 0, createdAt: new Date(), updatedAt: new Date() },
+      { scheduleId: 24, day: "wednesday", hours: 0, createdAt: new Date(), updatedAt: new Date() },
+      { scheduleId: 24, day: "thursday", hours: 0, createdAt: new Date(), updatedAt: new Date() },
+      { scheduleId: 24, day: "friday", hours: 0, createdAt: new Date(), updatedAt: new Date() },
+      { scheduleId: 24, day: "saturday", hours: 0, createdAt: new Date(), updatedAt: new Date() },
+      { scheduleId: 24, day: "sunday", hours: 0, createdAt: new Date(), updatedAt: new Date() },
+      { scheduleId: 27, day: "saturday", hours: 4, createdAt: new Date(), updatedAt: new Date() },
+      { scheduleId: 27, day: "sunday", hours: 4, createdAt: new Date(), updatedAt: new Date() },
+      { scheduleId: 44, day: "sunday", hours: 8, createdAt: new Date(), updatedAt: new Date() },
+      { scheduleId: 55, day: "monday", hours: 4, createdAt: new Date(), updatedAt: new Date() },
+      { scheduleId: 55, day: "tuesday", hours: 4, createdAt: new Date(), updatedAt: new Date() },
+      { scheduleId: 55, day: "wednesday", hours: 4, createdAt: new Date(), updatedAt: new Date() },
+      { scheduleId: 55, day: "thursday", hours: 4, createdAt: new Date(), updatedAt: new Date() },
+      { scheduleId: 55, day: "friday", hours: 4, createdAt: new Date(), updatedAt: new Date() },
+      { scheduleId: 55, day: "saturday", hours: 4, createdAt: new Date(), updatedAt: new Date() },
+      { scheduleId: 55, day: "sunday", hours: 4, createdAt: new Date(), updatedAt: new Date() },
+    ]);
+    const existingPermissionIds = (
+      await queryInterface.sequelize.query("SELECT id FROM permissions", {
+        type: queryInterface.sequelize.QueryTypes.SELECT,
+      })
+    ).map((p) => p.id);
+
+    const permissions = [
       {
         id: 1,
         name: "Ver Roles",
@@ -590,24 +491,50 @@ module.exports = {
         createdAt: new Date(),
         updatedAt: new Date(),
       },
-    ]);
-    await queryInterface.bulkInsert("roles", [
-      { id: 1, name: "Gerencia", createdAt: new Date(), updatedAt: new Date() },
       {
-        id: 2,
-        name: "Administrativo",
+        id: 42,
+        name: "Eliminar Courier",
         createdAt: new Date(),
         updatedAt: new Date(),
       },
       {
-        id: 3,
-        name: "Supervisor",
+        id: 43,
+        name: "Crear Usuario",
         createdAt: new Date(),
         updatedAt: new Date(),
       },
-      { id: 4, name: "Usuario", createdAt: new Date(), updatedAt: new Date() },
-    ]);
-    await queryInterface.bulkInsert("role_permission", [
+    ];
+
+    await queryInterface.bulkInsert(
+      "permissions",
+      permissions.filter((p) => !existingPermissionIds.includes(p.id)),
+    );
+    const existingRoleIds = (
+      await queryInterface.sequelize.query("SELECT id FROM roles", {
+        type: queryInterface.sequelize.QueryTypes.SELECT,
+      })
+    ).map((r) => r.id);
+
+    await queryInterface.bulkInsert(
+      "roles",
+      [
+        { id: 1, name: "Gerencia", createdAt: new Date(), updatedAt: new Date() },
+        {
+          id: 2,
+          name: "Administrativo",
+          createdAt: new Date(),
+          updatedAt: new Date(),
+        },
+        {
+          id: 3,
+          name: "Supervisor",
+          createdAt: new Date(),
+          updatedAt: new Date(),
+        },
+        { id: 4, name: "Usuario", createdAt: new Date(), updatedAt: new Date() },
+      ].filter((r) => !existingRoleIds.includes(r.id)),
+    );
+    const rolePermissions = [
       {
         roleId: 1,
         permissionId: 1,
@@ -856,6 +783,18 @@ module.exports = {
         updatedAt: new Date(),
       },
       {
+        roleId: 1,
+        permissionId: 42,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      },
+      {
+        roleId: 1,
+        permissionId: 43,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      },
+      {
         roleId: 2,
         permissionId: 1,
         createdAt: new Date(),
@@ -1017,63 +956,100 @@ module.exports = {
         createdAt: new Date(),
         updatedAt: new Date(),
       },
-    ]);
-    await queryInterface.bulkInsert("users", [
-      {
-        id: 1,
-        firstName: "Luis",
-        lastName: "Herrera",
-        email: "luis.herrera_506@hotmail.com",
-        username: "lmhq94",
-        password: await bcrypt.hash("Admin123$", 10),
-        temporalPassword: null,
-        isActive: true,
-        createdAt: new Date(),
-        updatedAt: new Date(),
-      },
-      {
-        id: 2,
-        firstName: "Daniela",
-        lastName: "Miranda",
-        email: "info@choferesdealquiler.com",
-        username: "danilumix",
-        password: await bcrypt.hash("Gerencia123$", 10),
-        temporalPassword: null,
-        isActive: true,
-        createdAt: new Date(),
-        updatedAt: new Date(),
-      },
-      {
-        id: 3,
-        firstName: "Damaris",
-        lastName: "Arias",
-        email: "administrativo@choferesdealquiler.com",
-        username: "damarisa",
-        password: await bcrypt.hash("Admin123$", 10),
-        temporalPassword: null,
-        isActive: true,
-        createdAt: new Date(),
-        updatedAt: new Date(),
-      },
-      {
-        id: 4,
-        firstName: "Carlos",
-        lastName: "Caamaño",
-        email: "servicioalcliente@choferesdealquiler.com",
-        username: "carlosc",
-        password: await bcrypt.hash("678900CS$", 10),
-        temporalPassword: null,
-        isActive: true,
-        createdAt: new Date(),
-        updatedAt: new Date(),
-      },
-    ]);
-    await queryInterface.bulkInsert("user_role", [
-      { userId: 1, roleId: 1, createdAt: new Date(), updatedAt: new Date() },
-      { userId: 2, roleId: 1, createdAt: new Date(), updatedAt: new Date() },
-      { userId: 3, roleId: 2, createdAt: new Date(), updatedAt: new Date() },
-      { userId: 4, roleId: 3, createdAt: new Date(), updatedAt: new Date() },
-    ]);
+    ];
+
+    const existingRolePermissionPairs = new Set(
+      (
+        await queryInterface.sequelize.query(
+          'SELECT "roleId", "permissionId" FROM role_permission',
+          { type: queryInterface.sequelize.QueryTypes.SELECT },
+        )
+      ).map((rp) => `${rp.roleId}:${rp.permissionId}`),
+    );
+
+    await queryInterface.bulkInsert(
+      "role_permission",
+      rolePermissions.filter(
+        (rp) => !existingRolePermissionPairs.has(`${rp.roleId}:${rp.permissionId}`),
+      ),
+    );
+    const existingUserIds = (
+      await queryInterface.sequelize.query("SELECT id FROM users", {
+        type: queryInterface.sequelize.QueryTypes.SELECT,
+      })
+    ).map((u) => u.id);
+
+    await queryInterface.bulkInsert(
+      "users",
+      [
+        {
+          id: 1,
+          firstName: "Luis",
+          lastName: "Herrera",
+          email: "luis.herrera_506@hotmail.com",
+          username: "lmhq94",
+          password: await bcrypt.hash(SEED_PASSWORDS.ADMIN, 10),
+          temporalPassword: null,
+          isActive: true,
+          createdAt: new Date(),
+          updatedAt: new Date(),
+        },
+        {
+          id: 2,
+          firstName: "Daniela",
+          lastName: "Miranda",
+          email: "info@choferesdealquiler.com",
+          username: "danilumix",
+          password: await bcrypt.hash(SEED_PASSWORDS.MANAGEMENT, 10),
+          temporalPassword: null,
+          isActive: true,
+          createdAt: new Date(),
+          updatedAt: new Date(),
+        },
+        {
+          id: 3,
+          firstName: "Damaris",
+          lastName: "Arias",
+          email: "administrativo@choferesdealquiler.com",
+          username: "damarisa",
+          password: await bcrypt.hash(SEED_PASSWORDS.ADMIN, 10),
+          temporalPassword: null,
+          isActive: true,
+          createdAt: new Date(),
+          updatedAt: new Date(),
+        },
+        {
+          id: 4,
+          firstName: "Carlos",
+          lastName: "Caamaño",
+          email: "servicioalcliente@choferesdealquiler.com",
+          username: "carlosc",
+          password: await bcrypt.hash(SEED_PASSWORDS.CUSTOMER_SERVICE, 10),
+          temporalPassword: null,
+          isActive: true,
+          createdAt: new Date(),
+          updatedAt: new Date(),
+        },
+      ].filter((u) => !existingUserIds.includes(u.id)),
+    );
+    const existingUserRolePairs = new Set(
+      (
+        await queryInterface.sequelize.query(
+          'SELECT "userId", "roleId" FROM user_role',
+          { type: queryInterface.sequelize.QueryTypes.SELECT },
+        )
+      ).map((ur) => `${ur.userId}:${ur.roleId}`),
+    );
+
+    await queryInterface.bulkInsert(
+      "user_role",
+      [
+        { userId: 1, roleId: 1, createdAt: new Date(), updatedAt: new Date() },
+        { userId: 2, roleId: 1, createdAt: new Date(), updatedAt: new Date() },
+        { userId: 3, roleId: 2, createdAt: new Date(), updatedAt: new Date() },
+        { userId: 4, roleId: 3, createdAt: new Date(), updatedAt: new Date() },
+      ].filter((ur) => !existingUserRolePairs.has(`${ur.userId}:${ur.roleId}`)),
+    );
   },
 
   down: async (queryInterface) => {

@@ -19,6 +19,7 @@ import { formatDistanceToNow } from 'date-fns';
 import { es } from 'date-fns/locale';
 import { translatePriorityToSpanish } from '../../utils/string';
 import PremiumTooltip from '../../components/PremiumTooltip/PremiumTooltip.component';
+import SegmentedToggle from '../SegmentedToggle/SegmentedToggle.component';
 
 interface NotificationMenuProps {
   anchorEl: HTMLElement | null;
@@ -57,6 +58,7 @@ const NotificationMenu: React.FC<NotificationMenuProps> = ({
     deleteAllNotifications,
     updateFilters,
     clearFilters,
+    filters,
   } = useNotificationMenu();
 
   const [showFilters, setShowFilters] = useState(false);
@@ -97,8 +99,32 @@ const NotificationMenu: React.FC<NotificationMenuProps> = ({
     deleteNotification(notificationId);
   };
 
-  const handleFilterChange = (filterType: 'read' | 'type' | 'category' | 'priority', value: boolean | string) => {
-    updateFilters({ [filterType]: value });
+  type PopupFilter = 'all' | 'unread' | 'read' | 'high';
+
+  const activeFilter: PopupFilter =
+    filters.priority === 'high'
+      ? 'high'
+      : filters.read === false
+        ? 'unread'
+        : filters.read === true
+          ? 'read'
+          : 'all';
+
+  const handlePopupFilterChange = (value: PopupFilter) => {
+    switch (value) {
+      case 'unread':
+        updateFilters({ read: false, priority: undefined });
+        break;
+      case 'read':
+        updateFilters({ read: true, priority: undefined });
+        break;
+      case 'high':
+        updateFilters({ priority: 'high', read: undefined });
+        break;
+      default:
+        clearFilters();
+        break;
+    }
   };
 
   const formatTime = (date: Date) => {
@@ -187,74 +213,17 @@ const NotificationMenu: React.FC<NotificationMenuProps> = ({
               Limpiar
             </Button>
           </Box>
-          <Box sx={{ display: 'flex', gap: 0.5, flexWrap: 'wrap' }}>
-            <Chip
-              label="No leídas"
-              size="small"
-              variant="outlined"
-              onClick={() => handleFilterChange('read', false)}
-              sx={{ 
-                fontSize: '0.65rem', 
-                height: 22,
-                '& .MuiChip-label': {
-                  color: theme.palette.text.primary,
-                  fontWeight: 500,
-                },
-                '& .MuiChip-outlined': {
-                  borderColor: theme.palette.mode === 'dark'
-                    ? 'rgba(255,255,255,0.2)'
-                    : 'rgba(0,0,0,0.2)',
-                },
-                backgroundColor: theme.palette.mode === 'dark'
-                  ? 'rgba(255, 255, 255, 0.05)'
-                  : 'rgba(0, 0, 0, 0.05)',
-              }}
-            />
-            <Chip
-              label="Leídas"
-              size="small"
-              variant="outlined"
-              onClick={() => handleFilterChange('read', true)}
-              sx={{ 
-                fontSize: '0.65rem', 
-                height: 22,
-                '& .MuiChip-label': {
-                  color: theme.palette.text.primary,
-                  fontWeight: 500,
-                },
-                '& .MuiChip-outlined': {
-                  borderColor: theme.palette.mode === 'dark'
-                    ? 'rgba(255,255,255,0.2)'
-                    : 'rgba(0,0,0,0.2)',
-                },
-                backgroundColor: theme.palette.mode === 'dark'
-                  ? 'rgba(255, 255, 255, 0.05)'
-                  : 'rgba(0, 0, 0, 0.05)',
-              }}
-            />
-            <Chip
-              label={`${translatePriorityToSpanish('high')} prioridad`}
-              size="small"
-              variant="outlined"
-              onClick={() => handleFilterChange('priority', 'high')}
-              sx={{ 
-                fontSize: '0.65rem', 
-                height: 22,
-                '& .MuiChip-label': {
-                  color: theme.palette.text.primary,
-                  fontWeight: 500,
-                },
-                '& .MuiChip-outlined': {
-                  borderColor: theme.palette.mode === 'dark'
-                    ? 'rgba(255,255,255,0.2)'
-                    : 'rgba(0,0,0,0.2)',
-                },
-                backgroundColor: theme.palette.mode === 'dark'
-                  ? 'rgba(255, 255, 255, 0.05)'
-                  : 'rgba(0, 0, 0, 0.05)',
-              }}
-            />
-          </Box>
+          <SegmentedToggle
+            value={activeFilter}
+            onChange={handlePopupFilterChange}
+            options={[
+              { value: 'all', label: 'Todas' },
+              { value: 'unread', label: 'No leídas' },
+              { value: 'read', label: 'Leídas' },
+              { value: 'high', label: `${translatePriorityToSpanish('high')} prioridad` },
+            ]}
+            size="small"
+          />
         </Box>
       )}
 

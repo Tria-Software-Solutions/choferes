@@ -32,9 +32,10 @@ services:
       PGPASSWORD: ${POSTGRES_PASSWORD:-changeme}
       PGDATABASE: ${POSTGRES_DB:-choferes_dev}
       PORT: 5000
-      JWT_SECRET_KEY: ${JWT_SECRET_KEY:-dev_super_secret_key_please_change_123456}
-      JWT_REFRESH_SECRET: ${JWT_REFRESH_SECRET:-dev_refresh_secret_please_change_654321}
-      JWT_SECRET_KEY_REFRESH: ${JWT_SECRET_KEY_REFRESH:-dev_refresh_secret_key_please_change_abcdef1234567890}
+      # Obligatorio configurar: sin valor deja de arrancar la API
+      JWT_SECRET_KEY: ${JWT_SECRET_KEY:?JWT_SECRET_KEY no configurada (min 32 chars)}
+      JWT_REFRESH_SECRET: ${JWT_REFRESH_SECRET:?JWT_REFRESH_SECRET no configurada}
+      JWT_SECRET_KEY_REFRESH: ${JWT_SECRET_KEY_REFRESH:?JWT_SECRET_KEY_REFRESH no configurada}
     depends_on:
       - db
     ports:

@@ -42,6 +42,13 @@ class ErrorBoundaryClass extends React.Component<
   }
 
   handleRetry = () => {
+    // ChunkLoadError (rutas lazy) significa que el chunk quedó obsoleto tras un
+    // rebuild del dev server. Solo una recarga completa de página recupera el
+    // manifest actualizado con los nombres de chunk nuevos.
+    if (this.state.error?.name === "ChunkLoadError") {
+      window.location.reload();
+      return;
+    }
     this.setState({ hasError: false, error: null });
   };
 

@@ -22,24 +22,129 @@ interface ActionButtonsProps<T extends object> {
   theme: Theme;
 }
 
+// ─── Modern pill-style action button styles (exported for reuse) ───
+export const pillButtonBase = {
+  width: 34,
+  height: 34,
+  borderRadius: "10px",
+  transition: "all 0.2s cubic-bezier(0.4, 0, 0.2, 1)",
+  "&:active": {
+    transform: "scale(0.92)",
+  },
+};
+
+// Edit: subtle primary tint that fills on hover
+export const editButtonStyles = (theme: Theme) => ({
+  ...pillButtonBase,
+  backgroundColor:
+    theme.palette.mode === "dark"
+      ? "rgba(99,102,241,0.12)"
+      : "rgba(99,102,241,0.08)",
+  color: theme.palette.primary.main,
+  "&:hover": {
+    backgroundColor: theme.palette.primary.main,
+    color: "#fff",
+    transform: "translateY(-1px)",
+    boxShadow: theme.palette.mode === "dark"
+      ? "0 4px 14px rgba(99,102,241,0.45)"
+      : "0 4px 14px rgba(99,102,241,0.35)",
+  },
+});
+
+// Delete: subtle error tint that fills on hover
+export const deleteButtonStyles = (theme: Theme) => ({
+  ...pillButtonBase,
+  backgroundColor:
+    theme.palette.mode === "dark"
+      ? "rgba(239,68,68,0.12)"
+      : "rgba(239,68,68,0.08)",
+  color: theme.palette.error.main,
+  "&:hover": {
+    backgroundColor: theme.palette.error.main,
+    color: "#fff",
+    transform: "translateY(-1px)",
+    boxShadow: theme.palette.mode === "dark"
+      ? "0 4px 14px rgba(239,68,68,0.45)"
+      : "0 4px 14px rgba(239,68,68,0.35)",
+  },
+});
+
+// Neutral: subtle surface tint for password/other actions
+export const neutralButtonStyles = (theme: Theme) => ({
+  ...pillButtonBase,
+  backgroundColor:
+    theme.palette.mode === "dark"
+      ? "rgba(255,255,255,0.06)"
+      : "rgba(0,0,0,0.04)",
+  color: theme.palette.text.secondary,
+  "&:hover": {
+    backgroundColor:
+      theme.palette.mode === "dark"
+        ? "rgba(255,255,255,0.12)"
+        : "rgba(0,0,0,0.08)",
+    color: theme.palette.text.primary,
+    transform: "translateY(-1px)",
+  },
+});
+
+// Save: solid primary fill
+export const saveButtonStyles = (theme: Theme) => ({
+  ...pillButtonBase,
+  backgroundColor: theme.palette.primary.main,
+  color: "#fff",
+  boxShadow: theme.palette.mode === "dark"
+    ? "0 4px 14px rgba(99,102,241,0.35)"
+    : "0 4px 14px rgba(99,102,241,0.25)",
+  "&:hover": {
+    backgroundColor: theme.palette.primary.dark,
+    transform: "translateY(-1px)",
+    boxShadow: theme.palette.mode === "dark"
+      ? "0 6px 18px rgba(99,102,241,0.5)"
+      : "0 6px 18px rgba(99,102,241,0.4)",
+  },
+  "&.Mui-disabled": {
+    backgroundColor:
+      theme.palette.mode === "dark"
+        ? "rgba(255,255,255,0.08)"
+        : "rgba(0,0,0,0.08)",
+    color: theme.palette.text.disabled,
+    boxShadow: "none",
+    "&:hover": {
+      backgroundColor:
+        theme.palette.mode === "dark"
+          ? "rgba(255,255,255,0.08)"
+          : "rgba(0,0,0,0.08)",
+      color: theme.palette.text.disabled,
+      transform: "none",
+      boxShadow: "none",
+    },
+  },
+});
+
 function EditingActions({
   rowId,
   isSaveDisabled,
   onSave,
   onCancel,
+  theme,
 }: {
   rowId: number;
   isSaveDisabled?: boolean;
   onSave: (id: number) => void;
   onCancel: () => void;
+  theme: Theme;
 }): React.ReactElement {
   return (
     <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
       <PremiumTooltip title={TABLE.SAVE}>
         <span>
           <Box>
-            <IconButton color="primary" onClick={() => onSave(rowId)} disabled={isSaveDisabled}>
-              <CheckCircle size={20} />
+            <IconButton
+              onClick={() => onSave(rowId)}
+              disabled={isSaveDisabled}
+              sx={saveButtonStyles(theme)}
+            >
+              <CheckCircle size={17} />
             </IconButton>
           </Box>
         </span>
@@ -47,8 +152,8 @@ function EditingActions({
       <PremiumTooltip title={TABLE.CANCEL}>
         <span>
           <Box>
-            <IconButton color="primary" onClick={onCancel}>
-              <X size={20} />
+            <IconButton onClick={onCancel} sx={neutralButtonStyles(theme)}>
+              <X size={17} />
             </IconButton>
           </Box>
         </span>
@@ -86,9 +191,9 @@ function ViewingActionsMobile<T extends object>({
       <IconButton
         onClick={(e) => setAnchorEl(e.currentTarget)}
         size="small"
-        sx={{ p: 0.5 }}
+        sx={{ ...neutralButtonStyles(theme), width: 30, height: 30, p: 0.5 }}
       >
-        <MoreVertical size={18} />
+        <MoreVertical size={17} />
       </IconButton>
       <Menu
         anchorEl={anchorEl}
@@ -138,8 +243,9 @@ function ViewingActions<T extends object>({
   onOpenPasswordModal,
   handleEditClick,
   handleOpenDeleteDialog,
+  theme,
 }: Required<Pick<ActionButtonsProps<T>, "row" | "currentUser" | "hasEditPermissions" | "hasDeletePermissions" | "isExpanded">> &
-  Pick<ActionButtonsProps<T>, "onOpenPasswordModal" | "handleEditClick" | "handleOpenDeleteDialog"> & { rowId: number }): React.ReactElement {
+  Pick<ActionButtonsProps<T>, "onOpenPasswordModal" | "handleEditClick" | "handleOpenDeleteDialog"> & { rowId: number; theme: Theme }): React.ReactElement {
   const isUser = "username" in row;
   const isCurrentUser = rowId === currentUser?.id;
   const showPasswordButton = isUser && isExpanded && onOpenPasswordModal;
@@ -156,8 +262,8 @@ function ViewingActions<T extends object>({
         <PremiumTooltip title={TABLE.CHANGE_PASSWORD}>
           <span>
             <Box>
-              <IconButton color="primary" onClick={handlePassword}>
-                <Lock size={20} />
+              <IconButton onClick={handlePassword} sx={neutralButtonStyles(theme)}>
+                <Lock size={16} />
               </IconButton>
             </Box>
           </span>
@@ -167,8 +273,8 @@ function ViewingActions<T extends object>({
         <PremiumTooltip title={TABLE.EDIT}>
           <span>
             <Box>
-              <IconButton color="primary" onClick={handleEdit}>
-                <FileEdit size={20} />
+              <IconButton onClick={handleEdit} sx={editButtonStyles(theme)}>
+                <FileEdit size={16} />
               </IconButton>
             </Box>
           </span>
@@ -178,8 +284,8 @@ function ViewingActions<T extends object>({
         <PremiumTooltip title={TABLE.DELETE}>
           <span>
             <Box>
-              <IconButton color="error" onClick={handleDelete}>
-                <Trash2 size={20} />
+              <IconButton onClick={handleDelete} sx={deleteButtonStyles(theme)}>
+                <Trash2 size={16} />
               </IconButton>
             </Box>
           </span>
@@ -202,6 +308,7 @@ export function renderActionButtons<T extends object>(props: ActionButtonsProps<
         isSaveDisabled={props.isSaveDisabled}
         onSave={props.handleSaveClick ?? (() => {})}
         onCancel={props.handleCancelClick ?? (() => {})}
+        theme={theme}
       />
     );
   }
@@ -236,6 +343,7 @@ export function renderActionButtons<T extends object>(props: ActionButtonsProps<
       onOpenPasswordModal={props.onOpenPasswordModal}
       handleEditClick={props.handleEditClick}
       handleOpenDeleteDialog={props.handleOpenDeleteDialog}
+      theme={theme}
     />
   );
 }

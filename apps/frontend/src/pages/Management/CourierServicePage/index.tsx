@@ -31,6 +31,7 @@ import { capitalizeFirstLetter } from "../../../utils/string";
 import PAGE_TITLE from "../../../constants/pageTitle.constants";
 import NOTIFICATIONS from "../../../constants/notifications.constants";
 import MANAGEMENT from "../../../constants/management.constants";
+import PERMISSIONS from "../../../constants/permissions.constants";
 import { Download, ChevronLeft, ChevronRight, Calendar, X, Search } from "lucide-react";
 import PremiumTooltip from "../../../components/PremiumTooltip/PremiumTooltip.component";
 import { Courier } from "../../../models/Courier";
@@ -58,6 +59,7 @@ import { PdfIcon, ExcelIcon } from "../../../components/Icons/FileIcons";
 // CourierServicePage component for managing courier services
 const CourierServicePage: React.FC = () => {
   const { userPermissions } = useAuthContext();
+  const canCreateCourier = userPermissions.includes(PERMISSIONS.CREATE_COURIER);
   const preferencesKey = "couriers-preferences";
   const defaultPreferences = { date: new Date().toISOString() };
   const [selectedDate, setSelectedDate] = useState<Date>(() => {
@@ -644,23 +646,25 @@ const CourierServicePage: React.FC = () => {
 
               {/* Add Button Desktop */}
               <Box sx={{ display: { xs: 'none', sm: 'flex' } }}>
-                <Button
-                  variant="contained"
-                  startIcon={<Plus size={16} strokeWidth={2} />}
-                  onClick={handleOpenAddCourierModal}
-                  sx={{
-                    px: 2.5,
-                    py: 0.75,
-                    fontWeight: 600,
-                    fontSize: "0.8rem",
-                    letterSpacing: "-0.01em",
-                    borderRadius: '10px',
-                    height: '36px',
-                    minWidth: 0,
-                  }}
-                >
-                  {MANAGEMENT.ADD}
-                </Button>
+                {canCreateCourier && (
+                  <Button
+                    variant="contained"
+                    startIcon={<Plus size={16} strokeWidth={2} />}
+                    onClick={handleOpenAddCourierModal}
+                    sx={{
+                      px: 2.5,
+                      py: 0.75,
+                      fontWeight: 600,
+                      fontSize: "0.8rem",
+                      letterSpacing: "-0.01em",
+                      borderRadius: '10px',
+                      height: '36px',
+                      minWidth: 0,
+                    }}
+                  >
+                    {MANAGEMENT.ADD}
+                  </Button>
+                )}
               </Box>
             </Box>
           </Box>
@@ -668,19 +672,21 @@ const CourierServicePage: React.FC = () => {
 
         {/* Mobile Add Button */}
         <Box sx={{ display: { xs: 'flex', sm: 'none' }, p: 2, borderTop: `1px solid ${theme.palette.mode === "dark" ? "rgba(255,255,255,0.08)" : "rgba(0,0,0,0.08)"}` }}>
-          <Button
-            variant="contained"
-            fullWidth
-            startIcon={<Plus size={18} />}
-            onClick={handleOpenAddCourierModal}
-            sx={{
-              py: 1.5,
-              fontWeight: 600,
-              borderRadius: '10px',
-            }}
-          >
-            {MANAGEMENT.ADD}
-          </Button>
+          {canCreateCourier && (
+            <Button
+              variant="contained"
+              fullWidth
+              startIcon={<Plus size={18} />}
+              onClick={handleOpenAddCourierModal}
+              sx={{
+                py: 1.5,
+                fontWeight: 600,
+                borderRadius: '10px',
+              }}
+            >
+              {MANAGEMENT.ADD}
+            </Button>
+          )}
         </Box>
 
         {/* Content Section */}
@@ -721,6 +727,10 @@ const CourierServicePage: React.FC = () => {
                   setRowsPerPage={setRowsPerPage}
                   isSaveDisabled={!isEditFormValid}
                   userPermissions={userPermissions || []}
+                  permissionMap={{
+                    edit: PERMISSIONS.EDIT_COURIER,
+                    delete: PERMISSIONS.DELETE_COURIER,
+                  }}
                 />
               ) : (
                 <Box sx={noCouriersBoxStyles}>

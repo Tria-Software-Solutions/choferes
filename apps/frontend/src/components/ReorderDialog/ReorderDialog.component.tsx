@@ -1,4 +1,4 @@
-import React, { useState, useCallback } from "react";
+import React, { useState, useCallback, useMemo } from "react";
 import {
   Dialog,
   DialogContent,
@@ -26,8 +26,9 @@ import {
   verticalListSortingStrategy,
 } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
-import { GripVertical, X } from "lucide-react";
+import { GripVertical, RotateCcw, X } from "lucide-react";
 import type { Schedule } from "../../models/Schedule";
+import { sortSchedulesByType } from "../../utils/schedule";
 
 interface SortableItemProps {
   schedule: Schedule;
@@ -228,11 +229,25 @@ const ReorderDialog: React.FC<ReorderDialogProps> = ({
     onClose();
   };
 
+  // Reset the list to the default (alphabetical) order
+  const handleReset = useCallback(() => {
+    setItems(sortSchedulesByType([...schedules]));
+  }, [schedules]);
+
+  // Whether the current draft already matches the default (alphabetical) order
+  const isDefaultOrder = useMemo(() => {
+    const defaultOrder = sortSchedulesByType([...schedules]);
+    return (
+      items.length === defaultOrder.length &&
+      items.every((item, i) => item.id === defaultOrder[i]?.id)
+    );
+  }, [items, schedules]);
+
   return (
     <Dialog
       open={open}
       onClose={onClose}
-      maxWidth="sm"
+      maxWidth="md"
       fullWidth
       PaperProps={{
         sx: {
@@ -331,20 +346,54 @@ const ReorderDialog: React.FC<ReorderDialogProps> = ({
           gap: 1,
         }}
       >
-        <Button
-          variant="outlined"
-          onClick={onClose}
-          sx={{ borderRadius: "10px", textTransform: "none", fontWeight: 600 }}
+        <Box
+          sx={{
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "space-between",
+            gap: 1,
+            width: "100%",
+          }}
         >
-          Cancelar
-        </Button>
-        <Button
-          variant="contained"
-          onClick={handleSave}
-          sx={{ borderRadius: "10px", textTransform: "none", fontWeight: 600 }}
-        >
-          Guardar orden
-        </Button>
+          <Button
+            variant="text"
+            startIcon={<RotateCcw size={15} strokeWidth={2} />}
+            onClick={handleReset}
+            disabled={isDefaultOrder}
+            sx={{
+              borderRadius: "10px",
+              textTransform: "none",
+              fontWeight: 600,
+              fontSize: "0.8rem",
+              color: theme.palette.text.secondary,
+              "&:hover": {
+                backgroundColor:
+                  theme.palette.mode === "dark"
+                    ? "rgba(255,255,255,0.06)"
+                    : "rgba(0,0,0,0.04)",
+                color: theme.palette.text.primary,
+              },
+            }}
+          >
+            Restaurar orden
+          </Button>
+          <Box sx={{ display: "flex", gap: 1 }}>
+            <Button
+              variant="outlined"
+              onClick={onClose}
+              sx={{ borderRadius: "10px", textTransform: "none", fontWeight: 600 }}
+            >
+              Cancelar
+            </Button>
+            <Button
+              variant="contained"
+              onClick={handleSave}
+              sx={{ borderRadius: "10px", textTransform: "none", fontWeight: 600 }}
+            >
+              Guardar orden
+            </Button>
+          </Box>
+        </Box>
       </DialogActions>
     </Dialog>
   );

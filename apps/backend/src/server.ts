@@ -24,6 +24,7 @@ import permissionRoutes from "./routes/permissionRoutes";
 import userRoleRoutes from "./routes/userRoleRoutes";
 import rolePermissionRoutes from "./routes/rolePermissionRoutes";
 import avatarRoutes from "./routes/avatarRoutes";
+import notificationRoutes from "./routes/notificationRoutes";
 import sequelize from "./config/database";
 import "./database/models";
 import "./database/associations";
@@ -157,6 +158,7 @@ app.use("/api/monthly-summary", monthlySummaryRoutes);
 app.use("/api/schedules", scheduleRoutes);
 app.use("/api/vehicles", vehicleRoutes);
 app.use("/api/users", avatarRoutes);
+app.use("/api/notifications", notificationRoutes);
 
 app.use(
   // eslint-disable-next-line @typescript-eslint/no-unused-vars, no-unused-vars

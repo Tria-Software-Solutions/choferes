@@ -12,7 +12,9 @@ import {
   setScheduleOrder,
 } from "../../../store/slices/schedulesSlice";
 import SearchBarComponent from "../../../components/SearchBar/SearchBar.component";
-import EditableTableComponent from "../../../components/Table/EditableTable/EditableTable.component";
+import StickyDataGridComponent from "../../../components/Table/StickyDataGrid/StickyDataGrid.component";
+import { GridColDef } from "@mui/x-data-grid";
+import { renderActionButtons } from "../../../components/Table/EditableTable/helpers";
 import SpeedDialComponent from "../../../components/SpeedDial/SpeedDial.component";
 import AddScheduleForm from "../../Forms/AddScheduleForm";
 import { useAppNotifications } from "../../../components/Snackbar/Snackbar.component";
@@ -62,12 +64,11 @@ import { capitalizeFirstLetter } from "../../../utils/string";
 const SchedulesPage: React.FC = () => {
   const dispatch = useDispatch<AppDispatch>();
   const { currentUser, userPermissions } = useAuthContext();
-  const { schedules, isLoadingSchedules } = useSelector(
+  const { schedules, isLoadingSchedules, customOrderIds } = useSelector(
     (state: RootState) => state.schedules
   );
   const { showNotification } = useAppNotifications();
   const [filteredSchedules, setFilteredSchedules] = useState<Schedule[]>([]);
-  const [totalCountSchedules, setTotalCountSchedules] = useState(0);
   const [editRowId, setEditRowId] = useState<number | null>(null);
   const [editFields, setEditFields] = useState<{
     label: string;
@@ -81,7 +82,6 @@ const SchedulesPage: React.FC = () => {
   const [dayHoursEditing, setDayHoursEditing] = useState<Record<string, string>>({});
   const [openDeleteDialog, setOpenDeleteDialog] = useState(false);
   const [scheduleToDelete, setScheduleToDelete] = useState<number | null>(null);
-  const [page, setPage] = useState(0);
   const [isEditFormValid, setIsEditFormValid] = useState(false);
   const [openAddScheduleModal, setOpenAddScheduleModal] = useState(false);
   const [isCreatingSchedule, setIsCreatingSchedule] = useState(false);
@@ -92,24 +92,32 @@ const SchedulesPage: React.FC = () => {
   const isSmallScreen = useMediaQuery(theme.breakpoints.down("sm"));
   const location = useLocation();
 
-  const getInitialRowsPerPage = () => {
-    if (typeof window !== "undefined") {
-      const maxHeight = window.innerHeight * 0.6;
-      const headHeight = 56;
-      const paginationHeight = 64;
-      const extra = 24;
-      const availableHeight = maxHeight - headHeight - paginationHeight - extra;
-      const rowHeight = 48;
-      let rows = Math.floor(availableHeight / rowHeight);
-      return Math.max(3, Math.min(100, rows));
-    }
-    return 25;
-  };
+const getInitialRowsPerPage = () => {
+  if (typeof window !== "undefined") {
+    const maxHeight = window.innerHeight * 0.6;
+    const headHeight = 56;
+    const paginationHeight = 64;
+    const extra = 24;
+    const availableHeight = maxHeight - headHeight - paginationHeight - extra;
+    const rowHeight = 48;
+    let rows = Math.floor(availableHeight / rowHeight);
+    return Math.max(3, Math.min(100, rows));
+  }
+  return 25;
+};
 
-  const { search, setSearch, rowsPerPage, setRowsPerPage } =
+const daysOfWeek = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'];
+const shortNames: Record<string, string> = {
+  monday: 'L', tuesday: 'M', wednesday: 'M', thursday: 'J', friday: 'V', saturday: 'S', sunday: 'D',
+};
+
+  const { search, setSearch } =
     useTablePreferences("schedules", getInitialRowsPerPage);
 
   const debouncedSearch = useDebounce(search, 400);
+
+  const hasEditPermissions = userPermissions.includes(PERMISSIONS.EDIT_SCHEDULES);
+  const hasDeletePermissions = userPermissions.includes(PERMISSIONS.DELETE_SCHEDULES);
 
   // Fetch schedules on mount, when debounced search changes, or when navigating back
   useEffect(() => {
@@ -121,8 +129,7 @@ const SchedulesPage: React.FC = () => {
   // Filter schedules by search input (client-side for instant feedback)
   useEffect(() => {
     if (!search) {
-      setFilteredSchedules(sortSchedulesByType(schedules));
-      setTotalCountSchedules(schedules.length);
+      setFilteredSchedules(sortSchedulesByType(schedules, customOrderIds));
       return;
     }
 
@@ -141,9 +148,9 @@ const SchedulesPage: React.FC = () => {
       )
         .toLowerCase()
         .includes(normalizedSearch);
-    });      setFilteredSchedules(sortSchedulesByType(newFilteredSchedules));
-    setTotalCountSchedules(newFilteredSchedules.length);
-  }, [search, schedules]);
+    });
+    setFilteredSchedules(sortSchedulesByType(newFilteredSchedules, customOrderIds));
+  }, [search, schedules, customOrderIds]);
 
   // Update edit form validity when fields or per-day hours change
   useEffect(() => {
@@ -182,7 +189,7 @@ const SchedulesPage: React.FC = () => {
         severity: "success",
         duration: 3000,
       });
-      
+
       // Add notification to menu
       createScheduleNotification('created', newSchedule.label);
     } catch (error) {
@@ -225,7 +232,7 @@ const SchedulesPage: React.FC = () => {
     try {
       const defaultHours = parseInt(editFields.hours, 10);
       const scheduleDays = buildScheduleDays(editFields.days, isNaN(defaultHours) ? 0 : defaultHours, dayHoursEditing);
-      
+
       const updatedSchedule = {
         ...editFields,
         hours: isNaN(defaultHours) ? 0 : defaultHours,
@@ -239,7 +246,7 @@ const SchedulesPage: React.FC = () => {
         severity: "success",
         duration: 3000,
       });
-      
+
       // Add notification to menu
       createScheduleNotification('updated', editFields.label);
     } catch (error) {
@@ -300,7 +307,7 @@ const SchedulesPage: React.FC = () => {
         severity: "success",
         duration: 3000,
       });
-      
+
       // Add notification to menu
       const schedule = schedules.find(sch => sch.id === scheduleToDelete);
       if (schedule) {
@@ -316,39 +323,44 @@ const SchedulesPage: React.FC = () => {
     }
   };
 
-  // When preparing data for export, only include the desired fields:
-  const exportData = filteredSchedules.map((s) => {
-    // Build per-day hours string
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const scheduleDays = (s as any).scheduleDays;
-    let hoursDisplay = String(s.hours);
-    if (scheduleDays && Array.isArray(scheduleDays) && scheduleDays.length > 0) {
-      hoursDisplay = scheduleDays
+  // Memoize export data so the DataGrid columns stay stable and exportOptions
+  // only recomputes when the filtered list actually changes
+  const exportData = useMemo(
+    () =>
+      filteredSchedules.map((s) => {
+        // Build per-day hours string
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        .map((sd: any) => `${translateDayOptionsToSpanish(sd.day)}: ${sd.hours}h`)
-        .join(', ');
-    }
+        const scheduleDays = (s as any).scheduleDays;
+        let hoursDisplay = String(s.hours);
+        if (scheduleDays && Array.isArray(scheduleDays) && scheduleDays.length > 0) {
+          hoursDisplay = scheduleDays
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            .map((sd: any) => `${translateDayOptionsToSpanish(sd.day)}: ${sd.hours}h`)
+            .join(', ');
+        }
 
-    return {
-      Nombre: s.label,
-      Días: Array.isArray(s.days) ? s.days.map(translateDayOptionsToSpanish).join(', ') : translateDayOptionsToSpanish(s.days),
-      Horas: hoursDisplay,
-      Agregado: s.createdAt
-        ? capitalizeFirstLetter(
-            format(new Date(s.createdAt), "EEEE dd 'de' MMMM 'de' yyyy", {
-              locale: es,
-            })
-          )
-        : "",
-      Actualizado: s.updatedAt
-        ? capitalizeFirstLetter(
-            format(new Date(s.updatedAt), "EEEE dd 'de' MMMM 'de' yyyy", {
-              locale: es,
-            })
-          )
-        : "",
-    };
-  });
+        return {
+          Nombre: s.label,
+          Días: Array.isArray(s.days) ? s.days.map(translateDayOptionsToSpanish).join(', ') : translateDayOptionsToSpanish(s.days),
+          Horas: hoursDisplay,
+          Agregado: s.createdAt
+            ? capitalizeFirstLetter(
+                format(new Date(s.createdAt), "EEEE dd 'de' MMMM 'de' yyyy", {
+                  locale: es,
+                })
+              )
+            : "",
+          Actualizado: s.updatedAt
+            ? capitalizeFirstLetter(
+                format(new Date(s.updatedAt), "EEEE dd 'de' MMMM 'de' yyyy", {
+                  locale: es,
+                })
+              )
+            : "",
+        };
+      }),
+    [filteredSchedules]
+  );
 
   const exportOptions = useMemo(() => {
     const exportHeaders = [
@@ -366,6 +378,322 @@ const SchedulesPage: React.FC = () => {
       customHeaders: exportHeaders,
     });
   }, [exportData]);
+
+  // Stable getRowId so the memoized StickyDataGrid doesn't re-render on every
+  // parent render (inline arrows create a new reference each time)
+  const getRowId = useCallback((row: Schedule) => row.id, []);
+
+  // Columnas del DataGrid (header sticky garantizado por arquitectura de MUI X Data Grid)
+  const columns = useMemo<GridColDef<Schedule>[]>(
+    () => [
+      {
+        field: "label",
+        headerName: "Nombre",
+        flex: 1,
+        minWidth: 200,
+        sortable: true,
+        renderCell: (params) => {
+          const rowId = Number(params.id);
+          const isEditing = editRowId === rowId;
+
+          if (isEditing) {
+            return (
+              <Box
+                sx={{ width: '100%', minWidth: 0 }}
+                onMouseDown={(e) => e.stopPropagation()}
+              >
+                <TextField
+                  value={String(editFields.label || '')}
+                  onChange={(e) => setEditFields((prev) => ({ ...prev, label: e.target.value }))}
+                  variant="standard"
+                  sx={{
+                    '& .MuiInputBase-root': {
+                      fontWeight: 600,
+                      fontSize: '0.9rem',
+                      '&:before, &:after': { border: 'none' },
+                      '&:hover:not(.Mui-disabled):before': { border: 'none' },
+                    },
+                    '& .MuiInputBase-input': {
+                      padding: '4px 0',
+                      '&:focus': { outline: 'none' },
+                    },
+                  }}
+                />
+              </Box>
+            );
+          }
+          return (
+            <Typography
+              component="span"
+              sx={{ fontWeight: 600, fontSize: '0.9rem', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}
+            >
+              {String(params.value)}
+            </Typography>
+          );
+        },
+      },
+      {
+        field: "hours",
+        headerName: "Horas",
+        flex: 1.8,
+        minWidth: 360,
+        sortable: true,
+        renderCell: (params) => {
+          const rowId = Number(params.id);
+          const isEditing = editRowId === rowId;
+
+          if (isEditing) {
+            const currentDays = (editFields.days as string[]) || [];
+            return (
+              <Box
+                sx={{ display: 'flex', gap: 0.75, flexWrap: 'nowrap', overflowX: 'auto', scrollbarWidth: 'none', '&::-webkit-scrollbar': { display: 'none' }, py: 0.5, alignItems: 'flex-start', width: '100%' }}
+                onMouseDown={(e) => e.stopPropagation()}
+              >
+                {daysOfWeek.map((day) => {
+                  const isActive = currentDays.includes(day);
+                  const dayValue = isActive ? (dayHoursEditing[day] ?? editFields.hours ?? '') : '';
+                  return (
+                    <Tooltip key={day} title={isActive ? `Desactivar ${shortNames[day]}` : `Activar ${shortNames[day]}`} arrow>
+                      <Box
+                        sx={{
+                          display: 'flex',
+                          flexDirection: 'column',
+                          alignItems: 'center',
+                          gap: 0.25,
+                          minWidth: 32,
+                        }}
+                      >
+                        {/* Day toggle circle */}
+                        <Box
+                          onClick={() => {
+                            const newDays = isActive
+                              ? currentDays.filter((d) => d !== day)
+                              : [...currentDays, day];
+                            setEditFields((prev) => ({ ...prev, days: newDays }));
+                            if (isActive) {
+                              const newDayHours = { ...dayHoursEditing };
+                              delete newDayHours[day];
+                              setDayHoursEditing(newDayHours);
+                            }
+                          }}
+                          sx={{
+                            width: 28,
+                            height: 28,
+                            borderRadius: '8px',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            fontSize: '0.68rem',
+                            fontWeight: 700,
+                            cursor: 'pointer',
+                            background: isActive
+                              ? (t) => t.palette.primary.main
+                              : (t) => t.palette.mode === 'dark'
+                                ? 'rgba(255,255,255,0.04)'
+                                : 'rgba(0,0,0,0.04)',
+                            color: isActive
+                              ? '#ffffff'
+                              : (t) => t.palette.mode === 'dark'
+                                ? 'rgba(255,255,255,0.2)'
+                                : 'rgba(0,0,0,0.2)',
+                            transition: 'all 0.15s ease',
+                            '&:hover': {
+                              transform: 'scale(1.15)',
+                              boxShadow: '0 2px 8px rgba(0,0,0,0.15)',
+                            },
+                            '&:active': { transform: 'scale(0.95)' },
+                          }}
+                        >
+                          {shortNames[day]}
+                        </Box>
+                        {/* Hours input below active day */}
+                        {isActive && (
+                          <Box
+                            sx={{
+                              display: 'flex',
+                              alignItems: 'center',
+                              gap: 0.1,
+                              backgroundColor: (t) => t.palette.mode === 'dark'
+                                ? 'rgba(99,102,241,0.06)'
+                                : 'rgba(99,102,241,0.04)',
+                              borderRadius: '6px',
+                              px: 0.4,
+                              py: 0.1,
+                            }}
+                          >
+                            <TextField
+                              type="number"
+                              value={dayValue}
+                              onClick={(e) => e.stopPropagation()}
+                              onChange={(e) => {
+                                const newDayHours = { ...dayHoursEditing };
+                                newDayHours[day] = e.target.value;
+                                setDayHoursEditing(newDayHours);
+                              }}
+                              variant="standard"
+                              inputProps={{
+                                min: '0', max: '24',
+                                style: { textAlign: 'center', fontWeight: 600, fontSize: '0.7rem', padding: '1px 0', width: '24px' },
+                              }}
+                              sx={{
+                                '& .MuiInputBase-root': {
+                                  '&:before, &:after': { border: 'none' },
+                                },
+                                '& .MuiInputBase-input': {
+                                  textAlign: 'center',
+                                  padding: '1px 0',
+                                  width: '24px',
+                                  fontSize: '0.7rem',
+                                  fontWeight: 700,
+                                  color: 'text.primary',
+                                },
+                              }}
+                            />
+                          </Box>
+                        )}
+                      </Box>
+                    </Tooltip>
+                  );
+                })}
+              </Box>
+            );
+          }
+
+          // Non-editing: show day circles with hours below (same style as edit mode)
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          const scheduleDays = params.row && (params.row as any).scheduleDays;
+          const hasPerDayHours = scheduleDays && Array.isArray(scheduleDays) && scheduleDays.length > 0;
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          const rowDays: string[] = params.row ? ((params.row as any).days || []) : [];
+
+          if (hasPerDayHours && rowDays.length > 0) {
+            return (
+              <Box sx={{ display: 'flex', gap: 0.7, flexWrap: 'nowrap', overflowX: 'auto', scrollbarWidth: 'none', '&::-webkit-scrollbar': { display: 'none' }, py: 0.5, alignItems: 'flex-start' }}>
+                {daysOfWeek.map((day) => {
+                  const isActive = rowDays.includes(day);
+                  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                  const dayEntry = scheduleDays.find((sd: any) => sd.day === day);
+                  const hours = dayEntry ? dayEntry.hours : 0;
+                  return (
+                    <Tooltip key={day} title={`${shortNames[day]}: ${hours}h`} arrow>
+                      <Box
+                        sx={{
+                          display: 'flex',
+                          flexDirection: 'column',
+                          alignItems: 'center',
+                          gap: 0.25,
+                          minWidth: 32,
+                        }}
+                      >
+                        {/* Day circle */}
+                        <Box
+                          sx={{
+                            width: 28,
+                            height: 28,
+                            borderRadius: '8px',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            fontSize: '0.68rem',
+                            fontWeight: 700,
+                            background: isActive
+                              ? (t) => t.palette.primary.main
+                              : (t) => t.palette.mode === 'dark'
+                                ? 'rgba(255,255,255,0.04)'
+                                : 'rgba(0,0,0,0.04)',
+                            color: isActive
+                              ? '#ffffff'
+                              : (t) => t.palette.mode === 'dark'
+                                ? 'rgba(255,255,255,0.2)'
+                                : 'rgba(0,0,0,0.2)',
+                          }}
+                        >
+                          {shortNames[day]}
+                        </Box>
+                        {/* Hours below active day */}
+                        {isActive && (
+                          <Typography
+                            sx={{
+                              fontSize: '0.6rem',
+                              fontWeight: 700,
+                              color: 'text.primary',
+                              lineHeight: 1,
+                            }}
+                          >
+                            {hours}h
+                          </Typography>
+                        )}
+                      </Box>
+                    </Tooltip>
+                  );
+                })}
+              </Box>
+            );
+          }
+
+          // Fallback: show total hours
+          return (
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+              <Clock size={14} strokeWidth={1.5} style={{ opacity: 0.4 }} />
+              <Typography
+                component="span"
+                sx={{
+                  fontWeight: 700,
+                  fontSize: '0.95rem',
+                  letterSpacing: '-0.02em',
+                  color: 'text.primary',
+                }}
+              >
+                {String(params.value)}h
+              </Typography>
+            </Box>
+          );
+        },
+      },
+      {
+        field: "actions",
+        headerName: "",
+        sortable: false,
+        width: isSmallScreen ? 64 : 150,
+        minWidth: isSmallScreen ? 64 : 150,
+        align: "right",
+        headerAlign: "right",
+        renderCell: (params) =>
+          renderActionButtons({
+            row: params.row as Schedule,
+            editRowId,
+            getRowId: (row) => row.id,
+            currentUser: currentUser || undefined,
+            hasEditPermissions,
+            hasDeletePermissions,
+            isExpanded: false,
+            handleEditClick: handleEdit,
+            handleSaveClick: handleUpdate,
+            handleCancelClick: handleCancel,
+            handleOpenDeleteDialog,
+            isSaveDisabled: !isEditFormValid,
+            isSmallScreen,
+            theme,
+          }),
+      },
+    ],
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [
+      editRowId,
+      editFields,
+      dayHoursEditing,
+      isEditFormValid,
+      isSmallScreen,
+      theme,
+      currentUser,
+      hasEditPermissions,
+      hasDeletePermissions,
+      handleEdit,
+      handleUpdate,
+      handleCancel,
+      handleOpenDeleteDialog,
+    ]
+  );
 
   return (
     <Box className="scrollable-content" sx={{ height: "100%", display: "flex", flexDirection: "column", overflow: "hidden", pb: 0, pt: 0, px: 0 }}>
@@ -476,39 +804,44 @@ const SchedulesPage: React.FC = () => {
             </Box>
 
             {/* Actions Row */}
-            {userPermissions.includes(PERMISSIONS.CREATE_SCHEDULES) && (
+            {(userPermissions.includes(PERMISSIONS.CREATE_SCHEDULES) ||
+              userPermissions.includes(PERMISSIONS.REORDER_SCHEDULES)) && (
               <Box sx={{ display: { xs: 'none', sm: 'flex' }, gap: 1 }}>
-                <Button
-                  variant="outlined"
-                  startIcon={<GripVertical size={16} />}
-                  onClick={() => setOpenReorderDialog(true)}
-                  disabled={filteredSchedules.length < 2}
-                  sx={{
-                    px: 2,
-                    py: 1,
-                    fontWeight: 600,
-                    fontSize: "0.85rem",
-                    borderRadius: '10px',
-                    textTransform: 'none',
-                  }}
-                >
-                  Ordenar
-                </Button>
-                <Button
-                  variant="contained"
-                  startIcon={<Plus size={18} />}
-                  onClick={handleOpenAddModal}
-                  sx={{
-                    px: 3,
-                    py: 1,
-                    fontWeight: 600,
-                    fontSize: "0.9rem",
-                    letterSpacing: "-0.01em",
-                    borderRadius: '10px',
-                  }}
-                >
-                  {MANAGEMENT.ADD}
-                </Button>
+                {userPermissions.includes(PERMISSIONS.REORDER_SCHEDULES) && (
+                  <Button
+                    variant="outlined"
+                    startIcon={<GripVertical size={16} />}
+                    onClick={() => setOpenReorderDialog(true)}
+                    disabled={filteredSchedules.length < 2}
+                    sx={{
+                      px: 2,
+                      py: 1,
+                      fontWeight: 600,
+                      fontSize: "0.85rem",
+                      borderRadius: '10px',
+                      textTransform: 'none',
+                    }}
+                  >
+                    Ordenar
+                  </Button>
+                )}
+                {userPermissions.includes(PERMISSIONS.CREATE_SCHEDULES) && (
+                  <Button
+                    variant="contained"
+                    startIcon={<Plus size={18} />}
+                    onClick={handleOpenAddModal}
+                    sx={{
+                      px: 3,
+                      py: 1,
+                      fontWeight: 600,
+                      fontSize: "0.9rem",
+                      letterSpacing: "-0.01em",
+                      borderRadius: '10px',
+                    }}
+                  >
+                    {MANAGEMENT.ADD}
+                  </Button>
+                )}
               </Box>
             )}
           </Box>
@@ -544,270 +877,11 @@ const SchedulesPage: React.FC = () => {
           ) : (
             <>
               {filteredSchedules.length > 0 ? (
-                <EditableTableComponent<Schedule>
-                  data={filteredSchedules}
-                  columns={["label", "hours"]}
-                  editRowId={editRowId}
-                  editFields={editFields}
-                  setEditField={(field, value) =>
-                    setEditFields({ ...editFields, [field]: value })
-                  }
-                  handleEdit={handleEdit}
-                  handleCancel={handleCancel}
-                  handleUpdate={handleUpdate}
-                  handleOpenDeleteDialog={handleOpenDeleteDialog}
-                  getRowId={(row) => row.id}
-                  totalCount={totalCountSchedules}
-                  page={page}
-                  rowsPerPage={rowsPerPage}
-                  setPage={setPage}
-                  setRowsPerPage={setRowsPerPage}
-                  isSaveDisabled={!isEditFormValid}
-                  userPermissions={userPermissions}
-                  renderColumnValue={(column, value, isEditing, editProps, row) => {
-                    if (column === 'label') {
-                      if (isEditing && editProps) {
-                        return (
-                          <TextField
-                            value={String(editProps.editFields['label'] || '')}
-                            onChange={(e) => editProps.setEditField('label', e.target.value)}
-                            variant="standard"
-                            sx={{
-                              '& .MuiInputBase-root': {
-                                fontWeight: 600,
-                                fontSize: '0.9rem',
-                                '&:before, &:after': { border: 'none' },
-                                '&:hover:not(.Mui-disabled):before': { border: 'none' },
-                              },
-                              '& .MuiInputBase-input': {
-                                padding: '4px 0',
-                                '&:focus': { outline: 'none' },
-                              },
-                            }}
-                          />
-                        );
-                      }
-                      return (
-                        <Typography
-                          component="span"
-                          sx={{ fontWeight: 600, fontSize: '0.9rem' }}
-                        >
-                          {String(value)}
-                        </Typography>
-                      );
-                    }
-                    if (column === 'hours') {
-                      const daysOfWeek = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'];
-                      const shortNames: Record<string, string> = {
-                        monday: 'L', tuesday: 'M', wednesday: 'M', thursday: 'J', friday: 'V', saturday: 'S', sunday: 'D',
-                      };
-
-                      if (isEditing && editProps) {
-                        const currentDays = editProps.editFields['days'] as string[] || [];
-                        return (
-                          <Box sx={{ display: 'flex', gap: 0.75, flexWrap: 'nowrap', overflowX: 'auto', scrollbarWidth: 'none', '&::-webkit-scrollbar': { display: 'none' }, py: 0.5, alignItems: 'flex-start' }}>
-                            {daysOfWeek.map((day) => {
-                              const isActive = currentDays.includes(day);
-                              const dayValue = isActive ? (dayHoursEditing[day] ?? editProps.editFields['hours'] ?? '') : '';
-                              return (
-                                <Tooltip key={day} title={isActive ? `Desactivar ${shortNames[day]}` : `Activar ${shortNames[day]}`} arrow>
-                                  <Box
-                                    sx={{
-                                      display: 'flex',
-                                      flexDirection: 'column',
-                                      alignItems: 'center',
-                                      gap: 0.25,
-                                      minWidth: 32,
-                                    }}
-                                  >
-                                    {/* Day toggle circle */}
-                                    <Box
-                                      onClick={() => {
-                                        const newDays = isActive
-                                          ? currentDays.filter((d) => d !== day)
-                                          : [...currentDays, day];
-                                        editProps.setEditField('days', newDays);
-                                        if (isActive) {
-                                          const newDayHours = { ...dayHoursEditing };
-                                          delete newDayHours[day];
-                                          setDayHoursEditing(newDayHours);
-                                        }
-                                      }}
-                                      sx={{
-                                        width: 28,
-                                        height: 28,
-                                        borderRadius: '8px',
-                                        display: 'flex',
-                                        alignItems: 'center',
-                                        justifyContent: 'center',
-                                        fontSize: '0.68rem',
-                                        fontWeight: 700,
-                                        cursor: 'pointer',
-                                        background: isActive
-                                          ? (t) => t.palette.primary.main
-                                          : (t) => t.palette.mode === 'dark'
-                                            ? 'rgba(255,255,255,0.04)'
-                                            : 'rgba(0,0,0,0.04)',
-                                        color: isActive
-                                          ? '#ffffff'
-                                          : (t) => t.palette.mode === 'dark'
-                                            ? 'rgba(255,255,255,0.2)'
-                                            : 'rgba(0,0,0,0.2)',
-                                        transition: 'all 0.15s ease',
-                                        '&:hover': {
-                                          transform: 'scale(1.15)',
-                                          boxShadow: '0 2px 8px rgba(0,0,0,0.15)',
-                                        },
-                                        '&:active': { transform: 'scale(0.95)' },
-                                      }}
-                                    >
-                                      {shortNames[day]}
-                                    </Box>
-                                    {/* Hours input below active day */}
-                                    {isActive && (
-                                      <Box
-                                        sx={{
-                                          display: 'flex',
-                                          alignItems: 'center',
-                                          gap: 0.1,
-                                          backgroundColor: (t) => t.palette.mode === 'dark'
-                                            ? 'rgba(99,102,241,0.06)'
-                                            : 'rgba(99,102,241,0.04)',
-                                          borderRadius: '6px',
-                                          px: 0.4,
-                                          py: 0.1,
-                                        }}
-                                      >
-                                        <TextField
-                                          type="number"
-                                          value={dayValue}
-                                          onClick={(e) => e.stopPropagation()}
-                                          onChange={(e) => {
-                                            const newDayHours = { ...dayHoursEditing };
-                                            newDayHours[day] = e.target.value;
-                                            setDayHoursEditing(newDayHours);
-                                          }}
-                                          variant="standard"
-                                          inputProps={{
-                                            min: '0', max: '24',
-                                            style: { textAlign: 'center', fontWeight: 600, fontSize: '0.7rem', padding: '1px 0', width: '24px' },
-                                          }}
-                                          sx={{
-                                            '& .MuiInputBase-root': {
-                                              '&:before, &:after': { border: 'none' },
-                                            },
-                                            '& .MuiInputBase-input': {
-                                              textAlign: 'center',
-                                              padding: '1px 0',
-                                              width: '24px',
-                                              fontSize: '0.7rem',
-                                              fontWeight: 700,
-                                              color: 'text.primary',
-                                            },
-                                          }}
-                                        />
-                                      </Box>
-                                    )}
-                                  </Box>
-                                </Tooltip>
-                              );
-                            })}
-                          </Box>
-                        );
-                      }
-
-                      // Non-editing: show day circles with hours below (same style as edit mode)
-                      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                      const scheduleDays = row && (row as any).scheduleDays;
-                      const hasPerDayHours = scheduleDays && Array.isArray(scheduleDays) && scheduleDays.length > 0;
-                      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                      const rowDays: string[] = row ? ((row as any).days || []) : [];
-
-                      if (hasPerDayHours && rowDays.length > 0) {
-                        return (
-                          <Box sx={{ display: 'flex', gap: 0.7, flexWrap: 'nowrap', overflowX: 'auto', scrollbarWidth: 'none', '&::-webkit-scrollbar': { display: 'none' }, py: 0.5, alignItems: 'flex-start' }}>
-                            {daysOfWeek.map((day) => {
-                              const isActive = rowDays.includes(day);
-                              // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                              const dayEntry = scheduleDays.find((sd: any) => sd.day === day);
-                              const hours = dayEntry ? dayEntry.hours : 0;
-                              return (
-                                <Tooltip key={day} title={`${shortNames[day]}: ${hours}h`} arrow>
-                                  <Box
-                                    sx={{
-                                      display: 'flex',
-                                      flexDirection: 'column',
-                                      alignItems: 'center',
-                                      gap: 0.25,
-                                      minWidth: 32,
-                                    }}
-                                  >
-                                    {/* Day circle */}
-                                    <Box
-                                      sx={{
-                                        width: 28,
-                                        height: 28,
-                                        borderRadius: '8px',
-                                        display: 'flex',
-                                        alignItems: 'center',
-                                        justifyContent: 'center',
-                                        fontSize: '0.68rem',
-                                        fontWeight: 700,
-                                        background: isActive
-                                          ? (t) => t.palette.primary.main
-                                          : (t) => t.palette.mode === 'dark'
-                                            ? 'rgba(255,255,255,0.04)'
-                                            : 'rgba(0,0,0,0.04)',
-                                        color: isActive
-                                          ? '#ffffff'
-                                          : (t) => t.palette.mode === 'dark'
-                                            ? 'rgba(255,255,255,0.2)'
-                                            : 'rgba(0,0,0,0.2)',
-                                      }}
-                                    >
-                                      {shortNames[day]}
-                                    </Box>
-                                    {/* Hours below active day */}
-                                    {isActive && (
-                                      <Typography
-                                        sx={{
-                                          fontSize: '0.6rem',
-                                          fontWeight: 700,
-                                          color: 'text.primary',
-                                          lineHeight: 1,
-                                        }}
-                                      >
-                                        {hours}h
-                                      </Typography>
-                                    )}
-                                  </Box>
-                                </Tooltip>
-                              );
-                            })}
-                          </Box>
-                        );
-                      }
-
-                      // Fallback: show total hours
-                      return (
-                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                          <Clock size={14} strokeWidth={1.5} style={{ opacity: 0.4 }} />
-                          <Typography
-                            component="span"
-                            sx={{
-                              fontWeight: 700,
-                              fontSize: '0.95rem',
-                              letterSpacing: '-0.02em',
-                              color: 'text.primary',
-                            }}
-                          >
-                            {String(value)}h
-                          </Typography>
-                        </Box>
-                      );
-                    }
-                    return undefined;
-                  }}
+                <StickyDataGridComponent<Schedule>
+                  rows={filteredSchedules}
+                  columns={columns}
+                  getRowId={getRowId}
+                  disableRowVirtualization={editRowId !== null}
                 />
               ) : (
                 <Box sx={noSchedulesBoxStyles}>

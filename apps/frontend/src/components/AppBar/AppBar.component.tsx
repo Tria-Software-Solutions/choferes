@@ -130,6 +130,20 @@ const AppBarComponent: React.FC<AppBarComponentProps> = ({
 
   const menuItems = useMemo(() => mapLinksToMenuItems(visibleLinks), [visibleLinks, mapLinksToMenuItems]);
 
+  // Mobile hamburger: merge dock links + user links, deduping by label
+  // (e.g. Configuración lives in both the dock and the avatar dropdown)
+  const mobileMenuItems = useMemo(() => {
+    const linkLabels = new Set(menuItems.map((item) => item.text));
+    const extraItems = userLinks
+      .filter((link) => !linkLabels.has(link.label))
+      .map((link) => ({
+        text: link.label,
+        onClick: link.onClick || (link.path ? () => navigate(link.path!) : undefined),
+        icon: link.icon,
+      }));
+    return [...menuItems, ...extraItems];
+  }, [menuItems, userLinks, navigate]);
+
   // Handle right-click / long-press on dock items - toggle edit mode
   const handleDockContextMenu = useCallback((_item: DockItemData) => {
     setMenuEditorOpen(prev => !prev);
@@ -379,11 +393,7 @@ const AppBarComponent: React.FC<AppBarComponentProps> = ({
                   <MenuComponent
                     buttonType="icon"
                     icon={<MenuIcon size={24} />}
-                    menuItems={[...menuItems, ...userLinks.map(link => ({
-                      text: link.label,
-                      onClick: link.onClick || (link.path ? () => navigate(link.path!) : undefined),
-                      icon: link.icon,
-                    }))]}
+                    menuItems={mobileMenuItems}
                   />
                 </>
               )}

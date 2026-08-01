@@ -46,7 +46,7 @@ import PAGE_TITLE from "../../../constants/pageTitle.constants";
 import PERMISSIONS from "../../../constants/permissions.constants";
 import NOTIFICATIONS from "../../../constants/notifications.constants";
 import MANAGEMENT from "../../../constants/management.constants";
-import { Car, Download, ChevronLeft, ChevronRight, X, Search, Plus, Trash2, PlusCircle, RotateCcw, ScanText } from "lucide-react";
+import { CircleParking, Download, ChevronLeft, ChevronRight, X, Search, Plus, Trash2, PlusCircle, RotateCcw, ScanText } from "lucide-react";
 import { PdfIcon, ExcelIcon } from "../../../components/Icons/FileIcons";
 import PremiumTooltip from "../../../components/PremiumTooltip/PremiumTooltip.component";
 import {
@@ -606,7 +606,7 @@ const VehiclesPage: React.FC = () => {
                   alignItems: 'center',
                 }}
               >
-                <Car size={20} strokeWidth={1.5} />
+                <CircleParking size={20} strokeWidth={1.5} />
               </Box>
               <Box>
                 <Typography
@@ -933,6 +933,10 @@ const VehiclesPage: React.FC = () => {
                   setRowsPerPage={setRowsPerPage}
                   isSaveDisabled={!isEditFormValid}
                   userPermissions={userPermissions}
+                  permissionMap={{
+                    edit: PERMISSIONS.EDIT_VEHICLES,
+                    delete: PERMISSIONS.DELETE_VEHICLES,
+                  }}
                   validateField={validateField}
                 />
               ) : (

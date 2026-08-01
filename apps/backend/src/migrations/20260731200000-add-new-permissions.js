@@ -75,19 +75,27 @@ module.exports = {
     ]);
 
     // Assign all new permissions to Gerencia role (id=1)
-    await queryInterface.bulkInsert("role_permission", [
-      { roleId: 1, permissionId: 31, createdAt: now, updatedAt: now },
-      { roleId: 1, permissionId: 32, createdAt: now, updatedAt: now },
-      { roleId: 1, permissionId: 33, createdAt: now, updatedAt: now },
-      { roleId: 1, permissionId: 34, createdAt: now, updatedAt: now },
-      { roleId: 1, permissionId: 35, createdAt: now, updatedAt: now },
-      { roleId: 1, permissionId: 36, createdAt: now, updatedAt: now },
-      { roleId: 1, permissionId: 37, createdAt: now, updatedAt: now },
-      { roleId: 1, permissionId: 38, createdAt: now, updatedAt: now },
-      { roleId: 1, permissionId: 39, createdAt: now, updatedAt: now },
-      { roleId: 1, permissionId: 40, createdAt: now, updatedAt: now },
-      { roleId: 1, permissionId: 41, createdAt: now, updatedAt: now },
-    ]);
+    // Solo si los roles ya existen (BD migrada con seed previo); en BD fresca
+    // el seed se encarga de las asignaciones completas.
+    const roles = await queryInterface.sequelize.query("SELECT id FROM roles", {
+      type: queryInterface.sequelize.QueryTypes.SELECT,
+    });
+    const roleIds = roles.map((r) => r.id);
+    if (roleIds.includes(1)) {
+      await queryInterface.bulkInsert("role_permission", [
+        { roleId: 1, permissionId: 31, createdAt: now, updatedAt: now },
+        { roleId: 1, permissionId: 32, createdAt: now, updatedAt: now },
+        { roleId: 1, permissionId: 33, createdAt: now, updatedAt: now },
+        { roleId: 1, permissionId: 34, createdAt: now, updatedAt: now },
+        { roleId: 1, permissionId: 35, createdAt: now, updatedAt: now },
+        { roleId: 1, permissionId: 36, createdAt: now, updatedAt: now },
+        { roleId: 1, permissionId: 37, createdAt: now, updatedAt: now },
+        { roleId: 1, permissionId: 38, createdAt: now, updatedAt: now },
+        { roleId: 1, permissionId: 39, createdAt: now, updatedAt: now },
+        { roleId: 1, permissionId: 40, createdAt: now, updatedAt: now },
+        { roleId: 1, permissionId: 41, createdAt: now, updatedAt: now },
+      ]);
+    }
   },
 
   down: async (queryInterface) => {

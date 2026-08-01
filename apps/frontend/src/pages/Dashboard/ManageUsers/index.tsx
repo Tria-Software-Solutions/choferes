@@ -17,11 +17,13 @@ import { useAppNotifications } from "../../../components/Snackbar/Snackbar.compo
 import { createUserNotification } from "../../../services/notificationService";
 import {
   Alert,
+  Avatar,
   Backdrop,
   Box,
   Button,
   CircularProgress,
   FormControl,
+  IconButton,
   MenuItem,
   Paper,
   Select,
@@ -33,24 +35,40 @@ import {
 import EditableTableComponent from "../../../components/Table/EditableTable/EditableTable.component";
 import SearchBarComponent from "../../../components/SearchBar/SearchBar.component";
 import AddUserForm from "../../Forms/AddUserForm";
-import { Check, Eye, EyeOff, PlusCircle, Plus, Users, X } from "lucide-react";
+import PremiumTooltip from "../../../components/PremiumTooltip/PremiumTooltip.component";
+import {
+  CheckCircle,
+  FileEdit,
+  PlusCircle,
+  Plus,
+  Users,
+  X,
+} from "lucide-react";
+import {
+  editButtonStyles,
+  saveButtonStyles,
+  neutralButtonStyles,
+} from "../../../components/Table/EditableTable/helpers/actionButtons";
+import { premiumMenuProps } from "../../../components/Table/EditableTable/EditableTable.styles";
 import DialogComponent from "../../../components/Dialog/Dialog.component";
 import { DASHBOARD_USERS } from "../../../constants/constants";
 import { NOTIFICATIONS } from "../../../constants/constants";
+import { TABLE } from "../../../constants/constants";
+import PERMISSIONS from "../../../constants/permissions.constants";
 import PasswordChangeForm from "../../Forms/PasswordChangeForm";
 import {
   errorBoxStyles,
   errorAlertStyles,
   retryButtonStyles,
   loadingBoxStyles,
-  showInactiveBoxStyles,
-  showInactiveTypographyStyles,
   noUsersBoxStyles,
   addDialogPaperSx,
   passwordDialogPaperSx,
   backdropStyles,
 } from "./styles";
+import SegmentedToggle from "../../../components/SegmentedToggle/SegmentedToggle.component";
 import { useLocation } from "react-router-dom";
+import { API_URL } from "../../../services/api";
 import { useTablePreferences } from '../../../hooks/useTablePreferences';
 import { validateName, validateEmail, validateUsername, validatePassword } from '../../../utils/userValidation';
 
@@ -61,6 +79,8 @@ const ManageUsers: React.FC<{ isExpanded?: boolean; hideHeader?: boolean }> = ({
 }) => {
   const dispatch = useDispatch<AppDispatch>();
   const { userPermissions } = useAuthContext();
+  const canCreateUser = userPermissions.includes(PERMISSIONS.CREATE_USERS);
+  const canEditUser = userPermissions.includes(PERMISSIONS.EDIT_USER);
   const {
     users,
     isLoadingUsers,
@@ -68,7 +88,7 @@ const ManageUsers: React.FC<{ isExpanded?: boolean; hideHeader?: boolean }> = ({
   } = useSelector((state: RootState) => state.users);
   const { roles } = useSelector((state: RootState) => state.roles);
   const { showNotification } = useAppNotifications();
-  const [showInactive, setShowInactive] = useState(false);
+  const [statusFilter, setStatusFilter] = useState<"all" | "active" | "inactive">("active");
   const [editRowId, setEditRowId] = useState<number | null>(null);
   const [editFields, setEditFields] = useState({
     firstName: "",
@@ -87,6 +107,21 @@ const ManageUsers: React.FC<{ isExpanded?: boolean; hideHeader?: boolean }> = ({
   const [loadError, setLoadError] = useState<string | null>(null);
   const theme = useTheme();
   const isSmallScreen = useMediaQuery(theme.breakpoints.down("sm"));
+
+  const inputSx = {
+    '& .MuiInputBase-root': {
+      fontWeight: 600,
+      fontSize: '0.85rem',
+      '&:before, &:after': { border: 'none' },
+      '&:hover:not(.Mui-disabled):before': { border: 'none' },
+    },
+    '& .MuiInputBase-input': {
+      padding: '4px 0',
+      minWidth: 0,
+      '&::placeholder': { opacity: 0.4, fontWeight: 400 },
+      '&:focus': { outline: 'none' },
+    },
+  } as const;
   const [passwordModalOpen, setPasswordModalOpen] = useState(false);
   const [passwordUserId, setPasswordUserId] = useState<number | null>(null);
   const location = useLocation();
@@ -149,6 +184,17 @@ const ManageUsers: React.FC<{ isExpanded?: boolean; hideHeader?: boolean }> = ({
     }
   }, [usersError, showNotification]);
 
+  // Counts per status, based on the raw users list (before search/status filters)
+  const statusCounts = useMemo(() => {
+    const list = users || [];
+    const active = list.filter((u) => u.isActive).length;
+    return {
+      all: list.length,
+      active,
+      inactive: list.length - active,
+    };
+  }, [users]);
+
   // Filters users based on search input and active status
   const filteredUsers = useMemo(() => {
     if (!users || users.length === 0) {
@@ -176,7 +222,8 @@ const ManageUsers: React.FC<{ isExpanded?: boolean; hideHeader?: boolean }> = ({
         }
       })
       .filter((user) => {
-        if (!showInactive && !user.isActive) return false;
+        if (statusFilter === "active" && !user.isActive) return false;
+        if (statusFilter === "inactive" && user.isActive) return false;
 
         if (!search.trim()) return true;
 
@@ -192,7 +239,7 @@ const ManageUsers: React.FC<{ isExpanded?: boolean; hideHeader?: boolean }> = ({
       });
 
     return processedUsers;
-  }, [search, users, showInactive]);
+  }, [search, users, statusFilter]);
 
   const totalCount = useMemo(() => filteredUsers.length, [filteredUsers]);
 
@@ -506,7 +553,7 @@ const ManageUsers: React.FC<{ isExpanded?: boolean; hideHeader?: boolean }> = ({
                         letterSpacing: "0.02em",
                       }}
                     >
-                      {filteredUsers.length} usuarios {showInactive ? '(mostrando inactivos)' : 'activos'}
+                      {filteredUsers.length} {statusFilter === "all" ? "usuarios" : statusFilter === "inactive" ? "usuarios inactivos" : "usuarios activos"}
                     </Typography>
                   </Box>
                 </Box>
@@ -552,63 +599,40 @@ const ManageUsers: React.FC<{ isExpanded?: boolean; hideHeader?: boolean }> = ({
                 alignItems={{ xs: "stretch", sm: "center" }}
                 gap={1}
               >
-                <Box
-                  onClick={() => setShowInactive(!showInactive)}
-                  sx={showInactiveBoxStyles(theme)}
-                >
-                  {showInactive ? (
-                    <EyeOff size={18} />
-                  ) : (
-                    <Eye size={18} />
-                  )}
-                  <Typography
-                    variant="body2"
-                    fontWeight={600}
-                    sx={showInactiveTypographyStyles}
-                  >
-                    {showInactive
-                      ? DASHBOARD_USERS.HIDE_INACTIVE
-                      : DASHBOARD_USERS.SHOW_INACTIVE}
-                  </Typography>
-                </Box>
+                {/* Segmented status filter — modern pattern with counts */}
+                <SegmentedToggle
+                  size="medium"
+                  value={statusFilter}
+                  onChange={(v) => setStatusFilter(v)}
+                  options={[
+                    { value: "all", label: DASHBOARD_USERS.FILTER_ALL, count: statusCounts.all },
+                    { value: "active", label: DASHBOARD_USERS.FILTER_ACTIVE, count: statusCounts.active },
+                    { value: "inactive", label: DASHBOARD_USERS.FILTER_INACTIVE, count: statusCounts.inactive },
+                  ]}
+                />
 
-                <Box sx={{ display: { xs: 'none', sm: 'flex' } }}>
-                  <Button
-                    variant="contained"
-                    startIcon={<Plus size={18} />}
-                    onClick={handleOpenAddUserModal}
-                    sx={{
-                      px: 3,
-                      py: 1,
-                      fontWeight: 600,
-                      fontSize: "0.9rem",
-                      letterSpacing: "-0.01em",
-                      borderRadius: '10px',
-                    }}
-                  >
-                    {DASHBOARD_USERS.ADD}
-                  </Button>
+                <Box sx={{ display: "flex", flexShrink: 0 }}>
+                  {canCreateUser && (
+                    <Button
+                      variant="contained"
+                      startIcon={<Plus size={18} />}
+                      onClick={handleOpenAddUserModal}
+                      sx={{
+                        px: 3,
+                        py: 1,
+                        fontWeight: 600,
+                        fontSize: "0.9rem",
+                        letterSpacing: "-0.01em",
+                        borderRadius: '10px',
+                      }}
+                    >
+                      {DASHBOARD_USERS.ADD}
+                    </Button>
+                  )}
                 </Box>
               </Box>
             </Box>
           </Box>
-
-            {/* Mobile Add Button */}
-            <Box sx={{ display: { xs: 'flex', sm: 'none' }, p: 2, borderTop: `1px solid ${theme.palette.mode === "dark" ? "rgba(255,255,255,0.08)" : "rgba(0,0,0,0.08)"}` }}>
-              <Button
-                variant="contained"
-                fullWidth
-                startIcon={<Plus size={18} />}
-                onClick={handleOpenAddUserModal}
-                sx={{
-                  py: 1.5,
-                  fontWeight: 600,
-                  borderRadius: '10px',
-                }}
-              >
-                {DASHBOARD_USERS.ADD}
-              </Button>
-            </Box>
 
             {/* Content Section */}
             <Box sx={{ flex: 1, minHeight: 0, display: "flex", flexDirection: "column", overflow: "hidden" }}>
@@ -640,113 +664,69 @@ const ManageUsers: React.FC<{ isExpanded?: boolean; hideHeader?: boolean }> = ({
                     >
                       {isEditing ? (
                         <>
-                          <Box sx={{ width: 8, height: 8, borderRadius: "50%", backgroundColor: user.isActive ? "#4CAF50" : "#BDBDBD", flexShrink: 0, alignSelf: "flex-start", mt: 2 }} />
-                          <Box sx={{ flex: 1, minWidth: 0, display: "flex", flexDirection: "column", gap: { xs: 1, sm: 1.25 } }}>
-                            {/* Section: Información personal */}
-                            <Typography
-                              variant="caption"
-                              sx={{
-                                fontWeight: 700,
-                                fontSize: "0.65rem",
-                                textTransform: "uppercase",
-                                letterSpacing: "0.08em",
-                                color: theme.palette.text.disabled,
-                                mb: 0.25,
-                              }}
-                            >
-                              Información personal
-                            </Typography>
+                          <Avatar
+                            src={user.avatar ? `${API_URL}${user.avatar}` : undefined}
+                            sx={{
+                              width: 34,
+                              height: 34,
+                              fontSize: "0.8rem",
+                              fontWeight: 700,
+                              flexShrink: 0,
+                              alignSelf: "flex-start",
+                              mt: 1,
+                              bgcolor: theme.palette.primary.main,
+                              color: theme.palette.primary.contrastText,
+                            }}
+                          >
+                            {user.firstName?.[0]}{user.lastName?.[0]}
+                          </Avatar>
+                          <Box
+                            sx={{
+                              flex: 1,
+                              minWidth: 0,
+                              display: "flex",
+                              flexDirection: "column",
+                              gap: 0.75,
+                              py: 0.5,
+                            }}
+                          >
                             <Box sx={{ display: "flex", gap: 1 }}>
                               <TextField
                                 size="small"
                                 value={editFields.firstName}
                                 onChange={(e) => setEditFields({ ...editFields, firstName: e.target.value })}
                                 placeholder="Nombre"
-                                sx={{
-                                  flex: 1,
-                                  '& .MuiOutlinedInput-root': {
-                                    borderRadius: '8px',
-                                    backgroundColor: theme.palette.mode === 'dark' ? 'rgba(255,255,255,0.04)' : 'rgba(0,0,0,0.015)',
-                                  },
-                                  '& .MuiInputBase-input': { fontSize: '0.8rem', py: 0.75, px: 1 },
-                                }}
+                                variant="standard"
+                                sx={{ flex: 1, ...inputSx }}
                               />
                               <TextField
                                 size="small"
                                 value={editFields.lastName}
                                 onChange={(e) => setEditFields({ ...editFields, lastName: e.target.value })}
                                 placeholder="Apellido"
-                                sx={{
-                                  flex: 1,
-                                  '& .MuiOutlinedInput-root': {
-                                    borderRadius: '8px',
-                                    backgroundColor: theme.palette.mode === 'dark' ? 'rgba(255,255,255,0.04)' : 'rgba(0,0,0,0.015)',
-                                  },
-                                  '& .MuiInputBase-input': { fontSize: '0.8rem', py: 0.75, px: 1 },
-                                }}
+                                variant="standard"
+                                sx={{ flex: 1, ...inputSx }}
                               />
                             </Box>
-                            {/* Section: Contacto */}
-                            <Typography
-                              variant="caption"
-                              sx={{
-                                fontWeight: 700,
-                                fontSize: "0.65rem",
-                                textTransform: "uppercase",
-                                letterSpacing: "0.08em",
-                                color: theme.palette.text.disabled,
-                                mt: 0.25,
-                                mb: 0.25,
-                              }}
-                            >
-                              Contacto
-                            </Typography>
                             <Box sx={{ display: "flex", gap: 1 }}>
                               <TextField
                                 size="small"
                                 value={editFields.email}
                                 onChange={(e) => setEditFields({ ...editFields, email: e.target.value })}
                                 placeholder="Correo"
-                                sx={{
-                                  flex: 1,
-                                  '& .MuiOutlinedInput-root': {
-                                    borderRadius: '8px',
-                                    backgroundColor: theme.palette.mode === 'dark' ? 'rgba(255,255,255,0.04)' : 'rgba(0,0,0,0.015)',
-                                  },
-                                  '& .MuiInputBase-input': { fontSize: '0.8rem', py: 0.75, px: 1 },
-                                }}
+                                variant="standard"
+                                sx={{ flex: 1, ...inputSx }}
                               />
                               <TextField
                                 size="small"
                                 value={editFields.username}
                                 onChange={(e) => setEditFields({ ...editFields, username: e.target.value })}
                                 placeholder="Usuario"
-                                sx={{
-                                  flex: 1,
-                                  '& .MuiOutlinedInput-root': {
-                                    borderRadius: '8px',
-                                    backgroundColor: theme.palette.mode === 'dark' ? 'rgba(255,255,255,0.04)' : 'rgba(0,0,0,0.015)',
-                                  },
-                                  '& .MuiInputBase-input': { fontSize: '0.8rem', py: 0.75, px: 1 },
-                                }}
+                                variant="standard"
+                                sx={{ flex: 1, ...inputSx }}
                               />
                             </Box>
-                            {/* Section: Rol */}
-                            <Typography
-                              variant="caption"
-                              sx={{
-                                fontWeight: 700,
-                                fontSize: "0.65rem",
-                                textTransform: "uppercase",
-                                letterSpacing: "0.08em",
-                                color: theme.palette.text.disabled,
-                                mt: 0.25,
-                                mb: 0.25,
-                              }}
-                            >
-                              Rol del usuario
-                            </Typography>
-                            <FormControl size="small" fullWidth>
+                            <FormControl variant="standard" size="small" fullWidth sx={{ minWidth: 0 }}>
                               <Select
                                 value={editFields.roleName}
                                 onChange={(e) => setEditFields({ ...editFields, roleName: e.target.value })}
@@ -758,16 +738,13 @@ const ManageUsers: React.FC<{ isExpanded?: boolean; hideHeader?: boolean }> = ({
                                   );
                                 }}
                                 sx={{
-                                  backgroundColor: theme.palette.mode === "dark" ? "rgba(99,102,241,0.06)" : "rgba(99,102,241,0.06)",
-                                  border: `1.5px solid ${theme.palette.mode === "dark" ? "rgba(99,102,241,0.25)" : "rgba(99,102,241,0.25)"}`,
-                                  borderRadius: "10px",
-                                  fontWeight: 600,
                                   fontSize: "0.8rem",
-                                  '& .MuiSelect-select': { py: 0.75, px: 1 },
-                                  '&:hover': {
-                                    borderColor: theme.palette.primary.main,
-                                  },
+                                  fontWeight: 600,
+                                  '&:before, &:after': { border: 'none' },
+                                  '&:hover:not(.Mui-disabled):before': { border: 'none' },
+                                  '& .MuiSelect-select': { py: 0.25 },
                                 }}
+                                MenuProps={premiumMenuProps}
                               >
                                 {roles.map((role) => (
                                   <MenuItem key={role.id} value={role.name} sx={{ fontSize: '0.8rem' }}>
@@ -778,75 +755,76 @@ const ManageUsers: React.FC<{ isExpanded?: boolean; hideHeader?: boolean }> = ({
                             </FormControl>
                           </Box>
                           <Box sx={{ display: "flex", gap: 0.5, flexShrink: 0, alignSelf: "flex-start", mt: 2 }}>
-                            <Button
-                              size="small"
-                              variant="contained"
-                              onClick={() => handleUpdate(user.id)}
-                              disabled={!isEditFormValid}
-                              startIcon={<Check size={14} />}
-                              sx={{
-                                minWidth: "auto",
-                                px: 1.5,
-                                py: 0.5,
-                                fontSize: "0.7rem",
-                                fontWeight: 700,
-                                textTransform: "none",
-                                borderRadius: "8px",
-                                boxShadow: "none",
-                                '&:hover': { boxShadow: '0 2px 8px rgba(0,0,0,0.15)' },
-                              }}
-                            >
-                              Guardar
-                            </Button>
-                            <Button
-                              size="small"
-                              variant="outlined"
-                              onClick={handleCancel}
-                              startIcon={<X size={14} />}
-                              sx={{
-                                minWidth: "auto",
-                                px: 1.5,
-                                py: 0.5,
-                                fontSize: "0.7rem",
-                                fontWeight: 600,
-                                color: "text.secondary",
-                                textTransform: "none",
-                                borderRadius: "8px",
-                                borderColor: 'divider',
-                              }}
-                            >
-                              Cancelar
-                            </Button>
+                            <PremiumTooltip title={TABLE.SAVE}>
+                              <span>
+                                <IconButton
+                                  onClick={() => handleUpdate(user.id)}
+                                  disabled={!isEditFormValid}
+                                  sx={saveButtonStyles(theme)}
+                                >
+                                  <CheckCircle size={17} />
+                                </IconButton>
+                              </span>
+                            </PremiumTooltip>
+                            <PremiumTooltip title={TABLE.CANCEL}>
+                              <span>
+                                <IconButton onClick={handleCancel} sx={neutralButtonStyles(theme)}>
+                                  <X size={17} />
+                                </IconButton>
+                              </span>
+                            </PremiumTooltip>
                           </Box>
                         </>
                       ) : (
                         <>
-                          <Box
-                            sx={{
-                              width: 8,
-                              height: 8,
-                              borderRadius: "50%",
-                              backgroundColor: user.isActive ? "#4CAF50" : "#BDBDBD",
-                              flexShrink: 0,
-                            }}
-                          />
+                          <Box sx={{ position: "relative", flexShrink: 0 }}>
+                            <Avatar
+                              src={user.avatar ? `${API_URL}${user.avatar}` : undefined}
+                              sx={{
+                                width: 36,
+                                height: 36,
+                                fontSize: "0.85rem",
+                                fontWeight: 700,
+                                bgcolor: theme.palette.primary.main,
+                                color: theme.palette.primary.contrastText,
+                              }}
+                            >
+                              {user.firstName?.[0]}{user.lastName?.[0]}
+                            </Avatar>
+                            <Box
+                              sx={{
+                                position: "absolute",
+                                right: -1,
+                                bottom: -1,
+                                width: 11,
+                                height: 11,
+                                borderRadius: "50%",
+                                backgroundColor: user.isActive ? "#4CAF50" : "#BDBDBD",
+                                border: `2px solid ${theme.palette.background.paper}`,
+                              }}
+                            />
+                          </Box>
                           <Box sx={{ flex: 1, minWidth: 0 }}>
                             <Typography variant="body2" sx={{ fontWeight: 600, fontSize: "0.85rem", color: "text.primary", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
                               {user.firstName} {user.lastName}
                             </Typography>
-                            <Typography variant="caption" sx={{ fontSize: "0.7rem", color: "text.secondary", display: "block", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
-                              {user.email} · {user.roleName || "Sin rol"}
+                            <Typography variant="body2" sx={{ fontWeight: 700, fontSize: "0.72rem", color: "primary.main", display: "block", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", mt: 0.15 }}>
+                              {user.roleName || "Sin rol"}
                             </Typography>
                           </Box>
+                          <Typography variant="caption" sx={{ fontSize: "0.7rem", color: "text.secondary", flexShrink: 0, maxWidth: { xs: 120, sm: 200 }, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                            {user.email}
+                          </Typography>
                           <Box sx={{ display: "flex", gap: 0.5, flexShrink: 0 }}>
-                            <Button
-                              size="small"
-                              variant="text"
-                              onClick={() => handleEdit(user)}
-                              sx={{ minWidth: "auto", px: 1, fontSize: "0.7rem", fontWeight: 600, color: "primary.main", textTransform: "none" }}
-                            >
-                              Editar
-                            </Button>
+                            {canEditUser && (
+                              <PremiumTooltip title={TABLE.EDIT}>
+                                <span>
+                                  <IconButton onClick={() => handleEdit(user)} sx={editButtonStyles(theme)}>
+                                    <FileEdit size={16} />
+                                  </IconButton>
+                                </span>
+                              </PremiumTooltip>
+                            )}
                           </Box>
                         </>
                       )}
@@ -896,6 +874,10 @@ const ManageUsers: React.FC<{ isExpanded?: boolean; hideHeader?: boolean }> = ({
                     setRowsPerPage={setRowsPerPage}
                     isSaveDisabled={!isEditFormValid}
                     userPermissions={userPermissions}
+                    permissionMap={{
+                      edit: PERMISSIONS.EDIT_USER,
+                      delete: PERMISSIONS.ENABLE_DISABLE_USER,
+                    }}
                     isExpanded={isExpanded}
                     validateField={validateField}
                     passwordModalOpen={passwordModalOpen}

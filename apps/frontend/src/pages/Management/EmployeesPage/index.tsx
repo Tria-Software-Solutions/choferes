@@ -11,7 +11,9 @@ import {
 } from "../../../store/slices/employeeSlice";
 import SearchBarComponent from "../../../components/SearchBar/SearchBar.component";
 import SpeedDialComponent from "../../../components/SpeedDial/SpeedDial.component";
-import EditableTableComponent from "../../../components/Table/EditableTable/EditableTable.component";
+import StickyDataGridComponent from "../../../components/Table/StickyDataGrid/StickyDataGrid.component";
+import { GridColDef } from "@mui/x-data-grid";
+import { renderActionButtons } from "../../../components/Table/EditableTable/helpers";
 import AddEmployeeForm from "../../Forms/AddEmployeeForm";
 import { useAppNotifications } from "../../../components/Snackbar/Snackbar.component";
 import DialogComponent from "../../../components/Dialog/Dialog.component";
@@ -36,7 +38,7 @@ import PAGE_TITLE from "../../../constants/pageTitle.constants";
 import PERMISSIONS from "../../../constants/permissions.constants";
 import NOTIFICATIONS from "../../../constants/notifications.constants";
 import MANAGEMENT from "../../../constants/management.constants";
-import { Users, Download, X, Search, Plus, Trash2, PlusCircle, Mail } from "lucide-react";
+import { UsersRound, Download, X, Search, Plus, Trash2, PlusCircle, Mail } from "lucide-react";
 import { PdfIcon, ExcelIcon } from "../../../components/Icons/FileIcons";
 import {
   exportSpeedDialBoxStyles,
@@ -74,20 +76,18 @@ const getInitialRowsPerPage = () => {
 // Employees management page component
 const EmployeesPage: React.FC = () => {
   const dispatch = useDispatch<AppDispatch>();
-  const { userPermissions } = useAuthContext();
+  const { userPermissions, currentUser } = useAuthContext();
   const { employees, isLoadingEmployees } = useSelector(
     (state: RootState) => state.employees
   );
   const { showNotification } = useAppNotifications();
   const [filteredEmployees, setFilteredEmployees] = useState<Employee[]>([]);
-  const [totalCount, setTotalCount] = useState(0);
   const [editRowId, setEditRowId] = useState<number | null>(null);
   const [openAddModal, setOpenAddModal] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [editFields, setEditFields] = useState({ firstName: "", lastName: "", email: "" });
   const [openDeleteDialog, setOpenDeleteDialog] = useState(false);
   const [employeeToDelete, setEmployeeToDelete] = useState<number | null>(null);
-  const [page, setPage] = useState(0);
   const [isEditFormValid, setIsEditFormValid] = useState(false);
   const [isDeletingEmployee, setIsDeletingEmployee] = useState(false);
 
@@ -106,7 +106,7 @@ const EmployeesPage: React.FC = () => {
     },
   } as const;
 
-  const { search, setSearch, rowsPerPage, setRowsPerPage } =
+  const { search, setSearch } =
     useTablePreferences("employees", getInitialRowsPerPage);
 
   const debouncedSearch = useDebounce(search, 400);
@@ -114,6 +114,9 @@ const EmployeesPage: React.FC = () => {
   const theme = useTheme();
   const isSmallScreen = useMediaQuery(theme.breakpoints.down("sm"));
   const location = useLocation();
+
+  const hasEditPermissions = userPermissions.includes(PERMISSIONS.EDIT_EMPLOYEES);
+  const hasDeletePermissions = userPermissions.includes(PERMISSIONS.DELETE_EMPLOYEES);
 
   // Fetch employees on mount, when debounced search changes, or when navigating back
   useEffect(() => {
@@ -126,7 +129,6 @@ const EmployeesPage: React.FC = () => {
   useEffect(() => {
     if (!search) {
       setFilteredEmployees(employees);
-      setTotalCount(employees.length);
       return;
     }
 
@@ -142,8 +144,7 @@ const EmployeesPage: React.FC = () => {
           .includes(normalizedSearch)
       )
     );
-    setTotalCount(filteredEmployees.length);
-  }, [search, employees, filteredEmployees.length]);
+  }, [search, employees]);
 
   // Validate edit fields for employee
   const validateFields = useCallback((fields: typeof editFields) => {
@@ -183,7 +184,7 @@ const EmployeesPage: React.FC = () => {
         severity: "success",
         duration: 3000,
       });
-      
+
       // Add notification to menu
       createEmployeeNotification('created', `${newEmployee.firstName} ${newEmployee.lastName}`);
     } catch (error) {
@@ -233,7 +234,7 @@ const EmployeesPage: React.FC = () => {
         severity: "success",
         duration: 3000,
       });
-      
+
       // Add notification to menu
       createEmployeeNotification('updated', `${editFields.firstName} ${editFields.lastName}`);
     } catch (error) {
@@ -269,7 +270,7 @@ const EmployeesPage: React.FC = () => {
         severity: "success",
         duration: 3000,
       });
-      
+
       // Add notification to menu
       const employee = employees.find(emp => emp.id === employeeToDelete);
       if (employee) {
@@ -285,26 +286,31 @@ const EmployeesPage: React.FC = () => {
     }
   };
 
-  // When preparing data for export, only include the desired fields:
-  const exportData = filteredEmployees.map(e => ({
-    Nombre: e.firstName,
-    Apellido: e.lastName,
-    Email: e.email || "",
-    Agregado: e.createdAt
-      ? capitalizeFirstLetter(
-          format(new Date(e.createdAt), "EEEE dd 'de' MMMM 'de' yyyy", {
-            locale: es,
-          })
-        )
-      : "",
-    Actualizado: e.updatedAt
-      ? capitalizeFirstLetter(
-          format(new Date(e.updatedAt), "EEEE dd 'de' MMMM 'de' yyyy", {
-            locale: es,
-          })
-        )
-      : "",
-  }));
+  // Memoize export data so the DataGrid columns stay stable and exportOptions
+  // only recomputes when the filtered list actually changes
+  const exportData = useMemo(
+    () =>
+      filteredEmployees.map(e => ({
+        Nombre: e.firstName,
+        Apellido: e.lastName,
+        Email: e.email || "",
+        Agregado: e.createdAt
+          ? capitalizeFirstLetter(
+              format(new Date(e.createdAt), "EEEE dd 'de' MMMM 'de' yyyy", {
+                locale: es,
+              })
+            )
+          : "",
+        Actualizado: e.updatedAt
+          ? capitalizeFirstLetter(
+              format(new Date(e.updatedAt), "EEEE dd 'de' MMMM 'de' yyyy", {
+                locale: es,
+              })
+            )
+          : "",
+      })),
+    [filteredEmployees]
+  );
 
   // Memoize export options based on permissions
   const exportOptions = useMemo(() => {
@@ -317,7 +323,222 @@ const EmployeesPage: React.FC = () => {
       customHeaders: exportHeaders,
     });
   }, [exportData]);
-  // Use exportTable({ data: exportData, ... }) for export
+
+  // Stable getRowId so the memoized StickyDataGrid doesn't re-render on every
+  // parent render (inline arrows create a new reference each time)
+  const getRowId = useCallback((row: Employee) => row.id, []);
+
+  // Columnas del DataGrid (header sticky garantizado por arquitectura de MUI X Data Grid)
+  const columns = useMemo<GridColDef<Employee>[]>(
+    () => [
+      {
+        field: "firstName",
+        headerName: "Nombre",
+        flex: 1.6,
+        minWidth: 260,
+        sortable: true,
+        renderCell: (params) => {
+          const rowId = Number(params.id);
+          const isEditing = editRowId === rowId;
+          const rowData = params.row as Employee;
+          const firstName = isEditing
+            ? String(editFields.firstName || "")
+            : String(rowData.firstName || "");
+          const lastName = isEditing
+            ? String(editFields.lastName || "")
+            : String(rowData.lastName || "");
+          const fullName = `${firstName} ${lastName}`.trim() || 'Nombre Completo';
+          const initials = `${(firstName.charAt(0) || '').toUpperCase()}${(lastName.charAt(0) || '').toUpperCase()}` || '?';
+          const empColor = getEmployeeColor(rowId);
+
+          if (isEditing) {
+            return (
+              <Box
+                sx={{ display: 'flex', alignItems: 'center', gap: 1.5, py: 0.5, width: '100%', minWidth: 0 }}
+                onMouseDown={(e) => e.stopPropagation()}
+              >
+                <Avatar
+                  sx={{
+                    width: 32,
+                    height: 32,
+                    fontSize: '0.75rem',
+                    fontWeight: 700,
+                    bgcolor: empColor,
+                    color: '#fff',
+                    flexShrink: 0,
+                  }}
+                >
+                  {initials}
+                </Avatar>
+                <Box sx={{ display: 'flex', gap: 0.5, flex: 1, minWidth: 0 }}>
+                  <TextField
+                    value={String(editFields.firstName || '')}
+                    onChange={(e) => setEditFields((prev) => ({ ...prev, firstName: e.target.value }))}
+                    placeholder="Nombre"
+                    variant="standard"
+                    size="small"
+                    sx={inputSx}
+                  />
+                  <TextField
+                    value={String(editFields.lastName || '')}
+                    onChange={(e) => setEditFields((prev) => ({ ...prev, lastName: e.target.value }))}
+                    placeholder="Apellido"
+                    variant="standard"
+                    size="small"
+                    sx={inputSx}
+                  />
+                </Box>
+              </Box>
+            );
+          }
+
+          return (
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, py: 0.5 }}>
+              <Avatar
+                sx={{
+                  width: 32,
+                  height: 32,
+                  fontSize: '0.75rem',
+                  fontWeight: 700,
+                  bgcolor: empColor,
+                  color: '#fff',
+                  flexShrink: 0,
+                }}
+              >
+                {initials}
+              </Avatar>
+              <Typography
+                component="span"
+                sx={{ fontWeight: 600, fontSize: '0.9rem', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}
+              >
+                {fullName}
+              </Typography>
+            </Box>
+          );
+        },
+      },
+      {
+        field: "email",
+        headerName: "Email",
+        flex: 1.4,
+        minWidth: 220,
+        sortable: true,
+        renderCell: (params) => {
+          const rowId = Number(params.id);
+          const isEditing = editRowId === rowId;
+          const rowData = params.row as Employee;
+          const email = isEditing
+            ? String(editFields.email || '')
+            : String(rowData.email || '');
+
+          if (isEditing) {
+            return (
+              <Box
+                sx={{ display: 'flex', alignItems: 'center', gap: 1, width: '100%', minWidth: 0 }}
+                onMouseDown={(e) => e.stopPropagation()}
+              >
+                <Mail size={14} strokeWidth={1.5} style={{ opacity: 0.4, flexShrink: 0 }} />
+                <TextField
+                  value={String(editFields.email || '')}
+                  onChange={(e) => setEditFields((prev) => ({ ...prev, email: e.target.value }))}
+                  variant="standard"
+                  fullWidth
+                  sx={{
+                    '& .MuiInputBase-root': {
+                      fontSize: '0.85rem',
+                      '&:before, &:after': { border: 'none' },
+                      '&:hover:not(.Mui-disabled):before': { border: 'none' },
+                    },
+                    '& .MuiInputBase-input': {
+                      padding: '4px 0',
+                      color: 'text.secondary',
+                      '&:focus': { outline: 'none' },
+                    },
+                  }}
+                />
+              </Box>
+            );
+          }
+
+          if (email) {
+            return (
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                <Mail size={14} strokeWidth={1.5} style={{ opacity: 0.4, flexShrink: 0 }} />
+                <Typography
+                  component="a"
+                  href={`mailto:${email}`}
+                  sx={{
+                    fontSize: '0.85rem',
+                    color: 'text.secondary',
+                    textDecoration: 'none',
+                    whiteSpace: 'nowrap',
+                    overflow: 'hidden',
+                    textOverflow: 'ellipsis',
+                    '&:hover': {
+                      color: 'primary.main',
+                      textDecoration: 'underline',
+                    },
+                  }}
+                >
+                  {email}
+                </Typography>
+              </Box>
+            );
+          }
+
+          return (
+            <Typography
+              component="span"
+              sx={{ fontSize: '0.85rem', color: 'text.disabled', fontStyle: 'italic' }}
+            >
+              Sin email
+            </Typography>
+          );
+        },
+      },
+      {
+        field: "actions",
+        headerName: "",
+        sortable: false,
+        width: isSmallScreen ? 64 : 150,
+        minWidth: isSmallScreen ? 64 : 150,
+        align: "right",
+        headerAlign: "right",
+        renderCell: (params) =>
+          renderActionButtons({
+            row: params.row as Employee,
+            editRowId,
+            getRowId: (row) => row.id,
+            currentUser: currentUser || undefined,
+            hasEditPermissions,
+            hasDeletePermissions,
+            isExpanded: false,
+            handleEditClick: handleEdit,
+            handleSaveClick: handleUpdate,
+            handleCancelClick: handleCancel,
+            handleOpenDeleteDialog,
+            isSaveDisabled: !isEditFormValid,
+            isSmallScreen,
+            theme,
+          }),
+      },
+    ],
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [
+      editRowId,
+      editFields,
+      isEditFormValid,
+      isSmallScreen,
+      theme,
+      currentUser,
+      hasEditPermissions,
+      hasDeletePermissions,
+      handleEdit,
+      handleUpdate,
+      handleCancel,
+      handleOpenDeleteDialog,
+    ]
+  );
 
   return (
     <Box className="scrollable-content" sx={{ height: "100%", display: "flex", flexDirection: "column", overflow: "hidden", pb: 0, pt: 0, px: 0 }}>
@@ -362,7 +583,7 @@ const EmployeesPage: React.FC = () => {
                   alignItems: 'center',
                 }}
               >
-                <Users size={20} strokeWidth={1.5} />
+                <UsersRound size={20} strokeWidth={1.5} />
               </Box>
               <Box>
                 <Typography
@@ -480,159 +701,11 @@ const EmployeesPage: React.FC = () => {
           ) : (
             <>
               {filteredEmployees.length > 0 ? (
-                <EditableTableComponent<Employee>
-                  data={filteredEmployees}
-                  columns={["firstName", "email"]}
-                  editRowId={editRowId}
-                  editFields={editFields}
-                  setEditField={(field, value) =>
-                    setEditFields({ ...editFields, [field]: value })
-                  }
-                  handleEdit={handleEdit}
-                  handleCancel={handleCancel}
-                  handleUpdate={handleUpdate}
-                  handleOpenDeleteDialog={handleOpenDeleteDialog}
-                  getRowId={(row) => row.id}
-                  totalCount={totalCount}
-                  page={page}
-                  setPage={setPage}
-                  rowsPerPage={rowsPerPage}
-                  setRowsPerPage={setRowsPerPage}
-                  isSaveDisabled={!isEditFormValid}
-                  userPermissions={userPermissions}
-                  renderColumnValue={(column, value, isEditing, editProps, row) => {
-                    if (column === 'firstName') {
-                      const rowData = row as Record<string, unknown> | undefined;
-                      const firstName = String(editProps?.editFields?.['firstName'] || value || '');
-                      const lastName = isEditing && editProps
-                        ? String(editProps.editFields['lastName'] || '')
-                        : String((rowData?.lastName as string) || '');
-                      const fullName = `${firstName} ${lastName}`.trim() || 'Nombre Completo';
-                      const initials = `${(firstName.charAt(0) || '').toUpperCase()}${(lastName.charAt(0) || '').toUpperCase()}` || '?';
-                      const rowId = row?.id ? Number(row.id) : 0;
-                      const empColor = getEmployeeColor(rowId);
-                      
-                      if (isEditing && editProps) {
-                        return (
-                          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, py: 0.5 }}>
-                            <Avatar
-                              sx={{
-                                width: 32,
-                                height: 32,
-                                fontSize: '0.75rem',
-                                fontWeight: 700,
-                                bgcolor: empColor,
-                                color: '#fff',
-                                flexShrink: 0,
-                              }}
-                            >
-                              {initials}
-                            </Avatar>
-                            <Box sx={{ display: 'flex', gap: 0.5, flex: 1 }}>
-                              <TextField
-                                value={String(editProps.editFields['firstName'] || '')}
-                                onChange={(e) => editProps.setEditField('firstName', e.target.value)}
-                                placeholder="Nombre"
-                                variant="standard"
-                                size="small"
-                                sx={inputSx}
-                              />
-                              <TextField
-                                value={String(editProps.editFields['lastName'] || '')}
-                                onChange={(e) => editProps.setEditField('lastName', e.target.value)}
-                                placeholder="Apellido"
-                                variant="standard"
-                                size="small"
-                                sx={inputSx}
-                              />
-                            </Box>
-                          </Box>
-                        );
-                      }
-                      return (
-                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, py: 0.5 }}>
-                          <Avatar
-                            sx={{
-                              width: 32,
-                              height: 32,
-                              fontSize: '0.75rem',
-                              fontWeight: 700,
-                              bgcolor: empColor,
-                              color: '#fff',
-                              flexShrink: 0,
-                            }}
-                          >
-                            {initials}
-                          </Avatar>
-                          <Typography
-                            component="span"
-                            sx={{ fontWeight: 600, fontSize: '0.9rem' }}
-                          >
-                            {fullName}
-                          </Typography>
-                        </Box>
-                      );
-                    }
-                    if (column === 'email') {
-                      const email = String(value || '');
-                      if (isEditing && editProps) {
-                        return (
-                          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                            <Mail size={14} strokeWidth={1.5} style={{ opacity: 0.4, flexShrink: 0 }} />
-                            <TextField
-                              value={String(editProps.editFields['email'] || '')}
-                              onChange={(e) => editProps.setEditField('email', e.target.value)}
-                              variant="standard"
-                              fullWidth
-                              sx={{
-                                '& .MuiInputBase-root': {
-                                  fontSize: '0.85rem',
-                                  '&:before, &:after': { border: 'none' },
-                                  '&:hover:not(.Mui-disabled):before': { border: 'none' },
-                                },
-                                '& .MuiInputBase-input': {
-                                  padding: '4px 0',
-                                  color: 'text.secondary',
-                                  '&:focus': { outline: 'none' },
-                                },
-                              }}
-                            />
-                          </Box>
-                        );
-                      }
-                      if (email) {
-                        return (
-                          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                            <Mail size={14} strokeWidth={1.5} style={{ opacity: 0.4, flexShrink: 0 }} />
-                            <Typography
-                              component="a"
-                              href={`mailto:${email}`}
-                              sx={{
-                                fontSize: '0.85rem',
-                                color: 'text.secondary',
-                                textDecoration: 'none',
-                                '&:hover': {
-                                  color: 'primary.main',
-                                  textDecoration: 'underline',
-                                },
-                              }}
-                            >
-                              {email}
-                            </Typography>
-                          </Box>
-                        );
-                      }
-                      return (
-                        <Typography
-                          component="span"
-                          sx={{ fontSize: '0.85rem', color: 'text.disabled', fontStyle: 'italic' }}
-                        >
-                          Sin email
-                        </Typography>
-                      );
-                    }
-                    return undefined;
-                  }}
+                <StickyDataGridComponent<Employee>
+                  rows={filteredEmployees}
+                  columns={columns}
+                  getRowId={getRowId}
+                  disableRowVirtualization={editRowId !== null}
                 />
               ) : (
                 <Box sx={noEmployeesBoxStyles}>

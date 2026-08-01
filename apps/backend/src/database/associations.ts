@@ -8,6 +8,17 @@ import { ScheduleDay } from "../models/ScheduleDay";
 import { HoursWorked } from "../models/HoursWorked";
 import { UserRole } from "../models/UserRole";
 import { RolePermission } from "../models/RolePermission";
+import { Notification } from "../models/Notification";
+
+// User <-> Notification (One-to-Many)
+Notification.belongsTo(User, {
+  foreignKey: "userId",
+  onDelete: "CASCADE",
+});
+User.hasMany(Notification, {
+  foreignKey: "userId",
+  onDelete: "CASCADE",
+});
 
 // User <-> Role (Many-to-Many)
 User.belongsToMany(Role, {
