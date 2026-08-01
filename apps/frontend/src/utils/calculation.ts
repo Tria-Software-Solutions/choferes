@@ -95,13 +95,17 @@ export const calculateTotalHoursAndOvertimeForPeriods = (
         s.year === weekNumbers[0].year,
     );
 
+  // Si una semana ISO abarca dos años calendario (p.ej. 29 dic - 4 ene) es UN solo
+  // periodo semanal; la segunda entrada puede no existir y debe tratarse como 0.
   const findSecondWeeklySummary = () =>
-    weeklySummaries.find(
-      (s) =>
-        s.employeeId === employeeId &&
-        s.weekNumber === weekNumbers[1].weekNumber &&
-        s.year === weekNumbers[1].year,
-    );
+    weekNumbers.length > 1
+      ? weeklySummaries.find(
+          (s) =>
+            s.employeeId === employeeId &&
+            s.weekNumber === weekNumbers[1].weekNumber &&
+            s.year === weekNumbers[1].year,
+        )
+      : undefined;
 
   const findFirstBiweeklySummary = () =>
     biweeklySummaries.find(
@@ -112,12 +116,14 @@ export const calculateTotalHoursAndOvertimeForPeriods = (
     );
 
   const findSecondBiweeklySummary = () =>
-    biweeklySummaries.find(
-      (s) =>
-        s.employeeId === employeeId &&
-        s.biweekNumber === biweekNumbers[1].biweekNumber &&
-        s.year === biweekNumbers[1].year,
-    );
+    biweekNumbers.length > 1
+      ? biweeklySummaries.find(
+          (s) =>
+            s.employeeId === employeeId &&
+            s.biweekNumber === biweekNumbers[1].biweekNumber &&
+            s.year === biweekNumbers[1].year,
+        )
+      : undefined;
 
   const findFirstMonthlySummary = () =>
     monthlySummaries.find(
@@ -128,12 +134,14 @@ export const calculateTotalHoursAndOvertimeForPeriods = (
     );
 
   const findSecondMonthlySummary = () =>
-    monthlySummaries.find(
-      (s) =>
-        s.employeeId === employeeId &&
-        s.month === months[1].month &&
-        s.year === months[1].year,
-    );
+    months.length > 1
+      ? monthlySummaries.find(
+          (s) =>
+            s.employeeId === employeeId &&
+            s.month === months[1].month &&
+            s.year === months[1].year,
+        )
+      : undefined;
 
   const firstSummary =
     selectedPeriod === "weekly"

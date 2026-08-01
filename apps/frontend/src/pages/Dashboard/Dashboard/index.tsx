@@ -15,7 +15,7 @@ import { getBiweeklySummaries } from "../../../services/biweeklySummaryService";
 import { getVehicles } from "../../../services/vehicleService";
 import { getHoursWorked } from "../../../services/hoursWorkedService";
 import { getSchedules } from "../../../services/scheduleService";
-import { getWeekNumber, getBiweekNumber, getMonthNumber, getBiweeklyDates, getFirstDayOfWeek } from "../../../utils/dates";
+import { getWeekNumber, getWeekNumberAndYear, getBiweekNumber, getMonthNumber, getBiweeklyDates, getFirstDayOfWeek } from "../../../utils/dates";
 import { ChartNoAxesCombined } from "lucide-react";
 import { PAGE_TITLE } from "../../../constants/constants";
 import SegmentedToggle from "../../../components/SegmentedToggle/SegmentedToggle.component";
@@ -179,7 +179,9 @@ const Dashboard = () => {
   }, [load, location.pathname]);
 
   const currentYear = new Date().getFullYear();
+  const { year: currentWeekYear } = getWeekNumberAndYear(new Date());
   const currentPeriod = getCurrentPeriodNum(period);
+  const filterYear = period === "weekly" ? currentWeekYear : currentYear;
 
   const filteredEmployeeIds = useMemo(() => {
     const raw: RawEntry[] =
@@ -189,10 +191,10 @@ const Dashboard = () => {
     const periodKey = PERIOD_KEYS[period];
     return new Set(
       raw
-        .filter((r) => r.year === currentYear && r[periodKey] === currentPeriod)
+        .filter((r) => r.year === filterYear && r[periodKey] === currentPeriod)
         .map((r) => r.employeeId)
     );
-  }, [period, weeklyRaw, biweeklyRaw, monthlyRaw, currentYear, currentPeriod]);
+  }, [period, weeklyRaw, biweeklyRaw, monthlyRaw, filterYear, currentPeriod]);
 
   const periodDateRange = useMemo(() => {
     if (period === "weekly") {
@@ -219,7 +221,7 @@ const Dashboard = () => {
       monthlyRaw;
 
     const periodKey = PERIOD_KEYS[period];
-    const current = raw.filter((r) => r.year === currentYear && r[periodKey] === currentPeriod);
+    const current = raw.filter((r) => r.year === filterYear && r[periodKey] === currentPeriod);
 
     // Deduplicate by employeeId: DB can have duplicate entries for the same
     // (employeeId, period, year) due to race conditions in RolesPage (prior to
@@ -265,7 +267,7 @@ const Dashboard = () => {
 
     const totalOvertime = overtime.reduce((sum, e) => sum + e.overtime, 0);
     return { top, overtime, totalHours: Math.round(totalHrs), totalOvertime, employeeCount: employeeMap.size };
-  }, [period, weeklyRaw, biweeklyRaw, monthlyRaw, employeeMap, currentYear, currentPeriod]);
+  }, [period, weeklyRaw, biweeklyRaw, monthlyRaw, employeeMap, filterYear, currentPeriod]);
 
   const scheduleDist = useMemo(() => {
     if (!hoursWorked.length || !schedules.length || !filteredEmployeeIds.size) return [];

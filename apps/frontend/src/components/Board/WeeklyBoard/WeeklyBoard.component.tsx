@@ -60,6 +60,7 @@ import {
   isToday,
 } from "../../Table/SelectorTable/helpers/scheduleCell";
 import SegmentedToggle from "../../SegmentedToggle/SegmentedToggle.component";
+import QuickAssignPopover from "./QuickAssignPopover.component";
 import {
   calculateTotalHours,
   calculateOvertime,
@@ -831,13 +832,14 @@ interface SwimlaneRowProps {
   isDragging?: boolean;
   onInfoClick?: (employee: Employee) => void;
   onAdjustClick?: (employee: Employee) => void;
+  onCellClick?: (schedule: Schedule, day: string, date: string, e: React.MouseEvent<HTMLElement>) => void;
 }
 
 function SwimlaneRow({
   schedule, scheduleColor, currentWeek, filteredEmployees,
   getDaySchedule, selectedEmployeeIds, toggleEmployeeSelection,
   handleCardClick, canEdit, isDark, isDragging,
-  onInfoClick, onAdjustClick,
+  onInfoClick, onAdjustClick, onCellClick,
 }: SwimlaneRowProps) {
   const theme = useTheme();
 
@@ -877,6 +879,7 @@ function SwimlaneRow({
               isTodayDate={todayDate} isWeekend={isWeekend}
               isDark={isDark}
               scheduleLabel={schedule.label}
+              onClick={onCellClick && isDayAvailable ? (e) => onCellClick(schedule, day, date, e) : undefined}
             >
               <Box sx={{
                 px: 1.25, py: 0.85, textAlign: "center",
@@ -959,9 +962,10 @@ interface SwimlaneDayCellProps {
   children: React.ReactNode;
   isDark: boolean;
   scheduleLabel?: string;
+  onClick?: (e: React.MouseEvent<HTMLElement>) => void;
 }
 
-function SwimlaneDayCell({ columnId, day, date, isTodayDate, isWeekend, children, isDark, scheduleLabel }: SwimlaneDayCellProps) {
+function SwimlaneDayCell({ columnId, day, date, isTodayDate, isWeekend, children, isDark, scheduleLabel, onClick }: SwimlaneDayCellProps) {
   const { setNodeRef, isOver } = useDroppable({
     id: columnId,
     data: { viewType: 'schedule', day, date, scheduleLabel } satisfies DropColumnData,
@@ -976,12 +980,14 @@ function SwimlaneDayCell({ columnId, day, date, isTodayDate, isWeekend, children
   return (
     <Box
       ref={setNodeRef}
+      onClick={onClick}
       sx={{
         flex: isWeekend ? 0.7 : 1,
         minWidth: { xs: isWeekend ? 76 : 100, sm: isWeekend ? 90 : 120 },
         scrollSnapAlign: "start",
         p: 0.6,
         borderRadius: "8px",
+        cursor: onClick ? "pointer" : "default",
         backgroundColor: isTodayDate
           ? (isDark ? "rgba(56,189,248,0.06)" : "rgba(56,189,248,0.04)")
           : "transparent",
@@ -1389,6 +1395,7 @@ interface DayColumnProps {
   }>;
   totalHours: number;
   onEmployeeClick: (employee: Employee, event: React.MouseEvent<HTMLElement>) => void;
+  onColumnClick?: (day: string, date: string, e: React.MouseEvent<HTMLElement>) => void;
   onInfoClick?: (employee: Employee) => void;
   onAdjustClick?: (employee: Employee) => void;
   theme: Theme;
@@ -1396,7 +1403,7 @@ interface DayColumnProps {
 
 const DayColumn = memo(function DayColumn({
   columnId, day, date, isTodayDate, isWeekend, employees, totalHours,
-  onEmployeeClick, onInfoClick, onAdjustClick, theme,
+  onEmployeeClick, onColumnClick, onInfoClick, onAdjustClick, theme,
 }: DayColumnProps) {
   const isDark = theme.palette.mode === "dark";
   const todayColor = "#38bdf8";
@@ -1413,12 +1420,15 @@ const DayColumn = memo(function DayColumn({
   } : {};
 
   return (
-    <Box ref={setNodeRef} data-column-id={columnId} sx={{
-      flex: isWeekend ? 0.7 : 1,
-      minWidth: { xs: isWeekend ? 96 : 112, sm: isWeekend ? 110 : 140 },
-      maxWidth: { xs: isWeekend ? 120 : 160, sm: isWeekend ? 130 : 190 },
-      scrollSnapAlign: "start",
-      display: "flex", flexDirection: "column",
+    <Box ref={setNodeRef} data-column-id={columnId}
+      onClick={(e) => onColumnClick?.(day, date, e)}
+      sx={{
+        flex: isWeekend ? 0.7 : 1,
+        minWidth: { xs: isWeekend ? 96 : 112, sm: isWeekend ? 110 : 140 },
+        maxWidth: { xs: isWeekend ? 120 : 160, sm: isWeekend ? 130 : 190 },
+        scrollSnapAlign: "start",
+        display: "flex", flexDirection: "column",
+        cursor: onColumnClick ? "pointer" : "default",
       backgroundColor: isTodayDate
         ? (isDark ? "rgba(56,189,248,0.06)" : "rgba(56,189,248,0.04)")
         : isWeekend
@@ -1441,6 +1451,15 @@ const DayColumn = memo(function DayColumn({
           : "transparent",
         transition: "background-color 0.15s ease",
       }}>
+        {onColumnClick && (
+          <Box sx={{
+            display: "inline-flex", alignItems: "center", justifyContent: "center",
+            width: 16, height: 16, borderRadius: "50%", mb: 0.4,
+            backgroundColor: isDark ? "rgba(99,102,241,0.15)" : "rgba(99,102,241,0.1)",
+            color: "#818cf8",
+            fontSize: "0.7rem", fontWeight: 700, lineHeight: 1,
+          }}>+</Box>
+        )}
         <Typography sx={{
           fontWeight: isTodayDate ? 700 : 600, fontSize: "0.75rem",
           color: isTodayDate ? todayColor : theme.palette.text.primary,
@@ -1522,6 +1541,15 @@ const WeeklyBoard: React.FC<WeeklyBoardProps> = ({
   const [selectedEmployee, setSelectedEmployee] = useState<Employee | null>(null);
   const [selectedDay, setSelectedDay] = useState<string>("");
   const [selectedDateStr, setSelectedDateStr] = useState<string>("");
+
+  // ─── Quick-assign (click on day column / swimlane cell) ───
+  const [quickAssign, setQuickAssign] = useState<{
+    view: "employee" | "schedule";
+    day: string;
+    date: string;
+    scheduleLabel?: string;
+    anchorEl: HTMLElement;
+  } | null>(null);
 
   // ─── Multi-select state ───
   const [selectedEmployeeIds, setSelectedEmployeeIds] = useState<Set<number>>(new Set());
@@ -1805,6 +1833,26 @@ const WeeklyBoard: React.FC<WeeklyBoardProps> = ({
     setPopoverAnchor(null); setSelectedEmployee(null); setSelectedDay(""); setSelectedDateStr("");
   }, []);
 
+  // ─── Quick-assign handlers (click to assign without dragging) ───
+  const handleOpenQuickAssign = useCallback((
+    view: "employee" | "schedule",
+    day: string,
+    date: string,
+    anchorEl: HTMLElement,
+    scheduleLabel?: string,
+  ) => {
+    if (!canEdit) return;
+    setPopoverAnchor(null);
+    setQuickAssign({ view, day, date, scheduleLabel, anchorEl });
+  }, [canEdit]);
+
+  const handleQuickAssignConfirm = useCallback((employeeId: number, scheduleLabel: string) => {
+    if (!canEdit || !quickAssign) return;
+    const date = new Date(quickAssign.date);
+    handleChange(scheduleLabel, employeeId, date);
+    setQuickAssign(null);
+  }, [canEdit, quickAssign, handleChange]);
+
   const handleScheduleSelect = useCallback(
     (scheduleLabel: string) => {
       if (!selectedEmployee || !selectedDateStr) return;
@@ -1897,6 +1945,7 @@ const WeeklyBoard: React.FC<WeeklyBoardProps> = ({
                     employees={dayEmployees}
                     totalHours={dayEmployees.reduce((sum, e) => sum + e.hours, 0)}
                     onEmployeeClick={(emp, event) => handleCardClick(emp, day, date)(event)}
+                    onColumnClick={canEdit ? (d, dt, e) => handleOpenQuickAssign("employee", d, dt, e.currentTarget) : undefined}
                     onInfoClick={showHours ? onInfoClick : undefined}
                     onAdjustClick={showHours ? onAdjustClick : undefined}
                     theme={theme}
@@ -1937,6 +1986,7 @@ const WeeklyBoard: React.FC<WeeklyBoardProps> = ({
                       isDragging={activeDragItem !== null}
                       onInfoClick={onInfoClick}
                       onAdjustClick={onAdjustClick}
+                      onCellClick={canEdit ? (sched, d, dt, e) => handleOpenQuickAssign("schedule", d, dt, e.currentTarget, sched.label) : undefined}
                     />
                   );
                 })}
@@ -2094,6 +2144,22 @@ const WeeklyBoard: React.FC<WeeklyBoardProps> = ({
           </ListItemButton>
         </List>
       </Popover>
+
+      {/* ─── Quick-assign popover (click on day column / swimlane cell) ─── */}
+      <QuickAssignPopover
+        open={!!quickAssign}
+        anchorEl={quickAssign?.anchorEl ?? null}
+        onClose={() => setQuickAssign(null)}
+        view={quickAssign?.view ?? "employee"}
+        day={quickAssign?.day ?? ""}
+        date={quickAssign?.date ?? ""}
+        schedules={schedules}
+        employees={filteredEmployees}
+        fixedScheduleLabel={quickAssign?.scheduleLabel}
+        isDark={isDark}
+        theme={theme}
+        onAssign={handleQuickAssignConfirm}
+      />
     </Box>
   );
 };
