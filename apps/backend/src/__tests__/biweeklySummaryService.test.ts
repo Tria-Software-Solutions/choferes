@@ -6,6 +6,7 @@ jest.mock("../models/BiweeklySummary", () => {
     findAll: jest.fn(),
     findOne: jest.fn(),
     upsert: jest.fn(),
+    create: jest.fn(),
     update: jest.fn(),
     destroy: jest.fn(),
   };
@@ -110,7 +111,7 @@ describe("getCurrentBiweeklySummary", () => {
 });
 
 describe("createBiweeklySummary", () => {
-  it("debería crear con upsert", async () => {
+  it("debería crear si no existe un resumen previo", async () => {
     const newData = {
       employeeId: 2,
       biweekNumber: 2,
@@ -120,12 +121,34 @@ describe("createBiweeklySummary", () => {
     };
     const created = { id: 2, ...newData };
 
-    BiweeklySummary.upsert.mockResolvedValue([created, true]);
+    BiweeklySummary.findOne.mockResolvedValue(null);
+    BiweeklySummary.create.mockResolvedValue(created);
 
     const result = await biweeklySummaryService.createBiweeklySummary(newData as never);
 
-    expect(BiweeklySummary.upsert).toHaveBeenCalledWith(newData);
+    expect(BiweeklySummary.findOne).toHaveBeenCalledWith({
+      where: { employeeId: 2, biweekNumber: 2, year: 2026 },
+    });
+    expect(BiweeklySummary.create).toHaveBeenCalledWith(newData);
     expect(result).toEqual(created);
+  });
+
+  it("debería actualizar el resumen existente", async () => {
+    const newData = {
+      employeeId: 2,
+      biweekNumber: 2,
+      month: 7,
+      year: 2026,
+      totalHours: 85,
+    };
+    const existing = { id: 2, ...newData, update: jest.fn().mockResolvedValue(undefined) };
+
+    BiweeklySummary.findOne.mockResolvedValue(existing);
+
+    const result = await biweeklySummaryService.createBiweeklySummary(newData as never);
+
+    expect(existing.update).toHaveBeenCalledWith(newData);
+    expect(result).toEqual(existing);
   });
 });
 

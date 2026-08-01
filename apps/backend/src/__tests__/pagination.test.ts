@@ -31,14 +31,14 @@ describe("getPaginationParams", () => {
     expect(result).toEqual({ page: 1, limit: 10 });
   });
 
-  it("debería cap limit a 500 para prevenir abuso", () => {
+  it("debería cap limit a 10000 para prevenir abuso", () => {
     const result = getPaginationParams({ page: "1", limit: "99999" });
-    expect(result).toEqual({ page: 1, limit: 500 });
+    expect(result).toEqual({ page: 1, limit: 10000 });
   });
 
-  it("debería aceptar limit=500 (valor máximo)", () => {
-    const result = getPaginationParams({ page: "1", limit: "500" });
-    expect(result).toEqual({ page: 1, limit: 500 });
+  it("debería aceptar limit=10000 (valor máximo)", () => {
+    const result = getPaginationParams({ page: "1", limit: "10000" });
+    expect(result).toEqual({ page: 1, limit: 10000 });
   });
 
   it("debería usar default si page es número negativo", () => {

@@ -89,7 +89,12 @@ describe("getScheduleById", () => {
 
     const result = await scheduleService.getScheduleById(1);
 
-    expect(Schedule.findByPk).toHaveBeenCalledWith(1);
+    expect(Schedule.findByPk).toHaveBeenCalledWith(
+      1,
+      expect.objectContaining({
+        include: [expect.objectContaining({ as: "scheduleDays" })],
+      }),
+    );
     expect(result).toEqual(mockSchedule);
   });
 
@@ -140,7 +145,12 @@ describe("updateSchedule", () => {
     expect(Schedule.update).toHaveBeenCalledWith(updateData, {
       where: { id: 1 },
     });
-    expect(Schedule.findByPk).toHaveBeenCalledWith(1);
+    expect(Schedule.findByPk).toHaveBeenCalledWith(
+      1,
+      expect.objectContaining({
+        include: [expect.objectContaining({ as: "scheduleDays" })],
+      }),
+    );
     expect(result).toHaveProperty("hours", 10);
   });
 });
