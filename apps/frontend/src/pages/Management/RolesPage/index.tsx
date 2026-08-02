@@ -1423,7 +1423,7 @@ const RolesPage: React.FC = () => {
               {/* Export Speed Dial */}
               {userPermissions.includes(PERMISSIONS.EXPORT_EXCEL_ROLES) &&
                 userPermissions.includes(PERMISSIONS.EXPORT_PDF_ROLES) && (
-                  <Box sx={{ ...exportSpeedDialBoxStyles, minHeight: 'auto' }}>
+                  <Box sx={{ ...exportSpeedDialBoxStyles, minHeight: 'auto', ml: 'auto' }}>
                     {(viewMode === 'employee' ? filteredEmployees.length > 0 : filteredSchedules.length > 0) && (
                       <SpeedDialComponent
                         actions={exportOptions}
@@ -1457,9 +1457,10 @@ const RolesPage: React.FC = () => {
               {/* Date Picker and Navigation */}
               <Box
                 display="flex"
-                flexDirection={{ xs: "column", sm: "row" }}
-                alignItems={{ xs: "stretch", sm: "center" }}
+                flexDirection="row"
+                alignItems="center"
                 gap={0.75}
+                width={{ xs: "100%", sm: "auto" }}
               >
                 <Box
                   display="flex"
@@ -1467,6 +1468,7 @@ const RolesPage: React.FC = () => {
                   justifyContent={{ xs: "flex-start", sm: "flex-end" }}
                   gap={0.5}
                   flexWrap="wrap"
+                  flexShrink={0}
                 >
                   {/* Previous Week Button */}
                   <PremiumTooltip title={MANAGEMENT.TOOLTIP_PREV_WEEK}>
@@ -1489,13 +1491,13 @@ const RolesPage: React.FC = () => {
                     </IconButton>
                   </PremiumTooltip>
 
-                  {/* Date Picker (full row on mobile) */}
+                  {/* Date Picker (flexes in the same row on mobile) */}
                   <Box
                     sx={{
-                      flex: { xs: "1 1 100%", sm: "0 0 auto" },
-                      order: { xs: -1, sm: 0 },
+                      flex: { xs: 1, sm: "0 0 auto" },
                       display: "flex",
                       justifyContent: { xs: "center", sm: "flex-end" },
+                      minWidth: 0,
                     }}
                   >
                   <LocalizationProvider
@@ -1514,7 +1516,7 @@ const RolesPage: React.FC = () => {
                           required: true,
                           variant: "standard",
                           sx: {
-                            width: { sm: "150px", md: "170px" },
+                            width: { xs: "100%", sm: "150px", md: "170px" },
                             '& .MuiInputBase-root': {
                               height: '36px',
                               fontSize: '0.85rem',

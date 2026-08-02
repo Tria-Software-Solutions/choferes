@@ -47,6 +47,7 @@ const mapApiNotification = (row: {
   read: boolean;
   actionUrl?: string | null;
   actionText?: string | null;
+  source?: string | null;
   createdAt: string;
 }): Notification => ({
   id: String(row.id),
@@ -58,6 +59,7 @@ const mapApiNotification = (row: {
   read: Boolean(row.read),
   actionUrl: row.actionUrl || undefined,
   actionText: row.actionText || undefined,
+  source: row.source || undefined,
   timestamp: new Date(row.createdAt),
 });
 
@@ -123,7 +125,8 @@ export const createEmployeeNotification = (action: 'created' | 'updated' | 'dele
     category: 'employee',
     priority: 'medium',
     actionUrl: '/employees',
-    actionText: 'Ver empleados'
+    actionText: 'Ver empleados',
+    source: 'employee'
   });
 };
 
@@ -141,7 +144,8 @@ export const createScheduleNotification = (action: 'created' | 'updated' | 'dele
     category: 'schedule',
     priority: 'low',
     actionUrl: '/schedules',
-    actionText: 'Ver horarios'
+    actionText: 'Ver horarios',
+    source: 'schedule'
   });
 };
 
@@ -159,7 +163,8 @@ export const createVehicleNotification = (action: 'created' | 'updated' | 'delet
     category: 'vehicle',
     priority: 'medium',
     actionUrl: '/vehicles',
-    actionText: 'Ver vehículos'
+    actionText: 'Ver vehículos',
+    source: 'vehicle'
   });
 };
 
@@ -177,7 +182,8 @@ export const createCourierNotification = (action: 'created' | 'updated' | 'delet
     category: 'system',
     priority: 'medium',
     actionUrl: '/courier-services',
-    actionText: 'Ver servicios'
+    actionText: 'Ver servicios',
+    source: 'courier'
   });
 };
 
@@ -195,7 +201,8 @@ export const createUserNotification = (action: 'created' | 'updated' | 'deleted'
     category: 'system',
     priority: 'high',
     actionUrl: '/dashboard',
-    actionText: 'Ver usuarios'
+    actionText: 'Ver usuarios',
+    source: 'user'
   });
 };
 
@@ -213,7 +220,8 @@ export const createRoleNotification = (action: 'created' | 'updated' | 'deleted'
     category: 'system',
     priority: 'high',
     actionUrl: '/dashboard',
-    actionText: 'Ver roles'
+    actionText: 'Ver roles',
+    source: 'role'
   });
 };
 
@@ -226,7 +234,8 @@ export const createHoursGenerationNotification = (success: boolean, employeeCoun
       category: 'report',
       priority: 'high',
       actionUrl: '/roles',
-      actionText: 'Ver resultados'
+      actionText: 'Ver resultados',
+      source: 'hours'
     });
   } else {
     return addNotificationToMenu({
@@ -236,7 +245,8 @@ export const createHoursGenerationNotification = (success: boolean, employeeCoun
       category: 'report',
       priority: 'high',
       actionUrl: '/roles',
-      actionText: 'Reintentar'
+      actionText: 'Reintentar',
+      source: 'hours'
     });
   }
 };
@@ -247,7 +257,8 @@ export const createSystemNotification = (title: string, message: string, type: '
     message,
     type,
     category: 'system',
-    priority: 'low'
+    priority: 'low',
+    source: 'system'
   });
 };
 
@@ -259,7 +270,8 @@ export const createReportNotification = (title: string, message: string, actionU
     category: 'report',
     priority: 'medium',
     actionUrl,
-    actionText: 'Ver reporte'
+    actionText: 'Ver reporte',
+    source: 'report'
   });
 };
 
@@ -282,7 +294,8 @@ export const createBackupNotification = (action: 'created' | 'failed', format: '
     category: 'system',
     priority: 'high',
     actionUrl: '/dashboard',
-    actionText: 'Ir al dashboard'
+    actionText: 'Ir al dashboard',
+    source: 'backup'
   });
 };
 
@@ -305,6 +318,7 @@ export const createDataDeletionNotification = (action: 'completed' | 'failed') =
     category: 'system',
     priority: 'high',
     actionUrl: '/dashboard',
-    actionText: 'Ir al dashboard'
+    actionText: 'Ir al dashboard',
+    source: 'data-deletion'
   });
 };

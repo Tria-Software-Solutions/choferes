@@ -1,5 +1,5 @@
 import React, { useState, useCallback, useMemo, useRef, useEffect } from "react";
-import MenuComponent from "../Menu/Menu.component";
+import MobileMenuDrawer from "../MobileMenu/MobileMenu.component";
 import NotificationMenu from "../NotificationMenu/NotificationMenu.component";
 import Dock, { DockItemData } from "../Dock/Dock.component";
 import { useMenuPreferences } from "../../hooks/useMenuPreferences";
@@ -30,7 +30,6 @@ import { useNotificationMenu } from "../../context/NotificationContext";
 import { Menu as MenuIcon, Bell, Blocks } from "lucide-react";
 import { ThemeToggle } from "../ThemeToggle/ThemeToggle";
 import logo from "../../assets/images/logo.png";
-import { MenuItemProps } from "../Menu/Menu.component";
 import { Roles } from "../../constants/roles";
 import {
   appBarStyles,
@@ -84,6 +83,8 @@ const AppBarComponent: React.FC<AppBarComponentProps> = ({
 
   // Menu editor state
   const [menuEditorOpen, setMenuEditorOpen] = useState(false);
+  // Mobile drawer state
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   // Extract keys from links for menu preferences
   const linkKeys = useMemo(() => links.map(l => l.label), [links]);
@@ -120,29 +121,12 @@ const AppBarComponent: React.FC<AppBarComponentProps> = ({
     useState<null | HTMLElement>(null);
   const blocksButtonRef = useRef<HTMLButtonElement>(null);
 
-  const mapLinksToMenuItems = useCallback((linkList: Link[]): MenuItemProps[] =>
-    linkList.map(({ label, path, icon, subLinks, onClick }) => ({
-      text: label,
-      onClick: onClick || (path ? () => navigate(path) : undefined),
-      icon,
-      subMenuItems: subLinks ? mapLinksToMenuItems(subLinks) : undefined,
-    })), [navigate]);
-
-  const menuItems = useMemo(() => mapLinksToMenuItems(visibleLinks), [visibleLinks, mapLinksToMenuItems]);
-
-  // Mobile hamburger: merge dock links + user links, deduping by label
+  // Mobile drawer: dedupe user links against nav links by label
   // (e.g. Configuración lives in both the dock and the avatar dropdown)
-  const mobileMenuItems = useMemo(() => {
-    const linkLabels = new Set(menuItems.map((item) => item.text));
-    const extraItems = userLinks
-      .filter((link) => !linkLabels.has(link.label))
-      .map((link) => ({
-        text: link.label,
-        onClick: link.onClick || (link.path ? () => navigate(link.path!) : undefined),
-        icon: link.icon,
-      }));
-    return [...menuItems, ...extraItems];
-  }, [menuItems, userLinks, navigate]);
+  const mobileUserLinks = useMemo(() => {
+    const linkLabels = new Set(visibleLinks.map((link) => link.label));
+    return userLinks.filter((link) => !linkLabels.has(link.label));
+  }, [visibleLinks, userLinks]);
 
   // Handle right-click / long-press on dock items - toggle edit mode
   const handleDockContextMenu = useCallback((_item: DockItemData) => {
@@ -390,10 +374,26 @@ const AppBarComponent: React.FC<AppBarComponentProps> = ({
                     flexItem
                     sx={mobileDividerStyles}
                   />
-                  <MenuComponent
-                    buttonType="icon"
-                    icon={<MenuIcon size={24} />}
-                    menuItems={mobileMenuItems}
+                  <IconButton
+                    onClick={() => setMobileMenuOpen(true)}
+                    aria-label="Abrir menú de navegación"
+                    sx={{
+                      color: "#ffffff",
+                      transition: "all 0.2s ease",
+                      "&:hover": {
+                        backgroundColor: "rgba(255,255,255,0.1)",
+                      },
+                    }}
+                  >
+                    <MenuIcon size={24} />
+                  </IconButton>
+                  <MobileMenuDrawer
+                    open={mobileMenuOpen}
+                    onClose={() => setMobileMenuOpen(false)}
+                    title={title}
+                    navLinks={visibleLinks}
+                    userLinks={mobileUserLinks}
+                    currentUser={currentUser}
                   />
                 </>
               )}

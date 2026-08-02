@@ -436,7 +436,7 @@ const shortNames: Record<string, string> = {
         field: "hours",
         headerName: "Horas",
         flex: 1.8,
-        minWidth: 360,
+        minWidth: isSmallScreen ? 240 : 360,
         sortable: true,
         renderCell: (params) => {
           const rowId = Number(params.id);

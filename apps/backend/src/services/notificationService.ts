@@ -1,5 +1,6 @@
 // Service for business logic and database operations related to notifications
 import { Notification } from "../models/Notification";
+import { User } from "../models/User";
 
 export type NotificationType = "info" | "success" | "warning" | "error";
 export type NotificationCategory = "employee" | "schedule" | "vehicle" | "system" | "report";
@@ -87,12 +88,19 @@ export const generatePaymentReminders = async (userId: number, today?: string) =
   const month = now.getMonth(); // 0-indexed
   const monthName = MONTH_NAMES[month];
 
+  // Respect the user's notification settings (default: enabled)
+  const user = await User.findByPk(userId);
+  const notifSettings =
+    ((user?.settings as Record<string, unknown> | undefined)?.notifications as
+      Record<string, unknown> | undefined) ?? {};
+  const paymentsEnabled = notifSettings.payments !== false;
+
   // Last day of the current month (28/29/30/31 depending on month and leap year)
   const lastDayOfMonth = new Date(year, month + 1, 0).getDate();
 
   const reminders: CreateNotificationData[] = [];
 
-  if (day === 15) {
+  if (paymentsEnabled && day === 15) {
     reminders.push({
       source: `payment-1:${year}-${month + 1}`,
       title: "Pago de Quincena 1",
@@ -105,7 +113,7 @@ export const generatePaymentReminders = async (userId: number, today?: string) =
     });
   }
 
-  if (day === lastDayOfMonth) {
+  if (paymentsEnabled && day === lastDayOfMonth) {
     reminders.push({
       source: `payment-2:${year}-${month + 1}`,
       title: "Pago de Quincena 2",

@@ -9,6 +9,7 @@ export interface Notification {
   actionText?: string;
   category: 'employee' | 'schedule' | 'vehicle' | 'system' | 'report';
   priority: 'low' | 'medium' | 'high';
+  source?: string;
 }
 
 export interface NotificationFilters {
