@@ -17,12 +17,29 @@ jest.mock("../models/Notification", () => {
   };
 });
 
+// Mock User model - generatePaymentReminders reads the user's notification settings
+jest.mock("../models/User", () => {
+  const mockUser = {
+    findByPk: jest.fn(),
+  };
+
+  return {
+    __esModule: true,
+    User: mockUser,
+    default: mockUser,
+  };
+});
+
 // eslint-disable-next-line @typescript-eslint/no-require-imports
 const Notification = require("../models/Notification").default;
+// eslint-disable-next-line @typescript-eslint/no-require-imports
+const User = require("../models/User").default;
 import * as notificationService from "../services/notificationService";
 
 beforeEach(() => {
   jest.clearAllMocks();
+  // Default: user has no settings (all notifications enabled)
+  User.findByPk.mockResolvedValue({ settings: {} });
 });
 
 describe("generatePaymentReminders", () => {
@@ -113,6 +130,29 @@ describe("generatePaymentReminders", () => {
     expect(Notification.create).toHaveBeenCalledWith(
       expect.objectContaining({ source: "payment-1:2026-6" }),
     );
+  });
+
+  it("no debería crear recordatorios si el usuario desactivó los pagos en settings", async () => {
+    User.findByPk.mockResolvedValue({
+      settings: { notifications: { payments: false } },
+    });
+
+    const result = await notificationService.generatePaymentReminders(1, "2026-07-15");
+
+    expect(result).toHaveLength(0);
+    expect(Notification.create).not.toHaveBeenCalled();
+  });
+
+  it("debería crear recordatorios si el usuario no definió settings.notifications (default on)", async () => {
+    User.findByPk.mockResolvedValue({ settings: { theme: "dark" } });
+    Notification.findOne.mockResolvedValue(null);
+    const created = { id: 6, source: "payment-1:2026-7", title: "Pago de Quincena 1" };
+    Notification.create.mockResolvedValue(created);
+
+    const result = await notificationService.generatePaymentReminders(1, "2026-07-15");
+
+    expect(result).toHaveLength(1);
+    expect(Notification.create).toHaveBeenCalledTimes(1);
   });
 });
 

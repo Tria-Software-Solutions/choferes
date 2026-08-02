@@ -174,7 +174,7 @@ const EmployeeCard = memo(function EmployeeCard({
       <Box
         onClick={onClick}
         sx={{
-          display: "flex", alignItems: "center", gap: 0.75, px: 1, py: 0.85,
+          display: "flex", alignItems: "center", gap: { xs: 0.4, sm: 0.75 }, px: { xs: 0.6, sm: 1 }, py: { xs: 0.6, sm: 0.85 },
           borderRadius: "10px", cursor: "grab",
           backgroundColor: isDark ? "rgba(255,255,255,0.02)" : "rgba(0,0,0,0.015)",
           border: `1px dashed ${isDark ? "rgba(255,255,255,0.12)" : "rgba(0,0,0,0.10)"}`,
@@ -189,18 +189,21 @@ const EmployeeCard = memo(function EmployeeCard({
           "&:active": { transform: "scale(0.98)", cursor: "grabbing" },
         }}
       >
-        <DragIndicatorIcon sx={{ fontSize: 13, color: theme.palette.text.disabled, opacity: 0.35, flexShrink: 0 }} />          <Box sx={{
-          width: 24, height: 24, borderRadius: "50%",
+        <Box sx={{ display: { xs: "none", sm: "flex" }, alignItems: "center", flexShrink: 0 }}>
+          <DragIndicatorIcon sx={{ fontSize: 13, color: theme.palette.text.disabled, opacity: 0.35 }} />
+        </Box>
+        <Box sx={{
+          width: { xs: 20, sm: 24 }, height: { xs: 20, sm: 24 }, borderRadius: "50%",
           backgroundColor: empColor,
           color: "#fff",
           display: "flex", alignItems: "center", justifyContent: "center",
-          fontSize: "0.6rem", fontWeight: 700, flexShrink: 0,
+          fontSize: { xs: "0.52rem", sm: "0.6rem" }, fontWeight: 700, flexShrink: 0,
         }}>
           {initials}
         </Box>
         <Box sx={{ flex: 1, minWidth: 0 }}>
           <Typography sx={{
-            fontSize: "0.72rem", fontWeight: 600, color: theme.palette.text.primary,
+            fontSize: { xs: "0.68rem", sm: "0.72rem" }, fontWeight: 600, color: theme.palette.text.primary,
             lineHeight: 1.2, overflow: "hidden",
             display: "-webkit-box", WebkitBoxOrient: "vertical",
             WebkitLineClamp: { xs: 2, sm: 1 },
@@ -232,7 +235,7 @@ const EmployeeCard = memo(function EmployeeCard({
     <Box
       onClick={onClick}
       sx={{
-        display: "flex", alignItems: "center", gap: 0.5, px: 1, py: 0.85,
+        display: "flex", alignItems: "center", gap: { xs: 0.4, sm: 0.5 }, px: { xs: 0.6, sm: 1 }, py: { xs: 0.6, sm: 0.85 },
         borderRadius: "10px",
         backgroundColor: scheduleColor.bg,
         border: `1px solid ${scheduleColor.border}`,
@@ -262,17 +265,17 @@ const EmployeeCard = memo(function EmployeeCard({
       }}
     >
       {/* Drag handle */}
-      <Box sx={{ display: "flex", alignItems: "center", flexShrink: 0, color: scheduleColor.text, opacity: 0.3, ml: 0.25 }}>
+      <Box sx={{ display: { xs: "none", sm: "flex" }, alignItems: "center", flexShrink: 0, color: scheduleColor.text, opacity: 0.3, ml: 0.25 }}>
         <DragIndicatorIcon sx={{ fontSize: 13 }} />
       </Box>
 
       {/* Initials */}
       <Box sx={{
-        width: 24, height: 24, borderRadius: "50%",
+        width: { xs: 20, sm: 24 }, height: { xs: 20, sm: 24 }, borderRadius: "50%",
         backgroundColor: empColor,
         color: "#fff",
         display: "flex", alignItems: "center", justifyContent: "center",
-        fontSize: "0.6rem", fontWeight: 700, flexShrink: 0,
+        fontSize: { xs: "0.52rem", sm: "0.6rem" }, fontWeight: 700, flexShrink: 0,
       }}>
         {initials}
       </Box>
@@ -280,7 +283,7 @@ const EmployeeCard = memo(function EmployeeCard({
       {/* Name + label */}
       <Box sx={{ flex: 1, minWidth: 0 }}>
         <Typography sx={{
-          fontSize: "0.72rem", fontWeight: 600, color: theme.palette.text.primary,
+          fontSize: { xs: "0.68rem", sm: "0.72rem" }, fontWeight: 600, color: theme.palette.text.primary,
           lineHeight: 1.2, overflow: "hidden",
           display: "-webkit-box", WebkitBoxOrient: "vertical",
           WebkitLineClamp: { xs: 2, sm: 1 },
@@ -297,9 +300,9 @@ const EmployeeCard = memo(function EmployeeCard({
         </Typography>
       </Box>
 
-      {/* Info/adjust buttons (hover only) */}
+      {/* Info/adjust buttons (hover only on desktop, always visible on touch) */}
       <Box className="card-actions" sx={{
-        display: "flex", alignItems: "center", gap: 0.15, opacity: 0,
+        display: "flex", alignItems: "center", gap: 0.15, opacity: { xs: 1, sm: 0 },
         transition: "opacity 0.15s ease",
         flexShrink: 0,
       }}>
@@ -525,8 +528,8 @@ function DraggableTotalsRow({
       {...listeners}
       {...attributes}
       sx={{
-        display: "flex", alignItems: "center", gap: 0.75,
-        px: 1.25, py: 1.35, borderRadius: "12px",
+        display: "flex", alignItems: "center", gap: { xs: 0.5, sm: 0.75 },
+        px: { xs: 0.9, sm: 1.25 }, py: { xs: 1, sm: 1.35 }, borderRadius: "12px",
         backgroundColor: isDark ? "rgba(255,255,255,0.02)" : "rgba(0,0,0,0.01)",
         border: `1.5px dashed ${isDark ? "rgba(255,255,255,0.1)" : "rgba(0,0,0,0.08)"}`,
         cursor: "grab",
@@ -545,18 +548,18 @@ function DraggableTotalsRow({
       }}
     >
       {/* Drag handle */}
-      <Box sx={{ display: "flex", alignItems: "center", flexShrink: 0, color: theme.palette.text.disabled, opacity: 0.4 }}>
+      <Box sx={{ display: { xs: "none", sm: "flex" }, alignItems: "center", flexShrink: 0, color: theme.palette.text.disabled, opacity: 0.4 }}>
         <DragIndicatorIcon sx={{ fontSize: 15 }} />
       </Box>
 
       {/* Initials */}
       <Box sx={{
-        width: 28, height: 28, borderRadius: "50%",
+        width: { xs: 24, sm: 28 }, height: { xs: 24, sm: 28 }, borderRadius: "50%",
         backgroundColor: empColor, flexShrink: 0,
         display: "flex", alignItems: "center", justifyContent: "center",
         boxShadow: `0 2px 6px ${empColor}50`,
       }}>
-        <Typography sx={{ fontSize: "0.65rem", fontWeight: 700, color: "#fff", lineHeight: 1 }}>
+        <Typography sx={{ fontSize: { xs: "0.58rem", sm: "0.65rem" }, fontWeight: 700, color: "#fff", lineHeight: 1 }}>
           {initials}
         </Typography>
       </Box>
@@ -712,7 +715,7 @@ function DraggableSwimlaneCard({
       {...attributes}
       onClick={handleClick}
       sx={{
-        display: "flex", alignItems: "center", gap: 0.5, px: 1, py: 0.85,
+        display: "flex", alignItems: "center", gap: { xs: 0.4, sm: 0.5 }, px: { xs: 0.6, sm: 1 }, py: { xs: 0.6, sm: 0.85 },
         borderRadius: "10px",
         backgroundColor: scheduleColor.bg,
         border: `1px solid ${scheduleColor.border}`,
@@ -745,17 +748,17 @@ function DraggableSwimlaneCard({
       }}
     >
       {/* Drag handle */}
-      <Box sx={{ display: "flex", alignItems: "center", flexShrink: 0, color: scheduleColor.text, opacity: 0.3, ml: 0.25 }}>
+      <Box sx={{ display: { xs: "none", sm: "flex" }, alignItems: "center", flexShrink: 0, color: scheduleColor.text, opacity: 0.3, ml: 0.25 }}>
         <DragIndicatorIcon sx={{ fontSize: 13 }} />
       </Box>
 
       {/* Initials */}
       <Box sx={{
-        width: 24, height: 24, borderRadius: "50%",
+        width: { xs: 20, sm: 24 }, height: { xs: 20, sm: 24 }, borderRadius: "50%",
         backgroundColor: empColor,
         color: "#fff",
         display: "flex", alignItems: "center", justifyContent: "center",
-        fontSize: "0.6rem", fontWeight: 700, flexShrink: 0,
+        fontSize: { xs: "0.52rem", sm: "0.6rem" }, fontWeight: 700, flexShrink: 0,
       }}>
         {initials}
       </Box>
@@ -763,7 +766,7 @@ function DraggableSwimlaneCard({
       {/* Name + label */}
       <Box sx={{ flex: 1, minWidth: 0 }}>
         <Typography sx={{
-          fontSize: "0.72rem", fontWeight: 600, color: theme.palette.text.primary,
+          fontSize: { xs: "0.68rem", sm: "0.72rem" }, fontWeight: 600, color: theme.palette.text.primary,
           lineHeight: 1.2, overflow: "hidden",
           display: "-webkit-box", WebkitBoxOrient: "vertical",
           WebkitLineClamp: { xs: 2, sm: 1 },
@@ -772,9 +775,9 @@ function DraggableSwimlaneCard({
         </Typography>
       </Box>
 
-      {/* Info/adjust buttons (hover only) */}
+      {/* Info/adjust buttons (hover only on desktop, always visible on touch) */}
       <Box className="card-actions" sx={{
-        display: "flex", alignItems: "center", gap: 0.15, opacity: 0,
+        display: "flex", alignItems: "center", gap: 0.15, opacity: { xs: 1, sm: 0 },
         transition: "opacity 0.15s ease",
         flexShrink: 0,
       }}>
@@ -829,7 +832,6 @@ interface SwimlaneRowProps {
   handleCardClick: (employee: Employee, day: string, date: string) => (e: React.MouseEvent<HTMLElement>) => void;
   canEdit: boolean | undefined;
   isDark: boolean;
-  isDragging?: boolean;
   onInfoClick?: (employee: Employee) => void;
   onAdjustClick?: (employee: Employee) => void;
   onCellClick?: (schedule: Schedule, day: string, date: string, e: React.MouseEvent<HTMLElement>) => void;
@@ -838,7 +840,7 @@ interface SwimlaneRowProps {
 function SwimlaneRow({
   schedule, scheduleColor, currentWeek, filteredEmployees,
   getDaySchedule, selectedEmployeeIds, toggleEmployeeSelection,
-  handleCardClick, canEdit, isDark, isDragging,
+  handleCardClick, canEdit, isDark,
   onInfoClick, onAdjustClick, onCellClick,
 }: SwimlaneRowProps) {
   const theme = useTheme();
@@ -847,21 +849,20 @@ function SwimlaneRow({
     <Paper elevation={0} sx={{
       borderRadius: "12px",
       border: `1px solid ${isDark ? "rgba(255,255,255,0.05)" : "rgba(0,0,0,0.05)"}`,
-      overflow: "hidden", flexShrink: 0,
+      flexShrink: 0, width: "100%", minWidth: "max-content",
     }}>
       <Box sx={{
-        px: 1.5, py: 0.75, display: "flex", alignItems: "center", gap: 1,
+        px: { xs: 1, sm: 1.5 }, py: { xs: 0.5, sm: 0.75 }, display: "flex", alignItems: "center", gap: 1,
         backgroundColor: scheduleColor.bg,
         borderBottom: `1px solid ${scheduleColor.border}`,
+        borderRadius: "12px 12px 0 0",
       }}>
-        <Typography sx={{ fontWeight: 700, fontSize: "0.82rem", color: scheduleColor.text, flex: 1 }}>
+        <Typography sx={{ fontWeight: 700, fontSize: { xs: "0.75rem", sm: "0.82rem" }, color: scheduleColor.text, flex: 1 }}>
           {schedule.label}
         </Typography>
       </Box>
       <Box sx={{
-        display: "flex", gap: 0.5, px: 0.75, py: 0.75, overflowX: "auto",
-        scrollSnapType: { xs: isDragging ? "none" : "x mandatory", sm: "none" },
-        scrollPadding: { xs: "0 0.75rem", sm: 0 },
+        display: "flex", gap: { xs: 0.4, sm: 0.5 }, px: { xs: 0.5, sm: 0.75 }, py: 0.75,
       }}>
         {currentWeek.map(({ day, date, isoDate }) => {
           const todayDate = isToday(isoDate);
@@ -882,7 +883,7 @@ function SwimlaneRow({
               onClick={onCellClick && isDayAvailable ? (e) => onCellClick(schedule, day, date, e) : undefined}
             >
               <Box sx={{
-                px: 1.25, py: 0.85, textAlign: "center",
+                px: { xs: 0.75, sm: 1.25 }, py: { xs: 0.6, sm: 0.85 }, textAlign: "center",
                 borderBottom: `1px solid ${isDark ? "rgba(255,255,255,0.06)" : "rgba(0,0,0,0.06)"}`,
                 backgroundColor: todayDate
                   ? (isDark ? "rgba(56,189,248,0.1)" : "rgba(56,189,248,0.07)")
@@ -983,9 +984,10 @@ function SwimlaneDayCell({ columnId, day, date, isTodayDate, isWeekend, children
       onClick={onClick}
       sx={{
         flex: isWeekend ? 0.7 : 1,
-        minWidth: { xs: isWeekend ? 76 : 100, sm: isWeekend ? 90 : 120 },
+        minWidth: { xs: isWeekend ? 88 : 100, sm: isWeekend ? 110 : 140 },
+        maxWidth: { xs: isWeekend ? 104 : 124, sm: isWeekend ? 130 : 190 },
         scrollSnapAlign: "start",
-        p: 0.6,
+        p: { xs: 0.4, sm: 0.6 },
         borderRadius: "8px",
         cursor: onClick ? "pointer" : "default",
         backgroundColor: isTodayDate
@@ -1030,10 +1032,20 @@ function TotalsColumn({
   employeeDataMap, filteredEmployees, selectedPeriod, onPeriodChange,
   onInfoClick, onAdjustClick, handleAdjustTime: onAdjust, theme, isDark,
 }: TotalsColumnProps) {
+  const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
   const { setNodeRef, isOver } = useDroppable({
     id: "totals-column",
     data: { viewType: 'totals', day: '', date: '' } satisfies DropColumnData,
   });
+
+  const periodOptions = useMemo(() => isMobile
+    ? [
+        { value: "weekly" as PeriodType, label: "Sem", icon: <CalendarTodayIcon sx={{ fontSize: 13 }} /> },
+        { value: "biweekly" as PeriodType, label: "Qna", icon: <DateRangeIcon sx={{ fontSize: 13 }} /> },
+        { value: "monthly" as PeriodType, label: "Mes", icon: <CalendarMonthIcon sx={{ fontSize: 13 }} /> },
+      ]
+    : PERIOD_OPTIONS,
+  [isMobile]);
 
   const dropHighlight = isOver ? {
     borderColor: "#818cf8",
@@ -1107,13 +1119,16 @@ function TotalsColumn({
       ref={setNodeRef}
       sx={{
         flex: 0.6,
-        minWidth: { xs: 260, sm: 180 },
-        maxWidth: { xs: 285, sm: 240, md: 300 },
+        minWidth: { xs: 195, sm: 180 },
+        maxWidth: { xs: 215, sm: 240, md: 300 },
         scrollSnapAlign: "start",
         display: "flex", flexDirection: "column",
         borderRadius: "12px",
         overflow: "hidden",
-        position: "relative",
+        position: "sticky",
+        top: 0,
+        alignSelf: "flex-start",
+        height: "100%",
         backgroundColor: isDark ? "rgba(124,58,237,0.05)" : "rgba(124,58,237,0.03)",
         transition: "all 0.25s ease",
         ...dropHighlight,
@@ -1121,19 +1136,20 @@ function TotalsColumn({
     >
       {/* Header */}
       <Box sx={{
-        px: 1.5, py: 1.25, textAlign: "center",
+        px: { xs: 0.75, sm: 1.5 }, py: { xs: 0.75, sm: 1.25 }, textAlign: "center",
       }}>
         {/* Period toggle */}
         <SegmentedToggle
           value={selectedPeriod}
           onChange={onPeriodChange}
-          options={PERIOD_OPTIONS}
+          options={periodOptions}
           size="small"
+          fullWidth={isMobile}
         />
       </Box>
       {/* Employee rows — draggable to assign */}
       <Box sx={{
-        flex: 1, p: 0.75, display: "flex", flexDirection: "column", gap: 0.5,
+        flex: 1, p: { xs: 0.5, sm: 0.75 }, display: "flex", flexDirection: "column", gap: { xs: 0.4, sm: 0.5 },
         overflowY: "auto", minHeight: 80,
       }}>
         {filteredEmployees.map((employee) => {
@@ -1163,7 +1179,7 @@ function TotalsColumn({
                     title="Ajustar horas"
                     sx={{
                       display: "flex", alignItems: "center", justifyContent: "center",
-                      width: 28, height: 28, borderRadius: "7px", cursor: "pointer",
+                      width: { xs: 24, sm: 28 }, height: { xs: 24, sm: 28 }, borderRadius: "7px", cursor: "pointer",
                       fontSize: "1rem", fontWeight: 700, lineHeight: 1,
                       color: "text.secondary",
                       transition: "all 0.15s ease",
@@ -1178,7 +1194,7 @@ function TotalsColumn({
       </Box>
       {/* Footer - total */}
       <Box sx={{
-        px: 1.5, py: 0.75, textAlign: "center",
+        px: { xs: 0.75, sm: 1.5 }, py: { xs: 0.5, sm: 0.75 }, textAlign: "center",
         backgroundColor: isDark ? "rgba(139,92,246,0.06)" : "rgba(139,92,246,0.03)",
       }}>
         {hasPeriodBreakdown && (
@@ -1424,8 +1440,8 @@ const DayColumn = memo(function DayColumn({
       onClick={(e) => onColumnClick?.(day, date, e)}
       sx={{
         flex: isWeekend ? 0.7 : 1,
-        minWidth: { xs: isWeekend ? 96 : 112, sm: isWeekend ? 110 : 140 },
-        maxWidth: { xs: isWeekend ? 120 : 160, sm: isWeekend ? 130 : 190 },
+        minWidth: { xs: isWeekend ? 88 : 100, sm: isWeekend ? 110 : 140 },
+        maxWidth: { xs: isWeekend ? 104 : 124, sm: isWeekend ? 130 : 190 },
         scrollSnapAlign: "start",
         display: "flex", flexDirection: "column",
         cursor: onColumnClick ? "pointer" : "default",
@@ -1444,7 +1460,7 @@ const DayColumn = memo(function DayColumn({
     }}>
       {/* Day header */}
       <Box data-anchor-id={`anchor-${columnId}`} sx={{
-        px: 1.25, py: 0.85, textAlign: "center",
+        px: { xs: 0.75, sm: 1.25 }, py: { xs: 0.6, sm: 0.85 }, textAlign: "center",
         borderBottom: `1px solid ${isDark ? "rgba(255,255,255,0.06)" : "rgba(0,0,0,0.06)"}`,
         backgroundColor: isTodayDate
           ? (isDark ? "rgba(56,189,248,0.1)" : "rgba(56,189,248,0.07)")
@@ -1478,7 +1494,7 @@ const DayColumn = memo(function DayColumn({
 
       {/* Cards area */}
       <Box sx={{
-        flex: 1, p: 0.6, display: "flex", flexDirection: "column", gap: 0.5,
+        flex: 1, p: { xs: 0.4, sm: 0.6 }, display: "flex", flexDirection: "column", gap: { xs: 0.4, sm: 0.5 },
         overflowY: "auto", minHeight: 80,
       }}>
         {employees.length === 0 ? (
@@ -1504,7 +1520,7 @@ const DayColumn = memo(function DayColumn({
 
       {/* Column footer — total */}
       <Box sx={{
-        px: 1.25, py: 0.55,
+        px: { xs: 0.75, sm: 1.25 }, py: { xs: 0.45, sm: 0.55 },
         borderTop: `1px solid ${isDark ? "rgba(255,255,255,0.06)" : "rgba(0,0,0,0.06)"}`,
         textAlign: "center",
         backgroundColor: isTodayDate
@@ -1548,7 +1564,7 @@ const WeeklyBoard: React.FC<WeeklyBoardProps> = ({
     day: string;
     date: string;
     scheduleLabel?: string;
-    anchorEl: HTMLElement;
+    anchor: { top: number; left: number };
   } | null>(null);
 
   // ─── Multi-select state ───
@@ -1838,12 +1854,15 @@ const WeeklyBoard: React.FC<WeeklyBoardProps> = ({
     view: "employee" | "schedule",
     day: string,
     date: string,
-    anchorEl: HTMLElement,
+    e: React.MouseEvent<HTMLElement>,
     scheduleLabel?: string,
   ) => {
     if (!canEdit) return;
     setPopoverAnchor(null);
-    setQuickAssign({ view, day, date, scheduleLabel, anchorEl });
+    // Keep the popover inside the viewport when anchored near the edges
+    const left = Math.min(e.clientX, window.innerWidth - 260);
+    const top = Math.min(e.clientY, window.innerHeight - 340);
+    setQuickAssign({ view, day, date, scheduleLabel, anchor: { top, left } });
   }, [canEdit]);
 
   const handleQuickAssignConfirm = useCallback((employeeId: number, scheduleLabel: string) => {
@@ -1913,15 +1932,16 @@ const WeeklyBoard: React.FC<WeeklyBoardProps> = ({
 
       {/* ─── Board ─── */}
       <Box sx={{
-        flex: 1, overflowX: "auto", overflowY: "hidden",
-        px: { xs: 0.75, sm: 1.25 }, py: 1.25,
-        // Scroll-snap on mobile: each day column / totals lands cleanly on swipe
-        scrollSnapType: { xs: activeDragItem ? "none" : "x mandatory", sm: "none" },
+        flex: 1, overflowX: "auto", overflowY: "auto",
+        px: { xs: 0.75, sm: 1.25 }, py: { xs: 0.75, sm: 1.25 },
+        // Scroll-snap only in employee view on mobile: each day column / totals lands cleanly on swipe
+        // (schedule view uses free scrolling — mandatory snap made it bounce back)
+        scrollSnapType: { xs: viewMode === "employee" && !activeDragItem ? "x mandatory" : "none", sm: "none" },
         scrollPadding: { xs: "0 0.75rem", sm: 0 },
       }}>
         <DndContext sensors={sensors} onDragStart={handleDragStart} onDragEnd={handleDragEnd}>
           {viewMode === "employee" ? (
-            <Box sx={{ display: "flex", gap: 1, height: "100%", minHeight: 350 }}>
+            <Box sx={{ display: "flex", gap: { xs: 0.6, sm: 1 }, height: "100%", minHeight: 350 }}>
               {currentWeek.map(({ day, date, isoDate }) => {
                 const todayDate = isToday(isoDate);
                 const isWeekend = day === "saturday" || day === "sunday";
@@ -1945,7 +1965,7 @@ const WeeklyBoard: React.FC<WeeklyBoardProps> = ({
                     employees={dayEmployees}
                     totalHours={dayEmployees.reduce((sum, e) => sum + e.hours, 0)}
                     onEmployeeClick={(emp, event) => handleCardClick(emp, day, date)(event)}
-                    onColumnClick={canEdit ? (d, dt, e) => handleOpenQuickAssign("employee", d, dt, e.currentTarget) : undefined}
+                    onColumnClick={canEdit ? (d, dt, e) => handleOpenQuickAssign("employee", d, dt, e) : undefined}
                     onInfoClick={showHours ? onInfoClick : undefined}
                     onAdjustClick={showHours ? onAdjustClick : undefined}
                     theme={theme}
@@ -1966,8 +1986,16 @@ const WeeklyBoard: React.FC<WeeklyBoardProps> = ({
             </Box>
           ) : (
             /* ─── Schedule view (swimlanes) with drag & drop + totals column ─── */
-            <Box sx={{ display: "flex", gap: 1, height: "100%", minHeight: 350 }}>
-              <Box sx={{ display: "flex", flexDirection: "column", gap: 1.25, height: "100%", overflowY: "auto", flex: 1 }}>
+            <Box sx={{ display: "flex", gap: { xs: 0.6, sm: 1 }, height: "100%", minHeight: 350 }}>
+              <Box sx={{
+              display: "flex", flexDirection: "column", gap: 1.25,
+              // Mobile/tablet: keep the original max-content behavior so all swimlane
+              // rows + totals column scroll together horizontally.
+              // Desktop (md+): stretch to fill the available width.
+              width: { xs: "max-content", md: "auto" },
+              flex: { xs: "0 0 auto", md: 1 },
+              minWidth: { xs: "auto", md: 0 },
+            }}>
                 {schedules.map((schedule) => {
                   const scheduleColor = scheduleColorMap.get(schedule.label) ?? SCHEDULE_COLORS[0];
                   return (
@@ -1983,10 +2011,9 @@ const WeeklyBoard: React.FC<WeeklyBoardProps> = ({
                       handleCardClick={handleCardClick}
                       canEdit={canEdit}
                       isDark={isDark}
-                      isDragging={activeDragItem !== null}
                       onInfoClick={onInfoClick}
                       onAdjustClick={onAdjustClick}
-                      onCellClick={canEdit ? (sched, d, dt, e) => handleOpenQuickAssign("schedule", d, dt, e.currentTarget, sched.label) : undefined}
+                      onCellClick={canEdit ? (sched, d, dt, e) => handleOpenQuickAssign("schedule", d, dt, e, sched.label) : undefined}
                     />
                   );
                 })}
@@ -2148,7 +2175,7 @@ const WeeklyBoard: React.FC<WeeklyBoardProps> = ({
       {/* ─── Quick-assign popover (click on day column / swimlane cell) ─── */}
       <QuickAssignPopover
         open={!!quickAssign}
-        anchorEl={quickAssign?.anchorEl ?? null}
+        anchorPosition={quickAssign?.anchor ?? undefined}
         onClose={() => setQuickAssign(null)}
         view={quickAssign?.view ?? "employee"}
         day={quickAssign?.day ?? ""}

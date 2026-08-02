@@ -335,7 +335,7 @@ const EmployeesPage: React.FC = () => {
         field: "firstName",
         headerName: "Nombre",
         flex: 1.6,
-        minWidth: 260,
+        minWidth: isSmallScreen ? 150 : 260,
         sortable: true,
         renderCell: (params) => {
           const rowId = Number(params.id);
@@ -421,7 +421,7 @@ const EmployeesPage: React.FC = () => {
         field: "email",
         headerName: "Email",
         flex: 1.4,
-        minWidth: 220,
+        minWidth: isSmallScreen ? 140 : 220,
         sortable: true,
         renderCell: (params) => {
           const rowId = Number(params.id);

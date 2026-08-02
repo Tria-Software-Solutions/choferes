@@ -57,8 +57,12 @@ function StickyDataGridComponent<T extends GridValidRowModel>({
           "--DataGrid-rowBorderColor": "transparent",
           "--DataGrid-containerBackground": "transparent",
           // ── Header moderno ──
-          // Gradiente con brillo superior + sombra de profundidad que aparece al scrollear
+          // Gradiente con brillo superior + sombra de profundidad que aparece al scrollear.
+          // minWidth: sin esto el fondo del header solo cubre el viewport y, al hacer scroll
+          // horizontal en mobile, los headers de las columnas de la derecha quedan sin fondo
+          // (el header se ve "cortado"). rowWidth = max(viewport, ancho total de columnas).
           "& .MuiDataGrid-topContainer": {
+            minWidth: "var(--DataGrid-rowWidth)",
             borderRadius: 0,
             borderBottom: "none",
             background: isDark
@@ -155,6 +159,32 @@ function StickyDataGridComponent<T extends GridValidRowModel>({
           "& .MuiDataGrid-scrollbarFiller": { borderRadius: 0, background: "transparent" },
           "& .MuiDataGrid-virtualScroller": { outline: "none", borderRadius: 0 },
           "& .MuiDataGrid-overlay": { display: "none" },
+          // ── Scrollbars visibles ──
+          // MUI v7 oculta los scrollbars nativos y usa scrollbars "fake" flotantes;
+          // sin estilos explícitos quedan casi invisibles en macOS/iOS y el contenido
+          // cortado (header incluido) no se ve scrollable en mobile.
+          "& .MuiDataGrid-scrollbar--horizontal": {
+            height: 14,
+            backgroundColor: isDark ? "rgba(255,255,255,0.04)" : "rgba(0,0,0,0.04)",
+            borderTop: `1px solid ${isDark ? "rgba(255,255,255,0.08)" : "rgba(0,0,0,0.08)"}`,
+            zIndex: 70,
+          },
+          "& .MuiDataGrid-scrollbar--horizontal > div": {
+            backgroundColor: isDark ? "rgba(255,255,255,0.35)" : "rgba(0,0,0,0.35)",
+            borderRadius: "7px",
+            opacity: 0.9,
+          },
+          "& .MuiDataGrid-scrollbar--vertical": {
+            width: 14,
+            backgroundColor: isDark ? "rgba(255,255,255,0.04)" : "rgba(0,0,0,0.04)",
+            borderLeft: `1px solid ${isDark ? "rgba(255,255,255,0.08)" : "rgba(0,0,0,0.08)"}`,
+            zIndex: 70,
+          },
+          "& .MuiDataGrid-scrollbar--vertical > div": {
+            backgroundColor: isDark ? "rgba(255,255,255,0.35)" : "rgba(0,0,0,0.35)",
+            borderRadius: "7px",
+            opacity: 0.9,
+          },
         }}
       />
     </Box>

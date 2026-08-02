@@ -11,6 +11,10 @@ import {
   generatePaymentRemindersInApi,
 } from "../services/notificationService";
 import { useAuthContext } from "./AuthContext";
+import {
+  getNotificationSettings,
+  notificationSourceToSettingKey,
+} from "../constants/notificationSettings.constants";
 
 interface NotificationContextType {
   notifications: Notification[];
@@ -38,6 +42,18 @@ export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({ 
   const [filters, setFilters] = useState<NotificationFilters>({});
   const [isLoading, setIsLoading] = useState(false);
 
+  // Whether a notification type is enabled for this user (defaults to enabled).
+  const isNotificationEnabled = useCallback(
+    (source?: string) => {
+      if (!currentUser) return true;
+      const settings = getNotificationSettings(currentUser.settings);
+      const key = notificationSourceToSettingKey(source);
+      if (!key) return true;
+      return settings[key];
+    },
+    [currentUser],
+  );
+
   // Sync notifications from the database whenever the logged-in user changes.
   // Also generates payment reminders (15th / last day of month) on open.
   useEffect(() => {
@@ -56,7 +72,7 @@ export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({ 
         await generatePaymentRemindersInApi();
         const data = await fetchNotificationsFromApi();
         if (!cancelled) {
-          setNotifications(data);
+          setNotifications(data.filter((n) => isNotificationEnabled(n.source)));
         }
       } catch (error) {
         // Keep previous notifications on failure (offline / API down)
@@ -74,7 +90,7 @@ export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({ 
     return () => {
       cancelled = true;
     };
-  }, [currentUser?.id]);
+  }, [currentUser?.id, isNotificationEnabled]);
 
   // Get unread count
   const unreadCount = useMemo(() => {
@@ -141,6 +157,10 @@ export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({ 
   // Add new notification (optimistic local + persist to DB, then reconcile the id)
   const addNotification = useCallback(
     (notification: Omit<Notification, "id" | "timestamp" | "read">) => {
+      // Skip if this notification type is disabled in the user's settings
+      if (!isNotificationEnabled(notification.source)) {
+        return;
+      }
       const tempId = `temp-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`;
       const newNotification: Notification = {
         ...notification,
@@ -163,7 +183,7 @@ export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({ 
           });
       }
     },
-    [currentUser?.id],
+    [currentUser?.id, isNotificationEnabled],
   );
 
   // Update filters

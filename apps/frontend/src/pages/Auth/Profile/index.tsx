@@ -54,7 +54,7 @@ import {
   CircularProgress,
 } from "@mui/material";
 import { Pencil, Camera, X, Loader2, Bell, ShieldCheck, HelpCircle, Blocks, Sun, Moon, Monitor, Check } from "lucide-react";
-import NotificationsTab from "./NotificationsTab";
+import NotificationSettingsTab from "./NotificationSettingsTab";
 import SessionsTab from "./SessionsTab";
 import HelpCenterTab from "./HelpCenterTab";
 import QuickAccessTab from "./QuickAccessTab";
@@ -734,6 +734,15 @@ const Profile: React.FC = () => {
               pt: 0.5,
               px: 0.5,
               mb: 1,
+              // Keep pills accessible while scrolling content on small screens
+              position: "sticky",
+              top: 0,
+              zIndex: 10,
+              backgroundColor: theme.palette.background.default,
+              backdropFilter: "blur(10px)",
+              borderBottom: `1px solid ${
+                theme.palette.mode === "dark" ? "rgba(255,255,255,0.08)" : "rgba(0,0,0,0.08)"
+              }`,
               scrollSnapType: "x mandatory",
               "&::-webkit-scrollbar": {
                 height: "4px",
@@ -1257,7 +1266,7 @@ const Profile: React.FC = () => {
                 <Box
                   sx={{
                     width: "100%",
-                    height: 260,
+                    height: { xs: 180, sm: 260 },
                     borderRadius: "14px",
                     border: `1.5px solid ${
                       theme.palette.mode === "dark" ? "rgba(255,255,255,0.08)" : "rgba(0,0,0,0.08)"
@@ -1308,7 +1317,7 @@ const Profile: React.FC = () => {
 
           {activeTab === "notifications" && (
             <Box sx={{ flex: 1, minHeight: 0, display: "flex", flexDirection: "column" }}>
-              <NotificationsTab />
+              <NotificationSettingsTab />
             </Box>
           )}
 

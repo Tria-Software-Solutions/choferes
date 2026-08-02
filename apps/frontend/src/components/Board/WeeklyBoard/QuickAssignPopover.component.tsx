@@ -20,7 +20,7 @@ import { SELECTOR_TABLE } from "../../../constants/constants";
 
 interface QuickAssignPopoverProps {
   open: boolean;
-  anchorEl: HTMLElement | null;
+  anchorPosition?: { top: number; left: number };
   onClose: () => void;
   view: "employee" | "schedule";
   day: string;
@@ -42,7 +42,7 @@ interface QuickAssignPopoverProps {
  * - view === "schedule": one dropdown — employee (schedule is fixed by the cell)
  */
 const QuickAssignPopover: React.FC<QuickAssignPopoverProps> = ({
-  open, anchorEl, onClose, view, day, date, schedules, employees,
+  open, anchorPosition, onClose, view, day, date, schedules, employees,
   fixedScheduleLabel, isDark, theme, onAssign,
 }) => {
   const [selectedEmployeeId, setSelectedEmployeeId] = useState<number | null>(null);
@@ -116,7 +116,8 @@ const QuickAssignPopover: React.FC<QuickAssignPopoverProps> = ({
   return (
     <Popover
       open={open}
-      anchorEl={anchorEl}
+      anchorReference="anchorPosition"
+      anchorPosition={anchorPosition}
       onClose={onClose}
       anchorOrigin={{ vertical: "bottom", horizontal: "center" }}
       transformOrigin={{ vertical: "top", horizontal: "center" }}
