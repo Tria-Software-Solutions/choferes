@@ -12,6 +12,8 @@ import {
   Button,
   Grid,
   IconButton,
+  Tab,
+  Tabs,
   Typography,
   useTheme,
   useMediaQuery,
@@ -526,7 +528,7 @@ const Profile: React.FC = () => {
           <Paper
             elevation={0}
             sx={{
-              width: 270,
+              width: { md: 240, lg: 270 },
               flexShrink: 0,
               borderRadius: "16px",
               border: `1px solid ${
@@ -669,18 +671,14 @@ const Profile: React.FC = () => {
                         const isActive = activeTab === item.id;
                         const bg = isActive
                           ? theme.palette.mode === "dark"
-                            ? "rgba(139,92,246,0.15)"
-                            : "rgba(139,92,246,0.1)"
+                            ? "rgba(255,255,255,0.1)"
+                            : "rgba(0,0,0,0.06)"
                           : "transparent";
                         const textColor = isActive
-                          ? theme.palette.mode === "dark"
-                            ? "#a78bfa"
-                            : "#7c3aed"
+                          ? theme.palette.primary.main
                           : theme.palette.text.secondary;
                         const iconColor = isActive
-                          ? theme.palette.mode === "dark"
-                            ? "#a78bfa"
-                            : "#7c3aed"
+                          ? theme.palette.primary.main
                           : theme.palette.text.secondary;
                         return (
                           <Button
@@ -724,17 +722,14 @@ const Profile: React.FC = () => {
             </Box>
           </Paper>
         ) : (
-          /* Scrollable pills for Mobile / Tablet */
+          /* Scrollable Tab Bar for Mobile / Tablet */
           <Box
             sx={{
               display: "flex",
-              overflowX: "auto",
-              gap: 1.25,
               pb: 1.5,
               pt: 0.5,
-              px: 0.5,
               mb: 1,
-              // Keep pills accessible while scrolling content on small screens
+              // Keep tabs accessible while scrolling content on small screens
               position: "sticky",
               top: 0,
               zIndex: 10,
@@ -743,48 +738,76 @@ const Profile: React.FC = () => {
               borderBottom: `1px solid ${
                 theme.palette.mode === "dark" ? "rgba(255,255,255,0.08)" : "rgba(0,0,0,0.08)"
               }`,
-              scrollSnapType: "x mandatory",
-              "&::-webkit-scrollbar": {
-                height: "4px",
-              },
-              "&::-webkit-scrollbar-thumb": {
-                backgroundColor: theme.palette.mode === "dark" ? "rgba(255,255,255,0.15)" : "rgba(0,0,0,0.12)",
-                borderRadius: "2px",
-              },
             }}
           >
-            {sidebarItems.map((item) => {
-              const Icon = item.icon;
-              const isActive = activeTab === item.id;
-              return (
-                <Button
-                  key={item.id}
-                  variant={isActive ? "contained" : "outlined"}
-                  onClick={() => setActiveTab(item.id as TabId)}
-                  startIcon={<Icon size={16} />}
-                  sx={{
-                    borderRadius: "20px",
-                    px: 2.5,
-                    py: 1,
-                    whiteSpace: "nowrap",
-                    textTransform: "none",
-                    fontWeight: 600,
-                    fontSize: "0.85rem",
-                    flexShrink: 0,
-                    scrollSnapAlign: "start",
-                    boxShadow: "none !important",
-                    border: isActive ? "none" : undefined,
-                    borderColor: isActive ? "transparent" : theme.palette.mode === "dark" ? "rgba(255,255,255,0.2)" : "rgba(0,0,0,0.15)",
-                    color: isActive ? theme.palette.primary.contrastText : theme.palette.text.primary,
-                    "&:hover": {
-                      boxShadow: "none !important",
-                    },
-                  }}
-                >
-                  {item.label}
-                </Button>
-              );
-            })}
+            <Tabs
+              value={activeTab}
+              onChange={(_event, value) => setActiveTab(value as TabId)}
+              variant="scrollable"
+              scrollButtons={false}
+              sx={{
+                width: "100%",
+                minHeight: 44,
+                "& .MuiTabs-flexContainer": {
+                  gap: 0.5,
+                },
+                "& .MuiTabs-indicator": {
+                  height: 3,
+                  borderRadius: "3px 3px 0 0",
+                  backgroundColor: theme.palette.primary.main,
+                },
+                "&::-webkit-scrollbar": {
+                  height: "4px",
+                },
+                "&::-webkit-scrollbar-thumb": {
+                  backgroundColor: theme.palette.mode === "dark" ? "rgba(255,255,255,0.15)" : "rgba(0,0,0,0.12)",
+                  borderRadius: "2px",
+                },
+              }}
+            >
+              {sidebarItems.map((item) => {
+                const Icon = item.icon;
+                const isActive = activeTab === item.id;
+                return (
+                  <Tab
+                    key={item.id}
+                    value={item.id}
+                    label={item.label}
+                    icon={<Icon size={17} />}
+                    iconPosition="start"
+                    disableRipple
+                    sx={{
+                      textTransform: "none",
+                      fontWeight: isActive ? 700 : 600,
+                      fontSize: "0.85rem",
+                      minHeight: 44,
+                      minWidth: "fit-content",
+                      px: 1.5,
+                      borderRadius: "10px 10px 0 0",
+                      color: isActive
+                        ? theme.palette.primary.main
+                        : theme.palette.text.secondary,
+                      backgroundColor: isActive
+                        ? theme.palette.mode === "dark"
+                          ? "rgba(255,255,255,0.06)"
+                          : "rgba(0,0,0,0.04)"
+                        : "transparent",
+                      transition: "all 0.15s ease",
+                      "&:hover": {
+                        color: theme.palette.text.primary,
+                        backgroundColor: isActive
+                          ? theme.palette.mode === "dark"
+                            ? "rgba(255,255,255,0.06)"
+                            : "rgba(0,0,0,0.04)"
+                          : theme.palette.mode === "dark"
+                            ? "rgba(255,255,255,0.03)"
+                            : "rgba(0,0,0,0.02)",
+                      },
+                    }}
+                  />
+                );
+              })}
+            </Tabs>
           </Box>
         )}
 
@@ -804,6 +827,7 @@ const Profile: React.FC = () => {
                 display: "flex",
                 flexDirection: "column",
                 height: { xs: "auto", md: "100%" },
+                minHeight: { xs: "calc(100dvh - 240px)", md: 0 },
                 mb: 0,
               }}
             >
@@ -946,6 +970,7 @@ const Profile: React.FC = () => {
                 display: "flex",
                 flexDirection: "column",
                 height: { xs: "auto", md: "100%" },
+                minHeight: { xs: "calc(100dvh - 240px)", md: 0 },
                 mb: 0,
               }}
             >
@@ -1115,12 +1140,9 @@ const Profile: React.FC = () => {
                                 ? {
                                     backgroundColor:
                                       theme.palette.mode === "dark"
-                                        ? "rgba(139,92,246,0.1)"
-                                        : "rgba(139,92,246,0.08)",
-                                    color:
-                                      theme.palette.mode === "dark"
-                                        ? "#a78bfa"
-                                        : "#7c3aed",
+                                        ? "rgba(255,255,255,0.08)"
+                                        : "rgba(0,0,0,0.05)",
+                                    color: theme.palette.primary.main,
                                   }
                                 : {
                                     backgroundColor: "transparent",
@@ -1210,6 +1232,7 @@ const Profile: React.FC = () => {
                 display: "flex",
                 flexDirection: "column",
                 height: { xs: "auto", md: "100%" },
+                minHeight: { xs: "calc(100dvh - 240px)", md: 0 },
                 mb: 0,
               }}
             >
@@ -1252,6 +1275,7 @@ const Profile: React.FC = () => {
                 <SegmentedToggle
                   value={mode}
                   onChange={(value) => setMode(value as ThemeMode)}
+                  fullWidth={isSmallScreen}
                   options={[
                     { value: "default" as ThemeMode, label: "Sistema", icon: <Monitor size={15} /> },
                     { value: "light" as ThemeMode, label: "Claro", icon: <Sun size={15} /> },

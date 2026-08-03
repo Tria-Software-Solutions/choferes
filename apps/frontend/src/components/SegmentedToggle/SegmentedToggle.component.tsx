@@ -17,7 +17,7 @@ interface SegmentedToggleProps<T extends string> {
 }
 
 // SegmentedToggle renders a pill-style segmented control (e.g. Semanal / Quincenal / Mensual)
-// with a purple-tinted active state, used consistently across all pages.
+// with a neutral theme-based active state, used consistently across all pages.
 export default function SegmentedToggle<T extends string>({
   options,
   value,
@@ -32,10 +32,12 @@ export default function SegmentedToggle<T extends string>({
     display: "flex",
     gap: 0.3,
     justifyContent: "center",
-    backgroundColor: isDark ? "rgba(0,0,0,0.2)" : "rgba(255,255,255,0.5)",
+    backgroundColor: isDark ? "rgba(255,255,255,0.06)" : "rgba(0,0,0,0.05)",
     borderRadius: "10px",
     p: 0.35,
     width: fullWidth ? "100%" : "fit-content",
+    maxWidth: "100%",
+    overflowX: "auto",
   };
 
   const itemSx = (active: boolean) => ({
@@ -51,15 +53,11 @@ export default function SegmentedToggle<T extends string>({
     justifyContent: "center",
     fontSize: size === "medium" ? { xs: "0.7rem", sm: "0.8rem" } : "0.7rem",
     fontWeight: active ? 700 : 500,
-    color: active
-      ? isDark
-        ? "#a78bfa"
-        : "#7c3aed"
-      : theme.palette.text.secondary,
+    color: active ? theme.palette.primary.main : theme.palette.text.secondary,
     backgroundColor: active
       ? isDark
-        ? "rgba(139,92,246,0.15)"
-        : "rgba(139,92,246,0.1)"
+        ? "rgba(255,255,255,0.14)"
+        : "rgba(0,0,0,0.08)"
       : "transparent",
     transition: "all 0.15s ease",
     whiteSpace: "nowrap",
@@ -109,15 +107,13 @@ export default function SegmentedToggle<T extends string>({
                   lineHeight: 1,
                   backgroundColor: active
                     ? isDark
-                      ? "rgba(139,92,246,0.3)"
-                      : "rgba(124,58,237,0.12)"
+                      ? "rgba(255,255,255,0.2)"
+                      : "rgba(0,0,0,0.12)"
                     : isDark
                       ? "rgba(255,255,255,0.08)"
                       : "rgba(0,0,0,0.06)",
                   color: active
-                    ? isDark
-                      ? "#a78bfa"
-                      : "#7c3aed"
+                    ? theme.palette.primary.main
                     : theme.palette.text.secondary,
                 }}
               >

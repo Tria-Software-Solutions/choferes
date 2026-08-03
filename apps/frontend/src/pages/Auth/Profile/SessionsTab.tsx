@@ -68,7 +68,7 @@ const SessionsTab: React.FC = () => {
         display: "flex",
         flexDirection: "column",
         height: { xs: "auto", md: "100%" },
-        minHeight: 0,
+        minHeight: { xs: "calc(100dvh - 240px)", md: 0 },
         overflow: "auto",
       }}
     >

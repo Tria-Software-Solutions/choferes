@@ -1,10 +1,10 @@
 import { SxProps, Theme } from "@mui/material";
+import { SystemStyleObject } from "@mui/system";
 import { CSSProperties } from "react";
 
 export const appBarStyles: SxProps<Theme> = {
-  background: "linear-gradient(135deg, #000000 0%, #1a1a1a 100%)",
+  background: "#000000",
   borderBottom: "1px solid rgba(255,255,255,0.1)",
-  backdropFilter: "blur(10px)",
   top: 0,
   zIndex: 1100,
 };
@@ -156,13 +156,13 @@ export const userMenuIconButtonStyles: SxProps<Theme> = {
 export const userAvatarStyles: SxProps<Theme> = (theme) => ({
   width: 44,
   height: 44,
-  background: "linear-gradient(135deg, rgba(255,255,255,0.15) 0%, rgba(255,255,255,0.05) 100%)",
+  background: theme.palette.mode === "dark" ? "#3a3a3f" : "#1a1a1a",
   color: "#ffffff",
   fontWeight: 600,
   fontSize: "0.9rem",
   border: "1.5px solid rgba(255,255,255,0.25)",
   borderRadius: "50%",
-  boxShadow: "0 4px 20px rgba(0,0,0,0.3), inset 0 1px 0 rgba(255,255,255,0.2)",
+  boxShadow: "0 4px 20px rgba(0,0,0,0.3)",
 });
 
 export const mobileDividerStyles: SxProps<Theme> = {
@@ -191,3 +191,64 @@ export const dashboardNoLinksBoxStyles: SxProps<Theme> = {
   color: "white",
   p: 1,
 };
+
+// ─── User menu (avatar dropdown: profile header + actions) ───
+
+export const userMenuPaperStyles = (theme: Theme): SystemStyleObject<Theme> => ({
+  mt: 0.5,
+  minWidth: 230,
+  backgroundColor: theme.palette.mode === "dark" ? "#1e1e23" : "#ffffff",
+  border: `1px solid ${
+    theme.palette.mode === "dark" ? "rgba(255,255,255,0.08)" : "rgba(0,0,0,0.06)"
+  }`,
+  borderRadius: "14px",
+  boxShadow:
+    theme.palette.mode === "dark"
+      ? "0 12px 40px rgba(0,0,0,0.5), 0 2px 8px rgba(0,0,0,0.3)"
+      : "0 12px 40px rgba(0,0,0,0.12), 0 2px 8px rgba(0,0,0,0.06)",
+  overflow: "hidden",
+  padding: 0,
+});
+
+export const userMenuDividerStyles = (theme: Theme): SystemStyleObject<Theme> => ({
+  my: 0.5,
+  mx: 1,
+  borderColor:
+    theme.palette.mode === "dark" ? "rgba(255,255,255,0.07)" : "rgba(0,0,0,0.06)",
+});
+
+export const userMenuItemStyles = (theme: Theme, isLogout: boolean): SystemStyleObject<Theme> => ({
+  display: "flex",
+  alignItems: "center",
+  gap: 1.25,
+  px: 1.25,
+  py: 0.85,
+  mx: 0.75,
+  my: 0.25,
+  borderRadius: "10px",
+  transition: "all 0.15s ease",
+  color: isLogout ? theme.palette.error.main : theme.palette.text.primary,
+  "&:hover": {
+    backgroundColor: isLogout
+      ? `${theme.palette.error.main}14`
+      : theme.palette.mode === "dark"
+        ? "rgba(255,255,255,0.06)"
+        : "rgba(0,0,0,0.04)",
+  },
+});
+
+export const userMenuIconChipStyles = (theme: Theme, isLogout: boolean): SystemStyleObject<Theme> => ({
+  width: 32,
+  height: 32,
+  borderRadius: "9px",
+  flexShrink: 0,
+  display: "flex",
+  alignItems: "center",
+  justifyContent: "center",
+  backgroundColor: isLogout
+    ? `${theme.palette.error.main}14`
+    : theme.palette.mode === "dark"
+      ? "rgba(255,255,255,0.07)"
+      : "rgba(0,0,0,0.05)",
+  color: isLogout ? theme.palette.error.main : theme.palette.primary.main,
+});

@@ -5,16 +5,16 @@ export const dockContainerStyles: SxProps<Theme> = (theme) => ({
   flexDirection: 'column',
   alignItems: 'center',
   gap: 0,
-  px: 1,
+  px: { xs: 0.75, sm: 1 },
   py: 1.75,
-  borderRadius: '16px',
-  backgroundColor: theme.palette.mode === 'dark'
-    ? 'rgba(24, 24, 30, 0.92)'
-    : 'rgba(255, 255, 255, 0.85)',
-  backdropFilter: 'blur(24px) saturate(1.4)',
+  borderRadius: '14px',
+  backgroundColor: theme.palette.mode === 'dark' ? '#1e1e23' : '#ffffff',
+  border: `1px solid ${
+    theme.palette.mode === 'dark' ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.06)'
+  }`,
   boxShadow: theme.palette.mode === 'dark'
-    ? '0 8px 32px rgba(0,0,0,0.5), 0 1px 2px rgba(0,0,0,0.3)'
-    : '0 8px 32px rgba(0,0,0,0.12), 0 1px 2px rgba(0,0,0,0.05)',
+    ? '0 12px 40px rgba(0,0,0,0.5), 0 2px 8px rgba(0,0,0,0.3)'
+    : '0 12px 40px rgba(0,0,0,0.1), 0 2px 8px rgba(0,0,0,0.05)',
   minHeight: 56,
   overflow: 'visible',
   transition: 'all 0.2s ease',
@@ -24,7 +24,7 @@ export const dockItemsRowStyles: SxProps<Theme> = {
   display: 'flex',
   alignItems: 'center',
   justifyContent: 'center',
-  gap: 1,
+  gap: { xs: 0.5, sm: 1 },
   position: 'relative', // so absolute drop overlays anchor to the items row
 };
 
@@ -99,10 +99,9 @@ export const dockDropIndicatorStyles: SxProps<Theme> = (theme) => ({
   width: 4,
   height: 52,
   borderRadius: 4,
-  background: `linear-gradient(180deg, ${theme.palette.primary.main} 0%, ${theme.palette.primary.light} 100%)`,
+  background: theme.palette.primary.main,
   flexShrink: 0,
-  opacity: 0.85,
-  boxShadow: `0 0 16px ${theme.palette.primary.main}60, 0 0 4px ${theme.palette.primary.main}30`,
+  opacity: 0.9,
   transition: 'all 0.2s ease',
 });
 

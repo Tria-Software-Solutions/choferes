@@ -849,7 +849,7 @@ function SwimlaneRow({
     <Paper elevation={0} sx={{
       borderRadius: "12px",
       border: `1px solid ${isDark ? "rgba(255,255,255,0.05)" : "rgba(0,0,0,0.05)"}`,
-      flexShrink: 0, width: "100%", minWidth: "max-content",
+      flexShrink: 0, width: "100%",
     }}>
       <Box sx={{
         px: { xs: 1, sm: 1.5 }, py: { xs: 0.5, sm: 0.75 }, display: "flex", alignItems: "center", gap: 1,
@@ -1989,12 +1989,15 @@ const WeeklyBoard: React.FC<WeeklyBoardProps> = ({
             <Box sx={{ display: "flex", gap: { xs: 0.6, sm: 1 }, height: "100%", minHeight: 350 }}>
               <Box sx={{
               display: "flex", flexDirection: "column", gap: 1.25,
-              // Mobile/tablet: keep the original max-content behavior so all swimlane
+              // Mobile: keep the original max-content behavior so all swimlane
               // rows + totals column scroll together horizontally.
-              // Desktop (md+): stretch to fill the available width.
-              width: { xs: "max-content", md: "auto" },
-              flex: { xs: "0 0 auto", md: 1 },
-              minWidth: { xs: "auto", md: 0 },
+              // Tablet+ (sm+): stretch to fill the available width, but never
+              // shrink below the rows' intrinsic minimum so the day cells stay
+              // usable and each row frame always wraps its content — same
+              // adaptive behavior as the individual calendar view.
+              width: { xs: "max-content", sm: "auto" },
+              flex: { xs: "0 0 auto", sm: 1 },
+              minWidth: { xs: "auto", sm: "min-content" },
             }}>
                 {schedules.map((schedule) => {
                   const scheduleColor = scheduleColorMap.get(schedule.label) ?? SCHEDULE_COLORS[0];

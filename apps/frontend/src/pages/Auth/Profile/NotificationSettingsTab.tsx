@@ -135,9 +135,10 @@ const NotificationSettingsTab: React.FC = () => {
         boxShadow: "0 4px 24px rgba(0,0,0,0.08), 0 1px 2px rgba(0,0,0,0.04)",
         display: "flex",
         flexDirection: "column",
-        height: { xs: "auto", md: "100%" },
-        minHeight: 0,
+        height: { xs: "calc(100dvh - 240px)", md: "100%" },
+        minHeight: { xs: "calc(100dvh - 240px)", md: 0 },
         overflow: "hidden",
+        flexShrink: 0,
       }}
     >
       {/* Header */}
@@ -177,6 +178,7 @@ const NotificationSettingsTab: React.FC = () => {
           justifyContent: "space-between",
           gap: 2,
           px: 1.5,
+          pr: 2,
           py: 1.25,
           borderRadius: "12px",
           mb: 1.5,

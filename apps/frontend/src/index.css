@@ -66,6 +66,10 @@ body {
   button, a, [role="button"], .MuiIconButton-root, .MuiButtonBase-root {
     min-height: 44px;
   }
+  /* Keep MUI Switch geometry intact (thumb must stay centered on track) */
+  .MuiSwitch-root .MuiButtonBase-root {
+    min-height: 0;
+  }
 }
 
 /* Code blocks */

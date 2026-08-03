@@ -176,9 +176,10 @@ const HelpCenterTab: React.FC = () => {
         boxShadow: "0 4px 24px rgba(0,0,0,0.08), 0 1px 2px rgba(0,0,0,0.04)",
         display: "flex",
         flexDirection: "column",
-        height: { xs: "auto", md: "100%" },
-        minHeight: 0,
+        height: { xs: "calc(100dvh - 240px)", md: "100%" },
+        minHeight: { xs: "calc(100dvh - 240px)", md: 0 },
         overflow: "hidden",
+        flexShrink: 0,
       }}
     >
       {/* Header */}
@@ -214,8 +215,8 @@ const HelpCenterTab: React.FC = () => {
       <Box
         sx={{
           display: "grid",
-          gridTemplateColumns: { xs: "1fr", sm: "repeat(3, 1fr)" },
-          gap: 1.5,
+          gridTemplateColumns: "repeat(3, 1fr)",
+          gap: { xs: 1, sm: 1.5 },
           mb: 2.5,
           flexShrink: 0,
         }}
@@ -236,7 +237,7 @@ const HelpCenterTab: React.FC = () => {
                 }
               }}
               sx={{
-                p: 2,
+                p: { xs: 1, sm: 2 },
                 borderRadius: "12px",
                 cursor: "pointer",
                 border: `1.5px solid ${
@@ -248,8 +249,8 @@ const HelpCenterTab: React.FC = () => {
                 }`,
                 backgroundColor: isActive
                   ? theme.palette.mode === "dark"
-                    ? "rgba(139,92,246,0.12)"
-                    : "rgba(139,92,246,0.06)"
+                    ? "rgba(255,255,255,0.08)"
+                    : "rgba(0,0,0,0.05)"
                   : "transparent",
                 display: "flex",
                 flexDirection: "column",
@@ -265,7 +266,7 @@ const HelpCenterTab: React.FC = () => {
               <Box sx={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
                 <Box
                   sx={{
-                    p: 1,
+                    p: { xs: 0.75, sm: 1 },
                     borderRadius: "10px",
                     backgroundColor: isActive
                       ? theme.palette.primary.main
@@ -286,14 +287,23 @@ const HelpCenterTab: React.FC = () => {
               <Typography
                 sx={{
                   fontWeight: isActive ? 700 : 650,
-                  fontSize: "0.85rem",
+                  fontSize: { xs: "0.72rem", sm: "0.85rem" },
+                  lineHeight: 1.25,
                   color: isActive ? theme.palette.primary.main : theme.palette.text.primary,
                   transition: "color 0.2s ease",
                 }}
               >
                 {topic.title}
               </Typography>
-              <Typography variant="body2" sx={{ fontSize: "0.75rem", color: "text.secondary", lineHeight: 1.45 }}>
+              <Typography
+                variant="body2"
+                sx={{
+                  fontSize: "0.75rem",
+                  color: "text.secondary",
+                  lineHeight: 1.45,
+                  display: { xs: "none", sm: "block" },
+                }}
+              >
                 {topic.description}
               </Typography>
             </Box>
@@ -325,11 +335,11 @@ const HelpCenterTab: React.FC = () => {
                     }`,
                     transition: "all 0.2s ease",
                     "&:hover": {
-                      borderColor: "rgba(139,92,246,0.35)",
+                      borderColor: theme.palette.primary.main,
                       backgroundColor:
                         theme.palette.mode === "dark"
-                          ? "rgba(139,92,246,0.05)"
-                          : "rgba(139,92,246,0.03)",
+                          ? "rgba(255,255,255,0.04)"
+                          : "rgba(0,0,0,0.02)",
                     },
                   }}
                 >
@@ -610,11 +620,12 @@ const HelpCenterTab: React.FC = () => {
       <Box
         sx={{
           display: "flex",
-          flexDirection: { xs: "column", sm: "row" },
-          alignItems: { xs: "flex-start", sm: "center" },
-          gap: 2,
+          flexDirection: "row",
+          alignItems: "center",
+          flexWrap: "wrap",
+          gap: { xs: 1, sm: 2 },
           mt: 2.5,
-          p: 2,
+          p: { xs: 1.5, sm: 2 },
           borderRadius: "12px",
           backgroundColor: theme.palette.background.paper,
           border: `1px solid ${
@@ -625,8 +636,8 @@ const HelpCenterTab: React.FC = () => {
       >
         <Box
           sx={{
-            width: 40,
-            height: 40,
+            width: { xs: 34, sm: 40 },
+            height: { xs: 34, sm: 40 },
             borderRadius: "12px",
             flexShrink: 0,
             display: "flex",
@@ -645,7 +656,15 @@ const HelpCenterTab: React.FC = () => {
           <Typography sx={{ fontWeight: 700, fontSize: "0.85rem", color: "text.primary", mb: 0.25 }}>
             ¿No encuentras lo que buscas?
           </Typography>
-          <Typography variant="body2" sx={{ fontSize: "0.75rem", color: "text.secondary", lineHeight: 1.45 }}>
+          <Typography
+            variant="body2"
+            sx={{
+              fontSize: "0.75rem",
+              color: "text.secondary",
+              lineHeight: 1.45,
+              display: { xs: "none", sm: "block" },
+            }}
+          >
             Contacta al administrador del sistema o visita las secciones de la plataforma para
             obtener más información.
           </Typography>
