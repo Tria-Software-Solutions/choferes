@@ -317,7 +317,7 @@ const ManageRoles: React.FC<{ isExpanded?: boolean; hideHeader?: boolean }> = ({
   };
 
   return (
-    <Box sx={{ height: "100%", minHeight: "500px", display: "flex", flexDirection: "column", overflow: "hidden" }}>
+    <Box sx={{ height: "100%", minHeight: { xs: "calc(100dvh - 240px)", md: 0 }, display: "flex", flexDirection: "column", overflow: "hidden" }}>
       {/* Premium Card with Header and Grid */}
       <Paper
         elevation={0}

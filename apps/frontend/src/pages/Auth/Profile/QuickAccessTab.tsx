@@ -7,6 +7,7 @@ import {
   Paper,
   Switch,
   Typography,
+  useMediaQuery,
   useTheme,
 } from "@mui/material";
 import { Blocks, ArrowUp, ArrowDown, RotateCcw, NotepadText, ChartNoAxesCombined, CircleParking, UsersRound, CalendarDays, Settings } from "lucide-react";
@@ -45,6 +46,7 @@ const DOCK_MENU_ICONS: Record<string, React.ReactNode> = {
 
 const QuickAccessTab: React.FC = () => {
   const theme = useTheme();
+  const isSmallScreen = useMediaQuery(theme.breakpoints.down("sm"));
   const { userPermissions } = useAuthContext();
   const { preferences, itemOrder, toggleMenu, moveItem, resetDefaults } =
     useMenuPreferences(DOCK_MENU_KEYS);
@@ -82,9 +84,10 @@ const QuickAccessTab: React.FC = () => {
         boxShadow: "0 4px 24px rgba(0,0,0,0.08), 0 1px 2px rgba(0,0,0,0.04)",
         display: "flex",
         flexDirection: "column",
-        height: { xs: "auto", md: "100%" },
-        minHeight: 0,
+        height: { xs: "calc(100dvh - 240px)", md: "100%" },
+        minHeight: { xs: "calc(100dvh - 240px)", md: 0 },
         overflow: "hidden",
+        flexShrink: 0,
       }}
     >
       {/* Header */}
@@ -139,14 +142,14 @@ const QuickAccessTab: React.FC = () => {
           </Typography>
         </Box>
 
-        <Box sx={{ borderRadius: "16px", overflow: "visible" }}>
+        <Box sx={{ borderRadius: "16px", overflowX: "auto", maxWidth: "100%" }}>
           <Dock
             items={previewItems}
             itemPreferences={preferences}
             itemOrder={itemOrder}
-            distance={150}
-            baseItemSize={44}
-            magnification={58}
+            distance={isSmallScreen ? 100 : 150}
+            baseItemSize={isSmallScreen ? 36 : 44}
+            magnification={isSmallScreen ? 46 : 58}
             spring={{ mass: 0.1, stiffness: 150, damping: 12 }}
           />
         </Box>
@@ -199,7 +202,7 @@ const QuickAccessTab: React.FC = () => {
                 )}
               </Box>
 
-              <Box sx={{ display: "flex", alignItems: "center", gap: 0.25 }}>
+              <Box sx={{ display: "flex", alignItems: "center", gap: 0.25, flexShrink: 0 }}>
                 <PremiumTooltip title="Mover arriba">
                   <span>
                     <IconButton

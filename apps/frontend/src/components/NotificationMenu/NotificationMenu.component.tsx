@@ -27,18 +27,38 @@ interface NotificationMenuProps {
   onNotificationClick?: (notification: Notification) => void;
 }
 
+const NOTIFICATION_TYPE_COLORS: Record<Notification['type'], string> = {
+  success: '#4caf50',
+  error: '#ef5350',
+  warning: '#ffa726',
+  info: '#29b6f6',
+};
+
 const getNotificationIcon = (type: Notification['type']) => {
-  switch (type) {
-    case 'success':
-      return <CheckCircle size={20} color="green" />;
-    case 'error':
-      return <AlertCircle size={20} color="red" />;
-    case 'warning':
-      return <AlertTriangle size={20} color="orange" />;
-    case 'info':
-    default:
-      return <Info size={20} color="blue" />;
-  }
+  const color = NOTIFICATION_TYPE_COLORS[type] ?? '#29b6f6';
+  const Icon =
+    type === 'success'
+      ? CheckCircle
+      : type === 'error'
+        ? AlertCircle
+        : type === 'warning'
+          ? AlertTriangle
+          : Info;
+  return (
+    <Box sx={{
+      width: 34,
+      height: 34,
+      borderRadius: '10px',
+      flexShrink: 0,
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'center',
+      backgroundColor: `${color}1a`,
+      color,
+    }}>
+      <Icon size={18} strokeWidth={2} />
+    </Box>
+  );
 };
 
 
@@ -146,15 +166,14 @@ const NotificationMenu: React.FC<NotificationMenuProps> = ({
           width: 380,
           maxHeight: 580,
           mt: 0.5,
-          background: theme.palette.mode === 'dark'
-            ? 'rgba(30,30,35,0.95)'
-            : '#ffffff',
-          backdropFilter: 'blur(20px)',
-          border: 'none',
-          borderRadius: '16px',
+          backgroundColor: theme.palette.mode === 'dark' ? '#1e1e23' : '#ffffff',
+          border: `1px solid ${
+            theme.palette.mode === 'dark' ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.06)'
+          }`,
+          borderRadius: '14px',
           boxShadow: theme.palette.mode === 'dark'
-            ? '0 10px 40px rgba(0,0,0,0.4), 0 2px 8px rgba(0,0,0,0.2)'
-            : '0 10px 40px rgba(0,0,0,0.15), 0 2px 8px rgba(0,0,0,0.1)',
+            ? '0 12px 40px rgba(0,0,0,0.5), 0 2px 8px rgba(0,0,0,0.3)'
+            : '0 12px 40px rgba(0,0,0,0.12), 0 2px 8px rgba(0,0,0,0.06)',
           overflow: 'hidden',
           padding: 0,
         },
@@ -172,7 +191,18 @@ const NotificationMenu: React.FC<NotificationMenuProps> = ({
                 size="small"
                 onClick={() => setShowFilters(!showFilters)}
                 color={showFilters ? 'primary' : 'default'}
-                sx={{ padding: 0.4, color: theme.palette.text.primary }}
+                sx={{
+                  padding: 0.4,
+                  color: showFilters ? theme.palette.primary.main : theme.palette.text.primary,
+                  backgroundColor: showFilters
+                    ? (theme.palette.mode === 'dark' ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.06)')
+                    : 'transparent',
+                  '&:hover': {
+                    backgroundColor: theme.palette.mode === 'dark'
+                      ? 'rgba(255,255,255,0.1)'
+                      : 'rgba(0,0,0,0.06)',
+                  },
+                }}
               >
                 <ListFilter size={16} />
               </IconButton>
@@ -182,7 +212,16 @@ const NotificationMenu: React.FC<NotificationMenuProps> = ({
                 <IconButton 
                   size="small" 
                   onClick={handleMarkAllAsRead}
-                  sx={{ padding: 0.4, color: theme.palette.text.primary }}
+                  sx={{
+                    padding: 0.4,
+                    color: theme.palette.text.primary,
+                    '&:hover': {
+                      backgroundColor: theme.palette.mode === 'dark'
+                        ? 'rgba(255,255,255,0.1)'
+                        : 'rgba(0,0,0,0.06)',
+                      color: theme.palette.primary.main,
+                    },
+                  }}
                 >
                   <CheckCheck size={16} />
                 </IconButton>
@@ -275,7 +314,7 @@ const NotificationMenu: React.FC<NotificationMenuProps> = ({
                     },
                   }}
                 >
-                  <ListItemIcon sx={{ minWidth: 36 }}>
+                  <ListItemIcon sx={{ minWidth: 42 }}>
                     {getNotificationIcon(notification.type)}
                   </ListItemIcon>
 
@@ -393,8 +432,8 @@ const NotificationMenu: React.FC<NotificationMenuProps> = ({
         {notifications.length > 0 && (
           <Box sx={{ 
             p: 0.75, 
-            borderTop: theme.palette.mode === 'dark' ? '1px solid rgba(255,255,255,0.1)' : theme.palette.divider,
-            backgroundColor: theme.palette.mode === 'dark' ? 'rgba(0,0,0,0.3)' : theme.palette.background.paper,
+            borderTop: theme.palette.mode === 'dark' ? '1px solid rgba(255,255,255,0.08)' : theme.palette.divider,
+            backgroundColor: theme.palette.mode === 'dark' ? '#23232a' : theme.palette.background.paper,
             position: 'sticky',
             bottom: 0,
             zIndex: 1,

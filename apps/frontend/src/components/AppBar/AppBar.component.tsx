@@ -16,7 +16,6 @@ import {
   Badge,
   Menu,
   MenuItem,
-  ListItemIcon,
   ListItemText,
   Popover,
   Grow,
@@ -45,6 +44,10 @@ import {
   userMenuIconButtonStyles,
   userAvatarStyles,
   mobileDividerStyles,
+  userMenuPaperStyles,
+  userMenuDividerStyles,
+  userMenuItemStyles,
+  userMenuIconChipStyles,
 } from "./AppBar.styles";
 
 interface Link {
@@ -408,88 +411,41 @@ const AppBarComponent: React.FC<AppBarComponentProps> = ({
           onClose={handleUserMenuClose}
           transformOrigin={{ horizontal: "right", vertical: "top" }}
           anchorOrigin={{ horizontal: "right", vertical: "bottom" }}
-          PaperProps={{
-            elevation: 0,
-            sx: {
-              mt: 0.5,
-              minWidth: 200,
-              background: theme.palette.mode === 'dark'
-                ? 'rgba(30, 30, 35, 0.95)'
-                : '#ffffff',
-              backdropFilter: "blur(20px)",
-              border: 'none',
-              borderRadius: '16px',
-              boxShadow: theme.palette.mode === 'dark'
-                ? '0 10px 40px rgba(0,0,0,0.4), 0 2px 8px rgba(0,0,0,0.2)'
-                : '0 10px 40px rgba(0,0,0,0.15), 0 2px 8px rgba(0,0,0,0.1)',
-              overflow: 'hidden',
-              padding: 0,
-            },
-          }}
+          PaperProps={{ elevation: 0, sx: userMenuPaperStyles(theme) }}
         >
-          {userLinks.map((link, index) => (
-            <React.Fragment key={link.label}>
-              {index > 0 && link.label === APPBAR_MENU.LOGOUT && (
-                <Divider
-                  sx={{
-                    my: 0,
-                    borderColor: theme.palette.mode === 'dark'
-                      ? "rgba(255,255,255,0.1)"
-                      : "rgba(0,0,0,0.08)",
+          {userLinks.map((link, index) => {
+            const isLogout = link.label === APPBAR_MENU.LOGOUT;
+            return (
+              <React.Fragment key={link.label}>
+                {index > 0 && isLogout && (
+                  <Divider sx={userMenuDividerStyles(theme)} />
+                )}
+                <MenuItem
+                  onClick={() => {
+                    handleUserMenuClose();
+                    if (link.onClick) {
+                      link.onClick();
+                    } else if (link.path) {
+                      navigate(link.path);
+                    }
                   }}
-                />
-              )}
-              <MenuItem
-                onClick={() => {
-                  handleUserMenuClose();
-                  if (link.onClick) {
-                    link.onClick();
-                  } else if (link.path) {
-                    navigate(link.path);
-                  }
-                }}
-                sx={{
-                  py: 1,
-                  px: 2,
-                  transition: "all 0.2s cubic-bezier(0.4, 0, 0.2, 1)",
-                  color: link.label === APPBAR_MENU.LOGOUT
-                    ? theme.palette.error.main
-                    : theme.palette.text.primary,
-                  '&:hover': {
-                    backgroundColor: link.label === APPBAR_MENU.LOGOUT
-                      ? `${theme.palette.error.light}15`
-                      : theme.palette.mode === 'dark'
-                        ? "rgba(255,255,255,0.1)"
-                        : "rgba(0,0,0,0.04)",
-                    transform: "translateX(2px)",
-                  },
-                  '& .MuiListItemIcon-root': {
-                    minWidth: 32,
-                    color: link.label === APPBAR_MENU.LOGOUT
-                      ? theme.palette.error.main
-                      : theme.palette.primary.main,
-                  },
-                }}
-              >
-                <ListItemIcon>
-                  {link.icon && React.cloneElement(link.icon as React.ReactElement, {
-                    size: 18,
-                    strokeWidth: 2,
-                    color: link.label === APPBAR_MENU.LOGOUT
-                      ? theme.palette.error.main
-                      : theme.palette.primary.main,
-                  })}
-                </ListItemIcon>
-                <ListItemText
-                  primary={link.label}
-                  primaryTypographyProps={{
-                    fontSize: "0.875rem",
-                    fontWeight: 500,
-                  }}
-                />
-              </MenuItem>
-            </React.Fragment>
-          ))}
+                  sx={userMenuItemStyles(theme, isLogout)}
+                >
+                  <Box sx={userMenuIconChipStyles(theme, isLogout)}>
+                    {link.icon &&
+                      React.cloneElement(link.icon as React.ReactElement, {
+                        size: 16,
+                        strokeWidth: 2,
+                      })}
+                  </Box>
+                  <ListItemText
+                    primary={link.label}
+                    primaryTypographyProps={{ fontSize: "0.875rem", fontWeight: 600 }}
+                  />
+                </MenuItem>
+              </React.Fragment>
+            );
+          })}
         </Menu>
 
         <NotificationMenu

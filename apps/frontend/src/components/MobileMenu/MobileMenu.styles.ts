@@ -19,7 +19,7 @@ export const drawerHeaderStyles: SxProps<Theme> = {
   px: 2.5,
   pt: 2,
   pb: 2,
-  background: "linear-gradient(135deg, #000000 0%, #1a1a1a 100%)",
+  background: "#000000",
   display: "flex",
   alignItems: "center",
   justifyContent: "space-between",
@@ -66,7 +66,7 @@ export const drawerAvatarStyles: SxProps<Theme> = {
   fontSize: "0.95rem",
   fontWeight: 700,
   flexShrink: 0,
-  background: "linear-gradient(135deg, rgba(139,92,246,0.5) 0%, rgba(139,92,246,0.2) 100%)",
+  background: "#2a2a2f",
   color: "#ffffff",
   border: "1.5px solid rgba(255,255,255,0.25)",
 };
@@ -118,15 +118,15 @@ export const drawerNavRowStyles = (
   ml: depth > 0 ? 2.5 : 0,
   backgroundColor: active
     ? theme.palette.mode === "dark"
-      ? "rgba(139,92,246,0.14)"
-      : "rgba(139,92,246,0.08)"
+      ? "rgba(255,255,255,0.1)"
+      : "rgba(0,0,0,0.06)"
     : "transparent",
   transition: "all 0.2s ease",
   "&:hover": {
     backgroundColor: active
       ? theme.palette.mode === "dark"
-        ? "rgba(139,92,246,0.2)"
-        : "rgba(139,92,246,0.12)"
+        ? "rgba(255,255,255,0.14)"
+        : "rgba(0,0,0,0.1)"
       : theme.palette.mode === "dark"
         ? "rgba(255,255,255,0.06)"
         : "rgba(0,0,0,0.04)",
@@ -156,8 +156,8 @@ export const drawerNavIconStyles = (theme: Theme, active: boolean): SxProps<Them
   justifyContent: "center",
   backgroundColor: active
     ? theme.palette.mode === "dark"
-      ? "rgba(139,92,246,0.25)"
-      : "rgba(139,92,246,0.14)"
+      ? "rgba(255,255,255,0.18)"
+      : "rgba(0,0,0,0.12)"
     : theme.palette.mode === "dark"
       ? "rgba(255,255,255,0.06)"
       : "rgba(0,0,0,0.04)",

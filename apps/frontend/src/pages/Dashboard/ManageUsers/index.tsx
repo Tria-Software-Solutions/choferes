@@ -464,7 +464,7 @@ const ManageUsers: React.FC<{ isExpanded?: boolean; hideHeader?: boolean }> = ({
   }, []);
 
   return (
-    <Box sx={{ height: "100%", minHeight: "500px", display: "flex", flexDirection: "column", overflow: "hidden" }}>
+    <Box sx={{ height: "100%", minHeight: { xs: "calc(100dvh - 240px)", md: 0 }, display: "flex", flexDirection: "column", overflow: "hidden" }}>
       {loadError ? (
         <Box sx={errorBoxStyles}>
           <Alert severity="error" sx={errorAlertStyles}>
@@ -602,6 +602,7 @@ const ManageUsers: React.FC<{ isExpanded?: boolean; hideHeader?: boolean }> = ({
                 {/* Segmented status filter — modern pattern with counts */}
                 <SegmentedToggle
                   size="medium"
+                  fullWidth={isSmallScreen}
                   value={statusFilter}
                   onChange={(v) => setStatusFilter(v)}
                   options={[
@@ -611,7 +612,7 @@ const ManageUsers: React.FC<{ isExpanded?: boolean; hideHeader?: boolean }> = ({
                   ]}
                 />
 
-                <Box sx={{ display: "flex", flexShrink: 0 }}>
+                <Box sx={{ display: { xs: 'none', sm: 'flex' }, flexShrink: 0 }}>
                   {canCreateUser && (
                     <Button
                       variant="contained"
@@ -632,6 +633,25 @@ const ManageUsers: React.FC<{ isExpanded?: boolean; hideHeader?: boolean }> = ({
                 </Box>
               </Box>
             </Box>
+          </Box>
+
+          {/* Mobile Add Button */}
+          <Box sx={{ display: { xs: 'flex', sm: 'none' }, p: 2, borderTop: `1px solid ${theme.palette.mode === "dark" ? "rgba(255,255,255,0.08)" : "rgba(0,0,0,0.08)"}` }}>
+            {canCreateUser && (
+              <Button
+                variant="contained"
+                fullWidth
+                startIcon={<Plus size={18} />}
+                onClick={handleOpenAddUserModal}
+                sx={{
+                  py: 1.5,
+                  fontWeight: 600,
+                  borderRadius: '10px',
+                }}
+              >
+                {DASHBOARD_USERS.ADD}
+              </Button>
+            )}
           </Box>
 
             {/* Content Section */}
@@ -690,14 +710,14 @@ const ManageUsers: React.FC<{ isExpanded?: boolean; hideHeader?: boolean }> = ({
                               py: 0.5,
                             }}
                           >
-                            <Box sx={{ display: "flex", gap: 1 }}>
+                            <Box sx={{ display: "flex", flexDirection: { xs: "column", sm: "row" }, gap: 1 }}>
                               <TextField
                                 size="small"
                                 value={editFields.firstName}
                                 onChange={(e) => setEditFields({ ...editFields, firstName: e.target.value })}
                                 placeholder="Nombre"
                                 variant="standard"
-                                sx={{ flex: 1, ...inputSx }}
+                                sx={{ flex: 1, minWidth: 0, ...inputSx }}
                               />
                               <TextField
                                 size="small"
@@ -705,17 +725,17 @@ const ManageUsers: React.FC<{ isExpanded?: boolean; hideHeader?: boolean }> = ({
                                 onChange={(e) => setEditFields({ ...editFields, lastName: e.target.value })}
                                 placeholder="Apellido"
                                 variant="standard"
-                                sx={{ flex: 1, ...inputSx }}
+                                sx={{ flex: 1, minWidth: 0, ...inputSx }}
                               />
                             </Box>
-                            <Box sx={{ display: "flex", gap: 1 }}>
+                            <Box sx={{ display: "flex", flexDirection: { xs: "column", sm: "row" }, gap: 1 }}>
                               <TextField
                                 size="small"
                                 value={editFields.email}
                                 onChange={(e) => setEditFields({ ...editFields, email: e.target.value })}
                                 placeholder="Correo"
                                 variant="standard"
-                                sx={{ flex: 1, ...inputSx }}
+                                sx={{ flex: 1, minWidth: 0, ...inputSx }}
                               />
                               <TextField
                                 size="small"
@@ -723,7 +743,7 @@ const ManageUsers: React.FC<{ isExpanded?: boolean; hideHeader?: boolean }> = ({
                                 onChange={(e) => setEditFields({ ...editFields, username: e.target.value })}
                                 placeholder="Usuario"
                                 variant="standard"
-                                sx={{ flex: 1, ...inputSx }}
+                                sx={{ flex: 1, minWidth: 0, ...inputSx }}
                               />
                             </Box>
                             <FormControl variant="standard" size="small" fullWidth sx={{ minWidth: 0 }}>

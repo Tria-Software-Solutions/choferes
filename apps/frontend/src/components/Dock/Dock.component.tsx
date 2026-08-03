@@ -1,5 +1,5 @@
 import React, { useRef, useCallback, useState } from 'react';
-import { Box, Switch, Typography, Button, type SxProps, type Theme } from '@mui/material';
+import { Box, Switch, Typography, Button, useTheme, type SxProps, type Theme } from '@mui/material';
 import { RotateCcw, GripVertical } from 'lucide-react';
 import {
   motion,
@@ -55,12 +55,18 @@ function DockIcon({
   children: React.ReactNode;
   active?: boolean;
 }) {
+  const theme = useTheme();
+  const isDark = theme.palette.mode === 'dark';
   return (
     <Box sx={{
       ...dockIconRootStyles,
       opacity: active ? 1 : 0.6,
       transition: 'opacity 0.2s ease',
-      color: active ? 'primary.main' : 'text.secondary',
+      color: active ? theme.palette.primary.main : theme.palette.text.secondary,
+      borderRadius: 12,
+      backgroundColor: active
+        ? (isDark ? 'rgba(255,255,255,0.14)' : 'rgba(0,0,0,0.06)')
+        : 'transparent',
     }}>
       {children}
     </Box>
