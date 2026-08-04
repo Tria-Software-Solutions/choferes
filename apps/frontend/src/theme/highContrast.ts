@@ -305,14 +305,31 @@ export const highContrastTheme = createTheme({
     MuiSwitch: {
       styleOverrides: {
         root: {
-          "& .MuiSwitch-switchBase.Mui-checked": {
-            color: "#000000",
-            "&:hover": {
-              backgroundColor: "#ffff66",
+          width: 40,
+          height: 24,
+          padding: 3,
+          "& .MuiSwitch-switchBase": {
+            padding: 3,
+            "&.Mui-checked": {
+              transform: "translateX(16px)",
+              color: "#000000",
+              "&:hover": {
+                backgroundColor: "#ffff66",
+              },
+              "& + .MuiSwitch-track": {
+                opacity: 1,
+                backgroundColor: "#000000",
+              },
             },
           },
-          "& .MuiSwitch-switchBase.Mui-checked + .MuiSwitch-track": {
-            backgroundColor: "#000000",
+          "& .MuiSwitch-thumb": {
+            width: 18,
+            height: 18,
+            boxShadow: "0 1px 3px rgba(0,0,0,0.2)",
+          },
+          "& .MuiSwitch-track": {
+            borderRadius: 12,
+            opacity: 0.38,
           },
         },
       },

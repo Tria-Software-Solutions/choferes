@@ -229,7 +229,6 @@ const QuickAccessTab: React.FC = () => {
                 <Switch
                   checked={isVisible}
                   onChange={() => toggleMenu(key)}
-                  size="small"
                 />
               </Box>
             </Box>
