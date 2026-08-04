@@ -217,8 +217,10 @@ export const textFieldStyles: SxProps<Theme> = (theme: Theme) => ({
       backgroundColor: theme.palette.mode === "dark"
         ? "rgba(55,55,65,0.8)"
         : "rgba(255,255,255,0.95)",
-      borderColor: theme.palette.primary.main,
-      boxShadow: `0 0 0 3px ${theme.palette.primary.main}33`,
+      borderColor: theme.palette.mode === "dark"
+        ? "rgba(255,255,255,0.2)"
+        : "rgba(0,0,0,0.15)",
+      boxShadow: "none",
     },
     "&.Mui-focused .MuiOutlinedInput-notchedOutline": {
       borderColor: "transparent",

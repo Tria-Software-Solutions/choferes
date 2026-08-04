@@ -20,7 +20,7 @@ const baseInputStyles = (theme: Theme) => ({
   },
   "&.Mui-focused": {
     backgroundColor: theme.palette.background.paper,
-    boxShadow: "0 8px 24px rgba(0,0,0,0.1), 0 2px 8px rgba(25, 118, 210, 0.08)",
+    boxShadow: "0 8px 24px rgba(0,0,0,0.1), 0 2px 8px rgba(0,0,0,0.06)",
     outline: "none",
     transform: "translateY(-1px)",
   },
@@ -71,6 +71,17 @@ export const datePickerTextFieldStyles: SxProps<Theme> = (theme) => ({
     },
   },
 });
+
+// Inline edit text fields: neutral focus (no colored underline/glow)
+// Usa selectores top-level (NO bajo "& .MuiOutlinedInput-root") porque
+// textFieldStyles hace un spread shallow de customSx: anidar bajo esa clave
+// reemplazaría todo el objeto root base (bordes, paddings, etc).
+export const inlineEditTextfieldSx: SxProps<Theme> = {
+  "& .MuiOutlinedInput-root::after": { display: "none" },
+  "& .MuiOutlinedInput-root.Mui-focused": {
+    boxShadow: "none",
+  },
+};
 
 // Premium table cell styles
 export const tableCellStyles: SxProps<Theme> = (theme) => ({

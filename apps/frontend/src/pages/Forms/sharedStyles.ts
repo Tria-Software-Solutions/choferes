@@ -134,13 +134,9 @@ export const actionsInnerBox = {
 };
 
 // ─── Base button mixin (shared visual traits) ───
+// Geometry (radius, min-height, weight, size) comes from the theme's MuiButton
+// override so every button in the app shares the same look & feel.
 const buttonBase = {
-  fontWeight: 600,
-  fontSize: "0.85rem",
-  textTransform: "none" as const,
-  letterSpacing: "-0.01em",
-  borderRadius: "12px",
-  minHeight: "48px",
   px: 3,
   transition: "all 0.25s cubic-bezier(0.4, 0, 0.2, 1)",
   "&:hover": {
@@ -156,19 +152,18 @@ const buttonBase = {
   },
 };
 
-// ─── Primary (gradient filled) ───
+// ─── Primary (filled) ───
 export const primaryButton = {
   ...buttonBase,
-  fontSize: "0.9rem",
-  boxShadow: "0 4px 14px rgba(99,102,241,0.25)",
+  boxShadow: "0 4px 14px rgba(0,0,0,0.12)",
   "&:hover": {
     ...buttonBase["&:hover"],
     transform: "translateY(-2px)",
-    boxShadow: "0 8px 25px rgba(99,102,241,0.35)",
+    boxShadow: "0 8px 25px rgba(0,0,0,0.18)",
   },
   "&:active": {
     ...buttonBase["&:active"],
-    boxShadow: "0 2px 8px rgba(99,102,241,0.2)",
+    boxShadow: "0 2px 8px rgba(0,0,0,0.1)",
   },
   "&.Mui-disabled": buttonBase["&.Mui-disabled"],
 };
@@ -187,7 +182,6 @@ export const secondaryButton = {
 // ─── Danger (red filled) ───
 export const dangerButton = {
   ...buttonBase,
-  fontSize: "0.9rem",
   boxShadow: "0 4px 14px rgba(239,68,68,0.25)",
   "&:hover": {
     ...buttonBase["&:hover"],

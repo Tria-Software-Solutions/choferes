@@ -256,7 +256,7 @@ const QuickAccessTab: React.FC = () => {
             size="small"
             startIcon={<RotateCcw size={14} />}
             onClick={resetDefaults}
-            sx={{ textTransform: "none", fontWeight: 600, borderRadius: "10px", fontSize: "0.75rem" }}
+            sx={{ fontWeight: 600, fontSize: "0.75rem" }}
           >
             Restaurar valores
           </Button>

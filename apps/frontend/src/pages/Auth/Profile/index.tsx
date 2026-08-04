@@ -47,7 +47,7 @@ import {
 } from "../../../utils/userValidation";
 import TextfieldComponent from "../../../components/Textfield/Textfield.component";
 import { useThemeMode } from "../../../context/ThemeContext";
-import { API_URL } from "../../../services/api";
+import { getAvatarSrc, resizeAvatarFile } from "../../../utils/avatar";
 import { updateUserAvatar, removeUserAvatar } from "../../../store/slices/userSlice";
 import {
   Dialog,
@@ -171,6 +171,7 @@ const Profile: React.FC = () => {
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [avatarPreview, setAvatarPreview] = useState<string | null>(null);
   const [isUploadingAvatar, setIsUploadingAvatar] = useState(false);
+  const [avatarLoadFailed, setAvatarLoadFailed] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [isEditFormValid, setIsEditFormValid] = useState(false);
   const [isPasswordFormValid, setIsPasswordFormValid] = useState(false);
@@ -308,14 +309,12 @@ const Profile: React.FC = () => {
       };
       if (currentUser) {
         dispatch(updateUser({ id: currentUser.id, updatedUser }));
+        // Preserve settings/avatar/roles — rebuilding the object without them
+        // wiped currentUser.settings and broke theme→DB sync (ThemeSync gates
+        // on currentUser.id now, but sessionStorage must stay complete).
         setUser({
-          id: currentUser.id,
-          firstName: updatedUser.firstName || "",
-          lastName: updatedUser.lastName || "",
-          email: updatedUser.email || "",
-          username: updatedUser.username || "",
-          password: updatedUser.password || "",
-          isActive: updatedUser.isActive || false,
+          ...currentUser,
+          ...updatedUser,
         });
       } else {
         throw new Error("Current User is null");
@@ -381,10 +380,15 @@ const Profile: React.FC = () => {
 
   const getAvatarUrl = () => {
     if (!currentUser?.avatar) return null;
-    return `${API_URL}${currentUser.avatar}`;
+    return getAvatarSrc(currentUser.avatar) ?? null;
   };
 
-  const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+  // Reset the broken-image fallback whenever the avatar value changes
+  useEffect(() => {
+    setAvatarLoadFailed(false);
+  }, [currentUser?.avatar]);
+
+  const handleFileSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
 
@@ -400,12 +404,17 @@ const Profile: React.FC = () => {
       return;
     }
 
-    setSelectedFile(file);
-    const reader = new FileReader();
-    reader.onload = (event) => {
-      setAvatarPreview(event.target?.result as string);
-    };
-    reader.readAsDataURL(file);
+    try {
+      const resized = await resizeAvatarFile(file);
+      setSelectedFile(resized);
+      const reader = new FileReader();
+      reader.onload = (event) => {
+        setAvatarPreview(event.target?.result as string);
+      };
+      reader.readAsDataURL(resized);
+    } catch (error) {
+      showNotification("No se pudo procesar la imagen", { severity: "error" });
+    }
   };
 
   const handleUploadAvatar = async () => {
@@ -424,7 +433,10 @@ const Profile: React.FC = () => {
       });
 
       showNotification("Avatar actualizado exitosamente", { severity: "success", duration: 3000 });
-      handleCloseAvatarDialog();
+      // Close directly (bypasses the isUploadingAvatar guard) so the dialog
+      // doesn't stay stuck open after a successful upload.
+      setIsUploadingAvatar(false);
+      resetAvatarDialog();
     } catch (error) {
       showNotification("Error al actualizar el avatar", { severity: "error", duration: 5000 });
     } finally {
@@ -445,7 +457,8 @@ const Profile: React.FC = () => {
       });
 
       showNotification("Avatar eliminado exitosamente", { severity: "success", duration: 3000 });
-      handleCloseAvatarDialog();
+      setIsUploadingAvatar(false);
+      resetAvatarDialog();
     } catch (error) {
       showNotification("Error al eliminar el avatar", { severity: "error", duration: 5000 });
     } finally {
@@ -457,14 +470,20 @@ const Profile: React.FC = () => {
     setAvatarDialogOpen(true);
   };
 
-  const handleCloseAvatarDialog = () => {
-    if (isUploadingAvatar) return;
+  // Resets the dialog state (no guard) — used by the guarded close handler
+  // and by the success paths, which must close even while uploading.
+  const resetAvatarDialog = () => {
     setAvatarDialogOpen(false);
     setSelectedFile(null);
     setAvatarPreview(null);
     if (fileInputRef.current) {
       fileInputRef.current.value = "";
     }
+  };
+
+  const handleCloseAvatarDialog = () => {
+    if (isUploadingAvatar) return;
+    resetAvatarDialog();
   };
 
   const getInitials = () => {
@@ -561,10 +580,11 @@ const Profile: React.FC = () => {
                 }}
                 onClick={handleOpenAvatarDialog}
               >
-                {getAvatarUrl() ? (
+                {getAvatarUrl() && !avatarLoadFailed ? (
                   <img
                     src={getAvatarUrl()!}
                     alt="Avatar"
+                    onError={() => setAvatarLoadFailed(true)}
                     style={{
                       width: "100%",
                       height: "100%",
@@ -1448,10 +1468,11 @@ const Profile: React.FC = () => {
                     objectFit: "cover",
                   }}
                 />
-              ) : getAvatarUrl() ? (
+              ) : getAvatarUrl() && !avatarLoadFailed ? (
                 <img
                   src={getAvatarUrl()!}
                   alt="Current avatar"
+                  onError={() => setAvatarLoadFailed(true)}
                   style={{
                     width: "100%",
                     height: "100%",

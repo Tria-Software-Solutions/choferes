@@ -102,12 +102,12 @@ export const getEmployeeRowStyles = (theme: Theme, isSmallScreen: boolean, rowIn
     "&.Mui-focused": {
       backgroundColor: theme.palette.mode === "dark" ? "rgba(40, 40, 45, 0.98)" : "rgba(255, 255, 255, 1)",
       transform: "translateY(-2px) scale(1.01)",
-      border: theme.palette.mode === "dark" ? "1px solid rgba(25, 118, 210, 0.3)" : "1px solid rgba(25, 118, 210, 0.2)",
+      border: theme.palette.mode === "dark" ? "1px solid rgba(255, 255, 255, 0.12)" : "1px solid rgba(0, 0, 0, 0.1)",
     },
     "&.Mui-focused .MuiOutlinedInput-notchedOutline": {
       borderColor: "transparent",
       borderWidth: "0",
-      boxShadow: `0 0 0 4px ${theme.palette.mode === "dark" ? "rgba(25, 118, 210, 0.2)" : "rgba(25, 118, 210, 0.15)"}, 0 8px 24px rgba(25, 118, 210, 0.15)`,
+      boxShadow: "none",
     },
     "& .MuiSelect-icon": {
       color: theme.palette.text.secondary,

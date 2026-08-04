@@ -44,7 +44,8 @@ import {
   DialogActions,
   Paper,
 } from "@mui/material";
-import { exportFileFormattedDate, exportTable } from "../../../utils/export";
+import { exportFileFormattedDate, exportTable, PdfHeaderIcon, PdfLegendEntry } from "../../../utils/export";
+import { ICON_PERSON, ICON_CLOCK, ICON_CLOCK_PLUS } from "../../../utils/pdfIcons";
 import {
   getBiweekNumber,
   getBiweeklyDates,
@@ -61,9 +62,7 @@ import PAGE_TITLE from "../../../constants/pageTitle.constants";
 import PERMISSIONS from "../../../constants/permissions.constants";
 import MANAGEMENT from "../../../constants/management.constants";
 import { SELECTOR_TABLE } from "../../../constants/constants";
-import { Download, ChevronLeft, ChevronRight, X, Search, RotateCcw } from "lucide-react";
-import DialogComponent from "../../../components/Dialog/Dialog.component";
-import { NotepadText, Sparkles } from "lucide-react";
+import { Download, ChevronLeft, ChevronRight, X, Search, RotateCcw, NotepadText, Sparkles } from "lucide-react";
 import AutoGenerateModal, { AutoGenerateConfig } from "../../../components/Modal/AutoGenerateModal/AutoGenerateModal.component";
 import {
   exportSpeedDialBoxStyles,
@@ -141,9 +140,6 @@ const RolesPage: React.FC = () => {
     const prefs = getPreferencesObject(preferencesKey, defaultPreferences);
     return prefs.date ? new Date(prefs.date) : new Date();
   });
-  const [openExportDialog, setOpenExportDialog] = useState(false);
-  const [exportType, setExportType] = useState<"excel" | "pdf">("excel");
-  const [isExporting, setIsExporting] = useState(false);
   const [openAddRoleModal, setOpenAddRoleModal] = useState(false);
   const [isGeneratingHours, setIsGeneratingHours] = useState(false);
   const [currentModalConfig, setCurrentModalConfig] = useState<AutoGenerateConfig | null>(null);
@@ -766,11 +762,6 @@ const RolesPage: React.FC = () => {
   });
   const nextWeekEnd = endOfWeek(nextWeekStart, { weekStartsOn: 1 });
 
-  const handleOpenExportDialog = (type: "excel" | "pdf") => {
-    setExportType(type);
-    setOpenExportDialog(true);
-  };
-
   const handleCloseAddRoleModal = () => {
     setOpenAddRoleModal(false);
   };
@@ -1289,35 +1280,70 @@ const RolesPage: React.FC = () => {
     return [firstRow, secondRow];
   };
 
-  // Export handler
-  const handleExportHours = async (shouldExportHours: boolean) => {
-    setIsExporting(true);
+  // Export handler — siempre incluye las columnas de totales y horas extra.
+  // Se guarda en un ref para que exportOptions (memoizado solo por permisos)
+  // siempre invoque la versión actual con los datos frescos del último render.
+  const handleExport = async (format: "excel" | "pdf") => {
     try {
-      const headers = getExportHeaders(currentWeek, shouldExportHours);
+      const headers = getExportHeaders(currentWeek, true);
       const data = getExportData(
         filteredEmployees,
         currentWeek,
-        shouldExportHours,
-        headers.slice(1, shouldExportHours ? -2 : undefined)
+        true,
+        headers.slice(1, -2)
       );
-      const groupedHeaders = getGroupedHeaders(currentWeek, shouldExportHours);
+      const groupedHeaders = getGroupedHeaders(currentWeek, true);
+      const banner = groupedHeaders?.[0]?.[0] ?? "";
       const fileName = `Roles_${exportFileFormattedDate(new Date())}`;
+      // Iconos vectoriales (Lucide) en el header de la tabla (Empleado,
+      // Total horas, Horas extra) + leyenda explicativa debajo de la tabla.
+      const headerIcons: Record<number, PdfHeaderIcon> = {
+        0: { path: ICON_PERSON },
+        [headers.length - 2]: { path: ICON_CLOCK },
+        [headers.length - 1]: { path: ICON_CLOCK_PLUS },
+      };
+      const legend: PdfLegendEntry[] = [
+        {
+          icon: ICON_PERSON,
+          label: "Empleado",
+          description: "Nombre del empleado asignado.",
+        },
+        {
+          icon: ICON_CLOCK,
+          label: "Total horas",
+          description: "Suma de horas trabajadas en la semana.",
+        },
+        {
+          icon: ICON_CLOCK_PLUS,
+          label: "Horas extra",
+          description: "Horas adicionales fuera del horario regular.",
+        },
+      ];
       await exportTable({
         data,
         fileName,
-        format: exportType,
+        format,
         customHeaders: headers,
-        groupedHeaders: exportType === "excel" ? groupedHeaders : undefined,
+        groupedHeaders,
+        title: "Reporte de Horas",
+        subtitle: banner
+          ? `Semana ${currentWeekNumber} · ${banner}`
+          : undefined,
+        headerIcons: format === "pdf" ? headerIcons : undefined,
+        legend: format === "pdf" ? legend : undefined,
       });
     } catch (error) {
       showNotification("Error al exportar los datos", {
         severity: "error",
         duration: 5000,
       });
-    } finally {
-      setIsExporting(false);
     }
   };
+
+  const handleExportRef = useRef(handleExport);
+  useEffect(() => {
+    handleExportRef.current = handleExport;
+  });
 
   const exportOptions = useMemo(() => {
     const options = [];
@@ -1325,14 +1351,14 @@ const RolesPage: React.FC = () => {
       options.push({
         label: "Exportar a Excel",
         icon: <ExcelIcon size={20} />,
-        onClick: () => handleOpenExportDialog("excel"),
+        onClick: () => handleExportRef.current("excel"),
       });
     }
     if (userPermissions.includes(PERMISSIONS.EXPORT_PDF_ROLES)) {
       options.push({
         label: "Exportar a PDF",
         icon: <PdfIcon size={20} />,
-        onClick: () => handleOpenExportDialog("pdf"),
+        onClick: () => handleExportRef.current("pdf"),
       });
     }
     return options;
@@ -1644,23 +1670,6 @@ const RolesPage: React.FC = () => {
             );
         })()}
           </Box>
-          <DialogComponent
-            open={openExportDialog}
-            onClose={() => {
-              setOpenExportDialog(false);
-            }}
-            onConfirm={() => {
-              setOpenExportDialog(false);
-              handleExportHours(true);
-            }}
-            title={MANAGEMENT.DIALOG_EXPORT_TITLE}
-            message={MANAGEMENT.DIALOG_EXPORT_MESSAGE}
-            type="warning"
-            confirmText={MANAGEMENT.DIALOG_EXPORT_CONFIRM}
-            cancelText={MANAGEMENT.DIALOG_EXPORT_CANCEL}
-            loading={isExporting}
-            icon={<Download size={24} color="orange" />}
-          />
         </Paper>
       )}
       

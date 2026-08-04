@@ -3,6 +3,7 @@ export interface Employee {
   firstName: string;
   lastName: string;
   email?: string;
+  avatar?: string;
   createdAt?: string;
   updatedAt?: string;
 }

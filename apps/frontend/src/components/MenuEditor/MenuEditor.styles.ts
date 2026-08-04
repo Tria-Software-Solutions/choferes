@@ -56,7 +56,7 @@ export const editorTitleStyles: SxProps<Theme> = (theme) => ({
 export const editorCloseBtnStyles: SxProps<Theme> = (theme) => ({
   width: 28,
   height: 28,
-  borderRadius: '8px',
+  borderRadius: '12px',
   color: theme.palette.mode === 'dark'
     ? 'rgba(255,255,255,0.3)'
     : 'rgba(0,0,0,0.3)',
@@ -161,20 +161,18 @@ export const editorResetBtnStyles: SxProps<Theme> = (theme) => ({
   fontWeight: 600,
   fontSize: '0.75rem',
   color: theme.palette.mode === 'dark'
-    ? 'rgba(255,255,255,0.4)'
-    : 'rgba(0,0,0,0.4)',
-  borderRadius: '8px',
+    ? 'rgba(255,255,255,0.55)'
+    : 'rgba(0,0,0,0.55)',
+  borderRadius: '12px',
   px: 1.5,
   py: 0.4,
   minWidth: 0,
   minHeight: 0,
   '&:hover': {
     background: theme.palette.mode === 'dark'
-      ? 'rgba(255,255,255,0.06)'
-      : 'rgba(0,0,0,0.04)',
-    color: theme.palette.mode === 'dark'
-      ? 'rgba(255,255,255,0.7)'
-      : 'rgba(0,0,0,0.7)',
+      ? 'rgba(255,255,255,0.08)'
+      : 'rgba(0,0,0,0.05)',
+    color: theme.palette.text.primary,
   },
 });
 
@@ -182,18 +180,18 @@ export const editorDoneBtnStyles: SxProps<Theme> = (theme) => ({
   textTransform: 'none',
   fontWeight: 600,
   fontSize: '0.75rem',
-  borderRadius: '8px',
+  borderRadius: '12px',
   px: 2,
   py: 0.4,
   minWidth: 0,
   minHeight: 0,
-  background: theme.palette.mode === 'dark'
-    ? 'rgba(255,255,255,0.1)'
-    : theme.palette.primary.main,
-  color: '#ffffff',
+  background: theme.palette.primary.main,
+  color: theme.palette.primary.contrastText,
+  boxShadow: 'none',
   '&:hover': {
     background: theme.palette.mode === 'dark'
-      ? 'rgba(255,255,255,0.18)'
-      : theme.palette.primary.dark,
+      ? '#d4d4d4'
+      : '#1a1a1a',
+    boxShadow: 'none',
   },
 });

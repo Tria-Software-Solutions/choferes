@@ -246,12 +246,11 @@ class ErrorBoundaryClass extends React.Component<
                 startIcon={<RefreshCw size={18} />}
                 onClick={this.handleRetry}
                 sx={{
-                  minHeight: 44,
+                  minHeight: 48,
                   fontSize: "0.875rem",
                   fontWeight: 600,
                   px: { xs: 3, sm: 5 },
-                  borderRadius: "10px",
-                  textTransform: "none",
+                  borderRadius: "12px",
                   background: isDark
                     ? "linear-gradient(135deg, #ff3b30, #dc2626)"
                     : "linear-gradient(135deg, #dc2626, #b91c1c)",
@@ -282,12 +281,11 @@ class ErrorBoundaryClass extends React.Component<
                 startIcon={<Home size={18} />}
                 onClick={this.handleGoHome}
                 sx={{
-                  minHeight: 44,
+                  minHeight: 48,
                   fontSize: "0.875rem",
                   fontWeight: 600,
                   px: { xs: 3, sm: 5 },
-                  borderRadius: "10px",
-                  textTransform: "none",
+                  borderRadius: "12px",
                   color: isDark ? alpha("#ffffff", 0.8) : alpha("#1a1a2e", 0.7),
                   borderColor: isDark
                     ? alpha("#ffffff", 0.15)

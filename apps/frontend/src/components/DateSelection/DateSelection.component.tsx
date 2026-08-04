@@ -93,8 +93,8 @@ const DateSelectionComponent: React.FC<DateSelectionProps> = ({
             },
             "&.Mui-focused": {
               backgroundColor: theme.palette.action.hover,
-              borderColor: theme.palette.primary.main,
-              boxShadow: `0 0 0 3px ${theme.palette.mode === "dark" ? "rgba(255,255,255,0.08)" : "rgba(0,0,0,0.06)"}`,
+              borderColor: theme.palette.mode === "dark" ? "rgba(255,255,255,0.3)" : "rgba(0,0,0,0.25)",
+              boxShadow: "none",
             },
             "&.Mui-focused .MuiOutlinedInput-notchedOutline": {
               border: "none !important",

@@ -1,6 +1,6 @@
 import { SxProps, Theme } from "@mui/material";
 
-export const dockContainerStyles: SxProps<Theme> = (theme) => ({
+export const dockContainerStyles = (theme: Theme) => ({
   display: 'flex',
   flexDirection: 'column',
   alignItems: 'center',
@@ -20,6 +20,15 @@ export const dockContainerStyles: SxProps<Theme> = (theme) => ({
   transition: 'all 0.2s ease',
 });
 
+// Container variant while in edit mode — no border, no shadow, just extra padding
+export const dockEditContainerStyles = (_theme: Theme) => ({
+  border: 'none',
+  boxShadow: 'none',
+  pt: 1.25,
+  px: { xs: 0.75, sm: 1 },
+  pb: 1.25,
+});
+
 export const dockItemsRowStyles: SxProps<Theme> = {
   display: 'flex',
   alignItems: 'center',
@@ -36,77 +45,151 @@ export const dockIconRootStyles: SxProps<Theme> = {
   height: '100%',
 };
 
-// Edit mode: each item gets vertical layout (icon + switch)
-export const dockItemEditWrapperStyles: SxProps<Theme> = {
+// Edit mode header (title + hint)
+export const dockEditHeaderStyles = (theme: Theme) => ({
+  display: 'flex',
+  alignItems: 'center',
+  flexDirection: 'column',
+  gap: 0.5,
+  mb: 2.5,
+  pb: 1,
+  width: '100%',
+  borderBottom: `1px solid ${
+    theme.palette.mode === 'dark'
+      ? 'rgba(255,255,255,0.07)'
+      : 'rgba(0,0,0,0.07)'
+  }`,
+});
+
+export const dockEditTitleStyles = (theme: Theme) => ({
+  fontWeight: 700,
+  fontSize: '0.82rem',
+  letterSpacing: '0.02em',
+  textTransform: 'uppercase',
+  color: theme.palette.mode === 'dark'
+    ? 'rgba(255,255,255,0.55)'
+    : 'rgba(0,0,0,0.45)',
+  display: 'flex',
+  alignItems: 'center',
+  gap: 1,
+});
+
+export const dockEditHintStyles = (theme: Theme) => ({
+  fontSize: '0.66rem',
+  fontWeight: 500,
+  color: theme.palette.mode === 'dark'
+    ? 'rgba(255,255,255,0.28)'
+    : 'rgba(0,0,0,0.28)',
+  textAlign: 'center',
+});
+
+// Edit mode: each item gets vertical layout (icon + label + switch)
+export const dockItemEditWrapperStyles = (theme: Theme) => ({
   display: 'flex',
   flexDirection: 'column',
   alignItems: 'center',
-  gap: 0.25,
+  gap: 0.4,
   position: 'relative',
+  px: 0.75,
+  py: 0.5,
+  borderRadius: '12px',
+  transition: 'background-color 0.15s ease, opacity 0.2s ease, transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1)',
+  '&:hover': {
+    backgroundColor: theme.palette.mode === 'dark'
+      ? 'rgba(255,255,255,0.05)'
+      : 'rgba(0,0,0,0.03)',
+  },
+  // Highlight when a drag is hovering over this item as a drop target
+  '&.is-drop-target': {
+    backgroundColor: theme.palette.mode === 'dark'
+      ? 'rgba(129,140,248,0.16)'
+      : 'rgba(99,102,241,0.1)',
+    boxShadow: `inset 0 0 0 1.5px ${
+      theme.palette.mode === 'dark'
+        ? 'rgba(129,140,248,0.5)'
+        : 'rgba(99,102,241,0.45)'
+    }`,
+  },
+});
+
+// Staggered entrance animation for items when entering edit mode.
+// Only transforms are animated so hidden items keep their inline opacity.
+export const dockItemEditEntranceStyles: SxProps<Theme> = {
+  animation: 'dockItemIn 0.28s cubic-bezier(0.16, 1, 0.3, 1) both',
+  '@keyframes dockItemIn': {
+    from: { transform: 'translateY(6px) scale(0.96)' },
+    to: { transform: 'translateY(0) scale(1)' },
+  },
 };
 
-// Drag handle for reordering in edit mode
-export const dockDragHandleStyles: SxProps<Theme> = (theme) => ({
+// Label shown under each icon in edit mode
+export const dockItemLabelStyles = (theme: Theme) => ({
+  fontSize: '0.6rem',
+  fontWeight: 600,
+  lineHeight: 1.15,
+  textAlign: 'center',
+  maxWidth: 56,
+  overflow: 'hidden',
+  textOverflow: 'ellipsis',
+  whiteSpace: 'nowrap',
+  color: theme.palette.mode === 'dark'
+    ? 'rgba(255,255,255,0.45)'
+    : 'rgba(0,0,0,0.45)',
+});
+
+// Drag handle for reordering in edit mode — plain icon (no badge/pill), hugs the item below
+export const dockDragHandleStyles = (theme: Theme) => ({
   position: 'absolute',
-  top: -4,
+  top: -9,
   left: '50%',
   transform: 'translateX(-50%)',
-  width: 28,
-  height: 20,
-  borderRadius: '6px',
   display: 'flex',
   alignItems: 'center',
   justifyContent: 'center',
   cursor: 'grab',
   color: theme.palette.mode === 'dark'
-    ? 'rgba(255,255,255,0.25)'
-    : 'rgba(0,0,0,0.2)',
-  background: theme.palette.mode === 'dark'
-    ? 'rgba(255,255,255,0.04)'
-    : 'rgba(0,0,0,0.03)',
+    ? 'rgba(255,255,255,0.3)'
+    : 'rgba(0,0,0,0.25)',
   transition: 'all 0.2s cubic-bezier(0.34, 1.56, 0.64, 1)',
   zIndex: 2,
   '&:hover': {
-    color: theme.palette.mode === 'dark'
-      ? 'rgba(255,255,255,0.7)'
-      : 'rgba(0,0,0,0.6)',
-    background: theme.palette.mode === 'dark'
-      ? 'rgba(255,255,255,0.12)'
-      : 'rgba(0,0,0,0.1)',
+    color: theme.palette.primary.main,
     transform: 'translateX(-50%) scale(1.2)',
-    boxShadow: theme.palette.mode === 'dark'
-      ? '0 2px 8px rgba(0,0,0,0.3)'
-      : '0 2px 8px rgba(0,0,0,0.08)',
   },
   '&:active': {
     cursor: 'grabbing',
     transform: 'translateX(-50%) scale(0.92)',
-    background: theme.palette.mode === 'dark'
-      ? 'rgba(255,255,255,0.16)'
-      : 'rgba(0,0,0,0.14)',
+    color: theme.palette.primary.main,
   },
 });
 
 // Item wrapper when being dragged
-export const dockItemDraggingStyles: SxProps<Theme> = (theme) => ({
-  opacity: 0.4,
-  transform: 'scale(0.95)',
+export const dockItemDraggingStyles = (theme: Theme) => ({
+  opacity: 0.35,
+  transform: 'scale(0.92)',
+  filter: 'grayscale(0.5)',
   transition: 'all 0.15s ease',
+  boxShadow: theme.palette.mode === 'dark'
+    ? '0 8px 24px rgba(0,0,0,0.4)'
+    : '0 8px 24px rgba(0,0,0,0.12)',
 });
 
 // Drop indicator (shown between items during drag)
-export const dockDropIndicatorStyles: SxProps<Theme> = (theme) => ({
+export const dockDropIndicatorStyles = (theme: Theme) => ({
   width: 4,
   height: 52,
   borderRadius: 4,
-  background: theme.palette.primary.main,
+  background: 'linear-gradient(180deg, #818cf8, #6366f1)',
   flexShrink: 0,
-  opacity: 0.9,
+  opacity: 0.95,
   transition: 'all 0.2s ease',
+  boxShadow: theme.palette.mode === 'dark'
+    ? '0 0 12px rgba(99,102,241,0.5)'
+    : '0 0 12px rgba(99,102,241,0.3)',
 });
 
 // Subtle tick shown in the empty start/end drop zones (edit mode)
-export const dockEndZoneTickStyles: SxProps<Theme> = (theme) => ({
+export const dockEndZoneTickStyles = (theme: Theme) => ({
   width: 2,
   height: 28,
   borderRadius: 2,
@@ -115,17 +198,21 @@ export const dockEndZoneTickStyles: SxProps<Theme> = (theme) => ({
     : 'rgba(0,0,0,0.12)',
 });
 
-export const dockItemSwitchStyles: SxProps<Theme> = {};
+// Switch in edit mode (dimmed when the item is hidden).
+// Kept at full size so it stays an easy touch target.
+export const dockItemSwitchStyles = (_theme: Theme) => ({
+  transition: 'opacity 0.2s ease',
+});
 
 // Edit mode footer bar
-export const dockEditFooterStyles: SxProps<Theme> = (theme) => ({
+export const dockEditFooterStyles = (theme: Theme) => ({
   display: 'flex',
   alignItems: 'center',
   justifyContent: 'space-between',
   width: '100%',
   mt: 1.25,
-  pt: 1.25,
-  px: 0.75,
+  pt: 1,
+  px: 0.5,
   borderTop: `1px solid ${
     theme.palette.mode === 'dark'
       ? 'rgba(255,255,255,0.08)'
@@ -133,12 +220,19 @@ export const dockEditFooterStyles: SxProps<Theme> = (theme) => ({
   }`,
 });
 
-export const dockEditHiddenCountStyles: SxProps<Theme> = (theme) => ({
-  fontSize: '0.65rem',
-  fontWeight: 500,
+export const dockEditHiddenCountStyles = (theme: Theme) => ({
+  fontSize: '0.66rem',
+  fontWeight: 600,
+  letterSpacing: '0.02em',
   color: theme.palette.mode === 'dark'
-    ? 'rgba(255,255,255,0.3)'
-    : 'rgba(0,0,0,0.3)',
+    ? 'rgba(255,255,255,0.35)'
+    : 'rgba(0,0,0,0.35)',
+  px: 0.75,
+  py: 0.25,
+  borderRadius: '99px',
+  backgroundColor: theme.palette.mode === 'dark'
+    ? 'rgba(255,255,255,0.05)'
+    : 'rgba(0,0,0,0.04)',
 });
 
 export const dockEditActionsStyles: SxProps<Theme> = {
@@ -146,46 +240,52 @@ export const dockEditActionsStyles: SxProps<Theme> = {
   gap: 0.5,
 };
 
-export const dockEditResetBtnStyles: SxProps<Theme> = (theme) => ({
+// Reset button — standard text button, compact, no border
+// (follows the theme's text button styling)
+export const dockEditResetBtnStyles = (theme: Theme) => ({
   textTransform: 'none',
   fontWeight: 600,
   fontSize: '0.7rem',
   color: theme.palette.mode === 'dark'
-    ? 'rgba(255,255,255,0.35)'
-    : 'rgba(0,0,0,0.35)',
-  borderRadius: '8px',
+    ? 'rgba(255,255,255,0.55)'
+    : 'rgba(0,0,0,0.55)',
+  borderRadius: '12px',
   px: 1.5,
-  py: 0.3,
+  py: 0.4,
   minWidth: 0,
   minHeight: 0,
   lineHeight: 1.3,
   '&:hover': {
     background: theme.palette.mode === 'dark'
-      ? 'rgba(255,255,255,0.06)'
-      : 'rgba(0,0,0,0.04)',
-    color: theme.palette.mode === 'dark'
-      ? 'rgba(255,255,255,0.7)'
-      : 'rgba(0,0,0,0.7)',
+      ? 'rgba(255,255,255,0.08)'
+      : 'rgba(0,0,0,0.05)',
+    color: theme.palette.text.primary,
   },
 });
 
-export const dockEditDoneBtnStyles: SxProps<Theme> = (theme) => ({
+// Done button — standard contained button (theme primary), compact size, no shadow
+export const dockEditDoneBtnStyles = (theme: Theme) => ({
   textTransform: 'none',
-  fontWeight: 700,
+  fontWeight: 600,
   fontSize: '0.7rem',
-  borderRadius: '8px',
+  borderRadius: '12px',
   px: 2,
-  py: 0.3,
+  py: 0.4,
   minWidth: 0,
   minHeight: 0,
   lineHeight: 1.3,
-  background: theme.palette.mode === 'dark'
-    ? 'rgba(255,255,255,0.1)'
-    : theme.palette.primary.main,
-  color: '#ffffff',
+  background: theme.palette.primary.main,
+  color: theme.palette.primary.contrastText,
+  boxShadow: 'none',
   '&:hover': {
     background: theme.palette.mode === 'dark'
-      ? 'rgba(255,255,255,0.18)'
-      : theme.palette.primary.dark,
+      ? '#d4d4d4'
+      : '#1a1a1a',
+    boxShadow: 'none',
+    transform: 'translateY(-1px)',
+  },
+  '&:active': {
+    transform: 'translateY(0)',
+    boxShadow: 'none',
   },
 });

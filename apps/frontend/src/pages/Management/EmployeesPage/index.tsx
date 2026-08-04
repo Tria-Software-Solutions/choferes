@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback, useMemo } from "react";
+import React, { useState, useEffect, useCallback, useMemo, useRef } from "react";
 import { useAuthContext } from "../../../context/AuthContext";
 import { Employee } from "../../../models/Employee";
 import { useSelector, useDispatch } from "react-redux";
@@ -8,6 +8,8 @@ import {
   createEmployee,
   updateEmployee,
   deleteEmployee,
+  updateEmployeeAvatar,
+  removeEmployeeAvatar,
 } from "../../../store/slices/employeeSlice";
 import SearchBarComponent from "../../../components/SearchBar/SearchBar.component";
 import SpeedDialComponent from "../../../components/SpeedDial/SpeedDial.component";
@@ -23,12 +25,14 @@ import {
   Box,
   Typography,
   TextField,
-  Avatar,
   useTheme,
   useMediaQuery,
   CircularProgress,
   Backdrop,
   Paper,
+  Dialog,
+  DialogContent,
+  DialogActions,
 } from "@mui/material";
 import {
   createExportOptions,
@@ -38,7 +42,7 @@ import PAGE_TITLE from "../../../constants/pageTitle.constants";
 import PERMISSIONS from "../../../constants/permissions.constants";
 import NOTIFICATIONS from "../../../constants/notifications.constants";
 import MANAGEMENT from "../../../constants/management.constants";
-import { UsersRound, Download, X, Search, Plus, Trash2, PlusCircle, Mail } from "lucide-react";
+import { UsersRound, Download, X, Search, Plus, Trash2, PlusCircle, Mail, Pencil, Loader2, Camera } from "lucide-react";
 import { PdfIcon, ExcelIcon } from "../../../components/Icons/FileIcons";
 import {
   exportSpeedDialBoxStyles,
@@ -55,7 +59,8 @@ import { useDebounce } from "../../../hooks/useDebounce";
 import { format } from "date-fns";
 import { es } from "date-fns/locale";
 import { capitalizeFirstLetter } from "../../../utils/string";
-import { getEmployeeColor } from "../../../utils/employeeColors";
+import { getAvatarSrc, resizeAvatarFile } from "../../../utils/avatar";
+import EmployeeAvatar from "../../../components/EmployeeAvatar/EmployeeAvatar.component";
 
 const getInitialRowsPerPage = () => {
   // Example: calculate based on window size or available height
@@ -90,6 +95,13 @@ const EmployeesPage: React.FC = () => {
   const [employeeToDelete, setEmployeeToDelete] = useState<number | null>(null);
   const [isEditFormValid, setIsEditFormValid] = useState(false);
   const [isDeletingEmployee, setIsDeletingEmployee] = useState(false);
+  // Avatar picker modal state (same UX as the user avatar modal)
+  const [avatarDialogEmployee, setAvatarDialogEmployee] = useState<Employee | null>(null);
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const [avatarPreview, setAvatarPreview] = useState<string | null>(null);
+  const [isUploadingAvatar, setIsUploadingAvatar] = useState(false);
+  const [avatarLoadFailed, setAvatarLoadFailed] = useState(false);
+  const avatarFileInputRef = useRef<HTMLInputElement>(null);
 
   const inputSx = {
     '& .MuiInputBase-root': {
@@ -246,6 +258,108 @@ const EmployeesPage: React.FC = () => {
     }
   };
 
+  // Get the avatar URL for the employee in the picker dialog
+  const getDialogAvatarUrl = () => {
+    if (!avatarDialogEmployee?.avatar) return null;
+    return getAvatarSrc(avatarDialogEmployee.avatar) ?? null;
+  };
+
+  // Reset the broken-image fallback whenever the dialog target changes
+  useEffect(() => {
+    setAvatarLoadFailed(false);
+  }, [avatarDialogEmployee?.avatar]);
+
+  const handleOpenAvatarDialog = (employee: Employee) => {
+    setAvatarDialogEmployee(employee);
+    setSelectedFile(null);
+    setAvatarPreview(null);
+    setAvatarLoadFailed(false);
+  };
+
+  // Resets the dialog state (no guard) — used by the guarded close handler
+  // and by the success paths, which must close even while uploading.
+  const resetAvatarDialog = () => {
+    setAvatarDialogEmployee(null);
+    setSelectedFile(null);
+    setAvatarPreview(null);
+    if (avatarFileInputRef.current) {
+      avatarFileInputRef.current.value = "";
+    }
+  };
+
+  const handleCloseAvatarDialog = () => {
+    if (isUploadingAvatar) return;
+    resetAvatarDialog();
+  };
+
+  // Validate + downscale the selected image and show a preview
+  const handleAvatarFileSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    // Validate file type
+    if (!["image/jpeg", "image/png", "image/gif", "image/webp"].includes(file.type)) {
+      showNotification("Solo se permiten imágenes (JPEG, PNG, GIF, WebP)", { severity: "error" });
+      return;
+    }
+
+    // Validate file size (5MB max)
+    if (file.size > 5 * 1024 * 1024) {
+      showNotification("La imagen no debe superar los 5MB", { severity: "error" });
+      return;
+    }
+
+    try {
+      const resized = await resizeAvatarFile(file);
+      setSelectedFile(resized);
+      const reader = new FileReader();
+      reader.onload = (event) => {
+        setAvatarPreview(event.target?.result as string);
+      };
+      reader.readAsDataURL(resized);
+    } catch (error) {
+      showNotification("No se pudo procesar la imagen", { severity: "error" });
+    }
+  };
+
+  // Upload the selected avatar for the employee in the dialog
+  const handleUploadAvatar = async () => {
+    if (!selectedFile || !avatarDialogEmployee) return;
+
+    setIsUploadingAvatar(true);
+    try {
+      await dispatch(
+        updateEmployeeAvatar({ id: avatarDialogEmployee.id, file: selectedFile }),
+      ).unwrap();
+      showNotification("Avatar actualizado exitosamente", { severity: "success", duration: 3000 });
+      // Close directly (bypasses the isUploadingAvatar guard) so the dialog
+      // doesn't stay stuck open after a successful upload.
+      setIsUploadingAvatar(false);
+      resetAvatarDialog();
+    } catch (error) {
+      showNotification("Error al actualizar el avatar", { severity: "error", duration: 5000 });
+    } finally {
+      setIsUploadingAvatar(false);
+    }
+  };
+
+  // Delete the avatar of the employee in the dialog
+  const handleAvatarDelete = async () => {
+    if (!avatarDialogEmployee) return;
+
+    setIsUploadingAvatar(true);
+    try {
+      await dispatch(removeEmployeeAvatar(avatarDialogEmployee.id)).unwrap();
+      showNotification("Avatar eliminado exitosamente", { severity: "success", duration: 3000 });
+      setIsUploadingAvatar(false);
+      resetAvatarDialog();
+    } catch (error) {
+      showNotification("Error al eliminar el avatar", { severity: "error", duration: 5000 });
+    } finally {
+      setIsUploadingAvatar(false);
+    }
+  };
+
   // Open/close delete confirmation dialog
   const handleOpenDeleteDialog = (id: number) => {
     setOpenDeleteDialog(true);
@@ -312,15 +426,21 @@ const EmployeesPage: React.FC = () => {
     [filteredEmployees]
   );
 
-  // Memoize export options based on permissions
+  // Memoize export options based on permissions.
+  // Excel y PDF comparten las mismas columnas; "Actualizado" se omite.
   const exportOptions = useMemo(() => {
-    const exportHeaders = ["Nombre", "Apellido", "Email", "Agregado", "Actualizado"];
+    const exportHeaders = ["Nombre", "Apellido", "Email", "Agregado"];
+    const exportRows = exportData.map((e) => {
+      const { Actualizado: _omit, ...rest } = e;
+      return rest;
+    });
     return createExportOptions({
       excelIcon: <ExcelIcon size={20} />,
       pdfIcon: <PdfIcon size={20} />,
-      data: exportData,
+      data: exportRows,
       fileName: `empleados-${exportFileFormattedDate(new Date())}`,
       customHeaders: exportHeaders,
+      title: "Reporte de Empleados",
     });
   }, [exportData]);
 
@@ -348,8 +468,7 @@ const EmployeesPage: React.FC = () => {
             ? String(editFields.lastName || "")
             : String(rowData.lastName || "");
           const fullName = `${firstName} ${lastName}`.trim() || 'Nombre Completo';
-          const initials = `${(firstName.charAt(0) || '').toUpperCase()}${(lastName.charAt(0) || '').toUpperCase()}` || '?';
-          const empColor = getEmployeeColor(rowId);
+          const canPickAvatar = hasEditPermissions || isEditing;
 
           if (isEditing) {
             return (
@@ -357,19 +476,43 @@ const EmployeesPage: React.FC = () => {
                 sx={{ display: 'flex', alignItems: 'center', gap: 1.5, py: 0.5, width: '100%', minWidth: 0 }}
                 onMouseDown={(e) => e.stopPropagation()}
               >
-                <Avatar
+                {/* Avatar with edit-on-hover (only while editing) — opens the picker modal */}
+                <Box
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handleOpenAvatarDialog(rowData);
+                  }}
                   sx={{
+                    position: 'relative',
                     width: 32,
                     height: 32,
-                    fontSize: '0.75rem',
-                    fontWeight: 700,
-                    bgcolor: empColor,
-                    color: '#fff',
+                    borderRadius: '50%',
                     flexShrink: 0,
+                    cursor: 'pointer',
+                    '&:hover .avatar-edit-overlay': { opacity: 1 },
                   }}
                 >
-                  {initials}
-                </Avatar>
+                  <EmployeeAvatar
+                    employee={{ id: rowId, firstName, lastName, avatar: rowData.avatar }}
+                    size={32}
+                  />
+                  <Box
+                    className="avatar-edit-overlay"
+                    sx={{
+                      position: 'absolute',
+                      inset: 0,
+                      borderRadius: '50%',
+                      backgroundColor: 'rgba(0,0,0,0.55)',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      opacity: 0,
+                      transition: 'opacity 0.2s ease',
+                    }}
+                  >
+                    <Pencil size={12} color="#fff" />
+                  </Box>
+                </Box>
                 <Box sx={{ display: 'flex', gap: 0.5, flex: 1, minWidth: 0 }}>
                   <TextField
                     value={String(editFields.firstName || '')}
@@ -394,19 +537,28 @@ const EmployeesPage: React.FC = () => {
 
           return (
             <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, py: 0.5 }}>
-              <Avatar
+              <Box
+                onClick={(e) => {
+                  if (!canPickAvatar) return;
+                  e.stopPropagation();
+                  handleOpenAvatarDialog(rowData);
+                }}
+                title={canPickAvatar ? "Cambiar foto" : undefined}
                 sx={{
-                  width: 32,
-                  height: 32,
-                  fontSize: '0.75rem',
-                  fontWeight: 700,
-                  bgcolor: empColor,
-                  color: '#fff',
+                  display: 'flex',
+                  alignItems: 'center',
+                  borderRadius: '50%',
                   flexShrink: 0,
+                  cursor: canPickAvatar ? 'pointer' : 'default',
+                  transition: 'transform 0.15s ease',
+                  '&:hover': canPickAvatar ? { transform: 'scale(1.06)' } : undefined,
                 }}
               >
-                {initials}
-              </Avatar>
+                <EmployeeAvatar
+                  employee={{ id: rowId, firstName, lastName, avatar: rowData.avatar }}
+                  size={32}
+                />
+              </Box>
               <Typography
                 component="span"
                 sx={{ fontWeight: 600, fontSize: '0.9rem', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}
@@ -537,6 +689,7 @@ const EmployeesPage: React.FC = () => {
       handleUpdate,
       handleCancel,
       handleOpenDeleteDialog,
+      handleOpenAvatarDialog,
     ]
   );
 
@@ -748,6 +901,279 @@ const EmployeesPage: React.FC = () => {
           isLoading={isSubmitting}
         />
       </DialogComponent>
+
+      {/* Avatar Picker Modal — same UX as the user avatar modal */}
+      <Dialog
+        open={avatarDialogEmployee !== null}
+        onClose={handleCloseAvatarDialog}
+        maxWidth="xs"
+        fullWidth
+        PaperProps={{
+          sx: {
+            borderRadius: "20px",
+            p: 0,
+            overflow: "hidden",
+            boxShadow: "0 25px 60px rgba(0,0,0,0.15), 0 4px 16px rgba(0,0,0,0.06)",
+          },
+        }}
+      >
+        {/* Header with icon box */}
+        <Box sx={{ px: { xs: 2.5, sm: 4 }, pt: { xs: 2.5, sm: 3.5 }, pb: 0 }}>
+          <Box display="flex" alignItems="center" gap={1.5} mb={0.75}>
+            <Box
+              sx={{
+                backgroundColor: theme.palette.primary.main,
+                borderRadius: "12px",
+                p: 1,
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                boxShadow: "0 4px 12px rgba(0,0,0,0.08)",
+              }}
+            >
+              <Camera size={18} color={theme.palette.primary.contrastText} />
+            </Box>
+            <Typography
+              variant="h6"
+              sx={{
+                fontWeight: 700,
+                fontSize: "1.15rem",
+                color: theme.palette.text.primary,
+                letterSpacing: "-0.02em",
+              }}
+            >
+              Foto del empleado
+            </Typography>
+          </Box>
+          <Typography
+            variant="body2"
+            color="textSecondary"
+            sx={{ fontSize: "0.85rem", lineHeight: 1.5, pl: 6 }}
+          >
+            Sube una foto para personalizar el perfil de{" "}
+            {avatarDialogEmployee
+              ? `${avatarDialogEmployee.firstName} ${avatarDialogEmployee.lastName}`
+              : "el empleado"}
+            .
+          </Typography>
+        </Box>
+
+        <DialogContent sx={{ pb: 1, pt: 3, px: { xs: 2.5, sm: 4 } }}>
+          <Box sx={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 3 }}>
+            {/* Avatar Preview Circle */}
+            <Box
+              sx={{
+                width: 180,
+                height: 180,
+                borderRadius: "50%",
+                overflow: "hidden",
+                position: "relative",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                backgroundColor: theme.palette.mode === "dark" ? "rgba(255,255,255,0.03)" : "rgba(0,0,0,0.03)",
+                border: `3px solid ${theme.palette.mode === "dark" ? "rgba(255,255,255,0.08)" : "rgba(0,0,0,0.06)"}`,
+                transition: "all 0.3s ease",
+                boxShadow: avatarPreview || getDialogAvatarUrl()
+                  ? "0 8px 32px rgba(0,0,0,0.15)"
+                  : "0 4px 16px rgba(0,0,0,0.06)",
+              }}
+            >
+              {avatarPreview ? (
+                <img
+                  src={avatarPreview}
+                  alt="Preview"
+                  style={{
+                    width: "100%",
+                    height: "100%",
+                    objectFit: "cover",
+                  }}
+                />
+              ) : getDialogAvatarUrl() && !avatarLoadFailed ? (
+                <img
+                  src={getDialogAvatarUrl()!}
+                  alt="Avatar del empleado"
+                  onError={() => setAvatarLoadFailed(true)}
+                  style={{
+                    width: "100%",
+                    height: "100%",
+                    objectFit: "cover",
+                  }}
+                />
+              ) : avatarDialogEmployee ? (
+                <EmployeeAvatar
+                  employee={avatarDialogEmployee}
+                  size={180}
+                  sx={{ fontSize: "3.5rem" }}
+                />
+              ) : (
+                <Box />
+              )}
+              {isUploadingAvatar && (
+                <Box
+                  sx={{
+                    position: "absolute",
+                    inset: 0,
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    backgroundColor: "rgba(0,0,0,0.5)",
+                    borderRadius: "50%",
+                    backdropFilter: "blur(2px)",
+                  }}
+                >
+                  <CircularProgress size={44} sx={{ color: "#fff" }} />
+                </Box>
+              )}
+            </Box>
+
+            {/* Drop zone / Select area */}
+            <Box
+              onClick={() => avatarFileInputRef.current?.click()}
+              sx={{
+                width: "100%",
+                border: `2px dashed ${theme.palette.mode === "dark" ? "rgba(255,255,255,0.12)" : "rgba(0,0,0,0.12)"}`,
+                borderRadius: "14px",
+                p: 3,
+                display: "flex",
+                flexDirection: "column",
+                alignItems: "center",
+                gap: 1.5,
+                cursor: "pointer",
+                transition: "all 0.2s cubic-bezier(0.4, 0, 0.2, 1)",
+                backgroundColor: selectedFile
+                  ? (theme.palette.mode === "dark" ? "rgba(255,255,255,0.04)" : "rgba(0,0,0,0.02)")
+                  : "transparent",
+                borderColor: selectedFile
+                  ? theme.palette.primary.main
+                  : (theme.palette.mode === "dark" ? "rgba(255,255,255,0.12)" : "rgba(0,0,0,0.12)"),
+                "&:hover": {
+                  borderColor: theme.palette.primary.main,
+                  backgroundColor: theme.palette.mode === "dark"
+                    ? "rgba(255,255,255,0.04)"
+                    : "rgba(0,0,0,0.02)",
+                },
+              }}
+            >
+              <Box
+                sx={{
+                  backgroundColor: theme.palette.mode === "dark"
+                    ? "rgba(255,255,255,0.06)"
+                    : "rgba(0,0,0,0.04)",
+                  borderRadius: "10px",
+                  p: 1.25,
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  transition: "all 0.2s ease",
+                }}
+              >
+                <Camera size={22} color={theme.palette.text.secondary} />
+              </Box>
+              {selectedFile ? (
+                <Typography
+                  variant="body2"
+                  sx={{
+                    fontWeight: 600,
+                    color: theme.palette.text.primary,
+                    fontSize: "0.875rem",
+                    textAlign: "center",
+                    wordBreak: "break-all",
+                    maxWidth: "100%",
+                  }}
+                >
+                  {selectedFile.name}
+                </Typography>
+              ) : (
+                <Box sx={{ textAlign: "center" }}>
+                  <Typography
+                    variant="body2"
+                    sx={{
+                      fontWeight: 600,
+                      color: theme.palette.text.primary,
+                      fontSize: "0.875rem",
+                    }}
+                  >
+                    Haz clic para seleccionar una imagen
+                  </Typography>
+                  <Typography
+                    variant="caption"
+                    sx={{
+                      color: theme.palette.text.secondary,
+                      fontSize: "0.75rem",
+                      mt: 0.25,
+                      display: "block",
+                    }}
+                  >
+                    JPEG, PNG, GIF o WebP · Máx 5MB
+                  </Typography>
+                </Box>
+              )}
+            </Box>
+
+            {/* File Input */}
+            <input
+              ref={avatarFileInputRef}
+              type="file"
+              accept="image/jpeg,image/png,image/gif,image/webp"
+              onChange={handleAvatarFileSelect}
+              style={{ display: "none" }}
+            />
+          </Box>
+        </DialogContent>
+
+        <DialogActions sx={{ px: { xs: 2.5, sm: 4 }, pb: { xs: 2.5, sm: 3.5 }, pt: 1.5, gap: 1, flexDirection: { xs: "column", sm: "row" }, justifyContent: "space-between" }}>
+          {getDialogAvatarUrl() && !selectedFile ? (
+            <Button
+              variant="text"
+              color="error"
+              onClick={handleAvatarDelete}
+              disabled={isUploadingAvatar}
+              startIcon={isUploadingAvatar ? <Loader2 size={16} className="animate-spin" /> : <X size={16} />}
+              sx={{
+                order: { xs: 2, sm: 1 },
+                "&:hover": {
+                  backgroundColor: theme.palette.mode === "dark"
+                    ? "rgba(244,67,54,0.1)"
+                    : "rgba(244,67,54,0.06)",
+                },
+              }}
+            >
+              Eliminar
+            </Button>
+          ) : (
+            <Box /> /* Spacer */
+          )}
+          <Box sx={{ display: "flex", gap: 1, order: { xs: 1, sm: 2 } }}>
+            <Button
+              variant="outlined"
+              onClick={handleCloseAvatarDialog}
+              disabled={isUploadingAvatar}
+            >
+              Cancelar
+            </Button>
+            <Button
+              variant="contained"
+              onClick={selectedFile ? handleUploadAvatar : () => avatarFileInputRef.current?.click()}
+              disabled={isUploadingAvatar}
+              sx={{ minWidth: 120 }}
+              startIcon={
+                isUploadingAvatar ? (
+                  <Loader2 size={16} className="animate-spin" />
+                ) : selectedFile ? (
+                  <Camera size={16} />
+                ) : undefined
+              }
+            >
+              {isUploadingAvatar
+                ? "Subiendo..."
+                : selectedFile
+                ? "Subir foto"
+                : "Seleccionar"}
+            </Button>
+          </Box>
+        </DialogActions>
+      </Dialog>
     </Box>
   );
 };

@@ -70,7 +70,8 @@ User.init(
       defaultValue: true,
     },
     avatar: {
-      type: DataTypes.STRING,
+      // TEXT so it can hold a base64 data URL (VARCHAR(255) would truncate it)
+      type: DataTypes.TEXT,
       allowNull: true,
     },
     settings: {

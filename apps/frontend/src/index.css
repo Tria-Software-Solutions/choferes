@@ -56,7 +56,9 @@ body {
   outline: none;
 }
 
-*:focus-visible {
+/* Focus visible solo para navegación por teclado en elementos interactivos no-form.
+   Los inputs/selects/textareas usan sus propios estados de focus de MUI (sin contorno negro). */
+*:focus-visible:not(input):not(textarea):not(select):not([role="combobox"]) {
   outline: 2px solid #000000;
   outline-offset: 2px;
 }
@@ -140,20 +142,6 @@ code {
   display: grid;
   gap: clamp(12px, 2vw, 24px);
   grid-template-columns: repeat(auto-fill, minmax(min(280px, 100%), 1fr));
-}
-
-/* Input focus ring animation */
-@keyframes focusRing {
-  from {
-    box-shadow: 0 0 0 0 rgba(0, 0, 0, 0);
-  }
-  to {
-    box-shadow: 0 0 0 3px rgba(0, 0, 0, 0.05);
-  }
-}
-
-.Mui-focused {
-  animation: focusRing 0.2s ease-out forwards;
 }
 
 /* Use viewport units for responsive positioning - menu will flip based on available space */

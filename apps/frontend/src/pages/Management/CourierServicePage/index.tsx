@@ -366,6 +366,7 @@ const CourierServicePage: React.FC = () => {
       data: exportData,
       fileName: `reporte-de-servicios-de-mensajeria-${exportFileFormattedDate(selectedDate || new Date())}`,
       customHeaders: exportHeaders,
+      title: "Reporte de Servicios de Mensajería",
     });
   }, [exportData, selectedDate]);
 

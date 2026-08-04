@@ -97,8 +97,10 @@ export const autoGenerateModalTextFieldStyles = (theme: Theme): SxProps<Theme> =
       backgroundColor: theme.palette.mode === "dark"
         ? "rgba(55,55,65,0.8)"
         : "rgba(255,255,255,0.95)",
-      borderColor: theme.palette.primary.main,
-      boxShadow: `0 0 0 3px ${theme.palette.mode === "dark" ? "rgba(255,255,255,0.08)" : "rgba(0,0,0,0.06)"}`,
+      borderColor: theme.palette.mode === "dark"
+        ? "rgba(255,255,255,0.2)"
+        : "rgba(0,0,0,0.15)",
+      boxShadow: "none",
     },
     "&.Mui-focused .MuiOutlinedInput-notchedOutline": {
       borderColor: "transparent",
@@ -184,30 +186,9 @@ export const autoGenerateModalFormGroupStyles = (theme: Theme): SxProps<Theme> =
   '& .MuiFormControlLabel-root': {
     marginBottom: theme.spacing(1),
   },
-  '& .MuiSwitch-root': {
-    color: theme.palette.primary.main,
-  },
   '& .MuiFormControlLabel-label': {
     color: theme.palette.text.primary,
     fontWeight: 500,
-  },
-});
-
-export const autoGenerateModalSwitchStyles = (theme: Theme): SxProps<Theme> => ({
-  '& .MuiSwitch-switchBase': {
-    color: theme.palette.grey[400],
-    '&.Mui-checked': {
-      color: theme.palette.primary.main,
-    },
-    '&.Mui-disabled': {
-      color: theme.palette.action.disabled,
-    },
-  },
-  '& .MuiSwitch-track': {
-    backgroundColor: theme.palette.grey[300],
-    '&.Mui-checked': {
-      backgroundColor: theme.palette.primary.light,
-    },
   },
 });
 
@@ -266,8 +247,8 @@ export const autoGenerateModalIndividualHoursStyles = (theme: Theme): SxProps<Th
       borderWidth: 1,
     },
     '&.Mui-focused fieldset': {
-      borderColor: theme.palette.primary.main,
-      borderWidth: 2,
+      borderColor: theme.palette.mode === 'dark' ? 'rgba(255,255,255,0.25)' : 'rgba(0,0,0,0.2)',
+      borderWidth: 1,
     },
     '&.Mui-error fieldset': {
       borderColor: theme.palette.error.main,
@@ -313,8 +294,8 @@ export const autoGenerateModalCustomScheduleStyles = (theme: Theme): SxProps<The
       borderWidth: 1,
     },
     '&.Mui-focused fieldset': {
-      borderColor: theme.palette.primary.main,
-      borderWidth: 2,
+      borderColor: theme.palette.mode === 'dark' ? 'rgba(255,255,255,0.25)' : 'rgba(0,0,0,0.2)',
+      borderWidth: 1,
     },
     '& input': {
       color: theme.palette.text.primary,
@@ -390,7 +371,7 @@ export const autoGenerateModalGenerateButtonStyles: SxProps<Theme> = {
   ...autoGenerateModalButtonStyles,
   '&:hover': {
     transform: "translateY(-2px)",
-    boxShadow: "0 8px 25px rgba(99,102,241,0.35)",
+    boxShadow: "0 8px 25px rgba(0,0,0,0.15)",
   },
 };
 

@@ -189,7 +189,7 @@ export const getScheduleRowStyles = (theme: Theme, isSmallScreen: boolean, rowIn
     "&:focus-within": {
       borderColor: "transparent",
       backgroundColor: theme.palette.mode === "dark" ? "rgba(40, 40, 45, 0.8)" : "rgba(255, 255, 255, 0.95)",
-      boxShadow: `0 0 0 3px ${theme.palette.mode === "dark" ? "rgba(25, 118, 210, 0.15)" : "rgba(25, 118, 210, 0.1)"}, 0 4px 12px rgba(0, 0, 0, 0.1)`,
+      boxShadow: "0 4px 12px rgba(0, 0, 0, 0.1)",
     },
   },
   searchIcon: {

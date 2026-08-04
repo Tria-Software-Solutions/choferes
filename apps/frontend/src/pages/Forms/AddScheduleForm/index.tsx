@@ -271,8 +271,8 @@ const AddScheduleForm: React.FC<AddScheduleFormProps> = ({
                                 borderColor: isFilled ? theme.palette.primary.main : theme.palette.text.disabled,
                               },
                               "&.Mui-focused fieldset": {
-                                borderColor: theme.palette.primary.main,
-                                borderWidth: "2px",
+                                borderColor: theme.palette.mode === "dark" ? "rgba(255,255,255,0.3)" : "rgba(0,0,0,0.25)",
+                                borderWidth: "1.5px",
                               },
                             },
                           }}
