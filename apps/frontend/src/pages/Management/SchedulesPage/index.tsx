@@ -391,19 +391,25 @@ const shortNames: Record<string, string> = {
   );
 
   const exportOptions = useMemo(() => {
-    const exportHeaders = [
-      "Nombre",
-      "Días",
-      "Horas",
-      "Agregado",
-      "Actualizado",
-    ];
+    // Excel y PDF comparten las mismas columnas: "Días" y "Horas" se fusionan
+    // en "Días y Horas" y se omite "Actualizado". Horas ya incluye cada día
+    // con su hora ("lunes: 8h, martes: 8h"), así que se usa ese detalle como
+    // contenido de la columna fusionada.
+    const exportHeaders = ["Nombre", "Días y Horas", "Agregado"];
+    const exportRows = exportData.map((s) => {
+      const { Días, Horas, Actualizado: _omit, ...rest } = s;
+      return {
+        ...rest,
+        "Días y Horas": Horas || Días,
+      };
+    });
     return createExportOptions({
       excelIcon: <ExcelIcon />,
       pdfIcon: <PdfIcon />,
-      data: exportData,
+      data: exportRows,
       fileName: `horarios-${exportFileFormattedDate(new Date())}`,
       customHeaders: exportHeaders,
+      title: "Reporte de Horarios",
     });
   }, [exportData]);
 

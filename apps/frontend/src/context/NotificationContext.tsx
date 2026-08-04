@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, useCallback, useEffect, useMemo } from "react";
+import React, { createContext, useContext, useState, useCallback, useEffect, useMemo, useRef } from "react";
 import { Notification, NotificationFilters } from "../models/Notification";
 import { notificationEvents } from "../services/notificationService";
 import {
@@ -54,6 +54,34 @@ export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({ 
     [currentUser],
   );
 
+  // Keep the latest notification settings in a ref so the load effect below
+  // only re-runs when the logged-in user id changes. Without this, every
+  // settings update (e.g. toggling a notification switch) replaces the
+  // currentUser object, which re-created isNotificationEnabled and triggered
+  // a full notifications refetch on each toggle.
+  const notificationSettingsRef = useRef<Record<string, boolean>>({});
+  notificationSettingsRef.current = currentUser
+    ? getNotificationSettings(currentUser.settings)
+    : {};
+
+  // Re-filter in-memory notifications when notification settings change
+  // (e.g. the user disables a notification type in Settings). This is purely
+  // local — no API refetch — so toggling a switch stays instant.
+  const appliedSettingsRef = useRef<string | null>(null);
+  useEffect(() => {
+    const settingsKey = JSON.stringify(notificationSettingsRef.current);
+    if (settingsKey === appliedSettingsRef.current) return;
+    appliedSettingsRef.current = settingsKey;
+    const settings = notificationSettingsRef.current;
+    setNotifications((prev) =>
+      prev.filter((n) => {
+        const key = notificationSourceToSettingKey(n.source);
+        if (!key) return true;
+        return settings[key] ?? true;
+      }),
+    );
+  }, [currentUser?.settings]);
+
   // Sync notifications from the database whenever the logged-in user changes.
   // Also generates payment reminders (15th / last day of month) on open.
   useEffect(() => {
@@ -72,7 +100,14 @@ export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({ 
         await generatePaymentRemindersInApi();
         const data = await fetchNotificationsFromApi();
         if (!cancelled) {
-          setNotifications(data.filter((n) => isNotificationEnabled(n.source)));
+          const settings = notificationSettingsRef.current;
+          setNotifications(
+            data.filter((n) => {
+              const key = notificationSourceToSettingKey(n.source);
+              if (!key) return true;
+              return settings[key] ?? true;
+            }),
+          );
         }
       } catch (error) {
         // Keep previous notifications on failure (offline / API down)
@@ -90,7 +125,7 @@ export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({ 
     return () => {
       cancelled = true;
     };
-  }, [currentUser?.id, isNotificationEnabled]);
+  }, [currentUser?.id]);
 
   // Get unread count
   const unreadCount = useMemo(() => {

@@ -8,6 +8,11 @@ import {
   paginationRules,
   validate,
 } from "../middleware/validation";
+import {
+  upload as multerUpload,
+  uploadEmployeeAvatar,
+  deleteEmployeeAvatar,
+} from "../controllers/avatarController";
 
 const router = express.Router();
 
@@ -22,5 +27,9 @@ router.put(
   employeeController.updateEmployee,
 );
 router.delete("/:id", authenticateToken, idParam, validate, employeeController.deleteEmployee);
+
+// Employee avatar routes (base64 stored in DB, mirrors user avatar approach)
+router.post("/:id/avatar", authenticateToken, multerUpload.single("avatar"), uploadEmployeeAvatar);
+router.delete("/:id/avatar", authenticateToken, deleteEmployeeAvatar);
 
 export default router;

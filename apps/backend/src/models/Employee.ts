@@ -10,6 +10,8 @@ export class Employee extends Model {
   public lastName!: string; // Employee's last name
 
   public email!: string; // Employee's email address
+
+  public avatar?: string; // Avatar image as base64 data URL
 }
 
 Employee.init(
@@ -29,6 +31,10 @@ Employee.init(
     },
     email: {
       type: DataTypes.STRING,
+      allowNull: true,
+    },
+    avatar: {
+      type: DataTypes.TEXT,
       allowNull: true,
     },
   },

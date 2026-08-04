@@ -36,3 +36,21 @@ export const deleteEmployee = async (id: number) => {
   invalidateCache("/employees");
   return { id, message: response.data };
 };
+
+// Upload avatar for an employee (multipart/form-data)
+export const uploadEmployeeAvatar = async (id: number, file: File) => {
+  const formData = new FormData();
+  formData.append("avatar", file);
+
+  const response = await api.post(`/employees/${id}/avatar`, formData, {
+    headers: { "Content-Type": "multipart/form-data" },
+    timeout: 30000,
+  });
+  return response.data;
+};
+
+// Delete avatar for an employee
+export const deleteEmployeeAvatar = async (id: number) => {
+  const response = await api.delete(`/employees/${id}/avatar`);
+  return response.data;
+};

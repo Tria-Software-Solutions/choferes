@@ -94,6 +94,39 @@ export const deleteEmployee = createAsyncThunk(
   },
 );
 
+export const updateEmployeeAvatar = createAsyncThunk(
+  "employees/updateEmployeeAvatar",
+  async (
+    { id, file }: { id: number; file: File },
+    { rejectWithValue },
+  ) => {
+    // Uploads an avatar image for an employee
+    try {
+      const result = await EmployeeService.uploadEmployeeAvatar(id, file);
+      return { id, avatar: result.avatar };
+    } catch (error: unknown) {
+      const errorMessage =
+        error instanceof Error ? error.message : "Failed to update employee avatar";
+      return rejectWithValue(errorMessage);
+    }
+  },
+);
+
+export const removeEmployeeAvatar = createAsyncThunk(
+  "employees/removeEmployeeAvatar",
+  async (id: number, { rejectWithValue }) => {
+    // Deletes the avatar of an employee
+    try {
+      await EmployeeService.deleteEmployeeAvatar(id);
+      return { id, avatar: null };
+    } catch (error: unknown) {
+      const errorMessage =
+        error instanceof Error ? error.message : "Failed to delete employee avatar";
+      return rejectWithValue(errorMessage);
+    }
+  },
+);
+
 const employeeSlice = createSlice({
   name: "employees",
   initialState,
@@ -142,6 +175,26 @@ const employeeSlice = createSlice({
             (employee) => employee.id !== action.payload,
           );
           state.totalCountEmployees -= 1;
+        },
+      )
+      .addCase(
+        updateEmployeeAvatar.fulfilled,
+        (state, action: PayloadAction<{ id: number; avatar: string | null }>) => {
+          state.employees = state.employees.map((employee) =>
+            employee.id === action.payload.id
+              ? { ...employee, avatar: action.payload.avatar ?? undefined }
+              : employee,
+          );
+        },
+      )
+      .addCase(
+        removeEmployeeAvatar.fulfilled,
+        (state, action: PayloadAction<{ id: number; avatar: null }>) => {
+          state.employees = state.employees.map((employee) =>
+            employee.id === action.payload.id
+              ? { ...employee, avatar: undefined }
+              : employee,
+          );
         },
       );
   },

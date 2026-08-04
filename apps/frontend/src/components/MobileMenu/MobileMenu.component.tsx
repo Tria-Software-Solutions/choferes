@@ -11,8 +11,8 @@ import {
 } from "@mui/material";
 import { ChevronDown, X } from "lucide-react";
 import { useLocation, useNavigate } from "react-router-dom";
-import { API_URL } from "../../services/api";
 import { APPBAR_MENU } from "../../constants/constants";
+import { getAvatarSrc } from "../../utils/avatar";
 import logo from "../../assets/images/logo.png";
 import {
   drawerPaperStyles,
@@ -179,7 +179,7 @@ const MobileMenuDrawer: React.FC<MobileMenuDrawerProps> = ({
       {currentUser && (
         <Box sx={drawerUserCardStyles(theme)}>
           {currentUser.avatar ? (
-            <Avatar src={`${API_URL}${currentUser.avatar}`} sx={drawerAvatarStyles} />
+            <Avatar src={getAvatarSrc(currentUser.avatar)} sx={drawerAvatarStyles} />
           ) : (
             <Avatar sx={drawerAvatarStyles}>
               {currentUser.firstName?.[0]}
