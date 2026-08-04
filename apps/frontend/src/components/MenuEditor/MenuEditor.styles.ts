@@ -132,21 +132,7 @@ export const editorItemLabelStyles: SxProps<Theme> = (theme) => ({
   textOverflow: 'ellipsis',
 });
 
-export const editorItemSwitchStyles: SxProps<Theme> = {
-  '& .MuiSwitch-switchBase': {
-    '&.Mui-checked': {
-      '& + .MuiSwitch-track': {
-        opacity: 1,
-      },
-    },
-  },
-  '& .MuiSwitch-thumb': {
-    boxShadow: '0 2px 6px rgba(0,0,0,0.15)',
-  },
-  '& .MuiSwitch-sizeSmall': {
-    padding: '6px',
-  },
-};
+export const editorItemSwitchStyles: SxProps<Theme> = {};
 
 export const editorFooterStyles: SxProps<Theme> = (theme) => ({
   display: 'flex',

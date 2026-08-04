@@ -319,7 +319,6 @@ export default function Dock({
             <Switch
               checked={isVisible}
               onChange={() => onToggleItem?.(item.label)}
-              size="small"
               sx={{
                 ...dockItemSwitchStyles,
                 opacity: isVisible ? 1 : 0.5,

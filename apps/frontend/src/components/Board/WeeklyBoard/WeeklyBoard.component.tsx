@@ -1554,6 +1554,7 @@ const WeeklyBoard: React.FC<WeeklyBoardProps> = ({
 
   const [selectedPeriod, setSelectedPeriod] = useState<PeriodType>("weekly");
   const [popoverAnchor, setPopoverAnchor] = useState<HTMLElement | null>(null);
+  const [popoverSelectedLabel, setPopoverSelectedLabel] = useState<string>("");
   const [selectedEmployee, setSelectedEmployee] = useState<Employee | null>(null);
   const [selectedDay, setSelectedDay] = useState<string>("");
   const [selectedDateStr, setSelectedDateStr] = useState<string>("");
@@ -1842,11 +1843,13 @@ const WeeklyBoard: React.FC<WeeklyBoardProps> = ({
       if (!canEdit) return;
       e.stopPropagation();
       setSelectedEmployee(employee); setSelectedDay(day); setSelectedDateStr(date);
+      setPopoverSelectedLabel("");
       setPopoverAnchor(e.currentTarget);
     }, [canEdit]);
 
   const handleClosePopover = useCallback(() => {
     setPopoverAnchor(null); setSelectedEmployee(null); setSelectedDay(""); setSelectedDateStr("");
+    setPopoverSelectedLabel("");
   }, []);
 
   // ─── Quick-assign handlers (click to assign without dragging) ───
@@ -2101,78 +2104,118 @@ const WeeklyBoard: React.FC<WeeklyBoardProps> = ({
               borderRadius: "12px",
               boxShadow: isDark ? "0 10px 40px rgba(0,0,0,0.4)" : "0 10px 40px rgba(0,0,0,0.12)",
               border: `1px solid ${isDark ? "rgba(255,255,255,0.08)" : "rgba(0,0,0,0.06)"}`,
-              maxHeight: 280, minWidth: 170, overflow: "auto", mt: 0.5,
+              minWidth: 170, mt: 0.5,
+              display: "flex", flexDirection: "column",
+              height: 400,
+              overflow: "hidden",
             },
           },
         }}
       >
-        <List dense sx={{ py: 0.5 }}>
-          {popoverCurrentLabel && popoverCurrentLabel !== SELECTOR_TABLE.UNASSIGNED && (
-            <Box sx={{
-              px: 1.5, py: 0.75,
-              borderBottom: `1px solid ${isDark ? "rgba(255,255,255,0.05)" : "rgba(0,0,0,0.05)"}`,
-            }}>
-              <Typography sx={{ fontSize: "0.6rem", fontWeight: 600, color: "text.secondary", mb: 0.35 }}>
-                Actual
-              </Typography>
-              <Chip
-                label={popoverCurrentLabel} size="small"
+        <Box sx={{ overflow: "auto", flex: 1, minHeight: 0 }}>
+          <List dense sx={{ py: 0.5 }}>
+            {popoverCurrentLabel && popoverCurrentLabel !== SELECTOR_TABLE.UNASSIGNED && (
+              <Box sx={{
+                px: 1.5, py: 0.75,
+                borderBottom: `1px solid ${isDark ? "rgba(255,255,255,0.05)" : "rgba(0,0,0,0.05)"}`,
+              }}>
+                <Typography sx={{ fontSize: "0.6rem", fontWeight: 600, color: "text.secondary", mb: 0.35 }}>
+                  Actual
+                </Typography>
+                <Chip
+                  label={popoverCurrentLabel} size="small"
+                  sx={{
+                    fontWeight: 600, fontSize: "0.65rem", height: 22,
+                    backgroundColor: scheduleColorMap.get(popoverCurrentLabel)?.bg ?? "transparent",
+                    color: scheduleColorMap.get(popoverCurrentLabel)?.text ?? theme.palette.text.primary,
+                    border: `1px solid ${scheduleColorMap.get(popoverCurrentLabel)?.border ?? "transparent"}`,
+                  }}
+                />
+              </Box>
+            )}
+            {popoverOptions.map((option) => (
+              <ListItemButton
+                key={option.label}
+                onClick={() => setPopoverSelectedLabel(option.label)}
+                selected={option.label === popoverSelectedLabel}
                 sx={{
-                  fontWeight: 600, fontSize: "0.65rem", height: 22,
-                  backgroundColor: scheduleColorMap.get(popoverCurrentLabel)?.bg ?? "transparent",
-                  color: scheduleColorMap.get(popoverCurrentLabel)?.text ?? theme.palette.text.primary,
-                  border: `1px solid ${scheduleColorMap.get(popoverCurrentLabel)?.border ?? "transparent"}`,
+                  mx: 0.5, borderRadius: "7px", my: 0.2, px: 1.25, py: 0.75,
+                  "&.Mui-selected": { backgroundColor: option.color.bg },
+                  "&:hover": { backgroundColor: isDark ? "rgba(255,255,255,0.04)" : "rgba(0,0,0,0.03)" },
                 }}
-              />
-            </Box>
-          )}
-          {popoverOptions.map((option) => (
+              >
+                <Box sx={{
+                  width: 6, height: 6, borderRadius: "50%",
+                  backgroundColor: option.color.text, mr: 1.25, flexShrink: 0,
+                }} />
+                <ListItemText
+                  primary={option.label}
+                  primaryTypographyProps={{
+                    fontSize: "0.78rem",
+                    fontWeight: option.label === popoverSelectedLabel ? 700 : 500,
+                  }}
+                />
+                <Typography sx={{ fontSize: "0.6rem", fontWeight: 600, color: option.color.text, ml: 1 }}>
+                  {option.hours}h
+                </Typography>
+              </ListItemButton>
+            ))}
             <ListItemButton
-              key={option.label}
-              onClick={() => handleScheduleSelect(option.label)}
-              selected={option.label === popoverCurrentLabel}
+              onClick={() => setPopoverSelectedLabel(SELECTOR_TABLE.UNASSIGNED)}
+              selected={popoverSelectedLabel === SELECTOR_TABLE.UNASSIGNED}
               sx={{
                 mx: 0.5, borderRadius: "7px", my: 0.2, px: 1.25, py: 0.75,
-                "&.Mui-selected": { backgroundColor: option.color.bg },
+                borderTop: `1px solid ${isDark ? "rgba(255,255,255,0.05)" : "rgba(0,0,0,0.05)"}`,
+                mt: 0.5,
                 "&:hover": { backgroundColor: isDark ? "rgba(255,255,255,0.04)" : "rgba(0,0,0,0.03)" },
               }}
             >
-              <Box sx={{
-                width: 6, height: 6, borderRadius: "50%",
-                backgroundColor: option.color.text, mr: 1.25, flexShrink: 0,
-              }} />
               <ListItemText
-                primary={option.label}
+                primary={SELECTOR_TABLE.UNASSIGNED}
                 primaryTypographyProps={{
                   fontSize: "0.78rem",
-                  fontWeight: option.label === popoverCurrentLabel ? 700 : 500,
+                  fontWeight: popoverSelectedLabel === SELECTOR_TABLE.UNASSIGNED ? 700 : 400,
+                  color: "text.disabled",
                 }}
               />
-              <Typography sx={{ fontSize: "0.6rem", fontWeight: 600, color: option.color.text, ml: 1 }}>
-                {option.hours}h
-              </Typography>
             </ListItemButton>
-          ))}
-          <ListItemButton
-            onClick={() => handleScheduleSelect(SELECTOR_TABLE.UNASSIGNED)}
-            selected={popoverCurrentLabel === SELECTOR_TABLE.UNASSIGNED}
+          </List>
+        </Box>
+        {/* Sticky actions */}
+        <Box sx={{
+          display: "flex", gap: 0.75, p: 1,
+          borderTop: `1px solid ${isDark ? "rgba(255,255,255,0.06)" : "rgba(0,0,0,0.06)"}`,
+          flexShrink: 0,
+        }}>
+          <Box
+            onClick={handleClosePopover}
             sx={{
-              mx: 0.5, borderRadius: "7px", my: 0.2, px: 1.25, py: 0.75,
-              borderTop: `1px solid ${isDark ? "rgba(255,255,255,0.05)" : "rgba(0,0,0,0.05)"}`,
-              mt: 0.5,
-              "&:hover": { backgroundColor: isDark ? "rgba(255,255,255,0.04)" : "rgba(0,0,0,0.03)" },
+              flex: 1, textAlign: "center", py: 0.7, borderRadius: "8px", cursor: "pointer",
+              fontSize: "0.75rem", fontWeight: 600, color: "text.secondary",
+              transition: "all 0.15s ease",
+              "&:hover": { backgroundColor: isDark ? "rgba(255,255,255,0.05)" : "rgba(0,0,0,0.04)" },
             }}
           >
-            <ListItemText
-              primary={SELECTOR_TABLE.UNASSIGNED}
-              primaryTypographyProps={{
-                fontSize: "0.78rem",
-                fontWeight: popoverCurrentLabel === SELECTOR_TABLE.UNASSIGNED ? 700 : 400,
-                color: "text.disabled",
-              }}
-            />
-          </ListItemButton>
-        </List>
+            Cancelar
+          </Box>
+          <Box
+            onClick={() => {
+              if (popoverSelectedLabel) handleScheduleSelect(popoverSelectedLabel);
+            }}
+            sx={{
+              flex: 1, textAlign: "center", py: 0.7, borderRadius: "8px", cursor: "pointer",
+              fontSize: "0.75rem", fontWeight: 700,
+              backgroundColor: !popoverSelectedLabel
+                ? (isDark ? "rgba(99,102,241,0.12)" : "rgba(99,102,241,0.08)")
+                : "#6366f1",
+              color: !popoverSelectedLabel ? (isDark ? "rgba(255,255,255,0.25)" : "rgba(0,0,0,0.25)") : "#fff",
+              transition: "all 0.15s ease",
+              "&:hover": !popoverSelectedLabel ? {} : { backgroundColor: "#4f46e5" },
+            }}
+          >
+            Asignar
+          </Box>
+        </Box>
       </Popover>
 
       {/* ─── Quick-assign popover (click on day column / swimlane cell) ─── */}
