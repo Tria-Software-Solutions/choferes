@@ -447,7 +447,6 @@ const AutoGenerateModal: React.FC<AutoGenerateModalProps> = ({
                           e.target.checked
                         )
                       }
-                      size="small"
                       sx={autoGenerateModalSwitchStyles(theme)}
                     />
                   }
@@ -533,18 +532,7 @@ const AutoGenerateModal: React.FC<AutoGenerateModalProps> = ({
                         handleSelectAllEmployees();
                       }
                     }}
-                    size="small"
-                    sx={{
-                      '& .MuiSwitch-switchBase': {
-                        color: theme.palette.grey[400],
-                      },
-                      '& .MuiSwitch-switchBase.Mui-checked': {
-                        color: theme.palette.primary.main,
-                      },
-                      '& .MuiSwitch-switchBase.Mui-checked + .MuiSwitch-track': {
-                        backgroundColor: theme.palette.primary.main,
-                      },
-                    }}
+                    sx={autoGenerateModalSwitchStyles(theme)}
                   />
                 </Box>
               </Box>
@@ -593,7 +581,6 @@ const AutoGenerateModal: React.FC<AutoGenerateModalProps> = ({
                       <Switch
                         checked={config.selectedEmployees.includes(employee.id)}
                         onChange={() => handleEmployeeToggle(employee.id)}
-                        size="small"
                         sx={autoGenerateModalSwitchStyles(theme)}
                       />
                     </Box>
