@@ -1,4 +1,4 @@
-import React, { Suspense, lazy, useEffect, useRef } from "react";
+import React, { Suspense, lazy, useEffect, useRef, useState } from "react";
 import {
   BrowserRouter as Router,
   Route,
@@ -346,21 +346,30 @@ const AppContent: React.FC = () => {
 // ─── ThemeSync: synchronizes theme preference between DB and localStorage ───
 const ThemeSync: React.FC = () => {
   const { mode, setMode } = useThemeMode();
-  const { currentUser } = useAuthContext();
+  const { currentUser, setUser } = useAuthContext();
   const dispatch = useDispatch<AppDispatch>();
   const initFromDbDone = useRef(false);
   const lastSyncedMode = useRef<string | null>(null);
+  const retryCount = useRef(0);
+  const retryTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const currentUserRef = useRef(currentUser);
+  currentUserRef.current = currentUser;
+  const setUserRef = useRef(setUser);
+  setUserRef.current = setUser;
+  const [syncRetry, setSyncRetry] = useState(0);
 
-  // On user login, sync DB settings → localStorage/context + Redux (one-time)
+  // On user login, sync DB settings → localStorage/context + Redux (one-time).
+  // Gates on currentUser.id (not settings truthiness) so it always initializes,
+  // even if the user object was set without a settings key.
   useEffect(() => {
-    if (currentUser?.settings && !initFromDbDone.current) {
+    if (currentUser?.id && !initFromDbDone.current) {
       // Sync theme
-      const dbTheme = currentUser.settings.theme as "light" | "dark" | "default" | "high-contrast";
+      const dbTheme = currentUser.settings?.theme as "light" | "dark" | "default" | "high-contrast" | undefined;
       if (dbTheme && dbTheme !== mode) {
         setMode(dbTheme);
       }
       // Sync schedule order to schedules store
-      const scheduleOrder = currentUser.settings.scheduleOrder as number[] | undefined;
+      const scheduleOrder = currentUser.settings?.scheduleOrder as number[] | undefined;
       if (scheduleOrder && Array.isArray(scheduleOrder) && scheduleOrder.length > 0) {
         dispatch(setScheduleOrder(scheduleOrder));
       }
@@ -373,16 +382,52 @@ const ThemeSync: React.FC = () => {
     }
   }, [currentUser, mode, setMode, dispatch]);
 
-  // On theme change (from anywhere), sync → DB (debounced)
+  // On theme change (from anywhere), sync → DB (debounced).
+  // lastSyncedMode is only advanced AFTER a successful save, so if the request
+  // fails (e.g. the prod server was asleep), we retry (with a cap) until it
+  // persists — this prevents the theme from silently reverting on next login.
   useEffect(() => {
     if (currentUser?.id && initFromDbDone.current && mode !== lastSyncedMode.current) {
-      lastSyncedMode.current = mode;
-      const timer = setTimeout(() => {
-        dispatch(updateUserSettings({ id: currentUser.id, settings: { theme: mode } }));
+      // A new sync attempt gets a fresh retry budget (previous mode's failures
+      // must not consume the new mode's retries).
+      retryCount.current = 0;
+      const timer = setTimeout(async () => {
+        const user = currentUserRef.current;
+        if (!user?.id) return;
+        try {
+          await dispatch(
+            updateUserSettings({ id: user.id, settings: { theme: mode } }),
+          ).unwrap();
+          lastSyncedMode.current = mode;
+          retryCount.current = 0;
+          // Keep AuthContext/sessionStorage in sync so the saved theme survives
+          // reloads and is picked up by the DB → local sync on next mount.
+          setUserRef.current({
+            ...user,
+            settings: { ...(user.settings || {}), theme: mode },
+          });
+        } catch {
+          // Keep lastSyncedMode stale so the next render re-attempts the sync.
+          // Bounded retry (max 5) recovers from a transient failure (server
+          // waking up from sleep) without hammering the API indefinitely.
+          retryCount.current += 1;
+          if (retryCount.current <= 5) {
+            if (retryTimer.current) clearTimeout(retryTimer.current);
+            retryTimer.current = setTimeout(() => {
+              setSyncRetry((v) => v + 1);
+            }, 5000);
+          }
+        }
       }, 300);
-      return () => clearTimeout(timer);
+      return () => {
+        clearTimeout(timer);
+        if (retryTimer.current) {
+          clearTimeout(retryTimer.current);
+          retryTimer.current = null;
+        }
+      };
     }
-  }, [mode, currentUser?.id, dispatch]);
+  }, [mode, currentUser?.id, dispatch, syncRetry]);
 
   return null;
 };

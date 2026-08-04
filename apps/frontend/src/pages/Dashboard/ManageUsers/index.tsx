@@ -68,8 +68,8 @@ import {
 } from "./styles";
 import SegmentedToggle from "../../../components/SegmentedToggle/SegmentedToggle.component";
 import { useLocation } from "react-router-dom";
-import { API_URL } from "../../../services/api";
 import { useTablePreferences } from '../../../hooks/useTablePreferences';
+import { getAvatarSrc } from "../../../utils/avatar";
 import { validateName, validateEmail, validateUsername, validatePassword } from '../../../utils/userValidation';
 
 // ManageUsers page component for user management in the dashboard
@@ -685,7 +685,7 @@ const ManageUsers: React.FC<{ isExpanded?: boolean; hideHeader?: boolean }> = ({
                       {isEditing ? (
                         <>
                           <Avatar
-                            src={user.avatar ? `${API_URL}${user.avatar}` : undefined}
+                            src={getAvatarSrc(user.avatar)}
                             sx={{
                               width: 34,
                               height: 34,
@@ -799,7 +799,7 @@ const ManageUsers: React.FC<{ isExpanded?: boolean; hideHeader?: boolean }> = ({
                         <>
                           <Box sx={{ position: "relative", flexShrink: 0 }}>
                             <Avatar
-                              src={user.avatar ? `${API_URL}${user.avatar}` : undefined}
+                              src={getAvatarSrc(user.avatar)}
                               sx={{
                                 width: 36,
                                 height: 36,

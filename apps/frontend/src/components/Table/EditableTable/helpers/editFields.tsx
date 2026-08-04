@@ -6,7 +6,7 @@ import { DatePicker } from "@mui/x-date-pickers/DatePicker";
 import { AdapterDateFns } from "@mui/x-date-pickers/AdapterDateFns";
 import { es } from "date-fns/locale";
 import { maskLicensePlate } from "../../../../utils/mask";
-import { formControlStyles, selectStyles, datePickerTextFieldStyles, premiumMenuProps } from "../EditableTable.styles";
+import { formControlStyles, selectStyles, datePickerTextFieldStyles, premiumMenuProps, inlineEditTextfieldSx } from "../EditableTable.styles";
 import { ColumnConfigType } from "./columnConfig";
 import { DAYS_LIST } from "../../../../constants/constants";
 
@@ -170,7 +170,7 @@ export function renderEditField<T extends object>({
         value={licensePlateValue}
         onChange={handleLicensePlateChange}
         error={!validateField("licensePlate", licensePlateValue)}
-        sx={{ width: "120px" }}
+        sx={{ ...inlineEditTextfieldSx, width: "120px" }}
       />
     );
   }
@@ -183,7 +183,7 @@ export function renderEditField<T extends object>({
           setEditField && setEditField(String(column), e.target.value)
         }
         error={!validateField(String(column), value)}
-        sx={{ width: "80px" }}
+        sx={{ ...inlineEditTextfieldSx, width: "80px" }}
       />
     );
   }
@@ -197,7 +197,7 @@ export function renderEditField<T extends object>({
           setEditField && setEditField(String(column), e.target.value)
         }
         error={!validateField(String(column), value)}
-        sx={{ width: "80px" }}
+        sx={{ ...inlineEditTextfieldSx, width: "80px" }}
         inputProps={{ min: "0" }}
         InputProps={{
           endAdornment: (
@@ -218,7 +218,7 @@ export function renderEditField<T extends object>({
           setEditField && setEditField(String(column), e.target.value)
         }
         error={!validateField(String(column), value)}
-        sx={{ width: "200px" }}
+        sx={{ ...inlineEditTextfieldSx, width: "200px" }}
       />
     );
   }
@@ -231,7 +231,7 @@ export function renderEditField<T extends object>({
           setEditField && setEditField(String(column), e.target.value)
         }
         error={!validateField(String(column), value)}
-        sx={{ width: "150px" }}
+        sx={{ ...inlineEditTextfieldSx, width: "150px" }}
       />
     );
   }
@@ -262,6 +262,7 @@ export function renderEditField<T extends object>({
           setEditField && setEditField(String(column), e.target.value)
         }
         error={!validateField(String(column), value)}
+        sx={inlineEditTextfieldSx}
       />
     );
   }
@@ -281,7 +282,7 @@ export function renderEditField<T extends object>({
         value={parkingLotValue}
         onChange={handleParkingLotChange}
         error={!validateField("parkingLot", parkingLotValue)}
-        sx={{ width: "120px" }}
+        sx={{ ...inlineEditTextfieldSx, width: "120px" }}
       />
     );
   }
@@ -364,6 +365,7 @@ export function renderEditField<T extends object>({
         setEditField && setEditField(String(column), e.target.value)
       }
       error={!validateField(String(column), value)}
+      sx={inlineEditTextfieldSx}
     />
   );
 } 

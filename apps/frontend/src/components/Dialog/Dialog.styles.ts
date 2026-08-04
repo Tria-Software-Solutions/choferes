@@ -81,12 +81,7 @@ export const dialogActionsStyles = (
 export const cancelButtonStyles = (isSmallScreen: boolean): SxProps<Theme> => ({
   minWidth: isSmallScreen ? "100%" : 120,
   px: 3,
-  py: 1.5,
-  fontWeight: 600,
-  fontSize: "0.85rem",
-  letterSpacing: "-0.01em",
-  borderRadius: "12px",
-  textTransform: "none",
+  // Geometry (radius, weight, size, min-height) inherited from theme MuiButton
   color: (theme) => theme.palette.text.secondary,
   backgroundColor: (theme) => theme.palette.mode === "dark" ? "rgba(255,255,255,0.05)" : "rgba(0,0,0,0.03)",
   transition: "all 0.25s cubic-bezier(0.4, 0, 0.2, 1)",
@@ -109,23 +104,18 @@ export const confirmButtonStyles = (
 ): SxProps<Theme> => ({
   minWidth: isSmallScreen ? "100%" : 120,
   px: 3,
-  py: 1.5,
-  fontWeight: 600,
-  fontSize: "0.85rem",
-  letterSpacing: "-0.01em",
-  borderRadius: "12px",
-  textTransform: "none",
+  // Geometry (radius, weight, size, min-height) inherited from theme MuiButton
   background: (theme) => `linear-gradient(135deg, ${theme.palette.primary.main}, ${theme.palette.primary.dark})`,
   color: (theme) => theme.palette.primary.contrastText,
   boxShadow: (theme) => theme.palette.mode === "dark"
-    ? "0 4px 14px rgba(99,102,241,0.3)"
-    : "0 4px 14px rgba(99,102,241,0.25)",
+    ? "0 4px 14px rgba(0,0,0,0.35)"
+    : "0 4px 14px rgba(0,0,0,0.12)",
   transition: "all 0.25s cubic-bezier(0.4, 0, 0.2, 1)",
   '&:hover': {
     transform: "translateY(-2px)",
     boxShadow: (theme) => theme.palette.mode === "dark"
-      ? "0 8px 25px rgba(99,102,241,0.4)"
-      : "0 8px 25px rgba(99,102,241,0.35)",
+      ? "0 8px 25px rgba(0,0,0,0.4)"
+      : "0 8px 25px rgba(0,0,0,0.15)",
   },
   '&:active': {
     transform: "translateY(0)",

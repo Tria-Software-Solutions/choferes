@@ -69,7 +69,7 @@ export const formControl = (theme: Theme) => ({
         : "#fff",
       boxShadow: theme.palette.mode === "dark"
         ? "0 4px 20px rgba(0,0,0,0.3), 0 1px 4px rgba(0,0,0,0.1)"
-        : "0 4px 20px rgba(99,102,241,0.1), 0 1px 4px rgba(99,102,241,0.06)",
+        : "0 4px 20px rgba(0,0,0,0.08), 0 1px 4px rgba(0,0,0,0.04)",
     },
   },
 });

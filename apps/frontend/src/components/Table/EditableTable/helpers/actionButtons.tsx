@@ -26,28 +26,28 @@ interface ActionButtonsProps<T extends object> {
 export const pillButtonBase = {
   width: 34,
   height: 34,
-  borderRadius: "10px",
+  borderRadius: "12px",
   transition: "all 0.2s cubic-bezier(0.4, 0, 0.2, 1)",
   "&:active": {
     transform: "scale(0.92)",
   },
 };
 
-// Edit: subtle primary tint that fills on hover
+// Edit: subtle neutral tint that fills on hover
 export const editButtonStyles = (theme: Theme) => ({
   ...pillButtonBase,
   backgroundColor:
     theme.palette.mode === "dark"
-      ? "rgba(99,102,241,0.12)"
-      : "rgba(99,102,241,0.08)",
-  color: theme.palette.primary.main,
+      ? "rgba(255,255,255,0.08)"
+      : "rgba(0,0,0,0.05)",
+  color: theme.palette.text.secondary,
   "&:hover": {
     backgroundColor: theme.palette.primary.main,
-    color: "#fff",
+    color: theme.palette.primary.contrastText,
     transform: "translateY(-1px)",
     boxShadow: theme.palette.mode === "dark"
-      ? "0 4px 14px rgba(99,102,241,0.45)"
-      : "0 4px 14px rgba(99,102,241,0.35)",
+      ? "0 4px 14px rgba(0,0,0,0.4)"
+      : "0 4px 14px rgba(0,0,0,0.15)",
   },
 });
 
@@ -91,16 +91,16 @@ export const neutralButtonStyles = (theme: Theme) => ({
 export const saveButtonStyles = (theme: Theme) => ({
   ...pillButtonBase,
   backgroundColor: theme.palette.primary.main,
-  color: "#fff",
+  color: theme.palette.primary.contrastText,
   boxShadow: theme.palette.mode === "dark"
-    ? "0 4px 14px rgba(99,102,241,0.35)"
-    : "0 4px 14px rgba(99,102,241,0.25)",
+    ? "0 4px 14px rgba(0,0,0,0.35)"
+    : "0 4px 14px rgba(0,0,0,0.12)",
   "&:hover": {
     backgroundColor: theme.palette.primary.dark,
     transform: "translateY(-1px)",
     boxShadow: theme.palette.mode === "dark"
-      ? "0 6px 18px rgba(99,102,241,0.5)"
-      : "0 6px 18px rgba(99,102,241,0.4)",
+      ? "0 6px 18px rgba(0,0,0,0.4)"
+      : "0 6px 18px rgba(0,0,0,0.18)",
   },
   "&.Mui-disabled": {
     backgroundColor:

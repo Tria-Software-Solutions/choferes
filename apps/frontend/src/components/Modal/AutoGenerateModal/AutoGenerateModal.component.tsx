@@ -14,7 +14,6 @@ import {
   FormGroup,
   useTheme,
   LinearProgress,
-  Avatar,
   MenuItem,
   CircularProgress,
 } from '@mui/material';
@@ -22,6 +21,7 @@ import { Users, Settings } from "lucide-react";
 import { format, startOfWeek, addDays } from 'date-fns';
 import { es } from 'date-fns/locale';
 import { Employee } from '../../../models/Employee';
+import EmployeeAvatar from '../../EmployeeAvatar/EmployeeAvatar.component';
 import { Schedule } from '../../../models/Schedule';
 import {
   autoGenerateModalContainerStyles,
@@ -45,7 +45,6 @@ import {
   autoGenerateModalProgressBarStyles,
   autoGenerateModalConfigSectionStyles,
   autoGenerateModalEmployeeCardStyles,
-  autoGenerateModalSwitchStyles,
   autoGenerateModalChipStyles,
   autoGenerateModalLoadingBoxStyles,
   autoGenerateModalLoadingTextStyles,
@@ -447,7 +446,6 @@ const AutoGenerateModal: React.FC<AutoGenerateModalProps> = ({
                           e.target.checked
                         )
                       }
-                      sx={autoGenerateModalSwitchStyles(theme)}
                     />
                   }
                   label="Usar asignaciones existentes"
@@ -532,7 +530,6 @@ const AutoGenerateModal: React.FC<AutoGenerateModalProps> = ({
                         handleSelectAllEmployees();
                       }
                     }}
-                    sx={autoGenerateModalSwitchStyles(theme)}
                   />
                 </Box>
               </Box>
@@ -561,16 +558,11 @@ const AutoGenerateModal: React.FC<AutoGenerateModalProps> = ({
                       <Box
                         sx={{ display: "flex", alignItems: "center", gap: 1.5 }}
                       >
-                        <Avatar
-                          sx={{
-                            width: 36,
-                            height: 36,
-                            bgcolor: "primary.main",
-                            fontSize: "1rem",
-                          }}
-                        >
-                          {employee.firstName.charAt(0).toUpperCase()}
-                        </Avatar>
+                        <EmployeeAvatar
+                          employee={employee}
+                          size={36}
+                          sx={{ fontSize: "1rem" }}
+                        />
                         <Typography
                           variant="body2"
                           sx={{ fontWeight: 500, fontSize: "0.95rem" }}
@@ -581,7 +573,6 @@ const AutoGenerateModal: React.FC<AutoGenerateModalProps> = ({
                       <Switch
                         checked={config.selectedEmployees.includes(employee.id)}
                         onChange={() => handleEmployeeToggle(employee.id)}
-                        sx={autoGenerateModalSwitchStyles(theme)}
                       />
                     </Box>
 
@@ -702,10 +693,10 @@ const AutoGenerateModal: React.FC<AutoGenerateModalProps> = ({
                                   },
                                 },
                                 '&.Mui-focused': {
-                                  boxShadow: '0 0 0 3px rgba(0,0,0,0.04)',
+                                  boxShadow: 'none',
                                   '& fieldset': {
-                                    borderColor: theme.palette.primary.main,
-                                    borderWidth: '2px',
+                                    borderColor: theme.palette.mode === 'dark' ? 'rgba(255,255,255,0.25)' : 'rgba(0,0,0,0.2)',
+                                    borderWidth: '1.5px',
                                   },
                                 },
                               },

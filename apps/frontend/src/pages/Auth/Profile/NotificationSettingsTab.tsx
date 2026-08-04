@@ -332,7 +332,7 @@ const NotificationSettingsTab: React.FC = () => {
         ))}
       </Box>
 
-      {/* Footer — subtle save indicator (auto-saves with debounce) */}
+      {/* Footer — stable auto-save status (fixed text + subtle status dot) */}
       <Box
         sx={{
           display: "flex",
@@ -347,15 +347,36 @@ const NotificationSettingsTab: React.FC = () => {
       >
         <Typography
           variant="caption"
-          sx={{ fontSize: "0.72rem", color: theme.palette.text.secondary, display: "flex", alignItems: "center", gap: 0.5 }}
+          sx={{
+            fontSize: "0.72rem",
+            color: theme.palette.text.secondary,
+            display: "flex",
+            alignItems: "center",
+            gap: 0.75,
+          }}
         >
-          {saving ? (
-            "Guardando cambios..."
-          ) : saved ? (
-            "✓ Cambios guardados automáticamente"
-          ) : (
-            "Los cambios se guardan automáticamente"
-          )}
+          Los cambios se guardan automáticamente
+          <Box
+            component="span"
+            aria-hidden
+            sx={{
+              width: 7,
+              height: 7,
+              borderRadius: "50%",
+              flexShrink: 0,
+              backgroundColor: saving
+                ? "#6366f1"
+                : saved
+                  ? "#22c55e"
+                  : "transparent",
+              transition: "background-color 0.3s ease",
+              animation: saving ? "saveStatusPulse 1.2s ease-in-out infinite" : "none",
+              "@keyframes saveStatusPulse": {
+                "0%, 100%": { opacity: 1, transform: "scale(1)" },
+                "50%": { opacity: 0.4, transform: "scale(0.7)" },
+              },
+            }}
+          />
         </Typography>
       </Box>
     </Paper>

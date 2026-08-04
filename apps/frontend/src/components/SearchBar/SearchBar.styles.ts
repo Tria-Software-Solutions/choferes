@@ -9,10 +9,10 @@ export const searchBarRoot: SxProps<Theme> = (theme) => ({
   boxShadow: "none",
   transition: "border-color 0.2s",
   '&:hover': {
-    borderColor: theme.palette.primary.main,
+    borderColor: theme.palette.mode === "dark" ? "rgba(255,255,255,0.35)" : "rgba(0,0,0,0.3)",
   },
   '&.Mui-focused': {
-    borderColor: theme.palette.primary.main,
+    borderColor: theme.palette.mode === "dark" ? "rgba(255,255,255,0.35)" : "rgba(0,0,0,0.3)",
   },
   'input::placeholder': {
     color: theme.palette.text.secondary,
@@ -51,7 +51,7 @@ export const textFieldStyles = (customSx: object = {}): SxProps<Theme> => (theme
       backgroundColor: theme.palette.mode === "dark"
         ? "rgba(255,255,255,0.08)"
         : "rgba(0,0,0,0.06)",
-      boxShadow: `0 0 0 3px ${theme.palette.primary.main}15, 0 8px 24px rgba(0,0,0,0.12)`,
+      boxShadow: "0 8px 24px rgba(0,0,0,0.12)",
     },
     "&.Mui-focused .MuiOutlinedInput-notchedOutline": {
       borderColor: "transparent",

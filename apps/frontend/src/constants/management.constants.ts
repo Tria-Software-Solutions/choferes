@@ -104,15 +104,6 @@ const MANAGEMENT = {
   SUMMARY_INFO_DESC:
     "Aquí puedes ver el resumen de horas trabajadas por el empleado.",
 
-  // Export dialogs
-  DIALOG_EXPORT_TITLE: "Exportar horarios",
-  DIALOG_EXPORT_MESSAGE:
-    "¿Quieres exportar el archivo incluyendo las columnas de horas totales y horas extra?",
-  DIALOG_EXPORT_CONFIRM: "Sí, incluir totales",
-  DIALOG_EXPORT_CANCEL: "No, solo horarios",
-  DIALOG_EXPORT_MESSAGE_EXCEL: "¿Deseas exportar los datos a Excel?",
-  DIALOG_EXPORT_MESSAGE_PDF: "¿Deseas exportar los datos a PDF?",
-
   // Week navigation tooltips
   TOOLTIP_PREV_WEEK: "Semana anterior",
   TOOLTIP_NEXT_WEEK: "Semana siguiente",

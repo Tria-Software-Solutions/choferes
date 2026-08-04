@@ -136,6 +136,8 @@ function StickyDataGridComponent<T extends GridValidRowModel>({
           "& .MuiDataGrid-columnSeparator": { display: "none" },
           // Celdas
           "& .MuiDataGrid-cell": {
+            display: "flex",
+            alignItems: "center",
             borderBottom: `1px solid ${
               isDark ? "rgba(255,255,255,0.04)" : "rgba(0,0,0,0.04)"
             }`,
@@ -147,6 +149,16 @@ function StickyDataGridComponent<T extends GridValidRowModel>({
             letterSpacing: "-0.01em",
             fontFamily: "'Urbanist', -apple-system, BlinkMacSystemFont, sans-serif",
             outline: "none",
+            // Sin contorno/outline al enfocar la celda (evita el borde negro al editar inline)
+            "&:focus, &:focus-within, &:focus-visible": { outline: "none", boxShadow: "none" },
+          },
+          // Contenido de la celda: centrado verticalmente y ocupando todo el ancho
+          "& .MuiDataGrid-cellContent": {
+            display: "flex",
+            alignItems: "center",
+            width: "100%",
+            minWidth: 0,
+            lineHeight: "normal",
           },
           "& .MuiDataGrid-row": {
             transition: "background 0.15s ease",

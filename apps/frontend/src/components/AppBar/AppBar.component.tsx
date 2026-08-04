@@ -22,8 +22,8 @@ import {
 } from "@mui/material";
 import { useNavigate, useLocation } from "react-router-dom";
 import { useAuthContext } from "../../context/AuthContext";
-import { API_URL } from "../../services/api";
 import * as UserService from "../../services/userService";
+import { getAvatarSrc } from "../../utils/avatar";
 import { APPBAR_MENU } from "../../constants/constants";
 import { useNotificationMenu } from "../../context/NotificationContext";
 import { Menu as MenuIcon, Bell, Blocks } from "lucide-react";
@@ -227,7 +227,7 @@ const AppBarComponent: React.FC<AppBarComponentProps> = ({
                 color: "#ffffff",
                 cursor: "pointer",
                 p: 0.5,
-                borderRadius: "10px",
+                borderRadius: "12px",
                 minWidth: 36,
                 height: 36,
                 border: "none",
@@ -352,7 +352,7 @@ const AppBarComponent: React.FC<AppBarComponentProps> = ({
                 >
                   {currentUser.avatar ? (
                     <Avatar
-                      src={`${API_URL}${currentUser.avatar}`}
+                      src={getAvatarSrc(currentUser.avatar)}
                       sx={{
                         width: 44,
                         height: 44,
