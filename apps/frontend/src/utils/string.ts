@@ -5,6 +5,17 @@ import { EnglishAbrevMonthOfYear } from "./monthAbreviations";
 
 // Utility functions for string translation, formatting, and mapping for UI labels and dates
 // Includes helpers for translating columns, days, months, and periods to Spanish, and for string capitalization
+
+// Normalizes a string for comparisons: trims, removes diacritics, lowercases
+// and collapses internal whitespace (e.g. "Avenida Escazú" vs "avenida escazu")
+export const normalizeString = (str: string): string =>
+  str
+    .trim()
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .toLowerCase()
+    .replace(/\s+/g, " ");
+
 export const translateColumnHeaderToSpanish = (
   column: string | number | symbol,
 ): string => {

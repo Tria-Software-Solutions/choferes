@@ -39,11 +39,11 @@ import {
   createExportOptions,
   exportFileFormattedDate,
 } from "../../../utils/export";
-import { translateDayOptionsToSpanish } from "../../../utils/string";
+import { normalizeString, translateDayOptionsToSpanish } from "../../../utils/string";
 import PAGE_TITLE from "../../../constants/pageTitle.constants";
 import PERMISSIONS from "../../../constants/permissions.constants";
 import MANAGEMENT from "../../../constants/management.constants";
-import { CalendarDays, Download, X, Plus, Trash2, PlusCircle, Clock, GripVertical } from "lucide-react";
+import { CalendarDays, Download, X, Plus, Trash2, PlusCircle, Clock, GripVertical, AlertTriangle } from "lucide-react";
 import { PdfIcon, ExcelIcon } from "../../../components/Icons/FileIcons";
 import { NOTIFICATIONS } from "../../../constants/constants";
 import {
@@ -87,6 +87,10 @@ const SchedulesPage: React.FC = () => {
   const [isCreatingSchedule, setIsCreatingSchedule] = useState(false);
   const [isDeletingSchedule, setIsDeletingSchedule] = useState(false);
   const [openReorderDialog, setOpenReorderDialog] = useState(false);
+  const [duplicateDialog, setDuplicateDialog] = useState<{
+    label: string;
+    onConfirm: () => void;
+  } | null>(null);
 
   const theme = useTheme();
   const isSmallScreen = useMediaQuery(theme.breakpoints.down("sm"));
@@ -180,7 +184,7 @@ const shortNames: Record<string, string> = {
   }, [editFields, dayHoursEditing, editRowId]);
 
   // Handle creation of a new schedule
-  const handleCreate = async (newSchedule: Omit<Schedule, "id">) => {
+  const doCreate = async (newSchedule: Omit<Schedule, "id">) => {
     try {
       setIsCreatingSchedule(true);
       await dispatch(createSchedule(newSchedule));
@@ -200,6 +204,18 @@ const shortNames: Record<string, string> = {
     } finally {
       setIsCreatingSchedule(false);
     }
+  };
+
+  const handleCreate = async (newSchedule: Omit<Schedule, "id">) => {
+    const label = newSchedule.label?.trim() ?? "";
+    const isDuplicate =
+      label.length > 0 &&
+      schedules.some((s) => normalizeString(s.label) === normalizeString(label));
+    if (isDuplicate) {
+      setDuplicateDialog({ label, onConfirm: () => void doCreate(newSchedule) });
+      return;
+    }
+    await doCreate(newSchedule);
   };
 
   // Handle editing of a schedule
@@ -228,7 +244,7 @@ const shortNames: Record<string, string> = {
   };
 
   // Handle update of a schedule
-  const handleUpdate = async (id: number) => {
+  const doUpdate = async (id: number) => {
     try {
       const defaultHours = parseInt(editFields.hours, 10);
       const scheduleDays = buildScheduleDays(editFields.days, isNaN(defaultHours) ? 0 : defaultHours, dayHoursEditing);
@@ -256,6 +272,18 @@ const shortNames: Record<string, string> = {
         duration: 5000,
       });
     }
+  };
+
+  const handleUpdate = async (id: number) => {
+    const label = editFields.label?.trim() ?? "";
+    const isDuplicate =
+      label.length > 0 &&
+      schedules.some((s) => s.id !== id && normalizeString(s.label) === normalizeString(label));
+    if (isDuplicate) {
+      setDuplicateDialog({ label, onConfirm: () => void doUpdate(id) });
+      return;
+    }
+    await doUpdate(id);
   };
 
   // Open/close delete confirmation dialog
@@ -933,8 +961,23 @@ const shortNames: Record<string, string> = {
           onSubmit={handleCreate}
           onCancel={handleCloseAddModal}
           isLoading={isCreatingSchedule}
+          existingLabels={schedules.map((s) => s.label)}
         />
       </DialogComponent>
+      <DialogComponent
+        open={duplicateDialog !== null}
+        onClose={() => setDuplicateDialog(null)}
+        onConfirm={() => {
+          duplicateDialog?.onConfirm();
+          setDuplicateDialog(null);
+        }}
+        title="Horario duplicado"
+        message={`Ya existe un horario llamado "${duplicateDialog?.label ?? ""}". ¿Deseas continuar de todas formas?`}
+        type="warning"
+        confirmText="Continuar"
+        cancelText="Cancelar"
+        icon={<AlertTriangle color="var(--mui-palette-warning-main)" />}
+      />
       <ReorderDialog
         open={openReorderDialog}
         schedules={filteredSchedules}
