@@ -350,9 +350,9 @@ export const scheduleSelectStyles: SxProps<Theme> = (theme) => ({
       borderColor: theme.palette.mode === "dark" ? "rgba(255,255,255,0.3)" : "rgba(0,0,0,0.2)",
     },
     "&.Mui-focused fieldset": {
-      borderColor: theme.palette.primary.main,
-      borderWidth: "2px",
-      boxShadow: "0 0 0 3px rgba(25, 118, 210, 0.1)",
+      borderColor: theme.palette.mode === "dark" ? "rgba(255,255,255,0.3)" : "rgba(0,0,0,0.2)",
+      borderWidth: "1.5px",
+      boxShadow: "none",
     },
   },
   "& .MuiSelect-select": {
@@ -453,8 +453,8 @@ export const scheduleMultiSelectStyles: SxProps<Theme> = (theme) => ({
       borderColor: theme.palette.mode === "dark" ? "rgba(255,255,255,0.3)" : "rgba(0,0,0,0.25)",
     },
     "&.Mui-focused fieldset": {
-      borderColor: theme.palette.primary.main,
-      borderWidth: "2px",
+      borderColor: theme.palette.mode === "dark" ? "rgba(255,255,255,0.3)" : "rgba(0,0,0,0.25)",
+      borderWidth: "1.5px",
     },
   },
   "& .MuiSelect-select": {

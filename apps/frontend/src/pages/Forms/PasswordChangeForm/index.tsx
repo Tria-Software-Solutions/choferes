@@ -301,11 +301,11 @@ const PasswordChangeForm: React.FC<PasswordChangeFormProps> = ({
                   borderRadius: "12px",
                   minHeight: "48px",
                   px: 3,
-                  boxShadow: "0 4px 14px rgba(99,102,241,0.25)",
+                  boxShadow: "0 4px 14px rgba(0,0,0,0.12)",
                   transition: "all 0.25s cubic-bezier(0.4, 0, 0.2, 1)",
                   '&:hover': {
                     transform: "translateY(-2px)",
-                    boxShadow: "0 8px 25px rgba(99,102,241,0.35)",
+                    boxShadow: "0 8px 25px rgba(0,0,0,0.15)",
                   },
                   '&:active': {
                     transform: "translateY(0)",

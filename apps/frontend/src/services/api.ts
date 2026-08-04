@@ -138,7 +138,9 @@ const disconnectUser = () => {
   removeTokenWithFallback("accessToken", cookieOptions);
   removeTokenWithFallback("refreshToken", cookieOptions);
   sessionStorage.clear();
-  localStorage.clear();
+  // NOTE: do NOT clear all of localStorage here. It holds user preferences
+  // (themeMode, dock/table preferences, schedule order) that must survive a
+  // token refresh failure. Clearing it wiped the saved theme in production.
   window.location.href = "/session-expired";
 };
 

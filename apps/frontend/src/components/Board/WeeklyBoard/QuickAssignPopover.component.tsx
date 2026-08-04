@@ -10,8 +10,8 @@ import {
 } from "@mui/material";
 import type { Employee } from "../../../models/Employee";
 import type { Schedule } from "../../../models/Schedule";
-import { getInitials, capitalizeFirstLetter, translateDayToAbrevSpanish } from "../../../utils/string";
-import { getEmployeeColor } from "../../../utils/employeeColors";
+import { capitalizeFirstLetter, translateDayToAbrevSpanish } from "../../../utils/string";
+import EmployeeAvatar from "../../EmployeeAvatar/EmployeeAvatar.component";
 import { formatHeaderDate } from "../../../utils/dates";
 import { EnglishDayOfWeek } from "../../../utils/dayAbreviations";
 import { getScheduleHours } from "../../../utils/schedule";
@@ -86,9 +86,6 @@ const QuickAssignPopover: React.FC<QuickAssignPopoverProps> = ({
     onClose();
   };
 
-  const employeeInitials = (emp: Employee) =>
-    getInitials(emp.firstName, emp.lastName);
-
   const renderEmployeeItem = (emp: Employee) => {
     const isSelected = selectedEmployeeIds.has(emp.id);
     return (
@@ -104,17 +101,11 @@ const QuickAssignPopover: React.FC<QuickAssignPopoverProps> = ({
           "&:hover": { backgroundColor: isDark ? "rgba(255,255,255,0.05)" : "rgba(0,0,0,0.03)" },
         }}
       >
-        <Box
-          sx={{
-            width: 24, height: 24, borderRadius: "50%", flexShrink: 0, mr: 1,
-            backgroundColor: getEmployeeColor(emp.id),
-            display: "flex", alignItems: "center", justifyContent: "center",
-          }}
-        >
-          <Typography sx={{ fontSize: "0.6rem", fontWeight: 700, color: "#fff", lineHeight: 1 }}>
-            {employeeInitials(emp)}
-          </Typography>
-        </Box>
+        <EmployeeAvatar
+          employee={emp}
+          size={24}
+          sx={{ flexShrink: 0, mr: 1, fontSize: "0.6rem" }}
+        />
         <ListItemText
           primary={`${emp.firstName} ${emp.lastName?.[0]}.`}
           primaryTypographyProps={{
@@ -239,7 +230,7 @@ const QuickAssignPopover: React.FC<QuickAssignPopoverProps> = ({
         <Box
           onClick={onClose}
           sx={{
-            flex: 1, textAlign: "center", py: 0.7, borderRadius: "8px", cursor: "pointer",
+            flex: 1, textAlign: "center", py: 0.7, borderRadius: "12px", cursor: "pointer",
             fontSize: "0.75rem", fontWeight: 600, color: "text.secondary",
             transition: "all 0.15s ease",
             "&:hover": { backgroundColor: isDark ? "rgba(255,255,255,0.05)" : "rgba(0,0,0,0.04)" },
@@ -250,14 +241,21 @@ const QuickAssignPopover: React.FC<QuickAssignPopoverProps> = ({
         <Box
           onClick={handleConfirm}
           sx={{
-            flex: 1, textAlign: "center", py: 0.7, borderRadius: "8px", cursor: "pointer",
+            flex: 1, textAlign: "center", py: 0.7, borderRadius: "12px", cursor: "pointer",
             fontSize: "0.75rem", fontWeight: 700,
             backgroundColor: confirmDisabled
-              ? (isDark ? "rgba(99,102,241,0.12)" : "rgba(99,102,241,0.08)")
-              : "#6366f1",
-            color: confirmDisabled ? (isDark ? "rgba(255,255,255,0.25)" : "rgba(0,0,0,0.25)") : "#fff",
+              ? (isDark ? "rgba(255,255,255,0.12)" : "rgba(0,0,0,0.08)")
+              : theme.palette.primary.main,
+            color: confirmDisabled
+              ? (isDark ? "rgba(255,255,255,0.25)" : "rgba(0,0,0,0.25)")
+              : theme.palette.primary.contrastText,
             transition: "all 0.15s ease",
-            "&:hover": confirmDisabled ? {} : { backgroundColor: "#4f46e5" },
+            "&:hover": confirmDisabled
+              ? {}
+              : {
+                  backgroundColor: isDark ? "#d4d4d4" : "#1a1a1a",
+                  transform: "translateY(-1px)",
+                },
           }}
         >
           Asignar {selectedEmployeeIds.size > 1 ? `(${selectedEmployeeIds.size})` : ""}

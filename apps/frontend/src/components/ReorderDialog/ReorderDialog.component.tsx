@@ -361,8 +361,6 @@ const ReorderDialog: React.FC<ReorderDialogProps> = ({
             onClick={handleReset}
             disabled={isDefaultOrder}
             sx={{
-              borderRadius: "10px",
-              textTransform: "none",
               fontWeight: 600,
               fontSize: "0.8rem",
               color: theme.palette.text.secondary,
@@ -381,14 +379,14 @@ const ReorderDialog: React.FC<ReorderDialogProps> = ({
             <Button
               variant="outlined"
               onClick={onClose}
-              sx={{ borderRadius: "10px", textTransform: "none", fontWeight: 600 }}
+              sx={{ fontWeight: 600 }}
             >
               Cancelar
             </Button>
             <Button
               variant="contained"
               onClick={handleSave}
-              sx={{ borderRadius: "10px", textTransform: "none", fontWeight: 600 }}
+              sx={{ fontWeight: 600 }}
             >
               Guardar orden
             </Button>

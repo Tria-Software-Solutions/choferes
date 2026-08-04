@@ -10,12 +10,20 @@ import {
 } from 'motion/react';
 import {
   dockContainerStyles,
+  dockEditContainerStyles,
   dockItemsRowStyles,
   dockIconRootStyles,
   dockItemSwitchStyles,
+  dockItemEditWrapperStyles,
+  dockItemEditEntranceStyles,
+  dockItemDraggingStyles,
+  dockItemLabelStyles,
   dockDragHandleStyles,
   dockDropIndicatorStyles,
   dockEndZoneTickStyles,
+  dockEditHeaderStyles,
+  dockEditTitleStyles,
+  dockEditHintStyles,
   dockEditFooterStyles,
   dockEditHiddenCountStyles,
   dockEditActionsStyles,
@@ -199,6 +207,7 @@ export default function Dock({
   itemOrder,
   onMoveItem,
 }: DockProps) {
+  const theme = useTheme();
   const mouseX = useMotionValue(Infinity);
   const [dragIndex, setDragIndex] = useState<number | null>(null);
   const [dropIndex, setDropIndex] = useState<number | null>(null);
@@ -274,17 +283,18 @@ export default function Dock({
       result.push(
         <Box
           key={`${item.label}-${i}`}
-          sx={(editable ? {
-            display: 'flex',
-            flexDirection: 'column',
-            alignItems: 'center',
-            gap: 0.5,
-            position: 'relative',
-            opacity: isDragging ? 0.3 : 1,
-            transform: isDragging ? 'scale(0.88)' : 'none',
-            transition: 'opacity 0.2s ease, transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1)',
-            filter: isDragging ? 'grayscale(0.6) brightness(0.8)' : 'none',
-          } : {}) as SxProps<Theme>}
+          className={dropIndex === i ? 'is-drop-target' : undefined}
+          sx={{
+            ...(editable
+              ? {
+                  ...dockItemEditWrapperStyles(theme),
+                  ...dockItemEditEntranceStyles,
+                  animationDelay: `${i * 0.045}s`,
+                  opacity: isDragging ? undefined : isVisible ? 1 : 0.55,
+                }
+              : {}),
+            ...(isDragging ? dockItemDraggingStyles(theme) : {}),
+          } as SxProps<Theme>}
           draggable={editable}
           onDragStart={editable ? handleDragStart(i) : undefined}
           onDragOver={editable ? handleDragOver(i) : undefined}
@@ -295,7 +305,7 @@ export default function Dock({
           {/* Drag handle - only in edit mode */}
           {editable && (
             <Box sx={dockDragHandleStyles}>
-              <GripVertical size={10} strokeWidth={2} />
+              <GripVertical size={11} strokeWidth={2.25} />
             </Box>
           )}
 
@@ -309,22 +319,28 @@ export default function Dock({
             magnification={magnification}
             editable={editable}
           >
-            <DockIcon active={item.active}>
+            {/* No active-page highlight while editing */}
+            <DockIcon active={editable ? false : item.active}>
               {item.icon}
             </DockIcon>
           </DockItem>
 
-          {/* Switch shown in edit mode */}
+          {/* Label + switch shown in edit mode */}
           {editable && (
-            <Switch
-              checked={isVisible}
-              onChange={() => onToggleItem?.(item.label)}
-              sx={{
-                ...dockItemSwitchStyles,
-                opacity: isVisible ? 1 : 0.5,
-              }}
-              onClick={(e) => e.stopPropagation()}
-            />
+            <>
+              <Typography sx={dockItemLabelStyles(theme)}>
+                {item.label}
+              </Typography>
+              <Switch
+                checked={isVisible}
+                onChange={() => onToggleItem?.(item.label)}
+                sx={{
+                  ...dockItemSwitchStyles(theme),
+                  opacity: isVisible ? 1 : 0.45,
+                }}
+                onClick={(e) => e.stopPropagation()}
+              />
+            </>
           )}
         </Box>
       );
@@ -356,10 +372,25 @@ export default function Dock({
         mouseX.set(e.clientX - rect.left);
       }}
       onMouseLeave={() => mouseX.set(Infinity)}
-      sx={dockContainerStyles}
+      sx={[
+        dockContainerStyles,
+        ...(editable ? [dockEditContainerStyles] : []),
+      ]}
       role="toolbar"
       aria-label="Navigation dock"
     >
+      {/* Edit mode header */}
+      {editable && (
+        <Box sx={dockEditHeaderStyles}>
+          <Typography sx={dockEditTitleStyles}>
+            Personalizar
+          </Typography>
+          <Typography sx={dockEditHintStyles}>
+            Arrastra para reordenar · Usa el switch para ocultar
+          </Typography>
+        </Box>
+      )}
+
       {/* Items row */}
       <Box sx={dockItemsRowStyles}>
         {renderItems()}

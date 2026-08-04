@@ -550,12 +550,15 @@ const VehiclesPage: React.FC = () => {
   const handleExport = (format: "excel" | "pdf") => {
     const { exportRows, exportHeaders, groupedHeaders } =
       getExportDataAndHeaders();
+    const banner = groupedHeaders?.[0]?.[0] ?? "";
     exportTable({
       data: exportRows,
       fileName: `reporte-de-vehiculos-${exportFileFormattedDate(selectedDate || new Date())}`,
       format,
       customHeaders: exportHeaders,
-      groupedHeaders: format === "excel" ? groupedHeaders : undefined,
+      groupedHeaders,
+      title: "Reporte de Vehículos",
+      subtitle: banner || undefined,
     });
   };
 

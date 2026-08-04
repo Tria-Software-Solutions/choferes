@@ -212,10 +212,6 @@ const DialogComponent: React.FC<ConfirmationDialogProps> = ({
               onClick={onClose}
               disabled={loading}
               sx={{
-                borderRadius: "12px",
-                textTransform: "none",
-                fontWeight: 600,
-                py: 1,
                 color: "text.secondary",
                 "&:hover": {
                   backgroundColor: isDark ? "rgba(255,255,255,0.06)" : "rgba(0,0,0,0.04)",
@@ -231,10 +227,6 @@ const DialogComponent: React.FC<ConfirmationDialogProps> = ({
               onClick={onConfirm}
               disabled={loading}
               sx={{
-                borderRadius: "12px",
-                textTransform: "none",
-                fontWeight: 600,
-                py: 1,
                 backgroundColor: "#ef4444",
                 "&:hover": { backgroundColor: "#dc2626" },
                 "&.Mui-disabled": {

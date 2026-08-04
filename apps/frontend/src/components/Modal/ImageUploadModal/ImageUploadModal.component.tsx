@@ -39,7 +39,7 @@ const ImageUploadModal: React.FC<ImageUploadModalProps> = ({
 
   // Consistent button styling
   const buttonSx = {
-    borderRadius: '8px',
+    borderRadius: '12px',
     textTransform: 'none',
     borderColor: theme.palette.mode === "dark" ? "rgba(255,255,255,0.2)" : "rgba(0,0,0,0.15)",
     '&:hover': {
@@ -447,7 +447,7 @@ const ImageUploadModal: React.FC<ImageUploadModalProps> = ({
           onClick={handleClose} 
           variant="outlined"
           sx={{
-            borderRadius: "10px",
+            borderRadius: "12px",
             px: 3,
             py: 1.5,
             fontWeight: 600,
@@ -468,7 +468,7 @@ const ImageUploadModal: React.FC<ImageUploadModalProps> = ({
             variant="contained"
             disabled={isProcessing}
             sx={{
-              borderRadius: "10px",
+              borderRadius: "12px",
               px: 3,
               py: 1.5,
               fontWeight: 600,

@@ -103,8 +103,8 @@ export const createEmployee = async (data: Omit<Employee, "id">) => {
   return newEmployee;
 };
 
-// Updates employee data by ID
-export const updateEmployee = async (id: number, data: Omit<Employee, "id">) => {
+// Updates employee data by ID (partial update — only provided fields change)
+export const updateEmployee = async (id: number, data: Partial<Omit<Employee, "id">>) => {
   await Employee.update(data, { where: { id } });
   return Employee.findByPk(id);
 };

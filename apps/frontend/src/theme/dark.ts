@@ -107,12 +107,12 @@ export const darkTheme = createTheme({
     MuiButton: {
       styleOverrides: {
         root: {
-          borderRadius: "10px",
+          borderRadius: "12px",
           textTransform: "none",
           fontWeight: 600,
           fontSize: "0.875rem",
           padding: "10px 24px",
-          minHeight: "44px",
+          minHeight: "48px",
           transition: "all 0.2s cubic-bezier(0.4, 0, 0.2, 1)",
           letterSpacing: "-0.01em",
           boxShadow: "0 1px 3px rgba(0,0,0,0.25), 0 1px 2px rgba(0,0,0,0.18)",
@@ -169,7 +169,7 @@ export const darkTheme = createTheme({
           padding: "6px 14px",
           fontSize: "0.8125rem",
           minHeight: "36px",
-          borderRadius: "8px",
+          borderRadius: "12px",
         },
         sizeLarge: {
           padding: "14px 32px",
@@ -196,7 +196,7 @@ export const darkTheme = createTheme({
         },
         sizeSmall: {
           padding: "6px",
-          borderRadius: "8px",
+          borderRadius: "12px",
         },
         sizeLarge: {
           padding: "14px",
@@ -438,20 +438,23 @@ export const darkTheme = createTheme({
             padding: 3,
             "&.Mui-checked": {
               transform: "translateX(16px)",
-              color: "#90caf9",
+              color: "#181818",
               "&:hover": {
-                backgroundColor: "rgba(144,202,249,0.08)",
+                backgroundColor: "transparent",
               },
               "& + .MuiSwitch-track": {
                 opacity: 1,
-                backgroundColor: "#90caf9",
+                backgroundColor: "#bdbdbd",
               },
+            },
+            "&:hover": {
+              backgroundColor: "transparent",
             },
           },
           "& .MuiSwitch-thumb": {
             width: 18,
             height: 18,
-            boxShadow: "0 1px 3px rgba(0,0,0,0.2)",
+            boxShadow: "none",
           },
           "& .MuiSwitch-track": {
             borderRadius: 12,

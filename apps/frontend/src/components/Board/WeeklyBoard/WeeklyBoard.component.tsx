@@ -53,6 +53,7 @@ import {
 import { translateDayToAbrevSpanish, capitalizeFirstLetter, getInitials, getMonthName } from "../../../utils/string";
 import { getEmployeeColor } from "../../../utils/employeeColors";
 import { EnglishDayOfWeek } from "../../../utils/dayAbreviations";
+import EmployeeAvatar from "../../EmployeeAvatar/EmployeeAvatar.component";
 import { PERMISSIONS, SELECTOR_TABLE } from "../../../constants/constants";
 import { getScheduleHours } from "../../../utils/schedule";
 import {
@@ -165,9 +166,7 @@ const EmployeeCard = memo(function EmployeeCard({
   periodTotal,
   onClick, onInfo, onAdjust, theme, isDragging,
 }: EmployeeCardProps) {
-  const initials = getInitials(employee.firstName, employee.lastName);
   const isDark = theme.palette.mode === "dark";
-  const empColor = getEmployeeColor(employee.id);
 
   if (isUnassigned) {
     return (
@@ -192,15 +191,11 @@ const EmployeeCard = memo(function EmployeeCard({
         <Box sx={{ display: { xs: "none", sm: "flex" }, alignItems: "center", flexShrink: 0 }}>
           <DragIndicatorIcon sx={{ fontSize: 13, color: theme.palette.text.disabled, opacity: 0.35 }} />
         </Box>
-        <Box sx={{
-          width: { xs: 20, sm: 24 }, height: { xs: 20, sm: 24 }, borderRadius: "50%",
-          backgroundColor: empColor,
-          color: "#fff",
-          display: "flex", alignItems: "center", justifyContent: "center",
-          fontSize: { xs: "0.52rem", sm: "0.6rem" }, fontWeight: 700, flexShrink: 0,
-        }}>
-          {initials}
-        </Box>
+        <EmployeeAvatar
+          employee={employee}
+          size={24}
+          sx={{ width: { xs: 20, sm: 24 }, height: { xs: 20, sm: 24 }, fontSize: { xs: "0.52rem", sm: "0.6rem" } }}
+        />
         <Box sx={{ flex: 1, minWidth: 0 }}>
           <Typography sx={{
             fontSize: { xs: "0.68rem", sm: "0.72rem" }, fontWeight: 600, color: theme.palette.text.primary,
@@ -269,16 +264,12 @@ const EmployeeCard = memo(function EmployeeCard({
         <DragIndicatorIcon sx={{ fontSize: 13 }} />
       </Box>
 
-      {/* Initials */}
-      <Box sx={{
-        width: { xs: 20, sm: 24 }, height: { xs: 20, sm: 24 }, borderRadius: "50%",
-        backgroundColor: empColor,
-        color: "#fff",
-        display: "flex", alignItems: "center", justifyContent: "center",
-        fontSize: { xs: "0.52rem", sm: "0.6rem" }, fontWeight: 700, flexShrink: 0,
-      }}>
-        {initials}
-      </Box>
+      {/* Initials or photo */}
+      <EmployeeAvatar
+        employee={employee}
+        size={24}
+        sx={{ width: { xs: 20, sm: 24 }, height: { xs: 20, sm: 24 }, fontSize: { xs: "0.52rem", sm: "0.6rem" } }}
+      />
 
       {/* Name + label */}
       <Box sx={{ flex: 1, minWidth: 0 }}>
@@ -356,9 +347,6 @@ interface DragOverlayCardProps {
 const DragOverlayCard = memo(function DragOverlayCard({
   employee, scheduleLabel, scheduleColor, hours, periodTotal, periodOvertime, isUnassigned, isDark,
 }: DragOverlayCardProps) {
-  const initials = getInitials(employee.firstName, employee.lastName);
-  const empColor = getEmployeeColor(employee.id);
-
   return (
     <Box sx={{
       display: "flex", alignItems: "center", gap: 0.75, px: 1.25, py: 1.25,
@@ -386,16 +374,13 @@ const DragOverlayCard = memo(function DragOverlayCard({
         opacity: 0.6,
       }} />
 
-      <Box sx={{
-        width: 32, height: 32, borderRadius: "50%",
-        backgroundColor: empColor,
-        color: "#fff",
-        display: "flex", alignItems: "center", justifyContent: "center",
-        fontSize: "0.75rem", fontWeight: 700, flexShrink: 0,
-        boxShadow: `0 0 0 2px ${isDark ? "rgba(255,255,255,0.15)" : "rgba(255,255,255,0.8)"}`,
-      }}>
-        {initials}
-      </Box>
+      <EmployeeAvatar
+        employee={employee}
+        size={32}
+        sx={{
+          boxShadow: `0 0 0 2px ${isDark ? "rgba(255,255,255,0.15)" : "rgba(255,255,255,0.8)"}`,
+        }}
+      />
 
       <Box sx={{ flex: 1, minWidth: 0 }}>
         <Typography sx={{
@@ -510,7 +495,6 @@ function DraggableTotalsRow({
   employee, hours, overtime, empColor, isDark, onInfoClick, onAdjustClick, theme,
   firstPeriodLabel, secondPeriodLabel, firstPeriodHours, secondPeriodHours,
 }: DraggableTotalsRowProps) {
-  const initials = getInitials(employee.firstName, employee.lastName);
   const dragId: UniqueIdentifier = `totals-${employee.id}`;
   const { attributes, listeners, setNodeRef, isDragging } = useDraggable({
     id: dragId,
@@ -552,17 +536,12 @@ function DraggableTotalsRow({
         <DragIndicatorIcon sx={{ fontSize: 15 }} />
       </Box>
 
-      {/* Initials */}
-      <Box sx={{
-        width: { xs: 24, sm: 28 }, height: { xs: 24, sm: 28 }, borderRadius: "50%",
-        backgroundColor: empColor, flexShrink: 0,
-        display: "flex", alignItems: "center", justifyContent: "center",
-        boxShadow: `0 2px 6px ${empColor}50`,
-      }}>
-        <Typography sx={{ fontSize: { xs: "0.58rem", sm: "0.65rem" }, fontWeight: 700, color: "#fff", lineHeight: 1 }}>
-          {initials}
-        </Typography>
-      </Box>
+      {/* Initials or photo */}
+      <EmployeeAvatar
+        employee={employee}
+        size={28}
+        sx={{ width: { xs: 24, sm: 28 }, height: { xs: 24, sm: 28 }, fontSize: { xs: "0.58rem", sm: "0.65rem" }, boxShadow: `0 2px 6px ${empColor}50` }}
+      />
 
       {/* Name */}
       <Box sx={{ flex: 1, minWidth: 0 }}>
@@ -696,9 +675,6 @@ function DraggableSwimlaneCard({
     } satisfies DragCardData,
   });
 
-  const initials = getInitials(employee.firstName, employee.lastName);
-  const empColor = getEmployeeColor(employee.id);
-
   const handleClick = (e: React.MouseEvent<HTMLElement>) => {
     if (e.ctrlKey || e.metaKey) {
       e.stopPropagation();
@@ -752,16 +728,12 @@ function DraggableSwimlaneCard({
         <DragIndicatorIcon sx={{ fontSize: 13 }} />
       </Box>
 
-      {/* Initials */}
-      <Box sx={{
-        width: { xs: 20, sm: 24 }, height: { xs: 20, sm: 24 }, borderRadius: "50%",
-        backgroundColor: empColor,
-        color: "#fff",
-        display: "flex", alignItems: "center", justifyContent: "center",
-        fontSize: { xs: "0.52rem", sm: "0.6rem" }, fontWeight: 700, flexShrink: 0,
-      }}>
-        {initials}
-      </Box>
+      {/* Initials or photo */}
+      <EmployeeAvatar
+        employee={employee}
+        size={24}
+        sx={{ width: { xs: 20, sm: 24 }, height: { xs: 20, sm: 24 }, fontSize: { xs: "0.52rem", sm: "0.6rem" } }}
+      />
 
       {/* Name + label */}
       <Box sx={{ flex: 1, minWidth: 0 }}>
@@ -1127,8 +1099,8 @@ function TotalsColumn({
         overflow: "hidden",
         position: "sticky",
         top: 0,
-        alignSelf: "flex-start",
-        height: "100%",
+        // Stretch (default) so the column fills the full height of the board,
+        // matching the day columns / swimlanes (same behavior as DayColumn).
         backgroundColor: isDark ? "rgba(124,58,237,0.05)" : "rgba(124,58,237,0.03)",
         transition: "all 0.25s ease",
         ...dropHighlight,
@@ -1283,8 +1255,8 @@ function TotalsColumn({
                 "&:hover .MuiOutlinedInput-notchedOutline": { borderColor: "transparent" },
                 "&.Mui-focused": {
                   backgroundColor: isDark ? "rgba(55,55,65,0.8)" : "rgba(255,255,255,0.95)",
-                  borderColor: "#a78bfa",
-                  boxShadow: `0 0 0 3px ${isDark ? "rgba(167,139,250,0.15)" : "rgba(167,139,250,0.1)"}`,
+                  borderColor: isDark ? "rgba(255,255,255,0.2)" : "rgba(0,0,0,0.15)",
+                  boxShadow: "none",
                 },
                 "&.Mui-focused .MuiOutlinedInput-notchedOutline": { borderColor: "transparent" },
                 "& fieldset": { border: "none" },
@@ -1307,24 +1279,18 @@ function TotalsColumn({
 
           {/* Add / Subtract buttons */}
           <Box sx={{ display: "flex", gap: 1, mb: 1 }}>
-            <Button fullWidth size="medium" variant="contained" onClick={() => handleDialogConfirm("subtract")}
+            <Button fullWidth size="medium" variant="contained" color="error" onClick={() => handleDialogConfirm("subtract")}
               disabled={!dialogHours || parseFloat(dialogHours) <= 0}
               sx={{
                 borderRadius: "12px", textTransform: "none", fontWeight: 700, fontSize: "0.9rem", py: 1,
-                backgroundColor: "#ef4444", color: "#fff",
-                "&:hover": { backgroundColor: "#dc2626" },
-                "&.Mui-disabled": { backgroundColor: isDark ? "rgba(239,68,68,0.12)" : "rgba(239,68,68,0.08)", color: isDark ? "rgba(255,255,255,0.2)" : "rgba(0,0,0,0.2)" },
               }}
             >
               − Restar
             </Button>
-            <Button fullWidth size="medium" variant="contained" onClick={() => handleDialogConfirm("add")}
+            <Button fullWidth size="medium" variant="contained" color="success" onClick={() => handleDialogConfirm("add")}
               disabled={!dialogHours || parseFloat(dialogHours) <= 0}
               sx={{
                 borderRadius: "12px", textTransform: "none", fontWeight: 700, fontSize: "0.9rem", py: 1,
-                backgroundColor: "#34d399", color: "#fff",
-                "&:hover": { backgroundColor: "#2ecc71" },
-                "&.Mui-disabled": { backgroundColor: isDark ? "rgba(52,211,153,0.12)" : "rgba(52,211,153,0.08)", color: isDark ? "rgba(255,255,255,0.2)" : "rgba(0,0,0,0.2)" },
               }}
             >
               + Agregar
@@ -1334,7 +1300,7 @@ function TotalsColumn({
           {/* Cancel */}
           <Button fullWidth size="small" onClick={closeDialog}
             sx={{
-              borderRadius: "8px", textTransform: "none", fontWeight: 500, color: "text.secondary", py: 0.75,
+              borderRadius: "12px", textTransform: "none", fontWeight: 500, color: "text.secondary", py: 0.75,
               "&:hover": { backgroundColor: isDark ? "rgba(255,255,255,0.06)" : "rgba(0,0,0,0.04)" },
             }}
           >
@@ -1384,11 +1350,9 @@ function TotalsColumn({
             >
               Cancelar
             </Button>
-            <Button fullWidth size="medium" variant="contained" onClick={applyPending}
+            <Button fullWidth size="medium" variant="contained" color={pendingEdit?.condition === "add" ? "success" : "error"} onClick={applyPending}
               sx={{
                 borderRadius: "12px", textTransform: "none", fontWeight: 600, py: 1,
-                backgroundColor: pendingEdit?.condition === "add" ? "#34d399" : "#ef4444",
-                "&:hover": { backgroundColor: pendingEdit?.condition === "add" ? "#2ecc71" : "#dc2626" },
               }}
             >
               Confirmar
@@ -1989,7 +1953,13 @@ const WeeklyBoard: React.FC<WeeklyBoardProps> = ({
             </Box>
           ) : (
             /* ─── Schedule view (swimlanes) with drag & drop + totals column ─── */
-            <Box sx={{ display: "flex", gap: { xs: 0.6, sm: 1 }, height: "100%", minHeight: 350 }}>
+            /*
+             * minHeight 100% (not height 100%): the row grows with the swimlane
+             * content, so the totals column stretches to the full height of the
+             * schedules (or the viewport when content is short) instead of
+             * leaving an empty gap below the last column.
+             */
+            <Box sx={{ display: "flex", gap: { xs: 0.6, sm: 1 }, minHeight: "100%" }}>
               <Box sx={{
               display: "flex", flexDirection: "column", gap: 1.25,
               // Mobile: keep the original max-content behavior so all swimlane
@@ -2203,14 +2173,21 @@ const WeeklyBoard: React.FC<WeeklyBoardProps> = ({
               if (popoverSelectedLabel) handleScheduleSelect(popoverSelectedLabel);
             }}
             sx={{
-              flex: 1, textAlign: "center", py: 0.7, borderRadius: "8px", cursor: "pointer",
+              flex: 1, textAlign: "center", py: 0.7, borderRadius: "12px", cursor: "pointer",
               fontSize: "0.75rem", fontWeight: 700,
               backgroundColor: !popoverSelectedLabel
-                ? (isDark ? "rgba(99,102,241,0.12)" : "rgba(99,102,241,0.08)")
-                : "#6366f1",
-              color: !popoverSelectedLabel ? (isDark ? "rgba(255,255,255,0.25)" : "rgba(0,0,0,0.25)") : "#fff",
+                ? (isDark ? "rgba(255,255,255,0.12)" : "rgba(0,0,0,0.08)")
+                : theme.palette.primary.main,
+              color: !popoverSelectedLabel
+                ? (isDark ? "rgba(255,255,255,0.25)" : "rgba(0,0,0,0.25)")
+                : theme.palette.primary.contrastText,
               transition: "all 0.15s ease",
-              "&:hover": !popoverSelectedLabel ? {} : { backgroundColor: "#4f46e5" },
+              "&:hover": !popoverSelectedLabel
+                ? {}
+                : {
+                    backgroundColor: isDark ? "#d4d4d4" : "#1a1a1a",
+                    transform: "translateY(-1px)",
+                  },
             }}
           >
             Asignar

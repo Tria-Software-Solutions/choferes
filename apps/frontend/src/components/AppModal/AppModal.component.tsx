@@ -210,10 +210,6 @@ const AppModal: React.FC<AppModalProps> = ({
               fullWidth={isSmallScreen}
               sx={{
                 minWidth: isSmallScreen ? "100%" : 120,
-                py: 1.5,
-                fontWeight: 600,
-                borderRadius: "10px",
-                border: `1px solid ${isSmallScreen ? "transparent" : "rgba(0,0,0,0.12)"}`,
                 color: theme.palette.text.secondary,
                 backgroundColor: theme.palette.mode === "dark" ? "rgba(255,255,255,0.05)" : "rgba(0,0,0,0.04)",
                 '&:hover': {
@@ -233,15 +229,6 @@ const AppModal: React.FC<AppModalProps> = ({
                 fullWidth={isSmallScreen}
                 sx={{
                   minWidth: isSmallScreen ? "100%" : 120,
-                  py: 1.5,
-                  fontWeight: 600,
-                  borderRadius: "10px",
-                  backgroundColor: theme.palette.primary.main,
-                  color: theme.palette.primary.contrastText,
-                  border: "none",
-                  '&:hover': {
-                    backgroundColor: theme.palette.primary.dark,
-                  },
                   '&:disabled': {
                     backgroundColor: theme.palette.action.disabled,
                     color: theme.palette.text.disabled,
