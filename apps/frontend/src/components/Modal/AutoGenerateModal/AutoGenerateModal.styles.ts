@@ -208,12 +208,6 @@ export const autoGenerateModalSwitchStyles = (theme: Theme): SxProps<Theme> => (
     '&.Mui-checked': {
       backgroundColor: theme.palette.primary.light,
     },
-    '&.Mui-disabled': {
-      backgroundColor: theme.palette.action.disabledBackground,
-    },
-  },
-  '& .MuiSwitch-thumb': {
-    boxShadow: theme.shadows[1],
   },
 });
 

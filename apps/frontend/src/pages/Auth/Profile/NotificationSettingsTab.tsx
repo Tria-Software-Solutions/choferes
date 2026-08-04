@@ -226,14 +226,7 @@ const NotificationSettingsTab: React.FC = () => {
           disabled={saving}
           onChange={(event) => handleToggleAll(event.target.checked)}
           inputProps={{ "aria-label": "Todas las notificaciones" }}
-          sx={{
-            "& .MuiSwitch-switchBase.Mui-checked": {
-              color: theme.palette.primary.main,
-            },
-            "& .MuiSwitch-switchBase.Mui-checked + .MuiSwitch-track": {
-              backgroundColor: theme.palette.primary.main,
-            },
-          }}
+          sx={{ flexShrink: 0 }}
         />
       </Box>
 
@@ -329,15 +322,7 @@ const NotificationSettingsTab: React.FC = () => {
                       disabled={saving}
                       onChange={(event) => handleToggle(item.key, event.target.checked)}
                       inputProps={{ "aria-label": item.label }}
-                      sx={{
-                        flexShrink: 0,
-                        "& .MuiSwitch-switchBase.Mui-checked": {
-                          color: theme.palette.primary.main,
-                        },
-                        "& .MuiSwitch-switchBase.Mui-checked + .MuiSwitch-track": {
-                          backgroundColor: theme.palette.primary.main,
-                        },
-                      }}
+                      sx={{ flexShrink: 0 }}
                     />
                   </Box>
                 );

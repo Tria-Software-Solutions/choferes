@@ -115,21 +115,7 @@ export const dockEndZoneTickStyles: SxProps<Theme> = (theme) => ({
     : 'rgba(0,0,0,0.12)',
 });
 
-export const dockItemSwitchStyles: SxProps<Theme> = {
-  '& .MuiSwitch-switchBase': {
-    '&.Mui-checked': {
-      '& + .MuiSwitch-track': {
-        opacity: 1,
-      },
-    },
-  },
-  '& .MuiSwitch-thumb': {
-    boxShadow: '0 1px 4px rgba(0,0,0,0.2)',
-  },
-  '& .MuiSwitch-sizeSmall': {
-    padding: 4,
-  },
-};
+export const dockItemSwitchStyles: SxProps<Theme> = {};
 
 // Edit mode footer bar
 export const dockEditFooterStyles: SxProps<Theme> = (theme) => ({

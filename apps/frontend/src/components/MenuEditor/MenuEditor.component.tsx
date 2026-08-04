@@ -141,7 +141,6 @@ const MenuEditor: React.FC<MenuEditorProps> = ({
                 <Switch
                   checked={isVisible}
                   onChange={() => onToggle(item.key)}
-                  size="small"
                   sx={editorItemSwitchStyles}
                   onClick={(e) => e.stopPropagation()}
                 />

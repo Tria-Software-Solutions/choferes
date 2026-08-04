@@ -6,7 +6,6 @@ import {
   List,
   ListItemButton,
   ListItemText,
-  Chip,
   type Theme,
 } from "@mui/material";
 import type { Employee } from "../../../models/Employee";
@@ -38,14 +37,14 @@ interface QuickAssignPopoverProps {
  * or a day cell (schedule view) to quickly assign an employee + schedule
  * without dragging.
  *
- * - view === "employee": two dropdowns — employee + schedule (filtered to the day)
- * - view === "schedule": one dropdown — employee (schedule is fixed by the cell)
+ * - view === "employee": two lists — select multiple employees + pick a schedule
+ * - view === "schedule": one list — select multiple employees (schedule is fixed by the cell)
  */
 const QuickAssignPopover: React.FC<QuickAssignPopoverProps> = ({
   open, anchorPosition, onClose, view, day, date, schedules, employees,
   fixedScheduleLabel, isDark, theme, onAssign,
 }) => {
-  const [selectedEmployeeId, setSelectedEmployeeId] = useState<number | null>(null);
+  const [selectedEmployeeIds, setSelectedEmployeeIds] = useState<Set<number>>(new Set());
   const [selectedScheduleLabel, setSelectedScheduleLabel] = useState<string>("");
 
   const daySchedules = useMemo(
@@ -56,62 +55,78 @@ const QuickAssignPopover: React.FC<QuickAssignPopoverProps> = ({
   // Reset selection each time it opens
   useEffect(() => {
     if (open) {
-      setSelectedEmployeeId(null);
+      setSelectedEmployeeIds(new Set());
       setSelectedScheduleLabel("");
     }
   }, [open]);
 
   const confirmDisabled =
-    selectedEmployeeId === null ||
+    selectedEmployeeIds.size === 0 ||
     (view === "employee" && selectedScheduleLabel === "");
 
+  const handleToggleEmployee = (employeeId: number) => {
+    setSelectedEmployeeIds(prev => {
+      const next = new Set(prev);
+      if (next.has(employeeId)) next.delete(employeeId);
+      else next.add(employeeId);
+      return next;
+    });
+  };
+
   const handleConfirm = () => {
-    if (selectedEmployeeId === null) return;
+    if (selectedEmployeeIds.size === 0) return;
     const scheduleLabel =
       view === "schedule" ? fixedScheduleLabel ?? "" : selectedScheduleLabel;
     if (!scheduleLabel) return;
-    onAssign(selectedEmployeeId, scheduleLabel);
+
+    // Assign to all selected employees
+    selectedEmployeeIds.forEach((empId) => {
+      onAssign(empId, scheduleLabel);
+    });
     onClose();
   };
 
   const employeeInitials = (emp: Employee) =>
     getInitials(emp.firstName, emp.lastName);
 
-  const renderEmployeeItem = (emp: Employee) => (
-    <ListItemButton
-      key={emp.id}
-      onClick={() => setSelectedEmployeeId(emp.id)}
-      selected={selectedEmployeeId === emp.id}
-      sx={{
-        mx: 0.5, borderRadius: "8px", my: 0.2, px: 1.25, py: 0.7,
-        "&.Mui-selected": {
-          backgroundColor: isDark ? "rgba(99,102,241,0.14)" : "rgba(99,102,241,0.08)",
-        },
-        "&:hover": { backgroundColor: isDark ? "rgba(255,255,255,0.05)" : "rgba(0,0,0,0.03)" },
-      }}
-    >
-      <Box
+  const renderEmployeeItem = (emp: Employee) => {
+    const isSelected = selectedEmployeeIds.has(emp.id);
+    return (
+      <ListItemButton
+        key={emp.id}
+        onClick={() => handleToggleEmployee(emp.id)}
+        selected={isSelected}
         sx={{
-          width: 24, height: 24, borderRadius: "50%", flexShrink: 0, mr: 1,
-          backgroundColor: getEmployeeColor(emp.id),
-          display: "flex", alignItems: "center", justifyContent: "center",
+          mx: 0.5, borderRadius: "8px", my: 0.2, px: 1.25, py: 0.7,
+          "&.Mui-selected": {
+            backgroundColor: isDark ? "rgba(99,102,241,0.14)" : "rgba(99,102,241,0.08)",
+          },
+          "&:hover": { backgroundColor: isDark ? "rgba(255,255,255,0.05)" : "rgba(0,0,0,0.03)" },
         }}
       >
-        <Typography sx={{ fontSize: "0.6rem", fontWeight: 700, color: "#fff", lineHeight: 1 }}>
-          {employeeInitials(emp)}
-        </Typography>
-      </Box>
-      <ListItemText
-        primary={`${emp.firstName} ${emp.lastName?.[0]}.`}
-        primaryTypographyProps={{
-          fontSize: "0.78rem", fontWeight: selectedEmployeeId === emp.id ? 700 : 500,
-        }}
-      />
-      {selectedEmployeeId === emp.id && (
-        <Typography sx={{ fontSize: "0.65rem", fontWeight: 700, color: "#818cf8" }}>✓</Typography>
-      )}
-    </ListItemButton>
-  );
+        <Box
+          sx={{
+            width: 24, height: 24, borderRadius: "50%", flexShrink: 0, mr: 1,
+            backgroundColor: getEmployeeColor(emp.id),
+            display: "flex", alignItems: "center", justifyContent: "center",
+          }}
+        >
+          <Typography sx={{ fontSize: "0.6rem", fontWeight: 700, color: "#fff", lineHeight: 1 }}>
+            {employeeInitials(emp)}
+          </Typography>
+        </Box>
+        <ListItemText
+          primary={`${emp.firstName} ${emp.lastName?.[0]}.`}
+          primaryTypographyProps={{
+            fontSize: "0.78rem", fontWeight: isSelected ? 700 : 500,
+          }}
+        />
+        {isSelected && (
+          <Typography sx={{ fontSize: "0.65rem", fontWeight: 700, color: "#818cf8" }}>✓</Typography>
+        )}
+      </ListItemButton>
+    );
+  };
 
   return (
     <Popover
@@ -128,7 +143,7 @@ const QuickAssignPopover: React.FC<QuickAssignPopoverProps> = ({
             boxShadow: isDark ? "0 12px 44px rgba(0,0,0,0.45)" : "0 12px 44px rgba(0,0,0,0.14)",
             border: `1px solid ${isDark ? "rgba(255,255,255,0.08)" : "rgba(0,0,0,0.06)"}`,
             width: 240,
-            maxHeight: 320,
+            maxHeight: 360,
             overflow: "auto",
             mt: 0.5,
             p: 0.5,
@@ -150,28 +165,23 @@ const QuickAssignPopover: React.FC<QuickAssignPopoverProps> = ({
               {capitalizeFirstLetter(translateDayToAbrevSpanish(day as EnglishDayOfWeek))} {formatHeaderDate(date)}
             </Typography>
           ) : null}
-          {view === "schedule" && fixedScheduleLabel && (
-            <Chip
-              label={fixedScheduleLabel} size="small"
-              sx={{
-                height: 20, fontSize: "0.6rem", fontWeight: 600,
-                backgroundColor: isDark ? "rgba(99,102,241,0.15)" : "rgba(99,102,241,0.1)",
-                color: "#818cf8",
-              }}
-            />
-          )}
         </Box>
       </Box>
 
-      {/* Employee dropdown */}
+      {/* Employee list with checkboxes */}
       <Typography sx={{
         px: 1.25, pt: 0.75, pb: 0.25, fontSize: "0.6rem", fontWeight: 600,
         color: "text.secondary", textTransform: "uppercase", letterSpacing: "0.04em",
       }}>
-        Empleado
+        Empleados ({selectedEmployeeIds.size} seleccionados)
       </Typography>
       <List dense sx={{ py: 0, maxHeight: 150, overflow: "auto" }}>
         {employees.map(renderEmployeeItem)}
+        {employees.length === 0 && (
+          <Typography sx={{ px: 1.5, py: 1, fontSize: "0.7rem", color: "text.disabled" }}>
+            No hay empleados disponibles
+          </Typography>
+        )}
       </List>
 
       {/* Schedule dropdown — only in employee view */}
@@ -250,7 +260,7 @@ const QuickAssignPopover: React.FC<QuickAssignPopoverProps> = ({
             "&:hover": confirmDisabled ? {} : { backgroundColor: "#4f46e5" },
           }}
         >
-          Asignar
+          Asignar {selectedEmployeeIds.size > 1 ? `(${selectedEmployeeIds.size})` : ""}
         </Box>
       </Box>
     </Popover>
