@@ -805,6 +805,7 @@ export const darkTheme = createTheme({
       styleOverrides: {
         paper: {
           borderRadius: "12px",
+          border: "none",
         },
       },
     },

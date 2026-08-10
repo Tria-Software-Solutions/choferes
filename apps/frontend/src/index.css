@@ -57,8 +57,10 @@ body {
 }
 
 /* Focus visible solo para navegación por teclado en elementos interactivos no-form.
-   Los inputs/selects/textareas usan sus propios estados de focus de MUI (sin contorno negro). */
-*:focus-visible:not(input):not(textarea):not(select):not([role="combobox"]) {
+   Los inputs/selects/textareas usan sus propios estados de focus de MUI (sin contorno negro).
+   Los popovers/menus/dialogs (superficies flotantes) quedan excluidos: el outline global
+   de 2px negro se ve como un "border" indeseado dentro de los popups. */
+*:focus-visible:not(input):not(textarea):not(select):not([role="combobox"]):not(.MuiPopover-root *):not(.MuiMenu-root *):not(.MuiDialog-root *):not(.MuiModal-root *) {
   outline: 2px solid #000000;
   outline-offset: 2px;
 }

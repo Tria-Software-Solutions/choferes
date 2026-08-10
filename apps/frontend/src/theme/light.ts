@@ -931,6 +931,7 @@ export const lightTheme = createTheme({
       styleOverrides: {
         paper: {
           borderRadius: "8px",
+          border: "none",
         },
       },
     },
