@@ -45,8 +45,11 @@ import type { BiweeklySummary } from '../../../models/BiweeklySummary';
 import type { MonthlySummary } from '../../../models/MonthlySummary';
 import {
   formatHeaderDate,
+  getBiweekNumber,
   getCurrentWeekDates,
   getInvolvedPeriods,
+  getMonthNumber,
+  getWeekNumberAndYear,
   hasMultipleBiweeks,
   hasMultipleMonths,
   hasMultipleYears,
@@ -66,8 +69,7 @@ import { getScheduleCellData, isToday } from '../../Table/SelectorTable/helpers/
 import SegmentedToggle from '../../SegmentedToggle/SegmentedToggle.component';
 import QuickAssignPopover from './QuickAssignPopover.component';
 import {
-  calculateTotalHours,
-  calculateOvertime,
+  calculateHoursForPeriod,
 } from '../../Table/SelectorTable/helpers/hoursCalculation';
 
 // ─── Palette ───
@@ -2482,33 +2484,42 @@ const WeeklyBoard: React.FC<WeeklyBoardProps> = ({
     const hasMultiMonths = hasMultipleMonths(currentWeek);
     const hasMultiYears = hasMultipleYears(currentWeek);
 
+    // Período "actual": el de HOY cuando la semana mostrada contiene hoy;
+    // si se navega a otra semana, el período de su lunes (props).
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const weekContainsToday = currentWeek.some((d) => d.isoDate === today.toISOString());
+    const { weekNumber: effWeekNumber, year: effYear } = weekContainsToday
+      ? getWeekNumberAndYear(today)
+      : { weekNumber, year };
+    const effBiweek = weekContainsToday ? getBiweekNumber(today) : biweekNumber;
+    const effMonth = weekContainsToday ? getMonthNumber(today) : month;
+
     filteredEmployees.forEach((emp) => {
-      const totalH = calculateTotalHours(
-        emp,
-        selectedPeriod,
-        currentWeek,
-        weekNumber,
-        biweekNumber,
-        month,
-        year,
+      const totalH = calculateHoursForPeriod({
+        employee: emp,
+        period: selectedPeriod,
+        type: 'totalHours',
+        weekNumber: effWeekNumber,
+        biweekNumber: effBiweek,
+        month: effMonth,
+        year: effYear,
         weeklySummaries,
         biweeklySummaries,
         monthlySummaries,
-        multiplePeriods
-      );
-      const overT = calculateOvertime(
-        emp,
-        selectedPeriod,
-        currentWeek,
-        weekNumber,
-        biweekNumber,
-        month,
-        year,
+      });
+      const overT = calculateHoursForPeriod({
+        employee: emp,
+        period: selectedPeriod,
+        type: 'overtime',
+        weekNumber: effWeekNumber,
+        biweekNumber: effBiweek,
+        month: effMonth,
+        year: effYear,
         weeklySummaries,
         biweeklySummaries,
         monthlySummaries,
-        multiplePeriods
-      );
+      });
       const hasWkd = weeklySummaries.some(
         (s) =>
           s.employeeId === emp.id &&
@@ -2815,8 +2826,11 @@ const WeeklyBoard: React.FC<WeeklyBoardProps> = ({
       if (!canEdit) return;
       setPopoverAnchor(null);
       // Keep the popover inside the viewport when anchored near the edges
-      const left = Math.min(e.clientX, window.innerWidth - 260);
-      const top = Math.min(e.clientY, window.innerHeight - 340);
+      const isMobileViewport = window.innerWidth < 600;
+      const popupWidth = !isMobileViewport && view === 'employee' ? 560 : 300;
+      const maxTop = isMobileViewport ? window.innerHeight * 0.2 : 560;
+      const left = Math.min(e.clientX, window.innerWidth - popupWidth);
+      const top = Math.min(e.clientY, window.innerHeight - maxTop);
       setQuickAssign({ view, day, date, scheduleLabel, anchor: { top, left } });
     },
     [canEdit]
@@ -3181,11 +3195,12 @@ const WeeklyBoard: React.FC<WeeklyBoardProps> = ({
             sx: {
               borderRadius: '12px',
               boxShadow: isDark ? '0 10px 40px rgba(0,0,0,0.4)' : '0 10px 40px rgba(0,0,0,0.12)',
-              minWidth: 170,
+              border: 'none',
+              minWidth: { xs: 190, sm: 210, md: 230 },
               mt: 0.5,
               display: 'flex',
               flexDirection: 'column',
-              height: 400,
+              height: { xs: '72vh', sm: 440, md: 500 },
               overflow: 'hidden',
             },
           },
