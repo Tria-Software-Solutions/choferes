@@ -1,14 +1,27 @@
 // Note: Sequelize v3 uses string operators. Using inline types instead.
 import { HoursWorked } from "../models/HoursWorked";
 import { Employee } from "../models/Employee";
+import { parseCalendarDate } from "./summaryRecalculationService";
 import { paginate, getPaginationParams, getSearchParam, QueryParams } from "../utils/pagination";
 
 export const getHoursWorked = async (query: QueryParams) => {
   const params = getPaginationParams(query);
   const search = getSearchParam(query);
 
+  // Optional inclusive date range filter (YYYY-MM-DD or ISO dates). Used by the
+  // board to fetch only the visible week instead of the whole history.
+  const dateFrom = query.dateFrom ? parseCalendarDate(query.dateFrom) : null;
+  const dateTo = query.dateTo ? parseCalendarDate(query.dateTo) : null;
+
   // HoursWorked search is done via the associated Employee model
   const whereClause: Record<string, any> = {};
+  if (dateFrom && !Number.isNaN(dateFrom.getTime()) && dateTo && !Number.isNaN(dateTo.getTime())) {
+    const start = new Date(dateFrom);
+    start.setHours(0, 0, 0, 0);
+    const end = new Date(dateTo);
+    end.setHours(23, 59, 59, 999);
+    whereClause.date = { $between: [start, end] };
+  }
   const includeWhere: Record<string, any> | undefined = search
     ? {
         $or: [{ firstName: { $iLike: `%${search}%` } }, { lastName: { $iLike: `%${search}%` } }],

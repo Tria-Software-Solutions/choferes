@@ -19,6 +19,8 @@ jest.mock("../middleware/validation", () => {
     idParam: [mockRule],
     hoursWorkedRules: [mockRule],
     hoursWorkedUpdateRules: [...[mockRule], mockRule],
+    hoursWorkedQueryRules: [mockRule],
+    recalculateRules: [mockRule],
     paginationRules: [mockRule],
     validate: jest.fn((_req: express.Request, _res: express.Response, next: express.NextFunction) => next()),
   };
