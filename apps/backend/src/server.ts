@@ -33,6 +33,10 @@ dotenv.config();
 
 const app = express();
 
+// Render sits behind a proxy, so trust it to get the real client IP
+// (required for per-IP rate limiting, and express-rate-limit v7 validation)
+app.set("trust proxy", 1);
+
 // Serve uploaded static files (avatars)
 app.use("/uploads", express.static(path.resolve(process.cwd(), "uploads")));
 
@@ -72,34 +76,9 @@ app.use(
   }),
 );
 
-// Rate limiting to prevent abuse (production only)
-const limiter = rateLimit({
-  windowMs: 15 * 60 * 1000, // 15 minutes
-  max: 1000, // Max 1000 requests per window (increased for development)
-  message: "Too many requests from this IP, please try again later.",
-  standardHeaders: true,
-  legacyHeaders: false,
-});
-
-// Only apply rate limiting in production
-if (process.env.NODE_ENV === "production") {
-  app.use("/api/", limiter);
-}
-
-// Stricter rate limiting for authentication (production only)
-const authLimiter = rateLimit({
-  windowMs: 15 * 60 * 1000, // 15 minutes
-  max: 20, // Max 20 login attempts per window (increased for development)
-  message: "Too many login attempts, please try again later.",
-  standardHeaders: true,
-  legacyHeaders: false,
-});
-
-// Only apply auth rate limiting in production
-if (process.env.NODE_ENV === "production") {
-  app.use("/api/auth", authLimiter);
-}
-
+// CORS must run BEFORE the rate limiters so blocked responses (429) still
+// carry Access-Control-Allow-Origin headers; otherwise browsers report a
+// misleading CORS error and hide the real "Too Many Requests" message.
 const allowedOrigins = [
   "http://localhost:3000",
   "https://choferesdealquiler.vercel.app",
@@ -133,6 +112,34 @@ app.use(
     maxAge: 86400,
   }),
 );
+
+// Rate limiting to prevent abuse (production only)
+const limiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 1000, // Max 1000 requests per window (increased for development)
+  message: "Too many requests from this IP, please try again later.",
+  standardHeaders: true,
+  legacyHeaders: false,
+});
+
+// Only apply rate limiting in production
+if (process.env.NODE_ENV === "production") {
+  app.use("/api/", limiter);
+}
+
+// Stricter rate limiting for authentication (production only)
+const authLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 20, // Max 20 login attempts per window (increased for development)
+  message: "Too many login attempts, please try again later.",
+  standardHeaders: true,
+  legacyHeaders: false,
+});
+
+// Only apply auth rate limiting in production
+if (process.env.NODE_ENV === "production") {
+  app.use("/api/auth", authLimiter);
+}
 
 app.use(cookieParser());
 app.use(json({ limit: "10mb" }));
