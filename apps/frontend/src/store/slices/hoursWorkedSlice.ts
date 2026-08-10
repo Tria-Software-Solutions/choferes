@@ -10,6 +10,69 @@ interface HoursWorkedState {
   error: string | null;
 }
 
+// Retries transient failures that commonly happen on slow/free hosting
+// (e.g. Render free tier waking up after inactivity), preventing silent data
+// loss when a save is aborted mid-flight.
+//
+// Idempotent operations (update/delete/fetch) are retried aggressively. For
+// non-idempotent operations (POST create) we ONLY retry failures where the
+// server definitely did NOT process the request (connection refused, 429,
+// 503/504). Retrying a create after a timeout or a 500 could insert a
+// duplicate record, and duplicate hours records inflate the totals.
+const RETRYABLE_STATUS_CODES = new Set([408, 429, 503, 504]);
+// 500/502 may occur after the server already committed the write — retried
+// only for idempotent operations.
+const RETRYABLE_AMBIGUOUS_STATUS_CODES = new Set([500, 502]);
+const MAX_RETRIES = 3;
+// Connection-level failures (no response) usually mean the server is cold
+// starting (Render free tier takes 30-60s), so wait longer between attempts.
+const CONNECTION_RETRY_BACKOFF_MS = 10000;
+const HTTP_RETRY_BACKOFF_MS = 1000;
+
+const wait = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
+
+// Connection errors that guarantee the request never reached the server.
+const SAFE_CONNECTION_ERRORS = new Set([
+  "ECONNREFUSED",
+  "ECONNRESET",
+  "ENOTFOUND",
+  "EHOSTUNREACH",
+  "ENETUNREACH",
+]);
+
+const isRetryable = (error: unknown, idempotent: boolean): boolean => {
+  const status = (error as { response?: { status?: number } })?.response?.status;
+
+  if (status) {
+    if (RETRYABLE_STATUS_CODES.has(status)) return true;
+    return idempotent && RETRYABLE_AMBIGUOUS_STATUS_CODES.has(status);
+  }
+
+  // No response → connection-level failure.
+  const code = (error as { code?: string })?.code;
+  if (code && SAFE_CONNECTION_ERRORS.has(code)) return true;
+  // An axios timeout (ECONNABORTED) is ambiguous — only retry for idempotent ops.
+  return idempotent && code === "ECONNABORTED";
+};
+
+async function withRetry<T>(fn: () => Promise<T>, idempotent = true): Promise<T> {
+  let attempt = 0;
+  for (;;) {
+    try {
+      return await fn();
+    } catch (error: unknown) {
+      attempt += 1;
+      if (attempt >= MAX_RETRIES || !isRetryable(error, idempotent)) {
+        throw error;
+      }
+      const hasResponse = Boolean((error as { response?: unknown })?.response);
+      await wait(
+        hasResponse ? HTTP_RETRY_BACKOFF_MS * attempt : CONNECTION_RETRY_BACKOFF_MS,
+      );
+    }
+  }
+}
+
 const initialState: HoursWorkedState = {
   hoursWorked: [],
   totalCountHoursWorked: 0,
@@ -46,7 +109,10 @@ export const createHoursWorked = createAsyncThunk(
         ...newHours,
         date: newHours.date instanceof Date ? newHours.date.toISOString() : newHours.date,
       };
-      const createdHours = await HoursWorkedService.createHoursWorked(serializedHours);
+      const createdHours = await withRetry(
+        () => HoursWorkedService.createHoursWorked(serializedHours),
+        false, // POST create is not idempotent
+      );
       return createdHours;
     } catch (error: unknown) {
       return rejectWithValue(
@@ -70,9 +136,9 @@ export const updateHoursWorked = createAsyncThunk(
         ...updatedHours,
         date: updatedHours.date instanceof Date ? updatedHours.date.toISOString() : updatedHours.date,
       };
-      await HoursWorkedService.updateHoursWorked(id, serializedHours);
+      await withRetry(() => HoursWorkedService.updateHoursWorked(id, serializedHours));
       // Fetch fresh data from server to ensure consistency
-      const refreshedHours = await HoursWorkedService.getHoursWorkedById(id);
+      const refreshedHours = await withRetry(() => HoursWorkedService.getHoursWorkedById(id));
       return refreshedHours;
     } catch (error: unknown) {
       return rejectWithValue(
@@ -99,9 +165,11 @@ export const createOrUpdateHoursWorked = createAsyncThunk(
 
       // Check if id exists and is a valid positive number (not 0)
       if ("id" in serializedHours && serializedHours.id && serializedHours.id > 0) {
-        const updatedHoursWorked = await HoursWorkedService.updateHoursWorked(
-          serializedHours.id,
-          serializedHours,
+        const updatedHoursWorked = await withRetry(() =>
+          HoursWorkedService.updateHoursWorked(
+            serializedHours.id,
+            serializedHours,
+          ),
         );
         return updatedHoursWorked;
       } else {
@@ -109,8 +177,10 @@ export const createOrUpdateHoursWorked = createAsyncThunk(
         const hoursToCreate = "id" in serializedHours 
           ? { date: serializedHours.date, employeeId: serializedHours.employeeId, scheduleId: serializedHours.scheduleId }
           : serializedHours;
-        const createdHoursWorked =
-          await HoursWorkedService.createHoursWorked(hoursToCreate);
+        const createdHoursWorked = await withRetry(
+          () => HoursWorkedService.createHoursWorked(hoursToCreate),
+          false, // POST create is not idempotent
+        );
         return createdHoursWorked;
       }
     } catch (error: unknown) {
@@ -127,7 +197,7 @@ export const deleteHoursWorked = createAsyncThunk(
   "hoursWorked/deleteHoursWorked",
   async (id: number, { rejectWithValue }) => {
     try {
-      await HoursWorkedService.deleteHoursWorked(id);
+      await withRetry(() => HoursWorkedService.deleteHoursWorked(id));
       return id;
     } catch (error: unknown) {
       return rejectWithValue(

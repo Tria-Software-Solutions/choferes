@@ -11,6 +11,14 @@ export const API_URL = process.env.REACT_APP_API_URL || "http://localhost:5000";
 const requestCache = new Map<string, { data: unknown; timestamp: number }>();
 const CACHE_DURATION = 5 * 60 * 1000; // 5 minutes
 
+// How long before the access token expires we proactively refresh it.
+// This prevents saves from hitting a 401 mid-edit (the main cause of
+// silent data loss when the session dies while entering hours records).
+const PROACTIVE_REFRESH_MARGIN_MS = 3 * 60 * 1000;
+
+// Singleton: concurrent 401s / proactive refreshes share a single in-flight request.
+let refreshPromise: Promise<{ accessToken: string; refreshToken: string }> | null = null;
+
 const api = axios.create({
   baseURL: `${API_URL}/api`,
   headers: { "Content-Type": "application/json" },
@@ -20,10 +28,99 @@ const api = axios.create({
   maxContentLength: 50 * 1024 * 1024, // 50MB
 });
 
+const getCookieOptions = () => {
+  const isProduction = process.env.NODE_ENV === "production";
+  return {
+    secure: isProduction,
+    sameSite: (isProduction ? "strict" : "lax") as "strict" | "lax",
+    path: "/",
+  };
+};
+
+// Decode the JWT payload (unverified) to read the `exp` claim.
+const getTokenExpiry = (token: string): number | null => {
+  try {
+    const payload = JSON.parse(atob(token.split(".")[1]));
+    return typeof payload?.exp === "number" ? payload.exp * 1000 : null;
+  } catch {
+    return null;
+  }
+};
+
+const isTokenExpiringSoon = (token: string): boolean => {
+  const exp = getTokenExpiry(token);
+  if (!exp) return false;
+  return exp - Date.now() < PROACTIVE_REFRESH_MARGIN_MS;
+};
+
+// Refresh the access token (and optionally the refresh token) using the
+// backend /auth/refresh-token endpoint. Reuses an in-flight refresh so that
+// multiple requests triggered at the same time only cause one round-trip.
+const refreshAccessToken = async (): Promise<{
+  accessToken: string;
+  refreshToken: string;
+}> => {
+  if (refreshPromise) return refreshPromise;
+
+  refreshPromise = (async () => {
+    const refreshToken = getTokenWithFallback("refreshToken");
+    if (!refreshToken) {
+      throw new Error("No refresh token available");
+    }
+
+    const response = await axios.post(
+      `${API_URL}/api/auth/refresh-token`,
+      {},
+      {
+        // Cover Render free-tier cold starts (30-60s) without hanging forever.
+        timeout: 70000,
+        withCredentials: true,
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${refreshToken}`,
+        },
+      },
+    );
+
+    const newAccessToken = response.data.accessToken;
+    const newRefreshToken = response.data.refreshToken;
+
+    setTokenWithFallback("accessToken", newAccessToken, getCookieOptions());
+    if (newRefreshToken) {
+      setTokenWithFallback("refreshToken", newRefreshToken, {
+        ...getCookieOptions(),
+        expires: 7,
+      });
+    }
+
+    return { accessToken: newAccessToken, refreshToken: newRefreshToken };
+  })();
+
+  try {
+    return await refreshPromise;
+  } finally {
+    refreshPromise = null;
+  }
+};
+
 api.interceptors.request.use(
-  (config) => {
+  async (config) => {
     const accessToken = getTokenWithFallback("accessToken");
-    if (accessToken) {
+
+    // Proactively refresh if the access token is about to expire so requests
+    // (e.g. saving hours worked) never fail with an unexpected 401.
+    if (accessToken && isTokenExpiringSoon(accessToken)) {
+      try {
+        const refreshed = await refreshAccessToken();
+        config.headers["Authorization"] = `Bearer ${refreshed.accessToken}`;
+      } catch {
+        // Refresh failed — let the request proceed with the old token; the
+        // response interceptor will handle a 401 (or fall back to login).
+        if (accessToken) {
+          config.headers["Authorization"] = `Bearer ${accessToken}`;
+        }
+      }
+    } else if (accessToken) {
       config.headers["Authorization"] = `Bearer ${accessToken}`;
     }
 
@@ -68,46 +165,29 @@ api.interceptors.response.use(
     }
 
     if (error.response?.status === 401) {
-      // Try to refresh token first
-      const refreshToken = getTokenWithFallback("refreshToken");
-      if (refreshToken && error.response.data?.error === "Token expired") {
-        try {
-          const response = await axios.post(
-            `${API_URL}/api/auth/refresh-token`,
-            {},
-            {
-              withCredentials: true,
-              headers: {
-                "Content-Type": "application/json",
-                Authorization: `Bearer ${refreshToken}`,
-              },
-            },
-          );
+      // The backend responds with { error: "Unauthorized: Token expired", code: "TOKEN_EXPIRED" }.
+      // Match the `code` (and the message as a fallback) so the refresh flow actually runs.
+      const data = error.response.data as { code?: string; error?: string } | undefined;
+      const isTokenExpired =
+        data?.code === "TOKEN_EXPIRED" ||
+        (typeof data?.error === "string" && data.error.includes("Token expired"));
 
-          const newAccessToken = response.data.accessToken;
-          const newRefreshToken = response.data.refreshToken;
-          
-          // Use same cookie options as in AuthContext
-          const isProduction = process.env.NODE_ENV === "production";
-          const cookieOptions = {
-            secure: isProduction,
-            sameSite: isProduction ? "strict" as const : "lax" as const,
-            path: "/",
-          };
-          
-          setTokenWithFallback("accessToken", newAccessToken, cookieOptions);
-          if (newRefreshToken) {
-            setTokenWithFallback("refreshToken", newRefreshToken, { ...cookieOptions, expires: 7 });
-          }
-          
-          error.config.headers["Authorization"] = `Bearer ${newAccessToken}`;
+      const alreadyRetried = Boolean(
+        (error.config as { _retry?: boolean } | undefined)?._retry,
+      );
+
+      if (isTokenExpired && !alreadyRetried && error.config) {
+        try {
+          const refreshed = await refreshAccessToken();
+          (error.config as { _retry?: boolean })._retry = true;
+          error.config.headers["Authorization"] = `Bearer ${refreshed.accessToken}`;
           return api.request(error.config);
         } catch (refreshError) {
           disconnectUser();
           return Promise.reject(refreshError);
         }
       } else {
-        // No refresh token or not a token expired error, redirect to login
+        // No refresh token, not a token-expired error, or refresh already retried → login required.
         disconnectUser();
         return Promise.reject(error);
       }
@@ -129,12 +209,12 @@ export const invalidateCache = (url: string) => {
 };
 
 const disconnectUser = () => {
-  // Use same cookie options for removal as for setting
-  const isProduction = process.env.NODE_ENV === "production";
   const cookieOptions = {
-    sameSite: isProduction ? "strict" as const : "lax" as const,
+    sameSite: (process.env.NODE_ENV === "production" ? "strict" : "lax") as
+      | "strict"
+      | "lax",
   };
-  
+
   removeTokenWithFallback("accessToken", cookieOptions);
   removeTokenWithFallback("refreshToken", cookieOptions);
   sessionStorage.clear();
