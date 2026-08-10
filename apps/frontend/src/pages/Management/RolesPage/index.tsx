@@ -12,6 +12,7 @@ import {
   createOrUpdateHoursWorked,
   deleteHoursWorked,
 } from "../../../store/slices/hoursWorkedSlice";
+import { recalculateSummaries } from "../../../services/hoursWorkedService";
 import { useWeeklySummaries } from "../../../hooks/useWeeklySummary";
 import { useBiweeklySummaries } from "../../../hooks/useBiweeklySummary";
 import { useMonthlySummaries } from "../../../hooks/useMonthlySummary";
@@ -48,7 +49,6 @@ import { exportFileFormattedDate, exportTable, PdfHeaderIcon, PdfLegendEntry } f
 import { ICON_PERSON, ICON_CLOCK, ICON_CLOCK_PLUS } from "../../../utils/pdfIcons";
 import {
   getBiweekNumber,
-  getBiweeklyDates,
   getCurrentWeekDates,
   getDayName,
   getFirstDayOfWeek,
@@ -114,18 +114,21 @@ const RolesPage: React.FC = () => {
   const {
     weeklySummaries,
     isLoadingWeeklySummaries,
+    getWeeklySummaries,
     updateWeeklySummary,
     createOrUpdateWeeklySummary,
   } = useWeeklySummaries();
   const {
     biweeklySummaries,
     isLoadingBiweeklySummaries,
+    getBiweeklySummaries,
     createOrUpdateBiweeklySummary,
     updateBiweeklySummary,
   } = useBiweeklySummaries();
   const {
     monthlySummaries,
     isLoadingMonthlySummaries,
+    getMonthlySummaries,
     createOrUpdateMonthlySummary,
     updateMonthlySummary,
   } = useMonthlySummaries();
@@ -190,11 +193,11 @@ const RolesPage: React.FC = () => {
     }
   }, [userPermissions, viewMode]);
 
-  // Fetch employees, schedules, and hours worked on mount
+  // Fetch employees and schedules on mount; hours worked are fetched by the
+  // visible week range effect below.
   useEffect(() => {
     dispatch(fetchEmployees({}));
     dispatch(fetchSchedules({}));
-    dispatch(fetchHoursWorked());
   }, [dispatch, location.pathname]);
 
   // Initialize filteredSchedules with all schedules (sorted by saved custom order)
@@ -281,288 +284,70 @@ const RolesPage: React.FC = () => {
   const currentMonth = getMonthNumber(firstDayOfCurrentWeek);
   const currentYear = firstDayOfCurrentWeek.getFullYear();
 
-  // Helper function to recalculate and update weekly summary for an employee
-  const recalculateEmployeeWeeklySummary = useCallback(async (
-    employeeId: number,
-    date: Date,
-    newHoursWorkedEntry?: {
-      employeeId: number;
-      date: string;
-      scheduleId: number;
-    }
-  ) => {
-    const calculateTotalHoursForRange = (
-      rangeStart: Date,
-      rangeEnd: Date,
-    ) => {
-      const employeeHoursWorked = hoursWorkedRef.current.filter((hw) => {
-        const hwDate = new Date(hw.date);
-        return (
-          hw.employeeId === employeeId &&
-          hwDate >= rangeStart &&
-          hwDate <= rangeEnd
-        );
-      });
-
-      const allEntries = newHoursWorkedEntry
-        ? [
-            ...employeeHoursWorked.filter((hw) => {
-              const hwDate = new Date(hw.date);
-              const newEntryDate = new Date(newHoursWorkedEntry.date);
-              return hwDate.toDateString() !== newEntryDate.toDateString();
-            }),
-            newHoursWorkedEntry,
-          ]
-        : employeeHoursWorked;
-
-      let totalHours = 0;
-
-      allEntries.forEach((hw) => {
-        const schedule = schedules.find((s) => s.id === hw.scheduleId);
-        if (schedule) {
-          let dayHours: number;
-          if ("hours" in hw && typeof hw.hours === "number") {
-            dayHours = hw.hours;
-          } else {
-            const hwDate = new Date(hw.date);
-            const dayName = hwDate.toLocaleDateString("en-US", { weekday: "long" }).toLowerCase();
-            dayHours = getScheduleHours(schedule, dayName);
-          }
-          totalHours += dayHours;
-        }
-      });
-
-      return totalHours;
-    };
-
-    // Calculate total weekly hours for this employee
-    const weekStart = startOfWeek(date, { weekStartsOn: 1 });
-    const weekEnd = addDays(weekStart, 6);
-    
-    const totalWeeklyHours = calculateTotalHoursForRange(weekStart, weekEnd);
-
-    // Update weekly summary
-    const { year: weekIsoYear, weekNumber } = getWeekNumberAndYear(date);
-    const month = date.getMonth() + 1;
-    const year = date.getFullYear();
-    
-    const existingWeeklySummary = weeklySummariesRef.current.find(
-      (ws) => ws.employeeId === employeeId &&
-               ws.weekNumber === weekNumber &&
-               ws.year === weekIsoYear
-    );
-
-    const weeklySummary = {
-      employeeId,
-      weekNumber,
-      month,
-      year: weekIsoYear,
-      totalHours: totalWeeklyHours,
-    };
-
-    if (existingWeeklySummary) {
-      await updateWeeklySummary(existingWeeklySummary.id, weeklySummary);
-    } else {
-      await createOrUpdateWeeklySummary(weeklySummary);
-    }
-
-    const biweekNumber = getBiweekNumber(date);
-    const { startDate: biweekStart, endDate: biweekEnd } = getBiweeklyDates(
-      year,
-      biweekNumber,
-    );
-    const totalBiweeklyHours = calculateTotalHoursForRange(
-      biweekStart,
-      biweekEnd,
-    );
-    const existingBiweeklySummary = biweeklySummariesRef.current.find(
-      (bs) =>
-        bs.employeeId === employeeId &&
-        bs.biweekNumber === biweekNumber &&
-        bs.year === year,
-    );
-
-    const biweeklySummary = {
-      employeeId,
-      biweekNumber,
-      month,
-      year,
-      totalHours: totalBiweeklyHours,
-    };
-
-    if (existingBiweeklySummary) {
-      await updateBiweeklySummary(existingBiweeklySummary.id, biweeklySummary);
-    } else {
-      await createOrUpdateBiweeklySummary(biweeklySummary);
-    }
-
-    const monthStart = new Date(year, month - 1, 1);
-    const monthEnd = new Date(year, month, 0);
-    const totalMonthlyHours = calculateTotalHoursForRange(
-      monthStart,
-      monthEnd,
-    );
-    const existingMonthlySummary = monthlySummariesRef.current.find(
-      (ms) =>
-        ms.employeeId === employeeId && ms.month === month && ms.year === year,
-    );
-
-    const monthlySummary = {
-      employeeId,
-      month,
-      year,
-      totalHours: totalMonthlyHours,
-    };
-
-    if (existingMonthlySummary) {
-      await updateMonthlySummary(existingMonthlySummary.id, monthlySummary);
-    } else {
-      await createOrUpdateMonthlySummary(monthlySummary);
-    }
-  }, [
-    schedules,
-    updateWeeklySummary,
-    createOrUpdateWeeklySummary,
-    updateBiweeklySummary,
-    createOrUpdateBiweeklySummary,
-    updateMonthlySummary,
-    createOrUpdateMonthlySummary,
-  ]);
+  // Fetch hours worked only for the visible week (the server filters by date
+  // range). This keeps the board lightweight instead of loading the whole
+  // history, which previously capped at 50 rows and made data appear lost.
+  const weekStartDate = currentWeek.length > 0 ? currentWeek[0].isoDate : undefined;
+  const weekEndDate = currentWeek.length > 6 ? currentWeek[6].isoDate : undefined;
 
   useEffect(() => {
-    const backfillCurrentPeriodSummaries = async () => {
-      if (
-        employees.length === 0 ||
-        schedules.length === 0 ||
-        hoursWorked.length === 0 ||
-        !currentBiweekNumber ||
-        !currentMonth ||
-        !currentYear
-      ) {
+    if (!weekStartDate || !weekEndDate) return;
+    dispatch(fetchHoursWorked({ dateFrom: weekStartDate, dateTo: weekEndDate }));
+  }, [dispatch, weekStartDate, weekEndDate, location.pathname]);
+
+  // Refresh the three summary collections from the server after a recalc.
+  const refreshSummaries = useCallback(async () => {
+    await Promise.all([
+      getWeeklySummaries(),
+      getBiweeklySummaries(),
+      getMonthlySummaries(),
+    ]);
+  }, [getWeeklySummaries, getBiweeklySummaries, getMonthlySummaries]);
+
+  // Server-side recalculation of weekly/biweekly/monthly summaries. The server
+  // recomputes from the full hours_worked history (source of truth), so the
+  // client never has to hold the whole dataset.
+  const recalculateEmployeeWeeklySummary = useCallback(async (
+    employeeId: number,
+    date?: Date
+  ) => {
+    try {
+      await recalculateSummaries({
+        employeeId,
+        date: date ? new Date(date).toISOString() : undefined,
+      });
+      await refreshSummaries();
+    } catch {
+      showNotification(
+        "No se pudieron recalcular los totales. Verifica tu conexión e inténtalo de nuevo.",
+        { severity: "warning", duration: 5000 },
+      );
+    }
+  }, [refreshSummaries, showNotification]);
+
+  useEffect(() => {
+    // Keep the summaries of the current period in sync with the server. Runs
+    // once the initial data is loaded (replaces the old client-side backfill);
+    // individual recalculations happen server-side on every assignment change.
+    let cancelled = false;
+    const syncCurrentPeriodSummaries = async () => {
+      if (employees.length === 0 || schedules.length === 0) {
         return;
       }
-
-      const calculateTotalHoursForRange = (
-        employeeId: number,
-        rangeStart: Date,
-        rangeEnd: Date,
-      ) => {
-      const employeeHoursWorked = hoursWorkedRef.current.filter((hw) => {
-          const hwDate = new Date(hw.date);
-          return (
-            hw.employeeId === employeeId &&
-            hwDate >= rangeStart &&
-            hwDate <= rangeEnd
-          );
-        });
-
-        let totalHours = 0;
-        employeeHoursWorked.forEach((hw) => {
-          const schedule = schedules.find((s) => s.id === hw.scheduleId);
-          if (schedule) {
-            let dayHours: number;
-            if ("hours" in hw && typeof hw.hours === "number") {
-              dayHours = hw.hours;
-            } else {
-              const hwDate = new Date(hw.date);
-              const dayName = hwDate.toLocaleDateString("en-US", { weekday: "long" }).toLowerCase();
-              dayHours = getScheduleHours(schedule, dayName);
-            }
-            totalHours += dayHours;
-          }
-        });
-
-        return totalHours;
-      };
-
-      const { startDate: biweekStart, endDate: biweekEnd } = getBiweeklyDates(
-        currentYear,
-        currentBiweekNumber,
-      );
-      const monthStart = new Date(currentYear, currentMonth - 1, 1);
-      const monthEnd = new Date(currentYear, currentMonth, 0);
-
-      const biweeklyPromises = employees
-        .filter(
-          (employee) =>
-            !biweeklySummaries.some(
-              (bs) =>
-                bs.employeeId === employee.id &&
-                bs.biweekNumber === currentBiweekNumber &&
-                bs.year === currentYear,
-            ),
-        )
-        .map(async (employee) => {
-          const totalHours = calculateTotalHoursForRange(
-            employee.id,
-            biweekStart,
-            biweekEnd,
-          );
-          if (totalHours <= 0) {
-            return;
-          }
-          try {
-            await createOrUpdateBiweeklySummary({
-              employeeId: employee.id,
-              biweekNumber: currentBiweekNumber,
-              month: currentMonth,
-              year: currentYear,
-              totalHours,
-            });
-          } catch (error) {
-            // eslint-disable-next-line no-console
-            console.warn(`[backfill] Error creating biweekly summary for employee ${employee.id}:`, error);
-          }
-        });
-
-      const monthlyPromises = employees
-        .filter(
-          (employee) =>
-            !monthlySummaries.some(
-              (ms) =>
-                ms.employeeId === employee.id &&
-                ms.month === currentMonth &&
-                ms.year === currentYear,
-            ),
-        )
-        .map(async (employee) => {
-          const totalHours = calculateTotalHoursForRange(
-            employee.id,
-            monthStart,
-            monthEnd,
-          );
-          if (totalHours <= 0) {
-            return;
-          }
-          try {
-            await createOrUpdateMonthlySummary({
-              employeeId: employee.id,
-              month: currentMonth,
-              year: currentYear,
-              totalHours,
-            });
-          } catch (error) {
-            // eslint-disable-next-line no-console
-            console.warn(`[backfill] Error creating monthly summary for employee ${employee.id}:`, error);
-          }
-        });
-
-      await Promise.all([...biweeklyPromises, ...monthlyPromises]);
+      try {
+        await recalculateSummaries({});
+        if (!cancelled) {
+          await refreshSummaries();
+        }
+      } catch {
+        // Non-fatal: totals will sync on the next assignment change.
+      }
     };
-
-    void backfillCurrentPeriodSummaries();
-  }, [
-    employees,
-    schedules,
-    hoursWorked,
-    currentBiweekNumber,
-    currentMonth,
-    currentYear,
-    biweeklySummaries,
-    monthlySummaries,
-    createOrUpdateBiweeklySummary,
-    createOrUpdateMonthlySummary,
-  ]);
+    void syncCurrentPeriodSummaries();
+    return () => {
+      cancelled = true;
+    };
+  }, [employees.length, schedules.length, refreshSummaries]);
 
   const handleChange = (
     value: string,
@@ -619,7 +404,7 @@ const RolesPage: React.FC = () => {
         dispatch(deleteHoursWorked(existingHoursWorkedRecord.id))
           .then(async () => {
             // recalculateEmployeeWeeklySummary recalcula los 3 summaries (semanal, quincenal, mensual)
-            // usando los datos actualizados de hoursWorked. Es la fuente única de verdad.
+            // en el servidor, que es la fuente única de verdad.
             if (!skipRecalc) {
               await recalculateEmployeeWeeklySummary(employeeId, date);
             }
@@ -663,7 +448,7 @@ const RolesPage: React.FC = () => {
     dispatch(createOrUpdateHoursWorked(hoursWorkedEntry))
       .then(() => {
         if (!skipRecalc) {
-          recalculateEmployeeWeeklySummary(employeeId, date, hoursWorkedEntry);
+          recalculateEmployeeWeeklySummary(employeeId, date);
         }
       })
       .catch(() => {
@@ -683,26 +468,65 @@ const RolesPage: React.FC = () => {
 
     const adjustment = condition === "add" ? timeAdjustment : -timeAdjustment;
 
-    const existingWeeklySummary = weeklySummaries.find(
-      (weeklySummary) =>
-        weeklySummary.employeeId === employeeId &&
-        weeklySummary.weekNumber === currentWeekNumber &&
-        weeklySummary.month === currentMonth &&
-        weeklySummary.year === currentWeekYear
-    );
-    const existingBiweeklySummary = biweeklySummaries.find(
-      (biweeklySummary) =>
-        biweeklySummary.employeeId === employeeId &&
-        biweeklySummary.biweekNumber === currentBiweekNumber &&
-        biweeklySummary.month === currentMonth &&
-        biweeklySummary.year === currentYear
-    );
-    const existingMonthlySummary = monthlySummaries.find(
-      (monthlySummary) =>
-        monthlySummary.employeeId === employeeId &&
-        monthlySummary.month === currentMonth &&
-        monthlySummary.year === currentYear
-    );
+    // The visible week can span two periods (biweek/month/year boundary). A
+    // manual adjustment must apply to the period where the employee actually
+    // has data, otherwise it creates a summary in the wrong period (e.g. hours
+    // on Sunday Aug 16 belong to quincena 16, not to Monday's quincena 15).
+    // Pick the employee's existing summary among the involved periods
+    // (Monday-first order), falling back to the visible week's own period.
+    const involved = getInvolvedPeriods(currentWeek);
+
+    const pickExistingSummary = <
+      S extends { employeeId: number; year: number },
+    >(
+      summaries: S[],
+      periods: Array<{ year: number; [key: string]: number }>,
+      matches: (summary: S, period: { year: number; [key: string]: number }) => boolean,
+    ) =>
+      summaries.find((summary) =>
+        periods.some(
+          (period) => summary.employeeId === employeeId && matches(summary, period),
+        ),
+      );
+
+    const existingWeeklySummary =
+      pickExistingSummary(
+        weeklySummaries,
+        involved.weekNumbers,
+        (summary, period) =>
+          summary.weekNumber === period.weekNumber && summary.year === period.year,
+      ) ??
+      weeklySummaries.find(
+        (weeklySummary) =>
+          weeklySummary.employeeId === employeeId &&
+          weeklySummary.weekNumber === currentWeekNumber &&
+          weeklySummary.year === currentWeekYear
+      );
+    const existingBiweeklySummary =
+      pickExistingSummary(
+        biweeklySummaries,
+        involved.biweekNumbers,
+        (summary, period) =>
+          summary.biweekNumber === period.biweekNumber && summary.year === period.year,
+      ) ??
+      biweeklySummaries.find(
+        (biweeklySummary) =>
+          biweeklySummary.employeeId === employeeId &&
+          biweeklySummary.biweekNumber === currentBiweekNumber &&
+          biweeklySummary.year === currentYear
+      );
+    const existingMonthlySummary =
+      pickExistingSummary(
+        monthlySummaries,
+        involved.months,
+        (summary, period) => summary.month === period.month && summary.year === period.year,
+      ) ??
+      monthlySummaries.find(
+        (monthlySummary) =>
+          monthlySummary.employeeId === employeeId &&
+          monthlySummary.month === currentMonth &&
+          monthlySummary.year === currentYear
+      );
 
     const updatedWeeklyTotal = Math.max(
       0,
@@ -938,8 +762,7 @@ const RolesPage: React.FC = () => {
         const needsRedistribution = (config.mode === 'individual' && config.individualHours[employeeId] !== undefined) ||
                                    (config.mode === 'uniform' && config.uniformHours > 0);
         
-        // Calculate total weekly hours for this employee
-        let totalWeeklyHours = 0;
+        // Calculate total weekly hours used for the max-hours limit
         const weekDays = [];
         
         // Check if target hours is 0 (for both individual and uniform modes)
@@ -949,19 +772,6 @@ const RolesPage: React.FC = () => {
           
         // If target hours is 0, don't assign any hours
         if (targetWeeklyHours === 0) {
-          totalWeeklyHours = 0;
-          // Still create/update the weekly summary with 0 hours
-          const weekStartDate = startOfWeek(firstDayOfWeek || new Date(), { weekStartsOn: 1 });
-          const { year: weekStartIsoYear, weekNumber: weekStartWeek } =
-            getWeekNumberAndYear(weekStartDate);
-          const weeklySummary = {
-            employeeId,
-            weekNumber: weekStartWeek,
-            month: weekStartDate.getMonth() + 1,
-            year: weekStartIsoYear,
-            totalHours: 0,
-          };
-          await createOrUpdateWeeklySummary(weeklySummary);
           return;
         }
         
@@ -975,19 +785,6 @@ const RolesPage: React.FC = () => {
         
         // If target hours are less than the minimum daily hours, don't assign anything
         if (targetWeeklyHours < minDailyHours) {
-          totalWeeklyHours = 0;
-          // Still create/update the weekly summary with 0 hours
-          const weekStartDate = startOfWeek(firstDayOfWeek || new Date(), { weekStartsOn: 1 });
-          const { year: weekStartIsoYear, weekNumber: weekStartWeek } =
-            getWeekNumberAndYear(weekStartDate);
-          const weeklySummary = {
-            employeeId,
-            weekNumber: weekStartWeek,
-            month: weekStartDate.getMonth() + 1,
-            year: weekStartIsoYear,
-            totalHours: 0,
-          };
-          await createOrUpdateWeeklySummary(weeklySummary);
           return;
         }
         
@@ -1033,7 +830,6 @@ const RolesPage: React.FC = () => {
                     scheduleId: daySchedule.id,
                   };
                   redistributedEntries.push(hoursWorkedEntry);
-                  totalWeeklyHours += dayActualHours;
                   accumulatedHours += dayActualHours;
                 } else {
                   // Stop assigning more days to respect the limit
@@ -1063,16 +859,12 @@ const RolesPage: React.FC = () => {
             
             // Create HoursWorked entry for this day
             if (daySchedule) {
-              const dayActualHours = getScheduleHours(daySchedule, dayName);
               const hoursWorkedEntry = {
                 employeeId,
                 date: dayDate.toISOString(),
                 scheduleId: daySchedule.id,
               };
               weekDays.push(hoursWorkedEntry);
-              
-              // Add to total weekly hours (using per-day hours)
-              totalWeeklyHours += dayActualHours;
             }
           }
           
@@ -1083,43 +875,22 @@ const RolesPage: React.FC = () => {
             })
           );
         }
-        
-        // Then create/update the weekly summary with the correct total
-        if (totalWeeklyHours > 0) {
-          const weekStartDate = startOfWeek(firstDayOfWeek || new Date(), { weekStartsOn: 1 });
-          
-          // Calculate final total hours based on mode and limits
-          let finalTotalHours = totalWeeklyHours;
-          
-          if (config.mode === 'individual' && config.individualHours[employeeId]) {
-            // Use the actual calculated hours (which respects the max limit)
-            finalTotalHours = totalWeeklyHours;
-          } else if (config.mode === 'uniform' && config.uniformHours) {
-            // Use the actual calculated hours (which respects the max limit)
-            finalTotalHours = totalWeeklyHours;
-          } else {
-            // For default mode, show the actual calculated hours
-            finalTotalHours = totalWeeklyHours;
-          }
-          
-          const { year: weekStartIsoYear, weekNumber: weekStartWeek } =
-            getWeekNumberAndYear(weekStartDate);
-          const weeklySummary = {
-            employeeId,
-            weekNumber: weekStartWeek,
-            month: weekStartDate.getMonth() + 1,
-            year: weekStartIsoYear,
-            totalHours: finalTotalHours,
-          };
-          await createOrUpdateWeeklySummary(weeklySummary);
-        }
       });
 
       // Wait for all operations to complete
       await Promise.all(promises);
 
-      // Refresh data
-      await dispatch(fetchHoursWorked());
+      // Recalculate summaries for the affected period and refresh the board.
+      // The server recomputes from the hours_worked records just created.
+      try {
+        await recalculateSummaries({});
+        await refreshSummaries();
+        if (weekStartDate && weekEndDate) {
+          await dispatch(fetchHoursWorked({ dateFrom: weekStartDate, dateTo: weekEndDate }));
+        }
+      } catch {
+        // Non-fatal: totals sync on the next assignment change.
+      }
       
       showNotification(NOTIFICATIONS.HOURS_GENERATION_SUCCESS, {
         severity: "success",
@@ -1676,7 +1447,6 @@ const RolesPage: React.FC = () => {
                 year={currentWeekYear}
                 handleChange={handleChange}
                 handleAdjustTime={handleAdjustTime}
-                recalculateEmployeeWeeklySummary={recalculateEmployeeWeeklySummary}
                 permissions={userPermissions}
                 viewMode={viewMode}
                 setViewMode={setViewMode}

@@ -91,7 +91,7 @@ describe("getWeeklySummariesByWeek", () => {
     const result = await weeklySummaryService.getWeeklySummariesByWeek(29, 2026);
 
     expect(WeeklySummary.findAll).toHaveBeenCalledWith({
-      where: { week: 29, year: 2026 },
+      where: { weekNumber: 29, year: 2026 },
     });
     expect(result).toEqual([mockSummary]);
   });
@@ -104,7 +104,7 @@ describe("getCurrentWeeklySummary", () => {
     const result = await weeklySummaryService.getCurrentWeeklySummary(1, 29, 2026);
 
     expect(WeeklySummary.findOne).toHaveBeenCalledWith({
-      where: { employeeId: 1, week: 29, year: 2026 },
+      where: { employeeId: 1, weekNumber: 29, year: 2026 },
     });
     expect(result).toEqual(mockSummary);
   });

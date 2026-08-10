@@ -5,13 +5,20 @@ import {
   idParam,
   hoursWorkedRules,
   hoursWorkedUpdateRules,
-  paginationRules,
+  hoursWorkedQueryRules,
+  recalculateRules,
   validate,
 } from "../middleware/validation";
 
 const router = express.Router();
 
-router.get("/", authenticateToken, paginationRules, validate, hoursWorkedController.getHoursWorked);
+router.get(
+  "/",
+  authenticateToken,
+  hoursWorkedQueryRules,
+  validate,
+  hoursWorkedController.getHoursWorked,
+);
 router.get("/:id", authenticateToken, idParam, validate, hoursWorkedController.getHoursWorkedById);
 router.post(
   "/",
@@ -19,6 +26,13 @@ router.post(
   hoursWorkedRules,
   validate,
   hoursWorkedController.createHoursWorked,
+);
+router.post(
+  "/recalculate",
+  authenticateToken,
+  recalculateRules,
+  validate,
+  hoursWorkedController.recalculateSummaries,
 );
 router.put(
   "/:id",

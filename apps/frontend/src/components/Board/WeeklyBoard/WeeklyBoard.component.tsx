@@ -145,11 +145,6 @@ interface WeeklyBoardProps {
     condition: 'add' | 'subtract',
     timeAdjustment: number
   ) => void;
-  recalculateEmployeeWeeklySummary?: (
-    employeeId: number,
-    date: Date,
-    newHoursWorkedEntry?: { employeeId: number; date: string; scheduleId: number }
-  ) => Promise<void>;
   permissions?: string[];
   viewMode: 'employee' | 'schedule';
   setViewMode: React.Dispatch<React.SetStateAction<'employee' | 'schedule'>>;
@@ -2386,7 +2381,6 @@ const WeeklyBoard: React.FC<WeeklyBoardProps> = ({
   setViewMode,
   onInfoClick,
   onAdjustClick,
-  recalculateEmployeeWeeklySummary,
 }) => {
   const theme = useTheme();
   const isDark = theme.palette.mode === 'dark';
@@ -2865,18 +2859,14 @@ const WeeklyBoard: React.FC<WeeklyBoardProps> = ({
     (scheduleLabel: string) => {
       if (!selectedEmployee || !selectedDateStr) return;
       const date = new Date(selectedDateStr);
+      // handleChange recalcula los resúmenes en el servidor al confirmar
       handleChange(scheduleLabel, selectedEmployee.id, date);
-      // Recalcular resúmenes para actualizar horas totales
-      if (recalculateEmployeeWeeklySummary) {
-        recalculateEmployeeWeeklySummary(selectedEmployee.id, date);
-      }
       handleClosePopover();
     },
     [
       selectedEmployee,
       selectedDateStr,
       handleChange,
-      recalculateEmployeeWeeklySummary,
       handleClosePopover,
     ]
   );
