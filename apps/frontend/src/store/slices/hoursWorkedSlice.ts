@@ -82,9 +82,12 @@ const initialState: HoursWorkedState = {
 
 export const fetchHoursWorked = createAsyncThunk(
   "hoursWorked/fetchHoursWorked",
-  async (_, { rejectWithValue }) => {
+  async (range: { dateFrom?: string; dateTo?: string } = {}, { rejectWithValue }) => {
     try {
-      const response = await HoursWorkedService.getHoursWorked();
+      const response = await HoursWorkedService.getHoursWorked(
+        range.dateFrom,
+        range.dateTo,
+      );
       if (Array.isArray(response)) {
         return response;
       } else if (response && Array.isArray(response.hoursWorked)) {

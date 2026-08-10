@@ -26,15 +26,19 @@ export const getWeeklySummariesByEmployee = async (employeeId: number) =>
   });
 
 // Get all weekly summaries for a specific week and year
-export const getWeeklySummariesByWeek = async (week: number, year: number) =>
+export const getWeeklySummariesByWeek = async (weekNumber: number, year: number) =>
   WeeklySummary.findAll({
-    where: { week, year },
+    where: { weekNumber, year },
   });
 
 // Get the current weekly summary for an employee, week, and year
-export const getCurrentWeeklySummary = async (employeeId: number, week: number, year: number) =>
+export const getCurrentWeeklySummary = async (
+  employeeId: number,
+  weekNumber: number,
+  year: number,
+) =>
   WeeklySummary.findOne({
-    where: { employeeId, week, year },
+    where: { employeeId, weekNumber, year },
   });
 
 // Check if an employee has worked in the current weekly summary

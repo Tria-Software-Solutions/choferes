@@ -20,6 +20,8 @@ via git tags (once tagged).
 - Badges in README (CI status, Node version, Turborepo, license)
 - ESLint config overrides for `**/services/**`, `**/scripts/**`, `**/utils/pagination.ts`
 - Script `cleanup:orphans` to remove orphaned FK records
+- Server-side summary recalculation: `POST /api/hours-worked/recalculate` with optional `employeeId` and `date` scoping, recalculating weekly/biweekly/monthly summaries (`summaryRecalculationService.ts`)
+- Optional `dateFrom`/`dateTo` range filter on `GET /api/hours-worked` (validated ISO dates), so the board fetches only the visible week
 
 ### Changed
 
@@ -27,11 +29,14 @@ via git tags (once tagged).
 - Monorepo restructured: apps moved to `apps/frontend` and `apps/backend`
 - Huskylint-staged config: now runs `eslint --fix --max-warnings 100` instead of `npm run lint`
 - Backend lint warnings reduced from 58 to 0
+- WeeklyBoard/RolesPage recalculate summaries via the server endpoint instead of client-side backfill; the board now loads hours only for the visible week
+- `parseCalendarDate` shared by `hoursWorkedService` and `summaryRecalculationService` to avoid UTC-offset date shifts on `YYYY-MM-DD` inputs
 
 ### Fixed
 
 - ESLint `SIGKILL` on pre-commit hook (frontend was OOM due to all files being passed)
 - Various ESLint errors: `no-unused-vars`, `import/no-duplicates`, `no-restricted-syntax`, `no-await-in-loop`
+- `weeklySummaryService` queries used a non-existent `week` column instead of `weekNumber`
 
 ---
 
