@@ -616,13 +616,20 @@ const RolesPage: React.FC = () => {
         }
         // Eliminar el registro de hoursWorked, luego recalcular TODOS los summaries
         // (weekly, biweekly, monthly) desde cero para evitar inconsistencias.
-        dispatch(deleteHoursWorked(existingHoursWorkedRecord.id)).then(async () => {
-          // recalculateEmployeeWeeklySummary recalcula los 3 summaries (semanal, quincenal, mensual)
-          // usando los datos actualizados de hoursWorked. Es la fuente única de verdad.
-          if (!skipRecalc) {
-            await recalculateEmployeeWeeklySummary(employeeId, date);
-          }
-        });
+        dispatch(deleteHoursWorked(existingHoursWorkedRecord.id))
+          .then(async () => {
+            // recalculateEmployeeWeeklySummary recalcula los 3 summaries (semanal, quincenal, mensual)
+            // usando los datos actualizados de hoursWorked. Es la fuente única de verdad.
+            if (!skipRecalc) {
+              await recalculateEmployeeWeeklySummary(employeeId, date);
+            }
+          })
+          .catch(() => {
+            showNotification(
+              "No se pudo eliminar el registro de horas. Verifica tu conexión e inténtalo de nuevo.",
+              { severity: "error", duration: 5000 },
+            );
+          });
       }
       return;
     }
@@ -653,11 +660,18 @@ const RolesPage: React.FC = () => {
     };
 
     // Update HoursWorked (si skipRecalc=true, no recalcular summaries — se hará después desde el popover)
-    dispatch(createOrUpdateHoursWorked(hoursWorkedEntry)).then(() => {
-      if (!skipRecalc) {
-        recalculateEmployeeWeeklySummary(employeeId, date, hoursWorkedEntry);
-      }
-    });
+    dispatch(createOrUpdateHoursWorked(hoursWorkedEntry))
+      .then(() => {
+        if (!skipRecalc) {
+          recalculateEmployeeWeeklySummary(employeeId, date, hoursWorkedEntry);
+        }
+      })
+      .catch(() => {
+        showNotification(
+          "No se pudo guardar el registro de horas. Verifica tu conexión e inténtalo de nuevo.",
+          { severity: "error", duration: 5000 },
+        );
+      });
   };
 
   const handleAdjustTime = async (

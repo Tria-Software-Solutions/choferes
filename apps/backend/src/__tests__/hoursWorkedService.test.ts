@@ -5,6 +5,7 @@ jest.mock("../models/HoursWorked", () => {
     findAndCountAll: jest.fn(),
     findByPk: jest.fn(),
     findAll: jest.fn(),
+    findOne: jest.fn(),
     create: jest.fn(),
     update: jest.fn(),
     destroy: jest.fn(),
@@ -228,7 +229,7 @@ describe("getHoursWorkedByDateRange", () => {
 });
 
 describe("createHoursWorked", () => {
-  it("debería crear y recargar el registro", async () => {
+  it("debería crear y recargar el registro cuando no existe uno para el día", async () => {
     const newData = {
       employeeId: 1,
       date: new Date("2026-07-21"),
@@ -236,15 +237,97 @@ describe("createHoursWorked", () => {
     };
     const createdRecord = { id: 3, ...newData, reload: jest.fn() };
 
+    HoursWorked.findOne.mockResolvedValue(null);
     HoursWorked.create.mockResolvedValue(createdRecord);
 
     const result = await hoursWorkedService.createHoursWorked(
       newData as Parameters<typeof hoursWorkedService.createHoursWorked>[0],
     );
 
+    expect(HoursWorked.findOne).toHaveBeenCalledTimes(1);
     expect(HoursWorked.create).toHaveBeenCalledWith(newData);
     expect(createdRecord.reload).toHaveBeenCalled();
     expect(result).toEqual(createdRecord);
+  });
+
+  it("debería actualizar el registro existente del mismo día en vez de crear un duplicado", async () => {
+    const newData = {
+      employeeId: 1,
+      date: new Date("2026-07-21"),
+      scheduleId: 2,
+    };
+    const existingRecord = {
+      id: 3,
+      ...newData,
+      scheduleId: 1,
+      update: jest.fn().mockResolvedValue(undefined),
+      reload: jest.fn(),
+    };
+
+    HoursWorked.findOne.mockResolvedValue(existingRecord);
+
+    const result = await hoursWorkedService.createHoursWorked(
+      newData as Parameters<typeof hoursWorkedService.createHoursWorked>[0],
+    );
+
+    expect(HoursWorked.create).not.toHaveBeenCalled();
+    expect(existingRecord.update).toHaveBeenCalledWith({
+      scheduleId: 2,
+      date: newData.date,
+    });
+    expect(existingRecord.reload).toHaveBeenCalled();
+    expect(result).toEqual(existingRecord);
+  });
+
+  it("debería actualizar el registro ganador si la creación falla por constraint única", async () => {
+    const newData = {
+      employeeId: 1,
+      date: new Date("2026-07-21"),
+      scheduleId: 2,
+    };
+    const uniqueError = new Error("Unique constraint");
+    uniqueError.name = "SequelizeUniqueConstraintError";
+    const winnerRecord = {
+      id: 3,
+      ...newData,
+      scheduleId: 1,
+      update: jest.fn().mockResolvedValue(undefined),
+      reload: jest.fn(),
+    };
+
+    HoursWorked.findOne
+      .mockResolvedValueOnce(null) // first lookup: nothing yet
+      .mockResolvedValueOnce(winnerRecord); // after the failed create
+    HoursWorked.create.mockRejectedValue(uniqueError);
+
+    const result = await hoursWorkedService.createHoursWorked(
+      newData as Parameters<typeof hoursWorkedService.createHoursWorked>[0],
+    );
+
+    expect(HoursWorked.create).toHaveBeenCalledTimes(1);
+    expect(winnerRecord.update).toHaveBeenCalledWith({
+      scheduleId: 2,
+      date: newData.date,
+    });
+    expect(result).toEqual(winnerRecord);
+  });
+
+  it("debería propagar el error si la creación falla por otra razón", async () => {
+    const newData = {
+      employeeId: 1,
+      date: new Date("2026-07-21"),
+      scheduleId: 2,
+    };
+    const dbError = new Error("DB down");
+
+    HoursWorked.findOne.mockResolvedValue(null);
+    HoursWorked.create.mockRejectedValue(dbError);
+
+    await expect(
+      hoursWorkedService.createHoursWorked(
+        newData as Parameters<typeof hoursWorkedService.createHoursWorked>[0],
+      ),
+    ).rejects.toThrow("DB down");
   });
 });
 

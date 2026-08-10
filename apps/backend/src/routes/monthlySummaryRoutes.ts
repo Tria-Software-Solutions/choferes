@@ -15,7 +15,6 @@ router.get(
 router.get("/employee/:id", authenticateToken, monthlySummaryController.getCurrentMonthlySummary);
 router.post("/", authenticateToken, monthlySummaryController.createMonthlySummary);
 router.put("/:id", authenticateToken, monthlySummaryController.updateMonthlySummary);
-router.delete("/bulk", authenticateToken, monthlySummaryController.deleteAllMonthlySummaries);
 router.delete("/:id", authenticateToken, monthlySummaryController.deleteMonthlySummary);
 
 export default router;
