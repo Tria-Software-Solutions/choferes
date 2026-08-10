@@ -4,6 +4,7 @@ import api, { invalidateCache } from "./api";
 export const getSchedules = async (search?: string) => {
   const params: Record<string, string | number> = {
     _t: Date.now(),
+    limit: 10000,
   };
   if (search) params.search = search;
 

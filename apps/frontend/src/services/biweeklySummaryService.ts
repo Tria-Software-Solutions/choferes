@@ -4,7 +4,8 @@ import api, { invalidateCache } from "./api";
 export const getBiweeklySummaries = async () => {
   const response = await api.get("/biweekly-summary", {
     params: {
-      _t: Date.now()
+      _t: Date.now(),
+      limit: 10000
     }
   });
   return response.data.data;
