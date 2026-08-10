@@ -454,3 +454,32 @@ export const paginationRules = [
     .isLength({ max: 100 })
     .withMessage("search no puede exceder 100 caracteres"),
 ];
+
+// ─── HoursWorked ──────────────────────────────────────────────────────────────
+
+// GET /hours-worked: pagination plus an optional inclusive date range so the
+// board can fetch only the visible week instead of the whole history.
+export const hoursWorkedQueryRules = [
+  ...paginationRules,
+  query("dateFrom").optional().isISO8601().withMessage("dateFrom debe ser una fecha ISO válida"),
+  query("dateTo").optional().isISO8601().withMessage("dateTo debe ser una fecha ISO válida"),
+  query("dateFrom").custom((value, { req }) => {
+    const dateTo = req.query?.dateTo as string | undefined;
+    if (value && dateTo && new Date(value) > new Date(dateTo)) {
+      throw new Error("dateFrom no puede ser posterior a dateTo");
+    }
+    return true;
+  }),
+];
+
+// POST /hours-worked/recalculate: employeeId (optional) and date (optional).
+export const recalculateRules = [
+  body("employeeId")
+    .optional({ values: "null" })
+    .isInt({ min: 1 })
+    .withMessage("employeeId debe ser un número entero positivo"),
+  body("date")
+    .optional({ values: "null" })
+    .isISO8601()
+    .withMessage("date debe ser una fecha ISO válida"),
+];

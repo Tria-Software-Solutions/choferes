@@ -29,6 +29,19 @@ jest.mock("../models/Employee", () => {
   };
 });
 
+// Mock summaryRecalculationService - hoursWorkedService imports parseCalendarDate from it.
+// The real module loads Sequelize models (WeeklySummary etc.) which would break with the
+// plain-object model mocks above.
+jest.mock("../services/summaryRecalculationService", () => ({
+  parseCalendarDate: jest.fn((value: string) => {
+    const match = /^(\d{4})-(\d{2})-(\d{2})$/.exec(value);
+    if (match) {
+      return new Date(Number(match[1]), Number(match[2]) - 1, Number(match[3]));
+    }
+    throw new Error("Invalid date");
+  }),
+}));
+
 // eslint-disable-next-line @typescript-eslint/no-require-imports
 const HoursWorked = require("../models/HoursWorked").default;
 import * as hoursWorkedService from "../services/hoursWorkedService";
