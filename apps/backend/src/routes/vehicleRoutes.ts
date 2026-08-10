@@ -29,7 +29,6 @@ router.put(
   validate,
   vehicleController.updateVehicle,
 );
-router.delete("/bulk", authenticateToken, vehicleController.deleteAllVehicles);
 router.delete("/:id", authenticateToken, idParam, validate, vehicleController.deleteVehicle);
 
 export default router;

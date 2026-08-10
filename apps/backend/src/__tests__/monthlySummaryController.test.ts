@@ -149,12 +149,3 @@ describe("DELETE /api/monthly-summaries/:id", () => {
   });
 });
 
-describe("DELETE /api/monthly-summaries/bulk", () => {
-  it("debería devolver 204 al eliminar todos", async () => {
-    service.deleteAllMonthlySummaries.mockResolvedValue(12);
-
-    const res = await request(app).delete("/api/monthly-summaries/bulk");
-
-    expect(res.status).toBe(204);
-  });
-});

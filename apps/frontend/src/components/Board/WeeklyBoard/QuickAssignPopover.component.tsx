@@ -26,6 +26,7 @@ interface QuickAssignPopoverProps {
   date: string;
   schedules: Schedule[];
   employees: Employee[];
+  assignedEmployeeIds?: number[];
   fixedScheduleLabel?: string;
   isDark: boolean;
   theme: Theme;
@@ -42,7 +43,7 @@ interface QuickAssignPopoverProps {
  */
 const QuickAssignPopover: React.FC<QuickAssignPopoverProps> = ({
   open, anchorPosition, onClose, view, day, date, schedules, employees,
-  fixedScheduleLabel, isDark, theme, onAssign,
+  assignedEmployeeIds = [], fixedScheduleLabel, isDark, theme, onAssign,
 }) => {
   const [selectedEmployeeIds, setSelectedEmployeeIds] = useState<Set<number>>(new Set());
   const [selectedScheduleLabel, setSelectedScheduleLabel] = useState<string>("");
@@ -52,12 +53,13 @@ const QuickAssignPopover: React.FC<QuickAssignPopoverProps> = ({
     [schedules, day],
   );
 
-  // Reset selection each time it opens
+  // Reset selection each time it opens (pre-check employees already in this column/cell)
   useEffect(() => {
     if (open) {
-      setSelectedEmployeeIds(new Set());
+      setSelectedEmployeeIds(new Set(assignedEmployeeIds));
       setSelectedScheduleLabel("");
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [open]);
 
   const confirmDisabled =
@@ -79,9 +81,15 @@ const QuickAssignPopover: React.FC<QuickAssignPopoverProps> = ({
       view === "schedule" ? fixedScheduleLabel ?? "" : selectedScheduleLabel;
     if (!scheduleLabel) return;
 
-    // Assign to all selected employees
-    selectedEmployeeIds.forEach((empId) => {
-      onAssign(empId, scheduleLabel);
+    // Assign to all selected employees and remove the ones that were unchecked
+    const initiallyAssigned = new Set(assignedEmployeeIds);
+    const affectedIds = new Set([...selectedEmployeeIds, ...initiallyAssigned]);
+    affectedIds.forEach((empId) => {
+      if (selectedEmployeeIds.has(empId)) {
+        onAssign(empId, scheduleLabel);
+      } else if (initiallyAssigned.has(empId)) {
+        onAssign(empId, SELECTOR_TABLE.UNASSIGNED);
+      }
     });
     onClose();
   };
@@ -132,7 +140,6 @@ const QuickAssignPopover: React.FC<QuickAssignPopoverProps> = ({
           sx: {
             borderRadius: "14px",
             boxShadow: isDark ? "0 12px 44px rgba(0,0,0,0.45)" : "0 12px 44px rgba(0,0,0,0.14)",
-            border: `1px solid ${isDark ? "rgba(255,255,255,0.08)" : "rgba(0,0,0,0.06)"}`,
             width: 240,
             maxHeight: 360,
             overflow: "auto",

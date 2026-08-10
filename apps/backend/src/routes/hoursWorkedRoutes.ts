@@ -27,7 +27,6 @@ router.put(
   validate,
   hoursWorkedController.updateHoursWorked,
 );
-router.delete("/bulk", authenticateToken, hoursWorkedController.deleteAllHoursWorked);
 router.delete(
   "/:id",
   authenticateToken,

@@ -82,10 +82,62 @@ export const getHoursWorkedByDateRange = async (startDate: Date, endDate: Date) 
     ],
   });
 
+// Returns the inclusive day range covering the calendar day of `date` (server-local).
+const getDayRange = (date: Date): { dayStart: Date; dayEnd: Date } => {
+  const dayStart = new Date(date);
+  dayStart.setHours(0, 0, 0, 0);
+  const dayEnd = new Date(dayStart);
+  dayEnd.setHours(23, 59, 59, 999);
+  return { dayStart, dayEnd };
+};
+
+const isUniqueConstraintError = (error: unknown): boolean =>
+  typeof error === "object" &&
+  error !== null &&
+  (error as { name?: string }).name === "SequelizeUniqueConstraintError";
+
+// The app expects ONE record per employee per calendar day (enforced by the
+// unique index hours_worked_employeeId_date_unique). The client may try to
+// create a record for a day that already has one (stale Redux state after a
+// race), so instead of failing we update the existing record — this keeps the
+// DB constraint and the UI in sync.
 export const createHoursWorked = async (data: Omit<HoursWorked, "id">) => {
-  const newHoursWorked = await HoursWorked.create(data);
-  await newHoursWorked.reload();
-  return newHoursWorked;
+  const { dayStart, dayEnd } = getDayRange(new Date(data.date));
+
+  const findExisting = () =>
+    HoursWorked.findOne({
+      where: {
+        employeeId: data.employeeId,
+        date: { $between: [dayStart, dayEnd] },
+      },
+      order: [["id", "DESC"]],
+    });
+
+  const existing = await findExisting();
+
+  if (existing) {
+    await existing.update({ scheduleId: data.scheduleId, date: data.date });
+    await existing.reload();
+    return existing;
+  }
+
+  try {
+    const newHoursWorked = await HoursWorked.create(data);
+    await newHoursWorked.reload();
+    return newHoursWorked;
+  } catch (error) {
+    // Concurrent creates for the same employee+day: the unique index rejected
+    // this one — update the record that won the race instead of erroring.
+    if (isUniqueConstraintError(error)) {
+      const winner = await findExisting();
+      if (winner) {
+        await winner.update({ scheduleId: data.scheduleId, date: data.date });
+        await winner.reload();
+        return winner;
+      }
+    }
+    throw error;
+  }
 };
 
 export const updateHoursWorked = async (id: number, data: Omit<HoursWorked, "id">) => {

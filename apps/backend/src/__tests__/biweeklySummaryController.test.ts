@@ -150,12 +150,3 @@ describe("DELETE /api/biweekly-summaries/:id", () => {
   });
 });
 
-describe("DELETE /api/biweekly-summaries/bulk", () => {
-  it("debería devolver 204 al eliminar todos", async () => {
-    service.deleteAllBiweeklySummaries.mockResolvedValue(5);
-
-    const res = await request(app).delete("/api/biweekly-summaries/bulk");
-
-    expect(res.status).toBe(204);
-  });
-});
