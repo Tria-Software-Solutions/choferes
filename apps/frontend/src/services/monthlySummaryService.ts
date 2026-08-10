@@ -4,7 +4,8 @@ import api, { invalidateCache } from "./api";
 export const getMonthlySummaries = async () => {
   const response = await api.get("/monthly-summary", {
     params: {
-      _t: Date.now()
+      _t: Date.now(),
+      limit: 10000
     }
   });
   return response.data.data;
