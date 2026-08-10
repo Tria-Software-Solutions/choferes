@@ -579,6 +579,7 @@ export const highContrastTheme = createTheme({
       styleOverrides: {
         paper: {
           borderRadius: "8px",
+          border: "none",
         },
       },
     },

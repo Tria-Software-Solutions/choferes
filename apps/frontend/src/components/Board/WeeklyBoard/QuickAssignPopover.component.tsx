@@ -140,8 +140,12 @@ const QuickAssignPopover: React.FC<QuickAssignPopoverProps> = ({
           sx: {
             borderRadius: "14px",
             boxShadow: isDark ? "0 12px 44px rgba(0,0,0,0.45)" : "0 12px 44px rgba(0,0,0,0.14)",
-            width: 240,
-            maxHeight: 360,
+            border: "none",
+            width:
+              view === "employee"
+                ? { xs: 264, sm: 520, md: 560 }
+                : { xs: 264, sm: 280, md: 300 },
+            maxHeight: { xs: "80vh", sm: "80vh", md: 640 },
             overflow: "auto",
             mt: 0.5,
             p: 0.5,
@@ -166,74 +170,115 @@ const QuickAssignPopover: React.FC<QuickAssignPopoverProps> = ({
         </Box>
       </Box>
 
-      {/* Employee list with checkboxes */}
-      <Typography sx={{
-        px: 1.25, pt: 0.75, pb: 0.25, fontSize: "0.6rem", fontWeight: 600,
-        color: "text.secondary", textTransform: "uppercase", letterSpacing: "0.04em",
-      }}>
-        Empleados ({selectedEmployeeIds.size} seleccionados)
-      </Typography>
-      <List dense sx={{ py: 0, maxHeight: 150, overflow: "auto" }}>
-        {employees.map(renderEmployeeItem)}
-        {employees.length === 0 && (
-          <Typography sx={{ px: 1.5, py: 1, fontSize: "0.7rem", color: "text.disabled" }}>
-            No hay empleados disponibles
-          </Typography>
-        )}
-      </List>
-
-      {/* Schedule dropdown — only in employee view */}
-      {view === "employee" && (
-        <>
+      {/* Employee + schedule lists: side by side on sm+, stacked on mobile */}
+      <Box
+        sx={{
+          display: "flex",
+          flexDirection: { xs: "column", sm: "row" },
+          alignItems: "flex-start",
+          minWidth: 0,
+        }}
+      >
+        <Box sx={{ flex: 1, minWidth: 0, width: { xs: "100%", sm: "auto" } }}>
           <Typography sx={{
-            px: 1.25, pt: 0.5, pb: 0.25, fontSize: "0.6rem", fontWeight: 600,
+            px: 1.25, pt: 0.75, pb: 0.25, fontSize: "0.6rem", fontWeight: 600,
             color: "text.secondary", textTransform: "uppercase", letterSpacing: "0.04em",
-            borderTop: `1px solid ${isDark ? "rgba(255,255,255,0.05)" : "rgba(0,0,0,0.05)"}`,
-            mt: 0.25,
           }}>
-            Horario
+            Empleados ({selectedEmployeeIds.size} seleccionados)
           </Typography>
-          <List dense sx={{ py: 0, maxHeight: 140, overflow: "auto" }}>
-            {daySchedules.map((s) => (
-              <ListItemButton
-                key={s.id}
-                onClick={() => setSelectedScheduleLabel(s.label)}
-                selected={selectedScheduleLabel === s.label}
-                sx={{
-                  mx: 0.5, borderRadius: "8px", my: 0.2, px: 1.25, py: 0.6,
-                  "&.Mui-selected": {
-                    backgroundColor: isDark ? "rgba(99,102,241,0.14)" : "rgba(99,102,241,0.08)",
-                  },
-                  "&:hover": { backgroundColor: isDark ? "rgba(255,255,255,0.05)" : "rgba(0,0,0,0.03)" },
-                }}
-              >
-                <Box sx={{
-                  width: 6, height: 6, borderRadius: "50%", mr: 1.25, flexShrink: 0,
-                  backgroundColor: "#818cf8",
-                }} />
-                <ListItemText
-                  primary={s.label}
-                  primaryTypographyProps={{
-                    fontSize: "0.78rem",
-                    fontWeight: selectedScheduleLabel === s.label ? 700 : 500,
-                  }}
-                />
-                <Typography sx={{ fontSize: "0.62rem", fontWeight: 600, color: "#818cf8", ml: 1 }}>
-                  {getScheduleHours(s, day)}h
-                </Typography>
-              </ListItemButton>
-            ))}
-            {daySchedules.length === 0 && (
+          <List
+            dense
+            sx={{
+              py: 0,
+              maxHeight:
+                view === "employee"
+                  ? { xs: "32vh", sm: 260, md: 320 }
+                  : { xs: "50vh", sm: 300, md: 360 },
+              overflow: "auto",
+            }}
+          >
+            {employees.map(renderEmployeeItem)}
+            {employees.length === 0 && (
               <Typography sx={{ px: 1.5, py: 1, fontSize: "0.7rem", color: "text.disabled" }}>
-                {SELECTOR_TABLE.NO_AVAILABLE}
+                No hay empleados disponibles
               </Typography>
             )}
           </List>
-        </>
-      )}
+        </Box>
 
-      {/* Actions */}
-      <Box sx={{ display: "flex", gap: 0.75, p: 1, borderTop: `1px solid ${isDark ? "rgba(255,255,255,0.06)" : "rgba(0,0,0,0.06)"}` }}>
+        {/* Schedule list — only in employee view */}
+        {view === "employee" && (
+          <Box
+            sx={{
+              flex: 1,
+              minWidth: 0,
+              width: { xs: "100%", sm: "auto" },
+              borderTop: { xs: `1px solid ${isDark ? "rgba(255,255,255,0.05)" : "rgba(0,0,0,0.05)"}`, sm: "none" },
+              borderLeft: { xs: "none", sm: `1px solid ${isDark ? "rgba(255,255,255,0.05)" : "rgba(0,0,0,0.05)"}` },
+              mt: { xs: 0.25, sm: 0 },
+              ml: { xs: 0, sm: 0.75 },
+            }}
+          >
+            <Typography sx={{
+              px: 1.25, pt: { xs: 0.5, sm: 0.75 }, pb: 0.25, fontSize: "0.6rem", fontWeight: 600,
+              color: "text.secondary", textTransform: "uppercase", letterSpacing: "0.04em",
+            }}>
+              Horario
+            </Typography>
+            <List dense sx={{ py: 0, maxHeight: { xs: "26vh", sm: 260, md: 320 }, overflow: "auto" }}>
+              {daySchedules.map((s) => (
+                <ListItemButton
+                  key={s.id}
+                  onClick={() => setSelectedScheduleLabel(s.label)}
+                  selected={selectedScheduleLabel === s.label}
+                  sx={{
+                    mx: 0.5, borderRadius: "8px", my: 0.2, px: 1.25, py: 0.6,
+                    "&.Mui-selected": {
+                      backgroundColor: isDark ? "rgba(99,102,241,0.14)" : "rgba(99,102,241,0.08)",
+                    },
+                    "&:hover": { backgroundColor: isDark ? "rgba(255,255,255,0.05)" : "rgba(0,0,0,0.03)" },
+                  }}
+                >
+                  <Box sx={{
+                    width: 6, height: 6, borderRadius: "50%", mr: 1.25, flexShrink: 0,
+                    backgroundColor: "#818cf8",
+                  }} />
+                  <ListItemText
+                    primary={s.label}
+                    primaryTypographyProps={{
+                      fontSize: "0.78rem",
+                      fontWeight: selectedScheduleLabel === s.label ? 700 : 500,
+                    }}
+                  />
+                  <Typography sx={{ fontSize: "0.62rem", fontWeight: 600, color: "#818cf8", ml: 1 }}>
+                    {getScheduleHours(s, day)}h
+                  </Typography>
+                </ListItemButton>
+              ))}
+              {daySchedules.length === 0 && (
+                <Typography sx={{ px: 1.5, py: 1, fontSize: "0.7rem", color: "text.disabled" }}>
+                  {SELECTOR_TABLE.NO_AVAILABLE}
+                </Typography>
+              )}
+            </List>
+          </Box>
+        )}
+      </Box>
+
+      {/* Actions — sticky so the buttons are always visible */}
+      <Box
+        sx={{
+          position: "sticky",
+          bottom: 0,
+          zIndex: 2,
+          display: "flex",
+          gap: 0.75,
+          p: 1,
+          backgroundColor: theme.palette.background.paper,
+          borderTop: `1px solid ${isDark ? "rgba(255,255,255,0.06)" : "rgba(0,0,0,0.06)"}`,
+          borderRadius: "0 0 13px 13px",
+        }}
+      >
         <Box
           onClick={onClose}
           sx={{
