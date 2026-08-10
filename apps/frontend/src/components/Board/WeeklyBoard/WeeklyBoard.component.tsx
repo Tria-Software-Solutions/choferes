@@ -1,4 +1,4 @@
-import React, { useMemo, useState, useCallback, memo, useEffect } from "react";
+import React, { useMemo, useState, useCallback, memo, useEffect, useRef } from 'react';
 import {
   Box,
   Typography,
@@ -13,16 +13,17 @@ import {
   TextField,
   Dialog,
   Button,
+  Tooltip,
   type Theme,
-} from "@mui/material";
-import CalendarTodayIcon from "@mui/icons-material/CalendarToday";
-import DateRangeIcon from "@mui/icons-material/DateRange";
-import CalendarMonthIcon from "@mui/icons-material/CalendarMonth";
-import InfoOutlinedIcon from "@mui/icons-material/InfoOutlined";
-import MoreTimeIcon from "@mui/icons-material/MoreTime";
-import PeopleOutlineIcon from "@mui/icons-material/PeopleOutline";
-import ViewTimelineIcon from "@mui/icons-material/ViewTimeline";
-import DragIndicatorIcon from "@mui/icons-material/DragIndicator";
+} from '@mui/material';
+import CalendarTodayIcon from '@mui/icons-material/CalendarToday';
+import DateRangeIcon from '@mui/icons-material/DateRange';
+import CalendarMonthIcon from '@mui/icons-material/CalendarMonth';
+import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined';
+import MoreTimeIcon from '@mui/icons-material/MoreTime';
+import PeopleOutlineIcon from '@mui/icons-material/PeopleOutline';
+import ViewTimelineIcon from '@mui/icons-material/ViewTimeline';
+import DragIndicatorIcon from '@mui/icons-material/DragIndicator';
 import {
   DndContext,
   DragOverlay,
@@ -35,13 +36,13 @@ import {
   useSensor,
   useSensors,
   type UniqueIdentifier,
-} from "@dnd-kit/core";
-import type { Employee } from "../../../models/Employee";
-import type { Schedule } from "../../../models/Schedule";
-import type { HoursWorked } from "../../../models/HoursWorked";
-import type { WeeklySummary } from "../../../models/WeeklySummary";
-import type { BiweeklySummary } from "../../../models/BiweeklySummary";
-import type { MonthlySummary } from "../../../models/MonthlySummary";
+} from '@dnd-kit/core';
+import type { Employee } from '../../../models/Employee';
+import type { Schedule } from '../../../models/Schedule';
+import type { HoursWorked } from '../../../models/HoursWorked';
+import type { WeeklySummary } from '../../../models/WeeklySummary';
+import type { BiweeklySummary } from '../../../models/BiweeklySummary';
+import type { MonthlySummary } from '../../../models/MonthlySummary';
 import {
   formatHeaderDate,
   getCurrentWeekDates,
@@ -49,43 +50,49 @@ import {
   hasMultipleBiweeks,
   hasMultipleMonths,
   hasMultipleYears,
-} from "../../../utils/dates";
-import { translateDayToAbrevSpanish, capitalizeFirstLetter, getInitials, getMonthName } from "../../../utils/string";
-import { getEmployeeColor } from "../../../utils/employeeColors";
-import { EnglishDayOfWeek } from "../../../utils/dayAbreviations";
-import EmployeeAvatar from "../../EmployeeAvatar/EmployeeAvatar.component";
-import { PERMISSIONS, SELECTOR_TABLE } from "../../../constants/constants";
-import { getScheduleHours } from "../../../utils/schedule";
+} from '../../../utils/dates';
 import {
-  getScheduleCellData,
-  isToday,
-} from "../../Table/SelectorTable/helpers/scheduleCell";
-import SegmentedToggle from "../../SegmentedToggle/SegmentedToggle.component";
-import QuickAssignPopover from "./QuickAssignPopover.component";
+  translateDayToAbrevSpanish,
+  capitalizeFirstLetter,
+  getInitials,
+  getMonthName,
+} from '../../../utils/string';
+import { getEmployeeColor } from '../../../utils/employeeColors';
+import { EnglishDayOfWeek } from '../../../utils/dayAbreviations';
+import EmployeeAvatar from '../../EmployeeAvatar/EmployeeAvatar.component';
+import { PERMISSIONS, SELECTOR_TABLE } from '../../../constants/constants';
+import { getScheduleHours } from '../../../utils/schedule';
+import { getScheduleCellData, isToday } from '../../Table/SelectorTable/helpers/scheduleCell';
+import SegmentedToggle from '../../SegmentedToggle/SegmentedToggle.component';
+import QuickAssignPopover from './QuickAssignPopover.component';
 import {
   calculateTotalHours,
   calculateOvertime,
-} from "../../Table/SelectorTable/helpers/hoursCalculation";
+} from '../../Table/SelectorTable/helpers/hoursCalculation';
 
 // ─── Palette ───
 const SCHEDULE_COLORS = [
-  { bg: "rgba(99, 102, 241, 0.08)", text: "#6366f1", border: "rgba(99, 102, 241, 0.14)" },
-  { bg: "rgba(79, 70, 229, 0.06)", text: "#6366f1", border: "rgba(79, 70, 229, 0.10)" },
-  { bg: "rgba(99, 102, 241, 0.04)", text: "#818cf8", border: "rgba(99, 102, 241, 0.08)" },
-  { bg: "rgba(99, 102, 241, 0.03)", text: "#6366f1", border: "rgba(99, 102, 241, 0.06)" },
+  { bg: 'rgba(99, 102, 241, 0.08)', text: '#6366f1', border: 'rgba(99, 102, 241, 0.14)' },
+  { bg: 'rgba(79, 70, 229, 0.06)', text: '#6366f1', border: 'rgba(79, 70, 229, 0.10)' },
+  { bg: 'rgba(99, 102, 241, 0.04)', text: '#818cf8', border: 'rgba(99, 102, 241, 0.08)' },
+  { bg: 'rgba(99, 102, 241, 0.03)', text: '#6366f1', border: 'rgba(99, 102, 241, 0.06)' },
 ];
 
-interface ColorScheme { bg: string; text: string; border: string; }
+interface ColorScheme {
+  bg: string;
+  text: string;
+  border: string;
+}
 
 const getScheduleColor = (_label: string, index: number): ColorScheme =>
   SCHEDULE_COLORS[index % SCHEDULE_COLORS.length];
 
-type PeriodType = "weekly" | "biweekly" | "monthly";
+type PeriodType = 'weekly' | 'biweekly' | 'monthly';
 
 const PERIOD_OPTIONS: { value: PeriodType; label: string; icon: React.ReactNode }[] = [
-  { value: "weekly", label: "Semanal", icon: <CalendarTodayIcon sx={{ fontSize: 15 }} /> },
-  { value: "biweekly", label: "Quincenal", icon: <DateRangeIcon sx={{ fontSize: 15 }} /> },
-  { value: "monthly", label: "Mensual", icon: <CalendarMonthIcon sx={{ fontSize: 15 }} /> },
+  { value: 'weekly', label: 'Semanal', icon: <CalendarTodayIcon sx={{ fontSize: 15 }} /> },
+  { value: 'biweekly', label: 'Quincenal', icon: <DateRangeIcon sx={{ fontSize: 15 }} /> },
+  { value: 'monthly', label: 'Mensual', icon: <CalendarMonthIcon sx={{ fontSize: 15 }} /> },
 ];
 
 // ─── Drag data types ───
@@ -131,15 +138,19 @@ interface WeeklyBoardProps {
   month: number;
   year: number;
   handleChange: (value: string, employeeId: number, date: Date, skipRecalc?: boolean) => void;
-  handleAdjustTime: (employeeId: number, condition: "add" | "subtract", timeAdjustment: number) => void;
+  handleAdjustTime: (
+    employeeId: number,
+    condition: 'add' | 'subtract',
+    timeAdjustment: number
+  ) => void;
   recalculateEmployeeWeeklySummary?: (
     employeeId: number,
     date: Date,
     newHoursWorkedEntry?: { employeeId: number; date: string; scheduleId: number }
   ) => Promise<void>;
   permissions?: string[];
-  viewMode: "employee" | "schedule";
-  setViewMode: React.Dispatch<React.SetStateAction<"employee" | "schedule">>;
+  viewMode: 'employee' | 'schedule';
+  setViewMode: React.Dispatch<React.SetStateAction<'employee' | 'schedule'>>;
   onInfoClick?: (employee: Employee) => void;
   onAdjustClick?: (employee: Employee) => void;
 }
@@ -162,64 +173,105 @@ interface EmployeeCardProps {
 }
 
 const EmployeeCard = memo(function EmployeeCard({
-  employee, scheduleLabel, scheduleColor, hours, overtime, isUnassigned,
+  employee,
+  scheduleLabel,
+  scheduleColor,
+  hours,
+  overtime,
+  isUnassigned,
   periodTotal,
-  onClick, onInfo, onAdjust, theme, isDragging,
+  onClick,
+  onInfo,
+  onAdjust,
+  theme,
+  isDragging,
 }: EmployeeCardProps) {
-  const isDark = theme.palette.mode === "dark";
+  const isDark = theme.palette.mode === 'dark';
 
   if (isUnassigned) {
     return (
       <Box
+        data-card
         onClick={onClick}
         sx={{
-          display: "flex", alignItems: "center", gap: { xs: 0.4, sm: 0.75 }, px: { xs: 0.6, sm: 1 }, py: { xs: 0.6, sm: 0.85 },
-          borderRadius: "10px", cursor: "grab",
-          backgroundColor: isDark ? "rgba(255,255,255,0.02)" : "rgba(0,0,0,0.015)",
-          border: `1px dashed ${isDark ? "rgba(255,255,255,0.12)" : "rgba(0,0,0,0.10)"}`,
-          transition: "all 0.2s ease", userSelect: "none",
+          display: 'flex',
+          alignItems: 'center',
+          gap: { xs: 0.4, sm: 0.75 },
+          px: { xs: 0.6, sm: 1 },
+          py: { xs: 0.6, sm: 0.85 },
+          // Fixed min-height shared with the board cards so every employee
+          // card looks the same across the day and schedule views.
+          minHeight: { xs: 38, sm: 42 },
+          borderRadius: '10px',
+          cursor: 'grab',
+          backgroundColor: isDark ? 'rgba(255,255,255,0.02)' : 'rgba(0,0,0,0.015)',
+          border: `1px dashed ${isDark ? 'rgba(255,255,255,0.12)' : 'rgba(0,0,0,0.10)'}`,
+          transition: 'all 0.2s ease',
+          userSelect: 'none',
           opacity: isDragging ? 0.3 : 1,
-          "&:hover": {
-            borderColor: "#818cf8",
-            backgroundColor: isDark ? "rgba(99,102,241,0.06)" : "rgba(99,102,241,0.04)",
-            transform: "translateY(-1px)",
-            boxShadow: "0 2px 8px rgba(99,102,241,0.12)",
+          '&:hover': {
+            borderColor: '#818cf8',
+            backgroundColor: isDark ? 'rgba(99,102,241,0.06)' : 'rgba(99,102,241,0.04)',
+            transform: 'translateY(-1px)',
+            boxShadow: '0 2px 8px rgba(99,102,241,0.12)',
           },
-          "&:active": { transform: "scale(0.98)", cursor: "grabbing" },
+          '&:active': { transform: 'scale(0.98)', cursor: 'grabbing' },
         }}
       >
-        <Box sx={{ display: { xs: "none", sm: "flex" }, alignItems: "center", flexShrink: 0 }}>
-          <DragIndicatorIcon sx={{ fontSize: 13, color: theme.palette.text.disabled, opacity: 0.35 }} />
+        <Box sx={{ display: { xs: 'none', sm: 'flex' }, alignItems: 'center', flexShrink: 0 }}>
+          <DragIndicatorIcon
+            sx={{ fontSize: 13, color: theme.palette.text.disabled, opacity: 0.35 }}
+          />
         </Box>
         <EmployeeAvatar
           employee={employee}
           size={24}
-          sx={{ width: { xs: 20, sm: 24 }, height: { xs: 20, sm: 24 }, fontSize: { xs: "0.52rem", sm: "0.6rem" } }}
+          sx={{
+            width: { xs: 20, sm: 24 },
+            height: { xs: 20, sm: 24 },
+            fontSize: { xs: '0.52rem', sm: '0.6rem' },
+          }}
         />
-        <Box sx={{ flex: 1, minWidth: 0 }}>
-          <Typography sx={{
-            fontSize: { xs: "0.68rem", sm: "0.72rem" }, fontWeight: 600, color: theme.palette.text.primary,
-            lineHeight: 1.2, overflow: "hidden",
-            display: "-webkit-box", WebkitBoxOrient: "vertical",
-            WebkitLineClamp: { xs: 2, sm: 1 },
-          }}>
-            {employee.firstName} {employee.lastName?.[0]}.
+        <Box sx={{ flex: 1, minWidth: 'max-content' }}>
+          <Typography
+            sx={{
+              fontSize: { xs: '0.68rem', sm: '0.72rem' },
+              fontWeight: 600,
+              color: theme.palette.text.primary,
+              lineHeight: 1.25,
+              whiteSpace: 'nowrap',
+            }}
+          >
+            {employee.firstName} {employee.lastName}
           </Typography>
-          <Typography sx={{
-            fontSize: "0.58rem", fontWeight: 500, color: theme.palette.text.disabled,
-            lineHeight: 1.3, fontStyle: "italic",
-          }}>
+          <Typography
+            sx={{
+              fontSize: '0.58rem',
+              fontWeight: 500,
+              color: theme.palette.text.disabled,
+              lineHeight: 1.3,
+              fontStyle: 'italic',
+            }}
+          >
             {scheduleLabel}
           </Typography>
         </Box>
-        <Box sx={{
-          width: 18, height: 18, borderRadius: "6px",
-          backgroundColor: isDark ? "rgba(255,255,255,0.06)" : "rgba(0,0,0,0.04)",
-          color: theme.palette.text.disabled,
-          display: "flex", alignItems: "center", justifyContent: "center",
-          fontSize: "0.75rem", fontWeight: 600, flexShrink: 0,
-          transition: "all 0.15s ease",
-        }}>
+        <Box
+          sx={{
+            width: 18,
+            height: 18,
+            borderRadius: '6px',
+            backgroundColor: isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.04)',
+            color: theme.palette.text.disabled,
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            fontSize: '0.75rem',
+            fontWeight: 600,
+            flexShrink: 0,
+            transition: 'all 0.15s ease',
+          }}
+        >
           +
         </Box>
       </Box>
@@ -228,39 +280,56 @@ const EmployeeCard = memo(function EmployeeCard({
 
   return (
     <Box
+      data-card
       onClick={onClick}
       sx={{
-        display: "flex", alignItems: "center", gap: { xs: 0.4, sm: 0.5 }, px: { xs: 0.6, sm: 1 }, py: { xs: 0.6, sm: 0.85 },
-        borderRadius: "10px",
+        display: 'flex',
+        alignItems: 'center',
+        gap: { xs: 0.4, sm: 0.5 },
+        px: { xs: 0.6, sm: 1 },
+        py: { xs: 0.6, sm: 0.85 },
+        // Fixed min-height shared with the board cards so every employee
+        // card looks the same across the day and schedule views.
+        minHeight: { xs: 38, sm: 42 },
+        borderRadius: '10px',
         backgroundColor: scheduleColor.bg,
         border: `1px solid ${scheduleColor.border}`,
-        cursor: "grab",
-        transition: "all 0.2s ease",
-        userSelect: "none",
+        cursor: 'grab',
+        transition: 'all 0.2s ease',
+        userSelect: 'none',
         opacity: isDragging ? 0.3 : 1,
-        position: "relative",
-        overflow: "hidden",
-        "&:hover": {
-          transform: "translateY(-1px)",
+        position: 'relative',
+        overflow: 'hidden',
+        '&:hover': {
+          transform: 'translateY(-1px)',
           boxShadow: `0 4px 12px ${scheduleColor.border}`,
-          "& .card-actions": { opacity: 1 },
+          '& .card-actions': { opacity: 1 },
         },
-        "&:active": { transform: "scale(0.98)", cursor: "grabbing" },
-        "&::before": {
+        '&:active': { transform: 'scale(0.98)', cursor: 'grabbing' },
+        '&::before': {
           content: '""',
-          position: "absolute",
+          position: 'absolute',
           left: 0,
-          top: "20%",
-          bottom: "20%",
+          top: '20%',
+          bottom: '20%',
           width: 2.5,
-          borderRadius: "0 2px 2px 0",
+          borderRadius: '0 2px 2px 0',
           backgroundColor: scheduleColor.text,
           opacity: 0.5,
         },
       }}
     >
       {/* Drag handle */}
-      <Box sx={{ display: { xs: "none", sm: "flex" }, alignItems: "center", flexShrink: 0, color: scheduleColor.text, opacity: 0.3, ml: 0.25 }}>
+      <Box
+        sx={{
+          display: { xs: 'none', sm: 'flex' },
+          alignItems: 'center',
+          flexShrink: 0,
+          color: scheduleColor.text,
+          opacity: 0.3,
+          ml: 0.25,
+        }}
+      >
         <DragIndicatorIcon sx={{ fontSize: 13 }} />
       </Box>
 
@@ -268,53 +337,88 @@ const EmployeeCard = memo(function EmployeeCard({
       <EmployeeAvatar
         employee={employee}
         size={24}
-        sx={{ width: { xs: 20, sm: 24 }, height: { xs: 20, sm: 24 }, fontSize: { xs: "0.52rem", sm: "0.6rem" } }}
+        sx={{
+          width: { xs: 20, sm: 24 },
+          height: { xs: 20, sm: 24 },
+          fontSize: { xs: '0.52rem', sm: '0.6rem' },
+        }}
       />
 
       {/* Name + label */}
-      <Box sx={{ flex: 1, minWidth: 0 }}>
-        <Typography sx={{
-          fontSize: { xs: "0.68rem", sm: "0.72rem" }, fontWeight: 600, color: theme.palette.text.primary,
-          lineHeight: 1.2, overflow: "hidden",
-          display: "-webkit-box", WebkitBoxOrient: "vertical",
-          WebkitLineClamp: { xs: 2, sm: 1 },
-        }}>
-          {employee.firstName}
+      <Box sx={{ flex: 1, minWidth: 'max-content' }}>
+        <Typography
+          sx={{
+            fontSize: { xs: '0.68rem', sm: '0.72rem' },
+            fontWeight: 600,
+            color: theme.palette.text.primary,
+            lineHeight: 1.25,
+            whiteSpace: 'nowrap',
+          }}
+        >
+          {employee.firstName} {employee.lastName}
         </Typography>
-        <Typography sx={{
-          fontSize: "0.58rem", fontWeight: 500, color: scheduleColor.text,
-          lineHeight: 1.3, overflow: "hidden",
-          display: "-webkit-box", WebkitBoxOrient: "vertical",
-          WebkitLineClamp: { xs: 2, sm: 1 },
-        }}>
+        <Typography
+          sx={{
+            fontSize: '0.58rem',
+            fontWeight: 500,
+            color: scheduleColor.text,
+            lineHeight: 1.3,
+            whiteSpace: 'nowrap',
+          }}
+        >
           {scheduleLabel}
         </Typography>
       </Box>
 
       {/* Info/adjust buttons (hover only on desktop, always visible on touch) */}
-      <Box className="card-actions" sx={{
-        display: "flex", alignItems: "center", gap: 0.15, opacity: { xs: 1, sm: 0 },
-        transition: "opacity 0.15s ease",
-        flexShrink: 0,
-      }}>
+      <Box
+        className="card-actions"
+        sx={{
+          display: 'flex',
+          alignItems: 'center',
+          gap: 0.15,
+          opacity: { xs: 1, sm: 0 },
+          transition: 'opacity 0.15s ease',
+          flexShrink: 0,
+        }}
+      >
         {onInfo && (
-          <Box component="span" onClick={(e: React.MouseEvent) => { e.stopPropagation(); onInfo(e); }}
+          <Box
+            component="span"
+            onClick={(e: React.MouseEvent) => {
+              e.stopPropagation();
+              onInfo(e);
+            }}
             sx={{
-              display: "flex", alignItems: "center", justifyContent: "center",
-              width: 18, height: 18, borderRadius: "5px", color: "text.secondary",
-              "&:hover": { backgroundColor: "rgba(0,0,0,0.06)", color: "primary.main" },
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              width: 18,
+              height: 18,
+              borderRadius: '5px',
+              color: 'text.secondary',
+              '&:hover': { backgroundColor: 'rgba(0,0,0,0.06)', color: 'primary.main' },
             }}
           >
             <InfoOutlinedIcon sx={{ fontSize: 11 }} />
           </Box>
         )}
         {onAdjust && (
-          <Box component="span" onClick={(e: React.MouseEvent) => { e.stopPropagation(); onAdjust(e); }}
+          <Box
+            component="span"
+            onClick={(e: React.MouseEvent) => {
+              e.stopPropagation();
+              onAdjust(e);
+            }}
             sx={{
-              display: "flex", alignItems: "center", justifyContent: "center",
-              width: 18, height: 18, borderRadius: "5px",
-              color: overtime > 0 ? "warning.main" : "text.disabled",
-              "&:hover": { backgroundColor: "rgba(237,108,2,0.1)" },
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              width: 18,
+              height: 18,
+              borderRadius: '5px',
+              color: overtime > 0 ? 'warning.main' : 'text.disabled',
+              '&:hover': { backgroundColor: 'rgba(237,108,2,0.1)' },
             }}
           >
             <MoreTimeIcon sx={{ fontSize: 11 }} />
@@ -323,9 +427,16 @@ const EmployeeCard = memo(function EmployeeCard({
       </Box>
 
       {/* Daily hours */}
-      <Typography sx={{
-        fontSize: "0.68rem", fontWeight: 700, color: scheduleColor.text, flexShrink: 0, opacity: 0.8, ml: 0.25,
-      }}>
+      <Typography
+        sx={{
+          fontSize: '0.68rem',
+          fontWeight: 700,
+          color: scheduleColor.text,
+          flexShrink: 0,
+          opacity: 0.8,
+          ml: 0.25,
+        }}
+      >
         {hours}h
       </Typography>
     </Box>
@@ -345,73 +456,120 @@ interface DragOverlayCardProps {
 }
 
 const DragOverlayCard = memo(function DragOverlayCard({
-  employee, scheduleLabel, scheduleColor, hours, periodTotal, periodOvertime, isUnassigned, isDark,
+  employee,
+  scheduleLabel,
+  scheduleColor,
+  hours,
+  periodTotal,
+  periodOvertime,
+  isUnassigned,
+  isDark,
 }: DragOverlayCardProps) {
   return (
-    <Box sx={{
-      display: "flex", alignItems: "center", gap: 0.75, px: 1.25, py: 1.25,
-      borderRadius: "14px",
-      backgroundColor: isUnassigned
-        ? (isDark ? "rgba(30,30,40,0.96)" : "rgba(255,255,255,0.96)" )
-        : scheduleColor.bg.replace("0.08", "0.92"),
-      border: `2px solid ${isUnassigned ? (isDark ? "rgba(255,255,255,0.25)" : "rgba(0,0,0,0.18)") : scheduleColor.text}`,
-      boxShadow: isDark
-        ? "0 20px 60px rgba(0,0,0,0.5), 0 0 0 1px rgba(255,255,255,0.1), 0 4px 20px rgba(0,0,0,0.3)"
-        : "0 20px 60px rgba(0,0,0,0.15), 0 0 0 1px rgba(255,255,255,0.9), 0 4px 20px rgba(0,0,0,0.08)",
-      transform: "scale(1.05) translateY(-4px)",
-      backdropFilter: "blur(12px)",
-      width: 180,
-      position: "relative",
-      overflow: "hidden",
-      willChange: "transform",
-      cursor: "grabbing",
-    }}>
+    <Box
+      sx={{
+        display: 'flex',
+        alignItems: 'center',
+        gap: 0.75,
+        px: 1.25,
+        py: 1.25,
+        borderRadius: '14px',
+        backgroundColor: isUnassigned
+          ? isDark
+            ? 'rgba(30,30,40,0.96)'
+            : 'rgba(255,255,255,0.96)'
+          : scheduleColor.bg.replace('0.08', '0.92'),
+        border: `2px solid ${isUnassigned ? (isDark ? 'rgba(255,255,255,0.25)' : 'rgba(0,0,0,0.18)') : scheduleColor.text}`,
+        boxShadow: isDark
+          ? '0 20px 60px rgba(0,0,0,0.5), 0 0 0 1px rgba(255,255,255,0.1), 0 4px 20px rgba(0,0,0,0.3)'
+          : '0 20px 60px rgba(0,0,0,0.15), 0 0 0 1px rgba(255,255,255,0.9), 0 4px 20px rgba(0,0,0,0.08)',
+        transform: 'scale(1.05) translateY(-4px)',
+        backdropFilter: 'blur(12px)',
+        minWidth: 200,
+        maxWidth: 420,
+        position: 'relative',
+        overflow: 'hidden',
+        willChange: 'transform',
+        cursor: 'grabbing',
+      }}
+    >
       {/* Color accent line */}
-      <Box sx={{
-        position: "absolute", left: 0, top: "15%", bottom: "15%", width: 3.5,
-        borderRadius: "0 4px 4px 0",
-        backgroundColor: isUnassigned ? (isDark ? "rgba(255,255,255,0.25)" : "rgba(0,0,0,0.2)") : scheduleColor.text,
-        opacity: 0.6,
-      }} />
+      <Box
+        sx={{
+          position: 'absolute',
+          left: 0,
+          top: '15%',
+          bottom: '15%',
+          width: 3.5,
+          borderRadius: '0 4px 4px 0',
+          backgroundColor: isUnassigned
+            ? isDark
+              ? 'rgba(255,255,255,0.25)'
+              : 'rgba(0,0,0,0.2)'
+            : scheduleColor.text,
+          opacity: 0.6,
+        }}
+      />
 
       <EmployeeAvatar
         employee={employee}
         size={32}
         sx={{
-          boxShadow: `0 0 0 2px ${isDark ? "rgba(255,255,255,0.15)" : "rgba(255,255,255,0.8)"}`,
+          boxShadow: `0 0 0 2px ${isDark ? 'rgba(255,255,255,0.15)' : 'rgba(255,255,255,0.8)'}`,
         }}
       />
 
-      <Box sx={{ flex: 1, minWidth: 0 }}>
-        <Typography sx={{
-          fontSize: "0.8rem", fontWeight: 700,
-          color: isUnassigned
-            ? (isDark ? "rgba(255,255,255,0.8)" : "rgba(0,0,0,0.8)")
-            : scheduleColor.text,
-          lineHeight: 1.2,
-          overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap",
-        }}>
-          {employee.firstName}
+      <Box sx={{ flex: 1, minWidth: 'max-content' }}>
+        <Typography
+          sx={{
+            fontSize: '0.8rem',
+            fontWeight: 700,
+            color: isUnassigned
+              ? isDark
+                ? 'rgba(255,255,255,0.8)'
+                : 'rgba(0,0,0,0.8)'
+              : scheduleColor.text,
+            lineHeight: 1.25,
+            whiteSpace: 'nowrap',
+          }}
+        >
+          {employee.firstName} {employee.lastName}
         </Typography>
-        <Typography sx={{
-          fontSize: "0.6rem", fontWeight: 500,
-          color: isUnassigned ? "rgba(0,0,0,0.35)" : scheduleColor.text,
-          lineHeight: 1.3, opacity: isUnassigned ? 0.55 : 0.85,
-        }}>
-          {isUnassigned ? "Sin asignar" : scheduleLabel}
+        <Typography
+          sx={{
+            fontSize: '0.6rem',
+            fontWeight: 500,
+            color: isUnassigned ? 'rgba(0,0,0,0.35)' : scheduleColor.text,
+            lineHeight: 1.3,
+            opacity: isUnassigned ? 0.55 : 0.85,
+          }}
+        >
+          {isUnassigned ? 'Sin asignar' : scheduleLabel}
         </Typography>
       </Box>
 
       {!isUnassigned && (
-        <Box sx={{ textAlign: "right", flexShrink: 0 }}>
-          <Typography sx={{ fontSize: "0.78rem", fontWeight: 800, color: scheduleColor.text, lineHeight: 1 }}>
+        <Box sx={{ textAlign: 'right', flexShrink: 0 }}>
+          <Typography
+            sx={{ fontSize: '0.78rem', fontWeight: 800, color: scheduleColor.text, lineHeight: 1 }}
+          >
             {hours}h
           </Typography>
-          <Typography sx={{ fontSize: "0.52rem", fontWeight: 600, color: scheduleColor.text, opacity: 0.5, lineHeight: 1.2 }}>
+          <Typography
+            sx={{
+              fontSize: '0.52rem',
+              fontWeight: 600,
+              color: scheduleColor.text,
+              opacity: 0.5,
+              lineHeight: 1.2,
+            }}
+          >
             T: {periodTotal}h
           </Typography>
           {periodOvertime > 0 && (
-            <Typography sx={{ fontSize: "0.52rem", fontWeight: 700, color: "#34d399", lineHeight: 1.2 }}>
+            <Typography
+              sx={{ fontSize: '0.52rem', fontWeight: 700, color: '#34d399', lineHeight: 1.2 }}
+            >
               +{periodOvertime}h
             </Typography>
           )}
@@ -440,15 +598,36 @@ interface DraggableCardWrapperProps {
 }
 
 function DraggableCardWrapper({
-  employee, scheduleLabel, scheduleColor, hours, overtime, isUnassigned,
-  periodTotal, periodOvertime, sourceDay, sourceDate, onClick, onInfo, onAdjust, theme,
+  employee,
+  scheduleLabel,
+  scheduleColor,
+  hours,
+  overtime,
+  isUnassigned,
+  periodTotal,
+  periodOvertime,
+  sourceDay,
+  sourceDate,
+  onClick,
+  onInfo,
+  onAdjust,
+  theme,
 }: DraggableCardWrapperProps) {
   const dragId: UniqueIdentifier = `emp-${employee.id}-${sourceDay}`;
   const { attributes, listeners, setNodeRef, isDragging } = useDraggable({
     id: dragId,
     data: {
       sourceType: 'card' as const,
-      employee, scheduleLabel, scheduleColor, hours, overtime, periodTotal, periodOvertime, isUnassigned, sourceDay, sourceDate,
+      employee,
+      scheduleLabel,
+      scheduleColor,
+      hours,
+      overtime,
+      periodTotal,
+      periodOvertime,
+      isUnassigned,
+      sourceDay,
+      sourceDate,
     } satisfies DragCardData,
   });
 
@@ -459,20 +638,117 @@ function DraggableCardWrapper({
       {...attributes}
       sx={{
         opacity: isDragging ? 0.08 : 1,
-        transform: isDragging ? "scale(0.92)" : "none",
-        transition: "opacity 0.3s cubic-bezier(0.4, 0, 0.2, 1), transform 0.3s cubic-bezier(0.4, 0, 0.2, 1)",
-        touchAction: "none",
-        pointerEvents: isDragging ? "none" : undefined,
+        transform: isDragging ? 'scale(0.92)' : 'none',
+        transition:
+          'opacity 0.3s cubic-bezier(0.4, 0, 0.2, 1), transform 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+        touchAction: 'none',
+        pointerEvents: isDragging ? 'none' : undefined,
       }}
     >
       <EmployeeCard
-        employee={employee} scheduleLabel={scheduleLabel} scheduleColor={scheduleColor}
-        hours={hours} overtime={overtime} isUnassigned={isUnassigned}
-        periodTotal={periodTotal} periodOvertime={periodOvertime}
-        onClick={onClick} onInfo={onInfo} onAdjust={onAdjust} theme={theme} isDragging={isDragging}
+        employee={employee}
+        scheduleLabel={scheduleLabel}
+        scheduleColor={scheduleColor}
+        hours={hours}
+        overtime={overtime}
+        isUnassigned={isUnassigned}
+        periodTotal={periodTotal}
+        periodOvertime={periodOvertime}
+        onClick={onClick}
+        onInfo={onInfo}
+        onAdjust={onAdjust}
+        theme={theme}
+        isDragging={isDragging}
       />
     </Box>
   );
+}
+
+// ─── Uniform column width ───
+// Makes every day column (and swimlane day cell) the same width: it measures the
+// widest card content across the view and applies it to all columns, so they are
+// always equal while long names are never clipped. Columns fill the board evenly
+// when there is spare space and the board panel scrolls horizontally when the
+// content is wider than the viewport.
+function useUniformColumnWidth(cardSelector: string, deps: React.DependencyList) {
+  const containerRef = useRef<HTMLDivElement | null>(null);
+  const [columnWidth, setColumnWidth] = useState<number | null>(null);
+
+  useEffect(() => {
+    const container = containerRef.current;
+    if (!container) return;
+    let cancelled = false;
+
+    const measure = () => {
+      let maxW = 0;
+      container.querySelectorAll<HTMLElement>(cardSelector).forEach((card) => {
+        // Only count cards whose content really overflows its own box: on wide
+        // screens cards fit and their scrollWidth equals the flex share, which
+        // would incorrectly inflate the uniform width and add a fake scrollbar.
+        if (card.scrollWidth > card.clientWidth + 1) {
+          maxW = Math.max(maxW, card.scrollWidth);
+        }
+      });
+      // +24 covers the column's inner padding + card borders so cards never
+      // clip. Keep the last value once set: reverting to null when cards now
+      // fit would shrink the columns back and re-clip them on the next measure.
+      setColumnWidth((prev) => (maxW > 0 ? maxW + 24 : prev));
+    };
+
+    measure();
+    const ro = new ResizeObserver(measure);
+    ro.observe(container);
+    window.addEventListener('resize', measure);
+    document.fonts?.ready
+      ?.then(() => {
+        if (!cancelled) measure();
+      })
+      .catch(() => {});
+    return () => {
+      cancelled = true;
+      ro.disconnect();
+      window.removeEventListener('resize', measure);
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, deps);
+
+  return { containerRef, columnWidth };
+}
+
+// ─── Name overflow tooltip ───
+// Shows the full employee name in a tooltip only when the name is wider than the
+// visible panel area (narrow screens, long names), so it can always be read in
+// full without cluttering rows where the name already fits.
+function useNameOverflowTooltip(fullName: string) {
+  const nameRef = useRef<HTMLSpanElement | null>(null);
+  const [overflows, setOverflows] = useState(false);
+
+  useEffect(() => {
+    const el = nameRef.current;
+    if (!el) {
+      setOverflows(false);
+      return;
+    }
+    // The employees panel grows with its content, so a long name is never clipped
+    // inside the panel itself: it overflows the layout container that bounds the
+    // viewport (e.g. on narrow screens). Measure against that container so the
+    // tooltip appears exactly when the name cannot be read in full.
+    const bounds = el.closest('[data-totals-bounds]') as HTMLElement | null;
+    const check = () => {
+      setOverflows(!!bounds && el.scrollWidth > bounds.clientWidth + 2);
+    };
+    check();
+    const ro = new ResizeObserver(check);
+    ro.observe(el);
+    if (bounds) ro.observe(bounds);
+    window.addEventListener('resize', check);
+    return () => {
+      ro.disconnect();
+      window.removeEventListener('resize', check);
+    };
+  }, [fullName]);
+
+  return { nameRef, overflows };
 }
 
 // ─── Draggable totals row ───
@@ -492,9 +768,22 @@ interface DraggableTotalsRowProps {
 }
 
 function DraggableTotalsRow({
-  employee, hours, overtime, empColor, isDark, onInfoClick, onAdjustClick, theme,
-  firstPeriodLabel, secondPeriodLabel, firstPeriodHours, secondPeriodHours,
+  employee,
+  hours,
+  overtime,
+  empColor,
+  isDark,
+  onInfoClick,
+  onAdjustClick,
+  theme,
+  firstPeriodLabel,
+  secondPeriodLabel,
+  firstPeriodHours,
+  secondPeriodHours,
 }: DraggableTotalsRowProps) {
+  const fullName = `${employee.firstName} ${employee.lastName}`;
+  const { nameRef, overflows: nameOverflows } = useNameOverflowTooltip(fullName);
+
   const dragId: UniqueIdentifier = `totals-${employee.id}`;
   const { attributes, listeners, setNodeRef, isDragging } = useDraggable({
     id: dragId,
@@ -504,7 +793,7 @@ function DraggableTotalsRow({
     } satisfies DragTotalsData,
   });
 
-  const accentColor = isDark ? "#a78bfa" : "#7c3aed";
+  const accentColor = isDark ? '#a78bfa' : '#7c3aed';
 
   return (
     <Box
@@ -512,27 +801,39 @@ function DraggableTotalsRow({
       {...listeners}
       {...attributes}
       sx={{
-        display: "flex", alignItems: "center", gap: { xs: 0.5, sm: 0.75 },
-        px: { xs: 0.9, sm: 1.25 }, py: { xs: 1, sm: 1.35 }, borderRadius: "12px",
-        backgroundColor: isDark ? "rgba(255,255,255,0.02)" : "rgba(0,0,0,0.01)",
-        border: `1.5px dashed ${isDark ? "rgba(255,255,255,0.1)" : "rgba(0,0,0,0.08)"}`,
-        cursor: "grab",
-        transition: "all 0.2s ease",
-        userSelect: "none",
+        display: 'flex',
+        alignItems: 'center',
+        gap: { xs: 0.5, sm: 0.75 },
+        px: { xs: 0.9, sm: 1.25 },
+        py: { xs: 1, sm: 1.35 },
+        borderRadius: '12px',
+        backgroundColor: isDark ? 'rgba(255,255,255,0.02)' : 'rgba(0,0,0,0.01)',
+        border: `1.5px dashed ${isDark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.08)'}`,
+        cursor: 'grab',
+        transition: 'all 0.2s ease',
+        userSelect: 'none',
         opacity: isDragging ? 0.2 : 1,
-        position: "relative",
-        touchAction: "none",
-        "&:hover": {
+        position: 'relative',
+        touchAction: 'none',
+        '&:hover': {
           borderColor: accentColor,
-          backgroundColor: isDark ? "rgba(139,92,246,0.06)" : "rgba(139,92,246,0.04)",
-          transform: "translateY(-1px)",
-          boxShadow: `0 3px 10px ${isDark ? "rgba(139,92,246,0.12)" : "rgba(139,92,246,0.08)"}`,
+          backgroundColor: isDark ? 'rgba(139,92,246,0.06)' : 'rgba(139,92,246,0.04)',
+          transform: 'translateY(-1px)',
+          boxShadow: `0 3px 10px ${isDark ? 'rgba(139,92,246,0.12)' : 'rgba(139,92,246,0.08)'}`,
         },
-        "&:active": { transform: "scale(0.97)", cursor: "grabbing" },
+        '&:active': { transform: 'scale(0.97)', cursor: 'grabbing' },
       }}
     >
       {/* Drag handle */}
-      <Box sx={{ display: { xs: "none", sm: "flex" }, alignItems: "center", flexShrink: 0, color: theme.palette.text.disabled, opacity: 0.4 }}>
+      <Box
+        sx={{
+          display: { xs: 'none', sm: 'flex' },
+          alignItems: 'center',
+          flexShrink: 0,
+          color: theme.palette.text.disabled,
+          opacity: 0.4,
+        }}
+      >
         <DragIndicatorIcon sx={{ fontSize: 15 }} />
       </Box>
 
@@ -540,70 +841,136 @@ function DraggableTotalsRow({
       <EmployeeAvatar
         employee={employee}
         size={28}
-        sx={{ width: { xs: 24, sm: 28 }, height: { xs: 24, sm: 28 }, fontSize: { xs: "0.58rem", sm: "0.65rem" }, boxShadow: `0 2px 6px ${empColor}50` }}
+        sx={{
+          width: { xs: 24, sm: 28 },
+          height: { xs: 24, sm: 28 },
+          fontSize: { xs: '0.58rem', sm: '0.65rem' },
+          boxShadow: `0 2px 6px ${empColor}50`,
+        }}
       />
 
       {/* Name */}
-      <Box sx={{ flex: 1, minWidth: 0 }}>
-        <Typography sx={{
-          fontSize: "0.72rem", fontWeight: 600, color: theme.palette.text.primary,
-          overflow: "hidden", lineHeight: 1.3,
-          display: "-webkit-box", WebkitBoxOrient: "vertical",
-          WebkitLineClamp: { xs: 2, sm: 1 },
-        }}>
-          {employee.firstName} {employee.lastName?.[0]}
-        </Typography>
+      <Box sx={{ flex: 1, minWidth: 'max-content' }}>
+        <Tooltip
+          title={fullName}
+          placement="top"
+          arrow
+          disableHoverListener={!nameOverflows}
+          disableFocusListener={!nameOverflows}
+          disableTouchListener={!nameOverflows}
+          slotProps={{
+            popper: {
+              sx: { zIndex: 2200 },
+            },
+          }}
+        >
+          <Typography
+            ref={nameRef}
+            sx={{
+              fontSize: '0.72rem',
+              fontWeight: 600,
+              color: theme.palette.text.primary,
+              lineHeight: 1.3,
+              whiteSpace: 'nowrap',
+            }}
+          >
+            {fullName}
+          </Typography>
+        </Tooltip>
       </Box>
 
-      {/* Hours + overtime + actions */}
-      <Box sx={{ display: "flex", flexDirection: "column", alignItems: "flex-end", gap: 0.2, flexShrink: 0 }}>
-        {hours > 0 ? (
-          <Typography sx={{
-            fontSize: "0.85rem", fontWeight: 800,
-            color: accentColor,
-            fontVariantNumeric: "tabular-nums",
+      {/* Hours + overtime (fixed structure so every row has the same height) + actions */}
+      <Box
+        sx={{
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'flex-end',
+          gap: 0.2,
+          flexShrink: 0,
+        }}
+      >
+        {/* Fixed-height line so "8h" and "Sin horas" occupy the same space */}
+        <Box
+          sx={{
+            height: { xs: 17, sm: 18 },
+            display: 'flex',
+            alignItems: 'center',
+          }}
+        >
+          {hours > 0 ? (
+            <Typography
+              sx={{
+                fontSize: '0.85rem',
+                fontWeight: 800,
+                color: accentColor,
+                fontVariantNumeric: 'tabular-nums',
+                lineHeight: 1.2,
+              }}
+            >
+              {hours}h
+            </Typography>
+          ) : (
+            <Typography
+              sx={{
+                fontSize: '0.6rem',
+                fontWeight: 500,
+                color: theme.palette.text.disabled,
+                lineHeight: 1.2,
+              }}
+            >
+              Sin horas
+            </Typography>
+          )}
+        </Box>
+        {/* Always rendered (hidden when 0) so every row keeps the same height */}
+        <Typography
+          sx={{
+            fontSize: '0.6rem',
+            fontWeight: 700,
+            color: '#34d399',
             lineHeight: 1.2,
-          }}>
-            {hours}h
-          </Typography>
-        ) : (
-          <Typography sx={{
-            fontSize: "0.6rem", fontWeight: 500, color: theme.palette.text.disabled,
-            lineHeight: 1.2,
-          }}>
-            Sin horas
-          </Typography>
-        )}
-        {overtime > 0 && (
-          <Typography sx={{
-            fontSize: "0.6rem", fontWeight: 700, color: "#34d399",
-            lineHeight: 1.2,
-          }}>
-            +{overtime}h extra
-          </Typography>
-        )}
+            visibility: overtime > 0 ? 'visible' : 'hidden',
+          }}
+        >
+          +{overtime}h extra
+        </Typography>
         {firstPeriodLabel && secondPeriodLabel && (
-          <Typography sx={{
-            fontSize: "0.48rem", fontWeight: 500,
-            color: theme.palette.text.disabled,
-            lineHeight: 1.2, textAlign: "right",
-            mt: 0.15, opacity: 0.7,
-            whiteSpace: "nowrap",
-          }}>
+          <Typography
+            sx={{
+              fontSize: '0.48rem',
+              fontWeight: 500,
+              color: theme.palette.text.disabled,
+              lineHeight: 1.2,
+              textAlign: 'right',
+              mt: 0.15,
+              opacity: 0.7,
+              whiteSpace: 'nowrap',
+            }}
+          >
             {firstPeriodLabel}: {firstPeriodHours}h | {secondPeriodLabel}: {secondPeriodHours}h
           </Typography>
         )}
-        <Box sx={{ display: "flex", alignItems: "center", gap: 0.25, mt: 0.3 }}>
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.25, mt: 0.3 }}>
           {onInfoClick && (
             <Box
-              onClick={(e: React.MouseEvent) => { e.stopPropagation(); onInfoClick(employee); }}
+              onClick={(e: React.MouseEvent) => {
+                e.stopPropagation();
+                onInfoClick(employee);
+              }}
               title="Ver información"
               sx={{
-                display: "flex", alignItems: "center", justifyContent: "center",
-                width: 24, height: 24, borderRadius: "6px",
-                color: "text.secondary",
-                transition: "all 0.15s ease",
-                "&:hover": { backgroundColor: isDark ? "rgba(139,92,246,0.12)" : "rgba(139,92,246,0.06)", color: accentColor },
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                width: 24,
+                height: 24,
+                borderRadius: '6px',
+                color: 'text.secondary',
+                transition: 'all 0.15s ease',
+                '&:hover': {
+                  backgroundColor: isDark ? 'rgba(139,92,246,0.12)' : 'rgba(139,92,246,0.06)',
+                  color: accentColor,
+                },
               }}
             >
               <InfoOutlinedIcon sx={{ fontSize: 13 }} />
@@ -611,15 +978,30 @@ function DraggableTotalsRow({
           )}
           {onAdjustClick && (
             <Box
-              onClick={(e: React.MouseEvent) => { e.stopPropagation(); onAdjustClick(employee); }}
+              onClick={(e: React.MouseEvent) => {
+                e.stopPropagation();
+                onAdjustClick(employee);
+              }}
               title="Ajustar horas manualmente"
               sx={{
-                display: "flex", alignItems: "center", justifyContent: "center",
-                width: 24, height: 24, borderRadius: "6px",
-                color: overtime > 0 ? "warning.main" : "text.secondary",
-                backgroundColor: overtime > 0 ? (isDark ? "rgba(237,108,2,0.1)" : "rgba(237,108,2,0.06)") : "transparent",
-                transition: "all 0.15s ease",
-                "&:hover": { backgroundColor: isDark ? "rgba(139,92,246,0.12)" : "rgba(139,92,246,0.06)", color: accentColor },
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                width: 24,
+                height: 24,
+                borderRadius: '6px',
+                color: overtime > 0 ? 'warning.main' : 'text.secondary',
+                backgroundColor:
+                  overtime > 0
+                    ? isDark
+                      ? 'rgba(237,108,2,0.1)'
+                      : 'rgba(237,108,2,0.06)'
+                    : 'transparent',
+                transition: 'all 0.15s ease',
+                '&:hover': {
+                  backgroundColor: isDark ? 'rgba(139,92,246,0.12)' : 'rgba(139,92,246,0.06)',
+                  color: accentColor,
+                },
               }}
             >
               <MoreTimeIcon sx={{ fontSize: 14 }} />
@@ -644,7 +1026,11 @@ interface DraggableSwimlaneCardProps {
   periodOvertime: number;
   isSelected: boolean;
   toggleSelection: (employeeId: number, ctrlKey: boolean) => void;
-  handleCardClick: (employee: Employee, day: string, date: string) => (e: React.MouseEvent<HTMLElement>) => void;
+  handleCardClick: (
+    employee: Employee,
+    day: string,
+    date: string
+  ) => (e: React.MouseEvent<HTMLElement>) => void;
   canEdit: boolean | undefined;
   onInfo?: (e: React.MouseEvent) => void;
   onAdjust?: (e: React.MouseEvent) => void;
@@ -652,10 +1038,22 @@ interface DraggableSwimlaneCardProps {
 }
 
 function DraggableSwimlaneCard({
-  employee, schedule, day, date, scheduleColor,
-  hours, overtime, periodTotal, periodOvertime,
-  isSelected, toggleSelection, handleCardClick, canEdit,
-  onInfo, onAdjust, theme,
+  employee,
+  schedule,
+  day,
+  date,
+  scheduleColor,
+  hours,
+  overtime,
+  periodTotal,
+  periodOvertime,
+  isSelected,
+  toggleSelection,
+  handleCardClick,
+  canEdit,
+  onInfo,
+  onAdjust,
+  theme,
 }: DraggableSwimlaneCardProps) {
   const dragId: UniqueIdentifier = `swim-${employee.id}-${schedule.id}-${day}`;
   const { attributes, listeners, setNodeRef, isDragging } = useDraggable({
@@ -686,45 +1084,62 @@ function DraggableSwimlaneCard({
 
   return (
     <Box
+      data-card
       ref={setNodeRef}
       {...listeners}
       {...attributes}
       onClick={handleClick}
       sx={{
-        display: "flex", alignItems: "center", gap: { xs: 0.4, sm: 0.5 }, px: { xs: 0.6, sm: 1 }, py: { xs: 0.6, sm: 0.85 },
-        borderRadius: "10px",
+        display: 'flex',
+        alignItems: 'center',
+        gap: { xs: 0.4, sm: 0.5 },
+        px: { xs: 0.6, sm: 1 },
+        py: { xs: 0.6, sm: 0.85 },
+        // Fixed min-height shared with the board cards so every employee
+        // card looks the same across the day and schedule views.
+        minHeight: { xs: 38, sm: 42 },
+        borderRadius: '10px',
         backgroundColor: scheduleColor.bg,
         border: `1px solid ${scheduleColor.border}`,
-        cursor: canEdit ? "grab" : "default",
-        transition: "all 0.2s ease",
-        userSelect: "none",
+        cursor: canEdit ? 'grab' : 'default',
+        transition: 'all 0.2s ease',
+        userSelect: 'none',
         opacity: isDragging ? 0.3 : 1,
-        position: "relative",
-        overflow: "hidden",
-        touchAction: "none",
-        outline: isSelected ? `2px solid ${scheduleColor.text}` : "none",
+        position: 'relative',
+        overflow: 'hidden',
+        touchAction: 'none',
+        outline: isSelected ? `2px solid ${scheduleColor.text}` : 'none',
         outlineOffset: 1,
-        "&:hover": {
-          transform: "translateY(-1px)",
+        '&:hover': {
+          transform: 'translateY(-1px)',
           boxShadow: `0 4px 12px ${scheduleColor.border}`,
-          "& .card-actions": { opacity: 1 },
+          '& .card-actions': { opacity: 1 },
         },
-        "&:active": { transform: "scale(0.98)", cursor: "grabbing" },
-        "&::before": {
+        '&:active': { transform: 'scale(0.98)', cursor: 'grabbing' },
+        '&::before': {
           content: '""',
-          position: "absolute",
+          position: 'absolute',
           left: 0,
-          top: "20%",
-          bottom: "20%",
+          top: '20%',
+          bottom: '20%',
           width: 2.5,
-          borderRadius: "0 2px 2px 0",
+          borderRadius: '0 2px 2px 0',
           backgroundColor: scheduleColor.text,
           opacity: 0.5,
         },
       }}
     >
       {/* Drag handle */}
-      <Box sx={{ display: { xs: "none", sm: "flex" }, alignItems: "center", flexShrink: 0, color: scheduleColor.text, opacity: 0.3, ml: 0.25 }}>
+      <Box
+        sx={{
+          display: { xs: 'none', sm: 'flex' },
+          alignItems: 'center',
+          flexShrink: 0,
+          color: scheduleColor.text,
+          opacity: 0.3,
+          ml: 0.25,
+        }}
+      >
         <DragIndicatorIcon sx={{ fontSize: 13 }} />
       </Box>
 
@@ -732,45 +1147,77 @@ function DraggableSwimlaneCard({
       <EmployeeAvatar
         employee={employee}
         size={24}
-        sx={{ width: { xs: 20, sm: 24 }, height: { xs: 20, sm: 24 }, fontSize: { xs: "0.52rem", sm: "0.6rem" } }}
+        sx={{
+          width: { xs: 20, sm: 24 },
+          height: { xs: 20, sm: 24 },
+          fontSize: { xs: '0.52rem', sm: '0.6rem' },
+        }}
       />
 
       {/* Name + label */}
-      <Box sx={{ flex: 1, minWidth: 0 }}>
-        <Typography sx={{
-          fontSize: { xs: "0.68rem", sm: "0.72rem" }, fontWeight: 600, color: theme.palette.text.primary,
-          lineHeight: 1.2, overflow: "hidden",
-          display: "-webkit-box", WebkitBoxOrient: "vertical",
-          WebkitLineClamp: { xs: 2, sm: 1 },
-        }}>
-          {employee.firstName}
+      <Box sx={{ flex: 1, minWidth: 'max-content' }}>
+        <Typography
+          sx={{
+            fontSize: { xs: '0.68rem', sm: '0.72rem' },
+            fontWeight: 600,
+            color: theme.palette.text.primary,
+            lineHeight: 1.25,
+            whiteSpace: 'nowrap',
+          }}
+        >
+          {employee.firstName} {employee.lastName}
         </Typography>
       </Box>
 
       {/* Info/adjust buttons (hover only on desktop, always visible on touch) */}
-      <Box className="card-actions" sx={{
-        display: "flex", alignItems: "center", gap: 0.15, opacity: { xs: 1, sm: 0 },
-        transition: "opacity 0.15s ease",
-        flexShrink: 0,
-      }}>
+      <Box
+        className="card-actions"
+        sx={{
+          display: 'flex',
+          alignItems: 'center',
+          gap: 0.15,
+          opacity: { xs: 1, sm: 0 },
+          transition: 'opacity 0.15s ease',
+          flexShrink: 0,
+        }}
+      >
         {onInfo && (
-          <Box component="span" onClick={(e: React.MouseEvent) => { e.stopPropagation(); onInfo(e); }}
+          <Box
+            component="span"
+            onClick={(e: React.MouseEvent) => {
+              e.stopPropagation();
+              onInfo(e);
+            }}
             sx={{
-              display: "flex", alignItems: "center", justifyContent: "center",
-              width: 18, height: 18, borderRadius: "5px", color: "text.secondary",
-              "&:hover": { backgroundColor: "rgba(0,0,0,0.06)", color: "primary.main" },
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              width: 18,
+              height: 18,
+              borderRadius: '5px',
+              color: 'text.secondary',
+              '&:hover': { backgroundColor: 'rgba(0,0,0,0.06)', color: 'primary.main' },
             }}
           >
             <InfoOutlinedIcon sx={{ fontSize: 11 }} />
           </Box>
         )}
         {onAdjust && (
-          <Box component="span" onClick={(e: React.MouseEvent) => { e.stopPropagation(); onAdjust(e); }}
+          <Box
+            component="span"
+            onClick={(e: React.MouseEvent) => {
+              e.stopPropagation();
+              onAdjust(e);
+            }}
             sx={{
-              display: "flex", alignItems: "center", justifyContent: "center",
-              width: 18, height: 18, borderRadius: "5px",
-              color: overtime > 0 ? "warning.main" : "text.disabled",
-              "&:hover": { backgroundColor: "rgba(237,108,2,0.1)" },
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              width: 18,
+              height: 18,
+              borderRadius: '5px',
+              color: overtime > 0 ? 'warning.main' : 'text.disabled',
+              '&:hover': { backgroundColor: 'rgba(237,108,2,0.1)' },
             }}
           >
             <MoreTimeIcon sx={{ fontSize: 11 }} />
@@ -779,9 +1226,16 @@ function DraggableSwimlaneCard({
       </Box>
 
       {/* Daily hours */}
-      <Typography sx={{
-        fontSize: "0.68rem", fontWeight: 700, color: scheduleColor.text, flexShrink: 0, opacity: 0.8, ml: 0.25,
-      }}>
+      <Typography
+        sx={{
+          fontSize: '0.68rem',
+          fontWeight: 700,
+          color: scheduleColor.text,
+          flexShrink: 0,
+          opacity: 0.8,
+          ml: 0.25,
+        }}
+      >
         {hours}h
       </Typography>
     </Box>
@@ -794,99 +1248,173 @@ interface SwimlaneRowProps {
   scheduleColor: ColorScheme;
   currentWeek: Array<{ day: string; date: string; isoDate: string }>;
   filteredEmployees: Employee[];
-  getDaySchedule: (employee: Employee, day: string, date: string) => {
-    label: string; isUnassigned: boolean; hours: number;
-    overtime: number; periodTotal: number; periodOvertime: number;
+  getDaySchedule: (
+    employee: Employee,
+    day: string,
+    date: string
+  ) => {
+    label: string;
+    isUnassigned: boolean;
+    hours: number;
+    overtime: number;
+    periodTotal: number;
+    periodOvertime: number;
     scheduleColor: ColorScheme;
   };
   selectedEmployeeIds: Set<number>;
   toggleEmployeeSelection: (employeeId: number, ctrlKey: boolean) => void;
-  handleCardClick: (employee: Employee, day: string, date: string) => (e: React.MouseEvent<HTMLElement>) => void;
+  handleCardClick: (
+    employee: Employee,
+    day: string,
+    date: string
+  ) => (e: React.MouseEvent<HTMLElement>) => void;
   canEdit: boolean | undefined;
   isDark: boolean;
   onInfoClick?: (employee: Employee) => void;
   onAdjustClick?: (employee: Employee) => void;
-  onCellClick?: (schedule: Schedule, day: string, date: string, e: React.MouseEvent<HTMLElement>) => void;
+  onCellClick?: (
+    schedule: Schedule,
+    day: string,
+    date: string,
+    e: React.MouseEvent<HTMLElement>
+  ) => void;
+  columnWidth?: number | null;
 }
 
 function SwimlaneRow({
-  schedule, scheduleColor, currentWeek, filteredEmployees,
-  getDaySchedule, selectedEmployeeIds, toggleEmployeeSelection,
-  handleCardClick, canEdit, isDark,
-  onInfoClick, onAdjustClick, onCellClick,
+  schedule,
+  scheduleColor,
+  currentWeek,
+  filteredEmployees,
+  getDaySchedule,
+  selectedEmployeeIds,
+  toggleEmployeeSelection,
+  handleCardClick,
+  canEdit,
+  isDark,
+  onInfoClick,
+  onAdjustClick,
+  onCellClick,
+  columnWidth,
 }: SwimlaneRowProps) {
   const theme = useTheme();
 
   return (
-    <Paper elevation={0} sx={{
-      borderRadius: "12px",
-      border: `1px solid ${isDark ? "rgba(255,255,255,0.05)" : "rgba(0,0,0,0.05)"}`,
-      flexShrink: 0, width: "100%",
-    }}>
-      <Box sx={{
-        px: { xs: 1, sm: 1.5 }, py: { xs: 0.5, sm: 0.75 }, display: "flex", alignItems: "center", gap: 1,
-        backgroundColor: scheduleColor.bg,
-        borderBottom: `1px solid ${scheduleColor.border}`,
-        borderRadius: "12px 12px 0 0",
-      }}>
-        <Typography sx={{ fontWeight: 700, fontSize: { xs: "0.75rem", sm: "0.82rem" }, color: scheduleColor.text, flex: 1 }}>
+    <Paper
+      elevation={0}
+      sx={{
+        borderRadius: '12px',
+        border: `1px solid ${isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.05)'}`,
+        flexShrink: 0,
+        width: '100%',
+      }}
+    >
+      <Box
+        sx={{
+          px: { xs: 1, sm: 1.5 },
+          py: { xs: 0.5, sm: 0.75 },
+          display: 'flex',
+          alignItems: 'center',
+          gap: 1,
+          backgroundColor: scheduleColor.bg,
+          borderBottom: `1px solid ${scheduleColor.border}`,
+          borderRadius: '12px 12px 0 0',
+        }}
+      >
+        <Typography
+          sx={{
+            fontWeight: 700,
+            fontSize: { xs: '0.75rem', sm: '0.82rem' },
+            color: scheduleColor.text,
+            flex: 1,
+          }}
+        >
           {schedule.label}
         </Typography>
       </Box>
-      <Box sx={{
-        display: "flex", gap: { xs: 0.4, sm: 0.5 }, px: { xs: 0.5, sm: 0.75 }, py: 0.75,
-      }}>
+      <Box
+        sx={{
+          display: 'flex',
+          gap: { xs: 0.4, sm: 0.5 },
+          px: { xs: 0.5, sm: 0.75 },
+          py: 0.75,
+        }}
+      >
         {currentWeek.map(({ day, date, isoDate }) => {
           const todayDate = isToday(isoDate);
-          const isWeekend = day === "saturday" || day === "sunday";
+          const isWeekend = day === 'saturday' || day === 'sunday';
           const isDayAvailable = schedule.days.includes(day.toLowerCase());
           const assignedEmployees = isDayAvailable
-            ? filteredEmployees.filter((emp) => getDaySchedule(emp, day, date).label === schedule.label)
+            ? filteredEmployees.filter(
+                (emp) => getDaySchedule(emp, day, date).label === schedule.label
+              )
             : [];
           const columnId = `swim-${schedule.id}-${day}`;
 
           return (
             <SwimlaneDayCell
-              key={day} columnId={columnId}
-              day={day} date={date}
-              isTodayDate={todayDate} isWeekend={isWeekend}
+              key={day}
+              columnId={columnId}
+              day={day}
+              date={date}
+              isTodayDate={todayDate}
+              isWeekend={isWeekend}
               isDark={isDark}
               scheduleLabel={schedule.label}
-              onClick={onCellClick && isDayAvailable ? (e) => onCellClick(schedule, day, date, e) : undefined}
+              columnWidth={columnWidth}
+              onClick={
+                onCellClick && isDayAvailable
+                  ? (e) => onCellClick(schedule, day, date, e)
+                  : undefined
+              }
             >
-              <Box sx={{
-                px: { xs: 0.75, sm: 1.25 }, py: { xs: 0.6, sm: 0.85 }, textAlign: "center",
-                borderBottom: `1px solid ${isDark ? "rgba(255,255,255,0.06)" : "rgba(0,0,0,0.06)"}`,
-                backgroundColor: todayDate
-                  ? (isDark ? "rgba(56,189,248,0.1)" : "rgba(56,189,248,0.07)")
-                  : "transparent",
-                transition: "background-color 0.15s ease",
-              }}>
-                <Typography sx={{
-                  fontWeight: todayDate ? 700 : 600, fontSize: "0.75rem",
-                  color: todayDate ? "#38bdf8" : theme.palette.text.primary,
-                  letterSpacing: todayDate ? "0.02em" : "normal",
-                }}>
+              <Box
+                sx={{
+                  px: { xs: 0.75, sm: 1.25 },
+                  py: { xs: 0.6, sm: 0.85 },
+                  textAlign: 'center',
+                  borderBottom: `1px solid ${isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.06)'}`,
+                  backgroundColor: todayDate
+                    ? isDark
+                      ? 'rgba(56,189,248,0.1)'
+                      : 'rgba(56,189,248,0.07)'
+                    : 'transparent',
+                  transition: 'background-color 0.15s ease',
+                }}
+              >
+                <Typography
+                  sx={{
+                    fontWeight: todayDate ? 700 : 600,
+                    fontSize: '0.75rem',
+                    color: todayDate ? '#38bdf8' : theme.palette.text.primary,
+                    letterSpacing: todayDate ? '0.02em' : 'normal',
+                  }}
+                >
                   {capitalizeFirstLetter(translateDayToAbrevSpanish(day as EnglishDayOfWeek))}
                 </Typography>
-                <Typography sx={{
-                  fontSize: "0.58rem", fontWeight: todayDate ? 600 : 400,
-                  color: todayDate ? "#38bdf8" : theme.palette.text.secondary,
-                  mt: 0.1,
-                }}>
+                <Typography
+                  sx={{
+                    fontSize: '0.58rem',
+                    fontWeight: todayDate ? 600 : 400,
+                    color: todayDate ? '#38bdf8' : theme.palette.text.secondary,
+                    mt: 0.1,
+                  }}
+                >
                   {formatHeaderDate(date)}
                 </Typography>
               </Box>
               {isDayAvailable ? (
-                <Box sx={{ display: "flex", flexDirection: "column", gap: 0.5 }}>
+                <Box sx={{ display: 'flex', flexDirection: 'column', gap: 0.5 }}>
                   {assignedEmployees.map((emp) => {
                     const empSchedule = getDaySchedule(emp, day, date);
                     const isSelected = selectedEmployeeIds.has(emp.id);
                     return (
                       <DraggableSwimlaneCard
                         key={emp.id}
-                        employee={emp} schedule={schedule}
-                        day={day} date={date}
+                        employee={emp}
+                        schedule={schedule}
+                        day={day}
+                        date={date}
                         scheduleColor={scheduleColor}
                         hours={empSchedule.hours}
                         overtime={empSchedule.overtime}
@@ -903,17 +1431,29 @@ function SwimlaneRow({
                     );
                   })}
                   {assignedEmployees.length === 0 && (
-                    <Typography sx={{
-                      fontSize: "0.55rem", color: theme.palette.text.disabled,
-                      opacity: 0.3, textAlign: "center", py: 0.35,
-                    }}>—</Typography>
+                    <Typography
+                      sx={{
+                        fontSize: '0.55rem',
+                        color: theme.palette.text.disabled,
+                        opacity: 0.3,
+                        textAlign: 'center',
+                        py: 0.35,
+                      }}
+                    >
+                      —
+                    </Typography>
                   )}
                 </Box>
               ) : (
-                <Typography sx={{
-                  fontSize: "0.55rem", color: theme.palette.text.disabled,
-                  opacity: 0.25, textAlign: "center", py: 0.35,
-                }}>
+                <Typography
+                  sx={{
+                    fontSize: '0.55rem',
+                    color: theme.palette.text.disabled,
+                    opacity: 0.25,
+                    textAlign: 'center',
+                    py: 0.35,
+                  }}
+                >
                   {SELECTOR_TABLE.NO_AVAILABLE}
                 </Typography>
               )}
@@ -936,39 +1476,60 @@ interface SwimlaneDayCellProps {
   isDark: boolean;
   scheduleLabel?: string;
   onClick?: (e: React.MouseEvent<HTMLElement>) => void;
+  columnWidth?: number | null;
 }
 
-function SwimlaneDayCell({ columnId, day, date, isTodayDate, isWeekend, children, isDark, scheduleLabel, onClick }: SwimlaneDayCellProps) {
+function SwimlaneDayCell({
+  columnId,
+  day,
+  date,
+  isTodayDate,
+  isWeekend,
+  children,
+  isDark,
+  scheduleLabel,
+  onClick,
+  columnWidth,
+}: SwimlaneDayCellProps) {
   const { setNodeRef, isOver } = useDroppable({
     id: columnId,
     data: { viewType: 'schedule', day, date, scheduleLabel } satisfies DropColumnData,
   });
 
-  const dropHighlight = isOver ? {
-    borderColor: "#818cf8",
-    boxShadow: `inset 0 0 0 2px ${isDark ? "rgba(99,102,241,0.35)" : "rgba(99,102,241,0.25)"}`,
-    backgroundColor: isDark ? "rgba(99,102,241,0.06)" : "rgba(99,102,241,0.04)",
-  } : {};
+  const dropHighlight = isOver
+    ? {
+        borderColor: '#818cf8',
+        boxShadow: `inset 0 0 0 2px ${isDark ? 'rgba(99,102,241,0.35)' : 'rgba(99,102,241,0.25)'}`,
+        backgroundColor: isDark ? 'rgba(99,102,241,0.06)' : 'rgba(99,102,241,0.04)',
+      }
+    : {};
 
   return (
     <Box
       ref={setNodeRef}
       onClick={onClick}
       sx={{
-        flex: isWeekend ? 0.7 : 1,
-        minWidth: { xs: isWeekend ? 88 : 100, sm: isWeekend ? 110 : 140 },
-        maxWidth: { xs: isWeekend ? 104 : 124, sm: isWeekend ? 130 : 190 },
-        scrollSnapAlign: "start",
+        // All columns share the same width (measured from the widest card
+        // content) so the board always looks uniform: equal flex basis keeps
+        // them identical even with spare space, and the shared min width
+        // guarantees long names are never clipped — the board panel scrolls
+        // horizontally when the total width exceeds the viewport.
+        flex: '1 1 0',
+        minWidth: columnWidth ?? { xs: 100, sm: 140 },
+        maxWidth: 'none',
+        scrollSnapAlign: 'start',
         p: { xs: 0.4, sm: 0.6 },
-        borderRadius: "8px",
-        cursor: onClick ? "pointer" : "default",
+        borderRadius: '8px',
+        cursor: onClick ? 'pointer' : 'default',
         backgroundColor: isTodayDate
-          ? (isDark ? "rgba(56,189,248,0.06)" : "rgba(56,189,248,0.04)")
-          : "transparent",
+          ? isDark
+            ? 'rgba(56,189,248,0.06)'
+            : 'rgba(56,189,248,0.04)'
+          : 'transparent',
         border: isTodayDate
-          ? `1px solid ${isDark ? "rgba(56,189,248,0.2)" : "rgba(56,189,248,0.15)"}`
-          : "1px solid transparent",
-        transition: "all 0.25s ease",
+          ? `1px solid ${isDark ? 'rgba(56,189,248,0.2)' : 'rgba(56,189,248,0.15)'}`
+          : '1px solid transparent',
+        transition: 'all 0.25s ease',
         ...dropHighlight,
       }}
     >
@@ -995,35 +1556,63 @@ interface TotalsColumnProps {
   onPeriodChange: (period: PeriodType) => void;
   onInfoClick?: (employee: Employee) => void;
   onAdjustClick?: (employee: Employee) => void;
-  handleAdjustTime?: (employeeId: number, condition: "add" | "subtract", timeAdjustment: number) => void;
+  handleAdjustTime?: (
+    employeeId: number,
+    condition: 'add' | 'subtract',
+    timeAdjustment: number
+  ) => void;
   theme: Theme;
   isDark: boolean;
 }
 
 function TotalsColumn({
-  employeeDataMap, filteredEmployees, selectedPeriod, onPeriodChange,
-  onInfoClick, onAdjustClick, handleAdjustTime: onAdjust, theme, isDark,
+  employeeDataMap,
+  filteredEmployees,
+  selectedPeriod,
+  onPeriodChange,
+  onInfoClick,
+  onAdjustClick,
+  handleAdjustTime: onAdjust,
+  theme,
+  isDark,
 }: TotalsColumnProps) {
-  const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
+  const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
   const { setNodeRef, isOver } = useDroppable({
-    id: "totals-column",
+    id: 'totals-column',
     data: { viewType: 'totals', day: '', date: '' } satisfies DropColumnData,
   });
 
-  const periodOptions = useMemo(() => isMobile
-    ? [
-        { value: "weekly" as PeriodType, label: "Sem", icon: <CalendarTodayIcon sx={{ fontSize: 13 }} /> },
-        { value: "biweekly" as PeriodType, label: "Qna", icon: <DateRangeIcon sx={{ fontSize: 13 }} /> },
-        { value: "monthly" as PeriodType, label: "Mes", icon: <CalendarMonthIcon sx={{ fontSize: 13 }} /> },
-      ]
-    : PERIOD_OPTIONS,
-  [isMobile]);
+  const periodOptions = useMemo(
+    () =>
+      isMobile
+        ? [
+            {
+              value: 'weekly' as PeriodType,
+              label: 'Sem',
+              icon: <CalendarTodayIcon sx={{ fontSize: 13 }} />,
+            },
+            {
+              value: 'biweekly' as PeriodType,
+              label: 'Qna',
+              icon: <DateRangeIcon sx={{ fontSize: 13 }} />,
+            },
+            {
+              value: 'monthly' as PeriodType,
+              label: 'Mes',
+              icon: <CalendarMonthIcon sx={{ fontSize: 13 }} />,
+            },
+          ]
+        : PERIOD_OPTIONS,
+    [isMobile]
+  );
 
-  const dropHighlight = isOver ? {
-    borderColor: "#818cf8",
-    boxShadow: `inset 0 0 0 2px ${isDark ? "rgba(99,102,241,0.35)" : "rgba(99,102,241,0.25)"}`,
-    backgroundColor: isDark ? "rgba(99,102,241,0.08)" : "rgba(99,102,241,0.06)",
-  } : {};
+  const dropHighlight = isOver
+    ? {
+        borderColor: '#818cf8',
+        boxShadow: `inset 0 0 0 2px ${isDark ? 'rgba(99,102,241,0.35)' : 'rgba(99,102,241,0.25)'}`,
+        backgroundColor: isDark ? 'rgba(99,102,241,0.08)' : 'rgba(99,102,241,0.06)',
+      }
+    : {};
 
   const entries = Array.from(employeeDataMap.values());
   const totalHours = entries.reduce((s, d) => s + d.totalHours, 0);
@@ -1032,26 +1621,30 @@ function TotalsColumn({
   // Per-period footer totals (when week spans multiple periods)
   const footerFirstTotal = entries.reduce((s, d) => s + (d.firstPeriodHours ?? 0), 0);
   const footerSecondTotal = entries.reduce((s, d) => s + (d.secondPeriodHours ?? 0), 0);
-  const footerFirstLabel = entries.find(e => e.firstPeriodLabel)?.firstPeriodLabel;
-  const footerSecondLabel = entries.find(e => e.secondPeriodLabel)?.secondPeriodLabel;
+  const footerFirstLabel = entries.find((e) => e.firstPeriodLabel)?.firstPeriodLabel;
+  const footerSecondLabel = entries.find((e) => e.secondPeriodLabel)?.secondPeriodLabel;
   const hasPeriodBreakdown = !!(footerFirstLabel && footerSecondLabel);
 
   const [dialogEmpId, setDialogEmpId] = useState<number | null>(null);
-  const [dialogHours, setDialogHours] = useState("");
+  const [dialogHours, setDialogHours] = useState('');
   const [confirmOpen, setConfirmOpen] = useState(false);
-  const [pendingEdit, setPendingEdit] = useState<{ employeeId: number; condition: "add" | "subtract"; hours: number } | null>(null);
+  const [pendingEdit, setPendingEdit] = useState<{
+    employeeId: number;
+    condition: 'add' | 'subtract';
+    hours: number;
+  } | null>(null);
 
   const openDialog = (empId: number) => {
     setDialogEmpId(empId);
-    setDialogHours("");
+    setDialogHours('');
   };
 
   const closeDialog = () => {
     setDialogEmpId(null);
-    setDialogHours("");
+    setDialogHours('');
   };
 
-  const handleDialogConfirm = (condition: "add" | "subtract") => {
+  const handleDialogConfirm = (condition: 'add' | 'subtract') => {
     if (dialogEmpId === null) return;
     const h = parseFloat(dialogHours);
     if (isNaN(h) || h <= 0) return;
@@ -1075,41 +1668,46 @@ function TotalsColumn({
   };
 
   const confirmDialogEmployee = pendingEdit
-    ? filteredEmployees.find(e => e.id === pendingEdit.employeeId)
+    ? filteredEmployees.find((e) => e.id === pendingEdit.employeeId)
     : null;
 
-  const dialogEmployee = dialogEmpId !== null
-    ? filteredEmployees.find(e => e.id === dialogEmpId)
-    : null;
-  const dialogEmpColor = dialogEmployee ? getEmployeeColor(dialogEmployee.id) : "#7c3aed";
+  const dialogEmployee =
+    dialogEmpId !== null ? filteredEmployees.find((e) => e.id === dialogEmpId) : null;
+  const dialogEmpColor = dialogEmployee ? getEmployeeColor(dialogEmployee.id) : '#7c3aed';
   const dialogInitials = dialogEmployee
     ? getInitials(dialogEmployee.firstName, dialogEmployee.lastName)
-    : "";
+    : '';
 
   return (
     <Box
       ref={setNodeRef}
       sx={{
-        flex: 0.6,
-        minWidth: { xs: 195, sm: 180 },
-        maxWidth: { xs: 215, sm: 240, md: 300 },
-        scrollSnapAlign: "start",
-        display: "flex", flexDirection: "column",
-        borderRadius: "12px",
-        overflow: "hidden",
-        position: "sticky",
-        top: 0,
-        // Stretch (default) so the column fills the full height of the board,
-        // matching the day columns / swimlanes (same behavior as DayColumn).
-        backgroundColor: isDark ? "rgba(124,58,237,0.05)" : "rgba(124,58,237,0.03)",
-        transition: "all 0.25s ease",
+        // Employees panel: on mobile it sizes to its content (up to 45% of the
+        // container height so the board keeps room) with its own internal scroll;
+        // on tablet+ it's a flexible-width column that stretches full height,
+        // scrolls its employee list independently, and grows to fit the longest
+        // employee name (names are always shown in a single line, no wrap).
+        minWidth: { xs: '100%', sm: 240, md: 280 },
+        flex: { xs: '0 0 auto', sm: '0 0 auto' },
+        maxHeight: { xs: '45%', sm: 'none' },
+        minHeight: 0,
+        display: 'flex',
+        flexDirection: 'column',
+        borderRadius: '12px',
+        overflow: 'hidden',
+        backgroundColor: isDark ? 'rgba(124,58,237,0.05)' : 'rgba(124,58,237,0.03)',
+        transition: 'all 0.25s ease',
         ...dropHighlight,
       }}
     >
       {/* Header */}
-      <Box sx={{
-        px: { xs: 0.75, sm: 1.5 }, py: { xs: 0.75, sm: 1.25 }, textAlign: "center",
-      }}>
+      <Box
+        sx={{
+          px: { xs: 0.75, sm: 1.5 },
+          py: { xs: 0.75, sm: 1.25 },
+          textAlign: 'center',
+        }}
+      >
         {/* Period toggle */}
         <SegmentedToggle
           value={selectedPeriod}
@@ -1120,21 +1718,31 @@ function TotalsColumn({
         />
       </Box>
       {/* Employee rows — draggable to assign */}
-      <Box sx={{
-        flex: 1, p: { xs: 0.5, sm: 0.75 }, display: "flex", flexDirection: "column", gap: { xs: 0.4, sm: 0.5 },
-        overflowY: "auto", minHeight: 80,
-      }}>
+      <Box
+        sx={{
+          flex: 1,
+          p: { xs: 0.5, sm: 0.75 },
+          display: 'flex',
+          flexDirection: 'column',
+          gap: { xs: 0.4, sm: 0.5 },
+          overflowY: 'auto',
+          minHeight: 80,
+        }}
+      >
         {filteredEmployees.map((employee) => {
           const empData = employeeDataMap.get(employee.id);
           const hours = empData?.totalHours ?? 0;
           const overtime = empData?.overtime ?? 0;
           const empColor = getEmployeeColor(employee.id);
           return (
-            <Box key={employee.id} sx={{ display: "flex", alignItems: "center", gap: 0.25 }}>
-              <Box sx={{ flex: 1, minWidth: 0 }}>
+            <Box key={employee.id} sx={{ display: 'flex', alignItems: 'center', gap: 0.25 }}>
+              <Box sx={{ flex: 1, minWidth: 'max-content' }}>
                 <DraggableTotalsRow
-                  employee={employee} hours={hours} overtime={overtime}
-                  empColor={empColor} isDark={isDark}
+                  employee={employee}
+                  hours={hours}
+                  overtime={overtime}
+                  empColor={empColor}
+                  isDark={isDark}
                   onInfoClick={onInfoClick}
                   onAdjustClick={onAdjustClick}
                   theme={theme}
@@ -1145,19 +1753,34 @@ function TotalsColumn({
                 />
               </Box>
               {onAdjust && (
-                <Box sx={{ display: "flex", alignItems: "center", flexShrink: 0, ml: 0.35 }}>
+                <Box sx={{ display: 'flex', alignItems: 'center', flexShrink: 0, ml: 0.35 }}>
                   <Box
-                    onClick={(e) => { e.stopPropagation(); openDialog(employee.id); }}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      openDialog(employee.id);
+                    }}
                     title="Ajustar horas"
                     sx={{
-                      display: "flex", alignItems: "center", justifyContent: "center",
-                      width: { xs: 24, sm: 28 }, height: { xs: 24, sm: 28 }, borderRadius: "7px", cursor: "pointer",
-                      fontSize: "1rem", fontWeight: 700, lineHeight: 1,
-                      color: "text.secondary",
-                      transition: "all 0.15s ease",
-                      "&:hover": { backgroundColor: isDark ? "rgba(139,92,246,0.15)" : "rgba(139,92,246,0.08)", color: "#a78bfa" },
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      width: { xs: 24, sm: 28 },
+                      height: { xs: 24, sm: 28 },
+                      borderRadius: '7px',
+                      cursor: 'pointer',
+                      fontSize: '1rem',
+                      fontWeight: 700,
+                      lineHeight: 1,
+                      color: 'text.secondary',
+                      transition: 'all 0.15s ease',
+                      '&:hover': {
+                        backgroundColor: isDark ? 'rgba(139,92,246,0.15)' : 'rgba(139,92,246,0.08)',
+                        color: '#a78bfa',
+                      },
                     }}
-                  >±</Box>
+                  >
+                    ±
+                  </Box>
                 </Box>
               )}
             </Box>
@@ -1165,70 +1788,129 @@ function TotalsColumn({
         })}
       </Box>
       {/* Footer - total */}
-      <Box sx={{
-        px: { xs: 0.75, sm: 1.5 }, py: { xs: 0.5, sm: 0.75 }, textAlign: "center",
-        backgroundColor: isDark ? "rgba(139,92,246,0.06)" : "rgba(139,92,246,0.03)",
-      }}>
+      <Box
+        sx={{
+          px: { xs: 0.75, sm: 1.5 },
+          py: { xs: 0.5, sm: 0.75 },
+          textAlign: 'center',
+          backgroundColor: isDark ? 'rgba(139,92,246,0.06)' : 'rgba(139,92,246,0.03)',
+        }}
+      >
         {hasPeriodBreakdown && (
-          <Typography sx={{
-            fontSize: "0.58rem", fontWeight: 600,
-            color: isDark ? "rgba(167,139,250,0.55)" : "rgba(124,58,237,0.55)",
-            lineHeight: 1.3, mb: 0.35,
-            letterSpacing: "-0.01em",
-          }}>
+          <Typography
+            sx={{
+              fontSize: '0.58rem',
+              fontWeight: 600,
+              color: isDark ? 'rgba(167,139,250,0.55)' : 'rgba(124,58,237,0.55)',
+              lineHeight: 1.3,
+              mb: 0.35,
+              letterSpacing: '-0.01em',
+            }}
+          >
             {footerFirstLabel}: {footerFirstTotal}h + {footerSecondLabel}: {footerSecondTotal}h
           </Typography>
         )}
-        <Typography sx={{
-          fontSize: "0.72rem", fontWeight: 800,
-          color: isDark ? "#a78bfa" : "#7c3aed",
-          letterSpacing: "-0.02em",
-        }}>
+        <Typography
+          sx={{
+            fontSize: '0.72rem',
+            fontWeight: 800,
+            color: isDark ? '#a78bfa' : '#7c3aed',
+            letterSpacing: '-0.02em',
+          }}
+        >
           {totalHours}h totales
         </Typography>
         {totalOvertime > 0 && (
-          <Typography sx={{
-            fontSize: "0.6rem", fontWeight: 700,
-            color: "#34d399",
-            lineHeight: 1.2,
-            mt: 0.1,
-          }}>
+          <Typography
+            sx={{
+              fontSize: '0.6rem',
+              fontWeight: 700,
+              color: '#34d399',
+              lineHeight: 1.2,
+              mt: 0.1,
+            }}
+          >
             +{totalOvertime}h extra
           </Typography>
         )}
       </Box>
 
       {/* Adjust hours dialog */}
-      <Dialog open={dialogEmpId !== null} onClose={closeDialog} maxWidth="xs" fullWidth
+      <Dialog
+        open={dialogEmpId !== null}
+        onClose={closeDialog}
+        maxWidth="xs"
+        fullWidth
         slotProps={{
-          backdrop: { sx: { backdropFilter: "blur(6px)", backgroundColor: isDark ? "rgba(0,0,0,0.6)" : "rgba(0,0,0,0.3)" } },
-          paper: { sx: { borderRadius: "20px", boxShadow: isDark ? "0 32px 80px rgba(0,0,0,0.6)" : "0 24px 80px rgba(0,0,0,0.15)", border: isDark ? "1px solid rgba(255,255,255,0.06)" : "none" } },
+          backdrop: {
+            sx: {
+              backdropFilter: 'blur(6px)',
+              backgroundColor: isDark ? 'rgba(0,0,0,0.6)' : 'rgba(0,0,0,0.3)',
+            },
+          },
+          paper: {
+            sx: {
+              borderRadius: '20px',
+              boxShadow: isDark ? '0 32px 80px rgba(0,0,0,0.6)' : '0 24px 80px rgba(0,0,0,0.15)',
+              border: isDark ? '1px solid rgba(255,255,255,0.06)' : 'none',
+            },
+          },
         }}
       >
-        <Box sx={{ p: 3, textAlign: "center", backgroundColor: isDark ? "rgba(18,18,24,0.98)" : undefined, borderRadius: "20px" }}>
+        <Box
+          sx={{
+            p: 3,
+            textAlign: 'center',
+            backgroundColor: isDark ? 'rgba(18,18,24,0.98)' : undefined,
+            borderRadius: '20px',
+          }}
+        >
           {/* Employee avatar */}
-          <Box sx={{
-            width: 60, height: 60, borderRadius: "50%",
-            backgroundColor: dialogEmpColor,
-            display: "flex", alignItems: "center", justifyContent: "center",
-            mx: "auto", mb: 1.5,
-            boxShadow: `0 4px 16px ${dialogEmpColor}60`,
-          }}>
-            <Typography sx={{ fontSize: "1.15rem", fontWeight: 700, color: "#fff" }}>
+          <Box
+            sx={{
+              width: 60,
+              height: 60,
+              borderRadius: '50%',
+              backgroundColor: dialogEmpColor,
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              mx: 'auto',
+              mb: 1.5,
+              boxShadow: `0 4px 16px ${dialogEmpColor}60`,
+            }}
+          >
+            <Typography sx={{ fontSize: '1.15rem', fontWeight: 700, color: '#fff' }}>
               {dialogInitials}
             </Typography>
           </Box>
 
           {/* Title */}
-          <Typography sx={{ fontSize: "1.1rem", fontWeight: 700, mb: 0.25, color: isDark ? "#e8e8f0" : undefined }}>
+          <Typography
+            sx={{
+              fontSize: '1.1rem',
+              fontWeight: 700,
+              mb: 0.25,
+              color: isDark ? '#e8e8f0' : undefined,
+            }}
+          >
             Ajustar horas
           </Typography>
-          <Typography sx={{ fontSize: "0.85rem", color: "text.secondary", mb: 2 }}>
+          <Typography sx={{ fontSize: '0.85rem', color: 'text.secondary', mb: 2 }}>
             {dialogEmployee?.firstName} {dialogEmployee?.lastName?.[0]}
           </Typography>
 
           {/* Accent bar */}
-          <Box sx={{ width: 36, height: 3.5, borderRadius: 2, mx: "auto", mb: 2.5, backgroundColor: "#a78bfa" }} />
+          <Box
+            sx={{
+              width: 36,
+              height: 3.5,
+              borderRadius: 2,
+              mx: 'auto',
+              mb: 2.5,
+              backgroundColor: '#a78bfa',
+            }}
+          />
 
           {/* Hours input */}
           <TextField
@@ -1238,38 +1920,40 @@ function TotalsColumn({
             type="number"
             value={dialogHours}
             onChange={(e) => setDialogHours(e.target.value)}
-            onKeyDown={(e) => { if (e.key === "Enter") handleDialogConfirm("add"); }}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter') handleDialogConfirm('add');
+            }}
             sx={{
               mb: 2.5,
-              "& .MuiOutlinedInput-root": {
-                borderRadius: "12px",
-                minHeight: "42px",
-                backgroundColor: isDark ? "rgba(40,40,50,0.6)" : "rgba(255,255,255,0.7)",
+              '& .MuiOutlinedInput-root': {
+                borderRadius: '12px',
+                minHeight: '42px',
+                backgroundColor: isDark ? 'rgba(40,40,50,0.6)' : 'rgba(255,255,255,0.7)',
                 color: theme.palette.text.primary,
-                border: isDark ? "1px solid rgba(255,255,255,0.1)" : "1px solid rgba(0,0,0,0.08)",
-                transition: "all 0.3s cubic-bezier(0.4, 0, 0.2, 1)",
-                "&:hover": {
-                  backgroundColor: isDark ? "rgba(50,50,60,0.7)" : "rgba(255,255,255,0.85)",
-                  borderColor: isDark ? "rgba(255,255,255,0.15)" : "rgba(0,0,0,0.12)",
+                border: isDark ? '1px solid rgba(255,255,255,0.1)' : '1px solid rgba(0,0,0,0.08)',
+                transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+                '&:hover': {
+                  backgroundColor: isDark ? 'rgba(50,50,60,0.7)' : 'rgba(255,255,255,0.85)',
+                  borderColor: isDark ? 'rgba(255,255,255,0.15)' : 'rgba(0,0,0,0.12)',
                 },
-                "&:hover .MuiOutlinedInput-notchedOutline": { borderColor: "transparent" },
-                "&.Mui-focused": {
-                  backgroundColor: isDark ? "rgba(55,55,65,0.8)" : "rgba(255,255,255,0.95)",
-                  borderColor: isDark ? "rgba(255,255,255,0.2)" : "rgba(0,0,0,0.15)",
-                  boxShadow: "none",
+                '&:hover .MuiOutlinedInput-notchedOutline': { borderColor: 'transparent' },
+                '&.Mui-focused': {
+                  backgroundColor: isDark ? 'rgba(55,55,65,0.8)' : 'rgba(255,255,255,0.95)',
+                  borderColor: isDark ? 'rgba(255,255,255,0.2)' : 'rgba(0,0,0,0.15)',
+                  boxShadow: 'none',
                 },
-                "&.Mui-focused .MuiOutlinedInput-notchedOutline": { borderColor: "transparent" },
-                "& fieldset": { border: "none" },
-                "& input": {
+                '&.Mui-focused .MuiOutlinedInput-notchedOutline': { borderColor: 'transparent' },
+                '& fieldset': { border: 'none' },
+                '& input': {
                   color: theme.palette.text.primary,
-                  fontSize: "0.9rem",
-                  paddingTop: "10px",
-                  paddingBottom: "10px",
-                  paddingLeft: "14px",
-                  paddingRight: "14px",
-                  textAlign: "center",
-                  "&::placeholder": {
-                    color: isDark ? "rgba(255,255,255,0.25)" : "rgba(0,0,0,0.25)",
+                  fontSize: '0.9rem',
+                  paddingTop: '10px',
+                  paddingBottom: '10px',
+                  paddingLeft: '14px',
+                  paddingRight: '14px',
+                  textAlign: 'center',
+                  '&::placeholder': {
+                    color: isDark ? 'rgba(255,255,255,0.25)' : 'rgba(0,0,0,0.25)',
                     opacity: 1,
                   },
                 },
@@ -1278,19 +1962,37 @@ function TotalsColumn({
           />
 
           {/* Add / Subtract buttons */}
-          <Box sx={{ display: "flex", gap: 1, mb: 1 }}>
-            <Button fullWidth size="medium" variant="contained" color="error" onClick={() => handleDialogConfirm("subtract")}
+          <Box sx={{ display: 'flex', gap: 1, mb: 1 }}>
+            <Button
+              fullWidth
+              size="medium"
+              variant="contained"
+              color="error"
+              onClick={() => handleDialogConfirm('subtract')}
               disabled={!dialogHours || parseFloat(dialogHours) <= 0}
               sx={{
-                borderRadius: "12px", textTransform: "none", fontWeight: 700, fontSize: "0.9rem", py: 1,
+                borderRadius: '12px',
+                textTransform: 'none',
+                fontWeight: 700,
+                fontSize: '0.9rem',
+                py: 1,
               }}
             >
               − Restar
             </Button>
-            <Button fullWidth size="medium" variant="contained" color="success" onClick={() => handleDialogConfirm("add")}
+            <Button
+              fullWidth
+              size="medium"
+              variant="contained"
+              color="success"
+              onClick={() => handleDialogConfirm('add')}
               disabled={!dialogHours || parseFloat(dialogHours) <= 0}
               sx={{
-                borderRadius: "12px", textTransform: "none", fontWeight: 700, fontSize: "0.9rem", py: 1,
+                borderRadius: '12px',
+                textTransform: 'none',
+                fontWeight: 700,
+                fontSize: '0.9rem',
+                py: 1,
               }}
             >
               + Agregar
@@ -1298,10 +2000,19 @@ function TotalsColumn({
           </Box>
 
           {/* Cancel */}
-          <Button fullWidth size="small" onClick={closeDialog}
+          <Button
+            fullWidth
+            size="small"
+            onClick={closeDialog}
             sx={{
-              borderRadius: "12px", textTransform: "none", fontWeight: 500, color: "text.secondary", py: 0.75,
-              "&:hover": { backgroundColor: isDark ? "rgba(255,255,255,0.06)" : "rgba(0,0,0,0.04)" },
+              borderRadius: '12px',
+              textTransform: 'none',
+              fontWeight: 500,
+              color: 'text.secondary',
+              py: 0.75,
+              '&:hover': {
+                backgroundColor: isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.04)',
+              },
             }}
           >
             Cancelar
@@ -1310,49 +2021,117 @@ function TotalsColumn({
       </Dialog>
 
       {/* Confirmation dialog */}
-      <Dialog open={confirmOpen} onClose={cancelPending} maxWidth="xs" fullWidth
+      <Dialog
+        open={confirmOpen}
+        onClose={cancelPending}
+        maxWidth="xs"
+        fullWidth
         slotProps={{
-          backdrop: { sx: { backdropFilter: "blur(6px)", backgroundColor: isDark ? "rgba(0,0,0,0.6)" : "rgba(0,0,0,0.3)" } },
-          paper: { sx: { borderRadius: "20px", boxShadow: isDark ? "0 32px 80px rgba(0,0,0,0.6)" : "0 24px 80px rgba(0,0,0,0.15)", border: isDark ? "1px solid rgba(255,255,255,0.06)" : "none" } },
+          backdrop: {
+            sx: {
+              backdropFilter: 'blur(6px)',
+              backgroundColor: isDark ? 'rgba(0,0,0,0.6)' : 'rgba(0,0,0,0.3)',
+            },
+          },
+          paper: {
+            sx: {
+              borderRadius: '20px',
+              boxShadow: isDark ? '0 32px 80px rgba(0,0,0,0.6)' : '0 24px 80px rgba(0,0,0,0.15)',
+              border: isDark ? '1px solid rgba(255,255,255,0.06)' : 'none',
+            },
+          },
         }}
       >
-        <Box sx={{ p: 3, textAlign: "center", backgroundColor: isDark ? "rgba(18,18,24,0.98)" : undefined, borderRadius: "20px" }}>
-          <Box sx={{
-            width: 56, height: 56, borderRadius: "50%",
-            backgroundColor: pendingEdit?.condition === "add"
-              ? (isDark ? "rgba(52,211,153,0.15)" : "rgba(52,211,153,0.1)")
-              : (isDark ? "rgba(239,68,68,0.15)" : "rgba(239,68,68,0.1)"),
-            display: "flex", alignItems: "center", justifyContent: "center",
-            mx: "auto", mb: 1.5,
-          }}>
-            <Typography sx={{ fontSize: "1.5rem" }}>
-              {pendingEdit?.condition === "add" ? "+" : "−"}
+        <Box
+          sx={{
+            p: 3,
+            textAlign: 'center',
+            backgroundColor: isDark ? 'rgba(18,18,24,0.98)' : undefined,
+            borderRadius: '20px',
+          }}
+        >
+          <Box
+            sx={{
+              width: 56,
+              height: 56,
+              borderRadius: '50%',
+              backgroundColor:
+                pendingEdit?.condition === 'add'
+                  ? isDark
+                    ? 'rgba(52,211,153,0.15)'
+                    : 'rgba(52,211,153,0.1)'
+                  : isDark
+                    ? 'rgba(239,68,68,0.15)'
+                    : 'rgba(239,68,68,0.1)',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              mx: 'auto',
+              mb: 1.5,
+            }}
+          >
+            <Typography sx={{ fontSize: '1.5rem' }}>
+              {pendingEdit?.condition === 'add' ? '+' : '−'}
             </Typography>
           </Box>
-          <Typography sx={{ fontSize: "1.05rem", fontWeight: 700, mb: 0.5, color: isDark ? "#e8e8f0" : undefined }}>
-            {pendingEdit?.condition === "add" ? "Agregar horas" : "Restar horas"}
+          <Typography
+            sx={{
+              fontSize: '1.05rem',
+              fontWeight: 700,
+              mb: 0.5,
+              color: isDark ? '#e8e8f0' : undefined,
+            }}
+          >
+            {pendingEdit?.condition === 'add' ? 'Agregar horas' : 'Restar horas'}
           </Typography>
-          <Typography sx={{ fontSize: "0.85rem", color: "text.secondary", mb: 1.5, lineHeight: 1.5 }}>
+          <Typography
+            sx={{ fontSize: '0.85rem', color: 'text.secondary', mb: 1.5, lineHeight: 1.5 }}
+          >
             {pendingEdit
-              ? `Se ${pendingEdit.condition === "add" ? "agregarán" : "restarán"} ${pendingEdit.hours}h ${pendingEdit.condition === "add" ? "a" : "de"} ${confirmDialogEmployee?.firstName ?? ""} ${confirmDialogEmployee?.lastName?.[0] ?? ""}.`
-              : ""}
+              ? `Se ${pendingEdit.condition === 'add' ? 'agregarán' : 'restarán'} ${pendingEdit.hours}h ${pendingEdit.condition === 'add' ? 'a' : 'de'} ${confirmDialogEmployee?.firstName ?? ''} ${confirmDialogEmployee?.lastName?.[0] ?? ''}.`
+              : ''}
           </Typography>
 
-          <Box sx={{ width: 36, height: 3.5, borderRadius: 2, mx: "auto", mb: 2.5,
-            backgroundColor: pendingEdit?.condition === "add" ? "#34d399" : "#ef4444",
-          }} />
+          <Box
+            sx={{
+              width: 36,
+              height: 3.5,
+              borderRadius: 2,
+              mx: 'auto',
+              mb: 2.5,
+              backgroundColor: pendingEdit?.condition === 'add' ? '#34d399' : '#ef4444',
+            }}
+          />
 
-          <Box sx={{ display: "flex", gap: 1 }}>
-            <Button fullWidth size="medium" onClick={cancelPending}
-              sx={{ borderRadius: "12px", textTransform: "none", fontWeight: 600, py: 1, color: "text.secondary",
-                "&:hover": { backgroundColor: isDark ? "rgba(255,255,255,0.06)" : "rgba(0,0,0,0.04)" },
+          <Box sx={{ display: 'flex', gap: 1 }}>
+            <Button
+              fullWidth
+              size="medium"
+              onClick={cancelPending}
+              sx={{
+                borderRadius: '12px',
+                textTransform: 'none',
+                fontWeight: 600,
+                py: 1,
+                color: 'text.secondary',
+                '&:hover': {
+                  backgroundColor: isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.04)',
+                },
               }}
             >
               Cancelar
             </Button>
-            <Button fullWidth size="medium" variant="contained" color={pendingEdit?.condition === "add" ? "success" : "error"} onClick={applyPending}
+            <Button
+              fullWidth
+              size="medium"
+              variant="contained"
+              color={pendingEdit?.condition === 'add' ? 'success' : 'error'}
+              onClick={applyPending}
               sx={{
-                borderRadius: "12px", textTransform: "none", fontWeight: 600, py: 1,
+                borderRadius: '12px',
+                textTransform: 'none',
+                fontWeight: 600,
+                py: 1,
               }}
             >
               Confirmar
@@ -1367,11 +2146,20 @@ function TotalsColumn({
 // ─── Day Column ───
 interface DayColumnProps {
   columnId: string;
-  day: string; date: string; isTodayDate: boolean; isWeekend: boolean;
+  day: string;
+  date: string;
+  isTodayDate: boolean;
+  isWeekend: boolean;
+  columnWidth?: number | null;
   employees: Array<{
-    employee: Employee; scheduleLabel: string; scheduleColor: ColorScheme;
-    hours: number; overtime: number; isUnassigned: boolean;
-    periodTotal: number; periodOvertime: number;
+    employee: Employee;
+    scheduleLabel: string;
+    scheduleColor: ColorScheme;
+    hours: number;
+    overtime: number;
+    isUnassigned: boolean;
+    periodTotal: number;
+    periodOvertime: number;
   }>;
   totalHours: number;
   onEmployeeClick: (employee: Employee, event: React.MouseEvent<HTMLElement>) => void;
@@ -1382,97 +2170,163 @@ interface DayColumnProps {
 }
 
 const DayColumn = memo(function DayColumn({
-  columnId, day, date, isTodayDate, isWeekend, employees, totalHours,
-  onEmployeeClick, onColumnClick, onInfoClick, onAdjustClick, theme,
+  columnId,
+  day,
+  date,
+  isTodayDate,
+  isWeekend,
+  columnWidth,
+  employees,
+  totalHours,
+  onEmployeeClick,
+  onColumnClick,
+  onInfoClick,
+  onAdjustClick,
+  theme,
 }: DayColumnProps) {
-  const isDark = theme.palette.mode === "dark";
-  const todayColor = "#38bdf8";
+  const isDark = theme.palette.mode === 'dark';
+  const todayColor = '#38bdf8';
 
   const { setNodeRef, isOver } = useDroppable({
     id: columnId,
     data: { viewType: 'employee', day, date } satisfies DropColumnData,
   });
 
-  const dropHighlight = isOver ? {
-    borderColor: "#818cf8",
-    boxShadow: `inset 0 0 0 2px ${isDark ? "rgba(99,102,241,0.35)" : "rgba(99,102,241,0.25)"}`,
-    backgroundColor: isDark ? "rgba(99,102,241,0.06)" : "rgba(99,102,241,0.04)",
-  } : {};
+  const dropHighlight = isOver
+    ? {
+        borderColor: '#818cf8',
+        boxShadow: `inset 0 0 0 2px ${isDark ? 'rgba(99,102,241,0.35)' : 'rgba(99,102,241,0.25)'}`,
+        backgroundColor: isDark ? 'rgba(99,102,241,0.06)' : 'rgba(99,102,241,0.04)',
+      }
+    : {};
 
   return (
-    <Box ref={setNodeRef} data-column-id={columnId}
+    <Box
+      ref={setNodeRef}
+      data-column-id={columnId}
       onClick={(e) => onColumnClick?.(day, date, e)}
       sx={{
-        flex: isWeekend ? 0.7 : 1,
-        minWidth: { xs: isWeekend ? 88 : 100, sm: isWeekend ? 110 : 140 },
-        maxWidth: { xs: isWeekend ? 104 : 124, sm: isWeekend ? 130 : 190 },
-        scrollSnapAlign: "start",
-        display: "flex", flexDirection: "column",
-        cursor: onColumnClick ? "pointer" : "default",
-      backgroundColor: isTodayDate
-        ? (isDark ? "rgba(56,189,248,0.06)" : "rgba(56,189,248,0.04)")
-        : isWeekend
-          ? (isDark ? "rgba(255,255,255,0.015)" : "rgba(0,0,0,0.01)")
-          : "transparent",
-      borderRadius: "12px",
-      border: isTodayDate
-        ? `1.5px solid ${isDark ? "rgba(56,189,248,0.3)" : "rgba(56,189,248,0.2)"}`
-        : `1px solid ${isDark ? "rgba(255,255,255,0.05)" : "rgba(0,0,0,0.05)"}`,
-      overflow: "hidden",
-      transition: "all 0.25s ease",
-      ...dropHighlight,
-    }}>
-      {/* Day header */}
-      <Box data-anchor-id={`anchor-${columnId}`} sx={{
-        px: { xs: 0.75, sm: 1.25 }, py: { xs: 0.6, sm: 0.85 }, textAlign: "center",
-        borderBottom: `1px solid ${isDark ? "rgba(255,255,255,0.06)" : "rgba(0,0,0,0.06)"}`,
+        // All columns share the same width (measured from the widest card
+        // content) so the board always looks uniform: equal flex basis keeps
+        // them identical even with spare space, and the shared min width
+        // guarantees long names are never clipped — the board panel scrolls
+        // horizontally when the total width exceeds the viewport.
+        flex: '1 1 0',
+        minWidth: columnWidth ?? { xs: 100, sm: 140 },
+        maxWidth: 'none',
+        scrollSnapAlign: 'start',
+        display: 'flex',
+        flexDirection: 'column',
+        cursor: onColumnClick ? 'pointer' : 'default',
         backgroundColor: isTodayDate
-          ? (isDark ? "rgba(56,189,248,0.1)" : "rgba(56,189,248,0.07)")
-          : "transparent",
-        transition: "background-color 0.15s ease",
-      }}>
+          ? isDark
+            ? 'rgba(56,189,248,0.06)'
+            : 'rgba(56,189,248,0.04)'
+          : isWeekend
+            ? isDark
+              ? 'rgba(255,255,255,0.015)'
+              : 'rgba(0,0,0,0.01)'
+            : 'transparent',
+        borderRadius: '12px',
+        border: isTodayDate
+          ? `1.5px solid ${isDark ? 'rgba(56,189,248,0.3)' : 'rgba(56,189,248,0.2)'}`
+          : `1px solid ${isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.05)'}`,
+        overflow: 'hidden',
+        transition: 'all 0.25s ease',
+        ...dropHighlight,
+      }}
+    >
+      {/* Day header */}
+      <Box
+        data-anchor-id={`anchor-${columnId}`}
+        sx={{
+          px: { xs: 0.75, sm: 1.25 },
+          py: { xs: 0.6, sm: 0.85 },
+          textAlign: 'center',
+          borderBottom: `1px solid ${isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.06)'}`,
+          backgroundColor: isTodayDate
+            ? isDark
+              ? 'rgba(56,189,248,0.1)'
+              : 'rgba(56,189,248,0.07)'
+            : 'transparent',
+          transition: 'background-color 0.15s ease',
+        }}
+      >
         {onColumnClick && (
-          <Box sx={{
-            display: "inline-flex", alignItems: "center", justifyContent: "center",
-            width: 16, height: 16, borderRadius: "50%", mb: 0.4,
-            backgroundColor: isDark ? "rgba(99,102,241,0.15)" : "rgba(99,102,241,0.1)",
-            color: "#818cf8",
-            fontSize: "0.7rem", fontWeight: 700, lineHeight: 1,
-          }}>+</Box>
+          <Box
+            sx={{
+              display: 'inline-flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              width: 16,
+              height: 16,
+              borderRadius: '50%',
+              mb: 0.4,
+              backgroundColor: isDark ? 'rgba(99,102,241,0.15)' : 'rgba(99,102,241,0.1)',
+              color: '#818cf8',
+              fontSize: '0.7rem',
+              fontWeight: 700,
+              lineHeight: 1,
+            }}
+          >
+            +
+          </Box>
         )}
-        <Typography sx={{
-          fontWeight: isTodayDate ? 700 : 600, fontSize: "0.75rem",
-          color: isTodayDate ? todayColor : theme.palette.text.primary,
-          letterSpacing: isTodayDate ? "0.02em" : "normal",
-        }}>
+        <Typography
+          sx={{
+            fontWeight: isTodayDate ? 700 : 600,
+            fontSize: '0.75rem',
+            color: isTodayDate ? todayColor : theme.palette.text.primary,
+            letterSpacing: isTodayDate ? '0.02em' : 'normal',
+          }}
+        >
           {capitalizeFirstLetter(translateDayToAbrevSpanish(day as EnglishDayOfWeek))}
         </Typography>
-        <Typography sx={{
-          fontSize: "0.58rem", fontWeight: isTodayDate ? 600 : 400,
-          color: isTodayDate ? todayColor : theme.palette.text.secondary,
-          mt: 0.1,
-        }}>
+        <Typography
+          sx={{
+            fontSize: '0.58rem',
+            fontWeight: isTodayDate ? 600 : 400,
+            color: isTodayDate ? todayColor : theme.palette.text.secondary,
+            mt: 0.1,
+          }}
+        >
           {formatHeaderDate(date)}
         </Typography>
       </Box>
 
-      {/* Cards area */}
-      <Box sx={{
-        flex: 1, p: { xs: 0.4, sm: 0.6 }, display: "flex", flexDirection: "column", gap: { xs: 0.4, sm: 0.5 },
-        overflowY: "auto", minHeight: 80,
-      }}>
+      {/* Cards area — no internal scroll: the whole board panel scrolls as one unit */}
+      <Box
+        sx={{
+          flex: 1,
+          p: { xs: 0.4, sm: 0.6 },
+          display: 'flex',
+          flexDirection: 'column',
+          gap: { xs: 0.4, sm: 0.5 },
+          minHeight: 80,
+        }}
+      >
         {employees.length === 0 ? (
-          <Box sx={{ flex: 1, display: "flex", alignItems: "center", justifyContent: "center" }}>
-            <Typography sx={{ fontSize: "0.65rem", color: theme.palette.text.disabled, opacity: 0.4 }}>—</Typography>
+          <Box sx={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+            <Typography
+              sx={{ fontSize: '0.65rem', color: theme.palette.text.disabled, opacity: 0.4 }}
+            >
+              —
+            </Typography>
           </Box>
         ) : (
           employees.map((emp) => (
             <DraggableCardWrapper
               key={`${emp.employee.id}-${emp.scheduleLabel}`}
-              employee={emp.employee} scheduleLabel={emp.scheduleLabel} scheduleColor={emp.scheduleColor}
-              hours={emp.hours} overtime={emp.overtime} isUnassigned={emp.isUnassigned}
-              periodTotal={emp.periodTotal} periodOvertime={emp.periodOvertime}
-              sourceDay={day} sourceDate={date}
+              employee={emp.employee}
+              scheduleLabel={emp.scheduleLabel}
+              scheduleColor={emp.scheduleColor}
+              hours={emp.hours}
+              overtime={emp.overtime}
+              isUnassigned={emp.isUnassigned}
+              periodTotal={emp.periodTotal}
+              periodOvertime={emp.periodOvertime}
+              sourceDay={day}
+              sourceDate={date}
               onClick={(e) => onEmployeeClick(emp.employee, e)}
               onInfo={onInfoClick ? () => onInfoClick(emp.employee) : undefined}
               onAdjust={onAdjustClick ? () => onAdjustClick(emp.employee) : undefined}
@@ -1483,19 +2337,27 @@ const DayColumn = memo(function DayColumn({
       </Box>
 
       {/* Column footer — total */}
-      <Box sx={{
-        px: { xs: 0.75, sm: 1.25 }, py: { xs: 0.45, sm: 0.55 },
-        borderTop: `1px solid ${isDark ? "rgba(255,255,255,0.06)" : "rgba(0,0,0,0.06)"}`,
-        textAlign: "center",
-        backgroundColor: isTodayDate
-          ? (isDark ? "rgba(56,189,248,0.07)" : "rgba(56,189,248,0.05)")
-          : "transparent",
-      }}>
-        <Typography sx={{
-          fontSize: "0.68rem", fontWeight: 700,
-          color: totalHours > 0 ? todayColor : theme.palette.text.disabled,
-        }}>
-          {totalHours > 0 ? `${totalHours}h` : "—"}
+      <Box
+        sx={{
+          px: { xs: 0.75, sm: 1.25 },
+          py: { xs: 0.45, sm: 0.55 },
+          borderTop: `1px solid ${isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.06)'}`,
+          textAlign: 'center',
+          backgroundColor: isTodayDate
+            ? isDark
+              ? 'rgba(56,189,248,0.07)'
+              : 'rgba(56,189,248,0.05)'
+            : 'transparent',
+        }}
+      >
+        <Typography
+          sx={{
+            fontSize: '0.68rem',
+            fontWeight: 700,
+            color: totalHours > 0 ? todayColor : theme.palette.text.disabled,
+          }}
+        >
+          {totalHours > 0 ? `${totalHours}h` : '—'}
         </Typography>
       </Box>
     </Box>
@@ -1504,28 +2366,40 @@ const DayColumn = memo(function DayColumn({
 
 // ─── Main WeeklyBoard ───
 const WeeklyBoard: React.FC<WeeklyBoardProps> = ({
-  filteredEmployees, schedules, hoursWorked,
-  weeklySummaries, biweeklySummaries, monthlySummaries,
-  weekOffset, weekNumber, biweekNumber, month, year,
-   handleChange, handleAdjustTime, permissions,
-  viewMode, setViewMode,
-  onInfoClick, onAdjustClick,
+  filteredEmployees,
+  schedules,
+  hoursWorked,
+  weeklySummaries,
+  biweeklySummaries,
+  monthlySummaries,
+  weekOffset,
+  weekNumber,
+  biweekNumber,
+  month,
+  year,
+  handleChange,
+  handleAdjustTime,
+  permissions,
+  viewMode,
+  setViewMode,
+  onInfoClick,
+  onAdjustClick,
   recalculateEmployeeWeeklySummary,
 }) => {
   const theme = useTheme();
-  const isDark = theme.palette.mode === "dark";
-  const isSmallScreen = useMediaQuery(theme.breakpoints.down("sm"));
+  const isDark = theme.palette.mode === 'dark';
+  const isSmallScreen = useMediaQuery(theme.breakpoints.down('sm'));
 
-  const [selectedPeriod, setSelectedPeriod] = useState<PeriodType>("weekly");
+  const [selectedPeriod, setSelectedPeriod] = useState<PeriodType>('weekly');
   const [popoverAnchor, setPopoverAnchor] = useState<HTMLElement | null>(null);
-  const [popoverSelectedLabel, setPopoverSelectedLabel] = useState<string>("");
+  const [popoverSelectedLabel, setPopoverSelectedLabel] = useState<string>('');
   const [selectedEmployee, setSelectedEmployee] = useState<Employee | null>(null);
-  const [selectedDay, setSelectedDay] = useState<string>("");
-  const [selectedDateStr, setSelectedDateStr] = useState<string>("");
+  const [selectedDay, setSelectedDay] = useState<string>('');
+  const [selectedDateStr, setSelectedDateStr] = useState<string>('');
 
   // ─── Quick-assign (click on day column / swimlane cell) ───
   const [quickAssign, setQuickAssign] = useState<{
-    view: "employee" | "schedule";
+    view: 'employee' | 'schedule';
     day: string;
     date: string;
     scheduleLabel?: string;
@@ -1536,14 +2410,17 @@ const WeeklyBoard: React.FC<WeeklyBoardProps> = ({
   const [selectedEmployeeIds, setSelectedEmployeeIds] = useState<Set<number>>(new Set());
 
   const toggleEmployeeSelection = useCallback((employeeId: number, ctrlKey: boolean) => {
-    setSelectedEmployeeIds(prev => {
+    setSelectedEmployeeIds((prev) => {
       const next = new Set(prev);
       if (ctrlKey) {
         if (next.has(employeeId)) next.delete(employeeId);
         else next.add(employeeId);
       } else {
         if (next.size > 0 && next.has(employeeId)) next.clear();
-        else { next.clear(); next.add(employeeId); }
+        else {
+          next.clear();
+          next.add(employeeId);
+        }
       }
       return next;
     });
@@ -1570,7 +2447,7 @@ const WeeklyBoard: React.FC<WeeklyBoardProps> = ({
 
   const sensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 5 } }),
-    useSensor(TouchSensor, { activationConstraint: { delay: 120, tolerance: 6 } }),
+    useSensor(TouchSensor, { activationConstraint: { delay: 120, tolerance: 6 } })
   );
 
   const handleDragStart = useCallback((event: DragStartEvent) => {
@@ -1578,6 +2455,17 @@ const WeeklyBoard: React.FC<WeeklyBoardProps> = ({
   }, []);
 
   const currentWeek = useMemo(() => getCurrentWeekDates(weekOffset), [weekOffset]);
+
+  // All day columns (and swimlane day cells) share the same width: measured
+  // from the widest card content so they are always equal without clipping names.
+  const { containerRef: columnsContainerRef, columnWidth } = useUniformColumnWidth('[data-card]', [
+    viewMode,
+    currentWeek,
+    filteredEmployees,
+    hoursWorked,
+    schedules,
+  ]);
+
   const multiplePeriods = useMemo(() => getInvolvedPeriods(currentWeek), [currentWeek]);
 
   const scheduleColorMap = useMemo(() => {
@@ -1595,10 +2483,38 @@ const WeeklyBoard: React.FC<WeeklyBoardProps> = ({
     const hasMultiYears = hasMultipleYears(currentWeek);
 
     filteredEmployees.forEach((emp) => {
-      const totalH = calculateTotalHours(emp, selectedPeriod, currentWeek, weekNumber, biweekNumber, month, year, weeklySummaries, biweeklySummaries, monthlySummaries, multiplePeriods);
-      const overT = calculateOvertime(emp, selectedPeriod, currentWeek, weekNumber, biweekNumber, month, year, weeklySummaries, biweeklySummaries, monthlySummaries, multiplePeriods);
+      const totalH = calculateTotalHours(
+        emp,
+        selectedPeriod,
+        currentWeek,
+        weekNumber,
+        biweekNumber,
+        month,
+        year,
+        weeklySummaries,
+        biweeklySummaries,
+        monthlySummaries,
+        multiplePeriods
+      );
+      const overT = calculateOvertime(
+        emp,
+        selectedPeriod,
+        currentWeek,
+        weekNumber,
+        biweekNumber,
+        month,
+        year,
+        weeklySummaries,
+        biweeklySummaries,
+        monthlySummaries,
+        multiplePeriods
+      );
       const hasWkd = weeklySummaries.some(
-        (s) => s.employeeId === emp.id && s.weekNumber === weekNumber && s.year === year && Number(s.totalHours) > 0,
+        (s) =>
+          s.employeeId === emp.id &&
+          s.weekNumber === weekNumber &&
+          s.year === year &&
+          Number(s.totalHours) > 0
       );
 
       // Per-period breakdown for display when week spans multiple periods
@@ -1607,29 +2523,53 @@ const WeeklyBoard: React.FC<WeeklyBoardProps> = ({
       let firstPeriodLabel: string | undefined;
       let secondPeriodLabel: string | undefined;
 
-      if (selectedPeriod === "biweekly" && hasMultiBiweeks && multiplePeriods.biweekNumbers.length >= 2) {
+      if (
+        selectedPeriod === 'biweekly' &&
+        hasMultiBiweeks &&
+        multiplePeriods.biweekNumbers.length >= 2
+      ) {
         const p1 = multiplePeriods.biweekNumbers[0];
         const p2 = multiplePeriods.biweekNumbers[1];
-        const s1 = biweeklySummaries.find(s => s.employeeId === emp.id && s.biweekNumber === p1.biweekNumber && s.year === p1.year);
-        const s2 = biweeklySummaries.find(s => s.employeeId === emp.id && s.biweekNumber === p2.biweekNumber && s.year === p2.year);
+        const s1 = biweeklySummaries.find(
+          (s) => s.employeeId === emp.id && s.biweekNumber === p1.biweekNumber && s.year === p1.year
+        );
+        const s2 = biweeklySummaries.find(
+          (s) => s.employeeId === emp.id && s.biweekNumber === p2.biweekNumber && s.year === p2.year
+        );
         firstPeriodHours = Number(s1?.totalHours ?? 0);
         secondPeriodHours = Number(s2?.totalHours ?? 0);
         firstPeriodLabel = `Qna ${p1.biweekNumber}`;
         secondPeriodLabel = `Qna ${p2.biweekNumber}`;
-      } else if (selectedPeriod === "monthly" && hasMultiMonths && multiplePeriods.months.length >= 2) {
+      } else if (
+        selectedPeriod === 'monthly' &&
+        hasMultiMonths &&
+        multiplePeriods.months.length >= 2
+      ) {
         const p1 = multiplePeriods.months[0];
         const p2 = multiplePeriods.months[1];
-        const s1 = monthlySummaries.find(s => s.employeeId === emp.id && s.month === p1.month && s.year === p1.year);
-        const s2 = monthlySummaries.find(s => s.employeeId === emp.id && s.month === p2.month && s.year === p2.year);
+        const s1 = monthlySummaries.find(
+          (s) => s.employeeId === emp.id && s.month === p1.month && s.year === p1.year
+        );
+        const s2 = monthlySummaries.find(
+          (s) => s.employeeId === emp.id && s.month === p2.month && s.year === p2.year
+        );
         firstPeriodHours = Number(s1?.totalHours ?? 0);
         secondPeriodHours = Number(s2?.totalHours ?? 0);
         firstPeriodLabel = getMonthName(p1.month);
         secondPeriodLabel = getMonthName(p2.month);
-      } else if (selectedPeriod === "weekly" && hasMultiYears && multiplePeriods.weekNumbers.length >= 2) {
+      } else if (
+        selectedPeriod === 'weekly' &&
+        hasMultiYears &&
+        multiplePeriods.weekNumbers.length >= 2
+      ) {
         const p1 = multiplePeriods.weekNumbers[0];
         const p2 = multiplePeriods.weekNumbers[1];
-        const s1 = weeklySummaries.find(s => s.employeeId === emp.id && s.weekNumber === p1.weekNumber && s.year === p1.year);
-        const s2 = weeklySummaries.find(s => s.employeeId === emp.id && s.weekNumber === p2.weekNumber && s.year === p2.year);
+        const s1 = weeklySummaries.find(
+          (s) => s.employeeId === emp.id && s.weekNumber === p1.weekNumber && s.year === p1.year
+        );
+        const s2 = weeklySummaries.find(
+          (s) => s.employeeId === emp.id && s.weekNumber === p2.weekNumber && s.year === p2.year
+        );
         firstPeriodHours = Number(s1?.totalHours ?? 0);
         secondPeriodHours = Number(s2?.totalHours ?? 0);
         firstPeriodLabel = `Sem ${p1.weekNumber}`;
@@ -1647,197 +2587,265 @@ const WeeklyBoard: React.FC<WeeklyBoardProps> = ({
       });
     });
     return map;
-  }, [filteredEmployees, selectedPeriod, currentWeek, weekNumber, biweekNumber, month, year, weeklySummaries, biweeklySummaries, monthlySummaries, multiplePeriods]);
+  }, [
+    filteredEmployees,
+    selectedPeriod,
+    currentWeek,
+    weekNumber,
+    biweekNumber,
+    month,
+    year,
+    weeklySummaries,
+    biweeklySummaries,
+    monthlySummaries,
+    multiplePeriods,
+  ]);
 
   const getDaySchedule = useCallback(
     (employee: Employee, day: string, date: string) => {
       const cellData = getScheduleCellData(employee, day, date, schedules, hoursWorked);
       const label = cellData.finalSelectedLabel;
       const isUnassigned = label === SELECTOR_TABLE.UNASSIGNED;
-      const matchingSchedule = schedules.find((s) => s.label === label && s.days.includes(day.toLowerCase()));
+      const matchingSchedule = schedules.find(
+        (s) => s.label === label && s.days.includes(day.toLowerCase())
+      );
       const empData = employeeDataMap.get(employee.id);
       return {
-        label, isUnassigned, hours: matchingSchedule ? getScheduleHours(matchingSchedule, day) : 0,
+        label,
+        isUnassigned,
+        hours: matchingSchedule ? getScheduleHours(matchingSchedule, day) : 0,
         overtime: empData?.overtime ?? 0,
         periodTotal: empData?.totalHours ?? 0,
         periodOvertime: empData?.overtime ?? 0,
         scheduleColor: isUnassigned
-          ? { bg: "transparent", text: theme.palette.text.disabled, border: "transparent" }
-          : scheduleColorMap.get(label) ?? SCHEDULE_COLORS[0],
+          ? { bg: 'transparent', text: theme.palette.text.disabled, border: 'transparent' }
+          : (scheduleColorMap.get(label) ?? SCHEDULE_COLORS[0]),
       };
     },
-    [schedules, hoursWorked, scheduleColorMap, employeeDataMap, theme],
+    [schedules, hoursWorked, scheduleColorMap, employeeDataMap, theme]
   );
 
-  const handleDragEnd = useCallback((event: DragEndEvent) => {
-    setActiveDragItem(null);
-    const { active, over } = event;
-    if (!over) return;
-    const sourceData = active.data.current as DragItemData | undefined;
-    const targetData = over.data.current as DropColumnData | undefined;
-    if (!sourceData || !targetData) return;
+  const handleDragEnd = useCallback(
+    (event: DragEndEvent) => {
+      setActiveDragItem(null);
+      const { active, over } = event;
+      if (!over) return;
+      const sourceData = active.data.current as DragItemData | undefined;
+      const targetData = over.data.current as DropColumnData | undefined;
+      if (!sourceData || !targetData) return;
 
-    const targetDate = new Date(targetData.date);
-    const targetDay = targetData.day.toLowerCase();
+      const targetDate = new Date(targetData.date);
+      const targetDay = targetData.day.toLowerCase();
 
-    // ── Determine which employees to apply the change to ──
-    let involvedIds: number[];
-    if (sourceData.sourceType === 'totals') {
-      involvedIds = [sourceData.employee.id];
-    } else {
-      const selected = Array.from(selectedEmployeeIds);
-      if (selected.length > 0 && selected.includes(sourceData.employee.id)) {
-        involvedIds = selected;
-      } else {
+      // ── Determine which employees to apply the change to ──
+      let involvedIds: number[];
+      if (sourceData.sourceType === 'totals') {
         involvedIds = [sourceData.employee.id];
+      } else {
+        const selected = Array.from(selectedEmployeeIds);
+        if (selected.length > 0 && selected.includes(sourceData.employee.id)) {
+          involvedIds = selected;
+        } else {
+          involvedIds = [sourceData.employee.id];
+        }
       }
-    }
 
-    // ── Dropped on totals column: unassign ──
-    if (targetData.viewType === 'totals') {
-      if (!canEdit) return;
-      if (sourceData.sourceType === 'card') {
-        const sourceDate = new Date(sourceData.sourceDate);
-        involvedIds.forEach((eid) => handleChange(SELECTOR_TABLE.UNASSIGNED, eid, sourceDate));
-        if (involvedIds.length > 1) clearSelection();
-      }
-      return;
-    }
-
-    // ── Source from totals column: assign immediately + open popover to change ──
-    if (sourceData.sourceType === 'totals') {
-      if (!canEdit) return;
-      // Si el empleado ya está asignado a este día, cancelar (solo snap-back)
-      const empAssignedToday = getDaySchedule(sourceData.employee, targetData.day, targetData.date);
-      if (!empAssignedToday.isUnassigned) return;
-
-      if (targetData.viewType === 'schedule' && targetData.scheduleLabel) {
-        // ── Dropping on a swimlane cell: assign directly to that schedule ──
-        const scheduleForCell = schedules.find(
-          (s) => s.label === targetData.scheduleLabel && s.days.includes(targetDay),
-        );
-        if (!scheduleForCell) return;
-        involvedIds.forEach((eid) => handleChange(scheduleForCell.label, eid, targetDate));
-        if (involvedIds.length > 1) clearSelection();
+      // ── Dropped on totals column: unassign ──
+      if (targetData.viewType === 'totals') {
+        if (!canEdit) return;
+        if (sourceData.sourceType === 'card') {
+          const sourceDate = new Date(sourceData.sourceDate);
+          involvedIds.forEach((eid) => handleChange(SELECTOR_TABLE.UNASSIGNED, eid, sourceDate));
+          if (involvedIds.length > 1) clearSelection();
+        }
         return;
       }
 
-      // ── Dropping on an employee day column: assign first available + popover ──
-      const firstAvailable = schedules.find((s) => s.days.includes(targetDay));
-      if (!firstAvailable) return;
-      // Asignar tarjeta visualmente sin recalcular totales (se hará al confirmar en popover)
-      involvedIds.forEach((eid) => handleChange(firstAvailable.label, eid, targetDate, true));
-      // Open popover for single employee so they can change the schedule
-      if (involvedIds.length === 1) {
-        const anchorEl = document.querySelector(`[data-anchor-id="anchor-day-col-${targetData.day}"]`);
-        if (anchorEl) {
-          setSelectedEmployee(sourceData.employee);
-          setSelectedDay(targetData.day);
-          setSelectedDateStr(targetData.date);
-          setPopoverAnchor(anchorEl as HTMLElement);
+      // ── Source from totals column: assign immediately + open popover to change ──
+      if (sourceData.sourceType === 'totals') {
+        if (!canEdit) return;
+        // Si el empleado ya está asignado a este día, cancelar (solo snap-back)
+        const empAssignedToday = getDaySchedule(
+          sourceData.employee,
+          targetData.day,
+          targetData.date
+        );
+        if (!empAssignedToday.isUnassigned) return;
+
+        if (targetData.viewType === 'schedule' && targetData.scheduleLabel) {
+          // ── Dropping on a swimlane cell: assign directly to that schedule ──
+          const scheduleForCell = schedules.find(
+            (s) => s.label === targetData.scheduleLabel && s.days.includes(targetDay)
+          );
+          if (!scheduleForCell) return;
+          involvedIds.forEach((eid) => handleChange(scheduleForCell.label, eid, targetDate));
+          if (involvedIds.length > 1) clearSelection();
+          return;
         }
-      } else {
-        clearSelection();
+
+        // ── Dropping on an employee day column: assign first available + popover ──
+        const firstAvailable = schedules.find((s) => s.days.includes(targetDay));
+        if (!firstAvailable) return;
+        // Asignar tarjeta visualmente sin recalcular totales (se hará al confirmar en popover)
+        involvedIds.forEach((eid) => handleChange(firstAvailable.label, eid, targetDate, true));
+        // Open popover for single employee so they can change the schedule
+        if (involvedIds.length === 1) {
+          const anchorEl = document.querySelector(
+            `[data-anchor-id="anchor-day-col-${targetData.day}"]`
+          );
+          if (anchorEl) {
+            setSelectedEmployee(sourceData.employee);
+            setSelectedDay(targetData.day);
+            setSelectedDateStr(targetData.date);
+            setPopoverAnchor(anchorEl as HTMLElement);
+          }
+        } else {
+          clearSelection();
+        }
+        return;
       }
-      return;
-    }
 
-    // ── Source from card: determine schedule label to assign ──
-    if (sourceData.sourceDay === targetData.day && involvedIds.length === 1) return;
+      // ── Source from card: determine schedule label to assign ──
+      if (sourceData.sourceDay === targetData.day && involvedIds.length === 1) return;
 
-    let scheduleToAssign: string | null = null;
-    const sourceLabel = sourceData.scheduleLabel;
-    const scheduleExists = schedules.some(
-      (s) => s.label === sourceLabel && s.days.includes(targetDay),
-    );
+      let scheduleToAssign: string | null = null;
+      const sourceLabel = sourceData.scheduleLabel;
+      const scheduleExists = schedules.some(
+        (s) => s.label === sourceLabel && s.days.includes(targetDay)
+      );
 
-    if (scheduleExists) {
-      scheduleToAssign = sourceLabel;
-    } else {
-      const firstAvailable = schedules.find((s) => s.days.includes(targetDay));
-      if (firstAvailable) scheduleToAssign = firstAvailable.label;
-    }
+      if (scheduleExists) {
+        scheduleToAssign = sourceLabel;
+      } else {
+        const firstAvailable = schedules.find((s) => s.days.includes(targetDay));
+        if (firstAvailable) scheduleToAssign = firstAvailable.label;
+      }
 
-    if (!scheduleToAssign) return;
+      if (!scheduleToAssign) return;
 
-    // ── Swap detection (only for single-employee drags) ──
-    if (involvedIds.length === 1) {
-      const sourceEmp = filteredEmployees.find((e) => e.id === involvedIds[0]);
-      if (sourceEmp) {
-        for (const emp of filteredEmployees) {
-          if (emp.id === involvedIds[0]) continue;
-          const existing = getDaySchedule(emp, targetData.day, targetData.date);
-          if (!existing.isUnassigned && existing.label === scheduleToAssign) {
-            const oldLabel = getDaySchedule(sourceEmp, sourceData.sourceDay, sourceData.sourceDate).label;
-            if (oldLabel && oldLabel !== SELECTOR_TABLE.UNASSIGNED) {
-              handleChange(oldLabel, emp.id, targetDate);
-            } else {
-              handleChange(SELECTOR_TABLE.UNASSIGNED, emp.id, targetDate);
+      // ── Swap detection (only for single-employee drags) ──
+      if (involvedIds.length === 1) {
+        const sourceEmp = filteredEmployees.find((e) => e.id === involvedIds[0]);
+        if (sourceEmp) {
+          for (const emp of filteredEmployees) {
+            if (emp.id === involvedIds[0]) continue;
+            const existing = getDaySchedule(emp, targetData.day, targetData.date);
+            if (!existing.isUnassigned && existing.label === scheduleToAssign) {
+              const oldLabel = getDaySchedule(
+                sourceEmp,
+                sourceData.sourceDay,
+                sourceData.sourceDate
+              ).label;
+              if (oldLabel && oldLabel !== SELECTOR_TABLE.UNASSIGNED) {
+                handleChange(oldLabel, emp.id, targetDate);
+              } else {
+                handleChange(SELECTOR_TABLE.UNASSIGNED, emp.id, targetDate);
+              }
+              break;
             }
-            break;
           }
         }
       }
-    }
 
-    // ── Remove from source day (move, not duplicate) ──
-    const sourceDate = new Date(sourceData.sourceDate);
-    involvedIds.forEach((eid) => handleChange(SELECTOR_TABLE.UNASSIGNED, eid, sourceDate));
+      // ── Remove from source day (move, not duplicate) ──
+      const sourceDate = new Date(sourceData.sourceDate);
+      involvedIds.forEach((eid) => handleChange(SELECTOR_TABLE.UNASSIGNED, eid, sourceDate));
 
-    // ── Aplicar al día destino ──
-    // Solo saltar recalculo si se abrirá popover (1 empleado + vista empleados)
-    const willOpenPopover = involvedIds.length === 1 && targetData.viewType === 'employee';
-    involvedIds.forEach((eid) => handleChange(scheduleToAssign!, eid, targetDate, willOpenPopover));
+      // ── Aplicar al día destino ──
+      // Solo saltar recalculo si se abrirá popover (1 empleado + vista empleados)
+      const willOpenPopover = involvedIds.length === 1 && targetData.viewType === 'employee';
+      involvedIds.forEach((eid) =>
+        handleChange(scheduleToAssign!, eid, targetDate, willOpenPopover)
+      );
 
-    // ── Abrir popover para que el usuario confirme/ajuste el horario ──
-    if (willOpenPopover) {
-      setSelectedEmployee(filteredEmployees.find((e) => e.id === involvedIds[0]) ?? null);
-      setSelectedDay(targetData.day);
-      setSelectedDateStr(targetData.date);
-      const anchorEl = document.querySelector(`[data-anchor-id="anchor-day-col-${targetData.day}"]`);
-      if (anchorEl) setPopoverAnchor(anchorEl as HTMLElement);
-    } else {
-      clearSelection();
-    }
-  }, [schedules, handleChange, canEdit, selectedEmployeeIds, filteredEmployees, getDaySchedule, clearSelection]);
-
+      // ── Abrir popover para que el usuario confirme/ajuste el horario ──
+      if (willOpenPopover) {
+        setSelectedEmployee(filteredEmployees.find((e) => e.id === involvedIds[0]) ?? null);
+        setSelectedDay(targetData.day);
+        setSelectedDateStr(targetData.date);
+        const anchorEl = document.querySelector(
+          `[data-anchor-id="anchor-day-col-${targetData.day}"]`
+        );
+        if (anchorEl) setPopoverAnchor(anchorEl as HTMLElement);
+      } else {
+        clearSelection();
+      }
+    },
+    [
+      schedules,
+      handleChange,
+      canEdit,
+      selectedEmployeeIds,
+      filteredEmployees,
+      getDaySchedule,
+      clearSelection,
+    ]
+  );
 
   const handleCardClick = useCallback(
     (employee: Employee, day: string, date: string) => (e: React.MouseEvent<HTMLElement>) => {
       if (!canEdit) return;
       e.stopPropagation();
-      setSelectedEmployee(employee); setSelectedDay(day); setSelectedDateStr(date);
-      setPopoverSelectedLabel("");
+      setSelectedEmployee(employee);
+      setSelectedDay(day);
+      setSelectedDateStr(date);
+      setPopoverSelectedLabel('');
       setPopoverAnchor(e.currentTarget);
-    }, [canEdit]);
+    },
+    [canEdit]
+  );
 
   const handleClosePopover = useCallback(() => {
-    setPopoverAnchor(null); setSelectedEmployee(null); setSelectedDay(""); setSelectedDateStr("");
-    setPopoverSelectedLabel("");
+    setPopoverAnchor(null);
+    setSelectedEmployee(null);
+    setSelectedDay('');
+    setSelectedDateStr('');
+    setPopoverSelectedLabel('');
   }, []);
 
   // ─── Quick-assign handlers (click to assign without dragging) ───
-  const handleOpenQuickAssign = useCallback((
-    view: "employee" | "schedule",
-    day: string,
-    date: string,
-    e: React.MouseEvent<HTMLElement>,
-    scheduleLabel?: string,
-  ) => {
-    if (!canEdit) return;
-    setPopoverAnchor(null);
-    // Keep the popover inside the viewport when anchored near the edges
-    const left = Math.min(e.clientX, window.innerWidth - 260);
-    const top = Math.min(e.clientY, window.innerHeight - 340);
-    setQuickAssign({ view, day, date, scheduleLabel, anchor: { top, left } });
-  }, [canEdit]);
+  const handleOpenQuickAssign = useCallback(
+    (
+      view: 'employee' | 'schedule',
+      day: string,
+      date: string,
+      e: React.MouseEvent<HTMLElement>,
+      scheduleLabel?: string
+    ) => {
+      if (!canEdit) return;
+      setPopoverAnchor(null);
+      // Keep the popover inside the viewport when anchored near the edges
+      const left = Math.min(e.clientX, window.innerWidth - 260);
+      const top = Math.min(e.clientY, window.innerHeight - 340);
+      setQuickAssign({ view, day, date, scheduleLabel, anchor: { top, left } });
+    },
+    [canEdit]
+  );
 
-  const handleQuickAssignConfirm = useCallback((employeeId: number, scheduleLabel: string) => {
-    if (!canEdit || !quickAssign) return;
-    const date = new Date(quickAssign.date);
-    handleChange(scheduleLabel, employeeId, date);
-    setQuickAssign(null);
-  }, [canEdit, quickAssign, handleChange]);
+  const handleQuickAssignConfirm = useCallback(
+    (employeeId: number, scheduleLabel: string) => {
+      if (!canEdit || !quickAssign) return;
+      const date = new Date(quickAssign.date);
+      handleChange(scheduleLabel, employeeId, date);
+      setQuickAssign(null);
+    },
+    [canEdit, quickAssign, handleChange]
+  );
+
+  // Employees already assigned in the clicked column/cell (pre-checked in the popover)
+  const quickAssignAssignedIds = useMemo(() => {
+    if (!quickAssign) return [];
+    return filteredEmployees
+      .filter((emp) => {
+        const cell = getDaySchedule(emp, quickAssign.day, quickAssign.date);
+        if (cell.isUnassigned) return false;
+        if (quickAssign.view === 'schedule' && quickAssign.scheduleLabel) {
+          return cell.label === quickAssign.scheduleLabel;
+        }
+        return true;
+      })
+      .map((e) => e.id);
+  }, [quickAssign, filteredEmployees, getDaySchedule]);
 
   const handleScheduleSelect = useCallback(
     (scheduleLabel: string) => {
@@ -1849,29 +2857,57 @@ const WeeklyBoard: React.FC<WeeklyBoardProps> = ({
         recalculateEmployeeWeeklySummary(selectedEmployee.id, date);
       }
       handleClosePopover();
-    }, [selectedEmployee, selectedDateStr, handleChange, recalculateEmployeeWeeklySummary, handleClosePopover]);
+    },
+    [
+      selectedEmployee,
+      selectedDateStr,
+      handleChange,
+      recalculateEmployeeWeeklySummary,
+      handleClosePopover,
+    ]
+  );
 
   const popoverOptions = useMemo(() => {
     if (!selectedDay) return [];
-    return schedules.filter((s) => s.days.includes(selectedDay.toLowerCase()))
-      .map((s) => ({ label: s.label, hours: getScheduleHours(s, selectedDay), color: scheduleColorMap.get(s.label) ?? SCHEDULE_COLORS[0] }));
+    return schedules
+      .filter((s) => s.days.includes(selectedDay.toLowerCase()))
+      .map((s) => ({
+        label: s.label,
+        hours: getScheduleHours(s, selectedDay),
+        color: scheduleColorMap.get(s.label) ?? SCHEDULE_COLORS[0],
+      }));
   }, [selectedDay, schedules, scheduleColorMap]);
 
   const popoverCurrentLabel = useMemo(() => {
-    if (!selectedEmployee || !selectedDateStr) return "";
-    return getScheduleCellData(selectedEmployee, "", selectedDateStr, schedules, hoursWorked).finalSelectedLabel;
+    if (!selectedEmployee || !selectedDateStr) return '';
+    return getScheduleCellData(selectedEmployee, '', selectedDateStr, schedules, hoursWorked)
+      .finalSelectedLabel;
   }, [selectedEmployee, selectedDateStr, schedules, hoursWorked]);
 
   return (
-    <Box sx={{ height: "100%", display: "flex", flexDirection: "column", overflow: "hidden" }}>
+    <Box sx={{ height: '100%', display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
       {/* ─── Header ─── */}
-      <Box sx={{
-        display: "flex", alignItems: "center", justifyContent: "space-between",
-        px: { xs: 1.5, sm: 2 }, py: 1, gap: 1,
-        borderBottom: `1px solid ${isDark ? "rgba(255,255,255,0.06)" : "rgba(0,0,0,0.06)"}`,
-        flexShrink: 0, flexWrap: "wrap",
-      }}>
-        <Box sx={{ display: "flex", alignItems: "center", gap: 1, flex: isSmallScreen ? 1 : undefined }}>
+      <Box
+        sx={{
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          px: { xs: 1.5, sm: 2 },
+          py: 1,
+          gap: 1,
+          borderBottom: `1px solid ${isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.06)'}`,
+          flexShrink: 0,
+          flexWrap: 'wrap',
+        }}
+      >
+        <Box
+          sx={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: 1,
+            flex: isSmallScreen ? 1 : undefined,
+          }}
+        >
           {/* View toggle - at the start */}
           <SegmentedToggle
             value={viewMode}
@@ -1880,133 +2916,176 @@ const WeeklyBoard: React.FC<WeeklyBoardProps> = ({
             fullWidth={isSmallScreen}
             options={[
               {
-                value: "employee",
-                label: isSmallScreen ? "Individual" : "Calendario Individual",
+                value: 'employee',
+                label: isSmallScreen ? 'Individual' : 'Calendario Individual',
                 icon: <PeopleOutlineIcon sx={{ fontSize: 14 }} />,
               },
               {
-                value: "schedule",
-                label: isSmallScreen ? "Por Horario" : "Calendario por Horario",
+                value: 'schedule',
+                label: isSmallScreen ? 'Por Horario' : 'Calendario por Horario',
                 icon: <ViewTimelineIcon sx={{ fontSize: 14 }} />,
               },
             ]}
           />
-
-
         </Box>
       </Box>
 
-
       {/* ─── Board ─── */}
-      <Box sx={{
-        flex: 1, overflowX: "auto", overflowY: "auto",
-        px: { xs: 0.75, sm: 1.25 }, py: { xs: 0.75, sm: 1.25 },
-        // Scroll-snap only in employee view on mobile: each day column / totals lands cleanly on swipe
-        // (schedule view uses free scrolling — mandatory snap made it bounce back)
-        scrollSnapType: { xs: viewMode === "employee" && !activeDragItem ? "x mandatory" : "none", sm: "none" },
-        scrollPadding: { xs: "0 0.75rem", sm: 0 },
-      }}>
+      {/* Two panels with independent scroll: the board (day columns / swimlanes)
+          scrolls on its own, and the employees panel (totals) on its own.
+          Stacked on mobile, side-by-side on tablet+. */}
+      <Box
+        data-totals-bounds
+        sx={{
+          flex: 1,
+          minHeight: 0,
+          display: 'flex',
+          flexDirection: { xs: 'column', sm: 'row' },
+          gap: { xs: 0.75, sm: 1 },
+          px: { xs: 0.75, sm: 1.25 },
+          py: { xs: 0.75, sm: 1.25 },
+        }}
+      >
         <DndContext sensors={sensors} onDragStart={handleDragStart} onDragEnd={handleDragEnd}>
-          {viewMode === "employee" ? (
-            <Box sx={{ display: "flex", gap: { xs: 0.6, sm: 1 }, height: "100%", minHeight: 350 }}>
-              {currentWeek.map(({ day, date, isoDate }) => {
-                const todayDate = isToday(isoDate);
-                const isWeekend = day === "saturday" || day === "sunday";
-                const dayEmployees: DayColumnProps["employees"] = [];
-                filteredEmployees.forEach((employee) => {
-                  const sched = getDaySchedule(employee, day, date);
-                  if (sched.isUnassigned) {
-                    // No mostrar empleados sin asignar — aparecen hasta que se arrastren
-                  } else {
-                    dayEmployees.push({
-                      employee, scheduleLabel: sched.label, scheduleColor: sched.scheduleColor,
-                      hours: sched.hours, overtime: sched.overtime, isUnassigned: false,
-                      periodTotal: sched.periodTotal, periodOvertime: sched.periodOvertime,
-                    });
-                  }
-                });
-                return (
-                  <DayColumn
-                    key={day} columnId={`day-col-${day}`} day={day} date={date}
-                    isTodayDate={todayDate} isWeekend={isWeekend}
-                    employees={dayEmployees}
-                    totalHours={dayEmployees.reduce((sum, e) => sum + e.hours, 0)}
-                    onEmployeeClick={(emp, event) => handleCardClick(emp, day, date)(event)}
-                    onColumnClick={canEdit ? (d, dt, e) => handleOpenQuickAssign("employee", d, dt, e) : undefined}
-                    onInfoClick={showHours ? onInfoClick : undefined}
-                    onAdjustClick={showHours ? onAdjustClick : undefined}
-                    theme={theme}
-                  />
-                );
-              })}
-              <TotalsColumn
-                employeeDataMap={employeeDataMap}
-                filteredEmployees={filteredEmployees}
-                selectedPeriod={selectedPeriod}
-                onPeriodChange={setSelectedPeriod}
-                onInfoClick={showHours ? onInfoClick : undefined}
-                onAdjustClick={showHours ? onAdjustClick : undefined}
-                handleAdjustTime={handleAdjustTime}
-                theme={theme}
-                isDark={isDark}
-              />
-            </Box>
-          ) : (
-            /* ─── Schedule view (swimlanes) with drag & drop + totals column ─── */
-            /*
-             * minHeight 100% (not height 100%): the row grows with the swimlane
-             * content, so the totals column stretches to the full height of the
-             * schedules (or the viewport when content is short) instead of
-             * leaving an empty gap below the last column.
-             */
-            <Box sx={{ display: "flex", gap: { xs: 0.6, sm: 1 }, minHeight: "100%" }}>
-              <Box sx={{
-              display: "flex", flexDirection: "column", gap: 1.25,
-              // Mobile: keep the original max-content behavior so all swimlane
-              // rows + totals column scroll together horizontally.
-              // Tablet+ (sm+): stretch to fill the available width, but never
-              // shrink below the rows' intrinsic minimum so the day cells stay
-              // usable and each row frame always wraps its content — same
-              // adaptive behavior as the individual calendar view.
-              width: { xs: "max-content", sm: "auto" },
-              flex: { xs: "0 0 auto", sm: 1 },
-              minWidth: { xs: "auto", sm: "min-content" },
-            }}>
-                {schedules.map((schedule) => {
-                  const scheduleColor = scheduleColorMap.get(schedule.label) ?? SCHEDULE_COLORS[0];
+          {/* ── Board panel (own scroll) ── */}
+          <Box
+            sx={{
+              flex: 1,
+              minWidth: 0,
+              minHeight: 0,
+              overflow: 'auto',
+              // Scroll-snap only in employee view on mobile: each day column lands cleanly on swipe
+              // (schedule view uses free scrolling — mandatory snap made it bounce back)
+              scrollSnapType: {
+                xs: viewMode === 'employee' && !activeDragItem ? 'x proximity' : 'none',
+                sm: 'none',
+              },
+              scrollPadding: { xs: '0 0.75rem', sm: 0 },
+            }}
+          >
+            {viewMode === 'employee' ? (
+              <Box
+                ref={columnsContainerRef}
+                sx={{ display: 'flex', gap: { xs: 0.6, sm: 1 }, minHeight: '100%' }}
+              >
+                {currentWeek.map(({ day, date, isoDate }) => {
+                  const todayDate = isToday(isoDate);
+                  const isWeekend = day === 'saturday' || day === 'sunday';
+                  const dayEmployees: DayColumnProps['employees'] = [];
+                  filteredEmployees.forEach((employee) => {
+                    const sched = getDaySchedule(employee, day, date);
+                    if (sched.isUnassigned) {
+                      // No mostrar empleados sin asignar — aparecen hasta que se arrastren
+                    } else {
+                      dayEmployees.push({
+                        employee,
+                        scheduleLabel: sched.label,
+                        scheduleColor: sched.scheduleColor,
+                        hours: sched.hours,
+                        overtime: sched.overtime,
+                        isUnassigned: false,
+                        periodTotal: sched.periodTotal,
+                        periodOvertime: sched.periodOvertime,
+                      });
+                    }
+                  });
                   return (
-                    <SwimlaneRow
-                      key={schedule.id}
-                      schedule={schedule}
-                      scheduleColor={scheduleColor}
-                      currentWeek={currentWeek}
-                      filteredEmployees={filteredEmployees}
-                      getDaySchedule={getDaySchedule}
-                      selectedEmployeeIds={selectedEmployeeIds}
-                      toggleEmployeeSelection={toggleEmployeeSelection}
-                      handleCardClick={handleCardClick}
-                      canEdit={canEdit}
-                      isDark={isDark}
-                      onInfoClick={onInfoClick}
-                      onAdjustClick={onAdjustClick}
-                      onCellClick={canEdit ? (sched, d, dt, e) => handleOpenQuickAssign("schedule", d, dt, e, sched.label) : undefined}
+                    <DayColumn
+                      key={day}
+                      columnId={`day-col-${day}`}
+                      day={day}
+                      date={date}
+                      isTodayDate={todayDate}
+                      isWeekend={isWeekend}
+                      columnWidth={columnWidth}
+                      employees={dayEmployees}
+                      totalHours={dayEmployees.reduce((sum, e) => sum + e.hours, 0)}
+                      onEmployeeClick={(emp, event) => handleCardClick(emp, day, date)(event)}
+                      onColumnClick={
+                        canEdit
+                          ? (d, dt, e) => handleOpenQuickAssign('employee', d, dt, e)
+                          : undefined
+                      }
+                      onInfoClick={showHours ? onInfoClick : undefined}
+                      onAdjustClick={showHours ? onAdjustClick : undefined}
+                      theme={theme}
                     />
                   );
                 })}
               </Box>
-              <TotalsColumn
-                employeeDataMap={employeeDataMap}
-                filteredEmployees={filteredEmployees}
-                selectedPeriod={selectedPeriod}
-                onPeriodChange={setSelectedPeriod}
-                onInfoClick={showHours ? onInfoClick : undefined}
-                onAdjustClick={showHours ? onAdjustClick : undefined}
-                handleAdjustTime={handleAdjustTime}
-                theme={theme}
-                isDark={isDark}
-              />
-            </Box>
-          )}
+            ) : (
+              /* ─── Schedule view (swimlanes) with drag & drop + totals column ─── */
+              /*
+               * minHeight 100% (not height 100%): the row grows with the swimlane
+               * content, so the totals column stretches to the full height of the
+               * schedules (or the viewport when content is short) instead of
+               * leaving an empty gap below the last column.
+               */
+              <Box
+                ref={columnsContainerRef}
+                sx={{ display: 'flex', gap: { xs: 0.6, sm: 1 }, minHeight: '100%' }}
+              >
+                <Box
+                  sx={{
+                    display: 'flex',
+                    flexDirection: 'column',
+                    gap: 1.25,
+                    // Mobile: keep the original max-content behavior so all swimlane
+                    // rows + totals column scroll together horizontally.
+                    // Tablet+ (sm+): stretch to fill the available width, but never
+                    // shrink below the rows' intrinsic minimum so the day cells stay
+                    // usable and each row frame always wraps its content — same
+                    // adaptive behavior as the individual calendar view.
+                    width: { xs: 'max-content', sm: 'auto' },
+                    flex: { xs: '0 0 auto', sm: 1 },
+                    minWidth: { xs: 'auto', sm: 'min-content' },
+                  }}
+                >
+                  {schedules.map((schedule) => {
+                    const scheduleColor =
+                      scheduleColorMap.get(schedule.label) ?? SCHEDULE_COLORS[0];
+                    return (
+                      <SwimlaneRow
+                        key={schedule.id}
+                        schedule={schedule}
+                        scheduleColor={scheduleColor}
+                        currentWeek={currentWeek}
+                        filteredEmployees={filteredEmployees}
+                        getDaySchedule={getDaySchedule}
+                        selectedEmployeeIds={selectedEmployeeIds}
+                        toggleEmployeeSelection={toggleEmployeeSelection}
+                        handleCardClick={handleCardClick}
+                        canEdit={canEdit}
+                        isDark={isDark}
+                        onInfoClick={onInfoClick}
+                        onAdjustClick={onAdjustClick}
+                        columnWidth={columnWidth}
+                        onCellClick={
+                          canEdit
+                            ? (sched, d, dt, e) =>
+                                handleOpenQuickAssign('schedule', d, dt, e, sched.label)
+                            : undefined
+                        }
+                      />
+                    );
+                  })}
+                </Box>
+              </Box>
+            )}
+          </Box>
+
+          {/* ── Employees panel (own scroll) ── */}
+          <TotalsColumn
+            employeeDataMap={employeeDataMap}
+            filteredEmployees={filteredEmployees}
+            selectedPeriod={selectedPeriod}
+            onPeriodChange={setSelectedPeriod}
+            onInfoClick={showHours ? onInfoClick : undefined}
+            onAdjustClick={showHours ? onAdjustClick : undefined}
+            handleAdjustTime={handleAdjustTime}
+            theme={theme}
+            isDark={isDark}
+          />
 
           <DragOverlay dropAnimation={null}>
             {activeDragItem?.sourceType === 'card' ? (
@@ -2021,40 +3100,67 @@ const WeeklyBoard: React.FC<WeeklyBoardProps> = ({
                 isDark={isDark}
               />
             ) : activeDragItem?.sourceType === 'totals' ? (
-              <Box sx={{
-                display: "flex", alignItems: "center", gap: 1,
-                px: 1.5, py: 1.25, borderRadius: "14px",
-                backgroundColor: isDark ? "rgba(30,30,40,0.96)" : "rgba(255,255,255,0.96)",
-                border: `2px solid ${isDark ? "#a78bfa" : "#7c3aed"}`,
-                boxShadow: isDark
-                  ? "0 20px 60px rgba(0,0,0,0.5), 0 0 0 1px rgba(255,255,255,0.1), 0 4px 20px rgba(0,0,0,0.3)"
-                  : "0 20px 60px rgba(0,0,0,0.15), 0 0 0 1px rgba(255,255,255,0.9), 0 4px 20px rgba(0,0,0,0.08)",
-                transform: "scale(1.05) translateY(-4px)",
-                backdropFilter: "blur(12px)",
-                width: 160,
-                willChange: "transform",
-                cursor: "grabbing",
-              }}>
-                <Box sx={{
-                  width: 28, height: 28, borderRadius: "50%",
-                  backgroundColor: getEmployeeColor(activeDragItem.employee.id),
-                  color: "#fff",
-                  display: "flex", alignItems: "center", justifyContent: "center",
-                  fontSize: "0.65rem", fontWeight: 700, flexShrink: 0,
-                }}>
+              <Box
+                sx={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: 1,
+                  px: 1.5,
+                  py: 1.25,
+                  borderRadius: '14px',
+                  backgroundColor: isDark ? 'rgba(30,30,40,0.96)' : 'rgba(255,255,255,0.96)',
+                  border: `2px solid ${isDark ? '#a78bfa' : '#7c3aed'}`,
+                  boxShadow: isDark
+                    ? '0 20px 60px rgba(0,0,0,0.5), 0 0 0 1px rgba(255,255,255,0.1), 0 4px 20px rgba(0,0,0,0.3)'
+                    : '0 20px 60px rgba(0,0,0,0.15), 0 0 0 1px rgba(255,255,255,0.9), 0 4px 20px rgba(0,0,0,0.08)',
+                  transform: 'scale(1.05) translateY(-4px)',
+                  backdropFilter: 'blur(12px)',
+                  minWidth: 160,
+                  maxWidth: 360,
+                  willChange: 'transform',
+                  cursor: 'grabbing',
+                }}
+              >
+                <Box
+                  sx={{
+                    width: 28,
+                    height: 28,
+                    borderRadius: '50%',
+                    backgroundColor: getEmployeeColor(activeDragItem.employee.id),
+                    color: '#fff',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    fontSize: '0.65rem',
+                    fontWeight: 700,
+                    flexShrink: 0,
+                  }}
+                >
                   {getInitials(activeDragItem.employee.firstName, activeDragItem.employee.lastName)}
                 </Box>
-                <Typography sx={{
-                  fontSize: "0.8rem", fontWeight: 700,
-                  color: isDark ? "#a78bfa" : "#7c3aed",
-                  lineHeight: 1.2,
-                }}>
-                  {activeDragItem.employee.firstName}
-                </Typography>
-                <Typography sx={{
-                  fontSize: "0.5rem", fontWeight: 600, color: "text.secondary",
-                  ml: "auto", opacity: 0.6, lineHeight: 1,
-                }}>
+                <Box sx={{ flex: 1, minWidth: 'max-content' }}>
+                  <Typography
+                    sx={{
+                      fontSize: '0.8rem',
+                      fontWeight: 700,
+                      color: isDark ? '#a78bfa' : '#7c3aed',
+                      lineHeight: 1.2,
+                      whiteSpace: 'nowrap',
+                    }}
+                  >
+                    {activeDragItem.employee.firstName} {activeDragItem.employee.lastName}
+                  </Typography>
+                </Box>
+                <Typography
+                  sx={{
+                    fontSize: '0.5rem',
+                    fontWeight: 600,
+                    color: 'text.secondary',
+                    ml: 'auto',
+                    opacity: 0.6,
+                    lineHeight: 1,
+                  }}
+                >
                   Asignar
                 </Typography>
               </Box>
@@ -2065,40 +3171,52 @@ const WeeklyBoard: React.FC<WeeklyBoardProps> = ({
 
       {/* ─── Popover ─── */}
       <Popover
-        open={!!popoverAnchor} anchorEl={popoverAnchor} onClose={handleClosePopover}
-        anchorOrigin={{ vertical: "bottom", horizontal: "center" }}
-        transformOrigin={{ vertical: "top", horizontal: "center" }}
+        open={!!popoverAnchor}
+        anchorEl={popoverAnchor}
+        onClose={handleClosePopover}
+        anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
+        transformOrigin={{ vertical: 'top', horizontal: 'center' }}
         slotProps={{
           paper: {
             sx: {
-              borderRadius: "12px",
-              boxShadow: isDark ? "0 10px 40px rgba(0,0,0,0.4)" : "0 10px 40px rgba(0,0,0,0.12)",
-              border: `1px solid ${isDark ? "rgba(255,255,255,0.08)" : "rgba(0,0,0,0.06)"}`,
-              minWidth: 170, mt: 0.5,
-              display: "flex", flexDirection: "column",
+              borderRadius: '12px',
+              boxShadow: isDark ? '0 10px 40px rgba(0,0,0,0.4)' : '0 10px 40px rgba(0,0,0,0.12)',
+              minWidth: 170,
+              mt: 0.5,
+              display: 'flex',
+              flexDirection: 'column',
               height: 400,
-              overflow: "hidden",
+              overflow: 'hidden',
             },
           },
         }}
       >
-        <Box sx={{ overflow: "auto", flex: 1, minHeight: 0 }}>
+        <Box sx={{ overflow: 'auto', flex: 1, minHeight: 0 }}>
           <List dense sx={{ py: 0.5 }}>
             {popoverCurrentLabel && popoverCurrentLabel !== SELECTOR_TABLE.UNASSIGNED && (
-              <Box sx={{
-                px: 1.5, py: 0.75,
-                borderBottom: `1px solid ${isDark ? "rgba(255,255,255,0.05)" : "rgba(0,0,0,0.05)"}`,
-              }}>
-                <Typography sx={{ fontSize: "0.6rem", fontWeight: 600, color: "text.secondary", mb: 0.35 }}>
+              <Box
+                sx={{
+                  px: 1.5,
+                  py: 0.75,
+                  borderBottom: `1px solid ${isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.05)'}`,
+                }}
+              >
+                <Typography
+                  sx={{ fontSize: '0.6rem', fontWeight: 600, color: 'text.secondary', mb: 0.35 }}
+                >
                   Actual
                 </Typography>
                 <Chip
-                  label={popoverCurrentLabel} size="small"
+                  label={popoverCurrentLabel}
+                  size="small"
                   sx={{
-                    fontWeight: 600, fontSize: "0.65rem", height: 22,
-                    backgroundColor: scheduleColorMap.get(popoverCurrentLabel)?.bg ?? "transparent",
-                    color: scheduleColorMap.get(popoverCurrentLabel)?.text ?? theme.palette.text.primary,
-                    border: `1px solid ${scheduleColorMap.get(popoverCurrentLabel)?.border ?? "transparent"}`,
+                    fontWeight: 600,
+                    fontSize: '0.65rem',
+                    height: 22,
+                    backgroundColor: scheduleColorMap.get(popoverCurrentLabel)?.bg ?? 'transparent',
+                    color:
+                      scheduleColorMap.get(popoverCurrentLabel)?.text ?? theme.palette.text.primary,
+                    border: `1px solid ${scheduleColorMap.get(popoverCurrentLabel)?.border ?? 'transparent'}`,
                   }}
                 />
               </Box>
@@ -2109,23 +3227,37 @@ const WeeklyBoard: React.FC<WeeklyBoardProps> = ({
                 onClick={() => setPopoverSelectedLabel(option.label)}
                 selected={option.label === popoverSelectedLabel}
                 sx={{
-                  mx: 0.5, borderRadius: "7px", my: 0.2, px: 1.25, py: 0.75,
-                  "&.Mui-selected": { backgroundColor: option.color.bg },
-                  "&:hover": { backgroundColor: isDark ? "rgba(255,255,255,0.04)" : "rgba(0,0,0,0.03)" },
+                  mx: 0.5,
+                  borderRadius: '7px',
+                  my: 0.2,
+                  px: 1.25,
+                  py: 0.75,
+                  '&.Mui-selected': { backgroundColor: option.color.bg },
+                  '&:hover': {
+                    backgroundColor: isDark ? 'rgba(255,255,255,0.04)' : 'rgba(0,0,0,0.03)',
+                  },
                 }}
               >
-                <Box sx={{
-                  width: 6, height: 6, borderRadius: "50%",
-                  backgroundColor: option.color.text, mr: 1.25, flexShrink: 0,
-                }} />
+                <Box
+                  sx={{
+                    width: 6,
+                    height: 6,
+                    borderRadius: '50%',
+                    backgroundColor: option.color.text,
+                    mr: 1.25,
+                    flexShrink: 0,
+                  }}
+                />
                 <ListItemText
                   primary={option.label}
                   primaryTypographyProps={{
-                    fontSize: "0.78rem",
+                    fontSize: '0.78rem',
                     fontWeight: option.label === popoverSelectedLabel ? 700 : 500,
                   }}
                 />
-                <Typography sx={{ fontSize: "0.6rem", fontWeight: 600, color: option.color.text, ml: 1 }}>
+                <Typography
+                  sx={{ fontSize: '0.6rem', fontWeight: 600, color: option.color.text, ml: 1 }}
+                >
                   {option.hours}h
                 </Typography>
               </ListItemButton>
@@ -2134,36 +3266,54 @@ const WeeklyBoard: React.FC<WeeklyBoardProps> = ({
               onClick={() => setPopoverSelectedLabel(SELECTOR_TABLE.UNASSIGNED)}
               selected={popoverSelectedLabel === SELECTOR_TABLE.UNASSIGNED}
               sx={{
-                mx: 0.5, borderRadius: "7px", my: 0.2, px: 1.25, py: 0.75,
-                borderTop: `1px solid ${isDark ? "rgba(255,255,255,0.05)" : "rgba(0,0,0,0.05)"}`,
+                mx: 0.5,
+                borderRadius: '7px',
+                my: 0.2,
+                px: 1.25,
+                py: 0.75,
+                borderTop: `1px solid ${isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.05)'}`,
                 mt: 0.5,
-                "&:hover": { backgroundColor: isDark ? "rgba(255,255,255,0.04)" : "rgba(0,0,0,0.03)" },
+                '&:hover': {
+                  backgroundColor: isDark ? 'rgba(255,255,255,0.04)' : 'rgba(0,0,0,0.03)',
+                },
               }}
             >
               <ListItemText
                 primary={SELECTOR_TABLE.UNASSIGNED}
                 primaryTypographyProps={{
-                  fontSize: "0.78rem",
+                  fontSize: '0.78rem',
                   fontWeight: popoverSelectedLabel === SELECTOR_TABLE.UNASSIGNED ? 700 : 400,
-                  color: "text.disabled",
+                  color: 'text.disabled',
                 }}
               />
             </ListItemButton>
           </List>
         </Box>
         {/* Sticky actions */}
-        <Box sx={{
-          display: "flex", gap: 0.75, p: 1,
-          borderTop: `1px solid ${isDark ? "rgba(255,255,255,0.06)" : "rgba(0,0,0,0.06)"}`,
-          flexShrink: 0,
-        }}>
+        <Box
+          sx={{
+            display: 'flex',
+            gap: 0.75,
+            p: 1,
+            borderTop: `1px solid ${isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.06)'}`,
+            flexShrink: 0,
+          }}
+        >
           <Box
             onClick={handleClosePopover}
             sx={{
-              flex: 1, textAlign: "center", py: 0.7, borderRadius: "8px", cursor: "pointer",
-              fontSize: "0.75rem", fontWeight: 600, color: "text.secondary",
-              transition: "all 0.15s ease",
-              "&:hover": { backgroundColor: isDark ? "rgba(255,255,255,0.05)" : "rgba(0,0,0,0.04)" },
+              flex: 1,
+              textAlign: 'center',
+              py: 0.7,
+              borderRadius: '8px',
+              cursor: 'pointer',
+              fontSize: '0.75rem',
+              fontWeight: 600,
+              color: 'text.secondary',
+              transition: 'all 0.15s ease',
+              '&:hover': {
+                backgroundColor: isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.04)',
+              },
             }}
           >
             Cancelar
@@ -2173,20 +3323,29 @@ const WeeklyBoard: React.FC<WeeklyBoardProps> = ({
               if (popoverSelectedLabel) handleScheduleSelect(popoverSelectedLabel);
             }}
             sx={{
-              flex: 1, textAlign: "center", py: 0.7, borderRadius: "12px", cursor: "pointer",
-              fontSize: "0.75rem", fontWeight: 700,
+              flex: 1,
+              textAlign: 'center',
+              py: 0.7,
+              borderRadius: '12px',
+              cursor: 'pointer',
+              fontSize: '0.75rem',
+              fontWeight: 700,
               backgroundColor: !popoverSelectedLabel
-                ? (isDark ? "rgba(255,255,255,0.12)" : "rgba(0,0,0,0.08)")
+                ? isDark
+                  ? 'rgba(255,255,255,0.12)'
+                  : 'rgba(0,0,0,0.08)'
                 : theme.palette.primary.main,
               color: !popoverSelectedLabel
-                ? (isDark ? "rgba(255,255,255,0.25)" : "rgba(0,0,0,0.25)")
+                ? isDark
+                  ? 'rgba(255,255,255,0.25)'
+                  : 'rgba(0,0,0,0.25)'
                 : theme.palette.primary.contrastText,
-              transition: "all 0.15s ease",
-              "&:hover": !popoverSelectedLabel
+              transition: 'all 0.15s ease',
+              '&:hover': !popoverSelectedLabel
                 ? {}
                 : {
-                    backgroundColor: isDark ? "#d4d4d4" : "#1a1a1a",
-                    transform: "translateY(-1px)",
+                    backgroundColor: isDark ? '#d4d4d4' : '#1a1a1a',
+                    transform: 'translateY(-1px)',
                   },
             }}
           >
@@ -2200,11 +3359,12 @@ const WeeklyBoard: React.FC<WeeklyBoardProps> = ({
         open={!!quickAssign}
         anchorPosition={quickAssign?.anchor ?? undefined}
         onClose={() => setQuickAssign(null)}
-        view={quickAssign?.view ?? "employee"}
-        day={quickAssign?.day ?? ""}
-        date={quickAssign?.date ?? ""}
+        view={quickAssign?.view ?? 'employee'}
+        day={quickAssign?.day ?? ''}
+        date={quickAssign?.date ?? ''}
         schedules={schedules}
         employees={filteredEmployees}
+        assignedEmployeeIds={quickAssignAssignedIds}
         fixedScheduleLabel={quickAssign?.scheduleLabel}
         isDark={isDark}
         theme={theme}

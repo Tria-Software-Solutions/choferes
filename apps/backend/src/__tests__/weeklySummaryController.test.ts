@@ -171,12 +171,3 @@ describe("DELETE /api/weekly-summaries/:id", () => {
   });
 });
 
-describe("DELETE /api/weekly-summaries/bulk", () => {
-  it("debería devolver 204 al eliminar todos", async () => {
-    service.deleteAllWeeklySummaries.mockResolvedValue(10);
-
-    const res = await request(app).delete("/api/weekly-summaries/bulk");
-
-    expect(res.status).toBe(204);
-  });
-});

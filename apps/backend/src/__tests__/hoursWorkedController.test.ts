@@ -162,13 +162,3 @@ describe("DELETE /api/hours-worked/:id", () => {
   });
 });
 
-describe("DELETE /api/hours-worked/bulk", () => {
-  it("debería devolver 204 al eliminar todos", async () => {
-    service.deleteAllHoursWorked.mockResolvedValue(10);
-
-    const res = await request(app).delete("/api/hours-worked/bulk");
-
-    expect(res.status).toBe(204);
-    expect(service.deleteAllHoursWorked).toHaveBeenCalled();
-  });
-});

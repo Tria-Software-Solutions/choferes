@@ -75,10 +75,21 @@ export const authenticateToken = (req: AuthenticatedRequest, res: Response, next
   }
 };
 
-// Middleware to authenticate and refresh refresh tokens from cookies
+// Middleware to authenticate and refresh refresh tokens.
+// Reads the refresh token from the Authorization header first (the frontend
+// always sends it there), falling back to the httpOnly cookie. This makes the
+// refresh flow resilient to browsers that block third-party cookies on
+// cross-site requests (frontend on Vercel, API on Render).
 export const authenticateRefreshToken = (req: AuthenticatedRequest, res: Response) => {
   try {
-    const { refreshToken } = req.cookies;
+    const authHeader = req.headers.authorization;
+    let refreshToken: string | null = null;
+
+    if (authHeader && authHeader.startsWith("Bearer ")) {
+      refreshToken = authHeader.substring(7);
+    } else {
+      refreshToken = req.cookies?.refreshToken || null;
+    }
 
     if (!refreshToken) {
       return res.status(401).json({

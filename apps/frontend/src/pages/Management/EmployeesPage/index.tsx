@@ -1,8 +1,8 @@
-import React, { useState, useEffect, useCallback, useMemo, useRef } from "react";
-import { useAuthContext } from "../../../context/AuthContext";
-import { Employee } from "../../../models/Employee";
-import { useSelector, useDispatch } from "react-redux";
-import { RootState, AppDispatch } from "../../../store/store";
+import React, { useState, useEffect, useCallback, useMemo, useRef } from 'react';
+import { useAuthContext } from '../../../context/AuthContext';
+import { Employee } from '../../../models/Employee';
+import { useSelector, useDispatch } from 'react-redux';
+import { RootState, AppDispatch } from '../../../store/store';
 import {
   fetchEmployees,
   createEmployee,
@@ -10,16 +10,16 @@ import {
   deleteEmployee,
   updateEmployeeAvatar,
   removeEmployeeAvatar,
-} from "../../../store/slices/employeeSlice";
-import SearchBarComponent from "../../../components/SearchBar/SearchBar.component";
-import SpeedDialComponent from "../../../components/SpeedDial/SpeedDial.component";
-import StickyDataGridComponent from "../../../components/Table/StickyDataGrid/StickyDataGrid.component";
-import { GridColDef } from "@mui/x-data-grid";
-import { renderActionButtons } from "../../../components/Table/EditableTable/helpers";
-import AddEmployeeForm from "../../Forms/AddEmployeeForm";
-import { useAppNotifications } from "../../../components/Snackbar/Snackbar.component";
-import DialogComponent from "../../../components/Dialog/Dialog.component";
-import { createEmployeeNotification } from "../../../services/notificationService";
+} from '../../../store/slices/employeeSlice';
+import SearchBarComponent from '../../../components/SearchBar/SearchBar.component';
+import SpeedDialComponent from '../../../components/SpeedDial/SpeedDial.component';
+import StickyDataGridComponent from '../../../components/Table/StickyDataGrid/StickyDataGrid.component';
+import { GridColDef } from '@mui/x-data-grid';
+import { renderActionButtons } from '../../../components/Table/EditableTable/helpers';
+import AddEmployeeForm from '../../Forms/AddEmployeeForm';
+import { useAppNotifications } from '../../../components/Snackbar/Snackbar.component';
+import DialogComponent from '../../../components/Dialog/Dialog.component';
+import { createEmployeeNotification } from '../../../services/notificationService';
 import {
   Button,
   Box,
@@ -33,17 +33,26 @@ import {
   Dialog,
   DialogContent,
   DialogActions,
-} from "@mui/material";
+} from '@mui/material';
+import { createExportOptions, exportFileFormattedDate } from '../../../utils/export';
+import PAGE_TITLE from '../../../constants/pageTitle.constants';
+import PERMISSIONS from '../../../constants/permissions.constants';
+import NOTIFICATIONS from '../../../constants/notifications.constants';
+import MANAGEMENT from '../../../constants/management.constants';
 import {
-  createExportOptions,
-  exportFileFormattedDate,
-} from "../../../utils/export";
-import PAGE_TITLE from "../../../constants/pageTitle.constants";
-import PERMISSIONS from "../../../constants/permissions.constants";
-import NOTIFICATIONS from "../../../constants/notifications.constants";
-import MANAGEMENT from "../../../constants/management.constants";
-import { UsersRound, Download, X, Search, Plus, Trash2, PlusCircle, Mail, Pencil, Loader2, Camera } from "lucide-react";
-import { PdfIcon, ExcelIcon } from "../../../components/Icons/FileIcons";
+  UsersRound,
+  Download,
+  X,
+  Search,
+  Plus,
+  Trash2,
+  PlusCircle,
+  Mail,
+  Pencil,
+  Loader2,
+  Camera,
+} from 'lucide-react';
+import { PdfIcon, ExcelIcon } from '../../../components/Icons/FileIcons';
 import {
   exportSpeedDialBoxStyles,
   loadingBoxStyles,
@@ -52,20 +61,20 @@ import {
   noEmployeesIconStyles,
   deleteDialogPaperSx,
   addDialogPaperSx,
-} from "./styles";
-import { useLocation } from "react-router-dom";
-import { useTablePreferences } from "../../../hooks/useTablePreferences";
-import { useDebounce } from "../../../hooks/useDebounce";
-import { format } from "date-fns";
-import { es } from "date-fns/locale";
-import { capitalizeFirstLetter } from "../../../utils/string";
-import { getAvatarSrc, resizeAvatarFile } from "../../../utils/avatar";
-import EmployeeAvatar from "../../../components/EmployeeAvatar/EmployeeAvatar.component";
+} from './styles';
+import { useLocation } from 'react-router-dom';
+import { useTablePreferences } from '../../../hooks/useTablePreferences';
+import { useDebounce } from '../../../hooks/useDebounce';
+import { format } from 'date-fns';
+import { es } from 'date-fns/locale';
+import { capitalizeFirstLetter } from '../../../utils/string';
+import { getAvatarSrc, resizeAvatarFile } from '../../../utils/avatar';
+import EmployeeAvatar from '../../../components/EmployeeAvatar/EmployeeAvatar.component';
 
 const getInitialRowsPerPage = () => {
   // Example: calculate based on window size or available height
   // You can refine this logic as needed
-  if (typeof window !== "undefined") {
+  if (typeof window !== 'undefined') {
     const maxHeight = window.innerHeight * 0.6;
     const headHeight = 56;
     const paginationHeight = 64;
@@ -82,15 +91,13 @@ const getInitialRowsPerPage = () => {
 const EmployeesPage: React.FC = () => {
   const dispatch = useDispatch<AppDispatch>();
   const { userPermissions, currentUser } = useAuthContext();
-  const { employees, isLoadingEmployees } = useSelector(
-    (state: RootState) => state.employees
-  );
+  const { employees, isLoadingEmployees } = useSelector((state: RootState) => state.employees);
   const { showNotification } = useAppNotifications();
   const [filteredEmployees, setFilteredEmployees] = useState<Employee[]>([]);
   const [editRowId, setEditRowId] = useState<number | null>(null);
   const [openAddModal, setOpenAddModal] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [editFields, setEditFields] = useState({ firstName: "", lastName: "", email: "" });
+  const [editFields, setEditFields] = useState({ firstName: '', lastName: '', email: '' });
   const [openDeleteDialog, setOpenDeleteDialog] = useState(false);
   const [employeeToDelete, setEmployeeToDelete] = useState<number | null>(null);
   const [isEditFormValid, setIsEditFormValid] = useState(false);
@@ -118,13 +125,12 @@ const EmployeesPage: React.FC = () => {
     },
   } as const;
 
-  const { search, setSearch } =
-    useTablePreferences("employees", getInitialRowsPerPage);
+  const { search, setSearch } = useTablePreferences('employees', getInitialRowsPerPage);
 
   const debouncedSearch = useDebounce(search, 400);
 
   const theme = useTheme();
-  const isSmallScreen = useMediaQuery(theme.breakpoints.down("sm"));
+  const isSmallScreen = useMediaQuery(theme.breakpoints.down('sm'));
   const location = useLocation();
 
   const hasEditPermissions = userPermissions.includes(PERMISSIONS.EDIT_EMPLOYEES);
@@ -132,9 +138,7 @@ const EmployeesPage: React.FC = () => {
 
   // Fetch employees on mount, when debounced search changes, or when navigating back
   useEffect(() => {
-    dispatch(
-      fetchEmployees({ search: debouncedSearch || undefined }),
-    );
+    dispatch(fetchEmployees({ search: debouncedSearch || undefined }));
   }, [dispatch, debouncedSearch, location.pathname]);
 
   // Filter employees by search input (client-side as instant feedback)
@@ -144,14 +148,13 @@ const EmployeesPage: React.FC = () => {
       return;
     }
 
-    const normalizeString = (str: string) =>
-      str.normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+    const normalizeString = (str: string) => str.normalize('NFD').replace(/[\u0300-\u036f]/g, '');
 
     const normalizedSearch = normalizeString(search).toLowerCase();
 
     setFilteredEmployees(
       employees.filter((employee) =>
-        normalizeString(`${employee.firstName} ${employee.lastName} ${employee.email || ""}`)
+        normalizeString(`${employee.firstName} ${employee.lastName} ${employee.email || ''}`)
           .toLowerCase()
           .includes(normalizedSearch)
       )
@@ -193,7 +196,7 @@ const EmployeesPage: React.FC = () => {
       dispatch(createEmployee(newEmployee));
       setOpenAddModal(false);
       showNotification(NOTIFICATIONS.EMPLOYEE_CREATE_SUCCESS, {
-        severity: "success",
+        severity: 'success',
         duration: 3000,
       });
 
@@ -201,7 +204,7 @@ const EmployeesPage: React.FC = () => {
       createEmployeeNotification('created', `${newEmployee.firstName} ${newEmployee.lastName}`);
     } catch (error) {
       showNotification(NOTIFICATIONS.EMPLOYEE_CREATE_ERROR, {
-        severity: "error",
+        severity: 'error',
         duration: 5000,
       });
     } finally {
@@ -224,7 +227,7 @@ const EmployeesPage: React.FC = () => {
     setEditFields({
       firstName: employee.firstName,
       lastName: employee.lastName,
-      email: employee.email || "",
+      email: employee.email || '',
     });
   };
 
@@ -241,9 +244,9 @@ const EmployeesPage: React.FC = () => {
       };
       dispatch(updateEmployee({ id, updatedEmployee }));
       setEditRowId(null);
-      setEditFields({ firstName: "", lastName: "", email: "" });
+      setEditFields({ firstName: '', lastName: '', email: '' });
       showNotification(NOTIFICATIONS.EMPLOYEE_UPDATE_SUCCESS, {
-        severity: "success",
+        severity: 'success',
         duration: 3000,
       });
 
@@ -252,7 +255,7 @@ const EmployeesPage: React.FC = () => {
     } catch (error) {
       handleCancel();
       showNotification(NOTIFICATIONS.EMPLOYEE_UPDATE_ERROR, {
-        severity: "error",
+        severity: 'error',
         duration: 5000,
       });
     }
@@ -283,7 +286,7 @@ const EmployeesPage: React.FC = () => {
     setSelectedFile(null);
     setAvatarPreview(null);
     if (avatarFileInputRef.current) {
-      avatarFileInputRef.current.value = "";
+      avatarFileInputRef.current.value = '';
     }
   };
 
@@ -298,14 +301,14 @@ const EmployeesPage: React.FC = () => {
     if (!file) return;
 
     // Validate file type
-    if (!["image/jpeg", "image/png", "image/gif", "image/webp"].includes(file.type)) {
-      showNotification("Solo se permiten imágenes (JPEG, PNG, GIF, WebP)", { severity: "error" });
+    if (!['image/jpeg', 'image/png', 'image/gif', 'image/webp'].includes(file.type)) {
+      showNotification('Solo se permiten imágenes (JPEG, PNG, GIF, WebP)', { severity: 'error' });
       return;
     }
 
     // Validate file size (5MB max)
     if (file.size > 5 * 1024 * 1024) {
-      showNotification("La imagen no debe superar los 5MB", { severity: "error" });
+      showNotification('La imagen no debe superar los 5MB', { severity: 'error' });
       return;
     }
 
@@ -318,7 +321,7 @@ const EmployeesPage: React.FC = () => {
       };
       reader.readAsDataURL(resized);
     } catch (error) {
-      showNotification("No se pudo procesar la imagen", { severity: "error" });
+      showNotification('No se pudo procesar la imagen', { severity: 'error' });
     }
   };
 
@@ -329,15 +332,15 @@ const EmployeesPage: React.FC = () => {
     setIsUploadingAvatar(true);
     try {
       await dispatch(
-        updateEmployeeAvatar({ id: avatarDialogEmployee.id, file: selectedFile }),
+        updateEmployeeAvatar({ id: avatarDialogEmployee.id, file: selectedFile })
       ).unwrap();
-      showNotification("Avatar actualizado exitosamente", { severity: "success", duration: 3000 });
+      showNotification('Avatar actualizado exitosamente', { severity: 'success', duration: 3000 });
       // Close directly (bypasses the isUploadingAvatar guard) so the dialog
       // doesn't stay stuck open after a successful upload.
       setIsUploadingAvatar(false);
       resetAvatarDialog();
     } catch (error) {
-      showNotification("Error al actualizar el avatar", { severity: "error", duration: 5000 });
+      showNotification('Error al actualizar el avatar', { severity: 'error', duration: 5000 });
     } finally {
       setIsUploadingAvatar(false);
     }
@@ -350,11 +353,11 @@ const EmployeesPage: React.FC = () => {
     setIsUploadingAvatar(true);
     try {
       await dispatch(removeEmployeeAvatar(avatarDialogEmployee.id)).unwrap();
-      showNotification("Avatar eliminado exitosamente", { severity: "success", duration: 3000 });
+      showNotification('Avatar eliminado exitosamente', { severity: 'success', duration: 3000 });
       setIsUploadingAvatar(false);
       resetAvatarDialog();
     } catch (error) {
-      showNotification("Error al eliminar el avatar", { severity: "error", duration: 5000 });
+      showNotification('Error al eliminar el avatar', { severity: 'error', duration: 5000 });
     } finally {
       setIsUploadingAvatar(false);
     }
@@ -381,18 +384,18 @@ const EmployeesPage: React.FC = () => {
       setOpenDeleteDialog(false);
       setEmployeeToDelete(null);
       showNotification(NOTIFICATIONS.EMPLOYEE_DELETE_SUCCESS, {
-        severity: "success",
+        severity: 'success',
         duration: 3000,
       });
 
       // Add notification to menu
-      const employee = employees.find(emp => emp.id === employeeToDelete);
+      const employee = employees.find((emp) => emp.id === employeeToDelete);
       if (employee) {
         createEmployeeNotification('deleted', `${employee.firstName} ${employee.lastName}`);
       }
     } catch (error) {
       showNotification(NOTIFICATIONS.EMPLOYEE_DELETE_ERROR, {
-        severity: "error",
+        severity: 'error',
         duration: 5000,
       });
     } finally {
@@ -404,24 +407,24 @@ const EmployeesPage: React.FC = () => {
   // only recomputes when the filtered list actually changes
   const exportData = useMemo(
     () =>
-      filteredEmployees.map(e => ({
+      filteredEmployees.map((e) => ({
         Nombre: e.firstName,
         Apellido: e.lastName,
-        Email: e.email || "",
+        Email: e.email || '',
         Agregado: e.createdAt
           ? capitalizeFirstLetter(
               format(new Date(e.createdAt), "EEEE dd 'de' MMMM 'de' yyyy", {
                 locale: es,
               })
             )
-          : "",
+          : '',
         Actualizado: e.updatedAt
           ? capitalizeFirstLetter(
               format(new Date(e.updatedAt), "EEEE dd 'de' MMMM 'de' yyyy", {
                 locale: es,
               })
             )
-          : "",
+          : '',
       })),
     [filteredEmployees]
   );
@@ -429,7 +432,7 @@ const EmployeesPage: React.FC = () => {
   // Memoize export options based on permissions.
   // Excel y PDF comparten las mismas columnas; "Actualizado" se omite.
   const exportOptions = useMemo(() => {
-    const exportHeaders = ["Nombre", "Apellido", "Email", "Agregado"];
+    const exportHeaders = ['Nombre', 'Apellido', 'Email', 'Agregado'];
     const exportRows = exportData.map((e) => {
       const { Actualizado: _omit, ...rest } = e;
       return rest;
@@ -440,7 +443,7 @@ const EmployeesPage: React.FC = () => {
       data: exportRows,
       fileName: `empleados-${exportFileFormattedDate(new Date())}`,
       customHeaders: exportHeaders,
-      title: "Reporte de Empleados",
+      title: 'Reporte de Empleados',
     });
   }, [exportData]);
 
@@ -452,8 +455,8 @@ const EmployeesPage: React.FC = () => {
   const columns = useMemo<GridColDef<Employee>[]>(
     () => [
       {
-        field: "firstName",
-        headerName: "Nombre",
+        field: 'firstName',
+        headerName: 'Nombre',
         flex: 1.6,
         minWidth: isSmallScreen ? 150 : 260,
         sortable: true,
@@ -462,18 +465,25 @@ const EmployeesPage: React.FC = () => {
           const isEditing = editRowId === rowId;
           const rowData = params.row as Employee;
           const firstName = isEditing
-            ? String(editFields.firstName || "")
-            : String(rowData.firstName || "");
+            ? String(editFields.firstName || '')
+            : String(rowData.firstName || '');
           const lastName = isEditing
-            ? String(editFields.lastName || "")
-            : String(rowData.lastName || "");
+            ? String(editFields.lastName || '')
+            : String(rowData.lastName || '');
           const fullName = `${firstName} ${lastName}`.trim() || 'Nombre Completo';
           const canPickAvatar = hasEditPermissions || isEditing;
 
           if (isEditing) {
             return (
               <Box
-                sx={{ display: 'flex', alignItems: 'center', gap: 1.5, py: 0.5, width: '100%', minWidth: 0 }}
+                sx={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: 1.5,
+                  py: 0.5,
+                  width: '100%',
+                  minWidth: 0,
+                }}
                 onMouseDown={(e) => e.stopPropagation()}
               >
                 {/* Avatar with edit-on-hover (only while editing) — opens the picker modal */}
@@ -516,7 +526,9 @@ const EmployeesPage: React.FC = () => {
                 <Box sx={{ display: 'flex', gap: 0.5, flex: 1, minWidth: 0 }}>
                   <TextField
                     value={String(editFields.firstName || '')}
-                    onChange={(e) => setEditFields((prev) => ({ ...prev, firstName: e.target.value }))}
+                    onChange={(e) =>
+                      setEditFields((prev) => ({ ...prev, firstName: e.target.value }))
+                    }
                     placeholder="Nombre"
                     variant="standard"
                     size="small"
@@ -524,7 +536,9 @@ const EmployeesPage: React.FC = () => {
                   />
                   <TextField
                     value={String(editFields.lastName || '')}
-                    onChange={(e) => setEditFields((prev) => ({ ...prev, lastName: e.target.value }))}
+                    onChange={(e) =>
+                      setEditFields((prev) => ({ ...prev, lastName: e.target.value }))
+                    }
                     placeholder="Apellido"
                     variant="standard"
                     size="small"
@@ -536,14 +550,22 @@ const EmployeesPage: React.FC = () => {
           }
 
           return (
-            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, py: 0.5 }}>
+            <Box
+              sx={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: 1.5,
+                width: '100%',
+                minWidth: 0,
+              }}
+            >
               <Box
                 onClick={(e) => {
                   if (!canPickAvatar) return;
                   e.stopPropagation();
                   handleOpenAvatarDialog(rowData);
                 }}
-                title={canPickAvatar ? "Cambiar foto" : undefined}
+                title={canPickAvatar ? 'Cambiar foto' : undefined}
                 sx={{
                   display: 'flex',
                   alignItems: 'center',
@@ -561,7 +583,15 @@ const EmployeesPage: React.FC = () => {
               </Box>
               <Typography
                 component="span"
-                sx={{ fontWeight: 600, fontSize: '0.9rem', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}
+                sx={{
+                  fontWeight: 600,
+                  fontSize: '0.9rem',
+                  whiteSpace: 'nowrap',
+                  overflow: 'hidden',
+                  textOverflow: 'ellipsis',
+                  minWidth: 0,
+                  lineHeight: 1.4,
+                }}
               >
                 {fullName}
               </Typography>
@@ -570,8 +600,8 @@ const EmployeesPage: React.FC = () => {
         },
       },
       {
-        field: "email",
-        headerName: "Email",
+        field: 'email',
+        headerName: 'Email',
         flex: 1.4,
         minWidth: isSmallScreen ? 140 : 220,
         sortable: true,
@@ -579,9 +609,7 @@ const EmployeesPage: React.FC = () => {
           const rowId = Number(params.id);
           const isEditing = editRowId === rowId;
           const rowData = params.row as Employee;
-          const email = isEditing
-            ? String(editFields.email || '')
-            : String(rowData.email || '');
+          const email = isEditing ? String(editFields.email || '') : String(rowData.email || '');
 
           if (isEditing) {
             return (
@@ -614,7 +642,9 @@ const EmployeesPage: React.FC = () => {
 
           if (email) {
             return (
-              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+              <Box
+                sx={{ display: 'flex', alignItems: 'center', gap: 1, width: '100%', minWidth: 0 }}
+              >
                 <Mail size={14} strokeWidth={1.5} style={{ opacity: 0.4, flexShrink: 0 }} />
                 <Typography
                   component="a"
@@ -626,6 +656,8 @@ const EmployeesPage: React.FC = () => {
                     whiteSpace: 'nowrap',
                     overflow: 'hidden',
                     textOverflow: 'ellipsis',
+                    minWidth: 0,
+                    lineHeight: 1.4,
                     '&:hover': {
                       color: 'primary.main',
                       textDecoration: 'underline',
@@ -649,13 +681,13 @@ const EmployeesPage: React.FC = () => {
         },
       },
       {
-        field: "actions",
-        headerName: "",
+        field: 'actions',
+        headerName: '',
         sortable: false,
         width: isSmallScreen ? 64 : 150,
         minWidth: isSmallScreen ? 64 : 150,
-        align: "right",
-        headerAlign: "right",
+        align: 'right',
+        headerAlign: 'right',
         renderCell: (params) =>
           renderActionButtons({
             row: params.row as Employee,
@@ -694,18 +726,29 @@ const EmployeesPage: React.FC = () => {
   );
 
   return (
-    <Box className="scrollable-content" sx={{ height: "100%", display: "flex", flexDirection: "column", overflow: "hidden", pb: 0, pt: 0, px: 0 }}>
+    <Box
+      className="scrollable-content"
+      sx={{
+        height: '100%',
+        display: 'flex',
+        flexDirection: 'column',
+        overflow: 'hidden',
+        pb: 0,
+        pt: 0,
+        px: 0,
+      }}
+    >
       {/* Premium Card with Header and Grid */}
       <Paper
         elevation={0}
         sx={{
-          borderRadius: "16px",
-          border: "1px solid rgba(0,0,0,0.08)",
-          boxShadow: "0 4px 24px rgba(0,0,0,0.08), 0 1px 2px rgba(0,0,0,0.04)",
-          overflow: "hidden",
+          borderRadius: '16px',
+          border: '1px solid rgba(0,0,0,0.08)',
+          boxShadow: '0 4px 24px rgba(0,0,0,0.08), 0 1px 2px rgba(0,0,0,0.04)',
+          overflow: 'hidden',
           flex: 1,
-          display: "flex",
-          flexDirection: "column",
+          display: 'flex',
+          flexDirection: 'column',
           mx: { xs: 1, sm: 1.5, md: 2 },
           mb: 3,
           mt: 0,
@@ -719,15 +762,10 @@ const EmployeesPage: React.FC = () => {
             backgroundColor: theme.palette.background.paper,
             color: theme.palette.text.primary,
             flexShrink: 0,
-            borderBottom: `1px solid ${theme.palette.mode === "dark" ? "rgba(255,255,255,0.06)" : "rgba(0,0,0,0.06)"}`,
+            borderBottom: `1px solid ${theme.palette.mode === 'dark' ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.06)'}`,
           }}
         >
-          <Box
-            display="flex"
-            justifyContent="space-between"
-            alignItems="center"
-            mb={1.5}
-          >
+          <Box display="flex" justifyContent="space-between" alignItems="center" mb={1.5}>
             <Box display="flex" alignItems="center" gap={1.5}>
               <Box
                 sx={{
@@ -740,12 +778,12 @@ const EmployeesPage: React.FC = () => {
               </Box>
               <Box>
                 <Typography
-                  variant={isSmallScreen ? "h6" : "h5"}
+                  variant={isSmallScreen ? 'h6' : 'h5'}
                   sx={{
                     fontWeight: 700,
-                    fontSize: { xs: "1rem", sm: "1.15rem" },
+                    fontSize: { xs: '1rem', sm: '1.15rem' },
                     color: theme.palette.text.primary,
-                    letterSpacing: "-0.02em",
+                    letterSpacing: '-0.02em',
                     lineHeight: 1.2,
                   }}
                 >
@@ -755,8 +793,8 @@ const EmployeesPage: React.FC = () => {
                   variant="caption"
                   sx={{
                     color: theme.palette.text.secondary,
-                    fontSize: "0.7rem",
-                    letterSpacing: "0.02em",
+                    fontSize: '0.7rem',
+                    letterSpacing: '0.02em',
                   }}
                 >
                   {filteredEmployees.length} empleados registrados
@@ -783,20 +821,20 @@ const EmployeesPage: React.FC = () => {
           {/* Controls Row */}
           <Box
             display="flex"
-            flexDirection={{ xs: "column", sm: "row" }}
-            alignItems={{ xs: "stretch", sm: "center" }}
+            flexDirection={{ xs: 'column', sm: 'row' }}
+            alignItems={{ xs: 'stretch', sm: 'center' }}
             justifyContent="space-between"
             gap={2}
           >
             {/* Search */}
-            <Box flex={1} maxWidth={{ sm: "320px" }}>
+            <Box flex={1} maxWidth={{ sm: '320px' }}>
               {filteredEmployees && (
                 <SearchBarComponent
                   placeholder={MANAGEMENT.EMPLOYEES_PAGE.SEARCH_PLACEHOLDER}
                   value={search}
                   onChange={handleFilterChange}
                   fullWidth
-                  isSearching={isLoadingEmployees && search !== ""}
+                  isSearching={isLoadingEmployees && search !== ''}
                 />
               )}
             </Box>
@@ -812,8 +850,8 @@ const EmployeesPage: React.FC = () => {
                     px: 3,
                     py: 1,
                     fontWeight: 600,
-                    fontSize: "0.9rem",
-                    letterSpacing: "-0.01em",
+                    fontSize: '0.9rem',
+                    letterSpacing: '-0.01em',
                     borderRadius: '10px',
                   }}
                 >
@@ -826,7 +864,13 @@ const EmployeesPage: React.FC = () => {
 
         {/* Mobile Add Button */}
         {userPermissions.includes(PERMISSIONS.CREATE_EMPLOYEES) && (
-          <Box sx={{ display: { xs: 'flex', sm: 'none' }, p: 2, borderTop: `1px solid ${theme.palette.mode === "dark" ? "rgba(255,255,255,0.08)" : "rgba(0,0,0,0.08)"}` }}>
+          <Box
+            sx={{
+              display: { xs: 'flex', sm: 'none' },
+              p: 2,
+              borderTop: `1px solid ${theme.palette.mode === 'dark' ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.08)'}`,
+            }}
+          >
             <Button
               variant="contained"
               fullWidth
@@ -844,7 +888,15 @@ const EmployeesPage: React.FC = () => {
         )}
 
         {/* Content Section */}
-        <Box sx={{ flex: 1, minHeight: 0, display: "flex", flexDirection: "column", overflow: "hidden" }}>
+        <Box
+          sx={{
+            flex: 1,
+            minHeight: 0,
+            display: 'flex',
+            flexDirection: 'column',
+            overflow: 'hidden',
+          }}
+        >
           {isLoadingEmployees ? (
             <Box sx={loadingBoxStyles}>
               <Backdrop sx={backdropStyles(theme)} open={isLoadingEmployees}>
@@ -862,7 +914,10 @@ const EmployeesPage: React.FC = () => {
                 />
               ) : (
                 <Box sx={noEmployeesBoxStyles}>
-                  <Search size={48} style={{ color: theme.palette.text.disabled, ...noEmployeesIconStyles }} />
+                  <Search
+                    size={48}
+                    style={{ color: theme.palette.text.disabled, ...noEmployeesIconStyles }}
+                  />
                   <Typography variant="h6" color="textSecondary">
                     {MANAGEMENT.EMPLOYEES_PAGE.NO_EMPLOYEES}
                   </Typography>
@@ -910,10 +965,10 @@ const EmployeesPage: React.FC = () => {
         fullWidth
         PaperProps={{
           sx: {
-            borderRadius: "20px",
+            borderRadius: '20px',
             p: 0,
-            overflow: "hidden",
-            boxShadow: "0 25px 60px rgba(0,0,0,0.15), 0 4px 16px rgba(0,0,0,0.06)",
+            overflow: 'hidden',
+            boxShadow: '0 25px 60px rgba(0,0,0,0.15), 0 4px 16px rgba(0,0,0,0.06)',
           },
         }}
       >
@@ -923,12 +978,12 @@ const EmployeesPage: React.FC = () => {
             <Box
               sx={{
                 backgroundColor: theme.palette.primary.main,
-                borderRadius: "12px",
+                borderRadius: '12px',
                 p: 1,
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                boxShadow: "0 4px 12px rgba(0,0,0,0.08)",
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                boxShadow: '0 4px 12px rgba(0,0,0,0.08)',
               }}
             >
               <Camera size={18} color={theme.palette.primary.contrastText} />
@@ -937,9 +992,9 @@ const EmployeesPage: React.FC = () => {
               variant="h6"
               sx={{
                 fontWeight: 700,
-                fontSize: "1.15rem",
+                fontSize: '1.15rem',
                 color: theme.palette.text.primary,
-                letterSpacing: "-0.02em",
+                letterSpacing: '-0.02em',
               }}
             >
               Foto del empleado
@@ -948,35 +1003,37 @@ const EmployeesPage: React.FC = () => {
           <Typography
             variant="body2"
             color="textSecondary"
-            sx={{ fontSize: "0.85rem", lineHeight: 1.5, pl: 6 }}
+            sx={{ fontSize: '0.85rem', lineHeight: 1.5, pl: 6 }}
           >
-            Sube una foto para personalizar el perfil de{" "}
+            Sube una foto para personalizar el perfil de{' '}
             {avatarDialogEmployee
               ? `${avatarDialogEmployee.firstName} ${avatarDialogEmployee.lastName}`
-              : "el empleado"}
+              : 'el empleado'}
             .
           </Typography>
         </Box>
 
         <DialogContent sx={{ pb: 1, pt: 3, px: { xs: 2.5, sm: 4 } }}>
-          <Box sx={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 3 }}>
+          <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 3 }}>
             {/* Avatar Preview Circle */}
             <Box
               sx={{
                 width: 180,
                 height: 180,
-                borderRadius: "50%",
-                overflow: "hidden",
-                position: "relative",
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                backgroundColor: theme.palette.mode === "dark" ? "rgba(255,255,255,0.03)" : "rgba(0,0,0,0.03)",
-                border: `3px solid ${theme.palette.mode === "dark" ? "rgba(255,255,255,0.08)" : "rgba(0,0,0,0.06)"}`,
-                transition: "all 0.3s ease",
-                boxShadow: avatarPreview || getDialogAvatarUrl()
-                  ? "0 8px 32px rgba(0,0,0,0.15)"
-                  : "0 4px 16px rgba(0,0,0,0.06)",
+                borderRadius: '50%',
+                overflow: 'hidden',
+                position: 'relative',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                backgroundColor:
+                  theme.palette.mode === 'dark' ? 'rgba(255,255,255,0.03)' : 'rgba(0,0,0,0.03)',
+                border: `3px solid ${theme.palette.mode === 'dark' ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.06)'}`,
+                transition: 'all 0.3s ease',
+                boxShadow:
+                  avatarPreview || getDialogAvatarUrl()
+                    ? '0 8px 32px rgba(0,0,0,0.15)'
+                    : '0 4px 16px rgba(0,0,0,0.06)',
               }}
             >
               {avatarPreview ? (
@@ -984,9 +1041,9 @@ const EmployeesPage: React.FC = () => {
                   src={avatarPreview}
                   alt="Preview"
                   style={{
-                    width: "100%",
-                    height: "100%",
-                    objectFit: "cover",
+                    width: '100%',
+                    height: '100%',
+                    objectFit: 'cover',
                   }}
                 />
               ) : getDialogAvatarUrl() && !avatarLoadFailed ? (
@@ -995,16 +1052,16 @@ const EmployeesPage: React.FC = () => {
                   alt="Avatar del empleado"
                   onError={() => setAvatarLoadFailed(true)}
                   style={{
-                    width: "100%",
-                    height: "100%",
-                    objectFit: "cover",
+                    width: '100%',
+                    height: '100%',
+                    objectFit: 'cover',
                   }}
                 />
               ) : avatarDialogEmployee ? (
                 <EmployeeAvatar
                   employee={avatarDialogEmployee}
                   size={180}
-                  sx={{ fontSize: "3.5rem" }}
+                  sx={{ fontSize: '3.5rem' }}
                 />
               ) : (
                 <Box />
@@ -1012,17 +1069,17 @@ const EmployeesPage: React.FC = () => {
               {isUploadingAvatar && (
                 <Box
                   sx={{
-                    position: "absolute",
+                    position: 'absolute',
                     inset: 0,
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "center",
-                    backgroundColor: "rgba(0,0,0,0.5)",
-                    borderRadius: "50%",
-                    backdropFilter: "blur(2px)",
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    backgroundColor: 'rgba(0,0,0,0.5)',
+                    borderRadius: '50%',
+                    backdropFilter: 'blur(2px)',
                   }}
                 >
-                  <CircularProgress size={44} sx={{ color: "#fff" }} />
+                  <CircularProgress size={44} sx={{ color: '#fff' }} />
                 </Box>
               )}
             </Box>
@@ -1031,41 +1088,43 @@ const EmployeesPage: React.FC = () => {
             <Box
               onClick={() => avatarFileInputRef.current?.click()}
               sx={{
-                width: "100%",
-                border: `2px dashed ${theme.palette.mode === "dark" ? "rgba(255,255,255,0.12)" : "rgba(0,0,0,0.12)"}`,
-                borderRadius: "14px",
+                width: '100%',
+                border: `2px dashed ${theme.palette.mode === 'dark' ? 'rgba(255,255,255,0.12)' : 'rgba(0,0,0,0.12)'}`,
+                borderRadius: '14px',
                 p: 3,
-                display: "flex",
-                flexDirection: "column",
-                alignItems: "center",
+                display: 'flex',
+                flexDirection: 'column',
+                alignItems: 'center',
                 gap: 1.5,
-                cursor: "pointer",
-                transition: "all 0.2s cubic-bezier(0.4, 0, 0.2, 1)",
+                cursor: 'pointer',
+                transition: 'all 0.2s cubic-bezier(0.4, 0, 0.2, 1)',
                 backgroundColor: selectedFile
-                  ? (theme.palette.mode === "dark" ? "rgba(255,255,255,0.04)" : "rgba(0,0,0,0.02)")
-                  : "transparent",
+                  ? theme.palette.mode === 'dark'
+                    ? 'rgba(255,255,255,0.04)'
+                    : 'rgba(0,0,0,0.02)'
+                  : 'transparent',
                 borderColor: selectedFile
                   ? theme.palette.primary.main
-                  : (theme.palette.mode === "dark" ? "rgba(255,255,255,0.12)" : "rgba(0,0,0,0.12)"),
-                "&:hover": {
+                  : theme.palette.mode === 'dark'
+                    ? 'rgba(255,255,255,0.12)'
+                    : 'rgba(0,0,0,0.12)',
+                '&:hover': {
                   borderColor: theme.palette.primary.main,
-                  backgroundColor: theme.palette.mode === "dark"
-                    ? "rgba(255,255,255,0.04)"
-                    : "rgba(0,0,0,0.02)",
+                  backgroundColor:
+                    theme.palette.mode === 'dark' ? 'rgba(255,255,255,0.04)' : 'rgba(0,0,0,0.02)',
                 },
               }}
             >
               <Box
                 sx={{
-                  backgroundColor: theme.palette.mode === "dark"
-                    ? "rgba(255,255,255,0.06)"
-                    : "rgba(0,0,0,0.04)",
-                  borderRadius: "10px",
+                  backgroundColor:
+                    theme.palette.mode === 'dark' ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.04)',
+                  borderRadius: '10px',
                   p: 1.25,
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  transition: "all 0.2s ease",
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  transition: 'all 0.2s ease',
                 }}
               >
                 <Camera size={22} color={theme.palette.text.secondary} />
@@ -1076,22 +1135,22 @@ const EmployeesPage: React.FC = () => {
                   sx={{
                     fontWeight: 600,
                     color: theme.palette.text.primary,
-                    fontSize: "0.875rem",
-                    textAlign: "center",
-                    wordBreak: "break-all",
-                    maxWidth: "100%",
+                    fontSize: '0.875rem',
+                    textAlign: 'center',
+                    wordBreak: 'break-all',
+                    maxWidth: '100%',
                   }}
                 >
                   {selectedFile.name}
                 </Typography>
               ) : (
-                <Box sx={{ textAlign: "center" }}>
+                <Box sx={{ textAlign: 'center' }}>
                   <Typography
                     variant="body2"
                     sx={{
                       fontWeight: 600,
                       color: theme.palette.text.primary,
-                      fontSize: "0.875rem",
+                      fontSize: '0.875rem',
                     }}
                   >
                     Haz clic para seleccionar una imagen
@@ -1100,9 +1159,9 @@ const EmployeesPage: React.FC = () => {
                     variant="caption"
                     sx={{
                       color: theme.palette.text.secondary,
-                      fontSize: "0.75rem",
+                      fontSize: '0.75rem',
                       mt: 0.25,
-                      display: "block",
+                      display: 'block',
                     }}
                   >
                     JPEG, PNG, GIF o WebP · Máx 5MB
@@ -1117,25 +1176,35 @@ const EmployeesPage: React.FC = () => {
               type="file"
               accept="image/jpeg,image/png,image/gif,image/webp"
               onChange={handleAvatarFileSelect}
-              style={{ display: "none" }}
+              style={{ display: 'none' }}
             />
           </Box>
         </DialogContent>
 
-        <DialogActions sx={{ px: { xs: 2.5, sm: 4 }, pb: { xs: 2.5, sm: 3.5 }, pt: 1.5, gap: 1, flexDirection: { xs: "column", sm: "row" }, justifyContent: "space-between" }}>
+        <DialogActions
+          sx={{
+            px: { xs: 2.5, sm: 4 },
+            pb: { xs: 2.5, sm: 3.5 },
+            pt: 1.5,
+            gap: 1,
+            flexDirection: { xs: 'column', sm: 'row' },
+            justifyContent: 'space-between',
+          }}
+        >
           {getDialogAvatarUrl() && !selectedFile ? (
             <Button
               variant="text"
               color="error"
               onClick={handleAvatarDelete}
               disabled={isUploadingAvatar}
-              startIcon={isUploadingAvatar ? <Loader2 size={16} className="animate-spin" /> : <X size={16} />}
+              startIcon={
+                isUploadingAvatar ? <Loader2 size={16} className="animate-spin" /> : <X size={16} />
+              }
               sx={{
                 order: { xs: 2, sm: 1 },
-                "&:hover": {
-                  backgroundColor: theme.palette.mode === "dark"
-                    ? "rgba(244,67,54,0.1)"
-                    : "rgba(244,67,54,0.06)",
+                '&:hover': {
+                  backgroundColor:
+                    theme.palette.mode === 'dark' ? 'rgba(244,67,54,0.1)' : 'rgba(244,67,54,0.06)',
                 },
               }}
             >
@@ -1144,7 +1213,7 @@ const EmployeesPage: React.FC = () => {
           ) : (
             <Box /> /* Spacer */
           )}
-          <Box sx={{ display: "flex", gap: 1, order: { xs: 1, sm: 2 } }}>
+          <Box sx={{ display: 'flex', gap: 1, order: { xs: 1, sm: 2 } }}>
             <Button
               variant="outlined"
               onClick={handleCloseAvatarDialog}
@@ -1154,7 +1223,9 @@ const EmployeesPage: React.FC = () => {
             </Button>
             <Button
               variant="contained"
-              onClick={selectedFile ? handleUploadAvatar : () => avatarFileInputRef.current?.click()}
+              onClick={
+                selectedFile ? handleUploadAvatar : () => avatarFileInputRef.current?.click()
+              }
               disabled={isUploadingAvatar}
               sx={{ minWidth: 120 }}
               startIcon={
@@ -1165,11 +1236,7 @@ const EmployeesPage: React.FC = () => {
                 ) : undefined
               }
             >
-              {isUploadingAvatar
-                ? "Subiendo..."
-                : selectedFile
-                ? "Subir foto"
-                : "Seleccionar"}
+              {isUploadingAvatar ? 'Subiendo...' : selectedFile ? 'Subir foto' : 'Seleccionar'}
             </Button>
           </Box>
         </DialogActions>
