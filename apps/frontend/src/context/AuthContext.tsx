@@ -56,7 +56,8 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     return sessionStorage.getItem("loggedInAt");
   });
 
-  // Handles login: sets tokens, user, and permissions in state, cookies, and sessionStorage
+  // Handles login: sets tokens (in-memory; httpOnly cookies are set by the
+  // backend), user and permissions in state/sessionStorage
   const login = (
     accessToken: string,
     refreshToken: string,
@@ -69,44 +70,24 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     setUserPermissions(userPermissions);
     const loginTime = new Date().toISOString();
     setLoggedInAt(loginTime);
-    
-    // Check if we're in production to set appropriate cookie settings
-        const isProduction = process.env.NODE_ENV === "production";
-    const cookieOptions = {
-      expires: 1,
-      secure: isProduction,
-      sameSite: isProduction ? "strict" as const : "lax" as const,
-      path: "/",
-    };
-    
-    const refreshCookieOptions = {
-      ...cookieOptions,
-      expires: 7,
-    };
-    
-    setTokenWithFallback("accessToken", accessToken, cookieOptions);
-    setTokenWithFallback("refreshToken", refreshToken, refreshCookieOptions);
+
+    setTokenWithFallback("accessToken", accessToken);
+    setTokenWithFallback("refreshToken", refreshToken);
     sessionStorage.setItem("currentUser", JSON.stringify(currentUser));
     sessionStorage.setItem("userPermissions", JSON.stringify(userPermissions));
     sessionStorage.setItem("loggedInAt", loginTime);
   };
 
-  // Handles logout: clears all auth state, cookies, and sessionStorage
+  // Handles logout: clears all auth state and sessionStorage
   const logout = () => {
     setAccessToken(null);
     setRefreshToken(null);
     setCurrentUser(null);
     setUserPermissions([]);
     setLoggedInAt(null);
-    
-    // Use same cookie options for removal as for setting
-    const isProduction = process.env.NODE_ENV === "production";
-    const cookieOptions = {
-      sameSite: isProduction ? "strict" as const : "lax" as const,
-    };
-    
-    removeTokenWithFallback("accessToken", cookieOptions);
-    removeTokenWithFallback("refreshToken", cookieOptions);
+
+    removeTokenWithFallback("accessToken");
+    removeTokenWithFallback("refreshToken");
     sessionStorage.clear();
   };
 

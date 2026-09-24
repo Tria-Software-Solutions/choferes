@@ -243,43 +243,50 @@ Services:
 
 | Variable | Description |
 | --- | --- |
-| `DB_HOST` | PostgreSQL host |
-| `DB_PORT` | Port (default: 5432) |
-| `DB_NAME` | Database name |
-| `DB_USER` | Database user |
-| `DB_PASSWORD` | Database password |
-| `JWT_SECRET_KEY` | Secret for access tokens |
-| `JWT_REFRESH_SECRET` | Secret for refresh tokens |
 | `PORT` | Server port (default: 5000) |
+| `DATABASE_URL` | PostgreSQL connection string (Render/Neon/Heroku) |
+| `PGHOST` / `PGPORT` / `PGUSER` / `PGPASSWORD` / `PGDATABASE` | Individual PostgreSQL credentials (alternative to `DATABASE_URL`) |
+| `JWT_SECRET_KEY` | Secret for access tokens (min 32 chars) |
+| `JWT_SECRET_KEY_REFRESH` | Secret for refresh tokens (min 32 chars) |
+| `GEMINI_API_KEY` | Google Gemini key — used only server-side by the OCR proxy |
+| `REACT_APP_UI_URL` | Frontend origin for CORS |
+| `SEED_ADMIN_PASSWORD` / `SEED_MANAGEMENT_PASSWORD` / `SEED_CUSTOMER_SERVICE_PASSWORD` | Seeder passwords (required in production, min 12 chars) |
+
+> Note: the seeder refuses to run in production with the default dev passwords. Real secrets (`JWT_*`, `GEMINI_API_KEY`) must be rotated and kept out of source control.
 
 ### Frontend (`apps/frontend/.env`)
 
 | Variable | Description |
 | --- | --- |
 | `REACT_APP_API_URL` | Backend API URL |
+| `REACT_APP_UI_URL` | Frontend origin (used for CORS) |
+
+> No Gemini/OCR keys belong here anymore: the frontend calls the backend proxy (`POST /api/vision/gemini`) and keys live only in the backend.
 
 ---
 
 ## CI/CD
 
-The GitHub Actions pipeline (`.github/workflows/ci.yml`) runs in parallel:
+The GitHub Actions pipeline (`.github/workflows/ci.yml`):
 
-1. **Install** — Install dependencies and build `packages/shared`
-1. **Backend** — Lint → Build → Test
-1. **Frontend** — Lint → Build → Test
+1. **Install** — `npm ci` at the monorepo root (single lockfile) + cache (key includes `package-lock.json`) + build `packages/shared`
+1. **Backend** — Lint → Test → Build (tests gate the pipeline)
+1. **Frontend** — Lint → Test → Build
 
-Tests have `continue-on-error: true` to avoid blocking the pipeline on transient failures.
+`keep-alive.yml` pings the deployed services (github-actions webhook + Render) with `curl -sf --retry 2` so results fail loudly instead of silently passing.
 
 ---
 
 ## Seed Users (Development)
 
-| Username | Password | Role |
+Only for local development. In production the seeder **fails unless** the `SEED_*_PASSWORD` env vars are set (min 12 chars). Rotate these credentials before any real use.
+
+| Username | Password (dev default) | Role |
 | --- | --- | --- |
-| `danilumix` | `Gerencia123$` | Management |
-| `damarisa` | `Admin123$` | Administrative |
-| `carlosc` | `678900CS$` | HR |
-| `lmhq94` | `Admin123$` | Administrative (inactive) |
+| `lmhq94` | `Admin123$`/`SEED_ADMIN_PASSWORD` | Gerencia |
+| `danilumix` | `Gerencia123$`/`SEED_MANAGEMENT_PASSWORD` | Gerencia |
+| `damarisa` | `Admin123$`/`SEED_ADMIN_PASSWORD` | Administrativo |
+| `carlosc` | `678900CS$`/`SEED_CUSTOMER_SERVICE_PASSWORD` | Supervisor |
 
 ---
 

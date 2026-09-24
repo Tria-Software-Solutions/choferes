@@ -22,20 +22,20 @@ jobs:
         with:
           node-version: ${{ matrix.node-version }}
 
-      # Cache node_modules based on package.json hashes.
-      # Lock files are gitignored so we hash package.json instead.
+      # Cache node_modules based on the manifest + single root lockfile
+      # (the workspace lockfiles under apps/* are intentionally not tracked).
       - name: Cache node_modules
         id: cache-modules
         uses: actions/cache@v4
         with:
           path: node_modules
-          key: modules-${{ runner.os }}-${{ hashFiles('package.json', 'apps/*/package.json', 'packages/*/package.json') }}
+          key: modules-${{ runner.os }}-${{ hashFiles('package.json', 'package-lock.json', 'apps/*/package.json', 'packages/*/package.json') }}
           restore-keys: |
             modules-${{ runner.os }}-
 
       - name: Install Dependencies (all workspaces)
         if: steps.cache-modules.outputs.cache-hit != 'true'
-        run: npm install
+        run: npm ci
 
       - name: Build Shared Package
         working-directory: ./packages/shared
@@ -71,14 +71,14 @@ jobs:
         uses: actions/cache/restore@v4
         with:
           path: node_modules
-          key: modules-${{ runner.os }}-${{ hashFiles('package.json', 'apps/*/package.json', 'packages/*/package.json') }}
+          key: modules-${{ runner.os }}-${{ hashFiles('package.json', 'package-lock.json', 'apps/*/package.json', 'packages/*/package.json') }}
           restore-keys: |
             modules-${{ runner.os }}-
 
       # Safety fallback if cache was unavailable
       - name: Install Dependencies (fallback)
         if: steps.cache-restore.outputs.cache-hit != 'true'
-        run: npm install
+        run: npm ci
 
       - name: Download Shared Package
         uses: actions/download-artifact@v4
@@ -87,17 +87,14 @@ jobs:
           path: packages/shared/dist
 
       - name: Lint Backend
-        if: always()
         working-directory: ./apps/backend
-        run: npm run lint || true
+        run: npm run lint
 
       - name: Build Backend
         working-directory: ./apps/backend
         run: npm run build
 
       - name: Test Backend
-        if: always()
-        continue-on-error: true
         working-directory: ./apps/backend
         run: npm test -- --verbose --testTimeout=10000
 
@@ -123,14 +120,14 @@ jobs:
         uses: actions/cache/restore@v4
         with:
           path: node_modules
-          key: modules-${{ runner.os }}-${{ hashFiles('package.json', 'apps/*/package.json', 'packages/*/package.json') }}
+          key: modules-${{ runner.os }}-${{ hashFiles('package.json', 'package-lock.json', 'apps/*/package.json', 'packages/*/package.json') }}
           restore-keys: |
             modules-${{ runner.os }}-
 
       # Safety fallback if cache was unavailable
       - name: Install Dependencies (fallback)
         if: steps.cache-restore.outputs.cache-hit != 'true'
-        run: npm install
+        run: npm ci
 
       - name: Download Shared Package
         uses: actions/download-artifact@v4
@@ -139,16 +136,13 @@ jobs:
           path: packages/shared/dist
 
       - name: Lint Frontend
-        if: always()
         working-directory: ./apps/frontend
-        run: npm run lint || true
+        run: npm run lint
 
       - name: Build Frontend
         working-directory: ./apps/frontend
         run: npm run build
 
       - name: Test Frontend
-        if: always()
-        continue-on-error: true
         working-directory: ./apps/frontend
         run: CI=true npm test -- --watchAll=false --verbose

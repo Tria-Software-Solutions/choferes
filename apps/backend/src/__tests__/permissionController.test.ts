@@ -3,11 +3,24 @@ import express from "express";
 
 // Mock auth middleware
 jest.mock("../middleware/authMiddleware", () => ({
-  authenticateToken: jest.fn((req: express.Request, _res: express.Response, next: express.NextFunction) => {
-    (req as any).user = { id: 1 };
-    next();
-  }),
+  authenticateToken: jest.fn(
+    (req: express.Request, _res: express.Response, next: express.NextFunction) => {
+      (req as any).user = { id: 1, roles: ["*"], permissions: ["*"] };
+      next();
+    },
+  ),
 }));
+
+jest.mock("../middleware/authorize", () => {
+  const pass = () => (_req: express.Request, _res: express.Response, next: express.NextFunction) =>
+    next();
+  return {
+    requirePermission: jest.fn(pass),
+    requireAnyPermission: jest.fn(pass),
+    requireRole: jest.fn(pass),
+    allowSelfOrPermission: jest.fn(pass),
+  };
+});
 
 // Mock validation middleware
 jest.mock("../middleware/validation", () => {
@@ -20,7 +33,9 @@ jest.mock("../middleware/validation", () => {
     permissionRules: [mockRule],
     permissionNamesParam: [mockRule],
     paginationRules: [mockRule],
-    validate: jest.fn((_req: express.Request, _res: express.Response, next: express.NextFunction) => next()),
+    validate: jest.fn((_req: express.Request, _res: express.Response, next: express.NextFunction) =>
+      next(),
+    ),
   };
 });
 
@@ -57,7 +72,14 @@ describe("GET /api/permissions", () => {
   it("debería devolver 200 con lista paginada", async () => {
     const paginatedResult = {
       data: [mockPermission],
-      pagination: { page: 1, limit: 50, totalItems: 1, totalPages: 1, hasNextPage: false, hasPreviousPage: false },
+      pagination: {
+        page: 1,
+        limit: 50,
+        totalItems: 1,
+        totalPages: 1,
+        hasNextPage: false,
+        hasPreviousPage: false,
+      },
     };
     service.getPermissions.mockResolvedValue(paginatedResult);
 
@@ -130,7 +152,12 @@ describe("GET /api/permissions/names/:names", () => {
 
 describe("POST /api/permissions", () => {
   it("debería devolver 201 con el permiso creado", async () => {
-    const createdPermission = { id: 2, name: "view_reports", createdAt: new Date().toISOString(), updatedAt: new Date().toISOString() };
+    const createdPermission = {
+      id: 2,
+      name: "view_reports",
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+    };
     service.createPermission.mockResolvedValue(createdPermission);
 
     const res = await request(app).post("/api/permissions").send({ name: "view_reports" });

@@ -7,7 +7,6 @@ const PAGE_TITLE = {
   EMPLOYEES_SIMPLIFIED: "Empleados",
   LOGIN: "Sistema de Gestión",
   LOGIN_SIMPLIFIED: "Gestión",
-  REGISTER: "Crear Cuenta",
   ROLES: "Administración de Roles",
   ROLES_SIMPLIFIED: "Roles",
   SCHEDULES: "Gestión de Horarios y Turnos",

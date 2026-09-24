@@ -40,7 +40,7 @@ import {
 } from './styles';
 import {
   submitProgressStyles,
-} from '../Register/styles';
+} from '../AuthPageStyles';
 
 const Login: React.FC = () => {
   const location = useLocation();

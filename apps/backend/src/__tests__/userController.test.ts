@@ -3,11 +3,24 @@ import express from "express";
 
 // Mock auth middleware
 jest.mock("../middleware/authMiddleware", () => ({
-  authenticateToken: jest.fn((req: express.Request, _res: express.Response, next: express.NextFunction) => {
-    (req as any).user = { id: 1 };
-    next();
-  }),
+  authenticateToken: jest.fn(
+    (req: express.Request, _res: express.Response, next: express.NextFunction) => {
+      (req as any).user = { id: 1, roles: ["*"], permissions: ["*"] };
+      next();
+    },
+  ),
 }));
+
+jest.mock("../middleware/authorize", () => {
+  const pass = () => (_req: express.Request, _res: express.Response, next: express.NextFunction) =>
+    next();
+  return {
+    requirePermission: jest.fn(pass),
+    requireAnyPermission: jest.fn(pass),
+    requireRole: jest.fn(pass),
+    allowSelfOrPermission: jest.fn(pass),
+  };
+});
 
 // Mock validation middleware
 jest.mock("../middleware/validation", () => {
@@ -17,12 +30,16 @@ jest.mock("../middleware/validation", () => {
   (mockRule as any).run = jest.fn();
   return {
     idParam: [mockRule],
+    userCreateRules: [mockRule],
+    userRules: [mockRule],
     userUpdateRules: [mockRule],
     userStatusUpdateRules: [mockRule],
     userPasswordUpdateRules: [mockRule],
     userTemporalPasswordUpdateRules: [mockRule],
     paginationRules: [mockRule],
-    validate: jest.fn((_req: express.Request, _res: express.Response, next: express.NextFunction) => next()),
+    validate: jest.fn((_req: express.Request, _res: express.Response, next: express.NextFunction) =>
+      next(),
+    ),
   };
 });
 
@@ -130,7 +147,14 @@ describe("GET /api/users", () => {
   it("debería devolver 200 con lista paginada", async () => {
     const paginatedResult = {
       data: [mockUser],
-      pagination: { page: 1, limit: 50, totalItems: 1, totalPages: 1, hasNextPage: false, hasPreviousPage: false },
+      pagination: {
+        page: 1,
+        limit: 50,
+        totalItems: 1,
+        totalPages: 1,
+        hasNextPage: false,
+        hasPreviousPage: false,
+      },
     };
     service.getUsers.mockResolvedValue(paginatedResult);
 
@@ -266,7 +290,9 @@ describe("PUT /api/users/:id/temporal-password", () => {
   it("debería devolver 200 con contraseña temporal actualizada", async () => {
     service.updateUserTemporalPassword.mockResolvedValue(mockUser);
 
-    const res = await request(app).put("/api/users/1/temporal-password").send({ temporalPassword: "temp_pass" });
+    const res = await request(app)
+      .put("/api/users/1/temporal-password")
+      .send({ temporalPassword: "temp_pass" });
 
     expect(res.status).toBe(200);
     expect(service.updateUserTemporalPassword).toHaveBeenCalledWith(1, "temp_pass");

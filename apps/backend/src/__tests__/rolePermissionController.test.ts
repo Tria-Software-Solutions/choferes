@@ -3,11 +3,24 @@ import express from "express";
 
 // Mock auth middleware
 jest.mock("../middleware/authMiddleware", () => ({
-  authenticateToken: jest.fn((req: express.Request, _res: express.Response, next: express.NextFunction) => {
-    (req as any).user = { id: 1 };
-    next();
-  }),
+  authenticateToken: jest.fn(
+    (req: express.Request, _res: express.Response, next: express.NextFunction) => {
+      (req as any).user = { id: 1, roles: ["*"], permissions: ["*"] };
+      next();
+    },
+  ),
 }));
+
+jest.mock("../middleware/authorize", () => {
+  const pass = () => (_req: express.Request, _res: express.Response, next: express.NextFunction) =>
+    next();
+  return {
+    requirePermission: jest.fn(pass),
+    requireAnyPermission: jest.fn(pass),
+    requireRole: jest.fn(pass),
+    allowSelfOrPermission: jest.fn(pass),
+  };
+});
 
 // Mock the entire service layer — validation is NOT used in rolePermissionRoutes
 jest.mock("../services/rolePermissionService", () => ({
@@ -72,16 +85,23 @@ describe("POST /api/role-permissions", () => {
 
 describe("PUT /api/role-permissions/:id", () => {
   it("debería devolver 200 con los permisos actualizados", async () => {
-    service.updateRolePermission.mockResolvedValue([{ roleId: 1, permissionId: 1 }, { roleId: 1, permissionId: 2 }]);
+    service.updateRolePermission.mockResolvedValue([
+      { roleId: 1, permissionId: 1 },
+      { roleId: 1, permissionId: 2 },
+    ]);
 
-    const res = await request(app).put("/api/role-permissions/1").send({ permissionIds: [1, 2] });
+    const res = await request(app)
+      .put("/api/role-permissions/1")
+      .send({ permissionIds: [1, 2] });
 
     expect(res.status).toBe(200);
     expect(res.body).toHaveLength(2);
   });
 
   it("debería devolver 400 si permissionIds no es array", async () => {
-    const res = await request(app).put("/api/role-permissions/1").send({ permissionIds: "not-an-array" });
+    const res = await request(app)
+      .put("/api/role-permissions/1")
+      .send({ permissionIds: "not-an-array" });
 
     expect(res.status).toBe(400);
     expect(res.body.message).toBe("Permission Ids must be an array");

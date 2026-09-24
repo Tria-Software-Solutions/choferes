@@ -2,9 +2,13 @@
 import jwt, { JwtPayload } from "jsonwebtoken";
 import { Request, Response, NextFunction } from "express";
 import { generateTokens } from "../utils/generateSecret";
+import { User } from "../models/User";
+import { Role } from "../models/Role";
+import { Permission } from "../models/Permission";
+import type { AuthenticatedUser } from "./authorize";
 
 interface AuthenticatedRequest extends Request {
-  user?: { id: number };
+  user?: AuthenticatedUser;
 }
 
 const { JWT_SECRET_KEY } = process.env;
@@ -14,8 +18,41 @@ if (!JWT_SECRET_KEY || !JWT_SECRET_KEY_REFRESH) {
   throw new Error("Missing JWT secret keys in environment variables");
 }
 
-// Middleware to authenticate access tokens from Authorization header or cookies
-export const authenticateToken = (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
+const verifyToken = (token: string, secret: string): Promise<JwtPayload> =>
+  new Promise((resolve, reject) => {
+    jwt.verify(token, secret, (error, decoded) => {
+      if (error) {
+        reject(error);
+        return;
+      }
+      resolve(decoded as JwtPayload);
+    });
+  });
+
+const mapVerifyError = (error: unknown): { status: number; error: string; code: string } => {
+  if (error instanceof Error) {
+    if (error.name === "TokenExpiredError") {
+      return { status: 401, error: "Unauthorized: Token expired", code: "TOKEN_EXPIRED" };
+    }
+    if (error.name === "JsonWebTokenError") {
+      return { status: 401, error: "Unauthorized: Invalid token", code: "INVALID_TOKEN" };
+    }
+  }
+  return {
+    status: 401,
+    error: "Unauthorized: Token verification failed",
+    code: "TOKEN_VERIFICATION_FAILED",
+  };
+};
+
+// Middleware to authenticate access tokens from Authorization header or cookies.
+// Resolves the user from the database (acts as a server-side revocation check),
+// verifies the account is active and attaches { id, roles, permissions } to req.user.
+export const authenticateToken = async (
+  req: AuthenticatedRequest,
+  res: Response,
+  next: NextFunction,
+): Promise<Response | void> => {
   try {
     // Check Authorization header first
     const authHeader = req.headers.authorization;
@@ -35,38 +72,61 @@ export const authenticateToken = (req: AuthenticatedRequest, res: Response, next
       });
     }
 
-    return jwt.verify(accessToken, JWT_SECRET_KEY, (error, decoded) => {
-      if (error) {
-        if (error.name === "TokenExpiredError") {
-          return res.status(401).json({
-            error: "Unauthorized: Token expired",
-            code: "TOKEN_EXPIRED",
-          });
-        }
-        if (error.name === "JsonWebTokenError") {
-          return res.status(401).json({
-            error: "Unauthorized: Invalid token",
-            code: "INVALID_TOKEN",
-          });
-        }
-        return res.status(401).json({
-          error: "Unauthorized: Token verification failed",
-          code: "TOKEN_VERIFICATION_FAILED",
-        });
-      }
+    let payload: JwtPayload;
+    try {
+      payload = await verifyToken(accessToken, JWT_SECRET_KEY);
+    } catch (error) {
+      const mapped = mapVerifyError(error);
+      return res.status(mapped.status).json({ error: mapped.error, code: mapped.code });
+    }
 
-      const payload = decoded as JwtPayload;
+    if (!payload.userId || typeof payload.userId !== "string") {
+      return res.status(403).json({
+        error: "Forbidden: Invalid token payload",
+        code: "INVALID_PAYLOAD",
+      });
+    }
 
-      if (!payload.userId || typeof payload.userId !== "string") {
-        return res.status(403).json({
-          error: "Forbidden: Invalid token payload",
-          code: "INVALID_PAYLOAD",
-        });
-      }
-
-      req.user = { id: parseInt(payload.userId, 10) };
-      return next();
+    const userId = parseInt(payload.userId, 10);
+    const user = await User.findByPk(userId, {
+      attributes: ["id", "isActive"],
+      include: [
+        {
+          model: Role,
+          as: "roles",
+          through: { attributes: [] },
+          include: [
+            {
+              model: Permission,
+              as: "permissions",
+              through: { attributes: [] },
+            },
+          ],
+        },
+      ],
     });
+
+    if (!user) {
+      return res.status(401).json({
+        error: "Unauthorized: User no longer exists",
+        code: "USER_UNAVAILABLE",
+      });
+    }
+
+    if (!user.isActive) {
+      return res.status(403).json({
+        error: "Forbidden: Account disabled",
+        code: "ACCOUNT_DISABLED",
+      });
+    }
+
+    const roles = (user.roles ?? []).map((role) => role.name);
+    const permissions = (user.roles ?? []).flatMap((role) =>
+      (role.permissions ?? []).map((permission) => permission.name),
+    );
+
+    req.user = { id: userId, roles, permissions };
+    return next();
   } catch {
     return res.status(500).json({
       error: "Internal server error",

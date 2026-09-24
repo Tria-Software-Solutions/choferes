@@ -18,8 +18,8 @@ services:
 
   api:
     build:
-      context: ./apps/backend
-      dockerfile: Dockerfile
+      context: .
+      dockerfile: apps/backend/Dockerfile
     environment:
       NODE_ENV: development
       DB_HOST: db
@@ -43,11 +43,13 @@ services:
 
   ui:
     build:
-      context: ./apps/frontend
-      dockerfile: Dockerfile
+      context: .
+      dockerfile: apps/frontend/Dockerfile
+      # CRA inyecta REACT_APP_* en build-time; el runtime de nginx no la usa
+      args:
+        REACT_APP_API_URL: ${REACT_APP_API_URL:-http://localhost:5001}
     environment:
       NODE_ENV: production
-      REACT_APP_API_URL: http://localhost:5001
     ports:
       - "3000:80"
     depends_on:

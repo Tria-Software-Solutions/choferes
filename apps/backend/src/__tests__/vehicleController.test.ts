@@ -3,11 +3,24 @@ import express from "express";
 
 // Mock auth middleware
 jest.mock("../middleware/authMiddleware", () => ({
-  authenticateToken: jest.fn((req: express.Request, _res: express.Response, next: express.NextFunction) => {
-    (req as any).user = { id: 1 };
-    next();
-  }),
+  authenticateToken: jest.fn(
+    (req: express.Request, _res: express.Response, next: express.NextFunction) => {
+      (req as any).user = { id: 1, roles: ["*"], permissions: ["*"] };
+      next();
+    },
+  ),
 }));
+
+jest.mock("../middleware/authorize", () => {
+  const pass = () => (_req: express.Request, _res: express.Response, next: express.NextFunction) =>
+    next();
+  return {
+    requirePermission: jest.fn(pass),
+    requireAnyPermission: jest.fn(pass),
+    requireRole: jest.fn(pass),
+    allowSelfOrPermission: jest.fn(pass),
+  };
+});
 
 // Mock validation middleware — rules are ARRAYS, validate is a function
 jest.mock("../middleware/validation", () => {
@@ -21,7 +34,9 @@ jest.mock("../middleware/validation", () => {
     vehicleUpdateRules: [...[mockRule], mockRule],
     paginationRules: [mockRule],
     vehicleDateQuery: [mockRule],
-    validate: jest.fn((_req: express.Request, _res: express.Response, next: express.NextFunction) => next()),
+    validate: jest.fn((_req: express.Request, _res: express.Response, next: express.NextFunction) =>
+      next(),
+    ),
   };
 });
 
@@ -68,7 +83,14 @@ describe("GET /api/vehicles", () => {
   it("debería devolver 200 con lista paginada", async () => {
     const paginatedResult = {
       data: [mockVehicle],
-      pagination: { page: 1, limit: 50, totalItems: 1, totalPages: 1, hasNextPage: false, hasPreviousPage: false },
+      pagination: {
+        page: 1,
+        limit: 50,
+        totalItems: 1,
+        totalPages: 1,
+        hasNextPage: false,
+        hasPreviousPage: false,
+      },
     };
     service.getVehicles.mockResolvedValue(paginatedResult);
 
@@ -82,7 +104,14 @@ describe("GET /api/vehicles", () => {
   it("debería pasar query params incluyendo search", async () => {
     service.getVehicles.mockResolvedValue({
       data: [],
-      pagination: { page: 1, limit: 10, totalItems: 0, totalPages: 0, hasNextPage: false, hasPreviousPage: false },
+      pagination: {
+        page: 1,
+        limit: 10,
+        totalItems: 0,
+        totalPages: 0,
+        hasNextPage: false,
+        hasPreviousPage: false,
+      },
     });
 
     await request(app).get("/api/vehicles?search=ABC&page=1&limit=10");
@@ -151,10 +180,20 @@ describe("GET /api/vehicles/by-date", () => {
 describe("POST /api/vehicles", () => {
   it("debería devolver 201 con el vehículo creado", async () => {
     const newVehicle = {
-      ticket: "99999", licensePlate: "XYZ-789", brand: "Honda", color: "Azul",
-      parkingLot: "B2", notes: "", parkingDate: "2026-07-20T00:00:00.000Z",
+      ticket: "99999",
+      licensePlate: "XYZ-789",
+      brand: "Honda",
+      color: "Azul",
+      parkingLot: "B2",
+      notes: "",
+      parkingDate: "2026-07-20T00:00:00.000Z",
     };
-    const createdVehicle = { id: 2, ...newVehicle, createdAt: new Date().toISOString(), updatedAt: new Date().toISOString() };
+    const createdVehicle = {
+      id: 2,
+      ...newVehicle,
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+    };
 
     service.createVehicle.mockResolvedValue(createdVehicle);
 

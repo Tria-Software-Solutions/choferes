@@ -1,6 +1,8 @@
 import express from "express";
 import * as permissionController from "../controllers/permissionController";
 import { authenticateToken } from "../middleware/authMiddleware";
+import { requirePermission } from "../middleware/authorize";
+import { PERMISSIONS } from "../constants/permissions";
 import {
   idParam,
   permissionRules,
@@ -23,10 +25,18 @@ router.get(
 router.post(
   "/",
   authenticateToken,
+  requirePermission(PERMISSIONS.EDIT_ROLE),
   permissionRules,
   validate,
   permissionController.createPermission,
 );
-router.delete("/:id", authenticateToken, idParam, validate, permissionController.deletePermission);
+router.delete(
+  "/:id",
+  authenticateToken,
+  requirePermission(PERMISSIONS.EDIT_ROLE),
+  idParam,
+  validate,
+  permissionController.deletePermission,
+);
 
 export default router;

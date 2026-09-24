@@ -3,11 +3,24 @@ import express from "express";
 
 // Mock auth middleware
 jest.mock("../middleware/authMiddleware", () => ({
-  authenticateToken: jest.fn((req: express.Request, _res: express.Response, next: express.NextFunction) => {
-    (req as any).user = { id: 1 };
-    next();
-  }),
+  authenticateToken: jest.fn(
+    (req: express.Request, _res: express.Response, next: express.NextFunction) => {
+      (req as any).user = { id: 1, roles: ["*"], permissions: ["*"] };
+      next();
+    },
+  ),
 }));
+
+jest.mock("../middleware/authorize", () => {
+  const pass = () => (_req: express.Request, _res: express.Response, next: express.NextFunction) =>
+    next();
+  return {
+    requirePermission: jest.fn(pass),
+    requireAnyPermission: jest.fn(pass),
+    requireRole: jest.fn(pass),
+    allowSelfOrPermission: jest.fn(pass),
+  };
+});
 
 // Mock validation middleware — rules are ARRAYS, validate is a function
 jest.mock("../middleware/validation", () => {
@@ -20,7 +33,9 @@ jest.mock("../middleware/validation", () => {
     employeeRules: [mockRule],
     employeeUpdateRules: [...[mockRule], mockRule],
     paginationRules: [mockRule],
-    validate: jest.fn((_req: express.Request, _res: express.Response, next: express.NextFunction) => next()),
+    validate: jest.fn((_req: express.Request, _res: express.Response, next: express.NextFunction) =>
+      next(),
+    ),
   };
 });
 
@@ -61,7 +76,14 @@ describe("GET /api/employees", () => {
   it("debería devolver 200 con lista paginada", async () => {
     const paginatedResult = {
       data: [mockEmployee],
-      pagination: { page: 1, limit: 50, totalItems: 1, totalPages: 1, hasNextPage: false, hasPreviousPage: false },
+      pagination: {
+        page: 1,
+        limit: 50,
+        totalItems: 1,
+        totalPages: 1,
+        hasNextPage: false,
+        hasPreviousPage: false,
+      },
     };
     service.getEmployees.mockResolvedValue(paginatedResult);
 
@@ -75,7 +97,14 @@ describe("GET /api/employees", () => {
   it("debería pasar query params al service", async () => {
     service.getEmployees.mockResolvedValue({
       data: [],
-      pagination: { page: 2, limit: 10, totalItems: 0, totalPages: 0, hasNextPage: false, hasPreviousPage: true },
+      pagination: {
+        page: 2,
+        limit: 10,
+        totalItems: 0,
+        totalPages: 0,
+        hasNextPage: false,
+        hasPreviousPage: true,
+      },
     });
 
     await request(app).get("/api/employees?page=2&limit=10&search=juan");
@@ -119,7 +148,12 @@ describe("GET /api/employees/:id", () => {
 describe("POST /api/employees", () => {
   it("debería devolver 201 con el empleado creado", async () => {
     const newEmployee = { firstName: "María", lastName: "García", email: "maria@example.com" };
-    const createdEmployee = { id: 2, ...newEmployee, createdAt: new Date().toISOString(), updatedAt: new Date().toISOString() };
+    const createdEmployee = {
+      id: 2,
+      ...newEmployee,
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+    };
 
     service.createEmployee.mockResolvedValue(createdEmployee);
 
