@@ -3,11 +3,24 @@ import express from "express";
 
 // Mock auth middleware
 jest.mock("../middleware/authMiddleware", () => ({
-  authenticateToken: jest.fn((req: express.Request, _res: express.Response, next: express.NextFunction) => {
-    (req as any).user = { id: 1 };
-    next();
-  }),
+  authenticateToken: jest.fn(
+    (req: express.Request, _res: express.Response, next: express.NextFunction) => {
+      (req as any).user = { id: 1, roles: ["*"], permissions: ["*"] };
+      next();
+    },
+  ),
 }));
+
+jest.mock("../middleware/authorize", () => {
+  const pass = () => (_req: express.Request, _res: express.Response, next: express.NextFunction) =>
+    next();
+  return {
+    requirePermission: jest.fn(pass),
+    requireAnyPermission: jest.fn(pass),
+    requireRole: jest.fn(pass),
+    allowSelfOrPermission: jest.fn(pass),
+  };
+});
 
 // Mock the entire service layer — validation is NOT used in userRoleRoutes (except POST / has NO auth)
 jest.mock("../services/userRoleService", () => ({

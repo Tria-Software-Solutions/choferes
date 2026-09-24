@@ -190,21 +190,6 @@ const OCRResultModal: React.FC<OCRResultModalProps> = ({
             >
               Resultados De Datos Extraídos
             </Typography>
-            {!process.env.REACT_APP_OCR_API_KEY && (
-              <Typography
-                variant="caption"
-                sx={{
-                  color: "warning.main",
-                  fontWeight: 500,
-                  display: "flex",
-                  alignItems: "center",
-                  gap: 0.5,
-                  mt: 0.5,
-                }}
-              >
-                ⚠️ Modo simulación
-              </Typography>
-            )}
             {result && (
               <Typography variant="body2" color="inherit" sx={subtitleStyles}>
                 {result.date} • {result.entries.length} entradas extraídas
@@ -242,9 +227,7 @@ const OCRResultModal: React.FC<OCRResultModalProps> = ({
                 opacity: 0.8,
               }}
             >
-              {process.env.REACT_APP_OCR_API_KEY
-                ? "Esto puede tomar unos segundos..."
-                : "Modo simulación - Configura API key para OCR real"}
+              Esto puede tomar unos segundos...
             </Typography>
           </Box>
         )}
@@ -326,9 +309,7 @@ const OCRResultModal: React.FC<OCRResultModalProps> = ({
                   color="text.secondary"
                   fontWeight={500}
                 >
-                  {process.env.REACT_APP_OCR_API_KEY
-                    ? "OCR Real"
-                    : "Simulación"}
+                  OCR
                 </Typography>
                 <Typography variant="caption" color="text.secondary">
                   {result.entries.length} entradas procesadas

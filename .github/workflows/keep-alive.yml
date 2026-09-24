@@ -9,4 +9,5 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Ping Backend
-        run: curl -s https://choferesdealquiler.onrender.com/health
+        # -f: fail on HTTP errors so a down backend marks the job as failed
+        run: curl -sf --retry 2 https://choferesdealquiler.onrender.com/health

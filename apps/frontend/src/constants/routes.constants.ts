@@ -3,7 +3,6 @@ const ROUTES = {
   DASHBOARD: "/dashboard",
   EMPLOYEES: "/employees",
   LOGIN: "/",
-  REGISTER: "register",
   ROLES: "/roles",
   SCHEDULES: "/schedules",
   PROFILE: "/settings",

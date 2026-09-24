@@ -2,7 +2,7 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuthContext } from "../context/AuthContext";
 import { authenticateUser as authenticateUserService } from "../services/userService";
-import { PERMISSIONS, ROUTES } from "../constants/constants";
+import { getDefaultRoute } from "../utils/defaultRoute";
 
 interface Role {
   permissions?: Array<{ name: string }>;
@@ -17,32 +17,6 @@ export const useAuth = () => {
   const [authError, setAuthError] = useState<string>("");
   const { login, logout } = useAuthContext();
   const navigate = useNavigate();
-
-  // Determines the default route based on user permissions
-  const getDefaultRoute = (userPermissions: string[]) => {
-    // Define the order of preference for routes
-    const routePreferences = [
-      { route: ROUTES.ROLES, permission: PERMISSIONS.VIEW_ROLES },
-      { route: ROUTES.DASHBOARD, permission: PERMISSIONS.VIEW_ADMIN },
-      { route: ROUTES.EMPLOYEES, permission: PERMISSIONS.VIEW_EMPLOYEES },
-      { route: ROUTES.SCHEDULES, permission: PERMISSIONS.VIEW_SCHEDULES },
-      { route: ROUTES.VEHICLES, permission: PERMISSIONS.VIEW_VEHICLES },
-      {
-        route: ROUTES.COURIER_SERVICE,
-        permission: PERMISSIONS.VIEW_COURIER_SERVICE,
-      },
-    ];
-
-    // Find the first route the user has permission to access
-    for (const { route, permission } of routePreferences) {
-      if (userPermissions.includes(permission)) {
-        return route;
-      }
-    }
-
-    // If no specific permissions, default to courier service (most basic)
-    return ROUTES.COURIER_SERVICE;
-  };
 
   // Authenticates the user and handles login, permissions extraction, and navigation
   const authenticateUser = async (identifier: string, password: string) => {

@@ -3,11 +3,24 @@ import express from "express";
 
 // Mock auth middleware
 jest.mock("../middleware/authMiddleware", () => ({
-  authenticateToken: jest.fn((req: express.Request, _res: express.Response, next: express.NextFunction) => {
-    (req as any).user = { id: 1 };
-    next();
-  }),
+  authenticateToken: jest.fn(
+    (req: express.Request, _res: express.Response, next: express.NextFunction) => {
+      (req as any).user = { id: 1, roles: ["*"], permissions: ["*"] };
+      next();
+    },
+  ),
 }));
+
+jest.mock("../middleware/authorize", () => {
+  const pass = () => (_req: express.Request, _res: express.Response, next: express.NextFunction) =>
+    next();
+  return {
+    requirePermission: jest.fn(pass),
+    requireAnyPermission: jest.fn(pass),
+    requireRole: jest.fn(pass),
+    allowSelfOrPermission: jest.fn(pass),
+  };
+});
 
 // Mock validation middleware
 jest.mock("../middleware/validation", () => {
@@ -17,7 +30,9 @@ jest.mock("../middleware/validation", () => {
   (mockRule as any).run = jest.fn();
   return {
     paginationRules: [mockRule],
-    validate: jest.fn((_req: express.Request, _res: express.Response, next: express.NextFunction) => next()),
+    validate: jest.fn((_req: express.Request, _res: express.Response, next: express.NextFunction) =>
+      next(),
+    ),
   };
 });
 
@@ -60,7 +75,14 @@ describe("GET /api/weekly-summaries", () => {
   it("debería devolver 200 con lista paginada", async () => {
     const paginatedResult = {
       data: [mockSummary],
-      pagination: { page: 1, limit: 50, totalItems: 1, totalPages: 1, hasNextPage: false, hasPreviousPage: false },
+      pagination: {
+        page: 1,
+        limit: 50,
+        totalItems: 1,
+        totalPages: 1,
+        hasNextPage: false,
+        hasPreviousPage: false,
+      },
     };
     service.getWeeklySummaries.mockResolvedValue(paginatedResult);
 
@@ -103,7 +125,9 @@ describe("GET /api/weekly-summaries/employee/:id/has-worked", () => {
   it("debería devolver true si trabajó", async () => {
     service.hasWorkedCurrenWeeklySummary.mockResolvedValue(true);
 
-    const res = await request(app).get("/api/weekly-summaries/employee/1/has-worked?weekNumber=29&month=7&year=2026");
+    const res = await request(app).get(
+      "/api/weekly-summaries/employee/1/has-worked?weekNumber=29&month=7&year=2026",
+    );
 
     expect(res.status).toBe(200);
     expect(res.body.hasWorked).toBe(true);
@@ -112,7 +136,9 @@ describe("GET /api/weekly-summaries/employee/:id/has-worked", () => {
   it("debería devolver false si no trabajó", async () => {
     service.hasWorkedCurrenWeeklySummary.mockResolvedValue(false);
 
-    const res = await request(app).get("/api/weekly-summaries/employee/1/has-worked?weekNumber=99&month=1&year=2025");
+    const res = await request(app).get(
+      "/api/weekly-summaries/employee/1/has-worked?weekNumber=99&month=1&year=2025",
+    );
 
     expect(res.status).toBe(200);
     expect(res.body.hasWorked).toBe(false);
@@ -122,7 +148,12 @@ describe("GET /api/weekly-summaries/employee/:id/has-worked", () => {
 describe("POST /api/weekly-summaries", () => {
   it("debería devolver 201 con el resumen creado", async () => {
     const newData = { employeeId: 1, weekNumber: 30, month: 7, year: 2026, totalHours: 45 };
-    const created = { id: 2, ...newData, createdAt: new Date().toISOString(), updatedAt: new Date().toISOString() };
+    const created = {
+      id: 2,
+      ...newData,
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+    };
 
     service.createWeeklySummary.mockResolvedValue(created);
 
@@ -170,4 +201,3 @@ describe("DELETE /api/weekly-summaries/:id", () => {
     expect(res.status).toBe(404);
   });
 });
-

@@ -3,11 +3,24 @@ import express from "express";
 
 // Mock auth middleware
 jest.mock("../middleware/authMiddleware", () => ({
-  authenticateToken: jest.fn((req: express.Request, _res: express.Response, next: express.NextFunction) => {
-    (req as any).user = { id: 1 };
-    next();
-  }),
+  authenticateToken: jest.fn(
+    (req: express.Request, _res: express.Response, next: express.NextFunction) => {
+      (req as any).user = { id: 1, roles: ["*"], permissions: ["*"] };
+      next();
+    },
+  ),
 }));
+
+jest.mock("../middleware/authorize", () => {
+  const pass = () => (_req: express.Request, _res: express.Response, next: express.NextFunction) =>
+    next();
+  return {
+    requirePermission: jest.fn(pass),
+    requireAnyPermission: jest.fn(pass),
+    requireRole: jest.fn(pass),
+    allowSelfOrPermission: jest.fn(pass),
+  };
+});
 
 // Mock validation middleware
 jest.mock("../middleware/validation", () => {
@@ -22,7 +35,9 @@ jest.mock("../middleware/validation", () => {
     hoursWorkedQueryRules: [mockRule],
     recalculateRules: [mockRule],
     paginationRules: [mockRule],
-    validate: jest.fn((_req: express.Request, _res: express.Response, next: express.NextFunction) => next()),
+    validate: jest.fn((_req: express.Request, _res: express.Response, next: express.NextFunction) =>
+      next(),
+    ),
   };
 });
 
@@ -62,7 +77,14 @@ describe("GET /api/hours-worked", () => {
   it("debería devolver 200 con lista paginada", async () => {
     const paginatedResult = {
       data: [mockHoursWorked],
-      pagination: { page: 1, limit: 50, totalItems: 1, totalPages: 1, hasNextPage: false, hasPreviousPage: false },
+      pagination: {
+        page: 1,
+        limit: 50,
+        totalItems: 1,
+        totalPages: 1,
+        hasNextPage: false,
+        hasPreviousPage: false,
+      },
     };
     service.getHoursWorked.mockResolvedValue(paginatedResult);
 
@@ -106,7 +128,12 @@ describe("GET /api/hours-worked/:id", () => {
 describe("POST /api/hours-worked", () => {
   it("debería devolver 201 con el registro creado", async () => {
     const newData = { employeeId: 1, date: "2026-07-21", scheduleId: 2 };
-    const created = { id: 2, ...newData, createdAt: new Date().toISOString(), updatedAt: new Date().toISOString() };
+    const created = {
+      id: 2,
+      ...newData,
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+    };
 
     service.createHoursWorked.mockResolvedValue(created);
 
@@ -163,4 +190,3 @@ describe("DELETE /api/hours-worked/:id", () => {
     expect(res.status).toBe(404);
   });
 });
-

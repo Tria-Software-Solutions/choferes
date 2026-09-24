@@ -3,11 +3,24 @@ import express from "express";
 
 // Mock auth middleware
 jest.mock("../middleware/authMiddleware", () => ({
-  authenticateToken: jest.fn((req: express.Request, _res: express.Response, next: express.NextFunction) => {
-    (req as any).user = { id: 1 };
-    next();
-  }),
+  authenticateToken: jest.fn(
+    (req: express.Request, _res: express.Response, next: express.NextFunction) => {
+      (req as any).user = { id: 1, roles: ["*"], permissions: ["*"] };
+      next();
+    },
+  ),
 }));
+
+jest.mock("../middleware/authorize", () => {
+  const pass = () => (_req: express.Request, _res: express.Response, next: express.NextFunction) =>
+    next();
+  return {
+    requirePermission: jest.fn(pass),
+    requireAnyPermission: jest.fn(pass),
+    requireRole: jest.fn(pass),
+    allowSelfOrPermission: jest.fn(pass),
+  };
+});
 
 // Mock validation middleware
 jest.mock("../middleware/validation", () => {
@@ -20,7 +33,9 @@ jest.mock("../middleware/validation", () => {
     scheduleRules: [mockRule],
     scheduleUpdateRules: [...[mockRule], mockRule],
     paginationRules: [mockRule],
-    validate: jest.fn((_req: express.Request, _res: express.Response, next: express.NextFunction) => next()),
+    validate: jest.fn((_req: express.Request, _res: express.Response, next: express.NextFunction) =>
+      next(),
+    ),
   };
 });
 
@@ -59,7 +74,14 @@ describe("GET /api/schedules", () => {
   it("debería devolver 200 con lista paginada", async () => {
     const paginatedResult = {
       data: [mockSchedule],
-      pagination: { page: 1, limit: 50, totalItems: 1, totalPages: 1, hasNextPage: false, hasPreviousPage: false },
+      pagination: {
+        page: 1,
+        limit: 50,
+        totalItems: 1,
+        totalPages: 1,
+        hasNextPage: false,
+        hasPreviousPage: false,
+      },
     };
     service.getSchedules.mockResolvedValue(paginatedResult);
 
@@ -102,8 +124,17 @@ describe("GET /api/schedules/:id", () => {
 
 describe("POST /api/schedules", () => {
   it("debería devolver 201 con el horario creado", async () => {
-    const newSchedule = { label: "Nocturno", days: ["monday", "tuesday", "wednesday", "thursday", "friday"], hours: 6 };
-    const createdSchedule = { id: 2, ...newSchedule, createdAt: new Date().toISOString(), updatedAt: new Date().toISOString() };
+    const newSchedule = {
+      label: "Nocturno",
+      days: ["monday", "tuesday", "wednesday", "thursday", "friday"],
+      hours: 6,
+    };
+    const createdSchedule = {
+      id: 2,
+      ...newSchedule,
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+    };
 
     service.createSchedule.mockResolvedValue(createdSchedule);
 

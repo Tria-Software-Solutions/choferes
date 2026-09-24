@@ -14,18 +14,68 @@ import {
   QueryParams,
 } from "../utils/pagination";
 
+// Sensitive columns that must never be serialized to API consumers.
+// Requests targeting these columns use their dedicated endpoints instead,
+// which always hash values before persisting them.
+const SAFE_ATTRS = { exclude: ["password", "temporalPassword"] };
+
+// Fields whitelisted for the generic profile-update endpoint. mass assignment
+// of password/isActive/settings/temporalPassword is not allowed through it.
+const EDITABLE_FIELDS = ["firstName", "lastName", "username", "email", "avatar"];
+
+// Fields accepted when creating a new user. isActive is intentionally not
+// here (defaults to true) so anonymous registration can't self-activate.
+const CREATABLE_FIELDS = ["firstName", "lastName", "username", "email", "password"];
+
+const ROLES_INCLUDE = [
+  {
+    model: Role,
+    as: "roles",
+    through: { attributes: [] },
+  },
+];
+
+const ROLES_WITH_PERMISSIONS_INCLUDE = [
+  {
+    model: Role,
+    as: "roles",
+    through: { attributes: [] },
+    include: [
+      {
+        model: Permission,
+        as: "permissions",
+        through: { attributes: [] },
+      },
+    ],
+  },
+];
+
+// Returns only the fields present in `fields` from the source object.
+function pickFields<T extends Record<string, any>>(
+  source: T,
+  fields: string[],
+): Record<string, any> {
+  const result: Record<string, any> = {};
+  fields.forEach((field) => {
+    if (source[field] !== undefined) {
+      result[field] = source[field];
+    }
+  });
+  return result;
+}
+
+// Builds a serializable user object without password hashes.
+function toSafeUser(user: User): Record<string, any> {
+  const { id, firstName, lastName, username, email, isActive, avatar, settings, roles } = user;
+  return { id, firstName, lastName, username, email, isActive, avatar, settings, roles };
+}
+
 // Authenticates a user by username/email and password, returns tokens and user info
 export const authenticateUser = async (identifier: string, password: string, res: Response) => {
   try {
     const user = await User.findOne({
       where: { $or: [{ username: identifier }, { email: identifier }] },
-      include: [
-        {
-          model: Role,
-          as: "roles",
-          include: [{ model: Permission, as: "permissions", through: { attributes: [] } }],
-        },
-      ],
+      include: ROLES_WITH_PERMISSIONS_INCLUDE,
     });
 
     if (!user) {
@@ -50,7 +100,9 @@ export const authenticateUser = async (identifier: string, password: string, res
 
     const { accessToken, refreshToken } = generateTokens(user.id.toString(), res);
 
-    return { user, accessToken, refreshToken };
+    // Never return the model instance — password/temporalPassword hashes must
+    // not leave the service boundary.
+    return { user: toSafeUser(user), accessToken, refreshToken };
   } catch (error) {
     // Re-throw known authentication errors
     if (
@@ -83,13 +135,8 @@ export const getUsers = async (query: QueryParams) => {
 
   const options: Record<string, any> = {
     where: searchWhere,
-    include: [
-      {
-        model: Role,
-        as: "roles",
-        through: { attributes: [] },
-      },
-    ],
+    attributes: SAFE_ATTRS,
+    include: ROLES_INCLUDE,
   };
   return paginate<User>(User, options, params);
 };
@@ -97,57 +144,31 @@ export const getUsers = async (query: QueryParams) => {
 // Fetches a user by ID with their roles
 export const getUserById = async (id: number) =>
   User.findByPk(id, {
-    include: [
-      {
-        model: Role,
-        as: "roles",
-        through: { attributes: [] },
-      },
-    ],
+    attributes: SAFE_ATTRS,
+    include: ROLES_INCLUDE,
   });
 
 // Fetches a user by email with their roles
 export const getUserByEmail = async (email: string) =>
   User.findOne({
     where: { email },
-    include: [
-      {
-        model: Role,
-        as: "roles",
-        through: { attributes: [] },
-      },
-    ],
+    attributes: SAFE_ATTRS,
+    include: ROLES_INCLUDE,
   });
 
 // Fetches a user by username with their roles
 export const getUserByUsername = async (username: string) =>
   User.findOne({
     where: { username },
-    include: [
-      {
-        model: Role,
-        as: "roles",
-        through: { attributes: [] },
-      },
-    ],
+    attributes: SAFE_ATTRS,
+    include: ROLES_INCLUDE,
   });
 
 // Fetches all permissions for a user by aggregating permissions from all roles
 export const getUserPermissions = async (userId: number) => {
   const user = await User.findByPk(userId, {
-    include: [
-      {
-        model: Role,
-        as: "roles",
-        include: [
-          {
-            model: Permission,
-            as: "permissions",
-            through: { attributes: [] },
-          },
-        ],
-      },
-    ],
+    attributes: SAFE_ATTRS,
+    include: ROLES_WITH_PERMISSIONS_INCLUDE,
   });
 
   if (!user) return null;
@@ -158,42 +179,37 @@ export const getUserPermissions = async (userId: number) => {
   return Array.from(new Set(permissions));
 };
 
-// Creates a new user with hashed password
-export const createUser = async (data: Omit<User, "id">) => {
-  const hashedPassword = await bcrypt.hash(data.password, 10);
+// Creates a new user with hashed password (whitelisted fields only)
+export const createUser = async (data: Record<string, any>) => {
+  const clean = pickFields(data, CREATABLE_FIELDS);
+  const hashedPassword = await bcrypt.hash(clean.password, 10);
   return User.create(
     {
-      ...data,
+      ...clean,
       password: hashedPassword,
     },
     { returning: true },
   );
 };
 
-// Updates user data by ID (accepts partial data)
-export const updateUser = async (id: number, data: Partial<Omit<User, "id">>) => {
-  await User.update(data, { where: { id } });
-  return User.findByPk(id);
+// Updates user data by ID (accepts only whitelisted, non-sensitive fields)
+export const updateUser = async (id: number, data: Record<string, any>) => {
+  const clean = pickFields(data, EDITABLE_FIELDS);
+  if (Object.keys(clean).length > 0) {
+    await User.update(clean, { where: { id } });
+  }
+  return User.findByPk(id, {
+    attributes: SAFE_ATTRS,
+    include: ROLES_INCLUDE,
+  });
 };
 
 // Updates the active status of a user
 export const updateUserStatus = async (id: number, status: boolean) => {
   await User.update({ isActive: status }, { where: { id } });
   const user = await User.findByPk(id, {
-    include: [
-      {
-        model: Role,
-        as: "roles",
-        through: { attributes: [] },
-        include: [
-          {
-            model: Permission,
-            as: "permissions",
-            through: { attributes: [] },
-          },
-        ],
-      },
-    ],
+    attributes: SAFE_ATTRS,
+    include: ROLES_WITH_PERMISSIONS_INCLUDE,
   });
   return user;
 };
@@ -202,14 +218,20 @@ export const updateUserStatus = async (id: number, status: boolean) => {
 export const updateUserPassword = async (id: number, password: string) => {
   const hashedPassword = await bcrypt.hash(password, 10);
   await User.update({ password: hashedPassword }, { where: { id } });
-  return User.findByPk(id);
+  return User.findByPk(id, {
+    attributes: SAFE_ATTRS,
+    include: ROLES_INCLUDE,
+  });
 };
 
 // Updates the temporary password of a user (hashes new password)
 export const updateUserTemporalPassword = async (id: number, temporalPassword: string) => {
   const hashedTemporalPassword = await bcrypt.hash(temporalPassword, 10);
   await User.update({ temporalPassword: hashedTemporalPassword }, { where: { id } });
-  return User.findByPk(id);
+  return User.findByPk(id, {
+    attributes: SAFE_ATTRS,
+    include: ROLES_INCLUDE,
+  });
 };
 
 // Updates user settings (merges with existing settings)
@@ -221,7 +243,10 @@ export const updateUserSettings = async (id: number, settings: Record<string, un
   const mergedSettings = { ...currentSettings, ...settings };
 
   await User.update({ settings: mergedSettings }, { where: { id } });
-  return User.findByPk(id);
+  return User.findByPk(id, {
+    attributes: SAFE_ATTRS,
+    include: ROLES_INCLUDE,
+  });
 };
 
 // Deletes a user by ID

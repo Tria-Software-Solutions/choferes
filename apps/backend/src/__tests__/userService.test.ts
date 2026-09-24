@@ -48,10 +48,11 @@ const mockUser = {
   email: "admin@example.com",
   password: "hashed_password",
   isActive: true,
-  roles: [
-    { id: 1, name: "admin", permissions: [{ id: 1, name: "manage_users" }] },
-  ],
+  roles: [{ id: 1, name: "admin", permissions: [{ id: 1, name: "manage_users" }] }],
 };
+
+// The public shape of a user: same as mockUser but WITHOUT password hashes.
+const mockSafeUser = (({ password, ...safe }) => safe)(mockUser);
 
 const mockResponse = {
   cookie: jest.fn(),
@@ -79,7 +80,7 @@ describe("authenticateUser", () => {
     expect(result.refreshToken).toBe("refresh123");
   });
 
-  it("debería autenticar con email correcto", async () => {
+  it("debería autenticar con email correcto y NO exponer hashes", async () => {
     (User.findOne as jest.Mock).mockResolvedValue(mockUser);
     (bcrypt.compare as jest.Mock).mockResolvedValue(true);
     (generateTokens as jest.Mock).mockReturnValue({
@@ -87,35 +88,41 @@ describe("authenticateUser", () => {
       refreshToken: "refresh123",
     });
 
-    const result = await userService.authenticateUser("admin@example.com", "password123", mockResponse);
+    const result = await userService.authenticateUser(
+      "admin@example.com",
+      "password123",
+      mockResponse,
+    );
 
     expect(result).toBeDefined();
-    expect(result.user).toEqual(mockUser);
+    expect(result.user).toEqual(mockSafeUser);
+    expect(result.user).not.toHaveProperty("password");
+    expect(result.user).not.toHaveProperty("temporalPassword");
   });
 
   it("debería lanzar error si el usuario no existe", async () => {
     (User.findOne as jest.Mock).mockResolvedValue(null);
 
-    await expect(
-      userService.authenticateUser("unknown", "pass", mockResponse),
-    ).rejects.toThrow("User not found");
+    await expect(userService.authenticateUser("unknown", "pass", mockResponse)).rejects.toThrow(
+      "User not found",
+    );
   });
 
   it("debería lanzar error si el usuario está inactivo", async () => {
     (User.findOne as jest.Mock).mockResolvedValue({ ...mockUser, isActive: false });
 
-    await expect(
-      userService.authenticateUser("admin", "pass", mockResponse),
-    ).rejects.toThrow("User is inactive");
+    await expect(userService.authenticateUser("admin", "pass", mockResponse)).rejects.toThrow(
+      "User is inactive",
+    );
   });
 
   it("debería lanzar error si la contraseña es incorrecta", async () => {
     (User.findOne as jest.Mock).mockResolvedValue(mockUser);
     (bcrypt.compare as jest.Mock).mockResolvedValue(false);
 
-    await expect(
-      userService.authenticateUser("admin", "wrong", mockResponse),
-    ).rejects.toThrow("Incorrect password");
+    await expect(userService.authenticateUser("admin", "wrong", mockResponse)).rejects.toThrow(
+      "Incorrect password",
+    );
   });
 
   it("debería lanzar error si temporalPassword también es incorrecta", async () => {
@@ -126,14 +133,14 @@ describe("authenticateUser", () => {
     (User.findOne as jest.Mock).mockResolvedValue(userWithTemporal);
     (bcrypt.compare as jest.Mock).mockResolvedValue(false);
 
-    await expect(
-      userService.authenticateUser("admin", "wrong", mockResponse),
-    ).rejects.toThrow("Incorrect password and temporary password");
+    await expect(userService.authenticateUser("admin", "wrong", mockResponse)).rejects.toThrow(
+      "Incorrect password and temporary password",
+    );
   });
 });
 
 describe("getUsers", () => {
-  it("debería devolver usuarios paginados con roles", async () => {
+  it("debería devolver usuarios paginados con roles y excluir hashes", async () => {
     (User.findAndCountAll as jest.Mock).mockResolvedValue({
       count: 1,
       rows: [mockUser],
@@ -142,6 +149,10 @@ describe("getUsers", () => {
     const result = await userService.getUsers({});
 
     expect(User.findAndCountAll).toHaveBeenCalledTimes(1);
+    const callArgs = (User.findAndCountAll as jest.Mock).mock.calls[0][0];
+    expect(callArgs.attributes.exclude).toEqual(
+      expect.arrayContaining(["password", "temporalPassword"]),
+    );
     expect(result.data).toEqual([mockUser]);
     expect(result.pagination.page).toBe(1);
   });
@@ -157,12 +168,14 @@ describe("getUsers", () => {
 });
 
 describe("getUserById", () => {
-  it("debería devolver usuario por id con roles", async () => {
+  it("debería devolver usuario por id con roles y excluir hashes", async () => {
     (User.findByPk as jest.Mock).mockResolvedValue(mockUser);
 
     const result = await userService.getUserById(1);
 
     expect(User.findByPk).toHaveBeenCalledWith(1, expect.any(Object));
+    const callArgs = (User.findByPk as jest.Mock).mock.calls[0][1];
+    expect(callArgs.attributes.exclude).toEqual(expect.arrayContaining(["password"]));
     expect(result).toEqual(mockUser);
   });
 
@@ -176,13 +189,14 @@ describe("getUserById", () => {
 });
 
 describe("getUserByEmail", () => {
-  it("debería buscar por email", async () => {
+  it("debería buscar por email excluyendo hashes", async () => {
     (User.findOne as jest.Mock).mockResolvedValue(mockUser);
 
     const result = await userService.getUserByEmail("admin@example.com");
 
     expect(User.findOne).toHaveBeenCalledWith({
       where: { email: "admin@example.com" },
+      attributes: expect.objectContaining({ exclude: expect.any(Array) }),
       include: expect.any(Array),
     });
     expect(result).toEqual(mockUser);
@@ -190,13 +204,14 @@ describe("getUserByEmail", () => {
 });
 
 describe("getUserByUsername", () => {
-  it("debería buscar por username", async () => {
+  it("debería buscar por username excluyendo hashes", async () => {
     (User.findOne as jest.Mock).mockResolvedValue(mockUser);
 
     const result = await userService.getUserByUsername("admin");
 
     expect(User.findOne).toHaveBeenCalledWith({
       where: { username: "admin" },
+      attributes: expect.objectContaining({ exclude: expect.any(Array) }),
       include: expect.any(Array),
     });
     expect(result).toEqual(mockUser);
@@ -222,14 +237,15 @@ describe("getUserPermissions", () => {
 });
 
 describe("createUser", () => {
-  it("debería hashear password y crear usuario", async () => {
+  it("debería hashear password y crear usuario solo con campos whitelist", async () => {
     const newData = {
       firstName: "Nuevo",
       lastName: "Usuario",
       username: "nuevo",
       email: "nuevo@example.com",
       password: "plain_password",
-      isActive: true,
+      isActive: false,
+      settings: { admin: 1 },
     };
     const createdUser = { id: 2, ...newData, password: "hashed" };
 
@@ -239,10 +255,17 @@ describe("createUser", () => {
     const result = await userService.createUser(newData as any);
 
     expect(bcrypt.hash).toHaveBeenCalledWith("plain_password", 10);
-    expect(User.create).toHaveBeenCalledWith(
-      { ...newData, password: "hashed" },
-      { returning: true },
-    );
+    const createArgs = (User.create as jest.Mock).mock.calls[0][0];
+    expect(createArgs).toMatchObject({
+      firstName: "Nuevo",
+      lastName: "Usuario",
+      username: "nuevo",
+      email: "nuevo@example.com",
+      password: "hashed",
+    });
+    // mass assignment de campos sensibles debe ser ignorado
+    expect(createArgs).not.toHaveProperty("isActive");
+    expect(createArgs).not.toHaveProperty("settings");
     expect(result).toEqual(createdUser);
   });
 });
@@ -259,8 +282,29 @@ describe("updateUser", () => {
     const result = await userService.updateUser(1, updateData);
 
     expect(User.update).toHaveBeenCalledWith(updateData, { where: { id: 1 } });
-    expect(User.findByPk).toHaveBeenCalledWith(1);
     expect(result).toHaveProperty("firstName", "Actualizado");
+  });
+
+  it("debería ignorar campos sensibles en update (password, isActive, settings)", async () => {
+    const maliciousData = {
+      firstName: "Real",
+      password: "hacked_password",
+      isActive: false,
+      settings: { theme: "evil" },
+      temporalPassword: "backdoor",
+    } as any;
+    (User.update as jest.Mock).mockResolvedValue([1]);
+    (User.findByPk as jest.Mock).mockResolvedValue({ ...mockUser, firstName: "Real" });
+
+    const result = await userService.updateUser(1, maliciousData);
+
+    expect(User.update).toHaveBeenCalledWith(
+      {
+        firstName: "Real",
+      },
+      { where: { id: 1 } },
+    );
+    expect(result).toHaveProperty("firstName", "Real");
   });
 });
 
@@ -274,10 +318,7 @@ describe("updateUserStatus", () => {
 
     const result = await userService.updateUserStatus(1, false);
 
-    expect(User.update).toHaveBeenCalledWith(
-      { isActive: false },
-      { where: { id: 1 } },
-    );
+    expect(User.update).toHaveBeenCalledWith({ isActive: false }, { where: { id: 1 } });
     expect(result).toHaveProperty("isActive", false);
   });
 });
@@ -291,10 +332,7 @@ describe("updateUserPassword", () => {
     const result = await userService.updateUserPassword(1, "new_password");
 
     expect(bcrypt.hash).toHaveBeenCalledWith("new_password", 10);
-    expect(User.update).toHaveBeenCalledWith(
-      { password: "new_hashed" },
-      { where: { id: 1 } },
-    );
+    expect(User.update).toHaveBeenCalledWith({ password: "new_hashed" }, { where: { id: 1 } });
     expect(result).toBeDefined();
   });
 });

@@ -1,6 +1,6 @@
 import { SxProps, Theme } from "@mui/material";
 import { CSSProperties } from "react";
-import blurredBg from "../../../assets/images/choferesblurred1.webp";
+import blurredBg from "../../assets/images/choferesblurred1.webp";
 
 export const authPageBoxStyles: SxProps<Theme> = (theme) => ({
   display: "flex",

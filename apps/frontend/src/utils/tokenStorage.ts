@@ -1,49 +1,24 @@
-import Cookies from "js-cookie";
-
 /**
- * Set a token in both cookie and localStorage (with localStorage fallback).
- * This dual-storage approach ensures tokens survive in case cookies are blocked.
+ * In-memory token store (no localStorage / JS cookies).
+ *
+ * Trusted credentials live ONLY in httpOnly cookies set server-side (see
+ * utils/generateSecret.ts). This module mirrors the previous
+ * get/set/remove token API so callers keep working unchanged, but tokens are
+ * never persisted anywhere a script can read them (XSS leak vector).
+ *
+ * On a hard reload the memory is empty and requests simply ride on the
+ * httpOnly cookies; the backend accepts cookies as a token source.
  */
-export const setTokenWithFallback = (key: string, value: string, options?: Cookies.CookieAttributes) => {
-  try {
-    // Try to set cookie first
-    Cookies.set(key, value, options);
-    // Also store in localStorage as backup
-    localStorage.setItem(key, value);
-  } catch {
-    // Fallback to localStorage only
-    localStorage.setItem(key, value);
-  }
+const tokens = new Map<string, string>();
+
+export const setTokenWithFallback = (key: string, value: string) => {
+  tokens.set(key, value);
 };
 
-/**
- * Get a token from cookie first, with localStorage fallback.
- */
 export const getTokenWithFallback = (key: string): string | null => {
-  try {
-    // Try to get from cookie first
-    const cookieValue = Cookies.get(key);
-    if (cookieValue) return cookieValue;
-
-    // Fallback to localStorage
-    return localStorage.getItem(key);
-  } catch {
-    // Fallback to localStorage only
-    return localStorage.getItem(key);
-  }
+  return tokens.get(key) ?? null;
 };
 
-/**
- * Remove a token from both cookie and localStorage.
- */
-export const removeTokenWithFallback = (key: string, options?: Cookies.CookieAttributes) => {
-  try {
-    // Try to remove from cookie first
-    Cookies.remove(key, options);
-    // Also remove from localStorage
-    localStorage.removeItem(key);
-  } catch {
-    // Fallback to localStorage only
-    localStorage.removeItem(key);
-  }
+export const removeTokenWithFallback = (key: string) => {
+  tokens.delete(key);
 };

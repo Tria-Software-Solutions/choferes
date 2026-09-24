@@ -28,15 +28,6 @@ const api = axios.create({
   maxContentLength: 50 * 1024 * 1024, // 50MB
 });
 
-const getCookieOptions = () => {
-  const isProduction = process.env.NODE_ENV === "production";
-  return {
-    secure: isProduction,
-    sameSite: (isProduction ? "strict" : "lax") as "strict" | "lax",
-    path: "/",
-  };
-};
-
 // Decode the JWT payload (unverified) to read the `exp` claim.
 const getTokenExpiry = (token: string): number | null => {
   try {
@@ -63,9 +54,15 @@ const refreshAccessToken = async (): Promise<{
   if (refreshPromise) return refreshPromise;
 
   refreshPromise = (async () => {
+    // Tokens live in memory + httpOnly cookies. If the in-memory refresh token
+    // survived (same page session) send it in the Authorization header; on a
+    // hard reload it's gone and the httpOnly refresh cookie is used instead.
     const refreshToken = getTokenWithFallback("refreshToken");
-    if (!refreshToken) {
-      throw new Error("No refresh token available");
+    const refreshHeaders: Record<string, string> = {
+      "Content-Type": "application/json",
+    };
+    if (refreshToken) {
+      refreshHeaders.Authorization = `Bearer ${refreshToken}`;
     }
 
     const response = await axios.post(
@@ -75,22 +72,16 @@ const refreshAccessToken = async (): Promise<{
         // Cover Render free-tier cold starts (30-60s) without hanging forever.
         timeout: 70000,
         withCredentials: true,
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${refreshToken}`,
-        },
+        headers: refreshHeaders,
       },
     );
 
     const newAccessToken = response.data.accessToken;
     const newRefreshToken = response.data.refreshToken;
 
-    setTokenWithFallback("accessToken", newAccessToken, getCookieOptions());
+    setTokenWithFallback("accessToken", newAccessToken);
     if (newRefreshToken) {
-      setTokenWithFallback("refreshToken", newRefreshToken, {
-        ...getCookieOptions(),
-        expires: 7,
-      });
+      setTokenWithFallback("refreshToken", newRefreshToken);
     }
 
     return { accessToken: newAccessToken, refreshToken: newRefreshToken };
@@ -209,14 +200,8 @@ export const invalidateCache = (url: string) => {
 };
 
 const disconnectUser = () => {
-  const cookieOptions = {
-    sameSite: (process.env.NODE_ENV === "production" ? "strict" : "lax") as
-      | "strict"
-      | "lax",
-  };
-
-  removeTokenWithFallback("accessToken", cookieOptions);
-  removeTokenWithFallback("refreshToken", cookieOptions);
+  removeTokenWithFallback("accessToken");
+  removeTokenWithFallback("refreshToken");
   sessionStorage.clear();
   // NOTE: do NOT clear all of localStorage here. It holds user preferences
   // (themeMode, dock/table preferences, schedule order) that must survive a

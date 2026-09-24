@@ -3,11 +3,24 @@ import express from "express";
 
 // Mock auth middleware
 jest.mock("../middleware/authMiddleware", () => ({
-  authenticateToken: jest.fn((req: express.Request, _res: express.Response, next: express.NextFunction) => {
-    (req as any).user = { id: 1 };
-    next();
-  }),
+  authenticateToken: jest.fn(
+    (req: express.Request, _res: express.Response, next: express.NextFunction) => {
+      (req as any).user = { id: 1, roles: ["*"], permissions: ["*"] };
+      next();
+    },
+  ),
 }));
+
+jest.mock("../middleware/authorize", () => {
+  const pass = () => (_req: express.Request, _res: express.Response, next: express.NextFunction) =>
+    next();
+  return {
+    requirePermission: jest.fn(pass),
+    requireAnyPermission: jest.fn(pass),
+    requireRole: jest.fn(pass),
+    allowSelfOrPermission: jest.fn(pass),
+  };
+});
 
 // Mock validation middleware
 jest.mock("../middleware/validation", () => {
@@ -21,7 +34,9 @@ jest.mock("../middleware/validation", () => {
     roleUpdateRules: [...[mockRule], mockRule],
     roleNameParam: [mockRule],
     paginationRules: [mockRule],
-    validate: jest.fn((_req: express.Request, _res: express.Response, next: express.NextFunction) => next()),
+    validate: jest.fn((_req: express.Request, _res: express.Response, next: express.NextFunction) =>
+      next(),
+    ),
   };
 });
 
@@ -61,7 +76,14 @@ describe("GET /api/roles", () => {
   it("debería devolver 200 con lista paginada", async () => {
     const paginatedResult = {
       data: [mockRole],
-      pagination: { page: 1, limit: 50, totalItems: 1, totalPages: 1, hasNextPage: false, hasPreviousPage: false },
+      pagination: {
+        page: 1,
+        limit: 50,
+        totalItems: 1,
+        totalPages: 1,
+        hasNextPage: false,
+        hasPreviousPage: false,
+      },
     };
     service.getRoles.mockResolvedValue(paginatedResult);
 
@@ -124,7 +146,12 @@ describe("GET /api/roles/name/:name", () => {
 describe("POST /api/roles", () => {
   it("debería devolver 201 con el rol creado", async () => {
     const newRole = { name: "editor", description: "Editor role" };
-    const createdRole = { id: 2, ...newRole, createdAt: new Date().toISOString(), updatedAt: new Date().toISOString() };
+    const createdRole = {
+      id: 2,
+      ...newRole,
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+    };
 
     service.createRole.mockResolvedValue(createdRole);
 

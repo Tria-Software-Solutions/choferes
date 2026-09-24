@@ -21,6 +21,7 @@ import ErrorBoundary from "./components/ErrorBoundary/ErrorBoundary.component";
 import { useThemeMode } from "./context/ThemeContext";
 import { updateUserSettings } from "./store/slices/userSlice";
 import { setScheduleOrder } from "./store/slices/schedulesSlice";
+import { getDefaultRoute } from "./utils/defaultRoute";
 
 const Login = lazy(() => import("./pages/Auth/Login"));
 const RolesPage = lazy(() => import("./pages/Management/RolesPage"));
@@ -183,28 +184,6 @@ const AppContent: React.FC = () => {
 
   const safeUserPermissions = userPermissions || [];
 
-  const getDefaultRoute = (userPermissions: string[]) => {
-    // /roles is the default landing page
-    const routePreferences = [
-      { route: ROUTES.ROLES, permission: PERMISSIONS.VIEW_ROLES },
-      { route: ROUTES.DASHBOARD, permission: PERMISSIONS.VIEW_ADMIN },
-      { route: ROUTES.VEHICLES, permission: PERMISSIONS.VIEW_VEHICLES },
-      { route: ROUTES.EMPLOYEES, permission: PERMISSIONS.VIEW_EMPLOYEES },
-      { route: ROUTES.SCHEDULES, permission: PERMISSIONS.VIEW_SCHEDULES },
-    ];
-
-    for (const { route, permission } of routePreferences) {
-      if (
-        Array.isArray(userPermissions) &&
-        userPermissions.includes(permission)
-      ) {
-        return route;
-      }
-    }
-
-    return ROUTES.ROLES; // fallback to roles if nothing else
-  };
-
   return (
     <Box sx={{ display: "flex", flexDirection: "column", height: "100dvh", overflow: "hidden" }}>
       {!isHideAppBar && <AppBarWrapper />}
@@ -289,7 +268,16 @@ const AppContent: React.FC = () => {
                   )
                 }
               />
-              <Route path="/dashboard" element={<Dashboard />} />
+              <Route
+                path="/dashboard"
+                element={
+                  safeUserPermissions.includes(PERMISSIONS.VIEW_ADMIN) ? (
+                    <Dashboard />
+                  ) : (
+                    <Navigate to="/forbidden" replace />
+                  )
+                }
+              />
               <Route path="/settings" element={<Profile />} />
               <Route path="/profile" element={<Navigate to="/settings" replace />} />
             </Route>

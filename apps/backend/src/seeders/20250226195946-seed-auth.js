@@ -25,15 +25,23 @@ if (process.env.NODE_ENV === "production") {
 /** @type {import('sequelize-cli').Migration} */
 module.exports = {
   up: async (queryInterface) => {
-    await queryInterface.bulkInsert("schedule", [
-      {
-        id: 1,
-        label: "Avenida Escazú",
-        hours: 12,
-        days: ["monday", "tuesday", "wednesday", "thursday", "friday", "saturday", "sunday"],
-        createdAt: new Date(),
-        updatedAt: new Date(),
-      },
+    const existingScheduleIds = (
+      await queryInterface.sequelize.query("SELECT id FROM schedule", {
+        type: queryInterface.sequelize.QueryTypes.SELECT,
+      })
+    ).map((s) => s.id);
+
+    await queryInterface.bulkInsert(
+      "schedule",
+      [
+        {
+          id: 1,
+          label: "Avenida Escazú",
+          hours: 12,
+          days: ["monday", "tuesday", "wednesday", "thursday", "friday", "saturday", "sunday"],
+          createdAt: new Date(),
+          updatedAt: new Date(),
+        },
       {
         id: 2,
         label: "Hospital CIMA",
@@ -154,8 +162,20 @@ module.exports = {
         createdAt: new Date(),
         updatedAt: new Date(),
       },
-    ]);
-    await queryInterface.bulkInsert("schedule_day", [
+    ].filter((s) => !existingScheduleIds.includes(s.id)));
+
+    const existingScheduleDayPairs = new Set(
+      (
+        await queryInterface.sequelize.query(
+          'SELECT "scheduleId", day FROM schedule_day',
+          { type: queryInterface.sequelize.QueryTypes.SELECT },
+        )
+      ).map((sd) => `${sd.scheduleId}:${sd.day}`),
+    );
+
+    await queryInterface.bulkInsert(
+      "schedule_day",
+      [
       { scheduleId: 1, day: "monday", hours: 12, createdAt: new Date(), updatedAt: new Date() },
       { scheduleId: 1, day: "tuesday", hours: 12, createdAt: new Date(), updatedAt: new Date() },
       { scheduleId: 1, day: "wednesday", hours: 12, createdAt: new Date(), updatedAt: new Date() },
@@ -236,7 +256,10 @@ module.exports = {
       { scheduleId: 55, day: "friday", hours: 4, createdAt: new Date(), updatedAt: new Date() },
       { scheduleId: 55, day: "saturday", hours: 4, createdAt: new Date(), updatedAt: new Date() },
       { scheduleId: 55, day: "sunday", hours: 4, createdAt: new Date(), updatedAt: new Date() },
-    ]);
+    ].filter(
+      (sd) => !existingScheduleDayPairs.has(`${sd.scheduleId}:${sd.day}`),
+    ));
+
     const existingPermissionIds = (
       await queryInterface.sequelize.query("SELECT id FROM permissions", {
         type: queryInterface.sequelize.QueryTypes.SELECT,
@@ -1053,6 +1076,7 @@ module.exports = {
   },
 
   down: async (queryInterface) => {
+    await queryInterface.bulkDelete("schedule_day", null, {});
     await queryInterface.bulkDelete("schedule", null, {});
     await queryInterface.bulkDelete("user_role", null, {});
     await queryInterface.bulkDelete("role_permission", null, {});
