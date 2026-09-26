@@ -107,75 +107,75 @@ export const darkTheme = createTheme({
     MuiButton: {
       styleOverrides: {
         root: {
-          borderRadius: "12px",
+          borderRadius: "8px",
           textTransform: "none",
           fontWeight: 600,
           fontSize: "0.875rem",
-          padding: "10px 24px",
-          minHeight: "48px",
-          transition: "all 0.2s cubic-bezier(0.4, 0, 0.2, 1)",
           letterSpacing: "-0.01em",
-          boxShadow: "0 1px 3px rgba(0,0,0,0.25), 0 1px 2px rgba(0,0,0,0.18)",
-          "&:hover": {
-            transform: "translateY(-1px)",
-            boxShadow: "0 6px 20px rgba(0,0,0,0.35)",
-          },
+          padding: "0 16px",
+          minHeight: "38px",
+          transition:
+            "background-color 0.15s ease, border-color 0.15s ease, box-shadow 0.15s ease, transform 0.05s ease",
           "&:active": {
-            transform: "translateY(0)",
-            boxShadow: "0 2px 4px rgba(0,0,0,0.3)",
+            transform: "scale(0.97)",
+          },
+          "&:focus-visible": {
+            outline: "2px solid rgba(255,255,255,0.3)",
+            outlineOffset: "2px",
           },
         },
         contained: {
           backgroundColor: "#333333",
           color: "#ffffff",
-          border: "none",
-          boxShadow: "0 2px 8px rgba(0,0,0,0.35), 0 1px 3px rgba(0,0,0,0.2)",
+          boxShadow: "none",
           "&:hover": {
             backgroundColor: "#444444",
-            boxShadow: "0 8px 20px rgba(0,0,0,0.4)",
+            boxShadow: "0 1px 2px rgba(0,0,0,0.4)",
+          },
+          "&:active": {
+            backgroundColor: "#3a3a3a",
+            boxShadow: "none",
           },
           "&:disabled": {
-            backgroundColor: "#2a2a2a",
-            color: "#666666",
-            transform: "none",
+            backgroundColor: "rgba(255,255,255,0.08)",
+            color: "rgba(255,255,255,0.32)",
             boxShadow: "none",
           },
         },
         outlined: {
-          borderColor: "rgba(255,255,255,0.15)",
+          borderColor: "rgba(255,255,255,0.18)",
           color: "#e0e0e0",
-          borderWidth: "1.5px",
           backgroundColor: "transparent",
           "&:hover": {
             backgroundColor: "rgba(255,255,255,0.06)",
             borderColor: "rgba(255,255,255,0.35)",
-            boxShadow: "0 4px 12px rgba(0,0,0,0.3)",
           },
           "&:disabled": {
-            borderColor: "rgba(255,255,255,0.12)",
-            color: "#666666",
+            borderColor: "rgba(255,255,255,0.1)",
+            color: "rgba(255,255,255,0.3)",
             backgroundColor: "transparent",
           },
         },
         text: {
           color: "#e0e0e0",
-          padding: "8px 16px",
           "&:hover": {
-            backgroundColor: "rgba(255,255,255,0.08)",
-            transform: "translateY(-1px)",
+            backgroundColor: "rgba(255,255,255,0.07)",
+          },
+          "&:disabled": {
+            color: "rgba(255,255,255,0.3)",
           },
         },
         sizeSmall: {
-          padding: "6px 14px",
+          minHeight: "32px",
+          padding: "0 12px",
           fontSize: "0.8125rem",
-          minHeight: "36px",
-          borderRadius: "12px",
+          borderRadius: "8px",
         },
         sizeLarge: {
-          padding: "14px 32px",
+          minHeight: "44px",
+          padding: "0 20px",
           fontSize: "0.9375rem",
-          minHeight: "52px",
-          borderRadius: "12px",
+          borderRadius: "8px",
         },
       },
     },
@@ -183,24 +183,28 @@ export const darkTheme = createTheme({
       styleOverrides: {
         root: {
           color: "#e0e0e0",
-          borderRadius: "12px",
-          transition: "all 0.2s cubic-bezier(0.4, 0, 0.2, 1)",
-          padding: "10px",
+          borderRadius: "8px",
+          transition:
+            "background-color 0.15s ease, color 0.15s ease, transform 0.05s ease",
+          padding: "7px",
           "&:hover": {
-            backgroundColor: "rgba(255,255,255,0.08)",
-            transform: "scale(1.08)",
+            backgroundColor: "rgba(255,255,255,0.07)",
           },
           "&:active": {
-            transform: "scale(0.98)",
+            transform: "scale(0.96)",
+          },
+          "&:focus-visible": {
+            outline: "2px solid rgba(255,255,255,0.3)",
+            outlineOffset: "1px",
           },
         },
         sizeSmall: {
-          padding: "6px",
-          borderRadius: "12px",
+          padding: "4px",
+          borderRadius: "8px",
         },
         sizeLarge: {
-          padding: "14px",
-          borderRadius: "14px",
+          padding: "9px",
+          borderRadius: "10px",
         },
         colorInherit: {
           color: "#ffffff",
@@ -221,44 +225,39 @@ export const darkTheme = createTheme({
         root: {
           margin: "8px 0",
           "& .MuiOutlinedInput-root": {
-            borderRadius: "12px",
-            backgroundColor: "#1e1e1e",
+            borderRadius: "10px",
+            backgroundColor: "rgba(255,255,255,0.06)",
             color: "#ffffff",
-            minHeight: "48px",
-            boxShadow: "0 1px 3px rgba(0,0,0,0.2)",
-            transition: "all 0.2s cubic-bezier(0.4, 0, 0.2, 1)",
+            minHeight: "40px",
+            transition:
+              "background-color 0.15s ease, box-shadow 0.15s ease",
             "& fieldset": {
-              borderColor: "transparent",
-              borderWidth: "0",
-              borderRadius: "12px",
+              border: "none",
             },
             "&:hover": {
-              boxShadow: "0 2px 6px rgba(0,0,0,0.3)",
-            },
-            "&:hover .MuiOutlinedInput-notchedOutline": {
-              borderColor: "transparent",
-            },
-            "&.Mui-focused .MuiOutlinedInput-notchedOutline": {
-              borderColor: "transparent",
-              borderWidth: "0",
-              boxShadow: "none",
+              backgroundColor: "rgba(255,255,255,0.09)",
             },
             "&.Mui-focused": {
-              backgroundColor: "#1e1e1e",
-              boxShadow: "0 4px 12px rgba(0,0,0,0.4)",
+              backgroundColor: "rgba(255,255,255,0.09)",
+              boxShadow: "0 0 0 3px rgba(255,255,255,0.1)",
             },
             "& input": {
               color: "#ffffff",
-              padding: "14px 18px",
+              padding: "11px 14px",
               fontSize: "0.9375rem",
               letterSpacing: "-0.01em",
             },
             "& textarea": {
-              padding: "14px 18px",
+              padding: "11px 14px",
               fontSize: "0.9375rem",
             },
-            "&.Mui-error fieldset": {
-              borderColor: "#ef5350",
+            "& input::-webkit-input-placeholder, & textarea::-webkit-input-placeholder": {
+              color: "rgba(255,255,255,0.35)",
+              opacity: 1,
+            },
+            "&.Mui-error": {
+              backgroundColor: "rgba(239,83,80,0.08)",
+              boxShadow: "0 0 0 3px rgba(239,83,80,0.18)",
             },
             "& .MuiSvgIcon-root, & .MuiInputAdornment-root": {
               color: "#ffffff",
@@ -272,29 +271,21 @@ export const darkTheme = createTheme({
         root: {
           margin: "8px 0",
           "& .MuiOutlinedInput-root": {
-            borderRadius: "12px",
-            backgroundColor: "#1e1e1e",
+            borderRadius: "10px",
+            backgroundColor: "rgba(255,255,255,0.06)",
             color: "#ffffff",
-            minHeight: "48px",
-            boxShadow: "0 1px 3px rgba(0,0,0,0.2)",
-            transition: "all 0.2s cubic-bezier(0.4, 0, 0.2, 1)",
+            minHeight: "40px",
+            transition:
+              "background-color 0.15s ease, box-shadow 0.15s ease",
             "& fieldset": {
-              borderColor: "transparent",
-              borderWidth: "0",
               border: "none",
-              borderRadius: "12px",
             },
             "&:hover": {
-              boxShadow: "0 2px 6px rgba(0,0,0,0.3)",
+              backgroundColor: "rgba(255,255,255,0.09)",
             },
-            "&:hover fieldset": {
-              borderColor: "transparent",
-            },
-            "&.Mui-focused fieldset": {
-              borderColor: "transparent",
-              borderWidth: "0",
-              border: "none",
-              boxShadow: "none",
+            "&.Mui-focused": {
+              backgroundColor: "rgba(255,255,255,0.09)",
+              boxShadow: "0 0 0 3px rgba(255,255,255,0.1)",
             },
             "& .MuiSvgIcon-root, & .MuiInputAdornment-root": {
               color: "#ffffff",
@@ -304,14 +295,14 @@ export const darkTheme = createTheme({
             color: "#b0b0b0",
             fontSize: "0.9375rem",
             fontWeight: 500,
-            transform: "translate(18px, 15px) scale(1)",
+            transform: "translate(14px, 12px) scale(1)",
             letterSpacing: "-0.01em",
             "&.Mui-focused": {
               color: "#ffffff",
               fontWeight: 600,
             },
             "&.MuiFormLabel-filled, &.Mui-focused": {
-              transform: "translate(18px, -9px) scale(0.85)",
+              transform: "translate(14px, -7px) scale(0.85)",
             },
           },
         },
@@ -321,45 +312,36 @@ export const darkTheme = createTheme({
       styleOverrides: {
         root: {
           color: "#ffffff",
-          backgroundColor: "#1e1e1e",
-          borderRadius: "12px",
-          minHeight: "48px",
-          boxShadow: "0 1px 3px rgba(0,0,0,0.2)",
+          backgroundColor: "rgba(255,255,255,0.06)",
+          borderRadius: "10px",
+          minHeight: "40px",
           "& .MuiOutlinedInput-root": {
-            border: "none",
             "& fieldset": {
-              borderColor: "transparent",
-              borderWidth: "0",
               border: "none",
             },
           },
-          "&.Mui-focused .MuiOutlinedInput-notchedOutline": {
-            borderColor: "transparent",
-            borderWidth: "0",
-            boxShadow: "none",
-          },
           "&:hover": {
-            boxShadow: "0 2px 6px rgba(0,0,0,0.3)",
+            backgroundColor: "rgba(255,255,255,0.09)",
           },
-          "&:hover .MuiOutlinedInput-notchedOutline": {
-            borderColor: "transparent",
+          "&.Mui-focused": {
+            backgroundColor: "rgba(255,255,255,0.09)",
+            boxShadow: "0 0 0 3px rgba(255,255,255,0.1)",
+            outline: "none",
           },
           "& .MuiOutlinedInput-notchedOutline": {
-            borderColor: "transparent",
-            borderWidth: "0",
-            borderRadius: "12px",
+            border: "none",
           },
         },
         select: {
           backgroundColor: "transparent",
-          padding: "14px 18px",
-          paddingRight: "48px !important",
+          padding: "11px 14px",
+          paddingRight: "44px !important",
           fontSize: "0.9375rem",
           letterSpacing: "-0.01em",
         },
         icon: {
           color: "#e0e0e0",
-          right: "14px",
+          right: "12px",
           top: "calc(50% - 12px)",
         },
       },
@@ -367,31 +349,35 @@ export const darkTheme = createTheme({
     MuiOutlinedInput: {
       styleOverrides: {
         root: {
-          borderRadius: "12px",
-          backgroundColor: "#1e1e1e",
+          borderRadius: "10px",
+          backgroundColor: "rgba(255,255,255,0.06)",
           color: "#ffffff",
-          transition: "all 0.2s cubic-bezier(0.4, 0, 0.2, 1)",
-          boxShadow: "0 1px 3px rgba(0,0,0,0.2)",
+          transition:
+            "background-color 0.15s ease, box-shadow 0.15s ease",
+          "& fieldset": {
+            border: "none",
+          },
           "&:hover": {
-            boxShadow: "0 2px 6px rgba(0,0,0,0.3)",
+            backgroundColor: "rgba(255,255,255,0.09)",
           },
           "& input": {
             color: "#ffffff",
           },
           "&.Mui-focused": {
-            backgroundColor: "#1e1e1e",
-            boxShadow: "0 4px 12px rgba(0,0,0,0.4)",
+            backgroundColor: "rgba(255,255,255,0.09)",
+            boxShadow: "0 0 0 3px rgba(255,255,255,0.1)",
           },
-          "&.Mui-error .MuiOutlinedInput-notchedOutline": {
-            borderColor: "#ef5350",
+          "&.Mui-error": {
+            backgroundColor: "rgba(239,83,80,0.08)",
+            boxShadow: "0 0 0 3px rgba(239,83,80,0.18)",
           },
           "& .MuiSvgIcon-root, & .MuiInputAdornment-root": {
             color: "#ffffff",
           },
         },
         notchedOutline: {
-          borderColor: "transparent",
-          borderRadius: "12px",
+          border: "none",
+          borderRadius: "10px",
         },
       },
     },
@@ -499,20 +485,11 @@ export const darkTheme = createTheme({
         root: {
           margin: "8px 0",
           "& .MuiOutlinedInput-root": {
-            borderRadius: "12px",
-            backgroundColor: "#1e1e1e",
-            minHeight: "48px",
-            padding: "4px 14px",
-            boxShadow: "0 1px 3px rgba(0,0,0,0.2)",
-            transition: "all 0.2s cubic-bezier(0.4, 0, 0.2, 1)",
-            "&:hover": {
-              boxShadow: "0 2px 6px rgba(0,0,0,0.3)",
-            },
-            "&.Mui-focused": {
-              boxShadow: "0 4px 12px rgba(0,0,0,0.4)",
-            },
+            borderRadius: "10px",
+            minHeight: "40px",
+            padding: "4px 12px",
             "& .MuiAutocomplete-input": {
-              padding: "8px 4px",
+              padding: "7px 4px",
               fontSize: "0.9375rem",
               letterSpacing: "-0.01em",
             },
@@ -659,12 +636,18 @@ export const darkTheme = createTheme({
     MuiFab: {
       styleOverrides: {
         root: {
-          borderRadius: "8px",
+          borderRadius: "50%",
           backgroundColor: "#232323",
           color: "#bdbdbd",
-          boxShadow: "0 4px 12px rgba(0,0,0,0.4)",
+          boxShadow: "0 2px 8px rgba(0,0,0,0.4)",
+          transition:
+            "background-color 0.15s ease, box-shadow 0.15s ease, transform 0.05s ease",
           "&:hover": {
             backgroundColor: "#333333",
+            boxShadow: "0 4px 12px rgba(0,0,0,0.5)",
+          },
+          "&:active": {
+            transform: "scale(0.96)",
           },
         },
       },

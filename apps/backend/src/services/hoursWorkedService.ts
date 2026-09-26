@@ -15,6 +15,7 @@ export const getHoursWorked = async (query: QueryParams) => {
 
   // HoursWorked search is done via the associated Employee model
   const whereClause: Record<string, any> = {};
+  if (query.employeeId) whereClause.employeeId = parseInt(query.employeeId, 10);
   if (dateFrom && !Number.isNaN(dateFrom.getTime()) && dateTo && !Number.isNaN(dateTo.getTime())) {
     const start = new Date(dateFrom);
     start.setHours(0, 0, 0, 0);

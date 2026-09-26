@@ -4,39 +4,26 @@ import { SxProps, Theme } from "@mui/material";
 export const formTextFieldStyles: SxProps<Theme> = (theme: Theme) => ({
   mb: 2.5,
   "& .MuiOutlinedInput-root": {
-    borderRadius: "12px",
+    borderRadius: "10px",
     minHeight: "52px",
     position: "relative",
     backgroundColor: theme.palette.mode === "dark"
-      ? "rgba(40,40,50,0.6)"
-      : "rgba(255,255,255,0.7)",
+      ? "rgba(255,255,255,0.06)"
+      : "rgba(0,0,0,0.04)",
     color: theme.palette.text.primary,
-    border: theme.palette.mode === "dark"
-      ? "1px solid rgba(255,255,255,0.1)"
-      : "1px solid rgba(0,0,0,0.08)",
-    transition: "all 0.3s cubic-bezier(0.4, 0, 0.2, 1)",
+    transition: "background-color 0.15s ease, box-shadow 0.15s ease",
     "&:hover": {
       backgroundColor: theme.palette.mode === "dark"
-        ? "rgba(50,50,60,0.7)"
-        : "rgba(255,255,255,0.85)",
-      borderColor: theme.palette.mode === "dark"
-        ? "rgba(255,255,255,0.15)"
-        : "rgba(0,0,0,0.12)",
-    },
-    "&:hover .MuiOutlinedInput-notchedOutline": {
-      borderColor: "transparent",
+        ? "rgba(255,255,255,0.09)"
+        : "rgba(0,0,0,0.06)",
     },
     "&.Mui-focused": {
       backgroundColor: theme.palette.mode === "dark"
-        ? "rgba(55,55,65,0.8)"
-        : "rgba(255,255,255,0.95)",
-      borderColor: theme.palette.mode === "dark"
-        ? "rgba(255,255,255,0.2)"
-        : "rgba(0,0,0,0.15)",
-      boxShadow: "none",
-    },
-    "&.Mui-focused .MuiOutlinedInput-notchedOutline": {
-      borderColor: "transparent",
+        ? "rgba(255,255,255,0.09)"
+        : "rgba(0,0,0,0.06)",
+      boxShadow: theme.palette.mode === "dark"
+        ? "0 0 0 3px rgba(255,255,255,0.1)"
+        : "0 0 0 3px rgba(0,0,0,0.07)",
     },
     "& fieldset": {
       border: "none",
@@ -79,17 +66,17 @@ export const formTextFieldStyles: SxProps<Theme> = (theme: Theme) => ({
     },
     // Fix autofill background color
     "& input:-webkit-autofill": {
-      WebkitBoxShadow: theme.palette.mode === "dark" 
-        ? "0 0 0 100px rgba(40,40,50,0.6) inset"
-        : "0 0 0 100px rgba(255,255,255,0.7) inset",
+      WebkitBoxShadow: theme.palette.mode === "dark"
+        ? "0 0 0 100px rgba(255,255,255,0.06) inset"
+        : "0 0 0 100px rgba(0,0,0,0.04) inset",
       WebkitTextFillColor: theme.palette.text.primary,
-      borderRadius: "12px",
+      borderRadius: "10px",
       transition: "background-color 5000s ease-in-out 0s",
     },
     "& input:-webkit-autofill:focus": {
       WebkitBoxShadow: theme.palette.mode === "dark"
-        ? "0 0 0 100px rgba(55,55,65,0.8) inset"
-        : "0 0 0 100px rgba(255,255,255,0.95) inset",
+        ? "0 0 0 100px rgba(255,255,255,0.09) inset"
+        : "0 0 0 100px rgba(0,0,0,0.06) inset",
       WebkitTextFillColor: theme.palette.text.primary,
     },
   },

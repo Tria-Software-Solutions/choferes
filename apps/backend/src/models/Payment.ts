@@ -1,0 +1,141 @@
+import { Model, DataTypes } from "sequelize";
+import sequelize from "../config/database";
+
+// Payment model: one row per employee per biweekly pay period.
+// Amounts are computed server-side (hours × hourlyRate) but are editable;
+// isManual marks that a recalculation must not overwrite manual edits.
+export class Payment extends Model {
+  public id!: number; // Unique identifier for the payment
+
+  public employeeId!: number; // Employee the payment belongs to
+
+  public payPeriod!: "biweekly"; // Pay period (only "biweekly" for now)
+
+  public biweekNumber!: number; // Quincena number (1-24, aligned to the calendar month)
+
+  public year!: number; // Year of the pay period
+
+  public payDate?: string | null; // Scheduled/actual payment date (YYYY-MM-DD)
+
+  public currency!: string; // ISO currency code (default "CRC")
+
+  public regularSalary!: number; // Hours worked in the period × hourlyRate
+
+  public overtimePay!: number; // Overtime pay (manually editable)
+
+  public mileage!: number; // Mileage reimbursement (manually editable)
+
+  public others!: number; // Other earnings (manually editable)
+
+  public socialCharges!: number; // Social charges deducted (manually editable)
+
+  public deductions!: number; // Other deductions (manually editable)
+
+  public totalPayable!: number; // Computed server-side: earnings − deductions
+
+  public notes?: string | null; // Free-form notes
+
+  public status!: "pending" | "sent" | "cancelled"; // Payment status
+
+  public emailSentAt?: Date | null; // When the slip was emailed to the employee
+
+  public isManual!: boolean; // True when amounts were manually edited
+
+  public createdAt!: Date; // Record creation timestamp
+
+  public updatedAt!: Date; // Record update timestamp
+}
+
+Payment.init(
+  {
+    id: {
+      type: DataTypes.INTEGER,
+      autoIncrement: true,
+      primaryKey: true,
+    },
+    employeeId: {
+      type: DataTypes.INTEGER,
+      allowNull: false,
+    },
+    payPeriod: {
+      type: DataTypes.STRING(20),
+      allowNull: false,
+      defaultValue: "biweekly",
+    },
+    biweekNumber: {
+      type: DataTypes.INTEGER,
+      allowNull: false,
+    },
+    year: {
+      type: DataTypes.INTEGER,
+      allowNull: false,
+    },
+    payDate: {
+      type: DataTypes.DATEONLY,
+      allowNull: true,
+    },
+    currency: {
+      type: DataTypes.STRING(3),
+      allowNull: false,
+      defaultValue: "CRC",
+    },
+    regularSalary: {
+      type: DataTypes.DECIMAL(12, 2),
+      allowNull: false,
+    },
+    overtimePay: {
+      type: DataTypes.DECIMAL(12, 2),
+      allowNull: false,
+      defaultValue: 0,
+    },
+    mileage: {
+      type: DataTypes.DECIMAL(12, 2),
+      allowNull: false,
+      defaultValue: 0,
+    },
+    others: {
+      type: DataTypes.DECIMAL(12, 2),
+      allowNull: false,
+      defaultValue: 0,
+    },
+    socialCharges: {
+      type: DataTypes.DECIMAL(12, 2),
+      allowNull: false,
+      defaultValue: 0,
+    },
+    deductions: {
+      type: DataTypes.DECIMAL(12, 2),
+      allowNull: false,
+      defaultValue: 0,
+    },
+    totalPayable: {
+      type: DataTypes.DECIMAL(12, 2),
+      allowNull: false,
+    },
+    notes: {
+      type: DataTypes.TEXT,
+      allowNull: true,
+    },
+    status: {
+      type: DataTypes.STRING(20),
+      allowNull: false,
+      defaultValue: "pending",
+    },
+    emailSentAt: {
+      type: DataTypes.DATE,
+      allowNull: true,
+    },
+    isManual: {
+      type: DataTypes.BOOLEAN,
+      allowNull: false,
+      defaultValue: false,
+    },
+  },
+  {
+    sequelize,
+    modelName: "Payment",
+    tableName: "payments",
+  },
+);
+
+export default Payment;

@@ -22,6 +22,15 @@ via git tags (once tagged).
 - Script `cleanup:orphans` to remove orphaned FK records
 - Server-side summary recalculation: `POST /api/hours-worked/recalculate` with optional `employeeId` and `date` scoping, recalculating weekly/biweekly/monthly summaries (`summaryRecalculationService.ts`)
 - Optional `dateFrom`/`dateTo` range filter on `GET /api/hours-worked` (validated ISO dates), so the board fetches only the visible week
+- Employee file: contract dates (hire date) and termination data (date, reason, notes) with a derived active/inactive status, plus `position` and `nationalId` (`PUT /api/employees/:id` whitelists the editable fields)
+- Driver's licenses per employee: `GET/POST/PUT/DELETE /api/employee-licenses` with Costa Rica license categories and computed expiry status (`vigente` / `por_vencer` / `vencida`)
+- Disciplinary actions (llamadas de atención / amonestaciones): `GET/POST/PUT/DELETE /api/disciplinary-actions` with type, severity and attachments stored as base64 data URLs (max 3 files, ~2MB each)
+- Vacation accrual per Costa Rica labor law (art. 153, prorated): `GET /api/employees/:id/vacation-accrual` returns accrued/taken/available business days
+- New permissions `licenses:*` and `disciplinary:*` (modules Licencias / Amonestaciones) and their role assignments
+- Employees list: active/inactive status column, worst driver's-license status per employee, and a status filter (Todos / Activos / Inactivos)
+- Hours board: shows only active employees by default, with a toggle to include terminated employees
+- `GET /api/employees` accepts an optional `isActive=true|false` filter (validated); the employees list applies the status filter server-side
+- KPI band: new "Licencias por vencer" metric counting employees with expired/expiring licenses
 
 ### Changed
 
@@ -29,6 +38,8 @@ via git tags (once tagged).
 - Monorepo restructured: apps moved to `apps/frontend` and `apps/backend`
 - Huskylint-staged config: now runs `eslint --fix --max-warnings 100` instead of `npm run lint`
 - Backend lint warnings reduced from 58 to 0
+- Employees list and hours board: the status filter (and search) is now persisted between navigations alongside the other table preferences (`useTablePreferences` / `localStorage`)
+- Employees KPIs: "Sin tarifa" and "Licencias por vencer" now count the full roster instead of only the rows matching the current search/status filter, so alerts are never hidden by a filter
 - WeeklyBoard/RolesPage recalculate summaries via the server endpoint instead of client-side backfill; the board now loads hours only for the visible week
 - `parseCalendarDate` shared by `hoursWorkedService` and `summaryRecalculationService` to avoid UTC-offset date shifts on `YYYY-MM-DD` inputs
 
@@ -37,6 +48,8 @@ via git tags (once tagged).
 - ESLint `SIGKILL` on pre-commit hook (frontend was OOM due to all files being passed)
 - Various ESLint errors: `no-unused-vars`, `import/no-duplicates`, `no-restricted-syntax`, `no-await-in-loop`
 - `weeklySummaryService` queries used a non-existent `week` column instead of `weekNumber`
+- Permission catalog migrations used unquoted `updatedAt` in raw SQL, which PostgreSQL folds to `updatedat` and rejects; the identifier is now quoted, so `migrate` succeeds and the `permissions.code` column used by authorization is created (previously every authenticated request returned 500 with `AUTH_ERROR`)
+- Hours tab now reconciles the biweekly summaries with `hours_worked` (server recalculation), dedupes rows per (year, quincena), drops phantom/zero rows and derives the month from the biweek number, so totals match the hours board; the table now matches the Pagos/Vacaciones styling
 
 ---
 

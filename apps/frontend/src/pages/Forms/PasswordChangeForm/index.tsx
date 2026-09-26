@@ -197,21 +197,13 @@ const PasswordChangeForm: React.FC<PasswordChangeFormProps> = ({
             onClick={handleGenerateTemporalPassword}
             fullWidth
             sx={{
-              minHeight: 48,
-              py: 1.5,
-              fontSize: "0.85rem",
+              minHeight: 40,
+              py: 1,
+              fontSize: "0.875rem",
               fontWeight: 600,
               textTransform: "none",
               letterSpacing: "-0.01em",
-              borderRadius: "12px",
-              transition: "all 0.25s cubic-bezier(0.4, 0, 0.2, 1)",
-              '&:hover': {
-                transform: "translateY(-1px)",
-                boxShadow: "0 4px 12px rgba(0,0,0,0.12)",
-              },
-              '&:active': {
-                transform: "translateY(0)",
-              },
+              borderRadius: "10px",
             }}
           >
             Generar contraseña temporal
@@ -264,24 +256,18 @@ const PasswordChangeForm: React.FC<PasswordChangeFormProps> = ({
           <Box sx={actionsBox}>
             <Button
               onClick={onClose}
-              variant="outlined"
-              color="inherit"
+              variant="text"
               sx={{
-                minWidth: 120,
-                px: 3,
-                py: 1.5,
-                fontWeight: 600,
-                fontSize: "0.85rem",
+                px: 1.5,
+                minWidth: "auto",
+                color: "text.secondary",
+                fontWeight: 500,
+                fontSize: "0.875rem",
                 textTransform: "none",
                 letterSpacing: "-0.01em",
-                borderRadius: "12px",
-                transition: "all 0.25s cubic-bezier(0.4, 0, 0.2, 1)",
+                transition: "color 0.15s ease",
                 '&:hover': {
-                  transform: "translateY(-1px)",
-                  boxShadow: "0 4px 12px rgba(0,0,0,0.12)",
-                },
-                '&:active': {
-                  transform: "translateY(0)",
+                  color: "text.primary",
                 },
               }}
               disabled={loading}
@@ -291,29 +277,22 @@ const PasswordChangeForm: React.FC<PasswordChangeFormProps> = ({
             <Box sx={actionsInnerBox}>
               <Button
                 type="submit"
-                variant="contained"
-                color="primary"
+                variant="text"
                 sx={{
+                  px: 1.5,
+                  minHeight: 36,
+                  color: "text.primary",
                   fontWeight: 600,
                   fontSize: "0.9rem",
                   textTransform: "none",
                   letterSpacing: "-0.01em",
-                  borderRadius: "12px",
-                  minHeight: "48px",
-                  px: 3,
-                  boxShadow: "0 4px 14px rgba(0,0,0,0.12)",
-                  transition: "all 0.25s cubic-bezier(0.4, 0, 0.2, 1)",
                   '&:hover': {
-                    transform: "translateY(-2px)",
-                    boxShadow: "0 8px 25px rgba(0,0,0,0.15)",
-                  },
-                  '&:active': {
-                    transform: "translateY(0)",
+                    textDecoration: "underline",
+                    textUnderlineOffset: "3px",
+                    textDecorationThickness: "1px",
                   },
                   '&.Mui-disabled': {
-                    boxShadow: "none",
-                    transform: "none",
-                    opacity: 0.6,
+                    opacity: 0.5,
                   },
                 }}
                 disabled={

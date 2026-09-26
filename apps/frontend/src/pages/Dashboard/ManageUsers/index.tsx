@@ -40,7 +40,6 @@ import {
   CheckCircle,
   FileEdit,
   PlusCircle,
-  Plus,
   Users,
   X,
 } from "lucide-react";
@@ -615,17 +614,8 @@ const ManageUsers: React.FC<{ isExpanded?: boolean; hideHeader?: boolean }> = ({
                 <Box sx={{ display: { xs: 'none', sm: 'flex' }, flexShrink: 0 }}>
                   {canCreateUser && (
                     <Button
-                      variant="contained"
-                      startIcon={<Plus size={18} />}
+                      variant="outlined"
                       onClick={handleOpenAddUserModal}
-                      sx={{
-                        px: 3,
-                        py: 1,
-                        fontWeight: 600,
-                        fontSize: "0.9rem",
-                        letterSpacing: "-0.01em",
-                        borderRadius: '10px',
-                      }}
                     >
                       {DASHBOARD_USERS.ADD}
                     </Button>
@@ -639,15 +629,9 @@ const ManageUsers: React.FC<{ isExpanded?: boolean; hideHeader?: boolean }> = ({
           <Box sx={{ display: { xs: 'flex', sm: 'none' }, p: 2, borderTop: `1px solid ${theme.palette.mode === "dark" ? "rgba(255,255,255,0.08)" : "rgba(0,0,0,0.08)"}` }}>
             {canCreateUser && (
               <Button
-                variant="contained"
+                variant="outlined"
                 fullWidth
-                startIcon={<Plus size={18} />}
                 onClick={handleOpenAddUserModal}
-                sx={{
-                  py: 1.5,
-                  fontWeight: 600,
-                  borderRadius: '10px',
-                }}
               >
                 {DASHBOARD_USERS.ADD}
               </Button>
@@ -814,13 +798,16 @@ const ManageUsers: React.FC<{ isExpanded?: boolean; hideHeader?: boolean }> = ({
                             <Box
                               sx={{
                                 position: "absolute",
-                                right: -1,
-                                bottom: -1,
+                                right: 0,
+                                bottom: 0,
                                 width: 11,
                                 height: 11,
                                 borderRadius: "50%",
-                                backgroundColor: user.isActive ? "#4CAF50" : "#BDBDBD",
                                 border: `2px solid ${theme.palette.background.paper}`,
+                                backgroundColor: user.isActive
+                                  ? theme.palette.success.main
+                                  : theme.palette.text.disabled,
+                                zIndex: 1,
                               }}
                             />
                           </Box>
@@ -935,8 +922,7 @@ const ManageUsers: React.FC<{ isExpanded?: boolean; hideHeader?: boolean }> = ({
       <DialogComponent
         open={openAddUserModal}
         onClose={handleCloseAddUserModal}
-        title={DASHBOARD_USERS.ADD}
-        subtitle={DASHBOARD_USERS.ADD_SUBTITLE}
+        title={DASHBOARD_USERS.ADD_SUBTITLE}
         hideActions
         paperSx={addDialogPaperSx ?? {}}
         icon={<PlusCircle color="var(--mui-palette-info-main)" />}

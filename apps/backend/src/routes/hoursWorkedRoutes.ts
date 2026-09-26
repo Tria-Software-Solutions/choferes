@@ -2,7 +2,7 @@ import express from "express";
 import * as hoursWorkedController from "../controllers/hoursWorkedController";
 import { authenticateToken } from "../middleware/authMiddleware";
 import { requirePermission } from "../middleware/authorize";
-import { PERMISSIONS } from "../constants/permissions";
+import { PERMISSION_CODES } from "../constants/permissions";
 import {
   idParam,
   hoursWorkedRules,
@@ -25,7 +25,7 @@ router.get("/:id", authenticateToken, idParam, validate, hoursWorkedController.g
 router.post(
   "/",
   authenticateToken,
-  requirePermission(PERMISSIONS.EDIT_EMPLOYEE_ROLES),
+  requirePermission(PERMISSION_CODES.EDIT_EMPLOYEE_ROLES),
   hoursWorkedRules,
   validate,
   hoursWorkedController.createHoursWorked,
@@ -33,7 +33,7 @@ router.post(
 router.post(
   "/recalculate",
   authenticateToken,
-  requirePermission(PERMISSIONS.EDIT_EMPLOYEE_ROLES),
+  requirePermission(PERMISSION_CODES.EDIT_EMPLOYEE_ROLES),
   recalculateRules,
   validate,
   hoursWorkedController.recalculateSummaries,
@@ -41,7 +41,7 @@ router.post(
 router.put(
   "/:id",
   authenticateToken,
-  requirePermission(PERMISSIONS.EDIT_EMPLOYEE_ROLES),
+  requirePermission(PERMISSION_CODES.EDIT_EMPLOYEE_ROLES),
   hoursWorkedUpdateRules,
   validate,
   hoursWorkedController.updateHoursWorked,
@@ -49,7 +49,7 @@ router.put(
 router.delete(
   "/:id",
   authenticateToken,
-  requirePermission(PERMISSIONS.EDIT_EMPLOYEE_ROLES),
+  requirePermission(PERMISSION_CODES.EDIT_EMPLOYEE_ROLES),
   idParam,
   validate,
   hoursWorkedController.deleteHoursWorked,

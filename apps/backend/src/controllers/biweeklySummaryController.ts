@@ -7,7 +7,7 @@ import * as biweeklySummaryService from "../services/biweeklySummaryService";
 export const getBiweeklySummaries = async (req: Request, res: Response) => {
   try {
     const result = await biweeklySummaryService.getBiweeklySummaries(
-      req.query as { page?: string; limit?: string },
+      req.query as { page?: string; limit?: string; employeeId?: string },
     );
     return res.status(200).json(result);
   } catch (error) {

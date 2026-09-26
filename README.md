@@ -115,6 +115,14 @@ with role-based authentication and permissions.
 - Excel / PDF export with grouped headers
 - View by schedule or by employee
 
+### Employee File
+
+- Personal data plus position and national ID
+- Contract dates (hire date) and termination data (date, reason, notes); the active status is derived from the termination date
+- Driver's licenses (Costa Rica categories) with number, issue/expiry dates and expiry alerts
+- Disciplinary actions (llamadas de atención / amonestaciones) with type, severity and attachments (documents/images)
+- Vacation accrual per Costa Rica labor law (art. 153, prorated): 2 weeks (10 business days) every 50 weeks worked
+
 ### Schedules
 
 - Shift definition with weekdays and hours

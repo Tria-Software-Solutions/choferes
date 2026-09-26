@@ -16,7 +16,8 @@ import { formatHeaderDate } from "../../../../utils/dates";
 import { EnglishDayOfWeek } from "../../../../utils/dayAbreviations";
 import { PERMISSIONS } from "../../../../constants/constants";
 import type { PeriodType } from "../helpers/hoursCalculation";
-import { getTableHeaderStyles, getPremiumToggleStyles } from "../styles/tableHeader.styles";
+import { getTableHeaderStyles } from "../styles/tableHeader.styles";
+import SegmentedToggle from "../../../SegmentedToggle/SegmentedToggle.component";
 
 interface TableHeaderProps {
   viewMode: "employee" | "schedule";
@@ -81,9 +82,7 @@ export const TableHeaderTop = memo(function TableHeaderTop({
 }: TableHeaderProps) {
   const theme = useTheme();
   const styles = getTableHeaderStyles(theme, isSmallScreen);
-  const premiumStyles = getPremiumToggleStyles(theme);
   const showHoursColumn = permissions?.includes(PERMISSIONS.VIEW_EMPLOYEE_ROLES_HOURS);
-  const isEmployeeView = viewMode === "employee";
 
   // Check if date is today
   const isToday = (date: string) => {
@@ -99,42 +98,28 @@ export const TableHeaderTop = memo(function TableHeaderTop({
       {/* Top header bar */}
       <Box sx={styles.topHeader}>
         <Box sx={styles.headerFlexContainer}>
-          {/* Left: Premium View toggle */}
+          {/* Left: View toggle */}
           <Box sx={styles.viewToggleContainer}>
-            <Box
-              onClick={onToggleViewMode}
-              sx={premiumStyles.toggleContainer}
-            >
-              {/* Animated background slider */}
-              <Box
-                sx={{
-                  ...premiumStyles.slider,
-                  transform: isEmployeeView ? "translateX(0)" : "translateX(100%)",
-                }}
-              />
-
-              {/* Employee view option */}
-              <Box sx={premiumStyles.option(isEmployeeView)}>
-                <Users size={18} strokeWidth={2} style={{ marginRight: 8 }} />
-                <Typography
-                  variant="caption"
-                  sx={premiumStyles.optionText(isEmployeeView)}
-                >
-                  {SELECTOR_TABLE.EMPLOYEE_VIEW}
-                </Typography>
-              </Box>
-
-              {/* Schedule view option */}
-              <Box sx={premiumStyles.option(!isEmployeeView)}>
-                <CalendarDays size={18} strokeWidth={2} style={{ marginRight: 8 }} />
-                <Typography
-                  variant="caption"
-                  sx={premiumStyles.optionText(!isEmployeeView)}
-                >
-                  {SELECTOR_TABLE.SCHEDULE_VIEW}
-                </Typography>
-              </Box>
-            </Box>
+            <SegmentedToggle
+              value={viewMode}
+              onChange={(v) => {
+                if (v !== viewMode) onToggleViewMode();
+              }}
+              options={[
+                {
+                  value: "employee",
+                  label: SELECTOR_TABLE.EMPLOYEE_VIEW,
+                  icon: <Users size={16} />,
+                },
+                {
+                  value: "schedule",
+                  label: SELECTOR_TABLE.SCHEDULE_VIEW,
+                  icon: <CalendarDays size={16} />,
+                },
+              ]}
+              size="medium"
+              surface="dark"
+            />
           </Box>
 
           {/* Center: Period title */}

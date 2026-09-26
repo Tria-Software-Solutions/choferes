@@ -69,35 +69,6 @@ export const fetchPermissionsByNames = createAsyncThunk(
   },
 );
 
-export const createPermission = createAsyncThunk(
-  "permissions/createPermission",
-  async (newPermission: Omit<Permission, "id">, { rejectWithValue }) => {
-    try {
-      const createdPermission =
-        await PermissionService.createPermission(newPermission);
-      return createdPermission;
-    } catch (error: unknown) {
-      return rejectWithValue(
-        error instanceof Error ? error.message : "Failed to create permission",
-      );
-    }
-  },
-);
-
-export const deletePermission = createAsyncThunk(
-  "permissions/deletePermission",
-  async (id: number, { rejectWithValue }) => {
-    try {
-      await PermissionService.deletePermission(id);
-      return id;
-    } catch (error: unknown) {
-      return rejectWithValue(
-        error instanceof Error ? error.message : "Failed to delete permission",
-      );
-    }
-  },
-);
-
 const permissionsSlice = createSlice({
   name: "permissions",
   initialState,
@@ -136,22 +107,6 @@ const permissionsSlice = createSlice({
           state.permissions = action.payload;
         },
       )
-      .addCase(
-        createPermission.fulfilled,
-        (state, action: PayloadAction<Permission>) => {
-          state.permissions.push(action.payload);
-          state.totalCountPermissions += 1;
-        },
-      )
-      .addCase(
-        deletePermission.fulfilled,
-        (state, action: PayloadAction<number>) => {
-          state.permissions = state.permissions.filter(
-            (permission) => permission.id !== action.payload,
-          );
-          state.totalCountPermissions -= 1;
-        },
-      );
   },
 });
 

@@ -10,7 +10,7 @@ import {
   useMediaQuery,
   Typography,
 } from "@mui/material";
-import { Plus, X, User, Ruler, FileText, MapPin, Info } from "lucide-react";
+import { RotateCcw, User, Ruler, FileText, MapPin, Info } from "lucide-react";
 import OutlinedInput from "@mui/material/OutlinedInput";
 import InputAdornment from "@mui/material/InputAdornment";
 import FORMS from "../../../constants/forms.constants";
@@ -177,15 +177,6 @@ const AddCourierForm: React.FC<AddCourierFormProps> = ({
 
   return (
     <Box sx={boxRoot}>
-      <Box sx={{ mb: 1 }}>
-        <Typography
-          variant="body2"
-          color="text.secondary"
-          sx={{ lineHeight: 1.4 }}
-        >
-          {FORMS.ADD_COURIER.DIALOG_CONTENT_TITLE}
-        </Typography>
-      </Box>
       <Grid container spacing={2} sx={gridContainer}>
         <Grid item xs={12} sm={6}>
           <TextfieldComponent
@@ -362,9 +353,9 @@ const AddCourierForm: React.FC<AddCourierFormProps> = ({
         <Grid item xs={12}>
           <Box sx={actionsBox(theme)}>
             <Button
-              variant="outlined"
+              variant="text"
               onClick={handleClearForm}
-              startIcon={<X />}
+              startIcon={<RotateCcw size={16} />}
               fullWidth={isSmallScreen}
               sx={clearButton}
             >
@@ -373,7 +364,7 @@ const AddCourierForm: React.FC<AddCourierFormProps> = ({
             <Box sx={actionsInnerBox}>
               {onCancel && (
                 <Button
-                  variant="outlined"
+                  variant="text"
                   onClick={onCancel}
                   disabled={isLoading}
                   fullWidth={isSmallScreen}
@@ -383,10 +374,9 @@ const AddCourierForm: React.FC<AddCourierFormProps> = ({
                 </Button>
               )}
               <Button
-                variant="contained"
+                variant="text"
                 onClick={handleSubmit}
                 disabled={!isFormValid || isLoading}
-                startIcon={<Plus size={18} />}
                 fullWidth={isSmallScreen}
                 sx={submitButton}
               >

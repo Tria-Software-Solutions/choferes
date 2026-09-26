@@ -55,7 +55,7 @@ import {
   DialogActions,
   CircularProgress,
 } from "@mui/material";
-import { Pencil, Camera, X, Loader2, Bell, ShieldCheck, HelpCircle, Blocks, Sun, Moon, Monitor, Check } from "lucide-react";
+import { Pencil, Camera, X, RotateCcw, Loader2, Bell, ShieldCheck, HelpCircle, Blocks, Sun, Moon, Monitor, Check } from "lucide-react";
 import NotificationSettingsTab from "./NotificationSettingsTab";
 import SessionsTab from "./SessionsTab";
 import HelpCenterTab from "./HelpCenterTab";
@@ -952,9 +952,9 @@ const Profile: React.FC = () => {
               {/* Action Button */}
               <Box sx={actionsBox(theme)}>
                 <Button
-                  variant="outlined"
+                  variant="text"
                   onClick={handleClearEditForm}
-                  startIcon={<X size={18} />}
+                  startIcon={<RotateCcw size={18} />}
                   fullWidth={isSmallScreen}
                   sx={clearButton}
                 >
@@ -962,7 +962,7 @@ const Profile: React.FC = () => {
                 </Button>
                 <Box sx={actionsInnerBox}>
                   <Button
-                    variant="contained"
+                    variant="text"
                     onClick={handleSaveChanges}
                     disabled={!isEditFormValid || !!infoError}
                     startIcon={<Check size={18} />}
@@ -1028,8 +1028,8 @@ const Profile: React.FC = () => {
 
               <Box sx={{ borderBottom: `1px solid ${theme.palette.mode === "dark" ? "rgba(255,255,255,0.06)" : "rgba(0,0,0,0.06)"}`, mb: { xs: 2, md: 2.5 } }} />
 
-              <Box sx={{ flex: 1, minHeight: 0, overflow: "auto" }}>
-              <Grid container spacing={{ xs: 2, sm: 2.5 }}>
+              <Box sx={{ flex: 1, minHeight: 0, overflowY: "auto", overflowX: "hidden" }}>
+              <Grid container spacing={{ xs: 2, sm: 2.5 }} sx={{ minWidth: 0, "& > .MuiGrid-item": { minWidth: 0 } }}>
                 {/* Password fields side by side */}
                 <Grid item xs={12} sm={6}>
                   <TextfieldComponent
@@ -1214,9 +1214,9 @@ const Profile: React.FC = () => {
               {/* Password Action Button */}
               <Box sx={actionsBox(theme)}>
                 <Button
-                  variant="outlined"
+                  variant="text"
                   onClick={handleClearPasswordForm}
-                  startIcon={<X size={18} />}
+                  startIcon={<RotateCcw size={18} />}
                   fullWidth={isSmallScreen}
                   sx={clearButton}
                 >
@@ -1224,7 +1224,7 @@ const Profile: React.FC = () => {
                 </Button>
                 <Box sx={actionsInnerBox}>
                   <Button
-                    variant="contained"
+                    variant="text"
                     onClick={handleChangePassword}
                     disabled={!isPasswordFormValid}
                     startIcon={<Check size={18} />}

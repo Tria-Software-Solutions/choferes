@@ -213,9 +213,7 @@ const DialogComponent: React.FC<ConfirmationDialogProps> = ({
               disabled={loading}
               sx={{
                 color: "text.secondary",
-                "&:hover": {
-                  backgroundColor: isDark ? "rgba(255,255,255,0.06)" : "rgba(0,0,0,0.04)",
-                },
+                fontWeight: 500,
               }}
             >
               {cancelText || DIALOG.CANCEL}
@@ -223,20 +221,25 @@ const DialogComponent: React.FC<ConfirmationDialogProps> = ({
             <Button
               fullWidth
               size="medium"
-              variant="contained"
+              variant="text"
               onClick={onConfirm}
               disabled={loading}
               sx={{
-                backgroundColor: "#ef4444",
-                "&:hover": { backgroundColor: "#dc2626" },
+                color: isDark ? "#f87171" : "#dc2626",
+                fontWeight: 600,
+                "&:hover": {
+                  color: isDark ? "#f87171" : "#dc2626",
+                  textDecoration: "underline",
+                  textUnderlineOffset: "3px",
+                  backgroundColor: "transparent",
+                },
                 "&.Mui-disabled": {
-                  backgroundColor: isDark ? "rgba(239,68,68,0.12)" : "rgba(239,68,68,0.08)",
-                  color: isDark ? "rgba(255,255,255,0.2)" : "rgba(0,0,0,0.2)",
+                  opacity: 0.4,
                 },
               }}
             >
               {loading ? (
-                <CircularProgress size={20} color="inherit" />
+                <CircularProgress size={16} color="inherit" />
               ) : (
                 confirmText || getDefaultConfirmText()
               )}
@@ -282,7 +285,6 @@ const DialogComponent: React.FC<ConfirmationDialogProps> = ({
               transition: "all 0.2s ease-in-out",
               "&:hover": {
                 backgroundColor: "rgba(0,0,0,0.04)",
-                transform: "scale(1.1)",
               },
             }}
           >
@@ -313,7 +315,6 @@ const DialogComponent: React.FC<ConfirmationDialogProps> = ({
           <DialogActions sx={dialogActionsStyles(isSmallScreen)}>
             <Button
               onClick={onClose}
-              variant="outlined"
               fullWidth={isSmallScreen}
               sx={cancelButtonStyles(isSmallScreen)}
               disabled={loading}
@@ -323,7 +324,6 @@ const DialogComponent: React.FC<ConfirmationDialogProps> = ({
             {onConfirm && (
               <Button
                 onClick={onConfirm}
-                variant="contained"
                 color={getConfirmButtonColor()}
                 fullWidth={isSmallScreen}
                 sx={confirmButtonStyles(isSmallScreen)}

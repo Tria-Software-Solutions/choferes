@@ -13,6 +13,10 @@ import { WeeklySummary } from "../models/WeeklySummary";
 import { MonthlySummary } from "../models/MonthlySummary";
 import { BiweeklySummary } from "../models/BiweeklySummary";
 import { Notification } from "../models/Notification";
+import { Payment } from "../models/Payment";
+import { Vacation } from "../models/Vacation";
+import { EmployeeLicense } from "../models/EmployeeLicense";
+import { DisciplinaryAction } from "../models/DisciplinaryAction";
 import setupAssociations from "./associations";
 
 // Setup all model associations (side effect)
@@ -34,4 +38,8 @@ export {
   MonthlySummary,
   BiweeklySummary,
   Notification,
+  Payment,
+  Vacation,
+  EmployeeLicense,
+  DisciplinaryAction,
 };

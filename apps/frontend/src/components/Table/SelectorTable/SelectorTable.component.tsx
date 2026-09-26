@@ -86,7 +86,7 @@ import {
   createOrUpdateHoursWorked,
   deleteHoursWorked, // <-- importa la acción de borrado
 } from "../../../store/slices/hoursWorkedSlice";
-import SwapHorizIcon from "@mui/icons-material/SwapHoriz";
+import SegmentedToggle from "../../SegmentedToggle/SegmentedToggle.component";
 import SelectorTableMobileLayout from "./SelectorTableMobileLayout";
 
 // SelectorTable component displays and manages employee schedules, hours worked, and summary data for different periods (weekly, biweekly, monthly).
@@ -623,45 +623,18 @@ const SelectorTableComponent: React.FC<SelectorTableProps> = ({
                   }}
                 >
                   <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-                    <Box
-                      sx={{ display: "flex", alignItems: "center", gap: 1, cursor: "pointer" }}
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        setViewMode(viewMode === "employee" ? "schedule" : "employee");
+                    <SegmentedToggle
+                      value={viewMode}
+                      onChange={(v) => {
+                        if (v !== viewMode) setViewMode(v);
                       }}
-                    >
-                      <IconButton
-                        aria-label="Cambiar vista"
-                        title={viewMode === "employee" ? SELECTOR_TABLE.EMPLOYEES : SELECTOR_TABLE.SCHEDULES}
-                        sx={{
-                          backgroundColor: "transparent",
-                          padding: "4px",
-                          transition: "all 0.3s cubic-bezier(0.4, 0, 0.2, 1)",
-                          "&:hover": {
-                            backgroundColor: "transparent",
-                            transform: "scale(1.1)",
-                          },
-                        }}
-                      >
-                        <SwapHorizIcon sx={{ fontSize: "1.2rem", color: "#fff" }} />
-                      </IconButton>
-                      <Typography
-                        variant="caption"
-                        sx={{
-                          display: { xs: 'none', sm: 'block' },
-                          fontWeight: 500,
-                          fontSize: "0.875rem",
-                          letterSpacing: "-0.01em",
-                          color: "#fff",
-                          cursor: "pointer",
-                          userSelect: "none",
-                        }}
-                      >
-                        {viewMode === "employee"
-                          ? SELECTOR_TABLE.EMPLOYEES
-                          : SELECTOR_TABLE.SCHEDULES}
-                      </Typography>
-                    </Box>
+                      options={[
+                        { value: "employee", label: SELECTOR_TABLE.EMPLOYEES },
+                        { value: "schedule", label: SELECTOR_TABLE.SCHEDULES },
+                      ]}
+                      size="medium"
+                      surface="dark"
+                    />
                     <TableSortLabel
                       direction={orderDirection}
                       onClick={() =>
@@ -1291,7 +1264,6 @@ const SelectorTableComponent: React.FC<SelectorTableProps> = ({
         open={openAddScheduleModal}
         onClose={() => setOpenAddScheduleModal(false)}
         title={MANAGEMENT.DIALOG_ADD_TITLE}
-        subtitle={MANAGEMENT.SCHEDULES_PAGE.DIALOG_ADD_SUBTITLE}
         hideActions
         paperSx={{}}
         icon={<PlusCircle color="var(--mui-palette-info-main)" />}

@@ -68,6 +68,24 @@ describe("employeeService", () => {
       expect(callArgs.order).toEqual([["firstName", "ASC"]]);
     });
 
+    it("filtra por estado activo/inactivo cuando se envía isActive", async () => {
+      mockFindAndCountAll.mockResolvedValue({ count: 0, rows: [] });
+
+      await employeeService.getEmployees({ isActive: "false" });
+
+      const callArgs = mockFindAndCountAll.mock.calls[0][0];
+      expect(callArgs.where.isActive).toBe(false);
+    });
+
+    it("no filtra por estado cuando no se envía isActive", async () => {
+      mockFindAndCountAll.mockResolvedValue({ count: 0, rows: [] });
+
+      await employeeService.getEmployees({});
+
+      const callArgs = mockFindAndCountAll.mock.calls[0][0];
+      expect(callArgs.where.isActive).toBeUndefined();
+    });
+
     it("debería manejar paginación personalizada", async () => {
       mockFindAndCountAll.mockResolvedValue({
         count: 100,

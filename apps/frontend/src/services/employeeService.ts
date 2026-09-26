@@ -1,12 +1,14 @@
 import { Employee } from "../models/Employee";
+import { VacationAccrual } from "../models/VacationAccrual";
 import api, { invalidateCache } from "./api";
 
-export const getEmployees = async (search?: string) => {
+export const getEmployees = async (search?: string, isActive?: boolean) => {
   const params: Record<string, string | number> = {
     _t: Date.now(),
     limit: 10000,
   };
   if (search) params.search = search;
+  if (isActive !== undefined) params.isActive = isActive ? "true" : "false";
 
   const response = await api.get("/employees", { params });
   return response.data.data;
@@ -14,6 +16,14 @@ export const getEmployees = async (search?: string) => {
 
 export const getEmployeeById = async (id: number) => {
   const response = await api.get(`/employees/${id}`);
+  return response.data;
+};
+
+// Acumulación de vacaciones según la ley de Costa Rica (art. 153, prorrateado).
+export const getVacationAccrual = async (id: number): Promise<VacationAccrual> => {
+  const response = await api.get(`/employees/${id}/vacation-accrual`, {
+    headers: { "x-no-cache": "1" },
+  });
   return response.data;
 };
 

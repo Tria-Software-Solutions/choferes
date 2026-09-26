@@ -164,7 +164,10 @@ export const getUserByUsername = async (username: string) =>
     include: ROLES_INCLUDE,
   });
 
-// Fetches all permissions for a user by aggregating permissions from all roles
+// Fetches all permissions for a user by aggregating permissions from all roles.
+// Returns display LABELS (not codes) because this feeds the frontend UI, which
+// gates elements against `PERMISSIONS.*` labels. Server-side authorization uses
+// `permission.code` instead (see middleware/authMiddleware).
 export const getUserPermissions = async (userId: number) => {
   const user = await User.findByPk(userId, {
     attributes: SAFE_ATTRS,

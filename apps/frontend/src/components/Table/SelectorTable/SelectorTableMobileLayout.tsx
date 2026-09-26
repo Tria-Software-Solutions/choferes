@@ -31,7 +31,7 @@ import {
   PERMISSIONS,
 } from "../../../constants/constants";
 import PaginationComponent from "../Pagination/Pagination.component";
-import SwapHorizIcon from "@mui/icons-material/SwapHoriz";
+import SegmentedToggle from "../../SegmentedToggle/SegmentedToggle.component";
 import { Employee } from "../../../models/Employee";
 import { Schedule } from "../../../models/Schedule";
 import { HoursWorked } from "../../../models/HoursWorked";
@@ -189,22 +189,15 @@ const SelectorTableMobileLayout: React.FC<MobileLayoutProps> = ({
         }}
       >
         <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-          <IconButton
-            size="small"
-            onClick={() => setViewMode(viewMode === "employee" ? "schedule" : "employee")}
-            sx={{
-              backgroundColor: "transparent",
-              p: 0.5,
-              "&:hover": { backgroundColor: "rgba(0,0,0,0.04)" },
-            }}
-          >
-            <SwapHorizIcon sx={{ fontSize: "1.2rem" }} />
-          </IconButton>
-          <Typography sx={{ fontWeight: 700, fontSize: "0.85rem" }}>
-            {viewMode === "employee"
-              ? SELECTOR_TABLE.EMPLOYEES
-              : SELECTOR_TABLE.SCHEDULES}
-          </Typography>
+          <SegmentedToggle
+            value={viewMode}
+            onChange={setViewMode}
+            options={[
+              { value: "employee", label: SELECTOR_TABLE.EMPLOYEES },
+              { value: "schedule", label: SELECTOR_TABLE.SCHEDULES },
+            ]}
+            size="medium"
+          />
         </Box>
         <Typography sx={{ fontWeight: 600, fontSize: "0.75rem", color: "text.secondary" }}>
           {renderPeriodHeader(

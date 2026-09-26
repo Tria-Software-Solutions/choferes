@@ -4,8 +4,12 @@
 import { BiweeklySummary } from "../models/BiweeklySummary";
 import { paginate, getPaginationParams } from "../utils/pagination";
 
-// Get all biweekly summaries (paginated)
-export const getBiweeklySummaries = async (query: { page?: string; limit?: string }) => {
+// Get all biweekly summaries (paginated, optionally filtered by employee)
+export const getBiweeklySummaries = async (query: {
+  page?: string;
+  limit?: string;
+  employeeId?: string;
+}) => {
   const params = getPaginationParams(query);
   const options: Record<string, any> = {
     order: [
@@ -13,6 +17,7 @@ export const getBiweeklySummaries = async (query: { page?: string; limit?: strin
       ["biweekNumber", "DESC"],
     ],
   };
+  if (query.employeeId) options.where = { employeeId: parseInt(query.employeeId, 10) };
   return paginate<BiweeklySummary>(BiweeklySummary, options, params);
 };
 

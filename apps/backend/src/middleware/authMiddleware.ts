@@ -121,8 +121,10 @@ export const authenticateToken = async (
     }
 
     const roles = (user.roles ?? []).map((role) => role.name);
+    // Authorize against the stable permission CODE, never the Spanish label.
+    // Labels are display-only and may change without breaking access control.
     const permissions = (user.roles ?? []).flatMap((role) =>
-      (role.permissions ?? []).map((permission) => permission.name),
+      (role.permissions ?? []).map((permission) => permission.code),
     );
 
     req.user = { id: userId, roles, permissions };

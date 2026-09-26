@@ -64,27 +64,18 @@ export const formContainer: SxProps<Theme> = {
 // Inputs sobre el overlay oscuro: fondo translúcido oscuro y texto blanco.
 export const loginTextFieldStyles: SxProps<Theme> = (theme) => ({
   "& .MuiOutlinedInput-root": {
-    borderRadius: "12px",
+    borderRadius: "10px",
     minHeight: "46px",
     position: "relative",
-    backgroundColor: "rgba(255,255,255,0.07)",
+    backgroundColor: "rgba(255,255,255,0.06)",
     color: "#ffffff",
-    border: "1px solid rgba(255,255,255,0.14)",
-    transition: "all 0.3s cubic-bezier(0.4, 0, 0.2, 1)",
+    transition: "background-color 0.15s ease, box-shadow 0.15s ease",
     "&:hover": {
-      backgroundColor: "rgba(255,255,255,0.11)",
-      borderColor: "rgba(255,255,255,0.26)",
-    },
-    "&:hover .MuiOutlinedInput-notchedOutline": {
-      borderColor: "transparent",
+      backgroundColor: "rgba(255,255,255,0.09)",
     },
     "&.Mui-focused": {
-      backgroundColor: "rgba(255,255,255,0.11)",
-      borderColor: "#a5b4fc",
-      boxShadow: "0 0 0 3px rgba(165,180,252,0.22)",
-    },
-    "&.Mui-focused .MuiOutlinedInput-notchedOutline": {
-      borderColor: "transparent",
+      backgroundColor: "rgba(255,255,255,0.09)",
+      boxShadow: "0 0 0 3px rgba(255,255,255,0.12)",
     },
     "& fieldset": {
       border: "none",

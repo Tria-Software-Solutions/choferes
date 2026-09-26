@@ -256,20 +256,19 @@ class ErrorBoundaryClass extends React.Component<
                     : "linear-gradient(135deg, #dc2626, #b91c1c)",
                   color: "#fff",
                   boxShadow: isDark
-                    ? `0 4px 20px ${alpha("#ff3b30", 0.3)}`
-                    : `0 4px 16px ${alpha("#dc2626", 0.25)}`,
+                    ? `0 2px 8px ${alpha("#ff3b30", 0.25)}`
+                    : `0 2px 8px ${alpha("#dc2626", 0.2)}`,
                   "&:hover": {
                     background: isDark
                       ? "linear-gradient(135deg, #ff453a, #c41e1e)"
                       : "linear-gradient(135deg, #b91c1c, #991b1b)",
                     boxShadow: isDark
-                      ? `0 6px 24px ${alpha("#ff3b30", 0.4)}`
-                      : `0 6px 20px ${alpha("#dc2626", 0.35)}`,
-                    transform: "translateY(-1px)",
+                      ? `0 4px 14px ${alpha("#ff3b30", 0.35)}`
+                      : `0 4px 14px ${alpha("#dc2626", 0.3)}`,
                   },
-                  transition: "all 0.2s ease",
+                  transition: "background 0.2s ease, box-shadow 0.2s ease",
                   "&:active": {
-                    transform: "translateY(0)",
+                    transform: "scale(0.97)",
                   },
                 }}
               >

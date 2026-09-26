@@ -30,6 +30,7 @@ jest.mock("../middleware/validation", () => {
   (mockRule as any).run = jest.fn();
   return {
     paginationRules: [mockRule],
+    biweeklySummaryQueryRules: [mockRule],
     validate: jest.fn((_req: express.Request, _res: express.Response, next: express.NextFunction) =>
       next(),
     ),

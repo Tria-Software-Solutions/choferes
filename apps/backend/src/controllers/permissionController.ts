@@ -1,5 +1,5 @@
-// Controller for handling HTTP requests related to permissions
-// Provides endpoints for CRUD operations on permissions
+// Controller for handling HTTP requests related to permissions.
+// Read-only: the permission catalog is code-owned, so there is no runtime CRUD.
 import { Request, Response } from "express";
 import * as permissionService from "../services/permissionService";
 
@@ -43,30 +43,5 @@ export const getPermissionsByNames = async (req: Request, res: Response) => {
     return res.status(200).json(permissions);
   } catch (error) {
     return res.status(500).json({ message: "Error fetching Permissions", error });
-  }
-};
-
-// Create a new permission
-export const createPermission = async (req: Request, res: Response) => {
-  try {
-    const { name } = req.body;
-    const permission = await permissionService.createPermission(name);
-    res.status(201).json(permission);
-  } catch (error) {
-    res.status(500).json({ message: "Error creating Permission", error });
-  }
-};
-
-// Delete a permission by its ID
-export const deletePermission = async (req: Request, res: Response) => {
-  try {
-    const id = parseInt(req.params.id, 10);
-    const deleted = await permissionService.deletePermission(id);
-    if (deleted) {
-      return res.status(204).end();
-    }
-    return res.status(404).json({ message: "Permission not found" });
-  } catch (error) {
-    return res.status(500).json({ message: "Error deleting Permission", error });
   }
 };

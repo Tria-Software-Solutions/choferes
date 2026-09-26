@@ -88,30 +88,19 @@ export const datePickerSx: SxProps<Theme> = (theme) => ({
   minWidth: "180px",
   "& .MuiOutlinedInput-root": {
     height: "48px",
-    borderRadius: "12px",
-    backgroundColor: theme.palette.background.paper,
+    borderRadius: "10px",
+    backgroundColor: theme.palette.mode === "dark" ? "rgba(255,255,255,0.06)" : "rgba(0,0,0,0.04)",
     color: theme.palette.text.primary,
-    boxShadow: "0 2px 6px rgba(0,0,0,0.08), 0 2px 4px rgba(0,0,0,0.04)",
-    transition: "all 0.2s cubic-bezier(0.4, 0, 0.2, 1)",
+    transition: "background-color 0.15s ease, box-shadow 0.15s ease",
     "& fieldset": {
-      borderColor: theme.palette.mode === "dark" ? "rgba(255,255,255,0.12)" : "rgba(0,0,0,0.12)",
-      borderWidth: "1.5px",
-      borderRadius: "12px",
+      border: "none",
     },
     "&:hover": {
-      backgroundColor: theme.palette.action.hover,
-      boxShadow: "0 4px 12px rgba(0,0,0,0.12), 0 2px 6px rgba(0,0,0,0.08)",
-    },
-    "&:hover .MuiOutlinedInput-notchedOutline": {
-      borderColor: theme.palette.mode === "dark" ? "rgba(255,255,255,0.25)" : "rgba(0,0,0,0.25)",
-    },
-    "&.Mui-focused .MuiOutlinedInput-notchedOutline": {
-      borderColor: theme.palette.mode === "dark" ? "rgba(255,255,255,0.25)" : "rgba(0,0,0,0.25)",
-      borderWidth: "1.5px",
+      backgroundColor: theme.palette.mode === "dark" ? "rgba(255,255,255,0.09)" : "rgba(0,0,0,0.06)",
     },
     "&.Mui-focused": {
-      backgroundColor: theme.palette.background.paper,
-      boxShadow: "0 4px 12px rgba(0,0,0,0.12), 0 2px 6px rgba(0,0,0,0.08)",
+      backgroundColor: theme.palette.mode === "dark" ? "rgba(255,255,255,0.09)" : "rgba(0,0,0,0.06)",
+      boxShadow: theme.palette.mode === "dark" ? "0 0 0 3px rgba(255,255,255,0.1)" : "0 0 0 3px rgba(0,0,0,0.07)",
       outline: "none",
     },
     "& input": {

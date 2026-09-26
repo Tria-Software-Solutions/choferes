@@ -35,7 +35,6 @@ import PremiumTooltip from "../../../components/PremiumTooltip/PremiumTooltip.co
 import {
   CheckCircle,
   FileEdit,
-  Plus,
   PlusCircle,
   Shield,
   Trash2,
@@ -422,17 +421,8 @@ const ManageRoles: React.FC<{ isExpanded?: boolean; hideHeader?: boolean }> = ({
             <Box sx={{ display: { xs: 'none', sm: 'flex' }, gap: 1 }}>
               {canCreateRole && (
                 <Button
-                  variant="contained"
-                  startIcon={<Plus size={18} />}
+                  variant="outlined"
                   onClick={handleOpenAddRoleModal}
-                  sx={{
-                    px: 3,
-                    py: 1,
-                    fontWeight: 600,
-                    fontSize: "0.9rem",
-                    letterSpacing: "-0.01em",
-                    borderRadius: '10px',
-                  }}
                 >
                   {DASHBOARD_ROLES.ADD}
                 </Button>
@@ -445,15 +435,9 @@ const ManageRoles: React.FC<{ isExpanded?: boolean; hideHeader?: boolean }> = ({
         <Box sx={{ display: { xs: 'flex', sm: 'none' }, p: 2, borderTop: `1px solid ${theme.palette.mode === "dark" ? "rgba(255,255,255,0.08)" : "rgba(0,0,0,0.08)"}` }}>
           {canCreateRole && (
             <Button
-              variant="contained"
+              variant="outlined"
               fullWidth
-              startIcon={<Plus size={18} />}
               onClick={handleOpenAddRoleModal}
-              sx={{
-                py: 1.5,
-                fontWeight: 600,
-                borderRadius: '10px',
-              }}
             >
               {DASHBOARD_ROLES.ADD}
             </Button>
@@ -706,7 +690,6 @@ const ManageRoles: React.FC<{ isExpanded?: boolean; hideHeader?: boolean }> = ({
             open={openAddRoleModal}
             onClose={handleCloseAddRoleModal}
             title={DASHBOARD_ROLES.DIALOG_ADD_TITLE}
-            subtitle={DASHBOARD_ROLES.DIALOG_ADD_SUBTITLE}
             hideActions
             paperSx={addDialogPaperSx ?? {}}
             icon={<PlusCircle color="var(--mui-palette-info-main)" />}

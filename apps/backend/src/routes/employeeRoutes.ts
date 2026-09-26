@@ -2,12 +2,12 @@ import express from "express";
 import * as employeeController from "../controllers/employeeController";
 import { authenticateToken } from "../middleware/authMiddleware";
 import { requirePermission } from "../middleware/authorize";
-import { PERMISSIONS } from "../constants/permissions";
+import { PERMISSION_CODES } from "../constants/permissions";
 import {
   idParam,
   employeeRules,
+  employeeQueryRules,
   employeeUpdateRules,
-  paginationRules,
   validate,
 } from "../middleware/validation";
 import {
@@ -18,12 +18,19 @@ import {
 
 const router = express.Router();
 
-router.get("/", authenticateToken, paginationRules, validate, employeeController.getEmployees);
+router.get("/", authenticateToken, employeeQueryRules, validate, employeeController.getEmployees);
 router.get("/:id", authenticateToken, idParam, validate, employeeController.getEmployeeById);
+router.get(
+  "/:id/vacation-accrual",
+  authenticateToken,
+  idParam,
+  validate,
+  employeeController.getVacationAccrual,
+);
 router.post(
   "/",
   authenticateToken,
-  requirePermission(PERMISSIONS.CREATE_EMPLOYEE),
+  requirePermission(PERMISSION_CODES.CREATE_EMPLOYEES),
   employeeRules,
   validate,
   employeeController.createEmployee,
@@ -31,7 +38,7 @@ router.post(
 router.put(
   "/:id",
   authenticateToken,
-  requirePermission(PERMISSIONS.EDIT_EMPLOYEE),
+  requirePermission(PERMISSION_CODES.EDIT_EMPLOYEES),
   employeeUpdateRules,
   validate,
   employeeController.updateEmployee,
@@ -39,7 +46,7 @@ router.put(
 router.delete(
   "/:id",
   authenticateToken,
-  requirePermission(PERMISSIONS.DELETE_EMPLOYEE),
+  requirePermission(PERMISSION_CODES.DELETE_EMPLOYEES),
   idParam,
   validate,
   employeeController.deleteEmployee,
@@ -49,14 +56,14 @@ router.delete(
 router.post(
   "/:id/avatar",
   authenticateToken,
-  requirePermission(PERMISSIONS.EDIT_EMPLOYEE),
+  requirePermission(PERMISSION_CODES.EDIT_EMPLOYEES),
   multerUpload.single("avatar"),
   uploadEmployeeAvatar,
 );
 router.delete(
   "/:id/avatar",
   authenticateToken,
-  requirePermission(PERMISSIONS.EDIT_EMPLOYEE),
+  requirePermission(PERMISSION_CODES.EDIT_EMPLOYEES),
   deleteEmployeeAvatar,
 );
 

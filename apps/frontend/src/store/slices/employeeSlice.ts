@@ -2,12 +2,16 @@ import { createSlice, createAsyncThunk, PayloadAction } from "@reduxjs/toolkit";
 import * as EmployeeService from "../../services/employeeService";
 import { Employee } from "../../models/Employee";
 import { RootState } from "../store";
+import { getApiErrorMessage } from "../../utils/apiError";
 
 // employeeSlice manages the state and async logic for employee data
 // Includes fetching, creating, updating, and deleting employees
 // State: employees array, total count, loading state, error
 interface EmployeeState {
   employees: Employee[];
+  // Plantilla completa, sin filtros de búsqueda ni estado. Se usa para los
+  // indicadores globales (p. ej. empleados sin tarifa o con licencias vencidas).
+  allEmployees: Employee[];
   totalCountEmployees: number;
   isLoadingEmployees: boolean;
   error: string | null;
@@ -15,6 +19,7 @@ interface EmployeeState {
 
 const initialState: EmployeeState = {
   employees: [],
+  allEmployees: [],
   totalCountEmployees: 0,
   isLoadingEmployees: false,
   error: null,
@@ -23,12 +28,33 @@ const initialState: EmployeeState = {
 export const fetchEmployees = createAsyncThunk(
   "employees/fetchEmployees",
   async (
-    params: { search?: string } = {},
+    params: { search?: string; isActive?: boolean } = {},
     { rejectWithValue },
   ) => {
-    // Fetches employees from the API, optionally filtered by search term
+    // Fetches employees from the API, optionally filtered by search/status
     try {
-      const response = await EmployeeService.getEmployees(params.search);
+      const response = await EmployeeService.getEmployees(params.search, params.isActive);
+      if (Array.isArray(response)) {
+        return response;
+      } else if (response && Array.isArray(response.employees)) {
+        return response.employees;
+      } else {
+        return [];
+      }
+    } catch (error: unknown) {
+      const errorMessage =
+        error instanceof Error ? error.message : "Failed to fetch employees";
+      return rejectWithValue(errorMessage);
+    }
+  },
+);
+
+export const fetchAllEmployees = createAsyncThunk(
+  "employees/fetchAllEmployees",
+  async (_: void | undefined, { rejectWithValue }) => {
+    // Fetches the full roster, ignoring any search/status filters
+    try {
+      const response = await EmployeeService.getEmployees();
       if (Array.isArray(response)) {
         return response;
       } else if (response && Array.isArray(response.employees)) {
@@ -72,8 +98,7 @@ export const updateEmployee = createAsyncThunk(
       const refreshedEmployee = await EmployeeService.getEmployeeById(id);
       return refreshedEmployee;
     } catch (error: unknown) {
-      const errorMessage =
-        error instanceof Error ? error.message : "Failed to update employee";
+      const errorMessage = getApiErrorMessage(error, "Failed to update employee");
       return rejectWithValue(errorMessage);
     }
   },
@@ -152,9 +177,16 @@ const employeeSlice = createSlice({
           (action.payload as string | null) || "Failed to fetch employees";
       })
       .addCase(
+        fetchAllEmployees.fulfilled,
+        (state, action: PayloadAction<Employee[]>) => {
+          state.allEmployees = action.payload;
+        },
+      )
+      .addCase(
         createEmployee.fulfilled,
         (state, action: PayloadAction<Employee>) => {
           state.employees = [...state.employees, action.payload];
+          state.allEmployees = [...state.allEmployees, action.payload];
           state.totalCountEmployees += 1;
         },
       )
@@ -166,12 +198,18 @@ const employeeSlice = createSlice({
           state.employees = state.employees.map((employee) =>
             employee.id === updatedEmployee.id ? updatedEmployee : employee,
           );
+          state.allEmployees = state.allEmployees.map((employee) =>
+            employee.id === updatedEmployee.id ? updatedEmployee : employee,
+          );
         },
       )
       .addCase(
         deleteEmployee.fulfilled,
         (state, action: PayloadAction<number>) => {
           state.employees = state.employees.filter(
+            (employee) => employee.id !== action.payload,
+          );
+          state.allEmployees = state.allEmployees.filter(
             (employee) => employee.id !== action.payload,
           );
           state.totalCountEmployees -= 1;
@@ -201,6 +239,7 @@ const employeeSlice = createSlice({
 });
 
 export const selectEmployees = (state: RootState) => state.employees.employees;
+export const selectAllEmployees = (state: RootState) => state.employees.allEmployees;
 export const selectTotalCountEmployees = (state: RootState) =>
   state.employees.totalCountEmployees;
 export const selectIsLoadingEmployees = (state: RootState) =>

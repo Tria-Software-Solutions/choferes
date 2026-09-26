@@ -135,32 +135,19 @@ export const actionsBox = (theme: Theme) => ({
 
 // Premium close button styling
 export const closeButtonSx = (theme: Theme) => ({
-  minWidth: 120,
-  px: 3,
-  py: 1.5,
-  fontWeight: 600,
-  fontSize: "0.85rem",
+  px: 1.5,
+  minWidth: "auto",
+  fontWeight: 500,
+  fontSize: "0.875rem",
   textTransform: "none" as const,
   letterSpacing: "-0.01em",
-  borderRadius: "12px",
   color: theme.palette.text.secondary,
-  backgroundColor: theme.palette.mode === 'dark'
-    ? 'rgba(255,255,255,0.05)'
-    : 'rgba(0,0,0,0.03)',
-  transition: 'all 0.25s cubic-bezier(0.4, 0, 0.2, 1)',
+  transition: 'color 0.15s ease',
   '&:hover': {
-    backgroundColor: theme.palette.mode === 'dark'
-      ? 'rgba(55,55,65,0.8)'
-      : 'rgba(255,255,255,0.95)',
-    transform: 'translateY(-1px)',
-    boxShadow: '0 4px 12px rgba(0,0,0,0.12)',
-  },
-  '&:active': {
-    transform: 'translateY(0)',
+    color: theme.palette.text.primary,
   },
   '&.Mui-disabled': {
     opacity: 0.6,
-    transform: 'none',
   },
 });
 

@@ -46,7 +46,7 @@ import PAGE_TITLE from "../../../constants/pageTitle.constants";
 import PERMISSIONS from "../../../constants/permissions.constants";
 import NOTIFICATIONS from "../../../constants/notifications.constants";
 import MANAGEMENT from "../../../constants/management.constants";
-import { CircleParking, Download, ChevronLeft, ChevronRight, X, Search, Plus, Trash2, PlusCircle, RotateCcw, ScanText } from "lucide-react";
+import { CircleParking, Download, ChevronLeft, ChevronRight, X, Search, Trash2, PlusCircle, RotateCcw, ScanText } from "lucide-react";
 import { PdfIcon, ExcelIcon } from "../../../components/Icons/FileIcons";
 import PremiumTooltip from "../../../components/PremiumTooltip/PremiumTooltip.component";
 import {
@@ -816,19 +816,8 @@ const VehiclesPage: React.FC = () => {
               {userPermissions.includes(PERMISSIONS.CREATE_VEHICLES) && (
                 <Box sx={{ display: { xs: 'none', sm: 'flex' }, gap: 1 }}>
                   <Button
-                    variant="contained"
-                    startIcon={<Plus size={16} strokeWidth={2} />}
+                    variant="outlined"
                     onClick={handleOpenAddVehicleModal}
-                    sx={{
-                      px: 2.5,
-                      py: 0.75,
-                      fontWeight: 600,
-                      fontSize: "0.8rem",
-                      letterSpacing: "-0.01em",
-                      borderRadius: '10px',
-                      height: '36px',
-                      minWidth: 0,
-                    }}
                   >
                     {MANAGEMENT.ADD}
                   </Button>
@@ -865,15 +854,9 @@ const VehiclesPage: React.FC = () => {
         {userPermissions.includes(PERMISSIONS.CREATE_VEHICLES) && (
           <Box sx={{ display: { xs: 'flex', sm: 'none' }, p: 2, borderTop: `1px solid ${theme.palette.mode === "dark" ? "rgba(255,255,255,0.08)" : "rgba(0,0,0,0.08)"}`, gap: 1 }}>
             <Button
-              variant="contained"
-              startIcon={<Plus size={18} />}
+              variant="outlined"
               onClick={handleOpenAddVehicleModal}
-              sx={{
-                py: 1.5,
-                fontWeight: 600,
-                borderRadius: '10px',
-                flex: 1,
-              }}
+              sx={{ flex: 1 }}
             >
               {MANAGEMENT.ADD}
             </Button>
@@ -882,7 +865,7 @@ const VehiclesPage: React.FC = () => {
               startIcon={<ScanText size={18} />}
               onClick={handleOpenScanModal}
               sx={{
-                py: 1.5,
+                py: 1,
                 fontWeight: 600,
                 borderRadius: '10px',
                 borderColor: theme.palette.mode === "dark" ? "rgba(255,255,255,0.2)" : "rgba(0,0,0,0.15)",
@@ -978,7 +961,6 @@ const VehiclesPage: React.FC = () => {
         open={openAddVehicleModal}
         onClose={handleCloseAddVehicleModal}
         title={MANAGEMENT.VEHICLES_PAGE.DIALOG_ADD_TITLE}
-        subtitle={MANAGEMENT.VEHICLES_PAGE.DIALOG_ADD_SUBTITLE}
         hideActions
         paperSx={addDialogPaperSx ?? {}}
         icon={<PlusCircle color="var(--mui-palette-info-main)" />}

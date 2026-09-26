@@ -12,7 +12,7 @@ import {
 import { Schedule } from "../../../models/Schedule";
 import FORMS from "../../../constants/forms.constants";
 import { translateDayOptionsToSpanish } from "../../../utils/string";
-import { Plus, X, Calendar } from "lucide-react";
+import { Calendar, RotateCcw } from "lucide-react";
 import TextfieldComponent from "../../../components/Textfield/Textfield.component";
 import {
   boxRoot,
@@ -105,15 +105,6 @@ const AddScheduleForm: React.FC<AddScheduleFormProps> = ({
 
   return (
     <Box sx={boxRoot}>
-      <Box sx={{ mb: 1 }}>
-        <Typography
-          variant="body2"
-          color="text.secondary"
-          sx={{ lineHeight: 1.4 }}
-        >
-          {FORMS.ADD_SCHEDULE.DIALOG_CONTENT_TITLE}
-        </Typography>
-      </Box>
       <Grid container spacing={2.5} sx={gridContainer}>
         {/* Name */}
         <Grid item xs={12}>
@@ -302,9 +293,9 @@ const AddScheduleForm: React.FC<AddScheduleFormProps> = ({
         <Grid item xs={12}>
           <Box sx={actionsBox(theme)}>
             <Button
-              variant="outlined"
+              variant="text"
               onClick={handleClearForm}
-              startIcon={<X />}
+              startIcon={<RotateCcw size={16} />}
               fullWidth={isSmallScreen}
               sx={clearButton}
             >
@@ -313,7 +304,7 @@ const AddScheduleForm: React.FC<AddScheduleFormProps> = ({
             <Box sx={actionsInnerBox}>
               {onCancel && (
                 <Button
-                  variant="outlined"
+                  variant="text"
                   onClick={onCancel}
                   disabled={isLoading}
                   fullWidth={isSmallScreen}
@@ -323,14 +314,13 @@ const AddScheduleForm: React.FC<AddScheduleFormProps> = ({
                 </Button>
               )}
               <Button
-                variant="contained"
+                variant="text"
                 onClick={handleSubmit}
                 disabled={!isFormValid || isLoading}
-                startIcon={<Plus size={18} />}
                 fullWidth={isSmallScreen}
                 sx={submitButton}
               >
-                Agregar
+                Crear
               </Button>
             </Box>
           </Box>

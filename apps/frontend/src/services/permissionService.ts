@@ -1,5 +1,7 @@
 import { Permission } from "../models/Permission";
-import api, { invalidateCache } from "./api";
+import api from "./api";
+
+// The permission catalog is code-owned, so the API is read-only.
 
 export const getPermissions = async (search?: string) => {
   const params: Record<string, string | number> = {
@@ -21,25 +23,4 @@ export const getPermissionsByNames = async (names: string[]) => {
   return response.data;
 };
 
-export const createPermission = async (
-  newPermission: Omit<Permission, "id">,
-) => {
-  const response = await api.post("/permissions", newPermission);
-  invalidateCache("/permissions");
-  return response.data;
-};
-
-export const updatePermission = async (
-  id: number,
-  updatedPermission: Partial<Permission>,
-) => {
-  const response = await api.put(`/permissions/${id}`, updatedPermission);
-  invalidateCache("/permissions");
-  return response.data;
-};
-
-export const deletePermission = async (id: number) => {
-  const response = await api.delete(`/permissions/${id}`);
-  invalidateCache("/permissions");
-  return { id, message: response.data };
-};
+export type { Permission };

@@ -13,7 +13,7 @@ import FORMS from "../../../constants/forms.constants";
 import BRANDS_LIST from "../../../constants/brands.constants";
 import COLORS_LIST from "../../../constants/colors.constants";
 import { maskLicensePlate } from "../../../utils/mask";
-import { Plus, X, Ticket, Car, ParkingCircle, Palette, FileEdit, Factory } from "lucide-react";
+import { RotateCcw, Ticket, Car, ParkingCircle, Palette, FileEdit, Factory } from "lucide-react";
 import TextfieldComponent from "../../../components/Textfield/Textfield.component";
 import { DatePicker, LocalizationProvider } from "@mui/x-date-pickers";
 import { AdapterDateFns } from "@mui/x-date-pickers/AdapterDateFns";
@@ -290,15 +290,6 @@ const AddVehicleForm: React.FC<AddVehicleFormProps> = ({
 
   return (
     <Box sx={boxRoot}>
-      <Box sx={{ mb: 1 }}>
-        <Typography
-          variant="body2"
-          color="text.secondary"
-          sx={{ lineHeight: 1.3 }}
-        >
-          {FORMS.ADD_VEHICLE.DIALOG_CONTENT_TITLE}
-        </Typography>
-      </Box>
       <Grid container spacing={2.5} sx={gridContainer}>
         {/* Section: Información del vehículo */}
         <Grid item xs={12}>
@@ -506,9 +497,9 @@ const AddVehicleForm: React.FC<AddVehicleFormProps> = ({
         <Grid item xs={12}>
           <Box sx={actionsBox(theme)}>
             <Button
-              variant="outlined"
+              variant="text"
               onClick={handleClearForm}
-              startIcon={<X />}
+              startIcon={<RotateCcw size={16} />}
               fullWidth={isSmallScreen}
               sx={clearButton}
             >
@@ -517,7 +508,7 @@ const AddVehicleForm: React.FC<AddVehicleFormProps> = ({
             <Box sx={actionsInnerBox}>
               {onCancel && (
                 <Button
-                  variant="outlined"
+                  variant="text"
                   onClick={onCancel}
                   disabled={isLoading}
                   fullWidth={isSmallScreen}
@@ -527,10 +518,9 @@ const AddVehicleForm: React.FC<AddVehicleFormProps> = ({
                 </Button>
               )}
               <Button
-                variant="contained"
+                variant="text"
                 onClick={handleSubmit}
                 disabled={!isFormValid || isLoading}
-                startIcon={<Plus size={18} />}
                 fullWidth={isSmallScreen}
                 sx={submitButton}
               >

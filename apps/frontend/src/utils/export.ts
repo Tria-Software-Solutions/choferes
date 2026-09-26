@@ -20,7 +20,7 @@ type PDFDocumentInstance = InstanceType<JSPDFType["default"]>;
 // Cached base64 data URL of the app logo so jsPDF can draw it synchronously.
 let logoDataUrlCache: string | null = null;
 
-async function loadLogoDataUrl(): Promise<string | null> {
+export async function loadLogoDataUrl(): Promise<string | null> {
   if (logoDataUrlCache) return logoDataUrlCache;
   try {
     const response = await fetch(logoAsset);
@@ -44,7 +44,7 @@ async function loadExcelJS(): Promise<ExcelJSModule> {
   return excelJsModule;
 }
 
-async function loadJSPDF(): Promise<JSPDFType["default"]> {
+export async function loadJSPDF(): Promise<JSPDFType["default"]> {
   if (!jsPDF) {
     const jspdfModule = await import("jspdf");
     await import("jspdf-autotable");

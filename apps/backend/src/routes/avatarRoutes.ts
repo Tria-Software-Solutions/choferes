@@ -6,14 +6,14 @@ import {
 } from "../controllers/avatarController";
 import { authenticateToken } from "../middleware/authMiddleware";
 import { allowSelfOrPermission } from "../middleware/authorize";
-import { PERMISSIONS } from "../constants/permissions";
+import { PERMISSION_CODES } from "../constants/permissions";
 
 const router = express.Router();
 
 router.post(
   "/:id/avatar",
   authenticateToken,
-  allowSelfOrPermission(PERMISSIONS.EDIT_USER),
+  allowSelfOrPermission(PERMISSION_CODES.EDIT_USER),
   multerUpload.single("avatar"),
   uploadAvatar,
 );
@@ -21,7 +21,7 @@ router.post(
 router.delete(
   "/:id/avatar",
   authenticateToken,
-  allowSelfOrPermission(PERMISSIONS.EDIT_USER),
+  allowSelfOrPermission(PERMISSION_CODES.EDIT_USER),
   deleteAvatar,
 );
 

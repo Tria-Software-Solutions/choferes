@@ -106,3 +106,44 @@ export const addDialogPaperSx: SxProps<Theme> = {
   minWidth: { xs: "90vw", sm: 500, md: 700 },
   maxWidth: { xs: "98vw", sm: 700 },
 };
+
+// Band of summary metrics shown between the page header and the grid.
+export const kpiRowStyles = (theme: Theme): SxProps<Theme> => ({
+  display: "grid",
+  gridTemplateColumns: {
+    xs: "repeat(2, minmax(0, 1fr))",
+    sm: "repeat(3, minmax(0, 1fr))",
+    md: "repeat(5, minmax(0, 1fr))",
+  },
+  gap: { xs: 1, sm: 1.5 },
+  px: { xs: 2, sm: 2.5 },
+  py: { xs: 1.5, sm: 1.75 },
+  borderBottom: `1px solid ${
+    theme.palette.mode === "dark" ? "rgba(255,255,255,0.06)" : "rgba(0,0,0,0.06)"
+  }`,
+});
+
+export const kpiCardStyles = (theme: Theme): SxProps<Theme> => ({
+  display: "flex",
+  alignItems: "center",
+  gap: 1.25,
+  minWidth: 0,
+  px: 1.5,
+  py: 1.25,
+  borderRadius: "12px",
+  border: `1px solid ${
+    theme.palette.mode === "dark" ? "rgba(255,255,255,0.07)" : "rgba(0,0,0,0.06)"
+  }`,
+  backgroundColor:
+    theme.palette.mode === "dark" ? "rgba(255,255,255,0.03)" : "rgba(0,0,0,0.015)",
+});
+
+// Plain amber icon (no pill / background) that flags employees missing
+// pay-related data. The tooltip explains what is missing.
+export const incompleteBadgeStyles = (theme: Theme): SxProps<Theme> => ({
+  display: "inline-flex",
+  alignItems: "center",
+  justifyContent: "center",
+  flexShrink: 0,
+  color: theme.palette.warning.main,
+});

@@ -93,27 +93,34 @@ export const highContrastTheme = createTheme({
     MuiButton: {
       styleOverrides: {
         root: {
-          borderRadius: "12px",
+          borderRadius: "8px",
           textTransform: "none",
           fontWeight: 600,
           fontSize: "0.875rem",
-          padding: "10px 24px",
-          minHeight: "48px",
-          transition: "all 0.2s cubic-bezier(0.4, 0, 0.2, 1)",
-          borderWidth: "2px",
-          "&:hover": {
-            transform: "translateY(-1px)",
+          letterSpacing: "-0.01em",
+          padding: "0 16px",
+          minHeight: "38px",
+          transition:
+            "background-color 0.15s ease, border-color 0.15s ease, box-shadow 0.15s ease, transform 0.05s ease",
+          "&:active": {
+            transform: "scale(0.97)",
+          },
+          "&:focus-visible": {
+            outline: "2px solid #000000",
+            outlineOffset: "2px",
           },
         },
         contained: {
           backgroundColor: "#000000",
           color: "#ffff00",
           border: "2px solid #000000",
-          boxShadow: "0 2px 8px rgba(0,0,0,0.12)",
+          boxShadow: "none",
           "&:hover": {
             backgroundColor: "#222222",
             borderColor: "#000000",
-            boxShadow: "0 6px 20px #000000",
+          },
+          "&:active": {
+            backgroundColor: "#000000",
           },
           "&:disabled": {
             backgroundColor: "#cccc00",
@@ -125,12 +132,10 @@ export const highContrastTheme = createTheme({
         outlined: {
           borderColor: "#000000",
           color: "#000000",
-          borderWidth: "2px",
           "&:hover": {
             backgroundColor: "#ffff00",
             color: "#000000",
             borderColor: "#000000",
-            boxShadow: "0 4px 12px #000000",
           },
           "&:disabled": {
             borderColor: "#cccc00",
@@ -140,10 +145,24 @@ export const highContrastTheme = createTheme({
         },
         text: {
           color: "#000000",
-          padding: "8px 16px",
           "&:hover": {
             backgroundColor: "#ffff66",
           },
+          "&:disabled": {
+            color: "#cccc00",
+          },
+        },
+        sizeSmall: {
+          minHeight: "32px",
+          padding: "0 12px",
+          fontSize: "0.8125rem",
+          borderRadius: "6px",
+        },
+        sizeLarge: {
+          minHeight: "44px",
+          padding: "0 20px",
+          fontSize: "0.9375rem",
+          borderRadius: "8px",
         },
       },
     },
@@ -151,10 +170,28 @@ export const highContrastTheme = createTheme({
       styleOverrides: {
         root: {
           color: "#000000",
-          borderRadius: "12px",
+          borderRadius: "8px",
+          padding: "8px",
+          transition:
+            "background-color 0.15s ease, color 0.15s ease, transform 0.05s ease",
           "&:hover": {
             backgroundColor: "#ffff66",
           },
+          "&:active": {
+            transform: "scale(0.96)",
+          },
+          "&:focus-visible": {
+            outline: "2px solid #000000",
+            outlineOffset: "1px",
+          },
+        },
+        sizeSmall: {
+          padding: "5px",
+          borderRadius: "6px",
+        },
+        sizeLarge: {
+          padding: "10px",
+          borderRadius: "10px",
         },
         colorInherit: {
           color: "#000000",
@@ -169,26 +206,30 @@ export const highContrastTheme = createTheme({
         root: {
           margin: "8px 0",
           "& .MuiOutlinedInput-root": {
-            borderRadius: 2,
+            borderRadius: "8px",
             backgroundColor: "#ffff00",
             color: "#000000",
+            minHeight: "40px",
             "& fieldset": {
-              borderColor: "transparent",
-              borderWidth: "0",
               border: "none",
             },
-            "&:hover .MuiOutlinedInput-notchedOutline": {
-              borderColor: "transparent",
-            },
-            "&.Mui-focused .MuiOutlinedInput-notchedOutline": {
-              borderColor: "transparent",
-              borderWidth: 0,
+            "&:hover": {
+              backgroundColor: "#e5e500",
             },
             "&.Mui-focused": {
               backgroundColor: "#ffff00",
+              boxShadow: "0 0 0 3px rgba(0,0,0,0.3)",
             },
             "& input": {
               color: "#000000",
+              padding: "11px 14px",
+            },
+            "& textarea": {
+              padding: "11px 14px",
+            },
+            "& input::-webkit-input-placeholder, & textarea::-webkit-input-placeholder": {
+              color: "rgba(0,0,0,0.45)",
+              opacity: 1,
             },
           },
         },
@@ -201,17 +242,16 @@ export const highContrastTheme = createTheme({
             borderRadius: "8px",
             backgroundColor: "#ffff00",
             color: "#000000",
+            minHeight: "40px",
             "& fieldset": {
-              borderColor: "transparent",
-              borderWidth: "0",
               border: "none",
             },
-            "&:hover fieldset": {
-              borderColor: "transparent",
+            "&:hover": {
+              backgroundColor: "#e5e500",
             },
-            "&.Mui-focused fieldset": {
-              borderColor: "transparent",
-              borderWidth: 0,
+            "&.Mui-focused": {
+              backgroundColor: "#ffff00",
+              boxShadow: "0 0 0 3px rgba(0,0,0,0.3)",
             },
           },
           "& .MuiInputLabel-root": {
@@ -231,32 +271,32 @@ export const highContrastTheme = createTheme({
           color: "#000000",
           backgroundColor: "#ffff00",
           borderRadius: "8px",
+          minHeight: "40px",
           "& .MuiOutlinedInput-root": {
-            border: "none",
             "& fieldset": {
-              borderColor: "transparent",
-              borderWidth: 0,
               border: "none",
             },
           },
-          "&.Mui-focused .MuiOutlinedInput-notchedOutline": {
-            borderColor: "transparent",
-            borderWidth: "0",
-            boxShadow: "none",
+          "&:hover": {
+            backgroundColor: "#e5e500",
           },
-          "&:hover .MuiOutlinedInput-notchedOutline": {
-            borderColor: "transparent",
+          "&.Mui-focused": {
+            backgroundColor: "#ffff00",
+            boxShadow: "0 0 0 3px rgba(0,0,0,0.3)",
+            outline: "none",
           },
           "& .MuiOutlinedInput-notchedOutline": {
-            borderColor: "transparent",
-            borderWidth: "0",
+            border: "none",
           },
         },
         select: {
           backgroundColor: "#ffff00",
+          padding: "11px 14px",
+          paddingRight: "44px !important",
         },
         icon: {
           color: "#000000",
+          right: "12px",
         },
       },
     },
@@ -266,6 +306,13 @@ export const highContrastTheme = createTheme({
           borderRadius: "8px",
           backgroundColor: "#ffff00",
           color: "#000000",
+          minHeight: "40px",
+          "& fieldset": {
+            border: "none",
+          },
+          "&.Mui-focused": {
+            boxShadow: "0 0 0 3px rgba(0,0,0,0.3)",
+          },
         },
       },
     },
@@ -432,12 +479,18 @@ export const highContrastTheme = createTheme({
     MuiFab: {
       styleOverrides: {
         root: {
-          borderRadius: "8px",
+          borderRadius: "50%",
           backgroundColor: "#000000",
           color: "#ffff00",
-          boxShadow: "0 4px 12px #000000",
+          boxShadow: "0 2px 8px #000000",
+          transition:
+            "background-color 0.15s ease, box-shadow 0.15s ease, transform 0.05s ease",
           "&:hover": {
             backgroundColor: "#222222",
+            boxShadow: "0 4px 12px #000000",
+          },
+          "&:active": {
+            transform: "scale(0.96)",
           },
         },
       },
