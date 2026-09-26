@@ -12,7 +12,7 @@ import {
   useMediaQuery,
   Typography,
 } from "@mui/material";
-import { Plus, X, Eye, EyeOff, User, Mail, Lock, Users } from "lucide-react";
+import { RotateCcw, Eye, EyeOff, User, Mail, Lock, Users } from "lucide-react";
 import OutlinedInput from "@mui/material/OutlinedInput";
 import { Role } from "../../../models/Role";
 import TextfieldComponent from "../../../components/Textfield/Textfield.component";
@@ -162,15 +162,6 @@ const AddUserForm: React.FC<AddUserFormProps> = ({
 
   return (
     <Box sx={boxRoot}>
-      <Box sx={{ mb: 1 }}>
-        <Typography
-          variant="body2"
-          color="text.secondary"
-          sx={{ lineHeight: 1.4 }}
-        >
-          {FORMS.ADD_USER.DIALOG_CONTENT_TITLE}
-        </Typography>
-      </Box>
       <Grid container spacing={2.5} sx={gridContainer}>
         {/* Section: Información personal */}
         <Grid item xs={12}>
@@ -351,9 +342,9 @@ const AddUserForm: React.FC<AddUserFormProps> = ({
         <Grid item xs={12}>
           <Box sx={actionsBox(theme)}>
             <Button
-              variant="outlined"
+              variant="text"
               onClick={handleClearForm}
-              startIcon={<X />}
+              startIcon={<RotateCcw size={16} />}
               fullWidth={isSmallScreen}
               sx={clearButton}
             >
@@ -362,7 +353,7 @@ const AddUserForm: React.FC<AddUserFormProps> = ({
             <Box sx={actionsInnerBox}>
               {onCancel && (
                 <Button
-                  variant="outlined"
+                  variant="text"
                   onClick={onCancel}
                   disabled={isLoading}
                   fullWidth={isSmallScreen}
@@ -372,14 +363,13 @@ const AddUserForm: React.FC<AddUserFormProps> = ({
                 </Button>
               )}
               <Button
-                variant="contained"
+                variant="text"
                 onClick={handleSubmit}
                 disabled={!isFormValid || isLoading}
-                startIcon={<Plus size={18} />}
                 fullWidth={isSmallScreen}
                 sx={submitButton}
               >
-                Agregar
+                Crear
               </Button>
             </Box>
           </Box>

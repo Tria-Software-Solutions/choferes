@@ -261,7 +261,7 @@ const NotificationMenu: React.FC<NotificationMenuProps> = ({
               { value: 'read', label: 'Leídas' },
               { value: 'high', label: `${translatePriorityToSpanish('high')} prioridad` },
             ]}
-            size="small"
+            size="medium"
           />
         </Box>
       )}

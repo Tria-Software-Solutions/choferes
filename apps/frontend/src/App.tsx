@@ -26,6 +26,7 @@ import { getDefaultRoute } from "./utils/defaultRoute";
 const Login = lazy(() => import("./pages/Auth/Login"));
 const RolesPage = lazy(() => import("./pages/Management/RolesPage"));
 const EmployeesPage = lazy(() => import("./pages/Management/EmployeesPage"));
+const EmployeeDetail = lazy(() => import("./pages/EmployeeDetail"));
 const SchedulesPage = lazy(() => import("./pages/Management/SchedulesPage"));
 const VehiclesPage = lazy(() => import("./pages/Management/VehiclesPage"));
 const CourierServicePage = lazy(() => import("./pages/Management/CourierServicePage"));
@@ -243,6 +244,16 @@ const AppContent: React.FC = () => {
                 element={
                   safeUserPermissions.includes(PERMISSIONS.VIEW_EMPLOYEES) ? (
                     <EmployeesPage />
+                  ) : (
+                    <Navigate to="/forbidden" replace />
+                  )
+                }
+              />
+              <Route
+                path="/employees/:id"
+                element={
+                  safeUserPermissions.includes(PERMISSIONS.VIEW_EMPLOYEES) ? (
+                    <EmployeeDetail />
                   ) : (
                     <Navigate to="/forbidden" replace />
                   )

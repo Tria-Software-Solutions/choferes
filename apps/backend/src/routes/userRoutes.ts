@@ -6,7 +6,7 @@ import {
   requireAnyPermission,
   requirePermission,
 } from "../middleware/authorize";
-import { PERMISSIONS } from "../constants/permissions";
+import { PERMISSION_CODES } from "../constants/permissions";
 import {
   idParam,
   userRules,
@@ -28,7 +28,7 @@ router.post("/login", userController.authenticateUser);
 router.post(
   "/register",
   authenticateToken,
-  requireAnyPermission([PERMISSIONS.CREATE_USER, PERMISSIONS.EDIT_USER]),
+  requireAnyPermission([PERMISSION_CODES.CREATE_USERS, PERMISSION_CODES.EDIT_USER]),
   userRules,
   validate,
   userController.createUser,
@@ -41,7 +41,7 @@ router.get("/username/:username", authenticateToken, userController.getUserByUse
 router.get(
   "/:id/permissions",
   authenticateToken,
-  allowSelfOrPermission(PERMISSIONS.VIEW_USERS),
+  allowSelfOrPermission(PERMISSION_CODES.VIEW_USERS),
   idParam,
   validate,
   userController.getUserPermissions,
@@ -49,7 +49,7 @@ router.get(
 router.put(
   "/:id",
   authenticateToken,
-  allowSelfOrPermission(PERMISSIONS.EDIT_USER),
+  allowSelfOrPermission(PERMISSION_CODES.EDIT_USER),
   userUpdateRules,
   validate,
   userController.updateUser,
@@ -57,7 +57,7 @@ router.put(
 router.put(
   "/:id/status",
   authenticateToken,
-  requirePermission(PERMISSIONS.ENABLE_DISABLE_USER),
+  requirePermission(PERMISSION_CODES.ENABLE_DISABLE_USER),
   userStatusUpdateRules,
   validate,
   userController.updateUserStatus,
@@ -65,7 +65,7 @@ router.put(
 router.put(
   "/:id/password",
   authenticateToken,
-  allowSelfOrPermission(PERMISSIONS.EDIT_USER),
+  allowSelfOrPermission(PERMISSION_CODES.EDIT_USER),
   userPasswordUpdateRules,
   validate,
   userController.updateUserPassword,
@@ -73,7 +73,7 @@ router.put(
 router.put(
   "/:id/temporal-password",
   authenticateToken,
-  requirePermission(PERMISSIONS.EDIT_USER),
+  requirePermission(PERMISSION_CODES.EDIT_USER),
   userTemporalPasswordUpdateRules,
   validate,
   userController.updateUserTemporalPassword,
@@ -81,13 +81,13 @@ router.put(
 router.put(
   "/:id/settings",
   authenticateToken,
-  allowSelfOrPermission(PERMISSIONS.EDIT_USER),
+  allowSelfOrPermission(PERMISSION_CODES.EDIT_USER),
   userController.updateUserSettings,
 );
 router.delete(
   "/:id",
   authenticateToken,
-  requireAnyPermission([PERMISSIONS.EDIT_USER, PERMISSIONS.ENABLE_DISABLE_USER]),
+  requireAnyPermission([PERMISSION_CODES.EDIT_USER, PERMISSION_CODES.ENABLE_DISABLE_USER]),
   idParam,
   validate,
   userController.deleteUser,

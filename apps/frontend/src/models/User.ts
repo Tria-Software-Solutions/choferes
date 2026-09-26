@@ -1,3 +1,5 @@
+import { Permission } from "@choferes/shared";
+
 /** Frontend User type — mirrors @choferes/shared with additional settings field */
 export interface User {
   id: number;
@@ -13,7 +15,7 @@ export interface User {
   roles?: Array<{
     id: number;
     name: string;
-    permissions?: Array<{ id: number; name: string }>;
+    permissions?: Permission[];
   }>;
   roleId?: number;
   roleName?: string;

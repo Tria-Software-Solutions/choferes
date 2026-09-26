@@ -44,10 +44,9 @@ export const editButtonStyles = (theme: Theme) => ({
   "&:hover": {
     backgroundColor: theme.palette.primary.main,
     color: theme.palette.primary.contrastText,
-    transform: "translateY(-1px)",
     boxShadow: theme.palette.mode === "dark"
-      ? "0 4px 14px rgba(0,0,0,0.4)"
-      : "0 4px 14px rgba(0,0,0,0.15)",
+      ? "0 2px 8px rgba(0,0,0,0.35)"
+      : "0 2px 8px rgba(0,0,0,0.15)",
   },
 });
 
@@ -62,10 +61,9 @@ export const deleteButtonStyles = (theme: Theme) => ({
   "&:hover": {
     backgroundColor: theme.palette.error.main,
     color: "#fff",
-    transform: "translateY(-1px)",
     boxShadow: theme.palette.mode === "dark"
-      ? "0 4px 14px rgba(239,68,68,0.45)"
-      : "0 4px 14px rgba(239,68,68,0.35)",
+      ? "0 2px 8px rgba(239,68,68,0.45)"
+      : "0 2px 8px rgba(239,68,68,0.35)",
   },
 });
 
@@ -83,7 +81,6 @@ export const neutralButtonStyles = (theme: Theme) => ({
         ? "rgba(255,255,255,0.12)"
         : "rgba(0,0,0,0.08)",
     color: theme.palette.text.primary,
-    transform: "translateY(-1px)",
   },
 });
 
@@ -97,10 +94,9 @@ export const saveButtonStyles = (theme: Theme) => ({
     : "0 4px 14px rgba(0,0,0,0.12)",
   "&:hover": {
     backgroundColor: theme.palette.primary.dark,
-    transform: "translateY(-1px)",
     boxShadow: theme.palette.mode === "dark"
-      ? "0 6px 18px rgba(0,0,0,0.4)"
-      : "0 6px 18px rgba(0,0,0,0.18)",
+      ? "0 2px 8px rgba(0,0,0,0.4)"
+      : "0 2px 8px rgba(0,0,0,0.18)",
   },
   "&.Mui-disabled": {
     backgroundColor:

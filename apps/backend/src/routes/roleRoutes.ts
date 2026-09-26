@@ -2,7 +2,7 @@ import express from "express";
 import * as roleController from "../controllers/roleController";
 import { authenticateToken } from "../middleware/authMiddleware";
 import { requirePermission } from "../middleware/authorize";
-import { PERMISSIONS } from "../constants/permissions";
+import { PERMISSION_CODES } from "../constants/permissions";
 import {
   idParam,
   roleRules,
@@ -20,7 +20,7 @@ router.get("/name/:name", authenticateToken, roleNameParam, validate, roleContro
 router.post(
   "/",
   authenticateToken,
-  requirePermission(PERMISSIONS.CREATE_ROLE),
+  requirePermission(PERMISSION_CODES.CREATE_ROLE),
   roleRules,
   validate,
   roleController.createRole,
@@ -28,7 +28,7 @@ router.post(
 router.put(
   "/:id",
   authenticateToken,
-  requirePermission(PERMISSIONS.EDIT_ROLE),
+  requirePermission(PERMISSION_CODES.EDIT_ROLE),
   roleUpdateRules,
   validate,
   roleController.updateRole,
@@ -36,7 +36,7 @@ router.put(
 router.delete(
   "/:id",
   authenticateToken,
-  requirePermission(PERMISSIONS.DELETE_ROLE),
+  requirePermission(PERMISSION_CODES.DELETE_ROLE),
   idParam,
   validate,
   roleController.deleteRole,

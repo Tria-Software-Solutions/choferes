@@ -382,7 +382,7 @@ const Dashboard = () => {
                 { value: "biweekly" as Period, label: "Quincenal" },
                 { value: "monthly" as Period, label: "Mensual" },
               ]}
-              size={isSmallScreen ? "small" : "medium"}
+              size="medium"
               fullWidth={isSmallScreen}
             />
           </Box>

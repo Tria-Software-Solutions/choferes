@@ -2,7 +2,7 @@ import express from "express";
 import * as userRoleController from "../controllers/userRoleController";
 import { authenticateToken } from "../middleware/authMiddleware";
 import { requireAnyPermission, requirePermission } from "../middleware/authorize";
-import { PERMISSIONS } from "../constants/permissions";
+import { PERMISSION_CODES } from "../constants/permissions";
 
 const router = express.Router();
 
@@ -12,19 +12,19 @@ router.get("/roleId/:roleId", authenticateToken, userRoleController.getUserRoleB
 router.post(
   "/",
   authenticateToken,
-  requireAnyPermission([PERMISSIONS.CREATE_USER, PERMISSIONS.EDIT_USER]),
+  requireAnyPermission([PERMISSION_CODES.CREATE_USERS, PERMISSION_CODES.EDIT_USER]),
   userRoleController.createUserRole,
 );
 router.put(
   "/:id",
   authenticateToken,
-  requirePermission(PERMISSIONS.EDIT_USER),
+  requirePermission(PERMISSION_CODES.EDIT_USER),
   userRoleController.updateUserRole,
 );
 router.delete(
   "/:id",
   authenticateToken,
-  requirePermission(PERMISSIONS.EDIT_USER),
+  requirePermission(PERMISSION_CODES.EDIT_USER),
   userRoleController.deleteUserRole,
 );
 

@@ -43,7 +43,7 @@ import { translateDayOptionsToSpanish } from "../../../utils/string";
 import PAGE_TITLE from "../../../constants/pageTitle.constants";
 import PERMISSIONS from "../../../constants/permissions.constants";
 import MANAGEMENT from "../../../constants/management.constants";
-import { CalendarDays, Download, X, Plus, Trash2, PlusCircle, Clock, GripVertical } from "lucide-react";
+import { CalendarDays, Download, X, Trash2, PlusCircle, Clock, GripVertical } from "lucide-react";
 import { PdfIcon, ExcelIcon } from "../../../components/Icons/FileIcons";
 import { NOTIFICATIONS } from "../../../constants/constants";
 import {
@@ -833,17 +833,8 @@ const shortNames: Record<string, string> = {
                 )}
                 {userPermissions.includes(PERMISSIONS.CREATE_SCHEDULES) && (
                   <Button
-                    variant="contained"
-                    startIcon={<Plus size={18} />}
+                    variant="outlined"
                     onClick={handleOpenAddModal}
-                    sx={{
-                      px: 3,
-                      py: 1,
-                      fontWeight: 600,
-                      fontSize: "0.9rem",
-                      letterSpacing: "-0.01em",
-                      borderRadius: '10px',
-                    }}
                   >
                     {MANAGEMENT.ADD}
                   </Button>
@@ -857,15 +848,9 @@ const shortNames: Record<string, string> = {
         {userPermissions.includes(PERMISSIONS.CREATE_SCHEDULES) && (
           <Box sx={{ display: { xs: 'flex', sm: 'none' }, p: 2, borderTop: `1px solid ${theme.palette.mode === "dark" ? "rgba(255,255,255,0.08)" : "rgba(0,0,0,0.08)"}` }}>
             <Button
-              variant="contained"
+              variant="outlined"
               fullWidth
-              startIcon={<Plus size={18} />}
               onClick={handleOpenAddModal}
-              sx={{
-                py: 1.5,
-                fontWeight: 600,
-                borderRadius: '10px',
-              }}
             >
               {MANAGEMENT.ADD}
             </Button>
@@ -930,7 +915,6 @@ const shortNames: Record<string, string> = {
         open={openAddScheduleModal}
         onClose={handleCloseAddModal}
         title={MANAGEMENT.DIALOG_ADD_TITLE}
-        subtitle={MANAGEMENT.SCHEDULES_PAGE.DIALOG_ADD_SUBTITLE}
         hideActions
         paperSx={addDialogPaperSx ?? {}}
         icon={<PlusCircle color="var(--mui-palette-info-main)" />}

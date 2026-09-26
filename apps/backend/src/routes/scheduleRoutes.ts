@@ -2,7 +2,7 @@ import express from "express";
 import * as scheduleController from "../controllers/scheduleController";
 import { authenticateToken } from "../middleware/authMiddleware";
 import { requirePermission } from "../middleware/authorize";
-import { PERMISSIONS } from "../constants/permissions";
+import { PERMISSION_CODES } from "../constants/permissions";
 import {
   idParam,
   scheduleRules,
@@ -18,7 +18,7 @@ router.get("/:id", authenticateToken, idParam, validate, scheduleController.getS
 router.post(
   "/",
   authenticateToken,
-  requirePermission(PERMISSIONS.CREATE_SCHEDULE),
+  requirePermission(PERMISSION_CODES.CREATE_SCHEDULES),
   scheduleRules,
   validate,
   scheduleController.createSchedule,
@@ -26,7 +26,7 @@ router.post(
 router.put(
   "/:id",
   authenticateToken,
-  requirePermission(PERMISSIONS.EDIT_SCHEDULE),
+  requirePermission(PERMISSION_CODES.EDIT_SCHEDULES),
   scheduleUpdateRules,
   validate,
   scheduleController.updateSchedule,
@@ -34,7 +34,7 @@ router.put(
 router.delete(
   "/:id",
   authenticateToken,
-  requirePermission(PERMISSIONS.DELETE_SCHEDULE),
+  requirePermission(PERMISSION_CODES.DELETE_SCHEDULES),
   idParam,
   validate,
   scheduleController.deleteSchedule,

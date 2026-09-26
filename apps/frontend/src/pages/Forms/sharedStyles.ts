@@ -19,16 +19,16 @@ export const textFieldSx = (theme: Theme) => ({});
 export const formControl = (theme: Theme) => ({
   "& .MuiOutlinedInput-root": {
     "& .MuiSelect-select": {
-      paddingLeft: "54px !important",
+      paddingLeft: "36px !important",
     },
     "&.MuiInputBase-adornedStart": {
       "& .MuiSelect-select": {
-        paddingTop: "16px !important",
-        paddingBottom: "16px !important",
+        paddingTop: "10px !important",
+        paddingBottom: "10px !important",
       },
     },
     "& .MuiInputAdornment-positionStart": {
-      left: "20px",
+      left: "12px",
     },
   },
 });
@@ -40,7 +40,7 @@ export const menuPaperProps = {
       maxHeight: 320,
       overflowY: "auto",
       mt: 0.5,
-      borderRadius: "16px",
+      borderRadius: "10px",
       backgroundColor: theme.palette.mode === 'dark' 
         ? 'rgba(30,30,35,0.95)'
         : '#ffffff',
@@ -109,11 +109,13 @@ export const infoDesc = (theme: Theme) => ({
   opacity: 0.8,
 });
 
-// ─── Standardized Premium Button Styles ───
-// These are the canonical button styles for all modals across the app.
-// - primaryButton: gradient filled (submit, save, confirm, generate, import)
-// - secondaryButton: subtle background (cancel, close, clear)
-// - dangerButton: red filled (delete, subtract)
+// ─── Standardized Modal Button Styles ───
+// Modal actions are plain, minimal TEXT buttons (link-like):
+// - submitButton: strong primary text (the main action)
+// - cancelButton: subtle secondary text
+// - clearButton: like cancel, but ordered first on mobile
+// Baseline geometry/weight comes from the theme MuiButton override so every
+// button in the app shares the same minimal look & feel.
 
 // ─── Layout helpers ───
 export const actionsBox = (theme: Theme) => ({
@@ -133,72 +135,58 @@ export const actionsInnerBox = {
   order: { xs: 1, sm: 2 },
 };
 
-// ─── Base button mixin (shared visual traits) ───
-// Geometry (radius, min-height, weight, size) comes from the theme's MuiButton
-// override so every button in the app shares the same look & feel.
-const buttonBase = {
-  px: 3,
-  transition: "all 0.25s cubic-bezier(0.4, 0, 0.2, 1)",
-  "&:hover": {
-    transform: "translateY(-1px)",
-  },
+// ─── Base link-button mixin (shared visual traits) ───
+const linkButtonBase = {
+  px: 1.5,
+  minHeight: 36,
+  transition: "color 0.15s ease",
   "&:active": {
-    transform: "translateY(0)",
+    transform: "scale(0.97)",
   },
   "&.Mui-disabled": {
-    boxShadow: "none",
-    transform: "none",
-    opacity: 0.6,
+    opacity: 0.5,
   },
 };
 
-// ─── Primary (filled) ───
-export const primaryButton = {
-  ...buttonBase,
-  boxShadow: "0 4px 14px rgba(0,0,0,0.12)",
+// ─── Primary action (main modal CTA: Agregar / Guardar / Confirmar) ───
+export const submitButton = {
+  ...linkButtonBase,
+  color: "text.primary",
+  fontWeight: 600,
   "&:hover": {
-    ...buttonBase["&:hover"],
-    transform: "translateY(-2px)",
-    boxShadow: "0 8px 25px rgba(0,0,0,0.18)",
+    color: "text.primary",
+    textDecoration: "underline",
+    textUnderlineOffset: "3px",
+    textDecorationThickness: "1px",
   },
-  "&:active": {
-    ...buttonBase["&:active"],
-    boxShadow: "0 2px 8px rgba(0,0,0,0.1)",
-  },
-  "&.Mui-disabled": buttonBase["&.Mui-disabled"],
 };
 
-// ─── Secondary (subtle background) ───
-export const secondaryButton = {
-  ...buttonBase,
+// ─── Secondary action (Cancelar) ───
+export const cancelButton = {
+  ...linkButtonBase,
+  color: "text.secondary",
+  fontWeight: 500,
   "&:hover": {
-    ...buttonBase["&:hover"],
-    boxShadow: "0 4px 12px rgba(0,0,0,0.12)",
+    color: "text.primary",
   },
-  "&:active": buttonBase["&:active"],
-  "&.Mui-disabled": buttonBase["&.Mui-disabled"],
 };
 
-// ─── Danger (red filled) ───
-export const dangerButton = {
-  ...buttonBase,
-  boxShadow: "0 4px 14px rgba(239,68,68,0.25)",
-  "&:hover": {
-    ...buttonBase["&:hover"],
-    transform: "translateY(-2px)",
-    boxShadow: "0 8px 25px rgba(239,68,68,0.35)",
-  },
-  "&:active": {
-    ...buttonBase["&:active"],
-    boxShadow: "0 2px 8px rgba(239,68,68,0.2)",
-  },
-  "&.Mui-disabled": buttonBase["&.Mui-disabled"],
-};
-
-// ─── Aliases for backward compatibility ───
-export const submitButton = primaryButton;
-export const cancelButton = secondaryButton;
+// ─── Clear form action ───
 export const clearButton = {
-  ...secondaryButton,
+  ...cancelButton,
   order: { xs: 3, sm: 1 },
+};
+
+// ─── Backwards-compatible semantic aliases ───
+export const primaryButton = submitButton;
+export const secondaryButton = cancelButton;
+export const dangerButton = {
+  ...submitButton,
+  color: "error.main",
+  "&:hover": {
+    color: "error.main",
+    textDecoration: "underline",
+    textUnderlineOffset: "3px",
+    textDecorationThickness: "1px",
+  },
 };

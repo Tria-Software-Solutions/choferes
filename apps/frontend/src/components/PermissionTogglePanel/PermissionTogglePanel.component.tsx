@@ -1,6 +1,7 @@
 import React, { useMemo } from "react";
 import { Box, Typography, useTheme } from "@mui/material";
 import { Check } from "lucide-react";
+import { PERMISSION_MODULE_ORDER } from "@choferes/shared";
 import { Permission } from "../../models/Permission";
 
 // Shared toggle-chip panel for picking role permissions.
@@ -16,33 +17,27 @@ interface PermissionTogglePanelProps {
   maxHeight?: number;
 }
 
-const MODULE_ORDER = [
-  "Empleados",
-  "Roles",
-  "Vehículos",
-  "Horarios",
-  "Usuarios",
-  "Resúmenes",
-  "Mensajería",
-  "Courier",
-  "Admin",
-  "Otros",
-];
+const MODULE_ORDER = [...PERMISSION_MODULE_ORDER, "Otros"];
 
+// Fallback grouping for legacy rows that predate the `module` column.
 const MODULE_RULES: { keyword: string; module: string }[] = [
   { keyword: "Courier", module: "Courier" },
   { keyword: "Mensajería", module: "Mensajería" },
   { keyword: "Horario", module: "Horarios" },
   { keyword: "Vehículo", module: "Vehículos" },
   { keyword: "Resumen", module: "Resúmenes" },
+  { keyword: "Pago", module: "Pagos" },
+  { keyword: "Vacaci", module: "Vacaciones" },
   { keyword: "Rol", module: "Roles" },
   { keyword: "Empleado", module: "Empleados" },
   { keyword: "Usuario", module: "Usuarios" },
   { keyword: "Admin", module: "Admin" },
 ];
 
-const moduleOf = (name: string) => {
-  const match = MODULE_RULES.find(({ keyword }) => name.includes(keyword));
+// Prefer the server-provided module; fall back to the legacy keyword match.
+const moduleOf = (permission: Permission) => {
+  if (permission.module) return permission.module;
+  const match = MODULE_RULES.find(({ keyword }) => permission.name.includes(keyword));
   return match ? match.module : "Otros";
 };
 
@@ -58,7 +53,7 @@ const PermissionTogglePanel: React.FC<PermissionTogglePanelProps> = ({
   const groupedPermissions = useMemo(() => {
     const grouped: { [key: string]: Permission[] } = {};
     permissions.forEach((permission) => {
-      const module = moduleOf(permission.name);
+      const module = moduleOf(permission);
       if (!grouped[module]) {
         grouped[module] = [];
       }
@@ -149,10 +144,9 @@ const PermissionTogglePanel: React.FC<PermissionTogglePanelProps> = ({
                         : "rgba(0,0,0,0.04)",
                     transition: "all 0.15s cubic-bezier(0.4, 0, 0.2, 1)",
                     "&:hover": {
-                      transform: "translateY(-1px)",
                       boxShadow: isSelected
                         ? "none"
-                        : "0 2px 8px rgba(0,0,0,0.1)",
+                        : "0 2px 6px rgba(0,0,0,0.08)",
                     },
                     "&:active": { transform: "scale(0.96)" },
                   }}

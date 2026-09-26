@@ -45,10 +45,9 @@ export const iconBoxStyles = (theme: Theme): SxProps<Theme> => ({
 export const closeButtonStyles: SxProps<Theme> = {
   color: "inherit",
   opacity: 0.5,
-  transition: "all 0.2s ease",
+  transition: "opacity 0.15s ease, background-color 0.15s ease",
   "&:hover": {
     opacity: 1,
-    transform: "scale(1.1)",
     backgroundColor: "rgba(0,0,0,0.04)",
   },
 };
@@ -79,52 +78,33 @@ export const dialogActionsStyles = (
 });
 
 export const cancelButtonStyles = (isSmallScreen: boolean): SxProps<Theme> => ({
-  minWidth: isSmallScreen ? "100%" : 120,
-  px: 3,
-  // Geometry (radius, weight, size, min-height) inherited from theme MuiButton
-  color: (theme) => theme.palette.text.secondary,
-  backgroundColor: (theme) => theme.palette.mode === "dark" ? "rgba(255,255,255,0.05)" : "rgba(0,0,0,0.03)",
-  transition: "all 0.25s cubic-bezier(0.4, 0, 0.2, 1)",
+  minWidth: isSmallScreen ? "100%" : "auto",
+  px: 1.5,
+  color: "text.secondary",
+  fontWeight: 500,
+  transition: "color 0.15s ease",
   '&:hover': {
-    backgroundColor: (theme) => theme.palette.mode === "dark" ? "rgba(255,255,255,0.1)" : "rgba(0,0,0,0.06)",
-    transform: "translateY(-1px)",
-    boxShadow: "0 4px 12px rgba(0,0,0,0.12)",
-  },
-  '&:active': {
-    transform: "translateY(0)",
+    backgroundColor: "transparent",
+    color: "text.primary",
   },
   '&.Mui-disabled': {
-    opacity: 0.6,
-    transform: "none",
+    opacity: 0.5,
   },
 });
 
 export const confirmButtonStyles = (
   isSmallScreen: boolean,
 ): SxProps<Theme> => ({
-  minWidth: isSmallScreen ? "100%" : 120,
-  px: 3,
-  // Geometry (radius, weight, size, min-height) inherited from theme MuiButton
-  background: (theme) => `linear-gradient(135deg, ${theme.palette.primary.main}, ${theme.palette.primary.dark})`,
-  color: (theme) => theme.palette.primary.contrastText,
-  boxShadow: (theme) => theme.palette.mode === "dark"
-    ? "0 4px 14px rgba(0,0,0,0.35)"
-    : "0 4px 14px rgba(0,0,0,0.12)",
-  transition: "all 0.25s cubic-bezier(0.4, 0, 0.2, 1)",
+  minWidth: isSmallScreen ? "100%" : "auto",
+  px: 1.5,
+  fontWeight: 600,
+  transition: "color 0.15s ease",
   '&:hover': {
-    transform: "translateY(-2px)",
-    boxShadow: (theme) => theme.palette.mode === "dark"
-      ? "0 8px 25px rgba(0,0,0,0.4)"
-      : "0 8px 25px rgba(0,0,0,0.15)",
-  },
-  '&:active': {
-    transform: "translateY(0)",
+    textDecoration: "underline",
+    textUnderlineOffset: "3px",
+    textDecorationThickness: "1px",
   },
   '&:disabled': {
-    background: (theme) => theme.palette.action.disabledBackground,
-    color: (theme) => theme.palette.text.disabled,
-    boxShadow: "none",
-    transform: "none",
-    opacity: 0.6,
+    opacity: 0.5,
   },
 });

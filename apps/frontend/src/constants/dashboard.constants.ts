@@ -8,7 +8,7 @@ export const DASHBOARD = {
 
 export const DASHBOARD_USERS = {
   TITLE: "Gestión de Usuarios",
-  ADD_USER: "Agregar Usuario",
+  ADD_USER: "Nuevo Usuario",
   EDIT_USER: "Editar Usuario",
   DELETE_USER: "Eliminar Usuario",
   SEARCH_PLACEHOLDER: "Buscar usuario...",
@@ -17,7 +17,7 @@ export const DASHBOARD_USERS = {
   FILTER_ALL: "Todos",
   FILTER_ACTIVE: "Activos",
   FILTER_INACTIVE: "Inactivos",
-  ADD: "Agregar",
+  ADD: "Crear",
   ADD_SUBTITLE: "Nuevo Usuario",
   DIALOG_STATUS_TITLE: "Cambiar estado del usuario",
   DIALOG_STATUS_MESSAGE:
@@ -28,24 +28,23 @@ export const DASHBOARD_USERS = {
 
 export const DASHBOARD_ROLES = {
   TITLE: "Gestión de Roles",
-  ADD_ROLE: "Agregar Rol",
+  ADD_ROLE: "Nuevo Rol",
   EDIT_ROLE: "Editar Rol",
   DELETE_ROLE: "Eliminar Rol",
   SEARCH_PLACEHOLDER: "Buscar rol...",
   NO_ROLES: "No hay roles registrados",
-  ADD: "Agregar",
+  ADD: "Crear",
   ADD_SUBTITLE: "Nuevo Rol",
   DIALOG_DELETE_TITLE: "Eliminar rol",
   DIALOG_DELETE_MESSAGE: "¿Estás seguro de que deseas eliminar este rol?",
   DIALOG_DELETE_CONFIRM: "Eliminar",
   DIALOG_DELETE_CANCEL: "Cancelar",
-  DIALOG_ADD_TITLE: "Agregar",
-  DIALOG_ADD_SUBTITLE: "Nuevo rol",
+  DIALOG_ADD_TITLE: "Nuevo rol",
 };
 
 export const DASHBOARD_PERMISSIONS = {
   TITLE: "Gestión de Permisos",
-  ADD_PERMISSION: "Agregar Permiso",
+  ADD_PERMISSION: "Nuevo Permiso",
   EDIT_PERMISSION: "Editar Permiso",
   DELETE_PERMISSION: "Eliminar Permiso",
   SEARCH_PLACEHOLDER: "Buscar permiso...",

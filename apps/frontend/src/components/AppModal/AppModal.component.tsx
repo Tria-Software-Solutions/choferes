@@ -158,7 +158,6 @@ const AppModal: React.FC<AppModalProps> = ({
               transition: "all 0.2s ease-in-out",
               "&:hover": {
                 backgroundColor: "rgba(0,0,0,0.04)",
-                transform: "scale(1.1)",
               },
             }}
           >

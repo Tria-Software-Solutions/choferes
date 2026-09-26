@@ -25,6 +25,10 @@ import userRoleRoutes from "./routes/userRoleRoutes";
 import rolePermissionRoutes from "./routes/rolePermissionRoutes";
 import avatarRoutes from "./routes/avatarRoutes";
 import notificationRoutes from "./routes/notificationRoutes";
+import paymentRoutes from "./routes/paymentRoutes";
+import vacationRoutes from "./routes/vacationRoutes";
+import employeeLicenseRoutes from "./routes/employeeLicenseRoutes";
+import disciplinaryActionRoutes from "./routes/disciplinaryActionRoutes";
 import visionRoutes from "./routes/visionRoutes";
 import sequelize from "./config/database";
 import "./database/models";
@@ -174,6 +178,10 @@ app.use("/api/schedules", scheduleRoutes);
 app.use("/api/vehicles", vehicleRoutes);
 app.use("/api/users", avatarRoutes);
 app.use("/api/notifications", notificationRoutes);
+app.use("/api/payments", paymentRoutes);
+app.use("/api/vacations", vacationRoutes);
+app.use("/api/employee-licenses", employeeLicenseRoutes);
+app.use("/api/disciplinary-actions", disciplinaryActionRoutes);
 app.use("/api/vision", visionRoutes);
 
 app.use(

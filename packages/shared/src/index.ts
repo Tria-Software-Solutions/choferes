@@ -1,5 +1,24 @@
 export { User } from "./types/User";
 export { Employee } from "./types/Employee";
+export {
+  EMPLOYEE_TERMINATION_REASONS,
+  TERMINATION_REASON_LABELS,
+} from "./types/Employee";
+export type { TerminationReason } from "./types/Employee";
+export { LICENSE_TYPES } from "./types/EmployeeLicense";
+export type { EmployeeLicense, LicenseType } from "./types/EmployeeLicense";
+export {
+  DISCIPLINARY_ACTION_TYPES,
+  DISCIPLINARY_ACTION_TYPE_LABELS,
+  DISCIPLINARY_SEVERITIES,
+  DISCIPLINARY_SEVERITY_LABELS,
+} from "./types/DisciplinaryAction";
+export type {
+  DisciplinaryAction,
+  DisciplinaryActionType,
+  DisciplinaryAttachment,
+  DisciplinarySeverity,
+} from "./types/DisciplinaryAction";
 export { Vehicle } from "./types/Vehicle";
 export { Role } from "./types/Role";
 export { Permission } from "./types/Permission";
@@ -13,6 +32,23 @@ export { MonthlySummary } from "./types/MonthlySummary";
 
 // Constants
 export { default as PERMISSIONS } from "./constants/permissions";
+export {
+  PERMISSION_CATALOG,
+  PERMISSION_CODES,
+  PERMISSION_DEFINITIONS,
+  PERMISSION_MODULE_ORDER,
+  ALL_PERMISSION_CODES,
+  DEFAULT_ROLE_PERMISSIONS,
+  ROLE_NAMES,
+  isPermissionCode,
+  getPermissionByCode,
+} from "./constants/permissions";
+export type {
+  PermissionKey,
+  PermissionModule,
+  PermissionDefinition,
+  RoleName,
+} from "./constants/permissions";
 
 // Validations
 export {

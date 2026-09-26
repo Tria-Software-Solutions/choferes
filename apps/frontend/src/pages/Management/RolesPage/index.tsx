@@ -73,6 +73,7 @@ import {
 } from "./styles";
 import { useLocation, useNavigate } from "react-router-dom";
 import PremiumTooltip from "../../../components/PremiumTooltip/PremiumTooltip.component";
+import SegmentedToggle from "../../../components/SegmentedToggle/SegmentedToggle.component";
 import { useTablePreferences } from "../../../hooks/useTablePreferences";
 import {
   getPreferencesObject,
@@ -108,6 +109,33 @@ const RolesPage: React.FC = () => {
     (state: RootState) => state.hoursWorked
   );
   const [filteredEmployees, setFilteredEmployees] = useState<Employee[]>([]);
+
+  // El buscador y el filtro de estado del board se recuerdan entre navegaciones.
+  const {
+    search,
+    setSearch,
+    statusFilter: employeeStatusFilter,
+    setStatusFilter: setEmployeeStatusFilter,
+  } = useTablePreferences<'active' | 'all'>("roles-selector", () => 25, "active");
+
+  // El board de horas muestra solo empleados activos por defecto: los egresados
+  // no deben recibir nuevas asignaciones.
+  const visibleEmployees = useMemo(
+    () =>
+      employeeStatusFilter === 'active'
+        ? employees.filter((employee) => employee.isActive !== false)
+        : employees,
+    [employees, employeeStatusFilter],
+  );
+
+  // Counts por estado (sobre la plantilla completa) para los filter tabs.
+  const filterCounts = useMemo(
+    () => ({
+      active: employees.filter((employee) => employee.isActive !== false).length,
+      all: employees.length,
+    }),
+    [employees],
+  );
   const [filteredSchedules, setFilteredSchedules] = useState<Schedule[]>([]);
   const hoursWorkedRef = useRef(hoursWorked);
   useEffect(() => { hoursWorkedRef.current = hoursWorked; }, [hoursWorked]);
@@ -174,9 +202,6 @@ const RolesPage: React.FC = () => {
   const location = useLocation();
   const navigate = useNavigate();
 
-  const { search, setSearch } =
-    useTablePreferences("roles-selector", () => 25);
-
   // Save viewMode to localStorage when it changes
   useEffect(() => {
     localStorage.setItem('selectorTableViewMode', viewMode);
@@ -223,18 +248,18 @@ const RolesPage: React.FC = () => {
     const normalizedSearch = normalizeString(search).toLowerCase().trim();
 
     if (!normalizedSearch) {
-      setFilteredEmployees(employees);
+      setFilteredEmployees(visibleEmployees);
       setFilteredSchedules(sortSchedulesByType(schedules, customOrderIds));
       return;
     }
 
     // Buscar en empleados — si hay match, filtrar; si no, mostrar todos
-    const matchedEmployees = employees.filter((employee) =>
+    const matchedEmployees = visibleEmployees.filter((employee) =>
       normalizeString(`${employee.firstName} ${employee.lastName}`)
         .toLowerCase()
         .includes(normalizedSearch)
     );
-    setFilteredEmployees(matchedEmployees.length > 0 ? matchedEmployees : employees);
+    setFilteredEmployees(matchedEmployees.length > 0 ? matchedEmployees : visibleEmployees);
 
     // Buscar en horarios — si hay match, filtrar; si no, mostrar todos
     const matchedSchedules = schedules.filter((schedule) =>
@@ -247,7 +272,7 @@ const RolesPage: React.FC = () => {
         ? sortSchedulesByType(matchedSchedules, customOrderIds)
         : sortSchedulesByType(schedules, customOrderIds)
     );
-  }, [search, employees, schedules, customOrderIds]);
+  }, [search, visibleEmployees, schedules, customOrderIds]);
 
 
 
@@ -1256,12 +1281,31 @@ const RolesPage: React.FC = () => {
               gap={1.5}
             >
               {/* Search - busca empleados Y horarios */}
-              <Box flex={1} maxWidth={{ sm: "280px" }}>
-                <SearchBarComponent
-                  placeholder="Buscar..."
-                  value={search}
-                  onChange={(e) => setSearch(e.target.value)}
-                  fullWidth
+              <Box
+                sx={{
+                  flex: 1,
+                  display: "flex",
+                  alignItems: "center",
+                  gap: 1.5,
+                  flexWrap: "wrap",
+                }}
+              >
+                <Box sx={{ flex: 1, maxWidth: { sm: "280px" }, minWidth: { xs: "100%", sm: 0 } }}>
+                  <SearchBarComponent
+                    placeholder="Buscar..."
+                    value={search}
+                    onChange={(e) => setSearch(e.target.value)}
+                    fullWidth
+                  />
+                </Box>
+                <SegmentedToggle
+                  size="medium"
+                  options={[
+                    { value: "active", label: "Activos", count: filterCounts.active },
+                    { value: "all", label: "Todos", count: filterCounts.all },
+                  ]}
+                  value={employeeStatusFilter}
+                  onChange={setEmployeeStatusFilter}
                 />
               </Box>
 
@@ -1544,7 +1588,7 @@ const RolesPage: React.FC = () => {
           <Button
             onClick={handleCloseAddRoleModal}
             variant="outlined"
-            sx={{ minWidth: 120, py: 1.5, fontWeight: 600 }}
+            sx={{ minWidth: 120, py: 1, fontWeight: 600 }}
           >
             Cancelar
           </Button>
@@ -1553,7 +1597,7 @@ const RolesPage: React.FC = () => {
             variant="contained"
             color="primary"
             disabled={isGeneratingHours || !userPermissions.includes(PERMISSIONS.EDIT_EMPLOYEE_ROLES)}
-            sx={{ minWidth: 200, py: 1.5, fontWeight: 600 }}
+            sx={{ minWidth: 200, py: 1, fontWeight: 600 }}
           >
             {isGeneratingHours ? "Generando..." : "Generar Horas"}
           </Button>

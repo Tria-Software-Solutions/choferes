@@ -1,13 +1,17 @@
 import { configureStore } from "@reduxjs/toolkit";
 import employeesReducer from "./slices/employeeSlice";
 import hoursWorkedReducer from "./slices/hoursWorkedSlice";
+import paymentsReducer from "./slices/paymentSlice";
 import permissionsReducer from "./slices/permissionsSlice";
 import rolePermissionsReducer from "./slices/rolePermissionsSlice";
 import rolesReducer from "./slices/rolesSlice";
 import schedulesReducer from "./slices/schedulesSlice";
 import userRolesReducer from "./slices/userRolesSlice";
 import usersReducer from "./slices/userSlice";
+import vacationsReducer from "./slices/vacationSlice";
 import vehiclesReducer from "./slices/vehiclesSlice";
+import licensesReducer from "./slices/licenseSlice";
+import disciplinaryReducer from "./slices/disciplinarySlice";
 
 // Redux store configuration for the application
 // Combines all feature slices and sets up middleware and dev tools
@@ -19,13 +23,17 @@ export const store = configureStore({
   reducer: {
     employees: employeesReducer, // Employee data slice
     hoursWorked: hoursWorkedReducer, // Hours worked data slice
+    payments: paymentsReducer, // Biweekly payments (boletas) slice
     permissions: permissionsReducer, // Permissions data slice
     rolePermissions: rolePermissionsReducer, // Role-permission assignments slice
     roles: rolesReducer, // Roles data slice
     schedules: schedulesReducer, // Schedules data slice
     userRoles: userRolesReducer, // User-role assignments slice
     users: usersReducer, // Users data slice
+    vacations: vacationsReducer, // Vacation requests slice
     vehicles: vehiclesReducer, // Vehicles data slice
+    licenses: licensesReducer, // Employee driver's licenses slice
+    disciplinary: disciplinaryReducer, // Disciplinary actions slice
   },
   // Customize middleware for serializability and immutability checks
   middleware: (getDefaultMiddleware) =>

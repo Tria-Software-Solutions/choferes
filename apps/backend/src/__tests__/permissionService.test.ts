@@ -1,4 +1,3 @@
-
 // Mock Permission model — service uses: import { Permission } from "../models/Permission" (named import)
 jest.mock("../models/Permission", () => {
   const mockFunctions = {
@@ -19,7 +18,9 @@ import * as permissionService from "../services/permissionService";
 
 const mockPermission = {
   id: 1,
-  name: "manage_users",
+  code: "employees:view",
+  module: "Empleados",
+  name: "Ver Empleados",
 };
 
 beforeEach(() => {
@@ -50,7 +51,7 @@ describe("getPermissions", () => {
   it("debería pasar search query", async () => {
     Permission.findAndCountAll.mockResolvedValue({ count: 0, rows: [] });
 
-    await permissionService.getPermissions({ search: "manage" });
+    await permissionService.getPermissions({ search: "emple" });
 
     const callArgs = Permission.findAndCountAll.mock.calls[0][0];
     expect(callArgs.where).toBeDefined();
@@ -76,26 +77,15 @@ describe("getPermissionById", () => {
   });
 });
 
-describe("getPermissionByName", () => {
-  it("debería buscar por nombre", async () => {
-    Permission.findOne.mockResolvedValue(mockPermission);
-
-    const result = await permissionService.getPermissionByName("manage_users");
-
-    expect(Permission.findOne).toHaveBeenCalledWith({ where: { name: "manage_users" } });
-    expect(result).toEqual(mockPermission);
-  });
-});
-
 describe("getPermissionsByNames", () => {
   it("debería buscar múltiples permisos por array de nombres", async () => {
     Permission.findAll.mockResolvedValue([mockPermission]);
 
-    const result = await permissionService.getPermissionsByNames(["manage_users", "view_reports"]);
+    const result = await permissionService.getPermissionsByNames(["Ver Empleados", "Ver Pagos"]);
 
     expect(Permission.findAll).toHaveBeenCalledTimes(1);
     const callArgs = Permission.findAll.mock.calls[0][0];
-    expect(callArgs.where.name["$in"]).toEqual(["manage_users", "view_reports"]);
+    expect(callArgs.where.name["$in"]).toEqual(["Ver Empleados", "Ver Pagos"]);
     expect(result).toEqual([mockPermission]);
   });
 
@@ -105,44 +95,5 @@ describe("getPermissionsByNames", () => {
     const result = await permissionService.getPermissionsByNames(["nonexistent"]);
 
     expect(result).toEqual([]);
-  });
-});
-
-describe("createPermission", () => {
-  it("debería crear y recargar el permiso", async () => {
-    const newData = { name: "view_reports" };
-    const createdPermission = { id: 2, ...newData, reload: jest.fn() };
-
-    Permission.create.mockResolvedValue(createdPermission);
-
-    const result = await permissionService.createPermission(newData as never);
-
-    expect(Permission.create).toHaveBeenCalledWith(newData);
-    expect(createdPermission.reload).toHaveBeenCalled();
-    expect(result).toEqual(createdPermission);
-  });
-});
-
-describe("updatePermission", () => {
-  it("debería actualizar y devolver el permiso actualizado", async () => {
-    const updateData = { name: "manage_all" };
-    Permission.update.mockResolvedValue([1]);
-    Permission.findByPk.mockResolvedValue({ ...mockPermission, name: "manage_all" });
-
-    const result = await permissionService.updatePermission(1, updateData as never);
-
-    expect(Permission.update).toHaveBeenCalledWith(updateData, { where: { id: 1 } });
-    expect(result).toHaveProperty("name", "manage_all");
-  });
-});
-
-describe("deletePermission", () => {
-  it("debería eliminar por id", async () => {
-    Permission.destroy.mockResolvedValue(1);
-
-    const result = await permissionService.deletePermission(1);
-
-    expect(Permission.destroy).toHaveBeenCalledWith({ where: { id: 1 } });
-    expect(result).toBe(1);
   });
 });

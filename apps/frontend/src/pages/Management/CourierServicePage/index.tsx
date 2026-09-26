@@ -38,7 +38,7 @@ import { Courier } from "../../../models/Courier";
 import EditableTableComponent from "../../../components/Table/EditableTable/EditableTable.component";
 import AddCourierForm from "../../Forms/AddCourierForm";
 import DialogComponent from "../../../components/Dialog/Dialog.component";
-import { Plus, Trash2, Truck } from "lucide-react";
+import { Trash2, Truck } from "lucide-react";
 import {
   exportSpeedDialBoxStyles,
   loadingBoxStyles,
@@ -649,19 +649,8 @@ const CourierServicePage: React.FC = () => {
               <Box sx={{ display: { xs: 'none', sm: 'flex' } }}>
                 {canCreateCourier && (
                   <Button
-                    variant="contained"
-                    startIcon={<Plus size={16} strokeWidth={2} />}
+                    variant="outlined"
                     onClick={handleOpenAddCourierModal}
-                    sx={{
-                      px: 2.5,
-                      py: 0.75,
-                      fontWeight: 600,
-                      fontSize: "0.8rem",
-                      letterSpacing: "-0.01em",
-                      borderRadius: '10px',
-                      height: '36px',
-                      minWidth: 0,
-                    }}
                   >
                     {MANAGEMENT.ADD}
                   </Button>
@@ -675,15 +664,9 @@ const CourierServicePage: React.FC = () => {
         <Box sx={{ display: { xs: 'flex', sm: 'none' }, p: 2, borderTop: `1px solid ${theme.palette.mode === "dark" ? "rgba(255,255,255,0.08)" : "rgba(0,0,0,0.08)"}` }}>
           {canCreateCourier && (
             <Button
-              variant="contained"
+              variant="outlined"
               fullWidth
-              startIcon={<Plus size={18} />}
               onClick={handleOpenAddCourierModal}
-              sx={{
-                py: 1.5,
-                fontWeight: 600,
-                borderRadius: '10px',
-              }}
             >
               {MANAGEMENT.ADD}
             </Button>
@@ -767,7 +750,6 @@ const CourierServicePage: React.FC = () => {
         open={openAddCourierModal}
         onClose={handleCloseAddCourierModal}
         title={MANAGEMENT.COURIER_SERVICE_PAGE.DIALOG_ADD_TITLE}
-        subtitle={MANAGEMENT.COURIER_SERVICE_PAGE.DIALOG_ADD_SUBTITLE}
         hideActions
         paperSx={addDialogPaperSx ?? {}}
         icon={<PlusCircle size={24} color="blue" />}

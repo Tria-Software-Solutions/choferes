@@ -3,6 +3,9 @@
 export interface TablePreferences {
   rowsPerPage: number;
   search: string;
+  // Filtro de estado del listado (p. ej. Todos / Activos / Inactivos).
+  // Opcional para no romper las tablas que no lo usan.
+  statusFilter?: string;
 }
 
 const STORAGE_KEY = 'tablePreferences';

@@ -1,18 +1,13 @@
 import express from "express";
 import * as permissionController from "../controllers/permissionController";
 import { authenticateToken } from "../middleware/authMiddleware";
-import { requirePermission } from "../middleware/authorize";
-import { PERMISSIONS } from "../constants/permissions";
-import {
-  idParam,
-  permissionRules,
-  permissionNamesParam,
-  paginationRules,
-  validate,
-} from "../middleware/validation";
+import { idParam, permissionNamesParam, paginationRules, validate } from "../middleware/validation";
 
 const router = express.Router();
 
+// The permission catalog is code-owned (see @choferes/shared PERMISSION_CATALOG),
+// so there is intentionally no create/update/delete endpoint here — permissions
+// are provisioned through migrations/seeders instead of at runtime.
 router.get("/", authenticateToken, paginationRules, validate, permissionController.getPermissions);
 router.get("/:id", authenticateToken, idParam, validate, permissionController.getPermissionById);
 router.get(
@@ -21,22 +16,6 @@ router.get(
   permissionNamesParam,
   validate,
   permissionController.getPermissionsByNames,
-);
-router.post(
-  "/",
-  authenticateToken,
-  requirePermission(PERMISSIONS.EDIT_ROLE),
-  permissionRules,
-  validate,
-  permissionController.createPermission,
-);
-router.delete(
-  "/:id",
-  authenticateToken,
-  requirePermission(PERMISSIONS.EDIT_ROLE),
-  idParam,
-  validate,
-  permissionController.deletePermission,
 );
 
 export default router;

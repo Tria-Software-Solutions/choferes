@@ -8,7 +8,7 @@ import {
   useMediaQuery,
   Typography,
 } from "@mui/material";
-import { Plus, X, Users } from "lucide-react";
+import { Users, RotateCcw } from "lucide-react";
 import { Permission } from "../../../models/Permission";
 import TextfieldComponent from "../../../components/Textfield/Textfield.component";
 import PermissionTogglePanel from "../../../components/PermissionTogglePanel/PermissionTogglePanel.component";
@@ -124,15 +124,6 @@ const AddRoleForm: React.FC<AddRoleFormProps> = ({
 
   return (
     <Box sx={boxRoot}>
-      <Box sx={{ mb: 1 }}>
-        <Typography
-          variant="body2"
-          color="text.secondary"
-          sx={{ lineHeight: 1.4 }}
-        >
-          {FORMS.ADD_ROLE.DIALOG_CONTENT_TITLE}
-        </Typography>
-      </Box>
       <Grid container spacing={2.5} sx={gridContainer}>
         {/* Section: Información del rol */}
         <Grid item xs={12}>
@@ -194,9 +185,9 @@ const AddRoleForm: React.FC<AddRoleFormProps> = ({
         <Grid item xs={12}>
           <Box sx={actionsBox(theme)}>
             <Button
-              variant="outlined"
+              variant="text"
               onClick={handleClearForm}
-              startIcon={<X />}
+              startIcon={<RotateCcw size={16} />}
               fullWidth={isSmallScreen}
               sx={clearButton}
             >
@@ -205,7 +196,7 @@ const AddRoleForm: React.FC<AddRoleFormProps> = ({
             <Box sx={actionsInnerBox}>
               {onCancel && (
                 <Button
-                  variant="outlined"
+                  variant="text"
                   onClick={onCancel}
                   disabled={isLoading}
                   fullWidth={isSmallScreen}
@@ -215,10 +206,9 @@ const AddRoleForm: React.FC<AddRoleFormProps> = ({
                 </Button>
               )}
               <Button
-                variant="contained"
+                variant="text"
                 onClick={handleSubmit}
                 disabled={!isFormValid || isLoading}
-                startIcon={<Plus size={18} />}
                 fullWidth={isSmallScreen}
                 sx={submitButton}
               >

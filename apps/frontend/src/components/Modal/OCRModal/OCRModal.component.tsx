@@ -272,10 +272,9 @@ const OCRResultModal: React.FC<OCRResultModalProps> = ({
                 </Typography>
                 <Box sx={errorActionsBoxStyles}>
                   <Button
-                    variant="contained"
+                    variant="text"
                     color="primary"
-                    size="large"
-                    startIcon={<RefreshCw size={20} />}
+                    startIcon={<RefreshCw size={16} />}
                     onClick={onClose}
                     fullWidth={false}
                     sx={errorButtonStyles}
@@ -632,13 +631,13 @@ const OCRResultModal: React.FC<OCRResultModalProps> = ({
       </DialogContent>
 
       <DialogActions sx={dialogActionsStyles}>
-        <Button onClick={onClose} variant="outlined" sx={cancelButtonStyles}>
+        <Button onClick={onClose} variant="text" sx={cancelButtonStyles}>
           Cancelar
         </Button>
         {result && !isLoading && isImageFormatValid && (
           <Button
             onClick={handleImport}
-            variant="contained"
+            variant="text"
             color="primary"
             disabled={result.entries.length === 0}
             sx={importButtonStyles}

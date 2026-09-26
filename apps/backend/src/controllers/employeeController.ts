@@ -2,6 +2,8 @@
 // Provides endpoints for CRUD operations on employees
 import { Request, Response } from "express";
 import * as employeeService from "../services/employeeService";
+import * as vacationAccrualService from "../services/vacationAccrualService";
+import { isServiceError } from "../utils/errors";
 
 // Get all employees (paginated)
 export const getEmployees = async (req: Request, res: Response) => {
@@ -50,6 +52,20 @@ export const updateEmployee = async (req: Request, res: Response) => {
     return res.status(404).json({ message: "Employee not found" });
   } catch (error) {
     return res.status(500).json({ message: "Error updating Employee", error });
+  }
+};
+
+// Get the vacation accrual of an employee (Costa Rica labor law, prorated)
+export const getVacationAccrual = async (req: Request, res: Response) => {
+  try {
+    const id = parseInt(req.params.id, 10);
+    const accrual = await vacationAccrualService.getVacationAccrual(id);
+    return res.status(200).json(accrual);
+  } catch (error) {
+    if (isServiceError(error)) {
+      return res.status(error.statusCode).json({ message: error.message });
+    }
+    return res.status(500).json({ message: "Error fetching vacation accrual", error });
   }
 };
 

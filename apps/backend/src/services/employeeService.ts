@@ -17,8 +17,14 @@ export const getEmployees = async (query: QueryParams) => {
   const search = getSearchParam(query);
   const searchWhere = buildSearchWhere(search, ["firstName", "lastName", "email"]);
 
+  const where: Record<string, any> = { ...(searchWhere ?? {}) };
+  // Optional active/inactive filter ("true"/"false"), validated by the route.
+  if (query.isActive === "true" || query.isActive === "false") {
+    where.isActive = query.isActive === "true";
+  }
+
   const options: Record<string, any> = {
-    where: searchWhere,
+    where,
     order: [["firstName", "ASC"]],
   };
   return paginate<Employee>(Employee, options, params);
@@ -96,16 +102,67 @@ export const getEmployeesByFilter = async (filter: Record<string, unknown>) => {
   return Employee.findAll({ where: whereClause });
 };
 
+// Fields a client is allowed to set on an employee. Prevents mass-assignment
+// of unknown columns (and keeps the payload surface predictable).
+const EDITABLE_FIELDS = [
+  "firstName",
+  "lastName",
+  "email",
+  "avatar",
+  "hourlyRate",
+  "vacationDays",
+  "contractStartDate",
+  "terminationDate",
+  "terminationReason",
+  "terminationNotes",
+  "position",
+  "nationalId",
+] as const;
+
+const TERMINATION_REASONS = new Set([
+  "renuncia",
+  "despido",
+  "mutuo_acuerdo",
+  "fin_contrato",
+  "jubilacion",
+  "fallecimiento",
+  "otro",
+]);
+
+const pickEditableFields = (data: Record<string, unknown>): Record<string, unknown> =>
+  Object.fromEntries(
+    EDITABLE_FIELDS.filter((field) => data[field] !== undefined).map((field) => [
+      field,
+      data[field],
+    ]),
+  );
+
 // Creates a new employee and reloads the instance
-export const createEmployee = async (data: Omit<Employee, "id">) => {
-  const newEmployee = await Employee.create(data);
+export const createEmployee = async (data: Record<string, unknown>) => {
+  const newEmployee = await Employee.create(pickEditableFields(data) as any);
   await newEmployee.reload();
   return newEmployee;
 };
 
-// Updates employee data by ID (partial update — only provided fields change)
-export const updateEmployee = async (id: number, data: Partial<Omit<Employee, "id">>) => {
-  await Employee.update(data, { where: { id } });
+// Updates employee data by ID (partial update — only provided fields change).
+// The active status is derived from the termination date so it can never drift.
+export const updateEmployee = async (id: number, data: Record<string, unknown>) => {
+  const clean = pickEditableFields(data);
+
+  if (
+    clean.terminationReason != null &&
+    !TERMINATION_REASONS.has(String(clean.terminationReason))
+  ) {
+    clean.terminationReason = null;
+  }
+
+  if (clean.terminationDate !== undefined) {
+    clean.isActive = !clean.terminationDate;
+  }
+
+  if (Object.keys(clean).length > 0) {
+    await Employee.update(clean, { where: { id } });
+  }
   return Employee.findByPk(id);
 };
 

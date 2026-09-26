@@ -306,8 +306,10 @@ const QuickAssignPopover: React.FC<QuickAssignPopoverProps> = ({
               ? {}
               : {
                   backgroundColor: isDark ? "#d4d4d4" : "#1a1a1a",
-                  transform: "translateY(-1px)",
                 },
+            "&:active": {
+              transform: "scale(0.97)",
+            },
           }}
         >
           Asignar {selectedEmployeeIds.size > 1 ? `(${selectedEmployeeIds.size})` : ""}

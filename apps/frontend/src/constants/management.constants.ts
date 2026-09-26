@@ -1,6 +1,6 @@
 const MANAGEMENT = {
   // Generic actions
-  ADD: "Agregar",
+  ADD: "Crear",
   EDIT: "Editar",
   DELETE: "Eliminar",
   CANCEL: "Cancelar",
@@ -23,14 +23,13 @@ const MANAGEMENT = {
       "¿Estás seguro de que deseas eliminar este empleado?",
     DIALOG_DELETE_CONFIRM: "Eliminar",
     DIALOG_DELETE_CANCEL: "Cancelar",
-    DIALOG_ADD_TITLE: "Agregar",
-    DIALOG_ADD_SUBTITLE: "Nuevo empleado",
+    DIALOG_ADD_TITLE: "Nuevo empleado",
   },
 
   // Vehicles Page
   VEHICLES_PAGE: {
     SEARCH_PLACEHOLDER: "Buscar vehículo...",
-    ADD: "Agregar vehículo",
+    ADD: "Crear vehículo",
     NO_VEHICLES: "No hay vehículos registrados",
     DATE_PICKER_LABEL: "Seleccionar fecha",
     TOOLTIP_PREV_DAY: "Día anterior",
@@ -41,14 +40,13 @@ const MANAGEMENT = {
       "¿Estás seguro de que deseas eliminar este vehículo?",
     DIALOG_DELETE_CONFIRM: "Eliminar",
     DIALOG_DELETE_CANCEL: "Cancelar",
-    DIALOG_ADD_TITLE: "Agregar",
-    DIALOG_ADD_SUBTITLE: "Nuevo vehículo",
+    DIALOG_ADD_TITLE: "Nuevo vehículo",
   },
 
   // Courier Service Page
   COURIER_SERVICE_PAGE: {
     SEARCH_PLACEHOLDER: "Buscar servicio...",
-    ADD: "Agregar servicio",
+    ADD: "Crear servicio",
     NO_SERVICES: "No hay servicios registrados",
     DATE_PICKER_LABEL: "Seleccionar fecha",
     TOOLTIP_PREV_DAY: "Día anterior",
@@ -59,34 +57,31 @@ const MANAGEMENT = {
       "¿Estás seguro de que deseas eliminar este servicio?",
     DIALOG_DELETE_CONFIRM: "Eliminar",
     DIALOG_DELETE_CANCEL: "Cancelar",
-    DIALOG_ADD_TITLE: "Agregar",
-    DIALOG_ADD_SUBTITLE: "Nuevo servicio",
+    DIALOG_ADD_TITLE: "Nuevo servicio",
   },
 
   // Schedules Page
   SCHEDULES_PAGE: {
     SEARCH_PLACEHOLDER: "Buscar horario...",
-    ADD: "Agregar horario",
+    ADD: "Crear horario",
     NO_SCHEDULES: "No hay horarios registrados",
     DIALOG_DELETE_TITLE: "Eliminar horario",
     DIALOG_DELETE_MESSAGE: "¿Estás seguro de que deseas eliminar este horario?",
     DIALOG_DELETE_CONFIRM: "Eliminar",
     DIALOG_DELETE_CANCEL: "Cancelar",
-    DIALOG_ADD_TITLE: "Agregar",
-    DIALOG_ADD_SUBTITLE: "Nuevo horario",
+    DIALOG_ADD_TITLE: "Nuevo horario",
   },
 
   // Roles Page
   ROLES_PAGE: {
     SEARCH_PLACEHOLDER: "Buscar empleado...",
-    ADD: "Agregar rol",
+    ADD: "Crear rol",
     NO_ROLES: "No hay roles registrados",
     DIALOG_DELETE_TITLE: "Eliminar rol",
     DIALOG_DELETE_MESSAGE: "¿Estás seguro de que deseas eliminar este rol?",
     DIALOG_DELETE_CONFIRM: "Eliminar",
     DIALOG_DELETE_CANCEL: "Cancelar",
-    DIALOG_ADD_TITLE: "Agregar rol",
-    DIALOG_ADD_SUBTITLE: "Completa los datos para agregar un nuevo rol",
+    DIALOG_ADD_TITLE: "Nuevo rol",
   },
 
   // Tabs and summaries
@@ -148,8 +143,7 @@ const MANAGEMENT = {
   DIALOG_DELETE_MESSAGE: "¿Estás seguro de que deseas eliminar este elemento?",
   DIALOG_DELETE_CONFIRM: "Eliminar",
   DIALOG_DELETE_CANCEL: "Cancelar",
-  DIALOG_ADD_TITLE: "Agregar",
-  DIALOG_ADD_SUBTITLE: "Completa los datos para agregar un nuevo elemento",
+  DIALOG_ADD_TITLE: "Nuevo horario",
   DATE_PICKER_LABEL: "Seleccionar fecha",
 };
 export default MANAGEMENT;

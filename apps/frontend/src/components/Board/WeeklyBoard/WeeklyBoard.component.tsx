@@ -1710,7 +1710,7 @@ function TotalsColumn({
           value={selectedPeriod}
           onChange={onPeriodChange}
           options={periodOptions}
-          size="small"
+          size="medium"
           fullWidth={isMobile}
         />
       </Box>
@@ -1923,23 +1923,18 @@ function TotalsColumn({
             sx={{
               mb: 2.5,
               '& .MuiOutlinedInput-root': {
-                borderRadius: '12px',
+                borderRadius: '10px',
                 minHeight: '42px',
-                backgroundColor: isDark ? 'rgba(40,40,50,0.6)' : 'rgba(255,255,255,0.7)',
+                backgroundColor: isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.04)',
                 color: theme.palette.text.primary,
-                border: isDark ? '1px solid rgba(255,255,255,0.1)' : '1px solid rgba(0,0,0,0.08)',
-                transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+                transition: 'background-color 0.15s ease, box-shadow 0.15s ease',
                 '&:hover': {
-                  backgroundColor: isDark ? 'rgba(50,50,60,0.7)' : 'rgba(255,255,255,0.85)',
-                  borderColor: isDark ? 'rgba(255,255,255,0.15)' : 'rgba(0,0,0,0.12)',
+                  backgroundColor: isDark ? 'rgba(255,255,255,0.09)' : 'rgba(0,0,0,0.06)',
                 },
-                '&:hover .MuiOutlinedInput-notchedOutline': { borderColor: 'transparent' },
                 '&.Mui-focused': {
-                  backgroundColor: isDark ? 'rgba(55,55,65,0.8)' : 'rgba(255,255,255,0.95)',
-                  borderColor: isDark ? 'rgba(255,255,255,0.2)' : 'rgba(0,0,0,0.15)',
-                  boxShadow: 'none',
+                  backgroundColor: isDark ? 'rgba(255,255,255,0.09)' : 'rgba(0,0,0,0.06)',
+                  boxShadow: isDark ? '0 0 0 3px rgba(255,255,255,0.1)' : '0 0 0 3px rgba(0,0,0,0.07)',
                 },
-                '&.Mui-focused .MuiOutlinedInput-notchedOutline': { borderColor: 'transparent' },
                 '& fieldset': { border: 'none' },
                 '& input': {
                   color: theme.palette.text.primary,
@@ -2916,7 +2911,7 @@ const WeeklyBoard: React.FC<WeeklyBoardProps> = ({
           <SegmentedToggle
             value={viewMode}
             onChange={setViewMode}
-            size="small"
+            size="medium"
             fullWidth={isSmallScreen}
             options={[
               {

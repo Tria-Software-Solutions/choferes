@@ -1,12 +1,14 @@
 import { BiweeklySummary } from "../models/BiweeklySummary";
 import api, { invalidateCache } from "./api";
 
-export const getBiweeklySummaries = async () => {
+export const getBiweeklySummaries = async (employeeId?: number) => {
+  const params: Record<string, string | number> = {
+    _t: Date.now(),
+    limit: 10000,
+  };
+  if (employeeId) params.employeeId = employeeId;
   const response = await api.get("/biweekly-summary", {
-    params: {
-      _t: Date.now(),
-      limit: 10000
-    }
+    params,
   });
   return response.data.data;
 };

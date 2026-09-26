@@ -14,6 +14,7 @@ interface SegmentedToggleProps<T extends string> {
   onChange: (value: T) => void;
   size?: "small" | "medium";
   fullWidth?: boolean;
+  surface?: "auto" | "dark" | "light";
 }
 
 // SegmentedToggle renders a pill-style segmented control (e.g. Semanal / Quincenal / Mensual)
@@ -24,17 +25,22 @@ export default function SegmentedToggle<T extends string>({
   onChange,
   size = "small",
   fullWidth = false,
+  surface = "auto",
 }: SegmentedToggleProps<T>) {
   const theme = useTheme();
   const isDark = theme.palette.mode === "dark";
+  const dark = surface === "dark" ? true : surface === "light" ? false : isDark;
 
   const containerSx = {
     display: "flex",
     gap: 0.3,
+    alignItems: "center",
     justifyContent: "center",
-    backgroundColor: isDark ? "rgba(255,255,255,0.06)" : "rgba(0,0,0,0.05)",
+    height: "38px",
+    boxSizing: "border-box",
+    backgroundColor: dark ? "rgba(255,255,255,0.06)" : "rgba(0,0,0,0.05)",
     borderRadius: "10px",
-    p: 0.35,
+    p: "3px",
     width: fullWidth ? "100%" : "fit-content",
     maxWidth: "100%",
     overflowX: "auto",
@@ -43,19 +49,19 @@ export default function SegmentedToggle<T extends string>({
   const itemSx = (active: boolean) => ({
     display: "flex",
     alignItems: "center",
+    justifyContent: "center",
+    alignSelf: "stretch",
     gap: 0.5,
     flex: fullWidth ? 1 : "none",
     px: size === "medium" ? { xs: 1, sm: 2 } : 0.9,
-    py: size === "medium" ? { xs: "5px", sm: "6px" } : 0.5,
     borderRadius: "8px",
     cursor: "pointer",
     userSelect: "none",
-    justifyContent: "center",
-    fontSize: size === "medium" ? { xs: "0.7rem", sm: "0.8rem" } : "0.7rem",
+    fontSize: size === "medium" ? "0.8rem" : "0.7rem",
     fontWeight: active ? 700 : 500,
     color: active ? theme.palette.primary.main : theme.palette.text.secondary,
     backgroundColor: active
-      ? isDark
+      ? dark
         ? "rgba(255,255,255,0.14)"
         : "rgba(0,0,0,0.08)"
       : "transparent",
@@ -65,7 +71,7 @@ export default function SegmentedToggle<T extends string>({
       ? {}
       : {
           "&:hover": {
-            backgroundColor: isDark ? "rgba(255,255,255,0.04)" : "rgba(0,0,0,0.03)",
+            backgroundColor: dark ? "rgba(255,255,255,0.04)" : "rgba(0,0,0,0.03)",
           },
         }),
   });
@@ -106,10 +112,10 @@ export default function SegmentedToggle<T extends string>({
                   fontWeight: 700,
                   lineHeight: 1,
                   backgroundColor: active
-                    ? isDark
+                    ? dark
                       ? "rgba(255,255,255,0.2)"
                       : "rgba(0,0,0,0.12)"
-                    : isDark
+                    : dark
                       ? "rgba(255,255,255,0.08)"
                       : "rgba(0,0,0,0.06)",
                   color: active

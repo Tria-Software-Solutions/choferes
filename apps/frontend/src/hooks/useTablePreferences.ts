@@ -6,9 +6,10 @@ function getDefaultRowsPerPage(isSmallScreen: boolean): number {
   return isSmallScreen ? 5 : 25;
 }
 
-export function useTablePreferences(
+export function useTablePreferences<TStatus extends string = string>(
   tableKey: string,
-  getInitialRowsPerPage?: () => number
+  getInitialRowsPerPage?: () => number,
+  defaultStatusFilter?: TStatus
 ) {
   const theme = useTheme();
   const isSmallScreen = useMediaQuery(theme.breakpoints.down('sm'));
@@ -16,16 +17,21 @@ export function useTablePreferences(
   // On first mount, check localStorage or set defaults
   const [prefs, setPrefs] = useState<TablePreferences>(() => {
     const stored = getTablePreferences(tableKey);
-    if (stored) return stored;
+    if (stored) {
+      // Older entries may not have a status filter yet: fall back to the
+      // default passed by the page.
+      return { ...stored, statusFilter: stored.statusFilter ?? defaultStatusFilter };
+    }
     return {
       rowsPerPage: getInitialRowsPerPage
         ? getInitialRowsPerPage()
         : getDefaultRowsPerPage(isSmallScreen),
       search: '',
+      statusFilter: defaultStatusFilter,
     };
   });
   const [hasManualRowsChange, setHasManualRowsChange] = useState(false);
-  
+
   // Use refs to track previous values and only persist when they actually change
   const prevPrefsRef = useRef(prefs);
   const prevTableKeyRef = useRef(tableKey);
@@ -34,9 +40,10 @@ export function useTablePreferences(
   useEffect(() => {
     const rowsPerPageChanged = prevPrefsRef.current.rowsPerPage !== prefs.rowsPerPage;
     const searchChanged = prevPrefsRef.current.search !== prefs.search;
+    const statusFilterChanged = prevPrefsRef.current.statusFilter !== prefs.statusFilter;
     const tableKeyChanged = prevTableKeyRef.current !== tableKey;
-    
-    if (rowsPerPageChanged || searchChanged || tableKeyChanged) {
+
+    if (rowsPerPageChanged || searchChanged || statusFilterChanged || tableKeyChanged) {
       setTablePreferences(tableKey, prefs);
       prevPrefsRef.current = prefs;
       prevTableKeyRef.current = tableKey;
@@ -71,11 +78,16 @@ export function useTablePreferences(
   const setSearch = (search: string) => {
     setPrefs((prev) => ({ ...prev, search }));
   };
+  const setStatusFilter = (statusFilter: TStatus) => {
+    setPrefs((prev) => ({ ...prev, statusFilter }));
+  };
 
   return {
     rowsPerPage: prefs.rowsPerPage,
     setRowsPerPage,
     search: prefs.search,
     setSearch,
+    statusFilter: (prefs.statusFilter ?? defaultStatusFilter) as TStatus,
+    setStatusFilter,
   };
-} 
+}

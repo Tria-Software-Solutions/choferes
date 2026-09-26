@@ -27,87 +27,80 @@ export const textFieldStyles = (customSx: object = {}): SxProps<Theme> => (theme
   mb: 1,
   ...customSx,
   "& .MuiOutlinedInput-root": {
-    borderRadius: "16px",
-    minHeight: "48px",
+    borderRadius: "10px",
+    minHeight: "38px",
     position: "relative",
     backgroundColor: theme.palette.mode === "dark"
-      ? "rgba(255,255,255,0.03)"
-      : "rgba(0,0,0,0.02)",
+      ? "rgba(255,255,255,0.06)"
+      : "rgba(0,0,0,0.04)",
     color: theme.palette.text.primary,
-    border: "none",
-    transition: "all 0.3s cubic-bezier(0.4, 0, 0.2, 1)",
-    boxShadow: "0 1px 3px rgba(0,0,0,0.04)",
-    "&:hover": {
-      backgroundColor: theme.palette.mode === "dark"
-        ? "rgba(255,255,255,0.06)"
-        : "rgba(0,0,0,0.04)",
-      boxShadow: "0 4px 12px rgba(0,0,0,0.08)",
-      transform: "translateY(-1px)",
-    },
-    "&:hover .MuiOutlinedInput-notchedOutline": {
-      borderColor: "transparent",
-    },
-    "&.Mui-focused": {
-      backgroundColor: theme.palette.mode === "dark"
-        ? "rgba(255,255,255,0.08)"
-        : "rgba(0,0,0,0.06)",
-      boxShadow: "0 8px 24px rgba(0,0,0,0.12)",
-    },
-    "&.Mui-focused .MuiOutlinedInput-notchedOutline": {
-      borderColor: "transparent",
-    },
+    transition:
+      "background-color 0.15s ease, box-shadow 0.15s ease",
     "& fieldset": {
       border: "none",
     },
+    "&:hover": {
+      backgroundColor: theme.palette.mode === "dark"
+        ? "rgba(255,255,255,0.09)"
+        : "rgba(0,0,0,0.06)",
+    },
+    "&.Mui-focused": {
+      backgroundColor: theme.palette.mode === "dark"
+        ? "rgba(255,255,255,0.09)"
+        : "rgba(0,0,0,0.06)",
+      boxShadow: theme.palette.mode === "dark"
+        ? "0 0 0 3px rgba(255,255,255,0.1)"
+        : "0 0 0 3px rgba(0,0,0,0.05)",
+    },
     "& input": {
       color: theme.palette.text.primary,
-      fontSize: "0.95rem",
+      fontSize: "0.9375rem",
       fontWeight: 400,
-      paddingTop: "12px",
-      paddingBottom: "12px",
-      paddingLeft: "16px",
-      paddingRight: "16px",
+      paddingTop: "9px",
+      paddingBottom: "9px",
+      paddingLeft: "14px",
+      paddingRight: "14px",
       "&::placeholder": {
         color: theme.palette.text.secondary,
-        opacity: 0.5,
+        opacity: 0.6,
         fontWeight: 400,
       },
     },
     "&.MuiInputBase-adornedStart input": {
-      paddingLeft: "44px",
-      paddingRight: "16px",
+      paddingLeft: "36px",
+      paddingRight: "14px",
     },
     "&.MuiInputBase-adornedEnd input": {
-      paddingLeft: "16px",
-      paddingRight: "48px",
+      paddingLeft: "14px",
+      paddingRight: "38px",
     },
     "&.MuiInputBase-adornedStart.MuiInputBase-adornedEnd input": {
-      paddingLeft: "44px",
-      paddingRight: "48px",
+      paddingLeft: "36px",
+      paddingRight: "38px",
     },
     "& .MuiInputAdornment-positionStart": {
       position: "absolute",
-      left: "14px",
+      left: "12px",
       marginRight: 0,
       zIndex: 2,
     },
     "& .MuiInputAdornment-positionEnd": {
       position: "absolute",
-      right: "14px",
+      right: "10px",
       marginLeft: 0,
       zIndex: 2,
     },
     "& input:-webkit-autofill": {
       WebkitBoxShadow: theme.palette.mode === "dark"
-        ? "0 0 0 100px rgba(255,255,255,0.03) inset"
-        : "0 0 0 100px rgba(0,0,0,0.02) inset",
+        ? "0 0 0 100px rgba(255,255,255,0.06) inset"
+        : "0 0 0 100px rgba(0,0,0,0.04) inset",
       WebkitTextFillColor: theme.palette.text.primary,
-      borderRadius: "16px",
+      borderRadius: "10px",
       transition: "background-color 5000s ease-in-out 0s",
     },
     "& input:-webkit-autofill:focus": {
       WebkitBoxShadow: theme.palette.mode === "dark"
-        ? "0 0 0 100px rgba(255,255,255,0.08) inset"
+        ? "0 0 0 100px rgba(255,255,255,0.09) inset"
         : "0 0 0 100px rgba(0,0,0,0.06) inset",
       WebkitTextFillColor: theme.palette.text.primary,
     },

@@ -167,8 +167,7 @@ const WorkedHoursSummaryDialog: React.FC<WorkedHoursSummaryDialogProps> = ({
           <Box sx={actionsBox}>
             <Button
               onClick={onCancel}
-              variant="outlined"
-              color="inherit"
+              variant="text"
               sx={closeButtonSx}
             >
               Cerrar

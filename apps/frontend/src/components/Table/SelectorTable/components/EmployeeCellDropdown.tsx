@@ -343,7 +343,7 @@ export const EmployeeCellDropdown: React.FC<EmployeeCellDropdownProps> = ({
                 >
                   <Box sx={{ display: "flex", alignItems: "center", gap: 2, width: "100%" }}>
                     <PlusIcon sx={{ fontSize: 20, fontWeight: 700 }} />
-                    <Typography sx={{ fontSize: "0.875rem", fontWeight: 600 }}>Agregar horario</Typography>
+                    <Typography sx={{ fontSize: "0.875rem", fontWeight: 600 }}>Crear horario</Typography>
                   </Box>
                 </MenuItem>
               </>

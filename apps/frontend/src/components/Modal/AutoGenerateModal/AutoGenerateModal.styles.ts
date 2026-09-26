@@ -71,39 +71,26 @@ export const autoGenerateModalTextFieldStyles = (theme: Theme): SxProps<Theme> =
   width: '100%',
   mb: 1,
   '& .MuiOutlinedInput-root': {
-    borderRadius: "12px",
+    borderRadius: "10px",
     minHeight: "42px",
     position: "relative",
     backgroundColor: theme.palette.mode === "dark"
-      ? "rgba(40,40,50,0.6)"
-      : "rgba(255,255,255,0.7)",
+      ? "rgba(255,255,255,0.06)"
+      : "rgba(0,0,0,0.04)",
     color: theme.palette.text.primary,
-    border: theme.palette.mode === "dark"
-      ? "1px solid rgba(255,255,255,0.1)"
-      : "1px solid rgba(0,0,0,0.08)",
-    transition: "all 0.3s cubic-bezier(0.4, 0, 0.2, 1)",
+    transition: "background-color 0.15s ease, box-shadow 0.15s ease",
     "&:hover": {
       backgroundColor: theme.palette.mode === "dark"
-        ? "rgba(50,50,60,0.7)"
-        : "rgba(255,255,255,0.85)",
-      borderColor: theme.palette.mode === "dark"
-        ? "rgba(255,255,255,0.15)"
-        : "rgba(0,0,0,0.12)",
-    },
-    "&:hover .MuiOutlinedInput-notchedOutline": {
-      borderColor: "transparent",
+        ? "rgba(255,255,255,0.09)"
+        : "rgba(0,0,0,0.06)",
     },
     "&.Mui-focused": {
       backgroundColor: theme.palette.mode === "dark"
-        ? "rgba(55,55,65,0.8)"
-        : "rgba(255,255,255,0.95)",
-      borderColor: theme.palette.mode === "dark"
-        ? "rgba(255,255,255,0.2)"
-        : "rgba(0,0,0,0.15)",
-      boxShadow: "none",
-    },
-    "&.Mui-focused .MuiOutlinedInput-notchedOutline": {
-      borderColor: "transparent",
+        ? "rgba(255,255,255,0.09)"
+        : "rgba(0,0,0,0.06)",
+      boxShadow: theme.palette.mode === "dark"
+        ? "0 0 0 3px rgba(255,255,255,0.1)"
+        : "0 0 0 3px rgba(0,0,0,0.07)",
     },
     "& fieldset": {
       border: "none",
@@ -146,16 +133,16 @@ export const autoGenerateModalTextFieldStyles = (theme: Theme): SxProps<Theme> =
     },
     "& input:-webkit-autofill": {
       WebkitBoxShadow: theme.palette.mode === "dark" 
-        ? "0 0 0 100px rgba(40,40,50,0.6) inset"
-        : "0 0 0 100px rgba(255,255,255,0.7) inset",
+        ? "0 0 0 100px rgba(255,255,255,0.06) inset"
+        : "0 0 0 100px rgba(0,0,0,0.04) inset",
       WebkitTextFillColor: theme.palette.text.primary,
-      borderRadius: "12px",
+      borderRadius: "10px",
       transition: "background-color 5000s ease-in-out 0s",
     },
     "& input:-webkit-autofill:focus": {
       WebkitBoxShadow: theme.palette.mode === "dark"
-        ? "0 0 0 100px rgba(55,55,65,0.8) inset"
-        : "0 0 0 100px rgba(255,255,255,0.95) inset",
+        ? "0 0 0 100px rgba(255,255,255,0.09) inset"
+        : "0 0 0 100px rgba(0,0,0,0.06) inset",
       WebkitTextFillColor: theme.palette.text.primary,
     },
   },
@@ -235,24 +222,34 @@ export const autoGenerateModalIndividualHoursStyles = (theme: Theme): SxProps<Th
   minWidth: { xs: '80px', sm: '100px' },
   flex: '0 0 auto',
   '& .MuiOutlinedInput-root': {
-    backgroundColor: theme.palette.background.paper,
+    backgroundColor: theme.palette.mode === 'dark'
+      ? 'rgba(255,255,255,0.06)'
+      : 'rgba(0,0,0,0.04)',
     borderRadius: 1,
     height: 56,
     '& fieldset': {
-      borderColor: theme.palette.divider,
-      borderWidth: 1,
+      border: 'none',
     },
-    '&:hover fieldset': {
-      borderColor: theme.palette.primary.light,
-      borderWidth: 1,
+    '&:hover': {
+      backgroundColor: theme.palette.mode === 'dark'
+        ? 'rgba(255,255,255,0.09)'
+        : 'rgba(0,0,0,0.06)',
     },
-    '&.Mui-focused fieldset': {
-      borderColor: theme.palette.mode === 'dark' ? 'rgba(255,255,255,0.25)' : 'rgba(0,0,0,0.2)',
-      borderWidth: 1,
+    '&.Mui-focused': {
+      backgroundColor: theme.palette.mode === 'dark'
+        ? 'rgba(255,255,255,0.09)'
+        : 'rgba(0,0,0,0.06)',
+      boxShadow: theme.palette.mode === 'dark'
+        ? '0 0 0 3px rgba(255,255,255,0.1)'
+        : '0 0 0 3px rgba(0,0,0,0.07)',
     },
-    '&.Mui-error fieldset': {
-      borderColor: theme.palette.error.main,
-      borderWidth: 2,
+    '&.Mui-error': {
+      backgroundColor: theme.palette.mode === 'dark'
+        ? 'rgba(239,68,68,0.08)'
+        : 'rgba(239,68,68,0.04)',
+      boxShadow: theme.palette.mode === 'dark'
+        ? '0 0 0 3px rgba(239,68,68,0.16)'
+        : '0 0 0 3px rgba(239,68,68,0.1)',
     },
     '& input': {
       color: theme.palette.text.primary,
@@ -282,20 +279,26 @@ export const autoGenerateModalCustomScheduleStyles = (theme: Theme): SxProps<The
   minWidth: { xs: '120px', sm: '140px' },
   flex: '1 1 auto',
   '& .MuiOutlinedInput-root': {
-    backgroundColor: theme.palette.background.paper,
+    backgroundColor: theme.palette.mode === 'dark'
+      ? 'rgba(255,255,255,0.06)'
+      : 'rgba(0,0,0,0.04)',
     borderRadius: 1,
     height: 56,
     '& fieldset': {
-      borderColor: theme.palette.divider,
-      borderWidth: 1,
+      border: 'none',
     },
-    '&:hover fieldset': {
-      borderColor: theme.palette.primary.light,
-      borderWidth: 1,
+    '&:hover': {
+      backgroundColor: theme.palette.mode === 'dark'
+        ? 'rgba(255,255,255,0.09)'
+        : 'rgba(0,0,0,0.06)',
     },
-    '&.Mui-focused fieldset': {
-      borderColor: theme.palette.mode === 'dark' ? 'rgba(255,255,255,0.25)' : 'rgba(0,0,0,0.2)',
-      borderWidth: 1,
+    '&.Mui-focused': {
+      backgroundColor: theme.palette.mode === 'dark'
+        ? 'rgba(255,255,255,0.09)'
+        : 'rgba(0,0,0,0.06)',
+      boxShadow: theme.palette.mode === 'dark'
+        ? '0 0 0 3px rgba(255,255,255,0.1)'
+        : '0 0 0 3px rgba(0,0,0,0.07)',
     },
     '& input': {
       color: theme.palette.text.primary,
@@ -336,42 +339,34 @@ export const autoGenerateModalActionsStyles: SxProps<Theme> = {
 };
 
 export const autoGenerateModalButtonStyles: SxProps<Theme> = {
-  minWidth: 120,
-  minHeight: 48,
-  py: 1.5,
-  px: 3,
+  px: 1.5,
+  minWidth: "auto",
   fontWeight: 600,
-  fontSize: "0.85rem",
+  fontSize: "0.875rem",
   textTransform: "none" as const,
   letterSpacing: "-0.01em",
-  borderRadius: "12px",
-  transition: "all 0.25s cubic-bezier(0.4, 0, 0.2, 1)",
-  '&:hover': {
-    transform: "translateY(-1px)",
-  },
-  '&:active': {
-    transform: "translateY(0)",
-  },
+  transition: "color 0.15s ease",
   '&.Mui-disabled': {
-    boxShadow: "none",
-    transform: "none",
-    opacity: 0.6,
+    opacity: 0.5,
   },
 };
 
 export const autoGenerateModalCancelButtonStyles: SxProps<Theme> = {
   ...autoGenerateModalButtonStyles,
+  color: "text.secondary",
+  fontWeight: 500,
   '&:hover': {
-    transform: "translateY(-1px)",
-    boxShadow: "0 4px 12px rgba(0,0,0,0.12)",
+    color: "text.primary",
   },
 };
 
 export const autoGenerateModalGenerateButtonStyles: SxProps<Theme> = {
   ...autoGenerateModalButtonStyles,
+  color: "text.primary",
   '&:hover': {
-    transform: "translateY(-2px)",
-    boxShadow: "0 8px 25px rgba(0,0,0,0.15)",
+    textDecoration: "underline",
+    textUnderlineOffset: "3px",
+    textDecorationThickness: "1px",
   },
 };
 

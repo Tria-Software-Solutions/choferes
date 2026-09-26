@@ -149,7 +149,8 @@ const toHoursRow = (plain: any): HoursRow => ({
   schedule: plain.Schedule ?? plain.schedule ?? null,
 });
 
-const loadEmployeeHours = async (
+// Exported for paymentCalculationService (biweekly pay = hours × hourlyRate).
+export const loadEmployeeHours = async (
   employeeId: number,
   start?: Date,
   end?: Date,
@@ -172,11 +173,14 @@ const loadEmployeeHours = async (
   return rows.map((row) => toHoursRow(row.get({ plain: true })));
 };
 
-const sumHours = (rows: HoursRow[]): number =>
+export const sumHours = (rows: HoursRow[]): number =>
   rows.reduce((total, row) => {
     const dayName = DAY_NAME_BY_INDEX(new Date(row.date));
     return total + getHoursForDay(row.schedule ?? null, dayName);
   }, 0);
+
+// Re-exported type for consumers of the exported helpers above.
+export type { HoursRow };
 
 type RangeSpec = {
   type: "weekly" | "biweekly" | "monthly";

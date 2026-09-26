@@ -1,5 +1,7 @@
 // Authorization middleware built on top of authenticateToken.
-// authenticateToken sets req.user = { id, roles: string[], permissions: string[] }.
+// authenticateToken sets req.user = { id, roles: string[], permissions: string[] },
+// where `permissions` holds stable permission CODES (e.g. "employees:view"), not
+// the Spanish display labels. Route guards therefore use PERMISSION_CODES.*.
 import { Request, Response, NextFunction } from "express";
 
 export interface AuthenticatedUser {

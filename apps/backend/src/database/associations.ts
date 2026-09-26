@@ -9,6 +9,10 @@ import { HoursWorked } from "../models/HoursWorked";
 import { UserRole } from "../models/UserRole";
 import { RolePermission } from "../models/RolePermission";
 import { Notification } from "../models/Notification";
+import { Payment } from "../models/Payment";
+import { Vacation } from "../models/Vacation";
+import { EmployeeLicense } from "../models/EmployeeLicense";
+import { DisciplinaryAction } from "../models/DisciplinaryAction";
 
 // User <-> Notification (One-to-Many)
 Notification.belongsTo(User, {
@@ -74,6 +78,78 @@ HoursWorked.belongsTo(Schedule, {
 Schedule.hasMany(HoursWorked, {
   foreignKey: "scheduleId",
   onDelete: "CASCADE",
+});
+
+// Employee <-> Payment (One-to-Many)
+Payment.belongsTo(Employee, {
+  foreignKey: "employeeId",
+  onDelete: "CASCADE",
+  as: "employee",
+});
+Employee.hasMany(Payment, {
+  foreignKey: "employeeId",
+  onDelete: "CASCADE",
+  as: "payments",
+});
+
+// Employee <-> Vacation (One-to-Many)
+Vacation.belongsTo(Employee, {
+  foreignKey: "employeeId",
+  onDelete: "CASCADE",
+  as: "employee",
+});
+Employee.hasMany(Vacation, {
+  foreignKey: "employeeId",
+  onDelete: "CASCADE",
+  as: "vacations",
+});
+
+// Vacation <-> User (approver)
+Vacation.belongsTo(User, {
+  foreignKey: "approvedBy",
+  as: "approvedByUser",
+  onDelete: "SET NULL",
+});
+User.hasMany(Vacation, {
+  foreignKey: "approvedBy",
+  as: "approvedVacations",
+  onDelete: "SET NULL",
+});
+
+// Employee <-> EmployeeLicense (One-to-Many)
+EmployeeLicense.belongsTo(Employee, {
+  foreignKey: "employeeId",
+  onDelete: "CASCADE",
+  as: "employee",
+});
+Employee.hasMany(EmployeeLicense, {
+  foreignKey: "employeeId",
+  onDelete: "CASCADE",
+  as: "licenses",
+});
+
+// Employee <-> DisciplinaryAction (One-to-Many)
+DisciplinaryAction.belongsTo(Employee, {
+  foreignKey: "employeeId",
+  onDelete: "CASCADE",
+  as: "employee",
+});
+Employee.hasMany(DisciplinaryAction, {
+  foreignKey: "employeeId",
+  onDelete: "CASCADE",
+  as: "disciplinaryActions",
+});
+
+// DisciplinaryAction <-> User (registrar)
+DisciplinaryAction.belongsTo(User, {
+  foreignKey: "createdBy",
+  as: "createdByUser",
+  onDelete: "SET NULL",
+});
+User.hasMany(DisciplinaryAction, {
+  foreignKey: "createdBy",
+  as: "createdDisciplinaryActions",
+  onDelete: "SET NULL",
 });
 
 // Function to ensure associations are set up (for import side effects)
