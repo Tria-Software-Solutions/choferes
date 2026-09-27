@@ -12,14 +12,14 @@ import {
   useMediaQuery,
   useTheme,
 } from "@mui/material";
-import { IconArrowLeft, IconBeach, IconBriefcase, IconCalendarMonth, IconId, IconMail, IconReceipt, IconShieldExclamation, IconTrash, IconUser, IconWallet } from "@tabler/icons-react";
+import { IconArrowLeft, IconBeach, IconBriefcase, IconCalendarMonth, IconCalendarX, IconId, IconMail, IconReceipt, IconShieldExclamation, IconUser, IconWallet } from "@tabler/icons-react";
 import { Employee, getEmployeePositionLabel } from "../../models/Employee";
 import * as EmployeeService from "../../services/employeeService";
 import { useAuthContext } from "../../context/AuthContext";
 import PERMISSIONS from "../../constants/permissions.constants";
 import NOTIFICATIONS from "../../constants/notifications.constants";
 import { AppDispatch } from "../../store/store";
-import { deleteEmployee } from "../../store/slices/employeeSlice";
+import { deleteEmployee, updateEmployee } from "../../store/slices/employeeSlice";
 import DialogComponent from "../../components/Dialog/Dialog.component";
 import { useAppNotifications } from "../../components/Snackbar/Snackbar.component";
 import EmployeeAvatar from "../../components/EmployeeAvatar/EmployeeAvatar.component";
@@ -74,6 +74,7 @@ const EmployeeDetailPage: React.FC = () => {
   const [loadError, setLoadError] = useState<string | null>(null);
   const [tab, setTab] = useState<TabKey>("datos");
   const [openDeleteDialog, setOpenDeleteDialog] = useState(false);
+  const [openTerminationDialog, setOpenTerminationDialog] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
 
   const canDelete = userPermissions.includes(PERMISSIONS.DELETE_EMPLOYEES);
@@ -129,6 +130,34 @@ const EmployeeDetailPage: React.FC = () => {
       });
     } finally {
       setIsDeleting(false);
+    }
+  };
+
+  // Marcar empleado como finalizado (egreso) - más suave que borrar.
+  const handleTerminateEmployee = async () => {
+    if (Number.isNaN(employeeId)) return;
+    setIsDeleting(true);
+    try {
+      const today = new Date().toISOString().slice(0, 10);
+      await dispatch(
+        updateEmployee({
+          id: employeeId,
+          updatedEmployee: {
+            terminationDate: today,
+            terminationReason: "despido",
+            isActive: false,
+          } as Partial<Employee>,
+        }),
+      ).unwrap();
+      await loadEmployee();
+      showNotification("Empleado marcado como finalizado", { severity: "success" });
+    } catch (error) {
+      const message =
+        error instanceof Error ? error.message : "No se pudo finalizar al empleado";
+      showNotification(message, { severity: "error" });
+    } finally {
+      setIsDeleting(false);
+      setOpenTerminationDialog(false);
     }
   };
 
@@ -208,14 +237,14 @@ const EmployeeDetailPage: React.FC = () => {
             >
               {isSmallScreen ? "Volver" : "Empleados"}
             </Button>
-            {canDelete && (
-              <Tooltip title="Eliminar empleado">
+            {canDelete && !employee.terminationDate && (
+              <Tooltip title="El empleado finalizó labores">
                 <IconButton
-                  color="error"
-                  aria-label="Eliminar empleado"
-                  onClick={() => setOpenDeleteDialog(true)}
+                  color="warning"
+                  aria-label="El empleado finalizó labores"
+                  onClick={() => setOpenTerminationDialog(true)}
                 >
-                  <IconTrash size={20} />
+                  <IconCalendarX size={20} />
                 </IconButton>
               </Tooltip>
             )}
@@ -323,6 +352,17 @@ const EmployeeDetailPage: React.FC = () => {
         message={`¿Seguro que quieres eliminar a ${employee.firstName} ${employee.lastName}? Esta acción no se puede deshacer.`}
         type="delete"
         confirmText="Eliminar"
+        cancelText="Cancelar"
+        loading={isDeleting}
+      />
+      <DialogComponent
+        open={openTerminationDialog}
+        onClose={() => setOpenTerminationDialog(false)}
+        onConfirm={() => void handleTerminateEmployee()}
+        title="El empleado finalizó labores"
+        message={`¿Marcar a ${employee.firstName} ${employee.lastName} como finalizado? Se registrará la fecha de hoy como egreso y quedará inactivo.`}
+        type="warning"
+        confirmText="Confirmar finalización"
         cancelText="Cancelar"
         loading={isDeleting}
       />
