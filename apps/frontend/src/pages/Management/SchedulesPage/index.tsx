@@ -32,6 +32,7 @@ import {
   useTheme,
   useMediaQuery,
   Tooltip,
+  IconButton,
 } from "@mui/material";
 import {
   createExportOptions,
@@ -456,7 +457,7 @@ const shortNames: Record<string, string> = {
             const currentDays = (editFields.days as string[]) || [];
             return (
               <Box
-                sx={{ display: 'flex', gap: 0.75, flexWrap: 'nowrap', overflowX: 'auto', scrollbarWidth: 'none', '&::-webkit-scrollbar': { display: 'none' }, py: 0.5, alignItems: 'flex-start', width: '100%' }}
+                sx={{ display: 'flex', gap: 0.5, flexWrap: 'nowrap', overflowX: 'auto', scrollbarWidth: 'none', '&::-webkit-scrollbar': { display: 'none' }, py: 0.25, alignItems: 'flex-start', width: '100%' }}
                 onMouseDown={(e) => e.stopPropagation()}
               >
                 {daysOfWeek.map((day) => {
@@ -487,13 +488,13 @@ const shortNames: Record<string, string> = {
                             }
                           }}
                           sx={{
-                            width: 28,
-                            height: 28,
-                            borderRadius: '8px',
+                            width: 24,
+                            height: 24,
+                            borderRadius: '6px',
                             display: 'flex',
                             alignItems: 'center',
                             justifyContent: 'center',
-                            fontSize: '0.68rem',
+                            fontSize: '0.58rem',
                             fontWeight: 700,
                             cursor: 'pointer',
                             background: isActive
@@ -524,6 +525,7 @@ const shortNames: Record<string, string> = {
                               setDayHoursEditing(newDayHours);
                             }}
                             inputProps={{ min: 0, max: 24, step: 0.5, inputMode: 'decimal' }}
+                            size="small"
                             sx={dayHoursInputSx(theme, dayValue !== '')}
                           />
                         )}
@@ -544,7 +546,7 @@ const shortNames: Record<string, string> = {
 
           if (hasPerDayHours && rowDays.length > 0) {
             return (
-              <Box sx={{ display: 'flex', gap: 0.7, flexWrap: 'nowrap', overflowX: 'auto', scrollbarWidth: 'none', '&::-webkit-scrollbar': { display: 'none' }, py: 0.5, alignItems: 'flex-start' }}>
+              <Box sx={{ display: 'flex', gap: 0.5, flexWrap: 'nowrap', overflowX: 'auto', scrollbarWidth: 'none', '&::-webkit-scrollbar': { display: 'none' }, py: 0.25, alignItems: 'flex-start' }}>
                 {daysOfWeek.map((day) => {
                   const isActive = rowDays.includes(day);
                   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -564,13 +566,13 @@ const shortNames: Record<string, string> = {
                         {/* Day circle */}
                         <Box
                           sx={{
-                            width: 28,
-                            height: 28,
-                            borderRadius: '8px',
+                            width: 24,
+                            height: 24,
+                            borderRadius: '6px',
                             display: 'flex',
                             alignItems: 'center',
                             justifyContent: 'center',
-                            fontSize: '0.68rem',
+                            fontSize: '0.58rem',
                             fontWeight: 700,
                             background: isActive
                               ? (t) => t.tokens.colors.inverseBg
@@ -586,10 +588,11 @@ const shortNames: Record<string, string> = {
                         {isActive && (
                           <Typography
                             sx={{
-                              fontSize: '0.6rem',
+                              fontSize: '0.55rem',
                               fontWeight: 700,
                               color: 'text.primary',
-                              lineHeight: 1,
+                              lineHeight: 1.1,
+                              mt: 0.1,
                             }}
                           >
                             {hours}h
@@ -701,26 +704,22 @@ const shortNames: Record<string, string> = {
             canReorder || canCreate ? (
               <>
                 {canReorder && (
-                  <Button
-                    variant="outlined"
-                    startIcon={<IconGripVertical size={16} />}
-                    onClick={() => setOpenReorderDialog(true)}
-                    disabled={filteredSchedules.length < 2}
-                    sx={{
-                      textTransform: 'none',
-                      fontWeight: 600,
-                      color: 'text.primary',
-                      borderColor: theme.tokens.colors.border,
-                      backgroundColor: theme.tokens.colors.hoverSoft,
-                      boxShadow: 'none',
-                      '&:hover': {
-                        backgroundColor: theme.tokens.colors.hover,
-                        borderColor: theme.tokens.colors.borderStrong,
-                      },
-                    }}
-                  >
-                    Ordenar
-                  </Button>
+                  <Tooltip title="Reordenar horarios" arrow>
+                    <IconButton
+                      onClick={() => setOpenReorderDialog(true)}
+                      disabled={filteredSchedules.length < 2}
+                      size="medium"
+                      sx={{
+                        color: 'text.primary',
+                        backgroundColor: theme.tokens.colors.hoverSoft,
+                        '&:hover': {
+                          backgroundColor: theme.tokens.colors.hover,
+                        },
+                      }}
+                    >
+                      <IconGripVertical size={20} />
+                    </IconButton>
+                  </Tooltip>
                 )}
                 {canCreate && (
                   <Button
