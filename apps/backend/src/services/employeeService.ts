@@ -1,12 +1,12 @@
 // Service for business logic and database operations related to employees
 // Note: Sequelize v3 uses string operators ($between, $iLike, $or). Using inline types instead.
 // eslint-disable-next-line import/no-named-as-default
+import bcrypt from "bcrypt";
+import * as crypto from "crypto";
 import Employee from "../models/Employee";
 import { HoursWorked } from "../models/HoursWorked";
 import User from "../models/User";
 import { ServiceError } from "../utils/errors";
-import bcrypt from "bcrypt";
-import * as crypto from "crypto";
 import {
   paginate,
   getPaginationParams,
@@ -269,17 +269,27 @@ export const linkEmployeeToUser = async (employeeId: number) => {
   // sufijo numérico hasta encontrar uno libre.
   const baseUsername =
     (employee.email && employee.email.split("@")[0]) || `empleado-${employee.id}`;
-  let username = baseUsername;
-  let counter = 1;
-  while (await User.findOne({ where: { username } })) {
-    username = `${baseUsername}${counter++}`;
-  }
 
-  let email = employee.email || `${username}@example.com`;
-  let emailCounter = 1;
-  while (await User.findOne({ where: { email } })) {
-    email = `${baseUsername}${emailCounter++}@example.com`;
-  }
+  const findUnique = async <T>(
+    check: (value: string) => Promise<T | null>,
+    base: string,
+  ): Promise<string> => {
+    let value = base;
+    let i = 1;
+    // eslint-disable-next-line no-await-in-loop -- sequential DB lookups are intentional
+    while (await check(value)) {
+      value = `${base}${i}`;
+      i += 1;
+    }
+    return value;
+  };
+
+  const username = await findUnique((v) => User.findOne({ where: { username: v } }), baseUsername);
+
+  const email = await findUnique(
+    (v) => User.findOne({ where: { email: v } }),
+    employee.email || `${username}@example.com`,
+  );
 
   // Contraseña temporal: se guarda hasheada (el login la compara con bcrypt)
   // y solo se devuelve en texto plano una vez, para entregarla al empleado.
