@@ -1,6 +1,6 @@
 import React, { memo } from "react";
 import { Box, useMediaQuery, useTheme } from "@mui/material";
-import { DataGrid, GridColDef, GridValidRowModel } from "@mui/x-data-grid";
+import { DataGrid, GridColDef, GridValidRowModel, GridRowHeightParams } from "@mui/x-data-grid";
 
 interface StickyDataGridProps<T extends GridValidRowModel> {
   rows: T[];
@@ -12,8 +12,10 @@ interface StickyDataGridProps<T extends GridValidRowModel> {
    * pierda el foco del texto a mitad de edición. Costo despreciable.
    */
   disableRowVirtualization?: boolean;
-  /** Altura de cada fila en píxeles. Útil aumentarla cuando hay una fila en edición. */
+  /** Altura fija para todas las filas (fallback). */
   rowHeight?: number;
+  /** Función para altura dinámica por fila. Si se provee, tiene prioridad sobre rowHeight. */
+  getRowHeight?: (params: GridRowHeightParams) => number;
 }
 
 /**
@@ -28,6 +30,7 @@ function StickyDataGridComponent<T extends GridValidRowModel>({
   getRowId,
   disableRowVirtualization = false,
   rowHeight = 60,
+  getRowHeight,
 }: StickyDataGridProps<T>) {
   const theme = useTheme();
   const { colors, borders } = theme.tokens;
@@ -51,6 +54,7 @@ function StickyDataGridComponent<T extends GridValidRowModel>({
         // visibles. Se desactiva mientras hay una fila en edición.
         disableVirtualization={disableRowVirtualization}
         rowHeight={rowHeight}
+        getRowHeight={getRowHeight}
         columnHeaderHeight={42}
         sx={{
           height: flowLayout ? "auto" : "100%",
