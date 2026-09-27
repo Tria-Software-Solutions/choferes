@@ -760,7 +760,7 @@ const shortNames: Record<string, string> = {
               columns={columns}
               getRowId={getRowId}
               disableRowVirtualization={editRowId !== null}
-              rowHeight={editRowId !== null ? 140 : 60}
+              getRowHeight={(params) => (params.id === editRowId ? 110 : 60)}
             />
           ) : (
             <EmptyState
