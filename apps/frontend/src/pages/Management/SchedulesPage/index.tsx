@@ -704,22 +704,38 @@ const shortNames: Record<string, string> = {
             canReorder || canCreate ? (
               <>
                 {canReorder && (
-                  <Tooltip title="Reordenar horarios" arrow>
-                    <IconButton
-                      onClick={() => setOpenReorderDialog(true)}
-                      disabled={filteredSchedules.length < 2}
-                      size="medium"
-                      sx={{
-                        color: 'text.primary',
-                        backgroundColor: theme.tokens.colors.hoverSoft,
-                        '&:hover': {
-                          backgroundColor: theme.tokens.colors.hover,
-                        },
-                      }}
-                    >
-                      <IconGripVertical size={20} />
-                    </IconButton>
-                  </Tooltip>
+                  <span>
+                    {filteredSchedules.length >= 2 ? (
+                      <Tooltip title="Reordenar horarios" arrow>
+                        <IconButton
+                          onClick={() => setOpenReorderDialog(true)}
+                          size="medium"
+                          sx={{
+                            color: 'text.primary',
+                            backgroundColor: theme.tokens.colors.hoverSoft,
+                            '&:hover': {
+                              backgroundColor: theme.tokens.colors.hover,
+                            },
+                          }}
+                        >
+                          <IconGripVertical size={20} />
+                        </IconButton>
+                      </Tooltip>
+                    ) : (
+                      <Tooltip title="Se necesitan al menos 2 horarios para reordenar" arrow>
+                        <IconButton
+                          disabled
+                          size="medium"
+                          sx={{
+                            color: 'text.disabled',
+                            backgroundColor: theme.tokens.colors.hoverSoft,
+                          }}
+                        >
+                          <IconGripVertical size={20} />
+                        </IconButton>
+                      </Tooltip>
+                    )}
+                  </span>
                 )}
                 {canCreate && (
                   <Button

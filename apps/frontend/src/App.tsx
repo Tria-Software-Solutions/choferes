@@ -31,6 +31,7 @@ const EmployeesPage = lazy(() => import("./pages/Management/EmployeesPage"));
 const EmployeeDetail = lazy(() => import("./pages/EmployeeDetail"));
 const SchedulesPage = lazy(() => import("./pages/Management/SchedulesPage"));
 const VehiclesPage = lazy(() => import("./pages/Management/VehiclesPage"));
+const TasksPage = lazy(() => import("./pages/Tasks"));
 const Profile = lazy(() => import("./pages/Auth/Profile"));
 const NotFound = lazy(() => import("./pages/ErrorPages/NotFound"));
 const Forbidden = lazy(() => import("./pages/ErrorPages/Forbidden"));
@@ -309,6 +310,16 @@ const AppContent: React.FC = () => {
                 element={
                   safeUserPermissions.includes(PERMISSIONS.VIEW_VEHICLES) ? (
                     <VehiclesPage />
+                  ) : (
+                    <Navigate to="/forbidden" replace />
+                  )
+                }
+              />
+              <Route
+                path="/tasks"
+                element={
+                  safeUserPermissions.includes(PERMISSIONS.VIEW_TASKS) ? (
+                    <TasksPage />
                   ) : (
                     <Navigate to="/forbidden" replace />
                   )

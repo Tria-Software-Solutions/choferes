@@ -27,7 +27,8 @@ export type PermissionModule =
   | "Pagos"
   | "Vacaciones"
   | "Licencias"
-  | "Amonestaciones";
+  | "Amonestaciones"
+  | "Tareas";
 
 export interface PermissionDefinition {
   readonly code: string;
@@ -169,6 +170,12 @@ export const PERMISSION_CATALOG = {
     label: "Enviar Pago por Correo",
   },
 
+  // ── Tareas ────────────────────────────────────────────────────────────────────
+  VIEW_TASKS: { code: "tasks:view", module: "Tareas", label: "Ver Tareas" },
+  CREATE_TASK: { code: "tasks:create", module: "Tareas", label: "Crear Tarea" },
+  EDIT_TASK: { code: "tasks:edit", module: "Tareas", label: "Editar Tarea" },
+  DELETE_TASK: { code: "tasks:delete", module: "Tareas", label: "Eliminar Tarea" },
+
   // ── Vacaciones ───────────────────────────────────────────────────────────────
   VIEW_VACATIONS: { code: "vacations:view", module: "Vacaciones", label: "Ver Vacaciones" },
   CREATE_VACATION: { code: "vacations:create", module: "Vacaciones", label: "Crear Vacación" },
@@ -235,12 +242,13 @@ export const PERMISSION_MODULE_ORDER: readonly PermissionModule[] = [
   "Horarios",
   "Vehículos",
   "Usuarios",
+  "Admin",
   "Resúmenes",
   "Pagos",
   "Vacaciones",
   "Licencias",
   "Amonestaciones",
-  "Admin",
+  "Tareas"
 ];
 
 const CODES_BY_SET = new Set<string>(ALL_PERMISSION_CODES);
