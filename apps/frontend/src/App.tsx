@@ -32,7 +32,6 @@ const EmployeeDetail = lazy(() => import("./pages/EmployeeDetail"));
 const SchedulesPage = lazy(() => import("./pages/Management/SchedulesPage"));
 const VehiclesPage = lazy(() => import("./pages/Management/VehiclesPage"));
 const Profile = lazy(() => import("./pages/Auth/Profile"));
-const TasksPage = lazy(() => import("./pages/Tasks"));
 const NotFound = lazy(() => import("./pages/ErrorPages/NotFound"));
 const Forbidden = lazy(() => import("./pages/ErrorPages/Forbidden"));
 const ErrorPage = lazy(() => import("./pages/ErrorPages/Error"));
@@ -325,7 +324,6 @@ const AppContent: React.FC = () => {
                   )
                 }
               />
-              <Route path="/tasks" element={<TasksPage />} />
               <Route path="/settings" element={<Profile />} />
               <Route path="/profile" element={<Navigate to="/settings" replace />} />
             </Route>
