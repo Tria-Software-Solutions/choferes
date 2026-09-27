@@ -395,7 +395,7 @@ const EditableTableComponent = <T extends object>({
             zIndex: 15,
             backgroundColor: theme.palette.background.paper,
             padding: isSmallScreen ? "8px" : "16px",
-            borderBottom: "1px solid #ddd",
+            borderBottom: theme.tokens.borders.hairline,
           }}
         >
           <Box sx={{ display: "flex", justifyContent: "center", alignItems: "center" }}>
@@ -403,7 +403,7 @@ const EditableTableComponent = <T extends object>({
               variant="body2"
               fontWeight="bold"
               sx={{
-                color: theme.palette.mode === "dark" ? "#fff" : theme.palette.text.secondary,
+                color: theme.palette.text.secondary,
               }}
             >
               {formatDateWithDay(groupByDate, false)}
@@ -427,7 +427,7 @@ const EditableTableComponent = <T extends object>({
           aria-label="sticky table"
           sx={{ width: "100%", minWidth: { xs: "auto", md: 650 }, borderCollapse: "separate" }}
         >
-          <TableHead sx={{ backgroundColor: theme.palette.mode === "dark" ? "#0a0a0a" : "#000000" }}>
+          <TableHead>
             <TableRow>
               {firstColumns.map((column) => (
                 <HeaderCell
@@ -462,7 +462,7 @@ const EditableTableComponent = <T extends object>({
                 </TableCell>
               )}
               {!noActions && (hasEditPermissions || hasDeletePermissions) && (
-                <TableCell className="tableCell" sx={{ ...tableHeadCellStyles(theme, tableHeadTopOffset), width: 0, whiteSpace: { xs: "normal", sm: "nowrap" }, borderRight: `1px solid ${theme.palette.mode === "dark" ? "rgba(255,255,255,0.06)" : "rgba(0,0,0,0.06)"}` }} />
+                <TableCell className="tableCell" sx={{ ...tableHeadCellStyles(theme, tableHeadTopOffset), width: 0 }} />
               )}
             </TableRow>
           </TableHead>
@@ -479,17 +479,8 @@ const EditableTableComponent = <T extends object>({
                 <TableRow
                   tabIndex={-1}
                   key={rowKey}
-                  sx={{
-                    backgroundColor: rowIndex % 2 === 0
-                      ? theme.palette.background.paper
-                      : theme.palette.mode === "dark" ? "#1f1f1f" : "#fafafa",
-                    transition: "background 0.2s",
-                    '&:hover': {
-                      backgroundColor: rowIndex % 2 === 0
-                        ? theme.palette.background.paper
-                        : theme.palette.mode === "dark" ? "#1f1f1f" : "#fafafa",
-                    },
-                  }}
+                  hover
+                  sx={isEditing ? { backgroundColor: theme.tokens.colors.accentSoft } : undefined}
                 >
                   {firstColumns.map((column) => (
                     <TableCell key={`${rowKey}-${String(column)}`} className="tableCell" sx={tableCellStyles}>
@@ -561,13 +552,15 @@ const EditableTableComponent = <T extends object>({
                     </TableCell>
                   )}
                   {!noActions && (hasEditPermissions || hasDeletePermissions) && (
-                    <TableCell className="tableCell" sx={{ 
-                      ...tableCellStyles, 
-                      width: 0, 
-                      whiteSpace: { xs: "normal", sm: "nowrap" }, 
-                      borderLeft: `1px solid ${theme.palette.mode === "dark" ? "rgba(255,255,255,0.06)" : "rgba(0,0,0,0.06)"}`,
-                      borderBottom: `1px solid ${theme.palette.mode === "dark" ? "rgba(255,255,255,0.04)" : "rgba(0,0,0,0.04)"}`
-                    }}>
+                    <TableCell
+                      className="tableCell"
+                      sx={(t) => ({
+                        ...(typeof tableCellStyles === "function" ? tableCellStyles(t) : {}),
+                        width: 0,
+                        whiteSpace: "nowrap",
+                        py: 1,
+                      })}
+                    >
                       {renderActionButtons({
                         row,
                         editRowId,
@@ -612,37 +605,21 @@ const EditableTableComponent = <T extends object>({
         ActionsComponent={PaginationComponent}
         sx={{
           flexShrink: 0,
-          borderRadius: 0,
           margin: 0,
-          border: 'none',
-          '.MuiTablePagination-toolbar': {
-            minHeight: '32px',
-            paddingTop: '2px',
-            paddingBottom: '0px',
-            border: 'none',
+          borderTop: theme.tokens.borders.hairline,
+          '.MuiTablePagination-toolbar': { minHeight: 48, px: 2 },
+          '.MuiTablePagination-selectLabel, .MuiTablePagination-input': {
+            fontSize: '0.8125rem',
+            color: theme.tokens.colors.textMuted,
           },
-          '.MuiTablePagination-selectLabel, .MuiTablePagination-input, .MuiTablePagination-displayedRows': {
-            fontSize: '0.75rem',
-          },
-          '.MuiTablePagination-select': {
-            fontSize: '0.75rem',
-            border: 'none',
-          },
-          '.MuiTablePagination-selectIcon': {
-            fontSize: '1rem',
-          },
-          '.MuiIconButton-root': {
-            padding: '2px',
-          },
+          '.MuiTablePagination-select': { fontSize: '0.8125rem' },
           '.MuiInputBase-root': {
             border: 'none',
-            '&:before, &:after': {
-              display: 'none',
-            },
-            fontSize: '0.75rem',
-          },
-          '.MuiTablePagination-input': {
-            fontSize: '0.75rem',
+            boxShadow: 'none',
+            backgroundColor: 'transparent',
+            minHeight: 0,
+            '& fieldset': { border: 'none' },
+            '&:before, &:after': { display: 'none' },
           },
         }}
         SelectProps={{

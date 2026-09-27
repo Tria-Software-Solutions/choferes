@@ -17,6 +17,8 @@ import { Payment } from "../models/Payment";
 import { Vacation } from "../models/Vacation";
 import { EmployeeLicense } from "../models/EmployeeLicense";
 import { DisciplinaryAction } from "../models/DisciplinaryAction";
+import { TaskList } from "../models/TaskList";
+import { Task } from "../models/Task";
 import setupAssociations from "./associations";
 
 // Setup all model associations (side effect)
@@ -42,4 +44,6 @@ export {
   Vacation,
   EmployeeLicense,
   DisciplinaryAction,
+  TaskList,
+  Task,
 };

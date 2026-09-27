@@ -32,8 +32,15 @@ jest.mock("../services/userRoleService", () => ({
   deleteUserRole: jest.fn(),
 }));
 
+// Grant rules have their own unit tests; here they're controlled per test.
+jest.mock("../services/accessGrantService", () => ({
+  checkRoleAssignment: jest.fn(),
+}));
+
 // eslint-disable-next-line @typescript-eslint/no-require-imports
 const userRoleService = require("../services/userRoleService");
+// eslint-disable-next-line @typescript-eslint/no-require-imports
+const accessGrant = require("../services/accessGrantService");
 import userRoleRoutes from "../routes/userRoleRoutes";
 import { createTestApp } from "./helpers/testApp";
 
@@ -49,6 +56,7 @@ const mockUserRole = {
 
 beforeEach(() => {
   jest.clearAllMocks();
+  accessGrant.checkRoleAssignment.mockResolvedValue(null);
 });
 
 describe("GET /api/user-roles", () => {
@@ -61,12 +69,14 @@ describe("GET /api/user-roles", () => {
     expect(res.body).toEqual([mockUserRole]);
   });
 
-  it("debería devolver 400 si el service falla", async () => {
+  it("debería devolver 500 si el service falla", async () => {
     service.getUserRoles.mockRejectedValue(new Error("DB error"));
 
     const res = await request(app).get("/api/user-roles");
 
-    expect(res.status).toBe(400);
+    expect(res.status).toBe(500);
+    // Raw error details are never serialized to the client.
+    expect(res.body).not.toHaveProperty("error");
   });
 });
 
@@ -109,7 +119,7 @@ describe("GET /api/user-roles/roleId/:roleId", () => {
 });
 
 describe("POST /api/user-roles", () => {
-  it("debería devolver 201 con la asignación creada (sin auth)", async () => {
+  it("debería devolver 201 con la asignación creada", async () => {
     const newData = { userId: 2, roleId: 2 };
     const created = { id: 2, ...newData };
 
@@ -119,6 +129,27 @@ describe("POST /api/user-roles", () => {
 
     expect(res.status).toBe(201);
     expect(res.body).toEqual(created);
+    expect(accessGrant.checkRoleAssignment).toHaveBeenCalledWith(
+      expect.objectContaining({ id: 1 }),
+      2,
+      2,
+    );
+  });
+
+  it("debería devolver 403 si el rol otorga más permisos de los que tiene el usuario", async () => {
+    accessGrant.checkRoleAssignment.mockResolvedValue({ status: 403, message: "No" });
+
+    const res = await request(app).post("/api/user-roles").send({ userId: 2, roleId: 1 });
+
+    expect(res.status).toBe(403);
+    expect(service.createUserRole).not.toHaveBeenCalled();
+  });
+
+  it("debería devolver 400 si userId/roleId no son enteros", async () => {
+    const res = await request(app).post("/api/user-roles").send({ userId: "x", roleId: 2 });
+
+    expect(res.status).toBe(400);
+    expect(service.createUserRole).not.toHaveBeenCalled();
   });
 
   it("debería devolver 400 si la creación falla", async () => {
@@ -146,6 +177,18 @@ describe("PUT /api/user-roles/:id", () => {
     const res = await request(app).put("/api/user-roles/999").send({ roleId: 2 });
 
     expect(res.status).toBe(404);
+  });
+
+  it("no permite cambiar el propio rol", async () => {
+    accessGrant.checkRoleAssignment.mockResolvedValue({
+      status: 403,
+      message: "No puedes cambiar tu propio rol",
+    });
+
+    const res = await request(app).put("/api/user-roles/1").send({ roleId: 2 });
+
+    expect(res.status).toBe(403);
+    expect(service.updateUserRole).not.toHaveBeenCalled();
   });
 });
 

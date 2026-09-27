@@ -1,6 +1,6 @@
 import React, { useMemo } from "react";
 import { Box, Typography, useTheme } from "@mui/material";
-import { Check } from "lucide-react";
+import { IconCheck } from "@tabler/icons-react";
 import { PERMISSION_MODULE_ORDER } from "@choferes/shared";
 import { Permission } from "../../models/Permission";
 
@@ -21,8 +21,6 @@ const MODULE_ORDER = [...PERMISSION_MODULE_ORDER, "Otros"];
 
 // Fallback grouping for legacy rows that predate the `module` column.
 const MODULE_RULES: { keyword: string; module: string }[] = [
-  { keyword: "Courier", module: "Courier" },
-  { keyword: "Mensajería", module: "Mensajería" },
   { keyword: "Horario", module: "Horarios" },
   { keyword: "Vehículo", module: "Vehículos" },
   { keyword: "Resumen", module: "Resúmenes" },
@@ -73,21 +71,13 @@ const PermissionTogglePanel: React.FC<PermissionTogglePanelProps> = ({
         overflowY: "auto",
         borderRadius: "12px",
         p: 1.25,
-        border: `1px solid ${
-          theme.palette.mode === "dark"
-            ? "rgba(255,255,255,0.07)"
-            : "rgba(0,0,0,0.06)"
-        }`,
+        border: theme.tokens.borders.hairline,
         backgroundColor:
-          theme.palette.mode === "dark"
-            ? "rgba(255,255,255,0.02)"
-            : "rgba(0,0,0,0.015)",
+          theme.tokens.colors.hoverSoft,
         "&::-webkit-scrollbar": { width: "6px" },
         "&::-webkit-scrollbar-thumb": {
           backgroundColor:
-            theme.palette.mode === "dark"
-              ? "rgba(255,255,255,0.15)"
-              : "rgba(0,0,0,0.15)",
+            theme.tokens.colors.borderStrong,
           borderRadius: "3px",
         },
       }}
@@ -139,9 +129,7 @@ const PermissionTogglePanel: React.FC<PermissionTogglePanelProps> = ({
                       : theme.palette.text.secondary,
                     backgroundColor: isSelected
                       ? theme.palette.primary.main
-                      : theme.palette.mode === "dark"
-                        ? "rgba(255,255,255,0.05)"
-                        : "rgba(0,0,0,0.04)",
+                      : theme.tokens.colors.hover,
                     transition: "all 0.15s cubic-bezier(0.4, 0, 0.2, 1)",
                     "&:hover": {
                       boxShadow: isSelected
@@ -151,7 +139,7 @@ const PermissionTogglePanel: React.FC<PermissionTogglePanelProps> = ({
                     "&:active": { transform: "scale(0.96)" },
                   }}
                 >
-                  {isSelected && <Check size={12} strokeWidth={3} />}
+                  {isSelected && <IconCheck size={12} stroke={3} />}
                   {permission.name}
                 </Box>
               );

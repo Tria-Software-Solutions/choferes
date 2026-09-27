@@ -100,19 +100,32 @@ describe("authenticateUser", () => {
     expect(result.user).not.toHaveProperty("temporalPassword");
   });
 
-  it("debería lanzar error si el usuario no existe", async () => {
+  it("no revela si el usuario existe: mismo error que una contraseña incorrecta", async () => {
     (User.findOne as jest.Mock).mockResolvedValue(null);
+    (bcrypt.compare as jest.Mock).mockResolvedValue(false);
 
     await expect(userService.authenticateUser("unknown", "pass", mockResponse)).rejects.toThrow(
-      "User not found",
+      userService.AUTH_ERRORS.INVALID_CREDENTIALS,
+    );
+    // Still spends a bcrypt comparison so response time doesn't leak existence.
+    expect(bcrypt.compare).toHaveBeenCalledTimes(1);
+  });
+
+  it("solo revela que la cuenta está inactiva con credenciales válidas", async () => {
+    (User.findOne as jest.Mock).mockResolvedValue({ ...mockUser, isActive: false });
+    (bcrypt.compare as jest.Mock).mockResolvedValue(true);
+
+    await expect(userService.authenticateUser("admin", "pass", mockResponse)).rejects.toThrow(
+      userService.AUTH_ERRORS.INACTIVE,
     );
   });
 
-  it("debería lanzar error si el usuario está inactivo", async () => {
+  it("no revela que la cuenta está inactiva si la contraseña es incorrecta", async () => {
     (User.findOne as jest.Mock).mockResolvedValue({ ...mockUser, isActive: false });
+    (bcrypt.compare as jest.Mock).mockResolvedValue(false);
 
-    await expect(userService.authenticateUser("admin", "pass", mockResponse)).rejects.toThrow(
-      "User is inactive",
+    await expect(userService.authenticateUser("admin", "wrong", mockResponse)).rejects.toThrow(
+      userService.AUTH_ERRORS.INVALID_CREDENTIALS,
     );
   });
 
@@ -121,8 +134,9 @@ describe("authenticateUser", () => {
     (bcrypt.compare as jest.Mock).mockResolvedValue(false);
 
     await expect(userService.authenticateUser("admin", "wrong", mockResponse)).rejects.toThrow(
-      "Incorrect password",
+      userService.AUTH_ERRORS.INVALID_CREDENTIALS,
     );
+    expect(generateTokens).not.toHaveBeenCalled();
   });
 
   it("debería lanzar error si temporalPassword también es incorrecta", async () => {
@@ -134,8 +148,36 @@ describe("authenticateUser", () => {
     (bcrypt.compare as jest.Mock).mockResolvedValue(false);
 
     await expect(userService.authenticateUser("admin", "wrong", mockResponse)).rejects.toThrow(
-      "Incorrect password and temporary password",
+      userService.AUTH_ERRORS.INVALID_CREDENTIALS,
     );
+    expect(bcrypt.compare).toHaveBeenCalledWith("wrong", "hashed_temporal");
+  });
+
+  it("debería autenticar con la contraseña temporal", async () => {
+    (User.findOne as jest.Mock).mockResolvedValue({ ...mockUser, temporalPassword: "hashed_tmp" });
+    (bcrypt.compare as jest.Mock).mockResolvedValueOnce(false).mockResolvedValueOnce(true);
+    (generateTokens as jest.Mock).mockReturnValue({ accessToken: "a", refreshToken: "r" });
+
+    const result = await userService.authenticateUser("admin", "tmp", mockResponse);
+
+    expect(result.accessToken).toBe("a");
+  });
+});
+
+describe("verifyUserPassword", () => {
+  it("acepta la contraseña actual", async () => {
+    (User.findByPk as jest.Mock).mockResolvedValue(mockUser);
+    (bcrypt.compare as jest.Mock).mockResolvedValue(true);
+
+    await expect(userService.verifyUserPassword(1, "current")).resolves.toBe(true);
+  });
+
+  it("rechaza una contraseña incorrecta o un usuario inexistente", async () => {
+    (User.findByPk as jest.Mock).mockResolvedValueOnce(mockUser).mockResolvedValueOnce(null);
+    (bcrypt.compare as jest.Mock).mockResolvedValue(false);
+
+    await expect(userService.verifyUserPassword(1, "wrong")).resolves.toBe(false);
+    await expect(userService.verifyUserPassword(99, "any")).resolves.toBe(false);
   });
 });
 
@@ -266,7 +308,10 @@ describe("createUser", () => {
     // mass assignment de campos sensibles debe ser ignorado
     expect(createArgs).not.toHaveProperty("isActive");
     expect(createArgs).not.toHaveProperty("settings");
-    expect(result).toEqual(createdUser);
+    // The response must never carry the password hash.
+    expect(result).not.toHaveProperty("password");
+    expect(result).not.toHaveProperty("temporalPassword");
+    expect(result).toMatchObject({ id: 2, username: "nuevo", email: "nuevo@example.com" });
   });
 });
 
@@ -332,7 +377,11 @@ describe("updateUserPassword", () => {
     const result = await userService.updateUserPassword(1, "new_password");
 
     expect(bcrypt.hash).toHaveBeenCalledWith("new_password", 10);
-    expect(User.update).toHaveBeenCalledWith({ password: "new_hashed" }, { where: { id: 1 } });
+    // Changing the password revokes any pending temporary password.
+    expect(User.update).toHaveBeenCalledWith(
+      { password: "new_hashed", temporalPassword: null },
+      { where: { id: 1 } },
+    );
     expect(result).toBeDefined();
   });
 });

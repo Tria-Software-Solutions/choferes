@@ -2,6 +2,7 @@ import { createSlice, createAsyncThunk, PayloadAction } from "@reduxjs/toolkit";
 import * as PermissionService from "../../services/permissionService";
 import { Permission } from "../../models/Permission";
 import { RootState } from "../store";
+import { getApiErrorMessage } from "../../utils/apiError";
 
 interface PermissionsState {
   permissions: Permission[];
@@ -30,9 +31,7 @@ export const fetchPermissions = createAsyncThunk(
         return [];
       }
     } catch (error: unknown) {
-      return rejectWithValue(
-        error instanceof Error ? error.message : "Failed to fetch permissions",
-      );
+      return rejectWithValue(getApiErrorMessage(error, "Failed to fetch permissions"));
     }
   },
 );
@@ -44,11 +43,7 @@ export const fetchPermissionById = createAsyncThunk(
       const permission = await PermissionService.getPermissionById(id);
       return permission;
     } catch (error: unknown) {
-      return rejectWithValue(
-        error instanceof Error
-          ? error.message
-          : "Failed to fetch permission by ID",
-      );
+      return rejectWithValue(getApiErrorMessage(error, "Failed to fetch permission by ID"));
     }
   },
 );
@@ -60,11 +55,7 @@ export const fetchPermissionsByNames = createAsyncThunk(
       const permissions = await PermissionService.getPermissionsByNames(names);
       return permissions;
     } catch (error: unknown) {
-      return rejectWithValue(
-        error instanceof Error
-          ? error.message
-          : "Failed to fetch permissions by names",
-      );
+      return rejectWithValue(getApiErrorMessage(error, "Failed to fetch permissions by names"));
     }
   },
 );

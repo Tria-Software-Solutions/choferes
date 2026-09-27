@@ -8,27 +8,13 @@ import {
   Typography,
   useTheme,
 } from "@mui/material";
-import {
-  HelpCircle,
-  ChevronDown,
-  MessageCircleQuestion,
-  LifeBuoy,
-  BookOpen,
-  Mail,
-  ArrowRight,
-  Users,
-  CalendarDays,
-  ClipboardList,
-  LayoutDashboard,
-  MessageCircle,
-  Clock,
-  CheckCircle2,
-} from "lucide-react";
+import { IconArrowRight, IconBook, IconCalendarTime, IconChevronDown, IconCircleCheck, IconClock, IconHelpCircle, IconLifebuoy, IconMail, IconMessageCircle, IconMessageQuestion, IconCalendarUser, IconChartBar, IconUsers } from "@tabler/icons-react";
 import { Link as RouterLink } from "react-router-dom";
 import ROUTES from "../../../constants/routes.constants";
 import APPBAR_MENU from "../../../constants/appbar.constants";
 import PERMISSIONS from "../../../constants/permissions.constants";
 import { useAuthContext } from "../../../context/AuthContext";
+import { PanelHeader } from "../../../components/Layout";
 
 interface FaqItem {
   question: string;
@@ -75,19 +61,19 @@ const HELP_TOPICS: {
     id: "guide",
     title: "Guía rápida",
     description: "Aprende los conceptos básicos de la plataforma",
-    icon: BookOpen,
+    icon: IconBook,
   },
   {
     id: "support",
     title: "Soporte técnico",
     description: "Contacta al equipo de soporte de la aplicación",
-    icon: LifeBuoy,
+    icon: IconLifebuoy,
   },
   {
     id: "faq",
     title: "Preguntas frecuentes",
     description: "Encuentra respuestas a las dudas más comunes",
-    icon: MessageCircleQuestion,
+    icon: IconMessageQuestion,
   },
 ];
 
@@ -101,7 +87,7 @@ const GUIDE_STEPS: {
   button: string;
 }[] = [
   {
-    icon: Users,
+    icon: IconUsers,
     title: "Registra empleados",
     description: "Agrega a los choferes con sus datos personales en la sección de empleados.",
     permission: PERMISSIONS.VIEW_EMPLOYEES,
@@ -109,7 +95,7 @@ const GUIDE_STEPS: {
     button: "Ir a empleados",
   },
   {
-    icon: CalendarDays,
+    icon: IconCalendarTime,
     title: "Crea horarios y turnos",
     description: "Define los horarios y los días de la semana en que aplica cada turno.",
     permission: PERMISSIONS.VIEW_SCHEDULES,
@@ -117,7 +103,7 @@ const GUIDE_STEPS: {
     button: "Ir a horarios",
   },
   {
-    icon: ClipboardList,
+    icon: IconCalendarUser,
     title: "Asigna empleados a las fechas",
     description: "En la vista de roles asigna un empleado y un horario a cada día de la semana.",
     permission: PERMISSIONS.VIEW_EMPLOYEE_ROLES_HOURS,
@@ -125,7 +111,7 @@ const GUIDE_STEPS: {
     button: "Ir a roles",
   },
   {
-    icon: LayoutDashboard,
+    icon: IconChartBar,
     title: "Revisa horas y reportes",
     description: "Consulta los resúmenes semanal, quincenal y mensual de horas trabajadas.",
     permission: PERMISSIONS.VIEW_WEEKLY_SUMMARY,
@@ -136,19 +122,19 @@ const GUIDE_STEPS: {
 
 const SUPPORT_CHANNELS = [
   {
-    icon: Mail,
+    icon: IconMail,
     label: "Correo electrónico",
     value: "support@triacr.com",
     href: "mailto:support@triacr.com",
   },
   {
-    icon: MessageCircle,
+    icon: IconMessageCircle,
     label: "WhatsApp",
     value: "+506 6216 4040",
     href: "https://wa.me/50662164040",
   },
   {
-    icon: Clock,
+    icon: IconClock,
     label: "Horario de atención",
     value: "Lunes a viernes, 8:00 a.m. – 6:00 p.m.",
   },
@@ -169,11 +155,9 @@ const HelpCenterTab: React.FC = () => {
       sx={{
         p: { xs: 2.5, sm: 3 },
         borderRadius: "16px",
-        border: `1px solid ${
-          theme.palette.mode === "dark" ? "rgba(255,255,255,0.08)" : "rgba(0,0,0,0.08)"
-        }`,
+        border: theme.tokens.borders.paper,
         backgroundColor: theme.palette.background.paper,
-        boxShadow: "0 4px 24px rgba(0,0,0,0.08), 0 1px 2px rgba(0,0,0,0.04)",
+        boxShadow: `0 1px 2px ${theme.tokens.shadows.card}`,
         display: "flex",
         flexDirection: "column",
         height: { xs: "calc(100dvh - 240px)", md: "100%" },
@@ -183,33 +167,11 @@ const HelpCenterTab: React.FC = () => {
       }}
     >
       {/* Header */}
-      <Box sx={{ mb: 2, flexShrink: 0 }}>
-        <Box display="flex" alignItems="center" gap={1.5} mb={0.5}>
-          <Box sx={{ color: theme.palette.primary.main, display: "flex", alignItems: "center" }}>
-            <HelpCircle size={20} strokeWidth={1.5} />
-          </Box>
-          <Typography
-            variant="h6"
-            sx={{
-              fontWeight: 700,
-              fontSize: "1.15rem",
-              color: theme.palette.text.primary,
-              letterSpacing: "-0.02em",
-              lineHeight: 1.2,
-            }}
-          >
-            Centro de ayuda
-          </Typography>
-        </Box>
-        <Typography
-          variant="caption"
-          sx={{ color: theme.palette.text.secondary, fontSize: "0.7rem", letterSpacing: "0.02em", ml: 5 }}
-        >
-          Recursos y guías para aprovechar al máximo la plataforma
-        </Typography>
-      </Box>
-
-      <Box sx={{ borderBottom: `1px solid ${theme.palette.mode === "dark" ? "rgba(255,255,255,0.06)" : "rgba(0,0,0,0.06)"}`, mb: 2 }} />
+      <PanelHeader
+        icon={<IconHelpCircle />}
+        title="Centro de ayuda"
+        description="Recursos y guías para aprovechar al máximo la plataforma"
+      />
 
       {/* Selectable Topics */}
       <Box
@@ -243,14 +205,10 @@ const HelpCenterTab: React.FC = () => {
                 border: `1.5px solid ${
                   isActive
                     ? theme.palette.primary.main
-                    : theme.palette.mode === "dark"
-                      ? "rgba(255,255,255,0.08)"
-                      : "rgba(0,0,0,0.08)"
+                    : theme.tokens.colors.hoverStrong
                 }`,
                 backgroundColor: isActive
-                  ? theme.palette.mode === "dark"
-                    ? "rgba(255,255,255,0.08)"
-                    : "rgba(0,0,0,0.05)"
+                  ? theme.tokens.colors.hoverStrong
                   : "transparent",
                 display: "flex",
                 flexDirection: "column",
@@ -270,9 +228,7 @@ const HelpCenterTab: React.FC = () => {
                     borderRadius: "10px",
                     backgroundColor: isActive
                       ? theme.palette.primary.main
-                      : theme.palette.mode === "dark"
-                        ? "rgba(255,255,255,0.06)"
-                        : "rgba(0,0,0,0.04)",
+                      : theme.tokens.colors.hover,
                     color: isActive ? theme.palette.primary.contrastText : theme.palette.primary.main,
                     display: "flex",
                     transition: "all 0.2s ease",
@@ -281,7 +237,7 @@ const HelpCenterTab: React.FC = () => {
                   <Icon size={18} />
                 </Box>
                 {isActive && (
-                  <CheckCircle2 size={16} color={theme.palette.primary.main} style={{ flexShrink: 0 }} />
+                  <IconCircleCheck size={16} color={theme.palette.primary.main} style={{ flexShrink: 0 }} />
                 )}
               </Box>
               <Typography
@@ -330,16 +286,12 @@ const HelpCenterTab: React.FC = () => {
                     px: 1.5,
                     py: 1.5,
                     borderRadius: "12px",
-                    border: `1px solid ${
-                      theme.palette.mode === "dark" ? "rgba(255,255,255,0.08)" : "rgba(0,0,0,0.08)"
-                    }`,
+                    border: theme.tokens.borders.paper,
                     transition: "all 0.2s ease",
                     "&:hover": {
                       borderColor: theme.palette.primary.main,
                       backgroundColor:
-                        theme.palette.mode === "dark"
-                          ? "rgba(255,255,255,0.04)"
-                          : "rgba(0,0,0,0.02)",
+                        theme.tokens.colors.hover,
                     },
                   }}
                 >
@@ -353,7 +305,7 @@ const HelpCenterTab: React.FC = () => {
                       alignItems: "center",
                       justifyContent: "center",
                       backgroundColor:
-                        theme.palette.mode === "dark" ? "rgba(255,255,255,0.06)" : "rgba(0,0,0,0.04)",
+                        theme.tokens.colors.hover,
                       color: theme.palette.primary.main,
                       fontWeight: 700,
                       fontSize: "0.8rem",
@@ -388,7 +340,7 @@ const HelpCenterTab: React.FC = () => {
                       }}
                     >
                       {step.button}
-                      <ArrowRight size={13} />
+                      <IconArrowRight size={13} />
                     </Typography>
                   </Box>
                 </Box>
@@ -403,9 +355,7 @@ const HelpCenterTab: React.FC = () => {
               sx={{
                 p: 2,
                 borderRadius: "12px",
-                border: `1px solid ${
-                  theme.palette.mode === "dark" ? "rgba(255,255,255,0.08)" : "rgba(0,0,0,0.08)"
-                }`,
+                border: theme.tokens.borders.paper,
                 display: "flex",
                 alignItems: "center",
                 gap: 1.5,
@@ -416,12 +366,12 @@ const HelpCenterTab: React.FC = () => {
                   p: 1.25,
                   borderRadius: "12px",
                   backgroundColor:
-                    theme.palette.mode === "dark" ? "rgba(255,255,255,0.06)" : "rgba(0,0,0,0.04)",
+                    theme.tokens.colors.hover,
                   color: theme.palette.primary.main,
                   display: "flex",
                 }}
               >
-                <LifeBuoy size={22} />
+                <IconLifebuoy size={22} />
               </Box>
               <Box sx={{ minWidth: 0 }}>
                 <Typography sx={{ fontWeight: 700, fontSize: "0.9rem", color: "text.primary" }}>
@@ -454,7 +404,7 @@ const HelpCenterTab: React.FC = () => {
                       alignItems: "center",
                       justifyContent: "center",
                       backgroundColor:
-                        theme.palette.mode === "dark" ? "rgba(255,255,255,0.06)" : "rgba(0,0,0,0.04)",
+                        theme.tokens.colors.hover,
                       color: theme.palette.primary.main,
                     }}
                   >
@@ -515,15 +465,13 @@ const HelpCenterTab: React.FC = () => {
                     key={faq.question}
                     sx={{
                       borderRadius: "12px",
-                      border: `1px solid ${
-                        theme.palette.mode === "dark" ? "rgba(255,255,255,0.08)" : "rgba(0,0,0,0.08)"
-                      }`,
+                      border: theme.tokens.borders.paper,
                       backgroundColor: "transparent",
                       transition: "all 0.2s ease",
                       overflow: "hidden",
                       "&:hover": {
                         borderColor:
-                          theme.palette.mode === "dark" ? "rgba(255,255,255,0.16)" : "rgba(0,0,0,0.16)",
+                          theme.tokens.colors.borderStrong,
                       },
                     }}
                   >
@@ -554,12 +502,12 @@ const HelpCenterTab: React.FC = () => {
                           alignItems: "center",
                           justifyContent: "center",
                           backgroundColor:
-                            theme.palette.mode === "dark" ? "rgba(255,255,255,0.06)" : "rgba(0,0,0,0.04)",
+                            theme.tokens.colors.hover,
                           color: theme.palette.text.secondary,
                           transition: "all 0.2s ease",
                         }}
                       >
-                        <HelpCircle size={15} strokeWidth={2} />
+                        <IconHelpCircle size={15} stroke={2} />
                       </Box>
                       <Box sx={{ flex: 1 }}>
                         <Typography
@@ -574,7 +522,7 @@ const HelpCenterTab: React.FC = () => {
                           {faq.question}
                         </Typography>
                       </Box>
-                      <ChevronDown
+                      <IconChevronDown
                         size={16}
                         style={{
                           transform: isOpen ? "rotate(180deg)" : "none",
@@ -592,7 +540,7 @@ const HelpCenterTab: React.FC = () => {
                           mb: 1.75,
                           pl: 1.5,
                           borderLeft: `2px solid ${
-                            theme.palette.mode === "dark" ? "rgba(255,255,255,0.12)" : "rgba(0,0,0,0.12)"
+                            theme.tokens.colors.border
                           }`,
                         }}
                       >
@@ -628,9 +576,7 @@ const HelpCenterTab: React.FC = () => {
           p: { xs: 1.5, sm: 2 },
           borderRadius: "12px",
           backgroundColor: theme.palette.background.paper,
-          border: `1px solid ${
-            theme.palette.mode === "dark" ? "rgba(255,255,255,0.08)" : "rgba(0,0,0,0.08)"
-          }`,
+          border: theme.tokens.borders.paper,
           flexShrink: 0,
         }}
       >
@@ -644,13 +590,11 @@ const HelpCenterTab: React.FC = () => {
             alignItems: "center",
             justifyContent: "center",
             backgroundColor:
-              theme.palette.mode === "dark"
-                ? "rgba(255,255,255,0.06)"
-                : "rgba(0,0,0,0.04)",
+              theme.tokens.colors.hover,
             color: theme.palette.text.secondary,
           }}
         >
-          <Mail size={18} strokeWidth={1.8} />
+          <IconMail size={18} stroke={1.8} />
         </Box>
         <Box sx={{ flex: 1, minWidth: 0 }}>
           <Typography sx={{ fontWeight: 700, fontSize: "0.85rem", color: "text.primary", mb: 0.25 }}>
@@ -686,7 +630,7 @@ const HelpCenterTab: React.FC = () => {
                     alignSelf: "center",
                     height: 16,
                     borderColor:
-                      theme.palette.mode === "dark" ? "rgba(255,255,255,0.12)" : "rgba(0,0,0,0.12)",
+                      theme.tokens.colors.border,
                   }}
                 />
               )}

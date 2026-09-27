@@ -3,7 +3,6 @@ import { useDispatch, useSelector } from "react-redux";
 import {
   Box,
   Button,
-  Chip,
   CircularProgress,
   IconButton,
   Paper,
@@ -13,12 +12,13 @@ import {
   TableContainer,
   TableHead,
   TableRow,
+  Tooltip,
   Typography,
   useTheme,
 } from "@mui/material";
-import { Eye, Inbox, RefreshCcw, Trash2 } from "lucide-react";
+import { IconEye, IconInbox, IconPencil, IconPlus, IconReceipt, IconRefresh, IconTrash } from "@tabler/icons-react";
 import { Employee } from "../../../models/Employee";
-import { Payment, PaymentStatus } from "../../../models/Payment";
+import { Payment } from "../../../models/Payment";
 import { AppDispatch } from "../../../store/store";
 import {
   deletePayment,
@@ -37,12 +37,15 @@ import {
   neutralButtonStyles,
 } from "../../../components/Table/EditableTable/helpers";
 import GeneratePaymentDialog from "./GeneratePaymentDialog";
-import PaymentBoletaDialog from "./PaymentBoletaDialog";
-import { formatMoney, getBiweeklyPeriodLabel } from "../../../utils/paymentSlipPdf";
+import PaymentBoletaDialog, { PAYMENT_STATUS } from "./PaymentBoletaDialog";
+import { StatusBadge } from "../../../components/Layout";
+import { formatBoletaPeriod, formatColones, getPeriodEndISO } from "../../../utils/boletaFormat";
+import { submitButton } from "../../Forms/sharedStyles";
+import SectionHeader from "./SectionHeader";
+import { getBiweeklyPeriodLabel } from "../../../utils/paymentSlipPdf";
 import {
   cardStackStyles,
-  sectionPaperStyles,
-  sectionTitleStyles,
+  fillSectionPaperStyles,
   emptyStateBoxStyles,
   tableContainerStyles,
   tableHeaderCellStyles,
@@ -54,11 +57,6 @@ interface PaymentsTabProps {
   onEmployeeRefresh: () => Promise<void> | void;
 }
 
-const STATUS: Record<PaymentStatus, { label: string; color: "warning" | "success" | "default" }> = {
-  pending: { label: "Pendiente", color: "warning" },
-  sent: { label: "Enviada", color: "success" },
-  cancelled: { label: "Cancelada", color: "default" },
-};
 
 const errorMessage = (error: unknown, fallback: string): string =>
   typeof error === "string" && error.trim().length > 0
@@ -133,48 +131,32 @@ const PaymentsTab: React.FC<PaymentsTabProps> = ({ employee, onEmployeeRefresh }
 
   return (
     <Box sx={cardStackStyles}>
-      <Paper elevation={0} sx={sectionPaperStyles(theme)}>
-        <Box
-          sx={{
-            display: "flex",
-            flexWrap: "wrap",
-            alignItems: "center",
-            justifyContent: "space-between",
-            gap: 1.5,
-            mb: 2,
-          }}
-        >
-          <Typography sx={{ ...sectionTitleStyles, mb: 0 }}>Pagos quincenales</Typography>
-          <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
-            <Typography variant="body2" sx={{ color: "text.secondary" }}>
-              {payments.length} boleta{payments.length === 1 ? "" : "s"} ·{" "}
-              <Box component="span" sx={{ fontWeight: 700, color: "text.primary" }}>
-                {formatMoney(totalPayable, "CRC")}
-              </Box>
-            </Typography>
-            {canCreate && (
-              <Button
-                variant="text"
-                onClick={() => setIsGenerateOpen(true)}
-                sx={{
-                  px: 0.5,
-                  minHeight: 32,
-                  fontWeight: 600,
-                  fontSize: "0.85rem",
-                  color: "text.primary",
-                  "&:hover": {
-                    backgroundColor: "transparent",
-                    textDecoration: "underline",
-                    textUnderlineOffset: "3px",
-                    textDecorationThickness: "1px",
-                  },
-                }}
-              >
-                Generar pago
-              </Button>
-            )}
-          </Box>
-        </Box>
+      <Paper elevation={0} sx={fillSectionPaperStyles(theme)}>
+        <SectionHeader
+          icon={<IconReceipt size={20} stroke={1.5} />}
+          title="Pagos quincenales"
+          description="Cada quincena se genera sola a partir de las horas registradas; puedes editar cualquier monto antes de enviarla."
+          actions={
+            <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
+              <Typography variant="body2" sx={{ color: "text.secondary" }}>
+                {payments.length} boleta{payments.length === 1 ? "" : "s"} ·{" "}
+                <Box component="span" sx={{ fontWeight: 700, color: "text.primary" }}>
+                  {formatColones(totalPayable)}
+                </Box>
+              </Typography>
+              {canCreate && (
+                <Button
+                  variant="text"
+                  startIcon={<IconPlus size={18} />}
+                  onClick={() => setIsGenerateOpen(true)}
+                  sx={submitButton}
+                >
+                  Generar pago
+                </Button>
+              )}
+            </Box>
+          }
+        />
 
         {isLoading && payments.length === 0 ? (
           <Box sx={{ display: "flex", justifyContent: "center", py: 4 }}>
@@ -182,7 +164,7 @@ const PaymentsTab: React.FC<PaymentsTabProps> = ({ employee, onEmployeeRefresh }
           </Box>
         ) : loadError && payments.length === 0 ? (
           <Box sx={emptyStateBoxStyles(theme)}>
-            <Inbox size={34} />
+            <IconInbox size={34} />
             <Typography variant="body2">{loadError}</Typography>
             <Button variant="outlined" onClick={() => void reload()}>
               Reintentar
@@ -190,7 +172,7 @@ const PaymentsTab: React.FC<PaymentsTabProps> = ({ employee, onEmployeeRefresh }
           </Box>
         ) : payments.length === 0 ? (
           <Box sx={emptyStateBoxStyles(theme)}>
-            <Inbox size={34} />
+            <IconInbox size={34} />
             <Typography variant="body2">No hay pagos registrados</Typography>
           </Box>
         ) : (
@@ -198,10 +180,10 @@ const PaymentsTab: React.FC<PaymentsTabProps> = ({ employee, onEmployeeRefresh }
             <Table size="small" stickyHeader>
               <TableHead>
                 <TableRow>
-                  <TableCell sx={tableHeaderCellStyles}>Quincena</TableCell>
                   <TableCell sx={tableHeaderCellStyles}>Periodo</TableCell>
+                  <TableCell sx={tableHeaderCellStyles}>Quincena</TableCell>
                   <TableCell sx={tableHeaderCellStyles} align="right">
-                    Salario
+                    Horas
                   </TableCell>
                   <TableCell sx={tableHeaderCellStyles} align="right">
                     Total
@@ -214,39 +196,38 @@ const PaymentsTab: React.FC<PaymentsTabProps> = ({ employee, onEmployeeRefresh }
               </TableHead>
               <TableBody>
                 {payments.map((payment) => {
-                  const status = STATUS[payment.status] ?? STATUS.pending;
+                  const status = PAYMENT_STATUS[payment.status] ?? PAYMENT_STATUS.pending;
                   const isBusy = busyId === payment.id;
                   return (
                     <TableRow
                       key={payment.id}
-                      sx={{
-                        "&:hover": {
-                          backgroundColor:
-                            theme.palette.mode === "dark"
-                              ? "rgba(255,255,255,0.04)"
-                              : "rgba(0,0,0,0.03)",
-                        },
-                      }}
+                      hover
+                      onClick={() => setBoletaPayment(payment)}
+                      sx={{ cursor: "pointer" }}
                     >
-                      <TableCell sx={tableCellStyles}>
-                        Q{payment.biweekNumber} · {payment.year}
+                      <TableCell sx={[tableCellStyles, { fontWeight: 600, whiteSpace: "nowrap" }]}>
+                        {formatBoletaPeriod(getPeriodEndISO(payment.biweekNumber, payment.year))}
                       </TableCell>
-                      <TableCell sx={tableCellStyles}>
-                        {getBiweeklyPeriodLabel(payment.biweekNumber, payment.year)}
+                      <TableCell sx={[tableCellStyles, { color: "text.secondary", whiteSpace: "nowrap" }]}>
+                        Q{payment.biweekNumber} · {getBiweeklyPeriodLabel(payment.biweekNumber, payment.year)}
                       </TableCell>
                       <TableCell sx={tableCellStyles} align="right">
-                        {formatMoney(payment.regularSalary, payment.currency)}
+                        {payment.hoursWorked != null ? `${payment.hoursWorked} h` : "—"}
                       </TableCell>
-                      <TableCell sx={{ ...tableCellStyles, fontWeight: 700 }} align="right">
-                        {formatMoney(payment.totalPayable, payment.currency)}
+                      <TableCell sx={[tableCellStyles, { fontWeight: 700, whiteSpace: "nowrap" }]} align="right">
+                        {formatColones(payment.totalPayable)}
                       </TableCell>
                       <TableCell sx={tableCellStyles}>
-                        <Chip
-                          size="small"
-                          label={status.label}
-                          color={status.color}
-                          variant={status.color === "default" ? "outlined" : "filled"}
-                        />
+                        <Box sx={{ display: "flex", alignItems: "center", gap: 0.75, flexWrap: "wrap" }}>
+                          <StatusBadge label={status.label} tone={status.tone} size="small" />
+                          {payment.isManual && (
+                            <Tooltip title="Tiene montos editados a mano">
+                              <Box component="span" sx={{ display: "inline-flex", color: "text.secondary" }}>
+                                <IconPencil size={14} />
+                              </Box>
+                            </Tooltip>
+                          )}
+                        </Box>
                       </TableCell>
                       <TableCell sx={tableCellStyles} align="right">
                         <Box
@@ -260,20 +241,26 @@ const PaymentsTab: React.FC<PaymentsTabProps> = ({ employee, onEmployeeRefresh }
                           <IconButton
                             size="small"
                             title="Ver boleta"
-                            onClick={() => setBoletaPayment(payment)}
+                            onClick={(event) => {
+                              event.stopPropagation();
+                              setBoletaPayment(payment);
+                            }}
                             sx={neutralButtonStyles(theme)}
                           >
-                            <Eye size={16} />
+                            <IconEye size={16} />
                           </IconButton>
                           {canEdit && (
                             <IconButton
                               size="small"
                               title="Recalcular"
                               disabled={isBusy}
-                              onClick={() => void handleRecalculate(payment)}
+                              onClick={(event) => {
+                                event.stopPropagation();
+                                void handleRecalculate(payment);
+                              }}
                               sx={neutralButtonStyles(theme)}
                             >
-                              <RefreshCcw size={16} />
+                              <IconRefresh size={16} />
                             </IconButton>
                           )}
                           {canDelete && (
@@ -281,10 +268,13 @@ const PaymentsTab: React.FC<PaymentsTabProps> = ({ employee, onEmployeeRefresh }
                               size="small"
                               title="Eliminar"
                               disabled={isBusy}
-                              onClick={() => setDeleteTarget(payment)}
+                              onClick={(event) => {
+                                event.stopPropagation();
+                                setDeleteTarget(payment);
+                              }}
                               sx={deleteButtonStyles(theme)}
                             >
-                              <Trash2 size={16} />
+                              <IconTrash size={16} />
                             </IconButton>
                           )}
                         </Box>

@@ -1,12 +1,11 @@
 import React from "react";
 import { render, screen, fireEvent } from "@testing-library/react";
-import { ThemeProvider, createTheme } from "@mui/material/styles";
+import { ThemeProvider } from "@mui/material/styles";
+import { lightTheme } from "../../theme";
 import SearchBarComponent from "./SearchBar.component";
 
-const renderWithTheme = (ui: React.ReactElement) => {
-  const theme = createTheme({ palette: { mode: "light" } });
-  return render(<ThemeProvider theme={theme}>{ui}</ThemeProvider>);
-};
+const renderWithTheme = (ui: React.ReactElement) =>
+  render(<ThemeProvider theme={lightTheme}>{ui}</ThemeProvider>);
 
 describe("SearchBarComponent", () => {
   it("debería renderizar con el placeholder por defecto", () => {

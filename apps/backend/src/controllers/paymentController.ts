@@ -3,21 +3,22 @@ import { Request, Response } from "express";
 import * as paymentService from "../services/paymentService";
 import * as paymentCalculationService from "../services/paymentCalculationService";
 import * as emailService from "../services/emailService";
-import { isServiceError } from "../utils/errors";
+import { isServiceError, sendServerError } from "../utils/errors";
 import { getBiweeklyDates } from "../services/summaryRecalculationService";
 
-const formatPeriodLabel = (biweekNumber: number, year: number): string => {
-  const { startDate, endDate } = getBiweeklyDates(year, biweekNumber);
-  const fmt = (date: Date): string =>
-    `${String(date.getDate()).padStart(2, "0")}/${String(date.getMonth() + 1).padStart(2, "0")}/${date.getFullYear()}`;
-  return `${fmt(startDate)} – ${fmt(endDate)}`;
+// Last day of the quincena (YYYY-MM-DD): the "PERIODO" printed on the slip.
+const periodEndDate = (biweekNumber: number, year: number): string => {
+  const { endDate } = getBiweeklyDates(year, biweekNumber);
+  return `${endDate.getFullYear()}-${String(endDate.getMonth() + 1).padStart(2, "0")}-${String(
+    endDate.getDate(),
+  ).padStart(2, "0")}`;
 };
 
 const handleError = (res: Response, error: unknown, fallbackMessage: string): Response => {
   if (isServiceError(error)) {
     return res.status(error.statusCode).json({ message: error.message });
   }
-  return res.status(500).json({ message: fallbackMessage, error });
+  return sendServerError(res, fallbackMessage, error);
 };
 
 // GET /payments — paginated list with employee identity
@@ -100,6 +101,21 @@ export const recalculatePayment = async (req: Request, res: Response) => {
   }
 };
 
+// POST /payments/generate — fills the slips of a quincena for every employee
+// who worked in it (idempotent; pending slips are refreshed, manual edits kept)
+export const generatePeriodPayments = async (req: Request, res: Response) => {
+  try {
+    const { year, biweekNumber } = req.body as { year: number; biweekNumber: number };
+    const result = await paymentService.generateBiweeklyPayments(
+      Number(year),
+      Number(biweekNumber),
+    );
+    return res.status(200).json(result);
+  } catch (error) {
+    return handleError(res, error, "Error generating payments");
+  }
+};
+
 // DELETE /payments/:id
 export const deletePayment = async (req: Request, res: Response) => {
   try {
@@ -141,7 +157,7 @@ export const sendPaymentEmail = async (req: Request, res: Response) => {
       employeeName: `${employee.firstName} ${employee.lastName}`.trim(),
       biweekNumber: payment.biweekNumber,
       year: payment.year,
-      periodLabel: formatPeriodLabel(payment.biweekNumber, payment.year),
+      periodEnd: periodEndDate(payment.biweekNumber, payment.year),
       currency: payment.currency,
       regularSalary: payment.regularSalary,
       overtimePay: payment.overtimePay,

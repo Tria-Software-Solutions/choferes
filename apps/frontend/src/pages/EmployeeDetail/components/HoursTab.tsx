@@ -4,12 +4,9 @@ import {
   Button,
   Chip,
   CircularProgress,
-  FormControl,
   IconButton,
-  InputLabel,
   MenuItem,
   Paper,
-  Select,
   Table,
   TableBody,
   TableCell,
@@ -17,9 +14,10 @@ import {
   TableHead,
   TableRow,
   Typography,
+  useMediaQuery,
   useTheme,
 } from "@mui/material";
-import { Inbox, RefreshCcw } from "lucide-react";
+import { IconCalendarMonth, IconInbox, IconRefresh } from "@tabler/icons-react";
 import { BiweeklySummary } from "../../../models/BiweeklySummary";
 import { Employee } from "../../../models/Employee";
 import { getBiweeklySummaries } from "../../../services/biweeklySummaryService";
@@ -29,12 +27,14 @@ import { useAppNotifications } from "../../../components/Snackbar/Snackbar.compo
 import PERMISSIONS from "../../../constants/permissions.constants";
 import OVERTIME from "../../../constants/overtime.constants";
 import { neutralButtonStyles } from "../../../components/Table/EditableTable/helpers";
+import PlaceholderSelect from "../../../components/PlaceholderSelect/PlaceholderSelect.component";
+import { submitButton } from "../../Forms/sharedStyles";
 import { getBiweeklyPeriodLabel } from "../../../utils/paymentSlipPdf";
 import { getBiweeklyDates } from "../../../utils/dates";
+import SectionHeader from "./SectionHeader";
 import {
   cardStackStyles,
-  sectionPaperStyles,
-  sectionTitleStyles,
+  fillSectionPaperStyles,
   emptyStateBoxStyles,
   tableContainerStyles,
   tableHeaderCellStyles,
@@ -86,6 +86,7 @@ const biweekStartDate = (biweekNumber: number, year: number): string => {
 // or duplicated rows made the totals disagree with the hours board).
 const HoursTab: React.FC<HoursTabProps> = ({ employee }) => {
   const theme = useTheme();
+  const isSmallScreen = useMediaQuery(theme.breakpoints.down("sm"));
   const { userPermissions } = useAuthContext();
   const { showNotification } = useAppNotifications();
 
@@ -218,46 +219,42 @@ const HoursTab: React.FC<HoursTabProps> = ({ employee }) => {
 
   return (
     <Box sx={cardStackStyles}>
-      <Paper elevation={0} sx={sectionPaperStyles(theme)}>
-        <Box
-          sx={{
-            display: "flex",
-            flexWrap: "wrap",
-            alignItems: "center",
-            justifyContent: "space-between",
-            gap: 1.5,
-            mb: 1.5,
-          }}
-        >
-          <Typography sx={{ ...sectionTitleStyles, mb: 0 }}>Horas por quincena</Typography>
-          <Box sx={{ display: "flex", alignItems: "center", gap: 1.5 }}>
-            <FormControl size="small" sx={{ minWidth: 110 }}>
-              <InputLabel id="hours-year-label">Año</InputLabel>
-              <Select
-                labelId="hours-year-label"
-                label="Año"
-                value={year}
-                onChange={(event) => setYear(Number(event.target.value))}
-              >
-                {availableYears.map((value) => (
-                  <MenuItem key={value} value={value}>
-                    {value}
-                  </MenuItem>
-                ))}
-              </Select>
-            </FormControl>
-            {canRecalculate && (
-              <Button
-                variant="outlined"
-                startIcon={<RefreshCcw size={15} />}
-                onClick={handleRecalculate}
-                disabled={isRecalculating}
-              >
-                {isRecalculating ? "Recalculando..." : "Recalcular"}
-              </Button>
-            )}
-          </Box>
-        </Box>
+      <Paper elevation={0} sx={fillSectionPaperStyles(theme)}>
+        <SectionHeader
+          icon={<IconCalendarMonth size={20} stroke={1.5} />}
+          title="Horas por quincena"
+          description="Resumen de horas laboradas por quincena, base del cálculo quincenal."
+          actions={
+            <Box sx={{ display: "flex", alignItems: "center", gap: 1.5 }}>
+              <Box sx={{ minWidth: 120 }}>
+                <PlaceholderSelect
+                  placeholder="Año"
+                  icon={<IconCalendarMonth size={20} color={theme.palette.text.secondary} />}
+                  value={year}
+                  onChange={(event) => setYear(Number(event.target.value))}
+                >
+                  {availableYears.map((value) => (
+                    <MenuItem key={value} value={value}>
+                      {value}
+                    </MenuItem>
+                  ))}
+                </PlaceholderSelect>
+              </Box>
+              {canRecalculate && (
+                <Button
+                  variant="text"
+                  startIcon={<IconRefresh size={18} />}
+                  onClick={() => void handleRecalculate()}
+                  disabled={isRecalculating}
+                  fullWidth={isSmallScreen}
+                  sx={submitButton}
+                >
+                  {isRecalculating ? "Recalculando..." : "Recalcular"}
+                </Button>
+              )}
+            </Box>
+          }
+        />
 
         <Typography variant="caption" sx={{ color: "text.secondary", display: "block", mb: 1.5 }}>
           {filtered.length} quincena{filtered.length === 1 ? "" : "s"} ·{" "}
@@ -273,7 +270,7 @@ const HoursTab: React.FC<HoursTabProps> = ({ employee }) => {
           </Box>
         ) : filtered.length === 0 ? (
           <Box sx={emptyStateBoxStyles(theme)}>
-            <Inbox size={34} />
+            <IconInbox size={34} />
             <Typography variant="body2">
               No hay horas registradas para {year}
             </Typography>
@@ -303,14 +300,7 @@ const HoursTab: React.FC<HoursTabProps> = ({ employee }) => {
                   return (
                     <TableRow
                       key={row.key}
-                      sx={{
-                        "&:hover": {
-                          backgroundColor:
-                            theme.palette.mode === "dark"
-                              ? "rgba(255,255,255,0.04)"
-                              : "rgba(0,0,0,0.03)",
-                        },
-                      }}
+                      hover
                     >
                       <TableCell sx={tableCellStyles}>
                         Q{row.biweekNumber} · {row.year}
@@ -351,7 +341,7 @@ const HoursTab: React.FC<HoursTabProps> = ({ employee }) => {
                             onClick={() => void handleRowRecalculate(row)}
                             sx={neutralButtonStyles(theme)}
                           >
-                            <RefreshCcw size={16} />
+                            <IconRefresh size={16} />
                           </IconButton>
                         </TableCell>
                       )}

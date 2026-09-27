@@ -3,6 +3,7 @@ import * as ScheduleService from "../../services/scheduleService";
 import { Schedule } from "../../models/Schedule";
 import { RootState } from "../store";
 import { sortSchedulesByType } from "../../utils/schedule";
+import { getApiErrorMessage } from "../../utils/apiError";
 
 // schedulesSlice manages the state and async logic for schedule data
 // Includes fetching, creating, updating, and deleting schedules
@@ -42,9 +43,7 @@ export const fetchSchedules = createAsyncThunk(
         return [];
       }
     } catch (error: unknown) {
-      return rejectWithValue(
-        error instanceof Error ? error.message : "Failed to fetch schedules",
-      );
+      return rejectWithValue(getApiErrorMessage(error, "Failed to fetch schedules"));
     }
   },
 );
@@ -57,9 +56,7 @@ export const createSchedule = createAsyncThunk(
       const createdSchedule = await ScheduleService.createSchedule(newSchedule);
       return createdSchedule;
     } catch (error: unknown) {
-      return rejectWithValue(
-        error instanceof Error ? error.message : "Failed to create schedule",
-      );
+      return rejectWithValue(getApiErrorMessage(error, "Failed to create schedule"));
     }
   },
 );
@@ -77,9 +74,7 @@ export const updateSchedule = createAsyncThunk(
       const refreshedSchedule = await ScheduleService.getScheduleById(args.id);
       return refreshedSchedule;
     } catch (error: unknown) {
-      return rejectWithValue(
-        error instanceof Error ? error.message : "Failed to update schedule",
-      );
+      return rejectWithValue(getApiErrorMessage(error, "Failed to update schedule"));
     }
   },
 );
@@ -92,9 +87,7 @@ export const deleteSchedule = createAsyncThunk(
       await ScheduleService.deleteSchedule(id);
       return id;
     } catch (error: unknown) {
-      return rejectWithValue(
-        error instanceof Error ? error.message : "Failed to delete schedule",
-      );
+      return rejectWithValue(getApiErrorMessage(error, "Failed to delete schedule"));
     }
   },
 );

@@ -44,15 +44,6 @@ const NOTIFICATIONS = {
   VEHICLE_CREATE_SUCCESS: "Vehículo creado exitosamente",
   VEHICLE_UPDATE_SUCCESS: "La actualización del vehículo fue exitosa",
   VEHICLE_DELETE_SUCCESS: "Vehículo eliminado exitosamente",
-  COURIER_CREATE_SUCCESS: "Servicio de mensajería creado exitosamente",
-  COURIER_UPDATE_SUCCESS: "La actualización del servicio fue exitosa",
-  COURIER_DELETE_SUCCESS: "Servicio de mensajería eliminado exitosamente",
-  COURIER_CREATE_ERROR:
-    "Ha ocurrido un error al crear el servicio de mensajería",
-  COURIER_UPDATE_ERROR:
-    "Ha ocurrido un error al actualizar el servicio de mensajería",
-  COURIER_DELETE_ERROR:
-    "Ha ocurrido un error al eliminar el servicio de mensajería",
   ROLE_CREATE_SUCCESS: "Rol creado exitosamente",
   ROLE_UPDATE_SUCCESS: "La actualización del rol fue exitosa",
   ROLE_DELETE_SUCCESS: "Rol eliminado exitosamente",
@@ -64,11 +55,5 @@ const NOTIFICATIONS = {
   USER_PASSWORD_UPDATE_SUCCESS: "La contraseña fue actualizada exitosamente",
   USER_PASSWORD_UPDATE_ERROR:
     "Ha ocurrido un error al actualizar la contraseña",
-  HOURS_GENERATION_SUCCESS: "Horas generadas exitosamente",
-  HOURS_GENERATION_ERROR: "Error al generar las horas",
-  HOURS_GENERATION_NO_CONFIG: "Error: No hay configuración disponible",
-  HOURS_GENERATION_PROCESSING: "Procesando generación de horas...",
-  HOURS_GENERATION_COMPLETED: "Generación de horas completada",
-  HOURS_GENERATION_PARTIAL: "Algunas horas no pudieron ser generadas",
 };
 export default NOTIFICATIONS;

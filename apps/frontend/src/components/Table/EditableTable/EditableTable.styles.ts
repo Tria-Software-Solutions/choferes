@@ -1,49 +1,13 @@
 import { SxProps, Theme } from "@mui/material";
 
-// Base input styles compartidos - Premium Edition (borderless: sin borde rectangular gris)
-const baseInputStyles = (theme: Theme) => ({
-  borderRadius: "14px",
-  backgroundColor: theme.palette.background.paper,
-  color: theme.palette.text.primary,
-  height: 56,
-  fontSize: "0.875rem",
-  fontWeight: 500,
-  letterSpacing: "-0.01em",
-  boxShadow: "0 2px 8px rgba(0,0,0,0.04), 0 1px 2px rgba(0,0,0,0.02)",
-  transition: "all 0.25s cubic-bezier(0.4, 0, 0.2, 1)",
-  "& fieldset": {
-    border: "none",
-  },
-  "&:hover": {
-    boxShadow: "0 4px 16px rgba(0,0,0,0.08), 0 2px 4px rgba(0,0,0,0.04)",
-    transform: "translateY(-1px)",
-  },
-  "&.Mui-focused": {
-    backgroundColor: theme.palette.background.paper,
-    boxShadow: "0 8px 24px rgba(0,0,0,0.1), 0 2px 8px rgba(0,0,0,0.06)",
-    outline: "none",
-    transform: "translateY(-1px)",
-  },
-});
-
-// Premium form control styles
-export const formControlStyles: SxProps<Theme> = (theme) => ({
-  height: 56,
-  mb: 1,
-  "& .MuiInputBase-root": { height: 56 },
-  "& .MuiOutlinedInput-root, & .MuiSelect-select": baseInputStyles(theme),
-});
-
-// Premium select styles
-export const selectStyles: SxProps<Theme> = (theme) => ({
-  height: 56,
-  borderRadius: "14px",
+// Los filtros de la toolbar usan el mismo estilo de campo que el resto de la
+// app (ver src/theme/fieldStyles.ts); aquí solo se ajusta la altura y el
+// espacio para la flecha del select.
+const filterFieldStyles = (theme: Theme) => ({
   "& .MuiOutlinedInput-root": {
-    ...baseInputStyles(theme),
-    paddingRight: "42px !important",
+    minHeight: 56,
   },
   "& .MuiSelect-select": {
-    paddingRight: "42px !important",
     display: "flex",
     alignItems: "center",
   },
@@ -58,16 +22,32 @@ export const selectStyles: SxProps<Theme> = (theme) => ({
   },
 });
 
-// Premium date picker text field styles
-export const datePickerTextFieldStyles: SxProps<Theme> = (theme) => ({
+export const formControlStyles: SxProps<Theme> = (theme) => ({
+  height: 56,
+  mb: 1,
+  ...filterFieldStyles(theme),
+});
+
+export const selectStyles: SxProps<Theme> = (theme) => ({
+  ...filterFieldStyles(theme),
+  height: 56,
   "& .MuiOutlinedInput-root": {
-    ...baseInputStyles(theme),
+    minHeight: 56,
+    paddingRight: "42px !important",
+  },
+  "& .MuiSelect-select": {
+    paddingRight: "42px !important",
+  },
+});
+
+export const datePickerTextFieldStyles: SxProps<Theme> = (theme) => ({
+  ...filterFieldStyles(theme),
+  "& .MuiOutlinedInput-root": {
+    minHeight: 56,
     "& input": {
       color: theme.palette.text.primary,
       outline: "none",
       boxShadow: "none",
-      fontSize: "0.875rem",
-      letterSpacing: "-0.01em",
     },
   },
 });
@@ -83,34 +63,27 @@ export const inlineEditTextfieldSx: SxProps<Theme> = {
   },
 };
 
-// Premium table cell styles
+// Body cell: hairline row separator, no vertical grid (see theme MuiTableCell).
 export const tableCellStyles: SxProps<Theme> = (theme) => ({
-  borderRight: `1px solid ${theme.palette.mode === "dark" ? "rgba(255,255,255,0.06)" : "rgba(0,0,0,0.06)"}`,
-  borderBottom: `1px solid ${theme.palette.mode === "dark" ? "rgba(255,255,255,0.04)" : "rgba(0,0,0,0.04)"}`,
+  borderBottom: theme.tokens.borders.hairline,
   padding: "12px 16px",
   fontSize: "0.875rem",
   fontWeight: 500,
-  letterSpacing: "-0.01em",
-  fontFamily: "'Urbanist', -apple-system, BlinkMacSystemFont, sans-serif",
-  transition: "background-color 0.15s ease",
+  color: theme.tokens.colors.textOnSunken,
 });
 
-// Premium permission chip styles
+// Permission chip (roles table)
 export const permissionChipStyles = (theme: Theme): SxProps<Theme> => ({
   fontWeight: 600,
-  color: theme.palette.text.primary,
-  backgroundColor: theme.palette.mode === "dark" ? "rgba(255,255,255,0.08)" : "rgba(0,0,0,0.06)",
-  px: 1.5,
-  py: 0.5,
+  color: theme.tokens.colors.text,
+  backgroundColor: theme.tokens.colors.chipTagBg,
+  px: 1,
+  py: 0.25,
   borderRadius: "6px",
-  fontSize: "clamp(0.75rem, 1vw, 0.8125rem)",
+  fontSize: "0.75rem",
   mb: 0.5,
-  textAlign: "center",
-  display: "flex",
+  display: "inline-flex",
   alignItems: "center",
-  justifyContent: "center",
-  letterSpacing: "-0.01em",
-  border: `1px solid ${theme.palette.mode === "dark" ? "rgba(255,255,255,0.1)" : "rgba(0,0,0,0.08)"}`,
 });
 
 export const viewMoreLessStyles = (theme: Theme): SxProps<Theme> => ({
@@ -137,98 +110,37 @@ export const emailLinkStyles = (theme: Theme): SxProps<Theme> => ({
   },
 });
 
-// Premium table head cell styles
+// Sticky head cell: quiet sunken strip with small uppercase labels.
 export const tableHeadCellStyles = (theme: Theme, topOffset: number | string = 0): SxProps<Theme> => ({
   position: "sticky",
   top: topOffset,
   zIndex: 10,
-  backgroundColor: theme.palette.mode === "dark" ? "#0a0a0a" : "#000000",
-  color: "#ffffff",
+  backgroundColor: theme.tokens.colors.tableHeadBg,
+  color: theme.tokens.colors.tableHeadText,
   fontWeight: 600,
-  fontSize: "0.8125rem",
+  fontSize: "0.6875rem",
   letterSpacing: "0.06em",
   textTransform: "uppercase",
-  padding: "14px 16px",
+  padding: "10px 16px",
   whiteSpace: "nowrap",
-  fontFamily: "'Urbanist', -apple-system, BlinkMacSystemFont, sans-serif",
-  borderBottom: `2px solid ${theme.palette.mode === "dark" ? "rgba(255,255,255,0.15)" : "rgba(255,255,255,0.25)"}`,
+  borderBottom: theme.tokens.borders.headCell,
 });
 
-// Premium dropdown menu props styles
+// Dropdown menu props for multi-select fields (menu look comes from the theme).
 export const premiumMenuProps = {
   PaperProps: {
     sx: (theme: Theme) => ({
       maxHeight: 360,
       overflowY: "auto",
-      backgroundColor: theme.palette.background.paper,
-      color: theme.palette.text.primary,
-      borderRadius: "16px",
-      marginTop: "8px",
-      boxShadow: "0 20px 60px rgba(0,0,0,0.15), 0 8px 24px rgba(0,0,0,0.1)",
-      border: "none",
-      "& .MuiList-root": {
-        padding: "8px",
+      marginTop: "6px",
+      "& .MuiMenuItem-root": { gap: "10px" },
+      "& .MuiMenuItem-root.Mui-selected": {
+        backgroundColor: "transparent",
+        fontWeight: 600,
+        "&:hover": { backgroundColor: theme.tokens.colors.hover },
       },
-      "& .MuiMenuItem-root": {
-        borderRadius: "10px",
-        margin: "2px 4px",
-        padding: "12px 16px",
-        fontSize: "0.875rem",
-        fontWeight: 500,
-        letterSpacing: "-0.01em",
-        transition: "all 0.2s cubic-bezier(0.4, 0, 0.2, 1)",
-        minHeight: "44px",
-        gap: "12px",
-        "&:hover": {
-          backgroundColor: theme.palette.mode === "dark" 
-            ? "rgba(255,255,255,0.08)" 
-            : "rgba(25, 118, 210, 0.08)",
-        },
-        "&.Mui-selected": {
-          backgroundColor: "transparent",
-          color: theme.palette.primary.main,
-          fontWeight: 600,
-          "&:hover": {
-            backgroundColor: theme.palette.mode === "dark" 
-              ? "rgba(25, 118, 210, 0.35)" 
-              : "rgba(25, 118, 210, 0.18)",
-          },
-        },
-      },
-      "& .MuiCheckbox-root": {
-        color: theme.palette.mode === "dark" ? "rgba(255,255,255,0.4)" : "rgba(0,0,0,0.3)",
-        borderRadius: "8px",
-        padding: "6px",
-        transition: "all 0.2s ease",
-        "&.Mui-checked": {
-          color: theme.palette.primary.main,
-        },
-        "&:hover": {
-          backgroundColor: theme.palette.mode === "dark" 
-            ? "rgba(255,255,255,0.08)" 
-            : "rgba(25, 118, 210, 0.08)",
-        },
-      },
-      "& .MuiListItemText-primary": {
-        fontWeight: 500,
-        fontSize: "0.875rem",
-        letterSpacing: "-0.01em",
-      },
-      // Scrollbar styling
-      "&::-webkit-scrollbar": {
-        width: "8px",
-      },
-      "&::-webkit-scrollbar-track": {
-        background: "transparent",
-        borderRadius: "0 16px 16px 0",
-      },
-      "&::-webkit-scrollbar-thumb": {
-        background: theme.palette.mode === "dark" ? "rgba(255,255,255,0.2)" : "rgba(0,0,0,0.2)",
-        borderRadius: "4px",
-      },
-      "&::-webkit-scrollbar-thumb:hover": {
-        background: theme.palette.mode === "dark" ? "rgba(255,255,255,0.3)" : "rgba(0,0,0,0.3)",
-      },
+      "& .MuiCheckbox-root": { padding: "4px" },
+      "& .MuiListItemText-primary": { fontSize: "0.875rem", fontWeight: 500 },
     }),
   },
   anchorOrigin: {

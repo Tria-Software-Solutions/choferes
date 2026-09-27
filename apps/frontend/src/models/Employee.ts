@@ -1,8 +1,16 @@
 /** Frontend Employee type — mirrors @choferes/shared with avatar support */
+import type { EmployeeGender } from "@choferes/shared";
 export type {
   TerminationReason,
+  EmployeeGender,
 } from "@choferes/shared";
-export { TERMINATION_REASON_LABELS } from "@choferes/shared";
+export {
+  TERMINATION_REASON_LABELS,
+  EMPLOYEE_GENDERS,
+  EMPLOYEE_POSITIONS,
+  EMPLOYEE_POSITION_LABELS,
+  getEmployeePositionLabel,
+} from "@choferes/shared";
 
 export interface Employee {
   id: number;
@@ -22,8 +30,16 @@ export interface Employee {
   terminationNotes?: string | null;
   /** Puesto o cargo. */
   position?: string | null;
-  /** Cédula de identidad. */
+  /** Género del empleado ("Masculino" | "Femenino"). */
+  gender?: EmployeeGender | null;
+  /** Cédula de identidad. Solo dígitos: la máscara se aplica en la UI. */
   nationalId?: string | null;
+  /** Teléfono principal. Solo dígitos: la máscara se aplica en la UI. */
+  primaryPhone?: string | null;
+  /** Teléfono secundario (opcional). Solo dígitos. */
+  secondaryPhone?: string | null;
+  /** Usuario vinculado (para login), si existe. */
+  employeeId?: number | null;
   /** Derivado de terminationDate por el servidor. */
   isActive?: boolean;
   createdAt?: string;

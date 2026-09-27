@@ -4,7 +4,17 @@ export {
   EMPLOYEE_TERMINATION_REASONS,
   TERMINATION_REASON_LABELS,
 } from "./types/Employee";
-export type { TerminationReason } from "./types/Employee";
+export {
+  EMPLOYEE_GENDERS,
+  EMPLOYEE_POSITIONS,
+  EMPLOYEE_POSITION_LABELS,
+  getEmployeePositionLabel,
+} from "./types/Employee";
+export type {
+  TerminationReason,
+  EmployeeGender,
+  EmployeePosition,
+} from "./types/Employee";
 export { LICENSE_TYPES } from "./types/EmployeeLicense";
 export type { EmployeeLicense, LicenseType } from "./types/EmployeeLicense";
 export {

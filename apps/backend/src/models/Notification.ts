@@ -13,7 +13,7 @@ export class Notification extends Model {
 
   public type!: "info" | "success" | "warning" | "error"; // Notification type
 
-  public category!: "employee" | "schedule" | "vehicle" | "system" | "report"; // Notification category
+  public category!: "employee" | "schedule" | "vehicle" | "system" | "report" | "task"; // Notification category
 
   public priority!: "low" | "medium" | "high"; // Notification priority
 

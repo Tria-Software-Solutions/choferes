@@ -1,11 +1,9 @@
 import { useEffect, useState, useMemo, useCallback, useRef } from "react";
 import {
   Box,
-  Typography,
   useTheme,
   useMediaQuery,
   CircularProgress,
-  Paper,
 } from "@mui/material";
 import { useLocation } from "react-router-dom";
 import { getEmployees } from "../../../services/employeeService";
@@ -16,9 +14,16 @@ import { getVehicles } from "../../../services/vehicleService";
 import { getHoursWorked } from "../../../services/hoursWorkedService";
 import { getSchedules } from "../../../services/scheduleService";
 import { getWeekNumber, getWeekNumberAndYear, getBiweekNumber, getMonthNumber, getBiweeklyDates, getFirstDayOfWeek } from "../../../utils/dates";
-import { ChartNoAxesCombined } from "lucide-react";
-import { PAGE_TITLE } from "../../../constants/constants";
+import { APPBAR_MENU, PAGE_TITLE } from "../../../constants/constants";
+import NavIcon from "../../../components/NavIcon/NavIcon.component";
 import SegmentedToggle from "../../../components/SegmentedToggle/SegmentedToggle.component";
+import {
+  LoadingState,
+  PageBody,
+  PageCard,
+  PageContainer,
+  PageHeader,
+} from "../../../components/Layout";
 import { BentoGrid, BentoGridItem } from "./components/BentoGrid";
 import {
   TopEmployeesChart,
@@ -329,72 +334,70 @@ const Dashboard = () => {
     return result;
   }, [hoursWorked, filteredEmployeeIds]);
 
+  const periodToggle = (
+    <SegmentedToggle
+      value={period}
+      onChange={(value) => setPeriod(value as Period)}
+      ariaLabel="Período del reporte"
+      options={[
+        { value: "weekly" as Period, label: "Semanal" },
+        { value: "biweekly" as Period, label: "Quincenal" },
+        { value: "monthly" as Period, label: "Mensual" },
+      ]}
+      size="medium"
+      fullWidth={isSmallScreen}
+    />
+  );
+
+  const header = (
+    <PageHeader
+      icon={<NavIcon label={APPBAR_MENU.DASHBOARD} />}
+      title={
+        <Box component="span" sx={{ display: "inline-flex", alignItems: "center", gap: 1 }}>
+          {PAGE_TITLE.DASHBOARD}
+          {refreshing && (
+            <CircularProgress size={14} thickness={5} aria-label="Actualizando datos" />
+          )}
+        </Box>
+      }
+      subtitle={
+        loading
+          ? "Cargando datos…"
+          : `${filtered.employeeCount} empleados · ${filtered.totalHours} horas (${PERIOD_LABELS[period].toLowerCase()})`
+      }
+      // Next to the title on wide screens, full-width row on phones.
+      actions={isSmallScreen ? undefined : periodToggle}
+      toolbarEnd={isSmallScreen ? periodToggle : undefined}
+    />
+  );
+
   if (loading) {
     return (
-      <Box className="scrollable-content" sx={{ height: "100%", display: "flex", flexDirection: "column", overflow: "hidden", pb: 0, pt: 0, px: 0 }}>
-        <Box sx={{ display: "flex", justifyContent: "center", alignItems: "center", flex: 1 }}>
-          <CircularProgress size={28} />
-        </Box>
-      </Box>
+      <PageContainer>
+        <PageCard>
+          {header}
+          <PageBody>
+            <LoadingState label="Cargando reportes…" />
+          </PageBody>
+        </PageCard>
+      </PageContainer>
     );
   }
 
   return (
-    <Box className="scrollable-content" sx={{ height: "100%", display: "flex", flexDirection: "column", overflow: "hidden", pb: 0, pt: 0, px: 0 }}>
-      <Paper elevation={0} sx={{ borderRadius: { xs: "8px", sm: "12px" }, boxShadow: "0 2px 8px rgba(0,0,0,0.04)", overflow: "hidden", flex: 1, display: "flex", flexDirection: "column", mx: { xs: 0, sm: 0.5, md: 1 }, mt: 0 }}>
-        <Box sx={{ px: { xs: 2, sm: 2.5 }, py: { xs: 1.5, sm: 2 }, flexShrink: 0, borderBottom: `1px solid ${theme.palette.mode === "dark" ? "rgba(255,255,255,0.06)" : "rgba(0,0,0,0.06)"}` }}>
-          <Box display="flex" justifyContent="space-between" alignItems={{ xs: "stretch", sm: "center" }} flexDirection={{ xs: "column", sm: "row" }} gap={{ xs: 0.75, sm: 1 }}>
-            <Box display="flex" alignItems="center" gap={1.5} flexShrink={0}>
-              <Box sx={{ color: theme.palette.primary.main, display: 'flex', alignItems: 'center' }}>
-                <ChartNoAxesCombined size={20} strokeWidth={1.5} />
-              </Box>
-              <Box minWidth={0}>
-                <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.75 }}>
-                  <Typography variant={isSmallScreen ? "h6" : "h5"} sx={{ fontWeight: 700, fontSize: { xs: "1rem", sm: "1.15rem" }, color: theme.palette.text.primary, letterSpacing: "-0.02em", lineHeight: 1.2, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
-                    {PAGE_TITLE.DASHBOARD}
-                  </Typography>
-                  {refreshing && (
-                    <Box
-                      sx={{
-                        width: 14,
-                        height: 14,
-                        border: '2px solid',
-                        borderColor: theme.palette.primary.main,
-                        borderTopColor: 'transparent',
-                        borderRadius: '50%',
-                        animation: 'spin 0.8s linear infinite',
-                        flexShrink: 0,
-                        '@keyframes spin': { '0%': { transform: 'rotate(0deg)' }, '100%': { transform: 'rotate(360deg)' } },
-                      }}
-                    />
-                  )}
-                </Box>
-                <Typography variant="caption" sx={{ color: theme.palette.text.secondary, fontSize: "0.7rem", letterSpacing: "0.02em", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", display: "block" }}>
-                  {filtered.employeeCount} empleados · {filtered.totalHours} horas ({PERIOD_LABELS[period].toLowerCase()})
-                </Typography>
-              </Box>
-            </Box>
-            <SegmentedToggle
-              value={period}
-              onChange={(value) => setPeriod(value as Period)}
-              options={[
-                { value: "weekly" as Period, label: "Semanal" },
-                { value: "biweekly" as Period, label: "Quincenal" },
-                { value: "monthly" as Period, label: "Mensual" },
-              ]}
-              size="medium"
-              fullWidth={isSmallScreen}
+    <PageContainer>
+      <PageCard>
+        {header}
+        <PageBody scroll sx={{ p: { xs: 1, sm: 1.5 } }}>
+          <Box sx={{ mb: { xs: 1, md: 1.25 }, flexShrink: 0 }}>
+            <PeriodSummary
+              employeeCount={filtered.employeeCount}
+              totalHours={filtered.totalHours}
+              overtimeCount={filtered.overtime.length}
+              totalOvertime={filtered.totalOvertime}
             />
           </Box>
-        </Box>
-        <Box className="scrollable-content" sx={{ flex: 1, overflowX: "hidden", overflowY: { xs: "auto", sm: "hidden" }, p: { xs: 0.75, sm: 1 }, display: "flex", flexDirection: "column" }}>
           <BentoGrid>
-            <BentoGridItem
-              title="Resumen del período"
-              description={PERIOD_LABELS[period]}
-              colSpan={{ lg: 4, md: 4 }}
-              header={<PeriodSummary employeeCount={filtered.employeeCount} totalHours={filtered.totalHours} overtimeCount={filtered.overtime.length} totalOvertime={filtered.totalOvertime} />}
-            />
             <BentoGridItem
               title="Horas por empleado"
               description="Top empleados con más horas trabajadas"
@@ -423,9 +426,9 @@ const Dashboard = () => {
               header={<VehicleBrandChart data={vehicleBrands} />}
             />
           </BentoGrid>
-        </Box>
-      </Paper>
-    </Box>
+        </PageBody>
+      </PageCard>
+    </PageContainer>
   );
 };
 

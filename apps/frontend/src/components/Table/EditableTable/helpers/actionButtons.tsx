@@ -1,7 +1,8 @@
 import React, { useCallback, useState } from "react";
 import { Box, IconButton, Menu, MenuItem, ListItemIcon, ListItemText, Theme } from "@mui/material";
 import PremiumTooltip from "../../../../components/PremiumTooltip/PremiumTooltip.component";
-import { FileEdit, Trash2, CheckCircle, X, Lock, ToggleLeft, ToggleRight, MoreVertical } from "lucide-react";
+import { IconCheck, IconDotsVertical, IconLock, IconPencil, IconTrash, IconX } from "@tabler/icons-react";
+import { StatusBadge } from "../../../Layout";
 import { TABLE } from "../../../../constants/constants";
 
 interface ActionButtonsProps<T extends object> {
@@ -22,98 +23,58 @@ interface ActionButtonsProps<T extends object> {
   theme: Theme;
 }
 
-// ─── Modern pill-style action button styles (exported for reuse) ───
+// ─── Row action button styles (shared by every table in the app) ───
+// Quiet "ghost" icon buttons: they only take color on hover, so a column of
+// actions never competes with the data. Destructive actions tint red on hover.
 export const pillButtonBase = {
-  width: 34,
-  height: 34,
-  borderRadius: "12px",
-  transition: "all 0.2s cubic-bezier(0.4, 0, 0.2, 1)",
-  "&:active": {
-    transform: "scale(0.92)",
-  },
+  width: 32,
+  height: 32,
+  borderRadius: "8px",
+  transition: "background-color 0.15s ease, color 0.15s ease",
 };
 
-// Edit: subtle neutral tint that fills on hover
+// Edit: ghost, neutral
 export const editButtonStyles = (theme: Theme) => ({
   ...pillButtonBase,
-  backgroundColor:
-    theme.palette.mode === "dark"
-      ? "rgba(255,255,255,0.08)"
-      : "rgba(0,0,0,0.05)",
-  color: theme.palette.text.secondary,
+  color: theme.tokens.colors.textMuted,
   "&:hover": {
-    backgroundColor: theme.palette.primary.main,
-    color: theme.palette.primary.contrastText,
-    boxShadow: theme.palette.mode === "dark"
-      ? "0 2px 8px rgba(0,0,0,0.35)"
-      : "0 2px 8px rgba(0,0,0,0.15)",
+    backgroundColor: theme.tokens.colors.hover,
+    color: theme.tokens.colors.text,
   },
 });
 
-// Delete: subtle error tint that fills on hover
+// Delete: ghost, red on hover
 export const deleteButtonStyles = (theme: Theme) => ({
   ...pillButtonBase,
-  backgroundColor:
-    theme.palette.mode === "dark"
-      ? "rgba(239,68,68,0.12)"
-      : "rgba(239,68,68,0.08)",
-  color: theme.palette.error.main,
+  color: theme.tokens.colors.textMuted,
   "&:hover": {
-    backgroundColor: theme.palette.error.main,
-    color: "#fff",
-    boxShadow: theme.palette.mode === "dark"
-      ? "0 2px 8px rgba(239,68,68,0.45)"
-      : "0 2px 8px rgba(239,68,68,0.35)",
+    backgroundColor: theme.tokens.colors.errorSoft,
+    color: theme.tokens.colors.error,
   },
 });
 
-// Neutral: subtle surface tint for password/other actions
+// Neutral: password/other secondary actions
 export const neutralButtonStyles = (theme: Theme) => ({
   ...pillButtonBase,
-  backgroundColor:
-    theme.palette.mode === "dark"
-      ? "rgba(255,255,255,0.06)"
-      : "rgba(0,0,0,0.04)",
-  color: theme.palette.text.secondary,
+  color: theme.tokens.colors.textMuted,
   "&:hover": {
-    backgroundColor:
-      theme.palette.mode === "dark"
-        ? "rgba(255,255,255,0.12)"
-        : "rgba(0,0,0,0.08)",
-    color: theme.palette.text.primary,
+    backgroundColor: theme.tokens.colors.hover,
+    color: theme.tokens.colors.text,
   },
 });
 
-// Save: solid primary fill
+// Save: solid primary (the only filled action in a row)
 export const saveButtonStyles = (theme: Theme) => ({
   ...pillButtonBase,
-  backgroundColor: theme.palette.primary.main,
-  color: theme.palette.primary.contrastText,
-  boxShadow: theme.palette.mode === "dark"
-    ? "0 4px 14px rgba(0,0,0,0.35)"
-    : "0 4px 14px rgba(0,0,0,0.12)",
+  backgroundColor: theme.tokens.colors.primary,
+  color: theme.tokens.colors.onPrimary,
   "&:hover": {
-    backgroundColor: theme.palette.primary.dark,
-    boxShadow: theme.palette.mode === "dark"
-      ? "0 2px 8px rgba(0,0,0,0.4)"
-      : "0 2px 8px rgba(0,0,0,0.18)",
+    backgroundColor: theme.tokens.colors.primaryHover,
+    color: theme.tokens.colors.onPrimary,
   },
   "&.Mui-disabled": {
-    backgroundColor:
-      theme.palette.mode === "dark"
-        ? "rgba(255,255,255,0.08)"
-        : "rgba(0,0,0,0.08)",
-    color: theme.palette.text.disabled,
-    boxShadow: "none",
-    "&:hover": {
-      backgroundColor:
-        theme.palette.mode === "dark"
-          ? "rgba(255,255,255,0.08)"
-          : "rgba(0,0,0,0.08)",
-      color: theme.palette.text.disabled,
-      transform: "none",
-      boxShadow: "none",
-    },
+    backgroundColor: theme.tokens.colors.disabled,
+    color: theme.tokens.colors.disabledText,
   },
 });
 
@@ -131,7 +92,7 @@ function EditingActions({
   theme: Theme;
 }): React.ReactElement {
   return (
-    <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+    <Box sx={{ display: "flex", alignItems: "center", justifyContent: "flex-end", gap: 0.25 }}>
       <PremiumTooltip title={TABLE.SAVE}>
         <span>
           <Box>
@@ -140,7 +101,7 @@ function EditingActions({
               disabled={isSaveDisabled}
               sx={saveButtonStyles(theme)}
             >
-              <CheckCircle size={17} />
+              <IconCheck size={16} stroke={2.25} />
             </IconButton>
           </Box>
         </span>
@@ -149,7 +110,7 @@ function EditingActions({
         <span>
           <Box>
             <IconButton onClick={onCancel} sx={neutralButtonStyles(theme)}>
-              <X size={17} />
+              <IconX size={16} stroke={1.75} />
             </IconButton>
           </Box>
         </span>
@@ -189,7 +150,7 @@ function ViewingActionsMobile<T extends object>({
         size="small"
         sx={{ ...neutralButtonStyles(theme), width: 30, height: 30, p: 0.5 }}
       >
-        <MoreVertical size={17} />
+        <IconDotsVertical size={17} />
       </IconButton>
       <Menu
         anchorEl={anchorEl}
@@ -202,25 +163,25 @@ function ViewingActionsMobile<T extends object>({
             minWidth: 160,
             borderRadius: 2,
             boxShadow: "0 8px 32px rgba(0,0,0,0.15)",
-            border: `1px solid ${theme.palette.mode === "dark" ? "rgba(255,255,255,0.08)" : "rgba(0,0,0,0.08)"}`,
+            border: theme.tokens.borders.paper,
           },
         }}
       >
         {showPasswordButton && (
           <MenuItem onClick={handlePassword} sx={{ gap: 1.5, py: 1 }}>
-            <ListItemIcon sx={{ minWidth: 28 }}><Lock size={16} /></ListItemIcon>
+            <ListItemIcon sx={{ minWidth: 28 }}><IconLock size={15} stroke={1.75} /></ListItemIcon>
             <ListItemText primaryTypographyProps={{ fontSize: "0.85rem" }}>{TABLE.CHANGE_PASSWORD}</ListItemText>
           </MenuItem>
         )}
         {showEditButton && (
           <MenuItem onClick={handleEdit} sx={{ gap: 1.5, py: 1 }}>
-            <ListItemIcon sx={{ minWidth: 28 }}><FileEdit size={16} /></ListItemIcon>
+            <ListItemIcon sx={{ minWidth: 28 }}><IconPencil size={15} stroke={1.75} /></ListItemIcon>
             <ListItemText primaryTypographyProps={{ fontSize: "0.85rem" }}>{TABLE.EDIT}</ListItemText>
           </MenuItem>
         )}
         {showDeleteButton && (
           <MenuItem onClick={handleDelete} sx={{ gap: 1.5, py: 1, color: theme.palette.error.main }}>
-            <ListItemIcon sx={{ minWidth: 28, color: theme.palette.error.main }}><Trash2 size={16} /></ListItemIcon>
+            <ListItemIcon sx={{ minWidth: 28, color: theme.palette.error.main }}><IconTrash size={15} stroke={1.75} /></ListItemIcon>
             <ListItemText primaryTypographyProps={{ fontSize: "0.85rem" }}>{TABLE.DELETE}</ListItemText>
           </MenuItem>
         )}
@@ -253,13 +214,13 @@ function ViewingActions<T extends object>({
   const handlePassword = useCallback(() => onOpenPasswordModal?.(rowId), [onOpenPasswordModal, rowId]);
 
   return (
-    <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+    <Box sx={{ display: "flex", alignItems: "center", justifyContent: "flex-end", gap: 0.25 }}>
       {showPasswordButton && (
         <PremiumTooltip title={TABLE.CHANGE_PASSWORD}>
           <span>
             <Box>
               <IconButton onClick={handlePassword} sx={neutralButtonStyles(theme)}>
-                <Lock size={16} />
+                <IconLock size={15} stroke={1.75} />
               </IconButton>
             </Box>
           </span>
@@ -270,7 +231,7 @@ function ViewingActions<T extends object>({
           <span>
             <Box>
               <IconButton onClick={handleEdit} sx={editButtonStyles(theme)}>
-                <FileEdit size={16} />
+                <IconPencil size={15} stroke={1.75} />
               </IconButton>
             </Box>
           </span>
@@ -281,7 +242,7 @@ function ViewingActions<T extends object>({
           <span>
             <Box>
               <IconButton onClick={handleDelete} sx={deleteButtonStyles(theme)}>
-                <Trash2 size={16} />
+                <IconTrash size={15} stroke={1.75} />
               </IconButton>
             </Box>
           </span>
@@ -363,20 +324,17 @@ export function renderStatusButton<T extends object>({
 
   return (
     <PremiumTooltip title={row.isActive ? TABLE.DISABLE : TABLE.ENABLE}>
-      <span>
-        <Box>
-          <IconButton
-            color="secondary"
-            onClick={() => handleOpenStatusDialog && handleOpenStatusDialog(row)}
-          >
-            {row.isActive ? (
-              <ToggleRight size={24} color="green" />
-            ) : (
-              <ToggleLeft size={24} color="gray" />
-            )}
-          </IconButton>
-        </Box>
-      </span>
+      <Box
+        component="button"
+        type="button"
+        onClick={() => handleOpenStatusDialog && handleOpenStatusDialog(row)}
+        sx={{ all: "unset", cursor: "pointer", borderRadius: "999px", display: "inline-flex" }}
+      >
+        <StatusBadge
+          label={row.isActive ? "Activo" : "Inactivo"}
+          tone={row.isActive ? "success" : "default"}
+        />
+      </Box>
     </PremiumTooltip>
   );
 } 

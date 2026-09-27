@@ -4,6 +4,7 @@ import { Request, Response } from "express";
 import * as hoursWorkedService from "../services/hoursWorkedService";
 import * as summaryRecalculationService from "../services/summaryRecalculationService";
 import { Employee } from "../models/Employee";
+import { sendServerError } from "../utils/errors";
 
 // Get all hours worked records (paginated, optionally filtered by date range)
 export const getHoursWorked = async (req: Request, res: Response) => {
@@ -13,7 +14,7 @@ export const getHoursWorked = async (req: Request, res: Response) => {
     );
     return res.status(200).json(result);
   } catch (error) {
-    return res.status(500).json({ message: "Error fetching HoursWorked", error });
+    return sendServerError(res, "Error fetching HoursWorked", error);
   }
 };
 
@@ -27,7 +28,7 @@ export const getHoursWorkedById = async (req: Request, res: Response) => {
     }
     return res.status(404).json({ message: "HoursWorked entry not found" });
   } catch (error) {
-    return res.status(500).json({ message: "Error fetching HoursWorked by ID", error });
+    return sendServerError(res, "Error fetching HoursWorked by ID", error);
   }
 };
 
@@ -37,7 +38,7 @@ export const createHoursWorked = async (req: Request, res: Response) => {
     const hoursWorked = await hoursWorkedService.createHoursWorked(req.body);
     return res.status(201).json(hoursWorked);
   } catch (error) {
-    return res.status(500).json({ message: "Error creating HoursWorked", error });
+    return sendServerError(res, "Error creating HoursWorked", error);
   }
 };
 
@@ -51,7 +52,7 @@ export const updateHoursWorked = async (req: Request, res: Response) => {
     }
     return res.status(404).json({ message: "HoursWorked entry not found" });
   } catch (error) {
-    return res.status(500).json({ message: "Error updating HoursWorked", error });
+    return sendServerError(res, "Error updating HoursWorked", error);
   }
 };
 
@@ -66,7 +67,7 @@ export const deleteHoursWorked = async (req: Request, res: Response) => {
     }
     return res.status(404).json({ message: "HoursWorked entry not found" });
   } catch (error) {
-    return res.status(500).json({ message: "Error deleting HoursWorked", error });
+    return sendServerError(res, "Error deleting HoursWorked", error);
   }
 };
 
@@ -100,6 +101,6 @@ export const recalculateSummaries = async (req: Request, res: Response) => {
       recalculated: counts,
     });
   } catch (error) {
-    return res.status(500).json({ message: "Error recalculating summaries", error });
+    return sendServerError(res, "Error recalculating summaries", error);
   }
 };

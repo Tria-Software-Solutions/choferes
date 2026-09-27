@@ -1,6 +1,7 @@
 import { Model, DataTypes, Association } from "sequelize";
 import sequelize from "../config/database";
 import { Role } from "./Role";
+import { Employee } from "./Employee";
 
 // User model definition for Sequelize ORM
 export class User extends Model {
@@ -26,8 +27,12 @@ export class User extends Model {
 
   public roles?: Role[]; // Associated roles for the user
 
+  /** Employee (Planilla) linked to this user, if any. */
+  public employeeId?: number | null;
+
   public static associations: {
     roles: Association<User, Role>; // Association with roles
+    employee: Association<User, Employee>;
   };
 }
 
@@ -78,6 +83,14 @@ User.init(
       type: DataTypes.JSONB,
       allowNull: true,
       defaultValue: {},
+    },
+    employeeId: {
+      type: DataTypes.INTEGER,
+      allowNull: true,
+      unique: true,
+      references: { model: "employees", key: "id" },
+      onDelete: "SET NULL",
+      onUpdate: "CASCADE",
     },
   },
   {

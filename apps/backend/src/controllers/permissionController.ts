@@ -2,6 +2,7 @@
 // Read-only: the permission catalog is code-owned, so there is no runtime CRUD.
 import { Request, Response } from "express";
 import * as permissionService from "../services/permissionService";
+import { sendServerError } from "../utils/errors";
 
 // Get all permissions (paginated)
 export const getPermissions = async (req: Request, res: Response) => {
@@ -11,7 +12,7 @@ export const getPermissions = async (req: Request, res: Response) => {
     );
     return res.status(200).json(result);
   } catch (error) {
-    return res.status(500).json({ message: "Error fetching Permissions", error });
+    return sendServerError(res, "Error fetching Permissions", error);
   }
 };
 
@@ -24,7 +25,7 @@ export const getPermissionById = async (req: Request, res: Response) => {
     }
     return res.status(200).json(permission);
   } catch (error) {
-    return res.status(500).json({ message: "Error fetching Permission", error });
+    return sendServerError(res, "Error fetching Permission", error);
   }
 };
 
@@ -42,6 +43,6 @@ export const getPermissionsByNames = async (req: Request, res: Response) => {
     }
     return res.status(200).json(permissions);
   } catch (error) {
-    return res.status(500).json({ message: "Error fetching Permissions", error });
+    return sendServerError(res, "Error fetching Permissions", error);
   }
 };

@@ -1,7 +1,7 @@
 // Middleware for authenticating and refreshing JWT tokens for protected routes
 import jwt, { JwtPayload } from "jsonwebtoken";
 import { Request, Response, NextFunction } from "express";
-import { generateTokens } from "../utils/generateSecret";
+import { clearAuthCookies, generateTokens } from "../utils/generateSecret";
 import { User } from "../models/User";
 import { Role } from "../models/Role";
 import { Permission } from "../models/Permission";
@@ -142,7 +142,10 @@ export const authenticateToken = async (
 // always sends it there), falling back to the httpOnly cookie. This makes the
 // refresh flow resilient to browsers that block third-party cookies on
 // cross-site requests (frontend on Vercel, API on Render).
-export const authenticateRefreshToken = (req: AuthenticatedRequest, res: Response) => {
+//
+// New tokens are only issued while the account still exists and is active, so
+// deleting or disabling a user also ends their session at the next refresh.
+export const authenticateRefreshToken = async (req: AuthenticatedRequest, res: Response) => {
   try {
     const authHeader = req.headers.authorization;
     let refreshToken: string | null = null;
@@ -160,43 +163,51 @@ export const authenticateRefreshToken = (req: AuthenticatedRequest, res: Respons
       });
     }
 
-    return jwt.verify(refreshToken, JWT_SECRET_KEY_REFRESH, (refreshErr, refreshDecoded) => {
-      if (refreshErr) {
-        if (refreshErr.name === "TokenExpiredError") {
-          return res.status(401).json({
-            error: "Unauthorized: Refresh token expired",
-            code: "REFRESH_TOKEN_EXPIRED",
-          });
-        }
-        return res.status(403).json({
-          error: "Forbidden: Invalid refresh token",
-          code: "INVALID_REFRESH_TOKEN",
+    let payload: JwtPayload;
+    try {
+      payload = await verifyToken(refreshToken, JWT_SECRET_KEY_REFRESH);
+    } catch (refreshErr) {
+      if (refreshErr instanceof Error && refreshErr.name === "TokenExpiredError") {
+        return res.status(401).json({
+          error: "Unauthorized: Refresh token expired",
+          code: "REFRESH_TOKEN_EXPIRED",
         });
       }
-
-      const payload = refreshDecoded as JwtPayload;
-      const { userId } = payload;
-
-      if (!userId || typeof userId !== "string") {
-        return res.status(403).json({
-          error: "Forbidden: Invalid refresh token payload",
-          code: "INVALID_REFRESH_PAYLOAD",
-        });
-      }
-
-      const { accessToken: newAccessToken, refreshToken: newRefreshToken } = generateTokens(
-        userId,
-        res,
-      );
-
-      res.setHeader("x-access-token", newAccessToken);
-      res.setHeader("x-refresh-token", newRefreshToken);
-
-      return res.status(200).json({
-        accessToken: newAccessToken,
-        refreshToken: newRefreshToken,
-        message: "Tokens refreshed successfully",
+      return res.status(403).json({
+        error: "Forbidden: Invalid refresh token",
+        code: "INVALID_REFRESH_TOKEN",
       });
+    }
+
+    const { userId } = payload;
+    if (!userId || typeof userId !== "string") {
+      return res.status(403).json({
+        error: "Forbidden: Invalid refresh token payload",
+        code: "INVALID_REFRESH_PAYLOAD",
+      });
+    }
+
+    const user = await User.findByPk(parseInt(userId, 10), { attributes: ["id", "isActive"] });
+    if (!user || !user.isActive) {
+      clearAuthCookies(res);
+      return res.status(401).json({
+        error: "Unauthorized: Account unavailable",
+        code: "USER_UNAVAILABLE",
+      });
+    }
+
+    const { accessToken: newAccessToken, refreshToken: newRefreshToken } = generateTokens(
+      userId,
+      res,
+    );
+
+    res.setHeader("x-access-token", newAccessToken);
+    res.setHeader("x-refresh-token", newRefreshToken);
+
+    return res.status(200).json({
+      accessToken: newAccessToken,
+      refreshToken: newRefreshToken,
+      message: "Tokens refreshed successfully",
     });
   } catch {
     return res.status(500).json({
@@ -204,4 +215,12 @@ export const authenticateRefreshToken = (req: AuthenticatedRequest, res: Respons
       code: "REFRESH_ERROR",
     });
   }
+};
+
+// Ends the session: expires the httpOnly auth cookies. Tokens held in memory
+// by the client are discarded client-side; this handler needs no valid token
+// so an already-expired session can still be closed cleanly.
+export const logout = (_req: Request, res: Response) => {
+  clearAuthCookies(res);
+  return res.status(204).end();
 };

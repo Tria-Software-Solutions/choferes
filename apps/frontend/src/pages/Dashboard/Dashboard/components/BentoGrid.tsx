@@ -17,16 +17,17 @@ export const BentoGrid: React.FC<BentoGridProps> = ({ children, sx }) => {
           md: "repeat(4, 1fr)",
           lg: "repeat(4, 1fr)",
         },
+        // Cards fill the viewport on tall screens but never shrink below a
+        // readable size: on short screens the dashboard body scrolls instead
+        // of clipping charts and legends.
         gridAutoRows: {
           xs: "auto",
-          sm: "1fr",
-          md: "1fr",
+          sm: "minmax(240px, auto)",
+          md: "minmax(230px, 1fr)",
         },
-        gap: { xs: 0.5, sm: 0.75, md: 1 },
-        // xs: content-sized so stacked cards push the scroll area naturally
-        // sm+: flex-fill to keep the equal-height bento layout
-        flex: { xs: "0 0 auto", sm: 1 },
-        minHeight: { xs: "auto", sm: 0 },
+        gap: { xs: 1, md: 1.25 },
+        flex: { xs: "0 0 auto", md: 1 },
+        minHeight: 0,
         ...(sx as object),
       }}
     >
@@ -62,7 +63,7 @@ export const BentoGridItem: React.FC<BentoGridItemProps> = ({
   rowSpan = {},
 }) => {
   const theme = useTheme();
-  const isDark = theme.palette.mode === "dark";
+  const { borders, shadows } = theme.tokens;
   const hasContent = header || title || description || icon;
 
   const gridColumn: Record<string, string> = {};
@@ -84,20 +85,14 @@ export const BentoGridItem: React.FC<BentoGridItemProps> = ({
       sx={{
         ...(Object.keys(gridColumn).length > 0 ? { gridColumn } : {}),
         ...(Object.keys(gridRow).length > 0 ? { gridRow } : {}),
-        borderRadius: { xs: "8px", sm: "10px" },
-        boxShadow: isDark
-          ? "0 2px 8px rgba(0,0,0,0.2)"
-          : "0 2px 8px rgba(0,0,0,0.04)",
-        p: { xs: 1, sm: 1.25, md: 1.5 },
+        borderRadius: "14px",
+        border: borders.paper,
+        boxShadow: `0 1px 2px ${shadows.card}`,
+        p: { xs: 2, md: 2.25 },
         display: "flex",
         flexDirection: "column",
+        minHeight: 0,
         backgroundColor: theme.palette.background.paper,
-        transition: "box-shadow 0.2s ease",
-        "&:hover": {
-          boxShadow: isDark
-            ? "0 4px 16px rgba(0,0,0,0.35)"
-            : "0 4px 16px rgba(0,0,0,0.08)",
-        },
         overflow: "hidden",
         position: "relative",
         ...(sx as object),
@@ -132,7 +127,7 @@ export const BentoGridItem: React.FC<BentoGridItemProps> = ({
                 color: theme.palette.text.primary,
                 letterSpacing: "-0.01em",
                 mb: 0.25,
-                fontSize: { xs: "0.8rem", sm: "0.875rem" },
+                fontSize: "0.9375rem",
               }}
             >
               {title}
@@ -143,9 +138,9 @@ export const BentoGridItem: React.FC<BentoGridItemProps> = ({
               variant="body2"
               sx={{
                 color: theme.palette.text.secondary,
-                fontSize: { xs: "0.65rem", sm: "0.75rem" },
+                fontSize: "0.75rem",
                 lineHeight: 1.3,
-                mb: header ? { xs: 0.75, sm: 1 } : 0,
+                mb: header ? 2 : 0,
               }}
             >
               {description}

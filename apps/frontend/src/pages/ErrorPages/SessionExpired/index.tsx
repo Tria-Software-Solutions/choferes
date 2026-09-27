@@ -7,7 +7,7 @@ import {
   useMediaQuery,
   useTheme,
 } from "@mui/material";
-import { LogIn } from "lucide-react";
+import { IconLogin2 } from "@tabler/icons-react";
 import sessionSvg from "../../../assets/images/401.svg";
 import ERRORS from "../../../constants/errors.constants";
 import {
@@ -33,7 +33,7 @@ const SessionExpired: React.FC = () => {
           elevation={0}
           sx={{
             borderRadius: "16px",
-            border: `1px solid ${theme.palette.mode === "dark" ? "rgba(255,255,255,0.08)" : "rgba(0,0,0,0.08)"}`,
+            border: theme.tokens.borders.paper,
             boxShadow:
               "0 4px 24px rgba(0,0,0,0.08), 0 1px 2px rgba(0,0,0,0.04)",
             overflow: "hidden",
@@ -46,7 +46,7 @@ const SessionExpired: React.FC = () => {
               py: { xs: 3, md: 4 },
               backgroundColor: theme.palette.background.paper,
               color: theme.palette.text.primary,
-              borderBottom: `1px solid ${theme.palette.mode === "dark" ? "rgba(255,255,255,0.08)" : "rgba(0,0,0,0.08)"}`,
+              borderBottom: theme.tokens.borders.paper,
             }}
           >
             <Box
@@ -80,7 +80,7 @@ const SessionExpired: React.FC = () => {
               <Button
                 variant="contained"
                 size="large"
-                startIcon={<LogIn size={20} />}
+                startIcon={<IconLogin2 size={20} />}
                 onClick={logoutUser}
                 fullWidth={isSmallScreen}
                 aria-label={ERRORS.SESSION_EXPIRED_BUTTON}

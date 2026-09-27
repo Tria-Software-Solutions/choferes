@@ -2,9 +2,10 @@ import React from "react";
 import TextField, { TextFieldProps } from "@mui/material/TextField";
 import InputAdornment from "@mui/material/InputAdornment";
 import { SxProps, Theme } from "@mui/material/styles";
-import { textFieldStyles, inputAdornmentStyles } from "./Textfield.styles";
+import { textFieldStyles } from "./Textfield.styles";
 
 // CustomTextField component wraps MUI TextField with optional start/end adornments (icons/buttons).
+// The field look comes from the theme, so it always matches the other inputs in the app.
 // Props:
 // - icon: element to show at the start
 // - endAdornment: element to show at the end
@@ -46,9 +47,7 @@ const TextfieldComponent: React.FC<CustomTextFieldProps> = ({
       onChange={handleChange}
       InputProps={{
         startAdornment: icon ? (
-          <InputAdornment position="start" sx={inputAdornmentStyles}>
-            {icon}
-          </InputAdornment>
+          <InputAdornment position="start">{icon}</InputAdornment>
         ) : undefined,
         endAdornment: endAdornment ? (
           // Check if endAdornment is already an InputAdornment by checking its type

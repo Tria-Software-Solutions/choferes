@@ -13,8 +13,22 @@ import {
 
 const router = express.Router();
 
-router.get("/", authenticateToken, licenseQueryRules, validate, licenseController.getLicenses);
-router.get("/:id", authenticateToken, idParam, validate, licenseController.getLicenseById);
+router.get(
+  "/",
+  authenticateToken,
+  requirePermission(PERMISSION_CODES.VIEW_LICENSES),
+  licenseQueryRules,
+  validate,
+  licenseController.getLicenses,
+);
+router.get(
+  "/:id",
+  authenticateToken,
+  requirePermission(PERMISSION_CODES.VIEW_LICENSES),
+  idParam,
+  validate,
+  licenseController.getLicenseById,
+);
 router.post(
   "/",
   authenticateToken,

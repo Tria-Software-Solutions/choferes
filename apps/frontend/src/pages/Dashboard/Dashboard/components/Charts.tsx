@@ -1,5 +1,6 @@
-import { useTheme, useMediaQuery, Box } from "@mui/material";
-import { Users, Clock, BarChart3, Zap } from "lucide-react";
+import React from "react";
+import { useTheme, Box, Typography } from "@mui/material";
+import { IconBolt, IconCalculator, IconClock, IconUserExclamation, IconUsers } from "@tabler/icons-react";
 import {
   XAxis,
   YAxis,
@@ -7,84 +8,121 @@ import {
   PieChart,
   Pie,
   Cell,
-  LineChart,
-  Line,
+  AreaChart,
+  Area,
   Tooltip,
+  CartesianGrid,
 } from "recharts";
+import { StatCard, StatGrid } from "../../../../components/Layout";
+import { getChartPalette } from "../../../../theme/chartPalette";
 
-const SCHEDULE_COLORS = ["#4361EE", "#F72585", "#FF6B6B", "#20B2AA", "#FFB703", "#06D6A0", "#7209B7", "#00B4D8", "#A7C957", "#FF85A1"];
+// ─── Shared pieces ───────────────────────────────────────────────────────────
 
-const COLORS = ["#F72585", "#4361EE", "#20B2AA", "#7209B7", "#FFB703", "#06D6A0", "#FF6B6B", "#00B4D8"];
+const ChartEmpty: React.FC<{ children: React.ReactNode }> = ({ children }) => (
+  <Box
+    sx={{
+      flex: 1,
+      minHeight: 96,
+      display: "flex",
+      alignItems: "center",
+      justifyContent: "center",
+      textAlign: "center",
+      fontSize: "0.8125rem",
+      color: "text.secondary",
+    }}
+  >
+    {children}
+  </Box>
+);
+
+const useTooltipStyle = () => {
+  const { colors, borders, shadows } = useTheme().tokens;
+  return {
+    contentStyle: {
+      backgroundColor: colors.menuSurface,
+      border: borders.dialog,
+      borderRadius: 10,
+      boxShadow: shadows.menu,
+      fontSize: 12,
+      color: colors.text,
+      padding: "8px 10px",
+    },
+    itemStyle: { color: colors.text },
+    labelStyle: { color: colors.textMuted, marginBottom: 2 },
+  };
+};
+
+interface RankedItem {
+  name: string;
+  value: number;
+}
+
+// Ranked list with thin proportional bars: one hue, value on the right.
+const RankedBarList: React.FC<{
+  data: RankedItem[];
+  color: string;
+  format: (value: number) => string;
+  showRank?: boolean;
+}> = ({ data, color, format, showRank = true }) => {
+  const { colors } = useTheme().tokens;
+  const maxVal = Math.max(...data.map((d) => d.value), 1);
+  return (
+    <Box sx={{ display: "flex", flexDirection: "column", gap: 1.25, overflow: "auto", flex: 1, minHeight: 0, pr: 0.5 }}>
+      {data.map((item, i) => (
+        <Box key={`${item.name}-${i}`}>
+          <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", gap: 1, mb: 0.5 }}>
+            <Typography
+              component="span"
+              sx={{ fontSize: "0.8125rem", fontWeight: 500, color: colors.text, minWidth: 0 }}
+              noWrap
+            >
+              {showRank && (
+                <Box component="span" sx={{ color: colors.textSubtle, mr: 0.75, fontVariantNumeric: "tabular-nums" }}>
+                  {i + 1}
+                </Box>
+              )}
+              {item.name}
+            </Typography>
+            <Typography
+              component="span"
+              sx={{ fontSize: "0.8125rem", fontWeight: 700, color: colors.text, whiteSpace: "nowrap", fontVariantNumeric: "tabular-nums" }}
+            >
+              {format(item.value)}
+            </Typography>
+          </Box>
+          <Box sx={{ height: 6, borderRadius: 999, backgroundColor: colors.hover, overflow: "hidden" }}>
+            <Box
+              sx={{
+                height: "100%",
+                width: `${Math.max(2, Math.round((item.value / maxVal) * 100))}%`,
+                borderRadius: 999,
+                backgroundColor: color,
+                opacity: Math.max(0.45, 1 - i * 0.06),
+                transition: "width 0.6s cubic-bezier(0.4, 0, 0.2, 1)",
+              }}
+            />
+          </Box>
+        </Box>
+      ))}
+    </Box>
+  );
+};
+
+// ─── Charts ──────────────────────────────────────────────────────────────────
 
 interface TopEmployeesProps {
   data: { name: string; hours: number }[];
 }
 
 export const TopEmployeesChart = ({ data }: TopEmployeesProps) => {
-  const theme = useTheme();
-  const isDark = theme.palette.mode === "dark";
-
-  if (!data.length) {
-    return (
-      <Box sx={{ flex: 1, display: "flex", alignItems: "center", justifyContent: "center", color: "text.disabled", fontSize: { xs: "0.7rem", sm: "0.85rem" }, fontStyle: "italic" }}>
-        Sin datos de horas en este período
-      </Box>
-    );
-  }
-
-  const limited = data.slice(0, 10);
-  const maxVal = Math.max(...limited.map((d) => d.hours), 1);
-
+  const { colors } = useTheme().tokens;
+  if (!data.length) return <ChartEmpty>Sin horas registradas en este período</ChartEmpty>;
   return (
-    <Box sx={{ display: "flex", flexDirection: "column", gap: { xs: 0.6, sm: 0.9 }, overflow: "auto", flex: 1, minHeight: 0, pr: 0.5 }}>
-      {limited.map((item, i) => {
-        const pct = Math.round((item.hours / maxVal) * 100);
-        const gradientColors = [
-          'linear-gradient(90deg, #6C83F5, #4361EE)',
-          'linear-gradient(90deg, #6C83F5, #4361EE)',
-          'linear-gradient(90deg, #8899FF, #5B75F5)',
-          'linear-gradient(90deg, #8899FF, #5B75F5)',
-          'linear-gradient(90deg, #A3B0FF, #7588FF)',
-          'linear-gradient(90deg, #A3B0FF, #7588FF)',
-          'linear-gradient(90deg, #C5CEFF, #95A3FF)',
-          'linear-gradient(90deg, #C5CEFF, #95A3FF)',
-          'linear-gradient(90deg, #DDE2FF, #B0BBFF)',
-          'linear-gradient(90deg, #DDE2FF, #B0BBFF)',
-        ];
-        return (
-          <Box key={item.name}>
-            <Box sx={{ display: "flex", justifyContent: "space-between", mb: 0.3, alignItems: "center" }}>
-              <Box sx={{
-                fontSize: { xs: "0.7rem", sm: "0.8rem" },
-                fontWeight: 500,
-                color: "text.primary",
-                overflow: "hidden",
-                textOverflow: "ellipsis",
-                whiteSpace: "nowrap",
-                maxWidth: { xs: "50%", sm: "60%" },
-              }}>
-                {i + 1}. {item.name}
-              </Box>
-              <Box sx={{
-                fontSize: { xs: "0.65rem", sm: "0.75rem" },
-                fontWeight: 700,
-                color: "#4361EE",
-                background: isDark ? "rgba(67,97,238,0.15)" : "rgba(67,97,238,0.1)",
-                px: { xs: 0.6, sm: 0.85 },
-                py: 0.2,
-                borderRadius: "6px",
-                whiteSpace: "nowrap",
-              }}>
-                {item.hours} hrs
-              </Box>
-            </Box>
-            <Box sx={{ height: { xs: 4, sm: 6 }, borderRadius: "4px", bgcolor: isDark ? "rgba(255,255,255,0.06)" : "rgba(0,0,0,0.06)", overflow: "hidden" }}>
-              <Box sx={{ height: "100%", width: `${pct}%`, borderRadius: "4px", background: gradientColors[Math.min(i, 9)], transition: "width 0.8s cubic-bezier(0.4, 0, 0.2, 1)" }} />
-            </Box>
-          </Box>
-        );
-      })}
-    </Box>
+    <RankedBarList
+      data={data.slice(0, 10).map((d) => ({ name: d.name, value: d.hours }))}
+      color={colors.accent}
+      format={(v) => `${v} h`}
+    />
   );
 };
 
@@ -94,90 +132,66 @@ interface VehicleBrandProps {
 
 export const VehicleBrandChart = ({ data }: VehicleBrandProps) => {
   const theme = useTheme();
-  const isDark = theme.palette.mode === "dark";
+  const { colors } = theme.tokens;
+  const palette = getChartPalette(theme.palette.mode);
+  const tooltip = useTooltipStyle();
 
-  if (!data.length) {
-    return (
-      <Box sx={{ flex: 1, display: "flex", alignItems: "center", justifyContent: "center", color: "text.disabled", fontSize: { xs: "0.75rem", sm: "0.85rem" } }}>
-        Sin datos de vehículos
-      </Box>
-    );
-  }
+  if (!data.length) return <ChartEmpty>Sin vehículos registrados</ChartEmpty>;
 
   const items = data.slice(0, 8);
+  const total = items.reduce((sum, item) => sum + item.count, 0);
 
   return (
-    <Box sx={{
-      flex: 1,
-      display: "flex",
-      flexDirection: { xs: "row", sm: "column", md: "row" },
-      gap: { xs: 0.5, sm: 1, md: 1.5 },
-      minHeight: 0,
-      alignItems: "center",
-    }}>
-      {/* Pie chart */}
-      <Box sx={{
-        width: { xs: "45%", sm: "100%", md: "50%" },
-        height: { xs: "100%", sm: "55%", md: "100%" },
-        minHeight: { xs: 80, sm: 100, md: 120 },
-        flexShrink: 0,
-      }}>
+    <Box sx={{ flex: 1, display: "flex", alignItems: "center", gap: 2, minHeight: 0 }}>
+      <Box sx={{ position: "relative", width: "45%", maxWidth: 150, aspectRatio: "1", flexShrink: 0 }}>
         <ResponsiveContainer width="100%" height="100%">
           <PieChart>
             <Pie
               data={items}
               dataKey="count"
               nameKey="brand"
-              cx="50%"
-              cy="50%"
-              innerRadius={20}
-              outerRadius={36}
+              innerRadius="68%"
+              outerRadius="100%"
               paddingAngle={2}
               cornerRadius={4}
+              stroke="none"
             >
-              {items.map((_, i) => (
-                <Cell key={i} fill={COLORS[i % COLORS.length]} />
+              {items.map((item, i) => (
+                <Cell key={item.brand} fill={palette[i % palette.length]} />
               ))}
             </Pie>
             <Tooltip
-              contentStyle={{
-                backgroundColor: isDark ? "#1f2937" : "#fff",
-                border: `1px solid ${isDark ? "#374151" : "#e5e7eb"}`,
-                borderRadius: 8,
-                fontSize: 11,
-              }}
+              {...tooltip}
               // eslint-disable-next-line @typescript-eslint/no-explicit-any
               formatter={(value: any, name: any) => [`${value} vehículos`, name]}
             />
           </PieChart>
         </ResponsiveContainer>
+        <Box
+          sx={{
+            position: "absolute",
+            inset: 0,
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "center",
+            justifyContent: "center",
+            pointerEvents: "none",
+          }}
+        >
+          <Typography sx={{ fontSize: "1.125rem", fontWeight: 700, lineHeight: 1, color: colors.text }}>{total}</Typography>
+          <Typography sx={{ fontSize: "0.6875rem", color: colors.textMuted }}>total</Typography>
+        </Box>
       </Box>
-      {/* Legend */}
-      <Box sx={{
-        flex: 1,
-        display: "flex",
-        flexDirection: { xs: "column", sm: "row", md: "column" },
-        gap: { xs: 0.25, sm: 0.4, md: 0.5 },
-        justifyContent: "center",
-        flexWrap: "wrap",
-        minHeight: 0,
-      }}>
+      <Box sx={{ flex: 1, minWidth: 0, display: "flex", flexDirection: "column", gap: 0.75, maxHeight: "100%", overflowY: "auto" }}>
         {items.map((item, i) => (
-          <Box key={item.brand} sx={{ display: "flex", alignItems: "center", gap: 0.5 }}>
-            <Box sx={{ width: 8, height: 8, borderRadius: "2px", backgroundColor: COLORS[i % COLORS.length], flexShrink: 0 }} />
-            <Box sx={{
-              fontSize: { xs: "0.6rem", sm: "0.7rem" },
-              fontWeight: 500,
-              color: "text.primary",
-              lineHeight: 1.2,
-              wordBreak: "break-word",
-              overflow: "hidden",
-              textOverflow: "ellipsis",
-              whiteSpace: "nowrap",
-              maxWidth: { xs: 80, sm: 120 },
-            }}>
+          <Box key={item.brand} sx={{ display: "flex", alignItems: "center", gap: 1, minWidth: 0 }}>
+            <Box sx={{ width: 8, height: 8, borderRadius: "3px", backgroundColor: palette[i % palette.length], flexShrink: 0 }} />
+            <Typography component="span" noWrap sx={{ fontSize: "0.8125rem", color: colors.text, flex: 1, minWidth: 0 }}>
               {item.brand}
-            </Box>
+            </Typography>
+            <Typography component="span" sx={{ fontSize: "0.8125rem", fontWeight: 600, color: colors.textMuted, fontVariantNumeric: "tabular-nums" }}>
+              {item.count}
+            </Typography>
           </Box>
         ))}
       </Box>
@@ -190,44 +204,48 @@ interface DailyAttendanceProps {
 }
 
 export const DailyAttendanceChart = ({ data }: DailyAttendanceProps) => {
-  const theme = useTheme();
-  const isDark = theme.palette.mode === "dark";
-  const isSmallScreen = useMediaQuery(theme.breakpoints.down("sm"));
+  const { colors } = useTheme().tokens;
+  const tooltip = useTooltipStyle();
   const daysOrder = ["Lun", "Mar", "Mié", "Jue", "Vie", "Sáb", "Dom"];
   const ordered = daysOrder.map((d) => data.find((x) => x.day === d) || { day: d, count: 0 });
 
-  if (!data.length) {
-    return (
-      <Box sx={{ flex: 1, display: "flex", alignItems: "center", justifyContent: "center", color: "text.disabled", fontSize: { xs: "0.75rem", sm: "0.85rem" } }}>
-        Sin datos de asistencia
-      </Box>
-    );
-  }
+  if (!data.length) return <ChartEmpty>Sin datos de asistencia</ChartEmpty>;
 
   return (
-    <Box sx={{ flex: 1, width: "100%", height: "100%", minHeight: { xs: 140, sm: 0 } }}>
+    <Box sx={{ flex: 1, width: "100%", minHeight: 150 }}>
       <ResponsiveContainer width="100%" height="100%">
-        <LineChart data={ordered} margin={{ left: 0, right: 0, top: 5, bottom: 0 }}>
+        <AreaChart data={ordered} margin={{ left: 0, right: 4, top: 8, bottom: 0 }}>
+          <defs>
+            <linearGradient id="attendanceFill" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stopColor={colors.accent} stopOpacity={0.28} />
+              <stop offset="100%" stopColor={colors.accent} stopOpacity={0} />
+            </linearGradient>
+          </defs>
+          <CartesianGrid vertical={false} stroke={colors.borderHairline} />
           <XAxis
             dataKey="day"
-            tick={{ fontSize: 9, fill: isDark ? "#9ca3af" : "#6b7280" }}
+            tick={{ fontSize: 11, fill: colors.textMuted }}
             axisLine={false}
             tickLine={false}
             interval="preserveStartEnd"
           />
           <YAxis hide />
           <Tooltip
-            contentStyle={{
-              backgroundColor: isDark ? "#1f2937" : "#fff",
-              border: `1px solid ${isDark ? "#374151" : "#e5e7eb"}`,
-              borderRadius: 8,
-              fontSize: 11,
-            }}
+            {...tooltip}
+            cursor={{ stroke: colors.borderStrong }}
             // eslint-disable-next-line @typescript-eslint/no-explicit-any
             formatter={(value: any) => [`${value} empleados`, "Asistencia"]}
           />
-          <Line type="monotone" dataKey="count" stroke="#4361EE" strokeWidth={2} dot={{ r: isSmallScreen ? 2 : 3, fill: "#4361EE" }} activeDot={{ r: isSmallScreen ? 3 : 5 }} />
-        </LineChart>
+          <Area
+            type="monotone"
+            dataKey="count"
+            stroke={colors.accent}
+            strokeWidth={2}
+            fill="url(#attendanceFill)"
+            dot={false}
+            activeDot={{ r: 4, strokeWidth: 0, fill: colors.accent }}
+          />
+        </AreaChart>
       </ResponsiveContainer>
     </Box>
   );
@@ -238,60 +256,16 @@ interface ScheduleDistributionProps {
 }
 
 export const ScheduleDistributionChart = ({ data }: ScheduleDistributionProps) => {
-  const theme = useTheme();
-  const isDark = theme.palette.mode === "dark";
-
-  if (!data.length) {
-    return (
-      <Box sx={{ flex: 1, display: "flex", alignItems: "center", justifyContent: "center", color: "text.disabled", fontSize: { xs: "0.75rem", sm: "0.85rem" } }}>
-        Sin datos de horarios
-      </Box>
-    );
-  }
-
+  const { colors } = useTheme().tokens;
+  if (!data.length) return <ChartEmpty>Sin datos de horarios</ChartEmpty>;
   const sorted = [...data].sort((a, b) => b.count - a.count);
-  const maxVal = Math.max(...sorted.map((d) => d.count), 1);
-
   return (
-    <Box sx={{ display: "flex", flexDirection: "column", gap: { xs: 0.5, sm: 1.25 }, overflow: "auto", flex: 1, minHeight: 0, pr: 0.5 }}>
-      {sorted.map((item, i) => {
-        const pct = Math.round((item.count / maxVal) * 100);
-        const color = SCHEDULE_COLORS[i % SCHEDULE_COLORS.length];
-        return (
-          <Box key={item.label}>
-            <Box sx={{ display: "flex", justifyContent: "space-between", mb: 0.2, alignItems: "center" }}>
-              <Box
-                sx={{
-                  fontSize: { xs: "0.65rem", sm: "0.75rem" },
-                  fontWeight: 500,
-                  color: "text.primary",
-                  overflow: "hidden",
-                  textOverflow: "ellipsis",
-                  whiteSpace: "nowrap",
-                  maxWidth: { xs: "55%", sm: "60%" },
-                }}
-              >
-                {item.label}
-              </Box>
-              <Box sx={{ fontSize: { xs: "0.65rem", sm: "0.75rem" }, fontWeight: 700, color, px: { xs: 0.5, sm: 0.75 }, py: 0.15, borderRadius: "4px", background: `${color}1a` }}>
-                {item.count}
-              </Box>
-            </Box>
-            <Box sx={{ height: { xs: 4, sm: 8 }, borderRadius: "4px", bgcolor: isDark ? "rgba(255,255,255,0.06)" : "rgba(0,0,0,0.06)", overflow: "hidden" }}>
-              <Box
-                sx={{
-                  height: "100%",
-                  width: `${pct}%`,
-                  borderRadius: "4px",
-                  background: `linear-gradient(90deg, ${color}, ${color}dd)`,
-                  transition: "width 0.6s cubic-bezier(0.4, 0, 0.2, 1)",
-                }}
-              />
-            </Box>
-          </Box>
-        );
-      })}
-    </Box>
+    <RankedBarList
+      data={sorted.map((d) => ({ name: d.label, value: d.count }))}
+      color={colors.accent}
+      format={(v) => `${v}`}
+      showRank={false}
+    />
   );
 };
 
@@ -303,90 +277,25 @@ interface PeriodSummaryProps {
 }
 
 export const PeriodSummary = ({ employeeCount, totalHours, overtimeCount, totalOvertime }: PeriodSummaryProps) => {
-  const theme = useTheme();
-  const isDark = theme.palette.mode === "dark";
   const avgHours = employeeCount > 0 ? Math.round((totalHours / employeeCount) * 10) / 10 : 0;
-
-  const stats = [
-    { label: "Empleados", value: employeeCount, color: "#4361EE", icon: <Users size={12} /> },
-    { label: "Horas totales", value: totalHours, color: "#F72585", icon: <Clock size={12} /> },
-    { label: "Promedio / emp.", value: avgHours, suffix: " hrs", color: "#20B2AA", icon: <BarChart3 size={12} /> },
-    { label: "Horas extra", value: totalOvertime, color: "#FF6B6B", icon: <Zap size={12} /> },
-    { label: "Con horas extra", value: overtimeCount, suffix: " emp.", color: "#FF8E53", icon: <Users size={12} /> },
-  ];
-
   return (
-    <Box sx={{
-      display: "grid",
-      gridTemplateColumns: { xs: "repeat(2, 1fr)", sm: "1fr 1fr", md: "repeat(5, 1fr)" },
-      gap: { xs: 0.5, sm: 0.75, md: 1 },
-      flex: 1,
-      alignItems: "stretch",
-    }}>
-      {stats.map((s, idx) => (
-        <Box
-          key={s.label}
-          sx={{
-            // Last stat spans full width below md so it doesn't sit alone in a 2-col grid
-            gridColumn: idx === stats.length - 1 ? { xs: "1 / -1", sm: "1 / -1", md: "auto" } : undefined,
-            display: "flex",
-            flexDirection: "column",
-            alignItems: { xs: "flex-start", sm: "center" },
-            justifyContent: "center",
-            borderRadius: "8px",
-            bgcolor: isDark
-              ? `${s.color}08`
-              : `${s.color}06`,
-            p: { xs: 0.5, sm: 0.75 },
-            transition: "background-color 0.2s ease",
-            "&:hover": {
-              bgcolor: isDark ? `${s.color}12` : `${s.color}0c`,
-            },
-          }}
-        >
-          {/* Icon badge */}
-          <Box
-            sx={{
-              width: 18,
-              height: 18,
-              borderRadius: "5px",
-              display: { xs: "none", sm: "flex" },
-              alignItems: "center",
-              justifyContent: "center",
-              background: `linear-gradient(135deg, ${s.color}, ${s.color}bb)`,
-              color: "#fff",
-              fontSize: "0.45rem",
-              mb: 0.35,
-            }}
-          >
-            {s.icon}
-          </Box>
-          <Box sx={{
-            fontSize: { xs: "0.95rem", sm: "1.05rem", md: "1.15rem" },
-            fontWeight: 800,
-            color: s.color,
-            lineHeight: 1.1,
-            letterSpacing: "-0.02em",
-            fontVariantNumeric: "tabular-nums",
-          }}>
-            {s.value}{s.suffix || ""}
-          </Box>
-          <Box sx={{
-            fontSize: { xs: "0.6rem", sm: "0.62rem" },
-            fontWeight: 600,
-            color: "text.secondary",
-            textTransform: "uppercase",
-            letterSpacing: "0.04em",
-            lineHeight: 1.2,
-            textAlign: { xs: "left", sm: "center" },
-            wordBreak: "break-word",
-            mt: 0.15,
-          }}>
-            {s.label}
-          </Box>
-        </Box>
-      ))}
-    </Box>
+    <StatGrid columns={5}>
+      <StatCard label="Empleados" value={employeeCount} icon={<IconUsers />} tone="accent" />
+      <StatCard label="Horas totales" value={`${totalHours} h`} icon={<IconClock />} />
+      <StatCard label="Promedio por empleado" value={`${avgHours} h`} icon={<IconCalculator />} />
+      <StatCard
+        label="Horas extra"
+        value={`${totalOvertime} h`}
+        icon={<IconBolt />}
+        tone={totalOvertime > 0 ? "warning" : "default"}
+      />
+      <StatCard
+        label="Con horas extra"
+        value={overtimeCount}
+        icon={<IconUserExclamation />}
+        tone={overtimeCount > 0 ? "warning" : "default"}
+      />
+    </StatGrid>
   );
 };
 
@@ -395,54 +304,7 @@ interface OvertimeProps {
 }
 
 export const OvertimeBarList = ({ data }: OvertimeProps) => {
-  const theme = useTheme();
-  const isDark = theme.palette.mode === "dark";
-
-  if (!data.length) {
-    return (
-      <Box sx={{ flex: 1, display: "flex", alignItems: "center", justifyContent: "center", color: "text.disabled", fontSize: { xs: "0.7rem", sm: "0.85rem" }, fontStyle: "italic" }}>
-        Ningún empleado con horas extra
-      </Box>
-    );
-  }
-
-  const maxVal = Math.max(...data.map((d) => d.value), 1);
-  const displayData = data.slice(0, 10);
-
-  return (
-    <Box sx={{ display: "flex", flexDirection: "column", gap: { xs: 0.6, sm: 0.9 }, overflow: "auto", flex: 1, minHeight: 0, pr: 0.5 }}>
-      {displayData.map((item, i) => (
-        <Box key={i}>
-          <Box sx={{ display: "flex", justifyContent: "space-between", mb: 0.3, alignItems: "center" }}>
-            <Box sx={{
-              fontSize: { xs: "0.7rem", sm: "0.8rem" },
-              fontWeight: 500,
-              color: "text.primary",
-              overflow: "hidden",
-              textOverflow: "ellipsis",
-              whiteSpace: "nowrap",
-              maxWidth: { xs: "50%", sm: "60%" },
-            }}>
-              {i + 1}. {item.name}
-            </Box>
-            <Box sx={{
-              fontSize: { xs: "0.65rem", sm: "0.75rem" },
-              fontWeight: 700,
-              color: "#F72585",
-              background: isDark ? "rgba(247,37,133,0.15)" : "rgba(247,37,133,0.1)",
-              px: { xs: 0.6, sm: 0.85 },
-              py: 0.2,
-              borderRadius: "6px",
-              whiteSpace: "nowrap",
-            }}>
-              +{item.value}h
-            </Box>
-          </Box>
-          <Box sx={{ height: { xs: 4, sm: 6 }, borderRadius: "4px", bgcolor: isDark ? "rgba(255,255,255,0.06)" : "rgba(0,0,0,0.06)", overflow: "hidden" }}>
-            <Box sx={{ height: "100%", width: `${(item.value / maxVal) * 100}%`, borderRadius: "4px", background: "linear-gradient(90deg, #FF5EAA, #F72585)", transition: "width 0.8s cubic-bezier(0.4, 0, 0.2, 1)" }} />
-          </Box>
-        </Box>
-      ))}
-    </Box>
-  );
+  const { colors } = useTheme().tokens;
+  if (!data.length) return <ChartEmpty>Ningún empleado con horas extra</ChartEmpty>;
+  return <RankedBarList data={data.slice(0, 10)} color={colors.warning} format={(v) => `+${v} h`} />;
 };

@@ -1,5 +1,7 @@
-import { Model, DataTypes } from "sequelize";
+import { Model, DataTypes, Association } from "sequelize";
 import sequelize from "../config/database";
+import { EmployeeLicense } from "./EmployeeLicense";
+import { User } from "./User";
 
 // Employee model definition for Sequelize ORM
 export class Employee extends Model {
@@ -27,9 +29,20 @@ export class Employee extends Model {
 
   public position?: string | null; // Job position / cargo
 
-  public nationalId?: string | null; // Cédula de identidad
+  public gender?: string | null; // "Masculino" | "Femenino"
+
+  public nationalId?: string | null; // Cédula de identidad (solo dígitos)
+
+  public primaryPhone?: string | null; // Teléfono principal (solo dígitos)
+
+  public secondaryPhone?: string | null; // Teléfono secundario (solo dígitos)
 
   public isActive!: boolean; // false once a termination date is registered
+
+  public static associations: {
+    licenses: Association<Employee, EmployeeLicense>;
+    user: Association<Employee, User>;
+  };
 }
 
 Employee.init(
@@ -83,8 +96,20 @@ Employee.init(
       type: DataTypes.STRING(100),
       allowNull: true,
     },
+    gender: {
+      type: DataTypes.STRING(20),
+      allowNull: true,
+    },
     nationalId: {
       type: DataTypes.STRING(30),
+      allowNull: true,
+    },
+    primaryPhone: {
+      type: DataTypes.STRING(20),
+      allowNull: true,
+    },
+    secondaryPhone: {
+      type: DataTypes.STRING(20),
       allowNull: true,
     },
     isActive: {

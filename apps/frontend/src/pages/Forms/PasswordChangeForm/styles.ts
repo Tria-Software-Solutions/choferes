@@ -17,10 +17,6 @@ export const temporalPasswordBox = {
   width: "100%",
 };
 
-export const generateButton = {
-  mt: 1,
-};
-
 export const iconStyle: CSSProperties = {
   color: "#666666",
 };

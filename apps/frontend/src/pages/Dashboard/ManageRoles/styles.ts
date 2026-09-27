@@ -29,33 +29,6 @@ export const backdropStyles = (theme: Theme): SxProps<Theme> => ({
   zIndex: theme.zIndex.drawer + 1,
 });
 
-export const searchBarBoxStyles: SxProps<Theme> = {
-  display: "flex",
-  alignItems: "center",
-  gap: 2,
-};
-
-export const addButtonMobileStyles: SxProps<Theme> = {
-  display: { xs: "flex", md: "none" },
-  minWidth: "auto",
-  width: 56,
-  height: 56,
-  borderRadius: "50%",
-  p: 0,
-  mt: -1,
-};
-
-export const addButtonDesktopBoxStyles: SxProps<Theme> = {
-  display: { xs: "none", md: "flex" },
-};
-
-export const addButtonDesktopStyles: SxProps<Theme> = {
-  px: 3,
-  py: 1.5,
-  fontSize: "1rem",
-  minHeight: 56,
-};
-
 export const noRolesBoxStyles: SxProps<Theme> = {
   display: "flex",
   flexDirection: "column",

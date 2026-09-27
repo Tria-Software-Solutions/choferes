@@ -8,10 +8,6 @@ export const getDefaultRoute = (userPermissions: string[]): string => {
     { route: ROUTES.VEHICLES, permission: PERMISSIONS.VIEW_VEHICLES },
     { route: ROUTES.EMPLOYEES, permission: PERMISSIONS.VIEW_EMPLOYEES },
     { route: ROUTES.SCHEDULES, permission: PERMISSIONS.VIEW_SCHEDULES },
-    {
-      route: ROUTES.COURIER_SERVICE,
-      permission: PERMISSIONS.VIEW_COURIER_SERVICE,
-    },
   ];
 
   for (const { route, permission } of routePreferences) {

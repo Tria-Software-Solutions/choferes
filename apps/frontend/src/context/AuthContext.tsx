@@ -6,6 +6,8 @@ import {
   removeTokenWithFallback,
 } from "../utils/tokenStorage";
 import { getUserPermissions } from "../services/userService";
+import { endServerSession } from "../services/api";
+import { resetStore, store } from "../store/store";
 
 interface AuthContextType {
   accessToken: string | null;
@@ -78,8 +80,12 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     sessionStorage.setItem("loggedInAt", loginTime);
   };
 
-  // Handles logout: clears all auth state and sessionStorage
+  // Handles logout: ends the server session (httpOnly cookies), then clears
+  // all auth state, sessionStorage, cached API responses and the Redux store.
   const logout = () => {
+    void endServerSession();
+    store.dispatch(resetStore());
+
     setAccessToken(null);
     setRefreshToken(null);
     setCurrentUser(null);

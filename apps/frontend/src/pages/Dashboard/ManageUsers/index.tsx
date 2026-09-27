@@ -36,13 +36,7 @@ import EditableTableComponent from "../../../components/Table/EditableTable/Edit
 import SearchBarComponent from "../../../components/SearchBar/SearchBar.component";
 import AddUserForm from "../../Forms/AddUserForm";
 import PremiumTooltip from "../../../components/PremiumTooltip/PremiumTooltip.component";
-import {
-  CheckCircle,
-  FileEdit,
-  PlusCircle,
-  Users,
-  X,
-} from "lucide-react";
+import { IconCheck, IconCirclePlus, IconPencil, IconPlus, IconUsers, IconX } from "@tabler/icons-react";
 import {
   editButtonStyles,
   saveButtonStyles,
@@ -70,6 +64,10 @@ import { useLocation } from "react-router-dom";
 import { useTablePreferences } from '../../../hooks/useTablePreferences';
 import { getAvatarSrc } from "../../../utils/avatar";
 import { validateName, validateEmail, validateUsername, validatePassword } from '../../../utils/userValidation';
+
+// A rejected thunk (`.unwrap()`) throws the server's message as a string.
+const rejectionMessage = (error: unknown, fallback: string): string =>
+  typeof error === "string" && error.trim() ? error : fallback;
 
 // ManageUsers page component for user management in the dashboard
 const ManageUsers: React.FC<{ isExpanded?: boolean; hideHeader?: boolean }> = ({
@@ -299,13 +297,13 @@ const ManageUsers: React.FC<{ isExpanded?: boolean; hideHeader?: boolean }> = ({
         showNotification(NOTIFICATIONS.USER_ROLE_NOT_FOUND, { severity: 'error', duration: 5000 });
         return;
       }
-      dispatch(
+      await dispatch(
         updateUser({
           id,
           updatedUser,
           newRoleId: role.id,
         }),
-      );
+      ).unwrap();
       setEditRowId(null);
       setEditFields({
         firstName: "",
@@ -321,7 +319,10 @@ const ManageUsers: React.FC<{ isExpanded?: boolean; hideHeader?: boolean }> = ({
       createUserNotification('updated', `${editFields.firstName} ${editFields.lastName}`);
     } catch (error) {
       handleCancel();
-      showNotification(NOTIFICATIONS.USER_UPDATE_ERROR, { severity: 'error', duration: 5000 });
+      showNotification(rejectionMessage(error, NOTIFICATIONS.USER_UPDATE_ERROR), {
+        severity: 'error',
+        duration: 5000,
+      });
     }
   };
 
@@ -345,7 +346,7 @@ const ManageUsers: React.FC<{ isExpanded?: boolean; hideHeader?: boolean }> = ({
           id: userToChange.id,
           status: !userToChange.isActive,
         }),
-      );
+      ).unwrap();
       setOpenStatusDialog(false);
       setUserToChange(null);
       showNotification(
@@ -357,7 +358,7 @@ const ManageUsers: React.FC<{ isExpanded?: boolean; hideHeader?: boolean }> = ({
       createUserNotification('updated', `${userToChange.firstName} ${userToChange.lastName}`);
     } catch (error) {
       showNotification(
-        "Error al actualizar el estado del usuario",
+        rejectionMessage(error, "Error al actualizar el estado del usuario"),
         { severity: 'error', duration: 5000 },
       );
     } finally {
@@ -402,14 +403,17 @@ const ManageUsers: React.FC<{ isExpanded?: boolean; hideHeader?: boolean }> = ({
           newUser,
           newRoleId: role.id,
         }),
-      );
+      ).unwrap();
       setOpenAddUserModal(false);
       showNotification(NOTIFICATIONS.USER_CREATED, { severity: 'success', duration: 3000 });
       
       // Add notification to menu
       createUserNotification('created', `${userData.firstName} ${userData.lastName}`);
     } catch (error) {
-      showNotification(NOTIFICATIONS.USER_CREATE_ERROR, { severity: 'error', duration: 5000 });
+      showNotification(rejectionMessage(error, NOTIFICATIONS.USER_CREATE_ERROR), {
+        severity: 'error',
+        duration: 5000,
+      });
     } finally {
       setIsCreatingUser(false);
     }
@@ -495,8 +499,10 @@ const ManageUsers: React.FC<{ isExpanded?: boolean; hideHeader?: boolean }> = ({
             elevation={0}
             sx={{
               borderRadius: "16px",
-              border: "1px solid rgba(0,0,0,0.08)",
-              boxShadow: "0 4px 24px rgba(0,0,0,0.08), 0 1px 2px rgba(0,0,0,0.04)",
+              // El borde del token se adapta al modo; hardcodear rgba(0,0,0,…)
+              // dejaba una línea casi invisible sobre el card en dark/high contrast.
+              border: theme.tokens.borders.paper,
+              boxShadow: `0 1px 2px ${theme.tokens.shadows.card}`,
               overflow: "hidden",
               flex: 1,
               minHeight: 0,
@@ -512,7 +518,7 @@ const ManageUsers: React.FC<{ isExpanded?: boolean; hideHeader?: boolean }> = ({
                 backgroundColor: theme.palette.background.paper,
                 color: theme.palette.text.primary,
                 flexShrink: 0,
-                borderBottom: `1px solid ${theme.palette.mode === "dark" ? "rgba(255,255,255,0.06)" : "rgba(0,0,0,0.06)"}`,
+                borderBottom: theme.tokens.borders.hairline,
               }}
             >
               <Box
@@ -529,7 +535,7 @@ const ManageUsers: React.FC<{ isExpanded?: boolean; hideHeader?: boolean }> = ({
                       alignItems: 'center',
                     }}
                   >
-                    <Users size={20} strokeWidth={1.5} />
+                    <IconUsers size={20} stroke={1.5} />
                   </Box>
                   <Box>
                     <Typography
@@ -568,7 +574,7 @@ const ManageUsers: React.FC<{ isExpanded?: boolean; hideHeader?: boolean }> = ({
               backgroundColor: theme.palette.background.paper,
               color: theme.palette.text.primary,
               flexShrink: 0,
-              borderBottom: `1px solid ${theme.palette.mode === "dark" ? "rgba(255,255,255,0.06)" : "rgba(0,0,0,0.06)"}`,
+              borderBottom: theme.tokens.borders.hairline,
             }}
           >
             <Box
@@ -614,7 +620,8 @@ const ManageUsers: React.FC<{ isExpanded?: boolean; hideHeader?: boolean }> = ({
                 <Box sx={{ display: { xs: 'none', sm: 'flex' }, flexShrink: 0 }}>
                   {canCreateUser && (
                     <Button
-                      variant="outlined"
+                      variant="contained"
+                      startIcon={<IconPlus size={18} />}
                       onClick={handleOpenAddUserModal}
                     >
                       {DASHBOARD_USERS.ADD}
@@ -626,10 +633,12 @@ const ManageUsers: React.FC<{ isExpanded?: boolean; hideHeader?: boolean }> = ({
           </Box>
 
           {/* Mobile Add Button */}
-          <Box sx={{ display: { xs: 'flex', sm: 'none' }, p: 2, borderTop: `1px solid ${theme.palette.mode === "dark" ? "rgba(255,255,255,0.08)" : "rgba(0,0,0,0.08)"}` }}>
-            {canCreateUser && (
+          {canCreateUser && (
+          <Box sx={{ display: { xs: 'flex', sm: 'none' }, p: 2, borderTop: theme.tokens.borders.hairline }}>
+            {(
               <Button
-                variant="outlined"
+                variant="contained"
+                startIcon={<IconPlus size={18} />}
                 fullWidth
                 onClick={handleOpenAddUserModal}
               >
@@ -637,6 +646,7 @@ const ManageUsers: React.FC<{ isExpanded?: boolean; hideHeader?: boolean }> = ({
               </Button>
             )}
           </Box>
+          )}
 
             {/* Content Section */}
             <Box sx={{ flex: 1, minHeight: 0, display: "flex", flexDirection: "column", overflow: "hidden" }}>
@@ -654,15 +664,15 @@ const ManageUsers: React.FC<{ isExpanded?: boolean; hideHeader?: boolean }> = ({
                         gap: 1.5,
                         px: { xs: 2, sm: 2.5 },
                         py: isEditing ? 1.25 : 1.5,
-                        borderBottom: `1px solid ${theme.palette.mode === "dark" ? "rgba(255,255,255,0.04)" : "rgba(0,0,0,0.04)"}`,
+                        borderBottom: theme.tokens.borders.hairline,
                         backgroundColor: isEditing
-                          ? (theme.palette.mode === "dark" ? "rgba(255,255,255,0.03)" : "rgba(0,0,0,0.02)")
-                          : (i % 2 === 0 ? "transparent" : (theme.palette.mode === "dark" ? "rgba(255,255,255,0.015)" : "rgba(0,0,0,0.012)")),
+                          ? (theme.tokens.colors.hoverSoft)
+                          : (i % 2 === 0 ? "transparent" : (theme.tokens.colors.hoverSoft)),
                         transition: "background-color 0.15s",
                         "&:hover": {
                           backgroundColor: isEditing
-                            ? (theme.palette.mode === "dark" ? "rgba(255,255,255,0.03)" : "rgba(0,0,0,0.02)")
-                            : (theme.palette.mode === "dark" ? "rgba(255,255,255,0.04)" : "rgba(0,0,0,0.025)"),
+                            ? (theme.tokens.colors.hoverSoft)
+                            : (theme.tokens.colors.hover),
                         },
                       }}
                     >
@@ -766,14 +776,14 @@ const ManageUsers: React.FC<{ isExpanded?: boolean; hideHeader?: boolean }> = ({
                                   disabled={!isEditFormValid}
                                   sx={saveButtonStyles(theme)}
                                 >
-                                  <CheckCircle size={17} />
+                                  <IconCheck size={16} stroke={2.25} />
                                 </IconButton>
                               </span>
                             </PremiumTooltip>
                             <PremiumTooltip title={TABLE.CANCEL}>
                               <span>
                                 <IconButton onClick={handleCancel} sx={neutralButtonStyles(theme)}>
-                                  <X size={17} />
+                                  <IconX size={16} stroke={1.75} />
                                 </IconButton>
                               </span>
                             </PremiumTooltip>
@@ -827,7 +837,7 @@ const ManageUsers: React.FC<{ isExpanded?: boolean; hideHeader?: boolean }> = ({
                               <PremiumTooltip title={TABLE.EDIT}>
                                 <span>
                                   <IconButton onClick={() => handleEdit(user)} sx={editButtonStyles(theme)}>
-                                    <FileEdit size={16} />
+                                    <IconPencil size={15} stroke={1.75} />
                                   </IconButton>
                                 </span>
                               </PremiumTooltip>
@@ -925,7 +935,7 @@ const ManageUsers: React.FC<{ isExpanded?: boolean; hideHeader?: boolean }> = ({
         title={DASHBOARD_USERS.ADD_SUBTITLE}
         hideActions
         paperSx={addDialogPaperSx ?? {}}
-        icon={<PlusCircle color="var(--mui-palette-info-main)" />}
+        icon={<IconCirclePlus color="var(--mui-palette-info-main)" />}
       >
         <AddUserForm
           onSubmit={handleCreateUser}

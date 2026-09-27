@@ -1,6 +1,8 @@
 // Controller for handling HTTP requests related to notifications
 import { Request, Response } from "express";
 import * as notificationService from "../services/notificationService";
+import { dispatchDueReminders } from "../services/taskService";
+import { sendServerError } from "../utils/errors";
 
 interface AuthenticatedRequest extends Request {
   user?: { id: number };
@@ -15,10 +17,13 @@ export const getNotifications = async (req: Request, res: Response) => {
     if (!userId) {
       return res.status(401).json({ message: "Unauthorized" });
     }
+    // Deliver this user's due task reminders first, so they arrive even when
+    // the background job has not run yet (e.g. the server just woke up).
+    await dispatchDueReminders({ userId }).catch(() => 0);
     const notifications = await notificationService.getNotificationsByUser(userId);
     return res.status(200).json(notifications);
   } catch (error) {
-    return res.status(500).json({ message: "Error fetching notifications", error });
+    return sendServerError(res, "Error fetching notifications", error);
   }
 };
 
@@ -32,7 +37,7 @@ export const createNotification = async (req: Request, res: Response) => {
     const notification = await notificationService.createNotification(userId, req.body);
     return res.status(201).json(notification);
   } catch (error) {
-    return res.status(500).json({ message: "Error creating notification", error });
+    return sendServerError(res, "Error creating notification", error);
   }
 };
 
@@ -50,7 +55,7 @@ export const markAsRead = async (req: Request, res: Response) => {
     }
     return res.status(404).json({ message: "Notification not found" });
   } catch (error) {
-    return res.status(500).json({ message: "Error updating notification", error });
+    return sendServerError(res, "Error updating notification", error);
   }
 };
 
@@ -64,7 +69,7 @@ export const markAllAsRead = async (req: Request, res: Response) => {
     await notificationService.markAllAsRead(userId);
     return res.status(200).json({ message: "All notifications marked as read" });
   } catch (error) {
-    return res.status(500).json({ message: "Error updating notifications", error });
+    return sendServerError(res, "Error updating notifications", error);
   }
 };
 
@@ -82,7 +87,7 @@ export const deleteNotification = async (req: Request, res: Response) => {
     }
     return res.status(404).json({ message: "Notification not found" });
   } catch (error) {
-    return res.status(500).json({ message: "Error deleting notification", error });
+    return sendServerError(res, "Error deleting notification", error);
   }
 };
 
@@ -96,7 +101,7 @@ export const deleteAllNotifications = async (req: Request, res: Response) => {
     await notificationService.deleteAllNotifications(userId);
     return res.status(204).end();
   } catch (error) {
-    return res.status(500).json({ message: "Error deleting all notifications", error });
+    return sendServerError(res, "Error deleting all notifications", error);
   }
 };
 
@@ -115,6 +120,6 @@ export const generatePaymentReminders = async (req: Request, res: Response) => {
     const created = await notificationService.generatePaymentReminders(userId, today);
     return res.status(200).json({ created, count: created.length });
   } catch (error) {
-    return res.status(500).json({ message: "Error generating payment reminders", error });
+    return sendServerError(res, "Error generating payment reminders", error);
   }
 };

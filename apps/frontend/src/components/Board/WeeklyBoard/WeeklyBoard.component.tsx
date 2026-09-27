@@ -15,15 +15,9 @@ import {
   Button,
   Tooltip,
   type Theme,
+  alpha,
 } from '@mui/material';
-import CalendarTodayIcon from '@mui/icons-material/CalendarToday';
-import DateRangeIcon from '@mui/icons-material/DateRange';
-import CalendarMonthIcon from '@mui/icons-material/CalendarMonth';
-import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined';
-import MoreTimeIcon from '@mui/icons-material/MoreTime';
-import PeopleOutlineIcon from '@mui/icons-material/PeopleOutline';
-import ViewTimelineIcon from '@mui/icons-material/ViewTimeline';
-import DragIndicatorIcon from '@mui/icons-material/DragIndicator';
+import { IconCalendar, IconCalendarEvent, IconCalendarMonth, IconClockPlus, IconGripVertical, IconInfoCircle } from "@tabler/icons-react";
 import {
   DndContext,
   DragOverlay,
@@ -92,9 +86,9 @@ const getScheduleColor = (_label: string, index: number): ColorScheme =>
 type PeriodType = 'weekly' | 'biweekly' | 'monthly';
 
 const PERIOD_OPTIONS: { value: PeriodType; label: string; icon: React.ReactNode }[] = [
-  { value: 'weekly', label: 'Semanal', icon: <CalendarTodayIcon sx={{ fontSize: 15 }} /> },
-  { value: 'biweekly', label: 'Quincenal', icon: <DateRangeIcon sx={{ fontSize: 15 }} /> },
-  { value: 'monthly', label: 'Mensual', icon: <CalendarMonthIcon sx={{ fontSize: 15 }} /> },
+  { value: 'weekly', label: 'Semanal', icon: <IconCalendar size={15} /> },
+  { value: 'biweekly', label: 'Quincenal', icon: <IconCalendarEvent size={15} /> },
+  { value: 'monthly', label: 'Mensual', icon: <IconCalendarMonth size={15} /> },
 ];
 
 // ─── Drag data types ───
@@ -147,7 +141,6 @@ interface WeeklyBoardProps {
   ) => void;
   permissions?: string[];
   viewMode: 'employee' | 'schedule';
-  setViewMode: React.Dispatch<React.SetStateAction<'employee' | 'schedule'>>;
   onInfoClick?: (employee: Employee) => void;
   onAdjustClick?: (employee: Employee) => void;
 }
@@ -183,7 +176,6 @@ const EmployeeCard = memo(function EmployeeCard({
   theme,
   isDragging,
 }: EmployeeCardProps) {
-  const isDark = theme.palette.mode === 'dark';
 
   if (isUnassigned) {
     return (
@@ -201,24 +193,22 @@ const EmployeeCard = memo(function EmployeeCard({
           minHeight: { xs: 38, sm: 42 },
           borderRadius: '10px',
           cursor: 'grab',
-          backgroundColor: isDark ? 'rgba(255,255,255,0.02)' : 'rgba(0,0,0,0.015)',
-          border: `1px dashed ${isDark ? 'rgba(255,255,255,0.12)' : 'rgba(0,0,0,0.10)'}`,
+          backgroundColor: theme.tokens.colors.surface,
+          border: theme.tokens.borders.paper,
           transition: 'all 0.2s ease',
           userSelect: 'none',
           opacity: isDragging ? 0.3 : 1,
           '&:hover': {
-            borderColor: '#818cf8',
-            backgroundColor: isDark ? 'rgba(99,102,241,0.06)' : 'rgba(99,102,241,0.04)',
+            borderColor: theme.tokens.colors.accent,
+            backgroundColor: theme.tokens.colors.accentSoft,
             transform: 'translateY(-1px)',
-            boxShadow: '0 2px 8px rgba(99,102,241,0.12)',
+            boxShadow: `0 2px 8px ${alpha(theme.tokens.colors.accent, 0.12)}`,
           },
           '&:active': { transform: 'scale(0.98)', cursor: 'grabbing' },
         }}
       >
         <Box sx={{ display: { xs: 'none', sm: 'flex' }, alignItems: 'center', flexShrink: 0 }}>
-          <DragIndicatorIcon
-            sx={{ fontSize: 13, color: theme.palette.text.disabled, opacity: 0.35 }}
-          />
+          <IconGripVertical size={13} color={theme.palette.text.disabled} style={{ opacity: 0.35 }} />
         </Box>
         <EmployeeAvatar
           employee={employee}
@@ -258,7 +248,7 @@ const EmployeeCard = memo(function EmployeeCard({
             width: 18,
             height: 18,
             borderRadius: '6px',
-            backgroundColor: isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.04)',
+            backgroundColor: theme.tokens.colors.hover,
             color: theme.palette.text.disabled,
             display: 'flex',
             alignItems: 'center',
@@ -327,7 +317,7 @@ const EmployeeCard = memo(function EmployeeCard({
           ml: 0.25,
         }}
       >
-        <DragIndicatorIcon sx={{ fontSize: 13 }} />
+        <IconGripVertical size={13} />
       </Box>
 
       {/* Initials or photo */}
@@ -397,7 +387,7 @@ const EmployeeCard = memo(function EmployeeCard({
               '&:hover': { backgroundColor: 'rgba(0,0,0,0.06)', color: 'primary.main' },
             }}
           >
-            <InfoOutlinedIcon sx={{ fontSize: 11 }} />
+            <IconInfoCircle size={11} />
           </Box>
         )}
         {onAdjust && (
@@ -415,10 +405,10 @@ const EmployeeCard = memo(function EmployeeCard({
               height: 18,
               borderRadius: '5px',
               color: overtime > 0 ? 'warning.main' : 'text.disabled',
-              '&:hover': { backgroundColor: 'rgba(237,108,2,0.1)' },
+              '&:hover': { backgroundColor: theme.tokens.colors.warningSoft },
             }}
           >
-            <MoreTimeIcon sx={{ fontSize: 11 }} />
+            <IconClockPlus size={11} />
           </Box>
         )}
       </Box>
@@ -462,6 +452,7 @@ const DragOverlayCard = memo(function DragOverlayCard({
   isUnassigned,
   isDark,
 }: DragOverlayCardProps) {
+  const theme = useTheme();
   return (
     <Box
       sx={{
@@ -472,11 +463,9 @@ const DragOverlayCard = memo(function DragOverlayCard({
         py: 1.25,
         borderRadius: '14px',
         backgroundColor: isUnassigned
-          ? isDark
-            ? 'rgba(30,30,40,0.96)'
-            : 'rgba(255,255,255,0.96)'
+          ? theme.tokens.colors.menuSurface
           : scheduleColor.bg.replace('0.08', '0.92'),
-        border: `2px solid ${isUnassigned ? (isDark ? 'rgba(255,255,255,0.25)' : 'rgba(0,0,0,0.18)') : scheduleColor.text}`,
+        border: `2px solid ${isUnassigned ? (theme.tokens.colors.borderStrong) : scheduleColor.text}`,
         boxShadow: isDark
           ? '0 20px 60px rgba(0,0,0,0.5), 0 0 0 1px rgba(255,255,255,0.1), 0 4px 20px rgba(0,0,0,0.3)'
           : '0 20px 60px rgba(0,0,0,0.15), 0 0 0 1px rgba(255,255,255,0.9), 0 4px 20px rgba(0,0,0,0.08)',
@@ -500,9 +489,7 @@ const DragOverlayCard = memo(function DragOverlayCard({
           width: 3.5,
           borderRadius: '0 4px 4px 0',
           backgroundColor: isUnassigned
-            ? isDark
-              ? 'rgba(255,255,255,0.25)'
-              : 'rgba(0,0,0,0.2)'
+            ? theme.tokens.colors.borderStrong
             : scheduleColor.text,
           opacity: 0.6,
         }}
@@ -522,9 +509,7 @@ const DragOverlayCard = memo(function DragOverlayCard({
             fontSize: '0.8rem',
             fontWeight: 700,
             color: isUnassigned
-              ? isDark
-                ? 'rgba(255,255,255,0.8)'
-                : 'rgba(0,0,0,0.8)'
+              ? theme.tokens.colors.textMuted
               : scheduleColor.text,
             lineHeight: 1.25,
             whiteSpace: 'nowrap',
@@ -565,7 +550,7 @@ const DragOverlayCard = memo(function DragOverlayCard({
           </Typography>
           {periodOvertime > 0 && (
             <Typography
-              sx={{ fontSize: '0.52rem', fontWeight: 700, color: '#34d399', lineHeight: 1.2 }}
+              sx={{ fontSize: '0.52rem', fontWeight: 700, color: theme.tokens.colors.success, lineHeight: 1.2 }}
             >
               +{periodOvertime}h
             </Typography>
@@ -790,7 +775,7 @@ function DraggableTotalsRow({
     } satisfies DragTotalsData,
   });
 
-  const accentColor = isDark ? '#a78bfa' : '#7c3aed';
+  const accentColor = theme.tokens.colors.accent;
 
   return (
     <Box
@@ -804,8 +789,8 @@ function DraggableTotalsRow({
         px: { xs: 0.9, sm: 1.25 },
         py: { xs: 1, sm: 1.35 },
         borderRadius: '12px',
-        backgroundColor: isDark ? 'rgba(255,255,255,0.02)' : 'rgba(0,0,0,0.01)',
-        border: `1.5px dashed ${isDark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.08)'}`,
+        backgroundColor: theme.tokens.colors.surface,
+        border: theme.tokens.borders.paper,
         cursor: 'grab',
         transition: 'all 0.2s ease',
         userSelect: 'none',
@@ -814,9 +799,9 @@ function DraggableTotalsRow({
         touchAction: 'none',
         '&:hover': {
           borderColor: accentColor,
-          backgroundColor: isDark ? 'rgba(139,92,246,0.06)' : 'rgba(139,92,246,0.04)',
+          backgroundColor: theme.tokens.colors.accentSoft,
           transform: 'translateY(-1px)',
-          boxShadow: `0 3px 10px ${isDark ? 'rgba(139,92,246,0.12)' : 'rgba(139,92,246,0.08)'}`,
+          boxShadow: `0 3px 10px ${theme.tokens.colors.accentSoft}`,
         },
         '&:active': { transform: 'scale(0.97)', cursor: 'grabbing' },
       }}
@@ -831,7 +816,7 @@ function DraggableTotalsRow({
           opacity: 0.4,
         }}
       >
-        <DragIndicatorIcon sx={{ fontSize: 15 }} />
+        <IconGripVertical size={15} />
       </Box>
 
       {/* Initials or photo */}
@@ -924,7 +909,7 @@ function DraggableTotalsRow({
           sx={{
             fontSize: '0.6rem',
             fontWeight: 700,
-            color: '#34d399',
+            color: theme.tokens.colors.success,
             lineHeight: 1.2,
             visibility: overtime > 0 ? 'visible' : 'hidden',
           }}
@@ -965,12 +950,12 @@ function DraggableTotalsRow({
                 color: 'text.secondary',
                 transition: 'all 0.15s ease',
                 '&:hover': {
-                  backgroundColor: isDark ? 'rgba(139,92,246,0.12)' : 'rgba(139,92,246,0.06)',
+                  backgroundColor: theme.tokens.colors.accentSoft,
                   color: accentColor,
                 },
               }}
             >
-              <InfoOutlinedIcon sx={{ fontSize: 13 }} />
+              <IconInfoCircle size={13} />
             </Box>
           )}
           {onAdjustClick && (
@@ -991,17 +976,16 @@ function DraggableTotalsRow({
                 backgroundColor:
                   overtime > 0
                     ? isDark
-                      ? 'rgba(237,108,2,0.1)'
-                      : 'rgba(237,108,2,0.06)'
+                      ? theme.tokens.colors.warningSoft : theme.tokens.colors.warningSoft
                     : 'transparent',
                 transition: 'all 0.15s ease',
                 '&:hover': {
-                  backgroundColor: isDark ? 'rgba(139,92,246,0.12)' : 'rgba(139,92,246,0.06)',
+                  backgroundColor: theme.tokens.colors.accentSoft,
                   color: accentColor,
                 },
               }}
             >
-              <MoreTimeIcon sx={{ fontSize: 14 }} />
+              <IconClockPlus size={14} />
             </Box>
           )}
         </Box>
@@ -1137,7 +1121,7 @@ function DraggableSwimlaneCard({
           ml: 0.25,
         }}
       >
-        <DragIndicatorIcon sx={{ fontSize: 13 }} />
+        <IconGripVertical size={13} />
       </Box>
 
       {/* Initials or photo */}
@@ -1196,7 +1180,7 @@ function DraggableSwimlaneCard({
               '&:hover': { backgroundColor: 'rgba(0,0,0,0.06)', color: 'primary.main' },
             }}
           >
-            <InfoOutlinedIcon sx={{ fontSize: 11 }} />
+            <IconInfoCircle size={11} />
           </Box>
         )}
         {onAdjust && (
@@ -1214,10 +1198,10 @@ function DraggableSwimlaneCard({
               height: 18,
               borderRadius: '5px',
               color: overtime > 0 ? 'warning.main' : 'text.disabled',
-              '&:hover': { backgroundColor: 'rgba(237,108,2,0.1)' },
+              '&:hover': { backgroundColor: theme.tokens.colors.warningSoft },
             }}
           >
-            <MoreTimeIcon sx={{ fontSize: 11 }} />
+            <IconClockPlus size={11} />
           </Box>
         )}
       </Box>
@@ -1301,7 +1285,7 @@ function SwimlaneRow({
       elevation={0}
       sx={{
         borderRadius: '12px',
-        border: `1px solid ${isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.05)'}`,
+        border: `1px solid ${theme.tokens.colors.borderHairline}`,
         flexShrink: 0,
         width: '100%',
       }}
@@ -1370,11 +1354,9 @@ function SwimlaneRow({
                   px: { xs: 0.75, sm: 1.25 },
                   py: { xs: 0.6, sm: 0.85 },
                   textAlign: 'center',
-                  borderBottom: `1px solid ${isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.06)'}`,
+                  borderBottom: `1px solid ${theme.tokens.colors.borderHairline}`,
                   backgroundColor: todayDate
-                    ? isDark
-                      ? 'rgba(56,189,248,0.1)'
-                      : 'rgba(56,189,248,0.07)'
+                    ? theme.tokens.colors.accentSoft
                     : 'transparent',
                   transition: 'background-color 0.15s ease',
                 }}
@@ -1383,7 +1365,7 @@ function SwimlaneRow({
                   sx={{
                     fontWeight: todayDate ? 700 : 600,
                     fontSize: '0.75rem',
-                    color: todayDate ? '#38bdf8' : theme.palette.text.primary,
+                    color: todayDate ? theme.tokens.colors.accent : theme.palette.text.primary,
                     letterSpacing: todayDate ? '0.02em' : 'normal',
                   }}
                 >
@@ -1393,7 +1375,7 @@ function SwimlaneRow({
                   sx={{
                     fontSize: '0.58rem',
                     fontWeight: todayDate ? 600 : 400,
-                    color: todayDate ? '#38bdf8' : theme.palette.text.secondary,
+                    color: todayDate ? theme.tokens.colors.accent : theme.palette.text.secondary,
                     mt: 0.1,
                   }}
                 >
@@ -1488,6 +1470,7 @@ function SwimlaneDayCell({
   onClick,
   columnWidth,
 }: SwimlaneDayCellProps) {
+  const theme = useTheme();
   const { setNodeRef, isOver } = useDroppable({
     id: columnId,
     data: { viewType: 'schedule', day, date, scheduleLabel } satisfies DropColumnData,
@@ -1495,9 +1478,9 @@ function SwimlaneDayCell({
 
   const dropHighlight = isOver
     ? {
-        borderColor: '#818cf8',
-        boxShadow: `inset 0 0 0 2px ${isDark ? 'rgba(99,102,241,0.35)' : 'rgba(99,102,241,0.25)'}`,
-        backgroundColor: isDark ? 'rgba(99,102,241,0.06)' : 'rgba(99,102,241,0.04)',
+        borderColor: theme.tokens.colors.accent,
+        boxShadow: `inset 0 0 0 2px ${alpha(theme.tokens.colors.accent, 0.35)}`,
+        backgroundColor: theme.tokens.colors.accentSoft,
       }
     : {};
 
@@ -1519,12 +1502,10 @@ function SwimlaneDayCell({
         borderRadius: '8px',
         cursor: onClick ? 'pointer' : 'default',
         backgroundColor: isTodayDate
-          ? isDark
-            ? 'rgba(56,189,248,0.06)'
-            : 'rgba(56,189,248,0.04)'
+          ? theme.tokens.colors.accentSoft
           : 'transparent',
         border: isTodayDate
-          ? `1px solid ${isDark ? 'rgba(56,189,248,0.2)' : 'rgba(56,189,248,0.15)'}`
+          ? `1px solid ${theme.tokens.colors.accentSoft}`
           : '1px solid transparent',
         transition: 'all 0.25s ease',
         ...dropHighlight,
@@ -1586,17 +1567,17 @@ function TotalsColumn({
             {
               value: 'weekly' as PeriodType,
               label: 'Sem',
-              icon: <CalendarTodayIcon sx={{ fontSize: 13 }} />,
+              icon: <IconCalendar size={13} />,
             },
             {
               value: 'biweekly' as PeriodType,
               label: 'Qna',
-              icon: <DateRangeIcon sx={{ fontSize: 13 }} />,
+              icon: <IconCalendarEvent size={13} />,
             },
             {
               value: 'monthly' as PeriodType,
               label: 'Mes',
-              icon: <CalendarMonthIcon sx={{ fontSize: 13 }} />,
+              icon: <IconCalendarMonth size={13} />,
             },
           ]
         : PERIOD_OPTIONS,
@@ -1605,9 +1586,9 @@ function TotalsColumn({
 
   const dropHighlight = isOver
     ? {
-        borderColor: '#818cf8',
-        boxShadow: `inset 0 0 0 2px ${isDark ? 'rgba(99,102,241,0.35)' : 'rgba(99,102,241,0.25)'}`,
-        backgroundColor: isDark ? 'rgba(99,102,241,0.08)' : 'rgba(99,102,241,0.06)',
+        borderColor: theme.tokens.colors.accent,
+        boxShadow: `inset 0 0 0 2px ${alpha(theme.tokens.colors.accent, 0.35)}`,
+        backgroundColor: theme.tokens.colors.accentSoft,
       }
     : {};
 
@@ -1670,10 +1651,6 @@ function TotalsColumn({
 
   const dialogEmployee =
     dialogEmpId !== null ? filteredEmployees.find((e) => e.id === dialogEmpId) : null;
-  const dialogEmpColor = dialogEmployee ? getEmployeeColor(dialogEmployee.id) : '#7c3aed';
-  const dialogInitials = dialogEmployee
-    ? getInitials(dialogEmployee.firstName, dialogEmployee.lastName)
-    : '';
 
   return (
     <Box
@@ -1692,7 +1669,8 @@ function TotalsColumn({
         flexDirection: 'column',
         borderRadius: '12px',
         overflow: 'hidden',
-        backgroundColor: isDark ? 'rgba(124,58,237,0.05)' : 'rgba(124,58,237,0.03)',
+        backgroundColor: theme.tokens.colors.surfaceSunken,
+        border: theme.tokens.borders.paper,
         transition: 'all 0.25s ease',
         ...dropHighlight,
       }}
@@ -1771,8 +1749,8 @@ function TotalsColumn({
                       color: 'text.secondary',
                       transition: 'all 0.15s ease',
                       '&:hover': {
-                        backgroundColor: isDark ? 'rgba(139,92,246,0.15)' : 'rgba(139,92,246,0.08)',
-                        color: '#a78bfa',
+                        backgroundColor: theme.tokens.colors.accentSoft,
+                        color: theme.tokens.colors.accent,
                       },
                     }}
                   >
@@ -1790,7 +1768,7 @@ function TotalsColumn({
           px: { xs: 0.75, sm: 1.5 },
           py: { xs: 0.5, sm: 0.75 },
           textAlign: 'center',
-          backgroundColor: isDark ? 'rgba(139,92,246,0.06)' : 'rgba(139,92,246,0.03)',
+          backgroundColor: theme.tokens.colors.accentSoft,
         }}
       >
         {hasPeriodBreakdown && (
@@ -1798,7 +1776,7 @@ function TotalsColumn({
             sx={{
               fontSize: '0.58rem',
               fontWeight: 600,
-              color: isDark ? 'rgba(167,139,250,0.55)' : 'rgba(124,58,237,0.55)',
+              color: theme.tokens.colors.textMuted,
               lineHeight: 1.3,
               mb: 0.35,
               letterSpacing: '-0.01em',
@@ -1811,7 +1789,7 @@ function TotalsColumn({
           sx={{
             fontSize: '0.72rem',
             fontWeight: 800,
-            color: isDark ? '#a78bfa' : '#7c3aed',
+            color: theme.tokens.colors.accent,
             letterSpacing: '-0.02em',
           }}
         >
@@ -1822,7 +1800,7 @@ function TotalsColumn({
             sx={{
               fontSize: '0.6rem',
               fontWeight: 700,
-              color: '#34d399',
+              color: theme.tokens.colors.success,
               lineHeight: 1.2,
               mt: 0.1,
             }}
@@ -1838,49 +1816,12 @@ function TotalsColumn({
         onClose={closeDialog}
         maxWidth="xs"
         fullWidth
-        slotProps={{
-          backdrop: {
-            sx: {
-              backdropFilter: 'blur(6px)',
-              backgroundColor: isDark ? 'rgba(0,0,0,0.6)' : 'rgba(0,0,0,0.3)',
-            },
-          },
-          paper: {
-            sx: {
-              borderRadius: '20px',
-              boxShadow: isDark ? '0 32px 80px rgba(0,0,0,0.6)' : '0 24px 80px rgba(0,0,0,0.15)',
-              border: isDark ? '1px solid rgba(255,255,255,0.06)' : 'none',
-            },
-          },
-        }}
       >
-        <Box
-          sx={{
-            p: 3,
-            textAlign: 'center',
-            backgroundColor: isDark ? 'rgba(18,18,24,0.98)' : undefined,
-            borderRadius: '20px',
-          }}
-        >
+        <Box sx={{ p: 3, textAlign: 'center' }}>
           {/* Employee avatar */}
-          <Box
-            sx={{
-              width: 60,
-              height: 60,
-              borderRadius: '50%',
-              backgroundColor: dialogEmpColor,
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              mx: 'auto',
-              mb: 1.5,
-              boxShadow: `0 4px 16px ${dialogEmpColor}60`,
-            }}
-          >
-            <Typography sx={{ fontSize: '1.15rem', fontWeight: 700, color: '#fff' }}>
-              {dialogInitials}
-            </Typography>
-          </Box>
+          {dialogEmployee && (
+            <EmployeeAvatar employee={dialogEmployee} size={56} fontSize="1.05rem" sx={{ mx: 'auto', mb: 1.5 }} />
+          )}
 
           {/* Title */}
           <Typography
@@ -1888,7 +1829,7 @@ function TotalsColumn({
               fontSize: '1.1rem',
               fontWeight: 700,
               mb: 0.25,
-              color: isDark ? '#e8e8f0' : undefined,
+              color: theme.tokens.colors.text,
             }}
           >
             Ajustar horas
@@ -1905,7 +1846,7 @@ function TotalsColumn({
               borderRadius: 2,
               mx: 'auto',
               mb: 2.5,
-              backgroundColor: '#a78bfa',
+              backgroundColor: theme.tokens.colors.accent,
             }}
           />
 
@@ -1920,37 +1861,8 @@ function TotalsColumn({
             onKeyDown={(e) => {
               if (e.key === 'Enter') handleDialogConfirm('add');
             }}
-            sx={{
-              mb: 2.5,
-              '& .MuiOutlinedInput-root': {
-                borderRadius: '10px',
-                minHeight: '42px',
-                backgroundColor: isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.04)',
-                color: theme.palette.text.primary,
-                transition: 'background-color 0.15s ease, box-shadow 0.15s ease',
-                '&:hover': {
-                  backgroundColor: isDark ? 'rgba(255,255,255,0.09)' : 'rgba(0,0,0,0.06)',
-                },
-                '&.Mui-focused': {
-                  backgroundColor: isDark ? 'rgba(255,255,255,0.09)' : 'rgba(0,0,0,0.06)',
-                  boxShadow: isDark ? '0 0 0 3px rgba(255,255,255,0.1)' : '0 0 0 3px rgba(0,0,0,0.07)',
-                },
-                '& fieldset': { border: 'none' },
-                '& input': {
-                  color: theme.palette.text.primary,
-                  fontSize: '0.9rem',
-                  paddingTop: '10px',
-                  paddingBottom: '10px',
-                  paddingLeft: '14px',
-                  paddingRight: '14px',
-                  textAlign: 'center',
-                  '&::placeholder': {
-                    color: isDark ? 'rgba(255,255,255,0.25)' : 'rgba(0,0,0,0.25)',
-                    opacity: 1,
-                  },
-                },
-              },
-            }}
+            inputProps={{ 'aria-label': 'Horas', min: 0, step: 0.5 }}
+            sx={{ mb: 2.5, '& input': { textAlign: 'center' } }}
           />
 
           {/* Add / Subtract buttons */}
@@ -1962,13 +1874,6 @@ function TotalsColumn({
               color="error"
               onClick={() => handleDialogConfirm('subtract')}
               disabled={!dialogHours || parseFloat(dialogHours) <= 0}
-              sx={{
-                borderRadius: '12px',
-                textTransform: 'none',
-                fontWeight: 700,
-                fontSize: '0.9rem',
-                py: 1,
-              }}
             >
               − Restar
             </Button>
@@ -1979,34 +1884,13 @@ function TotalsColumn({
               color="success"
               onClick={() => handleDialogConfirm('add')}
               disabled={!dialogHours || parseFloat(dialogHours) <= 0}
-              sx={{
-                borderRadius: '12px',
-                textTransform: 'none',
-                fontWeight: 700,
-                fontSize: '0.9rem',
-                py: 1,
-              }}
             >
               + Agregar
             </Button>
           </Box>
 
           {/* Cancel */}
-          <Button
-            fullWidth
-            size="small"
-            onClick={closeDialog}
-            sx={{
-              borderRadius: '12px',
-              textTransform: 'none',
-              fontWeight: 500,
-              color: 'text.secondary',
-              py: 0.75,
-              '&:hover': {
-                backgroundColor: isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.04)',
-              },
-            }}
-          >
+          <Button fullWidth variant="text" onClick={closeDialog}>
             Cancelar
           </Button>
         </Box>
@@ -2018,43 +1902,16 @@ function TotalsColumn({
         onClose={cancelPending}
         maxWidth="xs"
         fullWidth
-        slotProps={{
-          backdrop: {
-            sx: {
-              backdropFilter: 'blur(6px)',
-              backgroundColor: isDark ? 'rgba(0,0,0,0.6)' : 'rgba(0,0,0,0.3)',
-            },
-          },
-          paper: {
-            sx: {
-              borderRadius: '20px',
-              boxShadow: isDark ? '0 32px 80px rgba(0,0,0,0.6)' : '0 24px 80px rgba(0,0,0,0.15)',
-              border: isDark ? '1px solid rgba(255,255,255,0.06)' : 'none',
-            },
-          },
-        }}
       >
-        <Box
-          sx={{
-            p: 3,
-            textAlign: 'center',
-            backgroundColor: isDark ? 'rgba(18,18,24,0.98)' : undefined,
-            borderRadius: '20px',
-          }}
-        >
+        <Box sx={{ p: 3, textAlign: 'center' }}>
           <Box
             sx={{
-              width: 56,
-              height: 56,
-              borderRadius: '50%',
+              width: 48,
+              height: 48,
+              borderRadius: '14px',
+              color: pendingEdit?.condition === 'add' ? theme.tokens.colors.success : theme.tokens.colors.error,
               backgroundColor:
-                pendingEdit?.condition === 'add'
-                  ? isDark
-                    ? 'rgba(52,211,153,0.15)'
-                    : 'rgba(52,211,153,0.1)'
-                  : isDark
-                    ? 'rgba(239,68,68,0.15)'
-                    : 'rgba(239,68,68,0.1)',
+                pendingEdit?.condition === 'add' ? theme.tokens.colors.successSoft : theme.tokens.colors.errorSoft,
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
@@ -2062,7 +1919,7 @@ function TotalsColumn({
               mb: 1.5,
             }}
           >
-            <Typography sx={{ fontSize: '1.5rem' }}>
+            <Typography sx={{ fontSize: '1.5rem', fontWeight: 600, lineHeight: 1, color: 'inherit' }}>
               {pendingEdit?.condition === 'add' ? '+' : '−'}
             </Typography>
           </Box>
@@ -2071,7 +1928,7 @@ function TotalsColumn({
               fontSize: '1.05rem',
               fontWeight: 700,
               mb: 0.5,
-              color: isDark ? '#e8e8f0' : undefined,
+              color: theme.tokens.colors.text,
             }}
           >
             {pendingEdit?.condition === 'add' ? 'Agregar horas' : 'Restar horas'}
@@ -2091,26 +1948,12 @@ function TotalsColumn({
               borderRadius: 2,
               mx: 'auto',
               mb: 2.5,
-              backgroundColor: pendingEdit?.condition === 'add' ? '#34d399' : '#ef4444',
+              backgroundColor: pendingEdit?.condition === 'add' ? theme.tokens.colors.success : theme.tokens.colors.error,
             }}
           />
 
           <Box sx={{ display: 'flex', gap: 1 }}>
-            <Button
-              fullWidth
-              size="medium"
-              onClick={cancelPending}
-              sx={{
-                borderRadius: '12px',
-                textTransform: 'none',
-                fontWeight: 600,
-                py: 1,
-                color: 'text.secondary',
-                '&:hover': {
-                  backgroundColor: isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.04)',
-                },
-              }}
-            >
+            <Button fullWidth variant="outlined" onClick={cancelPending}>
               Cancelar
             </Button>
             <Button
@@ -2119,12 +1962,6 @@ function TotalsColumn({
               variant="contained"
               color={pendingEdit?.condition === 'add' ? 'success' : 'error'}
               onClick={applyPending}
-              sx={{
-                borderRadius: '12px',
-                textTransform: 'none',
-                fontWeight: 600,
-                py: 1,
-              }}
             >
               Confirmar
             </Button>
@@ -2176,8 +2013,7 @@ const DayColumn = memo(function DayColumn({
   onAdjustClick,
   theme,
 }: DayColumnProps) {
-  const isDark = theme.palette.mode === 'dark';
-  const todayColor = '#38bdf8';
+  const todayColor = theme.tokens.colors.accent;
 
   const { setNodeRef, isOver } = useDroppable({
     id: columnId,
@@ -2186,9 +2022,9 @@ const DayColumn = memo(function DayColumn({
 
   const dropHighlight = isOver
     ? {
-        borderColor: '#818cf8',
-        boxShadow: `inset 0 0 0 2px ${isDark ? 'rgba(99,102,241,0.35)' : 'rgba(99,102,241,0.25)'}`,
-        backgroundColor: isDark ? 'rgba(99,102,241,0.06)' : 'rgba(99,102,241,0.04)',
+        borderColor: theme.tokens.colors.accent,
+        boxShadow: `inset 0 0 0 2px ${alpha(theme.tokens.colors.accent, 0.35)}`,
+        backgroundColor: theme.tokens.colors.accentSoft,
       }
     : {};
 
@@ -2211,18 +2047,14 @@ const DayColumn = memo(function DayColumn({
         flexDirection: 'column',
         cursor: onColumnClick ? 'pointer' : 'default',
         backgroundColor: isTodayDate
-          ? isDark
-            ? 'rgba(56,189,248,0.06)'
-            : 'rgba(56,189,248,0.04)'
+          ? theme.tokens.colors.accentSoft
           : isWeekend
-            ? isDark
-              ? 'rgba(255,255,255,0.015)'
-              : 'rgba(0,0,0,0.01)'
+            ? theme.tokens.colors.hoverSoft
             : 'transparent',
         borderRadius: '12px',
         border: isTodayDate
-          ? `1.5px solid ${isDark ? 'rgba(56,189,248,0.3)' : 'rgba(56,189,248,0.2)'}`
-          : `1px solid ${isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.05)'}`,
+          ? `1.5px solid ${theme.tokens.colors.accentSoft}`
+          : `1px solid ${theme.tokens.colors.borderHairline}`,
         overflow: 'hidden',
         transition: 'all 0.25s ease',
         ...dropHighlight,
@@ -2235,11 +2067,9 @@ const DayColumn = memo(function DayColumn({
           px: { xs: 0.75, sm: 1.25 },
           py: { xs: 0.6, sm: 0.85 },
           textAlign: 'center',
-          borderBottom: `1px solid ${isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.06)'}`,
+          borderBottom: `1px solid ${theme.tokens.colors.borderHairline}`,
           backgroundColor: isTodayDate
-            ? isDark
-              ? 'rgba(56,189,248,0.1)'
-              : 'rgba(56,189,248,0.07)'
+            ? theme.tokens.colors.accentSoft
             : 'transparent',
           transition: 'background-color 0.15s ease',
         }}
@@ -2254,8 +2084,8 @@ const DayColumn = memo(function DayColumn({
               height: 16,
               borderRadius: '50%',
               mb: 0.4,
-              backgroundColor: isDark ? 'rgba(99,102,241,0.15)' : 'rgba(99,102,241,0.1)',
-              color: '#818cf8',
+              backgroundColor: theme.tokens.colors.accentSoft,
+              color: theme.tokens.colors.accent,
               fontSize: '0.7rem',
               fontWeight: 700,
               lineHeight: 1,
@@ -2333,12 +2163,10 @@ const DayColumn = memo(function DayColumn({
         sx={{
           px: { xs: 0.75, sm: 1.25 },
           py: { xs: 0.45, sm: 0.55 },
-          borderTop: `1px solid ${isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.06)'}`,
+          borderTop: `1px solid ${theme.tokens.colors.borderHairline}`,
           textAlign: 'center',
           backgroundColor: isTodayDate
-            ? isDark
-              ? 'rgba(56,189,248,0.07)'
-              : 'rgba(56,189,248,0.05)'
+            ? theme.tokens.colors.accentSoft
             : 'transparent',
         }}
       >
@@ -2373,13 +2201,11 @@ const WeeklyBoard: React.FC<WeeklyBoardProps> = ({
   handleAdjustTime,
   permissions,
   viewMode,
-  setViewMode,
   onInfoClick,
   onAdjustClick,
 }) => {
   const theme = useTheme();
   const isDark = theme.palette.mode === 'dark';
-  const isSmallScreen = useMediaQuery(theme.breakpoints.down('sm'));
 
   const [selectedPeriod, setSelectedPeriod] = useState<PeriodType>('weekly');
   const [popoverAnchor, setPopoverAnchor] = useState<HTMLElement | null>(null);
@@ -2883,52 +2709,10 @@ const WeeklyBoard: React.FC<WeeklyBoardProps> = ({
       .finalSelectedLabel;
   }, [selectedEmployee, selectedDateStr, schedules, hoursWorked]);
 
+  // El toggle de vista (Calendario Individual / Calendario por Horario) vive
+  // en la barra de filtros de la página: así el board usa todo su alto.
   return (
     <Box sx={{ height: '100%', display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
-      {/* ─── Header ─── */}
-      <Box
-        sx={{
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'space-between',
-          px: { xs: 1.5, sm: 2 },
-          py: 1,
-          gap: 1,
-          borderBottom: `1px solid ${isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.06)'}`,
-          flexShrink: 0,
-          flexWrap: 'wrap',
-        }}
-      >
-        <Box
-          sx={{
-            display: 'flex',
-            alignItems: 'center',
-            gap: 1,
-            flex: isSmallScreen ? 1 : undefined,
-          }}
-        >
-          {/* View toggle - at the start */}
-          <SegmentedToggle
-            value={viewMode}
-            onChange={setViewMode}
-            size="medium"
-            fullWidth={isSmallScreen}
-            options={[
-              {
-                value: 'employee',
-                label: isSmallScreen ? 'Individual' : 'Calendario Individual',
-                icon: <PeopleOutlineIcon sx={{ fontSize: 14 }} />,
-              },
-              {
-                value: 'schedule',
-                label: isSmallScreen ? 'Por Horario' : 'Calendario por Horario',
-                icon: <ViewTimelineIcon sx={{ fontSize: 14 }} />,
-              },
-            ]}
-          />
-        </Box>
-      </Box>
-
       {/* ─── Board ─── */}
       {/* Two panels with independent scroll: the board (day columns / swimlanes)
           scrolls on its own, and the employees panel (totals) on its own.
@@ -3107,8 +2891,8 @@ const WeeklyBoard: React.FC<WeeklyBoardProps> = ({
                   px: 1.5,
                   py: 1.25,
                   borderRadius: '14px',
-                  backgroundColor: isDark ? 'rgba(30,30,40,0.96)' : 'rgba(255,255,255,0.96)',
-                  border: `2px solid ${isDark ? '#a78bfa' : '#7c3aed'}`,
+                  backgroundColor: theme.tokens.colors.menuSurface,
+                  border: `2px solid ${theme.tokens.colors.accent}`,
                   boxShadow: isDark
                     ? '0 20px 60px rgba(0,0,0,0.5), 0 0 0 1px rgba(255,255,255,0.1), 0 4px 20px rgba(0,0,0,0.3)'
                     : '0 20px 60px rgba(0,0,0,0.15), 0 0 0 1px rgba(255,255,255,0.9), 0 4px 20px rgba(0,0,0,0.08)',
@@ -3125,8 +2909,8 @@ const WeeklyBoard: React.FC<WeeklyBoardProps> = ({
                     width: 28,
                     height: 28,
                     borderRadius: '50%',
-                    backgroundColor: getEmployeeColor(activeDragItem.employee.id),
-                    color: '#fff',
+                    backgroundColor: `${getEmployeeColor(activeDragItem.employee.id)}24`,
+                    color: getEmployeeColor(activeDragItem.employee.id),
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'center',
@@ -3142,7 +2926,7 @@ const WeeklyBoard: React.FC<WeeklyBoardProps> = ({
                     sx={{
                       fontSize: '0.8rem',
                       fontWeight: 700,
-                      color: isDark ? '#a78bfa' : '#7c3aed',
+                      color: theme.tokens.colors.accent,
                       lineHeight: 1.2,
                       whiteSpace: 'nowrap',
                     }}
@@ -3198,7 +2982,7 @@ const WeeklyBoard: React.FC<WeeklyBoardProps> = ({
                 sx={{
                   px: 1.5,
                   py: 0.75,
-                  borderBottom: `1px solid ${isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.05)'}`,
+                  borderBottom: `1px solid ${theme.tokens.colors.borderHairline}`,
                 }}
               >
                 <Typography
@@ -3234,7 +3018,7 @@ const WeeklyBoard: React.FC<WeeklyBoardProps> = ({
                   py: 0.75,
                   '&.Mui-selected': { backgroundColor: option.color.bg },
                   '&:hover': {
-                    backgroundColor: isDark ? 'rgba(255,255,255,0.04)' : 'rgba(0,0,0,0.03)',
+                    backgroundColor: theme.tokens.colors.hover,
                   },
                 }}
               >
@@ -3271,10 +3055,10 @@ const WeeklyBoard: React.FC<WeeklyBoardProps> = ({
                 my: 0.2,
                 px: 1.25,
                 py: 0.75,
-                borderTop: `1px solid ${isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.05)'}`,
+                borderTop: `1px solid ${theme.tokens.colors.borderHairline}`,
                 mt: 0.5,
                 '&:hover': {
-                  backgroundColor: isDark ? 'rgba(255,255,255,0.04)' : 'rgba(0,0,0,0.03)',
+                  backgroundColor: theme.tokens.colors.hover,
                 },
               }}
             >
@@ -3295,7 +3079,7 @@ const WeeklyBoard: React.FC<WeeklyBoardProps> = ({
             display: 'flex',
             gap: 0.75,
             p: 1,
-            borderTop: `1px solid ${isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.06)'}`,
+            borderTop: `1px solid ${theme.tokens.colors.borderHairline}`,
             flexShrink: 0,
           }}
         >
@@ -3312,7 +3096,7 @@ const WeeklyBoard: React.FC<WeeklyBoardProps> = ({
               color: 'text.secondary',
               transition: 'all 0.15s ease',
               '&:hover': {
-                backgroundColor: isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.04)',
+                backgroundColor: theme.tokens.colors.hover,
               },
             }}
           >
@@ -3331,14 +3115,10 @@ const WeeklyBoard: React.FC<WeeklyBoardProps> = ({
               fontSize: '0.75rem',
               fontWeight: 700,
               backgroundColor: !popoverSelectedLabel
-                ? isDark
-                  ? 'rgba(255,255,255,0.12)'
-                  : 'rgba(0,0,0,0.08)'
+                ? theme.tokens.colors.hoverStrong
                 : theme.palette.primary.main,
               color: !popoverSelectedLabel
-                ? isDark
-                  ? 'rgba(255,255,255,0.25)'
-                  : 'rgba(0,0,0,0.25)'
+                ? theme.tokens.colors.textSubtle
                 : theme.palette.primary.contrastText,
               transition: 'all 0.15s ease',
               '&:hover': !popoverSelectedLabel
@@ -3366,7 +3146,6 @@ const WeeklyBoard: React.FC<WeeklyBoardProps> = ({
         employees={filteredEmployees}
         assignedEmployeeIds={quickAssignAssignedIds}
         fixedScheduleLabel={quickAssign?.scheduleLabel}
-        isDark={isDark}
         theme={theme}
         onAssign={handleQuickAssignConfirm}
       />

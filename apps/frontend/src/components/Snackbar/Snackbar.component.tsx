@@ -1,6 +1,6 @@
 import React, { createContext, useContext, useState } from "react";
 import { Snackbar, Alert, Slide, SlideProps, useTheme } from "@mui/material";
-import { CheckCircle, XCircle, Info, AlertTriangle } from "lucide-react";
+import { IconAlertTriangle, IconCircleCheck, IconCircleX, IconInfoCircle } from "@tabler/icons-react";
 
 // SnackbarWrapper provides a context and provider for showing notifications across the app using Material-UI Snackbar.
 // Exposes a showNotification function via context for use in child components.
@@ -71,18 +71,19 @@ export const AppNotificationProvider: React.FC<{
     setOpen(false);
   };
 
-  // Custom icon with color only for the icon
+  // Status is conveyed by the icon color only; the toast itself is a surface.
   const getSeverityIcon = (severity: Severity) => {
-    const iconSize = 20;
+    const { colors } = theme.tokens;
+    const iconSize = 18;
     switch (severity) {
       case 'success':
-        return <CheckCircle size={iconSize} color="#4caf50" />;
+        return <IconCircleCheck size={iconSize} color={colors.success} />;
       case 'error':
-        return <XCircle size={iconSize} color="#f44336" />;
+        return <IconCircleX size={iconSize} color={colors.error} />;
       case 'info':
-        return <Info size={iconSize} color="#2196f3" />;
+        return <IconInfoCircle size={iconSize} color={colors.accent} />;
       case 'warning':
-        return <AlertTriangle size={iconSize} color="#ff9800" />;
+        return <IconAlertTriangle size={iconSize} color={colors.warning} />;
       default:
         return undefined;
     }
@@ -102,13 +103,20 @@ export const AppNotificationProvider: React.FC<{
           onClose={closeable ? handleClose : undefined}
           severity={severity}
           icon={getSeverityIcon(severity)}
-          variant="filled"
+          variant="outlined"
           sx={{
-            minWidth: 320,
+            minWidth: { xs: 'auto', sm: 320 },
+            maxWidth: 440,
             alignItems: 'center',
-            fontSize: '1rem',
-            backgroundColor: theme.palette.primary.dark,
-            color: theme.palette.primary.contrastText,
+            fontSize: '0.875rem',
+            fontWeight: 500,
+            borderRadius: '12px',
+            color: theme.tokens.colors.text,
+            backgroundColor: theme.tokens.colors.menuSurface,
+            border: theme.tokens.borders.dialog,
+            boxShadow: theme.tokens.shadows.menu,
+            '& .MuiAlert-icon': { mr: 1.25 },
+            '& .MuiAlert-action': { color: theme.tokens.colors.textMuted },
           }}
         >
           {message}

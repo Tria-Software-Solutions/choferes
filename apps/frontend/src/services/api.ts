@@ -155,12 +155,20 @@ api.interceptors.response.use(
       return error.cachedResponse;
     }
 
-    if (error.response?.status === 401) {
+    // A 401 from the login form means "wrong credentials", not "session over":
+    // let the form show the error instead of redirecting to /session-expired.
+    const isLoginRequest = String(error.config?.url ?? "").includes("/users/login");
+
+    if (error.response?.status === 401 && !isLoginRequest) {
       // The backend responds with { error: "Unauthorized: Token expired", code: "TOKEN_EXPIRED" }.
       // Match the `code` (and the message as a fallback) so the refresh flow actually runs.
       const data = error.response.data as { code?: string; error?: string } | undefined;
+      // MISSING_TOKEN: after a reload the in-memory token is gone and the 1h
+      // access cookie may have expired while the 7-day refresh cookie is still
+      // valid — try to refresh before ending the session.
       const isTokenExpired =
         data?.code === "TOKEN_EXPIRED" ||
+        data?.code === "MISSING_TOKEN" ||
         (typeof data?.error === "string" && data.error.includes("Token expired"));
 
       const alreadyRetried = Boolean(
@@ -191,6 +199,19 @@ export const clearApiCache = () => {
   requestCache.clear();
 };
 
+// Ends the server session: the backend expires the httpOnly auth cookies,
+// which otherwise stay valid (and keep authenticating requests) after the
+// in-memory tokens are dropped. Best effort — a failure must never block the
+// local logout.
+export const endServerSession = async () => {
+  clearApiCache();
+  try {
+    await axios.post(`${API_URL}/api/auth/logout`, {}, { withCredentials: true, timeout: 10000 });
+  } catch {
+    // Offline or server asleep: cookies expire on their own.
+  }
+};
+
 export const invalidateCache = (url: string) => {
   for (const [key] of requestCache) {
     if (key.includes(url)) {
@@ -203,6 +224,7 @@ const disconnectUser = () => {
   removeTokenWithFallback("accessToken");
   removeTokenWithFallback("refreshToken");
   sessionStorage.clear();
+  void endServerSession();
   // NOTE: do NOT clear all of localStorage here. It holds user preferences
   // (themeMode, dock/table preferences, schedule order) that must survive a
   // token refresh failure. Clearing it wiped the saved theme in production.

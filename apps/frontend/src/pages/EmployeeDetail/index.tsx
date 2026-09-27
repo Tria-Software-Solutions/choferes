@@ -1,24 +1,27 @@
 import React, { useCallback, useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
+import { useDispatch } from "react-redux";
 import {
   Box,
   Button,
-  Chip,
-  CircularProgress,
-  Paper,
+  IconButton,
   Tab,
   Tabs,
+  Tooltip,
   Typography,
   useMediaQuery,
   useTheme,
 } from "@mui/material";
-import { ArrowLeft, CalendarDays, Clock3, Mail, UsersRound, Wallet } from "lucide-react";
-import { format } from "date-fns";
-import { es } from "date-fns/locale";
-import { Employee } from "../../models/Employee";
+import { IconArrowLeft, IconBeach, IconBriefcase, IconCalendarMonth, IconId, IconMail, IconReceipt, IconShieldExclamation, IconTrash, IconUser, IconWallet } from "@tabler/icons-react";
+import { Employee, getEmployeePositionLabel } from "../../models/Employee";
 import * as EmployeeService from "../../services/employeeService";
 import { useAuthContext } from "../../context/AuthContext";
 import PERMISSIONS from "../../constants/permissions.constants";
+import NOTIFICATIONS from "../../constants/notifications.constants";
+import { AppDispatch } from "../../store/store";
+import { deleteEmployee } from "../../store/slices/employeeSlice";
+import DialogComponent from "../../components/Dialog/Dialog.component";
+import { useAppNotifications } from "../../components/Snackbar/Snackbar.component";
 import EmployeeAvatar from "../../components/EmployeeAvatar/EmployeeAvatar.component";
 import PersonalInfoTab from "./components/PersonalInfoTab";
 import HoursTab from "./components/HoursTab";
@@ -27,19 +30,16 @@ import VacationsTab from "./components/VacationsTab";
 import LicensesTab from "./components/LicensesTab";
 import DisciplinaryTab from "./components/DisciplinaryTab";
 import { formatMoney } from "../../utils/paymentSlipPdf";
+import { EmptyState, LoadingState, PageCard, PageContainer } from "../../components/Layout";
 import {
-  avatarRingStyles,
   backButtonStyles,
-  centeredCardContentStyles,
   contentBoxStyles,
-  detailBoxStyles,
   detailHeaderStyles,
   emailStyles,
   identityBoxStyles,
   metaChipStyles,
   metaChipsRowStyles,
   nameStyles,
-  premiumCardStyles,
   tabsBoxStyles,
 } from "./styles";
 
@@ -51,6 +51,13 @@ type TabKey =
   | "licencias"
   | "amonestaciones";
 
+type TabDescriptor = {
+  key: TabKey;
+  label: string;
+  icon: React.ElementType;
+  visible: boolean;
+};
+
 // Employee detail page: personal data, hours, biweekly payments (boletas)
 // and vacation requests for a single employee.
 const EmployeeDetailPage: React.FC = () => {
@@ -59,12 +66,17 @@ const EmployeeDetailPage: React.FC = () => {
   const theme = useTheme();
   const isSmallScreen = useMediaQuery(theme.breakpoints.down("sm"));
   const { userPermissions } = useAuthContext();
+  const dispatch = useDispatch<AppDispatch>();
+  const { showNotification } = useAppNotifications();
 
   const [employee, setEmployee] = useState<Employee | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [loadError, setLoadError] = useState<string | null>(null);
   const [tab, setTab] = useState<TabKey>("datos");
+  const [openDeleteDialog, setOpenDeleteDialog] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
 
+  const canDelete = userPermissions.includes(PERMISSIONS.DELETE_EMPLOYEES);
   const canViewPayments = userPermissions.includes(PERMISSIONS.VIEW_PAYMENTS);
   const canViewVacations = userPermissions.includes(PERMISSIONS.VIEW_VACATIONS);
   const canViewLicenses = userPermissions.includes(PERMISSIONS.VIEW_LICENSES);
@@ -98,113 +110,135 @@ const EmployeeDetailPage: React.FC = () => {
     setEmployee(updated);
   }, []);
 
+  // Eliminar es una acción de página (no de un tarb): el admin la confirma y
+  // vuelve al listado. Antes vivía en la columna de acciones de Planilla.
+  const handleDeleteEmployee = async () => {
+    if (Number.isNaN(employeeId)) return;
+    setIsDeleting(true);
+    try {
+      await dispatch(deleteEmployee(employeeId)).unwrap();
+      showNotification(NOTIFICATIONS.EMPLOYEE_DELETE_SUCCESS, {
+        severity: "success",
+        duration: 3000,
+      });
+      navigate("/employees");
+    } catch (error) {
+      showNotification(NOTIFICATIONS.EMPLOYEE_DELETE_ERROR, {
+        severity: "error",
+        duration: 5000,
+      });
+    } finally {
+      setIsDeleting(false);
+    }
+  };
+
   if (isLoading) {
     return (
-      <Box sx={detailBoxStyles}>
-        <Paper elevation={0} sx={premiumCardStyles(theme)}>
-          <Box sx={centeredCardContentStyles}>
-            <CircularProgress size={30} />
-            <Typography variant="body2" sx={{ color: "text.secondary" }}>
-              Cargando empleado…
-            </Typography>
-          </Box>
-        </Paper>
-      </Box>
+      <PageContainer>
+        <PageCard>
+          <LoadingState label="Cargando empleado…" />
+        </PageCard>
+      </PageContainer>
     );
   }
 
   if (loadError || !employee) {
     return (
-      <Box sx={detailBoxStyles}>
-        <Paper elevation={0} sx={premiumCardStyles(theme)}>
-          <Box sx={centeredCardContentStyles}>
-            <Box
-              sx={{
-                width: 56,
-                height: 56,
-                borderRadius: "16px",
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                color: theme.palette.text.secondary,
-                backgroundColor:
-                  theme.palette.mode === "dark"
-                    ? "rgba(255,255,255,0.05)"
-                    : "rgba(0,0,0,0.04)",
-              }}
-            >
-              <UsersRound size={26} strokeWidth={1.5} />
-            </Box>
-            <Typography sx={{ fontWeight: 600, color: "text.primary" }}>
-              {loadError || "Empleado no encontrado"}
-            </Typography>
-            <Button
-              variant="outlined"
-              startIcon={<ArrowLeft size={16} />}
-              onClick={() => navigate("/employees")}
-            >
-              Volver a empleados
-            </Button>
-          </Box>
-        </Paper>
-      </Box>
+      <PageContainer>
+        <PageCard>
+          <EmptyState
+            icon={<IconUser />}
+            title={loadError || "Empleado no encontrado"}
+            action={
+              <Button
+                variant="outlined"
+                startIcon={<IconArrowLeft size={16} />}
+                onClick={() => navigate("/employees")}
+              >
+                Volver a empleados
+              </Button>
+            }
+          />
+        </PageCard>
+      </PageContainer>
     );
   }
 
-  const tabs: Array<{ key: TabKey; label: string; visible: boolean }> = [
-    { key: "datos", label: "Datos", visible: true },
-    { key: "horas", label: "Horas", visible: true },
-    { key: "pagos", label: "Pagos", visible: canViewPayments },
-    { key: "vacaciones", label: "Vacaciones", visible: canViewVacations },
-    { key: "licencias", label: "Licencias", visible: canViewLicenses },
-    { key: "amonestaciones", label: "Amonestaciones", visible: canViewDisciplinary },
+  // Con un solo card, el icono del tab repite el del card para que la
+  // sección se lea como una unidad (Horas, Pagos, Licencias, Amonestaciones).
+  // Con varios cards (Datos, Vacaciones) el tab usa su propio icono.
+  const tabs: TabDescriptor[] = [
+    { key: "datos", label: "Datos", icon: IconUser, visible: true },
+    { key: "horas", label: "Horas", icon: IconCalendarMonth, visible: true },
+    { key: "pagos", label: "Pagos", icon: IconReceipt, visible: canViewPayments },
+    { key: "vacaciones", label: "Vacaciones", icon: IconBeach, visible: canViewVacations },
+    { key: "licencias", label: "Licencias", icon: IconId, visible: canViewLicenses },
+    {
+      key: "amonestaciones",
+      label: "Amonestaciones",
+      icon: IconShieldExclamation,
+      visible: canViewDisciplinary,
+    },
   ];
   const visibleTabs = tabs.filter((item) => item.visible);
   const activeTab = visibleTabs.some((item) => item.key === tab) ? tab : visibleTabs[0].key;
 
-  const registeredAt = employee.createdAt
-    ? format(new Date(employee.createdAt), "dd MMM yyyy", { locale: es })
-    : null;
+  const employeePosition = getEmployeePositionLabel(
+    employee.position,
+    employee.gender,
+  );
 
   return (
-    <Box className="scrollable-content" sx={detailBoxStyles}>
-      <Paper elevation={0} sx={premiumCardStyles(theme)}>
+    <PageContainer>
+      <PageCard>
         {/* Header: back navigation + identity + quick metrics */}
         <Box sx={detailHeaderStyles(theme)}>
-          <Button
-            startIcon={<ArrowLeft size={18} />}
-            onClick={() => navigate("/employees")}
-            sx={backButtonStyles(theme)}
+          <Box
+            sx={{
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "space-between",
+              gap: 1,
+            }}
           >
-            {isSmallScreen ? "Volver" : "Empleados"}
-          </Button>
+            <Button
+              startIcon={<IconArrowLeft size={18} />}
+              onClick={() => navigate("/employees")}
+              sx={backButtonStyles(theme)}
+            >
+              {isSmallScreen ? "Volver" : "Empleados"}
+            </Button>
+            {canDelete && (
+              <Tooltip title="Eliminar empleado">
+                <IconButton
+                  color="error"
+                  aria-label="Eliminar empleado"
+                  onClick={() => setOpenDeleteDialog(true)}
+                >
+                  <IconTrash size={20} />
+                </IconButton>
+              </Tooltip>
+            )}
+          </Box>
 
           <Box sx={identityBoxStyles}>
-            <Box sx={avatarRingStyles(theme)}>
-              <EmployeeAvatar
-                employee={employee}
-                size={isSmallScreen ? 52 : 64}
-                sx={{ border: `2px solid ${theme.palette.background.paper}` }}
-              />
-            </Box>
+            <EmployeeAvatar
+              employee={employee}
+              size={isSmallScreen ? 52 : 64}
+              sx={{ border: `2px solid ${theme.palette.background.paper}` }}
+            />
 
             <Box sx={{ minWidth: 0, flex: 1 }}>
               <Box sx={{ display: "flex", alignItems: "center", gap: 1, minWidth: 0 }}>
                 <Typography sx={nameStyles}>
                   {employee.firstName} {employee.lastName}
                 </Typography>
-                <Chip
-                  size="small"
-                  label={employee.isActive === false ? "Inactivo" : "Activo"}
-                  color={employee.isActive === false ? "default" : "success"}
-                  variant={employee.isActive === false ? "outlined" : "filled"}
-                />
               </Box>
 
               <Box sx={{ display: "flex", alignItems: "center", gap: 0.75, minWidth: 0 }}>
-                <Mail
+                <IconMail
                   size={13}
-                  strokeWidth={1.75}
+                  stroke={1.75}
                   style={{ flexShrink: 0, opacity: 0.5 }}
                 />
                 <Typography sx={emailStyles}>
@@ -214,38 +248,49 @@ const EmployeeDetailPage: React.FC = () => {
 
               <Box sx={metaChipsRowStyles}>
                 <Box component="span" sx={metaChipStyles(theme)}>
-                  <Wallet size={13} strokeWidth={1.75} style={{ opacity: 0.7 }} />
+                  <IconWallet size={13} stroke={1.75} style={{ opacity: 0.7 }} />
                   {employee.hourlyRate != null
                     ? `${formatMoney(Number(employee.hourlyRate), "CRC")}/h`
                     : "Sin tarifa"}
                 </Box>
                 <Box component="span" sx={metaChipStyles(theme)}>
-                  <CalendarDays size={13} strokeWidth={1.75} style={{ opacity: 0.7 }} />
+                  <IconBeach size={13} stroke={1.75} style={{ opacity: 0.7 }} />
                   {employee.vacationDays != null
                     ? `${employee.vacationDays} días disponibles`
                     : "Sin saldo de vacaciones"}
                 </Box>
-                {registeredAt && (
+                {employeePosition && (
                   <Box component="span" sx={metaChipStyles(theme)}>
-                    <Clock3 size={13} strokeWidth={1.75} style={{ opacity: 0.7 }} />
-                    Registrado el {registeredAt}
+                    <IconBriefcase size={13} stroke={1.75} style={{ opacity: 0.7 }} />
+                    {employeePosition}
                   </Box>
                 )}
               </Box>
             </Box>
           </Box>
 
-          <Box sx={tabsBoxStyles}>
+          <Box sx={tabsBoxStyles(theme)}>
             <Tabs
               value={activeTab}
               onChange={(_event, value: TabKey) => setTab(value)}
               variant={isSmallScreen ? "scrollable" : "standard"}
-              scrollButtons={isSmallScreen ? "auto" : false}
-              allowScrollButtonsMobile
+              // Swipe to scroll on phones; arrow buttons only ate horizontal room.
+              scrollButtons={false}
+              aria-label="Secciones del expediente"
             >
-              {visibleTabs.map((item) => (
-                <Tab key={item.key} value={item.key} label={item.label} />
-              ))}
+              {visibleTabs.map((item) => {
+                const Icon = item.icon;
+                return (
+                  <Tab
+                    key={item.key}
+                    value={item.key}
+                    label={item.label}
+                    icon={<Icon size={17} />}
+                    iconPosition="start"
+                    disableRipple
+                  />
+                );
+              })}
             </Tabs>
           </Box>
         </Box>
@@ -268,8 +313,20 @@ const EmployeeDetailPage: React.FC = () => {
           {activeTab === "licencias" && <LicensesTab employee={employee} />}
           {activeTab === "amonestaciones" && <DisciplinaryTab employee={employee} />}
         </Box>
-      </Paper>
-    </Box>
+      </PageCard>
+
+      <DialogComponent
+        open={openDeleteDialog}
+        onClose={() => setOpenDeleteDialog(false)}
+        onConfirm={() => void handleDeleteEmployee()}
+        title="Eliminar empleado"
+        message={`¿Seguro que quieres eliminar a ${employee.firstName} ${employee.lastName}? Esta acción no se puede deshacer.`}
+        type="delete"
+        confirmText="Eliminar"
+        cancelText="Cancelar"
+        loading={isDeleting}
+      />
+    </PageContainer>
   );
 };
 

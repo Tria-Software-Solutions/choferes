@@ -9,6 +9,8 @@ import compression from "compression";
 import helmet from "helmet";
 import rateLimit from "express-rate-limit";
 import path from "path";
+import { MulterError } from "multer";
+import { UPLOAD_TYPE_ERROR } from "./controllers/avatarController";
 import authRoutes from "./routes/authRoutes";
 import healthRoutes from "./routes/healthRoutes";
 import userRoutes from "./routes/userRoutes";
@@ -29,14 +31,17 @@ import paymentRoutes from "./routes/paymentRoutes";
 import vacationRoutes from "./routes/vacationRoutes";
 import employeeLicenseRoutes from "./routes/employeeLicenseRoutes";
 import disciplinaryActionRoutes from "./routes/disciplinaryActionRoutes";
-import visionRoutes from "./routes/visionRoutes";
+import { taskRouter, taskListRouter } from "./routes/taskRoutes";
 import sequelize from "./config/database";
 import "./database/models";
 import "./database/associations";
+import { startSchedulers } from "./services/schedulerService";
 
 dotenv.config();
 
 const app = express();
+
+const CORS_ERROR = "Not allowed by CORS";
 
 // Render sits behind a proxy, so trust it to get the real client IP
 // (required for per-IP rate limiting, and express-rate-limit v7 validation)
@@ -101,7 +106,7 @@ app.use(
       if (allowedOrigins.includes(origin)) {
         return callback(null, true);
       }
-      return callback(new Error("Not allowed by CORS"));
+      return callback(new Error(CORS_ERROR));
     },
     credentials: true,
     methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"],
@@ -182,11 +187,34 @@ app.use("/api/payments", paymentRoutes);
 app.use("/api/vacations", vacationRoutes);
 app.use("/api/employee-licenses", employeeLicenseRoutes);
 app.use("/api/disciplinary-actions", disciplinaryActionRoutes);
-app.use("/api/vision", visionRoutes);
+app.use("/api/tasks", taskRouter);
+app.use("/api/task-lists", taskListRouter);
 
 app.use(
   // eslint-disable-next-line @typescript-eslint/no-unused-vars, no-unused-vars
   (error: Error, req: express.Request, res: express.Response, _next: express.NextFunction) => {
+    // Upload problems (file too large, wrong type) are client errors.
+    if (error instanceof MulterError) {
+      const message =
+        error.code === "LIMIT_FILE_SIZE"
+          ? "El archivo excede el tamaño máximo permitido"
+          : error.message;
+      return res.status(400).json({ message });
+    }
+    if (error.message === UPLOAD_TYPE_ERROR) {
+      return res.status(400).json({ message: error.message });
+    }
+    if (error.message === CORS_ERROR) {
+      return res.status(403).json({ message: "Origen no permitido" });
+    }
+    // Malformed JSON bodies
+    if ((error as { type?: string }).type === "entity.parse.failed") {
+      return res.status(400).json({ message: "JSON inválido en el cuerpo de la solicitud" });
+    }
+    if ((error as { type?: string }).type === "entity.too.large") {
+      return res.status(413).json({ message: "La solicitud excede el tamaño máximo permitido" });
+    }
+
     console.error("[ErrorHandler]", error.message, error.stack);
     if (process.env.NODE_ENV === "production") {
       return res.status(500).json({ error: "Internal server error" });
@@ -232,6 +260,7 @@ const connectDatabase = async () => {
       // NOTE: We intentionally do NOT call sequelize.sync() here.
       // Schema changes are managed by migrations (sequelize-cli) during
       // the build step. sync() can alter/drop tables in production.
+      startSchedulers();
       return;
     } catch (error) {
       const errorMsg = error instanceof Error ? error.message : String(error);

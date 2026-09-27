@@ -3,7 +3,7 @@ import TextField from "@mui/material/TextField";
 import InputAdornment from "@mui/material/InputAdornment";
 import IconButton from "@mui/material/IconButton";
 import CircularProgress from "@mui/material/CircularProgress";
-import { Search, X } from "lucide-react";
+import { IconSearch, IconX } from "@tabler/icons-react";
 import { SEARCH_BAR } from "../../constants/constants";
 import {
   textFieldStyles,
@@ -70,7 +70,7 @@ const SearchBarComponent: React.FC<SearchBarProps> = ({
           </InputAdornment>
         ) : (
           <InputAdornment position="start">
-            <Search size={20} style={searchIconStyles} />
+            <IconSearch size={20} style={searchIconStyles} />
           </InputAdornment>
         ),
         endAdornment: value ? (
@@ -81,7 +81,7 @@ const SearchBarComponent: React.FC<SearchBarProps> = ({
               edge="end"
               size="small"
             >
-              <X size={18} style={clearIconStyles} />
+              <IconX size={18} style={clearIconStyles} />
             </IconButton>
           </InputAdornment>
         ) : null,

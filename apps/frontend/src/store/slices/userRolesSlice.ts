@@ -2,6 +2,7 @@ import { createSlice, createAsyncThunk, PayloadAction } from "@reduxjs/toolkit";
 import * as UserRoleService from "../../services/userRoleService";
 import { UserRole } from "../../models/UserRole";
 import { RootState } from "../store";
+import { getApiErrorMessage } from "../../utils/apiError";
 
 // userRolesSlice manages the state and async logic for user-role assignments
 // Includes fetching, creating, updating, and deleting user roles
@@ -29,9 +30,7 @@ export const fetchUserRoles = createAsyncThunk(
       const userRoles = await UserRoleService.getUserRoles();
       return userRoles;
     } catch (error: unknown) {
-      return rejectWithValue(
-        error instanceof Error ? error.message : "Failed to fetch user roles",
-      );
+      return rejectWithValue(getApiErrorMessage(error, "Failed to fetch user roles"));
     }
   },
 );
@@ -44,11 +43,7 @@ export const fetchUserRoleByUserId = createAsyncThunk(
       const userRole = await UserRoleService.getUserRoleByUserId(userId);
       return userRole;
     } catch (error: unknown) {
-      return rejectWithValue(
-        error instanceof Error
-          ? error.message
-          : "Failed to fetch user role by userId",
-      );
+      return rejectWithValue(getApiErrorMessage(error, "Failed to fetch user role by userId"));
     }
   },
 );
@@ -61,11 +56,7 @@ export const fetchUserRoleByRoleId = createAsyncThunk(
       const userRole = await UserRoleService.getUserRoleByRoleId(roleId);
       return userRole;
     } catch (error: unknown) {
-      return rejectWithValue(
-        error instanceof Error
-          ? error.message
-          : "Failed to fetch user role by roleId",
-      );
+      return rejectWithValue(getApiErrorMessage(error, "Failed to fetch user role by roleId"));
     }
   },
 );
@@ -78,9 +69,7 @@ export const createUserRole = createAsyncThunk(
       const createdUserRole = await UserRoleService.createUserRole(newUserRole);
       return createdUserRole;
     } catch (error: unknown) {
-      return rejectWithValue(
-        error instanceof Error ? error.message : "Failed to create user role",
-      );
+      return rejectWithValue(getApiErrorMessage(error, "Failed to create user role"));
     }
   },
 );
@@ -97,9 +86,7 @@ export const updateUserRole = createAsyncThunk(
       );
       return refreshedUserRole;
     } catch (error: unknown) {
-      return rejectWithValue(
-        error instanceof Error ? error.message : "Failed to update user role",
-      );
+      return rejectWithValue(getApiErrorMessage(error, "Failed to update user role"));
     }
   },
 );
@@ -112,9 +99,7 @@ export const deleteUserRole = createAsyncThunk(
       await UserRoleService.deleteUserRole(id);
       return id;
     } catch (error: unknown) {
-      return rejectWithValue(
-        error instanceof Error ? error.message : "Failed to delete user role",
-      );
+      return rejectWithValue(getApiErrorMessage(error, "Failed to delete user role"));
     }
   },
 );

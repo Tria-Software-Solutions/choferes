@@ -10,7 +10,7 @@ import {
 } from "@mui/material";
 import TextfieldComponent from "../../../components/Textfield/Textfield.component";
 import generateSecret from "../../../utils/generateSecret";
-import { Copy, Eye, EyeOff, Info } from "lucide-react";
+import { IconCopy, IconEye, IconEyeOff, IconInfoCircle } from "@tabler/icons-react";
 import FORMS, { PASSWORD_INFO_TITLE, PASSWORD_INFO_DESC } from "../../../constants/forms.constants";
 import NOTIFICATIONS from "../../../constants/notifications.constants";
 import MANAGEMENT from "../../../constants/management.constants";
@@ -146,6 +146,8 @@ const PasswordChangeForm: React.FC<PasswordChangeFormProps> = ({
             variant="outlined"
             fullWidth
             placeholder={MANAGEMENT.DIALOG_PASSWORD_NEW_PLACEHOLDER}
+            label="Nueva contraseña"
+            autoComplete="new-password"
             onChange={(e) => handleFieldChange("newPassword", e.target.value)}
             endAdornment={
               <IconButton
@@ -153,7 +155,7 @@ const PasswordChangeForm: React.FC<PasswordChangeFormProps> = ({
                 edge="end"
                 size="small"
               >
-                {showNewPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+                {showNewPassword ? <IconEyeOff size={20} /> : <IconEye size={20} />}
               </IconButton>
             }
             sx={formControl(theme)}
@@ -167,6 +169,8 @@ const PasswordChangeForm: React.FC<PasswordChangeFormProps> = ({
             variant="outlined"
             fullWidth
             placeholder={MANAGEMENT.DIALOG_PASSWORD_CONFIRM_PLACEHOLDER}
+            label="Confirmar contraseña"
+            autoComplete="new-password"
             onChange={(e) =>
               handleFieldChange("confirmNewPassword", e.target.value)
             }
@@ -176,7 +180,7 @@ const PasswordChangeForm: React.FC<PasswordChangeFormProps> = ({
                 edge="end"
                 size="small"
               >
-                {showConfirmNewPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+                {showConfirmNewPassword ? <IconEyeOff size={20} /> : <IconEye size={20} />}
               </IconButton>
             }
             sx={formControl(theme)}
@@ -214,6 +218,7 @@ const PasswordChangeForm: React.FC<PasswordChangeFormProps> = ({
             <Box sx={temporalPasswordBox}>
               <TextfieldComponent
                 placeholder="Contraseña temporal generada"
+                label="Contraseña temporal"
                 value={temporalPassword}
                 fullWidth
                 InputProps={{
@@ -228,7 +233,7 @@ const PasswordChangeForm: React.FC<PasswordChangeFormProps> = ({
                         edge="end"
                         size="small"
                       >
-                        <Copy
+                        <IconCopy
                           color={copySuccess ? "success" : "inherit"}
                           fontSize="small"
                         />
@@ -244,7 +249,7 @@ const PasswordChangeForm: React.FC<PasswordChangeFormProps> = ({
         <Grid item xs={12}>
           <Box sx={infoBox(theme)}>
             <Box sx={infoIconBox(theme)}>
-              <Info style={iconStyle} />
+              <IconInfoCircle style={iconStyle} />
             </Box>
             <Box>
               <Typography sx={infoTitle(theme)}>{PASSWORD_INFO_TITLE}</Typography>

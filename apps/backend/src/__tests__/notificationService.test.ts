@@ -176,7 +176,7 @@ describe("markAsRead", () => {
   it("debería actualizar read=true y devolver la notificación", async () => {
     Notification.update.mockResolvedValue([1]);
     const updated = { id: 1, read: true };
-    Notification.findByPk.mockResolvedValue(updated);
+    Notification.findOne.mockResolvedValue(updated);
 
     const result = await notificationService.markAsRead(1, 1);
 
@@ -184,6 +184,19 @@ describe("markAsRead", () => {
       { read: true },
       { where: { id: 1, userId: 1 } },
     );
+    expect(Notification.findOne).toHaveBeenCalledWith(
+      expect.objectContaining({ where: { id: 1, userId: 1 } }),
+    );
     expect(result).toEqual(updated);
+  });
+
+  it("no devuelve notificaciones de otro usuario", async () => {
+    Notification.update.mockResolvedValue([0]);
+    Notification.findOne.mockResolvedValue(null);
+
+    const result = await notificationService.markAsRead(2, 1);
+
+    expect(Notification.findByPk).not.toHaveBeenCalled();
+    expect(result).toBeNull();
   });
 });

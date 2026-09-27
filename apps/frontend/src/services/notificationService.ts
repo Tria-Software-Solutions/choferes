@@ -168,25 +168,6 @@ export const createVehicleNotification = (action: 'created' | 'updated' | 'delet
   });
 };
 
-export const createCourierNotification = (action: 'created' | 'updated' | 'deleted', courierInfo: string) => {
-  const actions = {
-    created: { title: 'Nuevo servicio de courier registrado', message: courierInfo },
-    updated: { title: 'Servicio de courier actualizado', message: courierInfo },
-    deleted: { title: 'Servicio de courier eliminado', message: courierInfo }
-  };
-
-  return addNotificationToMenu({
-    title: actions[action].title,
-    message: actions[action].message,
-    type: action === 'deleted' ? 'warning' : 'success',
-    category: 'system',
-    priority: 'medium',
-    actionUrl: '/courier-services',
-    actionText: 'Ver servicios',
-    source: 'courier'
-  });
-};
-
 export const createUserNotification = (action: 'created' | 'updated' | 'deleted', userName: string) => {
   const actions = {
     created: { title: 'Nuevo usuario registrado', message: `${userName} ha sido registrado en el sistema` },
@@ -222,103 +203,5 @@ export const createRoleNotification = (action: 'created' | 'updated' | 'deleted'
     actionUrl: '/dashboard',
     actionText: 'Ver roles',
     source: 'role'
-  });
-};
-
-export const createHoursGenerationNotification = (success: boolean, employeeCount?: number) => {
-  if (success) {
-    return addNotificationToMenu({
-      title: 'Horas generadas exitosamente',
-      message: employeeCount ? `Se generaron horas para ${employeeCount} empleados` : 'Se generaron las horas automáticamente',
-      type: 'success',
-      category: 'report',
-      priority: 'high',
-      actionUrl: '/roles',
-      actionText: 'Ver resultados',
-      source: 'hours'
-    });
-  } else {
-    return addNotificationToMenu({
-      title: 'Error al generar horas',
-      message: 'Hubo un problema al generar las horas automáticamente',
-      type: 'error',
-      category: 'report',
-      priority: 'high',
-      actionUrl: '/roles',
-      actionText: 'Reintentar',
-      source: 'hours'
-    });
-  }
-};
-
-export const createSystemNotification = (title: string, message: string, type: 'success' | 'info' | 'warning' | 'error' = 'info') => {
-  return addNotificationToMenu({
-    title,
-    message,
-    type,
-    category: 'system',
-    priority: 'low',
-    source: 'system'
-  });
-};
-
-export const createReportNotification = (title: string, message: string, actionUrl?: string) => {
-  return addNotificationToMenu({
-    title,
-    message,
-    type: 'info',
-    category: 'report',
-    priority: 'medium',
-    actionUrl,
-    actionText: 'Ver reporte',
-    source: 'report'
-  });
-};
-
-export const createBackupNotification = (action: 'created' | 'failed', format: 'excel' | 'pdf') => {
-  const actions = {
-    created: {
-      title: 'Backup creado exitosamente',
-      message: `Se ha creado un backup en formato ${format.toUpperCase()} con todos los datos del sistema`
-    },
-    failed: {
-      title: 'Error al crear backup',
-      message: `No se pudo crear el backup en formato ${format.toUpperCase()}`
-    }
-  };
-
-  return addNotificationToMenu({
-    title: actions[action].title,
-    message: actions[action].message,
-    type: action === 'created' ? 'success' : 'error',
-    category: 'system',
-    priority: 'high',
-    actionUrl: '/dashboard',
-    actionText: 'Ir al dashboard',
-    source: 'backup'
-  });
-};
-
-export const createDataDeletionNotification = (action: 'completed' | 'failed') => {
-  const actions = {
-    completed: {
-      title: 'Datos eliminados exitosamente',
-      message: 'Todos los datos no esenciales han sido eliminados del sistema'
-    },
-    failed: {
-      title: 'Error al eliminar datos',
-      message: 'No se pudieron eliminar todos los datos del sistema'
-    }
-  };
-
-  return addNotificationToMenu({
-    title: actions[action].title,
-    message: actions[action].message,
-    type: action === 'completed' ? 'warning' : 'error',
-    category: 'system',
-    priority: 'high',
-    actionUrl: '/dashboard',
-    actionText: 'Ir al dashboard',
-    source: 'data-deletion'
   });
 };

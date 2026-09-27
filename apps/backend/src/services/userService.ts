@@ -70,7 +70,27 @@ function toSafeUser(user: User): Record<string, any> {
   return { id, firstName, lastName, username, email, isActive, avatar, settings, roles };
 }
 
-// Authenticates a user by username/email and password, returns tokens and user info
+// Pre-computed bcrypt hash used when the identifier matches no account, so a
+// failed lookup costs the same as a failed password check (no timing oracle
+// revealing which usernames exist).
+const DUMMY_PASSWORD_HASH = "$2b$10$CwTycUXWue0Thq9StjUM0uJ8.xkKQ0c6nY6bP9.0p3H0NfOefXvUu";
+
+export const AUTH_ERRORS = {
+  INVALID_CREDENTIALS: "Invalid credentials",
+  INACTIVE: "User is inactive",
+} as const;
+
+// Checks a candidate password against the main and the temporary password.
+const matchesAnyPassword = async (candidate: string, user: User): Promise<boolean> => {
+  if (await bcrypt.compare(candidate, user.password)) return true;
+  if (user.temporalPassword) return bcrypt.compare(candidate, user.temporalPassword);
+  return false;
+};
+
+// Authenticates a user by username/email and password, returns tokens and user info.
+// Unknown identifiers and wrong passwords fail with the same error so the
+// endpoint can't be used to enumerate accounts; the "inactive" state is only
+// disclosed once the credentials are proven valid.
 export const authenticateUser = async (identifier: string, password: string, res: Response) => {
   try {
     const user = await User.findOne({
@@ -79,23 +99,16 @@ export const authenticateUser = async (identifier: string, password: string, res
     });
 
     if (!user) {
-      throw new Error("User not found");
+      await bcrypt.compare(password, DUMMY_PASSWORD_HASH);
+      throw new Error(AUTH_ERRORS.INVALID_CREDENTIALS);
+    }
+
+    if (!(await matchesAnyPassword(password, user))) {
+      throw new Error(AUTH_ERRORS.INVALID_CREDENTIALS);
     }
 
     if (!user.isActive) {
-      throw new Error("User is inactive");
-    }
-
-    const isMatch = await bcrypt.compare(password, user.password);
-    if (!isMatch) {
-      if (user.temporalPassword) {
-        const isMatchWithTemporalPassword = await bcrypt.compare(password, user.temporalPassword);
-        if (!isMatchWithTemporalPassword) {
-          throw new Error("Incorrect password and temporary password");
-        }
-      } else {
-        throw new Error("Incorrect password");
-      }
+      throw new Error(AUTH_ERRORS.INACTIVE);
     }
 
     const { accessToken, refreshToken } = generateTokens(user.id.toString(), res);
@@ -107,12 +120,7 @@ export const authenticateUser = async (identifier: string, password: string, res
     // Re-throw known authentication errors
     if (
       error instanceof Error &&
-      [
-        "User not found",
-        "User is inactive",
-        "Incorrect password",
-        "Incorrect password and temporary password",
-      ].includes(error.message)
+      (Object.values(AUTH_ERRORS) as string[]).includes(error.message)
     ) {
       throw error;
     }
@@ -125,6 +133,14 @@ export const authenticateUser = async (identifier: string, password: string, res
     );
     throw new Error("Authentication service error");
   }
+};
+
+// Verifies a user's current password (main or temporary). Used to confirm
+// self-service password changes.
+export const verifyUserPassword = async (id: number, candidate: string): Promise<boolean> => {
+  const user = await User.findByPk(id);
+  if (!user) return false;
+  return matchesAnyPassword(candidate, user);
 };
 
 // Fetches all users with their roles (paginated, searchable)
@@ -182,17 +198,19 @@ export const getUserPermissions = async (userId: number) => {
   return Array.from(new Set(permissions));
 };
 
-// Creates a new user with hashed password (whitelisted fields only)
+// Creates a new user with hashed password (whitelisted fields only). Returns
+// the safe projection: the created instance still holds the password hash.
 export const createUser = async (data: Record<string, any>) => {
   const clean = pickFields(data, CREATABLE_FIELDS);
   const hashedPassword = await bcrypt.hash(clean.password, 10);
-  return User.create(
+  const created = await User.create(
     {
       ...clean,
       password: hashedPassword,
     },
     { returning: true },
   );
+  return toSafeUser(created);
 };
 
 // Updates user data by ID (accepts only whitelisted, non-sensitive fields)
@@ -217,10 +235,12 @@ export const updateUserStatus = async (id: number, status: boolean) => {
   return user;
 };
 
-// Updates the password of a user (hashes new password)
+// Updates the password of a user (hashes new password). Any pending temporary
+// password is revoked: it is a one-off recovery credential, not a second
+// permanent password.
 export const updateUserPassword = async (id: number, password: string) => {
   const hashedPassword = await bcrypt.hash(password, 10);
-  await User.update({ password: hashedPassword }, { where: { id } });
+  await User.update({ password: hashedPassword, temporalPassword: null }, { where: { id } });
   return User.findByPk(id, {
     attributes: SAFE_ATTRS,
     include: ROLES_INCLUDE,

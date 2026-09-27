@@ -12,7 +12,7 @@ import {
 import { Schedule } from "../../../models/Schedule";
 import FORMS from "../../../constants/forms.constants";
 import { translateDayOptionsToSpanish } from "../../../utils/string";
-import { Calendar, RotateCcw } from "lucide-react";
+import { IconCalendar, IconRotate } from "@tabler/icons-react";
 import TextfieldComponent from "../../../components/Textfield/Textfield.component";
 import {
   boxRoot,
@@ -23,7 +23,7 @@ import {
   actionsInnerBox,
   cancelButton,
   submitButton,
-
+  dayHoursInputSx,
 } from "./styles";
 
 interface AddScheduleFormProps {
@@ -38,7 +38,6 @@ const AddScheduleForm: React.FC<AddScheduleFormProps> = ({
   isLoading = false,
 }) => {
   const theme = useTheme();
-  const isDark = theme.palette.mode === "dark";
   const isSmallScreen = useMediaQuery(theme.breakpoints.down("sm"));
   const daysOfWeek = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'];
   const shortNames: Record<string, string> = {
@@ -122,11 +121,13 @@ const AddScheduleForm: React.FC<AddScheduleFormProps> = ({
             </Typography>
             <TextfieldComponent
               placeholder={FORMS.ADD_SCHEDULE.SCHEDULE_LABEL_PLACEHOLDER}
+
+              label={FORMS.ADD_SCHEDULE.SCHEDULE_LABEL}
               variant="outlined"
               fullWidth
               value={label}
               onChange={(e) => setLabel(e.target.value)}
-              icon={<Calendar size={18} style={iconStyle(theme)} />}
+              icon={<IconCalendar size={18} style={iconStyle(theme)} />}
             />
           </Box>
         </Grid>
@@ -153,9 +154,9 @@ const AddScheduleForm: React.FC<AddScheduleFormProps> = ({
                 overflowY: "visible",
                 py: 0.5,
                 scrollbarWidth: "thin",
-                scrollbarColor: isDark ? "rgba(255,255,255,0.15) transparent" : "rgba(0,0,0,0.1) transparent",
+                scrollbarColor: `${theme.tokens.colors.borderStrong} transparent`,
                 "&::-webkit-scrollbar": { height: "4px" },
-                "&::-webkit-scrollbar-thumb": { borderRadius: "4px", backgroundColor: isDark ? "rgba(255,255,255,0.15)" : "rgba(0,0,0,0.1)" },
+                "&::-webkit-scrollbar-thumb": { borderRadius: "4px", backgroundColor: theme.tokens.colors.borderStrong },
                 "&::-webkit-scrollbar-track": { backgroundColor: "transparent" },
                 alignItems: "flex-start",
               }}
@@ -203,11 +204,9 @@ const AddScheduleForm: React.FC<AddScheduleFormProps> = ({
                           fontWeight: 700,
                           cursor: "pointer",
                           background: isActive
-                            ? (t) => t.palette.primary.main
-                            : (t) => t.palette.mode === "dark"
-                              ? "rgba(255,255,255,0.04)"
-                              : "rgba(0,0,0,0.04)",
-                          color: isActive ? "#ffffff" : (t) => t.palette.mode === "dark" ? "rgba(255,255,255,0.2)" : "rgba(0,0,0,0.2)",
+                            ? (t) => t.tokens.colors.inverseBg
+                            : (t) => t.tokens.colors.hover,
+                          color: isActive ? (t) => t.tokens.colors.onInverse : (t) => t.tokens.colors.textSubtle,
                           transition: "all 0.15s ease",
                           "&:hover": {
                             boxShadow: isActive
@@ -230,43 +229,8 @@ const AddScheduleForm: React.FC<AddScheduleFormProps> = ({
                             setDayHours((prev) => ({ ...prev, [day]: e.target.value }));
                           }}
                           error={formTouched && !isValid && hasValue}
-                          inputProps={{
-                            min: 0,
-                            max: 24,
-                            step: 0.5,
-                            style: { textAlign: "center", padding: "2px 0", fontSize: "0.7rem", fontWeight: 700 },
-                          }}
-                          sx={{
-                            "& .MuiOutlinedInput-root": {
-                              borderRadius: "6px",
-                              minHeight: "auto",
-                              backgroundColor: isFilled
-                                ? isDark ? "rgba(99,102,241,0.04)" : "#fff"
-                                : isDark ? "rgba(255,255,255,0.03)" : "rgba(0,0,0,0.02)",
-                              "& input": {
-                                textAlign: "center",
-                                padding: "2px 0",
-                                fontSize: "0.7rem",
-                                fontWeight: 700,
-                                width: "28px",
-                                color: isFilled ? "primary.main" : theme.palette.text.primary,
-                              },
-                              "& fieldset": {
-                                border: isFilled
-                                  ? `1.5px solid ${theme.palette.primary.main}40`
-                                  : formTouched && !hasValue
-                                    ? `1px solid ${theme.palette.error.main}60`
-                                    : "1px solid transparent",
-                              },
-                              "&:hover fieldset": {
-                                borderColor: isFilled ? theme.palette.primary.main : theme.palette.text.disabled,
-                              },
-                              "&.Mui-focused fieldset": {
-                                borderColor: theme.palette.mode === "dark" ? "rgba(255,255,255,0.3)" : "rgba(0,0,0,0.25)",
-                                borderWidth: "1.5px",
-                              },
-                            },
-                          }}
+                          inputProps={{ min: 0, max: 24, step: 0.5, inputMode: "decimal" }}
+                          sx={dayHoursInputSx(theme, isFilled)}
                         />
                       )}
                     </Box>
@@ -295,7 +259,7 @@ const AddScheduleForm: React.FC<AddScheduleFormProps> = ({
             <Button
               variant="text"
               onClick={handleClearForm}
-              startIcon={<RotateCcw size={16} />}
+              startIcon={<IconRotate size={16} />}
               fullWidth={isSmallScreen}
               sx={clearButton}
             >

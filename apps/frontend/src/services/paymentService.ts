@@ -1,4 +1,9 @@
-import { Payment, PaymentBreakdown } from "../models/Payment";
+import {
+  Payment,
+  PaymentAmountField,
+  PaymentBreakdown,
+  PaymentGenerationResult,
+} from "../models/Payment";
 import api, { invalidateCache } from "./api";
 import { PaginatedResult } from "@choferes/shared";
 
@@ -57,7 +62,8 @@ export const createPayment = async (input: {
   return response.data;
 };
 
-// Partial edit; amount changes recompute the total and flag isManual=true.
+// Partial edit: typed amounts become manual (kept by automatic refreshes);
+// `automaticFields` returns fields to their automatic value.
 export const updatePayment = async (
   id: number,
   input: {
@@ -70,6 +76,7 @@ export const updatePayment = async (
     others?: number;
     socialCharges?: number;
     deductions?: number;
+    automaticFields?: PaymentAmountField[];
   },
 ): Promise<Payment> => {
   const response = await api.put(`/payments/${id}`, input);
@@ -77,7 +84,7 @@ export const updatePayment = async (
   return response.data;
 };
 
-// Recomputes regularSalary from hours × hourlyRate, keeping optional amounts.
+// Refreshes the automatic amounts from the current hours, keeping manual ones.
 export const recalculatePayment = async (id: number): Promise<Payment> => {
   const response = await api.post(`/payments/${id}/recalculate`);
   invalidateCache("/payments");
@@ -90,6 +97,16 @@ export const sendPaymentEmail = async (
   body: { pdfBase64?: string | null; pdfFileName?: string | null },
 ): Promise<Payment> => {
   const response = await api.post(`/payments/${id}/email`, body);
+  invalidateCache("/payments");
+  return response.data;
+};
+
+// Fills the slips of a quincena for every employee who worked in it.
+export const generatePeriodPayments = async (
+  year: number,
+  biweekNumber: number,
+): Promise<PaymentGenerationResult> => {
+  const response = await api.post("/payments/generate", { year, biweekNumber });
   invalidateCache("/payments");
   return response.data;
 };

@@ -2,6 +2,7 @@ import { createSlice, createAsyncThunk, PayloadAction } from "@reduxjs/toolkit";
 import * as RolePermissionService from "../../services/rolePermissionService";
 import { RolePermission } from "../../models/RolePermission";
 import { RootState } from "../store";
+import { getApiErrorMessage } from "../../utils/apiError";
 
 interface RolePermissionsState {
   rolePermissions: RolePermission[];
@@ -24,11 +25,7 @@ export const fetchRolePermissions = createAsyncThunk(
       const rolePermissions = await RolePermissionService.getRolePermissions();
       return rolePermissions;
     } catch (error: unknown) {
-      return rejectWithValue(
-        error instanceof Error
-          ? error.message
-          : "Failed to fetch role permissions",
-      );
+      return rejectWithValue(getApiErrorMessage(error, "Failed to fetch role permissions"));
     }
   },
 );
@@ -44,11 +41,7 @@ export const createRolePermission = createAsyncThunk(
         await RolePermissionService.createRolePermission(newRolePermission);
       return createdRolePermission;
     } catch (error: unknown) {
-      return rejectWithValue(
-        error instanceof Error
-          ? error.message
-          : "Failed to create role permission",
-      );
+      return rejectWithValue(getApiErrorMessage(error, "Failed to create role permission"));
     }
   },
 );

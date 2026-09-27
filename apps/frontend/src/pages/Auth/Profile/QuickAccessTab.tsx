@@ -10,38 +10,32 @@ import {
   useMediaQuery,
   useTheme,
 } from "@mui/material";
-import { Blocks, ArrowUp, ArrowDown, RotateCcw, NotepadText, ChartNoAxesCombined, CircleParking, UsersRound, CalendarDays, Settings } from "lucide-react";
+import { IconApps, IconArrowDown, IconArrowUp, IconRotate } from "@tabler/icons-react";
+import NavIcon from "../../../components/NavIcon/NavIcon.component";
 import { useMenuPreferences } from "../../../hooks/useMenuPreferences";
 import APPBAR_MENU from "../../../constants/appbar.constants";
 import PERMISSIONS from "../../../constants/permissions.constants";
 import PremiumTooltip from "../../../components/PremiumTooltip/PremiumTooltip.component";
-import Dock from "../../../components/Dock/Dock.component";
+import TopNav from "../../../components/AppBar/TopNav.component";
 import { useAuthContext } from "../../../context/AuthContext";
+import { PanelHeader } from "../../../components/Layout";
 
 const DOCK_MENU_KEYS = [
-  APPBAR_MENU.ROLES,
-  APPBAR_MENU.DASHBOARD,
-  APPBAR_MENU.VEHICLES,
   APPBAR_MENU.EMPLOYEES,
   APPBAR_MENU.SCHEDULES,
+  APPBAR_MENU.ROLES,
+  APPBAR_MENU.VEHICLES,
+  APPBAR_MENU.DASHBOARD,
+  APPBAR_MENU.TASKS,
   APPBAR_MENU.PROFILE,
 ];
 
 const DOCK_MENU_PERMISSIONS: Record<string, string> = {
-  [APPBAR_MENU.ROLES]: PERMISSIONS.VIEW_ROLES,
-  [APPBAR_MENU.DASHBOARD]: PERMISSIONS.VIEW_ADMIN,
-  [APPBAR_MENU.VEHICLES]: PERMISSIONS.VIEW_VEHICLES,
   [APPBAR_MENU.EMPLOYEES]: PERMISSIONS.VIEW_EMPLOYEES,
   [APPBAR_MENU.SCHEDULES]: PERMISSIONS.VIEW_SCHEDULES,
-};
-
-const DOCK_MENU_ICONS: Record<string, React.ReactNode> = {
-  [APPBAR_MENU.ROLES]: <NotepadText size={22} strokeWidth={1.5} />,
-  [APPBAR_MENU.DASHBOARD]: <ChartNoAxesCombined size={22} strokeWidth={1.5} />,
-  [APPBAR_MENU.VEHICLES]: <CircleParking size={22} strokeWidth={1.5} />,
-  [APPBAR_MENU.EMPLOYEES]: <UsersRound size={22} strokeWidth={1.5} />,
-  [APPBAR_MENU.SCHEDULES]: <CalendarDays size={22} strokeWidth={1.5} />,
-  [APPBAR_MENU.PROFILE]: <Settings size={22} strokeWidth={1.5} />,
+  [APPBAR_MENU.ROLES]: PERMISSIONS.VIEW_ROLES,
+  [APPBAR_MENU.VEHICLES]: PERMISSIONS.VIEW_VEHICLES,
+  [APPBAR_MENU.DASHBOARD]: PERMISSIONS.VIEW_ADMIN,
 };
 
 const QuickAccessTab: React.FC = () => {
@@ -64,11 +58,10 @@ const QuickAccessTab: React.FC = () => {
         userPermissions.includes(requiredPermission)
       );
     })
+    .filter((key) => key !== APPBAR_MENU.PROFILE)
     .map((key) => ({
       label: key,
-      icon: DOCK_MENU_ICONS[key],
-      onClick: () => {},
-      active: false,
+      icon: <NavIcon label={key} />,
     }));
 
   return (
@@ -76,12 +69,10 @@ const QuickAccessTab: React.FC = () => {
       elevation={0}
       sx={{
         p: { xs: 2.5, sm: 3 },
-        borderRadius: "16px",
-        border: `1px solid ${
-          theme.palette.mode === "dark" ? "rgba(255,255,255,0.08)" : "rgba(0,0,0,0.08)"
-        }`,
-        backgroundColor: theme.palette.background.paper,
-        boxShadow: "0 4px 24px rgba(0,0,0,0.08), 0 1px 2px rgba(0,0,0,0.04)",
+        borderRadius: "14px",
+        border: theme.tokens.borders.paper,
+        backgroundColor: theme.tokens.colors.surface,
+        boxShadow: `0 1px 2px ${theme.tokens.shadows.card}`,
         display: "flex",
         flexDirection: "column",
         height: { xs: "calc(100dvh - 240px)", md: "100%" },
@@ -91,71 +82,38 @@ const QuickAccessTab: React.FC = () => {
       }}
     >
       {/* Header */}
-      <Box sx={{ mb: 2, flexShrink: 0 }}>
-        <Box display="flex" alignItems="center" gap={1.5} mb={0.5}>
-          <Box sx={{ color: theme.palette.primary.main, display: "flex", alignItems: "center" }}>
-            <Blocks size={20} strokeWidth={1.5} />
-          </Box>
-          <Typography
-            variant="h6"
-            sx={{
-              fontWeight: 700,
-              fontSize: "1.15rem",
-              color: theme.palette.text.primary,
-              letterSpacing: "-0.02em",
-              lineHeight: 1.2,
-            }}
-          >
-            Accesos rápidos
-          </Typography>
-        </Box>
-        <Typography
-          variant="caption"
-          sx={{ color: theme.palette.text.secondary, fontSize: "0.7rem", letterSpacing: "0.02em", ml: 5 }}
-        >
-          {visibleCount === 0
+      <PanelHeader
+        icon={<IconApps />}
+        title="Accesos rápidos"
+        description={visibleCount === 0
             ? "No tienes accesos visibles"
             : `${visibleCount} ${visibleCount === 1 ? "acceso visible" : "accesos visibles"} en la barra superior`}
+      />
+
+      {/* Preview of the top navigation bar */}
+      <Box sx={{ mb: 2.5, flexShrink: 0 }}>
+        <Typography sx={{ fontWeight: 600, fontSize: "0.8125rem", mb: 1 }}>
+          Vista previa de la barra superior
         </Typography>
-      </Box>
-
-      <Box sx={{ borderBottom: `1px solid ${theme.palette.mode === "dark" ? "rgba(255,255,255,0.06)" : "rgba(0,0,0,0.06)"}`, mb: 1.5 }} />
-
-      {/* Dock preview - exact copy of the real dock */}
-      <Box sx={{ mb: 2, flexShrink: 0 }}>
         <Box
           sx={{
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "space-between",
-            gap: 1,
-            mb: 0.75,
+            p: 1,
+            borderRadius: "12px",
+            border: theme.tokens.borders.paper,
+            backgroundColor: theme.tokens.colors.appBarBg,
+            overflowX: "auto",
+            maxWidth: "100%",
           }}
         >
-          <Typography sx={{ fontWeight: 700, fontSize: "0.8rem", color: "text.primary" }}>
-            Vista previa del dock
-          </Typography>
-          <Typography variant="caption" sx={{ fontSize: "0.68rem", color: "text.secondary" }}>
-            {visibleCount === 0
-              ? "Ningún acceso visible"
-              : `${orderedKeys.length - visibleCount === 0 ? "Todos" : `${orderedKeys.length - visibleCount} oculto${orderedKeys.length - visibleCount === 1 ? "" : "s"}`}`}
-          </Typography>
-        </Box>
-
-        <Box sx={{ borderRadius: "16px", overflowX: "auto", maxWidth: "100%" }}>
-          <Dock
-            items={previewItems}
-            itemPreferences={preferences}
-            itemOrder={itemOrder}
-            distance={isSmallScreen ? 100 : 150}
-            baseItemSize={isSmallScreen ? 36 : 44}
-            magnification={isSmallScreen ? 46 : 58}
-            spring={{ mass: 0.1, stiffness: 150, damping: 12 }}
-          />
+          {previewItems.length > 0 ? (
+            <TopNav links={previewItems} compact={isSmallScreen} />
+          ) : (
+            <Typography sx={{ fontSize: "0.8125rem", color: "text.secondary", px: 1, py: 0.75 }}>
+              Ningún acceso visible
+            </Typography>
+          )}
         </Box>
       </Box>
-
-      <Box sx={{ borderBottom: `1px solid ${theme.palette.mode === "dark" ? "rgba(255,255,255,0.06)" : "rgba(0,0,0,0.06)"}`, mb: 1.5 }} />
 
       {/* Item list */}
       <Box sx={{ flex: 1, minHeight: 0, overflowY: "auto", mb: 1 }}>
@@ -174,9 +132,7 @@ const QuickAccessTab: React.FC = () => {
                 mb: 0.5,
                 backgroundColor: isVisible
                   ? "transparent"
-                  : theme.palette.mode === "dark"
-                    ? "rgba(255,255,255,0.03)"
-                    : "rgba(0,0,0,0.025)",
+                  : theme.tokens.colors.hoverSoft,
                 transition: "background-color 0.15s",
                 "&:hover": {
                   backgroundColor: theme.palette.mode === "dark"
@@ -210,7 +166,7 @@ const QuickAccessTab: React.FC = () => {
                       disabled={index === 0}
                       onClick={() => moveItem(index, index - 1)}
                     >
-                      <ArrowUp size={14} />
+                      <IconArrowUp size={14} />
                     </IconButton>
                   </span>
                 </PremiumTooltip>
@@ -221,7 +177,7 @@ const QuickAccessTab: React.FC = () => {
                       disabled={index === orderedKeys.length - 1}
                       onClick={() => moveItem(index, index + 1)}
                     >
-                      <ArrowDown size={14} />
+                      <IconArrowDown size={14} />
                     </IconButton>
                   </span>
                 </PremiumTooltip>
@@ -254,7 +210,7 @@ const QuickAccessTab: React.FC = () => {
           <Button
             variant="outlined"
             size="small"
-            startIcon={<RotateCcw size={14} />}
+            startIcon={<IconRotate size={14} />}
             onClick={resetDefaults}
             sx={{ fontWeight: 600, fontSize: "0.75rem" }}
           >

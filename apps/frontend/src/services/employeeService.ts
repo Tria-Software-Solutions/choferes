@@ -14,6 +14,26 @@ export const getEmployees = async (search?: string, isActive?: boolean) => {
   return response.data.data;
 };
 
+export type EmployeeBiweeklyHours = {
+  employeeId: number;
+  totalHours: number;
+  regularHours: number;
+  overtimeHours: number;
+};
+
+export type BiweeklyHoursResponse = {
+  biweekNumber: number;
+  year: number;
+  summaries: EmployeeBiweeklyHours[];
+};
+
+// Horas de la quincena por empleado (columnas de Planilla). El backend las
+// calcula con la misma regla de horas extra que el comprobante de pago.
+export const getEmployeesBiweeklyHours = async (): Promise<BiweeklyHoursResponse> => {
+  const response = await api.get("/employees/hours-summary");
+  return response.data;
+};
+
 export const getEmployeeById = async (id: number) => {
   const response = await api.get(`/employees/${id}`);
   return response.data;
@@ -39,6 +59,19 @@ export const updateEmployee = async (
 ) => {
   const response = await api.put(`/employees/${id}`, updatedEmployee);
   invalidateCache("/employees");
+  return response.data;
+};
+
+// Enlaza el empleado a un usuario (botón "Activar acceso al sistema").
+// `created=false` significa que el empleado ya tenía cuenta: en ese caso no
+// hay contraseña temporal que entregar.
+export const linkEmployeeToUser = async (id: number): Promise<{
+  userId: number;
+  username?: string;
+  tempPassword?: string;
+  created: boolean;
+}> => {
+  const response = await api.post(`/employees/${id}/link-user`);
   return response.data;
 };
 

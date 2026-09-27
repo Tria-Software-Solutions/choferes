@@ -6,7 +6,7 @@ import {
   useTheme,
   useMediaQuery,
 } from "@mui/material";
-import { User, Mail, RotateCcw } from "lucide-react";
+import { IconMail, IconRotate, IconUser } from "@tabler/icons-react";
 import TextfieldComponent from "../../../components/Textfield/Textfield.component";
 import { FORMS } from "../../../constants/constants";
 import {
@@ -119,13 +119,15 @@ const AddEmployeeForm: React.FC<AddEmployeeFormProps> = ({
         <Grid item xs={12} sm={6}>
           <TextfieldComponent
             placeholder={FORMS.ADD_EMPLOYEE.FIRST_NAME_PLACEHOLDER}
+
+            label={FORMS.ADD_EMPLOYEE.FIRST_NAME_LABEL}
             variant="outlined"
             fullWidth
             value={formData.firstName}
             onChange={(e) => handleFieldChange("firstName", e.target.value)}
             error={errors.firstName !== ""}
             helperText={errors.firstName}
-            icon={<User style={iconStyle} />}
+            icon={<IconUser style={iconStyle} />}
             sx={formControl(theme)}
           />
         </Grid>
@@ -133,13 +135,15 @@ const AddEmployeeForm: React.FC<AddEmployeeFormProps> = ({
         <Grid item xs={12} sm={6}>
           <TextfieldComponent
             placeholder={FORMS.ADD_EMPLOYEE.LAST_NAME_PLACEHOLDER}
+
+            label={FORMS.ADD_EMPLOYEE.LAST_NAME_LABEL}
             variant="outlined"
             fullWidth
             value={formData.lastName}
             onChange={(e) => handleFieldChange("lastName", e.target.value)}
             error={errors.lastName !== ""}
             helperText={errors.lastName}
-            icon={<User style={iconStyle} />}
+            icon={<IconUser style={iconStyle} />}
             sx={formControl(theme)}
           />
         </Grid>
@@ -147,13 +151,15 @@ const AddEmployeeForm: React.FC<AddEmployeeFormProps> = ({
         <Grid item xs={12}>
           <TextfieldComponent
             placeholder={FORMS.ADD_EMPLOYEE.EMAIL_PLACEHOLDER}
+
+            label={FORMS.ADD_EMPLOYEE.EMAIL_LABEL}
             variant="outlined"
             fullWidth
             value={formData.email}
             onChange={(e) => handleFieldChange("email", e.target.value)}
             error={errors.email !== ""}
             helperText={errors.email}
-            icon={<Mail style={iconStyle} />}
+            icon={<IconMail style={iconStyle} />}
             sx={formControl(theme)}
           />
         </Grid>
@@ -163,7 +169,7 @@ const AddEmployeeForm: React.FC<AddEmployeeFormProps> = ({
             <Button
               variant="text"
               onClick={handleClearForm}
-              startIcon={<RotateCcw size={16} />}
+              startIcon={<IconRotate size={16} />}
               fullWidth={isSmallScreen}
               sx={clearButton}
             >

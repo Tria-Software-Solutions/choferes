@@ -16,6 +16,7 @@ const router = express.Router();
 router.get(
   "/",
   authenticateToken,
+  requirePermission(PERMISSION_CODES.VIEW_DISCIPLINARY),
   disciplinaryQueryRules,
   validate,
   disciplinaryController.getDisciplinaryActions,
@@ -23,6 +24,7 @@ router.get(
 router.get(
   "/:id",
   authenticateToken,
+  requirePermission(PERMISSION_CODES.VIEW_DISCIPLINARY),
   idParam,
   validate,
   disciplinaryController.getDisciplinaryActionById,

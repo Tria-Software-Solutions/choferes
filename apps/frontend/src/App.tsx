@@ -15,10 +15,12 @@ import { AuthProvider, useAuthContext } from "./context/AuthContext";
 import { NotificationProvider } from "./context/NotificationContext";
 import ProtectedRoute from "./routes/ProtectedRoute";
 import { Container, useMediaQuery, useTheme, CircularProgress, Box } from "@mui/material";
+import type { SxProps, Theme } from "@mui/material/styles";
 import { APPBAR_MENU, PERMISSIONS, ROUTES } from "./constants/constants";
-import { NotepadText, CircleParking, UsersRound, CalendarDays, LogOut, Settings, ChartNoAxesCombined } from "lucide-react";
+import NavIcon from "./components/NavIcon/NavIcon.component";
 import ErrorBoundary from "./components/ErrorBoundary/ErrorBoundary.component";
-import { useThemeMode } from "./context/ThemeContext";
+import ReminderAnnouncer from "./components/ReminderAnnouncer/ReminderAnnouncer.component";
+import { normalizeThemeMode, useThemeMode } from "./context/ThemeContext";
 import { updateUserSettings } from "./store/slices/userSlice";
 import { setScheduleOrder } from "./store/slices/schedulesSlice";
 import { getDefaultRoute } from "./utils/defaultRoute";
@@ -29,8 +31,8 @@ const EmployeesPage = lazy(() => import("./pages/Management/EmployeesPage"));
 const EmployeeDetail = lazy(() => import("./pages/EmployeeDetail"));
 const SchedulesPage = lazy(() => import("./pages/Management/SchedulesPage"));
 const VehiclesPage = lazy(() => import("./pages/Management/VehiclesPage"));
-const CourierServicePage = lazy(() => import("./pages/Management/CourierServicePage"));
 const Profile = lazy(() => import("./pages/Auth/Profile"));
+const TasksPage = lazy(() => import("./pages/Tasks"));
 const NotFound = lazy(() => import("./pages/ErrorPages/NotFound"));
 const Forbidden = lazy(() => import("./pages/ErrorPages/Forbidden"));
 const ErrorPage = lazy(() => import("./pages/ErrorPages/Error"));
@@ -52,48 +54,53 @@ const AppBarWrapper: React.FC = () => {
 
   const links = [
     {
-      label: APPBAR_MENU.ROLES,
-      icon: <NotepadText size={22} strokeWidth={1.5} />,
-      path: ROUTES.ROLES,
-      permission: PERMISSIONS.VIEW_ROLES,
-    },
-    {
-      label: APPBAR_MENU.DASHBOARD,
-      icon: <ChartNoAxesCombined size={22} strokeWidth={1.5} />,
-      path: ROUTES.DASHBOARD,
-      permission: PERMISSIONS.VIEW_ADMIN,
-    },
-    {
-      label: APPBAR_MENU.VEHICLES,
-      icon: <CircleParking size={22} strokeWidth={1.5} />,
-      path: ROUTES.VEHICLES,
-      permission: PERMISSIONS.VIEW_VEHICLES,
-    },
-    {
       label: APPBAR_MENU.EMPLOYEES,
-      icon: <UsersRound size={22} strokeWidth={1.5} />,
+      icon: <NavIcon label={APPBAR_MENU.EMPLOYEES} />,
       path: ROUTES.EMPLOYEES,
       permission: PERMISSIONS.VIEW_EMPLOYEES,
     },
     {
       label: APPBAR_MENU.SCHEDULES,
-      icon: <CalendarDays size={22} strokeWidth={1.5} />,
+      icon: <NavIcon label={APPBAR_MENU.SCHEDULES} />,
       path: ROUTES.SCHEDULES,
       permission: PERMISSIONS.VIEW_SCHEDULES,
     },
     {
+      label: APPBAR_MENU.ROLES,
+      icon: <NavIcon label={APPBAR_MENU.ROLES} />,
+      path: ROUTES.ROLES,
+      permission: PERMISSIONS.VIEW_ROLES,
+    },
+    {
+      label: APPBAR_MENU.VEHICLES,
+      icon: <NavIcon label={APPBAR_MENU.VEHICLES} />,
+      path: ROUTES.VEHICLES,
+      permission: PERMISSIONS.VIEW_VEHICLES,
+    },
+    {
+      label: APPBAR_MENU.DASHBOARD,
+      icon: <NavIcon label={APPBAR_MENU.DASHBOARD} />,
+      path: ROUTES.DASHBOARD,
+      permission: PERMISSIONS.VIEW_ADMIN,
+    },
+    {
+      label: APPBAR_MENU.TASKS,
+      icon: <NavIcon label={APPBAR_MENU.TASKS} />,
+      path: ROUTES.TASKS,
+    },
+    {
       label: APPBAR_MENU.PROFILE,
-      icon: <Settings size={22} strokeWidth={1.5} />,
+      icon: <NavIcon label={APPBAR_MENU.PROFILE} />,
       path: ROUTES.PROFILE,
     },
   ];
 
   const permissionsMap = {
-    [APPBAR_MENU.ROLES]: PERMISSIONS.VIEW_ROLES,
-    [APPBAR_MENU.DASHBOARD]: PERMISSIONS.VIEW_ADMIN,
-    [APPBAR_MENU.VEHICLES]: PERMISSIONS.VIEW_VEHICLES,
     [APPBAR_MENU.EMPLOYEES]: PERMISSIONS.VIEW_EMPLOYEES,
     [APPBAR_MENU.SCHEDULES]: PERMISSIONS.VIEW_SCHEDULES,
+    [APPBAR_MENU.ROLES]: PERMISSIONS.VIEW_ROLES,
+    [APPBAR_MENU.VEHICLES]: PERMISSIONS.VIEW_VEHICLES,
+    [APPBAR_MENU.DASHBOARD]: PERMISSIONS.VIEW_ADMIN,
   };
 
   const filteredLinks = links.filter((link) => {
@@ -111,12 +118,12 @@ const AppBarWrapper: React.FC = () => {
   const userLinks = [
     {
       label: APPBAR_MENU.PROFILE,
-      icon: <Settings size={20} />,
+      icon: <NavIcon label={APPBAR_MENU.PROFILE} size={20} />,
       path: ROUTES.PROFILE,
     },
     {
       label: APPBAR_MENU.LOGOUT,
-      icon: <LogOut size={20} />,
+      icon: <NavIcon label={APPBAR_MENU.LOGOUT} size={20} />,
       onClick: logoutUser,
     },
   ];
@@ -127,6 +134,46 @@ const AppBarWrapper: React.FC = () => {
       userLinks={userLinks}
       links={finalLinks}
     />
+  );
+};
+
+const AppFooter: React.FC<{ sx?: SxProps<Theme> }> = ({ sx }) => {
+  const { colors, borders } = useTheme().tokens;
+  return (
+    <Box
+      component="footer"
+      sx={[
+        {
+          flexShrink: 0,
+          textAlign: "center",
+          py: 1.25,
+          px: 3,
+          borderTop: borders.hairline,
+          fontSize: "0.65rem",
+          letterSpacing: "0.04em",
+          color: colors.textMuted,
+        },
+        ...(Array.isArray(sx) ? sx : sx ? [sx] : []),
+      ]}
+    >
+      Powered by{" "}
+      <Box
+        component="a"
+        href="https://triacr.com"
+        target="_blank"
+        rel="noopener noreferrer"
+        sx={{
+          fontWeight: 600,
+          color: colors.text,
+          opacity: 0.7,
+          textDecoration: "none",
+          "&:hover": { opacity: 1 },
+        }}
+      >
+        Tria
+      </Box>
+      {"  ·  "}&copy; {new Date().getFullYear()} Choferes de Alquiler
+    </Box>
   );
 };
 
@@ -146,7 +193,6 @@ const AppContent: React.FC = () => {
   // Helper: known app routes (excluding error/forbidden/notfound/sessionexpired)
   const knownAppRoutes = [
     "/",
-    "/courier-service",
     "/roles",
     "/employees",
     "/schedules",
@@ -154,6 +200,7 @@ const AppContent: React.FC = () => {
     "/dashboard",
     "/settings",
     "/profile",
+    "/tasks",
   ];
 
   // Only use wallpaper for login and error pages
@@ -188,6 +235,7 @@ const AppContent: React.FC = () => {
   return (
     <Box sx={{ display: "flex", flexDirection: "column", height: "100dvh", overflow: "hidden" }}>
       {!isHideAppBar && <AppBarWrapper />}
+      {currentUser && <ReminderAnnouncer />}
       <Container
         maxWidth={false}
         disableGutters
@@ -217,18 +265,6 @@ const AppContent: React.FC = () => {
               }
             />
                       <Route element={<ProtectedRoute />}>
-              <Route
-                path="/courier-service"
-                element={
-                  safeUserPermissions.includes(
-                    PERMISSIONS.VIEW_COURIER_SERVICE,
-                  ) ? (
-                    <CourierServicePage />
-                  ) : (
-                    <Navigate to="/forbidden" replace />
-                  )
-                }
-              />
               <Route
                 path="/roles"
                 element={
@@ -289,6 +325,7 @@ const AppContent: React.FC = () => {
                   )
                 }
               />
+              <Route path="/tasks" element={<TasksPage />} />
               <Route path="/settings" element={<Profile />} />
               <Route path="/profile" element={<Navigate to="/settings" replace />} />
             </Route>
@@ -299,44 +336,11 @@ const AppContent: React.FC = () => {
           </Routes>
           </Suspense>
           </ErrorBoundary>
+          {/* Phones/tablets: at the end of the content instead of eating viewport height */}
+          {!isHideAppBar && <AppFooter sx={{ display: { xs: "block", md: "none" } }} />}
         </Box>
-        {!isHideAppBar && (
-          <Box
-            component="footer"
-            sx={{
-              flexShrink: 0,
-              textAlign: "center",
-              py: 1.25,
-              px: 3,
-              background: theme.palette.mode === "dark" ? "rgba(255,255,255,0.02)" : "rgba(0,0,0,0.015)",
-              backdropFilter: "blur(4px)",
-              borderTop: `1px solid ${theme.palette.divider}`,
-              fontFamily: "'Urbanist', -apple-system, BlinkMacSystemFont, sans-serif",
-              fontSize: "0.6rem",
-              letterSpacing: "0.04em",
-              fontWeight: 400,
-              color: theme.palette.text.secondary,
-            }}
-          >
-            Powered by{" "}
-            <Box
-              component="span"
-              sx={{
-                fontWeight: 600,
-                color: theme.palette.text.primary,
-                opacity: 0.6,
-                transition: "opacity 0.2s",
-                cursor: "pointer",
-                "&:hover": { opacity: 0.85 },
-              }}
-              onClick={() => window.open("https://triacr.com", "_blank", "noopener noreferrer")}
-            >
-              Tria
-            </Box>
-            {'  ·  '}
-            &copy; {new Date().getFullYear()} Choferes de Alquiler
-          </Box>
-        )}
+        {/* Desktop: pinned under the scroll area */}
+        {!isHideAppBar && <AppFooter sx={{ display: { xs: "none", md: "block" } }} />}
       </Container>
     </Box>
   );
@@ -363,7 +367,8 @@ const ThemeSync: React.FC = () => {
   useEffect(() => {
     if (currentUser?.id && !initFromDbDone.current) {
       // Sync theme
-      const dbTheme = currentUser.settings?.theme as "light" | "dark" | "default" | "high-contrast" | undefined;
+      const storedTheme = currentUser.settings?.theme;
+      const dbTheme = storedTheme ? normalizeThemeMode(storedTheme) : undefined;
       if (dbTheme && dbTheme !== mode) {
         setMode(dbTheme);
       }
@@ -432,39 +437,6 @@ const ThemeSync: React.FC = () => {
 };
 
 const App: React.FC = () => {
-  // Fix accessibility warning: remove aria-hidden from MUI menus when they contain focused elements
-  React.useEffect(() => {
-    const handleFocusIn = (event: FocusEvent) => {
-      const target = event.target as HTMLElement;
-      // Find the closest MUI Menu/Popover/Modal root
-      const menuRoot = target.closest('.MuiMenu-root, .MuiPopover-root, .MuiModal-root');
-      if (menuRoot && menuRoot.getAttribute('aria-hidden') === 'true') {
-        menuRoot.setAttribute('aria-hidden', 'false');
-      }
-    };
-
-    const handleFocusOut = (event: FocusEvent) => {
-      const target = event.target as HTMLElement;
-      const menuRoot = target.closest('.MuiMenu-root, .MuiPopover-root, .MuiModal-root');
-      if (menuRoot) {
-        // Check if menu still has any focused elements
-        setTimeout(() => {
-          if (!menuRoot.contains(document.activeElement)) {
-            menuRoot.setAttribute('aria-hidden', 'true');
-          }
-        }, 0);
-      }
-    };
-
-    document.addEventListener('focusin', handleFocusIn, true);
-    document.addEventListener('focusout', handleFocusOut, true);
-
-    return () => {
-      document.removeEventListener('focusin', handleFocusIn, true);
-      document.removeEventListener('focusout', handleFocusOut, true);
-    };
-  }, []);
-
   return (
     <Provider store={store}>
       <AuthProvider>

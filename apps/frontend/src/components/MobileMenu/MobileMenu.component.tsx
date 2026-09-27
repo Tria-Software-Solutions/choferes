@@ -1,6 +1,5 @@
 import React, { useState } from "react";
 import {
-  Avatar,
   Box,
   Collapse,
   Divider,
@@ -9,10 +8,11 @@ import {
   Typography,
   useTheme,
 } from "@mui/material";
-import { ChevronDown, X } from "lucide-react";
+import { IconChevronDown, IconX } from "@tabler/icons-react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { APPBAR_MENU } from "../../constants/constants";
-import { getAvatarSrc } from "../../utils/avatar";
+import { NAV_SHORT_LABELS } from "../../constants/appbar.constants";
+import UserAvatar from "../UserAvatar/UserAvatar.component";
 import logo from "../../assets/images/logo.png";
 import {
   drawerPaperStyles,
@@ -107,10 +107,10 @@ const NavItem: React.FC<{
           </Box>
         )}
         <Typography sx={drawerNavTextStyles(theme, active)} noWrap>
-          {link.label}
+          {NAV_SHORT_LABELS[link.label] ?? link.label}
         </Typography>
         {hasSub && (
-          <ChevronDown
+          <IconChevronDown
             size={16}
             style={{
               transform: subOpen ? "rotate(180deg)" : "none",
@@ -166,26 +166,19 @@ const MobileMenuDrawer: React.FC<MobileMenuDrawerProps> = ({
       <Box sx={drawerHeaderStyles}>
         <Box sx={drawerHeaderTitleStyles}>
           <Box component="img" src={logo} alt="Logo" sx={drawerLogoStyles} />
-          <Typography sx={{ fontWeight: 800, fontSize: "1.05rem", letterSpacing: "0.04em" }}>
+          <Typography sx={{ fontWeight: 800, fontSize: "1.05rem", letterSpacing: "-0.01em" }}>
             {appTitle}
           </Typography>
         </Box>
         <IconButton onClick={onClose} sx={drawerCloseButtonStyles} aria-label="Cerrar menú">
-          <X size={20} />
+          <IconX size={18} />
         </IconButton>
       </Box>
 
       {/* User card */}
       {currentUser && (
         <Box sx={drawerUserCardStyles(theme)}>
-          {currentUser.avatar ? (
-            <Avatar src={getAvatarSrc(currentUser.avatar)} sx={drawerAvatarStyles} />
-          ) : (
-            <Avatar sx={drawerAvatarStyles}>
-              {currentUser.firstName?.[0]}
-              {currentUser.lastName?.[0]}
-            </Avatar>
-          )}
+          <UserAvatar user={currentUser} size={40} sx={drawerAvatarStyles} />
           <Box sx={{ minWidth: 0 }}>
             <Typography
               sx={{ fontWeight: 700, fontSize: "0.9rem", color: "text.primary" }}

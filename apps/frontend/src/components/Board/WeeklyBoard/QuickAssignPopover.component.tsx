@@ -1,6 +1,7 @@
 import React, { useEffect, useMemo, useState } from "react";
 import {
   Box,
+  Button,
   Typography,
   Popover,
   List,
@@ -28,7 +29,6 @@ interface QuickAssignPopoverProps {
   employees: Employee[];
   assignedEmployeeIds?: number[];
   fixedScheduleLabel?: string;
-  isDark: boolean;
   theme: Theme;
   onAssign: (employeeId: number, scheduleLabel: string) => void;
 }
@@ -43,7 +43,7 @@ interface QuickAssignPopoverProps {
  */
 const QuickAssignPopover: React.FC<QuickAssignPopoverProps> = ({
   open, anchorPosition, onClose, view, day, date, schedules, employees,
-  assignedEmployeeIds = [], fixedScheduleLabel, isDark, theme, onAssign,
+  assignedEmployeeIds = [], fixedScheduleLabel, theme, onAssign,
 }) => {
   const [selectedEmployeeIds, setSelectedEmployeeIds] = useState<Set<number>>(new Set());
   const [selectedScheduleLabel, setSelectedScheduleLabel] = useState<string>("");
@@ -104,9 +104,9 @@ const QuickAssignPopover: React.FC<QuickAssignPopoverProps> = ({
         sx={{
           mx: 0.5, borderRadius: "8px", my: 0.2, px: 1.25, py: 0.7,
           "&.Mui-selected": {
-            backgroundColor: isDark ? "rgba(99,102,241,0.14)" : "rgba(99,102,241,0.08)",
+            backgroundColor: theme.tokens.colors.accentSoft,
           },
-          "&:hover": { backgroundColor: isDark ? "rgba(255,255,255,0.05)" : "rgba(0,0,0,0.03)" },
+          "&:hover": { backgroundColor: theme.tokens.colors.hover },
         }}
       >
         <EmployeeAvatar
@@ -121,7 +121,7 @@ const QuickAssignPopover: React.FC<QuickAssignPopoverProps> = ({
           }}
         />
         {isSelected && (
-          <Typography sx={{ fontSize: "0.65rem", fontWeight: 700, color: "#818cf8" }}>✓</Typography>
+          <Typography sx={{ fontSize: "0.65rem", fontWeight: 700, color: theme.tokens.colors.accent }}>✓</Typography>
         )}
       </ListItemButton>
     );
@@ -138,9 +138,6 @@ const QuickAssignPopover: React.FC<QuickAssignPopoverProps> = ({
       slotProps={{
         paper: {
           sx: {
-            borderRadius: "14px",
-            boxShadow: isDark ? "0 12px 44px rgba(0,0,0,0.45)" : "0 12px 44px rgba(0,0,0,0.14)",
-            border: "none",
             width:
               view === "employee"
                 ? { xs: 264, sm: 520, md: 560 }
@@ -156,9 +153,9 @@ const QuickAssignPopover: React.FC<QuickAssignPopoverProps> = ({
       {/* Header */}
       <Box sx={{
         px: 1.25, py: 0.75, mb: 0.25,
-        borderBottom: `1px solid ${isDark ? "rgba(255,255,255,0.06)" : "rgba(0,0,0,0.06)"}`,
+        borderBottom: `1px solid ${theme.tokens.colors.borderHairline}`,
       }}>
-        <Typography sx={{ fontSize: "0.62rem", fontWeight: 700, color: "#818cf8", textTransform: "uppercase", letterSpacing: "0.04em", mb: 0.25 }}>
+        <Typography sx={{ fontSize: "0.62rem", fontWeight: 700, color: theme.tokens.colors.accent, textTransform: "uppercase", letterSpacing: "0.04em", mb: 0.25 }}>
           {view === "employee" ? "Asignar en" : "Asignar a horario"}
         </Typography>
         <Box sx={{ display: "flex", alignItems: "center", gap: 0.75, flexWrap: "wrap" }}>
@@ -213,8 +210,8 @@ const QuickAssignPopover: React.FC<QuickAssignPopoverProps> = ({
               flex: 1,
               minWidth: 0,
               width: { xs: "100%", sm: "auto" },
-              borderTop: { xs: `1px solid ${isDark ? "rgba(255,255,255,0.05)" : "rgba(0,0,0,0.05)"}`, sm: "none" },
-              borderLeft: { xs: "none", sm: `1px solid ${isDark ? "rgba(255,255,255,0.05)" : "rgba(0,0,0,0.05)"}` },
+              borderTop: { xs: `1px solid ${theme.tokens.colors.borderHairline}`, sm: "none" },
+              borderLeft: { xs: "none", sm: `1px solid ${theme.tokens.colors.borderHairline}` },
               mt: { xs: 0.25, sm: 0 },
               ml: { xs: 0, sm: 0.75 },
             }}
@@ -234,14 +231,14 @@ const QuickAssignPopover: React.FC<QuickAssignPopoverProps> = ({
                   sx={{
                     mx: 0.5, borderRadius: "8px", my: 0.2, px: 1.25, py: 0.6,
                     "&.Mui-selected": {
-                      backgroundColor: isDark ? "rgba(99,102,241,0.14)" : "rgba(99,102,241,0.08)",
+                      backgroundColor: theme.tokens.colors.accentSoft,
                     },
-                    "&:hover": { backgroundColor: isDark ? "rgba(255,255,255,0.05)" : "rgba(0,0,0,0.03)" },
+                    "&:hover": { backgroundColor: theme.tokens.colors.hover },
                   }}
                 >
                   <Box sx={{
                     width: 6, height: 6, borderRadius: "50%", mr: 1.25, flexShrink: 0,
-                    backgroundColor: "#818cf8",
+                    backgroundColor: theme.tokens.colors.accent,
                   }} />
                   <ListItemText
                     primary={s.label}
@@ -250,7 +247,7 @@ const QuickAssignPopover: React.FC<QuickAssignPopoverProps> = ({
                       fontWeight: selectedScheduleLabel === s.label ? 700 : 500,
                     }}
                   />
-                  <Typography sx={{ fontSize: "0.62rem", fontWeight: 600, color: "#818cf8", ml: 1 }}>
+                  <Typography sx={{ fontSize: "0.62rem", fontWeight: 600, color: theme.tokens.colors.accent, ml: 1 }}>
                     {getScheduleHours(s, day)}h
                   </Typography>
                 </ListItemButton>
@@ -274,46 +271,22 @@ const QuickAssignPopover: React.FC<QuickAssignPopoverProps> = ({
           display: "flex",
           gap: 0.75,
           p: 1,
-          backgroundColor: theme.palette.background.paper,
-          borderTop: `1px solid ${isDark ? "rgba(255,255,255,0.06)" : "rgba(0,0,0,0.06)"}`,
-          borderRadius: "0 0 13px 13px",
+          backgroundColor: theme.tokens.colors.menuSurface,
+          borderTop: `1px solid ${theme.tokens.colors.borderHairline}`,
         }}
       >
-        <Box
-          onClick={onClose}
-          sx={{
-            flex: 1, textAlign: "center", py: 0.7, borderRadius: "12px", cursor: "pointer",
-            fontSize: "0.75rem", fontWeight: 600, color: "text.secondary",
-            transition: "all 0.15s ease",
-            "&:hover": { backgroundColor: isDark ? "rgba(255,255,255,0.05)" : "rgba(0,0,0,0.04)" },
-          }}
-        >
+        <Button variant="text" size="small" onClick={onClose} sx={{ flex: 1 }}>
           Cancelar
-        </Box>
-        <Box
+        </Button>
+        <Button
+          variant="contained"
+          size="small"
           onClick={handleConfirm}
-          sx={{
-            flex: 1, textAlign: "center", py: 0.7, borderRadius: "12px", cursor: "pointer",
-            fontSize: "0.75rem", fontWeight: 700,
-            backgroundColor: confirmDisabled
-              ? (isDark ? "rgba(255,255,255,0.12)" : "rgba(0,0,0,0.08)")
-              : theme.palette.primary.main,
-            color: confirmDisabled
-              ? (isDark ? "rgba(255,255,255,0.25)" : "rgba(0,0,0,0.25)")
-              : theme.palette.primary.contrastText,
-            transition: "all 0.15s ease",
-            "&:hover": confirmDisabled
-              ? {}
-              : {
-                  backgroundColor: isDark ? "#d4d4d4" : "#1a1a1a",
-                },
-            "&:active": {
-              transform: "scale(0.97)",
-            },
-          }}
+          disabled={confirmDisabled}
+          sx={{ flex: 1 }}
         >
           Asignar {selectedEmployeeIds.size > 1 ? `(${selectedEmployeeIds.size})` : ""}
-        </Box>
+        </Button>
       </Box>
     </Popover>
   );

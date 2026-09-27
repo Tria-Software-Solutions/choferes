@@ -37,6 +37,7 @@ jest.mock("../middleware/validation", () => {
     paymentUpdateRules: [mockRule],
     paymentQueryRules: [mockRule],
     paymentEmailRules: [mockRule],
+    paymentGenerateRules: [mockRule],
     biweekParams: [mockRule],
     validate: jest.fn((_req: express.Request, _res: express.Response, next: express.NextFunction) =>
       next(),
@@ -52,6 +53,7 @@ jest.mock("../services/paymentService", () => ({
   recalculatePayment: jest.fn(),
   deletePayment: jest.fn(),
   markPaymentSent: jest.fn(),
+  generateBiweeklyPayments: jest.fn(),
 }));
 
 jest.mock("../services/paymentCalculationService", () => ({
@@ -279,6 +281,7 @@ describe("POST /api/payments/:id/email", () => {
         biweekNumber: 17,
         year: 2026,
         totalPayable: 32000,
+        periodEnd: "2026-09-15",
         pdfBase64: "JVBERi0xLjQK",
         pdfFileName: "boleta.pdf",
       }),
@@ -318,6 +321,19 @@ describe("POST /api/payments/:id/email", () => {
     expect(res.status).toBe(503);
     expect(res.body.message).toContain("RESEND_API_KEY");
     expect(service.markPaymentSent).not.toHaveBeenCalled();
+  });
+});
+
+describe("POST /api/payments/generate", () => {
+  it("debería generar las boletas de la quincena y devolver el resumen", async () => {
+    const summary = { year: 2026, biweekNumber: 18, created: 3, refreshed: 1, skipped: 2 };
+    service.generateBiweeklyPayments.mockResolvedValue(summary);
+
+    const res = await request(app).post("/api/payments/generate").send({ year: 2026, biweekNumber: 18 });
+
+    expect(res.status).toBe(200);
+    expect(res.body).toEqual(summary);
+    expect(service.generateBiweeklyPayments).toHaveBeenCalledWith(2026, 18);
   });
 });
 

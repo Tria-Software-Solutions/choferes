@@ -9,6 +9,12 @@ jest.mock("../models/RolePermission", () => {
   return { __esModule: true, RolePermission: mockFunctions, default: mockFunctions };
 });
 
+// Managed transaction: runs the callback with a fake transaction handle.
+jest.mock("../config/database", () => ({
+  __esModule: true,
+  default: { transaction: jest.fn((callback: (t: unknown) => unknown) => callback("tx")) },
+}));
+
 // eslint-disable-next-line @typescript-eslint/no-require-imports
 const RolePermission = require("../models/RolePermission").default;
 import * as rolePermissionService from "../services/rolePermissionService";
@@ -66,13 +72,36 @@ describe("updateRolePermission", () => {
 
     const result = await rolePermissionService.updateRolePermission(1, permissionIds);
 
-    expect(RolePermission.destroy).toHaveBeenCalledWith({ where: { roleId: 1 } });
-    expect(RolePermission.bulkCreate).toHaveBeenCalledWith([
-      { roleId: 1, permissionId: 1 },
-      { roleId: 1, permissionId: 2 },
-      { roleId: 1, permissionId: 3 },
-    ]);
+    // Both writes run inside the same transaction.
+    expect(RolePermission.destroy).toHaveBeenCalledWith({
+      where: { roleId: 1 },
+      transaction: "tx",
+    });
+    expect(RolePermission.bulkCreate).toHaveBeenCalledWith(
+      [
+        { roleId: 1, permissionId: 1 },
+        { roleId: 1, permissionId: 2 },
+        { roleId: 1, permissionId: 3 },
+      ],
+      { transaction: "tx" },
+    );
     expect(result).toHaveLength(3);
+  });
+
+  it("no duplica permisos repetidos en la solicitud", async () => {
+    RolePermission.destroy.mockResolvedValue(0);
+    RolePermission.bulkCreate.mockResolvedValue([]);
+    RolePermission.findAll.mockResolvedValue([]);
+
+    await rolePermissionService.updateRolePermission(1, [2, 2, 3]);
+
+    expect(RolePermission.bulkCreate).toHaveBeenCalledWith(
+      [
+        { roleId: 1, permissionId: 2 },
+        { roleId: 1, permissionId: 3 },
+      ],
+      { transaction: "tx" },
+    );
   });
 });
 

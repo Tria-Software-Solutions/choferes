@@ -19,6 +19,7 @@ jest.mock("../middleware/authorize", () => {
     requireAnyPermission: jest.fn(pass),
     requireRole: jest.fn(pass),
     allowSelfOrPermission: jest.fn(pass),
+    getUserId: (req: express.Request) => (req as any).user?.id,
   };
 });
 
@@ -55,8 +56,10 @@ jest.mock("../services/userService", () => ({
   updateUser: jest.fn(),
   updateUserStatus: jest.fn(),
   updateUserPassword: jest.fn(),
+  verifyUserPassword: jest.fn(),
   updateUserTemporalPassword: jest.fn(),
   deleteUser: jest.fn(),
+  AUTH_ERRORS: { INVALID_CREDENTIALS: "Invalid credentials", INACTIVE: "User is inactive" },
 }));
 
 // eslint-disable-next-line @typescript-eslint/no-require-imports
@@ -109,37 +112,35 @@ describe("POST /api/users/login", () => {
     expect(res.body.message).toBe("Credenciales incompletas");
   });
 
-  it("debería devolver 401 si usuario no encontrado", async () => {
-    service.authenticateUser.mockRejectedValue(new Error("User not found"));
+  it("debería devolver 400 si las credenciales no son texto", async () => {
+    const res = await request(app)
+      .post("/api/users/login")
+      .send({ identifier: { $in: ["admin"] }, password: "pass" });
+
+    expect(res.status).toBe(400);
+    expect(service.authenticateUser).not.toHaveBeenCalled();
+  });
+
+  it("debería devolver 401 genérico si las credenciales no son válidas", async () => {
+    service.authenticateUser.mockRejectedValue(new Error("Invalid credentials"));
 
     const res = await request(app)
       .post("/api/users/login")
       .send({ identifier: "unknown", password: "pass" });
 
     expect(res.status).toBe(401);
-    expect(res.body.message).toBe("Usuario no encontrado");
+    expect(res.body.message).toBe("Credenciales incorrectas");
   });
 
-  it("debería devolver 401 si usuario está inactivo", async () => {
+  it("debería devolver 403 si usuario está inactivo", async () => {
     service.authenticateUser.mockRejectedValue(new Error("User is inactive"));
 
     const res = await request(app)
       .post("/api/users/login")
       .send({ identifier: "inactive", password: "pass" });
 
-    expect(res.status).toBe(401);
+    expect(res.status).toBe(403);
     expect(res.body.message).toBe("Usuario desactivado");
-  });
-
-  it("debería devolver 401 si contraseña incorrecta", async () => {
-    service.authenticateUser.mockRejectedValue(new Error("Incorrect password"));
-
-    const res = await request(app)
-      .post("/api/users/login")
-      .send({ identifier: "admin", password: "wrong" });
-
-    expect(res.status).toBe(401);
-    expect(res.body.message).toBe("Contraseña incorrecta");
   });
 });
 
@@ -266,22 +267,62 @@ describe("PUT /api/users/:id", () => {
 
 describe("PUT /api/users/:id/status", () => {
   it("debería devolver 200 con el estado actualizado", async () => {
-    service.updateUserStatus.mockResolvedValue({ ...mockUser, isActive: false });
+    service.updateUserStatus.mockResolvedValue({ ...mockUser, id: 2, isActive: false });
 
-    const res = await request(app).put("/api/users/1/status").send({ isActive: false });
+    const res = await request(app).put("/api/users/2/status").send({ isActive: false });
 
     expect(res.status).toBe(200);
     expect(res.body.isActive).toBe(false);
   });
+
+  it("no permite desactivar la propia cuenta", async () => {
+    const res = await request(app).put("/api/users/1/status").send({ isActive: false });
+
+    expect(res.status).toBe(400);
+    expect(service.updateUserStatus).not.toHaveBeenCalled();
+  });
 });
 
 describe("PUT /api/users/:id/password", () => {
-  it("debería devolver 200 con contraseña actualizada", async () => {
+  it("un administrador cambia la contraseña de otro usuario sin la actual", async () => {
     service.updateUserPassword.mockResolvedValue(mockUser);
 
-    const res = await request(app).put("/api/users/1/password").send({ password: "new_pass" });
+    const res = await request(app).put("/api/users/2/password").send({ password: "new_pass" });
 
     expect(res.status).toBe(200);
+    expect(service.updateUserPassword).toHaveBeenCalledWith(2, "new_pass");
+    expect(service.verifyUserPassword).not.toHaveBeenCalled();
+  });
+
+  it("exige la contraseña actual al cambiar la propia", async () => {
+    const res = await request(app).put("/api/users/1/password").send({ password: "new_pass" });
+
+    expect(res.status).toBe(400);
+    expect(res.body.message).toBe("La contraseña actual es requerida");
+    expect(service.updateUserPassword).not.toHaveBeenCalled();
+  });
+
+  it("rechaza una contraseña actual incorrecta sin cerrar la sesión (400, no 401)", async () => {
+    service.verifyUserPassword.mockResolvedValue(false);
+
+    const res = await request(app)
+      .put("/api/users/1/password")
+      .send({ password: "new_pass", currentPassword: "wrong" });
+
+    expect(res.status).toBe(400);
+    expect(service.updateUserPassword).not.toHaveBeenCalled();
+  });
+
+  it("cambia la propia contraseña con la actual correcta", async () => {
+    service.verifyUserPassword.mockResolvedValue(true);
+    service.updateUserPassword.mockResolvedValue(mockUser);
+
+    const res = await request(app)
+      .put("/api/users/1/password")
+      .send({ password: "new_pass", currentPassword: "old_pass" });
+
+    expect(res.status).toBe(200);
+    expect(service.verifyUserPassword).toHaveBeenCalledWith(1, "old_pass");
     expect(service.updateUserPassword).toHaveBeenCalledWith(1, "new_pass");
   });
 });
@@ -303,7 +344,7 @@ describe("DELETE /api/users/:id", () => {
   it("debería devolver 204 si se elimina correctamente", async () => {
     service.deleteUser.mockResolvedValue(1);
 
-    const res = await request(app).delete("/api/users/1");
+    const res = await request(app).delete("/api/users/2");
 
     expect(res.status).toBe(204);
   });
@@ -314,5 +355,12 @@ describe("DELETE /api/users/:id", () => {
     const res = await request(app).delete("/api/users/999");
 
     expect(res.status).toBe(404);
+  });
+
+  it("no permite eliminar la propia cuenta", async () => {
+    const res = await request(app).delete("/api/users/1");
+
+    expect(res.status).toBe(400);
+    expect(service.deleteUser).not.toHaveBeenCalled();
   });
 });

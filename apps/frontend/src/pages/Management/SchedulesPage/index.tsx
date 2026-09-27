@@ -15,8 +15,9 @@ import SearchBarComponent from "../../../components/SearchBar/SearchBar.componen
 import StickyDataGridComponent from "../../../components/Table/StickyDataGrid/StickyDataGrid.component";
 import { GridColDef } from "@mui/x-data-grid";
 import { renderActionButtons } from "../../../components/Table/EditableTable/helpers";
-import SpeedDialComponent from "../../../components/SpeedDial/SpeedDial.component";
+import ExportMenu from "../../../components/ExportMenu/ExportMenu.component";
 import AddScheduleForm from "../../Forms/AddScheduleForm";
+import { dayHoursInputSx } from "../../Forms/AddScheduleForm/styles";
 import { useAppNotifications } from "../../../components/Snackbar/Snackbar.component";
 import DialogComponent from "../../../components/Dialog/Dialog.component";
 import ReorderDialog from "../../../components/ReorderDialog/ReorderDialog.component";
@@ -30,9 +31,6 @@ import {
   TextField,
   useTheme,
   useMediaQuery,
-  CircularProgress,
-  Backdrop,
-  Paper,
   Tooltip,
 } from "@mui/material";
 import {
@@ -40,17 +38,23 @@ import {
   exportFileFormattedDate,
 } from "../../../utils/export";
 import { translateDayOptionsToSpanish } from "../../../utils/string";
+import APPBAR_MENU from "../../../constants/appbar.constants";
+import NavIcon from "../../../components/NavIcon/NavIcon.component";
 import PAGE_TITLE from "../../../constants/pageTitle.constants";
 import PERMISSIONS from "../../../constants/permissions.constants";
 import MANAGEMENT from "../../../constants/management.constants";
-import { CalendarDays, Download, X, Trash2, PlusCircle, Clock, GripVertical } from "lucide-react";
+import { IconCalendarWeek, IconCirclePlus, IconClock, IconGripVertical, IconPlus, IconTrash } from "@tabler/icons-react";
+import {
+  EmptyState,
+  LoadingState,
+  PageBody,
+  PageCard,
+  PageContainer,
+  PageHeader,
+} from "../../../components/Layout";
 import { PdfIcon, ExcelIcon } from "../../../components/Icons/FileIcons";
 import { NOTIFICATIONS } from "../../../constants/constants";
 import {
-  exportSpeedDialBoxStyles,
-  loadingBoxStyles,
-  backdropStyles,
-  noSchedulesBoxStyles,
   deleteDialogPaperSx,
   addDialogPaperSx,
 } from "./styles";
@@ -183,7 +187,7 @@ const shortNames: Record<string, string> = {
   const handleCreate = async (newSchedule: Omit<Schedule, "id">) => {
     try {
       setIsCreatingSchedule(true);
-      await dispatch(createSchedule(newSchedule));
+      await dispatch(createSchedule(newSchedule)).unwrap();
       setOpenAddScheduleModal(false);
       showNotification(NOTIFICATIONS.SCHEDULE_CREATE_SUCCESS, {
         severity: "success",
@@ -238,7 +242,7 @@ const shortNames: Record<string, string> = {
         hours: isNaN(defaultHours) ? 0 : defaultHours,
         scheduleDays,
       };
-      dispatch(updateSchedule({ id, updatedSchedule }));
+      await dispatch(updateSchedule({ id, updatedSchedule })).unwrap();
       setEditRowId(null);
       setEditFields({ label: "", days: [], hours: "" });
       setDayHoursEditing({});
@@ -300,7 +304,7 @@ const shortNames: Record<string, string> = {
 
     setIsDeletingSchedule(true);
     try {
-      await dispatch(deleteSchedule(scheduleToDelete));
+      await dispatch(deleteSchedule(scheduleToDelete)).unwrap();
       setOpenDeleteDialog(false);
       setScheduleToDelete(null);
       showNotification(NOTIFICATIONS.SCHEDULE_DELETE_SUCCESS, {
@@ -493,15 +497,11 @@ const shortNames: Record<string, string> = {
                             fontWeight: 700,
                             cursor: 'pointer',
                             background: isActive
-                              ? (t) => t.palette.primary.main
-                              : (t) => t.palette.mode === 'dark'
-                                ? 'rgba(255,255,255,0.04)'
-                                : 'rgba(0,0,0,0.04)',
+                              ? (t) => t.tokens.colors.inverseBg
+                              : (t) => t.tokens.colors.hover,
                             color: isActive
-                              ? '#ffffff'
-                              : (t) => t.palette.mode === 'dark'
-                                ? 'rgba(255,255,255,0.2)'
-                                : 'rgba(0,0,0,0.2)',
+                              ? (t) => t.tokens.colors.onInverse
+                              : (t) => t.tokens.colors.textSubtle,
                             transition: 'all 0.15s ease',
                             '&:hover': {
                               transform: 'scale(1.15)',
@@ -514,48 +514,18 @@ const shortNames: Record<string, string> = {
                         </Box>
                         {/* Hours input below active day */}
                         {isActive && (
-                          <Box
-                            sx={{
-                              display: 'flex',
-                              alignItems: 'center',
-                              gap: 0.1,
-                              backgroundColor: (t) => t.palette.mode === 'dark'
-                                ? 'rgba(99,102,241,0.06)'
-                                : 'rgba(99,102,241,0.04)',
-                              borderRadius: '6px',
-                              px: 0.4,
-                              py: 0.1,
+                          <TextField
+                            type="number"
+                            value={dayValue}
+                            onClick={(e) => e.stopPropagation()}
+                            onChange={(e) => {
+                              const newDayHours = { ...dayHoursEditing };
+                              newDayHours[day] = e.target.value;
+                              setDayHoursEditing(newDayHours);
                             }}
-                          >
-                            <TextField
-                              type="number"
-                              value={dayValue}
-                              onClick={(e) => e.stopPropagation()}
-                              onChange={(e) => {
-                                const newDayHours = { ...dayHoursEditing };
-                                newDayHours[day] = e.target.value;
-                                setDayHoursEditing(newDayHours);
-                              }}
-                              variant="standard"
-                              inputProps={{
-                                min: '0', max: '24',
-                                style: { textAlign: 'center', fontWeight: 600, fontSize: '0.7rem', padding: '1px 0', width: '24px' },
-                              }}
-                              sx={{
-                                '& .MuiInputBase-root': {
-                                  '&:before, &:after': { border: 'none' },
-                                },
-                                '& .MuiInputBase-input': {
-                                  textAlign: 'center',
-                                  padding: '1px 0',
-                                  width: '24px',
-                                  fontSize: '0.7rem',
-                                  fontWeight: 700,
-                                  color: 'text.primary',
-                                },
-                              }}
-                            />
-                          </Box>
+                            inputProps={{ min: 0, max: 24, step: 0.5, inputMode: 'decimal' }}
+                            sx={dayHoursInputSx(theme, dayValue !== '')}
+                          />
                         )}
                       </Box>
                     </Tooltip>
@@ -603,15 +573,11 @@ const shortNames: Record<string, string> = {
                             fontSize: '0.68rem',
                             fontWeight: 700,
                             background: isActive
-                              ? (t) => t.palette.primary.main
-                              : (t) => t.palette.mode === 'dark'
-                                ? 'rgba(255,255,255,0.04)'
-                                : 'rgba(0,0,0,0.04)',
+                              ? (t) => t.tokens.colors.inverseBg
+                              : (t) => t.tokens.colors.hover,
                             color: isActive
-                              ? '#ffffff'
-                              : (t) => t.palette.mode === 'dark'
-                                ? 'rgba(255,255,255,0.2)'
-                                : 'rgba(0,0,0,0.2)',
+                              ? (t) => t.tokens.colors.onInverse
+                              : (t) => t.tokens.colors.textSubtle,
                           }}
                         >
                           {shortNames[day]}
@@ -640,7 +606,7 @@ const shortNames: Record<string, string> = {
           // Fallback: show total hours
           return (
             <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-              <Clock size={14} strokeWidth={1.5} style={{ opacity: 0.4 }} />
+              <IconClock size={14} stroke={1.5} style={{ opacity: 0.4 }} />
               <Typography
                 component="span"
                 sx={{
@@ -701,203 +667,107 @@ const shortNames: Record<string, string> = {
     ]
   );
 
+  const canExport =
+    userPermissions.includes(PERMISSIONS.EXPORT_EXCEL_SCHEDULES) &&
+    userPermissions.includes(PERMISSIONS.EXPORT_PDF_SCHEDULES);
+  const canReorder = userPermissions.includes(PERMISSIONS.REORDER_SCHEDULES);
+  const canCreate = userPermissions.includes(PERMISSIONS.CREATE_SCHEDULES);
+
   return (
-    <Box className="scrollable-content" sx={{ height: "100%", display: "flex", flexDirection: "column", overflow: "hidden", pb: 0, pt: 0, px: 0 }}>
-      {/* Premium Card with Header and Grid */}
-      <Paper
-        elevation={0}
-        sx={{
-          borderRadius: "16px",
-          border: "1px solid rgba(0,0,0,0.08)",
-          boxShadow: "0 4px 24px rgba(0,0,0,0.08), 0 1px 2px rgba(0,0,0,0.04)",
-          overflow: "hidden",
-          flex: 1,
-          display: "flex",
-          flexDirection: "column",
-          mx: { xs: 1, sm: 1.5, md: 2 },
-          mb: 3,
-          mt: 0,
-        }}
-      >
-        {/* Header Section */}
-        <Box
-          sx={{
-            px: { xs: 2, sm: 2.5 },
-            py: { xs: 1.5, sm: 2 },
-            backgroundColor: theme.palette.background.paper,
-            color: theme.palette.text.primary,
-            flexShrink: 0,
-            borderBottom: `1px solid ${theme.palette.mode === "dark" ? "rgba(255,255,255,0.06)" : "rgba(0,0,0,0.06)"}`,
-          }}
-        >
-          <Box
-            display="flex"
-            justifyContent="space-between"
-            alignItems="center"
-            mb={1.5}
-          >
-            <Box display="flex" alignItems="center" gap={1.5}>
-              <Box
-                sx={{
-                  color: theme.palette.primary.main,
-                  display: 'flex',
-                  alignItems: 'center',
-                }}
-              >
-                <CalendarDays size={20} strokeWidth={1.5} />
-              </Box>
-              <Box>
-                <Typography
-                  variant={isSmallScreen ? "h6" : "h5"}
-                  sx={{
-                    fontWeight: 700,
-                    fontSize: { xs: "1rem", sm: "1.15rem" },
-                    color: theme.palette.text.primary,
-                    letterSpacing: "-0.02em",
-                    lineHeight: 1.2,
-                  }}
-                >
-                  {isSmallScreen ? PAGE_TITLE.SCHEDULES_SIMPLIFIED : PAGE_TITLE.SCHEDULES}
-                </Typography>
-                <Typography
-                  variant="caption"
-                  sx={{
-                    color: theme.palette.text.secondary,
-                    fontSize: "0.7rem",
-                    letterSpacing: "0.02em",
-                  }}
-                >
-                  {filteredSchedules.length} horarios configurados
-                </Typography>
-              </Box>
+    <PageContainer>
+      <PageCard>
+        <PageHeader
+          icon={<NavIcon label={APPBAR_MENU.SCHEDULES} />}
+          title={PAGE_TITLE.SCHEDULES}
+          mobileTitle={PAGE_TITLE.SCHEDULES_SIMPLIFIED}
+          subtitle={`${filteredSchedules.length} horarios configurados`}
+          actions={
+            canExport ? (
+              <ExportMenu actions={exportOptions} disabled={filteredSchedules.length === 0} />
+            ) : undefined
+          }
+          toolbar={
+            <Box sx={{ flex: 1, maxWidth: { sm: 320 }, minWidth: { xs: "100%", sm: 200 } }}>
+              <SearchBarComponent
+                placeholder={MANAGEMENT.SCHEDULES_PAGE.SEARCH_PLACEHOLDER}
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+                fullWidth
+                isSearching={isLoadingSchedules && search !== ""}
+              />
             </Box>
-
-            {/* Export Speed Dial */}
-            {userPermissions.includes(PERMISSIONS.EXPORT_EXCEL_SCHEDULES) &&
-              userPermissions.includes(PERMISSIONS.EXPORT_PDF_SCHEDULES) && (
-                <Box sx={{ ...exportSpeedDialBoxStyles, minHeight: 'auto' }}>
-                  {filteredSchedules.length > 0 && (
-                    <SpeedDialComponent
-                      actions={exportOptions}
-                      mainIcon={<Download size={18} strokeWidth={1.5} />}
-                      openIcon={<X size={18} strokeWidth={1.5} />}
-                      direction="left"
-                    />
-                  )}
-                </Box>
-              )}
-          </Box>
-
-          {/* Controls Row */}
-          <Box
-            display="flex"
-            flexDirection={{ xs: "column", sm: "row" }}
-            alignItems={{ xs: "stretch", sm: "center" }}
-            justifyContent="space-between"
-            gap={2}
-          >
-            {/* Search */}
-            <Box flex={1} maxWidth={{ sm: "320px" }}>
-              {filteredSchedules && (
-                <SearchBarComponent
-                  placeholder={MANAGEMENT.SCHEDULES_PAGE.SEARCH_PLACEHOLDER}
-                  value={search}
-                  onChange={(e) => setSearch(e.target.value)}
-                  fullWidth
-                  isSearching={isLoadingSchedules && search !== ""}
-                />
-              )}
-            </Box>
-
-            {/* Actions Row */}
-            {(userPermissions.includes(PERMISSIONS.CREATE_SCHEDULES) ||
-              userPermissions.includes(PERMISSIONS.REORDER_SCHEDULES)) && (
-              <Box sx={{ display: { xs: 'none', sm: 'flex' }, gap: 1 }}>
-                {userPermissions.includes(PERMISSIONS.REORDER_SCHEDULES) && (
+          }
+          toolbarEnd={
+            canReorder || canCreate ? (
+              <>
+                {canReorder && (
                   <Button
                     variant="outlined"
-                    startIcon={<GripVertical size={16} />}
+                    startIcon={<IconGripVertical size={16} />}
                     onClick={() => setOpenReorderDialog(true)}
                     disabled={filteredSchedules.length < 2}
                     sx={{
-                      px: 2,
-                      py: 1,
-                      fontWeight: 600,
-                      fontSize: "0.85rem",
-                      borderRadius: '10px',
                       textTransform: 'none',
+                      fontWeight: 600,
+                      color: 'text.primary',
+                      borderColor: theme.tokens.colors.border,
+                      backgroundColor: theme.tokens.colors.hoverSoft,
+                      boxShadow: 'none',
+                      '&:hover': {
+                        backgroundColor: theme.tokens.colors.hover,
+                        borderColor: theme.tokens.colors.borderStrong,
+                      },
                     }}
                   >
                     Ordenar
                   </Button>
                 )}
-                {userPermissions.includes(PERMISSIONS.CREATE_SCHEDULES) && (
+                {canCreate && (
                   <Button
-                    variant="outlined"
+                    variant="contained"
+                    startIcon={<IconPlus size={18} />}
                     onClick={handleOpenAddModal}
                   >
-                    {MANAGEMENT.ADD}
+                    {MANAGEMENT.SCHEDULES_PAGE.ADD}
                   </Button>
                 )}
-              </Box>
-            )}
-          </Box>
-        </Box>
+              </>
+            ) : undefined
+          }
+        />
 
-        {/* Mobile Add Button */}
-        {userPermissions.includes(PERMISSIONS.CREATE_SCHEDULES) && (
-          <Box sx={{ display: { xs: 'flex', sm: 'none' }, p: 2, borderTop: `1px solid ${theme.palette.mode === "dark" ? "rgba(255,255,255,0.08)" : "rgba(0,0,0,0.08)"}` }}>
-            <Button
-              variant="outlined"
-              fullWidth
-              onClick={handleOpenAddModal}
-            >
-              {MANAGEMENT.ADD}
-            </Button>
-          </Box>
-        )}
-
-        {/* Content Section */}
-        <Box sx={{ flex: 1, minHeight: 0, display: "flex", flexDirection: "column", overflow: "hidden" }}>
-          {isLoadingSchedules ? (
-            <Box sx={loadingBoxStyles}>
-              <Backdrop sx={backdropStyles(theme)} open={isLoadingSchedules}>
-                <CircularProgress />
-              </Backdrop>
-            </Box>
+        <PageBody>
+          {isLoadingSchedules && filteredSchedules.length === 0 ? (
+            <LoadingState label="Cargando horarios…" />
+          ) : filteredSchedules.length > 0 ? (
+            <StickyDataGridComponent<Schedule>
+              rows={filteredSchedules}
+              columns={columns}
+              getRowId={getRowId}
+              disableRowVirtualization={editRowId !== null}
+            />
           ) : (
-            <>
-              {filteredSchedules.length > 0 ? (
-                <StickyDataGridComponent<Schedule>
-                  rows={filteredSchedules}
-                  columns={columns}
-                  getRowId={getRowId}
-                  disableRowVirtualization={editRowId !== null}
-                />
-              ) : (
-                <Box sx={noSchedulesBoxStyles}>
-                  <Box
-                    sx={{
-                      backgroundColor: theme.palette.mode === "dark" ? "rgba(255,255,255,0.05)" : "rgba(0,0,0,0.03)",
-                      borderRadius: "50%",
-                      p: 3,
-                      mb: 2,
-                    }}
+            <EmptyState
+              icon={<IconCalendarWeek />}
+              title={MANAGEMENT.NO_SCHEDULES}
+              description={
+                search ? "Prueba con otro término de búsqueda." : "No hay horarios configurados aún."
+              }
+              action={
+                canCreate && !search ? (
+                  <Button
+                    variant="outlined"
+                    startIcon={<IconPlus size={18} />}
+                    onClick={handleOpenAddModal}
                   >
-                    <CalendarDays size={48} color={theme.palette.text.disabled} />
-                  </Box>
-                  <Typography variant="h6" color="textSecondary" sx={{ fontWeight: 600, mb: 0.5 }}>
-                    {MANAGEMENT.NO_SCHEDULES}
-                  </Typography>
-                  <Typography variant="body2" color="textSecondary">
-                    No hay horarios configurados aún
-                  </Typography>
-                </Box>
-              )}
-            </>
+                    {MANAGEMENT.SCHEDULES_PAGE.ADD}
+                  </Button>
+                ) : undefined
+              }
+            />
           )}
-        </Box>
-      </Paper>
+        </PageBody>
+      </PageCard>
       <DialogComponent
         open={openDeleteDialog}
         onClose={handleCloseDeleteDialog}
@@ -909,7 +779,7 @@ const shortNames: Record<string, string> = {
         cancelText={MANAGEMENT.DIALOG_DELETE_CANCEL}
         loading={isDeletingSchedule}
         paperSx={deleteDialogPaperSx ?? {}}
-        icon={<Trash2 color="var(--mui-palette-error-main)" />}
+        icon={<IconTrash color="var(--mui-palette-error-main)" />}
       />
       <DialogComponent
         open={openAddScheduleModal}
@@ -917,7 +787,7 @@ const shortNames: Record<string, string> = {
         title={MANAGEMENT.DIALOG_ADD_TITLE}
         hideActions
         paperSx={addDialogPaperSx ?? {}}
-        icon={<PlusCircle color="var(--mui-palette-info-main)" />}
+        icon={<IconCirclePlus color="var(--mui-palette-info-main)" />}
       >
         <AddScheduleForm
           onSubmit={handleCreate}
@@ -931,7 +801,7 @@ const shortNames: Record<string, string> = {
         onClose={() => setOpenReorderDialog(false)}
         onSave={handleReorderSave}
       />
-    </Box>
+    </PageContainer>
   );
 };
 

@@ -442,6 +442,16 @@ module.exports = {
     if (userRoles.length > 0) {
       await queryInterface.bulkInsert("user_role", userRoles);
     }
+
+    // Rows above are inserted with explicit ids, which doesn't advance the
+    // serial sequences. Re-sync them so the next row created by the app doesn't
+    // collide with a seeded id ("duplicate key value violates users_pkey").
+    for (const table of ["permissions", "roles", "users", "schedule", "schedule_day"]) {
+      await queryInterface.sequelize.query(
+        `SELECT setval(pg_get_serial_sequence('"${table}"', 'id'),
+                       COALESCE((SELECT MAX(id) FROM "${table}"), 0) + 1, false)`,
+      );
+    }
   },
 
   down: async (queryInterface) => {

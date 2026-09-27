@@ -1,13 +1,13 @@
 // Controller for HTTP requests related to employee driver's licenses.
 import { Request, Response } from "express";
 import * as licenseService from "../services/employeeLicenseService";
-import { isServiceError } from "../utils/errors";
+import { isServiceError, sendServerError } from "../utils/errors";
 
 const handleError = (res: Response, error: unknown, fallbackMessage: string): Response => {
   if (isServiceError(error)) {
     return res.status(error.statusCode).json({ message: error.message });
   }
-  return res.status(500).json({ message: fallbackMessage, error });
+  return sendServerError(res, fallbackMessage, error);
 };
 
 export const getLicenses = async (req: Request, res: Response) => {
