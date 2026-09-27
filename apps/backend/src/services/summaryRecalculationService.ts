@@ -43,13 +43,15 @@ export const parseCalendarDate = (value: string): Date => {
   return new Date(Number(match[1]), Number(match[2]) - 1, Number(match[3]));
 };
 
-const startOfDay = (date: Date): Date => {
+// Exportados para el agregado de horas por quincena de Planilla: el rango debe
+// ser exactamente el mismo que usa el recálculo, horas 00:00:00 a 23:59:59.999.
+export const startOfDay = (date: Date): Date => {
   const d = new Date(date);
   d.setHours(0, 0, 0, 0);
   return d;
 };
 
-const endOfDay = (date: Date): Date => {
+export const endOfDay = (date: Date): Date => {
   const d = new Date(date);
   d.setHours(23, 59, 59, 999);
   return d;

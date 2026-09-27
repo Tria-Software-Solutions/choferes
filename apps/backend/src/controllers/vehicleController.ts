@@ -3,6 +3,7 @@
 import { Request, Response } from "express";
 import { parseISO, isValid } from "date-fns";
 import * as vehicleService from "../services/vehicleService";
+import { sendServerError } from "../utils/errors";
 
 // Get all vehicles (paginated)
 export const getVehicles = async (req: Request, res: Response) => {
@@ -10,7 +11,7 @@ export const getVehicles = async (req: Request, res: Response) => {
     const result = await vehicleService.getVehicles(req.query as { page?: string; limit?: string });
     return res.status(200).json(result);
   } catch (error) {
-    return res.status(500).json({ message: "Error fetching Vehicles", error });
+    return sendServerError(res, "Error fetching Vehicles", error);
   }
 };
 
@@ -24,7 +25,7 @@ export const getVehicleById = async (req: Request, res: Response) => {
     }
     return res.status(404).json({ message: "Vehicle not found" });
   } catch (error) {
-    return res.status(500).json({ message: "Error fetching Vehicle", error });
+    return sendServerError(res, "Error fetching Vehicle", error);
   }
 };
 
@@ -45,7 +46,7 @@ export const getVehiclesByDate = async (req: Request, res: Response) => {
     const vehicles = await vehicleService.getVehiclesByDate(parsedDate);
     return res.status(200).json(vehicles);
   } catch (error) {
-    return res.status(500).json({ message: "Error fetching Vehicles by date", error });
+    return sendServerError(res, "Error fetching Vehicles by date", error);
   }
 };
 
@@ -60,7 +61,7 @@ export const createVehicle = async (req: Request, res: Response) => {
     const newVehicle = await vehicleService.createVehicle(vehicleData);
     return res.status(201).json(newVehicle);
   } catch (error) {
-    return res.status(500).json({ message: "Error creating Vehicle", error });
+    return sendServerError(res, "Error creating Vehicle", error);
   }
 };
 
@@ -80,7 +81,7 @@ export const updateVehicle = async (req: Request, res: Response) => {
     }
     return res.status(404).json({ message: "Vehicle not found" });
   } catch (error) {
-    return res.status(500).json({ message: "Error updating Vehicle", error });
+    return sendServerError(res, "Error updating Vehicle", error);
   }
 };
 
@@ -94,6 +95,6 @@ export const deleteVehicle = async (req: Request, res: Response) => {
     }
     return res.status(404).json({ message: "Vehicle not found" });
   } catch (error) {
-    return res.status(500).json({ message: "Error deleting Vehicle", error });
+    return sendServerError(res, "Error deleting Vehicle", error);
   }
 };

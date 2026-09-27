@@ -102,8 +102,13 @@ export const updateUserStatus = async (id: number, status: boolean) => {
   return response.data;
 };
 
-export const updateUserPassword = async (id: number, password: string) => {
-  await api.put(`/users/${id}/password`, { password });
+// `currentPassword` is required by the API when changing your own password.
+export const updateUserPassword = async (
+  id: number,
+  password: string,
+  currentPassword?: string,
+) => {
+  await api.put(`/users/${id}/password`, { password, currentPassword });
 };
 
 export const updateUserTemporalPassword = async (

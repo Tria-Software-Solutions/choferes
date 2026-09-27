@@ -7,16 +7,15 @@ import {
   fetchEmployees,
   fetchAllEmployees,
   createEmployee,
-  updateEmployee,
-  deleteEmployee,
   updateEmployeeAvatar,
   removeEmployeeAvatar,
 } from '../../../store/slices/employeeSlice';
 import SearchBarComponent from '../../../components/SearchBar/SearchBar.component';
-import SpeedDialComponent from '../../../components/SpeedDial/SpeedDial.component';
 import StickyDataGridComponent from '../../../components/Table/StickyDataGrid/StickyDataGrid.component';
 import { GridColDef } from '@mui/x-data-grid';
-import { renderActionButtons } from '../../../components/Table/EditableTable/helpers';
+import { useEmployeeBiweeklyHours } from '../../../hooks/useEmployeeBiweeklyHours';
+import { formatTenure } from '../../../utils/tenure';
+import { maskNationalId, maskPhone } from '../../../utils/mask';
 import PremiumTooltip from '../../../components/PremiumTooltip/PremiumTooltip.component';
 import AddEmployeeForm from '../../Forms/AddEmployeeForm';
 import { useAppNotifications } from '../../../components/Snackbar/Snackbar.component';
@@ -25,70 +24,56 @@ import { createEmployeeNotification } from '../../../services/notificationServic
 import {
   Button,
   Box,
-  Chip,
   Typography,
-  TextField,
   useTheme,
   useMediaQuery,
   CircularProgress,
-  Backdrop,
-  Paper,
   Dialog,
   DialogContent,
   DialogActions,
 } from '@mui/material';
 import { createExportOptions, exportFileFormattedDate } from '../../../utils/export';
+import APPBAR_MENU from '../../../constants/appbar.constants';
+import NavIcon from '../../../components/NavIcon/NavIcon.component';
 import PAGE_TITLE from '../../../constants/pageTitle.constants';
 import PERMISSIONS from '../../../constants/permissions.constants';
 import NOTIFICATIONS from '../../../constants/notifications.constants';
 import MANAGEMENT from '../../../constants/management.constants';
-import {
-  UsersRound,
-  Download,
-  X,
-  Search,
-  Trash2,
-  PlusCircle,
-  Mail,
-  Pencil,
-  Loader2,
-  Camera,
-  ChevronRight,
-  AlertTriangle,
-  ShieldAlert,
-  Wallet,
-  CalendarDays,
-} from 'lucide-react';
+import { IconAlertTriangle, IconBriefcase, IconCalendarWeek, IconCamera, IconCash, IconChevronRight, IconCirclePlus, IconClockHour4, IconHourglassHigh, IconLoader2, IconMail, IconPhone, IconPlus, IconShieldExclamation, IconUsers, IconX } from "@tabler/icons-react";
 import SegmentedToggle from '../../../components/SegmentedToggle/SegmentedToggle.component';
+import {
+  EmptyState,
+  LoadingState,
+  PageBody,
+  PageCard,
+  PageContainer,
+  PageHeader,
+  StatCard,
+  StatGrid,
+} from '../../../components/Layout';
+import ExportMenu from '../../../components/ExportMenu/ExportMenu.component';
 import {
   fetchLicenses,
   selectLicenses,
 } from '../../../store/slices/licenseSlice';
 import { PdfIcon, ExcelIcon } from '../../../components/Icons/FileIcons';
 import {
-  exportSpeedDialBoxStyles,
-  loadingBoxStyles,
-  backdropStyles,
-  noEmployeesBoxStyles,
-  noEmployeesIconStyles,
-  deleteDialogPaperSx,
   addDialogPaperSx,
-  kpiRowStyles,
-  kpiCardStyles,
   incompleteBadgeStyles,
 } from './styles';
-import { alpha } from '@mui/material/styles';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { useTablePreferences } from '../../../hooks/useTablePreferences';
 import { useDebounce } from '../../../hooks/useDebounce';
-import { format } from 'date-fns';
-import { es } from 'date-fns/locale';
-import { capitalizeFirstLetter } from '../../../utils/string';
 import { getAvatarSrc, resizeAvatarFile } from '../../../utils/avatar';
-import EmployeeAvatar from '../../../components/EmployeeAvatar/EmployeeAvatar.component';
 import { formatMoney } from '../../../utils/paymentSlipPdf';
+import EmployeeAvatar from '../../../components/EmployeeAvatar/EmployeeAvatar.component';
 
 // Pay-related fields the employee still has no value for.
+// Las horas vienen con decimales (horas × turnos): se muestran sin ceros inútiles
+// ("72 h", "84.5 h") para que la columna no se ensanche.
+const formatHours = (value: number): string =>
+  `${Number.isInteger(value) ? value : value.toFixed(1)} h`;
+
 const getMissingProfileFields = (employee: Employee): string[] => {
   const missing: string[] = [];
   if (employee.hourlyRate === null || employee.hourlyRate === undefined) {
@@ -101,72 +86,6 @@ const getMissingProfileFields = (employee: Employee): string[] => {
 };
 
 // Compact summary metric shown in the KPI band above the grid.
-const KpiCard: React.FC<{
-  icon: React.ReactNode;
-  label: string;
-  value: string;
-  tone?: 'default' | 'primary' | 'warning';
-}> = ({ icon, label, value, tone = 'default' }) => {
-  const theme = useTheme();
-
-  const toneColor =
-    tone === 'warning'
-      ? theme.palette.warning.main
-      : tone === 'primary'
-        ? theme.palette.primary.main
-        : theme.palette.text.secondary;
-
-  return (
-    <Box sx={kpiCardStyles(theme)}>
-      <Box
-        sx={{
-          width: 34,
-          height: 34,
-          borderRadius: '10px',
-          flexShrink: 0,
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          color: toneColor,
-          backgroundColor: alpha(toneColor, theme.palette.mode === 'dark' ? 0.16 : 0.1),
-        }}
-      >
-        {icon}
-      </Box>
-      <Box sx={{ minWidth: 0 }}>
-        <Typography
-          sx={{
-            fontSize: '0.62rem',
-            fontWeight: 700,
-            letterSpacing: '0.07em',
-            textTransform: 'uppercase',
-            color: 'text.secondary',
-            lineHeight: 1.4,
-            whiteSpace: 'nowrap',
-            overflow: 'hidden',
-            textOverflow: 'ellipsis',
-          }}
-        >
-          {label}
-        </Typography>
-        <Typography
-          sx={{
-            fontSize: { xs: '0.95rem', sm: '1.05rem' },
-            fontWeight: 700,
-            letterSpacing: '-0.01em',
-            color: 'text.primary',
-            lineHeight: 1.25,
-            whiteSpace: 'nowrap',
-            overflow: 'hidden',
-            textOverflow: 'ellipsis',
-          }}
-        >
-          {value}
-        </Typography>
-      </Box>
-    </Box>
-  );
-};
 
 const getInitialRowsPerPage = () => {
   // Example: calculate based on window size or available height
@@ -187,28 +106,14 @@ const getInitialRowsPerPage = () => {
 // Employees management page component
 const EmployeesPage: React.FC = () => {
   const dispatch = useDispatch<AppDispatch>();
-  const { userPermissions, currentUser } = useAuthContext();
+  const { userPermissions } = useAuthContext();
   const { employees, allEmployees, isLoadingEmployees } = useSelector(
     (state: RootState) => state.employees,
   );
   const { showNotification } = useAppNotifications();
   const [filteredEmployees, setFilteredEmployees] = useState<Employee[]>([]);
-  const [editRowId, setEditRowId] = useState<number | null>(null);
   const [openAddModal, setOpenAddModal] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  // Every editable field of the grid row (pay-related ones included) is kept as
-  // a string so the inline inputs stay controlled while typing.
-  const [editFields, setEditFields] = useState({
-    firstName: '',
-    lastName: '',
-    email: '',
-    hourlyRate: '',
-    vacationDays: '',
-  });
-  const [openDeleteDialog, setOpenDeleteDialog] = useState(false);
-  const [employeeToDelete, setEmployeeToDelete] = useState<number | null>(null);
-  const [isEditFormValid, setIsEditFormValid] = useState(false);
-  const [isDeletingEmployee, setIsDeletingEmployee] = useState(false);
   // Avatar picker modal state (same UX as the user avatar modal)
   const [avatarDialogEmployee, setAvatarDialogEmployee] = useState<Employee | null>(null);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
@@ -217,43 +122,11 @@ const EmployeesPage: React.FC = () => {
   const [avatarLoadFailed, setAvatarLoadFailed] = useState(false);
   const avatarFileInputRef = useRef<HTMLInputElement>(null);
 
-  const inputSx = {
-    '& .MuiInputBase-root': {
-      fontWeight: 600,
-      fontSize: '0.85rem',
-      '&:before, &:after': { border: 'none' },
-      '&:hover:not(.Mui-disabled):before': { border: 'none' },
-    },
-    '& .MuiInputBase-input': {
-      padding: '4px 0',
-      minWidth: 0,
-      '&::placeholder': { opacity: 0.4, fontWeight: 400 },
-      '&:focus': { outline: 'none' },
-    },
-  } as const;
-
-  // Numeric variant used by the pay-related columns while editing the row.
-  const numericInputSx = {
-    '& .MuiInputBase-root': {
-      fontWeight: 600,
-      fontSize: '0.85rem',
-      '&:before, &:after': { border: 'none' },
-      '&:hover:not(.Mui-disabled):before': { border: 'none' },
-    },
-    '& .MuiInputBase-input': {
-      padding: '4px 0',
-      minWidth: 0,
-      textAlign: 'right',
-      '&::placeholder': { opacity: 0.4, fontWeight: 400 },
-      '&:focus': { outline: 'none' },
-    },
-  } as const;
-
   // El buscador y el filtro de estado se recuerdan entre navegaciones
   // (persistidos en localStorage junto con el resto de preferencias de la tabla).
   const { search, setSearch, statusFilter, setStatusFilter } = useTablePreferences<
     'all' | 'active' | 'inactive'
-  >('employees', getInitialRowsPerPage, 'all');
+  >('employees', getInitialRowsPerPage, 'active');
 
   const debouncedSearch = useDebounce(search, 400);
 
@@ -263,7 +136,6 @@ const EmployeesPage: React.FC = () => {
   const navigate = useNavigate();
 
   const hasEditPermissions = userPermissions.includes(PERMISSIONS.EDIT_EMPLOYEES);
-  const hasDeletePermissions = userPermissions.includes(PERMISSIONS.DELETE_EMPLOYEES);
 
   const licenses = useSelector(selectLicenses);
 
@@ -273,6 +145,13 @@ const EmployeesPage: React.FC = () => {
   useEffect(() => {
     void dispatch(fetchLicenses({ limit: 10000 }));
   }, [dispatch, location.pathname]);
+
+  // Horas y horas extra de la quincena actual (mismas reglas que el pago).
+  const {
+    byEmployeeId: hoursByEmployeeId,
+    biweekNumber: currentBiweekNumber,
+    year: currentBiweekYear,
+  } = useEmployeeBiweeklyHours();
 
   // Peor estado de licencia por empleado, para alertar sin abrir el detalle.
   const licenseAlertByEmployee = useMemo(() => {
@@ -337,34 +216,6 @@ const EmployeesPage: React.FC = () => {
     );
   }, [search, employees, statusFilter]);
 
-  // Validate edit fields for employee
-  const validateFields = useCallback((fields: typeof editFields) => {
-    const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
-    const regex = {
-      text: /^[a-zA-ZáéíóúÁÉÍÓÚñÑüÜëË\s-]+$/,
-    };
-
-    // Pay-related fields are optional, but must be valid non-negative numbers
-    // (whole days for the vacation balance).
-    const rate = fields.hourlyRate.trim() === '' ? null : Number(fields.hourlyRate);
-    const days = fields.vacationDays.trim() === '' ? null : Number(fields.vacationDays);
-    const isRateValid = rate === null || (Number.isFinite(rate) && rate >= 0);
-    const isDaysValid = days === null || (Number.isInteger(days) && days >= 0);
-
-    return (
-      regex.text.test(fields.firstName) &&
-      regex.text.test(fields.lastName) &&
-      (!fields.email || emailRegex.test(fields.email)) &&
-      isRateValid &&
-      isDaysValid
-    );
-  }, []);
-
-  // Update edit form validity when fields change
-  useEffect(() => {
-    if (editRowId !== null) setIsEditFormValid(validateFields(editFields));
-  }, [editFields, editRowId, validateFields]);
-
   // Handle search bar input change
   const handleFilterChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setSearch(e.target.value);
@@ -378,7 +229,7 @@ const EmployeesPage: React.FC = () => {
   }) => {
     try {
       setIsSubmitting(true);
-      dispatch(createEmployee(newEmployee));
+      await dispatch(createEmployee(newEmployee)).unwrap();
       setOpenAddModal(false);
       showNotification(NOTIFICATIONS.EMPLOYEE_CREATE_SUCCESS, {
         severity: 'success',
@@ -404,62 +255,6 @@ const EmployeesPage: React.FC = () => {
 
   const handleCloseAddModal = () => {
     setOpenAddModal(false);
-  };
-
-  // Handle editing of an employee
-  const handleEdit = (employee: Employee) => {
-    setEditRowId(employee.id);
-    setEditFields({
-      firstName: employee.firstName,
-      lastName: employee.lastName,
-      email: employee.email || '',
-      hourlyRate: employee.hourlyRate != null ? String(employee.hourlyRate) : '',
-      vacationDays: employee.vacationDays != null ? String(employee.vacationDays) : '',
-    });
-  };
-
-  // Cancel editing
-  const handleCancel = () => {
-    setEditRowId(null);
-  };
-
-  // Handle update of an employee
-  const handleUpdate = async (id: number) => {
-    try {
-      // Empty inputs clear the value (null) instead of storing 0.
-      const rate = editFields.hourlyRate.trim() === '' ? null : Number(editFields.hourlyRate);
-      const days =
-        editFields.vacationDays.trim() === '' ? null : Number(editFields.vacationDays);
-      const updatedEmployee = {
-        firstName: editFields.firstName,
-        lastName: editFields.lastName,
-        email: editFields.email,
-        hourlyRate: rate,
-        vacationDays: days,
-      };
-      dispatch(updateEmployee({ id, updatedEmployee }));
-      setEditRowId(null);
-      setEditFields({
-        firstName: '',
-        lastName: '',
-        email: '',
-        hourlyRate: '',
-        vacationDays: '',
-      });
-      showNotification(NOTIFICATIONS.EMPLOYEE_UPDATE_SUCCESS, {
-        severity: 'success',
-        duration: 3000,
-      });
-
-      // Add notification to menu
-      createEmployeeNotification('updated', `${editFields.firstName} ${editFields.lastName}`);
-    } catch (error) {
-      handleCancel();
-      showNotification(NOTIFICATIONS.EMPLOYEE_UPDATE_ERROR, {
-        severity: 'error',
-        duration: 5000,
-      });
-    }
   };
 
   // Get the avatar URL for the employee in the picker dialog
@@ -564,132 +359,84 @@ const EmployeesPage: React.FC = () => {
     }
   };
 
-  // Open/close delete confirmation dialog
-  const handleOpenDeleteDialog = (id: number) => {
-    setOpenDeleteDialog(true);
-    setEmployeeToDelete(id);
-  };
-
-  const handleCloseDeleteDialog = () => {
-    setOpenDeleteDialog(false);
-    setEmployeeToDelete(null);
-  };
-
-  // Handle deletion of an employee
-  const handleDelete = async () => {
-    if (!employeeToDelete) return;
-
-    setIsDeletingEmployee(true);
-    try {
-      await dispatch(deleteEmployee(employeeToDelete));
-      setOpenDeleteDialog(false);
-      setEmployeeToDelete(null);
-      showNotification(NOTIFICATIONS.EMPLOYEE_DELETE_SUCCESS, {
-        severity: 'success',
-        duration: 3000,
-      });
-
-      // Add notification to menu
-      const employee = employees.find((emp) => emp.id === employeeToDelete);
-      if (employee) {
-        createEmployeeNotification('deleted', `${employee.firstName} ${employee.lastName}`);
-      }
-    } catch (error) {
-      showNotification(NOTIFICATIONS.EMPLOYEE_DELETE_ERROR, {
-        severity: 'error',
-        duration: 5000,
-      });
-    } finally {
-      setIsDeletingEmployee(false);
-    }
-  };
-
   // Memoize export data so the DataGrid columns stay stable and exportOptions
   // only recomputes when the filtered list actually changes
   const exportData = useMemo(
     () =>
       filteredEmployees.map((e) => ({
-        Nombre: e.firstName,
-        Apellido: e.lastName,
+        Cédula: maskNationalId(e.nationalId ?? ''),
+        'Nombre completo': `${e.firstName} ${e.lastName}`.trim(),
+        Puesto: e.position || '',
         Email: e.email || '',
-        'Tarifa por hora':
-          e.hourlyRate != null ? `${formatMoney(Number(e.hourlyRate), 'CRC')}/h` : '',
-        'Saldo de vacaciones': e.vacationDays != null ? `${e.vacationDays} días` : '',
-        Agregado: e.createdAt
-          ? capitalizeFirstLetter(
-              format(new Date(e.createdAt), "EEEE dd 'de' MMMM 'de' yyyy", {
-                locale: es,
-              })
-            )
-          : '',
-        Actualizado: e.updatedAt
-          ? capitalizeFirstLetter(
-              format(new Date(e.updatedAt), "EEEE dd 'de' MMMM 'de' yyyy", {
-                locale: es,
-              })
-            )
-          : '',
+        Teléfono: maskPhone(e.primaryPhone ?? '') || maskPhone(e.secondaryPhone ?? ''),
       })),
     [filteredEmployees]
   );
 
   // Memoize export options based on permissions.
-  // Excel y PDF comparten las mismas columnas; "Actualizado" se omite.
+  // Excel y PDF comparten las mismas columnas.
   const exportOptions = useMemo(() => {
     const exportHeaders = [
-      'Nombre',
-      'Apellido',
+      'Cédula',
+      'Nombre completo',
+      'Puesto',
       'Email',
-      'Tarifa por hora',
-      'Saldo de vacaciones',
-      'Agregado',
+      'Teléfono',
     ];
-    const exportRows = exportData.map((e) => {
-      const { Actualizado: _omit, ...rest } = e;
-      return rest;
-    });
     return createExportOptions({
       excelIcon: <ExcelIcon size={20} />,
       pdfIcon: <PdfIcon size={20} />,
-      data: exportRows,
+      data: exportData,
       fileName: `empleados-${exportFileFormattedDate(new Date())}`,
       customHeaders: exportHeaders,
-      title: 'Reporte de Empleados',
+      title: 'Reporte de Planilla',
     });
   }, [exportData]);
 
-  // Summary metrics for the KPI band. The "size" metrics (total, average rate
-  // and vacation days) follow the visible rows so they match the grid, while
-  // the alert metrics (sin tarifa / licencias por vencer) are computed over the
-  // full roster so they never hide behind the current search or status filter.
+  // Summary metrics for the KPI band. Las métricas de tamaño (empleados, horas
+  // de la quincena y vacaciones) siguen las filas visibles para que coincidan con
+  // la tabla; las alertas de licencias se calculan sobre la plantilla completa
+  // para que no se escondan detrás de la búsqueda o el filtro de estado.
   const kpiStats = useMemo(() => {
-    const withRate = filteredEmployees.filter(
-      (employee) => employee.hourlyRate !== null && employee.hourlyRate !== undefined,
-    );
-    const averageRate = withRate.length
-      ? withRate.reduce((total, employee) => total + Number(employee.hourlyRate), 0) /
-        withRate.length
-      : null;
+    const activeCount = filteredEmployees.filter(
+      (employee) => employee.isActive !== false,
+    ).length;
+
+    // Tarifa promedio por hora: promedio simple sobre los empleados visibles que
+    // ya tienen tarifa registrada. Quienes no la tienen no entran en la base,
+    // para que el indicador no se vea inflado por ceros.
+    const rates = filteredEmployees
+      .filter(
+        (employee) => employee.hourlyRate !== null && employee.hourlyRate !== undefined,
+      )
+      .map((employee) => Number(employee.hourlyRate))
+      .filter((rate) => Number.isFinite(rate) && rate >= 0);
+    const averageRate =
+      rates.length > 0 ? rates.reduce((total, rate) => total + rate, 0) / rates.length : null;
+
     const totalVacationDays = filteredEmployees.reduce(
       (total, employee) => total + Number(employee.vacationDays ?? 0),
       0,
     );
 
     const roster = allEmployees.length > 0 ? allEmployees : filteredEmployees;
-    const rosterWithRate = roster.filter(
-      (employee) => employee.hourlyRate !== null && employee.hourlyRate !== undefined,
-    );
-    const licenseAlerts = roster.filter((employee) => {
+    let expiringLicenses = 0;
+    let expiredLicenses = 0;
+    roster.forEach((employee) => {
       const alert = licenseAlertByEmployee.get(employee.id);
-      return alert === 'vencida' || alert === 'por_vencer';
-    }).length;
+      if (alert === 'por_vencer') expiringLicenses += 1;
+      else if (alert === 'vencida') expiredLicenses += 1;
+    });
 
     return {
       total: filteredEmployees.length,
+      activeCount,
       averageRate,
+      ratesCount: rates.length,
       totalVacationDays,
-      withoutRate: roster.length - rosterWithRate.length,
-      licenseAlerts,
+      expiringLicenses,
+      expiredLicenses,
+      licenseAlerts: expiringLicenses + expiredLicenses,
     };
   }, [filteredEmployees, allEmployees, licenseAlertByEmployee]);
 
@@ -717,99 +464,22 @@ const EmployeesPage: React.FC = () => {
   const columns = useMemo<GridColDef<Employee>[]>(
     () => [
       {
-        field: 'firstName',
+        field: 'nombre',
         headerName: 'Nombre',
         flex: 1.6,
-        minWidth: isSmallScreen ? 150 : 260,
+        // El field es propio de la vista: ordena por el nombre completo.
+        valueGetter: (_value, row) =>
+          `${(row as Employee).firstName} ${(row as Employee).lastName}`.trim(),
+        // Avatar + badge take ~70px: keep room for a readable name on phones.
+        minWidth: isSmallScreen ? 210 : 260,
         sortable: true,
         renderCell: (params) => {
           const rowId = Number(params.id);
-          const isEditing = editRowId === rowId;
           const rowData = params.row as Employee;
-          const firstName = isEditing
-            ? String(editFields.firstName || '')
-            : String(rowData.firstName || '');
-          const lastName = isEditing
-            ? String(editFields.lastName || '')
-            : String(rowData.lastName || '');
+          const firstName = String(rowData.firstName || '');
+          const lastName = String(rowData.lastName || '');
           const fullName = `${firstName} ${lastName}`.trim() || 'Nombre Completo';
-          const canPickAvatar = hasEditPermissions || isEditing;
-
-          if (isEditing) {
-            return (
-              <Box
-                sx={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: 1.5,
-                  py: 0.5,
-                  width: '100%',
-                  minWidth: 0,
-                }}
-                onMouseDown={(e) => e.stopPropagation()}
-              >
-                {/* Avatar with edit-on-hover (only while editing) — opens the picker modal */}
-                <Box
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    handleOpenAvatarDialog(rowData);
-                  }}
-                  sx={{
-                    position: 'relative',
-                    width: 32,
-                    height: 32,
-                    borderRadius: '50%',
-                    flexShrink: 0,
-                    cursor: 'pointer',
-                    '&:hover .avatar-edit-overlay': { opacity: 1 },
-                  }}
-                >
-                  <EmployeeAvatar
-                    employee={{ id: rowId, firstName, lastName, avatar: rowData.avatar }}
-                    size={32}
-                  />
-                  <Box
-                    className="avatar-edit-overlay"
-                    sx={{
-                      position: 'absolute',
-                      inset: 0,
-                      borderRadius: '50%',
-                      backgroundColor: 'rgba(0,0,0,0.55)',
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      opacity: 0,
-                      transition: 'opacity 0.2s ease',
-                    }}
-                  >
-                    <Pencil size={12} color="#fff" />
-                  </Box>
-                </Box>
-                <Box sx={{ display: 'flex', gap: 0.5, flex: 1, minWidth: 0 }}>
-                  <TextField
-                    value={String(editFields.firstName || '')}
-                    onChange={(e) =>
-                      setEditFields((prev) => ({ ...prev, firstName: e.target.value }))
-                    }
-                    placeholder="Nombre"
-                    variant="standard"
-                    size="small"
-                    sx={inputSx}
-                  />
-                  <TextField
-                    value={String(editFields.lastName || '')}
-                    onChange={(e) =>
-                      setEditFields((prev) => ({ ...prev, lastName: e.target.value }))
-                    }
-                    placeholder="Apellido"
-                    variant="standard"
-                    size="small"
-                    sx={inputSx}
-                  />
-                </Box>
-              </Box>
-            );
-          }
+          const canPickAvatar = hasEditPermissions;
 
           const missingProfileFields = getMissingProfileFields(rowData);
 
@@ -893,9 +563,7 @@ const EmployeesPage: React.FC = () => {
                   transition: 'background-color 0.18s ease, box-shadow 0.18s ease',
                   '&:hover': {
                     backgroundColor:
-                      theme.palette.mode === 'dark'
-                        ? 'rgba(255,255,255,0.06)'
-                        : 'rgba(0,0,0,0.04)',
+                      theme.tokens.colors.hover,
                   },
                   '&:focus-visible': {
                     boxShadow: `0 0 0 2px ${theme.palette.primary.main}`,
@@ -937,14 +605,54 @@ const EmployeesPage: React.FC = () => {
                     title={`Perfil incompleto: falta ${missingProfileFields.join(' y ')}`}
                   >
                     <Box component="span" sx={incompleteBadgeStyles(theme)}>
-                      <AlertTriangle size={12} strokeWidth={2.4} />
+                      <IconAlertTriangle size={12} stroke={2.4} />
                     </Box>
                   </PremiumTooltip>
                 )}
                 <Box component="span" className="employee-detail-chevron">
-                  <ChevronRight size={16} strokeWidth={2.2} />
+                  <IconChevronRight size={16} stroke={2.2} />
                 </Box>
               </Box>
+            </Box>
+          );
+        },
+      },
+      {
+        field: 'puesto',
+        headerName: 'Puesto',
+        flex: 1.1,
+        valueGetter: (_value, row) => (row as Employee).position ?? '',
+        minWidth: isSmallScreen ? 120 : 150,
+        sortable: true,
+        renderCell: (params) => {
+          const position = (params.row as Employee).position;
+          if (!position) {
+            return (
+              <Typography
+                component="span"
+                sx={{ fontSize: '0.85rem', color: 'text.disabled', fontStyle: 'italic' }}
+              >
+                Sin puesto
+              </Typography>
+            );
+          }
+          return (
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, width: '100%', minWidth: 0 }}>
+              <IconBriefcase size={14} stroke={1.5} style={{ opacity: 0.4, flexShrink: 0 }} />
+              <Typography
+                component="span"
+                sx={{
+                  fontSize: '0.85rem',
+                  color: 'text.secondary',
+                  whiteSpace: 'nowrap',
+                  overflow: 'hidden',
+                  textOverflow: 'ellipsis',
+                  minWidth: 0,
+                  lineHeight: 1.4,
+                }}
+              >
+                {position}
+              </Typography>
             </Box>
           );
         },
@@ -956,46 +664,15 @@ const EmployeesPage: React.FC = () => {
         minWidth: isSmallScreen ? 140 : 220,
         sortable: true,
         renderCell: (params) => {
-          const rowId = Number(params.id);
-          const isEditing = editRowId === rowId;
           const rowData = params.row as Employee;
-          const email = isEditing ? String(editFields.email || '') : String(rowData.email || '');
-
-          if (isEditing) {
-            return (
-              <Box
-                sx={{ display: 'flex', alignItems: 'center', gap: 1, width: '100%', minWidth: 0 }}
-                onMouseDown={(e) => e.stopPropagation()}
-              >
-                <Mail size={14} strokeWidth={1.5} style={{ opacity: 0.4, flexShrink: 0 }} />
-                <TextField
-                  value={String(editFields.email || '')}
-                  onChange={(e) => setEditFields((prev) => ({ ...prev, email: e.target.value }))}
-                  variant="standard"
-                  fullWidth
-                  sx={{
-                    '& .MuiInputBase-root': {
-                      fontSize: '0.85rem',
-                      '&:before, &:after': { border: 'none' },
-                      '&:hover:not(.Mui-disabled):before': { border: 'none' },
-                    },
-                    '& .MuiInputBase-input': {
-                      padding: '4px 0',
-                      color: 'text.secondary',
-                      '&:focus': { outline: 'none' },
-                    },
-                  }}
-                />
-              </Box>
-            );
-          }
+          const email = String(rowData.email || '');
 
           if (email) {
             return (
               <Box
                 sx={{ display: 'flex', alignItems: 'center', gap: 1, width: '100%', minWidth: 0 }}
               >
-                <Mail size={14} strokeWidth={1.5} style={{ opacity: 0.4, flexShrink: 0 }} />
+                <IconMail size={14} stroke={1.5} style={{ opacity: 0.4, flexShrink: 0 }} />
                 <Typography
                   component="a"
                   href={`mailto:${email}`}
@@ -1031,107 +708,150 @@ const EmployeesPage: React.FC = () => {
         },
       },
       {
-        field: 'hourlyRate',
-        headerName: 'Tarifa/hora',
-        width: isSmallScreen ? 125 : 155,
-        minWidth: isSmallScreen ? 125 : 155,
-        sortable: true,
-        align: 'right',
-        headerAlign: 'right',
+        field: 'telefono',
+        headerName: 'Teléfono',
+        width: isSmallScreen ? 125 : 150,
+        minWidth: 125,
+        sortable: false,
+        valueGetter: (value) => maskPhone((value as Employee)?.primaryPhone ?? ''),
         renderCell: (params) => {
-          const rowId = Number(params.id);
-          const isEditing = editRowId === rowId;
-
-          if (isEditing) {
+          const rowData = params.row as Employee;
+          const phone = maskPhone(rowData.primaryPhone ?? '');
+          const secondary = maskPhone(rowData.secondaryPhone ?? '');
+          if (!phone && !secondary) {
             return (
-              <Box
-                sx={{ display: 'flex', alignItems: 'center', gap: 1, width: '100%', minWidth: 0 }}
-                onMouseDown={(e) => e.stopPropagation()}
+              <Typography
+                component="span"
+                sx={{ fontSize: '0.85rem', color: 'text.disabled', fontStyle: 'italic' }}
               >
-                <Wallet size={14} strokeWidth={1.5} style={{ opacity: 0.4, flexShrink: 0 }} />
-                <TextField
-                  value={editFields.hourlyRate}
-                  onChange={(e) =>
-                    setEditFields((prev) => ({ ...prev, hourlyRate: e.target.value }))
-                  }
-                  placeholder="0.00"
-                  variant="standard"
-                  size="small"
-                  type="number"
-                  inputProps={{ min: 0, step: '0.01' }}
-                  fullWidth
-                  sx={numericInputSx}
-                />
-              </Box>
+                Sin teléfono
+              </Typography>
             );
           }
-
-          const rate = (params.row as Employee).hourlyRate;
-          const hasRate = rate !== null && rate !== undefined;
+          return (
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, width: '100%', minWidth: 0 }}>
+              <IconPhone size={14} stroke={1.5} style={{ opacity: 0.4, flexShrink: 0 }} />
+              <Box sx={{ minWidth: 0, display: 'flex', flexDirection: 'column' }}>
+                <Typography
+                  component="span"
+                  sx={{
+                    fontSize: '0.85rem',
+                    color: 'text.secondary',
+                    whiteSpace: 'nowrap',
+                    overflow: 'hidden',
+                    textOverflow: 'ellipsis',
+                    lineHeight: 1.3,
+                  }}
+                >
+                  {phone || secondary}
+                </Typography>
+                {phone && secondary && (
+                  <Typography
+                    component="span"
+                    sx={{ fontSize: '0.7rem', color: 'text.disabled', lineHeight: 1.3 }}
+                  >
+                    {secondary}
+                  </Typography>
+                )}
+              </Box>
+            </Box>
+          );
+        },
+      },
+      {
+        field: 'horasQuincena',
+        // Sin el período, un número suelto en la tabla no dice a qué quincena
+        // pertenece.
+        headerName:
+          currentBiweekNumber && currentBiweekYear
+            ? `Horas quincena (Q${currentBiweekNumber}·${currentBiweekYear})`
+            : 'Horas quincena',
+        width: isSmallScreen ? 120 : 140,
+        minWidth: 120,
+        sortable: false,
+        renderCell: (params) => {
+          const entry = hoursByEmployeeId.get((params.row as Employee).id);
+          if (!entry) {
+            return (
+              <Typography
+                component="span"
+                sx={{ fontSize: '0.85rem', color: 'text.disabled', fontStyle: 'italic' }}
+              >
+                Sin registro
+              </Typography>
+            );
+          }
           return (
             <Box
               sx={{
                 display: 'flex',
                 alignItems: 'center',
-                justifyContent: 'flex-end',
                 gap: 1,
                 width: '100%',
                 minWidth: 0,
               }}
             >
-              <Wallet size={14} strokeWidth={1.5} style={{ opacity: 0.4, flexShrink: 0 }} />
+              <IconClockHour4 size={14} stroke={1.5} style={{ opacity: 0.4, flexShrink: 0 }} />
               <Typography
                 component="span"
-                sx={{
-                  fontSize: '0.85rem',
-                  fontWeight: hasRate ? 600 : 400,
-                  fontStyle: hasRate ? 'normal' : 'italic',
-                  color: hasRate ? 'text.primary' : 'text.disabled',
-                  whiteSpace: 'nowrap',
-                }}
+                sx={{ fontSize: '0.85rem', fontWeight: 600, whiteSpace: 'nowrap' }}
               >
-                {hasRate ? `${formatMoney(Number(rate), 'CRC')}/h` : 'Sin tarifa'}
+                {formatHours(entry.totalHours)}
               </Typography>
             </Box>
           );
         },
       },
       {
-        field: 'vacationDays',
+        field: 'horasExtra',
+        headerName: 'Horas extra',
+        width: isSmallScreen ? 115 : 130,
+        minWidth: 115,
+        sortable: false,
+        renderCell: (params) => {
+          const entry = hoursByEmployeeId.get((params.row as Employee).id);
+          const overtime = entry?.overtimeHours ?? 0;
+          return (
+            <Box
+              sx={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: 1,
+                width: '100%',
+                minWidth: 0,
+              }}
+            >
+              <IconHourglassHigh
+                size={14}
+                stroke={1.5}
+                style={{ opacity: overtime > 0 ? 0.6 : 0.25, flexShrink: 0 }}
+              />
+              <Typography
+                component="span"
+                sx={{
+                  fontSize: '0.85rem',
+                  fontWeight: overtime > 0 ? 600 : 400,
+                  fontStyle: overtime > 0 ? 'normal' : 'italic',
+                  color: overtime > 0 ? 'warning.main' : 'text.disabled',
+                  whiteSpace: 'nowrap',
+                }}
+              >
+                {entry ? formatHours(overtime) : '—'}
+              </Typography>
+            </Box>
+          );
+        },
+      },
+      {
+        field: 'vacaciones',
         headerName: 'Vacaciones',
         width: isSmallScreen ? 125 : 145,
         minWidth: isSmallScreen ? 125 : 145,
         sortable: true,
+        valueGetter: (_value, row) => (row as Employee).vacationDays ?? '',
         align: 'right',
         headerAlign: 'right',
         renderCell: (params) => {
-          const rowId = Number(params.id);
-          const isEditing = editRowId === rowId;
-
-          if (isEditing) {
-            return (
-              <Box
-                sx={{ display: 'flex', alignItems: 'center', gap: 1, width: '100%', minWidth: 0 }}
-                onMouseDown={(e) => e.stopPropagation()}
-              >
-                <CalendarDays size={14} strokeWidth={1.5} style={{ opacity: 0.4, flexShrink: 0 }} />
-                <TextField
-                  value={editFields.vacationDays}
-                  onChange={(e) =>
-                    setEditFields((prev) => ({ ...prev, vacationDays: e.target.value }))
-                  }
-                  placeholder="0"
-                  variant="standard"
-                  size="small"
-                  type="number"
-                  inputProps={{ min: 0, step: 1 }}
-                  fullWidth
-                  sx={numericInputSx}
-                />
-              </Box>
-            );
-          }
-
           const days = (params.row as Employee).vacationDays;
           const hasDays = days !== null && days !== undefined;
           return (
@@ -1145,7 +865,7 @@ const EmployeesPage: React.FC = () => {
                 minWidth: 0,
               }}
             >
-              <CalendarDays size={14} strokeWidth={1.5} style={{ opacity: 0.4, flexShrink: 0 }} />
+              <IconCalendarWeek size={14} stroke={1.5} style={{ opacity: 0.4, flexShrink: 0 }} />
               <Typography
                 component="span"
                 sx={{
@@ -1163,233 +883,89 @@ const EmployeesPage: React.FC = () => {
         },
       },
       {
-        field: 'licenses',
-        headerName: 'Licencias',
-        width: isSmallScreen ? 110 : 140,
-        minWidth: 110,
+        field: 'antiguedad',
+        headerName: 'Antigüedad',
+        // Con flex, la última columna absorbe el ancho que dejó la columna de
+        // acciones eliminada, así la tabla siempre llega al borde derecho y no
+        // queda un hueco vacío al final.
+        flex: 1,
+        minWidth: isSmallScreen ? 130 : 160,
         sortable: false,
+        valueGetter: (value, row) => formatTenure((row as Employee).contractStartDate),
         renderCell: (params) => {
-          const alert = licenseAlertByEmployee.get((params.row as Employee).id);
-          if (!alert) {
+          const rowData = params.row as Employee;
+          const tenure = formatTenure(rowData.contractStartDate);
+          if (!tenure) {
             return (
-              <Typography component="span" sx={{ fontSize: '0.85rem', color: 'text.disabled' }}>
-                —
+              <Typography
+                component="span"
+                sx={{ fontSize: '0.85rem', color: 'text.disabled', fontStyle: 'italic' }}
+              >
+                Sin ingreso
               </Typography>
             );
           }
-          const config = {
-            vencida: { label: 'Vencida', color: 'error' as const },
-            por_vencer: { label: 'Por vencer', color: 'warning' as const },
-            vigente: { label: 'Vigente', color: 'success' as const },
-          };
-          const { label, color } = config[alert];
           return (
-            <Chip
-              size="small"
-              label={label}
-              color={color}
-              variant={alert === 'vigente' ? 'outlined' : 'filled'}
-            />
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, width: '100%', minWidth: 0 }}>
+              <IconUsers size={14} stroke={1.5} style={{ opacity: 0.4, flexShrink: 0 }} />
+              <Typography
+                component="span"
+                sx={{
+                  fontSize: '0.85rem',
+                  color: 'text.secondary',
+                  whiteSpace: 'nowrap',
+                  lineHeight: 1.4,
+                }}
+              >
+                {tenure}
+              </Typography>
+            </Box>
           );
         },
-      },
-      {
-        field: 'createdAt',
-        headerName: 'Registro',
-        width: isSmallScreen ? 130 : 150,
-        minWidth: isSmallScreen ? 130 : 150,
-        sortable: true,
-        hide: isSmallScreen,
-        renderCell: (params) => {
-          const value = (params.row as Employee).createdAt;
-          return (
-            <Typography
-              component="span"
-              sx={{
-                fontSize: '0.85rem',
-                color: value ? 'text.secondary' : 'text.disabled',
-                fontStyle: value ? 'normal' : 'italic',
-                whiteSpace: 'nowrap',
-              }}
-            >
-              {value ? format(new Date(value), 'dd/MM/yyyy', { locale: es }) : '—'}
-            </Typography>
-          );
-        },
-      },
-      {
-        field: 'actions',
-        headerName: '',
-        sortable: false,
-        width: isSmallScreen ? 64 : 120,
-        minWidth: isSmallScreen ? 64 : 120,
-        align: 'right',
-        headerAlign: 'right',
-        renderCell: (params) => (
-          <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end', gap: 1 }}>
-            {renderActionButtons({
-              row: params.row as Employee,
-              editRowId,
-              getRowId: (row) => row.id,
-              currentUser: currentUser || undefined,
-              hasEditPermissions,
-              hasDeletePermissions,
-              isExpanded: false,
-              handleEditClick: handleEdit,
-              handleSaveClick: handleUpdate,
-              handleCancelClick: handleCancel,
-              handleOpenDeleteDialog,
-              isSaveDisabled: !isEditFormValid,
-              isSmallScreen,
-              theme,
-            })}
-          </Box>
-        ),
       },
     ],
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [
-      editRowId,
-      editFields,
-      isEditFormValid,
       isSmallScreen,
       theme,
-      currentUser,
       hasEditPermissions,
-      hasDeletePermissions,
-      handleEdit,
-      handleUpdate,
-      handleCancel,
-      handleOpenDeleteDialog,
       handleOpenAvatarDialog,
       licenseAlertByEmployee,
+      hoursByEmployeeId,
     ]
   );
 
+  const canExport =
+    userPermissions.includes(PERMISSIONS.EXPORT_EXCEL_EMPLOYEES) &&
+    userPermissions.includes(PERMISSIONS.EXPORT_PDF_EMPLOYEES);
+
   return (
-    <Box
-      className="scrollable-content"
-      sx={{
-        height: '100%',
-        display: 'flex',
-        flexDirection: 'column',
-        overflow: 'hidden',
-        pb: 0,
-        pt: 0,
-        px: 0,
-      }}
-    >
-      {/* Premium Card with Header and Grid */}
-      <Paper
-        elevation={0}
-        sx={{
-          borderRadius: '16px',
-          border: '1px solid rgba(0,0,0,0.08)',
-          boxShadow: '0 4px 24px rgba(0,0,0,0.08), 0 1px 2px rgba(0,0,0,0.04)',
-          overflow: 'hidden',
-          flex: 1,
-          display: 'flex',
-          flexDirection: 'column',
-          mx: { xs: 1, sm: 1.5, md: 2 },
-          mb: 3,
-          mt: 0,
-        }}
-      >
-        {/* Header Section */}
-        <Box
-          sx={{
-            px: { xs: 2, sm: 2.5 },
-            py: { xs: 1.5, sm: 2 },
-            backgroundColor: theme.palette.background.paper,
-            color: theme.palette.text.primary,
-            flexShrink: 0,
-            borderBottom: `1px solid ${theme.palette.mode === 'dark' ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.06)'}`,
-          }}
-        >
-          <Box display="flex" justifyContent="space-between" alignItems="center" mb={1.5}>
-            <Box display="flex" alignItems="center" gap={1.5}>
-              <Box
-                sx={{
-                  color: theme.palette.primary.main,
-                  display: 'flex',
-                  alignItems: 'center',
-                }}
-              >
-                <UsersRound size={20} strokeWidth={1.5} />
-              </Box>
-              <Box>
-                <Typography
-                  variant={isSmallScreen ? 'h6' : 'h5'}
-                  sx={{
-                    fontWeight: 700,
-                    fontSize: { xs: '1rem', sm: '1.15rem' },
-                    color: theme.palette.text.primary,
-                    letterSpacing: '-0.02em',
-                    lineHeight: 1.2,
-                  }}
-                >
-                  {isSmallScreen ? PAGE_TITLE.EMPLOYEES_SIMPLIFIED : PAGE_TITLE.EMPLOYEES}
-                </Typography>
-                <Typography
-                  variant="caption"
-                  sx={{
-                    color: theme.palette.text.secondary,
-                    fontSize: '0.7rem',
-                    letterSpacing: '0.02em',
-                  }}
-                >
-                  {filteredEmployees.length} empleados registrados
-                </Typography>
-              </Box>
-            </Box>
-
-            {/* Export Speed Dial */}
-            {userPermissions.includes(PERMISSIONS.EXPORT_EXCEL_EMPLOYEES) &&
-              userPermissions.includes(PERMISSIONS.EXPORT_PDF_EMPLOYEES) && (
-                <Box sx={{ ...exportSpeedDialBoxStyles, minHeight: 'auto' }}>
-                  {filteredEmployees.length > 0 && (
-                    <SpeedDialComponent
-                      actions={exportOptions}
-                      mainIcon={<Download size={18} strokeWidth={1.5} />}
-                      openIcon={<X size={18} strokeWidth={1.5} />}
-                      direction="left"
-                    />
-                  )}
-                </Box>
-              )}
-          </Box>
-
-          {/* Controls Row */}
-          <Box
-            display="flex"
-            flexDirection={{ xs: 'column', sm: 'row' }}
-            alignItems={{ xs: 'stretch', sm: 'center' }}
-            justifyContent="space-between"
-            gap={2}
-          >
-            {/* Search + estado */}
-            <Box
-              sx={{
-                flex: 1,
-                display: 'flex',
-                alignItems: 'center',
-                gap: 1.5,
-                flexWrap: 'wrap',
-              }}
-            >
-              <Box sx={{ flex: 1, maxWidth: { sm: '320px' }, minWidth: { xs: '100%', sm: 0 } }}>
-                {filteredEmployees && (
-                  <SearchBarComponent
-                    placeholder={MANAGEMENT.EMPLOYEES_PAGE.SEARCH_PLACEHOLDER}
-                    value={search}
-                    onChange={handleFilterChange}
-                    fullWidth
-                    isSearching={isLoadingEmployees && search !== ''}
-                  />
-                )}
+    <PageContainer>
+      <PageCard>
+        <PageHeader
+          icon={<NavIcon label={APPBAR_MENU.EMPLOYEES} />}
+          title={PAGE_TITLE.EMPLOYEES}
+          mobileTitle={PAGE_TITLE.EMPLOYEES_SIMPLIFIED}
+          subtitle={`${filteredEmployees.length} empleados`}
+          actions={
+            canExport ? (
+              <ExportMenu actions={exportOptions} disabled={filteredEmployees.length === 0} />
+            ) : undefined
+          }
+          toolbar={
+            <>
+              <Box sx={{ flex: 1, maxWidth: { sm: 320 }, minWidth: { xs: '100%', sm: 200 } }}>
+                <SearchBarComponent
+                  placeholder={MANAGEMENT.EMPLOYEES_PAGE.SEARCH_PLACEHOLDER}
+                  value={search}
+                  onChange={handleFilterChange}
+                  fullWidth
+                  isSearching={isLoadingEmployees && search !== ''}
+                />
               </Box>
               <SegmentedToggle
                 size="medium"
+                ariaLabel="Filtrar empleados por estado"
                 options={[
                   { value: 'all', label: 'Todos', count: filterCounts.all },
                   { value: 'active', label: 'Activos', count: filterCounts.active },
@@ -1398,140 +974,83 @@ const EmployeesPage: React.FC = () => {
                 value={statusFilter}
                 onChange={setStatusFilter}
               />
-            </Box>
+            </>
+          }
+          toolbarEnd={
+            userPermissions.includes(PERMISSIONS.CREATE_EMPLOYEES) ? (
+              <Button
+                variant="contained"
+                startIcon={<IconPlus size={18} />}
+                onClick={handleOpenAddModal}
+              >
+                {MANAGEMENT.EMPLOYEES_PAGE.ADD}
+              </Button>
+            ) : undefined
+          }
+        />
 
-            {/* Add Button */}
-            {userPermissions.includes(PERMISSIONS.CREATE_EMPLOYEES) && (
-              <Box sx={{ display: { xs: 'none', sm: 'flex' }, gap: 1 }}>
-                <Button
-                  variant="outlined"
-                  onClick={handleOpenAddModal}
-                >
-                  {MANAGEMENT.ADD}
-                </Button>
-              </Box>
-            )}
-          </Box>
-        </Box>
-
-        {/* Summary metrics (KPI band) */}
+        {/* Summary metrics */}
         {showKpiBand && (
-          <Box sx={kpiRowStyles(theme)}>
-            <KpiCard
-              icon={<UsersRound size={17} strokeWidth={1.75} />}
+          <StatGrid sx={{ px: { xs: 2, sm: 2.5 }, py: { xs: 1.5, sm: 2 }, borderBottom: theme.tokens.borders.hairline }}>
+            {/* Sin la fila de detalle: las tarjetas quedan más bajas y limpias. */}
+            <StatCard
+              icon={<IconUsers />}
               label="Empleados"
-              value={String(kpiStats.total)}
-              tone="primary"
+              value={kpiStats.total}
+              tone="accent"
             />
-            <KpiCard
-              icon={<Wallet size={17} strokeWidth={1.75} />}
+            <StatCard
+              icon={<IconCash />}
               label="Tarifa promedio"
               value={
-                kpiStats.averageRate !== null
+                kpiStats.averageRate != null
                   ? `${formatMoney(kpiStats.averageRate, 'CRC')}/h`
                   : '—'
               }
             />
-            <KpiCard
-              icon={<CalendarDays size={17} strokeWidth={1.75} />}
-              label="Días de vacaciones"
+            <StatCard
+              icon={<IconCalendarWeek />}
+              label="Vacaciones"
               value={`${kpiStats.totalVacationDays} días`}
             />
-            <KpiCard
-              icon={<AlertTriangle size={17} strokeWidth={1.75} />}
-              label="Sin tarifa"
-              value={String(kpiStats.withoutRate)}
-              tone={kpiStats.withoutRate > 0 ? 'warning' : 'default'}
+            <StatCard
+              icon={<IconShieldExclamation />}
+              label="Licencias"
+              value={kpiStats.licenseAlerts}
+              tone={kpiStats.licenseAlerts > 0 ? 'danger' : 'default'}
             />
-            <KpiCard
-              icon={<ShieldAlert size={17} strokeWidth={1.75} />}
-              label="Licencias por vencer"
-              value={String(kpiStats.licenseAlerts)}
-              tone={kpiStats.licenseAlerts > 0 ? 'warning' : 'default'}
-            />
-          </Box>
+          </StatGrid>
         )}
 
-        {/* Mobile Add Button */}
-        {userPermissions.includes(PERMISSIONS.CREATE_EMPLOYEES) && (
-          <Box
-            sx={{
-              display: { xs: 'flex', sm: 'none' },
-              p: 2,
-              borderTop: `1px solid ${theme.palette.mode === 'dark' ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.08)'}`,
-            }}
-          >
-            <Button
-              variant="outlined"
-              fullWidth
-              onClick={handleOpenAddModal}
-            >
-              {MANAGEMENT.ADD}
-            </Button>
-          </Box>
-        )}
-
-        {/* Content Section */}
-        <Box
-          sx={{
-            flex: 1,
-            minHeight: 0,
-            display: 'flex',
-            flexDirection: 'column',
-            overflow: 'hidden',
-          }}
-        >
-          {isLoadingEmployees ? (
-            <Box sx={loadingBoxStyles}>
-              <Backdrop sx={backdropStyles(theme)} open={isLoadingEmployees}>
-                <CircularProgress />
-              </Backdrop>
-            </Box>
+        <PageBody>
+          {isLoadingEmployees && filteredEmployees.length === 0 ? (
+            <LoadingState label="Cargando empleados…" />
+          ) : filteredEmployees.length > 0 ? (
+            <StickyDataGridComponent<Employee>
+              rows={filteredEmployees}
+              columns={columns}
+              getRowId={getRowId}
+            />
           ) : (
-            <>
-              {filteredEmployees.length > 0 ? (
-                <StickyDataGridComponent<Employee>
-                  rows={filteredEmployees}
-                  columns={columns}
-                  getRowId={getRowId}
-                  disableRowVirtualization={editRowId !== null}
-                />
-              ) : (
-                <Box sx={noEmployeesBoxStyles}>
-                  <Search
-                    size={48}
-                    style={{ color: theme.palette.text.disabled, ...noEmployeesIconStyles }}
-                  />
-                  <Typography variant="h6" color="textSecondary">
-                    {MANAGEMENT.EMPLOYEES_PAGE.NO_EMPLOYEES}
-                  </Typography>
-                </Box>
-              )}
-            </>
+            <EmptyState
+              icon={<IconUsers />}
+              title={MANAGEMENT.EMPLOYEES_PAGE.NO_EMPLOYEES}
+              description={
+                search || statusFilter !== 'all'
+                  ? 'Prueba con otro término de búsqueda o cambia el filtro.'
+                  : undefined
+              }
+            />
           )}
-        </Box>
-      </Paper>
-      <DialogComponent
-        open={openDeleteDialog}
-        onClose={handleCloseDeleteDialog}
-        onConfirm={handleDelete}
-        title={MANAGEMENT.EMPLOYEES_PAGE.DIALOG_DELETE_TITLE}
-        message={MANAGEMENT.EMPLOYEES_PAGE.DIALOG_DELETE_MESSAGE}
-        type="delete"
-        confirmText={MANAGEMENT.EMPLOYEES_PAGE.DIALOG_DELETE_CONFIRM}
-        cancelText={MANAGEMENT.EMPLOYEES_PAGE.DIALOG_DELETE_CANCEL}
-        loading={isDeletingEmployee}
-        paperSx={deleteDialogPaperSx ?? {}}
-        icon={<Trash2 size={24} color="red" />}
-      />
-
+        </PageBody>
+      </PageCard>
       <DialogComponent
         open={openAddModal}
         onClose={handleCloseAddModal}
         title={MANAGEMENT.EMPLOYEES_PAGE.DIALOG_ADD_TITLE}
         hideActions
         paperSx={addDialogPaperSx ?? {}}
-        icon={<PlusCircle size={24} color="blue" />}
+        icon={<IconCirclePlus size={24} color="blue" />}
       >
         <AddEmployeeForm
           onSubmit={handleCreate}
@@ -1569,7 +1088,7 @@ const EmployeesPage: React.FC = () => {
                 boxShadow: '0 4px 12px rgba(0,0,0,0.08)',
               }}
             >
-              <Camera size={18} color={theme.palette.primary.contrastText} />
+              <IconCamera size={18} color={theme.palette.primary.contrastText} />
             </Box>
             <Typography
               variant="h6"
@@ -1610,8 +1129,8 @@ const EmployeesPage: React.FC = () => {
                 alignItems: 'center',
                 justifyContent: 'center',
                 backgroundColor:
-                  theme.palette.mode === 'dark' ? 'rgba(255,255,255,0.03)' : 'rgba(0,0,0,0.03)',
-                border: `3px solid ${theme.palette.mode === 'dark' ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.06)'}`,
+                  theme.tokens.colors.hoverSoft,
+                border: `3px solid ${theme.tokens.colors.border}`,
                 transition: 'all 0.3s ease',
                 boxShadow:
                   avatarPreview || getDialogAvatarUrl()
@@ -1672,7 +1191,7 @@ const EmployeesPage: React.FC = () => {
               onClick={() => avatarFileInputRef.current?.click()}
               sx={{
                 width: '100%',
-                border: `2px dashed ${theme.palette.mode === 'dark' ? 'rgba(255,255,255,0.12)' : 'rgba(0,0,0,0.12)'}`,
+                border: `2px dashed ${theme.tokens.colors.border}`,
                 borderRadius: '14px',
                 p: 3,
                 display: 'flex',
@@ -1682,26 +1201,22 @@ const EmployeesPage: React.FC = () => {
                 cursor: 'pointer',
                 transition: 'all 0.2s cubic-bezier(0.4, 0, 0.2, 1)',
                 backgroundColor: selectedFile
-                  ? theme.palette.mode === 'dark'
-                    ? 'rgba(255,255,255,0.04)'
-                    : 'rgba(0,0,0,0.02)'
+                  ? theme.tokens.colors.hover
                   : 'transparent',
                 borderColor: selectedFile
                   ? theme.palette.primary.main
-                  : theme.palette.mode === 'dark'
-                    ? 'rgba(255,255,255,0.12)'
-                    : 'rgba(0,0,0,0.12)',
+                  : theme.tokens.colors.hoverStrong,
                 '&:hover': {
                   borderColor: theme.palette.primary.main,
                   backgroundColor:
-                    theme.palette.mode === 'dark' ? 'rgba(255,255,255,0.04)' : 'rgba(0,0,0,0.02)',
+                    theme.tokens.colors.hover,
                 },
               }}
             >
               <Box
                 sx={{
                   backgroundColor:
-                    theme.palette.mode === 'dark' ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.04)',
+                    theme.tokens.colors.hover,
                   borderRadius: '10px',
                   p: 1.25,
                   display: 'flex',
@@ -1710,7 +1225,7 @@ const EmployeesPage: React.FC = () => {
                   transition: 'all 0.2s ease',
                 }}
               >
-                <Camera size={22} color={theme.palette.text.secondary} />
+                <IconCamera size={22} color={theme.palette.text.secondary} />
               </Box>
               {selectedFile ? (
                 <Typography
@@ -1781,7 +1296,7 @@ const EmployeesPage: React.FC = () => {
               onClick={handleAvatarDelete}
               disabled={isUploadingAvatar}
               startIcon={
-                isUploadingAvatar ? <Loader2 size={16} className="animate-spin" /> : <X size={16} />
+                isUploadingAvatar ? <IconLoader2 size={16} className="animate-spin" /> : <IconX size={16} />
               }
               sx={{
                 order: { xs: 2, sm: 1 },
@@ -1813,9 +1328,9 @@ const EmployeesPage: React.FC = () => {
               sx={{ minWidth: 120 }}
               startIcon={
                 isUploadingAvatar ? (
-                  <Loader2 size={16} className="animate-spin" />
+                  <IconLoader2 size={16} className="animate-spin" />
                 ) : selectedFile ? (
-                  <Camera size={16} />
+                  <IconCamera size={16} />
                 ) : undefined
               }
             >
@@ -1824,7 +1339,7 @@ const EmployeesPage: React.FC = () => {
           </Box>
         </DialogActions>
       </Dialog>
-    </Box>
+    </PageContainer>
   );
 };
 

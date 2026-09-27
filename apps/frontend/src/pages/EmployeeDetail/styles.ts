@@ -1,88 +1,18 @@
 import { SxProps, Theme } from "@mui/material";
 
-// Soft surfaces/borders that stay legible in both light and dark mode.
-const softBorder = (theme: Theme) =>
-  theme.palette.mode === "dark" ? "rgba(255,255,255,0.08)" : "rgba(0,0,0,0.08)";
+// Surfaces, borders and shadows come from the theme tokens (theme/tokens.ts),
+// the same ones every page uses.
+const softBorder = (theme: Theme) => theme.tokens.colors.border;
 
-const hairline = (theme: Theme) =>
-  theme.palette.mode === "dark" ? "rgba(255,255,255,0.06)" : "rgba(0,0,0,0.06)";
+export const hairline = (theme: Theme) => theme.tokens.colors.borderHairline;
 
-const hoverTint = (theme: Theme) =>
-  theme.palette.mode === "dark" ? "rgba(255,255,255,0.06)" : "rgba(0,0,0,0.04)";
+export const panelShadow = (theme: Theme) => `0 1px 2px ${theme.tokens.shadows.card}`;
 
-// Ultra-subtle overlay scrollbar: 6px wide, near-invisible thumb that only
-// gains a bit of contrast while hovering the scroll area.
-const subtleScrollbar = (theme: Theme) => {
-  const thumb =
-    theme.palette.mode === "dark" ? "rgba(255,255,255,0.10)" : "rgba(0,0,0,0.10)";
-  const thumbHover =
-    theme.palette.mode === "dark" ? "rgba(255,255,255,0.20)" : "rgba(0,0,0,0.20)";
-
-  return {
-    scrollbarWidth: "thin" as const,
-    scrollbarColor: `${thumb} transparent`,
-    "&::-webkit-scrollbar": {
-      width: 6,
-      height: 6,
-    },
-    "&::-webkit-scrollbar-track": {
-      backgroundColor: "transparent",
-    },
-    "&::-webkit-scrollbar-thumb": {
-      backgroundColor: thumb,
-      borderRadius: 3,
-      "&:hover": { backgroundColor: thumbHover },
-    },
-    "&::-webkit-scrollbar-corner": {
-      backgroundColor: "transparent",
-    },
-  };
-};
-
-export const detailBoxStyles: SxProps<Theme> = {
-  height: "100%",
-  display: "flex",
-  flexDirection: "column",
-  minHeight: 0,
-  overflow: "hidden",
-  px: { xs: 1, sm: 1.5, md: 2 },
-  pt: 0,
-  pb: 0,
-};
-
-// Main surface — same premium treatment as the employees table card.
-export const premiumCardStyles = (theme: Theme): SxProps<Theme> => ({
-  borderRadius: "16px",
-  border: `1px solid ${softBorder(theme)}`,
-  boxShadow:
-    theme.palette.mode === "dark"
-      ? "0 4px 24px rgba(0,0,0,0.45), 0 1px 2px rgba(0,0,0,0.3)"
-      : "0 4px 24px rgba(0,0,0,0.08), 0 1px 2px rgba(0,0,0,0.04)",
-  overflow: "hidden",
-  flex: 1,
-  minHeight: 0,
-  display: "flex",
-  flexDirection: "column",
-  // The theme adds a 24px bottom margin to every Paper; the page handles its
-  // own spacing so the card fills the available height instead.
-  mb: 3,
-});
-
-export const centeredCardContentStyles: SxProps<Theme> = {
-  flex: 1,
-  display: "flex",
-  flexDirection: "column",
-  alignItems: "center",
-  justifyContent: "center",
-  gap: 2,
-  px: 3,
-  py: 8,
-  textAlign: "center",
-};
+const hoverTint = (theme: Theme) => theme.tokens.colors.hover;
 
 export const detailHeaderStyles = (theme: Theme): SxProps<Theme> => ({
-  px: { xs: 2, sm: 2.5 },
-  pt: { xs: 1.5, sm: 1.5 },
+  px: { xs: 2.5, sm: 3 },
+  pt: { xs: 2, sm: 2.5 },
   pb: 0,
   flexShrink: 0,
   backgroundColor: theme.palette.background.paper,
@@ -110,21 +40,6 @@ export const identityBoxStyles: SxProps<Theme> = {
   mt: { xs: 0.5, sm: 0.75 },
   minWidth: 0,
 };
-
-// Gradient ring around the avatar (premium touch, replaces the flat border).
-export const avatarRingStyles = (theme: Theme): SxProps<Theme> => ({
-  display: "flex",
-  alignItems: "center",
-  justifyContent: "center",
-  p: "3px",
-  borderRadius: "50%",
-  flexShrink: 0,
-  background: `linear-gradient(135deg, ${theme.palette.primary.main}, ${theme.palette.primary.light})`,
-  boxShadow:
-    theme.palette.mode === "dark"
-      ? "0 4px 16px rgba(0,0,0,0.4)"
-      : "0 4px 16px rgba(0,0,0,0.12)",
-});
 
 export const nameStyles: SxProps<Theme> = {
   fontWeight: 700,
@@ -166,112 +81,167 @@ export const metaChipStyles = (theme: Theme): SxProps<Theme> => ({
   fontSize: "0.72rem",
   fontWeight: 600,
   letterSpacing: "0.01em",
-  color: theme.palette.text.secondary,
-  backgroundColor:
-    theme.palette.mode === "dark" ? "rgba(255,255,255,0.05)" : "rgba(0,0,0,0.035)",
-  border: `1px solid ${hairline(theme)}`,
+  color: theme.tokens.colors.textMuted,
+  backgroundColor: theme.tokens.colors.hoverSoft,
+  border: theme.tokens.borders.paper,
   whiteSpace: "nowrap",
 });
 
-// Matches the tab bar used elsewhere in the app (44px tall, 3px indicator).
-export const tabsBoxStyles: SxProps<Theme> = {
-  mt: 1.5,
-  minHeight: 44,
-  "& .MuiTabs-root": { minHeight: 44 },
-  "& .MuiTab-root": {
-    textTransform: "none",
-    fontWeight: 600,
-    fontSize: "0.85rem",
-    letterSpacing: "-0.01em",
-    minHeight: 44,
-    px: { xs: 1.5, sm: 2 },
-  },
-  "& .MuiTabs-indicator": {
-    height: 3,
-    borderRadius: "3px 3px 0 0",
-  },
-};
+// Tab bar: underline indicator and muted → strong labels (theme MuiTabs/MuiTab).
+export const tabsBoxStyles = (theme: Theme): SxProps<Theme> => ({
+  mt: 2,
+  mx: { xs: -1, sm: -1.5 },
+  "& .MuiTab-root": { px: { xs: 1, sm: 1.5 } },
+  "& .MuiTab-root .MuiTab-iconWrapper": { color: theme.tokens.colors.textSubtle },
+  "& .MuiTab-root.Mui-selected .MuiTab-iconWrapper": { color: theme.tokens.colors.accent },
+});
 
 export const contentBoxStyles = (theme: Theme): SxProps<Theme> => ({
-  flex: 1,
-  minHeight: 0,
-  overflow: "auto",
-  px: { xs: 2, sm: 2.5 },
-  pt: { xs: 2, sm: 2.5 },
-  pb: 0,
-  ...subtleScrollbar(theme),
+  // Scrolls inside the card on desktop; on phones the whole page scrolls.
+  display: "flex",
+  flexDirection: "column",
+  flex: { md: 1 },
+  minHeight: { md: 0 },
+  overflow: { md: "auto" },
+  px: { xs: 2.5, sm: 3 },
+  pt: { xs: 2.5, sm: 3 },
+  pb: { xs: 2.5, sm: 3 },
 });
 
 // Vertical stack of the cards inside a tab. Spacing is handled by the theme's
 // Paper margin (mb: 3 set on sectionPaperStyles), like in the rest of the app.
+// On md+ the stack takes the height left by the header/tabs so the card marked
+// with `fillSectionPaperStyles` can reach the bottom of the page.
 export const cardStackStyles: SxProps<Theme> = {
   display: "flex",
   flexDirection: "column",
+  flex: { md: 1 },
+  minHeight: { md: 0 },
 };
 
-// Inner cards follow the app-standard surface: same radius, border and soft
-// shadow language as the other pages, with the detail padding on top.
+// Inner cards follow the same panel treatment as Configuraciones: 16px radius,
+// 1px border, paper background and the shared soft shadow.
 export const sectionPaperStyles = (theme: Theme): SxProps<Theme> => ({
   p: { xs: 2, sm: 2.5 },
-  borderRadius: "12px",
+  borderRadius: "14px",
   border: `1px solid ${softBorder(theme)}`,
   backgroundColor: theme.palette.background.paper,
-  boxShadow:
-    theme.palette.mode === "dark"
-      ? "0 1px 2px rgba(0,0,0,0.35)"
-      : "0 1px 2px rgba(0,0,0,0.03)",
-  mb: 3,
+  boxShadow: panelShadow(theme),
+  mb: 2,
+});
+
+// Last card of a tab: same panel treatment, but it stretches to the bottom of
+// the page on md+ and lets its table/list scroll instead of leaving empty space
+// below the last row.
+export const fillSectionPaperStyles = (theme: Theme): SxProps<Theme> => ({
+  ...sectionPaperStyles(theme),
+  display: "flex",
+  flexDirection: "column",
+  flex: { md: 1 },
+  minHeight: { md: 0 },
+  mb: 0,
+});
+
+// ─── Section header (identical to Configuraciones) ───
+// icon (20px, primary) + h6 title, then a short caption description, then a
+// hairline divider. See `SectionHeader` for the composed component.
+export const sectionHeaderStyles: SxProps<Theme> = {
+  mb: 2,
+  flexShrink: 0,
+};
+
+export const sectionHeaderRowStyles: SxProps<Theme> = {
+  display: "flex",
+  alignItems: "flex-start",
+  flexWrap: "wrap",
+  gap: 1.5,
+  mb: { xs: 1.5, md: 2 },
+};
+
+export const sectionHeaderIconStyles = (theme: Theme): SxProps<Theme> => ({
+  flexShrink: 0,
+  width: 32,
+  height: 32,
+  borderRadius: "9px",
+  display: "grid",
+  placeItems: "center",
+  color: theme.tokens.colors.accent,
+  backgroundColor: theme.tokens.colors.accentSoft,
+  "& svg": { width: 16, height: 16 },
 });
 
 export const sectionTitleStyles: SxProps<Theme> = {
   fontWeight: 700,
   fontSize: "1rem",
-  letterSpacing: "-0.01em",
+  letterSpacing: "-0.015em",
+  lineHeight: 1.3,
   color: "text.primary",
-  mb: 2,
 };
 
+export const sectionDescStyles: SxProps<Theme> = {
+  display: "block",
+  mt: 0.25,
+  color: "text.secondary",
+  fontSize: "0.8125rem",
+  lineHeight: 1.4,
+};
+
+export const sectionDividerStyles = (theme: Theme): SxProps<Theme> => ({
+  borderBottom: `1px solid ${hairline(theme)}`,
+  mt: { xs: -0.5, md: -0.5 },
+  mb: { xs: 2, md: 2.5 },
+});
+
+// Empty state of a filling card: it takes the same space the table would take,
+// so the message stays centered in the card instead of leaving the bottom empty.
 export const emptyStateBoxStyles = (theme: Theme): SxProps<Theme> => ({
   display: "flex",
   flexDirection: "column",
   alignItems: "center",
+  justifyContent: "center",
+  flex: { md: 1 },
+  minHeight: { md: 0 },
   gap: 1.5,
   py: 6,
   px: 2,
-  borderRadius: "12px",
+  textAlign: "center",
+  borderRadius: "16px",
   color: "text.secondary",
   border: `1px dashed ${softBorder(theme)}`,
-  backgroundColor:
-    theme.palette.mode === "dark" ? "rgba(255,255,255,0.02)" : "rgba(0,0,0,0.015)",
+  backgroundColor: theme.tokens.colors.surfaceSunken,
 });
 
 // Bounded height so the table header can stay sticky while the rows scroll.
 // Scrollbar is kept ultra subtle so the tables don't feel boxed in.
+// Table area of the filling cards: on md+ it takes the height left by the
+// section header and scrolls; on phones it keeps a fixed maximum height.
 export const tableContainerStyles = (theme: Theme): SxProps<Theme> => ({
+  flex: { md: 1 },
+  minHeight: { md: 0 },
   maxHeight: { xs: 340, sm: 440 },
-  ...subtleScrollbar(theme),
+  overflow: "auto",
+  borderRadius: "10px",
+  border: theme.tokens.borders.paper,
 });
 
 // Opaque background is required by MUI's stickyHeader so rows don't show
 // through while scrolling.
-export const tableHeaderCellStyles: SxProps<Theme> = {
-  fontWeight: 700,
-  fontSize: "0.72rem",
-  textTransform: "uppercase",
-  letterSpacing: "0.05em",
-  color: "text.secondary",
-  backgroundColor: "background.paper",
-  borderBottom: "1px solid",
-  borderColor: "divider",
-  py: 1.25,
-  whiteSpace: "nowrap",
-};
+export const tableHeaderCellStyles = (theme: Theme) => ({
+  fontWeight: 600,
+  fontSize: "0.6875rem",
+  textTransform: "uppercase" as const,
+  letterSpacing: "0.06em",
+  color: theme.tokens.colors.tableHeadText,
+  backgroundColor: theme.tokens.colors.tableHeadBg,
+  borderBottom: theme.tokens.borders.headCell,
+  py: 1,
+  whiteSpace: "nowrap" as const,
+});
 
-export const tableCellStyles: SxProps<Theme> = {
+export const tableCellStyles = (theme: Theme) => ({
   fontSize: "0.875rem",
-  color: "text.primary",
-  py: 1.35,
-  borderBottom: "1px solid",
-  borderColor: "divider",
-  verticalAlign: "middle",
-};
+  color: theme.tokens.colors.textOnSunken,
+  py: 1.25,
+  borderBottom: theme.tokens.borders.hairline,
+  verticalAlign: "middle" as const,
+});

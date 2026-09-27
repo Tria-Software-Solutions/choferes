@@ -1,13 +1,25 @@
 import React, { useEffect, useMemo, useState } from "react";
 import { useDispatch } from "react-redux";
-import { Box, Button, TextField, Typography } from "@mui/material";
-import { CalendarDays, Loader2, Save } from "lucide-react";
+import { Box, Button, Grid, Typography, useMediaQuery, useTheme } from "@mui/material";
+import { IconCalendarWeek, IconCheck, IconFileText, IconLoader2, IconX } from "@tabler/icons-react";
+import { DatePicker } from "@mui/x-date-pickers/DatePicker";
+import { LocalizationProvider } from "@mui/x-date-pickers";
+import { AdapterDateFns } from "@mui/x-date-pickers/AdapterDateFns";
+import { es } from "date-fns/locale";
+import { formatStoredDate, parseStoredDate } from "../../../utils/dates";
 import { Employee } from "../../../models/Employee";
 import { Vacation } from "../../../models/Vacation";
 import { AppDispatch } from "../../../store/store";
 import { createVacation, updateVacation } from "../../../store/slices/vacationSlice";
 import { useAppNotifications } from "../../../components/Snackbar/Snackbar.component";
 import DialogComponent from "../../../components/Dialog/Dialog.component";
+import TextfieldComponent from "../../../components/Textfield/Textfield.component";
+import {
+  actionsBox,
+  actionsInnerBox,
+  cancelButton,
+  submitButton,
+} from "../../Forms/sharedStyles";
 
 interface VacationFormDialogProps {
   open: boolean;
@@ -48,6 +60,8 @@ const VacationFormDialog: React.FC<VacationFormDialogProps> = ({
   onSaved,
 }) => {
   const dispatch = useDispatch<AppDispatch>();
+  const theme = useTheme();
+  const isSmallScreen = useMediaQuery(theme.breakpoints.down("sm"));
   const { showNotification } = useAppNotifications();
 
   const isEditing = Boolean(vacation);
@@ -118,28 +132,39 @@ const VacationFormDialog: React.FC<VacationFormDialogProps> = ({
       hideActions
       paperSx={{ maxWidth: 520 }}
     >
-      <Box sx={{ display: "flex", flexDirection: "column", gap: 2, pt: 1 }}>
-        <Box sx={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 2 }}>
-          <TextField
-            label="Desde"
-            type="date"
-            size="small"
-            value={startDate}
-            onChange={(event) => setStartDate(event.target.value)}
-            InputLabelProps={{ shrink: true }}
-            fullWidth
-          />
-          <TextField
-            label="Hasta"
-            type="date"
-            size="small"
-            value={endDate}
-            onChange={(event) => setEndDate(event.target.value)}
-            InputLabelProps={{ shrink: true }}
-            error={Boolean(dateError)}
-            fullWidth
-          />
-        </Box>
+      <Box sx={{ display: "flex", flexDirection: "column", gap: 2.5, pt: 1 }}>
+        <Grid container spacing={{ xs: 2, sm: 2.5 }}>
+          <Grid item xs={12} sm={6}>
+            <LocalizationProvider dateAdapter={AdapterDateFns} adapterLocale={es}>
+              <DatePicker
+                label="Desde"
+                value={parseStoredDate(startDate)}
+                onChange={(date) => setStartDate(formatStoredDate(date))}
+                format="d MMM yyyy"
+                slots={{ toolbar: () => null }}
+                slotProps={{ textField: { size: "small", fullWidth: true } }}
+              />
+            </LocalizationProvider>
+          </Grid>
+          <Grid item xs={12} sm={6}>
+            <LocalizationProvider dateAdapter={AdapterDateFns} adapterLocale={es}>
+              <DatePicker
+                label="Hasta"
+                value={parseStoredDate(endDate)}
+                onChange={(date) => setEndDate(formatStoredDate(date))}
+                format="d MMM yyyy"
+                slots={{ toolbar: () => null }}
+                slotProps={{
+                  textField: {
+                    size: "small",
+                    fullWidth: true,
+                    error: Boolean(dateError),
+                  },
+                }}
+              />
+            </LocalizationProvider>
+          </Grid>
+        </Grid>
 
         <Box
           sx={{
@@ -149,15 +174,16 @@ const VacationFormDialog: React.FC<VacationFormDialogProps> = ({
             color: dateError ? "error.main" : "text.secondary",
           }}
         >
-          <CalendarDays size={16} />
+          <IconCalendarWeek size={16} />
           <Typography variant="caption">
             {dateError ?? `Días hábiles: ${days}${employee.vacationDays != null ? ` · saldo disponible: ${employee.vacationDays}` : ""}`}
           </Typography>
         </Box>
 
-        <TextField
+        <TextfieldComponent
+          name="reason"
           label="Motivo"
-          size="small"
+          icon={<IconFileText size={20} color={theme.palette.text.secondary} />}
           value={reason}
           onChange={(event) => setReason(event.target.value)}
           multiline
@@ -166,18 +192,29 @@ const VacationFormDialog: React.FC<VacationFormDialogProps> = ({
           fullWidth
         />
 
-        <Box sx={{ display: "flex", justifyContent: "flex-end", gap: 1.5 }}>
-          <Button onClick={onClose} disabled={isSubmitting}>
+        <Box sx={actionsBox(theme)}>
+          <Button
+            variant="text"
+            startIcon={<IconX size={18} />}
+            onClick={onClose}
+            disabled={isSubmitting}
+            fullWidth={isSmallScreen}
+            sx={cancelButton}
+          >
             Cancelar
           </Button>
-          <Button
-            variant="contained"
-            startIcon={isSubmitting ? <Loader2 size={16} /> : <Save size={16} />}
-            onClick={() => void handleSubmit()}
-            disabled={!canSubmit}
-          >
-            {isEditing ? "Guardar" : "Solicitar"}
-          </Button>
+          <Box sx={actionsInnerBox}>
+            <Button
+              variant="text"
+              startIcon={isSubmitting ? <IconLoader2 size={18} /> : <IconCheck size={18} />}
+              onClick={() => void handleSubmit()}
+              disabled={!canSubmit}
+              fullWidth={isSmallScreen}
+              sx={submitButton}
+            >
+              {isEditing ? "Guardar" : "Solicitar"}
+            </Button>
+          </Box>
         </Box>
       </Box>
     </DialogComponent>

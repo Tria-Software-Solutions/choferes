@@ -18,14 +18,10 @@ import { useBiweeklySummaries } from "../../../hooks/useBiweeklySummary";
 import { useMonthlySummaries } from "../../../hooks/useMonthlySummary";
 import SearchBarComponent from "../../../components/SearchBar/SearchBar.component";
 import WeeklyBoard from "../../../components/Board/WeeklyBoard/WeeklyBoard.component";
-import SpeedDialComponent from "../../../components/SpeedDial/SpeedDial.component";
+import ExportMenu from "../../../components/ExportMenu/ExportMenu.component";
 import { es } from "date-fns/locale";
-import { LocalizationProvider } from "@mui/x-date-pickers";
-import { DatePicker } from "@mui/x-date-pickers/DatePicker";
-import { AdapterDateFns } from "@mui/x-date-pickers/AdapterDateFns";
 import {
   addWeeks,
-  addDays,
   differenceInCalendarWeeks,
   endOfWeek,
   startOfWeek,
@@ -33,17 +29,8 @@ import {
 } from "date-fns";
 import {
   Box,
-  Typography,
-  useTheme,
   useMediaQuery,
-  Button,
-  CircularProgress,
-  Backdrop,
-  IconButton,
-  Dialog,
-  DialogContent,
-  DialogActions,
-  Paper,
+  useTheme,
 } from "@mui/material";
 import { exportFileFormattedDate, exportTable, PdfHeaderIcon, PdfLegendEntry } from "../../../utils/export";
 import { ICON_PERSON, ICON_CLOCK, ICON_CLOCK_PLUS } from "../../../utils/pdfIcons";
@@ -58,21 +45,23 @@ import {
   isValidDateForSelect,
   DayEntry,
 } from "../../../utils/dates";
+import APPBAR_MENU from "../../../constants/appbar.constants";
+import NavIcon from "../../../components/NavIcon/NavIcon.component";
 import PAGE_TITLE from "../../../constants/pageTitle.constants";
 import PERMISSIONS from "../../../constants/permissions.constants";
 import MANAGEMENT from "../../../constants/management.constants";
 import { SELECTOR_TABLE } from "../../../constants/constants";
-import { Download, ChevronLeft, ChevronRight, X, Search, RotateCcw, NotepadText, Sparkles } from "lucide-react";
-import AutoGenerateModal, { AutoGenerateConfig } from "../../../components/Modal/AutoGenerateModal/AutoGenerateModal.component";
+import { IconLockAccess, IconTimeline, IconUsers } from "@tabler/icons-react";
+import DateNavigator from "../../../components/DateNavigator/DateNavigator.component";
 import {
-  exportSpeedDialBoxStyles,
-  loadingBoxStyles,
-  backdropStyles,
-  noEmployeesBoxStyles,
-  noEmployeesIconStyles,
-} from "./styles";
-import { useLocation, useNavigate } from "react-router-dom";
-import PremiumTooltip from "../../../components/PremiumTooltip/PremiumTooltip.component";
+  EmptyState,
+  LoadingState,
+  PageBody,
+  PageCard,
+  PageContainer,
+  PageHeader,
+} from "../../../components/Layout";
+import { useLocation } from "react-router-dom";
 import SegmentedToggle from "../../../components/SegmentedToggle/SegmentedToggle.component";
 import { useTablePreferences } from "../../../hooks/useTablePreferences";
 import {
@@ -80,8 +69,6 @@ import {
   setPreferencesObject,
 } from "../../../utils/persistentState";
 import { useAppNotifications } from "../../../components/Snackbar/Snackbar.component";
-import NOTIFICATIONS from "../../../constants/notifications.constants";
-import { createHoursGenerationNotification } from "../../../services/notificationService";
 import { PdfIcon, ExcelIcon } from "../../../components/Icons/FileIcons";
 import { capitalizeFirstLetter } from "../../../utils/string";
 import { getScheduleHours, sortSchedulesByType } from "../../../utils/schedule";
@@ -97,6 +84,8 @@ const defaultPreferences = { date: new Date().toISOString() };
 // Roles management and summary page component
 const RolesPage: React.FC = () => {
   const dispatch = useDispatch<AppDispatch>();
+  const theme = useTheme();
+  const isSmallScreen = useMediaQuery(theme.breakpoints.down('sm'));
   const { userPermissions } = useAuthContext();
   const { showNotification } = useAppNotifications();
   const { employees, isLoadingEmployees } = useSelector(
@@ -110,30 +99,13 @@ const RolesPage: React.FC = () => {
   );
   const [filteredEmployees, setFilteredEmployees] = useState<Employee[]>([]);
 
-  // El buscador y el filtro de estado del board se recuerdan entre navegaciones.
-  const {
-    search,
-    setSearch,
-    statusFilter: employeeStatusFilter,
-    setStatusFilter: setEmployeeStatusFilter,
-  } = useTablePreferences<'active' | 'all'>("roles-selector", () => 25, "active");
+  // El buscador se recuerda entre navegaciones.
+  const { search, setSearch } = useTablePreferences("roles-selector", () => 25);
 
-  // El board de horas muestra solo empleados activos por defecto: los egresados
-  // no deben recibir nuevas asignaciones.
+  // El board de horas muestra siempre solo empleados activos: los egresados no
+  // deben recibir nuevas asignaciones, así que no hace falta un filtro de estado.
   const visibleEmployees = useMemo(
-    () =>
-      employeeStatusFilter === 'active'
-        ? employees.filter((employee) => employee.isActive !== false)
-        : employees,
-    [employees, employeeStatusFilter],
-  );
-
-  // Counts por estado (sobre la plantilla completa) para los filter tabs.
-  const filterCounts = useMemo(
-    () => ({
-      active: employees.filter((employee) => employee.isActive !== false).length,
-      all: employees.length,
-    }),
+    () => employees.filter((employee) => employee.isActive !== false),
     [employees],
   );
   const [filteredSchedules, setFilteredSchedules] = useState<Schedule[]>([]);
@@ -171,9 +143,6 @@ const RolesPage: React.FC = () => {
     const prefs = getPreferencesObject(preferencesKey, defaultPreferences);
     return prefs.date ? new Date(prefs.date) : new Date();
   });
-  const [openAddRoleModal, setOpenAddRoleModal] = useState(false);
-  const [isGeneratingHours, setIsGeneratingHours] = useState(false);
-  const [currentModalConfig, setCurrentModalConfig] = useState<AutoGenerateConfig | null>(null);
   const [viewMode, setViewMode] = useState<'employee' | 'schedule'>(() => {
     const savedViewMode = localStorage.getItem('selectorTableViewMode');
     const hasRolesPermission = userPermissions.includes(PERMISSIONS.VIEW_ROLES);
@@ -197,10 +166,7 @@ const RolesPage: React.FC = () => {
       : 'employee';
   });
 
-  const theme = useTheme();
-  const isSmallScreen = useMediaQuery(theme.breakpoints.down("sm"));
   const location = useLocation();
-  const navigate = useNavigate();
 
   // Save viewMode to localStorage when it changes
   useEffect(() => {
@@ -625,361 +591,6 @@ const RolesPage: React.FC = () => {
   });
   const nextWeekEnd = endOfWeek(nextWeekStart, { weekStartsOn: 1 });
 
-  const handleCloseAddRoleModal = () => {
-    setOpenAddRoleModal(false);
-  };
-
-  const handleGenerateHours = async (config: AutoGenerateConfig) => {
-    try {
-      // Validate configuration
-      if (config.selectedEmployees.length === 0) {
-        throw new Error('No hay empleados seleccionados');
-      }
-      
-      // Get available schedules for balanced distribution
-      const availableSchedules = schedules.length > 0 ? schedules : [];
-      if (availableSchedules.length === 0) {
-        throw new Error('No hay horarios disponibles para asignar');
-      }
-      
-      // Get available schedules for balanced distribution
-      const scheduleLabels = [...new Set(availableSchedules.map(s => s.label))];
-      
-      if (scheduleLabels.length === 0) {
-        throw new Error('No hay horarios disponibles para asignar');
-      }
-      
-      // Calculate weekly hours for each schedule to plan distribution
-      const scheduleWeeklyHours: Record<string, number> = {};
-      
-      // Calculate total weekly hours for each schedule label
-      scheduleLabels.forEach(label => {
-        let totalHours = 0;
-        const weekStart = startOfWeek(firstDayOfWeek || new Date(), { weekStartsOn: 1 });
-        
-        for (let i = 0; i < 7; i++) {
-          const dayDate = addDays(weekStart, i);
-          const dayName = dayDate.toLocaleDateString("en-US", { weekday: "long" }).toLowerCase();
-          
-          const daySchedule = availableSchedules.find(s => 
-            s.label === label && s.days && s.days.includes(dayName)
-          );
-          
-          if (daySchedule) {
-            totalHours += getScheduleHours(daySchedule, dayName);
-          }
-        }
-        
-        scheduleWeeklyHours[label] = totalHours;
-      });
-      
-      // All non-special schedules should be covered, regardless of their weekly hours
-      // The maxHoursPerWeek limit will be applied to individual employees, not to schedules
-      const validScheduleLabels = Object.keys(scheduleWeeklyHours);
-      
-      // Sort valid schedules by weekly hours (ascending) to prioritize shorter schedules
-      const sortedScheduleLabels = validScheduleLabels.sort((a, b) => 
-        scheduleWeeklyHours[a] - scheduleWeeklyHours[b]
-      );
-      
-      // Track schedule assignments to enforce max 3-4 employees per schedule
-      const scheduleAssignments: Record<string, number> = {};
-      const maxEmployeesPerSchedule = 4;
-      
-      // Initialize assignments for each schedule
-      sortedScheduleLabels.forEach(label => {
-        scheduleAssignments[label] = 0;
-      });
-      
-      // Distribute employees across schedules to balance hours
-      const employeeAssignments: Record<number, string> = {};
-      
-      // Separate employees with custom schedules
-      const employeesWithCustomSchedules = config.selectedEmployees.filter(employeeId => 
-        config.customSchedules[employeeId]
-      );
-      const employeesToDistribute = config.selectedEmployees.filter(employeeId => 
-        !config.customSchedules[employeeId]
-      );
-      
-      // First, assign employees with custom schedules
-      for (const employeeId of employeesWithCustomSchedules) {
-        const customSchedule = availableSchedules.find(s => s.id === config.customSchedules[employeeId]);
-        if (customSchedule) {
-          employeeAssignments[employeeId] = customSchedule.label;
-          scheduleAssignments[customSchedule.label] = (scheduleAssignments[customSchedule.label] || 0) + 1;
-        }
-      }
-      
-      // Calculate how many employees we need to assign to each schedule
-      const totalEmployeesToDistribute = employeesToDistribute.length;
-      const totalSchedules = sortedScheduleLabels.length;
-      
-      if (totalSchedules > 0) {
-        // Calculate base distribution (minimum employees per schedule)
-        const baseEmployeesPerSchedule = Math.floor(totalEmployeesToDistribute / totalSchedules);
-        const remainingEmployees = totalEmployeesToDistribute % totalSchedules;
-        
-         // Distribute base employees to each schedule
-         for (let i = 0; i < sortedScheduleLabels.length; i++) {
-           const label = sortedScheduleLabels[i];
-           const baseCount = baseEmployeesPerSchedule + (i < remainingEmployees ? 1 : 0);
-           scheduleAssignments[label] = baseCount;
-         }
-         
-         // Now assign employees to schedules based on the calculated distribution
-         let employeeIndex = 0;
-         for (const label of sortedScheduleLabels) {
-           const targetCount = scheduleAssignments[label];
-           
-           // Assign employees to this schedule
-           for (let i = 0; i < targetCount && employeeIndex < employeesToDistribute.length; i++) {
-             const employeeId = employeesToDistribute[employeeIndex];
-             employeeAssignments[employeeId] = label;
-             employeeIndex++;
-           }
-         }
-        
-        // If there are still employees to assign, distribute them evenly
-        while (employeeIndex < employeesToDistribute.length) {
-          // Find the schedule with the least employees
-          let minSchedule = sortedScheduleLabels[0];
-          let minCount = scheduleAssignments[minSchedule] || 0;
-          
-          for (const label of sortedScheduleLabels) {
-            const currentCount = scheduleAssignments[label] || 0;
-            if (currentCount < minCount && currentCount < maxEmployeesPerSchedule) {
-              minSchedule = label;
-              minCount = currentCount;
-            }
-          }
-          
-          if (minCount >= maxEmployeesPerSchedule) {
-            // All schedules at max capacity, just continue distributing
-          } else {
-            // Assign to the schedule with least employees
-            const employeeId = employeesToDistribute[employeeIndex];
-            employeeAssignments[employeeId] = minSchedule;
-            scheduleAssignments[minSchedule] = (scheduleAssignments[minSchedule] || 0) + 1;
-          }
-          
-          employeeIndex++;
-        }
-      }
-      
-      // Generate hours for each employee based on their assigned schedule
-      const promises = config.selectedEmployees.map(async (employeeId) => {
-        const employee = employees.find(emp => emp.id === employeeId);
-        if (!employee) {
-          return;
-        }
-
-        const assignedScheduleLabel = employeeAssignments[employeeId];
-        if (!assignedScheduleLabel) {
-          // Employee could not be assigned to any schedule
-          return;
-        }
-
-        // Process each day of the week - assign appropriate schedule for each day
-        let current = startOfWeek(firstDayOfWeek || new Date(), { weekStartsOn: 1 });
-        
-        // Determine if we need to redistribute hours for individual/uniform mode
-        const needsRedistribution = (config.mode === 'individual' && config.individualHours[employeeId] !== undefined) ||
-                                   (config.mode === 'uniform' && config.uniformHours > 0);
-        
-        // Calculate total weekly hours used for the max-hours limit
-        const weekDays = [];
-        
-        // Check if target hours is 0 (for both individual and uniform modes)
-        const targetWeeklyHours = config.mode === 'individual' 
-          ? (config.individualHours[employeeId] !== undefined ? config.individualHours[employeeId] : 0)
-          : config.uniformHours;
-          
-        // If target hours is 0, don't assign any hours
-        if (targetWeeklyHours === 0) {
-          return;
-        }
-        
-        // Find the minimum daily hours available in schedules (per-day)
-        const minDailyHours = Math.min(...Array.from({ length: 7 }, (_, i) => {
-          const d = addDays(current, i);
-          const dayN = d.toLocaleDateString("en-US", { weekday: "long" }).toLowerCase();
-          const dayS = availableSchedules.find(s => s.label === assignedScheduleLabel && s.days.includes(dayN));
-          return dayS ? getScheduleHours(dayS, dayN) : Infinity;
-        }));
-        
-        // If target hours are less than the minimum daily hours, don't assign anything
-        if (targetWeeklyHours < minDailyHours) {
-          return;
-        }
-        
-        if (needsRedistribution) {
-            
-          // Apply maximum hours limit
-          const maxHoursPerWeek = config.maxHoursPerWeek || 48;
-          const limitedTargetHours = Math.min(targetWeeklyHours, maxHoursPerWeek);
-            
-          // Find the schedule's daily hours (use the first available day's per-day hours)
-          const mondaySchedule = availableSchedules.find(s => 
-            s.label === assignedScheduleLabel && 
-            s.days && s.days.includes('monday')
-          );
-          const scheduleDailyHours = mondaySchedule ? getScheduleHours(mondaySchedule, 'monday') : 0;
-          
-          if (scheduleDailyHours > 0) {
-            // Calculate how many days we need to assign
-            const daysNeeded = Math.ceil(limitedTargetHours / scheduleDailyHours);
-            
-            // Create entries only for the required number of days
-            const redistributedEntries = [];
-            let accumulatedHours = 0;
-            
-            for (let i = 0; i < 7; i++) {
-              const dayDate = addDays(current, i);
-              const dayName = dayDate.toLocaleDateString("en-US", { weekday: "long" }).toLowerCase();
-              
-              // Find the schedule for this specific day and label
-              const daySchedule = availableSchedules.find(s => 
-                s.label === assignedScheduleLabel && 
-                s.days && s.days.includes(dayName)
-              );
-              
-              if (daySchedule && i < daysNeeded) {
-                const dayActualHours = getScheduleHours(daySchedule, dayName);
-                // Check if adding this day's hours would exceed the limit
-                if (accumulatedHours + dayActualHours <= limitedTargetHours) {
-                  // Assign the schedule for this day
-                  const hoursWorkedEntry = {
-                    employeeId,
-                    date: dayDate.toISOString(),
-                    scheduleId: daySchedule.id,
-                  };
-                  redistributedEntries.push(hoursWorkedEntry);
-                  accumulatedHours += dayActualHours;
-                } else {
-                  // Stop assigning more days to respect the limit
-                  break;
-                }
-              }
-            }
-            
-            // Create redistributed entries
-            await Promise.all(
-              redistributedEntries.map(async (entry) => {
-                await dispatch(createOrUpdateHoursWorked(entry));
-              })
-            );
-          }
-        } else {
-          // Create original entries without redistribution
-          for (let i = 0; i < 7; i++) {
-            const dayDate = addDays(current, i);
-            const dayName = dayDate.toLocaleDateString("en-US", { weekday: "long" }).toLowerCase();
-            
-            // Find the schedule for this specific day and label
-            const daySchedule = availableSchedules.find(s => 
-              s.label === assignedScheduleLabel && 
-              s.days && s.days.includes(dayName)
-            );
-            
-            // Create HoursWorked entry for this day
-            if (daySchedule) {
-              const hoursWorkedEntry = {
-                employeeId,
-                date: dayDate.toISOString(),
-                scheduleId: daySchedule.id,
-              };
-              weekDays.push(hoursWorkedEntry);
-            }
-          }
-          
-          // Create original entries
-          await Promise.all(
-            weekDays.map(async (entry) => {
-              await dispatch(createOrUpdateHoursWorked(entry));
-            })
-          );
-        }
-      });
-
-      // Wait for all operations to complete
-      await Promise.all(promises);
-
-      // Recalculate summaries for the affected period and refresh the board.
-      // The server recomputes from the hours_worked records just created.
-      try {
-        await recalculateSummaries({});
-        await refreshSummaries();
-        if (weekStartDate && weekEndDate) {
-          await dispatch(fetchHoursWorked({ dateFrom: weekStartDate, dateTo: weekEndDate }));
-        }
-      } catch {
-        // Non-fatal: totals sync on the next assignment change.
-      }
-      
-      showNotification(NOTIFICATIONS.HOURS_GENERATION_SUCCESS, {
-        severity: "success",
-        duration: 5000,
-        closeable: true,
-        buttonText: "Ver resultados",
-        onButtonClick: () => {
-          // Navigate to the current page (roles) to show the generated results
-          navigate('/roles');
-        }
-      });
-      
-      // Add notification to menu
-      createHoursGenerationNotification(true, config.selectedEmployees.length);
-      
-      setOpenAddRoleModal(false);
-    } catch (error) {
-      showNotification(NOTIFICATIONS.HOURS_GENERATION_ERROR, {
-        severity: "error",
-        duration: 5000,
-      });
-      
-      // Add error notification to menu
-      createHoursGenerationNotification(false);
-    } finally {
-      setIsGeneratingHours(false);
-    }
-  };
-
-  const handleModalConfigChange = (config: AutoGenerateConfig) => {
-    setCurrentModalConfig(config);
-  };
-
-  const handleGenerateFromDialog = () => {
-    // Verificar permisos para generar horas
-    if (!userPermissions.includes(PERMISSIONS.EDIT_EMPLOYEE_ROLES)) {
-      showNotification("No tienes permisos para generar horas automáticamente", {
-        severity: "error",
-        duration: 3000,
-      });
-      return;
-    }
-    
-    if (!currentModalConfig) {
-      showNotification(NOTIFICATIONS.HOURS_GENERATION_NO_CONFIG, {
-        severity: "error",
-        duration: 3000,
-      });
-      return;
-    }
-    // Activate loading immediately for better UX
-    setIsGeneratingHours(true);
-    
-    // Show processing notification
-    showNotification(NOTIFICATIONS.HOURS_GENERATION_PROCESSING, {
-      severity: "info",
-      duration: 2000,
-    });
-    
-    // Use setTimeout to ensure the loading state is rendered before starting the process
-    setTimeout(() => {
-      handleGenerateHours(currentModalConfig);
-    }, 50);
-  };
 
   // Helper: gets the assigned schedule label for an employee on a given day
   const getScheduleLabelForDay = (
@@ -1174,436 +785,115 @@ const RolesPage: React.FC = () => {
     return options;
   }, [userPermissions]);
 
+  const canExport =
+    userPermissions.includes(PERMISSIONS.EXPORT_EXCEL_ROLES) &&
+    userPermissions.includes(PERMISSIONS.EXPORT_PDF_ROLES);
+  const hasExportableRows =
+    viewMode === "employee" ? filteredEmployees.length > 0 : filteredSchedules.length > 0;
+
   return (
-    <Box className="scrollable-content" sx={{ height: "100%", display: "flex", flexDirection: "column", overflow: "hidden", pb: 0, pt: 0, px: 0 }}>
-      {isLoading ? (
-        <Box sx={loadingBoxStyles}>
-          <Backdrop sx={backdropStyles(theme)} open={isLoading}>
-            <CircularProgress />
-          </Backdrop>
-        </Box>
-      ) : (
-        <Paper
-          elevation={0}
-          sx={{
-            flex: 1,
-            display: "flex",
-            flexDirection: "column",
-            overflow: "hidden",
-            border: "1px solid rgba(0,0,0,0.08)",
-            borderRadius: "16px",
-            boxShadow: "0 4px 24px rgba(0,0,0,0.08), 0 1px 2px rgba(0,0,0,0.04)",
-            mx: { xs: 1, sm: 1.5, md: 2 },
-            mb: 3,
-            mt: 0,
-          }}
-        >
-          {/* Simple Header */}
-          <Box
-            sx={{
-              px: { xs: 2, sm: 2.5 },
-              py: { xs: 1.5, sm: 2 },
-              backgroundColor: theme.palette.background.paper,
-              color: theme.palette.text.primary,
-              flexShrink: 0,
-              borderBottom: `1px solid ${theme.palette.mode === "dark" ? "rgba(255,255,255,0.06)" : "rgba(0,0,0,0.06)"}`,
-            }}
-          >
-            {/* Title Row */}
-            <Box
-              display="flex"
-              justifyContent="space-between"
-              alignItems="center"
-              mb={1.5}
-              flexWrap="wrap"
-              gap={1}
-            >
-              <Box display="flex" alignItems="center" gap={1.5}>
-                <Box
-                  sx={{
-                    color: theme.palette.primary.main,
-                    display: 'flex',
-                    alignItems: 'center',
-                  }}
-                >
-                  <NotepadText size={20} strokeWidth={1.5} />
-                </Box>
-                <Box>
-                  <Typography
-                    variant={isSmallScreen ? "h6" : "h5"}
-                    sx={{
-                      fontWeight: 700,
-                      fontSize: { xs: "1rem", sm: "1.15rem" },
-                      color: theme.palette.text.primary,
-                      letterSpacing: "-0.02em",
-                      lineHeight: 1.2,
-                    }}
-                  >
-                    {isSmallScreen ? PAGE_TITLE.ROLES_SIMPLIFIED : PAGE_TITLE.ROLES}
-                  </Typography>
-                  <Typography
-                    variant="caption"
-                    sx={{
-                      color: theme.palette.text.secondary,
-                      fontSize: "0.7rem",
-                      letterSpacing: "0.02em",
-                    }}
-                  >
-                    {viewMode === 'employee' 
-                      ? `${filteredEmployees.length} empleados` 
-                      : `${filteredSchedules.length} horarios`}
-                  </Typography>
-                </Box>
-              </Box>
-
-              {/* Export Speed Dial */}
-              {userPermissions.includes(PERMISSIONS.EXPORT_EXCEL_ROLES) &&
-                userPermissions.includes(PERMISSIONS.EXPORT_PDF_ROLES) && (
-                  <Box sx={{ ...exportSpeedDialBoxStyles, minHeight: 'auto', ml: 'auto' }}>
-                    {(viewMode === 'employee' ? filteredEmployees.length > 0 : filteredSchedules.length > 0) && (
-                      <SpeedDialComponent
-                        actions={exportOptions}
-                        mainIcon={<Download size={18} strokeWidth={1.5} />}
-                        openIcon={<X size={18} strokeWidth={1.5} />}
-                        direction="left"
-                      />
-                    )}
-                  </Box>
-                )}
-            </Box>
-
-            {/* Controls Row */}
-            <Box
-              display="flex"
-              flexDirection={{ xs: "column", sm: "row" }}
-              alignItems={{ xs: "stretch", sm: "center" }}
-              justifyContent="space-between"
-              gap={1.5}
-            >
-              {/* Search - busca empleados Y horarios */}
-              <Box
-                sx={{
-                  flex: 1,
-                  display: "flex",
-                  alignItems: "center",
-                  gap: 1.5,
-                  flexWrap: "wrap",
-                }}
-              >
-                <Box sx={{ flex: 1, maxWidth: { sm: "280px" }, minWidth: { xs: "100%", sm: 0 } }}>
-                  <SearchBarComponent
-                    placeholder="Buscar..."
-                    value={search}
-                    onChange={(e) => setSearch(e.target.value)}
-                    fullWidth
-                  />
-                </Box>
-                <SegmentedToggle
-                  size="medium"
-                  options={[
-                    { value: "active", label: "Activos", count: filterCounts.active },
-                    { value: "all", label: "Todos", count: filterCounts.all },
-                  ]}
-                  value={employeeStatusFilter}
-                  onChange={setEmployeeStatusFilter}
+    <PageContainer>
+      <PageCard>
+        <PageHeader
+          icon={<NavIcon label={APPBAR_MENU.ROLES} />}
+          title={PAGE_TITLE.ROLES}
+          mobileTitle={PAGE_TITLE.ROLES_SIMPLIFIED}
+          subtitle={
+            viewMode === "employee"
+              ? `${filteredEmployees.length} empleados`
+              : `${filteredSchedules.length} horarios`
+          }
+          actions={
+            canExport ? (
+              <ExportMenu actions={exportOptions} disabled={!hasExportableRows} />
+            ) : undefined
+          }
+          toolbar={
+            <>
+              <Box sx={{ flex: 1, maxWidth: { sm: 280 }, minWidth: { xs: "100%", sm: 180 } }}>
+                <SearchBarComponent
+                  placeholder="Buscar empleado u horario…"
+                  value={search}
+                  onChange={(e) => setSearch(e.target.value)}
+                  fullWidth
                 />
               </Box>
-
-              {/* Date Picker and Navigation */}
-              <Box
-                display="flex"
-                flexDirection="row"
-                alignItems="center"
-                gap={0.75}
-                width={{ xs: "100%", sm: "auto" }}
-              >
-                <Box
-                  display="flex"
-                  alignItems="center"
-                  justifyContent={{ xs: "flex-start", sm: "flex-end" }}
-                  gap={0.5}
-                  flexWrap="wrap"
-                  flexShrink={0}
-                >
-                  {/* Previous Week Button */}
-                  <PremiumTooltip title={MANAGEMENT.TOOLTIP_PREV_WEEK}>
-                    <IconButton
-                      onClick={handlePreviousWeek}
-                      size="small"
-                      sx={{
-                        width: 36,
-                        height: 36,
-                        borderRadius: '10px',
-                        color: theme.palette.mode === 'dark' ? 'rgba(255,255,255,0.4)' : 'rgba(0,0,0,0.35)',
-                        transition: 'all 0.15s ease',
-                        '&:hover': {
-                          background: theme.palette.mode === 'dark' ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.04)',
-                          color: theme.palette.mode === 'dark' ? 'rgba(255,255,255,0.7)' : 'rgba(0,0,0,0.7)',
-                        },
-                      }}
-                    >
-                      <ChevronLeft size={18} strokeWidth={1.5} />
-                    </IconButton>
-                  </PremiumTooltip>
-
-                  {/* Date Picker (flexes in the same row on mobile) */}
-                  <Box
-                    sx={{
-                      flex: { xs: 1, sm: "0 0 auto" },
-                      display: "flex",
-                      justifyContent: { xs: "center", sm: "flex-end" },
-                      minWidth: 0,
-                    }}
-                  >
-                  <LocalizationProvider
-                    dateAdapter={AdapterDateFns}
-                    adapterLocale={es}
-                  >
-                    <DatePicker
-                      value={firstDayOfWeek}
-                      maxDate={nextWeekEnd}
-                      views={["year", "month", "day"]}
-                      format="d MMM yyyy"
-                      slots={{ toolbar: () => null }}
-                      slotProps={{
-                        textField: {
-                          fullWidth: false,
-                          required: true,
-                          variant: "standard",
-                          sx: {
-                            width: { xs: "100%", sm: "150px", md: "170px" },
-                            '& .MuiInputBase-root': {
-                              height: '36px',
-                              fontSize: '0.85rem',
-                              fontWeight: 500,
-                              '&:before, &:after': { 
-                                display: 'none' 
-                              },
-                              '&:hover:not(.Mui-disabled):before': { 
-                                display: 'none' 
-                              },
-                            },
-                            '& input': {
-                              textAlign: 'center',
-                              cursor: 'pointer',
-                              padding: '4px 0',
-                            },
-                          },
-                        },
-                      }}
-                      closeOnSelect
-                      onChange={handleDateChange}
-                    />
-                  </LocalizationProvider>
-                  </Box>
-
-                  {/* Next Week Button */}
-                  <PremiumTooltip title={MANAGEMENT.TOOLTIP_NEXT_WEEK}>
-                    <span>
-                      <IconButton
-                        disabled={
-                          !isValidDateForSelect(
-                            new Date(
-                              getCurrentWeekDates(weekOffset + 1)[0].isoDate
-                            )
-                          )
-                        }
-                        onClick={handleNextWeek}
-                        size="small"
-                        sx={{
-                          width: 36,
-                          height: 36,
-                          borderRadius: '10px',
-                          color: theme.palette.mode === 'dark' ? 'rgba(255,255,255,0.4)' : 'rgba(0,0,0,0.35)',
-                          transition: 'all 0.15s ease',
-                          '&:hover': {
-                            background: theme.palette.mode === 'dark' ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.04)',
-                            color: theme.palette.mode === 'dark' ? 'rgba(255,255,255,0.7)' : 'rgba(0,0,0,0.7)',
-                          },
-                          '&.Mui-disabled': {
-                            color: theme.palette.mode === 'dark' ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.08)',
-                          },
-                        }}
-                      >
-                        <ChevronRight size={18} strokeWidth={1.5} />
-                      </IconButton>
-                    </span>
-                  </PremiumTooltip>
-
-                  {/* Current Week Button */}
-                  <PremiumTooltip title={MANAGEMENT.TOOLTIP_CURRENT_WEEK}>
-                    <span>
-                      <IconButton
-                        disabled={weekOffset === 0}
-                        onClick={handleCurrentWeek}
-                        size="small"
-                        sx={{
-                          width: 36,
-                          height: 36,
-                          borderRadius: '10px',
-                          color: theme.palette.mode === 'dark' ? 'rgba(255,255,255,0.4)' : 'rgba(0,0,0,0.35)',
-                          transition: 'all 0.15s ease',
-                          '&:hover': {
-                            background: theme.palette.mode === 'dark' ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.04)',
-                            color: theme.palette.mode === 'dark' ? 'rgba(255,255,255,0.7)' : 'rgba(0,0,0,0.7)',
-                          },
-                          '&.Mui-disabled': {
-                            color: theme.palette.mode === 'dark' ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.06)',
-                          },
-                        }}
-                      >
-                        <RotateCcw size={16} strokeWidth={1.5} />
-                      </IconButton>
-                    </span>
-                  </PremiumTooltip>
-                </Box>
+              {/* El toggle de calendario va justo a la derecha del buscador: el
+                  board queda libre de barras internas y usa todo su alto. */}
+              <Box sx={{ flexShrink: 0 }}>
+                <SegmentedToggle
+                  size="medium"
+                  ariaLabel="Cambiar la vista del calendario"
+                  fullWidth={isSmallScreen}
+                  options={[
+                    {
+                      value: "employee",
+                      label: isSmallScreen ? "Individual" : "Calendario Individual",
+                      icon: <IconUsers size={14} />,
+                    },
+                    {
+                      value: "schedule",
+                      label: isSmallScreen ? "Por Horario" : "Calendario por Horario",
+                      icon: <IconTimeline size={14} />,
+                    },
+                  ]}
+                  value={viewMode}
+                  onChange={setViewMode}
+                />
               </Box>
-            </Box>
-          </Box>
-          <Box sx={{ flex: 1, overflow: "hidden", p: 0 }}>
-          {(() => {
-            const hasRolesPermission = userPermissions.includes(PERMISSIONS.VIEW_ROLES);
-            
-            // Si no tiene permisos para ver roles, mostrar mensaje de error
-            if (!hasRolesPermission) {
-              return (
-                <Box sx={noEmployeesBoxStyles}>
-                  <Search size={48} style={{ color: theme.palette.text.disabled, ...noEmployeesIconStyles }} />
-                  <Typography variant="h6" color="textSecondary">
-                    No tienes permisos para ver roles
-                  </Typography>
-                </Box>
-              );
-            }
-            
-            return (
-              <WeeklyBoard
-                filteredEmployees={filteredEmployees}
-                schedules={viewMode === 'schedule' ? filteredSchedules : schedules}
-                hoursWorked={hoursWorked}
-                weeklySummaries={weeklySummaries}
-                biweeklySummaries={biweeklySummaries}
-                monthlySummaries={monthlySummaries}
-                weekOffset={weekOffset}
-                weekNumber={currentWeekNumber}
-                biweekNumber={currentBiweekNumber}
-                month={currentMonth}
-                year={currentWeekYear}
-                handleChange={handleChange}
-                handleAdjustTime={handleAdjustTime}
-                permissions={userPermissions}
-                viewMode={viewMode}
-                setViewMode={setViewMode}
-              />
-            );
-        })()}
-          </Box>
-        </Paper>
-      )}
-      
-      <Dialog
-        open={openAddRoleModal}
-        onClose={handleCloseAddRoleModal}
-        maxWidth={false}
-        fullWidth={false}
-        PaperProps={{
-          sx: {
-            border: "2px solid #fff",
-            borderRadius: 3,
-            minHeight: "60vh",
-            boxShadow: 3,
-            bgcolor: "background.paper",
-            width: { xs: '98%', sm: '1200px' },
-            maxWidth: { xs: '98%', sm: '1200px' },
-            height: { xs: '95vh', sm: 'auto' },
-            maxHeight: { xs: '95vh', sm: '90vh' },
-          },
-        }}
-      >
-        {/* Header with theme styling */}
-        <Box sx={{
-          background: (theme) => theme.palette.mode === "dark" ? "#111" : theme.palette.primary.main,
-          color: (theme) => theme.palette.mode === "dark" ? "#fff" : theme.palette.primary.contrastText,
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "space-between",
-          gap: 2,
-          px: 3,
-          py: 2,
-          borderTopLeftRadius: 12,
-          borderTopRightRadius: 12,
-        }}>
-          <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
-            <Box sx={{
-              background: (theme) => theme.palette.primary.contrastText,
-              borderRadius: "50%",
-              width: 40,
-              height: 40,
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              flexShrink: 0,
-            }}>
-              <Sparkles size={24} style={{ color: theme.palette.primary.main }} />
-            </Box>
-            <Box>
-              <Typography
-                variant="h6"
-                fontWeight={700}
-                color="inherit"
-                sx={{ lineHeight: 1.2, mb: 0.5 }}
-              >
-                Autogeneración de Roles
-              </Typography>
-              <Typography
-                variant="body2"
-                color="inherit"
-                sx={{ opacity: 0.9, lineHeight: 1.2 }}
-              >
-                Configurar parámetros
-              </Typography>
-            </Box>
-          </Box>
-          <IconButton 
-            onClick={handleCloseAddRoleModal} 
-            sx={{ color: "inherit", "&:hover": { backgroundColor: "rgba(255, 255, 255, 0.1)" } }}
-          >
-            <X size={20} />
-          </IconButton>
-        </Box>
+            </>
+          }
+          toolbarEnd={
+            <DateNavigator
+              value={firstDayOfWeek}
+              maxDate={nextWeekEnd}
+              onChange={handleDateChange}
+              onPrevious={handlePreviousWeek}
+              onNext={handleNextWeek}
+              onReset={handleCurrentWeek}
+              disableNext={
+                !isValidDateForSelect(new Date(getCurrentWeekDates(weekOffset + 1)[0].isoDate))
+              }
+              disableReset={weekOffset === 0}
+              labels={{
+                previous: MANAGEMENT.TOOLTIP_PREV_WEEK,
+                next: MANAGEMENT.TOOLTIP_NEXT_WEEK,
+                reset: MANAGEMENT.TOOLTIP_CURRENT_WEEK,
+              }}
+            />
+          }
+        />
 
-        <DialogContent sx={{ px: 3, py: 2 }}>
-          <AutoGenerateModal
-            onGenerate={handleGenerateHours}
-            onCancel={handleCloseAddRoleModal}
-            employees={employees}
-            schedules={schedules}
-            currentWeekStart={firstDayOfWeek || new Date()}
-            isLoading={isGeneratingHours}
-            onConfigChange={handleModalConfigChange}
-          />
-        </DialogContent>
+        {/* The board needs a definite height: on phones it takes the viewport
+            (scroll the page to reach it), on desktop it fills the card. */}
+        <PageBody sx={{ height: { xs: "calc(100dvh - 88px)", md: "auto" }, minHeight: { xs: 480, md: 0 } }}>
+          {isLoading ? (
+            <LoadingState label="Cargando roles…" />
+          ) : !userPermissions.includes(PERMISSIONS.VIEW_ROLES) ? (
+            <EmptyState icon={<IconLockAccess />} title="No tienes permisos para ver roles" />
+          ) : (
+            <WeeklyBoard
+              filteredEmployees={filteredEmployees}
+              schedules={viewMode === "schedule" ? filteredSchedules : schedules}
+              hoursWorked={hoursWorked}
+              weeklySummaries={weeklySummaries}
+              biweeklySummaries={biweeklySummaries}
+              monthlySummaries={monthlySummaries}
+              weekOffset={weekOffset}
+              weekNumber={currentWeekNumber}
+              biweekNumber={currentBiweekNumber}
+              month={currentMonth}
+              year={currentWeekYear}
+              handleChange={handleChange}
+              handleAdjustTime={handleAdjustTime}
+              permissions={userPermissions}
+              viewMode={viewMode}
+            />
+          )}
+        </PageBody>
+      </PageCard>
 
-        <DialogActions sx={{ gap: 2, px: 3, pb: 3 }}>
-          <Button
-            onClick={handleCloseAddRoleModal}
-            variant="outlined"
-            sx={{ minWidth: 120, py: 1, fontWeight: 600 }}
-          >
-            Cancelar
-          </Button>
-          <Button
-            onClick={handleGenerateFromDialog}
-            variant="contained"
-            color="primary"
-            disabled={isGeneratingHours || !userPermissions.includes(PERMISSIONS.EDIT_EMPLOYEE_ROLES)}
-            sx={{ minWidth: 200, py: 1, fontWeight: 600 }}
-          >
-            {isGeneratingHours ? "Generando..." : "Generar Horas"}
-          </Button>
-        </DialogActions>
-      </Dialog>
-      </Box>
+    </PageContainer>
   );
 };
 

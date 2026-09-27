@@ -8,7 +8,7 @@ import {
   useMediaQuery,
   Typography,
 } from "@mui/material";
-import { Users, RotateCcw } from "lucide-react";
+import { IconRotate, IconTag } from "@tabler/icons-react";
 import { Permission } from "../../../models/Permission";
 import TextfieldComponent from "../../../components/Textfield/Textfield.component";
 import PermissionTogglePanel from "../../../components/PermissionTogglePanel/PermissionTogglePanel.component";
@@ -143,13 +143,15 @@ const AddRoleForm: React.FC<AddRoleFormProps> = ({
         <Grid item xs={12}>
           <TextfieldComponent
             placeholder={FORMS.ADD_ROLE.NAME_PLACEHOLDER}
+
+            label={FORMS.ADD_ROLE.NAME_LABEL}
             variant="outlined"
             fullWidth
             value={formData.name}
             onChange={(e) => handleFieldChange("name", e.target.value)}
             error={errors.name !== ""}
             helperText={errors.name}
-            icon={<Users style={iconStyle} />}
+            icon={<IconTag style={iconStyle} />}
             sx={formControl(theme)}
           />
         </Grid>
@@ -187,7 +189,7 @@ const AddRoleForm: React.FC<AddRoleFormProps> = ({
             <Button
               variant="text"
               onClick={handleClearForm}
-              startIcon={<RotateCcw size={16} />}
+              startIcon={<IconRotate size={16} />}
               fullWidth={isSmallScreen}
               sx={clearButton}
             >

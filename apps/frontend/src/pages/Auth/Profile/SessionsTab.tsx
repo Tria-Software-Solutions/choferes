@@ -7,18 +7,11 @@ import {
   Typography,
   useTheme,
 } from "@mui/material";
-import {
-  ShieldCheck,
-  Laptop,
-  Smartphone,
-  MonitorSmartphone,
-  LogOut,
-  Clock,
-  AlertTriangle,
-} from "lucide-react";
+import { IconAlertTriangle, IconClock, IconDeviceLaptop, IconDeviceMobile, IconDevices, IconLogout, IconShieldCheck } from "@tabler/icons-react";
 import { format } from "date-fns";
 import { es } from "date-fns/locale";
 import { useAuthContext } from "../../../context/AuthContext";
+import { PanelHeader } from "../../../components/Layout";
 
 const SessionsTab: React.FC = () => {
   const theme = useTheme();
@@ -47,10 +40,10 @@ const SessionsTab: React.FC = () => {
   }, []);
 
   const DeviceIcon = deviceInfo.isMobile
-    ? Smartphone
+    ? IconDeviceMobile
     : deviceInfo.isTablet
-      ? MonitorSmartphone
-      : Laptop;
+      ? IconDevices
+      : IconDeviceLaptop;
 
   const loginDate = loggedInAt ? new Date(loggedInAt) : null;
 
@@ -60,11 +53,9 @@ const SessionsTab: React.FC = () => {
       sx={{
         p: { xs: 2.5, sm: 3 },
         borderRadius: "16px",
-        border: `1px solid ${
-          theme.palette.mode === "dark" ? "rgba(255,255,255,0.08)" : "rgba(0,0,0,0.08)"
-        }`,
+        border: theme.tokens.borders.paper,
         backgroundColor: theme.palette.background.paper,
-        boxShadow: "0 4px 24px rgba(0,0,0,0.08), 0 1px 2px rgba(0,0,0,0.04)",
+        boxShadow: `0 1px 2px ${theme.tokens.shadows.card}`,
         display: "flex",
         flexDirection: "column",
         height: { xs: "auto", md: "100%" },
@@ -73,33 +64,11 @@ const SessionsTab: React.FC = () => {
       }}
     >
       {/* Header */}
-      <Box sx={{ mb: 2, flexShrink: 0 }}>
-        <Box display="flex" alignItems="center" gap={1.5} mb={0.5}>
-          <Box sx={{ color: theme.palette.primary.main, display: "flex", alignItems: "center" }}>
-            <ShieldCheck size={20} strokeWidth={1.5} />
-          </Box>
-          <Typography
-            variant="h6"
-            sx={{
-              fontWeight: 700,
-              fontSize: "1.15rem",
-              color: theme.palette.text.primary,
-              letterSpacing: "-0.02em",
-              lineHeight: 1.2,
-            }}
-          >
-            Sesiones activas
-          </Typography>
-        </Box>
-        <Typography
-          variant="caption"
-          sx={{ color: theme.palette.text.secondary, fontSize: "0.7rem", letterSpacing: "0.02em", ml: 5 }}
-        >
-          Dispositivos donde tienes tu cuenta abierta
-        </Typography>
-      </Box>
-
-      <Box sx={{ borderBottom: `1px solid ${theme.palette.mode === "dark" ? "rgba(255,255,255,0.06)" : "rgba(0,0,0,0.06)"}`, mb: 2 }} />
+      <PanelHeader
+        icon={<IconShieldCheck />}
+        title="Sesiones activas"
+        description="Dispositivos donde tienes tu cuenta abierta"
+      />
 
       <Box sx={{ flex: 1, minHeight: 0 }}>
       {/* Current session */}
@@ -151,7 +120,7 @@ const SessionsTab: React.FC = () => {
             {deviceInfo.browser} en {deviceInfo.os}
           </Typography>
           <Typography variant="caption" sx={{ fontSize: "0.7rem", color: "text.secondary", display: "flex", alignItems: "center", gap: 0.5 }}>
-            <Clock size={12} />
+            <IconClock size={12} />
             Iniciada el {loginDate
               ? format(loginDate, "d 'de' MMMM 'de' yyyy, HH:mm", { locale: es })
               : "hoy"}
@@ -164,9 +133,7 @@ const SessionsTab: React.FC = () => {
         sx={{
           p: 2,
           borderRadius: "12px",
-          border: `1px solid ${
-            theme.palette.mode === "dark" ? "rgba(255,255,255,0.08)" : "rgba(0,0,0,0.08)"
-          }`,
+          border: theme.tokens.borders.paper,
           mb: 2,
         }}
       >
@@ -190,15 +157,13 @@ const SessionsTab: React.FC = () => {
           flexWrap: "wrap",
           pt: 3,
           mt: { xs: 2, md: 2.5 },
-          borderTop: `1px solid ${
-            theme.palette.mode === "dark" ? "rgba(255,255,255,0.06)" : "rgba(0,0,0,0.06)"
-          }`,
+          borderTop: theme.tokens.borders.hairline,
           flexShrink: 0,
         }}
       >
         <Box sx={{ display: "flex", alignItems: "center", gap: 1.5, minWidth: 0 }}>
           <Box sx={{ color: theme.palette.warning.main, display: "flex", flexShrink: 0 }}>
-            <AlertTriangle size={20} strokeWidth={1.5} />
+            <IconAlertTriangle size={20} stroke={1.5} />
           </Box>
           <Box sx={{ minWidth: 0 }}>
             <Typography sx={{ fontWeight: 650, fontSize: "0.85rem", color: "text.primary" }}>
@@ -213,7 +178,7 @@ const SessionsTab: React.FC = () => {
         <Button
           variant="outlined"
           color="error"
-          startIcon={<LogOut size={15} />}
+          startIcon={<IconLogout size={15} />}
           onClick={logout}
           sx={{
             textTransform: "none",

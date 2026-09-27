@@ -5,6 +5,7 @@ import { User } from "../../models/User";
 import { UserRole } from "../../models/UserRole";
 import { RootState } from "../store";
 import { Roles } from "../../constants/roles";
+import { getApiErrorMessage } from "../../utils/apiError";
 
 // userSlice manages the state and async logic for user data
 // Includes fetching, creating, updating, and deleting users, as well as user permissions and roles
@@ -46,9 +47,7 @@ export const fetchUsers = createAsyncThunk(
         return [];
       }
     } catch (error: unknown) {
-      return rejectWithValue(
-        error instanceof Error ? error.message : "Failed to fetch users",
-      );
+      return rejectWithValue(getApiErrorMessage(error, "Failed to fetch users"));
     }
   },
 );
@@ -60,9 +59,7 @@ export const fetchUserById = createAsyncThunk(
     try {
       return await UserService.getUserById(id);
     } catch (error: unknown) {
-      return rejectWithValue(
-        error instanceof Error ? error.message : "Failed to fetch user by ID",
-      );
+      return rejectWithValue(getApiErrorMessage(error, "Failed to fetch user by ID"));
     }
   },
 );
@@ -74,11 +71,7 @@ export const fetchUserByEmail = createAsyncThunk(
     try {
       return await UserService.getUserByEmail(email);
     } catch (error: unknown) {
-      return rejectWithValue(
-        error instanceof Error
-          ? error.message
-          : "Failed to fetch user by email",
-      );
+      return rejectWithValue(getApiErrorMessage(error, "Failed to fetch user by email"));
     }
   },
 );
@@ -90,11 +83,7 @@ export const fetchUserByUsername = createAsyncThunk(
     try {
       return await UserService.getUserByUsername(username);
     } catch (error: unknown) {
-      return rejectWithValue(
-        error instanceof Error
-          ? error.message
-          : "Failed to fetch user by username",
-      );
+      return rejectWithValue(getApiErrorMessage(error, "Failed to fetch user by username"));
     }
   },
 );
@@ -106,11 +95,7 @@ export const fetchUserPermissions = createAsyncThunk(
     try {
       return await UserService.getUserPermissions(id);
     } catch (error: unknown) {
-      return rejectWithValue(
-        error instanceof Error
-          ? error.message
-          : "Failed to fetch user permissions",
-      );
+      return rejectWithValue(getApiErrorMessage(error, "Failed to fetch user permissions"));
     }
   },
 );
@@ -135,9 +120,7 @@ export const createUser = createAsyncThunk(
       const updatedUser = await UserService.getUserById(createdUser.id);
       return updatedUser;
     } catch (error: unknown) {
-      return rejectWithValue(
-        error instanceof Error ? error.message : "Failed to create user",
-      );
+      return rejectWithValue(getApiErrorMessage(error, "Failed to create user"));
     }
   },
 );
@@ -172,9 +155,7 @@ export const updateUser = createAsyncThunk(
         newRoleId,
       };
     } catch (error: unknown) {
-      return rejectWithValue(
-        error instanceof Error ? error.message : "Failed to update user",
-      );
+      return rejectWithValue(getApiErrorMessage(error, "Failed to update user"));
     }
   },
 );
@@ -190,9 +171,7 @@ export const updateUserStatus = createAsyncThunk(
       const updatedUser = await UserService.updateUserStatus(id, status);
       return updatedUser;
     } catch (error: unknown) {
-      return rejectWithValue(
-        error instanceof Error ? error.message : "Failed to update user status",
-      );
+      return rejectWithValue(getApiErrorMessage(error, "Failed to update user status"));
     }
   },
 );
@@ -201,16 +180,19 @@ export const updateUserStatus = createAsyncThunk(
 export const updateUserPassword = createAsyncThunk(
   "users/updateUserPassword",
   async (
-    { id, password }: { id: number; password: string },
+    {
+      id,
+      password,
+      currentPassword,
+    }: { id: number; password: string; currentPassword?: string },
     { rejectWithValue },
   ) => {
     try {
-      await UserService.updateUserPassword(id, password);
-      return { id, password };
+      await UserService.updateUserPassword(id, password, currentPassword);
+      // Never put passwords in actions/state (Redux DevTools shows both).
+      return { id };
     } catch (error: unknown) {
-      return rejectWithValue(
-        error instanceof Error ? error.message : "Failed to update password",
-      );
+      return rejectWithValue(getApiErrorMessage(error, "Failed to update password"));
     }
   },
 );
@@ -223,13 +205,9 @@ export const updateUserTemporalPassword = createAsyncThunk(
   ) => {
     try {
       await UserService.updateUserTemporalPassword(id, temporalPassword);
-      return { id, temporalPassword };
+      return { id };
     } catch (error: unknown) {
-      return rejectWithValue(
-        error instanceof Error
-          ? error.message
-          : "Failed to update temporal password",
-      );
+      return rejectWithValue(getApiErrorMessage(error, "Failed to update temporal password"));
     }
   },
 );
@@ -245,9 +223,7 @@ export const updateUserAvatar = createAsyncThunk(
       const result = await UserService.uploadAvatar(id, file);
       return { id, avatar: result.avatar };
     } catch (error: unknown) {
-      return rejectWithValue(
-        error instanceof Error ? error.message : "Failed to upload avatar",
-      );
+      return rejectWithValue(getApiErrorMessage(error, "Failed to upload avatar"));
     }
   },
 );
@@ -263,9 +239,7 @@ export const updateUserSettings = createAsyncThunk(
       const updatedUser = await UserService.updateUserSettings(id, settings);
       return updatedUser;
     } catch (error: unknown) {
-      return rejectWithValue(
-        error instanceof Error ? error.message : "Failed to update user settings",
-      );
+      return rejectWithValue(getApiErrorMessage(error, "Failed to update user settings"));
     }
   },
 );
@@ -278,9 +252,7 @@ export const removeUserAvatar = createAsyncThunk(
       await UserService.deleteAvatar(id);
       return { id, avatar: null };
     } catch (error: unknown) {
-      return rejectWithValue(
-        error instanceof Error ? error.message : "Failed to delete avatar",
-      );
+      return rejectWithValue(getApiErrorMessage(error, "Failed to delete avatar"));
     }
   },
 );
@@ -292,9 +264,7 @@ export const deleteUser = createAsyncThunk(
       await UserService.deleteUser(id);
       return id;
     } catch (error: unknown) {
-      return rejectWithValue(
-        error instanceof Error ? error.message : "Failed to delete user",
-      );
+      return rejectWithValue(getApiErrorMessage(error, "Failed to delete user"));
     }
   },
 );
@@ -385,25 +355,7 @@ const userSlice = createSlice({
           );
         },
       )
-      .addCase(
-        updateUserPassword.fulfilled,
-        (state, action: PayloadAction<{ id: number; password: string }>) => {
-          // Update a user's password in the state (not stored for security)
-        },
-      )
-      .addCase(
-        updateUserTemporalPassword.fulfilled,
-        (
-          state,
-          action: PayloadAction<{ id: number; temporalPassword: string }>,
-        ) => {
-          state.users = state.users.map((user) =>
-            user.id === action.payload.id
-              ? { ...user, temporalPassword: action.payload.temporalPassword }
-              : user,
-          );
-        },
-      )
+
       .addCase(updateUserSettings.fulfilled, (state, action: PayloadAction<User>) => {
         state.currentUser = action.payload;
         state.users = state.users.map((user) =>

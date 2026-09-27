@@ -1,0 +1,17 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "audit-api",
+      "runtimeExecutable": "bash",
+      "runtimeArgs": ["-c", "cd apps/backend && DATABASE_URL= PGDATABASE=choferes_audit PORT=5055 REACT_APP_UI_URL=http://localhost:3055 npx ts-node src/server.ts"],
+      "port": 5055
+    },
+    {
+      "name": "audit-ui",
+      "runtimeExecutable": "bash",
+      "runtimeArgs": ["-c", "cd apps/frontend && PORT=3055 BROWSER=none REACT_APP_API_URL=http://localhost:5055 npx react-scripts start"],
+      "port": 3055
+    }
+  ]
+}

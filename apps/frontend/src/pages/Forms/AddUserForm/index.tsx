@@ -12,7 +12,7 @@ import {
   useMediaQuery,
   Typography,
 } from "@mui/material";
-import { RotateCcw, Eye, EyeOff, User, Mail, Lock, Users } from "lucide-react";
+import { IconEye, IconEyeOff, IconLock, IconMail, IconRotate, IconUser, IconUsers } from "@tabler/icons-react";
 import OutlinedInput from "@mui/material/OutlinedInput";
 import { Role } from "../../../models/Role";
 import TextfieldComponent from "../../../components/Textfield/Textfield.component";
@@ -181,13 +181,15 @@ const AddUserForm: React.FC<AddUserFormProps> = ({
         <Grid item xs={12} sm={6}>
           <TextfieldComponent
             placeholder={FORMS.ADD_USER.FIRST_NAME_PLACEHOLDER}
+
+            label={FORMS.ADD_USER.FIRST_NAME_LABEL}
             variant="outlined"
             fullWidth
             value={formData.firstName}
             onChange={(e) => handleFieldChange("firstName", e.target.value)}
             error={errors.firstName !== ""}
             helperText={errors.firstName}
-            icon={<User style={iconStyle} />}
+            icon={<IconUser style={iconStyle} />}
             sx={formControl(theme)}
           />
         </Grid>
@@ -195,13 +197,15 @@ const AddUserForm: React.FC<AddUserFormProps> = ({
         <Grid item xs={12} sm={6}>
           <TextfieldComponent
             placeholder={FORMS.ADD_USER.LAST_NAME_PLACEHOLDER}
+
+            label={FORMS.ADD_USER.LAST_NAME_LABEL}
             variant="outlined"
             fullWidth
             value={formData.lastName}
             onChange={(e) => handleFieldChange("lastName", e.target.value)}
             error={errors.lastName !== ""}
             helperText={errors.lastName}
-            icon={<User style={iconStyle} />}
+            icon={<IconUser style={iconStyle} />}
             sx={formControl(theme)}
           />
         </Grid>
@@ -224,13 +228,15 @@ const AddUserForm: React.FC<AddUserFormProps> = ({
         <Grid item xs={12} sm={6}>
           <TextfieldComponent
             placeholder={FORMS.ADD_USER.EMAIL_PLACEHOLDER}
+
+            label={FORMS.ADD_USER.EMAIL_LABEL}
             variant="outlined"
             fullWidth
             value={formData.email}
             onChange={(e) => handleFieldChange("email", e.target.value)}
             error={errors.email !== ""}
             helperText={errors.email}
-            icon={<Mail style={iconStyle} />}
+            icon={<IconMail style={iconStyle} />}
             sx={formControl(theme)}
           />
         </Grid>
@@ -238,13 +244,15 @@ const AddUserForm: React.FC<AddUserFormProps> = ({
         <Grid item xs={12} sm={6}>
           <TextfieldComponent
             placeholder={FORMS.ADD_USER.USERNAME_PLACEHOLDER}
+
+            label={FORMS.ADD_USER.USERNAME_LABEL}
             variant="outlined"
             fullWidth
             value={formData.username}
             onChange={(e) => handleFieldChange("username", e.target.value)}
             error={errors.username !== ""}
             helperText={errors.username}
-            icon={<User style={iconStyle} />}
+            icon={<IconUser style={iconStyle} />}
             sx={formControl(theme)}
           />
         </Grid>
@@ -252,6 +260,8 @@ const AddUserForm: React.FC<AddUserFormProps> = ({
         <Grid item xs={12} sm={6}>
           <TextfieldComponent
             placeholder={FORMS.ADD_USER.PASSWORD_PLACEHOLDER}
+
+            label={FORMS.ADD_USER.PASSWORD_LABEL}
             variant="outlined"
             fullWidth
             type={showPassword ? "text" : "password"}
@@ -259,11 +269,11 @@ const AddUserForm: React.FC<AddUserFormProps> = ({
             onChange={(e) => handleFieldChange("password", e.target.value)}
             error={errors.password !== ""}
             helperText={errors.password}
-            icon={<Lock style={iconStyle} />}
+            icon={<IconLock style={iconStyle} />}
             sx={formControl(theme)}
             endAdornment={
               <IconButton onClick={handleTogglePassword} edge="end" size="small">
-                {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+                {showPassword ? <IconEyeOff size={20} /> : <IconEye size={20} />}
               </IconButton>
             }
           />
@@ -296,7 +306,7 @@ const AddUserForm: React.FC<AddUserFormProps> = ({
                   placeholder={FORMS.ADD_USER.ROLE_LABEL}
                   startAdornment={
                     <InputAdornment position="start">
-                      <Users style={iconStyle} />
+                      <IconUsers style={iconStyle} />
                     </InputAdornment>
                   }
                 />
@@ -344,7 +354,7 @@ const AddUserForm: React.FC<AddUserFormProps> = ({
             <Button
               variant="text"
               onClick={handleClearForm}
-              startIcon={<RotateCcw size={16} />}
+              startIcon={<IconRotate size={16} />}
               fullWidth={isSmallScreen}
               sx={clearButton}
             >

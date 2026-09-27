@@ -24,8 +24,6 @@ export type PermissionModule =
   | "Usuarios"
   | "Admin"
   | "Resúmenes"
-  | "Mensajería"
-  | "Courier"
   | "Pagos"
   | "Vacaciones"
   | "Licencias"
@@ -160,13 +158,6 @@ export const PERMISSION_CATALOG = {
     label: "Editar Resumen Mensual",
   },
 
-  // ── Mensajería / Courier ─────────────────────────────────────────────────────
-  VIEW_COURIER_SERVICE: { code: "messaging:view", module: "Mensajería", label: "Ver Mensajería" },
-  VIEW_COURIER: { code: "courier:view", module: "Courier", label: "Ver Courier" },
-  CREATE_COURIER: { code: "courier:create", module: "Courier", label: "Crear Courier" },
-  EDIT_COURIER: { code: "courier:edit", module: "Courier", label: "Editar Courier" },
-  DELETE_COURIER: { code: "courier:delete", module: "Courier", label: "Eliminar Courier" },
-
   // ── Pagos ────────────────────────────────────────────────────────────────────
   VIEW_PAYMENTS: { code: "payments:view", module: "Pagos", label: "Ver Pagos" },
   CREATE_PAYMENT: { code: "payments:create", module: "Pagos", label: "Crear Pago" },
@@ -245,8 +236,6 @@ export const PERMISSION_MODULE_ORDER: readonly PermissionModule[] = [
   "Vehículos",
   "Usuarios",
   "Resúmenes",
-  "Mensajería",
-  "Courier",
   "Pagos",
   "Vacaciones",
   "Licencias",
@@ -289,7 +278,6 @@ export const DEFAULT_ROLE_PERMISSIONS: Readonly<Record<string, readonly string[]
     "vehicles:view",
     "vehicles:export:excel",
     "vehicles:export:pdf",
-    "messaging:view",
     "payments:view",
     "payments:create",
     "payments:edit",

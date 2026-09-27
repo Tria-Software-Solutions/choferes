@@ -4,14 +4,18 @@ import {
   Box,
   Button,
   Chip,
-  FormControl,
-  InputLabel,
+  Grid,
   MenuItem,
-  Select,
-  TextField,
   Typography,
+  useMediaQuery,
+  useTheme,
 } from "@mui/material";
-import { FileText, Loader2, Paperclip, Save, Trash2 } from "lucide-react";
+import { IconCheck, IconFileDescription, IconFileText, IconFlag, IconLoader2, IconNotebook, IconPaperclip, IconTrash, IconX } from "@tabler/icons-react";
+import { DatePicker } from "@mui/x-date-pickers/DatePicker";
+import { LocalizationProvider } from "@mui/x-date-pickers";
+import { AdapterDateFns } from "@mui/x-date-pickers/AdapterDateFns";
+import { es } from "date-fns/locale";
+import { formatStoredDate, parseStoredDate } from "../../../utils/dates";
 import { Employee } from "../../../models/Employee";
 import {
   DisciplinaryAction,
@@ -28,6 +32,14 @@ import {
 } from "../../../store/slices/disciplinarySlice";
 import { useAppNotifications } from "../../../components/Snackbar/Snackbar.component";
 import DialogComponent from "../../../components/Dialog/Dialog.component";
+import TextfieldComponent from "../../../components/Textfield/Textfield.component";
+import PlaceholderSelect from "../../../components/PlaceholderSelect/PlaceholderSelect.component";
+import {
+  actionsBox,
+  actionsInnerBox,
+  cancelButton,
+  submitButton,
+} from "../../Forms/sharedStyles";
 
 interface DisciplinaryFormDialogProps {
   open: boolean;
@@ -64,6 +76,8 @@ const DisciplinaryFormDialog: React.FC<DisciplinaryFormDialogProps> = ({
   onSaved,
 }) => {
   const dispatch = useDispatch<AppDispatch>();
+  const theme = useTheme();
+  const isSmallScreen = useMediaQuery(theme.breakpoints.down("sm"));
   const { showNotification } = useAppNotifications();
   const fileInputRef = useRef<HTMLInputElement | null>(null);
 
@@ -173,22 +187,31 @@ const DisciplinaryFormDialog: React.FC<DisciplinaryFormDialogProps> = ({
       hideActions
       paperSx={{ maxWidth: 560 }}
     >
-      <Box sx={{ display: "flex", flexDirection: "column", gap: 2, pt: 1 }}>
-        <Box sx={{ display: "grid", gridTemplateColumns: { xs: "1fr", sm: "1fr 1fr" }, gap: 2 }}>
-          <TextField
-            label="Fecha"
-            type="date"
-            size="small"
-            value={form.actionDate}
-            onChange={(event) => setForm((prev) => ({ ...prev, actionDate: event.target.value }))}
-            InputLabelProps={{ shrink: true }}
-            fullWidth
-          />
-          <FormControl size="small" fullWidth>
-            <InputLabel id="disciplinary-type-label">Tipo</InputLabel>
-            <Select
-              labelId="disciplinary-type-label"
+      <Box sx={{ display: "flex", flexDirection: "column", gap: 2.5, pt: 1 }}>
+        <Grid container spacing={{ xs: 2, sm: 2.5 }}>
+          <Grid item xs={12} sm={6}>
+            <LocalizationProvider dateAdapter={AdapterDateFns} adapterLocale={es}>
+              <DatePicker
+                label="Fecha"
+                value={parseStoredDate(form.actionDate)}
+                onChange={(date) =>
+                  setForm((prev) => ({ ...prev, actionDate: formatStoredDate(date) }))
+                }
+                format="d MMM yyyy"
+                slots={{ toolbar: () => null }}
+                slotProps={{ textField: { size: "small", fullWidth: true } }}
+              />
+            </LocalizationProvider>
+          </Grid>
+          <Grid item xs={12} sm={6}>
+            <PlaceholderSelect
               label="Tipo"
+              placeholder="Selecciona"
+              icon={<IconFileDescription size={20} color={theme.palette.text.secondary} />}
+              formatValue={(value) =>
+                DISCIPLINARY_ACTION_TYPE_LABELS[value as keyof typeof DISCIPLINARY_ACTION_TYPE_LABELS] ??
+                String(value)
+              }
               value={form.type}
               onChange={(event) => setForm((prev) => ({ ...prev, type: event.target.value }))}
             >
@@ -197,29 +220,31 @@ const DisciplinaryFormDialog: React.FC<DisciplinaryFormDialogProps> = ({
                   {DISCIPLINARY_ACTION_TYPE_LABELS[type]}
                 </MenuItem>
               ))}
-            </Select>
-          </FormControl>
-        </Box>
+            </PlaceholderSelect>
+          </Grid>
+        </Grid>
 
-        <FormControl size="small" fullWidth>
-          <InputLabel id="disciplinary-severity-label">Gravedad</InputLabel>
-          <Select
-            labelId="disciplinary-severity-label"
-            label="Gravedad"
-            value={form.severity}
-            onChange={(event) => setForm((prev) => ({ ...prev, severity: event.target.value }))}
-          >
-            {DISCIPLINARY_SEVERITIES.map((severity) => (
-              <MenuItem key={severity} value={severity}>
-                {DISCIPLINARY_SEVERITY_LABELS[severity]}
-              </MenuItem>
-            ))}
-          </Select>
-        </FormControl>
+        <PlaceholderSelect
+          label="Gravedad"
+          placeholder="Selecciona"
+          icon={<IconFlag size={20} color={theme.palette.text.secondary} />}
+          formatValue={(value) =>
+            DISCIPLINARY_SEVERITY_LABELS[value as keyof typeof DISCIPLINARY_SEVERITY_LABELS] ?? String(value)
+          }
+          value={form.severity}
+          onChange={(event) => setForm((prev) => ({ ...prev, severity: event.target.value }))}
+        >
+          {DISCIPLINARY_SEVERITIES.map((severity) => (
+            <MenuItem key={severity} value={severity}>
+              {DISCIPLINARY_SEVERITY_LABELS[severity]}
+            </MenuItem>
+          ))}
+        </PlaceholderSelect>
 
-        <TextField
+        <TextfieldComponent
+          name="reason"
           label="Motivo"
-          size="small"
+          icon={<IconFileDescription size={20} color={theme.palette.text.secondary} />}
           value={form.reason}
           onChange={(event) => setForm((prev) => ({ ...prev, reason: event.target.value }))}
           inputProps={{ maxLength: 500 }}
@@ -227,9 +252,10 @@ const DisciplinaryFormDialog: React.FC<DisciplinaryFormDialogProps> = ({
           fullWidth
         />
 
-        <TextField
+        <TextfieldComponent
+          name="description"
           label="Descripción"
-          size="small"
+          icon={<IconNotebook size={20} color={theme.palette.text.secondary} />}
           value={form.description}
           onChange={(event) => setForm((prev) => ({ ...prev, description: event.target.value }))}
           multiline
@@ -245,7 +271,7 @@ const DisciplinaryFormDialog: React.FC<DisciplinaryFormDialogProps> = ({
             </Typography>
             <Button
               size="small"
-              startIcon={<Paperclip size={15} />}
+              startIcon={<IconPaperclip size={15} />}
               onClick={() => fileInputRef.current?.click()}
               disabled={attachments.length >= MAX_ATTACHMENTS}
             >
@@ -266,10 +292,10 @@ const DisciplinaryFormDialog: React.FC<DisciplinaryFormDialogProps> = ({
               {attachments.map((attachment, index) => (
                 <Chip
                   key={`${attachment.name}-${index}`}
-                  icon={<FileText size={14} />}
+                  icon={<IconFileText size={14} />}
                   label={`${attachment.name} · ${formatSize(attachment.size)}`}
                   onDelete={() => removeAttachment(index)}
-                  deleteIcon={<Trash2 size={14} />}
+                  deleteIcon={<IconTrash size={14} />}
                   variant="outlined"
                   sx={{ maxWidth: "100%" }}
                 />
@@ -278,18 +304,29 @@ const DisciplinaryFormDialog: React.FC<DisciplinaryFormDialogProps> = ({
           )}
         </Box>
 
-        <Box sx={{ display: "flex", justifyContent: "flex-end", gap: 1.5 }}>
-          <Button onClick={onClose} disabled={isSubmitting}>
+        <Box sx={actionsBox(theme)}>
+          <Button
+            variant="text"
+            startIcon={<IconX size={18} />}
+            onClick={onClose}
+            disabled={isSubmitting}
+            fullWidth={isSmallScreen}
+            sx={cancelButton}
+          >
             Cancelar
           </Button>
-          <Button
-            variant="contained"
-            startIcon={isSubmitting ? <Loader2 size={16} /> : <Save size={16} />}
-            onClick={() => void handleSubmit()}
-            disabled={!canSubmit}
-          >
-            {isEditing ? "Guardar" : "Registrar"}
-          </Button>
+          <Box sx={actionsInnerBox}>
+            <Button
+              variant="text"
+              startIcon={isSubmitting ? <IconLoader2 size={18} /> : <IconCheck size={18} />}
+              onClick={() => void handleSubmit()}
+              disabled={!canSubmit}
+              fullWidth={isSmallScreen}
+              sx={submitButton}
+            >
+              {isEditing ? "Guardar" : "Registrar"}
+            </Button>
+          </Box>
         </Box>
       </Box>
     </DialogComponent>

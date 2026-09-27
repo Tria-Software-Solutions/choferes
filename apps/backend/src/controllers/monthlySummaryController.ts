@@ -2,6 +2,7 @@
 // Provides endpoints for CRUD operations and fetching summaries for employees
 import { Request, Response } from "express";
 import * as monthlySummaryService from "../services/monthlySummaryService";
+import { sendServerError } from "../utils/errors";
 
 // Get all monthly summaries (paginated)
 export const getMonthlySummaries = async (req: Request, res: Response) => {
@@ -11,7 +12,7 @@ export const getMonthlySummaries = async (req: Request, res: Response) => {
     );
     return res.status(200).json(result);
   } catch (error) {
-    return res.status(500).json({ message: "Error fetching MonthlySummaries", error });
+    return sendServerError(res, "Error fetching MonthlySummaries", error);
   }
 };
 
@@ -28,7 +29,7 @@ export const getCurrentMonthlySummary = async (req: Request, res: Response) => {
     }
     return res.status(404).json({ message: "MonthlySummary not found" });
   } catch (error) {
-    return res.status(500).json({ message: "Error fetching MonthlySummary", error });
+    return sendServerError(res, "Error fetching MonthlySummary", error);
   }
 };
 
@@ -51,7 +52,7 @@ export const createMonthlySummary = async (req: Request, res: Response) => {
         code: "FOREIGN_KEY_VIOLATION",
       });
     }
-    return res.status(500).json({ message: "Error creating MonthlySummary", error });
+    return sendServerError(res, "Error creating MonthlySummary", error);
   }
 };
 
@@ -65,7 +66,7 @@ export const updateMonthlySummary = async (req: Request, res: Response) => {
     }
     return res.status(404).json({ message: "MonthlySummary not found" });
   } catch (error) {
-    return res.status(500).json({ message: "Error updating MonthlySummary", error });
+    return sendServerError(res, "Error updating MonthlySummary", error);
   }
 };
 
@@ -79,6 +80,6 @@ export const deleteMonthlySummary = async (req: Request, res: Response) => {
     }
     return res.status(404).json({ message: "MonthlySummary not found" });
   } catch (error) {
-    return res.status(500).json({ message: "Error deleting MonthlySummary", error });
+    return sendServerError(res, "Error deleting MonthlySummary", error);
   }
 };

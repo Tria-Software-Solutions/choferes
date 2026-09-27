@@ -2,6 +2,9 @@
 // Provides endpoints for managing user-role relationships
 import { Request, Response } from "express";
 import * as userRoleService from "../services/userRoleService";
+import * as accessGrantService from "../services/accessGrantService";
+import type { AuthenticatedRequest } from "../middleware/authorize";
+import { sendServerError, sendError } from "../utils/errors";
 
 // Get all user-role assignments
 export const getUserRoles = async (req: Request, res: Response) => {
@@ -9,7 +12,7 @@ export const getUserRoles = async (req: Request, res: Response) => {
     const roles = await userRoleService.getUserRoles();
     return res.status(200).json(roles);
   } catch (error) {
-    return res.status(400).json({ message: "Error fetching UserRoles", error });
+    return sendServerError(res, "Error fetching UserRoles", error);
   }
 };
 
@@ -22,7 +25,7 @@ export const getUserRoleByUserId = async (req: Request, res: Response) => {
     }
     return res.status(200).json(user);
   } catch (error) {
-    return res.status(500).json({ message: "Error fetching UserRole", error });
+    return sendServerError(res, "Error fetching UserRole", error);
   }
 };
 
@@ -35,31 +38,57 @@ export const getUserRoleByRoleId = async (req: Request, res: Response) => {
     }
     return res.status(200).json(role);
   } catch (error) {
-    return res.status(500).json({ message: "Error fetching UserRole", error });
+    return sendServerError(res, "Error fetching UserRole", error);
   }
+};
+
+const toPositiveInt = (value: unknown): number | null => {
+  const parsed = Number(value);
+  return Number.isInteger(parsed) && parsed > 0 ? parsed : null;
 };
 
 // Create a new user-role assignment
 export const createUserRole = async (req: Request, res: Response) => {
   try {
-    const userRole = await userRoleService.createUserRole(req.body);
+    const actor = (req as AuthenticatedRequest).user;
+    const userId = toPositiveInt(req.body?.userId);
+    const roleId = toPositiveInt(req.body?.roleId);
+    if (!actor) return res.status(401).json({ message: "Unauthorized" });
+    if (!userId || !roleId) {
+      return res.status(400).json({ message: "userId y roleId deben ser enteros positivos" });
+    }
+
+    const denial = await accessGrantService.checkRoleAssignment(actor, userId, roleId);
+    if (denial) return res.status(denial.status).json({ message: denial.message });
+
+    const userRole = await userRoleService.createUserRole({ userId, roleId } as never);
     return res.status(201).json(userRole);
   } catch (error) {
-    return res.status(400).json({ message: "Error assigning UserRole", error });
+    return sendError(res, 400, "Error assigning UserRole", error);
   }
 };
 
-// Update a user-role assignment by ID
+// Update the role of a user (the :id param is the user id)
 export const updateUserRole = async (req: Request, res: Response) => {
   try {
-    const id = parseInt(req.params.id, 10);
-    const updatedUserRole = await userRoleService.updateUserRole(Number(id), req.body.roleId);
+    const actor = (req as AuthenticatedRequest).user;
+    const userId = toPositiveInt(req.params.id);
+    const roleId = toPositiveInt(req.body?.roleId);
+    if (!actor) return res.status(401).json({ message: "Unauthorized" });
+    if (!userId || !roleId) {
+      return res.status(400).json({ message: "userId y roleId deben ser enteros positivos" });
+    }
+
+    const denial = await accessGrantService.checkRoleAssignment(actor, userId, roleId);
+    if (denial) return res.status(denial.status).json({ message: denial.message });
+
+    const updatedUserRole = await userRoleService.updateUserRole(userId, roleId);
     if (updatedUserRole) {
       return res.status(200).json(updatedUserRole);
     }
     return res.status(404).json({ message: "UserRole not found" });
   } catch (error) {
-    return res.status(500).json({ message: "Error updating UserRole", error });
+    return sendServerError(res, "Error updating UserRole", error);
   }
 };
 
@@ -73,6 +102,6 @@ export const deleteUserRole = async (req: Request, res: Response) => {
     }
     return res.status(404).json({ message: "UserRole not found" });
   } catch (error) {
-    return res.status(500).json({ message: "Error deleting UserRole", error });
+    return sendServerError(res, "Error deleting UserRole", error);
   }
 };

@@ -1,7 +1,19 @@
-// Client-side generation of the biweekly payment slip (boleta quincenal).
-// Reuses the same lazy jsPDF + logo infra as utils/export.ts.
-import { Payment } from "../models/Payment";
-import { loadJSPDF, loadLogoDataUrl } from "./export";
+// Client-side generation of the biweekly pay slip ("Comprobante de pago").
+// Reproduces the company's Word template: letter page, both logos over a
+// thick rule, centered title, "PERIODO", the concept table with grey
+// borders, the currency note and the legal footer. The same PDF is downloaded
+// and attached to the email, so what the user checks is what is sent.
+import { Payment, PAYMENT_CONCEPTS } from "../models/Payment";
+import { loadJSPDF } from "./export";
+import shieldLogo from "../assets/images/boleta/logo-escudo.png";
+import brandLogo from "../assets/images/boleta/logo-su-auto.png";
+import {
+  COMPANY,
+  COMPANY_FOOTER_TEXT,
+  formatBoletaPeriod,
+  formatColones,
+  getPeriodEndISO,
+} from "./boletaFormat";
 
 const CURRENCY_LABELS: Record<string, string> = {
   CRC: "₡",
@@ -43,221 +55,157 @@ export const getPaymentFileName = (payment: Payment): string => {
     : "empleado"
   )
     .toLowerCase()
+    .normalize("NFD")
+    .replace(/[̀-ͯ]/g, "")
     .replace(/\s+/g, "-")
     .replace(/[^\w-]/g, "");
-  return `boleta-Q${payment.biweekNumber}-${payment.year}-${name}.pdf`;
+  const period = getPeriodEndISO(payment.biweekNumber, payment.year);
+  return `comprobante-de-pago-${period}-${name}.pdf`;
 };
 
-const STATUS_LABELS: Record<string, string> = {
-  pending: "Pendiente",
-  sent: "Enviada",
-  cancelled: "Cancelada",
+const imageCache = new Map<string, string | null>();
+
+const loadImageDataUrl = async (src: string): Promise<string | null> => {
+  if (imageCache.has(src)) return imageCache.get(src) ?? null;
+  try {
+    const blob = await (await fetch(src)).blob();
+    const dataUrl = await new Promise<string>((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = () => resolve(reader.result as string);
+      reader.onerror = () => reject(reader.error);
+      reader.readAsDataURL(blob);
+    });
+    imageCache.set(src, dataUrl);
+    return dataUrl;
+  } catch {
+    imageCache.set(src, null);
+    return null;
+  }
+};
+
+// Word template geometry (points): letter page, 1701 twips side margins.
+const PAGE = { marginX: 85, headerTop: 35 };
+const INK: [number, number, number] = [36, 36, 36]; // #242424
+const GRID: [number, number, number] = [191, 191, 191]; // #BFBFBF
+const LINK: [number, number, number] = [31, 73, 125]; // #1F497D
+
+export const boletaRows = (payment: Payment): Array<{ label: string; value: string }> => {
+  const employeeName = payment.employee
+    ? `${payment.employee.firstName} ${payment.employee.lastName}`.trim()
+    : `Empleado #${payment.employeeId}`;
+  return [
+    { label: "Nombre", value: employeeName },
+    ...PAYMENT_CONCEPTS.map(({ field, label }) => ({
+      label,
+      value: formatColones(Number(payment[field] ?? 0)),
+    })),
+    { label: "Total a pagar", value: formatColones(Number(payment.totalPayable ?? 0)) },
+  ];
 };
 
 /**
- * Builds the boleta PDF. Returns the jsPDF instance so callers can either
- * save it locally or read it as base64 to attach it to the email endpoint.
+ * Builds the "Comprobante de pago" PDF. Returns the jsPDF instance so callers
+ * can either save it locally or read it as base64 for the email endpoint.
  */
 export async function buildPaymentSlipPdf(payment: Payment) {
   const PDFDocument = await loadJSPDF();
   const doc = new PDFDocument({ unit: "pt", format: "letter" });
   const pageWidth = doc.internal.pageSize.getWidth();
   const pageHeight = doc.internal.pageSize.getHeight();
-  const margin = 48;
+  const left = PAGE.marginX;
+  const right = pageWidth - PAGE.marginX;
 
-  const currency = payment.currency || "CRC";
-  const employeeName = payment.employee
-    ? `${payment.employee.firstName} ${payment.employee.lastName}`.trim()
-    : `Empleado #${payment.employeeId}`;
-
-  // ── Header ────────────────────────────────────────────────────────────────
-  const logoDataUrl = await loadLogoDataUrl();
-  if (logoDataUrl) {
-    try {
-      doc.addImage(logoDataUrl, "PNG", margin, 36, 56, 56);
-    } catch {
-      // Corrupt/unsupported logo — draw the title without it.
+  // ── Header: shield (left) and "Su auto… nuestro chofer." (right) ──────────
+  const [shield, brand] = await Promise.all([
+    loadImageDataUrl(shieldLogo),
+    loadImageDataUrl(brandLogo),
+  ]);
+  const headerLeft = left - 9; // paragraph indent of the template header
+  const headerRight = right + 38;
+  const shieldSize = { w: 100, h: 106 };
+  const brandSize = { w: 86, h: 62 };
+  const headerBottom = PAGE.headerTop + shieldSize.h;
+  try {
+    if (shield) {
+      doc.addImage(shield, "PNG", headerLeft, PAGE.headerTop, shieldSize.w, shieldSize.h);
     }
-  }
-
-  doc.setTextColor(30, 30, 30);
-  doc.setFont("helvetica", "bold");
-  doc.setFontSize(17);
-  doc.text("Boleta de pago quincenal", margin + (logoDataUrl ? 70 : 0), 58);
-
-  doc.setFont("helvetica", "normal");
-  doc.setFontSize(10);
-  doc.setTextColor(110, 110, 110);
-  doc.text("Choferes de Alquiler", margin + (logoDataUrl ? 70 : 0), 74);
-
-  doc.setFontSize(10);
-  doc.setTextColor(60, 60, 60);
-  doc.text(
-    `Quincena ${payment.biweekNumber} · ${payment.year}`,
-    pageWidth - margin,
-    52,
-    { align: "right" },
-  );
-  doc.text(getBiweeklyPeriodLabel(payment.biweekNumber, payment.year), pageWidth - margin, 68, {
-    align: "right",
-  });
-  if (payment.payDate) {
-    doc.text(`Fecha de pago: ${formatPaymentDate(payment.payDate)}`, pageWidth - margin, 84, {
-      align: "right",
-    });
-  }
-
-  doc.setDrawColor(224, 224, 224);
-  doc.setLineWidth(1);
-  doc.line(margin, 104, pageWidth - margin, 104);
-
-  // ── Employee block ────────────────────────────────────────────────────────
-  let y = 130;
-  doc.setFont("helvetica", "bold");
-  doc.setFontSize(12);
-  doc.setTextColor(30, 30, 30);
-  doc.text(employeeName, margin, y);
-
-  if (payment.employee?.email) {
-    doc.setFont("helvetica", "normal");
-    doc.setFontSize(10);
-    doc.setTextColor(110, 110, 110);
-    doc.text(payment.employee.email, margin, y + 16);
-    y += 16;
-  }
-
-  if (payment.status) {
-    doc.setFont("helvetica", "normal");
-    doc.setFontSize(9);
-    doc.setTextColor(130, 130, 130);
-    doc.text(`Estado: ${STATUS_LABELS[payment.status] ?? payment.status}`, pageWidth - margin, 130, {
-      align: "right",
-    });
-    if (payment.emailSentAt) {
-      doc.text(
-        `Enviada por correo: ${formatPaymentDate(payment.emailSentAt)}`,
-        pageWidth - margin,
-        146,
-        { align: "right" },
+    if (brand) {
+      doc.addImage(
+        brand,
+        "PNG",
+        headerRight - brandSize.w,
+        headerBottom - brandSize.h,
+        brandSize.w,
+        brandSize.h,
       );
     }
+  } catch {
+    // Unreadable logo — keep the document without it.
   }
+  doc.setDrawColor(0, 0, 0);
+  doc.setLineWidth(2.25);
+  doc.line(headerLeft, headerBottom + 6, headerRight, headerBottom + 6);
 
-  // ── Amounts table ─────────────────────────────────────────────────────────
-  y += 40;
-  const hourlyRate = payment.employee?.hourlyRate;
-  const earnings: Array<{ label: string; value: string; strong?: boolean }> = [];
-
-  earnings.push({
-    label: "Salario ordinario",
-    value: formatMoney(payment.regularSalary, currency),
-    strong: true,
-  });
-  if (hourlyRate != null) {
-    earnings.push({
-      label: "Tarifa por hora",
-      value: formatMoney(Number(hourlyRate), currency),
-    });
-  }
-  earnings.push({ label: "Horas extra", value: formatMoney(payment.overtimePay, currency) });
-  earnings.push({ label: "Millaje", value: formatMoney(payment.mileage, currency) });
-  earnings.push({ label: "Otros ingresos", value: formatMoney(payment.others, currency) });
-
-  const deductions: Array<{ label: string; value: string }> = [
-    { label: "Cargas sociales", value: `− ${formatMoney(payment.socialCharges, currency)}` },
-    { label: "Deducciones", value: `− ${formatMoney(payment.deductions, currency)}` },
-  ];
-
-  const rowHeight = 24;
-  const labelX = margin + 8;
-  const valueX = pageWidth - margin - 8;
-
-  const drawSectionHeader = (title: string) => {
-    doc.setFillColor(246, 246, 248);
-    doc.roundedRect(margin, y, pageWidth - margin * 2, rowHeight, 4, 4, "F");
-    doc.setFont("helvetica", "bold");
-    doc.setFontSize(10);
-    doc.setTextColor(80, 80, 80);
-    doc.text(title, labelX, y + 16);
-    y += rowHeight;
-  };
-
-  const drawRow = (
-    label: string,
-    value: string,
-    options: { bold?: boolean; muted?: boolean } = {},
-  ) => {
-    doc.setFont("helvetica", options.bold ? "bold" : "normal");
-    doc.setFontSize(options.bold ? 11 : 10);
-    doc.setTextColor(options.muted ? 130 : 30, options.muted ? 130 : 30, options.muted ? 130 : 30);
-    doc.text(label, labelX, y + 16);
-    doc.text(value, valueX, y + 16, { align: "right" });
-    y += rowHeight;
-  };
-
-  drawSectionHeader("Ingresos");
-  earnings.forEach((row) => drawRow(row.label, row.value, { bold: row.strong }));
-  y += 8;
-  drawSectionHeader("Deducciones");
-  deductions.forEach((row) => drawRow(row.label, row.value, { muted: true }));
-
-  // Total
-  y += 10;
-  doc.setFillColor(236, 244, 255);
-  doc.roundedRect(margin, y, pageWidth - margin * 2, 40, 6, 6, "F");
+  // ── Title and period ──────────────────────────────────────────────────────
+  doc.setTextColor(...INK);
   doc.setFont("helvetica", "bold");
-  doc.setFontSize(13);
-  doc.setTextColor(25, 60, 120);
-  doc.text("Total a pagar", labelX + 4, y + 25);
-  doc.text(formatMoney(payment.totalPayable, currency), valueX - 4, y + 25, {
-    align: "right",
-  });
-  y += 40;
+  doc.setFontSize(12);
+  let y = headerBottom + 44;
+  doc.text("COMPROBANTE DE PAGO", pageWidth / 2, y, { align: "center" });
 
-  if (payment.isManual) {
-    doc.setFont("helvetica", "italic");
-    doc.setFontSize(9);
-    doc.setTextColor(150, 110, 40);
-    doc.text("Montos editados manualmente.", labelX, y + 14);
-    y += 18;
-  }
-
-  // ── Notes ─────────────────────────────────────────────────────────────────
-  if (payment.notes) {
-    y += 8;
-    doc.setFont("helvetica", "bold");
-    doc.setFontSize(10);
-    doc.setTextColor(80, 80, 80);
-    doc.text("Notas", labelX, y + 14);
-    y += 18;
-    doc.setFont("helvetica", "normal");
-    doc.setFontSize(10);
-    doc.setTextColor(90, 90, 90);
-    const lines = doc.splitTextToSize(payment.notes, pageWidth - margin * 2 - 16);
-    doc.text(lines, labelX, y + 14);
-    y += lines.length * 13 + 8;
-  }
-
-  // ── Footer ────────────────────────────────────────────────────────────────
-  doc.setDrawColor(224, 224, 224);
-  doc.line(margin, pageHeight - 52, pageWidth - margin, pageHeight - 52);
+  y += 30;
+  doc.setFontSize(9);
+  const periodLabel = "PERIODO: ";
+  doc.text(periodLabel, left, y);
   doc.setFont("helvetica", "normal");
-  doc.setFontSize(8);
-  doc.setTextColor(150, 150, 150);
   doc.text(
-    `Documento generado el ${formatPaymentDate(new Date())} · Choferes de Alquiler`,
-    margin,
-    pageHeight - 36,
+    formatBoletaPeriod(getPeriodEndISO(payment.biweekNumber, payment.year)),
+    left + doc.getTextWidth(periodLabel),
+    y,
   );
+
+  // ── Concept table (column widths 3415 / 5413 twips) ───────────────────────
+  y += 6;
+  const labelWidth = 170.75;
+  const valueWidth = 270.65;
+  const rowHeight = 17;
+  doc.setDrawColor(...GRID);
+  doc.setLineWidth(0.75);
+  boletaRows(payment).forEach((row, index, rows) => {
+    const isTotal = index === rows.length - 1;
+    doc.rect(left, y, labelWidth, rowHeight);
+    doc.rect(left + labelWidth, y, valueWidth, rowHeight);
+    doc.setFont("helvetica", "bold");
+    doc.text(row.label, left + 5, y + 11.5);
+    doc.setFont("helvetica", isTotal ? "bold" : "normal");
+    doc.text(row.value, left + labelWidth + 5, y + 11.5);
+    y += rowHeight;
+  });
+
+  doc.setFont("helvetica", "normal");
+  doc.text("*Moneda: Colón CR", left + labelWidth + valueWidth, y + 12, { align: "right" });
+
+  // ── Footer: legal line with the website link ──────────────────────────────
+  const footerY = pageHeight - 40;
+  doc.setFontSize(8);
+  const text = `${COMPANY_FOOTER_TEXT} /`;
+  // getTextWidth ignores trailing spaces: add the separating space by hand.
+  const spaceWidth = (doc.getStringUnitWidth(" ") * doc.getFontSize()) / doc.internal.scaleFactor;
+  const textWidth = doc.getTextWidth(text) + spaceWidth;
+  const linkWidth = doc.getTextWidth(COMPANY.website);
+  const startX = (pageWidth - textWidth - linkWidth) / 2;
+  doc.setTextColor(...INK);
+  doc.text(text, startX, footerY);
+  doc.setTextColor(...LINK);
+  doc.textWithLink(COMPANY.website, startX + textWidth, footerY, { url: COMPANY.websiteUrl });
+  doc.setDrawColor(...LINK);
+  doc.setLineWidth(0.4);
+  doc.line(startX + textWidth, footerY + 1.2, startX + textWidth + linkWidth, footerY + 1.2);
+  doc.setTextColor(...INK);
+  doc.text("c.archivo", left, footerY + 12);
 
   return doc;
 }
-
-const formatPaymentDate = (value: string | Date): string => {
-  const date = value instanceof Date ? value : new Date(value);
-  if (Number.isNaN(date.getTime())) return String(value);
-  return date.toLocaleDateString("es-CR", { day: "2-digit", month: "2-digit", year: "numeric" });
-};
 
 /** Downloads the boleta as a PDF file. */
 export async function downloadPaymentSlip(payment: Payment): Promise<void> {

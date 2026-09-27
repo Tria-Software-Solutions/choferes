@@ -32,14 +32,7 @@ import SearchBarComponent from "../../../components/SearchBar/SearchBar.componen
 import AddRoleForm from "../../Forms/AddRoleForm";
 import DialogComponent from "../../../components/Dialog/Dialog.component";
 import PremiumTooltip from "../../../components/PremiumTooltip/PremiumTooltip.component";
-import {
-  CheckCircle,
-  FileEdit,
-  PlusCircle,
-  Shield,
-  Trash2,
-  X,
-} from "lucide-react";
+import { IconCheck, IconCirclePlus, IconPencil, IconPlus, IconShield, IconTrash, IconX } from "@tabler/icons-react";
 import {
   editButtonStyles,
   saveButtonStyles,
@@ -195,7 +188,7 @@ const ManageRoles: React.FC<{ isExpanded?: boolean; hideHeader?: boolean }> = ({
       const updatedRole: Partial<Role> = {
         ...editFields,
       };
-      dispatch(
+      await dispatch(
         updateRole({
           id,
           updatedRole,
@@ -207,7 +200,7 @@ const ManageRoles: React.FC<{ isExpanded?: boolean; hideHeader?: boolean }> = ({
             )
             .map((permission) => permission.id),
         }),
-      );
+      ).unwrap();
       setEditRowId(null);
       setEditFields({ name: "", permissionNames: [] });
       showNotification(NOTIFICATIONS.ROLE_UPDATE_SUCCESS, { severity: 'success', duration: 3000 });
@@ -237,7 +230,7 @@ const ManageRoles: React.FC<{ isExpanded?: boolean; hideHeader?: boolean }> = ({
 
     setIsDeletingRole(true);
     try {
-      await dispatch(deleteRole(roleToDelete));
+      await dispatch(deleteRole(roleToDelete)).unwrap();
       setOpenDeleteDialog(false);
       setRoleToDelete(null);
       showNotification(NOTIFICATIONS.ROLE_DELETE_SUCCESS, { severity: 'success', duration: 3000 });
@@ -286,7 +279,7 @@ const ManageRoles: React.FC<{ isExpanded?: boolean; hideHeader?: boolean }> = ({
           newRole,
           newPermissionIds: roleData.permissions.map((id) => parseInt(id)),
         }),
-      );
+      ).unwrap();
       setOpenAddRoleModal(false);
       showNotification(NOTIFICATIONS.ROLE_CREATE_SUCCESS, { severity: 'success', duration: 3000 });
       
@@ -322,8 +315,10 @@ const ManageRoles: React.FC<{ isExpanded?: boolean; hideHeader?: boolean }> = ({
         elevation={0}
         sx={{
           borderRadius: "16px",
-          border: "1px solid rgba(0,0,0,0.08)",
-          boxShadow: "0 4px 24px rgba(0,0,0,0.08), 0 1px 2px rgba(0,0,0,0.04)",
+          // El borde del token se adapta al modo; hardcodear rgba(0,0,0,…)
+          // dejaba una línea casi invisible sobre el card en dark/high contrast.
+          border: theme.tokens.borders.paper,
+          boxShadow: `0 1px 2px ${theme.tokens.shadows.card}`,
           overflow: "hidden",
           flex: 1,
           minHeight: 0,
@@ -339,7 +334,7 @@ const ManageRoles: React.FC<{ isExpanded?: boolean; hideHeader?: boolean }> = ({
               backgroundColor: theme.palette.background.paper,
               color: theme.palette.text.primary,
               flexShrink: 0,
-              borderBottom: `1px solid ${theme.palette.mode === "dark" ? "rgba(255,255,255,0.06)" : "rgba(0,0,0,0.06)"}`,
+              borderBottom: theme.tokens.borders.hairline,
             }}
           >
             <Box
@@ -356,7 +351,7 @@ const ManageRoles: React.FC<{ isExpanded?: boolean; hideHeader?: boolean }> = ({
                     alignItems: 'center',
                   }}
                 >
-                  <Shield size={20} strokeWidth={1.5} />
+                  <IconShield size={20} stroke={1.5} />
                 </Box>
                 <Box>
                   <Typography
@@ -395,7 +390,7 @@ const ManageRoles: React.FC<{ isExpanded?: boolean; hideHeader?: boolean }> = ({
             backgroundColor: theme.palette.background.paper,
             color: theme.palette.text.primary,
             flexShrink: 0,
-            borderBottom: `1px solid ${theme.palette.mode === "dark" ? "rgba(255,255,255,0.06)" : "rgba(0,0,0,0.06)"}`,
+            borderBottom: theme.tokens.borders.hairline,
           }}
         >
           <Box
@@ -421,7 +416,8 @@ const ManageRoles: React.FC<{ isExpanded?: boolean; hideHeader?: boolean }> = ({
             <Box sx={{ display: { xs: 'none', sm: 'flex' }, gap: 1 }}>
               {canCreateRole && (
                 <Button
-                  variant="outlined"
+                  variant="contained"
+                  startIcon={<IconPlus size={18} />}
                   onClick={handleOpenAddRoleModal}
                 >
                   {DASHBOARD_ROLES.ADD}
@@ -432,10 +428,12 @@ const ManageRoles: React.FC<{ isExpanded?: boolean; hideHeader?: boolean }> = ({
         </Box>
 
         {/* Mobile Add Button */}
-        <Box sx={{ display: { xs: 'flex', sm: 'none' }, p: 2, borderTop: `1px solid ${theme.palette.mode === "dark" ? "rgba(255,255,255,0.08)" : "rgba(0,0,0,0.08)"}` }}>
-          {canCreateRole && (
+        {canCreateRole && (
+        <Box sx={{ display: { xs: 'flex', sm: 'none' }, p: 2, borderTop: theme.tokens.borders.hairline }}>
+          {(
             <Button
-              variant="outlined"
+              variant="contained"
+              startIcon={<IconPlus size={18} />}
               fullWidth
               onClick={handleOpenAddRoleModal}
             >
@@ -443,6 +441,7 @@ const ManageRoles: React.FC<{ isExpanded?: boolean; hideHeader?: boolean }> = ({
             </Button>
           )}
         </Box>
+        )}
 
         {/* Content Section */}
         <Box sx={{ flex: 1, minHeight: 0, display: "flex", flexDirection: "column", overflow: "hidden" }}>
@@ -466,15 +465,15 @@ const ManageRoles: React.FC<{ isExpanded?: boolean; hideHeader?: boolean }> = ({
                       gap: 1.5,
                       px: { xs: 2, sm: 2.5 },
                       py: isEditing ? 1.25 : 1.5,
-                      borderBottom: `1px solid ${theme.palette.mode === "dark" ? "rgba(255,255,255,0.04)" : "rgba(0,0,0,0.04)"}`,
+                      borderBottom: theme.tokens.borders.hairline,
                       backgroundColor: isEditing
-                        ? (theme.palette.mode === "dark" ? "rgba(255,255,255,0.03)" : "rgba(0,0,0,0.02)")
-                        : (i % 2 === 0 ? "transparent" : (theme.palette.mode === "dark" ? "rgba(255,255,255,0.015)" : "rgba(0,0,0,0.012)")),
+                        ? (theme.tokens.colors.hoverSoft)
+                        : (i % 2 === 0 ? "transparent" : (theme.tokens.colors.hoverSoft)),
                       transition: "background-color 0.15s",
                       "&:hover": {
                         backgroundColor: isEditing
-                          ? (theme.palette.mode === "dark" ? "rgba(255,255,255,0.03)" : "rgba(0,0,0,0.02)")
-                          : (theme.palette.mode === "dark" ? "rgba(255,255,255,0.04)" : "rgba(0,0,0,0.025)"),
+                          ? (theme.tokens.colors.hoverSoft)
+                          : (theme.tokens.colors.hover),
                       },
                     }}
                   >
@@ -488,13 +487,13 @@ const ManageRoles: React.FC<{ isExpanded?: boolean; hideHeader?: boolean }> = ({
                             display: "flex",
                             alignItems: "center",
                             justifyContent: "center",
-                            backgroundColor: theme.palette.mode === "dark" ? "rgba(255,255,255,0.06)" : "rgba(0,0,0,0.04)",
+                            backgroundColor: theme.tokens.colors.hover,
                             flexShrink: 0,
                             alignSelf: "flex-start",
                             mt: 1.25,
                           }}
                         >
-                          <Shield size={14} strokeWidth={1.5} />
+                          <IconShield size={14} stroke={1.5} />
                         </Box>
                         <Box
                           sx={{
@@ -560,14 +559,14 @@ const ManageRoles: React.FC<{ isExpanded?: boolean; hideHeader?: boolean }> = ({
                                 disabled={!isEditFormValid}
                                 sx={saveButtonStyles(theme)}
                               >
-                                <CheckCircle size={17} />
+                                <IconCheck size={16} stroke={2.25} />
                               </IconButton>
                             </span>
                           </PremiumTooltip>
                           <PremiumTooltip title={TABLE.CANCEL}>
                             <span>
                               <IconButton onClick={handleCancel} sx={neutralButtonStyles(theme)}>
-                                <X size={17} />
+                                <IconX size={16} stroke={1.75} />
                               </IconButton>
                             </span>
                           </PremiumTooltip>
@@ -583,11 +582,11 @@ const ManageRoles: React.FC<{ isExpanded?: boolean; hideHeader?: boolean }> = ({
                             display: "flex",
                             alignItems: "center",
                             justifyContent: "center",
-                            backgroundColor: theme.palette.mode === "dark" ? "rgba(255,255,255,0.06)" : "rgba(0,0,0,0.04)",
+                            backgroundColor: theme.tokens.colors.hover,
                             flexShrink: 0,
                           }}
                         >
-                          <Shield size={14} strokeWidth={1.5} />
+                          <IconShield size={14} stroke={1.5} />
                         </Box>
                         <Box sx={{ flex: 1, minWidth: 0 }}>
                           <Typography variant="body2" sx={{ fontWeight: 600, fontSize: "0.85rem", color: "text.primary", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
@@ -602,7 +601,7 @@ const ManageRoles: React.FC<{ isExpanded?: boolean; hideHeader?: boolean }> = ({
                             <PremiumTooltip title={TABLE.EDIT}>
                               <span>
                                 <IconButton onClick={() => handleEdit(role)} sx={editButtonStyles(theme)}>
-                                  <FileEdit size={16} />
+                                  <IconPencil size={15} stroke={1.75} />
                                 </IconButton>
                               </span>
                             </PremiumTooltip>
@@ -684,7 +683,7 @@ const ManageRoles: React.FC<{ isExpanded?: boolean; hideHeader?: boolean }> = ({
             cancelText={DASHBOARD_ROLES.DIALOG_DELETE_CANCEL}
             loading={isDeletingRole}
             paperSx={deleteDialogPaperSx ?? {}}
-            icon={<Trash2 color="var(--mui-palette-error-main)" />}
+            icon={<IconTrash color="var(--mui-palette-error-main)" />}
           />
           <DialogComponent
             open={openAddRoleModal}
@@ -692,7 +691,7 @@ const ManageRoles: React.FC<{ isExpanded?: boolean; hideHeader?: boolean }> = ({
             title={DASHBOARD_ROLES.DIALOG_ADD_TITLE}
             hideActions
             paperSx={addDialogPaperSx ?? {}}
-            icon={<PlusCircle color="var(--mui-palette-info-main)" />}
+            icon={<IconCirclePlus color="var(--mui-palette-info-main)" />}
           >
             <AddRoleForm
               onSubmit={handleCreateRole}

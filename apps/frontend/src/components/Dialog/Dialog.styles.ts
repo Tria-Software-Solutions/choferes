@@ -1,110 +1,68 @@
 import { SxProps, Theme } from "@mui/material";
 
-export const dialogPaperStyles = (paperSx: object = {}): SxProps<Theme> => (theme: Theme) => ({
-  border: "none",
-  borderRadius: "24px",
+// Paper: radius, border and shadow come from the theme (MuiDialog); only the
+// width bounds are set here.
+export const dialogPaperStyles = (paperSx: object = {}): SxProps<Theme> => ({
   minWidth: { xs: "calc(100vw - 32px)", sm: 440 },
-  maxWidth: { xs: "calc(100vw - 32px)", sm: 520 },
-  boxShadow: theme.palette.mode === "dark"
-    ? "0 40px 80px rgba(0,0,0,0.6), 0 0 0 1px rgba(255,255,255,0.04)"
-    : "0 40px 80px rgba(0,0,0,0.12), 0 0 0 1px rgba(0,0,0,0.03)",
-  overflow: "hidden",
-  bgcolor: "background.paper",
+  maxWidth: { xs: "calc(100vw - 32px)", sm: 560 },
   position: "relative",
   ...paperSx,
 });
 
 export const headerBoxStyles = (theme: Theme): SxProps<Theme> => ({
-  background: theme.palette.mode === "dark"
-    ? `linear-gradient(135deg, rgba(99,102,241,0.08), rgba(99,102,241,0.02))`
-    : `linear-gradient(135deg, rgba(99,102,241,0.06), rgba(99,102,241,0.01))`,
-  color: theme.palette.text.primary,
   display: "flex",
   alignItems: "flex-start",
-  gap: 2.5,
-  px: 3.5,
-  pt: 3.5,
-  pb: 2.5,
+  gap: 1.5,
+  px: 3,
+  pt: 2.5,
+  pb: 1.5,
+  color: theme.tokens.colors.text,
 });
 
+// Tinted icon tile next to the dialog title. Icons passed with their own
+// colors are normalised to the accent so every dialog looks the same.
+export const headerIconStyles = (theme: Theme): SxProps<Theme> => ({
+  flexShrink: 0,
+  width: 36,
+  height: 36,
+  borderRadius: "10px",
+  display: "grid",
+  placeItems: "center",
+  color: theme.tokens.colors.accent,
+  backgroundColor: theme.tokens.colors.accentSoft,
+  "& svg": { width: 18, height: 18, color: theme.tokens.colors.accent, stroke: "currentColor" },
+});
+
+// Dark tile kept for dialogs that build their own header (forms, OCR).
 export const iconBoxStyles = (theme: Theme): SxProps<Theme> => ({
-  background: `linear-gradient(135deg, ${theme.palette.primary.main}, ${theme.palette.primary.dark})`,
-  borderRadius: "12px",
-  width: 44,
-  height: 44,
+  width: 40,
+  height: 40,
+  borderRadius: "11px",
   display: "flex",
   alignItems: "center",
   justifyContent: "center",
-  color: theme.palette.primary.contrastText,
   flexShrink: 0,
-  boxShadow: theme.palette.mode === "dark"
-    ? "0 4px 12px rgba(99,102,241,0.3)"
-    : "0 4px 12px rgba(99,102,241,0.2)",
+  color: theme.tokens.colors.accent,
+  backgroundColor: theme.tokens.colors.accentSoft,
 });
 
 export const closeButtonStyles: SxProps<Theme> = {
   color: "inherit",
-  opacity: 0.5,
-  transition: "opacity 0.15s ease, background-color 0.15s ease",
-  "&:hover": {
-    opacity: 1,
-    backgroundColor: "rgba(0,0,0,0.04)",
-  },
 };
 
 export const dialogContentStyles: SxProps<Theme> = {
   px: 3,
   pt: 0.5,
-  pb: 1.5,
+  pb: 2.5,
 };
 
 export const messageTypographyStyles = (theme: Theme): SxProps<Theme> => ({
   lineHeight: 1.6,
-  color: theme.palette.text.secondary,
+  color: theme.tokens.colors.textMuted,
   fontSize: "0.9rem",
-  fontWeight: 400,
 });
 
 export const customActionsBoxStyles: SxProps<Theme> = {
   px: 3,
   pb: 3,
 };
-
-export const dialogActionsStyles = (
-  isSmallScreen: boolean,
-): SxProps<Theme> => ({
-  gap: 2,
-  flexDirection: isSmallScreen ? "column" : "row",
-});
-
-export const cancelButtonStyles = (isSmallScreen: boolean): SxProps<Theme> => ({
-  minWidth: isSmallScreen ? "100%" : "auto",
-  px: 1.5,
-  color: "text.secondary",
-  fontWeight: 500,
-  transition: "color 0.15s ease",
-  '&:hover': {
-    backgroundColor: "transparent",
-    color: "text.primary",
-  },
-  '&.Mui-disabled': {
-    opacity: 0.5,
-  },
-});
-
-export const confirmButtonStyles = (
-  isSmallScreen: boolean,
-): SxProps<Theme> => ({
-  minWidth: isSmallScreen ? "100%" : "auto",
-  px: 1.5,
-  fontWeight: 600,
-  transition: "color 0.15s ease",
-  '&:hover': {
-    textDecoration: "underline",
-    textUnderlineOffset: "3px",
-    textDecorationThickness: "1px",
-  },
-  '&:disabled': {
-    opacity: 0.5,
-  },
-});

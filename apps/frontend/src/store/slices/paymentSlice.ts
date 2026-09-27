@@ -103,7 +103,11 @@ export const deletePayment = createAsyncThunk(
 const upsertPayment = (state: PaymentState, payment: Payment) => {
   const index = state.payments.findIndex((item) => item.id === payment.id);
   if (index >= 0) {
-    state.payments[index] = payment;
+    // Mutations answer without the employee include: keep the one we had.
+    state.payments[index] = {
+      ...payment,
+      employee: payment.employee ?? state.payments[index].employee,
+    };
   } else {
     state.payments = [payment, ...state.payments];
   }

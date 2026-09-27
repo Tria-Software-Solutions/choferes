@@ -1,14 +1,14 @@
 // Controller for HTTP requests related to disciplinary actions (amonestaciones).
 import { Request, Response } from "express";
 import * as disciplinaryService from "../services/disciplinaryActionService";
-import { isServiceError } from "../utils/errors";
+import { isServiceError, sendServerError } from "../utils/errors";
 import { getUserId } from "../middleware/authorize";
 
 const handleError = (res: Response, error: unknown, fallbackMessage: string): Response => {
   if (isServiceError(error)) {
     return res.status(error.statusCode).json({ message: error.message });
   }
-  return res.status(500).json({ message: fallbackMessage, error });
+  return sendServerError(res, fallbackMessage, error);
 };
 
 export const getDisciplinaryActions = async (req: Request, res: Response) => {

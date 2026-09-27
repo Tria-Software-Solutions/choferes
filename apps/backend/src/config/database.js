@@ -12,11 +12,19 @@ const sequelize = new Sequelize(dbConfig.database, dbConfig.username, dbConfig.p
   port: dbConfig.port || 5432, // Database port (default PostgreSQL)
   dialect: dbConfig.dialect, // Database dialect (e.g., postgres)
   logging: false, // Disable SQL query logging
+  // Only the string operators listed here are recognized in `where` clauses;
+  // any other `$op` key makes Sequelize throw "Invalid value". Keep this list
+  // in sync with the operators used by the services (see operatorAliases test).
   operatorsAliases: {
     $or: Sequelize.Op.or,
     $iLike: Sequelize.Op.iLike,
     $between: Sequelize.Op.between,
     $in: Sequelize.Op.in,
+    $lt: Sequelize.Op.lt,
+    $lte: Sequelize.Op.lte,
+    $gt: Sequelize.Op.gt,
+    $gte: Sequelize.Op.gte,
+    $ne: Sequelize.Op.ne,
   },
   pool: {
     max: 20, // Maximum number of connections

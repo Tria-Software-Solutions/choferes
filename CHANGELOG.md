@@ -31,6 +31,14 @@ via git tags (once tagged).
 - Hours board: shows only active employees by default, with a toggle to include terminated employees
 - `GET /api/employees` accepts an optional `isActive=true|false` filter (validated); the employees list applies the status filter server-side
 - KPI band: new "Licencias por vencer" metric counting employees with expired/expiring licenses
+- Standard page layout (`components/Layout`): `PageContainer`, `PageCard`, `PageHeader`, `PageBody`, `EmptyState`, `LoadingState`. Every management page (Roles, Empleados, Vehículos, Horarios, Mensajería, Reportes, expediente de empleado) uses the same header, toolbar, gutters and loading/empty states
+- Shared `DateNavigator` (‹ fecha › ↺) used by Roles, Vehículos and Mensajería in the same order
+- Theme tokens exposed as `theme.tokens` (colors, borders, shadows per mode) and a theme-driven `CssBaseline` (body, selection, scrollbars, focus ring)
+- `POST /api/auth/logout` expires the httpOnly session cookies; the client calls it on logout
+- Migration `20260929000000-resync-serial-sequences` re-syncs every serial `id` sequence (seeded rows had left `users`/`roles` behind `MAX(id)`)
+- Design system: zinc neutrals, a single indigo accent and soft status tints (`accent`, `accentSoft`, `successSoft`, `warningSoft`, `errorSoft`, `infoSoft`) in `theme/tokens.ts`; `createAppTheme` is the single source for buttons, fields, tables, dialogs, menus, chips and tabs; charts read `theme/chartPalette.ts`
+- Top navigation bar (`AppBar/TopNav`) with the brand, section links, theme toggle, notifications and a user menu; the mobile drawer uses the same labels, icons and active state
+- Shared building blocks: `StatCard`/`StatGrid`, `StatusBadge`, `PanelHeader` (Configuración panels and expediente cards) and `ExportMenu` (replaces the floating export SpeedDial on every list page)
 
 ### Changed
 
@@ -42,6 +50,20 @@ via git tags (once tagged).
 - Employees KPIs: "Sin tarifa" and "Licencias por vencer" now count the full roster instead of only the rows matching the current search/status filter, so alerts are never hidden by a filter
 - WeeklyBoard/RolesPage recalculate summaries via the server endpoint instead of client-side backfill; the board now loads hours only for the visible week
 - `parseCalendarDate` shared by `hoursWorkedService` and `summaryRecalculationService` to avoid UTC-offset date shifts on `YYYY-MM-DD` inputs
+- Dark mode: `palette.primary` is now a light foreground (icons, active states, spinners, tab indicators were near-invisible); primary buttons are light-on-dark. Inverse surfaces use the `inverseBg`/`onInverse` tokens
+- Responsive: below `md` pages scroll as a whole instead of nesting scroll areas; data grids grow with their rows; the footer moves to the end of the content on phones
+- `SegmentedToggle` is a keyboard-accessible radio group (arrow keys, `aria-checked`) with a readable active state in every mode
+- Removed global `MuiPaper` bottom margin (leaked into menus, popovers and dialogs) and hover lift/scale on non-interactive cards and avatars
+- Changing your own password requires the current one; the Settings form asks for it and shows the server error under that field
+- Login errors are generic ("Credenciales incorrectas") and the disabled-account message is only shown after valid credentials
+- 5xx responses no longer serialize raw error objects (SQL/schema details); they are logged server-side
+- Mensajería shows a notice that it still runs on sample data (no API yet)
+- UI redesign on every page with one visual language: 1px hairlines instead of heavy shadows, the same page header (accent icon tile), tables (`EditableTable`, `StickyDataGrid`) with a shared header, row height, hover and pagination footer, and ghost row actions
+- Dialogs share one layout (icon tile, title/subtitle, close, footer actions); delete confirmations are a compact centered dialog with a destructive button. The hours board's "Ajustar horas" and confirmation dialogs and the quick-assign popover now use it too
+- Form fields have visible labels instead of placeholder-only inputs (employee, user, role, vehicle, courier, schedule, password and expediente forms)
+- Toasts are surface cards with a status-colored icon; employee avatars use a tint of the employee color; notifications, the mobile menu and the hours board use theme tokens instead of hard-coded violet/sky/green
+- Error pages and the `ErrorBoundary` fallback share the same card design; the login form keeps its photo background with radii, buttons and error states aligned to the rest of the app
+- The quick-assign popover's Cancelar/Asignar are real buttons (they were clickable `div`s, unreachable by keyboard)
 
 ### Fixed
 
@@ -50,6 +72,30 @@ via git tags (once tagged).
 - `weeklySummaryService` queries used a non-existent `week` column instead of `weekNumber`
 - Permission catalog migrations used unquoted `updatedAt` in raw SQL, which PostgreSQL folds to `updatedat` and rejects; the identifier is now quoted, so `migrate` succeeds and the `permissions.code` column used by authorization is created (previously every authenticated request returned 500 with `AUTH_ERROR`)
 - Hours tab now reconciles the biweekly summaries with `hours_worked` (server recalculation), dedupes rows per (year, quincena), drops phantom/zero rows and derives the month from the biweek number, so totals match the hours board; the table now matches the Pagos/Vacaciones styling
+- `GET /api/notifications` always failed with 500: the `$lt` operator was not a registered Sequelize alias (guarded now by an operator-alias test)
+- A wrong password on the login form redirected to "Sesión caducada" instead of showing the error
+- Create/update/delete actions (users, employees, vehicles, schedules, roles, password) showed a success message even when the request failed (thunks were not `unwrap()`ed); errors now surface the server message
+- Logging out left the previous user's cached API responses and Redux state in the tab
+- Schedule day chips, dialog icons and Settings navigation were unreadable in dark mode; select icons overlapped their placeholder; section descriptions wrapped out of alignment
+- Dashboard cards clipped their charts on short screens (the vehicle-brand legend overlapped its title)
+- Users were logged out about an hour into a session: once the access cookie expired the browser stopped sending it, the API answered `MISSING_TOKEN`, and the client only refreshed on `TOKEN_EXPIRED`
+- Login fields turned white (icons invisible) when showing a validation error
+
+### Removed
+
+- Unused UI and helpers: `Dock`, `MenuEditor`, `Menu`, `SpeedDial`, `SplitButton`, `AppModal`, `DateSelection`, `DotField`, `Typewriter`, the `SelectorTable` UI, the login `Orb` background, `AuthPageStyles`, unused hooks (`useFormValidation`, `useModal`, `useReduxData`, `useSpeechRecognition`, `useTableData`, `useTablePagination`) and style exports no component imported
+
+### Security
+
+- Privilege escalation: holders of `users:create`/`users:edit` could assign any role (including Gerencia) to anyone, themselves included, and `roles:edit` holders could add any permission to their own role. Granting now requires already holding every granted permission, and users cannot change their own role
+- Stored XSS: disciplinary attachments accepted any string as `dataUrl` (e.g. `javascript:`), which ran on download; only base64 `data:` URLs are accepted and the client refuses anything else
+- `POST /api/users/register` returned the new user's password hash
+- Refresh tokens kept issuing new sessions for disabled or deleted users
+- The temporary password stayed valid forever; it is revoked when the password changes. Passwords are no longer kept in Redux actions/state
+- `markAsRead` returned other users' notifications by id; notification `actionUrl` must be an in-app path
+- `GET` of disciplinary actions, licenses and vacation accrual now require their `view` permission; Gemini OCR requires `vehicles:create` and sends the API key in a header
+- Employee names are HTML-escaped in payment-slip emails; users cannot disable or delete their own account
+- Role permission replacement runs in a transaction (a failed insert used to leave the role with no permissions)
 
 ---
 

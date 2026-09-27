@@ -106,26 +106,6 @@ const FORMS = {
     BUTTON_ADDING: "Creando...",
     NO_OPTIONS: "Sin coincidencias",
   },
-  ADD_COURIER: {
-    INFO_TITLE: "Información del Servicio",
-    INFO_DESC:
-      "Guía para registrar los datos del servicio de mensajería. Todos los campos son obligatorios.",
-    DRIVER: "Chofer",
-    DRIVER_PLACEHOLDER: "Ej: Juan Pérez",
-    ROUTE: "Ruta",
-    DISTANCE: "Distancia (km)",
-    DISTANCE_PLACEHOLDER: "Ej: 45",
-    TRACKING_NUMBER: "Número de Guía",
-    TRACKING_NUMBER_PLACEHOLDER: "Ej: TRK001",
-    STATUS: "Estado",
-    STATUS_DESPACHADO: "Despachado",
-    STATUS_EN_TRANSITO: "En Tránsito",
-    STATUS_ENTREGADO: "Entregado",
-    CLEAR_BUTTON: "Limpiar",
-    CANCEL_BUTTON: "Cancelar",
-    LOADING_BUTTON: "Creando...",
-    ADD_BUTTON: "Crear",
-  },
   ADD_SCHEDULE: {
     INFO_TITLE: "Información del Horario",
     INFO_DESC:

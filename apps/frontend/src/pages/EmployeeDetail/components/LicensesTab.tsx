@@ -17,7 +17,7 @@ import {
   Typography,
   useTheme,
 } from "@mui/material";
-import { BadgeCheck, IdCard, Inbox, Pencil, Trash2 } from "lucide-react";
+import { IconAlertTriangle, IconId, IconInbox, IconPencil, IconPlus, IconTrash } from "@tabler/icons-react";
 import { Employee } from "../../../models/Employee";
 import { EmployeeLicense } from "../../../models/EmployeeLicense";
 import { AppDispatch } from "../../../store/store";
@@ -37,10 +37,11 @@ import {
   editButtonStyles,
 } from "../../../components/Table/EditableTable/helpers";
 import LicenseFormDialog from "./LicenseFormDialog";
+import { submitButton } from "../../Forms/sharedStyles";
+import SectionHeader from "./SectionHeader";
 import {
   cardStackStyles,
-  sectionPaperStyles,
-  sectionTitleStyles,
+  fillSectionPaperStyles,
   emptyStateBoxStyles,
   tableContainerStyles,
   tableHeaderCellStyles,
@@ -124,54 +125,38 @@ const LicensesTab: React.FC<LicensesTabProps> = ({ employee }) => {
 
   return (
     <Box sx={cardStackStyles}>
-      <Paper elevation={0} sx={sectionPaperStyles(theme)}>
-        <Box
-          sx={{
-            display: "flex",
-            flexWrap: "wrap",
-            alignItems: "center",
-            justifyContent: "space-between",
-            gap: 1.5,
-            mb: 1.5,
-          }}
-        >
-          <Typography sx={{ ...sectionTitleStyles, mb: 0 }}>Licencias de conducir</Typography>
-          <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
-            <Typography
-              variant="body2"
-              sx={{ display: "flex", alignItems: "center", gap: 0.75, color: "text.secondary" }}
-            >
-              <IdCard size={16} color={theme.palette.primary.main} />
-              {licenses.length} licencia{licenses.length === 1 ? "" : "s"}
-            </Typography>
-            {canCreate && (
-              <Button
-                variant="text"
-                onClick={() => handleOpenForm(null)}
-                sx={{
-                  px: 0.5,
-                  minHeight: 32,
-                  fontWeight: 600,
-                  fontSize: "0.85rem",
-                  color: "text.primary",
-                  "&:hover": {
-                    backgroundColor: "transparent",
-                    textDecoration: "underline",
-                    textUnderlineOffset: "3px",
-                    textDecorationThickness: "1px",
-                  },
-                }}
+      <Paper elevation={0} sx={fillSectionPaperStyles(theme)}>
+        <SectionHeader
+          icon={<IconId size={20} stroke={1.5} />}
+          title="Licencias de conducir"
+          description="Licencias del empleado y su fecha de vencimiento."
+          actions={
+            <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
+              <Typography
+                variant="body2"
+                sx={{ display: "flex", alignItems: "center", gap: 0.75, color: "text.secondary" }}
               >
-                Nueva licencia
-              </Button>
-            )}
-          </Box>
-        </Box>
+                <IconId size={16} color={theme.palette.primary.main} />
+                {licenses.length} licencia{licenses.length === 1 ? "" : "s"}
+              </Typography>
+              {canCreate && (
+                <Button
+                  variant="text"
+                  startIcon={<IconPlus size={18} />}
+                  onClick={() => handleOpenForm(null)}
+                  sx={submitButton}
+                >
+                  Nueva licencia
+                </Button>
+              )}
+            </Box>
+          }
+        />
 
         {alerts.length > 0 && (
           <Alert
             severity={alerts.some((license) => license.status === "vencida") ? "error" : "warning"}
-            icon={<BadgeCheck size={18} />}
+            icon={<IconAlertTriangle size={18} />}
             sx={{ mb: 1.5, borderRadius: "10px" }}
           >
             {alerts.length} licencia{alerts.length === 1 ? "" : "s"} vencida
@@ -185,7 +170,7 @@ const LicensesTab: React.FC<LicensesTabProps> = ({ employee }) => {
           </Box>
         ) : loadError && licenses.length === 0 ? (
           <Box sx={emptyStateBoxStyles(theme)}>
-            <Inbox size={34} />
+            <IconInbox size={34} />
             <Typography variant="body2">{loadError}</Typography>
             <Button variant="outlined" onClick={() => void reload()}>
               Reintentar
@@ -193,7 +178,7 @@ const LicensesTab: React.FC<LicensesTabProps> = ({ employee }) => {
           </Box>
         ) : licenses.length === 0 ? (
           <Box sx={emptyStateBoxStyles(theme)}>
-            <Inbox size={34} />
+            <IconInbox size={34} />
             <Typography variant="body2">No hay licencias registradas</Typography>
           </Box>
         ) : (
@@ -218,16 +203,9 @@ const LicensesTab: React.FC<LicensesTabProps> = ({ employee }) => {
                   return (
                     <TableRow
                       key={license.id}
-                      sx={{
-                        "&:hover": {
-                          backgroundColor:
-                            theme.palette.mode === "dark"
-                              ? "rgba(255,255,255,0.04)"
-                              : "rgba(0,0,0,0.03)",
-                        },
-                      }}
+                      hover
                     >
-                      <TableCell sx={{ ...tableCellStyles, fontWeight: 700 }}>
+                      <TableCell sx={[tableCellStyles, { fontWeight: 700 }]}>
                         {license.licenseType}
                       </TableCell>
                       <TableCell sx={tableCellStyles}>
@@ -271,7 +249,7 @@ const LicensesTab: React.FC<LicensesTabProps> = ({ employee }) => {
                               onClick={() => handleOpenForm(license)}
                               sx={editButtonStyles(theme)}
                             >
-                              <Pencil size={15} />
+                              <IconPencil size={15} />
                             </IconButton>
                           )}
                           {canDelete && (
@@ -282,7 +260,7 @@ const LicensesTab: React.FC<LicensesTabProps> = ({ employee }) => {
                               onClick={() => setDeleteTarget(license)}
                               sx={deleteButtonStyles(theme)}
                             >
-                              <Trash2 size={15} />
+                              <IconTrash size={15} />
                             </IconButton>
                           )}
                         </Box>

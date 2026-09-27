@@ -1,5 +1,6 @@
 import {
   addDays,
+  format,
   startOfWeek,
 } from "date-fns";
 import { EnglishAbrevMonthOfYear } from "./monthAbreviations";
@@ -298,3 +299,18 @@ export const parseIsoDateWithoutTimeZone = (isoString: string): Date => {
   const [year, month, day] = isoString.split("T")[0].split("-").map(Number);
   return new Date(year, month - 1, day);
 };
+
+// "YYYY-MM-DD" (as stored by the API) -> local Date at midnight, or null when
+// the value is empty. Feeding the raw string to a DatePicker would parse it as
+// UTC and shift the day in timezones behind Greenwich.
+export const parseStoredDate = (value?: string | null): Date | null => {
+  if (!value) return null;
+  const match = /^(\d{4})-(\d{2})-(\d{2})/.exec(value);
+  return match
+    ? new Date(Number(match[1]), Number(match[2]) - 1, Number(match[3]))
+    : null;
+};
+
+// Inverse of `parseStoredDate`: local Date -> "YYYY-MM-DD" for the API.
+export const formatStoredDate = (date?: Date | null): string =>
+  date ? format(date, "yyyy-MM-dd") : "";

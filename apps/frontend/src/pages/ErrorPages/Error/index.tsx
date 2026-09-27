@@ -7,7 +7,7 @@ import {
   useMediaQuery,
   useTheme,
 } from "@mui/material";
-import { Home, RefreshCw } from "lucide-react";
+import { IconHome, IconRefresh } from "@tabler/icons-react";
 import errorSvg from "../../../assets/images/500.svg";
 import { ERRORS } from "../../../constants/constants";
 import {
@@ -33,7 +33,7 @@ const ErrorPage: React.FC = () => {
           elevation={0}
           sx={{
             borderRadius: "16px",
-            border: `1px solid ${theme.palette.mode === "dark" ? "rgba(255,255,255,0.08)" : "rgba(0,0,0,0.08)"}`,
+            border: theme.tokens.borders.paper,
             boxShadow:
               "0 4px 24px rgba(0,0,0,0.08), 0 1px 2px rgba(0,0,0,0.04)",
             overflow: "hidden",
@@ -46,7 +46,7 @@ const ErrorPage: React.FC = () => {
               py: { xs: 3, md: 4 },
               backgroundColor: theme.palette.background.paper,
               color: theme.palette.text.primary,
-              borderBottom: `1px solid ${theme.palette.mode === "dark" ? "rgba(255,255,255,0.08)" : "rgba(0,0,0,0.08)"}`,
+              borderBottom: theme.tokens.borders.paper,
             }}
           >
             <Box
@@ -80,7 +80,7 @@ const ErrorPage: React.FC = () => {
               <Button
                 variant="contained"
                 size="large"
-                startIcon={<Home size={20} />}
+                startIcon={<IconHome size={20} />}
                 onClick={() => navigate("/")}
                 fullWidth={isSmallScreen}
                 aria-label={ERRORS.GO_HOME}
@@ -90,7 +90,7 @@ const ErrorPage: React.FC = () => {
               <Button
                 variant="outlined"
                 size="large"
-                startIcon={<RefreshCw size={20} />}
+                startIcon={<IconRefresh size={20} />}
                 onClick={() => window.location.reload()}
                 fullWidth={isSmallScreen}
                 aria-label={ERRORS.RELOAD}

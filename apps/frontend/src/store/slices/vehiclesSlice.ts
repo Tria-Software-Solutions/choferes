@@ -2,6 +2,7 @@ import { createSlice, createAsyncThunk, PayloadAction } from "@reduxjs/toolkit";
 import * as VehicleService from "../../services/vehicleService";
 import { Vehicle } from "../../models/Vehicle";
 import { RootState } from "../store";
+import { getApiErrorMessage } from "../../utils/apiError";
 
 interface VehicleState {
   vehicles: Vehicle[];
@@ -49,9 +50,7 @@ export const fetchVehicles = createAsyncThunk(
         return [];
       }
     } catch (error: unknown) {
-      return rejectWithValue(
-        error instanceof Error ? error.message : "Failed to fetch vehicles",
-      );
+      return rejectWithValue(getApiErrorMessage(error, "Failed to fetch vehicles"));
     }
   },
 );
@@ -80,9 +79,7 @@ export const createVehicle = createAsyncThunk(
       const createdVehicle = await VehicleService.createVehicle(newVehicle);
       return createdVehicle;
     } catch (error: unknown) {
-      return rejectWithValue(
-        error instanceof Error ? error.message : "Failed to create vehicle",
-      );
+      return rejectWithValue(getApiErrorMessage(error, "Failed to create vehicle"));
     }
   },
 );
@@ -101,9 +98,7 @@ export const updateVehicle = createAsyncThunk(
       );
       return updatedVehicleFromBackend;
     } catch (error: unknown) {
-      return rejectWithValue(
-        error instanceof Error ? error.message : "Failed to update vehicle",
-      );
+      return rejectWithValue(getApiErrorMessage(error, "Failed to update vehicle"));
     }
   },
 );
@@ -116,9 +111,7 @@ export const deleteVehicle = createAsyncThunk(
       await VehicleService.deleteVehicle(id);
       return id;
     } catch (error: unknown) {
-      return rejectWithValue(
-        error instanceof Error ? error.message : "Failed to delete vehicle",
-      );
+      return rejectWithValue(getApiErrorMessage(error, "Failed to delete vehicle"));
     }
   },
 );

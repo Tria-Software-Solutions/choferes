@@ -6,7 +6,7 @@ import {
   Typography,
   useTheme,
 } from "@mui/material";
-import { Bell, BellOff } from "lucide-react";
+import { IconBell, IconBellOff } from "@tabler/icons-react";
 import { useAuthContext } from "../../../context/AuthContext";
 import { useAppNotifications } from "../../../components/Snackbar/Snackbar.component";
 import * as UserService from "../../../services/userService";
@@ -15,6 +15,7 @@ import {
   getNotificationSettings,
   NotificationSettingKey,
 } from "../../../constants/notificationSettings.constants";
+import { PanelHeader } from "../../../components/Layout";
 
 const NotificationSettingsTab: React.FC = () => {
   const theme = useTheme();
@@ -128,11 +129,9 @@ const NotificationSettingsTab: React.FC = () => {
       sx={{
         p: { xs: 2.5, sm: 3 },
         borderRadius: "16px",
-        border: `1px solid ${
-          theme.palette.mode === "dark" ? "rgba(255,255,255,0.08)" : "rgba(0,0,0,0.08)"
-        }`,
+        border: theme.tokens.borders.paper,
         backgroundColor: theme.palette.background.paper,
-        boxShadow: "0 4px 24px rgba(0,0,0,0.08), 0 1px 2px rgba(0,0,0,0.04)",
+        boxShadow: `0 1px 2px ${theme.tokens.shadows.card}`,
         display: "flex",
         flexDirection: "column",
         height: { xs: "calc(100dvh - 240px)", md: "100%" },
@@ -142,33 +141,11 @@ const NotificationSettingsTab: React.FC = () => {
       }}
     >
       {/* Header */}
-      <Box sx={{ mb: 2, flexShrink: 0 }}>
-        <Box display="flex" alignItems="center" gap={1.5} mb={0.5}>
-          <Box sx={{ color: theme.palette.primary.main, display: "flex", alignItems: "center" }}>
-            <Bell size={20} strokeWidth={1.5} />
-          </Box>
-          <Typography
-            variant="h6"
-            sx={{
-              fontWeight: 700,
-              fontSize: "1.15rem",
-              color: theme.palette.text.primary,
-              letterSpacing: "-0.02em",
-              lineHeight: 1.2,
-            }}
-          >
-            Notificaciones
-          </Typography>
-        </Box>
-        <Typography
-          variant="caption"
-          sx={{ color: theme.palette.text.secondary, fontSize: "0.7rem", letterSpacing: "0.02em", ml: 5 }}
-        >
-          Elige qué notificaciones quieres recibir en el sistema.
-        </Typography>
-      </Box>
-
-      <Box sx={{ borderBottom: `1px solid ${theme.palette.mode === "dark" ? "rgba(255,255,255,0.06)" : "rgba(0,0,0,0.06)"}`, mb: 1.5 }} />
+      <PanelHeader
+        icon={<IconBell />}
+        title="Notificaciones"
+        description="Elige qué notificaciones quieres recibir en el sistema."
+      />
 
       {/* Master toggle */}
       <Box
@@ -182,7 +159,7 @@ const NotificationSettingsTab: React.FC = () => {
           py: 1.25,
           borderRadius: "12px",
           mb: 1.5,
-          backgroundColor: theme.palette.mode === "dark" ? "rgba(255,255,255,0.03)" : "rgba(0,0,0,0.02)",
+          backgroundColor: theme.tokens.colors.hoverSoft,
           flexShrink: 0,
         }}
       >
@@ -200,9 +177,9 @@ const NotificationSettingsTab: React.FC = () => {
             }}
           >
             {allEnabled ? (
-              <Bell size={18} color={theme.palette.primary.contrastText} />
+              <IconBell size={18} color={theme.palette.primary.contrastText} />
             ) : (
-              <BellOff size={18} color={theme.palette.primary.contrastText} />
+              <IconBellOff size={18} color={theme.palette.primary.contrastText} />
             )}
           </Box>
           <Box sx={{ minWidth: 0 }}>
@@ -267,9 +244,7 @@ const NotificationSettingsTab: React.FC = () => {
                       transition: "background-color 0.15s",
                       "&:hover": {
                         backgroundColor:
-                          theme.palette.mode === "dark"
-                            ? "rgba(255,255,255,0.04)"
-                            : "rgba(0,0,0,0.02)",
+                          theme.tokens.colors.hover,
                       },
                     }}
                   >
@@ -277,9 +252,7 @@ const NotificationSettingsTab: React.FC = () => {
                       <Box
                         sx={{
                           backgroundColor:
-                            theme.palette.mode === "dark"
-                              ? "rgba(255,255,255,0.06)"
-                              : "rgba(0,0,0,0.04)",
+                            theme.tokens.colors.hover,
                           borderRadius: "10px",
                           p: 1,
                           display: "flex",
@@ -290,7 +263,7 @@ const NotificationSettingsTab: React.FC = () => {
                           transition: "color 0.2s ease",
                         }}
                       >
-                        <Icon size={17} strokeWidth={1.5} />
+                        <Icon size={17} stroke={1.5} />
                       </Box>
                       <Box sx={{ minWidth: 0 }}>
                         <Typography
@@ -339,9 +312,7 @@ const NotificationSettingsTab: React.FC = () => {
           justifyContent: "flex-end",
           pt: 2,
           mt: 1.5,
-          borderTop: `1px solid ${
-            theme.palette.mode === "dark" ? "rgba(255,255,255,0.06)" : "rgba(0,0,0,0.06)"
-          }`,
+          borderTop: theme.tokens.borders.hairline,
           flexShrink: 0,
         }}
       >

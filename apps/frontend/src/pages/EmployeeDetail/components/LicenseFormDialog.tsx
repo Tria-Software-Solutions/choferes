@@ -1,21 +1,26 @@
 import React, { useEffect, useState } from "react";
 import { useDispatch } from "react-redux";
-import {
-  Box,
-  Button,
-  FormControl,
-  InputLabel,
-  MenuItem,
-  Select,
-  TextField,
-} from "@mui/material";
-import { Loader2, Save } from "lucide-react";
+import { Box, Button, Grid, MenuItem, useMediaQuery, useTheme } from "@mui/material";
+import { IconCheck, IconHash, IconId, IconLoader2, IconNotebook, IconX } from "@tabler/icons-react";
+import { DatePicker } from "@mui/x-date-pickers/DatePicker";
+import { LocalizationProvider } from "@mui/x-date-pickers";
+import { AdapterDateFns } from "@mui/x-date-pickers/AdapterDateFns";
+import { es } from "date-fns/locale";
+import { formatStoredDate, parseStoredDate } from "../../../utils/dates";
 import { Employee } from "../../../models/Employee";
 import { EmployeeLicense, LICENSE_TYPES } from "../../../models/EmployeeLicense";
 import { AppDispatch } from "../../../store/store";
 import { createLicense, updateLicense } from "../../../store/slices/licenseSlice";
 import { useAppNotifications } from "../../../components/Snackbar/Snackbar.component";
 import DialogComponent from "../../../components/Dialog/Dialog.component";
+import TextfieldComponent from "../../../components/Textfield/Textfield.component";
+import PlaceholderSelect from "../../../components/PlaceholderSelect/PlaceholderSelect.component";
+import {
+  actionsBox,
+  actionsInnerBox,
+  cancelButton,
+  submitButton,
+} from "../../Forms/sharedStyles";
 
 interface LicenseFormDialogProps {
   open: boolean;
@@ -35,6 +40,8 @@ const LicenseFormDialog: React.FC<LicenseFormDialogProps> = ({
   onSaved,
 }) => {
   const dispatch = useDispatch<AppDispatch>();
+  const theme = useTheme();
+  const isSmallScreen = useMediaQuery(theme.breakpoints.down("sm"));
   const { showNotification } = useAppNotifications();
 
   const isEditing = Boolean(license);
@@ -102,13 +109,13 @@ const LicenseFormDialog: React.FC<LicenseFormDialogProps> = ({
       hideActions
       paperSx={{ maxWidth: 520 }}
     >
-      <Box sx={{ display: "flex", flexDirection: "column", gap: 2, pt: 1 }}>
-        <Box sx={{ display: "grid", gridTemplateColumns: { xs: "1fr", sm: "1fr 1fr" }, gap: 2 }}>
-          <FormControl size="small" fullWidth>
-            <InputLabel id="license-type-label">Categoría</InputLabel>
-            <Select
-              labelId="license-type-label"
+      <Box sx={{ display: "flex", flexDirection: "column", gap: 2.5, pt: 1 }}>
+        <Grid container spacing={{ xs: 2, sm: 2.5 }}>
+          <Grid item xs={12} sm={6}>
+            <PlaceholderSelect
               label="Categoría"
+              placeholder="Selecciona"
+              icon={<IconId size={20} color={theme.palette.text.secondary} />}
               value={licenseType}
               onChange={(event) => setLicenseType(event.target.value)}
             >
@@ -117,44 +124,65 @@ const LicenseFormDialog: React.FC<LicenseFormDialogProps> = ({
                   {type}
                 </MenuItem>
               ))}
-            </Select>
-          </FormControl>
-          <TextField
-            label="Número de licencia"
-            size="small"
-            value={licenseNumber}
-            onChange={(event) => setLicenseNumber(event.target.value)}
-            inputProps={{ maxLength: 50 }}
-            fullWidth
-          />
-        </Box>
+            </PlaceholderSelect>
+          </Grid>
+          <Grid item xs={12} sm={6}>
+            <TextfieldComponent
+              name="licenseNumber"
+              label="Número de licencia"
+              icon={<IconHash size={20} color={theme.palette.text.secondary} />}
+              value={licenseNumber}
+              onChange={(event) => setLicenseNumber(event.target.value)}
+              inputProps={{ maxLength: 50 }}
+              fullWidth
+            />
+          </Grid>
+        </Grid>
 
-        <Box sx={{ display: "grid", gridTemplateColumns: { xs: "1fr", sm: "1fr 1fr" }, gap: 2 }}>
-          <TextField
-            label="Fecha de expedición"
-            type="date"
-            size="small"
-            value={issuedAt}
-            onChange={(event) => setIssuedAt(event.target.value)}
-            InputLabelProps={{ shrink: true }}
-            fullWidth
-          />
-          <TextField
-            label="Fecha de vencimiento"
-            type="date"
-            size="small"
-            value={expiresAt}
-            onChange={(event) => setExpiresAt(event.target.value)}
-            InputLabelProps={{ shrink: true }}
-            error={rangeInvalid}
-            helperText={rangeInvalid ? "No puede ser anterior a la expedición" : undefined}
-            fullWidth
-          />
-        </Box>
+        <Grid container spacing={{ xs: 2, sm: 2.5 }}>
+          <Grid item xs={12} sm={6}>
+            <LocalizationProvider dateAdapter={AdapterDateFns} adapterLocale={es}>
+              <DatePicker
+                label="Fecha de expedición"
+                value={parseStoredDate(issuedAt)}
+                onChange={(date) => setIssuedAt(formatStoredDate(date))}
+                format="d MMM yyyy"
+                slots={{ toolbar: () => null }}
+                slotProps={{
+                  textField: {
+                    size: "small",
+                    fullWidth: true,
+                    error: rangeInvalid,
+                  },
+                }}
+              />
+            </LocalizationProvider>
+          </Grid>
+          <Grid item xs={12} sm={6}>
+            <LocalizationProvider dateAdapter={AdapterDateFns} adapterLocale={es}>
+              <DatePicker
+                label="Fecha de vencimiento"
+                value={parseStoredDate(expiresAt)}
+                onChange={(date) => setExpiresAt(formatStoredDate(date))}
+                format="d MMM yyyy"
+                slots={{ toolbar: () => null }}
+                slotProps={{
+                  textField: {
+                    size: "small",
+                    fullWidth: true,
+                    error: rangeInvalid,
+                    helperText: rangeInvalid ? "No puede ser anterior a la expedición" : undefined,
+                  },
+                }}
+              />
+            </LocalizationProvider>
+          </Grid>
+        </Grid>
 
-        <TextField
+        <TextfieldComponent
+          name="notes"
           label="Notas"
-          size="small"
+          icon={<IconNotebook size={20} color={theme.palette.text.secondary} />}
           value={notes}
           onChange={(event) => setNotes(event.target.value)}
           multiline
@@ -163,18 +191,29 @@ const LicenseFormDialog: React.FC<LicenseFormDialogProps> = ({
           fullWidth
         />
 
-        <Box sx={{ display: "flex", justifyContent: "flex-end", gap: 1.5 }}>
-          <Button onClick={onClose} disabled={isSubmitting}>
+        <Box sx={actionsBox(theme)}>
+          <Button
+            variant="text"
+            startIcon={<IconX size={18} />}
+            onClick={onClose}
+            disabled={isSubmitting}
+            fullWidth={isSmallScreen}
+            sx={cancelButton}
+          >
             Cancelar
           </Button>
-          <Button
-            variant="contained"
-            startIcon={isSubmitting ? <Loader2 size={16} /> : <Save size={16} />}
-            onClick={() => void handleSubmit()}
-            disabled={!canSubmit}
-          >
-            {isEditing ? "Guardar" : "Registrar"}
-          </Button>
+          <Box sx={actionsInnerBox}>
+            <Button
+              variant="text"
+              startIcon={isSubmitting ? <IconLoader2 size={18} /> : <IconCheck size={18} />}
+              onClick={() => void handleSubmit()}
+              disabled={!canSubmit}
+              fullWidth={isSmallScreen}
+              sx={submitButton}
+            >
+              {isEditing ? "Guardar" : "Registrar"}
+            </Button>
+          </Box>
         </Box>
       </Box>
     </DialogComponent>

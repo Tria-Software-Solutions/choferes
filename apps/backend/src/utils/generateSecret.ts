@@ -18,6 +18,13 @@ if (!JWT_SECRET_KEY_REFRESH || JWT_SECRET_KEY_REFRESH.length < 32) {
   throw new Error("JWT_SECRET_KEY_REFRESH must be at least 32 characters long");
 }
 
+const AUTH_COOKIE_OPTIONS = {
+  httpOnly: true,
+  secure: IS_PRODUCTION,
+  sameSite: IS_PRODUCTION ? ("none" as const) : ("lax" as const),
+  path: "/",
+};
+
 // Generate access and refresh JWT tokens and set them as cookies in the response
 export const generateTokens = (userId: string, res: Response) => {
   const tokens = {
@@ -47,22 +54,21 @@ export const generateTokens = (userId: string, res: Response) => {
     ),
   };
 
-  const cookieOptions = {
-    httpOnly: true,
-    secure: IS_PRODUCTION,
-    sameSite: IS_PRODUCTION ? ("none" as const) : ("lax" as const),
-    path: "/",
-    maxAge: 3600 * 1000,
-  };
-
-  res.cookie("accessToken", tokens.accessToken, cookieOptions);
+  res.cookie("accessToken", tokens.accessToken, { ...AUTH_COOKIE_OPTIONS, maxAge: 3600 * 1000 });
 
   res.cookie("refreshToken", tokens.refreshToken, {
-    ...cookieOptions,
+    ...AUTH_COOKIE_OPTIONS,
     maxAge: 7 * 24 * 60 * 60 * 1000,
   });
 
   return tokens;
+};
+
+// Expires both auth cookies. The options must match the ones used when the
+// cookies were set, otherwise the browser keeps the originals.
+export const clearAuthCookies = (res: Response) => {
+  res.clearCookie("accessToken", AUTH_COOKIE_OPTIONS);
+  res.clearCookie("refreshToken", AUTH_COOKIE_OPTIONS);
 };
 
 // Generate a cryptographically secure random secret (hex string)

@@ -3,6 +3,10 @@
 // eslint-disable-next-line import/no-named-as-default
 import Employee from "../models/Employee";
 import { HoursWorked } from "../models/HoursWorked";
+import User from "../models/User";
+import { ServiceError } from "../utils/errors";
+import bcrypt from "bcrypt";
+import * as crypto from "crypto";
 import {
   paginate,
   getPaginationParams,
@@ -116,8 +120,13 @@ const EDITABLE_FIELDS = [
   "terminationReason",
   "terminationNotes",
   "position",
+  "gender",
   "nationalId",
+  "primaryPhone",
+  "secondaryPhone",
 ] as const;
+
+const GENDERS = new Set(["Masculino", "Femenino"]);
 
 const TERMINATION_REASONS = new Set([
   "renuncia",
@@ -137,9 +146,29 @@ const pickEditableFields = (data: Record<string, unknown>): Record<string, unkno
     ]),
   );
 
+// Garantiza que los valores "controlados" caigan fuera del rango esperado
+// queden como null en lugar de persistir basura.
+const DIGIT_ONLY_FIELDS = ["nationalId", "primaryPhone", "secondaryPhone"] as const;
+
+// La máscara (cédula, teléfonos) es solo de la vista: si el cliente manda
+// guiones se quitan antes de tocar la base.
+const sanitizeControlledValues = (clean: Record<string, unknown>): Record<string, unknown> => {
+  const sanitized = { ...clean };
+  DIGIT_ONLY_FIELDS.forEach((field) => {
+    if (typeof sanitized[field] === "string") {
+      sanitized[field] = (sanitized[field] as string).replace(/\D/g, "") || null;
+    }
+  });
+  if (sanitized.gender != null && !GENDERS.has(String(sanitized.gender))) {
+    sanitized.gender = null;
+  }
+  return sanitized;
+};
+
 // Creates a new employee and reloads the instance
 export const createEmployee = async (data: Record<string, unknown>) => {
-  const newEmployee = await Employee.create(pickEditableFields(data) as any);
+  const clean = sanitizeControlledValues(pickEditableFields(data));
+  const newEmployee = await Employee.create(clean as any);
   await newEmployee.reload();
   return newEmployee;
 };
@@ -147,7 +176,7 @@ export const createEmployee = async (data: Record<string, unknown>) => {
 // Updates employee data by ID (partial update — only provided fields change).
 // The active status is derived from the termination date so it can never drift.
 export const updateEmployee = async (id: number, data: Record<string, unknown>) => {
-  const clean = pickEditableFields(data);
+  const clean = sanitizeControlledValues(pickEditableFields(data));
 
   if (
     clean.terminationReason != null &&
@@ -204,7 +233,76 @@ export const getEmployeesBySearch = async (searchTerm: string) =>
     order: [["firstName", "ASC"]],
   });
 
-// Fetches employees with related hours worked if requested
+// Contraseña temporal que cumple la política (mayúscula, minúscula, dígito y
+// símbolo) y sale de un generador criptográfico, no de Math.random.
+const generateTempPassword = (): string => {
+  const lower = "abcdefghijkmnpqrstuvwxyz";
+  const upper = "ABCDEFGHJKLMNPQRSTUVWXYZ";
+  const digits = "23456789";
+  const symbols = "@$!%*?&";
+  const all = lower + upper + digits + symbols;
+  const pick = (chars: string) => chars[crypto.randomInt(chars.length)];
+  const chars = [pick(lower), pick(upper), pick(digits), pick(symbols)];
+  while (chars.length < 12) chars.push(pick(all));
+  // Fisher-Yates para que los caracteres obligatorios no queden al inicio.
+  for (let i = chars.length - 1; i > 0; i -= 1) {
+    const j = crypto.randomInt(i + 1);
+    [chars[i], chars[j]] = [chars[j], chars[i]];
+  }
+  return chars.join("");
+};
+
+// Crea o enlaza un usuario al empleado (botón "Activar acceso al sistema").
+// El vínculo vive en `users.employeeId` (un empleado -> 0 o 1 cuenta), por lo
+// que se busca al usuario por ese campo, no en el modelo Employee.
+// Si ya existe una cuenta, se devuelve sin crear nada (created: false).
+export const linkEmployeeToUser = async (employeeId: number) => {
+  const employee = await Employee.findByPk(employeeId, {
+    attributes: ["id", "firstName", "lastName", "email"],
+  });
+  if (!employee) throw new ServiceError(404, "Empleado no encontrado");
+
+  const existing = await User.findOne({ where: { employeeId: employee.id } });
+  if (existing) return { user: existing, created: false };
+
+  // Username/email pueden colisionar con cuentas ya existentes: se agrega un
+  // sufijo numérico hasta encontrar uno libre.
+  const baseUsername =
+    (employee.email && employee.email.split("@")[0]) || `empleado-${employee.id}`;
+  let username = baseUsername;
+  let counter = 1;
+  while (await User.findOne({ where: { username } })) {
+    username = `${baseUsername}${counter++}`;
+  }
+
+  let email = employee.email || `${username}@example.com`;
+  let emailCounter = 1;
+  while (await User.findOne({ where: { email } })) {
+    email = `${baseUsername}${emailCounter++}@example.com`;
+  }
+
+  // Contraseña temporal: se guarda hasheada (el login la compara con bcrypt)
+  // y solo se devuelve en texto plano una vez, para entregarla al empleado.
+  // La contraseña principal se inicializa con otro valor aleatorio que nadie
+  // conoce: el acceso inicial es solo con la temporal y se revoca al cambiarla.
+  const tempPassword = generateTempPassword();
+  const hashedTemporal = await bcrypt.hash(tempPassword, 10);
+  const hashedPassword = await bcrypt.hash(generateTempPassword(), 10);
+
+  const user = await User.create({
+    firstName: employee.firstName,
+    lastName: employee.lastName,
+    username,
+    email,
+    password: hashedPassword,
+    temporalPassword: hashedTemporal,
+    isActive: true,
+    employeeId: employee.id,
+  });
+
+  return { user, created: true, tempPassword };
+};
+
 export const getEmployeesWithRelations = async (includeHoursWorked = false) => {
   const include: Record<string, any>[] = [];
 

@@ -19,10 +19,29 @@ import {
 const router = express.Router();
 
 router.get("/", authenticateToken, employeeQueryRules, validate, employeeController.getEmployees);
+// Antes de "/:id" para que "hours-summary" no se interprete como un id.
+router.get(
+  "/hours-summary",
+  authenticateToken,
+  requirePermission(PERMISSION_CODES.VIEW_EMPLOYEES),
+  employeeController.getEmployeesBiweeklyHoursSummary,
+);
+
+// Enlazar/crear usuario para el empleado
+router.post(
+  "/:id/link-user",
+  authenticateToken,
+  requirePermission(PERMISSION_CODES.EDIT_EMPLOYEES),
+  idParam,
+  validate,
+  employeeController.linkEmployeeToUser,
+);
+
 router.get("/:id", authenticateToken, idParam, validate, employeeController.getEmployeeById);
 router.get(
   "/:id/vacation-accrual",
   authenticateToken,
+  requirePermission(PERMISSION_CODES.VIEW_VACATIONS),
   idParam,
   validate,
   employeeController.getVacationAccrual,

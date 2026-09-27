@@ -16,7 +16,7 @@ import {
   Typography,
   useTheme,
 } from "@mui/material";
-import { FileText, Inbox, Paperclip, Pencil, ShieldAlert, Trash2 } from "lucide-react";
+import { IconFileText, IconInbox, IconPaperclip, IconPencil, IconPlus, IconShieldExclamation, IconTrash } from "@tabler/icons-react";
 import { Employee } from "../../../models/Employee";
 import {
   DisciplinaryAction,
@@ -41,10 +41,11 @@ import {
   neutralButtonStyles,
 } from "../../../components/Table/EditableTable/helpers";
 import DisciplinaryFormDialog from "./DisciplinaryFormDialog";
+import { submitButton } from "../../Forms/sharedStyles";
+import SectionHeader from "./SectionHeader";
 import {
   cardStackStyles,
-  sectionPaperStyles,
-  sectionTitleStyles,
+  fillSectionPaperStyles,
   emptyStateBoxStyles,
   tableContainerStyles,
   tableHeaderCellStyles,
@@ -67,8 +68,11 @@ const formatDate = (value?: string | null): string => {
   return match ? `${match[3]}/${match[2]}/${match[1]}` : value;
 };
 
-// Downloads an attachment stored as a base64 data URL.
+// Downloads an attachment stored as a base64 data URL. Anything else is
+// refused: a `javascript:` URL clicked programmatically would run in the
+// viewer's session (records saved before the API validated this still exist).
 const downloadAttachment = (attachment: DisciplinaryAttachment) => {
+  if (!/^data:[\w.+-]+\/[\w.+-]+;base64,/.test(attachment.dataUrl ?? "")) return;
   const link = document.createElement("a");
   link.href = attachment.dataUrl;
   link.download = attachment.name;
@@ -128,51 +132,33 @@ const DisciplinaryTab: React.FC<DisciplinaryTabProps> = ({ employee }) => {
 
   return (
     <Box sx={cardStackStyles}>
-      <Paper elevation={0} sx={sectionPaperStyles(theme)}>
-        <Box
-          sx={{
-            display: "flex",
-            flexWrap: "wrap",
-            alignItems: "center",
-            justifyContent: "space-between",
-            gap: 1.5,
-            mb: 1.5,
-          }}
-        >
-          <Typography sx={{ ...sectionTitleStyles, mb: 0 }}>
-            Llamadas de atención y amonestaciones
-          </Typography>
-          <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
-            <Typography
-              variant="body2"
-              sx={{ display: "flex", alignItems: "center", gap: 0.75, color: "text.secondary" }}
-            >
-              <ShieldAlert size={16} color={theme.palette.primary.main} />
-              {actions.length} registro{actions.length === 1 ? "" : "s"}
-            </Typography>
-            {canCreate && (
-              <Button
-                variant="text"
-                onClick={() => handleOpenForm(null)}
-                sx={{
-                  px: 0.5,
-                  minHeight: 32,
-                  fontWeight: 600,
-                  fontSize: "0.85rem",
-                  color: "text.primary",
-                  "&:hover": {
-                    backgroundColor: "transparent",
-                    textDecoration: "underline",
-                    textUnderlineOffset: "3px",
-                    textDecorationThickness: "1px",
-                  },
-                }}
+      <Paper elevation={0} sx={fillSectionPaperStyles(theme)}>
+        <SectionHeader
+          icon={<IconShieldExclamation size={20} stroke={1.5} />}
+          title="Llamadas de atención y amonestaciones"
+          description="Registro disciplinario del empleado con sus adjuntos."
+          actions={
+            <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
+              <Typography
+                variant="body2"
+                sx={{ display: "flex", alignItems: "center", gap: 0.75, color: "text.secondary" }}
               >
-                Registrar
-              </Button>
-            )}
-          </Box>
-        </Box>
+                <IconShieldExclamation size={16} color={theme.palette.primary.main} />
+                {actions.length} registro{actions.length === 1 ? "" : "s"}
+              </Typography>
+              {canCreate && (
+                <Button
+                  variant="text"
+                  startIcon={<IconPlus size={18} />}
+                  onClick={() => handleOpenForm(null)}
+                  sx={submitButton}
+                >
+                  Registrar
+                </Button>
+              )}
+            </Box>
+          }
+        />
 
         {isLoading && actions.length === 0 ? (
           <Box sx={{ display: "flex", justifyContent: "center", py: 4 }}>
@@ -180,7 +166,7 @@ const DisciplinaryTab: React.FC<DisciplinaryTabProps> = ({ employee }) => {
           </Box>
         ) : loadError && actions.length === 0 ? (
           <Box sx={emptyStateBoxStyles(theme)}>
-            <Inbox size={34} />
+            <IconInbox size={34} />
             <Typography variant="body2">{loadError}</Typography>
             <Button variant="outlined" onClick={() => void reload()}>
               Reintentar
@@ -188,7 +174,7 @@ const DisciplinaryTab: React.FC<DisciplinaryTabProps> = ({ employee }) => {
           </Box>
         ) : actions.length === 0 ? (
           <Box sx={emptyStateBoxStyles(theme)}>
-            <Inbox size={34} />
+            <IconInbox size={34} />
             <Typography variant="body2">No hay amonestaciones registradas</Typography>
           </Box>
         ) : (
@@ -218,14 +204,7 @@ const DisciplinaryTab: React.FC<DisciplinaryTabProps> = ({ employee }) => {
                   return (
                     <TableRow
                       key={action.id}
-                      sx={{
-                        "&:hover": {
-                          backgroundColor:
-                            theme.palette.mode === "dark"
-                              ? "rgba(255,255,255,0.04)"
-                              : "rgba(0,0,0,0.03)",
-                        },
-                      }}
+                      hover
                     >
                       <TableCell sx={tableCellStyles}>{formatDate(action.actionDate)}</TableCell>
                       <TableCell sx={tableCellStyles}>
@@ -278,9 +257,9 @@ const DisciplinaryTab: React.FC<DisciplinaryTabProps> = ({ employee }) => {
                                 sx={neutralButtonStyles(theme)}
                               >
                                 {attachment.mimeType?.startsWith("image/") ? (
-                                  <Paperclip size={15} />
+                                  <IconPaperclip size={15} />
                                 ) : (
-                                  <FileText size={15} />
+                                  <IconFileText size={15} />
                                 )}
                               </IconButton>
                             ))}
@@ -304,7 +283,7 @@ const DisciplinaryTab: React.FC<DisciplinaryTabProps> = ({ employee }) => {
                               onClick={() => handleOpenForm(action)}
                               sx={editButtonStyles(theme)}
                             >
-                              <Pencil size={15} />
+                              <IconPencil size={15} />
                             </IconButton>
                           )}
                           {canDelete && (
@@ -315,7 +294,7 @@ const DisciplinaryTab: React.FC<DisciplinaryTabProps> = ({ employee }) => {
                               onClick={() => setDeleteTarget(action)}
                               sx={deleteButtonStyles(theme)}
                             >
-                              <Trash2 size={15} />
+                              <IconTrash size={15} />
                             </IconButton>
                           )}
                         </Box>

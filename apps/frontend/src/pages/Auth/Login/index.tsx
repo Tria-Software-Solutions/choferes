@@ -7,8 +7,8 @@ import {
 } from '@mui/material';
 import type { SxProps, Theme } from '@mui/material';
 import {
-  Visibility, VisibilityOff, MailOutline, Lock, ArrowBack, CheckCircleOutline,
-} from '@mui/icons-material';
+  IconArrowLeft, IconCircleCheck, IconEye, IconEyeOff, IconLock, IconMail,
+} from '@tabler/icons-react';
 import FORMS from '../../../constants/forms.constants';
 import LOGIN from '../../../constants/login.constants';
 import bg from '../../../assets/images/background.jpeg';
@@ -37,10 +37,8 @@ import {
   forgotSuccessStyles,
   loginSubmitButtonStyles,
   loginPasswordIconButtonStyles,
-} from './styles';
-import {
   submitProgressStyles,
-} from '../AuthPageStyles';
+} from './styles';
 
 const Login: React.FC = () => {
   const location = useLocation();
@@ -258,7 +256,7 @@ const Login: React.FC = () => {
                         input: {
                           startAdornment: (
                             <InputAdornment position="start">
-                              <MailOutline sx={inputIconStyles} />
+                              <IconMail size={18} stroke={1.75} style={inputIconStyles} />
                             </InputAdornment>
                           ),
                         },
@@ -288,7 +286,7 @@ const Login: React.FC = () => {
                         input: {
                           startAdornment: (
                             <InputAdornment position="start">
-                              <Lock sx={inputIconStyles} />
+                              <IconLock size={18} stroke={1.75} style={inputIconStyles} />
                             </InputAdornment>
                           ),
                           endAdornment: (
@@ -299,7 +297,7 @@ const Login: React.FC = () => {
                                 disabled={isSubmitting}
                                 sx={loginPasswordIconButtonStyles}
                               >
-                                {showPassword ? <VisibilityOff /> : <Visibility />}
+                                {showPassword ? <IconEyeOff size={18} stroke={1.75} /> : <IconEye size={18} stroke={1.75} />}
                               </IconButton>
                             </InputAdornment>
                           ),
@@ -317,6 +315,8 @@ const Login: React.FC = () => {
                         sx={checkboxStyles}
                       />
                       <Typography
+                        component="button"
+                        type="button"
                         sx={forgotLinkStyles}
                         onClick={() => setView('forgotPassword')}
                       >
@@ -375,7 +375,7 @@ const Login: React.FC = () => {
             ) : forgotSent ? (
               <Box sx={{ ...(mounted ? animateStagger(0) : {}) }}>
                 <Box sx={forgotSuccessStyles}>
-                  <CheckCircleOutline />
+                  <IconCircleCheck size={52} stroke={1.5} />
                   <Typography variant="h5" sx={{ fontWeight: 700, letterSpacing: -0.2, mb: 0.5 }}>
                     {LOGIN.FORGOT_SENT_TITLE}
                   </Typography>
@@ -428,7 +428,7 @@ const Login: React.FC = () => {
                         input: {
                           startAdornment: (
                             <InputAdornment position="start">
-                              <MailOutline sx={inputIconStyles} />
+                              <IconMail size={18} stroke={1.75} style={inputIconStyles} />
                             </InputAdornment>
                           ),
                         },
@@ -459,10 +459,12 @@ const Login: React.FC = () => {
                 </Box>
 
                 <Box
+                  component="button"
+                  type="button"
                   sx={backLinkStyles}
                   onClick={() => setView('login')}
                 >
-                  <ArrowBack sx={{ fontSize: '0.9rem' }} />
+                  <IconArrowLeft size={15} />
                   {LOGIN.BACK_TO_LOGIN}
                 </Box>
               </Box>

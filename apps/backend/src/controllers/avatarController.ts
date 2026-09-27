@@ -2,6 +2,7 @@ import { Request, Response } from "express";
 import multer, { FileFilterCallback } from "multer";
 import * as userService from "../services/userService";
 import * as employeeService from "../services/employeeService";
+import { sendServerError } from "../utils/errors";
 
 // Avatars are stored directly in the database as base64 data URLs.
 // This avoids the ephemeral filesystem problem in production (Render free tier
@@ -9,13 +10,15 @@ import * as employeeService from "../services/employeeService";
 // or render as corrupt images.
 const storage = multer.memoryStorage();
 
+export const UPLOAD_TYPE_ERROR = "Solo se permiten imágenes (JPEG, PNG, GIF, WebP)";
+
 /* global Express */
 const fileFilter = (_req: Request, file: Express.Multer.File, cb: FileFilterCallback) => {
   const allowedMimes = ["image/jpeg", "image/png", "image/gif", "image/webp"];
   if (allowedMimes.includes(file.mimetype)) {
     cb(null, true);
   } else {
-    cb(new Error("Solo se permiten imágenes (JPEG, PNG, GIF, WebP)"));
+    cb(new Error(UPLOAD_TYPE_ERROR));
   }
 };
 
@@ -47,7 +50,7 @@ export const uploadAvatar = async (req: Request, res: Response) => {
       avatar: avatarDataUrl,
     });
   } catch (error) {
-    return res.status(500).json({ message: "Error al subir avatar", error });
+    return sendServerError(res, "Error al subir avatar", error);
   }
 };
 
@@ -62,7 +65,7 @@ export const deleteAvatar = async (req: Request, res: Response) => {
       message: "Avatar eliminado exitosamente",
     });
   } catch (error) {
-    return res.status(500).json({ message: "Error al eliminar avatar", error });
+    return sendServerError(res, "Error al eliminar avatar", error);
   }
 };
 
@@ -92,7 +95,7 @@ export const uploadEmployeeAvatar = async (req: Request, res: Response) => {
       avatar: avatarDataUrl,
     });
   } catch (error) {
-    return res.status(500).json({ message: "Error al subir avatar", error });
+    return sendServerError(res, "Error al subir avatar", error);
   }
 };
 
@@ -113,6 +116,6 @@ export const deleteEmployeeAvatar = async (req: Request, res: Response) => {
       message: "Avatar eliminado exitosamente",
     });
   } catch (error) {
-    return res.status(500).json({ message: "Error al eliminar avatar", error });
+    return sendServerError(res, "Error al eliminar avatar", error);
   }
 };

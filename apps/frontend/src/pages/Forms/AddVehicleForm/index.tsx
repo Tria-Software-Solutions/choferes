@@ -13,7 +13,7 @@ import FORMS from "../../../constants/forms.constants";
 import BRANDS_LIST from "../../../constants/brands.constants";
 import COLORS_LIST from "../../../constants/colors.constants";
 import { maskLicensePlate } from "../../../utils/mask";
-import { RotateCcw, Ticket, Car, ParkingCircle, Palette, FileEdit, Factory } from "lucide-react";
+import { IconBuildingFactory2, IconCar, IconFilePencil, IconPalette, IconParking, IconRotate, IconTicket } from "@tabler/icons-react";
 import TextfieldComponent from "../../../components/Textfield/Textfield.component";
 import { DatePicker, LocalizationProvider } from "@mui/x-date-pickers";
 import { AdapterDateFns } from "@mui/x-date-pickers/AdapterDateFns";
@@ -309,13 +309,15 @@ const AddVehicleForm: React.FC<AddVehicleFormProps> = ({
         <Grid item xs={12} sm={6}>
           <TextfieldComponent
             placeholder={FORMS.ADD_VEHICLE.TICKET_PLACEHOLDER}
+
+            label={FORMS.ADD_VEHICLE.TICKET_LABEL}
             variant="outlined"
             fullWidth
             value={formData.ticket}
             onChange={(e) => handleFieldChange("ticket", e.target.value)}
             error={errors.ticket !== ""}
             helperText={errors.ticket}
-            icon={<Ticket style={iconStyle} />}
+            icon={<IconTicket style={iconStyle} />}
             sx={formControl(theme)}
           />
         </Grid>
@@ -323,13 +325,15 @@ const AddVehicleForm: React.FC<AddVehicleFormProps> = ({
         <Grid item xs={12} sm={6}>
           <TextfieldComponent
             placeholder={FORMS.ADD_VEHICLE.LICENSE_PLATE_PLACEHOLDER}
+
+            label={FORMS.ADD_VEHICLE.LICENSE_PLATE_LABEL}
             variant="outlined"
             fullWidth
             value={formData.licensePlate}
             onChange={handleLicensePlateChange}
             error={errors.licensePlate !== ""}
             helperText={errors.licensePlate}
-            icon={<Car style={iconStyle} />}
+            icon={<IconCar style={iconStyle} />}
             sx={formControl(theme)}
           />
         </Grid>
@@ -361,7 +365,8 @@ const AddVehicleForm: React.FC<AddVehicleFormProps> = ({
             renderInput={(params) => (
               <TextfieldComponent
                 {...params}
-                placeholder={FORMS.ADD_VEHICLE.BRAND_LABEL}
+                label={FORMS.ADD_VEHICLE.BRAND_LABEL}
+                placeholder="Selecciona o escribe"
                 variant="outlined"
                 fullWidth
                 error={errors.brand !== ""}
@@ -371,7 +376,7 @@ const AddVehicleForm: React.FC<AddVehicleFormProps> = ({
                   startAdornment: (
                     <>
                       <InputAdornment position="start">
-                        <Factory style={iconStyle} />
+                        <IconBuildingFactory2 style={iconStyle} />
                       </InputAdornment>
                       {params.InputProps.startAdornment}
                     </>
@@ -409,7 +414,8 @@ const AddVehicleForm: React.FC<AddVehicleFormProps> = ({
             renderInput={(params) => (
               <TextfieldComponent
                 {...params}
-                placeholder={FORMS.ADD_VEHICLE.COLOR_LABEL}
+                label={FORMS.ADD_VEHICLE.COLOR_LABEL}
+                placeholder="Selecciona o escribe"
                 variant="outlined"
                 fullWidth
                 error={errors.color !== ""}
@@ -419,7 +425,7 @@ const AddVehicleForm: React.FC<AddVehicleFormProps> = ({
                   startAdornment: (
                     <>
                       <InputAdornment position="start">
-                        <Palette style={iconStyle} />
+                        <IconPalette style={iconStyle} />
                       </InputAdornment>
                       {params.InputProps.startAdornment}
                     </>
@@ -449,13 +455,15 @@ const AddVehicleForm: React.FC<AddVehicleFormProps> = ({
         <Grid item xs={12} sm={6}>
           <TextfieldComponent
             placeholder={FORMS.ADD_VEHICLE.PARKING_LOT_PLACEHOLDER}
+
+            label={FORMS.ADD_VEHICLE.PARKING_LOT_LABEL}
             variant="outlined"
             fullWidth
             value={formData.parkingLot}
             onChange={handleParkingLotChange}
             error={errors.parkingLot !== ""}
             helperText={errors.parkingLot}
-            icon={<ParkingCircle style={iconStyle} />}
+            icon={<IconParking style={iconStyle} />}
             sx={formControl(theme)}
           />
         </Grid>
@@ -471,6 +479,8 @@ const AddVehicleForm: React.FC<AddVehicleFormProps> = ({
                   fullWidth: true,
                   required: true,
                   variant: "outlined",
+                  label: FORMS.ADD_VEHICLE.PARKING_DATE_LABEL,
+                  InputLabelProps: { shrink: true, required: false },
                   sx: formControl(theme),
                 },
               }}
@@ -481,6 +491,8 @@ const AddVehicleForm: React.FC<AddVehicleFormProps> = ({
         <Grid item xs={12}>
           <TextfieldComponent
             placeholder={FORMS.ADD_VEHICLE.OBSERVATIONS_PLACEHOLDER}
+
+            label={FORMS.ADD_VEHICLE.OBSERVATIONS_LABEL}
             variant="outlined"
             fullWidth
             multiline
@@ -489,7 +501,7 @@ const AddVehicleForm: React.FC<AddVehicleFormProps> = ({
             onChange={(e) =>
               setFormData({ ...formData, notes: e.target.value })
             }
-            icon={<FileEdit style={iconStyle} />}
+            icon={<IconFilePencil style={iconStyle} />}
             sx={formControl(theme)}
           />
         </Grid>
@@ -499,7 +511,7 @@ const AddVehicleForm: React.FC<AddVehicleFormProps> = ({
             <Button
               variant="text"
               onClick={handleClearForm}
-              startIcon={<RotateCcw size={16} />}
+              startIcon={<IconRotate size={16} />}
               fullWidth={isSmallScreen}
               sx={clearButton}
             >

@@ -2,6 +2,7 @@ import { createSlice, createAsyncThunk, PayloadAction } from "@reduxjs/toolkit";
 import * as HoursWorkedService from "../../services/hoursWorkedService";
 import { HoursWorked } from "../../models/HoursWorked";
 import { RootState } from "../store";
+import { getApiErrorMessage } from "../../utils/apiError";
 
 interface HoursWorkedState {
   hoursWorked: HoursWorked[];
@@ -96,9 +97,7 @@ export const fetchHoursWorked = createAsyncThunk(
         return [];
       }
     } catch (error: unknown) {
-      return rejectWithValue(
-        error instanceof Error ? error.message : "Failed to fetch hours worked",
-      );
+      return rejectWithValue(getApiErrorMessage(error, "Failed to fetch hours worked"));
     }
   },
 );
@@ -118,11 +117,7 @@ export const createHoursWorked = createAsyncThunk(
       );
       return createdHours;
     } catch (error: unknown) {
-      return rejectWithValue(
-        error instanceof Error
-          ? error.message
-          : "Failed to create hours worked",
-      );
+      return rejectWithValue(getApiErrorMessage(error, "Failed to create hours worked"));
     }
   },
 );
@@ -144,11 +139,7 @@ export const updateHoursWorked = createAsyncThunk(
       const refreshedHours = await withRetry(() => HoursWorkedService.getHoursWorkedById(id));
       return refreshedHours;
     } catch (error: unknown) {
-      return rejectWithValue(
-        error instanceof Error
-          ? error.message
-          : "Failed to update hours worked",
-      );
+      return rejectWithValue(getApiErrorMessage(error, "Failed to update hours worked"));
     }
   },
 );
@@ -187,11 +178,7 @@ export const createOrUpdateHoursWorked = createAsyncThunk(
         return createdHoursWorked;
       }
     } catch (error: unknown) {
-      return rejectWithValue(
-        error instanceof Error
-          ? error.message
-          : "Failed to create or update hours worked",
-      );
+      return rejectWithValue(getApiErrorMessage(error, "Failed to create or update hours worked"));
     }
   },
 );
@@ -203,11 +190,7 @@ export const deleteHoursWorked = createAsyncThunk(
       await withRetry(() => HoursWorkedService.deleteHoursWorked(id));
       return id;
     } catch (error: unknown) {
-      return rejectWithValue(
-        error instanceof Error
-          ? error.message
-          : "Failed to delete hours worked",
-      );
+      return rejectWithValue(getApiErrorMessage(error, "Failed to delete hours worked"));
     }
   },
 );

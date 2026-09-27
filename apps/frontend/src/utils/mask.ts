@@ -1,5 +1,33 @@
 // Utility functions for masking and formatting license plate and parking lot strings
 // Used for input formatting and validation in forms
+
+/**
+ * Cédula de identidad costarricense: 9 dígitos con guiones `1-0234-0567`.
+ * Only digits reach the database; the mask is a view concern, so the stored
+ * value stays sortable and searchable. Values typed with dashes (from older
+ * records or pasted text) are normalized by stripping them first.
+ */
+export const maskNationalId = (value: string): string => {
+  const digits = value.replace(/\D/g, "").slice(0, 9);
+  if (digits.length <= 1) return digits;
+  if (digits.length <= 4) return `${digits[0]}-${digits.slice(1)}`;
+  return `${digits.slice(0, 1)}-${digits.slice(1, 5)}-${digits.slice(5)}`;
+};
+
+/**
+ * Costa Rican landline: 8 digits formatted `2234-5678`. Mobile numbers (9
+ * digits with a leading 8) keep the first group so both fit the same field:
+ * `8312-3456`.
+ */
+export const maskPhone = (value: string): string => {
+  const digits = value.replace(/\D/g, "").slice(0, 9);
+  if (digits.length <= 4) return digits;
+  return `${digits.slice(0, digits.length === 9 ? 4 : 4)}-${digits.slice(4)}`;
+};
+
+/** Strips the mask so the API only ever receives digits. */
+export const digitsOnly = (value: string): string => value.replace(/\D/g, "");
+
 export const maskLicensePlate = (plate: string): string => {
   // Formats a license plate string to uppercase, removes non-alphanumeric, and adds hyphen if needed
   const sanitizedPlate = plate.replace(/[^A-Za-z0-9]/g, "").toUpperCase();

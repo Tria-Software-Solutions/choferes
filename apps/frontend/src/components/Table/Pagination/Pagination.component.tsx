@@ -1,5 +1,5 @@
 import { IconButton, Typography, useMediaQuery, useTheme } from "@mui/material";
-import { ArrowLeft, ArrowRight } from "lucide-react";
+import { IconArrowLeft, IconArrowRight } from "@tabler/icons-react";
 import React from "react";
 import { PAGINATION } from "../../../constants/constants";
 import { containerStyles, pageTextStyles } from "./Pagination.styles";
@@ -49,7 +49,7 @@ const PaginationComponent: React.FC<PaginationActionsProps> = ({
         aria-label={PAGINATION.PREVIOUS}
         sx={{ padding: "2px" }}
       >
-        <ArrowLeft
+        <IconArrowLeft
           size={16}
           style={{
             color:
@@ -68,7 +68,7 @@ const PaginationComponent: React.FC<PaginationActionsProps> = ({
         aria-label={PAGINATION.NEXT}
         sx={{ padding: "2px" }}
       >
-        <ArrowRight
+        <IconArrowRight
           size={16}
           style={{
             color:

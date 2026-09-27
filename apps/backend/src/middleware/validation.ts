@@ -31,6 +31,15 @@ export const idParam = [
   param("id").isInt({ min: 1 }).withMessage("ID inválido: debe ser un número entero positivo"),
 ];
 
+// Teléfono CR opcional: solo dígitos, 8 de fijo o 9 con el 8 inicial de móvil.
+const phoneRule = (field: string) =>
+  body(field)
+    .optional({ values: "null" })
+    .trim()
+    .customSanitizer((value: string) => value.replace(/\D/g, ""))
+    .isLength({ min: 1, max: 9 })
+    .withMessage(`${field} debe tener entre 1 y 9 dígitos`);
+
 // Optional YYYY-MM-DD body field (shared by contract, licenses and dates).
 const dateOnly = (field: string) =>
   body(field)
@@ -56,11 +65,16 @@ export const contractBodyRules = [
     .trim()
     .isLength({ max: 100 })
     .withMessage("position no puede exceder 100 caracteres"),
+  // La cédula y los teléfonos se guardan sin máscara: solo dígitos, para que
+  // la base siga siendo ordenable y buscable. El formato se aplica en la UI.
   body("nationalId")
     .optional({ values: "null" })
     .trim()
-    .isLength({ max: 30 })
-    .withMessage("nationalId no puede exceder 30 caracteres"),
+    .customSanitizer((value: string) => value.replace(/\D/g, ""))
+    .isLength({ min: 1, max: 9 })
+    .withMessage("nationalId debe tener entre 1 y 9 dígitos"),
+  phoneRule("primaryPhone"),
+  phoneRule("secondaryPhone"),
 ];
 
 // ─── Employees ───────────────────────────────────────────────────────────────
@@ -346,6 +360,10 @@ export const userPasswordUpdateRules = [
     .withMessage("La contraseña es requerida")
     .isLength({ min: 6 })
     .withMessage("La contraseña debe tener al menos 6 caracteres"),
+  body("currentPassword")
+    .optional()
+    .isString()
+    .withMessage("La contraseña actual debe ser un texto"),
 ];
 
 export const userTemporalPasswordUpdateRules = [
@@ -465,7 +483,10 @@ export const notificationRules = [
   body("actionUrl")
     .optional({ values: "falsy" })
     .isLength({ max: 255 })
-    .withMessage("actionUrl no puede exceder 255 caracteres"),
+    .withMessage("actionUrl no puede exceder 255 caracteres")
+    // In-app routes only: the client navigates to it on click.
+    .matches(/^\/(?!\/)[\w\-./?=&%#]*$/)
+    .withMessage("actionUrl debe ser una ruta interna (ej. /employees)"),
   body("actionText")
     .optional()
     .trim()
@@ -585,6 +606,21 @@ export const paymentUpdateRules = [
   amountField("others"),
   amountField("socialCharges"),
   amountField("deductions"),
+  body("automaticFields")
+    .optional()
+    .isArray({ max: 6 })
+    .withMessage("automaticFields debe ser una lista"),
+  body("automaticFields.*")
+    .isIn(["regularSalary", "overtimePay", "mileage", "others", "socialCharges", "deductions"])
+    .withMessage("automaticFields contiene un campo inválido"),
+];
+
+// POST /payments/generate — fill a quincena's slips for every employee.
+export const paymentGenerateRules = [
+  body("biweekNumber")
+    .isInt({ min: 1, max: 24 })
+    .withMessage("biweekNumber debe estar entre 1 y 24"),
+  body("year").isInt({ min: 2000, max: 2100 }).withMessage("year debe estar entre 2000 y 2100"),
 ];
 
 export const paymentQueryRules = [
@@ -691,6 +727,7 @@ export const licenseRules = [
 ];
 
 export const licenseUpdateRules = [
+  ...idParam,
   body("licenseType")
     .optional()
     .isIn([...LICENSE_TYPES])
@@ -740,7 +777,11 @@ const attachmentRules = [
     .optional()
     .isString()
     .isLength({ max: 3000000 })
-    .withMessage("Cada adjunto no puede exceder ~2MB"),
+    .withMessage("Cada adjunto no puede exceder ~2MB")
+    // Must be an inline base64 file. Anything else (e.g. a `javascript:` URL)
+    // would run in the viewer's session when the attachment is opened.
+    .matches(/^data:[\w.+-]+\/[\w.+-]+;base64,[A-Za-z0-9+/=\s]*$/)
+    .withMessage("Cada adjunto debe ser un archivo codificado en base64"),
 ];
 
 export const disciplinaryRules = [
@@ -772,6 +813,7 @@ export const disciplinaryRules = [
 ];
 
 export const disciplinaryUpdateRules = [
+  ...idParam,
   dateOnly("actionDate"),
   body("type")
     .optional()
@@ -799,4 +841,87 @@ export const disciplinaryUpdateRules = [
 export const disciplinaryQueryRules = [
   ...paginationRules,
   query("employeeId").optional().isInt({ min: 1 }).withMessage("employeeId inválido"),
+];
+
+// ─── Tasks (personal to-do lists) ─────────────────────────────────────────────
+
+const TASK_RECURRENCE_VALUES = ["none", "daily", "weekdays", "weekly", "monthly", "yearly"];
+const TASK_LIST_COLOR_VALUES = ["indigo", "sky", "emerald", "amber", "rose", "violet", "slate"];
+
+const taskFields = (optionalTitle: boolean) => [
+  (optionalTitle ? body("title").optional() : body("title"))
+    .isString()
+    .trim()
+    .isLength({ min: 1, max: 500 })
+    .withMessage("El título es obligatorio (máx. 500 caracteres)"),
+  body("notes")
+    .optional({ values: "null" })
+    .isString()
+    .isLength({ max: 10000 })
+    .withMessage("Las notas no pueden exceder 10000 caracteres"),
+  body("listId").optional({ values: "null" }).isInt({ min: 1 }).withMessage("listId inválido"),
+  body("dueDate")
+    .optional({ values: "null" })
+    .matches(/^\d{4}-\d{2}-\d{2}$/)
+    .withMessage("dueDate debe tener formato YYYY-MM-DD"),
+  body("dueTime")
+    .optional({ values: "null" })
+    .matches(/^([01]\d|2[0-3]):[0-5]\d$/)
+    .withMessage("dueTime debe tener formato HH:mm"),
+  body("remindAt")
+    .optional({ values: "null" })
+    .isISO8601()
+    .withMessage("remindAt debe ser una fecha ISO 8601"),
+  body("priority").optional().isInt({ min: 0, max: 3 }).withMessage("priority debe ser 0-3"),
+  body("isImportant").optional().isBoolean().withMessage("isImportant debe ser booleano"),
+  body("recurrence").optional().isIn(TASK_RECURRENCE_VALUES).withMessage("recurrence inválida"),
+  body("subtasks")
+    .optional()
+    .isArray({ max: 50 })
+    .withMessage("subtasks debe ser una lista (máx. 50)"),
+  body("subtasks.*.id").optional().isString().isLength({ min: 1, max: 50 }),
+  body("subtasks.*.title")
+    .optional()
+    .isString()
+    .trim()
+    .isLength({ min: 1, max: 300 })
+    .withMessage("Cada paso necesita un título (máx. 300 caracteres)"),
+  body("subtasks.*.done").optional().isBoolean(),
+  body("completed").optional().isBoolean().withMessage("completed debe ser booleano"),
+];
+
+export const taskCreateRules = taskFields(false);
+
+export const taskUpdateRules = [...idParam, ...taskFields(true)];
+
+export const reorderRules = [
+  body("ids").isArray({ min: 1, max: 1000 }).withMessage("ids debe ser una lista"),
+  body("ids.*").isInt({ min: 1 }).withMessage("ids contiene un valor inválido"),
+];
+
+export const clearCompletedRules = [
+  query("listId")
+    .optional()
+    .matches(/^(\d+|inbox)$/)
+    .withMessage("listId inválido"),
+];
+
+export const taskListRules = [
+  body("name")
+    .isString()
+    .trim()
+    .isLength({ min: 1, max: 80 })
+    .withMessage("El nombre es obligatorio (máx. 80 caracteres)"),
+  body("color").optional().isIn(TASK_LIST_COLOR_VALUES).withMessage("color inválido"),
+];
+
+export const taskListUpdateRules = [
+  ...idParam,
+  body("name")
+    .optional()
+    .isString()
+    .trim()
+    .isLength({ min: 1, max: 80 })
+    .withMessage("El nombre es obligatorio (máx. 80 caracteres)"),
+  body("color").optional().isIn(TASK_LIST_COLOR_VALUES).withMessage("color inválido"),
 ];

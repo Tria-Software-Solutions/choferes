@@ -6,9 +6,8 @@ export const boxRoot = { width: "100%", p: 0 };
 export const gridContainer = { mt: 0 };
 
 // ─── Icons ───
-export const iconStyle: CSSProperties = {
-  color: "#666666",
-};
+// Field icons inherit the adornment color from the theme (see fieldStyles).
+export const iconStyle: CSSProperties = {};
 
 // ─── Input field overrides for forms with icon adornments ───
 // NOTE: Base input styles are handled by TextfieldComponent.
@@ -33,160 +32,108 @@ export const formControl = (theme: Theme) => ({
   },
 });
 
-// ─── Dropdown menu paper ───
+// ─── Dropdown menu paper (look comes from the theme's MuiMenu/MuiPopover) ───
 export const menuPaperProps = {
   PaperProps: {
-    sx: (theme: Theme) => ({
+    sx: {
       maxHeight: 320,
       overflowY: "auto",
       mt: 0.5,
-      borderRadius: "10px",
-      backgroundColor: theme.palette.mode === 'dark' 
-        ? 'rgba(30,30,35,0.95)'
-        : '#ffffff',
-      boxShadow: theme.palette.mode === 'dark'
-        ? "0 10px 40px rgba(0,0,0,0.4), 0 2px 8px rgba(0,0,0,0.2)"
-        : "0 10px 40px rgba(0,0,0,0.15), 0 2px 8px rgba(0,0,0,0.1)",
-      border: "none",
-      overflow: 'hidden',
-      pr: 0.5,
-      color: theme.palette.text.primary,
-    }),
+    },
   },
 };
 
-// ─── Info box premium ───
+// ─── Info callout (accent-tinted note inside forms) ───
 export const infoBox = (theme: Theme) => ({
   display: "flex",
   alignItems: "center",
-  gap: { xs: 1.5, sm: 2.5 },
-  p: { xs: 1.5, sm: 2 },
-  borderRadius: "16px",
-  backgroundColor: theme.palette.mode === "dark"
-    ? "rgba(99,102,241,0.04)"
-    : "rgba(99,102,241,0.03)",
-  position: "relative",
-  overflow: "hidden",
-  "&::before": {
-    content: '""',
-    position: "absolute",
-    left: 0,
-    top: "15%",
-    bottom: "15%",
-    width: 3,
-    borderRadius: "0 3px 3px 0",
-    backgroundColor: theme.palette.primary.main,
-    opacity: 0.4,
-  },
+  gap: { xs: 1.5, sm: 2 },
+  p: { xs: 1.5, sm: 1.75 },
+  borderRadius: "12px",
+  backgroundColor: theme.tokens.colors.accentSoft,
 });
 
 export const infoIconBox = (theme: Theme) => ({
   display: "flex",
   alignItems: "center",
   justifyContent: "center",
-  width: 36,
-  height: 36,
+  width: 34,
+  height: 34,
   borderRadius: "10px",
-  background: `linear-gradient(135deg, ${theme.palette.primary.main}, ${theme.palette.primary.dark})`,
-  color: "#fff",
+  backgroundColor: theme.tokens.colors.surface,
+  color: theme.tokens.colors.accent,
   flexShrink: 0,
-  boxShadow: theme.palette.mode === "dark"
-    ? "0 4px 12px rgba(99,102,241,0.25)"
-    : "0 4px 12px rgba(99,102,241,0.15)",
 });
 
 export const infoTitle = (theme: Theme) => ({
   fontWeight: 600,
-  color: theme.palette.text.primary,
+  color: theme.tokens.colors.text,
   mb: 0.25,
-  fontSize: "0.8rem",
+  fontSize: "0.8125rem",
 });
 
 export const infoDesc = (theme: Theme) => ({
-  color: theme.palette.text.secondary,
-  fontSize: "0.7rem",
+  color: theme.tokens.colors.textMuted,
+  fontSize: "0.75rem",
   lineHeight: 1.45,
-  opacity: 0.8,
 });
 
-// ─── Standardized Modal Button Styles ───
-// Modal actions are plain, minimal TEXT buttons (link-like):
-// - submitButton: strong primary text (the main action)
-// - cancelButton: subtle secondary text
-// - clearButton: like cancel, but ordered first on mobile
-// Baseline geometry/weight comes from the theme MuiButton override so every
-// button in the app shares the same minimal look & feel.
+// ─── Standardized form actions ───
+// Every form ends with the same footer: an optional "Limpiar" on the left and
+// Cancel + the primary action on the right. The primary action is the only
+// solid button; secondary actions are quiet text buttons.
 
-// ─── Layout helpers ───
 export const actionsBox = (theme: Theme) => ({
   display: "flex",
   flexDirection: { xs: "column-reverse", sm: "row" },
   justifyContent: "space-between",
-  alignItems: "center",
-  gap: { xs: 1.5, sm: 2 },
-  pt: 3,
+  alignItems: { xs: "stretch", sm: "center" },
+  gap: { xs: 1, sm: 2 },
+  mt: 3,
+  pt: 2,
+  borderTop: theme.tokens.borders.hairline,
 });
 
 export const actionsInnerBox = {
   display: "flex",
-  flexDirection: { xs: "column", sm: "row" },
-  gap: { xs: 1, sm: 1.5 },
+  flexDirection: { xs: "column-reverse", sm: "row" },
+  gap: 1,
   width: { xs: "100%", sm: "auto" },
   order: { xs: 1, sm: 2 },
 };
 
-// ─── Base link-button mixin (shared visual traits) ───
-const linkButtonBase = {
-  px: 1.5,
-  minHeight: 36,
-  transition: "color 0.15s ease",
-  "&:active": {
-    transform: "scale(0.97)",
-  },
-  "&.Mui-disabled": {
-    opacity: 0.5,
-  },
-};
-
-// ─── Primary action (main modal CTA: Agregar / Guardar / Confirmar) ───
-export const submitButton = {
-  ...linkButtonBase,
-  color: "text.primary",
+const actionBase = {
+  px: 2,
+  minHeight: 38,
+  borderRadius: "10px",
   fontWeight: 600,
-  "&:hover": {
-    color: "text.primary",
-    textDecoration: "underline",
-    textUnderlineOffset: "3px",
-    textDecorationThickness: "1px",
-  },
+  whiteSpace: "nowrap",
 };
 
-// ─── Secondary action (Cancelar) ───
-export const cancelButton = {
-  ...linkButtonBase,
-  color: "text.secondary",
-  fontWeight: 500,
-  "&:hover": {
-    color: "text.primary",
+// Primary action (Agregar / Guardar / Confirmar)
+export const submitButton = (theme: Theme) => ({
+  ...actionBase,
+  backgroundColor: theme.tokens.colors.primary,
+  color: theme.tokens.colors.onPrimary,
+  boxShadow: `0 1px 2px ${theme.tokens.shadows.button}`,
+  "&:hover": { backgroundColor: theme.tokens.colors.primaryHover },
+  "&.Mui-disabled": {
+    backgroundColor: theme.tokens.colors.disabled,
+    color: theme.tokens.colors.disabledText,
+    boxShadow: "none",
   },
-};
+});
 
-// ─── Clear form action ───
-export const clearButton = {
-  ...cancelButton,
+// Secondary action (Cancelar)
+export const cancelButton = (theme: Theme) => ({
+  ...actionBase,
+  color: theme.tokens.colors.textMuted,
+  "&:hover": { backgroundColor: theme.tokens.colors.hover, color: theme.tokens.colors.text },
+  "&.Mui-disabled": { color: theme.tokens.colors.disabledText },
+});
+
+// Clear form action (left side on desktop, last on mobile)
+export const clearButton = (theme: Theme) => ({
+  ...cancelButton(theme),
   order: { xs: 3, sm: 1 },
-};
-
-// ─── Backwards-compatible semantic aliases ───
-export const primaryButton = submitButton;
-export const secondaryButton = cancelButton;
-export const dangerButton = {
-  ...submitButton,
-  color: "error.main",
-  "&:hover": {
-    color: "error.main",
-    textDecoration: "underline",
-    textUnderlineOffset: "3px",
-    textDecorationThickness: "1px",
-  },
-};
+});

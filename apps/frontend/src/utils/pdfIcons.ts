@@ -1,7 +1,7 @@
-// ─── PDF icon shapes (official Lucide icon geometry, 24x24 viewBox) ───
-// jsPDF cannot render font icons, so the PDF header/legend icons are drawn
-// as stroked vectors using the same path data as the `lucide-react` icons
-// used in the UI (stroke-width 2 in a 24x24 viewBox, scaled by export.ts).
+// ─── PDF icon shapes (24x24 stroked outline geometry) ───
+// jsPDF cannot render icon components, so the PDF header/legend icons are
+// drawn as stroked vectors (stroke-width 2 in a 24x24 viewBox, scaled by
+// export.ts), matching the outline style of the UI icon set.
 
 export type PdfIconElement =
   | { type: "path"; d: string }

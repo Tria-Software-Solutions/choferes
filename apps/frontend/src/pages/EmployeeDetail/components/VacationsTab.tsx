@@ -16,7 +16,7 @@ import {
   Typography,
   useTheme,
 } from "@mui/material";
-import { Ban, CalendarDays, Check, Inbox, Pencil, Save, Trash2 } from "lucide-react";
+import { IconBan, IconCalendarWeek, IconCheck, IconInbox, IconListCheck, IconPencil, IconPlus, IconRefresh, IconTrash } from "@tabler/icons-react";
 import { Employee } from "../../../models/Employee";
 import { Vacation, VacationStatus } from "../../../models/Vacation";
 import { AppDispatch } from "../../../store/store";
@@ -41,10 +41,12 @@ import VacationFormDialog from "./VacationFormDialog";
 import { getVacationAccrual } from "../../../services/employeeService";
 import { VacationAccrual } from "../../../models/VacationAccrual";
 import { updateEmployee } from "../../../store/slices/employeeSlice";
+import { submitButton } from "../../Forms/sharedStyles";
+import SectionHeader from "./SectionHeader";
 import {
   cardStackStyles,
+  fillSectionPaperStyles,
   sectionPaperStyles,
-  sectionTitleStyles,
   emptyStateBoxStyles,
   tableContainerStyles,
   tableHeaderCellStyles,
@@ -215,33 +217,24 @@ const VacationsTab: React.FC<VacationsTabProps> = ({ employee, onEmployeeRefresh
   return (
     <Box sx={cardStackStyles}>
       <Paper elevation={0} sx={sectionPaperStyles(theme)}>
-        <Box
-          sx={{
-            display: "flex",
-            flexWrap: "wrap",
-            alignItems: "center",
-            justifyContent: "space-between",
-            gap: 1.5,
-            mb: 2,
-          }}
-        >
-          <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-            <CalendarDays size={18} color={theme.palette.primary.main} />
-            <Typography sx={{ ...sectionTitleStyles, mb: 0 }}>
-              Acumulación de vacaciones (Ley CR)
-            </Typography>
-          </Box>
-          {canEdit && accrual && (
-            <Button
-              variant="outlined"
-              startIcon={<Save size={16} />}
-              onClick={() => void handleSyncBalance()}
-              disabled={isSyncing || accrual.availableDays <= 0}
-            >
-              {isSyncing ? "Sincronizando..." : "Sincronizar saldo"}
-            </Button>
-          )}
-        </Box>
+        <SectionHeader
+          icon={<IconCalendarWeek size={20} stroke={1.5} />}
+          title="Acumulación de vacaciones"
+          description="Cálculo legal de acumulación según semanas trabajadas."
+          actions={
+            canEdit && accrual ? (
+              <Button
+                variant="text"
+                startIcon={<IconRefresh size={18} />}
+                onClick={() => void handleSyncBalance()}
+                disabled={isSyncing || accrual.availableDays <= 0}
+                sx={submitButton}
+              >
+                {isSyncing ? "Sincronizando..." : "Sincronizar saldo"}
+              </Button>
+            ) : undefined
+          }
+        />
 
         {accrual ? (
           <>
@@ -277,52 +270,36 @@ const VacationsTab: React.FC<VacationsTabProps> = ({ employee, onEmployeeRefresh
         )}
       </Paper>
 
-      <Paper elevation={0} sx={sectionPaperStyles(theme)}>
-        <Box
-          sx={{
-            display: "flex",
-            flexWrap: "wrap",
-            alignItems: "center",
-            justifyContent: "space-between",
-            gap: 1.5,
-            mb: 2,
-          }}
-        >
-          <Typography sx={{ ...sectionTitleStyles, mb: 0 }}>Solicitudes</Typography>
-          <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
-            <Typography
-              variant="body2"
-              sx={{ display: "flex", alignItems: "center", gap: 0.75, color: "text.secondary" }}
-            >
-              <CalendarDays size={16} color={theme.palette.primary.main} />
-              Saldo:{" "}
-              <Box component="span" sx={{ fontWeight: 700, color: "text.primary" }}>
-                {employee.vacationDays != null ? `${employee.vacationDays} días` : "sin asignar"}
-              </Box>
-            </Typography>
-            {canCreate && (
-              <Button
-                variant="text"
-                onClick={() => handleOpenForm(null)}
-                sx={{
-                  px: 0.5,
-                  minHeight: 32,
-                  fontWeight: 600,
-                  fontSize: "0.85rem",
-                  color: "text.primary",
-                  "&:hover": {
-                    backgroundColor: "transparent",
-                    textDecoration: "underline",
-                    textUnderlineOffset: "3px",
-                    textDecorationThickness: "1px",
-                  },
-                }}
+      <Paper elevation={0} sx={fillSectionPaperStyles(theme)}>
+        <SectionHeader
+          icon={<IconListCheck size={20} stroke={1.5} />}
+          title="Solicitudes"
+          description="Solicitudes de vacaciones del empleado y su estado de aprobación."
+          actions={
+            <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
+              <Typography
+                variant="body2"
+                sx={{ display: "flex", alignItems: "center", gap: 0.75, color: "text.secondary" }}
               >
-                Nueva solicitud
-              </Button>
-            )}
-          </Box>
-        </Box>
+                <IconCalendarWeek size={16} color={theme.palette.primary.main} />
+                Saldo:{" "}
+                <Box component="span" sx={{ fontWeight: 700, color: "text.primary" }}>
+                  {employee.vacationDays != null ? `${employee.vacationDays} días` : "sin asignar"}
+                </Box>
+              </Typography>
+              {canCreate && (
+                <Button
+                  variant="text"
+                  startIcon={<IconPlus size={18} />}
+                  onClick={() => handleOpenForm(null)}
+                  sx={submitButton}
+                >
+                  Nueva solicitud
+                </Button>
+              )}
+            </Box>
+          }
+        />
 
         <Typography variant="caption" sx={{ color: "text.secondary", display: "block", mb: 1.5 }}>
           {vacations.length} solicitude{vacations.length === 1 ? "" : "s"} · {totalDays} días
@@ -335,7 +312,7 @@ const VacationsTab: React.FC<VacationsTabProps> = ({ employee, onEmployeeRefresh
           </Box>
         ) : loadError && vacations.length === 0 ? (
           <Box sx={emptyStateBoxStyles(theme)}>
-            <Inbox size={34} />
+            <IconInbox size={34} />
             <Typography variant="body2">{loadError}</Typography>
             <Button variant="outlined" onClick={() => void reload()}>
               Reintentar
@@ -343,7 +320,7 @@ const VacationsTab: React.FC<VacationsTabProps> = ({ employee, onEmployeeRefresh
           </Box>
         ) : vacations.length === 0 ? (
           <Box sx={emptyStateBoxStyles(theme)}>
-            <Inbox size={34} />
+            <IconInbox size={34} />
             <Typography variant="body2">No hay solicitudes de vacaciones</Typography>
           </Box>
         ) : (
@@ -370,19 +347,12 @@ const VacationsTab: React.FC<VacationsTabProps> = ({ employee, onEmployeeRefresh
                   return (
                     <TableRow
                       key={vacation.id}
-                      sx={{
-                        "&:hover": {
-                          backgroundColor:
-                            theme.palette.mode === "dark"
-                              ? "rgba(255,255,255,0.04)"
-                              : "rgba(0,0,0,0.03)",
-                        },
-                      }}
+                      hover
                     >
                       <TableCell sx={tableCellStyles}>
                         {formatDate(vacation.startDate)} – {formatDate(vacation.endDate)}
                       </TableCell>
-                      <TableCell sx={{ ...tableCellStyles, fontWeight: 700 }} align="right">
+                      <TableCell sx={[tableCellStyles, { fontWeight: 700 }]} align="right">
                         {vacation.daysRequested}
                       </TableCell>
                       <TableCell sx={tableCellStyles}>
@@ -409,7 +379,7 @@ const VacationsTab: React.FC<VacationsTabProps> = ({ employee, onEmployeeRefresh
                                 onClick={() => handleOpenForm(vacation)}
                                 sx={editButtonStyles(theme)}
                               >
-                                <Pencil size={15} />
+                                <IconPencil size={15} />
                               </IconButton>
                               <IconButton
                                 size="small"
@@ -421,7 +391,7 @@ const VacationsTab: React.FC<VacationsTabProps> = ({ employee, onEmployeeRefresh
                                 }}
                                 sx={neutralButtonStyles(theme)}
                               >
-                                <Check size={16} />
+                                <IconCheck size={16} />
                               </IconButton>
                               <IconButton
                                 size="small"
@@ -433,7 +403,7 @@ const VacationsTab: React.FC<VacationsTabProps> = ({ employee, onEmployeeRefresh
                                 }}
                                 sx={neutralButtonStyles(theme)}
                               >
-                                <Ban size={15} />
+                                <IconBan size={15} />
                               </IconButton>
                             </>
                           )}
@@ -448,7 +418,7 @@ const VacationsTab: React.FC<VacationsTabProps> = ({ employee, onEmployeeRefresh
                               }}
                               sx={neutralButtonStyles(theme)}
                             >
-                              <Ban size={15} />
+                              <IconBan size={15} />
                             </IconButton>
                           )}
                           {canDelete && (
@@ -459,7 +429,7 @@ const VacationsTab: React.FC<VacationsTabProps> = ({ employee, onEmployeeRefresh
                               onClick={() => setDeleteTarget(vacation)}
                               sx={deleteButtonStyles(theme)}
                             >
-                              <Trash2 size={15} />
+                              <IconTrash size={15} />
                             </IconButton>
                           )}
                         </Box>

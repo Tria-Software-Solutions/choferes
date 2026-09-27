@@ -36,6 +36,9 @@ interface NotificationContextType {
 
 const NotificationContext = createContext<NotificationContextType | undefined>(undefined);
 
+/** Window event fired with a Notification when a new task reminder arrives. */
+export const TASK_REMINDER_EVENT = "app:task-reminder";
+
 export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const { currentUser } = useAuthContext();
   const [notifications, setNotifications] = useState<Notification[]>([]);
@@ -124,6 +127,63 @@ export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({ 
 
     return () => {
       cancelled = true;
+    };
+  }, [currentUser?.id]);
+
+  // Poll the server so notifications created there (task reminders, other
+  // devices) show up without reloading. Every 30 s (browsers throttle it in
+  // background tabs) and right away when the tab regains focus. Fresh unread
+  // task reminders are announced to the UI (toast + desktop notification).
+  const knownIdsRef = useRef<Set<string> | null>(null);
+  useEffect(() => {
+    if (!currentUser?.id) {
+      knownIdsRef.current = null;
+      return undefined;
+    }
+    let cancelled = false;
+    let inFlight = false;
+
+    const poll = async () => {
+      if (inFlight) return;
+      inFlight = true;
+      try {
+        const data = await fetchNotificationsFromApi();
+        if (cancelled) return;
+        const settings = notificationSettingsRef.current;
+        const visible = data.filter((n) => {
+          const key = notificationSourceToSettingKey(n.source);
+          return !key || (settings[key] ?? true);
+        });
+        const known = knownIdsRef.current;
+        if (known) {
+          visible
+            .filter((n) => !known.has(n.id) && !n.read && n.source?.startsWith("task-reminder:"))
+            .forEach((n) => window.dispatchEvent(new CustomEvent(TASK_REMINDER_EVENT, { detail: n })));
+        }
+        knownIdsRef.current = new Set(data.map((n) => n.id));
+        // Server rows are the source of truth; keep optimistic local ones.
+        setNotifications((prev) => [...prev.filter((n) => n.id.startsWith("temp-")), ...visible]);
+      } catch {
+        // Offline / API asleep: try again on the next tick.
+      } finally {
+        inFlight = false;
+      }
+    };
+
+    const interval = window.setInterval(poll, 30000);
+    const onVisible = () => {
+      if (document.visibilityState === "visible") void poll();
+    };
+    document.addEventListener("visibilitychange", onVisible);
+    window.addEventListener("focus", onVisible);
+    // First poll only seeds the known ids (the initial load already showed them).
+    const seed = window.setTimeout(poll, 5000);
+    return () => {
+      cancelled = true;
+      window.clearInterval(interval);
+      window.clearTimeout(seed);
+      document.removeEventListener("visibilitychange", onVisible);
+      window.removeEventListener("focus", onVisible);
     };
   }, [currentUser?.id]);
 

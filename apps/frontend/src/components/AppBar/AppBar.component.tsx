@@ -1,54 +1,33 @@
-import React, { useState, useCallback, useMemo, useRef, useEffect } from "react";
-import MobileMenuDrawer from "../MobileMenu/MobileMenu.component";
-import NotificationMenu from "../NotificationMenu/NotificationMenu.component";
-import Dock, { DockItemData } from "../Dock/Dock.component";
-import { useMenuPreferences } from "../../hooks/useMenuPreferences";
+import React, { useState, useMemo, useRef, useEffect } from "react";
 import {
   AppBar,
   Toolbar,
   Typography,
   IconButton,
   Box,
-  Avatar,
+  ButtonBase,
   Divider,
   useTheme,
   useMediaQuery,
   Badge,
   Menu,
   MenuItem,
-  ListItemText,
-  Popover,
-  Grow,
+  Tooltip,
 } from "@mui/material";
 import { useNavigate, useLocation } from "react-router-dom";
+import { IconBell, IconChevronDown, IconMenu2 } from "@tabler/icons-react";
+import MobileMenuDrawer from "../MobileMenu/MobileMenu.component";
+import NotificationMenu from "../NotificationMenu/NotificationMenu.component";
+import TopNav from "./TopNav.component";
+import { useMenuPreferences } from "../../hooks/useMenuPreferences";
 import { useAuthContext } from "../../context/AuthContext";
 import * as UserService from "../../services/userService";
-import { getAvatarSrc } from "../../utils/avatar";
+import UserAvatar from "../UserAvatar/UserAvatar.component";
 import { APPBAR_MENU } from "../../constants/constants";
 import { useNotificationMenu } from "../../context/NotificationContext";
-import { Menu as MenuIcon, Bell, Blocks } from "lucide-react";
 import { ThemeToggle } from "../ThemeToggle/ThemeToggle";
 import logo from "../../assets/images/logo.png";
 import { Roles } from "../../constants/roles";
-import {
-  appBarStyles,
-  toolbarStyles,
-  logoBoxStyles,
-  logoImgStyles,
-  clickableBoxStyles,
-  notificationsIconButtonStyles,
-  dividerStyles,
-  userBoxStyles,
-  userNameStyles,
-  userEmailStyles,
-  userMenuIconButtonStyles,
-  userAvatarStyles,
-  mobileDividerStyles,
-  userMenuPaperStyles,
-  userMenuDividerStyles,
-  userMenuItemStyles,
-  userMenuIconChipStyles,
-} from "./AppBar.styles";
 
 interface Link {
   label: string;
@@ -65,400 +44,262 @@ interface AppBarComponentProps {
   links: Link[];
 }
 
-// AppBarComponent renders the main application bar with navigation, user menu, notifications, and branding.
-// Props:
-// - icon: optional icon to display
-// - title: app title
-// - userLinks: links for the user menu
-// - links: main navigation links
-const AppBarComponent: React.FC<AppBarComponentProps> = ({
-  icon,
-  title,
-  userLinks = [],
-  links,
-}) => {
+// Brand lockup: crest + wordmark. Clicking it goes to the user's home route.
+const Brand: React.FC<{ onClick: () => void }> = ({ onClick }) => {
+  const { colors } = useTheme().tokens;
+  return (
+    <ButtonBase
+      onClick={onClick}
+      aria-label="Ir al inicio"
+      sx={{ display: "flex", alignItems: "center", gap: 1.25, borderRadius: "10px", pr: 1, flexShrink: 0 }}
+    >
+      <Box component="img" src={logo} alt="" sx={{ width: 30, height: "auto", display: "block" }} />
+      <Box sx={{ display: { xs: "none", sm: "flex" }, flexDirection: "column", alignItems: "flex-start", lineHeight: 1 }}>
+        <Box component="span" sx={{ fontWeight: 800, fontSize: "1.05rem", letterSpacing: "-0.01em", color: colors.text }}>
+          Choferes
+        </Box>
+        <Box
+          component="span"
+          sx={{
+            mt: "3px",
+            fontWeight: 600,
+            fontSize: "0.58rem",
+            letterSpacing: "0.22em",
+            textTransform: "uppercase",
+            color: colors.textMuted,
+          }}
+        >
+          de Alquiler
+        </Box>
+      </Box>
+    </ButtonBase>
+  );
+};
+
+// AppBarComponent renders the main application bar: brand, primary navigation,
+// theme toggle, notifications and the user menu (drawer navigation on mobile).
+const AppBarComponent: React.FC<AppBarComponentProps> = ({ title, userLinks = [], links }) => {
   const { currentUser } = useAuthContext();
   const navigate = useNavigate();
   const location = useLocation();
   const theme = useTheme();
+  const { colors, borders } = theme.tokens;
   const isMobile = useMediaQuery(theme.breakpoints.down("md"));
+  const isCompactNav = useMediaQuery(theme.breakpoints.down("lg"));
   const { unreadCount } = useNotificationMenu();
 
-  // Menu editor state
-  const [menuEditorOpen, setMenuEditorOpen] = useState(false);
-  // Mobile drawer state
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [userMenuAnchor, setUserMenuAnchor] = useState<null | HTMLElement>(null);
+  const [notificationsAnchor, setNotificationsAnchor] = useState<null | HTMLElement>(null);
 
-  // Extract keys from links for menu preferences
-  const linkKeys = useMemo(() => links.map(l => l.label), [links]);
-  const { preferences, itemOrder, toggleMenu, isMenuVisible, moveItem, resetDefaults } = useMenuPreferences(linkKeys);
+  // Visible/ordered sections come from the user's menu preferences
+  // (Configuración → Accesos rápidos) and are synced to their settings.
+  const linkKeys = useMemo(() => links.map((l) => l.label), [links]);
+  const { preferences, itemOrder, isMenuVisible } = useMenuPreferences(linkKeys);
 
-  // Sync dock preferences to user.settings.dock in DB when they change
   const dockSyncRef = useRef<ReturnType<typeof setTimeout>>();
   useEffect(() => {
-    if (!currentUser?.id) return;
+    if (!currentUser?.id) return undefined;
     clearTimeout(dockSyncRef.current);
     dockSyncRef.current = setTimeout(() => {
       UserService.updateUserSettings(currentUser.id, {
-        dock: {
-          preferences,
-          order: itemOrder,
-        },
+        dock: { preferences, order: itemOrder },
       }).catch(() => {});
     }, 500);
     return () => clearTimeout(dockSyncRef.current);
   }, [preferences, itemOrder, currentUser?.id]);
 
-  // Filter links by menu preferences
-  const visibleLinks = useMemo(
-    () => links.filter(link => isMenuVisible(link.label)),
-    [links, isMenuVisible]
+  const visibleLinks = useMemo(() => {
+    const ordered = [...links].sort(
+      (a, b) => itemOrder.indexOf(a.label) - itemOrder.indexOf(b.label),
+    );
+    return ordered.filter((link) => isMenuVisible(link.label));
+  }, [links, itemOrder, isMenuVisible]);
+
+  // Settings lives in the user menu on desktop; the bar only lists sections.
+  const navLinks = useMemo(
+    () => visibleLinks.filter((link) => link.label !== APPBAR_MENU.PROFILE),
+    [visibleLinks],
   );
 
-  const [userMenuAnchor, setUserMenuAnchor] = useState<null | HTMLElement>(
-    null,
-  );
-  const [notificationsAnchor, setNotificationsAnchor] =
-    useState<null | HTMLElement>(null);
-  const [dashboardMenuAnchor, setDashboardMenuAnchor] =
-    useState<null | HTMLElement>(null);
-  const blocksButtonRef = useRef<HTMLButtonElement>(null);
-
-  // Mobile drawer: dedupe user links against nav links by label
-  // (e.g. Configuración lives in both the dock and the avatar dropdown)
+  // Mobile drawer: dedupe user links against nav links by label.
   const mobileUserLinks = useMemo(() => {
     const linkLabels = new Set(visibleLinks.map((link) => link.label));
     return userLinks.filter((link) => !linkLabels.has(link.label));
   }, [visibleLinks, userLinks]);
 
-  // Handle right-click / long-press on dock items - toggle edit mode
-  const handleDockContextMenu = useCallback((_item: DockItemData) => {
-    setMenuEditorOpen(prev => !prev);
-  }, []);
-
-  // Done editing - close the dock popover and exit edit mode
-  const handleEditDone = useCallback(() => {
-    setMenuEditorOpen(false);
-    handleDashboardMenuClose();
-  }, []);
-
-  const handleUserMenuOpen = (event: React.MouseEvent<HTMLElement>) => {
-    setUserMenuAnchor(event.currentTarget);
-  };
-
-  const handleUserMenuClose = () => {
-    setUserMenuAnchor(null);
-  };
-
-  const handleNotificationsOpen = (event: React.MouseEvent<HTMLElement>) => {
-    setNotificationsAnchor(event.currentTarget);
-  };
-
-  const handleNotificationsClose = () => {
-    setNotificationsAnchor(null);
-  };
-
-  const handleDashboardMenuOpen = (event: React.MouseEvent<HTMLElement>) => {
-    setDashboardMenuAnchor(event.currentTarget);
-  };
-
-  const handleDashboardMenuClose = () => {
-    setDashboardMenuAnchor(null);
-  };
-
-  const isActivePage = (path: string) => {
-    // Checks if the given path matches the current location
-    return location.pathname === path;
-  };
-
   const hasNotificationsAccess = () => {
-    // Check if user has "Gerencia" or "Administrativo" role
     if (!currentUser?.roles || currentUser.roles.length === 0) return false;
     const firstRole = currentUser.roles[0];
-    const userRole =
-      firstRole && "UserRole" in firstRole
-        ? (firstRole as { UserRole: { roleId: number } }).UserRole
-        : null;
-    if (!userRole?.roleId) return false;
-    return (
-      userRole.roleId === Roles.MANAGER ||
-      userRole.roleId === Roles.ADMINISTRATIVE
-    );
+    return firstRole.id === Roles.MANAGER || firstRole.id === Roles.ADMINISTRATIVE;
   };
 
-  return (
-    <AppBar position="sticky" elevation={0} sx={appBarStyles}>
-      <Toolbar sx={toolbarStyles}>
-        {/* Logo and Title */}
-        <Box sx={clickableBoxStyles} onClick={() => navigate("/")}>
-          <Box sx={logoBoxStyles}>
-            <Box component="img" src={logo} alt="Logo" sx={logoImgStyles} />
-          </Box>
-          <Box sx={{ display: { xs: "none", sm: "flex" }, flexDirection: "column", lineHeight: 1.1, textAlign: "center" }}>
-            <Box sx={{ fontWeight: 800, fontSize: { xs: "1rem", sm: "1.2rem", md: "1.5rem" }, letterSpacing: "0.04em", color: "#ffffff" }}>
-              {title === "Choferes de Alquiler" ? "Choferes" : title}
-            </Box>
-            {title === "Choferes de Alquiler" && (
-              <Box sx={{ fontWeight: 600, fontSize: { xs: "0.55rem", sm: "0.65rem", md: "0.75rem" }, color: "rgba(255,255,255,0.6)", mt: -0.25, letterSpacing: { xs: "0.15em", sm: "0.25em", md: "0.3em" } }}>
-                DE ALQUILER
-              </Box>
-            )}
-          </Box>
-        </Box>
 
-        {/* Center - Main Navigation (desktop only) */}
+  return (
+    <AppBar position="sticky">
+      <Toolbar
+        sx={{
+          minHeight: { xs: 56, md: 60 },
+          px: { xs: 1.5, sm: 2, md: 2.5 },
+          gap: { xs: 1, md: 2 },
+        }}
+      >
+        <Brand onClick={() => navigate("/")} />
+
         {!isMobile && (
-          <Box
-            sx={{
-              display: "flex",
-              alignItems: "center",
-              gap: 1,
-              position: "absolute",
-              left: "50%",
-              transform: "translateX(-50%)",
-            }}
-          >
-            <IconButton
-              ref={blocksButtonRef}
-              onClick={handleDashboardMenuOpen}
-              disableRipple
-              disableFocusRipple
-              sx={{
-                color: "#ffffff",
-                cursor: "pointer",
-                p: 0.5,
-                borderRadius: "12px",
-                minWidth: 36,
-                height: 36,
-                border: "none",
-                transition: "all 0.2s cubic-bezier(0.4, 0, 0.2, 1)",
-                "&:hover": {
-                  backgroundColor: "rgba(255,255,255,0.06)",
-                },
-                "&:active": {
-                  backgroundColor: "rgba(255,255,255,0.1)",
-                },
-              }}
-            >
-              <Blocks
-                size={20}
-                strokeWidth={1.5}
-                style={{
-                  color: "#ffffff",
-                  opacity: Boolean(dashboardMenuAnchor) ? 1 : 0.6,
-                  transition: "all 0.2s ease",
-                }}
-              />
-            </IconButton>
-            <Popover
-              open={Boolean(dashboardMenuAnchor) || menuEditorOpen}
-              anchorEl={blocksButtonRef.current}
-              onClose={menuEditorOpen ? undefined : handleDashboardMenuClose}
-              anchorOrigin={{ vertical: "bottom", horizontal: "center" }}
-              transformOrigin={{ vertical: "top", horizontal: "center" }}
-              PaperProps={{
-                elevation: 0,
-                sx: {
-                  background: 'transparent',
-                  backgroundColor: 'transparent',
-                  boxShadow: 'none',
-                  border: 'none',
-                  overflow: 'visible',
-                  mt: 0.5,
-                },
-              }}
-              TransitionComponent={Grow}
-              TransitionProps={{ timeout: 200 }}
-              keepMounted
-            >
-              <Dock
-                items={[
-                  ...(menuEditorOpen ? links : visibleLinks).map(link => ({
-                    label: link.label,
-                    icon: link.icon,
-                    onClick: () => {
-                      if (!menuEditorOpen) {
-                        handleDashboardMenuClose();
-                        link.path && navigate(link.path);
-                      }
-                    },
-                    active: isActivePage(link.path || ''),
-                  })),
-                ]}
-                onItemContextMenu={handleDockContextMenu}
-                editable={menuEditorOpen}
-                itemPreferences={preferences}
-                itemOrder={itemOrder}
-                onToggleItem={toggleMenu}
-                onMoveItem={moveItem}
-                onDone={handleEditDone}
-                onReset={resetDefaults}
-              />
-            </Popover>
-          </Box>
+          <>
+            <Divider orientation="vertical" flexItem sx={{ my: 1.75, borderColor: colors.border }} />
+            <TopNav
+              links={navLinks}
+              pathname={location.pathname}
+              onNavigate={navigate}
+              compact={isCompactNav && navLinks.length > 4}
+            />
+          </>
         )}
 
-        {/* Derecha - Acciones del Usuario */}
+        <Box sx={{ flex: 1 }} />
+
         {currentUser && (
-          <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-            {/* Theme Toggle */}
+          <Box sx={{ display: "flex", alignItems: "center", gap: 0.5 }}>
             <ThemeToggle />
 
-            {/* Notificaciones - Solo visible para Gerencia y Administrativo */}
             {hasNotificationsAccess() && (
-              <>
+              <Tooltip title={APPBAR_MENU.NOTIFICATIONS}>
                 <IconButton
-                  onClick={handleNotificationsOpen}
-                  sx={notificationsIconButtonStyles}
+                  onClick={(event) => setNotificationsAnchor(event.currentTarget)}
+                  aria-label={
+                    unreadCount > 0
+                      ? `${APPBAR_MENU.NOTIFICATIONS} (${unreadCount} sin leer)`
+                      : APPBAR_MENU.NOTIFICATIONS
+                  }
                 >
-                  <Badge badgeContent={unreadCount} color="error">
-                    <Bell size={20} />
+                  <Badge
+                    badgeContent={unreadCount}
+                    color="error"
+                    max={99}
+                    sx={{ "& .MuiBadge-badge": { border: `2px solid ${colors.appBarBg}` } }}
+                  >
+                    <IconBell size={18} stroke={1.75} />
                   </Badge>
                 </IconButton>
+              </Tooltip>
+            )}
 
-                <Divider
-                  orientation="vertical"
-                  flexItem
-                  sx={{
-                    ...dividerStyles,
-                    display: { xs: "none", md: "block" },
-                    mx: 2
-                  }}
+            {!isMobile && (
+              <ButtonBase
+                onClick={(event) => setUserMenuAnchor(event.currentTarget)}
+                aria-label={APPBAR_MENU.USER_MENU}
+                aria-haspopup="menu"
+                aria-expanded={Boolean(userMenuAnchor)}
+                sx={{
+                  ml: 1,
+                  display: "flex",
+                  alignItems: "center",
+                  gap: 1.25,
+                  height: 40,
+                  pl: 0.5,
+                  pr: 1,
+                  borderRadius: "999px",
+                  border: borders.paper,
+                  transition: "background-color 0.15s ease",
+                  "&:hover": { backgroundColor: colors.hover },
+                  "&.Mui-focusVisible": { outline: borders.focus, outlineOffset: 1 },
+                }}
+              >
+                <UserAvatar user={currentUser} size={30} />
+                <Box sx={{ display: { md: "none", lg: "block" }, textAlign: "left", maxWidth: 160 }}>
+                  <Typography
+                    sx={{
+                      fontSize: "0.8125rem",
+                      fontWeight: 600,
+                      lineHeight: 1.2,
+                      overflow: "hidden",
+                      textOverflow: "ellipsis",
+                      whiteSpace: "nowrap",
+                    }}
+                  >
+                    {currentUser.firstName} {currentUser.lastName}
+                  </Typography>
+                </Box>
+                <IconChevronDown size={16} color={colors.textMuted} />
+              </ButtonBase>
+            )}
+
+            {isMobile && (
+              <>
+                <IconButton onClick={() => setMobileMenuOpen(true)} aria-label="Abrir menú de navegación">
+                  <IconMenu2 size={20} stroke={1.75} />
+                </IconButton>
+                <MobileMenuDrawer
+                  open={mobileMenuOpen}
+                  onClose={() => setMobileMenuOpen(false)}
+                  title={title}
+                  navLinks={visibleLinks}
+                  userLinks={mobileUserLinks}
+                  currentUser={currentUser}
                 />
               </>
             )}
-
-            {/* Perfil del Usuario */}
-            <Box sx={userBoxStyles}>
-              <Box
-                sx={{
-                  textAlign: "right",
-                  display: { xs: "none", md: "block" },
-                }}
-              >
-                <Typography variant="body2" sx={userNameStyles}>
-                  {currentUser.firstName} {currentUser.lastName}
-                </Typography>
-                <Typography variant="caption" sx={userEmailStyles}>
-                  {currentUser.email}
-                </Typography>
-              </Box>
-
-              {/* Avatar Menu - Solo visible en pantallas medianas y grandes */}
-              <Box sx={{ display: { xs: "none", md: "block" } }}>
-                <IconButton
-                  onClick={handleUserMenuOpen}
-                  sx={userMenuIconButtonStyles}
-                >
-                  {currentUser.avatar ? (
-                    <Avatar
-                      src={getAvatarSrc(currentUser.avatar)}
-                      sx={{
-                        width: 44,
-                        height: 44,
-                        border: "1.5px solid rgba(255,255,255,0.25)",
-                        borderRadius: "50%",
-                        boxShadow: "0 4px 20px rgba(0,0,0,0.3), inset 0 1px 0 rgba(255,255,255,0.2)",
-                      }}
-                    />
-                  ) : (
-                    <Avatar sx={userAvatarStyles}>
-                      {currentUser.firstName?.[0]}{currentUser.lastName?.[0]}
-                    </Avatar>
-                  )}
-                </IconButton>
-              </Box>
-
-              {/* Menú Principal (solo mobile) */}
-              {isMobile && (
-                <>
-                  <Divider
-                    orientation="vertical"
-                    flexItem
-                    sx={mobileDividerStyles}
-                  />
-                  <IconButton
-                    onClick={() => setMobileMenuOpen(true)}
-                    aria-label="Abrir menú de navegación"
-                    sx={{
-                      color: "#ffffff",
-                      transition: "all 0.2s ease",
-                      "&:hover": {
-                        backgroundColor: "rgba(255,255,255,0.1)",
-                      },
-                    }}
-                  >
-                    <MenuIcon size={24} />
-                  </IconButton>
-                  <MobileMenuDrawer
-                    open={mobileMenuOpen}
-                    onClose={() => setMobileMenuOpen(false)}
-                    title={title}
-                    navLinks={visibleLinks}
-                    userLinks={mobileUserLinks}
-                    currentUser={currentUser}
-                  />
-                </>
-              )}
-            </Box>
           </Box>
         )}
 
-        {/* Menú de Usuario */}
         <Menu
           anchorEl={userMenuAnchor}
           open={Boolean(userMenuAnchor)}
-          onClose={handleUserMenuClose}
+          onClose={() => setUserMenuAnchor(null)}
           transformOrigin={{ horizontal: "right", vertical: "top" }}
           anchorOrigin={{ horizontal: "right", vertical: "bottom" }}
-          PaperProps={{ elevation: 0, sx: userMenuPaperStyles(theme) }}
+          slotProps={{ paper: { sx: { mt: 1, minWidth: 240 } } }}
         >
-          {userLinks.map((link, index) => {
+          {currentUser && (
+            <Box sx={{ px: 1.5, pt: 1, pb: 1.25, display: "flex", alignItems: "center", gap: 1.25 }}>
+              <UserAvatar user={currentUser} size={36} />
+              <Box sx={{ minWidth: 0 }}>
+                <Typography sx={{ fontSize: "0.875rem", fontWeight: 700, lineHeight: 1.3 }} noWrap>
+                  {currentUser.firstName} {currentUser.lastName}
+                </Typography>
+                <Typography variant="caption" component="div" noWrap>
+                  {currentUser.email}
+                </Typography>
+              </Box>
+            </Box>
+          )}
+          <Divider sx={{ my: 0.5 }} />
+          {userLinks.map((link) => {
             const isLogout = link.label === APPBAR_MENU.LOGOUT;
-            return (
-              <React.Fragment key={link.label}>
-                {index > 0 && isLogout && (
-                  <Divider sx={userMenuDividerStyles(theme)} />
-                )}
-                <MenuItem
-                  onClick={() => {
-                    handleUserMenuClose();
-                    if (link.onClick) {
-                      link.onClick();
-                    } else if (link.path) {
-                      navigate(link.path);
-                    }
-                  }}
-                  sx={userMenuItemStyles(theme, isLogout)}
-                >
-                  <Box sx={userMenuIconChipStyles(theme, isLogout)}>
-                    {link.icon &&
-                      React.cloneElement(link.icon as React.ReactElement, {
-                        size: 16,
-                        strokeWidth: 2,
-                      })}
-                  </Box>
-                  <ListItemText
-                    primary={link.label}
-                    primaryTypographyProps={{ fontSize: "0.875rem", fontWeight: 600 }}
-                  />
-                </MenuItem>
-              </React.Fragment>
-            );
+            return [
+              isLogout ? <Divider key={`${link.label}-divider`} sx={{ my: 0.5 }} /> : null,
+              <MenuItem
+                key={link.label}
+                onClick={() => {
+                  setUserMenuAnchor(null);
+                  if (link.onClick) link.onClick();
+                  else if (link.path) navigate(link.path);
+                }}
+                sx={isLogout ? { color: colors.error, "& svg": { color: colors.error } } : undefined}
+              >
+                {link.icon &&
+                  React.cloneElement(link.icon as React.ReactElement, {
+                    size: 16,
+                    strokeWidth: 1.75,
+                    color: isLogout ? colors.error : colors.textMuted,
+                  })}
+                {link.label}
+              </MenuItem>,
+            ];
           })}
         </Menu>
 
         <NotificationMenu
           anchorEl={notificationsAnchor}
-          onClose={handleNotificationsClose}
+          onClose={() => setNotificationsAnchor(null)}
           onNotificationClick={(notification) => {
             if (notification.actionUrl) {
               navigate(notification.actionUrl);
             }
           }}
         />
-
-
       </Toolbar>
     </AppBar>
   );

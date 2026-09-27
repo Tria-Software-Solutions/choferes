@@ -24,19 +24,7 @@ import MANAGEMENT from "../../../constants/management.constants";
 import PERMISSIONS from "../../../constants/permissions.constants";
 import ManageUsers from "../../Dashboard/ManageUsers";
 import ManageRoles from "../../Dashboard/ManageRoles";
-import {
-  Eye,
-  EyeOff,
-  User as UserIcon,
-  Mail,
-  UserCircle,
-  Info,
-  User as UserIcon2,
-  Lock,
-  Palette,
-  Shield,
-  Users,
-} from "lucide-react";
+import { IconApps, IconBell, IconCalendarUser, IconCamera, IconCheck, IconDeviceDesktop, IconEye, IconEyeOff, IconHelpCircle, IconInfoCircle, IconLoader2, IconLock, IconMail, IconMoon, IconPalette, IconPencil, IconRotate, IconShieldCheck, IconSun, IconUser, IconUserCircle, IconUsers, IconX } from "@tabler/icons-react";
 import { User } from "../../../models/User";
 import {
   validateName,
@@ -48,6 +36,7 @@ import {
 import TextfieldComponent from "../../../components/Textfield/Textfield.component";
 import { useThemeMode } from "../../../context/ThemeContext";
 import { getAvatarSrc, resizeAvatarFile } from "../../../utils/avatar";
+import UserAvatar from "../../../components/UserAvatar/UserAvatar.component";
 import { updateUserAvatar, removeUserAvatar } from "../../../store/slices/userSlice";
 import {
   Dialog,
@@ -55,7 +44,6 @@ import {
   DialogActions,
   CircularProgress,
 } from "@mui/material";
-import { Pencil, Camera, X, RotateCcw, Loader2, Bell, ShieldCheck, HelpCircle, Blocks, Sun, Moon, Monitor, Check } from "lucide-react";
 import NotificationSettingsTab from "./NotificationSettingsTab";
 import SessionsTab from "./SessionsTab";
 import HelpCenterTab from "./HelpCenterTab";
@@ -67,8 +55,9 @@ import {
   clearButton,
   submitButton,
 } from "../../Forms/sharedStyles";
+import { PanelHeader } from "../../../components/Layout";
 
-type ThemeMode = "default" | "light" | "dark" | "high-contrast";
+type ThemeMode = "default" | "light" | "dark";
 type TabId =
   | "personal"
   | "password"
@@ -160,18 +149,21 @@ const Profile: React.FC = () => {
     username: currentUser?.username || "",
   });
   const [passwordFields, setPasswordFields] = useState({
+    currentPassword: "",
     newPassword: "",
     confirmNewPassword: "",
   });
+  const [showCurrentPassword, setShowCurrentPassword] = useState(false);
   const [showNewPassword, setShowNewPassword] = useState(false);
   const [showConfirmNewPassword, setShowConfirmNewPassword] = useState(false);
   const [infoError, setInfoError] = useState<string | null>(null);
   const [passwordError, setPasswordError] = useState<string | null>(null);
+  // Server-side rejection of the current password (shown under that field).
+  const [currentPasswordError, setCurrentPasswordError] = useState<string | null>(null);
   const [avatarDialogOpen, setAvatarDialogOpen] = useState(false);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [avatarPreview, setAvatarPreview] = useState<string | null>(null);
   const [isUploadingAvatar, setIsUploadingAvatar] = useState(false);
-  const [avatarLoadFailed, setAvatarLoadFailed] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [isEditFormValid, setIsEditFormValid] = useState(false);
   const [isPasswordFormValid, setIsPasswordFormValid] = useState(false);
@@ -235,8 +227,9 @@ const Profile: React.FC = () => {
   }, [editFields, currentUser, validateField]);
 
   useEffect(() => {
-    const { newPassword, confirmNewPassword } = passwordFields;
+    const { currentPassword, newPassword, confirmNewPassword } = passwordFields;
     const allRequirementsMet =
+      currentPassword !== "" &&
       newPassword.length >= 8 &&
       /[A-Z]/.test(newPassword) &&
       /[a-z]/.test(newPassword) &&
@@ -258,8 +251,10 @@ const Profile: React.FC = () => {
   };
 
   const handleClearPasswordForm = () => {
-    setPasswordFields({ newPassword: "", confirmNewPassword: "" });
+    setPasswordFields({ currentPassword: "", newPassword: "", confirmNewPassword: "" });
     setPasswordError(null);
+    setCurrentPasswordError(null);
+    setShowCurrentPassword(false);
     setShowNewPassword(false);
     setShowConfirmNewPassword(false);
   };
@@ -308,7 +303,7 @@ const Profile: React.FC = () => {
         ...editFields,
       };
       if (currentUser) {
-        dispatch(updateUser({ id: currentUser.id, updatedUser }));
+        await dispatch(updateUser({ id: currentUser.id, updatedUser })).unwrap();
         // Preserve settings/avatar/roles — rebuilding the object without them
         // wiped currentUser.settings and broke theme→DB sync (ThemeSync gates
         // on currentUser.id now, but sessionStorage must stay complete).
@@ -323,6 +318,16 @@ const Profile: React.FC = () => {
     } catch (error) {
       showNotification(MANAGEMENT.UPDATE_ERROR, { severity: 'error', duration: 5000 });
     }
+  };
+
+  const handleCurrentPassword = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
+  ) => {
+    setPasswordFields({
+      ...passwordFields,
+      currentPassword: e.target.value,
+    });
+    setCurrentPasswordError(null);
   };
 
   const handleNewPassword = (
@@ -355,26 +360,24 @@ const Profile: React.FC = () => {
     e.preventDefault();
 
     const isValid = await validatePasswordFields(passwordFields);
-    if (!isValid) return;
+    if (!isValid || !currentUser) return;
 
     try {
-      if (currentUser) {
-        dispatch(
-          updateUserPassword({
-            id: currentUser.id,
-            password: passwordFields.newPassword,
-          }),
-        );
-      } else {
-        throw new Error("Current User is null");
-      }
-      setPasswordFields({
-        newPassword: "",
-        confirmNewPassword: "",
-      });
+      await dispatch(
+        updateUserPassword({
+          id: currentUser.id,
+          password: passwordFields.newPassword,
+          currentPassword: passwordFields.currentPassword,
+        }),
+      ).unwrap();
+      handleClearPasswordForm();
       showNotification(MANAGEMENT.PASSWORD_UPDATE_SUCCESS, { severity: 'success', duration: 3000 });
     } catch (error) {
-      showNotification(MANAGEMENT.PASSWORD_UPDATE_ERROR, { severity: 'error', duration: 5000 });
+      // e.g. "La contraseña actual no es correcta" from the API
+      const message =
+        typeof error === "string" && error.trim() ? error : MANAGEMENT.PASSWORD_UPDATE_ERROR;
+      setCurrentPasswordError(message);
+      showNotification(message, { severity: 'error', duration: 5000 });
     }
   };
 
@@ -385,7 +388,6 @@ const Profile: React.FC = () => {
 
   // Reset the broken-image fallback whenever the avatar value changes
   useEffect(() => {
-    setAvatarLoadFailed(false);
   }, [currentUser?.avatar]);
 
   const handleFileSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -486,28 +488,21 @@ const Profile: React.FC = () => {
     resetAvatarDialog();
   };
 
-  const getInitials = () => {
-    if (!currentUser) return "?";
-    const first = currentUser.firstName ? currentUser.firstName.charAt(0).toUpperCase() : "";
-    const last = currentUser.lastName ? currentUser.lastName.charAt(0).toUpperCase() : "";
-    return `${first}${last}` || currentUser.username.charAt(0).toUpperCase() || "?";
-  };
-
   const adminTabPermissions: Record<string, string> = {
     users: PERMISSIONS.VIEW_USERS,
     roles: PERMISSIONS.VIEW_ROLES,
   };
 
   const sidebarItems = [
-    { id: "personal", label: "Información Personal", icon: UserIcon2, group: "Cuenta" },
-    { id: "password", label: "Contraseña y Seguridad", icon: Lock, group: "Cuenta" },
-    { id: "sessions", label: "Sesiones activas", icon: ShieldCheck, group: "Cuenta" },
-    { id: "theme", label: "Apariencia", icon: Palette, group: "Preferencias" },
-    { id: "notifications", label: "Notificaciones", icon: Bell, group: "Preferencias" },
-    { id: "quickaccess", label: "Accesos rápidos", icon: Blocks, group: "Preferencias" },
-    { id: "help", label: "Centro de ayuda", icon: HelpCircle, group: "Soporte" },
-    { id: "users", label: "Usuarios", icon: Users, group: "Administración" },
-    { id: "roles", label: "Roles", icon: Shield, group: "Administración" },
+    { id: "personal", label: "Información Personal", icon: IconUser, group: "Cuenta" },
+    { id: "password", label: "Contraseña y Seguridad", icon: IconLock, group: "Cuenta" },
+    { id: "sessions", label: "Sesiones activas", icon: IconShieldCheck, group: "Cuenta" },
+    { id: "theme", label: "Apariencia", icon: IconPalette, group: "Preferencias" },
+    { id: "notifications", label: "Notificaciones", icon: IconBell, group: "Preferencias" },
+    { id: "quickaccess", label: "Accesos rápidos", icon: IconApps, group: "Preferencias" },
+    { id: "help", label: "Centro de ayuda", icon: IconHelpCircle, group: "Soporte" },
+    { id: "users", label: "Usuarios", icon: IconUsers, group: "Administración" },
+    { id: "roles", label: "Roles", icon: IconCalendarUser, group: "Administración" },
   ].filter(
     (item) =>
       item.group !== "Administración" ||
@@ -536,9 +531,10 @@ const Profile: React.FC = () => {
         sx={{
           display: "flex",
           flexDirection: { xs: "column", md: "row" },
-          gap: 3,
-          flex: 1,
-          minHeight: 0,
+          gap: { xs: 2, md: 3 },
+          // Fill the viewport on desktop only; on phones the page scrolls as a whole.
+          flex: { md: 1 },
+          minHeight: { md: 0 },
           height: { xs: "auto", md: "100%" },
         }}
       >
@@ -550,11 +546,9 @@ const Profile: React.FC = () => {
               width: { md: 240, lg: 270 },
               flexShrink: 0,
               borderRadius: "16px",
-              border: `1px solid ${
-                theme.palette.mode === "dark" ? "rgba(255,255,255,0.08)" : "rgba(0,0,0,0.08)"
-              }`,
+              border: theme.tokens.borders.paper,
               backgroundColor: theme.palette.background.paper,
-              boxShadow: "0 4px 24px rgba(0,0,0,0.08), 0 1px 2px rgba(0,0,0,0.04)",
+              boxShadow: `0 1px 2px ${theme.tokens.shadows.card}`,
               p: 2.5,
               display: "flex",
               flexDirection: "column",
@@ -565,7 +559,7 @@ const Profile: React.FC = () => {
             }}
           >
             {/* User Profile Info Card */}
-            <Box display="flex" alignItems="center" gap={2} sx={{ pb: 2, borderBottom: `1px solid ${theme.palette.mode === "dark" ? "rgba(255,255,255,0.08)" : "rgba(0,0,0,0.08)"}` }}>
+            <Box display="flex" alignItems="center" gap={2} sx={{ pb: 2, borderBottom: theme.tokens.borders.paper }}>
               <Box
                 sx={{
                   position: "relative",
@@ -580,43 +574,7 @@ const Profile: React.FC = () => {
                 }}
                 onClick={handleOpenAvatarDialog}
               >
-                {getAvatarUrl() && !avatarLoadFailed ? (
-                  <img
-                    src={getAvatarUrl()!}
-                    alt="Avatar"
-                    onError={() => setAvatarLoadFailed(true)}
-                    style={{
-                      width: "100%",
-                      height: "100%",
-                      borderRadius: "50%",
-                      objectFit: "cover",
-                    }}
-                  />
-                ) : (
-                  <Box
-                    sx={{
-                      width: "100%",
-                      height: "100%",
-                      borderRadius: "50%",
-                      background: `linear-gradient(135deg, ${theme.palette.primary.main} 0%, ${theme.palette.primary.light} 100%)`,
-                      display: "flex",
-                      alignItems: "center",
-                      justifyContent: "center",
-                      boxShadow: "0 4px 12px rgba(0,0,0,0.12)",
-                    }}
-                  >
-                    <Typography
-                      sx={{
-                        color: theme.palette.primary.contrastText,
-                        fontWeight: 700,
-                        fontSize: "1.15rem",
-                        letterSpacing: "0.05em",
-                      }}
-                    >
-                      {getInitials()}
-                    </Typography>
-                  </Box>
-                )}
+                <UserAvatar user={currentUser} size={52} />
                 {/* Hover overlay with pencil icon */}
                 <Box
                   className="avatar-overlay"
@@ -632,7 +590,7 @@ const Profile: React.FC = () => {
                     transition: "opacity 0.2s ease",
                   }}
                 >
-                  <Pencil size={18} color="#fff" />
+                  <IconPencil size={18} color="#fff" />
                 </Box>
               </Box>
               <Box sx={{ overflow: "hidden" }}>
@@ -689,45 +647,32 @@ const Profile: React.FC = () => {
                       {groupItems(groupName).map((item) => {
                         const Icon = item.icon;
                         const isActive = activeTab === item.id;
-                        const bg = isActive
-                          ? theme.palette.mode === "dark"
-                            ? "rgba(255,255,255,0.1)"
-                            : "rgba(0,0,0,0.06)"
-                          : "transparent";
-                        const textColor = isActive
-                          ? theme.palette.primary.main
-                          : theme.palette.text.secondary;
-                        const iconColor = isActive
-                          ? theme.palette.primary.main
-                          : theme.palette.text.secondary;
+                        const { colors } = theme.tokens;
+                        const textColor = isActive ? colors.text : colors.textMuted;
                         return (
                           <Button
                             key={item.id}
                             onClick={() => setActiveTab(item.id as TabId)}
-                            startIcon={<Icon size={18} color={iconColor} />}
+                            aria-current={isActive ? "page" : undefined}
+                            startIcon={<Icon size={18} color={textColor} />}
                             sx={{
                               justifyContent: "flex-start",
+                              textAlign: "left",
+                              lineHeight: 1.3,
                               textTransform: "none",
-                              borderRadius: "12px",
-                              py: 1.25,
-                              px: 2,
+                              borderRadius: "10px",
+                              minHeight: 40,
+                              py: 1,
+                              px: 1.5,
                               fontWeight: isActive ? 700 : 500,
-                              fontSize: "0.9rem",
-                              backgroundColor: bg,
+                              fontSize: "0.875rem",
+                              backgroundColor: isActive ? colors.selected : "transparent",
                               color: textColor,
-                              position: "relative",
                               border: "none !important",
-                              borderLeft: "none !important",
                               boxShadow: "none !important",
-                              transition: "all 0.2s cubic-bezier(0.4, 0, 0.2, 1)",
                               "&:hover": {
-                                backgroundColor: isActive
-                                  ? bg
-                                  : theme.palette.mode === "dark"
-                                  ? "rgba(255,255,255,0.04)"
-                                  : "rgba(0,0,0,0.02)",
-                                transform: "translateX(2px)",
-                                boxShadow: "none !important",
+                                backgroundColor: isActive ? colors.selected : colors.hover,
+                                color: colors.text,
                               },
                             }}
                           >
@@ -755,9 +700,7 @@ const Profile: React.FC = () => {
               zIndex: 10,
               backgroundColor: theme.palette.background.default,
               backdropFilter: "blur(10px)",
-              borderBottom: `1px solid ${
-                theme.palette.mode === "dark" ? "rgba(255,255,255,0.08)" : "rgba(0,0,0,0.08)"
-              }`,
+              borderBottom: theme.tokens.borders.paper,
             }}
           >
             <Tabs
@@ -780,7 +723,7 @@ const Profile: React.FC = () => {
                   height: "4px",
                 },
                 "&::-webkit-scrollbar-thumb": {
-                  backgroundColor: theme.palette.mode === "dark" ? "rgba(255,255,255,0.15)" : "rgba(0,0,0,0.12)",
+                  backgroundColor: theme.tokens.colors.borderStrong,
                   borderRadius: "2px",
                 },
               }}
@@ -808,20 +751,14 @@ const Profile: React.FC = () => {
                         ? theme.palette.primary.main
                         : theme.palette.text.secondary,
                       backgroundColor: isActive
-                        ? theme.palette.mode === "dark"
-                          ? "rgba(255,255,255,0.06)"
-                          : "rgba(0,0,0,0.04)"
+                        ? theme.tokens.colors.hover
                         : "transparent",
                       transition: "all 0.15s ease",
                       "&:hover": {
                         color: theme.palette.text.primary,
                         backgroundColor: isActive
-                          ? theme.palette.mode === "dark"
-                            ? "rgba(255,255,255,0.06)"
-                            : "rgba(0,0,0,0.04)"
-                          : theme.palette.mode === "dark"
-                            ? "rgba(255,255,255,0.03)"
-                            : "rgba(0,0,0,0.02)",
+                          ? theme.tokens.colors.hover
+                          : theme.tokens.colors.hoverSoft,
                       },
                     }}
                   />
@@ -832,18 +769,16 @@ const Profile: React.FC = () => {
         )}
 
         {/* Content Container */}
-        <Box sx={{ flex: 1, display: "flex", flexDirection: "column", minHeight: 0, height: { xs: "auto", md: "100%" } }}>
+        <Box sx={{ flex: 1, display: "flex", flexDirection: "column", minHeight: { md: 0 }, height: { xs: "auto", md: "100%" } }}>
           {activeTab === "personal" && (
             <Paper
               elevation={0}
               sx={{
                 p: { xs: 2.5, sm: 3 },
                 borderRadius: "16px",
-                border: `1px solid ${
-                  theme.palette.mode === "dark" ? "rgba(255,255,255,0.08)" : "rgba(0,0,0,0.08)"
-                }`,
+                border: theme.tokens.borders.paper,
                 backgroundColor: theme.palette.background.paper,
-                boxShadow: "0 4px 24px rgba(0,0,0,0.08), 0 1px 2px rgba(0,0,0,0.04)",
+                boxShadow: `0 1px 2px ${theme.tokens.shadows.card}`,
                 display: "flex",
                 flexDirection: "column",
                 height: { xs: "auto", md: "100%" },
@@ -852,98 +787,77 @@ const Profile: React.FC = () => {
               }}
             >
               {/* Section Header — estilo /roles */}
-              <Box sx={{ mb: 2, flexShrink: 0 }}>
-                <Box display="flex" alignItems="center" gap={1.5} mb={0.5}>
-                  <Box sx={{ color: theme.palette.primary.main, display: "flex", alignItems: "center" }}>
-                    <UserIcon2 size={20} strokeWidth={1.5} />
-                  </Box>
-                  <Typography
-                    variant="h6"
-                    sx={{
-                      fontWeight: 700,
-                      fontSize: "1.15rem",
-                      color: theme.palette.text.primary,
-                      letterSpacing: "-0.02em",
-                      lineHeight: 1.2,
-                    }}
-                  >
-                    Información Personal
-                  </Typography>
-                </Box>
-                <Typography
-                  variant="caption"
-                  sx={{
-                    color: theme.palette.text.secondary,
-                    fontSize: "0.7rem",
-                    letterSpacing: "0.02em",
-                    ml: 5,
-                  }}
-                >
-                  {MANAGEMENT.PERSONAL_INFO_DESC}
-                </Typography>
-              </Box>
+              <PanelHeader
+                icon={<IconUser />}
+                title="Información Personal"
+                description={MANAGEMENT.PERSONAL_INFO_DESC}
+              />
 
-              <Box sx={{ borderBottom: `1px solid ${theme.palette.mode === "dark" ? "rgba(255,255,255,0.06)" : "rgba(0,0,0,0.06)"}`, mb: { xs: 2, md: 2.5 } }} />
+              <Box sx={{ borderBottom: theme.tokens.borders.hairline, mb: { xs: 2, md: 2.5 } }} />
 
               {/* Form Fields */}
-              <Box sx={{ flex: 1, minHeight: 0, overflow: "auto" }}>
+              <Box sx={{ flex: 1, minHeight: { md: 0 }, overflow: { md: "auto" } }}>
               <Grid container spacing={{ xs: 2, sm: 2.5 }}>
                 <Grid item xs={12} sm={6}>
                   <TextfieldComponent
                     name="firstName"
                     placeholder="Nombre"
+                    label="Nombre"
                     value={editFields.firstName}
                     onChange={(e) =>
                       setEditFields({ ...editFields, firstName: e.target.value })
                     }
                     error={!!validateName(editFields.firstName)}
-                    helperText={validateName(editFields.firstName)}
+                    helperText={validateName(editFields.firstName) || undefined}
                     validateField={validateFieldBoolean}
-                    icon={<UserIcon size={20} color={theme.palette.text.secondary} />}
+                    icon={<IconUser size={20} color={theme.palette.text.secondary} />}
                   />
                 </Grid>
                 <Grid item xs={12} sm={6}>
                   <TextfieldComponent
                     name="lastName"
                     placeholder="Apellido"
+                    label="Apellido"
                     value={editFields.lastName}
                     onChange={(e) =>
                       setEditFields({ ...editFields, lastName: e.target.value })
                     }
                     error={!!validateName(editFields.lastName)}
-                    helperText={validateName(editFields.lastName)}
+                    helperText={validateName(editFields.lastName) || undefined}
                     validateField={validateFieldBoolean}
-                    icon={<UserIcon size={20} color={theme.palette.text.secondary} />}
+                    icon={<IconUser size={20} color={theme.palette.text.secondary} />}
                   />
                 </Grid>
                 <Grid item xs={12} sm={6}>
                   <TextfieldComponent
                     name="email"
                     placeholder="Correo Electrónico"
+                    label="Correo electrónico"
                     value={editFields.email}
                     onChange={(e) => {
                       setEditFields({ ...editFields, email: e.target.value });
                       handleEmailChange(e);
                     }}
                     error={!!validateEmail(editFields.email) || !!infoError}
-                    helperText={infoError || validateEmail(editFields.email)}
+                    helperText={infoError || validateEmail(editFields.email) || undefined}
                     validateField={validateFieldBoolean}
-                    icon={<Mail size={20} color={theme.palette.text.secondary} />}
+                    icon={<IconMail size={20} color={theme.palette.text.secondary} />}
                   />
                 </Grid>
                 <Grid item xs={12} sm={6}>
                   <TextfieldComponent
                     name="username"
                     placeholder="Nombre de Usuario"
+                    label="Nombre de usuario"
                     value={editFields.username}
                     onChange={(e) => {
                       setEditFields({ ...editFields, username: e.target.value });
                       handleUsernameChange(e);
                     }}
                     error={!!validateUsername(editFields.username) || !!infoError}
-                    helperText={infoError || validateUsername(editFields.username)}
+                    helperText={infoError || validateUsername(editFields.username) || undefined}
                     validateField={validateFieldBoolean}
-                    icon={<UserCircle size={20} color={theme.palette.text.secondary} />}
+                    icon={<IconUserCircle size={20} color={theme.palette.text.secondary} />}
                   />
                 </Grid>
               </Grid>
@@ -954,7 +868,7 @@ const Profile: React.FC = () => {
                 <Button
                   variant="text"
                   onClick={handleClearEditForm}
-                  startIcon={<RotateCcw size={18} />}
+                  startIcon={<IconRotate size={18} />}
                   fullWidth={isSmallScreen}
                   sx={clearButton}
                 >
@@ -965,7 +879,7 @@ const Profile: React.FC = () => {
                     variant="text"
                     onClick={handleSaveChanges}
                     disabled={!isEditFormValid || !!infoError}
-                    startIcon={<Check size={18} />}
+                    startIcon={<IconCheck size={18} />}
                     fullWidth={isSmallScreen}
                     sx={submitButton}
                   >
@@ -982,11 +896,9 @@ const Profile: React.FC = () => {
               sx={{
                 p: { xs: 2.5, sm: 3 },
                 borderRadius: "16px",
-                border: `1px solid ${
-                  theme.palette.mode === "dark" ? "rgba(255,255,255,0.08)" : "rgba(0,0,0,0.08)"
-                }`,
+                border: theme.tokens.borders.paper,
                 backgroundColor: theme.palette.background.paper,
-                boxShadow: "0 4px 24px rgba(0,0,0,0.08), 0 1px 2px rgba(0,0,0,0.04)",
+                boxShadow: `0 1px 2px ${theme.tokens.shadows.card}`,
                 display: "flex",
                 flexDirection: "column",
                 height: { xs: "auto", md: "100%" },
@@ -995,56 +907,34 @@ const Profile: React.FC = () => {
               }}
             >
               {/* Section Header — estilo /roles */}
-              <Box sx={{ mb: 2, flexShrink: 0 }}>
-                <Box display="flex" alignItems="center" gap={1.5} mb={0.5}>
-                  <Box sx={{ color: theme.palette.primary.main, display: "flex", alignItems: "center" }}>
-                    <Lock size={20} strokeWidth={1.5} />
-                  </Box>
-                  <Typography
-                    variant="h6"
-                    sx={{
-                      fontWeight: 700,
-                      fontSize: "1.15rem",
-                      color: theme.palette.text.primary,
-                      letterSpacing: "-0.02em",
-                      lineHeight: 1.2,
-                    }}
-                  >
-                    Contraseña y Seguridad
-                  </Typography>
-                </Box>
-                <Typography
-                  variant="caption"
-                  sx={{
-                    color: theme.palette.text.secondary,
-                    fontSize: "0.7rem",
-                    letterSpacing: "0.02em",
-                    ml: 5,
-                  }}
-                >
-                  Cambia tu contraseña para mantener tu cuenta segura.
-                </Typography>
-              </Box>
+              <PanelHeader
+                icon={<IconLock />}
+                title="Contraseña y Seguridad"
+                description="Cambia tu contraseña para mantener tu cuenta segura."
+              />
 
-              <Box sx={{ borderBottom: `1px solid ${theme.palette.mode === "dark" ? "rgba(255,255,255,0.06)" : "rgba(0,0,0,0.06)"}`, mb: { xs: 2, md: 2.5 } }} />
+              <Box sx={{ borderBottom: theme.tokens.borders.hairline, mb: { xs: 2, md: 2.5 } }} />
 
-              <Box sx={{ flex: 1, minHeight: 0, overflowY: "auto", overflowX: "hidden" }}>
+              <Box sx={{ flex: 1, minHeight: { md: 0 }, overflowY: { md: "auto" }, overflowX: "hidden" }}>
               <Grid container spacing={{ xs: 2, sm: 2.5 }} sx={{ minWidth: 0, "& > .MuiGrid-item": { minWidth: 0 } }}>
-                {/* Password fields side by side */}
-                <Grid item xs={12} sm={6}>
+                {/* Current password: required by the API to change your own */}
+                <Grid item xs={12}>
                   <TextfieldComponent
-                    name="newPassword"
-                    placeholder="Nueva Contraseña"
-                    type={showNewPassword ? "text" : "password"}
-                    value={passwordFields.newPassword}
-                    onChange={handleNewPassword}
-                    error={!!passwordError}
-                    helperText={passwordError}
-                    icon={<Lock size={20} color={theme.palette.text.secondary} />}
+                    name="currentPassword"
+                    placeholder="Contraseña actual"
+                    label="Contraseña actual"
+                    autoComplete="current-password"
+                    type={showCurrentPassword ? "text" : "password"}
+                    value={passwordFields.currentPassword}
+                    onChange={handleCurrentPassword}
+                    error={!!currentPasswordError}
+                    helperText={currentPasswordError || undefined}
+                    icon={<IconLock size={20} color={theme.palette.text.secondary} />}
                     endAdornment={
                       <IconButton
-                        onClick={handleToggleNewPassword}
+                        onClick={() => setShowCurrentPassword((prev) => !prev)}
                         edge="end"
+                        aria-label={showCurrentPassword ? "Ocultar contraseña" : "Mostrar contraseña"}
                         sx={{
                           color: theme.palette.text.secondary,
                           width: "36px",
@@ -1056,7 +946,41 @@ const Profile: React.FC = () => {
                           },
                         }}
                       >
-                        {showNewPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+                        {showCurrentPassword ? <IconEyeOff size={20} /> : <IconEye size={20} />}
+                      </IconButton>
+                    }
+                  />
+                </Grid>
+                {/* Password fields side by side */}
+                <Grid item xs={12} sm={6}>
+                  <TextfieldComponent
+                    name="newPassword"
+                    autoComplete="new-password"
+                    placeholder="Nueva Contraseña"
+                    label="Nueva contraseña"
+                    type={showNewPassword ? "text" : "password"}
+                    value={passwordFields.newPassword}
+                    onChange={handleNewPassword}
+                    error={!!passwordError}
+                    helperText={passwordError}
+                    icon={<IconLock size={20} color={theme.palette.text.secondary} />}
+                    endAdornment={
+                      <IconButton
+                        onClick={handleToggleNewPassword}
+                        edge="end"
+                        aria-label={showNewPassword ? "Ocultar contraseña" : "Mostrar contraseña"}
+                        sx={{
+                          color: theme.palette.text.secondary,
+                          width: "36px",
+                          height: "36px",
+                          padding: "8px",
+                          "&:hover": {
+                            color: theme.palette.text.primary,
+                            backgroundColor: "transparent",
+                          },
+                        }}
+                      >
+                        {showNewPassword ? <IconEyeOff size={20} /> : <IconEye size={20} />}
                       </IconButton>
                     }
                   />
@@ -1064,17 +988,20 @@ const Profile: React.FC = () => {
                 <Grid item xs={12} sm={6}>
                   <TextfieldComponent
                     name="confirmNewPassword"
+                    autoComplete="new-password"
                     placeholder="Confirmar Nueva Contraseña"
+                    label="Confirmar nueva contraseña"
                     type={showConfirmNewPassword ? "text" : "password"}
                     value={passwordFields.confirmNewPassword}
                     onChange={handleConfirmNewPassword}
                     error={!!passwordError}
                     helperText={passwordError}
-                    icon={<Lock size={20} color={theme.palette.text.secondary} />}
+                    icon={<IconLock size={20} color={theme.palette.text.secondary} />}
                     endAdornment={
                       <IconButton
                         onClick={handleToggleConfirmNewPassword}
                         edge="end"
+                        aria-label={showConfirmNewPassword ? "Ocultar contraseña" : "Mostrar contraseña"}
                         sx={{
                           color: theme.palette.text.secondary,
                           width: "36px",
@@ -1086,7 +1013,7 @@ const Profile: React.FC = () => {
                           },
                         }}
                       >
-                        {showConfirmNewPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+                        {showConfirmNewPassword ? <IconEyeOff size={20} /> : <IconEye size={20} />}
                       </IconButton>
                     }
                   />
@@ -1106,7 +1033,7 @@ const Profile: React.FC = () => {
                       letterSpacing: "-0.01em",
                     }}
                   >
-                    <Info size={16} strokeWidth={1.5} color={theme.palette.primary.main} />
+                    <IconInfoCircle size={16} stroke={1.5} color={theme.palette.primary.main} />
                     Información de la contraseña
                   </Typography>
                   <Box sx={{ display: "flex", flexWrap: "wrap", gap: 1, mb: 1.5 }}>
@@ -1159,24 +1086,20 @@ const Profile: React.FC = () => {
                               ...(met
                                 ? {
                                     backgroundColor:
-                                      theme.palette.mode === "dark"
-                                        ? "rgba(255,255,255,0.08)"
-                                        : "rgba(0,0,0,0.05)",
+                                      theme.tokens.colors.hoverStrong,
                                     color: theme.palette.primary.main,
                                   }
                                 : {
                                     backgroundColor: "transparent",
                                     color: theme.palette.text.secondary,
                                     border: `1px dashed ${
-                                      theme.palette.mode === "dark"
-                                        ? "rgba(255,255,255,0.15)"
-                                        : "rgba(0,0,0,0.15)"
+                                      theme.tokens.colors.borderStrong
                                     }`,
                                   }),
                             }}
                           >
                             {met ? (
-                              <Check size={13} strokeWidth={2.5} />
+                              <IconCheck size={13} stroke={2.5} />
                             ) : (
                               <Box
                                 sx={{
@@ -1204,7 +1127,7 @@ const Profile: React.FC = () => {
                       lineHeight: 1.4,
                     }}
                   >
-                    <ShieldCheck size={14} strokeWidth={1.5} />
+                    <IconShieldCheck size={14} stroke={1.5} />
                     Por seguridad, no compartas tu contraseña con nadie.
                   </Typography>
                 </Grid>
@@ -1216,7 +1139,7 @@ const Profile: React.FC = () => {
                 <Button
                   variant="text"
                   onClick={handleClearPasswordForm}
-                  startIcon={<RotateCcw size={18} />}
+                  startIcon={<IconRotate size={18} />}
                   fullWidth={isSmallScreen}
                   sx={clearButton}
                 >
@@ -1227,7 +1150,7 @@ const Profile: React.FC = () => {
                     variant="text"
                     onClick={handleChangePassword}
                     disabled={!isPasswordFormValid}
-                    startIcon={<Check size={18} />}
+                    startIcon={<IconCheck size={18} />}
                     fullWidth={isSmallScreen}
                     sx={submitButton}
                   >
@@ -1244,11 +1167,9 @@ const Profile: React.FC = () => {
               sx={{
                 p: { xs: 2.5, sm: 3 },
                 borderRadius: "16px",
-                border: `1px solid ${
-                  theme.palette.mode === "dark" ? "rgba(255,255,255,0.08)" : "rgba(0,0,0,0.08)"
-                }`,
+                border: theme.tokens.borders.paper,
                 backgroundColor: theme.palette.background.paper,
-                boxShadow: "0 4px 24px rgba(0,0,0,0.08), 0 1px 2px rgba(0,0,0,0.04)",
+                boxShadow: `0 1px 2px ${theme.tokens.shadows.card}`,
                 display: "flex",
                 flexDirection: "column",
                 height: { xs: "auto", md: "100%" },
@@ -1257,38 +1178,11 @@ const Profile: React.FC = () => {
               }}
             >
               {/* Section Header — estilo /roles */}
-              <Box sx={{ mb: 2 }}>
-                <Box display="flex" alignItems="center" gap={1.5} mb={0.5}>
-                  <Box sx={{ color: theme.palette.primary.main, display: "flex", alignItems: "center" }}>
-                    <Palette size={20} strokeWidth={1.5} />
-                  </Box>
-                  <Typography
-                    variant="h6"
-                    sx={{
-                      fontWeight: 700,
-                      fontSize: "1.15rem",
-                      color: theme.palette.text.primary,
-                      letterSpacing: "-0.02em",
-                      lineHeight: 1.2,
-                    }}
-                  >
-                    Apariencia
-                  </Typography>
-                </Box>
-                <Typography
-                  variant="caption"
-                  sx={{
-                    color: theme.palette.text.secondary,
-                    fontSize: "0.7rem",
-                    letterSpacing: "0.02em",
-                    ml: 5,
-                  }}
-                >
-                  Seleccione el tema que prefiera para la aplicación.
-                </Typography>
-              </Box>
-
-              <Box sx={{ borderBottom: `1px solid ${theme.palette.mode === "dark" ? "rgba(255,255,255,0.06)" : "rgba(0,0,0,0.06)"}`, mb: { xs: 2, md: 2.5 } }} />
+              <PanelHeader
+                icon={<IconPalette />}
+                title="Apariencia"
+                description="Elige el tema de la aplicación."
+              />
 
               {/* Theme Segmented Toggle */}
               <Box sx={{ display: "flex", justifyContent: "center", mb: 2.5 }}>
@@ -1297,9 +1191,9 @@ const Profile: React.FC = () => {
                   onChange={(value) => setMode(value as ThemeMode)}
                   fullWidth={isSmallScreen}
                   options={[
-                    { value: "default" as ThemeMode, label: "Sistema", icon: <Monitor size={15} /> },
-                    { value: "light" as ThemeMode, label: "Claro", icon: <Sun size={15} /> },
-                    { value: "dark" as ThemeMode, label: "Oscuro", icon: <Moon size={15} /> },
+                    { value: "default" as ThemeMode, label: "Sistema", icon: <IconDeviceDesktop size={15} /> },
+                    { value: "light" as ThemeMode, label: "Claro", icon: <IconSun size={15} /> },
+                    { value: "dark" as ThemeMode, label: "Oscuro", icon: <IconMoon size={15} /> },
                   ]}
                   size="medium"
                 />
@@ -1313,7 +1207,7 @@ const Profile: React.FC = () => {
                     height: { xs: 180, sm: 260 },
                     borderRadius: "14px",
                     border: `1.5px solid ${
-                      theme.palette.mode === "dark" ? "rgba(255,255,255,0.08)" : "rgba(0,0,0,0.08)"
+                      theme.tokens.colors.border
                     }`,
                     p: 1,
                     display: "flex",
@@ -1414,7 +1308,7 @@ const Profile: React.FC = () => {
                 boxShadow: "0 4px 12px rgba(0,0,0,0.08)",
               }}
             >
-              <Camera size={18} color={theme.palette.primary.contrastText} />
+              <IconCamera size={18} color={theme.palette.primary.contrastText} />
             </Box>
             <Typography
               variant="h6"
@@ -1450,47 +1344,20 @@ const Profile: React.FC = () => {
                 display: "flex",
                 alignItems: "center",
                 justifyContent: "center",
-                backgroundColor: theme.palette.mode === "dark" ? "rgba(255,255,255,0.03)" : "rgba(0,0,0,0.03)",
-                border: `3px solid ${theme.palette.mode === "dark" ? "rgba(255,255,255,0.08)" : "rgba(0,0,0,0.06)"}`,
+                backgroundColor: theme.tokens.colors.hoverSoft,
+                border: `3px solid ${theme.tokens.colors.border}`,
                 transition: "all 0.3s ease",
                 boxShadow: avatarPreview || getAvatarUrl()
                   ? "0 8px 32px rgba(0,0,0,0.15)"
                   : "0 4px 16px rgba(0,0,0,0.06)",
               }}
             >
-              {avatarPreview ? (
-                <img
-                  src={avatarPreview}
-                  alt="Preview"
-                  style={{
-                    width: "100%",
-                    height: "100%",
-                    objectFit: "cover",
-                  }}
-                />
-              ) : getAvatarUrl() && !avatarLoadFailed ? (
-                <img
-                  src={getAvatarUrl()!}
-                  alt="Current avatar"
-                  onError={() => setAvatarLoadFailed(true)}
-                  style={{
-                    width: "100%",
-                    height: "100%",
-                    objectFit: "cover",
-                  }}
-                />
-              ) : (
-                <Typography
-                  sx={{
-                    fontWeight: 700,
-                    fontSize: "3.5rem",
-                    color: theme.palette.text.secondary,
-                    opacity: 0.6,
-                  }}
-                >
-                  {getInitials()}
-                </Typography>
-              )}
+              <UserAvatar
+                user={currentUser}
+                src={avatarPreview}
+                size={180}
+                sx={{ fontSize: "3.5rem" }}
+              />
               {isUploadingAvatar && (
                 <Box
                   sx={{
@@ -1514,7 +1381,7 @@ const Profile: React.FC = () => {
               onClick={() => fileInputRef.current?.click()}
               sx={{
                 width: "100%",
-                border: `2px dashed ${theme.palette.mode === "dark" ? "rgba(255,255,255,0.12)" : "rgba(0,0,0,0.12)"}`,
+                border: `2px dashed ${theme.tokens.colors.border}`,
                 borderRadius: "14px",
                 p: 3,
                 display: "flex",
@@ -1524,24 +1391,20 @@ const Profile: React.FC = () => {
                 cursor: "pointer",
                 transition: "all 0.2s cubic-bezier(0.4, 0, 0.2, 1)",
                 backgroundColor: selectedFile
-                  ? (theme.palette.mode === "dark" ? "rgba(255,255,255,0.04)" : "rgba(0,0,0,0.02)")
+                  ? (theme.tokens.colors.hover)
                   : "transparent",
                 borderColor: selectedFile
                   ? theme.palette.primary.main
-                  : (theme.palette.mode === "dark" ? "rgba(255,255,255,0.12)" : "rgba(0,0,0,0.12)"),
+                  : (theme.tokens.colors.hoverStrong),
                 "&:hover": {
                   borderColor: theme.palette.primary.main,
-                  backgroundColor: theme.palette.mode === "dark"
-                    ? "rgba(255,255,255,0.04)"
-                    : "rgba(0,0,0,0.02)",
+                  backgroundColor: theme.tokens.colors.hover,
                 },
               }}
             >
               <Box
                 sx={{
-                  backgroundColor: theme.palette.mode === "dark"
-                    ? "rgba(255,255,255,0.06)"
-                    : "rgba(0,0,0,0.04)",
+                  backgroundColor: theme.tokens.colors.hover,
                   borderRadius: "10px",
                   p: 1.25,
                   display: "flex",
@@ -1550,7 +1413,7 @@ const Profile: React.FC = () => {
                   transition: "all 0.2s ease",
                 }}
               >
-                <Camera size={22} color={theme.palette.text.secondary} />
+                <IconCamera size={22} color={theme.palette.text.secondary} />
               </Box>
               {selectedFile ? (
                 <Typography
@@ -1611,7 +1474,7 @@ const Profile: React.FC = () => {
               color="error"
               onClick={handleDeleteAvatar}
               disabled={isUploadingAvatar}
-              startIcon={isUploadingAvatar ? <Loader2 size={16} className="animate-spin" /> : <X size={16} />}
+              startIcon={isUploadingAvatar ? <IconLoader2 size={16} className="animate-spin" /> : <IconX size={16} />}
               sx={{
                 order: { xs: 2, sm: 1 },
                 "&:hover": {
@@ -1641,9 +1504,9 @@ const Profile: React.FC = () => {
               sx={{ minWidth: 120 }}
               startIcon={
                 isUploadingAvatar ? (
-                  <Loader2 size={16} className="animate-spin" />
+                  <IconLoader2 size={16} className="animate-spin" />
                 ) : selectedFile ? (
-                  <Camera size={16} />
+                  <IconCamera size={16} />
                 ) : undefined
               }
             >

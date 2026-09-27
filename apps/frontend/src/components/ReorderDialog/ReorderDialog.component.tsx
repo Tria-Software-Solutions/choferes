@@ -26,7 +26,7 @@ import {
   verticalListSortingStrategy,
 } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
-import { GripVertical, RotateCcw, X } from "lucide-react";
+import { IconGripVertical, IconRotate, IconX } from "@tabler/icons-react";
 import type { Schedule } from "../../models/Schedule";
 import { sortSchedulesByType } from "../../utils/schedule";
 
@@ -83,18 +83,12 @@ const SortableItem: React.FC<SortableItemProps> = ({ schedule, index }) => {
             : isDragging
             ? "rgba(0,0,0,0.06)"
             : "rgba(0,0,0,0.015)",
-        border: `1px solid ${
-          theme.palette.mode === "dark"
-            ? "rgba(255,255,255,0.06)"
-            : "rgba(0,0,0,0.05)"
-        }`,
+        border: theme.tokens.borders.hairline,
         transition: "all 0.2s ease",
         userSelect: "none",
         "&:hover": {
           backgroundColor:
-            theme.palette.mode === "dark"
-              ? "rgba(255,255,255,0.05)"
-              : "rgba(0,0,0,0.025)",
+            theme.tokens.colors.hover,
         },
       }}
     >
@@ -116,7 +110,7 @@ const SortableItem: React.FC<SortableItemProps> = ({ schedule, index }) => {
           touchAction: "none",
         }}
       >
-        <GripVertical size={18} strokeWidth={1.5} />
+        <IconGripVertical size={18} stroke={1.5} />
       </Box>
 
       {/* Order number */}
@@ -126,9 +120,7 @@ const SortableItem: React.FC<SortableItemProps> = ({ schedule, index }) => {
           height: 24,
           borderRadius: "50%",
           backgroundColor:
-            theme.palette.mode === "dark"
-              ? "rgba(255,255,255,0.06)"
-              : "rgba(0,0,0,0.04)",
+            theme.tokens.colors.hover,
           display: "flex",
           alignItems: "center",
           justifyContent: "center",
@@ -266,11 +258,7 @@ const ReorderDialog: React.FC<ReorderDialogProps> = ({
           display: "flex",
           alignItems: "center",
           justifyContent: "space-between",
-          borderBottom: `1px solid ${
-            theme.palette.mode === "dark"
-              ? "rgba(255,255,255,0.06)"
-              : "rgba(0,0,0,0.06)"
-          }`,
+          borderBottom: theme.tokens.borders.hairline,
         }}
       >
         <Box>
@@ -305,7 +293,7 @@ const ReorderDialog: React.FC<ReorderDialogProps> = ({
             "&:hover": { backgroundColor: "rgba(0,0,0,0.04)" },
           }}
         >
-          <X size={18} />
+          <IconX size={18} />
         </IconButton>
       </Box>
 
@@ -338,11 +326,7 @@ const ReorderDialog: React.FC<ReorderDialogProps> = ({
         sx={{
           px: 3,
           py: 2,
-          borderTop: `1px solid ${
-            theme.palette.mode === "dark"
-              ? "rgba(255,255,255,0.06)"
-              : "rgba(0,0,0,0.06)"
-          }`,
+          borderTop: theme.tokens.borders.hairline,
           gap: 1,
         }}
       >
@@ -357,7 +341,7 @@ const ReorderDialog: React.FC<ReorderDialogProps> = ({
         >
           <Button
             variant="text"
-            startIcon={<RotateCcw size={15} strokeWidth={2} />}
+            startIcon={<IconRotate size={15} stroke={2} />}
             onClick={handleReset}
             disabled={isDefaultOrder}
             sx={{
@@ -366,9 +350,7 @@ const ReorderDialog: React.FC<ReorderDialogProps> = ({
               color: theme.palette.text.secondary,
               "&:hover": {
                 backgroundColor:
-                  theme.palette.mode === "dark"
-                    ? "rgba(255,255,255,0.06)"
-                    : "rgba(0,0,0,0.04)",
+                  theme.tokens.colors.hover,
                 color: theme.palette.text.primary,
               },
             }}

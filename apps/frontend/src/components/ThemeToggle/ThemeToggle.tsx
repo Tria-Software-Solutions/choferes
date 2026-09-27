@@ -1,6 +1,6 @@
 import React from "react";
-import { IconButton, Tooltip, useTheme } from "@mui/material";
-import { Sun, Moon, Monitor } from "lucide-react";
+import { IconButton, Tooltip } from "@mui/material";
+import { IconDeviceDesktop, IconMoon, IconSun } from "@tabler/icons-react";
 import { useThemeMode } from "../../context/ThemeContext";
 
 type ThemeMode = "light" | "dark" | "default";
@@ -11,7 +11,6 @@ type ThemeMode = "light" | "dark" | "default";
  */
 export const ThemeToggle: React.FC = () => {
   const { mode, setMode } = useThemeMode();
-  const muiTheme = useTheme();
 
   const currentMode = mode as ThemeMode;
 
@@ -26,15 +25,15 @@ export const ThemeToggle: React.FC = () => {
 
   const getIcon = () => {
     const iconSize = 18;
-    const iconProps = { size: iconSize, strokeWidth: 1.5 };
+    const iconProps = { size: iconSize, strokeWidth: 1.75 };
 
     switch (currentMode) {
       case "dark":
-        return <Sun {...iconProps} />;
+        return <IconSun {...iconProps} />;
       case "light":
-        return <Moon {...iconProps} />;
+        return <IconMoon {...iconProps} />;
       default:
-        return <Monitor {...iconProps} />;
+        return <IconDeviceDesktop {...iconProps} />;
     }
   };
 
@@ -49,25 +48,9 @@ export const ThemeToggle: React.FC = () => {
     }
   };
 
-  const isDarkMode = muiTheme.palette.mode === "dark";
-
   return (
-    <Tooltip title={getTooltip()} arrow>
-      <IconButton
-        onClick={cycleMode}
-        sx={{
-          color: "#ffffff",
-          backgroundColor: "transparent",
-          border: "none",
-          opacity: isDarkMode ? 0.9 : 0.7,
-          transition: "all 0.2s ease",
-          "&:hover": {
-            backgroundColor: "rgba(255,255,255,0.1)",
-            opacity: 1,
-          },
-        }}
-        aria-label="Cambiar tema"
-      >
+    <Tooltip title={getTooltip()}>
+      <IconButton onClick={cycleMode} aria-label="Cambiar tema">
         {getIcon()}
       </IconButton>
     </Tooltip>

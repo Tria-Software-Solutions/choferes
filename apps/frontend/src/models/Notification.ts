@@ -7,7 +7,7 @@ export interface Notification {
   read: boolean;
   actionUrl?: string;
   actionText?: string;
-  category: 'employee' | 'schedule' | 'vehicle' | 'system' | 'report';
+  category: 'employee' | 'schedule' | 'vehicle' | 'system' | 'report' | 'task';
   priority: 'low' | 'medium' | 'high';
   source?: string;
 }

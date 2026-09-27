@@ -2,6 +2,7 @@
 // Provides endpoints for CRUD operations and fetching summaries for employees
 import { Request, Response } from "express";
 import * as weeklySummaryService from "../services/weeklySummaryService";
+import { sendServerError } from "../utils/errors";
 
 // Get all weekly summaries (paginated)
 export const getWeeklySummaries = async (req: Request, res: Response) => {
@@ -11,7 +12,7 @@ export const getWeeklySummaries = async (req: Request, res: Response) => {
     );
     return res.status(200).json(result);
   } catch (error) {
-    return res.status(500).json({ message: "Error fetching WeeklySummaries", error });
+    return sendServerError(res, "Error fetching WeeklySummaries", error);
   }
 };
 
@@ -21,7 +22,7 @@ export const createWeeklySummary = async (req: Request, res: Response) => {
     const newWeeklySummary = await weeklySummaryService.createWeeklySummary(req.body);
     return res.status(201).json(newWeeklySummary);
   } catch (error) {
-    return res.status(500).json({ message: "Error creating WeeklySummary", error });
+    return sendServerError(res, "Error creating WeeklySummary", error);
   }
 };
 
@@ -38,7 +39,7 @@ export const getCurrentWeeklySummary = async (req: Request, res: Response) => {
     }
     return res.status(404).json({ message: "WeeklySummary not found" });
   } catch (error) {
-    return res.status(500).json({ message: "Error fetching WeeklySummary", error });
+    return sendServerError(res, "Error fetching WeeklySummary", error);
   }
 };
 
@@ -53,7 +54,7 @@ export const hasWorkedCurrenWeeklySummary = async (req: Request, res: Response) 
     );
     return res.status(200).json({ hasWorked });
   } catch (error) {
-    return res.status(500).json({ message: "Error checking work status", error });
+    return sendServerError(res, "Error checking work status", error);
   }
 };
 
@@ -67,7 +68,7 @@ export const updateWeeklySummary = async (req: Request, res: Response) => {
     }
     return res.status(404).json({ message: "WeeklySummary not found" });
   } catch (error) {
-    return res.status(500).json({ message: "Error updating WeeklySummary", error });
+    return sendServerError(res, "Error updating WeeklySummary", error);
   }
 };
 
@@ -81,6 +82,6 @@ export const deleteWeeklySummary = async (req: Request, res: Response) => {
     }
     return res.status(404).json({ message: "WeeklySummary not found" });
   } catch (error) {
-    return res.status(500).json({ message: "Error deleting WeeklySummary", error });
+    return sendServerError(res, "Error deleting WeeklySummary", error);
   }
 };

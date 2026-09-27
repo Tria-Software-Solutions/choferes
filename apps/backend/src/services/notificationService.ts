@@ -3,7 +3,8 @@ import { Notification } from "../models/Notification";
 import { User } from "../models/User";
 
 export type NotificationType = "info" | "success" | "warning" | "error";
-export type NotificationCategory = "employee" | "schedule" | "vehicle" | "system" | "report";
+export type NotificationCategory =
+  "employee" | "schedule" | "vehicle" | "system" | "report" | "task";
 export type NotificationPriority = "low" | "medium" | "high";
 
 interface CreateNotificationData {
@@ -59,10 +60,11 @@ export const createNotification = async (userId: number, data: CreateNotificatio
   return notification;
 };
 
-// Mark a single notification as read
+// Mark a single notification as read. Scoped by owner on both the update and
+// the read-back so a user can never fetch someone else's notification by id.
 export const markAsRead = async (userId: number, id: number) => {
   await Notification.update({ read: true }, { where: { id, userId } });
-  return Notification.findByPk(id, { attributes: ATTRIBUTES });
+  return Notification.findOne({ where: { id, userId }, attributes: ATTRIBUTES });
 };
 
 // Mark all notifications as read for a user

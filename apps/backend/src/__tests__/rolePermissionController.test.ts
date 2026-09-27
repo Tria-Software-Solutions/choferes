@@ -31,8 +31,15 @@ jest.mock("../services/rolePermissionService", () => ({
   getRolePermissionsByRoleId: jest.fn(),
 }));
 
+// Grant rules have their own unit tests; here they're controlled per test.
+jest.mock("../services/accessGrantService", () => ({
+  checkPermissionGrant: jest.fn(),
+}));
+
 // eslint-disable-next-line @typescript-eslint/no-require-imports
 const rolePermissionService = require("../services/rolePermissionService");
+// eslint-disable-next-line @typescript-eslint/no-require-imports
+const accessGrant = require("../services/accessGrantService");
 import rolePermissionRoutes from "../routes/rolePermissionRoutes";
 import { createTestApp } from "./helpers/testApp";
 
@@ -48,6 +55,7 @@ const mockRolePermission = {
 
 beforeEach(() => {
   jest.clearAllMocks();
+  accessGrant.checkPermissionGrant.mockResolvedValue(null);
 });
 
 describe("GET /api/role-permissions", () => {
@@ -60,12 +68,13 @@ describe("GET /api/role-permissions", () => {
     expect(res.body).toEqual([mockRolePermission]);
   });
 
-  it("debería devolver 400 si el service falla", async () => {
+  it("debería devolver 500 si el service falla", async () => {
     service.getRolePermissions.mockRejectedValue(new Error("DB error"));
 
     const res = await request(app).get("/api/role-permissions");
 
-    expect(res.status).toBe(400);
+    expect(res.status).toBe(500);
+    expect(res.body).not.toHaveProperty("error");
   });
 });
 
@@ -80,6 +89,22 @@ describe("POST /api/role-permissions", () => {
 
     expect(res.status).toBe(201);
     expect(res.body).toEqual(created);
+    expect(accessGrant.checkPermissionGrant).toHaveBeenCalledWith(
+      expect.objectContaining({ id: 1 }),
+      1,
+      [2],
+    );
+  });
+
+  it("debería devolver 403 si otorga un permiso que el usuario no tiene", async () => {
+    accessGrant.checkPermissionGrant.mockResolvedValue({ status: 403, message: "No" });
+
+    const res = await request(app)
+      .post("/api/role-permissions")
+      .send({ roleId: 1, permissionId: 9 });
+
+    expect(res.status).toBe(403);
+    expect(service.createRolePermission).not.toHaveBeenCalled();
   });
 });
 
@@ -104,7 +129,18 @@ describe("PUT /api/role-permissions/:id", () => {
       .send({ permissionIds: "not-an-array" });
 
     expect(res.status).toBe(400);
-    expect(res.body.message).toBe("Permission Ids must be an array");
+    expect(res.body.message).toBe("Permission Ids must be an array of integers");
+  });
+
+  it("debería devolver 403 y no tocar el rol si agrega permisos que el usuario no tiene", async () => {
+    accessGrant.checkPermissionGrant.mockResolvedValue({ status: 403, message: "No" });
+
+    const res = await request(app)
+      .put("/api/role-permissions/1")
+      .send({ permissionIds: [1, 2, 3] });
+
+    expect(res.status).toBe(403);
+    expect(service.updateRolePermission).not.toHaveBeenCalled();
   });
 });
 

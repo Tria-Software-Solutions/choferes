@@ -16,6 +16,7 @@ import { loadEmployeeHours } from "../services/summaryRecalculationService";
 import {
   calculateBiweeklyBreakdown,
   computeTotalPayable,
+  resolveAmounts,
   round2,
 } from "../services/paymentCalculationService";
 import { ServiceError } from "../utils/errors";
@@ -74,12 +75,60 @@ describe("computeTotalPayable", () => {
   });
 });
 
+describe("resolveAmounts", () => {
+  afterEach(() => {
+    delete process.env.PAYROLL_SOCIAL_CHARGES_RATE;
+    delete process.env.PAYROLL_REGULAR_HOURS_PER_BIWEEK;
+  });
+
+  it("aplica 10.83% de cargas sociales sobre el salario bruto", () => {
+    const { amounts, totalPayable } = resolveAmounts(80, 2000);
+    expect(amounts.regularSalary).toBe(160000);
+    expect(amounts.overtimePay).toBe(0);
+    expect(amounts.socialCharges).toBe(17328); // 160000 × 0.1083
+    expect(totalPayable).toBe(142672);
+  });
+
+  it("paga las horas sobre 96 como extraordinarias a tiempo y medio", () => {
+    const { amounts, regularHours, overtimeHours } = resolveAmounts(100, 1000);
+    expect(regularHours).toBe(96);
+    expect(overtimeHours).toBe(4);
+    expect(amounts.regularSalary).toBe(96000);
+    expect(amounts.overtimePay).toBe(6000); // 4 h × 1000 × 1.5
+    expect(amounts.socialCharges).toBe(11046.6); // (96000 + 6000) × 0.1083
+  });
+
+  it("respeta cada campo manual y recalcula las cargas sobre el salario final", () => {
+    const { amounts, manualFields } = resolveAmounts(80, 2000, {
+      regularSalary: 100000,
+      mileage: 5000,
+    });
+    expect(amounts.regularSalary).toBe(100000);
+    expect(amounts.mileage).toBe(5000);
+    expect(amounts.socialCharges).toBe(10830);
+    expect(manualFields).toEqual(["regularSalary", "mileage"]);
+  });
+
+  it("no sobreescribe unas cargas sociales ingresadas a mano", () => {
+    const { amounts } = resolveAmounts(80, 2000, { socialCharges: 1234.56 });
+    expect(amounts.socialCharges).toBe(1234.56);
+  });
+
+  it("permite ajustar las reglas por entorno", () => {
+    process.env.PAYROLL_SOCIAL_CHARGES_RATE = "0";
+    process.env.PAYROLL_REGULAR_HOURS_PER_BIWEEK = "88";
+    const { amounts, overtimeHours } = resolveAmounts(90, 1000);
+    expect(overtimeHours).toBe(2);
+    expect(amounts.socialCharges).toBe(0);
+  });
+});
+
 describe("calculateBiweeklyBreakdown", () => {
   beforeEach(() => {
     jest.clearAllMocks();
   });
 
-  it("calcula el salario ordinario como horas × hourlyRate", async () => {
+  it("calcula el salario ordinario como horas × hourlyRate y las cargas sociales", async () => {
     mockFindByPk.mockResolvedValue(employee(2000));
     mockLoadHours.mockResolvedValue([
       { date: new Date(2026, 8, 1), schedule: scheduleFor(8) },
@@ -91,7 +140,9 @@ describe("calculateBiweeklyBreakdown", () => {
     expect(result.hoursWorked).toBe(16);
     expect(result.hourlyRate).toBe(2000);
     expect(result.regularSalary).toBe(32000);
-    expect(result.totalPayable).toBe(32000);
+    expect(result.socialCharges).toBe(3465.6);
+    expect(result.totalPayable).toBe(28534.4);
+    expect(result.manualFields).toEqual([]);
   });
 
   it("usa el rango exacto de la quincena (16-fin de mes)", async () => {
@@ -151,7 +202,9 @@ describe("calculateBiweeklyBreakdown", () => {
     });
 
     expect(result.regularSalary).toBe(55000);
-    expect(result.totalPayable).toBe(55000);
+    expect(result.socialCharges).toBe(5956.5); // 55000 × 0.1083
+    expect(result.totalPayable).toBe(49043.5);
+    expect(result.manualFields).toEqual(["regularSalary"]);
   });
 
   it("falla con 404 si el empleado no existe", async () => {

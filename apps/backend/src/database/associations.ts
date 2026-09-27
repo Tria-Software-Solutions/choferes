@@ -13,6 +13,8 @@ import { Payment } from "../models/Payment";
 import { Vacation } from "../models/Vacation";
 import { EmployeeLicense } from "../models/EmployeeLicense";
 import { DisciplinaryAction } from "../models/DisciplinaryAction";
+import { TaskList } from "../models/TaskList";
+import { Task } from "../models/Task";
 
 // User <-> Notification (One-to-Many)
 Notification.belongsTo(User, {
@@ -151,6 +153,14 @@ User.hasMany(DisciplinaryAction, {
   as: "createdDisciplinaryActions",
   onDelete: "SET NULL",
 });
+
+// TaskList <-> Task (One-to-Many); both owned by a User
+Task.belongsTo(TaskList, { foreignKey: "listId", as: "list", onDelete: "CASCADE" });
+TaskList.hasMany(Task, { foreignKey: "listId", as: "tasks", onDelete: "CASCADE" });
+TaskList.belongsTo(User, { foreignKey: "userId", onDelete: "CASCADE" });
+User.hasMany(TaskList, { foreignKey: "userId", as: "taskLists", onDelete: "CASCADE" });
+Task.belongsTo(User, { foreignKey: "userId", onDelete: "CASCADE" });
+User.hasMany(Task, { foreignKey: "userId", as: "tasks", onDelete: "CASCADE" });
 
 // Function to ensure associations are set up (for import side effects)
 export default function setupAssociations() {}

@@ -1,4 +1,5 @@
 // Service for business logic and database operations related to role-permission assignments
+import sequelize from "../config/database";
 import { RolePermission } from "../models/RolePermission";
 
 // Get all role-permission assignments
@@ -11,14 +12,17 @@ export const createRolePermission = async (data: Omit<RolePermission, "id">) => 
   return newRolePermission;
 };
 
-// Update permissions for a specific role
+// Replaces the permission set of a role atomically: if inserting the new set
+// fails, the role keeps its previous permissions instead of ending up with none.
 export const updateRolePermission = async (roleId: number, permissionIds: number[]) => {
-  await RolePermission.destroy({ where: { roleId } });
-  const newPermissions = permissionIds.map((permissionId) => ({
+  const newPermissions = Array.from(new Set(permissionIds)).map((permissionId) => ({
     roleId,
     permissionId,
   }));
-  await RolePermission.bulkCreate(newPermissions);
+  await sequelize.transaction(async (transaction: unknown) => {
+    await RolePermission.destroy({ where: { roleId }, transaction });
+    await RolePermission.bulkCreate(newPermissions, { transaction });
+  });
   return RolePermission.findAll({ where: { roleId } });
 };
 

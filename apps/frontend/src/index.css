@@ -11,44 +11,11 @@ html {
   -moz-osx-font-smoothing: grayscale;
 }
 
+/* Body colors, selection, scrollbars and focus rings come from the MUI theme
+   (MuiCssBaseline in src/theme/createAppTheme.ts) so every mode stays in sync. */
 body {
   margin: 0;
   font-family: 'Urbanist', -apple-system, BlinkMacSystemFont, sans-serif;
-  font-size: 16px;
-  line-height: 1.6;
-  color: #1f2937;
-  background-color: #f9fafb;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-  overflow-x: hidden;
-  -webkit-tap-highlight-color: transparent;
-}
-
-/* Selection styling */
-::selection {
-  background-color: rgba(0, 0, 0, 0.08);
-  color: #000000;
-}
-
-/* Scrollbar styling */
-::-webkit-scrollbar {
-  width: 8px;
-  height: 8px;
-}
-
-::-webkit-scrollbar-track {
-  background: #f3f4f6;
-  border-radius: 4px;
-}
-
-::-webkit-scrollbar-thumb {
-  background: #d1d5db;
-  border-radius: 4px;
-  transition: background 0.2s ease;
-}
-
-::-webkit-scrollbar-thumb:hover {
-  background: #9ca3af;
 }
 
 /* Smooth focus transitions */
@@ -56,14 +23,6 @@ body {
   outline: none;
 }
 
-/* Focus visible solo para navegación por teclado en elementos interactivos no-form.
-   Los inputs/selects/textareas usan sus propios estados de focus de MUI (sin contorno negro).
-   Los popovers/menus/dialogs (superficies flotantes) quedan excluidos: el outline global
-   de 2px negro se ve como un "border" indeseado dentro de los popups. */
-*:focus-visible:not(input):not(textarea):not(select):not([role="combobox"]):not(.MuiPopover-root *):not(.MuiMenu-root *):not(.MuiDialog-root *):not(.MuiModal-root *) {
-  outline: 2px solid #000000;
-  outline-offset: 2px;
-}
 
 /* Ensure adequate touch target sizes on mobile */
 @media (pointer: coarse) {
@@ -180,22 +139,4 @@ html, body {
   overflow-y: auto;
   overflow-x: hidden;
   -webkit-overflow-scrolling: touch;
-}
-
-/* Hide scrollbar but keep functionality */
-.scrollable-content::-webkit-scrollbar {
-  width: 6px;
-}
-
-.scrollable-content::-webkit-scrollbar-track {
-  background: transparent;
-}
-
-.scrollable-content::-webkit-scrollbar-thumb {
-  background: rgba(0, 0, 0, 0.2);
-  border-radius: 3px;
-}
-
-.scrollable-content::-webkit-scrollbar-thumb:hover {
-  background: rgba(0, 0, 0, 0.3);
 }

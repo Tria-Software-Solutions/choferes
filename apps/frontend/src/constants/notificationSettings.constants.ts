@@ -1,36 +1,23 @@
 // Notification settings — define the notification types a user can enable/disable.
 // Persisted per-user inside `user.settings.notifications` (JSONB merged by the backend).
-import {
-  Wallet,
-  Users,
-  CalendarDays,
-  Car,
-  Package,
-  UserCog,
-  Shield,
-  Clock,
-  DatabaseBackup,
-  Info,
-} from "lucide-react";
-import type { LucideIcon } from "lucide-react";
+import { IconCalendarTime, IconCalendarUser, IconInfoCircle, IconListCheck, IconParking, IconUserCog, IconUsers, IconWallet } from "@tabler/icons-react";
+import type { TablerIcon } from "@tabler/icons-react";
 
 export type NotificationSettingKey =
   | "payments"
+  | "tasks"
   | "employees"
   | "schedules"
   | "vehicles"
-  | "courier"
   | "users"
   | "roles"
-  | "hoursGeneration"
-  | "backups"
   | "system";
 
 export interface NotificationSettingItem {
   key: NotificationSettingKey;
   label: string;
   description: string;
-  icon: LucideIcon;
+  icon: TablerIcon;
   default: boolean;
 }
 
@@ -50,7 +37,20 @@ export const NOTIFICATION_SETTING_GROUPS: NotificationSettingGroup[] = [
         key: "payments",
         label: "Recordatorios de pago",
         description: "Aviso el 15 y el último día de cada mes para realizar los pagos de quincena.",
-        icon: Wallet,
+        icon: IconWallet,
+        default: true,
+      },
+    ],
+  },
+  {
+    id: "tasks",
+    title: "Tareas",
+    items: [
+      {
+        key: "tasks",
+        label: "Recordatorios de tareas",
+        description: "Aviso a la hora programada en cada recordatorio de tu lista de tareas.",
+        icon: IconListCheck,
         default: true,
       },
     ],
@@ -63,42 +63,35 @@ export const NOTIFICATION_SETTING_GROUPS: NotificationSettingGroup[] = [
         key: "employees",
         label: "Empleados",
         description: "Registro, edición y eliminación de empleados.",
-        icon: Users,
+        icon: IconUsers,
         default: true,
       },
       {
         key: "schedules",
         label: "Horarios",
         description: "Creación, edición y eliminación de horarios.",
-        icon: CalendarDays,
+        icon: IconCalendarTime,
         default: true,
       },
       {
         key: "vehicles",
         label: "Vehículos",
         description: "Registro, edición y eliminación de vehículos.",
-        icon: Car,
-        default: true,
-      },
-      {
-        key: "courier",
-        label: "Servicio de mensajería",
-        description: "Creación, edición y eliminación de servicios de courier.",
-        icon: Package,
+        icon: IconParking,
         default: true,
       },
       {
         key: "users",
         label: "Usuarios",
         description: "Registro, edición y eliminación de usuarios.",
-        icon: UserCog,
+        icon: IconUserCog,
         default: true,
       },
       {
         key: "roles",
         label: "Roles",
         description: "Creación, edición y eliminación de roles.",
-        icon: Shield,
+        icon: IconCalendarUser,
         default: true,
       },
     ],
@@ -108,24 +101,10 @@ export const NOTIFICATION_SETTING_GROUPS: NotificationSettingGroup[] = [
     title: "Sistema",
     items: [
       {
-        key: "hoursGeneration",
-        label: "Generación de horas",
-        description: "Éxito o error al generar horas automáticamente.",
-        icon: Clock,
-        default: true,
-      },
-      {
-        key: "backups",
-        label: "Copias de seguridad",
-        description: "Backup creado correctamente o con errores.",
-        icon: DatabaseBackup,
-        default: true,
-      },
-      {
         key: "system",
         label: "Avisos del sistema",
         description: "Mensajes generales y avisos de limpieza de datos.",
-        icon: Info,
+        icon: IconInfoCircle,
         default: true,
       },
     ],
@@ -134,14 +113,12 @@ export const NOTIFICATION_SETTING_GROUPS: NotificationSettingGroup[] = [
 
 export const NOTIFICATION_SETTING_DEFAULTS: Record<NotificationSettingKey, boolean> = {
   payments: true,
+  tasks: true,
   employees: true,
   schedules: true,
   vehicles: true,
-  courier: true,
   users: true,
   roles: true,
-  hoursGeneration: true,
-  backups: true,
   system: true,
 };
 
@@ -161,11 +138,8 @@ const SOURCE_TO_SETTING: Record<string, NotificationSettingKey> = {
   employee: "employees",
   schedule: "schedules",
   vehicle: "vehicles",
-  courier: "courier",
   user: "users",
   role: "roles",
-  hours: "hoursGeneration",
-  backup: "backups",
   "data-deletion": "system",
   system: "system",
   report: "system",
@@ -176,5 +150,6 @@ export const notificationSourceToSettingKey = (
 ): NotificationSettingKey | undefined => {
   if (!source) return undefined;
   if (source.startsWith("payment-")) return "payments";
+  if (source.startsWith("task-reminder:")) return "tasks";
   return SOURCE_TO_SETTING[source];
 };

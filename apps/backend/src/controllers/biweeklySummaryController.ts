@@ -2,6 +2,7 @@
 // Provides endpoints for CRUD operations and fetching summaries for employees
 import { Request, Response } from "express";
 import * as biweeklySummaryService from "../services/biweeklySummaryService";
+import { sendServerError } from "../utils/errors";
 
 // Get all biweekly summaries (paginated)
 export const getBiweeklySummaries = async (req: Request, res: Response) => {
@@ -11,7 +12,7 @@ export const getBiweeklySummaries = async (req: Request, res: Response) => {
     );
     return res.status(200).json(result);
   } catch (error) {
-    return res.status(500).json({ message: "Error fetching BiweeklySummaries", error });
+    return sendServerError(res, "Error fetching BiweeklySummaries", error);
   }
 };
 
@@ -29,7 +30,7 @@ export const getCurrentBiweeklySummary = async (req: Request, res: Response) => 
     }
     return res.status(404).json({ message: "BiweeklySummary not found" });
   } catch (error) {
-    return res.status(500).json({ message: "Error fetching BiweeklySummary", error });
+    return sendServerError(res, "Error fetching BiweeklySummary", error);
   }
 };
 
@@ -52,7 +53,7 @@ export const createBiweeklySummary = async (req: Request, res: Response) => {
         code: "FOREIGN_KEY_VIOLATION",
       });
     }
-    return res.status(500).json({ message: "Error creating BiweeklySummary", error });
+    return sendServerError(res, "Error creating BiweeklySummary", error);
   }
 };
 
@@ -66,7 +67,7 @@ export const updateBiweeklySummary = async (req: Request, res: Response) => {
     }
     return res.status(404).json({ message: "BiweeklySummary not found" });
   } catch (error) {
-    return res.status(500).json({ message: "Error updating BiweeklySummary", error });
+    return sendServerError(res, "Error updating BiweeklySummary", error);
   }
 };
 
@@ -80,6 +81,6 @@ export const deleteBiweeklySummary = async (req: Request, res: Response) => {
     }
     return res.status(404).json({ message: "BiweeklySummary not found" });
   } catch (error) {
-    return res.status(500).json({ message: "Error deleting BiweeklySummary", error });
+    return sendServerError(res, "Error deleting BiweeklySummary", error);
   }
 };

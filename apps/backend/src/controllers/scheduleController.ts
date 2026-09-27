@@ -2,6 +2,7 @@
 // Provides endpoints for CRUD operations on schedules
 import { Request, Response } from "express";
 import * as scheduleService from "../services/scheduleService";
+import { sendServerError } from "../utils/errors";
 
 // Get all schedules (paginated)
 export const getSchedules = async (req: Request, res: Response) => {
@@ -11,7 +12,7 @@ export const getSchedules = async (req: Request, res: Response) => {
     );
     return res.status(200).json(result);
   } catch (error) {
-    return res.status(500).json({ message: "Error fetching Schedules", error });
+    return sendServerError(res, "Error fetching Schedules", error);
   }
 };
 
@@ -25,7 +26,7 @@ export const getScheduleById = async (req: Request, res: Response) => {
     }
     return res.status(404).json({ message: "Schedule not found" });
   } catch (error) {
-    return res.status(500).json({ message: "Error fetching Schedule", error });
+    return sendServerError(res, "Error fetching Schedule", error);
   }
 };
 
@@ -35,7 +36,7 @@ export const createSchedule = async (req: Request, res: Response) => {
     const newSchedule = await scheduleService.createSchedule(req.body);
     return res.status(201).json(newSchedule);
   } catch (error) {
-    return res.status(500).json({ message: "Error creating Schedule", error });
+    return sendServerError(res, "Error creating Schedule", error);
   }
 };
 
@@ -49,7 +50,7 @@ export const updateSchedule = async (req: Request, res: Response) => {
     }
     return res.status(404).json({ message: "Schedule not found" });
   } catch (error) {
-    return res.status(500).json({ message: "Error updating Schedule", error });
+    return sendServerError(res, "Error updating Schedule", error);
   }
 };
 
@@ -63,6 +64,6 @@ export const deleteSchedule = async (req: Request, res: Response) => {
     }
     return res.status(404).json({ message: "Schedule not found" });
   } catch (error) {
-    return res.status(500).json({ message: "Error deleting Schedule", error });
+    return sendServerError(res, "Error deleting Schedule", error);
   }
 };

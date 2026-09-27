@@ -9,6 +9,7 @@ import {
   paymentUpdateRules,
   paymentQueryRules,
   paymentEmailRules,
+  paymentGenerateRules,
   biweekParams,
   validate,
 } from "../middleware/validation";
@@ -46,6 +47,14 @@ router.post(
   paymentRules,
   validate,
   paymentController.createPayment,
+);
+router.post(
+  "/generate",
+  authenticateToken,
+  requirePermission(PERMISSION_CODES.CREATE_PAYMENT),
+  paymentGenerateRules,
+  validate,
+  paymentController.generatePeriodPayments,
 );
 router.put(
   "/:id",
