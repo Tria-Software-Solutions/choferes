@@ -24,7 +24,7 @@ export const iconStyle = (theme: Theme) => ({
 // nativas del input numérico, que se veían toscas tanto en el modal como en la
 // edición inline. Compartida por AddScheduleForm y SchedulesPage.
 export const dayHoursInputSx = (theme: Theme, isFilled: boolean) => ({
-  width: 36,
+  width: 50,
   "& .MuiInputBase-root": {
     height: 30,
     borderRadius: "8px",

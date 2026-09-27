@@ -12,6 +12,8 @@ interface StickyDataGridProps<T extends GridValidRowModel> {
    * pierda el foco del texto a mitad de edición. Costo despreciable.
    */
   disableRowVirtualization?: boolean;
+  /** Altura de cada fila en píxeles. Útil aumentarla cuando hay una fila en edición. */
+  rowHeight?: number;
 }
 
 /**
@@ -25,6 +27,7 @@ function StickyDataGridComponent<T extends GridValidRowModel>({
   columns,
   getRowId,
   disableRowVirtualization = false,
+  rowHeight = 60,
 }: StickyDataGridProps<T>) {
   const theme = useTheme();
   const { colors, borders } = theme.tokens;
@@ -47,7 +50,7 @@ function StickyDataGridComponent<T extends GridValidRowModel>({
         // Virtualización habilitada por defecto: solo se renderizan las filas
         // visibles. Se desactiva mientras hay una fila en edición.
         disableVirtualization={disableRowVirtualization}
-        rowHeight={60}
+        rowHeight={rowHeight}
         columnHeaderHeight={42}
         sx={{
           height: flowLayout ? "auto" : "100%",

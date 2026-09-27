@@ -744,6 +744,7 @@ const shortNames: Record<string, string> = {
               columns={columns}
               getRowId={getRowId}
               disableRowVirtualization={editRowId !== null}
+              rowHeight={editRowId !== null ? 140 : 60}
             />
           ) : (
             <EmptyState
