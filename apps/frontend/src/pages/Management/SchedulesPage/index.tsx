@@ -722,18 +722,20 @@ const shortNames: Record<string, string> = {
                         </IconButton>
                       </Tooltip>
                     ) : (
-                      <Tooltip title="Se necesitan al menos 2 horarios para reordenar" arrow>
-                        <IconButton
-                          disabled
-                          size="medium"
-                          sx={{
-                            color: 'text.disabled',
-                            backgroundColor: theme.tokens.colors.hoverSoft,
-                          }}
-                        >
-                          <IconGripVertical size={20} />
-                        </IconButton>
-                      </Tooltip>
+                      <span>
+                        <Tooltip title="Se necesitan al menos 2 horarios para reordenar" arrow>
+                          <IconButton
+                            disabled
+                            size="medium"
+                            sx={{
+                              color: 'text.disabled',
+                              backgroundColor: theme.tokens.colors.hoverSoft,
+                            }}
+                          >
+                            <IconGripVertical size={20} />
+                          </IconButton>
+                        </Tooltip>
+                      </span>
                     )}
                   </span>
                 )}
