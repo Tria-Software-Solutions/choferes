@@ -30,7 +30,7 @@ export const getScheduleCellData = (
     .filter(
       (record) =>
         record.employeeId === employee.id &&
-        format(new Date(record.date), "yyyy-MM-dd") === formattedDate,
+        String(record.date).slice(0, 10) === formattedDate,
     )
     .sort((a, b) => b.id - a.id)[0];
   let options = getOptionsForDay(day, schedules);
