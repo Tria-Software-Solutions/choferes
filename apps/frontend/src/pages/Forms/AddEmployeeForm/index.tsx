@@ -42,7 +42,6 @@ interface AddEmployeeFormData {
   gender: string;
   contractStartDate: string;
   hourlyRate: string;
-  vacationDays: string;
 }
 
 interface AddEmployeeFormProps {
@@ -57,7 +56,6 @@ interface AddEmployeeFormProps {
     gender?: string | null;
     contractStartDate?: string | null;
     hourlyRate?: number | null;
-    vacationDays?: number | null;
   }) => void;
   onCancel?: () => void;
   isLoading?: boolean;
@@ -90,7 +88,6 @@ const AddEmployeeForm: React.FC<AddEmployeeFormProps> = ({
     gender: "",
     contractStartDate: todayStr,
     hourlyRate: "",
-    vacationDays: "",
   });
   const [errors, setErrors] = useState<Record<keyof AddEmployeeFormData, string>>({
     firstName: "",
@@ -103,7 +100,6 @@ const AddEmployeeForm: React.FC<AddEmployeeFormProps> = ({
     gender: "",
     contractStartDate: "",
     hourlyRate: "",
-    vacationDays: "",
   });
 
   
@@ -163,13 +159,6 @@ const AddEmployeeForm: React.FC<AddEmployeeFormProps> = ({
       return "";
     }
 
-    if (name === "vacationDays") {
-      if (!value.trim()) return "";
-      const num = Number(value);
-      if (!Number.isInteger(num) || num < 0) return "Días de vacaciones debe ser un entero ≥ 0";
-      return "";
-    }
-
     const nameRegex = /^[a-zA-ZáéíóúÁÉÍÓÚñÑüÜëË\s-]+$/;
 
     if (!value.trim()) {
@@ -210,8 +199,7 @@ const AddEmployeeForm: React.FC<AddEmployeeFormProps> = ({
       errors.primaryPhone === "" &&
       errors.secondaryPhone === "" &&
       errors.contractStartDate === "" &&
-      errors.hourlyRate === "" &&
-      errors.vacationDays === ""
+      errors.hourlyRate === ""
     );
   };
 
@@ -232,10 +220,6 @@ const AddEmployeeForm: React.FC<AddEmployeeFormProps> = ({
           formData.hourlyRate.trim() === ""
             ? null
             : Number(formData.hourlyRate),
-        vacationDays:
-          formData.vacationDays.trim() === ""
-            ? null
-            : Number(formData.vacationDays),
       });
     }
   };
@@ -253,7 +237,6 @@ const AddEmployeeForm: React.FC<AddEmployeeFormProps> = ({
       gender: "",
       contractStartDate: todayStr,
       hourlyRate: "",
-      vacationDays: "",
     });
     setErrors({
       firstName: "",
@@ -266,7 +249,6 @@ const AddEmployeeForm: React.FC<AddEmployeeFormProps> = ({
       gender: "",
       contractStartDate: "",
       hourlyRate: "",
-      vacationDays: "",
     });
   };
 
@@ -438,23 +420,6 @@ const AddEmployeeForm: React.FC<AddEmployeeFormProps> = ({
             sx={formControl(theme)}
             type="number"
             inputProps={{ step: "0.01", min: 0 }}
-          />
-        </Grid>
-
-        <Grid item xs={12} sm={6}>
-          <TextfieldComponent
-            placeholder={FORMS.ADD_EMPLOYEE.VACATION_DAYS_PLACEHOLDER}
-            label={FORMS.ADD_EMPLOYEE.VACATION_DAYS_LABEL}
-            variant="outlined"
-            fullWidth
-            value={formData.vacationDays}
-            onChange={(e) => handleFieldChange("vacationDays", e.target.value)}
-            error={errors.vacationDays !== ""}
-            helperText={errors.vacationDays}
-            icon={<IconUser style={iconStyle} />}
-            sx={formControl(theme)}
-            type="number"
-            inputProps={{ step: 1, min: 0 }}
           />
         </Grid>
 
