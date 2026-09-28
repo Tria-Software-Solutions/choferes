@@ -28,6 +28,9 @@ export interface Employee {
   terminationDate?: string | null;
   terminationReason?: string | null;
   terminationNotes?: string | null;
+  /** Fecha futura en que el sistema desactivará automáticamente al empleado, YYYY-MM-DD. */
+  scheduledTerminationDate?: string | null;
+  scheduledTerminationReason?: string | null;
   /** Puesto o cargo. */
   position?: string | null;
   /** Género del empleado ("Masculino" | "Femenino"). */

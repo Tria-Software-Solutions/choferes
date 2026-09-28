@@ -3,11 +3,13 @@
 // soon as it wakes up. Every job is idempotent and guarded against overlap.
 import { generateBiweeklyPayments } from "./paymentService";
 import { dispatchDueReminders } from "./taskService";
+import { processScheduledTerminations } from "./employeeService";
 import { getBiweekNumber } from "./summaryRecalculationService";
 import { localDateString, parseISODate } from "../utils/timezone";
 
 const PAYROLL_INTERVAL_MS = 30 * 60 * 1000;
 const REMINDER_INTERVAL_MS = 30 * 1000;
+const TERMINATION_INTERVAL_MS = 24 * 60 * 60 * 1000;
 
 const log = (...args: unknown[]) => {
   // eslint-disable-next-line no-console
@@ -61,6 +63,11 @@ export const runReminderJob = guarded("reminders", async () => {
   if (sent > 0) log(`${sent} recordatorio(s) enviados`);
 });
 
+export const runScheduledTerminationsJob = guarded("terminations", async () => {
+  const count = await processScheduledTerminations();
+  if (count > 0) log(`${count} empleado(s) procesados por finalización programada`);
+});
+
 let timers: Array<ReturnType<typeof setInterval>> = [];
 
 export const startSchedulers = (): void => {
@@ -69,12 +76,14 @@ export const startSchedulers = (): void => {
 
   runReminderJob();
   runPayrollJob();
+  runScheduledTerminationsJob();
   timers = [
     setInterval(runReminderJob, REMINDER_INTERVAL_MS),
     setInterval(runPayrollJob, PAYROLL_INTERVAL_MS),
+    setInterval(runScheduledTerminationsJob, TERMINATION_INTERVAL_MS),
   ];
   timers.forEach((timer) => timer.unref());
-  log("jobs iniciados (boletas cada 30 min, recordatorios cada 30 s)");
+  log("jobs iniciados (boletas cada 30 min, recordatorios cada 30 s, finalizaciones cada 24 h)");
 };
 
 export const stopSchedulers = (): void => {

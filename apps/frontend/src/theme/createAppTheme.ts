@@ -236,8 +236,9 @@ export const createAppTheme = (tokens: ThemeTokens) => {
             color: c.onPrimary,
             border: b.contained,
             boxShadow: `0 1px 2px ${shadow.button}`,
-            "&:hover": { backgroundColor: c.primaryHover, boxShadow: `0 1px 2px ${shadow.button}` },
-            "&:active": { backgroundColor: c.primaryActive },
+            "&:hover": { backgroundColor: c.primaryHover, color: c.onPrimary, boxShadow: `0 1px 2px ${shadow.button}` },
+            "&:active": { backgroundColor: c.primaryActive, color: c.onPrimary },
+            "&:focus-visible": { color: c.onPrimary },
           },
           contained: {
             "&.Mui-disabled": {

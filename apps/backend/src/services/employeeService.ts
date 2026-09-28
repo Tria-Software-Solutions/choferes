@@ -124,6 +124,8 @@ const EDITABLE_FIELDS = [
   "nationalId",
   "primaryPhone",
   "secondaryPhone",
+  "scheduledTerminationDate",
+  "scheduledTerminationReason",
 ] as const;
 
 const GENDERS = new Set(["Masculino", "Femenino"]);
@@ -187,6 +189,18 @@ export const updateEmployee = async (id: number, data: Record<string, unknown>) 
 
   if (clean.terminationDate !== undefined) {
     clean.isActive = !clean.terminationDate;
+    // When a real termination is set, clear any pending scheduled one.
+    if (clean.terminationDate) {
+      clean.scheduledTerminationDate = null;
+      clean.scheduledTerminationReason = null;
+    }
+  }
+  // Validate scheduled termination reason the same way as the regular one.
+  if (
+    clean.scheduledTerminationReason != null &&
+    !TERMINATION_REASONS.has(String(clean.scheduledTerminationReason))
+  ) {
+    clean.scheduledTerminationReason = null;
   }
 
   if (Object.keys(clean).length > 0) {
@@ -334,4 +348,30 @@ export const getEmployeesWithRelations = async (includeHoursWorked = false) => {
     ],
     attributes: ["id", "firstName", "lastName"],
   });
+};
+
+// Processes employees whose scheduledTerminationDate has arrived: sets them
+// as terminated and clears the scheduled fields. Called by the daily scheduler.
+export const processScheduledTerminations = async (): Promise<number> => {
+  const today = new Date().toISOString().slice(0, 10);
+  const due = await Employee.findAll({
+    where: {
+      scheduledTerminationDate: { $lte: today },
+      isActive: true,
+    } as Record<string, unknown>,
+  });
+  if (due.length === 0) return 0;
+  for (const employee of due) {
+    await Employee.update(
+      {
+        terminationDate: employee.scheduledTerminationDate,
+        terminationReason: employee.scheduledTerminationReason ?? "fin_contrato",
+        isActive: false,
+        scheduledTerminationDate: null,
+        scheduledTerminationReason: null,
+      },
+      { where: { id: employee.id } },
+    );
+  }
+  return due.length;
 };

@@ -38,6 +38,7 @@ import {
   isOverdue,
   LIST_COLORS,
   priorityColor,
+  TaskPermissions,
   todayISO,
 } from "../taskUtils";
 
@@ -50,6 +51,7 @@ interface TaskItemProps {
   onPatch: (id: number, input: TaskInput) => void;
   onDuplicate: (task: Task) => void;
   onDelete: (task: Task) => void;
+  can: TaskPermissions;
   /** Drag handle (sortable lists only). */
   dragHandle?: React.ReactNode;
 }
@@ -61,7 +63,8 @@ export const TaskCheckbox: React.FC<{
   onToggle: () => void;
   size?: number;
   label: string;
-}> = ({ checked, priority, onToggle, size = 20, label }) => {
+  disabled?: boolean;
+}> = ({ checked, priority, onToggle, size = 20, label, disabled = false }) => {
   const theme = useTheme();
   const { colors } = theme.tokens;
   const ring = priority > 0 ? priorityColor(priority, theme) : colors.textSubtle;
@@ -70,6 +73,7 @@ export const TaskCheckbox: React.FC<{
       role="checkbox"
       aria-checked={checked}
       aria-label={label}
+      disabled={disabled}
       onClick={(event) => {
         event.stopPropagation();
         onToggle();
@@ -126,6 +130,7 @@ export const TaskItem: React.FC<TaskItemProps> = ({
   onPatch,
   onDuplicate,
   onDelete,
+  can,
   dragHandle,
 }) => {
   const theme = useTheme();
@@ -243,6 +248,7 @@ export const TaskItem: React.FC<TaskItemProps> = ({
           checked={completed}
           priority={task.priority}
           label={completed ? "Marcar como pendiente" : "Marcar como completada"}
+          disabled={!can.edit}
           onToggle={() => onPatch(task.id, { completed: !completed })}
         />
       </Box>
@@ -278,25 +284,33 @@ export const TaskItem: React.FC<TaskItemProps> = ({
         )}
       </Box>
 
-      <Tooltip title={task.isImportant ? "Quitar de importantes" : "Marcar como importante"}>
-        <IconButton
-          size="small"
-          aria-label={task.isImportant ? "Quitar de importantes" : "Marcar como importante"}
-          aria-pressed={task.isImportant}
-          onClick={(event) => {
-            event.stopPropagation();
-            onPatch(task.id, { isImportant: !task.isImportant });
-          }}
-          sx={{
-            mt: -0.4,
-            color: task.isImportant ? colors.warning : colors.textSubtle,
-            opacity: task.isImportant ? 1 : { xs: 1, md: 0 },
-          }}
-          className={task.isImportant ? undefined : "task-hover"}
-        >
-          {task.isImportant ? <IconStarFilled size={17} /> : <IconStar size={17} />}
-        </IconButton>
-      </Tooltip>
+      {can.edit ? (
+        <Tooltip title={task.isImportant ? "Quitar de importantes" : "Marcar como importante"}>
+          <IconButton
+            size="small"
+            aria-label={task.isImportant ? "Quitar de importantes" : "Marcar como importante"}
+            aria-pressed={task.isImportant}
+            onClick={(event) => {
+              event.stopPropagation();
+              onPatch(task.id, { isImportant: !task.isImportant });
+            }}
+            sx={{
+              mt: -0.4,
+              color: task.isImportant ? colors.warning : colors.textSubtle,
+              opacity: task.isImportant ? 1 : { xs: 1, md: 0 },
+            }}
+            className={task.isImportant ? undefined : "task-hover"}
+          >
+            {task.isImportant ? <IconStarFilled size={17} /> : <IconStar size={17} />}
+          </IconButton>
+        </Tooltip>
+      ) : (
+        task.isImportant && (
+          <Box component="span" aria-label="Importante" sx={{ color: colors.warning, display: "flex", pt: 0.25 }}>
+            <IconStarFilled size={17} />
+          </Box>
+        )
+      )}
       <IconButton
         size="small"
         aria-label="Más acciones"
@@ -328,38 +342,44 @@ export const TaskItem: React.FC<TaskItemProps> = ({
           <ListItemIcon>
             <IconPencil size={17} />
           </ListItemIcon>
-          <ListItemText>Editar detalles</ListItemText>
+          <ListItemText>{can.edit ? "Editar detalles" : "Ver detalles"}</ListItemText>
         </MenuItem>
-        <MenuItem onClick={(event) => setMoveAnchor(event.currentTarget)}>
-          <ListItemIcon>
-            <IconArrowRight size={17} />
-          </ListItemIcon>
-          <ListItemText>Mover a…</ListItemText>
-        </MenuItem>
-        <MenuItem
-          onClick={() => {
-            closeMenus();
-            onDuplicate(task);
-          }}
-        >
-          <ListItemIcon>
-            <IconCopy size={17} />
-          </ListItemIcon>
-          <ListItemText>Duplicar</ListItemText>
-        </MenuItem>
-        <Divider />
-        <MenuItem
-          onClick={() => {
-            closeMenus();
-            onDelete(task);
-          }}
-          sx={{ color: colors.error }}
-        >
-          <ListItemIcon sx={{ color: "inherit" }}>
-            <IconTrash size={17} />
-          </ListItemIcon>
-          <ListItemText>Eliminar</ListItemText>
-        </MenuItem>
+        {can.edit && (
+          <MenuItem onClick={(event) => setMoveAnchor(event.currentTarget)}>
+            <ListItemIcon>
+              <IconArrowRight size={17} />
+            </ListItemIcon>
+            <ListItemText>Mover a…</ListItemText>
+          </MenuItem>
+        )}
+        {can.create && (
+          <MenuItem
+            onClick={() => {
+              closeMenus();
+              onDuplicate(task);
+            }}
+          >
+            <ListItemIcon>
+              <IconCopy size={17} />
+            </ListItemIcon>
+            <ListItemText>Duplicar</ListItemText>
+          </MenuItem>
+        )}
+        {can.delete && <Divider />}
+        {can.delete && (
+          <MenuItem
+            onClick={() => {
+              closeMenus();
+              onDelete(task);
+            }}
+            sx={{ color: colors.error }}
+          >
+            <ListItemIcon sx={{ color: "inherit" }}>
+              <IconTrash size={17} />
+            </ListItemIcon>
+            <ListItemText>Eliminar</ListItemText>
+          </MenuItem>
+        )}
       </Menu>
 
       <Menu

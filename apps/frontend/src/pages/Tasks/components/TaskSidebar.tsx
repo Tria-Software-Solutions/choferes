@@ -36,9 +36,12 @@ interface TaskSidebarProps {
   lists: TaskList[];
   search: string;
   onSearchChange: (value: string) => void;
-  onNewList: () => void;
-  onEditList: (list: TaskList) => void;
-  onDeleteList: (list: TaskList) => void;
+  /** Omitted when the user can't create lists (tasks:create). */
+  onNewList?: () => void;
+  /** Omitted without tasks:edit. */
+  onEditList?: (list: TaskList) => void;
+  /** Omitted without tasks:delete. */
+  onDeleteList?: (list: TaskList) => void;
 }
 
 const SMART_ICONS: Record<SmartView, React.ReactNode> = {
@@ -186,7 +189,7 @@ export const TaskSidebar: React.FC<TaskSidebarProps> = ({
               count={countOpen(key, tasks)}
               onClick={() => onViewChange(key)}
               trailing={
-                <IconButton
+                (onEditList || onDeleteList) && <IconButton
                   size="small"
                   className="row-trailing"
                   aria-label={`Opciones de la lista ${list.name}`}
@@ -199,7 +202,7 @@ export const TaskSidebar: React.FC<TaskSidebarProps> = ({
             />
           );
         })}
-        <ButtonBase
+        {onNewList && <ButtonBase
           onClick={onNewList}
           sx={{
             justifyContent: "flex-start",
@@ -215,11 +218,11 @@ export const TaskSidebar: React.FC<TaskSidebarProps> = ({
           }}
         >
           <IconPlus size={18} /> Nueva lista
-        </ButtonBase>
+        </ButtonBase>}
       </Box>
 
       <Menu anchorEl={menu?.el} open={Boolean(menu)} onClose={() => setMenu(null)}>
-        <MenuItem
+        {onEditList && <MenuItem
           onClick={() => {
             if (menu) onEditList(menu.list);
             setMenu(null);
@@ -229,8 +232,8 @@ export const TaskSidebar: React.FC<TaskSidebarProps> = ({
             <IconPencil size={17} />
           </ListItemIcon>
           <ListItemText>Renombrar o cambiar color</ListItemText>
-        </MenuItem>
-        <MenuItem
+        </MenuItem>}
+        {onDeleteList && <MenuItem
           onClick={() => {
             if (menu) onDeleteList(menu.list);
             setMenu(null);
@@ -241,7 +244,7 @@ export const TaskSidebar: React.FC<TaskSidebarProps> = ({
             <IconTrash size={17} />
           </ListItemIcon>
           <ListItemText>Eliminar lista</ListItemText>
-        </MenuItem>
+        </MenuItem>}
       </Menu>
     </Box>
   );

@@ -116,7 +116,7 @@ export const submitButton = (theme: Theme) => ({
   backgroundColor: theme.tokens.colors.primary,
   color: theme.tokens.colors.onPrimary,
   boxShadow: `0 1px 2px ${theme.tokens.shadows.button}`,
-  "&:hover": { backgroundColor: theme.tokens.colors.primaryHover },
+  "&:hover": { backgroundColor: theme.tokens.colors.primaryHover, color: theme.tokens.colors.onPrimary },
   "&.Mui-disabled": {
     backgroundColor: theme.tokens.colors.disabled,
     color: theme.tokens.colors.disabledText,
