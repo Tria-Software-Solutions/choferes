@@ -25,8 +25,13 @@ export const iconStyle = (theme: Theme) => ({
 // edición inline. Compartida por AddScheduleForm y SchedulesPage.
 export const dayHoursInputSx = (theme: Theme, isFilled: boolean) => ({
   width: 50,
+  minWidth: 50,
+  maxWidth: 50,
+  boxSizing: "border-box",
   "& .MuiInputBase-root": {
     height: 30,
+    minWidth: 50,
+    maxWidth: 50,
     borderRadius: "8px",
     backgroundColor: isFilled
       ? theme.tokens.colors.surface
