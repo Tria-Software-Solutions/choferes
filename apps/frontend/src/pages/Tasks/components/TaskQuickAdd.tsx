@@ -10,6 +10,7 @@ import {
   IconX,
 } from "@tabler/icons-react";
 import { TaskInput, TaskList, TaskPriority } from "../../../models/Task";
+import { useTimeFormat } from "../../../hooks/useTimeFormat";
 import {
   formatDueDate,
   formatReminder,
@@ -87,6 +88,7 @@ const Chip: React.FC<{
 export const TaskQuickAdd: React.FC<TaskQuickAddProps> = ({ view, lists, onAdd, autoFocus }) => {
   const theme = useTheme();
   const { colors, borders } = theme.tokens;
+  const { is24h } = useTimeFormat();
   const inputRef = useRef<HTMLInputElement>(null);
 
   const defaultDue = view === "today" ? todayISO() : null;
@@ -201,7 +203,7 @@ export const TaskQuickAdd: React.FC<TaskQuickAddProps> = ({ view, lists, onAdd, 
         />
         <Chip
           icon={<IconBell size={14} />}
-          label={remindAt ? formatReminder(remindAt) : "Recordatorio"}
+          label={remindAt ? formatReminder(remindAt, is24h) : "Recordatorio"}
           active={Boolean(remindAt)}
           onClick={(event) => setAnchor({ el: event.currentTarget, kind: "reminder" })}
           onClear={() => setRemindAt(null)}

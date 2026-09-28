@@ -96,6 +96,8 @@ export interface Employee {
   primaryPhone?: string | null;
   /** Teléfono secundario (opcional). Solo dígitos. */
   secondaryPhone?: string | null;
+  /** Horario asignado al empleado (FK → schedule.id). */
+  scheduleId?: number | null;
   /** Derivado de terminationDate por el servidor. */
   isActive?: boolean;
   createdAt?: string;

@@ -52,6 +52,8 @@ export class Payment extends Model {
 
   public hourlyRate?: number | null; // Rate used for the amounts (snapshot)
 
+  public createdBy?: number | null; // User who created/authorized the payment
+
   public createdAt!: Date; // Record creation timestamp
 
   public updatedAt!: Date; // Record update timestamp
@@ -162,6 +164,13 @@ Payment.init(
     hourlyRate: {
       type: DataTypes.DECIMAL(12, 2),
       allowNull: true,
+    },
+    createdBy: {
+      type: DataTypes.INTEGER,
+      allowNull: true,
+      references: { model: "users", key: "id" },
+      onDelete: "SET NULL",
+      onUpdate: "CASCADE",
     },
   },
   {

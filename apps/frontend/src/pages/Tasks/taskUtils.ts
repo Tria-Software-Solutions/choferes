@@ -49,21 +49,21 @@ const capitalize = (value: string) => value.charAt(0).toUpperCase() + value.slic
 export const formatLongDate = (value: string) =>
   capitalize(format(parseDay(value), "EEEE d 'de' MMMM", { locale: es }));
 
-export const formatReminder = (iso: string): string => {
+export const formatReminder = (iso: string, use24h = false): string => {
   const date = new Date(iso);
   if (!isValid(date)) return "";
   const day = toISODate(date);
-  const time = format(date, "h:mm a", { locale: es });
+  const time = format(date, use24h ? "HH:mm" : "h:mm a", { locale: es });
   if (day === todayISO()) return `Hoy, ${time}`;
   if (day === toISODate(addDays(new Date(), 1))) return `Mañana, ${time}`;
   return `${formatDueDate(day)}, ${time}`;
 };
 
-export const formatTime = (value: string) => {
+export const formatTime = (value: string, use24h = false) => {
   const [hours, minutes] = value.split(":").map(Number);
   const date = new Date();
   date.setHours(hours, minutes, 0, 0);
-  return format(date, "h:mm a", { locale: es });
+  return format(date, use24h ? "HH:mm" : "h:mm a", { locale: es });
 };
 
 export const isOverdue = (task: Task) => {

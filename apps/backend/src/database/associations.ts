@@ -60,6 +60,18 @@ Employee.hasMany(HoursWorked, {
   onDelete: "CASCADE",
 });
 
+// Employee <-> Schedule (Many-to-One: each employee has one assigned schedule)
+Employee.belongsTo(Schedule, {
+  foreignKey: "scheduleId",
+  as: "schedule",
+  onDelete: "SET NULL",
+});
+Schedule.hasMany(Employee, {
+  foreignKey: "scheduleId",
+  as: "employees",
+  onDelete: "SET NULL",
+});
+
 // Schedule <-> ScheduleDay (One-to-Many)
 ScheduleDay.belongsTo(Schedule, {
   foreignKey: "scheduleId",
@@ -80,6 +92,18 @@ HoursWorked.belongsTo(Schedule, {
 Schedule.hasMany(HoursWorked, {
   foreignKey: "scheduleId",
   onDelete: "CASCADE",
+});
+
+// Payment <-> User (creator/authorizer)
+Payment.belongsTo(User, {
+  foreignKey: "createdBy",
+  as: "createdByUser",
+  onDelete: "SET NULL",
+});
+User.hasMany(Payment, {
+  foreignKey: "createdBy",
+  as: "createdPayments",
+  onDelete: "SET NULL",
 });
 
 // Employee <-> Payment (One-to-Many)

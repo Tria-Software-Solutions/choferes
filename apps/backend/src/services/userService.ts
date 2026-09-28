@@ -19,6 +19,9 @@ import {
 // which always hash values before persisting them.
 const SAFE_ATTRS = { exclude: ["password", "temporalPassword"] };
 
+// Base where clause that excludes soft-deleted accounts from every listing query.
+const ACTIVE_WHERE = { deletedAt: null };
+
 // Fields whitelisted for the generic profile-update endpoint. mass assignment
 // of password/isActive/settings/temporalPassword is not allowed through it.
 const EDITABLE_FIELDS = ["firstName", "lastName", "username", "email", "avatar"];
@@ -143,39 +146,40 @@ export const verifyUserPassword = async (id: number, candidate: string): Promise
   return matchesAnyPassword(candidate, user);
 };
 
-// Fetches all users with their roles (paginated, searchable)
+// Fetches all users with their roles (paginated, searchable). Excludes soft-deleted accounts.
 export const getUsers = async (query: QueryParams) => {
   const params = getPaginationParams(query);
   const search = getSearchParam(query);
   const searchWhere = buildSearchWhere(search, ["firstName", "lastName", "username", "email"]);
 
   const options: Record<string, any> = {
-    where: searchWhere,
+    where: { ...ACTIVE_WHERE, ...searchWhere },
     attributes: SAFE_ATTRS,
     include: ROLES_INCLUDE,
   };
   return paginate<User>(User, options, params);
 };
 
-// Fetches a user by ID with their roles
+// Fetches a user by ID with their roles. Returns null for soft-deleted accounts.
 export const getUserById = async (id: number) =>
-  User.findByPk(id, {
+  User.findOne({
+    where: { id, ...ACTIVE_WHERE },
     attributes: SAFE_ATTRS,
     include: ROLES_INCLUDE,
   });
 
-// Fetches a user by email with their roles
+// Fetches a user by email with their roles. Returns null for soft-deleted accounts.
 export const getUserByEmail = async (email: string) =>
   User.findOne({
-    where: { email },
+    where: { email, ...ACTIVE_WHERE },
     attributes: SAFE_ATTRS,
     include: ROLES_INCLUDE,
   });
 
-// Fetches a user by username with their roles
+// Fetches a user by username with their roles. Returns null for soft-deleted accounts.
 export const getUserByUsername = async (username: string) =>
   User.findOne({
-    where: { username },
+    where: { username, ...ACTIVE_WHERE },
     attributes: SAFE_ATTRS,
     include: ROLES_INCLUDE,
   });
@@ -272,5 +276,8 @@ export const updateUserSettings = async (id: number, settings: Record<string, un
   });
 };
 
-// Deletes a user by ID
-export const deleteUser = async (id: number) => User.destroy({ where: { id } });
+// Soft-deletes a user: sets deletedAt + isActive=false.
+// Child records (tasks, notifications) are preserved for audit; the account
+// becomes invisible in all listings and auth is blocked via isActive.
+export const deleteUser = async (id: number) =>
+  User.update({ deletedAt: new Date(), isActive: false }, { where: { id } });

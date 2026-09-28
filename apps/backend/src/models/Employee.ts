@@ -1,6 +1,7 @@
 import { Model, DataTypes, Association } from "sequelize";
 import sequelize from "../config/database";
 import { EmployeeLicense } from "./EmployeeLicense";
+import { Schedule } from "./Schedule";
 import { User } from "./User";
 
 // Employee model definition for Sequelize ORM
@@ -43,9 +44,12 @@ export class Employee extends Model {
 
   public isActive!: boolean; // false once a termination date is registered
 
+  public scheduleId?: number | null; // Assigned schedule (FK → schedule.id, SET NULL on delete)
+
   public static associations: {
     licenses: Association<Employee, EmployeeLicense>;
     user: Association<Employee, User>;
+    schedule: Association<Employee, Schedule>;
   };
 }
 
@@ -128,6 +132,13 @@ Employee.init(
     scheduledTerminationReason: {
       type: DataTypes.STRING(30),
       allowNull: true,
+    },
+    scheduleId: {
+      type: DataTypes.INTEGER,
+      allowNull: true,
+      references: { model: "schedule", key: "id" },
+      onDelete: "SET NULL",
+      onUpdate: "CASCADE",
     },
   },
   {

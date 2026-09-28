@@ -9,7 +9,7 @@ export class HoursWorked extends Model {
 
   public employeeId!: number; // Reference to the employee
 
-  public date!: Date; // Date of the worked hours
+  public date!: string; // Calendar day (YYYY-MM-DD) of the worked hours
 
   public scheduleId!: number; // Reference to the schedule
 }
@@ -31,7 +31,7 @@ HoursWorked.init(
       onDelete: "CASCADE",
     },
     date: {
-      type: DataTypes.DATE,
+      type: DataTypes.DATEONLY,
       allowNull: false,
     },
     scheduleId: {

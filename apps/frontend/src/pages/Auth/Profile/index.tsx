@@ -24,7 +24,7 @@ import MANAGEMENT from "../../../constants/management.constants";
 import PERMISSIONS from "../../../constants/permissions.constants";
 import ManageUsers from "../../Dashboard/ManageUsers";
 import ManageRoles from "../../Dashboard/ManageRoles";
-import { IconApps, IconBell, IconCalendarUser, IconCamera, IconCheck, IconDeviceDesktop, IconEye, IconEyeOff, IconHelpCircle, IconInfoCircle, IconLoader2, IconLock, IconMail, IconMoon, IconPalette, IconPencil, IconRotate, IconShieldCheck, IconSun, IconUser, IconUserCircle, IconUsers, IconX } from "@tabler/icons-react";
+import { IconApps, IconBell, IconCalendarUser, IconCamera, IconCheck, IconClock, IconDeviceDesktop, IconEye, IconEyeOff, IconHelpCircle, IconInfoCircle, IconLoader2, IconLock, IconMail, IconMoon, IconPalette, IconPencil, IconRotate, IconShieldCheck, IconSun, IconUser, IconUserCircle, IconUsers, IconX } from "@tabler/icons-react";
 import { User } from "../../../models/User";
 import {
   validateName,
@@ -35,6 +35,7 @@ import {
 } from "../../../utils/userValidation";
 import TextfieldComponent from "../../../components/Textfield/Textfield.component";
 import { useThemeMode } from "../../../context/ThemeContext";
+import { useTimeFormat } from "../../../hooks/useTimeFormat";
 import { getAvatarSrc, resizeAvatarFile } from "../../../utils/avatar";
 import UserAvatar from "../../../components/UserAvatar/UserAvatar.component";
 import { updateUserAvatar, removeUserAvatar } from "../../../store/slices/userSlice";
@@ -140,6 +141,7 @@ const Profile: React.FC = () => {
     mode: ThemeMode;
     setMode: (mode: ThemeMode) => void;
   };
+  const { clockFormat, setClockFormat } = useTimeFormat();
 
   const [activeTab, setActiveTab] = useState<TabId>("personal");
   const [editFields, setEditFields] = useState({
@@ -1181,7 +1183,7 @@ const Profile: React.FC = () => {
               <PanelHeader
                 icon={<IconPalette />}
                 title="Apariencia"
-                description="Elige el tema de la aplicación."
+                description="Elige el tema y el formato de hora de la aplicación."
               />
 
               {/* Theme Segmented Toggle */}
@@ -1239,6 +1241,28 @@ const Profile: React.FC = () => {
                       ? "Tema Claro: interfaz luminosa."
                       : "Tema Oscuro: interfaz oscura."}
                 </Typography>
+              </Box>
+
+              {/* Clock format toggle */}
+              <Box sx={{ display: "flex", alignItems: "center", justifyContent: "space-between", mt: 2.5, pt: 2.5, borderTop: `1px solid ${theme.tokens.colors.borderDivider}` }}>
+                <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+                  <IconClock size={18} style={{ color: theme.tokens.colors.textMuted }} />
+                  <Box>
+                    <Typography variant="body2" sx={{ fontWeight: 600 }}>Formato de hora</Typography>
+                    <Typography variant="caption" sx={{ color: "text.secondary" }}>
+                      {clockFormat === "24h" ? "Formato 24 horas (ej. 14:30)" : "Formato 12 horas (ej. 2:30 p. m.)"}
+                    </Typography>
+                  </Box>
+                </Box>
+                <SegmentedToggle
+                  value={clockFormat}
+                  onChange={(v) => setClockFormat(v as "12h" | "24h")}
+                  options={[
+                    { value: "12h", label: "12 h" },
+                    { value: "24h", label: "24 h" },
+                  ]}
+                  size="small"
+                />
               </Box>
 </Paper>
           )}

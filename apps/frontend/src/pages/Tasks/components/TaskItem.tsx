@@ -30,6 +30,7 @@ import {
   IconTrash,
 } from "@tabler/icons-react";
 import { Task, TaskInput, TaskList } from "../../../models/Task";
+import { useTimeFormat } from "../../../hooks/useTimeFormat";
 import {
   formatDueDate,
   formatReminder,
@@ -135,6 +136,7 @@ export const TaskItem: React.FC<TaskItemProps> = ({
 }) => {
   const theme = useTheme();
   const { colors } = theme.tokens;
+  const { is24h } = useTimeFormat();
   const [menuAnchor, setMenuAnchor] = useState<HTMLElement | null>(null);
   const [moveAnchor, setMoveAnchor] = useState<HTMLElement | null>(null);
 
@@ -173,7 +175,7 @@ export const TaskItem: React.FC<TaskItemProps> = ({
         color={completed ? undefined : overdue ? colors.error : dueToday ? colors.accent : undefined}
       >
         {formatDueDate(task.dueDate)}
-        {task.dueTime && `, ${formatTime(task.dueTime)}`}
+        {task.dueTime && `, ${formatTime(task.dueTime, is24h)}`}
       </Meta>,
     );
   }
@@ -184,7 +186,7 @@ export const TaskItem: React.FC<TaskItemProps> = ({
         icon={task.reminderSentAt ? <IconBellCheck size={13} /> : <IconBell size={13} />}
         title={task.reminderSentAt ? "Recordatorio enviado" : "Recordatorio"}
       >
-        {formatReminder(task.remindAt)}
+        {formatReminder(task.remindAt, is24h)}
       </Meta>,
     );
   }
