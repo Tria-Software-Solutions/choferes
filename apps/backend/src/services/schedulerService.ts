@@ -1,19 +1,16 @@
-// In-process background jobs. They also run once at startup, so work missed
-// while the server was asleep (e.g. a free-tier instance) is caught up as
-// soon as it wakes up. Every job is idempotent and guarded against overlap.
-import { generateBiweeklyPayments } from "./paymentService";
-import { dispatchDueReminders } from "./taskService";
-import { processScheduledTerminations } from "./employeeService";
-import { getBiweekNumber } from "./summaryRecalculationService";
-import { localDateString, parseISODate } from "../utils/timezone";
-
-const PAYROLL_INTERVAL_MS = 30 * 60 * 1000;
-const REMINDER_INTERVAL_MS = 5 * 60 * 1000;  // 5 min
-const TERMINATION_INTERVAL_MS = 24 * 60 * 60 * 1000;
+// In-process background jobs with Costa Rica timezone.
+// They run once at startup (to catch up if server was asleep) and then
+// on a cron schedule using America/Costa_Rica timezone.
+import cron, { ScheduledTask } from 'node-cron';
+import { generateBiweeklyPayments } from './paymentService';
+import { dispatchDueReminders } from './taskService';
+import { processScheduledTerminations } from './employeeService';
+import { getBiweekNumber } from './summaryRecalculationService';
+import { localDateString, parseISODate } from '../utils/timezone';
 
 const log = (...args: unknown[]) => {
   // eslint-disable-next-line no-console
-  console.error("[scheduler]", ...args);
+  console.error('[scheduler]', ...args);
 };
 
 const guarded = (name: string, job: () => Promise<void>) => {
@@ -44,9 +41,8 @@ export const currentAndPreviousBiweeks = (now: Date = new Date()) => {
 
 // Keeps the pay slips of the running quincena filled (and those of the one
 // that just closed, in case hours were corrected before paying).
-export const runPayrollJob = guarded("payroll", async () => {
+export const runPayrollJob = guarded('payroll', async () => {
   const { current, previous } = currentAndPreviousBiweeks();
-  /* eslint-disable no-await-in-loop, no-restricted-syntax */
   for (const period of [previous, current]) {
     const result = await generateBiweeklyPayments(period.year, period.biweekNumber);
     if (result.created || result.refreshed) {
@@ -55,38 +51,48 @@ export const runPayrollJob = guarded("payroll", async () => {
       );
     }
   }
-  /* eslint-enable no-await-in-loop, no-restricted-syntax */
 });
 
-export const runReminderJob = guarded("reminders", async () => {
+export const runReminderJob = guarded('reminders', async () => {
   const sent = await dispatchDueReminders();
   if (sent > 0) log(`${sent} recordatorio(s) enviados`);
 });
 
-export const runScheduledTerminationsJob = guarded("terminations", async () => {
+export const runScheduledTerminationsJob = guarded('terminations', async () => {
   const count = await processScheduledTerminations();
   if (count > 0) log(`${count} empleado(s) procesados por finalización programada`);
 });
 
-let timers: Array<ReturnType<typeof setInterval>> = [];
+let scheduledJobs: ScheduledTask[] = [];
+
+// Read cron expressions and timezone from env with sensible defaults for Costa Rica
+const TZ = process.env.SCHEDULER_TZ || 'America/Costa_Rica';
+const PAYROLL_CRON = process.env.PAYROLL_SCHEDULE || '0 2 * * *';       // daily 02:00 CR
+const REMINDER_CRON = process.env.REMINDER_SCHEDULE || '*/5 * * * *';  // every 5 min
+const TERMINATION_CRON = process.env.TERMINATION_SCHEDULE || '0 3 * * *'; // daily 03:00 CR
 
 export const startSchedulers = (): void => {
-  if (process.env.NODE_ENV === "test" || process.env.DISABLE_SCHEDULERS === "true") return;
-  if (timers.length > 0) return;
+  if (process.env.NODE_ENV === 'test' || process.env.DISABLE_SCHEDULERS === 'true') return;
+  if (scheduledJobs.length > 0) return;
 
+  // Run once at startup (catches up if server was asleep)
   runReminderJob();
   runPayrollJob();
   runScheduledTerminationsJob();
-  timers = [
-    setInterval(runReminderJob, REMINDER_INTERVAL_MS),
-    setInterval(runPayrollJob, PAYROLL_INTERVAL_MS),
-    setInterval(runScheduledTerminationsJob, TERMINATION_INTERVAL_MS),
+
+  // Schedule with Costa Rica timezone
+  scheduledJobs = [
+    cron.schedule(REMINDER_CRON, guarded('reminders', runReminderJob), { timezone: 'America/Costa_Rica' }),
+    cron.schedule(PAYROLL_CRON, guarded('payroll', runPayrollJob), { timezone: 'America/Costa_Rica' }),
+    cron.schedule(TERMINATION_CRON, guarded('terminations', runScheduledTerminationsJob), { timezone: 'America/Costa_Rica' }),
   ];
-  timers.forEach((timer) => timer.unref());
-  log("jobs iniciados (boletas cada 30 min, recordatorios cada 30 s, finalizaciones cada 24 h)");
+
+  log(
+    `jobs iniciados [TZ=America/Costa_Rica]: payroll ${PAYROLL_CRON}, reminders ${REMINDER_CRON}, terminations ${TERMINATION_CRON}`,
+  );
 };
 
 export const stopSchedulers = (): void => {
-  timers.forEach((timer) => clearInterval(timer));
-  timers = [];
+  scheduledJobs.forEach((job) => job.stop());
+  scheduledJobs = [];
 };
