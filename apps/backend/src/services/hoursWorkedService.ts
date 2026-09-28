@@ -2,6 +2,14 @@
 import { HoursWorked } from "../models/HoursWorked";
 import { Employee } from "../models/Employee";
 import { parseCalendarDate } from "./summaryRecalculationService";
+
+// Returns a YYYY-MM-DD string from a Date (local calendar day).
+const toDateStr = (date: Date): string => {
+  const y = date.getFullYear();
+  const m = String(date.getMonth() + 1).padStart(2, "0");
+  const d = String(date.getDate()).padStart(2, "0");
+  return `${y}-${m}-${d}`;
+};
 import { paginate, getPaginationParams, getSearchParam, QueryParams } from "../utils/pagination";
 
 export const getHoursWorked = async (query: QueryParams) => {
@@ -17,11 +25,7 @@ export const getHoursWorked = async (query: QueryParams) => {
   const whereClause: Record<string, any> = {};
   if (query.employeeId) whereClause.employeeId = parseInt(query.employeeId, 10);
   if (dateFrom && !Number.isNaN(dateFrom.getTime()) && dateTo && !Number.isNaN(dateTo.getTime())) {
-    const start = new Date(dateFrom);
-    start.setHours(0, 0, 0, 0);
-    const end = new Date(dateTo);
-    end.setHours(23, 59, 59, 999);
-    whereClause.date = { $between: [start, end] };
+    whereClause.date = { $between: [toDateStr(dateFrom), toDateStr(dateTo)] };
   }
   const includeWhere: Record<string, any> | undefined = search
     ? {
@@ -61,49 +65,17 @@ export const getHoursWorkedByEmployee = async (employeeId: number) =>
     ],
   });
 
-export const getHoursWorkedByDate = async (date: Date) => {
-  const startOfDay = new Date(date);
-  startOfDay.setHours(0, 0, 0, 0);
-
-  const endOfDay = new Date(date);
-  endOfDay.setHours(23, 59, 59, 999);
-
-  return HoursWorked.findAll({
-    where: {
-      date: {
-        $between: [startOfDay, endOfDay],
-      },
-    },
-    include: [
-      {
-        model: Employee,
-      },
-    ],
+export const getHoursWorkedByDate = async (date: Date) =>
+  HoursWorked.findAll({
+    where: { date: toDateStr(date) },
+    include: [{ model: Employee }],
   });
-};
 
 export const getHoursWorkedByDateRange = async (startDate: Date, endDate: Date) =>
   HoursWorked.findAll({
-    where: {
-      date: {
-        $between: [startDate, endDate],
-      },
-    },
-    include: [
-      {
-        model: Employee,
-      },
-    ],
+    where: { date: { $between: [toDateStr(startDate), toDateStr(endDate)] } },
+    include: [{ model: Employee }],
   });
-
-// Returns the inclusive day range covering the calendar day of `date` (server-local).
-const getDayRange = (date: Date): { dayStart: Date; dayEnd: Date } => {
-  const dayStart = new Date(date);
-  dayStart.setHours(0, 0, 0, 0);
-  const dayEnd = new Date(dayStart);
-  dayEnd.setHours(23, 59, 59, 999);
-  return { dayStart, dayEnd };
-};
 
 const isUniqueConstraintError = (error: unknown): boolean =>
   typeof error === "object" &&
@@ -116,27 +88,25 @@ const isUniqueConstraintError = (error: unknown): boolean =>
 // race), so instead of failing we update the existing record — this keeps the
 // DB constraint and the UI in sync.
 export const createHoursWorked = async (data: Omit<HoursWorked, "id">) => {
-  const { dayStart, dayEnd } = getDayRange(new Date(data.date));
+  // date is DATEONLY (YYYY-MM-DD string); use exact equality — no timestamp range needed.
+  const dateStr = typeof data.date === "string" ? data.date : toDateStr(data.date as unknown as Date);
 
   const findExisting = () =>
     HoursWorked.findOne({
-      where: {
-        employeeId: data.employeeId,
-        date: { $between: [dayStart, dayEnd] },
-      },
+      where: { employeeId: data.employeeId, date: dateStr },
       order: [["id", "DESC"]],
     });
 
   const existing = await findExisting();
 
   if (existing) {
-    await existing.update({ scheduleId: data.scheduleId, date: data.date });
+    await existing.update({ scheduleId: data.scheduleId, date: dateStr });
     await existing.reload();
     return existing;
   }
 
   try {
-    const newHoursWorked = await HoursWorked.create(data);
+    const newHoursWorked = await HoursWorked.create({ ...data, date: dateStr });
     await newHoursWorked.reload();
     return newHoursWorked;
   } catch (error) {
@@ -145,7 +115,7 @@ export const createHoursWorked = async (data: Omit<HoursWorked, "id">) => {
     if (isUniqueConstraintError(error)) {
       const winner = await findExisting();
       if (winner) {
-        await winner.update({ scheduleId: data.scheduleId, date: data.date });
+        await winner.update({ scheduleId: data.scheduleId, date: dateStr });
         await winner.reload();
         return winner;
       }

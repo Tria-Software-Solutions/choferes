@@ -132,16 +132,24 @@ const getHoursForDay = (
 };
 
 type HoursRow = {
-  date: Date;
+  date: string; // DATEONLY: YYYY-MM-DD
   employeeId?: number;
   schedule?: (Schedule & { scheduleDays?: ScheduleDay[] }) | null;
 };
 
-const hoursInRange = (rows: HoursRow[], start: Date, end: Date): HoursRow[] =>
-  rows.filter((row) => {
-    const t = new Date(row.date).getTime();
-    return t >= start.getTime() && t <= end.getTime();
-  });
+// ISO date string from a local-calendar Date (avoids UTC-midnight shift).
+const toDateStr = (date: Date): string => {
+  const y = date.getFullYear();
+  const m = String(date.getMonth() + 1).padStart(2, "0");
+  const d = String(date.getDate()).padStart(2, "0");
+  return `${y}-${m}-${d}`;
+};
+
+const hoursInRange = (rows: HoursRow[], start: Date, end: Date): HoursRow[] => {
+  const startStr = toDateStr(start);
+  const endStr = toDateStr(end);
+  return rows.filter((row) => row.date >= startStr && row.date <= endStr);
+};
 
 // Sequelize plucks a belongsTo association under the model name by default
 // ("Schedule", capital S) unless an alias is configured — normalize it.
@@ -159,7 +167,7 @@ export const loadEmployeeHours = async (
 ): Promise<HoursRow[]> => {
   const where: Record<string, any> = { employeeId };
   if (start && end) {
-    where.date = { $between: [start, end] };
+    where.date = { $between: [toDateStr(start), toDateStr(end)] };
   }
 
   const rows = await HoursWorked.findAll({
@@ -177,7 +185,7 @@ export const loadEmployeeHours = async (
 
 export const sumHours = (rows: HoursRow[]): number =>
   rows.reduce((total, row) => {
-    const dayName = DAY_NAME_BY_INDEX(new Date(row.date));
+    const dayName = DAY_NAME_BY_INDEX(parseCalendarDate(row.date));
     return total + getHoursForDay(row.schedule ?? null, dayName);
   }, 0);
 
@@ -354,7 +362,7 @@ export const recalculateSummariesForEmployee = async (
   }
 
   const rows = await loadEmployeeHours(employeeId);
-  const dates = rows.map((row) => new Date(row.date));
+  const dates = rows.map((row) => parseCalendarDate(row.date));
   return recalculateFromRows(employeeId, rows, dates);
 };
 
@@ -371,7 +379,7 @@ export const recalculateCurrentPeriodsForAllEmployees = async (): Promise<{
   const { start, end } = getMonthRange(today);
 
   const rows = await HoursWorked.findAll({
-    where: { date: { $between: [start, end] } },
+    where: { date: { $between: [toDateStr(start), toDateStr(end)] } },
     include: [
       {
         model: Schedule,
@@ -396,7 +404,7 @@ export const recalculateCurrentPeriodsForAllEmployees = async (): Promise<{
 
   const allCounts = await Promise.all(
     employeesWithHours.map(async ({ employeeId, employeeRows }) => {
-      const dates = employeeRows.map((row) => new Date(row.date));
+      const dates = employeeRows.map((row) => parseCalendarDate(row.date));
       return recalculateFromRows(employeeId, employeeRows, dates);
     }),
   );

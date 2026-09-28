@@ -30,6 +30,7 @@ import {
 import { format } from "date-fns";
 import { es } from "date-fns/locale";
 import { Task, TaskInput, TaskList, TaskRecurrence } from "../../../models/Task";
+import { useTimeFormat } from "../../../hooks/useTimeFormat";
 import {
   formatDueDate,
   formatReminder,
@@ -119,6 +120,7 @@ export const TaskDetailPanel: React.FC<TaskDetailPanelProps> = ({
   const readOnly = !can.edit;
   const theme = useTheme();
   const { colors, borders } = theme.tokens;
+  const { is24h } = useTimeFormat();
   const [title, setTitle] = useState(task.title);
   const [notes, setNotes] = useState(task.notes ?? "");
   const [newStep, setNewStep] = useState("");
@@ -169,7 +171,7 @@ export const TaskDetailPanel: React.FC<TaskDetailPanelProps> = ({
   const list = task.listId ? lists.find((item) => item.id === task.listId) : null;
   const recurrenceLabel = RECURRENCE_OPTIONS.find((option) => option.value === task.recurrence)?.label;
   const dueLabel = task.dueDate
-    ? `${formatDueDate(task.dueDate)}${task.dueTime ? `, ${formatTime(task.dueTime)}` : ""}`
+    ? `${formatDueDate(task.dueDate)}${task.dueTime ? `, ${formatTime(task.dueTime, is24h)}` : ""}`
     : undefined;
 
   return (
@@ -328,7 +330,7 @@ export const TaskDetailPanel: React.FC<TaskDetailPanelProps> = ({
             disabled={readOnly}
             icon={task.reminderSentAt ? <IconBellCheck size={18} /> : <IconBell size={18} />}
             label={task.reminderSentAt ? "Recordatorio enviado" : "Recordarme"}
-            value={task.remindAt ? formatReminder(task.remindAt) : undefined}
+            value={task.remindAt ? formatReminder(task.remindAt, is24h) : undefined}
             onClick={(event) => setAnchor({ el: event.currentTarget, kind: "reminder" })}
             onClear={() => onPatch(task.id, { remindAt: null })}
           />
@@ -398,7 +400,7 @@ export const TaskDetailPanel: React.FC<TaskDetailPanelProps> = ({
       >
         <Typography variant="caption" sx={{ flex: 1, textAlign: "center" }}>
           {task.completedAt
-            ? `Completada el ${format(new Date(task.completedAt), "EEE d 'de' MMM, h:mm a", { locale: es })}`
+            ? `Completada el ${format(new Date(task.completedAt), is24h ? "EEE d 'de' MMM, HH:mm" : "EEE d 'de' MMM, h:mm a", { locale: es })}`
             : `Creada el ${format(new Date(task.createdAt), "EEE d 'de' MMM", { locale: es })}`}
         </Typography>
         {can.delete && <Tooltip title="Eliminar tarea">

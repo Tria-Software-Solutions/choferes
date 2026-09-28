@@ -30,6 +30,9 @@ export class User extends Model {
   /** Employee (Planilla) linked to this user, if any. */
   public employeeId?: number | null;
 
+  /** Soft-delete timestamp. NULL = active account; set = account deleted. */
+  public deletedAt?: Date | null;
+
   public static associations: {
     roles: Association<User, Role>; // Association with roles
     employee: Association<User, Employee>;
@@ -91,6 +94,10 @@ User.init(
       references: { model: "employees", key: "id" },
       onDelete: "SET NULL",
       onUpdate: "CASCADE",
+    },
+    deletedAt: {
+      type: DataTypes.DATE,
+      allowNull: true,
     },
   },
   {

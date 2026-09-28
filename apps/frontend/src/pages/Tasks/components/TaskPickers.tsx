@@ -7,9 +7,9 @@ import {
   ListItemText,
   Menu,
   MenuItem,
-  TextField,
   useTheme,
 } from "@mui/material";
+import { useTimeFormat } from "../../../hooks/useTimeFormat";
 import {
   IconBell,
   IconCalendarDue,
@@ -21,16 +21,21 @@ import {
   IconSunrise,
   IconX,
 } from "@tabler/icons-react";
+import { DatePicker } from "@mui/x-date-pickers/DatePicker";
+import { TimePicker } from "@mui/x-date-pickers/TimePicker";
+import { DateTimePicker } from "@mui/x-date-pickers/DateTimePicker";
+import { LocalizationProvider } from "@mui/x-date-pickers";
+import { AdapterDateFns } from "@mui/x-date-pickers/AdapterDateFns";
+import { es } from "date-fns/locale";
+import { format, isValid, parseISO } from "date-fns";
 import { TaskList, TaskPriority } from "../../../models/Task";
 import {
   dueDateShortcuts,
-  fromDateTimeLocal,
   INBOX_LABEL,
   LIST_COLORS,
   PRIORITY_OPTIONS,
   priorityColor,
   reminderShortcuts,
-  toDateTimeLocal,
 } from "../taskUtils";
 
 interface MenuBaseProps {
@@ -49,6 +54,7 @@ export const DueDateMenu: React.FC<
     onChange: (dueDate: string | null, dueTime?: string | null) => void;
   }
 > = ({ anchorEl, onClose, dueDate, dueTime = null, withTime = false, onChange }) => {
+  const { is24h } = useTimeFormat();
   const [customDate, setCustomDate] = useState(dueDate ?? "");
   const [customTime, setCustomTime] = useState(dueTime ?? "");
   useEffect(() => {
@@ -58,74 +64,81 @@ export const DueDateMenu: React.FC<
     }
   }, [anchorEl, dueDate, dueTime]);
 
+  const dateValue = customDate ? parseISO(customDate) : null;
+  const timeValue = customTime ? new Date(`1970-01-01T${customTime}:00`) : null;
+
   return (
-    <Menu anchorEl={anchorEl} open={Boolean(anchorEl)} onClose={onClose} onClick={(event) => event.stopPropagation()}>
-      {dueDateShortcuts().map((option, index) => (
-        <MenuItem
-          key={option.label}
-          selected={dueDate === option.value}
-          onClick={() => {
-            onChange(option.value, withTime ? dueTime : undefined);
-            onClose();
-          }}
+    <LocalizationProvider dateAdapter={AdapterDateFns} adapterLocale={es}>
+      <Menu anchorEl={anchorEl} open={Boolean(anchorEl)} onClose={onClose} onClick={(event) => event.stopPropagation()}>
+        {dueDateShortcuts().map((option, index) => (
+          <MenuItem
+            key={option.label}
+            selected={dueDate === option.value}
+            onClick={() => {
+              onChange(option.value, withTime ? dueTime : undefined);
+              onClose();
+            }}
+          >
+            <ListItemIcon>{SHORTCUT_ICONS[index]}</ListItemIcon>
+            <ListItemText>{option.label}</ListItemText>
+          </MenuItem>
+        ))}
+        <Divider />
+        <Box
+          sx={{ px: 2, py: 1, display: "flex", flexDirection: "column", gap: 1, width: 260 }}
+          onKeyDown={(event) => event.stopPropagation()}
         >
-          <ListItemIcon>{SHORTCUT_ICONS[index]}</ListItemIcon>
-          <ListItemText>{option.label}</ListItemText>
-        </MenuItem>
-      ))}
-      <Divider />
-      <Box
-        sx={{ px: 2, py: 1, display: "flex", flexDirection: "column", gap: 1, width: 260 }}
-        onKeyDown={(event) => event.stopPropagation()}
-      >
-        <TextField
-          type="date"
-          label="Elegir fecha"
-          size="small"
-          value={customDate}
-          onChange={(event) => setCustomDate(event.target.value)}
-          InputLabelProps={{ shrink: true }}
-          fullWidth
-        />
-        {withTime && (
-          <TextField
-            type="time"
-            label="Hora (opcional)"
-            size="small"
-            value={customTime}
-            onChange={(event) => setCustomTime(event.target.value)}
-            InputLabelProps={{ shrink: true }}
-            fullWidth
+          <DatePicker
+            label="Elegir fecha"
+            value={dateValue}
+            onChange={(date) =>
+              setCustomDate(date && isValid(date) ? format(date, "yyyy-MM-dd") : "")
+            }
+            format="d MMM yyyy"
+            slots={{ toolbar: () => null }}
+            slotProps={{ textField: { size: "small", fullWidth: true } }}
           />
-        )}
-        <Button
-          variant="contained"
-          size="small"
-          disabled={!customDate}
-          onClick={() => {
-            onChange(customDate, withTime ? customTime || null : undefined);
-            onClose();
-          }}
-        >
-          Guardar
-        </Button>
-      </Box>
-      {dueDate && [
-        <Divider key="d" />,
-        <MenuItem
-          key="clear"
-          onClick={() => {
-            onChange(null, withTime ? null : undefined);
-            onClose();
-          }}
-        >
-          <ListItemIcon>
-            <IconX size={17} />
-          </ListItemIcon>
-          <ListItemText>Quitar fecha</ListItemText>
-        </MenuItem>,
-      ]}
-    </Menu>
+          {withTime && (
+            <TimePicker
+              label="Hora (opcional)"
+              value={timeValue}
+              onChange={(date) =>
+                setCustomTime(date && isValid(date) ? format(date, "HH:mm") : "")
+              }
+              ampm={!is24h}
+              slots={{ toolbar: () => null }}
+              slotProps={{ textField: { size: "small", fullWidth: true } }}
+            />
+          )}
+          <Button
+            variant="contained"
+            size="small"
+            disabled={!customDate}
+            onClick={() => {
+              onChange(customDate, withTime ? customTime || null : undefined);
+              onClose();
+            }}
+          >
+            Guardar
+          </Button>
+        </Box>
+        {dueDate && [
+          <Divider key="d" />,
+          <MenuItem
+            key="clear"
+            onClick={() => {
+              onChange(null, withTime ? null : undefined);
+              onClose();
+            }}
+          >
+            <ListItemIcon>
+              <IconX size={17} />
+            </ListItemIcon>
+            <ListItemText>Quitar fecha</ListItemText>
+          </MenuItem>,
+        ]}
+      </Menu>
+    </LocalizationProvider>
   );
 };
 
@@ -133,69 +146,77 @@ export const DueDateMenu: React.FC<
 export const ReminderMenu: React.FC<
   MenuBaseProps & { remindAt: string | null; onChange: (remindAt: string | null) => void }
 > = ({ anchorEl, onClose, remindAt, onChange }) => {
-  const [custom, setCustom] = useState(toDateTimeLocal(remindAt));
+  const { is24h } = useTimeFormat();
+  const [customValue, setCustomValue] = useState<Date | null>(remindAt ? new Date(remindAt) : null);
   useEffect(() => {
-    if (anchorEl) setCustom(toDateTimeLocal(remindAt));
+    if (anchorEl) setCustomValue(remindAt ? new Date(remindAt) : null);
   }, [anchorEl, remindAt]);
 
+  const isPast = !customValue || !isValid(customValue) || customValue.getTime() <= Date.now();
+
   return (
-    <Menu anchorEl={anchorEl} open={Boolean(anchorEl)} onClose={onClose} onClick={(event) => event.stopPropagation()}>
-      {reminderShortcuts().map((option) => (
-        <MenuItem
-          key={option.label}
-          onClick={() => {
-            onChange(option.value.toISOString());
-            onClose();
-          }}
+    <LocalizationProvider dateAdapter={AdapterDateFns} adapterLocale={es}>
+      <Menu anchorEl={anchorEl} open={Boolean(anchorEl)} onClose={onClose} onClick={(event) => event.stopPropagation()}>
+        {reminderShortcuts().map((option) => (
+          <MenuItem
+            key={option.label}
+            onClick={() => {
+              onChange(option.value.toISOString());
+              onClose();
+            }}
+          >
+            <ListItemIcon>
+              <IconBell size={17} />
+            </ListItemIcon>
+            <ListItemText>{option.label}</ListItemText>
+          </MenuItem>
+        ))}
+        <Divider />
+        <Box
+          sx={{ px: 2, py: 1, display: "flex", flexDirection: "column", gap: 1, width: 260 }}
+          onKeyDown={(event) => event.stopPropagation()}
         >
-          <ListItemIcon>
-            <IconBell size={17} />
-          </ListItemIcon>
-          <ListItemText>{option.label}</ListItemText>
-        </MenuItem>
-      ))}
-      <Divider />
-      <Box
-        sx={{ px: 2, py: 1, display: "flex", flexDirection: "column", gap: 1, width: 260 }}
-        onKeyDown={(event) => event.stopPropagation()}
-      >
-        <TextField
-          type="datetime-local"
-          label="Elegir fecha y hora"
-          size="small"
-          value={custom}
-          onChange={(event) => setCustom(event.target.value)}
-          InputLabelProps={{ shrink: true }}
-          fullWidth
-        />
-        <Button
-          variant="contained"
-          size="small"
-          disabled={!custom || new Date(custom).getTime() <= Date.now()}
-          onClick={() => {
-            onChange(fromDateTimeLocal(custom));
-            onClose();
-          }}
-        >
-          Programar recordatorio
-        </Button>
-      </Box>
-      {remindAt && [
-        <Divider key="d" />,
-        <MenuItem
-          key="clear"
-          onClick={() => {
-            onChange(null);
-            onClose();
-          }}
-        >
-          <ListItemIcon>
-            <IconX size={17} />
-          </ListItemIcon>
-          <ListItemText>Quitar recordatorio</ListItemText>
-        </MenuItem>,
-      ]}
-    </Menu>
+          <DateTimePicker
+            label="Elegir fecha y hora"
+            value={customValue}
+            onChange={(date) => setCustomValue(date && isValid(date) ? date : null)}
+            format={is24h ? "d MMM yyyy HH:mm" : "d MMM yyyy h:mm a"}
+            ampm={!is24h}
+            disablePast
+            slots={{ toolbar: () => null }}
+            slotProps={{ textField: { size: "small", fullWidth: true } }}
+          />
+          <Button
+            variant="contained"
+            size="small"
+            disabled={isPast}
+            onClick={() => {
+              if (customValue && isValid(customValue)) {
+                onChange(customValue.toISOString());
+              }
+              onClose();
+            }}
+          >
+            Programar recordatorio
+          </Button>
+        </Box>
+        {remindAt && [
+          <Divider key="d" />,
+          <MenuItem
+            key="clear"
+            onClick={() => {
+              onChange(null);
+              onClose();
+            }}
+          >
+            <ListItemIcon>
+              <IconX size={17} />
+            </ListItemIcon>
+            <ListItemText>Quitar recordatorio</ListItemText>
+          </MenuItem>,
+        ]}
+      </Menu>
+    </LocalizationProvider>
   );
 };
 

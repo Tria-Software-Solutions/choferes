@@ -215,7 +215,7 @@ const SchedulesPage: React.FC = () => {
   };
 
   // Handle editing of a schedule
-  const handleEdit = (schedule: Schedule) => {
+  const handleEdit = useCallback((schedule: Schedule) => {
     const dayHours: Record<string, string> = {};
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const scheduleDays = (schedule as any).scheduleDays;
@@ -231,16 +231,16 @@ const SchedulesPage: React.FC = () => {
       hours: schedule.hours.toString(),
     });
     setDayHoursEditing(dayHours);
-  };
+  }, []);
 
   // Cancel editing
-  const handleCancel = () => {
+  const handleCancel = useCallback(() => {
     setEditRowId(null);
     setDayHoursEditing({});
-  };
+  }, []);
 
   // Handle update of a schedule
-  const handleUpdate = async (id: number) => {
+  const handleUpdate = useCallback(async (id: number) => {
     try {
       const defaultHours = parseInt(editFields.hours, 10);
       const scheduleDays = buildScheduleDays(editFields.days, isNaN(defaultHours) ? 0 : defaultHours, dayHoursEditing);
@@ -268,13 +268,13 @@ const SchedulesPage: React.FC = () => {
         duration: 5000,
       });
     }
-  };
+  }, [editFields, dayHoursEditing, dispatch, handleCancel, showNotification, createScheduleNotification]);
 
   // Open/close delete confirmation dialog
-  const handleOpenDeleteDialog = (id: number) => {
+  const handleOpenDeleteDialog = useCallback((id: number) => {
     setOpenDeleteDialog(true);
     setScheduleToDelete(id);
-  };
+  }, []);
 
   const handleCloseDeleteDialog = () => {
     setOpenDeleteDialog(false);
@@ -340,12 +340,16 @@ const SchedulesPage: React.FC = () => {
   const exportData = useMemo(
     () =>
       filteredSchedules.map((s) => {
-        // Build per-day hours string
+        // Build per-day hours string, ordered Mon-Sun
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const scheduleDays = (s as any).scheduleDays;
         let hoursDisplay = String(s.hours);
         if (scheduleDays && Array.isArray(scheduleDays) && scheduleDays.length > 0) {
-          hoursDisplay = scheduleDays
+          const dayOrder = ["monday", "tuesday", "wednesday", "thursday", "friday", "saturday", "sunday"];
+          const sorted = [...scheduleDays].sort(
+            (a: any, b: any) => dayOrder.indexOf(a.day) - dayOrder.indexOf(b.day),
+          );
+          hoursDisplay = sorted
             // eslint-disable-next-line @typescript-eslint/no-explicit-any
             .map((sd: any) => `${translateDayOptionsToSpanish(sd.day)}: ${sd.hours}h`)
             .join(', ');
@@ -355,13 +359,6 @@ const SchedulesPage: React.FC = () => {
           Nombre: s.label,
           Días: Array.isArray(s.days) ? s.days.map(translateDayOptionsToSpanish).join(', ') : translateDayOptionsToSpanish(s.days),
           Horas: hoursDisplay,
-          Agregado: s.createdAt
-            ? capitalizeFirstLetter(
-                format(new Date(s.createdAt), "EEEE dd 'de' MMMM 'de' yyyy", {
-                  locale: es,
-                })
-              )
-            : "",
           Actualizado: s.updatedAt
             ? capitalizeFirstLetter(
                 format(new Date(s.updatedAt), "EEEE dd 'de' MMMM 'de' yyyy", {
@@ -375,16 +372,13 @@ const SchedulesPage: React.FC = () => {
   );
 
   const exportOptions = useMemo(() => {
-    // Excel y PDF comparten las mismas columnas: "Días" y "Horas" se fusionan
-    // en "Días y Horas" y se omite "Actualizado". Horas ya incluye cada día
-    // con su hora ("lunes: 8h, martes: 8h"), así que se usa ese detalle como
-    // contenido de la columna fusionada.
-    const exportHeaders = ["Nombre", "Días y Horas", "Agregado"];
+    // Export columns: Nombre, Días y Horas (ordered Mon-Sun)
+    const exportHeaders = ["Nombre", "Días y Horas"];
     const exportRows = exportData.map((s) => {
-      const { Días, Horas, Actualizado: _omit, ...rest } = s;
+      const { Actualizado: _omit, ...rest } = s;
       return {
         ...rest,
-        "Días y Horas": Horas || Días,
+        "Días y Horas": s.Horas || s.Días,
       };
     });
     return createExportOptions({
