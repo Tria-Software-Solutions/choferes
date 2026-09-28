@@ -268,7 +268,7 @@ const SchedulesPage: React.FC = () => {
         duration: 5000,
       });
     }
-  }, [editFields, dayHoursEditing, dispatch, handleCancel, showNotification, createScheduleNotification]);
+  }, [editFields, dayHoursEditing, dispatch, handleCancel, showNotification]);
 
   // Open/close delete confirmation dialog
   const handleOpenDeleteDialog = useCallback((id: number) => {
@@ -342,16 +342,16 @@ const SchedulesPage: React.FC = () => {
       filteredSchedules.map((s) => {
         // Build per-day hours string, ordered Mon-Sun
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        const scheduleDays = (s as any).scheduleDays;
+        const scheduleDays: Array<{ day: string; hours: number }> | undefined = s.scheduleDays;
         let hoursDisplay = String(s.hours);
         if (scheduleDays && Array.isArray(scheduleDays) && scheduleDays.length > 0) {
           const dayOrder = ["monday", "tuesday", "wednesday", "thursday", "friday", "saturday", "sunday"];
           const sorted = [...scheduleDays].sort(
-            (a: any, b: any) => dayOrder.indexOf(a.day) - dayOrder.indexOf(b.day),
+            (a, b) => dayOrder.indexOf(a.day) - dayOrder.indexOf(b.day),
           );
           hoursDisplay = sorted
             // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            .map((sd: any) => `${translateDayOptionsToSpanish(sd.day)}: ${sd.hours}h`)
+            .map((sd) => `${translateDayOptionsToSpanish(sd.day)}: ${sd.hours}h`)
             .join(', ');
         }
 
