@@ -136,8 +136,8 @@ export const buildPaymentSlipHtml = (input: PaymentSlipEmailInput): string => {
  * provider rejects the send.
  */
 export const sendPaymentSlipEmail = async (input: PaymentSlipEmailInput): Promise<void> => {
+  const from = resolveFrom();
   const client = getClient();
-  const from = process.env.EMAIL_FROM || "onboarding@resend.dev";
 
   const subject = `Comprobante de pago · ${formatBoletaPeriod(input.periodEnd)} · ${input.employeeName}`;
 
@@ -160,6 +160,37 @@ export const sendPaymentSlipEmail = async (input: PaymentSlipEmailInput): Promis
   if (error) {
     throw new ServiceError(502, `No se pudo enviar el correo: ${error.message}`);
   }
+};
+
+// Resend's onboarding address only delivers to the account that owns the API
+// key, so silently falling back to it in production makes every send fail with
+// a 403 that looks like a provider outage. Fail fast instead, and keep the
+// onboarding address only for local development.
+const RESEND_TEST_FROM = "onboarding@resend.dev";
+
+const resolveFrom = (): string => {
+  const from = process.env.EMAIL_FROM;
+
+  if (!from) {
+    if (process.env.NODE_ENV === "production") {
+      throw new ServiceError(
+        503,
+        "Servicio de correo no configurado: falta EMAIL_FROM en el entorno",
+      );
+    }
+    return RESEND_TEST_FROM;
+  }
+
+  // Catches a common misconfiguration (a bare domain or a display name without
+  // an address), which Resend rejects with an opaque 422.
+  if (!from.includes("@")) {
+    throw new ServiceError(
+      503,
+      `EMAIL_FROM inválido: se esperaba una dirección de correo y se recibió "${from}"`,
+    );
+  }
+
+  return from;
 };
 
 // Exposed for tests: resets the cached client.
