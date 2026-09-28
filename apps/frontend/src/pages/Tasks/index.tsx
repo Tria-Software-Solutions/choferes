@@ -54,6 +54,8 @@ import DialogComponent from "../../components/Dialog/Dialog.component";
 import { Task, TaskList } from "../../models/Task";
 import { TASK_REMINDER_EVENT } from "../../context/NotificationContext";
 import { useTasks } from "./useTasks";
+import { useAuthContext } from "../../context/AuthContext";
+import PERMISSIONS from "../../constants/permissions.constants";
 import {
   formatLongDate,
   groupCompletedTasks,
@@ -65,6 +67,7 @@ import {
   SORT_OPTIONS,
   sortTasks,
   TaskGroup,
+  TaskPermissions,
   TaskSort,
   TaskView,
   tasksOfView,
@@ -160,6 +163,15 @@ const TasksPage: React.FC = () => {
   const isDesktop = useMediaQuery(theme.breakpoints.up("md"));
   const store = useTasks();
   const { tasks, lists } = store;
+  const { userPermissions } = useAuthContext();
+  const can: TaskPermissions = useMemo(
+    () => ({
+      create: userPermissions.includes(PERMISSIONS.CREATE_TASK),
+      edit: userPermissions.includes(PERMISSIONS.EDIT_TASK),
+      delete: userPermissions.includes(PERMISSIONS.DELETE_TASK),
+    }),
+    [userPermissions],
+  );
   const [searchParams, setSearchParams] = useSearchParams();
 
   const [view, setViewState] = useState<TaskView>(() => readPref<TaskView>(VIEW_KEY, "today"));
@@ -235,7 +247,7 @@ const TasksPage: React.FC = () => {
   const selectedTask = tasks.find((task) => task.id === selectedId) ?? null;
   const searching = search.trim().length > 0;
   const listView = isListView(view);
-  const sortable = listView && sort === "manual" && !searching;
+  const sortable = listView && sort === "manual" && !searching && can.edit;
 
   const scoped = useMemo(() => tasksOfView(view, tasks), [view, tasks]);
   const openGroups: TaskGroup[] = useMemo(() => {
@@ -300,6 +312,7 @@ const TasksPage: React.FC = () => {
       onPatch={(id, input) => void store.patchTask(id, input)}
       onDuplicate={(item) => void store.duplicateTask(item)}
       onDelete={setDeleteTarget}
+      can={can}
       dragHandle={handle}
     />
   );
@@ -361,9 +374,9 @@ const TasksPage: React.FC = () => {
       lists={lists}
       search={search}
       onSearchChange={setSearch}
-      onNewList={() => setListDialog({ open: true, list: null })}
-      onEditList={(list) => setListDialog({ open: true, list })}
-      onDeleteList={setListToDelete}
+      onNewList={can.create ? () => setListDialog({ open: true, list: null }) : undefined}
+      onEditList={can.edit ? (list) => setListDialog({ open: true, list }) : undefined}
+      onDeleteList={can.delete ? setListToDelete : undefined}
     />
   );
 
@@ -374,6 +387,7 @@ const TasksPage: React.FC = () => {
       onPatch={(id, input) => void store.patchTask(id, input)}
       onDelete={setDeleteTarget}
       onClose={closeDetail}
+      can={can}
     />
   );
 
@@ -482,7 +496,7 @@ const TasksPage: React.FC = () => {
                     </IconButton>
                   </Tooltip>
                 )}
-                {view === "completed" && scoped.length > 0 && (
+                {view === "completed" && scoped.length > 0 && can.delete && (
                   <Button
                     variant="text"
                     size="small"
@@ -495,7 +509,7 @@ const TasksPage: React.FC = () => {
                 )}
               </Box>
 
-              {!searching && view !== "completed" && (
+              {!searching && view !== "completed" && can.create && (
                 <Box ref={quickAddRef} sx={{ px: { xs: 1.5, sm: 3 }, pb: 1.5 }}>
                   <TaskQuickAdd view={view} lists={lists} onAdd={store.addTask} autoFocus={isDesktop} />
                 </Box>
@@ -546,7 +560,7 @@ const TasksPage: React.FC = () => {
                         {view === "today" ? "Completadas hoy" : "Completadas"} ({completedInView.length})
                       </ButtonBase>
                       <Box sx={{ flex: 1 }} />
-                      {listView && showCompleted && (
+                      {listView && showCompleted && can.delete && (
                         <Button
                           size="small"
                           variant="text"

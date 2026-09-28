@@ -65,6 +65,31 @@ import { format } from "date-fns";
 import { es } from "date-fns/locale";
 import { capitalizeFirstLetter } from "../../../utils/string";
 
+const getInitialRowsPerPage = () => {
+  if (typeof window !== "undefined") {
+    const maxHeight = window.innerHeight * 0.6;
+    const headHeight = 56;
+    const paginationHeight = 64;
+    const extra = 24;
+    const availableHeight = maxHeight - headHeight - paginationHeight - extra;
+    const rowHeight = 48;
+    const rows = Math.floor(availableHeight / rowHeight);
+    return Math.max(3, Math.min(100, rows));
+  }
+  return 25;
+};
+
+const daysOfWeek = ["monday", "tuesday", "wednesday", "thursday", "friday", "saturday", "sunday"];
+const shortNames: Record<string, string> = {
+  monday: "L",
+  tuesday: "M",
+  wednesday: "X",
+  thursday: "J",
+  friday: "V",
+  saturday: "S",
+  sunday: "D",
+};
+
 // Schedules management page component
 const SchedulesPage: React.FC = () => {
   const dispatch = useDispatch<AppDispatch>();
@@ -97,24 +122,6 @@ const SchedulesPage: React.FC = () => {
   const isSmallScreen = useMediaQuery(theme.breakpoints.down("sm"));
   const location = useLocation();
 
-const getInitialRowsPerPage = () => {
-  if (typeof window !== "undefined") {
-    const maxHeight = window.innerHeight * 0.6;
-    const headHeight = 56;
-    const paginationHeight = 64;
-    const extra = 24;
-    const availableHeight = maxHeight - headHeight - paginationHeight - extra;
-    const rowHeight = 48;
-    let rows = Math.floor(availableHeight / rowHeight);
-    return Math.max(3, Math.min(100, rows));
-  }
-  return 25;
-};
-
-const daysOfWeek = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'];
-const shortNames: Record<string, string> = {
-  monday: 'L', tuesday: 'M', wednesday: 'M', thursday: 'J', friday: 'V', saturday: 'S', sunday: 'D',
-};
 
   const { search, setSearch } =
     useTablePreferences("schedules", getInitialRowsPerPage);
@@ -722,20 +729,20 @@ const shortNames: Record<string, string> = {
                         </IconButton>
                       </Tooltip>
                     ) : (
-                      <span>
-                        <Tooltip title="Se necesitan al menos 2 horarios para reordenar" arrow>
+                      <Tooltip title="Se necesitan al menos 2 horarios para reordenar" arrow>
+                        <span>
                           <IconButton
                             disabled
                             size="medium"
                             sx={{
-                              color: 'text.disabled',
+                              color: "text.disabled",
                               backgroundColor: theme.tokens.colors.hoverSoft,
                             }}
                           >
                             <IconGripVertical size={20} />
                           </IconButton>
-                        </Tooltip>
-                      </span>
+                        </span>
+                      </Tooltip>
                     )}
                   </span>
                 )}

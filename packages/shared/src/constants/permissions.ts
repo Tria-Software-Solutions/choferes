@@ -299,6 +299,10 @@ export const DEFAULT_ROLE_PERMISSIONS: Readonly<Record<string, readonly string[]
     "disciplinary:view",
     "disciplinary:create",
     "disciplinary:edit",
+    "tasks:view",
+    "tasks:create",
+    "tasks:edit",
+    "tasks:delete",
   ],
   Supervisor: [
     "roles:view",
@@ -314,8 +318,12 @@ export const DEFAULT_ROLE_PERMISSIONS: Readonly<Record<string, readonly string[]
     "schedules:export:pdf",
     "licenses:view",
     "disciplinary:view",
+    "tasks:view",
+    "tasks:create",
+    "tasks:edit",
+    "tasks:delete",
   ],
-  Usuario: ["roles:view"],
+  Usuario: ["roles:view", "tasks:view", "tasks:create", "tasks:edit", "tasks:delete"],
 };
 
 /** Seeded role names, in priority order. */

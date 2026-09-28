@@ -30,7 +30,9 @@ export type EmployeeBiweeklyHours = {
 };
 
 /** Quincena que contiene hoy (24 quincenas al año, dos por mes). */
-export const getCurrentBiweek = (now: Date = new Date()): { biweekNumber: number; year: number } => ({
+export const getCurrentBiweek = (
+  now: Date = new Date(),
+): { biweekNumber: number; year: number } => ({
   biweekNumber: getBiweekNumber(now),
   year: now.getFullYear(),
 });

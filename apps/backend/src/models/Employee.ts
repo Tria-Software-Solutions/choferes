@@ -27,6 +27,10 @@ export class Employee extends Model {
 
   public terminationNotes?: string | null; // Free-form termination notes
 
+  public scheduledTerminationDate?: string | null; // Future date when the employee will be deactivated automatically
+
+  public scheduledTerminationReason?: string | null; // Reason to carry over when the scheduled date is processed
+
   public position?: string | null; // Job position / cargo
 
   public gender?: string | null; // "Masculino" | "Femenino"
@@ -116,6 +120,14 @@ Employee.init(
       type: DataTypes.BOOLEAN,
       allowNull: false,
       defaultValue: true,
+    },
+    scheduledTerminationDate: {
+      type: DataTypes.DATEONLY,
+      allowNull: true,
+    },
+    scheduledTerminationReason: {
+      type: DataTypes.STRING(30),
+      allowNull: true,
     },
   },
   {

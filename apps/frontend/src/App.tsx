@@ -87,6 +87,7 @@ const AppBarWrapper: React.FC = () => {
       label: APPBAR_MENU.TASKS,
       icon: <NavIcon label={APPBAR_MENU.TASKS} />,
       path: ROUTES.TASKS,
+      permission: PERMISSIONS.VIEW_TASKS,
     },
     {
       label: APPBAR_MENU.PROFILE,
@@ -101,6 +102,7 @@ const AppBarWrapper: React.FC = () => {
     [APPBAR_MENU.ROLES]: PERMISSIONS.VIEW_ROLES,
     [APPBAR_MENU.VEHICLES]: PERMISSIONS.VIEW_VEHICLES,
     [APPBAR_MENU.DASHBOARD]: PERMISSIONS.VIEW_ADMIN,
+    [APPBAR_MENU.TASKS]: PERMISSIONS.VIEW_TASKS,
   };
 
   const filteredLinks = links.filter((link) => {

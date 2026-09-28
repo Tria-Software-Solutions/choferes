@@ -3,6 +3,7 @@ import { useDispatch } from "react-redux";
 import {
   Box,
   Button,
+  Chip,
   Divider,
   FormControlLabel,
   Grid,
@@ -13,7 +14,7 @@ import {
   useMediaQuery,
   useTheme,
 } from "@mui/material";
-import { IconBeach, IconBriefcase, IconCalendarCheck, IconCalendarX, IconCash, IconCheck, IconClockHour3, IconFileText, IconId, IconInfoCircle, IconKey, IconLoader2, IconMail, IconPencil, IconPhone, IconRotate, IconUser, IconUserCircle } from "@tabler/icons-react";
+import { IconAlertTriangle, IconBeach, IconBriefcase, IconCalendarCheck, IconCalendarClock, IconCalendarX, IconCash, IconCheck, IconClockHour3, IconFileText, IconId, IconInfoCircle, IconKey, IconLoader2, IconMail, IconPencil, IconPhone, IconRotate, IconUser, IconUserCircle, IconX } from "@tabler/icons-react";
 import { format } from "date-fns";
 import { es } from "date-fns/locale";
 import { DatePicker } from "@mui/x-date-pickers/DatePicker";
@@ -60,17 +61,44 @@ interface PersonalInfoTabProps {
 // "Editar" de su encabezado.
 type EditSection = "personal" | "contract" | "payment";
 
-const infoRowStyles = {
-  display: "flex",
-  alignItems: "center",
-  gap: 1.5,
-  py: 0.75,
-};
+// Celda de dato etiquetado para la vista de solo lectura.
+const InfoCell: React.FC<{
+  label: string;
+  icon?: React.ReactNode;
+  children: React.ReactNode;
+  span?: number;
+}> = ({ label, icon, children, span }) => (
+  <Box sx={{ gridColumn: span ? `span ${span}` : undefined }}>
+    <Box sx={{ display: "flex", alignItems: "center", gap: 0.5, mb: 0.5 }}>
+      {icon && (
+        <Box sx={{ display: "flex", color: "text.disabled", lineHeight: 1 }}>{icon}</Box>
+      )}
+      <Typography
+        variant="caption"
+        sx={{ color: "text.secondary", fontWeight: 600, letterSpacing: "0.04em", textTransform: "uppercase", fontSize: "0.6875rem" }}
+      >
+        {label}
+      </Typography>
+    </Box>
+    <Typography component="div" variant="body2" sx={{ fontWeight: 600, color: "text.primary" }}>
+      {children}
+    </Typography>
+  </Box>
+);
 
-const infoIconStyles = {
-  color: "text.secondary",
-  flexShrink: 0,
-} as const;
+// Grid de dos columnas que colapsa a una en móvil.
+const InfoGrid: React.FC<{ children: React.ReactNode }> = ({ children }) => (
+  <Box
+    sx={{
+      display: "grid",
+      gridTemplateColumns: { xs: "1fr", sm: "1fr 1fr" },
+      gap: { xs: 2, sm: 2.5 },
+      pt: 1,
+    }}
+  >
+    {children}
+  </Box>
+);
 
 const formatDate = (value?: string | null): string => {
   if (!value) return "—";
@@ -103,6 +131,8 @@ const buildFormFromEmployee = (employee: Employee) => ({
   terminationDate: employee.terminationDate ?? "",
   terminationReason: employee.terminationReason ?? "",
   terminationNotes: employee.terminationNotes ?? "",
+  scheduledTerminationDate: employee.scheduledTerminationDate ?? "",
+  scheduledTerminationReason: employee.scheduledTerminationReason ?? "",
   hourlyRate: employee.hourlyRate != null ? String(employee.hourlyRate) : "",
   vacationDays: employee.vacationDays != null ? String(employee.vacationDays) : "",
 });
@@ -246,6 +276,8 @@ const PersonalInfoTab: React.FC<PersonalInfoTabProps> = ({
       (employee.terminationReason ?? null) ||
     (hasTermination ? form.terminationNotes.trim() || null : null) !==
       (employee.terminationNotes ?? null) ||
+    (form.scheduledTerminationDate || null) !== (employee.scheduledTerminationDate ?? null) ||
+    (form.scheduledTerminationReason || null) !== (employee.scheduledTerminationReason ?? null) ||
     (rateValue ?? null) !== (employee.hourlyRate ?? null) ||
     (daysValue ?? null) !== (employee.vacationDays ?? null);
 
@@ -272,6 +304,8 @@ const PersonalInfoTab: React.FC<PersonalInfoTabProps> = ({
             terminationDate: hasTermination ? form.terminationDate || null : null,
             terminationReason: hasTermination ? form.terminationReason || null : null,
             terminationNotes: hasTermination ? form.terminationNotes.trim() || null : null,
+            scheduledTerminationDate: !hasTermination ? form.scheduledTerminationDate || null : null,
+            scheduledTerminationReason: !hasTermination ? form.scheduledTerminationReason || null : null,
             hourlyRate: rateValue,
             vacationDays: daysValue,
           } as Partial<Employee>,
@@ -317,9 +351,6 @@ const PersonalInfoTab: React.FC<PersonalInfoTabProps> = ({
 
   // La fila muestra una fecha, así que un calendario comunica mejor el
   // "desde el ..." que un icono de usuario.
-  const statusIcon = employee.isActive === false
-    ? <IconCalendarX size={17} style={infoIconStyles} />
-    : <IconCalendarCheck size={17} style={infoIconStyles} />;
 
   // Botón "Editar" a la derecha del título de cada sección.
   const editAction = (section: EditSection) =>
@@ -349,57 +380,52 @@ const PersonalInfoTab: React.FC<PersonalInfoTabProps> = ({
           />
 
           {!isEditing("personal") ? (
-            <>
-              <Box sx={infoRowStyles}>
-                <IconUser size={17} style={infoIconStyles} />
-                <Typography variant="body2" sx={{ fontWeight: 600 }}>
-                  {employee.firstName} {employee.lastName}
-                </Typography>
-              </Box>
-              <Box sx={infoRowStyles}>
-                <IconMail size={17} style={infoIconStyles} />
-                <Typography variant="body2" sx={{ fontWeight: 600 }}>
-                  {employee.email || "Sin correo registrado"}
-                </Typography>
-              </Box>
-              <Box sx={infoRowStyles}>
-                <IconPhone size={17} style={infoIconStyles} />
-                <Typography variant="body2" sx={{ fontWeight: 600 }}>
-                  {employee.primaryPhone
-                    ? maskPhone(employee.primaryPhone)
-                    : "Sin teléfono registrado"}
-                  {employee.secondaryPhone ? ` · ${maskPhone(employee.secondaryPhone)}` : ""}
-                </Typography>
-              </Box>
-              <Box sx={infoRowStyles}>
-                {statusIcon}
-                <Typography variant="body2" sx={{ fontWeight: 600 }}>
-                  {employee.isActive === false ? "Inactivo" : "Activo"}
-                  {registeredAt ? ` desde el ${registeredAt}` : ""}
-                </Typography>
-              </Box>
-              <Box sx={infoRowStyles}>
-                <IconBriefcase size={17} style={infoIconStyles} />
-                <Typography variant="body2" sx={{ fontWeight: 600 }}>
-                  {getEmployeePositionLabel(
-                    employee.position,
-                    (employee.gender || null) as EmployeeGender | null,
-                  ) || "Sin puesto"}
-                </Typography>
-              </Box>
-              <Box sx={infoRowStyles}>
-                <IconUserCircle size={17} style={infoIconStyles} />
-                <Typography variant="body2" sx={{ fontWeight: 600 }}>
-                  {employee.gender || "Sin especificar"}
-                </Typography>
-              </Box>
-              <Box sx={infoRowStyles}>
-                <IconId size={17} style={infoIconStyles} />
-                <Typography variant="body2" sx={{ fontWeight: 600 }}>
-                  {employee.nationalId ? maskNationalId(employee.nationalId) : "Sin cédula"}
-                </Typography>
-              </Box>
-            </>
+            <InfoGrid>
+              <InfoCell label="Nombre completo" icon={<IconUser size={13} />} span={2}>
+                {employee.firstName} {employee.lastName}
+              </InfoCell>
+              <InfoCell label="Cédula" icon={<IconId size={13} />}>
+                {employee.nationalId ? maskNationalId(employee.nationalId) : "Sin cédula"}
+              </InfoCell>
+              <InfoCell label="Estado">
+                <Box sx={{ display: "flex", alignItems: "center", gap: 1, flexWrap: "wrap" }}>
+                  <Chip
+                    size="small"
+                    label={employee.isActive === false ? "Inactivo" : "Activo"}
+                    color={employee.isActive === false ? "error" : "success"}
+                    variant="outlined"
+                    sx={{ height: 22, fontWeight: 700, fontSize: "0.7rem" }}
+                  />
+                  {registeredAt && (
+                    <Typography variant="caption" sx={{ color: "text.secondary" }}>
+                      desde el {registeredAt}
+                    </Typography>
+                  )}
+                </Box>
+              </InfoCell>
+              <InfoCell label="Puesto" icon={<IconBriefcase size={13} />}>
+                {getEmployeePositionLabel(
+                  employee.position,
+                  (employee.gender || null) as EmployeeGender | null,
+                ) || "Sin puesto"}
+              </InfoCell>
+              <InfoCell label="Género" icon={<IconUserCircle size={13} />}>
+                {employee.gender || "Sin especificar"}
+              </InfoCell>
+              <InfoCell label="Teléfono" icon={<IconPhone size={13} />}>
+                {employee.primaryPhone
+                  ? maskPhone(employee.primaryPhone)
+                  : "Sin teléfono registrado"}
+                {employee.secondaryPhone ? (
+                  <Typography component="span" sx={{ color: "text.secondary", fontWeight: 500 }}>
+                    {" · "}{maskPhone(employee.secondaryPhone)}
+                  </Typography>
+                ) : null}
+              </InfoCell>
+              <InfoCell label="Correo electrónico" icon={<IconMail size={13} />}>
+                {employee.email || "Sin correo registrado"}
+              </InfoCell>
+            </InfoGrid>
           ) : (
           <Grid container spacing={{ xs: 2, sm: 2.5 }}>
             <Grid item xs={12} sm={6}>
@@ -430,23 +456,55 @@ const PersonalInfoTab: React.FC<PersonalInfoTabProps> = ({
                 inputProps={{ maxLength: 100 }}
               />
             </Grid>
-            <Grid item xs={12}>
+            <Grid item xs={12} sm={6}>
               <TextfieldComponent
-                name="email"
-                label="Correo electrónico"
-                placeholder="Ej: juan.perez@empresa.com"
-                icon={<IconMail size={20} color={theme.palette.text.secondary} />}
-                value={form.email}
-                onChange={(event) => update("email", event.target.value)}
+                name="nationalId"
+                label="Cédula"
+                placeholder="Ej: 1-2345-6789"
+                icon={<IconId size={20} color={theme.palette.text.secondary} />}
+                value={form.nationalId}
+                onChange={(event) => update("nationalId", maskNationalId(event.target.value))}
                 disabled={!isEditing("personal") || isSaving}
-                error={emailInvalid}
-                helperText={
-                  emailInvalid
-                    ? "Ingresa un correo válido"
-                    : "Con este correo se crea la cuenta de acceso al sistema"
-                }
-                inputProps={{ maxLength: 150 }}
+                inputProps={{ inputMode: "numeric" }}
               />
+            </Grid>
+            <Grid item xs={12} sm={6}>
+              <PlaceholderSelect
+                label="Género"
+                placeholder="Selecciona"
+                icon={<IconUserCircle size={20} color={theme.palette.text.secondary} />}
+                value={form.gender}
+                disabled={!isEditing("personal") || isSaving}
+                onChange={(event) => update("gender", String(event.target.value))}
+              >
+                <MenuItem value="">Sin especificar</MenuItem>
+                {EMPLOYEE_GENDERS.map((gen) => (
+                  <MenuItem key={gen} value={gen}>
+                    {gen}
+                  </MenuItem>
+                ))}
+              </PlaceholderSelect>
+            </Grid>
+            <Grid item xs={12} sm={6}>
+              <PlaceholderSelect
+                label="Puesto"
+                placeholder="Selecciona"
+                icon={<IconBriefcase size={20} color={theme.palette.text.secondary} />}
+                formatValue={(value) =>
+                  getEmployeePositionLabel(String(value), (form.gender || null) as EmployeeGender | null) ??
+                  String(value)
+                }
+                value={form.position}
+                disabled={!isEditing("personal") || isSaving}
+                onChange={(event) => update("position", String(event.target.value))}
+              >
+                <MenuItem value="">Sin puesto</MenuItem>
+                {positionOptions.map((pos) => (
+                  <MenuItem key={pos} value={pos}>
+                    {getEmployeePositionLabel(pos, (form.gender || null) as EmployeeGender | null) ?? pos}
+                  </MenuItem>
+                ))}
+              </PlaceholderSelect>
             </Grid>
             <Grid item xs={12} sm={6}>
               <TextfieldComponent
@@ -472,54 +530,22 @@ const PersonalInfoTab: React.FC<PersonalInfoTabProps> = ({
                 inputProps={{ inputMode: "tel", maxLength: 9 }}
               />
             </Grid>
-            <Grid item xs={12} sm={6}>
-              <PlaceholderSelect
-                label="Puesto"
-                placeholder="Selecciona"
-                icon={<IconBriefcase size={20} color={theme.palette.text.secondary} />}
-                formatValue={(value) =>
-                  getEmployeePositionLabel(String(value), (form.gender || null) as EmployeeGender | null) ??
-                  String(value)
-                }
-                value={form.position}
-                disabled={!isEditing("personal") || isSaving}
-                onChange={(event) => update("position", String(event.target.value))}
-              >
-                <MenuItem value="">Sin puesto</MenuItem>
-                {positionOptions.map((pos) => (
-                  <MenuItem key={pos} value={pos}>
-                    {getEmployeePositionLabel(pos, (form.gender || null) as EmployeeGender | null) ?? pos}
-                  </MenuItem>
-                ))}
-              </PlaceholderSelect>
-            </Grid>
-            <Grid item xs={12} sm={6}>
-              <PlaceholderSelect
-                label="Género"
-                placeholder="Selecciona"
-                icon={<IconUserCircle size={20} color={theme.palette.text.secondary} />}
-                value={form.gender}
-                disabled={!isEditing("personal") || isSaving}
-                onChange={(event) => update("gender", String(event.target.value))}
-              >
-                <MenuItem value="">Sin especificar</MenuItem>
-                {EMPLOYEE_GENDERS.map((gen) => (
-                  <MenuItem key={gen} value={gen}>
-                    {gen}
-                  </MenuItem>
-                ))}
-              </PlaceholderSelect>
-            </Grid>
             <Grid item xs={12}>
               <TextfieldComponent
-                name="nationalId"
-                label="Cédula"
-                placeholder="Ej: 1-2345-6789"
-                icon={<IconId size={20} color={theme.palette.text.secondary} />}
-                value={form.nationalId}
-                onChange={(event) => update("nationalId", maskNationalId(event.target.value))}
+                name="email"
+                label="Correo electrónico"
+                placeholder="Ej: juan.perez@empresa.com"
+                icon={<IconMail size={20} color={theme.palette.text.secondary} />}
+                value={form.email}
+                onChange={(event) => update("email", event.target.value)}
                 disabled={!isEditing("personal") || isSaving}
-                inputProps={{ inputMode: "numeric" }}
+                error={emailInvalid}
+                helperText={
+                  emailInvalid
+                    ? "Ingresa un correo válido"
+                    : "Con este correo se crea la cuenta de acceso al sistema"
+                }
+                inputProps={{ maxLength: 150 }}
               />
             </Grid>
           </Grid>
@@ -537,48 +563,67 @@ const PersonalInfoTab: React.FC<PersonalInfoTabProps> = ({
 
           {!isEditing("contract") ? (
             <>
-              <Box sx={infoRowStyles}>
-                <IconCalendarCheck size={17} style={infoIconStyles} />
-                <Typography variant="body2" sx={{ fontWeight: 600 }}>
-                  {employee.contractStartDate
-                    ? `Ingreso: ${formatDate(employee.contractStartDate)}`
-                    : "Sin fecha de ingreso registrada"}
-                </Typography>
-              </Box>
-              <Box sx={infoRowStyles}>
-                <IconClockHour3 size={17} style={infoIconStyles} />
-                <Typography variant="body2" sx={{ fontWeight: 600 }}>
-                  {tenure ? `Antigüedad: ${tenure}` : "Antigüedad sin registrar"}
-                </Typography>
-              </Box>
-              {employee.terminationDate && (
-                <>
-                  <Box sx={infoRowStyles}>
-                    <IconCalendarX size={17} style={infoIconStyles} />
-                    <Typography variant="body2" sx={{ fontWeight: 600 }}>
-                      {`Egreso: ${formatDate(employee.terminationDate)}`}
+              {/* Scheduled termination banner */}
+              {employee.scheduledTerminationDate && !employee.terminationDate && (
+                <Box
+                  sx={{
+                    display: "flex",
+                    alignItems: "center",
+                    gap: 1.5,
+                    mb: 2,
+                    px: 1.5,
+                    py: 1.25,
+                    borderRadius: 2,
+                    bgcolor: "warning.main",
+                    color: "warning.contrastText",
+                    opacity: 0.9,
+                  }}
+                >
+                  <IconAlertTriangle size={18} style={{ flexShrink: 0 }} />
+                  <Box sx={{ flex: 1 }}>
+                    <Typography variant="body2" sx={{ fontWeight: 700 }}>
+                      Finalización programada: {formatDate(employee.scheduledTerminationDate)}
                     </Typography>
+                    {employee.scheduledTerminationReason && (
+                      <Typography variant="caption">
+                        Motivo:{" "}
+                        {TERMINATION_REASON_LABELS[
+                          employee.scheduledTerminationReason as keyof typeof TERMINATION_REASON_LABELS
+                        ] ?? employee.scheduledTerminationReason}
+                      </Typography>
+                    )}
                   </Box>
-                  <Box sx={infoRowStyles}>
-                    <IconFileText size={17} style={infoIconStyles} />
-                    <Typography variant="body2" sx={{ fontWeight: 600 }}>
+                </Box>
+              )}
+              <InfoGrid>
+                <InfoCell label="Fecha de ingreso" icon={<IconCalendarCheck size={13} />}>
+                  {employee.contractStartDate
+                    ? formatDate(employee.contractStartDate)
+                    : "Sin fecha registrada"}
+                </InfoCell>
+                <InfoCell label="Antigüedad" icon={<IconClockHour3 size={13} />}>
+                  {tenure ?? "Sin registrar"}
+                </InfoCell>
+                {employee.terminationDate && (
+                  <>
+                    <InfoCell label="Fecha de egreso" icon={<IconCalendarX size={13} />}>
+                      {formatDate(employee.terminationDate)}
+                    </InfoCell>
+                    <InfoCell label="Motivo del egreso" icon={<IconFileText size={13} />}>
                       {employee.terminationReason
                         ? TERMINATION_REASON_LABELS[
                             employee.terminationReason as keyof typeof TERMINATION_REASON_LABELS
                           ] ?? employee.terminationReason
-                        : "Motivo no registrado"}
-                    </Typography>
-                  </Box>
-                  {employee.terminationNotes && (
-                    <Box sx={infoRowStyles}>
-                      <IconFileText size={17} style={infoIconStyles} />
-                      <Typography variant="body2" sx={{ fontWeight: 600 }}>
+                        : "No registrado"}
+                    </InfoCell>
+                    {employee.terminationNotes && (
+                      <InfoCell label="Notas" icon={<IconFileText size={13} />} span={2}>
                         {employee.terminationNotes}
-                      </Typography>
-                    </Box>
-                  )}
-                </>
-              )}
+                      </InfoCell>
+                    )}
+                  </>
+                )}
+              </InfoGrid>
             </>
           ) : (
           <>
@@ -608,7 +653,7 @@ const PersonalInfoTab: React.FC<PersonalInfoTabProps> = ({
                   minHeight: 40,
                 }}
               >
-                <IconClockHour3 size={16} style={infoIconStyles} />
+                <IconClockHour3 size={16} style={{ color: "text.secondary", flexShrink: 0 }} />
                 <Typography variant="body2" sx={{ color: "text.secondary" }}>
                   Antigüedad:{" "}
                   {tenure ? (
@@ -734,6 +779,80 @@ const PersonalInfoTab: React.FC<PersonalInfoTabProps> = ({
               </Typography>
             </Box>
           )}
+
+          {/* Scheduled (future) termination — only visible when not already terminated */}
+          {!hasTermination && (
+            <>
+              <Divider sx={{ my: 2.5 }} />
+              <Box sx={{ display: "flex", alignItems: "center", gap: 1, mb: 1.5 }}>
+                <IconCalendarClock size={17} style={{ color: theme.palette.warning.main, flexShrink: 0 }} />
+                <Typography variant="body2" sx={{ fontWeight: 600 }}>
+                  Programar finalización de labores
+                </Typography>
+              </Box>
+              <Grid container spacing={{ xs: 2, sm: 2.5 }}>
+                <Grid item xs={12} sm={6}>
+                  <LocalizationProvider dateAdapter={AdapterDateFns} adapterLocale={es}>
+                    <DatePicker
+                      label="Fecha de finalización programada"
+                      value={parseStoredDate(form.scheduledTerminationDate)}
+                      onChange={(date) =>
+                        update("scheduledTerminationDate", date ? format(date, "yyyy-MM-dd") : "")
+                      }
+                      format="d MMM yyyy"
+                      minDate={new Date()}
+                      slots={{ toolbar: () => null }}
+                      disabled={!isEditing("contract") || isSaving}
+                      slotProps={{ textField: { size: "small", fullWidth: true } }}
+                    />
+                  </LocalizationProvider>
+                </Grid>
+                <Grid item xs={12} sm={6}>
+                  <PlaceholderSelect
+                    label="Motivo (opcional)"
+                    placeholder="Selecciona"
+                    icon={<IconFileText size={20} color={theme.palette.text.secondary} />}
+                    formatValue={(value) =>
+                      TERMINATION_REASON_LABELS[value as keyof typeof TERMINATION_REASON_LABELS] ?? String(value)
+                    }
+                    value={form.scheduledTerminationReason}
+                    disabled={!isEditing("contract") || isSaving || !form.scheduledTerminationDate}
+                    onChange={(event) => update("scheduledTerminationReason", event.target.value)}
+                  >
+                    <MenuItem value="">Sin especificar</MenuItem>
+                    {EMPLOYEE_TERMINATION_REASONS.map((reason) => (
+                      <MenuItem key={reason} value={reason}>
+                        {TERMINATION_REASON_LABELS[reason]}
+                      </MenuItem>
+                    ))}
+                  </PlaceholderSelect>
+                </Grid>
+                {form.scheduledTerminationDate && (
+                  <Grid item xs={12}>
+                    <Button
+                      size="small"
+                      variant="text"
+                      startIcon={<IconX size={15} />}
+                      onClick={() => {
+                        update("scheduledTerminationDate", "");
+                        update("scheduledTerminationReason", "");
+                      }}
+                      disabled={!isEditing("contract") || isSaving}
+                      sx={{ color: "text.secondary", textTransform: "none" }}
+                    >
+                      Quitar programación
+                    </Button>
+                  </Grid>
+                )}
+              </Grid>
+              <Box sx={{ display: "flex", alignItems: "center", gap: 1, mt: 1.5, color: "text.secondary" }}>
+                <IconInfoCircle size={16} />
+                <Typography variant="caption">
+                  El sistema desactivará automáticamente al empleado en esa fecha.
+                </Typography>
+              </Box>
+            </>
+          )}
           </>
           )}
         </Paper>
@@ -748,26 +867,18 @@ const PersonalInfoTab: React.FC<PersonalInfoTabProps> = ({
           />
 
           {!isEditing("payment") ? (
-            <>
-              <Box sx={infoRowStyles}>
-                <IconCash size={17} style={infoIconStyles} />
-                <Typography variant="body2" sx={{ fontWeight: 600 }}>
-                  {employee.hourlyRate != null
-                    ? `Tarifa por hora: ${formatMoney(Number(employee.hourlyRate), "CRC")}`
-                    : "Sin tarifa registrada"}
-                </Typography>
-              </Box>
-              <Box sx={infoRowStyles}>
-                <IconBeach size={17} style={infoIconStyles} />
-                <Typography variant="body2" sx={{ fontWeight: 600 }}>
-                  {employee.vacationDays != null
-                    ? `Vacaciones: ${employee.vacationDays} ${
-                        employee.vacationDays === 1 ? "día" : "días"
-                      }`
-                    : "Sin saldo de vacaciones"}
-                </Typography>
-              </Box>
-            </>
+            <InfoGrid>
+              <InfoCell label="Tarifa por hora" icon={<IconCash size={13} />}>
+                {employee.hourlyRate != null
+                  ? formatMoney(Number(employee.hourlyRate), "CRC")
+                  : "Sin tarifa registrada"}
+              </InfoCell>
+              <InfoCell label="Vacaciones disponibles" icon={<IconBeach size={13} />}>
+                {employee.vacationDays != null
+                  ? `${employee.vacationDays} ${employee.vacationDays === 1 ? "día" : "días"}`
+                  : "Sin saldo"}
+              </InfoCell>
+            </InfoGrid>
           ) : (
           <>
           <Grid container spacing={{ xs: 2, sm: 2.5 }}>

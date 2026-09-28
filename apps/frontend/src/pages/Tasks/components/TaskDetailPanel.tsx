@@ -41,6 +41,7 @@ import {
   PRIORITY_OPTIONS,
   priorityColor,
   RECURRENCE_OPTIONS,
+  TaskPermissions,
 } from "../taskUtils";
 import { TaskCheckbox } from "./TaskItem";
 import { DueDateMenu, ListMenu, PriorityMenu, ReminderMenu } from "./TaskPickers";
@@ -51,6 +52,7 @@ interface TaskDetailPanelProps {
   onPatch: (id: number, input: TaskInput) => void;
   onDelete: (task: Task) => void;
   onClose: () => void;
+  can: TaskPermissions;
 }
 
 const PropertyRow: React.FC<{
@@ -60,13 +62,15 @@ const PropertyRow: React.FC<{
   color?: string;
   onClick: (event: React.MouseEvent<HTMLElement>) => void;
   onClear?: () => void;
-}> = ({ icon, label, value, color, onClick, onClear }) => {
+  disabled?: boolean;
+}> = ({ icon, label, value, color, onClick, onClear, disabled = false }) => {
   const { colors } = useTheme().tokens;
   const active = value !== undefined && value !== null && value !== false;
   return (
     <Box sx={{ display: "flex", alignItems: "center", borderRadius: "10px", "&:hover": { backgroundColor: colors.hover } }}>
       <ButtonBase
         onClick={onClick}
+        disabled={disabled}
         sx={{
           flex: 1,
           justifyContent: "flex-start",
@@ -91,7 +95,7 @@ const PropertyRow: React.FC<{
           )}
         </Box>
       </ButtonBase>
-      {active && onClear && (
+      {active && onClear && !disabled && (
         <Tooltip title={`Quitar ${label.toLowerCase()}`}>
           <IconButton size="small" onClick={onClear} aria-label={`Quitar ${label.toLowerCase()}`} sx={{ mr: 0.5 }}>
             <IconX size={15} />
@@ -104,7 +108,15 @@ const PropertyRow: React.FC<{
 
 // Right-hand detail panel (full-screen drawer on phones) of the selected task.
 // Every change saves immediately; text fields save on blur.
-export const TaskDetailPanel: React.FC<TaskDetailPanelProps> = ({ task, lists, onPatch, onDelete, onClose }) => {
+export const TaskDetailPanel: React.FC<TaskDetailPanelProps> = ({
+  task,
+  lists,
+  onPatch,
+  onDelete,
+  onClose,
+  can,
+}) => {
+  const readOnly = !can.edit;
   const theme = useTheme();
   const { colors, borders } = theme.tokens;
   const [title, setTitle] = useState(task.title);
@@ -170,6 +182,7 @@ export const TaskDetailPanel: React.FC<TaskDetailPanelProps> = ({ task, lists, o
             priority={task.priority}
             size={22}
             label={completed ? "Marcar como pendiente" : "Marcar como completada"}
+            disabled={readOnly}
             onToggle={() => onPatch(task.id, { completed: !completed })}
           />
         </Box>
@@ -184,6 +197,7 @@ export const TaskDetailPanel: React.FC<TaskDetailPanelProps> = ({ task, lists, o
             }
           }}
           multiline
+          readOnly={readOnly}
           inputProps={{ "aria-label": "Título de la tarea", maxLength: 500 }}
           sx={{
             flex: 1,
@@ -198,6 +212,7 @@ export const TaskDetailPanel: React.FC<TaskDetailPanelProps> = ({ task, lists, o
           size="small"
           aria-label={task.isImportant ? "Quitar de importantes" : "Marcar como importante"}
           aria-pressed={task.isImportant}
+          disabled={readOnly}
           onClick={() => onPatch(task.id, { isImportant: !task.isImportant })}
           sx={{ color: task.isImportant ? colors.warning : colors.textMuted }}
         >
@@ -229,6 +244,7 @@ export const TaskDetailPanel: React.FC<TaskDetailPanelProps> = ({ task, lists, o
                 checked={step.done}
                 priority={0}
                 size={16}
+                disabled={readOnly}
                 label={step.done ? "Desmarcar paso" : "Completar paso"}
                 onToggle={() =>
                   updateSteps(task.subtasks.map((item) => (item.id === step.id ? { ...item, done: !item.done } : item)))
@@ -247,6 +263,7 @@ export const TaskDetailPanel: React.FC<TaskDetailPanelProps> = ({ task, lists, o
                 onKeyDown={(event) => {
                   if (event.key === "Enter") (event.target as HTMLElement).blur();
                 }}
+                readOnly={readOnly}
                 inputProps={{ "aria-label": "Paso", maxLength: 300 }}
                 sx={{
                   flex: 1,
@@ -255,7 +272,7 @@ export const TaskDetailPanel: React.FC<TaskDetailPanelProps> = ({ task, lists, o
                   color: step.done ? colors.textMuted : colors.text,
                 }}
               />
-              <IconButton
+              {!readOnly && <IconButton
                 size="small"
                 className="step-delete"
                 aria-label="Eliminar paso"
@@ -263,10 +280,10 @@ export const TaskDetailPanel: React.FC<TaskDetailPanelProps> = ({ task, lists, o
                 sx={{ opacity: { xs: 1, md: 0 }, color: colors.textMuted }}
               >
                 <IconX size={14} />
-              </IconButton>
+              </IconButton>}
             </Box>
           ))}
-          <Box sx={{ display: "flex", alignItems: "center", gap: 1, px: 1.25, minHeight: 36, color: colors.accent }}>
+          {!readOnly && <Box sx={{ display: "flex", alignItems: "center", gap: 1, px: 1.25, minHeight: 36, color: colors.accent }}>
             <IconPlus size={16} />
             <InputBase
               value={newStep}
@@ -282,7 +299,7 @@ export const TaskDetailPanel: React.FC<TaskDetailPanelProps> = ({ task, lists, o
               inputProps={{ "aria-label": "Agregar paso", maxLength: 300 }}
               sx={{ flex: 1, fontSize: "0.85rem", "& input::placeholder": { color: colors.accent, opacity: 1 } }}
             />
-          </Box>
+          </Box>}
         </Box>
 
         {/* Properties */}
@@ -299,6 +316,7 @@ export const TaskDetailPanel: React.FC<TaskDetailPanelProps> = ({ task, lists, o
           }}
         >
           <PropertyRow
+            disabled={readOnly}
             icon={<IconCalendarDue size={18} />}
             label="Fecha de vencimiento"
             value={dueLabel}
@@ -307,6 +325,7 @@ export const TaskDetailPanel: React.FC<TaskDetailPanelProps> = ({ task, lists, o
             onClear={() => onPatch(task.id, { dueDate: null, dueTime: null })}
           />
           <PropertyRow
+            disabled={readOnly}
             icon={task.reminderSentAt ? <IconBellCheck size={18} /> : <IconBell size={18} />}
             label={task.reminderSentAt ? "Recordatorio enviado" : "Recordarme"}
             value={task.remindAt ? formatReminder(task.remindAt) : undefined}
@@ -314,6 +333,7 @@ export const TaskDetailPanel: React.FC<TaskDetailPanelProps> = ({ task, lists, o
             onClear={() => onPatch(task.id, { remindAt: null })}
           />
           <PropertyRow
+            disabled={readOnly}
             icon={<IconRepeat size={18} />}
             label="Repetir"
             value={task.recurrence !== "none" ? recurrenceLabel : undefined}
@@ -321,6 +341,7 @@ export const TaskDetailPanel: React.FC<TaskDetailPanelProps> = ({ task, lists, o
             onClear={() => onPatch(task.id, { recurrence: "none" })}
           />
           <PropertyRow
+            disabled={readOnly}
             icon={task.priority > 0 ? <IconFlagFilled size={18} /> : <IconFlag size={18} />}
             label="Prioridad"
             value={task.priority > 0 ? PRIORITY_OPTIONS[task.priority].label : undefined}
@@ -329,6 +350,7 @@ export const TaskDetailPanel: React.FC<TaskDetailPanelProps> = ({ task, lists, o
             onClear={() => onPatch(task.id, { priority: 0 })}
           />
           <PropertyRow
+            disabled={readOnly}
             icon={
               list ? (
                 <Box sx={{ width: 10, height: 10, m: "4px", borderRadius: "50%", backgroundColor: LIST_COLORS[list.color] }} />
@@ -352,7 +374,8 @@ export const TaskDetailPanel: React.FC<TaskDetailPanelProps> = ({ task, lists, o
             notesTimer.current = setTimeout(() => commitNotes(value), 900);
           }}
           onBlur={() => commitNotes(notes)}
-          placeholder="Agregar notas"
+          placeholder={readOnly ? "Sin notas" : "Agregar notas"}
+          InputProps={{ readOnly }}
           multiline
           minRows={5}
           inputProps={{ "aria-label": "Notas", maxLength: 10000 }}
@@ -378,11 +401,11 @@ export const TaskDetailPanel: React.FC<TaskDetailPanelProps> = ({ task, lists, o
             ? `Completada el ${format(new Date(task.completedAt), "EEE d 'de' MMM, h:mm a", { locale: es })}`
             : `Creada el ${format(new Date(task.createdAt), "EEE d 'de' MMM", { locale: es })}`}
         </Typography>
-        <Tooltip title="Eliminar tarea">
+        {can.delete && <Tooltip title="Eliminar tarea">
           <IconButton size="small" aria-label="Eliminar tarea" onClick={() => onDelete(task)} sx={{ color: colors.textMuted, "&:hover": { color: colors.error } }}>
             <IconTrash size={18} />
           </IconButton>
-        </Tooltip>
+        </Tooltip>}
       </Box>
 
       <DueDateMenu

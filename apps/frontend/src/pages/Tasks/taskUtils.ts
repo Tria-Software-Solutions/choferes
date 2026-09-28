@@ -282,3 +282,10 @@ export const viewTitle = (view: TaskView, lists: TaskList[]) => {
 
 export const newSubtaskId = () =>
   `${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 7)}`;
+
+/** What the signed-in user may do in "Tareas" (tasks:create/edit/delete). */
+export interface TaskPermissions {
+  create: boolean;
+  edit: boolean;
+  delete: boolean;
+}

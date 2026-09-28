@@ -15,6 +15,14 @@ via git tags (once tagged).
 
 ### Added
 
+- Pay slips ("Comprobante de pago") reproduce the company's Word template in the email (Resend, logos as inline CID images), the attached PDF and the on-screen editor: both logos over a thick rule, "PERIODO: 30.SEPT. 2026", the concept table (Salario ordinario, Salario extraordinario, Kilometraje, Otros, Cargas Sociales, Rebajos, Total a pagar), "*Moneda: Colón CR" and the legal footer
+- Pay slips fill themselves every quincena: a background job (every 30 min and at startup) creates the slip of each employee who worked in the running and the previous quincena and keeps pending ones up to date. Ordinary salary = up to 96 h × rate, overtime = extra hours × rate × 1.5, social charges = 10.83 % CCSS (tunable with `PAYROLL_REGULAR_HOURS_PER_BIWEEK`, `PAYROLL_OVERTIME_MULTIPLIER`, `PAYROLL_SOCIAL_CHARGES_RATE`); `POST /api/payments/generate` fills a given quincena on demand
+- Every slip amount can be edited by hand; edited fields are remembered (`payments.manualFields`) so refreshes never overwrite them, and each one can be returned to automatic. Editing a slip that was already emailed sets it back to "Pendiente"
+- "Tareas" page (`/tasks`): personal to-do lists with Hoy / Próximos / Importantes / Todas / Completadas views, custom colored lists, quick add with date / reminder / priority / list, steps, notes, recurrence (daily, weekdays, weekly, monthly, yearly), priorities, stars, drag-and-drop ordering, search and a detail panel (full-screen on phones)
+- Task reminders: delivered as in-app notifications by a 30 s background job (also on every notifications fetch, so they arrive after the server wakes up), announced with a toast and, when the tab is in the background and permission was granted, a desktop notification that opens the task. New notification setting "Recordatorios de tareas"
+- Notifications are polled every 30 s and when the tab regains focus
+- `tasks:view|create|edit|delete` permissions, granted to every seeded role (migration `20261003000000-add-task-permissions`) and enforced by the API
+- Shared `UserAvatar`: Configuración, the top bar, the account menu and the mobile drawer show the same avatar
 - GitHub Actions CI pipeline (`.github/workflows/ci.yml`)
 - `CONTRIBUTING.md` with development guidelines
 - Badges in README (CI status, Node version, Turborepo, license)
@@ -31,8 +39,8 @@ via git tags (once tagged).
 - Hours board: shows only active employees by default, with a toggle to include terminated employees
 - `GET /api/employees` accepts an optional `isActive=true|false` filter (validated); the employees list applies the status filter server-side
 - KPI band: new "Licencias por vencer" metric counting employees with expired/expiring licenses
-- Standard page layout (`components/Layout`): `PageContainer`, `PageCard`, `PageHeader`, `PageBody`, `EmptyState`, `LoadingState`. Every management page (Roles, Empleados, Vehículos, Horarios, Mensajería, Reportes, expediente de empleado) uses the same header, toolbar, gutters and loading/empty states
-- Shared `DateNavigator` (‹ fecha › ↺) used by Roles, Vehículos and Mensajería in the same order
+- Standard page layout (`components/Layout`): `PageContainer`, `PageCard`, `PageHeader`, `PageBody`, `EmptyState`, `LoadingState`. Every management page (Roles, Empleados, Vehículos, Horarios, Reportes, expediente de empleado) uses the same header, toolbar, gutters and loading/empty states
+- Shared `DateNavigator` (‹ fecha › ↺) used by Roles and Vehículos in the same order
 - Theme tokens exposed as `theme.tokens` (colors, borders, shadows per mode) and a theme-driven `CssBaseline` (body, selection, scrollbars, focus ring)
 - `POST /api/auth/logout` expires the httpOnly session cookies; the client calls it on logout
 - Migration `20260929000000-resync-serial-sequences` re-syncs every serial `id` sequence (seeded rows had left `users`/`roles` behind `MAX(id)`)
@@ -42,6 +50,7 @@ via git tags (once tagged).
 
 ### Changed
 
+- Icons: the whole app uses Tabler (`@tabler/icons-react`) instead of lucide-react and MUI icons
 - Translated all documentation from Spanish to English
 - Monorepo restructured: apps moved to `apps/frontend` and `apps/backend`
 - Huskylint-staged config: now runs `eslint --fix --max-warnings 100` instead of `npm run lint`
@@ -57,7 +66,6 @@ via git tags (once tagged).
 - Changing your own password requires the current one; the Settings form asks for it and shows the server error under that field
 - Login errors are generic ("Credenciales incorrectas") and the disabled-account message is only shown after valid credentials
 - 5xx responses no longer serialize raw error objects (SQL/schema details); they are logged server-side
-- Mensajería shows a notice that it still runs on sample data (no API yet)
 - UI redesign on every page with one visual language: 1px hairlines instead of heavy shadows, the same page header (accent icon tile), tables (`EditableTable`, `StickyDataGrid`) with a shared header, row height, hover and pagination footer, and ghost row actions
 - Dialogs share one layout (icon tile, title/subtitle, close, footer actions); delete confirmations are a compact centered dialog with a destructive button. The hours board's "Ajustar horas" and confirmation dialogs and the quick-assign popover now use it too
 - Form fields have visible labels instead of placeholder-only inputs (employee, user, role, vehicle, courier, schedule, password and expediente forms)
@@ -83,6 +91,8 @@ via git tags (once tagged).
 
 ### Removed
 
+- Mensajería (courier) module, its routes, forms and `messaging:*` / `courier:*` permissions (migration `20260930000000-remove-courier-permissions`)
+- Hours auto-generation dialog in Roles, logbook scanning ("Escanear", OCR / Gemini vision proxy and `GEMINI_API_KEY`), the high-contrast theme (stored preferences fall back to "Sistema"), Tailwind/Tremor setup and unused screens, services and dependencies (`@fortawesome/*`, `@mui/lab`, `@mui/styles`, `@mui/base`, `@mui/x-charts`, `@tremor/react`, `motion`, `ogl`, `lucide-react`, `@mui/icons-material`, `bcryptjs`, `sequelize-typescript`, among others)
 - Unused UI and helpers: `Dock`, `MenuEditor`, `Menu`, `SpeedDial`, `SplitButton`, `AppModal`, `DateSelection`, `DotField`, `Typewriter`, the `SelectorTable` UI, the login `Orb` background, `AuthPageStyles`, unused hooks (`useFormValidation`, `useModal`, `useReduxData`, `useSpeechRecognition`, `useTableData`, `useTablePagination`) and style exports no component imported
 
 ### Security
