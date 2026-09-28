@@ -26,22 +26,6 @@ module.exports = {
         { transaction: t },
       );
 
-      // tasks: tareas pendientes de un usuario ordenadas por fecha de vencimiento
-      await queryInterface.sequelize.query(
-        `CREATE INDEX IF NOT EXISTS idx_tasks_user_due
-         ON tasks ("userId", "dueDate")
-         WHERE "completedAt" IS NULL`,
-        { transaction: t },
-      );
-
-      // tasks: tareas completadas de un usuario (historial)
-      await queryInterface.sequelize.query(
-        `CREATE INDEX IF NOT EXISTS idx_tasks_user_completed
-         ON tasks ("userId", "completedAt")
-         WHERE "completedAt" IS NOT NULL`,
-        { transaction: t },
-      );
-
       // vacations: detección de solapamiento de fechas por empleado
       await queryInterface.sequelize.query(
         `CREATE INDEX IF NOT EXISTS idx_vacations_employee_dates
@@ -63,8 +47,6 @@ module.exports = {
     await queryInterface.sequelize.query(`DROP INDEX IF EXISTS idx_employees_name`);
     await queryInterface.sequelize.query(`DROP INDEX IF EXISTS idx_employees_national_id`);
     await queryInterface.sequelize.query(`DROP INDEX IF EXISTS idx_payments_year_biweek`);
-    await queryInterface.sequelize.query(`DROP INDEX IF EXISTS idx_tasks_user_due`);
-    await queryInterface.sequelize.query(`DROP INDEX IF EXISTS idx_tasks_user_completed`);
     await queryInterface.sequelize.query(`DROP INDEX IF EXISTS idx_vacations_employee_dates`);
     await queryInterface.sequelize.query(`DROP INDEX IF EXISTS idx_hours_worked_date`);
   },

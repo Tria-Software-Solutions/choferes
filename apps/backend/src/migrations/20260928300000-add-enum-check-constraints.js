@@ -31,17 +31,6 @@ module.exports = {
         { transaction: t },
       );
 
-      // employees.scheduledTerminationReason (same set as terminationReason)
-      await queryInterface.sequelize.query(
-        `ALTER TABLE employees
-         ADD CONSTRAINT chk_employees_scheduled_termination_reason
-         CHECK ("scheduledTerminationReason" IN (
-           'renuncia','despido','mutuo_acuerdo','fin_contrato',
-           'jubilacion','fallecimiento','otro'
-         ))`,
-        { transaction: t },
-      );
-
       // payments.status
       await queryInterface.sequelize.query(
         `ALTER TABLE payments
@@ -117,7 +106,6 @@ module.exports = {
     const drops = [
       ["employees", "chk_employees_termination_reason"],
       ["employees", "chk_employees_gender"],
-      ["employees", "chk_employees_scheduled_termination_reason"],
       ["payments", "chk_payments_status"],
       ["payments", "chk_payments_pay_period"],
       ["vacations", "chk_vacations_status"],
