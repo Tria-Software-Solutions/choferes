@@ -8,7 +8,7 @@ import { getBiweekNumber } from "./summaryRecalculationService";
 import { localDateString, parseISODate } from "../utils/timezone";
 
 const PAYROLL_INTERVAL_MS = 30 * 60 * 1000;
-const REMINDER_INTERVAL_MS = 5 * 60 * 1000;  # 5 min
+const REMINDER_INTERVAL_MS = 5 * 60 * 1000;  // 5 min
 const TERMINATION_INTERVAL_MS = 24 * 60 * 60 * 1000;
 
 const log = (...args: unknown[]) => {
