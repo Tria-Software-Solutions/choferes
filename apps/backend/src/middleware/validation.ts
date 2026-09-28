@@ -99,6 +99,20 @@ export const employeeRules = [
     .withMessage("Email inválido")
     .isLength({ max: 255 })
     .withMessage("El email no puede exceder 255 caracteres"),
+  // Contract fields for create — same rules as update
+  ...contractBodyRules,
+  body("gender")
+    .optional({ values: "falsy" })
+    .isIn(["Masculino", "Femenino"])
+    .withMessage("gender debe ser Masculino o Femenino"),
+  body("hourlyRate")
+    .optional({ values: "falsy" })
+    .isFloat({ min: 0 })
+    .withMessage("hourlyRate debe ser un número ≥ 0"),
+  body("vacationDays")
+    .optional({ values: "falsy" })
+    .isInt({ min: 0 })
+    .withMessage("vacationDays debe ser un entero ≥ 0"),
 ];
 
 export const employeeUpdateRules = [
@@ -125,6 +139,18 @@ export const employeeUpdateRules = [
     .withMessage("Email inválido")
     .isLength({ max: 255 })
     .withMessage("El email no puede exceder 255 caracteres"),
+  body("gender")
+    .optional({ values: "falsy" })
+    .isIn(["Masculino", "Femenino"])
+    .withMessage("gender debe ser Masculino o Femenino"),
+  body("hourlyRate")
+    .optional({ values: "falsy" })
+    .isFloat({ min: 0 })
+    .withMessage("hourlyRate debe ser un número ≥ 0"),
+  body("vacationDays")
+    .optional({ values: "falsy" })
+    .isInt({ min: 0 })
+    .withMessage("vacationDays debe ser un entero ≥ 0"),
 ];
 
 // ─── Schedules ───────────────────────────────────────────────────────────────
