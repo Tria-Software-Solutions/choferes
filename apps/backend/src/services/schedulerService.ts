@@ -87,10 +87,8 @@ export const startSchedulers = (): void => {
     cron.schedule(TERMINATION_CRON, guarded('terminations', runScheduledTerminationsJob), { timezone: 'America/Costa_Rica' }),
   ];
 
-  log(
-    `jobs iniciados [TZ=America/Costa_Rica]: payroll ${PAYROLL_CRON}, reminders ${REMINDER_CRON}, terminations ${TERMINATION_CRON}`,
-  );
 };
+
 
 export const stopSchedulers = (): void => {
   scheduledJobs.forEach((job) => job.stop());
