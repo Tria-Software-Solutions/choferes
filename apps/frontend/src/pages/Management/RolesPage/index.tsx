@@ -356,7 +356,7 @@ const RolesPage: React.FC = () => {
       const existingHoursWorkedRecord = hoursWorked.find(
         (record) =>
           record.employeeId === employeeId &&
-          format(new Date(record.date), "yyyy-MM-dd") === formattedDate
+          String(record.date).slice(0, 10) === formattedDate
       );
 
       if (existingHoursWorkedRecord) {
@@ -424,7 +424,7 @@ const RolesPage: React.FC = () => {
     const existingHoursWorkedRecord = hoursWorked.find(
       (record) =>
         record.employeeId === employeeId &&
-        format(new Date(record.date), "yyyy-MM-dd") === formattedDate
+        String(record.date).slice(0, 10) === formattedDate
     );
 
     // Create/update HoursWorked entry
