@@ -11,8 +11,8 @@ import {
 } from "@mui/material";
 import { Schedule } from "../../../models/Schedule";
 import FORMS from "../../../constants/forms.constants";
-import { translateDayOptionsToSpanish } from "../../../utils/string";
-import { IconCalendar, IconRotate } from "@tabler/icons-react";
+import { normalizeString, translateDayOptionsToSpanish } from "../../../utils/string";
+import { IconCalendar, IconRotate, IconAlertTriangle } from "@tabler/icons-react";
 import TextfieldComponent from "../../../components/Textfield/Textfield.component";
 import {
   boxRoot,
@@ -30,12 +30,14 @@ interface AddScheduleFormProps {
   onSubmit: (schedule: Omit<Schedule, "id">) => void;
   onCancel?: () => void;
   isLoading?: boolean;
+  existingLabels?: string[];
 }
 
 const AddScheduleForm: React.FC<AddScheduleFormProps> = ({
   onSubmit,
   onCancel,
   isLoading = false,
+  existingLabels = [],
 }) => {
   const theme = useTheme();
   const isSmallScreen = useMediaQuery(theme.breakpoints.down("sm"));
@@ -57,6 +59,10 @@ const AddScheduleForm: React.FC<AddScheduleFormProps> = ({
       const val = dayHours[day];
       return val !== undefined && val !== "" && !isNaN(Number(val)) && Number(val) > 0 && Number(val) <= 24;
     });
+
+  const isDuplicateLabel =
+    label.trim().length > 0 &&
+    existingLabels.some((l) => normalizeString(l) === normalizeString(label));
 
   // Sync dayHours when days change (add empty entries for new days, remove unselected)
   useEffect(() => {
@@ -129,6 +135,21 @@ const AddScheduleForm: React.FC<AddScheduleFormProps> = ({
               onChange={(e) => setLabel(e.target.value)}
               icon={<IconCalendar size={18} style={iconStyle(theme)} />}
             />
+            {isDuplicateLabel && (
+              <Box sx={{ display: "flex", alignItems: "center", gap: 0.5, mt: 0.75 }}>
+                <IconAlertTriangle size={14} color={theme.palette.warning.main} style={{ flexShrink: 0 }} />
+                <Typography
+                  sx={{
+                    fontSize: "0.72rem",
+                    fontWeight: 500,
+                    color: theme.palette.warning.main,
+                    lineHeight: 1.35,
+                  }}
+                >
+                  Ya existe un horario con este nombre
+                </Typography>
+              </Box>
+            )}
           </Box>
         </Grid>
 

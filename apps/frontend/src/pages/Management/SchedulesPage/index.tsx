@@ -38,13 +38,13 @@ import {
   createExportOptions,
   exportFileFormattedDate,
 } from "../../../utils/export";
-import { translateDayOptionsToSpanish } from "../../../utils/string";
+import { normalizeString, translateDayOptionsToSpanish } from "../../../utils/string";
 import APPBAR_MENU from "../../../constants/appbar.constants";
 import NavIcon from "../../../components/NavIcon/NavIcon.component";
 import PAGE_TITLE from "../../../constants/pageTitle.constants";
 import PERMISSIONS from "../../../constants/permissions.constants";
 import MANAGEMENT from "../../../constants/management.constants";
-import { IconCalendarWeek, IconCirclePlus, IconClock, IconGripVertical, IconPlus, IconTrash } from "@tabler/icons-react";
+import { IconAlertTriangle, IconCalendarWeek, IconCirclePlus, IconClock, IconGripVertical, IconPlus, IconTrash } from "@tabler/icons-react";
 import {
   EmptyState,
   LoadingState,
@@ -117,6 +117,10 @@ const SchedulesPage: React.FC = () => {
   const [isCreatingSchedule, setIsCreatingSchedule] = useState(false);
   const [isDeletingSchedule, setIsDeletingSchedule] = useState(false);
   const [openReorderDialog, setOpenReorderDialog] = useState(false);
+  const [duplicateDialog, setDuplicateDialog] = useState<{
+    label: string;
+    onConfirm: () => void;
+  } | null>(null);
 
   const theme = useTheme();
   const isSmallScreen = useMediaQuery(theme.breakpoints.down("sm"));
@@ -145,10 +149,7 @@ const SchedulesPage: React.FC = () => {
       return;
     }
 
-    const normalizeString = (str: string) =>
-      str.normalize("NFD").replace(/[\u0300-\u036f]/g, "");
-
-    const normalizedSearch = normalizeString(search).toLowerCase();
+    const normalizedSearch = normalizeString(search);
 
     const newFilteredSchedules = schedules.filter((schedule) => {
       const daysString = Array.isArray(schedule.days)
@@ -157,9 +158,7 @@ const SchedulesPage: React.FC = () => {
 
       return normalizeString(
         `${schedule.label} ${daysString} ${schedule.hours}`
-      )
-        .toLowerCase()
-        .includes(normalizedSearch);
+      ).includes(normalizedSearch);
     });
     setFilteredSchedules(sortSchedulesByType(newFilteredSchedules, customOrderIds));
   }, [search, schedules, customOrderIds]);
@@ -192,7 +191,7 @@ const SchedulesPage: React.FC = () => {
   }, [editFields, dayHoursEditing, editRowId]);
 
   // Handle creation of a new schedule
-  const handleCreate = async (newSchedule: Omit<Schedule, "id">) => {
+  const doCreate = async (newSchedule: Omit<Schedule, "id">) => {
     try {
       setIsCreatingSchedule(true);
       await dispatch(createSchedule(newSchedule)).unwrap();
@@ -212,6 +211,18 @@ const SchedulesPage: React.FC = () => {
     } finally {
       setIsCreatingSchedule(false);
     }
+  };
+
+  const handleCreate = async (newSchedule: Omit<Schedule, "id">) => {
+    const label = newSchedule.label?.trim() ?? "";
+    const isDuplicate =
+      label.length > 0 &&
+      schedules.some((s) => normalizeString(s.label) === normalizeString(label));
+    if (isDuplicate) {
+      setDuplicateDialog({ label, onConfirm: () => void doCreate(newSchedule) });
+      return;
+    }
+    await doCreate(newSchedule);
   };
 
   // Handle editing of a schedule
@@ -240,7 +251,7 @@ const SchedulesPage: React.FC = () => {
   }, []);
 
   // Handle update of a schedule
-  const handleUpdate = useCallback(async (id: number) => {
+  const doUpdate = useCallback(async (id: number) => {
     try {
       const defaultHours = parseInt(editFields.hours, 10);
       const scheduleDays = buildScheduleDays(editFields.days, isNaN(defaultHours) ? 0 : defaultHours, dayHoursEditing);
@@ -269,6 +280,23 @@ const SchedulesPage: React.FC = () => {
       });
     }
   }, [editFields, dayHoursEditing, dispatch, handleCancel, showNotification]);
+
+  const handleUpdate = useCallback(
+    async (id: number) => {
+      const label = editFields.label?.trim() ?? "";
+      const isDuplicate =
+        label.length > 0 &&
+        schedules.some(
+          (s) => s.id !== id && normalizeString(s.label) === normalizeString(label),
+        );
+      if (isDuplicate) {
+        setDuplicateDialog({ label, onConfirm: () => void doUpdate(id) });
+        return;
+      }
+      await doUpdate(id);
+    },
+    [doUpdate, editFields.label, schedules],
+  );
 
   // Open/close delete confirmation dialog
   const handleOpenDeleteDialog = useCallback((id: number) => {
@@ -812,8 +840,23 @@ const SchedulesPage: React.FC = () => {
           onSubmit={handleCreate}
           onCancel={handleCloseAddModal}
           isLoading={isCreatingSchedule}
+          existingLabels={schedules.map((s) => s.label)}
         />
       </DialogComponent>
+      <DialogComponent
+        open={duplicateDialog !== null}
+        onClose={() => setDuplicateDialog(null)}
+        onConfirm={() => {
+          duplicateDialog?.onConfirm();
+          setDuplicateDialog(null);
+        }}
+        title="Horario duplicado"
+        message={`Ya existe un horario llamado "${duplicateDialog?.label ?? ""}". ¿Deseas continuar de todas formas?`}
+        type="warning"
+        confirmText="Continuar"
+        cancelText="Cancelar"
+        icon={<IconAlertTriangle color="var(--mui-palette-warning-main)" />}
+      />
       <ReorderDialog
         open={openReorderDialog}
         schedules={filteredSchedules}
