@@ -75,6 +75,14 @@ export const startSchedulers = (): void => {
   if (process.env.NODE_ENV === 'test' || process.env.DISABLE_SCHEDULERS === 'true') return;
   if (scheduledJobs.length > 0) return;
 
+  // Laptops sleep and wake up — suppress the flood of "missed execution" warnings
+  // that node-cron emits for every tick that passed while the process was suspended.
+  // Production (always-on) keeps the default logger so real anomalies are visible.
+  if (process.env.NODE_ENV !== 'production') {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    (cron as any).setLogger({ warn: () => {}, error: console.error, info: console.info });
+  }
+
   // Run once at startup (catches up if server was asleep)
   runReminderJob();
   runPayrollJob();
@@ -82,9 +90,9 @@ export const startSchedulers = (): void => {
 
   // Schedule with Costa Rica timezone
   scheduledJobs = [
-    cron.schedule(REMINDER_CRON, guarded('reminders', runReminderJob), { timezone: 'America/Costa_Rica' }),
-    cron.schedule(PAYROLL_CRON, guarded('payroll', runPayrollJob), { timezone: 'America/Costa_Rica' }),
-    cron.schedule(TERMINATION_CRON, guarded('terminations', runScheduledTerminationsJob), { timezone: 'America/Costa_Rica' }),
+    cron.schedule(REMINDER_CRON, runReminderJob, { timezone: TZ }),
+    cron.schedule(PAYROLL_CRON, runPayrollJob, { timezone: TZ }),
+    cron.schedule(TERMINATION_CRON, runScheduledTerminationsJob, { timezone: TZ }),
   ];
 
 };
