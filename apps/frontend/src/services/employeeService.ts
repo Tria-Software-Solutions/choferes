@@ -79,7 +79,7 @@ export const getEmployeeAccess = async (id: number): Promise<EmployeeAccess> => 
   return response.data;
 };
 
-// Asigna el rol por defecto ("Usuario") cuando la cuenta quedó sin rol.
+// Asigna el rol del puesto del empleado cuando la cuenta quedó sin rol.
 export const assignDefaultEmployeeRole = async (id: number): Promise<EmployeeAccess> => {
   const response = await api.post(`/employees/${id}/assign-default-role`);
   invalidateCache("/employees");

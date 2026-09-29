@@ -175,11 +175,14 @@ const sanitizeControlledValues = (clean: Record<string, unknown>): Record<string
   if (sanitized.gender != null && !GENDERS.has(String(sanitized.gender))) {
     sanitized.gender = null;
   }
+  // El puesto es obligatorio y define el rol de acceso de la cuenta, así que un
+  // valor nulo o desconocido se rechaza en vez de guardarse como null (lo que
+  // además violaría el NOT NULL de employees.position).
   if (
-    sanitized.position != null &&
+    sanitized.position !== undefined &&
     !(EMPLOYEE_POSITIONS as readonly string[]).includes(String(sanitized.position))
   ) {
-    sanitized.position = null;
+    throw new ServiceError(400, "El puesto es requerido y debe ser uno de los puestos válidos");
   }
   return sanitized;
 };
@@ -317,7 +320,7 @@ const generateTempPassword = (): string => {
 // se le asigna el rol de su puesto si quedó sin ninguno (cuentas previas al
 // arreglo de user_role).
 // La cuenta nueva recibe el rol que corresponde al puesto del empleado
-// (supervisor → Supervisor); sin puesto, el rol genérico "Usuario".
+// (supervisor → Supervisor). El puesto es obligatorio.
 export const linkEmployeeToUser = async (employeeId: number, actor?: AuthenticatedUser) => {
   const employee = await Employee.findByPk(employeeId, {
     attributes: ["id", "firstName", "lastName", "email", "position"],
@@ -436,8 +439,8 @@ export const getEmployeeAccess = async (employeeId: number): Promise<EmployeeAcc
   };
 };
 
-// Asigna a la cuenta del empleado el rol de su puesto (o "Usuario" si no tiene
-// puesto) cuando quedó sin ninguno. Idempotente: si ya tiene rol no cambia nada.
+// Asigna a la cuenta del empleado el rol de su puesto cuando quedó sin ninguno.
+// Idempotente: si ya tiene rol no cambia nada.
 export const assignDefaultRoleToEmployeeUser = async (
   employeeId: number,
 ): Promise<EmployeeAccess> => {
@@ -487,17 +490,19 @@ export const processScheduledTerminations = async (): Promise<number> => {
     } as Record<string, unknown>,
   });
   if (due.length === 0) return 0;
-  for (const employee of due) {
-    await Employee.update(
-      {
-        terminationDate: employee.scheduledTerminationDate,
-        terminationReason: employee.scheduledTerminationReason ?? "fin_contrato",
-        isActive: false,
-        scheduledTerminationDate: null,
-        scheduledTerminationReason: null,
-      },
-      { where: { id: employee.id } },
-    );
-  }
+  await Promise.all(
+    due.map((employee) =>
+      Employee.update(
+        {
+          terminationDate: employee.scheduledTerminationDate,
+          terminationReason: employee.scheduledTerminationReason ?? "fin_contrato",
+          isActive: false,
+          scheduledTerminationDate: null,
+          scheduledTerminationReason: null,
+        },
+        { where: { id: employee.id } },
+      ),
+    ),
+  );
   return due.length;
 };

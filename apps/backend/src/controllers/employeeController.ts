@@ -132,7 +132,7 @@ export const getEmployeeAccess = async (req: Request, res: Response) => {
   }
 };
 
-// Asigna el rol del puesto del empleado ("Usuario" si no tiene) cuando la cuenta quedó sin rol.
+// Asigna el rol del puesto del empleado cuando la cuenta quedó sin rol.
 export const assignDefaultRoleToEmployeeUser = async (req: Request, res: Response) => {
   try {
     const id = parseInt(req.params.id, 10);

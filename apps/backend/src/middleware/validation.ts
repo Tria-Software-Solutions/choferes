@@ -103,6 +103,8 @@ export const employeeRules = [
     .withMessage("El email no puede exceder 255 caracteres"),
   // Contract fields for create — same rules as update
   ...contractBodyRules,
+  // El puesto es obligatorio: define el rol de acceso del empleado.
+  body("position").trim().notEmpty().withMessage("El puesto es requerido"),
   body("gender")
     .optional({ values: "falsy" })
     .isIn(["Masculino", "Femenino"])
@@ -340,8 +342,12 @@ export const userRules = [
     .withMessage("La contraseña es requerida")
     .isLength({ min: 6 })
     .withMessage("La contraseña debe tener al menos 6 caracteres"),
-  // Rol a asignar (opcional). Si se omite, el servicio asigna el rol "Usuario".
-  body("roleId").optional().isInt({ min: 1 }).withMessage("roleId inválido"),
+  // Rol a asignar (obligatorio): toda cuenta debe tener un rol.
+  body("roleId")
+    .notEmpty()
+    .withMessage("El rol es requerido")
+    .isInt({ min: 1 })
+    .withMessage("roleId inválido"),
 ];
 
 export const userUpdateRules = [

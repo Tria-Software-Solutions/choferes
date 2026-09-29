@@ -90,9 +90,9 @@ const HoursTab: React.FC<HoursTabProps> = ({ employee }) => {
   const { userPermissions } = useAuthContext();
   const { showNotification } = useAppNotifications();
 
-  // The recalculate endpoint is guarded by `roles:hours:edit`, so gate the
+  // The recalculate endpoint is guarded by `employee-hours:edit`, so gate the
   // actions on that same permission (not the biweekly-summary one).
-  const canRecalculate = userPermissions.includes(PERMISSIONS.EDIT_EMPLOYEE_ROLES);
+  const canRecalculate = userPermissions.includes(PERMISSIONS.EDIT_EMPLOYEE_HOURS);
 
   const [summaries, setSummaries] = useState<BiweeklySummary[]>([]);
   const [isLoading, setIsLoading] = useState(true);

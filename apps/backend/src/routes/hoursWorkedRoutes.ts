@@ -17,15 +17,23 @@ const router = express.Router();
 router.get(
   "/",
   authenticateToken,
+  requirePermission(PERMISSION_CODES.VIEW_EMPLOYEE_HOURS),
   hoursWorkedQueryRules,
   validate,
   hoursWorkedController.getHoursWorked,
 );
-router.get("/:id", authenticateToken, idParam, validate, hoursWorkedController.getHoursWorkedById);
+router.get(
+  "/:id",
+  authenticateToken,
+  requirePermission(PERMISSION_CODES.VIEW_EMPLOYEE_HOURS),
+  idParam,
+  validate,
+  hoursWorkedController.getHoursWorkedById,
+);
 router.post(
   "/",
   authenticateToken,
-  requirePermission(PERMISSION_CODES.EDIT_EMPLOYEE_ROLES),
+  requirePermission(PERMISSION_CODES.EDIT_EMPLOYEE_HOURS),
   hoursWorkedRules,
   validate,
   hoursWorkedController.createHoursWorked,
@@ -33,7 +41,7 @@ router.post(
 router.post(
   "/recalculate",
   authenticateToken,
-  requirePermission(PERMISSION_CODES.EDIT_EMPLOYEE_ROLES),
+  requirePermission(PERMISSION_CODES.EDIT_EMPLOYEE_HOURS),
   recalculateRules,
   validate,
   hoursWorkedController.recalculateSummaries,
@@ -41,7 +49,7 @@ router.post(
 router.put(
   "/:id",
   authenticateToken,
-  requirePermission(PERMISSION_CODES.EDIT_EMPLOYEE_ROLES),
+  requirePermission(PERMISSION_CODES.EDIT_EMPLOYEE_HOURS),
   hoursWorkedUpdateRules,
   validate,
   hoursWorkedController.updateHoursWorked,
@@ -49,7 +57,7 @@ router.put(
 router.delete(
   "/:id",
   authenticateToken,
-  requirePermission(PERMISSION_CODES.EDIT_EMPLOYEE_ROLES),
+  requirePermission(PERMISSION_CODES.EDIT_EMPLOYEE_HOURS),
   idParam,
   validate,
   hoursWorkedController.deleteHoursWorked,

@@ -577,6 +577,8 @@ interface DraggableCardWrapperProps {
   onInfo?: (e: React.MouseEvent) => void;
   onAdjust?: (e: React.MouseEvent) => void;
   theme: Theme;
+  /** Solo lectura: sin permiso de edición las tarjetas no se pueden arrastrar. */
+  draggable?: boolean;
 }
 
 function DraggableCardWrapper({
@@ -594,10 +596,12 @@ function DraggableCardWrapper({
   onInfo,
   onAdjust,
   theme,
+  draggable = true,
 }: DraggableCardWrapperProps) {
   const dragId: UniqueIdentifier = `emp-${employee.id}-${sourceDay}`;
   const { attributes, listeners, setNodeRef, isDragging } = useDraggable({
     id: dragId,
+    disabled: !draggable,
     data: {
       sourceType: 'card' as const,
       employee,
@@ -616,7 +620,7 @@ function DraggableCardWrapper({
   return (
     <Box
       ref={setNodeRef}
-      {...listeners}
+      {...(draggable ? listeners : {})}
       {...attributes}
       sx={{
         opacity: isDragging ? 0.08 : 1,
@@ -1039,6 +1043,7 @@ function DraggableSwimlaneCard({
   const dragId: UniqueIdentifier = `swim-${employee.id}-${schedule.id}-${day}`;
   const { attributes, listeners, setNodeRef, isDragging } = useDraggable({
     id: dragId,
+    disabled: !canEdit,
     data: {
       sourceType: 'card' as const,
       employee,
@@ -1067,7 +1072,7 @@ function DraggableSwimlaneCard({
     <Box
       data-card
       ref={setNodeRef}
-      {...listeners}
+      {...(canEdit ? listeners : {})}
       {...attributes}
       onClick={handleClick}
       sx={{
@@ -1996,6 +2001,8 @@ interface DayColumnProps {
   onInfoClick?: (employee: Employee) => void;
   onAdjustClick?: (employee: Employee) => void;
   theme: Theme;
+  /** Solo lectura: sin edición las tarjetas del día no se arrastran. */
+  canEdit?: boolean;
 }
 
 const DayColumn = memo(function DayColumn({
@@ -2012,6 +2019,7 @@ const DayColumn = memo(function DayColumn({
   onInfoClick,
   onAdjustClick,
   theme,
+  canEdit,
 }: DayColumnProps) {
   const todayColor = theme.tokens.colors.accent;
 
@@ -2153,6 +2161,7 @@ const DayColumn = memo(function DayColumn({
               onInfo={onInfoClick ? () => onInfoClick(emp.employee) : undefined}
               onAdjust={onAdjustClick ? () => onAdjustClick(emp.employee) : undefined}
               theme={theme}
+              draggable={!!canEdit}
             />
           ))
         )}
@@ -2259,8 +2268,8 @@ const WeeklyBoard: React.FC<WeeklyBoardProps> = ({
   // ─── Drag and drop state ───
   const [activeDragItem, setActiveDragItem] = useState<DragItemData | null>(null);
 
-  const canEdit = permissions?.includes(PERMISSIONS.EDIT_EMPLOYEE_ROLES);
-  const showHours = permissions?.includes(PERMISSIONS.VIEW_EMPLOYEE_ROLES_HOURS);
+  const canEdit = permissions?.includes(PERMISSIONS.EDIT_EMPLOYEE_HOURS);
+  const showHours = permissions?.includes(PERMISSIONS.VIEW_EMPLOYEE_HOURS);
 
   const sensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 5 } }),
@@ -2792,6 +2801,7 @@ const WeeklyBoard: React.FC<WeeklyBoardProps> = ({
                       onInfoClick={showHours ? onInfoClick : undefined}
                       onAdjustClick={showHours ? onAdjustClick : undefined}
                       theme={theme}
+                      canEdit={canEdit}
                     />
                   );
                 })}
@@ -2858,17 +2868,21 @@ const WeeklyBoard: React.FC<WeeklyBoardProps> = ({
           </Box>
 
           {/* ── Employees panel (own scroll) ── */}
-          <TotalsColumn
-            employeeDataMap={employeeDataMap}
-            filteredEmployees={filteredEmployees}
-            selectedPeriod={selectedPeriod}
-            onPeriodChange={setSelectedPeriod}
-            onInfoClick={showHours ? onInfoClick : undefined}
-            onAdjustClick={showHours ? onAdjustClick : undefined}
-            handleAdjustTime={handleAdjustTime}
-            theme={theme}
-            isDark={isDark}
-          />
+          {/* Solo lectura: sin permiso de edición no se muestra el panel de
+              empleados arrastrables (no se puede asignar a nadie). */}
+          {canEdit && (
+            <TotalsColumn
+              employeeDataMap={employeeDataMap}
+              filteredEmployees={filteredEmployees}
+              selectedPeriod={selectedPeriod}
+              onPeriodChange={setSelectedPeriod}
+              onInfoClick={showHours ? onInfoClick : undefined}
+              onAdjustClick={showHours ? onAdjustClick : undefined}
+              handleAdjustTime={handleAdjustTime}
+              theme={theme}
+              isDark={isDark}
+            />
+          )}
 
           <DragOverlay dropAnimation={null}>
             {activeDragItem?.sourceType === 'card' ? (

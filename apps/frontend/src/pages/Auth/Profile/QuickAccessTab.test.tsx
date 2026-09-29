@@ -55,12 +55,12 @@ describe("QuickAccessTab", () => {
     expect(listedLabels()).toEqual([APPBAR_MENU.ROLES, APPBAR_MENU.PROFILE]);
   });
 
-  it("no lista Roles a un rol operativo aunque tenga el permiso", () => {
+  it("lista Roles a un rol operativo con el permiso (lectura)", () => {
     mockPermissions = [PERMISSIONS.VIEW_ROLES];
     mockRoles = [{ name: "Supervisor" }];
     renderTab();
 
-    expect(listedLabels()).toEqual([APPBAR_MENU.PROFILE]);
+    expect(listedLabels()).toEqual([APPBAR_MENU.ROLES, APPBAR_MENU.PROFILE]);
   });
 
   it("un rol sin permisos solo ve Configuración", () => {

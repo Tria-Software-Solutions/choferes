@@ -50,6 +50,10 @@ via git tags (once tagged).
 
 ### Changed
 
+- Permission catalog refactor: one uniform `<recurso>:<acción>` code per action (`employees:view|create|edit|delete|export`), consistent plural resources, and clean Spanish labels with no underscores or raw codes. Renames `roles:hours:*` → `employee-hours:*`, `dashboard:self:view` → `my-panel:view`, `summaries:weekly|biweekly|monthly:*` → `weekly|biweekly|monthly-summaries:*`, `disciplinary:*` → `disciplinary-actions:*`, and consolidates the Excel/PDF export pairs into a single `*:export` (migration `20261008000000-refactor-permission-catalog`, which remaps every existing role)
+- Complete permission coverage: every API endpoint is now gated, including previously open reads (employees, schedules, vehicles, hours, summaries, users, roles, permissions, user-roles, role-permissions). Self-service gets its own permissions (`my-panel:view`, `profile:view|edit`, `notifications:view|edit|delete`, `vacations:request`) granted to every seeded role, and account endpoints use a new `allowSelfWithPermission` guard (own account = self-service permission, others = management permission)
+- Seeded role policies: **Administrativo** is now Gerencia in read-only mode (see and export everything, modify nothing), **SysAdmin** is a special role with the full catalog like Gerencia (and is hidden from the role/position selectors), **Supervisor** gets self-service plus read-only Roles (employees, schedules, hours and summaries to render the board, no editing), and **Chofer / Chofer Coordinador / Recepcionista** keep only self-service (Mi Panel, Perfil, Configuración, Notificaciones, Tareas y solicitar vacaciones). The Roles board now hides the draggable employees panel and disables card drag when the user lacks `employee-hours:edit`, and role access is permission-based (Supervisor can open the board read-only). "Mi Panel" is employee-only (`my-panel:view`), so Gerencia, Administrativo and SysAdmin do not have it. Migration `20261009000000-rename-usuario-to-sysadmin` renames the legacy `Usuario` role, moves those accounts to `Chofer`, gives every account a role and makes `employees.position` mandatory
+- Role administration is now permission-based instead of requiring a management role: `roles:view` reads, `roles:create|edit|delete` writes (the privilege guards on granting still apply). The Configuración sidebar "Administración" section (Usuarios y Roles) is limited to Gerencia, Administrativo and SysAdmin
 - Icons: the whole app uses Tabler (`@tabler/icons-react`) instead of lucide-react and MUI icons
 - Translated all documentation from Spanish to English
 - Monorepo restructured: apps moved to `apps/frontend` and `apps/backend`
@@ -97,6 +101,7 @@ via git tags (once tagged).
 
 ### Security
 
+- Deleting a user is its own permission (`users:delete`) instead of riding on `users:edit`/`users:toggle-active`
 - Privilege escalation: holders of `users:create`/`users:edit` could assign any role (including Gerencia) to anyone, themselves included, and `roles:edit` holders could add any permission to their own role. Granting now requires already holding every granted permission, and users cannot change their own role
 - Stored XSS: disciplinary attachments accepted any string as `dataUrl` (e.g. `javascript:`), which ran on download; only base64 `data:` URLs are accepted and the client refuses anything else
 - `POST /api/users/register` returned the new user's password hash

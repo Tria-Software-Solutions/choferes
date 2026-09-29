@@ -136,7 +136,8 @@ const AddEmployeeForm: React.FC<AddEmployeeFormProps> = ({
     }
 
     if (name === "position") {
-      if (!value.trim()) return "";
+      // El puesto es obligatorio: define el rol de acceso del empleado.
+      if (!value.trim()) return FORMS.REQUIRED_FIELD;
       return "";
     }
 
@@ -194,6 +195,8 @@ const AddEmployeeForm: React.FC<AddEmployeeFormProps> = ({
       formData.lastName.trim() !== "" &&
       errors.firstName === "" &&
       errors.lastName === "" &&
+      formData.position.trim() !== "" &&
+      errors.position === "" &&
       errors.email === "" &&
       errors.nationalId === "" &&
       errors.primaryPhone === "" &&
@@ -213,7 +216,7 @@ const AddEmployeeForm: React.FC<AddEmployeeFormProps> = ({
         nationalId: digitsOnly(formData.nationalId) || null,
         primaryPhone: digitsOnly(formData.primaryPhone) || null,
         secondaryPhone: digitsOnly(formData.secondaryPhone) || null,
-        position: formData.position.trim() || null,
+        position: formData.position.trim(),
         gender: formData.gender.trim() || null,
         contractStartDate: formData.contractStartDate || null,
         hourlyRate:
@@ -360,7 +363,6 @@ const AddEmployeeForm: React.FC<AddEmployeeFormProps> = ({
             onChange={(event) => handleFieldChange("position", String(event.target.value))}
             sx={formControl(theme)}
           >
-            <MenuItem value="">Sin puesto</MenuItem>
             {EMPLOYEE_POSITIONS.map((pos) => (
               <MenuItem key={pos} value={pos}>
                 {getEmployeePositionLabel(pos, formData.gender as EmployeeGender | null) ?? pos}
