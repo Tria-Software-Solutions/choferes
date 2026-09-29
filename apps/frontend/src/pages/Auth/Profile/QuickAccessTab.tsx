@@ -14,7 +14,7 @@ import { IconApps, IconArrowDown, IconArrowUp, IconRotate } from "@tabler/icons-
 import NavIcon from "../../../components/NavIcon/NavIcon.component";
 import { useMenuPreferences } from "../../../hooks/useMenuPreferences";
 import APPBAR_MENU from "../../../constants/appbar.constants";
-import PERMISSIONS from "../../../constants/permissions.constants";
+import { PERMISSION_CODES } from "../../../constants/permissions.constants";
 import PremiumTooltip from "../../../components/PremiumTooltip/PremiumTooltip.component";
 import TopNav from "../../../components/AppBar/TopNav.component";
 import { useAuthContext } from "../../../context/AuthContext";
@@ -32,13 +32,13 @@ const DOCK_MENU_KEYS = [
 ];
 
 const DOCK_MENU_PERMISSIONS: Record<string, string> = {
-  [APPBAR_MENU.MY_PANEL]: PERMISSIONS.VIEW_MY_PANEL,
-  [APPBAR_MENU.EMPLOYEES]: PERMISSIONS.VIEW_EMPLOYEES,
-  [APPBAR_MENU.SCHEDULES]: PERMISSIONS.VIEW_SCHEDULES,
-  [APPBAR_MENU.ROLES]: PERMISSIONS.VIEW_ROLES,
-  [APPBAR_MENU.VEHICLES]: PERMISSIONS.VIEW_VEHICLES,
-  [APPBAR_MENU.DASHBOARD]: PERMISSIONS.VIEW_ADMIN,
-  [APPBAR_MENU.TASKS]: PERMISSIONS.VIEW_TASKS,
+  [APPBAR_MENU.MY_PANEL]: PERMISSION_CODES.VIEW_MY_PANEL,
+  [APPBAR_MENU.EMPLOYEES]: PERMISSION_CODES.VIEW_EMPLOYEES,
+  [APPBAR_MENU.SCHEDULES]: PERMISSION_CODES.VIEW_SCHEDULES,
+  [APPBAR_MENU.ROLES]: PERMISSION_CODES.VIEW_ROLES,
+  [APPBAR_MENU.VEHICLES]: PERMISSION_CODES.VIEW_VEHICLES,
+  [APPBAR_MENU.DASHBOARD]: PERMISSION_CODES.VIEW_ADMIN,
+  [APPBAR_MENU.TASKS]: PERMISSION_CODES.VIEW_TASKS,
 };
 
 const QuickAccessTab: React.FC = () => {

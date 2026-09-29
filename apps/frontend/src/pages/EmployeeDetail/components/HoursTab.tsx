@@ -24,7 +24,7 @@ import { getBiweeklySummaries } from "../../../services/biweeklySummaryService";
 import { recalculateSummaries } from "../../../services/hoursWorkedService";
 import { useAuthContext } from "../../../context/AuthContext";
 import { useAppNotifications } from "../../../components/Snackbar/Snackbar.component";
-import PERMISSIONS from "../../../constants/permissions.constants";
+import { PERMISSION_CODES } from "../../../constants/permissions.constants";
 import OVERTIME from "../../../constants/overtime.constants";
 import { neutralButtonStyles } from "../../../components/Table/EditableTable/helpers";
 import PlaceholderSelect from "../../../components/PlaceholderSelect/PlaceholderSelect.component";
@@ -92,7 +92,7 @@ const HoursTab: React.FC<HoursTabProps> = ({ employee }) => {
 
   // The recalculate endpoint is guarded by `employee-hours:edit`, so gate the
   // actions on that same permission (not the biweekly-summary one).
-  const canRecalculate = userPermissions.includes(PERMISSIONS.EDIT_EMPLOYEE_HOURS);
+  const canRecalculate = userPermissions.includes(PERMISSION_CODES.EDIT_EMPLOYEE_HOURS);
 
   const [summaries, setSummaries] = useState<BiweeklySummary[]>([]);
   const [isLoading, setIsLoading] = useState(true);

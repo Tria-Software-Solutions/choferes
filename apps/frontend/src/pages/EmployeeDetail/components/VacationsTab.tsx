@@ -30,7 +30,7 @@ import {
 } from "../../../store/slices/vacationSlice";
 import { useAuthContext } from "../../../context/AuthContext";
 import { useAppNotifications } from "../../../components/Snackbar/Snackbar.component";
-import PERMISSIONS from "../../../constants/permissions.constants";
+import { PERMISSION_CODES } from "../../../constants/permissions.constants";
 import DialogComponent from "../../../components/Dialog/Dialog.component";
 import {
   deleteButtonStyles,
@@ -113,9 +113,9 @@ const VacationsTab: React.FC<VacationsTabProps> = ({ employee, onEmployeeRefresh
   const [accrual, setAccrual] = useState<VacationAccrual | null>(null);
   const [isSyncing, setIsSyncing] = useState(false);
 
-  const canCreate = userPermissions.includes(PERMISSIONS.CREATE_VACATION);
-  const canEdit = userPermissions.includes(PERMISSIONS.EDIT_VACATION);
-  const canDelete = userPermissions.includes(PERMISSIONS.DELETE_VACATION);
+  const canCreate = userPermissions.includes(PERMISSION_CODES.CREATE_VACATION);
+  const canEdit = userPermissions.includes(PERMISSION_CODES.EDIT_VACATION);
+  const canDelete = userPermissions.includes(PERMISSION_CODES.DELETE_VACATION);
 
   useEffect(() => {
     void dispatch(fetchVacations({ employeeId: employee.id, limit: 10000 }));

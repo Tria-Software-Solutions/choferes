@@ -33,7 +33,7 @@ import {
 } from "../../../store/slices/disciplinarySlice";
 import { useAuthContext } from "../../../context/AuthContext";
 import { useAppNotifications } from "../../../components/Snackbar/Snackbar.component";
-import PERMISSIONS from "../../../constants/permissions.constants";
+import { PERMISSION_CODES } from "../../../constants/permissions.constants";
 import DialogComponent from "../../../components/Dialog/Dialog.component";
 import {
   deleteButtonStyles,
@@ -97,9 +97,9 @@ const DisciplinaryTab: React.FC<DisciplinaryTabProps> = ({ employee }) => {
   const [deleteTarget, setDeleteTarget] = useState<DisciplinaryAction | null>(null);
   const [busyId, setBusyId] = useState<number | null>(null);
 
-  const canCreate = userPermissions.includes(PERMISSIONS.CREATE_DISCIPLINARY);
-  const canEdit = userPermissions.includes(PERMISSIONS.EDIT_DISCIPLINARY);
-  const canDelete = userPermissions.includes(PERMISSIONS.DELETE_DISCIPLINARY);
+  const canCreate = userPermissions.includes(PERMISSION_CODES.CREATE_DISCIPLINARY);
+  const canEdit = userPermissions.includes(PERMISSION_CODES.EDIT_DISCIPLINARY);
+  const canDelete = userPermissions.includes(PERMISSION_CODES.DELETE_DISCIPLINARY);
 
   useEffect(() => {
     void dispatch(fetchDisciplinaryActions({ employeeId: employee.id, limit: 10000 }));
