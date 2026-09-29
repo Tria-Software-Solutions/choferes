@@ -88,10 +88,10 @@ const RolesPage: React.FC = () => {
   const isSmallScreen = useMediaQuery(theme.breakpoints.down('sm'));
   const { userPermissions } = useAuthContext();
   const { showNotification } = useAppNotifications();
-  // The recalculate endpoint is guarded by `roles:hours:edit`, so read-only
-  // users (e.g. Usuario, who only has `roles:view`) must not call it: they
-  // just read the summaries the server already computed.
-  const canRecalculate = userPermissions.includes(PERMISSIONS.EDIT_EMPLOYEE_ROLES);
+  // The recalculate endpoint is guarded by `employee-hours:edit`, so read-only
+  // users (e.g. a Supervisor, who only has `roles:view` + `employee-hours:view`)
+  // must not call it: they just read the summaries the server already computed.
+  const canRecalculate = userPermissions.includes(PERMISSIONS.EDIT_EMPLOYEE_HOURS);
   const { employees, isLoadingEmployees } = useSelector(
     (state: RootState) => state.employees
   );
@@ -775,14 +775,14 @@ const RolesPage: React.FC = () => {
 
   const exportOptions = useMemo(() => {
     const options = [];
-    if (userPermissions.includes(PERMISSIONS.EXPORT_EXCEL_ROLES)) {
+    if (userPermissions.includes(PERMISSIONS.EXPORT_ROLES)) {
       options.push({
         label: "Exportar a Excel",
         icon: <ExcelIcon size={20} />,
         onClick: () => handleExportRef.current("excel"),
       });
     }
-    if (userPermissions.includes(PERMISSIONS.EXPORT_PDF_ROLES)) {
+    if (userPermissions.includes(PERMISSIONS.EXPORT_ROLES)) {
       options.push({
         label: "Exportar a PDF",
         icon: <PdfIcon size={20} />,
@@ -792,9 +792,7 @@ const RolesPage: React.FC = () => {
     return options;
   }, [userPermissions]);
 
-  const canExport =
-    userPermissions.includes(PERMISSIONS.EXPORT_EXCEL_ROLES) &&
-    userPermissions.includes(PERMISSIONS.EXPORT_PDF_ROLES);
+  const canExport = userPermissions.includes(PERMISSIONS.EXPORT_ROLES);
   const hasExportableRows =
     viewMode === "employee" ? filteredEmployees.length > 0 : filteredSchedules.length > 0;
 

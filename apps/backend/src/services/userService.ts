@@ -13,7 +13,8 @@ import {
   buildSearchWhere,
   QueryParams,
 } from "../utils/pagination";
-import { assignRole, resolveDefaultRole, resolveRoleById } from "./userRoleService";
+import { assignRole, resolveRoleById } from "./userRoleService";
+import { ServiceError } from "../utils/errors";
 
 // Sensitive columns that must never be serialized to API consumers.
 // Requests targeting these columns use their dedicated endpoints instead,
@@ -230,17 +231,18 @@ export const getUserPermissions = async (userId: number) => {
 // Creates a new user with hashed password (whitelisted fields only). Returns
 // the safe projection: the created instance still holds the password hash.
 //
-// `roleId` (optional, not whitelisted for mass assignment) chooses the role;
-// when omitted the default "Usuario" role is used. Assigning the role here —
-// and resolving it BEFORE creating the account — keeps the invariant "toda
-// cuenta tiene al menos un rol" true for every client of the API, instead of
-// relying on a second request from the UI.
+// `roleId` (not whitelisted for mass assignment) chooses the role and is
+// REQUIRED: every account must have a role, so there is no generic fallback.
+// Resolving it BEFORE creating the account keeps the invariant "toda cuenta
+// tiene al menos un rol" true for every client of the API.
 export const createUser = async (data: Record<string, any>) => {
   const clean = pickFields(data, CREATABLE_FIELDS);
   const hashedPassword = await bcrypt.hash(clean.password, 10);
 
-  const role =
-    data.roleId != null ? await resolveRoleById(Number(data.roleId)) : await resolveDefaultRole();
+  if (data.roleId == null) {
+    throw new ServiceError(400, "El rol es requerido");
+  }
+  const role = await resolveRoleById(Number(data.roleId));
 
   const created = await User.create(
     {

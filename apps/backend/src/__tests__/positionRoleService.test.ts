@@ -1,5 +1,4 @@
 import {
-  DEFAULT_ACCESS_ROLE,
   EMPLOYEE_POSITIONS,
   POSITION_LINKED_ROLE_NAMES,
   POSITION_ROLE_NAMES,
@@ -44,7 +43,7 @@ beforeEach(() => {
 });
 
 describe("catálogo de puestos y roles", () => {
-  it("los puestos son los mismos roles de acceso, menos el genérico Usuario", () => {
+  it("los puestos son los mismos roles de acceso", () => {
     expect([...EMPLOYEE_POSITIONS]).toEqual([
       "chofer",
       "chofer_coordinador",
@@ -64,16 +63,14 @@ describe("catálogo de puestos y roles", () => {
     Object.values(POSITION_ROLE_NAMES).forEach((role) => expect(ROLE_NAMES).toContain(role));
   });
 
-  it("cada rol de acceso tiene su puesto salvo el genérico Usuario", () => {
-    // Es la Simetría que se pidió: puestos = roles, excepto Usuario, que es el
-    // fallback de quien no tiene puesto y no es un puesto en sí.
-    const rolesWithPosition = ROLE_NAMES.filter((name) => name !== DEFAULT_ACCESS_ROLE);
+  it("cada puesto tiene su rol: solo SysAdmin queda fuera", () => {
+    // SysAdmin es el rol especial de la plataforma, no un puesto.
+    const rolesWithPosition = ROLE_NAMES.filter((name) => name !== "SysAdmin");
     expect(Object.values(POSITION_ROLE_NAMES).sort()).toEqual([...rolesWithPosition].sort());
   });
 
-  it("los roles que siguen al puesto incluyen el genérico y los de gestión", () => {
+  it("los roles que siguen al puesto son exactamente los de puesto", () => {
     expect([...POSITION_LINKED_ROLE_NAMES]).toEqual([
-      "Usuario",
       "Chofer",
       "Chofer Coordinador",
       "Recepcionista",
@@ -95,8 +92,8 @@ describe("catálogo de puestos y roles", () => {
     expect(getPositionForRoleName("Chofer")).toBe("chofer");
     expect(getPositionForRoleName("gerencia")).toBe("gerencia");
     expect(getPositionForRoleName("Gerencia")).toBe("gerencia");
-    // El genérico y los personalizados no siguen a ningún puesto.
-    expect(getPositionForRoleName("Usuario")).toBeNull();
+    // SysAdmin y los personalizados no siguen a ningún puesto.
+    expect(getPositionForRoleName("SysAdmin")).toBeNull();
     expect(getPositionForRoleName("Contabilidad")).toBeNull();
     expect(getPositionForRoleName(null)).toBeNull();
   });
@@ -125,23 +122,19 @@ describe("resolveRoleForPosition", () => {
     expect(role.id).toBe(3);
   });
 
-  it("sin puesto usa el rol genérico Usuario", async () => {
-    Role.findOne.mockResolvedValue({ id: 7, name: "Usuario" });
-
-    const role = await positionRole.resolveRoleForPosition(null);
-
-    expect(Role.findOne).toHaveBeenCalledWith({ where: { name: "Usuario" } });
-    expect(role.name).toBe("Usuario");
+  it("rechaza el empleado sin puesto", async () => {
+    await expect(positionRole.resolveRoleForPosition(null)).rejects.toMatchObject({
+      statusCode: 400,
+    });
+    expect(Role.findOne).not.toHaveBeenCalled();
   });
 
-  it("si el rol del puesto aún no existe cae al genérico", async () => {
-    Role.findOne
-      .mockResolvedValueOnce(null)
-      .mockResolvedValueOnce({ id: 7, name: "Usuario" });
+  it("falla si el rol del puesto no existe", async () => {
+    Role.findOne.mockResolvedValue(null);
 
-    const role = await positionRole.resolveRoleForPosition("chofer");
-
-    expect(role.name).toBe("Usuario");
+    await expect(positionRole.resolveRoleForPosition("chofer")).rejects.toMatchObject({
+      statusCode: 500,
+    });
   });
 });
 
@@ -166,7 +159,7 @@ describe("planAccountRoleChange", () => {
   });
 
   it("sí propone el rol de gerencia a una cuenta operativa que pasa a ese puesto", async () => {
-    User.findOne.mockResolvedValue(accountWith({ id: 7, name: "Usuario" }));
+    User.findOne.mockResolvedValue(accountWith({ id: 7, name: "Chofer" }));
     Role.findOne.mockResolvedValue({ id: 1, name: "Gerencia" });
 
     const change = await positionRole.planAccountRoleChange(1, "gerencia");
@@ -182,7 +175,7 @@ describe("planAccountRoleChange", () => {
   });
 
   it("propone el rol del nuevo puesto cuando la cuenta tiene otro rol operativo", async () => {
-    User.findOne.mockResolvedValue(accountWith({ id: 7, name: "Usuario" }));
+    User.findOne.mockResolvedValue(accountWith({ id: 7, name: "Chofer" }));
     Role.findOne.mockResolvedValue({ id: 3, name: "Supervisor" });
 
     const change = await positionRole.planAccountRoleChange(1, "supervisor");
@@ -253,7 +246,7 @@ describe("checkRoleFitsEmployeePosition", () => {
 
   it("impide quitarle el rol Supervisor a un supervisor", async () => {
     linkedSupervisor();
-    Role.findByPk.mockResolvedValue({ id: 7, name: "Usuario" });
+    Role.findByPk.mockResolvedValue({ id: 7, name: "Chofer" });
 
     const denial = await positionRole.checkRoleFitsEmployeePosition(9, 7);
 

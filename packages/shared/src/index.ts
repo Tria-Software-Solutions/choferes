@@ -53,6 +53,11 @@ export {
   MANAGEMENT_ROLE_NAMES,
   isManagementRoleName,
   hasManagementRole,
+  ADMIN_SETTINGS_ROLE_NAMES,
+  isAdminSettingsRoleName,
+  hasAdminSettingsRole,
+  HIDDEN_ROLE_NAMES,
+  isRoleSelectable,
   isPermissionCode,
   getPermissionByCode,
 } from "./constants/permissions";
@@ -66,7 +71,6 @@ export {
   POSITION_ROLE_NAMES,
   POSITION_LINKED_ROLE_NAMES,
   POSITION_KEYS,
-  DEFAULT_ACCESS_ROLE,
   getRoleNameForPosition,
   getPositionForRoleName,
 } from "./constants/positionRoles";

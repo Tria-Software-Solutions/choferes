@@ -1,7 +1,7 @@
 import express from "express";
 import * as scheduleController from "../controllers/scheduleController";
 import { authenticateToken } from "../middleware/authMiddleware";
-import { requirePermission } from "../middleware/authorize";
+import { requireAnyPermission, requirePermission } from "../middleware/authorize";
 import { PERMISSION_CODES } from "../constants/permissions";
 import {
   idParam,
@@ -13,8 +13,23 @@ import {
 
 const router = express.Router();
 
-router.get("/", authenticateToken, paginationRules, validate, scheduleController.getSchedules);
-router.get("/:id", authenticateToken, idParam, validate, scheduleController.getScheduleById);
+router.get(
+  "/",
+  authenticateToken,
+  // El tablero de Roles (solo lectura) necesita el listado de horarios.
+  requireAnyPermission([PERMISSION_CODES.VIEW_SCHEDULES, PERMISSION_CODES.VIEW_ROLES]),
+  paginationRules,
+  validate,
+  scheduleController.getSchedules,
+);
+router.get(
+  "/:id",
+  authenticateToken,
+  requirePermission(PERMISSION_CODES.VIEW_SCHEDULES),
+  idParam,
+  validate,
+  scheduleController.getScheduleById,
+);
 router.post(
   "/",
   authenticateToken,

@@ -29,7 +29,7 @@ jest.mock("react-router-dom", () => ({
 
 jest.mock("../../context/AuthContext", () => ({
   useAuthContext: () => ({
-    currentUser: { id: 1, firstName: "Carlos", lastName: "Mora", roles: [{ id: 4, name: "Usuario" }] },
+    currentUser: { id: 1, firstName: "Carlos", lastName: "Mora", roles: [{ id: 6, name: "Chofer" }] },
     userPermissions: [],
   }),
 }));

@@ -109,7 +109,7 @@ export const createUser = createAsyncThunk(
     { rejectWithValue },
   ) => {
     try {
-      // El backend asigna el rol en la misma operación (por defecto "Usuario"),
+      // El backend asigna el rol en la misma operación (roleId es obligatorio),
       // así que la cuenta nunca queda sin permisos si falla un segundo request.
       const createdUser = await UserService.createUser({
         ...newUser,

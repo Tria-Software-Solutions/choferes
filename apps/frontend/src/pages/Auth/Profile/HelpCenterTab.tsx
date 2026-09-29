@@ -106,7 +106,7 @@ const GUIDE_STEPS: {
     icon: IconCalendarUser,
     title: "Asigna empleados a las fechas",
     description: "En la vista de roles asigna un empleado y un horario a cada día de la semana.",
-    permission: PERMISSIONS.VIEW_EMPLOYEE_ROLES_HOURS,
+    permission: PERMISSIONS.VIEW_EMPLOYEE_HOURS,
     route: ROUTES.ROLES,
     button: "Ir a roles",
   },

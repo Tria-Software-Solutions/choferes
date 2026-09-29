@@ -1,8 +1,8 @@
 import express from "express";
-import { MANAGEMENT_ROLE_NAMES, PERMISSION_CODES } from "@choferes/shared";
+import { PERMISSION_CODES } from "@choferes/shared";
 import * as roleController from "../controllers/roleController";
 import { authenticateToken } from "../middleware/authMiddleware";
-import { requirePermission, requireRole } from "../middleware/authorize";
+import { requirePermission } from "../middleware/authorize";
 import {
   idParam,
   roleRules,
@@ -14,14 +14,14 @@ import {
 
 const router = express.Router();
 
-// La API de roles es exclusiva de Gerencia/Administrativo: el permiso por sí
-// solo no habilita la administración. Coincide con lo que hace la UI.
-const requireManagementRole = requireRole([...MANAGEMENT_ROLE_NAMES]);
+// La administración de roles se controla con permisos (ver/crear/editar/eliminar).
+// Quien solo tiene `roles:view` (p. ej. Supervisor) entra en modo lectura; la
+// UI además oculta la edición. No se exige rol de gestión: el permiso basta.
 
 router.get(
   "/",
   authenticateToken,
-  requireManagementRole,
+  requirePermission(PERMISSION_CODES.VIEW_ROLES),
   paginationRules,
   validate,
   roleController.getRoles,
@@ -29,7 +29,7 @@ router.get(
 router.get(
   "/:id",
   authenticateToken,
-  requireManagementRole,
+  requirePermission(PERMISSION_CODES.VIEW_ROLES),
   idParam,
   validate,
   roleController.getRoleById,
@@ -37,7 +37,7 @@ router.get(
 router.get(
   "/name/:name",
   authenticateToken,
-  requireManagementRole,
+  requirePermission(PERMISSION_CODES.VIEW_ROLES),
   roleNameParam,
   validate,
   roleController.getRoleByName,
@@ -45,7 +45,6 @@ router.get(
 router.post(
   "/",
   authenticateToken,
-  requireManagementRole,
   requirePermission(PERMISSION_CODES.CREATE_ROLE),
   roleRules,
   validate,
@@ -54,7 +53,6 @@ router.post(
 router.put(
   "/:id",
   authenticateToken,
-  requireManagementRole,
   requirePermission(PERMISSION_CODES.EDIT_ROLE),
   roleUpdateRules,
   validate,
@@ -63,7 +61,6 @@ router.put(
 router.delete(
   "/:id",
   authenticateToken,
-  requireManagementRole,
   requirePermission(PERMISSION_CODES.DELETE_ROLE),
   idParam,
   validate,

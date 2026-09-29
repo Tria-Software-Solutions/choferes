@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useCallback, useMemo } from "react";
 import { useDebounce } from "../../../hooks/useDebounce";
 import { useAuthContext } from "../../../context/AuthContext";
+import { isRoleSelectable } from "@choferes/shared";
 import { User } from "../../../models/User";
 import { Role } from "../../../models/Role";
 import { useSelector, useDispatch } from "react-redux";
@@ -757,11 +758,13 @@ const ManageUsers: React.FC<{ isExpanded?: boolean; hideHeader?: boolean }> = ({
                                 }}
                                 MenuProps={premiumMenuProps}
                               >
-                                {roles.map((role) => (
-                                  <MenuItem key={role.id} value={role.name} sx={{ fontSize: '0.8rem' }}>
-                                    {role.name}
-                                  </MenuItem>
-                                ))}
+                                {roles
+                                  .filter((role) => isRoleSelectable(role.name))
+                                  .map((role) => (
+                                    <MenuItem key={role.id} value={role.name} sx={{ fontSize: '0.8rem' }}>
+                                      {role.name}
+                                    </MenuItem>
+                                  ))}
                               </Select>
                             </FormControl>
                           </Box>

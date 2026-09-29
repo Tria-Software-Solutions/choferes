@@ -10,14 +10,21 @@ const router = express.Router();
 router.get(
   "/",
   authenticateToken,
+  requirePermission(PERMISSION_CODES.VIEW_WEEKLY_SUMMARY),
   paginationRules,
   validate,
   weeklySummaryController.getWeeklySummaries,
 );
-router.get("/employee/:id", authenticateToken, weeklySummaryController.getCurrentWeeklySummary);
+router.get(
+  "/employee/:id",
+  authenticateToken,
+  requirePermission(PERMISSION_CODES.VIEW_WEEKLY_SUMMARY),
+  weeklySummaryController.getCurrentWeeklySummary,
+);
 router.get(
   "/employee/:id/has-worked",
   authenticateToken,
+  requirePermission(PERMISSION_CODES.VIEW_WEEKLY_SUMMARY),
   weeklySummaryController.hasWorkedCurrenWeeklySummary,
 );
 router.post(
