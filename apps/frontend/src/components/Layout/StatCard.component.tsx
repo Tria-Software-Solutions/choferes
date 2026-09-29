@@ -24,6 +24,10 @@ interface StatCardProps {
   icon?: React.ReactNode;
   /** Secondary line under the value (trend, unit, context). */
   hint?: React.ReactNode;
+  /** Extra content under the hint (e.g. a progress meter). */
+  footer?: React.ReactNode;
+  /** Makes the whole card a button (e.g. to jump to the detail of the metric). */
+  onClick?: () => void;
   tone?: StatTone;
   sx?: SxProps<Theme>;
 }
@@ -31,11 +35,31 @@ interface StatCardProps {
 // KPI tile used across the app (Empleados, Reportes, expediente): label, big
 // value and a small tinted icon. Tones only color the icon, never the card, so
 // a row of stats stays calm and readable.
-export const StatCard: React.FC<StatCardProps> = ({ label, value, icon, hint, tone = "default", sx }) => {
+export const StatCard: React.FC<StatCardProps> = ({
+  label,
+  value,
+  icon,
+  hint,
+  footer,
+  onClick,
+  tone = "default",
+  sx,
+}) => {
   const { colors, borders } = useTheme().tokens;
   const toneColors = useToneColors()(tone);
   return (
     <Box
+      {...(onClick && {
+        role: "button",
+        tabIndex: 0,
+        onClick,
+        onKeyDown: (event: React.KeyboardEvent) => {
+          if (event.key === "Enter" || event.key === " ") {
+            event.preventDefault();
+            onClick();
+          }
+        },
+      })}
       sx={[
         {
           minWidth: 0,
@@ -46,6 +70,12 @@ export const StatCard: React.FC<StatCardProps> = ({ label, value, icon, hint, to
           borderRadius: "12px",
           border: borders.paper,
           backgroundColor: colors.surface,
+        },
+        onClick && {
+          cursor: "pointer",
+          transition: "border-color 160ms ease, background-color 160ms ease",
+          "&:hover": { borderColor: colors.borderStrong, backgroundColor: colors.hoverSoft },
+          "&:focus-visible": { outline: `2px solid ${colors.accent}`, outlineOffset: 2 },
         },
         ...(Array.isArray(sx) ? sx : sx ? [sx] : []),
       ]}
@@ -103,6 +133,7 @@ export const StatCard: React.FC<StatCardProps> = ({ label, value, icon, hint, to
           {hint}
         </Typography>
       )}
+      {footer && <Box sx={{ mt: 0.5 }}>{footer}</Box>}
     </Box>
   );
 };

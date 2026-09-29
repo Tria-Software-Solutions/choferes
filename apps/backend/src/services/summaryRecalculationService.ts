@@ -28,7 +28,8 @@ const DAY_NAME_BY_INDEX = (date: Date): string => DAY_NAMES[date.getDay()];
 // from the client) parse normally; bare calendar dates ("2026-08-03") must be
 // interpreted as the LOCAL calendar day, not UTC midnight (which shifts a day
 // back in negative-offset timezones).
-export const parseCalendarDate = (value: string): Date => {
+export const parseCalendarDate = (value: string | Date): Date => {
+  if (value instanceof Date) return value;
   const date = new Date(value);
   if (Number.isNaN(date.getTime())) {
     return date;

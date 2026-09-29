@@ -50,6 +50,9 @@ export {
   ALL_PERMISSION_CODES,
   DEFAULT_ROLE_PERMISSIONS,
   ROLE_NAMES,
+  MANAGEMENT_ROLE_NAMES,
+  isManagementRoleName,
+  hasManagementRole,
   isPermissionCode,
   getPermissionByCode,
 } from "./constants/permissions";
@@ -59,6 +62,14 @@ export type {
   PermissionDefinition,
   RoleName,
 } from "./constants/permissions";
+export {
+  POSITION_ROLE_NAMES,
+  POSITION_LINKED_ROLE_NAMES,
+  POSITION_KEYS,
+  DEFAULT_ACCESS_ROLE,
+  getRoleNameForPosition,
+  getPositionForRoleName,
+} from "./constants/positionRoles";
 
 // Validations
 export {
