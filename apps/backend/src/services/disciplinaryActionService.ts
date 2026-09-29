@@ -12,6 +12,17 @@ export interface DisciplinaryAttachmentInput {
   dataUrl: string;
 }
 
+const MAX_ATTACHMENT_BYTES = 10 * 1024 * 1024; // 10MB per file (matches frontend)
+
+const validateAttachments = (attachments: DisciplinaryAttachmentInput[] | undefined): void => {
+  if (!attachments || attachments.length === 0) return;
+  for (const a of attachments) {
+    if (typeof a.size === "number" && a.size > MAX_ATTACHMENT_BYTES) {
+      throw new ServiceError(400, `El archivo "${a.name}" supera el máximo de 10MB`);
+    }
+  }
+};
+
 const employeeInclude = {
   model: Employee,
   as: "employee",
@@ -72,6 +83,8 @@ export interface CreateDisciplinaryInput {
 }
 
 export const createDisciplinaryAction = async (input: CreateDisciplinaryInput) => {
+  validateAttachments(input.attachments);
+
   const employee = await Employee.findByPk(input.employeeId);
   if (!employee) {
     throw new ServiceError(404, "Empleado no encontrado");
@@ -101,6 +114,8 @@ export interface UpdateDisciplinaryInput {
 }
 
 export const updateDisciplinaryAction = async (id: number, input: UpdateDisciplinaryInput) => {
+  validateAttachments(input.attachments);
+
   const action = await DisciplinaryAction.findByPk(id);
   if (!action) return null;
 
