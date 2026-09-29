@@ -29,7 +29,8 @@ export const TERMINATION_REASON_LABELS: Record<TerminationReason, string> = {
   otro: "Otro",
 };
 
-// Género de un empleado. Controla la variante de algunos puestos (Cajero/Cajera…).
+// Género de un empleado. Controla la variante de algunos puestos (Supervisora,
+// Chofer coordinadora…).
 export type EmployeeGender = "Masculino" | "Femenino";
 
 export const EMPLOYEE_GENDERS: readonly EmployeeGender[] = [
@@ -37,27 +38,42 @@ export const EMPLOYEE_GENDERS: readonly EmployeeGender[] = [
   "Femenino",
 ];
 
-// Puestos válidos de un empleado. Se guardan en su forma base (sin género).
-// "polivalente" abarca varios roles (cubre todo y no cambia con el género).
-export type EmployeePosition = "chofer" | "cajero" | "supervisor" | "polivalente";
+// Puestos válidos de un empleado (y los únicos que existen). Se guardan en su
+// forma base, sin género. Cada puesto tiene un rol de acceso con el mismo
+// nombre (ver `POSITION_ROLE_NAMES`): un supervisor siempre tiene el rol
+// Supervisor. El orden va de menor a mayor privilegio y es el que muestra el
+// selector de puesto.
+export type EmployeePosition =
+  | "chofer"
+  | "chofer_coordinador"
+  | "recepcionista"
+  | "supervisor"
+  | "administrativo"
+  | "gerencia";
 
 export const EMPLOYEE_POSITIONS: readonly EmployeePosition[] = [
   "chofer",
-  "cajero",
+  "chofer_coordinador",
+  "recepcionista",
   "supervisor",
-  "polivalente",
+  "administrativo",
+  "gerencia",
 ];
 
 export const EMPLOYEE_POSITION_LABELS: Record<EmployeePosition, string> = {
   chofer: "Chofer",
-  cajero: "Cajero",
+  chofer_coordinador: "Chofer coordinador",
+  recepcionista: "Recepcionista",
   supervisor: "Supervisor",
-  polivalente: "Polivalente",
+  administrativo: "Administrativo",
+  gerencia: "Gerencia",
 };
 
-// Etiqueta de un puesto. "Cajero" pasa a "Cajera" y "Supervisor" a
-// "Supervisora" cuando el género del empleado es femenino. Los puestos
-// legados (texto libre) se muestran tal cual.
+// Etiqueta de un puesto. "Supervisor" pasa a "Supervisora", "Chofer
+// coordinador" a "Chofer coordinadora" y "Administrativo" a "Administrativa"
+// cuando el género del empleado es femenino. "Gerencia" nombra un área, no una
+// persona, así que no cambia. Valores desconocidos (datos anteriores a esta
+// lista) se muestran tal cual.
 export const getEmployeePositionLabel = (
   position: string | null | undefined,
   gender: EmployeeGender | null | undefined,
@@ -66,8 +82,9 @@ export const getEmployeePositionLabel = (
   const base = EMPLOYEE_POSITION_LABELS[position as EmployeePosition];
   if (!base) return position;
   if (gender === "Femenino") {
-    if (position === "cajero") return "Cajera";
     if (position === "supervisor") return "Supervisora";
+    if (position === "chofer_coordinador") return "Chofer coordinadora";
+    if (position === "administrativo") return "Administrativa";
   }
   return base;
 };

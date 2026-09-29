@@ -88,6 +88,10 @@ const RolesPage: React.FC = () => {
   const isSmallScreen = useMediaQuery(theme.breakpoints.down('sm'));
   const { userPermissions } = useAuthContext();
   const { showNotification } = useAppNotifications();
+  // The recalculate endpoint is guarded by `roles:hours:edit`, so read-only
+  // users (e.g. Usuario, who only has `roles:view`) must not call it: they
+  // just read the summaries the server already computed.
+  const canRecalculate = userPermissions.includes(PERMISSIONS.EDIT_EMPLOYEE_ROLES);
   const { employees, isLoadingEmployees } = useSelector(
     (state: RootState) => state.employees
   );
@@ -320,13 +324,16 @@ const RolesPage: React.FC = () => {
     // Keep the summaries of the current period in sync with the server. Runs
     // once the initial data is loaded (replaces the old client-side backfill);
     // individual recalculations happen server-side on every assignment change.
+    // Read-only users only refresh: the write endpoint would answer 403.
     let cancelled = false;
     const syncCurrentPeriodSummaries = async () => {
       if (employees.length === 0 || schedules.length === 0) {
         return;
       }
       try {
-        await recalculateSummaries({});
+        if (canRecalculate) {
+          await recalculateSummaries({});
+        }
         if (!cancelled) {
           await refreshSummaries();
         }
@@ -338,7 +345,7 @@ const RolesPage: React.FC = () => {
     return () => {
       cancelled = true;
     };
-  }, [employees.length, schedules.length, refreshSummaries]);
+  }, [canRecalculate, employees.length, schedules.length, refreshSummaries]);
 
   const handleChange = (
     value: string,

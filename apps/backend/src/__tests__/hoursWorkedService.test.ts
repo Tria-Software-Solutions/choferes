@@ -168,8 +168,8 @@ describe("getHoursWorkedByEmployee", () => {
 });
 
 describe("getHoursWorkedByDate", () => {
-  it("debería filtrar por fecha usando Op.between", async () => {
-    const testDate = new Date("2026-07-20");
+  it("debería filtrar por fecha exacta (DATEONLY)", async () => {
+    const testDate = new Date(2026, 6, 20);
     HoursWorked.findAll.mockResolvedValue([mockHoursWorked]);
 
     const result = await hoursWorkedService.getHoursWorkedByDate(testDate);
@@ -177,25 +177,18 @@ describe("getHoursWorkedByDate", () => {
     expect(HoursWorked.findAll).toHaveBeenCalledTimes(1);
     const callArgs = HoursWorked.findAll.mock.calls[0][0];
 
-    const betweenRange = callArgs.where.date["$between"] as Date[];
-    expect(betweenRange).toBeDefined();
-    expect(betweenRange).toHaveLength(2);
+    expect(callArgs.where.date).toBe("2026-07-20");
     expect(result).toEqual([mockHoursWorked]);
   });
 
-  it("debería establecer el rango de fecha correcto", async () => {
-    const testDate = new Date("2026-07-20T15:30:00");
+  it("debería normalizar la fecha a YYYY-MM-DD", async () => {
+    const testDate = new Date(2026, 6, 20, 15, 30, 0);
     HoursWorked.findAll.mockResolvedValue([mockHoursWorked]);
 
     await hoursWorkedService.getHoursWorkedByDate(testDate);
 
     const callArgs = HoursWorked.findAll.mock.calls[0][0];
-    const betweenRange = callArgs.where.date["$between"] as Date[];
-
-    expect(betweenRange[0].getHours()).toBe(0);
-    expect(betweenRange[0].getMinutes()).toBe(0);
-    expect(betweenRange[1].getHours()).toBe(23);
-    expect(betweenRange[1].getMinutes()).toBe(59);
+    expect(callArgs.where.date).toBe("2026-07-20");
   });
 
   it("debería incluir Employee en la consulta", async () => {
@@ -210,9 +203,9 @@ describe("getHoursWorkedByDate", () => {
 });
 
 describe("getHoursWorkedByDateRange", () => {
-  it("debería filtrar por rango de fechas", async () => {
-    const startDate = new Date("2026-07-01");
-    const endDate = new Date("2026-07-31");
+  it("debería filtrar por rango de fechas (DATEONLY strings)", async () => {
+    const startDate = new Date(2026, 6, 1);
+    const endDate = new Date(2026, 6, 31);
     HoursWorked.findAll.mockResolvedValue([mockHoursWorked]);
 
     const result = await hoursWorkedService.getHoursWorkedByDateRange(
@@ -223,9 +216,8 @@ describe("getHoursWorkedByDateRange", () => {
     expect(HoursWorked.findAll).toHaveBeenCalledTimes(1);
     const callArgs = HoursWorked.findAll.mock.calls[0][0];
 
-    const betweenRange = callArgs.where.date["$between"] as Date[];
-    expect(betweenRange[0]).toEqual(startDate);
-    expect(betweenRange[1]).toEqual(endDate);
+    const betweenRange = callArgs.where.date.$between as string[];
+    expect(betweenRange).toEqual(["2026-07-01", "2026-07-31"]);
     expect(result).toEqual([mockHoursWorked]);
   });
 
@@ -233,8 +225,8 @@ describe("getHoursWorkedByDateRange", () => {
     HoursWorked.findAll.mockResolvedValue([]);
 
     const result = await hoursWorkedService.getHoursWorkedByDateRange(
-      new Date("2025-01-01"),
-      new Date("2025-01-31"),
+      new Date(2025, 0, 1),
+      new Date(2025, 0, 31),
     );
 
     expect(result).toEqual([]);
@@ -245,8 +237,11 @@ describe("createHoursWorked", () => {
   it("debería crear y recargar el registro cuando no existe uno para el día", async () => {
     const newData = {
       employeeId: 1,
-      date: new Date("2026-07-21"),
-      scheduleId: 2,
+      date: "2026-07-21",
+      scheduleId: 1,
+      reload: jest.fn(),
+      save: jest.fn(),
+      destroy: jest.fn(),
     };
     const createdRecord = { id: 3, ...newData, reload: jest.fn() };
 
@@ -266,8 +261,11 @@ describe("createHoursWorked", () => {
   it("debería actualizar el registro existente del mismo día en vez de crear un duplicado", async () => {
     const newData = {
       employeeId: 1,
-      date: new Date("2026-07-21"),
+      date: "2026-07-21",
       scheduleId: 2,
+      reload: jest.fn(),
+      save: jest.fn(),
+      destroy: jest.fn(),
     };
     const existingRecord = {
       id: 3,
@@ -295,8 +293,11 @@ describe("createHoursWorked", () => {
   it("debería actualizar el registro ganador si la creación falla por constraint única", async () => {
     const newData = {
       employeeId: 1,
-      date: new Date("2026-07-21"),
+      date: "2026-07-21",
       scheduleId: 2,
+      reload: jest.fn(),
+      save: jest.fn(),
+      destroy: jest.fn(),
     };
     const uniqueError = new Error("Unique constraint");
     uniqueError.name = "SequelizeUniqueConstraintError";
@@ -328,8 +329,11 @@ describe("createHoursWorked", () => {
   it("debería propagar el error si la creación falla por otra razón", async () => {
     const newData = {
       employeeId: 1,
-      date: new Date("2026-07-21"),
+      date: "2026-07-21",
       scheduleId: 2,
+      reload: jest.fn(),
+      save: jest.fn(),
+      destroy: jest.fn(),
     };
     const dbError = new Error("DB down");
 

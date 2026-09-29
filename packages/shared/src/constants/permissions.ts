@@ -126,6 +126,7 @@ export const PERMISSION_CATALOG = {
     label: "Habilitar/Deshabilitar Usuario",
   },
   VIEW_ADMIN: { code: "admin:view", module: "Admin", label: "Ver Admin" },
+  VIEW_MY_PANEL: { code: "dashboard:self:view", module: "Admin", label: "Ver Mi Panel" },
 
   // ── Resúmenes ────────────────────────────────────────────────────────────────
   VIEW_WEEKLY_SUMMARY: {
@@ -265,6 +266,18 @@ export const getPermissionByCode = (code: string): PermissionDefinition | undefi
   DEFINITION_BY_CODE.get(code);
 
 /**
+ * Permisos de autoservicio: lo que necesita cualquier persona con cuenta para
+ * usar Mi Panel y sus tareas. Base de los roles operativos.
+ */
+const SELF_SERVICE_PERMISSIONS = [
+  "dashboard:self:view",
+  "tasks:view",
+  "tasks:create",
+  "tasks:edit",
+  "tasks:delete",
+] as const;
+
+/**
  * Default permissions granted to each seeded role, expressed in stable codes.
  * Used by both the auth seeder and the catalog normalisation migration so a
  * fresh database and an existing one converge on the same baseline.
@@ -305,7 +318,7 @@ export const DEFAULT_ROLE_PERMISSIONS: Readonly<Record<string, readonly string[]
     "tasks:delete",
   ],
   Supervisor: [
-    "roles:view",
+    "dashboard:self:view",
     "roles:hours:view",
     "roles:hours:edit",
     "roles:export:excel",
@@ -323,12 +336,51 @@ export const DEFAULT_ROLE_PERMISSIONS: Readonly<Record<string, readonly string[]
     "tasks:edit",
     "tasks:delete",
   ],
-  Usuario: ["roles:view", "tasks:view", "tasks:create", "tasks:edit", "tasks:delete"],
+  // Un rol por puesto (ver POSITION_ROLE_NAMES). Arrancan con el autoservicio
+  // y se afinan desde Configuración → Roles.
+  "Chofer Coordinador": SELF_SERVICE_PERMISSIONS,
+  Recepcionista: SELF_SERVICE_PERMISSIONS,
+  Chofer: SELF_SERVICE_PERMISSIONS,
+  Usuario: SELF_SERVICE_PERMISSIONS,
 };
 
 /** Seeded role names, in priority order. */
-export const ROLE_NAMES = ["Gerencia", "Administrativo", "Supervisor", "Usuario"] as const;
+export const ROLE_NAMES = [
+  "Gerencia",
+  "Administrativo",
+  "Supervisor",
+  "Chofer Coordinador",
+  "Recepcionista",
+  "Chofer",
+  "Usuario",
+] as const;
 
 export type RoleName = (typeof ROLE_NAMES)[number];
+
+/**
+ * Roles de gestión: los únicos que administran la plataforma (roles,
+ * permisos y usuarios). Un permiso por sí solo no habilita esas pantallas,
+ * así que la UI y la API exigen rol de gestión además del permiso.
+ */
+export const MANAGEMENT_ROLE_NAMES: readonly RoleName[] = ["Gerencia", "Administrativo"];
+
+const MANAGEMENT_ROLE_NAMES_SET: ReadonlySet<string> = new Set(
+  MANAGEMENT_ROLE_NAMES.map((name) => name.toLowerCase()),
+);
+
+/** true si el nombre corresponde a un rol de gestión (Gerencia/Administrativo). */
+export const isManagementRoleName = (name?: string | null): boolean =>
+  typeof name === "string" && MANAGEMENT_ROLE_NAMES_SET.has(name.trim().toLowerCase());
+
+/** Estructura mínima que debe cumplir un usuario para revisar sus roles. */
+type RoleNameHolder = {
+  roles?: ReadonlyArray<{ name?: string | null } | null> | null;
+};
+
+/** true si el usuario tiene al menos un rol de gestión. */
+export const hasManagementRole = (user?: RoleNameHolder | null): boolean => {
+  const roles = user?.roles;
+  return Array.isArray(roles) && roles.some((role) => isManagementRoleName(role?.name));
+};
 
 export default PERMISSIONS;

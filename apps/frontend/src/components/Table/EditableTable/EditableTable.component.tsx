@@ -76,6 +76,11 @@ interface EditableTableProps<T extends object> {
   validateField?: (field: string, value: string | string[] | boolean) => boolean;
   isSaveDisabled?: boolean;
   noActions?: boolean;
+  /**
+   * Per-row veto on the delete action (e.g. rows the server refuses to delete).
+   * When it returns false the delete button is not rendered for that row.
+   */
+  canDeleteRow?: (row: T) => boolean;
   userPermissions?: string[];
   /** Permission names required for the row actions (edit/delete) of this entity */
   permissionMap?: { edit?: string; delete?: string };
@@ -188,6 +193,7 @@ const EditableTableComponent = <T extends object>({
   validateField = () => true,
   isSaveDisabled,
   noActions,
+  canDeleteRow,
   userPermissions,
   permissionMap,
   isExpanded = true,
@@ -567,7 +573,7 @@ const EditableTableComponent = <T extends object>({
                         getRowId,
                         currentUser: currentUser || undefined,
                         hasEditPermissions,
-                        hasDeletePermissions,
+                        hasDeletePermissions: hasDeletePermissions && (canDeleteRow?.(row) ?? true),
                         isExpanded: isExpanded || false,
                         onOpenPasswordModal,
                         handleEditClick,

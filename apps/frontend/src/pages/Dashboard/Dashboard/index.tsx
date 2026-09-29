@@ -24,7 +24,7 @@ import {
   PageContainer,
   PageHeader,
 } from "../../../components/Layout";
-import { BentoGrid, BentoGridItem } from "./components/BentoGrid";
+import { BentoGrid, BentoGridItem } from "../../../components/BentoGrid/BentoGrid.component";
 import {
   TopEmployeesChart,
   VehicleBrandChart,

@@ -4,6 +4,7 @@ import { Request, Response } from "express";
 import * as userRoleService from "../services/userRoleService";
 import * as accessGrantService from "../services/accessGrantService";
 import type { AuthenticatedRequest } from "../middleware/authorize";
+import * as positionRoleService from "../services/positionRoleService";
 import { sendServerError, sendError } from "../utils/errors";
 
 // Get all user-role assignments
@@ -61,6 +62,11 @@ export const createUserRole = async (req: Request, res: Response) => {
     const denial = await accessGrantService.checkRoleAssignment(actor, userId, roleId);
     if (denial) return res.status(denial.status).json({ message: denial.message });
 
+    // Un supervisor (por su puesto) no puede quedarse sin el rol Supervisor.
+    const positionDenial = await positionRoleService.checkRoleFitsEmployeePosition(userId, roleId);
+    if (positionDenial)
+      return res.status(positionDenial.status).json({ message: positionDenial.message });
+
     const userRole = await userRoleService.createUserRole({ userId, roleId } as never);
     return res.status(201).json(userRole);
   } catch (error) {
@@ -81,6 +87,11 @@ export const updateUserRole = async (req: Request, res: Response) => {
 
     const denial = await accessGrantService.checkRoleAssignment(actor, userId, roleId);
     if (denial) return res.status(denial.status).json({ message: denial.message });
+
+    // Un supervisor (por su puesto) no puede quedarse sin el rol Supervisor.
+    const positionDenial = await positionRoleService.checkRoleFitsEmployeePosition(userId, roleId);
+    if (positionDenial)
+      return res.status(positionDenial.status).json({ message: positionDenial.message });
 
     const updatedUserRole = await userRoleService.updateUserRole(userId, roleId);
     if (updatedUserRole) {

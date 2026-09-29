@@ -7,6 +7,7 @@ import {
   getCurrentBiweek,
   getEmployeesBiweeklyHours,
 } from "../services/employeeHoursSummaryService";
+import type { AuthenticatedRequest } from "../middleware/authorize";
 import { ServiceError, isServiceError, sendServerError } from "../utils/errors";
 
 // Get all employees (paginated)
@@ -49,12 +50,16 @@ export const createEmployee = async (req: Request, res: Response) => {
 export const updateEmployee = async (req: Request, res: Response) => {
   try {
     const id = parseInt(req.params.id, 10);
-    const updatedEmployee = await employeeService.updateEmployee(id, req.body);
+    const actor = (req as AuthenticatedRequest).user;
+    const updatedEmployee = await employeeService.updateEmployee(id, req.body, actor);
     if (updatedEmployee) {
       return res.status(200).json(updatedEmployee);
     }
     return res.status(404).json({ message: "Employee not found" });
   } catch (error) {
+    if (isServiceError(error)) {
+      return res.status(error.statusCode).json({ message: error.message });
+    }
     return sendServerError(res, "Error updating Employee", error);
   }
 };
@@ -112,12 +117,42 @@ export const getEmployeesBiweeklyHoursSummary = async (req: Request, res: Respon
   }
 };
 
+// Cuenta de acceso al sistema del empleado: usuario vinculado y sus roles.
+// La ficha lo usa para avisar cuando la cuenta quedó sin rol.
+export const getEmployeeAccess = async (req: Request, res: Response) => {
+  try {
+    const id = parseInt(req.params.id, 10);
+    const access = await employeeService.getEmployeeAccess(id);
+    return res.status(200).json(access);
+  } catch (error) {
+    if (isServiceError(error)) {
+      return res.status(error.statusCode).json({ message: error.message });
+    }
+    return sendServerError(res, "Error fetching employee access", error);
+  }
+};
+
+// Asigna el rol del puesto del empleado ("Usuario" si no tiene) cuando la cuenta quedó sin rol.
+export const assignDefaultRoleToEmployeeUser = async (req: Request, res: Response) => {
+  try {
+    const id = parseInt(req.params.id, 10);
+    const access = await employeeService.assignDefaultRoleToEmployeeUser(id);
+    return res.status(200).json(access);
+  } catch (error) {
+    if (isServiceError(error)) {
+      return res.status(error.statusCode).json({ message: error.message });
+    }
+    return sendServerError(res, "Error assigning default role", error);
+  }
+};
+
 // Enlaza el empleado a un usuario del sistema (o lo crea). Devuelve la contraseña
 // temporal solo si el usuario es NUEVO (para que el admin la entregue).
 export const linkEmployeeToUser = async (req: Request, res: Response) => {
   try {
     const id = parseInt(req.params.id, 10);
-    const result = await employeeService.linkEmployeeToUser(id);
+    const actor = (req as AuthenticatedRequest).user;
+    const result = await employeeService.linkEmployeeToUser(id, actor);
     if (!result.created) {
       return res.status(200).json({
         message: "El empleado ya tiene acceso al sistema",

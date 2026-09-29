@@ -3,10 +3,21 @@
 // eslint-disable-next-line import/no-named-as-default
 import bcrypt from "bcrypt";
 import * as crypto from "crypto";
+import { EMPLOYEE_POSITIONS } from "@choferes/shared";
 import Employee from "../models/Employee";
 import { HoursWorked } from "../models/HoursWorked";
+import { Role } from "../models/Role";
 import User from "../models/User";
 import { ServiceError } from "../utils/errors";
+import type { AuthenticatedUser } from "../middleware/authorize";
+import { checkRoleGrant } from "./accessGrantService";
+import {
+  applyAccountRole,
+  assignPositionRoleIfMissing,
+  planAccountRoleChange,
+  resolveRoleForPosition,
+} from "./positionRoleService";
+import { assignRole } from "./userRoleService";
 import {
   paginate,
   getPaginationParams,
@@ -164,6 +175,12 @@ const sanitizeControlledValues = (clean: Record<string, unknown>): Record<string
   if (sanitized.gender != null && !GENDERS.has(String(sanitized.gender))) {
     sanitized.gender = null;
   }
+  if (
+    sanitized.position != null &&
+    !(EMPLOYEE_POSITIONS as readonly string[]).includes(String(sanitized.position))
+  ) {
+    sanitized.position = null;
+  }
   return sanitized;
 };
 
@@ -177,7 +194,15 @@ export const createEmployee = async (data: Record<string, unknown>) => {
 
 // Updates employee data by ID (partial update — only provided fields change).
 // The active status is derived from the termination date so it can never drift.
-export const updateEmployee = async (id: number, data: Record<string, unknown>) => {
+// Changing the position also moves the linked account to the role of the new
+// position (a supervisor always ends up with the Supervisor role). When `actor`
+// is given, the change is refused if it would hand out a role the actor could
+// not assign by hand.
+export const updateEmployee = async (
+  id: number,
+  data: Record<string, unknown>,
+  actor?: AuthenticatedUser,
+) => {
   const clean = sanitizeControlledValues(pickEditableFields(data));
 
   if (
@@ -203,8 +228,27 @@ export const updateEmployee = async (id: number, data: Record<string, unknown>) 
     clean.scheduledTerminationReason = null;
   }
 
+  // Rol que exige el nuevo puesto sobre la cuenta vinculada (se valida antes de
+  // guardar nada para no dejar el puesto cambiado con un rol rechazado).
+  const roleChange =
+    clean.position !== undefined
+      ? await planAccountRoleChange(id, (clean.position as string | null) ?? null)
+      : null;
+  if (roleChange && actor) {
+    const denial = await checkRoleGrant(actor, roleChange.role.id);
+    if (denial) {
+      throw new ServiceError(
+        denial.status,
+        `No se puede cambiar el puesto: la cuenta del empleado pasaría a tener el rol "${roleChange.role.name}". ${denial.message}.`,
+      );
+    }
+  }
+
   if (Object.keys(clean).length > 0) {
     await Employee.update(clean, { where: { id } });
+  }
+  if (roleChange) {
+    await applyAccountRole(roleChange.userId, roleChange.role.id);
   }
   return Employee.findByPk(id);
 };
@@ -269,15 +313,35 @@ const generateTempPassword = (): string => {
 // Crea o enlaza un usuario al empleado (botón "Activar acceso al sistema").
 // El vínculo vive en `users.employeeId` (un empleado -> 0 o 1 cuenta), por lo
 // que se busca al usuario por ese campo, no en el modelo Employee.
-// Si ya existe una cuenta, se devuelve sin crear nada (created: false).
-export const linkEmployeeToUser = async (employeeId: number) => {
+// Si ya existe una cuenta, se devuelve sin crear nada (created: false) — pero
+// se le asigna el rol de su puesto si quedó sin ninguno (cuentas previas al
+// arreglo de user_role).
+// La cuenta nueva recibe el rol que corresponde al puesto del empleado
+// (supervisor → Supervisor); sin puesto, el rol genérico "Usuario".
+export const linkEmployeeToUser = async (employeeId: number, actor?: AuthenticatedUser) => {
   const employee = await Employee.findByPk(employeeId, {
-    attributes: ["id", "firstName", "lastName", "email"],
+    attributes: ["id", "firstName", "lastName", "email", "position"],
   });
   if (!employee) throw new ServiceError(404, "Empleado no encontrado");
 
   const existing = await User.findOne({ where: { employeeId: employee.id } });
-  if (existing) return { user: existing, created: false };
+  if (existing) {
+    // Cuentas creadas antes del arreglo quedaron sin rol: se les asigna el
+    // de su puesto la primera vez que se vuelve a enlazar.
+    await assignPositionRoleIfMissing(existing.id, employee.position);
+    return { user: existing, created: false };
+  }
+
+  const role = await resolveRoleForPosition(employee.position);
+  if (actor) {
+    const denial = await checkRoleGrant(actor, role.id);
+    if (denial) {
+      throw new ServiceError(
+        denial.status,
+        `No se puede activar el acceso: el puesto del empleado le da el rol "${role.name}". ${denial.message}.`,
+      );
+    }
+  }
 
   // Username/email pueden colisionar con cuentas ya existentes: se agrega un
   // sufijo numérico hasta encontrar uno libre.
@@ -324,7 +388,69 @@ export const linkEmployeeToUser = async (employeeId: number) => {
     employeeId: employee.id,
   });
 
+  // Sin esto la cuenta nacía sin permisos (no podía ver ni Tareas/Perfil).
+  await assignRole(user.id, role.id);
+
   return { user, created: true, tempPassword };
+};
+
+const ROLES_INCLUDE = {
+  model: Role,
+  as: "roles",
+  attributes: ["id", "name"],
+  through: { attributes: [] },
+};
+
+export interface EmployeeAccess {
+  hasUser: boolean;
+  userId: number | null;
+  username: string | null;
+  roles: { id: number; name: string }[];
+  /** true cuando la cuenta existe pero quedó sin ningún rol. */
+  needsRole: boolean;
+}
+
+// Cuenta de acceso al sistema del empleado (o vacío si no tiene). La ficha la
+// usa para avisar cuando la cuenta quedó sin rol.
+export const getEmployeeAccess = async (employeeId: number): Promise<EmployeeAccess> => {
+  const employee = await Employee.findByPk(employeeId, { attributes: ["id"] });
+  if (!employee) throw new ServiceError(404, "Empleado no encontrado");
+
+  const user = await User.findOne({
+    where: { employeeId: employee.id },
+    attributes: ["id", "username"],
+    include: [ROLES_INCLUDE],
+  });
+
+  if (!user) {
+    return { hasUser: false, userId: null, username: null, roles: [], needsRole: false };
+  }
+
+  const roles = (user.roles ?? []).map((role) => ({ id: role.id, name: role.name }));
+  return {
+    hasUser: true,
+    userId: user.id,
+    username: user.username,
+    roles,
+    needsRole: roles.length === 0,
+  };
+};
+
+// Asigna a la cuenta del empleado el rol de su puesto (o "Usuario" si no tiene
+// puesto) cuando quedó sin ninguno. Idempotente: si ya tiene rol no cambia nada.
+export const assignDefaultRoleToEmployeeUser = async (
+  employeeId: number,
+): Promise<EmployeeAccess> => {
+  const employee = await Employee.findByPk(employeeId, { attributes: ["id", "position"] });
+  if (!employee) throw new ServiceError(404, "Empleado no encontrado");
+
+  const user = await User.findOne({ where: { employeeId: employee.id }, attributes: ["id"] });
+  if (!user) {
+    throw new ServiceError(400, "El empleado no tiene una cuenta de acceso al sistema");
+  }
+
+  await assignPositionRoleIfMissing(user.id, employee.position);
+  return getEmployeeAccess(employeeId);
 };
 
 export const getEmployeesWithRelations = async (includeHoursWorked = false) => {

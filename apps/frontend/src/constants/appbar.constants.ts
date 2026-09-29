@@ -3,6 +3,7 @@ const APPBAR_MENU = {
   EMPLOYEES: "Gestión de Empleados",
   LOGOUT: "Cerrar Sesión",
   MANAGE: "Gestión",
+  MY_PANEL: "Mi Panel",
   ROLES: "Administración de Roles",
   SCHEDULES: "Gestión de Horarios y Turnos",
   TASKS: "Tareas",
@@ -19,6 +20,7 @@ const APPBAR_MENU = {
 // stable keys of the user's saved menu preferences, so renaming a page means
 // changing only its short label here.
 export const NAV_SHORT_LABELS: Record<string, string> = {
+  [APPBAR_MENU.MY_PANEL]: "Mi Panel",
   [APPBAR_MENU.ROLES]: "Roles",
   [APPBAR_MENU.DASHBOARD]: "Reportes",
   [APPBAR_MENU.VEHICLES]: "Vehículos",

@@ -47,12 +47,16 @@ jest.mock("../services/employeeService", () => ({
   createEmployee: jest.fn(),
   updateEmployee: jest.fn(),
   deleteEmployee: jest.fn(),
+  getEmployeeAccess: jest.fn(),
+  assignDefaultRoleToEmployeeUser: jest.fn(),
+  linkEmployeeToUser: jest.fn(),
 }));
 
 // eslint-disable-next-line @typescript-eslint/no-require-imports
 const employeeService = require("../services/employeeService");
 import employeeRoutes from "../routes/employeeRoutes";
 import { createTestApp } from "./helpers/testApp";
+import { ServiceError } from "../utils/errors";
 
 // Matches the real server mount: app.use("/api/employees", employeeRoutes)
 const app = createTestApp("/api/employees", employeeRoutes);
@@ -186,7 +190,23 @@ describe("PUT /api/employees/:id", () => {
 
     expect(res.status).toBe(200);
     expect(res.body).toEqual(updatedEmployee);
-    expect(service.updateEmployee).toHaveBeenCalledWith(1, updateData);
+    // El servicio recibe a quien hace el cambio para validar el rol que resulta del puesto.
+    expect(service.updateEmployee).toHaveBeenCalledWith(1, updateData, {
+      id: 1,
+      roles: ["*"],
+      permissions: ["*"],
+    });
+  });
+
+  it("debería responder con el código del servicio cuando el cambio de puesto no está permitido", async () => {
+    service.updateEmployee.mockRejectedValue(
+      new ServiceError(403, 'No se puede cambiar el puesto: la cuenta pasaría a tener el rol "Supervisor".'),
+    );
+
+    const res = await request(app).put("/api/employees/1").send({ position: "supervisor" });
+
+    expect(res.status).toBe(403);
+    expect(res.body.message).toContain("Supervisor");
   });
 
   it("debería devolver 404 si no existe", async () => {
@@ -216,5 +236,118 @@ describe("DELETE /api/employees/:id", () => {
 
     expect(res.status).toBe(404);
     expect(res.body.message).toBe("Employee not found");
+  });
+});
+
+// ─── Activar acceso al sistema ──────────────────────────────────────────────
+// Flujo completo a nivel de controller/ruta: verifica la respuesta HTTP y que
+// el error de configuración del rol por defecto se propague en vez de crear una
+// cuenta sin rol en silencio.
+describe("POST /api/employees/:id/link-user (Activar acceso al sistema)", () => {
+  const linkResult = { user: { id: 42, username: "ana.soto" }, created: true };
+
+  it("debería devolver 201 con la contraseña temporal cuando la cuenta es nueva", async () => {
+    service.linkEmployeeToUser.mockResolvedValue({
+      ...linkResult,
+      tempPassword: "Tmp#12345678",
+    });
+
+    const res = await request(app).post("/api/employees/7/link-user");
+
+    expect(service.linkEmployeeToUser).toHaveBeenCalledWith(7, {
+      id: 1,
+      roles: ["*"],
+      permissions: ["*"],
+    });
+    expect(res.status).toBe(201);
+    expect(res.body).toEqual({
+      message: "Acceso al sistema creado",
+      userId: 42,
+      username: "ana.soto",
+      tempPassword: "Tmp#12345678",
+      created: true,
+    });
+  });
+
+  it("debería devolver 200 sin contraseña cuando la cuenta ya existía", async () => {
+    service.linkEmployeeToUser.mockResolvedValue({ ...linkResult, created: false });
+
+    const res = await request(app).post("/api/employees/7/link-user");
+
+    expect(res.status).toBe(200);
+    expect(res.body).toEqual({
+      message: "El empleado ya tiene acceso al sistema",
+      userId: 42,
+      username: "ana.soto",
+      created: false,
+    });
+    expect(res.body).not.toHaveProperty("tempPassword");
+  });
+
+  it("debería propagar el error cuando el rol por defecto no está configurado", async () => {
+    service.linkEmployeeToUser.mockRejectedValue(
+      new ServiceError(500, 'El rol por defecto "Usuario" no está configurado'),
+    );
+
+    const res = await request(app).post("/api/employees/7/link-user");
+
+    expect(res.status).toBe(500);
+    expect(res.body.message).toBe('El rol por defecto "Usuario" no está configurado');
+  });
+});
+
+describe("GET /api/employees/:id/access", () => {
+  it("debería marcar needsRole cuando la cuenta quedó sin rol", async () => {
+    service.getEmployeeAccess.mockResolvedValue({
+      hasUser: true,
+      userId: 42,
+      username: "ana.soto",
+      roles: [],
+      needsRole: true,
+    });
+
+    const res = await request(app).get("/api/employees/7/access");
+
+    expect(service.getEmployeeAccess).toHaveBeenCalledWith(7);
+    expect(res.status).toBe(200);
+    expect(res.body).toMatchObject({ hasUser: true, username: "ana.soto", needsRole: true });
+  });
+
+  it("debería devolver 404 cuando el empleado no existe", async () => {
+    service.getEmployeeAccess.mockRejectedValue(new ServiceError(404, "Empleado no encontrado"));
+
+    const res = await request(app).get("/api/employees/999/access");
+
+    expect(res.status).toBe(404);
+    expect(res.body.message).toBe("Empleado no encontrado");
+  });
+});
+
+describe("POST /api/employees/:id/assign-default-role", () => {
+  it("debería devolver la cuenta con el rol asignado", async () => {
+    service.assignDefaultRoleToEmployeeUser.mockResolvedValue({
+      hasUser: true,
+      userId: 42,
+      username: "ana.soto",
+      roles: [{ id: 4, name: "Usuario" }],
+      needsRole: false,
+    });
+
+    const res = await request(app).post("/api/employees/7/assign-default-role");
+
+    expect(service.assignDefaultRoleToEmployeeUser).toHaveBeenCalledWith(7);
+    expect(res.status).toBe(200);
+    expect(res.body).toMatchObject({ needsRole: false, roles: [{ id: 4, name: "Usuario" }] });
+  });
+
+  it("debería devolver 400 cuando el empleado no tiene cuenta", async () => {
+    service.assignDefaultRoleToEmployeeUser.mockRejectedValue(
+      new ServiceError(400, "El empleado no tiene una cuenta de acceso al sistema"),
+    );
+
+    const res = await request(app).post("/api/employees/7/assign-default-role");
+
+    expect(res.status).toBe(400);
+    expect(res.body.message).toBe("El empleado no tiene una cuenta de acceso al sistema");
   });
 });
