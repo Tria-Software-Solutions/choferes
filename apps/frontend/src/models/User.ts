@@ -19,6 +19,8 @@ export interface User {
   }>;
   roleId?: number;
   roleName?: string;
+  /** Empleado (Planilla) vinculado a la cuenta, si existe. */
+  employeeId?: number | null;
   createdAt?: string;
   updatedAt?: string;
 }

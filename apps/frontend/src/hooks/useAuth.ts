@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { hasManagementRole } from "@choferes/shared";
 import { useAuthContext } from "../context/AuthContext";
 import { authenticateUser as authenticateUserService } from "../services/userService";
 import { getDefaultRoute } from "../utils/defaultRoute";
@@ -47,8 +48,12 @@ export const useAuth = () => {
         uniquePermissions,
       );
 
-      // Redirect to the first available route based on permissions
-      const defaultRoute = getDefaultRoute(uniquePermissions);
+      // Redirect to the first available route based on permissions. Roles solo
+      // es landing para Gerencia/Administrativo.
+      const defaultRoute = getDefaultRoute(
+        uniquePermissions,
+        hasManagementRole(response.user),
+      );
       navigate(defaultRoute);
     } catch (error: unknown) {
       let errorMessage = "Error de autenticación";

@@ -2,9 +2,7 @@ import { createSlice, createAsyncThunk, PayloadAction } from "@reduxjs/toolkit";
 import * as UserService from "../../services/userService";
 import * as UserRoleService from "../../services/userRoleService";
 import { User } from "../../models/User";
-import { UserRole } from "../../models/UserRole";
 import { RootState } from "../store";
-import { Roles } from "../../constants/roles";
 import { getApiErrorMessage } from "../../utils/apiError";
 
 // userSlice manages the state and async logic for user data
@@ -111,12 +109,12 @@ export const createUser = createAsyncThunk(
     { rejectWithValue },
   ) => {
     try {
-      const createdUser = await UserService.createUser(newUser);
-      const createdUserRole: Omit<UserRole, "id"> = {
-        userId: createdUser.id,
-        roleId: newRoleId ? newRoleId : Roles.USER,
-      };
-      await UserRoleService.createUserRole(createdUserRole);
+      // El backend asigna el rol en la misma operación (por defecto "Usuario"),
+      // así que la cuenta nunca queda sin permisos si falla un segundo request.
+      const createdUser = await UserService.createUser({
+        ...newUser,
+        roleId: newRoleId,
+      });
       const updatedUser = await UserService.getUserById(createdUser.id);
       return updatedUser;
     } catch (error: unknown) {

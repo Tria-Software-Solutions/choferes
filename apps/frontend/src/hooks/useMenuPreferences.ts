@@ -2,6 +2,12 @@ import { useState, useCallback, useEffect } from 'react';
 
 const STORAGE_KEY = 'menuPreferences';
 
+// Se incrementa cuando cambia el orden por defecto del menú (por ejemplo, al
+// insertar una página nueva en medio): los órdenes guardados con una versión
+// anterior se vuelven a sembrar para que la página nueva quede donde se define
+// en lugar del final del dock.
+const MENU_ORDER_VERSION = 2;
+
 export const MENU_PREFERENCES_EVENT = 'menuPreferencesChanged';
 
 export interface MenuPreferences {
@@ -34,12 +40,21 @@ export function useMenuPreferences(menuKeys: string[]) {
       const stored = localStorage.getItem(STORAGE_KEY);
       if (stored) {
         const parsed = JSON.parse(stored);
-        if (Array.isArray(parsed._order)) {
-          // Only keep valid keys and add any missing ones at the end
-          const valid = parsed._order.filter((k: string) => menuKeys.includes(k));
-          for (const key of menuKeys) {
-            if (!valid.includes(key)) valid.push(key);
-          }
+        // Un orden guardado antes del orden canónico actual mantendría las
+        // páginas nuevas al final, así que se vuelve a sembrar.
+        if (parsed._orderVersion === MENU_ORDER_VERSION && Array.isArray(parsed._order)) {
+          const valid: string[] = parsed._order.filter((k: string) => menuKeys.includes(k));
+          // Las páginas añadidas después vuelven a su posición canónica (justo
+          // detrás de la anterior del menú) en lugar del final del dock.
+          menuKeys.forEach((key, index) => {
+            if (valid.includes(key)) return;
+            const anchor = menuKeys
+              .slice(0, index)
+              .reverse()
+              .find((candidate) => valid.includes(candidate));
+            if (anchor) valid.splice(valid.indexOf(anchor) + 1, 0, key);
+            else valid.unshift(key);
+          });
           return valid;
         }
       }
@@ -63,7 +78,10 @@ export function useMenuPreferences(menuKeys: string[]) {
   }, [readPreferences, readOrder]);
 
   const saveAll = useCallback((prefs: MenuPreferences, order: string[]) => {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify({ ...prefs, _order: order }));
+    localStorage.setItem(
+      STORAGE_KEY,
+      JSON.stringify({ ...prefs, _order: order, _orderVersion: MENU_ORDER_VERSION }),
+    );
     window.dispatchEvent(new Event(MENU_PREFERENCES_EVENT));
   }, []);
 

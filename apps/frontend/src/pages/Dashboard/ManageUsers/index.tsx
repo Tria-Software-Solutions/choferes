@@ -686,61 +686,58 @@ const ManageUsers: React.FC<{ isExpanded?: boolean; hideHeader?: boolean }> = ({
                               fontSize: "0.8rem",
                               fontWeight: 700,
                               flexShrink: 0,
-                              alignSelf: "flex-start",
-                              mt: 1,
+                              alignSelf: { xs: "flex-start", md: "center" },
+                              mt: { xs: 1, md: 0 },
                               bgcolor: theme.palette.primary.main,
                               color: theme.palette.primary.contrastText,
                             }}
                           >
                             {user.firstName?.[0]}{user.lastName?.[0]}
                           </Avatar>
+                          {/* Todos los campos alineados en la misma fila en escritorio. */}
                           <Box
                             sx={{
                               flex: 1,
                               minWidth: 0,
                               display: "flex",
-                              flexDirection: "column",
-                              gap: 0.75,
-                              py: 0.5,
+                              flexDirection: { xs: "column", md: "row" },
+                              alignItems: { md: "center" },
+                              gap: 1,
                             }}
                           >
-                            <Box sx={{ display: "flex", flexDirection: { xs: "column", sm: "row" }, gap: 1 }}>
-                              <TextField
-                                size="small"
-                                value={editFields.firstName}
-                                onChange={(e) => setEditFields({ ...editFields, firstName: e.target.value })}
-                                placeholder="Nombre"
-                                variant="standard"
-                                sx={{ flex: 1, minWidth: 0, ...inputSx }}
-                              />
-                              <TextField
-                                size="small"
-                                value={editFields.lastName}
-                                onChange={(e) => setEditFields({ ...editFields, lastName: e.target.value })}
-                                placeholder="Apellido"
-                                variant="standard"
-                                sx={{ flex: 1, minWidth: 0, ...inputSx }}
-                              />
-                            </Box>
-                            <Box sx={{ display: "flex", flexDirection: { xs: "column", sm: "row" }, gap: 1 }}>
-                              <TextField
-                                size="small"
-                                value={editFields.email}
-                                onChange={(e) => setEditFields({ ...editFields, email: e.target.value })}
-                                placeholder="Correo"
-                                variant="standard"
-                                sx={{ flex: 1, minWidth: 0, ...inputSx }}
-                              />
-                              <TextField
-                                size="small"
-                                value={editFields.username}
-                                onChange={(e) => setEditFields({ ...editFields, username: e.target.value })}
-                                placeholder="Usuario"
-                                variant="standard"
-                                sx={{ flex: 1, minWidth: 0, ...inputSx }}
-                              />
-                            </Box>
-                            <FormControl variant="standard" size="small" fullWidth sx={{ minWidth: 0 }}>
+                            <TextField
+                              size="small"
+                              value={editFields.firstName}
+                              onChange={(e) => setEditFields({ ...editFields, firstName: e.target.value })}
+                              placeholder="Nombre"
+                              variant="standard"
+                              sx={{ flex: 1, minWidth: 0, ...inputSx }}
+                            />
+                            <TextField
+                              size="small"
+                              value={editFields.lastName}
+                              onChange={(e) => setEditFields({ ...editFields, lastName: e.target.value })}
+                              placeholder="Apellido"
+                              variant="standard"
+                              sx={{ flex: 1, minWidth: 0, ...inputSx }}
+                            />
+                            <TextField
+                              size="small"
+                              value={editFields.email}
+                              onChange={(e) => setEditFields({ ...editFields, email: e.target.value })}
+                              placeholder="Correo"
+                              variant="standard"
+                              sx={{ flex: 1.25, minWidth: 0, ...inputSx }}
+                            />
+                            <TextField
+                              size="small"
+                              value={editFields.username}
+                              onChange={(e) => setEditFields({ ...editFields, username: e.target.value })}
+                              placeholder="Usuario"
+                              variant="standard"
+                              sx={{ flex: 1, minWidth: 0, ...inputSx }}
+                            />
+                            <FormControl variant="standard" size="small" sx={{ flex: 1, minWidth: 0 }}>
                               <Select
                                 value={editFields.roleName}
                                 onChange={(e) => setEditFields({ ...editFields, roleName: e.target.value })}
@@ -768,7 +765,15 @@ const ManageUsers: React.FC<{ isExpanded?: boolean; hideHeader?: boolean }> = ({
                               </Select>
                             </FormControl>
                           </Box>
-                          <Box sx={{ display: "flex", gap: 0.5, flexShrink: 0, alignSelf: "flex-start", mt: 2 }}>
+                          <Box
+                            sx={{
+                              display: "flex",
+                              gap: 0.5,
+                              flexShrink: 0,
+                              alignSelf: { xs: "flex-start", md: "center" },
+                              mt: { xs: 2, md: 0 },
+                            }}
+                          >
                             <PremiumTooltip title={TABLE.SAVE}>
                               <span>
                                 <IconButton
