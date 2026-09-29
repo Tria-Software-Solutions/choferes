@@ -48,7 +48,7 @@ import {
 import APPBAR_MENU from "../../../constants/appbar.constants";
 import NavIcon from "../../../components/NavIcon/NavIcon.component";
 import PAGE_TITLE from "../../../constants/pageTitle.constants";
-import PERMISSIONS from "../../../constants/permissions.constants";
+import { PERMISSION_CODES } from "../../../constants/permissions.constants";
 import MANAGEMENT from "../../../constants/management.constants";
 import { SELECTOR_TABLE } from "../../../constants/constants";
 import { IconLockAccess, IconTimeline, IconUsers } from "@tabler/icons-react";
@@ -91,7 +91,7 @@ const RolesPage: React.FC = () => {
   // The recalculate endpoint is guarded by `employee-hours:edit`, so read-only
   // users (e.g. a Supervisor, who only has `roles:view` + `employee-hours:view`)
   // must not call it: they just read the summaries the server already computed.
-  const canRecalculate = userPermissions.includes(PERMISSIONS.EDIT_EMPLOYEE_HOURS);
+  const canRecalculate = userPermissions.includes(PERMISSION_CODES.EDIT_EMPLOYEE_HOURS);
   const { employees, isLoadingEmployees } = useSelector(
     (state: RootState) => state.employees
   );
@@ -149,8 +149,8 @@ const RolesPage: React.FC = () => {
   });
   const [viewMode, setViewMode] = useState<'employee' | 'schedule'>(() => {
     const savedViewMode = localStorage.getItem('selectorTableViewMode');
-    const hasRolesPermission = userPermissions.includes(PERMISSIONS.VIEW_ROLES);
-    const hasSchedulePermission = userPermissions.includes(PERMISSIONS.VIEW_SCHEDULES);
+    const hasRolesPermission = userPermissions.includes(PERMISSION_CODES.VIEW_ROLES);
+    const hasSchedulePermission = userPermissions.includes(PERMISSION_CODES.VIEW_SCHEDULES);
     
     // Si tiene permiso para roles, mostrar vista de horarios por defecto
     if (hasRolesPermission) {
@@ -179,8 +179,8 @@ const RolesPage: React.FC = () => {
 
   // Handle view mode based on permissions
   useEffect(() => {
-    const hasRolesPermission = userPermissions.includes(PERMISSIONS.VIEW_ROLES);
-    const hasSchedulePermission = userPermissions.includes(PERMISSIONS.VIEW_SCHEDULES);
+    const hasRolesPermission = userPermissions.includes(PERMISSION_CODES.VIEW_ROLES);
+    const hasSchedulePermission = userPermissions.includes(PERMISSION_CODES.VIEW_SCHEDULES);
     
     // Si no tiene permisos para roles pero sí para horarios, y está en vista de empleados, cambiar a horarios
     if (!hasRolesPermission && hasSchedulePermission && viewMode === 'employee') {
@@ -775,14 +775,14 @@ const RolesPage: React.FC = () => {
 
   const exportOptions = useMemo(() => {
     const options = [];
-    if (userPermissions.includes(PERMISSIONS.EXPORT_ROLES)) {
+    if (userPermissions.includes(PERMISSION_CODES.EXPORT_ROLES)) {
       options.push({
         label: "Exportar a Excel",
         icon: <ExcelIcon size={20} />,
         onClick: () => handleExportRef.current("excel"),
       });
     }
-    if (userPermissions.includes(PERMISSIONS.EXPORT_ROLES)) {
+    if (userPermissions.includes(PERMISSION_CODES.EXPORT_ROLES)) {
       options.push({
         label: "Exportar a PDF",
         icon: <PdfIcon size={20} />,
@@ -792,7 +792,7 @@ const RolesPage: React.FC = () => {
     return options;
   }, [userPermissions]);
 
-  const canExport = userPermissions.includes(PERMISSIONS.EXPORT_ROLES);
+  const canExport = userPermissions.includes(PERMISSION_CODES.EXPORT_ROLES);
   const hasExportableRows =
     viewMode === "employee" ? filteredEmployees.length > 0 : filteredSchedules.length > 0;
 
@@ -874,7 +874,7 @@ const RolesPage: React.FC = () => {
         <PageBody sx={{ height: { xs: "calc(100dvh - 88px)", md: "auto" }, minHeight: { xs: 480, md: 0 } }}>
           {isLoading ? (
             <LoadingState label="Cargando roles…" />
-          ) : !userPermissions.includes(PERMISSIONS.VIEW_ROLES) ? (
+          ) : !userPermissions.includes(PERMISSION_CODES.VIEW_ROLES) ? (
             <EmptyState icon={<IconLockAccess />} title="No tienes permisos para ver roles" />
           ) : (
             <WeeklyBoard

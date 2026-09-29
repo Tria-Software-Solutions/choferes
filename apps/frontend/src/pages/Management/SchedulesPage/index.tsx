@@ -42,7 +42,7 @@ import { normalizeString, translateDayOptionsToSpanish } from "../../../utils/st
 import APPBAR_MENU from "../../../constants/appbar.constants";
 import NavIcon from "../../../components/NavIcon/NavIcon.component";
 import PAGE_TITLE from "../../../constants/pageTitle.constants";
-import PERMISSIONS from "../../../constants/permissions.constants";
+import { PERMISSION_CODES } from "../../../constants/permissions.constants";
 import MANAGEMENT from "../../../constants/management.constants";
 import { IconAlertTriangle, IconCalendarWeek, IconCirclePlus, IconClock, IconGripVertical, IconPlus, IconTrash } from "@tabler/icons-react";
 import {
@@ -132,8 +132,8 @@ const SchedulesPage: React.FC = () => {
 
   const debouncedSearch = useDebounce(search, 400);
 
-  const hasEditPermissions = userPermissions.includes(PERMISSIONS.EDIT_SCHEDULES);
-  const hasDeletePermissions = userPermissions.includes(PERMISSIONS.DELETE_SCHEDULES);
+  const hasEditPermissions = userPermissions.includes(PERMISSION_CODES.EDIT_SCHEDULES);
+  const hasDeletePermissions = userPermissions.includes(PERMISSION_CODES.DELETE_SCHEDULES);
 
   // Fetch schedules on mount, when debounced search changes, or when navigating back
   useEffect(() => {
@@ -699,9 +699,9 @@ const SchedulesPage: React.FC = () => {
     ]
   );
 
-  const canExport = userPermissions.includes(PERMISSIONS.EXPORT_SCHEDULES);
-  const canReorder = userPermissions.includes(PERMISSIONS.REORDER_SCHEDULES);
-  const canCreate = userPermissions.includes(PERMISSIONS.CREATE_SCHEDULES);
+  const canExport = userPermissions.includes(PERMISSION_CODES.EXPORT_SCHEDULES);
+  const canReorder = userPermissions.includes(PERMISSION_CODES.REORDER_SCHEDULES);
+  const canCreate = userPermissions.includes(PERMISSION_CODES.CREATE_SCHEDULES);
 
   return (
     <PageContainer>

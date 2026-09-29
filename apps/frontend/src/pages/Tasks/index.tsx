@@ -55,7 +55,7 @@ import { Task, TaskList } from "../../models/Task";
 import { TASK_REMINDER_EVENT } from "../../context/NotificationContext";
 import { useTasks } from "./useTasks";
 import { useAuthContext } from "../../context/AuthContext";
-import PERMISSIONS from "../../constants/permissions.constants";
+import { PERMISSION_CODES } from "../../constants/permissions.constants";
 import {
   formatLongDate,
   groupCompletedTasks,
@@ -166,9 +166,9 @@ const TasksPage: React.FC = () => {
   const { userPermissions } = useAuthContext();
   const can: TaskPermissions = useMemo(
     () => ({
-      create: userPermissions.includes(PERMISSIONS.CREATE_TASK),
-      edit: userPermissions.includes(PERMISSIONS.EDIT_TASK),
-      delete: userPermissions.includes(PERMISSIONS.DELETE_TASK),
+      create: userPermissions.includes(PERMISSION_CODES.CREATE_TASK),
+      edit: userPermissions.includes(PERMISSION_CODES.EDIT_TASK),
+      delete: userPermissions.includes(PERMISSION_CODES.DELETE_TASK),
     }),
     [userPermissions],
   );

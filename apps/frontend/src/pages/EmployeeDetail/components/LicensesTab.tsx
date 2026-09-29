@@ -30,7 +30,7 @@ import {
 } from "../../../store/slices/licenseSlice";
 import { useAuthContext } from "../../../context/AuthContext";
 import { useAppNotifications } from "../../../components/Snackbar/Snackbar.component";
-import PERMISSIONS from "../../../constants/permissions.constants";
+import { PERMISSION_CODES } from "../../../constants/permissions.constants";
 import DialogComponent from "../../../components/Dialog/Dialog.component";
 import {
   deleteButtonStyles,
@@ -85,9 +85,9 @@ const LicensesTab: React.FC<LicensesTabProps> = ({ employee }) => {
   const [deleteTarget, setDeleteTarget] = useState<EmployeeLicense | null>(null);
   const [busyId, setBusyId] = useState<number | null>(null);
 
-  const canCreate = userPermissions.includes(PERMISSIONS.CREATE_LICENSE);
-  const canEdit = userPermissions.includes(PERMISSIONS.EDIT_LICENSE);
-  const canDelete = userPermissions.includes(PERMISSIONS.DELETE_LICENSE);
+  const canCreate = userPermissions.includes(PERMISSION_CODES.CREATE_LICENSE);
+  const canEdit = userPermissions.includes(PERMISSION_CODES.EDIT_LICENSE);
+  const canDelete = userPermissions.includes(PERMISSION_CODES.DELETE_LICENSE);
 
   useEffect(() => {
     void dispatch(fetchLicenses({ employeeId: employee.id, limit: 10000 }));

@@ -36,7 +36,7 @@ import { createExportOptions, exportFileFormattedDate } from '../../../utils/exp
 import APPBAR_MENU from '../../../constants/appbar.constants';
 import NavIcon from '../../../components/NavIcon/NavIcon.component';
 import PAGE_TITLE from '../../../constants/pageTitle.constants';
-import PERMISSIONS from '../../../constants/permissions.constants';
+import { PERMISSION_CODES } from '../../../constants/permissions.constants';
 import NOTIFICATIONS from '../../../constants/notifications.constants';
 import MANAGEMENT from '../../../constants/management.constants';
 import { IconAlertTriangle, IconBriefcase, IconCalendarWeek, IconCamera, IconCash, IconChevronRight, IconCirclePlus, IconClockHour4, IconHourglassHigh, IconLoader2, IconMail, IconPhone, IconPlus, IconShieldExclamation, IconUsers, IconX } from "@tabler/icons-react";
@@ -135,7 +135,7 @@ const EmployeesPage: React.FC = () => {
   const location = useLocation();
   const navigate = useNavigate();
 
-  const hasEditPermissions = userPermissions.includes(PERMISSIONS.EDIT_EMPLOYEES);
+  const hasEditPermissions = userPermissions.includes(PERMISSION_CODES.EDIT_EMPLOYEES);
 
   const licenses = useSelector(selectLicenses);
 
@@ -935,7 +935,7 @@ const EmployeesPage: React.FC = () => {
     ]
   );
 
-  const canExport = userPermissions.includes(PERMISSIONS.EXPORT_EMPLOYEES);
+  const canExport = userPermissions.includes(PERMISSION_CODES.EXPORT_EMPLOYEES);
 
   return (
     <PageContainer>
@@ -975,7 +975,7 @@ const EmployeesPage: React.FC = () => {
             </>
           }
           toolbarEnd={
-            userPermissions.includes(PERMISSIONS.CREATE_EMPLOYEES) ? (
+            userPermissions.includes(PERMISSION_CODES.CREATE_EMPLOYEES) ? (
               <Button
                 variant="contained"
                 startIcon={<IconPlus size={18} />}

@@ -12,7 +12,7 @@ import { IconArrowRight, IconBook, IconCalendarTime, IconChevronDown, IconCircle
 import { Link as RouterLink } from "react-router-dom";
 import ROUTES from "../../../constants/routes.constants";
 import APPBAR_MENU from "../../../constants/appbar.constants";
-import PERMISSIONS from "../../../constants/permissions.constants";
+import { PERMISSION_CODES } from "../../../constants/permissions.constants";
 import { useAuthContext } from "../../../context/AuthContext";
 import { PanelHeader } from "../../../components/Layout";
 
@@ -90,7 +90,7 @@ const GUIDE_STEPS: {
     icon: IconUsers,
     title: "Registra empleados",
     description: "Agrega a los choferes con sus datos personales en la sección de empleados.",
-    permission: PERMISSIONS.VIEW_EMPLOYEES,
+    permission: PERMISSION_CODES.VIEW_EMPLOYEES,
     route: ROUTES.EMPLOYEES,
     button: "Ir a empleados",
   },
@@ -98,7 +98,7 @@ const GUIDE_STEPS: {
     icon: IconCalendarTime,
     title: "Crea horarios y turnos",
     description: "Define los horarios y los días de la semana en que aplica cada turno.",
-    permission: PERMISSIONS.VIEW_SCHEDULES,
+    permission: PERMISSION_CODES.VIEW_SCHEDULES,
     route: ROUTES.SCHEDULES,
     button: "Ir a horarios",
   },
@@ -106,7 +106,7 @@ const GUIDE_STEPS: {
     icon: IconCalendarUser,
     title: "Asigna empleados a las fechas",
     description: "En la vista de roles asigna un empleado y un horario a cada día de la semana.",
-    permission: PERMISSIONS.VIEW_EMPLOYEE_HOURS,
+    permission: PERMISSION_CODES.VIEW_EMPLOYEE_HOURS,
     route: ROUTES.ROLES,
     button: "Ir a roles",
   },
@@ -114,7 +114,7 @@ const GUIDE_STEPS: {
     icon: IconChartBar,
     title: "Revisa horas y reportes",
     description: "Consulta los resúmenes semanal, quincenal y mensual de horas trabajadas.",
-    permission: PERMISSIONS.VIEW_WEEKLY_SUMMARY,
+    permission: PERMISSION_CODES.VIEW_WEEKLY_SUMMARY,
     route: ROUTES.DASHBOARD,
     button: "Ir a reportes",
   },
@@ -616,9 +616,9 @@ const HelpCenterTab: React.FC = () => {
         <Box sx={{ display: "flex", gap: 1.5, flexWrap: "wrap", flexShrink: 0, alignItems: "center" }}>
           {(
             [
-              { label: APPBAR_MENU.SCHEDULES, route: ROUTES.SCHEDULES, canSee: userCanSee(PERMISSIONS.VIEW_SCHEDULES) },
-              { label: APPBAR_MENU.VEHICLES, route: ROUTES.VEHICLES, canSee: userCanSee(PERMISSIONS.VIEW_VEHICLES) },
-              { label: APPBAR_MENU.EMPLOYEES, route: ROUTES.EMPLOYEES, canSee: userCanSee(PERMISSIONS.VIEW_EMPLOYEES) },
+              { label: APPBAR_MENU.SCHEDULES, route: ROUTES.SCHEDULES, canSee: userCanSee(PERMISSION_CODES.VIEW_SCHEDULES) },
+              { label: APPBAR_MENU.VEHICLES, route: ROUTES.VEHICLES, canSee: userCanSee(PERMISSION_CODES.VIEW_VEHICLES) },
+              { label: APPBAR_MENU.EMPLOYEES, route: ROUTES.EMPLOYEES, canSee: userCanSee(PERMISSION_CODES.VIEW_EMPLOYEES) },
             ].filter((item) => item.canSee)
           ).map(({ label, route }, index) => (
             <Fragment key={route}>

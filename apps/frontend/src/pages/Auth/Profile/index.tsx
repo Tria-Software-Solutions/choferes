@@ -23,7 +23,7 @@ import {
 } from "@mui/material";
 import { useAppNotifications } from "../../../components/Snackbar/Snackbar.component";
 import MANAGEMENT from "../../../constants/management.constants";
-import PERMISSIONS from "../../../constants/permissions.constants";
+import { PERMISSION_CODES } from "../../../constants/permissions.constants";
 import ManageUsers from "../../Dashboard/ManageUsers";
 import ManageRoles from "../../Dashboard/ManageRoles";
 import { IconApps, IconBell, IconCalendarUser, IconCamera, IconCheck, IconClock, IconDeviceDesktop, IconEye, IconEyeOff, IconHelpCircle, IconInfoCircle, IconLoader2, IconLock, IconMail, IconMoon, IconPalette, IconPencil, IconRotate, IconShieldCheck, IconSun, IconUser, IconUserCircle, IconUsers, IconX } from "@tabler/icons-react";
@@ -494,8 +494,8 @@ const Profile: React.FC = () => {
   };
 
   const adminTabPermissions: Record<string, string> = {
-    users: PERMISSIONS.VIEW_USERS,
-    roles: PERMISSIONS.VIEW_ROLES,
+    users: PERMISSION_CODES.VIEW_USERS,
+    roles: PERMISSION_CODES.VIEW_ROLES,
   };
 
   // La sección "Administración" (Usuarios, Roles) es solo para Gerencia,

@@ -48,7 +48,7 @@ import DialogComponent from "../../../components/Dialog/Dialog.component";
 import { DASHBOARD_USERS } from "../../../constants/constants";
 import { NOTIFICATIONS } from "../../../constants/constants";
 import { TABLE } from "../../../constants/constants";
-import PERMISSIONS from "../../../constants/permissions.constants";
+import { PERMISSION_CODES } from "../../../constants/permissions.constants";
 import PasswordChangeForm from "../../Forms/PasswordChangeForm";
 import {
   errorBoxStyles,
@@ -77,8 +77,8 @@ const ManageUsers: React.FC<{ isExpanded?: boolean; hideHeader?: boolean }> = ({
 }) => {
   const dispatch = useDispatch<AppDispatch>();
   const { userPermissions } = useAuthContext();
-  const canCreateUser = userPermissions.includes(PERMISSIONS.CREATE_USERS);
-  const canEditUser = userPermissions.includes(PERMISSIONS.EDIT_USER);
+  const canCreateUser = userPermissions.includes(PERMISSION_CODES.CREATE_USERS);
+  const canEditUser = userPermissions.includes(PERMISSION_CODES.EDIT_USER);
   const {
     users,
     isLoadingUsers,
@@ -900,8 +900,8 @@ const ManageUsers: React.FC<{ isExpanded?: boolean; hideHeader?: boolean }> = ({
                     isSaveDisabled={!isEditFormValid}
                     userPermissions={userPermissions}
                     permissionMap={{
-                      edit: PERMISSIONS.EDIT_USER,
-                      delete: PERMISSIONS.ENABLE_DISABLE_USER,
+                      edit: PERMISSION_CODES.EDIT_USER,
+                      delete: PERMISSION_CODES.ENABLE_DISABLE_USER,
                     }}
                     isExpanded={isExpanded}
                     validateField={validateField}
