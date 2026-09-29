@@ -32,7 +32,7 @@ import { capitalizeFirstLetter } from "../../../utils/string";
 import APPBAR_MENU from "../../../constants/appbar.constants";
 import NavIcon from "../../../components/NavIcon/NavIcon.component";
 import PAGE_TITLE from "../../../constants/pageTitle.constants";
-import PERMISSIONS from "../../../constants/permissions.constants";
+import { PERMISSION_CODES } from "../../../constants/permissions.constants";
 import NOTIFICATIONS from "../../../constants/notifications.constants";
 import MANAGEMENT from "../../../constants/management.constants";
 import { IconParking, IconCirclePlus, IconPlus, IconSearch, IconTrash } from "@tabler/icons-react";
@@ -495,8 +495,8 @@ const VehiclesPage: React.FC = () => {
 
   // Use exportTable({ data: exportData, ... }) for export
 
-  const canCreateVehicles = userPermissions.includes(PERMISSIONS.CREATE_VEHICLES);
-  const canExport = userPermissions.includes(PERMISSIONS.EXPORT_VEHICLES);
+  const canCreateVehicles = userPermissions.includes(PERMISSION_CODES.CREATE_VEHICLES);
+  const canExport = userPermissions.includes(PERMISSION_CODES.EXPORT_VEHICLES);
   const selectedDateLabel = capitalizeFirstLetter(
     format(selectedDate, "EEEE dd 'de' MMMM 'de' yyyy", { locale: es }),
   );
@@ -602,8 +602,8 @@ const VehiclesPage: React.FC = () => {
               isSaveDisabled={!isEditFormValid}
               userPermissions={userPermissions}
               permissionMap={{
-                edit: PERMISSIONS.EDIT_VEHICLES,
-                delete: PERMISSIONS.DELETE_VEHICLES,
+                edit: PERMISSION_CODES.EDIT_VEHICLES,
+                delete: PERMISSION_CODES.DELETE_VEHICLES,
               }}
               validateField={validateField}
             />

@@ -30,7 +30,7 @@ import {
 } from "../../../store/slices/paymentSlice";
 import { useAuthContext } from "../../../context/AuthContext";
 import { useAppNotifications } from "../../../components/Snackbar/Snackbar.component";
-import PERMISSIONS from "../../../constants/permissions.constants";
+import { PERMISSION_CODES } from "../../../constants/permissions.constants";
 import DialogComponent from "../../../components/Dialog/Dialog.component";
 import {
   deleteButtonStyles,
@@ -82,9 +82,9 @@ const PaymentsTab: React.FC<PaymentsTabProps> = ({ employee, onEmployeeRefresh }
   const [deleteTarget, setDeleteTarget] = useState<Payment | null>(null);
   const [busyId, setBusyId] = useState<number | null>(null);
 
-  const canCreate = userPermissions.includes(PERMISSIONS.CREATE_PAYMENT);
-  const canEdit = userPermissions.includes(PERMISSIONS.EDIT_PAYMENT);
-  const canDelete = userPermissions.includes(PERMISSIONS.DELETE_PAYMENT);
+  const canCreate = userPermissions.includes(PERMISSION_CODES.CREATE_PAYMENT);
+  const canEdit = userPermissions.includes(PERMISSION_CODES.EDIT_PAYMENT);
+  const canDelete = userPermissions.includes(PERMISSION_CODES.DELETE_PAYMENT);
 
   useEffect(() => {
     void dispatch(fetchPayments({ employeeId: employee.id, limit: 10000 }));

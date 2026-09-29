@@ -44,7 +44,7 @@ import { digitsOnly, maskNationalId, maskPhone } from "../../../utils/mask";
 import { formatMoney } from "../../../utils/paymentSlipPdf";
 import { useAuthContext } from "../../../context/AuthContext";
 import { useAppNotifications } from "../../../components/Snackbar/Snackbar.component";
-import PERMISSIONS from "../../../constants/permissions.constants";
+import { PERMISSION_CODES } from "../../../constants/permissions.constants";
 import TextfieldComponent from "../../../components/Textfield/Textfield.component";
 import PlaceholderSelect from "../../../components/PlaceholderSelect/PlaceholderSelect.component";
 import SectionHeader from "./SectionHeader";
@@ -196,7 +196,7 @@ const PersonalInfoTab: React.FC<PersonalInfoTabProps> = ({
   const { userPermissions } = useAuthContext();
   const { showNotification } = useAppNotifications();
 
-  const canEdit = userPermissions.includes(PERMISSIONS.EDIT_EMPLOYEES);
+  const canEdit = userPermissions.includes(PERMISSION_CODES.EDIT_EMPLOYEES);
 
   const [form, setForm] = useState(() => buildFormFromEmployee(employee));
   const [hasTermination, setHasTermination] = useState(Boolean(employee.terminationDate));

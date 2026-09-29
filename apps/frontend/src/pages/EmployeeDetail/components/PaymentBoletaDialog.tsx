@@ -35,7 +35,7 @@ import {
 } from "../../../store/slices/paymentSlice";
 import { useAuthContext } from "../../../context/AuthContext";
 import { useAppNotifications } from "../../../components/Snackbar/Snackbar.component";
-import PERMISSIONS from "../../../constants/permissions.constants";
+import { PERMISSION_CODES } from "../../../constants/permissions.constants";
 import DialogComponent from "../../../components/Dialog/Dialog.component";
 import BoletaDocument from "../../../components/Boleta/BoletaDocument.component";
 import { StatusBadge } from "../../../components/Layout";
@@ -146,8 +146,8 @@ const PaymentBoletaDialog: React.FC<PaymentBoletaDialogProps> = ({ open, onClose
   const { userPermissions } = useAuthContext();
   const { showNotification } = useAppNotifications();
 
-  const canSend = userPermissions.includes(PERMISSIONS.SEND_PAYMENT_EMAIL);
-  const canEdit = userPermissions.includes(PERMISSIONS.EDIT_PAYMENT);
+  const canSend = userPermissions.includes(PERMISSION_CODES.SEND_PAYMENT_EMAIL);
+  const canEdit = userPermissions.includes(PERMISSION_CODES.EDIT_PAYMENT);
 
   const [current, setCurrent] = useState<Payment | null>(payment);
   const [editing, setEditing] = useState(false);
