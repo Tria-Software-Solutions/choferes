@@ -14,6 +14,7 @@
 import {
   IconCalendarTime,
   IconCalendarUser,
+  IconLayoutDashboard,
   IconLayoutGrid,
   IconListCheck,
   IconLogout,
@@ -26,6 +27,7 @@ import type { TablerIcon } from "@tabler/icons-react";
 import APPBAR_MENU from "./appbar.constants";
 
 export const NAV_ICONS: Record<string, TablerIcon> = {
+  [APPBAR_MENU.MY_PANEL]: IconLayoutDashboard,
   [APPBAR_MENU.ROLES]: IconCalendarUser,
   [APPBAR_MENU.DASHBOARD]: IconChartBar,
   [APPBAR_MENU.VEHICLES]: IconParking,

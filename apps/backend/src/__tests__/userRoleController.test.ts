@@ -37,6 +37,13 @@ jest.mock("../services/accessGrantService", () => ({
   checkRoleAssignment: jest.fn(),
 }));
 
+// La regla "un supervisor conserva el rol Supervisor" se prueba en positionRoleService.test.ts.
+jest.mock("../services/positionRoleService", () => ({
+  checkRoleFitsEmployeePosition: jest.fn(),
+}));
+
+// eslint-disable-next-line @typescript-eslint/no-require-imports
+const positionRole = require("../services/positionRoleService");
 // eslint-disable-next-line @typescript-eslint/no-require-imports
 const userRoleService = require("../services/userRoleService");
 // eslint-disable-next-line @typescript-eslint/no-require-imports
@@ -57,6 +64,7 @@ const mockUserRole = {
 beforeEach(() => {
   jest.clearAllMocks();
   accessGrant.checkRoleAssignment.mockResolvedValue(null);
+  positionRole.checkRoleFitsEmployeePosition.mockResolvedValue(null);
 });
 
 describe("GET /api/user-roles", () => {
@@ -145,6 +153,20 @@ describe("POST /api/user-roles", () => {
     expect(service.createUserRole).not.toHaveBeenCalled();
   });
 
+  it("debería devolver 409 si el rol deja sin rol Supervisor a un empleado supervisor", async () => {
+    positionRole.checkRoleFitsEmployeePosition.mockResolvedValue({
+      status: 409,
+      message: 'debe tener el rol "Supervisor"',
+    });
+
+    const res = await request(app).post("/api/user-roles").send({ userId: 2, roleId: 5 });
+
+    expect(res.status).toBe(409);
+    expect(res.body.message).toContain("Supervisor");
+    expect(positionRole.checkRoleFitsEmployeePosition).toHaveBeenCalledWith(2, 5);
+    expect(service.createUserRole).not.toHaveBeenCalled();
+  });
+
   it("debería devolver 400 si userId/roleId no son enteros", async () => {
     const res = await request(app).post("/api/user-roles").send({ userId: "x", roleId: 2 });
 
@@ -162,6 +184,19 @@ describe("POST /api/user-roles", () => {
 });
 
 describe("PUT /api/user-roles/:id", () => {
+  it("debería devolver 409 sin cambiar nada si el empleado supervisor perdería el rol Supervisor", async () => {
+    positionRole.checkRoleFitsEmployeePosition.mockResolvedValue({
+      status: 409,
+      message: 'debe tener el rol "Supervisor"',
+    });
+
+    const res = await request(app).put("/api/user-roles/1").send({ roleId: 7 });
+
+    expect(res.status).toBe(409);
+    expect(positionRole.checkRoleFitsEmployeePosition).toHaveBeenCalledWith(1, 7);
+    expect(service.updateUserRole).not.toHaveBeenCalled();
+  });
+
   it("debería devolver 200 con la asignación actualizada", async () => {
     service.updateUserRole.mockResolvedValue({ ...mockUserRole, roleId: 2 });
 

@@ -5,6 +5,8 @@ const PAGE_TITLE = {
   EMPLOYEES_SIMPLIFIED: "Planilla",
   LOGIN: "Sistema de Gestión",
   LOGIN_SIMPLIFIED: "Gestión",
+  MY_PANEL: "Mi Panel",
+  MY_PANEL_SIMPLIFIED: "Mi Panel",
   ROLES: "Administración de Roles",
   ROLES_SIMPLIFIED: "Roles",
   SCHEDULES: "Gestión de Horarios y Turnos",

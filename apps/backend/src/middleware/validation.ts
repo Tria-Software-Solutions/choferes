@@ -4,6 +4,7 @@ import {
   LICENSE_TYPES,
   DISCIPLINARY_ACTION_TYPES,
   DISCIPLINARY_SEVERITIES,
+  EMPLOYEE_POSITIONS,
   EMPLOYEE_TERMINATION_REASONS,
 } from "@choferes/shared";
 
@@ -60,11 +61,12 @@ export const contractBodyRules = [
     .trim()
     .isLength({ max: 2000 })
     .withMessage("terminationNotes no puede exceder 2000 caracteres"),
+  // Solo existen los puestos de EMPLOYEE_POSITIONS (cada uno con su rol).
   body("position")
     .optional({ values: "null" })
     .trim()
-    .isLength({ max: 100 })
-    .withMessage("position no puede exceder 100 caracteres"),
+    .isIn([...EMPLOYEE_POSITIONS])
+    .withMessage(`position debe ser uno de: ${EMPLOYEE_POSITIONS.join(", ")}`),
   // La cédula y los teléfonos se guardan sin máscara: solo dígitos, para que
   // la base siga siendo ordenable y buscable. El formato se aplica en la UI.
   body("nationalId")
@@ -338,6 +340,8 @@ export const userRules = [
     .withMessage("La contraseña es requerida")
     .isLength({ min: 6 })
     .withMessage("La contraseña debe tener al menos 6 caracteres"),
+  // Rol a asignar (opcional). Si se omite, el servicio asigna el rol "Usuario".
+  body("roleId").optional().isInt({ min: 1 }).withMessage("roleId inválido"),
 ];
 
 export const userUpdateRules = [
@@ -683,6 +687,22 @@ export const paymentEmailRules = [
 
 export const vacationRules = [
   body("employeeId").isInt({ min: 1 }).withMessage("employeeId inválido"),
+  body("startDate")
+    .matches(/^\d{4}-\d{2}-\d{2}$/)
+    .withMessage("startDate debe tener formato YYYY-MM-DD"),
+  body("endDate")
+    .matches(/^\d{4}-\d{2}-\d{2}$/)
+    .withMessage("endDate debe tener formato YYYY-MM-DD"),
+  body("reason")
+    .optional({ values: "null" })
+    .trim()
+    .isLength({ max: 1000 })
+    .withMessage("reason no puede exceder 1000 caracteres"),
+];
+
+// POST /me/vacations — self-service request. The employee is resolved from the
+// session (users.employeeId), so `employeeId` is intentionally not accepted.
+export const myVacationRules = [
   body("startDate")
     .matches(/^\d{4}-\d{2}-\d{2}$/)
     .withMessage("startDate debe tener formato YYYY-MM-DD"),

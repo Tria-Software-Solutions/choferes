@@ -1,4 +1,5 @@
 import React, { useCallback, useEffect, useRef, useState } from "react";
+import { hasManagementRole } from "@choferes/shared";
 import { useAuthContext } from "../../../context/AuthContext";
 import { useSelector, useDispatch } from "react-redux";
 import { RootState, AppDispatch } from "../../../store/store";
@@ -59,6 +60,7 @@ import {
 import { PanelHeader } from "../../../components/Layout";
 
 type ThemeMode = "default" | "light" | "dark";
+
 type TabId =
   | "personal"
   | "password"
@@ -495,6 +497,10 @@ const Profile: React.FC = () => {
     roles: PERMISSIONS.VIEW_ROLES,
   };
 
+  // La sección "Administración" (Usuarios, Roles) exige rol de gestión
+  // además del permiso de cada pestaña.
+  const hasAdminRole = hasManagementRole(currentUser);
+
   const sidebarItems = [
     { id: "personal", label: "Información Personal", icon: IconUser, group: "Cuenta" },
     { id: "password", label: "Contraseña y Seguridad", icon: IconLock, group: "Cuenta" },
@@ -505,11 +511,11 @@ const Profile: React.FC = () => {
     { id: "help", label: "Centro de ayuda", icon: IconHelpCircle, group: "Soporte" },
     { id: "users", label: "Usuarios", icon: IconUsers, group: "Administración" },
     { id: "roles", label: "Roles", icon: IconCalendarUser, group: "Administración" },
-  ].filter(
-    (item) =>
-      item.group !== "Administración" ||
-      userPermissions.includes(adminTabPermissions[item.id]),
-  );
+  ].filter((item) => {
+    if (item.group !== "Administración") return true;
+    // Doble candado: rol habilitado + permiso de la pestaña.
+    return hasAdminRole && userPermissions.includes(adminTabPermissions[item.id]);
+  });
 
   const groupItems = (groupName: string) =>
     sidebarItems.filter((item) => item.group === groupName);
@@ -627,8 +633,9 @@ const Profile: React.FC = () => {
 
             {/* Sidebar Sections */}
             <Box sx={{ display: "flex", flexDirection: "column", gap: 3.5 }}>
-              {["Cuenta", "Preferencias", "Soporte", "Administración"].map(
-                (groupName) => (
+              {["Cuenta", "Preferencias", "Soporte", "Administración"]
+                .filter((groupName) => groupItems(groupName).length > 0)
+                .map((groupName) => (
                   <Box key={groupName}>
                     <Typography
                       variant="caption"
@@ -685,7 +692,7 @@ const Profile: React.FC = () => {
                     </Box>
                   </Box>
                 ),
-              )}
+                )}
             </Box>
           </Paper>
         ) : (

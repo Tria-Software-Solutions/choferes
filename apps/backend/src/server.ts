@@ -32,6 +32,7 @@ import vacationRoutes from "./routes/vacationRoutes";
 import employeeLicenseRoutes from "./routes/employeeLicenseRoutes";
 import disciplinaryActionRoutes from "./routes/disciplinaryActionRoutes";
 import { taskRouter, taskListRouter } from "./routes/taskRoutes";
+import meRoutes from "./routes/meRoutes";
 import sequelize from "./config/database";
 import "./database/models";
 import "./database/associations";
@@ -189,6 +190,7 @@ app.use("/api/employee-licenses", employeeLicenseRoutes);
 app.use("/api/disciplinary-actions", disciplinaryActionRoutes);
 app.use("/api/tasks", taskRouter);
 app.use("/api/task-lists", taskListRouter);
+app.use("/api/me", meRoutes);
 
 app.use(
   // eslint-disable-next-line @typescript-eslint/no-unused-vars, no-unused-vars
