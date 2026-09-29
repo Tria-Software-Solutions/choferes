@@ -9,14 +9,12 @@ const {
 const SEED_PASSWORDS = {
   ADMIN: process.env.SEED_ADMIN_PASSWORD || "Admin123$",
   MANAGEMENT: process.env.SEED_MANAGEMENT_PASSWORD || "Gerencia123$",
-  CUSTOMER_SERVICE: process.env.SEED_CUSTOMER_SERVICE_PASSWORD || "678900CS$",
 };
 
 if (process.env.NODE_ENV === "production") {
   const required = {
     SEED_ADMIN_PASSWORD: SEED_PASSWORDS.ADMIN,
     SEED_MANAGEMENT_PASSWORD: SEED_PASSWORDS.MANAGEMENT,
-    SEED_CUSTOMER_SERVICE_PASSWORD: SEED_PASSWORDS.CUSTOMER_SERVICE,
   };
   for (const [name, value] of Object.entries(required)) {
     if (!process.env[name] || value.length < 12) {
@@ -386,17 +384,6 @@ module.exports = {
           createdAt: new Date(),
           updatedAt: new Date(),
         },
-        {
-          firstName: "Carlos",
-          lastName: "Caamaño",
-          email: "servicioalcliente@choferesdealquiler.com",
-          username: "carlosc",
-          password: await bcrypt.hash(SEED_PASSWORDS.CUSTOMER_SERVICE, 10),
-          temporalPassword: null,
-          isActive: true,
-          createdAt: new Date(),
-          updatedAt: new Date(),
-        },
       ].filter((u) => !existingUsernames.has(u.username)),
     );
 
@@ -413,11 +400,12 @@ module.exports = {
       ),
     );
 
+    // Luis es el SysAdmin de la plataforma (rol especial, acceso total); Daniela
+    // queda en Gerencia y Damaris en Administrativo (Gerencia en solo lectura).
     const userRoleSpec = [
-      { username: "lmhq94", role: "Gerencia" },
+      { username: "lmhq94", role: "SysAdmin" },
       { username: "danilumix", role: "Gerencia" },
       { username: "damarisa", role: "Administrativo" },
-      { username: "carlosc", role: "Supervisor" },
     ];
 
     const existingUserRolePairs = new Set(

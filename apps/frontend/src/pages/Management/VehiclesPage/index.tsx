@@ -496,9 +496,7 @@ const VehiclesPage: React.FC = () => {
   // Use exportTable({ data: exportData, ... }) for export
 
   const canCreateVehicles = userPermissions.includes(PERMISSIONS.CREATE_VEHICLES);
-  const canExport =
-    userPermissions.includes(PERMISSIONS.EXPORT_EXCEL_VEHICLES) &&
-    userPermissions.includes(PERMISSIONS.EXPORT_PDF_VEHICLES);
+  const canExport = userPermissions.includes(PERMISSIONS.EXPORT_VEHICLES);
   const selectedDateLabel = capitalizeFirstLetter(
     format(selectedDate, "EEEE dd 'de' MMMM 'de' yyyy", { locale: es }),
   );

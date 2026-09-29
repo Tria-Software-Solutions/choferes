@@ -301,7 +301,6 @@ describe("getUserPermissions", () => {
 });
 
 describe("createUser", () => {
-  const mockRoleFindOne = Role.findOne as jest.Mock;
   const mockRoleFindByPk = Role.findByPk as jest.Mock;
   const mockUserRoleFindOne = UserRole.findOne as jest.Mock;
   const mockUserRoleCreate = UserRole.create as jest.Mock;
@@ -313,6 +312,7 @@ describe("createUser", () => {
       username: "nuevo",
       email: "nuevo@example.com",
       password: "plain_password",
+      roleId: 4,
       isActive: false,
       settings: { admin: 1 },
     };
@@ -320,7 +320,7 @@ describe("createUser", () => {
 
     (bcrypt.hash as jest.Mock).mockResolvedValue("hashed");
     (User.create as jest.Mock).mockResolvedValue(createdUser);
-    mockRoleFindOne.mockResolvedValue({ id: 4, name: "Usuario" });
+    mockRoleFindByPk.mockResolvedValue({ id: 4, name: "Chofer" });
     mockUserRoleFindOne.mockResolvedValue(null);
     mockUserRoleCreate.mockResolvedValue({ id: 1, userId: 2, roleId: 4 });
 
@@ -344,22 +344,21 @@ describe("createUser", () => {
     expect(result).toMatchObject({ id: 2, username: "nuevo", email: "nuevo@example.com" });
   });
 
-  it("asigna el rol Usuario por defecto cuando no se especifica roleId", async () => {
+  it("rechaza la creación cuando no se especifica roleId (no hay rol por defecto)", async () => {
     (bcrypt.hash as jest.Mock).mockResolvedValue("hashed");
-    (User.create as jest.Mock).mockResolvedValue({ id: 2 });
-    mockRoleFindOne.mockResolvedValue({ id: 4, name: "Usuario" });
-    mockUserRoleFindOne.mockResolvedValue(null);
-    mockUserRoleCreate.mockResolvedValue({ id: 1, userId: 2, roleId: 4 });
 
-    await userService.createUser({
-      firstName: "Nuevo",
-      lastName: "Usuario",
-      username: "nuevo",
-      email: "nuevo@example.com",
-      password: "plain_password",
-    } as any);
+    await expect(
+      userService.createUser({
+        firstName: "Nuevo",
+        lastName: "Usuario",
+        username: "nuevo",
+        email: "nuevo@example.com",
+        password: "plain_password",
+      } as any),
+    ).rejects.toMatchObject({ statusCode: 400 });
 
-    expect(mockUserRoleCreate).toHaveBeenCalledWith({ userId: 2, roleId: 4 });
+    expect(User.create).not.toHaveBeenCalled();
+    expect(mockUserRoleCreate).not.toHaveBeenCalled();
   });
 
   it("asigna el roleId indicado cuando viene en la petición", async () => {

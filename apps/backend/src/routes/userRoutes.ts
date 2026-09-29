@@ -2,7 +2,7 @@ import express from "express";
 import * as userController from "../controllers/userController";
 import { authenticateToken } from "../middleware/authMiddleware";
 import {
-  allowSelfOrPermission,
+  allowSelfWithPermission,
   requireAnyPermission,
   requirePermission,
 } from "../middleware/authorize";
@@ -34,14 +34,38 @@ router.post(
   userController.createUser,
 );
 
-router.get("/", authenticateToken, paginationRules, validate, userController.getUsers);
-router.get("/:id", authenticateToken, idParam, validate, userController.getUserById);
-router.get("/email/:email", authenticateToken, userController.getUserByEmail);
-router.get("/username/:username", authenticateToken, userController.getUserByUsername);
+router.get(
+  "/",
+  authenticateToken,
+  requirePermission(PERMISSION_CODES.VIEW_USERS),
+  paginationRules,
+  validate,
+  userController.getUsers,
+);
+router.get(
+  "/:id",
+  authenticateToken,
+  requirePermission(PERMISSION_CODES.VIEW_USERS),
+  idParam,
+  validate,
+  userController.getUserById,
+);
+router.get(
+  "/email/:email",
+  authenticateToken,
+  requirePermission(PERMISSION_CODES.VIEW_USERS),
+  userController.getUserByEmail,
+);
+router.get(
+  "/username/:username",
+  authenticateToken,
+  requirePermission(PERMISSION_CODES.VIEW_USERS),
+  userController.getUserByUsername,
+);
 router.get(
   "/:id/permissions",
   authenticateToken,
-  allowSelfOrPermission(PERMISSION_CODES.VIEW_USERS),
+  allowSelfWithPermission(PERMISSION_CODES.VIEW_PROFILE, PERMISSION_CODES.VIEW_USERS),
   idParam,
   validate,
   userController.getUserPermissions,
@@ -49,7 +73,7 @@ router.get(
 router.put(
   "/:id",
   authenticateToken,
-  allowSelfOrPermission(PERMISSION_CODES.EDIT_USER),
+  allowSelfWithPermission(PERMISSION_CODES.EDIT_PROFILE, PERMISSION_CODES.EDIT_USER),
   userUpdateRules,
   validate,
   userController.updateUser,
@@ -65,7 +89,7 @@ router.put(
 router.put(
   "/:id/password",
   authenticateToken,
-  allowSelfOrPermission(PERMISSION_CODES.EDIT_USER),
+  allowSelfWithPermission(PERMISSION_CODES.EDIT_PROFILE, PERMISSION_CODES.EDIT_USER),
   userPasswordUpdateRules,
   validate,
   userController.updateUserPassword,
@@ -81,13 +105,13 @@ router.put(
 router.put(
   "/:id/settings",
   authenticateToken,
-  allowSelfOrPermission(PERMISSION_CODES.EDIT_USER),
+  allowSelfWithPermission(PERMISSION_CODES.EDIT_PROFILE, PERMISSION_CODES.EDIT_USER),
   userController.updateUserSettings,
 );
 router.delete(
   "/:id",
   authenticateToken,
-  requireAnyPermission([PERMISSION_CODES.EDIT_USER, PERMISSION_CODES.ENABLE_DISABLE_USER]),
+  requirePermission(PERMISSION_CODES.DELETE_USER),
   idParam,
   validate,
   userController.deleteUser,

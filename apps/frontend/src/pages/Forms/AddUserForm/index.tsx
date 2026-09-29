@@ -14,6 +14,7 @@ import {
 } from "@mui/material";
 import { IconEye, IconEyeOff, IconLock, IconMail, IconRotate, IconUser, IconUsers } from "@tabler/icons-react";
 import OutlinedInput from "@mui/material/OutlinedInput";
+import { isRoleSelectable } from "@choferes/shared";
 import { Role } from "../../../models/Role";
 import TextfieldComponent from "../../../components/Textfield/Textfield.component";
 import FORMS from "../../../constants/forms.constants";
@@ -340,11 +341,13 @@ const AddUserForm: React.FC<AddUserFormProps> = ({
               }}
               MenuProps={menuPaperProps}
             >
-              {roles.map((role) => (
-                <MenuItem key={role.name} value={role.name}>
-                  {role.name}
-                </MenuItem>
-              ))}
+              {roles
+                .filter((role) => isRoleSelectable(role.name))
+                .map((role) => (
+                  <MenuItem key={role.name} value={role.name}>
+                    {role.name}
+                  </MenuItem>
+                ))}
             </Select>
           </FormControl>
         </Grid>

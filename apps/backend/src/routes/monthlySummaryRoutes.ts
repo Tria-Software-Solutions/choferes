@@ -10,11 +10,17 @@ const router = express.Router();
 router.get(
   "/",
   authenticateToken,
+  requirePermission(PERMISSION_CODES.VIEW_MONTHLY_SUMMARY),
   paginationRules,
   validate,
   monthlySummaryController.getMonthlySummaries,
 );
-router.get("/employee/:id", authenticateToken, monthlySummaryController.getCurrentMonthlySummary);
+router.get(
+  "/employee/:id",
+  authenticateToken,
+  requirePermission(PERMISSION_CODES.VIEW_MONTHLY_SUMMARY),
+  monthlySummaryController.getCurrentMonthlySummary,
+);
 router.post(
   "/",
   authenticateToken,
