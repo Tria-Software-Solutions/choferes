@@ -49,8 +49,7 @@ interface DisciplinaryFormDialogProps {
   onSaved: () => void;
 }
 
-const MAX_ATTACHMENTS = 3;
-const MAX_ATTACHMENT_BYTES = 2 * 1024 * 1024; // ~2MB por archivo
+const MAX_ATTACHMENT_BYTES = 10 * 1024 * 1024; // 10MB per file
 
 const formatSize = (bytes: number): string => {
   if (bytes < 1024) return `${bytes} B`;
@@ -68,6 +67,7 @@ const readAsDataUrl = (file: File): Promise<string> =>
 
 // Registers/edits a disciplinary action. Documents and images are read
 // client-side into base64 data URLs and stored in the database.
+// No hard limit on attachment count; each file max 10MB.
 const DisciplinaryFormDialog: React.FC<DisciplinaryFormDialogProps> = ({
   open,
   onClose,
@@ -106,17 +106,11 @@ const DisciplinaryFormDialog: React.FC<DisciplinaryFormDialogProps> = ({
 
   const handleFiles = async (files: FileList | null) => {
     if (!files || files.length === 0) return;
-    const free = MAX_ATTACHMENTS - attachments.length;
-    if (free <= 0) {
-      showNotification(`Máximo ${MAX_ATTACHMENTS} archivos adjuntos`, { severity: "warning" });
-      return;
-    }
 
-    const selected = Array.from(files).slice(0, free);
     const next: DisciplinaryAttachment[] = [];
-    for (const file of selected) {
+    for (const file of Array.from(files)) {
       if (file.size > MAX_ATTACHMENT_BYTES) {
-        showNotification(`"${file.name}" supera el máximo de 2MB`, { severity: "warning" });
+        showNotification(`"${file.name}" supera el máximo de 10MB`, { severity: "warning" });
         continue;
       }
       try {
@@ -267,13 +261,12 @@ const DisciplinaryFormDialog: React.FC<DisciplinaryFormDialogProps> = ({
         <Box>
           <Box sx={{ display: "flex", alignItems: "center", justifyContent: "space-between", mb: 1 }}>
             <Typography variant="caption" sx={{ color: "text.secondary" }}>
-              Adjuntos ({attachments.length}/{MAX_ATTACHMENTS}) · documentos o imágenes, máx. 2MB
+              Adjuntos ({attachments.length}) · documentos o imágenes, máx. 10MB c/u
             </Typography>
             <Button
               size="small"
               startIcon={<IconPaperclip size={15} />}
               onClick={() => fileInputRef.current?.click()}
-              disabled={attachments.length >= MAX_ATTACHMENTS}
             >
               Adjuntar
             </Button>
