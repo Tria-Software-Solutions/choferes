@@ -19,6 +19,7 @@ jest.mock("../middleware/authorize", () => {
     requireAnyPermission: jest.fn(pass),
     requireRole: jest.fn(pass),
     allowSelfOrPermission: jest.fn(pass),
+    allowSelfWithPermission: jest.fn(pass),
     getUserId: (req: express.Request) => (req as any).user?.id,
   };
 });

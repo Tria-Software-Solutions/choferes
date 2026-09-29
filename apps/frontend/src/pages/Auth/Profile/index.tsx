@@ -1,5 +1,6 @@
 import React, { useCallback, useEffect, useRef, useState } from "react";
-import { hasManagementRole } from "@choferes/shared";
+
+import { hasAdminSettingsRole } from "@choferes/shared";
 import { useAuthContext } from "../../../context/AuthContext";
 import { useSelector, useDispatch } from "react-redux";
 import { RootState, AppDispatch } from "../../../store/store";
@@ -497,9 +498,9 @@ const Profile: React.FC = () => {
     roles: PERMISSIONS.VIEW_ROLES,
   };
 
-  // La sección "Administración" (Usuarios, Roles) exige rol de gestión
-  // además del permiso de cada pestaña.
-  const hasAdminRole = hasManagementRole(currentUser);
+  // La sección "Administración" (Usuarios, Roles) es solo para Gerencia,
+  // Administrativo y SysAdmin, además del permiso de cada pestaña.
+  const hasAdminSection = hasAdminSettingsRole(currentUser);
 
   const sidebarItems = [
     { id: "personal", label: "Información Personal", icon: IconUser, group: "Cuenta" },
@@ -514,7 +515,7 @@ const Profile: React.FC = () => {
   ].filter((item) => {
     if (item.group !== "Administración") return true;
     // Doble candado: rol habilitado + permiso de la pestaña.
-    return hasAdminRole && userPermissions.includes(adminTabPermissions[item.id]);
+    return hasAdminSection && userPermissions.includes(adminTabPermissions[item.id]);
   });
 
   const groupItems = (groupName: string) =>
@@ -802,8 +803,6 @@ const Profile: React.FC = () => {
                 description={MANAGEMENT.PERSONAL_INFO_DESC}
               />
 
-              <Box sx={{ borderBottom: theme.tokens.borders.hairline, mb: { xs: 2, md: 2.5 } }} />
-
               {/* Form Fields */}
               <Box sx={{ flex: 1, minHeight: { md: 0 }, overflow: { md: "auto" } }}>
               <Grid container spacing={{ xs: 2, sm: 2.5 }}>
@@ -921,8 +920,6 @@ const Profile: React.FC = () => {
                 title="Contraseña y Seguridad"
                 description="Cambia tu contraseña para mantener tu cuenta segura."
               />
-
-              <Box sx={{ borderBottom: theme.tokens.borders.hairline, mb: { xs: 2, md: 2.5 } }} />
 
               <Box sx={{ flex: 1, minHeight: { md: 0 }, overflowY: { md: "auto" }, overflowX: "hidden" }}>
               <Grid container spacing={{ xs: 2, sm: 2.5 }} sx={{ minWidth: 0, "& > .MuiGrid-item": { minWidth: 0 } }}>

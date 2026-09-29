@@ -307,6 +307,10 @@ const PersonalInfoTab: React.FC<PersonalInfoTabProps> = ({
     (daysValue ?? null) !== (employee.vacationDays ?? null);
 
   const handleSave = async () => {
+    if (form.position.trim() === "") {
+      showNotification("El puesto es obligatorio", { severity: "warning" });
+      return;
+    }
     if (rateInvalid || daysInvalid || terminationInvalid || contactInvalid) {
       showNotification("Revisa los valores ingresados", { severity: "warning" });
       return;
@@ -322,7 +326,7 @@ const PersonalInfoTab: React.FC<PersonalInfoTabProps> = ({
             email: form.email.trim() || null,
             primaryPhone: digitsOnly(form.primaryPhone) || null,
             secondaryPhone: digitsOnly(form.secondaryPhone) || null,
-            position: form.position.trim() || null,
+            position: form.position.trim(),
             gender: (form.gender.trim() || null) as Employee["gender"],
             nationalId: digitsOnly(form.nationalId) || null,
             contractStartDate: form.contractStartDate || null,
@@ -376,8 +380,8 @@ const PersonalInfoTab: React.FC<PersonalInfoTabProps> = ({
     }
   };
 
-  // Rol de acceso que le corresponde a su puesto ("Usuario" si aún no tiene puesto).
-  const expectedRoleName = getRoleNameForPosition(employee.position) ?? "Usuario";
+  // Rol de acceso que le corresponde a su puesto.
+  const expectedRoleName = getRoleNameForPosition(employee.position);
 
   // Asigna el rol de su puesto cuando la cuenta quedó sin rol.
   const handleAssignDefaultRole = async () => {
@@ -386,9 +390,10 @@ const PersonalInfoTab: React.FC<PersonalInfoTabProps> = ({
     try {
       const updated = await assignDefaultEmployeeRole(employee.id);
       setAccess(updated);
-      showNotification(`Se asignó el rol "${updated.roles[0]?.name ?? expectedRoleName}" a la cuenta`, {
-        severity: "success",
-      });
+      showNotification(
+        `Se asignó el rol "${updated.roles[0]?.name ?? expectedRoleName ?? ""}" a la cuenta`,
+        { severity: "success" },
+      );
     } catch (error) {
       const message =
         error instanceof Error ? error.message : "No se pudo asignar el rol";
@@ -551,7 +556,6 @@ const PersonalInfoTab: React.FC<PersonalInfoTabProps> = ({
                 disabled={!isEditing("personal") || isSaving}
                 onChange={(event) => update("position", String(event.target.value))}
               >
-                <MenuItem value="">Sin puesto</MenuItem>
                 {positionOptions.map((pos) => (
                   <MenuItem key={pos} value={pos}>
                     {getEmployeePositionLabel(pos, (form.gender || null) as EmployeeGender | null) ?? pos}

@@ -3,9 +3,9 @@
 // Cada puesto (chofer, chofer coordinador, recepcionista, supervisor,
 // administrativo, gerencia) tiene un rol con el mismo nombre
 // (POSITION_ROLE_NAMES). La cuenta de un empleado recibe el rol de su puesto al
-// activarse y lo conserva al cambiar de puesto. "Usuario" es el rol genérico
-// (empleado sin puesto) y los roles personalizados son independientes del puesto:
-// nunca se tocan aquí.
+// activarse y lo conserva al cambiar de puesto. El puesto es obligatorio: no hay
+// rol genérico de respaldo. Los roles personalizados son independientes del
+// puesto y nunca se tocan aquí.
 import {
   POSITION_LINKED_ROLE_NAMES,
   getRoleNameForPosition,
@@ -15,8 +15,9 @@ import Employee from "../models/Employee";
 import { Role } from "../models/Role";
 import { User } from "../models/User";
 import { UserRole } from "../models/UserRole";
+import { ServiceError } from "../utils/errors";
 import type { GrantDenial } from "./accessGrantService";
-import { assignRole, resolveDefaultRole } from "./userRoleService";
+import { assignRole } from "./userRoleService";
 
 export const SUPERVISOR_POSITION = "supervisor";
 const SUPERVISOR_ROLE = "Supervisor";
@@ -28,15 +29,19 @@ const SUPERVISOR_ROLE = "Supervisor";
 const isAutoAssignableRole = (name: string): boolean =>
   !isManagementRoleName(name) && (POSITION_LINKED_ROLE_NAMES as readonly string[]).includes(name);
 
-// Rol que le corresponde a un puesto. Sin puesto (o si el rol aún no existe en
-// la base) se usa el rol genérico "Usuario".
+// Rol que le corresponde a un puesto. El puesto es obligatorio y su rol debe
+// existir en la base; si falta cualquiera de los dos se falla explícitamente en
+// vez de asignar un rol genérico.
 export const resolveRoleForPosition = async (position?: string | null): Promise<Role> => {
   const roleName = getRoleNameForPosition(position);
-  if (roleName) {
-    const role = await Role.findOne({ where: { name: roleName } });
-    if (role) return role;
+  if (!roleName) {
+    throw new ServiceError(400, "El empleado debe tener un puesto para tener acceso al sistema");
   }
-  return resolveDefaultRole();
+  const role = await Role.findOne({ where: { name: roleName } });
+  if (!role) {
+    throw new ServiceError(500, `El rol del puesto "${roleName}" no está configurado`);
+  }
+  return role;
 };
 
 // Da a la cuenta el rol de su puesto, pero solo si quedó sin ninguno.

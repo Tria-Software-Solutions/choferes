@@ -101,8 +101,9 @@ Employee.init(
       allowNull: true,
     },
     position: {
+      // Obligatorio: define el rol de acceso del empleado.
       type: DataTypes.STRING(100),
-      allowNull: true,
+      allowNull: false,
     },
     gender: {
       type: DataTypes.STRING(20),

@@ -16,11 +16,11 @@ const MAX_ATTACHMENT_BYTES = 10 * 1024 * 1024; // 10MB per file (matches fronten
 
 const validateAttachments = (attachments: DisciplinaryAttachmentInput[] | undefined): void => {
   if (!attachments || attachments.length === 0) return;
-  for (const a of attachments) {
+  attachments.forEach((a) => {
     if (typeof a.size === "number" && a.size > MAX_ATTACHMENT_BYTES) {
       throw new ServiceError(400, `El archivo "${a.name}" supera el máximo de 10MB`);
     }
-  }
+  });
 };
 
 const employeeInclude = {

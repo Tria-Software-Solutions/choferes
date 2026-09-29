@@ -8,27 +8,31 @@
  *
  * Rules:
  *  - `code` is the STABLE machine identity. It never changes and is what the
- *    server authorizes against. Format: `<module>:<action>[:<subaction>]`.
- *  - `label` is the Spanish display name. It is what users see and what the DB
- *    stores in the legacy `permissions.name` column for backwards compatibility.
+ *    server authorizes against. Format: `<module>:<action>` where `<module>` is
+ *    always a plural English resource (`employees`, `schedules`, `users`...).
+ *  - `label` is the Spanish display name shown to users. It must read like
+ *    natural Spanish — no underscores, no raw codes, no technical jargon.
  *  - `module` groups permissions in the UI (roles editor, permissions list).
  *
  * The `PERMISSIONS` map (key -> label) is kept as the public API used across the
  * frontend, so UI code reads `PERMISSIONS.VIEW_ROLES` instead of raw strings.
  */
 export type PermissionModule =
-  | "Roles"
+  | "Mi Panel"
   | "Empleados"
+  | "Roles"
   | "Horarios"
   | "Vehículos"
-  | "Usuarios"
-  | "Admin"
   | "Resúmenes"
   | "Pagos"
   | "Vacaciones"
   | "Licencias"
   | "Amonestaciones"
-  | "Tareas";
+  | "Tareas"
+  | "Usuarios"
+  | "Administración"
+  | "Perfil"
+  | "Notificaciones";
 
 export interface PermissionDefinition {
   readonly code: string;
@@ -37,46 +41,31 @@ export interface PermissionDefinition {
 }
 
 export const PERMISSION_CATALOG = {
-  // ── Roles ──────────────────────────────────────────────────────────────────
-  VIEW_ROLES: { code: "roles:view", module: "Roles", label: "Ver Roles" },
-  VIEW_EMPLOYEE_ROLES_HOURS: {
-    code: "roles:hours:view",
-    module: "Roles",
-    label: "Ver Horas de Empleados",
-  },
-  EDIT_EMPLOYEE_ROLES: {
-    code: "roles:hours:edit",
-    module: "Roles",
-    label: "Editar Roles de Empleados",
-  },
-  EXPORT_EXCEL_ROLES: {
-    code: "roles:export:excel",
-    module: "Roles",
-    label: "Exportar Excel de Roles de Empleados",
-  },
-  EXPORT_PDF_ROLES: {
-    code: "roles:export:pdf",
-    module: "Roles",
-    label: "Exportar PDF de Roles de Empleados",
-  },
-  CREATE_ROLE: { code: "roles:create", module: "Roles", label: "Crear Rol" },
-  EDIT_ROLE: { code: "roles:edit", module: "Roles", label: "Editar Rol" },
-  DELETE_ROLE: { code: "roles:delete", module: "Roles", label: "Eliminar Rol" },
+  // ── Mi Panel (autoservicio) ──────────────────────────────────────────────────
+  VIEW_MY_PANEL: { code: "my-panel:view", module: "Mi Panel", label: "Ver Mi Panel" },
 
   // ── Empleados ────────────────────────────────────────────────────────────────
   VIEW_EMPLOYEES: { code: "employees:view", module: "Empleados", label: "Ver Empleados" },
   CREATE_EMPLOYEES: { code: "employees:create", module: "Empleados", label: "Crear Empleado" },
   EDIT_EMPLOYEES: { code: "employees:edit", module: "Empleados", label: "Editar Empleado" },
   DELETE_EMPLOYEES: { code: "employees:delete", module: "Empleados", label: "Eliminar Empleado" },
-  EXPORT_EXCEL_EMPLOYEES: {
-    code: "employees:export:excel",
-    module: "Empleados",
-    label: "Exportar Excel de Empleados",
+  EXPORT_EMPLOYEES: { code: "employees:export", module: "Empleados", label: "Exportar Empleados" },
+
+  // ── Roles y horas de empleados ───────────────────────────────────────────────
+  VIEW_ROLES: { code: "roles:view", module: "Roles", label: "Ver Roles" },
+  CREATE_ROLE: { code: "roles:create", module: "Roles", label: "Crear Rol" },
+  EDIT_ROLE: { code: "roles:edit", module: "Roles", label: "Editar Rol" },
+  DELETE_ROLE: { code: "roles:delete", module: "Roles", label: "Eliminar Rol" },
+  EXPORT_ROLES: { code: "roles:export", module: "Roles", label: "Exportar Roles" },
+  VIEW_EMPLOYEE_HOURS: {
+    code: "employee-hours:view",
+    module: "Roles",
+    label: "Ver Horas de Empleados",
   },
-  EXPORT_PDF_EMPLOYEES: {
-    code: "employees:export:pdf",
-    module: "Empleados",
-    label: "Exportar PDF de Empleados",
+  EDIT_EMPLOYEE_HOURS: {
+    code: "employee-hours:edit",
+    module: "Roles",
+    label: "Editar Horas de Empleados",
   },
 
   // ── Horarios ─────────────────────────────────────────────────────────────────
@@ -84,78 +73,44 @@ export const PERMISSION_CATALOG = {
   CREATE_SCHEDULES: { code: "schedules:create", module: "Horarios", label: "Crear Horario" },
   EDIT_SCHEDULES: { code: "schedules:edit", module: "Horarios", label: "Editar Horario" },
   DELETE_SCHEDULES: { code: "schedules:delete", module: "Horarios", label: "Eliminar Horario" },
-  REORDER_SCHEDULES: {
-    code: "schedules:reorder",
-    module: "Horarios",
-    label: "Reordenar Horarios",
-  },
-  EXPORT_EXCEL_SCHEDULES: {
-    code: "schedules:export:excel",
-    module: "Horarios",
-    label: "Exportar Excel de Horarios",
-  },
-  EXPORT_PDF_SCHEDULES: {
-    code: "schedules:export:pdf",
-    module: "Horarios",
-    label: "Exportar PDF de Horarios",
-  },
+  REORDER_SCHEDULES: { code: "schedules:reorder", module: "Horarios", label: "Reordenar Horarios" },
+  EXPORT_SCHEDULES: { code: "schedules:export", module: "Horarios", label: "Exportar Horarios" },
 
   // ── Vehículos ────────────────────────────────────────────────────────────────
   VIEW_VEHICLES: { code: "vehicles:view", module: "Vehículos", label: "Ver Vehículos" },
   CREATE_VEHICLES: { code: "vehicles:create", module: "Vehículos", label: "Crear Vehículo" },
   EDIT_VEHICLES: { code: "vehicles:edit", module: "Vehículos", label: "Editar Vehículo" },
   DELETE_VEHICLES: { code: "vehicles:delete", module: "Vehículos", label: "Eliminar Vehículo" },
-  EXPORT_EXCEL_VEHICLES: {
-    code: "vehicles:export:excel",
-    module: "Vehículos",
-    label: "Exportar Excel de Vehículos",
-  },
-  EXPORT_PDF_VEHICLES: {
-    code: "vehicles:export:pdf",
-    module: "Vehículos",
-    label: "Exportar PDF de Vehículos",
-  },
-
-  // ── Usuarios / Admin ─────────────────────────────────────────────────────────
-  VIEW_USERS: { code: "users:view", module: "Usuarios", label: "Ver Usuarios" },
-  CREATE_USERS: { code: "users:create", module: "Usuarios", label: "Crear Usuario" },
-  EDIT_USER: { code: "users:edit", module: "Usuarios", label: "Editar Usuario" },
-  ENABLE_DISABLE_USER: {
-    code: "users:toggle-active",
-    module: "Usuarios",
-    label: "Habilitar/Deshabilitar Usuario",
-  },
-  VIEW_ADMIN: { code: "admin:view", module: "Admin", label: "Ver Admin" },
-  VIEW_MY_PANEL: { code: "dashboard:self:view", module: "Admin", label: "Ver Mi Panel" },
+  EXPORT_VEHICLES: { code: "vehicles:export", module: "Vehículos", label: "Exportar Vehículos" },
 
   // ── Resúmenes ────────────────────────────────────────────────────────────────
   VIEW_WEEKLY_SUMMARY: {
-    code: "summaries:weekly:view",
+    code: "weekly-summaries:view",
     module: "Resúmenes",
     label: "Ver Resumen Semanal",
   },
   EDIT_WEEKLY_SUMMARY: {
-    code: "summaries:weekly:edit",
+    code: "weekly-summaries:edit",
     module: "Resúmenes",
     label: "Editar Resumen Semanal",
   },
   VIEW_BIWEEKLY_SUMMARY: {
-    code: "summaries:biweekly:view",
+    code: "biweekly-summaries:view",
     module: "Resúmenes",
     label: "Ver Resumen Quincenal",
   },
   EDIT_BIWEEKLY_SUMMARY: {
-    code: "summaries:biweekly:edit",
+    code: "biweekly-summaries:edit",
     module: "Resúmenes",
     label: "Editar Resumen Quincenal",
   },
   VIEW_MONTHLY_SUMMARY: {
-    code: "summaries:monthly:view",
+    code: "monthly-summaries:view",
     module: "Resúmenes",
     label: "Ver Resumen Mensual",
   },
   EDIT_MONTHLY_SUMMARY: {
-    code: "summaries:monthly:edit",
+    code: "monthly-summaries:edit",
     module: "Resúmenes",
     label: "Editar Resumen Mensual",
   },
@@ -171,44 +126,86 @@ export const PERMISSION_CATALOG = {
     label: "Enviar Pago por Correo",
   },
 
-  // ── Tareas ────────────────────────────────────────────────────────────────────
-  VIEW_TASKS: { code: "tasks:view", module: "Tareas", label: "Ver Tareas" },
-  CREATE_TASK: { code: "tasks:create", module: "Tareas", label: "Crear Tarea" },
-  EDIT_TASK: { code: "tasks:edit", module: "Tareas", label: "Editar Tarea" },
-  DELETE_TASK: { code: "tasks:delete", module: "Tareas", label: "Eliminar Tarea" },
-
   // ── Vacaciones ───────────────────────────────────────────────────────────────
   VIEW_VACATIONS: { code: "vacations:view", module: "Vacaciones", label: "Ver Vacaciones" },
   CREATE_VACATION: { code: "vacations:create", module: "Vacaciones", label: "Crear Vacación" },
   EDIT_VACATION: { code: "vacations:edit", module: "Vacaciones", label: "Editar Vacación" },
   DELETE_VACATION: { code: "vacations:delete", module: "Vacaciones", label: "Eliminar Vacación" },
+  REQUEST_VACATION: {
+    code: "vacations:request",
+    module: "Vacaciones",
+    label: "Solicitar Mis Vacaciones",
+  },
 
-  // ── Licencias de conducir ─────────────────────────────────────────────────
+  // ── Licencias de conducir ────────────────────────────────────────────────────
   VIEW_LICENSES: { code: "licenses:view", module: "Licencias", label: "Ver Licencias" },
   CREATE_LICENSE: { code: "licenses:create", module: "Licencias", label: "Crear Licencia" },
   EDIT_LICENSE: { code: "licenses:edit", module: "Licencias", label: "Editar Licencia" },
   DELETE_LICENSE: { code: "licenses:delete", module: "Licencias", label: "Eliminar Licencia" },
 
-  // ── Amonestaciones / llamadas de atención ─────────────────────────────────
+  // ── Amonestaciones / llamadas de atención ────────────────────────────────────
   VIEW_DISCIPLINARY: {
-    code: "disciplinary:view",
+    code: "disciplinary-actions:view",
     module: "Amonestaciones",
     label: "Ver Amonestaciones",
   },
   CREATE_DISCIPLINARY: {
-    code: "disciplinary:create",
+    code: "disciplinary-actions:create",
     module: "Amonestaciones",
     label: "Crear Amonestación",
   },
   EDIT_DISCIPLINARY: {
-    code: "disciplinary:edit",
+    code: "disciplinary-actions:edit",
     module: "Amonestaciones",
     label: "Editar Amonestación",
   },
   DELETE_DISCIPLINARY: {
-    code: "disciplinary:delete",
+    code: "disciplinary-actions:delete",
     module: "Amonestaciones",
     label: "Eliminar Amonestación",
+  },
+
+  // ── Tareas ───────────────────────────────────────────────────────────────────
+  VIEW_TASKS: { code: "tasks:view", module: "Tareas", label: "Ver Tareas" },
+  CREATE_TASK: { code: "tasks:create", module: "Tareas", label: "Crear Tarea" },
+  EDIT_TASK: { code: "tasks:edit", module: "Tareas", label: "Editar Tarea" },
+  DELETE_TASK: { code: "tasks:delete", module: "Tareas", label: "Eliminar Tarea" },
+
+  // ── Usuarios y administración ────────────────────────────────────────────────
+  VIEW_USERS: { code: "users:view", module: "Usuarios", label: "Ver Usuarios" },
+  CREATE_USERS: { code: "users:create", module: "Usuarios", label: "Crear Usuario" },
+  EDIT_USER: { code: "users:edit", module: "Usuarios", label: "Editar Usuario" },
+  DELETE_USER: { code: "users:delete", module: "Usuarios", label: "Eliminar Usuario" },
+  ENABLE_DISABLE_USER: {
+    code: "users:toggle-active",
+    module: "Usuarios",
+    label: "Habilitar o Deshabilitar Usuario",
+  },
+  VIEW_ADMIN: {
+    code: "admin:view",
+    module: "Administración",
+    label: "Ver Panel de Administración",
+  },
+
+  // ── Perfil (autoservicio) ────────────────────────────────────────────────────
+  VIEW_PROFILE: { code: "profile:view", module: "Perfil", label: "Ver Mi Perfil" },
+  EDIT_PROFILE: { code: "profile:edit", module: "Perfil", label: "Editar Mi Perfil" },
+
+  // ── Notificaciones (autoservicio) ────────────────────────────────────────────
+  VIEW_NOTIFICATIONS: {
+    code: "notifications:view",
+    module: "Notificaciones",
+    label: "Ver Notificaciones",
+  },
+  EDIT_NOTIFICATIONS: {
+    code: "notifications:edit",
+    module: "Notificaciones",
+    label: "Marcar Notificaciones como Leídas",
+  },
+  DELETE_NOTIFICATIONS: {
+    code: "notifications:delete",
+    module: "Notificaciones",
+    label: "Eliminar Notificaciones",
   },
 } as const;
 
@@ -238,18 +235,21 @@ export const ALL_PERMISSION_CODES: readonly string[] = PERMISSION_DEFINITIONS.ma
 
 /** Module order used to render grouped permission lists in the UI. */
 export const PERMISSION_MODULE_ORDER: readonly PermissionModule[] = [
+  "Mi Panel",
   "Empleados",
   "Roles",
   "Horarios",
   "Vehículos",
-  "Usuarios",
-  "Admin",
   "Resúmenes",
   "Pagos",
   "Vacaciones",
   "Licencias",
   "Amonestaciones",
-  "Tareas"
+  "Tareas",
+  "Usuarios",
+  "Administración",
+  "Perfil",
+  "Notificaciones",
 ];
 
 const CODES_BY_SET = new Set<string>(ALL_PERMISSION_CODES);
@@ -267,15 +267,70 @@ export const getPermissionByCode = (code: string): PermissionDefinition | undefi
 
 /**
  * Permisos de autoservicio: lo que necesita cualquier persona con cuenta para
- * usar Mi Panel y sus tareas. Base de los roles operativos.
+ * usar Mi Panel, su perfil, sus notificaciones, sus tareas y pedir vacaciones.
+ * Es la base de todos los roles operativos.
  */
 const SELF_SERVICE_PERMISSIONS = [
-  "dashboard:self:view",
+  "my-panel:view",
+  "profile:view",
+  "profile:edit",
+  "notifications:view",
+  "notifications:edit",
+  "notifications:delete",
   "tasks:view",
   "tasks:create",
   "tasks:edit",
   "tasks:delete",
+  "vacations:request",
 ] as const;
+
+/**
+ * Permisos exclusivos de cuentas de empleado: "Mi Panel" es la vista personal
+ * del empleado vinculado a la cuenta, así que los roles de gestión (Gerencia,
+ * Administrativo y SysAdmin) no lo tienen — solo Chofer, Chofer Coordinador,
+ * Recepcionista y Supervisor.
+ */
+const EMPLOYEE_ONLY_PERMISSIONS: ReadonlySet<string> = new Set(["my-panel:view"]);
+
+const withoutEmployeeOnly = (codes: readonly string[]): readonly string[] =>
+  codes.filter((code) => !EMPLOYEE_ONLY_PERMISSIONS.has(code));
+
+/**
+ * Permisos de solo lectura: todo lo que permite mirar (`:view`) y exportar
+ * (`:export`), más el paquete de autoservicio (perfil, notificaciones, sus
+ * propias tareas y solicitar vacaciones). Es la base del rol Administrativo,
+ * que acompaña a Gerencia pero sin poder modificar nada del sistema.
+ */
+const READ_ONLY_PERMISSIONS: readonly string[] = withoutEmployeeOnly(
+  Array.from(
+    new Set([
+      ...PERMISSION_DEFINITIONS.filter(
+        (def) => def.code.endsWith(":view") || def.code.endsWith(":export"),
+      ).map((def) => def.code),
+      ...SELF_SERVICE_PERMISSIONS,
+    ]),
+  ),
+);
+
+/** Catálogo completo menos lo exclusivo de empleados (Gerencia y SysAdmin). */
+const FULL_MANAGEMENT_PERMISSIONS: readonly string[] = withoutEmployeeOnly(ALL_PERMISSION_CODES);
+
+/**
+ * Supervisor: autoservicio + lectura de la página de Roles. El tablero de solo
+ * lectura carga empleados y horarios a través de `roles:view` (las rutas de
+ * listado lo aceptan), así que no se le conceden `employees:view` ni
+ * `schedules:view`, que abrirían las páginas de Empleados y Horarios.
+ */
+const SUPERVISOR_PERMISSIONS: readonly string[] = Array.from(
+  new Set([
+    ...SELF_SERVICE_PERMISSIONS,
+    "roles:view",
+    "employee-hours:view",
+    "weekly-summaries:view",
+    "biweekly-summaries:view",
+    "monthly-summaries:view",
+  ]),
+);
 
 /**
  * Default permissions granted to each seeded role, expressed in stable codes.
@@ -283,65 +338,17 @@ const SELF_SERVICE_PERMISSIONS = [
  * fresh database and an existing one converge on the same baseline.
  */
 export const DEFAULT_ROLE_PERMISSIONS: Readonly<Record<string, readonly string[]>> = {
-  Gerencia: ALL_PERMISSION_CODES,
-  Administrativo: [
-    "roles:view",
-    "roles:hours:view",
-    "roles:hours:edit",
-    "roles:export:excel",
-    "roles:export:pdf",
-    "employees:view",
-    "employees:export:excel",
-    "employees:export:pdf",
-    "schedules:view",
-    "schedules:export:excel",
-    "schedules:export:pdf",
-    "vehicles:view",
-    "vehicles:export:excel",
-    "vehicles:export:pdf",
-    "payments:view",
-    "payments:create",
-    "payments:edit",
-    "payments:send-email",
-    "vacations:view",
-    "vacations:create",
-    "vacations:edit",
-    "licenses:view",
-    "licenses:create",
-    "licenses:edit",
-    "disciplinary:view",
-    "disciplinary:create",
-    "disciplinary:edit",
-    "tasks:view",
-    "tasks:create",
-    "tasks:edit",
-    "tasks:delete",
-  ],
-  Supervisor: [
-    "dashboard:self:view",
-    "roles:hours:view",
-    "roles:hours:edit",
-    "roles:export:excel",
-    "roles:export:pdf",
-    "employees:view",
-    "employees:export:excel",
-    "employees:export:pdf",
-    "schedules:view",
-    "schedules:export:excel",
-    "schedules:export:pdf",
-    "licenses:view",
-    "disciplinary:view",
-    "tasks:view",
-    "tasks:create",
-    "tasks:edit",
-    "tasks:delete",
-  ],
+  Gerencia: FULL_MANAGEMENT_PERMISSIONS,
+  // Igual que Gerencia pero solo lectura: ver y exportar, sin crear/editar/eliminar.
+  Administrativo: READ_ONLY_PERMISSIONS,
+  Supervisor: SUPERVISOR_PERMISSIONS,
   // Un rol por puesto (ver POSITION_ROLE_NAMES). Arrancan con el autoservicio
   // y se afinan desde Configuración → Roles.
   "Chofer Coordinador": SELF_SERVICE_PERMISSIONS,
   Recepcionista: SELF_SERVICE_PERMISSIONS,
   Chofer: SELF_SERVICE_PERMISSIONS,
-  Usuario: SELF_SERVICE_PERMISSIONS,
+  // Rol especial (SysAdmin): acceso total, igual que Gerencia.
+  SysAdmin: FULL_MANAGEMENT_PERMISSIONS,
 };
 
 /** Seeded role names, in priority order. */
@@ -352,25 +359,64 @@ export const ROLE_NAMES = [
   "Chofer Coordinador",
   "Recepcionista",
   "Chofer",
-  "Usuario",
+  "SysAdmin",
 ] as const;
 
 export type RoleName = (typeof ROLE_NAMES)[number];
+
+/**
+ * Rol especial de la plataforma (acceso total). No se ofrece en los selectores
+ * de rol de la UI (crear/editar usuario): se asigna deliberadamente a quien
+ * administra, no desde el formulario.
+ */
+export const HIDDEN_ROLE_NAMES: readonly RoleName[] = ["SysAdmin"];
+
+const HIDDEN_ROLE_NAMES_SET: ReadonlySet<string> = new Set(
+  HIDDEN_ROLE_NAMES.map((name) => name.toLowerCase()),
+);
+
+/** true si el rol puede elegirse desde los selectores de la UI. */
+export const isRoleSelectable = (name?: string | null): boolean =>
+  typeof name === "string" && !HIDDEN_ROLE_NAMES_SET.has(name.trim().toLowerCase());
 
 /**
  * Roles de gestión: los únicos que administran la plataforma (roles,
  * permisos y usuarios). Un permiso por sí solo no habilita esas pantallas,
  * así que la UI y la API exigen rol de gestión además del permiso.
  */
-export const MANAGEMENT_ROLE_NAMES: readonly RoleName[] = ["Gerencia", "Administrativo"];
+export const MANAGEMENT_ROLE_NAMES: readonly RoleName[] = [
+  "Gerencia",
+  "Administrativo",
+  "SysAdmin",
+];
 
 const MANAGEMENT_ROLE_NAMES_SET: ReadonlySet<string> = new Set(
   MANAGEMENT_ROLE_NAMES.map((name) => name.toLowerCase()),
 );
 
-/** true si el nombre corresponde a un rol de gestión (Gerencia/Administrativo). */
+/** true si el nombre corresponde a un rol de gestión (Gerencia/Administrativo/SysAdmin). */
 export const isManagementRoleName = (name?: string | null): boolean =>
   typeof name === "string" && MANAGEMENT_ROLE_NAMES_SET.has(name.trim().toLowerCase());
+
+/**
+ * Roles que pueden ver la sección "Administración" de Configuración (Usuarios
+ * y Roles): Gerencia, Administrativo y SysAdmin. Además hace falta el permiso de
+ * cada pestaña. Un Supervisor con `roles:view` puede ver el tablero de Roles,
+ * pero no esta sección.
+ */
+export const ADMIN_SETTINGS_ROLE_NAMES: readonly RoleName[] = [
+  "Gerencia",
+  "Administrativo",
+  "SysAdmin",
+];
+
+const ADMIN_SETTINGS_ROLE_NAMES_SET: ReadonlySet<string> = new Set(
+  ADMIN_SETTINGS_ROLE_NAMES.map((name) => name.toLowerCase()),
+);
+
+/** true si el nombre corresponde a un rol con acceso a la sección Administración. */
+export const isAdminSettingsRoleName = (name?: string | null): boolean =>
+  typeof name === "string" && ADMIN_SETTINGS_ROLE_NAMES_SET.has(name.trim().toLowerCase());
 
 /** Estructura mínima que debe cumplir un usuario para revisar sus roles. */
 type RoleNameHolder = {
@@ -381,6 +427,12 @@ type RoleNameHolder = {
 export const hasManagementRole = (user?: RoleNameHolder | null): boolean => {
   const roles = user?.roles;
   return Array.isArray(roles) && roles.some((role) => isManagementRoleName(role?.name));
+};
+
+/** true si el usuario puede ver la sección "Administración" de Configuración. */
+export const hasAdminSettingsRole = (user?: RoleNameHolder | null): boolean => {
+  const roles = user?.roles;
+  return Array.isArray(roles) && roles.some((role) => isAdminSettingsRoleName(role?.name));
 };
 
 export default PERMISSIONS;

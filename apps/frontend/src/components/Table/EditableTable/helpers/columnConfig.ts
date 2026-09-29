@@ -1,3 +1,4 @@
+import { isRoleSelectable } from "@choferes/shared";
 import {
   BRANDS_LIST,
   COLORS_LIST,
@@ -91,7 +92,9 @@ export const createColumnConfig = (
   },
   roleName: {
     type: "select",
-    options: roles.map((role) => ({ value: role.name, label: role.name })),
+    options: roles
+      .filter((role) => isRoleSelectable(role.name))
+      .map((role) => ({ value: role.name, label: role.name })),
     size: { xs: 6, sm: 6, md: 2, lg: 2 },
   },
 
