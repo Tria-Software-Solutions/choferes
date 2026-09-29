@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useMemo } from "react";
 import {
   Box,
   Button,
@@ -18,9 +18,11 @@ import PERMISSIONS from "../../../constants/permissions.constants";
 import PremiumTooltip from "../../../components/PremiumTooltip/PremiumTooltip.component";
 import TopNav from "../../../components/AppBar/TopNav.component";
 import { useAuthContext } from "../../../context/AuthContext";
+import { useHasManagementRole } from "../../../hooks/useHasManagementRole";
 import { PanelHeader } from "../../../components/Layout";
 
 const DOCK_MENU_KEYS = [
+  APPBAR_MENU.MY_PANEL,
   APPBAR_MENU.EMPLOYEES,
   APPBAR_MENU.SCHEDULES,
   APPBAR_MENU.ROLES,
@@ -30,7 +32,11 @@ const DOCK_MENU_KEYS = [
   APPBAR_MENU.PROFILE,
 ];
 
+// Accesos que además exigen un rol de gestión (Gerencia/Administrativo).
+const DOCK_MENU_MANAGEMENT_ONLY: readonly string[] = [APPBAR_MENU.ROLES];
+
 const DOCK_MENU_PERMISSIONS: Record<string, string> = {
+  [APPBAR_MENU.MY_PANEL]: PERMISSIONS.VIEW_MY_PANEL,
   [APPBAR_MENU.EMPLOYEES]: PERMISSIONS.VIEW_EMPLOYEES,
   [APPBAR_MENU.SCHEDULES]: PERMISSIONS.VIEW_SCHEDULES,
   [APPBAR_MENU.ROLES]: PERMISSIONS.VIEW_ROLES,
@@ -43,27 +49,42 @@ const QuickAccessTab: React.FC = () => {
   const theme = useTheme();
   const isSmallScreen = useMediaQuery(theme.breakpoints.down("sm"));
   const { userPermissions } = useAuthContext();
-  const { preferences, itemOrder, toggleMenu, moveItem, resetDefaults } =
-    useMenuPreferences(DOCK_MENU_KEYS);
+  const isManagement = useHasManagementRole();
 
-  const orderedKeys = itemOrder.filter((key) => DOCK_MENU_KEYS.includes(key));
-  const visibleCount = orderedKeys.filter((key) => preferences[key] !== false).length;
+  // Solo se listan (y se pueden ordenar u ocultar) los accesos que los
+  // permisos del rol permiten ver — los mismos que arma la barra superior.
+  const allowedKeys = useMemo(
+    () =>
+      DOCK_MENU_KEYS.filter((key) => {
+        if (DOCK_MENU_MANAGEMENT_ONLY.includes(key) && !isManagement) return false;
+        const requiredPermission = DOCK_MENU_PERMISSIONS[key];
+        if (!requiredPermission) return true; // sin permiso requerido (Configuración)
+        return Array.isArray(userPermissions) && userPermissions.includes(requiredPermission);
+      }),
+    [userPermissions, isManagement],
+  );
+
+  const { preferences, itemOrder, toggleMenu, moveItem, resetDefaults } =
+    useMenuPreferences(allowedKeys);
+
+  const orderedKeys = itemOrder.filter((key) => allowedKeys.includes(key));
 
   const previewItems = orderedKeys
     .filter((key) => preferences[key] !== false)
-    .filter((key) => {
-      const requiredPermission = DOCK_MENU_PERMISSIONS[key];
-      if (!requiredPermission) return true; // no permission required (e.g. Configuración)
-      return (
-        Array.isArray(userPermissions) &&
-        userPermissions.includes(requiredPermission)
-      );
-    })
     .filter((key) => key !== APPBAR_MENU.PROFILE)
     .map((key) => ({
       label: key,
       icon: <NavIcon label={key} />,
     }));
+  const visibleCount = previewItems.length;
+
+  // Mueve un acceso respecto a su vecino visible en la lista (los índices de la
+  // lista filtrada pueden no coincidir con los del orden guardado).
+  const moveKey = (key: string, direction: -1 | 1) => {
+    const neighbor = orderedKeys[orderedKeys.indexOf(key) + direction];
+    if (!neighbor) return;
+    moveItem(itemOrder.indexOf(key), itemOrder.indexOf(neighbor));
+  };
 
   return (
     <Paper
@@ -164,8 +185,9 @@ const QuickAccessTab: React.FC = () => {
                   <span>
                     <IconButton
                       size="small"
+                      aria-label={`Mover ${key} hacia arriba`}
                       disabled={index === 0}
-                      onClick={() => moveItem(index, index - 1)}
+                      onClick={() => moveKey(key, -1)}
                     >
                       <IconArrowUp size={14} />
                     </IconButton>
@@ -175,8 +197,9 @@ const QuickAccessTab: React.FC = () => {
                   <span>
                     <IconButton
                       size="small"
+                      aria-label={`Mover ${key} hacia abajo`}
                       disabled={index === orderedKeys.length - 1}
-                      onClick={() => moveItem(index, index + 1)}
+                      onClick={() => moveKey(key, 1)}
                     >
                       <IconArrowDown size={14} />
                     </IconButton>
@@ -186,6 +209,7 @@ const QuickAccessTab: React.FC = () => {
                 <Switch
                   checked={isVisible}
                   onChange={() => toggleMenu(key)}
+                  inputProps={{ "aria-label": `Mostrar ${key} en la barra superior` }}
                 />
               </Box>
             </Box>

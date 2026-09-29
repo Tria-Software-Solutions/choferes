@@ -37,6 +37,27 @@ router.post(
   employeeController.linkEmployeeToUser,
 );
 
+// Cuenta de acceso del empleado (usuario + roles) para el aviso de la ficha.
+// Antes de "/:id" para que no se interprete como un id.
+router.get(
+  "/:id/access",
+  authenticateToken,
+  requirePermission(PERMISSION_CODES.VIEW_EMPLOYEES),
+  idParam,
+  validate,
+  employeeController.getEmployeeAccess,
+);
+
+// Asigna el rol por defecto cuando la cuenta del empleado quedó sin rol.
+router.post(
+  "/:id/assign-default-role",
+  authenticateToken,
+  requirePermission(PERMISSION_CODES.EDIT_EMPLOYEES),
+  idParam,
+  validate,
+  employeeController.assignDefaultRoleToEmployeeUser,
+);
+
 router.get("/:id", authenticateToken, idParam, validate, employeeController.getEmployeeById);
 router.get(
   "/:id/vacation-accrual",

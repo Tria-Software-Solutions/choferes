@@ -62,6 +62,30 @@ export const updateEmployee = async (
   return response.data;
 };
 
+export interface EmployeeAccess {
+  hasUser: boolean;
+  userId: number | null;
+  username: string | null;
+  roles: { id: number; name: string }[];
+  /** true cuando la cuenta existe pero quedó sin ningún rol. */
+  needsRole: boolean;
+}
+
+// Cuenta de acceso al sistema del empleado (usuario vinculado + roles).
+export const getEmployeeAccess = async (id: number): Promise<EmployeeAccess> => {
+  const response = await api.get(`/employees/${id}/access`, {
+    headers: { "x-no-cache": "1" },
+  });
+  return response.data;
+};
+
+// Asigna el rol por defecto ("Usuario") cuando la cuenta quedó sin rol.
+export const assignDefaultEmployeeRole = async (id: number): Promise<EmployeeAccess> => {
+  const response = await api.post(`/employees/${id}/assign-default-role`);
+  invalidateCache("/employees");
+  return response.data;
+};
+
 // Enlaza el empleado a un usuario (botón "Activar acceso al sistema").
 // `created=false` significa que el empleado ya tenía cuenta: en ese caso no
 // hay contraseña temporal que entregar.

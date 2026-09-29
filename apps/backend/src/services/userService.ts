@@ -13,6 +13,7 @@ import {
   buildSearchWhere,
   QueryParams,
 } from "../utils/pagination";
+import { assignRole, resolveDefaultRole, resolveRoleById } from "./userRoleService";
 
 // Sensitive columns that must never be serialized to API consumers.
 // Requests targeting these columns use their dedicated endpoints instead,
@@ -68,9 +69,33 @@ function pickFields<T extends Record<string, any>>(
 }
 
 // Builds a serializable user object without password hashes.
+// `employeeId` is included so the client can resolve the linked employee
+// (Planilla) and open the personal panel without a second lookup.
 function toSafeUser(user: User): Record<string, any> {
-  const { id, firstName, lastName, username, email, isActive, avatar, settings, roles } = user;
-  return { id, firstName, lastName, username, email, isActive, avatar, settings, roles };
+  const {
+    id,
+    firstName,
+    lastName,
+    username,
+    email,
+    isActive,
+    avatar,
+    settings,
+    roles,
+    employeeId,
+  } = user;
+  return {
+    id,
+    firstName,
+    lastName,
+    username,
+    email,
+    isActive,
+    avatar,
+    settings,
+    roles,
+    employeeId: employeeId ?? null,
+  };
 }
 
 // Pre-computed bcrypt hash used when the identifier matches no account, so a
@@ -204,9 +229,19 @@ export const getUserPermissions = async (userId: number) => {
 
 // Creates a new user with hashed password (whitelisted fields only). Returns
 // the safe projection: the created instance still holds the password hash.
+//
+// `roleId` (optional, not whitelisted for mass assignment) chooses the role;
+// when omitted the default "Usuario" role is used. Assigning the role here —
+// and resolving it BEFORE creating the account — keeps the invariant "toda
+// cuenta tiene al menos un rol" true for every client of the API, instead of
+// relying on a second request from the UI.
 export const createUser = async (data: Record<string, any>) => {
   const clean = pickFields(data, CREATABLE_FIELDS);
   const hashedPassword = await bcrypt.hash(clean.password, 10);
+
+  const role =
+    data.roleId != null ? await resolveRoleById(Number(data.roleId)) : await resolveDefaultRole();
+
   const created = await User.create(
     {
       ...clean,
@@ -214,6 +249,9 @@ export const createUser = async (data: Record<string, any>) => {
     },
     { returning: true },
   );
+
+  await assignRole(created.id, role.id);
+
   return toSafeUser(created);
 };
 

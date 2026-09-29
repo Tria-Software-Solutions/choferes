@@ -39,6 +39,22 @@ export const getPermissionCodesByIds = async (ids: number[]): Promise<string[] |
   return rows.length === unique.length ? rows.map((row) => row.code) : null;
 };
 
+// Returns why `actor` may not hand out `roleId` (it carries permissions the actor
+// does not hold), or null when allowed. Used both when assigning a role to an
+// existing user and when a role is derived automatically (new account, change
+// of position), so nobody can gain access through a side door.
+export const checkRoleGrant = async (
+  actor: AuthenticatedUser,
+  roleId: number,
+): Promise<GrantDenial | null> => {
+  const codes = await getRolePermissionCodes(roleId);
+  if (!codes) return { status: 404, message: "Rol no encontrado" };
+  if (!holdsAll(actor, codes)) {
+    return { status: 403, message: "No puedes asignar un rol con permisos que tú no tienes" };
+  }
+  return null;
+};
+
 // Returns why `actor` may not give `roleId` to `targetUserId`, or null when allowed.
 export const checkRoleAssignment = async (
   actor: AuthenticatedUser,
@@ -53,12 +69,7 @@ export const checkRoleAssignment = async (
     return { status: 403, message: "No puedes cambiar tu propio rol" };
   }
 
-  const codes = await getRolePermissionCodes(roleId);
-  if (!codes) return { status: 404, message: "Rol no encontrado" };
-  if (!holdsAll(actor, codes)) {
-    return { status: 403, message: "No puedes asignar un rol con permisos que tú no tienes" };
-  }
-  return null;
+  return checkRoleGrant(actor, roleId);
 };
 
 // Returns why `actor` may not set `permissionIds` on `roleId`, or null when allowed.

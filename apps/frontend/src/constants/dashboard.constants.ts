@@ -40,6 +40,10 @@ export const DASHBOARD_ROLES = {
   DIALOG_DELETE_CONFIRM: "Eliminar",
   DIALOG_DELETE_CANCEL: "Cancelar",
   DIALOG_ADD_TITLE: "Nuevo rol",
+  // Etiqueta de los roles que nacen de un puesto de empleado: su nombre y su
+  // existencia los manda el puesto, no el editor (ver POSITION_ROLE_NAMES).
+  FOLLOWS_POSITION: "Sigue al puesto",
+  NO_POSITION: "Sin puesto",
 };
 
 export const DASHBOARD_PERMISSIONS = {

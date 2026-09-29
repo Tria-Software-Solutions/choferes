@@ -30,10 +30,16 @@ import {
   EMPLOYEE_GENDERS,
   EMPLOYEE_POSITIONS,
   EMPLOYEE_TERMINATION_REASONS,
+  getRoleNameForPosition,
 } from "@choferes/shared";
 import { AppDispatch } from "../../../store/store";
 import { updateEmployee } from "../../../store/slices/employeeSlice";
-import { linkEmployeeToUser } from "../../../services/employeeService";
+import {
+  assignDefaultEmployeeRole,
+  EmployeeAccess,
+  getEmployeeAccess,
+  linkEmployeeToUser,
+} from "../../../services/employeeService";
 import { digitsOnly, maskNationalId, maskPhone } from "../../../utils/mask";
 import { formatMoney } from "../../../utils/paymentSlipPdf";
 import { useAuthContext } from "../../../context/AuthContext";
@@ -197,6 +203,10 @@ const PersonalInfoTab: React.FC<PersonalInfoTabProps> = ({
   const [isSaving, setIsSaving] = useState(false);
   const [editingSection, setEditingSection] = useState<EditSection | null>(null);
   const [isActivatingAccess, setIsActivatingAccess] = useState(false);
+  const [isAssigningRole, setIsAssigningRole] = useState(false);
+  // Cuenta de acceso del empleado (usuario + roles). Permite avisar cuando la
+  // cuenta quedó sin rol, que deja al usuario sin ver nada en la app.
+  const [access, setAccess] = useState<EmployeeAccess | null>(null);
   // Credenciales temporales recién creadas: mientras no sean null, el diálogo
   // que las muestra permanece abierto (solo se entregan una vez).
   const [credentials, setCredentials] = useState<{
@@ -212,6 +222,21 @@ const PersonalInfoTab: React.FC<PersonalInfoTabProps> = ({
     setForm(buildFormFromEmployee(employee));
     setHasTermination(Boolean(employee.terminationDate));
   }, [employee]);
+
+  // Estado de la cuenta de acceso (se recarga al cambiar de empleado).
+  useEffect(() => {
+    let cancelled = false;
+    getEmployeeAccess(employee.id)
+      .then((data) => {
+        if (!cancelled) setAccess(data);
+      })
+      .catch(() => {
+        if (!cancelled) setAccess(null);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [employee.id]);
 
   // Vuelve a los valores guardados y sale del modo edición.
   const resetForm = () => {
@@ -315,6 +340,10 @@ const PersonalInfoTab: React.FC<PersonalInfoTabProps> = ({
       if (updated) onEmployeeUpdated(updated);
       setEditingSection(null);
       showNotification("Datos guardados", { severity: "success" });
+      // Cambiar el puesto mueve la cuenta al rol de ese puesto: se vuelve a leer.
+      getEmployeeAccess(employee.id)
+        .then(setAccess)
+        .catch(() => undefined);
     } catch (error) {
       const message =
         error instanceof Error ? error.message : "No se pudieron guardar los datos";
@@ -336,12 +365,36 @@ const PersonalInfoTab: React.FC<PersonalInfoTabProps> = ({
       } else {
         showNotification("El empleado ya tiene acceso al sistema", { severity: "info" });
       }
+      // La cuenta pudo quedar sin rol (o haberse reparado al re-vincular).
+      setAccess(await getEmployeeAccess(employee.id));
     } catch (error) {
       const message =
         error instanceof Error ? error.message : "No se pudo activar el acceso al sistema";
       showNotification(message, { severity: "error" });
     } finally {
       setIsActivatingAccess(false);
+    }
+  };
+
+  // Rol de acceso que le corresponde a su puesto ("Usuario" si aún no tiene puesto).
+  const expectedRoleName = getRoleNameForPosition(employee.position) ?? "Usuario";
+
+  // Asigna el rol de su puesto cuando la cuenta quedó sin rol.
+  const handleAssignDefaultRole = async () => {
+    if (!canEdit || isAssigningRole) return;
+    setIsAssigningRole(true);
+    try {
+      const updated = await assignDefaultEmployeeRole(employee.id);
+      setAccess(updated);
+      showNotification(`Se asignó el rol "${updated.roles[0]?.name ?? expectedRoleName}" a la cuenta`, {
+        severity: "success",
+      });
+    } catch (error) {
+      const message =
+        error instanceof Error ? error.message : "No se pudo asignar el rol";
+      showNotification(message, { severity: "error" });
+    } finally {
+      setIsAssigningRole(false);
     }
   };
 
@@ -945,7 +998,7 @@ const PersonalInfoTab: React.FC<PersonalInfoTabProps> = ({
           <SectionHeader
             icon={<IconKey size={20} stroke={1.5} />}
             title="Acceso al sistema"
-            description="Crea la cuenta de login del empleado y entrega una contraseña temporal."
+            description="Crea la cuenta de login del empleado y entrega una contraseña temporal. El rol de la cuenta es el de su puesto."
           />
 
           <Box
@@ -959,9 +1012,94 @@ const PersonalInfoTab: React.FC<PersonalInfoTabProps> = ({
           >
             <IconInfoCircle size={16} />
             <Typography variant="caption">
-              El usuario es su correo electrónico. Si ya tiene cuenta, no se crea otra.
+              El usuario es su correo electrónico. Si ya tiene cuenta, no se crea otra. La cuenta
+              recibe el rol &quot;{expectedRoleName}&quot;
+              {employee.position === "supervisor" ? " (un supervisor siempre lo tiene)" : ""} y
+              cambia si cambia su puesto.
             </Typography>
           </Box>
+
+          {access?.hasUser && (
+            <Box sx={{ display: "flex", flexDirection: "column", gap: 1.5, mb: 2.5 }}>
+              {/* Estado de la cuenta: usuario vinculado y sus roles. */}
+              <Box sx={{ display: "flex", alignItems: "center", gap: 1, flexWrap: "wrap" }}>
+                <Chip size="small" label={`@${access.username}`} sx={{ fontWeight: 600 }} />
+                {access.roles.length > 0 ? (
+                  access.roles.map((role) => (
+                    <Chip key={role.id} size="small" variant="outlined" label={role.name} />
+                  ))
+                ) : (
+                  <Chip size="small" color="error" variant="outlined" label="Sin rol" />
+                )}
+              </Box>
+
+              {access.needsRole && (
+                <Box
+                  sx={{
+                    display: "flex",
+                    flexDirection: { xs: "column", sm: "row" },
+                    alignItems: { xs: "flex-start", sm: "center" },
+                    gap: 1.5,
+                    p: 1.75,
+                    borderRadius: "12px",
+                    backgroundColor: theme.tokens.colors.warningSoft,
+                    border: `1px solid ${theme.tokens.colors.warning}`,
+                  }}
+                >
+                  <IconAlertTriangle
+                    size={20}
+                    color={theme.tokens.colors.warning}
+                    style={{ flexShrink: 0 }}
+                  />
+                  <Box sx={{ flex: 1, minWidth: 0 }}>
+                    <Typography
+                      sx={{
+                        fontWeight: 600,
+                        fontSize: "0.8125rem",
+                        color: theme.tokens.colors.text,
+                      }}
+                    >
+                      Esta cuenta no tiene ningún rol
+                    </Typography>
+                    <Typography
+                      sx={{
+                        fontSize: "0.75rem",
+                        color: theme.tokens.colors.textMuted,
+                        lineHeight: 1.45,
+                      }}
+                    >
+                      Sin un rol el usuario no ve ninguna sección de la app. Asígnale el rol
+                      &quot;{expectedRoleName}&quot; (el de su puesto) para que pueda entrar.
+                    </Typography>
+                  </Box>
+                  {canEdit && (
+                    <Button
+                      size="small"
+                      variant="text"
+                      startIcon={
+                        isAssigningRole ? (
+                          <IconLoader2 size={16} className="animate-spin" />
+                        ) : (
+                          <IconKey size={16} />
+                        )
+                      }
+                      onClick={() => void handleAssignDefaultRole()}
+                      disabled={isAssigningRole}
+                      sx={{
+                        flexShrink: 0,
+                        fontWeight: 600,
+                        color: theme.tokens.colors.text,
+                        backgroundColor: theme.palette.background.paper,
+                        "&:hover": { backgroundColor: theme.tokens.colors.hover },
+                      }}
+                    >
+                      Asignar rol {expectedRoleName}
+                    </Button>
+                  )}
+                </Box>
+              )}
+            </Box>
+          )}
 
           {canEdit && (
             <Button
