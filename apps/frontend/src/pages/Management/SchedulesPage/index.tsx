@@ -699,9 +699,7 @@ const SchedulesPage: React.FC = () => {
     ]
   );
 
-  const canExport =
-    userPermissions.includes(PERMISSIONS.EXPORT_EXCEL_SCHEDULES) &&
-    userPermissions.includes(PERMISSIONS.EXPORT_PDF_SCHEDULES);
+  const canExport = userPermissions.includes(PERMISSIONS.EXPORT_SCHEDULES);
   const canReorder = userPermissions.includes(PERMISSIONS.REORDER_SCHEDULES);
   const canCreate = userPermissions.includes(PERMISSIONS.CREATE_SCHEDULES);
 

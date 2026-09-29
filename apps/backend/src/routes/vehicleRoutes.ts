@@ -14,15 +14,30 @@ import {
 
 const router = express.Router();
 
-router.get("/", authenticateToken, paginationRules, validate, vehicleController.getVehicles);
+router.get(
+  "/",
+  authenticateToken,
+  requirePermission(PERMISSION_CODES.VIEW_VEHICLES),
+  paginationRules,
+  validate,
+  vehicleController.getVehicles,
+);
 router.get(
   "/by-date",
   authenticateToken,
+  requirePermission(PERMISSION_CODES.VIEW_VEHICLES),
   vehicleDateQuery,
   validate,
   vehicleController.getVehiclesByDate,
 );
-router.get("/:id", authenticateToken, idParam, validate, vehicleController.getVehicleById);
+router.get(
+  "/:id",
+  authenticateToken,
+  requirePermission(PERMISSION_CODES.VIEW_VEHICLES),
+  idParam,
+  validate,
+  vehicleController.getVehicleById,
+);
 router.post(
   "/",
   authenticateToken,

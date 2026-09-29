@@ -258,7 +258,7 @@ Services:
 | `JWT_SECRET_KEY_REFRESH` | Secret for refresh tokens (min 32 chars) |
 | `GEMINI_API_KEY` | Google Gemini key — used only server-side by the OCR proxy |
 | `REACT_APP_UI_URL` | Frontend origin for CORS |
-| `SEED_ADMIN_PASSWORD` / `SEED_MANAGEMENT_PASSWORD` / `SEED_CUSTOMER_SERVICE_PASSWORD` | Seeder passwords (required in production, min 12 chars) |
+| `SEED_ADMIN_PASSWORD` / `SEED_MANAGEMENT_PASSWORD` | Seeder passwords (required in production, min 12 chars) |
 
 > Note: the seeder refuses to run in production with the default dev passwords. Real secrets (`JWT_*`, `GEMINI_API_KEY`) must be rotated and kept out of source control.
 
@@ -291,10 +291,9 @@ Only for local development. In production the seeder **fails unless** the `SEED_
 
 | Username | Password (dev default) | Role |
 | --- | --- | --- |
-| `lmhq94` | `Admin123$`/`SEED_ADMIN_PASSWORD` | Gerencia |
+| `lmhq94` | `Admin123$`/`SEED_ADMIN_PASSWORD` | SysAdmin |
 | `danilumix` | `Gerencia123$`/`SEED_MANAGEMENT_PASSWORD` | Gerencia |
 | `damarisa` | `Admin123$`/`SEED_ADMIN_PASSWORD` | Administrativo |
-| `carlosc` | `678900CS$`/`SEED_CUSTOMER_SERVICE_PASSWORD` | Supervisor |
 
 ---
 

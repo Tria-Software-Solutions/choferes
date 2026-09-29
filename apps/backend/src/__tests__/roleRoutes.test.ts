@@ -1,5 +1,5 @@
-// La API de roles es exclusiva de Gerencia/Administrativo: el permiso
-// "roles:view" por sí solo no habilita la administración.
+// La API de roles se controla con permisos: leer requiere `roles:view`, escribir
+// `roles:create|edit|delete`. Ya no hace falta ser Gerencia/Administrativo.
 import express from "express";
 import request from "supertest";
 
@@ -46,46 +46,33 @@ const app = express();
 app.use(express.json());
 app.use("/api/roles", roleRoutes);
 
-describe("guardas de rol de la API de roles", () => {
+describe("guardas de permisos de la API de roles", () => {
   beforeEach(() => {
     mockRoles = [];
     mockPermissions = [];
   });
 
-  it("rechaza con 403 a un rol operativo aunque tenga todos los permisos", async () => {
-    mockRoles = ["Supervisor"];
-    mockPermissions = [
-      "roles:view",
-      "roles:create",
-      "roles:edit",
-      "roles:delete",
-    ];
+  it("exige el permiso aunque el rol sea de gestión", async () => {
+    mockRoles = ["Gerencia"];
 
     expect((await request(app).get("/api/roles")).status).toBe(403);
-    expect((await request(app).get("/api/roles/1")).status).toBe(403);
     expect((await request(app).post("/api/roles").send({ name: "X" })).status).toBe(403);
     expect((await request(app).put("/api/roles/1").send({ name: "X" })).status).toBe(403);
     expect((await request(app).delete("/api/roles/1")).status).toBe(403);
   });
 
-  it("permite el listado a Gerencia y Administrativo con roles:view", async () => {
+  it("permite leer con roles:view sin importar el rol (Supervisor en modo lectura)", async () => {
+    mockRoles = ["Supervisor"];
     mockPermissions = ["roles:view"];
 
-    mockRoles = ["Gerencia"];
     expect((await request(app).get("/api/roles")).status).toBe(200);
-
-    mockRoles = ["Administrativo"];
-    expect((await request(app).get("/api/roles")).status).toBe(200);
+    expect((await request(app).get("/api/roles/1")).status).toBe(200);
+    expect((await request(app).get("/api/roles/name/Chofer")).status).toBe(200);
   });
 
-  it("sigue exigiendo el permiso a Gerencia para crear/editar/eliminar", async () => {
-    mockRoles = ["Gerencia"];
-
-    expect((await request(app).post("/api/roles").send({ name: "X" })).status).toBe(403);
-    expect((await request(app).put("/api/roles/1").send({ name: "X" })).status).toBe(403);
-    expect((await request(app).delete("/api/roles/1")).status).toBe(403);
-
+  it("permite crear/editar/eliminar con sus permisos", async () => {
     mockPermissions = ["roles:create", "roles:edit", "roles:delete"];
+
     expect((await request(app).post("/api/roles").send({ name: "X" })).status).toBe(201);
     expect((await request(app).put("/api/roles/1").send({ name: "X" })).status).toBe(200);
     expect((await request(app).delete("/api/roles/1")).status).toBe(204);

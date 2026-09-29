@@ -284,15 +284,15 @@ describe("POST /api/employees/:id/link-user (Activar acceso al sistema)", () => 
     expect(res.body).not.toHaveProperty("tempPassword");
   });
 
-  it("debería propagar el error cuando el rol por defecto no está configurado", async () => {
+  it("debería propagar el error cuando el rol del puesto no está configurado", async () => {
     service.linkEmployeeToUser.mockRejectedValue(
-      new ServiceError(500, 'El rol por defecto "Usuario" no está configurado'),
+      new ServiceError(500, 'El rol del puesto "Supervisor" no está configurado'),
     );
 
     const res = await request(app).post("/api/employees/7/link-user");
 
     expect(res.status).toBe(500);
-    expect(res.body.message).toBe('El rol por defecto "Usuario" no está configurado');
+    expect(res.body.message).toBe('El rol del puesto "Supervisor" no está configurado');
   });
 });
 
@@ -329,7 +329,7 @@ describe("POST /api/employees/:id/assign-default-role", () => {
       hasUser: true,
       userId: 42,
       username: "ana.soto",
-      roles: [{ id: 4, name: "Usuario" }],
+      roles: [{ id: 6, name: "Chofer" }],
       needsRole: false,
     });
 
@@ -337,7 +337,7 @@ describe("POST /api/employees/:id/assign-default-role", () => {
 
     expect(service.assignDefaultRoleToEmployeeUser).toHaveBeenCalledWith(7);
     expect(res.status).toBe(200);
-    expect(res.body).toMatchObject({ needsRole: false, roles: [{ id: 4, name: "Usuario" }] });
+    expect(res.body).toMatchObject({ needsRole: false, roles: [{ id: 6, name: "Chofer" }] });
   });
 
   it("debería devolver 400 cuando el empleado no tiene cuenta", async () => {

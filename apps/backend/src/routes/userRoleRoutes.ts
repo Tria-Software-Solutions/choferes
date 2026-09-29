@@ -6,9 +6,24 @@ import { PERMISSION_CODES } from "../constants/permissions";
 
 const router = express.Router();
 
-router.get("/", authenticateToken, userRoleController.getUserRoles);
-router.get("/userId/:userId", authenticateToken, userRoleController.getUserRoleByUserId);
-router.get("/roleId/:roleId", authenticateToken, userRoleController.getUserRoleByRoleId);
+router.get(
+  "/",
+  authenticateToken,
+  requirePermission(PERMISSION_CODES.VIEW_USERS),
+  userRoleController.getUserRoles,
+);
+router.get(
+  "/userId/:userId",
+  authenticateToken,
+  requirePermission(PERMISSION_CODES.VIEW_USERS),
+  userRoleController.getUserRoleByUserId,
+);
+router.get(
+  "/roleId/:roleId",
+  authenticateToken,
+  requirePermission(PERMISSION_CODES.VIEW_USERS),
+  userRoleController.getUserRoleByRoleId,
+);
 router.post(
   "/",
   authenticateToken,
