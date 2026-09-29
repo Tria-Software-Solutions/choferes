@@ -24,6 +24,7 @@ import { normalizeThemeMode, useThemeMode } from "./context/ThemeContext";
 import { updateUserSettings } from "./store/slices/userSlice";
 import { setScheduleOrder } from "./store/slices/schedulesSlice";
 import { getDefaultRoute } from "./utils/defaultRoute";
+import { useHasManagementRole } from "./hooks/useHasManagementRole";
 
 const Login = lazy(() => import("./pages/Auth/Login"));
 const RolesPage = lazy(() => import("./pages/Management/RolesPage"));
@@ -37,6 +38,7 @@ const NotFound = lazy(() => import("./pages/ErrorPages/NotFound"));
 const Forbidden = lazy(() => import("./pages/ErrorPages/Forbidden"));
 const ErrorPage = lazy(() => import("./pages/ErrorPages/Error"));
 const Dashboard = lazy(() => import("./pages/Dashboard/Dashboard"));
+const MyPanel = lazy(() => import("./pages/MyPanel"));
 const SessionExpired = lazy(() => import("./pages/ErrorPages/SessionExpired"));
 
 const PageLoader = () => (
@@ -45,14 +47,30 @@ const PageLoader = () => (
   </Box>
 );
 
+interface NavLink {
+  label: string;
+  icon: React.ReactElement;
+  path: string;
+  permission?: string;
+  /** Exclusivo de Gerencia/Administrativo, además del permiso. */
+  managementOnly?: boolean;
+}
+
 const AppBarWrapper: React.FC = () => {
   const { userPermissions } = useAuthContext();
+  const isManagement = useHasManagementRole();
   const { logoutUser } = useAuth();
 
   const theme = useTheme();
   const isSmallScreen = useMediaQuery(theme.breakpoints.down("sm"));
 
-  const links = [
+  const links: NavLink[] = [
+    {
+      label: APPBAR_MENU.MY_PANEL,
+      icon: <NavIcon label={APPBAR_MENU.MY_PANEL} />,
+      path: ROUTES.MY_PANEL,
+      permission: PERMISSIONS.VIEW_MY_PANEL,
+    },
     {
       label: APPBAR_MENU.EMPLOYEES,
       icon: <NavIcon label={APPBAR_MENU.EMPLOYEES} />,
@@ -70,6 +88,8 @@ const AppBarWrapper: React.FC = () => {
       icon: <NavIcon label={APPBAR_MENU.ROLES} />,
       path: ROUTES.ROLES,
       permission: PERMISSIONS.VIEW_ROLES,
+      // La administración de roles es exclusiva de Gerencia/Administrativo.
+      managementOnly: true,
     },
     {
       label: APPBAR_MENU.VEHICLES,
@@ -97,6 +117,7 @@ const AppBarWrapper: React.FC = () => {
   ];
 
   const permissionsMap = {
+    [APPBAR_MENU.MY_PANEL]: PERMISSIONS.VIEW_MY_PANEL,
     [APPBAR_MENU.EMPLOYEES]: PERMISSIONS.VIEW_EMPLOYEES,
     [APPBAR_MENU.SCHEDULES]: PERMISSIONS.VIEW_SCHEDULES,
     [APPBAR_MENU.ROLES]: PERMISSIONS.VIEW_ROLES,
@@ -106,6 +127,8 @@ const AppBarWrapper: React.FC = () => {
   };
 
   const filteredLinks = links.filter((link) => {
+    // Roles exige rol de gestión además del permiso.
+    if (link.managementOnly && !isManagement) return false;
     const requiredPermission = permissionsMap[link.label];
     // Items without a mapped permission (e.g. Configuración) are always visible
     if (!requiredPermission) return true;
@@ -181,6 +204,7 @@ const AppFooter: React.FC<{ sx?: SxProps<Theme> }> = ({ sx }) => {
 
 const AppContent: React.FC = () => {
   const { currentUser, userPermissions } = useAuthContext();
+  const isManagement = useHasManagementRole();
   const location = useLocation();
   const theme = useTheme();
 
@@ -200,6 +224,7 @@ const AppContent: React.FC = () => {
     "/schedules",
     "/vehicles",
     "/dashboard",
+    "/mi-panel",
     "/settings",
     "/profile",
     "/tasks",
@@ -260,7 +285,7 @@ const AppContent: React.FC = () => {
               path="/"
               element={
                 currentUser ? (
-                  <Navigate to={getDefaultRoute(safeUserPermissions)} />
+                  <Navigate to={getDefaultRoute(safeUserPermissions, isManagement)} />
                 ) : (
                   <Login />
                 )
@@ -270,6 +295,7 @@ const AppContent: React.FC = () => {
               <Route
                 path="/roles"
                 element={
+                  isManagement &&
                   safeUserPermissions.includes(PERMISSIONS.VIEW_ROLES) ? (
                     <RolesPage />
                   ) : (
@@ -332,6 +358,16 @@ const AppContent: React.FC = () => {
                 element={
                   safeUserPermissions.includes(PERMISSIONS.VIEW_ADMIN) ? (
                     <Dashboard />
+                  ) : (
+                    <Navigate to="/forbidden" replace />
+                  )
+                }
+              />
+              <Route
+                path="/mi-panel"
+                element={
+                  safeUserPermissions.includes(PERMISSIONS.VIEW_MY_PANEL) ? (
+                    <MyPanel />
                   ) : (
                     <Navigate to="/forbidden" replace />
                   )

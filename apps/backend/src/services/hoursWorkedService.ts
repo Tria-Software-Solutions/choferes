@@ -2,6 +2,7 @@
 import { HoursWorked } from "../models/HoursWorked";
 import { Employee } from "../models/Employee";
 import { parseCalendarDate } from "./summaryRecalculationService";
+import { paginate, getPaginationParams, getSearchParam, QueryParams } from "../utils/pagination";
 
 // Returns a YYYY-MM-DD string from a Date (local calendar day).
 const toDateStr = (date: Date): string => {
@@ -10,7 +11,6 @@ const toDateStr = (date: Date): string => {
   const d = String(date.getDate()).padStart(2, "0");
   return `${y}-${m}-${d}`;
 };
-import { paginate, getPaginationParams, getSearchParam, QueryParams } from "../utils/pagination";
 
 export const getHoursWorked = async (query: QueryParams) => {
   const params = getPaginationParams(query);
@@ -89,7 +89,8 @@ const isUniqueConstraintError = (error: unknown): boolean =>
 // DB constraint and the UI in sync.
 export const createHoursWorked = async (data: Omit<HoursWorked, "id">) => {
   // date is DATEONLY (YYYY-MM-DD string); use exact equality — no timestamp range needed.
-  const dateStr = typeof data.date === "string" ? data.date : toDateStr(data.date as unknown as Date);
+  const dateStr =
+    typeof data.date === "string" ? data.date : toDateStr(data.date as unknown as Date);
 
   const findExisting = () =>
     HoursWorked.findOne({

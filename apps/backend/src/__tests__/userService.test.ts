@@ -24,8 +24,14 @@ jest.mock("../models/User", () => {
 
 jest.mock("../models/Role", () => ({
   __esModule: true,
-  Role: {},
-  default: {},
+  Role: { findOne: jest.fn(), findByPk: jest.fn() },
+  default: { findOne: jest.fn(), findByPk: jest.fn() },
+}));
+
+jest.mock("../models/UserRole", () => ({
+  __esModule: true,
+  UserRole: { findOne: jest.fn(), create: jest.fn() },
+  default: { findOne: jest.fn(), create: jest.fn() },
 }));
 
 jest.mock("../models/Permission", () => ({
@@ -37,6 +43,8 @@ jest.mock("../models/Permission", () => ({
 // eslint-disable-next-line @typescript-eslint/no-require-imports
 const User = require("../models/User").default;
 import bcrypt from "bcrypt";
+import { Role } from "../models/Role";
+import { UserRole } from "../models/UserRole";
 import { generateTokens } from "../utils/generateSecret";
 import * as userService from "../services/userService";
 
@@ -52,7 +60,11 @@ const mockUser = {
 };
 
 // The public shape of a user: same as mockUser but WITHOUT password hashes.
-const mockSafeUser = (({ password, ...safe }) => safe)(mockUser);
+// `employeeId` is always present in the safe shape (null when unlinked).
+const mockSafeUser = {
+  ...(({ password, ...safe }) => safe)(mockUser),
+  employeeId: null,
+};
 
 const mockResponse = {
   cookie: jest.fn(),
@@ -211,18 +223,24 @@ describe("getUsers", () => {
 
 describe("getUserById", () => {
   it("debería devolver usuario por id con roles y excluir hashes", async () => {
-    (User.findByPk as jest.Mock).mockResolvedValue(mockUser);
+    (User.findOne as jest.Mock).mockResolvedValue(mockUser);
 
     const result = await userService.getUserById(1);
 
-    expect(User.findByPk).toHaveBeenCalledWith(1, expect.any(Object));
-    const callArgs = (User.findByPk as jest.Mock).mock.calls[0][1];
-    expect(callArgs.attributes.exclude).toEqual(expect.arrayContaining(["password"]));
+    expect(User.findOne).toHaveBeenCalledWith(
+      expect.objectContaining({
+        where: { id: 1, deletedAt: null },
+        attributes: { exclude: expect.arrayContaining(["password", "temporalPassword"]) },
+        include: expect.any(Array),
+      }),
+    );
+    const callArgs = (User.findOne as jest.Mock).mock.calls[0][0];
+    expect(callArgs.attributes.exclude).toEqual(expect.arrayContaining(["password", "temporalPassword"]));
     expect(result).toEqual(mockUser);
   });
 
   it("debería devolver null si no existe", async () => {
-    (User.findByPk as jest.Mock).mockResolvedValue(null);
+    (User.findOne as jest.Mock).mockResolvedValue(null);
 
     const result = await userService.getUserById(999);
 
@@ -236,11 +254,13 @@ describe("getUserByEmail", () => {
 
     const result = await userService.getUserByEmail("admin@example.com");
 
-    expect(User.findOne).toHaveBeenCalledWith({
-      where: { email: "admin@example.com" },
-      attributes: expect.objectContaining({ exclude: expect.any(Array) }),
-      include: expect.any(Array),
-    });
+    expect(User.findOne).toHaveBeenCalledWith(
+      expect.objectContaining({
+        where: { email: "admin@example.com", deletedAt: null },
+        attributes: { exclude: expect.arrayContaining(["password", "temporalPassword"]) },
+        include: expect.any(Array),
+      }),
+    );
     expect(result).toEqual(mockUser);
   });
 });
@@ -251,11 +271,13 @@ describe("getUserByUsername", () => {
 
     const result = await userService.getUserByUsername("admin");
 
-    expect(User.findOne).toHaveBeenCalledWith({
-      where: { username: "admin" },
-      attributes: expect.objectContaining({ exclude: expect.any(Array) }),
-      include: expect.any(Array),
-    });
+    expect(User.findOne).toHaveBeenCalledWith(
+      expect.objectContaining({
+        where: { username: "admin", deletedAt: null },
+        attributes: { exclude: expect.arrayContaining(["password", "temporalPassword"]) },
+        include: expect.any(Array),
+      }),
+    );
     expect(result).toEqual(mockUser);
   });
 });
@@ -279,6 +301,11 @@ describe("getUserPermissions", () => {
 });
 
 describe("createUser", () => {
+  const mockRoleFindOne = Role.findOne as jest.Mock;
+  const mockRoleFindByPk = Role.findByPk as jest.Mock;
+  const mockUserRoleFindOne = UserRole.findOne as jest.Mock;
+  const mockUserRoleCreate = UserRole.create as jest.Mock;
+
   it("debería hashear password y crear usuario solo con campos whitelist", async () => {
     const newData = {
       firstName: "Nuevo",
@@ -293,6 +320,9 @@ describe("createUser", () => {
 
     (bcrypt.hash as jest.Mock).mockResolvedValue("hashed");
     (User.create as jest.Mock).mockResolvedValue(createdUser);
+    mockRoleFindOne.mockResolvedValue({ id: 4, name: "Usuario" });
+    mockUserRoleFindOne.mockResolvedValue(null);
+    mockUserRoleCreate.mockResolvedValue({ id: 1, userId: 2, roleId: 4 });
 
     const result = await userService.createUser(newData as any);
 
@@ -312,6 +342,44 @@ describe("createUser", () => {
     expect(result).not.toHaveProperty("password");
     expect(result).not.toHaveProperty("temporalPassword");
     expect(result).toMatchObject({ id: 2, username: "nuevo", email: "nuevo@example.com" });
+  });
+
+  it("asigna el rol Usuario por defecto cuando no se especifica roleId", async () => {
+    (bcrypt.hash as jest.Mock).mockResolvedValue("hashed");
+    (User.create as jest.Mock).mockResolvedValue({ id: 2 });
+    mockRoleFindOne.mockResolvedValue({ id: 4, name: "Usuario" });
+    mockUserRoleFindOne.mockResolvedValue(null);
+    mockUserRoleCreate.mockResolvedValue({ id: 1, userId: 2, roleId: 4 });
+
+    await userService.createUser({
+      firstName: "Nuevo",
+      lastName: "Usuario",
+      username: "nuevo",
+      email: "nuevo@example.com",
+      password: "plain_password",
+    } as any);
+
+    expect(mockUserRoleCreate).toHaveBeenCalledWith({ userId: 2, roleId: 4 });
+  });
+
+  it("asigna el roleId indicado cuando viene en la petición", async () => {
+    (bcrypt.hash as jest.Mock).mockResolvedValue("hashed");
+    (User.create as jest.Mock).mockResolvedValue({ id: 5 });
+    mockRoleFindByPk.mockResolvedValue({ id: 3, name: "Supervisor" });
+    mockUserRoleFindOne.mockResolvedValue(null);
+    mockUserRoleCreate.mockResolvedValue({ id: 2, userId: 5, roleId: 3 });
+
+    await userService.createUser({
+      firstName: "Otro",
+      lastName: "Usuario",
+      username: "otro",
+      email: "otro@example.com",
+      password: "plain_password",
+      roleId: 3,
+    } as any);
+
+    expect(mockRoleFindByPk).toHaveBeenCalledWith(3);
+    expect(mockUserRoleCreate).toHaveBeenCalledWith({ userId: 5, roleId: 3 });
   });
 });
 
@@ -404,12 +472,15 @@ describe("updateUserTemporalPassword", () => {
 });
 
 describe("deleteUser", () => {
-  it("debería eliminar por id", async () => {
-    (User.destroy as jest.Mock).mockResolvedValue(1);
+  it("debería desactivar (soft-delete) por id", async () => {
+    (User.update as jest.Mock).mockResolvedValue([1]);
 
     const result = await userService.deleteUser(1);
 
-    expect(User.destroy).toHaveBeenCalledWith({ where: { id: 1 } });
-    expect(result).toBe(1);
+    expect(User.update).toHaveBeenCalledWith(
+      expect.objectContaining({ isActive: false, deletedAt: expect.any(Date) }),
+      { where: { id: 1 } },
+    );
+    expect(result).toEqual([1]);
   });
 });

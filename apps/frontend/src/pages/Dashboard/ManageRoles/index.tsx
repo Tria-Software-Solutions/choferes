@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useCallback, useMemo } from "react";
+import { EMPLOYEE_POSITION_LABELS } from "@choferes/shared";
 import { useAuthContext } from "../../../context/AuthContext";
 import { Role } from "../../../models/Role";
 import { Permission } from "../../../models/Permission";
@@ -18,6 +19,7 @@ import {
   Backdrop,
   Box,
   Button,
+  Chip,
   CircularProgress,
   IconButton,
   Paper,
@@ -214,6 +216,15 @@ const ManageRoles: React.FC<{ isExpanded?: boolean; hideHeader?: boolean }> = ({
   };
 
   // Handles opening/closing delete dialog
+  // Un rol vinculado a un puesto (positions) existe porque el puesto lo necesita:
+  // la cuenta de cada empleado con ese puesto lo recibe al activarse. La API
+  // rechaza renombrarlo o borrarlo, así que aquí se oculta el botón de eliminar
+  // y el nombre se muestra como fijo.
+  const isPositionRole = useCallback(
+    (role: Role) => Boolean(role.positionKey),
+    [],
+  );
+
   const handleOpenDeleteDialog = (id: number) => {
     setOpenDeleteDialog(true);
     setRoleToDelete(id);
@@ -293,7 +304,7 @@ const ManageRoles: React.FC<{ isExpanded?: boolean; hideHeader?: boolean }> = ({
   };
 
   // Renders column values for the table
-  const renderColumnValue = (column: string, value: unknown) => {
+  const renderColumnValue = (column: string, value: unknown, isEditing?: boolean, _editProps?: unknown, row?: Record<string, unknown>) => {
     if (column === "permissionNames" && Array.isArray(value)) {
       return (
         <Box sx={permissionNamesBoxStyles}>
@@ -302,6 +313,22 @@ const ManageRoles: React.FC<{ isExpanded?: boolean; hideHeader?: boolean }> = ({
               {permission}
             </Box>
           ))}
+        </Box>
+      );
+    }
+    // El nombre de un rol de puesto no se edita: la API lo rechaza (409) y el
+    // puesto es quien manda sobre ese nombre.
+    if (column === "name" && row && isPositionRole(row as unknown as Role)) {
+      return (
+        <Box sx={{ display: "flex", alignItems: "center", gap: 0.75, flexWrap: "wrap" }}>
+          <Typography component="span" variant="body2" sx={{ fontWeight: 600 }}>
+            {String(value ?? "")}
+          </Typography>
+          <Chip
+            size="small"
+            label={DASHBOARD_ROLES.FOLLOWS_POSITION}
+            sx={{ height: 18, fontSize: "0.62rem", fontWeight: 600 }}
+          />
         </Box>
       );
     }
@@ -515,6 +542,14 @@ const ManageRoles: React.FC<{ isExpanded?: boolean; hideHeader?: boolean }> = ({
                             placeholder="Nombre del rol"
                             fullWidth
                             variant="standard"
+                            // El nombre de un rol de puesto lo define el puesto: la
+                            // API lo rechaza, así que no se ofrece editarlo.
+                            disabled={isPositionRole(role)}
+                            helperText={
+                              isPositionRole(role)
+                                ? `Este rol sigue al puesto "${EMPLOYEE_POSITION_LABELS[role.positionKey as keyof typeof EMPLOYEE_POSITION_LABELS] ?? DASHBOARD_ROLES.FOLLOWS_POSITION}". Solo se editan sus permisos.`
+                                : undefined
+                            }
                             sx={inputSx}
                           />
                           <Box sx={{ mb: 0.5, display: "flex", alignItems: "center", justifyContent: "space-between" }}>
@@ -642,6 +677,7 @@ const ManageRoles: React.FC<{ isExpanded?: boolean; hideHeader?: boolean }> = ({
                   handleCancel={handleCancel}
                   handleUpdate={handleUpdate}
                   handleOpenDeleteDialog={handleOpenDeleteDialog}
+                  canDeleteRow={(row) => !isPositionRole(row)}
                   getRowId={(row) => row.id}
                   totalCount={totalCount}
                   page={0}

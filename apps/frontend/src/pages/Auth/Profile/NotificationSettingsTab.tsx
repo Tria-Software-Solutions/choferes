@@ -17,6 +17,11 @@ import {
 } from "../../../constants/notificationSettings.constants";
 import { PanelHeader } from "../../../components/Layout";
 
+// Grupos que ya no se muestran en la configuración de notificaciones.
+// Las claves siguen existiendo (el NotificationContext las usa para filtrar),
+// pero dejan de ser configurables por el usuario.
+const HIDDEN_GROUP_IDS = new Set(["activity"]);
+
 const NotificationSettingsTab: React.FC = () => {
   const theme = useTheme();
   const { currentUser, setUser } = useAuthContext();
@@ -34,9 +39,20 @@ const NotificationSettingsTab: React.FC = () => {
   userRef.current = currentUser;
   pendingSettingsRef.current = settings;
 
+  // Solo los grupos visibles cuentan para el estado y el switch maestro, para
+  // que el encabezado coincida con lo que el usuario ve en pantalla.
+  const visibleGroups = useMemo(
+    () => NOTIFICATION_SETTING_GROUPS.filter((group) => !HIDDEN_GROUP_IDS.has(group.id)),
+    [],
+  );
+  const visibleKeys = useMemo(
+    () => visibleGroups.flatMap((group) => group.items.map((item) => item.key)),
+    [visibleGroups],
+  );
+
   const allEnabled = useMemo(
-    () => Object.values(settings).every((value) => value),
-    [settings],
+    () => visibleKeys.every((key) => settings[key]),
+    [settings, visibleKeys],
   );
 
   const persist = useCallback(
@@ -114,14 +130,19 @@ const NotificationSettingsTab: React.FC = () => {
     setSettings((prev) => ({ ...prev, [key]: value }));
   }, []);
 
-  const handleToggleAll = useCallback((value: boolean) => {
-    setSaved(false);
-    setSettings((prev) =>
-      Object.fromEntries(
-        Object.keys(prev).map((key) => [key, value]),
-      ) as Record<NotificationSettingKey, boolean>,
-    );
-  }, []);
+  const handleToggleAll = useCallback(
+    (value: boolean) => {
+      setSaved(false);
+      setSettings((prev) => {
+        const next = { ...prev };
+        visibleKeys.forEach((key) => {
+          next[key] = value;
+        });
+        return next;
+      });
+    },
+    [visibleKeys],
+  );
 
   return (
     <Paper
@@ -209,7 +230,7 @@ const NotificationSettingsTab: React.FC = () => {
 
       {/* Groups */}
       <Box sx={{ flex: 1, minHeight: 0, overflowY: "auto", pr: 0.5 }}>
-        {NOTIFICATION_SETTING_GROUPS.map((group) => (
+        {visibleGroups.map((group) => (
           <Box key={group.id} sx={{ mb: 2 }}>
             <Typography
               variant="caption"

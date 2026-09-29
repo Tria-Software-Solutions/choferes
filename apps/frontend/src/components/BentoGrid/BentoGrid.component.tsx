@@ -6,6 +6,9 @@ interface BentoGridProps {
   sx?: SxProps<Theme>;
 }
 
+// Responsive card grid used by the dashboards (Reportes, Mi Panel). Cards fill
+// the available space on tall screens but never shrink below a readable size:
+// on short screens the body scrolls instead of clipping charts and legends.
 export const BentoGrid: React.FC<BentoGridProps> = ({ children, sx }) => {
   return (
     <Box
@@ -17,9 +20,6 @@ export const BentoGrid: React.FC<BentoGridProps> = ({ children, sx }) => {
           md: "repeat(4, 1fr)",
           lg: "repeat(4, 1fr)",
         },
-        // Cards fill the viewport on tall screens but never shrink below a
-        // readable size: on short screens the dashboard body scrolls instead
-        // of clipping charts and legends.
         gridAutoRows: {
           xs: "auto",
           sm: "minmax(240px, auto)",
@@ -48,6 +48,8 @@ export interface BentoGridItemProps {
   description?: string;
   header?: React.ReactNode;
   icon?: React.ReactNode;
+  /** Controls rendered at the right of the title (e.g. "Solicitar"). */
+  actions?: React.ReactNode;
   sx?: SxProps<Theme>;
   colSpan?: ColSpanConfig;
   rowSpan?: ColSpanConfig;
@@ -58,13 +60,14 @@ export const BentoGridItem: React.FC<BentoGridItemProps> = ({
   description,
   header,
   icon,
+  actions,
   sx,
   colSpan,
   rowSpan = {},
 }) => {
   const theme = useTheme();
   const { borders, shadows } = theme.tokens;
-  const hasContent = header || title || description || icon;
+  const hasContent = header || title || description || icon || actions;
 
   const gridColumn: Record<string, string> = {};
   if (colSpan) {
@@ -114,24 +117,54 @@ export const BentoGridItem: React.FC<BentoGridItemProps> = ({
       )}
       {hasContent && (
         <>
-          {icon && (
-            <Box sx={{ color: theme.palette.primary.main, display: "flex", mb: 1, opacity: 0.7 }}>
-              {icon}
-            </Box>
-          )}
-          {title && (
-            <Typography
-              variant="subtitle2"
+          {(icon || title) && (
+            <Box
               sx={{
-                fontWeight: 700,
-                color: theme.palette.text.primary,
-                letterSpacing: "-0.01em",
-                mb: 0.25,
-                fontSize: "0.9375rem",
+                display: "flex",
+                alignItems: "flex-start",
+                justifyContent: "space-between",
+                gap: 1,
               }}
             >
-              {title}
-            </Typography>
+              <Box sx={{ display: "flex", alignItems: "center", gap: 0.75, minWidth: 0 }}>
+                {icon && (
+                  <Box
+                    sx={{
+                      color: theme.tokens.colors.accentStrong,
+                      backgroundColor: theme.tokens.colors.accentSoft,
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      width: 28,
+                      height: 28,
+                      borderRadius: "8px",
+                      flexShrink: 0,
+                      "& svg": { width: 18, height: 18 },
+                    }}
+                  >
+                    {icon}
+                  </Box>
+                )}
+                {title && (
+                  <Typography
+                    variant="subtitle2"
+                    sx={{
+                      fontWeight: 700,
+                      color: theme.palette.text.primary,
+                      letterSpacing: "-0.01em",
+                      fontSize: "0.9375rem",
+                    }}
+                  >
+                    {title}
+                  </Typography>
+                )}
+              </Box>
+              {actions && (
+                <Box sx={{ display: "flex", alignItems: "center", gap: 0.5, flexShrink: 0 }}>
+                  {actions}
+                </Box>
+              )}
+            </Box>
           )}
           {description && (
             <Typography
@@ -140,14 +173,23 @@ export const BentoGridItem: React.FC<BentoGridItemProps> = ({
                 color: theme.palette.text.secondary,
                 fontSize: "0.75rem",
                 lineHeight: 1.3,
-                mb: header ? 2 : 0,
+                mt: icon || title ? 0.5 : 0,
+                mb: header ? 1.5 : 0,
               }}
             >
               {description}
             </Typography>
           )}
           {header && (
-            <Box sx={{ flex: 1, display: "flex", flexDirection: "column", minHeight: 0, mt: { xs: 0.5, sm: 0 } }}>
+            <Box
+              sx={{
+                flex: 1,
+                display: "flex",
+                flexDirection: "column",
+                minHeight: 0,
+                mt: { xs: 0.5, sm: 0 },
+              }}
+            >
               {header}
             </Box>
           )}

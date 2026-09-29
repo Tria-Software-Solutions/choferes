@@ -125,17 +125,27 @@ describe("createRole", () => {
 
     const result = await roleService.createRole(newData as never);
 
-    expect(Role.create).toHaveBeenCalledWith(newData);
+    expect(Role.create).toHaveBeenCalledWith({ ...newData, positionKey: null });
     expect(createdRole.reload).toHaveBeenCalled();
     expect(result).toEqual(createdRole);
+  });
+
+  it("ignora un positionKey enviado por el cliente: los roles nuevos no siguen a ningún puesto", async () => {
+    const createdRole = { id: 3, name: "Auditoría", reload: jest.fn() };
+    Role.create.mockResolvedValue(createdRole);
+
+    await roleService.createRole({ name: "Auditoría", positionKey: "supervisor" } as never);
+
+    expect(Role.create).toHaveBeenCalledWith({ name: "Auditoría", positionKey: null });
   });
 });
 
 describe("updateRole", () => {
   it("debería actualizar y devolver el rol actualizado", async () => {
     const updateData = { name: "super_admin" };
+    Role.findByPk.mockResolvedValueOnce({ ...mockRole, positionKey: null });
     Role.update.mockResolvedValue([1]);
-    Role.findByPk.mockResolvedValue({ ...mockRole, name: "super_admin" });
+    Role.findByPk.mockResolvedValueOnce({ ...mockRole, name: "super_admin" });
 
     const result = await roleService.updateRole(1, updateData as never);
 
@@ -143,18 +153,52 @@ describe("updateRole", () => {
     expect(result).toHaveProperty("name", "super_admin");
   });
 
-  it("debería devolver null si no existe", async () => {
-    Role.update.mockResolvedValue([0]);
+  it("falla con 404 si el rol no existe", async () => {
     Role.findByPk.mockResolvedValue(null);
 
-    const result = await roleService.updateRole(999, { name: "x" } as never);
+    await expect(roleService.updateRole(999, { name: "x" } as never)).rejects.toMatchObject({
+      statusCode: 404,
+    });
+    expect(Role.update).not.toHaveBeenCalled();
+  });
 
-    expect(result).toBeNull();
+  it("rechaza renombrar un rol que sigue a un puesto", async () => {
+    // Renombrarlo rompería POSITION_ROLE_NAMES: la cuenta de cada empleado con
+    // ese puesto dejaría de encontrar su rol y perdería el acceso en silencio.
+    Role.findByPk.mockResolvedValue({ id: 4, name: "Chofer", positionKey: "chofer" });
+
+    await expect(roleService.updateRole(4, { name: "Chofer v2" } as never)).rejects.toMatchObject({
+      statusCode: 409,
+    });
+    expect(Role.update).not.toHaveBeenCalled();
+  });
+
+  it("permite editar los permisos de un rol de puesto, que es lo único mutable", async () => {
+    Role.findByPk.mockResolvedValueOnce({ id: 4, name: "Chofer", positionKey: "chofer" });
+    Role.update.mockResolvedValue([1]);
+    Role.findByPk.mockResolvedValueOnce({ id: 4, name: "Chofer", positionKey: "chofer" });
+
+    await roleService.updateRole(4, { description: "Chofer de ruta fija" } as never);
+
+    expect(Role.update).toHaveBeenCalledWith(
+      { description: "Chofer de ruta fija" },
+      { where: { id: 4 } },
+    );
+  });
+
+  it("ignora un positionKey enviado por el cliente", async () => {
+    Role.findByPk.mockResolvedValue({ id: 8, name: "Contabilidad", positionKey: null });
+    Role.update.mockResolvedValue([1]);
+
+    await roleService.updateRole(8, { name: "Contabilidad", positionKey: "supervisor" } as never);
+
+    expect(Role.update).toHaveBeenCalledWith({ name: "Contabilidad" }, { where: { id: 8 } });
   });
 });
 
 describe("deleteRole", () => {
   it("debería eliminar por id", async () => {
+    Role.findByPk.mockResolvedValue({ ...mockRole, positionKey: null });
     Role.destroy.mockResolvedValue(1);
 
     const result = await roleService.deleteRole(1);
@@ -163,11 +207,28 @@ describe("deleteRole", () => {
     expect(result).toBe(1);
   });
 
-  it("debería devolver 0 si no existe", async () => {
+  it("rechaza borrar un rol que sigue a un puesto", async () => {
+    // user_role tiene ON DELETE CASCADE: borrarlo dejaría sin rol a todos los
+    // empleados de ese puesto, sin error ni aviso.
+    Role.findByPk.mockResolvedValue({ id: 4, name: "Chofer", positionKey: "chofer" });
+
+    await expect(roleService.deleteRole(4)).rejects.toMatchObject({ statusCode: 409 });
+    expect(Role.destroy).not.toHaveBeenCalled();
+  });
+
+  it("devuelve 0 cuando la fila ya no está", async () => {
+    Role.findByPk.mockResolvedValue({ ...mockRole, positionKey: null });
     Role.destroy.mockResolvedValue(0);
 
-    const result = await roleService.deleteRole(999);
+    const result = await roleService.deleteRole(1);
 
     expect(result).toBe(0);
+  });
+
+  it("falla con 404 si el rol no existe", async () => {
+    Role.findByPk.mockResolvedValue(null);
+
+    await expect(roleService.deleteRole(999)).rejects.toMatchObject({ statusCode: 404 });
+    expect(Role.destroy).not.toHaveBeenCalled();
   });
 });
