@@ -16,7 +16,7 @@ import { IconArrowLeft, IconBeach, IconBriefcase, IconCalendarMonth, IconCalenda
 import { Employee, getEmployeePositionLabel } from "../../models/Employee";
 import * as EmployeeService from "../../services/employeeService";
 import { useAuthContext } from "../../context/AuthContext";
-import PERMISSIONS from "../../constants/permissions.constants";
+import { PERMISSION_CODES } from "../../constants/permissions.constants";
 import NOTIFICATIONS from "../../constants/notifications.constants";
 import { AppDispatch } from "../../store/store";
 import { deleteEmployee, updateEmployee } from "../../store/slices/employeeSlice";
@@ -77,11 +77,11 @@ const EmployeeDetailPage: React.FC = () => {
   const [openTerminationDialog, setOpenTerminationDialog] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
 
-  const canDelete = userPermissions.includes(PERMISSIONS.DELETE_EMPLOYEES);
-  const canViewPayments = userPermissions.includes(PERMISSIONS.VIEW_PAYMENTS);
-  const canViewVacations = userPermissions.includes(PERMISSIONS.VIEW_VACATIONS);
-  const canViewLicenses = userPermissions.includes(PERMISSIONS.VIEW_LICENSES);
-  const canViewDisciplinary = userPermissions.includes(PERMISSIONS.VIEW_DISCIPLINARY);
+  const canDelete = userPermissions.includes(PERMISSION_CODES.DELETE_EMPLOYEES);
+  const canViewPayments = userPermissions.includes(PERMISSION_CODES.VIEW_PAYMENTS);
+  const canViewVacations = userPermissions.includes(PERMISSION_CODES.VIEW_VACATIONS);
+  const canViewLicenses = userPermissions.includes(PERMISSION_CODES.VIEW_LICENSES);
+  const canViewDisciplinary = userPermissions.includes(PERMISSION_CODES.VIEW_DISCIPLINARY);
 
   const employeeId = parseInt(id || "", 10);
 

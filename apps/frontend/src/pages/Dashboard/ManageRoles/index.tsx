@@ -41,7 +41,7 @@ import {
   neutralButtonStyles,
 } from "../../../components/Table/EditableTable/helpers/actionButtons";
 import PAGE_TITLE from "../../../constants/pageTitle.constants";
-import PERMISSIONS from "../../../constants/permissions.constants";
+import { PERMISSION_CODES } from "../../../constants/permissions.constants";
 import { DASHBOARD_ROLES } from "../../../constants/constants";
 import { NOTIFICATIONS } from "../../../constants/constants";
 import { TABLE } from "../../../constants/constants";
@@ -66,8 +66,8 @@ const ManageRoles: React.FC<{ isExpanded?: boolean; hideHeader?: boolean }> = ({
   const { userPermissions } = useAuthContext();
   const theme = useTheme();
   const isSmallScreen = useMediaQuery(theme.breakpoints.down("sm"));
-  const canCreateRole = userPermissions.includes(PERMISSIONS.CREATE_ROLE);
-  const canEditRole = userPermissions.includes(PERMISSIONS.EDIT_ROLE);
+  const canCreateRole = userPermissions.includes(PERMISSION_CODES.CREATE_ROLE);
+  const canEditRole = userPermissions.includes(PERMISSION_CODES.EDIT_ROLE);
 
   const inputSx = {
     '& .MuiInputBase-root': {
@@ -686,10 +686,10 @@ const ManageRoles: React.FC<{ isExpanded?: boolean; hideHeader?: boolean }> = ({
                   setRowsPerPage={setRowsPerPage}
                   isSaveDisabled={!isEditFormValid}
                   userPermissions={userPermissions}
-                  permissionMap={{
-                    edit: PERMISSIONS.EDIT_ROLE,
-                    delete: PERMISSIONS.DELETE_ROLE,
-                  }}
+permissionMap={{
+                      edit: PERMISSION_CODES.EDIT_ROLE,
+                      delete: PERMISSION_CODES.DELETE_ROLE,
+                    }}
                   renderColumnValue={renderColumnValue}
                   isExpanded={isExpanded}
                 />

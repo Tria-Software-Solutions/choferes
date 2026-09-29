@@ -3,7 +3,7 @@ import { fireEvent, render, screen } from "@testing-library/react";
 import { ThemeProvider } from "@mui/material/styles";
 import { lightTheme } from "../../../theme";
 import APPBAR_MENU from "../../../constants/appbar.constants";
-import PERMISSIONS from "../../../constants/permissions.constants";
+import { PERMISSION_CODES } from "../../../constants/permissions.constants";
 import QuickAccessTab from "./QuickAccessTab";
 
 let mockPermissions: string[] = [];
@@ -38,7 +38,7 @@ describe("QuickAccessTab", () => {
   });
 
   it("solo lista los accesos que los permisos del rol permiten ver", () => {
-    mockPermissions = [PERMISSIONS.VIEW_MY_PANEL, PERMISSIONS.VIEW_TASKS];
+    mockPermissions = [PERMISSION_CODES.VIEW_MY_PANEL, PERMISSION_CODES.VIEW_TASKS];
     renderTab();
 
     expect(listedLabels()).toEqual([
@@ -49,14 +49,14 @@ describe("QuickAccessTab", () => {
   });
 
   it("lista Roles solo cuando el rol tiene el permiso de ver Roles", () => {
-    mockPermissions = [PERMISSIONS.VIEW_ROLES];
+    mockPermissions = [PERMISSION_CODES.VIEW_ROLES];
     renderTab();
 
     expect(listedLabels()).toEqual([APPBAR_MENU.ROLES, APPBAR_MENU.PROFILE]);
   });
 
   it("lista Roles a un rol operativo con el permiso (lectura)", () => {
-    mockPermissions = [PERMISSIONS.VIEW_ROLES];
+    mockPermissions = [PERMISSION_CODES.VIEW_ROLES];
     mockRoles = [{ name: "Supervisor" }];
     renderTab();
 
@@ -79,7 +79,7 @@ describe("QuickAccessTab", () => {
         _order: [APPBAR_MENU.TASKS, APPBAR_MENU.MY_PANEL, APPBAR_MENU.PROFILE],
       }),
     );
-    mockPermissions = [PERMISSIONS.VIEW_MY_PANEL, PERMISSIONS.VIEW_TASKS];
+    mockPermissions = [PERMISSION_CODES.VIEW_MY_PANEL, PERMISSION_CODES.VIEW_TASKS];
     renderTab();
 
     expect(listedLabels()).toEqual([
@@ -99,7 +99,7 @@ describe("QuickAccessTab", () => {
         _orderVersion: 2,
       }),
     );
-    mockPermissions = [PERMISSIONS.VIEW_MY_PANEL, PERMISSIONS.VIEW_TASKS];
+    mockPermissions = [PERMISSION_CODES.VIEW_MY_PANEL, PERMISSION_CODES.VIEW_TASKS];
     renderTab();
 
     expect(listedLabels()).toEqual([
@@ -110,7 +110,7 @@ describe("QuickAccessTab", () => {
   });
 
   it("reordena respetando solo los accesos permitidos", () => {
-    mockPermissions = [PERMISSIONS.VIEW_MY_PANEL, PERMISSIONS.VIEW_TASKS];
+    mockPermissions = [PERMISSION_CODES.VIEW_MY_PANEL, PERMISSION_CODES.VIEW_TASKS];
     renderTab();
 
     fireEvent.click(screen.getByRole("button", { name: `Mover ${APPBAR_MENU.MY_PANEL} hacia abajo` }));
