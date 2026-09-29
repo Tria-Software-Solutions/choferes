@@ -18,7 +18,6 @@ import PERMISSIONS from "../../../constants/permissions.constants";
 import PremiumTooltip from "../../../components/PremiumTooltip/PremiumTooltip.component";
 import TopNav from "../../../components/AppBar/TopNav.component";
 import { useAuthContext } from "../../../context/AuthContext";
-import { useHasManagementRole } from "../../../hooks/useHasManagementRole";
 import { PanelHeader } from "../../../components/Layout";
 
 const DOCK_MENU_KEYS = [
@@ -31,9 +30,6 @@ const DOCK_MENU_KEYS = [
   APPBAR_MENU.TASKS,
   APPBAR_MENU.PROFILE,
 ];
-
-// Accesos que además exigen un rol de gestión (Gerencia/Administrativo).
-const DOCK_MENU_MANAGEMENT_ONLY: readonly string[] = [APPBAR_MENU.ROLES];
 
 const DOCK_MENU_PERMISSIONS: Record<string, string> = {
   [APPBAR_MENU.MY_PANEL]: PERMISSIONS.VIEW_MY_PANEL,
@@ -49,19 +45,17 @@ const QuickAccessTab: React.FC = () => {
   const theme = useTheme();
   const isSmallScreen = useMediaQuery(theme.breakpoints.down("sm"));
   const { userPermissions } = useAuthContext();
-  const isManagement = useHasManagementRole();
 
   // Solo se listan (y se pueden ordenar u ocultar) los accesos que los
   // permisos del rol permiten ver — los mismos que arma la barra superior.
   const allowedKeys = useMemo(
     () =>
       DOCK_MENU_KEYS.filter((key) => {
-        if (DOCK_MENU_MANAGEMENT_ONLY.includes(key) && !isManagement) return false;
         const requiredPermission = DOCK_MENU_PERMISSIONS[key];
         if (!requiredPermission) return true; // sin permiso requerido (Configuración)
         return Array.isArray(userPermissions) && userPermissions.includes(requiredPermission);
       }),
-    [userPermissions, isManagement],
+    [userPermissions],
   );
 
   const { preferences, itemOrder, toggleMenu, moveItem, resetDefaults } =

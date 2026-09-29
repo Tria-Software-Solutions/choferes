@@ -10,11 +10,17 @@ const router = express.Router();
 router.get(
   "/",
   authenticateToken,
+  requirePermission(PERMISSION_CODES.VIEW_BIWEEKLY_SUMMARY),
   biweeklySummaryQueryRules,
   validate,
   biweeklySummaryController.getBiweeklySummaries,
 );
-router.get("/employee/:id", authenticateToken, biweeklySummaryController.getCurrentBiweeklySummary);
+router.get(
+  "/employee/:id",
+  authenticateToken,
+  requirePermission(PERMISSION_CODES.VIEW_BIWEEKLY_SUMMARY),
+  biweeklySummaryController.getCurrentBiweeklySummary,
+);
 router.post(
   "/",
   authenticateToken,

@@ -935,9 +935,7 @@ const EmployeesPage: React.FC = () => {
     ]
   );
 
-  const canExport =
-    userPermissions.includes(PERMISSIONS.EXPORT_EXCEL_EMPLOYEES) &&
-    userPermissions.includes(PERMISSIONS.EXPORT_PDF_EMPLOYEES);
+  const canExport = userPermissions.includes(PERMISSIONS.EXPORT_EMPLOYEES);
 
   return (
     <PageContainer>

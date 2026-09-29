@@ -228,13 +228,20 @@ describe("employeeService", () => {
       expect(User.findOne).not.toHaveBeenCalled();
     });
 
-    it("guarda como null un puesto que ya no existe", async () => {
-      mockUpdate.mockResolvedValue([1]);
-      mockFindByPk.mockResolvedValue(mockEmployee);
+    it("rechaza un puesto desconocido sin guardar nada", async () => {
+      await expect(
+        employeeService.updateEmployee(1, { position: "cajero" }),
+      ).rejects.toMatchObject({ statusCode: 400 });
 
-      await employeeService.updateEmployee(1, { position: "cajero" });
+      expect(mockUpdate).not.toHaveBeenCalled();
+    });
 
-      expect(mockUpdate).toHaveBeenCalledWith({ position: null }, { where: { id: 1 } });
+    it("rechaza dejar al empleado sin puesto", async () => {
+      await expect(
+        employeeService.updateEmployee(1, { position: null }),
+      ).rejects.toMatchObject({ statusCode: 400 });
+
+      expect(mockUpdate).not.toHaveBeenCalled();
     });
 
     describe("cambio de puesto con cuenta vinculada", () => {
@@ -252,7 +259,7 @@ describe("employeeService", () => {
       });
 
       it("pasa la cuenta al rol del nuevo puesto (supervisor → Supervisor)", async () => {
-        mockUserFindOne.mockResolvedValue({ id: 9, roles: [{ id: 7, name: "Usuario" }] });
+        mockUserFindOne.mockResolvedValue({ id: 9, roles: [{ id: 6, name: "Chofer" }] });
         mockRoleFindOne.mockResolvedValue({ id: 3, name: "Supervisor" });
 
         await employeeService.updateEmployee(1, { position: "supervisor" }, actor);
@@ -264,14 +271,13 @@ describe("employeeService", () => {
         expect(UserRole.create).toHaveBeenCalledWith({ userId: 9, roleId: 3 });
       });
 
-      it("sin puesto la cuenta vuelve al rol genérico Usuario", async () => {
-        mockUserFindOne.mockResolvedValue({ id: 9, roles: [{ id: 3, name: "Supervisor" }] });
-        mockRoleFindOne.mockResolvedValue({ id: 7, name: "Usuario" });
+      it("rechaza el cambio de puesto nulo sin tocar la cuenta", async () => {
+        await expect(
+          employeeService.updateEmployee(1, { position: null }, actor),
+        ).rejects.toMatchObject({ statusCode: 400 });
 
-        await employeeService.updateEmployee(1, { position: null }, actor);
-
-        expect(mockRoleFindOne).toHaveBeenCalledWith({ where: { name: "Usuario" } });
-        expect(UserRole.create).toHaveBeenCalledWith({ userId: 9, roleId: 7 });
+        expect(mockUserFindOne).not.toHaveBeenCalled();
+        expect(UserRole.create).not.toHaveBeenCalled();
       });
 
       it("no toca la cuenta si ya tiene el rol del puesto", async () => {
@@ -298,7 +304,7 @@ describe("employeeService", () => {
       });
 
       it("rechaza el cambio, sin guardar nada, si quien lo hace no puede otorgar ese rol", async () => {
-        mockUserFindOne.mockResolvedValue({ id: 9, roles: [{ id: 7, name: "Usuario" }] });
+        mockUserFindOne.mockResolvedValue({ id: 9, roles: [{ id: 6, name: "Chofer" }] });
         mockRoleFindOne.mockResolvedValue({ id: 3, name: "Supervisor" });
         (checkRoleGrant as jest.Mock).mockResolvedValue({
           status: 403,
@@ -663,18 +669,19 @@ describe("employeeService", () => {
     const mockUserRoleFindOne = UserRole.findOne as jest.Mock;
     const mockUserRoleCreate = UserRole.create as jest.Mock;
 
-    it("asigna el rol Usuario a la cuenta recién creada", async () => {
-      mockFindByPk.mockResolvedValue(employee);
+    it("asigna el rol del puesto a la cuenta recién creada (chofer → Chofer)", async () => {
+      mockFindByPk.mockResolvedValue({ ...employee, position: "chofer" });
       // Sin cuenta previa vinculada (y username/email libres).
       mockUserFindOne.mockResolvedValue(null);
       mockUserCreate.mockResolvedValue({ id: 42 });
-      mockRoleFindOne.mockResolvedValue({ id: 4, name: "Usuario" });
-      mockUserRoleCreate.mockResolvedValue({ id: 1, userId: 42, roleId: 4 });
+      mockRoleFindOne.mockResolvedValue({ id: 6, name: "Chofer" });
+      mockUserRoleCreate.mockResolvedValue({ id: 1, userId: 42, roleId: 6 });
 
       const result = await employeeService.linkEmployeeToUser(7);
 
       expect(result.created).toBe(true);
-      expect(mockUserRoleCreate).toHaveBeenCalledWith({ userId: 42, roleId: 4 });
+      expect(mockRoleFindOne).toHaveBeenCalledWith({ where: { name: "Chofer" } });
+      expect(mockUserRoleCreate).toHaveBeenCalledWith({ userId: 42, roleId: 6 });
     });
 
     it("da a la cuenta nueva el rol de su puesto (supervisor → Supervisor)", async () => {
@@ -710,16 +717,16 @@ describe("employeeService", () => {
     });
 
     it("repara una cuenta existente que quedó sin rol", async () => {
-      mockFindByPk.mockResolvedValue(employee);
+      mockFindByPk.mockResolvedValue({ ...employee, position: "chofer" });
       mockUserFindOne.mockResolvedValue({ id: 9 });
       mockUserRoleFindOne.mockResolvedValue(null);
-      mockRoleFindOne.mockResolvedValue({ id: 4, name: "Usuario" });
-      mockUserRoleCreate.mockResolvedValue({ id: 2, userId: 9, roleId: 4 });
+      mockRoleFindOne.mockResolvedValue({ id: 6, name: "Chofer" });
+      mockUserRoleCreate.mockResolvedValue({ id: 2, userId: 9, roleId: 6 });
 
       const result = await employeeService.linkEmployeeToUser(7);
 
       expect(result.created).toBe(false);
-      expect(mockUserRoleCreate).toHaveBeenCalledWith({ userId: 9, roleId: 4 });
+      expect(mockUserRoleCreate).toHaveBeenCalledWith({ userId: 9, roleId: 6 });
     });
 
     it("no duplica el rol cuando la cuenta ya tiene uno", async () => {
@@ -766,13 +773,13 @@ describe("employeeService", () => {
       mockUserFindOne.mockResolvedValue({
         id: 9,
         username: "ana",
-        roles: [{ id: 4, name: "Usuario" }],
+        roles: [{ id: 6, name: "Chofer" }],
       });
 
       const access = await employeeService.getEmployeeAccess(7);
 
       expect(access.needsRole).toBe(false);
-      expect(access.roles).toEqual([{ id: 4, name: "Usuario" }]);
+      expect(access.roles).toEqual([{ id: 6, name: "Chofer" }]);
     });
 
     it("lanza 404 cuando el empleado no existe", async () => {
@@ -788,21 +795,21 @@ describe("employeeService", () => {
     const mockUserRoleFindOne = UserRole.findOne as jest.Mock;
     const mockUserRoleCreate = UserRole.create as jest.Mock;
 
-    it("asigna el rol por defecto y devuelve la cuenta actualizada", async () => {
-      mockFindByPk.mockResolvedValue({ id: 7 });
+    it("asigna el rol del puesto y devuelve la cuenta actualizada", async () => {
+      mockFindByPk.mockResolvedValue({ id: 7, position: "chofer" });
       // 1) cuenta del empleado, 2) recarga en getEmployeeAccess.
       mockUserFindOne
         .mockResolvedValueOnce({ id: 9 })
-        .mockResolvedValueOnce({ id: 9, username: "ana", roles: [{ id: 4, name: "Usuario" }] });
+        .mockResolvedValueOnce({ id: 9, username: "ana", roles: [{ id: 6, name: "Chofer" }] });
       mockUserRoleFindOne.mockResolvedValue(null);
-      mockRoleFindOne.mockResolvedValue({ id: 4, name: "Usuario" });
-      mockUserRoleCreate.mockResolvedValue({ id: 1, userId: 9, roleId: 4 });
+      mockRoleFindOne.mockResolvedValue({ id: 6, name: "Chofer" });
+      mockUserRoleCreate.mockResolvedValue({ id: 1, userId: 9, roleId: 6 });
 
       const access = await employeeService.assignDefaultRoleToEmployeeUser(7);
 
-      expect(mockUserRoleCreate).toHaveBeenCalledWith({ userId: 9, roleId: 4 });
+      expect(mockUserRoleCreate).toHaveBeenCalledWith({ userId: 9, roleId: 6 });
       expect(access.needsRole).toBe(false);
-      expect(access.roles).toEqual([{ id: 4, name: "Usuario" }]);
+      expect(access.roles).toEqual([{ id: 6, name: "Chofer" }]);
     });
 
     it("asigna el rol del puesto del empleado cuando lo tiene", async () => {

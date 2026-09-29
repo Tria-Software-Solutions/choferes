@@ -1,7 +1,7 @@
 import express from "express";
 import * as employeeController from "../controllers/employeeController";
 import { authenticateToken } from "../middleware/authMiddleware";
-import { requirePermission } from "../middleware/authorize";
+import { requireAnyPermission, requirePermission } from "../middleware/authorize";
 import { PERMISSION_CODES } from "../constants/permissions";
 import {
   idParam,
@@ -18,7 +18,15 @@ import {
 
 const router = express.Router();
 
-router.get("/", authenticateToken, employeeQueryRules, validate, employeeController.getEmployees);
+router.get(
+  "/",
+  authenticateToken,
+  // El tablero de Roles (solo lectura) necesita el listado de empleados.
+  requireAnyPermission([PERMISSION_CODES.VIEW_EMPLOYEES, PERMISSION_CODES.VIEW_ROLES]),
+  employeeQueryRules,
+  validate,
+  employeeController.getEmployees,
+);
 // Antes de "/:id" para que "hours-summary" no se interprete como un id.
 router.get(
   "/hours-summary",
@@ -58,7 +66,14 @@ router.post(
   employeeController.assignDefaultRoleToEmployeeUser,
 );
 
-router.get("/:id", authenticateToken, idParam, validate, employeeController.getEmployeeById);
+router.get(
+  "/:id",
+  authenticateToken,
+  requirePermission(PERMISSION_CODES.VIEW_EMPLOYEES),
+  idParam,
+  validate,
+  employeeController.getEmployeeById,
+);
 router.get(
   "/:id/vacation-accrual",
   authenticateToken,

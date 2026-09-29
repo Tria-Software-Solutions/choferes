@@ -27,7 +27,7 @@ import { APPBAR_MENU } from "../../constants/constants";
 import { useNotificationMenu } from "../../context/NotificationContext";
 import { ThemeToggle } from "../ThemeToggle/ThemeToggle";
 import logo from "../../assets/images/logo.png";
-import { Roles } from "../../constants/roles";
+import { hasManagementRole } from "@choferes/shared";
 
 interface Link {
   label: string;
@@ -129,9 +129,7 @@ const AppBarComponent: React.FC<AppBarComponentProps> = ({ title, userLinks = []
   }, [visibleLinks, userLinks]);
 
   const hasNotificationsAccess = () => {
-    if (!currentUser?.roles || currentUser.roles.length === 0) return false;
-    const firstRole = currentUser.roles[0];
-    return firstRole.id === Roles.MANAGER || firstRole.id === Roles.ADMINISTRATIVE;
+    return hasManagementRole(currentUser);
   };
 
 

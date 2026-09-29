@@ -10,7 +10,8 @@ export const getDefaultRoute = (
   const has = (permission: string) =>
     Array.isArray(userPermissions) && userPermissions.includes(permission);
 
-  // Los roles operativos (Supervisor/Usuario) aterrizan en su panel personal.
+  // Los roles operativos (Chofer, Chofer Coordinador, Recepcionista,
+  // Supervisor) aterrizan en su panel personal.
   // Gerencia/Admin conservan su landing actual aunque también tengan el permiso.
   if (!has(PERMISSIONS.VIEW_ADMIN) && has(PERMISSIONS.VIEW_MY_PANEL)) {
     return ROUTES.MY_PANEL;

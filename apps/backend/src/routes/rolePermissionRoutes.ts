@@ -6,7 +6,12 @@ import { PERMISSION_CODES } from "../constants/permissions";
 
 const router = express.Router();
 
-router.get("/", authenticateToken, rolePermissionController.getRolePermissions);
+router.get(
+  "/",
+  authenticateToken,
+  requirePermission(PERMISSION_CODES.VIEW_ROLES),
+  rolePermissionController.getRolePermissions,
+);
 router.post(
   "/",
   authenticateToken,
@@ -25,6 +30,11 @@ router.delete(
   requirePermission(PERMISSION_CODES.EDIT_ROLE),
   rolePermissionController.deleteRolePermission,
 );
-router.get("/role/:roleId", authenticateToken, rolePermissionController.getRolePermissionsByRoleId);
+router.get(
+  "/role/:roleId",
+  authenticateToken,
+  requirePermission(PERMISSION_CODES.VIEW_ROLES),
+  rolePermissionController.getRolePermissionsByRoleId,
+);
 
 export default router;

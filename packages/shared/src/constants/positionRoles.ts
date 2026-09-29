@@ -19,17 +19,12 @@ export const POSITION_ROLE_NAMES: Readonly<Record<EmployeePosition, RoleName>> =
   gerencia: "Gerencia",
 };
 
-/** El rol genérico: se usa cuando el empleado no tiene puesto. No es un puesto. */
-export const DEFAULT_ACCESS_ROLE = "Usuario";
-
 /**
- * Roles que siguen al puesto del empleado ("Usuario" es el rol genérico de las
- * cuentas sin puesto y del que se parte al activar un acceso). Gerencia,
- * Administrativo y los roles personalizados son independientes del puesto y
- * nunca se tocan automáticamente.
+ * Roles que siguen al puesto del empleado. Gerencia, Administrativo, SysAdmin y
+ * los roles personalizados son independientes del puesto y nunca se tocan
+ * automáticamente.
  */
 export const POSITION_LINKED_ROLE_NAMES: readonly RoleName[] = [
-  DEFAULT_ACCESS_ROLE,
   ...Object.values(POSITION_ROLE_NAMES),
 ];
 

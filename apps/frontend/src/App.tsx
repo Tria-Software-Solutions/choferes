@@ -52,13 +52,10 @@ interface NavLink {
   icon: React.ReactElement;
   path: string;
   permission?: string;
-  /** Exclusivo de Gerencia/Administrativo, además del permiso. */
-  managementOnly?: boolean;
 }
 
 const AppBarWrapper: React.FC = () => {
   const { userPermissions } = useAuthContext();
-  const isManagement = useHasManagementRole();
   const { logoutUser } = useAuth();
 
   const theme = useTheme();
@@ -88,8 +85,6 @@ const AppBarWrapper: React.FC = () => {
       icon: <NavIcon label={APPBAR_MENU.ROLES} />,
       path: ROUTES.ROLES,
       permission: PERMISSIONS.VIEW_ROLES,
-      // La administración de roles es exclusiva de Gerencia/Administrativo.
-      managementOnly: true,
     },
     {
       label: APPBAR_MENU.VEHICLES,
@@ -127,8 +122,6 @@ const AppBarWrapper: React.FC = () => {
   };
 
   const filteredLinks = links.filter((link) => {
-    // Roles exige rol de gestión además del permiso.
-    if (link.managementOnly && !isManagement) return false;
     const requiredPermission = permissionsMap[link.label];
     // Items without a mapped permission (e.g. Configuración) are always visible
     if (!requiredPermission) return true;
@@ -295,7 +288,6 @@ const AppContent: React.FC = () => {
               <Route
                 path="/roles"
                 element={
-                  isManagement &&
                   safeUserPermissions.includes(PERMISSIONS.VIEW_ROLES) ? (
                     <RolesPage />
                   ) : (
@@ -373,7 +365,16 @@ const AppContent: React.FC = () => {
                   )
                 }
               />
-              <Route path="/settings" element={<Profile />} />
+              <Route
+                path="/settings"
+                element={
+                  safeUserPermissions.includes(PERMISSIONS.VIEW_PROFILE) ? (
+                    <Profile />
+                  ) : (
+                    <Navigate to="/forbidden" replace />
+                  )
+                }
+              />
               <Route path="/profile" element={<Navigate to="/settings" replace />} />
             </Route>
             <Route path="/forbidden" element={<Forbidden />} />
