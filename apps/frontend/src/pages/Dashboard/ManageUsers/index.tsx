@@ -15,7 +15,6 @@ import {
 import { fetchRoles } from "../../../store/slices/rolesSlice";
 import { fetchUserRoles } from "../../../store/slices/userRolesSlice";
 import { useAppNotifications } from "../../../components/Snackbar/Snackbar.component";
-import { createUserNotification } from "../../../services/notificationService";
 import {
   Alert,
   Avatar,
@@ -320,8 +319,6 @@ const ManageUsers: React.FC<{ isExpanded?: boolean; hideHeader?: boolean }> = ({
       });
       showNotification(NOTIFICATIONS.USER_UPDATE_SUCCESS, { severity: 'success', duration: 3000 });
       
-      // Add notification to menu
-      createUserNotification('updated', `${editFields.firstName} ${editFields.lastName}`);
     } catch (error) {
       handleCancel();
       showNotification(rejectionMessage(error, NOTIFICATIONS.USER_UPDATE_ERROR), {
@@ -359,8 +356,6 @@ const ManageUsers: React.FC<{ isExpanded?: boolean; hideHeader?: boolean }> = ({
         { severity: 'success', duration: 3000 },
       );
       
-      // Add notification to menu
-      createUserNotification('updated', `${userToChange.firstName} ${userToChange.lastName}`);
     } catch (error) {
       showNotification(
         rejectionMessage(error, "Error al actualizar el estado del usuario"),
@@ -412,8 +407,6 @@ const ManageUsers: React.FC<{ isExpanded?: boolean; hideHeader?: boolean }> = ({
       setOpenAddUserModal(false);
       showNotification(NOTIFICATIONS.USER_CREATED, { severity: 'success', duration: 3000 });
       
-      // Add notification to menu
-      createUserNotification('created', `${userData.firstName} ${userData.lastName}`);
     } catch (error) {
       showNotification(rejectionMessage(error, NOTIFICATIONS.USER_CREATE_ERROR), {
         severity: 'error',
