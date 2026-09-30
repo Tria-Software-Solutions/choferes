@@ -120,7 +120,7 @@ export const deleteSchedule = async (id: number) => {
         type: "warning",
         category: "schedule",
         priority: "high",
-        actionUrl: "/dashboard",
+        actionUrl: "/mi-panel?tab=horas",
         actionText: "Ver mi panel",
       }),
     ),
@@ -133,6 +133,8 @@ export const deleteSchedule = async (id: number) => {
     type: "warning",
     category: "schedule",
     priority: "medium",
+    actionUrl: "/schedules",
+    actionText: "Ver horarios",
   });
 
   return deleted;

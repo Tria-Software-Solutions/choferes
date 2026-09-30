@@ -99,8 +99,8 @@ export const applyAccountRole = async (userId: number, roleId: number): Promise<
     type: "info",
     category: "system",
     priority: "medium",
-    actionUrl: "/dashboard",
-    actionText: "Ir al panel",
+    actionUrl: "/mi-panel",
+    actionText: "Ir a mi panel",
   });
 };
 

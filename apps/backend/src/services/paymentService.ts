@@ -198,6 +198,8 @@ export const createPayment = async (
     type: "info",
     category: "report",
     priority: "low",
+    actionUrl: `/employees/${employeeId}?tab=pagos`,
+    actionText: "Ver boleta",
   });
 
   return serializePayment(created.get({ plain: true }));
@@ -271,8 +273,8 @@ export const updatePayment = async (id: number, input: UpdatePaymentInput) => {
       type: "warning",
       category: "report",
       priority: "medium",
-      actionUrl: "/dashboard",
-      actionText: "Ver mi panel",
+      actionUrl: "/mi-panel?tab=pagos",
+      actionText: "Ver mi boleta",
     });
   }
 
@@ -324,8 +326,8 @@ export const markPaymentSent = async (id: number) => {
     type: "success",
     category: "employee",
     priority: "low",
-    actionUrl: "/dashboard",
-    actionText: "Ver boleta",
+    actionUrl: "/mi-panel?tab=pagos",
+    actionText: "Ver mi boleta",
   });
 
   return serializePayment(payment.get({ plain: true }));
@@ -342,6 +344,8 @@ export const deletePayment = async (id: number) => {
       type: "warning",
       category: "report",
       priority: "medium",
+      actionUrl: "/employees",
+      actionText: "Ver boletas",
     });
   }
   return deleted > 0;
@@ -438,6 +442,8 @@ export const generateBiweeklyPayments = async (
       type: "info",
       category: "report",
       priority: "low",
+      actionUrl: "/employees",
+      actionText: "Ver boletas",
     });
   }
 
