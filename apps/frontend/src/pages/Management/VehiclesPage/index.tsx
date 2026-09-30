@@ -15,7 +15,6 @@ import ExportMenu from "../../../components/ExportMenu/ExportMenu.component";
 import AddVehicleForm from "../../Forms/AddVehicleForm";
 import { useAppNotifications } from "../../../components/Snackbar/Snackbar.component";
 import DialogComponent from "../../../components/Dialog/Dialog.component";
-import { createVehicleNotification } from "../../../services/notificationService";
 import {
   Box,
   Button,
@@ -307,11 +306,6 @@ const VehiclesPage: React.FC = () => {
         duration: 3000,
       });
 
-      // Add notification to menu
-      createVehicleNotification(
-        "updated",
-        `${editFields.licensePlate} - ${editFields.brand}`
-      );
     } catch (error) {
       handleCancel();
       showNotification(NOTIFICATIONS.VEHICLE_UPDATE_ERROR, {
@@ -344,15 +338,6 @@ const VehiclesPage: React.FC = () => {
         severity: "success",
         duration: 3000,
       });
-
-      // Add notification to menu
-      const vehicle = allVehicles.find((v) => v.id === vehicleToDelete);
-      if (vehicle) {
-        createVehicleNotification(
-          "deleted",
-          `${vehicle.licensePlate} - ${vehicle.brand}`
-        );
-      }
     } catch (error) {
       showNotification(NOTIFICATIONS.VEHICLE_DELETE_ERROR, {
         severity: "error",
@@ -424,11 +409,6 @@ const VehiclesPage: React.FC = () => {
         duration: 3000,
       });
 
-      // Add notification to menu
-      createVehicleNotification(
-        "created",
-        `${vehicleData.licensePlate} - ${vehicleData.brand}`
-      );
     } catch (error) {
       showNotification(NOTIFICATIONS.VEHICLE_CREATE_ERROR, {
         severity: "error",

@@ -1,6 +1,5 @@
 import React, { createContext, useContext, useState, useCallback, useEffect, useMemo, useRef } from "react";
 import { Notification, NotificationFilters } from "../models/Notification";
-import { notificationEvents } from "../services/notificationService";
 import {
   fetchNotificationsFromApi,
   createNotificationInApi,
@@ -312,15 +311,10 @@ export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({ 
     setNotifications(prev => prev.filter(notification => notification.timestamp > thirtyDaysAgo));
   }, []);
 
-  // Subscribe to notification events (helpers like createEmployeeNotification)
-  useEffect(() => {
-    const unsubscribe = notificationEvents.subscribe(newNotification => {
-      addNotification(newNotification);
-    });
-
-    return unsubscribe;
-  }, [addNotification]);
-
+  // Las notificaciones viven en la base: el backend es la única fuente y cada
+  // fila trae su propio actionUrl. Acá no se generan avisos locales, porque
+  // esos duplicados (sin id real y con destinos genéricos) ganaban el lugar
+  // arriba del menú y mandaban al lugar equivocado.
   const value = {
     notifications: filteredNotifications,
     allNotifications: notifications,

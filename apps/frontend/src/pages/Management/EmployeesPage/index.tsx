@@ -20,7 +20,6 @@ import PremiumTooltip from '../../../components/PremiumTooltip/PremiumTooltip.co
 import AddEmployeeForm from '../../Forms/AddEmployeeForm';
 import { useAppNotifications } from '../../../components/Snackbar/Snackbar.component';
 import DialogComponent from '../../../components/Dialog/Dialog.component';
-import { createEmployeeNotification } from '../../../services/notificationService';
 import {
   Button,
   Box,
@@ -236,8 +235,6 @@ const EmployeesPage: React.FC = () => {
         duration: 3000,
       });
 
-      // Add notification to menu
-      createEmployeeNotification('created', `${newEmployee.firstName} ${newEmployee.lastName}`);
     } catch (error) {
       showNotification(NOTIFICATIONS.EMPLOYEE_CREATE_ERROR, {
         severity: 'error',
