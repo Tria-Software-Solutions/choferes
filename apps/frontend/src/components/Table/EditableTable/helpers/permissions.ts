@@ -1,4 +1,4 @@
-import { PERMISSIONS } from "../../../../constants/constants";
+import { PERMISSION_CODES } from "../../../../constants/constants";
 
 /**
  * Checks if user has edit permissions for a specific item
@@ -9,7 +9,7 @@ export const checkEditPermissions = (
 ): boolean => {
   if (!permissions) return false;
   
-  const requiredPermissions = itemPermissions || [Object.values(PERMISSIONS)[0]];
+  const requiredPermissions = itemPermissions || [Object.values(PERMISSION_CODES)[0]];
   return requiredPermissions.some((permission) => permissions.includes(permission));
 };
 
@@ -22,6 +22,6 @@ export const checkDeletePermissions = (
 ): boolean => {
   if (!permissions) return false;
   
-  const requiredPermissions = itemPermissions || [Object.values(PERMISSIONS)[0]];
+  const requiredPermissions = itemPermissions || [Object.values(PERMISSION_CODES)[0]];
   return requiredPermissions.some((permission) => permissions.includes(permission));
 }; 

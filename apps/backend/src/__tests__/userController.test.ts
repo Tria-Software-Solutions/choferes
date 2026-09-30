@@ -79,7 +79,7 @@ const mockUser = {
   username: "admin",
   email: "admin@example.com",
   isActive: true,
-  roles: [{ id: 1, name: "admin", permissions: [{ id: 1, name: "manage_users" }] }],
+  roles: [{ id: 1, name: "admin", permissions: [{ id: 1, code: "manage_users", name: "Gestionar Usuarios" }] }],
   createdAt: "2026-07-20T00:00:00.000Z",
   updatedAt: "2026-07-20T00:00:00.000Z",
 };

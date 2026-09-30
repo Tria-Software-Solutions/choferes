@@ -32,7 +32,7 @@ export const authenticateUser = async (req: Request, res: Response) => {
     );
 
     const userPermissions =
-      user.roles?.flatMap((role) => role.permissions?.map((permission) => permission.name)) || [];
+      user.roles?.flatMap((role) => role.permissions?.map((permission) => permission.code)) || [];
 
     const uniquePermissions = Array.from(new Set(userPermissions));
 

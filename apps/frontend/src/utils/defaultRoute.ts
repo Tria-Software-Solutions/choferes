@@ -1,4 +1,4 @@
-import { PERMISSIONS, ROUTES } from "../constants/constants";
+import { PERMISSION_CODES, ROUTES } from "../constants/constants";
 
 // Single source of truth for the landing route after login / at "/".
 // `isManagement` acota la landing de Roles a Gerencia/Administrativo, igual que
@@ -13,18 +13,18 @@ export const getDefaultRoute = (
   // Los roles operativos (Chofer, Chofer Coordinador, Recepcionista,
   // Supervisor) aterrizan en su panel personal.
   // Gerencia/Admin conservan su landing actual aunque también tengan el permiso.
-  if (!has(PERMISSIONS.VIEW_ADMIN) && has(PERMISSIONS.VIEW_MY_PANEL)) {
+  if (!has(PERMISSION_CODES.VIEW_ADMIN) && has(PERMISSION_CODES.VIEW_MY_PANEL)) {
     return ROUTES.MY_PANEL;
   }
 
   const routePreferences = [
     ...(isManagement
-      ? [{ route: ROUTES.ROLES, permission: PERMISSIONS.VIEW_ROLES }]
+      ? [{ route: ROUTES.ROLES, permission: PERMISSION_CODES.VIEW_ROLES }]
       : []),
-    { route: ROUTES.DASHBOARD, permission: PERMISSIONS.VIEW_ADMIN },
-    { route: ROUTES.VEHICLES, permission: PERMISSIONS.VIEW_VEHICLES },
-    { route: ROUTES.EMPLOYEES, permission: PERMISSIONS.VIEW_EMPLOYEES },
-    { route: ROUTES.SCHEDULES, permission: PERMISSIONS.VIEW_SCHEDULES },
+    { route: ROUTES.DASHBOARD, permission: PERMISSION_CODES.VIEW_ADMIN },
+    { route: ROUTES.VEHICLES, permission: PERMISSION_CODES.VIEW_VEHICLES },
+    { route: ROUTES.EMPLOYEES, permission: PERMISSION_CODES.VIEW_EMPLOYEES },
+    { route: ROUTES.SCHEDULES, permission: PERMISSION_CODES.VIEW_SCHEDULES },
   ];
 
   for (const { route, permission } of routePreferences) {
