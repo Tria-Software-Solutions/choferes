@@ -6,6 +6,7 @@
 export { default as APPBAR_MENU } from "./appbar.constants";
 export { default as PAGE_TITLE } from "./pageTitle.constants";
 export { default as PERMISSIONS } from "./permissions.constants";
+export { PERMISSION_CODES } from "./permissions.constants";
 export { default as ROUTES } from "./routes.constants";
 export { default as ERRORS } from "./errors.constants";
 export { default as FORMS } from "./forms.constants";
