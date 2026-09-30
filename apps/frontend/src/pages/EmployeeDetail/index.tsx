@@ -85,10 +85,16 @@ const EmployeeDetailPage: React.FC = () => {
   const [employee, setEmployee] = useState<Employee | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [loadError, setLoadError] = useState<string | null>(null);
-  const [tab, setTab] = useState<TabKey>(() => {
-    const requested = searchParams.get("tab");
-    return isTabKey(requested) ? requested : "datos";
-  });
+  // La pestaña vive en la URL (?tab=) para que un enlace de notificación abra
+  // directo la sección, incluso si ya estás viendo otro empleado o la misma
+  // ficha en otra pestaña.
+  const requestedTab = searchParams.get("tab");
+  const tab: TabKey = isTabKey(requestedTab) ? requestedTab : "datos";
+  const setTab = useCallback(
+    (value: TabKey) =>
+      setSearchParams(value === "datos" ? {} : { tab: value }, { replace: true }),
+    [setSearchParams],
+  );
   const [openDeleteDialog, setOpenDeleteDialog] = useState(false);
   const [openTerminationDialog, setOpenTerminationDialog] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
@@ -317,10 +323,7 @@ const EmployeeDetailPage: React.FC = () => {
           <Box sx={tabsBoxStyles(theme)}>
             <Tabs
               value={activeTab}
-              onChange={(_event, value: TabKey) => {
-                setTab(value);
-                setSearchParams(value === "datos" ? {} : { tab: value }, { replace: true });
-              }}
+              onChange={(_event, value: TabKey) => setTab(value)}
               variant={isSmallScreen ? "scrollable" : "standard"}
               // Swipe to scroll on phones; arrow buttons only ate horizontal room.
               scrollButtons={false}
