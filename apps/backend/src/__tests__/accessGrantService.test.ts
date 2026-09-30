@@ -23,13 +23,19 @@ import * as accessGrant from "../services/accessGrantService";
 
 const roleWith = (...codes: string[]) => ({ permissions: codes.map((code) => ({ code })) });
 
+const roleNamed = (name: string, ...codes: string[]) => ({
+  name,
+  permissions: codes.map((code) => ({ code })),
+});
+
 // A user-admin who can manage users but holds only a handful of permissions.
 const limitedActor = {
   id: 10,
-  roles: ["Administrativo"],
+  roles: ["Asistente"],
   permissions: ["users:create", "roles:view"],
 };
 const superActor = { id: 1, roles: ["Gerencia"], permissions: ["*"] };
+const adminActor = { id: 6, roles: ["Administrativo"], permissions: ["users:create"] };
 
 beforeEach(() => {
   jest.clearAllMocks();
@@ -54,6 +60,22 @@ describe("checkRoleAssignment", () => {
     Role.findByPk.mockResolvedValue(roleWith("payments:delete"));
 
     await expect(accessGrant.checkRoleAssignment(superActor, 20, 1)).resolves.toBeNull();
+  });
+
+  it("un rol de gestión puede asignar un rol de puesto sin replicar sus permisos de autoservicio", async () => {
+    Role.findByPk.mockResolvedValue(roleNamed("Chofer", "my-panel:view", "tasks:create"));
+
+    await expect(accessGrant.checkRoleAssignment(superActor, 20, 1)).resolves.toBeNull();
+  });
+
+  it("impide a un rol de gestión conceder otro rol de gestión sin conservar sus permisos", async () => {
+    Role.findByPk.mockResolvedValue(
+      roleNamed("Gerencia", "users:create", "payments:delete", "roles:edit"),
+    );
+
+    const denial = await accessGrant.checkRoleAssignment(adminActor, 20, 1);
+
+    expect(denial).toEqual(expect.objectContaining({ status: 403 }));
   });
 
   it("impide cambiar el propio rol, aun con todos los permisos", async () => {
