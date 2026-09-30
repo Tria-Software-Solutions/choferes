@@ -1,6 +1,7 @@
 // Service for business logic and database operations related to vehicles
 // Note: Sequelize v3 uses string operators. Using inline types instead.
 import { Vehicle } from "../models/Vehicle";
+import { notifyManagementRoles } from "./notificationService";
 import {
   paginate,
   getPaginationParams,
@@ -88,20 +89,64 @@ export const getVehiclesByDate = async (parkingDate: Date) => {
 };
 
 // Create a new vehicle
+// The vehicle identifier that people recognise in a message: the plate when
+// there is one, otherwise the parking ticket.
+const vehicleLabel = (vehicle: Partial<Vehicle>): string =>
+  vehicle.licensePlate?.trim() || vehicle.ticket?.trim() || `#${vehicle.id}`;
+
 export const createVehicle = async (data: Omit<Vehicle, "id">) => {
   const newVehicle = await Vehicle.create(data);
   await newVehicle.reload();
+  await notifyManagementRoles({
+    source: `vehicle-created:${newVehicle.id}`,
+    title: "Vehículo registrado",
+    message: `Se registró el vehículo ${vehicleLabel(newVehicle)}.`,
+    type: "info",
+    category: "vehicle",
+    priority: "medium",
+    actionUrl: "/vehicles",
+    actionText: "Ver vehículos",
+  });
   return newVehicle;
 };
 
 // Update a vehicle by its ID
 export const updateVehicle = async (id: number, data: Omit<Vehicle, "id">) => {
   await Vehicle.update(data, { where: { id } });
-  return Vehicle.findByPk(id);
+  const updated = await Vehicle.findByPk(id);
+  if (updated) {
+    await notifyManagementRoles({
+      source: `vehicle-updated:${id}:${Date.now()}`,
+      title: "Vehículo actualizado",
+      message: `Se actualizó el vehículo ${vehicleLabel(updated)}.`,
+      type: "info",
+      category: "vehicle",
+      priority: "low",
+      actionUrl: "/vehicles",
+      actionText: "Ver vehículos",
+    });
+  }
+  return updated;
 };
 
 // Delete a vehicle by its ID
-export const deleteVehicle = async (id: number) => Vehicle.destroy({ where: { id } });
+export const deleteVehicle = async (id: number) => {
+  const vehicle = await Vehicle.findByPk(id);
+  const deleted = await Vehicle.destroy({ where: { id } });
+  if (deleted > 0) {
+    await notifyManagementRoles({
+      source: `vehicle-deleted:${id}`,
+      title: "Vehículo eliminado",
+      message: `Se eliminó el vehículo ${vehicle ? vehicleLabel(vehicle) : `#${id}`}.`,
+      type: "warning",
+      category: "vehicle",
+      priority: "medium",
+      actionUrl: "/vehicles",
+      actionText: "Ver vehículos",
+    });
+  }
+  return deleted;
+};
 
 // Delete all vehicles
 export const deleteAllVehicles = async () => Vehicle.destroy({ where: {} });
