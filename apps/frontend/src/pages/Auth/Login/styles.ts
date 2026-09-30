@@ -199,7 +199,8 @@ export const forgotLinkStyles: SxProps<Theme> = {
   cursor: 'pointer',
   userSelect: 'none',
   '&:hover': {
-    color: '#c7d2fe',
+    color: '#ffffff',
+    textDecoration: 'underline',
   },
   '&:focus-visible': {
     outline: '2px solid #a5b4fc',
@@ -244,6 +245,7 @@ export const backLinkStyles: SxProps<Theme> = {
   transition: 'color 0.2s ease',
   '&:hover': {
     color: '#ffffff',
+    textDecoration: 'underline',
   },
 };
 
@@ -301,9 +303,10 @@ export const loginSubmitButtonStyles: SxProps<Theme> = {
   fontWeight: 600,
   fontSize: "0.92rem",
   boxShadow: "0 8px 24px rgba(0,0,0,0.35)",
-  transition: "background-color 0.15s ease, box-shadow 0.15s ease",
+  transition: "background-color 0.15s ease, box-shadow 0.15s ease, color 0.15s ease",
   "&:hover": {
-    background: "#e4e4e7",
+    background: "#ffffff",
+    color: "#09090b",
     boxShadow: "0 10px 28px rgba(0,0,0,0.4)",
   },
   "&:disabled": {
