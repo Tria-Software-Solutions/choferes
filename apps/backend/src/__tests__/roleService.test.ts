@@ -1,4 +1,9 @@
 // Mock Role model — service uses: import { Role } from "../models/Role" (named import)
+jest.mock("../services/notificationService", () => ({
+  notifyManagementRoles: jest.fn(),
+  notifyEmployeeUser: jest.fn(),
+  createNotification: jest.fn(),
+}));
 jest.mock("../models/Role", () => {
   const mockFunctions = {
     findAndCountAll: jest.fn(),

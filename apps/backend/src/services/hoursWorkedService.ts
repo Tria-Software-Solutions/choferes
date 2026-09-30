@@ -1,8 +1,10 @@
 // Note: Sequelize v3 uses string operators. Using inline types instead.
 import { HoursWorked } from "../models/HoursWorked";
 import { Employee } from "../models/Employee";
+import { Schedule } from "../models/Schedule";
 import { parseCalendarDate } from "./summaryRecalculationService";
 import { paginate, getPaginationParams, getSearchParam, QueryParams } from "../utils/pagination";
+import { notifyEmployeeUser } from "./notificationService";
 
 // Returns a YYYY-MM-DD string from a Date (local calendar day).
 const toDateStr = (date: Date): string => {
@@ -10,6 +12,14 @@ const toDateStr = (date: Date): string => {
   const m = String(date.getMonth() + 1).padStart(2, "0");
   const d = String(date.getDate()).padStart(2, "0");
   return `${y}-${m}-${d}`;
+};
+
+const formatDay = (dateStr: string) => String(dateStr).split("-").reverse().join("/");
+
+const scheduleLabelFor = async (scheduleId: number | undefined): Promise<string | null> => {
+  if (!scheduleId) return null;
+  const schedule = await Schedule.findByPk(scheduleId, { attributes: ["label"] });
+  return schedule?.label ?? null;
 };
 
 export const getHoursWorked = async (query: QueryParams) => {
@@ -109,6 +119,19 @@ export const createHoursWorked = async (data: Omit<HoursWorked, "id">) => {
   try {
     const newHoursWorked = await HoursWorked.create({ ...data, date: dateStr });
     await newHoursWorked.reload();
+
+    const label = await scheduleLabelFor(data.scheduleId as number | undefined);
+    await notifyEmployeeUser(data.employeeId, {
+      source: `schedule-assigned:${data.employeeId}:${dateStr}`,
+      title: "Tu turno fue publicado",
+      message: `Se te asignó el turno ${label ?? "de la semana"} para el ${formatDay(dateStr)}.`,
+      type: "info",
+      category: "schedule",
+      priority: "medium",
+      actionUrl: "/dashboard",
+      actionText: "Ver mi panel",
+    });
+
     return newHoursWorked;
   } catch (error) {
     // Concurrent creates for the same employee+day: the unique index rejected
@@ -126,11 +149,47 @@ export const createHoursWorked = async (data: Omit<HoursWorked, "id">) => {
 };
 
 export const updateHoursWorked = async (id: number, data: Omit<HoursWorked, "id">) => {
+  const previous = await HoursWorked.findByPk(id);
   await HoursWorked.update(data, { where: { id } });
-  return HoursWorked.findByPk(id);
+  const updated = await HoursWorked.findByPk(id);
+
+  if (
+    previous &&
+    updated &&
+    (previous.scheduleId !== updated.scheduleId || previous.date !== updated.date)
+  ) {
+    const label = await scheduleLabelFor(updated.scheduleId as number | undefined);
+    await notifyEmployeeUser(updated.employeeId, {
+      source: `schedule-assignment-updated:${id}:${Date.now()}`,
+      title: "Tu turno cambió",
+      message: `Se actualizó tu turno para el ${formatDay(updated.date)} (${label ?? "turno"}). Revisa tu panel.`,
+      type: "warning",
+      category: "schedule",
+      priority: "medium",
+      actionUrl: "/dashboard",
+      actionText: "Ver mi panel",
+    });
+  }
+
+  return updated;
 };
 
-export const deleteHoursWorked = async (id: number) => HoursWorked.destroy({ where: { id } });
+export const deleteHoursWorked = async (id: number) => {
+  const row = await HoursWorked.findByPk(id);
+  if (!row) return 0;
+  await HoursWorked.destroy({ where: { id } });
+  await notifyEmployeeUser(row.employeeId, {
+    source: `schedule-assignment-removed:${id}`,
+    title: "Te quitaron un turno",
+    message: `Se retiró tu turno del ${formatDay(row.date)}.`,
+    type: "warning",
+    category: "schedule",
+    priority: "high",
+    actionUrl: "/dashboard",
+    actionText: "Ver mi panel",
+  });
+  return 1;
+};
 
 // Delete all hours worked records
 export const deleteAllHoursWorked = async () => HoursWorked.destroy({ where: {} });

@@ -481,7 +481,7 @@ const ManageRoles: React.FC<{ isExpanded?: boolean; hideHeader?: boolean }> = ({
           ) : hideHeader ? (
             /* Compact preview list for Profile mode */
             <Box sx={{ flex: 1, minHeight: 0, overflow: "auto", p: 0 }}>
-              {filteredRoles.slice(0, 5).map((role, i) => {
+              {filteredRoles.map((role, i) => {
                 const isEditing = editRowId === role.id;
                 return (
                   <Box
@@ -647,13 +647,6 @@ const ManageRoles: React.FC<{ isExpanded?: boolean; hideHeader?: boolean }> = ({
                   </Box>
                 );
               })}
-              {filteredRoles.length > 5 && (
-                <Box sx={{ px: { xs: 2, sm: 2.5 }, py: 1.5, textAlign: "center" }}>
-                  <Typography variant="caption" sx={{ color: "text.disabled", fontWeight: 500, fontSize: "0.7rem" }}>
-                    +{filteredRoles.length - 5} roles más
-                  </Typography>
-                </Box>
-              )}
               {filteredRoles.length === 0 && (
                 <Box sx={{ display: "flex", alignItems: "center", justifyContent: "center", flex: 1, minHeight: 100 }}>
                   <Typography variant="body2" color="textSecondary">

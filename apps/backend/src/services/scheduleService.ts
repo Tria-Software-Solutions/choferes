@@ -3,6 +3,8 @@
 // Using inline Record<string, any> instead
 import { Schedule } from "../models/Schedule";
 import { ScheduleDay } from "../models/ScheduleDay";
+import Employee from "../models/Employee";
+import { notifyEmployeeUser, notifyManagementRoles } from "./notificationService";
 import {
   paginate,
   getPaginationParams,
@@ -51,6 +53,16 @@ export const createSchedule = async (data: any) => {
   }
 
   await newSchedule.reload({ include: [SCHEDULE_DAYS_INCLUDE] });
+
+  await notifyManagementRoles({
+    source: `schedule-created:${newSchedule.id}`,
+    title: "Horario creado",
+    message: `Se creó el horario ${newSchedule.label}.`,
+    type: "info",
+    category: "schedule",
+    priority: "medium",
+  });
+
   return newSchedule;
 };
 
@@ -75,11 +87,56 @@ export const updateSchedule = async (id: number, data: any) => {
     }
   }
 
+  await notifyManagementRoles({
+    source: `schedule-updated:${id}:${Date.now()}`,
+    title: "Horario actualizado",
+    message: `Se actualizó el horario ${scheduleData.label ?? `#${id}`}.`,
+    type: "warning",
+    category: "schedule",
+    priority: "medium",
+  });
+
   return Schedule.findByPk(id, { include: [SCHEDULE_DAYS_INCLUDE] });
 };
 
-// Delete a schedule by its ID
-export const deleteSchedule = async (id: number) => Schedule.destroy({ where: { id } });
+// Delete a schedule by its ID. Employees assigned to it lose their schedule.
+export const deleteSchedule = async (id: number) => {
+  const schedule = await Schedule.findByPk(id, { attributes: ["id", "label"] });
+  if (!schedule) return 0;
+
+  const affectedEmployees = await Employee.findAll({
+    where: { scheduleId: id },
+    attributes: ["id"],
+  });
+
+  const deleted = await Schedule.destroy({ where: { id } });
+
+  await Promise.all(
+    affectedEmployees.map((employee) =>
+      notifyEmployeeUser(employee.id, {
+        source: `schedule-deleted:${id}`,
+        title: "Tu horario fue eliminado",
+        message: `Se eliminó el horario ${schedule.label ?? `#${id}`}. Quedaste sin horario asignado.`,
+        type: "warning",
+        category: "schedule",
+        priority: "high",
+        actionUrl: "/dashboard",
+        actionText: "Ver mi panel",
+      }),
+    ),
+  );
+
+  await notifyManagementRoles({
+    source: `schedule-deleted:${id}`,
+    title: "Horario eliminado",
+    message: `Se eliminó el horario ${schedule.label ?? `#${id}`}${affectedEmployees.length > 0 ? ` (${affectedEmployees.length} empleado(s) quedaron sin horario)` : ""}.`,
+    type: "warning",
+    category: "schedule",
+    priority: "medium",
+  });
+
+  return deleted;
+};
 
 // Helper: get hours for a specific day from a schedule's scheduleDays
 export const getHoursForDay = (schedule: any, day: string): number => {

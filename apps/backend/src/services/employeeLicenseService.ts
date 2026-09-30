@@ -3,6 +3,7 @@ import EmployeeLicense from "../models/EmployeeLicense";
 import Employee from "../models/Employee";
 import { ServiceError } from "../utils/errors";
 import { paginate, getPaginationParams, QueryParams } from "../utils/pagination";
+import { notifyEmployeeUser, notifyManagementRoles } from "./notificationService";
 
 // Días de anticipación con los que se considera una licencia "por vencer".
 export const LICENSE_EXPIRING_SOON_DAYS = 30;
@@ -23,7 +24,7 @@ const parseDateOnly = (value: string): Date => {
   return new Date(Number(match[1]), Number(match[2]) - 1, Number(match[3]));
 };
 
-const daysUntilExpiry = (expiresAt?: string | null): number | null => {
+export const daysUntilExpiry = (expiresAt?: string | null): number | null => {
   if (!expiresAt) return null;
   const expiry = parseDateOnly(String(expiresAt));
   const today = new Date();
@@ -31,11 +32,16 @@ const daysUntilExpiry = (expiresAt?: string | null): number | null => {
   return Math.round((expiry.getTime() - today.getTime()) / (24 * 60 * 60 * 1000));
 };
 
-const statusFor = (days: number | null): LicenseStatus => {
+export const statusFor = (days: number | null): LicenseStatus => {
   if (days === null) return "sin_vencimiento";
   if (days < 0) return "vencida";
   if (days <= LICENSE_EXPIRING_SOON_DAYS) return "por_vencer";
   return "vigente";
+};
+
+const formatDate = (value: string) => {
+  const [year, month, day] = String(value).split("-");
+  return `${day}/${month}/${year}`;
 };
 
 // Adds computed expiry fields so the UI can flag licenses without duplicating
@@ -110,6 +116,17 @@ export const createLicense = async (input: CreateLicenseInput) => {
     notes: input.notes || null,
   });
 
+  await notifyEmployeeUser(input.employeeId, {
+    source: `license-created:${created.id}`,
+    title: "Licencia registrada",
+    message: `Se registró tu licencia ${input.licenseType}${input.expiresAt ? ` (vence ${formatDate(input.expiresAt)})` : ""}.`,
+    type: "success",
+    category: "employee",
+    priority: "low",
+    actionUrl: "/dashboard",
+    actionText: "Ver licencias",
+  });
+
   return normalize(created.get({ plain: true }));
 };
 
@@ -135,7 +152,110 @@ export const updateLicense = async (id: number, input: UpdateLicenseInput) => {
   if (Object.keys(updates).length > 0) {
     await license.update(updates);
   }
+
+  if (Object.keys(updates).length > 0) {
+    await notifyEmployeeUser(license.employeeId, {
+      source: `license-updated:${id}:${Date.now()}`,
+      title: "Licencia actualizada",
+      message:
+        input.expiresAt !== undefined && input.expiresAt
+          ? `Se actualizó tu licencia ${input.licenseType ?? license.licenseType}; vence el ${formatDate(input.expiresAt)}.`
+          : `Se actualizó tu licencia ${input.licenseType ?? license.licenseType}.`,
+      type: "info",
+      category: "employee",
+      priority: "medium",
+      actionUrl: "/dashboard",
+      actionText: "Ver licencias",
+    });
+  }
+
   return getLicenseById(id);
 };
 
-export const deleteLicense = async (id: number) => EmployeeLicense.destroy({ where: { id } });
+export const deleteLicense = async (id: number) => {
+  const license = await EmployeeLicense.findByPk(id);
+  if (!license) return false;
+  await EmployeeLicense.destroy({ where: { id } });
+  await notifyEmployeeUser(license.employeeId, {
+    source: `license-deleted:${id}`,
+    title: "Licencia eliminada",
+    message: `Se eliminó tu licencia ${license.licenseType} del expediente.`,
+    type: "info",
+    category: "employee",
+    priority: "low",
+    actionUrl: "/dashboard",
+    actionText: "Ver licencias",
+  });
+  return true;
+};
+
+/**
+ * Dispatches expiring/expired license reminders to the linked employee and to
+ * management. Runs from the daily scheduler; idempotent through the unique
+ * (userId, source) index because the source embeds the expiry date.
+ */
+export const dispatchLicenseReminders = async () => {
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  const horizon = new Date(today);
+  horizon.setDate(horizon.getDate() + LICENSE_EXPIRING_SOON_DAYS);
+
+  const licenses = await EmployeeLicense.findAll({
+    where: {
+      expiresAt: { $lte: toDateOnly(horizon), $ne: null },
+    },
+    include: [employeeInclude],
+  });
+
+  const totalDispatched = await Promise.all(
+    licenses.map(async (license) => {
+      const expiresAt = String(license.expiresAt);
+      const days = daysUntilExpiry(expiresAt);
+      if (days === null) return 0;
+      const expired = days < 0;
+      const source = expired
+        ? `license-expired:${license.id}:${expiresAt}`
+        : `license-expiring:${license.id}:${expiresAt}`;
+      const title = expired ? "Licencia vencida" : "Licencia por vencer";
+      const type = expired ? "error" : "warning";
+      const priority = expired ? "high" : "high";
+      const rel = expired
+        ? `venció el ${formatDate(expiresAt)}`
+        : `vence en ${days} día(s) (${formatDate(expiresAt)})`;
+      const employeeName = license.employee
+        ? `${license.employee.firstName ?? ""} ${license.employee.lastName ?? ""}`.trim()
+        : `#${license.employeeId}`;
+
+      await notifyEmployeeUser(license.employeeId, {
+        source,
+        title,
+        message: `Tu licencia ${license.licenseType} ${rel}.`,
+        type,
+        category: "employee",
+        priority,
+        actionUrl: "/dashboard",
+        actionText: "Ver licencias",
+      });
+      await notifyManagementRoles({
+        source,
+        title,
+        message: `La licencia ${license.licenseType} del empleado ${employeeName} ${rel}.`,
+        type,
+        category: "employee",
+        priority,
+        actionUrl: "/dashboard",
+        actionText: "Ver licencias",
+      });
+      return 1;
+    }),
+  );
+
+  return totalDispatched.reduce<number>((sum, n) => sum + n, 0);
+};
+
+const toDateOnly = (date: Date) => {
+  const year = date.getFullYear();
+  const month = `${date.getMonth() + 1}`.padStart(2, "0");
+  const day = `${date.getDate()}`.padStart(2, "0");
+  return `${year}-${month}-${day}`;
+};
