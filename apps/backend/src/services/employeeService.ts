@@ -204,8 +204,8 @@ export const createEmployee = async (data: Record<string, unknown>) => {
     type: "info",
     category: "employee",
     priority: "medium",
-    actionUrl: "/employees",
-    actionText: "Ver empleados",
+    actionUrl: `/employees/${newEmployee.id}`,
+    actionText: "Ver ficha",
   });
   return newEmployee;
 };
@@ -294,8 +294,8 @@ export const updateEmployee = async (
       type: "warning",
       category: "employee",
       priority: "high",
-      actionUrl: "/employees",
-      actionText: "Ver empleados",
+      actionUrl: `/employees/${id}`,
+      actionText: "Ver ficha",
     });
   }
   if (clean.scheduledTerminationDate) {

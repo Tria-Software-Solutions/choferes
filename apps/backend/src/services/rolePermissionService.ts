@@ -17,7 +17,7 @@ export const createRolePermission = async (data: Omit<RolePermission, "id">) => 
     type: "info",
     category: "system",
     priority: "medium",
-    actionUrl: "/settings",
+    actionUrl: "/settings?tab=roles",
     actionText: "Ver roles",
   });
   return newRolePermission;
@@ -50,7 +50,7 @@ export const updateRolePermission = async (roleId: number, permissionIds: number
       type: "warning",
       category: "system",
       priority: "high",
-      actionUrl: "/settings",
+      actionUrl: "/settings?tab=roles",
       actionText: "Ver roles",
     });
   }
@@ -70,7 +70,7 @@ export const deleteRolePermission = async (id: number) => {
     type: "warning",
     category: "system",
     priority: "medium",
-    actionUrl: "/settings",
+    actionUrl: "/settings?tab=roles",
     actionText: "Ver roles",
   });
   return deleted;
