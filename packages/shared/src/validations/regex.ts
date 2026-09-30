@@ -9,8 +9,8 @@ export const nameRegex = /^[a-zA-ZáéíóúÁÉÍÓÚñÑüÜëË\s-]+$/;
 /** Email validation: standard email format */
 export const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
 
-/** Username validation: starts with a letter, 3-20 chars, letters/numbers/underscore/dot */
-export const usernameRegex = /^[a-zA-Z][a-zA-Z0-9_.]{2,19}$/;
+/** Username validation: starts with a letter, 3-50 chars, letters/numbers/underscore/dot/hyphen */
+export const usernameRegex = /^[a-zA-Z][a-zA-Z0-9_.-]{2,49}$/;
 
 /**
  * Password validation:
