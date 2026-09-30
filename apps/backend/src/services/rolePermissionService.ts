@@ -1,7 +1,13 @@
 // Service for business logic and database operations related to role-permission assignments
 import sequelize from "../config/database";
 import { RolePermission } from "../models/RolePermission";
+import { Role } from "../models/Role";
+import { Permission } from "../models/Permission";
 import { notifyManagementRoles } from "./notificationService";
+
+const roleLabel = async (roleId: number) => (await Role.findByPk(roleId))?.name ?? `#${roleId}`;
+const permissionLabel = async (permissionId: number) =>
+  (await Permission.findByPk(permissionId))?.name ?? `#${permissionId}`;
 
 // Get all role-permission assignments
 export const getRolePermissions = async () => RolePermission.findAll();
@@ -10,10 +16,14 @@ export const getRolePermissions = async () => RolePermission.findAll();
 export const createRolePermission = async (data: Omit<RolePermission, "id">) => {
   const newRolePermission = await RolePermission.create(data);
   await newRolePermission.reload();
+  const [roleName, permissionName] = await Promise.all([
+    roleLabel(newRolePermission.roleId),
+    permissionLabel(newRolePermission.permissionId),
+  ]);
   await notifyManagementRoles({
-    source: `role-permission-added:${newRolePermission.roleId}:${newRolePermission.permissionId}`,
+    source: `role-permission-added:${newRolePermission.roleId}:${newRolePermission.permissionId}:${Date.now()}`,
     title: "Permiso agregado a un rol",
-    message: `Se agregó el permiso #${newRolePermission.permissionId} al rol #${newRolePermission.roleId}.`,
+    message: `Se agregó el permiso "${permissionName}" al rol ${roleName}.`,
     type: "info",
     category: "system",
     priority: "medium",
@@ -43,10 +53,11 @@ export const updateRolePermission = async (roleId: number, permissionIds: number
   });
 
   if (changed) {
+    const roleName = await roleLabel(roleId);
     await notifyManagementRoles({
       source: `role-permissions-changed:${roleId}:${Date.now()}`,
       title: "Permisos de un rol modificados",
-      message: `El rol #${roleId} cambió su conjunto de permisos (ahora ${nextIds.length}).`,
+      message: `El rol ${roleName} cambió su conjunto de permisos (ahora ${nextIds.length}).`,
       type: "warning",
       category: "system",
       priority: "high",
@@ -63,10 +74,14 @@ export const deleteRolePermission = async (id: number) => {
   const assignment = await RolePermission.findByPk(id);
   if (!assignment) return 0;
   const deleted = await RolePermission.destroy({ where: { id } });
+  const [roleName, permissionName] = await Promise.all([
+    roleLabel(assignment.roleId),
+    permissionLabel(assignment.permissionId),
+  ]);
   await notifyManagementRoles({
-    source: `role-permission-removed:${assignment.roleId}:${assignment.permissionId}`,
+    source: `role-permission-removed:${assignment.roleId}:${assignment.permissionId}:${Date.now()}`,
     title: "Permiso retirado de un rol",
-    message: `Se retiró el permiso #${assignment.permissionId} del rol #${assignment.roleId}.`,
+    message: `Se retiró el permiso "${permissionName}" del rol ${roleName}.`,
     type: "warning",
     category: "system",
     priority: "medium",

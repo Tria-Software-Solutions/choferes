@@ -15,6 +15,7 @@ import {
   createNotification,
   notifyEmployeeUser,
   notifyManagementRoles,
+  notifyAccountRoleChange,
 } from "./notificationService";
 import {
   applyAccountRole,
@@ -322,17 +323,21 @@ export const updateEmployeeStatus = async (id: number, status: boolean) => {
 
 // Deletes an employee by ID
 export const deleteEmployee = async (id: number) => {
+  const existing = await Employee.findByPk(id, { attributes: ["id", "firstName", "lastName"] });
   const result = await Employee.destroy({ where: { id } });
-  await notifyManagementRoles({
-    source: `employee-deleted:${id}`,
-    title: "Empleado eliminado",
-    message: `Se eliminó al empleado #${id} de la planilla junto con sus registros asociados.`,
-    type: "error",
-    category: "employee",
-    priority: "high",
-    actionUrl: "/employees",
-    actionText: "Ver empleados",
-  });
+  if (result > 0) {
+    const name = existing ? `${existing.firstName ?? ""} ${existing.lastName ?? ""}`.trim() : "";
+    await notifyManagementRoles({
+      source: `employee-deleted:${id}`,
+      title: "Empleado eliminado",
+      message: `Se eliminó a ${name || `el empleado #${id}`} de la planilla junto con sus registros asociados.`,
+      type: "error",
+      category: "employee",
+      priority: "high",
+      actionUrl: "/employees",
+      actionText: "Ver empleados",
+    });
+  }
   return result;
 };
 
@@ -536,15 +541,8 @@ export const assignDefaultRoleToEmployeeUser = async (
 
   await assignPositionRoleIfMissing(user.id, employee.position);
   const role = await resolveRoleForPosition(employee.position);
-  await createNotification(user.id, {
-    source: `role-assigned:${user.id}:${role.id}`,
-    title: "Rol asignado",
-    message: `Se asignó el rol ${role.name} a tu cuenta, según tu puesto (${employee.position}).`,
-    type: "info",
-    category: "system",
-    priority: "medium",
-    actionUrl: "/mi-panel",
-    actionText: "Ir a mi panel",
+  await notifyAccountRoleChange(user.id, {
+    action: `se le asignó el rol ${role.name}, según su puesto (${employee.position})`,
   });
   return getEmployeeAccess(employeeId);
 };

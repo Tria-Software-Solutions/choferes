@@ -20,7 +20,6 @@ import {
   startOfDay,
 } from "./summaryRecalculationService";
 import * as vacationService from "./vacationService";
-import * as notificationService from "./notificationService";
 import * as vacationAccrualService from "./vacationAccrualService";
 import * as disciplinaryService from "./disciplinaryActionService";
 import * as licenseService from "./employeeLicenseService";
@@ -322,22 +321,10 @@ export const createMyVacation = async (userId: number, input: MyVacationInput) =
       endDate: input.endDate,
       reason: input.reason ?? null,
     },
-    // El empleado ya sabe que la pidió: no se le notifica a sí mismo.
+    // createVacation avisa a Gerencia/Administrativo; el empleado ya sabe que la
+    // pidió, así que no se le notifica a sí mismo.
     { notifyEmployee: false },
   );
-
-  const employeeName =
-    `${employee.firstName} ${employee.lastName}`.trim() || `el empleado #${employee.id}`;
-  await notificationService.notifyManagementRoles({
-    source: `vacation-request:${created.id}`,
-    title: "Solicitud de vacaciones",
-    message: `${employeeName} solicitó ${created.daysRequested} día(s) de vacaciones (del ${input.startDate} al ${input.endDate}).`,
-    type: "info",
-    category: "employee",
-    priority: "medium",
-    actionUrl: `/employees/${employee.id}?tab=vacaciones`,
-    actionText: "Revisar solicitud",
-  });
 
   return created;
 };

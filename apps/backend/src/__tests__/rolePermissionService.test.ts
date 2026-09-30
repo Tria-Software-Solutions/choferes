@@ -1,9 +1,18 @@
 // Mock RolePermission model — service uses: import { RolePermission } from "../models/RolePermission" (named import)
 jest.mock("../services/notificationService", () => ({
   notifyManagementRoles: jest.fn(),
+  notifyAccountRoleChange: jest.fn(),
   notifyEmployeeUser: jest.fn(),
   createNotification: jest.fn(),
 }));
+jest.mock("../models/Role", () => {
+  const mockRole = { findByPk: jest.fn().mockResolvedValue({ name: "Chofer" }) };
+  return { __esModule: true, Role: mockRole, default: mockRole };
+});
+jest.mock("../models/Permission", () => {
+  const mockPermission = { findByPk: jest.fn().mockResolvedValue({ name: "Ver Empleados" }) };
+  return { __esModule: true, Permission: mockPermission, default: mockPermission };
+});
 jest.mock("../models/RolePermission", () => {
   const mockFunctions = {
     findAll: jest.fn(),

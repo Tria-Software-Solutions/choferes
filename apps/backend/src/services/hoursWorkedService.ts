@@ -122,7 +122,7 @@ export const createHoursWorked = async (data: Omit<HoursWorked, "id">) => {
 
     const label = await scheduleLabelFor(data.scheduleId as number | undefined);
     await notifyEmployeeUser(data.employeeId, {
-      source: `schedule-assigned:${data.employeeId}:${dateStr}`,
+      source: `schedule-assigned:${data.employeeId}:${dateStr}:${Date.now()}`,
       title: "Tu turno fue publicado",
       message: `Se te asignó el turno ${label ?? "de la semana"} para el ${formatDay(dateStr)}.`,
       type: "info",
