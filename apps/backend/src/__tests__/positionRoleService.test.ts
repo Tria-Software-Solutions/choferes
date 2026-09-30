@@ -8,6 +8,12 @@ import {
   getRoleNameForPosition,
 } from "@choferes/shared";
 
+jest.mock("../services/notificationService", () => ({
+  notifyManagementRoles: jest.fn(),
+  notifyEmployeeUser: jest.fn(),
+  createNotification: jest.fn(),
+}));
+
 jest.mock("../models/Employee", () => {
   const mock = { findByPk: jest.fn() };
   return { __esModule: true, default: mock, Employee: mock };

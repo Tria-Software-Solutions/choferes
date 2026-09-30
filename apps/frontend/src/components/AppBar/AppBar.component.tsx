@@ -27,7 +27,6 @@ import { APPBAR_MENU } from "../../constants/constants";
 import { useNotificationMenu } from "../../context/NotificationContext";
 import { ThemeToggle } from "../ThemeToggle/ThemeToggle";
 import logo from "../../assets/images/logo.png";
-import { hasManagementRole } from "@choferes/shared";
 
 interface Link {
   label: string;
@@ -129,7 +128,7 @@ const AppBarComponent: React.FC<AppBarComponentProps> = ({ title, userLinks = []
   }, [visibleLinks, userLinks]);
 
   const hasNotificationsAccess = () => {
-    return hasManagementRole(currentUser);
+    return !!currentUser;
   };
 
 
