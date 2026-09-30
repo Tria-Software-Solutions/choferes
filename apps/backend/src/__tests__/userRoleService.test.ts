@@ -1,8 +1,14 @@
 // Mock UserRole model — service uses: import { UserRole } from "../models/UserRole" (named import)
+jest.mock("../services/notificationService", () => ({
+  notifyManagementRoles: jest.fn(),
+  notifyEmployeeUser: jest.fn(),
+  createNotification: jest.fn(),
+}));
 jest.mock("../models/UserRole", () => {
   const mockFunctions = {
     findAll: jest.fn(),
     findOne: jest.fn(),
+    findByPk: jest.fn(),
     create: jest.fn(),
     update: jest.fn(),
     destroy: jest.fn(),
@@ -10,8 +16,17 @@ jest.mock("../models/UserRole", () => {
   return { __esModule: true, UserRole: mockFunctions, default: mockFunctions };
 });
 
+jest.mock("../models/Role", () => {
+  const mockFunctions = {
+    findByPk: jest.fn(),
+  };
+  return { __esModule: true, Role: mockFunctions, default: mockFunctions };
+});
+
 // eslint-disable-next-line @typescript-eslint/no-require-imports
 const UserRole = require("../models/UserRole").default;
+// eslint-disable-next-line @typescript-eslint/no-require-imports
+const Role = require("../models/Role").default;
 import * as userRoleService from "../services/userRoleService";
 
 const mockUserRole = {
@@ -97,6 +112,8 @@ describe("updateUserRole", () => {
 
 describe("deleteUserRole", () => {
   it("debería eliminar por id", async () => {
+    UserRole.findByPk.mockResolvedValue({ ...mockUserRole, destroy: jest.fn().mockResolvedValue(1) });
+    Role.findByPk.mockResolvedValue({ roleId: 1, name: "Administrador" });
     UserRole.destroy.mockResolvedValue(1);
 
     const result = await userRoleService.deleteUserRole(1);

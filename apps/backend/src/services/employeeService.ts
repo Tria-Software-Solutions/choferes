@@ -12,6 +12,11 @@ import { ServiceError } from "../utils/errors";
 import type { AuthenticatedUser } from "../middleware/authorize";
 import { checkRoleGrant } from "./accessGrantService";
 import {
+  createNotification,
+  notifyEmployeeUser,
+  notifyManagementRoles,
+} from "./notificationService";
+import {
   applyAccountRole,
   assignPositionRoleIfMissing,
   planAccountRoleChange,
@@ -192,6 +197,14 @@ export const createEmployee = async (data: Record<string, unknown>) => {
   const clean = sanitizeControlledValues(pickEditableFields(data));
   const newEmployee = await Employee.create(clean as any);
   await newEmployee.reload();
+  await notifyManagementRoles({
+    source: `employee-created:${newEmployee.id}`,
+    title: "Empleado registrado",
+    message: `Se registró a ${newEmployee.firstName} ${newEmployee.lastName} (${newEmployee.position ?? "sin puesto"}).`,
+    type: "info",
+    category: "employee",
+    priority: "medium",
+  });
   return newEmployee;
 };
 
@@ -253,6 +266,47 @@ export const updateEmployee = async (
   if (roleChange) {
     await applyAccountRole(roleChange.userId, roleChange.role.id);
   }
+
+  if (clean.terminationDate) {
+    const terminated = await Employee.findByPk(id, {
+      attributes: ["id", "firstName", "lastName"],
+    });
+    const terminatedName = terminated
+      ? `${terminated.firstName ?? ""} ${terminated.lastName ?? ""}`.trim()
+      : `#${id}`;
+    await notifyEmployeeUser(id, {
+      source: `employee-terminated:${id}`,
+      title: "Tu contrato terminó",
+      message:
+        "Tu relación laboral fue dada por terminada. Comunícate con tu supervisor si tienes dudas.",
+      type: "warning",
+      category: "employee",
+      priority: "high",
+      actionUrl: "/dashboard",
+      actionText: "Ver detalle",
+    });
+    await notifyManagementRoles({
+      source: `employee-terminated:${id}`,
+      title: "Empleado dado de baja",
+      message: `Se marcó el fin de contrato del empleado ${terminatedName}.`,
+      type: "warning",
+      category: "employee",
+      priority: "high",
+    });
+  }
+  if (clean.scheduledTerminationDate) {
+    await notifyEmployeeUser(id, {
+      source: `employee-termination-scheduled:${id}:${clean.scheduledTerminationDate}`,
+      title: "Fin de contrato programado",
+      message: `Tu contrato tiene programada su finalización el ${String(clean.scheduledTerminationDate).split("-").reverse().join("/")}.`,
+      type: "info",
+      category: "employee",
+      priority: "medium",
+      actionUrl: "/dashboard",
+      actionText: "Ver detalle",
+    });
+  }
+
   return Employee.findByPk(id);
 };
 
@@ -263,7 +317,18 @@ export const updateEmployeeStatus = async (id: number, status: boolean) => {
 };
 
 // Deletes an employee by ID
-export const deleteEmployee = async (id: number) => Employee.destroy({ where: { id } });
+export const deleteEmployee = async (id: number) => {
+  const result = await Employee.destroy({ where: { id } });
+  await notifyManagementRoles({
+    source: `employee-deleted:${id}`,
+    title: "Empleado eliminado",
+    message: `Se eliminó al empleado #${id} de la planilla junto con sus registros asociados.`,
+    type: "error",
+    category: "employee",
+    priority: "high",
+  });
+  return result;
+};
 
 // Fetches all employees by department, ordered by first name
 export const getEmployeesByDepartment = async (department: string) =>
@@ -394,6 +459,17 @@ export const linkEmployeeToUser = async (employeeId: number, actor?: Authenticat
   // Sin esto la cuenta nacía sin permisos (no podía ver ni Tareas/Perfil).
   await assignRole(user.id, role.id);
 
+  await createNotification(user.id, {
+    source: `account-created:${user.id}`,
+    title: "Bienvenido a Choferes",
+    message: `Tu cuenta de acceso fue creada (usuario: ${user.username}). Usa la contraseña temporal para iniciar sesión.`,
+    type: "success",
+    category: "system",
+    priority: "high",
+    actionUrl: "/dashboard",
+    actionText: "Ir al panel",
+  });
+
   return { user, created: true, tempPassword };
 };
 
@@ -453,6 +529,17 @@ export const assignDefaultRoleToEmployeeUser = async (
   }
 
   await assignPositionRoleIfMissing(user.id, employee.position);
+  const role = await resolveRoleForPosition(employee.position);
+  await createNotification(user.id, {
+    source: `role-assigned:${user.id}:${role.id}`,
+    title: "Rol asignado",
+    message: `Se asignó el rol ${role.name} a tu cuenta, según tu puesto (${employee.position}).`,
+    type: "info",
+    category: "system",
+    priority: "medium",
+    actionUrl: "/dashboard",
+    actionText: "Ir al panel",
+  });
   return getEmployeeAccess(employeeId);
 };
 
@@ -504,5 +591,27 @@ export const processScheduledTerminations = async (): Promise<number> => {
       ),
     ),
   );
+  await Promise.all(
+    due.map((employee) =>
+      notifyEmployeeUser(employee.id, {
+        source: `employee-terminated:${employee.id}`,
+        title: "Fin de contrato",
+        message: `Tu contrato terminó el ${String(employee.scheduledTerminationDate).split("-").reverse().join("/")} (${employee.scheduledTerminationReason ?? "fin de contrato"}).`,
+        type: "warning",
+        category: "employee",
+        priority: "high",
+        actionUrl: "/dashboard",
+        actionText: "Ver detalle",
+      }),
+    ),
+  );
+  await notifyManagementRoles({
+    source: `terminations-processed:${today}`,
+    title: "Finalizaciones procesadas",
+    message: `Se procesaron ${due.length} finalización(es) programada(s) hoy.`,
+    type: "warning",
+    category: "employee",
+    priority: "high",
+  });
   return due.length;
 };

@@ -14,6 +14,7 @@ import {
   QueryParams,
 } from "../utils/pagination";
 import { assignRole, resolveRoleById } from "./userRoleService";
+import { createNotification, notifyManagementRoles } from "./notificationService";
 import { ServiceError } from "../utils/errors";
 
 // Sensitive columns that must never be serialized to API consumers.
@@ -255,6 +256,25 @@ export const createUser = async (data: Record<string, any>) => {
 
   await assignRole(created.id, role.id);
 
+  await createNotification(created.id, {
+    source: `account-created:${created.id}`,
+    title: "Bienvenido a Choferes",
+    message: `Tu cuenta fue creada con el rol ${role.name}.`,
+    type: "success",
+    category: "system",
+    priority: "high",
+    actionUrl: "/dashboard",
+    actionText: "Ir al panel",
+  });
+  await notifyManagementRoles({
+    source: `account-created:${created.id}`,
+    title: "Cuenta creada",
+    message: `Se creó la cuenta de ${created.firstName} ${created.lastName} (${created.username}) con el rol ${role.name}.`,
+    type: "info",
+    category: "system",
+    priority: "medium",
+  });
+
   return toSafeUser(created);
 };
 
@@ -277,6 +297,28 @@ export const updateUserStatus = async (id: number, status: boolean) => {
     attributes: SAFE_ATTRS,
     include: ROLES_WITH_PERMISSIONS_INCLUDE,
   });
+
+  if (user) {
+    await createNotification(id, {
+      source: status ? `user-activated:${id}` : `user-deactivated:${id}`,
+      title: status ? "Cuenta activada" : "Cuenta desactivada",
+      message: status
+        ? "Tu cuenta fue reactivada. Ya puedes iniciar sesión."
+        : "Tu cuenta fue desactivada. Si crees que es un error, contacta a tu administrador.",
+      type: status ? "success" : "warning",
+      category: "system",
+      priority: "high",
+    });
+    await notifyManagementRoles({
+      source: `user-status-${status ? "activated" : "deactivated"}:${id}`,
+      title: "Cuenta desactivada",
+      message: `Se ${status ? "activó" : "desactivó"} la cuenta de ${user.firstName} ${user.lastName} (${user.username}).`,
+      type: status ? "info" : "warning",
+      category: "system",
+      priority: status ? "low" : "high",
+    });
+  }
+
   return user;
 };
 
@@ -286,6 +328,16 @@ export const updateUserStatus = async (id: number, status: boolean) => {
 export const updateUserPassword = async (id: number, password: string) => {
   const hashedPassword = await bcrypt.hash(password, 10);
   await User.update({ password: hashedPassword, temporalPassword: null }, { where: { id } });
+  await createNotification(id, {
+    source: `password-changed:${id}:${Date.now()}`,
+    title: "Contraseña actualizada",
+    message: "Tu contraseña fue cambiada. Si no fuiste tú, contacta a tu administrador.",
+    type: "warning",
+    category: "system",
+    priority: "high",
+    actionUrl: "/dashboard",
+    actionText: "Ir al panel",
+  });
   return User.findByPk(id, {
     attributes: SAFE_ATTRS,
     include: ROLES_INCLUDE,
@@ -296,6 +348,15 @@ export const updateUserPassword = async (id: number, password: string) => {
 export const updateUserTemporalPassword = async (id: number, temporalPassword: string) => {
   const hashedTemporalPassword = await bcrypt.hash(temporalPassword, 10);
   await User.update({ temporalPassword: hashedTemporalPassword }, { where: { id } });
+  await createNotification(id, {
+    source: `temp-password-issued:${id}:${Date.now()}`,
+    title: "Contraseña temporal generada",
+    message:
+      "Un administrador generó una contraseña temporal para tu cuenta. Úsala en tu próximo inicio de sesión.",
+    type: "info",
+    category: "system",
+    priority: "medium",
+  });
   return User.findByPk(id, {
     attributes: SAFE_ATTRS,
     include: ROLES_INCLUDE,
@@ -320,5 +381,15 @@ export const updateUserSettings = async (id: number, settings: Record<string, un
 // Soft-deletes a user: sets deletedAt + isActive=false.
 // Child records (tasks, notifications) are preserved for audit; the account
 // becomes invisible in all listings and auth is blocked via isActive.
-export const deleteUser = async (id: number) =>
-  User.update({ deletedAt: new Date(), isActive: false }, { where: { id } });
+export const deleteUser = async (id: number) => {
+  const result = await User.update({ deletedAt: new Date(), isActive: false }, { where: { id } });
+  await notifyManagementRoles({
+    source: `user-deleted:${id}`,
+    title: "Cuenta eliminada",
+    message: `Se eliminó la cuenta #${id}.`,
+    type: "error",
+    category: "system",
+    priority: "high",
+  });
+  return result;
+};

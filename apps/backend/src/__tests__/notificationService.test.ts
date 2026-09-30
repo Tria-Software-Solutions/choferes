@@ -156,6 +156,46 @@ describe("generatePaymentReminders", () => {
   });
 });
 
+describe("createNotification", () => {
+  it("debería crear una notificación", async () => {
+    const reload = jest.fn();
+    const created = { id: 1, title: "Hola", reload };
+    reload.mockResolvedValue(created);
+    Notification.create.mockResolvedValue(created);
+
+    const result = await notificationService.createNotification(1, {
+      title: "Hola",
+      message: "Mensaje",
+      type: "info",
+      category: "system",
+      priority: "low",
+      source: "system:test",
+    });
+
+    expect(Notification.create).toHaveBeenCalledWith(
+      expect.objectContaining({ title: "Hola", userId: 1 }),
+    );
+    expect(result).toEqual(created);
+  });
+
+  it("debería ser idempotente ante una violación del unique (userId, source)", async () => {
+    Notification.create.mockRejectedValue({
+      name: "SequelizeUniqueConstraintError",
+    });
+
+    const result = await notificationService.createNotification(1, {
+      title: "Hola",
+      message: "Mensaje",
+      type: "info",
+      category: "system",
+      priority: "low",
+      source: "system:test",
+    });
+
+    expect(result).toBeNull();
+  });
+});
+
 describe("getNotificationsByUser", () => {
   it("debería eliminar notificaciones con más de 30 días y devolver el resto", async () => {
     Notification.destroy.mockResolvedValue(1);
