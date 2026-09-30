@@ -20,6 +20,7 @@ import {
   startOfDay,
 } from "./summaryRecalculationService";
 import * as vacationService from "./vacationService";
+import * as notificationService from "./notificationService";
 import * as vacationAccrualService from "./vacationAccrualService";
 import * as disciplinaryService from "./disciplinaryActionService";
 import * as licenseService from "./employeeLicenseService";
@@ -314,10 +315,25 @@ export const createMyVacation = async (userId: number, input: MyVacationInput) =
     );
   }
 
-  return vacationService.createVacation({
+  const created = await vacationService.createVacation({
     employeeId: employee.id,
     startDate: input.startDate,
     endDate: input.endDate,
     reason: input.reason ?? null,
   });
+
+  const employeeName =
+    `${employee.firstName} ${employee.lastName}`.trim() || `el empleado #${employee.id}`;
+  await notificationService.notifyManagementRoles({
+    source: `vacation-request:${created.id}`,
+    title: "Solicitud de vacaciones",
+    message: `${employeeName} solicitó ${created.daysRequested} día(s) de vacaciones (del ${input.startDate} al ${input.endDate}).`,
+    type: "info",
+    category: "employee",
+    priority: "medium",
+    actionUrl: "/dashboard",
+    actionText: "Ver solicitudes",
+  });
+
+  return created;
 };

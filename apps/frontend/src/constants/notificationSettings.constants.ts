@@ -149,7 +149,30 @@ export const notificationSourceToSettingKey = (
   source?: string,
 ): NotificationSettingKey | undefined => {
   if (!source) return undefined;
-  if (source.startsWith("payment-")) return "payments";
+  if (source.startsWith("payment-") || source.startsWith("boleta-") || source.startsWith("boletas-"))
+    return "payments";
   if (source.startsWith("task-reminder:")) return "tasks";
+  if (
+    source.startsWith("vacation-") ||
+    source.startsWith("employee-") ||
+    source.startsWith("terminations-") ||
+    source.startsWith("disciplinary-") ||
+    source.startsWith("license-")
+  )
+    return "employees";
+  if (
+    source.startsWith("schedule-") ||
+    source.startsWith("schedule-assigned") ||
+    source.startsWith("schedule-assignment-")
+  )
+    return "schedules";
+  if (
+    source.startsWith("account-") ||
+    source.startsWith("user-") ||
+    source.startsWith("password-") ||
+    source.startsWith("temp-password")
+  )
+    return "users";
+  if (source.startsWith("role-")) return "roles";
   return SOURCE_TO_SETTING[source];
 };

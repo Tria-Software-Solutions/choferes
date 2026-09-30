@@ -14,6 +14,7 @@ import {
 import Employee from "../models/Employee";
 import { Role } from "../models/Role";
 import { User } from "../models/User";
+import { createNotification } from "./notificationService";
 import { UserRole } from "../models/UserRole";
 import { ServiceError } from "../utils/errors";
 import type { GrantDenial } from "./accessGrantService";
@@ -89,6 +90,18 @@ export const planAccountRoleChange = async (
 export const applyAccountRole = async (userId: number, roleId: number): Promise<void> => {
   await UserRole.destroy({ where: { userId } });
   await assignRole(userId, roleId);
+
+  const role = await Role.findByPk(roleId);
+  await createNotification(userId, {
+    source: `role-changed:${userId}:${roleId}`,
+    title: "Tu rol cambió",
+    message: `Tu rol en la plataforma cambió a ${role?.name ?? "uno nuevo"}.`,
+    type: "info",
+    category: "system",
+    priority: "medium",
+    actionUrl: "/dashboard",
+    actionText: "Ir al panel",
+  });
 };
 
 // Un supervisor debe tener el rol Supervisor (o uno de gestión, que lo supera).

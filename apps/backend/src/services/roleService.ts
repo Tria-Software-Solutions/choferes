@@ -5,6 +5,7 @@ import { getPositionForRoleName, POSITION_ROLE_NAMES } from "@choferes/shared";
 import { Permission } from "../models/Permission";
 import { Role } from "../models/Role";
 import { ServiceError } from "../utils/errors";
+import { notifyManagementRoles } from "./notificationService";
 import {
   paginate,
   getPaginationParams,
@@ -87,6 +88,14 @@ export const createRole = async (data: Omit<Role, "id">) => {
   const { positionKey: _ignored, ...editable } = data as Partial<Role>;
   const newRole = await Role.create({ ...editable, positionKey: null });
   await newRole.reload();
+  await notifyManagementRoles({
+    source: `role-created:${newRole.id}`,
+    title: "Rol creado",
+    message: `Se creó el rol ${newRole.name}.`,
+    type: "info",
+    category: "system",
+    priority: "medium",
+  });
   return newRole;
 };
 
@@ -98,6 +107,14 @@ export const updateRole = async (id: number, data: Omit<Role, "id">) => {
   const role = assertRoleExists(await Role.findByPk(id));
   assertRoleCanBeRenamed(role, editable);
   await Role.update(editable, { where: { id } });
+  await notifyManagementRoles({
+    source: `role-updated:${id}:${Date.now()}`,
+    title: "Rol actualizado",
+    message: `Se actualizó el rol ${role.name}.`,
+    type: "info",
+    category: "system",
+    priority: "medium",
+  });
   return Role.findByPk(id);
 };
 
@@ -111,5 +128,14 @@ export const deleteRole = async (id: number) => {
         "eliminar: se lo asignan las cuentas de los empleados con ese puesto. Cámbialo en el puesto del empleado.",
     );
   }
-  return Role.destroy({ where: { id } });
+  const destroyed = await Role.destroy({ where: { id } });
+  await notifyManagementRoles({
+    source: `role-deleted:${id}`,
+    title: "Rol eliminado",
+    message: `Se eliminó el rol ${role.name}. Las cuentas que lo usaban quedaron sin ese acceso.`,
+    type: "warning",
+    category: "system",
+    priority: "high",
+  });
+  return destroyed;
 };

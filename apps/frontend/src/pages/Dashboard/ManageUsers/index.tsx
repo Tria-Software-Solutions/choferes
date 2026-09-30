@@ -37,11 +37,12 @@ import EditableTableComponent from "../../../components/Table/EditableTable/Edit
 import SearchBarComponent from "../../../components/SearchBar/SearchBar.component";
 import AddUserForm from "../../Forms/AddUserForm";
 import PremiumTooltip from "../../../components/PremiumTooltip/PremiumTooltip.component";
-import { IconCheck, IconCirclePlus, IconPencil, IconPlus, IconUsers, IconX } from "@tabler/icons-react";
+import { IconCheck, IconCirclePlus, IconLock, IconPencil, IconPlus, IconUsers, IconX } from "@tabler/icons-react";
 import {
   editButtonStyles,
   saveButtonStyles,
   neutralButtonStyles,
+  renderStatusButton,
 } from "../../../components/Table/EditableTable/helpers/actionButtons";
 import { premiumMenuProps } from "../../../components/Table/EditableTable/EditableTable.styles";
 import DialogComponent from "../../../components/Dialog/Dialog.component";
@@ -76,9 +77,10 @@ const ManageUsers: React.FC<{ isExpanded?: boolean; hideHeader?: boolean }> = ({
   hideHeader = false,
 }) => {
   const dispatch = useDispatch<AppDispatch>();
-  const { userPermissions } = useAuthContext();
+  const { userPermissions, currentUser } = useAuthContext();
   const canCreateUser = userPermissions.includes(PERMISSION_CODES.CREATE_USERS);
   const canEditUser = userPermissions.includes(PERMISSION_CODES.EDIT_USER);
+  const canDisableUser = userPermissions.includes(PERMISSION_CODES.ENABLE_DISABLE_USER);
   const {
     users,
     isLoadingUsers,
@@ -287,12 +289,14 @@ const ManageUsers: React.FC<{ isExpanded?: boolean; hideHeader?: boolean }> = ({
 
   const handleUpdate = async (id: number) => {
     try {
-      const updatedUser = {
-        firstName: editFields.firstName,
-        lastName: editFields.lastName,
-        email: editFields.email,
-        username: editFields.username,
-      };
+      const currentUser = users.find((u) => u.id === id);
+      const updatedUser: Partial<User> = {};
+      if (currentUser) {
+        if (editFields.firstName !== currentUser.firstName) updatedUser.firstName = editFields.firstName;
+        if (editFields.lastName !== currentUser.lastName) updatedUser.lastName = editFields.lastName;
+        if (editFields.email !== currentUser.email) updatedUser.email = editFields.email;
+        if (editFields.username !== currentUser.username) updatedUser.username = editFields.username;
+      }
       const role = roles.find((r) => r.name === editFields.roleName);
       if (!role) {
         showNotification(NOTIFICATIONS.USER_ROLE_NOT_FOUND, { severity: 'error', duration: 5000 });
@@ -654,7 +658,7 @@ const ManageUsers: React.FC<{ isExpanded?: boolean; hideHeader?: boolean }> = ({
             {hideHeader ? (
               /* Compact preview list for Profile mode */
               <Box sx={{ flex: 1, minHeight: 0, overflow: "auto", p: 0 }}>
-                {filteredUsers.slice(0, 5).map((user, i) => {
+                {filteredUsers.map((user, i) => {
                   const isEditing = editRowId === user.id;
                   return (
                     <Box
@@ -842,6 +846,24 @@ const ManageUsers: React.FC<{ isExpanded?: boolean; hideHeader?: boolean }> = ({
                           </Typography>
                           <Box sx={{ display: "flex", gap: 0.5, flexShrink: 0 }}>
                             {canEditUser && (
+                              <PremiumTooltip title={TABLE.CHANGE_PASSWORD}>
+                                <span>
+                                  <IconButton onClick={() => handleOpenPasswordModal(user.id)} sx={neutralButtonStyles(theme)}>
+                                    <IconLock size={15} stroke={1.75} />
+                                  </IconButton>
+                                </span>
+                              </PremiumTooltip>
+                            )}
+                            <Box sx={{ height: 32, display: "inline-flex", alignItems: "center" }}>
+                              {renderStatusButton({
+                                row: user,
+                                isUser: true,
+                                isCurrentUser: user.id === currentUser?.id,
+                                hasDeletePermissions: canDisableUser,
+                                handleOpenStatusDialog,
+                              })}
+                            </Box>
+                            {canEditUser && (
                               <PremiumTooltip title={TABLE.EDIT}>
                                 <span>
                                   <IconButton onClick={() => handleEdit(user)} sx={editButtonStyles(theme)}>
@@ -856,13 +878,6 @@ const ManageUsers: React.FC<{ isExpanded?: boolean; hideHeader?: boolean }> = ({
                     </Box>
                   );
                 })}
-                {filteredUsers.length > 5 && (
-                  <Box sx={{ px: { xs: 2, sm: 2.5 }, py: 1.5, textAlign: "center" }}>
-                    <Typography variant="caption" sx={{ color: "text.disabled", fontWeight: 500, fontSize: "0.7rem" }}>
-                      +{filteredUsers.length - 5} usuarios más
-                    </Typography>
-                  </Box>
-                )}
                 {filteredUsers.length === 0 && (
                   <Box sx={{ display: "flex", alignItems: "center", justifyContent: "center", flex: 1, minHeight: 100 }}>
                     <Typography variant="body2" color="textSecondary">
