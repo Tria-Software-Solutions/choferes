@@ -17,10 +17,10 @@ import {
 } from "../../../constants/notificationSettings.constants";
 import { PanelHeader } from "../../../components/Layout";
 
-// Grupos que ya no se muestran en la configuración de notificaciones.
-// Las claves siguen existiendo (el NotificationContext las usa para filtrar),
-// pero dejan de ser configurables por el usuario.
-const HIDDEN_GROUP_IDS = new Set(["activity"]);
+// Todos los grupos se muestran en la configuración. Las claves controlan el
+// filtrado en el NotificationContext (tanto notificaciones nuevas como
+// cargadas), de modo que desactivar un tipo lo oculta para este usuario.
+const HIDDEN_GROUP_IDS = new Set<string>([]);
 
 const NotificationSettingsTab: React.FC = () => {
   const theme = useTheme();

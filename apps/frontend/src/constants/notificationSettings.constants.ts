@@ -1,11 +1,15 @@
 // Notification settings — define the notification types a user can enable/disable.
 // Persisted per-user inside `user.settings.notifications` (JSONB merged by the backend).
-import { IconCalendarTime, IconCalendarUser, IconInfoCircle, IconListCheck, IconParking, IconUserCog, IconUsers, IconWallet } from "@tabler/icons-react";
+import { IconBeach, IconCalendarTime, IconId, IconInfoCircle, IconListCheck, IconReceipt, IconShieldCheck, IconShieldExclamation, IconUserCog, IconUsers, IconWallet } from "@tabler/icons-react";
 import type { TablerIcon } from "@tabler/icons-react";
 
 export type NotificationSettingKey =
   | "payments"
+  | "boletas"
   | "tasks"
+  | "vacations"
+  | "licenses"
+  | "disciplines"
   | "employees"
   | "schedules"
   | "vehicles"
@@ -31,13 +35,20 @@ export interface NotificationSettingGroup {
 export const NOTIFICATION_SETTING_GROUPS: NotificationSettingGroup[] = [
   {
     id: "payments",
-    title: "Pagos",
+    title: "Pagos y boletas",
     items: [
       {
         key: "payments",
-        label: "Recordatorios de pago",
+        label: "Recordatorios de quincena",
         description: "Aviso el 15 y el último día de cada mes para realizar los pagos de quincena.",
         icon: IconWallet,
+        default: true,
+      },
+      {
+        key: "boletas",
+        label: "Boletas de pago",
+        description: "Boletas creadas, enviadas, modificadas o eliminadas y generadas automáticamente.",
+        icon: IconReceipt,
         default: true,
       },
     ],
@@ -56,42 +67,74 @@ export const NOTIFICATION_SETTING_GROUPS: NotificationSettingGroup[] = [
     ],
   },
   {
-    id: "activity",
-    title: "Actividad",
+    id: "employees",
+    title: "Empleados",
     items: [
       {
+        key: "vacations",
+        label: "Vacaciones",
+        description: "Solicitudes, aprobaciones, rechazos y cancelaciones de vacaciones.",
+        icon: IconBeach,
+        default: true,
+      },
+      {
+        key: "licenses",
+        label: "Licencias de conducir",
+        description: "Registro, cambios y avisos de vencimiento de licencias.",
+        icon: IconId,
+        default: true,
+      },
+      {
+        key: "disciplines",
+        label: "Amonestaciones",
+        description: "Nueva amonestación y cambios o eliminación de una existente.",
+        icon: IconShieldExclamation,
+        default: true,
+      },
+      {
         key: "employees",
-        label: "Empleados",
-        description: "Registro, edición y eliminación de empleados.",
+        label: "Altas y bajas",
+        description: "Registro de empleados, fin de contrato y terminaciones programadas.",
         icon: IconUsers,
         default: true,
       },
+    ],
+  },
+  {
+    id: "schedules",
+    title: "Horarios y turnos",
+    items: [
       {
         key: "schedules",
-        label: "Horarios",
-        description: "Creación, edición y eliminación de horarios.",
+        label: "Horarios y turnos",
+        description: "Creación, edición, eliminación y asignación de turnos a empleados.",
         icon: IconCalendarTime,
         default: true,
       },
-      {
-        key: "vehicles",
-        label: "Vehículos",
-        description: "Registro, edición y eliminación de vehículos.",
-        icon: IconParking,
-        default: true,
-      },
+    ],
+  },
+  {
+    id: "users",
+    title: "Cuentas y accesos",
+    items: [
       {
         key: "users",
-        label: "Usuarios",
-        description: "Registro, edición y eliminación de usuarios.",
+        label: "Cuentas de usuario",
+        description: "Alta de cuentas, bienvenida, activación o baja y cambios de contraseña o claves temporales.",
         icon: IconUserCog,
         default: true,
       },
+    ],
+  },
+  {
+    id: "roles",
+    title: "Roles y permisos",
+    items: [
       {
         key: "roles",
-        label: "Roles",
-        description: "Creación, edición y eliminación de roles.",
-        icon: IconCalendarUser,
+        label: "Roles y permisos",
+        description: "Asignación, revocación y cambios de rol o de permisos publicados.",
+        icon: IconShieldCheck,
         default: true,
       },
     ],
@@ -113,7 +156,11 @@ export const NOTIFICATION_SETTING_GROUPS: NotificationSettingGroup[] = [
 
 export const NOTIFICATION_SETTING_DEFAULTS: Record<NotificationSettingKey, boolean> = {
   payments: true,
+  boletas: true,
   tasks: true,
+  vacations: true,
+  licenses: true,
+  disciplines: true,
   employees: true,
   schedules: true,
   vehicles: true,
@@ -133,7 +180,6 @@ export const getNotificationSettings = (
 
 // Map a notification's `source` to the setting key that controls it, so the
 // NotificationContext can skip disabled notifications (both new and fetched).
-// Backend payment reminders use "payment-1:YYYY-M" / "payment-2:YYYY-M".
 const SOURCE_TO_SETTING: Record<string, NotificationSettingKey> = {
   employee: "employees",
   schedule: "schedules",
@@ -149,23 +195,14 @@ export const notificationSourceToSettingKey = (
   source?: string,
 ): NotificationSettingKey | undefined => {
   if (!source) return undefined;
-  if (source.startsWith("payment-") || source.startsWith("boleta-") || source.startsWith("boletas-"))
-    return "payments";
+  if (source.startsWith("payment-")) return "payments";
+  if (source.startsWith("boleta-") || source.startsWith("boletas-")) return "boletas";
   if (source.startsWith("task-reminder:")) return "tasks";
-  if (
-    source.startsWith("vacation-") ||
-    source.startsWith("employee-") ||
-    source.startsWith("terminations-") ||
-    source.startsWith("disciplinary-") ||
-    source.startsWith("license-")
-  )
-    return "employees";
-  if (
-    source.startsWith("schedule-") ||
-    source.startsWith("schedule-assigned") ||
-    source.startsWith("schedule-assignment-")
-  )
-    return "schedules";
+  if (source.startsWith("vacation-")) return "vacations";
+  if (source.startsWith("license-")) return "licenses";
+  if (source.startsWith("disciplinary-")) return "disciplines";
+  if (source.startsWith("employee-") || source.startsWith("terminations-")) return "employees";
+  if (source.startsWith("schedule-")) return "schedules";
   if (
     source.startsWith("account-") ||
     source.startsWith("user-") ||
