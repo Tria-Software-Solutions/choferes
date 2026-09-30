@@ -3,6 +3,7 @@ jest.mock("../services/notificationService", () => ({
   notifyManagementRoles: jest.fn(),
   notifyEmployeeUser: jest.fn(),
   createNotification: jest.fn(),
+  notifyAccountRoleChange: jest.fn(),
 }));
 jest.mock("../models/UserRole", () => {
   const mockFunctions = {

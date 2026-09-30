@@ -273,7 +273,7 @@ export const createUser = async (data: Record<string, any>) => {
     type: "info",
     category: "system",
     priority: "medium",
-    actionUrl: "/settings?tab=usuarios",
+    actionUrl: "/settings?tab=users",
     actionText: "Ver usuarios",
   });
 
@@ -301,26 +301,14 @@ export const updateUserStatus = async (id: number, status: boolean) => {
   });
 
   if (user) {
-    await createNotification(id, {
-      source: status ? `user-activated:${id}` : `user-deactivated:${id}`,
-      title: status ? "Cuenta activada" : "Cuenta desactivada",
-      message: status
-        ? "Tu cuenta fue reactivada. Ya puedes iniciar sesión."
-        : "Tu cuenta fue desactivada. Si crees que es un error, contacta a tu administrador.",
-      type: status ? "success" : "warning",
-      category: "system",
-      priority: "high",
-      actionUrl: "/mi-panel",
-      actionText: "Ir a mi panel",
-    });
     await notifyManagementRoles({
-      source: `user-status-${status ? "activated" : "deactivated"}:${id}`,
-      title: "Cuenta desactivada",
+      source: `user-status-${status ? "activated" : "deactivated"}:${id}:${Date.now()}`,
+      title: status ? "Cuenta activada" : "Cuenta desactivada",
       message: `Se ${status ? "activó" : "desactivó"} la cuenta de ${user.firstName} ${user.lastName} (${user.username}).`,
       type: status ? "info" : "warning",
       category: "system",
       priority: status ? "low" : "high",
-      actionUrl: "/settings?tab=usuarios",
+      actionUrl: "/settings?tab=users",
       actionText: "Ver usuarios",
     });
   }
@@ -391,15 +379,17 @@ export const updateUserSettings = async (id: number, settings: Record<string, un
 // becomes invisible in all listings and auth is blocked via isActive.
 export const deleteUser = async (id: number) => {
   const result = await User.update({ deletedAt: new Date(), isActive: false }, { where: { id } });
-  await notifyManagementRoles({
-    source: `user-deleted:${id}`,
-    title: "Cuenta eliminada",
-    message: `Se eliminó la cuenta #${id}.`,
-    type: "error",
-    category: "system",
-    priority: "high",
-    actionUrl: "/settings?tab=usuarios",
-    actionText: "Ver usuarios",
-  });
+  if (result[0] > 0) {
+    await notifyManagementRoles({
+      source: `user-deleted:${id}`,
+      title: "Cuenta eliminada",
+      message: `Se eliminó la cuenta #${id}.`,
+      type: "error",
+      category: "system",
+      priority: "high",
+      actionUrl: "/settings?tab=users",
+      actionText: "Ver usuarios",
+    });
+  }
   return result;
 };
