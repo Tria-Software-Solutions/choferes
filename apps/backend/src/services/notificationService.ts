@@ -156,8 +156,8 @@ export const generatePaymentReminders = async (userId: number, today?: string) =
       type: "warning",
       category: "report",
       priority: "high",
-      actionUrl: "/dashboard",
-      actionText: "Ver resumen quincenal",
+      actionUrl: "/employees",
+      actionText: "Ver boletas",
     });
   }
 
@@ -169,8 +169,8 @@ export const generatePaymentReminders = async (userId: number, today?: string) =
       type: "warning",
       category: "report",
       priority: "high",
-      actionUrl: "/dashboard",
-      actionText: "Ver resumen quincenal",
+      actionUrl: "/employees",
+      actionText: "Ver boletas",
     });
   }
 

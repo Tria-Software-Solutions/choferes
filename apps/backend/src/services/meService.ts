@@ -331,8 +331,8 @@ export const createMyVacation = async (userId: number, input: MyVacationInput) =
     type: "info",
     category: "employee",
     priority: "medium",
-    actionUrl: "/dashboard",
-    actionText: "Ver solicitudes",
+    actionUrl: `/employees/${employee.id}?tab=vacaciones`,
+    actionText: "Revisar solicitud",
   });
 
   return created;
