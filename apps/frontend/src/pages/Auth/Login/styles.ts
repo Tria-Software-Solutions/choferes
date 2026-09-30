@@ -133,9 +133,17 @@ export const loginTextFieldStyles: SxProps<Theme> = {
       zIndex: 2,
     },
     // Evitar que los adornos (iconos inicio/fin) creen una franja visual más oscura
-    // al tener fondo propio: forzamos fondo transparente en los contenedores de adorno.
+    // al tener fondo propio: forzamos fondo transparente en los contenedores de adorno
+    // y en los IconButton internos (icono ojo, candado) en todos sus estados.
     "& .MuiInputAdornment-root": {
       backgroundColor: "transparent",
+    },
+    "& .MuiInputAdornment-root .MuiIconButton-root": {
+      backgroundColor: "transparent",
+      "&:hover": { backgroundColor: "transparent" },
+      "&:focus": { backgroundColor: "transparent" },
+      "&:focus-visible": { backgroundColor: "transparent" },
+      "&.Mui-focusVisible": { backgroundColor: "transparent" },
     },
     "& input:-webkit-autofill": {
       WebkitBoxShadow: "0 0 0 100px rgba(28,28,40,0.9) inset",
