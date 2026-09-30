@@ -211,9 +211,10 @@ export const getUserByUsername = async (username: string) =>
   });
 
 // Fetches all permissions for a user by aggregating permissions from all roles.
-// Returns display LABELS (not codes) because this feeds the frontend UI, which
-// gates elements against `PERMISSIONS.*` labels. Server-side authorization uses
-// `permission.code` instead (see middleware/authMiddleware).
+// Returns the STABLE CODES (permission.code) because the frontend gates every
+// element against `PERMISSION_CODES.*` and the server authorizes against codes
+// too (see middleware/authMiddleware). The Spanish labels are only for display
+// and live in the permission catalog, not in the permission grants.
 export const getUserPermissions = async (userId: number) => {
   const user = await User.findByPk(userId, {
     attributes: SAFE_ATTRS,
@@ -223,7 +224,7 @@ export const getUserPermissions = async (userId: number) => {
   if (!user) return null;
 
   const permissions =
-    user.roles?.flatMap((role) => role.permissions?.map((permission) => permission.name)) || [];
+    user.roles?.flatMap((role) => role.permissions?.map((permission) => permission.code)) || [];
 
   return Array.from(new Set(permissions));
 };

@@ -56,7 +56,7 @@ const mockUser = {
   email: "admin@example.com",
   password: "hashed_password",
   isActive: true,
-  roles: [{ id: 1, name: "admin", permissions: [{ id: 1, name: "manage_users" }] }],
+  roles: [{ id: 1, name: "admin", permissions: [{ id: 1, code: "manage_users", name: "Gestionar Usuarios" }] }],
 };
 
 // The public shape of a user: same as mockUser but WITHOUT password hashes.
