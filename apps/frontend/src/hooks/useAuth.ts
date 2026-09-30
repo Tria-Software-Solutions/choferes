@@ -6,11 +6,11 @@ import { authenticateUser as authenticateUserService } from "../services/userSer
 import { getDefaultRoute } from "../utils/defaultRoute";
 
 interface Role {
-  permissions?: Array<{ name: string }>;
+  permissions?: Array<{ code: string }>;
 }
 
 interface Permission {
-  name: string;
+  code: string;
 }
 
 // Custom hook for authentication logic and user session management
@@ -24,14 +24,16 @@ export const useAuth = () => {
     try {
       const response = await authenticateUserService(identifier, password);
 
-      // Extract permissions from the nested structure: user.roles.permissions
+      // Extract permission CODES from the nested structure: user.roles.permissions.
+      // The frontend gates against stable codes (PERMISSION_CODES.*), so labels
+      // (permission.name) are never used for authorization.
       const userPermissions: string[] = [];
       if (response.user?.roles) {
         response.user.roles.forEach((role: Role) => {
           if (role.permissions) {
             role.permissions.forEach((permission: Permission) => {
-              if (permission.name && typeof permission.name === "string") {
-                userPermissions.push(permission.name);
+              if (permission.code && typeof permission.code === "string") {
+                userPermissions.push(permission.code);
               }
             });
           }

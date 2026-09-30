@@ -57,7 +57,7 @@ import {
 import { getEmployeeColor } from '../../../utils/employeeColors';
 import { EnglishDayOfWeek } from '../../../utils/dayAbreviations';
 import EmployeeAvatar from '../../EmployeeAvatar/EmployeeAvatar.component';
-import { PERMISSIONS, SELECTOR_TABLE } from '../../../constants/constants';
+import { PERMISSION_CODES, SELECTOR_TABLE } from '../../../constants/constants';
 import { getScheduleHours } from '../../../utils/schedule';
 import { getScheduleCellData, isToday } from '../../Table/SelectorTable/helpers/scheduleCell';
 import SegmentedToggle from '../../SegmentedToggle/SegmentedToggle.component';
@@ -2268,8 +2268,8 @@ const WeeklyBoard: React.FC<WeeklyBoardProps> = ({
   // ─── Drag and drop state ───
   const [activeDragItem, setActiveDragItem] = useState<DragItemData | null>(null);
 
-  const canEdit = permissions?.includes(PERMISSIONS.EDIT_EMPLOYEE_HOURS);
-  const showHours = permissions?.includes(PERMISSIONS.VIEW_EMPLOYEE_HOURS);
+  const canEdit = permissions?.includes(PERMISSION_CODES.EDIT_EMPLOYEE_HOURS);
+  const showHours = permissions?.includes(PERMISSION_CODES.VIEW_EMPLOYEE_HOURS);
 
   const sensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 5 } }),

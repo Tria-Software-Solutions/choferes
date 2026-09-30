@@ -16,7 +16,7 @@ import { NotificationProvider } from "./context/NotificationContext";
 import ProtectedRoute from "./routes/ProtectedRoute";
 import { Container, useMediaQuery, useTheme, CircularProgress, Box } from "@mui/material";
 import type { SxProps, Theme } from "@mui/material/styles";
-import { APPBAR_MENU, PERMISSIONS, ROUTES } from "./constants/constants";
+import { APPBAR_MENU, PERMISSION_CODES, ROUTES } from "./constants/constants";
 import NavIcon from "./components/NavIcon/NavIcon.component";
 import ErrorBoundary from "./components/ErrorBoundary/ErrorBoundary.component";
 import ReminderAnnouncer from "./components/ReminderAnnouncer/ReminderAnnouncer.component";
@@ -66,43 +66,43 @@ const AppBarWrapper: React.FC = () => {
       label: APPBAR_MENU.MY_PANEL,
       icon: <NavIcon label={APPBAR_MENU.MY_PANEL} />,
       path: ROUTES.MY_PANEL,
-      permission: PERMISSIONS.VIEW_MY_PANEL,
+      permission: PERMISSION_CODES.VIEW_MY_PANEL,
     },
     {
       label: APPBAR_MENU.EMPLOYEES,
       icon: <NavIcon label={APPBAR_MENU.EMPLOYEES} />,
       path: ROUTES.EMPLOYEES,
-      permission: PERMISSIONS.VIEW_EMPLOYEES,
+      permission: PERMISSION_CODES.VIEW_EMPLOYEES,
     },
     {
       label: APPBAR_MENU.SCHEDULES,
       icon: <NavIcon label={APPBAR_MENU.SCHEDULES} />,
       path: ROUTES.SCHEDULES,
-      permission: PERMISSIONS.VIEW_SCHEDULES,
+      permission: PERMISSION_CODES.VIEW_SCHEDULES,
     },
     {
       label: APPBAR_MENU.ROLES,
       icon: <NavIcon label={APPBAR_MENU.ROLES} />,
       path: ROUTES.ROLES,
-      permission: PERMISSIONS.VIEW_ROLES,
+      permission: PERMISSION_CODES.VIEW_ROLES,
     },
     {
       label: APPBAR_MENU.VEHICLES,
       icon: <NavIcon label={APPBAR_MENU.VEHICLES} />,
       path: ROUTES.VEHICLES,
-      permission: PERMISSIONS.VIEW_VEHICLES,
+      permission: PERMISSION_CODES.VIEW_VEHICLES,
     },
     {
       label: APPBAR_MENU.DASHBOARD,
       icon: <NavIcon label={APPBAR_MENU.DASHBOARD} />,
       path: ROUTES.DASHBOARD,
-      permission: PERMISSIONS.VIEW_ADMIN,
+      permission: PERMISSION_CODES.VIEW_ADMIN,
     },
     {
       label: APPBAR_MENU.TASKS,
       icon: <NavIcon label={APPBAR_MENU.TASKS} />,
       path: ROUTES.TASKS,
-      permission: PERMISSIONS.VIEW_TASKS,
+      permission: PERMISSION_CODES.VIEW_TASKS,
     },
     {
       label: APPBAR_MENU.PROFILE,
@@ -112,13 +112,13 @@ const AppBarWrapper: React.FC = () => {
   ];
 
   const permissionsMap = {
-    [APPBAR_MENU.MY_PANEL]: PERMISSIONS.VIEW_MY_PANEL,
-    [APPBAR_MENU.EMPLOYEES]: PERMISSIONS.VIEW_EMPLOYEES,
-    [APPBAR_MENU.SCHEDULES]: PERMISSIONS.VIEW_SCHEDULES,
-    [APPBAR_MENU.ROLES]: PERMISSIONS.VIEW_ROLES,
-    [APPBAR_MENU.VEHICLES]: PERMISSIONS.VIEW_VEHICLES,
-    [APPBAR_MENU.DASHBOARD]: PERMISSIONS.VIEW_ADMIN,
-    [APPBAR_MENU.TASKS]: PERMISSIONS.VIEW_TASKS,
+    [APPBAR_MENU.MY_PANEL]: PERMISSION_CODES.VIEW_MY_PANEL,
+    [APPBAR_MENU.EMPLOYEES]: PERMISSION_CODES.VIEW_EMPLOYEES,
+    [APPBAR_MENU.SCHEDULES]: PERMISSION_CODES.VIEW_SCHEDULES,
+    [APPBAR_MENU.ROLES]: PERMISSION_CODES.VIEW_ROLES,
+    [APPBAR_MENU.VEHICLES]: PERMISSION_CODES.VIEW_VEHICLES,
+    [APPBAR_MENU.DASHBOARD]: PERMISSION_CODES.VIEW_ADMIN,
+    [APPBAR_MENU.TASKS]: PERMISSION_CODES.VIEW_TASKS,
   };
 
   const filteredLinks = links.filter((link) => {
@@ -288,7 +288,7 @@ const AppContent: React.FC = () => {
               <Route
                 path="/roles"
                 element={
-                  safeUserPermissions.includes(PERMISSIONS.VIEW_ROLES) ? (
+                  safeUserPermissions.includes(PERMISSION_CODES.VIEW_ROLES) ? (
                     <RolesPage />
                   ) : (
                     <Navigate to="/forbidden" replace />
@@ -298,7 +298,7 @@ const AppContent: React.FC = () => {
               <Route
                 path="/employees"
                 element={
-                  safeUserPermissions.includes(PERMISSIONS.VIEW_EMPLOYEES) ? (
+                  safeUserPermissions.includes(PERMISSION_CODES.VIEW_EMPLOYEES) ? (
                     <EmployeesPage />
                   ) : (
                     <Navigate to="/forbidden" replace />
@@ -308,7 +308,7 @@ const AppContent: React.FC = () => {
               <Route
                 path="/employees/:id"
                 element={
-                  safeUserPermissions.includes(PERMISSIONS.VIEW_EMPLOYEES) ? (
+                  safeUserPermissions.includes(PERMISSION_CODES.VIEW_EMPLOYEES) ? (
                     <EmployeeDetail />
                   ) : (
                     <Navigate to="/forbidden" replace />
@@ -318,7 +318,7 @@ const AppContent: React.FC = () => {
               <Route
                 path="/schedules"
                 element={
-                  safeUserPermissions.includes(PERMISSIONS.VIEW_SCHEDULES) ? (
+                  safeUserPermissions.includes(PERMISSION_CODES.VIEW_SCHEDULES) ? (
                     <SchedulesPage />
                   ) : (
                     <Navigate to="/forbidden" replace />
@@ -328,7 +328,7 @@ const AppContent: React.FC = () => {
               <Route
                 path="/vehicles"
                 element={
-                  safeUserPermissions.includes(PERMISSIONS.VIEW_VEHICLES) ? (
+                  safeUserPermissions.includes(PERMISSION_CODES.VIEW_VEHICLES) ? (
                     <VehiclesPage />
                   ) : (
                     <Navigate to="/forbidden" replace />
@@ -338,7 +338,7 @@ const AppContent: React.FC = () => {
               <Route
                 path="/tasks"
                 element={
-                  safeUserPermissions.includes(PERMISSIONS.VIEW_TASKS) ? (
+                  safeUserPermissions.includes(PERMISSION_CODES.VIEW_TASKS) ? (
                     <TasksPage />
                   ) : (
                     <Navigate to="/forbidden" replace />
@@ -348,7 +348,7 @@ const AppContent: React.FC = () => {
               <Route
                 path="/dashboard"
                 element={
-                  safeUserPermissions.includes(PERMISSIONS.VIEW_ADMIN) ? (
+                  safeUserPermissions.includes(PERMISSION_CODES.VIEW_ADMIN) ? (
                     <Dashboard />
                   ) : (
                     <Navigate to="/forbidden" replace />
@@ -358,7 +358,7 @@ const AppContent: React.FC = () => {
               <Route
                 path="/mi-panel"
                 element={
-                  safeUserPermissions.includes(PERMISSIONS.VIEW_MY_PANEL) ? (
+                  safeUserPermissions.includes(PERMISSION_CODES.VIEW_MY_PANEL) ? (
                     <MyPanel />
                   ) : (
                     <Navigate to="/forbidden" replace />
@@ -368,7 +368,7 @@ const AppContent: React.FC = () => {
               <Route
                 path="/settings"
                 element={
-                  safeUserPermissions.includes(PERMISSIONS.VIEW_PROFILE) ? (
+                  safeUserPermissions.includes(PERMISSION_CODES.VIEW_PROFILE) ? (
                     <Profile />
                   ) : (
                     <Navigate to="/forbidden" replace />
