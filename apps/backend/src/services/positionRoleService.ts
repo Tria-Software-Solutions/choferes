@@ -14,7 +14,7 @@ import {
 import Employee from "../models/Employee";
 import { Role } from "../models/Role";
 import { User } from "../models/User";
-import { createNotification } from "./notificationService";
+import { notifyAccountRoleChange } from "./notificationService";
 import { UserRole } from "../models/UserRole";
 import { ServiceError } from "../utils/errors";
 import type { GrantDenial } from "./accessGrantService";
@@ -92,15 +92,8 @@ export const applyAccountRole = async (userId: number, roleId: number): Promise<
   await assignRole(userId, roleId);
 
   const role = await Role.findByPk(roleId);
-  await createNotification(userId, {
-    source: `role-changed:${userId}:${roleId}`,
-    title: "Tu rol cambió",
-    message: `Tu rol en la plataforma cambió a ${role?.name ?? "uno nuevo"}.`,
-    type: "info",
-    category: "system",
-    priority: "medium",
-    actionUrl: "/mi-panel",
-    actionText: "Ir a mi panel",
+  await notifyAccountRoleChange(userId, {
+    action: `su rol cambió a ${role?.name ?? "uno nuevo"} (según su puesto)`,
   });
 };
 
