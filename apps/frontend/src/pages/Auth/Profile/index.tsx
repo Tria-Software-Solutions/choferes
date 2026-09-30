@@ -1,4 +1,5 @@
 import React, { useCallback, useEffect, useRef, useState } from "react";
+import { useSearchParams } from "react-router-dom";
 
 import { hasAdminSettingsRole } from "@choferes/shared";
 import { useAuthContext } from "../../../context/AuthContext";
@@ -73,6 +74,21 @@ type TabId =
   | "users"
   | "roles";
 
+const TAB_IDS: readonly TabId[] = [
+  "personal",
+  "password",
+  "theme",
+  "notifications",
+  "sessions",
+  "help",
+  "quickaccess",
+  "users",
+  "roles",
+];
+
+const isTabId = (value: string | null): value is TabId =>
+  value !== null && (TAB_IDS as readonly string[]).includes(value);
+
 const ThemeMockup: React.FC<{ tone: "light" | "dark" }> = ({ tone }) => {
   const bg = tone === "dark" ? "#0f172a" : "#f3f4f6";
   const panel = tone === "dark" ? "#1e293b" : "#ffffff";
@@ -146,7 +162,17 @@ const Profile: React.FC = () => {
   };
   const { clockFormat, setClockFormat } = useTimeFormat();
 
-  const [activeTab, setActiveTab] = useState<TabId>("personal");
+  // La pestaña vive en la URL (?tab=) para que un enlace de notificación abra
+  // directo la sección pedida (Usuarios, Roles, Notificaciones...) en lugar de
+  // dejar siempre en "personal".
+  const [searchParams, setSearchParams] = useSearchParams();
+  const requestedTab = searchParams.get("tab");
+  const urlTab: TabId = isTabId(requestedTab) ? requestedTab : "personal";
+  const setActiveTab = useCallback(
+    (value: TabId) =>
+      setSearchParams(value === "personal" ? {} : { tab: value }, { replace: true }),
+    [setSearchParams],
+  );
   const [editFields, setEditFields] = useState({
     firstName: currentUser?.firstName || "",
     lastName: currentUser?.lastName || "",
@@ -520,6 +546,10 @@ const Profile: React.FC = () => {
 
   const groupItems = (groupName: string) =>
     sidebarItems.filter((item) => item.group === groupName);
+
+  // Si el ?tab= apunta a una sección que el usuario no tiene (por ejemplo
+  // ?tab=roles para un Chofer), se cae a "personal" en vez de renderizarla.
+  const activeTab: TabId = sidebarItems.some((item) => item.id === urlTab) ? urlTab : "personal";
 
   return (
     <Box

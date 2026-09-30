@@ -346,7 +346,7 @@ export const deletePayment = async (id: number) => {
       type: "warning",
       category: "report",
       priority: "medium",
-      actionUrl: "/employees",
+      actionUrl: payment ? `/employees/${payment.employeeId}?tab=pagos` : "/employees",
       actionText: "Ver boletas",
     });
     if (payment) {
