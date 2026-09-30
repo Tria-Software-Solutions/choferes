@@ -95,7 +95,7 @@ export const createRole = async (data: Omit<Role, "id">) => {
     type: "info",
     category: "system",
     priority: "medium",
-    actionUrl: "/settings",
+    actionUrl: "/settings?tab=roles",
     actionText: "Ver roles",
   });
   return newRole;
@@ -116,7 +116,7 @@ export const updateRole = async (id: number, data: Omit<Role, "id">) => {
     type: "info",
     category: "system",
     priority: "medium",
-    actionUrl: "/settings",
+    actionUrl: "/settings?tab=roles",
     actionText: "Ver roles",
   });
   return Role.findByPk(id);
@@ -139,7 +139,7 @@ export const deleteRole = async (id: number) => {
     message: `Se eliminó el rol ${role.name}. Las cuentas que lo usaban quedaron sin ese acceso.`,
     type: "warning",
     priority: "high",
-    actionUrl: "/settings",
+    actionUrl: "/settings?tab=roles",
     actionText: "Ver roles",
   });
   return destroyed;

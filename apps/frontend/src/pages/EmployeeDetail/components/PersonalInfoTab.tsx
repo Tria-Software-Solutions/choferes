@@ -197,6 +197,7 @@ const PersonalInfoTab: React.FC<PersonalInfoTabProps> = ({
   const { showNotification } = useAppNotifications();
 
   const canEdit = userPermissions.includes(PERMISSION_CODES.EDIT_EMPLOYEES);
+  const canManageUser = userPermissions.includes(PERMISSION_CODES.EDIT_USER) || userPermissions.includes(PERMISSION_CODES.CREATE_USERS);
 
   const [form, setForm] = useState(() => buildFormFromEmployee(employee));
   const [hasTermination, setHasTermination] = useState(Boolean(employee.terminationDate));
@@ -1076,7 +1077,7 @@ const PersonalInfoTab: React.FC<PersonalInfoTabProps> = ({
                       &quot;{expectedRoleName}&quot; (el de su puesto) para que pueda entrar.
                     </Typography>
                   </Box>
-                  {canEdit && (
+                  {canManageUser && (
                     <Button
                       size="small"
                       variant="text"
@@ -1105,7 +1106,7 @@ const PersonalInfoTab: React.FC<PersonalInfoTabProps> = ({
             </Box>
           )}
 
-          {canEdit && (
+          {canManageUser && (
             <Button
               variant="outlined"
               startIcon={
