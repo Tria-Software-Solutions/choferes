@@ -6,6 +6,7 @@ import {
   DISCIPLINARY_SEVERITIES,
   EMPLOYEE_POSITIONS,
   EMPLOYEE_TERMINATION_REASONS,
+  usernameRegex,
 } from "@choferes/shared";
 
 /**
@@ -327,8 +328,10 @@ export const userRules = [
     .withMessage("El nombre de usuario es requerido")
     .isLength({ min: 3, max: 50 })
     .withMessage("El nombre de usuario debe tener entre 3 y 50 caracteres")
-    .matches(/^[a-zA-Z0-9_]+$/)
-    .withMessage("El nombre de usuario solo puede contener letras, números y guiones bajos"),
+    .matches(usernameRegex)
+    .withMessage(
+      "El nombre de usuario debe empezar con una letra y solo puede contener letras, números, guiones bajos, puntos y guiones",
+    ),
   body("email")
     .trim()
     .notEmpty()
@@ -373,8 +376,10 @@ export const userUpdateRules = [
     .withMessage("El nombre de usuario no puede estar vacío")
     .isLength({ min: 3, max: 50 })
     .withMessage("El nombre de usuario debe tener entre 3 y 50 caracteres")
-    .matches(/^[a-zA-Z0-9_]+$/)
-    .withMessage("El nombre de usuario solo puede contener letras, números y guiones bajos"),
+    .matches(usernameRegex)
+    .withMessage(
+      "El nombre de usuario debe empezar con una letra y solo puede contener letras, números, guiones bajos, puntos y guiones",
+    ),
   body("email")
     .optional()
     .trim()
