@@ -111,8 +111,20 @@ export interface CreateVacationInput {
   reason?: string | null;
 }
 
+export interface CreateVacationOptions {
+  /**
+   * false cuando la solicitud la hizo el propio empleado (Mi Panel): ahí ya
+   * sabe que la creó y avisarle sería ruido. Por defecto (alta desde
+   * administración) sí se le avisa.
+   */
+  notifyEmployee?: boolean;
+}
+
 // Creates a pending vacation request; days are always computed server-side.
-export const createVacation = async (input: CreateVacationInput) => {
+export const createVacation = async (
+  input: CreateVacationInput,
+  options: CreateVacationOptions = {},
+) => {
   const employee = await Employee.findByPk(input.employeeId);
   if (!employee) {
     throw new ServiceError(404, "Empleado no encontrado");
@@ -140,6 +152,19 @@ export const createVacation = async (input: CreateVacationInput) => {
     actionUrl: `/employees/${input.employeeId}?tab=vacaciones`,
     actionText: "Revisar solicitud",
   });
+
+  if (options.notifyEmployee !== false) {
+    await notifyEmployeeUser(input.employeeId, {
+      source: `vacation-registered:${created.id}`,
+      title: "Vacaciones registradas a tu nombre",
+      message: `Se registró una solicitud de vacaciones (del ${formatDate(input.startDate)} al ${formatDate(input.endDate)}) en tu expediente.`,
+      type: "info",
+      category: "employee",
+      priority: "medium",
+      actionUrl: "/mi-panel?tab=vacaciones",
+      actionText: "Ver solicitud",
+    });
+  }
 
   return normalize(created.get({ plain: true }));
 };

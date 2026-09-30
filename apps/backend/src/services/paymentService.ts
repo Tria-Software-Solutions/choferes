@@ -335,6 +335,8 @@ export const markPaymentSent = async (id: number) => {
 
 // Deletes a payment by ID.
 export const deletePayment = async (id: number) => {
+  // Se lee antes de borrar para poder avisarle al empleado afectado.
+  const payment = await Payment.findByPk(id, { attributes: ["id", "employeeId"] });
   const deleted = await Payment.destroy({ where: { id } });
   if (deleted > 0) {
     await notifyManagementRoles({
@@ -347,6 +349,18 @@ export const deletePayment = async (id: number) => {
       actionUrl: "/employees",
       actionText: "Ver boletas",
     });
+    if (payment) {
+      await notifyEmployeeUser(payment.employeeId, {
+        source: `boleta-deleted-employee:${id}`,
+        title: "Se eliminó una boleta de tu historial",
+        message: `La boleta #${id} fue eliminada de tu expediente.`,
+        type: "warning",
+        category: "report",
+        priority: "medium",
+        actionUrl: "/mi-panel?tab=pagos",
+        actionText: "Ver mi pagos",
+      });
+    }
   }
   return deleted > 0;
 };

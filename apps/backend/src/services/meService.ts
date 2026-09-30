@@ -315,12 +315,16 @@ export const createMyVacation = async (userId: number, input: MyVacationInput) =
     );
   }
 
-  const created = await vacationService.createVacation({
-    employeeId: employee.id,
-    startDate: input.startDate,
-    endDate: input.endDate,
-    reason: input.reason ?? null,
-  });
+  const created = await vacationService.createVacation(
+    {
+      employeeId: employee.id,
+      startDate: input.startDate,
+      endDate: input.endDate,
+      reason: input.reason ?? null,
+    },
+    // El empleado ya sabe que la pidió: no se le notifica a sí mismo.
+    { notifyEmployee: false },
+  );
 
   const employeeName =
     `${employee.firstName} ${employee.lastName}`.trim() || `el empleado #${employee.id}`;
