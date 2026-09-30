@@ -1,6 +1,11 @@
 
 // Mock Vehicle model - Vehicle is both a named AND default export
 // The service uses: import { Vehicle } from "../models/Vehicle" (named import)
+jest.mock("../services/notificationService", () => ({
+  notifyManagementRoles: jest.fn(),
+  notifyEmployeeUser: jest.fn(),
+  createNotification: jest.fn(),
+}));
 jest.mock("../models/Vehicle", () => {
   const mockFunctions = {
     findAndCountAll: jest.fn(),
@@ -181,5 +186,57 @@ describe("deleteVehicle", () => {
 
     expect(Vehicle.destroy).toHaveBeenCalledWith({ where: { id: 1 } });
     expect(result).toBe(1);
+  });
+});
+
+describe("notificaciones de vehículos", () => {
+  const { notifyManagementRoles } = require("../services/notificationService");
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
+  it("avisa a gerencia al registrar, con destino a la lista de vehículos", async () => {
+    const newData = {
+      ticket: "99999",
+      licensePlate: "XYZ-789",
+      brand: "Honda",
+      color: "Azul",
+      parkingLot: "B2",
+      notes: "",
+      parkingDate: new Date(),
+    };
+    Vehicle.create.mockResolvedValue({ id: 7, ...newData, reload: jest.fn() });
+
+    await vehicleService.createVehicle(newData as never);
+
+    expect(notifyManagementRoles).toHaveBeenCalledWith(
+      expect.objectContaining({
+        source: "vehicle-created:7",
+        actionUrl: "/vehicles",
+      }),
+    );
+  });
+
+  it("avisa al actualizar y al eliminar, y no avisa si no se eliminó nada", async () => {
+    Vehicle.update.mockResolvedValue([1]);
+    Vehicle.findByPk.mockResolvedValue({ ...mockVehicle, color: "Negro" });
+    await vehicleService.updateVehicle(1, { color: "Negro" } as never);
+    expect(notifyManagementRoles).toHaveBeenCalledWith(
+      expect.objectContaining({ actionUrl: "/vehicles" }),
+    );
+
+    jest.clearAllMocks();
+    Vehicle.findByPk.mockResolvedValue(mockVehicle);
+    Vehicle.destroy.mockResolvedValue(1);
+    await vehicleService.deleteVehicle(1);
+    expect(notifyManagementRoles).toHaveBeenCalledWith(
+      expect.objectContaining({ source: "vehicle-deleted:1", actionUrl: "/vehicles" }),
+    );
+
+    jest.clearAllMocks();
+    Vehicle.destroy.mockResolvedValue(0);
+    await vehicleService.deleteVehicle(99);
+    expect(notifyManagementRoles).not.toHaveBeenCalled();
   });
 });

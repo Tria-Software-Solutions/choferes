@@ -14,7 +14,6 @@ import {
 import { fetchPermissions } from "../../../store/slices/permissionsSlice";
 import { fetchRolePermissions } from "../../../store/slices/rolePermissionsSlice";
 import { useAppNotifications } from "../../../components/Snackbar/Snackbar.component";
-import { createRoleNotification } from "../../../services/notificationService";
 import {
   Backdrop,
   Box,
@@ -207,8 +206,6 @@ const ManageRoles: React.FC<{ isExpanded?: boolean; hideHeader?: boolean }> = ({
       setEditFields({ name: "", permissionNames: [] });
       showNotification(NOTIFICATIONS.ROLE_UPDATE_SUCCESS, { severity: 'success', duration: 3000 });
       
-      // Add notification to menu
-      createRoleNotification('updated', editFields.name);
     } catch (error) {
       handleCancel();
       showNotification(NOTIFICATIONS.ROLE_UPDATE_ERROR, { severity: 'error', duration: 5000 });
@@ -245,12 +242,6 @@ const ManageRoles: React.FC<{ isExpanded?: boolean; hideHeader?: boolean }> = ({
       setOpenDeleteDialog(false);
       setRoleToDelete(null);
       showNotification(NOTIFICATIONS.ROLE_DELETE_SUCCESS, { severity: 'success', duration: 3000 });
-      
-      // Add notification to menu
-      const role = roles.find(r => r.id === roleToDelete);
-      if (role) {
-        createRoleNotification('deleted', role.name);
-      }
     } catch (error) {
       showNotification(NOTIFICATIONS.ROLE_DELETE_ERROR, { severity: 'error', duration: 5000 });
     } finally {
@@ -294,8 +285,6 @@ const ManageRoles: React.FC<{ isExpanded?: boolean; hideHeader?: boolean }> = ({
       setOpenAddRoleModal(false);
       showNotification(NOTIFICATIONS.ROLE_CREATE_SUCCESS, { severity: 'success', duration: 3000 });
       
-      // Add notification to menu
-      createRoleNotification('created', roleData.name);
     } catch (error) {
       showNotification(NOTIFICATIONS.ROLE_CREATE_ERROR, { severity: 'error', duration: 5000 });
     } finally {
