@@ -265,7 +265,7 @@ export const updateVacation = async (id: number, input: UpdateVacationInput) => 
   if (statusChanged) {
     const decidedStatus = input.status === "approved" ? "aprobadas" : "rechazadas";
     await notifyEmployeeUser(vacation.employeeId, {
-      source: `vacation-decision:${vacation.id}`,
+      source: `vacation-decision:${vacation.id}:${input.status}:${Date.now()}`,
       title: `Vacaciones ${decidedStatus}`,
       message: `Tu solicitud de vacaciones (del ${vacation.startDate} al ${vacation.endDate}) fue ${input.status === "approved" ? "aprobada" : "rechazada"}.`,
       type: input.status === "approved" ? "success" : "error",

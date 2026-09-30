@@ -2,6 +2,7 @@
 import jwt, { JwtPayload } from "jsonwebtoken";
 import { Request, Response, NextFunction } from "express";
 import { clearAuthCookies, generateTokens } from "../utils/generateSecret";
+import { runAsActor } from "../utils/actorContext";
 import { User } from "../models/User";
 import { Role } from "../models/Role";
 import { Permission } from "../models/Permission";
@@ -128,7 +129,8 @@ export const authenticateToken = async (
     );
 
     req.user = { id: userId, roles, permissions };
-    return next();
+    // El resto de la petición corre "como" este usuario (ver utils/actorContext).
+    return runAsActor(userId, () => next());
   } catch {
     return res.status(500).json({
       error: "Internal server error",

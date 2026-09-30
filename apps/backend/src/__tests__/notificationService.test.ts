@@ -39,7 +39,7 @@ import * as notificationService from "../services/notificationService";
 beforeEach(() => {
   jest.clearAllMocks();
   // Default: user has no settings (all notifications enabled)
-  User.findByPk.mockResolvedValue({ settings: {} });
+  User.findByPk.mockResolvedValue({ settings: {}, roles: [{ name: "Gerencia" }] });
 });
 
 describe("generatePaymentReminders", () => {
@@ -135,6 +135,7 @@ describe("generatePaymentReminders", () => {
   it("no debería crear recordatorios si el usuario desactivó los pagos en settings", async () => {
     User.findByPk.mockResolvedValue({
       settings: { notifications: { payments: false } },
+      roles: [{ name: "Gerencia" }],
     });
 
     const result = await notificationService.generatePaymentReminders(1, "2026-07-15");
@@ -144,7 +145,7 @@ describe("generatePaymentReminders", () => {
   });
 
   it("debería crear recordatorios si el usuario no definió settings.notifications (default on)", async () => {
-    User.findByPk.mockResolvedValue({ settings: { theme: "dark" } });
+    User.findByPk.mockResolvedValue({ settings: { theme: "dark" }, roles: [{ name: "Gerencia" }] });
     Notification.findOne.mockResolvedValue(null);
     const created = { id: 6, source: "payment-1:2026-7", title: "Pago de Quincena 1" };
     Notification.create.mockResolvedValue(created);
@@ -238,5 +239,84 @@ describe("markAsRead", () => {
 
     expect(Notification.findByPk).not.toHaveBeenCalled();
     expect(result).toBeNull();
+  });
+});
+
+describe("preferencias de notificación", () => {
+  it("asigna cada clase de aviso a su preferencia", () => {
+    const key = notificationService.settingKeyForSource;
+    expect(key("vacation-request:3")).toBe("vacations");
+    expect(key("boleta-sent:3:1")).toBe("boletas");
+    expect(key("license-expiry:3")).toBe("licenses");
+    expect(key("disciplinary-created:3")).toBe("disciplines");
+    expect(key("employee-terminated:3")).toBe("employees");
+    expect(key("schedule-assigned:1:2026-09-01:5")).toBe("schedules");
+    expect(key("vehicle-created:3")).toBe("vehicles");
+    expect(key("password-changed:3:1")).toBe("users");
+    expect(key("role-access-changed:3:1")).toBe("roles");
+    expect(key(undefined)).toBeNull();
+    expect(key("otro:1")).toBeNull();
+  });
+
+  it("no entrega un aviso que el destinatario desactivó", async () => {
+    User.findByPk.mockResolvedValue({ settings: { notifications: { vacations: false } } });
+
+    const result = await notificationService.createNotification(1, {
+      source: "vacation-decision:4:approved:1",
+      title: "Vacaciones aprobadas",
+      message: "ok",
+    });
+
+    expect(result).toBeNull();
+    expect(Notification.create).not.toHaveBeenCalled();
+  });
+
+  it("entrega el aviso cuando la preferencia está activa o sin definir", async () => {
+    User.findByPk.mockResolvedValue({ settings: {} });
+    Notification.create.mockResolvedValue({ reload: jest.fn() });
+
+    await notificationService.createNotification(1, {
+      source: "vacation-decision:4:approved:1",
+      title: "Vacaciones aprobadas",
+      message: "ok",
+    });
+
+    expect(Notification.create).toHaveBeenCalledTimes(1);
+  });
+});
+
+describe("destinatarios y actor", () => {
+  it("no avisa a quien realizó la acción", async () => {
+    const { runAsActor } = require("../utils/actorContext");
+    User.findByPk.mockResolvedValue({ settings: {} });
+
+    const result = await runAsActor(5, () =>
+      notificationService.createNotification(5, { title: "t", message: "m" }),
+    );
+
+    expect(result).toBeNull();
+    expect(Notification.create).not.toHaveBeenCalled();
+  });
+
+  it("sí avisa a otros usuarios aunque haya un actor", async () => {
+    const { runAsActor } = require("../utils/actorContext");
+    Notification.create.mockResolvedValue({ reload: jest.fn() });
+
+    await runAsActor(5, () =>
+      notificationService.createNotification(6, { title: "t", message: "m" }),
+    );
+
+    expect(Notification.create).toHaveBeenCalledTimes(1);
+  });
+});
+
+describe("recordatorios de pago por rol", () => {
+  it("no envía el recordatorio a un chofer", async () => {
+    User.findByPk.mockResolvedValue({ settings: {}, roles: [{ name: "Chofer" }] });
+
+    const result = await notificationService.generatePaymentReminders(1, "2026-07-15");
+
+    expect(result).toHaveLength(0);
+    expect(Notification.create).not.toHaveBeenCalled();
   });
 });
