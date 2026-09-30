@@ -1,5 +1,5 @@
 // Service for business logic and database operations related to notifications
-import { MANAGEMENT_ROLE_NAMES } from "@choferes/shared";
+import { getCurrentActorId } from "../utils/actorContext";
 import { Notification } from "../models/Notification";
 import { User } from "../models/User";
 import { UserRole } from "../models/UserRole";
@@ -21,12 +21,39 @@ interface CreateNotificationData {
   source?: string;
 }
 
-// Delivers a notification to every user whose role is a management role
-// (Gerencia / Administrativo / SysAdmin). Used by the business flows so a
-// request raised by an employee reaches the people who approve it.
+// Notification preference (Perfil → Notificaciones) each kind of notification
+// belongs to, derived from the start of its `source` key. Sources that match
+// nothing (manual or system notifications) are always delivered.
+const SETTING_BY_SOURCE_PREFIX: ReadonlyArray<[RegExp, string]> = [
+  [/^vacation-/, "vacations"],
+  [/^boletas?-/, "boletas"],
+  [/^payment-/, "payments"],
+  [/^license-/, "licenses"],
+  [/^disciplinary-/, "disciplines"],
+  [/^(employee-|terminations-)/, "employees"],
+  [/^(schedule-)/, "schedules"],
+  [/^vehicle-/, "vehicles"],
+  [/^(account-|user-|password-|temp-password-)/, "users"],
+  [/^role-/, "roles"],
+  [/^task-/, "tasks"],
+];
+
+export const settingKeyForSource = (source?: string): string | null => {
+  if (!source) return null;
+  const match = SETTING_BY_SOURCE_PREFIX.find(([pattern]) => pattern.test(source));
+  return match ? match[1] : null;
+};
+
+// Roles that receive the management notifications (requests to approve, audit
+// events, account and role changes).
+const NOTIFIED_ROLE_NAMES = ["Gerencia", "Administrativo"];
+
+// Delivers a notification to every user with the Gerencia or Administrativo
+// role. Used by the business flows so a request raised by an employee reaches
+// the people who approve it.
 export const notifyManagementRoles = async (data: CreateNotificationData) => {
   const managementRoles = await Role.findAll({
-    where: { name: [...MANAGEMENT_ROLE_NAMES] },
+    where: { name: NOTIFIED_ROLE_NAMES },
     attributes: ["id"],
   });
   const managementRoleIds = managementRoles.map((role) => role.id);
@@ -39,6 +66,30 @@ export const notifyManagementRoles = async (data: CreateNotificationData) => {
 
   const targetIds = [...new Set(assignments.map((assignment) => assignment.userId))];
   await Promise.all(targetIds.map((userId) => createNotification(userId, data)));
+};
+
+// Tells Gerencia/Administrativo that an account's role changed. The affected
+// person is not notified: role changes are handled by management.
+export const notifyAccountRoleChange = async (
+  userId: number,
+  data: { action: string; type?: NotificationType; priority?: NotificationPriority },
+) => {
+  const user = await User.findByPk(userId, {
+    attributes: ["id", "firstName", "lastName", "username"],
+  });
+  const name = user
+    ? `${user.firstName ?? ""} ${user.lastName ?? ""}`.trim() || user.username
+    : `la cuenta #${userId}`;
+  await notifyManagementRoles({
+    source: `role-account:${userId}:${Date.now()}`,
+    title: "Rol de una cuenta modificado",
+    message: `${name}: ${data.action}.`,
+    type: data.type ?? "info",
+    category: "system",
+    priority: data.priority ?? "medium",
+    actionUrl: "/settings?tab=users",
+    actionText: "Ver usuarios",
+  });
 };
 
 // Delivers a notification to the user linked to an employee (by employeeId),
@@ -94,6 +145,16 @@ export const getNotificationsByUser = async (userId: number) => {
 // also Gerencia). A duplicate insert is a no-op instead of an error, and
 // re-running an idempotent job never spawns a second notification.
 export const createNotification = async (userId: number, data: CreateNotificationData) => {
+  // Whoever performed the action already knows about it: don't notify them.
+  if (getCurrentActorId() === userId) return null;
+
+  // Respect the recipient's preferences: a kind they switched off is not delivered.
+  const settingKey = settingKeyForSource(data.source);
+  if (settingKey) {
+    const recipient = await User.findByPk(userId, { attributes: ["id", "settings"] });
+    const prefs = (recipient?.settings as Record<string, any> | undefined)?.notifications;
+    if (prefs?.[settingKey] === false) return null;
+  }
   try {
     const notification = await Notification.create({ ...data, userId });
     await notification.reload();
@@ -137,7 +198,15 @@ export const generatePaymentReminders = async (userId: number, today?: string) =
   const monthName = MONTH_NAMES[month];
 
   // Respect the user's notification settings (default: enabled)
-  const user = await User.findByPk(userId);
+  const user = await User.findByPk(userId, { include: [{ model: Role, as: "roles" }] });
+
+  // Only Gerencia / Administrativo pay the quincena: drivers and other roles
+  // must not receive the reminder (the client asks for it on every login).
+  const roleNames = ((user as unknown as { roles?: Array<{ name: string }> })?.roles ?? []).map(
+    (role) => role.name,
+  );
+  if (!roleNames.some((name) => NOTIFIED_ROLE_NAMES.includes(name))) return [];
+
   const notifSettings =
     ((user?.settings as Record<string, unknown> | undefined)?.notifications as
       Record<string, unknown> | undefined) ?? {};
