@@ -204,6 +204,8 @@ export const createEmployee = async (data: Record<string, unknown>) => {
     type: "info",
     category: "employee",
     priority: "medium",
+    actionUrl: "/employees",
+    actionText: "Ver empleados",
   });
   return newEmployee;
 };
@@ -282,8 +284,8 @@ export const updateEmployee = async (
       type: "warning",
       category: "employee",
       priority: "high",
-      actionUrl: "/dashboard",
-      actionText: "Ver detalle",
+      actionUrl: "/mi-panel",
+      actionText: "Ver mi panel",
     });
     await notifyManagementRoles({
       source: `employee-terminated:${id}`,
@@ -292,6 +294,8 @@ export const updateEmployee = async (
       type: "warning",
       category: "employee",
       priority: "high",
+      actionUrl: "/employees",
+      actionText: "Ver empleados",
     });
   }
   if (clean.scheduledTerminationDate) {
@@ -302,8 +306,8 @@ export const updateEmployee = async (
       type: "info",
       category: "employee",
       priority: "medium",
-      actionUrl: "/dashboard",
-      actionText: "Ver detalle",
+      actionUrl: "/mi-panel",
+      actionText: "Ver mi panel",
     });
   }
 
@@ -326,6 +330,8 @@ export const deleteEmployee = async (id: number) => {
     type: "error",
     category: "employee",
     priority: "high",
+    actionUrl: "/employees",
+    actionText: "Ver empleados",
   });
   return result;
 };
@@ -466,8 +472,8 @@ export const linkEmployeeToUser = async (employeeId: number, actor?: Authenticat
     type: "success",
     category: "system",
     priority: "high",
-    actionUrl: "/dashboard",
-    actionText: "Ir al panel",
+    actionUrl: "/mi-panel",
+    actionText: "Ir a mi panel",
   });
 
   return { user, created: true, tempPassword };
@@ -537,8 +543,8 @@ export const assignDefaultRoleToEmployeeUser = async (
     type: "info",
     category: "system",
     priority: "medium",
-    actionUrl: "/dashboard",
-    actionText: "Ir al panel",
+    actionUrl: "/mi-panel",
+    actionText: "Ir a mi panel",
   });
   return getEmployeeAccess(employeeId);
 };
@@ -600,8 +606,8 @@ export const processScheduledTerminations = async (): Promise<number> => {
         type: "warning",
         category: "employee",
         priority: "high",
-        actionUrl: "/dashboard",
-        actionText: "Ver detalle",
+        actionUrl: "/mi-panel",
+        actionText: "Ver mi panel",
       }),
     ),
   );
@@ -612,6 +618,8 @@ export const processScheduledTerminations = async (): Promise<number> => {
     type: "warning",
     category: "employee",
     priority: "high",
+    actionUrl: "/employees",
+    actionText: "Ver empleados",
   });
   return due.length;
 };

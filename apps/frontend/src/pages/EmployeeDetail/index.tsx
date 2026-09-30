@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useState } from "react";
-import { useNavigate, useParams } from "react-router-dom";
+import { useNavigate, useParams, useSearchParams } from "react-router-dom";
 import { useDispatch } from "react-redux";
 import {
   Box,
@@ -58,11 +58,24 @@ type TabDescriptor = {
   visible: boolean;
 };
 
+const TAB_KEYS: readonly TabKey[] = [
+  "datos",
+  "horas",
+  "pagos",
+  "vacaciones",
+  "licencias",
+  "amonestaciones",
+];
+
+const isTabKey = (value: string | null): value is TabKey =>
+  value !== null && (TAB_KEYS as readonly string[]).includes(value);
+
 // Employee detail page: personal data, hours, biweekly payments (boletas)
 // and vacation requests for a single employee.
 const EmployeeDetailPage: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
+  const [searchParams, setSearchParams] = useSearchParams();
   const theme = useTheme();
   const isSmallScreen = useMediaQuery(theme.breakpoints.down("sm"));
   const { userPermissions } = useAuthContext();
@@ -72,7 +85,10 @@ const EmployeeDetailPage: React.FC = () => {
   const [employee, setEmployee] = useState<Employee | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [loadError, setLoadError] = useState<string | null>(null);
-  const [tab, setTab] = useState<TabKey>("datos");
+  const [tab, setTab] = useState<TabKey>(() => {
+    const requested = searchParams.get("tab");
+    return isTabKey(requested) ? requested : "datos";
+  });
   const [openDeleteDialog, setOpenDeleteDialog] = useState(false);
   const [openTerminationDialog, setOpenTerminationDialog] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
@@ -301,7 +317,10 @@ const EmployeeDetailPage: React.FC = () => {
           <Box sx={tabsBoxStyles(theme)}>
             <Tabs
               value={activeTab}
-              onChange={(_event, value: TabKey) => setTab(value)}
+              onChange={(_event, value: TabKey) => {
+                setTab(value);
+                setSearchParams(value === "datos" ? {} : { tab: value }, { replace: true });
+              }}
               variant={isSmallScreen ? "scrollable" : "standard"}
               // Swipe to scroll on phones; arrow buttons only ate horizontal room.
               scrollButtons={false}
