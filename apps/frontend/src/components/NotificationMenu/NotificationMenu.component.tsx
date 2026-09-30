@@ -15,24 +15,24 @@ import {
   IconAlarm,
   IconAlertCircle,
   IconAlertTriangle,
+  IconBeach,
   IconBell,
   IconCalendarTime,
   IconCar,
   IconChecks,
   IconCircleCheck,
   IconFilter,
-  IconGavel,
   IconId,
   IconInfoCircle,
   IconKey,
-  IconPlane,
+  IconReceipt,
   IconReport,
   IconShieldCheck,
+  IconShieldExclamation,
   IconTrash,
   IconUserCog,
   IconUserPlus,
   IconUsers,
-  IconWallet,
   IconX,
 } from "@tabler/icons-react";
 import { useNotificationMenu } from '../../context/NotificationContext';
@@ -51,13 +51,14 @@ interface NotificationMenuProps {
 
 // Icon per notification domain. When a source (backend-generated) is recognized
 // it wins; otherwise fall back to category and finally to the status type.
+// Icons mirror the EmployeeDetail tabs so both surfaces read consistently.
 const getSourceIcon = (source?: string) => {
   if (!source) return null;
-  if (source.startsWith('vacation-')) return IconPlane;
-  if (source.startsWith('boleta-') || source.startsWith('boletas-') || source.startsWith('payment-')) return IconWallet;
+  if (source.startsWith('vacation-')) return IconBeach;
+  if (source.startsWith('boleta-') || source.startsWith('boletas-') || source.startsWith('payment-')) return IconReceipt;
   if (source.startsWith('schedule-')) return IconCalendarTime;
   if (source.startsWith('license-')) return IconId;
-  if (source.startsWith('disciplinary-')) return IconGavel;
+  if (source.startsWith('disciplinary-')) return IconShieldExclamation;
   if (source.startsWith('account-')) return IconUserPlus;
   if (source.startsWith('user-')) return IconUserCog;
   if (source.startsWith('password-') || source.startsWith('temp-password')) return IconKey;
@@ -350,9 +351,6 @@ const NotificationMenu: React.FC<NotificationMenuProps> = ({
                   sx={{
                     py: 1.25,
                     px: 1.25,
-                    borderLeft: notification.read
-                      ? '3px solid transparent'
-                      : `3px solid ${theme.palette.primary.main}`,
                     backgroundColor: notification.read
                       ? 'transparent'
                       : theme.tokens.colors.hoverSoft,
@@ -374,6 +372,17 @@ const NotificationMenu: React.FC<NotificationMenuProps> = ({
                     sx={{ m: 0 }}
                     primary={
                       <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                        {!notification.read && (
+                          <Box
+                            sx={{
+                              width: 7,
+                              height: 7,
+                              borderRadius: '50%',
+                              backgroundColor: theme.palette.primary.main,
+                              flexShrink: 0,
+                            }}
+                          />
+                        )}
                         <Typography
                           variant="body2"
                           sx={{
