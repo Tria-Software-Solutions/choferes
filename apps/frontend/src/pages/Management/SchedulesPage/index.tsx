@@ -21,7 +21,6 @@ import { dayHoursInputSx } from "../../Forms/AddScheduleForm/styles";
 import { useAppNotifications } from "../../../components/Snackbar/Snackbar.component";
 import DialogComponent from "../../../components/Dialog/Dialog.component";
 import ReorderDialog from "../../../components/ReorderDialog/ReorderDialog.component";
-import { createScheduleNotification } from "../../../services/notificationService";
 import { buildScheduleDays, sortSchedulesByType } from "../../../utils/schedule";
 import * as UserService from "../../../services/userService";
 import {
@@ -201,8 +200,6 @@ const SchedulesPage: React.FC = () => {
         duration: 3000,
       });
 
-      // Add notification to menu
-      createScheduleNotification('created', newSchedule.label);
     } catch (error) {
       showNotification(NOTIFICATIONS.SCHEDULE_CREATE_ERROR, {
         severity: "error",
@@ -270,8 +267,6 @@ const SchedulesPage: React.FC = () => {
         duration: 3000,
       });
 
-      // Add notification to menu
-      createScheduleNotification('updated', editFields.label);
     } catch (error) {
       handleCancel();
       showNotification(NOTIFICATIONS.SCHEDULE_UPDATE_ERROR, {
@@ -347,12 +342,6 @@ const SchedulesPage: React.FC = () => {
         severity: "success",
         duration: 3000,
       });
-
-      // Add notification to menu
-      const schedule = schedules.find(sch => sch.id === scheduleToDelete);
-      if (schedule) {
-        createScheduleNotification('deleted', schedule.label);
-      }
     } catch (error) {
       showNotification(NOTIFICATIONS.SCHEDULE_DELETE_ERROR, {
         severity: "error",
