@@ -99,7 +99,7 @@ const EmployeeDetailPage: React.FC = () => {
   const [openTerminationDialog, setOpenTerminationDialog] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
 
-  const canDelete = userPermissions.includes(PERMISSION_CODES.DELETE_EMPLOYEES);
+  const canDelete = userPermissions.includes(PERMISSION_CODES.EDIT_EMPLOYEES);
   const canViewPayments = userPermissions.includes(PERMISSION_CODES.VIEW_PAYMENTS);
   const canViewVacations = userPermissions.includes(PERMISSION_CODES.VIEW_VACATIONS);
   const canViewLicenses = userPermissions.includes(PERMISSION_CODES.VIEW_LICENSES);
