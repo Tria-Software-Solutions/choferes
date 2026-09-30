@@ -43,8 +43,8 @@ export const createUserRole = async (data: Omit<UserRole, "id">) => {
     type: "success",
     category: "system",
     priority: "high",
-    actionUrl: "/dashboard",
-    actionText: "Ir al panel",
+    actionUrl: "/mi-panel",
+    actionText: "Ir a mi panel",
   });
 
   return newUserRole;
@@ -65,8 +65,8 @@ export const updateUserRole = async (userId: number, roleId: number) => {
       type: "warning",
       category: "system",
       priority: "high",
-      actionUrl: "/dashboard",
-      actionText: "Ir al panel",
+      actionUrl: "/mi-panel",
+      actionText: "Ir a mi panel",
     });
   }
 
@@ -87,8 +87,8 @@ export const deleteUserRole = async (id: number) => {
     type: "warning",
     category: "system",
     priority: "high",
-    actionUrl: "/dashboard",
-    actionText: "Ir al panel",
+    actionUrl: "/mi-panel",
+    actionText: "Ir a mi panel",
   });
   return deleted;
 };

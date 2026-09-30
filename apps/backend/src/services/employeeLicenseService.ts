@@ -123,8 +123,8 @@ export const createLicense = async (input: CreateLicenseInput) => {
     type: "success",
     category: "employee",
     priority: "low",
-    actionUrl: "/dashboard",
-    actionText: "Ver licencias",
+    actionUrl: "/mi-panel?tab=expediente",
+    actionText: "Ver mi expediente",
   });
 
   return normalize(created.get({ plain: true }));
@@ -164,8 +164,8 @@ export const updateLicense = async (id: number, input: UpdateLicenseInput) => {
       type: "info",
       category: "employee",
       priority: "medium",
-      actionUrl: "/dashboard",
-      actionText: "Ver licencias",
+      actionUrl: "/mi-panel?tab=expediente",
+      actionText: "Ver mi expediente",
     });
   }
 
@@ -183,8 +183,8 @@ export const deleteLicense = async (id: number) => {
     type: "info",
     category: "employee",
     priority: "low",
-    actionUrl: "/dashboard",
-    actionText: "Ver licencias",
+    actionUrl: "/mi-panel?tab=expediente",
+    actionText: "Ver mi expediente",
   });
   return true;
 };
@@ -233,8 +233,8 @@ export const dispatchLicenseReminders = async () => {
         type,
         category: "employee",
         priority,
-        actionUrl: "/dashboard",
-        actionText: "Ver licencias",
+        actionUrl: "/mi-panel?tab=expediente",
+        actionText: "Ver mi expediente",
       });
       await notifyManagementRoles({
         source,
@@ -243,8 +243,8 @@ export const dispatchLicenseReminders = async () => {
         type,
         category: "employee",
         priority,
-        actionUrl: "/dashboard",
-        actionText: "Ver licencias",
+        actionUrl: `/employees/${license.employeeId}?tab=licencias`,
+        actionText: "Ver licencia",
       });
       return 1;
     }),
