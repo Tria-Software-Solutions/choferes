@@ -5,6 +5,7 @@ import cron, { ScheduledTask } from "node-cron";
 import { generateBiweeklyPayments } from "./paymentService";
 import { dispatchDueReminders } from "./taskService";
 import { processScheduledTerminations } from "./employeeService";
+import { dispatchLicenseReminders } from "./employeeLicenseService";
 import { getBiweekNumber } from "./summaryRecalculationService";
 import { localDateString, parseISODate } from "../utils/timezone";
 
@@ -66,6 +67,11 @@ export const runScheduledTerminationsJob = guarded("terminations", async () => {
   if (count > 0) log(`${count} empleado(s) procesados por finalización programada`);
 });
 
+export const runLicenseReminderJob = guarded("licenses", async () => {
+  const sent = await dispatchLicenseReminders();
+  if (sent > 0) log(`${sent} recordatorio(s) de licencias enviados`);
+});
+
 let scheduledJobs: ScheduledTask[] = [];
 
 // Read cron expressions and timezone from env with sensible defaults for Costa Rica
@@ -73,6 +79,7 @@ const TZ = process.env.SCHEDULER_TZ || "America/Costa_Rica";
 const PAYROLL_CRON = process.env.PAYROLL_SCHEDULE || "0 2 * * *"; // daily 02:00 CR
 const REMINDER_CRON = process.env.REMINDER_SCHEDULE || "*/5 * * * *"; // every 5 min
 const TERMINATION_CRON = process.env.TERMINATION_SCHEDULE || "0 3 * * *"; // daily 03:00 CR
+const LICENSE_CRON = process.env.LICENSE_SCHEDULE || "0 4 * * *"; // daily 04:00 CR
 
 export const startSchedulers = (): void => {
   if (process.env.NODE_ENV === "test" || process.env.DISABLE_SCHEDULERS === "true") return;
@@ -90,12 +97,14 @@ export const startSchedulers = (): void => {
   runReminderJob();
   runPayrollJob();
   runScheduledTerminationsJob();
+  runLicenseReminderJob();
 
   // Schedule with Costa Rica timezone
   scheduledJobs = [
     cron.schedule(REMINDER_CRON, runReminderJob, { timezone: TZ }),
     cron.schedule(PAYROLL_CRON, runPayrollJob, { timezone: TZ }),
     cron.schedule(TERMINATION_CRON, runScheduledTerminationsJob, { timezone: TZ }),
+    cron.schedule(LICENSE_CRON, runLicenseReminderJob, { timezone: TZ }),
   ];
 };
 

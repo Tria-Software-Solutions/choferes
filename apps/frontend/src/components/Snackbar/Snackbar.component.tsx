@@ -1,4 +1,10 @@
-import React, { createContext, useContext, useState } from "react";
+import React, {
+  createContext,
+  useContext,
+  useMemo,
+  useState,
+  useCallback,
+} from "react";
 import { Snackbar, Alert, Slide, SlideProps, useTheme } from "@mui/material";
 import { IconAlertTriangle, IconCircleCheck, IconCircleX, IconInfoCircle } from "@tabler/icons-react";
 
@@ -49,22 +55,25 @@ export const AppNotificationProvider: React.FC<{
   const theme = useTheme();
 
   // Function to show a notification with custom options
-  const showNotification = (
-    message: string,
-    options: {
-      severity?: Severity;
-      duration?: number;
-      closeable?: boolean;
-      buttonText?: string;
-      onButtonClick?: () => void;
-    } = {}
-  ) => {
-    setMessage(message);
-    setSeverity(options.severity || "info");
-    setDuration(options.duration || 3000);
-    setCloseable(options.closeable !== undefined ? options.closeable : true);
-    setOpen(true);
-  };
+  const showNotification = useCallback(
+    (
+      message: string,
+      options: {
+        severity?: Severity;
+        duration?: number;
+        closeable?: boolean;
+        buttonText?: string;
+        onButtonClick?: () => void;
+      } = {},
+    ) => {
+      setMessage(message);
+      setSeverity(options.severity || "info");
+      setDuration(options.duration || 3000);
+      setCloseable(options.closeable !== undefined ? options.closeable : true);
+      setOpen(true);
+    },
+    [],
+  );
 
   const handleClose = (_event?: React.SyntheticEvent | Event, reason?: string) => {
     if (reason === 'clickaway') return;
@@ -89,8 +98,10 @@ export const AppNotificationProvider: React.FC<{
     }
   };
 
+  const contextValue = useMemo(() => ({ showNotification }), [showNotification]);
+
   return (
-    <NotificationContext.Provider value={{ showNotification }}>
+    <NotificationContext.Provider value={contextValue}>
       {children}
       <Snackbar
         open={open}

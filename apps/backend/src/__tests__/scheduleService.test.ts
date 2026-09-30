@@ -1,4 +1,9 @@
 // Mock Schedule model - service uses named import: import { Schedule } from "../models/Schedule"
+jest.mock("../services/notificationService", () => ({
+  notifyManagementRoles: jest.fn(),
+  notifyEmployeeUser: jest.fn(),
+  createNotification: jest.fn(),
+}));
 jest.mock("../models/Schedule", () => {
   const mockFunctions = {
     findAndCountAll: jest.fn(),
