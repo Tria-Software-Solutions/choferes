@@ -132,6 +132,11 @@ export const loginTextFieldStyles: SxProps<Theme> = {
       marginLeft: 0,
       zIndex: 2,
     },
+    // Evitar que los adornos (iconos inicio/fin) creen una franja visual más oscura
+    // al tener fondo propio: forzamos fondo transparente en los contenedores de adorno.
+    "& .MuiInputAdornment-root": {
+      backgroundColor: "transparent",
+    },
     "& input:-webkit-autofill": {
       WebkitBoxShadow: "0 0 0 100px rgba(28,28,40,0.9) inset",
       WebkitTextFillColor: "#ffffff",
