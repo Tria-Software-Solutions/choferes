@@ -273,7 +273,7 @@ export const createUser = async (data: Record<string, any>) => {
     type: "info",
     category: "system",
     priority: "medium",
-    actionUrl: "/settings",
+    actionUrl: "/settings?tab=usuarios",
     actionText: "Ver usuarios",
   });
 
@@ -320,7 +320,7 @@ export const updateUserStatus = async (id: number, status: boolean) => {
       type: status ? "info" : "warning",
       category: "system",
       priority: status ? "low" : "high",
-      actionUrl: "/settings",
+      actionUrl: "/settings?tab=usuarios",
       actionText: "Ver usuarios",
     });
   }
@@ -341,8 +341,8 @@ export const updateUserPassword = async (id: number, password: string) => {
     type: "warning",
     category: "system",
     priority: "high",
-    actionUrl: "/settings",
-    actionText: "Ir a configuración",
+    actionUrl: "/settings?tab=password",
+    actionText: "Ir a contraseña",
   });
   return User.findByPk(id, {
     attributes: SAFE_ATTRS,
@@ -362,8 +362,8 @@ export const updateUserTemporalPassword = async (id: number, temporalPassword: s
     type: "info",
     category: "system",
     priority: "medium",
-    actionUrl: "/settings",
-    actionText: "Ir a configuración",
+    actionUrl: "/settings?tab=password",
+    actionText: "Ir a contraseña",
   });
   return User.findByPk(id, {
     attributes: SAFE_ATTRS,
@@ -398,7 +398,7 @@ export const deleteUser = async (id: number) => {
     type: "error",
     category: "system",
     priority: "high",
-    actionUrl: "/settings",
+    actionUrl: "/settings?tab=usuarios",
     actionText: "Ver usuarios",
   });
   return result;
