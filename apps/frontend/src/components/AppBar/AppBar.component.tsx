@@ -19,6 +19,7 @@ import { IconBell, IconChevronDown, IconMenu2 } from "@tabler/icons-react";
 import MobileMenuDrawer from "../MobileMenu/MobileMenu.component";
 import NotificationMenu from "../NotificationMenu/NotificationMenu.component";
 import TopNav from "./TopNav.component";
+import { useNotificationNavigation } from "../../hooks/useNotificationNavigation";
 import { useMenuPreferences } from "../../hooks/useMenuPreferences";
 import { useAuthContext } from "../../context/AuthContext";
 import * as UserService from "../../services/userService";
@@ -80,6 +81,7 @@ const Brand: React.FC<{ onClick: () => void }> = ({ onClick }) => {
 const AppBarComponent: React.FC<AppBarComponentProps> = ({ title, userLinks = [], links }) => {
   const { currentUser } = useAuthContext();
   const navigate = useNavigate();
+  const openNotificationTarget = useNotificationNavigation();
   const location = useLocation();
   const theme = useTheme();
   const { colors, borders } = theme.tokens;
@@ -292,9 +294,7 @@ const AppBarComponent: React.FC<AppBarComponentProps> = ({ title, userLinks = []
           anchorEl={notificationsAnchor}
           onClose={() => setNotificationsAnchor(null)}
           onNotificationClick={(notification) => {
-            if (notification.actionUrl) {
-              navigate(notification.actionUrl);
-            }
+            openNotificationTarget(notification.actionUrl);
           }}
         />
       </Toolbar>
