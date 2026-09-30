@@ -1,4 +1,9 @@
 // Mocks for the payment service layer.
+jest.mock("../services/notificationService", () => ({
+  notifyManagementRoles: jest.fn(),
+  notifyEmployeeUser: jest.fn(),
+  createNotification: jest.fn(),
+}));
 jest.mock("../models/Payment", () => ({
   __esModule: true,
   default: {
@@ -13,6 +18,16 @@ jest.mock("../models/Payment", () => ({
 
 // Employee stays REAL (model associations depend on it); findByPk is not
 // exercised here — paymentCalculationService is mocked below.
+
+// User is mocked so notifyEmployeeUser (boleta-sent) short-circuits without
+// touching the database.
+jest.mock("../models/User", () => ({
+  __esModule: true,
+  default: {},
+  User: {
+    findOne: jest.fn().mockResolvedValue(null),
+  },
+}));
 
 // Breakdown is mocked; the pure helpers (round2, computeTotalPayable) stay real.
 jest.mock("../services/paymentCalculationService", () => {

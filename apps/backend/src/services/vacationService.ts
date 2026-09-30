@@ -4,6 +4,7 @@ import Employee from "../models/Employee";
 import User from "../models/User";
 import { ServiceError } from "../utils/errors";
 import { paginate, getPaginationParams, QueryParams } from "../utils/pagination";
+import { notifyEmployeeUser, notifyManagementRoles } from "./notificationService";
 
 const employeeInclude = {
   model: Employee,
@@ -53,6 +54,11 @@ export const countBusinessDays = (startDate: string, endDate: string): number =>
     throw new ServiceError(400, "El rango no incluye ningún día hábil");
   }
   return days;
+};
+
+const formatDate = (value: string) => {
+  const [year, month, day] = String(value).split("-");
+  return `${day}/${month}/${year}`;
 };
 
 const normalize = <T extends Record<string, any>>(vacation: T) => {
@@ -121,6 +127,18 @@ export const createVacation = async (input: CreateVacationInput) => {
     daysRequested,
     status: "pending",
     reason: input.reason || null,
+  });
+
+  const employeeName = `${employee.firstName ?? ""} ${employee.lastName ?? ""}`.trim();
+  await notifyManagementRoles({
+    source: `vacation-request:${created.id}`,
+    title: "Solicitud de vacaciones",
+    message: `${employeeName} solicitó ${daysRequested} día(s) de vacaciones (del ${formatDate(input.startDate)} al ${formatDate(input.endDate)}).`,
+    type: "info",
+    category: "employee",
+    priority: "medium",
+    actionUrl: "/dashboard",
+    actionText: "Ver solicitudes",
   });
 
   return normalize(created.get({ plain: true }));
@@ -212,6 +230,53 @@ export const updateVacation = async (id: number, input: UpdateVacationInput) => 
   if (Object.keys(updates).length > 0) {
     await vacation.update(updates);
   }
+
+  // Notify the employee once a request is approved or rejected so the flow is
+  // bidirectional: they asked, management decided, they get the answer.
+  const statusChanged =
+    input.status !== undefined &&
+    input.status !== previousStatus &&
+    (input.status === "approved" || input.status === "rejected");
+  if (statusChanged) {
+    const decidedStatus = input.status === "approved" ? "aprobadas" : "rechazadas";
+    await notifyEmployeeUser(vacation.employeeId, {
+      source: `vacation-decision:${vacation.id}`,
+      title: `Vacaciones ${decidedStatus}`,
+      message: `Tu solicitud de vacaciones (del ${vacation.startDate} al ${vacation.endDate}) fue ${input.status === "approved" ? "aprobada" : "rechazada"}.`,
+      type: input.status === "approved" ? "success" : "error",
+      category: "employee",
+      priority: input.status === "approved" ? "low" : "high",
+      actionUrl: "/dashboard",
+      actionText: "Ver estado",
+    });
+  }
+
+  if (input.status === "pending" && previousStatus === "approved") {
+    await notifyEmployeeUser(vacation.employeeId, {
+      source: `vacation-unapproved:${vacation.id}:${Date.now()}`,
+      title: "Solicitud devuelta a pendiente",
+      message: `Tu solicitud de vacaciones (del ${vacation.startDate} al ${vacation.endDate}) volvió a estado pendiente.`,
+      type: "warning",
+      category: "employee",
+      priority: "medium",
+      actionUrl: "/dashboard",
+      actionText: "Ver estado",
+    });
+  }
+
+  if (input.startDate !== undefined || input.endDate !== undefined) {
+    await notifyEmployeeUser(vacation.employeeId, {
+      source: `vacation-updated:${vacation.id}:${Date.now()}`,
+      title: "Solicitud de vacaciones actualizada",
+      message: `Se ajustaron las fechas de tu solicitud de vacaciones (del ${updates.startDate ?? vacation.startDate} al ${updates.endDate ?? vacation.endDate}).`,
+      type: "info",
+      category: "employee",
+      priority: "medium",
+      actionUrl: "/dashboard",
+      actionText: "Ver estado",
+    });
+  }
+
   return getVacationById(id);
 };
 
@@ -228,6 +293,17 @@ export const deleteVacation = async (id: number) => {
       });
     }
   }
+
+  await notifyEmployeeUser(vacation.employeeId, {
+    source: `vacation-cancelled:${vacation.id}`,
+    title: "Solicitud de vacaciones cancelada",
+    message: `Tu solicitud de vacaciones (del ${vacation.startDate} al ${vacation.endDate}) fue eliminada.`,
+    type: "info",
+    category: "employee",
+    priority: "medium",
+    actionUrl: "/dashboard",
+    actionText: "Ver estado",
+  });
 
   await vacation.destroy();
   return true;

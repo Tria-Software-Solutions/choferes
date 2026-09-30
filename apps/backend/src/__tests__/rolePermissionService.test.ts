@@ -1,7 +1,13 @@
 // Mock RolePermission model — service uses: import { RolePermission } from "../models/RolePermission" (named import)
+jest.mock("../services/notificationService", () => ({
+  notifyManagementRoles: jest.fn(),
+  notifyEmployeeUser: jest.fn(),
+  createNotification: jest.fn(),
+}));
 jest.mock("../models/RolePermission", () => {
   const mockFunctions = {
     findAll: jest.fn(),
+    findByPk: jest.fn(),
     create: jest.fn(),
     destroy: jest.fn(),
     bulkCreate: jest.fn(),
@@ -107,6 +113,7 @@ describe("updateRolePermission", () => {
 
 describe("deleteRolePermission", () => {
   it("debería eliminar por id", async () => {
+    RolePermission.findByPk.mockResolvedValue(mockRolePermission);
     RolePermission.destroy.mockResolvedValue(1);
 
     const result = await rolePermissionService.deleteRolePermission(1);

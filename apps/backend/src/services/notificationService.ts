@@ -1,6 +1,9 @@
 // Service for business logic and database operations related to notifications
+import { MANAGEMENT_ROLE_NAMES } from "@choferes/shared";
 import { Notification } from "../models/Notification";
 import { User } from "../models/User";
+import { UserRole } from "../models/UserRole";
+import { Role } from "../models/Role";
 
 export type NotificationType = "info" | "success" | "warning" | "error";
 export type NotificationCategory =
@@ -17,6 +20,38 @@ interface CreateNotificationData {
   actionText?: string;
   source?: string;
 }
+
+// Delivers a notification to every user whose role is a management role
+// (Gerencia / Administrativo / SysAdmin). Used by the business flows so a
+// request raised by an employee reaches the people who approve it.
+export const notifyManagementRoles = async (data: CreateNotificationData) => {
+  const managementRoles = await Role.findAll({
+    where: { name: [...MANAGEMENT_ROLE_NAMES] },
+    attributes: ["id"],
+  });
+  const managementRoleIds = managementRoles.map((role) => role.id);
+  if (managementRoleIds.length === 0) return;
+
+  const assignments = await UserRole.findAll({
+    where: { roleId: managementRoleIds },
+    attributes: ["userId"],
+  });
+
+  const targetIds = [...new Set(assignments.map((assignment) => assignment.userId))];
+  await Promise.all(targetIds.map((userId) => createNotification(userId, data)));
+};
+
+// Delivers a notification to the user linked to an employee (by employeeId),
+// returning true when such an account exists.
+export const notifyEmployeeUser = async (
+  employeeId: number,
+  data: CreateNotificationData,
+): Promise<boolean> => {
+  const user = await User.findOne({ where: { employeeId } });
+  if (!user) return false;
+  await createNotification(user.id, data);
+  return true;
+};
 
 const ATTRIBUTES = [
   "id",
@@ -53,11 +88,22 @@ export const getNotificationsByUser = async (userId: number) => {
   });
 };
 
-// Create a new notification for a user
+// Create a new notification for a user. Idempotent by design: the (userId,
+// source) pair is unique, and some flows notify both the employee and the
+// management roles using the same source (e.g. a user who is an employee and
+// also Gerencia). A duplicate insert is a no-op instead of an error, and
+// re-running an idempotent job never spawns a second notification.
 export const createNotification = async (userId: number, data: CreateNotificationData) => {
-  const notification = await Notification.create({ ...data, userId });
-  await notification.reload();
-  return notification;
+  try {
+    const notification = await Notification.create({ ...data, userId });
+    await notification.reload();
+    return notification;
+  } catch (error) {
+    if ((error as { name?: string }).name === "SequelizeUniqueConstraintError") {
+      return null;
+    }
+    throw error;
+  }
 };
 
 // Mark a single notification as read. Scoped by owner on both the update and

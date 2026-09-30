@@ -7,12 +7,34 @@ import {
   Typography,
   Box,
   Divider,
-  Chip,
   Button,
   useTheme,
   ListItemButton,
 } from '@mui/material';
-import { IconAlarm, IconAlertCircle, IconAlertTriangle, IconBell, IconChecks, IconCircleCheck, IconFilter, IconInfoCircle, IconTrash, IconX } from "@tabler/icons-react";
+import {
+  IconAlarm,
+  IconAlertCircle,
+  IconAlertTriangle,
+  IconBell,
+  IconCalendarTime,
+  IconCar,
+  IconChecks,
+  IconCircleCheck,
+  IconFilter,
+  IconGavel,
+  IconId,
+  IconInfoCircle,
+  IconKey,
+  IconPlane,
+  IconReport,
+  IconShieldCheck,
+  IconTrash,
+  IconUserCog,
+  IconUserPlus,
+  IconUsers,
+  IconWallet,
+  IconX,
+} from "@tabler/icons-react";
 import { useNotificationMenu } from '../../context/NotificationContext';
 import { Notification } from '../../models/Notification';
 import { formatDistanceToNow } from 'date-fns';
@@ -27,44 +49,75 @@ interface NotificationMenuProps {
   onNotificationClick?: (notification: Notification) => void;
 }
 
-const NOTIFICATION_TYPE_TONES = {
+// Icon per notification domain. When a source (backend-generated) is recognized
+// it wins; otherwise fall back to category and finally to the status type.
+const getSourceIcon = (source?: string) => {
+  if (!source) return null;
+  if (source.startsWith('vacation-')) return IconPlane;
+  if (source.startsWith('boleta-') || source.startsWith('boletas-') || source.startsWith('payment-')) return IconWallet;
+  if (source.startsWith('schedule-')) return IconCalendarTime;
+  if (source.startsWith('license-')) return IconId;
+  if (source.startsWith('disciplinary-')) return IconGavel;
+  if (source.startsWith('account-')) return IconUserPlus;
+  if (source.startsWith('user-')) return IconUserCog;
+  if (source.startsWith('password-') || source.startsWith('temp-password')) return IconKey;
+  if (source.startsWith('role-')) return IconShieldCheck;
+  if (source.startsWith('employee-') || source.startsWith('terminations-')) return IconUsers;
+  if (source.startsWith('task-reminder:')) return IconAlarm;
+  if (source.startsWith('data-deletion')) return IconTrash;
+  return null;
+};
+
+const CATEGORY_ICONS: Record<Notification['category'], typeof IconInfoCircle> = {
+  task: IconAlarm,
+  schedule: IconCalendarTime,
+  vehicle: IconCar,
+  report: IconReport,
+  system: IconInfoCircle,
+  employee: IconUsers,
+};
+
+const TYPE_ICONS: Record<Notification['type'], typeof IconInfoCircle> = {
+  success: IconCircleCheck,
+  error: IconAlertCircle,
+  warning: IconAlertTriangle,
+  info: IconInfoCircle,
+};
+
+const TONE_BY_TYPE: Record<Notification['type'], { fg: string; bg: string }> = {
   success: { fg: 'success', bg: 'successSoft' },
   error: { fg: 'error', bg: 'errorSoft' },
   warning: { fg: 'warning', bg: 'warningSoft' },
   info: { fg: 'accent', bg: 'accentSoft' },
-} as const;
+};
 
-const getNotificationIcon = (type: Notification['type'], category?: Notification['category']) => {
-  const tone = NOTIFICATION_TYPE_TONES[type] ?? NOTIFICATION_TYPE_TONES.info;
-  // Task reminders always read as an alarm (tinted by urgency).
+const getNotificationVisuals = (notification: Notification) => {
   const Icon =
-    category === 'task'
-      ? IconAlarm
-      : type === 'success'
-        ? IconCircleCheck
-        : type === 'error'
-          ? IconAlertCircle
-          : type === 'warning'
-            ? IconAlertTriangle
-            : IconInfoCircle;
-  return (
+    getSourceIcon(notification.source) ??
+    CATEGORY_ICONS[notification.category] ??
+    TYPE_ICONS[notification.type];
+  const tone = TONE_BY_TYPE[notification.type] ?? TONE_BY_TYPE.info;
+  const IconTile = (
     <Box sx={(theme) => ({
-      width: 34,
-      height: 34,
-      borderRadius: '10px',
+      width: 38,
+      height: 38,
+      borderRadius: '12px',
       flexShrink: 0,
       display: 'flex',
       alignItems: 'center',
       justifyContent: 'center',
-      backgroundColor: theme.tokens.colors[tone.bg],
-      color: theme.tokens.colors[tone.fg],
+      backgroundColor: theme.tokens.colors[tone.bg as keyof typeof theme.tokens.colors],
+      color: theme.tokens.colors[tone.fg as keyof typeof theme.tokens.colors],
+      '& svg': {
+        width: 20,
+        height: 20,
+      },
     })}>
-      <Icon size={18} stroke={2} />
+      <Icon stroke={1.75} />
     </Box>
   );
+  return { IconTile };
 };
-
-
 
 const NotificationMenu: React.FC<NotificationMenuProps> = ({
   anchorEl,
@@ -166,7 +219,7 @@ const NotificationMenu: React.FC<NotificationMenuProps> = ({
       PaperProps={{
         elevation: 0,
         sx: {
-          width: 380,
+          width: 392,
           maxHeight: 580,
           mt: 0.5,
           backgroundColor: theme.tokens.colors.menuSurface,
@@ -206,8 +259,8 @@ const NotificationMenu: React.FC<NotificationMenuProps> = ({
             </PremiumTooltip>
             {unreadCount > 0 && (
               <PremiumTooltip title="Marcar todas como leídas">
-                <IconButton 
-                  size="small" 
+                <IconButton
+                  size="small"
                   onClick={handleMarkAllAsRead}
                   sx={{
                     padding: 0.4,
@@ -225,7 +278,7 @@ const NotificationMenu: React.FC<NotificationMenuProps> = ({
 
           </Box>
         </Box>
-        
+
         {unreadCount > 0 && (
           <Typography variant="body2" sx={{ fontSize: '0.75rem', color: theme.palette.text.secondary }}>
             {unreadCount} {unreadCount === 1 ? 'notificación no leída' : 'notificaciones no leídas'}
@@ -238,9 +291,9 @@ const NotificationMenu: React.FC<NotificationMenuProps> = ({
         <Box sx={{ p: 1.5, borderBottom: theme.tokens.borders.hairline }}>
           <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 0.75 }}>
             <Typography variant="subtitle2" sx={{ fontSize: '0.8rem', color: theme.palette.text.primary }}>Filtros</Typography>
-            <Button 
-              size="small" 
-              onClick={clearFilters} 
+            <Button
+              size="small"
+              onClick={clearFilters}
               startIcon={<IconX size={14} />}
               sx={{ fontSize: '0.7rem', padding: '3px 8px', color: theme.palette.text.primary }}
             >
@@ -262,21 +315,21 @@ const NotificationMenu: React.FC<NotificationMenuProps> = ({
       )}
 
       {/* Main Content Container */}
-      <Box sx={{ 
-        display: 'flex', 
-        flexDirection: 'column', 
+      <Box sx={{
+        display: 'flex',
+        flexDirection: 'column',
         height: notifications.length === 0 ? 'auto' : 380,
         minHeight: notifications.length === 0 ? 'auto' : 180,
       }}>
         {/* Scrollable Notifications List */}
-        <Box sx={{ 
-          flex: notifications.length === 0 ? 'none' : 1, 
+        <Box sx={{
+          flex: notifications.length === 0 ? 'none' : 1,
           overflow: 'auto',
           minHeight: notifications.length === 0 ? 'auto' : 0,
         }}>
           {notifications.length === 0 ? (
-            <Box sx={{ 
-              p: 2, 
+            <Box sx={{
+              p: 2,
               textAlign: 'center',
               minHeight: notifications.length === 0 ? 100 : 'auto',
               display: 'flex',
@@ -295,92 +348,101 @@ const NotificationMenu: React.FC<NotificationMenuProps> = ({
                 <ListItemButton
                   onClick={() => handleNotificationClick(notification)}
                   sx={{
-                    py: 1,
-                    px: 1.5,
-                    backgroundColor: notification.read 
-                      ? 'transparent' 
+                    py: 1.25,
+                    px: 1.25,
+                    borderLeft: notification.read
+                      ? '3px solid transparent'
+                      : `3px solid ${theme.palette.primary.main}`,
+                    backgroundColor: notification.read
+                      ? 'transparent'
                       : theme.tokens.colors.hoverSoft,
                     '&:hover': {
                       backgroundColor: theme.palette.mode === 'dark'
                         ? 'rgba(255,255,255,0.08)'
                         : theme.palette.action.hover,
                     },
+                    '&:hover .notif-delete': {
+                      opacity: 1,
+                    },
                   }}
                 >
-                  <ListItemIcon sx={{ minWidth: 42 }}>
-                    {getNotificationIcon(notification.type, notification.category)}
+                  <ListItemIcon sx={{ minWidth: 46 }}>
+                    {getNotificationVisuals(notification).IconTile}
                   </ListItemIcon>
 
                   <ListItemText
+                    sx={{ m: 0 }}
                     primary={
-                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.75, mb: 0.25 }}>
-                        {!notification.read && (
-                          <Box
-                            sx={{
-                              width: 5,
-                              height: 5,
-                              borderRadius: '50%',
-                              backgroundColor: theme.palette.primary.main,
-                              flexShrink: 0,
-                            }}
-                          />
-                        )}
-                        <Chip
-                          label={translatePriorityToSpanish(notification.priority)}
-                          size="small"
-                          variant="outlined"
-                          sx={{ 
-                            fontSize: '0.65rem', 
-                            height: 18,
-                            '& .MuiChip-label': {
-                              color: theme.palette.text.primary,
-                              fontWeight: 500,
-                            },
-                            '& .MuiChip-outlined': {
-                              borderColor: theme.tokens.colors.borderStrong,
-                            },
-                            backgroundColor: theme.tokens.colors.hover,
-                          }}
-                        />
+                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
                         <Typography
                           variant="body2"
                           sx={{
-                            fontWeight: 600,
+                            fontWeight: notification.read ? 500 : 650,
                             color: theme.palette.text.primary,
                             fontSize: '0.875rem',
+                            lineHeight: 1.3,
+                            flex: 1,
+                            minWidth: 0,
+                            whiteSpace: 'nowrap',
+                            overflow: 'hidden',
+                            textOverflow: 'ellipsis',
                           }}
                         >
                           {notification.title}
                         </Typography>
-                      </Box>
-                    }
-                    secondary={
-                      <Box>
-                        <Typography variant="body2" sx={{ mb: 0.25, fontSize: '0.8rem', color: theme.palette.text.secondary }}>
-                          {notification.message}
-                        </Typography>
-                        <Typography variant="caption" sx={{ fontSize: '0.7rem', color: theme.palette.text.secondary }}>
+                        <Typography
+                          variant="caption"
+                          sx={{
+                            fontSize: '0.7rem',
+                            color: theme.palette.text.secondary,
+                            flexShrink: 0,
+                            whiteSpace: 'nowrap',
+                          }}
+                        >
                           {formatTime(notification.timestamp)}
                         </Typography>
                       </Box>
                     }
+                    secondary={
+                      <Typography
+                        variant="body2"
+                        sx={{
+                          mt: 0.5,
+                          fontSize: '0.8rem',
+                          lineHeight: 1.45,
+                          color: theme.palette.text.secondary,
+                          display: '-webkit-box',
+                          WebkitLineClamp: 2,
+                          WebkitBoxOrient: 'vertical',
+                          overflow: 'hidden',
+                        }}
+                      >
+                        {notification.message}
+                      </Typography>
+                    }
                   />
 
-                  <Box sx={{ display: 'flex', alignItems: 'center', minWidth: 28 }}>
+                  <Box sx={{ display: 'flex', alignItems: 'center', minWidth: 26, ml: 0.5 }}>
                     <PremiumTooltip title="Eliminar">
                       <IconButton
+                        className="notif-delete"
                         size="small"
                         onClick={(e) => handleDeleteNotification(e, notification.id)}
-                        sx={{ 
-                          opacity: 0.5, 
-                          '&:hover': { opacity: 1 },
-                          padding: 0.35,
-                          minWidth: 20,
-                          minHeight: 20,
+                        sx={{
+                          opacity: 0,
+                          transition: 'opacity 0.15s ease',
+                          '&:hover': {
+                            opacity: 1,
+                            color: theme.palette.error.main,
+                            backgroundColor: theme.tokens.colors.errorSoft,
+                          },
+                          padding: 0.4,
+                          minWidth: 28,
+                          minHeight: 28,
                           color: theme.palette.text.primary,
                         }}
                       >
-                        <IconTrash size={16} />
+                        <IconTrash size={15} />
                       </IconButton>
                     </PremiumTooltip>
                   </Box>
@@ -392,7 +454,7 @@ const NotificationMenu: React.FC<NotificationMenuProps> = ({
               </React.Fragment>
             ))
           )}
-          
+
           {/* Show More/Less Button */}
           {notifications.length > 5 && (
             <Box sx={{ p: 0.75, borderTop: theme.tokens.borders.hairline }}>
@@ -401,15 +463,15 @@ const NotificationMenu: React.FC<NotificationMenuProps> = ({
                 variant="text"
                 size="small"
                 onClick={() => setShowAllNotifications(!showAllNotifications)}
-                sx={{ 
-                  fontSize: '0.75rem', 
+                sx={{
+                  fontSize: '0.75rem',
                   padding: '3px 8px',
                   textTransform: 'none',
                   color: theme.palette.primary.main,
                 }}
               >
-                {showAllNotifications 
-                  ? `Mostrar menos (${notifications.length - 5} menos)` 
+                {showAllNotifications
+                  ? `Mostrar menos (${notifications.length - 5} menos)`
                   : `Ver todas las notificaciones (${notifications.length - 5} más)`
                 }
               </Button>
@@ -419,8 +481,8 @@ const NotificationMenu: React.FC<NotificationMenuProps> = ({
 
         {/* Sticky Footer with Delete All Button */}
         {notifications.length > 0 && (
-          <Box sx={{ 
-            p: 0.75, 
+          <Box sx={{
+            p: 0.75,
             borderTop: theme.tokens.borders.hairline,
             backgroundColor: theme.tokens.colors.surfaceSunken,
             position: 'sticky',
@@ -433,8 +495,8 @@ const NotificationMenu: React.FC<NotificationMenuProps> = ({
               size="small"
               onClick={handleDeleteAllNotifications}
               startIcon={<IconTrash size={14} />}
-              sx={{ 
-                fontSize: '0.75rem', 
+              sx={{
+                fontSize: '0.75rem',
                 padding: '4px 12px',
                 textTransform: 'none',
                 color: theme.palette.error.main,
@@ -460,4 +522,4 @@ const NotificationMenu: React.FC<NotificationMenuProps> = ({
   );
 };
 
-export default NotificationMenu; 
+export default NotificationMenu;

@@ -4,6 +4,7 @@ import Employee from "../models/Employee";
 import User from "../models/User";
 import { ServiceError } from "../utils/errors";
 import { paginate, getPaginationParams, QueryParams } from "../utils/pagination";
+import { notifyEmployeeUser, NotificationType, NotificationPriority } from "./notificationService";
 
 export interface DisciplinaryAttachmentInput {
   name: string;
@@ -101,6 +102,16 @@ export const createDisciplinaryAction = async (input: CreateDisciplinaryInput) =
     createdBy: input.createdBy ?? null,
   } as any);
 
+  await notifyEmployeeUser(input.employeeId, {
+    source: `disciplinary-created:${created.id}`,
+    title: "Nueva amonestación registrada",
+    message: `Se registró una ${input.type.toLowerCase()} en tu expediente (${formatActionDate(input.actionDate)}): ${input.reason}`,
+    ...severityNotification(created.severity as string),
+    category: "employee",
+    actionUrl: "/dashboard",
+    actionText: "Ver detalle",
+  });
+
   return getDisciplinaryActionById(created.id);
 };
 
@@ -130,8 +141,63 @@ export const updateDisciplinaryAction = async (id: number, input: UpdateDiscipli
   if (Object.keys(updates).length > 0) {
     await action.update(updates);
   }
+
+  const relevantChange =
+    input.severity !== undefined ||
+    input.type !== undefined ||
+    input.reason !== undefined ||
+    input.description !== undefined;
+  if (relevantChange && action.employeeId) {
+    await notifyEmployeeUser(action.employeeId, {
+      source: `disciplinary-updated:${id}:${Date.now()}`,
+      title: "Amonestación actualizada",
+      message: `Se actualizó una ${(input.type ?? action.type).toLowerCase()} en tu expediente (${formatActionDate(String(action.actionDate))}).`,
+      type: "warning",
+      category: "employee",
+      priority: "medium",
+      actionUrl: "/dashboard",
+      actionText: "Ver detalle",
+    });
+  }
+
   return getDisciplinaryActionById(id);
 };
 
-export const deleteDisciplinaryAction = async (id: number) =>
-  DisciplinaryAction.destroy({ where: { id } });
+export const deleteDisciplinaryAction = async (id: number) => {
+  const action = await DisciplinaryAction.findByPk(id);
+  if (!action) return false;
+  await DisciplinaryAction.destroy({ where: { id } });
+  if (action.employeeId) {
+    await notifyEmployeeUser(action.employeeId, {
+      source: `disciplinary-deleted:${id}`,
+      title: "Amonestación eliminada",
+      message: "Se eliminó una amonestación de tu expediente.",
+      type: "info",
+      category: "employee",
+      priority: "low",
+      actionUrl: "/dashboard",
+      actionText: "Ver detalle",
+    });
+  }
+  return true;
+};
+
+const SEVERITY_NOTIFICATION: Record<
+  string,
+  { type: NotificationType; priority: NotificationPriority }
+> = {
+  grave: { type: "error", priority: "high" },
+  muy_grave: { type: "error", priority: "high" },
+  leve: { type: "warning", priority: "medium" },
+};
+
+const severityNotification = (severity: string) =>
+  SEVERITY_NOTIFICATION[severity] ?? {
+    type: "warning",
+    priority: "medium" as NotificationPriority,
+  };
+
+const formatActionDate = (date: string) => {
+  const [year, month, day] = String(date).split("-");
+  return `${day}/${month}/${year}`;
+};

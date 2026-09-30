@@ -1,4 +1,9 @@
 // Mocks for the vacation service layer.
+jest.mock("../services/notificationService", () => ({
+  notifyManagementRoles: jest.fn(),
+  notifyEmployeeUser: jest.fn(),
+  createNotification: jest.fn(),
+}));
 jest.mock("../models/Vacation", () => ({
   __esModule: true,
   default: {
@@ -20,7 +25,9 @@ jest.mock("../models/Employee", () => ({
 jest.mock("../models/User", () => ({
   __esModule: true,
   default: {},
-  User: {},
+  User: {
+    findOne: jest.fn().mockResolvedValue(null),
+  },
 }));
 
 import Vacation from "../models/Vacation";

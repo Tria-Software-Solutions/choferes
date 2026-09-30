@@ -1,4 +1,9 @@
 // Mock Employee model - it's imported as DEFAULT export in the service
+jest.mock("../services/notificationService", () => ({
+  notifyManagementRoles: jest.fn(),
+  notifyEmployeeUser: jest.fn(),
+  createNotification: jest.fn(),
+}));
 jest.mock("../models/Employee", () => ({
   __esModule: true,
   default: {

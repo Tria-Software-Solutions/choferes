@@ -1,4 +1,9 @@
 // Mock bcrypt
+jest.mock("../services/notificationService", () => ({
+  notifyManagementRoles: jest.fn(),
+  notifyEmployeeUser: jest.fn(),
+  createNotification: jest.fn(),
+}));
 jest.mock("bcrypt", () => ({
   hash: jest.fn(),
   compare: jest.fn(),
