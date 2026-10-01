@@ -3,11 +3,19 @@ import { Box, Button, IconButton, Paper, Tooltip, Typography, useTheme } from "@
 import {
   IconChevronRight,
   IconDownload,
+  IconEye,
   IconFile,
   IconFolder,
   IconFolderOff,
   IconInbox,
 } from "@tabler/icons-react";
+import { hasManagementRole } from "@choferes/shared";
+import { useAuthContext } from "../../../context/AuthContext";
+import SegmentedToggle from "../../../components/SegmentedToggle/SegmentedToggle.component";
+import DocumentPreview, {
+  formatBytes,
+  triggerDownload,
+} from "../../../components/DocumentPreview/DocumentPreview.component";
 import type { DocumentDTO, DocumentFolderDTO, DocumentScope } from "../../../services/documentService";
 import { downloadDocument, getMyDocuments } from "../../../services/documentService";
 import { useAppNotifications } from "../../../components/Snackbar/Snackbar.component";
@@ -17,24 +25,6 @@ import {
   emptyStateBoxStyles,
   fillSectionPaperStyles,
 } from "../../EmployeeDetail/styles";
-
-const formatBytes = (bytes: number): string => {
-  if (!bytes) return "—";
-  if (bytes < 1024) return `${bytes} B`;
-  if (bytes < 1024 * 1024) return `${Math.round(bytes / 1024)} KB`;
-  return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
-};
-
-// Descarga una data URL base64 validando el esquema (evita `javascript:`).
-const triggerDownload = (url: string | undefined, name: string) => {
-  if (!url || !/^data:[\w.+-]+\/[\w.+-]+;base64,/.test(url)) return;
-  const link = document.createElement("a");
-  link.href = url;
-  link.download = name;
-  document.body.appendChild(link);
-  link.click();
-  document.body.removeChild(link);
-};
 
 const rowSx = (borders: { hairline: string }) => ({
   display: "flex",
@@ -50,10 +40,11 @@ const rowSx = (borders: { hairline: string }) => ({
 interface ScopeSectionProps {
   scope: DocumentScope;
   onDownload: (doc: DocumentDTO) => void;
+  onPreview: (doc: DocumentDTO) => void;
 }
 
 // Un ámbito (compartido o propio) con navegación por carpetas y descarga.
-const ScopeSection: React.FC<ScopeSectionProps> = ({ scope, onDownload }) => {
+const ScopeSection: React.FC<ScopeSectionProps> = ({ scope, onDownload, onPreview }) => {
   const theme = useTheme();
   const { colors, borders } = theme.tokens;
   const [currentFolderId, setCurrentFolderId] = useState<number | null>(null);
@@ -127,6 +118,11 @@ const ScopeSection: React.FC<ScopeSectionProps> = ({ scope, onDownload }) => {
               {formatBytes(doc.size)}
             </Typography>
           </Box>
+          <Tooltip title="Vista previa">
+            <IconButton size="small" aria-label={`Vista previa de ${doc.name}`} onClick={() => onPreview(doc)}>
+              <IconEye size={16} />
+            </IconButton>
+          </Tooltip>
           <Tooltip title="Descargar">
             <IconButton size="small" aria-label={`Descargar ${doc.name}`} onClick={() => onDownload(doc)}>
               <IconDownload size={16} />
@@ -147,11 +143,22 @@ const ScopeSection: React.FC<ScopeSectionProps> = ({ scope, onDownload }) => {
   );
 };
 
+// Los dos ámbitos disponibles en Mi Panel.
+type ScopeKey = "shared" | "personal";
+
 // "Documentos": lo compartido con toda la empresa y lo que administración subió
 // a la ficha del empleado. Solo lectura y descarga.
 export const DocumentsTab: React.FC = () => {
   const theme = useTheme();
   const { showNotification } = useAppNotifications();
+  const { currentUser } = useAuthContext();
+  // Vista de empleado (Supervisor/Chofer/Chofer Coordinador/Recepcionista):
+  // una sola sección con dos tabs. Solo los roles de gestión (Gerencia,
+  // Administrativo, SysAdmin) ven los dos ámbitos apilados, porque ahí la
+  // distinción es "lo de la empresa" vs "lo de este empleado".
+  const isEmployeeView = !hasManagementRole(currentUser);
+  const [activeScope, setActiveScope] = useState<ScopeKey>("shared");
+  const [previewTarget, setPreviewTarget] = useState<DocumentDTO | null>(null);
   const [data, setData] = useState<{ shared: DocumentScope; personal: DocumentScope } | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
@@ -200,25 +207,62 @@ export const DocumentsTab: React.FC = () => {
         </Box>
       ) : (
         <>
-          <Paper elevation={0} sx={fillSectionPaperStyles(theme)}>
-            <SectionHeader
-              icon={<IconFolder size={20} stroke={1.5} />}
-              title="Documentos compartidos"
-              description="Material que la empresa pone a disposición de todos."
-            />
-            {data && <ScopeSection scope={data.shared} onDownload={handleDownload} />}
-          </Paper>
+          {isEmployeeView ? (
+            <Paper elevation={0} sx={fillSectionPaperStyles(theme)}>
+              <SectionHeader
+                icon={<IconFolder size={20} stroke={1.5} />}
+                title="Documentos"
+                description="Compartidos por la empresa o subidos a tu expediente."
+              />
+              <Box sx={{ mb: 1.5 }}>
+                <SegmentedToggle<ScopeKey>
+                  value={activeScope}
+                  onChange={setActiveScope}
+                  ariaLabel="Ámbito de documentos"
+                  options={[
+                    { value: "shared", label: "Documentos compartidos" },
+                    { value: "personal", label: "Tus documentos" },
+                  ]}
+                />
+              </Box>
+              {data && (
+                <ScopeSection
+                  key={activeScope}
+                  scope={activeScope === "shared" ? data.shared : data.personal}
+                  onDownload={handleDownload}
+                  onPreview={setPreviewTarget}
+                />
+              )}
+            </Paper>
+          ) : (
+            <>
+              <Paper elevation={0} sx={fillSectionPaperStyles(theme)}>
+                <SectionHeader
+                  icon={<IconFolder size={20} stroke={1.5} />}
+                  title="Documentos compartidos"
+                  description="Material que la empresa pone a disposición de todos."
+                />
+                {data && <ScopeSection scope={data.shared} onDownload={handleDownload} onPreview={setPreviewTarget} />}
+              </Paper>
 
-          <Paper elevation={0} sx={fillSectionPaperStyles(theme)}>
-            <SectionHeader
-              icon={<IconFolder size={20} stroke={1.5} />}
-              title="Mis documentos"
-              description="Archivos que administración subió a tu expediente."
-            />
-            {data && <ScopeSection scope={data.personal} onDownload={handleDownload} />}
-          </Paper>
+              <Paper elevation={0} sx={fillSectionPaperStyles(theme)}>
+                <SectionHeader
+                  icon={<IconFolder size={20} stroke={1.5} />}
+                  title="Mis documentos"
+                  description="Archivos que administración subió a tu expediente."
+                />
+                {data && <ScopeSection scope={data.personal} onDownload={handleDownload} onPreview={setPreviewTarget} />}
+              </Paper>
+            </>
+          )}
         </>
       )}
+
+      <DocumentPreview
+        open={previewTarget != null}
+        doc={previewTarget}
+        onClose={() => setPreviewTarget(null)}
+      />
     </Box>
   );
 };
