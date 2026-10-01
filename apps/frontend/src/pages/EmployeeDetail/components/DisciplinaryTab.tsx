@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import {
   Box,
@@ -88,8 +88,16 @@ const DisciplinaryTab: React.FC<DisciplinaryTabProps> = ({ employee }) => {
   const { userPermissions } = useAuthContext();
   const { showNotification } = useAppNotifications();
 
-  const actions = useSelector(selectDisciplinaryActions);
+  const allActions = useSelector(selectDisciplinaryActions);
   const isLoading = useSelector(selectIsLoadingDisciplinary);
+  // El store puede traer filas de otros empleados (p. ej. el listado completo de
+  // Planilla): se muestran solo las de este empleado desde el primer cuadro y se
+  // espera la primera carga antes de decidir entre lista o estado vacío.
+  const [loaded, setLoaded] = useState(false);
+  const actions = useMemo(
+    () => allActions.filter((item) => item.employeeId === employee.id),
+    [allActions, employee.id],
+  );
   const loadError = useSelector(selectDisciplinaryError);
 
   const [isFormOpen, setIsFormOpen] = useState(false);
@@ -102,7 +110,10 @@ const DisciplinaryTab: React.FC<DisciplinaryTabProps> = ({ employee }) => {
   const canDelete = userPermissions.includes(PERMISSION_CODES.DELETE_DISCIPLINARY);
 
   useEffect(() => {
-    void dispatch(fetchDisciplinaryActions({ employeeId: employee.id, limit: 10000 }));
+    setLoaded(false);
+    void dispatch(fetchDisciplinaryActions({ employeeId: employee.id, limit: 10000 })).finally(() =>
+      setLoaded(true),
+    );
   }, [dispatch, employee.id]);
 
   const reload = async () => {
@@ -160,7 +171,7 @@ const DisciplinaryTab: React.FC<DisciplinaryTabProps> = ({ employee }) => {
           }
         />
 
-        {isLoading && actions.length === 0 ? (
+        {(isLoading || !loaded) && actions.length === 0 ? (
           <Box sx={{ display: "flex", justifyContent: "center", py: 4 }}>
             <CircularProgress size={26} />
           </Box>

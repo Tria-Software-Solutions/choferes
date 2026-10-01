@@ -100,8 +100,16 @@ const VacationsTab: React.FC<VacationsTabProps> = ({ employee, onEmployeeRefresh
   const { userPermissions } = useAuthContext();
   const { showNotification } = useAppNotifications();
 
-  const vacations = useSelector(selectVacations);
+  const allVacations = useSelector(selectVacations);
   const isLoading = useSelector(selectIsLoadingVacations);
+  // El store puede traer filas de otros empleados (p. ej. el listado completo de
+  // Planilla): se muestran solo las de este empleado desde el primer cuadro y se
+  // espera la primera carga antes de decidir entre lista o estado vacío.
+  const [loaded, setLoaded] = useState(false);
+  const vacations = useMemo(
+    () => allVacations.filter((item) => item.employeeId === employee.id),
+    [allVacations, employee.id],
+  );
   const loadError = useSelector(selectVacationsError);
 
   const [isFormOpen, setIsFormOpen] = useState(false);
@@ -118,7 +126,10 @@ const VacationsTab: React.FC<VacationsTabProps> = ({ employee, onEmployeeRefresh
   const canDelete = userPermissions.includes(PERMISSION_CODES.DELETE_VACATION);
 
   useEffect(() => {
-    void dispatch(fetchVacations({ employeeId: employee.id, limit: 10000 }));
+    setLoaded(false);
+    void dispatch(fetchVacations({ employeeId: employee.id, limit: 10000 })).finally(() =>
+      setLoaded(true),
+    );
   }, [dispatch, employee.id]);
 
   const reload = async () => {
@@ -306,7 +317,7 @@ const VacationsTab: React.FC<VacationsTabProps> = ({ employee, onEmployeeRefresh
           solicitados en total
         </Typography>
 
-        {isLoading && vacations.length === 0 ? (
+        {(isLoading || !loaded) && vacations.length === 0 ? (
           <Box sx={{ display: "flex", justifyContent: "center", py: 4 }}>
             <CircularProgress size={26} />
           </Box>

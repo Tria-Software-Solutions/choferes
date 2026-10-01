@@ -38,6 +38,16 @@ export const getRoleNameForPosition = (
   position: string | null | undefined,
 ): RoleName | null => (position && POSITION_ROLE_NAMES[position as EmployeePosition]) || null;
 
+/** Roles (sin repetir) que corresponden a una lista de puestos. */
+export const getRoleNamesForPositions = (
+  positions: ReadonlyArray<string | null | undefined>,
+): RoleName[] => {
+  const names = positions
+    .map((position) => getRoleNameForPosition(position))
+    .filter((name): name is RoleName => name !== null);
+  return Array.from(new Set(names));
+};
+
 /** Puesto al que corresponde un rol, o null si el rol no sigue a ningún puesto. */
 export const getPositionForRoleName = (roleName: string | null | undefined): EmployeePosition | null => {
   if (!roleName) return null;

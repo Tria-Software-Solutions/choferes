@@ -1,5 +1,5 @@
 /** Frontend Employee type — mirrors @choferes/shared with avatar support */
-import type { EmployeeGender } from "@choferes/shared";
+import type { EmployeeGender, NationalIdType } from "@choferes/shared";
 export type {
   TerminationReason,
   EmployeeGender,
@@ -31,12 +31,24 @@ export interface Employee {
   /** Fecha futura en que el sistema desactivará automáticamente al empleado, YYYY-MM-DD. */
   scheduledTerminationDate?: string | null;
   scheduledTerminationReason?: string | null;
-  /** Puesto o cargo. */
+  /** Puesto principal (el primero de `positions`). */
   position?: string | null;
+  /** Todos los puestos del empleado. */
+  positions?: string[] | null;
   /** Género del empleado ("Masculino" | "Femenino"). */
   gender?: EmployeeGender | null;
   /** Cédula de identidad. Solo dígitos: la máscara se aplica en la UI. */
   nationalId?: string | null;
+  /** Tipo de documento: cédula (por defecto), DIMEX, pasaporte u otro. */
+  nationalIdType?: NationalIdType;
+  /** Nacionalidad (ISO 3166-1 alfa-2); de aquí sale la bandera. */
+  nationality?: string | null;
+  /** Fecha de nacimiento, YYYY-MM-DD. */
+  birthDate?: string | null;
+  /** Dirección de residencia. */
+  address?: string | null;
+  /** Placas de sus vehículos propios (restricción vehicular). */
+  vehiclePlates?: string[] | null;
   /** Teléfono principal. Solo dígitos: la máscara se aplica en la UI. */
   primaryPhone?: string | null;
   /** Teléfono secundario (opcional). Solo dígitos. */
