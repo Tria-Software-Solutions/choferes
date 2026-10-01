@@ -1,4 +1,4 @@
-import React, { createContext, useContext } from "react";
+import React, { createContext, useCallback, useContext, useState } from "react";
 
 // Preferencia de nombre a mostrar (Roles y, a futuro, cualquier lista de
 // empleados). Se guarda en localStorage para recordarla entre sesiones y se
@@ -24,6 +24,24 @@ export const setStoredNameFormat = (format: EmployeeNameFormat): void => {
   } catch {
     /* almacenamiento no disponible: se mantiene en memoria */
   }
+};
+
+// Preferencia como setting global (Configuración → Apariencia), igual que el
+// formato de hora de `useTimeFormat`: se lee de localStorage al montar y se
+// persiste en cada cambio. Cada consumidor mantiene su propio estado, así que
+// el valor se relee al navegar.
+export const useEmployeeNameFormatSetting = (): {
+  nameFormat: EmployeeNameFormat;
+  setNameFormat: (format: EmployeeNameFormat) => void;
+} => {
+  const [nameFormat, setNameFormatState] = useState<EmployeeNameFormat>(() => getStoredNameFormat());
+
+  const setNameFormat = useCallback((format: EmployeeNameFormat) => {
+    setStoredNameFormat(format);
+    setNameFormatState(format);
+  }, []);
+
+  return { nameFormat, setNameFormat };
 };
 
 interface NameHolder {
