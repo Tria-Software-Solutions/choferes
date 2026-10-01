@@ -163,59 +163,77 @@ const VehiclePlates: React.FC<VehiclePlatesProps> = ({ vehicles, onChange, disab
       })}
 
       {editable && (
-        <Box sx={{ display: "flex", gap: 1, alignItems: "flex-start", flexWrap: "wrap" }}>
-          <Select
-            size="small"
-            value={draftType}
-            onChange={(e) => setDraftType(e.target.value as VehicleType)}
-            sx={{ minWidth: 130 }}
-            renderValue={(v) => (
-              <Box sx={{ display: "flex", alignItems: "center", gap: 0.75 }}>
-                {VEHICLE_ICONS[v as VehicleType]}
-                <Typography sx={{ fontSize: "0.875rem" }}>
-                  {VEHICLE_TYPE_LABELS[v as VehicleType]}
-                </Typography>
-              </Box>
-            )}
+        <Box sx={{ display: "flex", flexDirection: "column", gap: 0.75 }}>
+          {/* Los tres controles miden 40px (size="small" + height del botón),
+              así que van centrados en el mismo row. El mensaje va debajo: si
+              fuera helperText del TextField su caja crecería y descuadraría
+              la fila. */}
+          <Box
+            sx={{
+              display: "flex",
+              gap: 1,
+              alignItems: "center",
+              flexWrap: { xs: "wrap", sm: "nowrap" },
+            }}
           >
-            {VEHICLE_TYPES.map((type) => (
-              <MenuItem key={type} value={type}>
-                <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-                  {VEHICLE_ICONS[type]}
-                  {VEHICLE_TYPE_LABELS[type]}
+            <Select
+              size="small"
+              value={draftType}
+              onChange={(e) => setDraftType(e.target.value as VehicleType)}
+              sx={{ minWidth: 130, flexShrink: 0 }}
+              renderValue={(v) => (
+                <Box sx={{ display: "flex", alignItems: "center", gap: 0.75 }}>
+                  {VEHICLE_ICONS[v as VehicleType]}
+                  <Typography sx={{ fontSize: "0.875rem" }}>
+                    {VEHICLE_TYPE_LABELS[v as VehicleType]}
+                  </Typography>
                 </Box>
-              </MenuItem>
-            ))}
-          </Select>
-          <TextField
-            size="small"
-            value={draftPlate}
-            onChange={(event) => {
-              setDraftPlate(normalizePlate(event.target.value));
-              setError("");
-            }}
-            onKeyDown={(event) => {
-              if (event.key === "Enter") {
-                event.preventDefault();
-                add();
-              }
-            }}
-            placeholder="Ej: BCD123"
-            error={error !== ""}
-            helperText={error || "El último dígito define el día de restricción."}
-            inputProps={{ maxLength: 10, "aria-label": "Placa del vehículo" }}
-            sx={{ flex: 1, maxWidth: 200 }}
-          />
-          <Button
-            variant="outlined"
-            size="medium"
-            startIcon={<IconPlus size={16} />}
-            onClick={add}
-            disabled={!draftPlate}
-            sx={{ textTransform: "none", fontWeight: 600, height: 40 }}
+              )}
+            >
+              {VEHICLE_TYPES.map((type) => (
+                <MenuItem key={type} value={type}>
+                  <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+                    {VEHICLE_ICONS[type]}
+                    {VEHICLE_TYPE_LABELS[type]}
+                  </Box>
+                </MenuItem>
+              ))}
+            </Select>
+            <TextField
+              size="small"
+              value={draftPlate}
+              onChange={(event) => {
+                setDraftPlate(normalizePlate(event.target.value));
+                setError("");
+              }}
+              onKeyDown={(event) => {
+                if (event.key === "Enter") {
+                  event.preventDefault();
+                  add();
+                }
+              }}
+              placeholder="Ej: BCD123"
+              error={error !== ""}
+              inputProps={{ maxLength: 10, "aria-label": "Placa del vehículo" }}
+              sx={{ flex: 1, minWidth: 140 }}
+            />
+            <Button
+              variant="outlined"
+              size="medium"
+              startIcon={<IconPlus size={16} />}
+              onClick={add}
+              disabled={!draftPlate}
+              sx={{ textTransform: "none", fontWeight: 600, height: 40, flexShrink: 0 }}
+            >
+              Agregar
+            </Button>
+          </Box>
+          <Typography
+            variant="caption"
+            sx={{ color: error !== "" ? "error.main" : "text.secondary", lineHeight: 1.4 }}
           >
-            Agregar
-          </Button>
+            {error || "El último dígito define el día de restricción."}
+          </Typography>
         </Box>
       )}
     </Box>

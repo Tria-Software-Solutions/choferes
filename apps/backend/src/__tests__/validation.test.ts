@@ -54,7 +54,7 @@ describe("notificationRules › actionUrl", () => {
   it("acepta rutas internas", async () => {
     const res = await request(app)
       .post("/")
-      .send({ ...base, actionUrl: "/employees/12?tab=pagos" });
+      .send({ ...base, actionUrl: "/employees/12?tab=payments" });
 
     expect(res.status).toBe(204);
   });

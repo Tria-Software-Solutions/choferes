@@ -122,7 +122,7 @@ const QuickAccessTab: React.FC = () => {
           }}
         >
           {previewItems.length > 0 ? (
-            <TopNav links={previewItems} compact={isSmallScreen} />
+            <TopNav links={previewItems} compact={isSmallScreen} showAllLabels />
           ) : (
             <Typography sx={{ fontSize: "0.8125rem", color: "text.secondary", px: 1, py: 0.75 }}>
               Ningún acceso visible

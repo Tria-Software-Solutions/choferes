@@ -32,6 +32,11 @@ import {
   type UniqueIdentifier,
 } from '@dnd-kit/core';
 import type { Employee } from '../../../models/Employee';
+import {
+  EmployeeName,
+  formatEmployeeName,
+  useEmployeeNameFormat,
+} from '../../../context/NameFormatContext';
 import type { Schedule } from '../../../models/Schedule';
 import type { HoursWorked } from '../../../models/HoursWorked';
 import type { WeeklySummary } from '../../../models/WeeklySummary';
@@ -229,7 +234,7 @@ const EmployeeCard = memo(function EmployeeCard({
               whiteSpace: 'nowrap',
             }}
           >
-            {employee.firstName} {employee.lastName}
+            <EmployeeName employee={employee} />
           </Typography>
           <Typography
             sx={{
@@ -342,7 +347,7 @@ const EmployeeCard = memo(function EmployeeCard({
             whiteSpace: 'nowrap',
           }}
         >
-          {employee.firstName} {employee.lastName}
+          <EmployeeName employee={employee} />
         </Typography>
         <Typography
           sx={{
@@ -515,7 +520,7 @@ const DragOverlayCard = memo(function DragOverlayCard({
             whiteSpace: 'nowrap',
           }}
         >
-          {employee.firstName} {employee.lastName}
+          <EmployeeName employee={employee} />
         </Typography>
         <Typography
           sx={{
@@ -767,7 +772,7 @@ function DraggableTotalsRow({
   firstPeriodHours,
   secondPeriodHours,
 }: DraggableTotalsRowProps) {
-  const fullName = `${employee.firstName} ${employee.lastName}`;
+  const fullName = formatEmployeeName(employee, useEmployeeNameFormat());
   const { nameRef, overflows: nameOverflows } = useNameOverflowTooltip(fullName);
 
   const dragId: UniqueIdentifier = `totals-${employee.id}`;
@@ -1151,7 +1156,7 @@ function DraggableSwimlaneCard({
             whiteSpace: 'nowrap',
           }}
         >
-          {employee.firstName} {employee.lastName}
+          <EmployeeName employee={employee} />
         </Typography>
       </Box>
 
@@ -2945,7 +2950,7 @@ const WeeklyBoard: React.FC<WeeklyBoardProps> = ({
                       whiteSpace: 'nowrap',
                     }}
                   >
-                    {activeDragItem.employee.firstName} {activeDragItem.employee.lastName}
+                    <EmployeeName employee={activeDragItem.employee} />
                   </Typography>
                 </Box>
                 <Typography

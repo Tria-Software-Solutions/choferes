@@ -16,6 +16,11 @@ jest.mock("../services/disciplinaryActionService", () => ({
   getDisciplinaryActions: jest.fn(),
 }));
 jest.mock("../services/employeeLicenseService", () => ({ getLicensesByEmployee: jest.fn() }));
+jest.mock("../services/licenseRequestService", () => ({
+  listByEmployee: jest.fn(),
+  createRequest: jest.fn(),
+}));
+jest.mock("../services/employeeService", () => ({ updateEmployee: jest.fn() }));
 jest.mock("../services/paymentService", () => ({ getPayments: jest.fn() }));
 jest.mock("../services/taskService", () => ({ getTasks: jest.fn() }));
 
@@ -30,9 +35,16 @@ import * as vacationService from "../services/vacationService";
 import * as vacationAccrualService from "../services/vacationAccrualService";
 import * as disciplinaryService from "../services/disciplinaryActionService";
 import * as licenseService from "../services/employeeLicenseService";
+import * as licenseRequestService from "../services/licenseRequestService";
+import * as employeeService from "../services/employeeService";
 import * as paymentService from "../services/paymentService";
 import * as taskService from "../services/taskService";
-import { getMyOverview, createMyVacation } from "../services/meService";
+import {
+  getMyOverview,
+  createMyVacation,
+  updateMyProfile,
+  createMyLicenseRequest,
+} from "../services/meService";
 
 const UserMock = User as unknown as Record<string, jest.Mock>;
 const EmployeeMock = Employee as unknown as Record<string, jest.Mock>;
@@ -45,6 +57,8 @@ const vacationServiceMock = vacationService as unknown as Record<string, jest.Mo
 const vacationAccrualMock = vacationAccrualService as unknown as Record<string, jest.Mock>;
 const disciplinaryServiceMock = disciplinaryService as unknown as Record<string, jest.Mock>;
 const licenseServiceMock = licenseService as unknown as Record<string, jest.Mock>;
+const licenseRequestMock = licenseRequestService as unknown as Record<string, jest.Mock>;
+const employeeServiceMock = employeeService as unknown as Record<string, jest.Mock>;
 const paymentServiceMock = paymentService as unknown as Record<string, jest.Mock>;
 const taskServiceMock = taskService as unknown as Record<string, jest.Mock>;
 
@@ -103,6 +117,7 @@ const setupLinkedEmployee = () => {
   vacationAccrualMock.getVacationAccrual.mockResolvedValue(null);
   disciplinaryServiceMock.getDisciplinaryActions.mockResolvedValue({ data: [] });
   licenseServiceMock.getLicensesByEmployee.mockResolvedValue([]);
+  licenseRequestMock.listByEmployee.mockResolvedValue([]);
   paymentServiceMock.getPayments.mockResolvedValue({ data: [] });
   taskServiceMock.getTasks.mockResolvedValue([]);
   MonthlySummaryMock.findOne.mockResolvedValue(null);
@@ -124,6 +139,7 @@ describe("getMyOverview", () => {
     expect(overview.linked).toBe(false);
     expect(overview.employee).toBeUndefined();
     expect(overview.history).toEqual({ weekly: [] });
+    expect(overview.licenseRequests).toEqual([]);
     expect(EmployeeMock.findByPk).not.toHaveBeenCalled();
   });
 
@@ -247,5 +263,77 @@ describe("createMyVacation", () => {
     await expect(
       createMyVacation(1, { startDate: "2026-10-05", endDate: "2026-10-09" }),
     ).rejects.toMatchObject({ statusCode: 400 });
+  });
+});
+
+describe("updateMyProfile", () => {
+  it("rechaza el cambio cuando la cuenta no está vinculada a un empleado", async () => {
+    UserMock.findByPk.mockResolvedValue({ id: 1, employeeId: null });
+
+    await expect(updateMyProfile(1, { primaryPhone: "88887777" })).rejects.toMatchObject({
+      statusCode: 400,
+    });
+    expect(employeeServiceMock.updateEmployee).not.toHaveBeenCalled();
+  });
+
+  it("solo deja pasar los campos propios: puesto, tarifa y contrato se descartan", async () => {
+    setupLinkedEmployee();
+
+    await updateMyProfile(1, {
+      primaryPhone: "88887777",
+      address: "San José, Desamparados",
+      // Campos de administración: el empleado no los puede tocar.
+      position: "supervisor",
+      positions: ["supervisor"],
+      hourlyRate: 99999,
+      contractStartDate: "2020-01-01",
+      terminationDate: "2026-01-01",
+      isActive: false,
+    });
+
+    expect(employeeServiceMock.updateEmployee).toHaveBeenCalledTimes(1);
+    const [id, payload] = employeeServiceMock.updateEmployee.mock.calls[0];
+    expect(id).toBe(7);
+    expect(payload).toEqual({
+      primaryPhone: "88887777",
+      address: "San José, Desamparados",
+    });
+  });
+
+  it("rechaza una petición sin ningún campo propio", async () => {
+    setupLinkedEmployee();
+
+    await expect(updateMyProfile(1, { hourlyRate: 5000 })).rejects.toMatchObject({
+      statusCode: 400,
+    });
+    expect(employeeServiceMock.updateEmployee).not.toHaveBeenCalled();
+  });
+});
+
+describe("createMyLicenseRequest", () => {
+  it("rechaza la solicitud cuando la cuenta no está vinculada a un empleado", async () => {
+    UserMock.findByPk.mockResolvedValue({ id: 1, employeeId: null });
+
+    await expect(
+      createMyLicenseRequest(1, { action: "create", licenseType: "B1" }),
+    ).rejects.toMatchObject({ statusCode: 400 });
+  });
+
+  it("registra la solicitud a nombre del empleado vinculado", async () => {
+    setupLinkedEmployee();
+    licenseRequestMock.createRequest.mockResolvedValue({ id: 3, status: "pending" });
+
+    const request = await createMyLicenseRequest(1, {
+      action: "update",
+      licenseId: 12,
+      expiresAt: "2029-05-01",
+    });
+
+    expect(licenseRequestMock.createRequest).toHaveBeenCalledWith(7, {
+      action: "update",
+      licenseId: 12,
+      expiresAt: "2029-05-01",
+    });
+    expect(request).toEqual({ id: 3, status: "pending" });
   });
 });

@@ -22,6 +22,7 @@ import { UserRole } from "../models/UserRole";
 import User from "../models/User";
 import { ServiceError } from "../utils/errors";
 import type { AuthenticatedUser } from "../middleware/authorize";
+import { PERMISSION_CODES } from "../constants/permissions";
 import { checkRoleGrant } from "./accessGrantService";
 import {
   createNotification,
@@ -45,8 +46,46 @@ import {
   QueryParams,
 } from "../utils/pagination";
 
+// Columnas sensibles de la ficha y el permiso que las abre.
+//
+// COMPENSATION (salario y saldo de vacaciones): solo los roles que administran
+// la compensación, los que tienen `payments:view` y `vacations:view`, es decir
+// Gerencia, SysAdmin y Administrativo.
+//
+// PRIVACY (dirección y nombre preferido): requiere `employees:view`. No es un
+// permiso de escritura a propósito, porque Administrativo los necesita para ver
+// sin poder editar.
+//
+// Estas columnas existían en la respuesta de todos. Un Supervisor no tiene
+// ninguno de los dos permisos, pero sí `roles:view`, y el listado de empleados
+// se abre con ese permiso para el tablero de Roles: recibía el salario y la
+// dirección de todos aunque la tabla no los mostrara.
+const SENSITIVE_COLUMNS: Readonly<Record<string, string>> = {
+  hourlyRate: PERMISSION_CODES.VIEW_PAYMENTS,
+  vacationDays: PERMISSION_CODES.VIEW_VACATIONS,
+  address: PERMISSION_CODES.VIEW_EMPLOYEES,
+  preferredName: PERMISSION_CODES.VIEW_EMPLOYEES,
+};
+
+const grants = (actor: AuthenticatedUser | undefined, permissionCode: string): boolean =>
+  Boolean(actor?.permissions.includes("*") || actor?.permissions.includes(permissionCode));
+
+// Columnas que este actor no puede ver.
+const columnsToHide = (actor?: AuthenticatedUser): string[] =>
+  Object.entries(SENSITIVE_COLUMNS)
+    .filter(([, permissionCode]) => !grants(actor, permissionCode))
+    .map(([column]) => column);
+
+// El empleado al que pertenece la cuenta del actor (users.employeeId), para
+// distinguir "mi ficha" de "la ficha de otro" en el detalle.
+const actorEmployeeId = async (actor?: AuthenticatedUser): Promise<number | null> => {
+  if (actor?.id == null) return null;
+  const user = await User.findByPk(actor.id, { attributes: ["employeeId"] });
+  return user?.employeeId ?? null;
+};
+
 // Fetches all employees with pagination and search
-export const getEmployees = async (query: QueryParams) => {
+export const getEmployees = async (query: QueryParams, actor?: AuthenticatedUser) => {
   const params = getPaginationParams(query);
   const search = getSearchParam(query);
   const searchWhere = buildSearchWhere(search, ["firstName", "lastName", "email"]);
@@ -57,15 +96,28 @@ export const getEmployees = async (query: QueryParams) => {
     where.isActive = query.isActive === "true";
   }
 
+  // Sin excepción para el propio empleado: en un listado cada fila se ve igual.
+  // Lo propio se resuelve por sesión en /me/overview.
+  const hidden = columnsToHide(actor);
+
   const options: Record<string, any> = {
     where,
     order: [["firstName", "ASC"]],
+    // Se ocultan en el SQL, no se borran después: así no hay forma de que un
+    // forget de la limpieza deje la columna en la respuesta.
+    ...(hidden.length > 0 ? { attributes: { exclude: hidden } } : {}),
   };
   return paginate<Employee>(Employee, options, params);
 };
 
 // Fetches an employee by ID with their schedule
-export const getEmployeeById = async (id: number) => Employee.findByPk(id);
+export const getEmployeeById = async (id: number, actor?: AuthenticatedUser) => {
+  // En el detalle sí se le concede al propio empleado lo suyo: la dirección y el
+  // apodo son suyos, y ocultárselos no protege nada.
+  const isSelf = (await actorEmployeeId(actor)) === id;
+  const hidden = isSelf ? [] : columnsToHide(actor);
+  return Employee.findByPk(id, hidden.length > 0 ? { attributes: { exclude: hidden } } : {});
+};
 
 // Fetches an employee by email with their schedule
 export const getEmployeeByEmail = async (email: string) => Employee.findOne({ where: { email } });
@@ -366,7 +418,7 @@ export const updateEmployee = async (
       type: "warning",
       category: "employee",
       priority: "high",
-      actionUrl: "/mi-panel",
+      actionUrl: "/my-panel",
       actionText: "Ver mi panel",
     });
     await notifyManagementRoles({
@@ -388,7 +440,7 @@ export const updateEmployee = async (
       type: "info",
       category: "employee",
       priority: "medium",
-      actionUrl: "/mi-panel",
+      actionUrl: "/my-panel",
       actionText: "Ver mi panel",
     });
   }
@@ -561,7 +613,7 @@ export const linkEmployeeToUser = async (employeeId: number, actor?: Authenticat
     type: "success",
     category: "system",
     priority: "high",
-    actionUrl: "/mi-panel",
+    actionUrl: "/my-panel",
     actionText: "Ir a mi panel",
   });
 
@@ -579,6 +631,12 @@ export interface EmployeeAccess {
   hasUser: boolean;
   userId: number | null;
   username: string | null;
+  /**
+   * Estado de la cuenta, no del empleado: es lo único que además de
+   * authenticateUser bloquea el login (ver userService.authenticateUser).
+   * `false` cuando no hay cuenta, porque sin cuenta no se puede entrar.
+   */
+  isActive: boolean;
   roles: { id: number; name: string }[];
   /** true cuando la cuenta existe pero quedó sin ningún rol. */
   needsRole: boolean;
@@ -592,12 +650,19 @@ export const getEmployeeAccess = async (employeeId: number): Promise<EmployeeAcc
 
   const user = await User.findOne({
     where: { employeeId: employee.id },
-    attributes: ["id", "username"],
+    attributes: ["id", "username", "isActive"],
     include: [ROLES_INCLUDE],
   });
 
   if (!user) {
-    return { hasUser: false, userId: null, username: null, roles: [], needsRole: false };
+    return {
+      hasUser: false,
+      userId: null,
+      username: null,
+      isActive: false,
+      roles: [],
+      needsRole: false,
+    };
   }
 
   const roles = (user.roles ?? []).map((role) => ({ id: role.id, name: role.name }));
@@ -605,6 +670,7 @@ export const getEmployeeAccess = async (employeeId: number): Promise<EmployeeAcc
     hasUser: true,
     userId: user.id,
     username: user.username,
+    isActive: user.isActive,
     roles,
     needsRole: roles.length === 0,
   };
@@ -691,7 +757,7 @@ export const processScheduledTerminations = async (): Promise<number> => {
         type: "warning",
         category: "employee",
         priority: "high",
-        actionUrl: "/mi-panel",
+        actionUrl: "/my-panel",
         actionText: "Ver mi panel",
       }),
     ),

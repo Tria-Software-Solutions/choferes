@@ -4,6 +4,7 @@ import { hasManagementRole } from "@choferes/shared";
 import { useAuthContext } from "../context/AuthContext";
 import { authenticateUser as authenticateUserService } from "../services/userService";
 import { getDefaultRoute } from "../utils/defaultRoute";
+import ROUTES from "../constants/routes.constants";
 
 interface Role {
   permissions?: Array<{ code: string }>;
@@ -92,7 +93,7 @@ export const useAuth = () => {
   // Logs out the user and navigates to the home page
   const logoutUser = () => {
     logout();
-    navigate("/");
+    navigate(ROUTES.LOGIN);
   };
 
   return {

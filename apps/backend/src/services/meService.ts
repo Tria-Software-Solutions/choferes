@@ -22,9 +22,12 @@ import {
 import * as vacationService from "./vacationService";
 import * as vacationAccrualService from "./vacationAccrualService";
 import * as disciplinaryService from "./disciplinaryActionService";
+import * as employeeService from "./employeeService";
 import * as licenseService from "./employeeLicenseService";
+import * as licenseRequestService from "./licenseRequestService";
 import * as paymentService from "./paymentService";
 import * as taskService from "./taskService";
+import * as documentService from "./documentService";
 
 // Weekday order used to render the weekly schedule (matches schedule_day.day).
 const WEEK_DAYS = [
@@ -77,6 +80,18 @@ export const getLinkedEmployee = async (userId: number): Promise<Employee | null
   return Employee.findByPk(user.employeeId);
 };
 
+/**
+ * Documentos que ve el empleado en su panel: el ámbito compartido y el de su
+ * propia ficha. La página administrativa no está disponible para él.
+ */
+export const getMyDocuments = async (userId: number) => {
+  const employee = await getLinkedEmployee(userId);
+  if (!employee) {
+    throw new ServiceError(404, "Tu cuenta no está vinculada a un empleado");
+  }
+  return documentService.listForEmployee(employee.id);
+};
+
 /** Un día de la semana con el Horario/Lugar que la persona tiene asignado. */
 export interface MyPanelDay {
   date: string;
@@ -114,6 +129,8 @@ export interface MyPanelOverview {
   vacations: unknown[];
   disciplinaryActions: unknown[];
   licenses: unknown[];
+  /** Cambios de licencia que el empleado pidió y están en revisión (o cerrados). */
+  licenseRequests: unknown[];
   payments: unknown[];
   tasks: unknown[];
   summaries: {
@@ -136,6 +153,7 @@ const emptyOverview = (): MyPanelOverview => ({
   vacations: [],
   disciplinaryActions: [],
   licenses: [],
+  licenseRequests: [],
   payments: [],
   tasks: [],
   summaries: { weekly: null, biweekly: null, monthly: null },
@@ -205,6 +223,7 @@ export const getMyOverview = async (userId: number): Promise<MyPanelOverview> =>
     vacationAccrual,
     disciplinaryResult,
     licenses,
+    licenseRequests,
     paymentsResult,
     tasks,
     weekly,
@@ -216,6 +235,7 @@ export const getMyOverview = async (userId: number): Promise<MyPanelOverview> =>
     vacationAccrualService.getVacationAccrual(employee.id).catch(() => null),
     disciplinaryService.getDisciplinaryActions({ employeeId: String(employee.id), limit: "50" }),
     licenseService.getLicensesByEmployee(employee.id),
+    licenseRequestService.listByEmployee(employee.id),
     paymentService.getPayments({ employeeId: String(employee.id), limit: "24" }),
     taskService.getTasks(userId),
     WeeklySummary.findOne({ where: { employeeId: employee.id, weekNumber, year: weekYear } }),
@@ -278,6 +298,7 @@ export const getMyOverview = async (userId: number): Promise<MyPanelOverview> =>
     vacations: vacationsResult.data,
     disciplinaryActions: disciplinaryResult.data,
     licenses,
+    licenseRequests,
     payments: paymentsResult.data,
     tasks,
     summaries: {
@@ -327,4 +348,74 @@ export const createMyVacation = async (userId: number, input: MyVacationInput) =
   );
 
   return created;
+};
+
+// ─── Datos propios del empleado ──────────────────────────────────────────────
+//
+// El empleado mantiene al día su información de contacto y residencia. Lo
+// laboral (puesto, contrato, tarifa) sigue siendo de administración: se filtra
+// por lista blanca, así que ni un cliente manipulado puede tocar compensación
+// ni fechas de contrato.
+
+/** Campos del expediente que el propio empleado puede editar. */
+export const SELF_EDITABLE_EMPLOYEE_FIELDS = [
+  "primaryPhone",
+  "secondaryPhone",
+  "email",
+  "preferredName",
+  "address",
+  "nationality",
+  "birthDate",
+  "gender",
+  "nationalId",
+  "nationalIdType",
+  "vehicles",
+] as const;
+
+/** Actualiza solo los campos propios del empleado vinculado a la cuenta. */
+export const updateMyProfile = async (userId: number, data: Record<string, unknown>) => {
+  const employee = await getLinkedEmployee(userId);
+  if (!employee) {
+    throw new ServiceError(400, "Tu cuenta no está vinculada a un empleado de Planilla.");
+  }
+
+  const allowed = Object.fromEntries(
+    SELF_EDITABLE_EMPLOYEE_FIELDS.filter((field) => data[field] !== undefined).map((field) => [
+      field,
+      data[field],
+    ]),
+  );
+  if (Object.keys(allowed).length === 0) {
+    throw new ServiceError(400, "No hay cambios que guardar.");
+  }
+
+  // Reutiliza la validación y el saneamiento de planilla (documento, teléfonos,
+  // placas): al enviar solo los campos permitidos, el resto queda intacto.
+  return employeeService.updateEmployee(employee.id, allowed);
+};
+
+export interface MyLicenseRequestInput {
+  action: "create" | "update" | "delete";
+  licenseId?: number | null;
+  licenseType?: string;
+  licenseNumber?: string | null;
+  issuedAt?: string | null;
+  expiresAt?: string | null;
+  notes?: string | null;
+}
+
+/** Registra una solicitud de cambio de licencia del empleado vinculado. */
+export const createMyLicenseRequest = async (userId: number, input: MyLicenseRequestInput) => {
+  const employee = await getLinkedEmployee(userId);
+  if (!employee) {
+    throw new ServiceError(400, "Tu cuenta no está vinculada a un empleado de Planilla.");
+  }
+  return licenseRequestService.createRequest(employee.id, input);
+};
+
+/** Solicitudes de licencia del empleado vinculado (para ver su estado). */
+export const getMyLicenseRequests = async (userId: number) => {
+  const employee = await getLinkedEmployee(userId);
+  if (!employee) return [];
+  return licenseRequestService.listByEmployee(employee.id);
 };

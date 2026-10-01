@@ -149,7 +149,7 @@ export const createVacation = async (
     type: "info",
     category: "employee",
     priority: "medium",
-    actionUrl: `/employees/${input.employeeId}?tab=vacaciones`,
+    actionUrl: `/employees/${input.employeeId}?tab=vacations`,
     actionText: "Revisar solicitud",
   });
 
@@ -161,7 +161,7 @@ export const createVacation = async (
       type: "info",
       category: "employee",
       priority: "medium",
-      actionUrl: "/mi-panel?tab=vacaciones",
+      actionUrl: "/my-panel?tab=vacations",
       actionText: "Ver solicitud",
     });
   }
@@ -271,7 +271,7 @@ export const updateVacation = async (id: number, input: UpdateVacationInput) => 
       type: input.status === "approved" ? "success" : "error",
       category: "employee",
       priority: input.status === "approved" ? "low" : "high",
-      actionUrl: "/mi-panel?tab=vacaciones",
+      actionUrl: "/my-panel?tab=vacations",
       actionText: "Ver estado",
     });
   }
@@ -284,7 +284,7 @@ export const updateVacation = async (id: number, input: UpdateVacationInput) => 
       type: "warning",
       category: "employee",
       priority: "medium",
-      actionUrl: "/mi-panel?tab=vacaciones",
+      actionUrl: "/my-panel?tab=vacations",
       actionText: "Ver estado",
     });
   }
@@ -297,7 +297,7 @@ export const updateVacation = async (id: number, input: UpdateVacationInput) => 
       type: "info",
       category: "employee",
       priority: "medium",
-      actionUrl: "/mi-panel?tab=vacaciones",
+      actionUrl: "/my-panel?tab=vacations",
       actionText: "Ver estado",
     });
   }
@@ -326,7 +326,7 @@ export const deleteVacation = async (id: number) => {
     type: "info",
     category: "employee",
     priority: "medium",
-    actionUrl: "/mi-panel?tab=vacaciones",
+    actionUrl: "/my-panel?tab=vacations",
     actionText: "Ver estado",
   });
 

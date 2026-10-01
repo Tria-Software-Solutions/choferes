@@ -24,7 +24,7 @@ import { useMenuPreferences } from "../../hooks/useMenuPreferences";
 import { useAuthContext } from "../../context/AuthContext";
 import * as UserService from "../../services/userService";
 import UserAvatar from "../UserAvatar/UserAvatar.component";
-import { APPBAR_MENU } from "../../constants/constants";
+import { APPBAR_MENU, ROUTES } from "../../constants/constants";
 import { useNotificationMenu } from "../../context/NotificationContext";
 import { ThemeToggle } from "../ThemeToggle/ThemeToggle";
 import logo from "../../assets/images/logo.png";
@@ -143,7 +143,7 @@ const AppBarComponent: React.FC<AppBarComponentProps> = ({ title, userLinks = []
           gap: { xs: 1, md: 2 },
         }}
       >
-        <Brand onClick={() => navigate("/")} />
+        <Brand onClick={() => navigate(ROUTES.LOGIN)} />
 
         {!isMobile && (
           <>
