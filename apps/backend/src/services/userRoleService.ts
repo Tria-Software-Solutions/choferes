@@ -44,21 +44,33 @@ export const createUserRole = async (data: Omit<UserRole, "id">) => {
   return newUserRole;
 };
 
-// Update a user-role assignment by user ID
-export const updateUserRole = async (userId: number, roleId: number) => {
-  const previous = await UserRole.findOne({ where: { userId } });
-  await UserRole.update({ userId, roleId }, { where: { userId } });
-  const updated = await UserRole.findOne({ where: { userId } });
+// Replaces the roles of a user (the :id param is the user id) with the given
+// set. A single id keeps working for callers that only know one role.
+export const updateUserRole = async (userId: number, roleIds: number | number[]) => {
+  const target = Array.from(new Set(Array.isArray(roleIds) ? roleIds : [roleIds]));
+  const previous = await UserRole.findAll({ where: { userId } });
+  const previousIds = previous.map((row) => row.roleId);
 
-  if (previous && previous.roleId !== roleId) {
-    const role = await Role.findByPk(roleId);
-    await notifyAccountRoleChange(userId, {
-      action: `su rol cambió a ${role?.name ?? "uno nuevo"}`,
-      type: "warning",
-      priority: "high",
-    });
+  const unchanged =
+    previousIds.length === target.length && target.every((id) => previousIds.includes(id));
+  if (!unchanged) {
+    const removed = previousIds.filter((id) => !target.includes(id));
+    if (removed.length > 0) await UserRole.destroy({ where: { userId, roleId: removed } });
+    await Promise.all(
+      target.filter((id) => !previousIds.includes(id)).map((id) => assignRole(userId, id)),
+    );
+
+    if (previous.length > 0) {
+      const roles = await Role.findAll({ where: { id: target } });
+      await notifyAccountRoleChange(userId, {
+        action: `sus roles cambiaron a ${roles.map((role) => role.name).join(", ") || "ninguno"}`,
+        type: "warning",
+        priority: "high",
+      });
+    }
   }
 
+  const updated = await UserRole.findOne({ where: { userId } });
   return updated;
 };
 

@@ -21,6 +21,7 @@ import {
   Backdrop,
   Box,
   Button,
+  Checkbox,
   CircularProgress,
   FormControl,
   IconButton,
@@ -97,6 +98,8 @@ const ManageUsers: React.FC<{ isExpanded?: boolean; hideHeader?: boolean }> = ({
     password: "",
     roleName: "",
   });
+  // Una cuenta puede tener varios roles (uno por puesto, más los que se le den).
+  const [editRoleNames, setEditRoleNames] = useState<string[]>([]);
   const [openStatusDialog, setOpenStatusDialog] = useState(false);
   const [userToChange, setUserToChange] = useState<User | null>(null);
   const [page, setPage] = useState(0);
@@ -272,10 +275,12 @@ const ManageUsers: React.FC<{ isExpanded?: boolean; hideHeader?: boolean }> = ({
       password: "",
       roleName: user.roles?.map((role: Role) => role.name).join(", ") || "",
     });
+    setEditRoleNames(user.roles?.map((role: Role) => role.name) ?? []);
   }, []);
 
   const handleCancel = useCallback(() => {
     setEditRowId(null);
+    setEditRoleNames([]);
     setEditFields({
       firstName: "",
       lastName: "",
@@ -296,8 +301,10 @@ const ManageUsers: React.FC<{ isExpanded?: boolean; hideHeader?: boolean }> = ({
         if (editFields.email !== currentUser.email) updatedUser.email = editFields.email;
         if (editFields.username !== currentUser.username) updatedUser.username = editFields.username;
       }
-      const role = roles.find((r) => r.name === editFields.roleName);
-      if (!role) {
+      const selectedRoles = editRoleNames
+        .map((name) => roles.find((r) => r.name === name))
+        .filter((role): role is Role => role !== undefined);
+      if (selectedRoles.length === 0 || selectedRoles.length !== editRoleNames.length) {
         showNotification(NOTIFICATIONS.USER_ROLE_NOT_FOUND, { severity: 'error', duration: 5000 });
         return;
       }
@@ -305,9 +312,10 @@ const ManageUsers: React.FC<{ isExpanded?: boolean; hideHeader?: boolean }> = ({
         updateUser({
           id,
           updatedUser,
-          newRoleId: role.id,
+          newRoleIds: selectedRoles.map((role) => role.id),
         }),
       ).unwrap();
+      setEditRoleNames([]);
       setEditRowId(null);
       setEditFields({
         firstName: "",
@@ -737,13 +745,17 @@ const ManageUsers: React.FC<{ isExpanded?: boolean; hideHeader?: boolean }> = ({
                             />
                             <FormControl variant="standard" size="small" sx={{ flex: 1, minWidth: 0 }}>
                               <Select
-                                value={editFields.roleName}
-                                onChange={(e) => setEditFields({ ...editFields, roleName: e.target.value })}
+                                multiple
+                                value={editRoleNames}
+                                onChange={(e) => {
+                                  const next = e.target.value;
+                                  setEditRoleNames(typeof next === "string" ? next.split(",") : next);
+                                }}
                                 displayEmpty
                                 renderValue={(selected) => {
-                                  if (!selected) return <Typography sx={{ color: "text.disabled", fontSize: "0.8rem" }}>Seleccionar rol</Typography>;
+                                  if (selected.length === 0) return <Typography sx={{ color: "text.disabled", fontSize: "0.8rem" }}>Seleccionar roles</Typography>;
                                   return (
-                                    <Typography sx={{ fontWeight: 700, fontSize: "0.8rem" }}>{selected}</Typography>
+                                    <Typography sx={{ fontWeight: 700, fontSize: "0.8rem" }}>{selected.join(", ")}</Typography>
                                   );
                                 }}
                                 sx={{
@@ -759,6 +771,7 @@ const ManageUsers: React.FC<{ isExpanded?: boolean; hideHeader?: boolean }> = ({
                                   .filter((role) => isRoleSelectable(role.name))
                                   .map((role) => (
                                     <MenuItem key={role.id} value={role.name} sx={{ fontSize: '0.8rem' }}>
+                                      <Checkbox size="small" checked={editRoleNames.includes(role.name)} sx={{ p: 0.5, mr: 1 }} />
                                       {role.name}
                                     </MenuItem>
                                   ))}

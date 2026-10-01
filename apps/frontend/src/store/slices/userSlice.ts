@@ -131,17 +131,22 @@ export const updateUser = createAsyncThunk(
       id,
       updatedUser,
       newRoleId,
+      newRoleIds,
     }: {
       id: number;
       updatedUser: Partial<Omit<User, "id" | "temporalPassword">>;
       newRoleId?: number;
+      /** Lista completa de roles (una cuenta puede tener varios). */
+      newRoleIds?: number[];
     },
     { rejectWithValue },
   ) => {
     try {
       await UserService.updateUser(id, updatedUser);
 
-      if (newRoleId !== undefined && typeof newRoleId === "number") {
+      if (newRoleIds !== undefined && newRoleIds.length > 0) {
+        await UserRoleService.updateUserRole(id, newRoleIds);
+      } else if (newRoleId !== undefined && typeof newRoleId === "number") {
         await UserRoleService.updateUserRole(id, newRoleId);
       }
 

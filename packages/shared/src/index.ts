@@ -9,6 +9,8 @@ export {
   EMPLOYEE_POSITIONS,
   EMPLOYEE_POSITION_LABELS,
   getEmployeePositionLabel,
+  getEmployeePositions,
+  getEmployeePositionsLabel,
 } from "./types/Employee";
 export type {
   TerminationReason,
@@ -72,6 +74,7 @@ export {
   POSITION_LINKED_ROLE_NAMES,
   POSITION_KEYS,
   getRoleNameForPosition,
+  getRoleNamesForPositions,
   getPositionForRoleName,
 } from "./constants/positionRoles";
 
@@ -91,3 +94,35 @@ export {
   PaginatedResult,
   QueryParams,
 } from "./types/pagination";
+
+// Documento de identidad (cédula, DIMEX, pasaporte) y nacionalidad
+export {
+  NATIONAL_ID_TYPES,
+  NATIONAL_ID_TYPE_LABELS,
+  NATIONAL_ID_MAX_LENGTH,
+  DEFAULT_NATIONALITY,
+  COUNTRY_NAMES,
+  COUNTRY_CODES,
+  isCountryCode,
+  getCountryName,
+  getFlagEmoji,
+  nationalityForIdType,
+  normalizeNationalId,
+  validateNationalId,
+  formatNationalId,
+  isNationalIdType,
+} from "./types/EmployeeIdentity";
+export type { NationalIdType } from "./types/EmployeeIdentity";
+
+// Restricción vehicular (hoy no circula) de San José
+export {
+  RESTRICTION_HOURS,
+  WEEKDAY_NAMES,
+  MAX_PLATES_PER_EMPLOYEE,
+  normalizePlate,
+  isValidPlate,
+  getRestrictedWeekday,
+  getPlateRestriction,
+  formatPlate,
+} from "./types/VehicleRestriction";
+export type { PlateRestriction } from "./types/VehicleRestriction";

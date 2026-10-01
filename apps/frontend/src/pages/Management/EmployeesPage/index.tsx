@@ -1,3 +1,9 @@
+import {
+  NationalIdType,
+  formatNationalId,
+  getCountryName,
+  getEmployeePositionsLabel,
+} from '@choferes/shared';
 import React, { useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import { useAuthContext } from '../../../context/AuthContext';
 import { Employee } from '../../../models/Employee';
@@ -15,7 +21,7 @@ import StickyDataGridComponent from '../../../components/Table/StickyDataGrid/St
 import { GridColDef } from '@mui/x-data-grid';
 import { useEmployeeBiweeklyHours } from '../../../hooks/useEmployeeBiweeklyHours';
 import { formatTenure } from '../../../utils/tenure';
-import { maskNationalId, maskPhone } from '../../../utils/mask';
+import { maskPhone } from '../../../utils/mask';
 import PremiumTooltip from '../../../components/PremiumTooltip/PremiumTooltip.component';
 import AddEmployeeForm from '../../Forms/AddEmployeeForm';
 import { useAppNotifications } from '../../../components/Snackbar/Snackbar.component';
@@ -110,7 +116,14 @@ const EmployeesPage: React.FC = () => {
     (state: RootState) => state.employees,
   );
   const { showNotification } = useAppNotifications();
-  const [filteredEmployees, setFilteredEmployees] = useState<Employee[]>([]);
+  // Primera carga de los datos que alimentan las tarjetas y la tabla. Si el store
+  // ya los tiene (al volver desde un detalle) la página se pinta de inmediato,
+  // con la tabla en su lugar para poder restaurar el scroll.
+  const [loaded, setLoaded] = useState(() => ({
+    employees: employees.length > 0,
+    roster: allEmployees.length > 0,
+    licenses: employees.length > 0,
+  }));
   const [openAddModal, setOpenAddModal] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   // Avatar picker modal state (same UX as the user avatar modal)
@@ -142,7 +155,9 @@ const EmployeesPage: React.FC = () => {
   // reemplaza la lista del store con las suyas, así que aquí siempre se pide el
   // listado completo para poder alertar en toda la tabla.
   useEffect(() => {
-    void dispatch(fetchLicenses({ limit: 10000 }));
+    void dispatch(fetchLicenses({ limit: 10000 })).finally(() =>
+      setLoaded((prev) => ({ ...prev, licenses: true })),
+    );
   }, [dispatch, location.pathname]);
 
   // Horas y horas extra de la quincena actual (mismas reglas que el pago).
@@ -176,42 +191,40 @@ const EmployeesPage: React.FC = () => {
   // navigating back. The status filter is applied server-side; the client-side
   // pass below keeps the UI instant while the request resolves.
   useEffect(() => {
-    dispatch(
+    void dispatch(
       fetchEmployees({
         search: debouncedSearch || undefined,
         isActive: statusFilter === 'all' ? undefined : statusFilter === 'active',
       }),
-    );
+    ).finally(() => setLoaded((prev) => ({ ...prev, employees: true })));
   }, [dispatch, debouncedSearch, statusFilter, location.pathname]);
 
   // Plantilla completa (sin filtros) para los indicadores globales del KPI band.
   useEffect(() => {
-    void dispatch(fetchAllEmployees());
+    void dispatch(fetchAllEmployees()).finally(() =>
+      setLoaded((prev) => ({ ...prev, roster: true })),
+    );
   }, [dispatch, location.pathname]);
 
-  // Filter employees by status + search input (client-side as instant feedback)
-  useEffect(() => {
+  // Filter employees by status + search input (client-side as instant feedback).
+  // Se deriva (no es estado) para que, al volver a la página con empleados ya en
+  // el store, la tabla se pinte de inmediato en lugar de pasar por un vacío.
+  const filteredEmployees = useMemo(() => {
     const byStatus = employees.filter((employee) => {
       if (statusFilter === 'all') return true;
       const isActive = employee.isActive !== false;
       return statusFilter === 'active' ? isActive : !isActive;
     });
 
-    if (!search) {
-      setFilteredEmployees(byStatus);
-      return;
-    }
+    if (!search) return byStatus;
 
     const normalizeString = (str: string) => str.normalize('NFD').replace(/[\u0300-\u036f]/g, '');
-
     const normalizedSearch = normalizeString(search).toLowerCase();
 
-    setFilteredEmployees(
-      byStatus.filter((employee) =>
-        normalizeString(`${employee.firstName} ${employee.lastName} ${employee.email || ''}`)
-          .toLowerCase()
-          .includes(normalizedSearch)
-      )
+    return byStatus.filter((employee) =>
+      normalizeString(`${employee.firstName} ${employee.lastName} ${employee.email || ''}`)
+        .toLowerCase()
+        .includes(normalizedSearch),
     );
   }, [search, employees, statusFilter]);
 
@@ -361,9 +374,10 @@ const EmployeesPage: React.FC = () => {
   const exportData = useMemo(
     () =>
       filteredEmployees.map((e) => ({
-        Cédula: maskNationalId(e.nationalId ?? ''),
+        Documento: formatNationalId((e.nationalIdType ?? 'cedula') as NationalIdType, e.nationalId ?? ''),
+        Nacionalidad: getCountryName(e.nationality ?? 'CR') ?? '',
         'Nombre completo': `${e.firstName} ${e.lastName}`.trim(),
-        Puesto: e.position || '',
+        Puesto: getEmployeePositionsLabel(e, e.gender) || '',
         Email: e.email || '',
         Teléfono: maskPhone(e.primaryPhone ?? '') || maskPhone(e.secondaryPhone ?? ''),
       })),
@@ -374,7 +388,8 @@ const EmployeesPage: React.FC = () => {
   // Excel y PDF comparten las mismas columnas.
   const exportOptions = useMemo(() => {
     const exportHeaders = [
-      'Cédula',
+      'Documento',
+      'Nacionalidad',
       'Nombre completo',
       'Puesto',
       'Email',
@@ -618,11 +633,15 @@ const EmployeesPage: React.FC = () => {
         field: 'puesto',
         headerName: 'Puesto',
         flex: 1.1,
-        valueGetter: (_value, row) => (row as Employee).position ?? '',
+        valueGetter: (_value, row) =>
+          getEmployeePositionsLabel(row as Employee, (row as Employee).gender) ?? '',
         minWidth: isSmallScreen ? 120 : 150,
         sortable: true,
         renderCell: (params) => {
-          const position = (params.row as Employee).position;
+          const position = getEmployeePositionsLabel(
+            params.row as Employee,
+            (params.row as Employee).gender,
+          );
           if (!position) {
             return (
               <Typography
@@ -934,6 +953,18 @@ const EmployeesPage: React.FC = () => {
 
   const canExport = userPermissions.includes(PERMISSION_CODES.EXPORT_EMPLOYEES);
 
+  // Nada se pinta hasta que cargan las tarjetas de arriba y la tabla, para que
+  // la página aparezca completa de una vez y no se desplace al llegar los datos.
+  if (!(loaded.employees && loaded.roster && loaded.licenses)) {
+    return (
+      <PageContainer>
+        <PageCard>
+          <LoadingState label="Cargando planilla…" />
+        </PageCard>
+      </PageContainer>
+    );
+  }
+
   return (
     <PageContainer>
       <PageCard>
@@ -1025,6 +1056,7 @@ const EmployeesPage: React.FC = () => {
               rows={filteredEmployees}
               columns={columns}
               getRowId={getRowId}
+              scrollKey="employees-page"
             />
           ) : (
             <EmptyState

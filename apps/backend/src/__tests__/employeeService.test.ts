@@ -39,14 +39,14 @@ jest.mock("../models/User", () => {
 // Mock Role / UserRole (named imports in the service)
 jest.mock("../models/Role", () => ({
   __esModule: true,
-  Role: { findOne: jest.fn(), findByPk: jest.fn() },
-  default: { findOne: jest.fn(), findByPk: jest.fn() },
+  Role: { findOne: jest.fn(), findByPk: jest.fn(), findAll: jest.fn() },
+  default: { findOne: jest.fn(), findByPk: jest.fn(), findAll: jest.fn() },
 }));
 
 jest.mock("../models/UserRole", () => ({
   __esModule: true,
-  UserRole: { findOne: jest.fn(), create: jest.fn(), destroy: jest.fn() },
-  default: { findOne: jest.fn(), create: jest.fn(), destroy: jest.fn() },
+  UserRole: { findOne: jest.fn(), findAll: jest.fn(), create: jest.fn(), destroy: jest.fn() },
+  default: { findOne: jest.fn(), findAll: jest.fn(), create: jest.fn(), destroy: jest.fn() },
 }));
 
 // Quién puede otorgar qué rol se prueba en accessGrantService.test.ts.
@@ -202,6 +202,99 @@ describe("employeeService", () => {
       expect(createdEmployee.reload).toHaveBeenCalled();
       expect(result).toEqual(createdEmployee);
     });
+
+    it("guarda todos los puestos y deja el primero como principal", async () => {
+      mockCreate.mockResolvedValue({ id: 3, reload: jest.fn() });
+
+      await employeeService.createEmployee({
+        firstName: "Ana",
+        lastName: "Soto",
+        positions: ["supervisor", "chofer"],
+      });
+
+      expect(mockCreate).toHaveBeenCalledWith(
+        expect.objectContaining({ positions: ["supervisor", "chofer"], position: "supervisor" }),
+      );
+    });
+
+    it("acepta el formato anterior de un solo puesto", async () => {
+      mockCreate.mockResolvedValue({ id: 3, reload: jest.fn() });
+
+      await employeeService.createEmployee({ firstName: "Ana", lastName: "Soto", position: "chofer" });
+
+      expect(mockCreate).toHaveBeenCalledWith(
+        expect.objectContaining({ positions: ["chofer"], position: "chofer" }),
+      );
+    });
+
+    it("guarda un documento extranjero (DIMEX/pasaporte) con su nacionalidad", async () => {
+      mockCreate.mockResolvedValue({ id: 5, reload: jest.fn() });
+
+      await employeeService.createEmployee({
+        firstName: "José",
+        positions: ["chofer"],
+        nationalIdType: "pasaporte",
+        nationalId: "ab-123456",
+        nationality: "ni",
+      });
+
+      expect(mockCreate).toHaveBeenCalledWith(
+        expect.objectContaining({
+          nationalIdType: "pasaporte",
+          nationalId: "AB123456",
+          nationality: "NI",
+        }),
+      );
+    });
+
+    it("la cédula fuerza la nacionalidad costarricense", async () => {
+      mockCreate.mockResolvedValue({ id: 5, reload: jest.fn() });
+
+      await employeeService.createEmployee({
+        firstName: "Ana",
+        positions: ["chofer"],
+        nationalIdType: "cedula",
+        nationalId: "1-0234-0567",
+        nationality: "NI",
+      });
+
+      expect(mockCreate).toHaveBeenCalledWith(
+        expect.objectContaining({ nationalId: "102340567", nationality: "CR" }),
+      );
+    });
+
+    it("rechaza un DIMEX con longitud inválida", async () => {
+      await expect(
+        employeeService.createEmployee({
+          firstName: "Ana",
+          positions: ["chofer"],
+          nationalIdType: "dimex",
+          nationalId: "12345",
+        }),
+      ).rejects.toMatchObject({ statusCode: 400 });
+      expect(mockCreate).not.toHaveBeenCalled();
+    });
+
+    it("normaliza las placas: mayúsculas, sin repetir y solo válidas", async () => {
+      mockCreate.mockResolvedValue({ id: 5, reload: jest.fn() });
+
+      await employeeService.createEmployee({
+        firstName: "Ana",
+        positions: ["chofer"],
+        vehiclePlates: ["bcd-123", "BCD123", "x", "mot 4567"],
+      });
+
+      expect(mockCreate).toHaveBeenCalledWith(
+        expect.objectContaining({ vehiclePlates: ["BCD123", "MOT4567"] }),
+      );
+    });
+
+    it("rechaza puestos desconocidos", async () => {
+      await expect(
+        employeeService.createEmployee({ firstName: "Ana", positions: ["cajero"] }),
+      ).rejects.toMatchObject({ statusCode: 400 });
+      expect(mockCreate).not.toHaveBeenCalled();
+    });
   });
 
   describe("updateEmployee", () => {
@@ -252,7 +345,7 @@ describe("employeeService", () => {
 
     describe("cambio de puesto con cuenta vinculada", () => {
       const mockUserFindOne = User.findOne as jest.Mock;
-      const mockRoleFindOne = Role.findOne as jest.Mock;
+      const mockRoleFindAll = Role.findAll as jest.Mock;
       const mockUserRoleFindOne = UserRole.findOne as jest.Mock;
       const actor = { id: 1, roles: ["Gerencia"], permissions: ["*"] };
 
@@ -260,20 +353,41 @@ describe("employeeService", () => {
         mockUpdate.mockResolvedValue([1]);
         mockFindByPk.mockResolvedValue(mockEmployee);
         mockUserRoleFindOne.mockResolvedValue(null);
+        (UserRole.findAll as jest.Mock).mockResolvedValue([{ roleId: 6 }]);
         (UserRole.create as jest.Mock).mockResolvedValue({});
         (checkRoleGrant as jest.Mock).mockResolvedValue(null);
       });
 
       it("pasa la cuenta al rol del nuevo puesto (supervisor → Supervisor)", async () => {
         mockUserFindOne.mockResolvedValue({ id: 9, roles: [{ id: 6, name: "Chofer" }] });
-        mockRoleFindOne.mockResolvedValue({ id: 3, name: "Supervisor" });
+        mockRoleFindAll.mockResolvedValue([{ id: 3, name: "Supervisor" }]);
 
-        await employeeService.updateEmployee(1, { position: "supervisor" }, actor);
+        await employeeService.updateEmployee(1, { positions: ["supervisor"] }, actor);
 
-        expect(mockRoleFindOne).toHaveBeenCalledWith({ where: { name: "Supervisor" } });
+        expect(mockRoleFindAll).toHaveBeenCalledWith({ where: { name: ["Supervisor"] } });
         expect(checkRoleGrant).toHaveBeenCalledWith(actor, 3);
-        expect(mockUpdate).toHaveBeenCalledWith({ position: "supervisor" }, { where: { id: 1 } });
+        expect(mockUpdate).toHaveBeenCalledWith(
+          { positions: ["supervisor"], position: "supervisor" },
+          { where: { id: 1 } },
+        );
         expect(UserRole.destroy).toHaveBeenCalledWith({ where: { userId: 9 } });
+        expect(UserRole.create).toHaveBeenCalledWith({ userId: 9, roleId: 3 });
+      });
+
+      it("da a la cuenta los roles de todos sus puestos", async () => {
+        mockUserFindOne.mockResolvedValue({ id: 9, roles: [{ id: 6, name: "Chofer" }] });
+        mockRoleFindAll.mockResolvedValue([
+          { id: 6, name: "Chofer" },
+          { id: 3, name: "Supervisor" },
+        ]);
+
+        await employeeService.updateEmployee(1, { positions: ["chofer", "supervisor"] }, actor);
+
+        // Solo se revisa el rol que la cuenta todavía no tenía.
+        expect(checkRoleGrant).toHaveBeenCalledTimes(1);
+        expect(checkRoleGrant).toHaveBeenCalledWith(actor, 3);
+        expect(UserRole.destroy).toHaveBeenCalledWith({ where: { userId: 9 } });
+        expect(UserRole.create).toHaveBeenCalledWith({ userId: 9, roleId: 6 });
         expect(UserRole.create).toHaveBeenCalledWith({ userId: 9, roleId: 3 });
       });
 
@@ -288,9 +402,9 @@ describe("employeeService", () => {
 
       it("no toca la cuenta si ya tiene el rol del puesto", async () => {
         mockUserFindOne.mockResolvedValue({ id: 9, roles: [{ id: 3, name: "Supervisor" }] });
-        mockRoleFindOne.mockResolvedValue({ id: 3, name: "Supervisor" });
+        mockRoleFindAll.mockResolvedValue([{ id: 3, name: "Supervisor" }]);
 
-        await employeeService.updateEmployee(1, { position: "supervisor" }, actor);
+        await employeeService.updateEmployee(1, { positions: ["supervisor"] }, actor);
 
         expect(UserRole.destroy).not.toHaveBeenCalled();
         expect(UserRole.create).not.toHaveBeenCalled();
@@ -302,16 +416,19 @@ describe("employeeService", () => {
           roles: [{ id: 1, name: "Gerencia" }],
         });
 
-        await employeeService.updateEmployee(1, { position: "supervisor" }, actor);
+        await employeeService.updateEmployee(1, { positions: ["supervisor"] }, actor);
 
-        expect(mockUpdate).toHaveBeenCalledWith({ position: "supervisor" }, { where: { id: 1 } });
+        expect(mockUpdate).toHaveBeenCalledWith(
+          { positions: ["supervisor"], position: "supervisor" },
+          { where: { id: 1 } },
+        );
         expect(UserRole.destroy).not.toHaveBeenCalled();
         expect(UserRole.create).not.toHaveBeenCalled();
       });
 
       it("rechaza el cambio, sin guardar nada, si quien lo hace no puede otorgar ese rol", async () => {
         mockUserFindOne.mockResolvedValue({ id: 9, roles: [{ id: 6, name: "Chofer" }] });
-        mockRoleFindOne.mockResolvedValue({ id: 3, name: "Supervisor" });
+        mockRoleFindAll.mockResolvedValue([{ id: 3, name: "Supervisor" }]);
         (checkRoleGrant as jest.Mock).mockResolvedValue({
           status: 403,
           message: "No puedes asignar un rol con permisos que tú no tienes",
@@ -320,7 +437,7 @@ describe("employeeService", () => {
         await expect(
           employeeService.updateEmployee(
             1,
-            { position: "supervisor" },
+            { positions: ["supervisor"] },
             { id: 2, roles: ["Administrativo"], permissions: ["employees:edit"] },
           ),
         ).rejects.toMatchObject({ statusCode: 403 });
@@ -592,16 +709,17 @@ describe("employeeService", () => {
   });
 
   describe("getEmployeesByPosition", () => {
-    it("debería buscar empleados por puesto ordenados por firstName", async () => {
-      mockFindAll.mockResolvedValue([mockEmployee]);
+    it("devuelve los empleados que tienen ese puesto (entre varios), ordenados por firstName", async () => {
+      const driver = { id: 1, positions: ["chofer"] };
+      const both = { id: 2, positions: ["chofer", "supervisor"] };
+      const legacy = { id: 3, position: "chofer" };
+      const other = { id: 4, positions: ["recepcionista"] };
+      mockFindAll.mockResolvedValue([driver, both, legacy, other]);
 
-      const result = await employeeService.getEmployeesByPosition("Chofer");
+      const result = await employeeService.getEmployeesByPosition("chofer");
 
-      expect(mockFindAll).toHaveBeenCalledWith({
-        where: { position: "Chofer" },
-        order: [["firstName", "ASC"]],
-      });
-      expect(result).toEqual([mockEmployee]);
+      expect(mockFindAll).toHaveBeenCalledWith({ order: [["firstName", "ASC"]] });
+      expect(result).toEqual([driver, both, legacy]);
     });
   });
 
@@ -671,45 +789,45 @@ describe("employeeService", () => {
 
     const mockUserFindOne = User.findOne as jest.Mock;
     const mockUserCreate = User.create as jest.Mock;
-    const mockRoleFindOne = Role.findOne as jest.Mock;
+    const mockRoleFindAll = Role.findAll as jest.Mock;
     const mockUserRoleFindOne = UserRole.findOne as jest.Mock;
     const mockUserRoleCreate = UserRole.create as jest.Mock;
 
     it("asigna el rol del puesto a la cuenta recién creada (chofer → Chofer)", async () => {
-      mockFindByPk.mockResolvedValue({ ...employee, position: "chofer" });
+      mockFindByPk.mockResolvedValue({ ...employee, position: "chofer", positions: ["chofer"] });
       // Sin cuenta previa vinculada (y username/email libres).
       mockUserFindOne.mockResolvedValue(null);
       mockUserCreate.mockResolvedValue({ id: 42 });
-      mockRoleFindOne.mockResolvedValue({ id: 6, name: "Chofer" });
+      mockRoleFindAll.mockResolvedValue([{ id: 6, name: "Chofer" }]);
       mockUserRoleCreate.mockResolvedValue({ id: 1, userId: 42, roleId: 6 });
 
       const result = await employeeService.linkEmployeeToUser(7);
 
       expect(result.created).toBe(true);
-      expect(mockRoleFindOne).toHaveBeenCalledWith({ where: { name: "Chofer" } });
+      expect(mockRoleFindAll).toHaveBeenCalledWith({ where: { name: ["Chofer"] } });
       expect(mockUserRoleCreate).toHaveBeenCalledWith({ userId: 42, roleId: 6 });
     });
 
     it("da a la cuenta nueva el rol de su puesto (supervisor → Supervisor)", async () => {
-      mockFindByPk.mockResolvedValue({ ...employee, position: "supervisor" });
+      mockFindByPk.mockResolvedValue({ ...employee, position: "supervisor", positions: ["supervisor"] });
       mockUserFindOne.mockResolvedValue(null);
       mockUserCreate.mockResolvedValue({ id: 42 });
-      mockRoleFindOne.mockResolvedValue({ id: 3, name: "Supervisor" });
+      mockRoleFindAll.mockResolvedValue([{ id: 3, name: "Supervisor" }]);
       mockUserRoleCreate.mockResolvedValue({ id: 1, userId: 42, roleId: 3 });
       (checkRoleGrant as jest.Mock).mockResolvedValue(null);
       const actor = { id: 1, roles: ["Gerencia"], permissions: ["*"] };
 
       await employeeService.linkEmployeeToUser(7, actor);
 
-      expect(mockRoleFindOne).toHaveBeenCalledWith({ where: { name: "Supervisor" } });
+      expect(mockRoleFindAll).toHaveBeenCalledWith({ where: { name: ["Supervisor"] } });
       expect(checkRoleGrant).toHaveBeenCalledWith(actor, 3);
       expect(mockUserRoleCreate).toHaveBeenCalledWith({ userId: 42, roleId: 3 });
     });
 
     it("no crea la cuenta si quien la activa no puede otorgar el rol del puesto", async () => {
-      mockFindByPk.mockResolvedValue({ ...employee, position: "supervisor" });
+      mockFindByPk.mockResolvedValue({ ...employee, position: "supervisor", positions: ["supervisor"] });
       mockUserFindOne.mockResolvedValue(null);
-      mockRoleFindOne.mockResolvedValue({ id: 3, name: "Supervisor" });
+      mockRoleFindAll.mockResolvedValue([{ id: 3, name: "Supervisor" }]);
       (checkRoleGrant as jest.Mock).mockResolvedValue({
         status: 403,
         message: "No puedes asignar un rol con permisos que tú no tienes",
@@ -723,10 +841,10 @@ describe("employeeService", () => {
     });
 
     it("repara una cuenta existente que quedó sin rol", async () => {
-      mockFindByPk.mockResolvedValue({ ...employee, position: "chofer" });
+      mockFindByPk.mockResolvedValue({ ...employee, position: "chofer", positions: ["chofer"] });
       mockUserFindOne.mockResolvedValue({ id: 9 });
       mockUserRoleFindOne.mockResolvedValue(null);
-      mockRoleFindOne.mockResolvedValue({ id: 6, name: "Chofer" });
+      mockRoleFindAll.mockResolvedValue([{ id: 6, name: "Chofer" }]);
       mockUserRoleCreate.mockResolvedValue({ id: 2, userId: 9, roleId: 6 });
 
       const result = await employeeService.linkEmployeeToUser(7);
@@ -797,18 +915,18 @@ describe("employeeService", () => {
 
   describe("assignDefaultRoleToEmployeeUser", () => {
     const mockUserFindOne = User.findOne as jest.Mock;
-    const mockRoleFindOne = Role.findOne as jest.Mock;
+    const mockRoleFindAll = Role.findAll as jest.Mock;
     const mockUserRoleFindOne = UserRole.findOne as jest.Mock;
     const mockUserRoleCreate = UserRole.create as jest.Mock;
 
     it("asigna el rol del puesto y devuelve la cuenta actualizada", async () => {
-      mockFindByPk.mockResolvedValue({ id: 7, position: "chofer" });
+      mockFindByPk.mockResolvedValue({ id: 7, position: "chofer", positions: ["chofer"] });
       // 1) cuenta del empleado, 2) recarga en getEmployeeAccess.
       mockUserFindOne
         .mockResolvedValueOnce({ id: 9 })
         .mockResolvedValueOnce({ id: 9, username: "ana", roles: [{ id: 6, name: "Chofer" }] });
       mockUserRoleFindOne.mockResolvedValue(null);
-      mockRoleFindOne.mockResolvedValue({ id: 6, name: "Chofer" });
+      mockRoleFindAll.mockResolvedValue([{ id: 6, name: "Chofer" }]);
       mockUserRoleCreate.mockResolvedValue({ id: 1, userId: 9, roleId: 6 });
 
       const access = await employeeService.assignDefaultRoleToEmployeeUser(7);
@@ -819,7 +937,11 @@ describe("employeeService", () => {
     });
 
     it("asigna el rol del puesto del empleado cuando lo tiene", async () => {
-      mockFindByPk.mockResolvedValue({ id: 7, position: "chofer_coordinador" });
+      mockFindByPk.mockResolvedValue({
+        id: 7,
+        position: "chofer_coordinador",
+        positions: ["chofer_coordinador"],
+      });
       mockUserFindOne
         .mockResolvedValueOnce({ id: 9 })
         .mockResolvedValueOnce({
@@ -828,12 +950,12 @@ describe("employeeService", () => {
           roles: [{ id: 5, name: "Chofer Coordinador" }],
         });
       mockUserRoleFindOne.mockResolvedValue(null);
-      mockRoleFindOne.mockResolvedValue({ id: 5, name: "Chofer Coordinador" });
+      mockRoleFindAll.mockResolvedValue([{ id: 5, name: "Chofer Coordinador" }]);
       mockUserRoleCreate.mockResolvedValue({ id: 1, userId: 9, roleId: 5 });
 
       await employeeService.assignDefaultRoleToEmployeeUser(7);
 
-      expect(mockRoleFindOne).toHaveBeenCalledWith({ where: { name: "Chofer Coordinador" } });
+      expect(mockRoleFindAll).toHaveBeenCalledWith({ where: { name: ["Chofer Coordinador"] } });
       expect(mockUserRoleCreate).toHaveBeenCalledWith({ userId: 9, roleId: 5 });
     });
 

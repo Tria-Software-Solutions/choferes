@@ -8,17 +8,19 @@ import {
   MenuItem,
   Typography,
 } from "@mui/material";
-import { IconMail, IconRotate, IconUser, IconId, IconPhone, IconBriefcase, IconUserCircle } from "@tabler/icons-react";
+import { IconMail, IconRotate, IconUser, IconId, IconPhone, IconBriefcase, IconUserCircle, IconMapPin } from "@tabler/icons-react";
 import TextfieldComponent from "../../../components/Textfield/Textfield.component";
+import IdentityFields, { IdentityValue, identityError } from "../../../components/IdentityFields/IdentityFields.component";
+import PositionSelect from "../../../components/PositionSelect/PositionSelect.component";
 import PlaceholderSelect from "../../../components/PlaceholderSelect/PlaceholderSelect.component";
 import { FORMS } from "../../../constants/constants";
-import { maskNationalId, maskPhone, digitsOnly } from "../../../utils/mask";
-import {
-  EMPLOYEE_POSITIONS,
-  EMPLOYEE_GENDERS,
-  getEmployeePositionLabel,
-  EmployeeGender,
-} from "@choferes/shared";
+import { maskPhone, digitsOnly } from "../../../utils/mask";
+import { DEFAULT_NATIONALITY, EMPLOYEE_GENDERS, normalizeNationalId } from "@choferes/shared";
+import { format } from "date-fns";
+import { es } from "date-fns/locale";
+import { DatePicker } from "@mui/x-date-pickers/DatePicker";
+import { LocalizationProvider } from "@mui/x-date-pickers";
+import { AdapterDateFns } from "@mui/x-date-pickers/AdapterDateFns";
 import {
   boxRoot,
   gridContainer,
@@ -50,9 +52,14 @@ interface AddEmployeeFormProps {
     lastName: string;
     email?: string;
     nationalId?: string | null;
+    nationalIdType?: string;
+    nationality?: string;
+    birthDate?: string | null;
+    address?: string | null;
     primaryPhone?: string | null;
     secondaryPhone?: string | null;
     position?: string | null;
+    positions?: string[];
     gender?: string | null;
     contractStartDate?: string | null;
     hourlyRate?: number | null;
@@ -89,6 +96,16 @@ const AddEmployeeForm: React.FC<AddEmployeeFormProps> = ({
     contractStartDate: todayStr,
     hourlyRate: "",
   });
+  // Un empleado puede tener varios puestos; se necesita al menos uno.
+  const [positions, setPositions] = useState<string[]>([]);
+  // Documento (cédula, DIMEX, pasaporte u otro) con su nacionalidad y bandera.
+  const [identity, setIdentity] = useState<IdentityValue>({
+    nationalIdType: "cedula",
+    nationalId: "",
+    nationality: DEFAULT_NATIONALITY,
+  });
+  const [birthDate, setBirthDate] = useState("");
+  const [address, setAddress] = useState("");
   const [errors, setErrors] = useState<Record<keyof AddEmployeeFormData, string>>({
     firstName: "",
     lastName: "",
@@ -195,10 +212,10 @@ const AddEmployeeForm: React.FC<AddEmployeeFormProps> = ({
       formData.lastName.trim() !== "" &&
       errors.firstName === "" &&
       errors.lastName === "" &&
-      formData.position.trim() !== "" &&
-      errors.position === "" &&
+      positions.length > 0 &&
       errors.email === "" &&
-      errors.nationalId === "" &&
+      identity.nationalId !== "" &&
+      identityError(identity) === "" &&
       errors.primaryPhone === "" &&
       errors.secondaryPhone === "" &&
       errors.contractStartDate === "" &&
@@ -213,10 +230,15 @@ const AddEmployeeForm: React.FC<AddEmployeeFormProps> = ({
         firstName: formData.firstName.trim(),
         lastName: formData.lastName.trim(),
         email: formData.email.trim() || undefined,
-        nationalId: digitsOnly(formData.nationalId) || null,
+        nationalIdType: identity.nationalIdType,
+        nationalId: normalizeNationalId(identity.nationalIdType, identity.nationalId) || null,
+        nationality: identity.nationality,
+        birthDate: birthDate || null,
+        address: address.trim() || null,
         primaryPhone: digitsOnly(formData.primaryPhone) || null,
         secondaryPhone: digitsOnly(formData.secondaryPhone) || null,
-        position: formData.position.trim(),
+        position: positions[0],
+        positions,
         gender: formData.gender.trim() || null,
         contractStartDate: formData.contractStartDate || null,
         hourlyRate:
@@ -229,6 +251,10 @@ const AddEmployeeForm: React.FC<AddEmployeeFormProps> = ({
 
   // Clears the form and errors
   const handleClearForm = () => {
+    setPositions([]);
+    setIdentity({ nationalIdType: "cedula", nationalId: "", nationality: DEFAULT_NATIONALITY });
+    setBirthDate("");
+    setAddress("");
     setFormData({
       firstName: "",
       lastName: "",
@@ -290,19 +316,40 @@ const AddEmployeeForm: React.FC<AddEmployeeFormProps> = ({
           />
         </Grid>
 
+        <IdentityFields value={identity} onChange={setIdentity} iconColor={theme.palette.text.secondary} />
+
         <Grid item xs={12} sm={6}>
+          <LocalizationProvider dateAdapter={AdapterDateFns} adapterLocale={es}>
+            <DatePicker
+              label="Fecha de nacimiento"
+              value={birthDate ? new Date(`${birthDate}T00:00:00`) : null}
+              onChange={(date) =>
+                setBirthDate(date && !Number.isNaN(date.getTime()) ? format(date, "yyyy-MM-dd") : "")
+              }
+              format="d MMM yyyy"
+              maxDate={new Date()}
+              minDate={new Date(1900, 0, 1)}
+              openTo="year"
+              views={["year", "month", "day"]}
+              slots={{ toolbar: () => null }}
+              slotProps={{ textField: { size: "small", fullWidth: true } }}
+            />
+          </LocalizationProvider>
+        </Grid>
+
+        <Grid item xs={12}>
           <TextfieldComponent
-            placeholder={FORMS.ADD_EMPLOYEE.NATIONAL_ID_PLACEHOLDER}
-            label={FORMS.ADD_EMPLOYEE.NATIONAL_ID_LABEL}
+            placeholder="Provincia, cantón, distrito y otras señas"
+            label="Dirección"
             variant="outlined"
             fullWidth
-            value={formData.nationalId}
-            onChange={(e) => handleFieldChange("nationalId", maskNationalId(e.target.value))}
-            error={errors.nationalId !== ""}
-            helperText={errors.nationalId}
-            icon={<IconId style={iconStyle} />}
+            multiline
+            minRows={2}
+            value={address}
+            onChange={(e) => setAddress(e.target.value)}
+            icon={<IconMapPin style={iconStyle} />}
             sx={formControl(theme)}
-            inputProps={{ inputMode: "numeric", maxLength: 13 }}
+            inputProps={{ maxLength: 500 }}
           />
         </Grid>
 
@@ -355,21 +402,15 @@ const AddEmployeeForm: React.FC<AddEmployeeFormProps> = ({
         </Grid>
 
         <Grid item xs={12} sm={6}>
-          <PlaceholderSelect
+          <PositionSelect
             label={FORMS.ADD_EMPLOYEE.POSITION_LABEL}
             placeholder={FORMS.ADD_EMPLOYEE.POSITION_PLACEHOLDER}
             icon={<IconBriefcase style={iconStyle} />}
-            value={formData.position}
-            onChange={(event) => handleFieldChange("position", String(event.target.value))}
+            value={positions}
+            gender={formData.gender}
+            onChange={setPositions}
             sx={formControl(theme)}
-          >
-            {EMPLOYEE_POSITIONS.map((pos) => (
-              <MenuItem key={pos} value={pos}>
-                {getEmployeePositionLabel(pos, formData.gender as EmployeeGender | null) ?? pos}
-              </MenuItem>
-            ))}
-          </PlaceholderSelect>
-          {errors.position && <Typography variant="caption" sx={{ color: "error.main", mt: 0.5 }}>{errors.position}</Typography>}
+          />
         </Grid>
 
         <Grid item xs={12} sm={6}>

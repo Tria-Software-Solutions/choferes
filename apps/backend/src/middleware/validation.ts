@@ -5,6 +5,10 @@ import {
   DISCIPLINARY_ACTION_TYPES,
   DISCIPLINARY_SEVERITIES,
   EMPLOYEE_POSITIONS,
+  MAX_PLATES_PER_EMPLOYEE,
+  NATIONAL_ID_TYPES,
+  isValidPlate,
+  normalizePlate,
   EMPLOYEE_TERMINATION_REASONS,
   usernameRegex,
 } from "@choferes/shared";
@@ -68,14 +72,55 @@ export const contractBodyRules = [
     .trim()
     .isIn([...EMPLOYEE_POSITIONS])
     .withMessage(`position debe ser uno de: ${EMPLOYEE_POSITIONS.join(", ")}`),
+  // Un empleado puede tener varios puestos (cada uno con su rol).
+  body("positions")
+    .optional({ values: "null" })
+    .isArray({ min: 1, max: EMPLOYEE_POSITIONS.length })
+    .withMessage("positions debe ser una lista con al menos un puesto"),
+  body("positions.*")
+    .isIn([...EMPLOYEE_POSITIONS])
+    .withMessage(`Cada puesto debe ser uno de: ${EMPLOYEE_POSITIONS.join(", ")}`),
   // La cédula y los teléfonos se guardan sin máscara: solo dígitos, para que
   // la base siga siendo ordenable y buscable. El formato se aplica en la UI.
+  // El documento puede ser cédula, DIMEX, pasaporte u otro (los extranjeros tienen
+  // más caracteres e incluso letras): el servicio lo normaliza y valida según
+  // `nationalIdType`.
   body("nationalId")
     .optional({ values: "null" })
     .trim()
-    .customSanitizer((value: string) => value.replace(/\D/g, ""))
-    .isLength({ min: 1, max: 9 })
-    .withMessage("nationalId debe tener entre 1 y 9 dígitos"),
+    .isLength({ max: 30 })
+    .withMessage("nationalId es demasiado largo"),
+  body("nationalIdType")
+    .optional({ values: "null" })
+    .isIn([...NATIONAL_ID_TYPES])
+    .withMessage(`nationalIdType debe ser uno de: ${NATIONAL_ID_TYPES.join(", ")}`),
+  body("nationality")
+    .optional({ values: "null" })
+    .trim()
+    .matches(/^[A-Za-z]{2}$/)
+    .withMessage("nationality debe ser un código de país de 2 letras"),
+  dateOnly("birthDate"),
+  body("birthDate")
+    .optional({ values: "null" })
+    .custom((value: string) => {
+      const date = new Date(`${value}T00:00:00`);
+      return !Number.isNaN(date.getTime()) && date <= new Date() && date.getFullYear() >= 1900;
+    })
+    .withMessage("La fecha de nacimiento no es válida"),
+  body("address")
+    .optional({ values: "null" })
+    .trim()
+    .isLength({ max: 500 })
+    .withMessage("La dirección no puede exceder 500 caracteres"),
+  body("vehiclePlates")
+    .optional({ values: "null" })
+    .isArray({ max: MAX_PLATES_PER_EMPLOYEE })
+    .withMessage(`vehiclePlates admite hasta ${MAX_PLATES_PER_EMPLOYEE} placas`),
+  body("vehiclePlates.*")
+    .isString()
+    .customSanitizer((value: string) => normalizePlate(value))
+    .custom((value: string) => isValidPlate(value))
+    .withMessage("Cada placa debe tener entre 3 y 10 letras o números"),
   phoneRule("primaryPhone"),
   phoneRule("secondaryPhone"),
 ];
@@ -105,7 +150,11 @@ export const employeeRules = [
   // Contract fields for create — same rules as update
   ...contractBodyRules,
   // El puesto es obligatorio: define el rol de acceso del empleado.
-  body("position").trim().notEmpty().withMessage("El puesto es requerido"),
+  body("position")
+    .if((_value, { req }) => !Array.isArray(req.body?.positions) || req.body.positions.length === 0)
+    .trim()
+    .notEmpty()
+    .withMessage("El puesto es requerido"),
   body("gender")
     .optional({ values: "falsy" })
     .isIn(["Masculino", "Femenino"])

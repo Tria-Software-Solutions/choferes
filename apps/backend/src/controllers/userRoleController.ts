@@ -62,11 +62,6 @@ export const createUserRole = async (req: Request, res: Response) => {
     const denial = await accessGrantService.checkRoleAssignment(actor, userId, roleId);
     if (denial) return res.status(denial.status).json({ message: denial.message });
 
-    // Un supervisor (por su puesto) no puede quedarse sin el rol Supervisor.
-    const positionDenial = await positionRoleService.checkRoleFitsEmployeePosition(userId, roleId);
-    if (positionDenial)
-      return res.status(positionDenial.status).json({ message: positionDenial.message });
-
     const userRole = await userRoleService.createUserRole({ userId, roleId } as never);
     return res.status(201).json(userRole);
   } catch (error) {
@@ -79,21 +74,35 @@ export const updateUserRole = async (req: Request, res: Response) => {
   try {
     const actor = (req as AuthenticatedRequest).user;
     const userId = toPositiveInt(req.params.id);
-    const roleId = toPositiveInt(req.body?.roleId);
+    // `roleIds` (lista) reemplaza todos los roles; `roleId` (uno) se mantiene.
+    const rawIds: unknown[] = Array.isArray(req.body?.roleIds)
+      ? req.body.roleIds
+      : [req.body?.roleId];
+    const parsedIds = rawIds.map(toPositiveInt);
+    const roleIds: number[] = Array.from(
+      new Set(parsedIds.filter((id): id is number => id !== null)),
+    );
     if (!actor) return res.status(401).json({ message: "Unauthorized" });
-    if (!userId || !roleId) {
-      return res.status(400).json({ message: "userId y roleId deben ser enteros positivos" });
+    if (!userId || roleIds.length === 0 || parsedIds.includes(null)) {
+      return res.status(400).json({ message: "userId y roleId(s) deben ser enteros positivos" });
     }
 
-    const denial = await accessGrantService.checkRoleAssignment(actor, userId, roleId);
-    if (denial) return res.status(denial.status).json({ message: denial.message });
+    // eslint-disable-next-line no-restricted-syntax
+    for (const roleId of roleIds) {
+      // eslint-disable-next-line no-await-in-loop
+      const denial = await accessGrantService.checkRoleAssignment(actor, userId, roleId);
+      if (denial) return res.status(denial.status).json({ message: denial.message });
+    }
 
     // Un supervisor (por su puesto) no puede quedarse sin el rol Supervisor.
-    const positionDenial = await positionRoleService.checkRoleFitsEmployeePosition(userId, roleId);
+    const positionDenial = await positionRoleService.checkRolesFitEmployeePositions(
+      userId,
+      roleIds,
+    );
     if (positionDenial)
       return res.status(positionDenial.status).json({ message: positionDenial.message });
 
-    const updatedUserRole = await userRoleService.updateUserRole(userId, roleId);
+    const updatedUserRole = await userRoleService.updateUserRole(userId, roleIds);
     if (updatedUserRole) {
       return res.status(200).json(updatedUserRole);
     }
