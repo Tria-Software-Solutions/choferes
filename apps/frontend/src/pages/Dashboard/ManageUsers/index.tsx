@@ -128,6 +128,18 @@ const ManageUsers: React.FC<{ isExpanded?: boolean; hideHeader?: boolean }> = ({
   const [passwordUserId, setPasswordUserId] = useState<number | null>(null);
   const location = useLocation();
 
+  // Formato de nombre: "full" = nombre apellido, "short" = nombre + inicial
+  const [nameFormat, setNameFormat] = useState<"full" | "short">(() => {
+    try { return (localStorage.getItem("usersNameFormat") as "full" | "short") ?? "full"; }
+    catch { return "full"; }
+  });
+  const formatUserName = (user: { firstName?: string; lastName?: string }) => {
+    const first = user.firstName ?? "";
+    const last = user.lastName ?? "";
+    if (nameFormat === "short" && last) return `${first} ${last[0]}.`;
+    return `${first} ${last}`.trim();
+  };
+
   const getInitialRowsPerPage = () => {
     if (typeof window !== 'undefined') {
       const maxHeight = window.innerHeight * 0.6;
@@ -603,6 +615,25 @@ const ManageUsers: React.FC<{ isExpanded?: boolean; hideHeader?: boolean }> = ({
                 )}
               </Box>
 
+              {/* Toggle formato de nombre */}
+              <Box sx={{ display: "flex", gap: 0.5, flexShrink: 0 }}>
+                {(["full", "short"] as const).map((fmt) => (
+                  <Button
+                    key={fmt}
+                    size="small"
+                    variant={nameFormat === fmt ? "contained" : "outlined"}
+                    disableElevation
+                    onClick={() => {
+                      setNameFormat(fmt);
+                      try { localStorage.setItem("usersNameFormat", fmt); } catch { /* noop */ }
+                    }}
+                    sx={{ textTransform: "none", fontWeight: 600, fontSize: "0.75rem", px: 1.25, minWidth: 0 }}
+                  >
+                    {fmt === "full" ? "Nombre completo" : "Inicial"}
+                  </Button>
+                ))}
+              </Box>
+
               {/* Show Inactive Toggle & Add Button */}
               <Box
                 display="flex"
@@ -841,7 +872,7 @@ const ManageUsers: React.FC<{ isExpanded?: boolean; hideHeader?: boolean }> = ({
                           </Box>
                           <Box sx={{ flex: 1, minWidth: 0 }}>
                             <Typography variant="body2" sx={{ fontWeight: 600, fontSize: "0.85rem", color: "text.primary", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
-                              {user.firstName} {user.lastName}
+                              {formatUserName(user)}
                             </Typography>
                             <Typography variant="body2" sx={{ fontWeight: 700, fontSize: "0.72rem", color: "primary.main", display: "block", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", mt: 0.15 }}>
                               {user.roleName || "Sin rol"}

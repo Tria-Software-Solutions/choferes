@@ -112,6 +112,24 @@ export const contractBodyRules = [
     .trim()
     .isLength({ max: 500 })
     .withMessage("La dirección no puede exceder 500 caracteres"),
+  body("preferredName")
+    .optional({ values: "null" })
+    .trim()
+    .isLength({ max: 100 })
+    .withMessage("El nombre preferido no puede exceder 100 caracteres"),
+  body("vehicles")
+    .optional({ values: "null" })
+    .isArray({ max: MAX_PLATES_PER_EMPLOYEE })
+    .withMessage(`vehicles admite hasta ${MAX_PLATES_PER_EMPLOYEE} vehículos`),
+  body("vehicles.*.plate")
+    .isString()
+    .customSanitizer((value: string) => normalizePlate(value))
+    .custom((value: string) => isValidPlate(value))
+    .withMessage("Cada placa debe tener entre 3 y 10 letras o números"),
+  body("vehicles.*.type")
+    .optional()
+    .isIn(["car", "moto", "bus", "truck", "bike"])
+    .withMessage("Tipo de vehículo inválido"),
   body("vehiclePlates")
     .optional({ values: "null" })
     .isArray({ max: MAX_PLATES_PER_EMPLOYEE })

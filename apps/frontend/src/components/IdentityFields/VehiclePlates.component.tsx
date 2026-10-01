@@ -1,65 +1,100 @@
 import React, { useState } from "react";
-import { Box, Button, Chip, TextField, Typography, useTheme } from "@mui/material";
-import { IconCar, IconPlus } from "@tabler/icons-react";
 import {
+  Box,
+  Button,
+  Chip,
+  MenuItem,
+  Select,
+  TextField,
+  Typography,
+  useTheme,
+} from "@mui/material";
+import {
+  IconBike,
+  IconBus,
+  IconCar,
+  IconMotorbike,
+  IconPlus,
+  IconTruck,
+} from "@tabler/icons-react";
+import {
+  DEFAULT_VEHICLE_TYPE,
   MAX_PLATES_PER_EMPLOYEE,
   RESTRICTION_HOURS,
+  VEHICLE_TYPES,
+  VEHICLE_TYPE_LABELS,
+  VehicleType,
   formatPlate,
   getPlateRestriction,
   isValidPlate,
   normalizePlate,
 } from "@choferes/shared";
 
+export interface VehicleEntry {
+  plate: string;
+  type: VehicleType;
+}
+
+const VEHICLE_ICONS: Record<VehicleType, React.ReactNode> = {
+  car: <IconCar size={18} stroke={1.75} />,
+  moto: <IconMotorbike size={18} stroke={1.75} />,
+  bus: <IconBus size={18} stroke={1.75} />,
+  truck: <IconTruck size={18} stroke={1.75} />,
+  bike: <IconBike size={18} stroke={1.75} />,
+};
+
 interface VehiclePlatesProps {
-  plates: string[];
-  /** Con `onChange` se pueden agregar y quitar placas; sin él es solo lectura. */
-  onChange?: (plates: string[]) => void;
+  vehicles: VehicleEntry[];
+  /** Con `onChange` se pueden agregar y quitar vehículos; sin él es solo lectura. */
+  onChange?: (vehicles: VehicleEntry[]) => void;
   disabled?: boolean;
 }
 
-// Placas de los vehículos propios del empleado y su restricción vehicular
-// (hoy no circula de San José: de lunes a viernes, 6:00–19:00, según el último
-// dígito de la placa).
-const VehiclePlates: React.FC<VehiclePlatesProps> = ({ plates, onChange, disabled }) => {
+const VehiclePlates: React.FC<VehiclePlatesProps> = ({ vehicles, onChange, disabled }) => {
   const { colors } = useTheme().tokens;
-  const [draft, setDraft] = useState("");
+  const [draftPlate, setDraftPlate] = useState("");
+  const [draftType, setDraftType] = useState<VehicleType>(DEFAULT_VEHICLE_TYPE);
   const [error, setError] = useState("");
   const editable = Boolean(onChange) && !disabled;
 
   const add = () => {
-    const plate = normalizePlate(draft);
+    const plate = normalizePlate(draftPlate);
     if (!plate) return;
     if (!isValidPlate(plate)) {
       setError("La placa debe tener entre 3 y 10 letras o números");
       return;
     }
-    if (plates.includes(plate)) {
+    if (vehicles.some((v) => v.plate === plate)) {
       setError("Esa placa ya está registrada");
       return;
     }
-    if (plates.length >= MAX_PLATES_PER_EMPLOYEE) {
-      setError(`Máximo ${MAX_PLATES_PER_EMPLOYEE} placas`);
+    if (vehicles.length >= MAX_PLATES_PER_EMPLOYEE) {
+      setError(`Máximo ${MAX_PLATES_PER_EMPLOYEE} vehículos`);
       return;
     }
-    onChange?.([...plates, plate]);
-    setDraft("");
+    onChange?.([...vehicles, { plate, type: draftType }]);
+    setDraftPlate("");
+    setDraftType(DEFAULT_VEHICLE_TYPE);
     setError("");
   };
 
   return (
     <Box sx={{ display: "flex", flexDirection: "column", gap: 1.25 }}>
-      {plates.length === 0 && !editable && (
+      {vehicles.length === 0 && !editable && (
         <Typography variant="body2" sx={{ color: "text.secondary" }}>
           Sin vehículos registrados
         </Typography>
       )}
 
-      {plates.map((plate) => {
-        const restriction = getPlateRestriction(plate);
+      {vehicles.map((entry) => {
+        const restriction = getPlateRestriction(entry.plate);
         const restricted = restriction.restrictedOn;
+        const vehicleType = (VEHICLE_TYPES.includes(entry.type as VehicleType)
+          ? entry.type
+          : DEFAULT_VEHICLE_TYPE) as VehicleType;
         return (
           <Box
-            key={plate}
+            key={entry.plate}
             sx={{
               display: "flex",
               alignItems: "center",
@@ -83,12 +118,17 @@ const VehiclePlates: React.FC<VehiclePlatesProps> = ({ plates, onChange, disable
                 backgroundColor: restricted ? `${colors.warning}26` : colors.hover,
               }}
             >
-              <IconCar size={18} stroke={1.75} />
+              {VEHICLE_ICONS[vehicleType]}
             </Box>
             <Box sx={{ flex: 1, minWidth: 140 }}>
-              <Typography sx={{ fontWeight: 700, fontSize: "0.9rem", letterSpacing: "0.04em" }}>
-                {formatPlate(plate)}
-              </Typography>
+              <Box sx={{ display: "flex", alignItems: "baseline", gap: 0.75 }}>
+                <Typography sx={{ fontWeight: 700, fontSize: "0.9rem", letterSpacing: "0.04em" }}>
+                  {formatPlate(entry.plate)}
+                </Typography>
+                <Typography sx={{ fontSize: "0.75rem", color: "text.disabled" }}>
+                  {VEHICLE_TYPE_LABELS[vehicleType]}
+                </Typography>
+              </Box>
               <Typography sx={{ fontSize: "0.78rem", color: "text.secondary" }}>
                 {restriction.dayName
                   ? `No circula los ${restriction.dayName}, de ${RESTRICTION_HOURS.from} a ${RESTRICTION_HOURS.to}`
@@ -112,7 +152,7 @@ const VehiclePlates: React.FC<VehiclePlatesProps> = ({ plates, onChange, disable
                 size="small"
                 variant="text"
                 color="inherit"
-                onClick={() => onChange?.(plates.filter((item) => item !== plate))}
+                onClick={() => onChange?.(vehicles.filter((v) => v.plate !== entry.plate))}
                 sx={{ textTransform: "none", color: "text.secondary" }}
               >
                 Quitar
@@ -123,12 +163,35 @@ const VehiclePlates: React.FC<VehiclePlatesProps> = ({ plates, onChange, disable
       })}
 
       {editable && (
-        <Box sx={{ display: "flex", gap: 1, alignItems: "flex-start" }}>
+        <Box sx={{ display: "flex", gap: 1, alignItems: "flex-start", flexWrap: "wrap" }}>
+          <Select
+            size="small"
+            value={draftType}
+            onChange={(e) => setDraftType(e.target.value as VehicleType)}
+            sx={{ minWidth: 130 }}
+            renderValue={(v) => (
+              <Box sx={{ display: "flex", alignItems: "center", gap: 0.75 }}>
+                {VEHICLE_ICONS[v as VehicleType]}
+                <Typography sx={{ fontSize: "0.875rem" }}>
+                  {VEHICLE_TYPE_LABELS[v as VehicleType]}
+                </Typography>
+              </Box>
+            )}
+          >
+            {VEHICLE_TYPES.map((type) => (
+              <MenuItem key={type} value={type}>
+                <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+                  {VEHICLE_ICONS[type]}
+                  {VEHICLE_TYPE_LABELS[type]}
+                </Box>
+              </MenuItem>
+            ))}
+          </Select>
           <TextField
             size="small"
-            value={draft}
+            value={draftPlate}
             onChange={(event) => {
-              setDraft(normalizePlate(event.target.value));
+              setDraftPlate(normalizePlate(event.target.value));
               setError("");
             }}
             onKeyDown={(event) => {
@@ -141,14 +204,14 @@ const VehiclePlates: React.FC<VehiclePlatesProps> = ({ plates, onChange, disable
             error={error !== ""}
             helperText={error || "El último dígito define el día de restricción."}
             inputProps={{ maxLength: 10, "aria-label": "Placa del vehículo" }}
-            sx={{ flex: 1, maxWidth: 260 }}
+            sx={{ flex: 1, maxWidth: 200 }}
           />
           <Button
             variant="outlined"
             size="medium"
             startIcon={<IconPlus size={16} />}
             onClick={add}
-            disabled={!draft}
+            disabled={!draftPlate}
             sx={{ textTransform: "none", fontWeight: 600, height: 40 }}
           >
             Agregar
