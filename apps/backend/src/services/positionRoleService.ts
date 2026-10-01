@@ -7,8 +7,10 @@
 // rol genérico de respaldo. Los roles personalizados son independientes del
 // puesto y nunca se tocan aquí.
 import {
+  EMPLOYEE_POSITIONS,
+  getEmployeePositions,
   POSITION_LINKED_ROLE_NAMES,
-  getRoleNameForPosition,
+  getRoleNamesForPositions,
   isManagementRoleName,
 } from "@choferes/shared";
 import Employee from "../models/Employee";
@@ -30,44 +32,70 @@ const SUPERVISOR_ROLE = "Supervisor";
 const isAutoAssignableRole = (name: string): boolean =>
   !isManagementRoleName(name) && (POSITION_LINKED_ROLE_NAMES as readonly string[]).includes(name);
 
-// Rol que le corresponde a un puesto. El puesto es obligatorio y su rol debe
-// existir en la base; si falta cualquiera de los dos se falla explícitamente en
-// vez de asignar un rol genérico.
-export const resolveRoleForPosition = async (position?: string | null): Promise<Role> => {
-  const roleName = getRoleNameForPosition(position);
-  if (!roleName) {
-    throw new ServiceError(400, "El empleado debe tener un puesto para tener acceso al sistema");
+// Normaliza lo que llega del cliente a una lista de puestos válidos: `positions`
+// (lista) tiene prioridad sobre `position` (uno solo, formato anterior). Sin
+// duplicados y en el orden recibido; el primero es el puesto principal.
+export const normalizePositions = (input: {
+  positions?: unknown;
+  position?: unknown;
+}): string[] | undefined => {
+  if (input.positions === undefined && input.position === undefined) return undefined;
+  let raw: unknown[] = [];
+  if (Array.isArray(input.positions)) raw = input.positions;
+  else if (input.position !== undefined) raw = [input.position];
+  const list = Array.from(new Set(raw.map((value) => String(value ?? "").trim()).filter(Boolean)));
+  const valid = (EMPLOYEE_POSITIONS as readonly string[]).includes.bind(EMPLOYEE_POSITIONS);
+  if (list.length === 0 || !list.every((position) => valid(position))) {
+    throw new ServiceError(
+      400,
+      "El empleado debe tener al menos un puesto y todos deben ser puestos válidos",
+    );
   }
-  const role = await Role.findOne({ where: { name: roleName } });
-  if (!role) {
-    throw new ServiceError(500, `El rol del puesto "${roleName}" no está configurado`);
-  }
-  return role;
+  return list;
 };
 
-// Da a la cuenta el rol de su puesto, pero solo si quedó sin ninguno.
+// Roles que le corresponden a una lista de puestos. Los puestos son obligatorios
+// y cada rol debe existir en la base; si falta cualquiera se falla explícitamente
+// en vez de asignar un rol genérico.
+export const resolveRolesForPositions = async (
+  positions?: ReadonlyArray<string | null | undefined> | null,
+): Promise<Role[]> => {
+  const roleNames = getRoleNamesForPositions(positions ?? []);
+  if (roleNames.length === 0) {
+    throw new ServiceError(400, "El empleado debe tener un puesto para tener acceso al sistema");
+  }
+  const roles = await Role.findAll({ where: { name: roleNames } });
+  const missing = roleNames.filter((name) => !roles.some((role) => role.name === name));
+  if (missing.length > 0) {
+    throw new ServiceError(500, `El rol del puesto "${missing[0]}" no está configurado`);
+  }
+  // Mismo orden que los puestos (el primero es el principal).
+  return roleNames.map((name) => roles.find((role) => role.name === name) as Role);
+};
+
+// Da a la cuenta los roles de sus puestos, pero solo si quedó sin ninguno.
 export const assignPositionRoleIfMissing = async (
   userId: number,
-  position?: string | null,
-): Promise<Role | null> => {
+  positions?: ReadonlyArray<string | null | undefined> | null,
+): Promise<Role[]> => {
   const hasAnyRole = await UserRole.findOne({ where: { userId } });
-  if (hasAnyRole) return null;
-  const role = await resolveRoleForPosition(position);
-  await assignRole(userId, role.id);
-  return role;
+  if (hasAnyRole) return [];
+  const roles = await resolveRolesForPositions(positions);
+  await Promise.all(roles.map((role) => assignRole(userId, role.id)));
+  return roles;
 };
 
 export interface AccountRoleChange {
   userId: number;
-  role: Role;
+  roles: Role[];
 }
 
-// Cambio de rol que exige un nuevo puesto sobre la cuenta vinculada al empleado,
-// o null cuando no hay que tocar nada (sin cuenta, rol ya correcto, o la cuenta
-// tiene un rol de gestión o personalizado, que no dependen del puesto).
+// Cambio de roles que exigen los nuevos puestos sobre la cuenta vinculada al
+// empleado, o null cuando no hay que tocar nada (sin cuenta, roles ya correctos,
+// o la cuenta tiene un rol de gestión o personalizado, que no dependen del puesto).
 export const planAccountRoleChange = async (
   employeeId: number,
-  position: string | null,
+  positions: ReadonlyArray<string> | null,
 ): Promise<AccountRoleChange | null> => {
   const user = await User.findOne({
     where: { employeeId },
@@ -81,37 +109,43 @@ export const planAccountRoleChange = async (
   const currentRoles = user.roles ?? [];
   if (currentRoles.some((role) => !isAutoAssignableRole(role.name))) return null;
 
-  const target = await resolveRoleForPosition(position);
-  if (currentRoles.length === 1 && currentRoles[0].id === target.id) return null;
-  return { userId: user.id, role: target };
+  const targets = await resolveRolesForPositions(positions);
+  const sameSet =
+    currentRoles.length === targets.length &&
+    targets.every((target) => currentRoles.some((role) => role.id === target.id));
+  if (sameSet) return null;
+  return { userId: user.id, roles: targets };
 };
 
-// Deja a la cuenta únicamente con el rol indicado.
-export const applyAccountRole = async (userId: number, roleId: number): Promise<void> => {
+// Deja a la cuenta únicamente con los roles indicados.
+export const applyAccountRoles = async (userId: number, roles: Role[]): Promise<void> => {
   await UserRole.destroy({ where: { userId } });
-  await assignRole(userId, roleId);
+  await Promise.all(roles.map((role) => assignRole(userId, role.id)));
 
-  const role = await Role.findByPk(roleId);
   await notifyAccountRoleChange(userId, {
-    action: `su rol cambió a ${role?.name ?? "uno nuevo"} (según su puesto)`,
+    action: `sus roles cambiaron a ${roles.map((role) => role.name).join(", ")} (según sus puestos)`,
   });
 };
 
 // Un supervisor debe tener el rol Supervisor (o uno de gestión, que lo supera).
-// Devuelve el motivo del rechazo cuando `roleId` dejaría a un supervisor sin él.
-export const checkRoleFitsEmployeePosition = async (
+// Devuelve el motivo del rechazo cuando `roleIds` dejaría a un supervisor sin él.
+export const checkRolesFitEmployeePositions = async (
   userId: number,
-  roleId: number,
+  roleIds: number[],
 ): Promise<GrantDenial | null> => {
   const user = await User.findByPk(userId, { attributes: ["id", "employeeId"] });
   if (!user?.employeeId) return null;
 
-  const employee = await Employee.findByPk(user.employeeId, { attributes: ["id", "position"] });
-  if (employee?.position !== SUPERVISOR_POSITION) return null;
+  const employee = await Employee.findByPk(user.employeeId, {
+    attributes: ["id", "position", "positions"],
+  });
+  if (!employee || !getEmployeePositions(employee).includes(SUPERVISOR_POSITION)) return null;
 
-  const role = await Role.findByPk(roleId);
-  if (!role) return { status: 404, message: "Rol no encontrado" };
-  if (isManagementRoleName(role.name) || role.name === SUPERVISOR_ROLE) return null;
+  const roles = await Role.findAll({ where: { id: roleIds } });
+  if (roles.length !== new Set(roleIds).size) return { status: 404, message: "Rol no encontrado" };
+  if (roles.some((role) => isManagementRoleName(role.name) || role.name === SUPERVISOR_ROLE)) {
+    return null;
+  }
 
   return {
     status: 409,

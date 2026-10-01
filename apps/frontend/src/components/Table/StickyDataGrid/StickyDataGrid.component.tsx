@@ -1,4 +1,4 @@
-import React, { memo } from "react";
+import React, { memo, useEffect, useRef } from "react";
 import { Box, useMediaQuery, useTheme } from "@mui/material";
 import { DataGrid, GridColDef, GridValidRowModel, GridRowHeightParams } from "@mui/x-data-grid";
 
@@ -16,7 +16,15 @@ interface StickyDataGridProps<T extends GridValidRowModel> {
   rowHeight?: number;
   /** Función para altura dinámica por fila. Si se provee, tiene prioridad sobre rowHeight. */
   getRowHeight?: (params: GridRowHeightParams) => number;
+  /**
+   * Si se indica, la posición de scroll de la tabla se recuerda con esta clave
+   * y se restaura al volver a la página (p. ej. tras abrir un detalle).
+   */
+  scrollKey?: string;
 }
+
+// Posición de scroll por tabla; vive en memoria mientras dure la sesión de la app.
+const savedScroll = new Map<string, number>();
 
 /**
  * StickyDataGrid - wrapper de MUI X Data Grid con el estilo de tabla de la app:
@@ -31,6 +39,7 @@ function StickyDataGridComponent<T extends GridValidRowModel>({
   disableRowVirtualization = false,
   rowHeight = 60,
   getRowHeight,
+  scrollKey,
 }: StickyDataGridProps<T>) {
   const theme = useTheme();
   const { colors, borders } = theme.tokens;
@@ -38,8 +47,50 @@ function StickyDataGridComponent<T extends GridValidRowModel>({
   // grows with its rows instead of scrolling inside a cramped box.
   const flowLayout = useMediaQuery(theme.breakpoints.down("md"));
 
+  const containerRef = useRef<HTMLDivElement>(null);
+
+  // Restaura el scroll guardado y lo va guardando mientras el usuario se mueve.
+  useEffect(() => {
+    if (!scrollKey || flowLayout) return undefined;
+
+    let frame = 0;
+    let attempts = 0;
+    let scroller: HTMLElement | null = null;
+    const target = savedScroll.get(scrollKey) ?? 0;
+    const onScroll = () => {
+      if (scroller) savedScroll.set(scrollKey, scroller.scrollTop);
+    };
+
+    // El grid puede tardar unos cuadros en montar su contenedor y en tener alto
+    // suficiente para el offset guardado: se reintenta brevemente.
+    const attach = () => {
+      scroller ??= containerRef.current?.querySelector<HTMLElement>(
+        ".MuiDataGrid-virtualScroller",
+      ) ?? null;
+      attempts += 1;
+      if (scroller) {
+        if (target > 0) scroller.scrollTop = target;
+        if (!scroller.dataset.scrollTracked) {
+          scroller.dataset.scrollTracked = "1";
+          scroller.addEventListener("scroll", onScroll, { passive: true });
+        }
+        if (target === 0 || Math.abs(scroller.scrollTop - target) <= 1) return;
+      }
+      if (attempts < 30) frame = requestAnimationFrame(attach);
+    };
+    attach();
+
+    return () => {
+      cancelAnimationFrame(frame);
+      scroller?.removeEventListener("scroll", onScroll);
+    };
+  }, [scrollKey, flowLayout]);
+
   return (
-    <Box sx={{ flex: 1, minHeight: 0, height: flowLayout ? "auto" : "100%", width: "100%" }}>
+    <Box
+      ref={containerRef}
+      sx={{ flex: 1, minHeight: 0, height: flowLayout ? "auto" : "100%", width: "100%" }}
+    >
       <DataGrid
         autoHeight={flowLayout}
         rows={rows}

@@ -9,7 +9,7 @@ jest.mock("../models/Permission", () => {
 });
 
 jest.mock("../models/UserRole", () => {
-  const mock = { findOne: jest.fn() };
+  const mock = { findOne: jest.fn(), findAll: jest.fn() };
   return { __esModule: true, UserRole: mock, default: mock };
 });
 
@@ -79,7 +79,7 @@ describe("checkRoleAssignment", () => {
   });
 
   it("impide cambiar el propio rol, aun con todos los permisos", async () => {
-    UserRole.findOne.mockResolvedValue({ userId: 1, roleId: 2 });
+    UserRole.findAll.mockResolvedValue([{ userId: 1, roleId: 2 }]);
 
     const denial = await accessGrant.checkRoleAssignment(superActor, 1, 1);
 
@@ -87,7 +87,7 @@ describe("checkRoleAssignment", () => {
   });
 
   it("permite reenviar el mismo rol propio (guardar perfil sin cambios)", async () => {
-    UserRole.findOne.mockResolvedValue({ userId: 10, roleId: 3 });
+    UserRole.findAll.mockResolvedValue([{ userId: 10, roleId: 3 }]);
 
     await expect(accessGrant.checkRoleAssignment(limitedActor, 10, 3)).resolves.toBeNull();
     expect(Role.findByPk).not.toHaveBeenCalled();

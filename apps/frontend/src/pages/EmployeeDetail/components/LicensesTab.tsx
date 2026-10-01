@@ -76,8 +76,16 @@ const LicensesTab: React.FC<LicensesTabProps> = ({ employee }) => {
   const { userPermissions } = useAuthContext();
   const { showNotification } = useAppNotifications();
 
-  const licenses = useSelector(selectLicenses);
+  const allLicenses = useSelector(selectLicenses);
   const isLoading = useSelector(selectIsLoadingLicenses);
+  // El store puede traer filas de otros empleados (p. ej. el listado completo de
+  // Planilla): se muestran solo las de este empleado desde el primer cuadro y se
+  // espera la primera carga antes de decidir entre lista o estado vacío.
+  const [loaded, setLoaded] = useState(false);
+  const licenses = useMemo(
+    () => allLicenses.filter((item) => item.employeeId === employee.id),
+    [allLicenses, employee.id],
+  );
   const loadError = useSelector(selectLicensesError);
 
   const [isFormOpen, setIsFormOpen] = useState(false);
@@ -90,7 +98,10 @@ const LicensesTab: React.FC<LicensesTabProps> = ({ employee }) => {
   const canDelete = userPermissions.includes(PERMISSION_CODES.DELETE_LICENSE);
 
   useEffect(() => {
-    void dispatch(fetchLicenses({ employeeId: employee.id, limit: 10000 }));
+    setLoaded(false);
+    void dispatch(fetchLicenses({ employeeId: employee.id, limit: 10000 })).finally(() =>
+      setLoaded(true),
+    );
   }, [dispatch, employee.id]);
 
   const reload = async () => {
@@ -164,7 +175,7 @@ const LicensesTab: React.FC<LicensesTabProps> = ({ employee }) => {
           </Alert>
         )}
 
-        {isLoading && licenses.length === 0 ? (
+        {(isLoading || !loaded) && licenses.length === 0 ? (
           <Box sx={{ display: "flex", justifyContent: "center", py: 4 }}>
             <CircularProgress size={26} />
           </Box>
