@@ -16,6 +16,7 @@ import {
 import {
   IconChevronRight,
   IconDownload,
+  IconEye,
   IconFile,
   IconFolder,
   IconFolderPlus,
@@ -29,6 +30,10 @@ import APPBAR_MENU from "../../constants/appbar.constants";
 import NavIcon from "../../components/NavIcon/NavIcon.component";
 import EmployeeAvatar from "../../components/EmployeeAvatar/EmployeeAvatar.component";
 import PlaceholderSelect from "../../components/PlaceholderSelect/PlaceholderSelect.component";
+import DocumentPreview, {
+  formatBytes,
+  triggerDownload,
+} from "../../components/DocumentPreview/DocumentPreview.component";
 import { EmptyState, PageBody, PageCard, PageContainer, PageHeader } from "../../components/Layout";
 import { useAppNotifications } from "../../components/Snackbar/Snackbar.component";
 import * as EmployeeService from "../../services/employeeService";
@@ -38,25 +43,6 @@ import type { Employee } from "../../models/Employee";
 
 const SHARED_SCOPE = "shared";
 type ScopeValue = typeof SHARED_SCOPE | number;
-
-const formatBytes = (bytes: number): string => {
-  if (!bytes) return "—";
-  if (bytes < 1024) return `${bytes} B`;
-  if (bytes < 1024 * 1024) return `${Math.round(bytes / 1024)} KB`;
-  return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
-};
-
-// Descarga una data URL base64 validando el esquema: una URL `javascript:` se
-// ejecutaría en la sesión de quien la abre.
-const triggerDownload = (url: string | undefined, name: string) => {
-  if (!url || !/^data:[\w.+-]+\/[\w.+-]+;base64,/.test(url)) return;
-  const link = document.createElement("a");
-  link.href = url;
-  link.download = name;
-  document.body.appendChild(link);
-  link.click();
-  document.body.removeChild(link);
-};
 
 const employeeLabel = (employee: Employee) =>
   `${employee.firstName} ${employee.lastName}`.trim();
@@ -91,6 +77,7 @@ const DocumentsPage: React.FC = () => {
     { type: "folder" | "file"; id: number; name: string } | null
   >(null);
   const [deleting, setDeleting] = useState(false);
+  const [previewTarget, setPreviewTarget] = useState<DocumentDTO | null>(null);
 
   const ownerEmployeeId = scopeId === "shared" ? null : scopeId;
 
@@ -414,6 +401,15 @@ const DocumentsPage: React.FC = () => {
                       {formatBytes(doc.size)}
                     </Typography>
                   </Box>
+                  <Tooltip title="Vista previa">
+                    <IconButton
+                      size="small"
+                      aria-label={`Vista previa de ${doc.name}`}
+                      onClick={() => setPreviewTarget(doc)}
+                    >
+                      <IconEye size={16} />
+                    </IconButton>
+                  </Tooltip>
                   <Tooltip title="Descargar">
                     <IconButton
                       size="small"
@@ -471,6 +467,13 @@ const DocumentsPage: React.FC = () => {
           </Button>
         </DialogActions>
       </Dialog>
+
+      {/* Vista previa de un archivo */}
+      <DocumentPreview
+        open={previewTarget != null}
+        doc={previewTarget}
+        onClose={() => setPreviewTarget(null)}
+      />
 
       {/* Confirmación: eliminar carpeta/archivo */}
       <Dialog open={Boolean(deleteTarget)} onClose={() => setDeleteTarget(null)} fullWidth maxWidth="xs">
