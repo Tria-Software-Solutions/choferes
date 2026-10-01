@@ -122,6 +122,8 @@ describe("permission catalog invariants", () => {
       "tasks:edit",
       "tasks:delete",
       "vacations:request",
+      // Documentos es la excepción: Administrativo también sube archivos.
+      "documents:manage",
     ];
     const writes = DEFAULT_ROLE_PERMISSIONS.Administrativo.filter(
       (code) => !code.endsWith(":view") && !code.endsWith(":export"),

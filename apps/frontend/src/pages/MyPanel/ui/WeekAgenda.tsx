@@ -27,136 +27,224 @@ interface WeekAgendaProps {
   todayIso: string;
   emptyTitle?: string;
   emptyDescription?: string;
+  /** Si se debe mostrar el total de horas al pie (default: true). */
+  showTotal?: boolean;
 }
 
-// La semana como calendario en una sola fila: una columna por día con la fecha,
-// el Horario/Lugar y las horas. Solo neutros y el acento del sistema (hoy va
-// tintado). Si no caben las siete columnas (móvil, tarjetas angostas) la fila se
-// desplaza en horizontal en vez de apretar los nombres de los lugares.
+/**
+ * Semana completa estilo calendario: cabecera Lun..Dom y 7 columnas de día.
+ * Ocupa todo el alto del BentoGridItem (flex: 1, minHeight: 0).
+ * Cada celda de día crece para rellenar el espacio; si no hay turnos,
+ * muestra "Sin asignar" centrado.
+ */
 export const WeekAgenda: React.FC<WeekAgendaProps> = ({
   days,
   todayIso,
   emptyTitle = "Sin lugares asignados",
   emptyDescription = "Cuando te asignen un horario y lugar de trabajo lo verás aquí.",
+  showTotal = true,
 }) => {
   const { colors, borders } = useTheme().tokens;
 
   const assignedDays = days.filter(isAssigned);
   if (assignedDays.length === 0) {
-    return <EmptyHint icon={<IconMapPinOff />} title={emptyTitle} description={emptyDescription} />;
+    return (
+      <Box sx={{ flex: 1, display: "flex", flexDirection: "column", minHeight: 0 }}>
+        <EmptyHint icon={<IconMapPinOff />} title={emptyTitle} description={emptyDescription} />
+      </Box>
+    );
   }
+
   const totalHours = days.reduce((sum, day) => sum + day.hours, 0);
 
-  return (
-    <Box sx={{ display: "flex", flexDirection: "column", gap: 1.25 }}>
-      <Box sx={{ overflowX: "auto", mx: -0.5, px: 0.5, pb: 0.5 }}>
+  const dayColumns = days.map((day) => {
+    const isToday = day.date === todayIso;
+    const assigned = isAssigned(day);
+    const date = parseISODate(day.date);
+    const relative = relativeDayLabel(day.date, todayIso);
+
+    return (
+      <Box
+        key={day.date}
+        aria-label={assigned
+          ? `${capitalize(formatLongDate(date))}: ${day.scheduleLabel}, ${formatHours(day.hours)} horas`
+          : `${capitalize(formatLongDate(date))}: sin lugar asignado`}
+        sx={{
+          display: "flex",
+          flexDirection: "column",
+          minWidth: 0,
+          flex: "1 1 0",
+          borderRadius: "10px",
+          border: `1px solid ${isToday ? colors.accent : colors.border}`,
+          backgroundColor: isToday ? colors.accentSoft : colors.surface,
+          overflow: "hidden",
+        }}
+      >
+        {/* Cabecera del día */}
         <Box
-          component="ul"
           sx={{
-            listStyle: "none",
-            m: 0,
-            p: 0,
-            display: "grid",
-            gap: 0.75,
-            gridTemplateColumns: "repeat(7, minmax(88px, 1fr))",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "space-between",
+            gap: 0.5,
+            p: 0.75,
+            borderBottom: borders.hairline,
+            backgroundColor: isToday ? colors.accentSoft : "transparent",
           }}
         >
-          {days.map((day) => {
-            const isToday = day.date === todayIso;
-            const assigned = isAssigned(day);
-            const date = parseISODate(day.date);
-            const relative = relativeDayLabel(day.date, todayIso);
-            const summary = assigned
-              ? `${capitalize(formatLongDate(date))}: ${day.scheduleLabel}, ${formatHours(day.hours)} horas`
-              : `${capitalize(formatLongDate(date))}: sin lugar asignado`;
+          <Box sx={{ display: "flex", alignItems: "baseline", gap: 0.5 }}>
+            <Typography
+              sx={{
+                fontSize: "0.625rem",
+                fontWeight: 700,
+                letterSpacing: "0.05em",
+                textTransform: "uppercase",
+                color: isToday ? colors.accentStrong : colors.textMuted,
+              }}
+            >
+              {SHORT_LABELS[day.day] ?? day.day}
+            </Typography>
+            <Typography
+              component="span"
+              sx={{
+                fontSize: "1.125rem",
+                fontWeight: 800,
+                letterSpacing: "-0.02em",
+                color: isToday ? colors.accentStrong : colors.text,
+              }}
+            >
+              {date.getDate()}
+            </Typography>
+            <Typography
+              sx={{
+                fontSize: "0.5625rem",
+                fontWeight: 600,
+                letterSpacing: "0.03em",
+                textTransform: "uppercase",
+                color: isToday ? colors.accentStrong : colors.textMuted,
+                ml: 0.25,
+              }}
+            >
+              {date.toLocaleDateString("es-ES", { month: "short" }).toUpperCase()}
+            </Typography>
+          </Box>
+          {relative === "Hoy" && (
+            <Typography
+              sx={{
+                fontSize: "0.5625rem",
+                fontWeight: 700,
+                letterSpacing: "0.05em",
+                textTransform: "uppercase",
+                color: colors.accentStrong,
+                whiteSpace: "nowrap",
+              }}
+            >
+              Hoy
+            </Typography>
+          )}
+        </Box>
 
-            return (
-              <Box
-                component="li"
-                key={day.date}
-                aria-label={summary}
-                title={assigned ? (day.scheduleLabel ?? undefined) : undefined}
+        {/* Contenido del día: lugar arriba, horas abajo a la derecha */}
+        <Box
+          sx={{
+            flex: 1,
+            display: "flex",
+            flexDirection: "column",
+            justifyContent: "space-between",
+            p: 1,
+            minHeight: 0,
+          }}
+        >
+          {assigned ? (
+            <>
+              <Typography
                 sx={{
-                  display: "flex",
-                  flexDirection: "column",
-                  gap: 0.5,
-                  minWidth: 0,
-                  minHeight: 116,
-                  p: 1,
-                  borderRadius: "12px",
-                  border: `1px solid ${isToday ? colors.accent : colors.border}`,
-                  backgroundColor: isToday ? colors.accentSoft : "transparent",
+                  fontSize: "0.8125rem",
+                  fontWeight: 600,
+                  color: colors.text,
+                  lineHeight: 1.3,
+                  overflowWrap: "anywhere",
+                  display: "-webkit-box",
+                  WebkitLineClamp: 2,
+                  WebkitBoxOrient: "vertical",
+                  overflow: "hidden",
                 }}
               >
-                <Box aria-hidden sx={{ display: "flex", alignItems: "baseline", gap: 0.6 }}>
-                  <Typography
-                    component="span"
-                    sx={{
-                      fontSize: "0.6875rem",
-                      fontWeight: 700,
-                      letterSpacing: "0.05em",
-                      textTransform: "uppercase",
-                      color: isToday ? colors.accentStrong : colors.textMuted,
-                    }}
-                  >
-                    {SHORT_LABELS[day.day] ?? day.day}
-                  </Typography>
-                  <Typography component="span" sx={{ fontSize: "1.125rem", fontWeight: 800, letterSpacing: "-0.02em", color: colors.text }}>
-                    {date.getDate()}
-                  </Typography>
-                </Box>
+                {day.scheduleLabel}
+              </Typography>
+              <Box
+                sx={{
+                  display: "flex",
+                  justifyContent: "flex-end",
+                  alignItems: "center",
+                  gap: 0.25,
+                  color: colors.textSubtle,
+                  pt: 0.5,
+                }}
+              >
                 <Typography
-                  aria-hidden
                   sx={{
-                    minHeight: 14,
-                    fontSize: "0.625rem",
-                    fontWeight: 700,
-                    letterSpacing: "0.05em",
-                    textTransform: "uppercase",
-                    color: isToday ? colors.accentStrong : colors.textMuted,
+                    fontSize: "0.75rem",
+                    fontWeight: 600,
+                    lineHeight: 1,
+                    color: colors.textSubtle,
                   }}
                 >
-                  {relative === "Hoy" || relative === "Mañana" ? relative : ""}
-                </Typography>
-                <Typography
-                  aria-hidden
-                  sx={{
-                    flex: 1,
-                    fontSize: "0.8125rem",
-                    fontWeight: assigned ? 600 : 400,
-                    lineHeight: 1.3,
-                    color: assigned ? colors.text : colors.textSubtle,
-                    overflowWrap: "anywhere",
-                    display: "-webkit-box",
-                    WebkitLineClamp: 3,
-                    WebkitBoxOrient: "vertical",
-                    overflow: "hidden",
-                  }}
-                >
-                  {assigned ? day.scheduleLabel : "Sin asignar"}
-                </Typography>
-                <Typography
-                  aria-hidden
-                  sx={{ fontSize: "0.8125rem", fontWeight: 700, color: assigned ? colors.text : colors.textSubtle }}
-                >
-                  {assigned ? `${formatHours(day.hours)} h` : "—"}
+                  {formatHours(day.hours)} h
                 </Typography>
               </Box>
-            );
-          })}
+            </>
+          ) : (
+            <Typography
+              sx={{
+                fontSize: "0.8125rem",
+                fontWeight: 400,
+                color: colors.textSubtle,
+              }}
+            >
+              Sin asignar
+            </Typography>
+          )}
         </Box>
       </Box>
+    );
+  });
 
+  return (
+    <Box sx={{ display: "flex", flexDirection: "column", flex: 1, minHeight: 0 }}>
+      {/* 7 columnas de día */}
       <Box
-        sx={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", pt: 1, borderTop: borders.hairline }}
+        sx={{
+          flex: 1,
+          display: "grid",
+          gridTemplateColumns: "repeat(7, 1fr)",
+          gap: "1px",
+          minHeight: 0,
+          overflow: "hidden",
+        }}
       >
-        <Typography sx={{ fontSize: "0.75rem", color: colors.textMuted }}>
-          {assignedDays.length} {assignedDays.length === 1 ? "día" : "días"} con turno
-        </Typography>
-        <Typography sx={{ fontSize: "0.875rem", fontWeight: 700, color: colors.text }}>
-          Total {formatHours(totalHours)} h
-        </Typography>
+        {dayColumns}
       </Box>
+
+      {/* Pie: total horas */}
+      {showTotal && (
+        <Box
+          sx={{
+            display: "flex",
+            justifyContent: "space-between",
+            alignItems: "baseline",
+            pt: 1,
+            px: 0.5,
+          }}
+        >
+          <Typography sx={{ fontSize: "0.75rem", color: colors.textMuted }}>
+            {assignedDays.length} {assignedDays.length === 1 ? "día" : "días"} con turno
+          </Typography>
+          <Typography sx={{ fontSize: "0.875rem", fontWeight: 700, color: colors.text }}>
+            {formatHours(totalHours)} h
+          </Typography>
+        </Box>
+      )}
     </Box>
   );
 };

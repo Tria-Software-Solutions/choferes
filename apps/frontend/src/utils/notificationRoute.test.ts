@@ -14,24 +14,24 @@ const driver = { isManagement: false, permissions: [PERMISSIONS.VIEW_MY_PANEL, P
 
 describe("resolveNotificationUrl", () => {
   it("lleva al gerente directo a las vacaciones del empleado", () => {
-    expect(resolveNotificationUrl("/employees/7?tab=vacaciones", manager)).toBe(
-      "/employees/7?tab=vacaciones",
+    expect(resolveNotificationUrl("/employees/7?tab=vacations", manager)).toBe(
+      "/employees/7?tab=vacations",
     );
   });
 
-  it("lleva al chofer a la pestaña de su panel", () => {
-    expect(resolveNotificationUrl("/mi-panel?tab=vacaciones", driver)).toBe(
-      "/mi-panel?tab=vacaciones",
+  it("lleva al chofer a la pestaña de su panel (/my-panel)", () => {
+    expect(resolveNotificationUrl("/my-panel?tab=vacations", driver)).toBe(
+      "/my-panel?tab=vacations",
     );
   });
 
   it("manda a la pantalla de inicio a quien no tiene Mi Panel (gestión)", () => {
-    expect(resolveNotificationUrl("/mi-panel", manager)).toBe("/");
-    expect(resolveNotificationUrl("/mi-panel?tab=pagos", manager)).toBe("/");
+    expect(resolveNotificationUrl("/my-panel", manager)).toBe("/");
+    expect(resolveNotificationUrl("/my-panel?tab=payments", manager)).toBe("/");
   });
 
   it("no manda a Empleados a quien no puede verlos", () => {
-    expect(resolveNotificationUrl("/employees/7?tab=pagos", driver)).toBeNull();
+    expect(resolveNotificationUrl("/employees/7?tab=payments", driver)).toBeNull();
   });
 
   it("abre Configuración sin pestaña de administración si no hay acceso", () => {

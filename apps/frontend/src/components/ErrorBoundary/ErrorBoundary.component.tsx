@@ -3,6 +3,7 @@ import { Box, Typography, Button, useTheme } from "@mui/material";
 import type { Theme } from "@mui/material/styles";
 import { lightTokens } from "../../theme/tokens";
 import { IconAlertTriangle, IconHome, IconRefresh } from "@tabler/icons-react";
+import ROUTES from "../../constants/routes.constants";
 
 interface ErrorBoundaryProps {
   children: React.ReactNode;
@@ -49,7 +50,7 @@ class ErrorBoundaryClass extends React.Component<
   };
 
   handleGoHome = () => {
-    window.location.href = "/";
+    window.location.href = ROUTES.LOGIN;
   };
 
   render() {

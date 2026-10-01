@@ -11,6 +11,7 @@ import { Employee } from "../../../models/Employee";
 import { EmployeeLicense, LICENSE_TYPES } from "../../../models/EmployeeLicense";
 import { AppDispatch } from "../../../store/store";
 import { createLicense, updateLicense } from "../../../store/slices/licenseSlice";
+import { createMyLicenseRequest } from "../../../services/meService";
 import { useAppNotifications } from "../../../components/Snackbar/Snackbar.component";
 import DialogComponent from "../../../components/Dialog/Dialog.component";
 import TextfieldComponent from "../../../components/Textfield/Textfield.component";
@@ -28,6 +29,11 @@ interface LicenseFormDialogProps {
   employee: Employee;
   license?: EmployeeLicense | null;
   onSaved: () => void;
+  /**
+   * `request`: el propio empleado pide el cambio y queda pendiente de revisión.
+   * `direct` (por defecto): quien administra licencias escribe el expediente.
+   */
+  mode?: "direct" | "request";
 }
 
 // Creates/edits a driver's license. The expiry status is always computed
@@ -38,6 +44,7 @@ const LicenseFormDialog: React.FC<LicenseFormDialogProps> = ({
   employee,
   license,
   onSaved,
+  mode = "direct",
 }) => {
   const dispatch = useDispatch<AppDispatch>();
   const theme = useTheme();
@@ -78,7 +85,16 @@ const LicenseFormDialog: React.FC<LicenseFormDialogProps> = ({
         expiresAt: expiresAt || null,
         notes: notes.trim() || null,
       };
-      if (license) {
+      if (mode === "request") {
+        await createMyLicenseRequest({
+          action: license ? "update" : "create",
+          licenseId: license?.id ?? null,
+          ...payload,
+        });
+        showNotification("Solicitud enviada. Queda pendiente de revisión.", {
+          severity: "success",
+        });
+      } else if (license) {
         await dispatch(updateLicense({ id: license.id, input: payload })).unwrap();
         showNotification("Licencia actualizada", { severity: "success" });
       } else {
@@ -104,8 +120,20 @@ const LicenseFormDialog: React.FC<LicenseFormDialogProps> = ({
     <DialogComponent
       open={open}
       onClose={onClose}
-      title={isEditing ? "Editar licencia" : "Nueva licencia"}
-      subtitle={`${employee.firstName} ${employee.lastName}`}
+      title={
+        mode === "request"
+          ? isEditing
+            ? "Solicitar cambio de licencia"
+            : "Solicitar nueva licencia"
+          : isEditing
+            ? "Editar licencia"
+            : "Nueva licencia"
+      }
+      subtitle={
+        mode === "request"
+          ? "La solicitud queda pendiente de revisión"
+          : `${employee.firstName} ${employee.lastName}`
+      }
       hideActions
       paperSx={{ maxWidth: 520 }}
     >
@@ -211,7 +239,7 @@ const LicenseFormDialog: React.FC<LicenseFormDialogProps> = ({
               fullWidth={isSmallScreen}
               sx={submitButton}
             >
-              {isEditing ? "Guardar" : "Registrar"}
+              {mode === "request" ? "Enviar solicitud" : isEditing ? "Guardar" : "Registrar"}
             </Button>
           </Box>
         </Box>

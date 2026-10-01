@@ -204,7 +204,7 @@ export const createPayment = async (
       type: "info",
       category: "report",
       priority: "low",
-      actionUrl: `/employees/${employeeId}?tab=pagos`,
+      actionUrl: `/employees/${employeeId}?tab=payments`,
       actionText: "Ver boleta",
     });
   }
@@ -280,7 +280,7 @@ export const updatePayment = async (id: number, input: UpdatePaymentInput) => {
       type: "warning",
       category: "report",
       priority: "medium",
-      actionUrl: "/mi-panel?tab=pagos",
+      actionUrl: "/my-panel?tab=payments",
       actionText: "Ver mi boleta",
     });
   }
@@ -333,7 +333,7 @@ export const markPaymentSent = async (id: number) => {
     type: "success",
     category: "employee",
     priority: "low",
-    actionUrl: "/mi-panel?tab=pagos",
+    actionUrl: "/my-panel?tab=payments",
     actionText: "Ver mi boleta",
   });
 
@@ -353,7 +353,7 @@ export const deletePayment = async (id: number) => {
       type: "warning",
       category: "report",
       priority: "medium",
-      actionUrl: payment ? `/employees/${payment.employeeId}?tab=pagos` : "/employees",
+      actionUrl: payment ? `/employees/${payment.employeeId}?tab=payments` : "/employees",
       actionText: "Ver boletas",
     });
     if (payment) {
@@ -364,7 +364,7 @@ export const deletePayment = async (id: number) => {
         type: "warning",
         category: "report",
         priority: "medium",
-        actionUrl: "/mi-panel?tab=pagos",
+        actionUrl: "/my-panel?tab=payments",
         actionText: "Ver mi pagos",
       });
     }

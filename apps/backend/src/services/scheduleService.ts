@@ -120,7 +120,7 @@ export const deleteSchedule = async (id: number) => {
         type: "warning",
         category: "schedule",
         priority: "high",
-        actionUrl: "/mi-panel?tab=horas",
+        actionUrl: "/my-panel?tab=hours",
         actionText: "Ver mi panel",
       }),
     ),

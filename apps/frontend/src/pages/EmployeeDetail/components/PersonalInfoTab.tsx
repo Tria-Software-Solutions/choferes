@@ -14,7 +14,7 @@ import {
   useMediaQuery,
   useTheme,
 } from "@mui/material";
-import { IconAlertTriangle, IconBeach, IconBriefcase, IconCake, IconCalendarCheck, IconCalendarClock, IconCalendarX, IconCar, IconCash, IconCheck, IconClockHour3, IconFileText, IconId, IconInfoCircle, IconKey, IconLoader2, IconMail, IconMapPin, IconPencil, IconPhone, IconRotate, IconUser, IconUserCircle, IconWorld, IconX } from "@tabler/icons-react";
+import { IconActivity, IconAlertTriangle, IconBeach, IconBriefcase, IconCake, IconCalendarCheck, IconCalendarClock, IconCalendarX, IconCar, IconCash, IconCheck, IconClockHour3, IconFileText, IconId, IconInfoCircle, IconKey, IconLoader2, IconLock, IconLockOpen, IconMail, IconMapPin, IconPencil, IconPhone, IconRotate, IconUser, IconUserCircle, IconWorld, IconX } from "@tabler/icons-react";
 import { differenceInCalendarDays, format } from "date-fns";
 import { es } from "date-fns/locale";
 import { DatePicker } from "@mui/x-date-pickers/DatePicker";
@@ -51,6 +51,7 @@ import {
   getEmployeeAccess,
   linkEmployeeToUser,
 } from "../../../services/employeeService";
+import { updateMyProfile } from "../../../services/meService";
 import { digitsOnly, maskPhone } from "../../../utils/mask";
 import { formatMoney } from "../../../utils/paymentSlipPdf";
 import { useAuthContext } from "../../../context/AuthContext";
@@ -58,6 +59,7 @@ import { useAppNotifications } from "../../../components/Snackbar/Snackbar.compo
 import { PERMISSION_CODES } from "../../../constants/permissions.constants";
 import TextfieldComponent from "../../../components/Textfield/Textfield.component";
 import PlaceholderSelect from "../../../components/PlaceholderSelect/PlaceholderSelect.component";
+import { StatusBadge } from "../../../components/Layout/StatusBadge.component";
 import SectionHeader from "./SectionHeader";
 import TempPasswordDialog from "./TempPasswordDialog";
 import {
@@ -72,6 +74,13 @@ interface PersonalInfoTabProps {
   employee: Employee;
   onEmployeeUpdated: (employee: Employee) => void;
   onEmployeeRefresh: () => Promise<void> | void;
+  /**
+   * Autoservicio (Mi Panel → Datos): solo las secciones que el empleado
+   * mantiene (personal, identificación y vehículos), guardadas siempre por la
+   * vía de `updateMyProfile`, con una tarjeta con su propio "Editar". Oculta
+   * contrato, compensación y acceso al sistema (los administra gerencia).
+   */
+  selfService?: boolean;
 }
 
 // Cada sección conserva el mismo layout; sus campos se activan con el botón
@@ -209,15 +218,42 @@ const PersonalInfoTab: React.FC<PersonalInfoTabProps> = ({
   employee,
   onEmployeeUpdated,
   onEmployeeRefresh,
+  selfService = false,
 }) => {
   const dispatch = useDispatch<AppDispatch>();
   const theme = useTheme();
   const isSmallScreen = useMediaQuery(theme.breakpoints.down("sm"));
-  const { userPermissions } = useAuthContext();
+  const { currentUser, userPermissions } = useAuthContext();
   const { showNotification } = useAppNotifications();
 
   const canEdit = userPermissions.includes(PERMISSION_CODES.EDIT_EMPLOYEES);
+  // Autoservicio: cuando la ficha es la del propio usuario, puede mantener sus
+  // datos personales aunque no administre la planilla (misma vía que su panel).
+  // En Mi Panel ya es sus propios datos, así que el autoservicio es implícito.
+  const isSelf = currentUser?.employeeId != null && currentUser.employeeId === employee.id;
+  const canEditOwnData =
+    selfService || (isSelf && userPermissions.includes(PERMISSION_CODES.VIEW_MY_PANEL));
+  // Sin permiso de planilla, el empleado solo puede tocar sus secciones propias.
+  const selfOnly = selfService || (canEditOwnData && !canEdit);
   const canManageUser = userPermissions.includes(PERMISSION_CODES.EDIT_USER) || userPermissions.includes(PERMISSION_CODES.CREATE_USERS);
+  // Estas columnas llegan vacías cuando el backend las oculta, así que sin el
+  // permiso no se muestran: si se mostraran, "no hay dato" se confundiría con
+  // "no te lo puedo mostrar".
+  const canSeePayroll = userPermissions.includes(PERMISSION_CODES.VIEW_PAYMENTS);
+  const canSeeVacationBalance = userPermissions.includes(PERMISSION_CODES.VIEW_VACATIONS);
+  const canSeeCompensation = canSeePayroll || canSeeVacationBalance;
+  // En su propio panel el empleado ve siempre su nombre preferido y dirección;
+  // el backend solo omite esos campos a roles que no pueden ver la planilla.
+  const canSeePrivateData =
+    selfService || userPermissions.includes(PERMISSION_CODES.VIEW_EMPLOYEES);
+  // El nombre preferido se muestra solo si llegó y el rol puede verlo; el
+  // backend lo omite, así que sin permiso vendría vacío y no habría nada que
+  // ocultar salvo el hueco en el grid.
+  const showPreferredName = canSeePrivateData && Boolean(employee.preferredName);
+  const showAddress = canSeePrivateData;
+  // La tarjeta de cuenta de acceso solo aplica a quien administra usuarios o ve
+  // planilla; para el propio empleado su ficha no la necesita.
+  const canViewAccount = !selfService && (canSeePrivateData || canManageUser);
 
   const [form, setForm] = useState(() => buildFormFromEmployee(employee));
   const [hasTermination, setHasTermination] = useState(Boolean(employee.terminationDate));
@@ -235,9 +271,15 @@ const PersonalInfoTab: React.FC<PersonalInfoTabProps> = ({
     tempPassword?: string;
   } | null>(null);
 
+  // Secciones que el propio empleado puede mantener (contacto, documento,
+  // residencia y vehículos). Puesto, contrato y compensación siguen siendo de
+  // administración.
+  const SELF_SERVICE_SECTIONS: readonly EditSection[] = ["personal", "identity", "vehicles"];
+  const canEditSection = (section: EditSection) =>
+    canEdit || (canEditOwnData && SELF_SERVICE_SECTIONS.includes(section));
   // Los campos de una sección solo aceptan cambios cuando esa sección está en
   // edición (botón "Editar" en su encabezado).
-  const isEditing = (section: EditSection) => canEdit && editingSection === section;
+  const isEditing = (section: EditSection) => canEditSection(section) && editingSection === section;
 
   useEffect(() => {
     setForm(buildFormFromEmployee(employee));
@@ -246,6 +288,10 @@ const PersonalInfoTab: React.FC<PersonalInfoTabProps> = ({
 
   // Estado de la cuenta de acceso (se recarga al cambiar de empleado).
   useEffect(() => {
+    if (!canViewAccount) {
+      setAccess(null);
+      return undefined;
+    }
     let cancelled = false;
     getEmployeeAccess(employee.id)
       .then((data) => {
@@ -257,7 +303,7 @@ const PersonalInfoTab: React.FC<PersonalInfoTabProps> = ({
     return () => {
       cancelled = true;
     };
-  }, [employee.id]);
+  }, [employee.id, canViewAccount]);
 
   // Vuelve a los valores guardados y sale del modo edición.
   const resetForm = () => {
@@ -353,6 +399,27 @@ const PersonalInfoTab: React.FC<PersonalInfoTabProps> = ({
     }
     setIsSaving(true);
     try {
+      // Autoservicio: el empleado guarda solo sus campos propios por la vía de
+      // Mi Panel (el servidor filtra por lista blanca).
+      if (selfOnly) {
+        await updateMyProfile({
+          email: form.email.trim() || null,
+          preferredName: form.preferredName.trim() || null,
+          primaryPhone: digitsOnly(form.primaryPhone) || null,
+          secondaryPhone: digitsOnly(form.secondaryPhone) || null,
+          gender: form.gender.trim() || null,
+          nationalIdType: form.nationalIdType,
+          nationalId: normalizeNationalId(form.nationalIdType, form.nationalId) || null,
+          nationality: form.nationality,
+          birthDate: form.birthDate || null,
+          address: form.address.trim() || null,
+          vehicles: form.vehicles,
+        });
+        await onEmployeeRefresh();
+        setEditingSection(null);
+        showNotification("Datos guardados", { severity: "success" });
+        return;
+      }
       const updated = await dispatch(
         updateEmployee({
           id: employee.id,
@@ -447,16 +514,9 @@ const PersonalInfoTab: React.FC<PersonalInfoTabProps> = ({
     }
   };
 
-  const registeredAt = employee.createdAt
-    ? format(new Date(employee.createdAt), "dd MMM yyyy", { locale: es })
-    : null;
-
-  // La fila muestra una fecha, así que un calendario comunica mejor el
-  // "desde el ..." que un icono de usuario.
-
   // Botón "Editar" a la derecha del título de cada sección.
   const editAction = (section: EditSection) =>
-    canEdit && editingSection !== section ? (
+    canEditSection(section) && editingSection !== section ? (
       <Button
         size="small"
         variant="text"
@@ -483,30 +543,16 @@ const PersonalInfoTab: React.FC<PersonalInfoTabProps> = ({
 
           {!isEditing("personal") ? (
             <InfoGrid>
-              <InfoCell label="Nombre completo" icon={<IconUser size={13} />} span={employee.preferredName ? 1 : 2}>
+              {/* El span del nombre deja el hueco al nombre preferido; si el apodo
+                  no se puede ver, el nombre completo ocupa la fila entera. */}
+              <InfoCell label="Nombre completo" icon={<IconUser size={13} />} span={showPreferredName ? 1 : 2}>
                 {employee.firstName} {employee.lastName}
               </InfoCell>
-              {employee.preferredName && (
+              {showPreferredName && (
                 <InfoCell label="Nombre preferido" icon={<IconUser size={13} />}>
                   {employee.preferredName}
                 </InfoCell>
               )}
-              <InfoCell label="Estado">
-                <Box sx={{ display: "flex", alignItems: "center", gap: 1, flexWrap: "wrap" }}>
-                  <Chip
-                    size="small"
-                    label={employee.isActive === false ? "Inactivo" : "Activo"}
-                    color={employee.isActive === false ? "error" : "success"}
-                    variant="outlined"
-                    sx={{ height: 22, fontWeight: 700, fontSize: "0.7rem" }}
-                  />
-                  {registeredAt && (
-                    <Typography variant="caption" sx={{ color: "text.secondary" }}>
-                      desde el {registeredAt}
-                    </Typography>
-                  )}
-                </Box>
-              </InfoCell>
               <InfoCell label="Puesto" icon={<IconBriefcase size={13} />}>
                 {getEmployeePositionsLabel(
                   employee,
@@ -540,7 +586,7 @@ const PersonalInfoTab: React.FC<PersonalInfoTabProps> = ({
                 icon={<IconUser size={20} color={theme.palette.text.secondary} />}
                 value={form.firstName}
                 onChange={(event) => update("firstName", event.target.value)}
-                disabled={!isEditing("personal") || isSaving}
+                disabled={!isEditing("personal") || isSaving || selfOnly}
                 error={firstNameInvalid}
                 helperText={firstNameInvalid ? "El nombre es obligatorio" : undefined}
                 inputProps={{ maxLength: 100 }}
@@ -554,7 +600,7 @@ const PersonalInfoTab: React.FC<PersonalInfoTabProps> = ({
                 icon={<IconUser size={20} color={theme.palette.text.secondary} />}
                 value={form.lastName}
                 onChange={(event) => update("lastName", event.target.value)}
-                disabled={!isEditing("personal") || isSaving}
+                disabled={!isEditing("personal") || isSaving || selfOnly}
                 error={lastNameInvalid}
                 helperText={lastNameInvalid ? "El apellido es obligatorio" : undefined}
                 inputProps={{ maxLength: 100 }}
@@ -584,7 +630,7 @@ const PersonalInfoTab: React.FC<PersonalInfoTabProps> = ({
                 icon={<IconBriefcase size={20} color={theme.palette.text.secondary} />}
                 value={form.positions}
                 gender={form.gender}
-                disabled={!isEditing("personal") || isSaving}
+                disabled={!isEditing("personal") || isSaving || selfOnly}
                 onChange={(positions) => setForm((prev) => ({ ...prev, positions }))}
               />
             </Grid>
@@ -689,9 +735,11 @@ const PersonalInfoTab: React.FC<PersonalInfoTabProps> = ({
                   "Sin registrar"
                 )}
               </InfoCell>
-              <InfoCell label="Dirección" icon={<IconMapPin size={13} />} span={2}>
-                {employee.address || "Sin dirección registrada"}
-              </InfoCell>
+              {showAddress && (
+                <InfoCell label="Dirección" icon={<IconMapPin size={13} />}>
+                  {employee.address || "Sin dirección registrada"}
+                </InfoCell>
+              )}
             </InfoGrid>
           ) : (
             <Grid container spacing={{ xs: 2, sm: 2.5 }}>
@@ -742,26 +790,8 @@ const PersonalInfoTab: React.FC<PersonalInfoTabProps> = ({
           )}
         </Paper>
 
-        {/* ── Vehículos propios y restricción vehicular ── */}
-        <Paper elevation={0} sx={sectionPaperStyles(theme)}>
-          <SectionHeader
-            icon={<IconCar size={20} stroke={1.5} />}
-            title="Vehículos propios"
-            description="Placas de sus carros, para saber si les aplica la restricción vehicular de San José."
-            actions={editAction("vehicles")}
-          />
-          <VehiclePlates
-            vehicles={form.vehicles}
-            onChange={
-              isEditing("vehicles")
-                ? (vehicles) => setForm((prev) => ({ ...prev, vehicles }))
-                : undefined
-            }
-            disabled={isSaving}
-          />
-        </Paper>
-
-        {/* ── Contrato y egreso ── */}
+        {/* ── Contrato y egreso ── (no aplica al autoservicio) */}
+        {!selfService && (
         <Paper elevation={0} sx={sectionPaperStyles(theme)}>
           <SectionHeader
             icon={<IconFileText size={20} stroke={1.5} />}
@@ -860,6 +890,16 @@ const PersonalInfoTab: React.FC<PersonalInfoTabProps> = ({
                 );
               })()}
               <InfoGrid>
+                {/* Estado laboral: lo deriva la fecha de egreso, no la cuenta.
+                    Ocupa la fila entera para que el grid cierre parejo con y
+                            sin egreso: estado(2) + ingreso/antigüedad + egreso/motivo + notas(2). */}
+                <InfoCell label="Estado" icon={<IconActivity size={13} />} span={2}>
+                  <StatusBadge
+                    size="small"
+                    tone={employee.isActive === false ? "default" : "success"}
+                    label={employee.isActive === false ? "Inactivo" : "Activo"}
+                  />
+                </InfoCell>
                 <InfoCell label="Fecha de ingreso" icon={<IconCalendarCheck size={13} />}>
                   {employee.contractStartDate
                     ? formatDate(employee.contractStartDate)
@@ -1120,8 +1160,31 @@ const PersonalInfoTab: React.FC<PersonalInfoTabProps> = ({
           </>
           )}
         </Paper>
+        )}
+
+        {/* ── Vehículos propios y restricción vehicular ── */}
+        <Paper elevation={0} sx={sectionPaperStyles(theme)}>
+          <SectionHeader
+            icon={<IconCar size={20} stroke={1.5} />}
+            title="Vehículos propios"
+            description="Placas de sus carros, para saber si les aplica la restricción vehicular de San José."
+            actions={editAction("vehicles")}
+          />
+          <VehiclePlates
+            vehicles={form.vehicles}
+            onChange={
+              isEditing("vehicles")
+                ? (vehicles) => setForm((prev) => ({ ...prev, vehicles }))
+                : undefined
+            }
+            disabled={isSaving}
+          />
+        </Paper>
 
         {/* ── Datos de pago y vacaciones ── */}
+        {/* Sin permisos de compensación la tarjeta no se muestra: no hay dato
+            que ver y no es asunto del rol que la consulta. */}
+        {!selfService && canSeeCompensation && (
         <Paper elevation={0} sx={sectionPaperStyles(theme)}>
           <SectionHeader
             icon={<IconCash size={20} stroke={1.5} />}
@@ -1132,16 +1195,20 @@ const PersonalInfoTab: React.FC<PersonalInfoTabProps> = ({
 
           {!isEditing("payment") ? (
             <InfoGrid>
-              <InfoCell label="Tarifa por hora" icon={<IconCash size={13} />}>
-                {employee.hourlyRate != null
-                  ? formatMoney(Number(employee.hourlyRate), "CRC")
-                  : "Sin tarifa registrada"}
-              </InfoCell>
-              <InfoCell label="Vacaciones disponibles" icon={<IconBeach size={13} />}>
-                {employee.vacationDays != null
-                  ? `${employee.vacationDays} ${employee.vacationDays === 1 ? "día" : "días"}`
-                  : "Sin saldo"}
-              </InfoCell>
+              {canSeePayroll && (
+                <InfoCell label="Tarifa por hora" icon={<IconCash size={13} />}>
+                  {employee.hourlyRate != null
+                    ? formatMoney(Number(employee.hourlyRate), "CRC")
+                    : "Sin tarifa registrada"}
+                </InfoCell>
+              )}
+              {canSeeVacationBalance && (
+                <InfoCell label="Vacaciones disponibles" icon={<IconBeach size={13} />}>
+                  {employee.vacationDays != null
+                    ? `${employee.vacationDays} ${employee.vacationDays === 1 ? "día" : "días"}`
+                    : "Sin saldo"}
+                </InfoCell>
+              )}
             </InfoGrid>
           ) : (
           <>
@@ -1203,40 +1270,64 @@ const PersonalInfoTab: React.FC<PersonalInfoTabProps> = ({
           </>
           )}
         </Paper>
+        )}
 
         {/* ── Acceso al sistema ── */}
+        {!selfService && canViewAccount && (
         <Paper elevation={0} sx={sectionPaperStyles(theme)}>
           <SectionHeader
             icon={<IconKey size={20} stroke={1.5} />}
             title="Acceso al sistema"
-            description="Crea la cuenta de login del empleado y entrega una contraseña temporal. El rol de la cuenta es el de su puesto."
+            description={
+              canManageUser
+                ? "Crea la cuenta de login del empleado y entrega una contraseña temporal. El rol de la cuenta es el de su puesto."
+                : "Cuenta de login del empleado y roles que tiene asignados."
+            }
           />
 
-          <Box
-            sx={{
-              display: "flex",
-              alignItems: "center",
-              gap: 1,
-              mb: 2.5,
-              color: theme.palette.text.secondary,
-            }}
-          >
-            <IconInfoCircle size={16} />
-            <Typography variant="caption">
-              El usuario es su correo electrónico. Si ya tiene cuenta, no se crea otra. La cuenta
-              recibe {hasSeveralPositions ? "los roles" : "el rol"} &quot;{expectedRoleName}&quot;
-              {getEmployeePositions(employee).includes("supervisor")
-                ? " (un supervisor siempre tiene el de Supervisor)"
-                : ""}{" "}
-              y {hasSeveralPositions ? "cambian" : "cambia"} si {hasSeveralPositions ? "cambian sus puestos" : "cambia su puesto"}.
-            </Typography>
-          </Box>
+          {/* Solo quien puede administrar usuarios recibe las instrucciones y el
+              botón; el resto ve el estado de la cuenta, sin llamadas a la acción
+              que no puede ejecutar. */}
+          {canManageUser && (
+            <Box
+              sx={{
+                display: "flex",
+                alignItems: "center",
+                gap: 1,
+                mb: 2.5,
+                color: theme.palette.text.secondary,
+              }}
+            >
+              <IconInfoCircle size={16} />
+              <Typography variant="caption">
+                El usuario es su correo electrónico. Si ya tiene cuenta, no se crea otra. La cuenta
+                recibe {hasSeveralPositions ? "los roles" : "el rol"} &quot;{expectedRoleName}&quot;
+                {getEmployeePositions(employee).includes("supervisor")
+                  ? " (un supervisor siempre tiene el de Supervisor)"
+                  : ""}{" "}
+                y {hasSeveralPositions ? "cambian" : "cambia"} si {hasSeveralPositions ? "cambian sus puestos" : "cambia su puesto"}.
+              </Typography>
+            </Box>
+          )}
 
           {access?.hasUser && (
             <Box sx={{ display: "flex", flexDirection: "column", gap: 1.5, mb: 2.5 }}>
-              {/* Estado de la cuenta: usuario vinculado y sus roles. */}
+              {/* Estado de la cuenta: usuario vinculado, si el login está
+                  habilitado y sus roles. */}
               <Box sx={{ display: "flex", alignItems: "center", gap: 1, flexWrap: "wrap" }}>
                 <Chip size="small" label={`@${access.username}`} sx={{ fontWeight: 600 }} />
+                <StatusBadge
+                  size="small"
+                  tone={access.isActive ? "success" : "danger"}
+                  icon={
+                    access.isActive ? (
+                      <IconLockOpen size={12} stroke={2} />
+                    ) : (
+                      <IconLock size={12} stroke={2} />
+                    )
+                  }
+                  label={access.isActive ? "Acceso habilitado" : "Acceso bloqueado"}
+                />
                 {access.roles.length > 0 ? (
                   access.roles.map((role) => (
                     <Chip key={role.id} size="small" variant="outlined" label={role.name} />
@@ -1246,7 +1337,19 @@ const PersonalInfoTab: React.FC<PersonalInfoTabProps> = ({
                 )}
               </Box>
 
-              {access.needsRole && (
+              {!access.isActive && (
+                <Typography
+                  variant="caption"
+                  sx={{ color: "text.secondary", lineHeight: 1.45, mb: 2.5 }}
+                >
+                  La cuenta existe pero está deshabilitada: el login se rechaza aunque tenga rol.
+                  Se habilita o deshabilita desde Usuarios.
+                </Typography>
+              )}
+
+              {/* El aviso con su botón es una tarea de quien administra usuarios;
+                  los demás solo necesitan saber que la cuenta quedó sin rol. */}
+              {access.needsRole && canManageUser && (
                 <Box
                   sx={{
                     display: "flex",
@@ -1316,6 +1419,18 @@ const PersonalInfoTab: React.FC<PersonalInfoTabProps> = ({
             </Box>
           )}
 
+          {!access && (
+            <Typography variant="body2" sx={{ color: "text.secondary" }}>
+              Cargando estado de la cuenta…
+            </Typography>
+          )}
+
+          {access && !access.hasUser && (
+            <Typography variant="body2" sx={{ color: "text.secondary" }}>
+              Este empleado no tiene cuenta de acceso al sistema.
+            </Typography>
+          )}
+
           {canManageUser && (
             <Button
               variant="outlined"
@@ -1334,6 +1449,7 @@ const PersonalInfoTab: React.FC<PersonalInfoTabProps> = ({
             </Button>
           )}
         </Paper>
+        )}
 
         {editingSection !== null && (
           <Box sx={[actionsBox(theme), { mb: { xs: 1, sm: 2 } }]}>

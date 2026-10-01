@@ -38,6 +38,7 @@ const NotFound = lazy(() => import("./pages/ErrorPages/NotFound"));
 const Forbidden = lazy(() => import("./pages/ErrorPages/Forbidden"));
 const ErrorPage = lazy(() => import("./pages/ErrorPages/Error"));
 const Dashboard = lazy(() => import("./pages/Dashboard/Dashboard"));
+const DocumentsPage = lazy(() => import("./pages/Documents"));
 const MyPanel = lazy(() => import("./pages/MyPanel"));
 const SessionExpired = lazy(() => import("./pages/ErrorPages/SessionExpired"));
 
@@ -99,6 +100,12 @@ const AppBarWrapper: React.FC = () => {
       permission: PERMISSION_CODES.VIEW_ADMIN,
     },
     {
+      label: APPBAR_MENU.DOCUMENTS,
+      icon: <NavIcon label={APPBAR_MENU.DOCUMENTS} />,
+      path: ROUTES.DOCUMENTS,
+      permission: PERMISSION_CODES.VIEW_DOCUMENTS,
+    },
+    {
       label: APPBAR_MENU.TASKS,
       icon: <NavIcon label={APPBAR_MENU.TASKS} />,
       path: ROUTES.TASKS,
@@ -118,6 +125,7 @@ const AppBarWrapper: React.FC = () => {
     [APPBAR_MENU.ROLES]: PERMISSION_CODES.VIEW_ROLES,
     [APPBAR_MENU.VEHICLES]: PERMISSION_CODES.VIEW_VEHICLES,
     [APPBAR_MENU.DASHBOARD]: PERMISSION_CODES.VIEW_ADMIN,
+    [APPBAR_MENU.DOCUMENTS]: PERMISSION_CODES.VIEW_DOCUMENTS,
     [APPBAR_MENU.TASKS]: PERMISSION_CODES.VIEW_TASKS,
   };
 
@@ -203,52 +211,45 @@ const AppContent: React.FC = () => {
 
   // List of routes where AppBar should be hidden
   const hideAppBarRoutes = [
-    "/",
-    "/error",
-    "/session-expired",
-    "/forbidden",
+    ROUTES.LOGIN,
+    ROUTES.ERROR,
+    ROUTES.SESSION_EXPIRED,
+    ROUTES.FORBIDDEN,
   ];
 
   // Helper: known app routes (excluding error/forbidden/notfound/sessionexpired)
+  // Se leen de ROUTES para que renombrar una ruta no pueda quedar a medias: los
+  // <Route> de abajo también las consumen.
   const knownAppRoutes = [
-    "/",
-    "/roles",
-    "/employees",
-    "/schedules",
-    "/vehicles",
-    "/dashboard",
-    "/mi-panel",
-    "/settings",
+    ROUTES.LOGIN,
+    ROUTES.ROLES,
+    ROUTES.EMPLOYEES,
+    ROUTES.SCHEDULES,
+    ROUTES.VEHICLES,
+    ROUTES.DASHBOARD,
+    ROUTES.DOCUMENTS,
+    ROUTES.MY_PANEL,
+    ROUTES.PROFILE,
     "/profile",
-    "/tasks",
+    ROUTES.TASKS,
+    ROUTES.LEGACY_MY_PANEL,
   ];
 
   // Only use wallpaper for login and error pages
+  const isKnownAppPath = knownAppRoutes.some(
+    (route) =>
+      location.pathname === route || location.pathname.startsWith(route + "/"),
+  );
+
+  // Only use wallpaper for login and error pages
   const isAuthPage =
-    location.pathname === "/" ||
-    location.pathname === "/error" ||
-    location.pathname === "/session-expired" ||
-    location.pathname === "/forbidden" ||
-    location.pathname === "/notfound" ||
-    (!knownAppRoutes.some(
-      (route) =>
-        location.pathname === route ||
-        location.pathname.startsWith(route + "/"),
-    ) &&
-      location.pathname !== "/error" &&
-      location.pathname !== "/session-expired");
+    hideAppBarRoutes.includes(location.pathname) ||
+    location.pathname === ROUTES.NOT_FOUND ||
+    !isKnownAppPath;
 
   // Hide AppBar if on any of the hideAppBarRoutes, or if on a not found route
-  const isHideAppBar =
-    hideAppBarRoutes.includes(location.pathname) ||
-    // NotFound: if current path is not in knownAppRoutes and not a subroute of them
-    (!knownAppRoutes.some(
-      (route) =>
-        location.pathname === route ||
-        location.pathname.startsWith(route + "/"),
-    ) &&
-      location.pathname !== "/error" &&
-      location.pathname !== "/session-expired");
+  // (path fuera de las rutas conocidas y de las de error).
+  const isHideAppBar = isAuthPage;
 
   const safeUserPermissions = userPermissions || [];
 
@@ -275,7 +276,7 @@ const AppContent: React.FC = () => {
           <Suspense fallback={<PageLoader />}>
             <Routes>
             <Route
-              path="/"
+              path={ROUTES.LOGIN}
               element={
                 currentUser ? (
                   <Navigate to={getDefaultRoute(safeUserPermissions, isManagement)} />
@@ -286,101 +287,118 @@ const AppContent: React.FC = () => {
             />
                       <Route element={<ProtectedRoute />}>
               <Route
-                path="/roles"
+                path={ROUTES.ROLES}
                 element={
                   safeUserPermissions.includes(PERMISSION_CODES.VIEW_ROLES) ? (
                     <RolesPage />
                   ) : (
-                    <Navigate to="/forbidden" replace />
+                    <Navigate to={ROUTES.FORBIDDEN} replace />
                   )
                 }
               />
               <Route
-                path="/employees"
+                path={ROUTES.EMPLOYEES}
                 element={
                   safeUserPermissions.includes(PERMISSION_CODES.VIEW_EMPLOYEES) ? (
                     <EmployeesPage />
                   ) : (
-                    <Navigate to="/forbidden" replace />
+                    <Navigate to={ROUTES.FORBIDDEN} replace />
                   )
                 }
               />
               <Route
-                path="/employees/:id"
+                path={`${ROUTES.EMPLOYEES}/:id`}
                 element={
                   safeUserPermissions.includes(PERMISSION_CODES.VIEW_EMPLOYEES) ? (
                     <EmployeeDetail />
                   ) : (
-                    <Navigate to="/forbidden" replace />
+                    <Navigate to={ROUTES.FORBIDDEN} replace />
                   )
                 }
               />
               <Route
-                path="/schedules"
+                path={ROUTES.SCHEDULES}
                 element={
                   safeUserPermissions.includes(PERMISSION_CODES.VIEW_SCHEDULES) ? (
                     <SchedulesPage />
                   ) : (
-                    <Navigate to="/forbidden" replace />
+                    <Navigate to={ROUTES.FORBIDDEN} replace />
                   )
                 }
               />
               <Route
-                path="/vehicles"
+                path={ROUTES.VEHICLES}
                 element={
                   safeUserPermissions.includes(PERMISSION_CODES.VIEW_VEHICLES) ? (
                     <VehiclesPage />
                   ) : (
-                    <Navigate to="/forbidden" replace />
+                    <Navigate to={ROUTES.FORBIDDEN} replace />
                   )
                 }
               />
               <Route
-                path="/tasks"
+                path={ROUTES.TASKS}
                 element={
                   safeUserPermissions.includes(PERMISSION_CODES.VIEW_TASKS) ? (
                     <TasksPage />
                   ) : (
-                    <Navigate to="/forbidden" replace />
+                    <Navigate to={ROUTES.FORBIDDEN} replace />
                   )
                 }
               />
               <Route
-                path="/dashboard"
+                path={ROUTES.DASHBOARD}
                 element={
                   safeUserPermissions.includes(PERMISSION_CODES.VIEW_ADMIN) ? (
                     <Dashboard />
                   ) : (
-                    <Navigate to="/forbidden" replace />
+                    <Navigate to={ROUTES.FORBIDDEN} replace />
                   )
                 }
               />
               <Route
-                path="/mi-panel"
+                path={ROUTES.DOCUMENTS}
+                element={
+                  safeUserPermissions.includes(PERMISSION_CODES.VIEW_DOCUMENTS) ? (
+                    <DocumentsPage />
+                  ) : (
+                    <Navigate to={ROUTES.FORBIDDEN} replace />
+                  )
+                }
+              />
+              <Route
+                path={ROUTES.MY_PANEL}
                 element={
                   safeUserPermissions.includes(PERMISSION_CODES.VIEW_MY_PANEL) ? (
                     <MyPanel />
                   ) : (
-                    <Navigate to="/forbidden" replace />
+                    <Navigate to={ROUTES.FORBIDDEN} replace />
                   )
                 }
               />
               <Route
-                path="/settings"
+                path={ROUTES.PROFILE}
                 element={
                   safeUserPermissions.includes(PERMISSION_CODES.VIEW_PROFILE) ? (
                     <Profile />
                   ) : (
-                    <Navigate to="/forbidden" replace />
+                    <Navigate to={ROUTES.FORBIDDEN} replace />
                   )
                 }
               />
-              <Route path="/profile" element={<Navigate to="/settings" replace />} />
+              <Route
+                path={ROUTES.LEGACY_MY_PANEL}
+                element={<Navigate to={ROUTES.MY_PANEL} replace />}
+              />
+              <Route
+                path={ROUTES.LEGACY_PROFILE}
+                element={<Navigate to={ROUTES.PROFILE} replace />}
+              />
             </Route>
-            <Route path="/forbidden" element={<Forbidden />} />
+            <Route path={ROUTES.FORBIDDEN} element={<Forbidden />} />
             <Route path="*" element={<NotFound />} />
-            <Route path="/error" element={<ErrorPage />} />
-            <Route path="/session-expired" element={<SessionExpired />} />
+            <Route path={ROUTES.ERROR} element={<ErrorPage />} />
+            <Route path={ROUTES.SESSION_EXPIRED} element={<SessionExpired />} />
           </Routes>
           </Suspense>
           </ErrorBoundary>
