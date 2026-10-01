@@ -3,7 +3,7 @@ import { Badge, Box, IconButton, Skeleton, Tab, Tabs, Tooltip, Typography, useMe
 import { keyframes } from "@mui/material/styles";
 import { IconBeach, IconHourglass, IconMapPin, IconMapPinOff, IconRefresh } from "@tabler/icons-react";
 import type { User } from "../../../models/User";
-import { getEmployeePositionLabel } from "../../../models/Employee";
+import { getEmployeePositionsLabel } from "@choferes/shared";
 import EmployeeAvatar from "../../../components/EmployeeAvatar/EmployeeAvatar.component";
 import UserAvatar from "../../../components/UserAvatar/UserAvatar.component";
 import { formatTenure } from "../../../utils/tenure";
@@ -79,7 +79,7 @@ export const MyPanelHeader: React.FC<MyPanelHeaderProps> = ({
   const employee = overview?.employee;
 
   const firstName = user?.firstName || employee?.firstName || "";
-  const position = employee ? getEmployeePositionLabel(employee.position, employee.gender) : null;
+  const position = employee ? getEmployeePositionsLabel(employee, employee.gender) : null;
   const dateText = capitalize(formatLongDate(now));
   const subtitle = [position, dateText].filter(Boolean).join(" · ");
 

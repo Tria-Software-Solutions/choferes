@@ -3,10 +3,22 @@
 // eslint-disable-next-line import/no-named-as-default
 import bcrypt from "bcrypt";
 import * as crypto from "crypto";
-import { EMPLOYEE_POSITIONS } from "@choferes/shared";
+import {
+  DEFAULT_NATIONALITY,
+  MAX_PLATES_PER_EMPLOYEE,
+  NationalIdType,
+  getEmployeePositions,
+  getEmployeePositionsLabel,
+  isNationalIdType,
+  isValidPlate,
+  normalizeNationalId,
+  normalizePlate,
+  validateNationalId,
+} from "@choferes/shared";
 import Employee from "../models/Employee";
 import { HoursWorked } from "../models/HoursWorked";
 import { Role } from "../models/Role";
+import { UserRole } from "../models/UserRole";
 import User from "../models/User";
 import { ServiceError } from "../utils/errors";
 import type { AuthenticatedUser } from "../middleware/authorize";
@@ -18,10 +30,11 @@ import {
   notifyAccountRoleChange,
 } from "./notificationService";
 import {
-  applyAccountRole,
+  applyAccountRoles,
   assignPositionRoleIfMissing,
+  normalizePositions,
   planAccountRoleChange,
-  resolveRoleForPosition,
+  resolveRolesForPositions,
 } from "./positionRoleService";
 import { assignRole } from "./userRoleService";
 import {
@@ -137,8 +150,14 @@ const EDITABLE_FIELDS = [
   "terminationReason",
   "terminationNotes",
   "position",
+  "positions",
   "gender",
   "nationalId",
+  "nationalIdType",
+  "nationality",
+  "birthDate",
+  "address",
+  "vehiclePlates",
   "primaryPhone",
   "secondaryPhone",
   "scheduledTerminationDate",
@@ -167,28 +186,56 @@ const pickEditableFields = (data: Record<string, unknown>): Record<string, unkno
 
 // Garantiza que los valores "controlados" caigan fuera del rango esperado
 // queden como null en lugar de persistir basura.
-const DIGIT_ONLY_FIELDS = ["nationalId", "primaryPhone", "secondaryPhone"] as const;
+const DIGIT_ONLY_FIELDS = ["primaryPhone", "secondaryPhone"] as const;
 
 // La máscara (cédula, teléfonos) es solo de la vista: si el cliente manda
 // guiones se quitan antes de tocar la base.
-const sanitizeControlledValues = (clean: Record<string, unknown>): Record<string, unknown> => {
+const sanitizeControlledValues = (
+  clean: Record<string, unknown>,
+  storedIdType?: NationalIdType,
+): Record<string, unknown> => {
   const sanitized = { ...clean };
   DIGIT_ONLY_FIELDS.forEach((field) => {
     if (typeof sanitized[field] === "string") {
       sanitized[field] = (sanitized[field] as string).replace(/\D/g, "") || null;
     }
   });
+  // Documento de identidad: cédula y DIMEX solo llevan dígitos; pasaporte y otros
+  // admiten letras. La cédula implica nacionalidad costarricense.
+  if (sanitized.nationalIdType !== undefined || sanitized.nationalId !== undefined) {
+    const type = (sanitized.nationalIdType ?? storedIdType ?? "cedula") as NationalIdType;
+    if (!isNationalIdType(type)) throw new ServiceError(400, "Tipo de documento inválido");
+    sanitized.nationalIdType = type;
+    if (typeof sanitized.nationalId === "string") {
+      const normalized = normalizeNationalId(type, sanitized.nationalId);
+      const problem = validateNationalId(type, normalized);
+      if (problem) throw new ServiceError(400, problem);
+      sanitized.nationalId = normalized || null;
+    }
+    if (type === "cedula") sanitized.nationality = DEFAULT_NATIONALITY;
+  }
+  if (typeof sanitized.nationality === "string") {
+    sanitized.nationality = sanitized.nationality.toUpperCase();
+  }
+  if (sanitized.vehiclePlates !== undefined) {
+    const plates = Array.isArray(sanitized.vehiclePlates) ? sanitized.vehiclePlates : [];
+    sanitized.vehiclePlates = Array.from(
+      new Set(plates.map((plate) => normalizePlate(String(plate))).filter(isValidPlate)),
+    ).slice(0, MAX_PLATES_PER_EMPLOYEE);
+  }
+  if (typeof sanitized.address === "string") {
+    sanitized.address = sanitized.address.trim() || null;
+  }
   if (sanitized.gender != null && !GENDERS.has(String(sanitized.gender))) {
     sanitized.gender = null;
   }
-  // El puesto es obligatorio y define el rol de acceso de la cuenta, así que un
-  // valor nulo o desconocido se rechaza en vez de guardarse como null (lo que
-  // además violaría el NOT NULL de employees.position).
-  if (
-    sanitized.position !== undefined &&
-    !(EMPLOYEE_POSITIONS as readonly string[]).includes(String(sanitized.position))
-  ) {
-    throw new ServiceError(400, "El puesto es requerido y debe ser uno de los puestos válidos");
+  // Los puestos son obligatorios y definen los roles de acceso de la cuenta, así
+  // que una lista vacía o con valores desconocidos se rechaza. `position` queda
+  // como el puesto principal (el primero) y `positions` como la lista completa.
+  const positions = normalizePositions(sanitized);
+  if (positions) {
+    sanitized.positions = positions;
+    [sanitized.position] = positions;
   }
   return sanitized;
 };
@@ -201,7 +248,7 @@ export const createEmployee = async (data: Record<string, unknown>) => {
   await notifyManagementRoles({
     source: `employee-created:${newEmployee.id}`,
     title: "Empleado registrado",
-    message: `Se registró a ${newEmployee.firstName} ${newEmployee.lastName} (${newEmployee.position ?? "sin puesto"}).`,
+    message: `Se registró a ${newEmployee.firstName} ${newEmployee.lastName} (${getEmployeePositionsLabel(newEmployee, null) ?? "sin puesto"}).`,
     type: "info",
     category: "employee",
     priority: "medium",
@@ -222,7 +269,14 @@ export const updateEmployee = async (
   data: Record<string, unknown>,
   actor?: AuthenticatedUser,
 ) => {
-  const clean = sanitizeControlledValues(pickEditableFields(data));
+  // Si solo llega el número de documento, se valida con el tipo ya guardado.
+  const picked = pickEditableFields(data);
+  const storedIdType =
+    picked.nationalId !== undefined && picked.nationalIdType === undefined
+      ? ((await Employee.findByPk(id, { attributes: ["id", "nationalIdType"] }))?.nationalIdType as
+          NationalIdType | undefined)
+      : undefined;
+  const clean = sanitizeControlledValues(picked, storedIdType);
 
   if (
     clean.terminationReason != null &&
@@ -250,16 +304,24 @@ export const updateEmployee = async (
   // Rol que exige el nuevo puesto sobre la cuenta vinculada (se valida antes de
   // guardar nada para no dejar el puesto cambiado con un rol rechazado).
   const roleChange =
-    clean.position !== undefined
-      ? await planAccountRoleChange(id, (clean.position as string | null) ?? null)
+    clean.positions !== undefined
+      ? await planAccountRoleChange(id, clean.positions as string[])
       : null;
   if (roleChange && actor) {
-    const denial = await checkRoleGrant(actor, roleChange.role.id);
-    if (denial) {
-      throw new ServiceError(
-        denial.status,
-        `No se puede cambiar el puesto: la cuenta del empleado pasaría a tener el rol "${roleChange.role.name}". ${denial.message}.`,
-      );
+    // Solo se revisan los roles que la cuenta todavía no tiene.
+    const currentIds = new Set(
+      (await UserRole.findAll({ where: { userId: roleChange.userId } })).map((row) => row.roleId),
+    );
+    // eslint-disable-next-line no-restricted-syntax
+    for (const role of roleChange.roles.filter((target) => !currentIds.has(target.id))) {
+      // eslint-disable-next-line no-await-in-loop
+      const denial = await checkRoleGrant(actor, role.id);
+      if (denial) {
+        throw new ServiceError(
+          denial.status,
+          `No se puede cambiar el puesto: la cuenta del empleado pasaría a tener el rol "${role.name}". ${denial.message}.`,
+        );
+      }
     }
   }
 
@@ -267,7 +329,7 @@ export const updateEmployee = async (
     await Employee.update(clean, { where: { id } });
   }
   if (roleChange) {
-    await applyAccountRole(roleChange.userId, roleChange.role.id);
+    await applyAccountRoles(roleChange.userId, roleChange.roles);
   }
 
   if (clean.terminationDate) {
@@ -349,11 +411,10 @@ export const getEmployeesByDepartment = async (department: string) =>
   });
 
 // Fetches all employees by position, ordered by first name
-export const getEmployeesByPosition = async (position: string) =>
-  Employee.findAll({
-    where: { position },
-    order: [["firstName", "ASC"]],
-  });
+export const getEmployeesByPosition = async (position: string) => {
+  const employees = await Employee.findAll({ order: [["firstName", "ASC"]] });
+  return employees.filter((employee) => getEmployeePositions(employee).includes(position));
+};
 
 // Fetches employees by a search term (matches multiple fields)
 export const getEmployeesBySearch = async (searchTerm: string) =>
@@ -399,7 +460,7 @@ const generateTempPassword = (): string => {
 // (supervisor → Supervisor). El puesto es obligatorio.
 export const linkEmployeeToUser = async (employeeId: number, actor?: AuthenticatedUser) => {
   const employee = await Employee.findByPk(employeeId, {
-    attributes: ["id", "firstName", "lastName", "email", "position"],
+    attributes: ["id", "firstName", "lastName", "email", "position", "positions"],
   });
   if (!employee) throw new ServiceError(404, "Empleado no encontrado");
 
@@ -407,18 +468,22 @@ export const linkEmployeeToUser = async (employeeId: number, actor?: Authenticat
   if (existing) {
     // Cuentas creadas antes del arreglo quedaron sin rol: se les asigna el
     // de su puesto la primera vez que se vuelve a enlazar.
-    await assignPositionRoleIfMissing(existing.id, employee.position);
+    await assignPositionRoleIfMissing(existing.id, getEmployeePositions(employee));
     return { user: existing, created: false };
   }
 
-  const role = await resolveRoleForPosition(employee.position);
+  const roles = await resolveRolesForPositions(getEmployeePositions(employee));
   if (actor) {
-    const denial = await checkRoleGrant(actor, role.id);
-    if (denial) {
-      throw new ServiceError(
-        denial.status,
-        `No se puede activar el acceso: el puesto del empleado le da el rol "${role.name}". ${denial.message}.`,
-      );
+    // eslint-disable-next-line no-restricted-syntax
+    for (const role of roles) {
+      // eslint-disable-next-line no-await-in-loop
+      const denial = await checkRoleGrant(actor, role.id);
+      if (denial) {
+        throw new ServiceError(
+          denial.status,
+          `No se puede activar el acceso: el puesto del empleado le da el rol "${role.name}". ${denial.message}.`,
+        );
+      }
     }
   }
 
@@ -468,7 +533,7 @@ export const linkEmployeeToUser = async (employeeId: number, actor?: Authenticat
   });
 
   // Sin esto la cuenta nacía sin permisos (no podía ver ni Tareas/Perfil).
-  await assignRole(user.id, role.id);
+  await Promise.all(roles.map((role) => assignRole(user.id, role.id)));
 
   await createNotification(user.id, {
     source: `account-created:${user.id}`,
@@ -531,7 +596,9 @@ export const getEmployeeAccess = async (employeeId: number): Promise<EmployeeAcc
 export const assignDefaultRoleToEmployeeUser = async (
   employeeId: number,
 ): Promise<EmployeeAccess> => {
-  const employee = await Employee.findByPk(employeeId, { attributes: ["id", "position"] });
+  const employee = await Employee.findByPk(employeeId, {
+    attributes: ["id", "position", "positions"],
+  });
   if (!employee) throw new ServiceError(404, "Empleado no encontrado");
 
   const user = await User.findOne({ where: { employeeId: employee.id }, attributes: ["id"] });
@@ -539,10 +606,11 @@ export const assignDefaultRoleToEmployeeUser = async (
     throw new ServiceError(400, "El empleado no tiene una cuenta de acceso al sistema");
   }
 
-  await assignPositionRoleIfMissing(user.id, employee.position);
-  const role = await resolveRoleForPosition(employee.position);
+  const positions = getEmployeePositions(employee);
+  await assignPositionRoleIfMissing(user.id, positions);
+  const roles = await resolveRolesForPositions(positions);
   await notifyAccountRoleChange(user.id, {
-    action: `se le asignó el rol ${role.name}, según su puesto (${employee.position})`,
+    action: `se le asignó ${roles.length === 1 ? "el rol" : "los roles"} ${roles.map((role) => role.name).join(", ")}, según ${positions.length === 1 ? "su puesto" : "sus puestos"} (${getEmployeePositionsLabel(employee, null)})`,
   });
   return getEmployeeAccess(employeeId);
 };

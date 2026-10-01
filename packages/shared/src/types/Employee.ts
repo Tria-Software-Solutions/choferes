@@ -43,6 +43,8 @@ export const EMPLOYEE_GENDERS: readonly EmployeeGender[] = [
 // nombre (ver `POSITION_ROLE_NAMES`): un supervisor siempre tiene el rol
 // Supervisor. El orden va de menor a mayor privilegio y es el que muestra el
 // selector de puesto.
+import type { NationalIdType } from "./EmployeeIdentity";
+
 export type EmployeePosition =
   | "chofer"
   | "chofer_coordinador"
@@ -69,6 +71,13 @@ export const EMPLOYEE_POSITION_LABELS: Record<EmployeePosition, string> = {
   gerencia: "Gerencia",
 };
 
+// Valores fuera del catálogo (datos anteriores) nunca se muestran con guiones
+// bajos: "chofer_coordinador" -> "Chofer coordinador".
+const humanizeKey = (value: string): string => {
+  const spaced = value.replace(/_/g, " ").trim();
+  return spaced.charAt(0).toUpperCase() + spaced.slice(1);
+};
+
 // Etiqueta de un puesto. "Supervisor" pasa a "Supervisora", "Chofer
 // coordinador" a "Chofer coordinadora" y "Administrativo" a "Administrativa"
 // cuando el género del empleado es femenino. "Gerencia" nombra un área, no una
@@ -80,13 +89,43 @@ export const getEmployeePositionLabel = (
 ): string | null => {
   if (!position) return null;
   const base = EMPLOYEE_POSITION_LABELS[position as EmployeePosition];
-  if (!base) return position;
+  if (!base) return humanizeKey(position);
   if (gender === "Femenino") {
     if (position === "supervisor") return "Supervisora";
     if (position === "chofer_coordinador") return "Chofer coordinadora";
     if (position === "administrativo") return "Administrativa";
   }
   return base;
+};
+
+/**
+ * Puestos de un empleado. `positions` es la lista completa (un empleado puede
+ * tener varios); `position` es el principal (el primero) y se conserva para el
+ * código que solo conoce uno. Siempre devuelve al menos los puestos válidos
+ * conocidos, sin duplicados y en el orden en que se guardaron.
+ */
+export const getEmployeePositions = (employee: {
+  positions?: readonly string[] | null;
+  position?: string | null;
+}): string[] => {
+  const list =
+    employee.positions && employee.positions.length > 0
+      ? [...employee.positions]
+      : employee.position
+        ? [employee.position]
+        : [];
+  return Array.from(new Set(list.filter(Boolean)));
+};
+
+/** "Chofer, Supervisor": todos los puestos con su etiqueta, separados por coma. */
+export const getEmployeePositionsLabel = (
+  employee: { positions?: readonly string[] | null; position?: string | null },
+  gender: EmployeeGender | null | undefined,
+): string | null => {
+  const labels = getEmployeePositions(employee)
+    .map((position) => getEmployeePositionLabel(position, gender))
+    .filter((label): label is string => Boolean(label));
+  return labels.length > 0 ? labels.join(", ") : null;
 };
 
 export interface Employee {
@@ -105,10 +144,25 @@ export interface Employee {
   terminationNotes?: string | null;
   /** Puesto o cargo (base: chofer | cajero | supervisor, o legado como texto libre). */
   position?: string | null;
+  /** Todos los puestos del empleado (el primero es `position`). */
+  positions?: string[] | null;
   /** Género del empleado ("Masculino" | "Femenino"). */
   gender?: EmployeeGender | null;
-  /** Cédula de identidad. Solo dígitos: la máscara se aplica en la UI. */
+  /**
+   * Documento de identidad. Cédula y DIMEX: solo dígitos (la máscara se aplica en
+   * la UI); pasaporte y otros: letras y números en mayúscula.
+   */
   nationalId?: string | null;
+  /** Tipo del documento: cédula (por defecto), DIMEX, pasaporte u otro. */
+  nationalIdType?: NationalIdType;
+  /** Nacionalidad (ISO 3166-1 alfa-2). La bandera sale de aquí. */
+  nationality?: string | null;
+  /** Fecha de nacimiento, YYYY-MM-DD. */
+  birthDate?: string | null;
+  /** Dirección de residencia. */
+  address?: string | null;
+  /** Placas de los vehículos propios del empleado (para la restricción vehicular). */
+  vehiclePlates?: string[] | null;
   /** Teléfono principal. Solo dígitos: la máscara se aplica en la UI. */
   primaryPhone?: string | null;
   /** Teléfono secundario (opcional). Solo dígitos. */

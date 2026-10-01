@@ -26,7 +26,7 @@ jest.mock("../models/User", () => {
 });
 
 jest.mock("../models/Role", () => {
-  const mock = { findOne: jest.fn(), findByPk: jest.fn() };
+  const mock = { findOne: jest.fn(), findByPk: jest.fn(), findAll: jest.fn() };
   return { __esModule: true, default: mock, Role: mock };
 });
 
@@ -119,29 +119,53 @@ describe("catálogo de puestos y roles", () => {
   });
 });
 
-describe("resolveRoleForPosition", () => {
-  it("devuelve el rol con el nombre del puesto", async () => {
-    Role.findOne.mockResolvedValue({ id: 3, name: "Supervisor" });
-
-    const role = await positionRole.resolveRoleForPosition("supervisor");
-
-    expect(Role.findOne).toHaveBeenCalledWith({ where: { name: "Supervisor" } });
-    expect(role.id).toBe(3);
+describe("normalizePositions", () => {
+  it("no hace nada cuando no llegan puestos", () => {
+    expect(positionRole.normalizePositions({})).toBeUndefined();
   });
 
-  it("rechaza el empleado sin puesto", async () => {
-    await expect(positionRole.resolveRoleForPosition(null)).rejects.toMatchObject({
+  it("acepta una lista y quita duplicados conservando el orden", () => {
+    expect(
+      positionRole.normalizePositions({ positions: ["supervisor", "chofer", "supervisor"] }),
+    ).toEqual(["supervisor", "chofer"]);
+  });
+
+  it("acepta el formato anterior de un solo puesto", () => {
+    expect(positionRole.normalizePositions({ position: "chofer" })).toEqual(["chofer"]);
+  });
+
+  it("rechaza listas vacías o con puestos desconocidos", () => {
+    expect(() => positionRole.normalizePositions({ positions: [] })).toThrow();
+    expect(() => positionRole.normalizePositions({ positions: ["cajero"] })).toThrow();
+  });
+});
+
+describe("resolveRolesForPositions", () => {
+  it("devuelve un rol por puesto, sin repetir y en el mismo orden", async () => {
+    Role.findAll.mockResolvedValue([
+      { id: 3, name: "Supervisor" },
+      { id: 6, name: "Chofer" },
+    ]);
+
+    const roles = await positionRole.resolveRolesForPositions(["chofer", "supervisor", "chofer"]);
+
+    expect(Role.findAll).toHaveBeenCalledWith({ where: { name: ["Chofer", "Supervisor"] } });
+    expect(roles.map((role: { name: string }) => role.name)).toEqual(["Chofer", "Supervisor"]);
+  });
+
+  it("rechaza el empleado sin puestos", async () => {
+    await expect(positionRole.resolveRolesForPositions([])).rejects.toMatchObject({
       statusCode: 400,
     });
-    expect(Role.findOne).not.toHaveBeenCalled();
+    expect(Role.findAll).not.toHaveBeenCalled();
   });
 
-  it("falla si el rol del puesto no existe", async () => {
-    Role.findOne.mockResolvedValue(null);
+  it("falla si falta el rol de algún puesto", async () => {
+    Role.findAll.mockResolvedValue([{ id: 6, name: "Chofer" }]);
 
-    await expect(positionRole.resolveRoleForPosition("chofer")).rejects.toMatchObject({
-      statusCode: 500,
-    });
+    await expect(
+      positionRole.resolveRolesForPositions(["chofer", "supervisor"]),
+    ).rejects.toMatchObject({ statusCode: 500 });
   });
 });
 
@@ -151,7 +175,7 @@ describe("planAccountRoleChange", () => {
   it("no hace nada si el empleado no tiene cuenta", async () => {
     User.findOne.mockResolvedValue(null);
 
-    await expect(positionRole.planAccountRoleChange(1, "supervisor")).resolves.toBeNull();
+    await expect(positionRole.planAccountRoleChange(1, ["supervisor"])).resolves.toBeNull();
   });
 
   it("no toca cuentas con Gerencia, Administrativo o un rol personalizado", async () => {
@@ -160,55 +184,75 @@ describe("planAccountRoleChange", () => {
     for (const name of ["Gerencia", "Administrativo", "Contabilidad"]) {
       User.findOne.mockResolvedValue(accountWith({ id: 1, name }));
       // eslint-disable-next-line no-await-in-loop
-      await expect(positionRole.planAccountRoleChange(1, "supervisor")).resolves.toBeNull();
+      await expect(positionRole.planAccountRoleChange(1, ["supervisor"])).resolves.toBeNull();
     }
-    expect(Role.findOne).not.toHaveBeenCalled();
+    expect(Role.findAll).not.toHaveBeenCalled();
   });
 
-  it("sí propone el rol de gerencia a una cuenta operativa que pasa a ese puesto", async () => {
-    User.findOne.mockResolvedValue(accountWith({ id: 7, name: "Chofer" }));
-    Role.findOne.mockResolvedValue({ id: 1, name: "Gerencia" });
+  it("no cambia nada cuando la cuenta ya tiene exactamente los roles de sus puestos", async () => {
+    User.findOne.mockResolvedValue(
+      accountWith({ id: 3, name: "Supervisor" }, { id: 6, name: "Chofer" }),
+    );
+    Role.findAll.mockResolvedValue([
+      { id: 6, name: "Chofer" },
+      { id: 3, name: "Supervisor" },
+    ]);
 
-    const change = await positionRole.planAccountRoleChange(1, "gerencia");
-
-    expect(change?.role.name).toBe("Gerencia");
+    await expect(
+      positionRole.planAccountRoleChange(1, ["chofer", "supervisor"]),
+    ).resolves.toBeNull();
   });
 
-  it("no cambia nada cuando la cuenta ya tiene el rol del puesto", async () => {
-    User.findOne.mockResolvedValue(accountWith({ id: 3, name: "Supervisor" }));
-    Role.findOne.mockResolvedValue({ id: 3, name: "Supervisor" });
+  it("propone todos los roles cuando el empleado suma un segundo puesto", async () => {
+    User.findOne.mockResolvedValue(accountWith({ id: 6, name: "Chofer" }));
+    Role.findAll.mockResolvedValue([
+      { id: 6, name: "Chofer" },
+      { id: 3, name: "Supervisor" },
+    ]);
 
-    await expect(positionRole.planAccountRoleChange(1, "supervisor")).resolves.toBeNull();
+    const change = await positionRole.planAccountRoleChange(1, ["chofer", "supervisor"]);
+
+    expect(change?.userId).toBe(9);
+    expect(change?.roles.map((role: { name: string }) => role.name)).toEqual([
+      "Chofer",
+      "Supervisor",
+    ]);
   });
 
-  it("propone el rol del nuevo puesto cuando la cuenta tiene otro rol operativo", async () => {
-    User.findOne.mockResolvedValue(accountWith({ id: 7, name: "Chofer" }));
-    Role.findOne.mockResolvedValue({ id: 3, name: "Supervisor" });
+  it("quita el rol del puesto que el empleado ya no tiene", async () => {
+    User.findOne.mockResolvedValue(
+      accountWith({ id: 6, name: "Chofer" }, { id: 3, name: "Supervisor" }),
+    );
+    Role.findAll.mockResolvedValue([{ id: 3, name: "Supervisor" }]);
 
-    const change = await positionRole.planAccountRoleChange(1, "supervisor");
+    const change = await positionRole.planAccountRoleChange(1, ["supervisor"]);
 
-    expect(change).toEqual({ userId: 9, role: { id: 3, name: "Supervisor" } });
+    expect(change?.roles).toEqual([{ id: 3, name: "Supervisor" }]);
   });
 
-  it("propone un rol a la cuenta que quedó sin ninguno", async () => {
+  it("propone roles a la cuenta que quedó sin ninguno", async () => {
     User.findOne.mockResolvedValue(accountWith());
-    Role.findOne.mockResolvedValue({ id: 6, name: "Chofer" });
+    Role.findAll.mockResolvedValue([{ id: 6, name: "Chofer" }]);
 
-    const change = await positionRole.planAccountRoleChange(1, "chofer");
+    const change = await positionRole.planAccountRoleChange(1, ["chofer"]);
 
-    expect(change?.role.name).toBe("Chofer");
+    expect(change?.roles[0].name).toBe("Chofer");
   });
 });
 
-describe("applyAccountRole", () => {
-  it("deja a la cuenta únicamente con el rol indicado", async () => {
+describe("applyAccountRoles", () => {
+  it("deja a la cuenta únicamente con los roles indicados", async () => {
     UserRole.findOne.mockResolvedValue(null);
     UserRole.create.mockResolvedValue({});
 
-    await positionRole.applyAccountRole(9, 3);
+    await positionRole.applyAccountRoles(9, [
+      { id: 3, name: "Supervisor" },
+      { id: 6, name: "Chofer" },
+    ] as never);
 
     expect(UserRole.destroy).toHaveBeenCalledWith({ where: { userId: 9 } });
     expect(UserRole.create).toHaveBeenCalledWith({ userId: 9, roleId: 3 });
+    expect(UserRole.create).toHaveBeenCalledWith({ userId: 9, roleId: 6 });
   });
 });
 
@@ -216,57 +260,77 @@ describe("assignPositionRoleIfMissing", () => {
   it("no hace nada si la cuenta ya tiene un rol", async () => {
     UserRole.findOne.mockResolvedValue({ userId: 9, roleId: 1 });
 
-    await expect(positionRole.assignPositionRoleIfMissing(9, "chofer")).resolves.toBeNull();
+    await expect(positionRole.assignPositionRoleIfMissing(9, ["chofer"])).resolves.toEqual([]);
     expect(UserRole.create).not.toHaveBeenCalled();
   });
 
-  it("asigna el rol del puesto cuando no tiene ninguno", async () => {
-    UserRole.findOne.mockResolvedValueOnce(null).mockResolvedValueOnce(null);
-    Role.findOne.mockResolvedValue({ id: 6, name: "Chofer" });
+  it("asigna los roles de los puestos cuando no tiene ninguno", async () => {
+    UserRole.findOne.mockResolvedValue(null);
+    Role.findAll.mockResolvedValue([
+      { id: 6, name: "Chofer" },
+      { id: 3, name: "Supervisor" },
+    ]);
     UserRole.create.mockResolvedValue({});
 
-    const role = await positionRole.assignPositionRoleIfMissing(9, "chofer");
+    const roles = await positionRole.assignPositionRoleIfMissing(9, ["chofer", "supervisor"]);
 
-    expect(role?.name).toBe("Chofer");
+    expect(roles.map((role: { name: string }) => role.name)).toEqual(["Chofer", "Supervisor"]);
     expect(UserRole.create).toHaveBeenCalledWith({ userId: 9, roleId: 6 });
+    expect(UserRole.create).toHaveBeenCalledWith({ userId: 9, roleId: 3 });
   });
 });
 
-describe("checkRoleFitsEmployeePosition", () => {
+describe("checkRolesFitEmployeePositions", () => {
   const linkedSupervisor = () => {
     User.findByPk.mockResolvedValue({ id: 9, employeeId: 4 });
-    Employee.findByPk.mockResolvedValue({ id: 4, position: "supervisor" });
+    Employee.findByPk.mockResolvedValue({ id: 4, position: "supervisor", positions: ["supervisor"] });
   };
 
   it("permite cualquier rol si el usuario no está vinculado a un empleado", async () => {
     User.findByPk.mockResolvedValue({ id: 9, employeeId: null });
 
-    await expect(positionRole.checkRoleFitsEmployeePosition(9, 7)).resolves.toBeNull();
+    await expect(positionRole.checkRolesFitEmployeePositions(9, [7])).resolves.toBeNull();
   });
 
   it("permite cualquier rol si el empleado no es supervisor", async () => {
     User.findByPk.mockResolvedValue({ id: 9, employeeId: 4 });
-    Employee.findByPk.mockResolvedValue({ id: 4, position: "chofer" });
+    Employee.findByPk.mockResolvedValue({ id: 4, position: "chofer", positions: ["chofer"] });
 
-    await expect(positionRole.checkRoleFitsEmployeePosition(9, 7)).resolves.toBeNull();
+    await expect(positionRole.checkRolesFitEmployeePositions(9, [7])).resolves.toBeNull();
+  });
+
+  it("también aplica cuando supervisor es uno de varios puestos", async () => {
+    User.findByPk.mockResolvedValue({ id: 9, employeeId: 4 });
+    Employee.findByPk.mockResolvedValue({
+      id: 4,
+      position: "chofer",
+      positions: ["chofer", "supervisor"],
+    });
+    Role.findAll.mockResolvedValue([{ id: 7, name: "Chofer" }]);
+
+    const denial = await positionRole.checkRolesFitEmployeePositions(9, [7]);
+
+    expect(denial).toEqual(expect.objectContaining({ status: 409 }));
   });
 
   it("impide quitarle el rol Supervisor a un supervisor", async () => {
     linkedSupervisor();
-    Role.findByPk.mockResolvedValue({ id: 7, name: "Chofer" });
+    Role.findAll.mockResolvedValue([{ id: 7, name: "Chofer" }]);
 
-    const denial = await positionRole.checkRoleFitsEmployeePosition(9, 7);
+    const denial = await positionRole.checkRolesFitEmployeePositions(9, [7]);
 
     expect(denial).toEqual(expect.objectContaining({ status: 409 }));
     expect(denial?.message).toContain("Supervisor");
   });
 
-  it("permite el rol Supervisor y los de gestión, que lo superan", async () => {
+  it("permite el rol Supervisor (aunque vaya con otros) y los de gestión", async () => {
     linkedSupervisor();
-    for (const name of ["Supervisor", "Gerencia", "Administrativo"]) {
-      Role.findByPk.mockResolvedValue({ id: 1, name });
+    for (const names of [["Supervisor"], ["Gerencia"], ["Administrativo"], ["Chofer", "Supervisor"]]) {
+      Role.findAll.mockResolvedValue(names.map((name, i) => ({ id: i + 1, name })));
       // eslint-disable-next-line no-await-in-loop
-      await expect(positionRole.checkRoleFitsEmployeePosition(9, 1)).resolves.toBeNull();
+      await expect(
+        positionRole.checkRolesFitEmployeePositions(9, names.map((_n, i) => i + 1)),
+      ).resolves.toBeNull();
     }
   });
 });
