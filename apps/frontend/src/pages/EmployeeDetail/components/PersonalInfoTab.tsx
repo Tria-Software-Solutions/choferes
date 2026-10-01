@@ -27,19 +27,21 @@ import {
 } from "../../../models/Employee";
 import {
   DEFAULT_NATIONALITY,
+  DEFAULT_VEHICLE_TYPE,
   EMPLOYEE_GENDERS,
   EMPLOYEE_TERMINATION_REASONS,
   NATIONAL_ID_TYPE_LABELS,
   NationalIdType,
+  VehicleType,
   formatNationalId,
-  getFlagEmoji,
   normalizeNationalId,
   getEmployeePositions,
   getEmployeePositionsLabel,
   getRoleNamesForPositions,
 } from "@choferes/shared";
 import IdentityFields, { countryLabel, identityError } from "../../../components/IdentityFields/IdentityFields.component";
-import VehiclePlates from "../../../components/IdentityFields/VehiclePlates.component";
+import { getFlagEmoji } from "@choferes/shared";
+import VehiclePlates, { VehicleEntry } from "../../../components/IdentityFields/VehiclePlates.component";
 import PositionSelect from "../../../components/PositionSelect/PositionSelect.component";
 import { AppDispatch } from "../../../store/store";
 import { updateEmployee } from "../../../store/slices/employeeSlice";
@@ -136,6 +138,7 @@ const parseStoredDate = (value: string | null | undefined): Date | null => {
 const buildFormFromEmployee = (employee: Employee) => ({
   firstName: employee.firstName ?? "",
   lastName: employee.lastName ?? "",
+  preferredName: employee.preferredName ?? "",
   email: employee.email ?? "",
   primaryPhone: maskPhone(employee.primaryPhone ?? ""),
   secondaryPhone: maskPhone(employee.secondaryPhone ?? ""),
@@ -149,7 +152,7 @@ const buildFormFromEmployee = (employee: Employee) => ({
   nationality: employee.nationality ?? DEFAULT_NATIONALITY,
   birthDate: employee.birthDate ?? "",
   address: employee.address ?? "",
-  vehiclePlates: employee.vehiclePlates ?? [],
+  vehicles: (employee.vehicles ?? (employee.vehiclePlates ?? []).map((p) => ({ plate: p, type: DEFAULT_VEHICLE_TYPE as VehicleType }))) as VehicleEntry[],
   contractStartDate: employee.contractStartDate ?? "",
   terminationDate: employee.terminationDate ?? "",
   terminationReason: employee.terminationReason ?? "",
@@ -263,7 +266,7 @@ const PersonalInfoTab: React.FC<PersonalInfoTabProps> = ({
     setEditingSection(null);
   };
 
-  const update = (field: Exclude<keyof typeof form, "positions" | "vehiclePlates" | "nationalIdType">, value: string) =>
+  const update = (field: Exclude<keyof typeof form, "positions" | "vehicles" | "vehiclePlates" | "nationalIdType">, value: string) =>
     setForm((prev) => ({ ...prev, [field]: value }));
 
   const birthAge = (() => {
@@ -309,9 +312,12 @@ const PersonalInfoTab: React.FC<PersonalInfoTabProps> = ({
     [tenureStart, form.terminationDate, hasTermination],
   );
 
+  const savedVehicles = (employee.vehicles ?? (employee.vehiclePlates ?? []).map((p) => ({ plate: p, type: DEFAULT_VEHICLE_TYPE }))) as VehicleEntry[];
+
   const isDirty =
     (form.firstName.trim() || null) !== (employee.firstName ?? null) ||
     (form.lastName.trim() || null) !== (employee.lastName ?? null) ||
+    (form.preferredName.trim() || null) !== (employee.preferredName ?? null) ||
     (form.email.trim() || null) !== (employee.email ?? null) ||
     (normalizeNationalId(form.nationalIdType, form.nationalId) || null) !==
       (employee.nationalId ?? null) ||
@@ -319,7 +325,7 @@ const PersonalInfoTab: React.FC<PersonalInfoTabProps> = ({
     form.nationality !== (employee.nationality ?? DEFAULT_NATIONALITY) ||
     (form.birthDate || null) !== (employee.birthDate ?? null) ||
     (form.address.trim() || null) !== (employee.address ?? null) ||
-    form.vehiclePlates.join(",") !== (employee.vehiclePlates ?? []).join(",") ||
+    JSON.stringify(form.vehicles) !== JSON.stringify(savedVehicles) ||
     (digitsOnly(form.primaryPhone) || null) !== (employee.primaryPhone ?? null) ||
     (digitsOnly(form.secondaryPhone) || null) !== (employee.secondaryPhone ?? null) ||
     form.positions.join(",") !== getEmployeePositions(employee).join(",") ||
@@ -353,6 +359,7 @@ const PersonalInfoTab: React.FC<PersonalInfoTabProps> = ({
           updatedEmployee: {
             firstName: form.firstName.trim(),
             lastName: form.lastName.trim(),
+            preferredName: form.preferredName.trim() || null,
             email: form.email.trim() || null,
             primaryPhone: digitsOnly(form.primaryPhone) || null,
             secondaryPhone: digitsOnly(form.secondaryPhone) || null,
@@ -364,7 +371,7 @@ const PersonalInfoTab: React.FC<PersonalInfoTabProps> = ({
             nationality: form.nationality,
             birthDate: form.birthDate || null,
             address: form.address.trim() || null,
-            vehiclePlates: form.vehiclePlates,
+            vehicles: form.vehicles,
             contractStartDate: form.contractStartDate || null,
             terminationDate: hasTermination ? form.terminationDate || null : null,
             terminationReason: hasTermination ? form.terminationReason || null : null,
@@ -476,9 +483,14 @@ const PersonalInfoTab: React.FC<PersonalInfoTabProps> = ({
 
           {!isEditing("personal") ? (
             <InfoGrid>
-              <InfoCell label="Nombre completo" icon={<IconUser size={13} />} span={2}>
+              <InfoCell label="Nombre completo" icon={<IconUser size={13} />} span={employee.preferredName ? 1 : 2}>
                 {employee.firstName} {employee.lastName}
               </InfoCell>
+              {employee.preferredName && (
+                <InfoCell label="Nombre preferido" icon={<IconUser size={13} />}>
+                  {employee.preferredName}
+                </InfoCell>
+              )}
               <InfoCell label="Estado">
                 <Box sx={{ display: "flex", alignItems: "center", gap: 1, flexWrap: "wrap" }}>
                   <Chip
@@ -600,7 +612,7 @@ const PersonalInfoTab: React.FC<PersonalInfoTabProps> = ({
                 inputProps={{ inputMode: "tel", maxLength: 9 }}
               />
             </Grid>
-            <Grid item xs={12}>
+            <Grid item xs={12} sm={6}>
               <TextfieldComponent
                 name="email"
                 label="Correo electrónico"
@@ -616,6 +628,19 @@ const PersonalInfoTab: React.FC<PersonalInfoTabProps> = ({
                     : "Con este correo se crea la cuenta de acceso al sistema"
                 }
                 inputProps={{ maxLength: 150 }}
+              />
+            </Grid>
+            <Grid item xs={12} sm={6}>
+              <TextfieldComponent
+                name="preferredName"
+                label="Nombre preferido (apodo)"
+                placeholder="Ej: Juancho"
+                icon={<IconUser size={20} color={theme.palette.text.secondary} />}
+                value={form.preferredName}
+                onChange={(event) => update("preferredName", event.target.value)}
+                disabled={!isEditing("personal") || isSaving}
+                helperText="Cómo prefiere que le llamen. Se usa en listas y notificaciones."
+                inputProps={{ maxLength: 100 }}
               />
             </Grid>
           </Grid>
@@ -637,22 +662,18 @@ const PersonalInfoTab: React.FC<PersonalInfoTabProps> = ({
                 label={NATIONAL_ID_TYPE_LABELS[(employee.nationalIdType ?? "cedula") as NationalIdType].split(" (")[0]}
                 icon={<IconId size={13} />}
               >
-                {employee.nationalId ? (
-                  <>
-                    <Box component="span" aria-hidden sx={{ mr: 0.75 }}>
-                      {getFlagEmoji(employee.nationality ?? DEFAULT_NATIONALITY)}
-                    </Box>
-                    {formatNationalId(
+                {employee.nationalId
+                  ? formatNationalId(
                       (employee.nationalIdType ?? "cedula") as NationalIdType,
                       employee.nationalId,
-                    )}
-                  </>
-                ) : (
-                  "Sin documento"
-                )}
+                    )
+                  : "Sin documento"}
               </InfoCell>
               <InfoCell label="Nacionalidad" icon={<IconWorld size={13} />}>
-                {countryLabel(employee.nationality ?? DEFAULT_NATIONALITY)}
+                <Box component="span" aria-hidden sx={{ mr: 0.5 }}>
+                  {getFlagEmoji(employee.nationality ?? DEFAULT_NATIONALITY)}
+                </Box>
+                {countryLabel(employee.nationality ?? DEFAULT_NATIONALITY).split(" ").slice(1).join(" ")}
               </InfoCell>
               <InfoCell label="Fecha de nacimiento" icon={<IconCake size={13} />}>
                 {employee.birthDate ? (
@@ -730,10 +751,10 @@ const PersonalInfoTab: React.FC<PersonalInfoTabProps> = ({
             actions={editAction("vehicles")}
           />
           <VehiclePlates
-            plates={form.vehiclePlates}
+            vehicles={form.vehicles}
             onChange={
               isEditing("vehicles")
-                ? (plates) => setForm((prev) => ({ ...prev, vehiclePlates: plates }))
+                ? (vehicles) => setForm((prev) => ({ ...prev, vehicles }))
                 : undefined
             }
             disabled={isSaving}
@@ -779,8 +800,7 @@ const PersonalInfoTab: React.FC<PersonalInfoTabProps> = ({
                       mb: 2,
                       p: 1.5,
                       borderRadius: "12px",
-                      border: `1px solid ${colors.warning}33`,
-                      borderLeft: `4px solid ${colors.warning}`,
+                      border: `1px solid ${colors.warning}55`,
                       backgroundColor: colors.warningSoft,
                     }}
                   >

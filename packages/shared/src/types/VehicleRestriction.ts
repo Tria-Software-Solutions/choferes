@@ -73,3 +73,24 @@ export const formatPlate = (plate: string): string => {
   const match = normalized.match(/^([A-Z]{2,3})(\d{1,6})$/);
   return match ? `${match[1]}-${match[2]}` : normalized;
 };
+
+// ─── Tipo de vehículo ─────────────────────────────────────────────────────────
+
+export const VEHICLE_TYPES = ["car", "moto", "bus", "truck", "bike"] as const;
+export type VehicleType = (typeof VEHICLE_TYPES)[number];
+
+export const VEHICLE_TYPE_LABELS: Record<VehicleType, string> = {
+  car: "Carro",
+  moto: "Moto",
+  bus: "Buseta / Microbús",
+  truck: "Camión",
+  bike: "Bicicleta",
+};
+
+export const DEFAULT_VEHICLE_TYPE: VehicleType = "car";
+
+/** Un vehículo registrado: la placa (normalizada) y su tipo. */
+export interface VehicleEntry {
+  plate: string;
+  type: VehicleType;
+}
