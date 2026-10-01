@@ -8,7 +8,7 @@ import {
   Typography,
   useTheme,
 } from "@mui/material";
-import { IconArrowRight, IconBook, IconCalendarTime, IconChevronDown, IconCircleCheck, IconClock, IconHelpCircle, IconLifebuoy, IconMail, IconMessageCircle, IconMessageQuestion, IconCalendarUser, IconChartBar, IconUsers } from "@tabler/icons-react";
+import { IconArrowRight, IconBeach, IconBook, IconCalendarTime, IconChevronDown, IconCircleCheck, IconClock, IconFolder, IconHelpCircle, IconLayoutDashboard, IconLifebuoy, IconListCheck, IconMail, IconMessageCircle, IconMessageQuestion, IconCalendarUser, IconChartBar, IconReceipt, IconShieldCheck, IconUsers } from "@tabler/icons-react";
 import { Link as RouterLink } from "react-router-dom";
 import ROUTES from "../../../constants/routes.constants";
 import APPBAR_MENU from "../../../constants/appbar.constants";
@@ -30,7 +30,7 @@ const FAQS: FaqItem[] = [
   {
     question: "¿Cómo puedo cambiar mi contraseña?",
     answer:
-      "Entra a Configuración → Contraseña y Seguridad. Allí puedes actualizar tu contraseña ingresando tu contraseña actual y la nueva. Debe cumplir con los requisitos mínimos de seguridad.",
+      "Entra a Configuración → Cuenta y seguridad. Allí puedes actualizar tu contraseña ingresando tu contraseña actual y la nueva. Debe cumplir con los requisitos mínimos de seguridad.",
   },
   {
     question: "¿Qué hago si olvidé mi contraseña?",
@@ -77,7 +77,10 @@ const HELP_TOPICS: {
   },
 ];
 
-// Quick-guide steps with permission-gated navigation
+// Quick-guide steps with permission-gated navigation. La guía se arma según lo
+// que el rol puede usar: los pasos de gestión (con permiso de planilla,
+// horarios, etc.) los ve Gerencia/Administrativo, y los de autoservicio
+// (Mi Panel, tareas, cuenta) los ve cualquier empleado.
 const GUIDE_STEPS: {
   icon: React.ElementType;
   title: string;
@@ -86,6 +89,64 @@ const GUIDE_STEPS: {
   route: string;
   button: string;
 }[] = [
+  // ── Autoservicio (cualquier empleado con su panel) ──
+  {
+    icon: IconLayoutDashboard,
+    title: "Abre tu Mi Panel",
+    description: "Consulta tu horario, tus horas, tus pagos y tus avisos en un solo lugar.",
+    permission: PERMISSION_CODES.VIEW_MY_PANEL,
+    route: ROUTES.MY_PANEL,
+    button: "Ir a mi panel",
+  },
+  {
+    icon: IconShieldCheck,
+    title: "Completa tu expediente",
+    description: "Mantén al día tus datos de contacto, tu documento y tus vehículos desde la pestaña Datos.",
+    permission: PERMISSION_CODES.VIEW_MY_PANEL,
+    route: `${ROUTES.MY_PANEL}?tab=data`,
+    button: "Ir a mis datos",
+  },
+  {
+    icon: IconFolder,
+    title: "Revisa tus documentos",
+    description: "Descarga los archivos que administración comparte contigo o sube a tu expediente.",
+    permission: PERMISSION_CODES.VIEW_MY_PANEL,
+    route: `${ROUTES.MY_PANEL}?tab=documents`,
+    button: "Ir a documentos",
+  },
+  {
+    icon: IconBeach,
+    title: "Solicita tus vacaciones",
+    description: "Pide vacaciones y sigue el estado de tus solicitudes desde tu panel.",
+    permission: PERMISSION_CODES.REQUEST_VACATION,
+    route: `${ROUTES.MY_PANEL}?tab=vacations`,
+    button: "Ir a vacaciones",
+  },
+  {
+    icon: IconReceipt,
+    title: "Consulta tus pagos",
+    description: "Revisa tus boletas de pago por quincena desde la pestaña de pagos.",
+    permission: PERMISSION_CODES.VIEW_MY_PANEL,
+    route: `${ROUTES.MY_PANEL}?tab=payments`,
+    button: "Ir a mis pagos",
+  },
+  {
+    icon: IconListCheck,
+    title: "Gestiona tus tareas",
+    description: "Organiza tus tareas pendientes y recibe recordatorios de vencimiento.",
+    permission: PERMISSION_CODES.VIEW_TASKS,
+    route: ROUTES.TASKS,
+    button: "Ir a tareas",
+  },
+  {
+    icon: IconShieldCheck,
+    title: "Protege tu cuenta",
+    description: "Actualiza tu contraseña, tus accesos rápidos y tu preferencia de nombre.",
+    permission: PERMISSION_CODES.VIEW_PROFILE,
+    route: ROUTES.PROFILE,
+    button: "Ir a configuración",
+  },
+  // ── Gestión (planilla, horarios, reportes) ──
   {
     icon: IconUsers,
     title: "Registra empleados",
@@ -148,6 +209,11 @@ const HelpCenterTab: React.FC = () => {
 
   const userCanSee = (permission: string) =>
     Array.isArray(userPermissions) && userPermissions.includes(permission);
+
+  // Solo los pasos que el rol puede ejecutar (autoservicio o gestión).
+  const visibleGuideSteps = GUIDE_STEPS.filter(
+    (step) => !step.permission || userCanSee(step.permission),
+  );
 
   return (
     <Paper
@@ -271,10 +337,14 @@ const HelpCenterTab: React.FC = () => {
       <Box sx={{ flex: 1, minHeight: 0, overflowY: "auto", pr: 0.5 }} key={activeTopic}>
         {activeTopic === "guide" && (
           <Box sx={{ display: "flex", flexDirection: "column", gap: 1.25 }}>
-            {GUIDE_STEPS.map((step, index) => {
+            {visibleGuideSteps.length === 0 && (
+              <Typography variant="body2" sx={{ fontSize: "0.8rem", color: "text.secondary" }}>
+                No hay una guía específica para tu rol. Explora las secciones desde el menú
+                superior para descubrir todo lo que puedes hacer.
+              </Typography>
+            )}
+            {visibleGuideSteps.map((step, index) => {
               const Icon = step.icon;
-              const visible = !step.permission || userCanSee(step.permission);
-              if (!visible) return null;
               return (
                 <Box
                   key={step.title}

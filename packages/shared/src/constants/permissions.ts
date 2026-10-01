@@ -20,6 +20,7 @@
 export type PermissionModule =
   | "Mi Panel"
   | "Empleados"
+  | "Documentos"
   | "Roles"
   | "Horarios"
   | "Vehículos"
@@ -50,6 +51,16 @@ export const PERMISSION_CATALOG = {
   EDIT_EMPLOYEES: { code: "employees:edit", module: "Empleados", label: "Editar Empleado" },
   DELETE_EMPLOYEES: { code: "employees:delete", module: "Empleados", label: "Eliminar Empleado" },
   EXPORT_EMPLOYEES: { code: "employees:export", module: "Empleados", label: "Exportar Empleados" },
+
+  // ── Documentos ──────────────────────────────────────────────────────────────
+  // Página de Documentos (carpetas y archivos). El empleado no entra aquí: ve
+  // los documentos que le corresponden desde su Mi Panel.
+  VIEW_DOCUMENTS: { code: "documents:view", module: "Documentos", label: "Ver Documentos" },
+  MANAGE_DOCUMENTS: {
+    code: "documents:manage",
+    module: "Documentos",
+    label: "Administrar Documentos",
+  },
 
   // ── Roles y horas de empleados ───────────────────────────────────────────────
   VIEW_ROLES: { code: "roles:view", module: "Roles", label: "Ver Roles" },
@@ -142,6 +153,9 @@ export const PERMISSION_CATALOG = {
   CREATE_LICENSE: { code: "licenses:create", module: "Licencias", label: "Crear Licencia" },
   EDIT_LICENSE: { code: "licenses:edit", module: "Licencias", label: "Editar Licencia" },
   DELETE_LICENSE: { code: "licenses:delete", module: "Licencias", label: "Eliminar Licencia" },
+  // Pedir y revisar cambios de licencia no lleva permiso propio: el empleado
+  // los pide desde su panel (`my-panel:view`) y los resuelve quien edita
+  // licencias (`licenses:edit`).
 
   // ── Amonestaciones / llamadas de atención ────────────────────────────────────
   VIEW_DISCIPLINARY: {
@@ -237,6 +251,7 @@ export const ALL_PERMISSION_CODES: readonly string[] = PERMISSION_DEFINITIONS.ma
 export const PERMISSION_MODULE_ORDER: readonly PermissionModule[] = [
   "Mi Panel",
   "Empleados",
+  "Documentos",
   "Roles",
   "Horarios",
   "Vehículos",
@@ -340,7 +355,9 @@ const SUPERVISOR_PERMISSIONS: readonly string[] = Array.from(
 export const DEFAULT_ROLE_PERMISSIONS: Readonly<Record<string, readonly string[]>> = {
   Gerencia: FULL_MANAGEMENT_PERMISSIONS,
   // Igual que Gerencia pero solo lectura: ver y exportar, sin crear/editar/eliminar.
-  Administrativo: READ_ONLY_PERMISSIONS,
+  // Excepción: Documentos, donde Administrativo también crea carpetas y sube
+  // archivos (por eso se le concede `documents:manage` aparte).
+  Administrativo: Array.from(new Set([...READ_ONLY_PERMISSIONS, "documents:manage"])),
   Supervisor: SUPERVISOR_PERMISSIONS,
   // Un rol por puesto (ver POSITION_ROLE_NAMES). Arrancan con el autoservicio
   // y se afinan desde Configuración → Roles.

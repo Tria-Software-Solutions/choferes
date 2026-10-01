@@ -108,7 +108,7 @@ export const createDisciplinaryAction = async (input: CreateDisciplinaryInput) =
     message: `Se registró una ${input.type.toLowerCase()} en tu expediente (${formatActionDate(input.actionDate)}): ${input.reason}`,
     ...severityNotification(created.severity as string),
     category: "employee",
-    actionUrl: "/mi-panel?tab=expediente",
+    actionUrl: "/my-panel?tab=disciplinary",
     actionText: "Ver mi expediente",
   });
 
@@ -155,7 +155,7 @@ export const updateDisciplinaryAction = async (id: number, input: UpdateDiscipli
       type: "warning",
       category: "employee",
       priority: "medium",
-      actionUrl: "/mi-panel?tab=expediente",
+      actionUrl: "/my-panel?tab=disciplinary",
       actionText: "Ver mi expediente",
     });
   }
@@ -175,7 +175,7 @@ export const deleteDisciplinaryAction = async (id: number) => {
       type: "info",
       category: "employee",
       priority: "low",
-      actionUrl: "/mi-panel?tab=expediente",
+      actionUrl: "/my-panel?tab=disciplinary",
       actionText: "Ver mi expediente",
     });
   }

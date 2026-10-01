@@ -128,7 +128,7 @@ export const createHoursWorked = async (data: Omit<HoursWorked, "id">) => {
       type: "info",
       category: "schedule",
       priority: "medium",
-      actionUrl: "/mi-panel?tab=horas",
+      actionUrl: "/my-panel?tab=hours",
       actionText: "Ver mi panel",
     });
 
@@ -166,7 +166,7 @@ export const updateHoursWorked = async (id: number, data: Omit<HoursWorked, "id"
       type: "warning",
       category: "schedule",
       priority: "medium",
-      actionUrl: "/mi-panel?tab=horas",
+      actionUrl: "/my-panel?tab=hours",
       actionText: "Ver mi panel",
     });
   }
@@ -185,7 +185,7 @@ export const deleteHoursWorked = async (id: number) => {
     type: "warning",
     category: "schedule",
     priority: "high",
-    actionUrl: "/mi-panel?tab=horas",
+    actionUrl: "/my-panel?tab=hours",
     actionText: "Ver mi panel",
   });
   return 1;
