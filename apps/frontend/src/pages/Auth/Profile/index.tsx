@@ -13,6 +13,7 @@ import {
 import {
   Box,
   Button,
+  Divider,
   Grid,
   IconButton,
   Tab,
@@ -30,7 +31,6 @@ import ManageRoles from "../../Dashboard/ManageRoles";
 import { IconApps, IconBell, IconCalendarUser, IconCamera, IconCheck, IconClock, IconDeviceDesktop, IconEye, IconEyeOff, IconHelpCircle, IconInfoCircle, IconLoader2, IconLock, IconMail, IconMoon, IconPalette, IconPencil, IconRotate, IconShieldCheck, IconSun, IconUser, IconUserCircle, IconUsers, IconX } from "@tabler/icons-react";
 import { User } from "../../../models/User";
 import {
-  validateName,
   validateEmail,
   validateUsername,
   validatePassword,
@@ -64,24 +64,22 @@ import { PanelHeader } from "../../../components/Layout";
 type ThemeMode = "default" | "light" | "dark";
 
 type TabId =
-  | "personal"
-  | "password"
+  | "profile"
   | "theme"
   | "notifications"
   | "sessions"
   | "help"
-  | "quickaccess"
+  | "quick-access"
   | "users"
   | "roles";
 
 const TAB_IDS: readonly TabId[] = [
-  "personal",
-  "password",
+  "profile",
   "theme",
   "notifications",
   "sessions",
   "help",
-  "quickaccess",
+  "quick-access",
   "users",
   "roles",
 ];
@@ -164,18 +162,18 @@ const Profile: React.FC = () => {
 
   // La pestaña vive en la URL (?tab=) para que un enlace de notificación abra
   // directo la sección pedida (Usuarios, Roles, Notificaciones...) en lugar de
-  // dejar siempre en "personal".
+  // dejar siempre en "profile".
   const [searchParams, setSearchParams] = useSearchParams();
   const requestedTab = searchParams.get("tab");
-  const urlTab: TabId = isTabId(requestedTab) ? requestedTab : "personal";
+  const urlTab: TabId = isTabId(requestedTab) ? requestedTab : "profile";
   const setActiveTab = useCallback(
     (value: TabId) =>
-      setSearchParams(value === "personal" ? {} : { tab: value }, { replace: true }),
+      setSearchParams(value === "profile" ? {} : { tab: value }, { replace: true }),
     [setSearchParams],
   );
+  // El nombre y el apellido se editan en el expediente (Mi Panel o Planilla),
+  // así que aquí solo se mantienen las credenciales de la cuenta.
   const [editFields, setEditFields] = useState({
-    firstName: currentUser?.firstName || "",
-    lastName: currentUser?.lastName || "",
     email: currentUser?.email || "",
     username: currentUser?.username || "",
   });
@@ -206,9 +204,6 @@ const Profile: React.FC = () => {
   // Validates individual profile fields
   const validateField = useCallback((name: string, value: string) => {
     switch (name) {
-      case "firstName":
-      case "lastName":
-        return validateName(value);
       case "email":
         return validateEmail(value);
       case "username":
@@ -246,8 +241,6 @@ const Profile: React.FC = () => {
 
   useEffect(() => {
     const hasChanges =
-      editFields.firstName !== currentUser?.firstName ||
-      editFields.lastName !== currentUser?.lastName ||
       editFields.email !== currentUser?.email ||
       editFields.username !== currentUser?.username;
 
@@ -273,8 +266,6 @@ const Profile: React.FC = () => {
 
   const handleClearEditForm = () => {
     setEditFields({
-      firstName: currentUser?.firstName || "",
-      lastName: currentUser?.lastName || "",
       email: currentUser?.email || "",
       username: currentUser?.username || "",
     });
@@ -529,12 +520,11 @@ const Profile: React.FC = () => {
   const hasAdminSection = hasAdminSettingsRole(currentUser);
 
   const sidebarItems = [
-    { id: "personal", label: "Información Personal", icon: IconUser, group: "Cuenta" },
-    { id: "password", label: "Contraseña y Seguridad", icon: IconLock, group: "Cuenta" },
+    { id: "profile", label: "Cuenta y seguridad", icon: IconUser, group: "Cuenta" },
     { id: "sessions", label: "Sesiones activas", icon: IconShieldCheck, group: "Cuenta" },
     { id: "theme", label: "Apariencia", icon: IconPalette, group: "Preferencias" },
     { id: "notifications", label: "Notificaciones", icon: IconBell, group: "Preferencias" },
-    { id: "quickaccess", label: "Accesos rápidos", icon: IconApps, group: "Preferencias" },
+    { id: "quick-access", label: "Accesos rápidos", icon: IconApps, group: "Preferencias" },
     { id: "help", label: "Centro de ayuda", icon: IconHelpCircle, group: "Soporte" },
     { id: "users", label: "Usuarios", icon: IconUsers, group: "Administración" },
     { id: "roles", label: "Roles", icon: IconCalendarUser, group: "Administración" },
@@ -548,8 +538,8 @@ const Profile: React.FC = () => {
     sidebarItems.filter((item) => item.group === groupName);
 
   // Si el ?tab= apunta a una sección que el usuario no tiene (por ejemplo
-  // ?tab=roles para un Chofer), se cae a "personal" en vez de renderizarla.
-  const activeTab: TabId = sidebarItems.some((item) => item.id === urlTab) ? urlTab : "personal";
+  // ?tab=roles para un Chofer), se cae a "profile" en vez de renderizarla.
+  const activeTab: TabId = sidebarItems.some((item) => item.id === urlTab) ? urlTab : "profile";
 
   return (
     <Box
@@ -810,7 +800,7 @@ const Profile: React.FC = () => {
 
         {/* Content Container */}
         <Box sx={{ flex: 1, display: "flex", flexDirection: "column", minHeight: { md: 0 }, height: { xs: "auto", md: "100%" } }}>
-          {activeTab === "personal" && (
+          {activeTab === "profile" && (
             <Paper
               elevation={0}
               sx={{
@@ -829,43 +819,26 @@ const Profile: React.FC = () => {
               {/* Section Header — estilo /roles */}
               <PanelHeader
                 icon={<IconUser />}
-                title="Información Personal"
-                description={MANAGEMENT.PERSONAL_INFO_DESC}
+                title="Cuenta y seguridad"
+                description="Tu correo, nombre de usuario y contraseña de acceso."
               />
 
-              {/* Form Fields */}
-              <Box sx={{ flex: 1, minHeight: { md: 0 }, overflow: { md: "auto" } }}>
+              {/* Datos de la cuenta */}
+              <Box sx={{ minWidth: 0 }}>
+              <Typography
+                sx={{
+                  display: "flex",
+                  alignItems: "center",
+                  gap: 1,
+                  fontWeight: 700,
+                  fontSize: "0.95rem",
+                  mb: 2,
+                }}
+              >
+                <IconUserCircle size={18} stroke={1.75} color={theme.palette.text.secondary} />
+                Datos de la cuenta
+              </Typography>
               <Grid container spacing={{ xs: 2, sm: 2.5 }}>
-                <Grid item xs={12} sm={6}>
-                  <TextfieldComponent
-                    name="firstName"
-                    placeholder="Nombre"
-                    label="Nombre"
-                    value={editFields.firstName}
-                    onChange={(e) =>
-                      setEditFields({ ...editFields, firstName: e.target.value })
-                    }
-                    error={!!validateName(editFields.firstName)}
-                    helperText={validateName(editFields.firstName) || undefined}
-                    validateField={validateFieldBoolean}
-                    icon={<IconUser size={20} color={theme.palette.text.secondary} />}
-                  />
-                </Grid>
-                <Grid item xs={12} sm={6}>
-                  <TextfieldComponent
-                    name="lastName"
-                    placeholder="Apellido"
-                    label="Apellido"
-                    value={editFields.lastName}
-                    onChange={(e) =>
-                      setEditFields({ ...editFields, lastName: e.target.value })
-                    }
-                    error={!!validateName(editFields.lastName)}
-                    helperText={validateName(editFields.lastName) || undefined}
-                    validateField={validateFieldBoolean}
-                    icon={<IconUser size={20} color={theme.palette.text.secondary} />}
-                  />
-                </Grid>
                 <Grid item xs={12} sm={6}>
                   <TextfieldComponent
                     name="email"
@@ -925,31 +898,18 @@ const Profile: React.FC = () => {
                   </Button>
                 </Box>
               </Box>
-            </Paper>
-          )}
+            <Divider sx={{ my: { xs: 3, md: 4 } }} />
 
-          {activeTab === "password" && (
-            <Paper
-              elevation={0}
-              sx={{
-                p: { xs: 2.5, sm: 3 },
-                borderRadius: "16px",
-                border: theme.tokens.borders.paper,
-                backgroundColor: theme.palette.background.paper,
-                boxShadow: `0 1px 2px ${theme.tokens.shadows.card}`,
-                display: "flex",
-                flexDirection: "column",
-                height: { xs: "auto", md: "100%" },
-                minHeight: { xs: "calc(100dvh - 240px)", md: 0 },
-                mb: 0,
-              }}
-            >
-              {/* Section Header — estilo /roles */}
-              <PanelHeader
-                icon={<IconLock />}
-                title="Contraseña y Seguridad"
-                description="Cambia tu contraseña para mantener tu cuenta segura."
-              />
+            {/* ── Contraseña y seguridad ── */}
+            <Box sx={{ display: "flex", alignItems: "center", gap: 1, mb: 0.5 }}>
+              <IconLock size={18} stroke={1.75} color={theme.palette.text.secondary} />
+              <Typography sx={{ fontWeight: 700, fontSize: "0.95rem" }}>
+                Contraseña y seguridad
+              </Typography>
+            </Box>
+            <Typography variant="caption" sx={{ color: "text.secondary", display: "block", mb: 2 }}>
+              Actualiza tu contraseña para mantener tu cuenta segura.
+            </Typography>
 
               <Box sx={{ flex: 1, minHeight: { md: 0 }, overflowY: { md: "auto" }, overflowX: "hidden" }}>
               <Grid container spacing={{ xs: 2, sm: 2.5 }} sx={{ minWidth: 0, "& > .MuiGrid-item": { minWidth: 0 } }}>
@@ -1329,7 +1289,7 @@ const Profile: React.FC = () => {
             </Box>
           )}
 
-          {activeTab === "quickaccess" && (
+          {activeTab === "quick-access" && (
             <Box sx={{ flex: 1, minHeight: 0, display: "flex", flexDirection: "column" }}>
               <QuickAccessTab />
             </Box>

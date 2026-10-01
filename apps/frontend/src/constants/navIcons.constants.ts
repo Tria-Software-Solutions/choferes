@@ -14,6 +14,7 @@
 import {
   IconCalendarTime,
   IconCalendarUser,
+  IconFolder,
   IconLayoutDashboard,
   IconLayoutGrid,
   IconListCheck,
@@ -34,6 +35,7 @@ export const NAV_ICONS: Record<string, TablerIcon> = {
   [APPBAR_MENU.EMPLOYEES]: IconUsers,
   [APPBAR_MENU.SCHEDULES]: IconCalendarTime,
   [APPBAR_MENU.TASKS]: IconListCheck,
+  [APPBAR_MENU.DOCUMENTS]: IconFolder,
   [APPBAR_MENU.PROFILE]: IconSettings,
   [APPBAR_MENU.LOGOUT]: IconLogout,
 };

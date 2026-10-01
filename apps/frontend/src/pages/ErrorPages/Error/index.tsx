@@ -20,6 +20,7 @@ import {
   actionsBoxStyles,
   captionStyles,
 } from "./styles";
+import ROUTES from "../../../constants/routes.constants";
 
 const ErrorPage: React.FC = () => {
   const navigate = useNavigate();
@@ -81,7 +82,7 @@ const ErrorPage: React.FC = () => {
                 variant="contained"
                 size="large"
                 startIcon={<IconHome size={20} />}
-                onClick={() => navigate("/")}
+                onClick={() => navigate(ROUTES.LOGIN)}
                 fullWidth={isSmallScreen}
                 aria-label={ERRORS.GO_HOME}
               >

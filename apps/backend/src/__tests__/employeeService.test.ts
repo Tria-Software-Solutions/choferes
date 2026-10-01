@@ -152,19 +152,132 @@ describe("employeeService", () => {
   describe("getEmployeeById", () => {
     it("debería llamar a findByPk con el id correcto", async () => {
       mockFindByPk.mockResolvedValue(mockEmployee);
+      const userFindByPk = User.findByPk as jest.Mock;
+      userFindByPk.mockResolvedValue(null);
 
       const result = await employeeService.getEmployeeById(1);
 
-      expect(mockFindByPk).toHaveBeenCalledWith(1);
+      // Sin actor no se sabe qué puede ver, así que oculta las columnas
+      // sensibles (comprobado en detalle más abajo).
+      expect(mockFindByPk).toHaveBeenCalledWith(1, {
+        attributes: { exclude: ["hourlyRate", "vacationDays", "address", "preferredName"] },
+      });
       expect(result).toEqual(mockEmployee);
     });
 
     it("debería devolver null si no existe", async () => {
       mockFindByPk.mockResolvedValue(null);
+      const userFindByPk = User.findByPk as jest.Mock;
+      userFindByPk.mockResolvedValue(null);
 
       const result = await employeeService.getEmployeeById(999);
 
       expect(result).toBeNull();
+    });
+  });
+
+  describe("oculta las columnas sensibles a quien no tiene el permiso", () => {
+    const userFindByPk = User.findByPk as jest.Mock;
+
+    // El actor que llega por roles:view (tablero de Roles): puede leer la ficha
+    // pero no administra empleados, pagos ni vacaciones.
+    const supervisor = {
+      id: 3,
+      roles: ["Supervisor"],
+      permissions: ["roles:view", "employee-hours:view", "my-panel:view"],
+    };
+
+    const management = {
+      id: 1,
+      roles: ["Gerencia"],
+      permissions: ["employees:view", "payments:view", "vacations:view"],
+    };
+
+    const ALL_SENSITIVE = ["hourlyRate", "vacationDays", "address", "preferredName"];
+
+    beforeEach(() => {
+      mockFindAndCountAll.mockResolvedValue({ count: 0, rows: [] });
+      mockFindByPk.mockResolvedValue(mockEmployee);
+    });
+
+    it("el listado oculta las cuatro columnas sin permisos", async () => {
+      await employeeService.getEmployees({}, supervisor);
+
+      const options = mockFindAndCountAll.mock.calls[0][0];
+      expect(options.attributes).toEqual({ exclude: ALL_SENSITIVE });
+    });
+
+    it("el listado sí las incluye para quien administra empleados y compensación", async () => {
+      await employeeService.getEmployees({}, management);
+
+      const options = mockFindAndCountAll.mock.calls[0][0];
+      expect(options.attributes).toBeUndefined();
+    });
+
+    it("oculta únicamente las columnas cuyo permiso falta", async () => {
+      // Solo vacaciones: no ve el salario, pero sí el saldo, la dirección y el apodo.
+      const onlyVacations = {
+        id: 1,
+        roles: ["SysAdmin"],
+        permissions: ["employees:view", "vacations:view"],
+      };
+
+      await employeeService.getEmployees({}, onlyVacations);
+
+      const options = mockFindAndCountAll.mock.calls[0][0];
+      expect(options.attributes).toEqual({ exclude: ["hourlyRate"] });
+    });
+
+    it("un permiso de lectura de empleados no abre la compensación", async () => {
+      // Administrativo: ve empleados (y por eso dirección y apodo) pero no paga.
+      const readonlyAdmin = {
+        id: 2,
+        roles: ["Administrativo"],
+        permissions: ["employees:view"],
+      };
+
+      await employeeService.getEmployees({}, readonlyAdmin);
+
+      const options = mockFindAndCountAll.mock.calls[0][0];
+      expect(options.attributes).toEqual({ exclude: ["hourlyRate", "vacationDays"] });
+    });
+
+    it("el detalle de otro empleado oculta las cuatro columnas", async () => {
+      userFindByPk.mockResolvedValue({ id: 3, employeeId: 99 });
+
+      await employeeService.getEmployeeById(1, supervisor);
+
+      expect(mockFindByPk).toHaveBeenCalledWith(1, {
+        attributes: { exclude: ALL_SENSITIVE },
+      });
+    });
+
+    it("el detalle del propio empleado sí las incluye", async () => {
+      userFindByPk.mockResolvedValue({ id: 3, employeeId: 1 });
+
+      await employeeService.getEmployeeById(1, supervisor);
+
+      expect(mockFindByPk).toHaveBeenCalledWith(1, {});
+    });
+
+    it("sin actor se ocultan: por defecto no se filtra información", async () => {
+      userFindByPk.mockResolvedValue(null);
+
+      await employeeService.getEmployeeById(1);
+
+      expect(mockFindByPk).toHaveBeenCalledWith(1, {
+        attributes: { exclude: ALL_SENSITIVE },
+      });
+    });
+
+    it("el wildcard '*' cuenta como acceso total", async () => {
+      const wildcard = { id: 1, roles: ["*"], permissions: ["*"] };
+      userFindByPk.mockResolvedValue(null);
+
+      await employeeService.getEmployees({}, wildcard);
+
+      const options = mockFindAndCountAll.mock.calls[0][0];
+      expect(options.attributes).toBeUndefined();
     });
   });
 
@@ -878,6 +991,7 @@ describe("employeeService", () => {
         hasUser: false,
         userId: null,
         username: null,
+        isActive: false,
         roles: [],
         needsRole: false,
       });
@@ -885,7 +999,7 @@ describe("employeeService", () => {
 
     it("marca needsRole cuando la cuenta no tiene roles", async () => {
       mockFindByPk.mockResolvedValue({ id: 7 });
-      mockUserFindOne.mockResolvedValue({ id: 9, username: "ana", roles: [] });
+      mockUserFindOne.mockResolvedValue({ id: 9, username: "ana", isActive: true, roles: [] });
 
       const access = await employeeService.getEmployeeAccess(7);
 
@@ -897,6 +1011,7 @@ describe("employeeService", () => {
       mockUserFindOne.mockResolvedValue({
         id: 9,
         username: "ana",
+        isActive: true,
         roles: [{ id: 6, name: "Chofer" }],
       });
 
@@ -904,6 +1019,22 @@ describe("employeeService", () => {
 
       expect(access.needsRole).toBe(false);
       expect(access.roles).toEqual([{ id: 6, name: "Chofer" }]);
+    });
+
+    it("devuelve isActive false cuando la cuenta está bloqueada", async () => {
+      mockFindByPk.mockResolvedValue({ id: 7 });
+      mockUserFindOne.mockResolvedValue({
+        id: 9,
+        username: "ana",
+        isActive: false,
+        roles: [{ id: 6, name: "Chofer" }],
+      });
+
+      const access = await employeeService.getEmployeeAccess(7);
+
+      expect(access.isActive).toBe(false);
+      // Bloquear la cuenta no la deja "sin rol": son cosas distintas.
+      expect(access.needsRole).toBe(false);
     });
 
     it("lanza 404 cuando el empleado no existe", async () => {
@@ -924,7 +1055,12 @@ describe("employeeService", () => {
       // 1) cuenta del empleado, 2) recarga en getEmployeeAccess.
       mockUserFindOne
         .mockResolvedValueOnce({ id: 9 })
-        .mockResolvedValueOnce({ id: 9, username: "ana", roles: [{ id: 6, name: "Chofer" }] });
+        .mockResolvedValueOnce({
+          id: 9,
+          username: "ana",
+          isActive: true,
+          roles: [{ id: 6, name: "Chofer" }],
+        });
       mockUserRoleFindOne.mockResolvedValue(null);
       mockRoleFindAll.mockResolvedValue([{ id: 6, name: "Chofer" }]);
       mockUserRoleCreate.mockResolvedValue({ id: 1, userId: 9, roleId: 6 });

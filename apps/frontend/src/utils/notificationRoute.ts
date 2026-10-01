@@ -1,5 +1,6 @@
 import { hasManagementRole } from "@choferes/shared";
 import { PERMISSION_CODES as PERMISSIONS } from "../constants/permissions.constants";
+import ROUTES from "../constants/routes.constants";
 
 interface RecipientAccess {
   permissions: readonly string[];
@@ -14,7 +15,7 @@ const SETTINGS_ADMIN_TABS: Record<string, string> = {
 // Permiso que exige cada ruta a la que puede apuntar una notificación. Las más
 // específicas van primero.
 const ROUTE_PERMISSIONS: ReadonlyArray<[RegExp, string]> = [
-  [/^\/mi-panel$/, PERMISSIONS.VIEW_MY_PANEL],
+  [/^\/my-panel$/, PERMISSIONS.VIEW_MY_PANEL],
   [/^\/employees(\/\d+)?$/, PERMISSIONS.VIEW_EMPLOYEES],
   [/^\/schedules$/, PERMISSIONS.VIEW_SCHEDULES],
   [/^\/vehicles$/, PERMISSIONS.VIEW_VEHICLES],
@@ -42,10 +43,10 @@ export const resolveNotificationUrl = (
   const [path, query = ""] = actionUrl.split("?");
   const has = (permission: string) => access.permissions.includes(permission);
 
-  if (path === "/settings") {
+  if (path === ROUTES.PROFILE) {
     const tab = new URLSearchParams(query).get("tab");
     const required = tab ? SETTINGS_ADMIN_TABS[tab] : undefined;
-    if (required && !(access.isManagement && has(required))) return "/settings";
+    if (required && !(access.isManagement && has(required))) return ROUTES.PROFILE;
     return actionUrl;
   }
 
@@ -54,7 +55,7 @@ export const resolveNotificationUrl = (
   if (has(match[1])) return actionUrl;
   // Avisos de cuenta/rol apuntan a Mi Panel: quien no lo tiene (gestión) va a su
   // pantalla de inicio en lugar de quedarse sin destino.
-  return path === "/mi-panel" ? "/" : null;
+  return path === ROUTES.MY_PANEL ? ROUTES.LOGIN : null;
 };
 
 export const getRecipientAccess = (

@@ -139,45 +139,44 @@ export const HoursTab: React.FC<HoursTabProps> = ({ overview, now }) => {
         />
       </Box>
 
-      <BentoGridItem
-        icon={<IconMapPin />}
-        title="Mis turnos"
-        description={
-          shownWeek
-            ? `Semana ${shownWeek.weekNumber} · ${formatDateRange(shownWeek.startDate, shownWeek.endDate)}`
-            : undefined
-        }
-        actions={
-          <SegmentedToggle<WeekView>
-            value={weekView}
-            onChange={setWeekView}
-            ariaLabel="Semana de turnos"
-            options={[
-              { value: "current", label: "Esta semana" },
-              { value: "next", label: "Próxima" },
-            ]}
-          />
-        }
-        header={
-          <WeekAgenda
-            days={shownWeek?.days ?? []}
-            todayIso={todayIso}
-            emptyTitle={
-              weekView === "next" ? "Aún no hay turnos para la próxima semana" : "Sin lugares asignados esta semana"
-            }
-            emptyDescription="Cuando tu supervisor te asigne un horario y lugar de trabajo lo verás aquí."
-          />
-        }
-        sx={revealSx(3) as object}
-      />
-
       <Box sx={fillGridSx}>
+        <BentoGridItem
+          icon={<IconMapPin />}
+          title="Mis turnos"
+          description={
+            shownWeek
+              ? `Semana ${shownWeek.weekNumber} · ${formatDateRange(shownWeek.startDate, shownWeek.endDate)}`
+              : undefined
+          }
+          actions={
+            <SegmentedToggle<WeekView>
+              value={weekView}
+              onChange={setWeekView}
+              ariaLabel="Semana de turnos"
+              options={[
+                { value: "current", label: "Esta semana" },
+                { value: "next", label: "Próxima" },
+              ]}
+            />
+          }
+          header={
+            <WeekAgenda
+              days={shownWeek?.days ?? []}
+              todayIso={todayIso}
+              emptyTitle={
+                weekView === "next" ? "Aún no hay turnos para la próxima semana" : "Sin lugares asignados esta semana"
+              }
+              emptyDescription="Cuando tu supervisor te asigne un horario y lugar de trabajo lo verás aquí."
+            />
+          }
+          sx={{ ...span(9), ...(revealSx(3) as object) }}
+        />
         <BentoGridItem
           icon={<IconTimeline />}
           title="Evolución semanal"
           description={`Horas por semana · la línea marca la jornada ordinaria de ${REGULAR_HOURS.week} h`}
           header={<WeeklyHistoryChart data={overview.history?.weekly ?? []} />}
-          sx={{ ...span(12), ...(revealSx(4) as object) }}
+          sx={{ ...span(3), ...(revealSx(4) as object) }}
         />
       </Box>
     </Box>

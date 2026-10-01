@@ -20,6 +20,7 @@ import {
   actionsBoxStyles,
   captionStyles,
 } from "./styles";
+import ROUTES from "../../../constants/routes.constants";
 
 const NotFound: React.FC = () => {
   const navigate = useNavigate();
@@ -81,7 +82,7 @@ const NotFound: React.FC = () => {
                 variant="contained"
                 size="large"
                 startIcon={<IconHome size={20} />}
-                onClick={() => navigate("/")}
+                onClick={() => navigate(ROUTES.LOGIN)}
                 fullWidth={isSmallScreen}
                 aria-label={ERRORS.GO_HOME}
               >
@@ -91,7 +92,7 @@ const NotFound: React.FC = () => {
                 variant="outlined"
                 size="large"
                 startIcon={<IconCompass size={20} />}
-                onClick={() => navigate("/dashboard")}
+                onClick={() => navigate(ROUTES.DASHBOARD)}
                 fullWidth={isSmallScreen}
                 aria-label={ERRORS.ERROR_404_EXPLORE}
               >

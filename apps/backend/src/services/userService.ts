@@ -263,7 +263,7 @@ export const createUser = async (data: Record<string, any>) => {
     type: "success",
     category: "system",
     priority: "high",
-    actionUrl: "/mi-panel",
+    actionUrl: "/my-panel",
     actionText: "Ir a mi panel",
   });
   await notifyManagementRoles({
