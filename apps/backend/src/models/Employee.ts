@@ -48,7 +48,11 @@ export class Employee extends Model {
 
   public address?: string | null; // Dirección de residencia
 
-  public vehiclePlates!: string[]; // Placas de sus vehículos propios
+  public preferredName?: string | null; // Apodo o nombre preferido del empleado
+
+  public vehicles!: Array<{ plate: string; type: string }>; // Vehículos con tipo (carro, moto, etc.)
+
+  public vehiclePlates!: string[]; // Legado: solo las placas (sin tipo)
 
   public primaryPhone?: string | null; // Teléfono principal (solo dígitos)
 
@@ -143,6 +147,15 @@ Employee.init(
     address: {
       type: DataTypes.TEXT,
       allowNull: true,
+    },
+    preferredName: {
+      type: DataTypes.STRING(100),
+      allowNull: true,
+    },
+    vehicles: {
+      type: DataTypes.JSONB,
+      allowNull: false,
+      defaultValue: [],
     },
     vehiclePlates: {
       type: DataTypes.ARRAY(DataTypes.STRING(10)),

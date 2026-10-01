@@ -157,6 +157,8 @@ const EDITABLE_FIELDS = [
   "nationality",
   "birthDate",
   "address",
+  "preferredName",
+  "vehicles",
   "vehiclePlates",
   "primaryPhone",
   "secondaryPhone",
@@ -217,11 +219,28 @@ const sanitizeControlledValues = (
   if (typeof sanitized.nationality === "string") {
     sanitized.nationality = sanitized.nationality.toUpperCase();
   }
-  if (sanitized.vehiclePlates !== undefined) {
+  if (sanitized.vehicles !== undefined) {
+    const entries = Array.isArray(sanitized.vehicles) ? sanitized.vehicles : [];
+    const seen = new Set<string>();
+    const validTypes = new Set(["car", "moto", "bus", "truck", "bike"]);
+    sanitized.vehicles = entries
+      .filter((v): v is { plate: string; type: string } => v && typeof v.plate === "string")
+      .map((v) => ({
+        plate: normalizePlate(v.plate),
+        type: validTypes.has(v.type) ? v.type : "car",
+      }))
+      .filter((v) => isValidPlate(v.plate) && !seen.has(v.plate) && seen.add(v.plate))
+      .slice(0, MAX_PLATES_PER_EMPLOYEE);
+    // Mantiene vehiclePlates sincronizado para compatibilidad con el legado.
+    sanitized.vehiclePlates = (sanitized.vehicles as Array<{ plate: string }>).map((v) => v.plate);
+  } else if (sanitized.vehiclePlates !== undefined) {
     const plates = Array.isArray(sanitized.vehiclePlates) ? sanitized.vehiclePlates : [];
     sanitized.vehiclePlates = Array.from(
       new Set(plates.map((plate) => normalizePlate(String(plate))).filter(isValidPlate)),
     ).slice(0, MAX_PLATES_PER_EMPLOYEE);
+  }
+  if (typeof sanitized.preferredName === "string") {
+    sanitized.preferredName = sanitized.preferredName.trim() || null;
   }
   if (typeof sanitized.address === "string") {
     sanitized.address = sanitized.address.trim() || null;
